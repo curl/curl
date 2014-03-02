@@ -3,8 +3,23 @@
 #  G. Vanem <gvanem@broadpark.no>
 #
 
+.ERASE
+
+!if $(__VERSION__) < 1280
+!message !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!message ! This Open Watcom version is too old and is no longer supported !
+!message !     Please download latest version from www.openwatcom.org     !
+!message !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!error Unsupported version of Open Watcom
+!endif
+
 !ifndef %watcom
 !error WATCOM environment variable not set!
+!endif
+
+# In order to process Makefile.inc wmake must be called with -u switch!
+!ifndef %MAKEFLAGS
+!error You MUST call wmake with the -u switch!
 !endif
 
 !ifdef %libname
@@ -12,7 +27,7 @@ LIBNAME = $(%libname)
 !else
 LIBNAME = libcurl
 !endif
-TARGETS = $(LIBNAME).dll $(LIBNAME)_imp.lib $(LIBNAME).lib
+TARGETS = $(LIBNAME).dll $(LIBNAME).lib
 
 CC = wcc386
 LD = wlink
@@ -23,37 +38,29 @@ RC = wrc
 !  loaddll wcc386  wccd386
 !  loaddll wpp386  wppd386
 !  loaddll wlib    wlibd
-!  if $(__VERSION__) > 1270
-!    loaddll wlink   wlinkd
-!  else
-!    loaddll wlink   wlink
-!  endif
+!  loaddll wlink   wlinkd
 !endif
 
 !ifdef __LINUX__
-DS = /
 CP = cp
 MD = mkdir -p
-RD = rmdir -p
-RM = rm -f
 !else
-DS = $(X)\$(X)
 CP = copy 2>NUL
 MD = mkdir
-RD = rmdir /q /s 2>NUL
-!if $(__VERSION__) < 1250
-RM = del /q /f 2>NUL
-!else
-RM = rm -f
 !endif
+!if $(__VERSION__) > 1290
+RD = rm -rf
+!else ifdef __UNIX__
+RD = rm -rf
+!else
+RD = rmdir /q /s 2>NUL
 !endif
 
-SYS_INCL = -I$(%watcom)$(DS)h$(DS)nt -I$(%watcom)$(DS)h
-SYS_LIBS = $(%watcom)$(DS)lib386$(DS)nt;$(%watcom)$(DS)lib386
+SYS_INCL = -I"$(%watcom)/h/nt" -I"$(%watcom)/h"
 
 CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm &
          -wcd=201 -bt=nt -d+ -dWIN32 -dCURL_WANTS_CA_BUNDLE_ENV         &
-         -dBUILDING_LIBCURL -dHAVE_SPNEGO=1 -I. -I..$(DS)include $(SYS_INCL)
+         -dBUILDING_LIBCURL -dHAVE_SPNEGO=1 -I. -I"../include" $(SYS_INCL)
 
 !ifdef %debug
 DEBUG  = -dDEBUG=1 -dDEBUGBUILD
@@ -83,169 +90,162 @@ CFLAGS += -dWANT_IDN_PROTOTYPES
 !ifdef %zlib_root
 ZLIB_ROOT = $(%zlib_root)
 !else
-ZLIB_ROOT = ..$(DS)..$(DS)zlib-1.2.8
+ZLIB_ROOT = ../../zlib-1.2.8
 !endif
 
 !ifdef %libssh2_root
 LIBSSH2_ROOT = $(%libssh2_root)
 !else
-LIBSSH2_ROOT = ..$(DS)..$(DS)libssh2-1.4.3
+LIBSSH2_ROOT = ../../libssh2-1.4.3
 !endif
 
 !ifdef %librtmp_root
 LIBRTMP_ROOT = $(%librtmp_root)
 !else
-LIBRTMP_ROOT = ..$(DS)..$(DS)rtmpdump-2.3
+LIBRTMP_ROOT = ../../rtmpdump-2.3
 !endif
 
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ..$(DS)..$(DS)openssl-0.9.8y
+OPENSSL_ROOT = ../../openssl-0.9.8y
 !endif
 
 !ifdef %ares_root
 ARES_ROOT = $(%ares_root)
 !else
-ARES_ROOT = ..$(DS)ares
+ARES_ROOT = ../ares
 !endif
 
 !ifdef %use_zlib
-CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I$(ZLIB_ROOT)
+CFLAGS += -dHAVE_ZLIB_H -dHAVE_LIBZ -I"$(ZLIB_ROOT)"
 !endif
 
 !ifdef %use_rtmp
-CFLAGS += -dUSE_LIBRTMP -I$(LIBRTMP_ROOT)
+CFLAGS += -dUSE_LIBRTMP -I"$(LIBRTMP_ROOT)"
 !endif
 
 !ifdef %use_ssh2
-CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H -I$(LIBSSH2_ROOT)$(DS)include -I$(LIBSSH2_ROOT)$(DS)win32
+CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H -I"$(LIBSSH2_ROOT)/include" -I"$(LIBSSH2_ROOT)/win32"
 !endif
 
 !ifdef %use_ssl
-CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I$(OPENSSL_ROOT)$(DS)inc32
+CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I"$(OPENSSL_ROOT)/inc32"
 !endif
 
 !ifdef %use_ares
-CFLAGS += -dUSE_ARES -I$(ARES_ROOT)
+CFLAGS += -dUSE_ARES -I"$(ARES_ROOT)"
 !endif
 
 !ifdef %use_watt32
-CFLAGS += -dUSE_WATT32 -I$(%watt_root)$(DS)inc
+CFLAGS += -dUSE_WATT32 -I"$(%watt_root)/inc"
 !endif
 
 OBJ_BASE = WC_Win32.obj
-LINK_ARG = $(OBJ_BASE)$(DS)dyn$(DS)wlink.arg
-LIB_ARG  = $(OBJ_BASE)$(DS)stat$(DS)wlib.arg
-
-# In order to process Makefile.inc wmake must be called with -u switch!
-!ifndef %MAKEFLAGS
-!error You MUST call wmake with the -u switch!
+!if $(__VERSION__) > 1290
+OBJ_STAT = $(OBJ_BASE)/stat
+OBJ_DYN  = $(OBJ_BASE)/dyn
+!else ifdef __UNIX__
+OBJ_STAT = $(OBJ_BASE)/stat
+OBJ_DYN  = $(OBJ_BASE)/dyn
 !else
+OBJ_STAT = $(OBJ_BASE)\stat
+OBJ_DYN  = $(OBJ_BASE)\dyn
+!endif
+
+LINK_ARG = $(OBJ_DYN)/wlink.arg
+LIB_ARG  = $(OBJ_STAT)/wlib.arg
+
 !include Makefile.inc
-!endif
 
-OBJS = $(CSOURCES:.c=.obj)
-!ifdef __LINUX__
-OBJS = $OBJ_DIR/$(OBJS: = $OBJ_DIR/)
+OBJS1 = ./$(CSOURCES:.c=.obj)
+OBJS2 = $(OBJS1:vtls/=)
+OBJS3 = $(OBJS2: = ./)
+OBJS_STAT = $(OBJS3:./=$(OBJ_STAT)/)
+OBJS_DYN  = $(OBJS3:./=$(OBJ_DYN)/)
 
-!else
-OBJS = $OBJ_DIR\$(OBJS: = $OBJ_DIR\)
-!endif
+CURLBUILDH = ../include/curl/curlbuild.h
+RESOURCE   = $(OBJ_DYN)/libcurl.res
 
-#
-# Use $(OBJS) as a template to generate $(OBJS_STAT) and $(OBJS_DYN).
-#
-OBJ_DIR    = $(OBJ_BASE)$(DS)stat
-OBJS_STAT  = $+ $(OBJS) $-
+DIRS = $(OBJ_BASE) $(OBJ_BASE)/stat $(OBJ_BASE)/dyn
 
-OBJ_DIR    = $(OBJ_BASE)$(DS)dyn
-OBJS_DYN   = $+ $(OBJS) $-
+.c : vtls
 
-CURLBUILDH = ..$(DS)include$(DS)curl$(DS)curlbuild.h
-RESOURCE   = $(OBJ_BASE)$(DS)dyn$(DS)libcurl.res
-
-all: $(CURLBUILDH) $(OBJ_BASE) $(TARGETS) .SYMBOLIC
+all: $(CURLBUILDH) $(DIRS) $(TARGETS) .SYMBOLIC
 	@echo Welcome to libcurl
 
 clean: .SYMBOLIC
-	-$(RM) $(OBJS_STAT)
-	-$(RM) $(OBJS_DYN)
-	-$(RM) $(RESOURCE) $(LINK_ARG) $(LIB_ARG)
+	-rm -f $(OBJS_STAT)
+	-rm -f $(OBJS_DYN)
+	-rm -f $(RESOURCE) $(LINK_ARG) $(LIB_ARG)
 
 vclean distclean: clean .SYMBOLIC
-	-$(RM) $(TARGETS) $(LIBNAME).map $(LIBNAME).sym
-	-$(RD) $(OBJ_BASE)$(DS)stat
-	-$(RD) $(OBJ_BASE)$(DS)dyn
+	-rm -f $(TARGETS) $(LIBNAME).map $(LIBNAME).sym
+	-$(RD) $(OBJ_STAT)
+	-$(RD) $(OBJ_DYN)
 	-$(RD) $(OBJ_BASE)
 
-$(OBJ_BASE):
+$(DIRS):
 	-$(MD) $^@
-	-$(MD) $^@$(DS)stat
-	-$(MD) $^@$(DS)dyn
 
 $(CURLBUILDH): .EXISTSONLY
 	$(CP) $^@.dist $^@
 
-$(LIBNAME).dll: $(OBJS_DYN) $(RESOURCE) $(LINK_ARG)
-	$(LD) name $^@ @$]@
-
-$(LIBNAME).lib: $(OBJS_STAT) $(LIB_ARG)
-	$(AR) -q -b -c $^@ @$]@
-
-.ERASE
-$(RESOURCE): libcurl.rc
-	$(RC) $(DEBUG) -q -r -zm -bt=nt -I..$(DS)include $(SYS_INCL) $[@ -fo=$^@
-
-.ERASE
-.c{$(OBJ_BASE)$(DS)dyn}.obj:
-	$(CC) $(CFLAGS) -bd -br $[@ -fo=$^@
-
-.ERASE
-.c{$(OBJ_BASE)$(DS)stat}.obj:
-	$(CC) $(CFLAGS) -DCURL_STATICLIB $[@ -fo=$^@
-
-$(LINK_ARG): $(__MAKEFILES__)
-	%create $^@
-	@%append $^@ system nt dll
-	@%append $^@ file { $(OBJS_DYN) }
+$(LIBNAME).dll: $(OBJS_DYN) $(RESOURCE) $(__MAKEFILES__)
+	%create $(LINK_ARG)
+	@%append $(LINK_ARG) system nt dll
 !ifdef %debug
-	@%append $^@ debug all
-	@%append $^@ option symfile
+	@%append $(LINK_ARG) debug all
+	@%append $(LINK_ARG) option symfile
 !endif
-	@%append $^@ option quiet, map, caseexact, eliminate, implib=$(LIBNAME)_imp.lib,
-	@%append $^@ res=$(RESOURCE) libpath $(SYS_LIBS)
-	@%append $^@ library wldap32.lib
+	@%append $(LINK_ARG) option quiet, caseexact, eliminate
+	@%append $(LINK_ARG) option map=$(OBJ_DYN)/$(LIBNAME).map
+	@%append $(LINK_ARG) option implib=$(LIBNAME)_imp.lib
+	@%append $(LINK_ARG) option res=$(RESOURCE)
+	@for %f in ($(OBJS_DYN)) do @%append $(LINK_ARG) file %f
+	@%append $(LINK_ARG) library wldap32.lib
 !ifdef %use_watt32
-	@%append $^@ library $(%watt_root)$(DS)lib$(DS)wattcpw_imp.lib
+	@%append $(LINK_ARG) library '$(%watt_root)/lib/wattcpw_imp.lib'
 !else
-	@%append $^@ library ws2_32.lib
+	@%append $(LINK_ARG) library ws2_32.lib
 !endif
 !ifdef %use_zlib
-	@%append $^@ library $(ZLIB_ROOT)$(DS)zlib.lib
+	@%append $(LINK_ARG) library '$(ZLIB_ROOT)/zlib.lib'
 !endif
 !ifdef %use_rtmp
-	@%append $^@ library $(LIBRTMP_ROOT)$(DS)librtmp$(DS)librtmp.lib
+	@%append $(LINK_ARG) library '$(LIBRTMP_ROOT)/librtmp/librtmp.lib'
 !endif
 !ifdef %use_ssh2
-	@%append $^@ library $(LIBSSH2_ROOT)$(DS)win32$(DS)libssh2.lib
+	@%append $(LINK_ARG) library '$(LIBSSH2_ROOT)/win32/libssh2.lib'
 !endif
 !ifdef %use_ssl
-	@%append $^@ library $(OPENSSL_ROOT)$(DS)out32$(DS)libeay32.lib, $(OPENSSL_ROOT)$(DS)out32$(DS)ssleay32.lib
+	@%append $(LINK_ARG) library '$(OPENSSL_ROOT)/out32/libeay32.lib'
+	@%append $(LINK_ARG) library '$(OPENSSL_ROOT)/out32/ssleay32.lib'
 !endif
 !ifdef %use_ares
-	@%append $^@ library $(ARES_ROOT)$(DS)cares.lib
+	@%append $(LINK_ARG) library '$(ARES_ROOT)/cares.lib'
 !endif
 !ifdef %use_winidn
 !  if $(__VERSION__) > 1290
-	@%append $^@ library normaliz.lib
+	@%append $(LINK_ARG) library normaliz.lib
 !  else
-	@%append $^@ import '_IdnToAscii@20' 'NORMALIZ.DLL'.'IdnToAscii'
-	@%append $^@ import '_IdnToUnicode@20' 'NORMALIZ.DLL'.'IdnToUnicode'
+	@%append $(LINK_ARG) import '_IdnToAscii@20' 'NORMALIZ.DLL'.'IdnToAscii'
+	@%append $(LINK_ARG) import '_IdnToUnicode@20' 'NORMALIZ.DLL'.'IdnToUnicode'
 !  endif
 !endif
+	$(LD) name $^@ @$(LINK_ARG)
 
-$(LIB_ARG): $(__MAKEFILES__)
-	%create $^@
-	@for %f in ($(OBJS_STAT)) do @%append $^@ +- %f
+$(LIBNAME).lib: $(OBJS_STAT)
+	%create $(LIB_ARG)
+	@for %f in ($<) do @%append $(LIB_ARG) +- %f
+	$(AR) -q -b -c -pa $^@ @$(LIB_ARG)
 
+$(RESOURCE): libcurl.rc
+	$(RC) $(DEBUG) -q -r -zm -bt=nt -I"../include" $(SYS_INCL) $[@ -fo=$^@
+
+.c{$(OBJ_DYN)}.obj:
+	$(CC) $(CFLAGS) -bd -br $[@ -fo=$^@
+
+.c{$(OBJ_STAT)}.obj:
+	$(CC) $(CFLAGS) -DCURL_STATICLIB $[@ -fo=$^@
+	
