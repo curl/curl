@@ -1839,19 +1839,15 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 #ifndef CURL_DISABLE_LIBCURL_OPTION
         /* Cleanup the libcurl source output */
         easysrc_cleanup();
+
+        /* Dump the libcurl code if previously enabled */
+        dumpeasysrc(config);
 #endif
       }
       else
         helpf(config->errors, "out of memory\n");
     }
   }
-
-#ifndef CURL_DISABLE_LIBCURL_OPTION
-  /* Dump the libcurl code if previously enabled.
-     NOTE: that this function relies on config->errors amongst other things
-     so not everything can be closed and cleaned before this is called */
-  dumpeasysrc(config);
-#endif
 
   return result;
 }
