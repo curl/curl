@@ -410,8 +410,10 @@ static int parsedate(const char *date, time_t *output)
         if(error)
           return PARSEDATE_FAIL;
 
+#if LONG_MAX != INT_MAX
         if((lval > (long)INT_MAX) || (lval < (long)INT_MIN))
           return PARSEDATE_FAIL;
+#endif
 
         val = curlx_sltosi(lval);
 
