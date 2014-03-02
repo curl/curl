@@ -154,14 +154,16 @@ CURLcode easysrc_perform(void)
 
   CHKRET(easysrc_add(&easysrc_code, ""));
   CHKRET(easysrc_add(&easysrc_code, "ret = curl_easy_perform(hnd);"));
+  CHKRET(easysrc_add(&easysrc_code, ""));
+
   return CURLE_OK;
 }
 
 CURLcode easysrc_cleanup(void)
 {
-  CHKRET(easysrc_add(&easysrc_code, ""));
   CHKRET(easysrc_add(&easysrc_code, "curl_easy_cleanup(hnd);"));
   CHKRET(easysrc_add(&easysrc_code, "hnd = NULL;"));
+
   return CURLE_OK;
 }
 

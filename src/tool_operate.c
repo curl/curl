@@ -313,14 +313,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
     }
   }
 
-#ifndef CURL_DISABLE_LIBCURL_OPTION
-  res = easysrc_init();
-  if(res) {
-    helpf(global->errors, "out of memory\n");
-    goto quit_curl;
-  }
-#endif
-
   /* Single header file for all URLs */
   if(config->headerfile) {
     /* open file for output: */
@@ -1760,25 +1752,14 @@ static CURLcode operate_do(struct GlobalConfig *global,
   /* Free list of given URLs */
   clean_getout(config);
 
-#ifndef CURL_DISABLE_LIBCURL_OPTION
-  easysrc_cleanup();
-#endif
-
   hdrcbdata.heads = NULL;
 
   /* Close function-local opened file descriptors */
-
   if(heads.fopened && heads.stream)
     fclose(heads.stream);
+
   if(heads.alloc_filename)
     Curl_safefree(heads.filename);
-
-#ifndef CURL_DISABLE_LIBCURL_OPTION
-  /* Dump the libcurl code if previously enabled.
-     NOTE: that this function relies on config->errors amongst other things
-     so not everything can be closed and cleaned before this is called */
-  dumpeasysrc(global);
-#endif
 
   /* Release metalink related resources here */
   clean_metalink(config);
@@ -1827,29 +1808,50 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
       else
         result = CURLE_FAILED_INIT;
     }
-    /* Perform the main operations */
     else {
-      size_t count = 0;
-      struct OperationConfig *operation = config->first;
+#ifndef CURL_DISABLE_LIBCURL_OPTION
+      /* Initialise the libcurl source output */
+      result = easysrc_init();
+#endif
 
-      /* Get the required aguments for each operation */
-      while(!result && operation) {
-        result = get_args(operation, count++);
+      /* Perform the main operations */
+      if(!result) {
+        size_t count = 0;
+        struct OperationConfig *operation = config->first;
 
-        operation = operation->next;
+        /* Get the required aguments for each operation */
+        while(!result && operation) {
+          result = get_args(operation, count++);
+
+          operation = operation->next;
+        }
+
+        /* Set the current operation pointer */
+        config->current = config->first;
+
+        /* Perform each operation */
+        while(!result && config->current) {
+          result = operate_do(config, config->current);
+
+          config->current = config->current->next;
+        }
+
+#ifndef CURL_DISABLE_LIBCURL_OPTION
+        /* Cleanup the libcurl source output */
+        easysrc_cleanup();
+#endif
       }
-
-      /* Set the current operation pointer */
-      config->current = config->first;
-
-      /* Perform each operation */
-      while(!result && config->current) {
-        result = operate_do(config, config->current);
-
-        config->current = config->current->next;
-      }
+      else
+        helpf(config->errors, "out of memory\n");
     }
   }
+
+#ifndef CURL_DISABLE_LIBCURL_OPTION
+  /* Dump the libcurl code if previously enabled.
+     NOTE: that this function relies on config->errors amongst other things
+     so not everything can be closed and cleaned before this is called */
+  dumpeasysrc(config);
+#endif
 
   return result;
 }
