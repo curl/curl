@@ -20,6 +20,8 @@ This release includes the following changes:
  o winssl: enable TLSv1.1 and TLSv1.2 by default
  o winssl: TLSv1.2 disables certificate signatures using MD5 hash
  o winssl: enable hostname verification of IP address using SAN or CN [11]
+ o darwinssl: Don't omit CN verification when an IP address is used [12]
+ o http2: build with current nghttp2 version
 
 This release includes the following bugfixes:
 
@@ -50,6 +52,8 @@ This release includes the following bugfixes:
  o SFTP: skip reading the dir when NOBODY=1 [10]
  o easy: Fixed a memory leak on OOM condition
  o tool: Fixed incorrect return code when setting HTTP request fails
+ o configure: Tiny fix to honor POSIX
+ o tool: Do not output libcurl source for the information only parameters
 
 This release includes the following known bugs:
 
@@ -60,9 +64,10 @@ advice from friends like these:
 
   Adam Sampson, Arvid Norberg, Colin Hogben, Dan Fandrich, Daniel Stenberg,
   David Ryskalczyk, Fabian Frank, Gisle Vanem, Hubert Kario, Jeff King,
-  Maks Naumov, Kamil Dudka, Marc Hoersken, Patrick Monnerat, Prash Dush,
-  Remi Gacogne, Rob Davies, Romulo A. Ceccon, Shao Shuchao, Steve Holme,
-  Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma, Yehezkel Horowitz,
+  Maks Naumov, Kamil Dudka, Marc Hoersken, naota, Patrick Monnerat,
+  Prash Dush, Remi Gacogne, Rob Davies, Romulo A. Ceccon, Shao Shuchao,
+  Steve Holme, Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma,
+  Yehezkel Horowitz
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -79,3 +84,4 @@ References to bug reports and discussions on issues:
  [9] = http://thread.gmane.org/gmane.comp.version-control.git/242213
  [10] = http://curl.haxx.se/mail/lib-2014-02/0155.html
  [11] = http://curl.haxx.se/mail/lib-2014-02/0243.html
+ [12] = https://github.com/bagder/curl/pull/93
