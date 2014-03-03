@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -666,31 +666,6 @@ const char * Curl_DNtostr(curl_asn1Element * dn)
   return (const char *) buf;
 }
 
-static const char * checkOID(const char * beg, const char * end,
-                             const char * oid)
-{
-  curl_asn1Element e;
-  const char * ccp;
-  const char * p;
-  bool matched;
-
-  /* Check if first ASN.1 element at `beg' is the given OID.
-     Return a pointer in the source after the OID if found, else NULL. */
-
-  ccp = Curl_getASN1Element(&e, beg, end);
-  if(!ccp || e.tag != CURL_ASN1_OBJECT_IDENTIFIER)
-    return (const char *) NULL;
-
-  p = OID2str(e.beg, e.end, FALSE);
-  if(!p)
-    return (const char *) NULL;
-
-  matched = !strcmp(p, oid);
-  free((char *) p);
-  return matched? ccp: (const char *) NULL;
-}
-
-
 /*
  * X509 parser.
  */
@@ -1044,6 +1019,33 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
   return CURLE_OK;
 }
 
+#endif /* USE_QSOSSL or USE_GSKIT or USE_NSS */
+
+#if defined(USE_QSOSSL) || defined(USE_GSKIT)
+
+static const char * checkOID(const char * beg, const char * end,
+                             const char * oid)
+{
+  curl_asn1Element e;
+  const char * ccp;
+  const char * p;
+  bool matched;
+
+  /* Check if first ASN.1 element at `beg' is the given OID.
+     Return a pointer in the source after the OID if found, else NULL. */
+
+  ccp = Curl_getASN1Element(&e, beg, end);
+  if(!ccp || e.tag != CURL_ASN1_OBJECT_IDENTIFIER)
+    return (const char *) NULL;
+
+  p = OID2str(e.beg, e.end, FALSE);
+  if(!p)
+    return (const char *) NULL;
+
+  matched = !strcmp(p, oid);
+  free((char *) p);
+  return matched? ccp: (const char *) NULL;
+}
 
 CURLcode Curl_verifyhost(struct connectdata * conn,
                          const char * beg, const char * end)
@@ -1178,4 +1180,4 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
   return CURLE_PEER_FAILED_VERIFICATION;
 }
 
-#endif /* USE_QSOSSL or USE_GSKIT or USE_NSS */
+#endif /* USE_QSOSSL or USE_GSKIT */
