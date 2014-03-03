@@ -30,6 +30,10 @@
 #include "rawstr.h"
 #include "inet_pton.h"
 
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
+
 /*
  * Match a hostname against a wildcard pattern.
  * E.g.
@@ -37,9 +41,20 @@
  *
  * We use the matching rule described in RFC6125, section 6.4.3.
  * http://tools.ietf.org/html/rfc6125#section-6.4.3
+ *
+ * In addition: ignore trailing dots in the host names and wildcards, so that
+ * the names are used normalized. This is what the browsers do.
+ *
+ * Do not allow wildcard matching on IP numbers. There are apparently
+ * certificates being used with an IP address in the CN field, thus making no
+ * apparent distinction between a name and an IP. We need to detect the use of
+ * an IP address and not wildcard match on such names.
+ *
+ * NOTE: hostmatch() gets called with copied buffers so that it can modify the
+ * contents at will.
  */
 
-static int hostmatch(const char *hostname, const char *pattern)
+static int hostmatch(char *hostname, char *pattern)
 {
   const char *pattern_label_end, *pattern_wildcard, *hostname_label_end;
   int wildcard_enabled;
@@ -48,6 +63,15 @@ static int hostmatch(const char *hostname, const char *pattern)
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 si6;
 #endif
+
+  /* normalize pattern and hostname by stripping off trailing dots */
+  size_t len = strlen(hostname);
+  if(hostname[len-1]=='.')
+    hostname[len-1]=0;
+  len = strlen(pattern);
+  if(pattern[len-1]=='.')
+    pattern[len-1]=0;
+
   pattern_wildcard = strchr(pattern, '*');
   if(pattern_wildcard == NULL)
     return Curl_raw_equal(pattern, hostname) ?
@@ -95,16 +119,26 @@ static int hostmatch(const char *hostname, const char *pattern)
 
 int Curl_cert_hostcheck(const char *match_pattern, const char *hostname)
 {
+  char *matchp;
+  char *hostp;
+  int res = 0;
   if(!match_pattern || !*match_pattern ||
       !hostname || !*hostname) /* sanity check */
-    return 0;
+    ;
+  else {
+    matchp = strdup(match_pattern);
+    if(matchp) {
+      hostp = strdup(hostname);
+      if(hostp) {
+        if(hostmatch(hostp, matchp) == CURL_HOST_MATCH)
+          res= 1;
+        free(hostp);
+      }
+      free(matchp);
+    }
+  }
 
-  if(Curl_raw_equal(hostname, match_pattern)) /* trivial case */
-    return 1;
-
-  if(hostmatch(hostname,match_pattern) == CURL_HOST_MATCH)
-    return 1;
-  return 0;
+  return res;
 }
 
 #endif /* SSLEAY or AXTLS or QSOSSL or GSKIT */
