@@ -1173,26 +1173,26 @@ dnl **********************************************************************
 dnl Check for GSS-API libraries
 dnl **********************************************************************
 
-dnl check for gss stuff in the /usr as default
+dnl check for GSS-API stuff in the /usr as default
 
 GSSAPI_ROOT="/usr"
 AC_ARG_WITH(gssapi-includes,
   AC_HELP_STRING([--with-gssapi-includes=DIR],
-                 [Specify location of GSSAPI header]),
+                 [Specify location of GSS-API headers]),
   [ GSSAPI_INCS="-I$withval"
     want_gss="yes" ]
 )
 
 AC_ARG_WITH(gssapi-libs,
   AC_HELP_STRING([--with-gssapi-libs=DIR],
-                 [Specify location of GSSAPI libs]),
+                 [Specify location of GSS-API libs]),
   [ GSSAPI_LIB_DIR="-L$withval"
     want_gss="yes" ]
 )
 
 AC_ARG_WITH(gssapi,
   AC_HELP_STRING([--with-gssapi=DIR],
-                 [Where to look for GSSAPI]), [
+                 [Where to look for GSS-API]), [
   GSSAPI_ROOT="$withval"
   if test x"$GSSAPI_ROOT" != xno; then
     want_gss="yes"
@@ -1204,7 +1204,7 @@ AC_ARG_WITH(gssapi,
 ])
 
 save_CPPFLAGS="$CPPFLAGS"
-AC_MSG_CHECKING([if GSSAPI support is requested])
+AC_MSG_CHECKING([if GSS-API support is requested])
 if test x"$want_gss" = xyes; then
   AC_MSG_RESULT(yes)
 
@@ -1221,7 +1221,7 @@ if test x"$want_gss" = xyes; then
   AC_CHECK_HEADER(gss.h,
     [
       dnl found in the given dirs
-      AC_DEFINE(HAVE_GSSGNU, 1, [if you have the GNU gssapi libraries])
+      AC_DEFINE(HAVE_GSSGNU, 1, [if you have GNU GSS])
       gnu_gss=yes
     ],
     [
@@ -1242,19 +1242,19 @@ AC_INCLUDES_DEFAULT
         AC_CHECK_HEADER(gssapi.h,
             [
               dnl found
-              AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have the Heimdal gssapi libraries])
+              AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have Heimdal])
             ],
             [
               dnl no header found, disabling GSS
               want_gss=no
-              AC_MSG_WARN(disabling GSSAPI since no header files was found)
+              AC_MSG_WARN(disabling GSS-API support since no header files were found)
             ]
           )
       else
         dnl MIT found
-        AC_DEFINE(HAVE_GSSMIT, 1, [if you have the MIT gssapi libraries])
-        dnl check if we have a really old MIT kerberos (<= 1.2)
-        AC_MSG_CHECKING([if gssapi headers declare GSS_C_NT_HOSTBASED_SERVICE])
+        AC_DEFINE(HAVE_GSSMIT, 1, [if you have MIT Kerberos])
+        dnl check if we have a really old MIT Kerberos version (<= 1.2)
+        AC_MSG_CHECKING([if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE])
         AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
 #include <gssapi/gssapi.h>
@@ -1272,7 +1272,7 @@ AC_INCLUDES_DEFAULT
         ],[
           AC_MSG_RESULT([no])
           AC_DEFINE(HAVE_OLD_GSSMIT, 1,
-            [if you have an old MIT gssapi library, lacking GSS_C_NT_HOSTBASED_SERVICE])
+            [if you have an old MIT Kerberos version, lacking GSS_C_NT_HOSTBASED_SERVICE])
         ])
       fi
     ]
@@ -1281,9 +1281,9 @@ else
   AC_MSG_RESULT(no)
 fi
 if test x"$want_gss" = xyes; then
-  AC_DEFINE(HAVE_GSSAPI, 1, [if you have the gssapi libraries])
+  AC_DEFINE(HAVE_GSSAPI, 1, [if you have GSS-API libraries])
 
-  curl_gss_msg="enabled (MIT/Heimdal)"
+  curl_gss_msg="enabled (MIT Kerberos/Heimdal)"
 
   if test -n "$gnu_gss"; then
     curl_gss_msg="enabled (GNU GSS)"
@@ -3547,7 +3547,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   SSL support:      ${curl_ssl_msg}
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
-  GSSAPI support:   ${curl_gss_msg}
+  GSS-API support:  ${curl_gss_msg}
   SPNEGO support:   ${curl_spnego_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
