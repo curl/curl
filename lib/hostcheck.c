@@ -94,4 +94,4 @@ int Curl_cert_hostcheck(const char *match_pattern, const char *hostname)
   return 0;
 }
 
-#endif /* SSLEAY or AXTLS or QSOSSL or GSKIT or NSS */
+#endif /* SSLEAY or AXTLS or QSOSSL or GSKIT */
