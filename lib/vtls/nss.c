@@ -614,9 +614,8 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
  */
 static void HandshakeCallback(PRFileDesc *sock, void *arg)
 {
-  struct connectdata *conn = (struct connectdata*) arg;
-
 #ifdef USE_NGHTTP2
+  struct connectdata *conn = (struct connectdata*) arg;
   unsigned int buflenmax = 50;
   unsigned char buf[50];
   unsigned int buflen;
@@ -653,6 +652,9 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
       conn->negnpn = NPN_HTTP1_1;
     }
   }
+#else
+  (void)sock;
+  (void)arg;
 #endif
 }
 
