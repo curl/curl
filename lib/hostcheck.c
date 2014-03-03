@@ -28,6 +28,7 @@
 
 #include "hostcheck.h"
 #include "rawstr.h"
+#include "inet_pton.h"
 
 /*
  * Match a hostname against a wildcard pattern.
@@ -43,10 +44,22 @@ static int hostmatch(const char *hostname, const char *pattern)
   const char *pattern_label_end, *pattern_wildcard, *hostname_label_end;
   int wildcard_enabled;
   size_t prefixlen, suffixlen;
+  struct in_addr ignored;
+#ifdef ENABLE_IPV6
+  struct sockaddr_in6 si6;
+#endif
   pattern_wildcard = strchr(pattern, '*');
   if(pattern_wildcard == NULL)
     return Curl_raw_equal(pattern, hostname) ?
       CURL_HOST_MATCH : CURL_HOST_NOMATCH;
+
+  /* detect IP address as hostname and fail the match if so */
+  if(Curl_inet_pton(AF_INET, hostname, &ignored) > 0)
+    return CURL_HOST_NOMATCH;
+#ifdef ENABLE_IPV6
+  else if(Curl_inet_pton(AF_INET6, hostname, &si6.sin6_addr) > 0)
+    return CURL_HOST_NOMATCH;
+#endif
 
   /* We require at least 2 dots in pattern to avoid too wide wildcard
      match. */
