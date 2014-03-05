@@ -388,7 +388,7 @@ struct curl_ssl_session {
   void *sessionid;  /* as returned from the SSL layer */
   size_t idsize;    /* if known, otherwise 0 */
   long age;         /* just a number, the higher the more recent */
-  unsigned short remote_port; /* remote port to connect to */
+  int remote_port;  /* remote port to connect to */
   struct ssl_config_data ssl_config; /* setup for this session */
 };
 
@@ -868,8 +868,7 @@ struct connectdata {
   struct hostname proxy;
 
   long port;       /* which port to use locally */
-  unsigned short remote_port; /* what remote port to connect to,
-                                 not the proxy port! */
+  int remote_port; /* what remote port to connect to, not the proxy port! */
 
   /* 'primary_ip' and 'primary_port' get filled with peer's numerical
      ip address and port number whenever an outgoing connection is

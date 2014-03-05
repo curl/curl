@@ -3553,6 +3553,7 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   conn->tempsock[1] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->connection_id = -1;    /* no ID */
   conn->port = -1; /* unknown at this point */
+  conn->remote_port = -1; /* unknown */
 
   /* Default protocol-independent behavior doesn't support persistent
      connections, so we set this to force-close. Protocols that support
@@ -4075,7 +4076,7 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
 
   /* only if remote_port was not already parsed off the URL we use the
      default port number */
-  if(!conn->remote_port)
+  if(conn->remote_port < 0)
     conn->remote_port = (unsigned short)conn->given->defport;
 
   return CURLE_OK;
