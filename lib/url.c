@@ -4770,24 +4770,21 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
     /* no CURLOPT_PORT given, extract the one from the URL */
 
     char *rest;
-    unsigned long port;
+    long port;
 
-    port=strtoul(portptr+1, &rest, 10);  /* Port number must be decimal */
+    port=strtol(portptr+1, &rest, 10);  /* Port number must be decimal */
 
-    if(rest != (portptr+1) && *rest == '\0') {
-      /* The colon really did have only digits after it,
-       * so it is either a port number or a mistake */
+    if((port < 0) || (port > 0xffff)) {
+      /* Single unix standard says port numbers are 16 bits long */
+      failf(data, "Port number out of range");
+      return CURLE_URL_MALFORMAT;
+    }
 
-      if(port > 0xffff) {   /* Single unix standard says port numbers are
-                              * 16 bits long */
-        failf(data, "Port number too large: %lu", port);
-        return CURLE_URL_MALFORMAT;
-      }
-
+    else if(rest != &portptr[1]) {
       *portptr = '\0'; /* cut off the name there */
       conn->remote_port = curlx_ultous(port);
     }
-    else if(!port)
+    else
       /* Browser behavior adaptation. If there's a colon with no digits after,
          just cut off the name there which makes us ignore the colon and just
          use the default port. Firefox and Chrome both do that. */
