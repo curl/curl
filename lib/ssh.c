@@ -328,6 +328,7 @@ static LIBSSH2_FREE_FUNC(my_libssh2_free)
 /* This is the ONLY way to change SSH state! */
 static void state(struct connectdata *conn, sshstate nowstate)
 {
+  struct ssh_conn *sshc = &conn->proto.sshc;
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[] = {
@@ -387,10 +388,7 @@ static void state(struct connectdata *conn, sshstate nowstate)
     "SSH_SESSION_FREE",
     "QUIT"
   };
-#endif
-  struct ssh_conn *sshc = &conn->proto.sshc;
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   if(sshc->state != nowstate) {
     infof(conn->data, "SFTP %p state change from %s to %s\n",
           (void *)sshc, names[sshc->state], names[nowstate]);
@@ -1232,8 +1230,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
 
         /*
-         * SFTP is a binary protocol, so we don't send text commands to
-         * the server. Instead, we scan for commands for commands used by
+         * SFTP is a binary protocol, so we don't send text commands
+         * to the server. Instead, we scan for commands used by
          * OpenSSH's sftp program and call the appropriate libssh2
          * functions.
          */
@@ -3134,7 +3132,8 @@ static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
     *err = CURLE_AGAIN;
     nread = -1;
 
-  } else if(nread < 0) {
+  }
+  else if(nread < 0) {
     *err = libssh2_session_error_to_CURLE(nread);
   }
   return nread;
