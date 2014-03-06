@@ -3118,6 +3118,7 @@ static ssize_t sftp_send(struct connectdata *conn, int sockindex,
 
 /*
  * Return number of received (decrypted) bytes
+ * or <0 on error
  */
 static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
                          char *mem, size_t len, CURLcode *err)
@@ -3132,6 +3133,9 @@ static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
   if(nread == LIBSSH2_ERROR_EAGAIN) {
     *err = CURLE_AGAIN;
     nread = -1;
+
+  } else if(nread < 0) {
+    *err = libssh2_session_error_to_CURLE(nread);
   }
   return nread;
 }
