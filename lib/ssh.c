@@ -3134,7 +3134,7 @@ static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
 
   }
   else if(nread < 0) {
-    *err = libssh2_session_error_to_CURLE(nread);
+    *err = libssh2_session_error_to_CURLE((int)nread);
   }
   return nread;
 }
