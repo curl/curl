@@ -115,18 +115,6 @@ UNIX
 
        ./configure --disable-thread
 
-     To build curl with kerberos4 support enabled, curl requires the krb4 libs
-     and headers installed. You can then use a set of options to tell
-     configure where those are:
-
-          --with-krb4-includes[=DIR]   Specify location of kerberos4 headers
-          --with-krb4-libs[=DIR]       Specify location of kerberos4 libs
-          --with-krb4[=DIR]            where to look for Kerberos4
-
-     In most cases, /usr/athena is the install prefix and then it works with
-
-       ./configure --with-krb4=/usr/athena
-
      If you're a curl developer and use gcc, you might want to enable more
      debug options with the --enable-debug option.
 
