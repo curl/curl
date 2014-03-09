@@ -3,6 +3,10 @@ HTTP2 with libcurl
 
  Spec: http://tools.ietf.org/html/draft-ietf-httpbis-http2
 
+ Build prerequisites
+  - nghttp2
+  - OpenSSL or NSS or GnutTLS with a new enough version
+
  nghttp2 (https://github.com/tatsuhiro-t/nghttp2)
 
   libcurl uses this 3rd party library for the low level protocol handling
