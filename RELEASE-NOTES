@@ -54,6 +54,15 @@ This release includes the following bugfixes:
  o tool: Fixed incorrect return code when setting HTTP request fails
  o configure: Tiny fix to honor POSIX
  o tool: Do not output libcurl source for the information only parameters
+ o Rework Open Watcom make files to use standard Wmake features
+ o x509asn: moved out Curl_verifyhost from NSS builds
+ o configure: call it GSS-API
+ o hostcheck: Curl_cert_hostcheck is not used by NSS builds
+ o multi_runsingle: move timestamp into INIT [13]
+ o remote_port: allow connect to port 0
+ o parse_remote_port: error out on illegal port numbers better
+ o ssh: Pass errors from libssh2_sftp_read up the stack
+ o docs: remove documentation on setting up krb4 support
 
 This release includes the following known bugs:
 
@@ -62,12 +71,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Sampson, Arvid Norberg, Colin Hogben, Dan Fandrich, Daniel Stenberg,
-  David Ryskalczyk, Fabian Frank, Gisle Vanem, Hubert Kario, Jeff King,
-  Maks Naumov, Kamil Dudka, Marc Hoersken, naota, Patrick Monnerat,
-  Prash Dush, Remi Gacogne, Rob Davies, Romulo A. Ceccon, Shao Shuchao,
-  Steve Holme, Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma,
-  Yehezkel Horowitz
+  Adam Sampson, Arvid Norberg, Brad Spencer, Colin Hogben, Dan Fandrich,
+  Daniel Stenberg, David Ryskalczyk, Fabian Frank, Gisle Vanem, Hubert Kario,
+  Jeff King, Jiri Malak, Kamil Dudka, Maks Naumov, Marc Hoersken,
+  Michael Osipov, naota, Nick Zitzmann, Patrick Monnerat, Prash Dush,
+  Remi Gacogne, Rob Davies, Romulo A. Ceccon, Shao Shuchao, Steve Holme,
+  Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma, Yehezkel Horowitz
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -85,3 +94,4 @@ References to bug reports and discussions on issues:
  [10] = http://curl.haxx.se/mail/lib-2014-02/0155.html
  [11] = http://curl.haxx.se/mail/lib-2014-02/0243.html
  [12] = https://github.com/bagder/curl/pull/93
+ [13] = http://curl.haxx.se/mail/lib-2014-02/0036.html
