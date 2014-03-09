@@ -20,6 +20,12 @@ CA certs
   "ca bundle" for this. See lots of more details on this in the SSLCERTS
   document.
 
+CA bundle missing intermediate certificates
+
+  When using said CA bundle to verify a server cert, you will experience
+  problems if your CA cert does not have the certificates for the
+  intermediates in the whole trust chain.
+
 SSL version
 
   Some broken servers fail to support the protocol negotiation properly that
