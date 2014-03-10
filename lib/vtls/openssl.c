@@ -1445,6 +1445,30 @@ select_next_proto_cb(SSL *ssl,
 }
 #endif
 
+static const char *
+get_ssl_version_txt(SSL_SESSION *session)
+{
+  if(NULL == session)
+    return "";
+
+  switch(session->ssl_version) {
+#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
+  case TLS1_2_VERSION:
+    return "TLSv1.2";
+  case TLS1_1_VERSION:
+    return "TLSv1.1";
+#endif
+  case TLS1_VERSION:
+    return "TLSv1.0";
+  case SSL3_VERSION:
+    return "SSLv3";
+  case SSL2_VERSION:
+    return "SSLv2";
+  }
+  return "unknown";
+}
+
+
 static CURLcode
 ossl_connect_step1(struct connectdata *conn,
                    int sockindex)
@@ -1964,7 +1988,8 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
     connssl->connecting_state = ssl_connect_3;
 
     /* Informational message */
-    infof (data, "SSL connection using %s\n",
+    infof (data, "SSL connection using %s / %s\n",
+           get_ssl_version_txt(SSL_get_session(connssl->handle)),
            SSL_get_cipher(connssl->handle));
 
 #ifdef HAS_ALPN
