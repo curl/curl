@@ -75,6 +75,26 @@ static int http2_getsock(struct connectdata *conn,
   return http2_perform_getsock(conn, sock, numsocks);
 }
 
+static CURLcode http2_disconnect(struct connectdata *conn,
+                                 bool dead_connection)
+{
+  struct http_conn *httpc = &conn->proto.httpc;
+  (void)dead_connection;
+
+  infof(conn->data, "HTTP/2 DISCONNECT starts now\n");
+
+  nghttp2_session_del(httpc->h2);
+
+  Curl_safefree(httpc->header_recvbuf->buffer);
+  Curl_safefree(httpc->header_recvbuf);
+
+  Curl_safefree(httpc->inbuf);
+
+  infof(conn->data, "HTTP/2 DISCONNECT done\n");
+
+  return CURLE_OK;
+}
+
 /*
  * HTTP2 handler interface. This isn't added to the general list of protocols
  * but will be used at run-time when the protocol is dynamically switched from
@@ -93,7 +113,7 @@ const struct Curl_handler Curl_handler_http2 = {
   http2_getsock,                        /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   http2_perform_getsock,                /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
+  http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
@@ -113,7 +133,7 @@ const struct Curl_handler Curl_handler_http2_ssl = {
   http2_getsock,                        /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   http2_perform_getsock,                /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
+  http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP | CURLPROTO_HTTPS,     /* protocol */
@@ -493,7 +513,7 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
                             "Upgrade: %s\r\n"
                             "HTTP2-Settings: %s\r\n",
                             NGHTTP2_PROTO_VERSION_ID, base64);
-  free(base64);
+  Curl_safefree(base64);
 
   k->upgr101 = UPGR101_REQUESTED;
 
@@ -730,7 +750,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     rv = nghttp2_submit_request(httpc->h2, 0, nva, nheader, NULL, NULL);
   }
 
-  free(nva);
+  Curl_safefree(nva);
 
   if(rv != 0) {
     *err = CURLE_SEND_ERROR;
