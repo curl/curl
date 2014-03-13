@@ -58,7 +58,7 @@ test599 test600 test601 test602 test603 test604 test605 test606 test607 \
 test608 test609 test610 test611 test612 test613 test614 test615 test616 \
 test617 test618 test619 test620 test621 test622 test623 test624 test625 \
 test626 test627 test628 test629 test630 test631 test632 test633 test634 \
-test635 test636 test637 test638 test639 \
+test635 test636 test637 test638 test639 test640 test641 \
 \
 test700 test701 test702 test703 test704 test705 test706 test707 test708 \
 test709 test710 test711 test712 \
