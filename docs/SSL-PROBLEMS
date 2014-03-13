@@ -6,7 +6,7 @@
 
 SSL problems
 
-  First, let's establish that we often refer to TLS and SSL interchangably as
+  First, let's establish that we often refer to TLS and SSL interchangeably as
   SSL here. The current protocol is called TLS, it was called SSL a long time
   ago.
 
@@ -30,7 +30,7 @@ SSL version
 
   Some broken servers fail to support the protocol negotiation properly that
   SSL servers are supposed to handle. This may cause the connection to fail
-  completely. Sometimes you may need to explicity select a SSL version to use
+  completely. Sometimes you may need to explicitly select a SSL version to use
   when connecting to make the connection succeed.
 
   An additional complication can be that modern SSL libraries sometimes are
@@ -38,7 +38,7 @@ SSL version
 
 SSL ciphers
 
-  Clients give servers a list of ciphers to select from. If the list doens't
+  Clients give servers a list of ciphers to select from. If the list doesn't
   include any ciphers the server wants/can use, the connection handshake
   fails.
 

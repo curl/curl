@@ -300,7 +300,7 @@ Persistent Connections
  o When libcurl is told to perform a transfer, it first checks for an already
    existing connection in the cache that we can use. Otherwise it creates a
    new one and adds that the cache. If the cache is full already when a new
-   conncetion is added added, it will first close the oldest unused one.
+   connection is added added, it will first close the oldest unused one.
  o When the transfer operation is complete, the connection is left
    open. Particular options may tell libcurl not to, and protocols may signal
    closure on connections and then they won't be kept open of course.

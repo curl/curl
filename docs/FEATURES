@@ -55,7 +55,7 @@ HTTP
  - reads/writes the netscape cookie file format
  - custom headers (replace/remove internally generated headers)
  - custom user-agent string
- - custom referer string
+ - custom referrer string
  - range
  - proxy authentication
  - time conditions
@@ -161,8 +161,8 @@ IMAP
  - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5 and
    NTLM (*9)
  - list the folders of a mailbox
- - select a mailbox with support for verifing the UIDVALIDITY
- - fetch e-mails with support for specifing the UID and SECTION
+ - select a mailbox with support for verifying the UIDVALIDITY
+ - fetch e-mails with support for specifying the UID and SECTION
  - upload e-mails via the append command
  - enhanced command support for: EXAMINE, CREATE, DELETE, RENAME, STATUS,
    STORE, COPY and UID via custom requests

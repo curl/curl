@@ -71,7 +71,7 @@ Command Line CMake
 
     $ make install
 
-    (The teste suit does not work with the cmake build)
+    (The test suite does not work with the cmake build)
 
 ccmake
 =========

@@ -47,7 +47,7 @@ for older and later versions as things don't change drastically that often.
   ->mstate is the multi state of this particular SessionHandle. When
   multi_runsingle() is called, it will act on this handle according to which
   state it is in. The mstate is also what tells which sockets to return for a
-  speicific SessionHandle when curl_multi_fdset() is called etc.
+  specific SessionHandle when curl_multi_fdset() is called etc.
 
   The libcurl source code generally use the name 'data' for the variable that
   points to the SessionHandle.
@@ -60,7 +60,7 @@ for older and later versions as things don't change drastically that often.
   re-use an existing one instead of creating a new as it creates a significant
   performance boost.
 
-  Each 'connectdata' identifies a single physical conncetion to a server. If
+  Each 'connectdata' identifies a single physical connection to a server. If
   the connection can't be kept alive, the connection will be closed after use
   and then this struct can be removed from the cache and freed.
 
@@ -158,18 +158,18 @@ for older and later versions as things don't change drastically that often.
 
   ->do_it is the function called to issue the transfer request. What we call
   the DO action internally. If the DO is not enough and things need to be kept
-  getting done for the entier DO sequence to complete, ->doing is then usually
+  getting done for the entire DO sequence to complete, ->doing is then usually
   also provided. Each protocol that needs to do multiple commands or similar
   for do/doing need to implement their own state machines (see SCP, SFTP,
   FTP). Some protocols (only FTP and only due to historical reasons) has a
   separate piece of the DO state called DO_MORE.
 
-  ->doing keeps getting called while issudeing the transfer request command(s)
+  ->doing keeps getting called while issuing the transfer request command(s)
 
   ->done gets called when the transfer is complete and DONE. That's after the
   main data has been transferred.
 
-  ->do_more gets called doring the DO_MORE state. The FTP protocol uses this
+  ->do_more gets called during the DO_MORE state. The FTP protocol uses this
   state when setting up the second connection.
 
   ->proto_getsock

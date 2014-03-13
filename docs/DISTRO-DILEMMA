@@ -59,7 +59,7 @@ GnuTLS
  OpenSSL does. Now, you can build and distribute an TLS/SSL capable libcurl
  without including any Original BSD licensed code.
 
- I believe Debian is the first (only?) distro that provides libcurl/GnutTLS
+ I believe Debian is the first (only?) distro that provides libcurl/GnuTLS
  packages.
 
 yassl
@@ -72,20 +72,20 @@ GnuTLS vs OpenSSL vs yassl
 
  While these three libraries offer similar features, they are not equal.
  libcurl does not (yet) offer a standardized stable ABI if you decide to
- switch from using libcurl-openssl to libcurl-gnutls or vice versa. The GnuTLS
+ switch from using libcurl-openssl to libcurl-gnutls or vice-versa. The GnuTLS
  and yassl support is very recent in libcurl and it has not been tested nor
  used very extensively, while the OpenSSL equivalent code has been used and
  thus matured since 1999.
 
  GnuTLS
-   - LGPL licensened
+   - LGPL licensed
    - supports SRP
    - lacks SSLv2 support
    - lacks MD2 support (used by at least some CA certs)
    - lacks the crypto functions libcurl uses for NTLM
 
  OpenSSL
-   - Original BSD licensened
+   - Original BSD licensed
    - lacks SRP
    - supports SSLv2
    - older and more widely used

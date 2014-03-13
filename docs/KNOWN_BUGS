@@ -6,13 +6,13 @@ may have been fixed since this was written!
 87. -J/--remote-header-name doesn't decode %-encoded file names. RFC6266
   details how it should be done. The can of worm is basically that we have no
   charset handling in curl and ascii >=128 is a challenge for us. Not to
-  mention that decoding also means that we need to check for nastyness that is
+  mention that decoding also means that we need to check for nastiness that is
   attempted, like "../" sequences and the like. Probably everything to the left
   of any embedded slashes should be cut off.
   http://curl.haxx.se/bug/view.cgi?id=1294
 
 86. The disconnect commands (LOGOUT and QUIT) may not be sent by IMAP, POP3
-  and SMTP if a failure occures during the authentication phase of a
+  and SMTP if a failure occurs during the authentication phase of a
   connection.
 
 85. Wrong STARTTRANSFER timer accounting for POST requests
@@ -38,9 +38,9 @@ may have been fixed since this was written!
   such in the build.
   http://curl.haxx.se/bug/view.cgi?id=1222
 
-81. When using -J (with -O), automaticly resumed downloading together with "-C
-  -" fails. Without -J the same command line works! This happens because the
-  resume logic is worked out before the target file name (and thus its
+81. When using -J (with -O), automatically resumed downloading together with
+  "-C -" fails. Without -J the same command line works! This happens because
+  the resume logic is worked out before the target file name (and thus its
   pre-transfer size) has been figured out!
   http://curl.haxx.se/bug/view.cgi?id=1169
 

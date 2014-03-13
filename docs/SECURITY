@@ -60,7 +60,7 @@ announcement.
 
 - Write a security advisory draft about the problem that explains what the
   problem is, its impact, which versions it affects, solutions or
-  work-arounds, when the release is out and make sure to credit all
+  workarounds, when the release is out and make sure to credit all
   contributors properly.
 
 - Request a CVE number from distros@openwall.org[1] when also informing and
@@ -85,7 +85,7 @@ announcement.
   the same manner we always announce releases. It gets sent to the
   curl-announce, curl-library and curl-users mailing lists.
 
-- The security web page on the web site should get the new vulernability
+- The security web page on the web site should get the new vulnerability
   mentioned.
 
 [1] = http://oss-security.openwall.org/wiki/mailing-lists/distros

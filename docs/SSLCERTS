@@ -110,7 +110,7 @@ Starting with version 7.19.7, libcurl will check for the NSS version it runs,
 and automatically add the 'sql:' prefix to the certdb directory (either the
 hardcoded default /etc/pki/nssdb or the directory configured with SSL_DIR
 environment variable) if version 3.12.0 or later is detected. To check which
-ertdb format your distribution provides, examine the default
+certdb format your distribution provides, examine the default
 certdb location: /etc/pki/nssdb; the new certdb format can be identified by
 the filenames cert9.db, key4.db, pkcs11.txt; filenames of older versions are
 cert8.db, key3.db, modsec.db.

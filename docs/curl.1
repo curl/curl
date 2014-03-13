@@ -141,13 +141,13 @@ underlying libcurl was built to support it. (Added in 7.33.0)
 .IP "--no-npn"
 Disable the NPN TLS extension. NPN is enabled by default if libcurl was built
 with an SSL library that supports NPN. NPN is used by a libcurl that supports
-HTTP 2 to negoatiate HTTP 2 support with the server during https sessions.
+HTTP 2 to negotiate HTTP 2 support with the server during https sessions.
 
 (Added in 7.36.0)
 .IP "--no-alpn"
 Disable the ALPN TLS extension. ALPN is enabled by default if libcurl was built
 with an SSL library that supports ALPN. ALPN is used by a libcurl that supports
-HTTP 2 to negoatiate HTTP 2 support with the server during https sessions.
+HTTP 2 to negotiate HTTP 2 support with the server during https sessions.
 
 (Added in 7.36.0)
 .IP "-1, --tlsv1"
@@ -442,7 +442,7 @@ This option requires that libcurl was built with a resolver backend that
 supports this operation. The c-ares backend is the only such one.  (Added in
 7.33.0)
 .IP "-e, --referer <URL>"
-(HTTP) Sends the "Referer Page" information to the HTTP server. This can also
+(HTTP) Sends the "Referrer Page" information to the HTTP server. This can also
 be set with the \fI-H, --header\fP flag of course.  When used with
 \fI-L, --location\fP you can append ";auto" to the --referer URL to make curl
 automatically set the previous URL when it follows a Location: header. The
@@ -1424,7 +1424,7 @@ option name can still be used but will be removed in a future version.
 .IP "--ssl-allow-beast"
 (SSL) This option tells curl to not work around a security flaw in the SSL3
 and TLS1.0 protocols known as BEAST.  If this option isn't used, the SSL layer
-may use work-arounds known to cause interoperability problems with some older
+may use workarounds known to cause interoperability problems with some older
 SSL implementations. WARNING: this option loosens the SSL security, and by
 using this flag you ask for exactly that.  (Added in 7.25.0)
 .IP "--socks4 <host[:port]>"
@@ -1601,7 +1601,7 @@ will prompt for a password.
 
 If you use an SSPI-enabled curl binary and perform NTLM authentication, you
 can force curl to select the user name and password from your environment by
-simply specifying a single colon with this option: "-u :" or by specfying the
+simply specifying a single colon with this option: "-u :" or by specifying the
 login options on their own, for example "-u ;auth=NTLM".
 
 You can use the optional login options part to specify protocol specific
@@ -1823,7 +1823,7 @@ Specifies a custom POP3 command to use instead of LIST or RETR. (Added in
 7.26.0)
 
 (IMAP)
-Specifies a custom IMAP command to use insead of LIST. (Added in 7.30.0)
+Specifies a custom IMAP command to use instead of LIST. (Added in 7.30.0)
 
 (SMTP)
 Specifies a custom SMTP command to use instead of HELP or VRFY. (Added in 7.34.0)

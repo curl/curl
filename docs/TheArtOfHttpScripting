@@ -171,7 +171,7 @@ The Art Of Scripting HTTP Requests Using Curl
  2.4 User name and password
 
  Some services are setup to require HTTP authentication and then you need to
- provide name and password which then is transfered to the remote site in
+ provide name and password which then is transferred to the remote site in
  various ways depending on the exact authentication protocol used.
 
  You can opt to either insert the user and password in the URL or you can
@@ -520,7 +520,7 @@ The Art Of Scripting HTTP Requests Using Curl
 
  Curl has a full blown cookie parsing engine built-in that comes to use if you
  want to reconnect to a server and use cookies that were stored from a
- previous connection (or handicrafted manually to fool the server into
+ previous connection (or hand-crafted manually to fool the server into
  believing you had a previous connection). To use previously stored cookies,
  you run curl like:
 
@@ -645,7 +645,7 @@ The Art Of Scripting HTTP Requests Using Curl
  sometimes they use such code to set or modify cookie contents. Possibly they
  do that to prevent programmed logins, like this manual describes how to...
  Anyway, if reading the code isn't enough to let you repeat the behavior
- manually, capturing the HTTP requests done by your browers and analyzing the
+ manually, capturing the HTTP requests done by your browsers and analyzing the
  sent cookies is usually a working method to work out how to shortcut the
  javascript need.
 

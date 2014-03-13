@@ -10,7 +10,7 @@ README.netware
 
   Curl has been successfully compiled with gcc / nlmconv on different flavours
   of Linux as well as with the official Metrowerks CodeWarrior compiler.
-  While not being the main development target, a continously growing share of
+  While not being the main development target, a continuously growing share of
   curl users are NetWare-based, specially also consuming the lib from PHP.
 
   The unix-style man pages are tricky to read on windows, so therefore are all
