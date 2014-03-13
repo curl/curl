@@ -1196,7 +1196,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
            using ordinary FTP. */
         result = Curl_client_write(conn, CLIENTWRITE_HEADER, tmp, strlen(tmp));
         free(tmp);
-        state(conn, SSH_SFTP_NEXT_QUOTE);
+        if(result) {
+          state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
+          sshc->actualcode = result;
+        }
+        else
+          state(conn, SSH_SFTP_NEXT_QUOTE);
         break;
       }
       else if(cmd) {
@@ -2171,6 +2177,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       conn->cselect_bits = CURL_CSELECT_IN;
     }
     if(result) {
+      /* this should never occur; the close state should be entered
+         at the time the error occurs */
       state(conn, SSH_SFTP_CLOSE);
       sshc->actualcode = result;
     }
