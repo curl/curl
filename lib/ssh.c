@@ -734,6 +734,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       result = ssh_check_fingerprint(conn);
       if(result == CURLE_OK)
         state(conn, SSH_AUTHLIST);
+      /* ssh_check_fingerprint sets state appropriately on error */
       break;
 
     case SSH_AUTHLIST:
@@ -1677,7 +1678,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
       }
 
-      /* If we have restart point then we need to seek to the correct
+      /* If we have a restart point then we need to seek to the correct
          position. */
       if(data->state.resume_from > 0) {
         /* Let's read off the proper amount of bytes from the input. */
@@ -2152,9 +2153,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         SFTP_SEEK(sshc->sftp_handle, data->state.resume_from);
       }
     }
-
-    if(data->set.opt_no_body)
-      state(conn, SSH_SFTP_CLOSE);
 
     /* Setup the actual download */
     if(data->req.size == 0) {
