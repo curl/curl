@@ -72,11 +72,12 @@ typedef enum {
   CHUNKE_ILLEGAL_HEX,
   CHUNKE_BAD_CHUNK,
   CHUNKE_WRITE_ERROR,
-  CHUNKE_STATE_ERROR,
   CHUNKE_BAD_ENCODING,
   CHUNKE_OUT_OF_MEMORY,
   CHUNKE_LAST
 } CHUNKcode;
+
+const char *Curl_chunked_strerror(CHUNKcode code);
 
 struct Curl_chunker {
   char hexbuffer[ MAXNUM_SIZE + 1];

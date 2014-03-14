@@ -611,7 +611,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
             failf(data, "Failed writing data");
             return CURLE_WRITE_ERROR;
           }
-          failf(data, "Problem (%d) in the Chunked-Encoded data", (int)res);
+          failf(data, "%s in chunked-encoding", Curl_chunked_strerror(res));
           return CURLE_RECV_ERROR;
         }
         else if(CHUNKE_STOP == res) {
