@@ -956,9 +956,9 @@ IPv6
   When this style is used, the -g option must be given to stop curl from
   interpreting the square brackets as special globbing characters.  Link local
   and site local addresses including a scope identifier, such as fe80::1234%1,
-  may also be used, but the scope portion must be numeric and the percent
-  character must be URL escaped. The previous example in an SFTP URL might
-  look like:
+  may also be used, but the scope portion must be numeric or match an existing
+  network interface on Linux and the percent character must be URL escaped. The
+  previous example in an SFTP URL might look like:
 
     sftp://[fe80::1234%251]/
 

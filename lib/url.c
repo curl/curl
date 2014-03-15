@@ -3951,23 +3951,59 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   if(result != CURLE_OK)
     return result;
 
-  if(conn->host.name[0] == '[') {
+  if(conn->host.name[0] == '[' && !data->state.this_is_a_follow) {
     /* This looks like an IPv6 address literal.  See if there is an address
-       scope.  */
-    char *percent = strstr (conn->host.name, "%25");
+       scope if there is no location header */
+    char *percent = strchr(conn->host.name, '%');
     if(percent) {
+      unsigned int identifier_offset = 3;
       char *endp;
-      unsigned long scope = strtoul (percent + 3, &endp, 10);
+      unsigned long scope;
+      if(strncmp("%25", percent, 3) != 0) {
+        infof(data,
+              "Please URL encode %% as %%25, see RFC 6874.\n");
+        identifier_offset = 1;
+      }
+      scope = strtoul(percent + identifier_offset, &endp, 10);
       if(*endp == ']') {
         /* The address scope was well formed.  Knock it out of the
            hostname. */
         memmove(percent, endp, strlen(endp)+1);
-        if(!data->state.this_is_a_follow)
-          /* Don't honour a scope given in a Location: header */
-          conn->scope = (unsigned int)scope;
+        conn->scope = (unsigned int)scope;
       }
-      else
-        infof(data, "Invalid IPv6 address format\n");
+      else {
+        /* Zone identifier is not numeric */
+#ifdef HAVE_NET_IF_H
+        char ifname[IFNAMSIZ + 2];
+        char *square_bracket;
+        unsigned int scopeidx = 0;
+        strncpy(ifname, percent + identifier_offset, IFNAMSIZ + 2);
+        /* Ensure nullbyte termination */
+        ifname[IFNAMSIZ + 1] = '\0';
+        square_bracket = strchr(ifname, ']');
+        if(square_bracket) {
+          /* Remove ']' */
+          *square_bracket = '\0';
+          scopeidx = if_nametoindex(ifname);
+          if(scopeidx == 0) {
+            infof(data, "Invalid network interface: %s; %s\n", ifname,
+                  strerror(errno));
+          }
+        }
+        if(scopeidx > 0) {
+          /* Remove zone identifier from hostname */
+          memmove(percent,
+                  percent + identifier_offset + strlen(ifname),
+                  identifier_offset + strlen(ifname));
+          conn->scope = scopeidx;
+        }
+        else {
+#endif /* HAVE_NET_IF_H */
+          infof(data, "Invalid IPv6 address format\n");
+#ifdef HAVE_NET_IF_H
+        }
+#endif /* HAVE_NET_IF_H */
+      }
     }
   }
 
@@ -4350,12 +4386,21 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   /* start scanning for port number at this point */
   portptr = proxyptr;
 
-  /* detect and extract RFC2732-style IPv6-addresses */
+  /* detect and extract RFC6874-style IPv6-addresses */
   if(*proxyptr == '[') {
     char *ptr = ++proxyptr; /* advance beyond the initial bracket */
-    while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':') || (*ptr == '%') ||
-                   (*ptr == '.')))
+    while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':') || (*ptr == '.')))
       ptr++;
+    if(*ptr == '%') {
+      /* There might be a zone identifier */
+      if(strncmp("%25", ptr, 3))
+        infof(data, "Please URL encode %% as %%25, see RFC 6874.\n");
+      ptr++;
+      /* Allow unresered characters as defined in RFC 3986 */
+      while(*ptr && (ISALPHA(*ptr) || ISXDIGIT(*ptr) || (*ptr == '-') ||
+                     (*ptr == '.') || (*ptr == '_') || (*ptr == '~')))
+        ptr++;
+    }
     if(*ptr == ']')
       /* yeps, it ended nicely with a bracket as well */
       *ptr++ = 0;

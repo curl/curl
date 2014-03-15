@@ -180,16 +180,7 @@ may have been fixed since this was written!
   --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
 
 30. You need to use -g to the command line tool in order to use RFC2732-style
-  IPv6 numerical addresses in URLs.
-
-29. IPv6 URLs with zone ID is not nicely supported.
-  http://www.ietf.org/internet-drafts/draft-fenner-literal-zone-02.txt (expired)
-  specifies the use of a plus sign instead of a percent when specifying zone
-  IDs in URLs to get around the problem of percent signs being
-  special. According to the reporter, Firefox deals with the URL _with_ a
-  percent letter (which seems like a blatant URL spec violation).
-  libcurl supports zone IDs where the percent sign is URL-escaped (i.e. %25):
-  http://curl.haxx.se/bug/view.cgi?id=555
+  or RFC6874-style IPv6 numerical addresses in URLs.
 
 26. NTLM authentication using SSPI (on Windows) when (lib)curl is running in
   "system context" will make it use wrong(?) user name - at least when compared
