@@ -2,7 +2,8 @@
 <info>
 <keywords>
 SMTP
-SMTP AUTH NTLM SASL CANCELLATION
+SMTP AUTH NTLM
+SASL CANCELLATION
 RFC4954
 </keywords>
 </info>

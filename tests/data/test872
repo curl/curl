@@ -2,7 +2,8 @@
 <info>
 <keywords>
 POP3
-POP3 AUTH LOGIN SASL-IR 
+POP3 AUTH LOGIN
+SASL-IR
 RFC1734
 RFC5034
 </keywords>

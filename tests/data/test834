@@ -2,7 +2,9 @@
 <info>
 <keywords>
 IMAP
-IMAP AUTH NTLM SASL DOWNGRADE
+IMAP AUTH NTLM
+IMAP AUTH PLAIN
+SASL DOWNGRADE
 </keywords>
 </info>
 
