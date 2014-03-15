@@ -44,8 +44,6 @@ http://%HOSTIP:%HTTPPORT/path/553
 <strip>
 ^User-Agent: curl/.*
 </strip>
-# We strip off a large chunk of the type-2 NTLM message since it depends on
-# the local host name and thus differs on different machines!
 <protocol nonewline="yes">
 POST /path/553 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

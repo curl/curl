@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP PUT
+HTTP NTLM auth
 </keywords>
 </info>
 
