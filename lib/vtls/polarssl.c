@@ -31,6 +31,7 @@
 
 #ifdef USE_POLARSSL
 
+#include <polarssl/compat-1.2.h>
 #include <polarssl/net.h>
 #include <polarssl/ssl.h>
 #include <polarssl/certs.h>
@@ -192,7 +193,7 @@ polarssl_connect_step1(struct connectdata *conn,
 #endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
 
   /* Load the trusted CA */
-  memset(&connssl->cacert, 0, sizeof(x509_cert));
+  memset(&connssl->cacert, 0, sizeof(x509_crt));
 
   if(data->set.str[STRING_SSL_CAFILE]) {
     ret = x509parse_crtfile(&connssl->cacert,
@@ -211,7 +212,7 @@ polarssl_connect_step1(struct connectdata *conn,
   }
 
   /* Load the client certificate */
-  memset(&connssl->clicert, 0, sizeof(x509_cert));
+  memset(&connssl->clicert, 0, sizeof(x509_crt));
 
   if(data->set.str[STRING_CERT]) {
     ret = x509parse_crtfile(&connssl->clicert,

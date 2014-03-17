@@ -306,8 +306,8 @@ struct ssl_connect_data {
   ssl_context ssl;
   ssl_session ssn;
   int server_fd;
-  x509_cert cacert;
-  x509_cert clicert;
+  x509_crt cacert;
+  x509_crt clicert;
   x509_crl crl;
   rsa_context rsa;
   ssl_connect_state connecting_state;
