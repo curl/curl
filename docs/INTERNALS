@@ -45,6 +45,7 @@ Portability
  qsossl       V5R3M0
  NSS          3.14.x
  axTLS        1.2.7
+ PolarSSL     1.3.0
  Heimdal      ?
 
  On systems where configure runs, we aim at working on them all - if they have

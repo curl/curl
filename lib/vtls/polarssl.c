@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,25 +38,13 @@
 #include <polarssl/x509.h>
 #include <polarssl/version.h>
 
-#if POLARSSL_VERSION_NUMBER >= 0x01000000
-#include <polarssl/error.h>
-#endif /* POLARSSL_VERSION_NUMBER >= 0x01000000 */
+#if POLARSSL_VERSION_NUMBER < 0x01030000
+#error too old PolarSSL
+#endif
 
-#if POLARSSL_VERSION_NUMBER>0x01010000
+#include <polarssl/error.h>
 #include <polarssl/entropy.h>
 #include <polarssl/ctr_drbg.h>
-#else
-#include <polarssl/havege.h>
-#endif /* POLARSSL_VERSION_NUMBER>0x01010000 */
-
-
-#if POLARSSL_VERSION_NUMBER<0x01000000
-/*
-  Earlier versions of polarssl had no WANT_READ or WANT_WRITE, only TRY_AGAIN
-*/
-#define POLARSSL_ERR_NET_WANT_READ  POLARSSL_ERR_NET_TRY_AGAIN
-#define POLARSSL_ERR_NET_WANT_WRITE POLARSSL_ERR_NET_TRY_AGAIN
-#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -80,7 +68,7 @@
 #define THREADING_SUPPORT
 #endif
 
-#if defined(THREADING_SUPPORT) && POLARSSL_VERSION_NUMBER>0x01010000
+#if defined(THREADING_SUPPORT)
 static entropy_context entropy;
 
 static int  entropy_init_initialized  = 0;
@@ -111,7 +99,7 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 }
 /* end of entropy_func_mutex() */
 
-#endif /* THREADING_SUPPORT && POLARSSL_VERSION_NUMBER>0x01010000 */
+#endif /* THREADING_SUPPORT
 
 /* Define this to enable lots of debugging for PolarSSL */
 #undef POLARSSL_DEBUG
@@ -312,8 +300,8 @@ polarssl_connect_step1(struct connectdata *conn,
                    &connssl->crl,
                    conn->host.name);
 
-  ssl_set_own_cert(&connssl->ssl,
-                   &connssl->clicert, &connssl->rsa);
+  ssl_set_own_cert_rsa(&connssl->ssl,
+                       &connssl->clicert, &connssl->rsa);
 
   if(!Curl_inet_pton(AF_INET, conn->host.name, &addr) &&
 #ifdef ENABLE_IPV6
