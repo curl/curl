@@ -296,13 +296,8 @@ struct ssl_connect_data {
   ssl_connect_state connecting_state;
 #endif /* USE_GNUTLS */
 #ifdef USE_POLARSSL
-#if POLARSSL_VERSION_NUMBER<0x01010000
-  havege_state hs;
-#else
-  /* from v1.1.0, use ctr_drbg and entropy */
   ctr_drbg_context ctr_drbg;
   entropy_context entropy;
-#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
   ssl_context ssl;
   ssl_session ssn;
   int server_fd;

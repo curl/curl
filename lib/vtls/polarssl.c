@@ -151,9 +151,6 @@ polarssl_connect_step1(struct connectdata *conn,
   else if(data->set.ssl.version == CURL_SSLVERSION_SSLv3)
     sni = FALSE; /* SSLv3 has no SNI */
 
-#if POLARSSL_VERSION_NUMBER<0x01010000
-  havege_init(&connssl->hs);
-#else
 #ifdef THREADING_SUPPORT
   entropy_init_mutex(&entropy);
 
@@ -177,7 +174,6 @@ polarssl_connect_step1(struct connectdata *conn,
                                                             -ret, errorbuf);
   }
 #endif /* THREADING_SUPPORT */
-#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
 
   /* Load the trusted CA */
   memset(&connssl->cacert, 0, sizeof(x509_crt));
@@ -270,13 +266,8 @@ polarssl_connect_step1(struct connectdata *conn,
   ssl_set_endpoint(&connssl->ssl, SSL_IS_CLIENT);
   ssl_set_authmode(&connssl->ssl, SSL_VERIFY_OPTIONAL);
 
-#if POLARSSL_VERSION_NUMBER<0x01010000
-  ssl_set_rng(&connssl->ssl, havege_rand,
-              &connssl->hs);
-#else
   ssl_set_rng(&connssl->ssl, ctr_drbg_random,
               &connssl->ctr_drbg);
-#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
   ssl_set_bio(&connssl->ssl,
               net_recv, &conn->sock[sockindex],
               net_send, &conn->sock[sockindex]);
@@ -287,15 +278,8 @@ polarssl_connect_step1(struct connectdata *conn,
     infof(data, "PolarSSL re-using session\n");
   }
 
-/* PolarSSL SVN revision r1316 to r1317, matching <1.2.0 is to cover Ubuntu's
-   1.1.4 version and the like */
-#if POLARSSL_VERSION_NUMBER<0x01020000
-  ssl_set_session(&connssl->ssl, 1, 600,
-                  &connssl->ssn);
-#else
   ssl_set_session(&connssl->ssl,
                   &connssl->ssn);
-#endif
 
   ssl_set_ca_chain(&connssl->ssl,
                    &connssl->cacert,
@@ -367,13 +351,7 @@ polarssl_connect_step2(struct connectdata *conn,
   }
 
   infof(data, "PolarSSL: Handshake complete, cipher is %s\n",
-#if POLARSSL_VERSION_NUMBER<0x01000000
-        ssl_get_cipher(&conn->ssl[sockindex].ssl)
-#elif POLARSSL_VERSION_NUMBER >= 0x01010000
         ssl_get_ciphersuite(&conn->ssl[sockindex].ssl)
-#else
-        ssl_get_ciphersuite_name(&conn->ssl[sockindex].ssl)
-#endif
     );
 
   ret = ssl_get_verify_result(&conn->ssl[sockindex].ssl);
@@ -396,13 +374,7 @@ polarssl_connect_step2(struct connectdata *conn,
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
-/* PolarSSL SVN revision r1316 to r1317, matching <1.2.0 is to cover Ubuntu's
-   1.1.4 version and the like */
-#if POLARSSL_VERSION_NUMBER<0x01020000
-  if(conn->ssl[sockindex].ssl.peer_cert) {
-#else
   if(ssl_get_peer_cert(&(connssl->ssl))) {
-#endif
     /* If the session was resumed, there will be no peer certs */
     memset(buffer, 0, sizeof(buffer));
 
