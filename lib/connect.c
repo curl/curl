@@ -570,11 +570,11 @@ static CURLcode trynextip(struct connectdata *conn,
 
       if(ai) {
         rc = singleipconnect(conn, ai, &conn->tempsock[tempindex]);
-        conn->tempaddr[tempindex] = ai;
         if(rc == CURLE_COULDNT_CONNECT) {
           ai = ai->ai_next;
           continue;
         }
+        conn->tempaddr[tempindex] = ai;
       }
       break;
     }
