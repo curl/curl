@@ -99,7 +99,7 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 }
 /* end of entropy_func_mutex() */
 
-#endif /* THREADING_SUPPORT
+#endif /* THREADING_SUPPORT */
 
 /* Define this to enable lots of debugging for PolarSSL */
 #undef POLARSSL_DEBUG
