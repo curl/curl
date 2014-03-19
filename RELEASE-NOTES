@@ -22,6 +22,8 @@ This release includes the following changes:
  o winssl: enable hostname verification of IP address using SAN or CN [11]
  o darwinssl: Don't omit CN verification when an IP address is used [12]
  o http2: build with current nghttp2 version
+ o polarssl: dropped support for PolarSSL < 1.3.0
+ o openssl: info massage with SSL version used
 
 This release includes the following bugfixes:
 
@@ -63,6 +65,11 @@ This release includes the following bugfixes:
  o parse_remote_port: error out on illegal port numbers better
  o ssh: Pass errors from libssh2_sftp_read up the stack
  o docs: remove documentation on setting up krb4 support
+ o polarssl: build fixes to work with PolarSSL 1.3.x
+ o polarssl: fix possible handshake timeout issue in multi
+ o nss: allow to enable/disable cipher-suites better
+ o ssh: prevent a logic error that could result in an infinite loop
+ o http2: free resources on disconnect
 
 This release includes the following known bugs:
 
@@ -72,11 +79,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Adam Sampson, Arvid Norberg, Brad Spencer, Colin Hogben, Dan Fandrich,
-  Daniel Stenberg, David Ryskalczyk, Fabian Frank, Gisle Vanem, Hubert Kario,
-  Jeff King, Jiri Malak, Kamil Dudka, Maks Naumov, Marc Hoersken,
-  Michael Osipov, naota, Nick Zitzmann, Patrick Monnerat, Prash Dush,
-  Remi Gacogne, Rob Davies, Romulo A. Ceccon, Shao Shuchao, Steve Holme,
-  Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma, Yehezkel Horowitz
+  Daniel Stenberg, David Ryskalczyk, Fabian Frank, Gaël PORTAY, Gisle Vanem,
+  Hubert Kario, Jeff King, Jiri Malak, Kamil Dudka, Maks Naumov, Marc Hoersken,
+  Michael Osipov, Nick Zitzmann, Patrick Monnerat, Prash Dush, Remi Gacogne,
+  Rob Davies, Romulo A. Ceccon, Shao Shuchao, Steve Holme, Tatsuhiro Tsujikawa,
+  Thomas Braun, Tiit Pikma, Yehezkel Horowitz,
 
         Thanks! (and sorry if I forgot to mention someone)
 
