@@ -4901,6 +4901,19 @@ if ( $TESTCASES eq "all") {
         $TESTCASES .= " $n";
     }
 }
+else {
+    my $verified="";
+    map {
+        if (-e "$TESTDIR/test$_") {
+            $verified.="$_ ";
+        }
+    } split(" ", $TESTCASES);
+    if($verified eq "") {
+        print "No existing test cases were specified\n";
+        exit;
+    }
+    $TESTCASES = $verified;
+}
 
 #######################################################################
 # Start the command line log
