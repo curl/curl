@@ -23,7 +23,7 @@ This release includes the following changes:
  o darwinssl: Don't omit CN verification when an IP address is used [12]
  o http2: build with current nghttp2 version
  o polarssl: dropped support for PolarSSL < 1.3.0
- o openssl: info massage with SSL version used
+ o openssl: info message with SSL version used
 
 This release includes the following bugfixes:
 
