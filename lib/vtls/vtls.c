@@ -209,7 +209,6 @@ unsigned int Curl_rand(struct SessionHandle *data)
     }
     else
       randseed++;
-
     return randseed;
   }
 #endif
@@ -218,7 +217,7 @@ unsigned int Curl_rand(struct SessionHandle *data)
   (void)data;
 #else
   if(data) {
-    Curl_ssl_random(data, (unsigned char *)&r, sizeof(r));
+    curlssl_random(data, (unsigned char *)&r, sizeof(r));
     return r;
   }
 #endif
@@ -681,17 +680,6 @@ CURLcode Curl_ssl_push_certinfo(struct SessionHandle *data,
 
   return Curl_ssl_push_certinfo_len(data, certnum, label, value, valuelen);
 }
-
-/* these functions are only provided by some SSL backends */
-
-#ifdef have_curlssl_random
-void Curl_ssl_random(struct SessionHandle *data,
-                     unsigned char *entropy,
-                     size_t length)
-{
-  curlssl_random(data, entropy, length);
-}
-#endif
 
 #ifdef have_curlssl_md5sum
 void Curl_ssl_md5sum(unsigned char *tmp, /* input */

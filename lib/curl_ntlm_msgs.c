@@ -703,16 +703,11 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 #if USE_NTRESPONSES
   if(ntlm->target_info_len) {
     unsigned char ntbuffer[0x18];
-    unsigned char entropy[8];
+    unsigned int entropy[2];
     unsigned char ntlmv2hash[0x18];
 
-#if defined(DEBUGBUILD)
-    /* Use static client nonce in debug (Test Suite) builds */
-    memcpy(entropy, "12345678", sizeof(entropy));
-#else
-    /* Create an 8 byte random client nonce */
-    Curl_ssl_random(data, entropy, sizeof(entropy));
-#endif
+    entropy[0] = Curl_rand(data);
+    entropy[1] = Curl_rand(data);
 
     res = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
     if(res)
@@ -724,14 +719,16 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
       return res;
 
     /* LMv2 response */
-    res = Curl_ntlm_core_mk_lmv2_resp(ntlmv2hash, entropy, &ntlm->nonce[0],
-                                      lmresp);
+    res = Curl_ntlm_core_mk_lmv2_resp(ntlmv2hash,
+                                      (unsigned char *)&entropy[0],
+                                      &ntlm->nonce[0], lmresp);
     if(res)
       return res;
 
     /* NTLMv2 response */
-    res = Curl_ntlm_core_mk_ntlmv2_resp(ntlmv2hash, entropy, ntlm, &ntlmv2resp,
-                                        &ntresplen);
+    res = Curl_ntlm_core_mk_ntlmv2_resp(ntlmv2hash,
+                                        (unsigned char *)&entropy[0],
+                                        ntlm, &ntlmv2resp, &ntresplen);
     if(res)
       return res;
 
@@ -746,10 +743,11 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     unsigned char ntbuffer[0x18];
     unsigned char tmp[0x18];
     unsigned char md5sum[MD5_DIGEST_LENGTH];
-    unsigned char entropy[8];
+    unsigned int entropy[2];
 
     /* Need to create 8 bytes random data */
-    Curl_ssl_random(data, entropy, sizeof(entropy));
+    entropy[0] = Curl_rand(data);
+    entropy[1] = Curl_rand(data);
 
     /* 8 bytes random data as challenge in lmresp */
     memcpy(lmresp, entropy, 8);

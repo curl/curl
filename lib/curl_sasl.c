@@ -411,19 +411,13 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char HA1_hex[2 * MD5_DIGEST_LEN + 1];
   char HA2_hex[2 * MD5_DIGEST_LEN + 1];
   char resp_hash_hex[2 * MD5_DIGEST_LEN + 1];
-
   char nonce[64];
   char realm[128];
   char algorithm[64];
   char qop_options[64];
   int qop_values;
-
   char cnonce[33];
-  unsigned int cnonce1 = 0;
-  unsigned int cnonce2 = 0;
-  unsigned int cnonce3 = 0;
-  unsigned int cnonce4 = 0;
-
+  unsigned int entropy[4];
   char nonceCount[] = "00000001";
   char method[]     = "AUTHENTICATE";
   char qop[]        = DIGEST_QOP_VALUE_STRING_AUTH;
@@ -450,22 +444,22 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   if(!(qop_values & DIGEST_QOP_VALUE_AUTH))
     return CURLE_BAD_CONTENT_ENCODING;
 
-#ifndef DEBUGBUILD
   /* Generate 16 bytes of random data */
-  cnonce1 = Curl_rand(data);
-  cnonce2 = Curl_rand(data);
-  cnonce3 = Curl_rand(data);
-  cnonce4 = Curl_rand(data);
-#endif
+  entropy[0] = Curl_rand(data);
+  entropy[1] = Curl_rand(data);
+  entropy[2] = Curl_rand(data);
+  entropy[3] = Curl_rand(data);
 
   /* Convert the random data into a 32 byte hex string */
   snprintf(cnonce, sizeof(cnonce), "%08x%08x%08x%08x",
-           cnonce1, cnonce2, cnonce3, cnonce4);
+           entropy[0], entropy[1], entropy[2], entropy[3]);
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!ctxt)
-    return CURLE_OUT_OF_MEMORY;
+  if(!ctxt) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
 
   Curl_MD5_update(ctxt, (const unsigned char *) userp,
                   curlx_uztoui(strlen(userp)));
@@ -478,8 +472,10 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   Curl_MD5_final(ctxt, digest);
 
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!ctxt)
-    return CURLE_OUT_OF_MEMORY;
+  if(!ctxt) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
 
   Curl_MD5_update(ctxt, (const unsigned char *) digest, MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
@@ -499,8 +495,10 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!ctxt)
-    return CURLE_OUT_OF_MEMORY;
+  if(!ctxt) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
 
   Curl_MD5_update(ctxt, (const unsigned char *) method,
                   curlx_uztoui(strlen(method)));
@@ -514,8 +512,10 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Now calculate the response hash */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!ctxt)
-    return CURLE_OUT_OF_MEMORY;
+  if(!ctxt) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
 
   Curl_MD5_update(ctxt, (const unsigned char *) HA1_hex, 2 * MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
@@ -544,16 +544,18 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                      "cnonce=\"%s\",nc=\"%s\",digest-uri=\"%s\",response=%s,"
                      "qop=%s",
                      userp, realm, nonce,
-                     cnonce, nonceCount, uri, resp_hash_hex,
-                     qop);
-  if(!response)
-    return CURLE_OUT_OF_MEMORY;
+                     cnonce, nonceCount, uri, resp_hash_hex);
+  if(!response) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
 
   /* Base64 encode the response */
   result = Curl_base64_encode(data, response, 0, outptr, outlen);
 
-  Curl_safefree(response);
+  fail:
 
+  free(response);
   return result;
 }
 #endif  /* USE_WINDOWS_SSPI */
