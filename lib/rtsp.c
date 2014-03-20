@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -763,7 +763,7 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
     char *start;
 
     /* Find the first non-space letter */
-    start = header + 9;
+    start = header + 8;
     while(*start && ISSPACE(*start))
       start++;
 
