@@ -1828,6 +1828,10 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
 
         result = getparameter(flag, nextarg, &passarg, config, operation);
         if(result == PARAM_NEXT_OPERATION) {
+          /* Reset result as PARAM_NEXT_OPERATION is only used here and not
+             returned from this function */
+          result = PARAM_OK;
+
           if(operation->url_list && operation->url_list->url) {
             /* Allocate the next config */
             operation->next = malloc(sizeof(struct OperationConfig));
@@ -1851,9 +1855,6 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
             else
               result = PARAM_NO_MEM;
           }
-
-          /* Reset result to continue */
-          result = PARAM_OK;
         }
         else if(!result && passarg)
           i++; /* we're supposed to skip this */
