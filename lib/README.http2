@@ -50,6 +50,16 @@ SSL libs
     NSS:     ALPN and NPN
     GnuTLS:  ALPN
 
+Alt-Svc
+
+  Alt-Svc is a suggested new header with a corresponding frame (ALTSVC) in
+  http2 that tells the client about an alternative "route" to the same content
+  for the same origin server that you get the response from. A browser or
+  long-living client can use that hint to create a new connection
+  asynchronously.  For libcurl, we may introduce a way to bring such clues to
+  the applicaton and/or let a subsequent request use the alternate route
+  automatically.
+
 Applications
 
   We hide http2's binary nature and convert received http2 traffic to headers
