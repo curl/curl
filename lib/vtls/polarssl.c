@@ -104,7 +104,7 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 #undef POLARSSL_DEBUG
 
 #ifdef POLARSSL_DEBUG
-static void polarssl_debug(void *context, int level, char *line)
+static void polarssl_debug(void *context, int level, const char *line)
 {
   struct SessionHandle *data = NULL;
 
@@ -113,7 +113,8 @@ static void polarssl_debug(void *context, int level, char *line)
 
   data = (struct SessionHandle *)context;
 
-  infof(data, "%s\n", line);
+  infof(data, "%s", line);
+  (void) level;
 }
 #else
 #endif
