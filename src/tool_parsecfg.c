@@ -250,7 +250,8 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
             res = PARAM_NO_MEM;
         }
       }
-      else if(res != PARAM_OK) {
+
+      if(res != PARAM_OK && res != PARAM_NEXT_OPERATION) {
         /* the help request isn't really an error */
         if(!strcmp(filename, "-")) {
           filename = (char *)"<stdin>";
