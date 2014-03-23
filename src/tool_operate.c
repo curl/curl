@@ -205,8 +205,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
   int res = 0;
   unsigned long li;
 
-  bool orig_noprogress;
-  bool orig_isatty;
+  /* Save the values of noprogress and isatty to restore them later on */
+  bool orig_noprogress = global->noprogress;
+  bool orig_isatty = global->isatty;
 
   errorbuffer[0] = '\0';
 
@@ -335,10 +336,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
       set_binmode(heads.stream);
     }
   }
-
-  /* save the values of noprogress and isatty to restore them later on */
-  orig_noprogress = global->noprogress;
-  orig_isatty = global->isatty;
 
   /*
   ** Nested loops start here.
