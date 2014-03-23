@@ -30,7 +30,7 @@ REPLY FAIL 500 this might not be a failure!
 ftp
 </server>
  <name>
-FTP with quote ops
+--libcurl for FTP with quote ops
  </name>
  <command>
 ftp://%HOSTIP:%FTPPORT/1405 -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3" -Q "*FAIL" -Q "+*FAIL HARD" --libcurl log/test1405.c

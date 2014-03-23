@@ -23,7 +23,7 @@ CAPA SIZE
 smtp
 </server>
  <name>
-SMTP
+--libcurl for SMTP
  </name>
 <file name="log/test1406.eml">
 From: different

@@ -27,7 +27,7 @@ Connection: close
 http
 </server>
  <name>
-HTTP RFC1867-type formposting - -F with three files, one with explicit type
+--libcurl for HTTP RFC1867-type formposting - -F with three files, one with explicit type
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/1404 -F name=value -F 'file=@log/test1404.txt,log/test1404.txt;type=magic/content,log/test1404.txt' --libcurl log/test1404.c

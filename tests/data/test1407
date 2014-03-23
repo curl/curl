@@ -23,7 +23,7 @@ REPLY LIST +OK 1407 100\r\n.
 pop3
 </server>
  <name>
-POP3 LIST one message
+--libcurl for POP3 LIST one message
  </name>
  <command>
 pop3://%HOSTIP:%POP3PORT/1407 -l -u user:secret --libcurl log/test1407.c
