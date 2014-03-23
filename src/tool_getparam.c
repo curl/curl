@@ -1239,7 +1239,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
            &-letter */
         char *oldpost = config->postfields;
         curl_off_t oldlen = config->postfieldsize;
-        curl_off_t newlen = oldlen + size + 2;
+        curl_off_t newlen = oldlen + curlx_uztoso(size) + 2;
         config->postfields = malloc((size_t)newlen);
         if(!config->postfields) {
           Curl_safefree(oldpost);
@@ -1257,7 +1257,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       }
       else {
         config->postfields = postdata;
-        config->postfieldsize = size;
+        config->postfieldsize = curlx_uztoso(size);
       }
     }
     /*
