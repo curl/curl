@@ -1,5 +1,5 @@
 <testcase>
-# Based on test802
+# Based on test900
 # N.B. --libcurl output not sufficient to deal with uploaded files.
 <info>
 <keywords>
