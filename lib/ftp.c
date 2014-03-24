@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -877,13 +877,30 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
    */
 
   if(FTP_STOP == ftpc->state) {
+    int bits = GETSOCK_READSOCK(0);
+
     /* if stopped and still in this state, then we're also waiting for a
        connect on the secondary connection */
     socks[0] = conn->sock[FIRSTSOCKET];
-    socks[1] = conn->sock[SECONDARYSOCKET];
 
-    return GETSOCK_READSOCK(FIRSTSOCKET) |
-      GETSOCK_WRITESOCK(SECONDARYSOCKET);
+    if(!conn->data->set.ftp_use_port) {
+      int s;
+      int i;
+      /* PORT is used to tell the server to connect to us, and during that we
+         don't do happy eyeballs, but we do if we connect to the server */
+      for(s=1, i=0; i<2; i++) {
+        if(conn->tempsock[i] != CURL_SOCKET_BAD) {
+          socks[s] = conn->tempsock[i];
+          bits |= GETSOCK_WRITESOCK(s++);
+        }
+      }
+    }
+    else {
+      socks[1] = conn->sock[SECONDARYSOCKET];
+      bits |= GETSOCK_WRITESOCK(1);
+    }
+
+    return bits;
   }
   else
     return Curl_pp_getsock(&conn->proto.ftpc.pp, socks, numsocks);
