@@ -70,6 +70,9 @@ This release includes the following bugfixes:
  o nss: allow to enable/disable cipher-suites better
  o ssh: prevent a logic error that could result in an infinite loop
  o http2: free resources on disconnect
+ o polarssl: avoid extra newlines in debug messages
+ o rtsp: parse "Session:" header properly [14]
+ o trynextip: don't store 'ai' on failed connects
 
 This release includes the following known bugs:
 
@@ -81,9 +84,9 @@ advice from friends like these:
   Adam Sampson, Arvid Norberg, Brad Spencer, Colin Hogben, Dan Fandrich,
   Daniel Stenberg, David Ryskalczyk, Fabian Frank, Gaël PORTAY, Gisle Vanem,
   Hubert Kario, Jeff King, Jiri Malak, Kamil Dudka, Maks Naumov, Marc Hoersken,
-  Michael Osipov, Nick Zitzmann, Patrick Monnerat, Prash Dush, Remi Gacogne,
-  Rob Davies, Romulo A. Ceccon, Shao Shuchao, Steve Holme, Tatsuhiro Tsujikawa,
-  Thomas Braun, Tiit Pikma, Yehezkel Horowitz,
+  Michael Osipov, Mike Hasselberg, Nick Zitzmann, Patrick Monnerat, Prash Dush,
+  Remi Gacogne, Rob Davies, Romulo A. Ceccon, Shao Shuchao, Steve Holme,
+  Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma, Yehezkel Horowitz,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -102,3 +105,5 @@ References to bug reports and discussions on issues:
  [11] = http://curl.haxx.se/mail/lib-2014-02/0243.html
  [12] = https://github.com/bagder/curl/pull/93
  [13] = http://curl.haxx.se/mail/lib-2014-02/0036.html
+ [14] = http://curl.haxx.se/mail/lib-2014-03/0134.html
+ [15] = http://curl.haxx.se/bug/view.cgi?id=1337
