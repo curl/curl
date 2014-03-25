@@ -7,6 +7,13 @@ Curl and libcurl 7.36.0
  Known libcurl bindings:       42
  Contributors:                 1123
 
+This release includes the following SECURITY ADVISORIES:
+
+ o wrong re-use of connections [16]
+ o IP address wildcard certificate validation [17]
+ o not verifying certs for TLS to IP address / Darwinssl [18]
+ o not verifying certs for TLS to IP address / Winssl [19]
+
 This release includes the following changes:
 
  o ntlm: Added support for NTLMv2 [2]
@@ -73,6 +80,7 @@ This release includes the following bugfixes:
  o polarssl: avoid extra newlines in debug messages
  o rtsp: parse "Session:" header properly [14]
  o trynextip: don't store 'ai' on failed connects
+ o Curl_cert_hostcheck: strip trailing dots in host name and wildcard
 
 This release includes the following known bugs:
 
@@ -107,3 +115,7 @@ References to bug reports and discussions on issues:
  [13] = http://curl.haxx.se/mail/lib-2014-02/0036.html
  [14] = http://curl.haxx.se/mail/lib-2014-03/0134.html
  [15] = http://curl.haxx.se/bug/view.cgi?id=1337
+ [16] = http://curl.haxx.se/docs/adv_20140326A.html
+ [17] = http://curl.haxx.se/docs/adv_20140326B.html
+ [18] = http://curl.haxx.se/docs/adv_20140326C.html
+ [19] = http://curl.haxx.se/docs/adv_20140326D.html
