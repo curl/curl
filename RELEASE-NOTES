@@ -1,86 +1,18 @@
-Curl and libcurl 7.36.0
+Curl and libcurl 7.37.0
 
- Public curl releases:         138
+ Public curl releases:         139
  Command line options:         161
  curl_easy_setopt() options:   206
  Public functions in libcurl:  58
- Known libcurl bindings:       42
- Contributors:                 1123
-
-This release includes the following SECURITY ADVISORIES:
-
- o wrong re-use of connections [16]
- o IP address wildcard certificate validation [17]
- o not verifying certs for TLS to IP address / Darwinssl [18]
- o not verifying certs for TLS to IP address / Winssl [19]
+ Contributors:                 1137
 
 This release includes the following changes:
 
- o ntlm: Added support for NTLMv2 [2]
- o tool: Added support for URL specific options [3]
- o openssl: add ALPN support
- o gtls: add ALPN support
- o nss: add ALPN and NPN support
- o added CURLOPT_EXPECT_100_TIMEOUT_MS [7]
- o tool: add --no-alpn and --no-npn
- o added CURLOPT_SSL_ENABLE_NPN and CURLOPT_SSL_ENABLE_ALPN
- o winssl: enable TLSv1.1 and TLSv1.2 by default
- o winssl: TLSv1.2 disables certificate signatures using MD5 hash
- o winssl: enable hostname verification of IP address using SAN or CN [11]
- o darwinssl: Don't omit CN verification when an IP address is used [12]
- o http2: build with current nghttp2 version
- o polarssl: dropped support for PolarSSL < 1.3.0
- o openssl: info message with SSL version used
+ o 
 
 This release includes the following bugfixes:
 
- o nss: allow to use ECC ciphers if NSS implements them [1]
- o netrc: Fixed a memory leak in an OOM condition
- o ftp: fixed a memory leak on wildcard error path
- o pipeline: Fixed a NULL pointer dereference on OOM
- o nss: prefer highest available TLS version
- o 100-continue: fix timeout condition [4]
- o ssh: Fixed a NULL pointer dereference on OOM condition
- o formpost: use semicolon in multipart/mixed [5]
- o --help: add missing --tlsv1.x options
- o formdata: Fixed memory leak on OOM condition
- o ConnectionExists: reusing possible HTTP+NTLM connections better [6]
- o mingw32: fix compilation
- o chunked decoder: track overflows correctly [8]
- o curl_easy_setopt.3: add CURL_HTTP_VERSION_2_0
- o dict: fix memory leak in OOM exit path
- o valgrind: added suppression on optimized code
- o curl: output protocol headers using binary mode
- o tool: Added URL index to password prompt for multiple operations
- o ConnectionExists: re-use non-NTLM connections better [9]
- o axtls: call ssl_read repeatedly
- o multi: make MAXCONNECTS default 4 x number of easy handles function
- o configure: Fix the --disable-crypto-auth option
- o multi: ignore SIGPIPE internally
- o curl.1: update the description of --tlsv1
- o SFTP: skip reading the dir when NOBODY=1 [10]
- o easy: Fixed a memory leak on OOM condition
- o tool: Fixed incorrect return code when setting HTTP request fails
- o configure: Tiny fix to honor POSIX
- o tool: Do not output libcurl source for the information only parameters
- o Rework Open Watcom make files to use standard Wmake features
- o x509asn: moved out Curl_verifyhost from NSS builds
- o configure: call it GSS-API
- o hostcheck: Curl_cert_hostcheck is not used by NSS builds
- o multi_runsingle: move timestamp into INIT [13]
- o remote_port: allow connect to port 0
- o parse_remote_port: error out on illegal port numbers better
- o ssh: Pass errors from libssh2_sftp_read up the stack
- o docs: remove documentation on setting up krb4 support
- o polarssl: build fixes to work with PolarSSL 1.3.x
- o polarssl: fix possible handshake timeout issue in multi
- o nss: allow to enable/disable cipher-suites better
- o ssh: prevent a logic error that could result in an infinite loop
- o http2: free resources on disconnect
- o polarssl: avoid extra newlines in debug messages
- o rtsp: parse "Session:" header properly [14]
- o trynextip: don't store 'ai' on failed connects
- o Curl_cert_hostcheck: strip trailing dots in host name and wildcard
+ o 
 
 This release includes the following known bugs:
 
@@ -89,33 +21,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Sampson, Arvid Norberg, Brad Spencer, Colin Hogben, Dan Fandrich,
-  Daniel Stenberg, David Ryskalczyk, Fabian Frank, Gaël PORTAY, Gisle Vanem,
-  Hubert Kario, Jeff King, Jiri Malak, Kamil Dudka, Maks Naumov, Marc Hoersken,
-  Michael Osipov, Mike Hasselberg, Nick Zitzmann, Patrick Monnerat, Prash Dush,
-  Remi Gacogne, Rob Davies, Romulo A. Ceccon, Shao Shuchao, Steve Holme,
-  Tatsuhiro Tsujikawa, Thomas Braun, Tiit Pikma, Yehezkel Horowitz,
-
+  
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://bugzilla.redhat.com/1058776
- [2] = http://curl.haxx.se/mail/lib-2014-01/0183.html
- [3] = http://curl.haxx.se/mail/archive-2013-11/0006.html
- [4] = http://curl.haxx.se/bug/view.cgi?id=1334
- [5] = http://curl.haxx.se/bug/view.cgi?id=1333
- [6] = http://curl.haxx.se/mail/lib-2014-02/0100.html
- [7] = http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTEXPECT100TIMEOUTMS
- [8] = http://curl.haxx.se/mail/lib-2014-02/0097.html
- [9] = http://thread.gmane.org/gmane.comp.version-control.git/242213
- [10] = http://curl.haxx.se/mail/lib-2014-02/0155.html
- [11] = http://curl.haxx.se/mail/lib-2014-02/0243.html
- [12] = https://github.com/bagder/curl/pull/93
- [13] = http://curl.haxx.se/mail/lib-2014-02/0036.html
- [14] = http://curl.haxx.se/mail/lib-2014-03/0134.html
- [15] = http://curl.haxx.se/bug/view.cgi?id=1337
- [16] = http://curl.haxx.se/docs/adv_20140326A.html
- [17] = http://curl.haxx.se/docs/adv_20140326B.html
- [18] = http://curl.haxx.se/docs/adv_20140326C.html
- [19] = http://curl.haxx.se/docs/adv_20140326D.html
+ [1] = 
