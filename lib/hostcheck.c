@@ -26,6 +26,10 @@
     defined(USE_GSKIT)
 /* these backends use functions from this file */
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 #include "hostcheck.h"
 #include "rawstr.h"
 #include "inet_pton.h"
