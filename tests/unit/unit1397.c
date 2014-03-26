@@ -14,6 +14,10 @@ static void unit_stop( void )
 
 UNITTEST_START
 
+/* only these backends define the tested functions */
+#if defined(USE_SSLEAY) || defined(USE_AXTLS) || defined(USE_QSOSSL) || \
+    defined(USE_GSKIT)
+
   /* here you start doing things and checking that the results are good */
 
 fail_unless( Curl_cert_hostcheck("www.example.com", "www.example.com"), "good 1" );
@@ -39,6 +43,8 @@ fail_if( Curl_cert_hostcheck("www.example.com", "192.168.0.0"), "bad 13" );
 #ifdef ENABLE_IPV6
 fail_if( Curl_cert_hostcheck("*::3285:a9ff:fe46:b619", "fe80::3285:a9ff:fe46:b619"), "bad 14" );
 fail_unless( Curl_cert_hostcheck("fe80::3285:a9ff:fe46:b619", "fe80::3285:a9ff:fe46:b619"), "good 6" );
+#endif
+
 #endif
 
   /* you end the test code like this: */
