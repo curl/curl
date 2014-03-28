@@ -466,7 +466,8 @@ CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
 CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\rawstr.obj \
- $(CURL_DIROBJ)\strtoofft.obj
+ $(CURL_DIROBJ)\strtoofft.obj \
+ $(CURL_DIROBJ)\warnless.obj
  
 $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
@@ -483,6 +484,8 @@ $(CURL_DIROBJ)\rawstr.obj: ../lib/rawstr.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/rawstr.c
 $(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strtoofft.c
+$(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/warnless.c
 $(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
 	rc $(CURL_RC_FLAGS)
 
