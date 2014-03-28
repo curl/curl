@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -349,10 +349,11 @@ static CURLcode smtp_perform_ehlo(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
-  smtpc->authmechs = 0;         /* No known authentication mechanisms yet */
-  smtpc->authused = 0;          /* Clear the authentication mechanism used
-                                   for esmtp connections */
-  smtpc->tls_supported = FALSE; /* Clear the TLS capability */
+  smtpc->authmechs = 0;           /* No known authentication mechanisms yet */
+  smtpc->authused = 0;            /* Clear the authentication mechanism used
+                                     for esmtp connections */
+  smtpc->tls_supported = FALSE;   /* Clear the TLS capability */
+  smtpc->auth_supported = FALSE;  /* Clear the AUTH capability */
 
   /* Send the EHLO command */
   result = Curl_pp_sendf(&smtpc->pp, "EHLO %s", smtpc->domain);
@@ -475,15 +476,16 @@ static CURLcode smtp_perform_auth(struct connectdata *conn,
 static CURLcode smtp_perform_authentication(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
   const char *mech = NULL;
   char *initresp = NULL;
   size_t len = 0;
   smtpstate state1 = SMTP_STOP;
   smtpstate state2 = SMTP_STOP;
 
-  /* Check we have a username and password to authenticate with and end the
-     connect phase if we don't */
-  if(!conn->bits.user_passwd) {
+  /* Check we have a username and password to authenticate with, and the
+     server supports authentiation, and end the connect phase if not */
+  if(!conn->bits.user_passwd || !smtpc->auth_supported) {
     state(conn, SMTP_STOP);
 
     return result;
@@ -739,8 +741,11 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
     else if(len >= 4 && !memcmp(line, "SIZE", 4))
       smtpc->size_supported = TRUE;
 
-    /* Do we have the authentication mechanism list? */
+    /* Does the server support authentication? */
     else if(len >= 5 && !memcmp(line, "AUTH ", 5)) {
+      smtpc->auth_supported = TRUE;
+
+      /* Advance past the AUTH keyword */
       line += 5;
       len -= 5;
 
