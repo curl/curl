@@ -452,6 +452,9 @@ sub getreplydata {
     loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "data$testpart");
+    if((!@data) && ($testpart ne "")) {
+        @data = getpart("reply", "data");
+    }
 
     return @data;
 }
