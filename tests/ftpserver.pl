@@ -443,7 +443,7 @@ sub getreplydata {
     my ($testno) = @_;
     my $testpart = "";
 
-    $testno =~ s/^([^0-9]*)//
+    $testno =~ s/^([^0-9]*)//;
     if($testno > 10000) {
        $testpart = $testno % 10000;
        $testno = int($testno / 10000);
