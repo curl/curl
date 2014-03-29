@@ -517,18 +517,19 @@ sub senddata {
         }
         return;
     }
+
     foreach $l (@_) {
-      if(!$datadelay) {
-        # spit it all out at once
-        sockfiltsecondary $l;
-      }
-      else {
-          # pause between each byte
-          for (split(//,$l)) {
-              sockfiltsecondary $_;
-              select(undef, undef, undef, 0.01);
-          }
-      }
+        if(!$datadelay) {
+            # spit it all out at once
+            sockfiltsecondary $l;
+        }
+        else {
+            # pause between each byte
+            for (split(//,$l)) {
+                sockfiltsecondary $_;
+                select(undef, undef, undef, 0.01);
+            }
+        }
     }
 }
 
