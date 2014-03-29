@@ -436,6 +436,25 @@ sub startsf {
     }
 }
 
+#**********************************************************************
+# Returns the given test's reply data
+#
+sub getreplydata {
+    my ($testno) = @_;
+    my $testpart = "";
+
+    $testno =~ s/^([^0-9]*)//
+    if($testno > 10000) {
+       $testpart = $testno % 10000;
+       $testno = int($testno / 10000);
+    }
+
+    loadtest("$srcdir/data/test$testno");
+
+    my @data = getpart("reply", "data$testpart");
+
+    return @data;
+}
 
 sub sockfilt {
     my $l;
@@ -445,7 +464,6 @@ sub sockfilt {
     }
 }
 
-
 sub sockfiltsecondary {
     my $l;
     foreach $l (@_) {
@@ -454,10 +472,10 @@ sub sockfiltsecondary {
     }
 }
 
-
+#**********************************************************************
 # Send data to the client on the control stream, which happens to be plain
 # stdout.
-
+#
 sub sendcontrol {
     if(!$ctrldelay) {
         # spit it all out at once
