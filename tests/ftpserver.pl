@@ -1369,16 +1369,16 @@ sub LSUB_imap {
 }
 
 sub EXAMINE_imap {
-    my ($testno) = @_;
-    fix_imap_params($testno);
+    my ($mailbox) = @_;
+    fix_imap_params($mailbox);
 
-    logmsg "EXAMINE_imap got $testno\n";
+    logmsg "EXAMINE_imap got $mailbox\n";
 
-    if ($testno eq "") {
+    if ($mailbox eq "") {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
     else {
-        my @data = getreplydata($testno);
+        my @data = getreplydata($mailbox);
 
         for my $d (@data) {
             sendcontrol $d;
@@ -1756,10 +1756,10 @@ sub PASS_pop3 {
 }
 
 sub RETR_pop3 {
-    my ($testno) = @_;
+    my ($msgid) = @_;
     my @data;
 
-    if($testno =~ /^verifiedserver$/) {
+    if($msgid =~ /^verifiedserver$/) {
         # this is the secret command that verifies that this actually is
         # the curl test server
         my $response = "WE ROOLZ: $$\r\n";
@@ -1773,7 +1773,7 @@ sub RETR_pop3 {
         # send mail content
         logmsg "retrieve a mail\n";
 
-        @data = getreplydata($testno);
+        @data = getreplydata($msgid);
     }
 
     sendcontrol "+OK Mail transfer starts\r\n";
@@ -1812,15 +1812,15 @@ sub LIST_pop3 {
 }
 
 sub DELE_pop3 {
-    my ($msg) = @_;
+    my ($msgid) = @_;
 
-    logmsg "DELE_pop3 got $msg\n";
+    logmsg "DELE_pop3 got $msgid\n";
 
-    if (!$msg) {
+    if (!$msgid) {
         sendcontrol "-ERR Protocol error\r\n";
     }
     else {
-        push (@deleted, $msg);
+        push (@deleted, $msgid);
 
         sendcontrol "+OK\r\n";
     }
@@ -1885,14 +1885,14 @@ sub UIDL_pop3 {
 
 sub TOP_pop3 {
     my ($args) = @_;
-    my ($msg, $lines) = split(/ /, $args, 2);
+    my ($msgid, $lines) = split(/ /, $args, 2);
 
     logmsg "TOP_pop3 got $args\n";
 
     if (!grep /^TOP$/, @capabilities) {
         sendcontrol "-ERR Unrecognized command\r\n";
     }
-    elsif (($msg eq "") || ($lines eq "")) {
+    elsif (($msgid eq "") || ($lines eq "")) {
         sendcontrol "-ERR Protocol error\r\n";
     }
     else {
@@ -1903,7 +1903,7 @@ sub TOP_pop3 {
             logmsg "retrieve top $lines lines of mail\n";
         }
 
-        my @data = getreplydata($msg);
+        my @data = getreplydata($msgid);
 
         sendcontrol "+OK Mail transfer starts\r\n";
 
