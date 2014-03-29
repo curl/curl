@@ -1084,8 +1084,6 @@ sub fix_imap_params {
 }
 
 sub CAPABILITY_imap {
-    my ($testno) = @_;
-
     if((!@capabilities) && (!@auth_mechs)) {
         sendcontrol "$cmdid BAD Command\r\n";
     }
@@ -1621,7 +1619,6 @@ sub LOGOUT_imap {
 my $username;
 
 sub CAPA_pop3 {
-    my ($testno) = @_;
     my @list = ();
     my $mechs;
 
@@ -1696,8 +1693,6 @@ sub APOP_pop3 {
 }
 
 sub AUTH_pop3 {
-    my ($testno) = @_;
-
     if(!@auth_mechs) {
         sendcontrol "-ERR Unrecognized command\r\n";
     }
