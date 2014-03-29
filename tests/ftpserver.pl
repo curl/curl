@@ -1450,15 +1450,18 @@ sub EXAMINE_imap {
 }
 
 sub STATUS_imap {
-    my ($testno) = @_;
-    fix_imap_params($testno);
+    my ($args) = @_;
+    my ($mailbox, $what) = split(/ /, $args, 2);
+    fix_imap_params($mailbox);
 
-    logmsg "STATUS_imap got $testno\n";
+    logmsg "STATUS_imap got $args\n";
 
-    if ($testno eq "") {
+    if ($mailbox eq "") {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
     else {
+        my $testno = $mailbox;
+
         $testno =~ s/[^0-9]//g;
         my $testpart = "";
         if ($testno > 10000) {
