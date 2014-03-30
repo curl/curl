@@ -3,6 +3,7 @@
 <keywords>
 SMTP
 SMTP AUTH DIGEST-MD5
+SASL
 RFC2831
 RFC4954
 </keywords>

@@ -3,6 +3,7 @@
 <keywords>
 SMTP
 SMTP AUTH NTLM
+SASL
 SASL-IR
 RFC4954
 </keywords>

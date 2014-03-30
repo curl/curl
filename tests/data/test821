@@ -3,6 +3,7 @@
 <keywords>
 IMAP
 IMAP AUTH CRAM-MD5
+SASL
 RFC2195
 </keywords>
 </info>

@@ -3,6 +3,7 @@
 <keywords>
 SMTP
 SMTP AUTH CRAM-MD5
+SASL
 RFC2195
 RFC4954
 </keywords>

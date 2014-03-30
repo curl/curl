@@ -3,6 +3,7 @@
 <keywords>
 SMTP
 SMTP AUTH LOGIN
+SASL
 SASL-IR
 RFC4954
 </keywords>

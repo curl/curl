@@ -3,6 +3,7 @@
 <keywords>
 IMAP
 IMAP AUTH OAUTH2
+SASL
 SASL-IR
 RFC6749
 </keywords>

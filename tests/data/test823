@@ -3,6 +3,7 @@
 <keywords>
 IMAP
 IMAP AUTH DIGEST-MD5
+SASL
 RFC2831
 </keywords>
 </info>

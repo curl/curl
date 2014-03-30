@@ -3,6 +3,7 @@
 <keywords>
 IMAP
 IMAP AUTH LOGIN
+SASL
 </keywords>
 </info>
 

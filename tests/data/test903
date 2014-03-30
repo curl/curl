@@ -3,6 +3,7 @@
 <keywords>
 SMTP
 SMTP AUTH PLAIN
+SASL
 RFC4616
 RFC4954
 </keywords>

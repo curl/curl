@@ -3,6 +3,7 @@
 <keywords>
 IMAP
 IMAP AUTH PLAIN
+SASL
 SASL-IR
 RFC4616
 </keywords>
