@@ -3,6 +3,7 @@
 <info>
 <keywords>
 POP3
+Clear Text
 LIST
 --libcurl
 </keywords>

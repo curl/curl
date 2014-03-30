@@ -3,6 +3,7 @@
 <info>
 <keywords>
 IMAP
+Clear Text
 FETCH
 --libcurl
 </keywords>
