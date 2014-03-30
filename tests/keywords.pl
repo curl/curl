@@ -121,7 +121,7 @@ sub show {
 }
 
 # sort alphabetically 
-my @mtest = reverse sort { $b cmp $a } keys %k;
+my @mtest = reverse sort { lc($b) cmp lc($a) } keys %k;
 
 print <<TOP
 <table><tr><th>Num</th><th>Keyword</th><th>Test Cases</th></tr>
