@@ -2,6 +2,7 @@
 <info>
 <keywords>
 IMAP
+Clear Text
 STORE
 EXPUNGE
 CUSTOMREQUEST
