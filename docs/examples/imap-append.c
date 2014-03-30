@@ -20,6 +20,7 @@
  *
  ***************************************************************************/
 #include <stdio.h>
+#include <string.h>
 #include <curl/curl.h>
 
 /* This is a simple example showing how to send mail using libcurl's IMAP
