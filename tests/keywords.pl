@@ -120,8 +120,8 @@ sub show {
     return $ret;
 }
 
-# numerically on amount, or alphebetically if same amount
-my @mtest = reverse sort { $k{$a} <=> $k{$b} || $b cmp $a } keys %k;
+# sort alphabetically 
+my @mtest = reverse sort { $b cmp $a } keys %k;
 
 print <<TOP
 <table><tr><th>Num</th><th>Keyword</th><th>Test Cases</th></tr>
