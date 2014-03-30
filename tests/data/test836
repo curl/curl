@@ -45,7 +45,7 @@ IMAP multiple connection authentication
 <verify>
 <protocol>
 A001 CAPABILITY
-A002 LOGIN user.two secret
+A002 LOGIN user.one secret
 A003 SELECT 836
 A004 FETCH 1 BODY[]
 A005 LOGOUT
