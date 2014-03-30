@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -136,10 +136,10 @@ printf "</table><p> $count out of %d tests (%d lack keywords)\n",
     scalar(@miss);
 
 for(@miss) {
-    print STDERR "$_ ";
+    print "$_ ";
 }
 
-print STDERR "\n";
+print "\n";
 
 printf "<p> %d different error codes tested for:<br>\n",
     scalar(keys %errors);
