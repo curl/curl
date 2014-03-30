@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -302,6 +302,36 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
   return GLOB_OK;
 }
 
+static bool peek_ipv6(const char *str, size_t *skip)
+{
+  /*
+   * Scan for a potential IPv6 literal.
+   * - Valid globs contain a hyphen and <= 1 colon.
+   * - IPv6 literals contain no hyphens and >= 2 colons.
+   */
+  size_t i = 0;
+  size_t colons = 0;
+  if(str[i++] != '[') {
+    return FALSE;
+  }
+  for(;;) {
+    const char c = str[i++];
+    if(ISALNUM(c) || c == '.' || c == '%') {
+      /* ok */
+    }
+    else if(c == ':') {
+      colons++;
+    }
+    else if(c == ']') {
+      *skip = i;
+      return colons >= 2;
+    }
+    else {
+      return FALSE;
+    }
+  }
+}
+
 static GlobCode glob_parse(URLGlob *glob, char *pattern,
                            size_t pos, unsigned long *amount)
 {
@@ -315,8 +345,20 @@ static GlobCode glob_parse(URLGlob *glob, char *pattern,
 
   while(*pattern && !res) {
     char *buf = glob->glob_buffer;
-    int sublen = 0;
-    while(*pattern && *pattern != '{' && *pattern != '[') {
+    size_t sublen = 0;
+    while(*pattern && *pattern != '{') {
+      if(*pattern == '[') {
+        /* Skip over potential IPv6 literals. */
+        size_t skip;
+        if(peek_ipv6(pattern, &skip)) {
+          memcpy(buf, pattern, skip);
+          buf += skip;
+          pattern += skip;
+          sublen += skip;
+          continue;
+        }
+        break;
+      }
       if(*pattern == '}' || *pattern == ']')
         return GLOBERROR("unmatched close brace/bracket", pos, GLOB_ERROR);
 
