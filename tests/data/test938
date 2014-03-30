@@ -30,11 +30,11 @@ smtp
  <name>
 SMTP multiple connection authentication
  </name>
-<stdin>
+<file name="log/upload938">
 mail body
-</stdin>
+</file>
  <command>
-smtp://%HOSTIP:%SMTPPORT/938001 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.one:secret -T - -: smtp://%HOSTIP:%SMTPPORT/938002 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.two:secret -T -
+smtp://%HOSTIP:%SMTPPORT/938001 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.one:secret -T log/upload938 -: smtp://%HOSTIP:%SMTPPORT/938002 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.two:secret -T log/upload938
 </command>
 </client>
 
