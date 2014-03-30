@@ -2,8 +2,8 @@
 <info>
 <keywords>
 SMTP
-SMTP AUTH OAUTH2
 SASL
+SASL AUTH OAUTH2
 RFC4954
 RFC6749
 </keywords>

@@ -2,8 +2,8 @@
 <info>
 <keywords>
 IMAP
-IMAP AUTH CRAM-MD5
 SASL
+SASL AUTH CRAM-MD5
 RFC2195
 </keywords>
 </info>

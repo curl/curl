@@ -2,8 +2,8 @@
 <info>
 <keywords>
 IMAP
-IMAP AUTH LOGIN
 SASL
+SASL AUTH LOGIN
 </keywords>
 </info>
 

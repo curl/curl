@@ -2,8 +2,8 @@
 <info>
 <keywords>
 IMAP
-IMAP AUTH NTLM
 SASL
+SASL AUTH NTLM
 </keywords>
 </info>
 

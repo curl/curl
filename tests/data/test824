@@ -2,8 +2,8 @@
 <info>
 <keywords>
 IMAP
-IMAP AUTH OAUTH2
 SASL
+SASL AUTH OAUTH2
 RFC6749
 </keywords>
 </info>

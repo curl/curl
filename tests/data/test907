@@ -2,8 +2,8 @@
 <info>
 <keywords>
 SMTP
-SMTP AUTH DIGEST-MD5
 SASL
+SASL AUTH DIGEST-MD5
 RFC2831
 RFC4954
 </keywords>
