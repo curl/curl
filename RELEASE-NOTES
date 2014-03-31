@@ -8,10 +8,18 @@ Curl and libcurl 7.37.0
 
 This release includes the following changes:
 
+ o URL parser: IPv6 zone identifiers are now supported
  o 
 
 This release includes the following bugfixes:
 
+ o mkhelp: generate code for --disable-manual as well [1]
+ o hostcheck: added a system include to define struct in_addr
+ o winbuild: added warnless.c to fix build
+ o smtp: Fixed login denied when server doesn't support AUTH capability [2]
+ o curl: stop interpreting IPv6 literals as glob patterns
+ o http2: remove _DRAFT09 from the NPN_HTTP2 enum
+ o http2: let openssl mention the exact protocol negotiated
  o 
 
 This release includes the following known bugs:
@@ -21,9 +29,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Cody Mack, Dan Fandrich, Daniel Stenberg, Paul Marks, Remi Gacogne,
+  Steve Holme, Till Maas, Tom Sparrow
+
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = 
+ [1] = http://curl.haxx.se/bug/view.cgi?id=1350
+ [2] = http://curl.haxx.se/mail/lib-2014-03/0173.html
