@@ -88,7 +88,6 @@
  15.4 simultaneous parallel transfers
  15.5 provide formpost headers
  15.6 warning when setting an option
- 15.7 IPv6 addresses with globbing
 
  16. Build
  16.1 roffit
@@ -488,13 +487,6 @@ to provide the data to send.
   Display a warning when libcurl returns an error when setting an option.
   This can be useful to tell when support for a particular feature hasn't been
   compiled into the library.
-
-15.7 IPv6 addresses with globbing
-
-  Currently the command line client needs to get url globbing disabled (with
-  -g) for it to support IPv6 numerical addresses. This is a rather silly flaw
-  that should be corrected. It probably involves a smarter detection of the
-  '[' and ']' letters.
 
 16. Build
 

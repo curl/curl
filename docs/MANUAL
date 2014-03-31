@@ -50,7 +50,7 @@ SIMPLE USAGE
 
   Get the main page from an IPv6 web server:
 
-        curl -g "http://[2001:1890:1112:1::20]/"
+        curl "http://[2001:1890:1112:1::20]/"
 
 DOWNLOAD TO A FILE
 
