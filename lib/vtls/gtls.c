@@ -883,7 +883,7 @@ gtls_connect_step3(struct connectdata *conn,
       if(proto.size == NGHTTP2_PROTO_VERSION_ID_LEN &&
         memcmp(NGHTTP2_PROTO_VERSION_ID, proto.data,
         NGHTTP2_PROTO_VERSION_ID_LEN) == 0) {
-        conn->negnpn = NPN_HTTP2_DRAFT09;
+        conn->negnpn = NPN_HTTP2;
       }
       else if(proto.size == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
           proto.data, ALPN_HTTP_1_1_LENGTH) == 0) {

@@ -1674,8 +1674,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   *done = TRUE;
 
   switch (conn->negnpn) {
-    case NPN_HTTP2_DRAFT09:
-      infof(data, "http, we have to use HTTP-draft-09/2\n");
+    case NPN_HTTP2:
+      infof(data, "Negotiated http2\n");
       Curl_http2_init(conn);
       Curl_http2_switched(conn);
       break;

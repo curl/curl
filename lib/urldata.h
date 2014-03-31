@@ -595,7 +595,7 @@ enum upgrade101 {
 enum negotiatenpn {
   NPN_INIT,                   /* default state */
   NPN_HTTP1_1,                /* HTTP/1.1 negotiated */
-  NPN_HTTP2_DRAFT09           /* HTTP-draft-0.9/2.0 negotiated */
+  NPN_HTTP2                   /* HTTP2 (draft-xx) negotiated */
 };
 
 /*

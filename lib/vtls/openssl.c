@@ -1431,7 +1431,7 @@ select_next_proto_cb(SSL *ssl,
 
   if(retval == 1) {
     infof(conn->data, "NPN, negotiated HTTP2\n");
-    conn->negnpn = NPN_HTTP2_DRAFT09;
+    conn->negnpn = NPN_HTTP2;
   }
   else if(retval == 0) {
     infof(conn->data, "NPN, negotiated HTTP1.1\n");
@@ -2003,7 +2003,7 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
 
         if(len == NGHTTP2_PROTO_VERSION_ID_LEN &&
            memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len) == 0) {
-             conn->negnpn = NPN_HTTP2_DRAFT09;
+             conn->negnpn = NPN_HTTP2;
         }
         else if(len == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
             neg_protocol, ALPN_HTTP_1_1_LENGTH) == 0) {
