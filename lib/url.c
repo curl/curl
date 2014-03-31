@@ -3951,7 +3951,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   if(result != CURLE_OK)
     return result;
 
-  if(conn->host.name[0] == '[' && !data->state.this_is_a_follow) {
+  if(conn->host.name[0] == '[') {
     /* This looks like an IPv6 address literal.  See if there is an address
        scope if there is no location header */
     char *percent = strchr(conn->host.name, '%');
