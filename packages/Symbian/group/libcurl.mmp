@@ -39,7 +39,7 @@ SOURCE \
   http_proxy.c non-ascii.c asyn-ares.c asyn-thread.c curl_gssapi.c     \
   curl_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_ntlm_msgs.c         \
   curl_sasl.c vtls/curl_schannel.c curl_multibyte.c                    \
-  vtls/curl_darwinssl.c bundles.c conncache.c
+  vtls/curl_darwinssl.c bundles.c conncache.c sasl_sspi
 
 USERINCLUDE   ../../../lib ../../../include/curl
 #ifdef ENABLE_SSL

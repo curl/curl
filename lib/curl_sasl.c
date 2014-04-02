@@ -263,6 +263,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
   return result;
 }
 
+#ifndef USE_WINDOWS_SSPI
 /*
  * sasl_decode_digest_md5_message()
  *
@@ -480,7 +481,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   return result;
 }
-#endif
+#endif  /* USE_WINDOWS_SSPI */
+
+#endif  /* CURL_DISABLE_CRYPTO_AUTH */
 
 #ifdef USE_NTLM
 /*
