@@ -170,14 +170,6 @@ void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm);
 #define NTLMFLAG_NEGOTIATE_56                    (1<<31)
 /* Indicates that 56-bit encryption is supported. */
 
-#ifdef UNICODE
-#  define SECFLAG_WINNT_AUTH_IDENTITY \
-     (unsigned long)SEC_WINNT_AUTH_IDENTITY_UNICODE
-#else
-#  define SECFLAG_WINNT_AUTH_IDENTITY \
-     (unsigned long)SEC_WINNT_AUTH_IDENTITY_ANSI
-#endif
-
 #endif /* BUILDING_CURL_NTLM_MSGS_C */
 
 #endif /* USE_NTLM */

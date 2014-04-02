@@ -43,6 +43,13 @@
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
 
+/* This is used to generate an SSPI identity structure */
+CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
+                                   SEC_WINNT_AUTH_IDENTITY *identity);
+
+/* This is used to free an SSPI identity structure */
+void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
+
 /* Forward-declaration of global variables defined in curl_sspi.c */
 
 extern HMODULE s_hSecDll;
@@ -287,6 +294,14 @@ extern PSecurityFunctionTable s_pSecFn;
 #endif
 #ifndef SEC_I_SIGNATURE_NEEDED
 # define SEC_I_SIGNATURE_NEEDED                ((HRESULT)0x0009035CL)
+#endif
+
+#ifdef UNICODE
+#  define SECFLAG_WINNT_AUTH_IDENTITY \
+     (unsigned long)SEC_WINNT_AUTH_IDENTITY_UNICODE
+#else
+#  define SECFLAG_WINNT_AUTH_IDENTITY \
+     (unsigned long)SEC_WINNT_AUTH_IDENTITY_ANSI
 #endif
 
 #endif /* USE_WINDOWS_SSPI */
