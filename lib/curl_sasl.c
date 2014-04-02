@@ -264,9 +264,10 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
 }
 
 /*
- * Curl_sasl_decode_digest_md5_message()
+ * sasl_decode_digest_md5_message()
  *
- * This is used to decode an already encoded DIGEST-MD5 challenge message.
+ * This is used internally to decode an already encoded DIGEST-MD5 challenge
+ * message into the seperate attributes.
  *
  * Parameters:
  *
@@ -280,10 +281,10 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_decode_digest_md5_message(const char *chlg64,
-                                             char *nonce, size_t nlen,
-                                             char *realm, size_t rlen,
-                                             char *alg, size_t alen)
+static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
+                                               char *nonce, size_t nlen,
+                                               char *realm, size_t rlen,
+                                               char *alg, size_t alen)
 {
   CURLcode result = CURLE_OK;
   unsigned char *chlg = NULL;
@@ -332,8 +333,7 @@ CURLcode Curl_sasl_decode_digest_md5_message(const char *chlg64,
  * Parameters:
  *
  * data    [in]     - The session handle.
- * nonce   [in]     - The nonce.
- * realm   [in]     - The realm.
+ * chlg64  [in]     - Pointer to the base64 encoded challenge message.
  * userp   [in]     - The user name.
  * passdwp [in]     - The user's password.
  * service [in]     - The service type such as www, smtp, pop or imap.
@@ -344,8 +344,7 @@ CURLcode Curl_sasl_decode_digest_md5_message(const char *chlg64,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
-                                             const char *nonce,
-                                             const char *realm,
+                                             const char *chlg64,
                                              const char *userp,
                                              const char *passwdp,
                                              const char *service,
@@ -363,11 +362,25 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char HA2_hex[2 * MD5_DIGEST_LEN + 1];
   char resp_hash_hex[2 * MD5_DIGEST_LEN + 1];
 
+  char nonce[64];
+  char realm[128];
+  char algorithm[64];
   char nonceCount[] = "00000001";
   char cnonce[]     = "12345678"; /* will be changed */
   char method[]     = "AUTHENTICATE";
   char qop[]        = "auth";
   char uri[128];
+
+  /* Decode the challange message */
+  result = sasl_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
+                                          realm, sizeof(realm),
+                                          algorithm, sizeof(algorithm));
+  if(result)
+    return result;
+
+  /* We only support md5 sessions */
+  if(strcmp(algorithm, "md5-sess") != 0)
+     return CURLE_BAD_CONTENT_ENCODING;
 
 #ifndef DEBUGBUILD
   /* Generate 64 bits of random data */
