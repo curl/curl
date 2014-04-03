@@ -1892,11 +1892,6 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
   struct SessionHandle *data = conn->data;
   int err;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-#ifdef HAS_ALPN
-  char* neg_protocol;
-  int len = 0;
-#endif
-
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
              || ssl_connect_2_reading == connssl->connecting_state
              || ssl_connect_2_writing == connssl->connecting_state);
@@ -1998,6 +1993,8 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
      * negotiated
      */
     if(data->set.ssl_enable_alpn) {
+      const unsigned char* neg_protocol;
+      unsigned int len;
       SSL_get0_alpn_selected(connssl->handle, &neg_protocol, &len);
       if(len != 0) {
         infof(data, "ALPN, server accepted to use %.*s\n", len, neg_protocol);
