@@ -3,6 +3,8 @@
 <keywords>
 HTTP
 HTTP GET
+CURLE_PARTIAL_FILE
+FAILURE
 </keywords>
 </info>
 #

@@ -1,12 +1,13 @@
 <testcase>
 <info>
 <keywords>
-Proxy
-Socks Proxy
+HTTP
+SOCKS5
 NO_PROXY
 noproxy
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data>

@@ -5,7 +5,7 @@ HTTP
 HTTP GET
 compressed
 Transfer-Encoding
-chunked
+chunked Transfer-Encoding
 </keywords>
 </info>
 #

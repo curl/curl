@@ -2,8 +2,10 @@
 <info>
 <keywords>
 build system
+source analysis
 </keywords>
 </info>
+
 #
 # Client-side
 <client>
