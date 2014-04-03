@@ -55,3 +55,5 @@ B003 SELECT 836
 B004 FETCH 2 BODY[]
 B005 LOGOUT
 </protocol>
+</verify>
+</testcase>

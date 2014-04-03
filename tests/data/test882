@@ -54,3 +54,5 @@ PASS secret
 RETR 882002
 QUIT
 </protocol>
+</verify>
+</testcase>
