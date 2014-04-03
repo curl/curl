@@ -1,4 +1,10 @@
 <testcase>
+<info>
+<keywords>
+printf
+unittest
+</keywords>
+</info>
 #
 # Server-side
 <reply>

@@ -1,4 +1,10 @@
 <testcase>
+<info>
+<keywords>
+getdate
+unittest
+</keywords>
+</info>
 #
 # Server-side
 <reply>

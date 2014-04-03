@@ -1,4 +1,9 @@
 <testcase>
+<info>
+<keywords>
+build system
+</keywords>
+</info>
 #
 # Client-side
 <client>
