@@ -3014,6 +3014,11 @@ sub singletest {
         my @keywords = getpart("info", "keywords");
         my $match;
         my $k;
+
+        if(!$keywords[0]) {
+            $why = "missing the <keywords> section!";
+        }
+
         for $k (@keywords) {
             chomp $k;
             if ($disabled_keywords{$k}) {
