@@ -678,16 +678,16 @@ If this option is used several times, only the first one is used. This is
 because undoing a GET doesn't make sense, but you should then instead enforce
 the alternative method you prefer.
 .IP "-H, --header <header>"
-(HTTP) Extra header to use when getting a web page. You may specify any number
-of extra headers. Note that if you should add a custom header that has the
-same name as one of the internal ones curl would use, your externally set
-header will be used instead of the internal one. This allows you to make even
-trickier stuff than curl would normally do. You should not replace internally
-set headers without knowing perfectly well what you're doing. Remove an
-internal header by giving a replacement without content on the right side of
-the colon, as in: -H \&"Host:". If you send the custom header with no-value
-then its header must be terminated with a semicolon, such as \-H
-\&"X-Custom-Header;" to send "X-Custom-Header:".
+(HTTP) Extra header to include in the request when sending HTTP to a
+server. You may specify any number of extra headers. Note that if you should
+add a custom header that has the same name as one of the internal ones curl
+would use, your externally set header will be used instead of the internal
+one. This allows you to make even trickier stuff than curl would normally
+do. You should not replace internally set headers without knowing perfectly
+well what you're doing. Remove an internal header by giving a replacement
+without content on the right side of the colon, as in: -H \&"Host:". If you
+send the custom header with no-value then its header must be terminated with a
+semicolon, such as \-H \&"X-Custom-Header;" to send "X-Custom-Header:".
 
 curl will make sure that each header you add/replace is sent with the proper
 end-of-line marker, you should thus \fBnot\fP add that as a part of the header
@@ -695,6 +695,9 @@ content: do not add newlines or carriage returns, they will only mess things up
 for you.
 
 See also the \fI-A, --user-agent\fP and \fI-e, --referer\fP options.
+
+Starting in 7.37.0, you need \fI--proxy-header\fP to send custom headers
+intended for a proxy.
 
 This option can be used multiple times to add/replace/remove multiple headers.
 .IP "--hostpubmd5 <md5>"
@@ -1108,20 +1111,23 @@ The Bearer Token and user name are formatted according to RFC 6750.
 
 If this option is used several times, the last one will be used.
 .IP "--proxy-header <header>"
-(HTTP) Extra header to use when getting a web page with a proxy. You may
-specify any number of extra headers. This is the equivalent option to \fI-H,
---header\fP but is for proxy communication only like in CONNECT requests when
-you want a separate header sent to the proxy to what is sent to the actual
-remote host.
+(HTTP) Extra header to include in the request when sending HTTP to a
+proxy. You may specify any number of extra headers. This is the equivalent
+option to \fI-H, --header\fP but is for proxy communication only like in
+CONNECT requests when you want a separate header sent to the proxy to what is
+sent to the actual remote host.
 
 curl will make sure that each header you add/replace is sent with the proper
 end-of-line marker, you should thus \fBnot\fP add that as a part of the header
 content: do not add newlines or carriage returns, they will only mess things
 up for you.
 
+Headers specified with this option will not be included in requests that curl
+knows will not be sent to a proxy.
+
 This option can be used multiple times to add/replace/remove multiple headers.
 
-(Added in 7.36.0)
+(Added in 7.37.0)
 .IP "-p, --proxytunnel"
 When an HTTP proxy is used (\fI-x, --proxy\fP), this option will cause non-HTTP
 protocols to attempt to tunnel through the proxy instead of merely using it to
