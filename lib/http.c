@@ -2395,9 +2395,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         return result;
     }
 
-    result = expect100(data, conn, req_buffer);
-    if(result)
-      return result;
+    if(postsize != 0) {
+      result = expect100(data, conn, req_buffer);
+      if(result)
+        return result;
+    }
 
     result = Curl_add_buffer(req_buffer, "\r\n", 2); /* end of headers */
     if(result)

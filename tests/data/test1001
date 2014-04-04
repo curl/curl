@@ -90,7 +90,6 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
-Expect: 100-continue
 
 GET http://%HOSTIP:%HTTPPORT/1001 HTTP/1.1
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/1001", response="6af4d89c952f4dd4cc215a6878dc499d"

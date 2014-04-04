@@ -89,7 +89,6 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
-Expect: 100-continue
 
 GET http://%HOSTIP:%HTTPPORT/1002.upload1 HTTP/1.1
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/1002.upload1", response="198aa9b6acb4b0c71d02a197a5e41f54"
