@@ -1563,7 +1563,7 @@ sent to a proxy, libcurl will send both server headers and proxy headers. When
 doing CONNECT, libcurl will send \fICURLOPT_PROXYHEADER\fP headers only do the
 proxy and then \fICURLOPT_HTTPHEADER\fP headers only to the server.
 
-(Added in 7.36.0)
+(Added in 7.37.0)
 .IP CURLOPT_PROXYHEADER
 Pass a pointer to a linked list of HTTP headers to pass in your HTTP request
 sent to a proxy. The rules for this list is identical to the
@@ -1579,7 +1579,7 @@ of headers will only cause your request to send an invalid header.
 
 Pass a NULL to this to reset back to no custom headers.
 
-This option was added in libcurl 7.36.0.
+This option was added in libcurl 7.37.0.
 .IP CURLOPT_HTTP200ALIASES
 Pass a pointer to a linked list of aliases to be treated as valid HTTP 200
 responses.  Some servers respond with a custom header response line.  For
