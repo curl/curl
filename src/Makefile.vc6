@@ -139,6 +139,7 @@ RELEASE_OBJS= \
 	nonblockr.obj \
 	rawstrr.obj \
 	strtoofftr.obj \
+	warnless.obj \
 	tool_binmoder.obj \
 	tool_bnamer.obj \
 	tool_cb_dbgr.obj \
@@ -183,6 +184,7 @@ DEBUG_OBJS= \
 	nonblockd.obj \
 	rawstrd.obj \
 	strtoofftd.obj \
+	warnless.obj \
 	tool_binmoded.obj \
 	tool_bnamed.obj \
 	tool_cb_dbgd.obj \
