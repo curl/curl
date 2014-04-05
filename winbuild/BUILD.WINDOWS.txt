@@ -1,17 +1,23 @@
 Building with Visual C++, prerequises
 =====================================
+
    This document describes how to compile, build and install curl and libcurl
    from sources using the Visual C++ build tool. To build with VC++, you will
    of course have to first install VC++. The minimum required version of
-   VC is 6 (part of Visual Studio 6). However using a more recent version like
-   2008 (vc9) is strongly recommended.
+   VC is 6 (part of Visual Studio 6). However using a more recent version is
+   strongly recommended.
 
    VC++ is also part of the Windows Platform SDK. You do not have to install
    the full Visual Studio or Visual C++ if all you want is to build curl.
 
-   The Platform SDK can be fetched here, freely:
+   The latest Platform SDK can be downloaded freely from:
 
     http://msdn.microsoft.com/en-us/windows/bb980924
+
+   If you are building with VC6 then you will also need the February 2003
+   Edition of the Platform SDK which can be downloaded from:
+
+    http://www.microsoft.com/en-us/download/details.aspx?id=12261
 
    If you wish to support zlib, openssl, ssh2, you will have to download
    them separately and copy them to the deps directory as shown below:
