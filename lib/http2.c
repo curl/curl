@@ -349,14 +349,16 @@ static const char STATUS[] = ":status";
 
 /* frame->hd.type is either NGHTTP2_HEADERS or NGHTTP2_PUSH_PROMISE */
 static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
-                      const uint8_t *name, size_t namelen,
-                      const uint8_t *value, size_t valuelen,
-                      void *userp)
+                     const uint8_t *name, size_t namelen,
+                     const uint8_t *value, size_t valuelen,
+                     uint8_t flags,
+                     void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
   (void)session;
   (void)frame;
+  (void)flags;
 
   if(frame->hd.stream_id != c->stream_id) {
     return 0;
@@ -404,7 +406,7 @@ static const nghttp2_session_callbacks callbacks = {
 static ssize_t data_source_read_callback(nghttp2_session *session,
                                          int32_t stream_id,
                                          uint8_t *buf, size_t length,
-                                         int *eof,
+                                         uint32_t *data_flags,
                                          nghttp2_data_source *source,
                                          void *userp)
 {
@@ -413,7 +415,6 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   size_t nread;
   (void)session;
   (void)stream_id;
-  (void)eof;
   (void)source;
 
   nread = c->upload_len < length ? c->upload_len : length;
@@ -425,7 +426,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   }
 
   if(c->upload_left == 0)
-    *eof = 1;
+    *data_flags = 1;
   else if(nread == 0)
     return NGHTTP2_ERR_DEFERRED;
 
@@ -512,7 +513,7 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
                             "Connection: Upgrade, HTTP2-Settings\r\n"
                             "Upgrade: %s\r\n"
                             "HTTP2-Settings: %s\r\n",
-                            NGHTTP2_PROTO_VERSION_ID, base64);
+                            NGHTTP2_CLEARTEXT_PROTO_VERSION_ID, base64);
   Curl_safefree(base64);
 
   k->upgr101 = UPGR101_REQUESTED;
@@ -620,12 +621,6 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   return -1;
 }
 
-#define MAKE_NV(k, v)                                           \
-  { (uint8_t*)k, (uint8_t*)v, sizeof(k) - 1, sizeof(v) - 1 }
-
-#define MAKE_NV2(k, v, vlen)                            \
-  { (uint8_t*)k, (uint8_t*)v, sizeof(k) - 1, vlen }
-
 /* return number of received (decrypted) bytes */
 static ssize_t http2_send(struct connectdata *conn, int sockindex,
                           const void *mem, size_t len, CURLcode *err)
@@ -685,6 +680,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nva[0].namelen = (uint16_t)strlen((char *)nva[0].name);
   nva[0].value = (unsigned char *)hdbuf;
   nva[0].valuelen = (uint16_t)(end - hdbuf);
+  nva[0].flags = NGHTTP2_NV_FLAG_NONE;
 
   hdbuf = end + 1;
 
@@ -693,6 +689,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nva[1].namelen = (uint16_t)strlen((char *)nva[1].name);
   nva[1].value = (unsigned char *)hdbuf;
   nva[1].valuelen = (uint16_t)(end - hdbuf);
+  nva[1].flags = NGHTTP2_NV_FLAG_NONE;
 
   nva[2].name = (unsigned char *)":scheme";
   nva[2].namelen = (uint16_t)strlen((char *)nva[2].name);
@@ -701,6 +698,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   else
     nva[2].value = (unsigned char *)"http";
   nva[2].valuelen = (uint16_t)strlen((char *)nva[2].value);
+  nva[2].flags = NGHTTP2_NV_FLAG_NONE;
 
   hdbuf = strchr(hdbuf, 0x0a);
   ++hdbuf;
@@ -722,6 +720,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     assert(end);
     nva[i].value = (unsigned char *)hdbuf;
     nva[i].valuelen = (uint16_t)(end - hdbuf);
+    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
 
     hdbuf = end + 2;
     /* Inspect Content-Length header field and retrieve the request
@@ -744,10 +743,11 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   case HTTPREQ_PUT:
     data_prd.read_callback = data_source_read_callback;
     data_prd.source.ptr = NULL;
-    rv = nghttp2_submit_request(httpc->h2, 0, nva, nheader, &data_prd, NULL);
+    rv = nghttp2_submit_request(httpc->h2, NULL, nva, nheader, &data_prd,
+                                NULL);
     break;
   default:
-    rv = nghttp2_submit_request(httpc->h2, 0, nva, nheader, NULL, NULL);
+    rv = nghttp2_submit_request(httpc->h2, NULL, nva, nheader, NULL, NULL);
   }
 
   Curl_safefree(nva);
@@ -815,8 +815,8 @@ int Curl_http2_switched(struct connectdata *conn)
   /* TODO: May get CURLE_AGAIN */
   rv = (int) ((Curl_send*)httpc->send_underlying)
     (conn, FIRSTSOCKET,
-     NGHTTP2_CLIENT_CONNECTION_HEADER,
-     NGHTTP2_CLIENT_CONNECTION_HEADER_LEN,
+     NGHTTP2_CLIENT_CONNECTION_PREFACE,
+     NGHTTP2_CLIENT_CONNECTION_PREFACE_LEN,
      &rc);
   assert(rv == 24);
   if(conn->data->req.upgr101 == UPGR101_RECEIVED) {
