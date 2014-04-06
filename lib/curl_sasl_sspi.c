@@ -32,6 +32,7 @@
 #include "urldata.h"
 #include "curl_base64.h"
 #include "warnless.h"
+#include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
