@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,7 +24,7 @@
 
 #ifdef USE_WINDOWS_SSPI
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP_NEGOTIATE)
 
 #include "urldata.h"
 #include "sendf.h"
@@ -300,6 +300,6 @@ void Curl_cleanup_negotiate(struct SessionHandle *data)
   cleanup(&data->state.proxyneg);
 }
 
+#endif /* !CURL_DISABLE_HTTP && USE_HTTP_NEGOTIATE */
 
-#endif
-#endif
+#endif /* USE_WINDOWS_SSPI */
