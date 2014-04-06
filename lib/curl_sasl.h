@@ -22,7 +22,11 @@
  *
  ***************************************************************************/
 
-#include "pingpong.h"
+#include <curl/curl.h>
+
+struct SessionHandle;
+struct connectdata;
+struct ntlmdata;
 
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
