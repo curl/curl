@@ -29,6 +29,13 @@
 
 #include <curl/curl.h>
 
+#include "urldata.h"
+#include "curl_base64.h"
+#include "warnless.h"
+
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -58,14 +65,128 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              const char *service,
                                              char **outptr, size_t *outlen)
 {
-  (void)data;
-  (void)chlg64;
-  (void)userp;
-  (void)passwdp;
-  (void)outptr;
-  (void)outlen;
+  CURLcode result = CURLE_OK;
+  char *spn = NULL;
+  size_t chlglen = 0;
+  unsigned char *chlg = NULL;
+  unsigned char resp[1024];
+  CredHandle handle;
+  CtxtHandle ctx;
+  PSecPkgInfo SecurityPackage;
+  SEC_WINNT_AUTH_IDENTITY identity;
+  SEC_WINNT_AUTH_IDENTITY *identityp = NULL;
+  SecBuffer chlg_buf;
+  SecBuffer resp_buf;
+  SecBufferDesc chlg_desc;
+  SecBufferDesc resp_desc;
+  SECURITY_STATUS status;
+  unsigned long attrs;
+  TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
 
-  return CURLE_NOT_BUILT_IN;
+  /* Decode the base-64 encoded challenge message */
+  if(strlen(chlg64) && *chlg64 != '=') {
+    result = Curl_base64_decode(chlg64, &chlg, &chlglen);
+    if(result)
+      return result;
+  }
+
+  /* Ensure we have a valid challenge message */
+  if(!chlg)
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  /* Ensure we have some login credientials as DigestSSP cannot use the current
+     Windows user like NTLMSSP can */
+  if(!userp || !*userp)
+    return CURLE_LOGIN_DENIED;
+
+  /* Query the security package for DigestSSP */
+  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT("WDigest"),
+                                              &SecurityPackage);
+  if(status != SEC_E_OK)
+    return CURLE_NOT_BUILT_IN;
+
+  /* Calculate our SPN */
+  spn = aprintf("%s/%s", service, data->easy_conn->host);
+  if(!spn)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Populate our identity structure */
+  result = Curl_create_sspi_identity(userp, passwdp, &identity);
+  if(result) {
+    Curl_safefree(spn);
+
+    return result;
+  }
+
+  /* Allow proper cleanup of the identity structure */
+  identityp = &identity;
+
+  /* Acquire our credientials handle */
+  status = s_pSecFn->AcquireCredentialsHandle(NULL,
+                                              (TCHAR *) TEXT("WDigest"),
+                                              SECPKG_CRED_OUTBOUND, NULL,
+                                              identityp, NULL, NULL,
+                                              &handle, &tsDummy);
+
+  if(status != SEC_E_OK) {
+    Curl_sspi_free_identity(identityp);
+    Curl_safefree(spn);
+
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  /* Setup the challenge security buffer */
+  chlg_desc.ulVersion = SECBUFFER_VERSION;
+  chlg_desc.cBuffers  = 1;
+  chlg_desc.pBuffers  = &chlg_buf;
+  chlg_buf.BufferType = SECBUFFER_TOKEN;
+  chlg_buf.pvBuffer   = chlg;
+  chlg_buf.cbBuffer   = curlx_uztoul(chlglen);
+
+  /* Setup the response security buffer */
+  resp_desc.ulVersion = SECBUFFER_VERSION;
+  resp_desc.cBuffers  = 1;
+  resp_desc.pBuffers  = &resp_buf;
+  resp_buf.BufferType = SECBUFFER_TOKEN;
+  resp_buf.pvBuffer   = resp;
+  resp_buf.cbBuffer   = sizeof(resp);
+
+  /* Generate our challenge-response */
+  status = s_pSecFn->InitializeSecurityContext(&handle,
+                                               NULL,
+                                               (TCHAR *) spn,
+                                               0, 0, 0,
+                                               &chlg_desc,
+                                               0, &ctx,
+                                               &resp_desc,
+                                               &attrs, &tsDummy);
+
+  if(status == SEC_I_COMPLETE_AND_CONTINUE ||
+     status == SEC_I_CONTINUE_NEEDED)
+    s_pSecFn->CompleteAuthToken(&handle, &resp_desc);
+  else if(status != SEC_E_OK) {
+    s_pSecFn->FreeCredentialsHandle(&handle);
+    Curl_sspi_free_identity(identityp);
+    Curl_safefree(spn);
+
+    return CURLE_RECV_ERROR;
+  }
+
+  /* Base64 encode the response */
+  result = Curl_base64_encode(data, (char *)resp, resp_buf.cbBuffer, outptr,
+                              outlen);
+
+  /* Free our handles */
+  s_pSecFn->DeleteSecurityContext(&ctx);
+  s_pSecFn->FreeCredentialsHandle(&handle);
+
+  /* Free the identity structure */
+  Curl_sspi_free_identity(identityp);
+
+  /* Free the SPN */
+  Curl_safefree(spn);
+
+  return result;
 }
 
 #endif /* USE_WINDOWS_SSPI */
