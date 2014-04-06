@@ -29,6 +29,7 @@
 
 #include <curl/curl.h>
 
+#include "curl_sasl.h"
 #include "urldata.h"
 #include "curl_base64.h"
 #include "warnless.h"
