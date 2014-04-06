@@ -51,7 +51,7 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_WINDOWS_SSPI)
 /* Retrieves the value for a corresponding key from the challenge string
  * returns TRUE if the key could be found, FALSE if it does not exists
  */
