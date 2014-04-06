@@ -95,14 +95,18 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Ensure we have some login credientials as DigestSSP cannot use the current
      Windows user like NTLMSSP can */
-  if(!userp || !*userp)
+  if(!userp || !*userp) {
+    Curl_safefree(chlg);
     return CURLE_LOGIN_DENIED;
+  }
 
   /* Query the security package for DigestSSP */
   status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT("WDigest"),
                                               &SecurityPackage);
-  if(status != SEC_E_OK)
+  if(status != SEC_E_OK) {
+    Curl_safefree(chlg);
     return CURLE_NOT_BUILT_IN;
+  }
 
   /* Calculate our SPN */
   spn = aprintf("%s/%s", service, data->easy_conn->host);
@@ -113,6 +117,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   result = Curl_create_sspi_identity(userp, passwdp, &identity);
   if(result) {
     Curl_safefree(spn);
+    Curl_safefree(chlg);
 
     return result;
   }
@@ -127,6 +132,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   if(status != SEC_E_OK) {
     Curl_sspi_free_identity(&identity);
     Curl_safefree(spn);
+    Curl_safefree(chlg);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -164,6 +170,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     s_pSecFn->FreeCredentialsHandle(&handle);
     Curl_sspi_free_identity(&identity);
     Curl_safefree(spn);
+    Curl_safefree(chlg);
 
     return CURLE_RECV_ERROR;
   }
@@ -181,6 +188,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Free the SPN */
   Curl_safefree(spn);
+
+  /* Free the decoeded challenge message */
+  Curl_safefree(chlg);
 
   return result;
 }
