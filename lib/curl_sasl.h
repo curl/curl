@@ -76,9 +76,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
                                            const char *user,
                                            const char *passwdp,
                                            char **outptr, size_t *outlen);
-#endif
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_WINDOWS_SSPI)
 /* This is used to decode a base64 encoded DIGEST-MD5 challange message */
 CURLcode Curl_sasl_decode_digest_md5_message(const char *chlg64,
                                              char *nonce, size_t nlen,

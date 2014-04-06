@@ -25,7 +25,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_WINDOWS_SSPI)
+#if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 
 #include <curl/curl.h>
 
@@ -189,4 +189,4 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   return result;
 }
 
-#endif /* USE_WINDOWS_SSPI */
+#endif /* USE_WINDOWS_SSPI && !CURL_DISABLE_CRYPTO_AUTH */
