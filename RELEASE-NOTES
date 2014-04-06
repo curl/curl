@@ -9,6 +9,10 @@ Curl and libcurl 7.37.0
 This release includes the following changes:
 
  o URL parser: IPv6 zone identifiers are now supported
+ o CURLOPT_PROXYHEADER: set headers for proxy-only
+ o CURLOPT_HEADEROPT: added
+ o curl: add --proxy-header
+ o sasl: Added support for DIGEST-MD5 via Windows SSPI
  o 
 
 This release includes the following bugfixes:
@@ -16,10 +20,17 @@ This release includes the following bugfixes:
  o mkhelp: generate code for --disable-manual as well [1]
  o hostcheck: added a system include to define struct in_addr
  o winbuild: added warnless.c to fix build
+ o Makefile.vc6: added warnless.c to fix build
  o smtp: Fixed login denied when server doesn't support AUTH capability [2]
+ o smtp: Fixed login denied with a RFC-821 based server [2]
  o curl: stop interpreting IPv6 literals as glob patterns
  o http2: remove _DRAFT09 from the NPN_HTTP2 enum
  o http2: let openssl mention the exact protocol negotiated
+ o http2+openssl: fix compiler warnings in ALPN using code
+ o ftp: in passive data connect wait for happy eyeballs sockets [3]
+ o HTTP: don't send Content-Length: 0 _and_ Expect: 100-continue [4]
+ o http2: Compile with current nghttp2, which supports h2-11 [5]
+ o http_negotiate_sspi: Fixed compilation when USE_HTTP_NEGOTIATE not defined
  o 
 
 This release includes the following known bugs:
@@ -29,8 +40,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Cody Mack, Dan Fandrich, Daniel Stenberg, Paul Marks, Remi Gacogne,
-  Steve Holme, Till Maas, Tom Sparrow
+  Alan, Cody Mack, Dan Fandrich, Daniel Stenberg, JimS, Marc Hoersken,
+  Maciej Puzio, Melissa Mears, Paul Marks, Remi Gacogne, Steve Holme,
+  Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow, Vijay Panghal
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -38,3 +50,6 @@ References to bug reports and discussions on issues:
 
  [1] = http://curl.haxx.se/bug/view.cgi?id=1350
  [2] = http://curl.haxx.se/mail/lib-2014-03/0173.html
+ [3] = http://curl.haxx.se/mail/lib-2014-02/0135.html (ruined)
+ [4] = http://curl.haxx.se/bug/view.cgi?id=1349
+ [5] = http://curl.haxx.se/mail/lib-2014-04/0053.html
