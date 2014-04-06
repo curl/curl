@@ -74,7 +74,6 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   CtxtHandle ctx;
   PSecPkgInfo SecurityPackage;
   SEC_WINNT_AUTH_IDENTITY identity;
-  SEC_WINNT_AUTH_IDENTITY *identityp = NULL;
   SecBuffer chlg_buf;
   SecBuffer resp_buf;
   SecBufferDesc chlg_desc;
@@ -118,24 +117,21 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     return result;
   }
 
-  /* Allow proper cleanup of the identity structure */
-  identityp = &identity;
-
   /* Acquire our credientials handle */
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
                                               (TCHAR *) TEXT("WDigest"),
                                               SECPKG_CRED_OUTBOUND, NULL,
-                                              identityp, NULL, NULL,
+                                              &identity, NULL, NULL,
                                               &handle, &tsDummy);
 
   if(status != SEC_E_OK) {
-    Curl_sspi_free_identity(identityp);
+    Curl_sspi_free_identity(&identity);
     Curl_safefree(spn);
 
     return CURLE_OUT_OF_MEMORY;
   }
 
-  /* Setup the challenge security buffer */
+  /* Setup the challenge "input" security buffer */
   chlg_desc.ulVersion = SECBUFFER_VERSION;
   chlg_desc.cBuffers  = 1;
   chlg_desc.pBuffers  = &chlg_buf;
@@ -143,7 +139,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   chlg_buf.pvBuffer   = chlg;
   chlg_buf.cbBuffer   = curlx_uztoul(chlglen);
 
-  /* Setup the response security buffer */
+  /* Setup the response "output" security buffer */
   resp_desc.ulVersion = SECBUFFER_VERSION;
   resp_desc.cBuffers  = 1;
   resp_desc.pBuffers  = &resp_buf;
@@ -151,7 +147,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   resp_buf.pvBuffer   = resp;
   resp_buf.cbBuffer   = sizeof(resp);
 
-  /* Generate our challenge-response */
+  /* Generate our challenge-response message */
   status = s_pSecFn->InitializeSecurityContext(&handle,
                                                NULL,
                                                (TCHAR *) spn,
@@ -166,7 +162,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     s_pSecFn->CompleteAuthToken(&handle, &resp_desc);
   else if(status != SEC_E_OK) {
     s_pSecFn->FreeCredentialsHandle(&handle);
-    Curl_sspi_free_identity(identityp);
+    Curl_sspi_free_identity(&identity);
     Curl_safefree(spn);
 
     return CURLE_RECV_ERROR;
@@ -181,7 +177,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   s_pSecFn->FreeCredentialsHandle(&handle);
 
   /* Free the identity structure */
-  Curl_sspi_free_identity(identityp);
+  Curl_sspi_free_identity(&identity);
 
   /* Free the SPN */
   Curl_safefree(spn);

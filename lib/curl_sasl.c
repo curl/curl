@@ -292,6 +292,7 @@ static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
   size_t chlglen = 0;
   size_t chlg64len = strlen(chlg64);
 
+  /* Decode the base-64 encoded challenge message */
   if(chlg64len && *chlg64 != '=') {
     result = Curl_base64_decode(chlg64, &chlg, &chlglen);
     if(result)

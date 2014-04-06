@@ -414,8 +414,8 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
 
 #ifdef USE_WINDOWS_SSPI
 
-  SecBuffer buf;
-  SecBufferDesc desc;
+  SecBuffer type_1_buf;
+  SecBufferDesc type_1_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
   TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
@@ -434,8 +434,10 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
     ntlm->p_identity = &ntlm->identity;
   }
   else
+    /* Use the current Windows user */
     ntlm->p_identity = NULL;
 
+  /* Acquire our credientials handle */
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
                                               (TCHAR *) TEXT("NTLM"),
                                               SECPKG_CRED_OUTBOUND, NULL,
@@ -444,13 +446,15 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   if(status != SEC_E_OK)
     return CURLE_OUT_OF_MEMORY;
 
-  desc.ulVersion = SECBUFFER_VERSION;
-  desc.cBuffers  = 1;
-  desc.pBuffers  = &buf;
-  buf.cbBuffer   = NTLM_BUFSIZE;
-  buf.BufferType = SECBUFFER_TOKEN;
-  buf.pvBuffer   = ntlmbuf;
+  /* Setup the type-1 "output" security buffer */
+  type_1_desc.ulVersion = SECBUFFER_VERSION;
+  type_1_desc.cBuffers  = 1;
+  type_1_desc.pBuffers  = &type_1_buf;
+  type_1_buf.cbBuffer   = NTLM_BUFSIZE;
+  type_1_buf.BufferType = SECBUFFER_TOKEN;
+  type_1_buf.pvBuffer   = ntlmbuf;
 
+  /* Generate our type-1 message */
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle, NULL,
                                                (TCHAR *) TEXT(""),
                                                ISC_REQ_CONFIDENTIALITY |
@@ -458,19 +462,19 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                                ISC_REQ_CONNECTION,
                                                0, SECURITY_NETWORK_DREP,
                                                NULL, 0,
-                                               &ntlm->c_handle, &desc,
+                                               &ntlm->c_handle, &type_1_desc,
                                                &attrs, &tsDummy);
 
   if(status == SEC_I_COMPLETE_AND_CONTINUE ||
      status == SEC_I_CONTINUE_NEEDED)
-    s_pSecFn->CompleteAuthToken(&ntlm->c_handle, &desc);
+    s_pSecFn->CompleteAuthToken(&ntlm->c_handle, &type_1_desc);
   else if(status != SEC_E_OK) {
     s_pSecFn->FreeCredentialsHandle(&ntlm->handle);
     return CURLE_RECV_ERROR;
   }
 
   ntlm->has_handles = 1;
-  size = buf.cbBuffer;
+  size = type_1_buf.cbBuffer;
 
 #else
 
@@ -602,8 +606,8 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   size_t size;
 
 #ifdef USE_WINDOWS_SSPI
-  SecBuffer type_2;
-  SecBuffer type_3;
+  SecBuffer type_2_buf;
+  SecBuffer type_3_buf;
   SecBufferDesc type_2_desc;
   SecBufferDesc type_3_desc;
   SECURITY_STATUS status;
@@ -614,18 +618,23 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   (void)userp;
   (void)data;
 
-  type_2_desc.ulVersion = type_3_desc.ulVersion  = SECBUFFER_VERSION;
-  type_2_desc.cBuffers  = type_3_desc.cBuffers   = 1;
-  type_2_desc.pBuffers  = &type_2;
-  type_3_desc.pBuffers  = &type_3;
+  /* Setup the type-2 "input" security buffer */
+  type_2_desc.ulVersion = SECBUFFER_VERSION;
+  type_2_desc.cBuffers  = 1;
+  type_2_desc.pBuffers  = &type_2_buf;
+  type_2_buf.BufferType = SECBUFFER_TOKEN;
+  type_2_buf.pvBuffer   = ntlm->type_2;
+  type_2_buf.cbBuffer   = ntlm->n_type_2;
 
-  type_2.BufferType = SECBUFFER_TOKEN;
-  type_2.pvBuffer   = ntlm->type_2;
-  type_2.cbBuffer   = ntlm->n_type_2;
-  type_3.BufferType = SECBUFFER_TOKEN;
-  type_3.pvBuffer   = ntlmbuf;
-  type_3.cbBuffer   = NTLM_BUFSIZE;
+  /* Setup the type-3 "output" security buffer */
+  type_3_desc.ulVersion = SECBUFFER_VERSION;
+  type_3_desc.cBuffers  = 1;
+  type_3_desc.pBuffers  = &type_3_buf;
+  type_3_buf.BufferType = SECBUFFER_TOKEN;
+  type_3_buf.pvBuffer   = ntlmbuf;
+  type_3_buf.cbBuffer   = NTLM_BUFSIZE;
 
+  /* Generate our type-3 message */
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle,
                                                &ntlm->c_handle,
                                                (TCHAR *) TEXT(""),
@@ -640,7 +649,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   if(status != SEC_E_OK)
     return CURLE_RECV_ERROR;
 
-  size = type_3.cbBuffer;
+  size = type_3_buf.cbBuffer;
 
   Curl_ntlm_sspi_cleanup(ntlm);
 
