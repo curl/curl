@@ -27,6 +27,7 @@ REPLY  235 Authenticated
 smtp
 </server>
 <features>
+!SSPI
 debug
 crypto
 </features>

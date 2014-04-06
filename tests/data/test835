@@ -38,6 +38,7 @@ body
 imap
 </server>
 <features>
+!SSPI
 debug
 crypto
 </features>

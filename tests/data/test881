@@ -40,6 +40,7 @@ body
 pop3
 </server>
 <features>
+!SSPI
 debug
 crypto
 </features>

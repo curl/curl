@@ -27,6 +27,7 @@ REPLY * 501 AUTH exchange cancelled by client
 smtp
 </server>
 <features>
+!SSPI
 debug
 crypto
 </features>

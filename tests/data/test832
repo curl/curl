@@ -27,6 +27,7 @@ REPLY * A002 NO AUTH exchange cancelled by client
 imap
 </server>
 <features>
+!SSPI
 debug
 crypto
 </features>

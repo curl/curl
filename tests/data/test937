@@ -30,6 +30,7 @@ REPLY dXNlcgB1c2VyAHNlY3JldA== 235 Authenticated
 smtp
 </server>
 <features>
+!SSPI
 debug
 crypto
 </features>

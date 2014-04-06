@@ -28,6 +28,7 @@ REPLY * -ERR AUTH exchange cancelled by client
 pop3
 </server>
 <features>
+!SSPI
 debug
 crypto
 </features>
