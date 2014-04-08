@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -38,6 +38,10 @@ VC8LIBPRJ = vs/vc8/lib/vc8libcurl.vcproj
 VC8LIBPRJHEAD = vs/t/lib/vc8_libcurl_prj.head
 VC8LIBPRJFOOT = vs/t/lib/vc8_libcurl_prj.foot
 
+VCPROJECTS = projects/README projects/Windows/VC8/lib/libcurl.sln	    \
+ projects/Windows/VC8/lib/libcurl.tmpl projects/Windows/VC8/curl.sln	    \
+ projects/Windows/VC8/src/curlsrc.tmpl projects/Windows/VC8/src/curlsrc.sln
+
 VC_DIST = \
  vs/t/README \
  $(VC6LIBDSP) $(VC6LIBDSPHEAD) $(VC6LIBDSPFOOT) \
@@ -45,7 +49,7 @@ VC_DIST = \
  vs/vc6/vc6curl.dsw \
  vs/vc6/lib/vc6libcurl.dsw \
  vs/vc6/src/vc6curltool.dsw \
- vs/vc6/src/vc6curltool.dsp
+ vs/vc6/src/vc6curltool.dsp $(VCPROJECTS)
 
 VC6LIBDSP_DEPS = $(VC6LIBDSPHEAD) $(VC6LIBDSPFOOT) \
  Makefile.am lib/Makefile.inc
