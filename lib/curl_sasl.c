@@ -40,6 +40,8 @@
 #include "curl_sasl.h"
 #include "warnless.h"
 #include "curl_memory.h"
+#include "strtok.h"
+#include "rawstr.h"
 
 #ifdef USE_NSS
 #include "vtls/nssg.h" /* for Curl_nss_force_init() */
@@ -52,6 +54,14 @@
 #include "memdebug.h"
 
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_WINDOWS_SSPI)
+#define DIGEST_QOP_VALUE_AUTH             (1 << 0)
+#define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
+#define DIGEST_QOP_VALUE_AUTH_CONF        (1 << 2)
+
+#define DIGEST_QOP_VALUE_STRING_AUTH      "auth"
+#define DIGEST_QOP_VALUE_STRING_AUTH_INT  "auth-int"
+#define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
+
 /* Retrieves the value for a corresponding key from the challenge string
  * returns TRUE if the key could be found, FALSE if it does not exists
  */
@@ -75,6 +85,38 @@ static bool sasl_digest_get_key_value(const char *chlg,
   value[i] = '\0';
 
   return TRUE;
+}
+
+static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
+{
+  char *tmp;
+  char *token;
+  char *tok_buf;
+
+  /* Initialise the output */
+  *value = 0;
+
+  /* Tokenise the list of qop values. Use a temporary clone of the buffer since
+     strtok_r() ruins it. */
+  tmp = strdup(options);
+  if(!tmp)
+    return CURLE_OUT_OF_MEMORY;
+
+  token = strtok_r(tmp, ",", &tok_buf);
+  while(token != NULL) {
+    if(Curl_raw_equal(token, DIGEST_QOP_VALUE_STRING_AUTH))
+      *value |= DIGEST_QOP_VALUE_AUTH;
+    else if(Curl_raw_equal(token, DIGEST_QOP_VALUE_STRING_AUTH_INT))
+      *value |= DIGEST_QOP_VALUE_AUTH_INT;
+    else if(Curl_raw_equal(token, DIGEST_QOP_VALUE_STRING_AUTH_CONF))
+      *value |= DIGEST_QOP_VALUE_AUTH_CONF;
+
+    token = strtok_r(NULL, ",", &tok_buf);
+  }
+
+  Curl_safefree(tmp);
+
+  return CURLE_OK;
 }
 #endif
 
@@ -279,13 +321,16 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
  * rlen    [in]     - The length of the realm buffer.
  * alg     [in/out] - The buffer where the algorithm will be stored.
  * alen    [in]     - The length of the algorithm buffer.
+ * qop     [in/out] - The buffer where the qop-options will be stored.
+ * qlen    [in]     - The length of the qop buffer.
  *
  * Returns CURLE_OK on success.
  */
 static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
                                                char *nonce, size_t nlen,
                                                char *realm, size_t rlen,
-                                               char *alg, size_t alen)
+                                               char *alg, size_t alen,
+                                               char *qop, size_t qlen)
 {
   CURLcode result = CURLE_OK;
   unsigned char *chlg = NULL;
@@ -317,6 +362,12 @@ static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
 
   /* Retrieve algorithm string from the challenge */
   if(!sasl_digest_get_key_value((char *)chlg, "algorithm=", alg, alen, ',')) {
+    Curl_safefree(chlg);
+    return CURLE_BAD_CONTENT_ENCODING;
+  }
+
+  /* Retrieve qop-options string from the challenge */
+  if(!sasl_digest_get_key_value((char *)chlg, "qop=\"", qop, qlen, '\"')) {
     Curl_safefree(chlg);
     return CURLE_BAD_CONTENT_ENCODING;
   }
@@ -367,22 +418,35 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char nonce[64];
   char realm[128];
   char algorithm[64];
+  char qop_options[64];
+  int qop_values;
+
   char nonceCount[] = "00000001";
   char cnonce[]     = "12345678"; /* will be changed */
   char method[]     = "AUTHENTICATE";
-  char qop[]        = "auth";
+  char qop[]        = DIGEST_QOP_VALUE_STRING_AUTH;
   char uri[128];
 
   /* Decode the challange message */
   result = sasl_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
                                           realm, sizeof(realm),
-                                          algorithm, sizeof(algorithm));
+                                          algorithm, sizeof(algorithm),
+                                          qop_options, sizeof(qop_options));
   if(result)
     return result;
 
   /* We only support md5 sessions */
   if(strcmp(algorithm, "md5-sess") != 0)
-     return CURLE_BAD_CONTENT_ENCODING;
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  /* Get the qop-values from the qop-options */
+  result = sasl_digest_get_qop_values(qop_options, &qop_values);
+  if(result)
+    return result;
+
+  /* We only support auth quality-of-protection */
+  if(!(qop_values & DIGEST_QOP_VALUE_AUTH))
+    return CURLE_BAD_CONTENT_ENCODING;
 
 #ifndef DEBUGBUILD
   /* Generate 64 bits of random data */
