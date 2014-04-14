@@ -3995,7 +3995,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
       }
       else {
         /* Zone identifier is not numeric */
-#ifdef HAVE_NET_IF_H
+#if defined(HAVE_NET_IF_H) && defined(IFNAMSIZ)
         char ifname[IFNAMSIZ + 2];
         char *square_bracket;
         unsigned int scopeidx = 0;
@@ -4019,12 +4019,9 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
                   identifier_offset + strlen(ifname));
           conn->scope = scopeidx;
         }
-        else {
-#endif /* HAVE_NET_IF_H */
+        else
+#endif /* HAVE_NET_IF_H && IFNAMSIZ */
           infof(data, "Invalid IPv6 address format\n");
-#ifdef HAVE_NET_IF_H
-        }
-#endif /* HAVE_NET_IF_H */
       }
     }
   }
