@@ -404,6 +404,8 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* Point to the multi's connection cache */
   data->state.conn_cache = multi->conn_cache;
 
+  data->state.infilesize = data->set.filesize;
+
   /* This adds the new entry at the 'end' of the doubly-linked circular
      list of SessionHandle structs to try and maintain a FIFO queue so
      the pipelined requests are in order. */

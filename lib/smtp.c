@@ -583,8 +583,8 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
   }
 
   /* Calculate the optional SIZE parameter */
-  if(conn->proto.smtpc.size_supported && conn->data->set.infilesize > 0) {
-    size = aprintf("%" CURL_FORMAT_CURL_OFF_T, data->set.infilesize);
+  if(conn->proto.smtpc.size_supported && conn->data->state.infilesize > 0) {
+    size = aprintf("%" CURL_FORMAT_CURL_OFF_T, data->state.infilesize);
 
     if(!size) {
       Curl_safefree(from);
@@ -1356,7 +1356,7 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
   }
   else {
     /* Set the progress upload size */
-    Curl_pgrsSetUploadSize(data, data->set.infilesize);
+    Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* SMTP upload */
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
@@ -1659,7 +1659,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
        is "no mail data". RFC-5321, sect. 4.1.1.4. */
     eob = SMTP_EOB;
     len = SMTP_EOB_LEN;
-    if(smtp->trailing_crlf || !conn->data->set.infilesize) {
+    if(smtp->trailing_crlf || !conn->data->state.infilesize) {
       eob += 2;
       len -= 2;
     }

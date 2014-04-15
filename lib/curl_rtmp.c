@@ -5,6 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010, Howard Chu, <hyc@highlandsun.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -240,7 +241,7 @@ static CURLcode rtmp_do(struct connectdata *conn, bool *done)
     return CURLE_FAILED_INIT;
 
   if(conn->data->set.upload) {
-    Curl_pgrsSetUploadSize(conn->data, conn->data->set.infilesize);
+    Curl_pgrsSetUploadSize(conn->data, conn->data->state.infilesize);
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
   }
   else

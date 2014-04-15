@@ -485,7 +485,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->convtonetwork   = ZERO_NULL;
   set->convfromutf8    = ZERO_NULL;
 
-  set->infilesize = -1;      /* we don't know any size */
+  set->filesize = -1;        /* we don't know the size */
   set->postfieldsize = -1;   /* unknown size */
   set->maxredirs = -1;       /* allow any amount by default */
 
@@ -1491,14 +1491,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * If known, this should inform curl about the file size of the
      * to-be-uploaded file.
      */
-    data->set.infilesize = va_arg(param, long);
+    data->set.filesize = va_arg(param, long);
     break;
   case CURLOPT_INFILESIZE_LARGE:
     /*
      * If known, this should inform curl about the file size of the
      * to-be-uploaded file.
      */
-    data->set.infilesize = va_arg(param, curl_off_t);
+    data->set.filesize = va_arg(param, curl_off_t);
     break;
   case CURLOPT_LOW_SPEED_LIMIT:
     /*
@@ -4100,16 +4100,17 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
 {
   const struct Curl_handler * p;
   CURLcode result;
+  struct SessionHandle *data = conn->data;
 
   /* in some case in the multi state-machine, we go back to the CONNECT state
      and then a second (or third or...) call to this function will be made
      without doing a DISCONNECT or DONE in between (since the connection is
      yet in place) and therefore this function needs to first make sure
      there's no lingering previous data allocated. */
-  Curl_free_request_state(conn->data);
+  Curl_free_request_state(data);
 
-  memset(&conn->data->req, 0, sizeof(struct SingleRequest));
-  conn->data->req.maxdownload = -1;
+  memset(&data->req, 0, sizeof(struct SingleRequest));
+  data->req.maxdownload = -1;
 
   conn->socktype = SOCK_STREAM; /* most of them are TCP streams */
 

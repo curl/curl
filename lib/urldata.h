@@ -1306,6 +1306,8 @@ struct UrlState {
 
   /* if true, force SSL connection retry (workaround for certain servers) */
   bool ssl_connect_retry;
+  curl_off_t infilesize; /* size of file to upload, -1 means unknown.
+                            Copied from set.filesize at start of operation */
 };
 
 
@@ -1467,7 +1469,7 @@ struct UserDefined {
   long accepttimeout;   /* in milliseconds, 0 means no timeout */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
   long tftp_blksize ; /* in bytes, 0 means use default */
-  curl_off_t infilesize;      /* size of file to upload, -1 means unknown */
+  curl_off_t filesize;  /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
   curl_off_t max_send_speed; /* high speed limit in bytes/second for upload */

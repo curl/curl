@@ -493,7 +493,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
      rtspreq == RTSPREQ_GET_PARAMETER) {
 
     if(data->set.upload) {
-      putsize = data->set.infilesize;
+      putsize = data->state.infilesize;
       data->set.httpreq = HTTPREQ_PUT;
 
     }

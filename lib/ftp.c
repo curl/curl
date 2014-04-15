@@ -507,7 +507,7 @@ static CURLcode InitiateTransfer(struct connectdata *conn)
     /* When we know we're uploading a specified file, we can get the file
        size prior to the actual upload. */
 
-    Curl_pgrsSetUploadSize(data, data->set.infilesize);
+    Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* set the SO_SNDBUF for the secondary socket for those who need it */
     Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
@@ -1683,10 +1683,10 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
       }
     }
     /* now, decrease the size of the read */
-    if(data->set.infilesize>0) {
-      data->set.infilesize -= data->state.resume_from;
+    if(data->state.infilesize>0) {
+      data->state.infilesize -= data->state.resume_from;
 
-      if(data->set.infilesize <= 0) {
+      if(data->state.infilesize <= 0) {
         infof(data, "File already completely uploaded\n");
 
         /* no data to transfer */
@@ -3382,13 +3382,13 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
        use checking further */
     ;
   else if(data->set.upload) {
-    if((-1 != data->set.infilesize) &&
-       (data->set.infilesize != *ftp->bytecountp) &&
+    if((-1 != data->state.infilesize) &&
+       (data->state.infilesize != *ftp->bytecountp) &&
        !data->set.crlf &&
        (ftp->transfer == FTPTRANSFER_BODY)) {
       failf(data, "Uploaded unaligned file size (%" CURL_FORMAT_CURL_OFF_T
             " out of %" CURL_FORMAT_CURL_OFF_T " bytes)",
-            *ftp->bytecountp, data->set.infilesize);
+            *ftp->bytecountp, data->state.infilesize);
       result = CURLE_PARTIAL_FILE;
     }
   }

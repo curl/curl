@@ -405,8 +405,8 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
         expectsend = (curl_off_t)strlen(data->set.postfields);
       break;
     case HTTPREQ_PUT:
-      if(data->set.infilesize != -1)
-        expectsend = data->set.infilesize;
+      if(data->state.infilesize != -1)
+        expectsend = data->state.infilesize;
       break;
     case HTTPREQ_POST_FORM:
       expectsend = http->postsize;
@@ -1885,7 +1885,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     else {
       if((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
          data->set.upload &&
-         (data->set.infilesize == -1)) {
+         (data->state.infilesize == -1)) {
         if(conn->bits.authneg)
           /* don't enable chunked during auth neg */
           ;
@@ -2123,10 +2123,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       }
 
       /* now, decrease the size of the read */
-      if(data->set.infilesize>0) {
-        data->set.infilesize -= data->state.resume_from;
+      if(data->state.infilesize>0) {
+        data->state.infilesize -= data->state.resume_from;
 
-        if(data->set.infilesize <= 0) {
+        if(data->state.infilesize <= 0) {
           failf(data, "File already completely uploaded");
           return CURLE_PARTIAL_FILE;
         }
@@ -2162,13 +2162,13 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         conn->allocptr.rangeline =
           aprintf("Content-Range: bytes 0-%" CURL_FORMAT_CURL_OFF_T
                   "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
-                  data->set.infilesize - 1, data->set.infilesize);
+                  data->state.infilesize - 1, data->state.infilesize);
 
       }
       else if(data->state.resume_from) {
         /* This is because "resume" was selected */
         curl_off_t total_expected_size=
-          data->state.resume_from + data->set.infilesize;
+          data->state.resume_from + data->state.infilesize;
         conn->allocptr.rangeline =
           aprintf("Content-Range: bytes %s%" CURL_FORMAT_CURL_OFF_T
                   "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
@@ -2180,7 +2180,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
            append total size */
         conn->allocptr.rangeline =
           aprintf("Content-Range: bytes %s/%" CURL_FORMAT_CURL_OFF_T "\r\n",
-                  data->state.range, data->set.infilesize);
+                  data->state.range, data->state.infilesize);
       }
       if(!conn->allocptr.rangeline)
         return CURLE_OUT_OF_MEMORY;
@@ -2455,7 +2455,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(conn->bits.authneg)
       postsize = 0;
     else
-      postsize = data->set.infilesize;
+      postsize = data->state.infilesize;
 
     if((postsize != -1) && !data->req.upload_chunky &&
        !Curl_checkheaders(conn, "Content-Length:")) {

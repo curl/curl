@@ -926,7 +926,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
             if(!data->set.crlf) {
               /* we're here only because FTP is in ASCII mode...
                  bump infilesize for the LF we just added */
-              data->set.infilesize++;
+              data->state.infilesize++;
             }
           }
           else
@@ -967,7 +967,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
 
     k->writebytecount += bytes_written;
 
-    if(k->writebytecount == data->set.infilesize) {
+    if(k->writebytecount == data->state.infilesize) {
       /* we have sent all data we were supposed to */
       k->upload_done = TRUE;
       infof(data, "We are completely uploaded and fine\n");

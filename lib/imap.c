@@ -775,7 +775,7 @@ static CURLcode imap_perform_append(struct connectdata *conn)
   }
 
   /* Check we know the size of the upload */
-  if(conn->data->set.infilesize < 0) {
+  if(conn->data->state.infilesize < 0) {
     failf(conn->data, "Cannot APPEND with unknown input file size\n");
     return CURLE_UPLOAD_FAILED;
   }
@@ -787,7 +787,7 @@ static CURLcode imap_perform_append(struct connectdata *conn)
 
   /* Send the APPEND command */
   result = imap_sendf(conn, "APPEND %s (\\Seen) {%" CURL_FORMAT_CURL_OFF_T "}",
-                      mailbox, conn->data->set.infilesize);
+                      mailbox, conn->data->state.infilesize);
 
   Curl_safefree(mailbox);
 
@@ -1618,7 +1618,7 @@ static CURLcode imap_state_append_resp(struct connectdata *conn, int imapcode,
   }
   else {
     /* Set the progress upload size */
-    Curl_pgrsSetUploadSize(data, data->set.infilesize);
+    Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* IMAP upload */
     Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);

@@ -1717,17 +1717,17 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
 
         /* now, decrease the size of the read */
-        if(data->set.infilesize > 0) {
-          data->set.infilesize -= data->state.resume_from;
-          data->req.size = data->set.infilesize;
-          Curl_pgrsSetUploadSize(data, data->set.infilesize);
+        if(data->state.infilesize > 0) {
+          data->state.infilesize -= data->state.resume_from;
+          data->req.size = data->state.infilesize;
+          Curl_pgrsSetUploadSize(data, data->state.infilesize);
         }
 
         SFTP_SEEK(sshc->sftp_handle, data->state.resume_from);
       }
-      if(data->set.infilesize > 0) {
-        data->req.size = data->set.infilesize;
-        Curl_pgrsSetUploadSize(data, data->set.infilesize);
+      if(data->state.infilesize > 0) {
+        data->req.size = data->state.infilesize;
+        Curl_pgrsSetUploadSize(data, data->state.infilesize);
       }
       /* upload data */
       Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
@@ -2256,7 +2256,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
 
       if(data->set.upload) {
-        if(data->set.infilesize < 0) {
+        if(data->state.infilesize < 0) {
           failf(data, "SCP requires a known file size for upload");
           sshc->actualcode = CURLE_UPLOAD_FAILED;
           state(conn, SSH_SCP_CHANNEL_FREE);
@@ -2278,7 +2278,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        */
       sshc->ssh_channel =
         SCP_SEND(sshc->ssh_session, sftp_scp->path, data->set.new_file_perms,
-                 data->set.infilesize);
+                 data->state.infilesize);
       if(!sshc->ssh_channel) {
         if(libssh2_session_last_errno(sshc->ssh_session) ==
            LIBSSH2_ERROR_EAGAIN) {

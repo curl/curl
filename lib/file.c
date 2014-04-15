@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -336,9 +336,9 @@ static CURLcode file_upload(struct connectdata *conn)
     return CURLE_WRITE_ERROR;
   }
 
-  if(-1 != data->set.infilesize)
+  if(-1 != data->state.infilesize)
     /* known size of data to "upload" */
-    Curl_pgrsSetUploadSize(data, data->set.infilesize);
+    Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
   /* treat the negative resume offset value as the case of "-" */
   if(data->state.resume_from < 0) {
