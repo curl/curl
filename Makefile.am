@@ -43,7 +43,7 @@ VCPROJECTS = projects/README projects/Windows/VC8/lib/libcurl.sln	    \
  projects/Windows/VC8/src/curlsrc.tmpl projects/Windows/VC8/src/curlsrc.sln	\
  projects/Windows/VC9/curl.sln	\
  projects/Windows/VC9/lib/libcurl.sln projects/Windows/VC9/lib/libcurl.tmpl	\
- projects/Windows/VC9/src/curlsrc.sln projects/Windows/VC9/src/curlsrc.tmpl
+ projects/Windows/VC9/src/curlsrc.sln projects/Windows/VC9/src/curlsrc.tmpl	\
  projects/Windows/VC10/curl.sln	\
  projects/Windows/VC10/lib/libcurl.sln projects/Windows/VC10/lib/libcurl.tmpl	\
  projects/Windows/VC10/src/curlsrc.sln projects/Windows/VC10/src/curlsrc.tmpl
