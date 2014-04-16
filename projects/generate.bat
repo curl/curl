@@ -20,71 +20,120 @@ rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
 rem *
 rem ***************************************************************************
+setlocal ENABLEDELAYEDEXPANSION
 
 rem Generate VC8 project files
-call :generate Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
-call :generate Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
+call :generate vc8 Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
+call :generate vc8 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
+
+rem Generate VC9 project files
+call :generate vc9 Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
+call :generate vc9 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
+
+rem Generate VC10 project files
+call :generate vc10 Windows\VC10\src\curlsrc.tmpl Windows\VC10\src\curlsrc.vcxproj
+call :generate vc10 Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
 
 goto exit
 
 rem Main generate function.
 rem
-rem %1 - Input template file
-rem %2 - Output project file
+rem %1 - IDE
+rem %2 - Input template file
+rem %3 - Output project file
 rem
 :generate
   echo.
 
-  if not exist %1 (
-    echo Error: Cannot open %CD%\%1
+  if not exist %2 (
+    echo Error: Cannot open %CD%\%2
     exit /B
   )
 
-  if exist %2 (  
-    echo Deleting %2
-    del %2
+  if exist %3 (  
+    echo Deleting %3
+    del %3
   )
 
-  echo Generating %2
-  for /f "delims=" %%i in (%1) do (
+  echo Generating %3
+  for /f "delims=" %%i in (%2) do (
     if "%%i" == "CURL_SRC_C_FILES" (
-      for /f %%c in ('dir /b ..\src\*.c') do call :element src %%c %2
+      for /f %%c in ('dir /b ..\src\*.c') do call :element %1 src %%c %3
     ) else if "%%i" == "CURL_SRC_H_FILES" (
-      for /f %%h in ('dir /b ..\src\*.h') do call :element src %%h %2
+      for /f %%h in ('dir /b ..\src\*.h') do call :element %1 src %%h %3
     ) else if "%%i" == "CURL_SRC_RC_FILES" (
-      for /f %%r in ('dir /b ..\src\*.rc') do call :element src %%r %2
+      for /f %%r in ('dir /b ..\src\*.rc') do call :element %1 src %%r %3
     ) else if "%%i" == "CURL_LIB_C_FILES" (
-      for /f %%c in ('dir /b ..\lib\*.c') do call :element lib %%c %2
+      for /f %%c in ('dir /b ..\lib\*.c') do call :element %1 lib %%c %3
     ) else if "%%i" == "CURL_LIB_H_FILES" (
-      for /f %%h in ('dir /b ..\lib\*.h') do call :element lib %%h %2
+      for /f %%h in ('dir /b ..\lib\*.h') do call :element %1 lib %%h %3
     ) else if "%%i" == "CURL_LIB_RC_FILES" (
-      for /f %%r in ('dir /b ..\lib\*.rc') do call :element lib %%r %2
+      for /f %%r in ('dir /b ..\lib\*.rc') do call :element %1 lib %%r %3
     ) else if "%%i" == "CURL_LIB_VTLS_C_FILES" (
-      for /f %%c in ('dir /b ..\lib\vtls\*.c') do call :element lib\vtls %%c %2
+      for /f %%c in ('dir /b ..\lib\vtls\*.c') do call :element %1 lib\vtls %%c %3
     ) else if "%%i" == "CURL_LIB_VTLS_H_FILES" (
-      for /f %%h in ('dir /b ..\lib\vtls\*.h') do call :element lib\vtls %%h %2
+      for /f %%h in ('dir /b ..\lib\vtls\*.h') do call :element %1 lib\vtls %%h %3
     ) else (
-      echo %%i>> %2
+      echo %%i>> %3
     )
   )
   exit /B
 
 rem Generates a single file xml element.
 rem
-rem %1 - Directory (eg src, lib or lib\vtls)
-rem %2 - Source filename
-rem %3 - Output project file
+rem %1 - IDE
+rem %2 - Directory (eg src, lib or lib\vtls)
+rem %3 - Source filename
+rem %4 - Output project file
 rem
 :element
-  if "%1" == "lib\vtls" (
+  set "SPACES=    "
+  if "%2" == "lib\vtls" (
     set "TABS=        "
   ) else (
     set "TABS=      "
   )
-  echo %TABS%^<File>> %3
-  echo %TABS%  RelativePath="..\..\..\..\%1\%2">> %3
-  echo %TABS%^>>> %3
-  echo %TABS%^</File^>>> %3
+
+  call :extension %3 ext
+
+  if "%1" == "vc10" (
+    if "%ext%" == "c" (
+      echo %SPACES%^<ClCompile Include=^"..\..\..\..\%2\%3^" /^>>> %4
+    ) else if "%ext%" == "h" (
+      echo %SPACES%^<ClInclude Include=^"..\..\..\..\%2\%3^" /^>>> %4
+    ) else if "%ext%" == "rc" (
+      echo %SPACES%^<ResourceCompile Include=^"..\..\..\..\%2\%3^" /^>>> %4
+    )
+  ) else (
+    echo %TABS%^<File>> %4
+    echo %TABS%  RelativePath="..\..\..\..\%2\%3">> %4
+    echo %TABS%^>>> %4
+    echo %TABS%^</File^>>> %4
+  )
+
+  exit /B
+
+rem Returns the extension for a given filename.
+rem
+rem %1 - The filename
+rem %2 - The return value
+rem
+:extension
+  set fname=%1
+  set ename=
+:loop1
+  if "%fname%"=="" (
+    set %2=
+    exit /B
+  )
+
+  if not "%fname:~-1%"=="." (
+    set ename=%fname:~-1%%ename%
+    set fname=%fname:~0,-1%
+    goto loop1
+  )
+
+  set %2=%ename%
   exit /B
 
 :exit
