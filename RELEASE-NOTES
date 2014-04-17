@@ -16,6 +16,7 @@ This release includes the following changes:
  o sasl: Added DIGEST-MD5 qop-option validation in native challange handling
  o imap: Expanded mailbox SEARCH support to use URL query strings [7]
  o imap: Extended FETCH support to include PARTIAL URL specifier [7]
+ o nss: implement non-blocking SSL handshake
  o 
 
 This release includes the following bugfixes:

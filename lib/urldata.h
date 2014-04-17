@@ -318,6 +318,7 @@ struct ssl_connect_data {
   struct SessionHandle *data;
   struct curl_llist *obj_list;
   PK11GenericObject *obj_clicert;
+  ssl_connect_state connecting_state;
 #endif /* USE_NSS */
 #ifdef USE_QSOSSL
   SSLHandle *handle;

@@ -1611,7 +1611,10 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
   /* Force the handshake now */
   timeout = PR_MillisecondsToInterval((PRUint32) time_left);
   if(SSL_ForceHandshakeWithTimeout(connssl->handle, timeout) != SECSuccess) {
-    if(conn->data->set.ssl.certverifyresult == SSL_ERROR_BAD_CERT_DOMAIN)
+    if(PR_GetError() == PR_WOULD_BLOCK_ERROR)
+      /* TODO: propagate the blocking direction from the NSPR layer */
+      return CURLE_AGAIN;
+    else if(conn->data->set.ssl.certverifyresult == SSL_ERROR_BAD_CERT_DOMAIN)
       curlerr = CURLE_PEER_FAILED_VERIFICATION;
     else if(conn->data->set.ssl.certverifyresult!=0)
       curlerr = CURLE_SSL_CACERT;
@@ -1649,30 +1652,66 @@ error:
   return nss_fail_connect(connssl, data, curlerr);
 }
 
-CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
+static CURLcode nss_connect_common(struct connectdata *conn, int sockindex,
+                                   bool *done)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct SessionHandle *data = conn->data;
+  const bool blocking = (done == NULL);
   CURLcode rv;
 
-  rv = nss_setup_connect(conn, sockindex);
-  if(rv)
-    return rv;
+  if(connssl->connecting_state == ssl_connect_1) {
+    rv = nss_setup_connect(conn, sockindex);
+    if(rv)
+      /* we do not expect CURLE_AGAIN from nss_setup_connect() */
+      return rv;
+
+    if(!blocking) {
+      /* in non-blocking mode, set NSS non-blocking mode before handshake */
+      rv = nss_set_nonblock(connssl, data);
+      if(rv)
+        return rv;
+    }
+
+    connssl->connecting_state = ssl_connect_2;
+  }
 
   rv = nss_do_connect(conn, sockindex);
   switch(rv) {
   case CURLE_OK:
     break;
+  case CURLE_AGAIN:
+    if(!blocking)
+      /* CURLE_AGAIN in non-blocking mode is not an error */
+      return CURLE_OK;
+    /* fall through */
   default:
     return rv;
   }
 
-  /* switch the SSL socket into non-blocking mode */
-  rv = nss_set_nonblock(connssl, data);
-  if(rv)
-    return rv;
+  if(blocking) {
+    /* in blocking mode, set NSS non-blocking mode _after_ SSL handshake */
+    rv = nss_set_nonblock(connssl, data);
+    if(rv)
+      return rv;
+  }
+  else
+    /* signal completed SSL handshake */
+    *done = TRUE;
 
+  connssl->connecting_state = ssl_connect_done;
   return CURLE_OK;
+}
+
+CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
+{
+  return nss_connect_common(conn, sockindex, /* blocking */ NULL);
+}
+
+CURLcode Curl_nss_connect_nonblocking(struct connectdata *conn,
+                                      int sockindex, bool *done)
+{
+  return nss_connect_common(conn, sockindex, done);
 }
 
 static ssize_t nss_send(struct connectdata *conn,  /* connection data */

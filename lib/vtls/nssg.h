@@ -68,6 +68,7 @@ void Curl_nss_md5sum(unsigned char *tmp, /* input */
 #define curlssl_init Curl_nss_init
 #define curlssl_cleanup Curl_nss_cleanup
 #define curlssl_connect Curl_nss_connect
+#define curlssl_connect_nonblocking Curl_nss_connect_nonblocking
 
 /* NSS has its own session ID cache */
 #define curlssl_session_free(x) Curl_nop_stmt
