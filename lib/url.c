@@ -3682,14 +3682,30 @@ static CURLcode findprotocol(struct SessionHandle *data,
 {
   const struct Curl_handler * const *pp;
   const struct Curl_handler *p;
+  unsigned int real_proto;
 
   /* Scan protocol handler table and match against 'protostr' to set a few
      variables based on the URL. Now that the handler may be changed later
      when the protocol specific setup function is called. */
   for(pp = protocols; (p = *pp) != NULL; pp++) {
     if(Curl_raw_equal(p->scheme, protostr)) {
+      if(p->protocol & CURLPROTO_LDAPS)
+        real_proto = CURLPROTO_LDAPS;
+      else if(p->protocol & CURLPROTO_SMTPS)
+        real_proto = CURLPROTO_SMTPS;
+      else if(p->protocol & CURLPROTO_POP3S)
+        real_proto = CURLPROTO_POP3S;
+      else if(p->protocol & CURLPROTO_IMAPS)
+        real_proto = CURLPROTO_IMAPS;
+      else if(p->protocol & CURLPROTO_FTPS)
+        real_proto = CURLPROTO_FTPS;
+      else if(p->protocol & CURLPROTO_HTTPS)
+        real_proto = CURLPROTO_HTTPS;
+      else
+        real_proto = p->protocol;
+
       /* Protocol found in table. Check if allowed */
-      if(!(data->set.allowed_protocols & p->protocol))
+      if(!(data->set.allowed_protocols & real_proto))
         /* nope, get out */
         break;
 
