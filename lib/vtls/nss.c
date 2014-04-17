@@ -1296,9 +1296,62 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
   return CURLE_SSL_CONNECT_ERROR;
 }
 
-CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
+static CURLcode nss_fail_connect(struct ssl_connect_data *connssl,
+                                 struct SessionHandle *data,
+                                 CURLcode curlerr)
 {
+  SSLVersionRange sslver;
   PRErrorCode err = 0;
+
+  /* reset the flag to avoid an infinite loop */
+  data->state.ssl_connect_retry = FALSE;
+
+  if(is_nss_error(curlerr)) {
+    /* read NSPR error code */
+    err = PR_GetError();
+    if(is_cc_error(err))
+      curlerr = CURLE_SSL_CERTPROBLEM;
+
+    /* print the error number and error string */
+    infof(data, "NSS error %d (%s)\n", err, nss_error_to_name(err));
+
+    /* print a human-readable message describing the error if available */
+    nss_print_error_message(data, err);
+  }
+
+  /* cleanup on connection failure */
+  Curl_llist_destroy(connssl->obj_list, NULL);
+  connssl->obj_list = NULL;
+
+  if((SSL_VersionRangeGet(connssl->handle, &sslver) == SECSuccess)
+      && (sslver.min == SSL_LIBRARY_VERSION_3_0)
+      && (sslver.max == SSL_LIBRARY_VERSION_TLS_1_0)
+      && isTLSIntoleranceError(err)) {
+    /* schedule reconnect through Curl_retry_request() */
+    data->state.ssl_connect_retry = TRUE;
+    infof(data, "Error in TLS handshake, trying SSLv3...\n");
+    return CURLE_OK;
+  }
+
+  return curlerr;
+}
+
+/* Switch the SSL socket into non-blocking mode. */
+static CURLcode nss_set_nonblock(struct ssl_connect_data *connssl,
+                                 struct SessionHandle *data)
+{
+  static PRSocketOptionData sock_opt;
+  sock_opt.option = PR_SockOpt_Nonblocking;
+  sock_opt.value.non_blocking = PR_TRUE;
+
+  if(PR_SetSocketOption(connssl->handle, &sock_opt) != PR_SUCCESS)
+    return nss_fail_connect(connssl, data, CURLE_SSL_CONNECT_ERROR);
+
+  return CURLE_OK;
+}
+
+static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
+{
   PRFileDesc *model = NULL;
   PRBool ssl_no_cache;
   PRBool ssl_cbc_random_iv;
@@ -1306,9 +1359,6 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode curlerr;
-  PRSocketOptionData sock_opt;
-  long time_left;
-  PRUint32 timeout;
 
   SSLVersionRange sslver = {
     SSL_LIBRARY_VERSION_3_0,      /* min */
@@ -1534,16 +1584,32 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   SSL_SetURL(connssl->handle, conn->host.name);
 
+  return CURLE_OK;
+
+error:
+  if(model)
+    PR_Close(model);
+
+  return nss_fail_connect(connssl, data, curlerr);
+}
+
+static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct SessionHandle *data = conn->data;
+  CURLcode curlerr = CURLE_SSL_CONNECT_ERROR;
+  PRUint32 timeout;
+
   /* check timeout situation */
-  time_left = Curl_timeleft(data, NULL, TRUE);
+  const long time_left = Curl_timeleft(data, NULL, TRUE);
   if(time_left < 0L) {
     failf(data, "timed out before SSL handshake");
     curlerr = CURLE_OPERATION_TIMEDOUT;
     goto error;
   }
-  timeout = PR_MillisecondsToInterval((PRUint32) time_left);
 
   /* Force the handshake now */
+  timeout = PR_MillisecondsToInterval((PRUint32) time_left);
   if(SSL_ForceHandshakeWithTimeout(connssl->handle, timeout) != SECSuccess) {
     if(conn->data->set.ssl.certverifyresult == SSL_ERROR_BAD_CERT_DOMAIN)
       curlerr = CURLE_PEER_FAILED_VERIFICATION;
@@ -1551,12 +1617,6 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
       curlerr = CURLE_SSL_CACERT;
     goto error;
   }
-
-  /* switch the SSL socket into non-blocking mode */
-  sock_opt.option = PR_SockOpt_Nonblocking;
-  sock_opt.value.non_blocking = PR_TRUE;
-  if(PR_SetSocketOption(connssl->handle, &sock_opt) != PR_SUCCESS)
-    goto error;
 
   connssl->state = ssl_connection_complete;
   conn->recv[sockindex] = nss_recv;
@@ -1585,40 +1645,34 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   return CURLE_OK;
 
-  error:
-  /* reset the flag to avoid an infinite loop */
-  data->state.ssl_connect_retry = FALSE;
+error:
+  return nss_fail_connect(connssl, data, curlerr);
+}
 
-  if(is_nss_error(curlerr)) {
-    /* read NSPR error code */
-    err = PR_GetError();
-    if(is_cc_error(err))
-      curlerr = CURLE_SSL_CERTPROBLEM;
+CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct SessionHandle *data = conn->data;
+  CURLcode rv;
 
-    /* print the error number and error string */
-    infof(data, "NSS error %d (%s)\n", err, nss_error_to_name(err));
+  rv = nss_setup_connect(conn, sockindex);
+  if(rv)
+    return rv;
 
-    /* print a human-readable message describing the error if available */
-    nss_print_error_message(data, err);
+  rv = nss_do_connect(conn, sockindex);
+  switch(rv) {
+  case CURLE_OK:
+    break;
+  default:
+    return rv;
   }
 
-  if(model)
-    PR_Close(model);
+  /* switch the SSL socket into non-blocking mode */
+  rv = nss_set_nonblock(connssl, data);
+  if(rv)
+    return rv;
 
-  /* cleanup on connection failure */
-  Curl_llist_destroy(connssl->obj_list, NULL);
-  connssl->obj_list = NULL;
-
-  if((sslver.min == SSL_LIBRARY_VERSION_3_0)
-      && (sslver.max == SSL_LIBRARY_VERSION_TLS_1_0)
-      && isTLSIntoleranceError(err)) {
-    /* schedule reconnect through Curl_retry_request() */
-    data->state.ssl_connect_retry = TRUE;
-    infof(data, "Error in TLS handshake, trying SSLv3...\n");
-    return CURLE_OK;
-  }
-
-  return curlerr;
+  return CURLE_OK;
 }
 
 static ssize_t nss_send(struct connectdata *conn,  /* connection data */
