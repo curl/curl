@@ -821,8 +821,9 @@ the user
 
 The path part of an IMAP request not only specifies the mailbox to list (Added
 in 7.30.0) or select, but can also be used to check the UIDVALIDITY of the
-mailbox, to specify the UID and SECTION of the message to fetch (Added in
-7.30.0) and to specify what nessages to search for (Added in 7.37.0).
+mailbox, to specify the UID, SECTION (Added in 7.30.0) and PARTIAL octets
+(Added in 7.37.0) of the message to fetch and to specify what nessages to
+search for (Added in 7.37.0).
 
 imap://user:password@mail.example.com - Performs a top level folder list
 
@@ -837,7 +838,10 @@ the user's inbox, checks the UIDVALIDITY of the mailbox is 50 and fetches
 message 2 if it is
 
 imap://user:password@mail.example.com/INBOX/;UID=3/;SECTION=TEXT - Selects the
-user's inbox and fetches message 3 with only the text portion of the message
+user's inbox and fetches the text portial of message 3
+
+imap://user:password@mail.example.com/INBOX/;UID=4/;PARTIAL=0.1024 - Selects
+the user's inbox and fetches the first 1024 octets of message 4
 
 imap://user:password@mail.example.com/INBOX?NEW - Selects the user's inbox and
 checks for NEW messages
