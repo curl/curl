@@ -68,6 +68,7 @@ struct IMAP {
   char *uidvalidity;      /* UIDVALIDITY to check in select */
   char *uid;              /* Message UID to fetch */
   char *section;          /* Message SECTION to fetch */
+  char *partial;          /* Message PARTIAL to fetch */
   char *query;            /* Query to search for */
   char *custom;           /* Custom request */
   char *custom_params;    /* Parameters for the custom request */

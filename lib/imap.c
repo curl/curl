@@ -740,9 +740,15 @@ static CURLcode imap_perform_fetch(struct connectdata *conn)
   }
 
   /* Send the FETCH command */
-  result = imap_sendf(conn, "FETCH %s BODY[%s]",
-                      imap->uid,
-                      imap->section ? imap->section : "");
+  if(imap->partial)
+    result = imap_sendf(conn, "FETCH %s BODY[%s]<%s>",
+                        imap->uid,
+                        imap->section ? imap->section : "",
+                        imap->partial);
+  else
+    result = imap_sendf(conn, "FETCH %s BODY[%s]",
+                        imap->uid,
+                        imap->section ? imap->section : "");
 
   if(!result)
     state(conn, IMAP_FETCH);
@@ -1963,6 +1969,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
   Curl_safefree(imap->uidvalidity);
   Curl_safefree(imap->uid);
   Curl_safefree(imap->section);
+  Curl_safefree(imap->partial);
   Curl_safefree(imap->query);
   Curl_safefree(imap->custom);
   Curl_safefree(imap->custom_params);
@@ -2506,8 +2513,8 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
 
     DEBUGF(infof(conn->data, "IMAP URL parameter '%s' = '%s'\n", name, value));
 
-    /* Process the known hierarchical parameters (UIDVALIDITY, UID and SECTION)
-       stripping of the trailing slash character if it is present.
+    /* Process the known hierarchical parameters (UIDVALIDITY, UID, SECTION and
+       PARTIAL) stripping of the trailing slash character if it is present.
 
        Note: Unknown parameters trigger a URL_MALFORMAT error. */
     if(Curl_raw_equal(name, "UIDVALIDITY") && !imap->uidvalidity) {
@@ -2529,6 +2536,13 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
         value[valuelen - 1] = '\0';
 
       imap->section = value;
+      value = NULL;
+    }
+    else if(Curl_raw_equal(name, "PARTIAL") && !imap->partial) {
+      if(valuelen > 0 && value[valuelen - 1] == '/')
+        value[valuelen - 1] = '\0';
+
+      imap->partial = value;
       value = NULL;
     }
     else {
