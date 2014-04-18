@@ -150,8 +150,8 @@ int formparse(struct OperationConfig *config,
      build a linked list with the info */
   char name[256];
   char *contents = NULL;
-  char type_major[128];
-  char type_minor[128];
+  char type_major[128] = "";
+  char type_minor[128] = "";
   char *contp;
   const char *type = NULL;
   char *sep;
