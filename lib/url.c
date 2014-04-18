@@ -5245,7 +5245,7 @@ static CURLcode create_conn(struct SessionHandle *data,
 
   /*************************************************************
    * If the protocol can't handle url query strings, then cut
-   * of the unhandable part
+   * off the unhandable part
    *************************************************************/
   if((conn->given->flags&PROTOPT_NOURLQUERY)) {
     char *path_q_sep = strchr(conn->data->state.path, '?');
