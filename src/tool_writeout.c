@@ -103,7 +103,7 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
 {
   FILE *stream = stdout;
   const char *ptr = writeinfo;
-  char *stringp;
+  char *stringp = NULL;
   long longinfo;
   double doubleinfo;
 
