@@ -3733,7 +3733,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   char *query;
   int rc;
   char protobuf[16];
-  const char *protop;
+  const char *protop = "";
   CURLcode result;
   bool rebuild_url = FALSE;
 
