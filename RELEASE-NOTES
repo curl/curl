@@ -13,6 +13,9 @@ This release includes the following changes:
  o CURLOPT_HEADEROPT: added
  o curl: add --proxy-header
  o sasl: Added support for DIGEST-MD5 via Windows SSPI
+ o sasl: Added DIGEST-MD5 qop-option validation in native challange handling
+ o imap: Expanded mailbox SEARCH support to use URL query strings [7]
+ o imap: Extended FETCH support to include PARTIAL URL specifier [7]
  o 
 
 This release includes the following bugfixes:
@@ -31,6 +34,9 @@ This release includes the following bugfixes:
  o HTTP: don't send Content-Length: 0 _and_ Expect: 100-continue [4]
  o http2: Compile with current nghttp2, which supports h2-11 [5]
  o http_negotiate_sspi: Fixed compilation when USE_HTTP_NEGOTIATE not defined
+ o strerror: fix comment about vxworks' strerror_r buffer size [6]
+ o url: only use if_nametoindex() if IFNAMSIZ is available
+ o imap: Fixed untagged response detection when no data after command
  o 
 
 This release includes the following known bugs:
@@ -40,9 +46,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alan, Cody Mack, Dan Fandrich, Daniel Stenberg, JimS, Marc Hoersken,
-  Maciej Puzio, Melissa Mears, Paul Marks, Remi Gacogne, Steve Holme,
-  Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow, Vijay Panghal
+  Alan, Cody Mack, Dan Fandrich, Daniel Stenberg, Jeroen Koekkoek, JimS,
+  Marc Hoersken, Maciej Puzio, Melissa Mears, Paul Marks, Remi Gacogne,
+  Steve Holme, Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow, Vijay Panghal
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -53,3 +59,5 @@ References to bug reports and discussions on issues:
  [3] = http://curl.haxx.se/mail/lib-2014-02/0135.html (ruined)
  [4] = http://curl.haxx.se/bug/view.cgi?id=1349
  [5] = http://curl.haxx.se/mail/lib-2014-04/0053.html
+ [6] = http://curl.haxx.se/mail/lib-2014-04/0063.html
+ [7] = http://curl.haxx.se/mail/lib-2014-04/0067.html
