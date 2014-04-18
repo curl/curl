@@ -331,6 +331,11 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
           return FALSE;
         break;
 
+      case IMAP_SEARCH:
+        if(!imap_matchresp(line, len, "SEARCH"))
+          return FALSE;
+        break;
+
       /* Ignore other untagged responses */
       default:
         return FALSE;
@@ -782,6 +787,32 @@ static CURLcode imap_perform_append(struct connectdata *conn)
 
   if(!result)
     state(conn, IMAP_APPEND);
+
+  return result;
+}
+
+/***********************************************************************
+ *
+ * imap_perform_search()
+ *
+ * Sends a SEARCH command.
+ */
+static CURLcode imap_perform_search(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct IMAP *imap = conn->data->req.protop;
+
+  /* Check we have a query string */
+  if(!imap->query) {
+    failf(conn->data, "Cannot SEARCH without a query string.");
+    return CURLE_URL_MALFORMAT;
+  }
+
+  /* Send the SEARCH command */
+  result = imap_sendf(conn, "SEARCH %s", imap->query);
+
+  if(!result)
+    state(conn, IMAP_SEARCH);
 
   return result;
 }
@@ -1440,6 +1471,8 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
 
       if(imap->custom)
         result = imap_perform_list(conn);
+      else if(imap->query)
+        result = imap_perform_search(conn);
       else
         result = imap_perform_fetch(conn);
     }
@@ -1609,6 +1642,31 @@ static CURLcode imap_state_append_final_resp(struct connectdata *conn,
   return result;
 }
 
+/* For SEARCH responses */
+static CURLcode imap_state_search_resp(struct connectdata *conn, int imapcode,
+                                       imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  char *line = conn->data->state.buffer;
+  size_t len = strlen(line);
+
+  (void)instate; /* No use for this yet */
+
+  if(imapcode == '*') {
+    /* Temporarily add the LF character back and send as body to the client */
+    line[len] = '\n';
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, line, len + 1);
+    line[len] = '\0';
+  }
+  else if(imapcode != 'O')
+    result = CURLE_QUOTE_ERROR; /* TODO: Fix error code */
+  else
+    /* End of DO phase */
+    state(conn, IMAP_STOP);
+
+  return result;
+}
+
 static CURLcode imap_statemach_act(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -1729,6 +1787,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_APPEND_FINAL:
       result = imap_state_append_final_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_SEARCH:
+      result = imap_state_search_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGOUT:
@@ -1955,7 +2017,11 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   else if(!imap->custom && selected && imap->uid)
     /* FETCH from the same mailbox */
     result = imap_perform_fetch(conn);
-  else if(imap->mailbox && !selected && (imap->custom || imap->uid))
+  else if(!imap->custom && selected && imap->query)
+    /* SEARCH the current mailbox */
+    result = imap_perform_search(conn);
+  else if(imap->mailbox && !selected &&
+         (imap->custom || imap->uid || imap->query))
     /* SELECT the mailbox */
     result = imap_perform_select(conn);
   else
