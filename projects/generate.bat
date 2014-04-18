@@ -22,40 +22,45 @@ rem *
 rem ***************************************************************************
 setlocal ENABLEDELAYEDEXPANSION
 
-rem Generate VC8 project files
-call :generate vc8 Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
-call :generate vc8 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
+echo Generating VC8 project files
+call :generate vcproj Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
+call :generate vcproj Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
 
-rem Generate VC9 project files
-call :generate vc9 Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
-call :generate vc9 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
+echo.
+echo Generating VC9 project files
+call :generate vcproj Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
+call :generate vcproj Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
 
-rem Generate VC10 project files
-call :generate vc10 Windows\VC10\src\curlsrc.tmpl Windows\VC10\src\curlsrc.vcxproj
-call :generate vc10 Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
+echo.
+echo Generating VC10 project files
+call :generate vcxproj Windows\VC10\src\curlsrc.tmpl Windows\VC10\src\curlsrc.vcxproj
+call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
+
+echo.
+echo Generating VC11 project files
+call :generate vcxproj Windows\VC11\src\curlsrc.tmpl Windows\VC11\src\curlsrc.vcxproj
+call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
 
 goto exit
 
 rem Main generate function.
 rem
-rem %1 - IDE
+rem %1 - Project Type (dsp, vcproj or vcxproj)
 rem %2 - Input template file
 rem %3 - Output project file
 rem
 :generate
-  echo.
-
   if not exist %2 (
+    echo.
     echo Error: Cannot open %CD%\%2
     exit /B
   )
 
   if exist %3 (  
-    echo Deleting %3
     del %3
   )
 
-  echo Generating %3
+  echo * %CD%\%3
   for /f "delims=" %%i in (%2) do (
     if "%%i" == "CURL_SRC_C_FILES" (
       for /f %%c in ('dir /b ..\src\*.c') do call :element %1 src %%c %3
@@ -81,8 +86,8 @@ rem
 
 rem Generates a single file xml element.
 rem
-rem %1 - IDE
-rem %2 - Directory (eg src, lib or lib\vtls)
+rem %1 - Project Type (dsp, vcproj or vcxproj)
+rem %2 - Directory (src, lib or lib\vtls)
 rem %3 - Source filename
 rem %4 - Output project file
 rem
@@ -96,7 +101,12 @@ rem
 
   call :extension %3 ext
 
-  if "%1" == "vc10" (
+  if "%1" == "vcproj" (
+    echo %TABS%^<File>> %4
+    echo %TABS%  RelativePath="..\..\..\..\%2\%3">> %4
+    echo %TABS%^>>> %4
+    echo %TABS%^</File^>>> %4
+  ) else if "%1" == "vcxproj" (
     if "%ext%" == "c" (
       echo %SPACES%^<ClCompile Include=^"..\..\..\..\%2\%3^" /^>>> %4
     ) else if "%ext%" == "h" (
@@ -104,11 +114,6 @@ rem
     ) else if "%ext%" == "rc" (
       echo %SPACES%^<ResourceCompile Include=^"..\..\..\..\%2\%3^" /^>>> %4
     )
-  ) else (
-    echo %TABS%^<File>> %4
-    echo %TABS%  RelativePath="..\..\..\..\%2\%3">> %4
-    echo %TABS%^>>> %4
-    echo %TABS%^</File^>>> %4
   )
 
   exit /B
@@ -138,4 +143,5 @@ rem
 
 :exit
   echo.
+  endlocal
   pause
