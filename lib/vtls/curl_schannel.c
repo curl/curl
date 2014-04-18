@@ -310,6 +310,9 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 2/3)\n",
         conn->host.name, conn->remote_port);
 
+  if(!connssl->cred || !connssl->ctxt)
+    return CURLE_SSL_CONNECT_ERROR;
+
   /* buffer to store previously received and encrypted data */
   if(connssl->encdata_buffer == NULL) {
     connssl->encdata_offset = 0;
@@ -507,6 +510,9 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 3/3)\n",
         conn->host.name, conn->remote_port);
+
+  if(!connssl->cred)
+    return CURLE_SSL_CONNECT_ERROR;
 
   /* check if the required context attributes are met */
   if(connssl->ret_flags != connssl->req_flags) {
