@@ -131,8 +131,7 @@ const struct Curl_handler Curl_handler_imap = {
   ZERO_NULL,                        /* readwrite */
   PORT_IMAP,                        /* defport */
   CURLPROTO_IMAP,                   /* protocol */
-  PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD
-  | PROTOPT_NOURLQUERY              /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD  /* flags */
 };
 
 #ifdef USE_SSL
@@ -157,8 +156,8 @@ const struct Curl_handler Curl_handler_imaps = {
   ZERO_NULL,                        /* readwrite */
   PORT_IMAPS,                       /* defport */
   CURLPROTO_IMAP | CURLPROTO_IMAPS, /* protocol */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL | PROTOPT_NEEDSPWD
-  | PROTOPT_NOURLQUERY              /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL |
+  PROTOPT_NEEDSPWD                  /* flags */
 };
 #endif
 
@@ -1902,6 +1901,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
   Curl_safefree(imap->uidvalidity);
   Curl_safefree(imap->uid);
   Curl_safefree(imap->section);
+  Curl_safefree(imap->query);
   Curl_safefree(imap->custom);
   Curl_safefree(imap->custom_params);
 
@@ -2474,6 +2474,21 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
 
     Curl_safefree(name);
     Curl_safefree(value);
+  }
+
+  /* Does the URL contain a query parameter? Only valid when we have a mailbox
+     and no UID as per RFC-5092 */
+  if(imap->mailbox && !imap->uid && *ptr == '?') {
+    /* Find the length of the query parameter */
+    begin = ++ptr;
+    while(imap_is_bchar(*ptr))
+      ptr++;
+
+    /* Decode the query parameter */
+    result = Curl_urldecode(data, begin, ptr - begin, &imap->query, NULL,
+                            TRUE);
+    if(result)
+      return result;
   }
 
   /* Any extra stuff at the end of the URL is an error */
