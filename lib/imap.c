@@ -258,7 +258,7 @@ static bool imap_matchresp(const char *line, size_t len, const char *cmd)
   /* Does the command name match and is it followed by a space character or at
      the end of line? */
   if(line + cmd_len <= end && Curl_raw_nequal(line, cmd, cmd_len) &&
-     (line[cmd_len] == ' ' || line + cmd_len == end))
+     (line[cmd_len] == ' ' || line + cmd_len + 2 == end))
     return TRUE;
 
   return FALSE;
