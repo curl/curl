@@ -1320,7 +1320,10 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
     if(code)
       return code;
   }
+
   state = (tftp_state_data_t *)conn->proto.tftpc;
+  if(!state)
+    return CURLE_BAD_CALLING_ORDER;
 
   code = tftp_perform(conn, done);
 
