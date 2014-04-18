@@ -193,7 +193,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     }
 
     /* allocate memory for the re-usable credential handle */
-    connssl->cred = malloc(sizeof(struct curl_schannel_cred));
+    connssl->cred = (struct curl_schannel_cred *)
+                     malloc(sizeof(struct curl_schannel_cred));
     if(!connssl->cred) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
@@ -236,7 +237,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
                        ISC_REQ_STREAM;
 
   /* allocate memory for the security context handle */
-  connssl->ctxt = malloc(sizeof(struct curl_schannel_ctxt));
+  connssl->ctxt = (struct curl_schannel_ctxt *)
+                   malloc(sizeof(struct curl_schannel_ctxt));
   if(!connssl->ctxt) {
     failf(data, "schannel: unable to allocate memory");
     return CURLE_OUT_OF_MEMORY;
