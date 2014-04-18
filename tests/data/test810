@@ -4,7 +4,6 @@
 IMAP
 Clear Text
 SEARCH
-CUSTOMREQUEST
 </keywords>
 </info>
 
@@ -23,10 +22,10 @@ CUSTOMREQUEST
 imap
 </server>
  <name>
-IMAP SEARCH for NEW messages (CUSTOMREQUEST)
+IMAP SEARCH for NEW messages
  </name>
  <command>
-imap://%HOSTIP:%IMAPPORT/810 -u user:secret -X 'SEARCH NEW'
+imap://%HOSTIP:%IMAPPORT/810?NEW -u user:secret
 </command>
 </client>
 
