@@ -545,7 +545,7 @@ static CURLcode trynextip(struct connectdata *conn,
   conn->tempsock[tempindex] = CURL_SOCKET_BAD;
 
   if(sockindex == FIRSTSOCKET) {
-    Curl_addrinfo *ai;
+    Curl_addrinfo *ai = NULL;
     int family;
 
     if(conn->tempaddr[tempindex]) {
@@ -553,7 +553,7 @@ static CURLcode trynextip(struct connectdata *conn,
       family = conn->tempaddr[tempindex]->ai_family;
       ai = conn->tempaddr[tempindex]->ai_next;
     }
-    else {
+    else if(conn->tempaddr[0]) {
       /* happy eyeballs - try the other protocol family */
       int firstfamily = conn->tempaddr[0]->ai_family;
 #ifdef ENABLE_IPV6
@@ -811,14 +811,16 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       char ipaddress[MAX_IPADR_LEN];
       data->state.os_errno = error;
       SET_SOCKERRNO(error);
-      Curl_printable_address(conn->tempaddr[i], ipaddress, MAX_IPADR_LEN);
-      infof(data, "connect to %s port %ld failed: %s\n",
-            ipaddress, conn->port, Curl_strerror(conn, error));
+      if(conn->tempaddr[i]) {
+        Curl_printable_address(conn->tempaddr[i], ipaddress, MAX_IPADR_LEN);
+        infof(data, "connect to %s port %ld failed: %s\n",
+              ipaddress, conn->port, Curl_strerror(conn, error));
 
-      conn->timeoutms_per_addr = conn->tempaddr[i]->ai_next == NULL ?
-                                 allow : allow / 2;
+        conn->timeoutms_per_addr = conn->tempaddr[i]->ai_next == NULL ?
+                                   allow : allow / 2;
 
-      code = trynextip(conn, sockindex, i);
+        code = trynextip(conn, sockindex, i);
+      }
     }
   }
 
