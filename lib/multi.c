@@ -828,7 +828,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   curlfds = nfds; /* number of internal file descriptors */
   nfds += extra_nfds; /* add the externally provided ones */
 
-  if(nfds) {
+  if(nfds || extra_nfds) {
     ufds = malloc(nfds * sizeof(struct pollfd));
     if(!ufds)
       return CURLM_OUT_OF_MEMORY;
