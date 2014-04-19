@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,7 +61,7 @@ int Curl_parsenetrc(const char *host,
 {
   FILE *file;
   int retcode=1;
-  int specific_login = (**loginp != 0);
+  int specific_login = (*loginp && **loginp != 0);
   bool netrc_alloc = FALSE;
   enum host_lookup_state state=NOTHING;
 
@@ -113,7 +113,7 @@ int Curl_parsenetrc(const char *host,
       tok=strtok_r(netrcbuffer, " \t\n", &tok_buf);
       while(!done && tok) {
 
-        if(**loginp && **passwordp) {
+        if((*loginp && **loginp) && (*passwordp && **passwordp)) {
           done=TRUE;
           break;
         }
