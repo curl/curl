@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -353,9 +353,11 @@ static int parsedate(const char *date, time_t *output)
       /* a name coming up */
       char buf[32]="";
       size_t len;
-      sscanf(date, "%31[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz]",
-             buf);
-      len = strlen(buf);
+      if(sscanf(date, "%31[ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                          "abcdefghijklmnopqrstuvwxyz]", buf))
+        len = strlen(buf);
+      else
+        len = 0;
 
       if(wdaynum == -1) {
         wdaynum = checkday(buf, len);
