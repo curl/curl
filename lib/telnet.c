@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1491,6 +1491,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 
     case WAIT_OBJECT_0:
 
+      events.lNetworkEvents = 0;
       if(SOCKET_ERROR == enum_netevents_func(sockfd, event_handle, &events)) {
         if((err = SOCKERRNO) != EINPROGRESS) {
           infof(data,"WSAEnumNetworkEvents failed (%d)", err);
