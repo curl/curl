@@ -515,15 +515,24 @@ static void lograw(unsigned char *buffer, ssize_t len)
  */
 static DWORD WINAPI select_ws_stdin_wait_thread(LPVOID lpParameter)
 {
+  INPUT_RECORD inputrecord;
   HANDLE handle;
-  DWORD mode;
+  DWORD length;
 
   handle = (HANDLE) lpParameter;
 
-  if(GetConsoleMode(handle, &mode))
-    WaitForSingleObjectEx(handle, INFINITE, FALSE);
+  if(GetConsoleMode(handle, &length)) {
+    while(WaitForSingleObjectEx(handle, INFINITE, FALSE) == WAIT_OBJECT_0) {
+      if(PeekConsoleInput(handle, &inputrecord, 1, &length)) {
+        if(length == 1 && inputrecord.EventType != KEY_EVENT)
+          ReadConsoleInput(handle, &inputrecord, 1, &length);
+        else
+          break;
+      }
+    }
+  }
   else
-    ReadFile(handle, NULL, 0, &mode, NULL);
+    ReadFile(handle, NULL, 0, &length, NULL);
 
   return 0;
 }
