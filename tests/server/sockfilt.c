@@ -562,6 +562,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* allocate internal array for the internal event handles */
   handles = malloc(nfds * sizeof(HANDLE));
   if(handles == NULL) {
+    free(fdarr);
     errno = ENOMEM;
     return -1;
   }
@@ -569,6 +570,8 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* allocate internal array for the internal socket handles */
   wsasocks = malloc(nfds * sizeof(curl_socket_t));
   if(wsasocks == NULL) {
+    free(handles);
+    free(fdarr);
     errno = ENOMEM;
     return -1;
   }
@@ -576,6 +579,9 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* allocate internal array for the internal WINSOCK2 events */
   wsaevents = malloc(nfds * sizeof(WSAEVENT));
   if(wsaevents == NULL) {
+    free(wsasocks);
+    free(handles);
+    free(fdarr);
     errno = ENOMEM;
     return -1;
   }
