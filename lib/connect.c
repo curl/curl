@@ -1176,15 +1176,29 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
 
   DEBUGASSERT(data);
 
-  /* this only works for an easy handle that has been used for
-     curl_easy_perform()! */
-  if(data->state.lastconnect && data->multi_easy) {
-    struct connectdata *c = data->state.lastconnect;
+  /* this works for an easy handle:
+   * - that has been used for curl_easy_perform()
+   * - that is associated with a multi handle, and whose connection
+   *   was detached with pause/CURLOPT_FORBID_REUSE/CURLOPT_CONNECT_ONLY
+   */
+  if((data->state.lastconnect && data->multi_easy) ||
+     (data->easy_conn && data->multi)) {
+    struct connectdata *c;
     struct connfind find;
-    find.tofind = data->state.lastconnect;
+    struct Curl_multi *multi;
+    
+    if (data->multi) { /* connection from a multi handle */
+      c = data->easy_conn;
+      multi = data->multi;
+    } else { // use of a connect_only easy_socket
+      c = data->state.lastconnect;
+      multi = data->multi_easy;
+    }
+    
+    find.tofind = c;
     find.found = FALSE;
 
-    Curl_conncache_foreach(data->multi_easy->conn_cache, &find, conn_is_conn);
+    Curl_conncache_foreach(multi->conn_cache, &find, conn_is_conn);
 
     if(!find.found) {
       data->state.lastconnect = NULL;
