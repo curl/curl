@@ -515,24 +515,74 @@ static void lograw(unsigned char *buffer, ssize_t len)
  */
 static DWORD WINAPI select_ws_stdin_wait_thread(LPVOID lpParameter)
 {
+  HANDLE handle, handles[2];
   INPUT_RECORD inputrecord;
-  HANDLE handle;
-  DWORD length;
+  LARGE_INTEGER size, pos;
+  DWORD type, length;
 
-  handle = (HANDLE) lpParameter;
+  handle = GetStdHandle(STD_INPUT_HANDLE);
+  handles[0] = (HANDLE) lpParameter;
+  handles[1] = handle;
+  type = GetFileType(handle);
 
-  if(GetConsoleMode(handle, &length)) {
-    while(WaitForSingleObjectEx(handle, INFINITE, FALSE) == WAIT_OBJECT_0) {
-      if(PeekConsoleInput(handle, &inputrecord, 1, &length)) {
-        if(length == 1 && inputrecord.EventType != KEY_EVENT)
-          ReadConsoleInput(handle, &inputrecord, 1, &length);
+  switch(type) {
+    case FILE_TYPE_DISK:
+      while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
+            == WAIT_OBJECT_0 + 1) {
+        size.QuadPart = 0;
+        if(GetFileSizeEx(handle, &size)) {
+          pos.QuadPart = 0;
+          if(SetFilePointerEx(handle, pos, &pos, FILE_CURRENT)) {
+            if(size.QuadPart == pos.QuadPart)
+              SleepEx(100, FALSE);
+            else
+              break;
+          }
+          else
+            break;
+        }
         else
           break;
       }
-    }
+      break;
+
+    case FILE_TYPE_CHAR:
+      while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
+            == WAIT_OBJECT_0 + 1) {
+        if(GetConsoleMode(handle, &length)) {
+          length = 0;
+          if(PeekConsoleInput(handle, &inputrecord, 1, &length)) {
+            if(length == 1 && inputrecord.EventType != KEY_EVENT)
+              ReadConsoleInput(handle, &inputrecord, 1, &length);
+            else
+              break;
+          }
+          else
+            break;
+        }
+        else
+          break;
+      }
+      break;
+
+    case FILE_TYPE_PIPE:
+      while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
+            == WAIT_OBJECT_0 + 1) {
+        if(!PeekNamedPipe(handle, NULL, 0, NULL, &length, NULL)) {
+          if(GetLastError() == ERROR_BROKEN_PIPE)
+            SleepEx(100, FALSE);
+          else
+            break;
+        }
+        else
+          break;
+      }
+      break;
+
+    default:
+      WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE);
+      break;
   }
-  else
-    ReadFile(handle, NULL, 0, &length, NULL);
 
   return 0;
 }
@@ -546,6 +596,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   curl_socket_t sock, *fdarr, *wsasocks;
   long networkevents;
   int error, fds;
+  HANDLE threadevent = NULL, threadhandle = NULL;
   DWORD nfd = 0, wsa = 0;
   int ret = 0;
 
@@ -613,10 +664,11 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     if(networkevents) {
       fdarr[nfd] = curlx_sitosk(fds);
       if(fds == fileno(stdin)) {
-        handles[nfd] = CreateThread(NULL, 0,
+        threadevent = CreateEvent(NULL, TRUE, FALSE, NULL);
+        threadhandle = CreateThread(NULL, 0,
                                     &select_ws_stdin_wait_thread,
-                                    GetStdHandle(STD_INPUT_HANDLE),
-                                    0, NULL);
+                                    threadevent, 0, NULL);
+        handles[nfd] = threadhandle;
       }
       else if(fds == fileno(stdout)) {
         handles[nfd] = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -654,6 +706,11 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* wait for one of the internal handles to trigger */
   wait = WaitForMultipleObjectsEx(nfd, handles, FALSE, milliseconds, FALSE);
+
+  /* signal the event handle for the waiting thread */
+  if(threadevent) {
+    SetEvent(threadevent);
+  }
 
   /* loop over the internal handles returned in the descriptors */
   for(idx = 0; idx < nfd; idx++) {
@@ -719,6 +776,14 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   for(idx = 0; idx < wsa; idx++) {
     WSAEventSelect(wsasocks[idx], NULL, 0);
     WSACloseEvent(wsaevents[idx]);
+  }
+
+  if(threadhandle) {
+    WaitForSingleObject(threadhandle, INFINITE);
+    CloseHandle(threadhandle);
+  }
+  if(threadevent) {
+    CloseHandle(threadevent);
   }
 
   free(wsaevents);
