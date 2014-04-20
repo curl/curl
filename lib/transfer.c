@@ -99,7 +99,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 #ifdef CURL_DOES_CONVERSIONS
   bool sending_http_headers = FALSE;
 
-  if(conn->handler->protocol&(CURLPROTO_HTTP|CURLPROTO_RTSP)) {
+  if(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)) {
     const struct HTTP *http = data->req.protop;
 
     if(http->sending == HTTPSEND_REQUEST)
@@ -319,7 +319,7 @@ static int data_pending(const struct connectdata *conn)
        TRUE. The thing is if we read everything, then http2_recv won't
        be called and we cannot signal the HTTP/2 stream has closed. As
        a workaround, we return nonzero here to call http2_recv. */
-    ((conn->handler->protocol&CURLPROTO_HTTP) && conn->httpversion == 20 &&
+    ((conn->handler->protocol&PROTO_FAMILY_HTTP) && conn->httpversion == 20 &&
      conn->proto.httpc.closed);
 #else
     Curl_ssl_data_pending(conn, FIRSTSOCKET);
@@ -527,7 +527,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
       if(0 == k->bodywrites && !is_empty_data) {
         /* These checks are only made the first time we are about to
            write a piece of the body */
-        if(conn->handler->protocol&(CURLPROTO_HTTP|CURLPROTO_RTSP)) {
+        if(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)) {
           /* HTTP-only checks */
 
           if(data->req.newurl) {
@@ -723,7 +723,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
             if(!k->ignorebody) {
 
 #ifndef CURL_DISABLE_POP3
-              if(conn->handler->protocol&CURLPROTO_POP3)
+              if(conn->handler->protocol&PROTO_FAMILY_POP3)
                 result = Curl_pop3_write(conn, k->str, nread);
               else
 #endif /* CURL_DISABLE_POP3 */
@@ -854,7 +854,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           break;
         }
 
-        if(conn->handler->protocol&(CURLPROTO_HTTP|CURLPROTO_RTSP)) {
+        if(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)) {
           if(http->sending == HTTPSEND_REQUEST)
             /* We're sending the HTTP request headers, not the data.
                Remember that so we don't change the line endings. */
@@ -892,7 +892,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       data->req.upload_present = nread;
 
 #ifndef CURL_DISABLE_SMTP
-      if(conn->handler->protocol & CURLPROTO_SMTP) {
+      if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
         result = Curl_smtp_escape_eob(conn, nread);
         if(result)
           return result;
@@ -1873,7 +1873,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
   /* if we're talking upload, we can't do the checks below, unless the protocol
      is HTTP as when uploading over HTTP we will still get a response */
   if(data->set.upload &&
-     !(conn->handler->protocol&(CURLPROTO_HTTP|CURLPROTO_RTSP)))
+     !(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)))
     return CURLE_OK;
 
   if(/* workaround for broken TLS servers */ data->state.ssl_connect_retry ||
@@ -1899,7 +1899,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
                                 transferred! */
 
 
-    if(conn->handler->protocol&CURLPROTO_HTTP) {
+    if(conn->handler->protocol&PROTO_FAMILY_HTTP) {
       struct HTTP *http = data->req.protop;
       if(http->writebytecount)
         return Curl_readrewind(conn);
@@ -1972,7 +1972,7 @@ Curl_setup_transfer(
          state info where we wait for the 100-return code
       */
       if((data->state.expect100header) &&
-         (conn->handler->protocol&CURLPROTO_HTTP) &&
+         (conn->handler->protocol&PROTO_FAMILY_HTTP) &&
          (http->sending == HTTPSEND_BODY)) {
         /* wait with write until we either got 100-continue or a timeout */
         k->exp100 = EXP100_AWAITING_CONTINUE;

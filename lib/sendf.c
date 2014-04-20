@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -422,7 +422,7 @@ CURLcode Curl_client_write(struct connectdata *conn,
   }
 
   if(type & CLIENTWRITE_BODY) {
-    if((conn->handler->protocol&CURLPROTO_FTP) &&
+    if((conn->handler->protocol&PROTO_FAMILY_FTP) &&
        conn->proto.ftpc.transfertype == 'A') {
       /* convert from the network encoding */
       CURLcode rc = Curl_convert_from_network(data, ptr, len);

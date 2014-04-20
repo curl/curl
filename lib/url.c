@@ -2703,7 +2703,7 @@ static bool SocketIsDead(curl_socket_t sock)
 static bool IsPipeliningPossible(const struct SessionHandle *handle,
                                  const struct connectdata *conn)
 {
-  if((conn->handler->protocol & CURLPROTO_HTTP) &&
+  if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
      Curl_multi_pipeline_enabled(handle->multi) &&
      (handle->set.httpreq == HTTPREQ_GET ||
       handle->set.httpreq == HTTPREQ_HEAD) &&
@@ -2927,7 +2927,7 @@ ConnectionExists(struct SessionHandle *data,
   bool canPipeline = IsPipeliningPossible(data, needle);
   bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) ||
                        (data->state.authhost.want & CURLAUTH_NTLM_WB)) &&
-    (needle->handler->protocol & CURLPROTO_HTTP) ? TRUE : FALSE;
+    (needle->handler->protocol & PROTO_FAMILY_HTTP) ? TRUE : FALSE;
   struct connectbundle *bundle;
 
   *force_reuse = FALSE;
@@ -5330,7 +5330,7 @@ static CURLcode create_conn(struct SessionHandle *data,
 #else
       /* force this connection's protocol to become HTTP if not already
          compatible - if it isn't tunneling through */
-      if(!(conn->handler->protocol & CURLPROTO_HTTP) &&
+      if(!(conn->handler->protocol & PROTO_FAMILY_HTTP) &&
          !conn->bits.tunnel_proxy)
         conn->handler = &Curl_handler_http;
 

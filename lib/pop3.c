@@ -156,7 +156,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   PORT_POP3S,                       /* defport */
-  CURLPROTO_POP3 | CURLPROTO_POP3S, /* protocol */
+  CURLPROTO_POP3S,                  /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL
   | PROTOPT_NOURLQUERY              /* flags */
 };

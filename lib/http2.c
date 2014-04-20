@@ -136,7 +136,7 @@ const struct Curl_handler Curl_handler_http2_ssl = {
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
-  CURLPROTO_HTTP | CURLPROTO_HTTPS,     /* protocol */
+  CURLPROTO_HTTPS,                      /* protocol */
   PROTOPT_SSL                           /* flags */
 };
 

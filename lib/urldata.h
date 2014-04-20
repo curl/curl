@@ -58,6 +58,14 @@
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
 
+/* Convenience defines for checking protocols or their SSL based version. Each
+   protocol handler should only ever have a single CURLPROTO_ in its protocol
+   field. */
+#define PROTO_FAMILY_HTTP (CURLPROTO_HTTP|CURLPROTO_HTTPS)
+#define PROTO_FAMILY_FTP  (CURLPROTO_FTP|CURLPROTO_FTPS)
+#define PROTO_FAMILY_POP3 (CURLPROTO_POP3|CURLPROTO_POP3S)
+#define PROTO_FAMILY_SMTP (CURLPROTO_SMTP|CURLPROTO_SMTPS)
+
 #define DEFAULT_CONNCACHE_SIZE 5
 
 /* length of longest IPv6 address string including the trailing null */
@@ -778,7 +786,8 @@ struct Curl_handler {
                         ssize_t *nread, bool *readmore);
 
   long defport;           /* Default port. */
-  unsigned int protocol;  /* See CURLPROTO_*  */
+  unsigned int protocol;  /* See CURLPROTO_* - this needs to be the single
+                             specific protocol bit */
   unsigned int flags;     /* Extra particular characteristics, see PROTOPT_* */
 };
 

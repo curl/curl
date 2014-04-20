@@ -144,7 +144,7 @@ const struct Curl_handler Curl_handler_https = {
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTPS,                           /* defport */
-  CURLPROTO_HTTP | CURLPROTO_HTTPS,     /* protocol */
+  CURLPROTO_HTTPS,                      /* protocol */
   PROTOPT_SSL | PROTOPT_CREDSPERREQUEST /* flags */
 };
 #endif
@@ -1771,7 +1771,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
   http->writebytecount = http->readbytecount = 0;
 
-  if((conn->handler->protocol&(CURLPROTO_HTTP|CURLPROTO_FTP)) &&
+  if((conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
      data->set.upload) {
     httpreq = HTTPREQ_PUT;
   }
@@ -1883,7 +1883,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
     }
     else {
-      if((conn->handler->protocol&CURLPROTO_HTTP) &&
+      if((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
          data->set.upload &&
          (data->set.infilesize == -1)) {
         if(conn->bits.authneg)
@@ -3190,7 +3190,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 #define HEADER1 k->p /* no conversion needed, just use k->p */
 #endif /* CURL_DOES_CONVERSIONS */
 
-      if(conn->handler->protocol & CURLPROTO_HTTP) {
+      if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
         nc = sscanf(HEADER1,
                     " HTTP/%d.%d %3d",
                     &httpversion_major,

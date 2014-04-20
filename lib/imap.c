@@ -155,7 +155,7 @@ const struct Curl_handler Curl_handler_imaps = {
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   PORT_IMAPS,                       /* defport */
-  CURLPROTO_IMAP | CURLPROTO_IMAPS, /* protocol */
+  CURLPROTO_IMAPS,                  /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL |
   PROTOPT_NEEDSPWD                  /* flags */
 };

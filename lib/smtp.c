@@ -155,7 +155,7 @@ const struct Curl_handler Curl_handler_smtps = {
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   PORT_SMTPS,                       /* defport */
-  CURLPROTO_SMTP | CURLPROTO_SMTPS, /* protocol */
+  CURLPROTO_SMTPS,                  /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL
   | PROTOPT_NOURLQUERY              /* flags */
 };
