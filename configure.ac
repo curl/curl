@@ -2737,13 +2737,12 @@ AC_HELP_STRING([--without-nghttp2],[Disable nghttp2 usage]),
 case "$OPT_H2" in
   no)
     dnl --without-nghttp2 option used
-    want_idn="no"
+    want_h2="no"
     AC_MSG_RESULT([no])
     ;;
   default)
     dnl configure option not specified
     want_h2="no"
-    want_h2_path="default"
     AC_MSG_RESULT([no])
     ;;
   yes)
@@ -2755,31 +2754,30 @@ case "$OPT_H2" in
   *)
     dnl --with-nghttp2 option used with path
     want_h2="yes"
-    want_h2_path="$withval"
+    want_h2_path="$withval/lib/pkgconfig"
     AC_MSG_RESULT([yes ($withval)])
     ;;
 esac
 
 curl_h2_msg="disabled (--with-nghttp2)"
-if test X"$OPT_H2" != Xno; then
+if test X"$want_h2" != Xno; then
   dnl backup the pre-nghttp2 variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  h2pcdir=${want_h2_path}/lib/pkgconfig
-  CURL_CHECK_PKGCONFIG(libnghttp2, $h2pcdir)
+  CURL_CHECK_PKGCONFIG(libnghttp2, $want_h2_path)
 
   if test "$PKGCONFIG" != "no" ; then
-    LIB_H2=`CURL_EXPORT_PCDIR([$h2pcdir])
+    LIB_H2=`CURL_EXPORT_PCDIR([$want_h2_path])
       $PKGCONFIG --libs-only-l libnghttp2`
     AC_MSG_NOTICE([-l is $LIB_H2])
 
-    CPP_H2=`CURL_EXPORT_PCDIR([$h2pcdir]) dnl
+    CPP_H2=`CURL_EXPORT_PCDIR([$want_h2_path]) dnl
       $PKGCONFIG --cflags-only-I libnghttp2`
     AC_MSG_NOTICE([-I is $CPP_H2])
 
-    LD_H2=`CURL_EXPORT_PCDIR([$h2pcdir])
+    LD_H2=`CURL_EXPORT_PCDIR([$want_h2_path])
       $PKGCONFIG --libs-only-L libnghttp2`
     AC_MSG_NOTICE([-L is $LD_H2])
 
