@@ -2762,7 +2762,7 @@ esac
 
 curl_h2_msg="disabled (--with-nghttp2)"
 if test X"$OPT_H2" != Xno; then
-  dnl backup the pre-librtmp variables
+  dnl backup the pre-nghttp2 variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
