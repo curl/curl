@@ -568,14 +568,18 @@ static DWORD WINAPI select_ws_stdin_wait_thread(LPVOID lpParameter)
     case FILE_TYPE_PIPE:
       while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
             == WAIT_OBJECT_0 + 1) {
-        if(!PeekNamedPipe(handle, NULL, 0, NULL, &length, NULL)) {
+        if(PeekNamedPipe(handle, NULL, 0, NULL, &length, NULL)) {
+          if(length == 0)
+            SleepEx(100, FALSE);
+          else
+            break;
+        }
+        else {
           if(GetLastError() == ERROR_BROKEN_PIPE)
             SleepEx(100, FALSE);
           else
             break;
         }
-        else
-          break;
       }
       break;
 
