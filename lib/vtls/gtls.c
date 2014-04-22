@@ -735,9 +735,10 @@ gtls_connect_step3(struct connectdata *conn,
   /* initialize an X.509 certificate structure. */
   gnutls_x509_crt_init(&x509_cert);
 
-  /* convert the given DER or PEM encoded Certificate to the native
-     gnutls_x509_crt_t format */
-  gnutls_x509_crt_import(x509_cert, chainp, GNUTLS_X509_FMT_DER);
+  if(chainp)
+    /* convert the given DER or PEM encoded Certificate to the native
+       gnutls_x509_crt_t format */
+    gnutls_x509_crt_import(x509_cert, chainp, GNUTLS_X509_FMT_DER);
 
   if(data->set.ssl.issuercert) {
     gnutls_x509_crt_init(&x509_issuer);
