@@ -38,6 +38,19 @@ This release includes the following bugfixes:
  o strerror: fix comment about vxworks' strerror_r buffer size [6]
  o url: only use if_nametoindex() if IFNAMSIZ is available
  o imap: Fixed untagged response detection when no data after command
+ o various: fix possible dereference of null pointer
+ o various: fix use of uninitialized variable
+ o various: fix use of non-null terminated strings
+ o telnet.c: check sscanf results before passing them to snprintf
+ o parsedate.c: check sscanf result before passing it to strlen
+ o sockfilt.c: free memory in case of memory allocation errors
+ o sockfilt.c: ignore non-key-events and continue waiting for input
+ o sockfilt.c: properly handle disk files, pipes and character input
+ o sockfilt.c: fixed getting stuck waiting for MinGW stdin pipe
+ o sockfilt.c: clean up threaded approach and add documentation
+ o configure: use the nghttp2 path correctly with pkg-config [8]
+ o curl_global_init_mem: bump initialized even if already initialized [9]
+ o gtls: fix NULL pointer dereference [10]
  o 
 
 This release includes the following known bugs:
@@ -47,9 +60,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alan, Cody Mack, Dan Fandrich, Daniel Stenberg, Jeroen Koekkoek, JimS,
-  Marc Hoersken, Maciej Puzio, Melissa Mears, Paul Marks, Remi Gacogne,
-  Steve Holme, Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow, Vijay Panghal
+  Alan, Cody Mack, Damian Dixon, Dan Fandrich, Daniel Stenberg,
+  Dilyan Palauzov, Jeroen Koekkoek, JimS, Kamil Dudka, Maciej Puzio,
+  Marc Hoersken, Melissa Mears, Paul Marks, Remi Gacogne, Steve Holme,
+  Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow, Tristan, Vijay Panghal
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -62,3 +76,6 @@ References to bug reports and discussions on issues:
  [5] = http://curl.haxx.se/mail/lib-2014-04/0053.html
  [6] = http://curl.haxx.se/mail/lib-2014-04/0063.html
  [7] = http://curl.haxx.se/mail/lib-2014-04/0067.html
+ [8] = http://curl.haxx.se/mail/lib-2014-04/0159.html
+ [9] = http://curl.haxx.se/bug/view.cgi?id=1362
+ [10] = http://curl.haxx.se/mail/lib-2014-04/0145.html
