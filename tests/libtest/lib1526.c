@@ -47,7 +47,7 @@ int test(char *URL)
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
   /* http and proxy header list*/
-  struct curl_slist *hhl = NULL, *phl = NULL;
+  struct curl_slist *hhl = NULL, *phl = NULL, *tmp = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -62,11 +62,14 @@ int test(char *URL)
 
   hhl = curl_slist_append(hhl, "User-Agent: Http Agent");
   phl = curl_slist_append(phl, "User-Agent: Proxy Agent");
-  phl = curl_slist_append(phl, "Expect:");
-
   if (!hhl || !phl) {
     goto test_cleanup;
   }
+  tmp = curl_slist_append(phl, "Expect:");
+  if (!tmp) {
+    goto test_cleanup;
+  }
+  phl = tmp;
 
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
