@@ -738,6 +738,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
       }
       else {
         /* try to handle the event with the WINSOCK2 functions */
+        wsanetevents.lNetworkEvents = 0;
         error = WSAEnumNetworkEvents(fds, handle, &wsanetevents);
         if(error != SOCKET_ERROR) {
           /* remove from descriptor set if not ready for read/accept/close */
