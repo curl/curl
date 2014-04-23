@@ -47,11 +47,16 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 #include "curl_memory.h"
+
+#include <cyassl/ssl.h>
+#ifdef HAVE_CYASSL_ERROR_SSL_H
+#include <cyassl/error-ssl.h>
+#else
+#include <cyassl/error.h>
+#endif
+
 /* The last #include file should be: */
 #include "memdebug.h"
-#include <cyassl/ssl.h>
-#include <cyassl/error.h>
-
 
 static Curl_recv cyassl_recv;
 static Curl_send cyassl_send;
