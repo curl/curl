@@ -20,8 +20,12 @@ rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
 rem *
 rem ***************************************************************************
-setlocal ENABLEDELAYEDEXPANSION
 
+echo Generating VC6 project files
+call :generate dsp Windows\VC6\src\curlsrc.tmpl Windows\VC6\src\curlsrc.dsp
+call :generate dsp Windows\VC6\lib\libcurl.tmpl Windows\VC6\lib\libcurl.dsp
+
+echo.
 echo Generating VC8 project files
 call :generate vcproj Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
 call :generate vcproj Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
@@ -40,6 +44,11 @@ echo.
 echo Generating VC11 project files
 call :generate vcxproj Windows\VC11\src\curlsrc.tmpl Windows\VC11\src\curlsrc.vcxproj
 call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
+
+echo.
+echo Generating VC12 project files
+call :generate vcxproj Windows\VC12\src\curlsrc.tmpl Windows\VC12\src\curlsrc.vcxproj
+call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
 
 goto exit
 
@@ -61,26 +70,32 @@ rem
   )
 
   echo * %CD%\%3
-  for /f "delims=" %%i in (%2) do (
-    if "%%i" == "CURL_SRC_C_FILES" (
+  for /f "usebackq delims=" %%i in (`"findstr /n ^^ %2"`) do (
+    set "var=%%i"
+    setlocal enabledelayedexpansion
+    set "var=!var:*:=!"
+
+    if "!var!" == "CURL_SRC_C_FILES" (
       for /f %%c in ('dir /b ..\src\*.c') do call :element %1 src %%c %3
-    ) else if "%%i" == "CURL_SRC_H_FILES" (
+    ) else if "!var!" == "CURL_SRC_H_FILES" (
       for /f %%h in ('dir /b ..\src\*.h') do call :element %1 src %%h %3
-    ) else if "%%i" == "CURL_SRC_RC_FILES" (
+    ) else if "!var!" == "CURL_SRC_RC_FILES" (
       for /f %%r in ('dir /b ..\src\*.rc') do call :element %1 src %%r %3
-    ) else if "%%i" == "CURL_LIB_C_FILES" (
+    ) else if "!var!" == "CURL_LIB_C_FILES" (
       for /f %%c in ('dir /b ..\lib\*.c') do call :element %1 lib %%c %3
-    ) else if "%%i" == "CURL_LIB_H_FILES" (
+    ) else if "!var!" == "CURL_LIB_H_FILES" (
       for /f %%h in ('dir /b ..\lib\*.h') do call :element %1 lib %%h %3
-    ) else if "%%i" == "CURL_LIB_RC_FILES" (
+    ) else if "!var!" == "CURL_LIB_RC_FILES" (
       for /f %%r in ('dir /b ..\lib\*.rc') do call :element %1 lib %%r %3
-    ) else if "%%i" == "CURL_LIB_VTLS_C_FILES" (
+    ) else if "!var!" == "CURL_LIB_VTLS_C_FILES" (
       for /f %%c in ('dir /b ..\lib\vtls\*.c') do call :element %1 lib\vtls %%c %3
-    ) else if "%%i" == "CURL_LIB_VTLS_H_FILES" (
+    ) else if "!var!" == "CURL_LIB_VTLS_H_FILES" (
       for /f %%h in ('dir /b ..\lib\vtls\*.h') do call :element %1 lib\vtls %%h %3
     ) else (
-      echo %%i>> %3
+      echo.!var!>> %3
     )
+
+    endlocal
   )
   exit /B
 
@@ -99,14 +114,19 @@ rem
     set "TABS=      "
   )
 
-  call :extension %3 ext
-
-  if "%1" == "vcproj" (
+  if "%1" == "dsp" (
+    echo # Begin Source File>> %4
+    echo.>> %4
+    echo SOURCE=..\..\..\..\%2\%3>> %4
+    echo # End Source File>> %4
+  ) else if "%1" == "vcproj" (
     echo %TABS%^<File>> %4
     echo %TABS%  RelativePath="..\..\..\..\%2\%3">> %4
     echo %TABS%^>>> %4
     echo %TABS%^</File^>>> %4
   ) else if "%1" == "vcxproj" (
+    call :extension %3 ext
+
     if "%ext%" == "c" (
       echo %SPACES%^<ClCompile Include=^"..\..\..\..\%2\%3^" /^>>> %4
     ) else if "%ext%" == "h" (
@@ -143,5 +163,4 @@ rem
 
 :exit
   echo.
-  endlocal
   pause
