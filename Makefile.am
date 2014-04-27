@@ -38,9 +38,13 @@ VC8LIBPRJ = vs/vc8/lib/vc8libcurl.vcproj
 VC8LIBPRJHEAD = vs/t/lib/vc8_libcurl_prj.head
 VC8LIBPRJFOOT = vs/t/lib/vc8_libcurl_prj.foot
 
-VCPROJECTS = projects/README projects/Windows/VC8/lib/libcurl.sln	    \
- projects/Windows/VC8/lib/libcurl.tmpl projects/Windows/VC8/curl.sln	    \
- projects/Windows/VC8/src/curlsrc.tmpl projects/Windows/VC8/src/curlsrc.sln	\
+VCPROJECTS = projects/README	\
+ projects/Windows/VC6/curl.dsw	\
+ projects/Windows/VC6/lib/libcurl.dsw projects/Windows/VC6/lib/libcurl.tmpl	\
+ projects/Windows/VC6/src/curlsrc.dsw projects/Windows/VC6/src/curlsrc.tmpl	\
+ projects/Windows/VC8/curl.sln	\
+ projects/Windows/VC8/lib/libcurl.sln projects/Windows/VC8/lib/libcurl.tmpl	\
+ projects/Windows/VC8/src/curlsrc.sln projects/Windows/VC8/src/curlsrc.tmpl	\
  projects/Windows/VC9/curl.sln	\
  projects/Windows/VC9/lib/libcurl.sln projects/Windows/VC9/lib/libcurl.tmpl	\
  projects/Windows/VC9/src/curlsrc.sln projects/Windows/VC9/src/curlsrc.tmpl	\
