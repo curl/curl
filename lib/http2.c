@@ -400,6 +400,7 @@ static const nghttp2_session_callbacks callbacks = {
   on_header              /* nghttp2_on_header_callback */
 #if NGHTTP2_VERSION_NUM >= 0x000400
   , NULL                 /* nghttp2_select_padding_callback */
+  , NULL                 /* nghttp2_adjust_priority_callback */
 #endif
 };
 
