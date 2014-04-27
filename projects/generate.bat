@@ -26,14 +26,24 @@ call :generate dsp Windows\VC6\src\curlsrc.tmpl Windows\VC6\src\curlsrc.dsp
 call :generate dsp Windows\VC6\lib\libcurl.tmpl Windows\VC6\lib\libcurl.dsp
 
 echo.
+echo Generating VC7 project files
+call :generate vcproj1 Windows\VC7\src\curlsrc.tmpl Windows\VC7\src\curlsrc.vcproj
+call :generate vcproj1 Windows\VC7\lib\libcurl.tmpl Windows\VC7\lib\libcurl.vcproj
+
+echo.
+echo Generating VC7.1 project files
+call :generate vcproj1 Windows\VC7.1\src\curlsrc.tmpl Windows\VC7.1\src\curlsrc.vcproj
+call :generate vcproj1 Windows\VC7.1\lib\libcurl.tmpl Windows\VC7.1\lib\libcurl.vcproj
+
+echo.
 echo Generating VC8 project files
-call :generate vcproj Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
-call :generate vcproj Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
+call :generate vcproj2 Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
+call :generate vcproj2 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
 
 echo.
 echo Generating VC9 project files
-call :generate vcproj Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
-call :generate vcproj Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
+call :generate vcproj2 Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
+call :generate vcproj2 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
 
 echo.
 echo Generating VC10 project files
@@ -54,7 +64,8 @@ goto exit
 
 rem Main generate function.
 rem
-rem %1 - Project Type (dsp, vcproj or vcxproj)
+rem %1 - Project Type (dsp for VC6, vcproj1 for VC7 and VC7.1, vcproj2 for VC8 and VC9
+rem      or vcxproj for VC10, VC11 and VC12)
 rem %2 - Input template file
 rem %3 - Output project file
 rem
@@ -101,7 +112,8 @@ rem
 
 rem Generates a single file xml element.
 rem
-rem %1 - Project Type (dsp, vcproj or vcxproj)
+rem %1 - Project Type (dsp for VC6, vcproj1 for VC7 and VC7.1, vcproj2 for VC8 and VC9
+rem      or vcxproj for VC10, VC11 and VC12)
 rem %2 - Directory (src, lib or lib\vtls)
 rem %3 - Source filename
 rem %4 - Output project file
@@ -119,7 +131,11 @@ rem
     echo.>> %4
     echo SOURCE=..\..\..\..\%2\%3>> %4
     echo # End Source File>> %4
-  ) else if "%1" == "vcproj" (
+  ) else if "%1" == "vcproj1" (
+    echo %TABS%^<File>> %4
+    echo %TABS%  RelativePath="..\..\..\..\%2\%3"^>>> %4
+    echo %TABS%^</File^>>> %4
+  ) else if "%1" == "vcproj2" (
     echo %TABS%^<File>> %4
     echo %TABS%  RelativePath="..\..\..\..\%2\%3">> %4
     echo %TABS%^>>> %4
