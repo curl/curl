@@ -44,7 +44,7 @@ UNITTEST_START
 
   unsigned int i;
   int fails=0;
-  struct dotdot pairs[] = {
+  const struct dotdot pairs[] = {
     { "/a/b/c/./../../g", "/a/g" },
     { "mid/content=5/../6", "mid/6" },
     { "/hello/../moo", "/moo" },

@@ -47,7 +47,7 @@
  *
  * an allocated dedotdotified output string
  */
-char *Curl_dedotdotify(char *input)
+char *Curl_dedotdotify(const char *input)
 {
   size_t inlen = strlen(input);
   char *clone;

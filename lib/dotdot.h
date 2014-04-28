@@ -21,5 +21,5 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-char *Curl_dedotdotify(char *input);
+char *Curl_dedotdotify(const char *input);
 #endif

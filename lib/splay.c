@@ -101,7 +101,7 @@ struct Curl_tree *Curl_splayinsert(struct timeval i,
                                    struct Curl_tree *t,
                                    struct Curl_tree *node)
 {
-  static struct timeval KEY_NOTUSED = {-1,-1}; /* will *NEVER* appear */
+  static const struct timeval KEY_NOTUSED = {-1,-1}; /* will *NEVER* appear */
 
   if(node == NULL)
     return t;
@@ -223,7 +223,7 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
                            struct Curl_tree *removenode,
                            struct Curl_tree **newroot)
 {
-  static struct timeval KEY_NOTUSED = {-1,-1}; /* will *NEVER* appear */
+  static const struct timeval KEY_NOTUSED = {-1,-1}; /* will *NEVER* appear */
   struct Curl_tree *x;
 
   if(!t || !removenode)
