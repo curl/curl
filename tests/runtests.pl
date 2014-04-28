@@ -585,7 +585,7 @@ sub torture {
         else {
             $ret = runclient($testcmd);
         }
-        #logmsg "$_ Returned " . $ret >> 8 . "\n";
+        #logmsg "$_ Returned " . ($ret >> 8) . "\n";
 
         # Now clear the variable again
         delete $ENV{'CURL_MEMLIMIT'} if($ENV{'CURL_MEMLIMIT'});
@@ -599,7 +599,7 @@ sub torture {
 
         # verify that it returns a proper error code, doesn't leak memory
         # and doesn't core dump
-        if($ret & 255) {
+        if(($ret & 255) || ($ret >> 8) >= 128) {
             logmsg " system() returned $ret\n";
             $fail=1;
         }
