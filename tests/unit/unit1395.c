@@ -66,6 +66,7 @@ UNITTEST_START
 
   for(i=0; i < sizeof(pairs)/sizeof(pairs[0]); i++) {
     char *out = Curl_dedotdotify((char *)pairs[i].input);
+    abort_unless(out != NULL, "returned NULL!");
 
     if(strcmp(out, pairs[i].output)) {
       fprintf(stderr, "Test %d: '%s' gave '%s' instead of '%s'\n",
@@ -81,7 +82,3 @@ UNITTEST_START
   return fails;
 
 UNITTEST_STOP
-
-
-
-
