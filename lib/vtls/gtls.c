@@ -216,10 +216,10 @@ static void showtime(struct SessionHandle *data,
   infof(data, "%s\n", data->state.buffer);
 }
 
-static gnutls_datum load_file (const char *file)
+static gnutls_datum_t load_file (const char *file)
 {
   FILE *f;
-  gnutls_datum loaded_file = { NULL, 0 };
+  gnutls_datum_t loaded_file = { NULL, 0 };
   long filelen;
   void *ptr;
 
@@ -242,7 +242,7 @@ out:
   return loaded_file;
 }
 
-static void unload_file(gnutls_datum data) {
+static void unload_file(gnutls_datum_t data) {
   free(data.data);
 }
 
@@ -255,7 +255,7 @@ static CURLcode handshake(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  gnutls_session session = conn->ssl[sockindex].session;
+  gnutls_session_t session = conn->ssl[sockindex].session;
   curl_socket_t sockfd = conn->sock[sockindex];
   long timeout_ms;
   int rc;
@@ -344,7 +344,7 @@ static CURLcode handshake(struct connectdata *conn,
   }
 }
 
-static gnutls_x509_crt_fmt do_file_type(const char *type)
+static gnutls_x509_crt_fmt_t do_file_type(const char *type)
 {
   if(!type || !type[0])
     return GNUTLS_X509_FMT_PEM;
@@ -360,7 +360,7 @@ gtls_connect_step1(struct connectdata *conn,
                    int sockindex)
 {
   struct SessionHandle *data = conn->data;
-  gnutls_session session;
+  gnutls_session_t session;
   int rc;
   void *ssl_sessionid;
   size_t ssl_idsize;
@@ -651,10 +651,10 @@ gtls_connect_step3(struct connectdata *conn,
                    int sockindex)
 {
   unsigned int cert_list_size;
-  const gnutls_datum *chainp;
+  const gnutls_datum_t *chainp;
   unsigned int verify_status;
-  gnutls_x509_crt x509_cert,x509_issuer;
-  gnutls_datum issuerp;
+  gnutls_x509_crt_t x509_cert,x509_issuer;
+  gnutls_datum_t issuerp;
   char certbuf[256]; /* big enough? */
   size_t size;
   unsigned int algo;
@@ -662,7 +662,7 @@ gtls_connect_step3(struct connectdata *conn,
   time_t certclock;
   const char *ptr;
   struct SessionHandle *data = conn->data;
-  gnutls_session session = conn->ssl[sockindex].session;
+  gnutls_session_t session = conn->ssl[sockindex].session;
   int rc;
   int incache;
   void *ssl_sessionid;
