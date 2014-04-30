@@ -87,21 +87,21 @@ rem
     set "var=!var:*:=!"
 
     if "!var!" == "CURL_SRC_C_FILES" (
-      for /f %%c in ('dir /b ..\src\*.c') do call :element %1 src %%c %3
+      for /f "delims=" %%c in ('dir /b ..\src\*.c') do call :element %1 src "%%c" %3
     ) else if "!var!" == "CURL_SRC_H_FILES" (
-      for /f %%h in ('dir /b ..\src\*.h') do call :element %1 src %%h %3
+      for /f "delims=" %%h in ('dir /b ..\src\*.h') do call :element %1 src "%%h" %3
     ) else if "!var!" == "CURL_SRC_RC_FILES" (
-      for /f %%r in ('dir /b ..\src\*.rc') do call :element %1 src %%r %3
+      for /f "delims=" %%r in ('dir /b ..\src\*.rc') do call :element %1 src "%%r" %3
     ) else if "!var!" == "CURL_LIB_C_FILES" (
-      for /f %%c in ('dir /b ..\lib\*.c') do call :element %1 lib %%c %3
+      for /f "delims=" %%c in ('dir /b ..\lib\*.c') do call :element %1 lib "%%c" %3
     ) else if "!var!" == "CURL_LIB_H_FILES" (
-      for /f %%h in ('dir /b ..\lib\*.h') do call :element %1 lib %%h %3
+      for /f "delims=" %%h in ('dir /b ..\lib\*.h') do call :element %1 lib "%%h" %3
     ) else if "!var!" == "CURL_LIB_RC_FILES" (
-      for /f %%r in ('dir /b ..\lib\*.rc') do call :element %1 lib %%r %3
+      for /f "delims=" %%r in ('dir /b ..\lib\*.rc') do call :element %1 lib "%%r" %3
     ) else if "!var!" == "CURL_LIB_VTLS_C_FILES" (
-      for /f %%c in ('dir /b ..\lib\vtls\*.c') do call :element %1 lib\vtls %%c %3
+      for /f "delims=" %%c in ('dir /b ..\lib\vtls\*.c') do call :element %1 lib\vtls "%%c" %3
     ) else if "!var!" == "CURL_LIB_VTLS_H_FILES" (
-      for /f %%h in ('dir /b ..\lib\vtls\*.h') do call :element %1 lib\vtls %%h %3
+      for /f "delims=" %%h in ('dir /b ..\lib\vtls\*.h') do call :element %1 lib\vtls "%%h" %3
     ) else (
       echo.!var!>> %3
     )
@@ -129,26 +129,26 @@ rem
   if "%1" == "dsp" (
     echo # Begin Source File>> %4
     echo.>> %4
-    echo SOURCE=..\..\..\..\%2\%3>> %4
+    echo SOURCE=..\..\..\..\%2\%~3>> %4
     echo # End Source File>> %4
   ) else if "%1" == "vcproj1" (
     echo %TABS%^<File>> %4
-    echo %TABS%  RelativePath="..\..\..\..\%2\%3"^>>> %4
+    echo %TABS%  RelativePath="..\..\..\..\%2\%~3"^>>> %4
     echo %TABS%^</File^>>> %4
   ) else if "%1" == "vcproj2" (
     echo %TABS%^<File>> %4
-    echo %TABS%  RelativePath="..\..\..\..\%2\%3">> %4
+    echo %TABS%  RelativePath="..\..\..\..\%2\%~3">> %4
     echo %TABS%^>>> %4
     echo %TABS%^</File^>>> %4
   ) else if "%1" == "vcxproj" (
     call :extension %3 ext
 
     if "%ext%" == "c" (
-      echo %SPACES%^<ClCompile Include=^"..\..\..\..\%2\%3^" /^>>> %4
+      echo %SPACES%^<ClCompile Include=^"..\..\..\..\%2\%~3^" /^>>> %4
     ) else if "%ext%" == "h" (
-      echo %SPACES%^<ClInclude Include=^"..\..\..\..\%2\%3^" /^>>> %4
+      echo %SPACES%^<ClInclude Include=^"..\..\..\..\%2\%~3^" /^>>> %4
     ) else if "%ext%" == "rc" (
-      echo %SPACES%^<ResourceCompile Include=^"..\..\..\..\%2\%3^" /^>>> %4
+      echo %SPACES%^<ResourceCompile Include=^"..\..\..\..\%2\%~3^" /^>>> %4
     )
   )
 
@@ -160,7 +160,7 @@ rem %1 - The filename
 rem %2 - The return value
 rem
 :extension
-  set fname=%1
+  set fname=%~1
   set ename=
 :loop1
   if "%fname%"=="" (
