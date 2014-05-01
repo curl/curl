@@ -55,6 +55,10 @@ Dependencies
            |_VC <version>
              |_<configuration>
 
+   As OpenSSL doesn't support side-by-side compilation when using different
+   versions of Visual Studio a build helper batch file has been provided to
+   assist with this. Please run "build-openssl -help" for usage details.
+
 Building with Visual C++
 ========================
 
