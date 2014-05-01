@@ -126,6 +126,8 @@ rem
     set "TABS=      "
   )
 
+  call :extension %3 ext
+
   if "%1" == "dsp" (
     echo # Begin Source File>> %4
     echo.>> %4
@@ -141,8 +143,6 @@ rem
     echo %TABS%^>>> %4
     echo %TABS%^</File^>>> %4
   ) else if "%1" == "vcxproj" (
-    call :extension %3 ext
-
     if "%ext%" == "c" (
       echo %SPACES%^<ClCompile Include=^"..\..\..\..\%2\%~3^" /^>>> %4
     ) else if "%ext%" == "h" (
