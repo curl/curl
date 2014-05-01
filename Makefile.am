@@ -38,7 +38,7 @@ VC8LIBPRJ = vs/vc8/lib/vc8libcurl.vcproj
 VC8LIBPRJHEAD = vs/t/lib/vc8_libcurl_prj.head
 VC8LIBPRJFOOT = vs/t/lib/vc8_libcurl_prj.foot
 
-VCPROJECTS = projects/README	\
+VCPROJECTS = projects/README projects/build-openssl.bat	\
  projects/Windows/VC6/curl.dsw	\
  projects/Windows/VC6/lib/libcurl.dsw projects/Windows/VC6/lib/libcurl.tmpl	\
  projects/Windows/VC6/src/curlsrc.dsw projects/Windows/VC6/src/curlsrc.tmpl	\
