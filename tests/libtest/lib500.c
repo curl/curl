@@ -91,43 +91,44 @@ int test(char *URL)
   res = curl_easy_perform(curl);
 
   if(!res) {
-    FILE *moo;
     res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP, &ipstr);
-    moo = fopen(libtest_arg2, "wb");
-    if(moo) {
-      double time_namelookup;
-      double time_connect;
-      double time_pretransfer;
-      double time_starttransfer;
-      double time_total;
-      fprintf(moo, "IP: %s\n", ipstr);
-      curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME, &time_namelookup);
-      curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME, &time_connect);
-      curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME, &time_pretransfer);
-      curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME,
-                        &time_starttransfer);
-      curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &time_total);
+    if (libtest_arg2) {
+      FILE *moo = fopen(libtest_arg2, "wb");
+      if(moo) {
+	double time_namelookup;
+	double time_connect;
+	double time_pretransfer;
+	double time_starttransfer;
+	double time_total;
+	fprintf(moo, "IP: %s\n", ipstr);
+	curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME, &time_namelookup);
+	curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME, &time_connect);
+	curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME, &time_pretransfer);
+	curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME,
+			  &time_starttransfer);
+	curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &time_total);
 
-      /* since the timing will always vary we only compare relative differences
-         between these 5 times */
-      if(time_namelookup > time_connect) {
-        fprintf(moo, "namelookup vs connect: %f %f\n",
-                time_namelookup, time_connect);
-      }
-      if(time_connect > time_pretransfer) {
-        fprintf(moo, "connect vs pretransfer: %f %f\n",
-                time_connect, time_pretransfer);
-      }
-      if(time_pretransfer > time_starttransfer) {
-        fprintf(moo, "pretransfer vs starttransfer: %f %f\n",
-                time_pretransfer, time_starttransfer);
-      }
-      if(time_starttransfer > time_total) {
-        fprintf(moo, "starttransfer vs total: %f %f\n",
-                time_starttransfer, time_total);
-      }
+	/* since the timing will always vary we only compare relative differences
+	   between these 5 times */
+	if(time_namelookup > time_connect) {
+	  fprintf(moo, "namelookup vs connect: %f %f\n",
+		  time_namelookup, time_connect);
+	}
+	if(time_connect > time_pretransfer) {
+	  fprintf(moo, "connect vs pretransfer: %f %f\n",
+		  time_connect, time_pretransfer);
+	}
+	if(time_pretransfer > time_starttransfer) {
+	  fprintf(moo, "pretransfer vs starttransfer: %f %f\n",
+		  time_pretransfer, time_starttransfer);
+	}
+	if(time_starttransfer > time_total) {
+	  fprintf(moo, "starttransfer vs total: %f %f\n",
+		  time_starttransfer, time_total);
+	}
 
-      fclose(moo);
+	fclose(moo);
+      }
     }
   }
 
