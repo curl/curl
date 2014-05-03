@@ -2117,7 +2117,7 @@ static int X509V3_ext(struct SessionHandle *data,
         sep=", ";
         j++; /* skip the newline */
       };
-      while((biomem->data[j] == ' ') && (j<(size_t)biomem->length))
+      while((j<(size_t)biomem->length) && (biomem->data[j] == ' '))
         j++;
       if(j<(size_t)biomem->length)
         ptr+=snprintf(ptr, sizeof(buf)-(ptr-buf), "%s%c", sep,
@@ -2158,8 +2158,6 @@ static void dumpcert(struct SessionHandle *data, X509 *x, int numcert)
   PEM_write_bio_X509(bio_out, x);
 
   BIO_get_mem_ptr(bio_out, &biomem);
-
-  infof(data, "%s\n", biomem->data);
 
   Curl_ssl_push_certinfo_len(data, numcert,
                              "Cert", biomem->data, biomem->length);
