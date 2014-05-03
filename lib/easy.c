@@ -760,7 +760,7 @@ static CURLcode easy_perform(struct SessionHandle *data, bool events)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(data->multi) {
-    failf(data, "easy handled already used in multi handle");
+    failf(data, "easy handle already used in multi handle");
     return CURLE_FAILED_INIT;
   }
 
