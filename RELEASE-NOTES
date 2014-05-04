@@ -17,7 +17,7 @@ This release includes the following changes:
  o imap: Expanded mailbox SEARCH support to use URL query strings [7]
  o imap: Extended FETCH support to include PARTIAL URL specifier [7]
  o nss: implement non-blocking SSL handshake
- o 
+ o build: Reworked Visual Studio project files
 
 This release includes the following bugfixes:
 
@@ -51,6 +51,12 @@ This release includes the following bugfixes:
  o configure: use the nghttp2 path correctly with pkg-config [8]
  o curl_global_init_mem: bump initialized even if already initialized [9]
  o gtls: fix NULL pointer dereference [10]
+ o cyassl: Use error-ssl.h when available
+ o handler: make 'protocol' always specified as a single bit [11]
+ o INFILESIZE: fields in UserDefined must not be changed run-time
+ o openssl: biomem->data is not zero terminated
+ o config-win32.h: Fixed HAVE_LONGLONG for Visual Studio .NET 2003 and up
+ o curl_ntlm_core: Fixed use of long long for VC6 and VC7
  o 
 
 This release includes the following known bugs:
@@ -61,9 +67,10 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alan, Cody Mack, Damian Dixon, Dan Fandrich, Daniel Stenberg,
-  Dilyan Palauzov, Jeroen Koekkoek, JimS, Kamil Dudka, Maciej Puzio,
+  Dilyan Palauzov, drizzt, Jeroen Koekkoek, JimS, Kamil Dudka, Maciej Puzio,
   Marc Hoersken, Melissa Mears, Paul Marks, Remi Gacogne, Steve Holme,
-  Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow, Tristan, Vijay Panghal
+  Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow, Török Edwin, Tristan,
+  Vijay Panghal
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -79,3 +86,4 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/mail/lib-2014-04/0159.html
  [9] = http://curl.haxx.se/bug/view.cgi?id=1362
  [10] = http://curl.haxx.se/mail/lib-2014-04/0145.html
+ [11] = https://github.com/bagder/curl/pull/97
