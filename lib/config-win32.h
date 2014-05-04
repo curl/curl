@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -465,7 +465,8 @@
 #endif
 
 /* Define if the compiler supports the 'long long' data type. */
-#if defined(__MINGW32__) || defined(__WATCOMC__)
+#if defined(__MINGW32__) || defined(__WATCOMC__) || \
+    (defined(_MSC_VER) && (_MSC_VER >= 1310))
 #define HAVE_LONGLONG 1
 #endif
 
