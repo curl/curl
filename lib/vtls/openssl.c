@@ -1501,6 +1501,8 @@ ossl_connect_step1(struct connectdata *conn,
   /* Make funny stuff to get random input */
   Curl_ossl_seed(data);
 
+  data->set.ssl.certverifyresult = !X509_V_OK;
+
   /* check to see if we've been told to use an explicit SSL/TLS version */
 
   switch(data->set.ssl.version) {
@@ -2362,8 +2364,6 @@ static CURLcode servercert(struct connectdata *conn,
   if(data->set.ssl.certinfo)
     /* we've been asked to gather certificate info! */
     (void)get_cert_chain(conn, connssl);
-
-  data->set.ssl.certverifyresult = !X509_V_OK;
 
   connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
   if(!connssl->server_cert) {
