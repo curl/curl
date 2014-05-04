@@ -765,7 +765,7 @@ schannel_send(struct connectdata *conn, int sockindex,
 
       this_write = 0;
 
-      timeleft = Curl_timeleft(conn->data, NULL, TRUE);
+      timeleft = Curl_timeleft(conn->data, NULL, FALSE);
       if(timeleft < 0) {
         /* we already got the timeout */
         failf(conn->data, "schannel: timed out sending data "
