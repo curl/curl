@@ -402,7 +402,11 @@ static void write32_le(const int value, unsigned char *buffer)
   buffer[3] = (char)((value & 0xFF000000) >> 24);
 }
 
+#if defined(HAVE_LONGLONG)
 static void write64_le(const long long value, unsigned char *buffer)
+#else
+static void write64_le(const __int64 value, unsigned char *buffer)
+#endif
 {
   write32_le((int)value, buffer);
   write32_le((int)(value >> 32), buffer + 4);
@@ -550,16 +554,27 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   unsigned int len = 0;
   unsigned char *ptr = NULL;
   unsigned char hmac_output[NTLM_HMAC_MD5_LEN];
+#if defined(HAVE_LONGLONG)
   long long tw;
+#else
+  __int64 tw;
+#endif
   CURLcode res = CURLE_OK;
 
   /* Calculate the timestamp */
+#if defined(HAVE_LONGLONG)
 #if defined(DEBUGBUILD)
   tw = 11644473600ULL * 10000000ULL;
 #else
   tw = ((long long)time(NULL) + 11644473600ULL) * 10000000ULL;
 #endif
-
+#else
+#if defined(DEBUGBUILD)
+  tw = 11644473600ui64 * 10000000ui64;
+#else
+  tw = ((__int64)time(NULL) + 11644473600ui64) * 10000000ui64;
+#endif
+#endif
   /* Calculate the response len */
   len = NTLM_HMAC_MD5_LEN + NTLMv2_BLOB_LEN;
 
