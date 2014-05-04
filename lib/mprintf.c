@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1999 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1999 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -804,11 +804,11 @@ static int dprintf_formatf(
             len = 0;
           }
         }
+        else if(prec != -1)
+          len = (size_t)prec;
         else
           len = strlen(str);
 
-        if(prec != -1 && (size_t) prec < len)
-          len = (size_t)prec;
         width -= (long)len;
 
         if(p->flags & FLAGS_ALT)
@@ -818,7 +818,7 @@ static int dprintf_formatf(
           while(width-- > 0)
             OUTCHAR(' ');
 
-        while(len-- > 0)
+        while((len-- > 0) && *str)
           OUTCHAR(*str++);
         if(p->flags&FLAGS_LEFT)
           while(width-- > 0)
