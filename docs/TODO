@@ -220,10 +220,10 @@
 
 4.1 HOST
 
- HOST is a suggested command in the works for a client to tell which host name
- to use, to offer FTP servers named-based virtual hosting:
+ HOST is a command for a client to tell which host name to use, to offer FTP
+ servers named-based virtual hosting:
 
- http://tools.ietf.org/html/draft-hethmon-mcmurray-ftp-hosts-11
+ http://tools.ietf.org/html/rfc7151
 
 4.2 Alter passive/active on failure and retry
 
