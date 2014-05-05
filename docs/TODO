@@ -25,7 +25,7 @@
  2.2 Fix HTTP Pipelining for PUT
 
  3. Documentation
- 3.1  More and better
+ 3.1 Update date and version in man paegs
 
  4. FTP
  4.1 HOST
@@ -210,9 +210,11 @@
 
 3. Documentation
 
-3.1  More and better
+3.1 Update date and version in man pages
 
- Exactly
+ 'maketgz' or another suitable script could update the .TH sections of the man
+ pages at release time to use the current date and curl/libcurl version
+ number.
 
 4. FTP
 
