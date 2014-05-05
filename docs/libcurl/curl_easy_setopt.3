@@ -2793,6 +2793,14 @@ known_host matching has been done, to allow the application to act and decide
 for libcurl how to proceed. The callback will only be called if
 \fICURLOPT_SSH_KNOWNHOSTS\fP is also set.
 
+.nf
+int curl_sshkeycallback (CURL *easy,     /* easy handle */
+                         const struct curl_khkey *knownkey, /* known */
+                         const struct curl_khkey *foundkey, /* found */
+                         enum curl_khmatch, /* libcurl's view on the keys */
+                         void *clientp);
+.fi
+
 The curl_sshkeycallback function gets passed the CURL handle, the key from the
 known_hosts file, the key from the remote site, info from libcurl on the
 matching status and a custom pointer (set with \fICURLOPT_SSH_KEYDATA\fP). It
