@@ -64,6 +64,7 @@ This release includes the following bugfixes:
  o curl_multi_cleanup: ignore SIGPIPE better [13]
  o schannel: don't use the connect-timeout during send [14]
  o mprintf: allow %.s with data not being zero terminated
+ o http: auth failure on duplicated 'WWW-Authenticate: Negotiate' header [15]
 
 This release includes the following known bugs:
 
@@ -96,3 +97,4 @@ References to bug reports and discussions on issues:
  [12] = http://curl.haxx.se/mail/lib-2014-04/0161.html
  [13] = http://thread.gmane.org/gmane.comp.version-control.git/238242
  [14] = http://curl.haxx.se/bug/view.cgi?id=1352
+ [15] = https://bugzilla.redhat.com/1093348

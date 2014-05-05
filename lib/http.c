@@ -780,7 +780,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
           infof(data, "Authentication problem. Ignoring this.\n");
           data->state.authproblem = TRUE;
         }
-        else {
+        else if(data->state.negotiate.state == GSS_AUTHNONE) {
           neg = Curl_input_negotiate(conn, proxy, auth);
           if(neg == 0) {
             DEBUGASSERT(!data->req.newurl);
