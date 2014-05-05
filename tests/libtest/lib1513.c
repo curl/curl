@@ -47,7 +47,6 @@ static int progressKiller(void *arg,
 int test(char *URL)
 {
   CURL *curl;
-  CURLcode result;
   int res=0;
 
   global_init(CURL_GLOBAL_ALL);
@@ -61,7 +60,7 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
   easy_setopt(curl, CURLOPT_NOPROGRESS, (long)0);
 
-  result = curl_easy_perform(curl);
+  res = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -70,5 +69,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return (int)result;
+  return res;
 }
