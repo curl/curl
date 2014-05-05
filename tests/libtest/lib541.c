@@ -36,13 +36,13 @@ int test(char *URL)
   CURL *curl;
   CURLcode res = CURLE_OK;
   FILE *hd_src ;
-  int hd ;
+  int hd;
   struct_stat file_info;
   int error;
 
   if (!libtest_arg2) {
     fprintf(stderr, "Usage: <url> <file-to-upload>\n");
-    return -1;
+    return TEST_ERR_USAGE;
   }
 
   hd_src = fopen(libtest_arg2, "rb");
@@ -63,13 +63,13 @@ int test(char *URL)
             error, strerror(error));
     fprintf(stderr, "ERROR: cannot open file %s\n", libtest_arg2);
     fclose(hd_src);
-    return -1;
+    return TEST_ERR_MAJOR_BAD;
   }
 
   if(! file_info.st_size) {
     fprintf(stderr, "ERROR: file %s has zero size!\n", libtest_arg2);
     fclose(hd_src);
-    return -4;
+    return TEST_ERR_MAJOR_BAD;
   }
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {

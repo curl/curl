@@ -32,7 +32,7 @@ int test(char *URL)
   CURL* curls = NULL;
   CURLM* multi = NULL;
   int still_running;
-  int i = -1;
+  int i = TEST_ERR_FAILURE;
   int res = 0;
   CURLMsg *msg;
 
@@ -58,7 +58,7 @@ int test(char *URL)
     res = curl_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
     if (res != CURLM_OK) {
       printf("curl_multi_wait() returned %d\n", res);
-      res = -1;
+      res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
 

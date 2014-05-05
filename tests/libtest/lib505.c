@@ -50,7 +50,7 @@ int test(char *URL)
 
   if (!libtest_arg2) {
     fprintf(stderr, "Usage: <url> <file-to-upload>\n");
-    return -1;
+    return TEST_ERR_USAGE;
   }
 
   hd_src = fopen(libtest_arg2, "rb");
@@ -59,7 +59,7 @@ int test(char *URL)
     fprintf(stderr, "fopen() failed with error: %d %s\n",
             error, strerror(error));
     fprintf(stderr, "Error opening file: %s\n", libtest_arg2);
-    return -2; /* if this happens things are major weird */
+    return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
 
   /* get the file size of the local file */
@@ -71,13 +71,13 @@ int test(char *URL)
             error, strerror(error));
     fprintf(stderr, "ERROR: cannot open file %s\n", libtest_arg2);
     fclose(hd_src);
-    return -1;
+    return TEST_ERR_MAJOR_BAD;
   }
 
   if(! file_info.st_size) {
     fprintf(stderr, "ERROR: file %s has zero size!\n", libtest_arg2);
     fclose(hd_src);
-    return -4;
+    return TEST_ERR_MAJOR_BAD;
   }
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
