@@ -3502,9 +3502,17 @@ static void fix_hostname(struct SessionHandle *data,
 #elif defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void)conn;
 #endif
+  size_t len;
 
   /* set the name we use to display the host name */
   host->dispname = host->name;
+
+  len = strlen(host->name);
+  if(host->name[len-1] == '.')
+    /* strip off a single trailing dot if present, primarily for SNI but
+       there's no use for it */
+    host->name[len-1]=0;
+
   if(!is_ASCII_name(host->name)) {
 #ifdef USE_LIBIDN
   /*************************************************************
