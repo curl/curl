@@ -4729,7 +4729,7 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   tst_allow_poll="unknown"
   #
   case $host_os in
-    darwin*|interix*)
+    darwin[[123456789]].*|darwin10.*|darwin11.*|darwin12.*|interix*)
       dnl poll() does not work on these platforms
       dnl Interix: "does provide poll(), but the implementing developer must
       dnl have been in a bad mood, because poll() only works on the /proc
