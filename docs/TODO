@@ -97,6 +97,7 @@
  17.2 nicer lacking perl message
  17.3 more protocols supported
  17.4 more platforms supported
+ 17.5 Add support for concurrent connections
 
  18. Next SONAME bump
  18.1 http-style HEAD output for ftp
@@ -519,6 +520,20 @@ to provide the data to send.
 
  Make the test suite work on more platforms. OpenBSD and Mac OS. Remove
  fork()s and it should become even more portable.
+
+17.5 Add support for concurrent connections
+
+ Tests 836, 882 and 938 were designed to verify that separate connections aren't
+ used when using different login credentials in protocols that shouldn't re-use
+ a connection under such circumstances.
+
+ Unfortunately, ftpserver.pl doesn't appear to support multiple concurrent
+ connections. The read while() loop seems to loop until it receives a disconnect
+ from the client, where it then enters the waiting for connections loop. When
+ the client opens a second connection to the server, the first connection hasn't
+ been dropped (unless it has been forced - which we shouldn't do in these tests)
+ and thus the wait for connections loop is never entered to receive the second
+ connection.
 
 18. Next SONAME bump
 
