@@ -254,7 +254,7 @@ rem ***************************************************************************
 :syntax
   rem Display the help
   echo.
-  echo Usage: build-openssl <compiler> <platform> [configuration] [directory]
+  echo Usage: build-openssl ^<compiler^> ^<platform^> [configuration] [directory]
   echo.
   echo Compiler:
   echo.

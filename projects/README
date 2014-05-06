@@ -59,6 +59,9 @@ Dependencies
    versions of Visual Studio a build helper batch file has been provided to
    assist with this. Please run "build-openssl -help" for usage details.
 
+   The perl version available on the system may produce build errors. We've 
+   been able to build OpenSSL with ActiveState Perl v5.16.3.
+
 Building with Visual C++
 ========================
 
