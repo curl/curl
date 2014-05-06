@@ -18,6 +18,7 @@ This release includes the following changes:
  o imap: Extended FETCH support to include PARTIAL URL specifier [7]
  o nss: implement non-blocking SSL handshake
  o build: Reworked Visual Studio project files
+ o poll: enable poll on darwin13
 
 This release includes the following bugfixes:
 
@@ -57,7 +58,12 @@ This release includes the following bugfixes:
  o openssl: biomem->data is not zero terminated
  o config-win32.h: Fixed HAVE_LONGLONG for Visual Studio .NET 2003 and up
  o curl_ntlm_core: Fixed use of long long for VC6 and VC7
- o 
+ o SNI: strip off a single trailing dot from host name [12]
+ o curl: bail on cookie use when built with disabled cookies
+ o curl_easy_setopt.3: added the proto for CURLOPT_SSH_KNOWNHOSTS
+ o curl_multi_cleanup: ignore SIGPIPE better [13]
+ o schannel: don't use the connect-timeout during send [14]
+ o mprintf: allow %.s with data not being zero terminated
 
 This release includes the following known bugs:
 
@@ -66,11 +72,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alan, Cody Mack, Damian Dixon, Dan Fandrich, Daniel Stenberg,
-  Dilyan Palauzov, drizzt, Jeroen Koekkoek, JimS, Kamil Dudka, Maciej Puzio,
-  Marc Hoersken, Melissa Mears, Paul Marks, Remi Gacogne, Steve Holme,
-  Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow, Török Edwin, Tristan,
-  Vijay Panghal
+  Cody Mack, Damian Dixon, Dan Fandrich, Daniel Johnson, Daniel Stenberg,
+  Dilyan Palauzov, Jeff King, Jeroen Koekkoek, Kamil Dudka, Leon Winter,
+  Maciej Puzio, Marc Hoersken, Paul Marks, Radu Simionescu, Remi Gacogne,
+  Steve Holme, Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow, Török Edwin,
+  Vijay Panghal,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -87,3 +93,7 @@ References to bug reports and discussions on issues:
  [9] = http://curl.haxx.se/bug/view.cgi?id=1362
  [10] = http://curl.haxx.se/mail/lib-2014-04/0145.html
  [11] = https://github.com/bagder/curl/pull/97
+ [12] = http://curl.haxx.se/mail/lib-2014-04/0161.html
+ [13] = http://thread.gmane.org/gmane.comp.version-control.git/238242
+ [14] = http://curl.haxx.se/bug/view.cgi?id=1352
+ 
