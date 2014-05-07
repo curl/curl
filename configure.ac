@@ -2167,10 +2167,11 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
       USE_AXTLS="yes"
       curl_ssl_msg="enabled (axTLS)"
 
-
-      LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
-      export LD_LIBRARY_PATH
-      AC_MSG_NOTICE([Added $LIB_AXTLS to LD_LIBRARY_PATH])
+      if test "x$cross_compiling" != "xyes"; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
+        export LD_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $LIB_AXTLS to LD_LIBRARY_PATH])
+      fi
       ],[
       LDFLAGS="$CLEANLDFLAGS"
       CPPFLAGS="$CLEANCPPFLAGS"
@@ -2702,7 +2703,7 @@ if test "$want_idn" = "yes"; then
     if test "x$ac_cv_header_tld_h" = "xyes"; then
       AC_SUBST([IDN_ENABLED], [1])
       curl_idn_msg="enabled"
-      if test -n "$IDN_DIR"; then
+      if test -n "$IDN_DIR" -a "x$cross_compiling" != "xyes"; then
         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$IDN_DIR"
         export LD_LIBRARY_PATH
         AC_MSG_NOTICE([Added $IDN_DIR to LD_LIBRARY_PATH])
