@@ -911,6 +911,16 @@ timeout increases in decimal precision.  See also the \fI--connect-timeout\fP
 option.
 
 If this option is used several times, the last one will be used.
+.IP "--login-options <options>"
+Specify the login options to use during server authentication.
+
+You can use the login options to specify protocol specific options that may
+be used during authentication. At present only IMAP, POP3 and SMTP support
+login options. For more information about the login options please see
+RFC 2384, RFC 5092 and IETF draft draft-earhart-url-smtp-00.txt (Added in
+7.34.0).
+
+If this option is used several times, the last one will be used.
 .IP "--mail-auth <address>"
 (SMTP) Specify a single address. This will be used to specify the
 authentication address (identity) of a submitted message that is being relayed
@@ -1613,23 +1623,15 @@ If this option is used several times, the last one will be used.
 .IP "--trace-time"
 Prepends a time stamp to each trace or verbose line that curl displays.
 (Added in 7.14.0)
-.IP "-u, --user <user:password;options>"
-Specify the user name, password and optional login options to use for server
-authentication. Overrides \fI-n, --netrc\fP and \fI--netrc-optional\fP.
+.IP "-u, --user <user:password>"
+Specify the user name and password to use for server authentication. Overrides
+\fI-n, --netrc\fP and \fI--netrc-optional\fP.
 
-If you simply specify the user name, with or without the login options, curl
-will prompt for a password.
+If you simply specify the user name, curl will prompt for a password.
 
 If you use an SSPI-enabled curl binary and perform NTLM authentication, you
 can force curl to select the user name and password from your environment by
-simply specifying a single colon with this option: "-u :" or by specifying the
-login options on their own, for example "-u ;auth=NTLM".
-
-You can use the optional login options part to specify protocol specific
-options that may be used during authentication. At present only IMAP, POP3 and
-SMTP support login options as part of the user login information. For more
-information about the login options please see RFC 2384, RFC 5092 and IETF
-draft draft-earhart-url-smtp-00.txt (Added in 7.31.0). 
+specifying a single colon with this option: "-u :".
 
 If this option is used several times, the last one will be used.
 .IP "-U, --proxy-user <user:password>"
