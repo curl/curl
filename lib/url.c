@@ -3496,13 +3496,14 @@ static bool tld_check_name(struct SessionHandle *data,
 static void fix_hostname(struct SessionHandle *data,
                          struct connectdata *conn, struct hostname *host)
 {
+  size_t len;
+
 #ifndef USE_LIBIDN
   (void)data;
   (void)conn;
 #elif defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void)conn;
 #endif
-  size_t len;
 
   /* set the name we use to display the host name */
   host->dispname = host->name;
