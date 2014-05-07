@@ -126,6 +126,7 @@ static const char *const helptext[] = {
   "     --local-port RANGE  Force use of these local port numbers",
   " -L, --location      Follow redirects (H)",
   "     --location-trusted like --location and send auth to other hosts (H)",
+  "     --login-options OPTIONS  Server login options (IMAP, POP3, SMTP)",
   " -M, --manual        Display the full manual",
   "     --mail-from FROM  Mail from this address (SMTP)",
   "     --mail-rcpt TO  Mail to this/these addresses (SMTP)",
@@ -224,8 +225,7 @@ static const char *const helptext[] = {
   " -T, --upload-file FILE  Transfer FILE to destination",
   "     --url URL       URL to work with",
   " -B, --use-ascii     Use ASCII/text transfer",
-  " -u, --user USER[:PASSWORD][;OPTIONS]  Server user, password and login"
-  " options",
+  " -u, --user USER[:PASSWORD]  Server user and password",
   "     --tlsuser USER  TLS username",
   "     --tlspassword STRING TLS password",
   "     --tlsauthtype STRING  TLS authentication type (default SRP)",
