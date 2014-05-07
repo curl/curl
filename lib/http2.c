@@ -270,15 +270,9 @@ static int before_frame_send(nghttp2_session *session,
                              void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
-  struct http_conn *c = &conn->proto.httpc;
   (void)session;
   (void)frame;
   infof(conn->data, "before_frame_send() was called\n");
-  if(frame->hd.type == NGHTTP2_HEADERS &&
-     frame->headers.cat == NGHTTP2_HCAT_REQUEST) {
-    /* Get stream ID of our request */
-    c->stream_id = frame->hd.stream_id;
-  }
   return 0;
 }
 static int on_frame_send(nghttp2_session *session,
@@ -400,7 +394,6 @@ static const nghttp2_session_callbacks callbacks = {
   on_header              /* nghttp2_on_header_callback */
 #if NGHTTP2_VERSION_NUM >= 0x000400
   , NULL                 /* nghttp2_select_padding_callback */
-  , NULL                 /* nghttp2_adjust_priority_callback */
 #endif
 };
 
@@ -639,6 +632,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   char *hdbuf = (char*)mem;
   char *end;
   nghttp2_data_provider data_prd;
+  int32_t stream_id;
+
   (void)sockindex;
 
   infof(conn->data, "http2_send len=%zu\n", len);
@@ -744,19 +739,22 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   case HTTPREQ_PUT:
     data_prd.read_callback = data_source_read_callback;
     data_prd.source.ptr = NULL;
-    rv = nghttp2_submit_request(httpc->h2, NULL, nva, nheader, &data_prd,
-                                NULL);
+    stream_id = nghttp2_submit_request(httpc->h2, NULL, nva, nheader,
+                                       &data_prd, NULL);
     break;
   default:
-    rv = nghttp2_submit_request(httpc->h2, NULL, nva, nheader, NULL, NULL);
+    stream_id = nghttp2_submit_request(httpc->h2, NULL, nva, nheader,
+                                       NULL, NULL);
   }
 
   Curl_safefree(nva);
 
-  if(rv != 0) {
+  if(stream_id < 0) {
     *err = CURLE_SEND_ERROR;
     return -1;
   }
+
+  httpc->stream_id = stream_id;
 
   rv = nghttp2_session_send(httpc->h2);
 
