@@ -24,13 +24,14 @@
 .SH NAME
 mk-ca-bundle \- convert mozilla's certdata.txt to PEM format
 .SH SYNOPSIS
-mk-ca-bundle [bilnqtuv]
+mk-ca-bundle [bilnpqstuv]
 .I [outputfile]
 .SH DESCRIPTION
 The mk-ca-bundle tool downloads the certdata.txt file from Mozilla's source
-tree over HTTP, then parses certdata.txt and extracts CA Root Certificates
-into PEM format.  These are then processed with the OpenSSL commandline tool
-to produce the final ca-bundle file.
+tree over HTTP, then parses certdata.txt and extracts certificates
+into PEM format.  By default, only CA root certificates trusted to issue SSL
+server authentication certificates are extracted. These are then processed with
+the OpenSSL commandline tool to produce the final ca-bundle file.
 
 The default \fIoutputfile\fP name is \fBca-bundle.crt\fP. By setting it to '-'
 (a single dash) you will get the output sent to STDOUT instead of a file.
@@ -54,10 +55,40 @@ print version info about used modules
 print license info about certdata.txt
 .IP -n
 no download of certdata.txt (to use existing)
+.IP "-p [purposes]:[levels]"
+list of Mozilla trust purposes and levels for certificates to include in output.
+Takes the form of a comma separated list of purposes, a colon, and a comma
+separated list of levels. The default is to include all certificates trusted
+to issue SSL Server certificates (SERVER_AUTH:TRUSTED_DELEGATOR).
+
+(Added in version 1.21, Perl only)
+
+Valid purposes are:
+.RS
+ALL, DIGITAL_SIGNATURE, NON_REPUDIATION, KEY_ENCIPHERMENT,
+DATA_ENCIPHERMENT, KEY_AGREEMENT, KEY_CERT_SIGN, CRL_SIGN,
+SERVER_AUTH (default), CLIENT_AUTH, CODE_SIGNING, EMAIL_PROTECTION,
+IPSEC_END_SYSTEM, IPSEC_TUNNEL, IPSEC_USER, TIME_STAMPING, STEP_UP_APPROVED
+.RE
+
+Valid trust levels are:
+.RS
+ALL, TRUSTED_DELEGATOR (default), NOT_TRUSTED, MUST_VERIFY_TRUST, TRUSTED
+.RE
 .IP -q
 be really quiet (no progress output at all)
 .IP -t
 include plain text listing of certificates
+.IP "-s [algorithms]"
+comma separated list of signature algorithms with which to hash/fingerprint
+each certificate and output when run in plain text mode.
+
+(Added in version 1.21, Perl only)
+
+Valid algorithms are:
+.RS
+ALL, NONE, MD5 (default), SHA1, SHA256, SHA512
+.RE
 .IP -u
 unlink (remove) certdata.txt after processing
 .IP -v
