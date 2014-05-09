@@ -561,7 +561,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           else if(urls) {
             /* fill '#1' ... '#9' terms from URL pattern */
             char *storefile = outfile;
-			res = (CURLcode) glob_match_url(&outfile, storefile, urls);
+            res = (CURLcode) glob_match_url(&outfile, storefile, urls);
             Curl_safefree(storefile);
             if(res) {
               /* bad globbing */
