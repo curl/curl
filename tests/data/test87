@@ -47,7 +47,7 @@ urlglob with out of range -o #[num] usage
 # survives
 #
 <verify>
-<file name="log/dumpit#2.dump" [mode="text"]>
+<file name="log/dumpit#2.dump" mode="text">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 16
