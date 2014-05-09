@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -102,6 +102,10 @@ static CURLcode sslctx_function(CURL * curl, void * sslctx, void * parm)
   /* add our certificate to this store */
   if (X509_STORE_add_cert(store, cert)==0)
     printf("error adding certificate\n");
+
+  /* decrease reference counts */
+  X509_free(cert);
+  BIO_free(bio);
 
   /* all set to go */
   return CURLE_OK ;
