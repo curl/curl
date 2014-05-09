@@ -202,7 +202,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
   CURL *curl = config->easy;
   char *httpgetfields = NULL;
 
-  int res = 0;
+  CURLcode res = 0;
   unsigned long li;
 
   /* Save the values of noprogress and isatty to restore them later on */
@@ -398,7 +398,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
     if(!config->globoff && infiles) {
       /* Unless explicitly shut off */
-      res = glob_url(&inglob, infiles, &infilenum,
+      res = (CURLcode) glob_url(&inglob, infiles, &infilenum,
                      global->showerror?global->errors:NULL);
       if(res) {
         Curl_safefree(outfiles);
@@ -423,7 +423,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         Curl_nop_stmt;
       else {
         if(inglob) {
-          res = glob_next_url(&uploadfile, inglob);
+          res = (CURLcode) glob_next_url(&uploadfile, inglob);
           if(res == CURLE_OUT_OF_MEMORY)
             helpf(global->errors, "out of memory\n");
         }
@@ -449,7 +449,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
       if(!config->globoff) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
-        res = glob_url(&urls, urlnode->url, &urlnum,
+        res = (CURLcode) glob_url(&urls, urlnode->url, &urlnum,
                        global->showerror?global->errors:NULL);
         if(res) {
           Curl_safefree(uploadfile);
@@ -504,7 +504,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
         else {
           if(urls) {
-            res = glob_next_url(&this_url, urls);
+            res = (CURLcode) glob_next_url(&this_url, urls);
             if(res)
               goto show_error;
           }
@@ -561,7 +561,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           else if(urls) {
             /* fill '#1' ... '#9' terms from URL pattern */
             char *storefile = outfile;
-            res = glob_match_url(&outfile, storefile, urls);
+			res = (CURLcode) glob_match_url(&outfile, storefile, urls);
             Curl_safefree(storefile);
             if(res) {
               /* bad globbing */
@@ -1769,7 +1769,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
   /* Release metalink related resources here */
   clean_metalink(config);
 
-  return (CURLcode)res;
+  return res;
 }
 
 CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
