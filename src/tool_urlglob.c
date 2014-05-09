@@ -324,7 +324,7 @@ static bool peek_ipv6(const char *str, size_t *skip)
     }
     else if(c == ']') {
       *skip = i;
-      return colons >= 2;
+      return colons >= 2 ? TRUE : FALSE;
     }
     else {
       return FALSE;
