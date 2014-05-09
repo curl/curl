@@ -49,9 +49,9 @@ CC_FLAGS = -5 -O2 -tWM -w -w-aus -w-ccc -w-dup -w-prc -w-pro -w-rch -w-sig -w-sp
 LIBFLAGS = /C /P32
 LDFLAGS  = -q -lq -laa -tWD
 
-SRCDIR   = .
+SRCDIR   = .;.\vtls
 OBJDIR   = .\BCC_objs
-INCDIRS  = -I.;..\include
+INCDIRS  = -I.;.\lib;..\include
 LINKLIB  = $(BCCDIR)\lib\cw32mt.lib $(BCCDIR)\lib\ws2_32.lib
 DEFINES  = -DNDEBUG -DWIN32 -DBUILDING_LIBCURL
 
@@ -94,10 +94,11 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\l
 # build source files with hyphens in their name as objects with underscores
 # using explicit compilation build rules instead of implicit ones.
 
-NOHYPHEN = $(CSOURCES:-=_)
+NOHYPHEN1 = $(CSOURCES:-=_)
+NOHYPHEN2 = $(NOHYPHEN1:vtls/=)
 
-OBJECTS = $(NOHYPHEN:.c=.obj)
-PREPROCESSED = $(NOHYPHEN:.c=.int)
+OBJECTS = $(NOHYPHEN2:.c=.obj)
+PREPROCESSED = $(NOHYPHEN2:.c=.int)
 
 # Borland's command line compiler (BCC32) version 5.5.1 integrated
 # preprocessor has a bug which results in silently generating wrong
