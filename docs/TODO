@@ -186,6 +186,8 @@
  by Chrome already:
  http://www.chromium.org/developers/design-documents/secure-web-proxy
 
+ ...and by Firefox soon:
+ https://bugzilla.mozilla.org/show_bug.cgi?id=378637
 
 2. libcurl - multi interface
 
