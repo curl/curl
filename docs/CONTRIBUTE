@@ -278,6 +278,10 @@
       [full description, no wider than 72 columns that describe as much as
       possible as to why this change is made, and possibly what things
       it fixes and everything else that is related]
+
+      [Bug: link to source of the report or more related discussion]
+      [Reported-by: John Doe - credit the reporter]
+      [whatever-else-by: credit all helpers, finders, doers]
       ---- stop ----
 
  Don't forget to use commit --author="" if you commit someone else's work,
