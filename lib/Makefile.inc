@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -20,14 +20,15 @@
 #
 ###########################################################################
 
-VSOURCES=vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c vtls/qssl.c	\
-  vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c vtls/cyassl.c	\
-  vtls/curl_schannel.c vtls/curl_darwinssl.c vtls/gskit.c
-VHEADERS= vtls/qssl.h vtls/openssl.h vtls/vtls.h vtls/gtls.h		\
+LIB_VTLS_CSOURCES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c	\
+  vtls/qssl.c vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c	\
+  vtls/cyassl.c vtls/curl_schannel.c vtls/curl_darwinssl.c vtls/gskit.c
+
+LIB_VTLS_HHEADERS = vtls/qssl.h vtls/openssl.h vtls/vtls.h vtls/gtls.h	\
   vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h vtls/axtls.h	\
   vtls/cyassl.h vtls/curl_schannel.h vtls/curl_darwinssl.h vtls/gskit.h
 
-CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
+LIB_CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c	\
   ldap.c version.c getenv.c escape.c mprintf.c telnet.c netrc.c		\
   getinfo.c transfer.c strequal.c easy.c security.c curl_fnmatch.c	\
@@ -44,9 +45,9 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   asyn-thread.c curl_gssapi.c curl_ntlm.c curl_ntlm_wb.c		\
   curl_ntlm_core.c curl_ntlm_msgs.c curl_sasl.c curl_multibyte.c	\
   hostcheck.c bundles.c conncache.c pipeline.c dotdot.c x509asn1.c	\
-  http2.c curl_sasl_sspi.c $(VSOURCES)
+  http2.c curl_sasl_sspi.c
 
-HHEADERS = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h	\
+LIB_HHEADERS = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h	\
   formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h if2ip.h		\
   speedcheck.h urldata.h curl_ldap.h escape.h telnet.h getinfo.h	\
   strequal.h curl_sec.h memdebug.h http_chunks.h curl_fnmatch.h		\
@@ -62,4 +63,7 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h	\
   curl_ntlm.h curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h		\
   curl_ntlm_msgs.h curl_sasl.h curl_multibyte.h hostcheck.h bundles.h	\
   conncache.h curl_setup_once.h multihandle.h setup-vms.h pipeline.h	\
-  dotdot.h x509asn1.h http2.h sigpipe.h $(VHEADERS)
+  dotdot.h x509asn1.h http2.h sigpipe.h
+
+CSOURCES = $(LIB_CSOURCES) $(LIB_VTLS_CSOURCES)
+HHEADERS = $(LIB_HHEADERS) $(LIB_VTLS_HHEADERS)
