@@ -19,6 +19,8 @@ This release includes the following changes:
  o nss: implement non-blocking SSL handshake
  o build: Reworked Visual Studio project files
  o poll: enable poll on darwin13
+ o mk-ca-bundle: added -p
+ o libtests: add a wait_ms() function
 
 This release includes the following bugfixes:
 
@@ -64,7 +66,12 @@ This release includes the following bugfixes:
  o curl_multi_cleanup: ignore SIGPIPE better [13]
  o schannel: don't use the connect-timeout during send [14]
  o mprintf: allow %.s with data not being zero terminated
+ o tool_help: Fixed missing --login-options option
+ o configure: Don't set LD_LIBRARY_PATH when cross-compiling
  o http: auth failure on duplicated 'WWW-Authenticate: Negotiate' header [15]
+ o cacertinmem: fix memory leak [16]
+ o lib1506: make sure the transfers are not within the same ms [17]
+ o Makefile.b32: Fixed for vtls changes [18]
 
 This release includes the following known bugs:
 
@@ -73,11 +80,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Cody Mack, Damian Dixon, Dan Fandrich, Daniel Johnson, Daniel Stenberg,
-  Dilyan Palauzov, Jeff King, Jeroen Koekkoek, Kamil Dudka, Leon Winter,
-  Maciej Puzio, Marc Hoersken, Paul Marks, Radu Simionescu, Remi Gacogne,
-  Steve Holme, Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow, Török Edwin,
-  Vijay Panghal, Aaro Koskinen
+  Aaro Koskinen, Cody Mack, Damian Dixon, Dan Fandrich, Daniel Johnson,
+  Daniel Stenberg, David Woodhouse, Dilyan Palauzov, Henrik,
+  Ivo Bellin Salarin, Jeff King, Jeroen Koekkoek, Jon Torrey, Kamil Dudka,
+  Leon Winter, Maciej Puzio, Marc Hoersken, Marko, Patrick Watson, Paul Marks,
+  Radu Simionescu, Remi Gacogne, Steve Holme, Tatsuhiro Tsujikawa, Till Maas,
+  Tom Sparrow, Török Edwin, Vijay Panghal
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -98,3 +106,6 @@ References to bug reports and discussions on issues:
  [13] = http://thread.gmane.org/gmane.comp.version-control.git/238242
  [14] = http://curl.haxx.se/bug/view.cgi?id=1352
  [15] = https://bugzilla.redhat.com/1093348
+ [16] = http://curl.haxx.se/bug/view.cgi?id=1368
+ [17] = http://curl.haxx.se/mail/lib-2014-05/0081.html
+ [18] = http://curl.haxx.se/mail/lib-2014-05/0025.html
