@@ -202,7 +202,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
   CURL *curl = config->easy;
   char *httpgetfields = NULL;
 
-  CURLcode res = 0;
+  CURLcode res = CURLE_OK;
   unsigned long li;
 
   /* Save the values of noprogress and isatty to restore them later on */
