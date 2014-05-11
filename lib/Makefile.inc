@@ -65,5 +65,7 @@ LIB_HHEADERS = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h	\
   conncache.h curl_setup_once.h multihandle.h setup-vms.h pipeline.h	\
   dotdot.h x509asn1.h http2.h sigpipe.h
 
+LIB_RC = libcurl.rc
+
 CSOURCES = $(LIB_CSOURCES) $(LIB_VTLS_CSOURCES)
 HHEADERS = $(LIB_HHEADERS) $(LIB_VTLS_HHEADERS)
