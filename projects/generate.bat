@@ -121,9 +121,9 @@ rem
 :element
   set "SPACES=    "
   if "%2" == "lib\vtls" (
-    set "TABS=        "
+    set "TABS=			"
   ) else (
-    set "TABS=      "
+    set "TABS=		"
   )
 
   call :extension %3 ext
@@ -135,11 +135,11 @@ rem
     echo # End Source File>> %4
   ) else if "%1" == "vcproj1" (
     echo %TABS%^<File>> %4
-    echo %TABS%  RelativePath="..\..\..\..\%2\%~3"^>>> %4
+    echo %TABS%	RelativePath="..\..\..\..\%2\%~3"^>>> %4
     echo %TABS%^</File^>>> %4
   ) else if "%1" == "vcproj2" (
     echo %TABS%^<File>> %4
-    echo %TABS%  RelativePath="..\..\..\..\%2\%~3">> %4
+    echo %TABS%	RelativePath="..\..\..\..\%2\%~3">> %4
     echo %TABS%^>>> %4
     echo %TABS%^</File^>>> %4
   ) else if "%1" == "vcxproj" (
