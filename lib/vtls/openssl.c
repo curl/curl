@@ -538,6 +538,7 @@ int cert_stuff(struct connectdata *conn,
 
       if(!cert_done)
         return 0; /* failure! */
+      break;
 #else
       failf(data, "file type P12 for certificate not supported");
       return 0;
