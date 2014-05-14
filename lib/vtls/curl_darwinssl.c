@@ -952,7 +952,7 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
 
     /* Here we go: */
     status = SecPKCS12Import(pkcs_data, options, &items);
-    if(status == noErr) {
+    if(status == noErr && items && CFArrayGetCount(items)) {
       CFDictionaryRef identity_and_trust = CFArrayGetValueAtIndex(items, 0L);
       const void *temp_identity = CFDictionaryGetValue(identity_and_trust,
         kSecImportItemIdentity);
@@ -960,8 +960,10 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
       /* Retain the identity; we don't care about any other data... */
       CFRetain(temp_identity);
       *out_cert_and_key = (SecIdentityRef)temp_identity;
-      CFRelease(items);
     }
+
+    if(items)
+      CFRelease(items);
     CFRelease(options);
     CFRelease(pkcs_data);
   }
