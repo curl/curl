@@ -121,7 +121,7 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
+  PROTOPT_CREDSPERREQUEST               /* flags */
 };
 
 #ifdef USE_SSL
