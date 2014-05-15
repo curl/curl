@@ -224,7 +224,12 @@ long Curl_timeleft(struct SessionHandle *data,
   }
 
   /* subtract elapsed time */
-  timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startsingle);
+  if(duringconnect)
+    /* since this most recent connect started */
+    timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startsingle);
+  else
+    /* since the entire operation started */
+    timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startop);
   if(!timeout_ms)
     /* avoid returning 0 as that means no timeout! */
     return -1;

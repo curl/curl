@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -131,6 +131,8 @@ const struct timetest run[] = {
 /* this is the pretended start time of the transfer */
 data->progress.t_startsingle.tv_sec = BASE;
 data->progress.t_startsingle.tv_usec = 0;
+data->progress.t_startop.tv_sec = BASE;
+data->progress.t_startop.tv_usec = 0;
 
 for(i=0; i < sizeof(run)/sizeof(run[0]); i++) {
   NOW(run[i].now_s, run[i].now_us);

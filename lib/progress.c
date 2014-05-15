@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -172,8 +172,12 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
   case TIMER_NONE:
     /* mistake filter */
     break;
+  case TIMER_STARTOP:
+    /* This is set at the start of a transfer */
+    data->progress.t_startop = now;
+    break;
   case TIMER_STARTSINGLE:
-    /* This is set at the start of a single fetch */
+    /* This is set at the start of each single fetch */
     data->progress.t_startsingle = now;
     break;
 

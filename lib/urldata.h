@@ -1135,6 +1135,7 @@ struct Progress {
 
   struct timeval start;
   struct timeval t_startsingle;
+  struct timeval t_startop;
   struct timeval t_acceptdata;
 #define CURR_TIME (5+1) /* 6 entries for 5 seconds */
 
