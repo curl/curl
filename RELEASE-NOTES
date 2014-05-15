@@ -74,6 +74,9 @@ This release includes the following bugfixes:
  o Makefile.b32: Fixed for vtls changes [18]
  o sasl: Fixed missing qop in the client's challenge-response message
  o openssl: unbreak PKCS12 support [19]
+ o darwinssl: fix potential crash with a P12 file [20]
+ o timers: fix timer regression involving redirects / reconnects [21]
+ o CURLINFO_SSL_VERIFYRESULT: made more reliable [22]
 
 This release includes the following known bugs:
 
@@ -83,11 +86,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Aaro Koskinen, Cody Mack, Damian Dixon, Dan Fandrich, Daniel Johnson,
-  Daniel Stenberg, David Woodhouse, Dilyan Palauzov, Dmitry, Henrik,
-  Ivo Bellin Salarin, Jeff King, Jeroen Koekkoek, Jon Torrey, Kamil Dudka,
-  Leon Winter, Maciej Puzio, Marc Hoersken, Marko, Patrick Watson, Paul Marks,
-  Radu Simionescu, Remi Gacogne, Steve Holme, Tatsuhiro Tsujikawa, Till Maas,
-  Tom Sparrow, Török Edwin, Vijay Panghal
+  Daniel Stenberg, David Woodhouse, Dilyan Palauzov, Ivo Bellin Salarin,
+  Jeff King, Jeroen Koekkoek, Jon Torrey, Kamil Dudka, Larry Lin, Leon Winter,
+  Maciej Puzio, Marc Hoersken, Nick Zitzmann, Patrick Watson, Paul Marks,
+  Radu Simionescu, Remi Gacogne, Ryan Braud, Steve Holme, Tatsuhiro Tsujikawa,
+  Till Maas, Tom Sparrow, Török Edwin, Vijay Panghal,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -112,3 +115,6 @@ References to bug reports and discussions on issues:
  [17] = http://curl.haxx.se/mail/lib-2014-05/0081.html
  [18] = http://curl.haxx.se/mail/lib-2014-05/0025.html
  [19] = http://curl.haxx.se/bug/view.cgi?id=1371
+ [20] = http://curl.haxx.se/bug/view.cgi?id=1369
+ [21] = http://curl.haxx.se/mail/lib-2014-05/0147.html
+ [22] = http://curl.haxx.se/mail/lib-2014-04/0203.html
