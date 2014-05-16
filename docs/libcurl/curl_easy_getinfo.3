@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -109,7 +109,9 @@ uploaded.
 .IP CURLINFO_SIZE_DOWNLOAD
 Pass a pointer to a double to receive the total amount of bytes that were
 downloaded. The amount is only for the latest transfer and will be reset again
-for each new transfer.
+for each new transfer. This counts actual payload data, what's also commonly
+called body. All meta and header data are excluded and will not be counted in
+this number.
 .IP CURLINFO_SPEED_DOWNLOAD
 Pass a pointer to a double to receive the average download speed that curl
 measured for the complete download. Measured in bytes/second.
