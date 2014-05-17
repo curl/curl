@@ -33,61 +33,85 @@ CMake/Utilities.cmake include/curl/curlbuild.h.cmake
 VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
 VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp
 VC6_LIBDSP_DEPS = $(VC6_LIBTMPL) Makefile.am lib/Makefile.inc
+VC6_SRCTMPL = projects/Windows/VC6/src/curlsrc.tmpl
+VC6_SRCDSP = projects/Windows/VC6/src/curlsrc.dsp
+VC6_SRCDSP_DEPS = $(VC6_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC7_LIBTMPL = projects/Windows/VC7/lib/libcurl.tmpl
 VC7_LIBVCPROJ = projects/Windows/VC7/lib/libcurl.vcproj
 VC7_LIBVCPROJ_DEPS = $(VC7_LIBTMPL) Makefile.am lib/Makefile.inc
+VC7_SRCTMPL = projects/Windows/VC7/src/curlsrc.tmpl
+VC7_SRCVCPROJ = projects/Windows/VC7/src/curlsrc.vcproj
+VC7_SRCVCPROJ_DEPS = $(VC7_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC71_LIBTMPL = projects/Windows/VC7.1/lib/libcurl.tmpl
 VC71_LIBVCPROJ = projects/Windows/VC7.1/lib/libcurl.vcproj
 VC71_LIBVCPROJ_DEPS = $(VC71_LIBTMPL) Makefile.am lib/Makefile.inc
+VC71_SRCTMPL = projects/Windows/VC7.1/src/curlsrc.tmpl
+VC71_SRCVCPROJ = projects/Windows/VC7.1/src/curlsrc.vcproj
+VC71_SRCVCPROJ_DEPS = $(VC71_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC8_LIBTMPL = projects/Windows/VC8/lib/libcurl.tmpl
 VC8_LIBVCPROJ = projects/Windows/VC8/lib/libcurl.vcproj
 VC8_LIBVCPROJ_DEPS = $(VC8_LIBTMPL) Makefile.am lib/Makefile.inc
+VC8_SRCTMPL = projects/Windows/VC8/src/curlsrc.tmpl
+VC8_SRCVCPROJ = projects/Windows/VC8/src/curlsrc.vcproj
+VC8_SRCVCPROJ_DEPS = $(VC8_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC9_LIBTMPL = projects/Windows/VC9/lib/libcurl.tmpl
 VC9_LIBVCPROJ = projects/Windows/VC9/lib/libcurl.vcproj
 VC9_LIBVCPROJ_DEPS = $(VC9_LIBTMPL) Makefile.am lib/Makefile.inc
+VC9_SRCTMPL = projects/Windows/VC9/src/curlsrc.tmpl
+VC9_SRCVCPROJ = projects/Windows/VC9/src/curlsrc.vcproj
+VC9_SRCVCPROJ_DEPS = $(VC9_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC10_LIBTMPL = projects/Windows/VC10/lib/libcurl.tmpl
 VC10_LIBVCXPROJ = projects/Windows/VC10/lib/libcurl.vcxproj
 VC10_LIBVCXPROJ_DEPS = $(VC10_LIBTMPL) Makefile.am lib/Makefile.inc
+VC10_SRCTMPL = projects/Windows/VC10/src/curlsrc.tmpl
+VC10_SRCVCXPROJ = projects/Windows/VC10/src/curlsrc.vcxproj
+VC10_SRCVCXPROJ_DEPS = $(VC10_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC11_LIBTMPL = projects/Windows/VC11/lib/libcurl.tmpl
 VC11_LIBVCXPROJ = projects/Windows/VC11/lib/libcurl.vcxproj
 VC11_LIBVCXPROJ_DEPS = $(VC11_LIBTMPL) Makefile.am lib/Makefile.inc
+VC11_SRCTMPL = projects/Windows/VC11/src/curlsrc.tmpl
+VC11_SRCVCXPROJ = projects/Windows/VC11/src/curlsrc.vcxproj
+VC11_SRCVCXPROJ_DEPS = $(VC11_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC12_LIBTMPL = projects/Windows/VC12/lib/libcurl.tmpl
 VC12_LIBVCXPROJ = projects/Windows/VC12/lib/libcurl.vcxproj
 VC12_LIBVCXPROJ_DEPS = $(VC12_LIBTMPL) Makefile.am lib/Makefile.inc
+VC12_SRCTMPL = projects/Windows/VC12/src/curlsrc.tmpl
+VC12_SRCVCXPROJ = projects/Windows/VC12/src/curlsrc.vcxproj
+VC12_SRCVCXPROJ_DEPS = $(VC12_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC_DIST = projects/README	\
  projects/build-openssl.bat	\
  projects/Windows/VC6/curl.dsw	\
  projects/Windows/VC6/lib/libcurl.dsw $(VC6_LIBDSP)	\
- projects/Windows/VC6/src/curlsrc.dsw projects/Windows/VC6/src/curlsrc.tmpl	\
+ projects/Windows/VC6/src/curlsrc.dsw $(VC6_SRCDSP)	\
  projects/Windows/VC7/curl.sln	\
  projects/Windows/VC7/lib/libcurl.sln $(VC7_LIBVCPROJ)	\
- projects/Windows/VC7/src/curlsrc.sln projects/Windows/VC7/src/curlsrc.tmpl	\
+ projects/Windows/VC7/src/curlsrc.sln $(VC7_SRCVCPROJ)	\
  projects/Windows/VC7.1/curl.sln	\
  projects/Windows/VC7.1/lib/libcurl.sln $(VC71_LIBVCPROJ)	\
- projects/Windows/VC7.1/src/curlsrc.sln projects/Windows/VC7.1/src/curlsrc.tmpl	\
+ projects/Windows/VC7.1/src/curlsrc.sln $(VC71_SRCVCPROJ)	\
  projects/Windows/VC8/curl.sln	\
  projects/Windows/VC8/lib/libcurl.sln $(VC8_LIBVCPROJ)	\
- projects/Windows/VC8/src/curlsrc.sln projects/Windows/VC8/src/curlsrc.tmpl	\
+ projects/Windows/VC8/src/curlsrc.sln $(VC8_SRCVCPROJ)	\
  projects/Windows/VC9/curl.sln	\
  projects/Windows/VC9/lib/libcurl.sln $(VC9_LIBVCPROJ)	\
- projects/Windows/VC9/src/curlsrc.sln projects/Windows/VC9/src/curlsrc.tmpl	\
+ projects/Windows/VC9/src/curlsrc.sln $(VC9_SRCVCPROJ)	\
  projects/Windows/VC10/curl.sln	\
  projects/Windows/VC10/lib/libcurl.sln $(VC10_LIBVCXPROJ)	\
- projects/Windows/VC10/src/curlsrc.sln projects/Windows/VC10/src/curlsrc.tmpl	\
+ projects/Windows/VC10/src/curlsrc.sln $(VC10_SRCVCXPROJ)	\
  projects/Windows/VC11/curl.sln	\
  projects/Windows/VC11/lib/libcurl.sln $(VC11_LIBVCXPROJ)	\
- projects/Windows/VC11/src/curlsrc.sln projects/Windows/VC11/src/curlsrc.tmpl	\
+ projects/Windows/VC11/src/curlsrc.sln $(VC11_SRCVCXPROJ)	\
  projects/Windows/VC12/curl.sln	\
  projects/Windows/VC12/lib/libcurl.sln $(VC12_LIBVCXPROJ)	\
- projects/Windows/VC12/src/curlsrc.sln projects/Windows/VC12/src/curlsrc.tmpl
+ projects/Windows/VC12/src/curlsrc.sln $(VC12_SRCVCXPROJ)
 
 WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
  winbuild/MakefileBuild.vc winbuild/Makefile.vc				\
@@ -97,8 +121,10 @@ EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
  RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework	\
  $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST) lib/libcurl.vers.in
 
-CLEANFILES = $(VC6_LIBDSP) $(VC7_LIBVCPROJ) $(VC71_LIBVCPROJ) $(VC8_LIBVCPROJ)	\
- $(VC9_LIBVCPROJ) $(VC10_LIBVCXPROJ) $(VC11_LIBVCXPROJ) $(VC12_LIBVCXPROJ)
+CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP) $(VC7_LIBVCPROJ) $(VC7_SRCVCPROJ)	\
+ $(VC71_LIBVCPROJ) $(VC71_SRCVCPROJ) $(VC8_LIBVCPROJ) $(VC8_SRCVCPROJ)	\
+ $(VC9_LIBVCPROJ) $(VC9_SRCVCPROJ) $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ)	\
+ $(VC11_LIBVCXPROJ) $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ)
 
 bin_SCRIPTS = curl-config
 
@@ -108,8 +134,9 @@ DIST_SUBDIRS = $(SUBDIRS) tests packages docs
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
 
-# List of libcurl source files required to generate VC IDE dsp and prj files
+# List of files required to generate VC IDE .dsp, .vcproj and .vcxproj files
 include lib/Makefile.inc
+include src/Makefile.inc
 
 dist-hook:
 	rm -rf $(top_builddir)/tests/log
@@ -234,19 +261,27 @@ checksrc:
 
 .PHONY: vc-ide
 
-vc-ide: $(VC6_LIBDSP_DEPS) $(VC7_LIBVCPROJ_DEPS) $(VC71_LIBVCPROJ_DEPS)	\
- $(VC8_LIBVCPROJ_DEPS) $(VC9_LIBVCPROJ_DEPS) $(VC10_LIBVCXPROJ_DEPS)	\
- $(VC11_LIBVCXPROJ_DEPS) $(VC12_LIBVCXPROJ_DEPS)
+vc-ide: $(VC6_LIBDSP_DEPS) $(VC6_SRCDSP_DEPS) $(VC7_LIBVCPROJ_DEPS)	\
+ $(VC7_SRCVCPROJ_DEPS) $(VC71_LIBVCPROJ_DEPS) $(VC71_SRCVCPROJ_DEPS)	\
+ $(VC8_LIBVCPROJ_DEPS) $(VC8_SRCVCPROJ_DEPS) $(VC9_LIBVCPROJ_DEPS)	\
+ $(VC9_SRCVCPROJ_DEPS) $(VC10_LIBVCXPROJ_DEPS) $(VC10_SRCVCXPROJ_DEPS)	\
+ $(VC11_LIBVCXPROJ_DEPS) $(VC11_SRCVCXPROJ_DEPS) $(VC12_LIBVCXPROJ_DEPS)	\
+ $(VC12_SRCVCXPROJ_DEPS)
 	@(win32_lib_srcs='$(LIB_CSOURCES)'; \
 	win32_lib_hdrs='$(LIB_HHEADERS) config-win32.h'; \
 	win32_lib_rc='$(LIB_RC)'; \
 	win32_lib_vtls_srcs='$(LIB_VTLS_CSOURCES)'; \
 	win32_lib_vtls_hdrs='$(LIB_VTLS_HHEADERS)'; \
+	win32_src_srcs='$(CURL_CFILES)'; \
+	win32_src_hdrs='$(CURL_HFILES)'; \
+	win32_src_rc='$(CURL_RCFILES)'; \
 	\
 	sorted_lib_srcs=`for file in $$win32_lib_srcs; do echo $$file; done | sort`; \
 	sorted_lib_hdrs=`for file in $$win32_lib_hdrs; do echo $$file; done | sort`; \
 	sorted_lib_vtls_srcs=`for file in $$win32_lib_vtls_srcs; do echo $$file; done | sort`; \
 	sorted_lib_vtls_hdrs=`for file in $$win32_lib_vtls_hdrs; do echo $$file; done | sort`; \
+	sorted_src_srcs=`for file in $$win32_src_srcs; do echo $$file; done | sort`; \
+	sorted_src_hdrs=`for file in $$win32_src_hdrs; do echo $$file; done | sort`; \
 	\
 	awk_code='\
 function gen_element(type, dir, file)\
@@ -316,6 +351,18 @@ function gen_element(type, dir, file)\
     split(lib_vtls_hdrs, arr);\
     for(val in arr) gen_element(proj_type, "lib\\vtls", arr[val]);\
   }\
+  else if($$0 == "CURL_SRC_C_FILES") {\
+    split(src_srcs, arr);\
+    for(val in arr) gen_element(proj_type, "src", arr[val]);\
+  }\
+  else if($$0 == "CURL_SRC_H_FILES") {\
+    split(src_hdrs, arr);\
+    for(val in arr) gen_element(proj_type, "src", arr[val]);\
+  }\
+  else if($$0 == "CURL_SRC_RC_FILES") {\
+    split(src_rc, arr);\
+    for(val in arr) gen_element(proj_type, "src", arr[val]);\
+  }\
   else\
     printf("%s\r\n", $$0);\
 }';\
@@ -329,6 +376,13 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC6_LIBTMPL) > $(VC6_LIBDSP) || { exit 1; }; \
 	\
+	echo "generating '$(VC6_SRCDSP)'"; \
+	awk -v proj_type=dsp \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		"$$awk_code" $(srcdir)/$(VC6_SRCTMPL) > $(VC6_SRCDSP) || { exit 1; }; \
+	\
 	echo "generating '$(VC7_LIBVCPROJ)'"; \
 	awk -v proj_type=vcproj1 \
 		-v lib_srcs="$$sorted_lib_srcs" \
@@ -337,6 +391,13 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC7_LIBTMPL) > $(VC7_LIBVCPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC7_SRCVCPROJ)'"; \
+	awk -v proj_type=vcproj1 \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		"$$awk_code" $(srcdir)/$(VC7_SRCTMPL) > $(VC7_SRCVCPROJ) || { exit 1; }; \
 	\
 	echo "generating '$(VC71_LIBVCPROJ)'"; \
 	awk -v proj_type=vcproj1 \
@@ -347,6 +408,13 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC71_LIBTMPL) > $(VC71_LIBVCPROJ) || { exit 1; }; \
 	\
+	echo "generating '$(VC71_SRCVCPROJ)'"; \
+	awk -v proj_type=vcproj1 \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		"$$awk_code" $(srcdir)/$(VC71_SRCTMPL) > $(VC71_SRCVCPROJ) || { exit 1; }; \
+	\
 	echo "generating '$(VC8_LIBVCPROJ)'"; \
 	awk -v proj_type=vcproj2 \
 		-v lib_srcs="$$sorted_lib_srcs" \
@@ -355,6 +423,13 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC8_LIBTMPL) > $(VC8_LIBVCPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC8_SRCVCPROJ)'"; \
+	awk -v proj_type=vcproj2 \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		"$$awk_code" $(srcdir)/$(VC8_SRCTMPL) > $(VC8_SRCVCPROJ) || { exit 1; }; \
 	\
 	echo "generating '$(VC9_LIBVCPROJ)'"; \
 	awk -v proj_type=vcproj2 \
@@ -365,6 +440,13 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC9_LIBTMPL) > $(VC9_LIBVCPROJ) || { exit 1; }; \
 	\
+	echo "generating '$(VC9_SRCVCPROJ)'"; \
+	awk -v proj_type=vcproj2 \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		"$$awk_code" $(srcdir)/$(VC9_SRCTMPL) > $(VC9_SRCVCPROJ) || { exit 1; }; \
+	\
 	echo "generating '$(VC10_LIBVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
 		-v lib_srcs="$$sorted_lib_srcs" \
@@ -373,6 +455,13 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC10_LIBTMPL) > $(VC10_LIBVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC10_SRCVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		"$$awk_code" $(srcdir)/$(VC10_SRCTMPL) > $(VC10_SRCVCXPROJ) || { exit 1; }; \
 	\
 	echo "generating '$(VC11_LIBVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
@@ -383,6 +472,13 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC11_LIBTMPL) > $(VC11_LIBVCXPROJ) || { exit 1; }; \
 	\
+	echo "generating '$(VC11_SRCVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		"$$awk_code" $(srcdir)/$(VC11_SRCTMPL) > $(VC11_SRCVCXPROJ) || { exit 1; }; \
+	\
 	echo "generating '$(VC12_LIBVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
 		-v lib_srcs="$$sorted_lib_srcs" \
@@ -390,4 +486,11 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC12_LIBTMPL) > $(VC12_LIBVCXPROJ) || { exit 1; };)
+		"$$awk_code" $(srcdir)/$(VC12_LIBTMPL) > $(VC12_LIBVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC12_SRCVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		"$$awk_code" $(srcdir)/$(VC12_SRCTMPL) > $(VC12_SRCVCXPROJ) || { exit 1; };)
