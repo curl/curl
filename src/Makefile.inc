@@ -99,5 +99,7 @@ CURL_HFILES = \
 	tool_writeout.h \
 	tool_xattr.h
 
+CURL_RCFILES = curl.rc
+
 curl_SOURCES = $(CURL_CFILES) $(CURLX_ONES) $(CURL_HFILES)
 
