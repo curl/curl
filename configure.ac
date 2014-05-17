@@ -3406,6 +3406,9 @@ fi
 if test "x$curl_spnego_msg" = "xenabled"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
 fi
+if test "x$want_gss" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
+fi
 
 AC_SUBST(SUPPORT_FEATURES)
 
