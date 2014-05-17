@@ -30,31 +30,63 @@ CMake/CurlTests.c CMake/FindOpenSSL.cmake CMake/FindZLIB.cmake		\
 CMake/OtherTests.cmake CMake/Platforms/WindowsCache.cmake		\
 CMake/Utilities.cmake include/curl/curlbuild.h.cmake
 
+VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
+VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp
+VC6_LIBDSP_DEPS = $(VC6_LIBTMPL) Makefile.am lib/Makefile.inc
+
+VC7_LIBTMPL = projects/Windows/VC7/lib/libcurl.tmpl
+VC7_LIBVCPROJ = projects/Windows/VC7/lib/libcurl.vcproj
+VC7_LIBVCPROJ_DEPS = $(VC7_LIBTMPL) Makefile.am lib/Makefile.inc
+
+VC71_LIBTMPL = projects/Windows/VC7.1/lib/libcurl.tmpl
+VC71_LIBVCPROJ = projects/Windows/VC7.1/lib/libcurl.vcproj
+VC71_LIBVCPROJ_DEPS = $(VC71_LIBTMPL) Makefile.am lib/Makefile.inc
+
+VC8_LIBTMPL = projects/Windows/VC8/lib/libcurl.tmpl
+VC8_LIBVCPROJ = projects/Windows/VC8/lib/libcurl.vcproj
+VC8_LIBVCPROJ_DEPS = $(VC8_LIBTMPL) Makefile.am lib/Makefile.inc
+
+VC9_LIBTMPL = projects/Windows/VC9/lib/libcurl.tmpl
+VC9_LIBVCPROJ = projects/Windows/VC9/lib/libcurl.vcproj
+VC9_LIBVCPROJ_DEPS = $(VC9_LIBTMPL) Makefile.am lib/Makefile.inc
+
+VC10_LIBTMPL = projects/Windows/VC10/lib/libcurl.tmpl
+VC10_LIBVCXPROJ = projects/Windows/VC10/lib/libcurl.vcxproj
+VC10_LIBVCXPROJ_DEPS = $(VC10_LIBTMPL) Makefile.am lib/Makefile.inc
+
+VC11_LIBTMPL = projects/Windows/VC11/lib/libcurl.tmpl
+VC11_LIBVCXPROJ = projects/Windows/VC11/lib/libcurl.vcxproj
+VC11_LIBVCXPROJ_DEPS = $(VC11_LIBTMPL) Makefile.am lib/Makefile.inc
+
+VC12_LIBTMPL = projects/Windows/VC12/lib/libcurl.tmpl
+VC12_LIBVCXPROJ = projects/Windows/VC12/lib/libcurl.vcxproj
+VC12_LIBVCXPROJ_DEPS = $(VC12_LIBTMPL) Makefile.am lib/Makefile.inc
+
 VC_DIST = projects/README	\
  projects/build-openssl.bat	\
  projects/Windows/VC6/curl.dsw	\
- projects/Windows/VC6/lib/libcurl.dsw projects/Windows/VC6/lib/libcurl.tmpl	\
+ projects/Windows/VC6/lib/libcurl.dsw $(VC6_LIBDSP)	\
  projects/Windows/VC6/src/curlsrc.dsw projects/Windows/VC6/src/curlsrc.tmpl	\
  projects/Windows/VC7/curl.sln	\
- projects/Windows/VC7/lib/libcurl.sln projects/Windows/VC7/lib/libcurl.tmpl	\
+ projects/Windows/VC7/lib/libcurl.sln $(VC7_LIBVCPROJ)	\
  projects/Windows/VC7/src/curlsrc.sln projects/Windows/VC7/src/curlsrc.tmpl	\
  projects/Windows/VC7.1/curl.sln	\
- projects/Windows/VC7.1/lib/libcurl.sln projects/Windows/VC7.1/lib/libcurl.tmpl	\
+ projects/Windows/VC7.1/lib/libcurl.sln $(VC71_LIBVCPROJ)	\
  projects/Windows/VC7.1/src/curlsrc.sln projects/Windows/VC7.1/src/curlsrc.tmpl	\
  projects/Windows/VC8/curl.sln	\
- projects/Windows/VC8/lib/libcurl.sln projects/Windows/VC8/lib/libcurl.tmpl	\
+ projects/Windows/VC8/lib/libcurl.sln $(VC8_LIBVCPROJ)	\
  projects/Windows/VC8/src/curlsrc.sln projects/Windows/VC8/src/curlsrc.tmpl	\
  projects/Windows/VC9/curl.sln	\
- projects/Windows/VC9/lib/libcurl.sln projects/Windows/VC9/lib/libcurl.tmpl	\
+ projects/Windows/VC9/lib/libcurl.sln $(VC9_LIBVCPROJ)	\
  projects/Windows/VC9/src/curlsrc.sln projects/Windows/VC9/src/curlsrc.tmpl	\
  projects/Windows/VC10/curl.sln	\
- projects/Windows/VC10/lib/libcurl.sln projects/Windows/VC10/lib/libcurl.tmpl	\
+ projects/Windows/VC10/lib/libcurl.sln $(VC10_LIBVCXPROJ)	\
  projects/Windows/VC10/src/curlsrc.sln projects/Windows/VC10/src/curlsrc.tmpl	\
  projects/Windows/VC11/curl.sln	\
- projects/Windows/VC11/lib/libcurl.sln projects/Windows/VC11/lib/libcurl.tmpl	\
+ projects/Windows/VC11/lib/libcurl.sln $(VC11_LIBVCXPROJ)	\
  projects/Windows/VC11/src/curlsrc.sln projects/Windows/VC11/src/curlsrc.tmpl	\
  projects/Windows/VC12/curl.sln	\
- projects/Windows/VC12/lib/libcurl.sln projects/Windows/VC12/lib/libcurl.tmpl	\
+ projects/Windows/VC12/lib/libcurl.sln $(VC12_LIBVCXPROJ)	\
  projects/Windows/VC12/src/curlsrc.sln projects/Windows/VC12/src/curlsrc.tmpl
 
 WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
@@ -64,6 +96,9 @@ WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
  RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework	\
  $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST) lib/libcurl.vers.in
+
+CLEANFILES = $(VC6_LIBDSP) $(VC7_LIBVCPROJ) $(VC71_LIBVCPROJ) $(VC8_LIBVCPROJ)	\
+ $(VC9_LIBVCPROJ) $(VC10_LIBVCXPROJ) $(VC11_LIBVCXPROJ) $(VC12_LIBVCXPROJ)
 
 bin_SCRIPTS = curl-config
 
@@ -75,9 +110,6 @@ pkgconfig_DATA = libcurl.pc
 
 # List of libcurl source files required to generate VC IDE dsp and prj files
 include lib/Makefile.inc
-
-WIN32SOURCES = $(CSOURCES)
-WIN32HEADERS = $(HHEADERS) config-win32.h
 
 dist-hook:
 	rm -rf $(top_builddir)/tests/log
@@ -200,3 +232,162 @@ checksrc:
 	cd lib && $(MAKE) checksrc
 	cd src && $(MAKE) checksrc
 
+.PHONY: vc-ide
+
+vc-ide: $(VC6_LIBDSP_DEPS) $(VC7_LIBVCPROJ_DEPS) $(VC71_LIBVCPROJ_DEPS)	\
+ $(VC8_LIBVCPROJ_DEPS) $(VC9_LIBVCPROJ_DEPS) $(VC10_LIBVCXPROJ_DEPS)	\
+ $(VC11_LIBVCXPROJ_DEPS) $(VC12_LIBVCXPROJ_DEPS)
+	@(win32_lib_srcs='$(LIB_CSOURCES)'; \
+	win32_lib_hdrs='$(LIB_HHEADERS) config-win32.h'; \
+	win32_lib_rc='$(LIB_RC)'; \
+	win32_lib_vtls_srcs='$(LIB_VTLS_CSOURCES)'; \
+	win32_lib_vtls_hdrs='$(LIB_VTLS_HHEADERS)'; \
+	\
+	sorted_lib_srcs=`for file in $$win32_lib_srcs; do echo $$file; done | sort`; \
+	sorted_lib_hdrs=`for file in $$win32_lib_hdrs; do echo $$file; done | sort`; \
+	sorted_lib_vtls_srcs=`for file in $$win32_lib_vtls_srcs; do echo $$file; done | sort`; \
+	sorted_lib_vtls_hdrs=`for file in $$win32_lib_vtls_hdrs; do echo $$file; done | sort`; \
+	\
+	awk_code='\
+function gen_element(type, dir, file)\
+{\
+  sub(/vtls\//, "", file);\
+\
+  spaces="    ";\
+  if(dir == "lib\\vtls")\
+    tabs="				";\
+  else\
+    tabs="			";\
+\
+  if(type == "dsp") {\
+    printf("# Begin Source File\r\n");\
+    printf("\r\n");\
+    printf("SOURCE=..\\..\\..\\..\\%s\\%s\r\n", dir, file);\
+    printf("# End Source File\r\n");\
+  }\
+  else if(type == "vcproj1") {\
+    printf("%s<File\r\n", tabs);\
+    printf("%s	RelativePath=\"..\\..\\..\\..\\%s\\%s\">\r\n",\
+           tabs, dir, file);\
+    printf("%s</File>\r\n", tabs);\
+  }\
+  else if(type == "vcproj2") {\
+    printf("%s<File\r\n", tabs);\
+    printf("%s	RelativePath=\"..\\..\\..\\..\\%s\\%s\"\r\n",\
+           tabs, dir, file);\
+    printf("%s>\r\n", tabs);\
+    printf("%s</File>\r\n", tabs);\
+  }\
+  else if(type == "vcxproj") {\
+    i = index(file, ".");\
+    ext = substr(file, i == 0 ? 0 : i + 1);\
+\
+    if(ext == "c")\
+      printf("%s<ClCompile Include=\"..\\..\\..\\..\\%s\\%s\" />\r\n",\
+             spaces, dir, file);\
+    else if(ext == "h")\
+      printf("%s<ClInclude Include=\"..\\..\\..\\..\\%s\\%s\" />\r\n",\
+             spaces, dir, file);\
+    else if(ext == "rc")\
+      printf("%s<ResourceCompile Include=\"..\\..\\..\\..\\%s\\%s\" >\r\n",\
+      spaces, dir, file);\
+  }\
+}\
+\
+{\
+\
+  if($$0 == "CURL_LIB_C_FILES") {\
+    split(lib_srcs, arr);\
+    for(val in arr) gen_element(proj_type, "lib", arr[val]);\
+  }\
+  else if($$0 == "CURL_LIB_H_FILES") {\
+    split(lib_hdrs, arr);\
+    for(val in arr) gen_element(proj_type, "lib", arr[val]);\
+  }\
+  else if($$0 == "CURL_LIB_RC_FILES") {\
+    split(lib_rc, arr);\
+    for(val in arr) gen_element(proj_type, "lib", arr[val]);\
+  }\
+  else if($$0 == "CURL_LIB_VTLS_C_FILES") {\
+    split(lib_vtls_srcs, arr);\
+    for(val in arr) gen_element(proj_type, "lib\\vtls", arr[val]);\
+  }\
+  else if($$0 == "CURL_LIB_VTLS_H_FILES") {\
+    split(lib_vtls_hdrs, arr);\
+    for(val in arr) gen_element(proj_type, "lib\\vtls", arr[val]);\
+  }\
+  else\
+    printf("%s\r\n", $$0);\
+}';\
+	\
+	echo "generating '$(VC6_LIBDSP)'"; \
+	awk -v proj_type=dsp \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC6_LIBTMPL) > $(VC6_LIBDSP) || { exit 1; }; \
+	\
+	echo "generating '$(VC7_LIBVCPROJ)'"; \
+	awk -v proj_type=vcproj1 \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC7_LIBTMPL) > $(VC7_LIBVCPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC71_LIBVCPROJ)'"; \
+	awk -v proj_type=vcproj1 \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC71_LIBTMPL) > $(VC71_LIBVCPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC8_LIBVCPROJ)'"; \
+	awk -v proj_type=vcproj2 \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC8_LIBTMPL) > $(VC8_LIBVCPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC9_LIBVCPROJ)'"; \
+	awk -v proj_type=vcproj2 \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC9_LIBTMPL) > $(VC9_LIBVCPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC10_LIBVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC10_LIBTMPL) > $(VC10_LIBVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC11_LIBVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC11_LIBTMPL) > $(VC11_LIBVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC12_LIBVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC12_LIBTMPL) > $(VC12_LIBVCXPROJ) || { exit 1; };)
