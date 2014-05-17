@@ -481,7 +481,7 @@ Curl_axtls_connect(struct connectdata *conn,
       return map_error_to_curl(ssl_fcn_return);
     }
     usleep(10000);
-    /* TODO: check for timeout here as this could hang indefinitely otherwise */
+    /* TODO: check for timeout as this could hang indefinitely otherwise */
   }
   infof (conn->data, "handshake completed successfully\n");
 
