@@ -77,6 +77,9 @@ This release includes the following bugfixes:
  o darwinssl: fix potential crash with a P12 file [20]
  o timers: fix timer regression involving redirects / reconnects [21]
  o CURLINFO_SSL_VERIFYRESULT: made more reliable [22]
+ o HTTP: fixed connection re-use [23]
+ o configure: add SPNEGO to supported features [24]
+ o configure: add GSS-API to supported features [25]
 
 This release includes the following known bugs:
 
@@ -118,3 +121,6 @@ References to bug reports and discussions on issues:
  [20] = http://curl.haxx.se/bug/view.cgi?id=1369
  [21] = http://curl.haxx.se/mail/lib-2014-05/0147.html
  [22] = http://curl.haxx.se/mail/lib-2014-04/0203.html
+ [23] = http://curl.haxx.se/mail/lib-2014-05/0127.html
+ [24] = http://curl.haxx.se/bug/view.cgi?id=1343
+ [25] = http://curl.haxx.se/bug/view.cgi?id=1344
