@@ -30,15 +30,8 @@ CMake/CurlTests.c CMake/FindOpenSSL.cmake CMake/FindZLIB.cmake		\
 CMake/OtherTests.cmake CMake/Platforms/WindowsCache.cmake		\
 CMake/Utilities.cmake include/curl/curlbuild.h.cmake
 
-VC6LIBDSP = vs/vc6/lib/vc6libcurl.dsp
-VC6LIBDSPHEAD = vs/t/lib/vc6_libcurl_dsp.head
-VC6LIBDSPFOOT = vs/t/lib/vc6_libcurl_dsp.foot
-
-VC8LIBPRJ = vs/vc8/lib/vc8libcurl.vcproj
-VC8LIBPRJHEAD = vs/t/lib/vc8_libcurl_prj.head
-VC8LIBPRJFOOT = vs/t/lib/vc8_libcurl_prj.foot
-
-VCPROJECTS = projects/README projects/build-openssl.bat	\
+VC_DIST = projects/README	\
+ projects/build-openssl.bat	\
  projects/Windows/VC6/curl.dsw	\
  projects/Windows/VC6/lib/libcurl.dsw projects/Windows/VC6/lib/libcurl.tmpl	\
  projects/Windows/VC6/src/curlsrc.dsw projects/Windows/VC6/src/curlsrc.tmpl	\
@@ -64,21 +57,6 @@ VCPROJECTS = projects/README projects/build-openssl.bat	\
  projects/Windows/VC12/lib/libcurl.sln projects/Windows/VC12/lib/libcurl.tmpl	\
  projects/Windows/VC12/src/curlsrc.sln projects/Windows/VC12/src/curlsrc.tmpl
 
-VC_DIST = \
- vs/t/README \
- $(VC6LIBDSP) $(VC6LIBDSPHEAD) $(VC6LIBDSPFOOT) \
- $(VC8LIBPRJ) $(VC8LIBPRJHEAD) $(VC8LIBPRJFOOT) \
- vs/vc6/vc6curl.dsw \
- vs/vc6/lib/vc6libcurl.dsw \
- vs/vc6/src/vc6curltool.dsw \
- vs/vc6/src/vc6curltool.dsp $(VCPROJECTS)
-
-VC6LIBDSP_DEPS = $(VC6LIBDSPHEAD) $(VC6LIBDSPFOOT) \
- Makefile.am lib/Makefile.inc
-
-VC8LIBPRJ_DEPS = $(VC8LIBPRJHEAD) $(VC8LIBPRJFOOT) \
- Makefile.am lib/Makefile.inc
-
 WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
  winbuild/MakefileBuild.vc winbuild/Makefile.vc				\
  winbuild/Makefile.msvc.names
@@ -86,8 +64,6 @@ WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
  RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework	\
  $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST) lib/libcurl.vers.in
-
-CLEANFILES = $(VC6LIBDSP) $(VC8LIBPRJ)
 
 bin_SCRIPTS = curl-config
 
@@ -223,86 +199,4 @@ ca-firefox: lib/firefox-db2pem.sh
 checksrc:
 	cd lib && $(MAKE) checksrc
 	cd src && $(MAKE) checksrc
-
-.PHONY: vc6-ide
-
-vc6-ide:
-	$(MAKE) $(VC6LIBDSP)
-
-$(VC6LIBDSP): $(VC6LIBDSP_DEPS)
-	@(echo "generating '$(VC6LIBDSP)'"; \
-	\
-	for dir in 'vs' 'vs/vc6' 'vs/vc6/lib'; do \
-	  test -d "$$dir" || mkdir "$$dir" || exit 1; \
-	done; \
-	\
-	dir='..\..\..\lib\'; \
-	body='$(VC6LIBDSP)'.body; \
-	win32_srcs='$(WIN32SOURCES)'; \
-	win32_hdrs='$(WIN32HEADERS)'; \
-	sorted_srcs=`for file in $$win32_srcs; do echo $$file; done | sort`; \
-	sorted_hdrs=`for file in $$win32_hdrs; do echo $$file; done | sort`; \
-	\
-	echo "# Begin Group \"Source Files\""  > $$body; \
-	echo ""                               >> $$body; \
-	echo "# PROP Default_Filter \"\""     >> $$body; \
-	for file in $$sorted_srcs; do \
-	  echo "# Begin Source File"          >> $$body; \
-	  echo ""                             >> $$body; \
-	  echo "SOURCE="$$dir$$file           >> $$body; \
-	  echo "# End Source File"            >> $$body; \
-	done; \
-	echo "# End Group"                    >> $$body; \
-	echo "# Begin Group \"Header Files\"" >> $$body; \
-	echo ""                               >> $$body; \
-	echo "# PROP Default_Filter \"\""     >> $$body; \
-	for file in $$sorted_hdrs; do \
-	  echo "# Begin Source File"          >> $$body; \
-	  echo ""                             >> $$body; \
-	  echo "SOURCE="$$dir$$file           >> $$body; \
-	  echo "# End Source File"            >> $$body; \
-	done; \
-	echo "# End Group"                    >> $$body; \
-	\
-	awk '{ printf("%s\r\n", $$0); }' \
-	  $(srcdir)/$(VC6LIBDSPHEAD) $$body $(srcdir)/$(VC6LIBDSPFOOT) \
-	  > $(VC6LIBDSP) || { rm -f $$body; exit 1; }; \
-	\
-	rm -f $$body)
-
-.PHONY: vc8-ide
-
-vc8-ide:
-	$(MAKE) $(VC8LIBPRJ)
-
-$(VC8LIBPRJ): $(VC8LIBPRJ_DEPS)
-	@(echo "generating '$(VC8LIBPRJ)'"; \
-	\
-	for dir in 'vs' 'vs/vc8' 'vs/vc8/lib'; do \
-	  test -d "$$dir" || mkdir "$$dir" || exit 1; \
-	done; \
-	\
-	dir='..\..\..\lib\'; \
-	body='$(VC8LIBPRJ)'.body; \
-	win32_srcs='$(WIN32SOURCES)'; \
-	win32_hdrs='$(WIN32HEADERS)'; \
-	sorted_srcs=`for file in $$win32_srcs; do echo $$file; done | sort`; \
-	sorted_hdrs=`for file in $$win32_hdrs; do echo $$file; done | sort`; \
-	\
-	echo "%tab%%tab%<Filter Name=\"Source Files\">"  > $$body; \
-	for file in $$sorted_srcs; do \
-	  echo "%tab%%tab%%tab%<File RelativePath=\""$$dir$$file"\"></File>" >> $$body; \
-	done; \
-	echo "%tab%%tab%</Filter>"                      >> $$body; \
-	echo "%tab%%tab%<Filter Name=\"Header Files\">" >> $$body; \
-	for file in $$sorted_hdrs; do \
-	  echo "%tab%%tab%%tab%<File RelativePath=\""$$dir$$file"\"></File>" >> $$body; \
-	done; \
-	echo "%tab%%tab%</Filter>"                      >> $$body; \
-	\
-	awk '{ gsub(/%tab%/, "\t"); printf("%s\r\n", $$0); }' \
-	  $(srcdir)/$(VC8LIBPRJHEAD) $$body $(srcdir)/$(VC8LIBPRJFOOT) \
-	  > $(VC8LIBPRJ) || { rm -f $$body; exit 1; }; \
-	\
-	rm -f $$body)
 
