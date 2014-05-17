@@ -121,9 +121,9 @@ rem
 :element
   set "SPACES=    "
   if "%2" == "lib\vtls" (
-    set "TABS=			"
+    set "TABS=				"
   ) else (
-    set "TABS=		"
+    set "TABS=			"
   )
 
   call :extension %3 ext
