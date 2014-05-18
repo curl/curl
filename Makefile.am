@@ -267,11 +267,11 @@ vc-ide: $(VC6_LIBDSP_DEPS) $(VC6_SRCDSP_DEPS) $(VC7_LIBVCPROJ_DEPS)	\
  $(VC9_SRCVCPROJ_DEPS) $(VC10_LIBVCXPROJ_DEPS) $(VC10_SRCVCXPROJ_DEPS)	\
  $(VC11_LIBVCXPROJ_DEPS) $(VC11_SRCVCXPROJ_DEPS) $(VC12_LIBVCXPROJ_DEPS)	\
  $(VC12_SRCVCXPROJ_DEPS)
-	@(win32_lib_srcs='$(LIB_CSOURCES)'; \
-	win32_lib_hdrs='$(LIB_HHEADERS) config-win32.h'; \
-	win32_lib_rc='$(LIB_RC)'; \
-	win32_lib_vtls_srcs='$(LIB_VTLS_CSOURCES)'; \
-	win32_lib_vtls_hdrs='$(LIB_VTLS_HHEADERS)'; \
+	@(win32_lib_srcs='$(LIB_CFILES)'; \
+	win32_lib_hdrs='$(LIB_HFILES) config-win32.h'; \
+	win32_lib_rc='$(LIB_RCFILES)'; \
+	win32_lib_vtls_srcs='$(LIB_VTLS_CFILES)'; \
+	win32_lib_vtls_hdrs='$(LIB_VTLS_HFILES)'; \
 	win32_src_srcs='$(CURL_CFILES)'; \
 	win32_src_hdrs='$(CURL_HFILES)'; \
 	win32_src_rc='$(CURL_RCFILES)'; \

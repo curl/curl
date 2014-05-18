@@ -20,15 +20,15 @@
 #
 ###########################################################################
 
-LIB_VTLS_CSOURCES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c	\
+LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c	\
   vtls/qssl.c vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c	\
   vtls/cyassl.c vtls/curl_schannel.c vtls/curl_darwinssl.c vtls/gskit.c
 
-LIB_VTLS_HHEADERS = vtls/qssl.h vtls/openssl.h vtls/vtls.h vtls/gtls.h	\
+LIB_VTLS_HFILES = vtls/qssl.h vtls/openssl.h vtls/vtls.h vtls/gtls.h	\
   vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h vtls/axtls.h	\
   vtls/cyassl.h vtls/curl_schannel.h vtls/curl_darwinssl.h vtls/gskit.h
 
-LIB_CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
+LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c	\
   ldap.c version.c getenv.c escape.c mprintf.c telnet.c netrc.c		\
   getinfo.c transfer.c strequal.c easy.c security.c curl_fnmatch.c	\
@@ -47,7 +47,7 @@ LIB_CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   hostcheck.c bundles.c conncache.c pipeline.c dotdot.c x509asn1.c	\
   http2.c curl_sasl_sspi.c
 
-LIB_HHEADERS = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h	\
+LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h	\
   formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h if2ip.h		\
   speedcheck.h urldata.h curl_ldap.h escape.h telnet.h getinfo.h	\
   strequal.h curl_sec.h memdebug.h http_chunks.h curl_fnmatch.h		\
@@ -65,7 +65,7 @@ LIB_HHEADERS = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h	\
   conncache.h curl_setup_once.h multihandle.h setup-vms.h pipeline.h	\
   dotdot.h x509asn1.h http2.h sigpipe.h
 
-LIB_RC = libcurl.rc
+LIB_RCFILES = libcurl.rc
 
-CSOURCES = $(LIB_CSOURCES) $(LIB_VTLS_CSOURCES)
-HHEADERS = $(LIB_HHEADERS) $(LIB_VTLS_HHEADERS)
+CSOURCES = $(LIB_CFILES) $(LIB_VTLS_CFILES)
+HHEADERS = $(LIB_HFILES) $(LIB_VTLS_HFILES)
