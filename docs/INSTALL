@@ -252,16 +252,16 @@ Win32
    MSVC 6 caveats
    --------------
 
-   If you use MSVC 6 it is required that you use the February 2003 edition PSDK:
-   http://www.microsoft.com/msdownload/platformsdk/sdkupdate/psdk-full.htm
+   If you use MSVC 6 it is required that you use the February 2003 edition of
+   the 'Platform SDK' which can be downloaded from:
+
+   http://www.microsoft.com/en-us/download/details.aspx?id=12261
 
    Building any software with MSVC 6 without having PSDK installed is just
    asking for trouble down the road once you have released it, you might notice
    the problems in the first corner or ten miles ahead, depending mostly on your
    choice of static vs dynamic runtime and third party libraries. Anyone using
    software built in such way will at some point regret having done so.
-
-   When someone uses MSVC 6 without PSDK he is using a compiler back from 1998.
 
    If the compiler has been updated with the installation of a service pack as
    those mentioned in http://support.microsoft.com/kb/194022 the compiler can be
@@ -271,13 +271,6 @@ Win32
    software generated in such an environment will be using outdated system
    header files and libraries with bugs and security issues which have already
    been addressed and fixed long time ago.
-
-   In order to make use of the updated system headers and fixed libraries
-   for MSVC 6, it is required that 'Platform SDK', PSDK from now onwards,
-   is installed. The specific PSDK that must be installed for MSVC 6 is the
-   February 2003 edition, which is the latest one supporting the MSVC 6 compiler,
-   this PSDK is also known as 'Windows Server 2003 PSDK' and can be downloaded
-   from http://www.microsoft.com/msdownload/platformsdk/sdkupdate/psdk-full.htm
 
    So, building curl and libcurl with MSVC 6 without PSDK is absolutely
    discouraged for the benefit of anyone using software built in such
