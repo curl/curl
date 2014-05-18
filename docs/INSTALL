@@ -340,39 +340,18 @@ Win32
    at runtime.
    Run 'nmake vc-ssl-zlib' to build with both ssl and zlib support.
 
-   MSVC 6 IDE
-   ----------
+   MSVC IDE
+   --------
 
-   A minimal VC++ 6.0 reference workspace (vc6curl.dsw) is available with the
-   source distribution archive to allow proper building of the two included
-   projects, the libcurl library and the curl tool.
+   A fairly comprehensive set of Visual Studio project files are available for
+   v6.0 through v12.0 and are located in the projects folder to allow proper
+   building of both the libcurl library as well as the curl tool.
 
-   1) Open the vs/vc6/vc6curl.dsw workspace with MSVC6's IDE.
-   2) Select 'Build' from top menu.
-   3) Select 'Batch Build' from dropdown menu.
-   4) Make sure that the eight project configurations are 'checked'.
-   5) Click on the 'Build' button.
-   6) Once the eight project configurations are built you are done.
-
-   Dynamic and static libcurl libraries are built in debug and release flavours,
-   and can be located each one in its own subdirectory, dll-debug, dll-release,
-   lib-debug and lib-release, all of them below the 'vs/vc6/lib' subdirectory.
-
-   In the same way four curl executables are created, each using its respective
-   library. The resulting curl executables are located in its own subdirectory,
-   dll-debug, dll-release, lib-debug and lib-release, below 'vs/vc6/src' subdir.
-
-   These reference VC++ 6.0 configurations are generated using the dynamic CRT.
-
-   Intentionally, these reference VC++ 6.0 projects and configurations don't use
-   third party libraries, such as OpenSSL or Zlib, to allow proper compilation
-   and configuration for all new users without further requirements.
-
-   If you need something more 'involved' you might adjust them for your own use,
-   or explore the world of makefiles described above 'MSVC from command line'.
+   For more information about these projects and building via Visual Studio
+   please see the README file located in the projects folder.
 
    Borland C++ compiler
-   ---------------------
+   --------------------
 
    Ensure that your build environment is properly set up to use the compiler
    and associated tools. PATH environment variable must include the path to
