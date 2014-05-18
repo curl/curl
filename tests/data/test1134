@@ -1,0 +1,65 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP HEAD
+-G
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<servercmd>
+connection-monitor
+</servercmd>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 10
+
+contents1
+</data>
+<data1>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 10
+
+contents2
+</data1>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP connection re-use with different credentials
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1134 -u user1:password1 --next http://%HOSTIP:%HTTPPORT/11340001 -u 2user:password2
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1134 HTTP/1.1
+Authorization: Basic dXNlcjE6cGFzc3dvcmQx
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /11340001 HTTP/1.1
+Authorization: Basic MnVzZXI6cGFzc3dvcmQy
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+[DISCONNECT]
+</protocol>
+</verify>
+</testcase>
