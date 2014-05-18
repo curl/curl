@@ -1,7 +1,0 @@
-		<Filter Name="Resource Files">
-			<File RelativePath="..\..\..\lib\libcurl.rc"></File>
-		</Filter>
-	</Files>
-	<Globals>
-	</Globals>
-</VisualStudioProject>

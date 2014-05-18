@@ -1,7 +1,0 @@
-*
-!.gitattributes
-!.gitignore
-!lib
-!src
-!tests
-!vc6curl.dsw
