@@ -28,6 +28,9 @@
 
 #include "curl_setup.h"
 
+#include "urldata.h" /* for the SessionHandle definition */
+#include "curl_base64.h"
+
 #ifdef USE_DARWINSSL
 
 #ifdef HAVE_LIMITS_H
@@ -1298,9 +1301,11 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #else
   if(SSLSetSessionOption != NULL) {
 #endif /* CURL_BUILD_MAC */
+    bool break_on_auth = !data->set.ssl.verifypeer ||
+      data->set.str[STRING_SSL_CAFILE];
     err = SSLSetSessionOption(connssl->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
-                              data->set.ssl.verifypeer?false:true);
+                              break_on_auth);
     if(err != noErr) {
       failf(data, "SSL: SSLSetSessionOption() failed: OSStatus %d", err);
       return CURLE_SSL_CONNECT_ERROR;
@@ -1324,6 +1329,20 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 #endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
+
+  if(data->set.str[STRING_SSL_CAFILE]) {
+    bool is_cert_file = is_file(data->set.str[STRING_SSL_CAFILE]);
+    if (!is_cert_file) {
+      failf(data, "SSL: can't load CA certificate file %s",
+            data->set.str[STRING_SSL_CAFILE]);
+      return CURLE_SSL_CACERT_BADFILE;
+    }
+    if (!data->set.ssl.verifypeer) {
+      failf(data, "SSL: CA certificate set, but certificate verification "
+            "is disabled");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
 
   /* Configure hostname check. SNI is used if available.
    * Both hostname check and SNI require SSLSetPeerDomainName().
@@ -1505,6 +1524,211 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   return CURLE_OK;
 }
 
+static int pem_to_der(const char *in, unsigned char **out, size_t *outlen)
+{
+  char *sep, *start, *end;
+  int i, j, err;
+  size_t len;
+  unsigned char *b64;
+
+  /* Jump through the separators in the first line. */
+  sep = strstr(in, "-----");
+  if (sep == NULL)
+    return -1;
+  sep = strstr(sep + 1, "-----");
+  if (sep == NULL)
+    return -1;
+
+  start = sep + 5;
+
+  /* Find beginning of last line separator. */
+  end = strstr(start, "-----");
+  if (end == NULL)
+    return -1;
+
+  len = end - start;
+  *out = malloc(len);
+  if (!*out)
+    return -1;
+
+  b64 = malloc(len + 1);
+  if (!b64) {
+    free(*out);
+    return -1;
+  }
+
+  /* Create base64 string without linefeeds. */
+  for (i = 0, j = 0; i < len; i++) {
+    if (start[i] != '\r' && start[i] != '\n')
+      b64[j++] = start[i];
+  }
+  b64[j] = '\0';
+
+  err = (int)Curl_base64_decode((const char *)b64, out, outlen);
+  free(b64);
+  if (err) {
+    free(*out);
+    return -1;
+  }
+
+  return 0;
+}
+
+static int read_cert(const char *file, unsigned char **out, size_t *outlen)
+{
+  int fd, ret, n, len = 0, cap = 512;
+  size_t derlen;
+  unsigned char buf[cap], *data, *der;
+
+  fd = open(file, 0);
+  if (fd < 0)
+    return -1;
+
+  data = malloc(cap);
+  if (!data) {
+    close(fd);
+    return -1;
+  }
+
+  for (;;) {
+    n = read(fd, buf, sizeof(buf));
+    if (n < 0) {
+      close(fd);
+      free(data);
+      return -1;
+    } else if (n == 0) {
+      close(fd);
+      break;
+    }
+
+    if (len + n >= cap) {
+      cap *= 2;
+      data = realloc(data, cap);
+      if (!data) {
+        close(fd);
+        return -1;
+      }
+    }
+
+    memcpy(data + len, buf, n);
+    len += n;
+  }
+  data[len] = '\0';
+
+  /*
+   * Check if the certificate is in PEM format, and convert it to DER. If this
+   * fails, we assume the certificate is in DER format.
+   */
+  if (pem_to_der((const char *)data, &der, &derlen) == 0) {
+    free(data);
+    data = der;
+    len = derlen;
+  }
+
+  *out = data;
+  *outlen = len;
+
+  return 0;
+}
+
+static int sslerr_to_curlerr(struct SessionHandle *data, int err)
+{
+  switch(err) {
+    case errSSLXCertChainInvalid:
+      failf(data, "SSL certificate problem: Invalid certificate chain");
+      return CURLE_SSL_CACERT;
+    case errSSLUnknownRootCert:
+      failf(data, "SSL certificate problem: Untrusted root certificate");
+      return CURLE_SSL_CACERT;
+    case errSSLNoRootCert:
+      failf(data, "SSL certificate problem: No root certificate");
+      return CURLE_SSL_CACERT;
+    case errSSLCertExpired:
+      failf(data, "SSL certificate problem: Certificate chain had an "
+            "expired certificate");
+      return CURLE_SSL_CACERT;
+    case errSSLBadCert:
+      failf(data, "SSL certificate problem: Couldn't understand the server "
+            "certificate format");
+      return CURLE_SSL_CONNECT_ERROR;
+    case errSSLHostNameMismatch:
+      failf(data, "SSL certificate peer hostname mismatch");
+      return CURLE_PEER_FAILED_VERIFICATION;
+    default:
+      failf(data, "SSL unexpected certificate error %d", err);
+      return CURLE_SSL_CACERT;
+  }
+}
+
+static int verify_cert(const char *cafile, struct SessionHandle *data,
+                       SSLContextRef ctx)
+{
+  unsigned char *certbuf;
+  size_t buflen;
+  if (read_cert(cafile, &certbuf, &buflen) < 0) {
+    failf(data, "SSL: failed to read or invalid CA certificate");
+    return CURLE_SSL_CACERT;
+  }
+
+  CFDataRef certdata = CFDataCreate(kCFAllocatorDefault, certbuf, buflen);
+  free(certbuf);
+  if (!certdata) {
+    failf(data, "SSL: failed to allocate array for CA certificate");
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  SecCertificateRef cacert = SecCertificateCreateWithData(kCFAllocatorDefault,
+                                                          certdata);
+  CFRelease(certdata);
+  if (!cacert) {
+    failf(data, "SSL: failed to create SecCertificate from CA certificate");
+    return CURLE_SSL_CACERT;
+  }
+
+  SecTrustRef trust;
+  OSStatus ret = SSLCopyPeerTrust(ctx, &trust);
+  if (trust == NULL) {
+    failf(data, "SSL: error getting certificate chain");
+    return CURLE_OUT_OF_MEMORY;
+  } else if (ret != noErr) {
+    return sslerr_to_curlerr(data, ret);
+  }
+
+  CFMutableArrayRef array = CFArrayCreateMutable(kCFAllocatorDefault, 0,
+                                                 &kCFTypeArrayCallBacks);
+  CFArrayAppendValue(array, cacert);
+  CFRelease(cacert);
+
+  ret = SecTrustSetAnchorCertificates(trust, array);
+  if (ret != noErr) {
+    CFRelease(trust);
+    return sslerr_to_curlerr(data, ret);
+  }
+
+  SecTrustResultType trust_eval = 0;
+  ret = SecTrustEvaluate(trust, &trust_eval);
+  CFRelease(array);
+  CFRelease(trust);
+  if (ret != noErr) {
+    return sslerr_to_curlerr(data, ret);
+  }
+
+  switch (trust_eval) {
+    case kSecTrustResultUnspecified:
+    case kSecTrustResultProceed:
+      infof(data, "SSL: certificate verification succeeded (result: %d)",
+            trust_eval);
+      return CURLE_OK;
+
+    case kSecTrustResultRecoverableTrustFailure:
+    case kSecTrustResultDeny:
+    default:
+      failf(data, "SSL: certificate verification failed (result: %d)",
+            trust_eval);
+      return CURLE_PEER_FAILED_VERIFICATION;
+  }
+}
+
 static CURLcode
 darwinssl_connect_step2(struct connectdata *conn, int sockindex)
 {
@@ -1531,6 +1755,12 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       /* The below is errSSLServerAuthCompleted; it's not defined in
         Leopard's headers */
       case -9841:
+        if(data->set.str[STRING_SSL_CAFILE]) {
+          int res = verify_cert(data->set.str[STRING_SSL_CAFILE], data,
+                                connssl->ssl_ctx);
+          if (res != CURLE_OK)
+            return res;
+        }
         /* the documentation says we need to call SSLHandshake() again */
         return darwinssl_connect_step2(conn, sockindex);
 
