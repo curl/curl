@@ -151,6 +151,10 @@ SOURCE=..\..\..\lib\strtoofft.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\warnless.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\tool_binmode.c
 # End Source File
 # Begin Source File
