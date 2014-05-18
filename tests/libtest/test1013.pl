@@ -32,7 +32,10 @@ open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Can't get curl-config $what lis
 while( <CURLCONFIG> )
 {
     chomp;
-    push @curl_config, lc($_);
+    # ignore curl-config --features not in curl's feature list
+    if(!/^(GSS-API)$/) {
+        push @curl_config, lc($_);
+    }
 }
 close CURLCONFIG;
 
