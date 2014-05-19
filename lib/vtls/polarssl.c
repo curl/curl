@@ -119,6 +119,14 @@ static void polarssl_debug(void *context, int level, const char *line)
 #else
 #endif
 
+/* ALPN for http2? */
+#ifdef USE_NGHTTP2
+#  undef HAS_ALPN
+#  ifdef POLARSSL_SSL_ALPN
+#    define HAS_ALPN
+#  endif
+#endif
+
 static Curl_recv polarssl_recv;
 static Curl_send polarssl_send;
 
@@ -139,10 +147,8 @@ polarssl_connect_step1(struct connectdata *conn,
 #endif
   void *old_session = NULL;
   size_t old_session_size = 0;
-
   char errorbuf[128];
   memset(errorbuf, 0, sizeof(errorbuf));
-
 
   /* PolarSSL only supports SSLv3 and TLSv1 */
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
@@ -299,6 +305,19 @@ polarssl_connect_step1(struct connectdata *conn,
                  "server name indication (SNI) TLS extension\n");
   }
 
+#ifdef HAS_ALPN
+  if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+    if(data->set.ssl_enable_alpn) {
+      static const char* protocols[] = {
+        NGHTTP2_PROTO_VERSION_ID, ALPN_HTTP_1_1, NULL
+      };
+      ssl_set_alpn_protocols(&connssl->ssl, protocols);
+      infof(data, "ALPN, offering %s, %s\n", protocols[0],
+            protocols[1]);
+    }
+  }
+#endif
+
 #ifdef POLARSSL_DEBUG
   ssl_set_dbg(&connssl->ssl, polarssl_debug, data);
 #endif
@@ -316,6 +335,10 @@ polarssl_connect_step2(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   char buffer[1024];
+
+#ifdef HAS_ALPN
+  const char* next_protocol;
+#endif
 
   char errorbuf[128];
   memset(errorbuf, 0, sizeof(errorbuf));
@@ -383,6 +406,27 @@ polarssl_connect_step2(struct connectdata *conn,
                      ssl_get_peer_cert(&(connssl->ssl))) != -1)
       infof(data, "Dumping cert info:\n%s\n", buffer);
   }
+
+#ifdef HAS_ALPN
+  if(data->set.ssl_enable_alpn) {
+    next_protocol = ssl_get_alpn_protocol(&connssl->ssl);
+
+    if(next_protocol != NULL) {
+      infof(data, "ALPN, server accepted to use %s\n", next_protocol);
+
+      if(strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
+                  NGHTTP2_PROTO_VERSION_ID_LEN)) {
+        conn->negnpn = NPN_HTTP2;
+      }
+      else if(strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH)) {
+        conn->negnpn = NPN_HTTP1_1;
+      }
+    }
+    else {
+      infof(data, "ALPN, server did not agree to a protocol\n");
+    }
+  }
+#endif
 
   connssl->connecting_state = ssl_connect_3;
   infof(data, "SSL connected\n");
