@@ -324,7 +324,7 @@ function gen_element(type, dir, file)\
       printf("%s<ClInclude Include=\"..\\..\\..\\..\\%s\\%s\" />\r\n",\
              spaces, dir, file);\
     else if(ext == "rc")\
-      printf("%s<ResourceCompile Include=\"..\\..\\..\\..\\%s\\%s\" >\r\n",\
+      printf("%s<ResourceCompile Include=\"..\\..\\..\\..\\%s\\%s\" />\r\n",\
       spaces, dir, file);\
   }\
 }\
