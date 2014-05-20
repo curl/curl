@@ -103,8 +103,8 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 const struct Curl_handler Curl_handler_http2 = {
   "HTTP2",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
-  ZERO_NULL,                            /* do_it */
-  ZERO_NULL     ,                       /* done */
+  Curl_http,                            /* do_it */
+  ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */
   ZERO_NULL,                            /* connect_it */
   ZERO_NULL,                            /* connecting */
@@ -123,8 +123,8 @@ const struct Curl_handler Curl_handler_http2 = {
 const struct Curl_handler Curl_handler_http2_ssl = {
   "HTTP2",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
-  ZERO_NULL,                            /* do_it */
-  ZERO_NULL     ,                       /* done */
+  Curl_http,                            /* do_it */
+  ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */
   ZERO_NULL,                            /* connect_it */
   ZERO_NULL,                            /* connecting */
@@ -778,24 +778,15 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   return len;
 }
 
-int Curl_http2_switched(struct connectdata *conn)
+void Curl_http2_setup(struct connectdata *conn)
 {
-  int rv;
-  CURLcode rc;
   struct http_conn *httpc = &conn->proto.httpc;
-  /* we are switched! */
-  /* Don't know this is needed here at this moment. Original
-     handler->flags is still useful. */
   if(conn->handler->flags & PROTOPT_SSL)
     conn->handler = &Curl_handler_http2_ssl;
   else
     conn->handler = &Curl_handler_http2;
 
-  httpc->recv_underlying = (recving)conn->recv[FIRSTSOCKET];
-  httpc->send_underlying = (sending)conn->send[FIRSTSOCKET];
-  conn->recv[FIRSTSOCKET] = http2_recv;
-  conn->send[FIRSTSOCKET] = http2_send;
-  infof(conn->data, "We have switched to HTTP2\n");
+  infof(conn->data, "Using HTTP2\n");
   httpc->bodystarted = FALSE;
   httpc->closed = FALSE;
   httpc->header_recvbuf = Curl_add_buffer_init();
@@ -805,13 +796,26 @@ int Curl_http2_switched(struct connectdata *conn)
   httpc->upload_left = 0;
   httpc->upload_mem = NULL;
   httpc->upload_len = 0;
+  httpc->stream_id = -1;
 
   conn->httpversion = 20;
 
   /* Put place holder for status line */
   Curl_add_buffer(httpc->header_recvbuf, "HTTP/2.0 200\r\n", 14);
+}
 
+int Curl_http2_switched(struct connectdata *conn)
+{
   /* TODO: May get CURLE_AGAIN */
+  CURLcode rc;
+  struct http_conn *httpc = &conn->proto.httpc;
+  int rv;
+
+  httpc->recv_underlying = (recving)conn->recv[FIRSTSOCKET];
+  httpc->send_underlying = (sending)conn->send[FIRSTSOCKET];
+  conn->recv[FIRSTSOCKET] = http2_recv;
+  conn->send[FIRSTSOCKET] = http2_send;
+
   rv = (int) ((Curl_send*)httpc->send_underlying)
     (conn, FIRSTSOCKET,
      NGHTTP2_CLIENT_CONNECTION_PREFACE,

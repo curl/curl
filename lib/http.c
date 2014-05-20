@@ -1744,9 +1744,12 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
-  switch (conn->negnpn) {
+  if(conn->httpversion < 20) { /* unless the connection is re-used and already
+                                  http2 */
+    switch (conn->negnpn) {
     case NPN_HTTP2:
       Curl_http2_init(conn);
+      Curl_http2_setup(conn);
       Curl_http2_switched(conn);
       break;
     case NPN_HTTP1_1:
@@ -1755,7 +1758,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     default:
       /* and as fallback */
       break;
+    }
   }
+  else
+    /* prepare for a http2 request */
+    Curl_http2_setup(conn);
 
   http = data->req.protop;
 
@@ -2999,7 +3006,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         k->header = FALSE; /* no more header to parse! */
 
         if((k->size == -1) && !k->chunk && !conn->bits.close &&
-           (conn->httpversion >= 11) &&
+           (conn->httpversion == 11) &&
            !(conn->handler->protocol & CURLPROTO_RTSP) &&
            data->set.httpreq != HTTPREQ_HEAD) {
           /* On HTTP 1.1, when connection is not to get closed, but no
