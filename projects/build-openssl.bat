@@ -105,6 +105,9 @@ rem ***************************************************************************
   rem Check we have Visual Studio installed
   if not exist "%PF%\%VC_PATH%" goto novc
 
+  rem Check the start directory exists
+  if not exist "%START_DIR%" goto noopenssl
+
 :configure
   if "%BUILD_PLATFORM%" == "" (
     if "%VC_VER%" == "6.0" (
@@ -282,7 +285,7 @@ rem ***************************************************************************
   echo.
   echo Other:
   echo.
-  echo directory - Specifies the openssl directory
+  echo directory - Specifies the OpenSSL source directory
   goto error
 
 :unknown
@@ -308,6 +311,11 @@ rem ***************************************************************************
 :nox64
   echo.
   echo Error: %VC_DESC% does not support 64-bit builds
+  goto error
+
+:noopenssl
+  echo.
+  echo Error: Cannot locate OpenSSL source directory
   goto error
 
 :error
