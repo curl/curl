@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2012 - 2014, Steve Holme, <steve_holme@hotmail.com>
+rem * Copyright (C) 2012 - 2014, Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -86,6 +86,9 @@ rem ***************************************************************************
   shift & goto parseArgs
 
 :prerequisites
+  rem Default the start directory if one isn't specified
+  if not defined START_DIR set START_DIR=..\..\openssl
+
   rem Calculate the program files directory
   if defined PROGRAMFILES (
     set "PF=%PROGRAMFILES%"
