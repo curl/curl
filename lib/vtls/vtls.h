@@ -29,7 +29,7 @@
 
 /* see http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-04 */
 #define ALPN_HTTP_1_1_LENGTH 8
-#define ALPN_HTTP_1_1 "http/1.0"
+#define ALPN_HTTP_1_1 "http/1.1"
 
 bool Curl_ssl_config_matches(struct ssl_config_data* data,
                              struct ssl_config_data* needle);
