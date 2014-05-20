@@ -80,6 +80,8 @@ This release includes the following bugfixes:
  o HTTP: fixed connection re-use [23]
  o configure: add SPNEGO to supported features [24]
  o configure: add GSS-API to supported features [25]
+ o ALPN: fix typo in http/1.1 identifier
+ o http2: make connection re-use work [26]
 
 This release includes the following known bugs:
 
@@ -89,11 +91,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Aaro Koskinen, Cody Mack, Damian Dixon, Dan Fandrich, Daniel Johnson,
-  Daniel Stenberg, David Woodhouse, Dilyan Palauzov, Ivo Bellin Salarin,
-  Jeff King, Jeroen Koekkoek, Jon Torrey, Kamil Dudka, Larry Lin, Leon Winter,
-  Maciej Puzio, Marc Hoersken, Nick Zitzmann, Patrick Watson, Paul Marks,
-  Radu Simionescu, Remi Gacogne, Ryan Braud, Steve Holme, Tatsuhiro Tsujikawa,
-  Till Maas, Tom Sparrow, Török Edwin, Vijay Panghal,
+  Daniel Stenberg, David Woodhouse, Dilyan Palauzov, Fabian Frank,
+  Ivo Bellin Salarin, Jeff King, Jeroen Koekkoek, Jon Torrey, Kamil Dudka,
+  Larry Lin, Leon Winter, Maciej Puzio, Marc Hoersken, Michael Osipov,
+  Nick Zitzmann, Patrick Watson, Paul Marks, Radu Simionescu, Remi Gacogne,
+  Ryan Braud, Steve Holme, Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow,
+  Török Edwin, Vijay Panghal,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -124,3 +127,4 @@ References to bug reports and discussions on issues:
  [23] = http://curl.haxx.se/mail/lib-2014-05/0127.html
  [24] = http://curl.haxx.se/bug/view.cgi?id=1343
  [25] = http://curl.haxx.se/bug/view.cgi?id=1344
+ [26] = http://curl.haxx.se/bug/view.cgi?id=1374
