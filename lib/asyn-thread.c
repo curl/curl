@@ -446,7 +446,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   destroy_async_data(&conn->async);
 
   if(!conn->async.dns)
-    conn->bits.close = TRUE;
+    connclose(conn, "asynch resolve failed");
 
   return (rc);
 }

@@ -2544,7 +2544,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       memset(sshc, 0, sizeof(struct ssh_conn));
 
-      conn->bits.close = TRUE;
+      connclose(conn, "SSH session free");
       sshc->state = SSH_SESSION_FREE; /* current */
       sshc->nextstate = SSH_NO_STATE;
       state(conn, SSH_STOP);
@@ -2747,7 +2747,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
 
   /* We default to persistent connections. We set this already in this connect
      function to make the re-use checks properly be able to check this bit. */
-  conn->bits.close = FALSE;
+  connkeep(conn, "SSH default");
 
   if(conn->handler->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;

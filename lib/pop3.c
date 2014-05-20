@@ -1547,7 +1547,7 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
   *done = FALSE; /* default to not done yet */
 
   /* We always support persistent connections in POP3 */
-  conn->bits.close = FALSE;
+  connkeep(conn, "POP3 default");
 
   /* Set the default response time-out */
   pp->response_time = RESP_TIMEOUT;
@@ -1601,7 +1601,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
     return CURLE_OK;
 
   if(status) {
-    conn->bits.close = TRUE; /* marked for closure */
+    connclose(conn, "POP3 done with bad status");
     result = status;         /* use the already set error code */
   }
 

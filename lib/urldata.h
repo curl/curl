@@ -475,6 +475,7 @@ struct negotiatedata {
  * Boolean values that concerns this connection.
  */
 struct ConnectBits {
+  /* always modify bits.close with the connclose() and connkeep() macros! */
   bool close; /* if set, we close the connection after this request */
   bool reuse; /* if set, this is a re-used connection */
   bool proxy; /* if set, this transfer is done through a proxy - any type */

@@ -3590,7 +3590,7 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   /* Default protocol-independent behavior doesn't support persistent
      connections, so we set this to force-close. Protocols that support
      this need to set this to FALSE in their "curl_do" functions. */
-  conn->bits.close = TRUE;
+  connclose(conn, "Default to force-close");
 
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();

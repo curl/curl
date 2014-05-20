@@ -69,7 +69,7 @@ CURLcode Curl_proxy_connect(struct connectdata *conn)
     prot_save = conn->data->req.protop;
     memset(&http_proxy, 0, sizeof(http_proxy));
     conn->data->req.protop = &http_proxy;
-    conn->bits.close = FALSE;
+    connkeep(conn, "HTTP proxy CONNECT");
     result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
                                conn->host.name, conn->remote_port);
     conn->data->req.protop = prot_save;

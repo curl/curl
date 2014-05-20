@@ -974,9 +974,9 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  conn->bits.close = TRUE; /* we don't keep TFTP connections up bascially
-                              because there's none or very little gain for UDP
-                           */
+  /* we don't keep TFTP connections up bascially because there's none or very
+   * little gain for UDP */
+  connclose(conn, "TFTP");
 
   state->conn = conn;
   state->sockfd = state->conn->sock[FIRSTSOCKET];

@@ -569,7 +569,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
               infof(data, "Simulate a HTTP 304 response!\n");
               /* we abort the transfer before it is completed == we ruin the
                  re-use ability. Close the connection */
-              conn->bits.close = TRUE;
+              connclose(conn, "Simulated 304 handling");
               return CURLE_OK;
             }
           } /* we have a time condition */
@@ -1818,7 +1818,7 @@ Curl_reconnect_request(struct connectdata **connp)
 
   infof(data, "Re-used connection seems dead, get a new one\n");
 
-  conn->bits.close = TRUE; /* enforce close of this connection */
+  connclose(conn, "Reconnect dead connection"); /* enforce close */
   result = Curl_done(&conn, result, FALSE); /* we are so done with this */
 
   /* conn may no longer be a good pointer, clear it to avoid mistakes by
@@ -1891,7 +1891,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
     if(!*url)
       return CURLE_OUT_OF_MEMORY;
 
-    conn->bits.close = TRUE; /* close this connection */
+    connclose(conn, "retry"); /* close this connection */
     conn->bits.retry = TRUE; /* mark this as a connection we're about
                                 to retry. Marking it this way should
                                 prevent i.e HTTP transfers to return

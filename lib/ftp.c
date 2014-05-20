@@ -3164,7 +3164,7 @@ static CURLcode ftp_connect(struct connectdata *conn,
   *done = FALSE; /* default to not done yet */
 
   /* We always support persistent connections on ftp */
-  conn->bits.close = FALSE;
+  connkeep(conn, "FTP default");
 
   pp->response_time = RESP_TIMEOUT; /* set default response time-out */
   pp->statemach_act = ftp_statemach_act;
@@ -3248,7 +3248,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     ftpc->ctl_valid = FALSE;
     ftpc->cwdfail = TRUE; /* set this TRUE to prevent us to remember the
                              current path, as this connection is going */
-    conn->bits.close = TRUE; /* marked for closure */
+    connclose(conn, "FTP ended with bad error code");
     result = status;      /* use the already set error code */
     break;
   }
@@ -3272,7 +3272,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     if(!result)
       result = CURLE_OUT_OF_MEMORY;
     ftpc->ctl_valid = FALSE; /* mark control connection as bad */
-    conn->bits.close = TRUE; /* mark for connection closure */
+    connclose(conn, "FTP: out of memory!"); /* mark for connection closure */
     ftpc->prevpath = NULL; /* no path remembering */
   }
   else {
@@ -3315,7 +3315,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
         failf(data, "Failure sending ABOR command: %s",
               curl_easy_strerror(result));
         ftpc->ctl_valid = FALSE; /* mark control connection as bad */
-        conn->bits.close = TRUE; /* mark for connection closure */
+        connclose(conn, "ABOR command failed"); /* connection closure */
       }
     }
 
@@ -3354,7 +3354,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     if(!nread && (CURLE_OPERATION_TIMEDOUT == result)) {
       failf(data, "control connection looks dead");
       ftpc->ctl_valid = FALSE; /* mark control connection as bad */
-      conn->bits.close = TRUE; /* mark for closure */
+      connclose(conn, "Timeout or similar in FTP DONE operation"); /* close */
     }
 
     if(result)
@@ -3364,7 +3364,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
       /* we have just sent ABOR and there is no reliable way to check if it was
        * successful or not; we have to close the connection now */
       infof(data, "partial download completed, closing connection\n");
-      conn->bits.close = TRUE; /* mark for closure */
+      connclose(conn, "Partial download with no ability to check");
       return result;
     }
 
@@ -4133,7 +4133,7 @@ static CURLcode ftp_quit(struct connectdata *conn)
       failf(conn->data, "Failure sending QUIT command: %s",
             curl_easy_strerror(result));
       conn->proto.ftpc.ctl_valid = FALSE; /* mark control connection as bad */
-      conn->bits.close = TRUE; /* mark for connection closure */
+      connclose(conn, "QUIT command failed"); /* mark for connection closure */
       state(conn, FTP_STOP);
       return result;
     }

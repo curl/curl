@@ -1588,7 +1588,7 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   *done = FALSE; /* default to not done yet */
 
   /* We always support persistent connections in SMTP */
-  conn->bits.close = FALSE;
+  connkeep(conn, "SMTP default");
 
   /* Set the default response time-out */
   pp->response_time = RESP_TIMEOUT;
@@ -1650,7 +1650,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     return CURLE_OK;
 
   if(status) {
-    conn->bits.close = TRUE; /* marked for closure */
+    connclose(conn, "SMTP done with bad status"); /* marked for closure */
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && data->set.upload && data->set.mail_rcpt) {

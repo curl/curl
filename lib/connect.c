@@ -1321,3 +1321,20 @@ CURLcode Curl_socket(struct connectdata *conn,
   return CURLE_OK;
 
 }
+
+#ifdef CURLDEBUG
+/*
+ * Curl_conncontrol() is used to set the conn->bits.close bit on or off. It
+ * MUST be called with the connclose() or connclose() macros with a stated
+ * reason. The reason is only shown in debug builds but helps to figure out
+ * decision paths when connections are or aren't re-used as expected.
+ */
+void Curl_conncontrol(struct connectdata *conn, bool closeit,
+                      const char *reason)
+{
+  infof(conn->data, "Marked for [%s]: %s\n", closeit?"closure":"keep alive",
+        reason);
+  conn->bits.close = closeit; /* the only place in the source code that should
+                                 assign this bit */
+}
+#endif

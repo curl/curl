@@ -466,7 +466,7 @@ quit:
 
   /* no data to transfer */
   Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
-  conn->bits.close = TRUE;
+  connclose(conn, "LDAP connection always disable re-use");
 
   return status;
 }
