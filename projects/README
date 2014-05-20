@@ -97,6 +97,8 @@ TODO
    * Support zlib
    * Support WinIDN
    * Use of static runtime libraries
+   * Generate *.vcxproj.filters files for VC10, VC11 and VC12
+   * Use CURLX_* definitions for curl tool project generation
    * Support for other development IDEs
 
    Any additional help would be appreciated ;-)
