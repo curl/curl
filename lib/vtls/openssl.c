@@ -1440,7 +1440,11 @@ select_next_proto_cb(SSL *ssl,
     conn->negnpn = NPN_HTTP1_1;
   }
   else {
-    infof(conn->data, "NPN, no overlap, negotiated nothing\n");
+    infof(conn->data, "NPN, no overlap, use HTTP1.1\n",
+          NGHTTP2_PROTO_VERSION_ID);
+    *out = (unsigned char*)"http/1.1";
+    *outlen = sizeof("http/1.1") - 1;
+    conn->negnpn = NPN_HTTP1_1;
   }
 
   return SSL_TLSEXT_ERR_OK;
