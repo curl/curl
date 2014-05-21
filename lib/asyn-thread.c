@@ -68,6 +68,7 @@
 #include "inet_pton.h"
 #include "inet_ntop.h"
 #include "curl_threads.h"
+#include "connect.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
