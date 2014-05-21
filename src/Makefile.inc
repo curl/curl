@@ -16,6 +16,14 @@ CURLX_CFILES = \
 	../lib/nonblock.c \
 	../lib/warnless.c
 
+CURLX_HFILES = \
+	../lib/setup.h \
+	../lib/strtoofft.h \
+	../lib/strdup.h \
+	../lib/rawstr.h \
+	../lib/nonblock.h \
+	../lib/warnless.h
+
 CURL_CFILES = \
 	tool_binmode.c \
 	tool_bname.c \
