@@ -20,7 +20,7 @@ add_executable(
   ${curl_SOURCES}
   )
 
-source_group("cURLX source files" FILES ${CURLX_ONES})
+source_group("cURLX source files" FILES ${CURLX_CFILES})
 source_group("cURL source files" FILES ${CURL_CFILES})
 source_group("cURL header files" FILES ${CURL_HFILES})
 

@@ -16,7 +16,7 @@ MKHELP	=	../src/mkhelp.pl
 
 include Makefile.inc
 
-OBJS = $(CURL_CFILES:.c=.o) $(CURLX_ONES:.c=.o)
+OBJS = $(CURL_CFILES:.c=.o) $(CURLX_CFILES:.c=.o)
 
 all:	tool_hugehelp.c $(OBJS)
 	$(CC) $(CFLAGS) -o cURL $(OBJS) $(LIBS) -Wl,-Map,cURL.map,--cref

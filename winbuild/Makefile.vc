@@ -199,4 +199,4 @@ $(MODE):
 
 copy_from_lib:
 	echo copying .c...
-	FOR %%i IN ($(CURLX_ONES:/=\)) DO copy %%i ..\src\
+	FOR %%i IN ($(CURLX_CFILES:/=\)) DO copy %%i ..\src\

@@ -124,7 +124,7 @@ LINK_ARG = $(OBJ_DIR)/wlink.arg
 
 OBJS1 = $(OBJ_DIR)/$(CURL_CFILES)
 !ifndef %curl_static
-OBJS1 += $(CURLX_ONES:../lib/=)
+OBJS1 += $(CURLX_CFILES:../lib/=)
 !endif
 OBJS2 = $(OBJS1: = $(OBJ_DIR)/)
 OBJS = $(OBJS2:.c=.obj)

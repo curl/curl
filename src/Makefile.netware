@@ -353,7 +353,7 @@ endif
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-OBJX	:= $(patsubst %.c,$(OBJDIR)/%.o,$(notdir $(strip $(CURLX_ONES))))
+OBJX	:= $(patsubst %.c,$(OBJDIR)/%.o,$(notdir $(strip $(CURLX_CFILES))))
 OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CURL_CFILES)))
 ifndef LINK_STATIC
 OBJS	+= $(OBJX)

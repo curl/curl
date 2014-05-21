@@ -287,7 +287,7 @@ include Makefile.inc
 
 curl_PROGRAMS = curl.exe
 curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_CFILES)))
-curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_ONES))))
+curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_CFILES))))
 ifdef DYN
 curl_OBJECTS += $(curlx_OBJECTS)
 vpath %.c $(PROOT)/lib
