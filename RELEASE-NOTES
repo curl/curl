@@ -1,87 +1,18 @@
-Curl and libcurl 7.37.0
+Curl and libcurl 7.38.0
 
- Public curl releases:         139
- Command line options:         161
- curl_easy_setopt() options:   206
+ Public curl releases:         140
+ Command line options:         162
+ curl_easy_setopt() options:   208
  Public functions in libcurl:  58
- Contributors:                 1137
+ Contributors:                 1155
 
 This release includes the following changes:
 
- o URL parser: IPv6 zone identifiers are now supported
- o CURLOPT_PROXYHEADER: set headers for proxy-only
- o CURLOPT_HEADEROPT: added
- o curl: add --proxy-header
- o sasl: Added support for DIGEST-MD5 via Windows SSPI
- o sasl: Added DIGEST-MD5 qop-option validation in native challange handling
- o imap: Expanded mailbox SEARCH support to use URL query strings [7]
- o imap: Extended FETCH support to include PARTIAL URL specifier [7]
- o nss: implement non-blocking SSL handshake
- o build: Reworked Visual Studio project files
- o poll: enable poll on darwin13
- o mk-ca-bundle: added -p
- o libtests: add a wait_ms() function
+ o 
 
 This release includes the following bugfixes:
 
- o mkhelp: generate code for --disable-manual as well [1]
- o hostcheck: added a system include to define struct in_addr
- o winbuild: added warnless.c to fix build
- o Makefile.vc6: added warnless.c to fix build
- o smtp: Fixed login denied when server doesn't support AUTH capability [2]
- o smtp: Fixed login denied with a RFC-821 based server [2]
- o curl: stop interpreting IPv6 literals as glob patterns
- o http2: remove _DRAFT09 from the NPN_HTTP2 enum
- o http2: let openssl mention the exact protocol negotiated
- o http2+openssl: fix compiler warnings in ALPN using code
- o ftp: in passive data connect wait for happy eyeballs sockets [3]
- o HTTP: don't send Content-Length: 0 _and_ Expect: 100-continue [4]
- o http2: Compile with current nghttp2, which supports h2-11 [5]
- o http_negotiate_sspi: Fixed compilation when USE_HTTP_NEGOTIATE not defined
- o strerror: fix comment about vxworks' strerror_r buffer size [6]
- o url: only use if_nametoindex() if IFNAMSIZ is available
- o imap: Fixed untagged response detection when no data after command
- o various: fix possible dereference of null pointer
- o various: fix use of uninitialized variable
- o various: fix use of non-null terminated strings
- o telnet.c: check sscanf results before passing them to snprintf
- o parsedate.c: check sscanf result before passing it to strlen
- o sockfilt.c: free memory in case of memory allocation errors
- o sockfilt.c: ignore non-key-events and continue waiting for input
- o sockfilt.c: properly handle disk files, pipes and character input
- o sockfilt.c: fixed getting stuck waiting for MinGW stdin pipe
- o sockfilt.c: clean up threaded approach and add documentation
- o configure: use the nghttp2 path correctly with pkg-config [8]
- o curl_global_init_mem: bump initialized even if already initialized [9]
- o gtls: fix NULL pointer dereference [10]
- o cyassl: Use error-ssl.h when available
- o handler: make 'protocol' always specified as a single bit [11]
- o INFILESIZE: fields in UserDefined must not be changed run-time
- o openssl: biomem->data is not zero terminated
- o config-win32.h: Fixed HAVE_LONGLONG for Visual Studio .NET 2003 and up
- o curl_ntlm_core: Fixed use of long long for VC6 and VC7
- o SNI: strip off a single trailing dot from host name [12]
- o curl: bail on cookie use when built with disabled cookies
- o curl_easy_setopt.3: added the proto for CURLOPT_SSH_KNOWNHOSTS
- o curl_multi_cleanup: ignore SIGPIPE better [13]
- o schannel: don't use the connect-timeout during send [14]
- o mprintf: allow %.s with data not being zero terminated
- o tool_help: Fixed missing --login-options option
- o configure: Don't set LD_LIBRARY_PATH when cross-compiling
- o http: auth failure on duplicated 'WWW-Authenticate: Negotiate' header [15]
- o cacertinmem: fix memory leak [16]
- o lib1506: make sure the transfers are not within the same ms [17]
- o Makefile.b32: Fixed for vtls changes [18]
- o sasl: Fixed missing qop in the client's challenge-response message
- o openssl: unbreak PKCS12 support [19]
- o darwinssl: fix potential crash with a P12 file [20]
- o timers: fix timer regression involving redirects / reconnects [21]
- o CURLINFO_SSL_VERIFYRESULT: made more reliable [22]
- o HTTP: fixed connection re-use [23]
- o configure: add SPNEGO to supported features [24]
- o configure: add GSS-API to supported features [25]
- o ALPN: fix typo in http/1.1 identifier
- o http2: make connection re-use work [26]
+ o 
 
 This release includes the following known bugs:
 
@@ -90,41 +21,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aaro Koskinen, Cody Mack, Damian Dixon, Dan Fandrich, Daniel Johnson,
-  Daniel Stenberg, David Woodhouse, Dilyan Palauzov, Fabian Frank,
-  Ivo Bellin Salarin, Jeff King, Jeroen Koekkoek, Jon Torrey, Kamil Dudka,
-  Larry Lin, Leon Winter, Maciej Puzio, Marc Hoersken, Michael Osipov,
-  Nick Zitzmann, Patrick Watson, Paul Marks, Radu Simionescu, Remi Gacogne,
-  Ryan Braud, Steve Holme, Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow,
-  Török Edwin, Vijay Panghal,
+  
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/bug/view.cgi?id=1350
- [2] = http://curl.haxx.se/mail/lib-2014-03/0173.html
- [3] = http://curl.haxx.se/mail/lib-2014-02/0135.html (ruined)
- [4] = http://curl.haxx.se/bug/view.cgi?id=1349
- [5] = http://curl.haxx.se/mail/lib-2014-04/0053.html
- [6] = http://curl.haxx.se/mail/lib-2014-04/0063.html
- [7] = http://curl.haxx.se/mail/lib-2014-04/0067.html
- [8] = http://curl.haxx.se/mail/lib-2014-04/0159.html
- [9] = http://curl.haxx.se/bug/view.cgi?id=1362
- [10] = http://curl.haxx.se/mail/lib-2014-04/0145.html
- [11] = https://github.com/bagder/curl/pull/97
- [12] = http://curl.haxx.se/mail/lib-2014-04/0161.html
- [13] = http://thread.gmane.org/gmane.comp.version-control.git/238242
- [14] = http://curl.haxx.se/bug/view.cgi?id=1352
- [15] = https://bugzilla.redhat.com/1093348
- [16] = http://curl.haxx.se/bug/view.cgi?id=1368
- [17] = http://curl.haxx.se/mail/lib-2014-05/0081.html
- [18] = http://curl.haxx.se/mail/lib-2014-05/0025.html
- [19] = http://curl.haxx.se/bug/view.cgi?id=1371
- [20] = http://curl.haxx.se/bug/view.cgi?id=1369
- [21] = http://curl.haxx.se/mail/lib-2014-05/0147.html
- [22] = http://curl.haxx.se/mail/lib-2014-04/0203.html
- [23] = http://curl.haxx.se/mail/lib-2014-05/0127.html
- [24] = http://curl.haxx.se/bug/view.cgi?id=1343
- [25] = http://curl.haxx.se/bug/view.cgi?id=1344
- [26] = http://curl.haxx.se/bug/view.cgi?id=1374
+ [1] = 
