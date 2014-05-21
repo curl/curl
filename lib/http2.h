@@ -43,7 +43,7 @@ int Curl_http2_switched(struct connectdata *conn);
 #define Curl_http2_send_request(x)
 #define Curl_http2_request_upgrade(x,y) CURLE_OK
 #define Curl_http2_switched(x)
-#define Curl_http2_setup(x)
+#define Curl_http2_setup(x) Curl_nop_stmt
 #endif
 
 #endif /* HEADER_CURL_HTTP2_H */
