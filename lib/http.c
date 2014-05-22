@@ -1761,9 +1761,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       break;
     }
   }
-  else
+  else {
     /* prepare for a http2 request */
     Curl_http2_setup(conn);
+  }
 
   http = data->req.protop;
 
