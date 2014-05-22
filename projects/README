@@ -98,6 +98,7 @@ TODO
    * Support WinIDN
    * Use of static runtime libraries
    * Generate *.vcxproj.filters files for VC10, VC11 and VC12
+   * Add the Test Suite components
    * Support for other development IDEs
 
    Any additional help would be appreciated ;-)
