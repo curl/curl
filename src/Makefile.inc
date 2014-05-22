@@ -17,7 +17,7 @@ CURLX_CFILES = \
 	../lib/warnless.c
 
 CURLX_HFILES = \
-	../lib/setup.h \
+	../lib/curl_setup.h \
 	../lib/strtoofft.h \
 	../lib/strdup.h \
 	../lib/rawstr.h \
