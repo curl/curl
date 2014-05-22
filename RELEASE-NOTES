@@ -8,10 +8,13 @@ Curl and libcurl 7.38.0
 
 This release includes the following changes:
 
+ o bits.close: introduce connection close tracking
+ o darwinssl: Add support for --cacert
  o 
 
 This release includes the following bugfixes:
 
+ o build: Fixed incorrect reference to curl_setup.h in Visual Studio files
  o 
 
 This release includes the following known bugs:
@@ -21,7 +24,7 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Daniel Stenberg, Nick Zitzman, Steve Holme, Vilmos Nebehaj
 
         Thanks! (and sorry if I forgot to mention someone)
 
