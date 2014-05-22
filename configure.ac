@@ -2733,7 +2733,7 @@ dnl Check for nghttp2
 dnl **********************************************************************
 
 AC_MSG_CHECKING([whether to build with nghttp2])
-OPT_H2="no"
+OPT_H2="yes"
 AC_ARG_WITH(nghttp2,
 AC_HELP_STRING([--with-nghttp2=PATH],[Enable nghttp2 usage])
 AC_HELP_STRING([--without-nghttp2],[Disable nghttp2 usage]),
@@ -2741,11 +2741,6 @@ AC_HELP_STRING([--without-nghttp2],[Disable nghttp2 usage]),
 case "$OPT_H2" in
   no)
     dnl --without-nghttp2 option used
-    want_h2="no"
-    AC_MSG_RESULT([no])
-    ;;
-  default)
-    dnl configure option not specified
     want_h2="no"
     AC_MSG_RESULT([no])
     ;;
