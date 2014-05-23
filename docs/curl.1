@@ -1629,6 +1629,10 @@ Specify the user name and password to use for server authentication. Overrides
 
 If you simply specify the user name, curl will prompt for a password.
 
+The user name and passwords are split up on the first colon, which makes it
+impossible to use a colon in the user name with this option. The password can,
+still.
+
 If you use an SSPI-enabled curl binary and perform NTLM authentication, you
 can force curl to select the user name and password from your environment by
 specifying a single colon with this option: "-u :".
