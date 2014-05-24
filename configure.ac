@@ -2732,7 +2732,6 @@ dnl **********************************************************************
 dnl Check for nghttp2
 dnl **********************************************************************
 
-AC_MSG_CHECKING([whether to build with nghttp2])
 OPT_H2="yes"
 AC_ARG_WITH(nghttp2,
 AC_HELP_STRING([--with-nghttp2=PATH],[Enable nghttp2 usage])
@@ -2742,19 +2741,16 @@ case "$OPT_H2" in
   no)
     dnl --without-nghttp2 option used
     want_h2="no"
-    AC_MSG_RESULT([no])
     ;;
   yes)
     dnl --with-nghttp2 option used without path
-    want_h2="yes"
+    want_h2="default"
     want_h2_path=""
-    AC_MSG_RESULT([yes])
     ;;
   *)
     dnl --with-nghttp2 option used with path
     want_h2="yes"
     want_h2_path="$withval/lib/pkgconfig"
-    AC_MSG_RESULT([yes ($withval)])
     ;;
 esac
 
@@ -2780,30 +2776,33 @@ if test X"$want_h2" != Xno; then
       $PKGCONFIG --libs-only-L libnghttp2`
     AC_MSG_NOTICE([-L is $LD_H2])
 
+    LDFLAGS="$LDFLAGS $LD_H2"
+    CPPFLAGS="$CPPFLAGS $CPP_H2"
+    LIBS="$LIB_H2 $LIBS"
+
+    AC_CHECK_LIB(nghttp2, nghttp2_session_client_new,
+      [
+       AC_CHECK_HEADERS(nghttp2/nghttp2.h,
+          curl_h2_msg="enabled (nghttp2)"
+          NGHTTP2_ENABLED=1
+          AC_DEFINE(USE_NGHTTP2, 1, [if nghttp2 is in use])
+          AC_SUBST(USE_NGHTTP2, [1])
+       )
+      ],
+        dnl not found, revert back to clean variables
+        LDFLAGS=$CLEANLDFLAGS
+        CPPFLAGS=$CLEANCPPFLAGS
+        LIBS=$CLEANLIBS
+    )
+
   else
-    dnl To avoid link errors, we do not allow --libnghttp2 without
-    dnl a pkgconfig file
-    AC_MSG_ERROR([--with-nghttp2 was specified but could not find libnghttp2 pkg-config file.])
+    dnl no nghttp2 pkg-config found, deal with it
+    if test X"$want_h2" != Xdefault; then
+      dnl To avoid link errors, we do not allow --with-nghttp2 without
+      dnl a pkgconfig file
+      AC_MSG_ERROR([--with-nghttp2 was specified but could not find libnghttp2 pkg-config file.])
+    fi
   fi
-
-  LDFLAGS="$LDFLAGS $LD_H2"
-  CPPFLAGS="$CPPFLAGS $CPP_H2"
-  LIBS="$LIB_H2 $LIBS"
-
-  AC_CHECK_LIB(nghttp2, nghttp2_session_client_new,
-    [
-     AC_CHECK_HEADERS(nghttp2/nghttp2.h,
-        curl_h2_msg="enabled (nghttp2)"
-        NGHTTP2_ENABLED=1
-        AC_DEFINE(USE_NGHTTP2, 1, [if nghttp2 is in use])
-        AC_SUBST(USE_NGHTTP2, [1])
-     )
-    ],
-      dnl not found, revert back to clean variables
-      LDFLAGS=$CLEANLDFLAGS
-      CPPFLAGS=$CLEANCPPFLAGS
-      LIBS=$CLEANLIBS
-  )
 
 fi
 
