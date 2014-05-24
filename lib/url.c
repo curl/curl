@@ -278,6 +278,11 @@ void Curl_freeset(struct SessionHandle *data)
     data->change.referer_alloc = FALSE;
   }
   data->change.referer = NULL;
+  if(data->change.url_alloc) {
+    Curl_safefree(data->change.url);
+    data->change.url_alloc = FALSE;
+  }
+  data->change.url = NULL;
 }
 
 static CURLcode setstropt(char **charp, char *s)
