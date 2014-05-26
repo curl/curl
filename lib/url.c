@@ -4009,7 +4009,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
       }
       else {
         /* Zone identifier is not numeric */
-#if defined(HAVE_NET_IF_H) && defined(IFNAMSIZ)
+#if defined(HAVE_NET_IF_H) && defined(IFNAMSIZ) && defined(HAVE_IF_NAMETOINDEX)
         char ifname[IFNAMSIZ + 2];
         char *square_bracket;
         unsigned int scopeidx = 0;

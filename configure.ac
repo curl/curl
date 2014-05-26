@@ -3035,6 +3035,7 @@ AC_CHECK_FUNCS([fork \
   getpwuid \
   getrlimit \
   gettimeofday \
+  if_nametoindex \
   inet_addr \
   perror \
   pipe \
