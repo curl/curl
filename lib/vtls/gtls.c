@@ -94,8 +94,6 @@ static bool gtls_inited = FALSE;
 #    undef HAS_ALPN
 #    if (GNUTLS_VERSION_NUMBER >= 0x030200)
 #      define HAS_ALPN
-#    else
-#      error http2 builds require GnuTLS >= 3.2.0 for ALPN support
 #    endif
 #  endif
 #endif
