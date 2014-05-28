@@ -10,11 +10,21 @@ This release includes the following changes:
 
  o bits.close: introduce connection close tracking
  o darwinssl: Add support for --cacert
+ o polarssl: add ALPN support
  o 
 
 This release includes the following bugfixes:
 
  o build: Fixed incorrect reference to curl_setup.h in Visual Studio files
+ o build: Use $(TargetDir) and $(TargetName) macros for .pdb and .lib output
+ o curl.1: clarify that -u can't specify a user with colon [1]
+ o openssl: Fix uninitialized variable use in NPN callback
+ o curl_easy_reset: reset the URL [2]
+ o curl_version_info.3: returns a pointer to a static struct
+ o url-parser: only use if_nametoindex if detected by configure [3]
+ o select: with winsock, avoid passing unsupported arguments to select() [4]
+ o gnutls: don't use deprecated type names anymore
+ o gnutls: allow building with nghttp2 but without ALPN support
  o 
 
 This release includes the following known bugs:
@@ -24,10 +34,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Nick Zitzman, Steve Holme, Vilmos Nebehaj
+  Brad Spencer, Chris Young, Daniel Stenberg, Fabian Frank,
+  Jonathan Cardoso Machado, Nick Zitzman, Roman Neuhauser, Steve Holme,
+  Tatsuhiro Tsujikawa, Vilmos Nebehaj
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = 
+ [1] = http://curl.haxx.se/bug/view.cgi?id=1375
+ [2] = http://curl.haxx.se/mail/lib-2014-05/0235.html
+ [3] = http://curl.haxx.se/mail/lib-2014-05/0260.html
+ [4] = http://curl.haxx.se/mail/lib-2014-05/0278.html
