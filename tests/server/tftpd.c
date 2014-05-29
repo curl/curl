@@ -268,15 +268,6 @@ static struct tftphdr *w_init(void);
 
 static struct tftphdr *r_init(void);
 
-static int readit(struct testcase *test,
-                  struct tftphdr **dpp,
-                  int convert);
-
-static int writeit(struct testcase *test,
-                   struct tftphdr **dpp,
-                   int ct,
-                   int convert);
-
 static void read_ahead(struct testcase *test, int convert);
 
 static ssize_t write_behind(struct testcase *test, int convert);
@@ -539,7 +530,7 @@ static void read_ahead(struct testcase *test,
 /* Update count associated with the buffer, get new buffer from the queue.
    Calls write_behind only if next buffer not available.
  */
-static int writeit(struct testcase *test, struct tftphdr **dpp,
+static int writeit(struct testcase *test, struct tftphdr * volatile *dpp,
                    int ct, int convert)
 {
   bfs[current].counter = ct;      /* set size of data to write */
@@ -1211,7 +1202,8 @@ static void sendtftp(struct testcase *test, struct formats *pf)
 {
   int size;
   ssize_t n;
-  unsigned short sendblock; /* block count */
+  /* This is volatile to live through a siglongjmp */
+  volatile unsigned short sendblock; /* block count */
   struct tftphdr *sdp;      /* data buffer */
   struct tftphdr *sap;      /* ack buffer */
 
@@ -1289,15 +1281,16 @@ static void sendtftp(struct testcase *test, struct formats *pf)
 static void recvtftp(struct testcase *test, struct formats *pf)
 {
   ssize_t n, size;
-  unsigned short recvblock; /* block count */
-  struct tftphdr *rdp;      /* data buffer */
+  /* These are volatile to live through a siglongjmp */
+  volatile unsigned short recvblock; /* block count */
+  struct tftphdr * volatile rdp;     /* data buffer */
   struct tftphdr *rap;      /* ack buffer */
 
   recvblock = 0;
+  rdp = w_init();
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, timer);
 #endif
-  rdp = w_init();
   rap = &ackbuf.hdr;
   do {
     timeout = 0;
