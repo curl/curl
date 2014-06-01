@@ -111,7 +111,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   }
 
   /* Calculate our SPN */
-  spn = aprintf("%s/%s", service, data->easy_conn->host);
+  spn = aprintf("%s/%s", service, data->easy_conn->host.name);
   if(!spn)
     return CURLE_OUT_OF_MEMORY;
 
