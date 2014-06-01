@@ -423,7 +423,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   unsigned int cnonce2 = 0;
   unsigned int cnonce3 = 0;
   unsigned int cnonce4 = 0;
+#ifndef DEBUGBUILD
   struct timeval now;
+#endif
 
   char nonceCount[] = "00000001";
   char method[]     = "AUTHENTICATE";
