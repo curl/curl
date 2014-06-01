@@ -179,9 +179,6 @@ may have been fixed since this was written!
   run that might be needed only for building libcurl. Further, curl-config
   --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
 
-30. You need to use -g to the command line tool in order to use RFC2732-style
-  or RFC6874-style IPv6 numerical addresses in URLs.
-
 26. NTLM authentication using SSPI (on Windows) when (lib)curl is running in
   "system context" will make it use wrong(?) user name - at least when compared
   to what winhttp does. See http://curl.haxx.se/bug/view.cgi?id=535
