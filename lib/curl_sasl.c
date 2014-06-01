@@ -403,9 +403,6 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              const char *service,
                                              char **outptr, size_t *outlen)
 {
-#ifndef DEBUGBUILD
-  static const char table16[] = "0123456789abcdef";
-#endif
   CURLcode result = CURLE_OK;
   size_t i;
   MD5_context *ctxt;
@@ -421,8 +418,14 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char qop_options[64];
   int qop_values;
 
+  char cnonce[33];
+  unsigned int cnonce1 = 0;
+  unsigned int cnonce2 = 0;
+  unsigned int cnonce3 = 0;
+  unsigned int cnonce4 = 0;
+  struct timeval now;
+
   char nonceCount[] = "00000001";
-  char cnonce[]     = "12345678"; /* will be changed */
   char method[]     = "AUTHENTICATE";
   char qop[]        = DIGEST_QOP_VALUE_STRING_AUTH;
   char uri[128];
@@ -449,10 +452,17 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     return CURLE_BAD_CONTENT_ENCODING;
 
 #ifndef DEBUGBUILD
-  /* Generate 64 bits of random data */
-  for(i = 0; i < 8; i++)
-    cnonce[i] = table16[Curl_rand(data)%16];
+  /* Generate 16 bytes of random data */
+  cnonce1 = Curl_rand(data);
+  cnonce2 = Curl_rand(data);
+  now = Curl_tvnow();
+  cnonce3 = now.tv_sec;
+  cnonce4 = now.tv_sec;
 #endif
+
+  /* Convert the random data into a 32 byte hex string */
+  snprintf(cnonce, sizeof(cnonce), "%08x%08x%08x%08x",
+           cnonce1, cnonce2, cnonce3, cnonce4);
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
