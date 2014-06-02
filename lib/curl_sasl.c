@@ -459,7 +459,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   cnonce2 = Curl_rand(data);
   now = Curl_tvnow();
   cnonce3 = now.tv_sec;
-  cnonce4 = now.tv_sec;
+  cnonce4 = now.tv_usec;
 #endif
 
   /* Convert the random data into a 32 byte hex string */
