@@ -25,6 +25,9 @@ This release includes the following bugfixes:
  o select: with winsock, avoid passing unsupported arguments to select() [4]
  o gnutls: don't use deprecated type names anymore
  o gnutls: allow building with nghttp2 but without ALPN support
+ o tests: Fix portability issue with the tftpd server
+ o curl_sasl_sspi: Fixed corrupt hostname in DIGEST-MD5 SPN
+ o curl_sasl: extended native DIGEST-MD5 cnonce to be a 32-byte hex string
  o 
 
 This release includes the following known bugs:
@@ -34,9 +37,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad Spencer, Chris Young, Daniel Stenberg, Fabian Frank,
-  Jonathan Cardoso Machado, Nick Zitzman, Roman Neuhauser, Steve Holme,
-  Tatsuhiro Tsujikawa, Vilmos Nebehaj
+  Alessandro Ghedini, Brad Spencer, Chris Young, Dan Fandrich, Daniel Stenberg,
+  Fabian Frank, Jonathan Cardoso Machado, Nick Zitzmann, Steve Holme,
+  Tatsuhiro Tsujikawa, Vilmos Nebehaj,
 
         Thanks! (and sorry if I forgot to mention someone)
 
