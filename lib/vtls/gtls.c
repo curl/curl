@@ -1261,7 +1261,7 @@ size_t Curl_gtls_version(char *buffer, size_t size)
   return snprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
 }
 
-int Curl_gtls_seed(struct SessionHandle *data)
+static int Curl_gtls_seed(struct SessionHandle *data)
 {
   /* we have the "SSL is seeded" boolean static to prevent multiple
      time-consuming seedings in vain */
@@ -1285,17 +1285,20 @@ int Curl_gtls_seed(struct SessionHandle *data)
   return 0;
 }
 
-void Curl_gtls_random(struct SessionHandle *data,
-                      unsigned char *entropy,
-                      size_t length)
+/* data might be NULL! */
+int Curl_gtls_random(struct SessionHandle *data,
+                     unsigned char *entropy,
+                     size_t length)
 {
 #if defined(USE_GNUTLS_NETTLE)
   (void)data;
   gnutls_rnd(GNUTLS_RND_RANDOM, entropy, length);
 #elif defined(USE_GNUTLS)
-  Curl_gtls_seed(data); /* Initiate the seed if not already done */
+  if(data)
+    Curl_gtls_seed(data); /* Initiate the seed if not already done */
   gcry_randomize(entropy, length, GCRY_STRONG_RANDOM);
 #endif
+  return 0;
 }
 
 void Curl_gtls_md5sum(unsigned char *tmp, /* input */

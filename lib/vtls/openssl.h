@@ -61,20 +61,19 @@ void Curl_ossl_cleanup(void);
 
 size_t Curl_ossl_version(char *buffer, size_t size);
 int Curl_ossl_check_cxn(struct connectdata *cxn);
-int Curl_ossl_seed(struct SessionHandle *data);
-
 int Curl_ossl_shutdown(struct connectdata *conn, int sockindex);
 bool Curl_ossl_data_pending(const struct connectdata *conn,
                             int connindex);
-void Curl_ossl_random(struct SessionHandle *data, unsigned char *entropy,
-                      size_t length);
+
+/* return 0 if a find random is filled in */
+int Curl_ossl_random(struct SessionHandle *data, unsigned char *entropy,
+                     size_t length);
 void Curl_ossl_md5sum(unsigned char *tmp, /* input */
                       size_t tmplen,
                       unsigned char *md5sum /* output */,
                       size_t unused);
 
 /* this backend provides these functions: */
-#define have_curlssl_random 1
 #define have_curlssl_md5sum 1
 
 /* API setup for OpenSSL */

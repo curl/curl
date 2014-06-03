@@ -2267,9 +2267,8 @@ bool Curl_darwinssl_data_pending(const struct connectdata *conn,
     return false;
 }
 
-void Curl_darwinssl_random(struct SessionHandle *data,
-                           unsigned char *entropy,
-                           size_t length)
+int Curl_darwinssl_random(unsigned char *entropy,
+                          size_t length)
 {
   /* arc4random_buf() isn't available on cats older than Lion, so let's
      do this manually for the benefit of the older cats. */
@@ -2283,7 +2282,7 @@ void Curl_darwinssl_random(struct SessionHandle *data,
     random_number >>= 8;
   }
   i = random_number = 0;
-  (void)data;
+  return 0;
 }
 
 void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */

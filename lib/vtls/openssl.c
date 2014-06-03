@@ -259,7 +259,7 @@ static int ossl_seed(struct SessionHandle *data)
   return nread;
 }
 
-int Curl_ossl_seed(struct SessionHandle *data)
+static int Curl_ossl_seed(struct SessionHandle *data)
 {
   /* we have the "SSL is seeded" boolean static to prevent multiple
      time-consuming seedings in vain */
@@ -2865,11 +2865,14 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 #endif /* YASSL_VERSION */
 }
 
-void Curl_ossl_random(struct SessionHandle *data, unsigned char *entropy,
-                      size_t length)
+/* can be called with data == NULL */
+int Curl_ossl_random(struct SessionHandle *data, unsigned char *entropy,
+                     size_t length)
 {
-  Curl_ossl_seed(data); /* Initiate the seed if not already done */
+  if(data)
+    Curl_ossl_seed(data); /* Initiate the seed if not already done */
   RAND_bytes(entropy, curlx_uztosi(length));
+  return 0; /* 0 as in no problem */
 }
 
 void Curl_ossl_md5sum(unsigned char *tmp, /* input */

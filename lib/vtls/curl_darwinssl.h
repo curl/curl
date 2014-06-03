@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2013, Nick Zitzmann, <nickzman@gmail.com>.
+ * Copyright (C) 2012 - 2014, Nick Zitzmann, <nickzman@gmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,16 +44,14 @@ int Curl_darwinssl_check_cxn(struct connectdata *conn);
 bool Curl_darwinssl_data_pending(const struct connectdata *conn,
                                  int connindex);
 
-void Curl_darwinssl_random(struct SessionHandle *data,
-                           unsigned char *entropy,
-                           size_t length);
+int Curl_darwinssl_random(unsigned char *entropy,
+                          size_t length);
 void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
                            size_t tmplen,
                            unsigned char *md5sum, /* output */
                            size_t md5len);
 
 /* this backend provides these functions: */
-#define have_curlssl_random 1
 #define have_curlssl_md5sum 1
 
 /* API setup for SecureTransport */
@@ -71,7 +69,7 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
 #define curlssl_version Curl_darwinssl_version
 #define curlssl_check_cxn Curl_darwinssl_check_cxn
 #define curlssl_data_pending(x,y) Curl_darwinssl_data_pending(x, y)
-#define curlssl_random(x,y,z) Curl_darwinssl_random(x,y,z)
+#define curlssl_random(x,y,z) Curl_darwinssl_random(y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_darwinssl_md5sum(a,b,c,d)
 
 #endif /* USE_DARWINSSL */
