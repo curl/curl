@@ -33,7 +33,7 @@ Portability
  want it to remain functional and buildable with these and later versions
  (older versions may still work but is not what we work hard to maintain):
 
- OpenSSL      0.9.6
+ OpenSSL      0.9.7
  GnuTLS       1.2
  zlib         1.1.4
  libssh2      0.16

@@ -62,6 +62,7 @@
 #include <openssl/dh.h>
 #include <openssl/err.h>
 #include <openssl/md5.h>
+#include <openssl/conf.h>
 #else
 #include <rand.h>
 #include <x509v3.h>
@@ -740,6 +741,7 @@ int Curl_ossl_init(void)
     return 0;
 
   OpenSSL_add_all_algorithms();
+  OPENSSL_config(NULL);
 
   return 1;
 }
