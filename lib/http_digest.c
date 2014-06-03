@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -367,12 +367,9 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     d->nc = 1;
 
   if(!d->cnonce) {
-    struct timeval now = Curl_tvnow();
     snprintf(cnoncebuf, sizeof(cnoncebuf), "%08x%08x%08x%08x",
              Curl_rand(data), Curl_rand(data),
-             (unsigned int)now.tv_sec,
-             (unsigned int)now.tv_usec);
-
+             Curl_rand(data), Curl_rand(data));
     rc = Curl_base64_encode(data, cnoncebuf, strlen(cnoncebuf),
                             &cnonce, &cnonce_sz);
     if(rc)

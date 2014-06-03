@@ -423,9 +423,6 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   unsigned int cnonce2 = 0;
   unsigned int cnonce3 = 0;
   unsigned int cnonce4 = 0;
-#ifndef DEBUGBUILD
-  struct timeval now;
-#endif
 
   char nonceCount[] = "00000001";
   char method[]     = "AUTHENTICATE";
@@ -457,9 +454,8 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   /* Generate 16 bytes of random data */
   cnonce1 = Curl_rand(data);
   cnonce2 = Curl_rand(data);
-  now = Curl_tvnow();
-  cnonce3 = now.tv_sec;
-  cnonce4 = now.tv_usec;
+  cnonce3 = Curl_rand(data);
+  cnonce4 = Curl_rand(data);
 #endif
 
   /* Convert the random data into a 32 byte hex string */
