@@ -25,14 +25,6 @@ may have been fixed since this was written!
 84. CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS
   backends, so relying on this information in a generic app is flaky.
 
-83. curl is unable to load non-default openssl engines, because openssl isn't
-  initialized properly. This seems to require OpenSSL_config() or
-  CONF_modules_load_file() to be used by libcurl but the first seems to not
-  work and we've gotten not reports from tests with the latter. Possibly we
-  need to discuss with OpenSSL developers how this is supposed to be done. We
-  need users with actual external openssl engines for testing to work on this.
-  http://curl.haxx.se/bug/view.cgi?id=1208
-
 82. When building with the Windows Borland compiler, it fails because the
   "tlib" tool doesn't support hyphens (minus signs) in file names and we have
   such in the build.
