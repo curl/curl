@@ -5389,6 +5389,11 @@ while(@ARGV) {
         $use_external_proxy=1;
         $proxy_address=$ARGV[0];
     }
+    elsif($ARGV[0] eq "-L") {
+        # require additional library file
+        shift @ARGV;
+        require $ARGV[0];
+    }
     elsif($ARGV[0] eq "-l") {
         # lists the test case names only
         $listonly=1;
@@ -5438,6 +5443,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -gw      run the test case with gdb as a windowed application
   -h       this help text
   -k       keep stdout and stderr files present after tests
+  -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
   -n       no valgrind
   -P proxy use the specified proxy
