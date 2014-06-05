@@ -11,7 +11,7 @@ HTTP PUT
 HTTP/1.1 100 Continue
 
 HTTP/1.1 401 Bad Auth swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 WWW-Authenticate: Basic Realm=authenticate
 Server: test-server/fake
 

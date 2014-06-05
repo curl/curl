@@ -825,7 +825,7 @@ end of 1 KB aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 # this is returned when we get a GET!
 <data2>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 7
 Connection: close
 Content-Type: text/html
@@ -851,7 +851,7 @@ HTTP/1.1 200 OK swsbounce
 Server: no
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 7
 Connection: close
 Content-Type: text/html

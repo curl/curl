@@ -11,7 +11,7 @@ url_effective
 # we use this as response to a CONNECT
 <data nocheck="yes">
 HTTP/1.1 403 not OK at all
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close

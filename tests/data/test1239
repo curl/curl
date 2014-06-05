@@ -11,7 +11,7 @@ HTTP GET
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2010 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -51,7 +51,7 @@ If-Unmodified-Since: Sun, 12 Dec 1999 12:00:00 GMT
 </protocol>
 <stdout nonewline="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2010 12:10:00 GMT
 ETag: "21025-dc7-39462498"

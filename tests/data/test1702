@@ -12,7 +12,7 @@ HTTP/2
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
@@ -60,7 +60,7 @@ Connection: Upgrade
 Upgrade: h2c
 
 HTTP/2 200 
-date: Thu, 09 Nov 2010 14:49:00 GMT
+date: Tue, 09 Nov 2010 14:49:00 GMT
 last-modified: Tue, 13 Jun 2000 12:10:00 GMT
 etag: "21025-dc7-39462498"
 accept-ranges: bytes

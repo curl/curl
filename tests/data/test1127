@@ -11,7 +11,7 @@ If-Modified-Since
 <reply>
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 1980 12:10:00 GMT
 Content-Length: 11
@@ -21,7 +21,7 @@ Content-Type: text/html
 </data>
 <datacheck>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 1980 12:10:00 GMT
 Content-Length: 11

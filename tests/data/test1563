@@ -11,7 +11,7 @@ followlocation
 <reply>
 <data1>
 HTTP/1.1 302 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 7
 Location: gopher://www.example.co.uk

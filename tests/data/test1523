@@ -9,7 +9,7 @@ CURLINFO_LOW_SPEED_LIMIT
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Connection: close
 Funny-head: yesyes

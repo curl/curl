@@ -12,7 +12,7 @@ followlocation
 <reply>
 <data>
 HTTP/1.1 301 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
 Location: http://yet.another.host/184
 
@@ -20,19 +20,19 @@ moo
 </data>
 <data1>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
 
 moo
 </data1>
 <datacheck>
 HTTP/1.1 301 OK swsbounce
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
 Location: http://yet.another.host/184
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
 
 moo

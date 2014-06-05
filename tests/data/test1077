@@ -14,7 +14,7 @@ HTTP proxy
 <reply>
 <data>
 HTTP/1.0 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/plain
 Content-Length: 9
@@ -25,7 +25,7 @@ contents
 </data>
 <data2>
 HTTP/1.0 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/plain
 Content-Length: 9
