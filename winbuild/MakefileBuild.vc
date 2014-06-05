@@ -112,7 +112,7 @@ SSL_LIBS     = libeay32.lib ssleay32.lib
 USE_SSL      = true
 SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
-SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib
+SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib crypt32.lib
 USE_SSL      = true
 SSL          = static
 !ENDIF
