@@ -28,6 +28,9 @@ This release includes the following bugfixes:
  o tests: Fix portability issue with the tftpd server
  o curl_sasl_sspi: Fixed corrupt hostname in DIGEST-MD5 SPN
  o curl_sasl: extended native DIGEST-MD5 cnonce to be a 32-byte hex string
+ o random: use Curl_rand() for proper random data [5]
+ o Curl_ossl_init: call OPENSSL_config for initing engines [6]
+ o config-win32.h: Updated for VC12 [7]
  o 
 
 This release includes the following known bugs:
@@ -38,8 +41,8 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Brad Spencer, Chris Young, Dan Fandrich, Daniel Stenberg,
-  Fabian Frank, Jonathan Cardoso Machado, Nick Zitzmann, Steve Holme,
-  Tatsuhiro Tsujikawa, Vilmos Nebehaj,
+  Dmitry Falko, Fabian Frank, Jonathan Cardoso Machado, Marcel Raad,
+  Nick Zitzmann, Steve Holme, Tatsuhiro Tsujikawa, Vilmos Nebehaj
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -49,3 +52,6 @@ References to bug reports and discussions on issues:
  [2] = http://curl.haxx.se/mail/lib-2014-05/0235.html
  [3] = http://curl.haxx.se/mail/lib-2014-05/0260.html
  [4] = http://curl.haxx.se/mail/lib-2014-05/0278.html
+ [5] = http://curl.haxx.se/mail/lib-2014-06/0001.html
+ [6] = http://curl.haxx.se/mail/lib-2014-06/0003.html
+ [7] = http://curl.haxx.se/bug/view.cgi?id=1378
