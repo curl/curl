@@ -1719,54 +1719,50 @@ CURLcode Curl_follow(struct SessionHandle *data,
      */
     break;
   case 301: /* Moved Permanently */
-    /* (quote from RFC2616, section 10.3.2):
+    /* (quote from RFC7231, section 6.4.2)
      *
-     * When automatically redirecting a POST request after receiving a 301
-     * status code, some existing HTTP/1.0 user agents will erroneously change
-     * it into a GET request.
+     * Note: For historical reasons, a user agent MAY change the request
+     * method from POST to GET for the subsequent request.  If this
+     * behavior is undesired, the 307 (Temporary Redirect) status code
+     * can be used instead.
      *
      * ----
      *
-     * As most of the important user agents do this obvious RFC2616 violation,
-     * many webservers expect this. So these servers often answers to a POST
-     * request with an error page.  To be sure that libcurl gets the page that
+     * Many webservers expect this, so these servers often answers to a POST
+     * request with an error page. To be sure that libcurl gets the page that
      * most user agents would get, libcurl has to force GET.
      *
-     * This behavior can be overridden with CURLOPT_POSTREDIR.
+     * This behaviour is forbidden by RFC1945 and the obsolete RFC2616, and
+     * can be overridden with CURLOPT_POSTREDIR.
      */
     if((data->set.httpreq == HTTPREQ_POST
         || data->set.httpreq == HTTPREQ_POST_FORM)
        && !(data->set.keep_post & CURL_REDIR_POST_301)) {
-      infof(data,
-            "Violate RFC 2616/10.3.2 and switch from POST to GET\n");
+      infof(data, "Switch from POST to GET\n");
       data->set.httpreq = HTTPREQ_GET;
     }
     break;
   case 302: /* Found */
-    /* (From 10.3.3)
-
-    Note: RFC 1945 and RFC 2068 specify that the client is not allowed
-    to change the method on the redirected request.  However, most
-    existing user agent implementations treat 302 as if it were a 303
-    response, performing a GET on the Location field-value regardless
-    of the original request method. The status codes 303 and 307 have
-    been added for servers that wish to make unambiguously clear which
-    kind of reaction is expected of the client.
-
-    (From 10.3.4)
-
-    Note: Many pre-HTTP/1.1 user agents do not understand the 303
-    status. When interoperability with such clients is a concern, the
-    302 status code may be used instead, since most user agents react
-    to a 302 response as described here for 303.
-
-    This behavior can be overridden with CURLOPT_POSTREDIR
-    */
+    /* (quote from RFC7231, section 6.4.3)
+     *
+     * Note: For historical reasons, a user agent MAY change the request
+     * method from POST to GET for the subsequent request.  If this
+     * behavior is undesired, the 307 (Temporary Redirect) status code
+     * can be used instead.
+     *
+     * ----
+     *
+     * Many webservers expect this, so these servers often answers to a POST
+     * request with an error page. To be sure that libcurl gets the page that
+     * most user agents would get, libcurl has to force GET.
+     *
+     * This behaviour is forbidden by RFC1945 and the obsolete RFC2616, and
+     * can be overridden with CURLOPT_POSTREDIR.
+     */
     if((data->set.httpreq == HTTPREQ_POST
         || data->set.httpreq == HTTPREQ_POST_FORM)
        && !(data->set.keep_post & CURL_REDIR_POST_302)) {
-      infof(data,
-            "Violate RFC 2616/10.3.3 and switch from POST to GET\n");
+      infof(data, "Switch from POST to GET\n");
       data->set.httpreq = HTTPREQ_GET;
     }
     break;
