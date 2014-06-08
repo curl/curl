@@ -311,6 +311,7 @@ if (!$USER) {
 
 # enable memory debugging if curl is compiled with it
 $ENV{'CURL_MEMDEBUG'} = $memdump;
+$ENV{'CURL_ENTROPY'}="12345678";
 $ENV{'HOME'}=$pwd;
 
 sub catch_zap {
