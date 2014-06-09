@@ -1610,7 +1610,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         Curl_multi_process_pending_handles(multi);
 
         /* post-transfer command */
-        res = Curl_done(&data->easy_conn, CURLE_OK, FALSE);
+        res = Curl_done(&data->easy_conn, data->result, FALSE);
 
         /* allow a previously set error code take precedence */
         if(!data->result)

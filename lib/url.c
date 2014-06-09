@@ -5796,9 +5796,9 @@ CURLcode Curl_done(struct connectdata **connp,
   if(conn->handler->done)
     result = conn->handler->done(conn, status, premature);
   else
-    result = CURLE_OK;
+    result = status;
 
-  if(Curl_pgrsDone(conn) && !result)
+  if(!result && Curl_pgrsDone(conn))
     result = CURLE_ABORTED_BY_CALLBACK;
 
   /* if the transfer was completed in a paused state there can be buffered
