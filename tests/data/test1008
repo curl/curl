@@ -86,6 +86,7 @@ http
 <features>
 NTLM
 !SSPI
+debug
 </features>
  <name>
 HTTP proxy CONNECT auth NTLM with chunked-encoded 407 response

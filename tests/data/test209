@@ -76,6 +76,7 @@ http
 <features>
 NTLM
 !SSPI
+debug
 </features>
  <name>
 HTTP proxy CONNECT auth NTLM

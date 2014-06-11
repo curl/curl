@@ -64,6 +64,7 @@ This is the final page !
 <features>
 NTLM
 !SSPI
+debug
 </features>
 <server>
 http

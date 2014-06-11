@@ -57,6 +57,7 @@ Finally, this is the real page!
 <features>
 NTLM
 !SSPI
+debug
 </features>
 <server>
 http

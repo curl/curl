@@ -77,6 +77,7 @@ lib548
 <features>
 NTLM
 !SSPI
+debug
 </features>
  <name>
 HTTP proxy auth NTLM with POST data from CURLOPT_POSTFIELDS

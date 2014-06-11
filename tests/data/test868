@@ -38,6 +38,7 @@ pop3
 <features>
 NTLM
 !SSPI
+debug
 </features>
  <name>
 POP3 NTLM authentication

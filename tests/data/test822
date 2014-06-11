@@ -36,6 +36,7 @@ imap
 <features>
 NTLM
 !SSPI
+debug
 </features>
  <name>
 IMAP NTLM authentication

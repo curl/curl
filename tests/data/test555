@@ -82,6 +82,7 @@ lib555
 <features>
 NTLM
 !SSPI
+debug
 </features>
  <name>
 HTTP proxy auth NTLM with POST data from read callback multi-if

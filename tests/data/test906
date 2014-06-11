@@ -28,6 +28,7 @@ smtp
 <features>
 NTLM
 !SSPI
+debug
 </features>
  <name>
 SMTP NTLM authentication
