@@ -456,10 +456,8 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!ctxt) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
 
   Curl_MD5_update(ctxt, (const unsigned char *) userp,
                   curlx_uztoui(strlen(userp)));
@@ -472,10 +470,8 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   Curl_MD5_final(ctxt, digest);
 
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!ctxt) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
 
   Curl_MD5_update(ctxt, (const unsigned char *) digest, MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
@@ -495,10 +491,8 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!ctxt) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
 
   Curl_MD5_update(ctxt, (const unsigned char *) method,
                   curlx_uztoui(strlen(method)));
@@ -512,10 +506,8 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Now calculate the response hash */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!ctxt) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
+  if(!ctxt)
+    return CURLE_OUT_OF_MEMORY;
 
   Curl_MD5_update(ctxt, (const unsigned char *) HA1_hex, 2 * MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
@@ -545,15 +537,11 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                      "qop=%s",
                      userp, realm, nonce,
                      cnonce, nonceCount, uri, resp_hash_hex);
-  if(!response) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
+  if(!response)
+    return CURLE_OUT_OF_MEMORY;
 
   /* Base64 encode the response */
   result = Curl_base64_encode(data, response, 0, outptr, outlen);
-
-  fail:
 
   free(response);
   return result;
