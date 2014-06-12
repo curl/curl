@@ -482,6 +482,7 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   uint8_t *binsettings = conn->proto.httpc.binsettings;
 
   Curl_http2_init(conn);
+  Curl_http2_setup(conn);
 
   /* As long as we have a fixed set of settings, we don't have to dynamically
    * figure out the base64 strings since it'll always be the same. However,
