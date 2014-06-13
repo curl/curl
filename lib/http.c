@@ -1749,8 +1749,15 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                                   http2 */
     switch (conn->negnpn) {
     case NPN_HTTP2:
-      Curl_http2_init(conn);
-      Curl_http2_setup(conn);
+      result = Curl_http2_init(conn);
+      if(result)
+        return result;
+
+      result = Curl_http2_setup(conn);
+      if(result)
+        return result;
+
+      /* TODO: add error checking here */
       Curl_http2_switched(conn);
       break;
     case NPN_HTTP1_1:
@@ -2997,6 +3004,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
             k->upgr101 = UPGR101_RECEIVED;
 
             /* switch to http2 now */
+            /* TODO: add error checking */
             Curl_http2_switched(conn);
           }
           break;
