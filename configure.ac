@@ -1209,7 +1209,9 @@ if test x"$want_gss" = xyes; then
   AC_MSG_RESULT(yes)
 
   if test -z "$GSSAPI_INCS"; then
-     if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+     if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+        GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
+     elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
@@ -1301,7 +1303,12 @@ if test x"$want_gss" = xyes; then
         LIBS="-lgss $LIBS"
         ;;
      *)
-        if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+        if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+           dnl krb5-config doesn't have --libs-only-L or similar, put everything
+           dnl into LIBS
+           gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
+           LIBS="$gss_libs $LIBS"
+        elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
            dnl krb5-config doesn't have --libs-only-L or similar, put everything
            dnl into LIBS
            gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
