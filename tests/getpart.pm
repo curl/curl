@@ -239,7 +239,7 @@ sub writearray {
 }
 
 #
-# Load a specified file an return it as an array
+# Load a specified file and return it as an array
 #
 sub loadarray {
     my ($filename)=@_;
