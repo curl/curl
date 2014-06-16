@@ -1583,7 +1583,7 @@ sub runhttpserver {
     } else {
         $flags .= "--ipv$ipvnum --port 0 ";
     }
-    $flags .= "--srcdir \"$srcdir\"";
+    $flags .= "--srcdir \"$TESTDIR/..\"";
 
     my $cmd = "$exe $flags";
     my ($httppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
