@@ -126,6 +126,7 @@ struct OperationConfig {
   bool globoff;
   bool use_httpget;
   bool insecure_ok;         /* set TRUE to allow insecure SSL connects */
+  bool verifystatus;
   bool create_dirs;
   bool ftp_create_dirs;
   bool ftp_skip_ip;

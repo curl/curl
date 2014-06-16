@@ -552,6 +552,16 @@ This is currently only implemented in the OpenSSL, GnuTLS and GSKit backends.
 
 If this option is used several times, the last one will be used.
 (Added in 7.39.0)
+.IP "--cert-status"
+(SSL) Tells curl to verify the status of the server certificate by using the
+Certificate Status Request (aka. OCSP stapling) TLS extension.
+
+If this option is enabled and the server sends an invalid (e.g. expired)
+response, if the response suggests that the server certificate has been revoked,
+or no response at all is received, the verification fails.
+
+This is currently only implemented in the GnuTLS and NSS backends.
+(Added in 7.41.0)
 .IP "-f, --fail"
 (HTTP) Fail silently (no output at all) on server errors. This is mostly done
 to better enable scripts etc to better deal with failed attempts. In normal

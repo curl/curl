@@ -1038,6 +1038,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
             /* libcurl default is strict verifyhost -> 2L   */
             /* my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L); */
           }
+
+          if(config->verifystatus)
+            my_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
         }
 
         if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) {
