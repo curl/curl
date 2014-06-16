@@ -3248,7 +3248,7 @@ sub checksystem {
 # a command, in either case passed by reference
 #
 sub subVariables {
-    my ($thing, $prefix) = @_;
+    my ($thing, $testnum, $prefix) = @_;
 
     if(!$prefix) {
         $prefix = "%";
@@ -3304,6 +3304,7 @@ sub subVariables {
     $$thing =~ s/${prefix}PWD/$pwd/g;
     $$thing =~ s/${prefix}POSIX_PWD/$posix_pwd/g;
     $$thing =~ s/${prefix}VERSION/$VERSION/g;
+    $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
 
     my $file_pwd = $pwd;
     if($file_pwd !~ /^\//) {
@@ -3447,6 +3448,7 @@ sub timestampskippedevents {
 # etc. Returns the processed version of the array
 
 sub prepro {
+    my $testnum = shift;
     my (@entiretest) = @_;
     my $show = 1;
     my @out;
@@ -3473,7 +3475,7 @@ sub prepro {
             next;
         }
         if($show) {
-            subVariables(\$s, "%");
+            subVariables(\$s, $testnum, "%");
             subBase64(\$s);
             subNewlines(\$s) if($has_hyper);
             push @out, $s;
@@ -3666,7 +3668,7 @@ sub singletest {
     my @entiretest = fulltest();
     my $otest = "log/test$testnum";
 
-    @entiretest = prepro(@entiretest);
+    @entiretest = prepro($testnum, @entiretest);
 
     # save the new version
     open(D, ">$otest");
@@ -5691,7 +5693,7 @@ sub disabledtests {
 
         # preprocess the input to make conditionally disabled tests depending
         # on variables
-        my @pp = prepro(@input);
+        my @pp = prepro(0, @input);
         for my $t (@pp) {
             if($t =~ /(\d+)/) {
                 my ($n) = $1;
