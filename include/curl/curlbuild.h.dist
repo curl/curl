@@ -528,7 +528,7 @@
 
 #elif defined(__GNUC__)
 #  if defined(__ILP32__) || \
-      defined(__i386__) || defined(__ppc__) || defined(__arm__)
+      defined(__i386__) || defined(__ppc__) || defined(__arm__) || defined(__sparc__)
 #    define CURL_SIZEOF_LONG           4
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
@@ -538,7 +538,7 @@
 #    define CURL_SUFFIX_CURL_OFF_T     LL
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
 #  elif defined(__LP64__) || \
-        defined(__x86_64__) || defined(__ppc64__)
+        defined(__x86_64__) || defined(__ppc64__) || defined(__sparc64__)
 #    define CURL_SIZEOF_LONG           8
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
