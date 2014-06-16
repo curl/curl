@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,6 +21,8 @@
 ###########################################################################
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
+
+SUBDIRS = opts
 
 man_MANS = curl_easy_cleanup.3 curl_easy_getinfo.3 curl_easy_init.3	 \
  curl_easy_perform.3 curl_easy_setopt.3 curl_easy_duphandle.3		 \
@@ -91,11 +93,13 @@ MAN2HTML= roffit --mandir=. < $< >$@
 SUFFIXES = .3 .html
 
 html: $(HTMLPAGES)
+	cd opts; make html
 
 .3.html:
 	$(MAN2HTML)
 
 pdf: $(PDFPAGES)
+	cd pdf; make pdf
 
 .3.pdf:
 	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
