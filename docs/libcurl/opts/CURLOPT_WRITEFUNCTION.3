@@ -65,10 +65,14 @@ default is 16K). If you however have \fICURLOPT_HEADER(3)\fP set, which sends
 header data to the write callback, you can get up to
 \fICURL_MAX_HTTP_HEADER\fP bytes of header data passed into it. This usually
 means 100K.
+.SH DEFAULT
+libcurl will use 'fwrite' as a callback by default.
 .SH PROTOCOLS
 For all protocols
 .SH AVAILABILITY
 Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.
+.SH RETURN VALUE
+This will return CURLE_OK.
 .SH EXAMPLE
 A common technique is to use this callback to store the incoming data into a
 dynamically growing allocated buffer. Like in the getinmemory example:
