@@ -848,4 +848,16 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
 #endif
 }
 
+/*
+ * Check whether the SSL backend supports the status_request extension.
+ */
+bool Curl_ssl_cert_status_request(void)
+{
+#ifdef curlssl_cert_status_request
+  return curlssl_cert_status_request();
+#else
+  return FALSE;
+#endif
+}
+
 #endif /* USE_SSL */

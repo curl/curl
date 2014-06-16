@@ -1997,6 +1997,17 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
     data->set.ssl.verifyhost = (0 != arg)?TRUE:FALSE;
     break;
+  case CURLOPT_SSL_VERIFYSTATUS:
+    /*
+     * Enable certificate status verifying.
+     */
+    if(!Curl_ssl_cert_status_request()) {
+      result = CURLE_NOT_BUILT_IN;
+      break;
+    }
+
+    data->set.ssl.verifystatus = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
   case CURLOPT_SSL_CTX_FUNCTION:
 #ifdef have_curlssl_ssl_ctx
     /*
