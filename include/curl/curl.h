@@ -584,6 +584,11 @@ typedef enum {
 #define CURLOPT_INFILE CURLOPT_READDATA /* name changed in 7.9.7 */
 #define CURLOPT_WRITEHEADER CURLOPT_HEADERDATA
 
+/* Since long deprecated options with no code in the lib that does anything
+   with them. */
+#define CURLOPT_WRITEINFO CURLOPT_DEPRECATED40
+#define CURLOPT_CLOSEPOLICY CURLOPT_DEPRECATED72
+
 #endif /*!CURL_NO_OLDIES*/
 
 /* This prototype applies to all conversion callbacks */
@@ -966,7 +971,7 @@ typedef enum {
   /* send linked-list of post-transfer QUOTE commands */
   CINIT(POSTQUOTE, OBJECTPOINT, 39),
 
-  CINIT(WRITEINFO, OBJECTPOINT, 40), /* DEPRECATED, do not use! */
+  CINIT(DEPRECATED40, OBJECTPOINT, 40), /* DEPRECATED, do not use! */
 
   CINIT(VERBOSE, LONG, 41),      /* talk a lot */
   CINIT(HEADER, LONG, 42),       /* throw the header out too */
@@ -1045,7 +1050,7 @@ typedef enum {
   /* Max amount of cached alive connections */
   CINIT(MAXCONNECTS, LONG, 71),
 
-  CINIT(CLOSEPOLICY, LONG, 72), /* DEPRECATED, do not use! */
+  CINIT(DEPRECATED72, LONG, 72), /* DEPRECATED, do not use! */
 
   /* 73 = OBSOLETE */
 
