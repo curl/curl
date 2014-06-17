@@ -579,6 +579,11 @@ typedef enum {
    make programs break */
 #define CURLE_ALREADY_COMPLETE 99999
 
+/* Provide defines for really old option names */
+#define CURLOPT_FILE CURLOPT_WRITEDATA /* name changed in 7.9.7 */
+#define CURLOPT_INFILE CURLOPT_READDATA /* name changed in 7.9.7 */
+#define CURLOPT_WRITEHEADER CURLOPT_HEADERDATA
+
 #endif /*!CURL_NO_OLDIES*/
 
 /* This prototype applies to all conversion callbacks */
@@ -820,7 +825,7 @@ typedef enum {
 
 typedef enum {
   /* This is the FILE * or void * the regular output should be written to. */
-  CINIT(FILE, OBJECTPOINT, 1),
+  CINIT(WRITEDATA, OBJECTPOINT, 1),
 
   /* The full URL to get/put */
   CINIT(URL,  OBJECTPOINT, 2),
@@ -843,7 +848,7 @@ typedef enum {
   /* not used */
 
   /* Specified file stream to upload from (use as input): */
-  CINIT(INFILE, OBJECTPOINT, 9),
+  CINIT(READDATA, OBJECTPOINT, 9),
 
   /* Buffer to receive error messages in, must be at least CURL_ERROR_SIZE
    * bytes big. If this is not used, error messages go to stderr instead: */
@@ -928,7 +933,7 @@ typedef enum {
 
   /* send FILE * or void * to store headers to, if you use a callback it
      is simply passed to the callback unmodified */
-  CINIT(WRITEHEADER, OBJECTPOINT, 29),
+  CINIT(HEADERDATA, OBJECTPOINT, 29),
 
   /* point to a file to read the initial cookies from, also enables
      "cookie awareness" */
@@ -1633,9 +1638,6 @@ typedef enum {
 #define CURL_IPRESOLVE_V6       2 /* resolve to ipv6 addresses */
 
   /* three convenient "aliases" that follow the name scheme better */
-#define CURLOPT_WRITEDATA CURLOPT_FILE
-#define CURLOPT_READDATA  CURLOPT_INFILE
-#define CURLOPT_HEADERDATA CURLOPT_WRITEHEADER
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER
 
   /* These enums are for use with the CURLOPT_HTTP_VERSION option. */
