@@ -1,0 +1,64 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_USERPWD 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_USERPWD \- set user + password to work with
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERPWD, char *userpwd);
+.SH DESCRIPTION
+Pass a char * as parameter, pointing to a zero terminated login details string
+for the connection. The format of which is: [user name]:[password].
+
+When using NTLM, you can set the domain by prepending it to the user name and
+separating the domain and name with a forward (/) or backward slash (\\). Like
+this: "domain/user:password" or "domain\\user:password". Some HTTP servers (on
+Windows) support this style even for Basic authentication.
+
+When using HTTP and \fICURLOPT_FOLLOWLOCATION(3)\fP, libcurl might perform
+several requests to possibly different hosts. libcurl will only send this user
+and password information to hosts using the initial host name (unless
+\fICURLOPT_UNRESTRICTED_AUTH(3)\fP is set), so if libcurl follows locations to
+other hosts it will not send the user and password to those. This is enforced
+to prevent accidental information leakage.
+
+Use \fICURLOPT_HTTPAUTH(3)\fP to specify the authentication method for HTTP
+based connections or \fICURLOPT_LOGIN_OPTIONS(3)\fP to control IMAP, POP3 and
+SMTP options.
+
+The user and password strings are not URL decoded, so there's no way to send
+in a user name containing a colon using this option. Use
+\fICURLOPT_USERNAME(3)\fP for that, or include it in the URL.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+Most
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_USERNAME "(3), " CURLOPT_PASSWORD "(3), "
