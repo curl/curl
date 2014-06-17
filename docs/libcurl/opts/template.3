@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_TEMPLATE 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_TEMPLATE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_TEMPLATE \- [short desc]
 .SH SYNOPSIS
@@ -33,5 +33,6 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TEMPLATE, [argument]);
 .SH EXAMPLE
 .SH AVAILABILITY
 .SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLOPT_STDERR "(3), " CURLOPT_DEBUGFUNCTION "(3), "
