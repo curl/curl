@@ -40,9 +40,6 @@ given with this option, or to stdout if this option hasn't been set.
 If you're using libcurl as a win32 DLL, you \fBMUST\fP use the
 \fICURLOPT_WRITEFUNCTION\fP if you set this option or you will experience
 crashes.
-
-This option is also known with the older name \fICURLOPT_FILE\fP, the name
-\fICURLOPT_WRITEDATA\fP was introduced in 7.9.7.
 .SH DEFAULT
 By default, this is a FILE * to stdout.
 .SH PROTOCOLS
@@ -53,7 +50,8 @@ into a dynamically growing allocated buffer, and then this CURLOPT_WRITEDATA
 is used to point to a struct or the buffer to store data in. Like in the
 getinmemory example: http://curl.haxx.se/libcurl/c/getinmemory.html
 .SH AVAILABILITY
-Available in all libcurl versions
+Available in all libcurl versions. This option was formerly known as
+\fICURLOPT_FILE\fP, the name \fICURLOPT_WRITEDATA\fP was introduced in 7.9.7.
 .SH RETURN VALUE
 This will return CURLE_OK.
 .SH "SEE ALSO"
