@@ -1,0 +1,56 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_HTTPPOST 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_HTTPPOST \- specify the multipart formpost content
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPPOST,
+                          struct curl_httppost *formpost);
+.SH DESCRIPTION
+Tells libcurl you want a multipart/formdata HTTP POST to be made and you
+instruct what data to pass on to the server in the \fIformpost\fP argument.
+Pass a pointer to a linked list of curl_httppost structs as parameter.  The
+easiest way to create such a list, is to use \fIcurl_formadd(3)\fP as
+documented. The data in this list must remain intact until you close this curl
+handle again with \fIcurl_easy_cleanup(3)\fP.
+
+Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
+You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP.
+
+When setting \fICURLOPT_HTTPPOST(3)\fP, it will automatically set
+\fICURLOPT_NOBODY(3)\fP to 0.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+As long as HTTP is enabled
+.SH RETURN VALUE
+Returns CURLE_OK if HTTP is enabled, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_POSTFIELDS "(3), " CURLOPT_POST "(3), "

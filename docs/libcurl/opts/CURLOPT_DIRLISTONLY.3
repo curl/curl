@@ -1,0 +1,55 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_DIRLISTONLY 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_DIRLISTONLY \- ask for names only in a directory listing
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DIRLISTONLY, long listonly);
+.SH DESCRIPTION
+A parameter set to 1 tells the library to just list the names of files in a
+directory, instead of doing a full directory listing that would include file
+sizes, dates etc. This works for FTP and SFTP URLs.
+
+This causes an FTP NLST command to be sent on an FTP server.  Beware that some
+FTP servers list only files in their response to NLST; they might not include
+subdirectories and symbolic links.
+
+Setting this option to 1 also implies a directory listing even if the URL
+doesn't end with a slash, which otherwise is necessary.
+
+Do NOT use this option if you also use \fICURLOPT_WILDCARDMATCH(3)\fP as it
+will effectively break that feature then.
+.SH DEFAULT
+0, disabled
+.SH PROTOCOLS
+FTP and SFTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+This option was known as CURLOPT_FTPLISTONLY up to 7.16.4
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_CUSTOMREQUEST "(3), "

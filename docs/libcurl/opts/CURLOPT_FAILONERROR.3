@@ -1,0 +1,53 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_FAILONERROR 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_FAILONERROR \- request failure on HTTP response >= 400
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FAILONERROR, long fail);
+.SH DESCRIPTION
+A long parameter set to 1 tells the library to fail the request if the HTTP
+code returned is equal to or larger than 400. The default action would be to
+return the page normally, ignoring that code.
+
+This method is not fail-safe and there are occasions where non-successful
+response codes will slip through, especially when authentication is involved
+(response codes 401 and 407).
+
+You might get some amounts of headers transferred before this situation is
+detected, like when a "100-continue" is received as a response to a POST/PUT
+and a 401 or 407 is received immediately afterwards.
+.SH DEFAULT
+0, do not fail on error
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Along with HTTP 
+.SH RETURN VALUE
+Returns CURLE_OK if HTTP is enabled, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_HTTP200ALIASES "(3), "

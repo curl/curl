@@ -1,0 +1,59 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_COOKIEFILE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_COOKIEFILE \- file name to read cookies from
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEFILE, char *filename);
+.SH DESCRIPTION
+Pass a pointer to a zero terminated string as parameter. It should point to
+the file name of your file holding cookie data to read. The cookie data can be
+in either the old Netscape / Mozilla cookie data format or just regular
+HTTP-style headers dumped to a file.
+
+It also enables the cookie engine, making libcurl parse and send cookies on
+subsequent requests with this handle.
+
+Given an empty or non-existing file or by passing the empty string ("") to
+this option, you can enable the cookie engine without reading any initial
+cookies.
+
+This option only \fBreads\fP cookies. To make libcurl write cookies to file,
+see \fICURLOPT_COOKIEJAR(3)\fP.
+
+If you use this option multiple times, you just add more files to read.
+Subsequent files will add more cookies.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+As long as HTTP is supported
+.SH RETURN VALUE
+Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_COOKIE "(3), " CURLOPT_COOKIEJAR "(3), "

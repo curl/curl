@@ -1,0 +1,77 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_POST 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_POST \- request a HTTP POST
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POST, long post);
+.SH DESCRIPTION
+A parameter set to 1 tells libcurl to do a regular HTTP post. This will also
+make the library use a "Content-Type: application/x-www-form-urlencoded"
+header. (This is by far the most commonly used POST method).
+
+Use one of \fICURLOPT_POSTFIELDS(3)\fP or \fICURLOPT_COPYPOSTFIELDS(3)\fP
+options to specify what data to post and \fICURLOPT_POSTFIELDSIZE(3)\fP or
+\fICURLOPT_POSTFIELDSIZE_LARGE(3)\fP to set the data size.
+
+Optionally, you can provide data to POST using the
+\fICURLOPT_READFUNCTION(3)\fP and \fICURLOPT_READDATA(3)\fP options but then
+you must make sure to not set \fICURLOPT_POSTFIELDS(3)\fP to anything but
+NULL. When providing data with a callback, you must transmit it using chunked
+transfer-encoding or you must set the size of the data with the
+\fICURLOPT_POSTFIELDSIZE(3)\fP or \fICURLOPT_POSTFIELDSIZE_LARGE(3)\fP
+options. To enable chunked encoding, you simply pass in the appropriate
+Transfer-Encoding header, see the post-callback.c example.
+
+You can override the default POST Content-Type: header by setting your own
+with \fICURLOPT_HTTPHEADER(3)\fP.
+
+Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
+You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
+
+If you use POST to a HTTP 1.1 server, you can send data without knowing the
+size before starting the POST if you use chunked encoding. You enable this by
+adding a header like "Transfer-Encoding: chunked" with
+\fICURLOPT_HTTPHEADER(3)\fP. With HTTP 1.0 or without chunked transfer, you
+must specify the size in the request.
+
+When setting \fICURLOPT_POST(3)\fP to 1, it will automatically set
+\fICURLOPT_NOBODY(3)\fP to 0.
+
+If you issue a POST request and then want to make a HEAD or GET using the same
+re-used handle, you must explicitly set the new request type using
+\fICURLOPT_NOBODY(3)\fP or \fICURLOPT_HTTPGET(3)\fP or similar.
+.SH DEFAULT
+0, disabled
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Along with HTTP
+.SH RETURN VALUE
+Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_POSTFIELDS "(3), " CURLOPT_HTTPPOST "(3), "

@@ -1,0 +1,45 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_TIMEVALUE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_TIMEVALUE \- set time value for conditional
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE, long val);
+.SH DESCRIPTION
+Pass a long \fIval\fP as parameter. This should be the time counted as seconds
+since 1 Jan 1970, and the time will be used in a condition as specified with
+\fICURLOPT_TIMECONDITION(3)\fP.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+HTTP, FTP, RTSP, and FILE
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_TIMECONDITION "(3), "
