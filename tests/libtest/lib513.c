@@ -61,7 +61,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
   /* pointer to pass to our read function */
-  test_setopt(curl, CURLOPT_INFILE, NULL);
+  test_setopt(curl, CURLOPT_READDATA, NULL);
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);

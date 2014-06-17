@@ -126,7 +126,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_POSTQUOTE, headerlist);
 
   /* now specify which file to upload */
-  test_setopt(curl, CURLOPT_INFILE, hd_src);
+  test_setopt(curl, CURLOPT_READDATA, hd_src);
 
   /* and give the size of the upload (optional) */
   test_setopt(curl, CURLOPT_INFILESIZE_LARGE,

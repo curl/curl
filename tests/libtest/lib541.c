@@ -96,7 +96,7 @@ int test(char *URL)
   test_setopt(curl,CURLOPT_URL, URL);
 
   /* now specify which file to upload */
-  test_setopt(curl, CURLOPT_INFILE, hd_src);
+  test_setopt(curl, CURLOPT_READDATA, hd_src);
 
   /* Now run off and do what you've been told! */
   res = curl_easy_perform(curl);
