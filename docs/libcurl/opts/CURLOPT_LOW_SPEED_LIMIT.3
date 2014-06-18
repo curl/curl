@@ -30,8 +30,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LOW_SPEED_LIMIT, long speedlimit
 .SH DESCRIPTION
 Pass a long as parameter. It contains the average transfer speed in bytes per
 second that the transfer should be below during
-\fICURLOPT_LOW_SPEED_TIME(3)\fP seconds for libcurl to it to be too slow and
-abort.
+\fICURLOPT_LOW_SPEED_TIME(3)\fP seconds for libcurl to consider it to be too
+slow and abort.
 .SH DEFAULT
 0, disabled
 .SH PROTOCOLS
