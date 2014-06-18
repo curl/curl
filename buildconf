@@ -32,6 +32,7 @@ die(){
 #--------------------------------------------------------------------------
 # findtool works as 'which' but we use a different name to make it more
 # obvious we aren't using 'which'! ;-)
+# Unlike 'which' does, the current directory is ignored.
 #
 findtool(){
   file="$1"
@@ -49,7 +50,7 @@ findtool(){
   do
     IFS=$old_IFS
     # echo "checks for $file in $path" >&2
-    if test -f "$path/$file"; then
+    if test "$path" -a "$path" != '.' -a -f "$path/$file"; then
       echo "$path/$file"
       return
     fi
