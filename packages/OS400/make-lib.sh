@@ -21,21 +21,18 @@ MODULES=
 
 #       Get source list.
 
-CSOURCES()
-
-{
-        shift                   # Drop the equal sign.
-        CSOURCES="$*"           # Get the file names.
-}
-
-HHEADERS()
-
-{
-        shift                   # Drop the equal sign.
-        HHEADERS="$*"           # Get the file names.
-}
-
-. Makefile.inc
+sed -e ':begin'                                                         \
+    -e '/\\$/{'                                                         \
+    -e 's/\\$/ /'                                                       \
+    -e 'N'                                                              \
+    -e 'bbegin'                                                         \
+    -e '}'                                                              \
+    -e 's/\n//g'                                                        \
+    -e 's/[[:space:]]*$//'                                              \
+    -e 's/^\([A-Za-z][A-Za-z0-9_]*\)[[:space:]]*=[[:space:]]*\(.*\)/\1="\2"/' \
+    -e 's/\$(\([A-Za-z][A-Za-z0-9_]*\))/${\1}/g'                        \
+        < Makefile.inc > tmpscript.sh
+. ./tmpscript.sh
 
 
 #       Compile the sources into modules.

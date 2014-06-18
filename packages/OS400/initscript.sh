@@ -119,6 +119,41 @@ action_needed()
 }
 
 
+#       canonicalize_path path
+#
+#       Return canonicalized path as:
+#       - Absolute
+#       - No . or .. component.
+
+canonicalize_path()
+
+{
+        if expr "${1}" : '^/' > /dev/null
+        then    P="${1}"
+        else    P="`pwd`/${1}"
+        fi
+
+        R=
+        IFSSAVE="${IFS}"
+        IFS="/"
+
+        for C in ${P}
+        do      IFS="${IFSSAVE}"
+                case "${C}" in
+                .)      ;;
+                ..)     R=`expr "${R}" : '^\(.*/\)..*'`
+                        ;;
+                ?*)     R="${R}${C}/"
+                        ;;
+                *)      ;;
+                esac
+        done
+
+        IFS="${IFSSAVE}"
+        echo "/`expr "${R}" : '^\(.*\)/'`"
+}
+
+
 #       make_module module_name source_name [additional_definitions]
 #
 #       Compile source name into ASCII module if needed.
@@ -131,6 +166,7 @@ make_module()
         MODULES="${MODULES} ${1}"
         MODIFSNAME="${LIBIFSNAME}/${1}.MODULE"
         action_needed "${MODIFSNAME}" "${2}" || return 0;
+        SRCDIR=`dirname \`canonicalize_path "${2}"\``
 
         #       #pragma convert has to be in the source file itself, i.e.
         #               putting it in an include file makes it only active
@@ -147,7 +183,7 @@ make_module()
         CMD="${CMD} SYSIFCOPT(*IFS64IO) OPTION(*INCDIRFIRST)"
         CMD="${CMD} LOCALETYPE(*LOCALE)"
         CMD="${CMD} INCDIR('/qibm/proddata/qadrt/include'"
-        CMD="${CMD} '${TOPDIR}/include/curl' '${TOPDIR}/include'"
+        CMD="${CMD} '${TOPDIR}/include/curl' '${TOPDIR}/include' '${SRCDIR}'"
         CMD="${CMD} '${TOPDIR}/packages/OS400'"
 
         if [ "${WITH_ZLIB}" != "0" ]
