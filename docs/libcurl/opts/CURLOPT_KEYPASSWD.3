@@ -42,6 +42,7 @@ TODO
 This option was known as CURLOPT_SSLKEYPASSWD up to 7.16.4 and
 CURLOPT_SSLCERTPASSWD up to 7.9.2.
 .SH RETURN VALUE
-Returns CURLE_OK if TLS enabled, and CURLE_UNKNOWN_OPTION if not.
+Returns CURLE_OK if TLS enabled, CURLE_UNKNOWN_OPTION if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
 .BR CURLOPT_SSLKEY "(3), " CURLOPT_SSH_PRIVATE_KEYFILE "(3), "

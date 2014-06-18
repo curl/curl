@@ -49,6 +49,7 @@ TODO
 .SH AVAILABILITY
 FILE since 7.18.0, RTSP since 7.20.0
 .SH RETURN VALUE
-Returns CURLE_OK
+Returns CURLE_OK on success or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
 .BR CURLOPT_RESUME_FROM "(3), " 

@@ -55,7 +55,8 @@ TODO
 .SH AVAILABILITY
 If HTTP is enabled
 .SH RETURN VALUE
-Returns CURLE_OK if HTTP is enabled, and CURLE_UNKNOWN_OPTION if not.
+Returns CURLE_OK if HTTP is enabled, CURLE_UNKNOWN_OPTION if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
 .BR CURLOPT_COOKIEFILE "(3), " CURLOPT_COOKIEJAR "(3), "
 .BR CURLOPT_HTTPHEADER "(3), "
