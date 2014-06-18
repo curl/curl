@@ -99,7 +99,7 @@ html: $(HTMLPAGES)
 	$(MAN2HTML)
 
 pdf: $(PDFPAGES)
-	cd pdf; make pdf
+	cd opts; make pdf
 
 .3.pdf:
 	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
