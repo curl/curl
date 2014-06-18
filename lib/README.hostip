@@ -10,12 +10,12 @@
  defined.
 
  CURLRES_ARES - is defined if libcurl is built to use c-ares for asynchronous
- name resolves. It cannot have ENABLE_IPV6 defined at the same time, as c-ares
- has no ipv6 support. This can be Windows or *nix.
+ name resolves. This can be Windows or *nix.
 
- CURLRES_THREADED - is defined if libcurl is built to run under (native)
- Windows, and then the name resolve will be done in a new thread, and the
- supported asynch API will be the same as for ares-builds.
+ CURLRES_THREADED - is defined if libcurl is built to use threading for
+ asynchronous name resolves. The name resolve will be done in a new thread,
+ and the supported asynch API will be the same as for ares-builds. This is
+ the default under (native) Windows.
 
  If any of the two previous are defined, CURLRES_ASYNCH is defined too. If
  libcurl is not built to use an asynchronous resolver, CURLRES_SYNCH is
@@ -23,13 +23,13 @@
 
  The host*.c sources files are split up like this:
 
- hostip.c   - method-independent resolver functions and utility functions
- hostasyn.c - functions for asynchronous name resolves
- hostsyn.c  - functions for synchronous name resolves
- hostares.c - functions for ares-using name resolves
- hostthre.c - functions for threaded name resolves
- hostip4.c  - ipv4-specific functions
- hostip6.c  - ipv6-specific functions
+ hostip.c      - method-independent resolver functions and utility functions
+ hostasyn.c    - functions for asynchronous name resolves
+ hostsyn.c     - functions for synchronous name resolves
+ asyn-ares.c   - functions for asynchronous name resolves using c-ares
+ asyn-thread.c - functions for asynchronous name resolves using threads
+ hostip4.c     - ipv4-specific functions
+ hostip6.c     - ipv6-specific functions
 
  The hostip.h is the single united header file for all this. It defines the
  CURLRES_* defines based on the config*.h and curl_setup.h defines.
