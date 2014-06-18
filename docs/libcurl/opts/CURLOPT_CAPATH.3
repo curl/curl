@@ -1,0 +1,53 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_CAPATH 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_CAPATH \- specify directory holding CA certificates
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CAPATH, char *capath);
+.SH DESCRIPTION
+Pass a char * to a zero terminated string naming a directory holding multiple
+CA certificates to verify the peer with. If libcurl is built against OpenSSL,
+the certificate directory must be prepared using the openssl c_rehash utility.
+This makes sense only when used in combination with the
+\fICURLOPT_SSL_VERIFYPEER(3)\fP option.  If \fICURLOPT_SSL_VERIFYPEER(3)\fP is
+zero, \fICURLOPT_CAPATH(3)\fP need not even indicate an accessible path.  The
+\fICURLOPT_CAPATH(3)\fP function apparently does not work in Windows due to
+some limitation in openssl.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All TLS based protocols: HTTPS, FTPS, IMAPS, POP3, SMTPS etc.
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+This option is OpenSSL-specific and does nothing if libcurl is built to use
+GnuTLS. NSS-powered libcurl provides the option only for backward
+compatibility.
+.SH RETURN VALUE
+Returns CURLE_OK if TLS enabled, and CURLE_UNKNOWN_OPTION if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+.SH "SEE ALSO"
+.BR CURLOPT_STDERR "(3), " CURLOPT_DEBUGFUNCTION "(3), "

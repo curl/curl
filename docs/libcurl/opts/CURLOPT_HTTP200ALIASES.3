@@ -1,0 +1,56 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_HTTP200ALIASES 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_HTTP200ALIASES \- specify alternative matches for HTTP 200 OK
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP200ALIASES,
+                          struct curl_slist *aliases);
+.SH DESCRIPTION
+Pass a pointer to a linked list of \fIaliases\fP to be treated as valid HTTP
+200 responses.  Some servers respond with a custom header response line.  For
+example, IceCast servers respond with "ICY 200 OK".  By including this string
+in your list of aliases, the response will be treated as a valid HTTP header
+line such as "HTTP/1.0 200 OK".
+
+The linked list should be a fully valid list of struct curl_slist structs, and
+be properly filled in.  Use \fIcurl_slist_append(3)\fP to create the list and
+\fIcurl_slist_free_all(3)\fP to clean up an entire list.
+
+The alias itself is not parsed for any version strings. The protocol is
+assumed to match HTTP 1.0 when an alias match.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.10.3
+.SH RETURN VALUE
+Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_HTTP_VERSION "(3), "

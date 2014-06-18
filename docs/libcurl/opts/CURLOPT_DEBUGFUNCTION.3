@@ -1,0 +1,88 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_DEBUGFUNCTION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_DEBUGFUNCTION \- debug callback
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+typedef enum {
+  CURLINFO_TEXT = 0,
+  CURLINFO_HEADER_IN,    /* 1 */
+  CURLINFO_HEADER_OUT,   /* 2 */
+  CURLINFO_DATA_IN,      /* 3 */
+  CURLINFO_DATA_OUT,     /* 4 */
+  CURLINFO_SSL_DATA_IN,  /* 5 */
+  CURLINFO_SSL_DATA_OUT, /* 6 */
+  CURLINFO_END
+} curl_infotype;
+
+int debug_callback(CURL *handle,
+                   curl_infotype type,
+                   char *data,
+                   size_t size,
+                   void *userptr);
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DEBUGFUNCTION,
+                          debug_callback);
+.SH DESCRIPTION
+Pass a pointer to your callback function, which should match the prototype
+shown above.
+
+\fICURLOPT_DEBUGFUNCTION(3)\fP replaces the standard debug function used when
+\fICURLOPT_VERBOSE(3)\fP is in effect. This callback receives debug
+information, as specified in the \fItype\fP argument. This function must
+return 0. The \fIdata\fP pointed to by the char * passed to this function WILL
+NOT be zero terminated, but will be exactly of the \fIsize\fP as told by the
+\fIsize\fP argument.
+
+The \fIuserptr\fP argument is the pointer set with \fICURLOPT_DEBUGDATA(3)\fP.
+
+Available curl_infotype values:
+.IP CURLINFO_TEXT
+The data is informational text.
+.IP CURLINFO_HEADER_IN
+The data is header (or header-like) data received from the peer.
+.IP CURLINFO_HEADER_OUT
+The data is header (or header-like) data sent to the peer.
+.IP CURLINFO_DATA_IN
+The data is protocol data received from the peer.
+.IP CURLINFO_DATA_OUT
+The data is protocol data sent to the peer.
+.IP CURLINFO_SSL_DATA_OUT
+The data is SSL/TLS (binary) data sent to the peer.
+.IP CURLINFO_SSL_DATA_IN
+The data is SSL/TLS (binary) data received from the peer.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+http://curl.haxx.se/libcurl/c/debug.html
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_VERBOSE "(3), " CURLOPT_DEBUGDATA "(3), "
