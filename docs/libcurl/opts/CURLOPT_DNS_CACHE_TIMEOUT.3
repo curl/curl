@@ -1,0 +1,56 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_DNS_CACHE_TIMEOUT 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_DNS_CACHE_TIMEOUT \- set life-time for DNS cache entries
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_CACHE_TIMEOUT, long age);
+.SH DESCRIPTION
+Pass a long, this sets the timeout in seconds. Name resolves will be kept in
+memory and used for this number of seconds. Set to zero to completely disable
+caching, or set to -1 to make the cached entries remain forever. By default,
+libcurl caches this info for 60 seconds.
+
+The name resolve functions of various libc implementations don't re-read name
+server information unless explicitly told so (for example, by calling
+\fIres_init(3)\fP). This may cause libcurl to keep using the older server even
+if DHCP has updated the server info, and this may look like a DNS cache issue
+to the casual libcurl-app user.
+
+Note that DNS entries have a "TTL" property but libcurl doesn't use that. This
+DNS cache timeout is entirely speculative that a name will resolve to the same
+address for a certain small amount of time into the future.
+.SH DEFAULT
+60
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_DNS_USE_GLOBAL_CACHE "(3), " CURLOPT_DNS_SERVERS "(3), "
