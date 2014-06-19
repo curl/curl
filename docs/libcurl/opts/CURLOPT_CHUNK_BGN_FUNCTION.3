@@ -1,0 +1,69 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_CHUNK_BGN_FUNCTION 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_CHUNK_BGN_FUNCTION \- callback before a transfer with FTP wildcardmatch
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+long chunk_bgn_callback(const void *transfer_info, void *ptr,
+                        int remains);
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CHUNK_BGN_FUNCTION,
+                          chunk_bgn_callback);
+.SH DESCRIPTION
+Pass a pointer to your callback function, which should match the prototype
+shown above.
+
+This callback function gets called by libcurl before a part of the stream is
+going to be transferred (if the transfer supports chunks).
+
+The \fItransfer_info\fP pointer will point to a struct curl_fileinfo with
+details about the file that is about to get transfered.
+
+This callback makes sense only when using the \fICURLOPT_WILDCARDMATCH(3)\fP
+option for now.
+
+The target of transfer_info parameter is a "feature depended" structure. For
+the FTP wildcard download, the target is curl_fileinfo structure (see
+\fIcurl/curl.h\fP).  The parameter \fIptr\fP is a pointer given by
+\fICURLOPT_CHUNK_DATA(3)\fP. The parameter remains contains number of chunks
+remaining per the transfer. If the feature is not available, the parameter has
+zero value.
+
+Return \fICURL_CHUNK_BGN_FUNC_OK\fP if everything is fine,
+\fICURL_CHUNK_BGN_FUNC_SKIP\fP if you want to skip the concrete chunk or
+\fICURL_CHUNK_BGN_FUNC_FAIL\fP to tell libcurl to stop if some error occurred.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+FTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+This was added in 7.21.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_CHUNK_END_FUNCTION "(3), " CURLOPT_WILDCARDMATCH "(3), "
