@@ -1,0 +1,57 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_USE_SSL 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_USE_SSL \- request using SSL / TLS for the transfer
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USE_SSL, long level);
+.SH DESCRIPTION
+Pass a long using one of the values from below, to make libcurl use your
+desired \fIlevel\fP of SSL for the transfer.
+
+These are all protocols that start out plain text and get "upgraded" to SSL
+using the STARTTLS command.
+
+This is for enabling SSL/TLS when you use FTP, SMTP, POP3, IMAP etc.
+.IP CURLUSESSL_NONE
+Don't attempt to use SSL.
+.IP CURLUSESSL_TRY
+Try using SSL, proceed as normal otherwise.
+.IP CURLUSESSL_CONTROL
+Require SSL for the control connection or fail with \fICURLE_USE_SSL_FAILED\fP.
+.IP CURLUSESSL_ALL
+Require SSL for all communication or fail with \fICURLE_USE_SSL_FAILED\fP.
+.SH DEFAULT
+CURLUSESSL_NONE
+.SH PROTOCOLS
+FTP, SMTP, POP3, IMAP
+.SH EXAMPLE
+.SH AVAILABILITY
+Added in 7.11.0. This option was known as CURLOPT_FTP_SSL up to 7.16.4, and
+the constants were known as CURLFTPSSL_*
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_SSLVERSION "(3), " CURLOPT_SSL_OPTIONS "(3), "
