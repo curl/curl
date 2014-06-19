@@ -1,0 +1,48 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_TFTP_BLKSIZE 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_TFTP_BLKSIZE \- TFTP block size
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TFTP_BLKSIZE, long blocksize);
+.SH DESCRIPTION
+Specify \fIblocksize\fP to use for TFTP data transmission. Valid range as per
+RFC2348 is 8-65464 bytes. The default of 512 bytes will be used if this option
+is not specified. The specified block size will only be used pending support
+by the remote server. If the server does not return an option acknowledgement
+or returns an option acknowledgement with no blksize, the default of 512 bytes
+will be used.
+.SH DEFAULT
+512
+.SH PROTOCOLS
+TFTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.19.4
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_MAXFILESIZE "(3), "

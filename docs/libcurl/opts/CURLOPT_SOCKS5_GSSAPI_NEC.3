@@ -1,0 +1,47 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SOCKS5_GSSAPI_NEC 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SOCKS5_GSSAPI_NEC \- set socks proxy gssapi negotiation protection
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SOCKS5_GSSAPI_NEC, long nec);
+.SH DESCRIPTION
+Pass a long set to 1 to enable or 0 to disable. As part of the gssapi
+negotiation a protection mode is negotiated. The RFC1961 says in section
+4.3/4.4 it should be protected, but the NEC reference implementation does not.
+If enabled, this option allows the unprotected exchange of the protection mode
+negotiation.
+.SH DEFAULT
+?
+.SH PROTOCOLS
+Most
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.19.4
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_SOCKS5_GSSAPI_SERVICE "(3), " CURLOPT_PROXY "(3), "
