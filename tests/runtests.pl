@@ -4865,20 +4865,21 @@ if(!$listonly) {
 }
 
 #######################################################################
-# Fetch all disabled tests
+# Fetch all disabled tests, if there are any
 #
 
-open(D, "<$TESTDIR/DISABLED");
-while(<D>) {
-    if(/^ *\#/) {
-        # allow comments
-        next;
+if(open(D, "<$TESTDIR/DISABLED")) {
+    while(<D>) {
+        if(/^ *\#/) {
+            # allow comments
+            next;
+        }
+        if($_ =~ /(\d+)/) {
+            $disabled{$1}=$1; # disable this test number
+        }
     }
-    if($_ =~ /(\d+)/) {
-        $disabled{$1}=$1; # disable this test number
-    }
+    close(D);
 }
-close(D);
 
 #######################################################################
 # If 'all' tests are requested, find out all test numbers
