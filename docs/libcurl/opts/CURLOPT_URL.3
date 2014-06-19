@@ -51,6 +51,14 @@ from the host name, not be supported by libcurl then
 call them. Use \fIcurl_version_info(3)\fP for detailed information of which
 protocols are supported by the build of libcurl you are using.
 
+\fICURLOPT_PROTOCOLS(3)\fP can be used to limit what protocols libcurl will
+use for this transfer, independent of what libcurl has been compiled to
+support. That may be useful if you accept the URL from an external source and
+want to limit the accessibility.
+
+\fICURLOPT_URL(3)\fP is the only option that \fBmust\fP be set before a
+transfer is started.
+
 The host part of the URL contains the address of the server that you want to
 connect to. This can be the fully qualified domain name of the server, the
 local network name of the machine on your network or the IP address of the
@@ -257,15 +265,6 @@ user wants to pass in a '#' (hash) character it will be treated as a fragment
 and get cut off by libcurl if provided literally. You will instead have to
 escape it by providing it as backslash and its ASCII value in hexadecimal:
 "\\23".
-
-.IP NOTES
-\fICURLOPT_URL(3)\fP is the only option that \fBmust\fP be set before a
-transfer is started.
-
-\fICURLOPT_PROTOCOLS(3)\fP can be used to limit what protocols libcurl will
-use for this transfer, independent of what libcurl has been compiled to
-support. That may be useful if you accept the URL from an external source and
-want to limit the accessibility.
 .SH DEFAULT
 There is no default URL. If this option isn't set, no transfer can be
 performed.
