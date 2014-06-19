@@ -2208,37 +2208,10 @@ sub cleardir {
 }
 
 #######################################################################
-# filter out the specified pattern from the given input file and store the
-# results in the given output file
-#
-sub filteroff {
-    my $infile=$_[0];
-    my $filter=$_[1];
-    my $ofile=$_[2];
-
-    open(IN, "<$infile")
-        || return 1;
-
-    open(OUT, ">$ofile")
-        || return 1;
-
-    # logmsg "FILTER: off $filter from $infile to $ofile\n";
-
-    while(<IN>) {
-        $_ =~ s/$filter//;
-        print OUT $_;
-    }
-    close(IN);
-    close(OUT);
-    return 0;
-}
-
-#######################################################################
 # compare test results with the expected output, we might filter off
 # some pattern that is allowed to differ, output test results
 #
 sub compare {
-    # filter off patterns _before_ this comparison!
     my ($testnum, $testname, $subject, $firstref, $secondref)=@_;
 
     my $result = compareparts($firstref, $secondref);
