@@ -75,7 +75,7 @@ server-specified timeout) should send use an empty GET_PARAMETER request.
 .IP CURL_RTSPREQ_SET_PARAMETER
 Set a parameter on the server. By default, libcurl will automatically include
 a \fIContent-Type: text/parameters\fP header unless a custom one is set. The
-interaction with SET_PARAMTER is much like a HTTP PUT or POST. An application
+interaction with SET_PARAMETER is much like a HTTP PUT or POST. An application
 may either use \fICURLOPT_UPLOAD(3)\fP with \fICURLOPT_READDATA(3)\fP like a
 HTTP PUT, or it may use \fICURLOPT_POSTFIELDS(3)\fP like a HTTP POST. No
 chunked transfers are allowed, so the application must set the
