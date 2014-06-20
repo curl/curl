@@ -55,146 +55,20 @@ The \fIhandle\fP is the return code from a \fIcurl_easy_init(3)\fP or
 \fIcurl_easy_duphandle(3)\fP call.
 .SH BEHAVIOR OPTIONS
 .IP CURLOPT_VERBOSE
-Set the parameter to 1 to get the library to display a lot of verbose
-information about its operations. Very useful for libcurl and/or protocol
-debugging and understanding. The verbose information will be sent to stderr,
-or the stream set with \fICURLOPT_STDERR\fP. The default value for this
-parameter is 0.
-
-You hardly ever want this set in production use, you will almost always want
-this when you debug/report problems. Another neat option for debugging is the
-\fICURLOPT_DEBUGFUNCTION\fP.
+Display verbose information. See \fICURLOPT_VERBOSE(3)\fP
 .IP CURLOPT_HEADER
-A parameter set to 1 tells the library to include the header in the body
-output. This is only relevant for protocols that actually have headers
-preceding the data (like HTTP). The default value for this parameter is 0.
+Include the header in the body output. See \fICURLOPT_HEADER(3)\fP
 .IP CURLOPT_NOPROGRESS
-Pass a long. If set to 1, it tells the library to shut off the progress meter
-completely. It will also prevent the \fICURLOPT_PROGRESSFUNCTION\fP from
-getting called. The default value for this parameter is 1.
-
-Future versions of libcurl are likely to not have any built-in progress meter
-at all.
+Shut off the progress meter. See \fICURLOPT_NOPROGRESS(3)\fP
 .IP CURLOPT_NOSIGNAL
-Pass a long. If it is 1, libcurl will not use any functions that
-install signal handlers or any functions that cause signals to be sent to the
-process. This option is mainly here to allow multi-threaded unix applications
-to still set/use all timeout options etc, without risking getting signals.
-The default value for this parameter is 0.
-(Added in 7.10)
-
-If this option is set and libcurl has been built with the standard name
-resolver, timeouts will not occur while the name resolve takes place.
-Consider building libcurl with c-ares support to enable asynchronous DNS
-lookups, which enables nice timeouts for name resolves without signals.
-
-Setting \fICURLOPT_NOSIGNAL\fP to 1 makes libcurl NOT ask the system to ignore
-SIGPIPE signals, which otherwise are sent by the system when trying to send
-data to a socket which is closed in the other end. libcurl makes an effort to
-never cause such SIGPIPEs to trigger, but some operating systems have no way
-to avoid them and even on those that have there are some corner cases when
-they may still happen, contrary to our desire. In addition, using
-\fICURLAUTH_NTLM_WB\fP authentication could cause a SIGCHLD signal to be
-raised.
+Do not install signal handlers. See \fICURLOPT_NOSIGNAL(3)\fP
 .IP CURLOPT_WILDCARDMATCH
-Set this option to 1 if you want to transfer multiple files according to a
-file name pattern. The pattern can be specified as part of the
-\fICURLOPT_URL\fP option, using an fnmatch-like pattern (Shell Pattern
-Matching) in the last part of URL (file name).
-
-By default, libcurl uses its internal wildcard matching implementation. You
-can provide your own matching function by the \fICURLOPT_FNMATCH_FUNCTION\fP
-option.
-
-This feature is only supported by the FTP download for now.
-
-A brief introduction of its syntax follows:
-.RS
-.IP "* - ASTERISK"
-\&ftp://example.com/some/path/\fB*.txt\fP (for all txt's from the root
-directory)
-.RE
-.RS
-.IP "? - QUESTION MARK"
-Question mark matches any (exactly one) character.
-
-\&ftp://example.com/some/path/\fBphoto?.jpeg\fP
-.RE
-.RS
-.IP "[ - BRACKET EXPRESSION"
-The left bracket opens a bracket expression. The question mark and asterisk have
-no special meaning in a bracket expression. Each bracket expression ends by the
-right bracket and matches exactly one character. Some examples follow:
-
-\fB[a-zA-Z0\-9]\fP or \fB[f\-gF\-G]\fP \- character interval
-
-\fB[abc]\fP - character enumeration
-
-\fB[^abc]\fP or \fB[!abc]\fP - negation
-
-\fB[[:\fP\fIname\fP\fB:]]\fP class expression. Supported classes are
-\fBalnum\fP,\fBlower\fP, \fBspace\fP, \fBalpha\fP, \fBdigit\fP, \fBprint\fP,
-\fBupper\fP, \fBblank\fP, \fBgraph\fP, \fBxdigit\fP.
-
-\fB[][-!^]\fP - special case \- matches only '\-', ']', '[', '!' or '^'. These
-characters have no special purpose.
-
-\fB[\\[\\]\\\\]\fP - escape syntax. Matches '[', ']' or '\\'.
-
-Using the rules above, a file name pattern can be constructed:
-
-\&ftp://example.com/some/path/\fB[a-z[:upper:]\\\\].jpeg\fP
-.RE
-.PP
-(This was added in 7.21.0)
+Transfer multiple files according to a file name pattern. See \fICURLOPT_WILDCARDMATCH(3)\fP
 .SH CALLBACK OPTIONS
 .IP CURLOPT_WRITEFUNCTION
-Pass a pointer to a function that matches the following prototype:
-\fBsize_t function( char *ptr, size_t size, size_t nmemb, void *userdata);\fP
-This function gets called by libcurl as soon as there is data received that
-needs to be saved. The size of the data pointed to by \fIptr\fP is \fIsize\fP
-multiplied with \fInmemb\fP, it will not be zero terminated. Return the number
-of bytes actually taken care of. If that amount differs from the amount passed
-to your function, it'll signal an error to the library. This will abort the
-transfer and return \fICURLE_WRITE_ERROR\fP.
-
-From 7.18.0, the function can return CURL_WRITEFUNC_PAUSE which then will
-cause writing to this connection to become paused. See
-\fIcurl_easy_pause(3)\fP for further details.
-
-This function may be called with zero bytes data if the transferred file is
-empty.
-
-Set this option to NULL to get the internal default function. The internal
-default function will write the data to the FILE * given with
-\fICURLOPT_WRITEDATA\fP.
-
-Set the \fIuserdata\fP argument with the \fICURLOPT_WRITEDATA\fP option.
-
-The callback function will be passed as much data as possible in all invokes,
-but you cannot possibly make any assumptions. It may be one byte, it may be
-thousands. The maximum amount of body data that can be passed to the write
-callback is defined in the curl.h header file: CURL_MAX_WRITE_SIZE (the usual
-default is 16K). If you however have \fICURLOPT_HEADER\fP set, which sends
-header data to the write callback, you can get up to
-\fICURL_MAX_HTTP_HEADER\fP bytes of header data passed into it. This usually
-means 100K.
+Function called as soon as there is data received. See \fICURLOPT_WRITEFUNCTION(3)\fP
 .IP CURLOPT_WRITEDATA
-Data pointer to pass to the file write function. If you use the
-\fICURLOPT_WRITEFUNCTION\fP option, this is the pointer you'll get as
-input. If you don't use a callback, you must pass a 'FILE *' (cast
-to 'void *') as libcurl will pass this to fwrite() when writing data.
-By default, the value of this parameter is unspecified.
-
-The internal \fICURLOPT_WRITEFUNCTION\fP will write the data to the FILE *
-given with this option, or to stdout if this option hasn't been set.
-
-If you're using libcurl as a win32 DLL, you \fBMUST\fP use the
-\fICURLOPT_WRITEFUNCTION\fP if you set this option or you will experience
-crashes.
-
-This option is also known with the older name \fICURLOPT_FILE\fP, the name
-\fICURLOPT_WRITEDATA\fP was introduced in 7.9.7.
+Data pointer to pass to the file write function. See \fCURLOPT_WRITEDATA(3)\fP
 .IP CURLOPT_READFUNCTION
 Pass a pointer to a function that matches the following prototype:
 \fBsize_t function( void *ptr, size_t size, size_t nmemb, void *userdata);\fP
