@@ -320,4 +320,4 @@ pdf: $(PDFPAGES)
 	echo "converted $< to $@")
 
 mancheck:
-	@ls `grep -v OBSOLETE $(top_srcdir)/include/curl/curl.h | awk -F, '/^  CINIT/ { a=substr($$1, 9); print "CURLOPT_" a ".3"}' `
+	@cd $(top_srcdir)/docs/libcurl/opts && ls `awk -F, '!/OBSOLETE/ && /^  CINIT/ { a=substr($$1, 9); print "CURLOPT_" a ".3"}' $(top_srcdir)/include/curl/curl.h`
