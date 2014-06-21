@@ -45,8 +45,10 @@ options back to internal default with \fIcurl_easy_reset(3)\fP.
 
 Strings passed to libcurl as 'char *' arguments, are copied by the library;
 thus the string storage associated to the pointer argument may be overwritten
-after curl_easy_setopt() returns. Exceptions to this rule are described in
-the option details below.
+after curl_easy_setopt() returns. The only exception to this rule is really
+\fICURLOPT_POSTFIELDS\fP, but the alternative that copies the string
+\fICURLOPT_COPYPOSTFIELDS\fP has some usage characteristics you need to read
+up on.
 
 Before version 7.17.0, strings were not copied. Instead the user was forced
 keep them available until libcurl no longer needed them.
@@ -272,7 +274,7 @@ Do a HTTP GET request. See \fICURLOPT_HTTPGET(3)\fP
 .IP CURLOPT_HTTP_VERSION
 HTTP version to use. \fICURLOPT_HTTP_VERSION(3)\fP
 .IP CURLOPT_IGNORE_CONTENT_LENGTH
-Ignore Content-Length. See \fIURLOPT_IGNORE_CONTENT_LENGTH(3)\fP
+Ignore Content-Length. See \fICURLOPT_IGNORE_CONTENT_LENGTH(3)\fP
 .IP CURLOPT_HTTP_CONTENT_DECODING
 Disable Content decoding. See \fICURLOPT_HTTP_CONTENT_DECODING(3)\fP
 .IP CURLOPT_HTTP_TRANSFER_DECODING
@@ -333,8 +335,6 @@ RTSP session-id. See \fICURLOPT_RTSP_SESSION_ID(3)\fP
 RTSP stream URI. See \fICURLOPT_RTSP_STREAM_URI(3)\fP
 .IP CURLOPT_RTSP_TRANSPORT
 RTSP Transport: header. See \fICURLOPT_RTSP_TRANSPORT(3)\fP
-.IP CURLOPT_RTSP_HEADER
-RTSP custom headers. See \fICURLOPT_RTSP_HEADER(3)\fP
 .IP CURLOPT_RTSP_CLIENT_CSEQ
 Clent CSEQ number. See \fICURLOPT_RTSP_CLIENT_CSEQ(3)\fP
 .IP CURLOPT_RTSP_SERVER_CSEQ
