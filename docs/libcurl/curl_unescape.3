@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -38,11 +38,11 @@ converted to their plain text versions.
 If the 'length' argument is set to 0, curl_unescape() will use strlen() on the
 input 'url' string to find out the size.
 
-You must curl_free() the returned string when you're done with it.
+You must \fIcurl_free(3)\fP the returned string when you're done with it.
 .SH AVAILABILITY
 Since 7.15.4, \fIcurl_easy_unescape(3)\fP should be used. This function will
 be removed in a future release.
 .SH RETURN VALUE
 A pointer to a zero terminated string or NULL if it failed.
 .SH "SEE ALSO"
-.I curl_easy_escape(3), curl_easy_unescape(3), curl_free(3), RFC 2396
+.br curl_easy_escape "(3)," curl_easy_unescape "(3)," curl_free "(3)," RFC 2396
