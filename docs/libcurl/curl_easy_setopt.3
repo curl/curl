@@ -66,2684 +66,427 @@ Do not install signal handlers. See \fICURLOPT_NOSIGNAL(3)\fP
 Transfer multiple files according to a file name pattern. See \fICURLOPT_WILDCARDMATCH(3)\fP
 .SH CALLBACK OPTIONS
 .IP CURLOPT_WRITEFUNCTION
-Function called as soon as there is data received. See \fICURLOPT_WRITEFUNCTION(3)\fP
+Callback for writing data. See \fICURLOPT_WRITEFUNCTION(3)\fP
 .IP CURLOPT_WRITEDATA
-Data pointer to pass to the file write function. See \fCURLOPT_WRITEDATA(3)\fP
+Data pointer to pass to the write callback. See \fCURLOPT_WRITEDATA(3)\fP
 .IP CURLOPT_READFUNCTION
-Pass a pointer to a function that matches the following prototype:
-\fBsize_t function( void *ptr, size_t size, size_t nmemb, void *userdata);\fP
-This function gets called by libcurl as soon as it needs to read data in order
-to send it to the peer. The data area pointed at by the pointer \fIptr\fP may
-be filled with at most \fIsize\fP multiplied with \fInmemb\fP number of
-bytes. Your function must return the actual number of bytes that you stored in
-that memory area. Returning 0 will signal end-of-file to the library and cause
-it to stop the current transfer.
-
-If you stop the current transfer by returning 0 "pre-maturely" (i.e before the
-server expected it, like when you've said you will upload N bytes and you
-upload less than N bytes), you may experience that the server "hangs" waiting
-for the rest of the data that won't come.
-
-The read callback may return \fICURL_READFUNC_ABORT\fP to stop the current
-operation immediately, resulting in a \fICURLE_ABORTED_BY_CALLBACK\fP error
-code from the transfer (Added in 7.12.1)
-
-From 7.18.0, the function can return CURL_READFUNC_PAUSE which then will cause
-reading from this connection to become paused. See \fIcurl_easy_pause(3)\fP
-for further details.
-
-\fBBugs\fP: when doing TFTP uploads, you must return the exact amount of data
-that the callback wants, or it will be considered the final packet by the
-server end and the transfer will end there.
-
-If you set this callback pointer to NULL, or don't set it at all, the default
-internal read function will be used. It is doing an fread() on the FILE *
-userdata set with \fICURLOPT_READDATA\fP.
+Callback for reading data. See \fICURLOPT_READFUNCTION(3)\fP
 .IP CURLOPT_READDATA
-Data pointer to pass to the file read function. If you use the
-\fICURLOPT_READFUNCTION\fP option, this is the pointer you'll get as input. If
-you don't specify a read callback but instead rely on the default internal
-read function, this data must be a valid readable FILE * (cast to 'void *').
-
-If you're using libcurl as a win32 DLL, you MUST use a
-\fICURLOPT_READFUNCTION\fP if you set this option.
-
-This option was also known by the older name \fICURLOPT_INFILE\fP, the name
-\fICURLOPT_READDATA\fP was introduced in 7.9.7.
+Data pointer to pass to the read callback. See \fCURLOPT_READDATA(3)\fP
 .IP CURLOPT_IOCTLFUNCTION
-Pass a pointer to a function that matches the following prototype:
-\fBcurlioerr function(CURL *handle, int cmd, void *clientp);\fP. This function
-gets called by libcurl when something special I/O-related needs to be done
-that the library can't do by itself. For now, rewinding the read data stream
-is the only action it can request. The rewinding of the read data stream may
-be necessary when doing a HTTP PUT or POST with a multi-pass authentication
-method. By default, this parameter is set to NULL.  (Option added in 7.12.3).
-
-Use \fICURLOPT_SEEKFUNCTION\fP instead to provide seeking! If
-\fICURLOPT_SEEKFUNCTION\fP is set, this parameter will be ignored when seeking.
+Callback for I/O operations. See \fICURLOPT_IOCTLFUNCTION(3)\fP
 .IP CURLOPT_IOCTLDATA
-Pass a pointer that will be untouched by libcurl and passed as the 3rd
-argument in the ioctl callback set with \fICURLOPT_IOCTLFUNCTION\fP.
-By default, the value of this parameter is unspecified.  (Option added in
-7.12.3)
+Data pointer to pass to the i/o callback. See \fICURLOPT_IOCTLDATA(3)\fP
 .IP CURLOPT_SEEKFUNCTION
-Pass a pointer to a function that matches the following prototype: \fBint
-function(void *instream, curl_off_t offset, int origin);\fP This function gets
-called by libcurl to seek to a certain position in the input stream and can be
-used to fast forward a file in a resumed upload (instead of reading all
-uploaded bytes with the normal read function/callback). It is also called to
-rewind a stream when doing a HTTP PUT or POST with a multi-pass authentication
-method. The function shall work like "fseek" or "lseek" and accepted SEEK_SET,
-SEEK_CUR and SEEK_END as argument for origin, although libcurl currently only
-passes SEEK_SET. The callback must return 0 (CURL_SEEKFUNC_OK) on success, 1
-(CURL_SEEKFUNC_FAIL) to cause the upload operation to fail or 2
-(CURL_SEEKFUNC_CANTSEEK) to indicate that while the seek failed, libcurl is
-free to work around the problem if possible. The latter can sometimes be done
-by instead reading from the input or similar.
-
-By default, this parameter is unset.
-
-If you forward the input arguments directly to "fseek" or "lseek", note that
-the data type for \fIoffset\fP is not the same as defined for curl_off_t on
-many systems! (Option added in 7.18.0)
+Callback for seek operations. See \fICURLOPT_SEEKFUNCTION(3)\fP
 .IP CURLOPT_SEEKDATA
-Data pointer to pass to the file seek function. If you use the
-\fICURLOPT_SEEKFUNCTION\fP option, this is the pointer you'll get as input. If
-you don't specify a seek callback, NULL is passed. (Option added in 7.18.0)
+Data pointer to pass to the seek callback. See \fICURLOPT_SEEKDATA(3)\fP
 .IP CURLOPT_SOCKOPTFUNCTION
-Pass a pointer to a function that matches the following prototype: \fBint
-function(void *clientp, curl_socket_t curlfd, curlsocktype purpose);\fP. By
-default, this parameter is unset. If set, this
-function gets called by libcurl after the socket() call but before the
-connect() call. The callback's \fIpurpose\fP argument identifies the exact
-purpose for this particular socket:
-
-\fICURLSOCKTYPE_IPCXN\fP for actively created connections or since 7.28.0
-\fICURLSOCKTYPE_ACCEPT\fP for FTP when the connection was setup with PORT/EPSV
-(in earlier versions these sockets weren't passed to this callback).
-
-Future versions of libcurl may support more purposes. It passes the newly
-created socket descriptor so additional setsockopt() calls can be done at the
-user's discretion.  Return 0 (zero) from the callback on success. Return 1
-from the callback function to signal an unrecoverable error to the library and
-it will close the socket and return \fICURLE_COULDNT_CONNECT\fP.  (Option
-added in 7.16.0)
-
-Added in 7.21.5, the callback function may return
-\fICURL_SOCKOPT_ALREADY_CONNECTED\fP, which tells libcurl that the socket is
-in fact already connected and then libcurl will not attempt to connect it.
+Callback for sockopt operations. See \fICURLOPT_SOCKOPTFUNCTION(3)\fP
 .IP CURLOPT_SOCKOPTDATA
-Pass a pointer that will be untouched by libcurl and passed as the first
-argument in the sockopt callback set with \fICURLOPT_SOCKOPTFUNCTION\fP.
-The default value of this parameter is unspecified.
-(Option added in 7.16.0)
+Data pointer to pass to the sockopt callback. See \fICURLOPT_SOCKOPTDATA(3)\fP
 .IP CURLOPT_OPENSOCKETFUNCTION
-Pass a pointer to a function that matches the following prototype:
-\fBcurl_socket_t function(void *clientp, curlsocktype purpose, struct
-curl_sockaddr *address);\fP. This function gets called by libcurl instead of
-the \fIsocket(2)\fP call. The callback's \fIpurpose\fP argument identifies the
-exact purpose for this particular socket: \fICURLSOCKTYPE_IPCXN\fP is for IP
-based connections. Future versions of libcurl may support more purposes. It
-passes the resolved peer address as a \fIaddress\fP argument so the callback
-can modify the address or refuse to connect at all. The callback function
-should return the socket or \fICURL_SOCKET_BAD\fP in case no connection could
-be established or another error was detected. Any additional
-\fIsetsockopt(2)\fP calls can be done on the socket at the user's discretion.
-\fICURL_SOCKET_BAD\fP return value from the callback function will signal an
-unrecoverable error to the library and it will return
-\fICURLE_COULDNT_CONNECT\fP.  This return code can be used for IP address
-blacklisting.  The default behavior is:
-.nf
-   return socket(addr->family, addr->socktype, addr->protocol);
-.fi
-(Option added in 7.17.1.)
+Callback for socket creation. See \fICURLOPT_OPENSOCKETFUNCTION(3)\fP
 .IP CURLOPT_OPENSOCKETDATA
-Pass a pointer that will be untouched by libcurl and passed as the first
-argument in the opensocket callback set with \fICURLOPT_OPENSOCKETFUNCTION\fP.
-The default value of this parameter is unspecified.
-(Option added in 7.17.1.)
+Data pointer to pass to the open socket callback. See \fICURLOPT_OPENSOCKETDATA(3)\fP
 .IP CURLOPT_CLOSESOCKETFUNCTION
-Pass a pointer to a function that matches the following prototype: \fBint
-function(void *clientp, curl_socket_t item);\fP. This function gets called by
-libcurl instead of the \fIclose(3)\fP or \fIclosesocket(3)\fP call when
-sockets are closed (not for any other file descriptors). This is pretty much
-the reverse to the \fICURLOPT_OPENSOCKETFUNCTION\fP option. Return 0 to signal
-success and 1 if there was an error.  (Option added in 7.21.7)
+Callback for closing socket. See \fICURLOPT_CLOSESOCKETFUNCTION(3)\fP
 .IP CURLOPT_CLOSESOCKETDATA
-Pass a pointer that will be untouched by libcurl and passed as the first
-argument in the closesocket callback set with
-\fICURLOPT_CLOSESOCKETFUNCTION\fP.
-The default value of this parameter is unspecified.
-(Option added in 7.21.7)
+Data pointer to pass to the close socket callback. See \fICURLOPT_CLOSESOCKETDATA(3)\fP
 .IP CURLOPT_PROGRESSFUNCTION
-Pass a pointer to a function that matches the following prototype:
-
-\fBint function(void *clientp, double dltotal, double dlnow, double ultotal,
-double ulnow);\fP
-
-We encourage users to use \fICURLOPT_XFERINFOFUNCTION\fP instead, if you can.
-
-This function gets called by libcurl instead of its internal equivalent with a
-frequent interval. While data is being transferred it will be called very
-frequently, and during slow periods like when nothing is being transferred it
-can slow down to about one call per second.
-
-\fIclientp\fP is the pointer set with \fICURLOPT_PROGRESSDATA\fP, it is not
-actually used by libcurl but is only passed along from the application to the
-callback.
-
-The callback gets told how much data libcurl will transfer and has
-transferred, in number of bytes. \fIdltotal\fP is the total number of bytes
-libcurl expects to download in this transfer. \fIdlnow\fP is the number of
-bytes downloaded so far. \fIultotal\fP is the total number of bytes libcurl
-expects to upload in this transfer. \fIulnow\fP is the number of bytes
-uploaded so far.
-
-Unknown/unused argument values passed to the callback will be set to zero
-(like if you only download data, the upload size will remain 0). Many times
-the callback will be called one or more times first, before it knows the data
-sizes so a program must be made to handle that.
-
-Returning a non-zero value from this callback will cause libcurl to abort the
-transfer and return \fICURLE_ABORTED_BY_CALLBACK\fP.
-
-If you transfer data with the multi interface, this function will not be
-called during periods of idleness unless you call the appropriate libcurl
-function that performs transfers.
-
-\fICURLOPT_NOPROGRESS\fP must be set to 0 to make this function actually
-get called.
-.IP CURLOPT_XFERINFOFUNCTION
-Pass a pointer to a function that matches the following prototype:
-
-.nf
-\fBint function(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
-                curl_off_t ultotal, curl_off_t ulnow);\fP
-.fi
-
-This function gets called by libcurl instead of its internal equivalent with a
-frequent interval. While data is being transferred it will be called very
-frequently, and during slow periods like when nothing is being transferred it
-can slow down to about one call per second.
-
-\fIclientp\fP is the pointer set with \fICURLOPT_XFERINFODATA\fP, it is only
-passed along from the application to the callback.
-
-The callback gets told how much data libcurl will transfer and has
-transferred, in number of bytes. \fIdltotal\fP is the total number of bytes
-libcurl expects to download in this transfer. \fIdlnow\fP is the number of
-bytes downloaded so far. \fIultotal\fP is the total number of bytes libcurl
-expects to upload in this transfer. \fIulnow\fP is the number of bytes
-uploaded so far.
-
-Unknown/unused argument values passed to the callback will be set to zero
-(like if you only download data, the upload size will remain 0). Many times
-the callback will be called one or more times first, before it knows the data
-sizes so a program must be made to handle that.
-
-Returning a non-zero value from this callback will cause libcurl to abort the
-transfer and return \fICURLE_ABORTED_BY_CALLBACK\fP.
-
-If you transfer data with the multi interface, this function will not be
-called during periods of idleness unless you call the appropriate libcurl
-function that performs transfers.
-
-\fICURLOPT_NOPROGRESS\fP must be set to 0 to make this function actually
-get called.
-
-(Added in 7.32.0)
+OBSOLETE callback for progress meter. See \fICURLOPT_PROGRESSFUNCTION(3)\fP
 .IP CURLOPT_PROGRESSDATA
-Pass a pointer that will be untouched by libcurl and passed as the first
-argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
-The default value of this parameter is unspecified.
+Data pointer to pass to the progress meter callback. See \fICURLOPT_PROGRESSDATA(3)\fP
+.IP CURLOPT_XFERINFOFUNCTION
+Callback for progress meter. See \fICURLOPT_XFERINFOFUNCTION(3)\fP
 .IP CURLOPT_XFERINFODATA
-Pass a pointer that will be untouched by libcurl and passed as the first
-argument in the progress callback set with \fICURLOPT_XFERINFOFUNCTION\fP.
-The default value of this parameter is unspecified. This option is an alias
-for CURLOPT_PROGRESSDATA. (Added in 7.32.0)
+Data pointer to pass to the progress meter callback. See \fICURLOPT_XFERINFODATA(3)\fP
 .IP CURLOPT_HEADERFUNCTION
-Pass a pointer to a function that matches the following prototype:
-\fBsize_t function( void *ptr, size_t size, size_t nmemb, void
-*userdata);\fP. This function gets called by libcurl as soon as it has
-received header data. The header callback will be called once for each header
-and only complete header lines are passed on to the callback. Parsing headers
-is very easy using this. The size of the data pointed to by \fIptr\fP is
-\fIsize\fP multiplied with \fInmemb\fP. Do not assume that the header line is
-zero terminated! The pointer named \fIuserdata\fP is the one you set with the
-\fICURLOPT_WRITEHEADER\fP option. The callback function must return the number
-of bytes actually taken care of. If that amount differs from the amount passed
-to your function, it'll signal an error to the library. This will abort the
-transfer and return \fICURL_WRITE_ERROR\fP.
-
-A complete HTTP header that is passed to this function can be up to
-\fICURL_MAX_HTTP_HEADER\fP (100K) bytes.
-
-If this option is not set, or if it is set to NULL, but
-\fICURLOPT_HEADERDATA\fP (\fICURLOPT_WRITEHEADER\fP) is set to anything but
-NULL, the function used to accept response data will be used instead. That is,
-it will be the function specified with \fICURLOPT_WRITEFUNCTION\fP, or if it
-is not specified or NULL - the default, stream-writing function.
-
-It's important to note that the callback will be invoked for the headers of
-all responses received after initiating a request and not just the final
-response. This includes all responses which occur during authentication
-negotiation. If you need to operate on only the headers from the final
-response, you will need to collect headers in the callback yourself and use
-HTTP status lines, for example, to delimit response boundaries.
-
-When a server sends a chunked encoded transfer, it may contain a trailer. That
-trailer is identical to a HTTP header and if such a trailer is received it is
-passed to the application using this callback as well. There are several ways
-to detect it being a trailer and not an ordinary header: 1) it comes after the
-response-body. 2) it comes after the final header line (CR LF) 3) a Trailer:
-header among the regular response-headers mention what header(s) to expect in
-the trailer.
-
-For non-HTTP protocols like FTP, POP3, IMAP and SMTP this function will get
-called with the server responses to the commands that libcurl sends.
-.IP CURLOPT_WRITEHEADER
-(This option is also known as \fBCURLOPT_HEADERDATA\fP) Pass a pointer to be
-used to write the header part of the received data to. If you don't use
-\fICURLOPT_WRITEFUNCTION\fP or \fICURLOPT_HEADERFUNCTION\fP to take care of
-the writing, this must be a valid FILE * as the internal default will then be
-a plain fwrite(). See also the \fICURLOPT_HEADERFUNCTION\fP option above on
-how to set a custom get-all-headers callback.
+Callback for writing received headers. See \fICURLOPT_HEADERFUNCTION(3)\fP
+.IP CURLOPT_HEADERDATA
+Data pointer to pass to the header callback. See \fICURLOPT_HEADERDATA(3)\fP
 .IP CURLOPT_DEBUGFUNCTION
-Pass a pointer to a function that matches the following prototype: \fBint
-curl_debug_callback (CURL *, curl_infotype, char *, size_t, void *);\fP
-\fICURLOPT_DEBUGFUNCTION\fP replaces the standard debug function used when
-\fICURLOPT_VERBOSE \fP is in effect. This callback receives debug information,
-as specified with the \fBcurl_infotype\fP argument. This function must return
-0.  The data pointed to by the char * passed to this function WILL NOT be zero
-terminated, but will be exactly of the size as told by the size_t argument.
-
-Available curl_infotype values:
-.RS
-.IP CURLINFO_TEXT
-The data is informational text.
-.IP CURLINFO_HEADER_IN
-The data is header (or header-like) data received from the peer.
-.IP CURLINFO_HEADER_OUT
-The data is header (or header-like) data sent to the peer.
-.IP CURLINFO_DATA_IN
-The data is protocol data received from the peer.
-.IP CURLINFO_DATA_OUT
-The data is protocol data sent to the peer.
-.IP CURLINFO_SSL_DATA_OUT
-The data is SSL/TLS (binary) data sent to the peer.
-.IP CURLINFO_SSL_DATA_IN
-The data is SSL/TLS (binary) data received from the peer.
-.RE
+Callback for debug information. See \fICURLOPT_DEBUGFUNCTION(3)\fP
 .IP CURLOPT_DEBUGDATA
-Pass a pointer to whatever you want passed in to your
-\fICURLOPT_DEBUGFUNCTION\fP in the last void * argument. This pointer is not
-used by libcurl, it is only passed to the callback.
+Data pointer to pass to the debug callback. See \fICURLOPT_DEBUGDATA(3)\fP
 .IP CURLOPT_SSL_CTX_FUNCTION
-This option does only function for libcurl powered by OpenSSL. If libcurl was
-built against another SSL library, this functionality is absent.
-
-Pass a pointer to a function that matches the following prototype:
-\fBCURLcode sslctxfun(CURL *curl, void *sslctx, void *parm);\fP This function
-gets called by libcurl just before the initialization of a SSL connection
-after having processed all other SSL related options to give a last chance to
-an application to modify the behaviour of openssl's ssl initialization. The
-\fIsslctx\fP parameter is actually a pointer to an openssl \fISSL_CTX\fP. If
-an error is returned no attempt to establish a connection is made and the
-perform operation will return the error code from this callback function.  Set
-the \fIparm\fP argument with the \fICURLOPT_SSL_CTX_DATA\fP option. This
-option was introduced in 7.11.0.
-
-This function will get called on all new connections made to a server, during
-the SSL negotiation. The SSL_CTX pointer will be a new one every time.
-
-To use this properly, a non-trivial amount of knowledge of the openssl
-libraries is necessary. For example, using this function allows you to use
-openssl callbacks to add additional validation code for certificates, and even
-to change the actual URI of a HTTPS request (example used in the lib509 test
-case).  See also the example section for a replacement of the key, certificate
-and trust file settings.
+Callback for SSL CTX logic. See \fICURLOPT_SSL_CTX_FUNCTION(3)\fP
 .IP CURLOPT_SSL_CTX_DATA
-Data pointer to pass to the ssl context callback set by the option
-\fICURLOPT_SSL_CTX_FUNCTION\fP, this is the pointer you'll get as third
-parameter, otherwise \fBNULL\fP. (Added in 7.11.0)
+Data pointer to pass to the ssl context callback. See \fICURLOPT_SSL_CTX_DATA(3)\fP
 .IP CURLOPT_CONV_TO_NETWORK_FUNCTION
+Callback for code base conversion. See \fICURLOPT_CONV_TO_NETWORK_FUNCTION(3)\fP
 .IP CURLOPT_CONV_FROM_NETWORK_FUNCTION
+Callback for code base conversion. See \fICURLOPT_CONV_FROM_NETWORK_FUNCTION(3)\fP
 .IP CURLOPT_CONV_FROM_UTF8_FUNCTION
-Pass a pointer to a function that matches the following prototype:
-\fBCURLcode function(char *ptr, size_t length);\fP
-
-These three options apply to non-ASCII platforms only.  They are available
-only if \fBCURL_DOES_CONVERSIONS\fP was defined when libcurl was built. When
-this is the case, \fIcurl_version_info(3)\fP will return the CURL_VERSION_CONV
-feature bit set.
-
-The data to be converted is in a buffer pointed to by the ptr parameter.  The
-amount of data to convert is indicated by the length parameter.  The converted
-data overlays the input data in the buffer pointed to by the ptr parameter.
-CURLE_OK should be returned upon successful conversion.  A CURLcode return
-value defined by curl.h, such as CURLE_CONV_FAILED, should be returned if an
-error was encountered.
-
-\fBCURLOPT_CONV_TO_NETWORK_FUNCTION\fP and
-\fBCURLOPT_CONV_FROM_NETWORK_FUNCTION\fP convert between the host encoding and
-the network encoding.  They are used when commands or ASCII data are
-sent/received over the network.
-
-\fBCURLOPT_CONV_FROM_UTF8_FUNCTION\fP is called to convert from UTF8 into the
-host encoding.  It is required only for SSL processing.
-
-If you set a callback pointer to NULL, or don't set it at all, the built-in
-libcurl iconv functions will be used.  If HAVE_ICONV was not defined when
-libcurl was built, and no callback has been established, conversion will
-return the CURLE_CONV_REQD error code.
-
-If HAVE_ICONV is defined, CURL_ICONV_CODESET_OF_HOST must also be defined.
-For example:
-
- \&#define CURL_ICONV_CODESET_OF_HOST "IBM-1047"
-
-The iconv code in libcurl will default the network and UTF8 codeset names as
-follows:
-
- \&#define CURL_ICONV_CODESET_OF_NETWORK "ISO8859-1"
-
- \&#define CURL_ICONV_CODESET_FOR_UTF8   "UTF-8"
-
-You will need to override these definitions if they are different on your
-system.
+Callback for code base conversion. See \fICURLOPT_CONV_FROM_UTF8_FUNCTION(3)\fP
 .IP CURLOPT_INTERLEAVEFUNCTION
-Pass a pointer to a function that matches the following prototype:
-\fBsize_t function( void *ptr, size_t size, size_t nmemb, void
-*userdata)\fP. This function gets called by libcurl as soon as it has received
-interleaved RTP data. This function gets called for each $ block and therefore
-contains exactly one upper-layer protocol unit (e.g.  one RTP packet). Curl
-writes the interleaved header as well as the included data for each call. The
-first byte is always an ASCII dollar sign. The dollar sign is followed by a
-one byte channel identifier and then a 2 byte integer length in network byte
-order. See \fIRFC2326 Section 10.12\fP for more information on how RTP
-interleaving behaves. If unset or set to NULL, curl will use the default write
-function.
-
-Interleaved RTP poses some challenges for the client application. Since the
-stream data is sharing the RTSP control connection, it is critical to service
-the RTP in a timely fashion. If the RTP data is not handled quickly,
-subsequent response processing may become unreasonably delayed and the
-connection may close. The application may use \fICURL_RTSPREQ_RECEIVE\fP to
-service RTP data when no requests are desired. If the application makes a
-request, (e.g.  \fICURL_RTSPREQ_PAUSE\fP) then the response handler will
-process any pending RTP data before marking the request as finished.  (Added
-in 7.20.0)
+Callback for RTSP interleaved data. See \fICURLOPT_INTERLEAVEFUNCTION(3)\fP
 .IP CURLOPT_INTERLEAVEDATA
-This is the userdata pointer that will be passed to
-\fICURLOPT_INTERLEAVEFUNCTION\fP when interleaved RTP data is received. (Added
-in 7.20.0)
+Data pointer to pass to the interleave callback. See \fICURLOPT_INTERLEAVEDATA(3)\fP
 .IP CURLOPT_CHUNK_BGN_FUNCTION
-Pass a pointer to a function that matches the following prototype:
-\fBlong function (const void *transfer_info, void *ptr, int remains)\fP. This
-function gets called by libcurl before a part of the stream is going to be
-transferred (if the transfer supports chunks).
-
-This callback makes sense only when using the \fICURLOPT_WILDCARDMATCH\fP
-option for now.
-
-The target of transfer_info parameter is a "feature depended" structure. For
-the FTP wildcard download, the target is curl_fileinfo structure (see
-\fIcurl/curl.h\fP).  The parameter ptr is a pointer given by
-\fICURLOPT_CHUNK_DATA\fP. The parameter remains contains number of chunks
-remaining per the transfer. If the feature is not available, the parameter has
-zero value.
-
-Return \fICURL_CHUNK_BGN_FUNC_OK\fP if everything is fine,
-\fICURL_CHUNK_BGN_FUNC_SKIP\fP if you want to skip the concrete chunk or
-\fICURL_CHUNK_BGN_FUNC_FAIL\fP to tell libcurl to stop if some error occurred.
-(This was added in 7.21.0)
+Callback for wildcard download start of chunk. See \fICURLOPT_CHUNK_BGN_FUNCTION(3)\fP
 .IP CURLOPT_CHUNK_END_FUNCTION
-Pass a pointer to a function that matches the following prototype:
-\fBlong function(void *ptr)\fP. This function gets called by libcurl as soon
-as a part of the stream has been transferred (or skipped).
-
-Return \fICURL_CHUNK_END_FUNC_OK\fP if everything is fine or
-\fBCURL_CHUNK_END_FUNC_FAIL\fP to tell the lib to stop if some error occurred.
-(This was added in 7.21.0)
+Callback for wildcard download end of chunk. See \fICURLOPT_CHUNK_END_FUNCTION(3)\fP
 .IP CURLOPT_CHUNK_DATA
-Pass a pointer that will be untouched by libcurl and passed as the ptr
-argument to the \fICURL_CHUNK_BGN_FUNTION\fP and \fICURL_CHUNK_END_FUNTION\fP.
-(This was added in 7.21.0)
+Data pointer to pass to the chunk callbacks. See \fICURLOPT_CHUNK_DATA(3)\fP
 .IP CURLOPT_FNMATCH_FUNCTION
-Pass a pointer to a function that matches the following prototype: \fBint
-function(void *ptr, const char *pattern, const char *string)\fP prototype (see
-\fIcurl/curl.h\fP). It is used internally for the wildcard matching feature.
-
-Return \fICURL_FNMATCHFUNC_MATCH\fP if pattern matches the string,
-\fICURL_FNMATCHFUNC_NOMATCH\fP if not or \fICURL_FNMATCHFUNC_FAIL\fP if an
-error occurred.  (This was added in 7.21.0)
+Callback for wildcard matching. See \fICURLOPT_FNMATCH_FUNCTION(3)\fP
 .IP CURLOPT_FNMATCH_DATA
-Pass a pointer that will be untouched by libcurl and passed as the ptr argument
-to the \fICURL_FNMATCH_FUNCTION\fP. (This was added in 7.21.0)
+Data pointer to pass to the fnmatch callback. See \fICURLOPT_FNMATCH_DATA(3)\fP
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
-Pass a char * to a buffer that the libcurl may store human readable error
-messages in. This may be more helpful than just the return code from
-\fIcurl_easy_perform\fP. The buffer must be at least CURL_ERROR_SIZE big.
-Although this argument is a 'char *', it does not describe an input string.
-Therefore the (probably undefined) contents of the buffer is NOT copied by the
-library. You must keep the associated storage available until libcurl no
-longer needs it. Failing to do so will cause very odd behavior or even
-crashes. libcurl will need it until you call \fIcurl_easy_cleanup(3)\fP or you
-set the same option again to use a different pointer.
-
-Use \fICURLOPT_VERBOSE\fP and \fICURLOPT_DEBUGFUNCTION\fP to better
-debug/trace why errors happen.
-
-If the library does not return an error, the buffer may not have been
-touched. Do not rely on the contents in those cases.
-
+Error message buffer. See \fICURLOPT_ERRORBUFFER(3)\fP
 .IP CURLOPT_STDERR
-Pass a FILE * as parameter. Tell libcurl to use this stream instead of stderr
-when showing the progress meter and displaying \fICURLOPT_VERBOSE\fP data.
+stderr replacement stream. See \fICURLOPT_STDERR(3)\fP
 .IP CURLOPT_FAILONERROR
-A parameter set to 1 tells the library to fail silently if the HTTP code
-returned is equal to or larger than 400. The default action would be to return
-the page normally, ignoring that code.
-
-This method is not fail-safe and there are occasions where non-successful
-response codes will slip through, especially when authentication is involved
-(response codes 401 and 407).
-
-You might get some amounts of headers transferred before this situation is
-detected, like when a "100-continue" is received as a response to a
-POST/PUT and a 401 or 407 is received immediately afterwards.
+Fail on HTTP 4xx errors. \fICURLOPT_FAILONERROR(3)\fP
 .SH NETWORK OPTIONS
 .IP CURLOPT_URL
-Pass in a pointer to the actual URL to deal with. The parameter should be a
-char * to a zero terminated string which must be URL-encoded in the following
-format:
-
-scheme://host:port/path
-
-For a greater explanation of the format please see RFC3986.
-
-If the given URL lacks the scheme (such as "http://" or "ftp://" etc) then
-libcurl will attempt to resolve the protocol based on one of the following
-given host names:
-
-HTTP, FTP, DICT, LDAP, IMAP, POP3 or SMTP
-
-(POP3 and SMTP added in 7.31.0)
-
-Should the protocol, either that specified by the scheme or deduced by libcurl
-from the host name, not be supported by libcurl then
-(\fICURLE_UNSUPPORTED_PROTOCOL\fP) will be returned from either the
-\fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP functions when you
-call them. Use \fIcurl_version_info(3)\fP for detailed information of which
-protocols are supported by the build of libcurl you are using.
-
-The host part of the URL contains the address of the server that you want to
-connect to. This can be the fully qualified domain name of the server, the
-local network name of the machine on your network or the IP address of the
-server or machine represented by either an IPv4 or IPv6 address. For example:
-
-http://www.example.com/
-
-http://hostname/
-
-http://192.168.0.1/
-
-http://[2001:1890:1112:1::20]/
-
-It is also possible to specify the user name, password and any supported login
-options as part of the host, for the following protocols, when connecting to
-servers that require authentication:
-
-http://user:password@www.example.com
-
-ftp://user:password@ftp.example.com
-
-imap://user:password;options@mail.example.com
-
-pop3://user:password;options@mail.example.com
-
-smtp://user:password;options@mail.example.com
-
-At present only IMAP, POP3 and SMTP support login options as part of the host.
-For more information about the login options in URL syntax please see RFC2384,
-RFC5092 and IETF draft draft-earhart-url-smtp-00.txt (Added in 7.31.0).
-
-The port is optional and when not specified libcurl will use the default port
-based on the determined or specified protocol: 80 for HTTP, 21 for FTP and 25
-for SMTP, etc. The following examples show how to specify the port:
-
-http://www.example.com:8080/ - This will connect to a web server using port
-8080 rather than 80.
-
-smtp://mail.example.com:587/ - This will connect to a SMTP server on the
-alternative mail port.
-
-The path part of the URL is protocol specific and whilst some examples are
-given below this list is not conclusive:
-
-.B HTTP
-
-The path part of a HTTP request specifies the file to retrieve and from what
-directory. If the directory is not specified then the web server's root
-directory is used. If the file is omitted then the default document will be
-retrieved for either the directory specified or the root directory. The
-exact resource returned for each URL is entirely dependent on the server's
-configuration.
-
-http://www.example.com - This gets the main page from the web server.
-
-http://www.example.com/index.html - This returns the main page by explicitly
-requesting it.
-
-http://www.example.com/contactus/ - This returns the default document from
-the contactus directory.
-
-.B FTP
-
-The path part of an FTP request specifies the file to retrieve and from what
-directory. If the file part is omitted then libcurl downloads the directory
-listing for the directory specified. If the directory is omitted then
-the directory listing for the root / home directory will be returned.
-
-ftp://ftp.example.com - This retrieves the directory listing for the root
-directory.
-
-ftp://ftp.example.com/readme.txt - This downloads the file readme.txt from the
-root directory.
-
-ftp://ftp.example.com/libcurl/readme.txt - This downloads readme.txt from the
-libcurl directory.
-
-ftp://user:password@ftp.example.com/readme.txt - This retrieves the readme.txt
-file from the user's home directory. When a username and password is
-specified, everything that is specified in the path part is relative to the
-user's home directory. To retrieve files from the root directory or a
-directory underneath the root directory then the absolute path must be
-specified by prepending an additional forward slash to the beginning of the
-path.
-
-ftp://user:password@ftp.example.com//readme.txt - This retrieves the readme.txt
-from the root directory when logging in as a specified user.
-
-.B SMTP
-
-The path part of a SMTP request specifies the host name to present during
-communication with the mail server. If the path is omitted then libcurl will
-attempt to resolve the local computer's host name. However, this may not
-return the fully qualified domain name that is required by some mail servers
-and specifying this path allows you to set an alternative name, such as
-your machine's fully qualified domain name, which you might have obtained
-from an external function such as gethostname or getaddrinfo.
-
-smtp://mail.example.com - This connects to the mail server at example.com and
-sends your local computer's host name in the HELO / EHLO command.
-
-smtp://mail.example.com/client.example.com - This will send client.example.com in
-the HELO / EHLO command to the mail server at example.com.
-
-.B POP3
-
-The path part of a POP3 request specifies the message ID to retrieve. If the
-ID is not specified then a list of waiting messages is returned instead.
-
-pop3://user:password@mail.example.com - This lists the available messages for
-the user
-
-pop3://user:password@mail.example.com/1 - This retrieves the first message for
-the user
-
-.B IMAP
-
-The path part of an IMAP request not only specifies the mailbox to list (Added
-in 7.30.0) or select, but can also be used to check the UIDVALIDITY of the
-mailbox, to specify the UID, SECTION (Added in 7.30.0) and PARTIAL octets
-(Added in 7.37.0) of the message to fetch and to specify what nessages to
-search for (Added in 7.37.0).
-
-imap://user:password@mail.example.com - Performs a top level folder list
-
-imap://user:password@mail.example.com/INBOX - Performs a folder list on the
-user's inbox
-
-imap://user:password@mail.example.com/INBOX/;UID=1 - Selects the user's inbox
-and fetches message 1
-
-imap://user:password@mail.example.com/INBOX;UIDVALIDITY=50/;UID=2 - Selects
-the user's inbox, checks the UIDVALIDITY of the mailbox is 50 and fetches
-message 2 if it is
-
-imap://user:password@mail.example.com/INBOX/;UID=3/;SECTION=TEXT - Selects the
-user's inbox and fetches the text portial of message 3
-
-imap://user:password@mail.example.com/INBOX/;UID=4/;PARTIAL=0.1024 - Selects
-the user's inbox and fetches the first 1024 octets of message 4
-
-imap://user:password@mail.example.com/INBOX?NEW - Selects the user's inbox and
-checks for NEW messages
-
-imap://user:password@mail.example.com/INBOX?SUBJECT%20shadows - Selects the
-user's inbox and searches for messages containing "shadows" in the subject
-line
-
-For more information about the individual components of an IMAP URL please
-see RFC5092.
-
-.B SCP
-
-The path part of a SCP request specifies the file to retrieve and from what
-directory. The file part may not be omitted. The file is taken as an absolute
-path from the root directory on the server. To specify a path relative to
-the user's home directory on the server, prepend ~/ to the path portion.
-If the user name is not embedded in the URL, it can be set with the
-\fICURLOPT_USERPWD\fP or \fBCURLOPT_USERNAME\fP option.
-
-scp://user@example.com/etc/issue - This specifies the file /etc/issue
-
-scp://example.com/~/my-file - This specifies the file my-file in the
-user's home directory on the server
-
-.B SFTP
-
-The path part of a SFTP request specifies the file to retrieve and from what
-directory. If the file part is omitted then libcurl downloads the directory
-listing for the directory specified.  If the path ends in a / then a directory
-listing is returned instead of a file.  If the path is omitted entirely then
-the directory listing for the root / home directory will be returned.
-If the user name is not embedded in the URL, it can be set with the
-\fICURLOPT_USERPWD\fP or \fBCURLOPT_USERNAME\fP option.
-
-sftp://user:password@example.com/etc/issue - This specifies the file
-/etc/issue
-
-sftp://user@example.com/~/my-file - This specifies the file my-file in the
-user's home directory
-
-sftp://ssh.example.com/~/Documents/ - This requests a directory listing
-of the Documents directory under the user's home directory
-
-.B LDAP
-
-The path part of a LDAP request can be used to specify the: Distinguished
-Name, Attributes, Scope, Filter and Extension for a LDAP search. Each field
-is separated by a question mark and when that field is not required an empty
-string with the question mark separator should be included.
-
-ldap://ldap.example.com/o=My%20Organisation - This will perform a LDAP search
-with the DN as My Organisation.
-
-ldap://ldap.example.com/o=My%20Organisation?postalAddress - This will perform
-the same search but will only return postalAddress attributes.
-
-ldap://ldap.example.com/?rootDomainNamingContext - This specifies an empty DN
-and requests information about the rootDomainNamingContext attribute for an
-Active Directory server.
-
-For more information about the individual components of a LDAP URL please
-see RFC4516.
-
-.B RTMP
-
-There's no official URL spec for RTMP so libcurl uses the URL syntax supported
-by the underlying librtmp library. It has a syntax where it wants a
-traditional URL, followed by a space and a series of space-separated
-name=value pairs.
-
-While space is not typically a "legal" letter, libcurl accepts them. When a
-user wants to pass in a '#' (hash) character it will be treated as a fragment
-and get cut off by libcurl if provided literally. You will instead have to
-escape it by providing it as backslash and its ASCII value in hexadecimal:
-"\\23".
-
-.B NOTES
-
-Starting with version 7.20.0, the fragment part of the URI will not be sent as
-part of the path, which was previously the case.
-
-\fICURLOPT_URL\fP is the only option that \fBmust\fP be set before
-\fIcurl_easy_perform(3)\fP is called.
-
-\fICURLOPT_PROTOCOLS\fP can be used to limit what protocols libcurl will use
-for this transfer, independent of what libcurl has been compiled to
-support. That may be useful if you accept the URL from an external source and
-want to limit the accessibility.
+URL to work on. See \fICURLOPT_URL(3)\fP
 .IP CURLOPT_PROTOCOLS
-Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
-limits what protocols libcurl may use in the transfer. This allows you to have
-a libcurl built to support a wide range of protocols but still limit specific
-transfers to only be allowed to use a subset of them. By default libcurl will
-accept all protocols it supports. See also
-\fICURLOPT_REDIR_PROTOCOLS\fP. (Added in 7.19.4)
+Allowed protocols. See \fICURLOPT_PROTOCOLS(3)\fP
 .IP CURLOPT_REDIR_PROTOCOLS
-Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
-limits what protocols libcurl may use in a transfer that it follows to in a
-redirect when \fICURLOPT_FOLLOWLOCATION\fP is enabled. This allows you to
-limit specific transfers to only be allowed to use a subset of protocols in
-redirections. By default libcurl will allow all protocols except for FILE and
-SCP. This is a difference compared to pre-7.19.4 versions which
-unconditionally would follow to all protocols supported. (Added in 7.19.4)
+Protocols to allow redirects to. See \fICURLOPT_REDIR_PROTOCOLS(3)\fP
 .IP CURLOPT_PROXY
-Set HTTP proxy to use. The parameter should be a char * to a zero terminated
-string holding the host name or dotted IP address. To specify port number in
-this string, append :[port] to the end of the host name. The proxy string may
-be prefixed with [protocol]:// since any such prefix will be ignored. The
-proxy's port number may optionally be specified with the separate option
-\fICURLOPT_PROXYPORT\fP. If not specified, libcurl will default to using port
-1080 for proxies.
-
-When you tell the library to use a HTTP proxy, libcurl will transparently
-convert operations to HTTP even if you specify an FTP URL etc. This may have
-an impact on what other features of the library you can use, such as
-\fICURLOPT_QUOTE\fP and similar FTP specifics that don't work unless you
-tunnel through the HTTP proxy. Such tunneling is activated with
-\fICURLOPT_HTTPPROXYTUNNEL\fP.
-
-libcurl respects the environment variables \fBhttp_proxy\fP, \fBftp_proxy\fP,
-\fBall_proxy\fP etc, if any of those are set. The \fICURLOPT_PROXY\fP option
-does however override any possibly set environment variables.
-
-Setting the proxy string to "" (an empty string) will explicitly disable the
-use of a proxy, even if there is an environment variable set for it.
-
-Since 7.14.1, the proxy host string given in environment variables can be
-specified the exact same way as the proxy can be set with \fICURLOPT_PROXY\fP,
-include protocol prefix (http://) and embedded user + password.
-
-Since 7.21.7, the proxy string may be specified with a protocol:// prefix to
-specify alternative proxy protocols. Use socks4://, socks4a://, socks5:// or
-socks5h:// (the last one to enable socks5 and asking the proxy to do the
-resolving, also known as CURLPROXY_SOCKS5_HOSTNAME type) to request the
-specific SOCKS version to be used. No protocol specified, http:// and all
-others will be treated as HTTP proxies.
+Proxy to use. See \fICURLOPT_PROXY(3)\fP
 .IP CURLOPT_PROXYPORT
-Pass a long with this option to set the proxy port to connect to unless it is
-specified in the proxy string \fICURLOPT_PROXY\fP.
+Proxy port to use. See \fICURLOPT_PROXYPORT(3)\fP
 .IP CURLOPT_PROXYTYPE
-Pass a long with this option to set type of the proxy. Available options for
-this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_HTTP_1_0\fP (added in 7.19.4),
-\fICURLPROXY_SOCKS4\fP (added in 7.10), \fICURLPROXY_SOCKS5\fP,
-\fICURLPROXY_SOCKS4A\fP (added in 7.18.0) and \fICURLPROXY_SOCKS5_HOSTNAME\fP
-(added in 7.18.0). The HTTP type is default. (Added in 7.10)
-
-If you set \fBCURLOPT_PROXYTYPE\fP to \fICURLPROXY_HTTP_1_0\fP, it will only
-affect how libcurl speaks to a proxy when CONNECT is used. The HTTP version
-used for "regular" HTTP requests is instead controlled with
-\fICURLOPT_HTTP_VERSION\fP.
+Proxy type. See \fICURLOPT_PROXYTYPE(3)\fP
 .IP CURLOPT_NOPROXY
-Pass a pointer to a zero terminated string. The string consists of a comma
-separated list of host names that do not require a proxy to get reached, even
-if one is specified.  The only wildcard available is a single * character,
-which matches all hosts, and effectively disables the proxy. Each name in this
-list is matched as either a domain which contains the hostname, or the
-hostname itself. For example, example.com would match example.com,
-example.com:80, and www.example.com, but not www.notanexample.com or
-example.com.othertld.  (Added in 7.19.4)
+Filter out hosts from proxy use. \fICURLOPT_NOPROXY(3)\fP
 .IP CURLOPT_HTTPPROXYTUNNEL
-Set the parameter to 1 to make the library tunnel all operations through a
-given HTTP proxy. There is a big difference between using a proxy and to
-tunnel through it. If you don't know what this means, you probably don't want
-this tunneling option.
+Tunnel through the HTTP proxy. \fICURLOPT_HTTPPROXYTUNNEL(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_SERVICE
-Pass a char * as parameter to a string holding the name of the service. The
-default service name for a SOCKS5 server is rcmd/server-fqdn. This option
-allows you to change it. (Added in 7.19.4)
+Socks5 gassapi service name. \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_NEC
-Pass a long set to 1 to enable or 0 to disable. As part of the gssapi
-negotiation a protection mode is negotiated. The RFC1961 says in section
-4.3/4.4 it should be protected, but the NEC reference implementation does not.
-If enabled, this option allows the unprotected exchange of the protection mode
-negotiation. (Added in 7.19.4).
+Socks5 gssapi NEC mode. See \fICURLOPT_SOCKS5_GSSAPI_NEC(3)\fP
 .IP CURLOPT_INTERFACE
-Pass a char * as parameter. This sets the interface name to use as outgoing
-network interface. The name can be an interface name, an IP address, or a host
-name.
-
-Starting with 7.24.0: If the parameter starts with "if!" then it is treated as
-only as interface name and no attempt will ever be named to do treat it as an
-IP address or to do name resolution on it.  If the parameter starts with
-\&"host!" it is treated as either an IP address or a hostname.  Hostnames are
-resolved synchronously.  Using the if! format is highly recommended when using
-the multi interfaces to avoid allowing the code to block.  If "if!" is
-specified but the parameter does not match an existing interface,
-CURLE_INTERFACE_FAILED is returned.
+Bind connection locally to this. See \fICURLOPT_INTERFACE(3)\fP
 .IP CURLOPT_LOCALPORT
-Pass a long. This sets the local port number of the socket used for
-connection. This can be used in combination with \fICURLOPT_INTERFACE\fP and
-you are recommended to use \fICURLOPT_LOCALPORTRANGE\fP as well when this is
-set. Valid port numbers are 1 - 65535. (Added in 7.15.2)
+Bind connection locally to this port. See \fICURLOPT_LOCALPORT(3)\fP
 .IP CURLOPT_LOCALPORTRANGE
-Pass a long. This is the number of attempts libcurl will make to find a
-working local port number. It starts with the given \fICURLOPT_LOCALPORT\fP
-and adds one to the number for each retry. Setting this to 1 or below will
-make libcurl do only one try for the exact port number. Port numbers by nature
-are scarce resources that will be busy at times so setting this value to
-something too low might cause unnecessary connection setup failures. (Added in
-7.15.2)
+Bind connection locally to port range. See \fICURLOPT_LOCALPORTRANGE(3)\fP
 .IP CURLOPT_DNS_CACHE_TIMEOUT
-Pass a long, this sets the timeout in seconds. Name resolves will be kept in
-memory for this number of seconds. Set to zero to completely disable
-caching, or set to -1 to make the cached entries remain forever. By default,
-libcurl caches this info for 60 seconds.
-
-The name resolve functions of various libc implementations don't re-read name
-server information unless explicitly told so (for example, by calling
-\fIres_init(3)\fP). This may cause libcurl to keep using the older server even
-if DHCP has updated the server info, and this may look like a DNS cache issue
-to the casual libcurl-app user.
+Timeout for DNS cache. See \fICURLOPT_DNS_CACHE_TIMEOUT(3)\fP
 .IP CURLOPT_DNS_USE_GLOBAL_CACHE
-Pass a long. If the value is 1, it tells curl to use a global DNS cache
-that will survive between easy handle creations and deletions. This is not
-thread-safe and this will use a global variable.
-
-\fBWARNING:\fP this option is considered obsolete. Stop using it. Switch over
-to using the share interface instead! See \fICURLOPT_SHARE\fP and
-\fIcurl_share_init(3)\fP.
+OBSOLETE Enable global DNS cache. See \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP
 .IP CURLOPT_BUFFERSIZE
-Pass a long specifying your preferred size (in bytes) for the receive buffer
-in libcurl.  The main point of this would be that the write callback gets
-called more often and with smaller chunks. This is just treated as a request,
-not an order. You cannot be guaranteed to actually get the given size. (Added
-in 7.10)
-
-This size is by default set as big as possible (CURL_MAX_WRITE_SIZE), so it
-only makes sense to use this option if you want it smaller.
+Ask for smaller buffer size. See \fICURLOPT_BUFFERSIZE(3)\fP
 .IP CURLOPT_PORT
-Pass a long specifying what remote port number to connect to, instead of the
-one specified in the URL or the default port for the used protocol.
+Port number to connect to. See \fICURLOPT_PORT(3)\fP
 .IP CURLOPT_TCP_NODELAY
-Pass a long specifying whether the TCP_NODELAY option is to be set or cleared
-(1 = set, 0 = clear). The option is cleared by default. This will have no
-effect after the connection has been established.
-
-Setting this option will disable TCP's Nagle algorithm. The purpose of this
-algorithm is to try to minimize the number of small packets on the network
-(where "small packets" means TCP segments less than the Maximum Segment Size
-(MSS) for the network).
-
-Maximizing the amount of data sent per TCP segment is good because it
-amortizes the overhead of the send. However, in some cases (most notably
-telnet or rlogin) small segments may need to be sent without delay. This is
-less efficient than sending larger amounts of data at a time, and can
-contribute to congestion on the network if overdone.
+Disable the Nagle algorithm. See \fICURLOPT_TCP_NODELAY(3)\fP
 .IP CURLOPT_ADDRESS_SCOPE
-Pass a long specifying the scope_id value to use when connecting to IPv6
-link-local or site-local addresses. (Added in 7.19.0)
+IPv6 scope for local addresses. See \fICURLOPT_ADDRESS_SCOPE(3)\fP
 .IP CURLOPT_TCP_KEEPALIVE
-Pass a long. If set to 1, TCP keepalive probes will be sent. The delay and
-frequency of these probes can be controlled by the \fICURLOPT_TCP_KEEPIDLE\fP
-and \fICURLOPT_TCP_KEEPINTVL\fP options, provided the operating system supports
-them. Set to 0 (default behavior) to disable keepalive probes (Added in
-7.25.0).
+Enable TCP keep-alive. See \fICURLOPT_TCP_KEEPALIVE(3)\fP
 .IP CURLOPT_TCP_KEEPIDLE
-Pass a long. Sets the delay, in seconds, that the operating system will wait
-while the connection is idle before sending keepalive probes. Not all operating
-systems support this option. (Added in 7.25.0)
+Idle time before sending keep-alive. See \fICURLOPT_TCP_KEEPIDLE(3)\fP
 .IP CURLOPT_TCP_KEEPINTVL
-Pass a long. Sets the interval, in seconds, that the operating system will wait
-between sending keepalive probes. Not all operating systems support this
-option. (Added in 7.25.0)
+Interval between keep-alive probes. See \fICURLOPT_TCP_KEEPINTVL(3)\fP
 .SH NAMES and PASSWORDS OPTIONS (Authentication)
 .IP CURLOPT_NETRC
-This parameter controls the preference of libcurl between using user names and
-passwords from your \fI~/.netrc\fP file, relative to user names and passwords
-in the URL supplied with \fICURLOPT_URL\fP.
-
-libcurl uses a user name (and supplied or prompted password) supplied with
-\fICURLOPT_USERPWD\fP in preference to any of the options controlled by this
-parameter.
-
-Pass a long, set to one of the values described below.
-.RS
-.IP CURL_NETRC_OPTIONAL
-The use of your \fI~/.netrc\fP file is optional, and information in the URL is
-to be preferred.  The file will be scanned for the host and user name (to
-find the password only) or for the host only, to find the first user name and
-password after that \fImachine\fP, which ever information is not specified in
-the URL.
-
-Undefined values of the option will have this effect.
-.IP CURL_NETRC_IGNORED
-The library will ignore the file and use only the information in the URL.
-
-This is the default.
-.IP CURL_NETRC_REQUIRED
-This value tells the library that use of the file is required, to ignore the
-information in the URL, and to search the file for the host only.
-.RE
-Only machine name, user name and password are taken into account
-(init macros and similar things aren't supported).
-
-libcurl does not verify that the file has the correct properties set (as the
-standard Unix ftp client does). It should only be readable by user.
+Enable .netrc parsing. See \fICURLOPT_NETRC(3)\fP
 .IP CURLOPT_NETRC_FILE
-Pass a char * as parameter, pointing to a zero terminated string containing
-the full path name to the file you want libcurl to use as .netrc file. If this
-option is omitted, and \fICURLOPT_NETRC\fP is set, libcurl will attempt to
-find a .netrc file in the current user's home directory. (Added in 7.10.9)
+\&.netrc file name. See \fICURLOPT_NETRC_FILE(3)\fP
 .IP CURLOPT_USERPWD
-Pass a char * as parameter, pointing to a zero terminated login details string
-for the connection. The format of which is: [user name]:[password].
-
-When using NTLM, you can set the domain by prepending it to the user name and
-separating the domain and name with a forward (/) or backward slash (\\). Like
-this: "domain/user:password" or "domain\\user:password". Some HTTP servers (on
-Windows) support this style even for Basic authentication.
-
-When using HTTP and \fICURLOPT_FOLLOWLOCATION\fP, libcurl might perform
-several requests to possibly different hosts. libcurl will only send this user
-and password information to hosts using the initial host name (unless
-\fICURLOPT_UNRESTRICTED_AUTH\fP is set), so if libcurl follows locations to
-other hosts it will not send the user and password to those. This is enforced
-to prevent accidental information leakage.
-
-Use \fICURLOPT_HTTPAUTH\fP to specify the authentication method for HTTP based
-connections or \fICURLOPT_LOGIN_OPTIONS\fP to control IMAP, POP3 and SMTP
-options.
-
-The user and password strings are not URL decoded, so there's no way to send
-in a user name containing a colon using this option. Use \fICURLOPT_USERNAME\fP
-for that, or include it in the URL.
+User and password. See \fICURLOPT_USERPWD(3)\fP
 .IP CURLOPT_PROXYUSERPWD
-Pass a char * as parameter, which should be [user name]:[password] to use for
-the connection to the HTTP proxy. Both the name and the password will be URL
-decoded before use, so to include for example a colon in the user name you
-should encode it as %3A.
-
-Use \fICURLOPT_PROXYAUTH\fP to specify the authentication method.
+Proxy user and password. See \fICURLOPT_PROXYUSERPWD(3)\fP
 .IP CURLOPT_USERNAME
-Pass a char * as parameter, which should be pointing to the zero terminated
-user name to use for the transfer.
-
-\fBCURLOPT_USERNAME\fP sets the user name to be used in protocol
-authentication. You should not use this option together with the (older)
-CURLOPT_USERPWD option.
-
-To specify the password and login options, along with the user name, use the
-\fICURLOPT_PASSWORD\fP and \fICURLOPT_LOGIN_OPTIONS\fP options. (Added in
-7.19.1)
+Username. See \fICURLOPT_USERNAME(3)\fP
 .IP CURLOPT_PASSWORD
-Pass a char * as parameter, which should be pointing to the zero terminated
-password to use for the transfer.
-
-The CURLOPT_PASSWORD option should be used in conjunction with the
-\fICURLOPT_USERNAME\fP option. (Added in 7.19.1)
+Password. See \fICURLOPT_PASSWORD(3)\fP
 .IP CURLOPT_LOGIN_OPTIONS
-(Added in 7.34.0) Pass a char * as parameter, which should be pointing to the
-zero terminated options string to use for the transfer.
-
-At present only IMAP, POP3 and SMTP support login options. For more
-information about the login options please see RFC2384, RFC5092 and IETF draft
-draft-earhart-url-smtp-00.txt
-
-\fBCURLOPT_LOGIN_OPTIONS\fP can be used to set protocol specific login options,
-such as the preferred authentication mechanism via "AUTH=NTLM" or "AUTH=*",
-and should be used in conjunction with the \fICURLOPT_USERNAME\fP option.
+Login options. See \fICURLOPT_LOGIN_OPTIONS(3)\fP
 .IP CURLOPT_PROXYUSERNAME
-Pass a char * as parameter, which should be pointing to the zero terminated
-user name to use for the transfer while connecting to Proxy.
-
-The CURLOPT_PROXYUSERNAME option should be used in same way as the
-\fICURLOPT_PROXYUSERPWD\fP is used.  In comparison to
-\fICURLOPT_PROXYUSERPWD\fP the CURLOPT_PROXYUSERNAME allows the username to
-contain a colon, like in the following example: "sip:user@example.com". The
-CURLOPT_PROXYUSERNAME option is an alternative way to set the user name while
-connecting to Proxy.  There is no meaning to use it together with the
-\fICURLOPT_PROXYUSERPWD\fP option.
-
-In order to specify the password to be used in conjunction with the user name
-use the \fICURLOPT_PROXYPASSWORD\fP option.  (Added in 7.19.1)
+Proxy user name. See \fICURLOPT_PROXYUSERNAME(3)\fP
 .IP CURLOPT_PROXYPASSWORD
-Pass a char * as parameter, which should be pointing to the zero terminated
-password to use for the transfer while connecting to Proxy.
-
-The CURLOPT_PROXYPASSWORD option should be used in conjunction with
-the \fICURLOPT_PROXYUSERNAME\fP option. (Added in 7.19.1)
+Proxy password. See \fICURLOPT_PROXYPASSWORD(3)\fP
 .IP CURLOPT_HTTPAUTH
-Pass a long as parameter, which is set to a bitmask, to tell libcurl which
-authentication method(s) you want it to use. The available bits are listed
-below. If more than one bit is set, libcurl will first query the site to see
-which authentication methods it supports and then pick the best one you allow
-it to use. For some methods, this will induce an extra network round-trip. Set
-the actual name and password with the \fICURLOPT_USERPWD\fP option or
-with the \fICURLOPT_USERNAME\fP and the \fICURLOPT_PASSWORD\fP options.
-(Added in 7.10.6)
-.RS
-.IP CURLAUTH_BASIC
-HTTP Basic authentication. This is the default choice, and the only method
-that is in wide-spread use and supported virtually everywhere. This sends
-the user name and password over the network in plain text, easily captured by
-others.
-.IP CURLAUTH_DIGEST
-HTTP Digest authentication.  Digest authentication is defined in RFC2617 and
-is a more secure way to do authentication over public networks than the
-regular old-fashioned Basic method.
-.IP CURLAUTH_DIGEST_IE
-HTTP Digest authentication with an IE flavor.  Digest authentication is
-defined in RFC2617 and is a more secure way to do authentication over public
-networks than the regular old-fashioned Basic method. The IE flavor is simply
-that libcurl will use a special "quirk" that IE is known to have used before
-version 7 and that some servers require the client to use. (This define was
-added in 7.19.3)
-.IP CURLAUTH_GSSNEGOTIATE
-HTTP GSS-Negotiate authentication. The GSS-Negotiate (also known as plain
-\&"Negotiate") method was designed by Microsoft and is used in their web
-applications. It is primarily meant as a support for Kerberos5 authentication
-but may also be used along with other authentication methods. For more
-information see IETF draft draft-brezak-spnego-http-04.txt.
-
-You need to build libcurl with a suitable GSS-API library for this to work.
-.IP CURLAUTH_NTLM
-HTTP NTLM authentication. A proprietary protocol invented and used by
-Microsoft. It uses a challenge-response and hash concept similar to Digest, to
-prevent the password from being eavesdropped.
-
-You need to build libcurl with either OpenSSL, GnuTLS or NSS support for this
-option to work, or build libcurl on Windows with SSPI support.
-.IP CURLAUTH_NTLM_WB
-NTLM delegating to winbind helper. Authentication is performed by a separate
-binary application that is executed when needed. The name of the application
-is specified at compile time but is typically /usr/bin/ntlm_auth
-(Added in 7.22.0)
-
-Note that libcurl will fork when necessary to run the winbind application and
-kill it when complete, calling waitpid() to await its exit when done. On POSIX
-operating systems, killing the process will cause a SIGCHLD signal to be
-raised (regardless of whether \fICURLOPT_NOSIGNAL\fP is set), which must be
-handled intelligently by the application. In particular, the application must
-not unconditionally call wait() in its SIGCHLD signal handler to avoid being
-subject to a race condition.  This behavior is subject to change in future
-versions of libcurl.
-.IP CURLAUTH_ANY
-This is a convenience macro that sets all bits and thus makes libcurl pick any
-it finds suitable. libcurl will automatically select the one it finds most
-secure.
-.IP CURLAUTH_ANYSAFE
-This is a convenience macro that sets all bits except Basic and thus makes
-libcurl pick any it finds suitable. libcurl will automatically select the one
-it finds most secure.
-.IP CURLAUTH_ONLY
-This is a meta symbol. Or this value together with a single specific auth
-value to force libcurl to probe for un-restricted auth and if not, only that
-single auth algorithm is acceptable. (Added in 7.21.3)
-.RE
-.IP CURLOPT_TLSAUTH_TYPE
-Pass a long as parameter, which is set to a bitmask, to tell libcurl which
-authentication method(s) you want it to use for TLS authentication.
-.RS
-.IP CURLOPT_TLSAUTH_SRP
-TLS-SRP authentication. Secure Remote Password authentication for TLS is
-defined in RFC5054 and provides mutual authentication if both sides have a
-shared secret. To use TLS-SRP, you must also set the
-\fICURLOPT_TLSAUTH_USERNAME\fP and \fICURLOPT_TLSAUTH_PASSWORD\fP options.
-
-You need to build libcurl with GnuTLS or OpenSSL with TLS-SRP support for this
-to work. (Added in 7.21.4)
-.RE
+HTTP server authentication methods. See \fICURLOPT_HTTPAUTH(3)\fP
 .IP CURLOPT_TLSAUTH_USERNAME
-Pass a char * as parameter, which should point to the zero terminated username
-to use for the TLS authentication method specified with the
-\fICURLOPT_TLSAUTH_TYPE\fP option. Requires that the
-\fICURLOPT_TLS_PASSWORD\fP option also be set. (Added in 7.21.4)
+TLS authentication user name. See \fICURLOPT_TLSAUTH_USERNAME(3)\fP
 .IP CURLOPT_TLSAUTH_PASSWORD
-Pass a char * as parameter, which should point to the zero terminated password
-to use for the TLS authentication method specified with the
-\fICURLOPT_TLSAUTH_TYPE\fP option. Requires that the
-\fICURLOPT_TLS_USERNAME\fP option also be set. (Added in 7.21.4)
+TLS authentication password. See \fICURLOPT_TLSAUTH_PASSWORD(3)\fP
 .IP CURLOPT_PROXYAUTH
-Pass a long as parameter, which is set to a bitmask, to tell libcurl which
-authentication method(s) you want it to use for your proxy authentication.  If
-more than one bit is set, libcurl will first query the site to see what
-authentication methods it supports and then pick the best one you allow it to
-use. For some methods, this will induce an extra network round-trip. Set the
-actual name and password with the \fICURLOPT_PROXYUSERPWD\fP option. The
-bitmask can be constructed by or'ing together the bits listed above for the
-\fICURLOPT_HTTPAUTH\fP option. \fICURLOPT_PROXYAUTH\fP was added in 7.10.7
+HTTP proxy authentication methods. See \fICURLOPT_PROXYAUTH(3)\fP
 .IP CURLOPT_SASL_IR
-Pass a long. If the value is 1, curl will send the initial response to the
-server in the first authentication packet in order to reduce the number of
-ping pong requests. Only applicable to supporting SASL authentication
-mechanisms and to the IMAP, POP3 and SMTP protocols. (Added in 7.31.0)
-
-Note: Whilst IMAP supports this option there is no need to explicitly set it,
-as libcurl can determine the feature itself when the server supports the
-SASL-IR CAPABILITY.
+Enable SASL initial response. See \fICURLOPT_SASL_IR(3)\fP
 .IP CURLOPT_XOAUTH2_BEARER
-Pass a char * as parameter, which should point to the zero terminated OAuth
-2.0 Bearer Access Token for use with IMAP, POP3 and SMTP servers that support
-the OAuth 2.0 Authorization Framework. (Added in 7.33.0)
-
-Note: The user name used to generate the Bearer Token should be supplied via
-the \fICURLOPT_USERNAME\fP option.
+Xoauth2 bearer token. See \fICURLOPT_XOAUTH2_BEARER(3)\fP
 .SH HTTP OPTIONS
 .IP CURLOPT_AUTOREFERER
-Pass a parameter set to 1 to enable this. When enabled, libcurl will
-automatically set the Referer: field in requests where it follows a Location:
-redirect.
+Automatically set Referer: header. See \fICURLOPT_AUTOREFERER(3)\fP
 .IP CURLOPT_ACCEPT_ENCODING
-Sets the contents of the Accept-Encoding: header sent in a HTTP request, and
-enables decoding of a response when a Content-Encoding: header is received.
-Three encodings are supported: \fIidentity\fP, which does nothing,
-\fIdeflate\fP which requests the server to compress its response using the
-zlib algorithm, and \fIgzip\fP which requests the gzip algorithm.  If a
-zero-length string is set, then an Accept-Encoding: header containing all
-supported encodings is sent.
-
-This is a request, not an order; the server may or may not do it.  This option
-must be set (to any non-NULL value) or else any unsolicited encoding done by
-the server is ignored. See the special file lib/README.encoding for details.
-
-(This option was called CURLOPT_ENCODING before 7.21.6)
+Accept-Encoding and automatic decompressing data. See \fICURLOPT_ACCEPT_ENCODING(3)\fP
 .IP CURLOPT_TRANSFER_ENCODING
-Adds a request for compressed Transfer Encoding in the outgoing HTTP
-request. If the server supports this and so desires, it can respond with the
-HTTP response sent using a compressed Transfer-Encoding that will be
-automatically uncompressed by libcurl on reception.
-
-Transfer-Encoding differs slightly from the Content-Encoding you ask for with
-\fBCURLOPT_ACCEPT_ENCODING\fP in that a Transfer-Encoding is strictly meant to
-be for the transfer and thus MUST be decoded before the data arrives in the
-client. Traditionally, Transfer-Encoding has been much less used and supported
-by both HTTP clients and HTTP servers.
-
-(Added in 7.21.6)
+Request Transfer-Encoding. See \fICURLOPT_TRANSFER_ENCODING(3)\fP
 .IP CURLOPT_FOLLOWLOCATION
-A parameter set to 1 tells the library to follow any Location: header that the
-server sends as part of a HTTP header.
-
-This means that the library will re-send the same request on the new location
-and follow new Location: headers all the way until no more such headers are
-returned. \fICURLOPT_MAXREDIRS\fP can be used to limit the number of redirects
-libcurl will follow.
-
-Since 7.19.4, libcurl can limit what protocols it will automatically
-follow. The accepted protocols are set with \fICURLOPT_REDIR_PROTOCOLS\fP and
-it excludes the FILE protocol by default.
+Follow HTTP redirects. See \fICURLOPT_FOLLOWLOCATION(3)\fP
 .IP CURLOPT_UNRESTRICTED_AUTH
-A parameter set to 1 tells the library it can continue to send authentication
-(user+password) when following locations, even when hostname changed. This
-option is meaningful only when setting \fICURLOPT_FOLLOWLOCATION\fP.
+Do not restrict auth to original host. \fICURLOPT_UNRESTRICTED_AUTH(3)\fP
 .IP CURLOPT_MAXREDIRS
-Pass a long. The set number will be the redirection limit. If that many
-redirections have been followed, the next redirect will cause an error
-(\fICURLE_TOO_MANY_REDIRECTS\fP). This option only makes sense if the
-\fICURLOPT_FOLLOWLOCATION\fP is used at the same time. Added in 7.15.1:
-Setting the limit to 0 will make libcurl refuse any redirect. Set it to -1 for
-an infinite number of redirects (which is the default)
+Maximum number of redirects to follow. See \fICURLOPT_MAXREDIRS(3)\fP
 .IP CURLOPT_POSTREDIR
-Pass a bitmask to control how libcurl acts on redirects after POSTs that get a
-301, 302 or 303 response back.  A parameter with bit 0 set (value
-\fBCURL_REDIR_POST_301\fP) tells the library to respect RFC2616/10.3.2 and not
-convert POST requests into GET requests when following a 301 redirection.
-Setting bit 1 (value \fBCURL_REDIR_POST_302\fP) makes libcurl maintain the
-request method after a 302 redirect whilst setting bit 2 (value
-\fBCURL_REDIR_POST_303\fP) makes libcurl maintain the request method after a
-303 redirect. The value \fBCURL_REDIR_POST_ALL\fP is a convenience define that
-sets all three bits.
-
-The non-RFC behaviour is ubiquitous in web browsers, so the library does the
-conversion by default to maintain consistency. However, a server may require a
-POST to remain a POST after such a redirection. This option is meaningful only
-when setting \fICURLOPT_FOLLOWLOCATION\fP.  (Added in 7.17.1) (This option was
-known as CURLOPT_POST301 up to 7.19.0 as it only supported the 301 then)
+How to act on redirects after POST. See \fICURLOPT_POSTREDIR(3)\fP
 .IP CURLOPT_PUT
-A parameter set to 1 tells the library to use HTTP PUT to transfer data. The
-data should be set with \fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE\fP.
-
-This option is deprecated and starting with version 7.12.1 you should instead
-use \fICURLOPT_UPLOAD\fP.
+Issue a HTTP PUT request. See \fICURLOPT_PUT(3)\fP
 .IP CURLOPT_POST
-A parameter set to 1 tells the library to do a regular HTTP post. This will
-also make the library use a "Content-Type:
-application/x-www-form-urlencoded" header. (This is by far the most commonly
-used POST method).
-
-Use one of \fICURLOPT_POSTFIELDS\fP or \fICURLOPT_COPYPOSTFIELDS\fP options to
-specify what data to post and \fICURLOPT_POSTFIELDSIZE\fP or
-\fICURLOPT_POSTFIELDSIZE_LARGE\fP to set the data size.
-
-Optionally, you can provide data to POST using the \fICURLOPT_READFUNCTION\fP
-and \fICURLOPT_READDATA\fP options but then you must make sure to not set
-\fICURLOPT_POSTFIELDS\fP to anything but NULL. When providing data with a
-callback, you must transmit it using chunked transfer-encoding or you must set
-the size of the data with the \fICURLOPT_POSTFIELDSIZE\fP or
-\fICURLOPT_POSTFIELDSIZE_LARGE\fP option. To enable chunked encoding, you
-simply pass in the appropriate Transfer-Encoding header, see the
-post-callback.c example.
-
-You can override the default POST Content-Type: header by setting your own
-with \fICURLOPT_HTTPHEADER\fP.
-
-Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
-You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
-
-If you use POST to a HTTP 1.1 server, you can send data without knowing the
-size before starting the POST if you use chunked encoding. You enable this by
-adding a header like "Transfer-Encoding: chunked" with
-\fICURLOPT_HTTPHEADER\fP. With HTTP 1.0 or without chunked transfer, you must
-specify the size in the request.
-
-When setting \fICURLOPT_POST\fP to 1, it will automatically set
-\fICURLOPT_NOBODY\fP to 0 (since 7.14.1).
-
-If you issue a POST request and then want to make a HEAD or GET using the same
-re-used handle, you must explicitly set the new request type using
-\fICURLOPT_NOBODY\fP or \fICURLOPT_HTTPGET\fP or similar.
+Issue a HTTP POST requst. See \fICURLOPT_POST(3)\fP
 .IP CURLOPT_POSTFIELDS
-Pass a void * as parameter, which should be the full data to post in a HTTP
-POST operation. You must make sure that the data is formatted the way you want
-the server to receive it. libcurl will not convert or encode it for you. Most
-web servers will assume this data to be url-encoded.
-
-The pointed data are NOT copied by the library: as a consequence, they must
-be preserved by the calling application until the transfer finishes.
-
-This POST is a normal application/x-www-form-urlencoded kind (and libcurl will
-set that Content-Type by default when this option is used), which is the most
-commonly used one by HTML forms. See also the \fICURLOPT_POST\fP. Using
-\fICURLOPT_POSTFIELDS\fP implies \fICURLOPT_POST\fP.
-
-If you want to do a zero-byte POST, you need to set
-\fICURLOPT_POSTFIELDSIZE\fP explicitly to zero, as simply setting
-\fICURLOPT_POSTFIELDS\fP to NULL or "" just effectively disables the sending
-of the specified string. libcurl will instead assume that you'll send the POST
-data using the read callback!
-
-Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
-You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
-
-To make multipart/formdata posts (aka RFC2388-posts), check out the
-\fICURLOPT_HTTPPOST\fP option.
+Send a POST with this data. See \fICURLOPT_POSTFIELDS(3)\fP
 .IP CURLOPT_POSTFIELDSIZE
-If you want to post data to the server without letting libcurl do a strlen()
-to measure the data size, this option must be used. When this option is used
-you can post fully binary data, which otherwise is likely to fail. If this
-size is set to -1, the library will use strlen() to get the size.
+The POST data is this big. See \fICURLOPT_POSTFIELDSIZE(3)\fP
 .IP CURLOPT_POSTFIELDSIZE_LARGE
-Pass a curl_off_t as parameter. Use this to set the size of the
-\fICURLOPT_POSTFIELDS\fP data to prevent libcurl from doing strlen() on the
-data to figure out the size. This is the large file version of the
-\fICURLOPT_POSTFIELDSIZE\fP option. (Added in 7.11.1)
+The POST data is this big. See \fICURLOPT_POSTFIELDSIZE_LARGE(3)\fP
 .IP CURLOPT_COPYPOSTFIELDS
-Pass a char * as parameter, which should be the full data to post in a HTTP
-POST operation. It behaves as the \fICURLOPT_POSTFIELDS\fP option, but the
-original data are copied by the library, allowing the application to overwrite
-the original data after setting this option.
-
-Because data are copied, care must be taken when using this option in
-conjunction with \fICURLOPT_POSTFIELDSIZE\fP or
-\fICURLOPT_POSTFIELDSIZE_LARGE\fP: If the size has not been set prior to
-\fICURLOPT_COPYPOSTFIELDS\fP, the data are assumed to be a NUL-terminated
-string; else the stored size informs the library about the data byte count to
-copy. In any case, the size must not be changed after
-\fICURLOPT_COPYPOSTFIELDS\fP, unless another \fICURLOPT_POSTFIELDS\fP or
-\fICURLOPT_COPYPOSTFIELDS\fP option is issued.
-(Added in 7.17.1)
+Send a POST with this data - and copy it. See \fICURLOPT_COPYPOSTFIELDS(3)\fP
 .IP CURLOPT_HTTPPOST
-Tells libcurl you want a multipart/formdata HTTP POST to be made and you
-instruct what data to pass on to the server.  Pass a pointer to a linked list
-of curl_httppost structs as parameter.  The easiest way to create such a
-list, is to use \fIcurl_formadd(3)\fP as documented. The data in this list
-must remain intact until you close this curl handle again with
-\fIcurl_easy_cleanup(3)\fP.
-
-Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
-You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
-
-When setting \fICURLOPT_HTTPPOST\fP, it will automatically set
-\fICURLOPT_NOBODY\fP to 0 (since 7.14.1).
+Multipart formpost HTTP POST. See \fICURLOPT_HTTPPOST(3)\fP
 .IP CURLOPT_REFERER
-Pass a pointer to a zero terminated string as parameter. It will be used to
-set the Referer: header in the http request sent to the remote server. This
-can be used to fool servers or scripts. You can also set any custom header
-with \fICURLOPT_HTTPHEADER\fP.
+Referer: header. See \fICURLOPT_REFERER(3)\fP
 .IP CURLOPT_USERAGENT
-Pass a pointer to a zero terminated string as parameter. It will be used to
-set the User-Agent: header in the http request sent to the remote server. This
-can be used to fool servers or scripts. You can also set any custom header
-with \fICURLOPT_HTTPHEADER\fP.
+User-Agent: header. See \fICURLOPT_USERAGENT(3)\fP
 .IP CURLOPT_HTTPHEADER
-Pass a pointer to a linked list of HTTP headers to pass to the server and/or
-proxy in your HTTP request. The same list is used for both host and proxy
-requests!
-
-The linked list should be a fully valid list of \fBstruct curl_slist\fP
-structs properly filled in. Use \fIcurl_slist_append(3)\fP to create the list
-and \fIcurl_slist_free_all(3)\fP to clean up an entire list. If you add a
-header that is otherwise generated and used by libcurl internally, your added
-one will be used instead. If you add a header with no content as in 'Accept:'
-(no data on the right side of the colon), the internally used header will get
-disabled. With this option you can add new headers, replace internal headers
-and remove internal headers. To add a header with no content (nothing to the
-right side of the colon), use the form 'MyHeader;' (note the ending
-semicolon).
-
-The headers included in the linked list must not be CRLF-terminated, because
-curl adds CRLF after each header item. Failure to comply with this will result
-in strange bugs because the server will most likely ignore part of the headers
-you specified.
-
-The first line in a request (containing the method, usually a GET or POST) is
-not a header and cannot be replaced using this option. Only the lines
-following the request-line are headers. Adding this method line in this list
-of headers will only cause your request to send an invalid header.
-
-Pass a NULL to this to reset back to no custom headers.
-
-The most commonly replaced headers have "shortcuts" in the options
-\fICURLOPT_COOKIE\fP, \fICURLOPT_USERAGENT\fP and \fICURLOPT_REFERER\fP.
-
-There's an alternative option that sets or replaces headers only for requests
-that are sent with CONNECT to a proxy: \fICURLOPT_PROXYHEADER\fP. Use
-\fICURLOPT_HEADEROPT\fP to control the behavior.
+Custom HTTP headers. See \fICURLOPT_HTTPHEADER(3)\fP
 .IP CURLOPT_HEADEROPT
-Pass a long that is a bitmask of options of how to deal with headers. The two
-mutually exclusive options are:
-
-CURLHEADER_UNIFIED - keep working as before. This means CURLOPT_HTTPHEADER
-headers will be used in requests both to servers and proxies. With this option
-enabled, \fICURLOPT_PROXYHEADER\fP will not have any effect.
-
-CURLHEADER_SEPARATE - makes \fICURLOPT_HTTPHEADER\fP headers only get sent to
-a server and not to a proxy. Proxy headers must be set with
-\fICURLOPT_PROXYHEADER\fP to get used. Note that if a non-CONNECT request is
-sent to a proxy, libcurl will send both server headers and proxy headers. When
-doing CONNECT, libcurl will send \fICURLOPT_PROXYHEADER\fP headers only do the
-proxy and then \fICURLOPT_HTTPHEADER\fP headers only to the server.
-
-(Added in 7.37.0)
+Control custom headers. See \fICURLOPT_HEADEROPT(3)\fP
 .IP CURLOPT_PROXYHEADER
-Pass a pointer to a linked list of HTTP headers to pass in your HTTP request
-sent to a proxy. The rules for this list is identical to the
-\fICURLOPT_HTTPHEADER\fP option's.
-
-The headers set with this option is only ever used in requests sent to a proxy
-- when there's also a request sent to a host.
-
-The first line in a request (containing the method, usually a GET or POST) is
-NOT a header and cannot be replaced using this option. Only the lines
-following the request-line are headers. Adding this method line in this list
-of headers will only cause your request to send an invalid header.
-
-Pass a NULL to this to reset back to no custom headers.
-
-This option was added in libcurl 7.37.0.
+Custom HTTP headers sent to proxy. See \fICURLOPT_PROXYHEADER(3)\fP
 .IP CURLOPT_HTTP200ALIASES
-Pass a pointer to a linked list of aliases to be treated as valid HTTP 200
-responses.  Some servers respond with a custom header response line.  For
-example, IceCast servers respond with "ICY 200 OK".  By including this string
-in your list of aliases, the response will be treated as a valid HTTP header
-line such as "HTTP/1.0 200 OK". (Added in 7.10.3)
-
-The linked list should be a fully valid list of struct curl_slist structs, and
-be properly filled in.  Use \fIcurl_slist_append(3)\fP to create the list and
-\fIcurl_slist_free_all(3)\fP to clean up an entire list.
-
-The alias itself is not parsed for any version strings. Before libcurl 7.16.3,
-Libcurl used the value set by option \fICURLOPT_HTTP_VERSION\fP, but starting
-with 7.16.3 the protocol is assumed to match HTTP 1.0 when an alias matched.
+Alternative versions of 200 OK. See \fICURLOPT_HTTP200ALIASES(3)\fP
 .IP CURLOPT_COOKIE
-Pass a pointer to a zero terminated string as parameter. It will be used to
-set a cookie in the http request. The format of the string should be
-NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie
-should contain.
-
-If you need to set multiple cookies, you need to set them all using a single
-option and thus you need to concatenate them all in one single string. Set
-multiple cookies in one string like this: "name1=content1; name2=content2;"
-etc.
-
-This option sets the cookie header explicitly in the outgoing request(s). If
-multiple requests are done due to authentication, followed redirections or
-similar, they will all get this cookie passed on.
-
-Using this option multiple times will only make the latest string override the
-previous ones.
+Cookie(s) to send. See \fICURLOPT_COOKIE(3)\fP
 .IP CURLOPT_COOKIEFILE
-Pass a pointer to a zero terminated string as parameter. It should contain the
-name of your file holding cookie data to read. The cookie data may be in
-Netscape / Mozilla cookie data format or just regular HTTP-style headers
-dumped to a file.
-
-Given an empty or non-existing file or by passing the empty string (""), this
-option will enable cookies for this curl handle, making it understand and
-parse received cookies and then use matching cookies in future requests.
-
-If you use this option multiple times, you just add more files to read.
-Subsequent files will add more cookies.
+File to read cookies from. See \fICURLOPT_COOKIEFILE(3)\fP
 .IP CURLOPT_COOKIEJAR
-Pass a file name as char *, zero terminated. This will make libcurl write all
-internally known cookies to the specified file when \fIcurl_easy_cleanup(3)\fP
-is called. If no cookies are known, no file will be created. Specify "-" to
-instead have the cookies written to stdout. Using this option also enables
-cookies for this session, so if you for example follow a location it will make
-matching cookies get sent accordingly.
-
-If the cookie jar file can't be created or written to (when the
-\fIcurl_easy_cleanup(3)\fP is called), libcurl will not and cannot report an
-error for this. Using \fICURLOPT_VERBOSE\fP or \fICURLOPT_DEBUGFUNCTION\fP
-will get a warning to display, but that is the only visible feedback you get
-about this possibly lethal situation.
+File to write cookies to. See \fICURLOPT_COOKIEJAR(3)\fP
 .IP CURLOPT_COOKIESESSION
-Pass a long set to 1 to mark this as a new cookie "session". It will force
-libcurl to ignore all cookies it is about to load that are "session cookies"
-from the previous session. By default, libcurl always stores and loads all
-cookies, independent if they are session cookies or not. Session cookies are
-cookies without expiry date and they are meant to be alive and existing for
-this "session" only.
+Start a new cookie session. See \fICURLOPT_COOKIESESSION(3)\fP
 .IP CURLOPT_COOKIELIST
-Pass a char * to a cookie string. Cookie can be either in Netscape / Mozilla
-format or just regular HTTP-style header (Set-Cookie: ...) format. If cURL
-cookie engine was not enabled it will enable its cookie engine.  Passing a
-magic string \&"ALL" will erase all cookies known by cURL. (Added in 7.14.1)
-Passing the special string \&"SESS" will only erase all session cookies known
-by cURL. (Added in 7.15.4) Passing the special string \&"FLUSH" will write
-all cookies known by cURL to the file specified by \fICURLOPT_COOKIEJAR\fP.
-(Added in 7.17.1)
+Add or control cookies. See \fICURLOPT_COOKIELIST(3)\fP
 .IP CURLOPT_HTTPGET
-Pass a long. If the long is 1, this forces the HTTP request to get back
-to GET. Usable if a POST, HEAD, PUT, or a custom request has been used
-previously using the same curl handle.
-
-When setting \fICURLOPT_HTTPGET\fP to 1, it will automatically set
-\fICURLOPT_NOBODY\fP to 0 and \fICURLOPT_UPLOAD\fP to 0.
+Do a HTTP GET request. See \fICURLOPT_HTTPGET(3)\fP
 .IP CURLOPT_HTTP_VERSION
-Pass a long, set to one of the values described below. They force libcurl to
-use the specific HTTP versions. This is not sensible to do unless you have a
-good reason. You have to set this option if you want to use libcurl's HTTP 2.0
-support.
-.RS
-.IP CURL_HTTP_VERSION_NONE
-We don't care about what version the library uses. libcurl will use whatever
-it thinks fit.
-.IP CURL_HTTP_VERSION_1_0
-Enforce HTTP 1.0 requests.
-.IP CURL_HTTP_VERSION_1_1
-Enforce HTTP 1.1 requests.
-.IP CURL_HTTP_VERSION_2_0
-Attempt HTTP 2.0 requests. libcurl will fall back to HTTP 1.x if HTTP 2.0
-can't be negotiated with the server.
-.RE
+HTTP version to use. \fICURLOPT_HTTP_VERSION(3)\fP
 .IP CURLOPT_IGNORE_CONTENT_LENGTH
-Ignore the Content-Length header. This is useful for Apache 1.x (and similar
-servers) which will report incorrect content length for files over 2
-gigabytes. If this option is used, curl will not be able to accurately report
-progress, and will simply stop the download when the server ends the
-connection. (added in 7.14.1)
+Ignore Content-Length. See \fIURLOPT_IGNORE_CONTENT_LENGTH(3)\fP
 .IP CURLOPT_HTTP_CONTENT_DECODING
-Pass a long to tell libcurl how to act on content decoding. If set to zero,
-content decoding will be disabled. If set to 1 it is enabled. Libcurl has no
-default content decoding but requires you to use \fICURLOPT_ACCEPT_ENCODING\fP
-for that. (added in 7.16.2)
+Disable Content decoding. See \fICURLOPT_HTTP_CONTENT_DECODING(3)\fP
 .IP CURLOPT_HTTP_TRANSFER_DECODING
-Pass a long to tell libcurl how to act on transfer decoding. If set to zero,
-transfer decoding will be disabled, if set to 1 it is enabled
-(default). libcurl does chunked transfer decoding by default unless this
-option is set to zero. (added in 7.16.2)
+Disable Transfer decoding. See \fICURLOPT_HTTP_TRANSFER_DECODING(3)\fP
 .IP CURLOPT_EXPECT_100_TIMEOUT_MS
-Pass a long to tell libcurl the number of milliseconds to wait for a server
-response with the HTTP status 100 (Continue), 417 (Expectation Failed) or
-similar after sending a HTTP request containing an Expect: 100-continue
-header. If this times out before a response is received, the request body is
-sent anyway. By default, libcurl waits 1000 milliseconds. (Added in 7.36.0)
+100-continue timeout. See \fICURLOPT_EXPECT_100_TIMEOUT_MS(3)\fP
 .SH SMTP OPTIONS
 .IP CURLOPT_MAIL_FROM
-Pass a pointer to a zero terminated string as parameter. This should be used
-to specify the sender's email address when sending SMTP mail with libcurl.
-
-An originator email address should be specified with angled brackets (<>)
-around it, which if not specified, will be added by libcurl from version
-7.21.4 onwards. Failing to provide such brackets may cause the server to
-reject the email.
-
-If this parameter is not specified then an empty address will be sent to the
-mail server which may or may not cause the email to be rejected.
-
-(Added in 7.20.0)
+Address of the sender. See \fICURLOPT_MAIL_FROM(3)\fP
 .IP CURLOPT_MAIL_RCPT
-Pass a pointer to a linked list of recipients to pass to the server in your
-SMTP mail request. The linked list should be a fully valid list of \fBstruct
-curl_slist\fP structs properly filled in. Use \fIcurl_slist_append(3)\fP to
-create the list and \fIcurl_slist_free_all(3)\fP to clean up an entire list.
-
-When performing a mail transfer, each recipient should be specified within a
-pair of angled brackets (<>), however, should you not use an angled bracket as
-the first character libcurl will assume you provided a single email address and
-enclose that address within brackets for you. (Added in 7.20.0)
-
-When performing an address verification (VRFY command), each recipient should
-be specified as the user name or user name and domain (as per Section 3.5 of
-RFC5321). (Added in 7.34.0)
-
-When performing a mailing list expand (EXPN command), each recipient should be
-specified using the mailing list name, such as "Friends" or "London-Office".
-(Added in 7.34.0)
+Address of the recipients. See \fICURLOPT_MAIL_RCPT(3)\fP
 .IP CURLOPT_MAIL_AUTH
-Pass a pointer to a zero terminated string as parameter. This will be used
-to specify the authentication address (identity) of a submitted message that
-is being relayed to another server.
-
-This optional parameter allows co-operating agents in a trusted environment to
-communicate the authentication of individual messages and should only be used
-by the application program, using libcurl, if the application is itself a
-mail server acting in such an environment. If the application is operating as
-such and the AUTH address is not known or is invalid, then an empty string
-should be used for this parameter.
-
-Unlike CURLOPT_MAIL_FROM and CURLOPT_MAIL_RCPT, the address should not be
-specified within a pair of angled brackets (<>). However, if an empty string
-is used then a pair of brackets will be sent by libcurl as required by
-RFC2554.
-
-(Added in 7.25.0)
+Authentication address. See \fICURLOPT_MAIL_AUTH(3)\fP
 .SH TFTP OPTIONS
 .IP CURLOPT_TFTP_BLKSIZE
-Specify block size to use for TFTP data transmission. Valid range as per
-RFC2348 is 8-65464 bytes. The default of 512 bytes will be used if this option
-is not specified. The specified block size will only be used pending support
-by the remote server. If the server does not return an option acknowledgement
-or returns an option acknowledgement with no blksize, the default of 512 bytes
-will be used. (added in 7.19.4)
+TFTP block size. See \fICURLOPT_TFTP_BLKSIZE(3)\fP
 .SH FTP OPTIONS
 .IP CURLOPT_FTPPORT
-Pass a pointer to a zero terminated string as parameter. It will be used to
-get the IP address to use for the FTP PORT instruction. The PORT instruction
-tells the remote server to connect to our specified IP address. The string may
-be a plain IP address, a host name, a network interface name (under Unix) or
-just a '-' symbol to let the library use your system's default IP
-address. Default FTP operations are passive, and thus won't use PORT.
-
-The address can be followed by a ':' to specify a port, optionally followed by
-a '-' to specify a port range.  If the port specified is 0, the operating
-system will pick a free port.  If a range is provided and all ports in the
-range are not available, libcurl will report CURLE_FTP_PORT_FAILED for the
-handle.  Invalid port/range settings are ignored.  IPv6 addresses followed by
-a port or portrange have to be in brackets.  IPv6 addresses without port/range
-specifier can be in brackets.  (added in 7.19.5)
-
-Examples with specified ports:
-
-.nf
-  eth0:0
-  192.168.1.2:32000-33000
-  curl.se:32123
-  [::1]:1234-4567
-.fi
-
-You disable PORT again and go back to using the passive version by setting
-this option to NULL.
+Use active FTP. See \fICURLOPT_FTPPORT(3)\fP
 .IP CURLOPT_QUOTE
-Pass a pointer to a linked list of FTP or SFTP commands to pass to the server
-prior to your FTP request. This will be done before any other commands are
-issued (even before the CWD command for FTP). The linked list should be a
-fully valid list of 'struct curl_slist' structs properly filled in with text
-strings. Use \fIcurl_slist_append(3)\fP to append strings (commands) to the
-list, and clear the entire list afterwards with
-\fIcurl_slist_free_all(3)\fP. Disable this operation again by setting a NULL
-to this option. When speaking to a FTP (or SFTP since 7.24.0) server, prefix
-the command with an asterisk (*) to make libcurl continue even if the command
-fails as by default libcurl will stop at first failure.
-
-The set of valid FTP commands depends on the server (see RFC959 for a list of
-mandatory commands).
-
-The valid SFTP commands are: chgrp, chmod, chown, ln, mkdir, pwd, rename, rm,
-rmdir, symlink (see
-.BR curl (1))
-(SFTP support added in 7.16.3)
+Commands to run before transfer. See \fICURLOPT_QUOTE(3)\fP
 .IP CURLOPT_POSTQUOTE
-Pass a pointer to a linked list of FTP or SFTP commands to pass to the server
-after your FTP transfer request. The commands will only be run if no error
-occurred. The linked list should be a fully valid list of struct curl_slist
-structs properly filled in as described for \fICURLOPT_QUOTE\fP. Disable this
-operation again by setting a NULL to this option.
+Commands to run after transfer. See \fICURLOPT_POSTQUOTE(3)\fP
 .IP CURLOPT_PREQUOTE
-Pass a pointer to a linked list of FTP commands to pass to the server after
-the transfer type is set. The linked list should be a fully valid list of
-struct curl_slist structs properly filled in as described for
-\fICURLOPT_QUOTE\fP. Disable this operation again by setting a NULL to this
-option. Before version 7.16.0, if you also set \fICURLOPT_NOBODY\fP to 1, this
-option didn't work.
+Commands to run just before transfer. See \fICURLOPT_PREQUOTE(3)\fP
 .IP CURLOPT_DIRLISTONLY
-A parameter set to 1 tells the library to just list the names of files in a
-directory, instead of doing a full directory listing that would include file
-sizes, dates etc. This works for FTP and SFTP URLs.
-
-This causes an FTP NLST command to be sent on an FTP server.  Beware that some
-FTP servers list only files in their response to NLST; they might not include
-subdirectories and symbolic links.
-
-Setting this option to 1 also implies a directory listing even if the URL
-doesn't end with a slash, which otherwise is necessary.
-
-Do NOT use this option if you also use \fICURLOPT_WILDCARDMATCH\fP as it will
-effectively break that feature then.
-
-(This option was known as CURLOPT_FTPLISTONLY up to 7.16.4)
+List only. See \fICURLOPT_DIRLISTONLY(3)\fP
 .IP CURLOPT_APPEND
-A parameter set to 1 tells the library to append to the remote file instead of
-overwrite it. This is only useful when uploading to an FTP site.
-
-(This option was known as CURLOPT_FTPAPPEND up to 7.16.4)
+Append to remote file. See \fICURLOPT_APPEND(3)\fP
 .IP CURLOPT_FTP_USE_EPRT
-Pass a long. If the value is 1, it tells curl to use the EPRT (and
-LPRT) command when doing active FTP downloads (which is enabled by
-\fICURLOPT_FTPPORT\fP). Using EPRT means that it will first attempt to use
-EPRT and then LPRT before using PORT, but if you pass zero to this
-option, it will not try using EPRT or LPRT, only plain PORT. (Added in 7.10.5)
-
-If the server is an IPv6 host, this option will have no effect as of 7.12.3.
+Use EPTR. See \fICURLOPT_FTP_USE_EPRT(3)\fP
 .IP CURLOPT_FTP_USE_EPSV
-Pass a long. If the value is 1, it tells curl to use the EPSV command
-when doing passive FTP downloads (which it always does by default). Using EPSV
-means that it will first attempt to use EPSV before using PASV, but if you
-pass zero to this option, it will not try using EPSV, only plain PASV.
-
-If the server is an IPv6 host, this option will have no effect as of 7.12.3.
+Use EPSV. See \fICURLOPT_FTP_USE_EPSV(3)\fP
 .IP CURLOPT_FTP_USE_PRET
-Pass a long. If the value is 1, it tells curl to send a PRET command before
-PASV (and EPSV). Certain FTP servers, mainly drftpd, require this non-standard
-command for directory listings as well as up and downloads in PASV mode. Has
-no effect when using the active FTP transfers mode.  (Added in 7.20.0)
+Use PRET. See \fICURLOPT_FTP_USE_PRET(3)\fP
 .IP CURLOPT_FTP_CREATE_MISSING_DIRS
-Pass a long. If the value is 1, curl will attempt to create any remote
-directory that it fails to CWD into. CWD is the command that changes working
-directory. (Added in 7.10.7)
-
-This setting also applies to SFTP-connections. curl will attempt to create
-the remote directory if it can't obtain a handle to the target-location. The
-creation will fail if a file of the same name as the directory to create
-already exists or lack of permissions prevents creation. (Added in 7.16.3)
-
-Starting with 7.19.4, you can also set this value to 2, which will make
-libcurl retry the CWD command again if the subsequent MKD command fails. This
-is especially useful if you're doing many simultaneous connections against the
-same server and they all have this option enabled, as then CWD may first fail
-but then another connection does MKD before this connection and thus MKD fails
-but trying CWD works! 7.19.4 also introduced the \fICURLFTP_CREATE_DIR\fP and
-\fICURLFTP_CREATE_DIR_RETRY\fP enum names for these arguments.
-
-Before version 7.19.4, libcurl will simply ignore arguments set to 2 and act
-as if 1 was selected.
+Create missing dirs on the remote server. See \fICURLOPT_FTP_CREATE_MISSING_DIRS(3)\fP
 .IP CURLOPT_FTP_RESPONSE_TIMEOUT
-Pass a long.  Causes curl to set a timeout period (in seconds) on the amount
-of time that the server is allowed to take in order to generate a response
-message for a command before the session is considered hung.  While curl is
-waiting for a response, this value overrides \fICURLOPT_TIMEOUT\fP. It is
-recommended that if used in conjunction with \fICURLOPT_TIMEOUT\fP, you set
-\fICURLOPT_FTP_RESPONSE_TIMEOUT\fP to a value smaller than
-\fICURLOPT_TIMEOUT\fP.  (Added in 7.10.8)
+Timeout for FTP responses. See \fICURLOPT_FTP_RESPONSE_TIMEOUT(3)\fP
 .IP CURLOPT_FTP_ALTERNATIVE_TO_USER
-Pass a char * as parameter, pointing to a string which will be used to
-authenticate if the usual FTP "USER user" and "PASS password" negotiation
-fails. This is currently only known to be required when connecting to
-Tumbleweed's Secure Transport FTPS server using client certificates for
-authentication. (Added in 7.15.5)
+Alternative to USER. See \fICURLOPT_FTP_ALTERNATIVE_TO_USER(3)\fP
 .IP CURLOPT_FTP_SKIP_PASV_IP
-Pass a long. If set to 1, it instructs libcurl to not use the IP address the
-server suggests in its 227-response to libcurl's PASV command when libcurl
-connects the data connection. Instead libcurl will re-use the same IP address
-it already uses for the control connection. But it will use the port number
-from the 227-response. (Added in 7.14.2)
-
-This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
+Ignore the IP address in the PASV response. See \fICURLOPT_FTP_SKIP_PASV_IP(3)\fP
 .IP CURLOPT_FTPSSLAUTH
-Pass a long using one of the values from below, to alter how libcurl issues
-\&"AUTH TLS" or "AUTH SSL" when FTP over SSL is activated (see
-\fICURLOPT_USE_SSL\fP). (Added in 7.12.2)
-.RS
-.IP CURLFTPAUTH_DEFAULT
-Allow libcurl to decide.
-.IP CURLFTPAUTH_SSL
-Try "AUTH SSL" first, and only if that fails try "AUTH TLS".
-.IP CURLFTPAUTH_TLS
-Try "AUTH TLS" first, and only if that fails try "AUTH SSL".
-.RE
+Control how to do TLS. See \fICURLOPT_FTPSSLAUTH(3)\fP
 .IP CURLOPT_FTP_SSL_CCC
-If enabled, this option makes libcurl use CCC (Clear Command Channel). It
-shuts down the SSL/TLS layer after authenticating. The rest of the
-control channel communication will be unencrypted. This allows NAT routers
-to follow the FTP transaction. Pass a long using one of the values below.
-(Added in 7.16.1)
-.RS
-.IP CURLFTPSSL_CCC_NONE
-Don't attempt to use CCC.
-.IP CURLFTPSSL_CCC_PASSIVE
-Do not initiate the shutdown, but wait for the server to do it. Do not send
-a reply.
-.IP CURLFTPSSL_CCC_ACTIVE
-Initiate the shutdown and wait for a reply.
-.RE
+Back to non-TLS again after authentication. See \fICURLOPT_FTP_SSL_CCC(3)\fP
 .IP CURLOPT_FTP_ACCOUNT
-Pass a pointer to a zero terminated string (or NULL to disable). When an FTP
-server asks for "account data" after user name and password has been provided,
-this data is sent off using the ACCT command. (Added in 7.13.0)
+Send ACCT command. See \fICURLOPT_FTP_ACCOUNT(3)\fP
 .IP CURLOPT_FTP_FILEMETHOD
-Pass a long that should have one of the following values. This option controls
-what method libcurl should use to reach a file on a FTP(S) server. The
-argument should be one of the following alternatives:
-.RS
-.IP CURLFTPMETHOD_MULTICWD
-libcurl does a single CWD operation for each path part in the given URL. For
-deep hierarchies this means many commands. This is how RFC1738 says it
-should be done. This is the default but the slowest behavior.
-.IP CURLFTPMETHOD_NOCWD
-libcurl does no CWD at all. libcurl will do SIZE, RETR, STOR etc and give a
-full path to the server for all these commands. This is the fastest behavior.
-.IP CURLFTPMETHOD_SINGLECWD
-libcurl does one CWD with the full target directory and then operates on the
-file \&"normally" (like in the multicwd case). This is somewhat more standards
-compliant than 'nocwd' but without the full penalty of 'multicwd'.
-.RE
-(Added in 7.15.1)
+Specify how to reach files. See \fICURLOPT_FTP_FILEMETHOD(3)\fP
 .SH RTSP OPTIONS
 .IP CURLOPT_RTSP_REQUEST
-Tell libcurl what kind of RTSP request to make. Pass one of the following RTSP
-enum values. Unless noted otherwise, commands require the Session ID to be
-initialized. (Added in 7.20.0)
-.RS
-.IP CURL_RTSPREQ_OPTIONS
-Used to retrieve the available methods of the server. The application is
-responsible for parsing and obeying the response. \fB(The session ID is not
-needed for this method.)\fP  (Added in 7.20.0)
-.IP CURL_RTSPREQ_DESCRIBE
-Used to get the low level description of a stream. The application should note
-what formats it understands in the \fI'Accept:'\fP header. Unless set
-manually, libcurl will automatically fill in \fI'Accept:
-application/sdp'\fP. Time-condition headers will be added to Describe requests
-if the \fICURLOPT_TIMECONDITION\fP option is active. \fB(The session ID is not
-needed for this method)\fP  (Added in 7.20.0)
-.IP CURL_RTSPREQ_ANNOUNCE
-When sent by a client, this method changes the description of the session. For
-example, if a client is using the server to record a meeting, the client can
-use Announce to inform the server of all the meta-information about the
-session.  ANNOUNCE acts like a HTTP PUT or POST just like
-\fICURL_RTSPREQ_SET_PARAMETER\fP (Added in 7.20.0)
-.IP CURL_RTSPREQ_SETUP
-Setup is used to initialize the transport layer for the session. The
-application must set the desired Transport options for a session by using the
-\fICURLOPT_RTSP_TRANSPORT\fP option prior to calling setup. If no session ID
-is currently set with \fICURLOPT_RTSP_SESSION_ID\fP, libcurl will extract and
-use the session ID in the response to this request. \fB(The session ID is not
-needed for this method).\fP  (Added in 7.20.0)
-.IP CURL_RTSPREQ_PLAY
-Send a Play command to the server. Use the \fICURLOPT_RANGE\fP option to
-modify the playback time (e.g. 'npt=10-15').  (Added in 7.20.0)
-.IP CURL_RTSPREQ_PAUSE
-Send a Pause command to the server. Use the \fICURLOPT_RANGE\fP option with a
-single value to indicate when the stream should be halted. (e.g. npt='25')
-(Added in 7.20.0)
-.IP CURL_RTSPREQ_TEARDOWN
-This command terminates an RTSP session. Simply closing a connection does not
-terminate the RTSP session since it is valid to control an RTSP session over
-different connections.  (Added in 7.20.0)
-.IP CURL_RTSPREQ_GET_PARAMETER
-Retrieve a parameter from the server. By default, libcurl will automatically
-include a \fIContent-Type: text/parameters\fP header on all non-empty requests
-unless a custom one is set. GET_PARAMETER acts just like a HTTP PUT or POST
-(see \fICURL_RTSPREQ_SET_PARAMETER\fP).
-Applications wishing to send a heartbeat message (e.g. in the presence of a
-server-specified timeout) should send use an empty GET_PARAMETER request.
-(Added in 7.20.0)
-.IP CURL_RTSPREQ_SET_PARAMETER
-Set a parameter on the server. By default, libcurl will automatically include
-a \fIContent-Type: text/parameters\fP header unless a custom one is set. The
-interaction with SET_PARAMTER is much like a HTTP PUT or POST. An application
-may either use \fICURLOPT_UPLOAD\fP with \fICURLOPT_READDATA\fP like a HTTP
-PUT, or it may use \fICURLOPT_POSTFIELDS\fP like a HTTP POST. No chunked
-transfers are allowed, so the application must set the
-\fICURLOPT_INFILESIZE\fP in the former and \fICURLOPT_POSTFIELDSIZE\fP in the
-latter. Also, there is no use of multi-part POSTs within RTSP. (Added in
-7.20.0)
-.IP CURL_RTSPREQ_RECORD
-Used to tell the server to record a session. Use the \fICURLOPT_RANGE\fP
-option to modify the record time. (Added in 7.20.0)
-.IP CURL_RTSPREQ_RECEIVE
-This is a special request because it does not send any data to the server. The
-application may call this function in order to receive interleaved RTP
-data. It will return after processing one read buffer of data in order to give
-the application a chance to run. (Added in 7.20.0)
-.RE
+RTSP request. See \fICURLOPT_RTSP_REQUEST(3)\fP
 .IP CURLOPT_RTSP_SESSION_ID
-Pass a char * as a parameter to set the value of the current RTSP Session ID
-for the handle. Useful for resuming an in-progress session. Once this value is
-set to any non-NULL value, libcurl will return \fICURLE_RTSP_SESSION_ERROR\fP
-if ID received from the server does not match. If unset (or set to NULL),
-libcurl will automatically set the ID the first time the server sets it in a
-response. (Added in 7.20.0)
+RTSP session-id. See \fICURLOPT_RTSP_SESSION_ID(3)\fP
 .IP CURLOPT_RTSP_STREAM_URI
-Set the stream URI to operate on by passing a char * . For example, a single
-session may be controlling \fIrtsp://foo/twister/audio\fP and
-\fIrtsp://foo/twister/video\fP and the application can switch to the
-appropriate stream using this option. If unset, libcurl will default to
-operating on generic server options by passing '*' in the place of the RTSP
-Stream URI. This option is distinct from \fICURLOPT_URL\fP. When working with
-RTSP, the \fICURLOPT_STREAM_URI\fP indicates what URL to send to the server in
-the request header while the \fICURLOPT_URL\fP indicates where to make the
-connection to.  (e.g. the \fICURLOPT_URL\fP for the above examples might be
-set to \fIrtsp://foo/twister\fP (Added in 7.20.0)
+RTSP stream URI. See \fICURLOPT_RTSP_STREAM_URI(3)\fP
 .IP CURLOPT_RTSP_TRANSPORT
-Pass a char * to tell libcurl what to pass for the Transport: header for this
-RTSP session. This is mainly a convenience method to avoid needing to set a
-custom Transport: header for every SETUP request. The application must set a
-Transport: header before issuing a SETUP request. (Added in 7.20.0)
+RTSP Transport: header. See \fICURLOPT_RTSP_TRANSPORT(3)\fP
 .IP CURLOPT_RTSP_HEADER
-This option is simply an alias for \fICURLOPT_HTTP_HEADER\fP. Use this to
-replace the standard headers that RTSP and HTTP share. It is also valid to use
-the shortcuts such as \fICURLOPT_USERAGENT\fP. (Added in 7.20.0)
+RTSP custom headers. See \fICURLOPT_RTSP_HEADER(3)\fP
 .IP CURLOPT_RTSP_CLIENT_CSEQ
-Manually set the the CSEQ number to issue for the next RTSP request. Useful if
-the application is resuming a previously broken connection. The CSEQ will
-increment from this new number henceforth. (Added in 7.20.0)
+Clent CSEQ number. See \fICURLOPT_RTSP_CLIENT_CSEQ(3)\fP
 .IP CURLOPT_RTSP_SERVER_CSEQ
-Manually set the CSEQ number to expect for the next RTSP Server->Client
-request.  At the moment, this feature (listening for Server requests) is
-unimplemented. (Added in 7.20.0)
+CSEQ number for RTSP Server->Client request. See \fICURLOPT_RTSP_SERVER_CSEQ(3)\fP
 .SH PROTOCOL OPTIONS
 .IP CURLOPT_TRANSFERTEXT
-A parameter set to 1 tells the library to use ASCII mode for FTP transfers,
-instead of the default binary transfer. For win32 systems it does not set the
-stdout to binary mode. This option can be usable when transferring text data
-between systems with different views on certain characters, such as newlines
-or similar.
-
-libcurl does not do a complete ASCII conversion when doing ASCII transfers
-over FTP. This is a known limitation/flaw that nobody has rectified. libcurl
-simply sets the mode to ASCII and performs a standard transfer.
+Use text transfer. See \fICURLOPT_TRANSFERTEXT(3)\fP
 .IP CURLOPT_PROXY_TRANSFER_MODE
-Pass a long. If the value is set to 1 (one), it tells libcurl to set the
-transfer mode (binary or ASCII) for FTP transfers done via a HTTP proxy, by
-appending ;type=a or ;type=i to the URL. Without this setting, or it being set
-to 0 (zero, the default), \fICURLOPT_TRANSFERTEXT\fP has no effect when doing
-FTP via a proxy. Beware that not all proxies support this feature.  (Added in
-7.18.0)
+Add transfer mode to URL over proxy. See \fICURLOPT_PROXY_TRANSFER_MODE(3)\fP
 .IP CURLOPT_CRLF
-Pass a long. If the value is set to 1 (one), libcurl converts Unix newlines to
-CRLF newlines on transfers. Disable this option again by setting the value to
-0 (zero).
+Convert newlines. See \fICURLOPT_CRLF(3)\fP
 .IP CURLOPT_RANGE
-Pass a char * as parameter, which should contain the specified range you
-want. It should be in the format "X-Y", where X or Y may be left out. HTTP
-transfers also support several intervals, separated with commas as in
-\fI"X-Y,N-M"\fP. Using this kind of multiple intervals will cause the HTTP
-server to send the response document in pieces (using standard MIME separation
-techniques). For RTSP, the formatting of a range should follow RFC2326
-Section 12.29. For RTSP, byte ranges are \fBnot\fP permitted. Instead, ranges
-should be given in npt, utc, or smpte formats.
-
-Pass a NULL to this option to disable the use of ranges.
-
-Ranges work on HTTP, FTP, FILE (since 7.18.0), and RTSP (since 7.20.0)
-transfers only.
+Range requests. See \fICURLOPT_RANGE(3)\fP
 .IP CURLOPT_RESUME_FROM
-Pass a long as parameter. It contains the offset in number of bytes that you
-want the transfer to start from. Set this option to 0 to make the transfer
-start from the beginning (effectively disabling resume). For FTP, set this
-option to -1 to make the transfer start from the end of the target file
-(useful to continue an interrupted upload).
-
-When doing uploads with FTP, the resume position is where in the local/source
-file libcurl should try to resume the upload from and it will then append the
-source file to the remote target file.
+Resume a transfer. See \fICURLOPT_RESUME_FROM(3)\fP
 .IP CURLOPT_RESUME_FROM_LARGE
-Pass a curl_off_t as parameter. It contains the offset in number of bytes that
-you want the transfer to start from. (Added in 7.11.0)
+Resume a transfer. See \fICURLOPT_RESUME_FROM_LARGE(3)\fP
 .IP CURLOPT_CUSTOMREQUEST
-Pass a pointer to a zero terminated string as parameter.
-
-When you change the request method by setting \fBCURLOPT_CUSTOMREQUEST\fP to
-something, you don't actually change how libcurl behaves or acts in regards
-to the particular request method, it will only change the actual string sent
-in the request.
-
-Restore to the internal default by setting this to NULL.
-
-This option can be used to specify the request:
-
-.B HTTP
-
-Instead of GET or HEAD when performing HTTP based requests. This is
-particularly useful, for example, for performing a HTTP DELETE request.
-
-For example:
-
-When you tell libcurl to do a HEAD request, but then specify a GET though a
-custom request libcurl will still act as if it sent a HEAD. To switch to a
-proper HEAD use \fICURLOPT_NOBODY\fP, to switch to a proper POST use
-\fICURLOPT_POST\fP or \fICURLOPT_POSTFIELDS\fP and to switch to a proper GET
-use CURLOPT_HTTPGET.
-
-Please don't perform this at will, on HTTP based requests, by making sure
-your server supports the command you are sending first.
-
-Many people have wrongly used this option to replace the entire request with
-their own, including multiple headers and POST contents. While that might
-work in many cases, it will cause libcurl to send invalid requests and it
-could possibly confuse the remote server badly. Use \fICURLOPT_POST\fP and
-\fICURLOPT_POSTFIELDS\fP to set POST data. Use \fICURLOPT_HTTPHEADER\fP to
-replace or extend the set of headers sent by libcurl. Use
-\fICURLOPT_HTTP_VERSION\fP to change HTTP version.
-
-.B FTP
-
-Instead of LIST and NLST when performing FTP directory listings.
-
-.B IMAP
-
-Instead of LIST when issuing IMAP based requests. (Added in 7.30.0)
-
-.B POP3
-
-Instead of LIST and RETR when issuing POP3 based requests. (Added in 7.26.0)
-
-For example:
-
-When you tell libcurl to use a custom request it will behave like a LIST or
-RETR command was sent where it expects data to be returned by the server. As
-such \fICURLOPT_NOBODY\fP should be used when specifying commands such as
-DELE and NOOP for example.
-
-.B SMTP
-
-Instead of a HELP or VRFY when issuing SMTP based requests. (Added in 7.34.0)
-
-For example:
-
-Normally a multiline response is returned which can be used, in conjuection with
-\fICURLOPT_MAIL_RCPT\fP, to specify an EXPN request. If the \fICURLOPT_NOBODY\fP
-option is specified then the request can be used to issue NOOP and RSET
-commands.
+Custom request/method. See \fICURLOPT_CUSTOMREQUEST(3)\fP
 .IP CURLOPT_FILETIME
-Pass a long. If it is 1, libcurl will attempt to get the modification date of
-the remote document in this operation. This requires that the remote server
-sends the time or replies to a time querying command. The
-\fIcurl_easy_getinfo(3)\fP function with the \fICURLINFO_FILETIME\fP argument
-can be used after a transfer to extract the received time (if any).
+Request file modification date and time. See \fICURLOPT_FILETIME(3)\fP
 .IP CURLOPT_NOBODY
-A parameter set to 1 tells the library to not include the body-part in the
-output. This is only relevant for protocols that have separate header and
-body parts. On HTTP(S) servers, this will make libcurl do a HEAD request.
-
-To change request to GET, you should use \fICURLOPT_HTTPGET\fP. Change
-request to POST with \fICURLOPT_POST\fP etc.
+Do not get the body contents. See \fICURLOPT_NOBODY(3)\fP
 .IP CURLOPT_INFILESIZE
-When uploading a file to a remote site, this option should be used to tell
-libcurl what the expected size of the infile is. This value should be passed
-as a long. See also \fICURLOPT_INFILESIZE_LARGE\fP.
-
-For uploading using SCP, this option or \fICURLOPT_INFILESIZE_LARGE\fP is
-mandatory.
-
-To "unset" this value again, set it to -1.
-
-When sending emails using SMTP, this command can be used to specify the
-optional SIZE parameter for the MAIL FROM command. (Added in 7.23.0)
-
-This option does not limit how much data libcurl will actually send, as that
-is controlled entirely by what the read callback returns.
+Size of file to send. \fICURLOPT_INFILESIZE(3)\fP
 .IP CURLOPT_INFILESIZE_LARGE
-When uploading a file to a remote site, this option should be used to tell
-libcurl what the expected size of the infile is.  This value should be passed
-as a curl_off_t. (Added in 7.11.0)
-
-For uploading using SCP, this option or \fICURLOPT_INFILESIZE\fP is mandatory.
-
-To "unset" this value again, set it to -1.
-
-When sending emails using SMTP, this command can be used to specify the
-optional SIZE parameter for the MAIL FROM command. (Added in 7.23.0)
-
-This option does not limit how much data libcurl will actually send, as that
-is controlled entirely by what the read callback returns.
+Size of file to send. \fICURLOPT_INFILESIZE_LARGE(3)\fP
 .IP CURLOPT_UPLOAD
-A parameter set to 1 tells the library to prepare for an upload. The
-\fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE\fP or
-\fICURLOPT_INFILESIZE_LARGE\fP options are also interesting for uploads. If
-the protocol is HTTP, uploading means using the PUT request unless you tell
-libcurl otherwise.
-
-Using PUT with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
-You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
-
-If you use PUT to a HTTP 1.1 server, you can upload data without knowing the
-size before starting the transfer if you use chunked encoding. You enable this
-by adding a header like "Transfer-Encoding: chunked" with
-\fICURLOPT_HTTPHEADER\fP. With HTTP 1.0 or without chunked transfer, you must
-specify the size.
+Upload data. See \fICURLOPT_UPLOAD(3)\fP
 .IP CURLOPT_MAXFILESIZE
-Pass a long as parameter. This allows you to specify the maximum size (in
-bytes) of a file to download. If the file requested is larger than this value,
-the transfer will not start and CURLE_FILESIZE_EXCEEDED will be returned.
-
-The file size is not always known prior to download, and for such files this
-option has no effect even if the file transfer ends up being larger than this
-given limit. This concerns both FTP and HTTP transfers.
+Maximum file size to get. See \fICURLOPT_MAXFILESIZE(3)\fP
 .IP CURLOPT_MAXFILESIZE_LARGE
-Pass a curl_off_t as parameter. This allows you to specify the maximum size
-(in bytes) of a file to download. If the file requested is larger than this
-value, the transfer will not start and \fICURLE_FILESIZE_EXCEEDED\fP will be
-returned. (Added in 7.11.0)
-
-The file size is not always known prior to download, and for such files this
-option has no effect even if the file transfer ends up being larger than this
-given limit. This concerns both FTP and HTTP transfers.
+Maximum file size to get. See \fICURLOPT_MAXFILESIZE_LARGE(3)\fP
 .IP CURLOPT_TIMECONDITION
-Pass a long as parameter. This defines how the \fICURLOPT_TIMEVALUE\fP time
-value is treated. You can set this parameter to \fICURL_TIMECOND_IFMODSINCE\fP
-or \fICURL_TIMECOND_IFUNMODSINCE\fP. This feature applies to HTTP, FTP, RTSP,
-and FILE.
-
-The last modification time of a file is not always known and in such instances
-this feature will have no effect even if the given time condition would not
-have been met. \fIcurl_easy_getinfo(3)\fP with the
-\fICURLINFO_CONDITION_UNMET\fP option can be used after a transfer to learn if
-a zero-byte successful "transfer" was due to this condition not matching.
+Make a time conditional request. See \fICURLOPT_TIMECONDITION(3)\fP
 .IP CURLOPT_TIMEVALUE
-Pass a long as parameter. This should be the time in seconds since 1 Jan 1970,
-and the time will be used in a condition as specified with
-\fICURLOPT_TIMECONDITION\fP.
+Time value for the tiem conditional request. See \fICURLOPT_TIMEVALUE(3)\fP
 .SH CONNECTION OPTIONS
 .IP CURLOPT_TIMEOUT
-Pass a long as parameter containing the maximum time in seconds that you allow
-the libcurl transfer operation to take. Normally, name lookups can take a
-considerable time and limiting operations to less than a few minutes risk
-aborting perfectly normal operations. This option will cause curl to use the
-SIGALRM to enable time-outing system calls.
-
-In unix-like systems, this might cause signals to be used unless
-\fICURLOPT_NOSIGNAL\fP is set.
-
-Default timeout is 0 (zero) which means it never times out.
+Timeout for the entire request. See \fICURLOPT_TIMEOUT(3)\fP
 .IP CURLOPT_TIMEOUT_MS
-An alternative to \fICURLOPT_TIMEOUT\fP but takes number of milliseconds
-instead. If libcurl is built to use the standard system name resolver, that
-portion of the transfer will still use full-second resolution for timeouts
-with a minimum timeout allowed of one second.
-
-If both \fICURLOPT_TIMEOUT\fP and \fICURLOPT_TIMEOUT_MS\fP are set, the value
-set last will be used.
-
-(Added in 7.16.2)
+Millisecond timeout for the entire request. See \fICURLOPT_TIMEOUT_MS(3)\fP
 .IP CURLOPT_LOW_SPEED_LIMIT
-Pass a long as parameter. It contains the transfer speed in bytes per second
-that the transfer should be below during \fICURLOPT_LOW_SPEED_TIME\fP seconds
-for the library to consider it too slow and abort.
+Low speed limit to abort transfer. See \fICURLOPT_LOW_SPEED_LIMIT(3)\fP
 .IP CURLOPT_LOW_SPEED_TIME
-Pass a long as parameter. It contains the time in seconds that the transfer
-should be below the \fICURLOPT_LOW_SPEED_LIMIT\fP for the library to consider
-it too slow and abort.
+Time to be below the speed to triger low speed abort. See \fICURLOPT_LOW_SPEED_TIME(3)\fP
 .IP CURLOPT_MAX_SEND_SPEED_LARGE
-Pass a curl_off_t as parameter.  If an upload exceeds this speed (counted in
-bytes per second) on cumulative average during the transfer, the transfer will
-pause to keep the average rate less than or equal to the parameter value.
-Defaults to unlimited speed.
-
-This option doesn't affect transfer speeds done with FILE:// URLs. (Added in
- 7.15.5)
+Cap upload speed to this. See \fICURLOPT_MAX_SEND_SPEED_LARGE(3)\fP
 .IP CURLOPT_MAX_RECV_SPEED_LARGE
-Pass a curl_off_t as parameter.  If a download exceeds this speed (counted in
-bytes per second) on cumulative average during the transfer, the transfer will
-pause to keep the average rate less than or equal to the parameter
-value. Defaults to unlimited speed.
-
-This option doesn't affect transfer speeds done with FILE:// URLs. (Added in
-7.15.5)
+Cap download speed to this. See \fICURLOPT_MAX_RECV_SPEED_LARGE(3)\fP
 .IP CURLOPT_MAXCONNECTS
-Pass a long. The set number will be the persistent connection cache size. The
-set amount will be the maximum amount of simultaneously open connections that
-libcurl may cache in this easy handle. Default is 5, and there isn't much
-point in changing this value unless you are perfectly aware of how this works
-and changes libcurl's behaviour. This concerns connections using any of the
-protocols that support persistent connections.
-
-When reaching the maximum limit, curl closes the oldest one in the cache to
-prevent increasing the number of open connections.
-
-If you already have performed transfers with this curl handle, setting a
-smaller MAXCONNECTS than before may cause open connections to get closed
-unnecessarily.
-
-If you add this easy handle to a multi handle, this setting is not
-acknowledged, and you must instead use \fIcurl_multi_setopt(3)\fP and the
-\fICURLMOPT_MAXCONNECTS\fP option.
-.IP CURLOPT_CLOSEPOLICY
-(Obsolete) This option does nothing.
+Max number of connection is connection pool. See \fICURLOPT_MAXCONNECTS(3)\fP
 .IP CURLOPT_FRESH_CONNECT
-Pass a long. Set to 1 to make the next transfer use a new (fresh) connection
-by force. If the connection cache is full before this connection, one of the
-existing connections will be closed as according to the selected or default
-policy. This option should be used with caution and only if you understand
-what it does. Set this to 0 to have libcurl attempt re-using an existing
-connection (default behavior).
+Use a new connection. \fICURLOPT_FRESH_CONNECT(3)\fP
 .IP CURLOPT_FORBID_REUSE
-Pass a long. Set to 1 to make the next transfer explicitly close the
-connection when done. Normally, libcurl keeps all connections alive when done
-with one transfer in case a succeeding one follows that can re-use them.
-This option should be used with caution and only if you understand what it
-does. Set to 0 to have libcurl keep the connection open for possible later
-re-use (default behavior).
+Prevent subsequent connections from re-using this. See \fICURLOPT_FORBID_REUSE(3)\fP
 .IP CURLOPT_CONNECTTIMEOUT
-Pass a long. It should contain the maximum time in seconds that you allow the
-connection to the server to take.  This only limits the connection phase, once
-it has connected, this option is of no more use. Set to zero to switch to the
-default built-in connection timeout - 300 seconds. See also the
-\fICURLOPT_TIMEOUT\fP option.
-
-In unix-like systems, this might cause signals to be used unless
-\fICURLOPT_NOSIGNAL\fP is set.
+Timeout for the connection phase. See \fICURLOPT_CONNECTTIMEOUT(3)\fP
 .IP CURLOPT_CONNECTTIMEOUT_MS
-Like \fICURLOPT_CONNECTTIMEOUT\fP but takes the number of milliseconds
-instead. If libcurl is built to use the standard system name resolver,
-that portion of the connect will still use full-second resolution for
-timeouts with a minimum timeout allowed of one second.
-(Added in 7.16.2)
+Millisecond timeout for the connection phase. See \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
 .IP CURLOPT_IPRESOLVE
-Allows an application to select what kind of IP addresses to use when
-resolving host names. This is only interesting when using host names that
-resolve addresses using more than one version of IP. The allowed values are:
-.RS
-.IP CURL_IPRESOLVE_WHATEVER
-Default, resolves addresses to all IP versions that your system allows.
-.IP CURL_IPRESOLVE_V4
-Resolve to IPv4 addresses.
-.IP CURL_IPRESOLVE_V6
-Resolve to IPv6 addresses.
-.RE
+IP version to resolve to. See \fICURLOPT_IPRESOLVE(3)\fP
 .IP CURLOPT_CONNECT_ONLY
-Pass a long. If the parameter equals 1, it tells the library to perform all
-the required proxy authentication and connection setup, but no data transfer.
-This option is implemented for HTTP, SMTP and POP3.
-
-The option can be used to simply test a connection to a server, but is more
-useful when used with the \fICURLINFO_LASTSOCKET\fP option to
-\fIcurl_easy_getinfo(3)\fP as the library can set up the connection and then
-the application can obtain the most recently used socket for special data
-transfers. (Added in 7.15.2)
+Only connect, nothing else. See \fICURLOPT_CONNECT_ONLY(3)\fP
 .IP CURLOPT_USE_SSL
-Pass a long using one of the values from below, to make libcurl use your
-desired level of SSL for the transfer. (Added in 7.11.0)
-
-This is for enabling SSL/TLS when you use FTP, SMTP, POP3, IMAP etc.
-
-(This option was known as CURLOPT_FTP_SSL up to 7.16.4, and the constants
-were known as CURLFTPSSL_*)
-.RS
-.IP CURLUSESSL_NONE
-Don't attempt to use SSL.
-.IP CURLUSESSL_TRY
-Try using SSL, proceed as normal otherwise.
-.IP CURLUSESSL_CONTROL
-Require SSL for the control connection or fail with \fICURLE_USE_SSL_FAILED\fP.
-.IP CURLUSESSL_ALL
-Require SSL for all communication or fail with \fICURLE_USE_SSL_FAILED\fP.
-.RE
+Use TLS/SSL. See \fICURLOPT_USE_SSL(3)\fP
 .IP CURLOPT_RESOLVE
-Pass a pointer to a linked list of strings with host name resolve information
-to use for requests with this handle. The linked list should be a fully valid
-list of \fBstruct curl_slist\fP structs properly filled in. Use
-\fIcurl_slist_append(3)\fP to create the list and \fIcurl_slist_free_all(3)\fP
-to clean up an entire list.
-
-Each single name resolve string should be written using the format
-HOST:PORT:ADDRESS where HOST is the name libcurl will try to resolve, PORT is
-the port number of the service where libcurl wants to connect to the HOST and
-ADDRESS is the numerical IP address. If libcurl is built to support IPv6,
-ADDRESS can of course be either IPv4 or IPv6 style addressing.
-
-This option effectively pre-populates the DNS cache with entries for the
-host+port pair so redirects and everything that operations against the
-HOST+PORT will instead use your provided ADDRESS. Addresses to set with
-\fICURL_RESOLVE\fP will not time-out from the DNS cache like ordindary
-entries.
-
-You can remove names from the DNS cache again, to stop providing these fake
-resolves, by including a string in the linked list that uses the format
-\&"-HOST:PORT". The host name must be prefixed with a dash, and the host name
-and port number must exactly match what was already added previously.
-
-(Added in 7.21.3)
-.IP CURLOPT_DNS_SERVERS
-Set the list of DNS servers to be used instead of the system default.
-The format of the dns servers option is:
-
-host[:port][,host[:port]]...
-
-For example:
-
-192.168.1.100,192.168.1.101,3.4.5.6
-
-This option requires that libcurl was built with a resolver backend that
-supports this operation. The c-ares backend is the only such one.
-
-(Added in 7.24.0)
+Provide fixed/fake name resolves. See \fICURLOPT_RESOLVE(3)\fP
 .IP CURLOPT_DNS_INTERFACE
-Pass a char * as parameter. Set the name of the network interface that
-the DNS resolver should bind to. This must be an interface name (not an
-address). Set this option to NULL to use the default setting (don't
-bind to a specific interface).
-
-This option requires that libcurl was built with a resolver backend that
-supports this operation. The c-ares backend is the only such one.
-
-(Added in 7.33.0)
+Bind name resolves to this interface. See \fICURLOPT_DNS_INTERFACE(3)\fP
 .IP CURLOPT_DNS_LOCAL_IP4
-Set the local IPv4 address that the resolver should bind to. The argument
-should be of type char * and contain a single IPv4 address as a string.
-Set this option to NULL to use the default setting (don't
-bind to a specific IP address).
-
-This option requires that libcurl was built with a resolver backend that
-supports this operation. The c-ares backend is the only such one.
-
-(Added in 7.33.0)
+Bind name rewsolves to this IP4 address. See \fICURLOPT_DNS_LOCAL_IP4(3)\fP
 .IP CURLOPT_DNS_LOCAL_IP6
-Set the local IPv6 address that the resolver should bind to. The argument
-should be of type char * and contain a single IPv6 address as a string.
-Set this option to NULL to use the default setting (don't
-bind to a specific IP address).
-
-This option requires that libcurl was built with a resolver backend that
-supports this operation. The c-ares backend is the only such one.
-
-(Added in 7.33.0)
+Bind name rewsolves to this IP6 address. See \fICURLOPT_DNS_LOCAL_IP6(3)\fP
 .IP CURLOPT_ACCEPTTIMEOUT_MS
-Pass a long telling libcurl the maximum number of milliseconds to wait for a
-server to connect back to libcurl when an active FTP connection is used. If no
-timeout is set, the internal default of 60000 will be used. (Added in 7.24.0)
+Timeout for waiting for the server's connect back to be accepted. See \fICURLOPT_ACCEPTTIMEOUT_MS(3)\fP
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
-Pass a pointer to a zero terminated string as parameter. The string should be
-the file name of your certificate. The default format is "P12" on Secure
-Transport and "PEM" on other engines, and can be changed with
-\fICURLOPT_SSLCERTTYPE\fP.
-
-With NSS or Secure Transport, this can also be the nickname of the certificate
-you wish to authenticate with as it is named in the security database. If you
-want to use a file from the current directory, please precede it with "./"
-prefix, in order to avoid confusion with a nickname.
+Client cert. See \fICURLOPT_SSLCERT(3)\fP
 .IP CURLOPT_SSLCERTTYPE
-Pass a pointer to a zero terminated string as parameter. The string should be
-the format of your certificate. Supported formats are "PEM" and "DER", except
-with Secure Transport. OpenSSL (versions 0.9.3 and later) and Secure Transport
-(on iOS 5 or later, or OS X 10.7 or later) also support "P12" for
-PKCS#12-encoded files. (Added in 7.9.3)
+Client cert type.  See \fICURLOPT_SSLCERTTYPE(3)\fP
 .IP CURLOPT_SSLKEY
-Pass a pointer to a zero terminated string as parameter. The string should be
-the file name of your private key. The default format is "PEM" and can be
-changed with \fICURLOPT_SSLKEYTYPE\fP.
-
-(iOS and Mac OS X only) This option is ignored if curl was built against Secure
-Transport. Secure Transport expects the private key to be already present in
-the keychain or PKCS#12 file containing the certificate.
+Client key. See \fICURLOPT_SSLKEY(3)\fP
 .IP CURLOPT_SSLKEYTYPE
-Pass a pointer to a zero terminated string as parameter. The string should be
-the format of your private key. Supported formats are "PEM", "DER" and "ENG".
-
-The format "ENG" enables you to load the private key from a crypto engine. In
-this case \fICURLOPT_SSLKEY\fP is used as an identifier passed to the
-engine. You have to set the crypto engine with \fICURLOPT_SSLENGINE\fP.
-\&"DER" format key file currently does not work because of a bug in OpenSSL.
+Client key type. See \fICURLOPT_SSLKEYTYPE(3)\fP
 .IP CURLOPT_KEYPASSWD
-Pass a pointer to a zero terminated string as parameter. It will be used as
-the password required to use the \fICURLOPT_SSLKEY\fP or
-\fICURLOPT_SSH_PRIVATE_KEYFILE\fP private key.
-You never needed a pass phrase to load a certificate but you need one to
-load your private key.
-
-(This option was known as CURLOPT_SSLKEYPASSWD up to 7.16.4 and
-CURLOPT_SSLCERTPASSWD up to 7.9.2)
+Client key password. See \fICURLOPT_KEYPASSWD(3)\fP
 .IP CURLOPT_SSL_ENABLE_ALPN
-Pass a long as parameter, 0 or 1 where 1 is for enable and 0 for disable. By
-default, libcurl assumes a value of 1. This option enables/disables ALPN in
-the SSL handshake (if the SSL backend libcurl is built to use supports it),
-which can be used to negotiate http2.
-
-(Added in 7.36.0)
+Enable use of ALPN. See \fICURLOPT_SSL_ENABLE_ALPN(3)\fP
 .IP CURLOPT_SSL_ENABLE_NPN
-Pass a long as parameter, 0 or 1 where 1 is for enable and 0 for disable. By
-default, libcurl assumes a value of 1. This option enables/disables NPN in the
-SSL handshake (if the SSL backend libcurl is built to use supports it), which
-can be used to negotiate http2.
-
-(Added in 7.36.0)
+)Enable use of NPN. See \fICURLOPT_SSL_ENABLE_NPN(3)\fP
 .IP CURLOPT_SSLENGINE
-Pass a pointer to a zero terminated string as parameter. It will be used as
-the identifier for the crypto engine you want to use for your private
-key.
-
-If the crypto device cannot be loaded, \fICURLE_SSL_ENGINE_NOTFOUND\fP is
-returned.
+Use identifier with SSL engine. See \fICURLOPT_SSLENGINE(3)\fP
 .IP CURLOPT_SSLENGINE_DEFAULT
-Sets the actual crypto engine as the default for (asymmetric) crypto
-operations.
-
-If the crypto device cannot be set, \fICURLE_SSL_ENGINE_SETFAILED\fP is
-returned.
-
-Even though this option doesn't need any parameter, in some configurations
-\fIcurl_easy_setopt\fP might be defined as a macro taking exactly three
-arguments. Therefore, it's recommended to pass 1 as parameter to this option.
+Default SSL engine. See \fICURLOPT_SSLENGINE_DEFAULT(3)\fP
 .IP CURLOPT_SSLVERSION
-Pass a long as parameter to control what version of SSL/TLS to attempt to use.
-(Added in 7.9.2)
-
-The available options are:
-.RS
-.IP CURL_SSLVERSION_DEFAULT
-The default action. This will attempt to figure out the remote SSL protocol
-version, i.e. either SSLv3 or TLSv1 (but not SSLv2, which became disabled
-by default with 7.18.1).
-.IP CURL_SSLVERSION_TLSv1
-Force TLSv1.x
-.IP CURL_SSLVERSION_SSLv2
-Force SSLv2
-.IP CURL_SSLVERSION_SSLv3
-Force SSLv3
-.IP CURL_SSLVERSION_TLSv1_0
-Force TLSv1.0 (Added in 7.34.0)
-.IP CURL_SSLVERSION_TLSv1_1
-Force TLSv1.1 (Added in 7.34.0)
-.IP CURL_SSLVERSION_TLSv1_2
-Force TLSv1.2 (Added in 7.34.0)
-.RE
+SSL version to use. See \fICURLOPT_SSLVERSION(3)\fP
 .IP CURLOPT_SSL_VERIFYPEER
-Pass a long as parameter. By default, curl assumes a value of 1.
-
-This option determines whether curl verifies the authenticity of the peer's
-certificate. A value of 1 means curl verifies; 0 (zero) means it doesn't.
-
-When negotiating a SSL connection, the server sends a certificate indicating
-its identity.  Curl verifies whether the certificate is authentic, i.e. that
-you can trust that the server is who the certificate says it is.  This trust
-is based on a chain of digital signatures, rooted in certification authority
-(CA) certificates you supply.  curl uses a default bundle of CA certificates
-(the path for that is determined at build time) and you can specify alternate
-certificates with the \fICURLOPT_CAINFO\fP option or the \fICURLOPT_CAPATH\fP
-option.
-
-When \fICURLOPT_SSL_VERIFYPEER\fP is nonzero, and the verification fails to
-prove that the certificate is authentic, the connection fails.  When the
-option is zero, the peer certificate verification succeeds regardless.
-
-Authenticating the certificate is not by itself very useful.  You typically
-want to ensure that the server, as authentically identified by its
-certificate, is the server you mean to be talking to.  Use
-\fICURLOPT_SSL_VERIFYHOST\fP to control that. The check that the host name in
-the certificate is valid for the host name you're connecting to is done
-independently of the \fICURLOPT_SSL_VERIFYPEER\fP option.
+Verify the SSL certificate. See \fICURLOPT_SSL_VERIFYPEER(3)\fP
 .IP CURLOPT_CAINFO
-Pass a char * to a zero terminated string naming a file holding one or more
-certificates to verify the peer with.  This makes sense only when used in
-combination with the \fICURLOPT_SSL_VERIFYPEER\fP option.  If
-\fICURLOPT_SSL_VERIFYPEER\fP is zero, \fICURLOPT_CAINFO\fP need not
-even indicate an accessible file.
-
-This option is by default set to the system path where libcurl's cacert bundle
-is assumed to be stored, as established at build time.
-
-If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
-(libnsspem.so) needs to be available for this option to work properly.
+CA cert bundle. See \fICURLOPT_CAINFO(3)\fP
 .IP CURLOPT_ISSUERCERT
-Pass a char * to a zero terminated string naming a file holding a CA
-certificate in PEM format. If the option is set, an additional check against
-the peer certificate is performed to verify the issuer is indeed the one
-associated with the certificate provided by the option. This additional check
-is useful in multi-level PKI where one needs to enforce that the peer
-certificate is from a specific branch of the tree.
-
-This option makes sense only when used in combination with the
-\fICURLOPT_SSL_VERIFYPEER\fP option. Otherwise, the result of the check is not
-considered as failure.
-
-A specific error code (CURLE_SSL_ISSUER_ERROR) is defined with the option,
-which is returned if the setup of the SSL/TLS session has failed due to a
-mismatch with the issuer of peer certificate (\fICURLOPT_SSL_VERIFYPEER\fP has
-to be set too for the check to fail). (Added in 7.19.0)
+Issuer certificate. See \fICURLOPT_ISSUERCERT(3)\fP
 .IP CURLOPT_CAPATH
-Pass a char * to a zero terminated string naming a directory holding multiple
-CA certificates to verify the peer with. If libcurl is built against OpenSSL,
-the certificate directory must be prepared using the openssl c_rehash utility.
-This makes sense only when used in combination with the
-\fICURLOPT_SSL_VERIFYPEER\fP option.  If \fICURLOPT_SSL_VERIFYPEER\fP is zero,
-\fICURLOPT_CAPATH\fP need not even indicate an accessible path.  The
-\fICURLOPT_CAPATH\fP function apparently does not work in Windows due to some
-limitation in openssl. This option is OpenSSL-specific and does nothing if
-libcurl is built to use GnuTLS. NSS-powered libcurl provides the option only
-for backward compatibility.
+Path to CA cert bundle. See \fICURLOPT_CAPATH(3)\fP
 .IP CURLOPT_CRLFILE
-Pass a char * to a zero terminated string naming a file with the concatenation
-of CRL (in PEM format) to use in the certificate validation that occurs during
-the SSL exchange.
-
-When curl is built to use NSS or GnuTLS, there is no way to influence the use
-of CRL passed to help in the verification process. When libcurl is built with
-OpenSSL support, X509_V_FLAG_CRL_CHECK and X509_V_FLAG_CRL_CHECK_ALL are both
-set, requiring CRL check against all the elements of the certificate chain if
-a CRL file is passed.
-
-This option makes sense only when used in combination with the
-\fICURLOPT_SSL_VERIFYPEER\fP option.
-
-A specific error code (CURLE_SSL_CRL_BADFILE) is defined with the option. It
-is returned when the SSL exchange fails because the CRL file cannot be loaded.
-A failure in certificate verification due to a revocation information found in
-the CRL does not trigger this specific error. (Added in 7.19.0)
+Certificate Revocation List. See \fICURLOPT_CRLFILE(3)\fP
 .IP CURLOPT_SSL_VERIFYHOST
-Pass a long as parameter.
-
-This option determines whether libcurl verifies that the server cert is for
-the server it is known as.
-
-When negotiating a SSL connection, the server sends a certificate indicating
-its identity.
-
-When \fICURLOPT_SSL_VERIFYHOST\fP is 2, that certificate must indicate that
-the server is the server to which you meant to connect, or the connection
-fails.
-
-Curl considers the server the intended one when the Common Name field or a
-Subject Alternate Name field in the certificate matches the host name in the
-URL to which you told Curl to connect.
-
-When the value is 1, \fIcurl_easy_setopt\fP will return an error and the option
-value will not be changed.  It was previously (in 7.28.0 and earlier) a debug
-option of some sorts, but it is no longer supported due to frequently leading
-to programmer mistakes.
-
-When the value is 0, the connection succeeds regardless of the names in the
-certificate.
-
-The default value for this option is 2.
-
-This option controls checking the server's certificate's claimed identity.
-The server could be lying.  To control lying, see
-\fICURLOPT_SSL_VERIFYPEER\fP.  If libcurl is built against NSS and
-\fICURLOPT_SSL_VERIFYPEER\fP is zero, \fICURLOPT_SSL_VERIFYHOST\fP is also set
-to zero and cannot be overridden.
+Verify the host name in the SSL certificate. See \fICURLOPT_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_CERTINFO
-Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
-this enabled, libcurl (if built with OpenSSL, NSS, GSKit or QsoSSL) will
-extract lots of information
-and data about the certificates in the certificate chain used in the SSL
-connection. This data may then be retrieved after a transfer using
-\fIcurl_easy_getinfo(3)\fP and its option \fICURLINFO_CERTINFO\fP. (Added in
-7.19.1)
+Extract certficate info. See \fICURLOPT_CERTINFO(3)\fP
 .IP CURLOPT_RANDOM_FILE
-Pass a char * to a zero terminated file name. The file will be used to read
-from to seed the random engine for SSL. The more random the specified file is,
-the more secure the SSL connection will become.
+Provide source for entropy random data. See \fICURLOPT_RANDOM_FILE(3)\fP
 .IP CURLOPT_EGDSOCKET
-Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
-socket. It will be used to seed the random engine for SSL.
+Identify EGD socket for entropy. See \fICURLOPT_EGDSOCKET(3)\fP
 .IP CURLOPT_SSL_CIPHER_LIST
-Pass a char *, pointing to a zero terminated string holding the list of
-ciphers to use for the SSL connection. The list must be syntactically correct,
-it consists of one or more cipher strings separated by colons. Commas or
-spaces are also acceptable separators but colons are normally used, \&!, \&-
-and \&+ can be used as operators.
-
-For OpenSSL and GnuTLS valid examples of cipher lists include 'RC4-SHA',
-\'SHA1+DES\', 'TLSv1' and 'DEFAULT'. The default list is normally set when you
-compile OpenSSL.
-
-You'll find more details about cipher lists on this URL:
-\fIhttp://www.openssl.org/docs/apps/ciphers.html\fP
-
-For NSS, valid examples of cipher lists include 'rsa_rc4_128_md5',
-\'rsa_aes_128_sha\', etc. With NSS you don't add/remove ciphers. If one uses
-this option then all known ciphers are disabled and only those passed in
-are enabled.
-
-You'll find more details about the NSS cipher lists on this URL:
-\fIhttp://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html#Directives\fP
-
+Ciphers to use. See \fICURLOPT_SSL_CIPHER_LIST(3)\fP
 .IP CURLOPT_SSL_SESSIONID_CACHE
-Pass a long set to 0 to disable libcurl's use of SSL session-ID caching. Set
-this to 1 to enable it. By default all transfers are done using the
-cache. While nothing ever should get hurt by attempting to reuse SSL
-session-IDs, there seem to be broken SSL implementations in the wild that may
-require you to disable this in order for you to succeed. (Added in 7.16.0)
+Disable SSL session-id cache. See \fICURLOPT_SSL_SESSIONID_CACHE(3)\fP
 .IP CURLOPT_SSL_OPTIONS
-Pass a long with a bitmask to tell libcurl about specific SSL behaviors.
-
-CURLSSLOPT_ALLOW_BEAST is the only supported bit and by setting this the user
-will tell libcurl to not attempt to use any workarounds for a security flaw
-in the SSL3 and TLS1.0 protocols.  If this option isn't used or this bit is
-set to 0, the SSL layer libcurl uses may use a work-around for this flaw
-although it might cause interoperability problems with some (older) SSL
-implementations. WARNING: avoiding this work-around loosens the security, and
-by setting this option to 1 you ask for exactly that. (Added in 7.25.0)
+Control SSL behavior. See \fICURLOPT_SSL_OPTIONS(3)\fP
 .IP CURLOPT_KRBLEVEL
-Pass a char * as parameter. Set the kerberos security level for FTP; this also
-enables kerberos awareness.  This is a string, \&'clear', \&'safe',
-\&'confidential' or \&'private'.  If the string is set but doesn't match one
-of these, 'private' will be used. Set the string to NULL to disable kerberos
-support for FTP.
-
-(This option was known as CURLOPT_KRB4LEVEL up to 7.16.3)
+Kerberos security level. See \fICURLOPT_KRBLEVEL(3)\fP
 .IP CURLOPT_GSSAPI_DELEGATION
-Set the parameter to CURLGSSAPI_DELEGATION_FLAG to allow unconditional GSSAPI
-credential delegation.  The delegation is disabled by default since 7.21.7.
-Set the parameter to CURLGSSAPI_DELEGATION_POLICY_FLAG to delegate only if
-the OK-AS-DELEGATE flag is set in the service ticket in case this feature is
-supported by the GSSAPI implementation and the definition of
-GSS_C_DELEG_POLICY_FLAG was available at compile-time.
-(Added in 7.22.0)
+Disable GSS-API delegation. See \fICURLOPT_GSSAPI_DELEGATION(3)\fP
 .SH SSH OPTIONS
 .IP CURLOPT_SSH_AUTH_TYPES
-Pass a long set to a bitmask consisting of one or more of
-CURLSSH_AUTH_PUBLICKEY, CURLSSH_AUTH_PASSWORD, CURLSSH_AUTH_HOST,
-CURLSSH_AUTH_KEYBOARD and CURLSSH_AUTH_AGENT. Set CURLSSH_AUTH_ANY to let
-libcurl pick a suitable one. Currently CURLSSH_AUTH_HOST has no effect. (Added
-in 7.16.1) If CURLSSH_AUTH_AGENT is used, libcurl attempts to connect to
-ssh-agent or pageant and let the agent attempt the authentication. (Added in
-7.28.0)
+SSH authentication types. See \fICURLOPT_SSH_AUTH_TYPES(3)\fP
 .IP CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
-Pass a char * pointing to a string containing 32 hexadecimal digits. The
-string should be the 128 bit MD5 checksum of the remote host's public key, and
-libcurl will reject the connection to the host unless the md5sums match. This
-option is only for SCP and SFTP transfers. (Added in 7.17.1)
+MD5 of host's public key. See \fICURLOPT_SSH_HOST_PUBLIC_KEY_MD5(3)\fP
 .IP CURLOPT_SSH_PUBLIC_KEYFILE
-Pass a char * pointing to a file name for your public key. If not used,
-libcurl defaults to \fB$HOME/.ssh/id_dsa.pub\fP if the HOME environment
-variable is set, and just "id_dsa.pub" in the current directory if HOME is not
-set.  (Added in 7.16.1)
-If an empty string is passed, libcurl will pass no public key to libssh2
-which then tries to compute it from the private key, this is known to work
-when libssh2 1.4.0+ is linked against OpenSSL. (Added in 7.26.0)
+File name of public key. See \fICURLOPT_SSH_PUBLIC_KEYFILE(3)\fP
 .IP CURLOPT_SSH_PRIVATE_KEYFILE
-Pass a char * pointing to a file name for your private key. If not used,
-libcurl defaults to \fB$HOME/.ssh/id_dsa\fP if the HOME environment variable
-is set, and just "id_dsa" in the current directory if HOME is not set.  If the
-file is password-protected, set the password with
-\fICURLOPT_KEYPASSWD\fP. (Added in 7.16.1)
+File name of private key. See \fICURLOPT_SSH_PRIVATE_KEYFILE(3)\fP
 .IP CURLOPT_SSH_KNOWNHOSTS
-Pass a pointer to a zero terminated string holding the file name of the
-known_host file to use.  The known_hosts file should use the OpenSSH file
-format as supported by libssh2. If this file is specified, libcurl will only
-accept connections with hosts that are known and present in that file, with a
-matching public key. Use \fICURLOPT_SSH_KEYFUNCTION\fP to alter the default
-behavior on host and key (mis)matching. (Added in 7.19.6)
+File name with known hosts. See \fICURLOPT_SSH_KNOWNHOSTS(3)\fP
 .IP CURLOPT_SSH_KEYFUNCTION
-Pass a pointer to a curl_sshkeycallback function. It gets called when the
-known_host matching has been done, to allow the application to act and decide
-for libcurl how to proceed. The callback will only be called if
-\fICURLOPT_SSH_KNOWNHOSTS\fP is also set.
-
-.nf
-int curl_sshkeycallback (CURL *easy,     /* easy handle */
-                         const struct curl_khkey *knownkey, /* known */
-                         const struct curl_khkey *foundkey, /* found */
-                         enum curl_khmatch, /* libcurl's view on the keys */
-                         void *clientp);
-.fi
-
-The curl_sshkeycallback function gets passed the CURL handle, the key from the
-known_hosts file, the key from the remote site, info from libcurl on the
-matching status and a custom pointer (set with \fICURLOPT_SSH_KEYDATA\fP). It
-MUST return one of the following return codes to tell libcurl how to act:
-.RS
-.IP CURLKHSTAT_FINE_ADD_TO_FILE
-The host+key is accepted and libcurl will append it to the known_hosts file
-before continuing with the connection. This will also add the host+key combo
-to the known_host pool kept in memory if it wasn't already present there. The
-adding of data to the file is done by completely replacing the file with a new
-copy, so the permissions of the file must allow this.
-.IP CURLKHSTAT_FINE
-The host+key is accepted libcurl will continue with the connection. This will
-also add the host+key combo to the known_host pool kept in memory if it wasn't
-already present there.
-.IP CURLKHSTAT_REJECT
-The host+key is rejected. libcurl will deny the connection to continue and it
-will be closed.
-.IP CURLKHSTAT_DEFER
-The host+key is rejected, but the SSH connection is asked to be kept alive.
-This feature could be used when the app wants to somehow return back and act
-on the host+key situation and then retry without needing the overhead of
-setting it up from scratch again.
-.RE
- (Added in 7.19.6)
+Callback for known hosts handling. See \fICURLOPT_SSH_KEYFUNCTION(3)\fP
 .IP CURLOPT_SSH_KEYDATA
-Pass a void * as parameter. This pointer will be passed along verbatim to the
-callback set with \fICURLOPT_SSH_KEYFUNCTION\fP. (Added in 7.19.6)
+Custom pointer to pass to ssh key callback. See \fICURLOPT_SSH_KEYDATA(3)\fP
 .SH OTHER OPTIONS
 .IP CURLOPT_PRIVATE
-Pass a void * as parameter, pointing to data that should be associated with
-this curl handle.  The pointer can subsequently be retrieved using
-\fIcurl_easy_getinfo(3)\fP with the CURLINFO_PRIVATE option. libcurl itself
-does nothing with this data. (Added in 7.10.3)
+Private pointer to store. See \fICURLOPT_PRIVATE(3)\fP
 .IP CURLOPT_SHARE
-Pass a share handle as a parameter. The share handle must have been created by
-a previous call to \fIcurl_share_init(3)\fP. Setting this option, will make
-this curl handle use the data from the shared handle instead of keeping the
-data to itself. This enables several curl handles to share data. If the curl
-handles are used simultaneously in multiple threads, you \fBMUST\fP use the
-locking methods in the share handle. See \fIcurl_share_setopt(3)\fP for
-details.
-
-If you add a share that is set to share cookies, your easy handle will use
-that cookie cache and get the cookie engine enabled. If you unshare an object
-that was using cookies (or change to another object that doesn't share
-cookies), the easy handle will get its cookie engine disabled.
-
-Data that the share object is not set to share will be dealt with the usual
-way, as if no share was used.
+Share object to use. See \fICURLOPT_SHARE(3)\fP
 .IP CURLOPT_NEW_FILE_PERMS
-Pass a long as a parameter, containing the value of the permissions that will
-be assigned to newly created files on the remote server.  The default value is
-\fI0644\fP, but any valid value can be used.  The only protocols that can use
-this are \fIsftp://\fP, \fIscp://\fP, and \fIfile://\fP. (Added in 7.16.4)
+Mode for creating new remote files. See \fICURLOPT_NEW_FILE_PERMS(3)\fP
 .IP CURLOPT_NEW_DIRECTORY_PERMS
-Pass a long as a parameter, containing the value of the permissions that will
-be assigned to newly created directories on the remote server.  The default
-value is \fI0755\fP, but any valid value can be used.  The only protocols that
-can use this are \fIsftp://\fP, \fIscp://\fP, and \fIfile://\fP.
-(Added in 7.16.4)
+Mode for creating new remote dirs. See \fICURLOPT_NEW_DIRECTORY_PERMS(3)\fP
 .SH TELNET OPTIONS
 .IP CURLOPT_TELNETOPTIONS
-Provide a pointer to a curl_slist with variables to pass to the telnet
-negotiations. The variables should be in the format <option=value>. libcurl
-supports the options 'TTYPE', 'XDISPLOC' and 'NEW_ENV'. See the TELNET
-standard for details.
+TELNET options. See \fICURLOPT_TELNETOPTIONS(3)\fP
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, non-zero means an
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP
