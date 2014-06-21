@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -33,8 +33,8 @@ curl_formfree() is used to clean up data previously built/appended with
 typically means after \fIcurl_easy_perform(3)\fP has been called.
 
 The pointer to free is the same pointer you passed to the
-\fBCURLOPT_HTTPPOST\fP option, which is the \fIfirstitem\fP pointer from the
-\fIcurl_formadd(3)\fP invoke(s).
+\fBCURLOPT_HTTPPOST(3)\fP option, which is the \fIfirstitem\fP pointer from
+the \fIcurl_formadd(3)\fP invoke(s).
 
 \fBform\fP is the pointer as returned from a previous call to
 \fIcurl_formadd(3)\fP and may be NULL.

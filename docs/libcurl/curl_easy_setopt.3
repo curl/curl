@@ -46,9 +46,9 @@ options back to internal default with \fIcurl_easy_reset(3)\fP.
 Strings passed to libcurl as 'char *' arguments, are copied by the library;
 thus the string storage associated to the pointer argument may be overwritten
 after curl_easy_setopt() returns. The only exception to this rule is really
-\fICURLOPT_POSTFIELDS\fP, but the alternative that copies the string
-\fICURLOPT_COPYPOSTFIELDS\fP has some usage characteristics you need to read
-up on.
+\fICURLOPT_POSTFIELDS(3)\fP, but the alternative that copies the string
+\fICURLOPT_COPYPOSTFIELDS(3)\fP has some usage characteristics you need to
+read up on.
 
 Before version 7.17.0, strings were not copied. Instead the user was forced
 keep them available until libcurl no longer needed them.

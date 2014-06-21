@@ -38,10 +38,10 @@ use \fIcurl_easy_perform(3)\fP on that handle. After having removed the handle
 from the multi stack again, it is perfectly fine to use it with the easy
 interface again.
 
-If the easy handle is not set to use a shared (CURLOPT_SHARE) or global DNS
-cache (CURLOPT_DNS_USE_GLOBAL_CACHE), it will be made to use the DNS cache
-that is shared between all easy handles within the multi handle when
-\fIcurl_multi_add_handle(3)\fP is called.
+If the easy handle is not set to use a shared (\fICURLOPT_SHARE(3)\fP) or
+global DNS cache (\fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP), it will be made to
+use the DNS cache that is shared between all easy handles within the multi
+handle when \fIcurl_multi_add_handle(3)\fP is called.
 
 If you have CURLMOPT_TIMERFUNCTION set in the multi handle (and you really
 should if you're working event-based with \fIcurl_multi_socket_action(3)\fP

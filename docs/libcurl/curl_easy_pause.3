@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -41,8 +41,8 @@ the writing is later unpaused.
 While it may feel tempting, take care and notice that you cannot call this
 function from another thread. To unpause, you may for example call it from the
 progress callback (see \fIcurl_easy_setopt(3)\fP's
-\fICURLOPT_PROGRESSFUNCTION\fP), which gets called at least once per second,
-even if the connection is paused.
+\fICURLOPT_PROGRESSFUNCTION(3)\fP), which gets called at least once per
+second, even if the connection is paused.
 
 When this function is called to unpause reading, the chance is high that you
 will get your write callback called before this function returns.
@@ -55,11 +55,11 @@ connection. The following bits can be used:
 .IP CURLPAUSE_RECV
 Pause receiving data. There will be no data received on this connection until
 this function is called again without this bit set. Thus, the write callback
-(\fICURLOPT_WRITEFUNCTION\fP) won't be called.
+(\fICURLOPT_WRITEFUNCTION(3)\fP) won't be called.
 .IP CURLPAUSE_SEND
 Pause sending data. There will be no data sent on this connection until this
 function is called again without this bit set. Thus, the read callback
-(\fICURLOPT_READFUNCTION\fP) won't be called.
+(\fICURLOPT_READFUNCTION(3)\fP) won't be called.
 .IP CURLPAUSE_ALL
 Convenience define that pauses both directions.
 .IP CURLPAUSE_CONT

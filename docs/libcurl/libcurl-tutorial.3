@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -170,8 +170,8 @@ terminated with a zero byte. When you set strings with
 \fIcurl_easy_setopt(3)\fP, libcurl makes its own copy so that they don't
 need to be kept around in your application after being set[4].
 
-One of the most basic properties to set in the handle is the URL. You set
-your preferred URL to transfer with CURLOPT_URL in a manner similar to:
+One of the most basic properties to set in the handle is the URL. You set your
+preferred URL to transfer with \fICURLOPT_URL(3)\fP in a manner similar to:
 
 .nf
  curl_easy_setopt(handle, CURLOPT_URL, "http://domain.com/");
@@ -197,27 +197,27 @@ by setting another property:
 
 Using that property, you can easily pass local data between your application
 and the function that gets invoked by libcurl. libcurl itself won't touch the
-data you pass with \fICURLOPT_WRITEDATA\fP.
+data you pass with \fICURLOPT_WRITEDATA(3)\fP.
 
-libcurl offers its own default internal callback that will take care of the data
-if you don't set the callback with \fICURLOPT_WRITEFUNCTION\fP. It will then
-simply output the received data to stdout. You can have the default callback
-write the data to a different file handle by passing a 'FILE *' to a file
-opened for writing with the \fICURLOPT_WRITEDATA\fP option.
+libcurl offers its own default internal callback that will take care of the
+data if you don't set the callback with \fICURLOPT_WRITEFUNCTION(3)\fP. It
+will then simply output the received data to stdout. You can have the default
+callback write the data to a different file handle by passing a 'FILE *' to a
+file opened for writing with the \fICURLOPT_WRITEDATA(3)\fP option.
 
 Now, we need to take a step back and have a deep breath. Here's one of those
 rare platform-dependent nitpicks. Did you spot it? On some platforms[2],
 libcurl won't be able to operate on files opened by the program. Thus, if you
 use the default callback and pass in an open file with
-\fICURLOPT_WRITEDATA\fP, it will crash. You should therefore avoid this to
+\fICURLOPT_WRITEDATA(3)\fP, it will crash. You should therefore avoid this to
 make your program run fine virtually everywhere.
 
-(\fICURLOPT_WRITEDATA\fP was formerly known as \fICURLOPT_FILE\fP. Both names
-still work and do the same thing).
+(\fICURLOPT_WRITEDATA(3)\fP was formerly known as \fICURLOPT_FILE\fP. Both
+names still work and do the same thing).
 
 If you're using libcurl as a win32 DLL, you MUST use the
-\fICURLOPT_WRITEFUNCTION\fP if you set \fICURLOPT_WRITEDATA\fP - or you will
-experience crashes.
+\fICURLOPT_WRITEFUNCTION(3)\fP if you set \fICURLOPT_WRITEDATA(3)\fP - or you
+will experience crashes.
 
 There are of course many more options you can set, and we'll get back to a few
 of them later. Let's instead continue to the actual transfer:
@@ -234,8 +234,8 @@ passed to it, libcurl will abort the operation and return with an error code.
 
 When the transfer is complete, the function returns a return code that informs
 you if it succeeded in its mission or not. If a return code isn't enough for
-you, you can use the CURLOPT_ERRORBUFFER to point libcurl to a buffer of yours
-where it'll store a human readable error message as well.
+you, you can use the \fICURLOPT_ERRORBUFFER(3)\fP to point libcurl to a buffer
+of yours where it'll store a human readable error message as well.
 
 If you then want to transfer another file, the handle is ready to be used
 again. Mind you, it is even preferred that you re-use an existing handle if
@@ -293,14 +293,14 @@ Secure Transport
 
  The engine is fully thread-safe, and no additional steps are required.
 
-When using multiple threads you should set the CURLOPT_NOSIGNAL option to 1
-for all handles. Everything will or might work fine except that timeouts are
-not honored during the DNS lookup - which you can work around by building
-libcurl with c-ares support. c-ares is a library that provides asynchronous
-name resolves. On some platforms, libcurl simply will not function properly
-multi-threaded unless this option is set.
+When using multiple threads you should set the \fICURLOPT_NOSIGNAL(3)\fP
+option to 1 for all handles. Everything will or might work fine except that
+timeouts are not honored during the DNS lookup - which you can work around by
+building libcurl with c-ares support. c-ares is a library that provides
+asynchronous name resolves. On some platforms, libcurl simply will not
+function properly multi-threaded unless this option is set.
 
-Also, note that CURLOPT_DNS_USE_GLOBAL_CACHE is not thread-safe.
+Also, note that \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP is not thread-safe.
 
 .SH "When It Doesn't Work"
 There will always be times when the transfer fails for some reason. You might
@@ -308,23 +308,23 @@ have set the wrong libcurl option or misunderstood what the libcurl option
 actually does, or the remote server might return non-standard replies that
 confuse the library which then confuses your program.
 
-There's one golden rule when these things occur: set the CURLOPT_VERBOSE
-option to 1. It'll cause the library to spew out the entire protocol
-details it sends, some internal info and some received protocol data as well
-(especially when using FTP). If you're using HTTP, adding the headers in the
-received output to study is also a clever way to get a better understanding
-why the server behaves the way it does. Include headers in the normal body
-output with CURLOPT_HEADER set 1.
+There's one golden rule when these things occur: set the
+\fICURLOPT_VERBOSE(3)\fP option to 1. It'll cause the library to spew out the
+entire protocol details it sends, some internal info and some received
+protocol data as well (especially when using FTP). If you're using HTTP,
+adding the headers in the received output to study is also a clever way to get
+a better understanding why the server behaves the way it does. Include headers
+in the normal body output with \fICURLOPT_HEADER(3)\fP set 1.
 
-Of course, there are bugs left. We need to know about them to be able
-to fix them, so we're quite dependent on your bug reports! When you do report
-suspected bugs in libcurl, please include as many details as you possibly can: a
-protocol dump that CURLOPT_VERBOSE produces, library version, as much as
-possible of your code that uses libcurl, operating system name and version,
-compiler name and version etc.
+Of course, there are bugs left. We need to know about them to be able to fix
+them, so we're quite dependent on your bug reports! When you do report
+suspected bugs in libcurl, please include as many details as you possibly can:
+a protocol dump that \fICURLOPT_VERBOSE(3)\fP produces, library version, as
+much as possible of your code that uses libcurl, operating system name and
+version, compiler name and version etc.
 
-If CURLOPT_VERBOSE is not enough, you increase the level of debug data your
-application receive by using the CURLOPT_DEBUGFUNCTION.
+If \fICURLOPT_VERBOSE(3)\fP is not enough, you increase the level of debug
+data your application receive by using the \fICURLOPT_DEBUGFUNCTION(3)\fP.
 
 Getting some in-depth knowledge about the protocols involved is never wrong,
 and if you're trying to do funny things, you might very well understand
@@ -363,7 +363,7 @@ Tell libcurl that we want to upload:
 
 A few protocols won't behave properly when uploads are done without any prior
 knowledge of the expected file size. So, set the upload file size using the
-CURLOPT_INFILESIZE_LARGE for all known file sizes like this[1]:
+\fICURLOPT_INFILESIZE_LARGE(3)\fP for all known file sizes like this[1]:
 
 .nf
  /* in this example, file_size must be an curl_off_t variable */
@@ -393,15 +393,15 @@ them URL encoded, as %XX where XX is a two-digit hexadecimal number.
 
 libcurl also provides options to set various passwords. The user name and
 password as shown embedded in the URL can instead get set with the
-CURLOPT_USERPWD option. The argument passed to libcurl should be a char * to
-a string in the format "user:password". In a manner like this:
+\fICURLOPT_USERPWD(3)\fP option. The argument passed to libcurl should be a
+char * to a string in the format "user:password". In a manner like this:
 
  curl_easy_setopt(easyhandle, CURLOPT_USERPWD, "myname:thesecret");
 
 Another case where name and password might be needed at times, is for those
 users who need to authenticate themselves to a proxy they use. libcurl offers
-another option for this, the CURLOPT_PROXYUSERPWD. It is used quite similar
-to the CURLOPT_USERPWD option like this:
+another option for this, the \fICURLOPT_PROXYUSERPWD(3)\fP. It is used quite
+similar to the \fICURLOPT_USERPWD(3)\fP option like this:
 
  curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
 
@@ -412,7 +412,7 @@ chapter), as it might contain the password in plain text. libcurl has the
 ability to use this file to figure out what set of user name and password to
 use for a particular host. As an extension to the normal functionality,
 libcurl also supports this file for non-FTP protocols such as HTTP. To make
-curl use this file, use the CURLOPT_NETRC option:
+curl use this file, use the \fICURLOPT_NETRC(3)\fP option:
 
  curl_easy_setopt(easyhandle, CURLOPT_NETRC, 1L);
 
@@ -443,12 +443,12 @@ password in clear-text in the HTTP request, base64-encoded. This is insecure.
 
 At the time of this writing, libcurl can be built to use: Basic, Digest, NTLM,
 Negotiate, GSS-Negotiate and SPNEGO. You can tell libcurl which one to use
-with CURLOPT_HTTPAUTH as in:
+with \fICURLOPT_HTTPAUTH(3)\fP as in:
 
  curl_easy_setopt(easyhandle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
 
 And when you send authentication to a proxy, you can also set authentication
-type the same way but instead with CURLOPT_PROXYAUTH:
+type the same way but instead with \fICURLOPT_PROXYAUTH(3)\fP:
 
  curl_easy_setopt(easyhandle, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
 
@@ -484,8 +484,8 @@ libcurl to post it all to the remote site:
 .fi
 
 Simple enough, huh? Since you set the POST options with the
-CURLOPT_POSTFIELDS, this automatically switches the handle to use POST in the
-upcoming request.
+\fICURLOPT_POSTFIELDS(3)\fP, this automatically switches the handle to use
+POST in the upcoming request.
 
 Ok, so what if you want to post binary data that also requires you to set the
 Content-Type: header of the post? Well, binary posts prevent libcurl from
@@ -576,14 +576,14 @@ post handle:
 
 Since all options on an easyhandle are "sticky", they remain the same until
 changed even if you do call \fIcurl_easy_perform(3)\fP, you may need to tell
-curl to go back to a plain GET request if you intend to do one as your
-next request. You force an easyhandle to go back to GET by using the
-CURLOPT_HTTPGET option:
+curl to go back to a plain GET request if you intend to do one as your next
+request. You force an easyhandle to go back to GET by using the
+\fICURLOPT_HTTPGET(3)\fP option:
 
  curl_easy_setopt(easyhandle, CURLOPT_HTTPGET, 1L);
 
-Just setting CURLOPT_POSTFIELDS to "" or NULL will *not* stop libcurl from
-doing a POST. It will just make it POST without any data to send!
+Just setting \fICURLOPT_POSTFIELDS(3)\fP to "" or NULL will *not* stop libcurl
+from doing a POST. It will just make it POST without any data to send!
 
 .SH "Showing Progress"
 
@@ -591,16 +591,16 @@ For historical and traditional reasons, libcurl has a built-in progress meter
 that can be switched on and then makes it present a progress meter in your
 terminal.
 
-Switch on the progress meter by, oddly enough, setting CURLOPT_NOPROGRESS to
-zero. This option is set to 1 by default.
+Switch on the progress meter by, oddly enough, setting
+\fICURLOPT_NOPROGRESS(3)\fP to zero. This option is set to 1 by default.
 
 For most applications however, the built-in progress meter is useless and
 what instead is interesting is the ability to specify a progress
 callback. The function pointer you pass to libcurl will then be called on
 irregular intervals with information about the current transfer.
 
-Set the progress callback by using CURLOPT_PROGRESSFUNCTION. And pass a
-pointer to a function that matches this prototype:
+Set the progress callback by using \fICURLOPT_PROGRESSFUNCTION(3)\fP. And pass
+a pointer to a function that matches this prototype:
 
 .nf
  int progress_callback(void *clientp,
@@ -612,7 +612,7 @@ pointer to a function that matches this prototype:
 
 If any of the input arguments is unknown, a 0 will be passed. The first
 argument, the 'clientp' is the pointer you pass to libcurl with
-CURLOPT_PROGRESSDATA. libcurl won't touch it.
+\fICURLOPT_PROGRESSDATA(3)\fP. libcurl won't touch it.
 
 .SH "libcurl with C++"
 
@@ -671,11 +671,12 @@ pass that information similar to this:
 
  curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "user:password");
 
-If you want to, you can specify the host name only in the CURLOPT_PROXY
-option, and set the port number separately with CURLOPT_PROXYPORT.
+If you want to, you can specify the host name only in the
+\fICURLOPT_PROXY(3)\fP option, and set the port number separately with
+\fICURLOPT_PROXYPORT(3)\fP.
 
-Tell libcurl what kind of proxy it is with CURLOPT_PROXYTYPE (if not, it will
-default to assume a HTTP proxy):
+Tell libcurl what kind of proxy it is with \fICURLOPT_PROXYTYPE(3)\fP (if not,
+it will default to assume a HTTP proxy):
 
  curl_easy_setopt(easyhandle, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
 
@@ -704,7 +705,8 @@ variable may say so. If 'no_proxy' is a plain asterisk ("*") it matches all
 hosts.
 
 To explicitly disable libcurl's checking for and using the proxy environment
-variables, set the proxy name to "" - an empty string - with CURLOPT_PROXY.
+variables, set the proxy name to "" - an empty string - with
+\fICURLOPT_PROXY(3)\fP.
 .IP "SSL and Proxies"
 
 SSL is for secure point-to-point connections. This involves strong encryption
@@ -800,21 +802,21 @@ may also be added in the future.
 
 Each easy handle will attempt to keep the last few connections alive for a
 while in case they are to be used again. You can set the size of this "cache"
-with the CURLOPT_MAXCONNECTS option. Default is 5. There is very seldom any
-point in changing this value, and if you think of changing this it is often
-just a matter of thinking again.
+with the \fICURLOPT_MAXCONNECTS(3)\fP option. Default is 5. There is very
+seldom any point in changing this value, and if you think of changing this it
+is often just a matter of thinking again.
 
 To force your upcoming request to not use an already existing connection (it
 will even close one first if there happens to be one alive to the same host
-you're about to operate on), you can do that by setting CURLOPT_FRESH_CONNECT
-to 1. In a similar spirit, you can also forbid the upcoming request to be
-"lying" around and possibly get re-used after the request by setting
-CURLOPT_FORBID_REUSE to 1.
+you're about to operate on), you can do that by setting
+\fICURLOPT_FRESH_CONNECT(3)\fP to 1. In a similar spirit, you can also forbid
+the upcoming request to be "lying" around and possibly get re-used after the
+request by setting \fICURLOPT_FORBID_REUSE(3)\fP to 1.
 
 .SH "HTTP Headers Used by libcurl"
 When you use libcurl to do HTTP requests, it'll pass along a series of headers
 automatically. It might be good for you to know and understand these. You
-can replace or remove them by using the CURLOPT_HTTPHEADER option.
+can replace or remove them by using the \fICURLOPT_HTTPHEADER(3)\fP option.
 
 .IP "Host"
 This header is required by HTTP 1.1 and even many 1.0 servers and should be
@@ -843,8 +845,8 @@ libcurl is your friend here too.
 
 .IP CUSTOMREQUEST
 If just changing the actual HTTP request keyword is what you want, like when
-GET, HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST is there
-for you. It is very simple to use:
+GET, HEAD or POST is not good enough for you, \fICURLOPT_CUSTOMREQUEST(3)\fP
+is there for you. It is very simple to use:
 
  curl_easy_setopt(easyhandle, CURLOPT_CUSTOMREQUEST, "MYOWNREQUEST");
 
@@ -939,28 +941,29 @@ A little example that deletes a given file before an operation:
 
 If you would instead want this operation (or chain of operations) to happen
 _after_ the data transfer took place the option to \fIcurl_easy_setopt(3)\fP
-would instead be called CURLOPT_POSTQUOTE and used the exact same way.
+would instead be called \fICURLOPT_POSTQUOTE(3)\fP and used the exact same
+way.
 
 The custom FTP command will be issued to the server in the same order they are
 added to the list, and if a command gets an error code returned back from the
 server, no more commands will be issued and libcurl will bail out with an
-error code (CURLE_QUOTE_ERROR). Note that if you use CURLOPT_QUOTE to send
-commands before a transfer, no transfer will actually take place when a quote
-command has failed.
+error code (CURLE_QUOTE_ERROR). Note that if you use \fICURLOPT_QUOTE(3)\fP to
+send commands before a transfer, no transfer will actually take place when a
+quote command has failed.
 
-If you set the CURLOPT_HEADER to 1, you will tell libcurl to get
+If you set the \fICURLOPT_HEADER(3)\fP to 1, you will tell libcurl to get
 information about the target file and output "headers" about it. The headers
 will be in "HTTP-style", looking like they do in HTTP.
 
 The option to enable headers or to run custom FTP commands may be useful to
-combine with CURLOPT_NOBODY. If this option is set, no actual file content
-transfer will be performed.
+combine with \fICURLOPT_NOBODY(3)\fP. If this option is set, no actual file
+content transfer will be performed.
 
 .IP "FTP Custom CUSTOMREQUEST"
-If you do want to list the contents of a FTP directory using your own defined FTP
-command, CURLOPT_CUSTOMREQUEST will do just that. "NLST" is the default one
-for listing directories but you're free to pass in your idea of a good
-alternative.
+If you do want to list the contents of a FTP directory using your own defined
+FTP command, \fICURLOPT_CUSTOMREQUEST(3)\fP will do just that. "NLST" is the
+default one for listing directories but you're free to pass in your idea of a
+good alternative.
 
 .SH "Cookies Without Chocolate Chips"
 In the HTTP sense, a cookie is a name with an associated value. A server sends
@@ -975,8 +978,8 @@ update them. Server use cookies to "track" users and to keep "sessions".
 Cookies are sent from server to clients with the header Set-Cookie: and
 they're sent from clients to servers with the Cookie: header.
 
-To just send whatever cookie you want to a server, you can use CURLOPT_COOKIE
-to set a cookie string like this:
+To just send whatever cookie you want to a server, you can use
+\fICURLOPT_COOKIE(3)\fP to set a cookie string like this:
 
  curl_easy_setopt(easyhandle, CURLOPT_COOKIE, "name1=var1; name2=var2;");
 
@@ -987,29 +990,30 @@ are then used accordingly on later requests.
 One way to do this, is to save all headers you receive in a plain file and
 when you make a request, you tell libcurl to read the previous headers to
 figure out which cookies to use. Set the header file to read cookies from with
-CURLOPT_COOKIEFILE.
+\fICURLOPT_COOKIEFILE(3)\fP.
 
-The CURLOPT_COOKIEFILE option also automatically enables the cookie parser in
-libcurl. Until the cookie parser is enabled, libcurl will not parse or
-understand incoming cookies and they will just be ignored. However, when the
-parser is enabled the cookies will be understood and the cookies will be kept
-in memory and used properly in subsequent requests when the same handle is
-used. Many times this is enough, and you may not have to save the cookies to
-disk at all. Note that the file you specify to CURLOPT_COOKIEFILE doesn't have
-to exist to enable the parser, so a common way to just enable the parser and
-not read any cookies is to use the name of a file you know doesn't exist.
+The \fICURLOPT_COOKIEFILE(3)\fP option also automatically enables the cookie
+parser in libcurl. Until the cookie parser is enabled, libcurl will not parse
+or understand incoming cookies and they will just be ignored. However, when
+the parser is enabled the cookies will be understood and the cookies will be
+kept in memory and used properly in subsequent requests when the same handle
+is used. Many times this is enough, and you may not have to save the cookies
+to disk at all. Note that the file you specify to \ICURLOPT_COOKIEFILE(3)\fP
+doesn't have to exist to enable the parser, so a common way to just enable the
+parser and not read any cookies is to use the name of a file you know doesn't
+exist.
 
 If you would rather use existing cookies that you've previously received with
 your Netscape or Mozilla browsers, you can make libcurl use that cookie file
-as input. The CURLOPT_COOKIEFILE is used for that too, as libcurl will
-automatically find out what kind of file it is and act accordingly.
+as input. The \fICURLOPT_COOKIEFILE(3)\fP is used for that too, as libcurl
+will automatically find out what kind of file it is and act accordingly.
 
 Perhaps the most advanced cookie operation libcurl offers, is saving the
 entire internal cookie state back into a Netscape/Mozilla formatted cookie
 file. We call that the cookie-jar. When you set a file name with
-CURLOPT_COOKIEJAR, that file name will be created and all received cookies
-will be stored in it when \fIcurl_easy_cleanup(3)\fP is called. This enables
-cookies to get passed on properly between multiple handles without any
+\fICURLOPT_COOKIEJAR(3)\fP, that file name will be created and all received
+cookies will be stored in it when \fIcurl_easy_cleanup(3)\fP is called. This
+enables cookies to get passed on properly between multiple handles without any
 information getting lost.
 
 .SH "FTP Peculiarities We Need"
@@ -1028,36 +1032,36 @@ work it tries PASV instead. (EPSV is an extension to the original FTP spec
 and does not exist nor work on all FTP servers.)
 
 You can prevent libcurl from first trying the EPSV command by setting
-CURLOPT_FTP_USE_EPSV to zero.
+\fICURLOPT_FTP_USE_EPSV(3)\fP to zero.
 
 In some cases, you will prefer to have the server connect back to you for the
 second connection. This might be when the server is perhaps behind a firewall
 or something and only allows connections on a single port. libcurl then
 informs the remote server which IP address and port number to connect to.
-This is made with the CURLOPT_FTPPORT option. If you set it to "-", libcurl
-will use your system's "default IP address". If you want to use a particular
-IP, you can set the full IP address, a host name to resolve to an IP address
-or even a local network interface name that libcurl will get the IP address
-from.
+This is made with the \fICURLOPT_FTPPORT(3)\fP option. If you set it to "-",
+libcurl will use your system's "default IP address". If you want to use a
+particular IP, you can set the full IP address, a host name to resolve to an
+IP address or even a local network interface name that libcurl will get the IP
+address from.
 
 When doing the "PORT" approach, libcurl will attempt to use the EPRT and the
 LPRT before trying PORT, as they work with more protocols. You can disable
-this behavior by setting CURLOPT_FTP_USE_EPRT to zero.
+this behavior by setting \fICURLOPT_FTP_USE_EPRT(3)\fP to zero.
 
 .SH "Headers Equal Fun"
 
 Some protocols provide "headers", meta-data separated from the normal
-data. These headers are by default not included in the normal data stream,
-but you can make them appear in the data stream by setting CURLOPT_HEADER to
-1.
+data. These headers are by default not included in the normal data stream, but
+you can make them appear in the data stream by setting \fICURLOPT_HEADER(3)\fP
+to 1.
 
 What might be even more useful, is libcurl's ability to separate the headers
 from the data and thus make the callbacks differ. You can for example set a
 different pointer to pass to the ordinary write callback by setting
-CURLOPT_WRITEHEADER.
+\fICURLOPT_WRITEHEADER(3)\fP.
 
-Or, you can set an entirely separate function to receive the headers, by
-using CURLOPT_HEADERFUNCTION.
+Or, you can set an entirely separate function to receive the headers, by using
+\fICURLOPT_HEADERFUNCTION(3)\fP.
 
 The headers are passed to the callback function one by one, and you can
 depend on that fact. It makes it easier for you to add custom header parsers
@@ -1123,13 +1127,13 @@ don't let snoopers see your password: HTTP with Digest, NTLM or GSS
 authentication, HTTPS, FTPS, SCP, SFTP and FTP-Kerberos are a few examples.
 
 .IP "Redirects"
-The CURLOPT_FOLLOWLOCATION option automatically follows HTTP redirects sent
-by a remote server.  These redirects can refer to any kind of URL, not just
-HTTP.  A redirect to a file: URL would cause the libcurl to read (or write)
-arbitrary files from the local filesystem.  If the application returns
-the data back to the user (as would happen in some kinds of CGI scripts),
-an attacker could leverage this to read otherwise forbidden data (e.g.
-file://localhost/etc/passwd).
+The \fICURLOPT_FOLLOWLOCATION(3)\fP option automatically follows HTTP
+redirects sent by a remote server.  These redirects can refer to any kind of
+URL, not just HTTP.  A redirect to a file: URL would cause the libcurl to read
+(or write) arbitrary files from the local filesystem.  If the application
+returns the data back to the user (as would happen in some kinds of CGI
+scripts), an attacker could leverage this to read otherwise forbidden data
+(e.g.  file://localhost/etc/passwd).
 
 If authentication credentials are stored in the ~/.netrc file, or Kerberos
 is in use, any other URL type (not just file:) that requires
@@ -1142,19 +1146,20 @@ the user running the libcurl application, SCP: or SFTP: URLs could access
 password or private-key protected resources,
 e.g. sftp://user@some-internal-server/etc/passwd
 
-The CURLOPT_REDIR_PROTOCOLS and CURLOPT_NETRC options can be used to
-mitigate against this kind of attack.
+The \fICURLOPT_REDIR_PROTOCOLS(3)\fP and \fICURLOPT_NETRC(3)\fP options can be
+used to mitigate against this kind of attack.
 
 A redirect can also specify a location available only on the machine running
 libcurl, including servers hidden behind a firewall from the attacker.
 e.g. http://127.0.0.1/ or http://intranet/delete-stuff.cgi?delete=all or
 tftp://bootp-server/pc-config-data
 
-Apps can mitigate against this by disabling CURLOPT_FOLLOWLOCATION and
-handling redirects itself, sanitizing URLs as necessary. Alternately, an
-app could leave CURLOPT_FOLLOWLOCATION enabled but set CURLOPT_REDIR_PROTOCOLS
-and install a CURLOPT_OPENSOCKETFUNCTION callback function in which addresses
-are sanitized before use.
+Apps can mitigate against this by disabling \fICURLOPT_FOLLOWLOCATION(3)\fP
+and handling redirects itself, sanitizing URLs as necessary. Alternately, an
+app could leave \fICURLOPT_FOLLOWLOCATION(3)\fP enabled but set
+\fICURLOPT_REDIR_PROTOCOLS(3)\fP and install a
+\fICURLOPT_OPENSOCKETFUNCTION(3)\fP callback function in which addresses are
+sanitized before use.
 
 .IP "Private Resources"
 A user who can control the DNS server of a domain being passed in within a URL
@@ -1162,21 +1167,21 @@ can change the address of the host to a local, private address which a
 server-side libcurl-using application could then use. e.g. the innocuous URL
 http://fuzzybunnies.example.com/ could actually resolve to the IP address of a
 server behind a firewall, such as 127.0.0.1 or 10.1.2.3.  Apps can mitigate
-against this by setting a CURLOPT_OPENSOCKETFUNCTION and checking the address
-before a connection.
+against this by setting a \fICURLOPT_OPENSOCKETFUNCTION(3)\fP and checking the
+address before a connection.
 
-All the malicious scenarios regarding redirected URLs apply just as well
-to non-redirected URLs, if the user is allowed to specify an arbitrary URL
-that could point to a private resource. For example, a web app providing
-a translation service might happily translate file://localhost/etc/passwd
-and display the result.  Apps can mitigate against this with the
-CURLOPT_PROTOCOLS option as well as by similar mitigation techniques for
-redirections.
+All the malicious scenarios regarding redirected URLs apply just as well to
+non-redirected URLs, if the user is allowed to specify an arbitrary URL that
+could point to a private resource. For example, a web app providing a
+translation service might happily translate file://localhost/etc/passwd and
+display the result.  Apps can mitigate against this with the
+\fICURLOPT_PROTOCOLS(3)\fP option as well as by similar mitigation techniques
+for redirections.
 
-A malicious FTP server could in response to the PASV command return an
-IP address and port number for a server local to the app running libcurl
-but behind a firewall.  Apps can mitigate against this by using the
-CURLOPT_FTP_SKIP_PASV_IP option or CURLOPT_FTPPORT.
+A malicious FTP server could in response to the PASV command return an IP
+address and port number for a server local to the app running libcurl but
+behind a firewall.  Apps can mitigate against this by using the
+\fICURLOPT_FTP_SKIP_PASV_IP(3)\fP option or \fICURLOPT_FTPPORT(3)\fP.
 
 .IP "IPv6 Addresses"
 libcurl will normally handle IPv6 addresses transparently and just as easily
@@ -1193,25 +1198,25 @@ can be used to limit resolved addresses to IPv4 only and bypass these issues.
 
 .IP Uploads
 When uploading, a redirect can cause a local (or remote) file to be
-overwritten.  Apps must not allow any unsanitized URL to be passed in
-for uploads.  Also, CURLOPT_FOLLOWLOCATION should not be used on uploads.
+overwritten.  Apps must not allow any unsanitized URL to be passed in for
+uploads.  Also, \fICURLOPT_FOLLOWLOCATION(3)\fP should not be used on uploads.
 Instead, the app should handle redirects itself, sanitizing each URL first.
 
 .IP Authentication
-Use of CURLOPT_UNRESTRICTED_AUTH could cause authentication information to
-be sent to an unknown second server.  Apps can mitigate against this
-by disabling CURLOPT_FOLLOWLOCATION and handling redirects itself,
-sanitizing where necessary.
+Use of \fICURLOPT_UNRESTRICTED_AUTH(3)\fP could cause authentication
+information to be sent to an unknown second server.  Apps can mitigate against
+this by disabling \fICURLOPT_FOLLOWLOCATION(3)\fP and handling redirects
+itself, sanitizing where necessary.
 
-Use of the CURLAUTH_ANY option to CURLOPT_HTTPAUTH could result in user
-name and password being sent in clear text to an HTTP server.  Instead,
-use CURLAUTH_ANYSAFE which ensures that the password is encrypted over
-the network, or else fail the request.
+Use of the CURLAUTH_ANY option to \fICURLOPT_HTTPAUTH(3)\fP could result in
+user name and password being sent in clear text to an HTTP server.  Instead,
+use CURLAUTH_ANYSAFE which ensures that the password is encrypted over the
+network, or else fail the request.
 
-Use of the CURLUSESSL_TRY option to CURLOPT_USE_SSL could result in user
-name and password being sent in clear text to an FTP server.  Instead,
-use CURLUSESSL_CONTROL to ensure that an encrypted connection is used or
-else fail the request.
+Use of the CURLUSESSL_TRY option to \fICURLOPT_USE_SSL(3)\fP could result in
+user name and password being sent in clear text to an FTP server.  Instead,
+use CURLUSESSL_CONTROL to ensure that an encrypted connection is used or else
+fail the request.
 
 .IP Cookies
 If cookies are enabled and cached, then a user could craft a URL which
@@ -1227,34 +1232,35 @@ scp://user:pass@host/a;date >/tmp/test;
 Apps must not allow unsanitized SCP: URLs to be passed in for downloads.
 
 .IP "Denial of Service"
-A malicious server could cause libcurl to effectively hang by sending
-a trickle of data through, or even no data at all but just keeping the TCP
+A malicious server could cause libcurl to effectively hang by sending a
+trickle of data through, or even no data at all but just keeping the TCP
 connection open.  This could result in a denial-of-service attack. The
-CURLOPT_TIMEOUT and/or CURLOPT_LOW_SPEED_LIMIT options can be used to
-mitigate against this.
+\fICURLOPT_TIMEOUT(3)\fP and/or \fICURLOPT_LOW_SPEED_LIMIT(3)\fP options can
+be used to mitigate against this.
 
-A malicious server could cause libcurl to effectively hang by starting to
-send data, then severing the connection without cleanly closing the
-TCP connection.  The app could install a CURLOPT_SOCKOPTFUNCTION callback
-function and set the TCP SO_KEEPALIVE option to mitigate against this.
-Setting one of the timeout options would also work against this attack.
+A malicious server could cause libcurl to effectively hang by starting to send
+data, then severing the connection without cleanly closing the TCP connection.
+The app could install a \fICURLOPT_SOCKOPTFUNCTION(3)\fP callback function and
+set the TCP SO_KEEPALIVE option to mitigate against this.  Setting one of the
+timeout options would also work against this attack.
 
-A malicious server could cause libcurl to download an infinite amount of
-data, potentially causing all of memory or disk to be filled. Setting
-the CURLOPT_MAXFILESIZE_LARGE option is not sufficient to guard against this.
-Instead, the app should monitor the amount of data received within the
+A malicious server could cause libcurl to download an infinite amount of data,
+potentially causing all of memory or disk to be filled. Setting the
+\fICURLOPT_MAXFILESIZE_LARGE(3)\fP option is not sufficient to guard against
+this.  Instead, the app should monitor the amount of data received within the
 write or progress callback and abort once the limit is reached.
 
 A malicious HTTP server could cause an infinite redirection loop, causing a
-denial-of-service. This can be mitigated by using the CURLOPT_MAXREDIRS
-option.
+denial-of-service. This can be mitigated by using the
+\fICURLOPT_MAXREDIRS(3)\fP option.
 
 .IP "Arbitrary Headers"
 User-supplied data must be sanitized when used in options like
-CURLOPT_USERAGENT, CURLOPT_HTTPHEADER, CURLOPT_POSTFIELDS and others that
-are used to generate structured data. Characters like embedded carriage
-returns or ampersands could allow the user to create additional headers or
-fields that could cause malicious transactions.
+\fICURLOPT_USERAGENT(3)\fP, \fICURLOPT_HTTPHEADER(3)\fP,
+\fICURLOPT_POSTFIELDS(3)\fP and others that are used to generate structured
+data. Characters like embedded carriage returns or ampersands could allow the
+user to create additional headers or fields that could cause malicious
+transactions.
 
 .IP "Server-supplied Names"
 A server can supply data which the application may, in some cases, use as
@@ -1266,9 +1272,9 @@ names to avoid the possibility of a malicious server supplying one like
 "/etc/passwd", "\\autoexec.bat", "prn:" or even ".bashrc".
 
 .IP "Server Certificates"
-A secure application should never use the CURLOPT_SSL_VERIFYPEER option to
-disable certificate validation. There are numerous attacks that are enabled
-by apps that fail to properly validate server TLS/SSL certificates,
+A secure application should never use the \fICURLOPT_SSL_VERIFYPEER(3)\fP
+option to disable certificate validation. There are numerous attacks that are
+enabled by apps that fail to properly validate server TLS/SSL certificates,
 thus enabling a malicious server to spoof a legitimate one. HTTPS without
 validated certificates is potentially as insecure as a plain HTTP connection.
 

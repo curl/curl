@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -32,7 +32,7 @@ curl_formadd - add a section to a multipart/formdata HTTP POST
 curl_formadd() is used to append sections when building a multipart/formdata
 HTTP POST (sometimes referred to as RFC2388-style posts). Append one section
 at a time until you've added all the sections you want included and then you
-pass the \fIfirstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST\fP.
+pass the \fIfirstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST(3)\fP.
 \fIlastitem\fP is set after each \fIcurl_formadd(3)\fP call and on repeated
 invokes it should be left as set to allow repeated invokes to find the end of
 the list faster.
@@ -45,7 +45,7 @@ the function itself. You must call \fIcurl_formfree(3)\fP on the
 \fIfirstitem\fP after the form post has been done to free the resources.
 
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
-You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
+You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
 
 First, there are some basics you need to understand about multipart/formdata
 posts. Each part consists of at least a NAME and a CONTENTS part. If the part
@@ -121,12 +121,13 @@ to the buffer to be uploaded. This buffer must not be freed until after
 is used in combination with \fICURLFORM_BUFFER\fP. The parameter is a
 long which gives the length of the buffer.
 .IP CURLFORM_STREAM
-Tells libcurl to use the \fICURLOPT_READFUNCTION\fP callback to get data. The
-parameter you pass to \fICURLFORM_STREAM\fP is the pointer passed on to the
-read callback's fourth argument. If you want the part to look like a file
-upload one, set the \fICURLFORM_FILENAME\fP parameter as well. Note that when
-using \fICURLFORM_STREAM\fP, \fICURLFORM_CONTENTSLENGTH\fP must also be set
-with the total expected length of the part. (Option added in libcurl 7.18.2)
+Tells libcurl to use the \fICURLOPT_READFUNCTION(3)\fP callback to get
+data. The parameter you pass to \fICURLFORM_STREAM\fP is the pointer passed on
+to the read callback's fourth argument. If you want the part to look like a
+file upload one, set the \fICURLFORM_FILENAME\fP parameter as well. Note that
+when using \fICURLFORM_STREAM\fP, \fICURLFORM_CONTENTSLENGTH\fP must also be
+set with the total expected length of the part. (Option added in libcurl
+7.18.2)
 .IP CURLFORM_ARRAY
 Another possibility to send options to curl_formadd() is the
 \fBCURLFORM_ARRAY\fP option, that passes a struct curl_forms array pointer as
@@ -142,7 +143,7 @@ the POST occurs, if you free it before the post completes you may experience
 problems.
 
 When you've passed the HttpPost pointer to \fIcurl_easy_setopt(3)\fP (using
-the \fICURLOPT_HTTPPOST\fP option), you must not free the list until after
+the \fICURLOPT_HTTPPOST(3)\fP option), you must not free the list until after
 you've called \fIcurl_easy_cleanup(3)\fP for the curl handle.
 
 See example below.

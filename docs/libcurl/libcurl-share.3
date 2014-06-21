@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -51,11 +51,12 @@ using this multi-threaded. You set lock and unlock functions with
 \fIcurl_share_setopt(3)\fP too.
 
 Then, you make an easy handle to use this share, you set the
-\fICURLOPT_SHARE\fP option with \fIcurl_easy_setopt(3)\fP, and pass in share
-handle. You can make any number of easy handles share the same share handle.
+\fICURLOPT_SHARE(3)\fP option with \fIcurl_easy_setopt(3)\fP, and pass in
+share handle. You can make any number of easy handles share the same share
+handle.
 
 To make an easy handle stop using that particular share, you set
-\fICURLOPT_SHARE\fP to NULL for that easy handle. To make a handle stop
+\fICURLOPT_SHARE(3)\fP to NULL for that easy handle. To make a handle stop
 sharing a particular data, you can \fICURLSHOPT_UNSHARE\fP it.
 
 When you're done using the share, make sure that no easy handle is still using
