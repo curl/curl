@@ -31,7 +31,6 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADER, long onoff);
 Pass in \fIonoff\fP set to 1 to tell the library to include the header in the
 body output for requests with this \fIhandle\fP. This option is relevant for
 protocols that actually have headers or other meta-data (like HTTP and FTP).
-The default value for this option is 0.
 
 When asking to get the header info passed to the same callback as the body, it
 is not possible to accurately separate them again without detailed knowledge
@@ -39,5 +38,9 @@ about the protocol in use.
 
 It is often better to use \fICURLOPT_HEADERFUNCTION(3)\fP to get the header
 data separately.
+.SH DEFAULT
+0
+.SH RETURN VALUE
+Returns CURLE_OK.
 .SH "SEE ALSO"
 .BR CURLOPT_HEADERFUNCTION "(3), "
