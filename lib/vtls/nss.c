@@ -60,6 +60,12 @@
 #include <cert.h>
 #include <prerror.h>
 
+#define NSSVERNUM ((NSS_VMAJOR<<16)|(NSS_VMINOR<<8)|NSS_VPATCH)
+
+#if NSSVERNUM >= 0x030f00 /* 3.15.0 */
+#include <ocsp.h>
+#endif
+
 #include "curl_memory.h"
 #include "rawstr.h"
 #include "warnless.h"
@@ -639,6 +645,34 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
                                     PRBool isServer)
 {
   struct connectdata *conn = (struct connectdata *)arg;
+
+#ifdef SSL_ENABLE_OCSP_STAPLING
+  if(conn->data->set.ssl.verifystatus) {
+    SECStatus cacheResult;
+
+    const SECItemArray *csa = SSL_PeerStapledOCSPResponses(fd);
+    if(!csa) {
+      failf(conn->data, "Invalid OCSP response");
+      return SECFailure;
+    }
+
+    if(csa->len == 0) {
+      failf(conn->data, "No OCSP response received");
+      return SECFailure;
+    }
+
+    cacheResult = CERT_CacheOCSPResponseFromSideChannel(
+      CERT_GetDefaultCertDB(), SSL_PeerCertificate(fd),
+      PR_Now(), &csa->items[0], arg
+    );
+
+    if(cacheResult != SECSuccess) {
+      failf(conn->data, "Invalid OCSP response");
+      return cacheResult;
+    }
+  }
+#endif
+
   if(!conn->data->set.ssl.verifypeer) {
     infof(conn->data, "skipping SSL peer certificate verification\n");
     return SECSuccess;
@@ -1620,6 +1654,14 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     SSL_SetPKCS11PinArg(connssl->handle, data->set.str[STRING_KEY_PASSWD]);
   }
 
+#ifdef SSL_ENABLE_OCSP_STAPLING
+  if(data->set.ssl.verifystatus) {
+    if(SSL_OptionSet(connssl->handle, SSL_ENABLE_OCSP_STAPLING, PR_TRUE)
+        != SECSuccess)
+      goto error;
+  }
+#endif
+
 #ifdef USE_NGHTTP2
   if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
 #ifdef SSL_ENABLE_NPN
@@ -1906,6 +1948,15 @@ void Curl_nss_md5sum(unsigned char *tmp, /* input */
   PK11_DigestOp(MD5pw, tmp, curlx_uztoui(tmplen));
   PK11_DigestFinal(MD5pw, md5sum, &MD5out, curlx_uztoui(md5len));
   PK11_DestroyContext(MD5pw, PR_TRUE);
+}
+
+bool Curl_nss_cert_status_request(void)
+{
+#ifdef SSL_ENABLE_OCSP_STAPLING
+  return TRUE;
+#else
+  return FALSE;
+#endif
 }
 
 #endif /* USE_NSS */
