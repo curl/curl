@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "1 Jan 2010" "libcurl 7.20.0" "libcurl Manual"
+.TH curl_easy_setopt 3 "25 Jun 2014" "libcurl 7.38.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt \- set options for a curl easy handle
 .SH SYNOPSIS
@@ -336,7 +336,7 @@ RTSP stream URI. See \fICURLOPT_RTSP_STREAM_URI(3)\fP
 .IP CURLOPT_RTSP_TRANSPORT
 RTSP Transport: header. See \fICURLOPT_RTSP_TRANSPORT(3)\fP
 .IP CURLOPT_RTSP_CLIENT_CSEQ
-Clent CSEQ number. See \fICURLOPT_RTSP_CLIENT_CSEQ(3)\fP
+Client CSEQ number. See \fICURLOPT_RTSP_CLIENT_CSEQ(3)\fP
 .IP CURLOPT_RTSP_SERVER_CSEQ
 CSEQ number for RTSP Server->Client request. See \fICURLOPT_RTSP_SERVER_CSEQ(3)\fP
 .SH PROTOCOL OPTIONS
@@ -488,12 +488,14 @@ Mode for creating new remote dirs. See \fICURLOPT_NEW_DIRECTORY_PERMS(3)\fP
 .IP CURLOPT_TELNETOPTIONS
 TELNET options. See \fICURLOPT_TELNETOPTIONS(3)\fP
 .SH RETURN VALUE
-CURLE_OK (zero) means that the option was set properly, non-zero means an
+\fICURLE_OK\fP (zero) means that the option was set properly, non-zero means an
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP
 man page for the full list with descriptions.
 
 If you try to set an option that libcurl doesn't know about, perhaps because
 the library is too old to support it or the option was removed in a recent
-version, this function will return \fICURLE_FAILED_INIT\fP.
+version, this function will return \fICURLE_UNKNOWN_OPTION\fP. If support for
+the option was disabled at compile-time, it will return
+\fICURLE_NOT_BUILT_IN\fP.
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_cleanup "(3), " curl_easy_reset "(3)"
