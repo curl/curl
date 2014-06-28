@@ -26,7 +26,7 @@ CURLOPT_SASL_IR \- enable sending initial response in first packet
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SASL_IR, long first);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SASL_IR, long enable);
 .SH DESCRIPTION
 Pass a long. If the value is 1, curl will send the initial response to the
 server in the first authentication packet in order to reduce the number of
