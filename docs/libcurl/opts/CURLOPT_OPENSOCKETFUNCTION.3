@@ -57,6 +57,9 @@ and \fICURLSOCKTYPE_ACCEPT\fP is for sockets created after accept() - such as
 when doing active FTP. Future versions of libcurl may support more
 purposes.
 
+The \fIclientp\fP pointer contains whatever user-defined value set using the
+\fICURLOPT_OPENSOCKETDATA\fP function.
+
 The callback gets the resolved peer address as the \fIaddress\fP argument and
 is allowed to modify the address or refuse to connect completely. The callback
 function should return the newly created socket or \fICURL_SOCKET_BAD\fP in

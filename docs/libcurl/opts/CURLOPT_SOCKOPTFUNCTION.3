@@ -57,12 +57,16 @@ exact purpose for this particular socket:
 (in earlier versions these sockets weren't passed to this callback).
 
 Future versions of libcurl may support more purposes. libcurl passes the newly
-created socket descriptor to the callback so additional setsockopt() calls can
-be done at the user's discretion.  Return \fICURL_SOCKOPT_OK\fP from the
-callback on success. Return \fICURL_SOCKOPT_ERROR\fP from the callback
-function to signal an unrecoverable error to the library and it will close the
-socket and return \fICURLE_COULDNT_CONNECT\fP.
+created socket descriptor to the callback in the \fIcurlfd\fP parameter so
+additional setsockopt() calls can be done at the user's discretion.
 
+The \fIclientp\fP pointer contains whatever user-defined value set using the
+\fICURLOPT_SOCKOPTDATA\fP function.
+
+Return \fICURL_SOCKOPT_OK\fP from the callback on success. Return
+\fICURL_SOCKOPT_ERROR\fP from the callback function to signal an unrecoverable
+error to the library and it will close the socket and return
+\fICURLE_COULDNT_CONNECT\fP.
 Alternatively, the callback function can return
 \fICURL_SOCKOPT_ALREADY_CONNECTED\fP, to tell libcurl that the socket is
 already connected and then libcurl will not attempt to connect it. This allows
