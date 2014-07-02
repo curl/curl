@@ -26,7 +26,7 @@ CURLOPT_ERRORBUFFER \- set error buffer for error messages
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ERRORBUFFER, [argument]);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ERRORBUFFER, char *buf);
 .SH DESCRIPTION
 Pass a char * to a buffer that the libcurl may store human readable error
 messages in on failures or problems. This may be more helpful than just the
