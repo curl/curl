@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o winbuild: Don't USE_WINSSL when WITH_SSL is being used
  o getinfo: HTTP CONNECT code not reset between transfers [8]
  o Curl_rand: Use a fake entropy for debug builds when CURL_ENTROPY set
+ o nss: do not abort on connection failure (failing tests 305 and 404)
  o 
 
 This release includes the following known bugs:

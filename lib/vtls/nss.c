@@ -1396,7 +1396,8 @@ static CURLcode nss_fail_connect(struct ssl_connect_data *connssl,
   Curl_llist_destroy(connssl->obj_list, NULL);
   connssl->obj_list = NULL;
 
-  if((SSL_VersionRangeGet(connssl->handle, &sslver) == SECSuccess)
+  if(connssl->handle
+      && (SSL_VersionRangeGet(connssl->handle, &sslver) == SECSuccess)
       && (sslver.min == SSL_LIBRARY_VERSION_3_0)
       && (sslver.max == SSL_LIBRARY_VERSION_TLS_1_0)
       && isTLSIntoleranceError(err)) {
