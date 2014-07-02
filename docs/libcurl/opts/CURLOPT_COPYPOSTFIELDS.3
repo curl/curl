@@ -26,7 +26,7 @@ CURLOPT_COPYPOSTFIELDS \- have libcurl copy data to POST
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COPYPOSTFIELDS, [argument]);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COPYPOSTFIELDS, char *data);
 .SH DESCRIPTION
 Pass a char * as parameter, which should be the full data to post in a HTTP
 POST operation. It behaves as the \fICURLOPT_POSTFIELDS(3)\fP option, but the
