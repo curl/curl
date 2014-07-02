@@ -1315,6 +1315,7 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
   switch (data->set.ssl.version) {
   default:
   case CURL_SSLVERSION_DEFAULT:
+    sslver->min = SSL_LIBRARY_VERSION_3_0;
     if(data->state.ssl_connect_retry) {
       infof(data, "TLS disabled due to previous handshake failure\n");
       sslver->max = SSL_LIBRARY_VERSION_3_0;
@@ -1323,7 +1324,6 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
   /* intentional fall-through to default to highest TLS version if possible */
 
   case CURL_SSLVERSION_TLSv1:
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
 #ifdef SSL_LIBRARY_VERSION_TLS_1_2
     sslver->max = SSL_LIBRARY_VERSION_TLS_1_2;
 #elif defined SSL_LIBRARY_VERSION_TLS_1_1
@@ -1399,7 +1399,7 @@ static CURLcode nss_fail_connect(struct ssl_connect_data *connssl,
   if(connssl->handle
       && (SSL_VersionRangeGet(connssl->handle, &sslver) == SECSuccess)
       && (sslver.min == SSL_LIBRARY_VERSION_3_0)
-      && (sslver.max == SSL_LIBRARY_VERSION_TLS_1_0)
+      && (sslver.max != SSL_LIBRARY_VERSION_3_0)
       && isTLSIntoleranceError(err)) {
     /* schedule reconnect through Curl_retry_request() */
     data->state.ssl_connect_retry = TRUE;
@@ -1437,7 +1437,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   CURLcode curlerr;
 
   SSLVersionRange sslver = {
-    SSL_LIBRARY_VERSION_3_0,      /* min */
+    SSL_LIBRARY_VERSION_TLS_1_0,  /* min */
     SSL_LIBRARY_VERSION_TLS_1_0   /* max */
   };
 

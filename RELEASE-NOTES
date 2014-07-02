@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o getinfo: HTTP CONNECT code not reset between transfers [8]
  o Curl_rand: Use a fake entropy for debug builds when CURL_ENTROPY set
  o nss: do not abort on connection failure (failing tests 305 and 404)
+ o nss: make the fallback to SSLv3 work again
  o 
 
 This release includes the following known bugs:
