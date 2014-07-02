@@ -26,7 +26,7 @@ CURLOPT_ADDRESS_SCOPE \- set scope for local IPv6 addresses
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ADDRESS_SCOPE, [argument]);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ADDRESS_SCOPE, long scope);
 .SH DESCRIPTION
 Pass a long specifying the scope_id value to use when connecting to IPv6
 link-local or site-local addresses.
