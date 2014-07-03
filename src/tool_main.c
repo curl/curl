@@ -29,6 +29,7 @@
 
 #ifdef USE_NSS
 #include <nspr.h>
+#include <plarenas.h>
 #endif
 
 #define ENABLE_CURLX_PRINTF
