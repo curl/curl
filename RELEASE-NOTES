@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o nss: do not abort on connection failure (failing tests 305 and 404)
  o nss: make the fallback to SSLv3 work again
  o tool: prevent valgrind from reporting possibly lost memory (nss only)
+ o nss: fix a memory leak when CURLOPT_CRLFILE is used
  o 
 
 This release includes the following known bugs:
