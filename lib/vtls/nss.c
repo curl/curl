@@ -439,7 +439,7 @@ static SECStatus nss_cache_crl(SECItem *crlDER)
     /* CRL already cached */
     SEC_DestroyCrl(crl);
     SECITEM_FreeItem(crlDER, PR_FALSE);
-    return SECSuccess;
+    return CURLE_SSL_CRL_BADFILE;
   }
 
   /* acquire lock before call of CERT_CacheCRL() */
@@ -448,16 +448,16 @@ static SECStatus nss_cache_crl(SECItem *crlDER)
     /* unable to cache CRL */
     PR_Unlock(nss_crllock);
     SECITEM_FreeItem(crlDER, PR_FALSE);
-    return SECFailure;
+    return CURLE_SSL_CRL_BADFILE;
   }
 
   /* we need to clear session cache, so that the CRL could take effect */
   SSL_ClearSessionCache();
   PR_Unlock(nss_crllock);
-  return SECSuccess;
+  return CURLE_OK;
 }
 
-static SECStatus nss_load_crl(const char* crlfilename)
+static CURLcode nss_load_crl(const char* crlfilename)
 {
   PRFileDesc *infile;
   PRFileInfo  info;
@@ -467,7 +467,7 @@ static SECStatus nss_load_crl(const char* crlfilename)
 
   infile = PR_Open(crlfilename, PR_RDONLY, 0);
   if(!infile)
-    return SECFailure;
+    return CURLE_SSL_CRL_BADFILE;
 
   if(PR_SUCCESS != PR_GetOpenFileInfo(infile, &info))
     goto fail;
@@ -513,7 +513,7 @@ static SECStatus nss_load_crl(const char* crlfilename)
 fail:
   PR_Close(infile);
   SECITEM_FreeItem(&filedata, PR_FALSE);
-  return SECFailure;
+  return CURLE_SSL_CRL_BADFILE;
 }
 
 static CURLcode nss_load_key(struct connectdata *conn, int sockindex,
@@ -1564,13 +1564,12 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   }
 
   if(data->set.ssl.CRLfile) {
-    if(SECSuccess != nss_load_crl(data->set.ssl.CRLfile)) {
-      curlerr = CURLE_SSL_CRL_BADFILE;
+    const CURLcode rv = nss_load_crl(data->set.ssl.CRLfile);
+    if(CURLE_OK != rv) {
+      curlerr = rv;
       goto error;
     }
-    infof(data,
-          "  CRLfile: %s\n",
-          data->set.ssl.CRLfile ? data->set.ssl.CRLfile : "none");
+    infof(data, "  CRLfile: %s\n", data->set.ssl.CRLfile);
   }
 
   if(data->set.str[STRING_CERT]) {
