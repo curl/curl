@@ -324,7 +324,6 @@ struct ssl_connect_data {
   PRFileDesc *handle;
   char *client_nickname;
   struct SessionHandle *data;
-  struct curl_llist *crl_list;
   struct curl_llist *obj_list;
   PK11GenericObject *obj_clicert;
   ssl_connect_state connecting_state;

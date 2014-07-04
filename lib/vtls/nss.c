@@ -77,6 +77,7 @@ PRFileDesc *PR_ImportTCPSocket(PRInt32 osfd);
 
 PRLock * nss_initlock = NULL;
 PRLock * nss_crllock = NULL;
+struct curl_llist *nss_crl_list = NULL;
 NSSInitContext * nss_context = NULL;
 
 volatile int initialized = 0;
@@ -439,7 +440,7 @@ static CURLcode nss_load_cert(struct ssl_connect_data *ssl,
 }
 
 /* add given CRL to cache if it is not already there */
-static CURLcode nss_cache_crl(struct ssl_connect_data *ssl, SECItem *crl_der)
+static CURLcode nss_cache_crl(SECItem *crl_der)
 {
   CERTCertDBHandle *db = CERT_GetDefaultCertDB();
   CERTSignedCrl *crl = SEC_FindCrlByDERCert(db, crl_der, 0);
@@ -450,14 +451,16 @@ static CURLcode nss_cache_crl(struct ssl_connect_data *ssl, SECItem *crl_der)
     return CURLE_SSL_CRL_BADFILE;
   }
 
-  /* store the CRL item so that we can free it in Curl_nss_close() */
-  if(!Curl_llist_insert_next(ssl->crl_list, ssl->crl_list->tail, crl_der)) {
-    SECITEM_FreeItem(crl_der, PR_FALSE);
+  /* acquire lock before call of CERT_CacheCRL() and accessing nss_crl_list */
+  PR_Lock(nss_crllock);
+
+  /* store the CRL item so that we can free it in Curl_nss_cleanup() */
+  if(!Curl_llist_insert_next(nss_crl_list, nss_crl_list->tail, crl_der)) {
+    SECITEM_FreeItem(crl_der, PR_TRUE);
+    PR_Unlock(nss_crllock);
     return CURLE_OUT_OF_MEMORY;
   }
 
-  /* acquire lock before call of CERT_CacheCRL() */
-  PR_Lock(nss_crllock);
   if(SECSuccess != CERT_CacheCRL(db, crl_der)) {
     /* unable to cache CRL */
     PR_Unlock(nss_crllock);
@@ -470,8 +473,7 @@ static CURLcode nss_cache_crl(struct ssl_connect_data *ssl, SECItem *crl_der)
   return CURLE_OK;
 }
 
-static CURLcode nss_load_crl(struct ssl_connect_data *connssl,
-                             const char* crlfilename)
+static CURLcode nss_load_crl(const char* crlfilename)
 {
   PRFileDesc *infile;
   PRFileInfo  info;
@@ -526,7 +528,7 @@ static CURLcode nss_load_crl(struct ssl_connect_data *connssl,
     *crl_der = filedata;
 
   PR_Close(infile);
-  return nss_cache_crl(connssl, crl_der);
+  return nss_cache_crl(crl_der);
 
 fail:
   PR_Close(infile);
@@ -1064,6 +1066,11 @@ static CURLcode nss_init(struct SessionHandle *data)
   if(initialized)
     return CURLE_OK;
 
+  /* list of all CRL items we need to destroy in Curl_nss_cleanup() */
+  nss_crl_list = Curl_llist_alloc(nss_destroy_crl_item);
+  if(!nss_crl_list)
+    return CURLE_OUT_OF_MEMORY;
+
   /* First we check if $SSL_DIR points to a valid dir */
   cert_dir = getenv("SSL_DIR");
   if(cert_dir) {
@@ -1163,6 +1170,11 @@ void Curl_nss_cleanup(void)
     NSS_ShutdownContext(nss_context);
     nss_context = NULL;
   }
+
+  /* destroy all CRL items */
+  Curl_llist_destroy(nss_crl_list, NULL);
+  nss_crl_list = NULL;
+
   PR_Unlock(nss_initlock);
 
   PR_DestroyLock(nss_initlock);
@@ -1226,10 +1238,6 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
     Curl_llist_destroy(connssl->obj_list, NULL);
     connssl->obj_list = NULL;
     connssl->obj_clicert = NULL;
-
-    /* destroy all CRL items */
-    Curl_llist_destroy(connssl->crl_list, NULL);
-    connssl->crl_list = NULL;
 
     PR_Close(connssl->handle);
     connssl->handle = NULL;
@@ -1418,8 +1426,6 @@ static CURLcode nss_fail_connect(struct ssl_connect_data *connssl,
   /* cleanup on connection failure */
   Curl_llist_destroy(connssl->obj_list, NULL);
   connssl->obj_list = NULL;
-  Curl_llist_destroy(connssl->crl_list, NULL);
-  connssl->crl_list = NULL;
 
   if(connssl->handle
       && (SSL_VersionRangeGet(connssl->handle, &sslver) == SECSuccess)
@@ -1486,14 +1492,6 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   connssl->obj_list = Curl_llist_alloc(nss_destroy_object);
   if(!connssl->obj_list)
     return CURLE_OUT_OF_MEMORY;
-
-  /* list of all CRL items we need to destroy in Curl_nss_close() */
-  connssl->crl_list = Curl_llist_alloc(nss_destroy_crl_item);
-  if(!connssl->crl_list) {
-    Curl_llist_destroy(connssl->obj_list, NULL);
-    connssl->obj_list = NULL;
-    return CURLE_OUT_OF_MEMORY;
-  }
 
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
   PR_Lock(nss_initlock);
@@ -1597,7 +1595,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   }
 
   if(data->set.ssl.CRLfile) {
-    const CURLcode rv = nss_load_crl(connssl, data->set.ssl.CRLfile);
+    const CURLcode rv = nss_load_crl(data->set.ssl.CRLfile);
     if(CURLE_OK != rv) {
       curlerr = rv;
       goto error;
