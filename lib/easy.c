@@ -674,7 +674,7 @@ static CURLcode easy_transfer(CURLM *multi)
                            curl_multi_wait() without any filedescriptors */
 
   while(!done && !mcode) {
-    int still_running;
+    int still_running = 0;
     int ret;
 
     before = curlx_tvnow();

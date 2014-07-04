@@ -551,7 +551,7 @@ static CURLcode trynextip(struct connectdata *conn,
 
   if(sockindex == FIRSTSOCKET) {
     Curl_addrinfo *ai = NULL;
-    int family;
+    int family = AF_UNSPEC;
 
     if(conn->tempaddr[tempindex]) {
       /* find next address in the same protocol family */

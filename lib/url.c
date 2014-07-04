@@ -5137,7 +5137,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   char *proxy = NULL;
   bool prot_missing = FALSE;
   bool no_connections_available = FALSE;
-  bool force_reuse;
+  bool force_reuse = FALSE;
   size_t max_host_connections = Curl_multi_max_host_connections(data->multi);
   size_t max_total_connections = Curl_multi_max_total_connections(data->multi);
 
