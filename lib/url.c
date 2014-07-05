@@ -1430,7 +1430,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 #endif
 
-  case CURLOPT_WRITEHEADER:
+  case CURLOPT_HEADERDATA:
     /*
      * Custom pointer to pass the header write callback function
      */
@@ -1443,7 +1443,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.errorbuffer = va_arg(param, char *);
     break;
-  case CURLOPT_FILE:
+  case CURLOPT_WRITEDATA:
     /*
      * FILE pointer to write to. Or possibly
      * used as argument to the write callback.

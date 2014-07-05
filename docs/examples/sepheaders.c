@@ -66,7 +66,7 @@ int main(void)
   }
 
   /* we want the headers be written to this file handle */
-  curl_easy_setopt(curl_handle,   CURLOPT_WRITEHEADER, headerfile);
+  curl_easy_setopt(curl_handle,   CURLOPT_HEADERDATA, headerfile);
 
   /* we want the body be written to this file handle instead of stdout */
   curl_easy_setopt(curl_handle,   CURLOPT_WRITEDATA, bodyfile);

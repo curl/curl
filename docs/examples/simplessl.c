@@ -75,7 +75,7 @@ int main(void)
   if(curl) {
     /* what call to write: */
     curl_easy_setopt(curl, CURLOPT_URL, "HTTPS://your.favourite.ssl.site");
-    curl_easy_setopt(curl, CURLOPT_WRITEHEADER, headerfile);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, headerfile);
 
     for(i = 0; i < 1; i++) /* single-iteration loop, just to break out from */
     {

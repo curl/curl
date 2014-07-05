@@ -63,9 +63,8 @@ int main(int argc, char *argv[])
   pagefile = fopen(pagefilename, "wb");
   if (pagefile) {
 
-    /* write the page body to this file handle. CURLOPT_FILE is also known as
-       CURLOPT_WRITEDATA*/
-    curl_easy_setopt(curl_handle, CURLOPT_FILE, pagefile);
+    /* write the page body to this file handle */
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
 
     /* get it! */
     curl_easy_perform(curl_handle);

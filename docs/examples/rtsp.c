@@ -224,7 +224,7 @@ int main(int argc, char * const argv[])
       if (curl != NULL) {
         my_curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
         my_curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
-        my_curl_easy_setopt(curl, CURLOPT_WRITEHEADER, stdout);
+        my_curl_easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
         my_curl_easy_setopt(curl, CURLOPT_URL, url);
 
         /* request server options */
