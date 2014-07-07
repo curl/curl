@@ -4149,6 +4149,7 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
 void Curl_free_request_state(struct SessionHandle *data)
 {
   Curl_safefree(data->req.protop);
+  Curl_safefree(data->req.newurl);
 }
 
 
