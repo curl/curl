@@ -21,6 +21,9 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
+# remove targets if the command fails
+.DELETE_ON_ERROR:
+
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
 # being currently built and tested are searched before the library which
