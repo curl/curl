@@ -8,7 +8,7 @@ HTTP
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200
+HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fakem
 Last-Modified: Mon, 22 Apr 2013 17:45:05 GMT
@@ -20,7 +20,7 @@ Hello World
 </data>
 
 <datacheck>
-HTTP/1.1 200
+HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fakem
 Last-Modified: Mon, 22 Apr 2013 17:45:05 GMT
@@ -28,7 +28,7 @@ Content-Type: text/html
 Content-Length: 12
 Connection: close
 
-HTTP/1.1 200
+HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fakem
 Last-Modified: Mon, 22 Apr 2013 17:45:05 GMT
