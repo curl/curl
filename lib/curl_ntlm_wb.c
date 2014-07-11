@@ -39,6 +39,9 @@
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -117,6 +120,10 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
   char *slash, *domain = NULL;
   const char *ntlm_auth = NULL;
   char *ntlm_auth_alloc = NULL;
+#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
+  struct passwd pw, *pw_res;
+  char pwbuf[1024];
+#endif
   int error;
 
   /* Return if communication with ntlm_auth already set up */
@@ -125,6 +132,30 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
     return CURLE_OK;
 
   username = userp;
+  /* The real ntlm_auth really doesn't like being invoked with an
+     empty username. It won't make inferences for itself, and expects
+     the client to do so (mostly because it's really designed for
+     servers like squid to use for auth, and client support is an
+     afterthought for it). So try hard to provide a suitable username
+     if we don't already have one. But if we can't, provide the
+     empty one anyway. Perhaps they have an implementation of the
+     ntlm_auth helper which *doesn't* need it so we might as well try */
+  if(!username || !username[0]) {
+    username = getenv("NTLMUSER");
+    if(!username || !username[0])
+      username = getenv("LOGNAME");
+    if(!username || !username[0])
+      username = getenv("USER");
+#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
+    if((!username || !username[0]) &&
+       !getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res) &&
+       pw_res) {
+      username = pw.pw_name;
+    }
+#endif
+    if(!username || !username[0])
+      username = userp;
+  }
   slash = strpbrk(username, "\\/");
   if(slash) {
     if((domain = strdup(username)) == NULL)
