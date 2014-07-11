@@ -36,7 +36,7 @@ typedef enum {
 } GlobCode;
 
 #define GLOBERROR(string, column, code) \
-  glob->error = string, glob->pos = column, code;
+  glob->error = string, glob->pos = column, code
 
 void glob_cleanup(URLGlob* glob);
 

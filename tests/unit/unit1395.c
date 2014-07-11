@@ -79,6 +79,6 @@ UNITTEST_START
     free(out);
   }
 
-  return fails;
+  fail_if(fails, "output mismatched");
 
 UNITTEST_STOP
