@@ -40,6 +40,7 @@ This release includes the following bugfixes:
  o nss: fix a memory leak when CURLOPT_CRLFILE is used
  o gnutls: ignore invalid certificate dates with VERIFYPEER disabled
  o gnutls: fix SRP support with versions of GnuTLS from 2.99.0
+ o gnutls: fixed compilation against versions < 2.12.0
  o 
 
 This release includes the following known bugs:

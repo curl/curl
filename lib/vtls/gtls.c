@@ -369,10 +369,17 @@ gtls_connect_step1(struct connectdata *conn,
   struct in_addr addr;
 #endif
 #ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
-  static int cipher_priority[] = { GNUTLS_CIPHER_AES_128_GCM,
-    GNUTLS_CIPHER_AES_256_GCM, GNUTLS_CIPHER_AES_128_CBC,
-    GNUTLS_CIPHER_AES_256_CBC, GNUTLS_CIPHER_CAMELLIA_128_CBC,
-    GNUTLS_CIPHER_CAMELLIA_256_CBC, GNUTLS_CIPHER_3DES_CBC,
+  static const int cipher_priority[] = {
+  /* These two ciphers were added to GnuTLS as late as ver. 3.0.1,
+     but this code path is only ever used for ver. < 2.12.0.
+     GNUTLS_CIPHER_AES_128_GCM,
+     GNUTLS_CIPHER_AES_256_GCM,
+  */
+    GNUTLS_CIPHER_AES_128_CBC,
+    GNUTLS_CIPHER_AES_256_CBC,
+    GNUTLS_CIPHER_CAMELLIA_128_CBC,
+    GNUTLS_CIPHER_CAMELLIA_256_CBC,
+    GNUTLS_CIPHER_3DES_CBC,
   };
   static const int cert_type_priority[] = { GNUTLS_CRT_X509, 0 };
   static int protocol_priority[] = { 0, 0, 0, 0 };
