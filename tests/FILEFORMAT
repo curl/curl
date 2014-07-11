@@ -175,20 +175,20 @@ ftp-ipv6
 ftps
 http
 http-ipv6
+http-proxy
 https
-none
-scp
-sftp
-socks4
-socks5
-rtsp
-rtsp-ipv6
-imap
-pop3
-smtp
 httptls+srp
 httptls+srp-ipv6
-http-proxy
+imap
+none
+pop3
+rtsp
+rtsp-ipv6
+scp
+sftp
+smtp
+socks4
+socks5
 
 Give only one per line.  This subsection is mandatory.
 </server>
@@ -200,22 +200,22 @@ SKIPPED). Features testable here are:
 
 axTLS
 crypto
+debug
 getrlimit
 GnuTLS
 idn
 ipv6
 large_file
 libz
+Metalink
 NSS
 NTLM
 OpenSSL
-SSL
 socks
-unittest
-debug
+SSL
 TLS-SRP
-Metalink
 TrackMemory
+unittest
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
@@ -302,29 +302,41 @@ not negative integer number of seconds for the delay. This 'delay' attribute
 is intended for very specific test cases, and normally not needed.
 
 Available substitute variables include:
-%CLIENTIP   - IPv4 address of the client running curl
-%CLIENT6IP  - IPv6 address of the client running curl
-%HOSTIP    - IPv4 address of the host running this test
-%HTTPPORT  - Port number of the HTTP server
-%HOST6IP   - IPv6 address of the host running this test
-%HTTP6PORT - IPv6 port number of the HTTP server
-%HTTPSPORT - Port number of the HTTPS server
-%PROXYPORT - Port number of the HTTP proxy
-%FTPPORT   - Port number of the FTP server
-%FTP6PORT  - IPv6 port number of the FTP server
-%FTPSPORT  - Port number of the FTPS server
+%CLIENT6IP - IPv6 address of the client running curl
+%CLIENTIP  - IPv4 address of the client running curl
+%CURL      - Path to the curl executable
 %FTP2PORT  - Port number of the FTP server 2
+%FTP6PORT  - IPv6 port number of the FTP server
+%FTPPORT   - Port number of the FTP server
+%FTPSPORT  - Port number of the FTPS server
 %FTPTIME2  - Timeout in seconds that should be just sufficient to receive
              a response from the test FTP server
-%TFTPPORT  - Port number of the TFTP server
-%TFTP6PORT - IPv6 port number of the TFTP server
-%SSHPORT   - Port number of the SCP/SFTP server
-%SOCKSPORT - Port number of the SOCKS4/5 server
-%RTSPPORT  - Port number of the RTSP server
-%RTSP6PORT - IPv6 port number of the RTSP server
-%SRCDIR    - Full path to the source dir
+%FTPTIME3  - Even longer than %FTPTIME2
+%GOPHER6PORT  - IPv6 port number of the Gopher server
+%GOPHERPORT   - Port number of the Gopher server
+%HOST6IP      - IPv6 address of the host running this test
+%HOSTIP       - IPv4 address of the host running this test
+%HTTP6PORT    - IPv6 port number of the HTTP server
+%HTTPPIPEPORT - Port number of the HTTP pipelining server
+%HTTPPORT     - Port number of the HTTP server
+%HTTPSPORT    - Port number of the HTTPS server
+%HTTPTLS6PORT - IPv6 port number of the HTTP TLS server
+%HTTPTLSPORT  - Port number of the HTTP TLS server
+%IMAP6PORT - IPv6 port number of the IMAP server
+%IMAPPORT  - Port number of the IMAP server
+%POP36PORT - IPv6 ort number of the POP3 server
+%POP3PORT  - Port number of the POP3 server
+%PROXYPORT - Port number of the HTTP proxy
 %PWD       - Current directory
-%CURL      - Path to the curl executable
+%RTSP6PORT - IPv6 port number of the RTSP server
+%RTSPPORT  - Port number of the RTSP server
+%SMTP6PORT - IPv6 port number of the SMTP server
+%SMTPPORT  - Port number of the SMTP server
+%SOCKSPORT - Port number of the SOCKS4/5 server
+%SRCDIR    - Full path to the source dir
+%SSHPORT   - Port number of the SCP/SFTP server
+%TFTP6PORT - IPv6 port number of the TFTP server
+%TFTPPORT  - Port number of the TFTP server
 %USER      - Login ID of the user running the test
 </command>
 
