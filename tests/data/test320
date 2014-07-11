@@ -50,7 +50,7 @@ TLS-SRP
 simple TLS-SRP HTTPS GET, check user in response
  </name>
 <command>
---insecure --tlsauthtype SRP --tlsuser jsmith --tlspassword abc https://%HOSTIP:%HTTPTLSSRPPORT
+--insecure --tlsauthtype SRP --tlsuser jsmith --tlspassword abc https://%HOSTIP:%HTTPTLSPORT
 </command>
 </client>
 
@@ -78,7 +78,7 @@ Content-type: text/html
 <TR><TD>MAC</TD><TD>SHA1</TD></TR>
 <TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_128_CBC_SHA1</TD></TR></p></TABLE>
 <PRE>
-Host: %HOSTIP:%HTTPTLSSRPPORT
+Host: %HOSTIP:%HTTPTLSPORT
 Accept: */*
 
 </PRE></P>

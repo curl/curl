@@ -19,7 +19,7 @@ TLS-SRP
 TLS-SRP with bad username and password
  </name>
 <command>
---insecure --tlsauthtype SRP --tlsuser baduser --tlspassword badpass https://%HOSTIP:%HTTPTLSSRPPORT
+--insecure --tlsauthtype SRP --tlsuser baduser --tlspassword badpass https://%HOSTIP:%HTTPTLSPORT
 </command>
 </client>
 
