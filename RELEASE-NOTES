@@ -39,6 +39,7 @@ This release includes the following bugfixes:
  o tool: prevent valgrind from reporting possibly lost memory (nss only)
  o nss: fix a memory leak when CURLOPT_CRLFILE is used
  o gnutls: ignore invalid certificate dates with VERIFYPEER disabled
+ o gnutls: fix SRP support with versions of GnuTLS from 2.99.0
  o 
 
 This release includes the following known bugs:

@@ -1452,6 +1452,7 @@ sub runhttptlsserver {
     $flags .= "--http ";
     $flags .= "--debug 1 " if($debugprotocol);
     $flags .= "--port $port ";
+    $flags .= "--priority NORMAL:+SRP ";
     $flags .= "--srppasswd $srcdir/certs/srp-verifier-db ";
     $flags .= "--srppasswdconf $srcdir/certs/srp-verifier-conf";
 

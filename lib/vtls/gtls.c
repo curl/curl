@@ -544,19 +544,19 @@ gtls_connect_step1(struct connectdata *conn,
       break;
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
-      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0";
+      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:+SRP";
       break;
     case CURL_SSLVERSION_TLSv1_0:
       prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                     "+VERS-TLS1.0";
+                     "+VERS-TLS1.0:+SRP";
       break;
     case CURL_SSLVERSION_TLSv1_1:
       prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                     "+VERS-TLS1.1";
+                     "+VERS-TLS1.1:+SRP";
       break;
     case CURL_SSLVERSION_TLSv1_2:
       prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                     "+VERS-TLS1.2";
+                     "+VERS-TLS1.2:+SRP";
       break;
     case CURL_SSLVERSION_SSLv2:
     default:
