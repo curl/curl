@@ -660,7 +660,7 @@ gtls_connect_step3(struct connectdata *conn,
   unsigned int verify_status;
   gnutls_x509_crt_t x509_cert,x509_issuer;
   gnutls_datum_t issuerp;
-  char certbuf[256]; /* big enough? */
+  char certbuf[256] = ""; /* big enough? */
   size_t size;
   unsigned int algo;
   unsigned int bits;
@@ -922,7 +922,7 @@ gtls_connect_step3(struct connectdata *conn,
        might've been rejected and then a new one is in use now and we need to
        detect that. */
     void *connect_sessionid;
-    size_t connect_idsize;
+    size_t connect_idsize = 0;
 
     /* get the session ID data size */
     gnutls_session_get_data(session, NULL, &connect_idsize);
