@@ -775,13 +775,8 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
       authp->avail |= CURLAUTH_GSSNEGOTIATE;
 
       if(authp->picked == CURLAUTH_GSSNEGOTIATE) {
-        if(data->state.negotiate.state == GSS_AUTHSENT) {
-          /* if we sent GSS authentication in the outgoing request and we get
-             this back, we're in trouble */
-          infof(data, "Authentication problem. Ignoring this.\n");
-          data->state.authproblem = TRUE;
-        }
-        else if(data->state.negotiate.state == GSS_AUTHNONE) {
+        if(data->state.negotiate.state == GSS_AUTHSENT ||
+           data->state.negotiate.state == GSS_AUTHNONE) {
           neg = Curl_input_negotiate(conn, proxy, auth);
           if(neg == 0) {
             DEBUGASSERT(!data->req.newurl);
