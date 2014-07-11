@@ -1,6 +1,7 @@
 <testcase>
 <info>
 <keywords>
+globbing
 {} list
 FAILURE
 </keywords>

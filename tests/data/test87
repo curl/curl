@@ -1,6 +1,9 @@
 <testcase>
 <info>
 <keywords>
+HTTP
+HTTP GET
+globbing
 [] range
 FAILURE
 </keywords>
