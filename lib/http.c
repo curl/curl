@@ -737,6 +737,10 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
    */
   struct SessionHandle *data = conn->data;
 
+#ifdef USE_HTTP_NEGOTIATE
+  struct negotiatedata *negdata = proxy?
+    &data->state.proxyneg:&data->state.negotiate;
+#endif
   unsigned long *availp;
   struct auth *authp;
 
@@ -775,8 +779,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
       authp->avail |= CURLAUTH_GSSNEGOTIATE;
 
       if(authp->picked == CURLAUTH_GSSNEGOTIATE) {
-        if(data->state.negotiate.state == GSS_AUTHSENT ||
-           data->state.negotiate.state == GSS_AUTHNONE) {
+        if(negdata->state == GSS_AUTHSENT || negdata->state == GSS_AUTHNONE) {
           neg = Curl_input_negotiate(conn, proxy, auth);
           if(neg == 0) {
             DEBUGASSERT(!data->req.newurl);
@@ -785,7 +788,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
               return CURLE_OUT_OF_MEMORY;
             data->state.authproblem = FALSE;
             /* we received GSS auth info and we dealt with it fine */
-            data->state.negotiate.state = GSS_AUTHRECV;
+            negdata->state = GSS_AUTHRECV;
           }
           else
             data->state.authproblem = TRUE;
