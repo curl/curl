@@ -68,8 +68,6 @@ get_gss_name(struct connectdata *conn, bool proxy,
 int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                          const char *header)
 {
-  struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
-    &conn->data->state.negotiate;
   BYTE              *input_token = 0;
   SecBufferDesc     out_buff_desc;
   SecBuffer         out_sec_buff;
@@ -81,6 +79,31 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   int ret;
   size_t len = 0, input_token_len = 0;
   CURLcode error;
+
+  /* Point to the username and password */
+  const char *userp;
+  const char *passwdp;
+
+  /* Point to the correct struct with this */
+  struct negotiatedata *neg_ctx;
+
+  if(proxy) {
+    userp = conn->proxyuser;
+    passwdp = conn->proxypasswd;
+    neg_ctx = &conn->data->state.proxyneg;
+  }
+  else {
+    userp = conn->user;
+    passwdp = conn->passwd;
+    neg_ctx = &conn->data->state.negotiate;
+  }
+
+  /* Not set means empty */
+  if(!userp)
+    userp = "";
+
+  if(!passwdp)
+    passwdp = "";
 
   if(neg_ctx->context && neg_ctx->status == SEC_E_OK) {
     /* We finished successfully our part of authentication, but server
@@ -131,12 +154,26 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     if(!neg_ctx->credentials || !neg_ctx->context)
       return -1;
 
+    if(userp && *userp) {
+      /* Populate our identity structure */
+      error = Curl_create_sspi_identity(userp, passwdp, &neg_ctx->identity);
+      if(error)
+        return -1;
+
+      /* Allow proper cleanup of the identity structure */
+      neg_ctx->p_identity = &neg_ctx->identity;
+    }
+    else
+      /* Use the current Windows user */
+      neg_ctx->p_identity = NULL;
+
+    /* Acquire our credientials handle */
     neg_ctx->status =
       s_pSecFn->AcquireCredentialsHandle(NULL,
                                          (TCHAR *) TEXT("Negotiate"),
-                                         SECPKG_CRED_OUTBOUND, NULL, NULL,
-                                         NULL, NULL, neg_ctx->credentials,
-                                         &lifetime);
+                                         SECPKG_CRED_OUTBOUND, NULL,
+                                         neg_ctx->p_identity, NULL, NULL,
+                                         neg_ctx->credentials, &lifetime);
     if(neg_ctx->status != SEC_E_OK)
       return -1;
   }
@@ -260,6 +297,9 @@ static void cleanup(struct negotiatedata *neg_ctx)
   }
 
   neg_ctx->max_token_length = 0;
+
+  Curl_sspi_free_identity(neg_ctx->p_identity);
+  neg_ctx->p_identity = NULL;
 }
 
 void Curl_cleanup_negotiate(struct SessionHandle *data)

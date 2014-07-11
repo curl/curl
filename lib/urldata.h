@@ -459,6 +459,8 @@ struct negotiatedata {
   DWORD status;
   CtxtHandle *context;
   CredHandle *credentials;
+  SEC_WINNT_AUTH_IDENTITY identity;
+  SEC_WINNT_AUTH_IDENTITY *p_identity;
   char server_name[1024];
   size_t max_token_length;
   BYTE *output_token;
