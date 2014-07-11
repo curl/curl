@@ -39,19 +39,6 @@
 #include "curl_memory.h"
 #include "url.h"
 
-#ifdef HAVE_SPNEGO
-#  include <spnegohelp.h>
-#  ifdef USE_SSLEAY
-#    ifdef USE_OPENSSL
-#      include <openssl/objects.h>
-#    else
-#      include <objects.h>
-#    endif
-#  else
-#    error "Can't compile SPNEGO support without OpenSSL."
-#  endif
-#endif
-
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
@@ -191,53 +178,6 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     input_token.length = rawlen;
 
     DEBUGASSERT(input_token.value != NULL);
-
-#ifdef HAVE_SPNEGO /* Handle SPNEGO */
-    if(checkprefix("Negotiate", header)) {
-      unsigned char  *spnegoToken       = NULL;
-      size_t          spnegoTokenLength = 0;
-      gss_buffer_desc mechToken         = GSS_C_EMPTY_BUFFER;
-
-      spnegoToken = malloc(input_token.length);
-      if(spnegoToken == NULL) {
-        Curl_safefree(input_token.value);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      memcpy(spnegoToken, input_token.value, input_token.length);
-      spnegoTokenLength = input_token.length;
-
-      if(!parseSpnegoTargetToken(spnegoToken,
-                                 spnegoTokenLength,
-                                 NULL,
-                                 NULL,
-                                 (unsigned char**)&mechToken.value,
-                                 &mechToken.length,
-                                 NULL,
-                                 NULL)) {
-        Curl_safefree(spnegoToken);
-        infof(data, "Parse SPNEGO Target Token failed\n");
-      }
-      else if(!mechToken.value || !mechToken.length) {
-        Curl_safefree(spnegoToken);
-        if(mechToken.value)
-          gss_release_buffer(&discard_st, &mechToken);
-        infof(data, "Parse SPNEGO Target Token succeeded (NULL token)\n");
-      }
-      else {
-        Curl_safefree(spnegoToken);
-        Curl_safefree(input_token.value);
-        input_token.value = malloc(mechToken.length);
-        if(input_token.value == NULL) {
-          gss_release_buffer(&discard_st, &mechToken);
-          return CURLE_OUT_OF_MEMORY;
-        }
-        memcpy(input_token.value, mechToken.value, mechToken.length);
-        input_token.length = mechToken.length;
-        gss_release_buffer(&discard_st, &mechToken);
-        infof(data, "Parse SPNEGO Target Token succeeded\n");
-      }
-    }
-#endif
   }
 
   major_status = Curl_gss_init_sec_context(data,
@@ -279,52 +219,6 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   CURLcode error;
   OM_uint32 discard_st;
 
-#ifdef HAVE_SPNEGO /* Handle SPNEGO */
-  if(checkprefix("Negotiate", neg_ctx->protocol)) {
-    ASN1_OBJECT    *object              = NULL;
-    unsigned char  *responseToken       = NULL;
-    size_t          responseTokenLength = 0;
-    gss_buffer_desc spnegoToken         = GSS_C_EMPTY_BUFFER;
-
-    responseToken = malloc(neg_ctx->output_token.length);
-    if(responseToken == NULL)
-      return CURLE_OUT_OF_MEMORY;
-    memcpy(responseToken, neg_ctx->output_token.value,
-           neg_ctx->output_token.length);
-    responseTokenLength = neg_ctx->output_token.length;
-
-    object = OBJ_txt2obj("1.2.840.113554.1.2.2", 1);
-    if(!object) {
-      Curl_safefree(responseToken);
-      return CURLE_OUT_OF_MEMORY;
-    }
-
-    if(!makeSpnegoInitialToken(object,
-                               responseToken,
-                               responseTokenLength,
-                               (unsigned char**)&spnegoToken.value,
-                               &spnegoToken.length)) {
-      Curl_safefree(responseToken);
-      ASN1_OBJECT_free(object);
-      infof(conn->data, "Make SPNEGO Initial Token failed\n");
-    }
-    else if(!spnegoToken.value || !spnegoToken.length) {
-      Curl_safefree(responseToken);
-      ASN1_OBJECT_free(object);
-      if(spnegoToken.value)
-        gss_release_buffer(&discard_st, &spnegoToken);
-      infof(conn->data, "Make SPNEGO Initial Token succeeded (NULL token)\n");
-    }
-    else {
-      Curl_safefree(responseToken);
-      ASN1_OBJECT_free(object);
-      gss_release_buffer(&discard_st, &neg_ctx->output_token);
-      neg_ctx->output_token.value = spnegoToken.value;
-      neg_ctx->output_token.length = spnegoToken.length;
-      infof(conn->data, "Make SPNEGO Initial Token succeeded\n");
-    }
-  }
-#endif
   error = Curl_base64_encode(conn->data,
                              neg_ctx->output_token.value,
                              neg_ctx->output_token.length,

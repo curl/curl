@@ -137,9 +137,6 @@ endif
 ifeq ($(findstring -sspi,$(CFG)),-sspi)
 SSPI = 1
 endif
-ifeq ($(findstring -spnego,$(CFG)),-spnego)
-SPNEGO = 1
-endif
 ifeq ($(findstring -ldaps,$(CFG)),-ldaps)
 LDAPS = 1
 endif

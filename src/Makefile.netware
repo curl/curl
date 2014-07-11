@@ -226,10 +226,6 @@ endif
 ifeq ($(findstring -idn,$(CFG)),-idn)
 WITH_IDN = 1
 endif
-ifeq ($(findstring -spnego,$(CFG)),-spnego)
-WITH_SPNEGO = 1
-WITH_SSL = 1
-endif
 ifeq ($(findstring -metalink,$(CFG)),-metalink)
 WITH_METALINK = 1
 WITH_SSL = 1
@@ -267,10 +263,6 @@ ifdef WITH_SSL
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/ssl.$(LIBEXT)
 	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/crypto.$(LIBEXT)
 	IMPORTS += GetProcessSwitchCount RunningProcess
-ifdef WITH_SPNEGO
-	# INCLUDES += -I$(FBOPENSSL_PATH)/include
-	LDLIBS += $(FBOPENSSL_PATH)/nw/fbopenssl.$(LIBEXT)
-endif
 else
 ifdef WITH_AXTLS
 	# INCLUDES += -I$(AXTLS_PATH)/inc

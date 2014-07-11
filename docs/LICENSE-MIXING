@@ -94,12 +94,6 @@ GNU GSS http://www.gnu.org/software/gss/
         may not distribute binary curl packages that uses this if you build
         curl to also link and use any Original BSD licensed libraries!
 
-fbopenssl
-
-        (Used for SPNEGO support) Unclear license. Based on its name, I assume
-        that it uses the OpenSSL license and thus shares the same issues as
-        described for OpenSSL above.
-
 libidn  http://josefsson.org/libidn/
 
         (Used for IDNA support) Uses the GNU Lesser General Public

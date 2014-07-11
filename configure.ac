@@ -151,7 +151,6 @@ dnl initialize all the info variables
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
     curl_gss_msg="no      (--with-gssapi)"
- curl_spnego_msg="no      (--with-spnego)"
 curl_tls_srp_msg="no      (--enable-tls-srp)"
     curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
@@ -1133,41 +1132,6 @@ no)
         AC_MSG_WARN([the previous check could not be made default was used])
         ;;
 esac
-
-dnl **********************************************************************
-dnl Check for FBopenssl(SPNEGO) libraries
-dnl **********************************************************************
-
-AC_ARG_WITH(spnego,
-  AC_HELP_STRING([--with-spnego=DIR],
-                 [Specify location of SPNEGO library fbopenssl]), [
-  SPNEGO_ROOT="$withval"
-  if test x"$SPNEGO_ROOT" != xno; then
-    want_spnego="yes"
-  fi
-])
-
-AC_MSG_CHECKING([if SPNEGO support is requested])
-if test x"$want_spnego" = xyes; then
-
-  if test X"$SPNEGO_ROOT" = Xyes; then
-     AC_MSG_ERROR([FBOpenSSL libs and/or directories were not found where specified!])
-     AC_MSG_RESULT(no)
-  else
-     if test -z "$SPNEGO_LIB_DIR"; then
-        LDFLAGS="$LDFLAGS -L$SPNEGO_ROOT -lfbopenssl"
-     else
-        LDFLAGS="$LDFLAGS $SPNEGO_LIB_DIR"
-     fi
-
-     AC_MSG_RESULT(yes)
-     AC_DEFINE(HAVE_SPNEGO, 1,
-               [Define this if you have the SPNEGO library fbopenssl])
-     curl_spnego_msg="enabled"
-  fi
-else
-  AC_MSG_RESULT(no)
-fi
 
 dnl **********************************************************************
 dnl Check for GSS-API libraries
@@ -3406,9 +3370,6 @@ fi
 if test "x$USE_NGHTTP2" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
 fi
-if test "x$curl_spnego_msg" = "xenabled"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
-fi
 if test "x$want_gss" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
 fi
@@ -3560,7 +3521,6 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
   GSS-API support:  ${curl_gss_msg}
-  SPNEGO support:   ${curl_spnego_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
   ipv6 support:     ${curl_ipv6_msg}

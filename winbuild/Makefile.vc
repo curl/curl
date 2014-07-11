@@ -28,7 +28,6 @@ CFGSET=true
 !MESSAGE                                  http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
 !MESSAGE   ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
 !MESSAGE   ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes
-!MESSAGE   ENABLE_SPNEGO=<yes or no>    - Enable Simple and Protected GSSAPI Negotiation Mechanism, defaults to yes
 !MESSAGE   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
 !MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
 !MESSAGE   DEBUG=<yes or no>            - Debug builds
@@ -84,14 +83,6 @@ USE_SSPI = true
 USE_SSPI = true
 !ELSEIF "$(ENABLE_SSPI)"=="no"
 USE_SSPI = false
-!ENDIF
-
-!IFNDEF ENABLE_SPNEGO
-USE_SPNEGO = true
-!ELSEIF "$(ENABLE_SPNEGO)"=="yes"
-USE_SPNEGO = true
-!ELSEIF "$(ENABLE_SPNEGO)"=="no"
-USE_SPNEGO = false
 !ENDIF
 
 !IFNDEF ENABLE_WINSSL
@@ -166,10 +157,6 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ipv6
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 !ENDIF
 
-!IF "$(USE_SPNEGO)"=="true"
-CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-spnego
-!ENDIF
-
 !IF "$(USE_WINSSL)"=="true"
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-winssl
 !ENDIF
@@ -197,7 +184,6 @@ $(MODE):
 	@SET USE_IDN=$(USE_IDN)
 	@SET USE_IPV6=$(USE_IPV6)
 	@SET USE_SSPI=$(USE_SSPI)
-	@SET USE_SPNEGO=$(USE_SPNEGO)
 	@SET USE_WINSSL=$(USE_WINSSL)
 	@$(MAKE) /NOLOGO /F MakefileBuild.vc
 

@@ -528,9 +528,6 @@
 /* Define to 1 if you have the `socket' function. */
 #cmakedefine HAVE_SOCKET ${HAVE_SOCKET}
 
-/* Define this if you have the SPNEGO library fbopenssl */
-#cmakedefine HAVE_SPNEGO ${HAVE_SPNEGO}
-
 /* Define to 1 if you have the `SSL_get_shutdown' function. */
 #cmakedefine HAVE_SSL_GET_SHUTDOWN ${HAVE_SSL_GET_SHUTDOWN}
 

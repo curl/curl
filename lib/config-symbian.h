@@ -480,9 +480,6 @@
 /* Define to 1 if you have the `socket' function. */
 #define HAVE_SOCKET 1
 
-/* Define this if you have the SPNEGO library fbopenssl */
-/* #undef HAVE_SPNEGO */
-
 /* Define to 1 if you have the `SSL_get_shutdown' function. */
 /*#define HAVE_SSL_GET_SHUTDOWN 1*/
 

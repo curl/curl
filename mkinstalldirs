@@ -81,9 +81,9 @@ case $dirmode in
       echo "mkdir -p -- $*"
       exec mkdir -p -- "$@"
     else
-      # On NextStep and OpenStep, the `mkdir' command does not
+      # On NextStep and OpenStep, the 'mkdir' command does not
       # recognize any option.  It will interpret all options as
-      # directories to create, and then abort because `.' already
+      # directories to create, and then abort because '.' already
       # exists.
       test -d ./-p && rmdir ./-p
       test -d ./--version && rmdir ./--version

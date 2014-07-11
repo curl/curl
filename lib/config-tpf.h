@@ -436,9 +436,6 @@
 /* Define to 1 if you have the `socket' function. */
 #define HAVE_SOCKET 1
 
-/* Define this if you have the SPNEGO library fbopenssl */
-/* #undef HAVE_SPNEGO */
-
 /* Define to 1 if you have the <ssl.h> header file. */
 /* #undef HAVE_SSL_H */
 #define HAVE_SSL_H 1

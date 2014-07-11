@@ -148,9 +148,6 @@ endif
 ifeq ($(findstring -sspi,$(CFG)),-sspi)
 SSPI = 1
 endif
-ifeq ($(findstring -spnego,$(CFG)),-spnego)
-SPNEGO = 1
-endif
 ifeq ($(findstring -ldaps,$(CFG)),-ldaps)
 LDAPS = 1
 endif
@@ -229,9 +226,6 @@ ifdef SSPI
   ifdef SCHANNEL
     CFLAGS += -DUSE_SCHANNEL
   endif
-endif
-ifdef SPNEGO
-  CFLAGS += -DHAVE_SPNEGO
 endif
 ifdef IPV6
   CFLAGS += -DENABLE_IPV6 -D_WIN32_WINNT=0x0501

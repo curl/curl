@@ -264,7 +264,6 @@ static const struct feat feats[] = {
   {"Largefile",      CURL_VERSION_LARGEFILE},
   {"NTLM",           CURL_VERSION_NTLM},
   {"NTLM_WB",        CURL_VERSION_NTLM_WB},
-  {"SPNEGO",         CURL_VERSION_SPNEGO},
   {"SSL",            CURL_VERSION_SSL},
   {"SSPI",           CURL_VERSION_SSPI},
   {"krb4",           CURL_VERSION_KERBEROS4},

@@ -60,7 +60,7 @@ SYS_INCL = -I"$(%watcom)/h/nt" -I"$(%watcom)/h"
 
 CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm &
          -wcd=201 -bt=nt -d+ -dWIN32 -dCURL_WANTS_CA_BUNDLE_ENV         &
-         -dBUILDING_LIBCURL -dHAVE_SPNEGO=1 -I. -I"../include" $(SYS_INCL)
+         -dBUILDING_LIBCURL -I. -I"../include" $(SYS_INCL)
 
 !ifdef %debug
 DEBUG  = -dDEBUG=1 -dDEBUGBUILD
