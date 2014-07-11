@@ -250,7 +250,6 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   }
 
   Curl_safefree(encoded);
-  Curl_cleanup_negotiate(conn->data);
 
   return (userp == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }

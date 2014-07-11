@@ -1443,6 +1443,12 @@ CURLcode Curl_http_done(struct connectdata *conn,
 
   Curl_unencode_cleanup(conn);
 
+#ifdef USE_HTTP_NEGOTIATE
+  if(data->state.proxyneg.state == GSS_AUTHSENT ||
+      data->state.negotiate.state == GSS_AUTHSENT)
+    Curl_cleanup_negotiate(data);
+#endif
+
   /* set the proper values (possibly modified on POST) */
   conn->fread_func = data->set.fread_func; /* restore */
   conn->fread_in = data->set.in; /* restore */
