@@ -1037,7 +1037,7 @@ sub verifyhttptls {
         close(FILE);
     }
 
-    if($data && ($data =~ /GNUTLS/) && open(FILE, "<$pidfile")) {
+    if($data && ($data =~ /(GNUTLS|GnuTLS)/) && open(FILE, "<$pidfile")) {
         $pid=0+<FILE>;
         close(FILE);
         if($pid > 0) {
