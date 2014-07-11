@@ -789,38 +789,48 @@ gtls_connect_step3(struct connectdata *conn,
   certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
 
   if(certclock == (time_t)-1) {
-    failf(data, "server cert expiration date verify failed");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-
-  if(certclock < time(NULL)) {
     if(data->set.ssl.verifypeer) {
-      failf(data, "server certificate expiration date has passed.");
-      return CURLE_PEER_FAILED_VERIFICATION;
+      failf(data, "server cert expiration date verify failed");
+      return CURLE_SSL_CONNECT_ERROR;
     }
     else
-      infof(data, "\t server certificate expiration date FAILED\n");
+      infof(data, "\t server certificate expiration date verify FAILED\n");
   }
-  else
-    infof(data, "\t server certificate expiration date OK\n");
+  else {
+    if(certclock < time(NULL)) {
+      if(data->set.ssl.verifypeer) {
+        failf(data, "server certificate expiration date has passed.");
+        return CURLE_PEER_FAILED_VERIFICATION;
+      }
+      else
+        infof(data, "\t server certificate expiration date FAILED\n");
+    }
+    else
+      infof(data, "\t server certificate expiration date OK\n");
+  }
 
   certclock = gnutls_x509_crt_get_activation_time(x509_cert);
 
   if(certclock == (time_t)-1) {
-    failf(data, "server cert activation date verify failed");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-
-  if(certclock > time(NULL)) {
     if(data->set.ssl.verifypeer) {
-      failf(data, "server certificate not activated yet.");
-      return CURLE_PEER_FAILED_VERIFICATION;
+      failf(data, "server cert activation date verify failed");
+      return CURLE_SSL_CONNECT_ERROR;
     }
     else
-      infof(data, "\t server certificate activation date FAILED\n");
+      infof(data, "\t server certificate activation date verify FAILED\n");
   }
-  else
-    infof(data, "\t server certificate activation date OK\n");
+  else {
+    if(certclock > time(NULL)) {
+      if(data->set.ssl.verifypeer) {
+        failf(data, "server certificate not activated yet.");
+        return CURLE_PEER_FAILED_VERIFICATION;
+      }
+      else
+        infof(data, "\t server certificate activation date FAILED\n");
+    }
+    else
+      infof(data, "\t server certificate activation date OK\n");
+  }
 
   /* Show:
 
