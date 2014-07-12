@@ -11,7 +11,7 @@ This release includes the following changes:
  o bits.close: introduce connection close tracking
  o darwinssl: Add support for --cacert
  o polarssl: add ALPN support
- o 
+ o docs: Added new option man pages
 
 This release includes the following bugfixes:
 
@@ -34,14 +34,29 @@ This release includes the following bugfixes:
  o winbuild: Don't USE_WINSSL when WITH_SSL is being used
  o getinfo: HTTP CONNECT code not reset between transfers [8]
  o Curl_rand: Use a fake entropy for debug builds when CURL_ENTROPY set
+ o http2: avoid segfault when using the plain-text http2
+ o conncache: move the connection counter to the cache struct
+ o http2: better return code error checking
+ o curlbuild: fix GCC build on SPARC systems without configure script
+ o tool_metalink: Support polarssl as digest provider
+ o curl.h: reverse the enum/define setup for old symbols
+ o curl.h: moved two really old deprecated symbols
+ o curl.h: renamed CURLOPT_DEPRECATEDx to CURLOPT_OBSOLETEx
+ o buildconf: do not search tools in current directory.
+ o OS400: make it compilable again. Make RPG binding up to date
  o nss: do not abort on connection failure (failing tests 305 and 404)
  o nss: make the fallback to SSLv3 work again
  o tool: prevent valgrind from reporting possibly lost memory (nss only)
+ o progress callback: skip last callback update on errors [9]
  o nss: fix a memory leak when CURLOPT_CRLFILE is used
+ o compiler warnings: potentially uninitialized variables [10]
+ o url.c: Fixed memory leak on OOM
  o gnutls: ignore invalid certificate dates with VERIFYPEER disabled
  o gnutls: fix SRP support with versions of GnuTLS from 2.99.0
+ o gnutls: fixed a couple of uninitialized variable references
  o gnutls: fixed compilation against versions < 2.12.0
- o 
+ o build: Fixed overridden compiler PDB settings in VC7 to VC12
+ o ntlm_wb: Fixed buffer size not being large enough for NTLMv2 sessions [11]
 
 This release includes the following known bugs:
 
@@ -50,9 +65,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Brad Spencer, Chris Young, Dan Fandrich, Daniel Stenberg,
-  Dmitry Falko, Fabian Frank, Jonathan Cardoso Machado, Marcel Raad,
-  Nick Zitzmann, Steve Holme, Tatsuhiro Tsujikawa, Vilmos Nebehaj
+  Alessandro Ghedini, Brad Spencer, Chris Young, Colin Hogben, Dan Fandrich,
+  Daniel Stenberg, David Woodhouse, Dimitrios Siganos, Dmitry Falko,
+  Fabian Frank, Hubert Kario, Jonathan Cardoso Machado, Kamil Dudka,
+  Lindley French, Marcel Raad, Michal Górny, Nick Zitzmann, Patrick Monnerat,
+  Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa, Vilmos Nebehaj
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -66,3 +83,6 @@ References to bug reports and discussions on issues:
  [6] = http://curl.haxx.se/mail/lib-2014-06/0003.html
  [7] = http://curl.haxx.se/bug/view.cgi?id=1378
  [8] = http://curl.haxx.se/bug/view.cgi?id=1380
+ [9] = http://curl.haxx.se/mail/lib-2014-06/0062.html
+ [10] = http://curl.haxx.se/bug/view.cgi?id=1391
+ [11] = http://curl.haxx.se/mail/lib-2014-07/0103.html
