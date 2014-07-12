@@ -386,7 +386,7 @@ gtls_connect_step1(struct connectdata *conn,
 #else
 #define GNUTLS_CIPHERS "NORMAL:-ARCFOUR-128:-CTYPE-ALL:+CTYPE-X509"
   const char* prioritylist;
-  const char *err;
+  const char *err = NULL;
 #endif
 #ifdef HAS_ALPN
   int protocols_size = 2;
@@ -543,6 +543,11 @@ gtls_connect_step1(struct connectdata *conn,
       break;
   }
   rc = gnutls_protocol_set_priority(session, protocol_priority);
+  if(rc != GNUTLS_E_SUCCESS) {
+    failf(data, "Did you pass a valid GnuTLS cipher list?");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
 #else
   switch (data->set.ssl.version) {
     case CURL_SSLVERSION_SSLv3:
@@ -572,6 +577,11 @@ gtls_connect_step1(struct connectdata *conn,
       break;
   }
   rc = gnutls_priority_set_direct(session, prioritylist, &err);
+  if(rc != GNUTLS_E_SUCCESS) {
+    failf(data, "Error %d setting GnuTLS cipher list starting with %s",
+          rc, err);
+    return CURLE_SSL_CONNECT_ERROR;
+  }
 #endif
 
 #ifdef HAS_ALPN
@@ -590,12 +600,6 @@ gtls_connect_step1(struct connectdata *conn,
     }
   }
 #endif
-
-  if(rc != GNUTLS_E_SUCCESS) {
-    failf(data, "Did you pass a valid GnuTLS cipher list?");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-
 
   if(data->set.str[STRING_CERT]) {
     if(gnutls_certificate_set_x509_key_file(
