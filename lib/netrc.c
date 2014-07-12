@@ -88,7 +88,7 @@ int Curl_parsenetrc(const char *host,
     }
 
     if(!home)
-      return -1;
+      return retcode; /* no home directory found (or possibly out of memory) */
 
     netrcfile = curl_maprintf("%s%s%s", home, DIR_CHAR, NETRC);
     if(home_alloc)

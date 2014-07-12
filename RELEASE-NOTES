@@ -57,6 +57,7 @@ This release includes the following bugfixes:
  o gnutls: fixed compilation against versions < 2.12.0
  o build: Fixed overridden compiler PDB settings in VC7 to VC12
  o ntlm_wb: Fixed buffer size not being large enough for NTLMv2 sessions [11]
+ o netrc: don't abort if home dir cannot be found
 
 This release includes the following known bugs:
 
