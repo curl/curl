@@ -3033,6 +3033,7 @@ AC_CHECK_FUNCS([fork \
   getppid \
   getprotobyname \
   getpwuid \
+  getpwuid_r \
   getrlimit \
   gettimeofday \
   if_nametoindex \

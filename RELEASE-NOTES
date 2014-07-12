@@ -58,6 +58,7 @@ This release includes the following bugfixes:
  o build: Fixed overridden compiler PDB settings in VC7 to VC12
  o ntlm_wb: Fixed buffer size not being large enough for NTLMv2 sessions [11]
  o netrc: don't abort if home dir cannot be found
+ o netrc: fixed thread safety problem by using getpwuid_r if available
 
 This release includes the following known bugs:
 
