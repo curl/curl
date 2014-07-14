@@ -25,9 +25,9 @@ Content-type: text/html
 <TABLE border=1><TR><TD>Protocol version:</TD><TD>TLS1.2</TD></TR>
 <TR><TD>Key Exchange:</TD><TD>SRP</TD></TR>
 <TR><TD>Compression</TD><TD>NULL</TD></TR>
-<TR><TD>Cipher</TD><TD>AES-128-CBC</TD></TR>
+<TR><TD>Cipher</TD><TD>AES-NNN-CBC</TD></TR>
 <TR><TD>MAC</TD><TD>SHA1</TD></TR>
-<TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_128_CBC_SHA1</TD></TR></p></TABLE>
+<TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_NNN_CBC_SHA1</TD></TR></p></TABLE>
 <hr><P>Your HTTP header was:<PRE>User-Agent: curl/7.21.4-DEV (x86_64-apple-darwin10.5.0) libcurl/7.21.4-DEV GnuTLS/2.10.4 zlib/1.2.5 libidn/1.19
 Host: localhost:9011
 Accept: */*
@@ -74,9 +74,9 @@ Content-type: text/html
 <TABLE border=1><TR><TD></TD></TR>
 <TR><TD>Key Exchange:</TD><TD>SRP</TD></TR>
 <TR><TD>Compression</TD><TD>NULL</TD></TR>
-<TR><TD>Cipher</TD><TD>AES-128-CBC</TD></TR>
+<TR><TD>Cipher</TD><TD>AES-NNN-CBC</TD></TR>
 <TR><TD>MAC</TD><TD>SHA1</TD></TR>
-<TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_128_CBC_SHA1</TD></TR></p></TABLE>
+<TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_NNN_CBC_SHA1</TD></TR></p></TABLE>
 <PRE>
 Host: %HOSTIP:%HTTPTLSPORT
 Accept: */*
@@ -90,6 +90,7 @@ s/^<p>Session ID:.*//
 s/^<hr><P>Your HTTP header was:<PRE>.*/<PRE>/
 s/Protocol version:.*[0-9]//
 s/GNUTLS/GnuTLS/
+s/(AES[-_])\d\d\d([-_]CBC)/$1NNN$2/
 </stripfile>
 </verify>
 
