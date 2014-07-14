@@ -385,6 +385,10 @@ gtls_connect_step1(struct connectdata *conn,
   static int protocol_priority[] = { 0, 0, 0, 0 };
 #else
 #define GNUTLS_CIPHERS "NORMAL:-ARCFOUR-128:-CTYPE-ALL:+CTYPE-X509"
+/* If GnuTLS was compiled without support for SRP it will error out if SRP is
+   requested in the priority string, so treat it specially
+ */
+#define GNUTLS_SRP "+SRP"
   const char* prioritylist;
   const char *err = NULL;
 #endif
@@ -549,6 +553,9 @@ gtls_connect_step1(struct connectdata *conn,
   }
 
 #else
+  /* Ensure +SRP comes at the *end* of all relevant strings so that it can be
+   * removed if a run-time error indicates that SRP is not supported by this
+   * GnuTLS version */
   switch (data->set.ssl.version) {
     case CURL_SSLVERSION_SSLv3:
       prioritylist = GNUTLS_CIPHERS ":-VERS-TLS-ALL:+VERS-SSL3.0";
@@ -556,19 +563,19 @@ gtls_connect_step1(struct connectdata *conn,
       break;
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
-      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:+SRP";
+      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:" GNUTLS_SRP;
       break;
     case CURL_SSLVERSION_TLSv1_0:
       prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                     "+VERS-TLS1.0:+SRP";
+                     "+VERS-TLS1.0:" GNUTLS_SRP;
       break;
     case CURL_SSLVERSION_TLSv1_1:
       prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                     "+VERS-TLS1.1:+SRP";
+                     "+VERS-TLS1.1:" GNUTLS_SRP;
       break;
     case CURL_SSLVERSION_TLSv1_2:
       prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                     "+VERS-TLS1.2:+SRP";
+                     "+VERS-TLS1.2:" GNUTLS_SRP;
       break;
     case CURL_SSLVERSION_SSLv2:
     default:
@@ -577,6 +584,23 @@ gtls_connect_step1(struct connectdata *conn,
       break;
   }
   rc = gnutls_priority_set_direct(session, prioritylist, &err);
+  if((rc == GNUTLS_E_INVALID_REQUEST) && err) {
+    if(!strcmp(err, GNUTLS_SRP)) {
+      /* This GnuTLS was probably compiled without support for SRP.
+       * Note that fact and try again without it. */
+      int validprioritylen = err - prioritylist;
+      char *prioritycopy = strdup(prioritylist);
+      if(!prioritycopy)
+        return CURLE_OUT_OF_MEMORY;
+
+      infof(data, "This GnuTLS does not support SRP\n");
+      if(validprioritylen)
+        /* Remove the :+SRP */
+        prioritycopy[validprioritylen - 1] = 0;
+      rc = gnutls_priority_set_direct(session, prioritycopy, &err);
+      free(prioritycopy);
+    }
+  }
   if(rc != GNUTLS_E_SUCCESS) {
     failf(data, "Error %d setting GnuTLS cipher list starting with %s",
           rc, err);
