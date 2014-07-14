@@ -781,7 +781,48 @@ gtls_connect_step3(struct connectdata *conn,
      alternative name PKIX extension. Returns non zero on success, and zero on
      failure. */
   rc = gnutls_x509_crt_check_hostname(x509_cert, conn->host.name);
+#if GNUTLS_VERSION_NUMBER < 0x030306
+  /* Before 3.3.6, gnutls_x509_crt_check_hostname() didn't check IP
+     addresses. */
+  if(!rc) {
+#ifdef ENABLE_IPV6
+    #define use_addr in6_addr
+#else
+    #define use_addr in_addr
+#endif
+    unsigned char addrbuf[sizeof(struct use_addr)];
+    unsigned char certaddr[sizeof(struct use_addr)];
+    size_t addrlen = 0, certaddrlen;
+    int i;
+    int ret = 0;
 
+    if(Curl_inet_pton(AF_INET, conn->host.name, addrbuf) > 0)
+      addrlen = 4;
+#ifdef ENABLE_IPV6
+    else if(Curl_inet_pton(AF_INET6, conn->host.name, addrbuf) > 0)
+      addrlen = 16;
+#endif
+
+    if(addrlen) {
+      for(i=0; ; i++) {
+        certaddrlen = sizeof(certaddr);
+        ret = gnutls_x509_crt_get_subject_alt_name(x509_cert, i, certaddr,
+                                                   &certaddrlen, NULL);
+        /* If this happens, it wasn't an IP address. */
+        if(ret == GNUTLS_E_SHORT_MEMORY_BUFFER)
+          continue;
+        if(ret < 0)
+          break;
+        if(ret != GNUTLS_SAN_IPADDRESS)
+          continue;
+        if(certaddrlen == addrlen && !memcmp(addrbuf, certaddr, addrlen)) {
+          rc = 1;
+          break;
+        }
+      }
+    }
+  }
+#endif
   if(!rc) {
     if(data->set.ssl.verifyhost) {
       failf(data, "SSL: certificate subject name (%s) does not match "
