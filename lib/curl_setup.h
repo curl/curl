@@ -112,6 +112,13 @@
 #  endif
 #endif
 
+/* Solaris needs this to get a POSIX-conformant getpwuid_r */
+#if defined(sun) || defined(__sun)
+#  ifndef _POSIX_PTHREAD_SEMANTICS
+#    define _POSIX_PTHREAD_SEMANTICS 1
+#  endif
+#endif
+
 /* ================================================================ */
 /*  If you need to include a system header file for your platform,  */
 /*  please, do it beyond the point further indicated in this file.  */
