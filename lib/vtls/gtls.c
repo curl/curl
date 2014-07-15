@@ -51,6 +51,7 @@
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "rawstr.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -588,7 +589,7 @@ gtls_connect_step1(struct connectdata *conn,
     if(!strcmp(err, GNUTLS_SRP)) {
       /* This GnuTLS was probably compiled without support for SRP.
        * Note that fact and try again without it. */
-      int validprioritylen = err - prioritylist;
+      int validprioritylen = curlx_uztosi(err - prioritylist);
       char *prioritycopy = strdup(prioritylist);
       if(!prioritycopy)
         return CURLE_OUT_OF_MEMORY;
