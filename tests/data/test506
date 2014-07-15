@@ -156,33 +156,31 @@ unlock: share  [Pigs in space]: 53
 CURLOPT_COOKIEJAR
 CURLOPT_COOKIELIST FLUSH
 lock:   cookie [Pigs in space]: 54
-lock:   cookie [Pigs in space]: 55
-unlock: cookie [Pigs in space]: 56
-unlock: cookie [Pigs in space]: 57
+unlock: cookie [Pigs in space]: 55
 PERFORM
-lock:   dns    [Pigs in space]: 58
-unlock: dns    [Pigs in space]: 59
+lock:   dns    [Pigs in space]: 56
+unlock: dns    [Pigs in space]: 57
+lock:   cookie [Pigs in space]: 58
+unlock: cookie [Pigs in space]: 59
 lock:   cookie [Pigs in space]: 60
 unlock: cookie [Pigs in space]: 61
 lock:   cookie [Pigs in space]: 62
 unlock: cookie [Pigs in space]: 63
-lock:   cookie [Pigs in space]: 64
-unlock: cookie [Pigs in space]: 65
 run 3: overwrite cookie 1 and 4
-lock:   dns    [Pigs in space]: 66
-unlock: dns    [Pigs in space]: 67
+lock:   dns    [Pigs in space]: 64
+unlock: dns    [Pigs in space]: 65
 try SHARE_CLEANUP...
-lock:   share  [Pigs in space]: 68
-unlock: share  [Pigs in space]: 69
+lock:   share  [Pigs in space]: 66
+unlock: share  [Pigs in space]: 67
 SHARE_CLEANUP failed, correct
 CLEANUP
-lock:   cookie [Pigs in space]: 70
-unlock: cookie [Pigs in space]: 71
+lock:   cookie [Pigs in space]: 68
+unlock: cookie [Pigs in space]: 69
+lock:   share  [Pigs in space]: 70
+unlock: share  [Pigs in space]: 71
+SHARE_CLEANUP
 lock:   share  [Pigs in space]: 72
 unlock: share  [Pigs in space]: 73
-SHARE_CLEANUP
-lock:   share  [Pigs in space]: 74
-unlock: share  [Pigs in space]: 75
 GLOBAL_CLEANUP
 </stdout>
 <stderr>

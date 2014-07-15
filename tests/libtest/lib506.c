@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,12 +40,15 @@ struct userdata {
   int counter;
 };
 
+int lock[3];
+
 /* lock callback */
 static void my_lock(CURL *handle, curl_lock_data data, curl_lock_access laccess,
           void *useptr )
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
+  int locknum;
 
   (void)handle;
   (void)laccess;
@@ -53,17 +56,28 @@ static void my_lock(CURL *handle, curl_lock_data data, curl_lock_access laccess,
   switch ( data ) {
     case CURL_LOCK_DATA_SHARE:
       what = "share";
+      locknum = 0;
       break;
     case CURL_LOCK_DATA_DNS:
       what = "dns";
+      locknum = 1;
       break;
     case CURL_LOCK_DATA_COOKIE:
       what = "cookie";
+      locknum = 2;
       break;
     default:
       fprintf(stderr, "lock: no such data: %d\n", (int)data);
       return;
   }
+
+  /* detect locking of locked locks */
+  if(lock[locknum]) {
+    printf("lock: double locked %s\n", what);
+    return;
+  }
+  lock[locknum]++;
+
   printf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
 }
@@ -73,21 +87,33 @@ static void my_unlock(CURL *handle, curl_lock_data data, void *useptr )
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
+  int locknum;
   (void)handle;
   switch ( data ) {
     case CURL_LOCK_DATA_SHARE:
       what = "share";
+      locknum = 0;
       break;
     case CURL_LOCK_DATA_DNS:
       what = "dns";
+      locknum = 1;
       break;
     case CURL_LOCK_DATA_COOKIE:
       what = "cookie";
+      locknum = 2;
       break;
     default:
       fprintf(stderr, "unlock: no such data: %d\n", (int)data);
       return;
   }
+
+  /* detect unlocking of unlocked locks */
+  if(!lock[locknum]) {
+    printf("unlock: double unlocked %s\n", what);
+    return;
+  }
+  lock[locknum]--;
+
   printf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
 }
