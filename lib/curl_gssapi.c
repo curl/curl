@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,7 +62,8 @@ OM_uint32 Curl_gss_init_sec_context(
                               GSS_C_NO_CREDENTIAL, /* cred_handle */
                               context,
                               target_name,
-                              use_spnego ? (gss_OID)&gss_mech_spnego : GSS_C_NO_OID,
+                              use_spnego ? (gss_OID)&gss_mech_spnego :
+                              GSS_C_NO_OID,
                               req_flags,
                               0, /* time_req */
                               input_chan_bindings,
