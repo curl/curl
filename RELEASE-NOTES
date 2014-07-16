@@ -1,6 +1,6 @@
-Curl and libcurl 7.37.1
+Curl and libcurl 7.37.2
 
- Public curl releases:         140
+ Public curl releases:         141
  Command line options:         162
  curl_easy_setopt() options:   208
  Public functions in libcurl:  58
@@ -8,60 +8,11 @@ Curl and libcurl 7.37.1
 
 This release includes the following changes:
 
- o bits.close: introduce connection close tracking
- o darwinssl: Add support for --cacert
- o polarssl: add ALPN support
- o docs: Added new option man pages
+ o 
 
 This release includes the following bugfixes:
 
- o build: Fixed incorrect reference to curl_setup.h in Visual Studio files
- o build: Use $(TargetDir) and $(TargetName) macros for .pdb and .lib output
- o curl.1: clarify that -u can't specify a user with colon [1]
- o openssl: Fix uninitialized variable use in NPN callback
- o curl_easy_reset: reset the URL [2]
- o curl_version_info.3: returns a pointer to a static struct
- o url-parser: only use if_nametoindex if detected by configure [3]
- o select: with winsock, avoid passing unsupported arguments to select() [4]
- o gnutls: don't use deprecated type names anymore
- o gnutls: allow building with nghttp2 but without ALPN support
- o tests: Fix portability issue with the tftpd server
- o curl_sasl_sspi: Fixed corrupt hostname in DIGEST-MD5 SPN
- o curl_sasl: extended native DIGEST-MD5 cnonce to be a 32-byte hex string
- o random: use Curl_rand() for proper random data [5]
- o Curl_ossl_init: call OPENSSL_config for initing engines [6]
- o config-win32.h: Updated for VC12 [7]
- o winbuild: Don't USE_WINSSL when WITH_SSL is being used
- o getinfo: HTTP CONNECT code not reset between transfers [8]
- o Curl_rand: Use a fake entropy for debug builds when CURL_ENTROPY set
- o http2: avoid segfault when using the plain-text http2
- o conncache: move the connection counter to the cache struct
- o http2: better return code error checking
- o curlbuild: fix GCC build on SPARC systems without configure script
- o tool_metalink: Support polarssl as digest provider
- o curl.h: reverse the enum/define setup for old symbols
- o curl.h: moved two really old deprecated symbols
- o curl.h: renamed CURLOPT_DEPRECATEDx to CURLOPT_OBSOLETEx
- o buildconf: do not search tools in current directory.
- o OS400: make it compilable again. Make RPG binding up to date
- o nss: do not abort on connection failure (failing tests 305 and 404)
- o nss: make the fallback to SSLv3 work again
- o tool: prevent valgrind from reporting possibly lost memory (nss only)
- o progress callback: skip last callback update on errors [9]
- o nss: fix a memory leak when CURLOPT_CRLFILE is used
- o compiler warnings: potentially uninitialized variables [10]
- o url.c: Fixed memory leak on OOM
- o gnutls: ignore invalid certificate dates with VERIFYPEER disabled
- o gnutls: fix SRP support with versions of GnuTLS from 2.99.0
- o gnutls: fixed a couple of uninitialized variable references
- o gnutls: fixed compilation against versions < 2.12.0
- o build: Fixed overridden compiler PDB settings in VC7 to VC12
- o ntlm_wb: Fixed buffer size not being large enough for NTLMv2 sessions [11]
- o netrc: don't abort if home dir cannot be found
- o netrc: fixed thread safety problem by using getpwuid_r if available
- o cookie: avoid mutex deadlock [12]
- o configure: respect host tool prefix for krb5-config
- o gnutls: handle IP address in cert name check
+ o 
 
 This release includes the following known bugs:
 
@@ -70,26 +21,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Brad Spencer, Chris Young, Colin Hogben, Dan Fandrich,
-  Daniel Stenberg, David Woodhouse, Dimitrios Siganos, Fabian Frank,
-  Glen A Johnson Jr., Hubert Kario, Jeff Pohlmeyer, Jonathan Cardoso Machado,
-  Kamil Dudka, Lindley French, Marcel Raad, Michał Górny, Nick Zitzmann,
-  Patrick Monnerat, Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa,
-  Vilmos Nebehaj, Yousuke Kimoto, Dmitry Falko
+  
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/bug/view.cgi?id=1375
- [2] = http://curl.haxx.se/mail/lib-2014-05/0235.html
- [3] = http://curl.haxx.se/mail/lib-2014-05/0260.html
- [4] = http://curl.haxx.se/mail/lib-2014-05/0278.html
- [5] = http://curl.haxx.se/mail/lib-2014-06/0001.html
- [6] = http://curl.haxx.se/mail/lib-2014-06/0003.html
- [7] = http://curl.haxx.se/bug/view.cgi?id=1378
- [8] = http://curl.haxx.se/bug/view.cgi?id=1380
- [9] = http://curl.haxx.se/mail/lib-2014-06/0062.html
- [10] = http://curl.haxx.se/bug/view.cgi?id=1391
- [11] = http://curl.haxx.se/mail/lib-2014-07/0103.html
- [12] = http://curl.haxx.se/mail/lib-2014-02/0184.html
+ [1] = 
