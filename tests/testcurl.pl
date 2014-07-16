@@ -333,6 +333,7 @@ logit "EMAIL = $email";
 logit "DESC = $desc";
 logit "NOTES = $notes";
 logit "CONFOPTS = $confopts";
+logit "RUNTESTOPTS = ".$runtestopts;
 logit "CPPFLAGS = ".$ENV{CPPFLAGS};
 logit "CFLAGS = ".$ENV{CFLAGS};
 logit "LDFLAGS = ".$ENV{LDFLAGS};
