@@ -59,6 +59,9 @@ This release includes the following bugfixes:
  o ntlm_wb: Fixed buffer size not being large enough for NTLMv2 sessions [11]
  o netrc: don't abort if home dir cannot be found
  o netrc: fixed thread safety problem by using getpwuid_r if available
+ o cookie: avoid mutex deadlock [12]
+ o configure: respect host tool prefix for krb5-config
+ o gnutls: handle IP address in cert name check
 
 This release includes the following known bugs:
 
@@ -68,11 +71,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Brad Spencer, Chris Young, Colin Hogben, Dan Fandrich,
-  Daniel Stenberg, David Woodhouse, Dimitrios Siganos, Dmitry Falko,
-  Fabian Frank, Hubert Kario, Jonathan Cardoso Machado, Kamil Dudka,
-  Lindley French, Marcel Raad, Michal Górny, Nick Zitzmann, Patrick Monnerat,
-  Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa, Vilmos Nebehaj,
-  Glen A Johnson Jr.
+  Daniel Stenberg, David Woodhouse, Dimitrios Siganos, Fabian Frank,
+  Glen A Johnson Jr., Hubert Kario, Jeff Pohlmeyer, Jonathan Cardoso Machado,
+  Kamil Dudka, Lindley French, Marcel Raad, Michał Górny, Nick Zitzmann,
+  Patrick Monnerat, Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa,
+  Vilmos Nebehaj, Yousuke Kimoto, Dmitry Falko
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -89,3 +92,4 @@ References to bug reports and discussions on issues:
  [9] = http://curl.haxx.se/mail/lib-2014-06/0062.html
  [10] = http://curl.haxx.se/bug/view.cgi?id=1391
  [11] = http://curl.haxx.se/mail/lib-2014-07/0103.html
+ [12] = http://curl.haxx.se/mail/lib-2014-02/0184.html
