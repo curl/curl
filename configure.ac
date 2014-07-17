@@ -2078,6 +2078,10 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
       if test "x$USE_NSS" = "xyes"; then
         AC_MSG_NOTICE([detected NSS version $version])
 
+        dnl needed when linking the curl tool without USE_EXPLICIT_LIB_DEPS
+        NSS_LIBS=$addlib
+        AC_SUBST([NSS_LIBS])
+
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to
         dnl LD_LIBRARY_PATH to prevent further configure tests to fail

@@ -12,6 +12,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o fix a build failure on Debian when NSS support is enabled [1]
  o 
 
 This release includes the following known bugs:
@@ -27,4 +28,4 @@ advice from friends like these:
 
 References to bug reports and discussions on issues:
 
- [1] = 
+ [1] = http://curl.haxx.se/mail/lib-2014-07/0209.html
