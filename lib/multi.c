@@ -1137,11 +1137,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       data->result = Curl_http_connect(data->easy_conn, &protocol_connect);
 
       if(data->easy_conn->bits.proxy_connect_closed) {
-        /* reset the error buffer */
-        if(data->set.errorbuffer)
-          data->set.errorbuffer[0] = '\0';
-        data->state.errorbuf = FALSE;
-
+        /* connect back to proxy again */
         data->result = CURLE_OK;
         result = CURLM_CALL_MULTI_PERFORM;
         multistate(data, CURLM_STATE_CONNECT);
@@ -1167,7 +1163,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                                &protocol_connect);
       }
 
-      if(CURLE_OK != data->result) {
+      if(data->easy_conn->bits.proxy_connect_closed) {
+        /* connect back to proxy again since it was closed in a proxy CONNECT
+           setup */
+        data->result = CURLE_OK;
+        result = CURLM_CALL_MULTI_PERFORM;
+        multistate(data, CURLM_STATE_CONNECT);
+        break;
+      }
+      else if(CURLE_OK != data->result) {
         /* failure detected */
         /* Just break, the cleaning up is handled all in one place */
         disconnect_conn = TRUE;
