@@ -39,19 +39,27 @@
 #  include <gssapi.h>
 #endif
 
+#ifndef SPNEGO_MECHANISM
+CURL_EXTERN gss_OID_desc spnego_mech_oid;
+#define SPNEGO_MECHANISM &spnego_mech_oid
+#endif
+#ifndef KRB5_MECHANISM
+CURL_EXTERN gss_OID_desc krb5_mech_oid;
+#define KRB5_MECHANISM &krb5_mech_oid
+#endif
 
-/* Common method for using gss api */
+/* Common method for using GSS-API */
 
 OM_uint32 Curl_gss_init_sec_context(
     struct SessionHandle *data,
-    OM_uint32 * minor_status,
-    gss_ctx_id_t * context,
+    OM_uint32 *minor_status,
+    gss_ctx_id_t *context,
     gss_name_t target_name,
-    bool use_spnego,
+    gss_OID mech_type,
     gss_channel_bindings_t input_chan_bindings,
     gss_buffer_t input_token,
     gss_buffer_t output_token,
-    OM_uint32 * ret_flags);
+    OM_uint32 *ret_flags);
 
 #endif /* HAVE_GSSAPI */
 
