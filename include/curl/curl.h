@@ -619,7 +619,8 @@ typedef enum {
  * CURLAUTH_NONE         - No HTTP authentication
  * CURLAUTH_BASIC        - HTTP Basic authentication (default)
  * CURLAUTH_DIGEST       - HTTP Digest authentication
- * CURLAUTH_GSSNEGOTIATE - HTTP GSS-Negotiate authentication
+ * CURLAUTH_NEGOTIATE    - HTTP Negotiate (SPNEGO) authentication
+ * CURLAUTH_GSSNEGOTIATE - Alias for CURLAUTH_NEGOTIATE (deprecated)
  * CURLAUTH_NTLM         - HTTP NTLM authentication
  * CURLAUTH_DIGEST_IE    - HTTP Digest authentication with IE flavour
  * CURLAUTH_NTLM_WB      - HTTP NTLM authentication delegated to winbind helper
@@ -632,7 +633,9 @@ typedef enum {
 #define CURLAUTH_NONE         ((unsigned long)0)
 #define CURLAUTH_BASIC        (((unsigned long)1)<<0)
 #define CURLAUTH_DIGEST       (((unsigned long)1)<<1)
-#define CURLAUTH_GSSNEGOTIATE (((unsigned long)1)<<2)
+#define CURLAUTH_NEGOTIATE    (((unsigned long)1)<<2)
+/* Deprecated since the advent of CURLAUTH_NEGOTIATE */
+#define CURLAUTH_GSSNEGOTIATE CURLAUTH_NEGOTIATE
 #define CURLAUTH_NTLM         (((unsigned long)1)<<3)
 #define CURLAUTH_DIGEST_IE    (((unsigned long)1)<<4)
 #define CURLAUTH_NTLM_WB      (((unsigned long)1)<<5)
@@ -2231,7 +2234,8 @@ typedef struct {
 #define CURL_VERSION_SSL       (1<<2)  /* SSL options are present */
 #define CURL_VERSION_LIBZ      (1<<3)  /* libz features are present */
 #define CURL_VERSION_NTLM      (1<<4)  /* NTLM auth is supported */
-#define CURL_VERSION_GSSNEGOTIATE (1<<5) /* Negotiate auth support */
+#define CURL_VERSION_GSSNEGOTIATE (1<<5) /* Negotiate auth support
+                                            (deprecated) */
 #define CURL_VERSION_DEBUG     (1<<6)  /* built with debug capabilities */
 #define CURL_VERSION_ASYNCHDNS (1<<7)  /* asynchronous dns resolves */
 #define CURL_VERSION_SPNEGO    (1<<8)  /* SPNEGO auth is supported */

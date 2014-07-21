@@ -1267,9 +1267,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #elif !defined(NTLM_WB_ENABLED)
     auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
-#ifndef USE_HTTP_NEGOTIATE
-    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or
-                                       WINDOWS_SSPI */
+#ifndef USE_SPNEGO
+    auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
+                                    GSS-API or SSPI */
 #endif
 
     /* check if any auth bit lower than CURLAUTH_ONLY is still set */
@@ -1355,9 +1355,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #elif !defined(NTLM_WB_ENABLED)
     auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
-#ifndef USE_HTTP_NEGOTIATE
-    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or
-                                       WINDOWS_SSPI */
+#ifndef USE_SPNEGO
+    auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
+                                    GSS-API or SSPI */
 #endif
 
     /* check if any auth bit lower than CURLAUTH_ONLY is still set */

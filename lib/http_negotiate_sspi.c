@@ -24,7 +24,7 @@
 
 #ifdef USE_WINDOWS_SSPI
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP_NEGOTIATE)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
 
 #include "urldata.h"
 #include "sendf.h"
@@ -262,6 +262,6 @@ void Curl_cleanup_negotiate(struct SessionHandle *data)
   cleanup(&data->state.proxyneg);
 }
 
-#endif /* !CURL_DISABLE_HTTP && USE_HTTP_NEGOTIATE */
+#endif /* !CURL_DISABLE_HTTP && USE_SPNEGO */
 
 #endif /* USE_WINDOWS_SSPI */

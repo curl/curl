@@ -262,9 +262,6 @@ static curl_version_info_data version_info = {
 #ifdef HAVE_LIBZ
   | CURL_VERSION_LIBZ
 #endif
-#ifdef USE_HTTP_NEGOTIATE
-  | CURL_VERSION_GSSNEGOTIATE
-#endif
 #ifdef DEBUGBUILD
   | CURL_VERSION_DEBUG
 #endif

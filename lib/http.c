@@ -328,8 +328,8 @@ static bool pickoneauth(struct auth *pick)
 
   /* The order of these checks is highly relevant, as this will be the order
      of preference in case of the existence of multiple accepted types. */
-  if(avail & CURLAUTH_GSSNEGOTIATE)
-    pick->picked = CURLAUTH_GSSNEGOTIATE;
+  if(avail & CURLAUTH_NEGOTIATE)
+    pick->picked = CURLAUTH_NEGOTIATE;
   else if(avail & CURLAUTH_DIGEST)
     pick->picked = CURLAUTH_DIGEST;
   else if(avail & CURLAUTH_NTLM)
@@ -557,7 +557,7 @@ output_auth_headers(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   const char *auth=NULL;
   CURLcode result = CURLE_OK;
-#ifdef USE_HTTP_NEGOTIATE
+#ifdef USE_SPNEGO
   struct negotiatedata *negdata = proxy?
     &data->state.proxyneg:&data->state.negotiate;
 #endif
@@ -567,9 +567,9 @@ output_auth_headers(struct connectdata *conn,
   (void)path;
 #endif
 
-#ifdef USE_HTTP_NEGOTIATE
+#ifdef USE_SPNEGO
   negdata->state = GSS_AUTHNONE;
-  if((authstatus->picked == CURLAUTH_GSSNEGOTIATE) &&
+  if((authstatus->picked == CURLAUTH_NEGOTIATE) &&
      negdata->context && !GSS_ERROR(negdata->status)) {
     auth="Negotiate";
     result = Curl_output_negotiate(conn, proxy);
@@ -737,7 +737,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
    */
   struct SessionHandle *data = conn->data;
 
-#ifdef USE_HTTP_NEGOTIATE
+#ifdef USE_SPNEGO
   struct negotiatedata *negdata = proxy?
     &data->state.proxyneg:&data->state.negotiate;
 #endif
@@ -771,13 +771,13 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
    */
 
   while(*auth) {
-#ifdef USE_HTTP_NEGOTIATE
+#ifdef USE_SPNEGO
     if(checkprefix("Negotiate", auth)) {
       int neg;
-      *availp |= CURLAUTH_GSSNEGOTIATE;
-      authp->avail |= CURLAUTH_GSSNEGOTIATE;
+      *availp |= CURLAUTH_NEGOTIATE;
+      authp->avail |= CURLAUTH_NEGOTIATE;
 
-      if(authp->picked == CURLAUTH_GSSNEGOTIATE) {
+      if(authp->picked == CURLAUTH_NEGOTIATE) {
         if(negdata->state == GSS_AUTHSENT || negdata->state == GSS_AUTHNONE) {
           neg = Curl_input_negotiate(conn, proxy, auth);
           if(neg == 0) {
@@ -1440,7 +1440,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
 
   Curl_unencode_cleanup(conn);
 
-#ifdef USE_HTTP_NEGOTIATE
+#ifdef USE_SPNEGO
   if(data->state.proxyneg.state == GSS_AUTHSENT ||
       data->state.negotiate.state == GSS_AUTHSENT)
     Curl_cleanup_negotiate(data);

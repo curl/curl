@@ -444,7 +444,7 @@ struct ntlmdata {
 #endif
 };
 
-#ifdef USE_HTTP_NEGOTIATE
+#ifdef USE_SPNEGO
 struct negotiatedata {
   /* When doing Negotiate (SPNEGO) auth, we first need to send a token
      and then validate the received one. */
@@ -1245,7 +1245,7 @@ struct UrlState {
   struct digestdata digest;      /* state data for host Digest auth */
   struct digestdata proxydigest; /* state data for proxy Digest auth */
 
-#ifdef USE_HTTP_NEGOTIATE
+#ifdef USE_SPNEGO
   struct negotiatedata negotiate; /* state data for host Negotiate auth */
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif

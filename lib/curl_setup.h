@@ -610,7 +610,7 @@ int netware_init(void);
 
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
-#define USE_HTTP_NEGOTIATE
+#define USE_SPNEGO
 #endif
 
 /* Single point where USE_NTLM definition might be done */

@@ -597,13 +597,13 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
       case 'l': /* --negotiate */
         if(toggle) {
-          if(curlinfo->features & CURL_VERSION_GSSNEGOTIATE)
-            config->authtype |= CURLAUTH_GSSNEGOTIATE;
+          if(curlinfo->features & CURL_VERSION_SPNEGO)
+            config->authtype |= CURLAUTH_NEGOTIATE;
           else
             return PARAM_LIBCURL_DOESNT_SUPPORT;
         }
         else
-          config->authtype &= ~CURLAUTH_GSSNEGOTIATE;
+          config->authtype &= ~CURLAUTH_NEGOTIATE;
         break;
 
       case 'm': /* --ntlm */
@@ -697,8 +697,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'x': /* --krb */
         /* kerberos level string */
-        if(curlinfo->features & (CURL_VERSION_KERBEROS4 |
-                                 CURL_VERSION_GSSNEGOTIATE))
+        if(curlinfo->features & CURL_VERSION_KERBEROS4)
           GetStr(&config->krblevel, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
@@ -798,11 +797,12 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
 
       case 'k': /* --proxy-negotiate */
-        if(curlinfo->features & CURL_VERSION_GSSNEGOTIATE)
+        if(curlinfo->features & CURL_VERSION_SPNEGO)
           config->proxynegotiate = toggle;
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
+
       case 'm': /* --ftp-account */
         GetStr(&config->ftp_account, nextarg);
         break;

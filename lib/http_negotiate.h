@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#ifdef USE_HTTP_NEGOTIATE
+#ifdef USE_SPNEGO
 
 /* this is for Negotiate header input */
 int Curl_input_negotiate(struct connectdata *conn, bool proxy,
@@ -37,6 +37,6 @@ void Curl_cleanup_negotiate(struct SessionHandle *data);
 #define GSS_ERROR(status) (status & 0x80000000)
 #endif
 
-#endif /* USE_HTTP_NEGOTIATE */
+#endif /* USE_SPNEGO */
 
 #endif /* HEADER_CURL_HTTP_NEGOTIATE_H */
