@@ -543,7 +543,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
    * seem not to follow rfc1961 section 4.3/4.4
    */
   set->socks5_gssapi_nec = FALSE;
-  /* set default gssapi service name */
+  /* set default GSS-API service name */
   res = setstropt(&set->str[STRING_SOCKS5_GSSAPI_SERVICE],
                   (char *) CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE);
   if(res != CURLE_OK)
@@ -1419,7 +1419,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
     /*
-     * Set gssapi service name
+     * Set GSS-API service name
      */
     result = setstropt(&data->set.str[STRING_SOCKS5_GSSAPI_SERVICE],
                        va_arg(param, char *));
@@ -1925,7 +1925,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_GSSAPI_DELEGATION:
     /*
-     * GSSAPI credential delegation
+     * GSS-API credential delegation
      */
     data->set.gssapi_delegation = va_arg(param, long);
     break;

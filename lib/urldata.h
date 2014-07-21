@@ -1595,7 +1595,7 @@ struct UserDefined {
                                     to pattern (e.g. if WILDCARDMATCH is on) */
   void *fnmatch_data;
 
-  long gssapi_delegation; /* GSSAPI credential delegation, see the
+  long gssapi_delegation; /* GSS-API credential delegation, see the
                              documentation of CURLOPT_GSSAPI_DELEGATION */
 
   bool tcp_keepalive;    /* use TCP keepalives */

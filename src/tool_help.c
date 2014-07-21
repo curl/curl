@@ -198,7 +198,7 @@ static const char *const helptext[] = {
   "     --socks5-hostname HOST[:PORT] "
   "SOCKS5 proxy, pass host name to proxy",
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  "     --socks5-gssapi-service NAME  SOCKS5 proxy service name for gssapi",
+  "     --socks5-gssapi-service NAME  SOCKS5 proxy service name for GSS-API",
   "     --socks5-gssapi-nec  Compatibility with NEC SOCKS5 server",
 #endif
   " -Y, --speed-limit RATE  "

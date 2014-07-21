@@ -786,7 +786,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
             if(!data->req.newurl)
               return CURLE_OUT_OF_MEMORY;
             data->state.authproblem = FALSE;
-            /* we received GSS auth info and we dealt with it fine */
+            /* we received a GSS auth token and we dealt with it fine */
             negdata->state = GSS_AUTHRECV;
           }
           else
