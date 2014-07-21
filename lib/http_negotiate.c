@@ -53,19 +53,7 @@ get_gss_name(struct connectdata *conn, bool proxy, gss_name_t *server)
   OM_uint32 major_status, minor_status;
   gss_buffer_desc token = GSS_C_EMPTY_BUFFER;
   char name[2048];
-  const char* service;
-
-  /* GSSAPI implementation by Globus (known as GSI) requires the name to be
-     of form "<service>/<fqdn>" instead of <service>@<fqdn> (ie. slash instead
-     of at-sign). Also GSI servers are often identified as 'host' not 'khttp'.
-     Change following lines if you want to use GSI */
-
-  /* IIS uses the <service>@<fqdn> form but uses 'http' as the service name */
-
-  if(neg_ctx->gss)
-    service = "KHTTP";
-  else
-    service = "HTTP";
+  const char* service = "HTTP";
 
   token.length = strlen(service) + 1 + strlen(proxy ? conn->proxy.name :
                                               conn->host.name) + 1;
@@ -128,30 +116,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   int ret;
   size_t len;
   size_t rawlen = 0;
-  bool gss;
-  const char* protocol;
   CURLcode error;
-
-  if(checkprefix("GSS-Negotiate", header)) {
-    protocol = "GSS-Negotiate";
-    gss = TRUE;
-  }
-  else if(checkprefix("Negotiate", header)) {
-    protocol = "Negotiate";
-    gss = FALSE;
-  }
-  else
-    return -1;
-
-  if(neg_ctx->context) {
-    if(neg_ctx->gss != gss) {
-      return -1;
-    }
-  }
-  else {
-    neg_ctx->protocol = protocol;
-    neg_ctx->gss = gss;
-  }
 
   if(neg_ctx->context && neg_ctx->status == GSS_S_COMPLETE) {
     /* We finished successfully our part of authentication, but server
@@ -165,7 +130,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
       (ret = get_gss_name(conn, proxy, &neg_ctx->server_name)))
     return ret;
 
-  header += strlen(neg_ctx->protocol);
+  header += strlen("Negotiate");
   while(*header && ISSPACE(*header))
     header++;
 
@@ -238,8 +203,8 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     return CURLE_REMOTE_ACCESS_DENIED;
   }
 
-  userp = aprintf("%sAuthorization: %s %s\r\n", proxy ? "Proxy-" : "",
-                  neg_ctx->protocol, encoded);
+  userp = aprintf("%sAuthorization: Negotiate %s\r\n", proxy ? "Proxy-" : "",
+                  encoded);
   if(proxy) {
     Curl_safefree(conn->allocptr.proxyuserpwd);
     conn->allocptr.proxyuserpwd = userp;

@@ -446,11 +446,9 @@ struct ntlmdata {
 
 #ifdef USE_HTTP_NEGOTIATE
 struct negotiatedata {
-  /* when doing Negotiate we first need to receive an auth token and then we
-     need to send our header */
+  /* When doing Negotiate (SPNEGO) auth, we first need to send a token
+     and then validate the received one. */
   enum { GSS_AUTHNONE, GSS_AUTHRECV, GSS_AUTHSENT } state;
-  bool gss; /* Whether we're processing GSS-Negotiate or Negotiate */
-  const char* protocol; /* "GSS-Negotiate" or "Negotiate" */
 #ifdef HAVE_GSSAPI
   OM_uint32 status;
   gss_ctx_id_t context;

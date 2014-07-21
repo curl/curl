@@ -571,7 +571,7 @@ output_auth_headers(struct connectdata *conn,
   negdata->state = GSS_AUTHNONE;
   if((authstatus->picked == CURLAUTH_GSSNEGOTIATE) &&
      negdata->context && !GSS_ERROR(negdata->status)) {
-    auth="GSS-Negotiate";
+    auth="Negotiate";
     result = Curl_output_negotiate(conn, proxy);
     if(result)
       return result;
@@ -772,8 +772,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
 
   while(*auth) {
 #ifdef USE_HTTP_NEGOTIATE
-    if(checkprefix("GSS-Negotiate", auth) ||
-       checkprefix("Negotiate", auth)) {
+    if(checkprefix("Negotiate", auth)) {
       int neg;
       *availp |= CURLAUTH_GSSNEGOTIATE;
       authp->avail |= CURLAUTH_GSSNEGOTIATE;
