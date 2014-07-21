@@ -1248,7 +1248,7 @@ else
 fi
 if test x"$want_gss" = xyes; then
   AC_DEFINE(HAVE_GSSAPI, 1, [if you have GSS-API libraries])
-
+  HAVE_GSSAPI=1
   curl_gss_msg="enabled (MIT Kerberos/Heimdal)"
 
   if test -n "$gnu_gss"; then
@@ -3356,8 +3356,18 @@ fi
 if test "x$USE_WINDOWS_SSPI" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSPI"
 fi
+
+if test "x$HAVE_GSSAPI" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
+fi
+
+if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
+    \( "x$HAVE_GSSAPI" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \); then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
+fi
+
 if test "x$CURL_DISABLE_HTTP" != "x1" -a \
-	"x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
+    "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
   if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
       -o "x$DARWINSSL_ENABLED" = "x1"; then
@@ -3373,9 +3383,6 @@ fi
 
 if test "x$USE_NGHTTP2" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
-fi
-if test "x$want_gss" = "xyes"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
 fi
 
 AC_SUBST(SUPPORT_FEATURES)
