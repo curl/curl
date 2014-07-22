@@ -144,7 +144,7 @@ cyassl_connect_step1(struct connectdata *conn,
                                       data->set.str[STRING_SSL_CAFILE],
                                       data->set.str[STRING_SSL_CAPATH])) {
       if(data->set.ssl.verifypeer) {
-        /* Fail if we insiste on successfully verifying the server. */
+        /* Fail if we insist on successfully verifying the server. */
         failf(data,"error setting certificate verify locations:\n"
               "  CAfile: %s\n  CApath: %s",
               data->set.str[STRING_SSL_CAFILE]?
@@ -154,7 +154,7 @@ cyassl_connect_step1(struct connectdata *conn,
         return CURLE_SSL_CACERT_BADFILE;
       }
       else {
-        /* Just continue with a warning if no strict  certificate
+        /* Just continue with a warning if no strict certificate
            verification is required. */
         infof(data, "error setting certificate verify locations,"
               " continuing anyway:\n");
@@ -298,6 +298,18 @@ cyassl_connect_step2(struct connectdata *conn,
         return CURLE_OK;
       }
 #endif
+    }
+    else if(ASN_NO_SIGNER_E == detail) {
+      if(data->set.ssl.verifypeer) {
+        failf(data, "\tCA signer not available for verification\n");
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+      else {
+        /* Just continue with a warning if no strict certificate
+           verification is required. */
+        infof(data, "CA signer not available for verification, "
+                    "continuing anyway\n");
+      }
     }
     else {
       failf(data, "SSL_connect failed with error %d: %s", detail,
