@@ -23,7 +23,7 @@ $curl_protocols =~ /\w+: (.*)$/;
 @curl = split / /,$1;
 
 # These features are not supported by curl-config
-@curl = grep(!/^(Debug|TrackMemory|Metalink|Largefile|CharConv|GSS-Negotiate|SPNEGO)$/i, @curl);
+@curl = grep(!/^(Debug|TrackMemory|Metalink|Largefile|CharConv|GSS-Negotiate)$/i, @curl);
 @curl = sort @curl;
 
 # Read the output of curl-config
@@ -33,9 +33,7 @@ while( <CURLCONFIG> )
 {
     chomp;
     # ignore curl-config --features not in curl's feature list
-    if(!/^(GSS-API)$/) {
-        push @curl_config, lc($_);
-    }
+    push @curl_config, lc($_);
 }
 close CURLCONFIG;
 
