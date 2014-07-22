@@ -1487,7 +1487,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.ftp_skip_ip = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
 
-  case CURLOPT_INFILE:
+  case CURLOPT_READDATA:
     /*
      * FILE pointer to read the file to be uploaded from. Or possibly
      * used as argument to the read callback.
