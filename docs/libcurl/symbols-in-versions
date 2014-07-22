@@ -18,6 +18,7 @@ CURLAUTH_BASIC                  7.10.6
 CURLAUTH_DIGEST                 7.10.6
 CURLAUTH_DIGEST_IE              7.19.3
 CURLAUTH_GSSNEGOTIATE           7.10.6
+CURLAUTH_NEGOTIATE              7.38.0
 CURLAUTH_NONE                   7.10.6
 CURLAUTH_NTLM                   7.10.6
 CURLAUTH_NTLM_WB                7.22.0
@@ -727,6 +728,7 @@ CURL_VERSION_ASYNCHDNS          7.10.7
 CURL_VERSION_CONV               7.15.4
 CURL_VERSION_CURLDEBUG          7.19.6
 CURL_VERSION_DEBUG              7.10.6
+CURL_VERSION_GSSAPI             7.38.0
 CURL_VERSION_GSSNEGOTIATE       7.10.6
 CURL_VERSION_HTTP2              7.33.0
 CURL_VERSION_IDN                7.12.0
