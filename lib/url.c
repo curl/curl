@@ -3717,7 +3717,7 @@ static CURLcode findprotocol(struct SessionHandle *data,
   /* The protocol was not found in the table, but we don't have to assign it
      to anything since it is already assigned to a dummy-struct in the
      create_conn() function when the connectdata struct is allocated. */
-  failf(data, "Protocol %s not supported or disabled in " LIBCURL_NAME,
+  failf(data, "Protocol \"%s\" not supported or disabled in " LIBCURL_NAME,
         protostr);
 
   return CURLE_UNSUPPORTED_PROTOCOL;
