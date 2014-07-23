@@ -236,7 +236,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
                                       &min,
                                       context,
                                       gssname,
-                                      KRB5_MECHANISM,
+                                      &Curl_krb5_mech_oid,
                                       &chan,
                                       gssresp,
                                       &output_buffer,

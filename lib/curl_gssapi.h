@@ -39,14 +39,8 @@
 #  include <gssapi.h>
 #endif
 
-#ifndef SPNEGO_MECHANISM
 extern gss_OID_desc Curl_spnego_mech_oid;
-#define SPNEGO_MECHANISM &Curl_spnego_mech_oid
-#endif
-#ifndef KRB5_MECHANISM
 extern gss_OID_desc Curl_krb5_mech_oid;
-#define KRB5_MECHANISM &Curl_krb5_mech_oid
-#endif
 
 /* Common method for using GSS-API */
 
