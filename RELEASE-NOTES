@@ -1,19 +1,29 @@
-Curl and libcurl 7.37.2
+Curl and libcurl 7.38.0
 
  Public curl releases:         141
  Command line options:         162
  curl_easy_setopt() options:   208
  Public functions in libcurl:  58
- Contributors:                 1155
+ Contributors:                 1164
 
 This release includes the following changes:
 
- o 
+ o CURLE_HTTP2 is a new error code
+ o CURLAUTH_NEGOTIATE is a new auth define
+ o CURL_VERSION_GSSAPI is a new capability bit
+ o no longer use fbopenssl for anything
 
 This release includes the following bugfixes:
 
  o fix a build failure on Debian when NSS support is enabled [1]
- o 
+ o http2: fixed compiler warnings when built disabled [2]
+ o cyassl: return the correct error code on no CA cert
+ o http: Deprecate GSS-Negotiate macros due to bad naming
+ o http: Fixed Negotiate: authentication
+ o multi: Improve proxy CONNECT performance (regression) [3]
+ o ntlm_wb: Avoid invoking ntlm_auth helper with empty username
+ o ntlm_wb: Fix hard-coded limit on NTLM auth packet size
+ o url.c: use the preferred symbol name: *READDATA [4]
 
 This release includes the following known bugs:
 
@@ -22,10 +32,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Alessandro Ghedini, Dan Fandrich, Daniel Stenberg, Dave Reisner,
+  David Woodhouse, Marcel Raad, Michael Osipov, Paul Saab, Rafaël Carré,
+  Steve Holme
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
  [1] = http://curl.haxx.se/mail/lib-2014-07/0209.html
+ [2] = http://curl.haxx.se/mail/lib-2014-07/0202.html
+ [3] = http://curl.haxx.se/bug/view.cgi?id=1397
+ [4] = http://curl.haxx.se/bug/view.cgi?id=1398
