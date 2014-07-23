@@ -83,6 +83,9 @@ FTP servers return a 227-line as a response to a PASV command. If libcurl
 fails to parse that line, this return code is passed back.
 .IP "CURLE_FTP_CANT_GET_HOST (15)"
 An internal failure to lookup the host used for the new connection.
+.IP "CURLE_HTTP2 (16)"
+A problem was detected in the HTTP2 framing layer. This is somewhat generic
+and can be one out of several problems, see the error buffer for details.
 .IP "CURLE_FTP_COULDNT_SET_TYPE (17)"
 Received an error when trying to set the transfer mode to binary or ASCII.
 .IP "CURLE_PARTIAL_FILE (18)"

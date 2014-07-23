@@ -810,12 +810,12 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   return Curl_add_buffer(httpc->header_recvbuf, "HTTP/2.0 200\r\n", 14);
 }
 
-int Curl_http2_switched(struct connectdata *conn)
+CURLcode Curl_http2_switched(struct connectdata *conn)
 {
-  /* TODO: May get CURLE_AGAIN */
   CURLcode rc;
   struct http_conn *httpc = &conn->proto.httpc;
   int rv;
+  struct SessionHandle *data = conn->data;
 
   httpc->recv_underlying = (recving)conn->recv[FIRSTSOCKET];
   httpc->send_underlying = (sending)conn->send[FIRSTSOCKET];
@@ -827,7 +827,15 @@ int Curl_http2_switched(struct connectdata *conn)
      NGHTTP2_CLIENT_CONNECTION_PREFACE,
      NGHTTP2_CLIENT_CONNECTION_PREFACE_LEN,
      &rc);
-  assert(rv == 24);
+  if(rc)
+    /* TODO: This may get CURLE_AGAIN */
+    return rc;
+
+  if(rv != 24) {
+    failf(data, "Only sent partial HTTP2 packet");
+    return CURLE_SEND_ERROR;
+  }
+
   if(conn->data->req.upgr101 == UPGR101_RECEIVED) {
     /* stream 1 is opened implicitly on upgrade */
     httpc->stream_id = 1;
@@ -835,9 +843,9 @@ int Curl_http2_switched(struct connectdata *conn)
     rv = nghttp2_session_upgrade(httpc->h2, httpc->binsettings,
                                  httpc->binlen, NULL);
     if(rv != 0) {
-      failf(conn->data, "nghttp2_session_upgrade() failed: %s(%d)",
+      failf(data, "nghttp2_session_upgrade() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
-      return -1;
+      return CURLE_HTTP2;
     }
   }
   else {
@@ -845,12 +853,12 @@ int Curl_http2_switched(struct connectdata *conn)
     httpc->stream_id = -1;
     rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, NULL, 0);
     if(rv != 0) {
-      failf(conn->data, "nghttp2_submit_settings() failed: %s(%d)",
+      failf(data, "nghttp2_submit_settings() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
-      return -1;
+      return CURLE_HTTP2;
     }
   }
-  return 0;
+  return CURLE_OK;
 }
 
 #endif

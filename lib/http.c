@@ -1760,8 +1760,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       if(result)
         return result;
 
-      /* TODO: add error checking here */
-      Curl_http2_switched(conn);
+      result = Curl_http2_switched(conn);
+      if(result)
+        return result;
       break;
     case NPN_HTTP1_1:
       /* continue with HTTP/1.1 when explicitly requested */
@@ -1773,7 +1774,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
   else {
     /* prepare for a http2 request */
-    Curl_http2_setup(conn);
+    result = Curl_http2_setup(conn);
+    if(result)
+      return result;
   }
 
   http = data->req.protop;
@@ -3007,8 +3010,9 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
             k->upgr101 = UPGR101_RECEIVED;
 
             /* switch to http2 now */
-            /* TODO: add error checking */
-            Curl_http2_switched(conn);
+            result = Curl_http2_switched(conn);
+            if(result)
+              return result;
           }
           break;
         default:

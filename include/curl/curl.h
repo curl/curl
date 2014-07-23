@@ -423,7 +423,9 @@ typedef enum {
   CURLE_FTP_WEIRD_PASV_REPLY,    /* 13 */
   CURLE_FTP_WEIRD_227_FORMAT,    /* 14 */
   CURLE_FTP_CANT_GET_HOST,       /* 15 */
-  CURLE_OBSOLETE16,              /* 16 - NOT USED */
+  CURLE_HTTP2,                   /* 16 - A problem in the http2 framing layer.
+                                    [was obsoleted in August 2007 for 7.17.0,
+                                    reused in July 2014 for 7.38.0] */
   CURLE_FTP_COULDNT_SET_TYPE,    /* 17 */
   CURLE_PARTIAL_FILE,            /* 18 */
   CURLE_FTP_COULDNT_RETR_FILE,   /* 19 */
