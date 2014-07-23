@@ -175,6 +175,15 @@
 /* Define if you have GSS API. */
 #define HAVE_GSSAPI
 
+/* Define if you have the GNU gssapi libraries */
+#undef HAVE_GSSGNU
+
+/* Define if you have the Heimdal gssapi libraries */
+#define HAVE_GSSHEIMDAL
+
+/* Define if you have the MIT gssapi libraries */
+#undef HAVE_GSSMIT
+
 /* Define if you have the `ucb' library (-lucb). */
 #undef HAVE_LIBUCB
 

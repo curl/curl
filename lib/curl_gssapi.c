@@ -27,10 +27,10 @@
 #include "curl_gssapi.h"
 #include "sendf.h"
 
-static const char spengo_oid_bytes[] = "\x2b\x06\x01\x05\x05\x02";
-gss_OID_desc spnego_mech_oid = { 6, &spengo_oid_bytes };
+static const char spnego_oid_bytes[] = "\x2b\x06\x01\x05\x05\x02";
+gss_OID_desc Curl_spnego_mech_oid = { 6, &spnego_oid_bytes };
 static const char krb5_oid_bytes[] = "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02";
-gss_OID_desc krb5_mech_oid = { 9, &krb5_oid_bytes };
+gss_OID_desc Curl_krb5_mech_oid = { 9, &krb5_oid_bytes };
 
 OM_uint32 Curl_gss_init_sec_context(
     struct SessionHandle *data,

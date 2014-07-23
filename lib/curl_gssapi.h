@@ -40,12 +40,12 @@
 #endif
 
 #ifndef SPNEGO_MECHANISM
-CURL_EXTERN gss_OID_desc spnego_mech_oid;
-#define SPNEGO_MECHANISM &spnego_mech_oid
+extern gss_OID_desc Curl_spnego_mech_oid;
+#define SPNEGO_MECHANISM &Curl_spnego_mech_oid
 #endif
 #ifndef KRB5_MECHANISM
-CURL_EXTERN gss_OID_desc krb5_mech_oid;
-#define KRB5_MECHANISM &krb5_mech_oid
+extern gss_OID_desc Curl_krb5_mech_oid;
+#define KRB5_MECHANISM &Curl_krb5_mech_oid
 #endif
 
 /* Common method for using GSS-API */
