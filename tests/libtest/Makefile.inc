@@ -22,7 +22,6 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib583 lib585 lib586 lib587        lib590 lib591 lib597 lib598 lib599   \
  lib1500 lib1501 lib1502 lib1503 lib1504 lib1505 lib1506 lib1507 lib1508 \
  lib1509 lib1510 lib1511 lib1512 lib1513 lib1514 lib1515 \
- lib1509 lib1510 lib1511 lib1512 lib1513 lib1514 lib1515 \
  lib1525 lib1526 lib1527 lib1528 \
  lib1900 \
  lib2033
