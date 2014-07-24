@@ -136,10 +136,6 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
       return -1;
   }
   else {
-    input_token = malloc(neg_ctx->max_token_length);
-    if(!input_token)
-      return -1;
-
     error = Curl_base64_decode(header,
                                (unsigned char **)&input_token,
                                &input_token_len);
@@ -186,6 +182,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     &lifetime);
 
   Curl_unicodefree(sname);
+  Curl_safefree(input_token);
 
   if(GSS_ERROR(neg_ctx->status))
     return -1;
@@ -226,10 +223,14 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   userp = aprintf("%sAuthorization: Negotiate %s\r\n", proxy ? "Proxy-" : "",
                   encoded);
 
-  if(proxy)
+  if(proxy) {
+    Curl_safefree(conn->allocptr.proxyuserpwd);
     conn->allocptr.proxyuserpwd = userp;
-  else
+  }
+  else {
+    Curl_safefree(conn->allocptr.userpwd);
     conn->allocptr.userpwd = userp;
+  }
   free(encoded);
   return (userp == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }
