@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -68,6 +68,24 @@ verify_memory( output, "aWlp", 4);
 Curl_safefree(output);
 
 rc = Curl_base64_encode(data, "iiii", 4, &output, &size);
+fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
+fail_unless(size == 8, "size should be 8");
+verify_memory( output, "aWlpaQ==", 8);
+Curl_safefree(output);
+
+rc = Curl_base64_encode(data, "\xff\x01\xfe\x02", 4, &output, &size);
+fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
+fail_unless(size == 8, "size should be 8");
+verify_memory( output, "/wH+Ag==", 8);
+Curl_safefree(output);
+
+rc = Curl_base64url_encode(data, "\xff\x01\xfe\x02", 4, &output, &size);
+fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
+fail_unless(size == 8, "size should be 8");
+verify_memory( output, "_wH-Ag==", 8);
+Curl_safefree(output);
+
+rc = Curl_base64url_encode(data, "iiii", 4, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
 fail_unless(size == 8, "size should be 8");
 verify_memory( output, "aWlpaQ==", 8);

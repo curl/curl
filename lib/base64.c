@@ -303,7 +303,7 @@ CURLcode Curl_base64_encode(struct SessionHandle *data,
  *
  * When encoded data length is 0, returns NULL in *outptr.
  *
- * @unittest:
+ * @unittest: 1302
  */
 CURLcode Curl_base64url_encode(struct SessionHandle *data,
                                const char *inputbuff, size_t insize,
