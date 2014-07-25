@@ -504,8 +504,8 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   }
   conn->proto.httpc.binlen = binlen;
 
-  result = Curl_base64_encode(conn->data, (const char *)binsettings, binlen,
-                              &base64, &blen);
+  result = Curl_base64url_encode(conn->data, (const char *)binsettings, binlen,
+                                 &base64, &blen);
   if(result)
     return result;
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,8 +37,13 @@
 #include "memdebug.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
-static const char table64[]=
+static const char base64[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+/* The Base 64 encoding with an URL and filename safe alphabet, RFC 4648
+   section 5 */
+static const char base64url[]=
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 static size_t decodeQuantum(unsigned char *dest, const char *src)
 {
@@ -54,7 +59,7 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
       padding++;
     }
     else {
-      p = table64;
+      p = base64;
 
       while(*p && (*p != *s)) {
         v++;
@@ -167,26 +172,10 @@ CURLcode Curl_base64_decode(const char *src,
   return CURLE_OK;
 }
 
-/*
- * Curl_base64_encode()
- *
- * Given a pointer to an input buffer and an input size, encode it and
- * return a pointer in *outptr to a newly allocated memory area holding
- * encoded data. Size of encoded data is returned in variable pointed by
- * outlen.
- *
- * Input length of 0 indicates input buffer holds a NUL-terminated string.
- *
- * Returns CURLE_OK on success, otherwise specific error code. Function
- * output shall not be considered valid unless CURLE_OK is returned.
- *
- * When encoded data length is 0, returns NULL in *outptr.
- *
- * @unittest: 1302
- */
-CURLcode Curl_base64_encode(struct SessionHandle *data,
-                            const char *inputbuff, size_t insize,
-                            char **outptr, size_t *outlen)
+static CURLcode base64_encode(const char *table64,
+                              struct SessionHandle *data,
+                              const char *inputbuff, size_t insize,
+                              char **outptr, size_t *outlen)
 {
   CURLcode error;
   unsigned char ibuf[3];
@@ -273,5 +262,53 @@ CURLcode Curl_base64_encode(struct SessionHandle *data,
   *outlen = strlen(base64data); /* return the length of the new data */
 
   return CURLE_OK;
+}
+
+/*
+ * Curl_base64_encode()
+ *
+ * Given a pointer to an input buffer and an input size, encode it and
+ * return a pointer in *outptr to a newly allocated memory area holding
+ * encoded data. Size of encoded data is returned in variable pointed by
+ * outlen.
+ *
+ * Input length of 0 indicates input buffer holds a NUL-terminated string.
+ *
+ * Returns CURLE_OK on success, otherwise specific error code. Function
+ * output shall not be considered valid unless CURLE_OK is returned.
+ *
+ * When encoded data length is 0, returns NULL in *outptr.
+ *
+ * @unittest: 1302
+ */
+CURLcode Curl_base64_encode(struct SessionHandle *data,
+                            const char *inputbuff, size_t insize,
+                            char **outptr, size_t *outlen)
+{
+  return base64_encode(base64, data, inputbuff, insize, outptr, outlen);
+}
+
+/*
+ * Curl_base64url_encode()
+ *
+ * Given a pointer to an input buffer and an input size, encode it and
+ * return a pointer in *outptr to a newly allocated memory area holding
+ * encoded data. Size of encoded data is returned in variable pointed by
+ * outlen.
+ *
+ * Input length of 0 indicates input buffer holds a NUL-terminated string.
+ *
+ * Returns CURLE_OK on success, otherwise specific error code. Function
+ * output shall not be considered valid unless CURLE_OK is returned.
+ *
+ * When encoded data length is 0, returns NULL in *outptr.
+ *
+ * @unittest:
+ */
+CURLcode Curl_base64url_encode(struct SessionHandle *data,
+                               const char *inputbuff, size_t insize,
+                               char **outptr, size_t *outlen)
+{
+  return base64_encode(base64url, data, inputbuff, insize, outptr, outlen);
 }
 /* ---- End of Base64 Encoding ---- */
