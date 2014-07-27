@@ -3113,14 +3113,14 @@ sub singletest {
         if(!$short) {
             if($skipped{$why} <= 3) {
                 # show only the first three skips for each reason
-                logmsg sprintf("test %03d SKIPPED: $why\n", $testnum);
+                logmsg sprintf("test %04d SKIPPED: $why\n", $testnum);
             }
         }
 
         timestampskippedevents($testnum);
         return -1;
     }
-    logmsg sprintf("test %03d...", $testnum) if(!$automakestyle);
+    logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
 
     # extract the reply data
     my @reply = getpart("reply", "data");
