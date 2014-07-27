@@ -527,7 +527,10 @@ typedef enum {
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
 
-/* Previously obsoletes error codes re-used in 7.24.0 */
+/* Previously obsolete error code re-used in 7.38.0 */
+#define CURLE_OBSOLETE16 CURLE_HTTP2
+
+/* Previously obsolete error codes re-used in 7.24.0 */
 #define CURLE_OBSOLETE10 CURLE_FTP_ACCEPT_FAILED
 #define CURLE_OBSOLETE12 CURLE_FTP_ACCEPT_TIMEOUT
 
