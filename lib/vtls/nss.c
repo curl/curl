@@ -1030,8 +1030,7 @@ static CURLcode nss_init_core(struct SessionHandle *data, const char *cert_dir)
   initparams.length = sizeof(initparams);
 
   if(cert_dir) {
-    const bool use_sql = NSS_VersionCheck("3.12.0");
-    char *certpath = aprintf("%s%s", use_sql ? "sql:" : "", cert_dir);
+    char *certpath = aprintf("sql:%s", cert_dir);
     if(!certpath)
       return CURLE_OUT_OF_MEMORY;
 
