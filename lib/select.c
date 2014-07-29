@@ -108,8 +108,10 @@ int Curl_wait_ms(int timeout_ms)
     if(error && error_not_EINTR)
       break;
     pending_ms = timeout_ms - elapsed_ms;
-    if(pending_ms <= 0)
+    if(pending_ms <= 0) {
+      r = 0;  /* Simulate a "call timed out" case */
       break;
+    }
   } while(r == -1);
 #endif /* USE_WINSOCK */
   if(r)
@@ -432,8 +434,10 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
       break;
     if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
-      if(pending_ms <= 0)
+      if(pending_ms <= 0) {
+        r = 0;  /* Simulate a "call timed out" case */
         break;
+      }
     }
   } while(r == -1);
 
@@ -517,8 +521,10 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
       break;
     if(timeout_ms > 0) {
       pending_ms = timeout_ms - elapsed_ms;
-      if(pending_ms <= 0)
+      if(pending_ms <= 0) {
+        r = 0;  /* Simulate a "call timed out" case */
         break;
+      }
     }
   } while(r == -1);
 
