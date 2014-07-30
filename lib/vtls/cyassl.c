@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -299,6 +299,7 @@ cyassl_connect_step2(struct connectdata *conn,
       }
 #endif
     }
+#ifdef ASN_NO_SIGNER_E /* not present in 2.0.6 */
     else if(ASN_NO_SIGNER_E == detail) {
       if(data->set.ssl.verifypeer) {
         failf(data, "\tCA signer not available for verification\n");
@@ -311,6 +312,7 @@ cyassl_connect_step2(struct connectdata *conn,
                     "continuing anyway\n");
       }
     }
+#endif
     else {
       failf(data, "SSL_connect failed with error %d: %s", detail,
           ERR_error_string(detail, error_buffer));
