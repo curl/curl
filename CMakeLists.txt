@@ -38,7 +38,7 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-cmake_minimum_required(VERSION 2.6.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 
@@ -250,7 +250,7 @@ option(CURL_ZLIB "Set to ON to enable building cURL with zlib support." ON)
 set(HAVE_LIBZ OFF)
 set(HAVE_ZLIB_H OFF)
 set(HAVE_ZLIB OFF)
-if(CURL_ZLIB)  # AND CURL_CONFIG_HAS_BEEN_RUN_BEFORE
+if(CURL_ZLIB)
   find_package(ZLIB QUIET)
   if(ZLIB_FOUND)
     set(HAVE_ZLIB_H ON)
@@ -262,13 +262,13 @@ endif()
 
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ON)
 mark_as_advanced(CMAKE_USE_OPENSSL)
+
+set(USE_SSLEAY OFF)
+set(USE_OPENSSL OFF)
+set(HAVE_LIBCRYPTO OFF)
+set(HAVE_LIBSSL OFF)
+
 if(CMAKE_USE_OPENSSL)
-
-  set(USE_SSLEAY OFF)
-  set(USE_OPENSSL OFF)
-  set(HAVE_LIBCRYPTO OFF)
-  set(HAVE_LIBSSL OFF)
-
   find_package(OpenSSL)
   if(OPENSSL_FOUND)
     list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
