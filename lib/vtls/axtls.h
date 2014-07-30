@@ -46,6 +46,9 @@ void Curl_axtls_session_free(void *ptr);
 size_t Curl_axtls_version(char *buffer, size_t size);
 int Curl_axtls_shutdown(struct connectdata *conn, int sockindex);
 int Curl_axtls_check_cxn(struct connectdata *conn);
+int Curl_axtls_random(struct SessionHandle *data,
+                      unsigned char *entropy,
+                      size_t length);
 
 /* API setup for axTLS */
 #define curlssl_init Curl_axtls_init
@@ -62,6 +65,7 @@ int Curl_axtls_check_cxn(struct connectdata *conn);
 #define curlssl_version Curl_axtls_version
 #define curlssl_check_cxn(x) Curl_axtls_check_cxn(x)
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
+#define curlssl_random(x,y,z) Curl_axtls_random(x,y,z)
 
 #endif /* USE_AXTLS */
 #endif /* HEADER_CURL_AXTLS_H */
