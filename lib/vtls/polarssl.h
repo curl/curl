@@ -63,5 +63,10 @@ int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
 
+/* This might cause libcurl to use a weeker random!
+   TODO: implement proper use of Polarssl's CTR-DRBG or HMAC-DRBG and use that
+*/
+#define curlssl_random(x,y,z) (x=x, y=y, z=z, CURLE_NOT_BUILT_IN)
+
 #endif /* USE_POLARSSL */
 #endif /* HEADER_CURL_POLARSSL_H */
