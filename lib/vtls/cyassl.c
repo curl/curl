@@ -300,7 +300,7 @@ cyassl_connect_step2(struct connectdata *conn,
       }
 #endif
     }
-#ifdef ASN_NO_SIGNER_E /* not present in 2.0.6 */
+#if LIBCYASSL_VERSION_HEX >= 0x02007000 /* 2.7.0 */
     else if(ASN_NO_SIGNER_E == detail) {
       if(data->set.ssl.verifypeer) {
         failf(data, "\tCA signer not available for verification\n");
