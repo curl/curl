@@ -1642,7 +1642,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 
   (void)premature;
 
-  if(!smtp)
+  if(!smtp || !pp->conn)
     /* When the easy handle is removed from the multi interface while libcurl
        is still trying to resolve the host name, the SMTP struct is not yet
        initialized. However, the removal action calls Curl_done() which in
