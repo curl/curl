@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -59,6 +59,9 @@ CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
 #define curlssl_version Curl_cyassl_version
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending(x,y) Curl_cyassl_data_pending(x,y)
+
+/* this might cause libcurl to use a weeker random! */
+#define curlssl_random(x,y,z) (x=x, y=y, z=z, CURLE_NOT_BUILT_IN)
 
 #endif /* USE_CYASSL */
 #endif /* HEADER_CURL_CYASSL_H */
