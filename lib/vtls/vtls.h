@@ -123,6 +123,7 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
 #define Curl_ssl_connect_nonblocking(x,y,z) CURLE_NOT_BUILT_IN
 #define Curl_ssl_kill_session(x) Curl_nop_stmt
+#define Curl_ssl_random(x,y,z) CURLE_NOT_BUILT_IN
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */
