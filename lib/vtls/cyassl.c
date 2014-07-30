@@ -54,6 +54,7 @@
 #else
 #include <cyassl/error.h>
 #endif
+#include <cyassl/ctaocrypt/random.h>
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -636,6 +637,19 @@ Curl_cyassl_connect(struct connectdata *conn,
   DEBUGASSERT(done);
 
   return CURLE_OK;
+}
+
+int Curl_cyassl_random(struct SessionHandle *data,
+                       unsigned char *entropy,
+                       size_t length)
+{
+  RNG rng;
+  (void)data;
+  if(InitRng(&rng))
+    return 1;
+  if(RNG_GenerateBlock(&rng, entropy, length))
+    return 1;
+  return 0;
 }
 
 #endif

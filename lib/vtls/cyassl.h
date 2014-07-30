@@ -43,6 +43,9 @@ int Curl_cyassl_init(void);
 CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
                                          int sockindex,
                                          bool *done);
+int Curl_cyassl_random(struct SessionHandle *data,
+                       unsigned char *entropy,
+                       size_t length);
 
 /* API setup for CyaSSL */
 #define curlssl_init Curl_cyassl_init
@@ -59,9 +62,7 @@ CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
 #define curlssl_version Curl_cyassl_version
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending(x,y) Curl_cyassl_data_pending(x,y)
-
-/* this might cause libcurl to use a weeker random! */
-#define curlssl_random(x,y,z) (x=x, y=y, z=z, CURLE_NOT_BUILT_IN)
+#define curlssl_random(x,y,z) Curl_cyassl_random(x,y,z)
 
 #endif /* USE_CYASSL */
 #endif /* HEADER_CURL_CYASSL_H */
