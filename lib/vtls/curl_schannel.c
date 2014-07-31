@@ -1215,6 +1215,23 @@ size_t Curl_schannel_version(char *buffer, size_t size)
   return size;
 }
 
+int Curl_schannel_random(unsigned char *entropy, size_t length)
+{
+  HCRYPTPROV hCryptProv = 0;
+
+  if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+    return 1;
+
+  if(!CryptGenRandom(hCryptProv, (DWORD)length, entropy)) {
+    CryptReleaseContext(hCryptProv, 0UL);
+    return 1;
+  }
+
+  CryptReleaseContext(hCryptProv, 0UL);
+  return 0;
+}
+
 #ifdef _WIN32_WCE
 static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 {

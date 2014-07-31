@@ -113,6 +113,8 @@ int Curl_schannel_init(void);
 void Curl_schannel_cleanup(void);
 size_t Curl_schannel_version(char *buffer, size_t size);
 
+int Curl_schannel_random(unsigned char *entropy, size_t length);
+
 /* API setup for Schannel */
 #define curlssl_init Curl_schannel_init
 #define curlssl_cleanup Curl_schannel_cleanup
@@ -129,5 +131,6 @@ size_t Curl_schannel_version(char *buffer, size_t size);
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending Curl_schannel_data_pending
 #define CURL_SSL_BACKEND CURLSSLBACKEND_SCHANNEL
+#define curlssl_random(x,y,z) Curl_schannel_random(y,z)
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_H */
