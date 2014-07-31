@@ -12,6 +12,10 @@ This release includes the following changes:
  o CURLAUTH_NEGOTIATE is a new auth define
  o CURL_VERSION_GSSAPI is a new capability bit
  o no longer use fbopenssl for anything
+ o schannel: use CryptGenRandom for random numbers
+ o axtls: define curlssl_random using axTLS's PRNG
+ o cyassl: use RNG_GenerateBlock to generate a good random number
+ o findprotocol: show unsupported protocol within quotes
 
 This release includes the following bugfixes:
 
@@ -24,6 +28,14 @@ This release includes the following bugfixes:
  o ntlm_wb: Avoid invoking ntlm_auth helper with empty username
  o ntlm_wb: Fix hard-coded limit on NTLM auth packet size
  o url.c: use the preferred symbol name: *READDATA [4]
+ o smtp: fixed a segfault during test 1320 torture test
+ o cyassl: made it compile with version 2.0.6 again
+ o nss: do not check the version of NSS at run time
+ o c-ares: fix build without IPv6 support [5]
+ o http2: use base64url encoding [6]
+ o SSPI Negotiate: Fix 3 memory leaks
+ o libtest: fixed duplicated line in Makefile [7]
+ o conncache: fix compiler warning [8]
 
 This release includes the following known bugs:
 
@@ -32,9 +44,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Dan Fandrich, Daniel Stenberg, Dave Reisner,
-  David Woodhouse, Marcel Raad, Michael Osipov, Paul Saab, Rafaël Carré,
-  Steve Holme
+  Alessandro Ghedini, Anthon Pang, Dan Fandrich, Daniel Stenberg, Dave Reisner,
+  David Woodhouse, Fabian Keil, Kamil Dudka, Marcel Raad, Michael Osipov,
+  Michael Wallner, Patrick Monnerat, Paul Saab, Rafaël Carré, Sergey Nikulov,
+  Spork Schivago, Steve Holme,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -44,3 +57,7 @@ References to bug reports and discussions on issues:
  [2] = http://curl.haxx.se/mail/lib-2014-07/0202.html
  [3] = http://curl.haxx.se/bug/view.cgi?id=1397
  [4] = http://curl.haxx.se/bug/view.cgi?id=1398
+ [5] = http://curl.haxx.se/mail/lib-2014-07/0337.html
+ [6] = https://github.com/tatsuhiro-t/nghttp2/issues/62
+ [7] = https://github.com/bagder/curl/pull/105
+ [8] = http://curl.haxx.se/bug/view.cgi?id=1399
