@@ -2752,6 +2752,7 @@ static ssize_t ossl_send(struct connectdata *conn,
     *curlcode = CURLE_SEND_ERROR;
     return -1;
   }
+  *curlcode = CURLE_OK;
   return (ssize_t)rc; /* number of bytes */
 }
 
