@@ -8,7 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Marc Hoersken, <info@marc-hoersken.de>, et al.
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -128,5 +128,6 @@ size_t Curl_schannel_version(char *buffer, size_t size);
 #define curlssl_version Curl_schannel_version
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending Curl_schannel_data_pending
+#define CURL_SSL_BACKEND CURLSSLBACKEND_SCHANNEL
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_H */

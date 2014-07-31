@@ -697,4 +697,9 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
 }
 #endif
 
+int Curl_ssl_backend(void)
+{
+  return (int)CURL_SSL_BACKEND;
+}
+
 #endif /* USE_SSL */

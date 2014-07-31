@@ -73,6 +73,7 @@ void Curl_gtls_md5sum(unsigned char *tmp, /* input */
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
 #define curlssl_random(x,y,z) Curl_gtls_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_gtls_md5sum(a,b,c,d)
+#define CURL_SSL_BACKEND CURLSSLBACKEND_GNUTLS
 
 #endif /* USE_GNUTLS */
 #endif /* HEADER_CURL_GTLS_H */

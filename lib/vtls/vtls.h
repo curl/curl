@@ -96,6 +96,7 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
                      size_t tmplen,
                      unsigned char *md5sum, /* output */
                      size_t md5len);
+int Curl_ssl_backend(void);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
@@ -124,6 +125,7 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
 #define Curl_ssl_connect_nonblocking(x,y,z) CURLE_NOT_BUILT_IN
 #define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) CURLE_NOT_BUILT_IN
+#define CURL_SSL_BACKEND CURLSSLBACKEND_NONE
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */

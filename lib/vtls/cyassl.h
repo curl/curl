@@ -63,6 +63,7 @@ int Curl_cyassl_random(struct SessionHandle *data,
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending(x,y) Curl_cyassl_data_pending(x,y)
 #define curlssl_random(x,y,z) Curl_cyassl_random(x,y,z)
+#define CURL_SSL_BACKEND CURLSSLBACKEND_CYASSL
 
 #endif /* USE_CYASSL */
 #endif /* HEADER_CURL_CYASSL_H */

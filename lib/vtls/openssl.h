@@ -93,6 +93,7 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
 #define curlssl_data_pending(x,y) Curl_ossl_data_pending(x,y)
 #define curlssl_random(x,y,z) Curl_ossl_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_ossl_md5sum(a,b,c,d)
+#define CURL_SSL_BACKEND CURLSSLBACKEND_OPENSSL
 
 #define DEFAULT_CIPHER_SELECTION "ALL!EXPORT!EXPORT40!EXPORT56!aNULL!LOW!RC4"
 

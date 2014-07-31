@@ -83,6 +83,7 @@ void Curl_nss_md5sum(unsigned char *tmp, /* input */
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
 #define curlssl_random(x,y,z) Curl_nss_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_nss_md5sum(a,b,c,d)
+#define CURL_SSL_BACKEND CURLSSLBACKEND_NSS
 
 #endif /* USE_NSS */
 #endif /* HEADER_CURL_NSSG_H */

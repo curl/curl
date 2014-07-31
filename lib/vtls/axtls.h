@@ -66,7 +66,7 @@ int Curl_axtls_random(struct SessionHandle *data,
 #define curlssl_check_cxn(x) Curl_axtls_check_cxn(x)
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
 #define curlssl_random(x,y,z) Curl_axtls_random(x,y,z)
-
+#define CURL_SSL_BACKEND CURLSSLBACKEND_AXTLS
 #endif /* USE_AXTLS */
 #endif /* HEADER_CURL_AXTLS_H */
 
