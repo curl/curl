@@ -41,7 +41,7 @@ sent to a server and not to a proxy. Proxy headers must be set with
 \fICURLOPT_PROXYHEADER(3)\fP to get used. Note that if a non-CONNECT request
 is sent to a proxy, libcurl will send both server headers and proxy
 headers. When doing CONNECT, libcurl will send \fICURLOPT_PROXYHEADER(3)\fP
-headers only do the proxy and then \fICURLOPT_HTTPHEADER(3)\fP headers only to
+headers only to the proxy and then \fICURLOPT_HTTPHEADER(3)\fP headers only to
 the server.
 .SH DEFAULT
 CURLHEADER_UNIFIED
