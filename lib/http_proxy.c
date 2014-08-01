@@ -343,7 +343,6 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                 perline++; /* amount of bytes in this line so far */
                 if(*ptr == 0x0a) {
                   char letter;
-                  int writetype;
 
                   /* convert from the network encoding */
                   result = Curl_convert_from_network(data, line_start,
@@ -357,19 +356,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                     Curl_debug(data, CURLINFO_HEADER_IN,
                                line_start, (size_t)perline, conn);
 
-                  /* send the header to the callback */
-                  writetype = CLIENTWRITE_HEADER;
-                  if(data->set.include_header)
-                    writetype |= CLIENTWRITE_BODY;
-
-                  result = Curl_client_write(conn, writetype, line_start,
-                                             perline);
-
                   data->info.header_size += (long)perline;
                   data->req.headerbytecount += (long)perline;
-
-                  if(result)
-                    return result;
 
                   /* Newlines are CRLF, so the CR is ignored as the line isn't
                      really terminated until the LF comes. Treat a following CR
