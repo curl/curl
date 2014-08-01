@@ -28,7 +28,7 @@ libcurl
  - selectable network interface for outgoing traffic
  - IPv6 support on unix and Windows
  - persistent connections
- - socks5 support
+ - socks 4 + 5 support, with or without local name resolving
  - supports user name and password in proxy environment variables
  - operations through proxy "tunnel" (using CONNECT)
  - support for large files (>2GB and >4GB) during upload and download
@@ -45,8 +45,8 @@ HTTP
  - POST
  - Pipelining
  - multipart formpost (RFC1867-style)
- - authentication: Basic, Digest, NTLM (*9), GSS-Negotiate/Negotiate (*3) and
-   SPNEGO (*4) to server and proxy
+ - authentication: Basic, Digest, NTLM (*9), Negotiate (*3) and to server and
+   proxy
  - resume (both GET and PUT)
  - follow redirects
  - maximum amount of redirects to follow
@@ -64,6 +64,7 @@ HTTP
  - Content-Encoding support for deflate and gzip
  - "Transfer-Encoding: chunked" support in uploads
  - data compression (*12)
+ - HTTP/2 (*4)
 
 HTTPS (*1)
  - (all the HTTP features)
@@ -180,7 +181,7 @@ FOOTNOTES
        Windows), Secure Transport (native iOS/OS X) or qssl (native IBM i)
   *2 = requires OpenLDAP
   *3 = requires a GSSAPI-compliant library, such as Heimdal or similar
-  *4 = requires FBopenssl
+  *4 = requires nghttp2 and possibly a recent TLS library
   *5 = requires a krb4 library, such as the MIT one or similar
   *6 = requires c-ares
   *7 = requires OpenSSL, NSS, qssl, WinSSL or Secure Transport; GnuTLS, for
