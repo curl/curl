@@ -106,19 +106,13 @@ NSS to read the OpenSSL PEM CA bundle. This library is missing in OpenSuSE, and
 without it, NSS can only work with its own internal formats. NSS also has a new
 database format: https://wiki.mozilla.org/NSS_Shared_DB
 
-Starting with version 7.19.7, libcurl will check for the NSS version it runs,
-and automatically add the 'sql:' prefix to the certdb directory (either the
-hardcoded default /etc/pki/nssdb or the directory configured with SSL_DIR
-environment variable) if version 3.12.0 or later is detected. To check which
-certdb format your distribution provides, examine the default
-certdb location: /etc/pki/nssdb; the new certdb format can be identified by
-the filenames cert9.db, key4.db, pkcs11.txt; filenames of older versions are
-cert8.db, key3.db, modsec.db.
-
-Usually these cert databases are empty, but NSS also has built-in CAs which are
-provided through a shared library, libnssckbi.so; if you want to use these
-built-in CAs, then create a symlink to libnssckbi.so in /etc/pki/nssdb:
-ln -s /usr/lib[64]/libnssckbi.so /etc/pki/nssdb/libnssckbi.so
+Starting with version 7.19.7, libcurl automatically adds the 'sql:' prefix to
+the certdb directory (either the hardcoded default /etc/pki/nssdb or the
+directory configured with SSL_DIR environment variable). To check which certdb
+format your distribution provides, examine the default certdb location:
+/etc/pki/nssdb; the new certdb format can be identified by the filenames
+cert9.db, key4.db, pkcs11.txt; filenames of older versions are cert8.db,
+key3.db, secmod.db.
 
      Peer SSL Certificate Verification with Schannel and Secure Transport
      ====================================================================
