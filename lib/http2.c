@@ -191,23 +191,75 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
   int rv;
+  size_t left, ncopy;
+
   (void)session;
   (void)frame;
   infof(conn->data, "on_frame_recv() was called with header %x\n",
         frame->hd.type);
   switch(frame->hd.type) {
+  case NGHTTP2_DATA:
+    /* If body started, then receiving DATA is illegal. */
+    if(!c->bodystarted) {
+      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+                                     frame->hd.stream_id,
+                                     NGHTTP2_PROTOCOL_ERROR);
+
+      if(nghttp2_is_fatal(rv)) {
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
+      }
+    }
+    break;
   case NGHTTP2_HEADERS:
-    if(frame->headers.cat != NGHTTP2_HCAT_RESPONSE)
+    if(frame->headers.cat == NGHTTP2_HCAT_REQUEST)
       break;
-    c->bodystarted = TRUE;
+
+    if(c->bodystarted) {
+      /* Only valid HEADERS after body started is trailer header,
+         which is not fully supported in this code.  If HEADERS is not
+         trailer, then it is a PROTOCOL_ERROR. */
+      if((frame->hd.flags & NGHTTP2_FLAG_END_STREAM) == 0) {
+        rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+                                       frame->hd.stream_id,
+                                       NGHTTP2_PROTOCOL_ERROR);
+
+        if(nghttp2_is_fatal(rv)) {
+          return NGHTTP2_ERR_CALLBACK_FAILURE;
+        }
+      }
+      break;
+    }
+
+    if(c->status_code == -1) {
+      /* No :status header field means PROTOCOL_ERROR. */
+      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+                                     frame->hd.stream_id,
+                                     NGHTTP2_PROTOCOL_ERROR);
+
+      if(nghttp2_is_fatal(rv)) {
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
+      }
+
+      break;
+    }
+
+    /* Only final status code signals the end of header */
+    if(c->status_code / 100 != 1) {
+      c->bodystarted = TRUE;
+    }
+
+    c->status_code = -1;
+
     Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
-    c->nread_header_recvbuf = c->len < c->header_recvbuf->size_used ?
-      c->len : c->header_recvbuf->size_used;
 
-    memcpy(c->mem, c->header_recvbuf->buffer, c->nread_header_recvbuf);
+    left = c->header_recvbuf->size_used - c->nread_header_recvbuf;
+    ncopy = c->len < left ? c->len : left;
 
-    c->mem += c->nread_header_recvbuf;
-    c->len -= c->nread_header_recvbuf;
+    memcpy(c->mem, c->header_recvbuf->buffer + c->nread_header_recvbuf, ncopy);
+    c->nread_header_recvbuf += ncopy;
+
+    c->mem += ncopy;
+    c->len -= ncopy;
     break;
   case NGHTTP2_PUSH_PROMISE:
     rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
@@ -339,6 +391,33 @@ static int on_begin_headers(nghttp2_session *session,
   return 0;
 }
 
+/* Decode HTTP status code.  Returns -1 if no valid status code was
+   decoded. */
+static int decode_status_code(const uint8_t *value, size_t len)
+{
+  int i;
+  int res;
+
+  if(len != 3) {
+    return -1;
+  }
+
+  res = 0;
+
+  for(i = 0; i < 3; ++i) {
+    char c = value[i];
+
+    if(c < '0' || c > '9') {
+      return -1;
+    }
+
+    res *= 10;
+    res += c - '0';
+  }
+
+  return res;
+}
+
 static const char STATUS[] = ":status";
 
 /* frame->hd.type is either NGHTTP2_HEADERS or NGHTTP2_PUSH_PROMISE */
@@ -350,6 +429,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
+  int rv;
+
   (void)session;
   (void)frame;
   (void)flags;
@@ -358,13 +439,64 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
+  if(c->bodystarted) {
+    /* Ignore trailer or HEADERS not mapped to HTTP semantics.  The
+       consequence is handled in on_frame_recv(). */
+    return 0;
+  }
+
+  if(!nghttp2_check_header_name(name, namelen) ||
+     !nghttp2_check_header_value(value, valuelen)) {
+
+    rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+                                   frame->hd.stream_id,
+                                   NGHTTP2_PROTOCOL_ERROR);
+
+    if(nghttp2_is_fatal(rv)) {
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
+
+    return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+  }
+
   if(namelen == sizeof(":status") - 1 &&
      memcmp(STATUS, name, namelen) == 0) {
-    snprintf(c->header_recvbuf->buffer, 13, "HTTP/2.0 %s", value);
-    c->header_recvbuf->buffer[12] = '\r';
+
+    /* :status must appear exactly once. */
+    if(c->status_code != -1 ||
+       (c->status_code = decode_status_code(value, valuelen)) == -1) {
+
+      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+                                     frame->hd.stream_id,
+                                     NGHTTP2_PROTOCOL_ERROR);
+      if(nghttp2_is_fatal(rv)) {
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
+      }
+
+      return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+    }
+
+    Curl_add_buffer(c->header_recvbuf, "HTTP/2.0 ", 9);
+    Curl_add_buffer(c->header_recvbuf, value, valuelen);
+    Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
+
     return 0;
   }
   else {
+    /* Here we are sure that namelen > 0 because of
+       nghttp2_check_header_name().  Pseudo header other than :status
+       is illegal. */
+    if(c->status_code == -1 || name[0] == ':') {
+      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+                                     frame->hd.stream_id,
+                                     NGHTTP2_PROTOCOL_ERROR);
+      if(nghttp2_is_fatal(rv)) {
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
+      }
+
+      return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+    }
+
     /* convert to a HTTP1-style header */
     infof(conn->data, "got header\n");
     Curl_add_buffer(c->header_recvbuf, name, namelen);
@@ -803,11 +935,11 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   httpc->upload_mem = NULL;
   httpc->upload_len = 0;
   httpc->stream_id = -1;
+  httpc->status_code = -1;
 
   conn->httpversion = 20;
 
-  /* Put place holder for status line */
-  return Curl_add_buffer(httpc->header_recvbuf, "HTTP/2.0 200\r\n", 14);
+  return 0;
 }
 
 CURLcode Curl_http2_switched(struct connectdata *conn)

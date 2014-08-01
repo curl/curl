@@ -1525,10 +1525,6 @@ static CURLcode expect100(struct SessionHandle *data,
   const char *ptr;
   data->state.expect100header = FALSE; /* default to false unless it is set
                                           to TRUE below */
-  if(conn->httpversion == 20) {
-    /* We don't use Expect in HTTP2 */
-    return CURLE_OK;
-  }
   if(use_http_1_1plus(data, conn)) {
     /* if not doing HTTP 1.0 or disabled explicitly, we add a Expect:
        100-continue to the headers which actually speeds up post operations

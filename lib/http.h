@@ -169,7 +169,9 @@ struct http_conn {
   sending send_underlying; /* underlying send Curl_send callback */
   recving recv_underlying; /* underlying recv Curl_recv callback */
   bool closed; /* TRUE on HTTP2 stream close */
-  Curl_send_buffer *header_recvbuf; /* store response headers */
+  Curl_send_buffer *header_recvbuf; /* store response headers.  We
+                                       store non-final and final
+                                       response headers into it. */
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf
                                   fed into upper layer */
   int32_t stream_id; /* stream we are interested in */
@@ -185,6 +187,7 @@ struct http_conn {
   const uint8_t *upload_mem; /* points to a buffer to read from */
   size_t upload_len; /* size of the buffer 'upload_mem' points to */
   size_t upload_left; /* number of bytes left to upload */
+  int status_code; /* HTTP status code */
 #else
   int unused; /* prevent a compiler warning */
 #endif
