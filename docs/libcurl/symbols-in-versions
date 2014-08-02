@@ -17,7 +17,7 @@ CURLAUTH_ANYSAFE                7.10.6
 CURLAUTH_BASIC                  7.10.6
 CURLAUTH_DIGEST                 7.10.6
 CURLAUTH_DIGEST_IE              7.19.3
-CURLAUTH_GSSNEGOTIATE           7.10.6
+CURLAUTH_GSSNEGOTIATE           7.10.6       7.38.0
 CURLAUTH_NEGOTIATE              7.38.0
 CURLAUTH_NONE                   7.10.6
 CURLAUTH_NTLM                   7.10.6

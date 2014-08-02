@@ -45,8 +45,8 @@ HTTP
  - POST
  - Pipelining
  - multipart formpost (RFC1867-style)
- - authentication: Basic, Digest, NTLM (*9), Negotiate (*3) and to server and
-   proxy
+ - authentication: Basic, Digest, NTLM (*9) and Negotiate (SPNEGO) (*3)
+   to server and proxy
  - resume (both GET and PUT)
  - follow redirects
  - maximum amount of redirects to follow
@@ -78,7 +78,7 @@ FTP
  - download
  - authentication
  - kerberos4 (*5)
- - kerberos5 (*3)
+ - Kerberos 5 (*14)
  - active/passive using PORT, EPRT, PASV or EPSV
  - single file size information (compare to HTTP HEAD)
  - 'type=' URL support
@@ -180,7 +180,8 @@ FOOTNOTES
   *1 = requires OpenSSL, GnuTLS, NSS, yassl, axTLS, PolarSSL, WinSSL (native
        Windows), Secure Transport (native iOS/OS X) or qssl (native IBM i)
   *2 = requires OpenLDAP
-  *3 = requires a GSSAPI-compliant library, such as Heimdal or similar
+  *3 = requires a GSS-API implementation (such as Heimdal or MIT Kerberos) or
+       SSPI (native Windows)
   *4 = requires nghttp2 and possibly a recent TLS library
   *5 = requires a krb4 library, such as the MIT one or similar
   *6 = requires c-ares
@@ -195,3 +196,4 @@ FOOTNOTES
   *12 = requires libz
   *13 = requires libmetalink, and either an Apple or Microsoft operating
         system, or OpenSSL, or GnuTLS, or NSS
+  *14 = requires a GSS-API implementation (such as Heimdal or MIT Kerberos)

@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH libcurl-tutorial 3 "4 Mar 2009" "libcurl" "libcurl programming"
+.TH libcurl-tutorial 3 "2 Aug 2014" "libcurl" "libcurl programming"
 .SH NAME
 libcurl-tutorial \- libcurl programming tutorial
 .SH "Objective"
@@ -442,7 +442,7 @@ authentication method is called 'Basic', which is sending the name and
 password in clear-text in the HTTP request, base64-encoded. This is insecure.
 
 At the time of this writing, libcurl can be built to use: Basic, Digest, NTLM,
-Negotiate, GSS-Negotiate and SPNEGO. You can tell libcurl which one to use
+Negotiate (SPNEGO). You can tell libcurl which one to use
 with \fICURLOPT_HTTPAUTH(3)\fP as in:
 
  curl_easy_setopt(easyhandle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);

@@ -216,9 +216,9 @@ may have been fixed since this was written!
   acknowledged after the actual TCP connect (during the SOCKS "negotiate"
   phase).
 
-10. To get HTTP Negotiate authentication to work fine, you need to provide a
-  (fake) user name (this concerns both curl and the lib) because the code
-  wrongly only considers authentication if there's a user name provided.
+10. To get HTTP Negotiate (SPNEGO) authentication to work fine, you need to
+  provide a (fake) user name (this concerns both curl and the lib) because the
+  code wrongly only considers authentication if there's a user name provided.
   http://curl.haxx.se/bug/view.cgi?id=440 How?
   http://curl.haxx.se/mail/lib-2004-08/0182.html
 

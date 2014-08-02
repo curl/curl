@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_HTTPAUTH 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_HTTPAUTH 3 "2 Aug 2014" "libcurl 7.38.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_HTTPAUTH \- set HTTP server authentication methods to try
 .SH SYNOPSIS
@@ -56,14 +56,12 @@ defined in RFC2617 and is a more secure way to do authentication over public
 networks than the regular old-fashioned Basic method. The IE flavor is simply
 that libcurl will use a special "quirk" that IE is known to have used before
 version 7 and that some servers require the client to use.
-.IP CURLAUTH_GSSNEGOTIATE
-HTTP GSS-Negotiate authentication. The GSS-Negotiate (also known as plain
-\&"Negotiate") method was designed by Microsoft and is used in their web
-applications. It is primarily meant as a support for Kerberos5 authentication
-but may also be used along with other authentication methods. For more
-information see IETF draft draft-brezak-spnego-http-04.txt.
+.IP CURLAUTH_NEGOTIATE
+HTTP Negotiate (SPNEGO) authentication. Negotiate authentication is defined
+in RFC 4559 and is the most secure way to perform authentication over HTTP.
 
-You need to build libcurl with a suitable GSS-API library for this to work.
+You need to build libcurl with a suitable GSS-API library or SSPI on Windows
+for this to work.
 .IP CURLAUTH_NTLM
 HTTP NTLM authentication. A proprietary protocol invented and used by
 Microsoft. It uses a challenge-response and hash concept similar to Digest, to

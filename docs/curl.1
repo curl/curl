@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl 1 "27 July 2012" "Curl 7.27.0" "Curl Manual"
+.TH curl 1 "2 Aug 2014" "Curl 7.38.0" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -827,9 +827,8 @@ If this option is used several times, the last one will be used.
 should be one of 'clear', 'safe', 'confidential', or 'private'. Should you use
 a level that is not one of these, 'private' will instead be used.
 
-This option requires a library built with kerberos4 or GSSAPI
-(GSS-Negotiate) support. This is not very common. Use \fI-V, --version\fP to
-see if your curl supports it.
+This option requires a library built with kerberos4 support. This is not
+very common. Use \fI-V, --version\fP to see if your curl supports it.
 
 If this option is used several times, the last one will be used.
 .IP "-l, --list-only"
@@ -1024,18 +1023,13 @@ Very similar to \fI--netrc\fP, but this option makes the .netrc usage
 \fBoptional\fP and not mandatory as the \fI--netrc\fP option does.
 
 .IP "--negotiate"
-(HTTP) Enables GSS-Negotiate authentication. The GSS-Negotiate method was
-designed by Microsoft and is used in their web applications. It is primarily
-meant as a support for Kerberos5 authentication but may be also used along
-with another authentication method. For more information see IETF draft
-draft-brezak-spnego-http-04.txt.
+(HTTP) Enables Negotiate (SPNEGO) authentication.
 
-If you want to enable Negotiate for your proxy authentication, then use
+If you want to enable Negotiate (SPNEGO) for proxy authentication, then use
 \fI--proxy-negotiate\fP.
 
-This option requires a library built with GSSAPI support. This is
-not very common. Use \fI-V, --version\fP to see if your version supports
-GSS-Negotiate.
+This option requires a library built with GSS-API or SSPI support. Use \fI-V,
+--version\fP to see if your curl supports GSS-API/SSPI and SPNEGO.
 
 When using this option, you must also provide a fake \fI-u, --user\fP option to
 activate the authentication code properly. Sending a '-u :' is enough as the
@@ -1254,8 +1248,8 @@ the default authentication method curl uses with proxies.
 Tells curl to use HTTP Digest authentication when communicating with the given
 proxy. Use \fI--digest\fP for enabling HTTP Digest with a remote host.
 .IP "--proxy-negotiate"
-Tells curl to use HTTP Negotiate authentication when communicating
-with the given proxy. Use \fI--negotiate\fP for enabling HTTP Negotiate
+Tells curl to use HTTP Negotiate (SPNEGO) authentication when communicating
+with the given proxy. Use \fI--negotiate\fP for enabling HTTP Negotiate (SPNEGO)
 with a remote host. (Added in 7.17.1)
 .IP "--proxy-ntlm"
 Tells curl to use HTTP NTLM authentication when communicating with the given
@@ -1518,7 +1512,7 @@ sockd/proxy-name --socks5 proxy-name \fI--socks5-gssapi-service\fP
 sockd/real-name would use sockd/real-name for cases where the proxy-name does
 not match the principal name.  (Added in 7.19.4).
 .IP "--socks5-gssapi-nec"
-As part of the gssapi negotiation a protection mode is negotiated. RFC 1961
+As part of the GSS-API negotiation a protection mode is negotiated. RFC 1961
 says in section 4.3/4.4 it should be protected, but the NEC reference
 implementation does not.  The option \fI--socks5-gssapi-nec\fP allows the
 unprotected exchange of the protection mode negotiation. (Added in 7.19.4).
@@ -1917,22 +1911,21 @@ HTTPS and FTPS are supported.
 Automatic decompression of compressed files over HTTP is supported.
 .IP "NTLM"
 NTLM authentication is supported.
-.IP "GSS-Negotiate"
-Negotiate authentication and krb5 for FTP is supported.
 .IP "Debug"
 This curl uses a libcurl built with Debug. This enables more error-tracking
 and memory debugging etc. For curl-developers only!
 .IP "AsynchDNS"
 This curl uses asynchronous name resolves.
 .IP "SPNEGO"
-SPNEGO Negotiate authentication is supported.
+SPNEGO authentication is supported.
 .IP "Largefile"
 This curl supports transfers of large files, files larger than 2GB.
 .IP "IDN"
 This curl supports IDN - international domain names.
+.IP "GSS-API"
+GSS-API is supported.
 .IP "SSPI"
-SSPI is supported. If you use Negotiate or NTLM authentication and set a blank
-user name, curl will authenticate with your current user and password.
+SSPI is supported.
 .IP "TLS-SRP"
 SRP (Secure Remote Password) authentication is supported for TLS.
 .IP "Metalink"

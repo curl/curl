@@ -136,11 +136,11 @@ FAQ
     POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
 
     libcurl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading,
-    kerberos, HTTP form based upload, proxies, cookies, user+password
+    Kerberos, SPNEGO, HTTP form based upload, proxies, cookies, user+password
     authentication, file transfer resume, http proxy tunneling and more!
 
     libcurl is highly portable, it builds and works identically on numerous
-    platforms, including Solaris, NetBSD, FreeBSD, OpenBSD, Darwin, HPUX,
+    platforms, including Solaris, NetBSD, FreeBSD, OpenBSD, Darwin, HP-UX,
     IRIX, AIX, Tru64, Linux, UnixWare, HURD, Windows, Amiga, OS/2, BeOS, Mac
     OS X, Ultrix, QNX, OpenVMS, RISC OS, Novell NetWare, DOS, Symbian, OSF,
     Android, Minix, IBM TPF and more...
