@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -114,6 +114,8 @@ struct httprequest {
   bool pipelining;   /* true if request is pipelined */
   int callcount;  /* times ProcessRequest() gets called */
   bool connmon;   /* monitor the state of the connection, log disconnects */
+  bool upgrade;   /* test case allows upgrade to http2 */
+  bool upgrade_request; /* upgrade request found and allowed */
   int done_processing;
 };
 
@@ -163,6 +165,9 @@ const char *serverlogfile = DEFAULT_LOGFILE;
    disconnected as for some cases it is important that it gets done at the
    proper point - like with NTLM */
 #define CMD_CONNECTIONMONITOR "connection-monitor"
+
+/* upgrade to http2 */
+#define CMD_UPGRADE "upgrade"
 
 #define END_OF_HEADERS "\r\n\r\n"
 
@@ -375,6 +380,10 @@ static int parse_servercmd(struct httprequest *req)
                        strlen(CMD_CONNECTIONMONITOR))) {
         logmsg("enabled connection monitoring");
         req->connmon = TRUE;
+      }
+      else if(!strncmp(CMD_UPGRADE, cmd, strlen(CMD_UPGRADE))) {
+        logmsg("enabled upgrade to http2");
+        req->upgrade = TRUE;
       }
       else if(1 == sscanf(cmd, "pipe: %d", &num)) {
         logmsg("instructed to allow a pipe size of %d", num);
@@ -787,6 +796,12 @@ static int ProcessRequest(struct httprequest *req)
   if(req->auth_req && !req->auth) {
     logmsg("Return early due to auth requested by none provided");
     return 1; /* done */
+  }
+
+  if(req->upgrade && strstr(req->reqbuf, "Upgrade:")) {
+    /* we allow upgrade and there was one! */
+    logmsg("Found Upgrade: in request and allows it");
+    req->upgrade_request = TRUE;
   }
 
   if(req->cl > 0) {
@@ -1754,6 +1769,14 @@ http_connect_cleanup:
   *infdp = CURL_SOCKET_BAD;
 }
 
+static void http2(struct httprequest *req)
+{
+  (void)req;
+  logmsg("switched to http2");
+  /* left to implement */
+}
+
+
 /* returns a socket handle, or 0 if there are no more waiting sockets,
    or < 0 if there was an error */
 static curl_socket_t accept_connection(curl_socket_t sock)
@@ -1887,6 +1910,12 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
       http_connect(&msgsock, listensock, connecthost, req->connect_port);
       return -1;
     }
+  }
+
+  if(req->upgrade_request) {
+    /* an upgrade request, switch to http2 here */
+    http2(req);
+    return -1;
   }
 
   /* if we got a CONNECT, loop and get another request as well! */
