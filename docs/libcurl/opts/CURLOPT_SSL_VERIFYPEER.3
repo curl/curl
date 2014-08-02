@@ -51,6 +51,12 @@ typically also want to ensure that the server is the server you mean to be
 talking to.  Use \fICURLOPT_SSL_VERIFYHOST(3)\fP for that. The check that the
 host name in the certificate is valid for the host name you're connecting to
 is done independently of the \fICURLOPT_SSL_VERIFYPEER(3)\fP option.
+
+WARNING: disabling verification of the certificate allows bad guys to
+man-in-the-middle the communication without you knowing it. Disabling
+verification makes the communication insecure. Just having encryption on a
+transfer is not enough as you cannot be sure that you are communicating with
+the correct end-point.
 .SH DEFAULT
 By default, curl assumes a value of 1.
 .SH PROTOCOLS
