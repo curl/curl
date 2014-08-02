@@ -214,6 +214,10 @@ my $has_sspi;    # set if libcurl is built with SSPI support
 my $has_charconv;# set if libcurl is built with CharConv support
 my $has_tls_srp; # set if libcurl is built with TLS-SRP support
 my $has_metalink;# set if curl is built with Metalink support
+my $has_http2;   # set if libcurl is built with HTTP2 support
+
+# this version is decided by the particular nghttp2 library that is being used
+my $h2cver = "h2c-14";
 
 my $has_openssl;  # built with a lib using an OpenSSL-like API
 my $has_gnutls;   # built with GnuTLS
@@ -2413,6 +2417,10 @@ sub checksystem {
                     $resolver="threaded";
                 }
             }
+            if($feat =~ /HTTP2/) {
+                # http2 enabled
+                $has_http2=1;
+            }
         }
         #
         # Test harness currently uses a non-stunnel server in order to
@@ -2645,6 +2653,10 @@ sub subVariables {
 
   $$thing =~ s/%FTPTIME2/$ftp2/g;
   $$thing =~ s/%FTPTIME3/$ftp3/g;
+
+  # HTTP2
+
+  $$thing =~ s/%H2CVER/$h2cver/g;  
 }
 
 sub fixarray {
@@ -2864,6 +2876,11 @@ sub singletest {
             }
             elsif($1 eq "Metalink") {
                 if($has_metalink) {
+                    next;
+                }
+            }
+            elsif($1 eq "http2") {
+                if($has_http2) {
                     next;
                 }
             }
