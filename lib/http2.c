@@ -668,6 +668,9 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
   if(httpc->closed) {
+    /* Reset to FALSE to prevent infinite loop in readwrite_data
+       function. */
+    httpc->closed = FALSE;
     return 0;
   }
 
@@ -747,6 +750,9 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   /* If stream is closed, return 0 to signal the http routine to close
      the connection */
   if(httpc->closed) {
+    /* Reset to FALSE to prevent infinite loop in readwrite_data
+       function. */
+    httpc->closed = FALSE;
     return 0;
   }
   *err = CURLE_AGAIN;
