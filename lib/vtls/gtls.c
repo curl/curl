@@ -1261,6 +1261,7 @@ size_t Curl_gtls_version(char *buffer, size_t size)
   return snprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
 }
 
+#ifndef USE_GNUTLS_NETTLE
 static int Curl_gtls_seed(struct SessionHandle *data)
 {
   /* we have the "SSL is seeded" boolean static to prevent multiple
@@ -1268,9 +1269,7 @@ static int Curl_gtls_seed(struct SessionHandle *data)
   static bool ssl_seeded = FALSE;
 
   /* Quickly add a bit of entropy */
-#ifndef USE_GNUTLS_NETTLE
   gcry_fast_random_poll();
-#endif
 
   if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
      data->set.str[STRING_SSL_EGDSOCKET]) {
@@ -1284,6 +1283,7 @@ static int Curl_gtls_seed(struct SessionHandle *data)
   }
   return 0;
 }
+#endif
 
 /* data might be NULL! */
 int Curl_gtls_random(struct SessionHandle *data,
