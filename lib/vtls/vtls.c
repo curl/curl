@@ -249,6 +249,11 @@ unsigned int Curl_rand(struct SessionHandle *data)
   return (r << 16) | ((r >> 16) & 0xFFFF);
 }
 
+int Curl_ssl_backend(void)
+{
+  return (int)CURL_SSL_BACKEND;
+}
+
 #ifdef USE_SSL
 
 /* "global" init done? */
@@ -696,10 +701,5 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
   curlssl_md5sum(tmp, tmplen, md5sum, md5len);
 }
 #endif
-
-int Curl_ssl_backend(void)
-{
-  return (int)CURL_SSL_BACKEND;
-}
 
 #endif /* USE_SSL */

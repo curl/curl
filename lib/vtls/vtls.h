@@ -39,6 +39,8 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc);
 
 unsigned int Curl_rand(struct SessionHandle *);
 
+int Curl_ssl_backend(void);
+
 #ifdef USE_SSL
 int Curl_ssl_init(void);
 void Curl_ssl_cleanup(void);
@@ -96,7 +98,6 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
                      size_t tmplen,
                      unsigned char *md5sum, /* output */
                      size_t md5len);
-int Curl_ssl_backend(void);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
