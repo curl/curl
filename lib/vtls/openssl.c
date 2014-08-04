@@ -2830,8 +2830,13 @@ size_t Curl_ossl_version(char *buffer, size_t size)
         sub[0]='\0';
     }
 
-    return snprintf(buffer, size, "OpenSSL/%lx.%lx.%lx%s",
-                    (ssleay_value>>28)&0xf,
+    return snprintf(buffer, size, "%s/%lx.%lx.%lx%s",
+#ifdef LIBRESSL_VERSION_NUMBER
+                    "LibreSSL"
+#else
+                    "OpenSSL"
+#endif
+                    , (ssleay_value>>28)&0xf,
                     (ssleay_value>>20)&0xff,
                     (ssleay_value>>12)&0xff,
                     sub);
