@@ -30,6 +30,7 @@
 
 #include "urldata.h" /* for the SessionHandle definition */
 #include "curl_base64.h"
+#include "strtok.h"
 
 #ifdef USE_DARWINSSL
 
@@ -782,6 +783,7 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
   char *os_version;
   size_t os_version_len;
   char *os_version_major, *os_version_minor/*, *os_version_point*/;
+  char *tok_buf;
 
   /* Get the Darwin kernel version from the kernel using sysctl(): */
   mib[0] = CTL_KERN;
@@ -797,9 +799,9 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
   }
 
   /* Parse the version: */
-  os_version_major = strtok(os_version, ".");
-  os_version_minor = strtok(NULL, ".");
-  /*os_version_point = strtok(NULL, ".");*/
+  os_version_major = strtok_r(os_version, ".", &tok_buf);
+  os_version_minor = strtok_r(NULL, ".", &tok_buf);
+  /*os_version_point = strtok_r(NULL, ".", &tok_buf);*/
   *major = atoi(os_version_major);
   *minor = atoi(os_version_minor);
   free(os_version);
