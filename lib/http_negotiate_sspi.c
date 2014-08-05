@@ -117,9 +117,14 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
   len = strlen(header);
   if(!len) {
-    /* first call in a new negotation, we have to acquire credentials,
-       and allocate memory for the context */
+    /* Is this the first call in a new negotiation? */
+    if(neg_ctx->context) {
+      /* The server rejected our authentication and hasn't suppled any more
+         negotiation mechanisms */
+      return -1;
+    }
 
+    /* We have to acquire credentials and allocate memory for the context */
     neg_ctx->credentials = malloc(sizeof(CredHandle));
     neg_ctx->context = malloc(sizeof(CtxtHandle));
 
