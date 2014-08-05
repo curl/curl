@@ -16,6 +16,8 @@ This release includes the following changes:
  o axtls: define curlssl_random using axTLS's PRNG
  o cyassl: use RNG_GenerateBlock to generate a good random number
  o findprotocol: show unsupported protocol within quotes
+ o version: detect and show LibreSSL
+ o version: detect and show BoringSSL
 
 This release includes the following bugfixes:
 
@@ -36,6 +38,11 @@ This release includes the following bugfixes:
  o SSPI Negotiate: Fix 3 memory leaks
  o libtest: fixed duplicated line in Makefile [7]
  o conncache: fix compiler warning [8]
+ o openssl: make ossl_send return CURLE_OK better
+ o HTTP2: Support expect: 100-continue
+ o HTTP/2: Fix infinite loop in readwrite_data()
+ o parsedate: fix the return code for an overflow edge condition
+ o darwinssl: don't use strtok()
 
 This release includes the following known bugs:
 
@@ -47,7 +54,7 @@ advice from friends like these:
   Alessandro Ghedini, Anthon Pang, Dan Fandrich, Daniel Stenberg, Dave Reisner,
   David Woodhouse, Fabian Keil, Kamil Dudka, Marcel Raad, Michael Osipov,
   Michael Wallner, Patrick Monnerat, Paul Saab, Rafaël Carré, Sergey Nikulov,
-  Spork Schivago, Steve Holme,
+  Spork Schivago, Steve Holme, Tatsuhiro Tsujikawa, Toby Peterson,
 
         Thanks! (and sorry if I forgot to mention someone)
 
