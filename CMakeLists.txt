@@ -289,10 +289,39 @@ if(CMAKE_USE_OPENSSL)
   endif(OPENSSL_FOUND)
 endif(CMAKE_USE_OPENSSL)
 
+#libSSH2
+option(CMAKE_USE_LIBSSH2 "Use libSSH2" ON)
+mark_as_advanced(CMAKE_USE_LIBSSH2)
+set(USE_LIBSSH2 OFF)
+set(HAVE_LIBSSH2 OFF)
+
+if(CMAKE_USE_LIBSSH2)
+  find_package(LibSSH2)
+  if(LIBSSH2_FOUND)
+    list(APPEND CURL_LIBS ${LIBSSH2_LIBRARY})
+    set(CMAKE_REQUIRED_LIBRARIES ${LIBSSH2_LIBRARY})
+    set(CMAKE_REQUIRED_INCLUDES "${LIBSSH2_INCLUDE_DIR}")
+    set(HAVE_LIBSSH2 ON)
+    set(USE_LIBSSH2 ON)
+
+    # find_package has already found the headers
+    set(CURL_INCLUDES ${CURL_INCLUDES} "${LIBSSH2_INCLUDE_DIR}/libssh2.h")
+    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -DHAVE_LIBSSH2_H")
+
+    # now check for specific libssh2 symbols as they were added in different versions
+    set(CMAKE_EXTRA_INCLUDE_FILES "libssh2.h")
+    check_function_exists(libssh2_version           HAVE_LIBSSH2_VERSION)
+    check_function_exists(libssh2_init              HAVE_LIBSSH2_INIT)
+    check_function_exists(libssh2_exit              HAVE_LIBSSH2_EXIT)
+    check_function_exists(libssh2_scp_send64        HAVE_LIBSSH2_SCP_SEND64)
+    check_function_exists(libssh2_session_handshake HAVE_LIBSSH2_SESSION_HANDSHAKE)
+    set(CMAKE_EXTRA_INCLUDE_FILES "")
+
+  endif(LIBSSH2_FOUND)
+endif(CMAKE_USE_LIBSSH2)
+
 # If we have features.h, then do the _BSD_SOURCE magic
 check_include_file("features.h"       HAVE_FEATURES_H)
-
-
 
 # Check for header files
 if(NOT UNIX)
@@ -337,7 +366,6 @@ check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file_concat("io.h"             HAVE_IO_H)
 check_include_file_concat("krb.h"            HAVE_KRB_H)
 check_include_file_concat("libgen.h"         HAVE_LIBGEN_H)
-check_include_file_concat("libssh2.h"        HAVE_LIBSSH2_H)
 check_include_file_concat("limits.h"         HAVE_LIMITS_H)
 check_include_file_concat("locale.h"         HAVE_LOCALE_H)
 check_include_file_concat("net/if.h"         HAVE_NET_IF_H)
@@ -777,6 +805,10 @@ function(SETUP_CURL_DEPENDENCIES TARGET_NAME)
   endif()
   if(CMAKE_USE_OPENSSL AND CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
     #ADD_DEFINITIONS( -DUSE_SSLEAY )
+  endif()
+
+  if(CMAKE_USE_LIBSSH2 AND LIBSSH2_FOUND)
+    include_directories(${LIBSSH2_INCLUDE_DIR})
   endif()
 
   target_link_libraries(${TARGET_NAME} ${CURL_LIBS})
