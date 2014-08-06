@@ -33,6 +33,7 @@
  4.3 Earlier bad letter detection
  4.4 REST for large files
  4.5 ASCII support
+ 4.6 GSSAPI via Windows SSPI
 
  5. HTTP
  5.1 Better persistency for HTTP 1.0
@@ -250,6 +251,12 @@
 
  FTP ASCII transfers do not follow RFC959. They don't convert the data
  accordingly.
+
+4.6 GSSAPI via Windows SSPI
+
+In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
+via third-party GSS-API libraries, such as Heimdal or MIT Kerberos, also add
+support for Kerberos via Windows SSPI.
 
 5. HTTP
 
