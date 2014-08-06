@@ -245,6 +245,9 @@ check_library_exists_concat("idn" idna_to_ascii_lz HAVE_LIBIDN)
 
 # Check for LDAP
 check_library_exists_concat("ldap" ldap_init HAVE_LIBLDAP)
+check_library_exists_concat("lber" ber_init HAVE_LIBLBER)
+option(CMAKE_USE_OPENLDAP "Use OpenLDAP code." OFF)
+mark_as_advanced(CMAKE_USE_OPENLDAP)
 # if(NOT HAVE_LIBLDAP)
 # SET(CURL_DISABLE_LDAP ON)
 # endif(NOT HAVE_LIBLDAP)
@@ -411,13 +414,14 @@ check_include_file_concat("stddef.h"         HAVE_STDDEF_H)
 check_include_file_concat("dlfcn.h"          HAVE_DLFCN_H)
 check_include_file_concat("malloc.h"         HAVE_MALLOC_H)
 check_include_file_concat("memory.h"         HAVE_MEMORY_H)
-check_include_file_concat("ldap.h"           HAVE_LDAP_H)
 check_include_file_concat("netinet/if_ether.h" HAVE_NETINET_IF_ETHER_H)
 check_include_file_concat("stdint.h"        HAVE_STDINT_H)
 check_include_file_concat("sockio.h"        HAVE_SOCKIO_H)
 check_include_file_concat("sys/utsname.h"   HAVE_SYS_UTSNAME_H)
 check_include_file_concat("idna.h"          HAVE_IDNA_H)
 
+check_include_file_concat("ldap.h"           HAVE_LDAP_H)
+check_include_file_concat("lber.h"           HAVE_LBER_H)
 if(NOT HAVE_LDAP_H)
   message(STATUS "LDAP_H not found CURL_DISABLE_LDAP set ON")
   set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
@@ -430,6 +434,52 @@ if(CURL_DISABLE_LDAP)
     set(CURL_DISABLE_LDAPS ON CACHE BOOL "" FORCE)
   endif()
 endif()
+
+if(NOT CURL_DISABLE_LDAPS)
+  check_include_file_concat("ldap_ssl.h" HAVE_LDAP_SSL_H)
+  check_include_file_concat("ldapssl.h"  HAVE_LDAPSSL_H)
+endif()
+
+include(CheckCSourceCompiles)
+
+set(NEED_LBER_H ON)
+if(NOT CURL_DISABLE_LDAP AND HAVE_LDAP_H)
+  set(_HEADER_LIST)
+  if(HAVE_WINDOWS_H)
+    list(APPEND _HEADER_LIST "windows.h")
+  endif()
+  if(HAVE_SYS_TYPES_H)
+    list(APPEND _HEADER_LIST "sys/types.h")
+  endif()
+  list(APPEND _HEADER_LIST "ldap.h")
+
+  set(_SRC_STRING "")
+  foreach(_HEADER ${_HEADER_LIST})
+    set(_INCLUDE_STRING "${_INCLUDE_STRING}#include <${_HEADER}>\n")
+  endforeach()
+
+  set(_SRC_STRING
+    "
+    ${_INCLUDE_STRING}
+    int main(int argc, char ** argv)
+    {
+      BerValue *bvp = NULL;
+      BerElement *bep = ber_init(bvp);
+      ber_free(bep, 1);
+      return 0;
+    }"
+  )
+  set(CMAKE_REQUIRED_DEFINITIONS "-DLDAP_DEPRECATED=1" "-DWIN32_LEAN_AND_MEAN")
+  set(CMAKE_REQUIRED_LIBRARIES ldap lber)
+  check_c_source_compiles("${_SRC_STRING}" NOT_NEED_LBER_H)
+
+  if(NOT_NEED_LBER_H)
+    set(NEED_LBER_H OFF)
+  else()
+    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -DNEED_LBER_H")
+  endif()
+endif()
+
 
 check_type_size(size_t  SIZEOF_SIZE_T)
 check_type_size(ssize_t  SIZEOF_SSIZE_T)
