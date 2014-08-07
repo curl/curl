@@ -1633,17 +1633,17 @@ The user name and passwords are split up on the first colon, which makes it
 impossible to use a colon in the user name with this option. The password can,
 still.
 
-If you use an SSPI-enabled curl binary and perform NTLM authentication, you
-can force curl to select the user name and password from your environment by
-specifying a single colon with this option: "-u :".
+If you use a Windows SSPI-enabled curl binary and perform either Negotiate or
+NTLM authentication then you can force curl to select the user name and password
+from your environment by specifying a single colon with this option: "-u :".
 
 If this option is used several times, the last one will be used.
 .IP "-U, --proxy-user <user:password>"
 Specify the user name and password to use for proxy authentication.
 
-If you use an SSPI-enabled curl binary and do NTLM authentication, you can
-force curl to pick up the user name and password from your environment by
-simply specifying a single colon with this option: "-U :".
+If you use a Windows SSPI-enabled curl binary and do either Negotiate or NTLM
+authentication then you can force curl to select the user name and password
+from your environment by specifying a single colon with this option: "-U :".
 
 If this option is used several times, the last one will be used.
 .IP "--url <URL>"
@@ -1931,8 +1931,8 @@ This curl supports transfers of large files, files larger than 2GB.
 .IP "IDN"
 This curl supports IDN - international domain names.
 .IP "SSPI"
-SSPI is supported. If you use NTLM and set a blank user name, curl will
-authenticate with your current user and password.
+SSPI is supported. If you use Negotiate or NTLM authentication and set a blank
+user name, curl will authenticate with your current user and password.
 .IP "TLS-SRP"
 SRP (Secure Remote Password) authentication is supported for TLS.
 .IP "Metalink"
