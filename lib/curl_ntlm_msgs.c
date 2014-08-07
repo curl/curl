@@ -414,6 +414,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
 
 #ifdef USE_WINDOWS_SSPI
 
+  PSecPkgInfo SecurityPackage;
   SecBuffer type_1_buf;
   SecBufferDesc type_1_desc;
   SECURITY_STATUS status;
@@ -421,6 +422,15 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
 
   Curl_ntlm_sspi_cleanup(ntlm);
+
+  /* Query the security package for NTLM */
+  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT("NTLM"),
+                                              &SecurityPackage);
+  if(status != SEC_E_OK)
+    return CURLE_NOT_BUILT_IN;
+
+  /* Release the package buffer as it is not required anymore */
+  s_pSecFn->FreeContextBuffer(SecurityPackage);
 
   if(userp && *userp) {
     CURLcode result;
