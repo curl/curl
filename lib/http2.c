@@ -761,6 +761,10 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   return -1;
 }
 
+/* Index where :authority header field will appear in request header
+   field list. */
+#define AUTHORITY_DST_IDX 3
+
 /* return number of received (decrypted) bytes */
 static ssize_t http2_send(struct connectdata *conn, int sockindex,
                           const void *mem, size_t len, CURLcode *err)
@@ -775,6 +779,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nghttp2_nv *nva;
   size_t nheader;
   size_t i;
+  size_t authority_idx;
   char *hdbuf = (char*)mem;
   char *end;
   nghttp2_data_provider data_prd;
@@ -845,10 +850,13 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   hdbuf = strchr(hdbuf, 0x0a);
   ++hdbuf;
 
+  authority_idx = 0;
+
   for(i = 3; i < nheader; ++i) {
     end = strchr(hdbuf, ':');
     assert(end);
     if(end - hdbuf == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
+      authority_idx = i;
       nva[i].name = (unsigned char *)":authority";
       nva[i].namelen = (uint16_t)strlen((char *)nva[i].name);
     }
@@ -877,6 +885,15 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       }
       infof(conn->data, "request content-length=%zu\n", httpc->upload_left);
     }
+  }
+
+  /* :authority must come before non-pseudo header fields */
+  if(authority_idx != 0 && authority_idx != AUTHORITY_DST_IDX) {
+    nghttp2_nv authority = nva[authority_idx];
+    for(i = authority_idx; i > AUTHORITY_DST_IDX; --i) {
+      nva[i] = nva[i - 1];
+    }
+    nva[i] = authority;
   }
 
   switch(conn->data->set.httpreq) {
