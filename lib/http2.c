@@ -263,7 +263,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     break;
   case NGHTTP2_PUSH_PROMISE:
     rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                   frame->hd.stream_id, NGHTTP2_CANCEL);
+                                   frame->push_promise.promised_stream_id,
+                                   NGHTTP2_CANCEL);
     if(nghttp2_is_fatal(rv)) {
       return rv;
     }
