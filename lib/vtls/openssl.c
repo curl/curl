@@ -741,7 +741,17 @@ int Curl_ossl_init(void)
     return 0;
 
   OpenSSL_add_all_algorithms();
-  OPENSSL_config(NULL);
+
+
+  /* OPENSSL_config(NULL); is "strongly recommended" to use but unfortunately
+     that function makes an exit() call on wrongly formatted config files
+     which makes it hard to use in some situations. OPENSSL_config() itself
+     calls CONF_modules_load_file() and we use that instead and we ignore
+     its return code! */
+
+  (void)CONF_modules_load_file(NULL, NULL,
+                               CONF_MFLAGS_DEFAULT_SECTION|
+                               CONF_MFLAGS_IGNORE_MISSING_FILE);
 
   return 1;
 }
