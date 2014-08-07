@@ -498,11 +498,13 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     }
 
     /* convert to a HTTP1-style header */
-    infof(conn->data, "got header\n");
     Curl_add_buffer(c->header_recvbuf, name, namelen);
     Curl_add_buffer(c->header_recvbuf, ":", 1);
     Curl_add_buffer(c->header_recvbuf, value, valuelen);
     Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
+
+    infof(conn->data, "got http2 header: %*s: %*s\n",
+          namelen, name, valuelen, value);
   }
 
   return 0; /* 0 is successful */
