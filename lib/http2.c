@@ -431,6 +431,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
   int rv;
+  int goodname;
+  int goodheader;
 
   (void)session;
   (void)frame;
@@ -446,8 +448,14 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
-  if(!nghttp2_check_header_name(name, namelen) ||
-     !nghttp2_check_header_value(value, valuelen)) {
+  goodname = nghttp2_check_header_name(name, namelen);
+  goodheader = nghttp2_check_header_value(value, valuelen);
+
+  if(!goodname || !goodheader) {
+
+    infof(conn->data, "Detected bad incoming header %s%s, reset stream!\n",
+          goodname?"":"name",
+          goodheader?"":"value");
 
     rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
                                    frame->hd.stream_id,
@@ -504,7 +512,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(c->header_recvbuf, value, valuelen);
     Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
 
-    infof(conn->data, "got http2 header: %*s: %*s\n",
+    infof(conn->data, "got http2 header: %.*s: %.*s\n",
           namelen, name, valuelen, value);
   }
 
