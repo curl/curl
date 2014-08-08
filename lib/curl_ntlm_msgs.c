@@ -469,9 +469,9 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   type_1_desc.ulVersion = SECBUFFER_VERSION;
   type_1_desc.cBuffers  = 1;
   type_1_desc.pBuffers  = &type_1_buf;
-  type_1_buf.cbBuffer   = curlx_uztoul(ntlm->max_token_length);
   type_1_buf.BufferType = SECBUFFER_TOKEN;
   type_1_buf.pvBuffer   = ntlm->output_token;
+  type_1_buf.cbBuffer   = curlx_uztoul(ntlm->max_token_length);
 
   /* Generate our type-1 message */
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle, NULL,

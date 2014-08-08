@@ -68,7 +68,7 @@ get_gss_name(struct connectdata *conn, bool proxy,
 int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                          const char *header)
 {
-  BYTE              *input_token = 0;
+  BYTE              *input_token = NULL;
   SecBufferDesc     out_buff_desc;
   SecBuffer         out_sec_buff;
   SecBufferDesc     in_buff_desc;
@@ -113,7 +113,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     return -1;
   }
 
-  if(0 == strlen(neg_ctx->server_name)) {
+  if(!strlen(neg_ctx->server_name)) {
     ret = get_gss_name(conn, proxy, neg_ctx);
     if(ret)
       return ret;
@@ -181,42 +181,41 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     error = Curl_base64_decode(header,
                                (unsigned char **)&input_token,
                                &input_token_len);
-    if(error || input_token_len == 0)
+    if(error || !input_token_len)
       return -1;
   }
 
-  /* prepare the output buffers, and input buffers if present */
-  out_buff_desc.ulVersion = 0;
+  /* Setup the "output" security buffer */
+  out_buff_desc.ulVersion = SECBUFFER_VERSION;
   out_buff_desc.cBuffers  = 1;
   out_buff_desc.pBuffers  = &out_sec_buff;
-
-  out_sec_buff.cbBuffer   = curlx_uztoul(neg_ctx->max_token_length);
   out_sec_buff.BufferType = SECBUFFER_TOKEN;
   out_sec_buff.pvBuffer   = neg_ctx->output_token;
+  out_sec_buff.cbBuffer   = curlx_uztoul(neg_ctx->max_token_length);
 
-
+  /* Setup the "input" security buffer if present */
   if(input_token) {
-    in_buff_desc.ulVersion = 0;
+    in_buff_desc.ulVersion = SECBUFFER_VERSION;
     in_buff_desc.cBuffers  = 1;
     in_buff_desc.pBuffers  = &in_sec_buff;
-
-    in_sec_buff.cbBuffer   = curlx_uztoul(input_token_len);
     in_sec_buff.BufferType = SECBUFFER_TOKEN;
     in_sec_buff.pvBuffer   = input_token;
+    in_sec_buff.cbBuffer   = curlx_uztoul(input_token_len);
   }
 
   sname = Curl_convert_UTF8_to_tchar(neg_ctx->server_name);
   if(!sname)
     return CURLE_OUT_OF_MEMORY;
 
+  /* Generate our message */
   neg_ctx->status = s_pSecFn->InitializeSecurityContext(
     neg_ctx->credentials,
-    input_token ? neg_ctx->context : 0,
+    input_token ? neg_ctx->context : NULL,
     sname,
     ISC_REQ_CONFIDENTIALITY,
     0,
     SECURITY_NATIVE_DREP,
-    input_token ? &in_buff_desc : 0,
+    input_token ? &in_buff_desc : NULL,
     0,
     neg_ctx->context,
     &out_buff_desc,
@@ -259,7 +258,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   if(error)
     return error;
 
-  if(len == 0)
+  if(!len)
     return CURLE_REMOTE_ACCESS_DENIED;
 
   userp = aprintf("%sAuthorization: Negotiate %s\r\n", proxy ? "Proxy-" : "",
@@ -282,21 +281,17 @@ static void cleanup(struct negotiatedata *neg_ctx)
   if(neg_ctx->context) {
     s_pSecFn->DeleteSecurityContext(neg_ctx->context);
     free(neg_ctx->context);
-    neg_ctx->context = 0;
+    neg_ctx->context = NULL;
   }
 
   if(neg_ctx->credentials) {
     s_pSecFn->FreeCredentialsHandle(neg_ctx->credentials);
     free(neg_ctx->credentials);
-    neg_ctx->credentials = 0;
-  }
-
-  if(neg_ctx->output_token) {
-    free(neg_ctx->output_token);
-    neg_ctx->output_token = 0;
+    neg_ctx->credentials = NULL;
   }
 
   neg_ctx->max_token_length = 0;
+  Curl_safefree(neg_ctx->output_token);
 
   Curl_sspi_free_identity(neg_ctx->p_identity);
   neg_ctx->p_identity = NULL;
