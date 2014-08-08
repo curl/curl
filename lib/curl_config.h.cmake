@@ -897,6 +897,9 @@
 /* if NSS is enabled */
 #cmakedefine USE_NSS 1
 
+/* if you want to use OpenLDAP code instead of legacy ldap implementation */
+#cmakedefine USE_OPENLDAP 1
+
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
