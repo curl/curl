@@ -576,7 +576,8 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
 
   /* Return with binary blob encoded into base64 */
 #ifdef USE_WINDOWS_SSPI
-  return Curl_base64_encode(NULL, (char *)ntlm->output_token, size, outptr, outlen);
+  return Curl_base64_encode(NULL, (char *)ntlm->output_token, size,
+                            outptr, outlen);
 #else
   return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
 #endif
@@ -676,7 +677,8 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   size = type_3_buf.cbBuffer;
 
   /* Return with binary blob encoded into base64 */
-  result = Curl_base64_encode(NULL, (char *)ntlm->output_token, size, outptr, outlen);
+  result = Curl_base64_encode(NULL, (char *)ntlm->output_token, size,
+                              outptr, outlen);
 
   Curl_ntlm_sspi_cleanup(ntlm);
 
