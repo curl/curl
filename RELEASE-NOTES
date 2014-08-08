@@ -43,6 +43,14 @@ This release includes the following bugfixes:
  o HTTP/2: Fix infinite loop in readwrite_data()
  o parsedate: fix the return code for an overflow edge condition
  o darwinssl: don't use strtok()
+ o http_negotiate_sspi: Fixed specific username and password not working [9]
+ o openssl: replace call to OPENSSL_config [10]
+ o http2: show the received header for better debugging
+ o HTTP/2: Move :authority before non-pseudo header fields
+ o HTTP/2: Reset promised stream, not its associated stream
+ o http2: added some more logging for debugging stream problems
+ o ntlm: Added support for SSPI package info query
+ o ntlm: Fixed hard coded buffer for SSPI based auth packet generation
 
 This release includes the following known bugs:
 
@@ -52,9 +60,10 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Anthon Pang, Dan Fandrich, Daniel Stenberg, Dave Reisner,
-  David Woodhouse, Fabian Keil, Kamil Dudka, Marcel Raad, Michael Osipov,
-  Michael Wallner, Patrick Monnerat, Paul Saab, Rafaël Carré, Sergey Nikulov,
-  Spork Schivago, Steve Holme, Tatsuhiro Tsujikawa, Toby Peterson,
+  David Woodhouse, Fabian Keil, Jan Ehrhardt, Kamil Dudka, Leonardo Rosati,
+  Marcel Raad, Michael Osipov, Michael Wallner, Patrick Monnerat, Paul Saab,
+  Rafaël Carré, Sergey Nikulov, Spork Schivago, Steve Holme,
+  Tatsuhiro Tsujikawa, Toby Peterson,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -68,3 +77,5 @@ References to bug reports and discussions on issues:
  [6] = https://github.com/tatsuhiro-t/nghttp2/issues/62
  [7] = https://github.com/bagder/curl/pull/105
  [8] = http://curl.haxx.se/bug/view.cgi?id=1399
+ [9] = http://curl.haxx.se/mail/lib-2014-06/0224.html
+ [10] = http://curl.haxx.se/bug/view.cgi?id=1401
