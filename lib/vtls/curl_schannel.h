@@ -131,6 +131,7 @@ int Curl_schannel_random(unsigned char *entropy, size_t length);
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending Curl_schannel_data_pending
 #define CURL_SSL_BACKEND CURLSSLBACKEND_SCHANNEL
-#define curlssl_random(x,y,z) Curl_schannel_random(y,z)
+#define curlssl_random(x,y,z) ((void)x, Curl_schannel_random(y,z))
+
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_H */
