@@ -289,6 +289,7 @@ if(CMAKE_USE_OPENSSL)
     set(USE_OPENSSL ON)
     set(HAVE_LIBCRYPTO ON)
     set(HAVE_LIBSSL ON)
+    include_directories(${OPENSSL_INCLUDE_DIR})
   endif(OPENSSL_FOUND)
 endif(CMAKE_USE_OPENSSL)
 
