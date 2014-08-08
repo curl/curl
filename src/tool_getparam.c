@@ -1811,7 +1811,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
 {
   int i;
   bool stillflags;
-  char *orig_opt;
+  char *orig_opt = NULL;
   ParameterError result = PARAM_OK;
   struct OperationConfig *operation = config->first;
 
@@ -1879,7 +1879,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
      result != PARAM_ENGINES_REQUESTED) {
     const char *reason = param2text(result);
 
-    if(!curlx_strequal(":", orig_opt))
+    if(orig_opt && !curlx_strequal(":", orig_opt))
       helpf(config->errors, "option %s: %s\n", orig_opt, reason);
     else
       helpf(config->errors, "%s\n", reason);
