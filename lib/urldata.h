@@ -433,6 +433,8 @@ struct ntlmdata {
   CtxtHandle c_handle;
   SEC_WINNT_AUTH_IDENTITY identity;
   SEC_WINNT_AUTH_IDENTITY *p_identity;
+  size_t max_token_length;
+  BYTE *output_token;
   int has_handles;
   void *type_2;
   unsigned long n_type_2;

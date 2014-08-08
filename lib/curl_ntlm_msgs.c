@@ -353,6 +353,9 @@ void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm)
     ntlm->has_handles = 0;
   }
 
+  ntlm->max_token_length = 0;
+  Curl_safefree(ntlm->output_token);
+
   Curl_sspi_free_identity(ntlm->p_identity);
   ntlm->p_identity = NULL;
 }
@@ -409,7 +412,6 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                      (*) -> Optional
   */
 
-  unsigned char ntlmbuf[NTLM_BUFSIZE];
   size_t size;
 
 #ifdef USE_WINDOWS_SSPI
@@ -429,8 +431,15 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   if(status != SEC_E_OK)
     return CURLE_NOT_BUILT_IN;
 
+  ntlm->max_token_length = SecurityPackage->cbMaxToken;
+
   /* Release the package buffer as it is not required anymore */
   s_pSecFn->FreeContextBuffer(SecurityPackage);
+
+  /* Allocate our output buffer */
+  ntlm->output_token = malloc(ntlm->max_token_length);
+  if(!ntlm->output_token)
+    return CURLE_OUT_OF_MEMORY;
 
   if(userp && *userp) {
     CURLcode result;
@@ -460,9 +469,9 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   type_1_desc.ulVersion = SECBUFFER_VERSION;
   type_1_desc.cBuffers  = 1;
   type_1_desc.pBuffers  = &type_1_buf;
-  type_1_buf.cbBuffer   = NTLM_BUFSIZE;
+  type_1_buf.cbBuffer   = curlx_uztoul(ntlm->max_token_length);
   type_1_buf.BufferType = SECBUFFER_TOKEN;
-  type_1_buf.pvBuffer   = ntlmbuf;
+  type_1_buf.pvBuffer   = ntlm->output_token;
 
   /* Generate our type-1 message */
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle, NULL,
@@ -488,6 +497,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
 
 #else
 
+  unsigned char ntlmbuf[NTLM_BUFSIZE];
   const char *host = "";              /* empty */
   const char *domain = "";            /* empty */
   size_t hostlen = 0;
@@ -565,7 +575,11 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   });
 
   /* Return with binary blob encoded into base64 */
+#ifdef USE_WINDOWS_SSPI
+  return Curl_base64_encode(NULL, (char *)ntlm->output_token, size, outptr, outlen);
+#else
   return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
+#endif
 }
 
 /*
@@ -612,10 +626,10 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
                                           (*) -> Optional
   */
 
-  unsigned char ntlmbuf[NTLM_BUFSIZE];
   size_t size;
 
 #ifdef USE_WINDOWS_SSPI
+  CURLcode result = CURLE_OK;
   SecBuffer type_2_buf;
   SecBuffer type_3_buf;
   SecBufferDesc type_2_desc;
@@ -641,8 +655,8 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   type_3_desc.cBuffers  = 1;
   type_3_desc.pBuffers  = &type_3_buf;
   type_3_buf.BufferType = SECBUFFER_TOKEN;
-  type_3_buf.pvBuffer   = ntlmbuf;
-  type_3_buf.cbBuffer   = NTLM_BUFSIZE;
+  type_3_buf.pvBuffer   = ntlm->output_token;
+  type_3_buf.cbBuffer   = curlx_uztoul(ntlm->max_token_length);
 
   /* Generate our type-3 message */
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle,
@@ -661,9 +675,16 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 
   size = type_3_buf.cbBuffer;
 
+  /* Return with binary blob encoded into base64 */
+  result = Curl_base64_encode(NULL, (char *)ntlm->output_token, size, outptr, outlen);
+
   Curl_ntlm_sspi_cleanup(ntlm);
 
+  return result;
+
 #else
+
+  unsigned char ntlmbuf[NTLM_BUFSIZE];
   int lmrespoff;
   unsigned char lmresp[24]; /* fixed-size */
 #if USE_NTRESPONSES
@@ -979,10 +1000,9 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   if(res)
     return CURLE_CONV_FAILED;
 
-#endif
-
   /* Return with binary blob encoded into base64 */
   return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
+#endif
 }
 
 #endif /* USE_NTLM */
