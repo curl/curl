@@ -441,7 +441,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char nonceCount[] = "00000001";
   char method[]     = "AUTHENTICATE";
   char qop[]        = DIGEST_QOP_VALUE_STRING_AUTH;
-  char uri[128];
+  char *uri         = NULL;
 
   /* Decode the challange message */
   result = sasl_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
@@ -507,12 +507,17 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     snprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Prepare the URL string */
-  snprintf(uri, sizeof(uri), "%s/%s", service, realm);
+  uri = Curl_sasl_build_spn(service, realm);
+  if(!uri)
+    return CURLE_OUT_OF_MEMORY;
 
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!ctxt)
+  if(!ctxt) {
+    Curl_safefree(uri);
+
     return CURLE_OUT_OF_MEMORY;
+  }
 
   Curl_MD5_update(ctxt, (const unsigned char *) method,
                   curlx_uztoui(strlen(method)));
@@ -526,8 +531,11 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Now calculate the response hash */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
-  if(!ctxt)
+  if(!ctxt) {
+    Curl_safefree(uri);
+
     return CURLE_OUT_OF_MEMORY;
+  }
 
   Curl_MD5_update(ctxt, (const unsigned char *) HA1_hex, 2 * MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
@@ -563,7 +571,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   /* Base64 encode the response */
   result = Curl_base64_encode(data, response, 0, outptr, outlen);
 
-  free(response);
+  Curl_safefree(response);
+  Curl_safefree(uri);
+
   return result;
 }
 #endif  /* USE_WINDOWS_SSPI */
