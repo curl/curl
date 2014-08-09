@@ -24,6 +24,7 @@
  * RFC3207 SMTP over TLS
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
+ * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
  * RFC4954 SMTP Authentication
  * RFC5321 SMTP protocol
  * RFC6749 OAuth 2.0 Authorization Framework
@@ -317,6 +318,9 @@ static void state(struct connectdata *conn, smtpstate newstate)
     "AUTH_DIGESTMD5_RESP",
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
+    "AUTH_GSSAPI",
+    "AUTH_GSSAPI_TOKEN",
+    "AUTH_GSSAPI_NO_DATA",
     "AUTH_XOAUTH2",
     "AUTH_CANCEL",
     "AUTH_FINAL",

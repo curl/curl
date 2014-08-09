@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,6 +43,9 @@ typedef enum {
   POP3_AUTH_DIGESTMD5_RESP,
   POP3_AUTH_NTLM,
   POP3_AUTH_NTLM_TYPE2MSG,
+  POP3_AUTH_GSSAPI,
+  POP3_AUTH_GSSAPI_TOKEN,
+  POP3_AUTH_GSSAPI_NO_DATA,
   POP3_AUTH_XOAUTH2,
   POP3_AUTH_CANCEL,
   POP3_AUTH_FINAL,

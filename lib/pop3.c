@@ -27,6 +27,7 @@
  * RFC2831 DIGEST-MD5 authentication
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
+ * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
  * RFC5034 POP3 SASL Authentication Mechanism
  * RFC6749 OAuth 2.0 Authorization Framework
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
@@ -320,6 +321,9 @@ static void state(struct connectdata *conn, pop3state newstate)
     "AUTH_DIGESTMD5_RESP",
     "AUTH_NTLM",
     "AUTH_NTLM_TYPE2MSG",
+    "AUTH_GSSAPI",
+    "AUTH_GSSAPI_TOKEN",
+    "AUTH_GSSAPI_NO_DATA",
     "AUTH_XOAUTH2",
     "AUTH_CANCEL",
     "AUTH_FINAL",

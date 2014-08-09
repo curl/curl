@@ -24,6 +24,7 @@
  * RFC3501 IMAPv4 protocol
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
+ * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
  * RFC4959 IMAP Extension for SASL Initial Client Response
  * RFC5092 IMAP URL Scheme
  * RFC6749 OAuth 2.0 Authorization Framework
@@ -433,6 +434,9 @@ static void state(struct connectdata *conn, imapstate newstate)
     "AUTHENTICATE_DIGESTMD5_RESP",
     "AUTHENTICATE_NTLM",
     "AUTHENTICATE_NTLM_TYPE2MSG",
+    "AUTHENTICATE_GSSAPI",
+    "AUTHENTICATE_GSSAPI_TOKEN",
+    "AUTHENTICATE_GSSAPI_NO_DATA",
     "AUTHENTICATE_XOAUTH2",
     "AUTHENTICATE_CANCEL",
     "AUTHENTICATE_FINAL",
