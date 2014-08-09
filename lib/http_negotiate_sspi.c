@@ -42,25 +42,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-static int
-get_gss_name(struct connectdata *conn, bool proxy,
-             struct negotiatedata *neg_ctx)
-{
-  const char* service = "HTTP";
-
-  if(proxy && !conn->proxy.name)
-    /* proxy auth requested but no given proxy name, error out! */
-    return -1;
-
-  neg_ctx->server_name = Curl_sasl_build_spn(service,
-                                             proxy ? conn->proxy.name :
-                                                     conn->host.name);
-  if(!neg_ctx->server_name)
-    return -1;
-
-  return 0;
-}
-
 /* returning zero (0) means success, everything else is treated as "failure"
    with no care exactly what the failure was */
 int Curl_input_negotiate(struct connectdata *conn, bool proxy,
@@ -111,9 +92,16 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   }
 
   if(!neg_ctx->server_name) {
-    ret = get_gss_name(conn, proxy, neg_ctx);
-    if(ret)
-      return ret;
+    /* Check proxy auth requested but no given proxy name */
+    if(proxy && !conn->proxy.name)
+      return -1;
+
+    /* Generate our SPN */
+    neg_ctx->server_name = Curl_sasl_build_spn("HTTP",
+                                                proxy ? conn->proxy.name :
+                                                        conn->host.name);
+    if(!neg_ctx->server_name)
+      return -1;
   }
 
   if(!neg_ctx->output_token) {
