@@ -110,6 +110,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     return CURLE_NOT_BUILT_IN;
   }
 
+  /* Release the package buffer as it is not required anymore */
+  s_pSecFn->FreeContextBuffer(SecurityPackage);
+
   /* Calculate our SPN */
   spn = aprintf("%s/%s", service, data->easy_conn->host.name);
   if(!spn)
