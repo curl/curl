@@ -57,6 +57,13 @@ struct ntlmdata;
   (wordlen == (sizeof(mech) - 1) / sizeof(char) && \
    !memcmp(line, mech, wordlen))
 
+/* This is used to build a SPN string */
+#if !defined(USE_WINDOWS_SSPI)
+char *Curl_sasl_build_spn(const char *service, const char *instance);
+#else
+TCHAR *Curl_sasl_build_spn(const char *service, const char *instance);
+#endif
+
 /* This is used to generate a base64 encoded PLAIN authentication message */
 CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
                                         const char *userp,

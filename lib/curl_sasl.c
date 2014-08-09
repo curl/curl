@@ -120,6 +120,26 @@ static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
 }
 #endif
 
+#if !defined(USE_WINDOWS_SSPI)
+/*
+ * Curl_sasl_build_spn()
+ *
+ * This is used to build a SPN string in the format service/host.
+ *
+ * Parameters:
+ *
+ * serivce  [in] - The service type such as www, smtp, pop or imap.
+ * instance [in] - The instance name such as the host nme or realm.
+ *
+ * Returns a pointer to the newly allocated SPN.
+ */
+char *Curl_sasl_build_spn(const char *service, const char *host)
+{
+  /* Generate and return our SPN */
+  return aprintf("%s/%s", service, host);
+}
+#endif
+
 /*
  * Curl_sasl_create_plain_message()
  *
