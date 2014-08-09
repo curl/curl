@@ -116,7 +116,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              char **outptr, size_t *outlen)
 {
   CURLcode result = CURLE_OK;
-  char *spn = NULL;
+  TCHAR *spn = NULL;
   size_t chlglen = 0;
   unsigned char *chlg = NULL;
   unsigned char resp[1024];
@@ -161,8 +161,8 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   /* Release the package buffer as it is not required anymore */
   s_pSecFn->FreeContextBuffer(SecurityPackage);
 
-  /* Calculate our SPN */
-  spn = aprintf("%s/%s", service, data->easy_conn->host.name);
+  /* Generate our SPN */
+  spn = Curl_sasl_build_spn(service, data->easy_conn->host.name);
   if(!spn)
     return CURLE_OUT_OF_MEMORY;
 
@@ -207,14 +207,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   resp_buf.cbBuffer   = sizeof(resp);
 
   /* Generate our challenge-response message */
-  status = s_pSecFn->InitializeSecurityContext(&handle,
-                                               NULL,
-                                               (TCHAR *) spn,
-                                               0, 0, 0,
-                                               &chlg_desc,
-                                               0, &ctx,
-                                               &resp_desc,
-                                               &attrs, &tsDummy);
+  status = s_pSecFn->InitializeSecurityContext(&handle, NULL, spn, 0, 0, 0,
+                                               &chlg_desc, 0, &ctx,
+                                               &resp_desc, &attrs, &tsDummy);
 
   if(status == SEC_I_COMPLETE_AND_CONTINUE ||
      status == SEC_I_CONTINUE_NEEDED)
