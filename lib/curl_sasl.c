@@ -441,7 +441,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char nonceCount[] = "00000001";
   char method[]     = "AUTHENTICATE";
   char qop[]        = DIGEST_QOP_VALUE_STRING_AUTH;
-  char *uri         = NULL;
+  char *spn         = NULL;
 
   /* Decode the challange message */
   result = sasl_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
@@ -506,15 +506,15 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   for(i = 0; i < MD5_DIGEST_LEN; i++)
     snprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
-  /* Prepare the URL string */
-  uri = Curl_sasl_build_spn(service, realm);
-  if(!uri)
+  /* Generate our SPN */
+  spn = Curl_sasl_build_spn(service, realm);
+  if(!spn)
     return CURLE_OUT_OF_MEMORY;
 
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
   if(!ctxt) {
-    Curl_safefree(uri);
+    Curl_safefree(spn);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -522,8 +522,8 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   Curl_MD5_update(ctxt, (const unsigned char *) method,
                   curlx_uztoui(strlen(method)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) uri,
-                  curlx_uztoui(strlen(uri)));
+  Curl_MD5_update(ctxt, (const unsigned char *) spn,
+                  curlx_uztoui(strlen(spn)));
   Curl_MD5_final(ctxt, digest);
 
   for(i = 0; i < MD5_DIGEST_LEN; i++)
@@ -532,7 +532,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   /* Now calculate the response hash */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
   if(!ctxt) {
-    Curl_safefree(uri);
+    Curl_safefree(spn);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -564,7 +564,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                      "cnonce=\"%s\",nc=\"%s\",digest-uri=\"%s\",response=%s,"
                      "qop=%s",
                      userp, realm, nonce,
-                     cnonce, nonceCount, uri, resp_hash_hex, qop);
+                     cnonce, nonceCount, spn, resp_hash_hex, qop);
   if(!response)
     return CURLE_OUT_OF_MEMORY;
 
@@ -572,11 +572,11 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   result = Curl_base64_encode(data, response, 0, outptr, outlen);
 
   Curl_safefree(response);
-  Curl_safefree(uri);
+  Curl_safefree(spn);
 
   return result;
 }
-#endif  /* USE_WINDOWS_SSPI */
+#endif  /* !USE_WINDOWS_SSPI */
 
 #endif  /* CURL_DISABLE_CRYPTO_AUTH */
 
