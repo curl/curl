@@ -31,6 +31,7 @@
 #include "rawstr.h"
 #include "warnless.h"
 #include "curl_base64.h"
+#include "curl_sasl.h"
 #include "http_negotiate.h"
 #include "curl_memory.h"
 #include "curl_multibyte.h"
@@ -46,19 +47,16 @@ get_gss_name(struct connectdata *conn, bool proxy,
              struct negotiatedata *neg_ctx)
 {
   const char* service = "HTTP";
-  size_t length;
 
   if(proxy && !conn->proxy.name)
     /* proxy auth requested but no given proxy name, error out! */
     return -1;
 
-  length = strlen(service) + 1 + strlen(proxy ? conn->proxy.name :
-                                        conn->host.name) + 1;
-  if(length + 1 > sizeof(neg_ctx->server_name))
-    return EMSGSIZE;
-
-  snprintf(neg_ctx->server_name, sizeof(neg_ctx->server_name), "%s/%s",
-           service, proxy ? conn->proxy.name : conn->host.name);
+  neg_ctx->server_name = Curl_sasl_build_spn(service,
+                                             proxy ? conn->proxy.name :
+                                                     conn->host.name);
+  if(!neg_ctx->server_name)
+    return -1;
 
   return 0;
 }
@@ -75,7 +73,6 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   SecBuffer         in_sec_buff;
   unsigned long     context_attributes;
   TimeStamp         lifetime;
-  TCHAR             *sname;
   int ret;
   size_t len = 0, input_token_len = 0;
   CURLcode error;
@@ -113,7 +110,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     return -1;
   }
 
-  if(!strlen(neg_ctx->server_name)) {
+  if(!neg_ctx->server_name) {
     ret = get_gss_name(conn, proxy, neg_ctx);
     if(ret)
       return ret;
@@ -203,15 +200,11 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     in_sec_buff.cbBuffer   = curlx_uztoul(input_token_len);
   }
 
-  sname = Curl_convert_UTF8_to_tchar(neg_ctx->server_name);
-  if(!sname)
-    return CURLE_OUT_OF_MEMORY;
-
   /* Generate our message */
   neg_ctx->status = s_pSecFn->InitializeSecurityContext(
     neg_ctx->credentials,
     input_token ? neg_ctx->context : NULL,
-    sname,
+    neg_ctx->server_name,
     ISC_REQ_CONFIDENTIALITY,
     0,
     SECURITY_NATIVE_DREP,
@@ -222,7 +215,6 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     &context_attributes,
     &lifetime);
 
-  Curl_unicodefree(sname);
   Curl_safefree(input_token);
 
   if(GSS_ERROR(neg_ctx->status))
@@ -292,6 +284,8 @@ static void cleanup(struct negotiatedata *neg_ctx)
 
   neg_ctx->max_token_length = 0;
   Curl_safefree(neg_ctx->output_token);
+
+  Curl_safefree(neg_ctx->server_name);
 
   Curl_sspi_free_identity(neg_ctx->p_identity);
   neg_ctx->p_identity = NULL;
