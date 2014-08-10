@@ -163,8 +163,11 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Generate our SPN */
   spn = Curl_sasl_build_spn(service, data->easy_conn->host.name);
-  if(!spn)
+  if(!spn) {
+    Curl_safefree(chlg);
+
     return CURLE_OUT_OF_MEMORY;
+  }
 
   /* Populate our identity structure */
   result = Curl_create_sspi_identity(userp, passwdp, &identity);
