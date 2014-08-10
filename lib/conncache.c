@@ -202,6 +202,7 @@ void Curl_conncache_foreach(struct conncache *connc,
     struct connectdata *conn;
 
     bundle = he->ptr;
+    he = Curl_hash_next_element(&iter);
 
     curr = bundle->conn_list->head;
     while(curr) {
@@ -213,8 +214,6 @@ void Curl_conncache_foreach(struct conncache *connc,
       if(1 == func(conn, param))
         return;
     }
-
-    he = Curl_hash_next_element(&iter);
   }
 }
 

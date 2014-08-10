@@ -2913,6 +2913,69 @@ find_oldest_idle_connection_in_bundle(struct SessionHandle *data,
 }
 
 /*
+ * This function checks if given connection is dead and disconnects if so.
+ * (That also removes it from the connection cache.)
+ *
+ * Returns TRUE if the connection actually was dead and disconnected.
+ */
+static bool disconnect_if_dead(struct connectdata *conn,
+                               struct SessionHandle *data)
+{
+  size_t pipeLen = conn->send_pipe->size + conn->recv_pipe->size;
+  if(!pipeLen && !conn->inuse) {
+    /* The check for a dead socket makes sense only if there are no
+       handles in pipeline and the connection isn't already marked in
+       use */
+    bool dead;
+    if(conn->handler->protocol & CURLPROTO_RTSP)
+      /* RTSP is a special case due to RTP interleaving */
+      dead = Curl_rtsp_connisdead(conn);
+    else
+      dead = SocketIsDead(conn->sock[FIRSTSOCKET]);
+
+    if(dead) {
+      conn->data = data;
+      infof(data, "Connection %ld seems to be dead!\n", conn->connection_id);
+
+      /* disconnect resources */
+      Curl_disconnect(conn, /* dead_connection */TRUE);
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+/*
+ * Wrapper to use disconnect_if_dead() function in Curl_conncache_foreach()
+ *
+ * Returns always 0.
+ */
+static int call_disconnect_if_dead(struct connectdata *conn,
+                                      void *param)
+{
+  struct SessionHandle* data = (struct SessionHandle*)param;
+  disconnect_if_dead(conn, data);
+  return 0; /* continue iteration */
+}
+
+/*
+ * This function scans the connection cache for half-open/dead connections,
+ * closes and removes them.
+ * The cleanup is done at most once per second.
+ */
+static void prune_dead_connections(struct SessionHandle *data)
+{
+  struct timeval now = Curl_tvnow();
+  long elapsed = Curl_tvdiff(now, data->state.conn_cache->last_cleanup);
+
+  if(elapsed >= 1000L) {
+    Curl_conncache_foreach(data->state.conn_cache, data,
+                           call_disconnect_if_dead);
+    data->state.conn_cache->last_cleanup = now;
+  }
+}
+
+/*
  * Given one filled in connection struct (named needle), this function should
  * detect if there already is one that has all the significant details
  * exactly the same and thus should be used instead.
@@ -2976,29 +3039,10 @@ ConnectionExists(struct SessionHandle *data,
       check = curr->ptr;
       curr = curr->next;
 
+      if(disconnect_if_dead(check, data))
+        continue;
+
       pipeLen = check->send_pipe->size + check->recv_pipe->size;
-
-      if(!pipeLen && !check->inuse) {
-        /* The check for a dead socket makes sense only if there are no
-           handles in pipeline and the connection isn't already marked in
-           use */
-        bool dead;
-        if(check->handler->protocol & CURLPROTO_RTSP)
-          /* RTSP is a special case due to RTP interleaving */
-          dead = Curl_rtsp_connisdead(check);
-        else
-          dead = SocketIsDead(check->sock[FIRSTSOCKET]);
-
-        if(dead) {
-          check->data = data;
-          infof(data, "Connection %ld seems to be dead!\n",
-                check->connection_id);
-
-          /* disconnect resources */
-          Curl_disconnect(check, /* dead_connection */ TRUE);
-          continue;
-        }
-      }
 
       if(canPipeline) {
         /* Make sure the pipe has only GET requests */
@@ -5459,6 +5503,8 @@ static CURLcode create_conn(struct SessionHandle *data,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+
+  prune_dead_connections(data);
 
   /*************************************************************
    * Check the current list of connections to see if we can
