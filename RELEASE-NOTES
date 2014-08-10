@@ -51,6 +51,12 @@ This release includes the following bugfixes:
  o http2: added some more logging for debugging stream problems
  o ntlm: Added support for SSPI package info query
  o ntlm: Fixed hard coded buffer for SSPI based auth packet generation
+ o sasl_sspi: Fixed memory leak with not releasing Package Info struct
+ o sasl_sspi: Fixed SPN not being converted to wchar under Unicode builds
+ o sasl: Use a dynamic buffer for DIGEST-MD5 SPN generation
+ o http_negotiate_sspi: Use a dynamic buffer for SPN generation
+ o sasl_sspi: Fixed missing free of challenge buffer on SPN failure
+ o sasl_sspi: Fixed hard coded buffer for response generation
 
 This release includes the following known bugs:
 
