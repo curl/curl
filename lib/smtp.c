@@ -1150,6 +1150,158 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 }
 #endif
 
+#if defined(USE_WINDOWS_SSPI)
+/* For AUTH GSSAPI (without initial response) responses */
+static CURLcode smtp_state_auth_gssapi_resp(struct connectdata *conn,
+                                            int smtpcode,
+                                            smtpstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
+  char *respmsg = NULL;
+  size_t len = 0;
+
+  (void)instate; /* no use for this yet */
+
+  if(smtpcode != 334) {
+    failf(data, "Access denied: %d", smtpcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    /* Create the initial response message */
+    result = Curl_sasl_create_gssapi_user_message(data, conn->user,
+                                                  conn->passwd, "smtp",
+                                                  smtpc->mutual_auth, NULL,
+                                                  &conn->krb5,
+                                                  &respmsg, &len);
+    if(!result && respmsg) {
+      /* Send the message */
+      result = Curl_pp_sendf(&smtpc->pp, "%s", respmsg);
+
+      if(!result)
+        state(conn, SMTP_AUTH_GSSAPI_TOKEN);
+    }
+  }
+
+  Curl_safefree(respmsg);
+
+  return result;
+}
+
+/* For AUTH GSSAPI user token responses */
+static CURLcode smtp_state_auth_gssapi_token_resp(struct connectdata *conn,
+                                                  int smtpcode,
+                                                  smtpstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
+  char *chlgmsg = NULL;
+  char *respmsg = NULL;
+  size_t len = 0;
+
+  (void)instate; /* no use for this yet */
+
+  if(smtpcode != 334) {
+    failf(data, "Access denied: %d", smtpcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    /* Get the challenge message */
+    smtp_get_message(data->state.buffer, &chlgmsg);
+
+    if(smtpc->mutual_auth)
+      /* Decode the user token challenge and create the optional response
+         message */
+      result = Curl_sasl_create_gssapi_user_message(data, NULL, NULL, NULL,
+                                                    smtpc->mutual_auth,
+                                                    chlgmsg, &conn->krb5,
+                                                    &respmsg, &len);
+    else
+      /* Decode the security challenge and create the response message */
+      result = Curl_sasl_create_gssapi_security_message(data, chlgmsg,
+                                                        &conn->krb5,
+                                                        &respmsg, &len);
+
+    if(result) {
+      if(result == CURLE_BAD_CONTENT_ENCODING) {
+        /* Send the cancellation */
+        result = Curl_pp_sendf(&smtpc->pp, "%s", "*");
+
+        if(!result)
+          state(conn, SMTP_AUTH_CANCEL);
+      }
+    }
+    else {
+      /* Send the response */
+      if(respmsg)
+        result = Curl_pp_sendf(&smtpc->pp, "%s", respmsg);
+      else
+        result = Curl_pp_sendf(&smtpc->pp, "%s", "");
+
+      if(!result)
+        state(conn, (smtpc->mutual_auth ? SMTP_AUTH_GSSAPI_NO_DATA :
+                                          SMTP_AUTH_FINAL));
+    }
+  }
+
+  Curl_safefree(respmsg);
+
+  return result;
+}
+
+/* For AUTH GSSAPI no data responses */
+static CURLcode smtp_state_auth_gssapi_no_data_resp(struct connectdata *conn,
+                                                    int smtpcode,
+                                                    smtpstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  char *chlgmsg = NULL;
+  char *respmsg = NULL;
+  size_t len = 0;
+
+  (void)instate; /* no use for this yet */
+
+  if(smtpcode != 334) {
+    failf(data, "Access denied: %d", smtpcode);
+    result = CURLE_LOGIN_DENIED;
+  }
+  else {
+    /* Get the challenge message */
+    smtp_get_message(data->state.buffer, &chlgmsg);
+
+    /* Decode the security challenge and create the response message */
+    result = Curl_sasl_create_gssapi_security_message(data, chlgmsg,
+                                                      &conn->krb5,
+                                                      &respmsg, &len);
+    if(result) {
+      if(result == CURLE_BAD_CONTENT_ENCODING) {
+        /* Send the cancellation */
+        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "*");
+
+        if(!result)
+          state(conn, SMTP_AUTH_CANCEL);
+      }
+    }
+    else {
+      /* Send the response */
+      if(respmsg) {
+        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", respmsg);
+
+        if(!result)
+          state(conn, SMTP_AUTH_FINAL);
+      }
+    }
+  }
+
+  Curl_safefree(respmsg);
+
+  return result;
+}
+#endif
+
 /* For AUTH XOAUTH2 (without initial response) responses */
 static CURLcode smtp_state_auth_xoauth2_resp(struct connectdata *conn,
                                              int smtpcode, smtpstate instate)
@@ -1475,6 +1627,21 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
     case SMTP_AUTH_NTLM_TYPE2MSG:
       result = smtp_state_auth_ntlm_type2msg_resp(conn, smtpcode,
                                                   smtpc->state);
+      break;
+#endif
+
+#if defined(USE_WINDOWS_SSPI)
+    case SMTP_AUTH_GSSAPI:
+      result = smtp_state_auth_gssapi_resp(conn, smtpcode, smtpc->state);
+      break;
+
+    case SMTP_AUTH_GSSAPI_TOKEN:
+      result = smtp_state_auth_gssapi_token_resp(conn, smtpcode, smtpc->state);
+      break;
+
+    case SMTP_AUTH_GSSAPI_NO_DATA:
+      result = smtp_state_auth_gssapi_no_data_resp(conn, smtpcode,
+                                                   smtpc->state);
       break;
 #endif
 
@@ -2039,6 +2206,25 @@ static CURLcode smtp_calc_sasl_details(struct connectdata *conn,
 
   /* Calculate the supported authentication mechanism, by decreasing order of
      security, as well as the initial response where appropriate */
+#if defined(USE_WINDOWS_SSPI)
+  if((smtpc->authmechs & SASL_MECH_GSSAPI) &&
+     (smtpc->prefmech & SASL_MECH_GSSAPI)) {
+    smtpc->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */
+
+    *mech = SASL_MECH_STRING_GSSAPI;
+    *state1 = SMTP_AUTH_GSSAPI;
+    *state2 = SMTP_AUTH_GSSAPI_TOKEN;
+    smtpc->authused = SASL_MECH_GSSAPI;
+
+    if(data->set.sasl_ir)
+      result = Curl_sasl_create_gssapi_user_message(data, conn->user,
+                                                    conn->passwd, "smtp",
+                                                    smtpc->mutual_auth,
+                                                    NULL, &conn->krb5,
+                                                    initresp, len);
+    }
+  else
+#endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   if((smtpc->authmechs & SASL_MECH_DIGEST_MD5) &&
      (smtpc->prefmech & SASL_MECH_DIGEST_MD5)) {
