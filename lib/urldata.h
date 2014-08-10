@@ -425,6 +425,19 @@ typedef enum {
 #include <iconv.h>
 #endif
 
+/* Struct used for GSSAPI (Kerberos V5) authentication */
+#if defined(USE_WINDOWS_SSPI)
+struct kerberos5data {
+  CredHandle *credentials;
+  CtxtHandle *context;
+  TCHAR *spn;
+  SEC_WINNT_AUTH_IDENTITY identity;
+  SEC_WINNT_AUTH_IDENTITY *p_identity;
+  size_t token_max;
+  BYTE *output_token;
+};
+#endif;
+
 /* Struct used for NTLM challenge-response authentication */
 struct ntlmdata {
   curlntlm state;
@@ -972,6 +985,10 @@ struct connectdata {
   const struct Curl_sec_client_mech *mech;
   struct sockaddr_in local_addr;
 #endif
+
+#if defined(USE_WINDOWS_SSPI) /* Consider moving some of the above GSS-API */
+  struct kerberos5data krb5;  /* variables into the structure definition, */
+#endif                        /* however, some of them are ftp specific. */
 
   /* the two following *_inuse fields are only flags, not counters in any way.
      If TRUE it means the channel is in use, and if FALSE it means the channel
