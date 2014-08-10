@@ -118,8 +118,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   CURLcode result = CURLE_OK;
   TCHAR *spn = NULL;
   size_t chlglen = 0;
+  size_t resp_max = 0;
   unsigned char *chlg = NULL;
-  unsigned char resp[1024];
+  unsigned char *resp = NULL;
   CredHandle handle;
   CtxtHandle ctx;
   PSecPkgInfo SecurityPackage;
@@ -155,15 +156,27 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                               &SecurityPackage);
   if(status != SEC_E_OK) {
     Curl_safefree(chlg);
+
     return CURLE_NOT_BUILT_IN;
   }
+
+  resp_max = SecurityPackage->cbMaxToken;
 
   /* Release the package buffer as it is not required anymore */
   s_pSecFn->FreeContextBuffer(SecurityPackage);
 
+  /* Allocate our response buffer */
+  resp = malloc(resp_max);
+  if(!resp) {
+    Curl_safefree(chlg);
+
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   /* Generate our SPN */
   spn = Curl_sasl_build_spn(service, data->easy_conn->host.name);
   if(!spn) {
+    Curl_safefree(resp);
     Curl_safefree(chlg);
 
     return CURLE_OUT_OF_MEMORY;
@@ -173,6 +186,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   result = Curl_create_sspi_identity(userp, passwdp, &identity);
   if(result) {
     Curl_safefree(spn);
+    Curl_safefree(resp);
     Curl_safefree(chlg);
 
     return result;
@@ -188,6 +202,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   if(status != SEC_E_OK) {
     Curl_sspi_free_identity(&identity);
     Curl_safefree(spn);
+    Curl_safefree(resp);
     Curl_safefree(chlg);
 
     return CURLE_OUT_OF_MEMORY;
@@ -207,7 +222,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   resp_desc.pBuffers  = &resp_buf;
   resp_buf.BufferType = SECBUFFER_TOKEN;
   resp_buf.pvBuffer   = resp;
-  resp_buf.cbBuffer   = sizeof(resp);
+  resp_buf.cbBuffer   = curlx_uztoul(resp_max);
 
   /* Generate our challenge-response message */
   status = s_pSecFn->InitializeSecurityContext(&handle, NULL, spn, 0, 0, 0,
@@ -221,6 +236,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     s_pSecFn->FreeCredentialsHandle(&handle);
     Curl_sspi_free_identity(&identity);
     Curl_safefree(spn);
+    Curl_safefree(resp);
     Curl_safefree(chlg);
 
     return CURLE_RECV_ERROR;
@@ -239,6 +255,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Free the SPN */
   Curl_safefree(spn);
+
+  /* Free the response buffer */
+  Curl_safefree(resp);
 
   /* Free the decoeded challenge message */
   Curl_safefree(chlg);
