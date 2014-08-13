@@ -119,6 +119,27 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
 
 #endif /* USE_NTLM */
 
+#if defined(USE_WINDOWS_SSPI)
+/* This is used to generate a base64 encoded GSSAPI (Kerberos V5) user token
+   message */
+CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
+                                              const char *userp,
+                                              const char *passwdp,
+                                              const char *service,
+                                              const bool mutual,
+                                              const char *chlg64,
+                                              struct kerberos5data *krb5,
+                                              char **outptr, size_t *outlen);
+
+/* This is used to generate a base64 encoded GSSAPI (Kerberos V5) security
+   token message */
+CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
+                                                  const char *input,
+                                                  struct kerberos5data *krb5,
+                                                  char **outptr,
+                                                  size_t *outlen);
+#endif
+
 /* This is used to generate a base64 encoded XOAUTH2 authentication message
    containing the user name and bearer token */
 CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,

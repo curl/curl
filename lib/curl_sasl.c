@@ -53,6 +53,10 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#if defined(USE_WINDOWS_SSPI)
+extern void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
+#endif
+
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_WINDOWS_SSPI)
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
@@ -718,12 +722,17 @@ CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
  */
 void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
 {
+#if defined(USE_WINDOWS_SSPI)
+  /* Cleanup the gssapi structure */
+  if(authused == SASL_MECH_GSSAPI) {
+    Curl_sasl_gssapi_cleanup(&conn->krb5);
+  }
 #ifdef USE_NTLM
   /* Cleanup the ntlm structure */
-  if(authused == SASL_MECH_NTLM) {
+  else if(authused == SASL_MECH_NTLM) {
     Curl_ntlm_sspi_cleanup(&conn->ntlm);
   }
-  (void)conn;
+#endif
 #else
   /* Reserved for future use */
   (void)conn;
