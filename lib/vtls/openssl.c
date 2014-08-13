@@ -2824,8 +2824,9 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 
 #if(SSLEAY_VERSION_NUMBER >= 0x905000)
   {
-    char sub[2];
+    char sub[3];
     unsigned long ssleay_value;
+    sub[2]='\0';
     sub[1]='\0';
     ssleay_value=SSLeay();
     if(ssleay_value < 0x906000) {
@@ -2834,7 +2835,14 @@ size_t Curl_ossl_version(char *buffer, size_t size)
     }
     else {
       if(ssleay_value&0xff0) {
-        sub[0]=(char)(((ssleay_value>>4)&0xff) + 'a' -1);
+        int minor = (ssleay_value >> 4) & 0xff;
+        if(minor > 26) { /* handle extended version introduced for 0.9.8za */
+          sub[1] = (char) ((minor - 1) % 26 + 'a' + 1);
+          sub[0] = 'z';
+        }
+        else {
+          sub[0]=(char)(((ssleay_value>>4)&0xff) + 'a' -1);
+        }
       }
       else
         sub[0]='\0';
