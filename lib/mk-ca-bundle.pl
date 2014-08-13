@@ -211,7 +211,7 @@ sub sha1 {
     my ($txt)=@_;
     my $sha1 = `$openssl dgst -sha1 $txt | cut '-d ' -f2`;
     chomp $sha1;
-    return sha1;
+    return $sha1;
 }
 
 sub oldsha1 {
