@@ -40,17 +40,15 @@ use Text::Wrap;
 
 my %urls = (
   'nss' =>
-    'http://mxr.mozilla.org/nss/source/lib/ckfw/builtins/certdata.txt?raw=1',
+    'http://hg.mozilla.org/projects/nss/raw-file/tip/lib/ckfw/builtins/certdata.txt',
   'central' =>
-    'http://mxr.mozilla.org/mozilla-central/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1',
+    'http://hg.mozilla.org/mozilla-central/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'aurora' =>
-    'http://mxr.mozilla.org/mozilla-aurora/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1',
+    'http://hg.mozilla.org/releases/mozilla-aurora/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'beta' =>
-    'http://mxr.mozilla.org/mozilla-beta/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1',
+    'http://hg.mozilla.org/releases/mozilla-beta/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'release' =>
-    'http://mxr.mozilla.org/mozilla-release/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1',
-  'mozilla' =>
-    'http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1'
+    'http://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
 );
 
 $opt_d = 'release';
@@ -58,7 +56,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.21';
+my $version = '1.22';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -209,6 +207,28 @@ sub PARSE_CSV_PARAM($$@) {
   return @values;
 }
 
+sub sha1 {
+    my ($txt)=@_;
+    my $sha1 = `$openssl dgst -sha1 $txt | cut '-d ' -f2`;
+    chomp $sha1;
+    return sha1;
+}
+
+sub oldsha1 {
+    my ($crt)=@_;
+    my $sha1="";
+    open(C, "<$crt");
+    while(<C>) {
+        chomp;
+        if($_ =~ /^\#\# SHA1: (.*)/) {
+            $sha1 = $1;
+            last;
+        }
+    }
+    close(C);
+    return $sha1;
+}
+
 if ( $opt_p !~ m/:/ ) {
   print "Error: Mozilla trust identifier list must include both purposes and levels\n";
   HELP_MESSAGE();
@@ -238,6 +258,10 @@ my $stdout = $crt eq '-';
 my $resp;
 my $fetched;
 
+my $oldsha1= oldsha1($crt);
+
+print STDERR "SHA1 of old file: $oldsha1\n";
+
 unless ($opt_n and -e $txt) {
   print STDERR "Downloading '$txt' ...\n" if (!$opt_q);
   my $ua  = new LWP::UserAgent(agent => "$0/$version");
@@ -257,7 +281,25 @@ unless ($opt_n and -e $txt) {
   }
 }
 
-my $currentdate = scalar gmtime($fetched ? $resp->last_modified : (stat($txt))[9]);
+my $filedate = $fetched ? $resp->last_modified : (stat($txt))[9];
+my $datesrc = "as of";
+if(!$filedate) {
+    # mxr.mozilla.org gave us a time, hg.mozilla.org does not!
+    $filedate = time();
+    $datesrc="downloaded on";
+}
+
+# get the hash from the download file
+my $newsha1= sha1($txt); 
+
+if($oldsha1 eq $newsha1) {
+    print STDERR "Downloaded file identical to previous run\'s source file. Exiting\n";
+    exit;
+}
+
+print STDERR "SHA1 of new file: $newsha1\n";
+
+my $currentdate = scalar gmtime($filedate);
 
 my $format = $opt_t ? "plain text and " : "";
 if( $stdout ) {
@@ -267,9 +309,9 @@ if( $stdout ) {
 }
 print CRT <<EOT;
 ##
-## $crt -- Bundle of CA Root Certificates
+## Bundle of CA Root Certificates
 ##
-## Certificate data from Mozilla as of: ${currentdate}
+## Certificate data from Mozilla ${datesrc}: ${currentdate}
 ##
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates
@@ -280,6 +322,9 @@ print CRT <<EOT;
 ## can be directly used with curl / libcurl / php_curl, or with
 ## an Apache+mod_ssl webserver for SSL client authentication.
 ## Just configure this file as the SSLCACertificateFile.
+##
+## Conversion done with mk-ca-bundle.pl verison $version.
+## SHA1: $newsha1
 ##
 
 EOT
@@ -415,7 +460,3 @@ unless( $stdout ) {
 }
 unlink $txt if ($opt_u);
 print STDERR "Done ($certnum CA certs processed, $skipnum skipped).\n" if (!$opt_q);
-
-exit;
-
-
