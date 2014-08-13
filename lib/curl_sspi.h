@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -304,5 +304,12 @@ extern PSecurityFunctionTable s_pSecFn;
      (unsigned long)SEC_WINNT_AUTH_IDENTITY_ANSI
 #endif
 
+/*
+ * Definitions required from ntsecapi.h are directly provided below this point
+ * to avoid including ntsecapi.h due to a conflict with OpenSSL's safestack.h
+ */
+#define KERB_WRAP_NO_ENCRYPT 0x80000001
+
 #endif /* USE_WINDOWS_SSPI */
+
 #endif /* HEADER_CURL_SSPI_H */
