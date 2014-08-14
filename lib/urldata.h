@@ -436,7 +436,7 @@ struct kerberos5data {
   size_t token_max;
   BYTE *output_token;
 };
-#endif;
+#endif
 
 /* Struct used for NTLM challenge-response authentication */
 struct ntlmdata {
