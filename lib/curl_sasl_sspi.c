@@ -44,6 +44,8 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
+
 /*
  * Curl_sasl_build_spn()
  *
@@ -303,7 +305,6 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
   CURLcode result = CURLE_OK;
   size_t chlglen = 0;
   unsigned char *chlg = NULL;
-  unsigned char *resp = NULL;
   CtxtHandle context;
   PSecPkgInfo SecurityPackage;
   SecBuffer chlg_buf;
