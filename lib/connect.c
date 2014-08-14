@@ -94,7 +94,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error);
 #define KEEPALIVE_FACTOR(x)
 #endif
 
-#if defined(HAVE_WINSOCK_H) && !defined(SIO_KEEPALIVE_VALS)
+#if defined(HAVE_WINSOCK2_H) && !defined(SIO_KEEPALIVE_VALS)
 #define SIO_KEEPALIVE_VALS    _WSAIOW(IOC_VENDOR,4)
 
 struct tcp_keepalive {
