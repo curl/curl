@@ -471,6 +471,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   SecBufferDesc input_desc;
   SecBufferDesc wrap_desc;
   unsigned long indata = 0;
+  unsigned long outdata = 0;
   unsigned long qop = 0;
   unsigned long sec_layer = 0;
   unsigned long max_size = 0;
@@ -552,6 +553,14 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
 
   /* Extract the maximum message size the server can receive */
   max_size = ntohl(indata & 0xFFFFFF00);
+  if(max_size > 0) {
+    /* The server has told us it supports a maximum receive buffer, however, as
+       we don't require one unless we are encrypting data we, tell the server
+       our receive buffer is zero. */
+    max_size = 0;
+  }
+
+  outdata = htonl(max_size) | sec_layer;
 
   /* Allocate the trailer */
   trailer = malloc(sizes.cbSecurityTrailer);
@@ -572,11 +581,11 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   }
 
   /* Populate the message with the security layer, client supported receive
-     message size (lets claim to support the same as the server) and
-     authorization identity including the 0x00 based terminator. Note: Dispite
-     RFC4752 Section 3.1 stating "The authorization identity is not terminated
-     with the zero-valued (%x00) octet." it seems necessary to include it. */
-  memcpy(message, &indata, 4);
+     message size and authorization identity including the 0x00 based
+     terminator. Note: Dispite RFC4752 Section 3.1 stating "The authorization
+     identity is not terminated with the zero-valued (%x00) octet." it seems
+     necessary to include it. */
+  memcpy(message, &outdata, 4);
   strcpy((char *)message + 4, names.sUserName);
 
   /* Allocate the padding */
