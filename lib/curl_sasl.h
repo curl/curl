@@ -28,6 +28,10 @@ struct SessionHandle;
 struct connectdata;
 struct ntlmdata;
 
+#if defined(USE_WINDOWS_SSPI)
+struct kerberos5data;
+#endif
+
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
 #define SASL_AUTH_ANY           ~0U
