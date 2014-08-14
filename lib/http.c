@@ -920,14 +920,6 @@ static int http_should_fail(struct connectdata *conn)
   if(httpcode < 400)
     return 0;
 
-  if(data->state.resume_from &&
-     (data->set.httpreq==HTTPREQ_GET) &&
-     (httpcode == 416)) {
-    /* "Requested Range Not Satisfiable", just proceed and
-       pretend this is no error */
-    return 0;
-  }
-
   /*
   ** Any code >= 400 that's not 401 or 407 is always
   ** a terminal error
@@ -3539,23 +3531,30 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
       /* Content-Range: bytes [num]-
          Content-Range: bytes: [num]-
          Content-Range: [num]-
+         Content-Range: [asterisk]/[total]
 
          The second format was added since Sun's webserver
          JavaWebServer/1.1.1 obviously sends the header this way!
          The third added since some servers use that!
+         The forth means the requested range was unsatisfied.
       */
 
       char *ptr = k->p + 14;
 
-      /* Move forward until first digit */
-      while(*ptr && !ISDIGIT(*ptr))
+      /* Move forward until first digit or asterisk */
+      while(*ptr && !ISDIGIT(*ptr) && *ptr != '*')
         ptr++;
 
-      k->offset = curlx_strtoofft(ptr, NULL, 10);
+      /* if it truly stopped on a digit */
+      if(ISDIGIT(*ptr)) {
+        k->offset = curlx_strtoofft(ptr, NULL, 10);
 
-      if(data->state.resume_from == k->offset)
-        /* we asked for a resume and we got it */
-        k->content_range = TRUE;
+        if(data->state.resume_from == k->offset)
+          /* we asked for a resume and we got it */
+          k->content_range = TRUE;
+      }
+      else
+        data->state.resume_from = 0; /* get everything */
     }
 #if !defined(CURL_DISABLE_COOKIES)
     else if(data->cookies &&
