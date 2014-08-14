@@ -333,8 +333,6 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
       return CURLE_OUT_OF_MEMORY;
 
     if(userp && *userp) {
-      CURLcode result;
-
       /* Populate our identity structure */
       result = Curl_create_sspi_identity(userp, passwdp, &krb5->identity);
       if(result)
