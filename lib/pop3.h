@@ -84,6 +84,7 @@ struct pop3_conn {
   unsigned int authused;  /* SASL auth mechanism used for the connection */
   char *apoptimestamp;    /* APOP timestamp from the server greeting */
   bool tls_supported;     /* StartTLS capability supported by server */
+  bool mutual_auth;       /* Mutual authentication enabled (GSSAPI only) */
 };
 
 extern const struct Curl_handler Curl_handler_pop3;

@@ -86,6 +86,7 @@ struct smtp_conn {
   bool size_supported;     /* If server supports SIZE extension according to
                               RFC 1870 */
   bool auth_supported;     /* AUTH capability supported by server */
+  bool mutual_auth;        /* Mutual authentication enabled (GSSAPI only) */
 };
 
 extern const struct Curl_handler Curl_handler_smtp;
