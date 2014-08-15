@@ -12,7 +12,7 @@ endmacro(CHECK_LIBRARY_EXISTS_CONCAT)
 
 # Check if header file exists and add it to the list.
 macro(CHECK_INCLUDE_FILE_CONCAT FILE VARIABLE)
-  check_include_files("${CURL_INCLUDES};${FILE}" ${VARIABLE})
+  check_include_file("${FILE}" ${VARIABLE})
   if(${VARIABLE})
     set(CURL_INCLUDES ${CURL_INCLUDES} ${FILE})
     set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D${VARIABLE}")
