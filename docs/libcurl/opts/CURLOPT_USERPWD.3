@@ -31,10 +31,21 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERPWD, char *userpwd);
 Pass a char * as parameter, pointing to a zero terminated login details string
 for the connection. The format of which is: [user name]:[password].
 
-When using NTLM, you can set the domain by prepending it to the user name and
-separating the domain and name with a forward (/) or backward slash (\\). Like
-this: "domain/user:password" or "domain\\user:password". Some HTTP servers (on
-Windows) support this style even for Basic authentication.
+When using Kerberos V5 authentication with a Windows based server, you should
+specify the user name part with the domain name in order for the server to
+successfully obtain a Kerberos Ticket. If you don't then the initial part of
+the authentication handshake may fail.
+
+When using NTLM, the user name can be specified simply as the user name
+without the domain name should the server be part of a single domain and
+forest.
+
+To specify the domain name use either Down-Level Logon Name or UPN (User
+Principal Name) formats. For example, EXAMPLE\user and user@example.com
+respectively.
+
+Some HTTP servers (on Windows) support inclusion of the domain for Basic
+authentication as well.
 
 When using HTTP and \fICURLOPT_FOLLOWLOCATION(3)\fP, libcurl might perform
 several requests to possibly different hosts. libcurl will only send this user
