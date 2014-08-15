@@ -19,17 +19,17 @@ macro(CURL_CHECK_C_SOURCE_COMPILES SOURCE VAR)
     if(${ARGC} GREATER 2)
       # then add the third argument as a message
       set(message "${ARGV2} (${VAR})")
-    endif(${ARGC} GREATER 2)
+    endif()
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CURL_CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
-    endif(CMAKE_REQUIRED_LIBRARIES)
+    endif()
     if(CMAKE_REQUIRED_INCLUDES)
       set(CURL_CHECK_C_SOURCE_COMPILES_ADD_INCLUDES
         "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
-    endif(CMAKE_REQUIRED_INCLUDES)
+    endif()
     set(src "")
     foreach(def ${EXTRA_DEFINES})
       set(src "${src}#define ${def} 1\n")
@@ -59,13 +59,13 @@ macro(CURL_CHECK_C_SOURCE_COMPILES SOURCE VAR)
         "Performing C SOURCE FILE Test ${message} succeded with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${src}\n")
-    else(${VAR})
+    else()
       message(STATUS "Performing Test ${message} - Failed")
       set(${VAR} "" CACHE INTERNAL "Test ${message}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing C SOURCE FILE Test ${message} failed with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${src}\n")
-    endif(${VAR})
-  endif("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
-endmacro(CURL_CHECK_C_SOURCE_COMPILES)
+    endif()
+  endif()
+endmacro()
