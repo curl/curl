@@ -236,9 +236,6 @@ if(WIN32)
 endif()
 
 
-# IF(NOT CURL_SPECIAL_LIBZ)
-#  CHECK_LIBRARY_EXISTS_CONCAT("z"      inflateEnd   HAVE_LIBZ)
-# ENDIF(NOT CURL_SPECIAL_LIBZ)
 
 # Check for idn
 check_library_exists_concat("idn" idna_to_ascii_lz HAVE_LIBIDN)
@@ -248,9 +245,6 @@ check_library_exists_concat("ldap" ldap_init HAVE_LIBLDAP)
 check_library_exists_concat("lber" ber_init HAVE_LIBLBER)
 option(CMAKE_USE_OPENLDAP "Use OpenLDAP code." OFF)
 mark_as_advanced(CMAKE_USE_OPENLDAP)
-# if(NOT HAVE_LIBLDAP)
-# SET(CURL_DISABLE_LDAP ON)
-# endif(NOT HAVE_LIBLDAP)
 
 # Check for symbol dlopen (same as HAVE_LIBDL)
 check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
@@ -848,14 +842,10 @@ endif(MSVC)
 function(SETUP_CURL_DEPENDENCIES TARGET_NAME)
   if(CURL_ZLIB AND ZLIB_FOUND)
     include_directories(${ZLIB_INCLUDE_DIR})
-    #ADD_DEFINITIONS( -DHAVE_ZLIB_H -DHAVE_ZLIB -DHAVE_LIBZ )
   endif()
 
   if(CMAKE_USE_OPENSSL AND OPENSSL_FOUND)
     include_directories(${OPENSSL_INCLUDE_DIR})
-  endif()
-  if(CMAKE_USE_OPENSSL AND CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
-    #ADD_DEFINITIONS( -DUSE_SSLEAY )
   endif()
 
   if(CMAKE_USE_LIBSSH2 AND LIBSSH2_FOUND)
