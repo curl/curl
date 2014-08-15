@@ -37,6 +37,22 @@ user name to use for the transfer.
 authentication. You should not use this option together with the (older)
 \fICURLOPT_USERPWD(3)\fP option.
 
+When using Kerberos V5 authentication with a Windows based server, you should
+include the domain name in order for the server to successfully obtain a
+Kerberos Ticket. If you don't then the initial part of the authentication
+handshake may fail.
+
+When using NTLM, the user name can be specified simply as the user name
+without the domain name should the server be part of a single domain and
+forest.
+
+To include the domain name use either Down-Level Logon Name or UPN (User
+Principal Name) formats. For example, EXAMPLE\user and user@example.com
+respectively.
+
+Some HTTP servers (on Windows) support inclusion of the domain for Basic
+authentication as well.
+
 To specify the password and login options, along with the user name, use the
 \fICURLOPT_PASSWORD(3)\fP and \fICURLOPT_LOGIN_OPTIONS(3)\fP options.
 .SH DEFAULT
