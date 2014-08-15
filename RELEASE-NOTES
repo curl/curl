@@ -18,6 +18,7 @@ This release includes the following changes:
  o findprotocol: show unsupported protocol within quotes
  o version: detect and show LibreSSL
  o version: detect and show BoringSSL
+ o Kerberos (SASL GSSAPI) authentication working for IMAP, SMTP and POP3
 
 This release includes the following bugfixes:
 
@@ -57,6 +58,12 @@ This release includes the following bugfixes:
  o http_negotiate_sspi: Use a dynamic buffer for SPN generation
  o sasl_sspi: Fixed missing free of challenge buffer on SPN failure
  o sasl_sspi: Fixed hard coded buffer for response generation
+ o Curl_poll + Curl_wait_ms: fix timeout return value
+ o docs/SSLCERTS: update the section about NSS database
+ o create_conn: prune dead connections [11]
+ o openssl: fix version report for the 0.9.8 branch
+ o mk-ca-bundle.pl: switched to using hg.mozilla.org [12]
+ o http: fix the Content-Range: parser [13]
 
 This release includes the following known bugs:
 
@@ -66,10 +73,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Anthon Pang, Dan Fandrich, Daniel Stenberg, Dave Reisner,
-  David Woodhouse, Fabian Keil, Jan Ehrhardt, Kamil Dudka, Leonardo Rosati,
-  Marcel Raad, Michael Osipov, Michael Wallner, Patrick Monnerat, Paul Saab,
-  Rafaël Carré, Sergey Nikulov, Spork Schivago, Steve Holme,
-  Tatsuhiro Tsujikawa, Toby Peterson,
+  David Shaw, David Woodhouse, Dimitrios Siganos, Ed Morley, Fabian Keil,
+  Frank Meier, Jan Ehrhardt, Jonatan Vela, Jose Alf, Kamil Dudka,
+  Leonardo Rosati, Marcel Raad, Michael Osipov, Michael Wallner,
+  Patrick Monnerat, Paul Saab, Peter Wang, Rafaël Carré, Sergey Nikulov,
+  Spork Schivago, Steve Holme, Tatsuhiro Tsujikawa, Toby Peterson,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -85,3 +93,6 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/bug/view.cgi?id=1399
  [9] = http://curl.haxx.se/mail/lib-2014-06/0224.html
  [10] = http://curl.haxx.se/bug/view.cgi?id=1401
+ [11] = http://curl.haxx.se/mail/lib-2014-06/0189.html
+ [12] = http://curl.haxx.se/bug/view.cgi?id=1409
+ [13] = http://curl.haxx.se/mail/lib-2014-06/0221.html
