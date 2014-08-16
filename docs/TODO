@@ -82,6 +82,7 @@
 
  14. SASL
  14.1 Other authentication mechanisms
+ 14.2 GSSAPI via GSS-API libraries
  
  15. Client
  15.1 sync
@@ -257,7 +258,7 @@
 
 In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
 via third-party GSS-API libraries, such as Heimdal or MIT Kerberos, also add
-support for Kerberos via Windows SSPI.
+support for GSSAPI authentication via Windows SSPI.
 
 5. HTTP
 
@@ -454,7 +455,13 @@ to provide the data to send.
 
 14.1 Other authentication mechanisms
 
- Add support for GSSAPI to SMTP, POP3 and IMAP.
+ Add support for other authentication mechanisms such as EXTERNAL, OLP,
+ GSS-SPNEGO and others.
+ 
+14.2 GSSAPI via GSS-API libraries
+
+ Add support for GSSAPI authentication via third-party GSS-API libraries, such
+ as Heimdal and MIT Kerberos.
 
 15. Client
 
