@@ -416,8 +416,11 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
                                                &resp_desc, &attrs,
                                                &tsDummy);
 
-  if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED)
+  if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
+    Curl_safefree(chlg);
+
     return CURLE_RECV_ERROR;
+  }
 
   if(memcmp(&context, krb5->context, sizeof(context))) {
     s_pSecFn->DeleteSecurityContext(krb5->context);
@@ -430,6 +433,9 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
     result = Curl_base64_encode(data, (char *)resp_buf.pvBuffer,
                                 resp_buf.cbBuffer, outptr, outlen);
   }
+
+  /* Free the decoded challenge */
+  Curl_safefree(chlg);
 
   return result;
 }
