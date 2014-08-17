@@ -279,17 +279,18 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
  *
  * Parameters:
  *
- * data    [in]     - The session handle.
- * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
- * service [in]     - The service type such as www, smtp, pop or imap.
- * mutual  [in]     - Flag specifing whether or not mutual authentication is
- *                    enabled.
- * chlg64  [in]     - Pointer to the optional base64 encoded challenge message.
- * krb5    [in/out] - The gssapi data struct being used and modified.
- * outptr  [in/out] - The address where a pointer to newly allocated memory
- *                    holding the result will be stored upon completion.
- * outlen  [out]    - The length of the output message.
+ * data        [in]     - The session handle.
+ * userp       [in]     - The user name.
+ * passdwp     [in]     - The user's password.
+ * service     [in]     - The service type such as www, smtp, pop or imap.
+ * mutual_auth [in]     - Flag specifing whether or not mutual authentication
+ *                        is enabled.
+ * chlg64      [in]     - Pointer to the optional base64 encoded challenge
+ *                        message.
+ * krb5        [in/out] - The gssapi data struct being used and modified.
+ * outptr      [in/out] - The address where a pointer to newly allocated memory
+ *                        holding the result will be stored upon completion.
+ * outlen      [out]    - The length of the output message.
  *
  * Returns CURLE_OK on success.
  */
@@ -297,7 +298,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const char *service,
-                                              const bool mutual,
+                                              const bool mutual_auth,
                                               const char *chlg64,
                                               struct kerberos5data *krb5,
                                               char **outptr, size_t *outlen)
@@ -407,7 +408,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
   status = s_pSecFn->InitializeSecurityContext(krb5->credentials,
                                                chlg ? krb5->context : NULL,
                                                krb5->spn,
-                                               (mutual ?
+                                               (mutual_auth ?
                                                  ISC_REQ_MUTUAL_AUTH : 0),
                                                0, SECURITY_NATIVE_DREP,
                                                chlg ? &chlg_desc : NULL, 0,
