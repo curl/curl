@@ -528,14 +528,14 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   if(status != SEC_E_OK) {
     Curl_safefree(chlg);
 
-    return CURLE_RECV_ERROR;
+    return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Not 4 octets long to fail as per RFC4752 Section 3.1 */
   if(input_buf[1].cbBuffer != 4) {
     Curl_safefree(chlg);
 
-    return CURLE_RECV_ERROR;
+    return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Copy the data out into a coinput_bufnvenient variable and free the SSPI
@@ -548,7 +548,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   if(!(sec_layer & KERB_WRAP_NO_ENCRYPT)) {
     Curl_safefree(chlg);
 
-    return CURLE_RECV_ERROR;
+    return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Extract the maximum message size the server can receive */
@@ -621,7 +621,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
     Curl_safefree(trailer);
     Curl_safefree(chlg);
 
-    return CURLE_RECV_ERROR;
+    return CURLE_OUT_OF_MEMORY;
   }
 
   /* Allocate the encryption (wrap) buffer */
