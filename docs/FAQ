@@ -238,10 +238,10 @@ FAQ
   1.6 What do you get for making curl?
 
   Project cURL is entirely free and open. No person gets paid for developing
-  (lib)curl on full or even part time. We do this voluntarily on our spare
-  time. Occasionally companies pay individual developers to work on curl, but
-  that's up to each company and developer. It is not controlled by nor
-  supervised in any way by the project.
+  curl on full time. We do this voluntarily, mostly on spare time.
+  Occasionally companies pay individual developers to work on curl, but that's
+  up to each company and developer. It is not controlled by nor supervised in
+  any way by the project.
 
   We still get help from companies. Haxx provides web site, bandwidth, mailing
   lists etc, sourceforge.net hosts project services we take advantage from,
