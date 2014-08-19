@@ -95,6 +95,7 @@ Example set of cookies:
 #include "strtoofft.h"
 #include "rawstr.h"
 #include "curl_memrchr.h"
+#include "inet_pton.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -319,6 +320,28 @@ static void remove_expired(struct CookieInfo *cookies)
   }
 }
 
+/*
+ * Return true if the given string is an IP(v4|v6) address.
+ */
+static bool isip(const char *domain)
+{
+  struct in_addr addr;
+#ifdef ENABLE_IPV6
+  struct in6_addr addr6;
+#endif
+
+  if(Curl_inet_pton(AF_INET, domain, &addr)
+#ifdef ENABLE_IPV6
+     || Curl_inet_pton(AF_INET6, domain, &addr6)
+#endif
+    ) {
+    /* domain name given as IP address */
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
 /****************************************************************************
  *
  * Curl_cookie_add()
@@ -439,24 +462,27 @@ Curl_cookie_add(struct SessionHandle *data,
           }
         }
         else if(Curl_raw_equal("domain", name)) {
+          bool is_ip;
+
           /* Now, we make sure that our host is within the given domain,
              or the given domain is not valid and thus cannot be set. */
 
           if('.' == whatptr[0])
             whatptr++; /* ignore preceding dot */
 
-          if(!domain || tailmatch(whatptr, domain)) {
-            const char *tailptr=whatptr;
-            if(tailptr[0] == '.')
-              tailptr++;
-            strstore(&co->domain, tailptr); /* don't prefix w/dots
-                                               internally */
+          is_ip = isip(domain ? domain : whatptr);
+
+          if(!domain
+             || (is_ip && !strcmp(whatptr, domain))
+             || (!is_ip && tailmatch(whatptr, domain))) {
+            strstore(&co->domain, whatptr);
             if(!co->domain) {
               badcookie = TRUE;
               break;
             }
-            co->tailmatch=TRUE; /* we always do that if the domain name was
-                                   given */
+            if(!is_ip)
+              co->tailmatch=TRUE; /* we always do that if the domain name was
+                                     given */
           }
           else {
             /* we did not get a tailmatch and then the attempted set domain
@@ -968,12 +994,16 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
   time_t now = time(NULL);
   struct Cookie *mainco=NULL;
   size_t matches = 0;
+  bool is_ip;
 
   if(!c || !c->cookies)
     return NULL; /* no cookie struct or no cookies in the struct */
 
   /* at first, remove expired cookies */
   remove_expired(c);
+
+  /* check if host is an IP(v4|v6) address */
+  is_ip = isip(host);
 
   co = c->cookies;
 
@@ -986,8 +1016,8 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 
       /* now check if the domain is correct */
       if(!co->domain ||
-         (co->tailmatch && tailmatch(co->domain, host)) ||
-         (!co->tailmatch && Curl_raw_equal(host, co->domain)) ) {
+         (co->tailmatch && !is_ip && tailmatch(co->domain, host)) ||
+         ((!co->tailmatch || is_ip) && Curl_raw_equal(host, co->domain)) ) {
         /* the right part of the host matches the domain stuff in the
            cookie data */
 

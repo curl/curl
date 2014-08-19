@@ -42,7 +42,8 @@ Set-Cookie: duplicate=test; domain=.0.0.1; domain=.0.0.1; path=/donkey;
 Set-Cookie: cookie=yes; path=/we;
 Set-Cookie: cookie=perhaps; path=/we/want;
 Set-Cookie: nocookie=yes; path=/WE;
-Set-Cookie: blexp=yesyes; domain=.0.0.1; domain=.0.0.1; expiry=totally bad;
+Set-Cookie: blexp=yesyes; domain=%HOSTIP; domain=%HOSTIP; expiry=totally bad;
+Set-Cookie: partialip=nono; domain=.0.0.1;
 
 </file>
 <precheck>
