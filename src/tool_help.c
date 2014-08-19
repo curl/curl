@@ -71,7 +71,7 @@ static const char *const helptext[] = {
   "     --digest        Use HTTP Digest Authentication (H)",
   "     --disable-eprt  Inhibit using EPRT or LPRT (F)",
   "     --disable-epsv  Inhibit using EPSV (F)",
-  "     --dns-servers    DNS server addrs to use: 1.1.1.1;2.2.2.2",
+  "     --dns-servers   DNS server addrs to use: 1.1.1.1;2.2.2.2",
   "     --dns-interface  Interface to use for DNS requests",
   "     --dns-ipv4-addr  IPv4 address to use for DNS requests, dot notation",
   "     --dns-ipv6-addr  IPv6 address to use for DNS requests, dot notation",
@@ -125,7 +125,8 @@ static const char *const helptext[] = {
   " -l, --list-only     List only mode (F/POP3)",
   "     --local-port RANGE  Force use of RANGE for local port numbers",
   " -L, --location      Follow redirects (H)",
-  "     --location-trusted  Like '--location', and send auth to other hosts (H)",
+  "     --location-trusted  "
+  "Like '--location', and send auth to other hosts (H)",
   "     --login-options OPTIONS  Server login options (IMAP, POP3, SMTP)",
   " -M, --manual        Display the full manual",
   "     --mail-from FROM  Mail from this address (SMTP)",
@@ -235,8 +236,8 @@ static const char *const helptext[] = {
   "     --wdebug        Turn on Watt-32 debugging",
 #endif
   " -w, --write-out FORMAT  Use output FORMAT after completion",
-  "     --xattr        Store metadata in extended file attributes",
-  " -q                 Disable .curlrc (must be first parameter)",
+  "     --xattr         Store metadata in extended file attributes",
+  " -q                  Disable .curlrc (must be first parameter)",
   NULL
 };
 
