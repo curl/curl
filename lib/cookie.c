@@ -463,6 +463,7 @@ Curl_cookie_add(struct SessionHandle *data,
         }
         else if(Curl_raw_equal("domain", name)) {
           bool is_ip;
+          const char *dotp;
 
           /* Now, we make sure that our host is within the given domain,
              or the given domain is not valid and thus cannot be set. */
@@ -471,6 +472,11 @@ Curl_cookie_add(struct SessionHandle *data,
             whatptr++; /* ignore preceding dot */
 
           is_ip = isip(domain ? domain : whatptr);
+
+          /* check for more dots */
+          dotp = strchr(whatptr, '.');
+          if(!dotp)
+            domain=":";
 
           if(!domain
              || (is_ip && !strcmp(whatptr, domain))
