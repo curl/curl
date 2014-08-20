@@ -424,6 +424,12 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_safefree(data->state.scratch);
   Curl_ssl_free_certinfo(data);
 
+  /* Cleanup possible redirect junk */
+  if(data->req.newurl) {
+    free(data->req.newurl);
+    data->req.newurl = NULL;
+  }
+
   if(data->change.referer_alloc) {
     Curl_safefree(data->change.referer);
     data->change.referer_alloc = FALSE;
@@ -2641,12 +2647,6 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 
   /* Cleanup NTLM connection-related data */
   Curl_http_ntlm_cleanup(conn);
-
-  /* Cleanup possible redirect junk */
-  if(data->req.newurl) {
-    free(data->req.newurl);
-    data->req.newurl = NULL;
-  }
 
   if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
