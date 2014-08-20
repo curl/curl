@@ -30,6 +30,7 @@
 #include "connect.h"
 #include "progress.h"
 #include "easyif.h"
+#include "share.h"
 #include "multiif.h"
 #include "sendf.h"
 #include "timeval.h"
@@ -1084,9 +1085,30 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* awaiting an asynch name resolve to complete */
     {
       struct Curl_dns_entry *dns = NULL;
+      struct connectdata *conn = data->easy_conn;
+      int stale;
 
       /* check if we have the name resolved by now */
-      data->result = Curl_resolver_is_resolved(data->easy_conn, &dns);
+      if(data->share)
+        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
+      dns = Curl_fetch_addr(conn, conn->host.name, (int)conn->port, &stale);
+
+      if(dns) {
+        dns->inuse++; /* we use it! */
+        conn->async.dns = dns;
+        conn->async.done = TRUE;
+        data->result = CURLRESOLV_RESOLVED;
+        infof(data, "Hostname was found in DNS cache\n");
+      }
+      if(stale)
+        infof(data, "Hostname in DNS cache was stale, zapped\n");
+
+      if(data->share)
+        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+
+      if(!dns)
+        data->result = Curl_resolver_is_resolved(data->easy_conn, &dns);
 
       /* Update sockets here, because the socket(s) may have been
          closed and the application thus needs to be told, even if it

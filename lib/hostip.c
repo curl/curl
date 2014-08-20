@@ -318,6 +318,47 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
 sigjmp_buf curl_jmpenv;
 #endif
 
+/*
+ * Curl_fetch_addr() fetches a 'Curl_dns_entry' already in the DNS cache.
+ *
+ * Curl_resolv() checks initially and Curl_resolver_is_resolved() checks each
+ * time it is called if the hostname has already been resolved and the address
+ * has already been stored in the DNS cache. This short circuits waiting for
+ * lot of pending lookups for the same hostname.
+ *
+ * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
+ */
+struct Curl_dns_entry *
+Curl_fetch_addr(struct connectdata *conn,
+                const char *hostname,
+                int port, int *stale)
+{
+  char *entry_id = NULL;
+  struct Curl_dns_entry *dns = NULL;
+  size_t entry_len;
+  struct SessionHandle *data = conn->data;
+
+  /* Create an entry id, based upon the hostname and port */
+  entry_id = create_hostcache_id(hostname, port);
+  /* If we can't create the entry id, fail */
+  if(!entry_id)
+    return dns;
+
+  entry_len = strlen(entry_id);
+
+  /* See if its already in our dns cache */
+  dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
+
+  /* free the allocated entry_id again */
+  free(entry_id);
+
+  /* See whether the returned entry is stale. Done before we release lock */
+  *stale = remove_entry_if_stale(data, dns);
+  if(*stale)
+    dns = NULL; /* the memory deallocation is being handled by the hash */
+
+  return dns;
+}
 
 /*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
@@ -403,39 +444,22 @@ int Curl_resolv(struct connectdata *conn,
                 int port,
                 struct Curl_dns_entry **entry)
 {
-  char *entry_id = NULL;
   struct Curl_dns_entry *dns = NULL;
-  size_t entry_len;
   struct SessionHandle *data = conn->data;
   CURLcode result;
-  int rc = CURLRESOLV_ERROR; /* default to failure */
+  int stale, rc = CURLRESOLV_ERROR; /* default to failure */
 
   *entry = NULL;
-
-  /* Create an entry id, based upon the hostname and port */
-  entry_id = create_hostcache_id(hostname, port);
-  /* If we can't create the entry id, fail */
-  if(!entry_id)
-    return rc;
-
-  entry_len = strlen(entry_id);
 
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  /* See if its already in our dns cache */
-  dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
+  dns = Curl_fetch_addr(conn, hostname, port, &stale);
 
-  /* free the allocated entry_id again */
-  free(entry_id);
-
-  infof(data, "Hostname was %sfound in DNS cache\n", dns?"":"NOT ");
-
-  /* See whether the returned entry is stale. Done before we release lock */
-  if(remove_entry_if_stale(data, dns)) {
+  infof(data, "Hostname was %sfound in DNS cache\n", dns||stale?"":"NOT ");
+  if(stale)
     infof(data, "Hostname in DNS cache was stale, zapped\n");
-    dns = NULL; /* the memory deallocation is being handled by the hash */
-  }
+
 
   if(dns) {
     dns->inuse++; /* we use it! */

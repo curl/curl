@@ -172,6 +172,17 @@ const char *Curl_printable_address(const Curl_addrinfo *ip,
                                    char *buf, size_t bufsize);
 
 /*
+ * Curl_fetch_addr() fetches a 'Curl_dns_entry' already in the DNS cache.
+ *
+ * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
+ */
+struct Curl_dns_entry *
+Curl_fetch_addr(struct connectdata *conn,
+                const char *hostname,
+                int port,
+                int *stale);
+
+/*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
  *
  * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
