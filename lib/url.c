@@ -2602,6 +2602,16 @@ static void conn_free(struct connectdata *conn)
   free(conn); /* free all the connection oriented data */
 }
 
+/*
+ * Disconnects the given connection. Note the connection may not be the
+ * primary connection, like when freeing room in the connection cache or
+ * killing of a dead old connection.
+ *
+ * This function MUST NOT reset state in the SessionHandle struct if that
+ * isn't strictly bound to the life-time of *this* particular connection.
+ *
+ */
+
 CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 {
   struct SessionHandle *data;
@@ -2620,30 +2630,6 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
   }
 
   Curl_hostcache_prune(data); /* kill old DNS cache entries */
-
-  {
-    int has_host_ntlm = (conn->ntlm.state != NTLMSTATE_NONE);
-    int has_proxy_ntlm = (conn->proxyntlm.state != NTLMSTATE_NONE);
-
-    /* Authentication data is a mix of connection-related and sessionhandle-
-       related stuff. NTLM is connection-related so when we close the shop
-       we shall forget. */
-
-    if(has_host_ntlm) {
-      data->state.authhost.done = FALSE;
-      data->state.authhost.picked =
-        data->state.authhost.want;
-    }
-
-    if(has_proxy_ntlm) {
-      data->state.authproxy.done = FALSE;
-      data->state.authproxy.picked =
-        data->state.authproxy.want;
-    }
-
-    if(has_host_ntlm || has_proxy_ntlm)
-      data->state.authproblem = FALSE;
-  }
 
   /* Cleanup NTLM connection-related data */
   Curl_http_ntlm_cleanup(conn);
@@ -2684,8 +2670,6 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
   }
 
   conn_free(conn);
-
-  Curl_speedinit(data);
 
   return CURLE_OK;
 }
@@ -5617,6 +5601,21 @@ static CURLcode create_conn(struct SessionHandle *data,
        */
       ConnectionStore(data, conn);
     }
+
+    /* If NTLM is requested in a part of this connection, make sure we don't
+       assume the state is fine as this is a fresh connection and NTLM is
+       connection based. */
+    if((data->state.authhost.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+       data->state.authhost.done) {
+      infof(data, "NTLM picked AND auth done set, clear picked!\n");
+      data->state.authhost.picked = 0;
+    }
+    if((data->state.authproxy.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+       data->state.authproxy.done) {
+      infof(data, "NTLM-proxy picked AND auth done set, clear picked!\n");
+      data->state.authproxy.picked = 0;
+    }
+
   }
 
   /* Mark the connection as used */
@@ -6031,4 +6030,3 @@ CURLcode Curl_do_more(struct connectdata *conn, int *complete)
 
   return result;
 }
-
