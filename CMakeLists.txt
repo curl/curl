@@ -367,9 +367,6 @@ check_library_exists_concat("idn" idna_to_ascii_lz HAVE_LIBIDN)
 # Check for symbol dlopen (same as HAVE_LIBDL)
 check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
 
-# For other tests to use the same libraries
-set(CMAKE_REQUIRED_LIBRARIES ${CURL_LIBS})
-
 option(CURL_ZLIB "Set to ON to enable building cURL with zlib support." ON)
 set(HAVE_LIBZ OFF)
 set(HAVE_ZLIB_H OFF)
@@ -416,6 +413,9 @@ if(CMAKE_USE_LIBSSH2)
 
   endif(LIBSSH2_FOUND)
 endif(CMAKE_USE_LIBSSH2)
+
+# For other tests to use the same libraries
+set(CMAKE_REQUIRED_LIBRARIES ${CURL_LIBS})
 
 # If we have features.h, then do the _BSD_SOURCE magic
 check_include_file("features.h"       HAVE_FEATURES_H)
