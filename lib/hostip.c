@@ -321,10 +321,11 @@ sigjmp_buf curl_jmpenv;
 /*
  * Curl_fetch_addr() fetches a 'Curl_dns_entry' already in the DNS cache.
  *
- * Curl_resolv() checks initially and Curl_resolver_is_resolved() checks each
- * time it is called if the hostname has already been resolved and the address
- * has already been stored in the DNS cache. This short circuits waiting for
- * lot of pending lookups for the same hostname.
+ * Curl_resolv() checks initially and multi_runsingle() checks each time
+ * it discovers the handle in the state WAITRESOLVE whether the hostname 
+ * has already been resolved and the address has already been stored in 
+ * the DNS cache. This short circuits waiting for a lot of pending 
+ * lookups for the same hostname requested by different handles.
  *
  * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
  */
