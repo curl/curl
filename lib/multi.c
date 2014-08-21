@@ -1096,8 +1096,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(dns) {
         dns->inuse++; /* we use it! */
+#ifdef CURLRES_ASYNCH
         conn->async.dns = dns;
         conn->async.done = TRUE;
+#endif
         data->result = CURLRESOLV_RESOLVED;
         infof(data, "Hostname was found in DNS cache\n");
       }
