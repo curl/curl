@@ -2836,7 +2836,8 @@ size_t Curl_ossl_version(char *buffer, size_t size)
     else {
       if(ssleay_value&0xff0) {
         int minor_ver = (ssleay_value >> 4) & 0xff;
-        if(minor_ver > 26) { /* handle extended version introduced for 0.9.8za */
+        if(minor_ver > 26) {
+          /* handle extended version introduced for 0.9.8za */
           sub[1] = (char) ((minor_ver - 1) % 26 + 'a' + 1);
           sub[0] = 'z';
         }
