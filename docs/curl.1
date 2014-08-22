@@ -865,6 +865,10 @@ When curl follows a redirect and the request is not a plain GET (for example
 POST or PUT), it will do the following request with a GET if the HTTP response
 was 301, 302, or 303. If the response code was any other 3xx code, curl will
 re-send the following request using the same unmodified method.
+
+You can tell curl to not change the non-GET request method to GET after a 30x
+response by using the dedicated options for that: \fI--post301\fP,
+\fI--post302\fP and \fI-post303\fP.
 .IP "--libcurl <file>"
 Append this option to any ordinary curl command line, and you will get a
 libcurl-using C source code written to the file that does the equivalent
