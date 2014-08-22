@@ -12,8 +12,8 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   if(CURL_USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
   endif()
-  # resolve test needs this
-  setup_curl_dependencies(${TEST_NAME})
+
+  target_link_libraries(${TEST_NAME} ${CURL_LIBS})
 
   # Test servers simply are standalone programs that do not use libcurl
   # library.  For convinience and to ease portability of these servers,

@@ -378,6 +378,7 @@ if(CURL_ZLIB)
     set(HAVE_ZLIB ON)
     set(HAVE_LIBZ ON)
     list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
+    include_directories(${ZLIB_INCLUDE_DIR})
   endif()
 endif()
 
@@ -394,6 +395,7 @@ if(CMAKE_USE_LIBSSH2)
     list(APPEND CURL_LIBS ${LIBSSH2_LIBRARY})
     set(CMAKE_REQUIRED_LIBRARIES ${LIBSSH2_LIBRARY})
     set(CMAKE_REQUIRED_INCLUDES "${LIBSSH2_INCLUDE_DIR}")
+    include_directories("${LIBSSH2_INCLUDE_DIR}")
     set(HAVE_LIBSSH2 ON)
     set(USE_LIBSSH2 ON)
 
@@ -869,24 +871,6 @@ endif(WIN32)
 if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
 endif(MSVC)
-
-# Sets up the dependencies (zlib, OpenSSL, etc.) of a cURL subproject according to options.
-# TODO This is far to be complete!
-function(SETUP_CURL_DEPENDENCIES TARGET_NAME)
-  if(CURL_ZLIB AND ZLIB_FOUND)
-    include_directories(${ZLIB_INCLUDE_DIR})
-  endif()
-
-  if(CMAKE_USE_OPENSSL AND OPENSSL_FOUND)
-    include_directories(${OPENSSL_INCLUDE_DIR})
-  endif()
-
-  if(CMAKE_USE_LIBSSH2 AND LIBSSH2_FOUND)
-    include_directories(${LIBSSH2_INCLUDE_DIR})
-  endif()
-
-  target_link_libraries(${TARGET_NAME} ${CURL_LIBS})
-endfunction()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
 function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)

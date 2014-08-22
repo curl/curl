@@ -30,11 +30,8 @@ include_directories(
   ${CURL_BINARY_DIR}/include    # To be able to reach "curl/curlbuild.h"
   )
 
-
-# Setup dependencies
-setup_curl_dependencies(${EXE_NAME})
-target_link_libraries( ${EXE_NAME} libcurl )
-
+#Build cURL executable
+target_link_libraries( ${EXE_NAME} libcurl ${CURL_LIBS})
 
 ################################################################################
 

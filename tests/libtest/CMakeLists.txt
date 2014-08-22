@@ -12,8 +12,8 @@ function(SETUP_TEST TEST_NAME)          # ARGN are the files in the test
   if(CURL_USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
   endif()
-  setup_curl_dependencies(${TEST_NAME})
-  target_link_libraries( ${TEST_NAME} libcurl )
+
+  target_link_libraries( ${TEST_NAME} libcurl ${CURL_LIBS})
 
   set_target_properties(${TEST_NAME}
     PROPERTIES COMPILE_DEFINITIONS ${UPPER_TEST_NAME})

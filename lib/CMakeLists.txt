@@ -106,8 +106,6 @@ endif()
 
 set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS BUILDING_LIBCURL)
 
-setup_curl_dependencies(${LIB_NAME})
-
 # Remove the "lib" prefix since the library is already named "libcurl".
 set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
 set_target_properties(${LIB_NAME} PROPERTIES IMPORT_PREFIX "")
