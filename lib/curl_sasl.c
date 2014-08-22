@@ -569,6 +569,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                      "qop=%s",
                      userp, realm, nonce,
                      cnonce, nonceCount, spn, resp_hash_hex, qop);
+  Curl_safefree(spn);
   if(!response)
     return CURLE_OUT_OF_MEMORY;
 
@@ -576,7 +577,6 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   result = Curl_base64_encode(data, response, 0, outptr, outlen);
 
   Curl_safefree(response);
-  Curl_safefree(spn);
 
   return result;
 }
