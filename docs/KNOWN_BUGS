@@ -51,10 +51,6 @@ may have been fixed since this was written!
   any file at all. Like when using FTP.
   http://curl.haxx.se/bug/view.cgi?id=1063
 
-77. CURLOPT_FORBID_REUSE on a handle prevents NTLM from working since it
-  "abuses" the underlying connection re-use system and if connections are
-  forced to close they break the NTLM support.
-
 76. The SOCKET type in Win64 is 64 bits large (and thus so is curl_socket_t on
   that platform), and long is only 32 bits. It makes it impossible for
   curl_easy_getinfo() to return a socket properly with the CURLINFO_LASTSOCKET

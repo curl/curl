@@ -5859,7 +5859,8 @@ CURLcode Curl_done(struct connectdata **connp,
   }
 
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
-     forced us to close this no matter what we think.
+     forced us to close this connection. This is ignored for requests taking
+     place in a NTLM authentication handshake
 
      if conn->bits.close is TRUE, it means that the connection should be
      closed in spite of all our efforts to be nice, due to protocol
@@ -5871,7 +5872,10 @@ CURLcode Curl_done(struct connectdata **connp,
      we can add code that keep track of if we really must close it here or not,
      but currently we have no such detail knowledge.
   */
-  if(data->set.reuse_forbid || conn->bits.close || premature) {
+
+  if((data->set.reuse_forbid && !(conn->ntlm.state == NTLMSTATE_TYPE2 ||
+                                  conn->proxyntlm.state == NTLMSTATE_TYPE2))
+     || conn->bits.close || premature) {
     CURLcode res2 = Curl_disconnect(conn, premature); /* close connection */
 
     /* If we had an error already, make sure we return that one. But
