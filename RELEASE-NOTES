@@ -64,6 +64,12 @@ This release includes the following bugfixes:
  o openssl: fix version report for the 0.9.8 branch
  o mk-ca-bundle.pl: switched to using hg.mozilla.org [12]
  o http: fix the Content-Range: parser [13]
+ o Curl_disconnect: don't free the URL [14]
+ o win32: Fixed WinSock 2 #if [15]
+ o NTLM: ignore CURLOPT_FORBID_REUSE during NTLM HTTP auth
+ o curl.1: clarify --limit-rate's effect on both directions [16]
+ o disconnect: don't touch easy-related state on disconnects [17]
+ o Cmake: big cleanup and numerous fixes
 
 This release includes the following known bugs:
 
@@ -74,10 +80,11 @@ advice from friends like these:
 
   Alessandro Ghedini, Anthon Pang, Dan Fandrich, Daniel Stenberg, Dave Reisner,
   David Shaw, David Woodhouse, Dimitrios Siganos, Ed Morley, Fabian Keil,
-  Frank Meier, Jan Ehrhardt, Jonatan Vela, Jose Alf, Kamil Dudka,
-  Leonardo Rosati, Marcel Raad, Michael Osipov, Michael Wallner,
-  Patrick Monnerat, Paul Saab, Peter Wang, Rafaël Carré, Sergey Nikulov,
-  Spork Schivago, Steve Holme, Tatsuhiro Tsujikawa, Toby Peterson,
+  Frank Meier, Haris Okanovic, Jakub Zakrzewski, Jan Ehrhardt, Jonatan Vela,
+  Jose Alf, Kamil Dudka, Leonardo Rosati, Marcel Raad, Michael Osipov,
+  Michael Wallner, Paras S, Patrick Monnerat, Paul Saab, Peter Wang,
+  Rafaël Carré, Sergey Nikulov, Spork Schivago, Steve Holme,
+  Tatsuhiro Tsujikawa, Toby Peterson,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -96,3 +103,7 @@ References to bug reports and discussions on issues:
  [11] = http://curl.haxx.se/mail/lib-2014-06/0189.html
  [12] = http://curl.haxx.se/bug/view.cgi?id=1409
  [13] = http://curl.haxx.se/mail/lib-2014-06/0221.html
+ [14] = http://curl.haxx.se/mail/lib-2014-08/0148.html
+ [15] = http://curl.haxx.se/mail/lib-2014-08/0155.html
+ [16] = http://curl.haxx.se/bug/view.cgi?id=1414
+ [17] = http://curl.haxx.se/mail/lib-2014-08/0148.html
