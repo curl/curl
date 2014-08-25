@@ -235,7 +235,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
   milli = (timeout->tv_sec * 1000) + (timeout->tv_usec/1000);
   if(milli == 0)
     milli += 10;
-  Curl_expire(conn->data, milli);
+  Curl_expire_latest(conn->data, milli);
 
   return max;
 }

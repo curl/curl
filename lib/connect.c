@@ -1054,7 +1054,7 @@ singleipconnect(struct connectdata *conn,
 
   conn->connecttime = Curl_tvnow();
   if(conn->num_addr > 1)
-    Curl_expire(data, conn->timeoutms_per_addr);
+    Curl_expire_latest(data, conn->timeoutms_per_addr);
 
   /* Connect TCP sockets, bind UDP */
   if(!isconnected && (conn->socktype == SOCK_STREAM)) {

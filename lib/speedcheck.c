@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,7 +57,7 @@ CURLcode Curl_speedcheck(struct SessionHandle *data,
     }
     else {
       /* wait complete low_speed_time */
-      Curl_expire(data, nextcheck);
+      Curl_expire_latest(data, nextcheck);
     }
   }
   else {
@@ -68,7 +68,7 @@ CURLcode Curl_speedcheck(struct SessionHandle *data,
       /* if there is a low speed limit enabled, we set the expire timer to
          make this connection's speed get checked again no later than when
          this time is up */
-      Curl_expire(data, data->set.low_speed_time*1000);
+      Curl_expire_latest(data, data->set.low_speed_time*1000);
   }
   return CURLE_OK;
 }

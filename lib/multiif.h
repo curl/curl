@@ -26,6 +26,7 @@
  * Prototypes for library-wide functions provided by multi.c
  */
 void Curl_expire(struct SessionHandle *data, long milli);
+void Curl_expire_latest(struct SessionHandle *data, long milli);
 
 bool Curl_multi_pipeline_enabled(const struct Curl_multi* multi);
 void Curl_multi_handlePipeBreak(struct SessionHandle *data);
