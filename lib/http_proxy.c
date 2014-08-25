@@ -554,10 +554,16 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       conn->bits.proxy_connect_closed = TRUE;
       infof(data, "Connect me again please\n");
     }
-    else if(data->req.newurl) {
-      /* this won't be used anymore for the CONNECT so free it now */
-      free(data->req.newurl);
-      data->req.newurl = NULL;
+    else {
+      if(data->req.newurl) {
+        /* this won't be used anymore for the CONNECT so free it now */
+        free(data->req.newurl);
+        data->req.newurl = NULL;
+      }
+      /* failure, close this connection to avoid re-use */
+      connclose(conn, "proxy CONNECT failure");
+      Curl_closesocket(conn, conn->sock[sockindex]);
+      conn->sock[sockindex] = CURL_SOCKET_BAD;
     }
 
     /* to back to init state */
