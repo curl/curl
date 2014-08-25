@@ -23,7 +23,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o fix a build failure on Debian when NSS support is enabled [1]
- o http2: fixed compiler warnings when built disabled [2]
+ o HTTP/2: fixed compiler warnings when built disabled [2]
  o cyassl: return the correct error code on no CA cert
  o http: Deprecate GSS-Negotiate macros due to bad naming
  o http: Fixed Negotiate: authentication
@@ -35,12 +35,12 @@ This release includes the following bugfixes:
  o cyassl: made it compile with version 2.0.6 again
  o nss: do not check the version of NSS at run time
  o c-ares: fix build without IPv6 support [5]
- o http2: use base64url encoding [6]
+ o HTTP/2: use base64url encoding [6]
  o SSPI Negotiate: Fix 3 memory leaks
  o libtest: fixed duplicated line in Makefile [7]
  o conncache: fix compiler warning [8]
  o openssl: make ossl_send return CURLE_OK better
- o HTTP2: Support expect: 100-continue
+ o HTTP/2: Support expect: 100-continue
  o HTTP/2: Fix infinite loop in readwrite_data()
  o parsedate: fix the return code for an overflow edge condition
  o darwinssl: don't use strtok()
@@ -49,7 +49,7 @@ This release includes the following bugfixes:
  o http2: show the received header for better debugging
  o HTTP/2: Move :authority before non-pseudo header fields
  o HTTP/2: Reset promised stream, not its associated stream
- o http2: added some more logging for debugging stream problems
+ o HTTP/2: added some more logging for debugging stream problems
  o ntlm: Added support for SSPI package info query
  o ntlm: Fixed hard coded buffer for SSPI based auth packet generation
  o sasl_sspi: Fixed memory leak with not releasing Package Info struct
@@ -70,6 +70,8 @@ This release includes the following bugfixes:
  o curl.1: clarify --limit-rate's effect on both directions [16]
  o disconnect: don't touch easy-related state on disconnects [17]
  o Cmake: big cleanup and numerous fixes
+ o HTTP/2: supports draft-14 - moved :headers before the non-psuedo headers
+ o HTTP/2: Reset promised stream, not its associated stream
 
 This release includes the following known bugs:
 
