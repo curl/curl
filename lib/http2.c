@@ -39,7 +39,7 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#if (NGHTTP2_VERSION_NUM < 0x000300)
+#if (NGHTTP2_VERSION_NUM < 0x000600)
 #error too old nghttp2 version, upgrade!
 #endif
 
@@ -275,7 +275,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 
 static int on_invalid_frame_recv(nghttp2_session *session,
                                  const nghttp2_frame *frame,
-                                 nghttp2_error_code error_code, void *userp)
+                                 uint32_t error_code, void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
@@ -350,7 +350,7 @@ static int on_frame_not_send(nghttp2_session *session,
   return 0;
 }
 static int on_stream_close(nghttp2_session *session, int32_t stream_id,
-                           nghttp2_error_code error_code, void *userp)
+                           uint32_t error_code, void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
@@ -368,20 +368,6 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   return 0;
 }
 
-static int on_unknown_frame_recv(nghttp2_session *session,
-                                 const uint8_t *head, size_t headlen,
-                                 const uint8_t *payload, size_t payloadlen,
-                                 void *userp)
-{
-  struct connectdata *conn = (struct connectdata *)userp;
-  (void)session;
-  (void)head;
-  (void)headlen;
-  (void)payload;
-  (void)payloadlen;
-  infof(conn->data, "on_unknown_frame_recv() was called\n");
-  return 0;
-}
 static int on_begin_headers(nghttp2_session *session,
                             const nghttp2_frame *frame, void *userp)
 {
@@ -519,27 +505,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   return 0; /* 0 is successful */
 }
 
-/*
- * This is all callbacks nghttp2 calls
- */
-static const nghttp2_session_callbacks callbacks = {
-  send_callback,         /* nghttp2_send_callback */
-  NULL,                  /* nghttp2_recv_callback */
-  on_frame_recv,         /* nghttp2_on_frame_recv_callback */
-  on_invalid_frame_recv, /* nghttp2_on_invalid_frame_recv_callback */
-  on_data_chunk_recv,    /* nghttp2_on_data_chunk_recv_callback */
-  before_frame_send,     /* nghttp2_before_frame_send_callback */
-  on_frame_send,         /* nghttp2_on_frame_send_callback */
-  on_frame_not_send,     /* nghttp2_on_frame_not_send_callback */
-  on_stream_close,       /* nghttp2_on_stream_close_callback */
-  on_unknown_frame_recv, /* nghttp2_on_unknown_frame_recv_callback */
-  on_begin_headers,      /* nghttp2_on_begin_headers_callback */
-  on_header              /* nghttp2_on_header_callback */
-#if NGHTTP2_VERSION_NUM >= 0x000400
-  , NULL                 /* nghttp2_select_padding_callback */
-#endif
-};
-
 static ssize_t data_source_read_callback(nghttp2_session *session,
                                          int32_t stream_id,
                                          uint8_t *buf, size_t length,
@@ -587,13 +552,54 @@ CURLcode Curl_http2_init(struct connectdata *conn)
 {
   if(!conn->proto.httpc.h2) {
     int rc;
+    nghttp2_session_callbacks *callbacks;
+
     conn->proto.httpc.inbuf = malloc(H2_BUFSIZE);
     if(conn->proto.httpc.inbuf == NULL)
       return CURLE_OUT_OF_MEMORY;
 
+    rc = nghttp2_session_callbacks_new(&callbacks);
+
+    if(rc) {
+      failf(conn->data, "Couldn't initialize nghttp2 callbacks!");
+      return CURLE_OUT_OF_MEMORY; /* most likely at least */
+    }
+
+    /* nghttp2_send_callback */
+    nghttp2_session_callbacks_set_send_callback(callbacks, send_callback);
+    /* nghttp2_on_frame_recv_callback */
+    nghttp2_session_callbacks_set_on_frame_recv_callback
+      (callbacks, on_frame_recv);
+    /* nghttp2_on_invalid_frame_recv_callback */
+    nghttp2_session_callbacks_set_on_invalid_frame_recv_callback
+      (callbacks, on_invalid_frame_recv);
+    /* nghttp2_on_data_chunk_recv_callback */
+    nghttp2_session_callbacks_set_on_data_chunk_recv_callback
+      (callbacks, on_data_chunk_recv);
+    /* nghttp2_before_frame_send_callback */
+    nghttp2_session_callbacks_set_before_frame_send_callback
+      (callbacks, before_frame_send);
+    /* nghttp2_on_frame_send_callback */
+    nghttp2_session_callbacks_set_on_frame_send_callback
+      (callbacks, on_frame_send);
+    /* nghttp2_on_frame_not_send_callback */
+    nghttp2_session_callbacks_set_on_frame_not_send_callback
+      (callbacks, on_frame_not_send);
+    /* nghttp2_on_stream_close_callback */
+    nghttp2_session_callbacks_set_on_stream_close_callback
+      (callbacks, on_stream_close);
+    /* nghttp2_on_begin_headers_callback */
+    nghttp2_session_callbacks_set_on_begin_headers_callback
+      (callbacks, on_begin_headers);
+    /* nghttp2_on_header_callback */
+    nghttp2_session_callbacks_set_on_header_callback(callbacks, on_header);
+
     /* The nghttp2 session is not yet setup, do it */
     rc = nghttp2_session_client_new(&conn->proto.httpc.h2,
-                                    &callbacks, conn);
+                                    callbacks, conn);
+
+    nghttp2_session_callbacks_del(callbacks);
+
     if(rc) {
       failf(conn->data, "Couldn't initialize nghttp2!");
       return CURLE_OUT_OF_MEMORY; /* most likely at least */

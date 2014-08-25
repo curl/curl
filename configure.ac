@@ -2760,7 +2760,7 @@ if test X"$want_h2" != Xno; then
     CPPFLAGS="$CPPFLAGS $CPP_H2"
     LIBS="$LIB_H2 $LIBS"
 
-    AC_CHECK_LIB(nghttp2, nghttp2_session_client_new,
+    AC_CHECK_LIB(nghttp2, nghttp2_session_callbacks_set_send_callback,
       [
        AC_CHECK_HEADERS(nghttp2/nghttp2.h,
           curl_h2_msg="enabled (nghttp2)"
