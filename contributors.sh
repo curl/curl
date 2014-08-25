@@ -39,12 +39,12 @@ fi
 # sort all unique names
 # awk them into RELEASE-NOTES format
 git log $start..HEAD | \
-egrep '(Author|Commit|by):' | \
+egrep -i '(Author|Commit|by):' | \
 cut -d: -f2- | \
 cut '-d<' -f1 | \
 sed -e 's/^ //' -e 's/ $//g' | \
 grep ' ' | \
-sort -u |
+sort -fu |
 awk '{
  num++;
  n = sprintf("%s%s%s,", n, length(n)?" ":"", $0);
