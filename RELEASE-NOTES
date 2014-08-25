@@ -4,7 +4,7 @@ Curl and libcurl 7.38.0
  Command line options:         162
  curl_easy_setopt() options:   208
  Public functions in libcurl:  58
- Contributors:                 1164
+ Contributors:                 1210
 
 This release includes the following changes:
 
@@ -72,6 +72,8 @@ This release includes the following bugfixes:
  o Cmake: big cleanup and numerous fixes
  o HTTP/2: supports draft-14 - moved :headers before the non-psuedo headers
  o HTTP/2: Reset promised stream, not its associated stream
+ o configure.ac: Add support for recent GSS-API implementations for HP-UX
+ o CONNECT: close proxy connections that fail [18]
 
 This release includes the following known bugs:
 
@@ -109,3 +111,4 @@ References to bug reports and discussions on issues:
  [15] = http://curl.haxx.se/mail/lib-2014-08/0155.html
  [16] = http://curl.haxx.se/bug/view.cgi?id=1414
  [17] = http://curl.haxx.se/mail/lib-2014-08/0148.html
+ [18] = http://curl.haxx.se/bug/view.cgi?id=1381
