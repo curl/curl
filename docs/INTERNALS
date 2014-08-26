@@ -47,6 +47,7 @@ Portability
  axTLS        1.2.7
  PolarSSL     1.3.0
  Heimdal      ?
+ nghttp2      0.6.0
 
  On systems where configure runs, we aim at working on them all - if they have
  a suitable C compiler. On systems that don't run configure, we strive to keep
