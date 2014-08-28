@@ -1109,6 +1109,9 @@ FAQ
   message, curl has a dedicated option for that: -f (CURLOPT_FAILONERROR in
   libcurl speak).
 
+  You can also use the -w option and the variable %{response_code} to extract
+  the exact response code that was return in the response.
+
 
 5. libcurl Issues
 
