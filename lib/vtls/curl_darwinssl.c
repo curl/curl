@@ -1527,43 +1527,42 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static int pem_to_der(const char *in, unsigned char **out, size_t *outlen)
+static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
 {
-  char *sep, *start, *end;
+  char *sep_start, *sep_end, *cert_start, *cert_end;
   size_t i, j, err;
   size_t len;
   unsigned char *b64;
 
-  /* Jump through the separators in the first line. */
-  sep = strstr(in, "-----");
-  if(sep == NULL)
-    return -1;
-  sep = strstr(sep + 1, "-----");
-  if(sep == NULL)
-    return -1;
-
-  start = sep + 5;
-
-  /* Find beginning of last line separator. */
-  end = strstr(start, "-----");
-  if(end == NULL)
+  /* Jump through the separators at the beginning of the certificate. */
+  sep_start = strstr(in, "-----");
+  if(sep_start == NULL)
+    return 0;
+  cert_start = strstr(sep_start + 1, "-----");
+  if(cert_start == NULL)
     return -1;
 
-  len = end - start;
-  *out = malloc(len);
-  if(!*out)
+  cert_start += 5;
+
+  /* Find separator after the end of the certificate. */
+  cert_end = strstr(cert_start, "-----");
+  if(cert_end == NULL)
     return -1;
 
+  sep_end = strstr(cert_end + 1, "-----");
+  if(sep_end == NULL)
+    return -1;
+  sep_end += 5;
+
+  len = cert_end - cert_start;
   b64 = malloc(len + 1);
-  if(!b64) {
-    free(*out);
+  if(!b64)
     return -1;
-  }
 
   /* Create base64 string without linefeeds. */
   for(i = 0, j = 0; i < len; i++) {
-    if(start[i] != '\r' && start[i] != '\n')
-      b64[j++] = start[i];
+    if(cert_start[i] != '\r' && cert_start[i] != '\n')
+      b64[j++] = cert_start[i];
   }
   b64[j] = '\0';
 
@@ -1574,15 +1573,14 @@ static int pem_to_der(const char *in, unsigned char **out, size_t *outlen)
     return -1;
   }
 
-  return 0;
+  return sep_end - in;
 }
 
 static int read_cert(const char *file, unsigned char **out, size_t *outlen)
 {
   int fd;
   ssize_t n, len = 0, cap = 512;
-  size_t derlen;
-  unsigned char buf[cap], *data, *der;
+  unsigned char buf[cap], *data;
 
   fd = open(file, 0);
   if(fd < 0)
@@ -1620,16 +1618,6 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
   }
   data[len] = '\0';
 
-  /*
-   * Check if the certificate is in PEM format, and convert it to DER. If this
-   * fails, we assume the certificate is in DER format.
-   */
-  if(pem_to_der((const char *)data, &der, &derlen) == 0) {
-    free(data);
-    data = der;
-    len = derlen;
-  }
-
   *out = data;
   *outlen = len;
 
@@ -1665,47 +1653,120 @@ static int sslerr_to_curlerr(struct SessionHandle *data, int err)
   }
 }
 
+static int append_cert_to_array(struct SessionHandle *data,
+                                unsigned char *buf, size_t buflen,
+                                CFMutableArrayRef array)
+{
+    CFDataRef certdata = CFDataCreate(kCFAllocatorDefault, buf, buflen);
+    if(!certdata) {
+      failf(data, "SSL: failed to allocate array for CA certificate");
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    SecCertificateRef cacert =
+      SecCertificateCreateWithData(kCFAllocatorDefault, certdata);
+    CFRelease(certdata);
+    if(!cacert) {
+      failf(data, "SSL: failed to create SecCertificate from CA certificate");
+      return CURLE_SSL_CACERT;
+    }
+
+    CFArrayAppendValue(array, cacert);
+    CFRelease(cacert);
+
+    return CURLE_OK;
+}
+
 static int verify_cert(const char *cafile, struct SessionHandle *data,
                        SSLContextRef ctx)
 {
-  unsigned char *certbuf;
-  size_t buflen;
+  int n = 0, rc;
+  long res;
+  unsigned char *certbuf, *der;
+  size_t buflen, derlen, offset = 0;
+
   if(read_cert(cafile, &certbuf, &buflen) < 0) {
     failf(data, "SSL: failed to read or invalid CA certificate");
     return CURLE_SSL_CACERT;
   }
 
-  CFDataRef certdata = CFDataCreate(kCFAllocatorDefault, certbuf, buflen);
-  free(certbuf);
-  if(!certdata) {
-    failf(data, "SSL: failed to allocate array for CA certificate");
+  /*
+   * Certbuf now contains the contents of the certificate file, which can be
+   * - a single DER certificate,
+   * - a single PEM certificate or
+   * - a bunch of PEM certificates (certificate bundle).
+   *
+   * Go through certbuf, and convert any PEM certificate in it into DER
+   * format.
+   */
+  CFMutableArrayRef array = CFArrayCreateMutable(kCFAllocatorDefault, 0,
+                                                 &kCFTypeArrayCallBacks);
+  if(array == NULL) {
+    free(certbuf);
+    failf(data, "SSL: out of memory creating CA certificate array");
     return CURLE_OUT_OF_MEMORY;
   }
 
-  SecCertificateRef cacert = SecCertificateCreateWithData(kCFAllocatorDefault,
-                                                          certdata);
-  CFRelease(certdata);
-  if(!cacert) {
-    failf(data, "SSL: failed to create SecCertificate from CA certificate");
-    return CURLE_SSL_CACERT;
+  while(offset < buflen) {
+    n++;
+
+    /*
+     * Check if the certificate is in PEM format, and convert it to DER. If
+     * this fails, we assume the certificate is in DER format.
+     */
+    res = pem_to_der((const char *)certbuf + offset, &der, &derlen);
+    if(res < 0) {
+      free(certbuf);
+      CFRelease(array);
+      failf(data, "SSL: invalid CA certificate #%d (offset %d) in bundle",
+            n, offset);
+      return CURLE_SSL_CACERT;
+    }
+    offset += res;
+
+    if(res == 0 && offset == 0) {
+      /* This is not a PEM file, probably a certificate in DER format. */
+      rc = append_cert_to_array(data, certbuf, buflen, array);
+      free(certbuf);
+      if(rc != CURLE_OK) {
+        CFRelease(array);
+        return rc;
+      }
+      break;
+    }
+    else if(res == 0) {
+      /* No more certificates in the bundle. */
+      free(certbuf);
+      break;
+    }
+
+    rc = append_cert_to_array(data, der, derlen, array);
+    free(der);
+    if(rc != CURLE_OK) {
+      free(certbuf);
+      CFRelease(array);
+      return rc;
+    }
   }
 
   SecTrustRef trust;
   OSStatus ret = SSLCopyPeerTrust(ctx, &trust);
   if(trust == NULL) {
     failf(data, "SSL: error getting certificate chain");
+    CFRelease(array);
     return CURLE_OUT_OF_MEMORY;
   }
   else if(ret != noErr) {
+    CFRelease(array);
     return sslerr_to_curlerr(data, ret);
   }
 
-  CFMutableArrayRef array = CFArrayCreateMutable(kCFAllocatorDefault, 0,
-                                                 &kCFTypeArrayCallBacks);
-  CFArrayAppendValue(array, cacert);
-  CFRelease(cacert);
-
   ret = SecTrustSetAnchorCertificates(trust, array);
+  if(ret != noErr) {
+    CFRelease(trust);
+    return sslerr_to_curlerr(data, ret);
+  }
+  ret = SecTrustSetAnchorCertificatesOnly(trust, true);
   if(ret != noErr) {
     CFRelease(trust);
     return sslerr_to_curlerr(data, ret);
@@ -1722,8 +1783,6 @@ static int verify_cert(const char *cafile, struct SessionHandle *data,
   switch (trust_eval) {
     case kSecTrustResultUnspecified:
     case kSecTrustResultProceed:
-      infof(data, "SSL: certificate verification succeeded (result: %d)",
-            trust_eval);
       return CURLE_OK;
 
     case kSecTrustResultRecoverableTrustFailure:
