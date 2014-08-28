@@ -80,6 +80,7 @@ FAQ
   4.17 Non-functional connect timeouts on Windows
   4.18 file:// URLs containing drive letters (Windows, NetWare)
   4.19 Why doesn't cURL return an error when the network cable is unplugged?
+  4.20 curl doesn't return error for HTTP non-200 responses!
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -1086,7 +1087,28 @@ FAQ
   immediately if its lone network connection goes down.  That can be achieved
   by having the application monitor the network connection on its own using an
   OS-specific mechanism, then signalling libcurl to abort (see also item 5.13).
-  
+
+  4.20 curl doesn't return error for HTTP non-200 responses!
+
+  Correct. Unless you use -f (--fail).
+
+  When doing HTTP transfers, curl will perform exactly what you're asking it
+  to do and if successful it will not return an error. You can use curl to
+  test your web server's "file not found" page (that gets 404 back), you can
+  use it to check your authentication protected web pages (that get a 401
+  back) and so on.
+
+  The specific HTTP response code does not constitute a problem or error for
+  curl. It simply sends and delivers HTTP as you asked and if that worked,
+  everything is fine and dandy. The response code is generally providing more
+  higher level error information that curl doesn't care about. The error was
+  not in the HTTP transfer.
+
+  If you want your command line to treat error codes in the 400 and up range
+  as errors and thus return a non-zero value and possibly show an error
+  message, curl has a dedicated option for that: -f (CURLOPT_FAILONERROR in
+  libcurl speak).
+
 
 5. libcurl Issues
 
