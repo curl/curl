@@ -1715,8 +1715,6 @@ static int verify_cert(const char *cafile, struct SessionHandle *data,
 
     n++;
     offset += res;
-    infof(data, "SSL: parsing CA certificate file n=%d offset=%d/%d\n",
-          n, offset, (int)buflen);
 
     CFDataRef certdata = CFDataCreate(kCFAllocatorDefault, der, derlen);
     free(der);
@@ -1778,8 +1776,6 @@ static int verify_cert(const char *cafile, struct SessionHandle *data,
   switch (trust_eval) {
     case kSecTrustResultUnspecified:
     case kSecTrustResultProceed:
-      infof(data, "SSL: certificate verification succeeded (result: %d)",
-            trust_eval);
       return CURLE_OK;
 
     case kSecTrustResultRecoverableTrustFailure:
