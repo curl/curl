@@ -86,6 +86,10 @@ you must set its length  with \fBCURLFORM_CONTENTSLENGTH\fP.
 .IP CURLFORM_CONTENTSLENGTH
 followed by a long giving the length of the contents. Note that for
 \fICURLFORM_STREAM\fP contents, this option is mandatory.
+
+If you pass a 0 (zero) for this option, libcurl will instead do a strlen() on
+the contents to figure out the size. If you really want to send a zero byte
+content then you must make sure strlen() on the data pointer returns zero.
 .IP CURLFORM_FILECONTENT
 followed by a filename, causes that file to be read and its contents used
 as data in this part. This part does \fInot\fP automatically become a file
