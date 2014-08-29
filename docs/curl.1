@@ -699,6 +699,10 @@ See also the \fI-A, --user-agent\fP and \fI-e, --referer\fP options.
 Starting in 7.37.0, you need \fI--proxy-header\fP to send custom headers
 intended for a proxy.
 
+Example:
+
+\&# curl -H "X-First-Name: Joe" http://192.168.0.1/
+
 This option can be used multiple times to add/replace/remove multiple headers.
 .IP "--hostpubmd5 <md5>"
 (SCP/SFTP) Pass a string containing 32 hexadecimal digits. The string should
