@@ -1,6 +1,6 @@
 An overview of the six time values available from curl_easy_getinfo()
 
-curk_easy_perform()
+curl_easy_perform()
     |
     |--NT
     |--|--CT
