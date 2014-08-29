@@ -71,13 +71,15 @@ lib599
 HTTP GET with progress callback and redirects changing content sizes
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/599
+http://%HOSTIP:%HTTPPORT/599 log/ip599
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-
+<file name="log/ip599">
+CL: -1
+</file>
 </verify>
 </testcase>

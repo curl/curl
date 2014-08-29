@@ -1662,7 +1662,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   (void)instate; /* no use for this yet */
 
   if(imapcode != '*') {
-    Curl_pgrsSetDownloadSize(data, 0);
+    Curl_pgrsSetDownloadSize(data, -1);
     state(conn, IMAP_STOP);
     return CURLE_REMOTE_FILE_NOT_FOUND; /* TODO: Fix error code */
   }
@@ -2336,8 +2336,8 @@ static CURLcode imap_regular_transfer(struct connectdata *conn,
   /* Set the progress data */
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, 0);
-  Curl_pgrsSetDownloadSize(data, 0);
+  Curl_pgrsSetUploadSize(data, -1);
+  Curl_pgrsSetDownloadSize(data, -1);
 
   /* Carry out the perform */
   result = imap_perform(conn, &connected, dophase_done);

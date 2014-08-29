@@ -2878,8 +2878,8 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
 
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, 0);
-  Curl_pgrsSetDownloadSize(data, 0);
+  Curl_pgrsSetUploadSize(data, -1);
+  Curl_pgrsSetDownloadSize(data, -1);
 
   if(conn->handler->protocol & CURLPROTO_SCP)
     res = scp_perform(conn, &connected,  done);

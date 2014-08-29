@@ -77,12 +77,11 @@ http://%HOSTIP:%HTTPPORT/579 log/ip579
 <verify>
 <file name="log/ip579">
 Progress callback called with UL 0 out of 0
-Progress callback called with UL 0 out of -1
-Progress callback called with UL 8 out of -1
-Progress callback called with UL 16 out of -1
-Progress callback called with UL 26 out of -1
-Progress callback called with UL 61 out of -1
-Progress callback called with UL 66 out of -1
+Progress callback called with UL 8 out of 0
+Progress callback called with UL 16 out of 0
+Progress callback called with UL 26 out of 0
+Progress callback called with UL 61 out of 0
+Progress callback called with UL 66 out of 0
 </file>
 </verify>
 </testcase>

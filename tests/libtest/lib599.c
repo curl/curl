@@ -43,6 +43,7 @@ int test(char *URL)
 {
   CURL *curl;
   CURLcode res=CURLE_OK;
+  double content_length = 0.0;
 
   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -73,6 +74,17 @@ int test(char *URL)
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);
+
+  if (!res) {
+    FILE *moo;
+    res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
+                            &content_length);
+    moo = fopen(libtest_arg2, "wb");
+    if (moo) {
+      fprintf(moo, "CL: %.0f\n", content_length);
+      fclose(moo);
+    }
+  }
 
 test_cleanup:
 

@@ -159,8 +159,8 @@ void Curl_pgrsResetTimesSizes(struct SessionHandle *data)
   data->progress.t_pretransfer = 0.0;
   data->progress.t_starttransfer = 0.0;
 
-  Curl_pgrsSetDownloadSize(data, 0);
-  Curl_pgrsSetUploadSize(data, 0);
+  Curl_pgrsSetDownloadSize(data, -1);
+  Curl_pgrsSetUploadSize(data, -1);
 }
 
 void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
@@ -234,20 +234,26 @@ void Curl_pgrsSetUploadCounter(struct SessionHandle *data, curl_off_t size)
 
 void Curl_pgrsSetDownloadSize(struct SessionHandle *data, curl_off_t size)
 {
-  data->progress.size_dl = size;
-  if(size >= 0)
+  if(size >= 0) {
+    data->progress.size_dl = size;
     data->progress.flags |= PGRS_DL_SIZE_KNOWN;
-  else
+  }
+  else {
+    data->progress.size_dl = 0;
     data->progress.flags &= ~PGRS_DL_SIZE_KNOWN;
+  }
 }
 
 void Curl_pgrsSetUploadSize(struct SessionHandle *data, curl_off_t size)
 {
-  data->progress.size_ul = size;
-  if(size >= 0)
+  if(size >= 0) {
+    data->progress.size_ul = size;
     data->progress.flags |= PGRS_UL_SIZE_KNOWN;
-  else
+  }
+  else {
+    data->progress.size_ul = 0;
     data->progress.flags &= ~PGRS_UL_SIZE_KNOWN;
+  }
 }
 
 /*

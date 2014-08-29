@@ -2351,7 +2351,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     return result;
 
   http->postdata = NULL;  /* nothing to post at this point */
-  Curl_pgrsSetUploadSize(data, 0); /* upload size is 0 atm */
+  Curl_pgrsSetUploadSize(data, -1); /* upload size is unknown atm */
 
   /* If 'authdone' is FALSE, we must not set the write socket index to the
      Curl_transfer() call below, as we're not ready to actually upload any

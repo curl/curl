@@ -1935,8 +1935,8 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
   /* Set the progress data */
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, 0);
-  Curl_pgrsSetDownloadSize(data, 0);
+  Curl_pgrsSetUploadSize(data, -1);
+  Curl_pgrsSetDownloadSize(data, -1);
 
   /* Carry out the perform */
   result = pop3_perform(conn, &connected, dophase_done);
