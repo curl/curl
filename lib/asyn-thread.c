@@ -166,6 +166,7 @@ struct thread_sync_data {
 #ifdef HAVE_GETADDRINFO
   struct addrinfo hints;
 #endif
+  struct thread_data *td; /* for thread-self cleanup */
 };
 
 struct thread_data {
@@ -202,13 +203,16 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
 
 /* Initialize resolver thread synchronization data */
 static
-int init_thread_sync_data(struct thread_sync_data * tsd,
+int init_thread_sync_data(struct thread_data * td,
                            const char * hostname,
                            int port,
                            const struct addrinfo *hints)
 {
+  struct thread_sync_data *tsd = &td->tsd;
+
   memset(tsd, 0, sizeof(*tsd));
 
+  tsd->td = td;
   tsd->port = port;
 #ifdef HAVE_GETADDRINFO
   DEBUGASSERT(hints);
@@ -266,6 +270,7 @@ static int getaddrinfo_complete(struct connectdata *conn)
 static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
 {
   struct thread_sync_data *tsd = (struct thread_sync_data*)arg;
+  struct thread_data *td = tsd->td;
   char service[12];
   int rc;
 
@@ -280,8 +285,16 @@ static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
   }
 
   Curl_mutex_acquire(tsd->mtx);
-  tsd->done = 1;
-  Curl_mutex_release(tsd->mtx);
+  if (tsd->done) {
+    /* too late, gotta clean up the mess */
+    Curl_mutex_release(tsd->mtx);
+    destroy_thread_sync_data(tsd);
+    free(td);
+  }
+  else {
+    tsd->done = 1;
+    Curl_mutex_release(tsd->mtx);
+  }
 
   return 0;
 }
@@ -294,6 +307,7 @@ static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
 static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
 {
   struct thread_sync_data *tsd = (struct thread_sync_data *)arg;
+  struct thread_data *td = tsd->td;
 
   tsd->res = Curl_ipv4_resolve_r(tsd->hostname, tsd->port);
 
@@ -304,8 +318,16 @@ static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
   }
 
   Curl_mutex_acquire(tsd->mtx);
-  tsd->done = 1;
-  Curl_mutex_release(tsd->mtx);
+  if (tsd->done) {
+    /* too late, gotta clean up the mess */
+    Curl_mutex_release(tsd->mtx);
+    destroy_thread_sync_data(tsd);
+    free(td);
+  }
+  else {
+    tsd->done = 1;
+    Curl_mutex_release(tsd->mtx);
+  }
 
   return 0;
 }
@@ -317,21 +339,37 @@ static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
  */
 static void destroy_async_data (struct Curl_async *async)
 {
+  if(async->os_specific) {
+    struct thread_data *td = (struct thread_data*) async->os_specific;
+    int done;
+
+    /*
+     * if the thread is still blocking in the resolve syscall, detach it and
+     * let the thread do the cleanup...
+     */
+    Curl_mutex_acquire(td->tsd.mtx);
+    done = td->tsd.done;
+    td->tsd.done = 1;
+    Curl_mutex_release(td->tsd.mtx);
+
+    if(!done) {
+      Curl_thread_destroy(td->thread_hnd);
+    }
+    else {
+      if(td->thread_hnd != curl_thread_t_null)
+        Curl_thread_join(&td->thread_hnd);
+
+      destroy_thread_sync_data(&td->tsd);
+
+      free(async->os_specific);
+    }
+  }
+  async->os_specific = NULL;
+
   if(async->hostname)
     free(async->hostname);
 
-  if(async->os_specific) {
-    struct thread_data *td = (struct thread_data*) async->os_specific;
-
-    if(td->thread_hnd != curl_thread_t_null)
-      Curl_thread_join(&td->thread_hnd);
-
-    destroy_thread_sync_data(&td->tsd);
-
-    free(async->os_specific);
-  }
   async->hostname = NULL;
-  async->os_specific = NULL;
 }
 
 /*
@@ -357,7 +395,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   conn->async.dns = NULL;
   td->thread_hnd = curl_thread_t_null;
 
-  if(!init_thread_sync_data(&td->tsd, hostname, port, hints))
+  if(!init_thread_sync_data(td, hostname, port, hints))
     goto err_exit;
 
   Curl_safefree(conn->async.hostname);
