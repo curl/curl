@@ -19,6 +19,7 @@ This release includes the following changes:
  o version: detect and show LibreSSL
  o version: detect and show BoringSSL
  o Kerberos (SASL GSSAPI) authentication working for IMAP, SMTP and POP3
+ o http2: requires nghttp2 0.0.6 or later
 
 This release includes the following bugfixes:
 
@@ -74,6 +75,11 @@ This release includes the following bugfixes:
  o HTTP/2: Reset promised stream, not its associated stream
  o configure.ac: Add support for recent GSS-API implementations for HP-UX
  o CONNECT: close proxy connections that fail [18]
+ o CURLOPT_NOBODY.3: clarify this option is for downloads [19]
+ o darwinssl: fix CA certificate checking using PEM format [20]
+ o resolve: cache lookup for async resolvers [21]
+ o low-speed-limit: avoid timeout flood [22]
+ o polarssl: implement CURLOPT_SSLVERSION [23]
 
 This release includes the following known bugs:
 
@@ -82,13 +88,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Anthon Pang, Dan Fandrich, Daniel Stenberg, Dave Reisner,
-  David Shaw, David Woodhouse, Dimitrios Siganos, Ed Morley, Fabian Keil,
-  Frank Meier, Haris Okanovic, Jakub Zakrzewski, Jan Ehrhardt, Jonatan Vela,
-  Jose Alf, Kamil Dudka, Leonardo Rosati, Marcel Raad, Michael Osipov,
-  Michael Wallner, Paras S, Patrick Monnerat, Paul Saab, Peter Wang,
-  Rafaël Carré, Sergey Nikulov, Spork Schivago, Steve Holme,
-  Tatsuhiro Tsujikawa, Toby Peterson,
+  Alessandro Ghedini, Andre Heinecke, Anthon Pang, Askar Safin, Dan Fandrich,
+  Daniel Stenberg, Dave Reisner, David Shaw, David Woodhouse, Dimitrios Siganos,
+  Ed Morley, Fabian Keil, Florian Weimer, Frank Meier, Haris Okanovic,
+  Jakub Zakrzewski, Jan Ehrhardt, John Coffey, Jonatan Vela, Jose Alf,
+  Kamil Dudka, Leonardo Rosati, Marcel Raad, Michael Osipov, Michael Wallner,
+  Paras S, Patrick Monnerat, Paul Saab, Peter Wang, Rafaël Carré,
+  Sergey Nikulov, Spork Schivago, Steve Holme, Tatsuhiro Tsujikawa,
+  Toby Peterson, Vilmos Nebehaj,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -112,3 +119,8 @@ References to bug reports and discussions on issues:
  [16] = http://curl.haxx.se/bug/view.cgi?id=1414
  [17] = http://curl.haxx.se/mail/lib-2014-08/0148.html
  [18] = http://curl.haxx.se/bug/view.cgi?id=1381
+ [19] = http://curl.haxx.se/mail/lib-2014-08/0236.html
+ [20] = https://github.com/bagder/curl/pull/115
+ [21] = https://github.com/bagder/curl/pull/112
+ [22] = http://curl.haxx.se/mail/lib-2014-06/0235.html
+ [23] = http://curl.haxx.se/bug/view.cgi?id=1419
