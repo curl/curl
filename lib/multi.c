@@ -1881,22 +1881,12 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
                            multi->closure_handle->dns.hostcache);
 
       Curl_close(multi->closure_handle);
-      multi->closure_handle = NULL;
     }
 
     Curl_hash_destroy(multi->sockhash);
-    multi->sockhash = NULL;
-
     Curl_conncache_destroy(multi->conn_cache);
-    multi->conn_cache = NULL;
-
-    /* remove the pending list of messages */
     Curl_llist_destroy(multi->msglist, NULL);
-    multi->msglist = NULL;
-
-    /* remove the pending handles queue */
     Curl_llist_destroy(multi->pending, NULL);
-    multi->msglist = NULL;
 
     /* remove all easy handles */
     data = multi->easyp;
@@ -1917,7 +1907,6 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     }
 
     Curl_hash_destroy(multi->hostcache);
-    multi->hostcache = NULL;
 
     /* Free the blacklists by setting them to NULL */
     Curl_pipeline_set_site_blacklist(NULL, &multi->pipelining_site_bl);
