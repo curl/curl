@@ -309,6 +309,10 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   if(!multi->msglist)
     goto error;
 
+  multi->pending = Curl_llist_alloc(multi_freeamsg);
+  if(!multi->pending)
+    goto error;
+
   /* allocate a new easy handle to use when closing cached connections */
   multi->closure_handle = curl_easy_init();
   if(!multi->closure_handle)
@@ -334,6 +338,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   Curl_close(multi->closure_handle);
   multi->closure_handle = NULL;
   Curl_llist_destroy(multi->msglist, NULL);
+  Curl_llist_destroy(multi->pending, NULL);
 
   free(multi);
   return NULL;
@@ -1046,7 +1051,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* There was no connection available. We will go to the pending
            state and wait for an available connection. */
         multistate(data, CURLM_STATE_CONNECT_PEND);
-        data->result = CURLE_OK;
+
+        /* add this handle to the list of connect-pending handles */
+        if(!Curl_llist_insert_next(multi->pending, multi->pending->tail, data))
+          data->result = CURLM_OUT_OF_MEMORY;
+        else
+          data->result = CURLE_OK;
         break;
       }
 
@@ -1882,6 +1892,10 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
     /* remove the pending list of messages */
     Curl_llist_destroy(multi->msglist, NULL);
+    multi->msglist = NULL;
+
+    /* remove the pending handles queue */
+    Curl_llist_destroy(multi->pending, NULL);
     multi->msglist = NULL;
 
     /* remove all easy handles */
@@ -2776,16 +2790,17 @@ struct curl_llist *Curl_multi_pipelining_server_bl(struct Curl_multi *multi)
 
 void Curl_multi_process_pending_handles(struct Curl_multi *multi)
 {
-  struct SessionHandle *data;
+  struct curl_llist_element *e;
 
-  data=multi->easyp;
-  while(data) {
+  for(e = multi->pending->head; e; e = e->next) {
+    struct SessionHandle *data = e->ptr;
     if(data->mstate == CURLM_STATE_CONNECT_PEND) {
       multistate(data, CURLM_STATE_CONNECT);
+      /* Remove this node from the list */
+      Curl_llist_remove(multi->pending, e, NULL);
       /* Make sure that the handle will be processed soonish. */
-      Curl_expire(data, 1);
+      Curl_expire_latest(data, 1);
     }
-    data = data->next; /* operate on next handle */
   }
 }
 
