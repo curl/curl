@@ -14,6 +14,7 @@ MAIL ETIQUETTE
   1.5 Moderation of new posters
   1.6 Handling trolls and spam
   1.7 How to unsubscribe
+  1.8 I posted, now what?
 
  2. Sending mail
   2.1 Reply or New Mail
@@ -124,6 +125,42 @@ MAIL ETIQUETTE
 
   You NEVER EVER email the mailing list requesting someone else to get you off
   the list.
+
+  1.8 I posted, now what?
+
+  If you aren't subscribed with the exact same email address that you used to
+  send the email, your post will just be silently discarded.
+
+  If you posted for the first time to the mailing list, you first need to wait
+  for an administrator to allow your email to go through. This normally
+  happens very quickly but in case we're asleep, you may have to wait a few
+  hours.
+
+  Once your email goes through it is sent out to several hundred or even
+  thousand recipients.  Your email may cover an area that not that many people
+  know about or are interested in. Or possibly the person who knows about it
+  is on vacation or under a very heavy work load right now. You have to wait
+  for a response and you must not expect to get a response at all, but
+  hopefully you get an answer within a couple of days.
+
+  You do yourself and all of us a service when you include as many details as
+  possible already in your first email. Mention your operating system and
+  environment. Tell us which curl version you're using and tell us what you
+  did, what happened and what you expected would happen. Preferably, show us
+  what you did in details enough to allow others to help point out the problem
+  or repeat the same steps in their places.
+
+  Failing to include details will only delay responses and make people respond
+  and ask for the details and you have to send a follow-up email that includes
+  them.
+
+  Expect the responses to primarily help YOU debug the issue, or ask you
+  questions that can lead you or others towards a solution or explanation to
+  whatever you experience.
+
+  If you are a repeat offender to the guidelines outlined in this document,
+  chances are that people will ignore you at will and your chances to get
+  responses will greatly diminish.
 
 
 2. Sending mail
