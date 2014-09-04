@@ -1672,14 +1672,25 @@ static int append_cert_to_array(struct SessionHandle *data,
     }
 
     /* Check if cacert is valid. */
-    SecKeyRef key;
-    OSStatus ret = SecCertificateCopyPublicKey(cacert, &key);
-    if(ret != noErr) {
+    CFStringRef subject = CopyCertSubject(cacert);
+    if(subject) {
+      char subject_cbuf[128];
+      memset(subject_cbuf, 0, 128);
+      if(!CFStringGetCString(subject,
+                            subject_cbuf,
+                            128,
+                            kCFStringEncodingUTF8)) {
+        CFRelease(cacert);
+        failf(data, "SSL: invalid CA certificate subject");
+        return CURLE_SSL_CACERT;
+      }
+      CFRelease(subject);
+    }
+    else {
       CFRelease(cacert);
       failf(data, "SSL: invalid CA certificate");
       return CURLE_SSL_CACERT;
     }
-    CFRelease(key);
 
     CFArrayAppendValue(array, cacert);
     CFRelease(cacert);
