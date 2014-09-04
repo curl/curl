@@ -18,7 +18,7 @@ This release includes the following changes:
  o findprotocol: show unsupported protocol within quotes
  o version: detect and show LibreSSL
  o version: detect and show BoringSSL
- o Kerberos (SASL GSSAPI) authentication working for IMAP, SMTP and POP3
+ o imap/pop3/smtp: Kerberos (SASL GSSAPI) authentication via Windows SSPI
  o http2: requires nghttp2 0.0.6 or later
 
 This release includes the following bugfixes:
