@@ -3216,6 +3216,12 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
                     &k->httpcode);
         if(nc==3) {
           conn->httpversion += 10 * httpversion_major;
+
+          if(k->upgr101 == UPGR101_RECEIVED) {
+            /* supposedly upgraded to http2 now */
+            if(conn->httpversion != 20)
+              infof(data, "Lying server, not serving HTTP/2\n");
+          }
         }
         else {
           /* this is the real world, not a Nirvana
