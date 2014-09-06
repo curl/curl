@@ -5608,12 +5608,12 @@ static CURLcode create_conn(struct SessionHandle *data,
     if((data->state.authhost.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
        data->state.authhost.done) {
       infof(data, "NTLM picked AND auth done set, clear picked!\n");
-      data->state.authhost.picked = 0;
+      data->state.authhost.picked = CURLAUTH_NONE;
     }
     if((data->state.authproxy.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
        data->state.authproxy.done) {
       infof(data, "NTLM-proxy picked AND auth done set, clear picked!\n");
-      data->state.authproxy.picked = 0;
+      data->state.authproxy.picked = CURLAUTH_NONE;
     }
 
   }
