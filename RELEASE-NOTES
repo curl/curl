@@ -80,6 +80,8 @@ This release includes the following bugfixes:
  o resolve: cache lookup for async resolvers [21]
  o low-speed-limit: avoid timeout flood [22]
  o polarssl: implement CURLOPT_SSLVERSION [23]
+ o multi: convert CURLM_STATE_CONNECT_PEND handling to a list [24]
+ o curl_multi_cleanup: remove superfluous NULL assigns
 
 This release includes the following known bugs:
 
@@ -89,13 +91,13 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Andre Heinecke, Anthon Pang, Askar Safin, Dan Fandrich,
-  Daniel Stenberg, Dave Reisner, David Shaw, David Woodhouse, Dimitrios Siganos,
-  Ed Morley, Fabian Keil, Florian Weimer, Frank Meier, Haris Okanovic,
-  Jakub Zakrzewski, Jan Ehrhardt, John Coffey, Jonatan Vela, Jose Alf,
-  Kamil Dudka, Leonardo Rosati, Marcel Raad, Michael Osipov, Michael Wallner,
-  Paras S, Patrick Monnerat, Paul Saab, Peter Wang, Rafaël Carré,
-  Sergey Nikulov, Spork Schivago, Steve Holme, Tatsuhiro Tsujikawa,
-  Toby Peterson, Vilmos Nebehaj,
+  Daniel Stenberg, Dave Reisner, David Meyer, David Shaw, David Woodhouse,
+  Dimitrios Siganos, Ed Morley, Fabian Keil, Florian Weimer, Frank Meier,
+  Haris Okanovic, Jakub Zakrzewski, Jan Ehrhardt, John Coffey, Jonatan Vela,
+  Jose Alf, Kamil Dudka, Leonardo Rosati, Marcel Raad, Michael Osipov,
+  Michael Wallner, Paras S, Patrick Monnerat, Paul Saab, Peter Wang,
+  Rafaël Carré, Sergey Nikulov, Spork Schivago, Steve Holme,
+  Tatsuhiro Tsujikawa, Toby Peterson, Vilmos Nebehaj,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -124,3 +126,4 @@ References to bug reports and discussions on issues:
  [21] = https://github.com/bagder/curl/pull/112
  [22] = http://curl.haxx.se/mail/lib-2014-06/0235.html
  [23] = http://curl.haxx.se/bug/view.cgi?id=1419
+ [24] = http://curl.haxx.se/mail/lib-2014-07/0206.html
