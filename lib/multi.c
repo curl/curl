@@ -1054,7 +1054,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         /* add this handle to the list of connect-pending handles */
         if(!Curl_llist_insert_next(multi->pending, multi->pending->tail, data))
-          data->result = CURLM_OUT_OF_MEMORY;
+          data->result = CURLE_OUT_OF_MEMORY;
         else
           data->result = CURLE_OK;
         break;
