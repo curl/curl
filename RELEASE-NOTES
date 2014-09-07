@@ -19,7 +19,7 @@ This release includes the following changes:
  o version: detect and show LibreSSL
  o version: detect and show BoringSSL
  o imap/pop3/smtp: Kerberos (SASL GSSAPI) authentication via Windows SSPI
- o http2: requires nghttp2 0.0.6 or later
+ o http2: requires nghttp2 0.6.0 or later
 
 This release includes the following bugfixes:
 
