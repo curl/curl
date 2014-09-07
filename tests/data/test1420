@@ -62,7 +62,6 @@ int main(int argc, char *argv[])
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_URL, "imap://%HOSTIP:%IMAPPORT/1420/;UID=1");
   curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
-  curl_easy_setopt(hnd, CURLOPT_DIRLISTONLY, 1L);
   curl_easy_setopt(hnd, CURLOPT_USERPWD, "user:secret");
   curl_easy_setopt(hnd, CURLOPT_USERAGENT, "stripped");
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
