@@ -201,6 +201,22 @@ polarssl_connect_step1(struct connectdata *conn,
     }
   }
 
+  if(data->set.str[STRING_SSL_CAPATH]) {
+    ret = x509_crt_parse_path(&connssl->cacert,
+                              data->set.str[STRING_SSL_CAPATH]);
+
+    if(ret<0) {
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+      failf(data, "Error reading ca cert path %s - PolarSSL: (-0x%04X) %s",
+            data->set.str[STRING_SSL_CAPATH], -ret, errorbuf);
+
+      if(data->set.ssl.verifypeer)
+        return CURLE_SSL_CACERT_BADFILE;
+    }
+  }
+
   /* Load the client certificate */
   memset(&connssl->clicert, 0, sizeof(x509_crt));
 
