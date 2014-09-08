@@ -148,7 +148,7 @@ polarssl_connect_step1(struct connectdata *conn,
   void *old_session = NULL;
   size_t old_session_size = 0;
   char errorbuf[128];
-  memset(errorbuf, 0, sizeof(errorbuf));
+  errorbuf[0]=0;
 
   /* PolarSSL only supports SSLv3 and TLSv1 */
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
@@ -380,7 +380,7 @@ polarssl_connect_step2(struct connectdata *conn,
 #endif
 
   char errorbuf[128];
-  memset(errorbuf, 0, sizeof(errorbuf));
+  errorbuf[0] = 0;
 
   conn->recv[sockindex] = polarssl_recv;
   conn->send[sockindex] = polarssl_send;
