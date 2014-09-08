@@ -82,6 +82,8 @@ This release includes the following bugfixes:
  o polarssl: implement CURLOPT_SSLVERSION [23]
  o multi: convert CURLM_STATE_CONNECT_PEND handling to a list [24]
  o curl_multi_cleanup: remove superfluous NULL assigns
+ o polarssl: support CURLOPT_CAPATH / --capath
+ o progress: size_dl/size_ul are always >= 0, and clear "KNOWN" properly
 
 This release includes the following known bugs:
 
@@ -90,14 +92,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Andre Heinecke, Anthon Pang, Askar Safin, Dan Fandrich,
-  Daniel Stenberg, Dave Reisner, David Meyer, David Shaw, David Woodhouse,
-  Dimitrios Siganos, Ed Morley, Fabian Keil, Florian Weimer, Frank Meier,
-  Haris Okanovic, Jakub Zakrzewski, Jan Ehrhardt, John Coffey, Jonatan Vela,
-  Jose Alf, Kamil Dudka, Leonardo Rosati, Marcel Raad, Michael Osipov,
-  Michael Wallner, Paras S, Patrick Monnerat, Paul Saab, Peter Wang,
-  Rafaël Carré, Sergey Nikulov, Spork Schivago, Steve Holme,
-  Tatsuhiro Tsujikawa, Toby Peterson, Vilmos Nebehaj,
+  Alessandro Ghedini, Andre Heinecke, Anthon Pang, Askar Safin, Brandon Casey,
+  Catalin Patulea, Dan Fandrich, Daniel Stenberg, Dave Reisner, David Meyer,
+  David Shaw, David Woodhouse, Dimitrios Siganos, Ed Morley, Fabian Keil,
+  Florian Weimer, Frank Meier, Haris Okanovic, Jakub Zakrzewski, Jan Ehrhardt,
+  John Coffey, Jonatan Vela, Jose Alf, Kamil Dudka, Leonardo Rosati,
+  Marcel Raad, Michael Osipov, Michael Wallner, Paras S, Patrick Monnerat,
+  Paul Saab, Peter Wang, Rafaël Carré, Sergey Nikulov, Spork Schivago,
+  Steve Holme, Tatsuhiro Tsujikawa, Toby Peterson, Vilmos Nebehaj,
 
         Thanks! (and sorry if I forgot to mention someone)
 
