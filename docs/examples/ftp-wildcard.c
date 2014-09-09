@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,9 +26,9 @@ struct callback_data {
   FILE *output;
 };
 
-static long file_is_comming(struct curl_fileinfo *finfo,
-                            struct callback_data *data,
-                            int remains);
+static long file_is_coming(struct curl_fileinfo *finfo,
+                           struct callback_data *data,
+                           int remains);
 
 static long file_is_downloaded(struct callback_data *data);
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
   curl_easy_setopt(handle, CURLOPT_WILDCARDMATCH, 1L);
 
   /* callback is called before download of concrete file started */
-  curl_easy_setopt(handle, CURLOPT_CHUNK_BGN_FUNCTION, file_is_comming);
+  curl_easy_setopt(handle, CURLOPT_CHUNK_BGN_FUNCTION, file_is_coming);
 
   /* callback is called after data from the file have been transferred */
   curl_easy_setopt(handle, CURLOPT_CHUNK_END_FUNCTION, file_is_downloaded);
@@ -89,9 +89,9 @@ int main(int argc, char **argv)
   return rc;
 }
 
-static long file_is_comming(struct curl_fileinfo *finfo,
-                            struct callback_data *data,
-                            int remains)
+static long file_is_coming(struct curl_fileinfo *finfo,
+                           struct callback_data *data,
+                           int remains)
 {
   printf("%3d %40s %10luB ", remains, finfo->filename,
          (unsigned long)finfo->size);
