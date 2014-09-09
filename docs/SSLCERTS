@@ -1,5 +1,5 @@
-                      Peer SSL Certificate Verification
-                      =================================
+Peer SSL Certificate Verification
+=================================
 
 (NOTE: If libcurl was built with Schannel or Secure Transport support, then
 this does not apply to you. Scroll down for details on how the OS-native
@@ -26,13 +26,13 @@ impersonating your favorite site, and you want to transfer files from this
 server, do one of the following:
 
  1. Tell libcurl to *not* verify the peer. With libcurl you disable this with
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+    `curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);`
 
     With the curl command line tool, you disable this with -k/--insecure.
 
  2. Get a CA certificate that can verify the remote server and use the proper
     option to point out this CA cert for verification when connecting. For
-    libcurl hackers: curl_easy_setopt(curl, CURLOPT_CAPATH, capath);
+    libcurl hackers: `curl_easy_setopt(curl, CURLOPT_CAPATH, capath);`
 
     With the curl command line tool: --cacert [file]
 
@@ -46,32 +46,32 @@ server, do one of the following:
     If you use Internet Explorer, this is one way to get extract the CA cert
     for a particular server:
 
-     o View the certificate by double-clicking the padlock
-     o Find out where the CA certificate is kept (Certificate>
+     - View the certificate by double-clicking the padlock
+     - Find out where the CA certificate is kept (Certificate>
        Authority Information Access>URL)
-     o Get a copy of the crt file using curl
-     o Convert it from crt to PEM using the openssl tool:
+     - Get a copy of the crt file using curl
+     - Convert it from crt to PEM using the openssl tool:
        openssl x509 -inform DES -in yourdownloaded.crt \
        -out outcert.pem -text
-     o Append the 'outcert.pem' to the CA cert bundle or use it stand-alone
+     - Append the 'outcert.pem' to the CA cert bundle or use it stand-alone
        as described below.
 
     If you use the 'openssl' tool, this is one way to get extract the CA cert
     for a particular server:
 
-     o openssl s_client -connect xxxxx.com:443 |tee logfile
-     o type "QUIT", followed by the "ENTER" key
-     o The certificate will have "BEGIN CERTIFICATE" and "END CERTIFICATE"
+     - `openssl s_client -connect xxxxx.com:443 |tee logfile`
+     - type "QUIT", followed by the "ENTER" key
+     - The certificate will have "BEGIN CERTIFICATE" and "END CERTIFICATE"
        markers.
-     o If you want to see the data in the certificate, you can do: "openssl
+     - If you want to see the data in the certificate, you can do: "openssl
        x509 -inform PEM -in certfile -text -out certdata" where certfile is
        the cert you extracted from logfile. Look in certdata.
-     o If you want to trust the certificate, you can append it to your
-       cert_bundle or use it stand-alone as described. Just remember that the
+     - If you want to trust the certificate, you can append it to your
+       cert bundle or use it stand-alone as described. Just remember that the
        security is no better than the way you obtained the certificate.
 
  4. If you're using the curl command line tool, you can specify your own CA
-    cert path by setting the environment variable CURL_CA_BUNDLE to the path
+    cert path by setting the environment variable `CURL_CA_BUNDLE` to the path
     of your choice.
 
     If you're using the curl command line tool on Windows, curl will search
@@ -86,9 +86,7 @@ server, do one of the following:
  5. Get a better/different/newer CA cert bundle! One option is to extract the
     one a recent Firefox browser uses by running 'make ca-bundle' in the curl
     build tree root, or possibly download a version that was generated this
-    way for you:
-
-        http://curl.haxx.se/docs/caextract.html
+    way for you: [CA Extract](http://curl.haxx.se/docs/caextract.html)
 
 Neglecting to use one of the above methods when dealing with a server using a
 certificate that isn't signed by one of the certificates in the installed CA
@@ -96,15 +94,15 @@ cert bundle, will cause SSL to report an error ("certificate verify failed")
 during the handshake and SSL will then refuse further communication with that
 server.
 
-                      Peer SSL Certificate Verification with NSS
-                      ==========================================
+Peer SSL Certificate Verification with NSS
+==========================================
 
 If libcurl was built with NSS support, then depending on the OS distribution,
 it is probably required to take some additional steps to use the system-wide CA
 cert db. RedHat ships with an additional module, libnsspem.so, which enables
 NSS to read the OpenSSL PEM CA bundle. This library is missing in OpenSuSE, and
 without it, NSS can only work with its own internal formats. NSS also has a new
-database format: https://wiki.mozilla.org/NSS_Shared_DB
+[database format](https://wiki.mozilla.org/NSS_Shared_DB).
 
 Starting with version 7.19.7, libcurl automatically adds the 'sql:' prefix to
 the certdb directory (either the hardcoded default /etc/pki/nssdb or the
@@ -114,8 +112,8 @@ format your distribution provides, examine the default certdb location:
 cert9.db, key4.db, pkcs11.txt; filenames of older versions are cert8.db,
 key3.db, secmod.db.
 
-     Peer SSL Certificate Verification with Schannel and Secure Transport
-     ====================================================================
+Peer SSL Certificate Verification with Schannel and Secure Transport
+====================================================================
 
 If libcurl was built with Schannel (Microsoft's TLS/SSL engine) or Secure
 Transport (Apple's TLS/SSL engine) support, then libcurl will still perform
