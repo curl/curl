@@ -4,7 +4,7 @@ Curl and libcurl 7.38.0
  Command line options:         162
  curl_easy_setopt() options:   208
  Public functions in libcurl:  58
- Contributors:                 1210
+ Contributors:                 1216
 
 This release includes the following changes:
 
@@ -22,6 +22,9 @@ This release includes the following changes:
  o http2: requires nghttp2 0.6.0 or later
 
 This release includes the following bugfixes:
+
+ o CVE-2014-3613: cookie leak with IP address as domain [25]
+ o CVE-2014-3620: cookie leak for TLDs [26]
 
  o fix a build failure on Debian when NSS support is enabled [1]
  o HTTP/2: fixed compiler warnings when built disabled [2]
@@ -95,11 +98,12 @@ advice from friends like these:
   Alessandro Ghedini, Andre Heinecke, Anthon Pang, Askar Safin, Brandon Casey,
   Catalin Patulea, Dan Fandrich, Daniel Stenberg, Dave Reisner, David Meyer,
   David Shaw, David Woodhouse, Dimitrios Siganos, Ed Morley, Fabian Keil,
-  Florian Weimer, Frank Meier, Haris Okanovic, Jakub Zakrzewski, Jan Ehrhardt,
-  John Coffey, Jonatan Vela, Jose Alf, Kamil Dudka, Leonardo Rosati,
-  Marcel Raad, Michael Osipov, Michael Wallner, Paras S, Patrick Monnerat,
-  Paul Saab, Peter Wang, Rafaël Carré, Sergey Nikulov, Spork Schivago,
-  Steve Holme, Tatsuhiro Tsujikawa, Toby Peterson, Vilmos Nebehaj,
+  Florian Weimer, Frank Gevaerts, Frank Meier, Haris Okanovic, Jakub Zakrzewski,
+  Jan Ehrhardt, John Coffey, Jonatan Vela, Jose Alf, Kamil Dudka,
+  Leonardo Rosati, Marcel Raad, Michael Osipov, Michael Wallner, Paras S,
+  Patrick Monnerat, Paul Saab, Peter Wang, Rafaël Carré, Sergey Nikulov,
+  Spork Schivago, Steve Holme, Tatsuhiro Tsujikawa, Tim Ruehsen, Toby Peterson,
+  Vilmos Nebehaj,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -129,3 +133,5 @@ References to bug reports and discussions on issues:
  [22] = http://curl.haxx.se/mail/lib-2014-06/0235.html
  [23] = http://curl.haxx.se/bug/view.cgi?id=1419
  [24] = http://curl.haxx.se/mail/lib-2014-07/0206.html
+ [25] = http://curl.haxx.se/docs/adv_20140910A.html
+ [26] = http://curl.haxx.se/docs/adv_20140910B.html
