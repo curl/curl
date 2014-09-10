@@ -1,12 +1,12 @@
 curl the next few years - perhaps
-=======================
+=================================
 
 Roadmap of things Daniel Stenberg and Steve Holme want to work on next. It is
 intended to serve as a guideline for others for information, feedback and
 possible participation.
 
 New stuff - libcurl
-===================
+-------------------
 
 1. http2 test suite
 
@@ -48,7 +48,7 @@ New stuff - libcurl
     memory when handles are not in use?
 
 New stuff - curl
-================
+----------------
 
 1. Embed a language interpreter (lua?). For that middle ground where curl
    isn’t enough and a libcurl binding feels “too much”. Build-time conditional
@@ -58,7 +58,7 @@ New stuff - curl
    don't have to be constructed before calling curl
 
 Improve
-=======
+-------
 
 1. build for windows (considered hard by many users)
 
@@ -80,7 +80,7 @@ Improve
    ago
 
 Remove
-======
+------
 
 1. cmake support (nobody maintains it)
 
