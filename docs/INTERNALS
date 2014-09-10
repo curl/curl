@@ -14,6 +14,7 @@ INTERNALS
 
 GIT
 ===
+
  All changes to the sources are committed to the git repository as soon as
  they're somewhat verified to work. Changes shall be committed as independently
  as possible so that individual changes can be easier spotted and tracked
@@ -251,7 +252,9 @@ Library
 
  Kerberos
 
- The kerberos support is mainly in lib/krb4.c and lib/security.c.
+ The kerberos support is mainly in lib/krb5.c and lib/security.c but also
+ curl_sasl_sspi.c for the email protocols and socks_gssapi.c & socks_sspi.c for
+ SOCKS5 proxy specifics.
 
  TELNET
 
@@ -264,6 +267,10 @@ Library
  LDAP
 
  Everything LDAP is in lib/ldap.c and lib/openldap.c
+
+ E-mail
+
+ The e-mail related source code is in lib/imap.c, lib/pop3.c and lib/smtp.c.
 
  GENERAL
 
