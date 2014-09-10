@@ -64,7 +64,7 @@ HTTP
  - Content-Encoding support for deflate and gzip
  - "Transfer-Encoding: chunked" support in uploads
  - data compression (*12)
- - HTTP/2 (*4)
+ - HTTP/2 (*5)
 
 HTTPS (*1)
  - (all the HTTP features)
@@ -77,7 +77,6 @@ HTTPS (*1)
 FTP
  - download
  - authentication
- - kerberos4 (*5)
  - Kerberos 5 (*14)
  - active/passive using PORT, EPRT, PASV or EPSV
  - single file size information (compare to HTTP HEAD)
@@ -129,7 +128,8 @@ FILE
  - resume
 
 SMTP
- - authentication: Plain, Login, CRAM-MD5, Digest-MD5 and NTLM (*9)
+ - authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9) and Kerberos 5
+   (*4)
  - send e-mails
  - mail from support
  - mail size support
@@ -144,8 +144,8 @@ SMTPS (*1)
 
 POP3
  - authentication: Clear Text, APOP and SASL
- - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5 and
-   NTLM (*9)
+ - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9) and
+   Kerberos 5 (*4)
  - list e-mails
  - retrieve e-mails
  - enhanced command support for: CAPA, DELE, TOP, STAT, UIDL and NOOP via
@@ -159,8 +159,8 @@ POP3S (*1)
 
 IMAP
  - authentication: Clear Text and SASL
- - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5 and
-   NTLM (*9)
+ - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9) and
+   Kerberos 5 (*4)
  - list the folders of a mailbox
  - select a mailbox with support for verifying the UIDVALIDITY
  - fetch e-mails with support for specifying the UID and SECTION
@@ -182,8 +182,9 @@ FOOTNOTES
   *2 = requires OpenLDAP
   *3 = requires a GSS-API implementation (such as Heimdal or MIT Kerberos) or
        SSPI (native Windows)
-  *4 = requires nghttp2 and possibly a recent TLS library
-  *5 = requires a krb4 library, such as the MIT one or similar
+  *4 = requires a GSS-API implementation, however, only Windows SSPI is
+       currently supported
+  *5 = requires nghttp2 and possibly a recent TLS library
   *6 = requires c-ares
   *7 = requires OpenSSL, NSS, qssl, WinSSL or Secure Transport; GnuTLS, for
        example, only supports SSLv3 and TLSv1
