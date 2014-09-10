@@ -56,7 +56,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.22';
+my $version = '1.23';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -111,6 +111,8 @@ if(!defined($opt_d)) {
 
 # Use predefined URL or else custom URL specified on command line.
 my $url = ( defined( $urls{$opt_d} ) ) ? $urls{$opt_d} : $opt_d;
+
+my $curl=`curl -V`;
 
 if ($opt_i) {
   print ("=" x 78 . "\n");
@@ -217,7 +219,7 @@ sub sha1 {
 sub oldsha1 {
     my ($crt)=@_;
     my $sha1="";
-    open(C, "<$crt");
+    open(C, "<$crt") || return 0;
     while(<C>) {
         chomp;
         if($_ =~ /^\#\# SHA1: (.*)/) {
@@ -260,10 +262,32 @@ my $fetched;
 
 my $oldsha1= oldsha1($crt);
 
-print STDERR "SHA1 of old file: $oldsha1\n";
+print STDERR "SHA1 of old file: $oldsha1\n" if (!$opt_q);
 
-unless ($opt_n and -e $txt) {
-  print STDERR "Downloading '$txt' ...\n" if (!$opt_q);
+print STDERR "Downloading '$txt' ...\n" if (!$opt_q);
+
+if($curl && !$opt_n) {
+    my $https = $url;
+    $https =~ s/^http:/https:/;
+    printf "Get certdata over HTTPS with curl!\n", $https;
+    my $quiet = $opt_q?"-s":"";
+    my @out = `curl -w %{response_code} $quiet -O $https`;
+
+    my $code = 0;
+    if(@out) {
+        $code = $out[0];
+    }
+
+    if($code == 200) {
+        $fetched = 1;
+    }
+    else {
+        print STDERR "Failed downloading HTTPS with curl, trying HTTP with LWP\n"
+            unless $opt_q;
+    }
+}
+
+unless ($fetched || ($opt_n and -e $txt)) {
   my $ua  = new LWP::UserAgent(agent => "$0/$version");
   $ua->env_proxy();
   $resp = $ua->mirror($url, $txt);
@@ -281,7 +305,7 @@ unless ($opt_n and -e $txt) {
   }
 }
 
-my $filedate = $fetched ? $resp->last_modified : (stat($txt))[9];
+my $filedate = $resp ? $resp->last_modified : (stat($txt))[9];
 my $datesrc = "as of";
 if(!$filedate) {
     # mxr.mozilla.org gave us a time, hg.mozilla.org does not!
