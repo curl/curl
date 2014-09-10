@@ -24,7 +24,7 @@ New stuff - libcurl
 
 7. HTTP Digest authentication via Windows SSPI
 
-8. GSSAPI authentication in the email protocols
+8. SASL GSSAPI (Kerberos 5) authentication via a GSS-API library
 
 9. add support for third-party SASL libraries such as Cyrus SASL - may need to
    move existing native and SSPI based authentication into vsasl folder after
