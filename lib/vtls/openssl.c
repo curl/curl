@@ -749,6 +749,12 @@ int Curl_ossl_init(void)
      calls CONF_modules_load_file() and we use that instead and we ignore
      its return code! */
 
+  /* CONF_MFLAGS_DEFAULT_SECTION introduced some time between 0.9.8b and
+     0.9.8e */
+#ifndef CONF_MFLAGS_DEFAULT_SECTION
+#define CONF_MFLAGS_DEFAULT_SECTION 0x0
+#endif
+
   (void)CONF_modules_load_file(NULL, NULL,
                                CONF_MFLAGS_DEFAULT_SECTION|
                                CONF_MFLAGS_IGNORE_MISSING_FILE);
