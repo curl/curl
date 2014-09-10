@@ -85,8 +85,7 @@ TCHAR *Curl_sasl_build_spn(const char *service, const char *host)
   }
 
   /* Release the UTF8 variant when operating with Unicode */
-  if(utf8_spn != tchar_spn)
-    Curl_safefree(utf8_spn);
+  Curl_unicodefree(utf8_spn);
 
   /* Return our newly allocated SPN */
   return tchar_spn;
@@ -485,8 +484,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   SecPkgContext_Sizes sizes;
   SecPkgCredentials_Names names;
   SECURITY_STATUS status;
-
-  /* TODO: Verify the unicodeness of this function */
+  char *user_name;
 
   /* Decode the base-64 encoded input message */
   if(strlen(chlg64) && *chlg64 != '=') {
@@ -577,12 +575,22 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
+  /* Convert the user name to UTF8 when operating with Unicode */
+  user_name = Curl_convert_tchar_to_UTF8(names.sUserName);
+  if(!user_name) {
+    Curl_safefree(trailer);
+    Curl_safefree(chlg);
+
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   /* Allocate our message */
-  messagelen = 4 + strlen(names.sUserName) + 1;
+  messagelen = 4 + strlen(user_name) + 1;
   message = malloc(messagelen);
   if(!message) {
     Curl_safefree(trailer);
     Curl_safefree(chlg);
+    Curl_unicodefree(user_name);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -593,7 +601,8 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
      identity is not terminated with the zero-valued (%x00) octet." it seems
      necessary to include it. */
   memcpy(message, &outdata, 4);
-  strcpy((char *)message + 4, names.sUserName);
+  strcpy((char *)message + 4, user_name);
+  Curl_unicodefree(user_name);
 
   /* Allocate the padding */
   padding = malloc(sizes.cbBlockSize);
