@@ -21,9 +21,7 @@ announcement clause that collides with GPL.
 libcurl http://curl.haxx.se/docs/copyright.html
 
         Uses an MIT (or Modified BSD)-style license that is as liberal as
-        possible.  Some of the source files that deal with KRB4 have Original
-        BSD-style announce-clause licenses. You may not distribute binaries
-        with krb4-enabled libcurl that also link with GPL-licensed code!
+        possible.
 
 OpenSSL http://www.openssl.org/source/license.html
 
@@ -69,14 +67,6 @@ zlib    http://www.gzip.org/zlib/zlib_license.html
 
         (Used for compressed Transfer-Encoding support) Uses an MIT-style
         license that shouldn't collide with any other library.
-
-krb4
-
-        While nothing in particular says that a Kerberos4 library must use any
-        particular license, the one I've tried and used successfully so far
-        (kth-krb4) is partly Original BSD-licensed with the announcement
-        clause. Some of the code in libcurl that is written to deal with
-        Kerberos4 is Modified BSD-licensed.
 
 MIT Kerberos http://web.mit.edu/kerberos/www/dist/
 
