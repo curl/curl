@@ -18,8 +18,8 @@ New stuff - libcurl
 
 5. HTTPS to proxy
 
-6. make sure there's an easy handle passed in to curl_formadd(),
-   curl_formget() and curl_formfree() by adding replacement functions and
+6. make sure there's an easy handle passed in to `curl_formadd()`,
+   `curl_formget()` and `curl_formfree()` by adding replacement functions and
    deprecating the old ones to allow custom mallocs and more
 
 7. HTTP Digest authentication via Windows SSPI
@@ -69,8 +69,9 @@ Improve
    features/options in the future too
 
 4. docs (considered "bad" by users but how do we make it better?)
-   A - split up curl_easy_setopt.3
-   B - split up curl.1
+
+  - split up `curl_easy_setopt.3`
+  - split up curl.1
 
 5. authentication framework (consider merging HTTP and SASL authentication to
    give one API for protocols to call)
