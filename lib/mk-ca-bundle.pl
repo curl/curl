@@ -97,7 +97,7 @@ my @valid_signature_algorithms = (
   "MD5",
   "SHA1",
   "SHA256",
-  "SHA512"  
+  "SHA512"
 );
 
 $0 =~ s@.*(/|\\)@@;
@@ -129,14 +129,14 @@ if ($opt_i) {
 sub WARNING_MESSAGE() {
   if ( $opt_d =~ m/^risk$/i ) { # Long Form Warning and Exit
     print "Warning: Use of this script may pose some risk:\n";
-	print "\n";
-	print "  1) Using http is subject to man in the middle attack of certdata content\n";
-	print "  2) Default to 'release', but more recent updates may be found in other trees\n";
-	print "  3) certdata.txt file format may change, lag time to update this script\n";
-	print "  4) Generally unwise to blindly trust CAs without manual review & verification\n";
-	print "  5) Mozilla apps use additional security checks aren't represented in certdata\n";
-	print "  6) Use of this script will make a security engineer grind his teeth and\n";
-	print "     swear at you.  ;)\n";
+    print "\n";
+    print "  1) Using http is subject to man in the middle attack of certdata content\n";
+    print "  2) Default to 'release', but more recent updates may be found in other trees\n";
+    print "  3) certdata.txt file format may change, lag time to update this script\n";
+    print "  4) Generally unwise to blindly trust CAs without manual review & verification\n";
+    print "  5) Mozilla apps use additional security checks aren't represented in certdata\n";
+    print "  6) Use of this script will make a security engineer grind his teeth and\n";
+    print "     swear at you.  ;)\n";
     exit;
   } else { # Short Form Warning
     print "Warning: Use of this script may pose some risk, -d risk for more details.\n";
@@ -203,9 +203,9 @@ sub PARSE_CSV_PARAM($$@) {
     print "Error: Invalid ", $description, scalar(@invalid) == 1 ? ": " : "s: ", join( ", ", map { "\"$_\"" } @invalid ), "\n";
     HELP_MESSAGE();
   }
-  
+
   @values = @valid_values if ( IS_IN_LIST("ALL",@values) );
-  
+
   return @values;
 }
 
@@ -244,12 +244,12 @@ my @included_signature_algorithms = PARSE_CSV_PARAM( "signature algorithm", $opt
 
 sub SHOULD_OUTPUT_CERT(%) {
   my %trust_purposes_by_level = @_;
-  
+
   foreach my $level (@included_mozilla_trust_levels) {
     # for each level we want to output, see if any of our desired purposes are included
     return 1 if ( defined( List::Util::first { IS_IN_LIST( $_, @included_mozilla_trust_purposes ) } @{$trust_purposes_by_level{$level}} ) );
   }
-  
+
   return 0;
 }
 
@@ -314,7 +314,7 @@ if(!$filedate) {
 }
 
 # get the hash from the download file
-my $newsha1= sha1($txt); 
+my $newsha1= sha1($txt);
 
 if($oldsha1 eq $newsha1) {
     print STDERR "Downloaded file identical to previous run\'s source file. Exiting\n";
