@@ -476,10 +476,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   /* Generate our type-1 message */
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle, NULL,
                                                (TCHAR *) TEXT(""),
-                                               ISC_REQ_CONFIDENTIALITY |
-                                               ISC_REQ_REPLAY_DETECT |
-                                               ISC_REQ_CONNECTION,
-                                               0, SECURITY_NETWORK_DREP,
+                                               0, 0, SECURITY_NETWORK_DREP,
                                                NULL, 0,
                                                &ntlm->c_handle, &type_1_desc,
                                                &attrs, &tsDummy);
@@ -641,7 +638,6 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 
   (void)passwdp;
   (void)userp;
-  (void)data;
 
   /* Setup the type-2 "input" security buffer */
   type_2_desc.ulVersion = SECBUFFER_VERSION;
@@ -663,16 +659,17 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle,
                                                &ntlm->c_handle,
                                                (TCHAR *) TEXT(""),
-                                               ISC_REQ_CONFIDENTIALITY |
-                                               ISC_REQ_REPLAY_DETECT |
-                                               ISC_REQ_CONNECTION,
-                                               0, SECURITY_NETWORK_DREP,
+                                               0, 0, SECURITY_NETWORK_DREP,
                                                &type_2_desc,
                                                0, &ntlm->c_handle,
                                                &type_3_desc,
                                                &attrs, &tsDummy);
-  if(status != SEC_E_OK)
+  if(status != SEC_E_OK) {
+    infof(data, "NTLM handshake failure (type-3 message): Status=%x\n",
+          status);
+
     return CURLE_RECV_ERROR;
+  }
 
   size = type_3_buf.cbBuffer;
 
