@@ -24,7 +24,7 @@
 
 #include <curl/curl.h>
 
-#if !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY)
+#ifndef CURL_DISABLE_HTTP
 
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>
@@ -42,10 +42,6 @@
 
 /* The last #include file should be: */
 #include "memdebug.h"
-
-#endif  /* !defined(CURL_DISABLE_HTTP) || defined(USE_SSLEAY) */
-
-#ifndef CURL_DISABLE_HTTP
 
 #ifndef HAVE_BASENAME
 static char *Curl_basename(char *path);
