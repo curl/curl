@@ -2614,8 +2614,8 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     capath="no"
   elif test "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
     dnl --with-ca-path given
-    if test "x$OPENSSL_ENABLED" != "x1"; then
-      AC_MSG_ERROR([--with-ca-path only works with openSSL])
+    if test "x$OPENSSL_ENABLED" != "x1" -a "x$POLARSSL_ENABLED" != "x1"; then
+      AC_MSG_ERROR([--with-ca-path only works with openSSL or PolarSSL])
     fi
     capath="$want_capath"
     ca="no"
