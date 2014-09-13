@@ -82,6 +82,9 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
 /* this backend supports CURLOPT_CERTINFO */
 #define have_curlssl_certinfo 1
 
+/* this backend suppots CURLOPT_SSL_CTX_* */
+#define have_curlssl_ssl_ctx 1
+
 /* API setup for OpenSSL */
 #define curlssl_init Curl_ossl_init
 #define curlssl_cleanup Curl_ossl_cleanup

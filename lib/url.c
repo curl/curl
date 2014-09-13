@@ -1959,24 +1959,26 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
     data->set.ssl.verifyhost = (0 != arg)?TRUE:FALSE;
     break;
-#ifdef USE_SSLEAY
-    /* since these two options are only possible to use on an OpenSSL-
-       powered libcurl we #ifdef them on this condition so that libcurls
-       built against other SSL libs will return a proper error when trying
-       to set this option! */
   case CURLOPT_SSL_CTX_FUNCTION:
+#ifdef have_curlssl_ssl_ctx
     /*
      * Set a SSL_CTX callback
      */
     data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
+#else
+    result = CURLE_NOT_BUILT_IN;
+#endif
     break;
   case CURLOPT_SSL_CTX_DATA:
+#ifdef have_curlssl_ssl_ctx
     /*
      * Set a SSL_CTX callback parameter pointer
      */
     data->set.ssl.fsslctxp = va_arg(param, void *);
-    break;
+#else
+    result = CURLE_NOT_BUILT_IN;
 #endif
+    break;
   case CURLOPT_CERTINFO:
 #ifdef have_curlssl_certinfo
     data->set.ssl.certinfo = (0 != va_arg(param, long))?TRUE:FALSE;
