@@ -8,6 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, Hoi-Ho Chan, <hoiho.chan@gmail.com>
+ * Copyright (C) 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,6 +47,9 @@ void Curl_polarssl_close(struct connectdata *conn, int sockindex);
 void Curl_polarssl_session_free(void *ptr);
 size_t Curl_polarssl_version(char *buffer, size_t size);
 int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
+
+/* this backend supports the CAPATH option */
+#define have_ca_path 1
 
 /* API setup for PolarSSL */
 #define curlssl_init() polarssl_init()

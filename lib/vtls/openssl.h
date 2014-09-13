@@ -76,6 +76,9 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
 /* this backend provides these functions: */
 #define have_curlssl_md5sum 1
 
+/* this backend supports the CAPATH option */
+#define have_ca_path 1
+
 /* API setup for OpenSSL */
 #define curlssl_init Curl_ossl_init
 #define curlssl_cleanup Curl_ossl_cleanup
