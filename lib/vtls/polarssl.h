@@ -49,7 +49,7 @@ size_t Curl_polarssl_version(char *buffer, size_t size);
 int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 
 /* this backend supports the CAPATH option */
-#define have_ca_path 1
+#define have_curlssl_ca_path 1
 
 /* API setup for PolarSSL */
 #define curlssl_init() polarssl_init()

@@ -77,7 +77,7 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
 #define have_curlssl_md5sum 1
 
 /* this backend supports the CAPATH option */
-#define have_ca_path 1
+#define have_curlssl_ca_path 1
 
 /* this backend supports CURLOPT_CERTINFO */
 #define have_curlssl_certinfo 1
