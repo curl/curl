@@ -40,6 +40,9 @@ int Curl_qsossl_shutdown(struct connectdata * conn, int sockindex);
 size_t Curl_qsossl_version(char * buffer, size_t size);
 int Curl_qsossl_check_cxn(struct connectdata * cxn);
 
+/* this backend supports CURLOPT_CERTINFO */
+#define have_curlssl_certinfo 1
+
 /* API setup for QsoSSL */
 #define curlssl_init Curl_qsossl_init
 #define curlssl_cleanup Curl_qsossl_cleanup

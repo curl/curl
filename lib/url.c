@@ -1977,12 +1977,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.ssl.fsslctxp = va_arg(param, void *);
     break;
 #endif
-#if defined(USE_SSLEAY) || defined(USE_QSOSSL) || defined(USE_GSKIT) || \
-    defined(USE_NSS)
   case CURLOPT_CERTINFO:
+#ifdef have_curlssl_certinfo
     data->set.ssl.certinfo = (0 != va_arg(param, long))?TRUE:FALSE;
-    break;
+#else
+    result = CURLE_NOT_BUILT_IN;
 #endif
+    break;
   case CURLOPT_CAINFO:
     /*
      * Set CA info for SSL connection. Specify file name of the CA certificate
