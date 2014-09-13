@@ -12,6 +12,10 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o openssl: build fix for versions < 0.9.8e [1]
+ o newlines: fix mixed newlines to LF-only [2]
+ o ntlm: Fixed HTTP proxy authentication when using Windows SSPI [3]
+ o sasl_sspi: Fixed Unicode build [4]
  o 
 
 This release includes the following known bugs:
@@ -21,9 +25,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Askar Safin, Daniel Stenberg, Paul Howarth, Ray Satiro, Steve Holme,
+  Viktor Szakáts
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = 
+ [1] = http://curl.haxx.se/mail/lib-2014-09/0064.html
+ [2] = http://curl.haxx.se/mail/lib-2014-09/0075.html
+ [3] = http://curl.haxx.se/mail/lib-2014-08/0273.html
+ [4] = http://curl.haxx.se/bug/view.cgi?id=1422
+ [5] =
