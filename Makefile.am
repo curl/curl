@@ -87,6 +87,7 @@ VC12_SRCVCXPROJ_DEPS = $(VC12_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC_DIST = projects/README	\
  projects/build-openssl.bat	\
+ projects/checksrc.bat	\
  projects/Windows/VC6/curl.dsw	\
  projects/Windows/VC6/lib/libcurl.dsw $(VC6_LIBDSP)	\
  projects/Windows/VC6/src/curlsrc.dsw $(VC6_SRCDSP)	\
