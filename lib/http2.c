@@ -744,6 +744,12 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   }
 
   infof(conn->data, "nread=%zd\n", nread);
+
+  if(nread == 0) {
+    failf(conn->data, "EOF");
+    return 0;
+  }
+
   rv = nghttp2_session_mem_recv(httpc->h2,
                                 (const uint8_t *)httpc->inbuf, nread);
 
