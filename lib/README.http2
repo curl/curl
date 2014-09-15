@@ -5,7 +5,7 @@ HTTP2 with libcurl
 
  Build prerequisites
   - nghttp2
-  - OpenSSL or NSS or GnutTLS with a new enough version
+  - OpenSSL, NSS, GnutTLS or PolarSSL with a new enough version
 
  nghttp2 (https://github.com/tatsuhiro-t/nghttp2)
 
@@ -14,9 +14,9 @@ HTTP2 with libcurl
   than HTTP1.1 (which we implement on our own) and that nghttp2 is an already
   existing and well functional library.
 
-  Right now, nghttp2 implements http2 draft-09
+  Right now, nghttp2 implements http2 draft-14
 
-  We require at least version 0.3.0
+  We require at least version 0.6.0
 
  Over an http:// URL
 
@@ -46,9 +46,10 @@ SSL libs
   backends. You may need a fairly updated SSL library version for it to
   provide the necessary TLS features. Right now we support:
 
-    OpenSSL: ALPN and NPN
-    NSS:     ALPN and NPN
-    GnuTLS:  ALPN
+    OpenSSL:  ALPN and NPN
+    NSS:      ALPN and NPN
+    GnuTLS:   ALPN
+    PolarSSL: ALPN
 
 Alt-Svc
 
