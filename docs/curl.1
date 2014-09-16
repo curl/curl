@@ -825,7 +825,8 @@ If this option is used several times, the last one will be used. If
 unspecified, the option defaults to 60 seconds.
 .IP "--key <key>"
 (SSL/SSH) Private key file name. Allows you to provide your private key in this
-separate file.
+separate file. For SSH, if not specified, curl tries the following candidates
+in order: '~/.ssh/id_rsa', '~/.ssh/id_dsa', './id_rsa', './id_dsa'.
 
 If this option is used several times, the last one will be used.
 .IP "--key-type <type>"
@@ -1283,6 +1284,11 @@ protocol instead of the default HTTP 1.1.
 separate file.
 
 If this option is used several times, the last one will be used.
+
+(As of 7.39.0, curl attempts to automatically extract the public key from the
+private key file, so passing this option is generally not required. Note that
+this public key extraction requires libcurl to be linked against a copy of
+libssh2 1.2.8 or higher that is itself linked against OpenSSL.)
 .IP "-q"
 If used as the first parameter on the command line, the \fIcurlrc\fP config
 file will not be read and used. See the \fI-K, --config\fP for details on the

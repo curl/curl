@@ -41,12 +41,19 @@ SIMPLE USAGE
 
   Get a file from an SSH server using SFTP:
 
-        curl -u username sftp://shell.example.com/etc/issue
+        curl -u username sftp://example.com/etc/issue
 
-  Get a file from an SSH server using SCP using a private key to authenticate:
+  Get a file from an SSH server using SCP using a private key
+  (not password-protected) to authenticate:
 
-        curl -u username: --key ~/.ssh/id_dsa --pubkey ~/.ssh/id_dsa.pub \
-            scp://shell.example.com/~/personal.txt
+        curl -u username: --key ~/.ssh/id_rsa \
+             scp://example.com/~/file.txt
+
+  Get a file from an SSH server using SCP using a private key
+  (password-protected) to authenticate:
+
+        curl -u username: --key ~/.ssh/id_rsa --pass private_key_password \
+             scp://example.com/~/file.txt
 
   Get the main page from an IPv6 web server:
 
@@ -91,10 +98,13 @@ USING PASSWORDS
 
  SFTP / SCP
 
-   This is similar to FTP, but you can specify a private key to use instead of
-   a password. Note that the private key may itself be protected by a password
-   that is unrelated to the login password of the remote system.  If you
-   provide a private key file you must also provide a public key file.
+   This is similar to FTP, but you can use the --key option to specify a
+   private key to use instead of a password. Note that the private key may
+   itself be protected by a password that is unrelated to the login password
+   of the remote system; this password is specified using the --pass option.
+   Typically, curl will automatically extract the public key from the private
+   key file, but in cases where curl does not have the proper library support,
+   a matching public key file must be specified using the --pubkey option.
 
  HTTP
 

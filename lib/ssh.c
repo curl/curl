@@ -786,7 +786,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       if((data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) &&
          (strstr(sshc->authlist, "publickey") != NULL)) {
         char *home = NULL;
-        bool rsa_pub_empty_but_ok = FALSE;
+        bool out_of_memory = FALSE;
 
         sshc->rsa_pub = sshc->rsa = NULL;
 
@@ -794,34 +794,55 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
            HOME environment variable etc? */
         home = curl_getenv("HOME");
 
-        if(data->set.str[STRING_SSH_PUBLIC_KEY] &&
-           !*data->set.str[STRING_SSH_PUBLIC_KEY])
-           rsa_pub_empty_but_ok = true;
-        else if(data->set.str[STRING_SSH_PUBLIC_KEY])
-          sshc->rsa_pub = aprintf("%s", data->set.str[STRING_SSH_PUBLIC_KEY]);
-        else if(home)
-          sshc->rsa_pub = aprintf("%s/.ssh/id_dsa.pub", home);
-        else
-          /* as a final resort, try current dir! */
-          sshc->rsa_pub = strdup("id_dsa.pub");
-
-        if(!rsa_pub_empty_but_ok && (sshc->rsa_pub == NULL)) {
-          Curl_safefree(home);
-          state(conn, SSH_SESSION_FREE);
-          sshc->actualcode = CURLE_OUT_OF_MEMORY;
-          break;
+        if(data->set.str[STRING_SSH_PRIVATE_KEY])
+          sshc->rsa = strdup(data->set.str[STRING_SSH_PRIVATE_KEY]);
+        else {
+          /* If no private key file is specified, try some common paths. */
+          if(home) {
+            /* Try ~/.ssh first. */
+            sshc->rsa = aprintf("%s/.ssh/id_rsa", home);
+            if(!sshc->rsa)
+              out_of_memory = TRUE;
+            else if(access(sshc->rsa, R_OK) != 0) {
+              Curl_safefree(sshc->rsa);
+              sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
+              if(!sshc->rsa)
+                out_of_memory = TRUE;
+              else if(access(sshc->rsa, R_OK) != 0) {
+                Curl_safefree(sshc->rsa);
+              }
+            }
+          }
+          if(!out_of_memory && !sshc->rsa) {
+            /* Nothing found; try the current dir. */
+            sshc->rsa = strdup("id_rsa");
+            if(sshc->rsa && access(sshc->rsa, R_OK) != 0) {
+              Curl_safefree(sshc->rsa);
+              sshc->rsa = strdup("id_dsa");
+              if(sshc->rsa && access(sshc->rsa, R_OK) != 0) {
+                Curl_safefree(sshc->rsa);
+                /* Out of guesses. Set to the empty string to avoid
+                 * surprising info messages. */
+                sshc->rsa = strdup("");
+              }
+            }
+          }
         }
 
-        if(data->set.str[STRING_SSH_PRIVATE_KEY])
-          sshc->rsa = aprintf("%s", data->set.str[STRING_SSH_PRIVATE_KEY]);
-        else if(home)
-          sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
-        else
-          /* as a final resort, try current dir! */
-          sshc->rsa = strdup("id_dsa");
+        /*
+         * Unless the user explicitly specifies a public key file, let
+         * libssh2 extract the public key from the private key file.
+         * This is done by simply passing sshc->rsa_pub = NULL.
+         */
+        if(data->set.str[STRING_SSH_PUBLIC_KEY]) {
+          sshc->rsa_pub = strdup(data->set.str[STRING_SSH_PUBLIC_KEY]);
+          if(!sshc->rsa_pub)
+            out_of_memory = TRUE;
+        }
 
-        if(sshc->rsa == NULL) {
+        if(out_of_memory || sshc->rsa == NULL) {
           Curl_safefree(home);
+          Curl_safefree(sshc->rsa);
           Curl_safefree(sshc->rsa_pub);
           state(conn, SSH_SESSION_FREE);
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
@@ -834,8 +855,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
         Curl_safefree(home);
 
-        infof(data, "Using ssh public key file %s\n", sshc->rsa_pub);
-        infof(data, "Using ssh private key file %s\n", sshc->rsa);
+        infof(data, "Using SSH public key file '%s'\n", sshc->rsa_pub);
+        infof(data, "Using SSH private key file '%s'\n", sshc->rsa);
 
         state(conn, SSH_AUTH_PKEY);
       }
