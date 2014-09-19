@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH libcurl-tutorial 3 "2 Aug 2014" "libcurl" "libcurl programming"
+.TH libcurl-tutorial 3 "19 Sep 2014" "libcurl" "libcurl programming"
 .SH NAME
 libcurl-tutorial \- libcurl programming tutorial
 .SH "Objective"
@@ -137,15 +137,17 @@ rather than at build-time (if possible of course). By calling
 struct, your program can figure out exactly what the currently running libcurl
 supports.
 
-.SH "Handle the Easy libcurl"
+.SH "Two Interfaces"
 libcurl first introduced the so called easy interface. All operations in the
-easy interface are prefixed with 'curl_easy'.
+easy interface are prefixed with 'curl_easy'. The easy interface lets you do
+single transfers with a synchronous and blocking function call.
 
-Recent libcurl versions also offer the multi interface. More about that
-interface, what it is targeted for and how to use it is detailed in a separate
-chapter further down. You still need to understand the easy interface first,
-so please continue reading for better understanding.
-
+libcurl also offers another interface that allows multiple simultaneous
+transfers in a single thread, the so called multi interface. More about that
+interface is detailed in a separate chapter further down. You still need to
+understand the easy interface first, so please continue reading for better
+understanding.
+.SH "Handle the Easy libcurl"
 To use the easy interface, you must first create yourself an easy handle. You
 need one handle for each easy session you want to perform. Basically, you
 should use one handle for every thread you plan to use for transferring. You
@@ -162,13 +164,18 @@ transfer or series of transfers.
 You set properties and options for this handle using
 \fIcurl_easy_setopt(3)\fP. They control how the subsequent transfer or
 transfers will be made. Options remain set in the handle until set again to
-something different. Alas, multiple requests using the same handle will use
-the same options.
+something different. They are sticky. Multiple requests using the same handle
+will use the same options.
+
+If you at any point would like to blank all previously set options for a
+single easy handle, you can call \fIcurl_easy_reset(3)\fP and you can also
+make a clone of an easy handle (with all its set options) using
+\fIcurl_easy_duphandle(3)\fP.
 
 Many of the options you set in libcurl are "strings", pointers to data
 terminated with a zero byte. When you set strings with
-\fIcurl_easy_setopt(3)\fP, libcurl makes its own copy so that they don't
-need to be kept around in your application after being set[4].
+\fIcurl_easy_setopt(3)\fP, libcurl makes its own copy so that they don't need
+to be kept around in your application after being set[4].
 
 One of the most basic properties to set in the handle is the URL. You set your
 preferred URL to transfer with \fICURLOPT_URL(3)\fP in a manner similar to:
@@ -1295,39 +1302,44 @@ To avoid this problem, you must of course use your common sense. Often, you
 can just edit out the sensitive data or just search/replace your true
 information with faked data.
 
-.SH "Multiple Transfers Using the multi Interface"
-
+.SH "The multi Interface"
 The easy interface as described in detail in this document is a synchronous
 interface that transfers one file at a time and doesn't return until it is
 done.
 
 The multi interface, on the other hand, allows your program to transfer
-multiple files in both directions at the same time, without forcing you
-to use multiple threads.  The name might make it seem that the multi
-interface is for multi-threaded programs, but the truth is almost the
-reverse.  The multi interface can allow a single-threaded application
-to perform the same kinds of multiple, simultaneous transfers that
-multi-threaded programs can perform.  It allows many of the benefits
-of multi-threaded transfers without the complexity of managing and
-synchronizing many threads.
+multiple files in both directions at the same time, without forcing you to use
+multiple threads.  The name might make it seem that the multi interface is for
+multi-threaded programs, but the truth is almost the reverse.  The multi
+interface allows a single-threaded application to perform the same kinds of
+multiple, simultaneous transfers that multi-threaded programs can perform.  It
+allows many of the benefits of multi-threaded transfers without the complexity
+of managing and synchronizing many threads.
+
+To complicate matters somewhat more, there are even two versions of the multi
+interface. The event based one, also called multi_socket and the "normal one"
+designed for using with select(). See the libcurl-multi.3 man page for details
+on the multi_socket event based API, this description here is for the select()
+oriented one.
 
 To use this interface, you are better off if you first understand the basics
 of how to use the easy interface. The multi interface is simply a way to make
 multiple transfers at the same time by adding up multiple easy handles into
 a "multi stack".
 
-You create the easy handles you want and you set all the options just like you
-have been told above, and then you create a multi handle with
-\fIcurl_multi_init(3)\fP and add all those easy handles to that multi handle
-with \fIcurl_multi_add_handle(3)\fP.
+You create the easy handles you want, one for each concurrent transfer, and
+you set all the options just like you learned above, and then you create a
+multi handle with \fIcurl_multi_init(3)\fP and add all those easy handles to
+that multi handle with \fIcurl_multi_add_handle(3)\fP.
 
 When you've added the handles you have for the moment (you can still add new
 ones at any time), you start the transfers by calling
 \fIcurl_multi_perform(3)\fP.
 
-\fIcurl_multi_perform(3)\fP is asynchronous. It will only execute as little as
-possible and then return back control to your program. It is designed to never
-block.
+\fIcurl_multi_perform(3)\fP is asynchronous. It will only perform what can be
+done now and then return back control to your program. It is designed to never
+block. You need to keep calling the function until all transfers are
+completed.
 
 The best usage of this interface is when you do a select() on all possible
 file descriptors or sockets to know when to call libcurl again. This also
@@ -1340,11 +1352,12 @@ When you then call select(), it'll return when one of the file handles signal
 action and you then call \fIcurl_multi_perform(3)\fP to allow libcurl to do
 what it wants to do. Take note that libcurl does also feature some time-out
 code so we advise you to never use very long timeouts on select() before you
-call \fIcurl_multi_perform(3)\fP, which thus should be called unconditionally
-every now and then even if none of its file descriptors have signaled
-ready. Another precaution you should use: always call
-\fIcurl_multi_fdset(3)\fP immediately before the select() call since the
-current set of file descriptors may change when calling a curl function.
+call \fIcurl_multi_perform(3)\fP again. \fIcurl_multi_timeout(3)\fP is
+provided to help you get a suitable timeout period.
+
+Another precaution you should use: always call \fIcurl_multi_fdset(3)\fP
+immediately before the select() call since the current set of file descriptors
+may change in any curl function invoke.
 
 If you want to stop the transfer of one of the easy handles in the stack, you
 can use \fIcurl_multi_remove_handle(3)\fP to remove individual easy

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -19,7 +19,7 @@
 .\" * KIND, either express or implied.
 .\" *
 .\" **************************************************************************
-.TH libcurl 3 "12 Aug 2003" "libcurl 7.10.7" "libcurl easy interface"
+.TH libcurl 3 "19 Sep 2014" "libcurl" "libcurl easy interface"
 .SH NAME
 libcurl-easy \- easy interface overview
 .SH DESCRIPTION
@@ -33,6 +33,17 @@ without a specified URL as you may have figured out yourself). You might want
 to set some callbacks as well that will be called from the library when data
 is available etc. \fIcurl_easy_setopt(3)\fP is used for all this.
 
+\fICURLOPT_URL(3)\fP is only option you really must set, as otherwise there
+can be no transfer. Another commonly used option is \fICURLOPT_VERBOSE(3)\fP
+that will help you see what libcurl is doing under the hood, very useful when
+debugging for example. The \fIcurl_easy_setopt(3)\fP man page has a full index
+of the over 200 available options.
+
+If you at any point would like to blank all previously set options for a
+single easy handle, you can call \fIcurl_easy_reset(3)\fP and you can also
+make a clone of an easy handle (with all its set options) using
+\fIcurl_easy_duphandle(3)\fP.
+
 When all is setup, you tell libcurl to perform the transfer using
 \fIcurl_easy_perform(3)\fP.  It will then do the entire operation and won't
 return until it is done (successfully or not).
@@ -42,4 +53,5 @@ transfer, or if you're done, cleanup the session by calling
 \fIcurl_easy_cleanup(3)\fP. If you want persistent connections, you don't
 cleanup immediately, but instead run ahead and perform other transfers using
 the same easy handle.
-
+.SH "SEE ALSO"
+.BR curl_easy_init "(3)," curl_easy_cleanup "(3)," curl_easy_setopt "(3)"
