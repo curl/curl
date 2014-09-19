@@ -156,7 +156,10 @@ FAQ
     Since curl uses libcurl, curl supports the same wide range of common
     Internet protocols that libcurl does.
 
-  We pronounce curl and cURL with an initial k sound: [kurl].
+  We pronounce curl with an initial k sound. It rhymes with words like girl
+  and earl. This is a short WAV file to help you:
+
+     http://media.merriam-webster.com/soundc11/c/curl0001.wav
 
   There are numerous sub-projects and related projects that also use the word
   curl in the project names in various combinations, but you should take
