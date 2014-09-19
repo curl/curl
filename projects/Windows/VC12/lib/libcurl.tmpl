@@ -17,6 +17,14 @@
       <Configuration>DLL Debug - DLL OpenSSL</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32">
+      <Configuration>DLL Debug - DLL Windows SSPI - DLL WinIDN</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DLL Debug - DLL Windows SSPI - DLL WinIDN|x64">
+      <Configuration>DLL Debug - DLL Windows SSPI - DLL WinIDN</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="DLL Debug - DLL Windows SSPI|Win32">
       <Configuration>DLL Debug - DLL Windows SSPI</Configuration>
       <Platform>Win32</Platform>
@@ -49,6 +57,14 @@
       <Configuration>DLL Release - DLL OpenSSL</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="DLL Release - DLL Windows SSPI - DLL WinIDN|Win32">
+      <Configuration>DLL Release - DLL Windows SSPI - DLL WinIDN</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DLL Release - DLL Windows SSPI - DLL WinIDN|x64">
+      <Configuration>DLL Release - DLL Windows SSPI - DLL WinIDN</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="DLL Release - DLL Windows SSPI|Win32">
       <Configuration>DLL Release - DLL Windows SSPI</Configuration>
       <Platform>Win32</Platform>
@@ -79,6 +95,14 @@
     </ProjectConfiguration>
     <ProjectConfiguration Include="LIB Debug - DLL OpenSSL|x64">
       <Configuration>LIB Debug - DLL OpenSSL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32">
+      <Configuration>LIB Debug - DLL Windows SSPI - DLL WinIDN</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="LIB Debug - DLL Windows SSPI - DLL WinIDN|x64">
+      <Configuration>LIB Debug - DLL Windows SSPI - DLL WinIDN</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="LIB Debug - DLL Windows SSPI|Win32">
@@ -127,6 +151,14 @@
     </ProjectConfiguration>
     <ProjectConfiguration Include="LIB Release - DLL OpenSSL|x64">
       <Configuration>LIB Release - DLL OpenSSL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="LIB Release - DLL Windows SSPI - DLL WinIDN|Win32">
+      <Configuration>LIB Release - DLL Windows SSPI - DLL WinIDN</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="LIB Release - DLL Windows SSPI - DLL WinIDN|x64">
+      <Configuration>LIB Release - DLL Windows SSPI - DLL WinIDN</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="LIB Release - DLL Windows SSPI|Win32">
@@ -185,6 +217,12 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI - DLL WinIDN|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL OpenSSL - DLL LibSSH2|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
@@ -210,6 +248,12 @@
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
@@ -245,7 +289,19 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
@@ -305,6 +361,12 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI - DLL WinIDN|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL OpenSSL - DLL LibSSH2|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
@@ -330,6 +392,12 @@
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
@@ -365,7 +433,19 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
@@ -419,6 +499,9 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI - DLL WinIDN|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL OpenSSL - DLL LibSSH2|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -432,6 +515,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL OpenSSL - DLL LibSSH2|Win32'" Label="PropertySheets">
@@ -449,7 +535,13 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL OpenSSL|Win32'" Label="PropertySheets">
@@ -479,6 +571,9 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI - DLL WinIDN|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL OpenSSL - DLL LibSSH2|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -492,6 +587,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL OpenSSL - DLL LibSSH2|x64'" Label="PropertySheets">
@@ -509,7 +607,13 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL OpenSSL|x64'" Label="PropertySheets">
@@ -566,17 +670,29 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL OpenSSL|x64'">$(OutDir)lib\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL OpenSSL|x64'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|Win32'">$(OutDir)lib\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32'">$(OutDir)lib\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|x64'">$(OutDir)lib\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|x64'">$(OutDir)lib\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|x64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|x64'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI|Win32'">$(OutDir)lib\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|Win32'">$(OutDir)lib\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI|x64'">$(OutDir)lib\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|x64'">$(OutDir)lib\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI|x64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|x64'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL OpenSSL - DLL LibSSH2|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL OpenSSL - DLL LibSSH2|Win32'">$(OutDir)lib\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL OpenSSL - DLL LibSSH2|Win32'">false</LinkIncremental>
@@ -598,9 +714,13 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL OpenSSL - DLL LibSSH2|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL OpenSSL - DLL LibSSH2|x64'">$(OutDir)lib\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|Win32'">$(OutDir)lib\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32'">$(OutDir)lib\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|x64'">$(OutDir)lib\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|x64'">$(OutDir)lib\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - LIB OpenSSL|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - LIB OpenSSL|Win32'">$(OutDir)lib\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Debug - LIB OpenSSL|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
@@ -618,9 +738,13 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL OpenSSL - DLL LibSSH2|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL OpenSSL - DLL LibSSH2|x64'">$(OutDir)lib\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI - DLL WinIDN|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI|Win32'">$(OutDir)lib\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI - DLL WinIDN|Win32'">$(OutDir)lib\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI - DLL WinIDN|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI|x64'">$(OutDir)lib\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI - DLL WinIDN|x64'">$(OutDir)lib\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - LIB OpenSSL|Win32'">..\..\..\..\build\Win32\VC12\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - LIB OpenSSL|Win32'">$(OutDir)lib\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='LIB Release - LIB OpenSSL|x64'">..\..\..\..\build\Win64\VC12\$(Configuration)\</OutDir>
@@ -636,7 +760,9 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL OpenSSL - DLL LibSSH2|Win32'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL OpenSSL - DLL LibSSH2|x64'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|Win32'">$(ProjectName)d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|x64'">$(ProjectName)d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|x64'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug|Win32'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug|x64'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL OpenSSL|Win32'">$(ProjectName)d</TargetName>
@@ -644,7 +770,9 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL OpenSSL - DLL LibSSH2|Win32'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL OpenSSL - DLL LibSSH2|x64'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|Win32'">$(ProjectName)d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|x64'">$(ProjectName)d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|x64'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug - LIB OpenSSL|Win32'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug - LIB OpenSSL|x64'">$(ProjectName)d</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='LIB Debug - LIB OpenSSL - LIB LibSSH2|Win32'">$(ProjectName)d</TargetName>
@@ -1144,6 +1272,50 @@
       <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
     </Bscmake>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>$(OutDir)$(ProjectName).tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\include;..\..\..\..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;wldap32.lib;normaliz.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ManifestFile>$(IntDir)$(TargetFileName).intermediate.manifest</ManifestFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI|x64'">
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -1171,6 +1343,49 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug - DLL Windows SSPI - DLL WinIDN|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>$(OutDir)$(ProjectName).tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\include;..\..\..\..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN64;_DEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;wldap32.lib;normaliz.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -1229,6 +1444,48 @@
       <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
     </Bscmake>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>$(OutDir)$(ProjectName).tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\..\..\..\include;..\..\..\..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;wldap32.lib;normaliz.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ManifestFile>$(IntDir)$(TargetFileName).intermediate.manifest</ManifestFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI|x64'">
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -1256,6 +1513,47 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release - DLL Windows SSPI - DLL WinIDN|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>$(OutDir)$(ProjectName).tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\..\..\..\include;..\..\..\..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN64;NDEBUG;BUILDING_LIBCURL;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;wldap32.lib;normaliz.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -1576,6 +1874,32 @@
       <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
     </Bscmake>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\include;..\..\..\..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Lib>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI|x64'">
     <Midl>
       <TargetEnvironment>X64</TargetEnvironment>
@@ -1584,6 +1908,35 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\..\include;..\..\..\..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;_DEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Lib>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='LIB Debug - DLL Windows SSPI - DLL WinIDN|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\include;..\..\..\..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN64;_DEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -1851,6 +2204,32 @@
       <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
     </Bscmake>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI - DLL WinIDN|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\..\..\..\include;..\..\..\..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Lib>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI|x64'">
     <Midl>
       <TargetEnvironment>X64</TargetEnvironment>
@@ -1860,6 +2239,35 @@
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\..\..\..\include;..\..\..\..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Lib>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='LIB Release - DLL Windows SSPI - DLL WinIDN|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\..\..\..\include;..\..\..\..\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN64;NDEBUG;BUILDING_LIBCURL;CURL_STATICLIB;USE_WINDOWS_SSPI;USE_SCHANNEL;USE_WIN32_IDN;WANT_IDN_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
