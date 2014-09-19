@@ -257,7 +257,7 @@ than one thread at any given time.
 
 libcurl is completely thread safe, except for two issues: signals and SSL/TLS
 handlers. Signals are used for timing out name resolves (during DNS lookup) -
-when built without c-ares support and not on Windows.
+when built without using either the c-ares or threaded resolver backends.
 
 If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
 then of course using the underlying SSL library multi-threaded and those libs
