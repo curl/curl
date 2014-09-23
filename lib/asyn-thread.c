@@ -541,7 +541,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
       td->poll_interval = 250;
 
     td->interval_end = elapsed + td->poll_interval;
-    Curl_expire_latest(conn->data, td->poll_interval);
+    Curl_expire(conn->data, td->poll_interval);
   }
 
   return CURLE_OK;
