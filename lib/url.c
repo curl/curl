@@ -1191,6 +1191,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       /* flush cookies to file, takes care of the locking */
       Curl_flush_cookies(data, 0);
     }
+    else if(Curl_raw_equal(argptr, "RELOAD")) {
+      /* reload cookies from file */
+      Curl_cookie_loadfiles(data);
+      break;
+    }
     else {
       if(!data->cookies)
         /* if cookie engine was not running, activate it */

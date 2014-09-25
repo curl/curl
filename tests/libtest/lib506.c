@@ -175,11 +175,13 @@ int test(char *URL)
 {
   int res;
   CURLSHcode scode = CURLSHE_OK;
+  CURLcode code = CURLE_OK;
   char *url = NULL;
   struct Tdata tdata;
   CURL *curl;
   CURLSH *share;
   struct curl_slist *headers = NULL;
+  struct curl_slist *cookies = NULL;
   int i;
   struct userdata user;
 
@@ -295,6 +297,54 @@ int test(char *URL)
 
   printf( "PERFORM\n" );
   curl_easy_perform( curl );
+
+  printf( "CLEANUP\n" );
+  curl_easy_cleanup( curl );
+
+  /* load cookies */
+  if ((curl = curl_easy_init()) == NULL) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_share_cleanup(share);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+  url = suburl( URL, i );
+  headers = sethost( NULL );
+  test_setopt( curl, CURLOPT_HTTPHEADER, headers );
+  test_setopt( curl, CURLOPT_URL,        url );
+  printf( "CURLOPT_SHARE\n" );
+  test_setopt( curl, CURLOPT_SHARE,      share );
+  printf( "CURLOPT_COOKIELIST ALL\n" );
+  test_setopt( curl, CURLOPT_COOKIELIST, "ALL" );
+  printf( "CURLOPT_COOKIEJAR\n" );
+  test_setopt( curl, CURLOPT_COOKIEFILE, JAR );
+  printf( "CURLOPT_COOKIELIST RELOAD\n" );
+  test_setopt( curl, CURLOPT_COOKIELIST, "RELOAD" );
+
+  code = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+  if ( code != CURLE_OK )
+  {
+    fprintf(stderr, "curl_easy_getinfo() failed\n");
+    curl_share_cleanup(share);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+  printf("loaded cookies:\n");
+  if ( !cookies )
+  {
+    fprintf(stderr, "  reloading cookies from '%s' failed\n", JAR);
+    curl_share_cleanup(share);
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+  printf("-----------------\n");
+  while ( cookies )
+  {
+    printf( "  %s\n", cookies->data );
+    cookies = cookies->next;
+  }
+  printf("-----------------\n");
+  curl_slist_free_all( cookies );
 
   /* try to free share, expect to fail because share is in use*/
   printf( "try SHARE_CLEANUP...\n" );

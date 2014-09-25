@@ -46,6 +46,10 @@ erases all session cookies held in memory
 
 .IP FLUSH
 writes all known cookies to the file specified by \fICURLOPT_COOKIEJAR(3)\fP
+
+.IP RELOAD
+loads all cookies from the files specified by \fICURLOPT_COOKIEFILE(3)\fP
+
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -58,6 +62,8 @@ ALL was added in 7.14.1
 SESS was added in 7.15.4
 
 FLUSH was added in 7.17.1
+
+RELOAD was added in 7.39.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
