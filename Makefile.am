@@ -26,8 +26,9 @@ ACLOCAL_AMFLAGS = -I m4
 
 CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in		    \
 CMake/CurlCheckCSourceCompiles.cmake CMake/CurlCheckCSourceRuns.cmake	    \
-CMake/CurlTests.c CMake/OtherTests.cmake CMake/Platforms/WindowsCache.cmake \
-CMake/Utilities.cmake include/curl/curlbuild.h.cmake
+CMake/CurlTests.c CMake/FindGSS.cmake CMake/OtherTests.cmake                \
+CMake/Platforms/WindowsCache.cmake CMake/Utilities.cmake                    \
+include/curl/curlbuild.h.cmake
 
 VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
 VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp

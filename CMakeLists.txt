@@ -416,8 +416,64 @@ if(CMAKE_USE_LIBSSH2)
   endif(LIBSSH2_FOUND)
 endif(CMAKE_USE_LIBSSH2)
 
-# For other tests to use the same libraries
-set(CMAKE_REQUIRED_LIBRARIES ${CURL_LIBS})
+option(CMAKE_USE_GSSAPI "Use GSSAPI implementation (right now only Heimdal is supported with CMake build)" OFF)
+mark_as_advanced(CMAKE_USE_GSSAPI)
+
+if(CMAKE_USE_GSSAPI)
+  find_package(GSS)
+
+  set(HAVE_GSS_API ${GSS_FOUND})
+  if(GSS_FOUND)
+
+    message(STATUS "Found ${GSS_FLAVOUR} GSSAPI version: \"${GSS_VERSION}\"")
+
+    set(CMAKE_REQUIRED_INCLUDES ${GSS_INCLUDE_DIR})
+    check_include_file_concat("gssapi/gssapi.h"  HAVE_GSSAPI_GSSAPI_H)
+    check_include_file_concat("gssapi/gssapi_generic.h" HAVE_GSSAPI_GSSAPI_GENERIC_H)
+    check_include_file_concat("gssapi/gssapi_krb5.h" HAVE_GSSAPI_GSSAPI_KRB5_H)
+
+    if(GSS_FLAVOUR STREQUAL "Heimdal")
+      set(HAVE_GSSHEIMDAL ON)
+    else() # MIT
+      set(HAVE_GSSMIT ON)
+      set(_INCLUDE_LIST "")
+      if(HAVE_GSSAPI_GSSAPI_H)
+        list(APPEND _INCLUDE_LIST "gssapi/gssapi.h")
+      endif()
+      if(HAVE_GSSAPI_GSSAPI_GENERIC_H)
+        list(APPEND _INCLUDE_LIST "gssapi/gssapi_generic.h")
+      endif()
+      if(HAVE_GSSAPI_GSSAPI_KRB5_H)
+        list(APPEND _INCLUDE_LIST "gssapi/gssapi_krb5.h")
+      endif()
+
+      string(REPLACE ";" " " _COMPILER_FLAGS_STR "${GSS_COMPILER_FLAGS}")
+      string(REPLACE ";" " " _LINKER_FLAGS_STR "${GSS_LINKER_FLAGS}")
+
+      foreach(_dir ${GSS_LINK_DIRECTORIES})
+        set(_LINKER_FLAGS_STR "${_LINKER_FLAGS_STR} -L\"${_dir}\"")
+      endforeach()
+
+      set(CMAKE_REQUIRED_FLAGS "${_COMPILER_FLAGS_STR} ${_LINKER_FLAGS_STR}")
+      set(CMAKE_REQUIRED_LIBRARIES ${GSS_LIBRARIES})
+      check_symbol_exists("GSS_C_NT_HOSTBASED_SERVICE" ${_INCLUDE_LIST} HAVE_GSS_C_NT_HOSTBASED_SERVICE)
+      if(NOT HAVE_GSS_C_NT_HOSTBASED_SERVICE)
+        set(HAVE_OLD_GSSMIT ON)
+      endif()
+
+    endif()
+
+    include_directories(${GSS_INCLUDE_DIR})
+    link_directories(${GSS_LINK_DIRECTORIES})
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GSS_COMPILER_FLAGS}")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GSS_LINKER_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GSS_LINKER_FLAGS}")
+    list(APPEND CURL_LIBS ${GSS_LIBRARIES})
+
+  else()
+    message(WARNING "GSSAPI support has been requested but no supporting libraries found. Skipping.")
+  endif()
+endif()
 
 # If we have features.h, then do the _BSD_SOURCE magic
 check_include_file("features.h"       HAVE_FEATURES_H)
@@ -457,9 +513,6 @@ check_include_file_concat("des.h"            HAVE_DES_H)
 check_include_file_concat("err.h"            HAVE_ERR_H)
 check_include_file_concat("errno.h"          HAVE_ERRNO_H)
 check_include_file_concat("fcntl.h"          HAVE_FCNTL_H)
-check_include_file_concat("gssapi/gssapi.h"  HAVE_GSSAPI_GSSAPI_H)
-check_include_file_concat("gssapi/gssapi_generic.h" HAVE_GSSAPI_GSSAPI_GENERIC_H)
-check_include_file_concat("gssapi/gssapi_krb5.h" HAVE_GSSAPI_GSSAPI_KRB5_H)
 check_include_file_concat("idn-free.h"       HAVE_IDN_FREE_H)
 check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file_concat("io.h"             HAVE_IO_H)
@@ -579,6 +632,12 @@ find_file(RANDOM_FILE urandom /dev)
 mark_as_advanced(RANDOM_FILE)
 
 # Check for some functions that are used
+if(HAVE_LIBWS2_32)
+  set(CMAKE_REQUIRED_LIBRARIES ws2_32)
+elseif(HAVE_LIBSOCKET)
+  set(CMAKE_REQUIRED_LIBRARIES socket)
+endif()
+
 check_symbol_exists(basename      "${CURL_INCLUDES}" HAVE_BASENAME)
 check_symbol_exists(socket        "${CURL_INCLUDES}" HAVE_SOCKET)
 check_symbol_exists(poll          "${CURL_INCLUDES}" HAVE_POLL)
@@ -680,12 +739,7 @@ if(NOT HAVE_STRICMP)
   set(HAVE_LDAP_URL_PARSE 1)
 endif(NOT HAVE_STRICMP)
 
-
-
 # Do curl specific tests
-if(HAVE_LIBWS2_32)
-  set(CMAKE_REQUIRED_LIBRARIES ws2_32)
-endif()
 foreach(CURL_TEST
     HAVE_FCNTL_O_NONBLOCK
     HAVE_IOCTLSOCKET
