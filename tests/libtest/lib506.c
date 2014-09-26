@@ -182,6 +182,7 @@ int test(char *URL)
   CURLSH *share;
   struct curl_slist *headers = NULL;
   struct curl_slist *cookies = NULL;
+  struct curl_slist *next_cookie = NULL;
   int i;
   struct userdata user;
 
@@ -300,6 +301,8 @@ int test(char *URL)
 
   printf( "CLEANUP\n" );
   curl_easy_cleanup( curl );
+  curl_free(url);
+  curl_slist_free_all( headers );
 
   /* load cookies */
   if ((curl = curl_easy_init()) == NULL) {
@@ -338,10 +341,11 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
   printf("-----------------\n");
-  while ( cookies )
+  next_cookie = cookies;
+  while ( next_cookie )
   {
-    printf( "  %s\n", cookies->data );
-    cookies = cookies->next;
+    printf( "  %s\n", next_cookie->data );
+    next_cookie = next_cookie->next;
   }
   printf("-----------------\n");
   curl_slist_free_all( cookies );
@@ -362,12 +366,8 @@ test_cleanup:
   /* clean up last handle */
   printf( "CLEANUP\n" );
   curl_easy_cleanup( curl );
-
-  if ( headers )
-    curl_slist_free_all( headers );
-
-  if ( url )
-    curl_free(url);
+  curl_slist_free_all( headers );
+  curl_free(url);
 
   /* free share */
   printf( "SHARE_CLEANUP\n" );
