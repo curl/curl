@@ -1807,7 +1807,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
   struct SessionHandle *data = conn->data;
   struct SMTP *smtp = data->req.protop;
   struct pingpong *pp = &conn->proto.smtpc.pp;
-  const char *eob;
+  char *eob;
   ssize_t len;
   ssize_t bytes_written;
 
@@ -1827,29 +1827,44 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
   else if(!data->set.connect_only && data->set.upload && data->set.mail_rcpt) {
     /* Calculate the EOB taking into account any terminating CRLF from the
        previous line of the email or the CRLF of the DATA command when there
-       is "no mail data". RFC-5321, sect. 4.1.1.4. */
-    eob = SMTP_EOB;
-    len = SMTP_EOB_LEN;
+       is "no mail data". RFC-5321, sect. 4.1.1.4.
+
+       Note: As some SSL backends, such as OpenSSL, will cause Curl_write() to
+       fail when using a different pointer following a previous write, that
+       returned CURLE_AGAIN, we duplicate the EOB now rather than when the
+       bytes written doesn't equal len. */
     if(smtp->trailing_crlf || !conn->data->state.infilesize) {
-      eob += 2;
-      len -= 2;
+      eob = strdup(SMTP_EOB + 2);
+      len = SMTP_EOB_LEN - 2;
     }
+    else {
+      eob = strdup(SMTP_EOB);
+      len = SMTP_EOB_LEN;
+    }
+
+    if(!eob)
+      return CURLE_OUT_OF_MEMORY;
 
     /* Send the end of block data */
     result = Curl_write(conn, conn->writesockfd, eob, len, &bytes_written);
-    if(result)
+    if(result) {
+      free(eob);
       return result;
+    }
 
     if(bytes_written != len) {
       /* The whole chunk was not sent so keep it around and adjust the
          pingpong structure accordingly */
-      pp->sendthis = strdup(eob);
+      pp->sendthis = eob;
       pp->sendsize = len;
       pp->sendleft = len - bytes_written;
     }
-    else
+    else {
       /* Successfully sent so adjust the response timeout relative to now */
       pp->response = Curl_tvnow();
+
+      free(eob);
+    }
 
     state(conn, SMTP_POSTDATA);
 
