@@ -8,7 +8,7 @@ Curl and libcurl 7.38.1
 
 This release includes the following changes:
 
- o 
+ o CURLOPT_COOKIELIST: Added "RELOAD" command [5]
 
 This release includes the following bugfixes:
 
@@ -16,7 +16,12 @@ This release includes the following bugfixes:
  o newlines: fix mixed newlines to LF-only [2]
  o ntlm: Fixed HTTP proxy authentication when using Windows SSPI [3]
  o sasl_sspi: Fixed Unicode build [4]
- o 
+ o file: reject paths using embedded %00
+ o threaded-resolver: revert Curl_expire_latest() switch [6]
+ o build: Added WinIDN build configuration options
+ o configure: allow --with-ca-path with PolarSSL too
+ o HTTP/2: Fix busy loop when EOF is encountered
+ o CURLOPT_CAPATH: return failure if set without backend support
 
 This release includes the following known bugs:
 
@@ -25,8 +30,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Askar Safin, Daniel Stenberg, Paul Howarth, Ray Satiro, Steve Holme,
-  Viktor Szakáts
+  Askar Safin, Catalin Patulea, Dan Fandrich, Daniel Stenberg, Dimitar Boevski,
+  Jonathan Cardoso Machado, Marcel Raad, Michael Wallner, Paul Howarth,
+  Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts,
+  Yousuke Kimoto,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -36,4 +43,5 @@ References to bug reports and discussions on issues:
  [2] = http://curl.haxx.se/mail/lib-2014-09/0075.html
  [3] = http://curl.haxx.se/mail/lib-2014-08/0273.html
  [4] = http://curl.haxx.se/bug/view.cgi?id=1422
- [5] =
+ [5] = http://curl.haxx.se/libcurl/c/CURLOPT_COOKIELIST.html
+ [6] = http://curl.haxx.se/bug/view.cgi?id=1426
