@@ -1991,6 +1991,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     result = CURLE_NOT_BUILT_IN;
 #endif
     break;
+  case CURLOPT_PINNEDPUBLICKEY:
+    /*
+     * Set pinned public key for SSL connection.
+     * Specify file name of the public key in DER format.
+     */
+    result = setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+                       va_arg(param, char *));
+    break;
   case CURLOPT_CAINFO:
     /*
      * Set CA info for SSL connection. Specify file name of the CA certificate

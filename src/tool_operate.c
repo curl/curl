@@ -1025,6 +1025,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->crlfile)
           my_setopt_str(curl, CURLOPT_CRLFILE, config->crlfile);
 
+        if(config->pinnedpubkey)
+          my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
+
         if(curlinfo->features & CURL_VERSION_SSL) {
           if(config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);

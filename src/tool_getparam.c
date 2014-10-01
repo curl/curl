@@ -215,6 +215,7 @@ static const struct LongShort aliases[]= {
   {"Em", "tlsauthtype",              TRUE},
   {"En", "ssl-allow-beast",          FALSE},
   {"Eo", "login-options",            TRUE},
+  {"Ep", "pinnedpubkey",             TRUE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -1351,6 +1352,11 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
       case 'o': /* --login-options */
         GetStr(&config->login_options, nextarg);
+        break;
+
+      case 'p': /* Pinned public key DER file */
+        /* Pinned public key DER file */
+        GetStr(&config->pinnedpubkey, nextarg);
         break;
 
       default: /* certificate file */

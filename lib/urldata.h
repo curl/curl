@@ -1385,6 +1385,7 @@ enum dupstring {
   STRING_SET_URL,         /* what original URL to work on */
   STRING_SSL_CAPATH,      /* CA directory name (doesn't work on windows) */
   STRING_SSL_CAFILE,      /* certificate file to verify peer against */
+  STRING_SSL_PINNEDPUBLICKEY, /* public key file to verify peer against */
   STRING_SSL_CIPHER_LIST, /* list of ciphers to use */
   STRING_SSL_EGDSOCKET,   /* path to file containing the EGD daemon socket */
   STRING_SSL_RANDOM_FILE, /* path to file containing "random" data */

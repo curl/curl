@@ -298,6 +298,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_NO_CONNECTION_AVAILABLE:
     return "The max connection limit is reached";
 
+  case CURLE_SSL_PINNEDPUBKEYNOTMATCH:
+    return "SSL public key does not matched pinned public key";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:

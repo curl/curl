@@ -110,6 +110,7 @@ struct OperationConfig {
   char *cacert;
   char *capath;
   char *crlfile;
+  char *pinnedpubkey;
   char *key;
   char *key_type;
   char *key_passwd;

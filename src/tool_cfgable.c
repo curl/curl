@@ -101,6 +101,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->cacert);
   Curl_safefree(config->capath);
   Curl_safefree(config->crlfile);
+  Curl_safefree(config->pinnedpubkey);
   Curl_safefree(config->key);
   Curl_safefree(config->key_type);
   Curl_safefree(config->key_passwd);
