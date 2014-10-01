@@ -32,6 +32,7 @@
 
 #ifdef USE_GNUTLS
 
+#include <gnutls/abstract.h>
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
 
@@ -677,6 +678,102 @@ gtls_connect_step1(struct connectdata *conn,
   return CURLE_OK;
 }
 
+static int pkp_pin_peer_pubkey(gnutls_x509_crt_t cert, char *pinnedpubkey)
+{
+  /* Scratch */
+  FILE* fp = NULL;
+  size_t len1 = 0, len2 = 0;
+  unsigned char *buff1 = NULL, *buff2 = NULL;
+  long size = 0;
+
+  gnutls_pubkey_t key = NULL;
+
+  /* Result is returned to caller */
+  int ret = 0, result = FALSE;
+
+  /* if a path wasn't specified, don't pin */
+  if(NULL == pinnedpubkey) return TRUE;
+  if(NULL == cert) return FALSE;
+
+  do {
+    /* Begin Gyrations to get the public key     */
+    gnutls_pubkey_init(&key);
+
+    ret = gnutls_pubkey_import_x509(key, cert, 0);
+    if(ret < 0)
+      break; /* failed */
+
+    ret = gnutls_pubkey_export(key, GNUTLS_X509_FMT_DER, NULL, &len1);
+    if(ret != GNUTLS_E_SHORT_MEMORY_BUFFER || len1 == 0)
+        break; /* failed */
+
+    buff1 = malloc(len1);
+    if(NULL == buff1)
+      break; /* failed */
+
+    len2 = len1;
+
+    ret = gnutls_pubkey_export(key, GNUTLS_X509_FMT_DER, buff1, &len2);
+    if(ret < 0 || len1 != len2)
+      break; /* failed */
+
+    /* End Gyrations */
+
+    fp = fopen(pinnedpubkey, "r");
+
+    if(NULL == fp)
+      break; /* failed */
+
+    /* Seek to eof to determine the file's size */
+    ret = fseek(fp, 0, SEEK_END);
+    if(0 != ret)
+      break; /* failed */
+
+    /* Fetch the file's size */
+    size = ftell(fp);
+
+    /*
+     * if the size of our certificate doesn't match the size of
+     * the file, they can't be the same, don't bother reading it
+     */
+    if(size > 0 && len2 != (size_t)size)
+      break; /* failed */
+
+    /* Rewind to beginning to perform the read */
+    ret = fseek(fp, 0, SEEK_SET);
+    if(0 != ret)
+      break; /* failed */
+
+    /* http://www.openssl.org/docs/crypto/buffer.html */
+    buff2 = malloc(len2);
+    if(NULL == buff2)
+      break; /* failed */
+
+    /* Returns number of elements read, which should be 1 */
+    ret = (int)fread(buff2, (size_t)len2, 1, fp);
+    if(1 != ret)
+      break; /* failed */
+
+    /* The one good exit point */
+    result = (0 == memcmp(buff1, buff2, (size_t)len2));
+
+  } while(0);
+
+  if(NULL != fp)
+    fclose(fp);
+
+  if(NULL != key)
+    gnutls_pubkey_deinit(key);
+
+  if(NULL != buff2)
+    free(buff2);
+
+  if(NULL != buff1)
+    free(buff1);
+
+  return result;
+}
+
 static Curl_recv gtls_recv;
 static Curl_send gtls_send;
 
@@ -907,6 +1004,13 @@ gtls_connect_step3(struct connectdata *conn,
     }
     else
       infof(data, "\t server certificate activation date OK\n");
+  }
+
+  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY] != NULL &&
+      TRUE != pkp_pin_peer_pubkey(x509_cert,
+      data->set.str[STRING_SSL_PINNEDPUBLICKEY])) {
+    failf(data, "SSL: public key does not matched pinned public key!");
+    return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
   }
 
   /* Show:
