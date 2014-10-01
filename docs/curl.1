@@ -48,18 +48,20 @@ RFC 3986.
 You can specify multiple URLs or parts of URLs by writing part sets within
 braces as in:
 
- http://site.{one,two,three}.com
+  http://site.{one,two,three}.com
 
 or you can get sequences of alphanumeric series by using [] as in:
 
- ftp://ftp.numericals.com/file[1-100].txt
- ftp://ftp.numericals.com/file[001-100].txt    (with leading zeros)
- ftp://ftp.letters.com/file[a-z].txt
+  ftp://ftp.numericals.com/file[1-100].txt
+
+  ftp://ftp.numericals.com/file[001-100].txt    (with leading zeros)
+
+  ftp://ftp.letters.com/file[a-z].txt
 
 Nested sequences are not supported, but you can use several ones next to each
 other:
 
- http://any.org/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
+  http://any.org/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
 
 You can specify any amount of URLs on the command line. They will be fetched
 in a sequential manner in the specified order.
@@ -67,8 +69,14 @@ in a sequential manner in the specified order.
 You can specify a step counter for the ranges to get every Nth number or
 letter:
 
- http://www.numericals.com/file[1-100:10].txt
- http://www.letters.com/file[a-z:2].txt
+  http://www.numericals.com/file[1-100:10].txt
+
+  http://www.letters.com/file[a-z:2].txt
+
+When using [] or {} sequences when invoked from a command line prompt, you
+probably have to put the full URL within double quotes to avoid the shell from
+interfering with it. This also goes for other characters treated special, like
+for example '&', '?' and '*'.
 
 If you specify URL without protocol:// prefix, curl will attempt to guess what
 protocol you might want. It will then default to HTTP but try other protocols
