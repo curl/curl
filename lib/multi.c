@@ -1590,6 +1590,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           if(!retry) {
             /* if the URL is a follow-location and not just a retried request
                then figure out the URL here */
+            if(newurl)
+              free(newurl);
             newurl = data->req.newurl;
             data->req.newurl = NULL;
             follow = FOLLOW_REDIR;
