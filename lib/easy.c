@@ -630,6 +630,9 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         ev->ms += curlx_tvdiff(after, before);
 
     }
+    else
+      return CURLE_RECV_ERROR;
+
     if(mcode)
       return CURLE_URL_MALFORMAT; /* TODO: return a proper error! */
 
