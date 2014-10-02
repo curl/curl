@@ -4339,9 +4339,8 @@ static char *detect_proxy(struct connectdata *conn)
       prox=curl_getenv(proxy_env);
     }
 
-    if(prox && *prox) { /* don't count "" strings */
+    if(prox)
       proxy = prox; /* use this */
-    }
     else {
       proxy = curl_getenv("all_proxy"); /* default proxy to use */
       if(!proxy)
