@@ -560,8 +560,6 @@ static CURLcode pop3_perform_authentication(struct connectdata *conn)
     if(mech && (pop3c->preftype & POP3_TYPE_SASL)) {
       /* Perform SASL based authentication */
       result = pop3_perform_auth(conn, mech, initresp, len, state1, state2);
-
-      Curl_safefree(initresp);
     }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
     else if((pop3c->authtypes & POP3_TYPE_APOP) &&
@@ -579,6 +577,8 @@ static CURLcode pop3_perform_authentication(struct connectdata *conn)
       result = CURLE_LOGIN_DENIED;
     }
   }
+
+  Curl_safefree(initresp);
 
   return result;
 }
