@@ -54,6 +54,11 @@ following the request-line are headers. Adding this method line in this list
 of headers will only cause your request to send an invalid header. Use
 \fICURLOPT_CUSTOMREQUEST(3)\fP to change the method.
 
+When this option is passed to \fIcurl_easy_setopt(3)\fP, libcurl will not copy
+the entire list so you \fBmust\fP keep it around until you no longer use this
+\fIhandle\fP for a transfer before you call \fIcurl_slist_free_all(3)\fP on
+the list.
+
 Pass a NULL to this option to reset back to no custom headers.
 
 The most commonly replaced headers have "shortcuts" in the options
