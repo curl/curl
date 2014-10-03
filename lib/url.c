@@ -4434,10 +4434,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
         conn->bits.proxy_user_passwd = TRUE; /* enable it */
         atsign++; /* the right side of the @-letter */
 
-        if(atsign)
-          proxyptr = atsign; /* now use this instead */
-        else
-          res = CURLE_OUT_OF_MEMORY;
+        proxyptr = atsign; /* now use this instead */
       }
     }
 
