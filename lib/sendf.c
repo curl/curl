@@ -661,11 +661,13 @@ int Curl_debug(struct SessionHandle *data, curl_infotype type,
     switch (type) {
     case CURLINFO_HEADER_IN:
       w = "Header";
+      /* FALLTHROUGH */
     case CURLINFO_DATA_IN:
       t = "from";
       break;
     case CURLINFO_HEADER_OUT:
       w = "Header";
+      /* FALLTHROUGH */
     case CURLINFO_DATA_OUT:
       t = "to";
       break;
