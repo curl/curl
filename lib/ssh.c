@@ -588,8 +588,10 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
 
     switch(rc) {
     default: /* unknown return codes will equal reject */
+      /* FALLTHROUGH */
     case CURLKHSTAT_REJECT:
       state(conn, SSH_SESSION_FREE);
+      /* FALLTHROUGH */
     case CURLKHSTAT_DEFER:
       /* DEFER means bail out but keep the SSH_HOSTKEY state */
       result = sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
