@@ -564,7 +564,7 @@ static CURLcode choose_mech(struct connectdata *conn)
     break;
   }
 
-  return mech != NULL ? CURLE_OK : CURLE_FAILED_INIT;
+  return *mech != NULL ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
 CURLcode
