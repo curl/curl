@@ -1762,6 +1762,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       switch(*nextarg) {
       case '+':
         nextarg++;
+        /* FALLTHROUGH */
       default:
         /* If-Modified-Since: (section 14.28 in RFC2068) */
         config->timecond = CURL_TIMECOND_IFMODSINCE;
