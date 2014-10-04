@@ -1145,29 +1145,29 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
               " (bytes written: %zd)\n", curl_easy_strerror(code), written);
       }
     }
+  }
 
-    /* free SSPI Schannel API security context handle */
-    if(connssl->ctxt) {
-      infof(data, "schannel: clear security context handle\n");
-      s_pSecFn->DeleteSecurityContext(&connssl->ctxt->ctxt_handle);
-      Curl_safefree(connssl->ctxt);
+  /* free SSPI Schannel API security context handle */
+  if(connssl->ctxt) {
+    infof(data, "schannel: clear security context handle\n");
+    s_pSecFn->DeleteSecurityContext(&connssl->ctxt->ctxt_handle);
+    Curl_safefree(connssl->ctxt);
+  }
+
+  /* free SSPI Schannel API credential handle */
+  if(connssl->cred) {
+    /* decrement the reference counter of the credential/session handle */
+    if(connssl->cred->refcount > 0) {
+      connssl->cred->refcount--;
+      infof(data, "schannel: decremented credential handle refcount = %d\n",
+            connssl->cred->refcount);
     }
 
-    /* free SSPI Schannel API credential handle */
-    if(connssl->cred) {
-      /* decrement the reference counter of the credential/session handle */
-      if(connssl->cred->refcount > 0) {
-        connssl->cred->refcount--;
-        infof(data, "schannel: decremented credential handle refcount = %d\n",
-              connssl->cred->refcount);
-      }
-
-      /* if the handle was not cached and the refcount is zero */
-      if(!connssl->cred->cached && connssl->cred->refcount == 0) {
-        infof(data, "schannel: clear credential handle\n");
-        s_pSecFn->FreeCredentialsHandle(&connssl->cred->cred_handle);
-        Curl_safefree(connssl->cred);
-      }
+    /* if the handle was not cached and the refcount is zero */
+    if(!connssl->cred->cached && connssl->cred->refcount == 0) {
+      infof(data, "schannel: clear credential handle\n");
+      s_pSecFn->FreeCredentialsHandle(&connssl->cred->cred_handle);
+      Curl_safefree(connssl->cred);
     }
   }
 
