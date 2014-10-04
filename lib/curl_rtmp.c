@@ -217,7 +217,7 @@ static CURLcode rtmp_connect(struct connectdata *conn, bool *done)
      !(r->Link.protocol & RTMP_FEATURE_HTTP))
     r->Link.lFlags |= RTMP_LF_BUFX;
 
-  curlx_nonblock(r->m_sb.sb_socket, FALSE);
+  (void)curlx_nonblock(r->m_sb.sb_socket, FALSE);
   setsockopt(r->m_sb.sb_socket, SOL_SOCKET, SO_RCVTIMEO,
              (char *)&tv, sizeof(tv));
 

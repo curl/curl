@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -127,7 +127,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  curlx_nonblock(sock, FALSE);
+  (void)curlx_nonblock(sock, FALSE);
 
   infof(data, "SOCKS4 communication to %s:%d\n", hostname, remote_port);
 
@@ -335,7 +335,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     }
   }
 
-  curlx_nonblock(sock, TRUE);
+  (void)curlx_nonblock(sock, TRUE);
 
   return CURLE_OK; /* Proxy was successful! */
 }
@@ -396,7 +396,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  curlx_nonblock(sock, TRUE);
+  (void)curlx_nonblock(sock, TRUE);
 
   /* wait until socket gets connected */
   result = Curl_socket_ready(CURL_SOCKET_BAD, sock, timeout);
@@ -427,7 +427,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   socksreq[3] = 2; /* username/password */
 #endif
 
-  curlx_nonblock(sock, FALSE);
+  (void)curlx_nonblock(sock, FALSE);
 
   code = Curl_write_plain(conn, sock, (char *)socksreq, (2 + (int)socksreq[1]),
                           &written);
@@ -436,7 +436,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     return CURLE_COULDNT_CONNECT;
   }
 
-  curlx_nonblock(sock, TRUE);
+  (void)curlx_nonblock(sock, TRUE);
 
   result = Curl_socket_ready(sock, CURL_SOCKET_BAD, timeout);
 
@@ -454,7 +454,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     return CURLE_RECV_ERROR;
   }
 
-  curlx_nonblock(sock, FALSE);
+  (void)curlx_nonblock(sock, FALSE);
 
   result=Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread);
   if((result != CURLE_OK) || (actualread != 2)) {
@@ -747,7 +747,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   }
 #endif
 
-  curlx_nonblock(sock, TRUE);
+  (void)curlx_nonblock(sock, TRUE);
   return CURLE_OK; /* Proxy was successful! */
 }
 

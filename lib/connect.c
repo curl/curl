@@ -1050,7 +1050,7 @@ singleipconnect(struct connectdata *conn,
   }
 
   /* set socket non-blocking */
-  curlx_nonblock(sockfd, TRUE);
+  (void)curlx_nonblock(sockfd, TRUE);
 
   conn->connecttime = Curl_tvnow();
   if(conn->num_addr > 1)

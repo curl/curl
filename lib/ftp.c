@@ -346,7 +346,7 @@ static CURLcode AcceptServerConnect(struct connectdata *conn)
   infof(data, "Connection accepted from server\n");
 
   conn->sock[SECONDARYSOCKET] = s;
-  curlx_nonblock(s, TRUE); /* enable non-blocking */
+  (void)curlx_nonblock(s, TRUE); /* enable non-blocking */
   conn->sock_accepted[SECONDARYSOCKET] = TRUE;
 
   if(data->set.fsockopt) {
