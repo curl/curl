@@ -10,7 +10,7 @@
  * Copyright (c) 1998, 1999, 2013 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
- * Copyright (C) 2001 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * All rights reserved.
  *
@@ -402,7 +402,7 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
     ret_code = 0;
   else {
     /* Check for error? */
-    sscanf(buf, "%d", &ret_code);
+    (void)sscanf(buf, "%d", &ret_code);
   }
 
   if(buf[decoded_len - 1] == '\n')
