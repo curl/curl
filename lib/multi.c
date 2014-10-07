@@ -1365,6 +1365,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           else {
             /* Have error handler disconnect conn if we can't retry */
             disconnect_conn = TRUE;
+            free(newurl);
           }
         }
         else {
