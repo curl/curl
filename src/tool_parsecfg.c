@@ -208,7 +208,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         }
       }
 
-      if(param && !*param) {
+      if(!*param) {
         /* do this so getparameter can check for required parameters.
            Otherwise it always thinks there's a parameter. */
         if(alloced_param)
