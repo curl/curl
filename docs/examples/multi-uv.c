@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -95,6 +95,31 @@ void add_download(const char *url, int num)
   fprintf(stderr, "Added download %s -> %s\n", url, filename);
 }
 
+static void check_multi_info(void)
+{
+  int running_handles;
+  char *done_url;
+  CURLMsg *message;
+  int pending;
+
+  while ((message = curl_multi_info_read(curl_handle, &pending))) {
+    switch (message->msg) {
+    case CURLMSG_DONE:
+      curl_easy_getinfo(message->easy_handle, CURLINFO_EFFECTIVE_URL,
+                        &done_url);
+      printf("%s DONE\n", done_url);
+
+      curl_multi_remove_handle(curl_handle, message->easy_handle);
+      curl_easy_cleanup(message->easy_handle);
+      break;
+
+    default:
+      fprintf(stderr, "CURLMSG default\n");
+      break;
+    }
+  }
+}
+
 void curl_perform(uv_poll_t *req, int status, int events)
 {
   int running_handles;
@@ -116,22 +141,7 @@ void curl_perform(uv_poll_t *req, int status, int events)
   curl_multi_socket_action(curl_handle, context->sockfd, flags,
                            &running_handles);
 
-  while ((message = curl_multi_info_read(curl_handle, &pending))) {
-    switch (message->msg) {
-    case CURLMSG_DONE:
-      curl_easy_getinfo(message->easy_handle, CURLINFO_EFFECTIVE_URL,
-                        &done_url);
-      printf("%s DONE\n", done_url);
-
-      curl_multi_remove_handle(curl_handle, message->easy_handle);
-      curl_easy_cleanup(message->easy_handle);
-
-      break;
-    default:
-      fprintf(stderr, "CURLMSG default\n");
-      abort();
-    }
-  }
+  check_multi_info();
 }
 
 void on_timeout(uv_timer_t *req, int status)
@@ -139,6 +149,7 @@ void on_timeout(uv_timer_t *req, int status)
   int running_handles;
   curl_multi_socket_action(curl_handle, CURL_SOCKET_TIMEOUT, 0,
                            &running_handles);
+  check_multi_info();
 }
 
 void start_timeout(CURLM *multi, long timeout_ms, void *userp)
