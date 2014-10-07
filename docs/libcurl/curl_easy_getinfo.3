@@ -76,8 +76,8 @@ start until the connect to the remote host (or proxy) was completed.
 Pass a pointer to a double to receive the time, in seconds, it took from the
 start until the SSL/SSH connect/handshake to the remote host was completed.
 This time is most often very near to the PRETRANSFER time, except for cases
-such as HTTP pippelining where the pretransfer time can be delayed due to
-waits in line for the pipeline and more. (Added in 7.19.0)
+such as HTTP pipelining where the pretransfer time can be delayed due to waits
+in line for the pipeline and more. (Added in 7.19.0)
 .IP CURLINFO_PRETRANSFER_TIME
 Pass a pointer to a double to receive the time, in seconds, it took from the
 start until the file transfer is just about to begin. This includes all
