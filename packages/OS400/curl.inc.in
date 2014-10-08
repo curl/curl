@@ -511,6 +511,8 @@
      d                 c                   88
      d  CURLE_NO_CONNECTION_AVAILABLE...
      d                 c                   89
+     d  CURLE_SSL_PINNEDPUBKEYNOTMATCH...
+     d                 c                   90
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLE_URL_MALFORMAT_USER...
@@ -1189,6 +1191,8 @@
      d                 c                   10228
      d  CURLOPT_HEADEROPT...
      d                 c                   00229
+     d  CURLOPT_PINNEDPUBLICKEY...
+     d                 c                   10230
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
