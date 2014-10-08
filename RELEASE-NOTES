@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o configure: allow --with-ca-path with PolarSSL too
  o HTTP/2: Fix busy loop when EOF is encountered
  o CURLOPT_CAPATH: return failure if set without backend support
+ o nss: do not fail if a CRL is already cached
 
 This release includes the following known bugs:
 

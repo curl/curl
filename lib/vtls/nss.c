@@ -448,7 +448,7 @@ static CURLcode nss_cache_crl(SECItem *crl_der)
     /* CRL already cached */
     SEC_DestroyCrl(crl);
     SECITEM_FreeItem(crl_der, PR_TRUE);
-    return CURLE_SSL_CRL_BADFILE;
+    return CURLE_OK;
   }
 
   /* acquire lock before call of CERT_CacheCRL() and accessing nss_crl_list */
