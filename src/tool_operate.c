@@ -1848,6 +1848,9 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
         /* Cleanup the libcurl source output */
         easysrc_cleanup();
 
+        /* set current back to first so that isn't NULL */
+        config->current = config->first;
+
         /* Dump the libcurl code if previously enabled */
         dumpeasysrc(config);
 #endif
