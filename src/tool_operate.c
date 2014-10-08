@@ -543,7 +543,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             res = get_url_file_name(&outfile, this_url);
             if(res)
               goto show_error;
-            if((!outfile || !*outfile) && !config->content_disposition) {
+            if(!*outfile && !config->content_disposition) {
               helpf(global->errors, "Remote file name has no length!\n");
               res = CURLE_WRITE_ERROR;
               goto quit_urls;
