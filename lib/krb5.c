@@ -2,7 +2,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999, 2013 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2012 Daniel Stenberg
+ * Copyright (c) 2004 - 2014 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,17 +121,13 @@ krb5_overhead(void *app_data, int level, int len)
 }
 
 static int
-krb5_encode(void *app_data, const void *from, int length, int level, void **to,
-            struct connectdata *conn UNUSED_PARAM)
+krb5_encode(void *app_data, const void *from, int length, int level, void **to)
 {
   gss_ctx_id_t *context = app_data;
   gss_buffer_desc dec, enc;
   OM_uint32 maj, min;
   int state;
   int len;
-
-  /* shut gcc up */
-  conn = NULL;
 
   /* NOTE that the cast is safe, neither of the krb5, gnu gss and heimdal
    * libraries modify the input buffer in gss_seal()

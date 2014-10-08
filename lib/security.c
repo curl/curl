@@ -295,7 +295,7 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
       prot_level = conn->command_prot;
   }
   bytes = conn->mech->encode(conn->app_data, from, length, prot_level,
-                             (void**)&buffer, conn);
+                             (void**)&buffer);
   if(!buffer || bytes <= 0)
     return; /* error */
 
