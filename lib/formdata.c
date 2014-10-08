@@ -689,7 +689,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         }
         if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
                             HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
-                            HTTPPOST_CALLBACK)) ) {
+                            HTTPPOST_CALLBACK)) && form->value) {
           /* copy value (without strdup; possibly contains null characters) */
           form->value = memdup(form->value, form->contentslength);
           if(!form->value) {
