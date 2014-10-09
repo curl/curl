@@ -60,16 +60,6 @@
 #include "urldata.h"
 
 #include "vtls.h" /* generic SSL protos etc */
-#include "openssl.h" /* OpenSSL versions */
-#include "gtls.h"   /* GnuTLS versions */
-#include "nssg.h"   /* NSS versions */
-#include "qssl.h"   /* QSOSSL versions */
-#include "gskit.h"  /* Global Secure ToolKit versions */
-#include "polarssl.h" /* PolarSSL versions */
-#include "axtls.h"  /* axTLS versions */
-#include "cyassl.h"  /* CyaSSL versions */
-#include "curl_schannel.h" /* Schannel SSPI version */
-#include "curl_darwinssl.h" /* SecureTransport (Darwin) version */
 #include "slist.h"
 #include "sendf.h"
 #include "rawstr.h"
