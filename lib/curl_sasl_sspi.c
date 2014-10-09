@@ -485,6 +485,46 @@ void Curl_sasl_digest_cleanup(struct digestdata *digest)
 }
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */
 
+#if defined USE_NTLM
+/*
+ * Curl_sasl_ntlm_cleanup()
+ *
+ * This is used to clean up the ntlm specific data.
+ *
+ * Parameters:
+ *
+ * ntlm    [in/out] - The ntlm data struct being cleaned up.
+ *
+ */
+void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
+{
+  /* Free our security context */
+  if(ntlm->context) {
+    s_pSecFn->DeleteSecurityContext(ntlm->context);
+    free(ntlm->context);
+    ntlm->context = NULL;
+  }
+
+  /* Free our credentials handle */
+  if(ntlm->credentials) {
+    s_pSecFn->FreeCredentialsHandle(ntlm->credentials);
+    free(ntlm->credentials);
+    ntlm->credentials = NULL;
+  }
+
+  /* Free our identity */
+  Curl_sspi_free_identity(ntlm->p_identity);
+  ntlm->p_identity = NULL;
+
+  /* Free the input and output tokens */
+  Curl_safefree(ntlm->input_token);
+  Curl_safefree(ntlm->output_token);
+
+  /* Reset any variables */
+  ntlm->token_max = 0;
+}
+#endif /* USE_NTLM */
+
 #if defined(USE_KRB5)
 /*
  * Curl_sasl_create_gssapi_user_message()

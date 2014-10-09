@@ -149,6 +149,11 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen);
 
+#if defined(USE_WINDOWS_SSPI)
+/* This is used to clean up the ntlm specific data */
+void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm);
+#endif
+
 #endif /* USE_NTLM */
 
 #if defined(USE_KRB5)

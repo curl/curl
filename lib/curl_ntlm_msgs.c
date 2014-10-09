@@ -51,6 +51,7 @@
 
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "curl_ntlm_msgs.h"
+#include "curl_sasl.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -338,36 +339,6 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   return CURLE_OK;
 }
 
-#ifdef USE_WINDOWS_SSPI
-void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm)
-{
-  /* Free our security context */
-  if(ntlm->context) {
-    s_pSecFn->DeleteSecurityContext(ntlm->context);
-    free(ntlm->context);
-    ntlm->context = NULL;
-  }
-
-  /* Free our credentials handle */
-  if(ntlm->credentials) {
-    s_pSecFn->FreeCredentialsHandle(ntlm->credentials);
-    free(ntlm->credentials);
-    ntlm->credentials = NULL;
-  }
-
-  /* Free our identity */
-  Curl_sspi_free_identity(ntlm->p_identity);
-  ntlm->p_identity = NULL;
-
-  /* Free the input and output tokens */
-  Curl_safefree(ntlm->input_token);
-  Curl_safefree(ntlm->output_token);
-
-  /* Reset any variables */
-  ntlm->token_max = 0;
-}
-#endif
-
 #ifndef USE_WINDOWS_SSPI
 /* copy the source to the destination and fill in zeroes in every
    other destination byte! */
@@ -430,7 +401,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   unsigned long attrs;
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
-  Curl_ntlm_sspi_cleanup(ntlm);
+  Curl_sasl_ntlm_cleanup(ntlm);
 
   /* Query the security package for NTLM */
   status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
@@ -695,7 +666,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   result = Curl_base64_encode(NULL, (char *)ntlm->output_token, size,
                               outptr, outlen);
 
-  Curl_ntlm_sspi_cleanup(ntlm);
+  Curl_sasl_ntlm_cleanup(ntlm);
 
   return result;
 

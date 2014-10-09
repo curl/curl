@@ -52,14 +52,6 @@ CURLcode Curl_ntlm_decode_type2_target(struct SessionHandle *data,
                                        size_t size,
                                        struct ntlmdata* ntlm);
 
-
-/* This is to clean up the ntlm data structure */
-#ifdef USE_WINDOWS_SSPI
-void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm);
-#else
-#define Curl_ntlm_sspi_cleanup(x)
-#endif
-
 /* NTLM buffer fixed size, large enough for long user + host + domain */
 #define NTLM_BUFSIZE 1024
 

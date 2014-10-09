@@ -39,6 +39,7 @@
 #include "curl_ntlm.h"
 #include "curl_ntlm_msgs.h"
 #include "curl_ntlm_wb.h"
+#include "curl_sasl.h"
 #include "url.h"
 #include "curl_memory.h"
 
@@ -229,8 +230,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
 void Curl_http_ntlm_cleanup(struct connectdata *conn)
 {
 #ifdef USE_WINDOWS_SSPI
-  Curl_ntlm_sspi_cleanup(&conn->ntlm);
-  Curl_ntlm_sspi_cleanup(&conn->proxyntlm);
+  Curl_sasl_ntlm_cleanup(&conn->ntlm);
+  Curl_sasl_ntlm_cleanup(&conn->proxyntlm);
 #elif defined(NTLM_WB_ENABLED)
   Curl_ntlm_wb_cleanup(conn);
 #else

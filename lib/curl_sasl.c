@@ -1243,7 +1243,7 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
 #ifdef USE_NTLM
   /* Cleanup the ntlm structure */
   else if(authused == SASL_MECH_NTLM) {
-    Curl_ntlm_sspi_cleanup(&conn->ntlm);
+    Curl_sasl_ntlm_cleanup(&conn->ntlm);
   }
 #endif
 #else
