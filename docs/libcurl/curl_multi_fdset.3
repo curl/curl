@@ -53,18 +53,18 @@ of type fd_set that on return specifies the file descriptors to be checked for
 error conditions pending.
 
 If no file descriptors are set by libcurl, \fImax_fd\fP will contain -1 when
-this function returns. Otherwise it will contain the higher descriptor number
+this function returns. Otherwise it will contain the highest descriptor number
 libcurl set. When libcurl returns -1 in \fImax_fd\fP, it is because libcurl
 currently does something that isn't possible for your application to monitor
 with a socket and unfortunately you can then not know exactly when the current
-action is completed using select(). When max_fd returns with -1, you need to
-wait a while and then proceed and call \fIcurl_multi_perform\fP anyway. How
-long to wait? We suggest 100 milliseconds at least, but you may want to test
-it out in your own particular conditions to find a suitable value.
+action is completed using select(). You then need to wait a while before you
+proceed and call \fIcurl_multi_perform(3)\fP anyway. How long to wait? We
+suggest 100 milliseconds at least, but you may want to test it out in your own
+particular conditions to find a suitable value.
 
 When doing select(), you should use \fBcurl_multi_timeout\fP to figure out how
-long to wait for action. Call \fIcurl_multi_perform\fP even if no activity has
-been seen on the fd_sets after the timeout expires as otherwise internal
+long to wait for action. Call \fIcurl_multi_perform(3)\fP even if no activity
+has been seen on the fd_sets after the timeout expires as otherwise internal
 retries and timeouts may not work as you'd think and want.
 
 If one of the sockets used by libcurl happens to be larger than what can be
