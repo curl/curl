@@ -1,4 +1,4 @@
-Curl and libcurl 7.38.1
+Curl and libcurl 7.39.0
 
  Public curl releases:         142
  Command line options:         162
@@ -9,6 +9,8 @@ Curl and libcurl 7.38.1
 This release includes the following changes:
 
  o CURLOPT_COOKIELIST: Added "RELOAD" command [5]
+ o ssh: improve key file search
+ o SSL: public key pinning. Use CURLOPT_PINNEDPUBLICKEY and --pinnedpubkey
 
 This release includes the following bugfixes:
 
@@ -23,6 +25,15 @@ This release includes the following bugfixes:
  o HTTP/2: Fix busy loop when EOF is encountered
  o CURLOPT_CAPATH: return failure if set without backend support
  o nss: do not fail if a CRL is already cached
+ o smtp: Fixed intermittent "SSL3_WRITE_PENDING: bad write retry" error
+ o fixed 20+ nits/memory leaks identified by Coverity scans
+ o curl_schannel.c: Fixed possible memory or handle leak
+ o multi-uv.c: call curl_multi_info_read() better
+ o Cmake: Check for OpenSSL before OpenLDAP
+ o Cmake: Fix library list provided to cURL tests
+ o Cmake: Avoid cycle directory dependencies
+ o Cmake: Build with GSSAPI (MIT or Heimdal)
+ o vtls: provide backend defines for internal source code
 
 This release includes the following known bugs:
 
@@ -31,9 +42,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Askar Safin, Catalin Patulea, Dan Fandrich, Daniel Stenberg, Dimitar Boevski,
-  Jonathan Cardoso Machado, Marcel Raad, Michael Wallner, Paul Howarth,
-  Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts,
+  Askar Safin, Bill Nagel, Catalin Patulea, Dan Fandrich, Daniel Stenberg,
+  Dimitar Boevski, Fabian Keil, Jakub Zakrzewski, Jeremy Lin,
+  Jonathan Cardoso Machado, Kamil Dudka, Luan Cestari, Marcel Raad,
+  Marc Hoersken, Michael Wallner, Patrick Monnerat, Paul Howarth, Ray Satiro,
+  Steve Holme, Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts, Waldek Kozba,
   Yousuke Kimoto,
 
         Thanks! (and sorry if I forgot to mention someone)
