@@ -143,11 +143,9 @@ CURLcode get_url_file_name(char **filename, const char *url)
   if(pc) {
     /* duplicate the string beyond the slash */
     pc++;
-    if(*pc) {
-      *filename = strdup(pc);
-      if(!*filename)
-        return CURLE_OUT_OF_MEMORY;
-    }
+    *filename = strdup(pc);
+    if(!*filename)
+      return CURLE_OUT_OF_MEMORY;
   }
 
   /* in case we built debug enabled, we allow an environment variable
