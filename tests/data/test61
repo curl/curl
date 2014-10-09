@@ -23,7 +23,7 @@ Set-Cookie: test3=maybe; domain=foo.com; path=/moo; secure
 Set-Cookie: test4=no; domain=nope.foo.com; path=/moo; secure
 Set-Cookie: test5=name; domain=anything.com; path=/ ; secure
 Set-Cookie: fake=fooledyou; domain=..com; path=/;
-Set-Cookie: supercookie=fooledyou; domain=.com; path=/;^M
+Set-Cookie: supercookie=fooledyou; domain=.com; path=/;
 Content-Length: 4
 
 boo
