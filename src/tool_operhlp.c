@@ -140,13 +140,16 @@ CURLcode get_url_file_name(char **filename, const char *url)
     pc = url;
   pc = strrchr(pc, '/');
 
-  if(pc) {
+  if(pc)
     /* duplicate the string beyond the slash */
     pc++;
-    *filename = strdup(pc);
-    if(!*filename)
-      return CURLE_OUT_OF_MEMORY;
-  }
+  else
+    /* no slash => empty string */
+    pc = "";
+
+  *filename = strdup(pc);
+  if(!*filename)
+    return CURLE_OUT_OF_MEMORY;
 
   /* in case we built debug enabled, we allow an environment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a
