@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -37,8 +37,20 @@ This function extracts file descriptor information from a given multi_handle.
 libcurl returns its fd_set sets. The application can use these to select() on,
 but be sure to FD_ZERO them before calling this function as
 \fIcurl_multi_fdset(3)\fP only adds its own descriptors, it doesn't zero or
-otherwise remove any others. The \fIcurl_multi_perform(3)\fP function should be
-called as soon as one of them is ready to be read from or written to.
+otherwise remove any others. The \fIcurl_multi_perform(3)\fP function should
+be called as soon as one of them is ready to be read from or written to.
+
+If the \fIread_fd_set\fP argument is not a null pointer, it points to an
+object of type fd_set that on returns specifies the file descriptors to be
+checked for being ready to read.
+
+If the \fIwrite_fd_set\fP argument is not a null pointer, it points to an
+object of type fd_set that on return specifies the file descriptors to be
+checked for being ready to write.
+
+If the \fIexc_fd_set\fP argument is not a null pointer, it points to an object
+of type fd_set that on return specifies the file descriptors to be checked for
+error conditions pending.
 
 If no file descriptors are set by libcurl, \fImax_fd\fP will contain -1 when
 this function returns. Otherwise it will contain the higher descriptor number
@@ -47,8 +59,8 @@ currently does something that isn't possible for your application to monitor
 with a socket and unfortunately you can then not know exactly when the current
 action is completed using select(). When max_fd returns with -1, you need to
 wait a while and then proceed and call \fIcurl_multi_perform\fP anyway. How
-long to wait? I would suggest 100 milliseconds at least, but you may want to
-test it out in your own particular conditions to find a suitable value.
+long to wait? We suggest 100 milliseconds at least, but you may want to test
+it out in your own particular conditions to find a suitable value.
 
 When doing select(), you should use \fBcurl_multi_timeout\fP to figure out how
 long to wait for action. Call \fIcurl_multi_perform\fP even if no activity has
@@ -67,4 +79,4 @@ CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
-.BR curl_multi_timeout "(3), " curl_multi_perform "(3) "
+.BR curl_multi_timeout "(3), " curl_multi_perform "(3), " select "(2) "
