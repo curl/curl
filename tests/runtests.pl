@@ -5429,6 +5429,15 @@ while(@ARGV) {
         # continue anyway, even if a test fail
         $anyway=1;
     }
+    elsif($ARGV[0] eq "-o") {
+        shift @ARGV;
+        if ($ARGV[0] =~ /^(\w+)=([\w.:\/\[\]-]+)$/) {
+            my ($variable, $value) = ($1, $2);
+            eval "\$$variable='$value'" or die "Failed to set \$$variable to $value: $@";
+        } else {
+            die "Failed to parse '-o $ARGV[0]'. May contain unexpected characters.\n";
+        }
+    }
     elsif($ARGV[0] eq "-p") {
         $postmortem=1;
     }
@@ -5495,6 +5504,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
   -n       no valgrind
+  -o variable=value set internal variable to the specified value
   -P proxy use the specified proxy
   -p       print log file contents when a test fails
   -R       scrambled order (uses the random seed, see --seed)
