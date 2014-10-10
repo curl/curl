@@ -4,21 +4,24 @@
                             | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
-CURL SECURITY FOR DEVELOPERS
+curl security for developers
+============================
 
 This document is intended to provide guidance to curl developers on how
 security vulnerabilities should be handled.
 
-PUBLISHING INFORMATION
+Publishing Information
+----------------------
 
-All known and public curl or libcurl related vulnerabilities are listed at
-http://curl.haxx.se/docs/security.html
+All known and public curl or libcurl related vulnerabilities are listed on
+[the curl web site security page](http://curl.haxx.se/docs/security.html).
 
 Security vulnerabilities should not be entered in the project's public bug
 tracker unless the necessary configuration is in place to limit access to the
 issue to only the reporter and the project's security team.
 
-VULNERABILITY HANDLING
+Vulnerability Handling
+----------------------
 
 The typical process for handling a new security vulnerability is as follows.
 
@@ -31,7 +34,7 @@ any reference to the security nature of the commit if done prior to the public
 announcement.
 
 - The person discovering the issue, the reporter, reports the vulnerability
-  privately to curl-security@haxx.se. That's an email alias that reaches a
+  privately to `curl-security@haxx.se`. That's an email alias that reaches a
   handful of selected and trusted people.
 
 - Messages that do not relate to the reporting or managing of an undisclosed
@@ -63,7 +66,7 @@ announcement.
   workarounds, when the release is out and make sure to credit all
   contributors properly.
 
-- Request a CVE number from distros@openwall.org[1] when also informing and
+- Request a CVE number from distros@openwall[1] when also informing and
   preparing them for the upcoming public security vulnerability announcement -
   attach the advisory draft for information. Note that 'distros' won't accept
   an embargo longer than 19 days.
@@ -91,6 +94,7 @@ announcement.
 [1] = http://oss-security.openwall.org/wiki/mailing-lists/distros
 
 CURL-SECURITY (at haxx dot se)
+------------------------------
 
 Who is on this list? There are a couple of criteria you must meet, and then we
 might ask you to join the list or you can ask to join it. It really isn't very
