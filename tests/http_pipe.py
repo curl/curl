@@ -17,7 +17,10 @@
 # Modified by Linus Nielsen Feltzing for inclusion in the libcurl test
 # framework
 #
-import SocketServer
+try:
+    import socketserver
+except:
+    import SocketServer as socketserver
 import argparse
 import re
 import select
@@ -251,24 +254,21 @@ class ResponseBuilder(object):
         self._processed_end = True
 
       elif path == '/1k.txt':
-        str = '0123456789abcdef'
-        body = ''.join([str for num in xrange(64)])
+        body = '0123456789abcdef' * 64
         result += self._BuildResponse(
             '200 OK', ['Server: Apache',
                        'Content-Length: 1024',
                        'Cache-Control: max-age=60'], body)
 
       elif path == '/10k.txt':
-        str = '0123456789abcdef'
-        body = ''.join([str for num in xrange(640)])
+        body = '0123456789abcdef' * 640
         result += self._BuildResponse(
             '200 OK', ['Server: Apache',
                        'Content-Length: 10240',
                        'Cache-Control: max-age=60'], body)
 
       elif path == '/100k.txt':
-        str = '0123456789abcdef'
-        body = ''.join([str for num in xrange(6400)])
+        body = '0123456789abcdef' * 6400
         result += self._BuildResponse(
             '200 OK',
             ['Server: Apache',
@@ -277,9 +277,7 @@ class ResponseBuilder(object):
             body)
 
       elif path == '/100k_chunked.txt':
-        str = '0123456789abcdef'
-        moo = ''.join([str for num in xrange(6400)])
-        body = self.Chunkify(moo, 20480)
+        body = self.Chunkify('0123456789abcdef' * 6400, 20480)
         body.append('0\r\n\r\n')
         body = ''.join(body)
 
@@ -337,7 +335,7 @@ class ResponseBuilder(object):
             '%s' % (status, '\r\n'.join(headers), body))
 
 
-class PipelineRequestHandler(SocketServer.BaseRequestHandler):
+class PipelineRequestHandler(socketserver.BaseRequestHandler):
   """Called on an incoming TCP connection."""
 
   def _GetTimeUntilTimeout(self):
@@ -407,11 +405,11 @@ class PipelineRequestHandler(SocketServer.BaseRequestHandler):
       self.request.send(self._response_builder.WriteError(
           '200 OK', INFO_MESSAGE))
     except Exception as e:
-      print e
+      print(e)
     self.request.close()
 
 
-class PipelineServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class PipelineServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
   pass
 
 
