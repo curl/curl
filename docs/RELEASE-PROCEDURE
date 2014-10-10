@@ -7,15 +7,16 @@
 curl release procedure - how to do a release
 ============================================
 
-[in the source code repo]
+in the source code repo
+-----------------------
 
-- edit RELEASE-NOTES to be accurate
+- edit `RELEASE-NOTES` to be accurate
 
-- update docs/THANKS
+- update `docs/THANKS`
 
 - make sure all relevant changes are committed on the master branch
 
-- tag the git repo in this style: 'git tag -a curl-7_34_0'. -a annotates the
+- tag the git repo in this style: `git tag -a curl-7_34_0`. -a annotates the
   tag and we use underscores instead of dots in the version number. 
    
 - run "./maketgz 7.34.0" to build the release tarballs. It is important that
@@ -29,11 +30,14 @@ curl release procedure - how to do a release
 
 - upload the 8 resulting files to the primary download directory
 
-[data in the curl-www repo]
+in the curl-www repo
+--------------------
 
-- edit Makefile (version number and date),
-  _newslog.html (announce the new release) and
-  _changes.html (insert changes+bugfixes from RELEASE-NOTES)
+- edit `Makefile` (version number and date),
+
+- edit `_newslog.html` (announce the new release) and
+
+- edit `_changes.html` (insert changes+bugfixes from RELEASE-NOTES)
 
 - commit all local changes
 
@@ -43,11 +47,48 @@ curl release procedure - how to do a release
 
   (the web site then updates its contents automatically)
 
-[inform]
+inform
+------
 
 - send an email to curl-users, curl-announce and curl-library. Insert the
   RELEASE-NOTES into the mail.
 
-[celebrate]
+celebrate
+---------
 
 - suitable beverage intake is encouraged for the festivities
+
+curl release scheduling
+=======================
+
+Basics
+------
+
+We do releases every 8 weeks on Wednesdays. If critical problems arise, we can
+insert releases outside of the schedule or we can move the release date - but
+this is very rare.
+
+Each 8 week release cycle is split in two 4-week periods.
+
+- During the first 4 weeks after a release, we allow new features and changes
+  to curl and libcurl. If we accept any such changes, we bump the minor number
+  used for the next release.
+
+- During the second 4-week period we do not merge any features or changes, we
+  then only focus on fixing bugs and polishing things to make a solid coming
+  release.
+
+Coming dates
+------------
+
+Based on the description above, here are some planned release dates (at the
+time of this writing):
+
+- November 5, 2014 (version 7.39.0)
+- December 31, 2014
+- February 25, 2015
+- April 22, 2015
+- June 17, 2015
+- August 12, 2015
+- October 7, 2015
+- December 2, 2015
