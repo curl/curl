@@ -174,6 +174,36 @@ mark_as_advanced(DISABLED_THREADSAFE)
 option(ENABLE_IPV6 "Define if you want to enable IPv6 support" OFF)
 mark_as_advanced(ENABLE_IPV6)
 
+option(ENABLE_MANUAL "to provide the built-in manual" ON)
+unset(USE_MANUAL CACHE) # TODO: cache NROFF/NROFF_MANOPT/USE_MANUAL vars?
+if(ENABLE_MANUAL)
+  find_program(NROFF NAMES gnroff nroff)
+  if(NROFF)
+    # Need a way to write to stdin, this will do
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt" "test")
+    # Tests for a valid nroff option to generate a manpage
+    foreach(_MANOPT "-man" "-mandoc")
+      execute_process(COMMAND "${NROFF}" ${_MANOPT}
+        OUTPUT_VARIABLE NROFF_MANOPT_OUTPUT
+        INPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt"
+        ERROR_QUIET)
+      # Save the option if it was valid
+      if(NROFF_MANOPT_OUTPUT)
+        message("Found *nroff option: -- ${_MANOPT}")
+        set(NROFF_MANOPT ${_MANOPT})
+        set(USE_MANUAL 1)
+        break()
+      endif()
+    endforeach()
+    # No need for the temporary file
+    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt")
+    if(NOT USE_MANUAL)
+      message(WARNING "Found no *nroff option to get plaintext from man pages")
+    endif()
+  else()
+    message(WARNING "Found no *nroff program")
+  endif()
+endif()
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
