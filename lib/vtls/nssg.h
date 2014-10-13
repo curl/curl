@@ -60,9 +60,6 @@ void Curl_nss_md5sum(unsigned char *tmp, /* input */
                      unsigned char *md5sum, /* output */
                      size_t md5len);
 
-/* this backend provides these functions: */
-#define have_curlssl_md5sum 1
-
 /* this backend supports CURLOPT_CERTINFO */
 #define have_curlssl_certinfo 1
 

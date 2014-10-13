@@ -112,10 +112,6 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
-#ifdef have_curlssl_md5sum
-#define HAVE_CURL_SSL_MD5SUM
-#endif
-
 #else
 /* When SSL support is not present, just define away these function calls */
 #define Curl_ssl_init() 1

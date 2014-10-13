@@ -51,9 +51,6 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
                            unsigned char *md5sum, /* output */
                            size_t md5len);
 
-/* this backend provides these functions: */
-#define have_curlssl_md5sum 1
-
 /* API setup for SecureTransport */
 #define curlssl_init() (1)
 #define curlssl_cleanup() Curl_nop_stmt

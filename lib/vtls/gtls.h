@@ -53,9 +53,6 @@ void Curl_gtls_md5sum(unsigned char *tmp, /* input */
                       unsigned char *md5sum, /* output */
                       size_t md5len);
 
-/* this backend provides these functions: */
-#define have_curlssl_md5sum 1
-
 /* API setup for GnuTLS */
 #define curlssl_init Curl_gtls_init
 #define curlssl_cleanup Curl_gtls_cleanup

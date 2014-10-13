@@ -68,6 +68,7 @@
 #include "progress.h"
 #include "share.h"
 #include "timeval.h"
+#include "curl_md5.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -682,14 +683,21 @@ int Curl_ssl_random(struct SessionHandle *data,
   return curlssl_random(data, entropy, length);
 }
 
-#ifdef have_curlssl_md5sum
 void Curl_ssl_md5sum(unsigned char *tmp, /* input */
                      size_t tmplen,
                      unsigned char *md5sum, /* output */
                      size_t md5len)
 {
+#ifdef curlssl_md5sum
   curlssl_md5sum(tmp, tmplen, md5sum, md5len);
-}
+#else
+  MD5_context *MD5pw;
+
+  (void) md5len;
+  MD5pw = Curl_MD5_init(Curl_DIGEST_MD5);
+  Curl_MD5_update(MD5pw, tmp, tmplen);
+  Curl_MD5_final(MD5pw, md5sum);
 #endif
+}
 
 #endif /* USE_SSL */
