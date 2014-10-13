@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,10 +40,6 @@
 
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
-#endif
-
-#ifdef USE_QSOSSL
-#include <qsossl.h>
 #endif
 
 #ifdef USE_GSKIT
@@ -368,102 +364,6 @@ Curl_getaddrinfo_a(const char * nodename, const char * servname,
 
   return status;
 }
-
-
-#ifdef USE_QSOSSL
-
-/* ASCII wrappers for the SSL procedures. */
-
-int
-Curl_SSL_Init_Application_a(SSLInitApp * init_app)
-
-{
-  int rc;
-  unsigned int i;
-  SSLInitApp ia;
-
-  if(!init_app || !init_app->applicationID || !init_app->applicationIDLen)
-    return SSL_Init_Application(init_app);
-
-  memcpy((char *) &ia, (char *) init_app, sizeof ia);
-  i = ia.applicationIDLen;
-
-  if(!(ia.applicationID = malloc(i + 1))) {
-    errno = ENOMEM;
-    return SSL_ERROR_IO;
-    }
-
-  QadrtConvertA2E(ia.applicationID, init_app->applicationID, i, i);
-  ia.applicationID[i] = '\0';
-  rc = SSL_Init_Application(&ia);
-  free(ia.applicationID);
-  init_app->localCertificateLen = ia.localCertificateLen;
-  init_app->sessionType = ia.sessionType;
-  return rc;
-}
-
-
-int
-Curl_SSL_Init_a(SSLInit * init)
-
-{
-  int rc;
-  unsigned int i;
-  SSLInit ia;
-
-  if(!init || (!init->keyringFileName && !init->keyringPassword))
-    return SSL_Init(init);
-
-  memcpy((char *) &ia, (char *) init, sizeof ia);
-
-  if(ia.keyringFileName) {
-    i = strlen(ia.keyringFileName);
-
-    if(!(ia.keyringFileName = malloc(i + 1))) {
-      errno = ENOMEM;
-      return SSL_ERROR_IO;
-      }
-
-    QadrtConvertA2E(ia.keyringFileName, init->keyringFileName, i, i);
-    ia.keyringFileName[i] = '\0';
-    }
-
-  if(ia.keyringPassword) {
-    i = strlen(ia.keyringPassword);
-
-    if(!(ia.keyringPassword = malloc(i + 1))) {
-      if(ia.keyringFileName)
-        free(ia.keyringFileName);
-
-      errno = ENOMEM;
-      return SSL_ERROR_IO;
-      }
-
-    QadrtConvertA2E(ia.keyringPassword, init->keyringPassword, i, i);
-    ia.keyringPassword[i] = '\0';
-    }
-
-  rc = SSL_Init(&ia);
-
-  if(ia.keyringFileName)
-    free(ia.keyringFileName);
-
-  if(ia.keyringPassword)
-    free(ia.keyringPassword);
-
-  return rc;
-}
-
-
-char *
-Curl_SSL_Strerror_a(int sslreturnvalue, SSLErrorMsg * serrmsgp)
-
-{
-  return set_thread_string(LK_SSL_ERROR,
-                           SSL_Strerror(sslreturnvalue, serrmsgp));
-}
-
-#endif /* USE_QSOSSL */
 
 
 #ifdef USE_GSKIT

@@ -599,7 +599,6 @@ X_OBJS= \
 	$(DIROBJ)\polarssl_threadlock.obj \
 	$(DIROBJ)\pop3.obj \
 	$(DIROBJ)\progress.obj \
-	$(DIROBJ)\qssl.obj \
 	$(DIROBJ)\rawstr.obj \
 	$(DIROBJ)\rtsp.obj \
 	$(DIROBJ)\security.obj \

@@ -43,7 +43,7 @@ Portability
  cyassl       2.0.0
  openldap     2.0
  MIT krb5 lib 1.2.4
- qsossl       V5R3M0
+ GSKit        V5R3M0
  NSS          3.14.x
  axTLS        1.2.7
  PolarSSL     1.3.0

@@ -161,7 +161,7 @@ then    MODULES=
         #               formdata.c. However, there are some unsatisfied
         #               external references leading in the following
         #               modules to be (recursively) needed.
-        MODULES="${MODULES} EASY STRDUP SSLGEN QSSL HOSTIP HOSTIP4 HOSTIP6"
+        MODULES="${MODULES} EASY STRDUP SSLGEN GSKIT HOSTIP HOSTIP4 HOSTIP6"
         MODULES="${MODULES} URL HASH TRANSFER GETINFO COOKIE SENDF SELECT"
         MODULES="${MODULES} INET_NTOP SHARE HOSTTHRE MULTI LLIST FTP HTTP"
         MODULES="${MODULES} HTTP_DIGES HTTP_CHUNK HTTP_NEGOT TIMEVAL HOSTSYN"

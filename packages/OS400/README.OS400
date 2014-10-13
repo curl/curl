@@ -39,12 +39,9 @@ header files are thus altered during build process to use this pragma, in
 order to force libcurl enums of being type int (the pragma disposition in use
 before inclusion is restored before resuming the including unit compilation).
 
-  Two SSL implementations are available to libcurl on OS/400: QsoSSL which is
-obsolescent, does not support asynchronous I/O and only allows a single SSL
-context within a job, and GSKit that does not suffer from these limitations
-and is able to provide some information about the server certificate.
-  Both implementations of SSL are working on "certificate stores" or keyrings,
-rather than individual certificate/key files. Certificate stores, as weel as
+  Secure socket layer is provided by the IBM GSKit API: unlike other SSL
+implementations, GSKit is based on "certificate stores" or keyrings
+rather than individual certificate/key files. Certificate stores, as well as
 "certificate labels" are managed by external IBM-defined applications.
   There are two ways to specify an SSL context:
 - By an application identifier.
@@ -213,8 +210,6 @@ _ As a prerequisite, QADRT development environment must be installed.
 _ Install the curl source directory in IFS.
 _ Enter shell (QSH)
 _ Change current directory to the curl installation directory
-- If the SSL backend has to be changed, edit file lib/config-os400.h
-  accordingly.
 _ Change current directory to ./packages/OS400
 _ Edit file iniscript.sh. You may want to change tunable configuration
   parameters, like debug info generation, optimisation level, listing option,

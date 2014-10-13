@@ -138,10 +138,6 @@
 #include <pk11pub.h>
 #endif
 
-#ifdef USE_QSOSSL
-#include <qsossl.h>
-#endif
-
 #ifdef USE_GSKIT
 #include <gskssl.h>
 #endif
@@ -328,9 +324,6 @@ struct ssl_connect_data {
   PK11GenericObject *obj_clicert;
   ssl_connect_state connecting_state;
 #endif /* USE_NSS */
-#ifdef USE_QSOSSL
-  SSLHandle *handle;
-#endif /* USE_QSOSSL */
 #ifdef USE_GSKIT
   gsk_handle handle;
   int iocport;

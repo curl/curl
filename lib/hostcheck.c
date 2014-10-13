@@ -22,8 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_SSLEAY) || defined(USE_AXTLS) || defined(USE_QSOSSL) || \
-    defined(USE_GSKIT)
+#if defined(USE_SSLEAY) || defined(USE_AXTLS) || defined(USE_GSKIT)
 /* these backends use functions from this file */
 
 #ifdef HAVE_NETINET_IN_H
@@ -145,4 +144,4 @@ int Curl_cert_hostcheck(const char *match_pattern, const char *hostname)
   return res;
 }
 
-#endif /* SSLEAY or AXTLS or QSOSSL or GSKIT */
+#endif /* SSLEAY or AXTLS or GSKIT */

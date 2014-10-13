@@ -312,9 +312,6 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
 #ifdef USE_NSS
       internals = conn->ssl[sockindex].handle;
 #endif
-#ifdef USE_QSOSSL
-      internals = conn->ssl[sockindex].handle;
-#endif
 #ifdef USE_GSKIT
       internals = conn->ssl[sockindex].handle;
 #endif

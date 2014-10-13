@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,7 +25,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_QSOSSL) || defined(USE_GSKIT) || defined(USE_NSS)
+#if defined(USE_GSKIT) || defined(USE_NSS)
 
 #include "urldata.h"
 
@@ -125,5 +125,5 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn, int certnum,
 CURLcode Curl_verifyhost(struct connectdata * conn,
                          const char * beg, const char * end);
 
-#endif /* USE_QSOSSL or USE_GSKIT or USE_NSS */
+#endif /* USE_GSKIT or USE_NSS */
 #endif /* HEADER_CURL_X509ASN1_H */

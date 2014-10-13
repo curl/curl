@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_QSOSSL) || defined(USE_GSKIT) || defined(USE_NSS)
+#if defined(USE_GSKIT) || defined(USE_NSS)
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -1019,9 +1019,9 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
   return CURLE_OK;
 }
 
-#endif /* USE_QSOSSL or USE_GSKIT or USE_NSS */
+#endif /* USE_GSKIT or USE_NSS */
 
-#if defined(USE_QSOSSL) || defined(USE_GSKIT)
+#if defined(USE_GSKIT)
 
 static const char * checkOID(const char * beg, const char * end,
                              const char * oid)
@@ -1180,4 +1180,4 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
   return CURLE_PEER_FAILED_VERIFICATION;
 }
 
-#endif /* USE_QSOSSL or USE_GSKIT */
+#endif /* USE_GSKIT */

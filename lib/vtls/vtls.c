@@ -31,7 +31,6 @@
    Curl_ossl_ - prefix for OpenSSL ones
    Curl_gtls_ - prefix for GnuTLS ones
    Curl_nss_ - prefix for NSS ones
-   Curl_qssl_ - prefix for QsoSSL ones
    Curl_gskit_ - prefix for GSKit ones
    Curl_polarssl_ - prefix for PolarSSL ones
    Curl_cyassl_ - prefix for CyaSSL ones

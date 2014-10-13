@@ -26,7 +26,6 @@
 #include "openssl.h" /* OpenSSL versions */
 #include "gtls.h"   /* GnuTLS versions */
 #include "nssg.h"   /* NSS versions */
-#include "qssl.h"   /* QSOSSL versions */
 #include "gskit.h"  /* Global Secure ToolKit versions */
 #include "polarssl.h" /* PolarSSL versions */
 #include "axtls.h"  /* axTLS versions */

@@ -21,10 +21,10 @@
 ###########################################################################
 
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c	\
-  vtls/qssl.c vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c	\
+  vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c		\
   vtls/cyassl.c vtls/curl_schannel.c vtls/curl_darwinssl.c vtls/gskit.c
 
-LIB_VTLS_HFILES = vtls/qssl.h vtls/openssl.h vtls/vtls.h vtls/gtls.h	\
+LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h		\
   vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h vtls/axtls.h	\
   vtls/cyassl.h vtls/curl_schannel.h vtls/curl_darwinssl.h vtls/gskit.h
 
