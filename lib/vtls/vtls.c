@@ -682,6 +682,62 @@ int Curl_ssl_random(struct SessionHandle *data,
   return curlssl_random(data, entropy, length);
 }
 
+/*
+ * Generic pinned public key check.
+ */
+
+CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
+                              const unsigned char *pubkey, size_t pubkeylen)
+{
+  FILE *fp = NULL;
+  unsigned char *buf = NULL;
+  long size = 0;
+  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+
+  /* if a path wasn't specified, don't pin */
+  if(!pinnedpubkey)
+    return CURLE_OK;
+  if(!pubkey || !pubkeylen)
+    return result;
+  fp = fopen(pinnedpubkey, "rb");
+  if(!fp)
+    return result;
+
+  do {
+    /* Determine the file's size */
+    if(fseek(fp, 0, SEEK_END))
+      break;
+    size = ftell(fp);
+    if(fseek(fp, 0, SEEK_SET))
+      break;
+
+    /*
+     * if the size of our certificate doesn't match the size of
+     * the file, they can't be the same, don't bother reading it
+     */
+    if((long) pubkeylen != size)
+      break;
+
+    /* Allocate buffer for the pinned key. */
+    buf = malloc(pubkeylen);
+    if(!buf)
+      break;
+
+    /* Returns number of elements read, which should be 1 */
+    if((int) fread(buf, pubkeylen, 1, fp) != 1)
+      break;
+
+    /* The one good exit point */
+    if(!memcmp(pubkey, buf, pubkeylen))
+      result = CURLE_OK;
+  } while(0);
+
+  Curl_safefree(buf);
+  fclose(fp);
+
+  return result;
+}
+
 void Curl_ssl_md5sum(unsigned char *tmp, /* input */
                      size_t tmplen,
                      unsigned char *md5sum, /* output */

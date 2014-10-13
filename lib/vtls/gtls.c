@@ -678,22 +678,22 @@ gtls_connect_step1(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static int pkp_pin_peer_pubkey(gnutls_x509_crt_t cert, char *pinnedpubkey)
+static CURLcode pkp_pin_peer_pubkey(gnutls_x509_crt_t cert,
+                                    const char *pinnedpubkey)
 {
   /* Scratch */
-  FILE* fp = NULL;
   size_t len1 = 0, len2 = 0;
-  unsigned char *buff1 = NULL, *buff2 = NULL;
-  long size = 0;
+  unsigned char *buff1 = NULL;
 
   gnutls_pubkey_t key = NULL;
 
   /* Result is returned to caller */
-  int ret = 0, result = FALSE;
+  int ret = 0;
+  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
   /* if a path wasn't specified, don't pin */
-  if(NULL == pinnedpubkey) return TRUE;
-  if(NULL == cert) return FALSE;
+  if(NULL == pinnedpubkey) return CURLE_OK;
+  if(NULL == cert) return result;
 
   do {
     /* Begin Gyrations to get the public key     */
@@ -719,57 +719,14 @@ static int pkp_pin_peer_pubkey(gnutls_x509_crt_t cert, char *pinnedpubkey)
 
     /* End Gyrations */
 
-    fp = fopen(pinnedpubkey, "r");
-
-    if(NULL == fp)
-      break; /* failed */
-
-    /* Seek to eof to determine the file's size */
-    ret = fseek(fp, 0, SEEK_END);
-    if(0 != ret)
-      break; /* failed */
-
-    /* Fetch the file's size */
-    size = ftell(fp);
-
-    /*
-     * if the size of our certificate doesn't match the size of
-     * the file, they can't be the same, don't bother reading it
-     */
-    if(size > 0 && len2 != (size_t)size)
-      break; /* failed */
-
-    /* Rewind to beginning to perform the read */
-    ret = fseek(fp, 0, SEEK_SET);
-    if(0 != ret)
-      break; /* failed */
-
-    /* http://www.openssl.org/docs/crypto/buffer.html */
-    buff2 = malloc(len2);
-    if(NULL == buff2)
-      break; /* failed */
-
-    /* Returns number of elements read, which should be 1 */
-    ret = (int)fread(buff2, (size_t)len2, 1, fp);
-    if(1 != ret)
-      break; /* failed */
-
     /* The one good exit point */
-    result = (0 == memcmp(buff1, buff2, (size_t)len2));
-
+    result = Curl_pin_peer_pubkey(pinnedpubkey, buff1, len1);
   } while(0);
-
-  if(NULL != fp)
-    fclose(fp);
 
   if(NULL != key)
     gnutls_pubkey_deinit(key);
 
-  if(NULL != buff2)
-    free(buff2);
-
-  if(NULL != buff1)
-    free(buff1);
+  Curl_safefree(buff1);
 
   return result;
 }
@@ -876,10 +833,12 @@ gtls_connect_step3(struct connectdata *conn,
     issuerp = load_file(data->set.ssl.issuercert);
     gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
     rc = gnutls_x509_crt_check_issuer(x509_cert,x509_issuer);
+    gnutls_x509_crt_deinit(x509_issuer);
     unload_file(issuerp);
     if(rc <= 0) {
       failf(data, "server certificate issuer check failed (IssuerCert: %s)",
             data->set.ssl.issuercert?data->set.ssl.issuercert:"none");
+      gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_ISSUER_ERROR;
     }
     infof(data,"\t server certificate issuer check OK (Issuer Cert: %s)\n",
@@ -965,6 +924,7 @@ gtls_connect_step3(struct connectdata *conn,
   if(certclock == (time_t)-1) {
     if(data->set.ssl.verifypeer) {
       failf(data, "server cert expiration date verify failed");
+      gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_CONNECT_ERROR;
     }
     else
@@ -974,6 +934,7 @@ gtls_connect_step3(struct connectdata *conn,
     if(certclock < time(NULL)) {
       if(data->set.ssl.verifypeer) {
         failf(data, "server certificate expiration date has passed.");
+        gnutls_x509_crt_deinit(x509_cert);
         return CURLE_PEER_FAILED_VERIFICATION;
       }
       else
@@ -988,6 +949,7 @@ gtls_connect_step3(struct connectdata *conn,
   if(certclock == (time_t)-1) {
     if(data->set.ssl.verifypeer) {
       failf(data, "server cert activation date verify failed");
+      gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_CONNECT_ERROR;
     }
     else
@@ -997,6 +959,7 @@ gtls_connect_step3(struct connectdata *conn,
     if(certclock > time(NULL)) {
       if(data->set.ssl.verifypeer) {
         failf(data, "server certificate not activated yet.");
+        gnutls_x509_crt_deinit(x509_cert);
         return CURLE_PEER_FAILED_VERIFICATION;
       }
       else
@@ -1006,11 +969,14 @@ gtls_connect_step3(struct connectdata *conn,
       infof(data, "\t server certificate activation date OK\n");
   }
 
-  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY] != NULL &&
-      TRUE != pkp_pin_peer_pubkey(x509_cert,
-      data->set.str[STRING_SSL_PINNEDPUBLICKEY])) {
-    failf(data, "SSL: public key does not matched pinned public key!");
-    return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+  ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  if(ptr) {
+    result = pkp_pin_peer_pubkey(x509_cert, ptr);
+    if(result != CURLE_OK) {
+      failf(data, "SSL: public key does not match pinned public key!");
+      gnutls_x509_crt_deinit(x509_cert);
+      return result;
+    }
   }
 
   /* Show:

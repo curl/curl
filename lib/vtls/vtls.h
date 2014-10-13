@@ -108,6 +108,9 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
                      size_t tmplen,
                      unsigned char *md5sum, /* output */
                      size_t md5len);
+/* Check pinned public key. */
+CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
+                              const unsigned char *pubkey, size_t pubkeylen);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 

@@ -2366,20 +2366,18 @@ static CURLcode get_cert_chain(struct connectdata *conn,
  * Heavily modified from:
  * https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning#OpenSSL
  */
-static int pkp_pin_peer_pubkey(X509* cert, char *pinnedpubkey)
+static CURLcode pkp_pin_peer_pubkey(X509* cert, const char *pinnedpubkey)
 {
   /* Scratch */
-  FILE* fp = NULL;
   int len1 = 0, len2 = 0;
-  unsigned char *buff1 = NULL, *buff2 = NULL, *temp = NULL;
-  long size = 0;
+  unsigned char *buff1 = NULL, *temp = NULL;
 
   /* Result is returned to caller */
-  int ret = 0, result = FALSE;
+  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
   /* if a path wasn't specified, don't pin */
-  if(NULL == pinnedpubkey) return TRUE;
-  if(NULL == cert) return FALSE;
+  if(NULL == pinnedpubkey) return CURLE_OK;
+  if(NULL == cert) return result;
 
   do {
     /* Begin Gyrations to get the subjectPublicKeyInfo     */
@@ -2409,54 +2407,11 @@ static int pkp_pin_peer_pubkey(X509* cert, char *pinnedpubkey)
 
     /* End Gyrations */
 
-    /* See the warning above!!! */
-    fp = fopen(pinnedpubkey, "r");
-
-    if(NULL == fp)
-      break; /* failed */
-
-    /* Seek to eof to determine the file's size */
-    ret = fseek(fp, 0, SEEK_END);
-    if(0 != ret)
-      break; /* failed */
-
-    /* Fetch the file's size */
-    size = ftell(fp);
-
-    /*
-     * if the size of our certificate doesn't match the size of
-     * the file, they can't be the same, don't bother reading it
-     */
-    if(len2 != size)
-      break; /* failed */
-
-    /* Rewind to beginning to perform the read */
-    ret = fseek(fp, 0, SEEK_SET);
-    if(0 != ret)
-      break; /* failed */
-
-    /* http://www.openssl.org/docs/crypto/buffer.html */
-    buff2 = OPENSSL_malloc(len2);
-    if(NULL == buff2)
-      break; /* failed */
-
-    /* Returns number of elements read, which should be 1 */
-    ret = (int)fread(buff2, (size_t)len2, 1, fp);
-    if(1 != ret)
-      break; /* failed */
-
     /* The one good exit point */
-    result = (0 == memcmp(buff1, buff2, (size_t)len2));
-
+    result = Curl_pin_peer_pubkey(pinnedpubkey, buff1, len1);
   } while(0);
 
-  if(NULL != fp)
-    fclose(fp);
-
   /* http://www.openssl.org/docs/crypto/buffer.html */
-  if(NULL != buff2)
-    OPENSSL_free(buff2);
-
   if(NULL != buff1)
     OPENSSL_free(buff1);
 
@@ -2483,6 +2438,7 @@ static CURLcode servercert(struct connectdata *conn,
   X509 *issuer;
   FILE *fp;
   char *buffer = data->state.buffer;
+  const char *ptr;
 
   if(data->set.ssl.certinfo)
     /* we've been asked to gather certificate info! */
@@ -2586,11 +2542,11 @@ static CURLcode servercert(struct connectdata *conn,
       infof(data, "\t SSL certificate verify ok.\n");
   }
 
-  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY] != NULL &&
-      TRUE != pkp_pin_peer_pubkey(connssl->server_cert,
-      data->set.str[STRING_SSL_PINNEDPUBLICKEY])) {
-    failf(data, "SSL: public key does not matched pinned public key!");
-    return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+  ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  if(retcode == CURLE_OK && ptr) {
+    retcode = pkp_pin_peer_pubkey(connssl->server_cert, ptr);
+    if(retcode != CURLE_OK)
+      failf(data, "SSL: public key does not match pinned public key!");
   }
 
   X509_free(connssl->server_cert);
