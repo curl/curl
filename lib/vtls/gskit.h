@@ -62,6 +62,7 @@ int Curl_gskit_check_cxn(struct connectdata * cxn);
 #define curlssl_version Curl_gskit_version
 #define curlssl_check_cxn(x) Curl_gskit_check_cxn(x)
 #define curlssl_data_pending(x,y) 0
+#define curlssl_random(x,y,z) -1
 #define CURL_SSL_BACKEND CURLSSLBACKEND_GSKIT
 #endif /* USE_GSKIT */
 
