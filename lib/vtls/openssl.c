@@ -2376,8 +2376,11 @@ static CURLcode pkp_pin_peer_pubkey(X509* cert, const char *pinnedpubkey)
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
   /* if a path wasn't specified, don't pin */
-  if(NULL == pinnedpubkey) return CURLE_OK;
-  if(NULL == cert) return result;
+  if(NULL == pinnedpubkey)
+    return CURLE_OK;
+
+  if(NULL == cert)
+    return result;
 
   do {
     /* Begin Gyrations to get the subjectPublicKeyInfo     */
@@ -2412,7 +2415,7 @@ static CURLcode pkp_pin_peer_pubkey(X509* cert, const char *pinnedpubkey)
   } while(0);
 
   /* http://www.openssl.org/docs/crypto/buffer.html */
-  if(NULL != buff1)
+  if(buff1)
     OPENSSL_free(buff1);
 
   return result;

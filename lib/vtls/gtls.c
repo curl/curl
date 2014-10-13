@@ -692,8 +692,11 @@ static CURLcode pkp_pin_peer_pubkey(gnutls_x509_crt_t cert,
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
   /* if a path wasn't specified, don't pin */
-  if(NULL == pinnedpubkey) return CURLE_OK;
-  if(NULL == cert) return result;
+  if(NULL == pinnedpubkey)
+    return CURLE_OK;
+
+  if(NULL == cert)
+    return result;
 
   do {
     /* Begin Gyrations to get the public key     */
@@ -705,7 +708,7 @@ static CURLcode pkp_pin_peer_pubkey(gnutls_x509_crt_t cert,
 
     ret = gnutls_pubkey_export(key, GNUTLS_X509_FMT_DER, NULL, &len1);
     if(ret != GNUTLS_E_SHORT_MEMORY_BUFFER || len1 == 0)
-        break; /* failed */
+      break; /* failed */
 
     buff1 = malloc(len1);
     if(NULL == buff1)
