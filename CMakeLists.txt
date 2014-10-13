@@ -171,8 +171,21 @@ option(CURL_DISABLE_VERBOSE_STRINGS "to disable verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
 option(DISABLED_THREADSAFE "Set to explicitly specify we don't want to use thread-safe functions" OFF)
 mark_as_advanced(DISABLED_THREADSAFE)
-option(ENABLE_IPV6 "Define if you want to enable IPv6 support" OFF)
+option(ENABLE_IPV6 "Define if you want to enable IPv6 support" ON)
 mark_as_advanced(ENABLE_IPV6)
+if(ENABLE_IPV6)
+  include(CheckStructHasMember)
+  check_struct_has_member("struct sockaddr_in6" sin6_addr "netinet/in.h"
+                          HAVE_SOCKADDR_IN6_SIN6_ADDR)
+  check_struct_has_member("struct sockaddr_in6" sin6_scope_id "netinet/in.h"
+                          HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+  if(NOT HAVE_SOCKADDR_IN6_SIN6_ADDR)
+    message(WARNING "struct sockaddr_in6 not available, disabling IPv6 support")
+    # Force the feature off as this name is used as guard macro...
+    set(ENABLE_IPV6 OFF
+        CACHE BOOL "Define if you want to enable IPv6 support" FORCE)
+  endif()
+endif()
 
 option(ENABLE_MANUAL "to provide the built-in manual" ON)
 unset(USE_MANUAL CACHE) # TODO: cache NROFF/NROFF_MANOPT/USE_MANUAL vars?
@@ -731,6 +744,7 @@ check_symbol_exists(strerror_r     "${CURL_INCLUDES}" HAVE_STRERROR_R)
 check_symbol_exists(siginterrupt   "${CURL_INCLUDES}" HAVE_SIGINTERRUPT)
 check_symbol_exists(perror         "${CURL_INCLUDES}" HAVE_PERROR)
 check_symbol_exists(fork           "${CURL_INCLUDES}" HAVE_FORK)
+check_symbol_exists(getaddrinfo    "${CURL_INCLUDES}" HAVE_GETADDRINFO)
 check_symbol_exists(freeaddrinfo   "${CURL_INCLUDES}" HAVE_FREEADDRINFO)
 check_symbol_exists(freeifaddrs    "${CURL_INCLUDES}" HAVE_FREEIFADDRS)
 check_symbol_exists(pipe           "${CURL_INCLUDES}" HAVE_PIPE)
