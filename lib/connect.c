@@ -988,7 +988,7 @@ singleipconnect(struct connectdata *conn,
   bool isconnected = FALSE;
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd;
-  CURLcode res = CURLE_OK;
+  CURLcode res;
   char ipaddress[MAX_IPADR_LEN];
   long port;
 
