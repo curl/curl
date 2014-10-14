@@ -199,7 +199,6 @@ void Curl_conncache_foreach(struct conncache *connc,
   he = Curl_hash_next_element(&iter);
   while(he) {
     struct connectbundle *bundle;
-    struct connectdata *conn;
 
     bundle = he->ptr;
     he = Curl_hash_next_element(&iter);
@@ -208,7 +207,7 @@ void Curl_conncache_foreach(struct conncache *connc,
     while(curr) {
       /* Yes, we need to update curr before calling func(), because func()
          might decide to remove the connection */
-      conn = curr->ptr;
+      struct connectdata *conn = curr->ptr;
       curr = curr->next;
 
       if(1 == func(conn, param))
@@ -223,7 +222,6 @@ struct connectdata *
 Curl_conncache_find_first_connection(struct conncache *connc)
 {
   struct curl_hash_iterator iter;
-  struct curl_llist_element *curr;
   struct curl_hash_element *he;
   struct connectbundle *bundle;
 
@@ -231,6 +229,7 @@ Curl_conncache_find_first_connection(struct conncache *connc)
 
   he = Curl_hash_next_element(&iter);
   while(he) {
+    struct curl_llist_element *curr;
     bundle = he->ptr;
 
     curr = bundle->conn_list->head;

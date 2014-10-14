@@ -49,10 +49,10 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
 {
   size_t padding = 0;
   const char *s, *p;
-  unsigned long i, v, x = 0;
+  unsigned long i, x = 0;
 
   for(i = 0, s = src; i < 4; i++, s++) {
-    v = 0;
+    unsigned long v = 0;
 
     if(*s == '=') {
       x = (x << 6);
@@ -107,7 +107,6 @@ CURLcode Curl_base64_decode(const char *src,
   size_t length = 0;
   size_t padding = 0;
   size_t i;
-  size_t result;
   size_t numQuantums;
   size_t rawlen = 0;
   unsigned char *pos;
@@ -151,7 +150,7 @@ CURLcode Curl_base64_decode(const char *src,
 
   /* Decode the quantums */
   for(i = 0; i < numQuantums; i++) {
-    result = decodeQuantum(pos, src);
+    size_t result = decodeQuantum(pos, src);
     if(!result) {
       Curl_safefree(newstr);
 

@@ -257,12 +257,6 @@ static CURLcode bindlocal(struct connectdata *conn,
   int portnum = data->set.localportrange;
   const char *dev = data->set.str[STRING_DEVICE];
   int error;
-  char myhost[256] = "";
-  int done = 0; /* -1 for error, 1 for address found */
-  bool is_interface = FALSE;
-  bool is_host = FALSE;
-  static const char *if_prefix = "if!";
-  static const char *host_prefix = "host!";
 
   /*************************************************************
    * Select device to bind socket to
@@ -274,6 +268,13 @@ static CURLcode bindlocal(struct connectdata *conn,
   memset(&sa, 0, sizeof(struct Curl_sockaddr_storage));
 
   if(dev && (strlen(dev)<255) ) {
+    char myhost[256] = "";
+    int done = 0; /* -1 for error, 1 for address found */
+    bool is_interface = FALSE;
+    bool is_host = FALSE;
+    static const char *if_prefix = "if!";
+    static const char *host_prefix = "host!";
+
     if(strncmp(if_prefix, dev, strlen(if_prefix)) == 0) {
       dev += strlen(if_prefix);
       is_interface = TRUE;
@@ -656,7 +657,6 @@ static bool getaddressinfo(struct sockaddr* sa, char* addr,
    connection */
 void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
 {
-  int error;
   curl_socklen_t len;
   struct Curl_sockaddr_storage ssrem;
   struct Curl_sockaddr_storage ssloc;
@@ -667,6 +667,7 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     return;
 
   if(!conn->bits.reuse) {
+    int error;
 
     len = sizeof(struct Curl_sockaddr_storage);
     if(getpeername(sockfd, (struct sockaddr*) &ssrem, &len)) {
@@ -813,10 +814,10 @@ CURLcode Curl_is_connected(struct connectdata *conn,
      * address" for the given host. But first remember the latest error.
      */
     if(error) {
-      char ipaddress[MAX_IPADR_LEN];
       data->state.os_errno = error;
       SET_SOCKERRNO(error);
       if(conn->tempaddr[i]) {
+        char ipaddress[MAX_IPADR_LEN];
         Curl_printable_address(conn->tempaddr[i], ipaddress, MAX_IPADR_LEN);
         infof(data, "connect to %s port %ld failed: %s\n",
               ipaddress, conn->port, Curl_strerror(conn, error));
