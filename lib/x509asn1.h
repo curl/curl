@@ -76,8 +76,9 @@
 
 /* ASN.1 parsed element. */
 typedef struct {
+  const char *  header;         /* Pointer to header byte. */
   const char *  beg;            /* Pointer to element data. */
-  const char *  end;            /* Pointer to 1st byte after element data. */
+  const char *  end;            /* Pointer to 1st byte after element. */
   unsigned char class;          /* ASN.1 element class. */
   unsigned char tag;            /* ASN.1 element tag. */
   bool          constructed;    /* Element is constructed. */
@@ -102,6 +103,7 @@ typedef struct {
   curl_asn1Element      notBefore;
   curl_asn1Element      notAfter;
   curl_asn1Element      subject;
+  curl_asn1Element      subjectPublicKeyInfo;
   curl_asn1Element      subjectPublicKeyAlgorithm;
   curl_asn1Element      subjectPublicKey;
   curl_asn1Element      issuerUniqueID;

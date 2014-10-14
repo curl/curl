@@ -122,6 +122,7 @@ const char * Curl_getASN1Element(curl_asn1Element * elem,
     return (const char *) NULL;
 
   /* Process header byte. */
+  elem->header = beg;
   b = (unsigned char) *beg++;
   elem->constructed = (b & 0x20) != 0;
   elem->class = (b >> 6) & 3;
@@ -682,6 +683,7 @@ void Curl_parseX509(curl_X509certificate * cert,
      Syntax is assumed to have already been checked by the SSL backend.
      See RFC 5280. */
 
+  cert->certificate.header = NULL;
   cert->certificate.beg = beg;
   cert->certificate.end = end;
 
@@ -701,6 +703,7 @@ void Curl_parseX509(curl_X509certificate * cert,
   beg = tbsCertificate.beg;
   end = tbsCertificate.end;
   /* Get optional version, get serialNumber. */
+  cert->version.header = NULL;
   cert->version.beg = &defaultVersion;
   cert->version.end = &defaultVersion + sizeof defaultVersion;;
   beg = Curl_getASN1Element(&elem, beg, end);
@@ -720,15 +723,19 @@ void Curl_parseX509(curl_X509certificate * cert,
   /* Get subject. */
   beg = Curl_getASN1Element(&cert->subject, beg, end);
   /* Get subjectPublicKeyAlgorithm and subjectPublicKey. */
-  beg = Curl_getASN1Element(&elem, beg, end);
+  beg = Curl_getASN1Element(&cert->subjectPublicKeyInfo, beg, end);
   ccp = Curl_getASN1Element(&cert->subjectPublicKeyAlgorithm,
-                            elem.beg, elem.end);
-  Curl_getASN1Element(&cert->subjectPublicKey, ccp, elem.end);
+                            cert->subjectPublicKeyInfo.beg,
+                            cert->subjectPublicKeyInfo.end);
+  Curl_getASN1Element(&cert->subjectPublicKey, ccp,
+                      cert->subjectPublicKeyInfo.end);
   /* Get optional issuerUiqueID, subjectUniqueID and extensions. */
   cert->issuerUniqueID.tag = cert->subjectUniqueID.tag = 0;
   cert->extensions.tag = elem.tag = 0;
+  cert->issuerUniqueID.header = cert->subjectUniqueID.header = NULL;
   cert->issuerUniqueID.beg = cert->issuerUniqueID.end = "";
   cert->subjectUniqueID.beg = cert->subjectUniqueID.end = "";
+  cert->extensions.header = NULL;
   cert->extensions.beg = cert->extensions.end = "";
   if(beg < end)
     beg = Curl_getASN1Element(&elem, beg, end);
@@ -771,6 +778,7 @@ static const char * dumpAlgo(curl_asn1Element * param,
   /* Get algorithm parameters and return algorithm name. */
 
   beg = Curl_getASN1Element(&oid, beg, end);
+  param->header = NULL;
   param->tag = 0;
   param->beg = param->end = end;
   if(beg < end)
@@ -1140,6 +1148,7 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
   }
 
   /* Process subject. */
+  name.header = NULL;
   name.beg = name.end = "";
   q = cert.subject.beg;
   /* we have to look to the last occurrence of a commonName in the
