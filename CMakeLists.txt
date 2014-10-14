@@ -1060,6 +1060,57 @@ list(SORT _items)
 string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
 message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
 
+# curl-config needs the following options to be set.
+set(CC                      "${CMAKE_C_COMPILER}")
+# TODO probably put a -D... options here?
+set(CONFIGURE_OPTIONS       "")
+# TODO when to set "-DCURL_STATICLIB" for CPPFLAG_CURL_STATICLIB?
+set(CPPFLAG_CURL_STATICLIB  "")
+# TODO need to set this (see CURL_CHECK_CA_BUNDLE in acinclude.m4)
+set(CURL_CA_BUNDLE          "")
+set(CURLVERSION             "${CURL_VERSION}")
+set(ENABLE_SHARED           "yes")
+if(CURL_STATICLIB)
+  # Broken: LIBCURL_LIBS below; .a lib is not built
+  message(WARNING "Static linking is broken!")
+  set(ENABLE_STATIC         "no")
+else()
+  set(ENABLE_STATIC         "no")
+endif()
+set(exec_prefix             "\${prefix}")
+set(includedir              "\${prefix}/include")
+set(LDFLAGS                 "${CMAKE_SHARED_LINKER_FLAGS}")
+set(LIBCURL_LIBS            "")
+set(libdir                  "${CMAKE_INSTALL_PREFIX}/lib")
+# TODO CURL_LIBS also contains absolute paths which don't work with static -l...
+foreach(_lib ${CMAKE_C_IMPLICIT_LINK_LIBRARIES} ${CURL_LIBS})
+  set(LIBCURL_LIBS          "${LIBCURL_LIBS} -l${_lib}")
+endforeach()
+# "a" (Linux) or "lib" (Windows)
+string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set(prefix                  "${CMAKE_INSTALL_PREFIX}")
+# Set this to "yes" to append all libraries on which -lcurl is dependent
+set(REQUIRE_LIB_DEPS        "no")
+# SUPPORT_FEATURES
+# SUPPORT_PROTOCOLS
+set(VERSIONNUM              "${CURL_VERSION_NUM}")
+
+# Finally generate a "curl-config" matching this config
+configure_file("${CURL_SOURCE_DIR}/curl-config.in"
+               "${CURL_BINARY_DIR}/curl-config" @ONLY)
+install(FILES "${CMAKE_BINARY_DIR}/curl-config"
+        DESTINATION bin
+        PERMISSIONS
+          OWNER_READ OWNER_WRITE OWNER_EXECUTE
+          GROUP_READ GROUP_EXECUTE
+          WORLD_READ WORLD_EXECUTE)
+
+# Finally generate a pkg-config file matching this config
+configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
+               "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
+install(FILES "${CMAKE_BINARY_DIR}/libcurl.pc"
+        DESTINATION lib/pkgconfig)
+
 # This needs to be run very last so other parts of the scripts can take advantage of this.
 if(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
   set(CURL_CONFIG_HAS_BEEN_RUN_BEFORE 1 CACHE INTERNAL "Flag to track whether this is the first time running CMake or if CMake has been configured before")
