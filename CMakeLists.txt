@@ -994,6 +994,82 @@ if(BUILD_CURL_TESTS)
   add_subdirectory(tests)
 endif()
 
+# TODO support GNUTLS, NSS, POLARSSL, AXTLS, CYASSL, WINSSL, DARWINSSL
+if(USE_OPENSSL)
+  set(SSL_ENABLED 1)
+endif()
+
+# Helper to populate a list (_items) with a label when conditions (the remaining
+# args) are satisfied
+function(_add_if label)
+  # TODO need to disable policy CMP0054 (CMake 3.1) to allow this indirection
+  if(${ARGN})
+    set(_items ${_items} "${label}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+# Clear list and try to detect available features
+set(_items)
+_add_if("SSL"           SSL_ENABLED)
+_add_if("IPv6"          ENABLE_IPV6)
+_add_if("unix-sockets"  USE_UNIX_SOCKETS)
+_add_if("libz"          HAVE_LIBZ)
+find_package(Threads)
+# AsynchDNS depends or USE_ARES or pthreads (mutually exclusive)
+_add_if("AsynchDNS"     USE_ARES OR CMAKE_USE_PTHREADS_INIT)
+_add_if("IDN"           HAVE_LIBIDN)
+# TODO SSP1 (WinSSL) check is missing
+_add_if("SSPI"          USE_WINDOWS_SSPI)
+_add_if("GSS-API"       HAVE_GSS_API)
+# TODO SSP1 missing for SPNEGO
+_add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
+                        (HAVE_GSS_API OR USE_WINDOWS_SSPI))
+# NTLM support requires crypto function adaptions from various SSL libs
+# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS, DARWINSSL
+if(NOT CURL_DISABLE_HTTP AND NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR
+   USE_WINDOWS_SSPI OR GNUTLS_ENABLED OR NSS_ENABLED OR DARWINSSL_ENABLED))
+  _add_if("NTLM"        1)
+  # TODO missing option (autoconf: --enable-ntlm-wb)
+  _add_if("NTLM_WB"     NTLM_WB_ENABLED)
+endif()
+# TODO missing option (--enable-tls-srp), depends on GNUTLS_SRP/OPENSSL_SRP
+_add_if("TLS-SRP"       USE_TLS_SRP)
+# TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
+_add_if("HTTP2"         USE_NGHTTP2)
+string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
+message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
+
+# Clear list and try to detect available protocols
+set(_items)
+_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
+_add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND SSL_ENABLED)
+_add_if("FTP"           NOT CURL_DISABLE_FTP)
+_add_if("FTPS"          NOT CURL_DISABLE_FTP AND SSL_ENABLED)
+_add_if("FILE"          NOT CURL_DISABLE_FILE)
+_add_if("TELNET"        NOT CURL_DISABLE_TELNET)
+_add_if("LDAP"          NOT CURL_DISABLE_LDAP)
+# CURL_DISABLE_LDAP implies CURL_DISABLE_LDAPS
+# TODO check HAVE_LDAP_SSL (in autoconf this is enabled with --enable-ldaps)
+_add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
+                        ((USE_OPENLDAP AND SSL_ENABLED) OR
+                        (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
+_add_if("DICT"          NOT CURL_DISABLE_DICT)
+_add_if("TFTP"          NOT CURL_DISABLE_TFTP)
+_add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
+_add_if("POP3"          NOT CURL_DISABLE_POP3)
+_add_if("POP3S"         NOT CURL_DISABLE_POP3 AND SSL_ENABLED)
+_add_if("IMAP"          NOT CURL_DISABLE_IMAP)
+_add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND SSL_ENABLED)
+_add_if("SMTP"          NOT CURL_DISABLE_SMTP)
+_add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND SSL_ENABLED)
+_add_if("SCP"           USE_LIBSSH2)
+_add_if("SFTP"          USE_LIBSSH2)
+_add_if("RTSP"          NOT CURL_DISABLE_RTSP)
+_add_if("RTMP"          USE_LIBRTMP)
+list(SORT _items)
+string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
+message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
+
 # This needs to be run very last so other parts of the scripts can take advantage of this.
 if(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
   set(CURL_CONFIG_HAS_BEEN_RUN_BEFORE 1 CACHE INTERNAL "Flag to track whether this is the first time running CMake or if CMake has been configured before")
