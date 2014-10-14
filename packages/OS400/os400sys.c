@@ -94,11 +94,9 @@ static void
 thdbufdestroy(void * private)
 
 {
-  localkey_t i;
-  buffer_t * p;
-
   if(private) {
-    p = (buffer_t *) private;
+    buffer_t * p = (buffer_t *) private;
+    localkey_t i;
 
     for(i = (localkey_t) 0; i < LK_LAST; i++) {
       if(p->buf)
@@ -1095,14 +1093,13 @@ struct berval * *
 Curl_ldap_get_values_len_a(void * ld, LDAPMessage * entry, const char * attr)
 
 {
-  int i;
   char * cp;
   struct berval * * result;
 
   cp = (char *) NULL;
 
   if(attr) {
-    i = strlen(attr);
+    int i = strlen(attr);
 
     if(!(cp = malloc(i + 1))) {
       ldap_set_lderrno(ld, LDAP_NO_MEMORY, NULL,
