@@ -328,6 +328,11 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
     /* Release the package buffer as it is not required anymore */
     s_pSecFn->FreeContextBuffer(SecurityPackage);
 
+    /* Allocate our response buffer */
+    krb5->output_token = malloc(krb5->token_max);
+    if(!krb5->output_token)
+      return CURLE_OUT_OF_MEMORY;
+
     /* Generate our SPN */
     krb5->spn = Curl_sasl_build_spn(service, data->easy_conn->host.name);
     if(!krb5->spn)
@@ -341,11 +346,6 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
 
       /* Allow proper cleanup of the identity structure */
       krb5->p_identity = &krb5->identity;
-
-      /* Allocate our response buffer */
-      krb5->output_token = malloc(krb5->token_max);
-      if(!krb5->output_token)
-        return CURLE_OUT_OF_MEMORY;
     }
     else
       /* Use the current Windows user */
