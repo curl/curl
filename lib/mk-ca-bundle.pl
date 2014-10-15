@@ -56,7 +56,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.23';
+my $version = '1.24';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -97,6 +97,7 @@ my @valid_signature_algorithms = (
   "MD5",
   "SHA1",
   "SHA256",
+  "SHA384",
   "SHA512"
 );
 
