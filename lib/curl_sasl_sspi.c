@@ -147,7 +147,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   if(!chlg)
     return CURLE_BAD_CONTENT_ENCODING;
 
-  /* Ensure we have some login credientials as DigestSSP cannot use the current
+  /* Ensure we have some login credentials as DigestSSP cannot use the current
      Windows user like NTLMSSP can */
   if(!userp || !*userp) {
     Curl_safefree(chlg);
@@ -195,7 +195,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     return result;
   }
 
-  /* Acquire our credientials handle */
+  /* Acquire our credentials handle */
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
                                               (TCHAR *) TEXT("WDigest"),
                                               SECPKG_CRED_OUTBOUND, NULL,
@@ -358,7 +358,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
 
     memset(krb5->credentials, 0, sizeof(CredHandle));
 
-    /* Acquire our credientials handle */
+    /* Acquire our credentials handle */
     status = s_pSecFn->AcquireCredentialsHandle(NULL,
                                                 (TCHAR *) TEXT("Kerberos"),
                                                 SECPKG_CRED_OUTBOUND, NULL,
@@ -676,14 +676,14 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
 
 void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5)
 {
-  /* Free  the context */
+  /* Free our security context */
   if(krb5->context) {
     s_pSecFn->DeleteSecurityContext(krb5->context);
     free(krb5->context);
     krb5->context = NULL;
   }
 
-  /* Free the credientials handle */
+  /* Free our credentials handle */
   if(krb5->credentials) {
     s_pSecFn->FreeCredentialsHandle(krb5->credentials);
     free(krb5->credentials);
