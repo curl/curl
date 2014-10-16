@@ -292,7 +292,7 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
     return error;
 
   if(!buffer) {
-    infof(data, "NTLM handshake failure (unhandled condition)\n");
+    infof(data, "NTLM handshake failure (empty type-2 message)\n");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
