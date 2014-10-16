@@ -297,13 +297,8 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   }
 
 #ifdef USE_WINDOWS_SSPI
-  ntlm->type_2 = malloc(size + 1);
-  if(ntlm->type_2 == NULL) {
-    free(buffer);
-    return CURLE_OUT_OF_MEMORY;
-  }
+  ntlm->type_2 = buffer;
   ntlm->n_type_2 = curlx_uztoul(size);
-  memcpy(ntlm->type_2, buffer, size);
 #else
   ntlm->flags = 0;
 
@@ -336,8 +331,9 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
     fprintf(stderr, "\n****\n");
     fprintf(stderr, "**** Header %s\n ", header);
   });
-#endif
+
   free(buffer);
+#endif
 
   return CURLE_OK;
 }
