@@ -1372,7 +1372,6 @@ enum dupstring {
   STRING_KRB_LEVEL,       /* krb security level */
   STRING_NETRC_FILE,      /* if not NULL, use this instead of trying to find
                              $HOME/.netrc */
-  STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
   STRING_PROXY,           /* proxy to use */
   STRING_SET_RANGE,       /* range, if used */
   STRING_SET_REFERER,     /* custom string for the HTTP referer field */
@@ -1415,7 +1414,15 @@ enum dupstring {
 
   STRING_BEARER,          /* <bearer>, if used */
 
-  /* -- end of strings -- */
+  /* -- end of zero-terminated strings -- */
+
+  STRING_LASTZEROTERMINATED,
+
+  /* -- below this are pointers to binary data that cannot be strdup'ed.
+     Each such pointer must be added manually to Curl_dupset() --- */
+
+  STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
+
   STRING_LAST /* not used, just an end-of-list marker */
 };
 

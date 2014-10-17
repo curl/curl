@@ -36,6 +36,7 @@
 #include "strequal.h"
 #include "curl_memory.h"
 #include "sendf.h"
+#include "strdup.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -206,46 +207,6 @@ static const char *ContentTypeForFilename(const char *filename,
   }
   /* we have a contenttype by now */
   return contenttype;
-}
-
-/***************************************************************************
- *
- * memdup()
- *
- * Copies the 'source' data to a newly allocated buffer buffer (that is
- * returned). Uses buffer_length if not null, else uses strlen to determine
- * the length of the buffer to be copied
- *
- * Returns the new pointer or NULL on failure.
- *
- ***************************************************************************/
-static char *memdup(const char *src, size_t buffer_length)
-{
-  size_t length;
-  bool add = FALSE;
-  char *buffer;
-
-  if(buffer_length)
-    length = buffer_length;
-  else if(src) {
-    length = strlen(src);
-    add = TRUE;
-  }
-  else
-    /* no length and a NULL src pointer! */
-    return strdup("");
-
-  buffer = malloc(length+add);
-  if(!buffer)
-    return NULL; /* fail */
-
-  memcpy(buffer, src, length);
-
-  /* if length unknown do null termination */
-  if(add)
-    buffer[length] = '\0';
-
-  return buffer;
 }
 
 /***************************************************************************
@@ -678,9 +639,12 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
            (form == first_form) ) {
           /* Note that there's small risk that form->name is NULL here if the
              app passed in a bad combo, so we better check for that first. */
-          if(form->name)
+          if(form->name) {
             /* copy name (without strdup; possibly contains null characters) */
-            form->name = memdup(form->name, form->namelength);
+            form->name = Curl_memdup(form->name, form->namelength?
+                                     form->namelength:
+                                     strlen(form->name)+1);
+          }
           if(!form->name) {
             return_value = CURL_FORMADD_MEMORY;
             break;
@@ -691,7 +655,9 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
                             HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
                             HTTPPOST_CALLBACK)) && form->value) {
           /* copy value (without strdup; possibly contains null characters) */
-          form->value = memdup(form->value, form->contentslength);
+          form->value = Curl_memdup(form->value, form->contentslength?
+                                    form->contentslength:
+                                    strlen(form->value)+1);
           if(!form->value) {
             return_value = CURL_FORMADD_MEMORY;
             break;

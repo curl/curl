@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_STRDUP_H
-#define HEADER_CURL_STRDUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,11 +19,29 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "strdup.h"
 
 #ifndef HAVE_STRDUP
-extern char *curlx_strdup(const char *str);
-#endif
-char *Curl_memdup(const char *src, size_t buffer_length);
+char *strdup(const char *str)
+{
+  size_t len;
+  char *newstr;
 
-#endif /* HEADER_CURL_STRDUP_H */
+  if(!str)
+    return (char *)NULL;
+
+  len = strlen(str);
+
+  if(len >= ((size_t)-1) / sizeof(char))
+    return (char *)NULL;
+
+  newstr = malloc((len+1)*sizeof(char));
+  if(!newstr)
+    return (char *)NULL;
+
+  memcpy(newstr,str,(len+1)*sizeof(char));
+
+  return newstr;
+
+}
+#endif

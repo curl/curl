@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_STRDUP_H
-#define HEADER_CURL_STRDUP_H
+#ifndef HEADER_TOOL_STRDUP_H
+#define HEADER_TOOL_STRDUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,11 +21,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "tool_setup.h"
 
 #ifndef HAVE_STRDUP
-extern char *curlx_strdup(const char *str);
+extern char *strdup(const char *str);
 #endif
-char *Curl_memdup(const char *src, size_t buffer_length);
 
-#endif /* HEADER_CURL_STRDUP_H */
+#endif /* HEADER_TOOL_STRDUP_H */
