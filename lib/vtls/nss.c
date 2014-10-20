@@ -1482,9 +1482,6 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
 #endif
 
 
-  if(connssl->state == ssl_connection_complete)
-    return CURLE_OK;
-
   connssl->data = data;
 
   /* list of all NSS objects we need to destroy in Curl_nss_close() */
@@ -1749,10 +1746,6 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
     goto error;
   }
 
-  connssl->state = ssl_connection_complete;
-  conn->recv[sockindex] = nss_recv;
-  conn->send[sockindex] = nss_send;
-
   display_conn_info(conn, connssl->handle);
 
   if(data->set.str[STRING_SSL_ISSUERCERT]) {
@@ -1787,6 +1780,9 @@ static CURLcode nss_connect_common(struct connectdata *conn, int sockindex,
   struct SessionHandle *data = conn->data;
   const bool blocking = (done == NULL);
   CURLcode rv;
+
+  if(connssl->state == ssl_connection_complete)
+    return CURLE_OK;
 
   if(connssl->connecting_state == ssl_connect_1) {
     rv = nss_setup_connect(conn, sockindex);
@@ -1827,7 +1823,12 @@ static CURLcode nss_connect_common(struct connectdata *conn, int sockindex,
     /* signal completed SSL handshake */
     *done = TRUE;
 
-  connssl->connecting_state = ssl_connect_done;
+  connssl->state = ssl_connection_complete;
+  conn->recv[sockindex] = nss_recv;
+  conn->send[sockindex] = nss_send;
+
+  /* ssl_connect_done is never used outside, go back to the initial state */
+  connssl->connecting_state = ssl_connect_1;
   return CURLE_OK;
 }
 

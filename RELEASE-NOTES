@@ -34,6 +34,7 @@ This release includes the following bugfixes:
  o Cmake: Avoid cycle directory dependencies
  o Cmake: Build with GSSAPI (MIT or Heimdal)
  o vtls: provide backend defines for internal source code
+ o nss: fix a connection failure when FTPS handle is reused
 
 This release includes the following known bugs:
 
