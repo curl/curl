@@ -44,10 +44,31 @@ source file to the remote target file.
 .SH PROTOCOLS
 HTTP, FTP, SFTP, FILE
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_off_t resume_position = GET_IT_SOMEHOW;
+  curl_off_t file_size = GET_IT_SOMEHOW_AS_WELL;
+
+  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com");
+
+  /* resuming upload at this position, possibly beyond 2GB */
+  curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, resume_position);
+
+  /* ask for upload */
+  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+  /* set total data amount to expect */
+  curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, file_size);
+
+  /* Perform the request */
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.11.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLOPT_RESUME_FROM "(3), " CURLOPT_RANGE "(3), "
+.BR CURLOPT_INFILESIZE_LARGE "(3), "

@@ -48,6 +48,18 @@ CURLUSESSL_NONE
 .SH PROTOCOLS
 FTP, SMTP, POP3, IMAP
 .SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/file.ext");
+
+  /* require use of SSL for this, or fail */
+  curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+
+  /* Perform the request */
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.11.0. This option was known as CURLOPT_FTP_SSL up to 7.16.4, and
 the constants were known as CURLFTPSSL_*

@@ -55,7 +55,7 @@ CURL_SSLVERSION_DEFAULT
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3, SMTPS etc.
 .SH EXAMPLE
 .nf
-curl = curl_easy_init();
+CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
