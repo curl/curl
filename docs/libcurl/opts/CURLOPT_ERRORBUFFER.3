@@ -48,10 +48,25 @@ NULL
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+curl = curl_easy_init();
+if(curl) {
+  char error[CURL_ERROR_SIZE]
+
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  /* provide a buffer to store errors in */
+  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
+
+  /* Perform the request */
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
 .BR CURLOPT_DEBUGFUNCTION "(3), " CURLOPT_VERBOSE "(3), "
+.BR curl_easy_strerror "(3), " curl_multi_strerror "(3), "
+.BR curl_share_strerror "(3) "

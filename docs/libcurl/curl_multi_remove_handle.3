@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,16 +28,17 @@ curl_multi_remove_handle - remove an easy handle from a multi session
 CURLMcode curl_multi_remove_handle(CURLM *multi_handle, CURL *easy_handle);
 .ad
 .SH DESCRIPTION
-Removes a given easy_handle from the multi_handle. This will make the
-specified easy handle be removed from this multi handle's control.
+Removes a given \fIeasy_handle\fI from the \fImulti_handle\fI. This will make
+the specified easy handle be removed from this multi handle's control.
 
 When the easy handle has been removed from a multi stack, it is again
-perfectly legal to invoke \fIcurl_easy_perform()\fP on this easy handle.
+perfectly legal to invoke \fIcurl_easy_perform(3)\fP on this easy handle.
 
-Removing an easy handle while being used, will effectively halt the transfer
-in progress involving that easy handle. All other easy handles and transfers
-will remain unaffected.
+Removing an easy handle while being used is perfectly legal and will
+effectively halt the transfer in progress involving that easy handle. All
+other easy handles and transfers will remain unaffected.
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"
-.BR curl_multi_cleanup "(3)," curl_multi_init "(3)"
+.BR curl_multi_cleanup "(3)," curl_multi_init "(3), "
+.BR curl_multi_add_handle "(3) "

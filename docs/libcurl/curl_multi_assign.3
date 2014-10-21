@@ -21,7 +21,7 @@
 .\" **************************************************************************
 .TH curl_multi_assign 3 "9 Jul 2006" "libcurl 7.16.0" "libcurl Manual"
 .SH NAME
-curl_multi_assign \- set data to association with an internal socket
+curl_multi_assign \- set data to associate with an internal socket
 .SH SYNOPSIS
 #include <curl/curl.h>
 
@@ -30,7 +30,7 @@ CURLMcode curl_multi_assign(CURLM *multi_handle, curl_socket_t sockfd,
 .SH DESCRIPTION
 This function creates an association in the multi handle between the given
 socket and a private pointer of the application. This is designed for
-\fIcurl_multi_socket(3)\fP uses.
+\fIcurl_multi_socket_action(3)\fP uses.
 
 When set, the \fIsockptr\fP pointer will be passed to all future socket
 callbacks for the specific \fIsockfd\fP socket.

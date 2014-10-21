@@ -29,19 +29,22 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle, CURL *easy_handle);
 .ad
 .SH DESCRIPTION
 Adds a standard easy handle to the multi stack. This function call will make
-this \fImulti_handle\fP control the specified \fIeasy_handle\fP.  Furthermore,
-libcurl now initiates the connection associated with the specified
-\fIeasy_handle\fP.
+this \fImulti_handle\fP control the specified \fIeasy_handle\fP.
 
 While an easy handle is added to a multi stack, you can not and you must not
-use \fIcurl_easy_perform(3)\fP on that handle. After having removed the handle
-from the multi stack again, it is perfectly fine to use it with the easy
-interface again.
+use \fIcurl_easy_perform(3)\fP on that handle. After having removed the easy
+handle from the multi stack again, it is perfectly fine to use it with the
+easy interface again.
 
 If the easy handle is not set to use a shared (\fICURLOPT_SHARE(3)\fP) or
 global DNS cache (\fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP), it will be made to
 use the DNS cache that is shared between all easy handles within the multi
 handle when \fIcurl_multi_add_handle(3)\fP is called.
+
+When an easy interface is added to a multi handle, it will use a shared
+connection cache owned by the multi handle. Removing and adding new easy
+handles will not affect the pool of connections or the ability to do
+connection re-use.
 
 If you have CURLMOPT_TIMERFUNCTION set in the multi handle (and you really
 should if you're working event-based with \fIcurl_multi_socket_action(3)\fP
@@ -49,10 +52,12 @@ and friends), that callback will be called from within this function to ask
 for an updated timer so that your main event loop will get the activity on
 this handle to get started.
 
-The easy handle will remain added until you remove it again with
-\fIcurl_multi_remove_handle(3)\fP. You should remove the easy handle from the
-multi stack before you terminate first the easy handle and then the multi
-handle:
+The easy handle will remain added to the multi handle until you remove it
+again with \fIcurl_multi_remove_handle(3)\fP - even when a transfer with that
+specific easy handle is completed.
+
+You should remove the easy handle from the multi stack before you terminate
+first the easy handle and then the multi handle:
 
 1 - \fIcurl_multi_remove_handle(3)\fP
 
@@ -62,4 +67,5 @@ handle:
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"
-.BR curl_multi_cleanup "(3)," curl_multi_init "(3)"
+.BR curl_multi_cleanup "(3)," curl_multi_init "(3), "
+.BR curl_multi_setopt "(3), " curl_multi_socket_action "(3) "

@@ -29,7 +29,7 @@ curl_free - reclaim memory that has been obtained through a libcurl call
 .ad
 .SH DESCRIPTION
 curl_free reclaims memory that has been obtained through a libcurl call.  Use
-curl_free() instead of free() to avoid anomalies that can result from
+\fIcurl_free(3)\fP instead of free() to avoid anomalies that can result from
 differences in memory management between your application and libcurl.
 .SH "SEE ALSO"
-.BR curl_unescape "(3)"
+.BR curl_easy_unescape "(3), " curl_easy_escape "(3) "

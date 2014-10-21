@@ -28,14 +28,14 @@ curl_easy_setopt \- set options for a curl easy handle
 
 CURLcode curl_easy_setopt(CURL *handle, CURLoption option, parameter);
 .SH DESCRIPTION
-curl_easy_setopt() is used to tell libcurl how to behave. By using the
-appropriate options to \fIcurl_easy_setopt\fP, you can change libcurl's
-behavior.  All options are set with the \fIoption\fP followed by a
-\fIparameter\fP. That parameter can be a \fBlong\fP, a \fBfunction pointer\fP,
-an \fBobject pointer\fP or a \fBcurl_off_t\fP, depending on what the specific
-option expects. Read this manual carefully as bad input values may cause
-libcurl to behave badly!  You can only set one option in each function call. A
-typical application uses many curl_easy_setopt() calls in the setup phase.
+\fIcurl_easy_setopt(3)\fP is used to tell libcurl how to behave. By setting
+the appropriate options, the application can change libcurl's behavior.  All
+options are set with an \fIoption\fP followed by a \fIparameter\fP. That
+parameter can be a \fBlong\fP, a \fBfunction pointer\fP, an \fBobject
+pointer\fP or a \fBcurl_off_t\fP, depending on what the specific option
+expects. Read this manual carefully as bad input values may cause libcurl to
+behave badly!  You can only set one option in each function call. A typical
+application uses many \fIcurl_easy_setopt(3)\fP calls in the setup phase.
 
 Options set with this function call are valid for all forthcoming transfers
 performed using this \fIhandle\fP.  The options are not in any way reset
@@ -45,8 +45,8 @@ options back to internal default with \fIcurl_easy_reset(3)\fP.
 
 Strings passed to libcurl as 'char *' arguments, are copied by the library;
 thus the string storage associated to the pointer argument may be overwritten
-after curl_easy_setopt() returns. The only exception to this rule is really
-\fICURLOPT_POSTFIELDS(3)\fP, but the alternative that copies the string
+after \fIcurl_easy_setopt(3)\fP returns. The only exception to this rule is
+really \fICURLOPT_POSTFIELDS(3)\fP, but the alternative that copies the string
 \fICURLOPT_COPYPOSTFIELDS(3)\fP has some usage characteristics you need to
 read up on.
 
@@ -498,4 +498,5 @@ version, this function will return \fICURLE_UNKNOWN_OPTION\fP. If support for
 the option was disabled at compile-time, it will return
 \fICURLE_NOT_BUILT_IN\fP.
 .SH "SEE ALSO"
-.BR curl_easy_init "(3), " curl_easy_cleanup "(3), " curl_easy_reset "(3)"
+.BR curl_easy_init "(3), " curl_easy_cleanup "(3), " curl_easy_reset "(3), "
+.BR curl_multi_setopt "(3), "

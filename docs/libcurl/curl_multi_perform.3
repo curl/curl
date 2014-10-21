@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -34,7 +34,7 @@ in an non-blocking fashion.
 When an application has found out there's data available for the multi_handle
 or a timeout has elapsed, the application should call this function to
 read/write whatever there is to read or write right now etc.
-curl_multi_perform() returns as soon as the reads/writes are done. This
+\fIcurl_multi_perform(3)\fP returns as soon as the reads/writes are done. This
 function does not require that there actually is any data available for
 reading or that data can be written, it can be called just in case. It will
 write the number of handles that still transfer data in the second argument's
@@ -53,7 +53,7 @@ there is no longer any transfers in progress.
 CURLMcode type, general libcurl multi interface error code.
 
 Before version 7.20.0: If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this
-basically means that you should call \fIcurl_multi_perform\fP again, before
+basically means that you should call \fIcurl_multi_perform(3)\fP again, before
 you select() on more actions. You don't have to do it immediately, but the
 return code means that libcurl may have more data available to return or that
 there may be more data to send off before it is "satisfied". Do note that
