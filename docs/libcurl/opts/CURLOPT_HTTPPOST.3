@@ -47,7 +47,29 @@ NULL
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
-TODO
+.nf
+/* Fill in the file upload field. This makes libcurl load data from
+   the given file name when curl_easy_perform() is called. */
+curl_formadd(&formpost,
+             &lastptr,
+             CURLFORM_COPYNAME, "sendfile",
+             CURLFORM_FILE, "postit2.c",
+             CURLFORM_END);
+
+/* Fill in the filename field */
+curl_formadd(&formpost,
+             &lastptr,
+             CURLFORM_COPYNAME, "filename",
+             CURLFORM_COPYCONTENTS, "postit2.c",
+             CURLFORM_END);
+
+/* Fill in the submit field too, even if this is rarely needed */
+curl_formadd(&formpost,
+             &lastptr,
+             CURLFORM_COPYNAME, "submit",
+             CURLFORM_COPYCONTENTS, "send",
+             CURLFORM_END);
+.fi
 .SH AVAILABILITY
 As long as HTTP is enabled
 .SH RETURN VALUE

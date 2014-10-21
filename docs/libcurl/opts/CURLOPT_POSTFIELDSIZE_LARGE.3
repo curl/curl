@@ -37,12 +37,28 @@ set to -1, the library will use strlen() to get the size.
 .SH DEFAULT
 -1
 .SH PROTOCOLS
-HTTP
+HTTP(S)
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  const char *data = large_chunk;
+  curl_off_t length_of_data; /* set somehow */
+
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  /* size of the POST data */
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, length_of_data);
+
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Along with HTTP
 .SH RETURN VALUE
 Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLOPT_POSTFIELDS "(3), " CURLOPT_COPYPOSTFIELDS "(3), "
+.BR CURLOPT_POSTFIELDSIZE "(3), "

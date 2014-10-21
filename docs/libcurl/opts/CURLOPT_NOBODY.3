@@ -39,7 +39,18 @@ Enabling this option means asking for a download but without a body.
 .SH PROTOCOLS
 Most
 .SH EXAMPLE
-TODO
+.nf
+curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  /* get us the resource without a body! */ 
+  curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+
+  /* Perform the request */ 
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE

@@ -39,15 +39,32 @@ redirects libcurl will follow.
 libcurl can limit to what protocols it will automatically follow. The accepted
 protocols are set with \fICURLOPT_REDIR_PROTOCOLS(3)\fP and it excludes the
 FILE protocol by default.
+
+For users who think the existing location following is too naive, too simple
+or just lacks features, it is very easy to instead implement your own redirect
+follow logic with the use of \fIcurl_easy_getinfo(3)\fP's
+\fICURLINFO_REDIRECT_URL\fP option instead of using
+\fICURLOPT_FOLLOWLOCATION(3)\fP.
 .SH DEFAULT
 0, disabled
 .SH PROTOCOLS
-HTTP
+HTTP(S)
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  /* example.com is redirected, so we tell libcurl to follow redirection */
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Along with HTTP
 .SH RETURN VALUE
 Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLOPT_REDIR_PROTOCOLS "(3), " CURLOPT_PROTOCOLS "(3), "
+.BR CURLOPT_POSTREDIR "(3), "

@@ -28,10 +28,10 @@ CURLOPT_COPYPOSTFIELDS \- have libcurl copy data to POST
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COPYPOSTFIELDS, char *data);
 .SH DESCRIPTION
-Pass a char * as parameter, which should be the full data to post in a HTTP
-POST operation. It behaves as the \fICURLOPT_POSTFIELDS(3)\fP option, but the
-original data is instead copied by the library, allowing the application to
-overwrite the original data after setting this option.
+Pass a char * as parameter, which should be the full \fIdata\fP to post in a
+HTTP POST operation. It behaves as the \fICURLOPT_POSTFIELDS(3)\fP option, but
+the original data is instead copied by the library, allowing the application
+to overwrite the original data after setting this option.
 
 Because data are copied, care must be taken when using this option in
 conjunction with \fICURLOPT_POSTFIELDSIZE(3)\fP or
@@ -44,9 +44,23 @@ copy. In any case, the size must not be changed after
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
-HTTP
+HTTP(S)
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  char local_buffer[1024]="data to send";
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  /* size of the data to copy from the buffer and send in the request */
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 12L);
+
+  /* send data from the local stack */
+  curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, local_buffer);
+
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.17.1
 .SH RETURN VALUE

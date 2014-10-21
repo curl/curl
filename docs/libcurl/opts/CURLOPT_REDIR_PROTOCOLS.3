@@ -34,12 +34,55 @@ redirect when \fICURLOPT_FOLLOWLOCATION(3)\fP is enabled. This allows you to
 limit specific transfers to only be allowed to use a subset of protocols in
 redirections. By default libcurl will allow all protocols except for FILE and
 SCP.
+
+These are the available protocol defines:
+.nf
+CURLPROTO_DICT
+CURLPROTO_FILE
+CURLPROTO_FTP
+CURLPROTO_FTPS
+CURLPROTO_GOPHER
+CURLPROTO_HTTP
+CURLPROTO_HTTPS
+CURLPROTO_IMAP
+CURLPROTO_IMAPS
+CURLPROTO_LDAP
+CURLPROTO_LDAPS
+CURLPROTO_POP3
+CURLPROTO_POP3S
+CURLPROTO_RTMP
+CURLPROTO_RTMPE
+CURLPROTO_RTMPS
+CURLPROTO_RTMPT
+CURLPROTO_RTMPTE
+CURLPROTO_RTMPTS
+CURLPROTO_RTSP
+CURLPROTO_SCP
+CURLPROTO_SFTP
+CURLPROTO_SMTP
+CURLPROTO_SMTPS
+CURLPROTO_TELNET
+CURLPROTO_TFTP
+.fi
 .SH DEFAULT
 All protocols except for FILE and SCP
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+curl = curl_easy_init();
+if(curl) {
+  /* pass in the URL from an external source */
+  curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
+
+  /* only allow redirects to HTTP and HTTPS URLs */
+  curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS,
+                   CURLPROTO_HTTP | CURLPROTO_HTTPS);
+
+  /* Perform the request */
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.19.4, before then it would follow all protocols.
 .SH RETURN VALUE

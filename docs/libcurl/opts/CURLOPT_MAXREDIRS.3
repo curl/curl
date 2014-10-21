@@ -39,9 +39,23 @@ Set it to -1 for an infinite number of redirects.
 .SH DEFAULT
 -1, unlimited
 .SH PROTOCOLS
-HTTP
+HTTP(S)
 .SH EXAMPLE
-TODO
+.nf
+curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
+
+  /* enable redirect following */
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+  /* allow three redirects */
+  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 3L);
+
+  /* Perform the request */
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Along with HTTP
 .SH RETURN VALUE
