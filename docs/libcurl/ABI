@@ -7,16 +7,16 @@
                           libcurl's binary interface
 
 ABI - Application Binary Interface
+----------------------------------
 
-  First, allow me to define the word for this context: ABI describes the
-  low-level interface between an application program and a library. Calling
-  conventions, function arguments, return values, struct sizes/defines and
-  more.
+  "ABI" describes the low-level interface between an application program and a
+  library. Calling conventions, function arguments, return values, struct
+  sizes/defines and more.
 
-  For a longer description, see
-  http://en.wikipedia.org/wiki/Application_binary_interface
+  [Wikipedia has a longer description](http://en.wikipedia.org/wiki/Application_binary_interface)
 
 Upgrades
+--------
 
   In the vast majority of all cases, a typical libcurl upgrade does not break
   the ABI at all. Your application can remain using libcurl just as before,
@@ -26,11 +26,13 @@ Upgrades
   it now is defined to work.
 
 Version Numbers
+---------------
 
   In libcurl land, you really can't tell by the libcurl version number if that
   libcurl is binary compatible or not with another libcurl version.
 
 Soname Bumps
+------------
 
   Whenever there are changes done to the library that will cause an ABI
   breakage, that may require your application to get attention or possibly be
@@ -43,7 +45,11 @@ Soname Bumps
   During the first seven years of libcurl releases, there have only been four
   ABI breakages.
 
+  We are determined to bump the SONAME as rarely as possible.  Ideally, we
+  never do it again.
+
 Downgrades
+----------
 
   Going to an older libcurl version from one you're currently using can be a
   tricky thing. Mostly we add features and options to newer libcurls as that
@@ -54,6 +60,7 @@ Downgrades
   soname, and then your application may need to adapt to the modified ABI.
 
 History
+-------
 
   The previous major library soname number bumps (breaking backwards
   compatibility) have happened the following times:
