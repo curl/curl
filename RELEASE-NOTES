@@ -11,6 +11,9 @@ This release includes the following changes:
  o CURLOPT_COOKIELIST: Added "RELOAD" command [5]
  o ssh: improve key file search
  o SSL: public key pinning. Use CURLOPT_PINNEDPUBLICKEY and --pinnedpubkey
+ o vtls: remove QsoSSL support, use gskit!
+ o mk-ca-bundle: added SHA-384 signature algorithm
+ o docs: added many examples for libcurl opts and other doc improvements
 
 This release includes the following bugfixes:
 
@@ -35,6 +38,17 @@ This release includes the following bugfixes:
  o Cmake: Build with GSSAPI (MIT or Heimdal)
  o vtls: provide backend defines for internal source code
  o nss: fix a connection failure when FTPS handle is reused
+ o tests/http_pipe.py: Python 3 support
+ o cmake: build tool_hugehelp (ENABLE_MANUAL)
+ o cmake: enable IPv6 by default if available
+ o tests: move TESTCASES to Makefile.inc, add show for cmake
+ o ntlm: Avoid unnecessary buffer allocation for SSPI based type-2 token
+ o ntlm: Fixed empty/bad base-64 decoded buffer return codes
+ o ntlm: Fixed empty type-2 decoded message info text
+ o cmake: add CMake/Macros.cmake to the release tarball
+ o cmake: add SUPPORT_FEATURES and SUPPORT_PROTOCOLS
+ o cmake: use LIBCURL_VERSION from curlver.h
+ o cmake: generate pkg-config and curl-config
 
 This release includes the following known bugs:
 
@@ -43,12 +57,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Askar Safin, Bill Nagel, Catalin Patulea, Dan Fandrich, Daniel Stenberg,
-  Dimitar Boevski, Fabian Keil, Jakub Zakrzewski, Jeremy Lin,
+  Askar Safin, Bill Nagel, Bruno Thomsen, Catalin Patulea, Dan Fandrich,
+  Daniel Stenberg, Dimitar Boevski, Fabian Keil, Jakub Zakrzewski, Jeremy Lin,
   Jonathan Cardoso Machado, Kamil Dudka, Luan Cestari, Marcel Raad,
-  Marc Hoersken, Michael Wallner, Patrick Monnerat, Paul Howarth, Ray Satiro,
-  Steve Holme, Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts, Waldek Kozba,
-  Yousuke Kimoto,
+  Marc Hoersken, Michael Wallner, Patrick Monnerat, Paul Howarth, Peter Wu,
+  Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts,
+  Waldek Kozba, Yousuke Kimoto,
 
         Thanks! (and sorry if I forgot to mention someone)
 
