@@ -1659,10 +1659,8 @@ CURLcode Curl_add_timecondition(struct SessionHandle *data,
 {
   const struct tm *tm;
   char *buf = data->state.buffer;
-  CURLcode result = CURLE_OK;
   struct tm keeptime;
-
-  result = Curl_gmtime(data->set.timevalue, &keeptime);
+  CURLcode result = Curl_gmtime(data->set.timevalue, &keeptime);
   if(result) {
     failf(data, "Invalid TIMEVALUE");
     return result;
