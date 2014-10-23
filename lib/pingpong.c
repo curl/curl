@@ -476,11 +476,9 @@ CURLcode Curl_pp_flushsend(struct pingpong *pp)
   /* we have a piece of a command still left to send */
   struct connectdata *conn = pp->conn;
   ssize_t written;
-  CURLcode result = CURLE_OK;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
-
-  result = Curl_write(conn, sock, pp->sendthis + pp->sendsize -
-                      pp->sendleft, pp->sendleft, &written);
+  CURLcode result = Curl_write(conn, sock, pp->sendthis + pp->sendsize -
+                               pp->sendleft, pp->sendleft, &written);
   if(result)
     return result;
 
