@@ -252,7 +252,6 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
       nread=0;
       perline=0;
-      keepon=TRUE;
 
       while((nread<BUFSIZE) && (keepon && !error)) {
 
