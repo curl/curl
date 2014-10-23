@@ -307,8 +307,6 @@ static CURLcode handshake(struct connectdata *conn,
         gnutls_record_get_direction(session)?
         ssl_connect_2_writing:ssl_connect_2_reading;
       continue;
-      if(nonblocking)
-        return CURLE_OK;
     }
     else if((rc < 0) && !gnutls_error_is_fatal(rc)) {
       const char *strerr = NULL;
