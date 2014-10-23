@@ -234,18 +234,17 @@ sub sha1 {
 
 
 sub oldsha1 {
-    my ($crt)=@_;
-    my $sha1="";
-    open(C, "<$crt") || return 0;
-    while(<C>) {
-        chomp;
-        if($_ =~ /^\#\# SHA1: (.*)/) {
-            $sha1 = $1;
-            last;
-        }
+  my $sha1 = "";
+  open(C, "<$_[0]") || return 0;
+  while(<C>) {
+    chomp;
+    if($_ =~ /^\#\# SHA1: (.*)/) {
+      $sha1 = $1;
+      last;
     }
-    close(C);
-    return $sha1;
+  }
+  close(C);
+  return $sha1;
 }
 
 if ( $opt_p !~ m/:/ ) {
@@ -277,31 +276,23 @@ my $stdout = $crt eq '-';
 my $resp;
 my $fetched;
 
-my $oldsha1= oldsha1($crt);
+my $oldsha1 = oldsha1($crt);
 
 print STDERR "SHA1 of old file: $oldsha1\n" if (!$opt_q);
 
 print STDERR "Downloading '$txt' ...\n" if (!$opt_q);
 
 if($curl && !$opt_n) {
-    my $https = $url;
-    $https =~ s/^http:/https:/;
-    printf "Get certdata over HTTPS with curl!\n", $https;
-    my $quiet = $opt_q?"-s":"";
-    my @out = `curl -w %{response_code} $quiet -O $https`;
-
-    my $code = 0;
-    if(@out) {
-        $code = $out[0];
-    }
-
-    if($code == 200) {
-        $fetched = 1;
-    }
-    else {
-        print STDERR "Failed downloading HTTPS with curl, trying HTTP with LWP\n"
-            unless $opt_q;
-    }
+  my $https = $url;
+  $https =~ s/^http:/https:/;
+  print STDERR "Get certdata over HTTPS with curl!\n" if (!$opt_q);
+  my $quiet = $opt_q ? "-s" : "";
+  my @out = `curl -w %{response_code} $quiet -O $https`;
+  if(@out && $out[0] == 200) {
+    $fetched = 1;
+  } else {
+    print STDERR "Failed downloading HTTPS with curl, trying HTTP with LWP\n" if (!$opt_q);
+  }
 }
 
 unless ($fetched || ($opt_n and -e $txt)) {
