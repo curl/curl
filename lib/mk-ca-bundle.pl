@@ -37,6 +37,12 @@ use strict;
 use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_l $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
 use List::Util;
 use Text::Wrap;
+my $MOD_SHA = "Digest::SHA";
+eval "require $MOD_SHA";
+if ($@) {
+  $MOD_SHA = "Digest::SHA::PurePerl";
+  eval "require $MOD_SHA";
+}
 
 my %urls = (
   'nss' =>
@@ -56,7 +62,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.24';
+my $version = '1.25';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -117,13 +123,15 @@ my $curl=`curl -V`;
 
 if ($opt_i) {
   print ("=" x 78 . "\n");
-  print "Script Version            : $version\n";
-  print "Perl Version              : $]\n";
-  print "Operating System Name     : $^O\n";
-  print "Getopt::Std.pm Version    : ${Getopt::Std::VERSION}\n";
-  print "MIME::Base64.pm Version   : ${MIME::Base64::VERSION}\n";
-  print "LWP::UserAgent.pm Version : ${LWP::UserAgent::VERSION}\n";
-  print "LWP.pm Version            : ${LWP::VERSION}\n";
+  print "Script Version                   : $version\n";
+  print "Perl Version                     : $]\n";
+  print "Operating System Name            : $^O\n";
+  print "Getopt::Std.pm Version           : ${Getopt::Std::VERSION}\n";
+  print "MIME::Base64.pm Version          : ${MIME::Base64::VERSION}\n";
+  print "LWP::UserAgent.pm Version        : ${LWP::UserAgent::VERSION}\n";
+  print "LWP.pm Version                   : ${LWP::VERSION}\n";
+  print "Digest::SHA.pm Version           : ${Digest::SHA::VERSION}\n" if ($Digest::SHA::VERSION);
+  print "Digest::SHA::PurePerl.pm Version : ${Digest::SHA::PurePerl::VERSION}\n" if ($Digest::SHA::PurePerl::VERSION);
   print ("=" x 78 . "\n");
 }
 
@@ -211,11 +219,19 @@ sub PARSE_CSV_PARAM($$@) {
 }
 
 sub sha1 {
-    my ($txt)=@_;
-    my $sha1 = `$openssl dgst -sha1 $txt | cut '-d ' -f2`;
-    chomp $sha1;
-    return $sha1;
+  my $result;
+  if ($Digest::SHA::VERSION || $Digest::SHA::PurePerl::VERSION) {
+    open(FILE, $_[0]) or die "Can't open '$_[0]': $!";
+    binmode(FILE);
+    $result = $MOD_SHA->new(1)->addfile(*FILE)->hexdigest;
+    close(FILE);
+  } else {
+    # Use OpenSSL command if Perl Digest::SHA modules not available
+    $result = (split(/ |\r|\n/,`$openssl dgst -sha1 $_[0]`))[1];
+  }
+  return $result;
 }
+
 
 sub oldsha1 {
     my ($crt)=@_;
