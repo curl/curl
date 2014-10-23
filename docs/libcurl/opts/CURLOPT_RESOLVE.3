@@ -57,7 +57,23 @@ NULL
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl;
+struct curl_slist *host = NULL;
+host = curl_slist_append(NULL, "example.com:80:127.0.0.1");
+
+curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  res = curl_easy_perform(curl);
+
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+}
+
+curl_slist_free_all(host);
+.fi
 .SH AVAILABILITY
 Added in 7.21.3
 .SH RETURN VALUE
