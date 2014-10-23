@@ -183,7 +183,7 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc)
 
 unsigned int Curl_rand(struct SessionHandle *data)
 {
-  unsigned int r;
+  unsigned int r = 0;
   static unsigned int randseed;
   static bool seeded = FALSE;
 
