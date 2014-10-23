@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -121,7 +121,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
   for(;;) {
     result = Curl_write(conn, sockfd, sel, k, &amount);
-    if(CURLE_OK == result) { /* Which may not have written it all! */
+    if(!result) { /* Which may not have written it all! */
       result = Curl_client_write(conn, CLIENTWRITE_HEADER, sel, amount);
       if(result) {
         Curl_safefree(sel_org);
@@ -154,7 +154,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   /* We can use Curl_sendf to send the terminal \r\n relatively safely and
      save allocing another string/doing another _write loop. */
   result = Curl_sendf(sockfd, conn, "\r\n");
-  if(result != CURLE_OK) {
+  if(result) {
     failf(data, "Failed sending Gopher request");
     return result;
   }

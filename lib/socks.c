@@ -238,7 +238,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     code = Curl_write_plain(conn, sock, (char *)socksreq,
                             packetsize + hostnamelen,
                             &written);
-    if((code != CURLE_OK) || (written != packetsize + hostnamelen)) {
+    if(code || (written != packetsize + hostnamelen)) {
       failf(data, "Failed to send SOCKS4 connect request.");
       return CURLE_COULDNT_CONNECT;
     }
@@ -247,7 +247,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
       hostnamelen = (ssize_t)strlen(hostname) + 1;
       code = Curl_write_plain(conn, sock, (char *)hostname, hostnamelen,
                               &written);
-      if((code != CURLE_OK) || (written != hostnamelen)) {
+      if(code || (written != hostnamelen)) {
         failf(data, "Failed to send SOCKS4 connect request.");
         return CURLE_COULDNT_CONNECT;
       }
@@ -258,7 +258,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     /* Receive response */
     result = Curl_blockread_all(conn, sock, (char *)socksreq, packetsize,
                                 &actualread);
-    if((result != CURLE_OK) || (actualread != packetsize)) {
+    if(result || (actualread != packetsize)) {
       failf(data, "Failed to receive SOCKS4 connect request ack.");
       return CURLE_COULDNT_CONNECT;
     }
@@ -431,7 +431,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   code = Curl_write_plain(conn, sock, (char *)socksreq, (2 + (int)socksreq[1]),
                           &written);
-  if((code != CURLE_OK) || (written != (2 + (int)socksreq[1]))) {
+  if(code || (written != (2 + (int)socksreq[1]))) {
     failf(data, "Unable to send initial SOCKS5 request.");
     return CURLE_COULDNT_CONNECT;
   }
@@ -457,7 +457,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   (void)curlx_nonblock(sock, FALSE);
 
   result=Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread);
-  if((result != CURLE_OK) || (actualread != 2)) {
+  if(result || (actualread != 2)) {
     failf(data, "Unable to receive initial SOCKS5 response.");
     return CURLE_COULDNT_CONNECT;
   }
@@ -473,7 +473,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   else if(socksreq[1] == 1) {
     code = Curl_SOCKS5_gssapi_negotiate(sockindex, conn);
-    if(code != CURLE_OK) {
+    if(code) {
       failf(data, "Unable to negotiate SOCKS5 GSS-API context.");
       return CURLE_COULDNT_CONNECT;
     }
@@ -510,13 +510,13 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     len += proxy_password_len;
 
     code = Curl_write_plain(conn, sock, (char *)socksreq, len, &written);
-    if((code != CURLE_OK) || (len != written)) {
+    if(code || (len != written)) {
       failf(data, "Failed to send SOCKS5 sub-negotiation request.");
       return CURLE_COULDNT_CONNECT;
     }
 
     result=Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread);
-    if((result != CURLE_OK) || (actualread != 2)) {
+    if(result || (actualread != 2)) {
       failf(data, "Unable to receive SOCKS5 sub-negotiation response.");
       return CURLE_COULDNT_CONNECT;
     }
@@ -583,7 +583,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     if(rc == CURLRESOLV_PENDING) {
       /* this requires that we're in "wait for resolve" state */
       code = Curl_resolver_wait_resolv(conn, &dns);
-      if(code != CURLE_OK)
+      if(code)
         return code;
     }
 
@@ -642,7 +642,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 #endif
     code = Curl_write_plain(conn, sock, (char *)socksreq, len, &written);
 
-  if((code != CURLE_OK) || (len != written)) {
+  if(code || (len != written)) {
     failf(data, "Failed to send SOCKS5 connect request.");
     return CURLE_COULDNT_CONNECT;
   }
@@ -658,7 +658,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     result = Curl_blockread_all(conn, sock, (char *)socksreq,
                                 len, &actualread);
 
-  if((result != CURLE_OK) || (len != actualread)) {
+  if(result || (len != actualread)) {
     failf(data, "Failed to receive SOCKS5 connect request ack.");
     return CURLE_COULDNT_CONNECT;
   }
@@ -738,7 +738,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       len -= 10;
       result = Curl_blockread_all(conn, sock, (char *)&socksreq[10],
                                   len, &actualread);
-      if((result != CURLE_OK) || (len != actualread)) {
+      if(result || (len != actualread)) {
         failf(data, "Failed to receive SOCKS5 connect request ack.");
         return CURLE_COULDNT_CONNECT;
       }

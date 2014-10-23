@@ -1024,7 +1024,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* init this transfer. */
       data->result=Curl_pretransfer(data);
 
-      if(CURLE_OK == data->result) {
+      if(!data->result) {
         /* after init, go CONNECT */
         multistate(data, CURLM_STATE_CONNECT);
         Curl_pgrsTime(data, TIMER_STARTOP);
@@ -1055,7 +1055,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         break;
       }
 
-      if(CURLE_OK == data->result) {
+      if(!data->result) {
         /* Add this handle to the send or pend pipeline */
         data->result = Curl_add_handle_to_pipeline(data, data->easy_conn);
         if(CURLE_OK != data->result)
@@ -1171,7 +1171,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         result = CURLM_CALL_MULTI_PERFORM;
         multistate(data, CURLM_STATE_CONNECT);
       }
-      else if(CURLE_OK == data->result) {
+      else if(!data->result) {
         if(data->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_COMPLETE)
           multistate(data, CURLM_STATE_WAITCONNECT);
       }
@@ -1235,7 +1235,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* protocol-specific connect phase */
       data->result = Curl_protocol_connecting(data->easy_conn,
                                               &protocol_connect);
-      if((data->result == CURLE_OK) && protocol_connect) {
+      if(!data->result && protocol_connect) {
         /* after the connect has completed, go WAITDO or DO */
         multistate(data, multi->pipelining_enabled?
                    CURLM_STATE_WAITDO:CURLM_STATE_DO);
@@ -1283,7 +1283,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         /* When Curl_do() returns failure, data->easy_conn might be NULL! */
 
-        if(CURLE_OK == data->result) {
+        if(!data->result) {
           if(!dophase_done) {
             /* some steps needed for wildcard matching */
             if(data->set.wildcardmatch) {
@@ -1342,10 +1342,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           /* When set to retry the connection, we must to go back to
            * the CONNECT state */
           if(retry) {
-            if((drc == CURLE_OK) || (drc == CURLE_SEND_ERROR)) {
+            if(!drc || (drc == CURLE_SEND_ERROR)) {
               follow = FOLLOW_RETRY;
               drc = Curl_follow(data, newurl, follow);
-              if(drc == CURLE_OK) {
+              if(!drc) {
                 multistate(data, CURLM_STATE_CONNECT);
                 result = CURLM_CALL_MULTI_PERFORM;
                 data->result = CURLE_OK;
@@ -1382,7 +1382,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* we continue DOING until the DO phase is complete */
       data->result = Curl_protocol_doing(data->easy_conn,
                                          &dophase_done);
-      if(CURLE_OK == data->result) {
+      if(!data->result) {
         if(dophase_done) {
           /* after DO, go DO_DONE or DO_MORE */
           multistate(data, data->easy_conn->bits.do_more?
@@ -1407,7 +1407,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       /* No need to remove this handle from the send pipeline here since that
          is done in Curl_done() */
-      if(CURLE_OK == data->result) {
+      if(!data->result) {
         if(control) {
           /* if positive, advance to DO_DONE
              if negative, go back to DOING */
@@ -1595,9 +1595,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           else
             follow = FOLLOW_RETRY;
           data->result = Curl_done(&data->easy_conn, CURLE_OK, FALSE);
-          if(CURLE_OK == data->result) {
+          if(!data->result) {
             data->result = Curl_follow(data, newurl, follow);
-            if(CURLE_OK == data->result) {
+            if(!data->result) {
               multistate(data, CURLM_STATE_CONNECT);
               result = CURLM_CALL_MULTI_PERFORM;
               newurl = NULL; /* handed over the memory ownership to
@@ -1617,7 +1617,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             newurl = data->req.location;
             data->req.location = NULL;
             data->result = Curl_follow(data, newurl, FOLLOW_FAKE);
-            if(CURLE_OK == data->result)
+            if(!data->result)
               newurl = NULL; /* allocation was handed over Curl_follow() */
             else
               disconnect_conn = TRUE;

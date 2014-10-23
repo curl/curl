@@ -328,7 +328,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 */
 #define CURL_OUTPUT_DIGEST_CONV(a, b) \
   rc = Curl_convert_to_network(a, (char *)b, strlen((const char*)b)); \
-  if(rc != CURLE_OK) { \
+  if(rc) { \
     free(b); \
     return rc; \
   }

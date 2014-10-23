@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,7 +87,7 @@ CURLcode Curl_convert_to_network(struct SessionHandle *data,
   if(data->set.convtonetwork) {
     /* use translation callback */
     rc = data->set.convtonetwork(buffer, length);
-    if(rc != CURLE_OK) {
+    if(rc) {
       failf(data,
             "CURLOPT_CONV_TO_NETWORK_FUNCTION callback returned %d: %s",
             (int)rc, curl_easy_strerror(rc));
@@ -148,7 +148,7 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
   if(data->set.convfromnetwork) {
     /* use translation callback */
     rc = data->set.convfromnetwork(buffer, length);
-    if(rc != CURLE_OK) {
+    if(rc) {
       failf(data,
             "CURLOPT_CONV_FROM_NETWORK_FUNCTION callback returned %d: %s",
             (int)rc, curl_easy_strerror(rc));
@@ -209,7 +209,7 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
   if(data->set.convfromutf8) {
     /* use translation callback */
     rc = data->set.convfromutf8(buffer, length);
-    if(rc != CURLE_OK) {
+    if(rc) {
       failf(data,
             "CURLOPT_CONV_FROM_UTF8_FUNCTION callback returned %d: %s",
             (int)rc, curl_easy_strerror(rc));
@@ -333,7 +333,7 @@ CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form)
     if(form->type == FORM_DATA) {
       rc = Curl_convert_to_network(data, form->line, form->length);
       /* Curl_convert_to_network calls failf if unsuccessful */
-      if(rc != CURLE_OK)
+      if(rc)
         return rc;
     }
   } while((form = next) != NULL); /* continue */

@@ -330,7 +330,7 @@ curl_easy_strerror(CURLcode error)
    */
   return "Unknown error";
 #else
-  if(error == CURLE_OK)
+  if(!error)
     return "No error";
   else
     return "Error";
@@ -597,7 +597,7 @@ get_winsock_error (int err, char *buf, size_t len)
     return NULL;
   }
 #else
-  if(err == CURLE_OK)
+  if(!err)
     return NULL;
   else
     p = "error";

@@ -950,13 +950,13 @@ void Curl_formclean(struct FormData **form_ptr)
 int curl_formget(struct curl_httppost *form, void *arg,
                  curl_formget_callback append)
 {
-  CURLcode rc;
+  CURLcode result;
   curl_off_t size;
   struct FormData *data, *ptr;
 
-  rc = Curl_getformdata(NULL, &data, form, NULL, &size);
-  if(rc != CURLE_OK)
-    return (int)rc;
+  result = Curl_getformdata(NULL, &data, form, NULL, &size);
+  if(result)
+    return (int)result;
 
   for(ptr = data; ptr; ptr = ptr->next) {
     if((ptr->type == FORM_FILE) || (ptr->type == FORM_CALLBACK)) {
@@ -1365,10 +1365,8 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
   } while((post = post->next) != NULL); /* for each field */
 
   /* end-boundary for everything */
-  if(CURLE_OK == result)
-    result = AddFormDataf(&form, &size,
-                          "\r\n--%s--\r\n",
-                          boundary);
+  if(!result)
+    result = AddFormDataf(&form, &size, "\r\n--%s--\r\n", boundary);
 
   if(result) {
     Curl_formclean(&firstform);

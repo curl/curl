@@ -148,7 +148,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
       free(host_port);
 
-      if(CURLE_OK == result) {
+      if(!result) {
         char *host=(char *)"";
         const char *proxyconn="";
         const char *useragent="";
@@ -197,14 +197,14 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           free(host);
         free(hostheader);
 
-        if(CURLE_OK == result)
+        if(!result)
           result = Curl_add_custom_headers(conn, TRUE, req_buffer);
 
-        if(CURLE_OK == result)
+        if(!result)
           /* CRLF terminate the request */
           result = Curl_add_bufferf(req_buffer, "\r\n");
 
-        if(CURLE_OK == result) {
+        if(!result) {
           /* Send the connect request to the proxy */
           /* BLOCKING */
           result =

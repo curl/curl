@@ -279,35 +279,35 @@ void Curl_ssl_cleanup(void)
 CURLcode
 Curl_ssl_connect(struct connectdata *conn, int sockindex)
 {
-  CURLcode res;
+  CURLcode result;
   /* mark this is being ssl-enabled from here on. */
   conn->ssl[sockindex].use = TRUE;
   conn->ssl[sockindex].state = ssl_connection_negotiating;
 
-  res = curlssl_connect(conn, sockindex);
+  result = curlssl_connect(conn, sockindex);
 
-  if(!res)
+  if(!result)
     Curl_pgrsTime(conn->data, TIMER_APPCONNECT); /* SSL is connected */
 
-  return res;
+  return result;
 }
 
 CURLcode
 Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
                              bool *done)
 {
-  CURLcode res;
+  CURLcode result;
   /* mark this is being ssl requested from here on. */
   conn->ssl[sockindex].use = TRUE;
 #ifdef curlssl_connect_nonblocking
-  res = curlssl_connect_nonblocking(conn, sockindex, done);
+  result = curlssl_connect_nonblocking(conn, sockindex, done);
 #else
   *done = TRUE; /* fallback to BLOCKING */
-  res = curlssl_connect(conn, sockindex);
+  result = curlssl_connect(conn, sockindex);
 #endif /* non-blocking connect support */
-  if(!res && *done)
+  if(!result && *done)
     Curl_pgrsTime(conn->data, TIMER_APPCONNECT); /* SSL is connected */
-  return res;
+  return result;
 }
 
 /*
@@ -633,7 +633,7 @@ CURLcode Curl_ssl_push_certinfo_len(struct SessionHandle *data,
   struct curl_certinfo * ci = &data->info.certs;
   char * output;
   struct curl_slist * nl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   size_t labellen = strlen(label);
   size_t outlen = labellen + 1 + valuelen + 1; /* label:value\0 */
 
@@ -654,11 +654,11 @@ CURLcode Curl_ssl_push_certinfo_len(struct SessionHandle *data,
   if(!nl) {
     free(output);
     curl_slist_free_all(ci->certinfo[certnum]);
-    res = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
   }
 
   ci->certinfo[certnum] = nl;
-  return res;
+  return result;
 }
 
 /*

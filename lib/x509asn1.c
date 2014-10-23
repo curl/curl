@@ -879,7 +879,7 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
   char * cp1;
   size_t cl1;
   char * cp2;
-  CURLcode cc;
+  CURLcode result;
   unsigned long version;
   size_t i;
   size_t j;
@@ -993,11 +993,11 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
   free((char *) ccp);
 
   /* Generate PEM certificate. */
-  cc = Curl_base64_encode(data, cert.certificate.beg,
-                          cert.certificate.end - cert.certificate.beg,
-                          &cp1, &cl1);
-  if(cc != CURLE_OK)
-    return cc;
+  result = Curl_base64_encode(data, cert.certificate.beg,
+                              cert.certificate.end - cert.certificate.beg,
+                              &cp1, &cl1);
+  if(result)
+    return result;
   /* Compute the number of characters in final certificate string. Format is:
      -----BEGIN CERTIFICATE-----\n
      <max 64 base64 characters>\n

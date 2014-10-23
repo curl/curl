@@ -717,11 +717,11 @@ CURLcode Curl_is_connected(struct connectdata *conn,
                            bool *connected)
 {
   struct SessionHandle *data = conn->data;
-  CURLcode code = CURLE_OK;
+  CURLcode result = CURLE_OK;
   long allow;
   int error = 0;
   struct timeval now;
-  int result;
+  int rc;
   int i;
 
   DEBUGASSERT(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
@@ -757,9 +757,9 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 #endif
 
     /* check socket for connect */
-    result = Curl_socket_ready(CURL_SOCKET_BAD, conn->tempsock[i], 0);
+    rc = Curl_socket_ready(CURL_SOCKET_BAD, conn->tempsock[i], 0);
 
-    if(result == 0) { /* no connection yet */
+    if(rc == 0) { /* no connection yet */
       if(curlx_tvdiff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
         infof(data, "After %ldms connect time, move on!\n",
               conn->timeoutms_per_addr);
@@ -772,7 +772,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         trynextip(conn, sockindex, 1);
       }
     }
-    else if(result == CURL_CSELECT_OUT) {
+    else if(rc == CURL_CSELECT_OUT) {
       if(verifyconnect(conn->tempsock[i], &error)) {
         /* we are connected with TCP, awesome! */
         int other = i ^ 1;
@@ -789,9 +789,9 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         }
 
         /* see if we need to do any proxy magic first once we connected */
-        code = Curl_connected_proxy(conn, sockindex);
-        if(code)
-          return code;
+        result = Curl_connected_proxy(conn, sockindex);
+        if(result)
+          return result;
 
         conn->bits.tcpconnect[sockindex] = TRUE;
 
@@ -806,7 +806,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       else
         infof(data, "Connection failed\n");
     }
-    else if(result & CURL_CSELECT_ERR)
+    else if(rc & CURL_CSELECT_ERR)
       (void)verifyconnect(conn->tempsock[i], &error);
 
     /*
@@ -825,21 +825,20 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         conn->timeoutms_per_addr = conn->tempaddr[i]->ai_next == NULL ?
                                    allow : allow / 2;
 
-        code = trynextip(conn, sockindex, i);
+        result = trynextip(conn, sockindex, i);
       }
     }
   }
 
-  if(code) {
+  if(result) {
     /* no more addresses to try */
 
     /* if the first address family runs out of addresses to try before
        the happy eyeball timeout, go ahead and try the next family now */
     if(conn->tempaddr[1] == NULL) {
-      int rc;
-      rc = trynextip(conn, sockindex, 1);
-      if(rc == CURLE_OK)
-        return CURLE_OK;
+      result = trynextip(conn, sockindex, 1);
+      if(!result)
+        return result;
     }
 
     failf(data, "Failed to connect to %s port %ld: %s",
@@ -847,7 +846,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
           conn->port, Curl_strerror(conn, error));
   }
 
-  return code;
+  return result;
 }
 
 static void tcpnodelay(struct connectdata *conn,
@@ -1117,7 +1116,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 {
   struct SessionHandle *data = conn->data;
   struct timeval before = Curl_tvnow();
-  CURLcode res = CURLE_COULDNT_CONNECT;
+  CURLcode result = CURLE_COULDNT_CONNECT;
 
   long timeout_ms = Curl_timeleft(data, &before, TRUE);
 
@@ -1140,14 +1139,14 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   /* start connecting to first IP */
   while(conn->tempaddr[0]) {
-    res = singleipconnect(conn, conn->tempaddr[0], &(conn->tempsock[0]));
-    if(res == CURLE_OK)
-        break;
+    result = singleipconnect(conn, conn->tempaddr[0], &(conn->tempsock[0]));
+    if(!result)
+      break;
     conn->tempaddr[0] = conn->tempaddr[0]->ai_next;
   }
 
   if(conn->tempsock[0] == CURL_SOCKET_BAD)
-    return res;
+    return result;
 
   data->info.numconnects++; /* to track the number of connections made */
 

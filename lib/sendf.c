@@ -174,7 +174,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   ssize_t bytes_written;
   size_t write_len;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char *s;
   char *sptr;
   va_list ap;
@@ -190,9 +190,9 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
 
   for(;;) {
     /* Write the buffer to the socket */
-    res = Curl_write(conn, sockfd, sptr, write_len, &bytes_written);
+    result = Curl_write(conn, sockfd, sptr, write_len, &bytes_written);
 
-    if(CURLE_OK != res)
+    if(result)
       break;
 
     if(data->set.verbose)
@@ -210,7 +210,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
 
   free(s); /* free the output string */
 
-  return res;
+  return result;
 }
 
 /*
@@ -227,10 +227,10 @@ CURLcode Curl_write(struct connectdata *conn,
                     ssize_t *written)
 {
   ssize_t bytes_written;
-  CURLcode curlcode = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  bytes_written = conn->send[num](conn, num, mem, len, &curlcode);
+  bytes_written = conn->send[num](conn, num, mem, len, &result);
 
   *written = bytes_written;
   if(bytes_written >= 0)
@@ -238,7 +238,7 @@ CURLcode Curl_write(struct connectdata *conn,
     return CURLE_OK;
 
   /* handle CURLE_AGAIN or a send failure */
-  switch(curlcode) {
+  switch(result) {
   case CURLE_AGAIN:
     *written = 0;
     return CURLE_OK;
@@ -249,7 +249,7 @@ CURLcode Curl_write(struct connectdata *conn,
 
   default:
     /* we got a specific curlcode, forward it */
-    return curlcode;
+    return result;
   }
 }
 
@@ -300,14 +300,14 @@ CURLcode Curl_write_plain(struct connectdata *conn,
                           ssize_t *written)
 {
   ssize_t bytes_written;
-  CURLcode retcode;
+  CURLcode result;
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  bytes_written = Curl_send_plain(conn, num, mem, len, &retcode);
+  bytes_written = Curl_send_plain(conn, num, mem, len, &result);
 
   *written = bytes_written;
 
-  return retcode;
+  return result;
 }
 
 ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
@@ -425,10 +425,10 @@ CURLcode Curl_client_write(struct connectdata *conn,
     if((conn->handler->protocol&PROTO_FAMILY_FTP) &&
        conn->proto.ftpc.transfertype == 'A') {
       /* convert from the network encoding */
-      CURLcode rc = Curl_convert_from_network(data, ptr, len);
+      CURLcode result = Curl_convert_from_network(data, ptr, len);
       /* Curl_convert_from_network calls failf if unsuccessful */
-      if(rc)
-        return rc;
+      if(result)
+        return result;
 
 #ifdef CURL_DO_LINEEND_CONV
       /* convert end-of-line markers */
@@ -525,7 +525,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
                    size_t sizerequested,     /* max amount to read */
                    ssize_t *n)               /* amount bytes read */
 {
-  CURLcode curlcode = CURLE_RECV_ERROR;
+  CURLcode result = CURLE_RECV_ERROR;
   ssize_t nread = 0;
   size_t bytesfromsocket = 0;
   char *buffertofill = NULL;
@@ -564,9 +564,9 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
     buffertofill = buf;
   }
 
-  nread = conn->recv[num](conn, num, buffertofill, bytesfromsocket, &curlcode);
+  nread = conn->recv[num](conn, num, buffertofill, bytesfromsocket, &result);
   if(nread < 0)
-    return curlcode;
+    return result;
 
   if(pipelining) {
     memcpy(buf, conn->master_buffer, nread);

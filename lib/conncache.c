@@ -131,7 +131,7 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
                                       conn->host.name);
   if(!bundle) {
     result = Curl_bundle_create(data, &new_bundle);
-    if(result != CURLE_OK)
+    if(result)
       return result;
 
     if(!conncache_add_bundle(data->state.conn_cache,
@@ -143,7 +143,7 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   }
 
   result = Curl_bundle_add_conn(bundle, conn);
-  if(result != CURLE_OK) {
+  if(result) {
     if(new_bundle)
       conncache_remove_bundle(data->state.conn_cache, new_bundle);
     return result;

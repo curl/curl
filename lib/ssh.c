@@ -734,7 +734,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        * whatever) is up to us.
        */
       result = ssh_check_fingerprint(conn);
-      if(result == CURLE_OK)
+      if(!result)
         state(conn, SSH_AUTHLIST);
       /* ssh_check_fingerprint sets state appropriately on error */
       break;
@@ -2022,7 +2022,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                                  sshc->readdir_line,
                                  sshc->readdir_currLen);
 
-      if(result == CURLE_OK) {
+      if(!result) {
 
         /* output debug output if that is requested */
         if(data->set.verbose) {
@@ -2715,7 +2715,7 @@ static CURLcode ssh_block_statemach(struct connectdata *conn,
     }
 
 #ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
-    if((CURLE_OK == result) && block) {
+    if(!result && block) {
       int dir = libssh2_session_block_directions(sshc->ssh_session);
       curl_socket_t sock = conn->sock[FIRSTSOCKET];
       curl_socket_t fd_read = CURL_SOCKET_BAD;
@@ -2887,7 +2887,7 @@ static CURLcode scp_doing(struct connectdata *conn,
 
 static CURLcode ssh_do(struct connectdata *conn, bool *done)
 {
-  CURLcode res;
+  CURLcode result;
   bool connected = 0;
   struct SessionHandle *data = conn->data;
   struct ssh_conn *sshc = &conn->proto.sshc;
@@ -2906,11 +2906,11 @@ static CURLcode ssh_do(struct connectdata *conn, bool *done)
   Curl_pgrsSetDownloadSize(data, -1);
 
   if(conn->handler->protocol & CURLPROTO_SCP)
-    res = scp_perform(conn, &connected,  done);
+    result = scp_perform(conn, &connected,  done);
   else
-    res = sftp_perform(conn, &connected,  done);
+    result = sftp_perform(conn, &connected,  done);
 
-  return res;
+  return result;
 }
 
 /* BLOCKING, but the function is using the state machine so the only reason
@@ -2942,7 +2942,7 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
   CURLcode result = CURLE_OK;
   struct SSHPROTO *sftp_scp = conn->data->req.protop;
 
-  if(status == CURLE_OK) {
+  if(!status) {
     /* run the state-machine
 
        TODO: when the multi interface is used, this _really_ should be using
@@ -2970,7 +2970,7 @@ static CURLcode scp_done(struct connectdata *conn, CURLcode status,
 {
   (void)premature; /* not used */
 
-  if(status == CURLE_OK)
+  if(!status)
     state(conn, SSH_SCP_DONE);
 
   return ssh_done(conn, status);
@@ -3068,8 +3068,7 @@ CURLcode sftp_perform(struct connectdata *conn,
 static CURLcode sftp_doing(struct connectdata *conn,
                            bool *dophase_done)
 {
-  CURLcode result;
-  result = ssh_multi_statemach(conn, dophase_done);
+  CURLcode result = ssh_multi_statemach(conn, dophase_done);
 
   if(*dophase_done) {
     DEBUGF(infof(conn->data, "DO phase is complete\n"));
@@ -3106,7 +3105,7 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
 
-  if(status == CURLE_OK) {
+  if(!status) {
     /* Post quote commands are executed after the SFTP_CLOSE state to avoid
        errors that could happen due to open file handles during POSTQUOTE
        operation */

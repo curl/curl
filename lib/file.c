@@ -303,7 +303,7 @@ static CURLcode file_upload(struct connectdata *conn)
   const char *dir = strchr(file->path, DIRSEP);
   int fd;
   int mode;
-  CURLcode res=CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   char *buf = data->state.buffer;
   size_t nread;
@@ -359,10 +359,10 @@ static CURLcode file_upload(struct connectdata *conn)
       data->state.resume_from = (curl_off_t)file_stat.st_size;
   }
 
-  while(res == CURLE_OK) {
+  while(!result) {
     int readcount;
-    res = Curl_fillreadbuffer(conn, BUFSIZE, &readcount);
-    if(res)
+    result = Curl_fillreadbuffer(conn, BUFSIZE, &readcount);
+    if(result)
       break;
 
     if(readcount <= 0)  /* fix questionable compare error. curlvms */
@@ -389,7 +389,7 @@ static CURLcode file_upload(struct connectdata *conn)
     /* write the data to the target */
     nwrite = write(fd, buf2, nread);
     if(nwrite != nread) {
-      res = CURLE_SEND_ERROR;
+      result = CURLE_SEND_ERROR;
       break;
     }
 
@@ -398,16 +398,16 @@ static CURLcode file_upload(struct connectdata *conn)
     Curl_pgrsSetUploadCounter(data, bytecount);
 
     if(Curl_pgrsUpdate(conn))
-      res = CURLE_ABORTED_BY_CALLBACK;
+      result = CURLE_ABORTED_BY_CALLBACK;
     else
-      res = Curl_speedcheck(data, now);
+      result = Curl_speedcheck(data, now);
   }
-  if(!res && Curl_pgrsUpdate(conn))
-    res = CURLE_ABORTED_BY_CALLBACK;
+  if(!result && Curl_pgrsUpdate(conn))
+    result = CURLE_ABORTED_BY_CALLBACK;
 
   close(fd);
 
-  return res;
+  return result;
 }
 
 /*
@@ -425,7 +425,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
      are supported. This means that files on remotely mounted directories
      (via NFS, Samba, NT sharing) can be accessed through a file:// URL
   */
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct_stat statbuf; /* struct_stat instead of struct stat just to allow the
                           Windows version to have a different struct without
                           having to redefine the simple word 'stat' */
@@ -472,7 +472,6 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
      information. Which for FILE can't be much more than the file size and
      date. */
   if(data->set.opt_no_body && data->set.include_header && fstated) {
-    CURLcode result;
     snprintf(buf, sizeof(data->state.buffer),
              "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", expected_size);
     result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
@@ -554,7 +553,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
 
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
-  while(res == CURLE_OK) {
+  while(!result) {
     /* Don't fill a whole buffer if we want less than all data */
     size_t bytestoread =
       (expected_size < CURL_OFF_T_C(BUFSIZE) - CURL_OFF_T_C(1)) ?
@@ -571,21 +570,21 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     bytecount += nread;
     expected_size -= nread;
 
-    res = Curl_client_write(conn, CLIENTWRITE_BODY, buf, nread);
-    if(res)
-      return res;
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, buf, nread);
+    if(result)
+      return result;
 
     Curl_pgrsSetDownloadCounter(data, bytecount);
 
     if(Curl_pgrsUpdate(conn))
-      res = CURLE_ABORTED_BY_CALLBACK;
+      result = CURLE_ABORTED_BY_CALLBACK;
     else
-      res = Curl_speedcheck(data, now);
+      result = Curl_speedcheck(data, now);
   }
   if(Curl_pgrsUpdate(conn))
-    res = CURLE_ABORTED_BY_CALLBACK;
+    result = CURLE_ABORTED_BY_CALLBACK;
 
-  return res;
+  return result;
 }
 
 #endif
