@@ -164,6 +164,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     }
 
     switch(data->set.ssl.version) {
+      default:
+      case CURL_SSLVERSION_DEFAULT:
       case CURL_SSLVERSION_TLSv1:
         schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_0_CLIENT |
                                               SP_PROT_TLS1_1_CLIENT |
@@ -183,12 +185,6 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         break;
       case CURL_SSLVERSION_SSLv2:
         schannel_cred.grbitEnabledProtocols = SP_PROT_SSL2_CLIENT;
-        break;
-      default:
-        schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_0_CLIENT |
-                                              SP_PROT_TLS1_1_CLIENT |
-                                              SP_PROT_TLS1_2_CLIENT |
-                                              SP_PROT_SSL3_CLIENT;
         break;
     }
 

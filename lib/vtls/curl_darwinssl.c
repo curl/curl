@@ -1057,10 +1057,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLSetProtocolVersionMax != NULL) {
     switch(data->set.ssl.version) {
-      case CURL_SSLVERSION_DEFAULT: default:
-        (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol3);
-        (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
-        break;
+      default:
+      case CURL_SSLVERSION_DEFAULT:
       case CURL_SSLVERSION_TLSv1:
         (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol1);
         (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
@@ -1096,20 +1094,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                        kSSLProtocolAll,
                                        false);
     switch (data->set.ssl.version) {
-      case CURL_SSLVERSION_DEFAULT: default:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kSSLProtocol3,
-                                           true);
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol1,
-                                           true);
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol11,
-                                           true);
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol12,
-                                           true);
-        break;
+      default:
+      case CURL_SSLVERSION_DEFAULT:
       case CURL_SSLVERSION_TLSv1:
         (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                            kTLSProtocol1,
@@ -1158,13 +1144,6 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   switch(data->set.ssl.version) {
     default:
     case CURL_SSLVERSION_DEFAULT:
-      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                         kSSLProtocol3,
-                                         true);
-      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                         kTLSProtocol1,
-                                         true);
-      break;
     case CURL_SSLVERSION_TLSv1:
     case CURL_SSLVERSION_TLSv1_0:
       (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,

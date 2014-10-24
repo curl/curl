@@ -99,10 +99,8 @@ cyassl_connect_step1(struct connectdata *conn,
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
   switch(data->set.ssl.version) {
+  default:
   case CURL_SSLVERSION_DEFAULT:
-    /* we try to figure out version */
-    req_method = SSLv23_client_method();
-    break;
   case CURL_SSLVERSION_TLSv1:
     infof(data, "CyaSSL cannot be configured to use TLS 1.0-1.2, "
           "TLS 1.0 is used exclusively\n");
@@ -120,8 +118,6 @@ cyassl_connect_step1(struct connectdata *conn,
   case CURL_SSLVERSION_SSLv3:
     req_method = SSLv3_client_method();
     break;
-  default:
-    req_method = TLSv1_client_method();
   }
 
   if(!req_method) {

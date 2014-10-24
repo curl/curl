@@ -35,7 +35,7 @@ Use one of the available defines for this purpose. The available options are:
 .RS
 .IP CURL_SSLVERSION_DEFAULT
 The default action. This will attempt to figure out the remote SSL protocol
-version, i.e. either SSLv3 or TLSv1
+version.
 .IP CURL_SSLVERSION_TLSv1
 TLSv1.x
 .IP CURL_SSLVERSION_SSLv2
@@ -69,6 +69,8 @@ if(curl) {
 .SH AVAILABILITY
 SSLv2 is disabled by default since 7.18.1. Other SSL versions availability may
 vary depending on which backend libcurl has been built to use.
+
+SSLv3 is disabled by default since 7.39.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
