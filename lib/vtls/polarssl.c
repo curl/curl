@@ -287,6 +287,11 @@ polarssl_connect_step1(struct connectdata *conn,
   }
 
   switch(data->set.ssl.version) {
+  default:
+  case CURL_SSLVERSION_DEFAULT:
+    ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
+                        SSL_MINOR_VERSION_1);
+    break;
   case CURL_SSLVERSION_SSLv3:
     ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
                         SSL_MINOR_VERSION_0);
