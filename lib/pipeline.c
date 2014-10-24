@@ -272,7 +272,7 @@ bool Curl_pipeline_server_blacklisted(struct SessionHandle *handle,
       }
     }
 
-    infof(handle, "Server %s is not blacklisted\n", server_name);
+    DEBUGF(infof(handle, "Server %s is not blacklisted\n", server_name));
   }
   return FALSE;
 }
