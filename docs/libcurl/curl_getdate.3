@@ -102,4 +102,7 @@ number).
 
 Having a 64 bit time_t is not a guarantee that dates beyond 03:14:07 UTC,
 January 19, 2038 will work fine. On systems with a 64 bit time_t but with a
-crippled mktime(), \fIcurl_getdate\fP will return -1 in this case.
+crippled mktime(), \fIcurl_getdate(3)\fP will return -1 in this case.
+.SH "SEE ALSO"
+.BR curl_easy_escape "(3), " curl_easy_unescape "(3), "
+.BR CURLOPT_TIMECONDITION "(3), " CURLOPT_TIMEVALUE "(3) "
