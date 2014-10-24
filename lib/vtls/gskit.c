@@ -134,8 +134,12 @@ static const gskit_cipher  ciphertable[] = {
       CURL_GSKPROTO_TLSV10_MASK | CURL_GSKPROTO_TLSV11_MASK |
       CURL_GSKPROTO_TLSV12_MASK },
   { "null-sha256",      "3B",   CURL_GSKPROTO_TLSV12_MASK },
-  { "aes128-sha256",    "3D",   CURL_GSKPROTO_TLSV12_MASK },
+  { "aes128-sha256",    "3C",   CURL_GSKPROTO_TLSV12_MASK },
   { "aes256-sha256",    "3D",   CURL_GSKPROTO_TLSV12_MASK },
+  { "aes128-gcm-sha256",
+                        "9C",   CURL_GSKPROTO_TLSV12_MASK },
+  { "aes256-gcm-sha384",
+                        "9D",   CURL_GSKPROTO_TLSV12_MASK },
   { "rc4-md5",          "1",    CURL_GSKPROTO_SSLV2_MASK },
   { "exp-rc4-md5",      "2",    CURL_GSKPROTO_SSLV2_MASK },
   { "rc2-md5",          "3",    CURL_GSKPROTO_SSLV2_MASK },
@@ -612,8 +616,8 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
     return result;
 
   /* Determine which SSL/TLS version should be enabled. */
-  protoflags = CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK |
-               CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK;
+  protoflags = CURL_GSKPROTO_TLSV10_MASK | CURL_GSKPROTO_TLSV11_MASK |
+               CURL_GSKPROTO_TLSV12_MASK;
   sni = conn->host.name;
   switch (data->set.ssl.version) {
   case CURL_SSLVERSION_SSLv2:
