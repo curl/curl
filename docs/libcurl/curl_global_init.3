@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -46,11 +46,11 @@ libcurl.
 \fBThis function is not thread safe.\fP You must not call it when any other
 thread in the program (i.e. a thread sharing the same memory) is running.
 This doesn't just mean no other thread that is using libcurl.  Because
-\fIcurl_global_init()\fP calls functions of other libraries that are similarly
-thread unsafe, it could conflict with any other thread that uses these other
-libraries.
+\fIcurl_global_init(3)\fP calls functions of other libraries that are
+similarly thread unsafe, it could conflict with any other thread that uses
+these other libraries.
 
-See the description in \fBlibcurl\fP(3) of global environment requirements for
+See the description in \fBlibcurl(3)\fP of global environment requirements for
 details of how to use this function.
 
 .SH FLAGS
@@ -74,7 +74,8 @@ the functionality of the \fBCURL_GLOBAL_ALL\fP mask.
 .TP
 .B CURL_GLOBAL_ACK_EINTR
 When this flag is set, curl will acknowledge EINTR condition when connecting
-or when waiting for data.  Otherwise, curl waits until full timeout elapses.
+or when waiting for data.  Otherwise, curl waits until full timeout
+elapses. (Added in 7.30.0)
 .SH RETURN VALUE
 If this function returns non-zero, something went wrong and you cannot use the
 other curl functions.
