@@ -86,6 +86,7 @@
 #define CURL_SUPPORT_MAC_10_6 0
 #define CURL_SUPPORT_MAC_10_7 0
 #define CURL_SUPPORT_MAC_10_8 0
+#define CURL_SUPPORT_MAC_10_9 0
 
 #else
 #error "The darwinssl back-end requires iOS or OS X."
@@ -1076,7 +1077,11 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
         break;
       case CURL_SSLVERSION_SSLv3:
-        (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol3);
+        err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol3);
+        if(err != noErr) {
+          failf(data, "Your version of the OS does not support SSLv3");
+          return CURLE_SSL_CONNECT_ERROR;
+        }
         (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kSSLProtocol3);
         break;
       case CURL_SSLVERSION_SSLv2:
@@ -1123,9 +1128,13 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                            true);
         break;
       case CURL_SSLVERSION_SSLv3:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+        err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                            kSSLProtocol3,
                                            true);
+        if(err != noErr) {
+          failf(data, "Your version of the OS does not support SSLv3");
+          return CURLE_SSL_CONNECT_ERROR;
+        }
         break;
       case CURL_SSLVERSION_SSLv2:
         err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
@@ -1166,9 +1175,13 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       }
       break;
     case CURL_SSLVERSION_SSLv3:
-      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+      err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                          kSSLProtocol3,
                                          true);
+      if(err != noErr) {
+        failf(data, "Your version of the OS does not support SSLv3");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
       break;
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
