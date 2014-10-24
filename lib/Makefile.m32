@@ -42,6 +42,10 @@ endif
 ifndef LDAP_SDK
 LDAP_SDK = c:/novell/ndk/cldapsdk/win32
 endif
+# Edit the path below to point to the base of your nghttp2 package.
+ifndef NGHTTP2_PATH
+NGHTTP2_PATH = ../../nghttp2-0.6.4
+endif
 
 PROOT = ..
 
@@ -147,6 +151,9 @@ ifeq ($(findstring -winssl,$(CFG)),-winssl)
 WINSSL = 1
 SSPI = 1
 endif
+ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
+NGHTTP2 = 1
+endif
 
 INCLUDES = -I. -I../include
 CFLAGS += -DBUILDING_LIBCURL
@@ -165,6 +172,11 @@ ifdef RTMP
   INCLUDES += -I"$(LIBRTMP_PATH)"
   CFLAGS += -DUSE_LIBRTMP
   DLL_LIBS += -L"$(LIBRTMP_PATH)/librtmp" -lrtmp -lwinmm
+endif
+ifdef NGHTTP2
+  INCLUDES += -I"$(NGHTTP2_PATH)/include"
+  CFLAGS += -DUSE_NGHTTP2
+  DLL_LIBS += -L"$(NGHTTP2_PATH)/lib" -lnghttp2
 endif
 ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
