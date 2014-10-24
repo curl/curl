@@ -591,9 +591,8 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 
 CURLcode Curl_open(struct SessionHandle **curl)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct SessionHandle *data;
-  CURLcode status;
 
   /* Very simple start-up: alloc the struct, init it with zeroes and return */
   data = calloc(1, sizeof(struct SessionHandle));
@@ -605,11 +604,11 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
-  status = Curl_resolver_init(&data->state.resolver);
-  if(status) {
+  result = Curl_resolver_init(&data->state.resolver);
+  if(result) {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
     free(data);
-    return status;
+    return result;
   }
 
   /* We do some initial setup here, all those fields that can't be just 0 */
@@ -4408,13 +4407,12 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   /* Is there a username and password given in this proxy url? */
   atsign = strchr(proxyptr, '@');
   if(atsign) {
-    CURLcode res = CURLE_OK;
     char *proxyuser = NULL;
     char *proxypasswd = NULL;
-
-    res = parse_login_details(proxyptr, atsign - proxyptr,
-                              &proxyuser, &proxypasswd, NULL);
-    if(!res) {
+    CURLcode result =
+      parse_login_details(proxyptr, atsign - proxyptr,
+                          &proxyuser, &proxypasswd, NULL);
+    if(!result) {
       /* found user and password, rip them out.  note that we are
          unescaping them, as there is otherwise no way to have a
          username or password with reserved characters like ':' in
@@ -4426,7 +4424,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
         conn->proxyuser = strdup("");
 
       if(!conn->proxyuser)
-        res = CURLE_OUT_OF_MEMORY;
+        result = CURLE_OUT_OF_MEMORY;
       else {
         Curl_safefree(conn->proxypasswd);
         if(proxypasswd && strlen(proxypasswd) < MAX_CURL_PASSWORD_LENGTH)
@@ -4435,10 +4433,10 @@ static CURLcode parse_proxy(struct SessionHandle *data,
           conn->proxypasswd = strdup("");
 
         if(!conn->proxypasswd)
-          res = CURLE_OUT_OF_MEMORY;
+          result = CURLE_OUT_OF_MEMORY;
       }
 
-      if(!res) {
+      if(!result) {
         conn->bits.proxy_user_passwd = TRUE; /* enable it */
         atsign++; /* the right side of the @-letter */
 
@@ -4449,8 +4447,8 @@ static CURLcode parse_proxy(struct SessionHandle *data,
     Curl_safefree(proxyuser);
     Curl_safefree(proxypasswd);
 
-    if(res)
-      return res;
+    if(result)
+      return result;
   }
 
   /* start scanning for port number at this point */
