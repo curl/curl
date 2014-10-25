@@ -8,6 +8,8 @@ Global
 		DLL Debug - DLL OpenSSL - DLL LibSSH2|x64 = DLL Debug - DLL OpenSSL - DLL LibSSH2|x64
 		DLL Debug - DLL OpenSSL|Win32 = DLL Debug - DLL OpenSSL|Win32
 		DLL Debug - DLL OpenSSL|x64 = DLL Debug - DLL OpenSSL|x64
+		DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32 = DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32
+		DLL Debug - DLL Windows SSPI - DLL WinIDN|x64 = DLL Debug - DLL Windows SSPI - DLL WinIDN|x64
 		DLL Debug - DLL Windows SSPI|Win32 = DLL Debug - DLL Windows SSPI|Win32
 		DLL Debug - DLL Windows SSPI|x64 = DLL Debug - DLL Windows SSPI|x64
 		DLL Debug|Win32 = DLL Debug|Win32
@@ -16,6 +18,8 @@ Global
 		DLL Release - DLL OpenSSL - DLL LibSSH2|x64 = DLL Release - DLL OpenSSL - DLL LibSSH2|x64
 		DLL Release - DLL OpenSSL|Win32 = DLL Release - DLL OpenSSL|Win32
 		DLL Release - DLL OpenSSL|x64 = DLL Release - DLL OpenSSL|x64
+		DLL Release - DLL Windows SSPI - DLL WinIDN|Win32 = DLL Release - DLL Windows SSPI - DLL WinIDN|Win32
+		DLL Release - DLL Windows SSPI - DLL WinIDN|x64 = DLL Release - DLL Windows SSPI - DLL WinIDN|x64
 		DLL Release - DLL Windows SSPI|Win32 = DLL Release - DLL Windows SSPI|Win32
 		DLL Release - DLL Windows SSPI|x64 = DLL Release - DLL Windows SSPI|x64
 		DLL Release|Win32 = DLL Release|Win32
@@ -24,6 +28,8 @@ Global
 		LIB Debug - DLL OpenSSL - DLL LibSSH2|x64 = LIB Debug - DLL OpenSSL - DLL LibSSH2|x64
 		LIB Debug - DLL OpenSSL|Win32 = LIB Debug - DLL OpenSSL|Win32
 		LIB Debug - DLL OpenSSL|x64 = LIB Debug - DLL OpenSSL|x64
+		LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32 = LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32
+		LIB Debug - DLL Windows SSPI - DLL WinIDN|x64 = LIB Debug - DLL Windows SSPI - DLL WinIDN|x64
 		LIB Debug - DLL Windows SSPI|Win32 = LIB Debug - DLL Windows SSPI|Win32
 		LIB Debug - DLL Windows SSPI|x64 = LIB Debug - DLL Windows SSPI|x64
 		LIB Debug - LIB OpenSSL - LIB LibSSH2|Win32 = LIB Debug - LIB OpenSSL - LIB LibSSH2|Win32
@@ -36,6 +42,8 @@ Global
 		LIB Release - DLL OpenSSL - DLL LibSSH2|x64 = LIB Release - DLL OpenSSL - DLL LibSSH2|x64
 		LIB Release - DLL OpenSSL|Win32 = LIB Release - DLL OpenSSL|Win32
 		LIB Release - DLL OpenSSL|x64 = LIB Release - DLL OpenSSL|x64
+		LIB Release - DLL Windows SSPI - DLL WinIDN|Win32 = LIB Release - DLL Windows SSPI - DLL WinIDN|Win32
+		LIB Release - DLL Windows SSPI - DLL WinIDN|x64 = LIB Release - DLL Windows SSPI - DLL WinIDN|x64
 		LIB Release - DLL Windows SSPI|Win32 = LIB Release - DLL Windows SSPI|Win32
 		LIB Release - DLL Windows SSPI|x64 = LIB Release - DLL Windows SSPI|x64
 		LIB Release - LIB OpenSSL - LIB LibSSH2|Win32 = LIB Release - LIB OpenSSL - LIB LibSSH2|Win32
@@ -54,6 +62,10 @@ Global
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug - DLL OpenSSL|Win32.Build.0 = DLL Debug - DLL OpenSSL|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug - DLL OpenSSL|x64.ActiveCfg = DLL Debug - DLL OpenSSL|x64
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug - DLL OpenSSL|x64.Build.0 = DLL Debug - DLL OpenSSL|x64
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32.ActiveCfg = DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32.Build.0 = DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug - DLL Windows SSPI - DLL WinIDN|x64.ActiveCfg = DLL Debug - DLL Windows SSPI - DLL WinIDN|x64
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug - DLL Windows SSPI - DLL WinIDN|x64.Build.0 = DLL Debug - DLL Windows SSPI - DLL WinIDN|x64
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug - DLL Windows SSPI|Win32.ActiveCfg = DLL Debug - DLL Windows SSPI|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug - DLL Windows SSPI|Win32.Build.0 = DLL Debug - DLL Windows SSPI|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug - DLL Windows SSPI|x64.ActiveCfg = DLL Debug - DLL Windows SSPI|x64
@@ -70,6 +82,10 @@ Global
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL OpenSSL|Win32.Build.0 = DLL Release - DLL OpenSSL|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL OpenSSL|x64.ActiveCfg = DLL Release - DLL OpenSSL|x64
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL OpenSSL|x64.Build.0 = DLL Release - DLL OpenSSL|x64
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL Windows SSPI - DLL WinIDN|Win32.ActiveCfg = DLL Release - DLL Windows SSPI - DLL WinIDN|Win32
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL Windows SSPI - DLL WinIDN|Win32.Build.0 = DLL Release - DLL Windows SSPI - DLL WinIDN|Win32
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL Windows SSPI - DLL WinIDN|x64.ActiveCfg = DLL Release - DLL Windows SSPI - DLL WinIDN|x64
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL Windows SSPI - DLL WinIDN|x64.Build.0 = DLL Release - DLL Windows SSPI - DLL WinIDN|x64
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL Windows SSPI|Win32.ActiveCfg = DLL Release - DLL Windows SSPI|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL Windows SSPI|Win32.Build.0 = DLL Release - DLL Windows SSPI|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL Windows SSPI|x64.ActiveCfg = DLL Release - DLL Windows SSPI|x64
@@ -86,6 +102,10 @@ Global
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Debug - DLL OpenSSL|Win32.Build.0 = LIB Debug - DLL OpenSSL|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Debug - DLL OpenSSL|x64.ActiveCfg = LIB Debug - DLL OpenSSL|x64
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Debug - DLL OpenSSL|x64.Build.0 = LIB Debug - DLL OpenSSL|x64
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32.ActiveCfg = LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32.Build.0 = LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Debug - DLL Windows SSPI - DLL WinIDN|x64.ActiveCfg = LIB Debug - DLL Windows SSPI - DLL WinIDN|x64
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Debug - DLL Windows SSPI - DLL WinIDN|x64.Build.0 = LIB Debug - DLL Windows SSPI - DLL WinIDN|x64
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Debug - DLL Windows SSPI|Win32.ActiveCfg = LIB Debug - DLL Windows SSPI|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Debug - DLL Windows SSPI|Win32.Build.0 = LIB Debug - DLL Windows SSPI|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Debug - DLL Windows SSPI|x64.ActiveCfg = LIB Debug - DLL Windows SSPI|x64
@@ -110,6 +130,10 @@ Global
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Release - DLL OpenSSL|Win32.Build.0 = LIB Release - DLL OpenSSL|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Release - DLL OpenSSL|x64.ActiveCfg = LIB Release - DLL OpenSSL|x64
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Release - DLL OpenSSL|x64.Build.0 = LIB Release - DLL OpenSSL|x64
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Release - DLL Windows SSPI - DLL WinIDN|Win32.ActiveCfg = LIB Release - DLL Windows SSPI - DLL WinIDN|Win32
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Release - DLL Windows SSPI - DLL WinIDN|Win32.Build.0 = LIB Release - DLL Windows SSPI - DLL WinIDN|Win32
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Release - DLL Windows SSPI - DLL WinIDN|x64.ActiveCfg = LIB Release - DLL Windows SSPI - DLL WinIDN|x64
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Release - DLL Windows SSPI - DLL WinIDN|x64.Build.0 = LIB Release - DLL Windows SSPI - DLL WinIDN|x64
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Release - DLL Windows SSPI|Win32.ActiveCfg = LIB Release - DLL Windows SSPI|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Release - DLL Windows SSPI|Win32.Build.0 = LIB Release - DLL Windows SSPI|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.LIB Release - DLL Windows SSPI|x64.ActiveCfg = LIB Release - DLL Windows SSPI|x64
