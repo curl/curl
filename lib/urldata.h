@@ -435,8 +435,8 @@ struct kerberos5data {
 struct ntlmdata {
   curlntlm state;
 #ifdef USE_WINDOWS_SSPI
-  CredHandle handle;
-  CtxtHandle c_handle;
+  CredHandle credentials;
+  CtxtHandle context;
   SEC_WINNT_AUTH_IDENTITY identity;
   SEC_WINNT_AUTH_IDENTITY *p_identity;
   size_t max_token_length;
