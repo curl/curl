@@ -343,10 +343,16 @@ void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm)
 {
   Curl_safefree(ntlm->input_token);
 
-  if(ntlm->has_handles) {
-    s_pSecFn->DeleteSecurityContext(&ntlm->context);
-    s_pSecFn->FreeCredentialsHandle(&ntlm->credentials);
-    ntlm->has_handles = 0;
+  if(ntlm->context) {
+    s_pSecFn->DeleteSecurityContext(ntlm->context);
+    free(ntlm->context);
+    ntlm->context = NULL;
+  }
+
+  if(ntlm->credentials) {
+    s_pSecFn->FreeCredentialsHandle(ntlm->credentials);
+    free(ntlm->credentials);
+    ntlm->credentials = NULL;
   }
 
   ntlm->max_token_length = 0;
@@ -452,14 +458,28 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
     /* Use the current Windows user */
     ntlm->p_identity = NULL;
 
-  /* Acquire our credientials handle */
+  /* Allocate our credentials handle */
+  ntlm->credentials = malloc(sizeof(CredHandle));
+  if(!ntlm->credentials)
+    return CURLE_OUT_OF_MEMORY;
+
+  memset(ntlm->credentials, 0, sizeof(CredHandle));
+
+  /* Acquire our credentials handle */
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
                                               (TCHAR *) TEXT("NTLM"),
                                               SECPKG_CRED_OUTBOUND, NULL,
                                               ntlm->p_identity, NULL, NULL,
-                                              &ntlm->credentials, &tsDummy);
+                                              ntlm->credentials, &tsDummy);
   if(status != SEC_E_OK)
     return CURLE_OUT_OF_MEMORY;
+
+  /* Allocate our new context handle */
+  ntlm->context = malloc(sizeof(CtxtHandle));
+  if(!ntlm->context)
+    return CURLE_OUT_OF_MEMORY;
+
+  memset(ntlm->context, 0, sizeof(CtxtHandle));
 
   /* Setup the type-1 "output" security buffer */
   type_1_desc.ulVersion = SECBUFFER_VERSION;
@@ -470,22 +490,19 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   type_1_buf.cbBuffer   = curlx_uztoul(ntlm->max_token_length);
 
   /* Generate our type-1 message */
-  status = s_pSecFn->InitializeSecurityContext(&ntlm->credentials, NULL,
+  status = s_pSecFn->InitializeSecurityContext(ntlm->credentials, NULL,
                                                (TCHAR *) TEXT(""),
                                                0, 0, SECURITY_NETWORK_DREP,
                                                NULL, 0,
-                                               &ntlm->context, &type_1_desc,
+                                               ntlm->context, &type_1_desc,
                                                &attrs, &tsDummy);
 
   if(status == SEC_I_COMPLETE_AND_CONTINUE ||
      status == SEC_I_CONTINUE_NEEDED)
-    s_pSecFn->CompleteAuthToken(&ntlm->context, &type_1_desc);
-  else if(status != SEC_E_OK) {
-    s_pSecFn->FreeCredentialsHandle(&ntlm->credentials);
+    s_pSecFn->CompleteAuthToken(ntlm->context, &type_1_desc);
+  else if(status != SEC_E_OK)
     return CURLE_RECV_ERROR;
-  }
 
-  ntlm->has_handles = 1;
   size = type_1_buf.cbBuffer;
 
 #else
@@ -652,12 +669,12 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   type_3_buf.cbBuffer   = curlx_uztoul(ntlm->max_token_length);
 
   /* Generate our type-3 message */
-  status = s_pSecFn->InitializeSecurityContext(&ntlm->credentials,
-                                               &ntlm->context,
+  status = s_pSecFn->InitializeSecurityContext(ntlm->credentials,
+                                               ntlm->context,
                                                (TCHAR *) TEXT(""),
                                                0, 0, SECURITY_NETWORK_DREP,
                                                &type_2_desc,
-                                               0, &ntlm->context,
+                                               0, ntlm->context,
                                                &type_3_desc,
                                                &attrs, &tsDummy);
   if(status != SEC_E_OK) {
