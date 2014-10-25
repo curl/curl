@@ -420,6 +420,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
   conn->bits.rewindaftersend = FALSE; /* default */
 
   if((expectsend == -1) || (expectsend > bytessent)) {
+#if defined(USE_NTLM)
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM) ||
@@ -439,6 +440,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
 
         return CURLE_OK;
       }
+
       if(conn->bits.close)
         /* this is already marked to get closed */
         return CURLE_OK;
@@ -447,9 +449,9 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
             CURL_FORMAT_CURL_OFF_T " bytes\n",
             (curl_off_t)(expectsend - bytessent));
     }
+#endif
 
-    /* This is not NTLM or many bytes left to send: close
-     */
+    /* This is not NTLM or many bytes left to send: close */
     connclose(conn, "Mid-auth HTTP and much data left to send");
     data->req.size = 0; /* don't download any more than 0 bytes */
 

@@ -2650,8 +2650,10 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 
   Curl_hostcache_prune(data); /* kill old DNS cache entries */
 
+#if defined(USE_NTLM)
   /* Cleanup NTLM connection-related data */
   Curl_http_ntlm_cleanup(conn);
+#endif
 
   if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
@@ -3198,6 +3200,7 @@ ConnectionExists(struct SessionHandle *data,
       }
 
       if(match) {
+#if defined(USE_NTLM)
         /* If we are looking for an HTTP+NTLM connection, check if this is
            already authenticating with the right credentials. If not, keep
            looking so that we can reuse NTLM connections if
@@ -3216,6 +3219,7 @@ ConnectionExists(struct SessionHandle *data,
             chosen = check;
           continue;
         }
+#endif
 
         if(canPipeline) {
           /* We can pipeline if we want to. Let's continue looking for
@@ -5616,6 +5620,7 @@ static CURLcode create_conn(struct SessionHandle *data,
       ConnectionStore(data, conn);
     }
 
+#if defined(USE_NTLM)
     /* If NTLM is requested in a part of this connection, make sure we don't
        assume the state is fine as this is a fresh connection and NTLM is
        connection based. */
@@ -5624,12 +5629,13 @@ static CURLcode create_conn(struct SessionHandle *data,
       infof(data, "NTLM picked AND auth done set, clear picked!\n");
       data->state.authhost.picked = CURLAUTH_NONE;
     }
+
     if((data->state.authproxy.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
        data->state.authproxy.done) {
       infof(data, "NTLM-proxy picked AND auth done set, clear picked!\n");
       data->state.authproxy.picked = CURLAUTH_NONE;
     }
-
+#endif
   }
 
   /* Mark the connection as used */
@@ -5886,9 +5892,12 @@ CURLcode Curl_done(struct connectdata **connp,
      but currently we have no such detail knowledge.
   */
 
-  if((data->set.reuse_forbid && !(conn->ntlm.state == NTLMSTATE_TYPE2 ||
-                                  conn->proxyntlm.state == NTLMSTATE_TYPE2))
-     || conn->bits.close || premature) {
+  if((data->set.reuse_forbid
+#if defined(USE_NTLM)
+      && !(conn->ntlm.state == NTLMSTATE_TYPE2 ||
+           conn->proxyntlm.state == NTLMSTATE_TYPE2)
+#endif
+     ) || conn->bits.close || premature) {
     CURLcode res2 = Curl_disconnect(conn, premature); /* close connection */
 
     /* If we had an error already, make sure we return that one. But

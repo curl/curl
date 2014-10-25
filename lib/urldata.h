@@ -432,6 +432,7 @@ struct kerberos5data {
 #endif
 
 /* Struct used for NTLM challenge-response authentication */
+#if defined(USE_NTLM)
 struct ntlmdata {
   curlntlm state;
 #ifdef USE_WINDOWS_SSPI
@@ -450,6 +451,7 @@ struct ntlmdata {
   unsigned int target_info_len;
 #endif
 };
+#endif
 
 #ifdef USE_SPNEGO
 struct negotiatedata {
@@ -1009,17 +1011,19 @@ struct connectdata {
   curl_read_callback fread_func; /* function that reads the input */
   void *fread_in;           /* pointer to pass to the fread() above */
 
+#if defined(USE_NTLM)
   struct ntlmdata ntlm;     /* NTLM differs from other authentication schemes
                                because it authenticates connections, not
                                single requests! */
   struct ntlmdata proxyntlm; /* NTLM data for proxy */
 
-#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
+#if defined(NTLM_WB_ENABLED)
   /* used for communication with Samba's winbind daemon helper ntlm_auth */
   curl_socket_t ntlm_auth_hlpr_socket;
   pid_t ntlm_auth_hlpr_pid;
   char* challenge_header;
   char* response_header;
+#endif
 #endif
 
   char syserr_buf [256]; /* buffer for Curl_strerror() */
