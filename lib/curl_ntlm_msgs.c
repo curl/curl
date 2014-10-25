@@ -620,10 +620,10 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
                                           (*) -> Optional
   */
 
+  CURLcode result = CURLE_OK;
   size_t size;
 
 #ifdef USE_WINDOWS_SSPI
-  CURLcode result = CURLE_OK;
   SecBuffer type_2_buf;
   SecBuffer type_3_buf;
   SecBufferDesc type_2_desc;
@@ -699,7 +699,6 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   size_t hostlen = 0;
   size_t userlen = 0;
   size_t domlen = 0;
-  CURLcode res = CURLE_OK;
 
   user = strchr(userp, '\\');
   if(!user)
@@ -735,28 +734,28 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     entropy[0] = Curl_rand(data);
     entropy[1] = Curl_rand(data);
 
-    res = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
-    if(res)
-      return res;
+    result = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
+    if(result)
+      return result;
 
-    res = Curl_ntlm_core_mk_ntlmv2_hash(user, userlen, domain, domlen,
-                                        ntbuffer, ntlmv2hash);
-    if(res)
-      return res;
+    result = Curl_ntlm_core_mk_ntlmv2_hash(user, userlen, domain, domlen,
+                                           ntbuffer, ntlmv2hash);
+    if(result)
+      return result;
 
     /* LMv2 response */
-    res = Curl_ntlm_core_mk_lmv2_resp(ntlmv2hash,
-                                      (unsigned char *)&entropy[0],
-                                      &ntlm->nonce[0], lmresp);
-    if(res)
-      return res;
+    result = Curl_ntlm_core_mk_lmv2_resp(ntlmv2hash,
+                                         (unsigned char *)&entropy[0],
+                                         &ntlm->nonce[0], lmresp);
+    if(result)
+      return result;
 
     /* NTLMv2 response */
-    res = Curl_ntlm_core_mk_ntlmv2_resp(ntlmv2hash,
-                                        (unsigned char *)&entropy[0],
-                                        ntlm, &ntlmv2resp, &ntresplen);
-    if(res)
-      return res;
+    result = Curl_ntlm_core_mk_ntlmv2_resp(ntlmv2hash,
+                                           (unsigned char *)&entropy[0],
+                                           ntlm, &ntlmv2resp, &ntresplen);
+    if(result)
+      return result;
 
     ptr_ntresp = ntlmv2resp;
   }
@@ -990,9 +989,9 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   size += hostlen;
 
   /* Convert domain, user, and host to ASCII but leave the rest as-is */
-  res = Curl_convert_to_network(data, (char *)&ntlmbuf[domoff],
-                                size - domoff);
-  if(res)
+  result = Curl_convert_to_network(data, (char *)&ntlmbuf[domoff],
+                                   size - domoff);
+  if(result)
     return CURLE_CONV_FAILED;
 
   /* Return with binary blob encoded into base64 */
