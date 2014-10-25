@@ -442,8 +442,8 @@ struct ntlmdata {
   size_t max_token_length;
   BYTE *output_token;
   int has_handles;
-  BYTE *type_2;
-  unsigned long n_type_2;
+  BYTE *input_token;
+  size_t input_token_len;
 #else
   unsigned int flags;
   unsigned char nonce[8];

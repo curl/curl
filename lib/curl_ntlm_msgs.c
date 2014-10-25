@@ -297,8 +297,8 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   }
 
 #ifdef USE_WINDOWS_SSPI
-  ntlm->type_2 = buffer;
-  ntlm->n_type_2 = curlx_uztoul(size);
+  ntlm->input_token = buffer;
+  ntlm->input_token_len = size;
 #else
   ntlm->flags = 0;
 
@@ -341,7 +341,7 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
 #ifdef USE_WINDOWS_SSPI
 void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm)
 {
-  Curl_safefree(ntlm->type_2);
+  Curl_safefree(ntlm->input_token);
 
   if(ntlm->has_handles) {
     s_pSecFn->DeleteSecurityContext(&ntlm->c_handle);
@@ -640,8 +640,8 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   type_2_desc.cBuffers  = 1;
   type_2_desc.pBuffers  = &type_2_buf;
   type_2_buf.BufferType = SECBUFFER_TOKEN;
-  type_2_buf.pvBuffer   = ntlm->type_2;
-  type_2_buf.cbBuffer   = ntlm->n_type_2;
+  type_2_buf.pvBuffer   = ntlm->input_token;
+  type_2_buf.cbBuffer   = curlx_uztoul(ntlm->input_token_len);
 
   /* Setup the type-3 "output" security buffer */
   type_3_desc.ulVersion = SECBUFFER_VERSION;
