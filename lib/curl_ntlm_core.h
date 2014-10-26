@@ -53,9 +53,9 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results);
 
-void Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
-                               const char *password,
-                               unsigned char *lmbuffer /* 21 bytes */);
+CURLcode Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
+                                   const char *password,
+                                   unsigned char *lmbuffer /* 21 bytes */);
 
 #if USE_NTRESPONSES
 CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,

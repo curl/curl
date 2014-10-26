@@ -311,9 +311,9 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
 /*
  * Set up lanmanager hashed password
  */
-void Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
-                               const char *password,
-                               unsigned char *lmbuffer /* 21 bytes */)
+CURLcode Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
+                                   const char *password,
+                                   unsigned char *lmbuffer /* 21 bytes */)
 {
   CURLcode result;
   unsigned char pw[14];
@@ -331,7 +331,7 @@ void Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
    */
   result = Curl_convert_to_network(data, (char *)pw, 14);
   if(result)
-    return;
+    return result;
 
   {
     /* Create LanManager hashed password. */
@@ -371,6 +371,8 @@ void Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
 
     memset(lmbuffer + 16, 0, 21 - 16);
   }
+
+  return CURLE_OK;
 }
 
 #if USE_NTRESPONSES

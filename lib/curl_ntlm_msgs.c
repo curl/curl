@@ -830,8 +830,12 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     Curl_ntlm_core_lm_resp(ntbuffer, &ntlm->nonce[0], ntresp);
 #endif
 
-    Curl_ntlm_core_mk_lm_hash(data, passwdp, lmbuffer);
+    result = Curl_ntlm_core_mk_lm_hash(data, passwdp, lmbuffer);
+    if(result)
+      return result;
+
     Curl_ntlm_core_lm_resp(lmbuffer, &ntlm->nonce[0], lmresp);
+
     /* A safer but less compatible alternative is:
      *   Curl_ntlm_core_lm_resp(ntbuffer, &ntlm->nonce[0], lmresp);
      * See http://davenport.sourceforge.net/ntlm.html#ntlmVersion2 */
