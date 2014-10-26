@@ -805,9 +805,9 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 
     /* We shall only use the first 8 bytes of md5sum, but the des
        code in Curl_ntlm_core_lm_resp only encrypt the first 8 bytes */
-    if(CURLE_OUT_OF_MEMORY ==
-       Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer))
-      return CURLE_OUT_OF_MEMORY;
+    result = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
+    if(result)
+      return result;
 
     Curl_ntlm_core_lm_resp(ntbuffer, md5sum, ntresp);
 
@@ -824,9 +824,10 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     unsigned char lmbuffer[0x18];
 
 #if USE_NTRESPONSES
-    if(CURLE_OUT_OF_MEMORY ==
-       Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer))
-      return CURLE_OUT_OF_MEMORY;
+    result = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
+    if(result)
+      return result;
+
     Curl_ntlm_core_lm_resp(ntbuffer, &ntlm->nonce[0], ntresp);
 #endif
 
