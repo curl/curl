@@ -315,7 +315,7 @@ void Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
                                const char *password,
                                unsigned char *lmbuffer /* 21 bytes */)
 {
-  CURLcode res;
+  CURLcode result;
   unsigned char pw[14];
   static const unsigned char magic[] = {
     0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 /* i.e. KGS!@#$% */
@@ -329,8 +329,8 @@ void Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
    * The LanManager hashed password needs to be created using the
    * password in the network encoding not the host encoding.
    */
-  res = Curl_convert_to_network(data, (char *)pw, 14);
-  if(res)
+  result = Curl_convert_to_network(data, (char *)pw, 14);
+  if(result)
     return;
 
   {
@@ -497,7 +497,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   /* Unicode representation */
   size_t identity_len = (userlen + domlen) * 2;
   unsigned char *identity = malloc(identity_len);
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   if(!identity)
     return CURLE_OUT_OF_MEMORY;
@@ -505,12 +505,12 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   ascii_uppercase_to_unicode_le(identity, user, userlen);
   ascii_to_unicode_le(identity + (userlen << 1), domain, domlen);
 
-  res = Curl_hmac_md5(ntlmhash, 16, identity, curlx_uztoui(identity_len),
-                      ntlmv2hash);
+  result = Curl_hmac_md5(ntlmhash, 16, identity, curlx_uztoui(identity_len),
+                         ntlmv2hash);
 
   Curl_safefree(identity);
 
-  return res;
+  return result;
 }
 
 /*
@@ -559,7 +559,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 #else
   __int64 tw;
 #endif
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   /* Calculate the timestamp */
 #ifdef DEBUGBUILD
@@ -592,11 +592,12 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
   memcpy(ptr + 8, &ntlm->nonce[0], 8);
-  res = Curl_hmac_md5(ntlmv2hash, NTLM_HMAC_MD5_LEN, ptr + 8,
-                      NTLMv2_BLOB_LEN + 8, hmac_output);
-  if(res) {
+  result = Curl_hmac_md5(ntlmv2hash, NTLM_HMAC_MD5_LEN, ptr + 8,
+                         NTLMv2_BLOB_LEN + 8, hmac_output);
+  if(result) {
     Curl_safefree(ptr);
-    return res;
+
+    return result;
   }
 
   /* Concatenate the HMAC MD5 output  with the BLOB */
@@ -606,7 +607,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   *ntresp = ptr;
   *ntresp_len = len;
 
-  return res;
+  return result;
 }
 
 /*
@@ -630,20 +631,20 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
 {
   unsigned char data[16];
   unsigned char hmac_output[16];
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   memcpy(&data[0], challenge_server, 8);
   memcpy(&data[8], challenge_client, 8);
 
-  res = Curl_hmac_md5(ntlmv2hash, 16, &data[0], 16, hmac_output);
-  if(res)
-    return res;
+  result = Curl_hmac_md5(ntlmv2hash, 16, &data[0], 16, hmac_output);
+  if(result)
+    return result;
 
   /* Concatenate the HMAC MD5 output  with the client nonce */
   memcpy(lmresp, hmac_output, 16);
   memcpy(lmresp+16, challenge_client, 8);
 
-  return res;
+  return result;
 }
 
 #endif /* USE_NTRESPONSES */
