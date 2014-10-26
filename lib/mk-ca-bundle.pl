@@ -119,7 +119,7 @@ if(!defined($opt_d)) {
 # Use predefined URL or else custom URL specified on command line.
 my $url = ( defined( $urls{$opt_d} ) ) ? $urls{$opt_d} : $opt_d;
 
-my $curl=`curl -V`;
+my $curl = `curl -V`;
 
 if ($opt_i) {
   print ("=" x 78 . "\n");
@@ -135,7 +135,7 @@ if ($opt_i) {
   print ("=" x 78 . "\n");
 }
 
-sub WARNING_MESSAGE() {
+sub warning_message() {
   if ( $opt_d =~ m/^risk$/i ) { # Long Form Warning and Exit
     print "Warning: Use of this script may pose some risk:\n";
     print "\n";
@@ -182,10 +182,10 @@ sub VERSION_MESSAGE() {
   print "${0} version ${version} running Perl ${]} on ${^O}\n";
 }
 
-WARNING_MESSAGE() unless ($opt_q || $url =~ m/^(ht|f)tps:/i );
+warning_message() unless ($opt_q || $url =~ m/^(ht|f)tps:/i );
 HELP_MESSAGE() if ($opt_h);
 
-sub IS_IN_LIST($@) {
+sub is_in_list($@) {
   my $target = shift;
 
   return defined(List::Util::first { $target eq $_ } @_);
@@ -193,7 +193,7 @@ sub IS_IN_LIST($@) {
 
 # Parses $param_string as a case insensitive comma separated list with optional whitespace
 # validates that only allowed parameters are supplied
-sub PARSE_CSV_PARAM($$@) {
+sub parse_csv_param($$@) {
   my $description = shift;
   my $param_string = shift;
   my @valid_values = @_;
@@ -205,7 +205,7 @@ sub PARSE_CSV_PARAM($$@) {
   } split( ',', $param_string );
 
   # Find all values which are not in the list of valid values or "ALL"
-  my @invalid = grep { !IS_IN_LIST($_,"ALL",@valid_values) } @values;
+  my @invalid = grep { !is_in_list($_,"ALL",@valid_values) } @values;
 
   if ( scalar(@invalid) > 0 ) {
     # Tell the user which parameters were invalid and print the standard help message which will exit
@@ -213,7 +213,7 @@ sub PARSE_CSV_PARAM($$@) {
     HELP_MESSAGE();
   }
 
-  @values = @valid_values if ( IS_IN_LIST("ALL",@values) );
+  @values = @valid_values if ( is_in_list("ALL",@values) );
 
   return @values;
 }
@@ -253,17 +253,17 @@ if ( $opt_p !~ m/:/ ) {
 }
 
 (my $included_mozilla_trust_purposes_string, my $included_mozilla_trust_levels_string) = split( ':', $opt_p );
-my @included_mozilla_trust_purposes = PARSE_CSV_PARAM( "trust purpose", $included_mozilla_trust_purposes_string, @valid_mozilla_trust_purposes );
-my @included_mozilla_trust_levels = PARSE_CSV_PARAM( "trust level", $included_mozilla_trust_levels_string, @valid_mozilla_trust_levels );
+my @included_mozilla_trust_purposes = parse_csv_param( "trust purpose", $included_mozilla_trust_purposes_string, @valid_mozilla_trust_purposes );
+my @included_mozilla_trust_levels = parse_csv_param( "trust level", $included_mozilla_trust_levels_string, @valid_mozilla_trust_levels );
 
-my @included_signature_algorithms = PARSE_CSV_PARAM( "signature algorithm", $opt_s, @valid_signature_algorithms );
+my @included_signature_algorithms = parse_csv_param( "signature algorithm", $opt_s, @valid_signature_algorithms );
 
-sub SHOULD_OUTPUT_CERT(%) {
+sub should_output_cert(%) {
   my %trust_purposes_by_level = @_;
 
   foreach my $level (@included_mozilla_trust_levels) {
     # for each level we want to output, see if any of our desired purposes are included
-    return 1 if ( defined( List::Util::first { IS_IN_LIST( $_, @included_mozilla_trust_purposes ) } @{$trust_purposes_by_level{$level}} ) );
+    return 1 if ( defined( List::Util::first { is_in_list( $_, @included_mozilla_trust_purposes ) } @{$trust_purposes_by_level{$level}} ) );
   }
 
   return 0;
@@ -412,9 +412,9 @@ while (<TXT>) {
     while (<TXT>) {
       last if (/^#/);
       if (/^CKA_TRUST_([A-Z_]+)\s+CK_TRUST\s+CKT_NSS_([A-Z_]+)\s*$/) {
-        if ( !IS_IN_LIST($1,@valid_mozilla_trust_purposes) ) {
+        if ( !is_in_list($1,@valid_mozilla_trust_purposes) ) {
           print STDERR "Warning: Unrecognized trust purpose for cert: $caname. Trust purpose: $1. Trust Level: $2\n" if (!$opt_q);
-        } elsif ( !IS_IN_LIST($2,@valid_mozilla_trust_levels) ) {
+        } elsif ( !is_in_list($2,@valid_mozilla_trust_levels) ) {
           print STDERR "Warning: Unrecognized trust level for cert: $caname. Trust purpose: $1. Trust Level: $2\n" if (!$opt_q);
         } else {
           push @{$trust_purposes_by_level{$2}}, $1;
@@ -422,7 +422,7 @@ while (<TXT>) {
       }
     }
 
-    if ( !SHOULD_OUTPUT_CERT(%trust_purposes_by_level) ) {
+    if ( !should_output_cert(%trust_purposes_by_level) ) {
       $skipnum ++;
     } else {
       my $encoded = MIME::Base64::encode_base64($data, '');
