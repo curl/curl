@@ -232,10 +232,10 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                                &chlg_desc, 0, &ctx,
                                                &resp_desc, &attrs, &tsDummy);
 
-  if(status == SEC_I_COMPLETE_AND_CONTINUE ||
-     status == SEC_I_CONTINUE_NEEDED)
+  if(status == SEC_I_COMPLETE_NEEDED ||
+     status == SEC_I_COMPLETE_AND_CONTINUE)
     s_pSecFn->CompleteAuthToken(&handle, &resp_desc);
-  else if(status != SEC_E_OK) {
+  else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
     s_pSecFn->FreeCredentialsHandle(&handle);
     Curl_sspi_free_identity(&identity);
     Curl_safefree(spn);

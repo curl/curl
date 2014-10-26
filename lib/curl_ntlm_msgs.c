@@ -497,10 +497,10 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                                ntlm->context, &type_1_desc,
                                                &attrs, &tsDummy);
 
-  if(status == SEC_I_COMPLETE_AND_CONTINUE ||
-     status == SEC_I_CONTINUE_NEEDED)
+  if(status == SEC_I_COMPLETE_NEEDED ||
+     status == SEC_I_COMPLETE_AND_CONTINUE)
     s_pSecFn->CompleteAuthToken(ntlm->context, &type_1_desc);
-  else if(status != SEC_E_OK)
+  else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED)
     return CURLE_RECV_ERROR;
 
   size = type_1_buf.cbBuffer;
