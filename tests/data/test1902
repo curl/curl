@@ -4,6 +4,7 @@
 HTTP
 pipelining
 multi
+flaky
 </keywords>
 </info>
 
