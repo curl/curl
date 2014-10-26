@@ -113,8 +113,8 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
     /* Allocate input and output buffers according to the max token size
        as indicated by the security package */
-    neg_ctx->max_token_length = SecurityPackage->cbMaxToken;
-    neg_ctx->output_token = malloc(neg_ctx->max_token_length);
+    neg_ctx->token_max = SecurityPackage->cbMaxToken;
+    neg_ctx->output_token = malloc(neg_ctx->token_max);
     s_pSecFn->FreeContextBuffer(SecurityPackage);
   }
 
@@ -176,7 +176,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   out_buff_desc.pBuffers  = &out_sec_buff;
   out_sec_buff.BufferType = SECBUFFER_TOKEN;
   out_sec_buff.pvBuffer   = neg_ctx->output_token;
-  out_sec_buff.cbBuffer   = curlx_uztoul(neg_ctx->max_token_length);
+  out_sec_buff.cbBuffer   = curlx_uztoul(neg_ctx->token_max);
 
   /* Setup the "input" security buffer if present */
   if(input_token) {
@@ -270,7 +270,7 @@ static void cleanup(struct negotiatedata *neg_ctx)
     neg_ctx->credentials = NULL;
   }
 
-  neg_ctx->max_token_length = 0;
+  neg_ctx->token_max = 0;
   Curl_safefree(neg_ctx->output_token);
 
   Curl_safefree(neg_ctx->server_name);

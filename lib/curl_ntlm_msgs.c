@@ -355,7 +355,7 @@ void Curl_ntlm_sspi_cleanup(struct ntlmdata *ntlm)
     ntlm->credentials = NULL;
   }
 
-  ntlm->max_token_length = 0;
+  ntlm->token_max = 0;
   Curl_safefree(ntlm->output_token);
 
   Curl_sspi_free_identity(ntlm->p_identity);
@@ -433,13 +433,13 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   if(status != SEC_E_OK)
     return CURLE_NOT_BUILT_IN;
 
-  ntlm->max_token_length = SecurityPackage->cbMaxToken;
+  ntlm->token_max = SecurityPackage->cbMaxToken;
 
   /* Release the package buffer as it is not required anymore */
   s_pSecFn->FreeContextBuffer(SecurityPackage);
 
   /* Allocate our output buffer */
-  ntlm->output_token = malloc(ntlm->max_token_length);
+  ntlm->output_token = malloc(ntlm->token_max);
   if(!ntlm->output_token)
     return CURLE_OUT_OF_MEMORY;
 
@@ -487,7 +487,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   type_1_desc.pBuffers  = &type_1_buf;
   type_1_buf.BufferType = SECBUFFER_TOKEN;
   type_1_buf.pvBuffer   = ntlm->output_token;
-  type_1_buf.cbBuffer   = curlx_uztoul(ntlm->max_token_length);
+  type_1_buf.cbBuffer   = curlx_uztoul(ntlm->token_max);
 
   /* Generate our type-1 message */
   status = s_pSecFn->InitializeSecurityContext(ntlm->credentials, NULL,
@@ -666,7 +666,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   type_3_desc.pBuffers  = &type_3_buf;
   type_3_buf.BufferType = SECBUFFER_TOKEN;
   type_3_buf.pvBuffer   = ntlm->output_token;
-  type_3_buf.cbBuffer   = curlx_uztoul(ntlm->max_token_length);
+  type_3_buf.cbBuffer   = curlx_uztoul(ntlm->token_max);
 
   /* Generate our type-3 message */
   status = s_pSecFn->InitializeSecurityContext(ntlm->credentials,

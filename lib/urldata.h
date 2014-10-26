@@ -440,7 +440,7 @@ struct ntlmdata {
   CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY identity;
   SEC_WINNT_AUTH_IDENTITY *p_identity;
-  size_t max_token_length;
+  size_t token_max;
   BYTE *output_token;
   BYTE *input_token;
   size_t input_token_len;
@@ -466,12 +466,12 @@ struct negotiatedata {
 #else
 #ifdef USE_WINDOWS_SSPI
   DWORD status;
-  CtxtHandle *context;
   CredHandle *credentials;
+  CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY identity;
   SEC_WINNT_AUTH_IDENTITY *p_identity;
   TCHAR *server_name;
-  size_t max_token_length;
+  size_t token_max;
   BYTE *output_token;
   size_t output_token_length;
 #endif
