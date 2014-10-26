@@ -9,11 +9,14 @@ Curl and libcurl 7.39.0
 This release includes the following changes:
 
  o CURLOPT_COOKIELIST: Added "RELOAD" command [5]
+ o build: Added WinIDN build configuration options
  o ssh: improve key file search
  o SSL: public key pinning. Use CURLOPT_PINNEDPUBLICKEY and --pinnedpubkey
  o vtls: remove QsoSSL support, use gskit!
  o mk-ca-bundle: added SHA-384 signature algorithm
  o docs: added many examples for libcurl opts and other doc improvements
+ o build: Added VC ssh2 target to main Makefile
+ o MinGW: Added support to build with nghttp2
 
 This release includes the following bugfixes:
 
@@ -23,7 +26,6 @@ This release includes the following bugfixes:
  o sasl_sspi: Fixed Unicode build [4]
  o file: reject paths using embedded %00
  o threaded-resolver: revert Curl_expire_latest() switch [6]
- o build: Added WinIDN build configuration options
  o configure: allow --with-ca-path with PolarSSL too
  o HTTP/2: Fix busy loop when EOF is encountered
  o CURLOPT_CAPATH: return failure if set without backend support
@@ -49,6 +51,17 @@ This release includes the following bugfixes:
  o cmake: add SUPPORT_FEATURES and SUPPORT_PROTOCOLS
  o cmake: use LIBCURL_VERSION from curlver.h
  o cmake: generate pkg-config and curl-config
+ o fixed several superfluous variable assignements identified by cppcheck
+ o cleanup of 'CURLcode result' return code
+ o pipelining: only output "is not blacklisted" in debug builds
+ o SSL: Remove SSLv3 from SSL default due to POODLE attack
+ o gskit.c: remove SSLv3 from SSL default
+ o darwinssl: detect possible future removal of SSLv3 from the framework
+ o ntlm: Only define ntlm data structure when USE_NTLM is defined
+ o ntlm: Return CURLcode from Curl_ntlm_core_mk_lm_hash()
+ o ntlm: Return all errors from Curl_ntlm_core_mk_nt_hash()
+ o sspi: Only call CompleteAuthToken() when complete is needed
+ o http_negotiate: Fixed missing check for USE_SPNEGO
 
 This release includes the following known bugs:
 
@@ -58,11 +71,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Askar Safin, Bill Nagel, Bruno Thomsen, Catalin Patulea, Dan Fandrich,
-  Daniel Stenberg, Dimitar Boevski, Fabian Keil, Jakub Zakrzewski, Jeremy Lin,
-  Jonathan Cardoso Machado, Kamil Dudka, Luan Cestari, Marcel Raad,
-  Marc Hoersken, Michael Wallner, Patrick Monnerat, Paul Howarth, Peter Wu,
-  Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts,
-  Waldek Kozba, Yousuke Kimoto,
+  Daniel Stenberg, Dimitar Boevski, Fabian Keil, Guenter Knauf,
+  Jakub Zakrzewski, Jeremy Lin, Jonathan Cardoso Machado, Kamil Dudka,
+  Luan Cestari, Marcel Raad, Marc Hoersken, Michael Wallner, Nick Zitzmann,
+  Patrick Monnerat, Paul Howarth, Peter Wu, Ray Satiro, Steve Holme,
+  Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts, Waldek Kozba,
+  Yousuke Kimoto,
 
         Thanks! (and sorry if I forgot to mention someone)
 
