@@ -85,7 +85,7 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
 
     if(*header) {
       result = Curl_ntlm_decode_type2_message(conn->data, header, ntlm);
-      if(CURLE_OK != result)
+      if(result)
         return result;
 
       ntlm->state = NTLMSTATE_TYPE2; /* We got a type-2 message */
@@ -112,12 +112,11 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
 /*
  * This is for creating ntlm header output
  */
-CURLcode Curl_output_ntlm(struct connectdata *conn,
-                          bool proxy)
+CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
 {
   char *base64 = NULL;
   size_t len = 0;
-  CURLcode error;
+  CURLcode result;
 
   /* point to the address of the pointer that holds the string to send to the
      server, which is for a plain host or for a HTTP proxy */
@@ -175,10 +174,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     /* Create a type-1 message */
-    error = Curl_ntlm_create_type1_message(userp, passwdp, ntlm, &base64,
-                                           &len);
-    if(error)
-      return error;
+    result = Curl_ntlm_create_type1_message(userp, passwdp, ntlm, &base64,
+                                            &len);
+    if(result)
+      return result;
 
     if(base64) {
       Curl_safefree(*allocuserpwd);
@@ -188,16 +187,17 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       free(base64);
       if(!*allocuserpwd)
         return CURLE_OUT_OF_MEMORY;
+
       DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
     }
     break;
 
   case NTLMSTATE_TYPE2:
     /* We already received the type-2 message, create a type-3 message */
-    error = Curl_ntlm_create_type3_message(conn->data, userp, passwdp,
-                                           ntlm, &base64, &len);
-    if(error)
-      return error;
+    result = Curl_ntlm_create_type3_message(conn->data, userp, passwdp,
+                                            ntlm, &base64, &len);
+    if(result)
+      return result;
 
     if(base64) {
       Curl_safefree(*allocuserpwd);
@@ -207,6 +207,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       free(base64);
       if(!*allocuserpwd)
         return CURLE_OUT_OF_MEMORY;
+
       DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
 
       ntlm->state = NTLMSTATE_TYPE3; /* we send a type-3 */
