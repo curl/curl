@@ -23,12 +23,13 @@
 #include "curl_setup.h"
 
 #ifdef HAVE_GSSAPI
+
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
+
 #ifdef HAVE_OLD_GSSMIT
 #define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
 #define NCOMPAT 1
 #endif
-
-#ifndef CURL_DISABLE_HTTP
 
 #include "urldata.h"
 #include "sendf.h"
@@ -238,6 +239,6 @@ void Curl_cleanup_negotiate(struct SessionHandle *data)
   cleanup(&data->state.proxyneg);
 }
 
+#endif /* !CURL_DISABLE_HTTP && USE_SPNEGO */
 
-#endif
-#endif
+#endif /* HAVE_GSSAPI */
