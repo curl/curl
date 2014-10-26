@@ -115,7 +115,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   int ret;
   size_t len;
   size_t rawlen = 0;
-  CURLcode error;
+  CURLcode result;
 
   if(neg_ctx->context && neg_ctx->status == GSS_S_COMPLETE) {
     /* We finished successfully our part of authentication, but server
@@ -135,9 +135,9 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
   len = strlen(header);
   if(len > 0) {
-    error = Curl_base64_decode(header,
-                               (unsigned char **)&input_token.value, &rawlen);
-    if(error || rawlen == 0)
+    result = Curl_base64_decode(header, (unsigned char **)&input_token.value,
+                                &rawlen);
+    if(result || rawlen == 0)
       return -1;
     input_token.length = rawlen;
 
@@ -181,18 +181,18 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   char *encoded = NULL;
   size_t len = 0;
   char *userp;
-  CURLcode error;
+  CURLcode result;
   OM_uint32 discard_st;
 
-  error = Curl_base64_encode(conn->data,
-                             neg_ctx->output_token.value,
-                             neg_ctx->output_token.length,
-                             &encoded, &len);
-  if(error) {
+  result = Curl_base64_encode(conn->data,
+                              neg_ctx->output_token.value,
+                              neg_ctx->output_token.length,
+                              &encoded, &len);
+  if(result) {
     gss_release_buffer(&discard_st, &neg_ctx->output_token);
     neg_ctx->output_token.value = NULL;
     neg_ctx->output_token.length = 0;
-    return error;
+    return result;
   }
 
   if(!encoded || !len) {
