@@ -423,7 +423,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   SecBufferDesc type_1_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
-  TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
+  TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
   Curl_ntlm_sspi_cleanup(ntlm);
 
@@ -470,7 +470,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                               (TCHAR *) TEXT("NTLM"),
                                               SECPKG_CRED_OUTBOUND, NULL,
                                               ntlm->p_identity, NULL, NULL,
-                                              ntlm->credentials, &tsDummy);
+                                              ntlm->credentials, &expiry);
   if(status != SEC_E_OK)
     return CURLE_OUT_OF_MEMORY;
 
@@ -495,7 +495,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                                0, 0, SECURITY_NETWORK_DREP,
                                                NULL, 0,
                                                ntlm->context, &type_1_desc,
-                                               &attrs, &tsDummy);
+                                               &attrs, &expiry);
 
   if(status == SEC_I_COMPLETE_NEEDED ||
      status == SEC_I_COMPLETE_AND_CONTINUE)
@@ -647,7 +647,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   SecBufferDesc type_3_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
-  TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
+  TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
   (void)passwdp;
   (void)userp;
@@ -676,7 +676,7 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
                                                &type_2_desc,
                                                0, ntlm->context,
                                                &type_3_desc,
-                                               &attrs, &tsDummy);
+                                               &attrs, &expiry);
   if(status != SEC_E_OK) {
     infof(data, "NTLM handshake failure (type-3 message): Status=%x\n",
           status);

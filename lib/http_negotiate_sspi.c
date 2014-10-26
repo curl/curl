@@ -53,7 +53,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   SecBufferDesc     in_buff_desc;
   SecBuffer         in_sec_buff;
   unsigned long     context_attributes;
-  TimeStamp         lifetime;
+  TimeStamp         expiry;
   int ret;
   size_t len = 0, input_token_len = 0;
   CURLcode error;
@@ -158,7 +158,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                                          (TCHAR *) TEXT("Negotiate"),
                                          SECPKG_CRED_OUTBOUND, NULL,
                                          neg_ctx->p_identity, NULL, NULL,
-                                         neg_ctx->credentials, &lifetime);
+                                         neg_ctx->credentials, &expiry);
     if(neg_ctx->status != SEC_E_OK)
       return -1;
   }
@@ -201,7 +201,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     neg_ctx->context,
     &out_buff_desc,
     &context_attributes,
-    &lifetime);
+    &expiry);
 
   Curl_safefree(input_token);
 

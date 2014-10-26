@@ -134,7 +134,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   SecBufferDesc resp_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
-  TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
+  TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
   /* Decode the base-64 encoded challenge message */
   if(strlen(chlg64) && *chlg64 != '=') {
@@ -200,7 +200,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                               (TCHAR *) TEXT("WDigest"),
                                               SECPKG_CRED_OUTBOUND, NULL,
                                               &identity, NULL, NULL,
-                                              &handle, &tsDummy);
+                                              &handle, &expiry);
 
   if(status != SEC_E_OK) {
     Curl_sspi_free_identity(&identity);
@@ -230,7 +230,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   /* Generate our challenge-response message */
   status = s_pSecFn->InitializeSecurityContext(&handle, NULL, spn, 0, 0, 0,
                                                &chlg_desc, 0, &ctx,
-                                               &resp_desc, &attrs, &tsDummy);
+                                               &resp_desc, &attrs, &expiry);
 
   if(status == SEC_I_COMPLETE_NEEDED ||
      status == SEC_I_COMPLETE_AND_CONTINUE)
@@ -313,7 +313,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
   SecBufferDesc resp_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
-  TimeStamp tsDummy; /* For Windows 9x compatibility of SSPI calls */
+  TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
   if(!krb5->credentials) {
     /* Query the security package for Kerberos */
@@ -363,7 +363,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
                                                 (TCHAR *) TEXT("Kerberos"),
                                                 SECPKG_CRED_OUTBOUND, NULL,
                                                 krb5->p_identity, NULL, NULL,
-                                                krb5->credentials, &tsDummy);
+                                                krb5->credentials, &expiry);
     if(status != SEC_E_OK)
       return CURLE_OUT_OF_MEMORY;
 
@@ -413,7 +413,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
                                                chlg ? &chlg_desc : NULL, 0,
                                                &context,
                                                &resp_desc, &attrs,
-                                               &tsDummy);
+                                               &expiry);
 
   if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
     Curl_safefree(chlg);
