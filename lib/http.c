@@ -3200,8 +3200,15 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 #endif /* CURL_DOES_CONVERSIONS */
 
       if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
+        /*
+         * https://tools.ietf.org/html/rfc7230#section-3.1.2
+         *
+         * The reponse code is always a three-digit number in HTTP as the spec
+         * says. We try to allow any number here, but we cannot make
+         * guarantees on future behaviors since it isn't within the protocol.
+         */
         nc = sscanf(HEADER1,
-                    " HTTP/%d.%d %3d",
+                    " HTTP/%d.%d %d",
                     &httpversion_major,
                     &conn->httpversion,
                     &k->httpcode);
