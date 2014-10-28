@@ -355,7 +355,7 @@ print CRT <<EOT;
 ## an Apache+mod_ssl webserver for SSL client authentication.
 ## Just configure this file as the SSLCACertificateFile.
 ##
-## Conversion done with mk-ca-bundle.pl verison $version.
+## Conversion done with mk-ca-bundle.pl version $version.
 ## SHA1: $newsha1
 ##
 
