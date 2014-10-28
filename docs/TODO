@@ -34,6 +34,7 @@
  4.4 REST for large files
  4.5 ASCII support
  4.6 GSSAPI via Windows SSPI
+ 4.7 STAT for LIST without data connection
 
  5. HTTP
  5.1 Better persistency for HTTP 1.0
@@ -259,6 +260,14 @@
 In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
 via third-party GSS-API libraries, such as Heimdal or MIT Kerberos, also add
 support for GSSAPI authentication via Windows SSPI.
+
+4.7 STAT for LIST without data connection
+
+Some FTP servers allow STAT for listing directories instead of using LIST, and
+the response is then sent over the control connection instead of as the
+otherwise usedw data connection: http://www.nsftools.com/tips/RawFTP.htm#STAT
+
+This is not detailed in any FTP specification.
 
 5. HTTP
 
