@@ -1657,6 +1657,8 @@ struct SessionHandle {
   struct SessionHandle *prev;
 
   struct connectdata *easy_conn;     /* the "unit's" connection */
+  long multi_do_connection_id;       /* the value of easy_conn->connection_id
+                                        at the moment Curl_do was called */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */
