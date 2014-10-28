@@ -3203,6 +3203,11 @@ ConnectionExists(struct SessionHandle *data,
              the optimal connection to use, i.e the shortest pipe that is not
              blacklisted. */
 
+          /* We can't use the connection if the connection should be closed
+             (this is set when request in the pipeline times out). */
+          if(check->bits.close)
+            continue;
+
           if(pipeLen == 0) {
             /* We have the optimal connection. Let's stop looking. */
             chosen = check;
