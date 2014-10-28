@@ -1643,14 +1643,30 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(data->easy_conn) {
         CURLcode res;
+        struct connectbundle *bundle;
+        bool keep_bundle;
 
         /* Remove ourselves from the receive pipeline, if we are there. */
         Curl_removeHandleFromPipeline(data, data->easy_conn->recv_pipe);
         /* Check if we can move pending requests to send pipe */
         Curl_multi_process_pending_handles(multi);
 
+        /* If we're doing pipelining and this connection timed out then we do
+           not want Curl_done -> Curl_disconnect -> Curl_conncache_remove_conn
+           to remove the bundle: we need to remember that this server is
+           capable of pipelining. */
+        bundle = data->easy_conn->bundle;
+        keep_bundle = (bundle->server_supports_pipelining &&
+                       data->result == CURLE_OPERATION_TIMEDOUT);
+        if(keep_bundle)
+          ++bundle->num_connections;
+
         /* post-transfer command */
         res = Curl_done(&data->easy_conn, data->result, FALSE);
+
+        /* Restore num_connections to its original value. */
+        if(keep_bundle)
+          --bundle->num_connections;
 
         /* allow a previously set error code take precedence */
         if(!data->result)
