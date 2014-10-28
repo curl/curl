@@ -262,7 +262,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   /* Free the response buffer */
   Curl_safefree(resp);
 
-  /* Free the decoeded challenge message */
+  /* Free the decoded challenge message */
   Curl_safefree(chlg);
 
   return result;
