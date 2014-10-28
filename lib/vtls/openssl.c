@@ -1420,17 +1420,13 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 
 #ifdef USE_NGHTTP2
 
+/* Check for OpenSSL 1.0.2 which has ALPN support. */
 #undef HAS_ALPN
-#if defined(HAVE_SSL_CTX_SET_ALPN_PROTOS) && \
-  defined(HAVE_SSL_CTX_SET_ALPN_SELECT_CB)
-#  define HAS_ALPN 1
-#endif
-
-#if !defined(HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB) || \
-  defined(OPENSSL_NO_NEXTPROTONEG)
-#  if !defined(HAS_ALPN)
-#    error http2 builds require OpenSSL with NPN or ALPN support
-#  endif
+#if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(OPENSSL_NO_NEXTPROTONEG) \
+    && !defined(OPENSSL_NO_TLSEXT)
+#  define HAS_ALPN
+#else
+#  error http2 builds require OpenSSL with NPN or ALPN support
 #endif
 
 
