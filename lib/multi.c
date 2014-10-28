@@ -949,7 +949,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     /* Handle the case when the pipe breaks, i.e., the connection
        we're using gets cleaned up and we're left with nothing. */
     if(data->state.pipe_broke) {
-      infof(data, "Pipe broke: handle 0x%p, url = %s\n",
+      infof(data, "Pipe broke: handle %p, url = %s\n",
             (void *)data, data->state.path);
 
       if(data->mstate < CURLM_STATE_COMPLETED) {
