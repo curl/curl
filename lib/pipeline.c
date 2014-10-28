@@ -99,11 +99,11 @@ CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
 {
   struct curl_llist_element *sendhead = conn->send_pipe->head;
   struct curl_llist *pipeline;
-  CURLcode rc;
+  CURLcode result;
 
   pipeline = conn->send_pipe;
 
-  rc = Curl_addHandleToPipeline(handle, pipeline);
+  result = Curl_addHandleToPipeline(handle, pipeline);
 
   if(pipeline == conn->send_pipe && sendhead != conn->send_pipe->head) {
     /* this is a new one as head, expire it */
@@ -115,7 +115,7 @@ CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
   print_pipeline(conn);
 #endif
 
-  return rc;
+  return result;
 }
 
 /* Move this transfer from the sending list to the receiving list.

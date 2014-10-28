@@ -321,16 +321,16 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
   struct SessionHandle *data = conn->data;
   struct digestdata *d;
-  CURLcode rc;
+  CURLcode result;
 /* The CURL_OUTPUT_DIGEST_CONV macro below is for non-ASCII machines.
    It converts digest text to ASCII so the MD5 will be correct for
    what ultimately goes over the network.
 */
 #define CURL_OUTPUT_DIGEST_CONV(a, b) \
-  rc = Curl_convert_to_network(a, (char *)b, strlen((const char*)b)); \
-  if(rc) { \
+  result = Curl_convert_to_network(a, (char *)b, strlen((const char*)b)); \
+  if(result) { \
     free(b); \
-    return rc; \
+    return result; \
   }
 
   if(proxy) {
@@ -370,10 +370,12 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     snprintf(cnoncebuf, sizeof(cnoncebuf), "%08x%08x%08x%08x",
              Curl_rand(data), Curl_rand(data),
              Curl_rand(data), Curl_rand(data));
-    rc = Curl_base64_encode(data, cnoncebuf, strlen(cnoncebuf),
-                            &cnonce, &cnonce_sz);
-    if(rc)
-      return rc;
+
+    result = Curl_base64_encode(data, cnoncebuf, strlen(cnoncebuf),
+                                &cnonce, &cnonce_sz);
+    if(result)
+      return result;
+
     d->cnonce = cnonce;
   }
 

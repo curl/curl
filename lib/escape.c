@@ -87,7 +87,7 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
   size_t newlen = alloc;
   size_t strindex=0;
   size_t length;
-  CURLcode res;
+  CURLcode result;
 
   ns = malloc(alloc);
   if(!ns)
@@ -115,8 +115,8 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
         }
       }
 
-      res = Curl_convert_to_network(handle, &in, 1);
-      if(res) {
+      result = Curl_convert_to_network(handle, &in, 1);
+      if(result) {
         /* Curl_convert_to_network calls failf if unsuccessful */
         free(ns);
         return NULL;
@@ -152,7 +152,7 @@ CURLcode Curl_urldecode(struct SessionHandle *data,
   unsigned char in;
   size_t strindex=0;
   unsigned long hex;
-  CURLcode res;
+  CURLcode result;
 
   if(!ns)
     return CURLE_OUT_OF_MEMORY;
@@ -172,16 +172,17 @@ CURLcode Curl_urldecode(struct SessionHandle *data,
 
       in = curlx_ultouc(hex); /* this long is never bigger than 255 anyway */
 
-      res = Curl_convert_from_network(data, &in, 1);
-      if(res) {
+      result = Curl_convert_from_network(data, &in, 1);
+      if(result) {
         /* Curl_convert_from_network calls failf if unsuccessful */
         free(ns);
-        return res;
+        return result;
       }
 
       string+=2;
       alloc-=2;
     }
+
     if(reject_ctrl && (in < 0x20)) {
       free(ns);
       return CURLE_URL_MALFORMAT;
