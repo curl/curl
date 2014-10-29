@@ -152,6 +152,10 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   conn->connection_id = connc->next_connection_id++;
   connc->num_connections++;
 
+  DEBUGF(infof(conn->data, "Added connection %d. "
+               "The cache now contains %d members\n",
+               conn->connection_id, connc->num_connections));
+
   return CURLE_OK;
 }
 
