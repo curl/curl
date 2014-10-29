@@ -1426,7 +1426,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
     && !defined(OPENSSL_NO_TLSEXT)
 #  define HAS_ALPN
 #else
-#  error http2 builds require OpenSSL with NPN or ALPN support
+#  error http2 builds require OpenSSL with ALPN support!
 #endif
 
 
