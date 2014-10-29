@@ -1321,8 +1321,6 @@ struct UrlState {
   long rtsp_next_server_CSeq; /* the session's next server CSeq */
   long rtsp_CSeq_recv; /* most recent CSeq received */
 
-  /* if true, force SSL connection retry (workaround for certain servers) */
-  bool ssl_connect_retry;
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
 };
