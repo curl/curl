@@ -1422,7 +1422,8 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 
 /* Check for OpenSSL 1.0.2 which has ALPN support. */
 #undef HAS_ALPN
-#if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(OPENSSL_NO_NEXTPROTONEG) \
+#if OPENSSL_VERSION_NUMBER >= 0x10002000L \
+    && !defined(OPENSSL_NO_NEXTPROTONEG) \
     && !defined(OPENSSL_NO_TLSEXT)
 #  define HAS_ALPN
 #else
