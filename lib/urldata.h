@@ -492,6 +492,7 @@ struct negotiatedata {
 struct ConnectBits {
   /* always modify bits.close with the connclose() and connkeep() macros! */
   bool close; /* if set, we close the connection after this request */
+  bool timedout; /* if set, the transfer timedout */
   bool reuse; /* if set, this is a re-used connection */
   bool proxy; /* if set, this transfer is done through a proxy - any type */
   bool httpproxy;    /* if set, this transfer is done through a http proxy */

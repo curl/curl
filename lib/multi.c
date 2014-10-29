@@ -1017,8 +1017,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* Force the connection closed when the server could continue to
            send us stuff at any time. (The disconnect_conn logic used below
            doesn't work at this point). */
-        if(data->multi_do_connection_id == data->easy_conn->connection_id)
+        if(data->multi_do_connection_id == data->easy_conn->connection_id) {
           connclose(data->easy_conn, "Disconnected with pending data");
+          /* Make sure this connection is no longer considered for
+             pipelining. */
+          data->easy_conn->bits.timedout = TRUE;
+        }
         data->result = CURLE_OPERATION_TIMEDOUT;
         multistate(data, CURLM_STATE_DONE);
       }

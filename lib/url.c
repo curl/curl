@@ -3204,8 +3204,8 @@ ConnectionExists(struct SessionHandle *data,
              blacklisted. */
 
           /* We can't use the connection if the connection should be closed
-             (this is set when request in the pipeline times out). */
-          if(check->bits.close)
+             due to a timeout. */
+          if(check->bits.timedout)
             continue;
 
           if(pipeLen == 0) {
@@ -3620,6 +3620,9 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
      connections, so we set this to force-close. Protocols that support
      this need to set this to FALSE in their "curl_do" functions. */
   connclose(conn, "Default to force-close");
+
+  /* This is a fresh connection */
+  conn->bits.timedout = FALSE;
 
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
