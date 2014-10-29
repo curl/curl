@@ -68,6 +68,7 @@
 #include "share.h"
 #include "timeval.h"
 #include "curl_md5.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -749,8 +750,9 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
   MD5_context *MD5pw;
 
   (void) md5len;
+
   MD5pw = Curl_MD5_init(Curl_DIGEST_MD5);
-  Curl_MD5_update(MD5pw, tmp, tmplen);
+  Curl_MD5_update(MD5pw, tmp, curlx_uztoui(tmplen));
   Curl_MD5_final(MD5pw, md5sum);
 #endif
 }
