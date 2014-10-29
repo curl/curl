@@ -42,6 +42,11 @@ ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp-2.3
 endif
 
+# Edit the path below to point to the base of your nghttp2 package.
+ifndef NGHTTP2_PATH
+NGHTTP2_PATH = ../../nghttp2-0.6.4
+endif
+
 # Edit the path below to point to the base of your fbopenssl package.
 ifndef FBOPENSSL_PATH
 FBOPENSSL_PATH = ../../fbopenssl-0.4
@@ -217,6 +222,9 @@ endif
 ifeq ($(findstring -idn,$(CFG)),-idn)
 WITH_IDN = 1
 endif
+ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
+WITH_NGHTTP2 = 1
+endif
 ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 ENABLE_IPV6 = 1
 endif
@@ -268,6 +276,10 @@ endif
 ifdef WITH_IDN
 	INCLUDES += -I$(LIBIDN_PATH)/include
 	LDLIBS += $(LIBIDN_PATH)/lib/libidn.$(LIBEXT)
+endif
+ifdef WITH_NGHTTP2
+	INCLUDES += -I$(NGHTTP2_PATH)/include
+	LDLIBS += $(NGHTTP2_PATH)/lib/libnghttp2.$(LIBEXT)
 endif
 
 ifeq ($(LIBARCH),LIBC)
@@ -645,6 +657,9 @@ endif
 ifdef WITH_RTMP
 	@echo $(DL)#define USE_LIBRTMP 1$(DL) >> $@
 endif
+ifdef WITH_NGHTTP2
+	@echo $(DL)#define USE_NGHTTP2 1$(DL) >> $@
+endif
 	@echo $(DL)#ifdef __GNUC__$(DL) >> $@
 	@echo $(DL)#define HAVE_VARIADIC_MACROS_GCC 1$(DL) >> $@
 	@echo $(DL)#else$(DL) >> $@
@@ -684,6 +699,11 @@ ifdef WITH_ZLIB
 	@echo zlib support:    enabled
 else
 	@echo zlib support:    no
+endif
+ifdef WITH_NGHTTP2
+	@echo http2 support:   enabled
+else
+	@echo http2 support:   no
 endif
 ifdef WITH_ARES
 	@echo c-ares support:  enabled

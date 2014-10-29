@@ -42,6 +42,11 @@ ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp-2.3
 endif
 
+# Edit the path below to point to the base of your nghttp2 package.
+ifndef NGHTTP2_PATH
+NGHTTP2_PATH = ../../nghttp2-0.6.4
+endif
+
 # Edit the path below to point to the base of your fbopenssl package.
 ifndef FBOPENSSL_PATH
 FBOPENSSL_PATH = ../../fbopenssl-0.4
@@ -230,6 +235,9 @@ ifeq ($(findstring -metalink,$(CFG)),-metalink)
 WITH_METALINK = 1
 WITH_SSL = 1
 endif
+ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
+WITH_NGHTTP2 = 1
+endif
 ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 ENABLE_IPV6 = 1
 endif
@@ -286,6 +294,10 @@ endif
 ifdef WITH_IDN
 	# INCLUDES += -I$(LIBIDN_PATH)/include
 	LDLIBS += $(LIBIDN_PATH)/lib/libidn.$(LIBEXT)
+endif
+ifdef WITH_NGHTTP2
+	INCLUDES += -I$(NGHTTP2_PATH)/include
+	LDLIBS += $(NGHTTP2_PATH)/lib/libnghttp2.$(LIBEXT)
 endif
 ifdef WITH_METALINK
 	CFLAGS += -DUSE_METALINK
