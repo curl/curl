@@ -17,6 +17,7 @@ This release includes the following changes:
  o docs: added many examples for libcurl opts and other doc improvements
  o build: Added VC ssh2 target to main Makefile
  o MinGW: Added support to build with nghttp2
+ o NetWare: Added support to build with nghttp2
 
 This release includes the following bugfixes:
 
@@ -62,6 +63,11 @@ This release includes the following bugfixes:
  o ntlm: Return all errors from Curl_ntlm_core_mk_nt_hash()
  o sspi: Only call CompleteAuthToken() when complete is needed
  o http_negotiate: Fixed missing check for USE_SPNEGO
+ o HTTP: return larger than 3 digit response codes too [7]
+ o openssl: Check for ALPN via OpenSSL version number
+ o openssl: Fixed error message since we require ALPN support
+ o sasl_sspi: Allow DIGEST-MD5 to use current windows credentials
+ o sspi: Return CURLE_LOGIN_DENIED on AcquireCredentialsHandle() failure
 
 This release includes the following known bugs:
 
@@ -70,8 +76,8 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Askar Safin, Bill Nagel, Bruno Thomsen, Catalin Patulea, Dan Fandrich,
-  Daniel Stenberg, Dimitar Boevski, Fabian Keil, Guenter Knauf,
+  Askar Safin, Balaji Salunke, Bill Nagel, Bruno Thomsen, Catalin Patulea,
+  Dan Fandrich, Daniel Stenberg, Dimitar Boevski, Fabian Keil, Guenter Knauf,
   Jakub Zakrzewski, Jeremy Lin, Jonathan Cardoso Machado, Kamil Dudka,
   Luan Cestari, Marcel Raad, Marc Hoersken, Michael Wallner, Nick Zitzmann,
   Patrick Monnerat, Paul Howarth, Peter Wu, Ray Satiro, Steve Holme,
@@ -88,3 +94,4 @@ References to bug reports and discussions on issues:
  [4] = http://curl.haxx.se/bug/view.cgi?id=1422
  [5] = http://curl.haxx.se/libcurl/c/CURLOPT_COOKIELIST.html
  [6] = http://curl.haxx.se/bug/view.cgi?id=1426
+ [7] = http://curl.haxx.se/bug/view.cgi?id=1441
