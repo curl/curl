@@ -210,7 +210,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     Curl_safefree(resp);
     Curl_safefree(chlg);
 
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_LOGIN_DENIED;
   }
 
   /* Setup the challenge "input" security buffer */
@@ -367,7 +367,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
                                                 krb5->p_identity, NULL, NULL,
                                                 krb5->credentials, &expiry);
     if(status != SEC_E_OK)
-      return CURLE_OUT_OF_MEMORY;
+      return CURLE_LOGIN_DENIED;
 
     /* Allocate our new context handle */
     krb5->context = malloc(sizeof(CtxtHandle));

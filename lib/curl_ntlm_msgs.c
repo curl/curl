@@ -477,7 +477,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                               ntlm->p_identity, NULL, NULL,
                                               ntlm->credentials, &expiry);
   if(status != SEC_E_OK)
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_LOGIN_DENIED;
 
   /* Allocate our new context handle */
   ntlm->context = malloc(sizeof(CtxtHandle));
