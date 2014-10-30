@@ -77,6 +77,11 @@ CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 CFLAGS += -dUSE_WINDOWS_SSPI
 !endif
 
+!ifdef %use_winssl
+CFLAGS += -dUSE_WINDOWS_SSPI
+CFLAGS += -DUSE_SCHANNEL
+!endif
+
 !ifdef %use_winidn
 CFLAGS += -dWINVER=0x0600 -dUSE_WIN32_IDN
 !  if $(__VERSION__) <= 1290
