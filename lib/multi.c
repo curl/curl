@@ -1661,7 +1661,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
            capable of pipelining. */
         bundle = data->easy_conn->bundle;
         keep_bundle = (bundle->server_supports_pipelining &&
-                       data->result == CURLE_OPERATION_TIMEDOUT);
+                       (data->result == CURLE_OPERATION_TIMEDOUT ||
+                        data->easy_conn->bits.retry));
         if(keep_bundle)
           ++bundle->num_connections;
 
