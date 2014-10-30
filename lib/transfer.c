@@ -547,6 +547,18 @@ static CURLcode readwrite_data(struct SessionHandle *data,
           if(data->state.resume_from && !k->content_range &&
              (data->set.httpreq==HTTPREQ_GET) &&
              !k->ignorebody) {
+
+            if(k->size == data->state.resume_from) {
+              /* The resume point is at the end of file, consider this fine
+                 even if it doesn't allow resume from here. */
+              infof(data, "The entire document is already downloaded");
+              connclose(conn, "already downloaded");
+              /* Abort download */
+              k->keepon &= ~KEEP_RECV;
+              *done = TRUE;
+              return CURLE_OK;
+            }
+
             /* we wanted to resume a download, although the server doesn't
              * seem to support this and we did this with a GET (if it
              * wasn't a GET we did a POST or PUT resume) */

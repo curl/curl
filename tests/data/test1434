@@ -4,7 +4,6 @@
 HTTP
 HTTP GET
 Resume
-FAILURE
 </keywords>
 </info>
 
@@ -56,12 +55,12 @@ Content-Type: text/plain
 http
 </server>
  <name>
-HTTP GET beyond end of entirely-downloaded file, no server resume
+HTTP GET resume at exactly the existing file size is fine
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1042 -C 200
+http://%HOSTIP:%HTTPPORT/1434 -C 100
 </command>
-<file name="log/curl1042.out">
+<file name="log/curl1434.out">
 012345678
 012345678
 012345678
@@ -77,15 +76,12 @@ http://%HOSTIP:%HTTPPORT/1042 -C 200
 
 # Verify data after the test has been "shot"
 <verify>
-<errorcode>
-33
-</errorcode>
 <strip>
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /1042 HTTP/1.1
-Range: bytes=200-
+GET /1434 HTTP/1.1
+Range: bytes=100-
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
