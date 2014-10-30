@@ -541,7 +541,7 @@ static CURLcode trynextip(struct connectdata *conn,
                           int sockindex,
                           int tempindex)
 {
-  CURLcode rc = CURLE_COULDNT_CONNECT;
+  CURLcode result = CURLE_COULDNT_CONNECT;
 
   /* First clean up after the failed socket.
      Don't close it yet to ensure that the next IP's socket gets a different
@@ -575,11 +575,12 @@ static CURLcode trynextip(struct connectdata *conn,
         ai = ai->ai_next;
 
       if(ai) {
-        rc = singleipconnect(conn, ai, &conn->tempsock[tempindex]);
-        if(rc == CURLE_COULDNT_CONNECT) {
+        result = singleipconnect(conn, ai, &conn->tempsock[tempindex]);
+        if(result == CURLE_COULDNT_CONNECT) {
           ai = ai->ai_next;
           continue;
         }
+
         conn->tempaddr[tempindex] = ai;
       }
       break;
@@ -589,7 +590,7 @@ static CURLcode trynextip(struct connectdata *conn,
   if(fd_to_close != CURL_SOCKET_BAD)
     Curl_closesocket(conn, fd_to_close);
 
-  return rc;
+  return result;
 }
 
 /* Copies connection info into the session handle to make it available

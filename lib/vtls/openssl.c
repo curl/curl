@@ -1913,8 +1913,7 @@ ossl_connect_step1(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode
-ossl_connect_step2(struct connectdata *conn, int sockindex)
+static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
 {
   struct SessionHandle *data = conn->data;
   int err;
@@ -1946,7 +1945,7 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
       unsigned long errdetail;
       char error_buffer[256]; /* OpenSSL documents that this must be at least
                                  256 bytes long. */
-      CURLcode rc;
+      CURLcode result;
       const char *cert_problem = NULL;
       long lerr;
 
@@ -1970,7 +1969,7 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
            SSL routines:
            SSL3_GET_SERVER_CERTIFICATE:
            certificate verify failed */
-        rc = CURLE_SSL_CACERT;
+        result = CURLE_SSL_CACERT;
 
         lerr = SSL_get_verify_result(connssl->handle);
         if(lerr != X509_V_OK) {
@@ -1984,7 +1983,7 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
 
         break;
       default:
-        rc = CURLE_SSL_CONNECT_ERROR;
+        result = CURLE_SSL_CONNECT_ERROR;
         SSL_strerror(errdetail, error_buffer, sizeof(error_buffer));
         break;
       }
@@ -1995,15 +1994,16 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
        * (RST connection etc.), OpenSSL gives no explanation whatsoever and
        * the SO_ERROR is also lost.
        */
-      if(CURLE_SSL_CONNECT_ERROR == rc && errdetail == 0) {
+      if(CURLE_SSL_CONNECT_ERROR == result && errdetail == 0) {
         failf(data, "Unknown SSL protocol error in connection to %s:%ld ",
               conn->host.name, conn->remote_port);
-        return rc;
+        return result;
       }
-      /* Could be a CERT problem */
 
+      /* Could be a CERT problem */
       failf(data, "%s%s", cert_problem ? cert_problem : "", error_buffer);
-      return rc;
+
+      return result;
     }
   }
   else {
@@ -2011,9 +2011,9 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
     connssl->connecting_state = ssl_connect_3;
 
     /* Informational message */
-    infof (data, "SSL connection using %s / %s\n",
-           get_ssl_version_txt(SSL_get_session(connssl->handle)),
-           SSL_get_cipher(connssl->handle));
+    infof(data, "SSL connection using %s / %s\n",
+          get_ssl_version_txt(SSL_get_session(connssl->handle)),
+          SSL_get_cipher(connssl->handle));
 
 #ifdef HAS_ALPN
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
@@ -2035,9 +2035,8 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
           conn->negnpn = NPN_HTTP1_1;
         }
       }
-      else {
+      else
         infof(data, "ALPN, server did not agree to a protocol\n");
-      }
     }
 #endif
 
