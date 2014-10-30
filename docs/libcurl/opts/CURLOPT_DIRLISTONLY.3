@@ -28,13 +28,18 @@ CURLOPT_DIRLISTONLY \- ask for names only in a directory listing
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DIRLISTONLY, long listonly);
 .SH DESCRIPTION
-A parameter set to 1 tells the library to just list the names of files in a
-directory, instead of doing a full directory listing that would include file
-sizes, dates etc. This works for FTP and SFTP URLs.
+For FTP and SFTP based URLs a parameter set to 1 tells the library to list the
+names of files in a directory, rather than performing a full directory listing
+that would normally include file sizes, dates etc.
 
-This causes an FTP NLST command to be sent on an FTP server.  Beware that some
-FTP servers list only files in their response to NLST; they might not include
-subdirectories and symbolic links.
+For POP3 a parameter of 1 tells the library to list the email message or
+messages on the POP3 server. This can be used to change the default behaviour
+of libcurl, when combined with a URL that contains a message ID, to perform a
+"scan listing" which can then be used to determine the size of an email.
+
+Note: For FTP this causes a NLST command to be sent to the FTP server.  Beware
+that some FTP servers list only files in their response to NLST; they might not
+include subdirectories and symbolic links.
 
 Setting this option to 1 also implies a directory listing even if the URL
 doesn't end with a slash, which otherwise is necessary.
@@ -44,11 +49,12 @@ will effectively break that feature then.
 .SH DEFAULT
 0, disabled
 .SH PROTOCOLS
-FTP and SFTP
+FTP, SFTP and POP3
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-This option was known as CURLOPT_FTPLISTONLY up to 7.16.4
+This option was known as CURLOPT_FTPLISTONLY up to 7.16.4. POP3 is supported
+since 7.21.5.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
