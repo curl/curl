@@ -78,7 +78,7 @@ Data pointer to pass to the read callback. See \fICURLOPT_READDATA(3)\fP
 .IP CURLOPT_IOCTLFUNCTION
 Callback for I/O operations. See \fICURLOPT_IOCTLFUNCTION(3)\fP
 .IP CURLOPT_IOCTLDATA
-Data pointer to pass to the i/o callback. See \fICURLOPT_IOCTLDATA(3)\fP
+Data pointer to pass to the I/O callback. See \fICURLOPT_IOCTLDATA(3)\fP
 .IP CURLOPT_SEEKFUNCTION
 Callback for seek operations. See \fICURLOPT_SEEKFUNCTION(3)\fP
 .IP CURLOPT_SEEKDATA
@@ -112,9 +112,9 @@ Callback for debug information. See \fICURLOPT_DEBUGFUNCTION(3)\fP
 .IP CURLOPT_DEBUGDATA
 Data pointer to pass to the debug callback. See \fICURLOPT_DEBUGDATA(3)\fP
 .IP CURLOPT_SSL_CTX_FUNCTION
-Callback for SSL CTX logic. See \fICURLOPT_SSL_CTX_FUNCTION(3)\fP
+Callback for SSL context logic. See \fICURLOPT_SSL_CTX_FUNCTION(3)\fP
 .IP CURLOPT_SSL_CTX_DATA
-Data pointer to pass to the ssl context callback. See \fICURLOPT_SSL_CTX_DATA(3)\fP
+Data pointer to pass to the SSL context callback. See \fICURLOPT_SSL_CTX_DATA(3)\fP
 .IP CURLOPT_CONV_TO_NETWORK_FUNCTION
 Callback for code base conversion. See \fICURLOPT_CONV_TO_NETWORK_FUNCTION(3)\fP
 .IP CURLOPT_CONV_FROM_NETWORK_FUNCTION
@@ -124,7 +124,7 @@ Callback for code base conversion. See \fICURLOPT_CONV_FROM_UTF8_FUNCTION(3)\fP
 .IP CURLOPT_INTERLEAVEFUNCTION
 Callback for RTSP interleaved data. See \fICURLOPT_INTERLEAVEFUNCTION(3)\fP
 .IP CURLOPT_INTERLEAVEDATA
-Data pointer to pass to the interleave callback. See \fICURLOPT_INTERLEAVEDATA(3)\fP
+Data pointer to pass to the RTSP interleave callback. See \fICURLOPT_INTERLEAVEDATA(3)\fP
 .IP CURLOPT_CHUNK_BGN_FUNCTION
 Callback for wildcard download start of chunk. See \fICURLOPT_CHUNK_BGN_FUNCTION(3)\fP
 .IP CURLOPT_CHUNK_END_FUNCTION
@@ -134,7 +134,7 @@ Data pointer to pass to the chunk callbacks. See \fICURLOPT_CHUNK_DATA(3)\fP
 .IP CURLOPT_FNMATCH_FUNCTION
 Callback for wildcard matching. See \fICURLOPT_FNMATCH_FUNCTION(3)\fP
 .IP CURLOPT_FNMATCH_DATA
-Data pointer to pass to the fnmatch callback. See \fICURLOPT_FNMATCH_DATA(3)\fP
+Data pointer to pass to the wildcard matching callback. See \fICURLOPT_FNMATCH_DATA(3)\fP
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Error message buffer. See \fICURLOPT_ERRORBUFFER(3)\fP
@@ -160,9 +160,9 @@ Filter out hosts from proxy use. \fICURLOPT_NOPROXY(3)\fP
 .IP CURLOPT_HTTPPROXYTUNNEL
 Tunnel through the HTTP proxy. \fICURLOPT_HTTPPROXYTUNNEL(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_SERVICE
-Socks5 gassapi service name. \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
+Socks5 GSSAPI service name. \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_NEC
-Socks5 gssapi NEC mode. See \fICURLOPT_SOCKS5_GSSAPI_NEC(3)\fP
+Socks5 GSSAPI NEC mode. See \fICURLOPT_SOCKS5_GSSAPI_NEC(3)\fP
 .IP CURLOPT_INTERFACE
 Bind connection locally to this. See \fICURLOPT_INTERFACE(3)\fP
 .IP CURLOPT_LOCALPORT
@@ -193,11 +193,11 @@ Enable .netrc parsing. See \fICURLOPT_NETRC(3)\fP
 .IP CURLOPT_NETRC_FILE
 \&.netrc file name. See \fICURLOPT_NETRC_FILE(3)\fP
 .IP CURLOPT_USERPWD
-User and password. See \fICURLOPT_USERPWD(3)\fP
+User name and password. See \fICURLOPT_USERPWD(3)\fP
 .IP CURLOPT_PROXYUSERPWD
-Proxy user and password. See \fICURLOPT_PROXYUSERPWD(3)\fP
+Proxy user name and password. See \fICURLOPT_PROXYUSERPWD(3)\fP
 .IP CURLOPT_USERNAME
-Username. See \fICURLOPT_USERNAME(3)\fP
+User name. See \fICURLOPT_USERNAME(3)\fP
 .IP CURLOPT_PASSWORD
 Password. See \fICURLOPT_PASSWORD(3)\fP
 .IP CURLOPT_LOGIN_OPTIONS
@@ -217,7 +217,7 @@ HTTP proxy authentication methods. See \fICURLOPT_PROXYAUTH(3)\fP
 .IP CURLOPT_SASL_IR
 Enable SASL initial response. See \fICURLOPT_SASL_IR(3)\fP
 .IP CURLOPT_XOAUTH2_BEARER
-XOAuth2 bearer token. See \fICURLOPT_XOAUTH2_BEARER(3)\fP
+OAuth2 bearer token. See \fICURLOPT_XOAUTH2_BEARER(3)\fP
 .SH HTTP OPTIONS
 .IP CURLOPT_AUTOREFERER
 Automatically set Referer: header. See \fICURLOPT_AUTOREFERER(3)\fP
@@ -228,7 +228,7 @@ Request Transfer-Encoding. See \fICURLOPT_TRANSFER_ENCODING(3)\fP
 .IP CURLOPT_FOLLOWLOCATION
 Follow HTTP redirects. See \fICURLOPT_FOLLOWLOCATION(3)\fP
 .IP CURLOPT_UNRESTRICTED_AUTH
-Do not restrict auth to original host. \fICURLOPT_UNRESTRICTED_AUTH(3)\fP
+Do not restrict authentication to original host. \fICURLOPT_UNRESTRICTED_AUTH(3)\fP
 .IP CURLOPT_MAXREDIRS
 Maximum number of redirects to follow. See \fICURLOPT_MAXREDIRS(3)\fP
 .IP CURLOPT_POSTREDIR
@@ -309,7 +309,7 @@ Use EPSV. See \fICURLOPT_FTP_USE_EPSV(3)\fP
 .IP CURLOPT_FTP_USE_PRET
 Use PRET. See \fICURLOPT_FTP_USE_PRET(3)\fP
 .IP CURLOPT_FTP_CREATE_MISSING_DIRS
-Create missing dirs on the remote server. See \fICURLOPT_FTP_CREATE_MISSING_DIRS(3)\fP
+Create missing directories on the remote server. See \fICURLOPT_FTP_CREATE_MISSING_DIRS(3)\fP
 .IP CURLOPT_FTP_RESPONSE_TIMEOUT
 Timeout for FTP responses. See \fICURLOPT_FTP_RESPONSE_TIMEOUT(3)\fP
 .IP CURLOPT_FTP_ALTERNATIVE_TO_USER
@@ -382,11 +382,11 @@ Low speed limit to abort transfer. See \fICURLOPT_LOW_SPEED_LIMIT(3)\fP
 .IP CURLOPT_LOW_SPEED_TIME
 Time to be below the speed to trigger low speed abort. See \fICURLOPT_LOW_SPEED_TIME(3)\fP
 .IP CURLOPT_MAX_SEND_SPEED_LARGE
-Cap upload speed to this. See \fICURLOPT_MAX_SEND_SPEED_LARGE(3)\fP
+Cap the upload speed to this. See \fICURLOPT_MAX_SEND_SPEED_LARGE(3)\fP
 .IP CURLOPT_MAX_RECV_SPEED_LARGE
-Cap download speed to this. See \fICURLOPT_MAX_RECV_SPEED_LARGE(3)\fP
+Cap the download speed to this. See \fICURLOPT_MAX_RECV_SPEED_LARGE(3)\fP
 .IP CURLOPT_MAXCONNECTS
-Max number of connection is connection pool. See \fICURLOPT_MAXCONNECTS(3)\fP
+Maximum number of connection in the connection pool. See \fICURLOPT_MAXCONNECTS(3)\fP
 .IP CURLOPT_FRESH_CONNECT
 Use a new connection. \fICURLOPT_FRESH_CONNECT(3)\fP
 .IP CURLOPT_FORBID_REUSE
@@ -425,7 +425,7 @@ Client key password. See \fICURLOPT_KEYPASSWD(3)\fP
 .IP CURLOPT_SSL_ENABLE_ALPN
 Enable use of ALPN. See \fICURLOPT_SSL_ENABLE_ALPN(3)\fP
 .IP CURLOPT_SSL_ENABLE_NPN
-)Enable use of NPN. See \fICURLOPT_SSL_ENABLE_NPN(3)\fP
+Enable use of NPN. See \fICURLOPT_SSL_ENABLE_NPN(3)\fP
 .IP CURLOPT_SSLENGINE
 Use identifier with SSL engine. See \fICURLOPT_SSLENGINE(3)\fP
 .IP CURLOPT_SSLENGINE_DEFAULT
@@ -483,7 +483,7 @@ Share object to use. See \fICURLOPT_SHARE(3)\fP
 .IP CURLOPT_NEW_FILE_PERMS
 Mode for creating new remote files. See \fICURLOPT_NEW_FILE_PERMS(3)\fP
 .IP CURLOPT_NEW_DIRECTORY_PERMS
-Mode for creating new remote dirs. See \fICURLOPT_NEW_DIRECTORY_PERMS(3)\fP
+Mode for creating new remote directories. See \fICURLOPT_NEW_DIRECTORY_PERMS(3)\fP
 .SH TELNET OPTIONS
 .IP CURLOPT_TELNETOPTIONS
 TELNET options. See \fICURLOPT_TELNETOPTIONS(3)\fP
