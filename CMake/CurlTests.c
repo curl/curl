@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,264 +71,88 @@ main ()
 }
 #endif
 
-#ifdef HAVE_GETHOSTBYADDR_R_5
+/* tests for gethostbyaddr_r or gethostbyname_r */
+#if defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT) || \
+    defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT) || \
+    defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT) || \
+    defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT) || \
+    defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
+    defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
+#   define _REENTRANT
+    /* no idea whether _REENTRANT is always set, just invent a new flag */
+#   define TEST_GETHOSTBYFOO_REENTRANT
+#endif
+#if defined(HAVE_GETHOSTBYADDR_R_5) || \
+    defined(HAVE_GETHOSTBYADDR_R_7) || \
+    defined(HAVE_GETHOSTBYADDR_R_8) || \
+    defined(HAVE_GETHOSTBYNAME_R_3) || \
+    defined(HAVE_GETHOSTBYNAME_R_5) || \
+    defined(HAVE_GETHOSTBYNAME_R_6) || \
+    defined(TEST_GETHOSTBYFOO_REENTRANT)
 #include <sys/types.h>
 #include <netdb.h>
-int
-main ()
+int main(void)
 {
-
-char * address;
-int length;
-int type;
-struct hostent h;
-struct hostent_data hdata;
-int rc;
-#ifndef gethostbyaddr_r
-  (void)gethostbyaddr_r;
+  char *address = "example.com";
+  int length = 0;
+  int type = 0;
+  struct hostent h;
+  int rc = 0;
+#if defined(HAVE_GETHOSTBYADDR_R_5) || \
+    defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT) || \
+    \
+    defined(HAVE_GETHOSTBYNAME_R_3) || \
+    defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT)
+  struct hostent_data hdata;
+#elif defined(HAVE_GETHOSTBYADDR_R_7) || \
+      defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT) || \
+      defined(HAVE_GETHOSTBYADDR_R_8) || \
+      defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT) || \
+      \
+      defined(HAVE_GETHOSTBYNAME_R_5) || \
+      defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT) || \
+      defined(HAVE_GETHOSTBYNAME_R_6) || \
+      defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
+  char buffer[8192];
+  int h_errnop;
+  struct hostent *hp;
 #endif
-rc = gethostbyaddr_r(address, length, type, &h, &hdata);
-  ;
-  return 0;
-}
-#endif
-#ifdef HAVE_GETHOSTBYADDR_R_5_REENTRANT
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
-int
-main ()
-{
-
-char * address;
-int length;q
-int type;
-struct hostent h;
-struct hostent_data hdata;
-int rc;
-#ifndef gethostbyaddr_r
-  (void)gethostbyaddr_r;
-#endif
-rc = gethostbyaddr_r(address, length, type, &h, &hdata);
-  ;
-  return 0;
-}
-#endif
-#ifdef HAVE_GETHOSTBYADDR_R_7
-#include <sys/types.h>
-#include <netdb.h>
-int
-main ()
-{
-
-char * address;
-int length;
-int type;
-struct hostent h;
-char buffer[8192];
-int h_errnop;
-struct hostent * hp;
 
 #ifndef gethostbyaddr_r
   (void)gethostbyaddr_r;
 #endif
-hp = gethostbyaddr_r(address, length, type, &h,
-                     buffer, 8192, &h_errnop);
-  ;
+
+#if   defined(HAVE_GETHOSTBYADDR_R_5) || \
+      defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT)
+  rc = gethostbyaddr_r(address, length, type, &h, &hdata);
+#elif defined(HAVE_GETHOSTBYADDR_R_7) || \
+      defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT)
+  hp = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &h_errnop);
+  (void)hp;
+#elif defined(HAVE_GETHOSTBYADDR_R_8) || \
+      defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT)
+  rc = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &hp, &h_errnop);
+#endif
+
+#if   defined(HAVE_GETHOSTBYNAME_R_3) || \
+      defined(HAVE_GETHOSTBYNAME_R_3_REENTRANT)
+  rc = gethostbyname_r(address, &h, &hdata);
+#elif defined(HAVE_GETHOSTBYNAME_R_5) || \
+      defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT)
+  rc = gethostbyname_r(address, &h, buffer, 8192, 0, &h_errnop);
+  (void)hp; /* not used for test */
+#elif defined(HAVE_GETHOSTBYNAME_R_6) || \
+      defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
+  rc = gethostbyname_r(address, &h, buffer, 8192, &hp, &h_errnop);
+#endif
+
+  (void)length;
+  (void)type;
+  (void)rc;
   return 0;
 }
 #endif
-#ifdef HAVE_GETHOSTBYADDR_R_7_REENTRANT
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
-int
-main ()
-{
 
-char * address;
-int length;
-int type;
-struct hostent h;
-char buffer[8192];
-int h_errnop;
-struct hostent * hp;
-
-#ifndef gethostbyaddr_r
-  (void)gethostbyaddr_r;
-#endif
-hp = gethostbyaddr_r(address, length, type, &h,
-                     buffer, 8192, &h_errnop);
-  ;
-  return 0;
-}
-#endif
-#ifdef HAVE_GETHOSTBYADDR_R_8
-#include <sys/types.h>
-#include <netdb.h>
-int
-main ()
-{
-
-char * address;
-int length;
-int type;
-struct hostent h;
-char buffer[8192];
-int h_errnop;
-struct hostent * hp;
-int rc;
-
-#ifndef gethostbyaddr_r
-  (void)gethostbyaddr_r;
-#endif
-rc = gethostbyaddr_r(address, length, type, &h,
-                     buffer, 8192, &hp, &h_errnop);
-  ;
-  return 0;
-}
-#endif
-#ifdef HAVE_GETHOSTBYADDR_R_8_REENTRANT
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
-int
-main ()
-{
-
-char * address;
-int length;
-int type;
-struct hostent h;
-char buffer[8192];
-int h_errnop;
-struct hostent * hp;
-int rc;
-
-#ifndef gethostbyaddr_r
-  (void)gethostbyaddr_r;
-#endif
-rc = gethostbyaddr_r(address, length, type, &h,
-                     buffer, 8192, &hp, &h_errnop);
-  ;
-  return 0;
-}
-#endif
-#ifdef HAVE_GETHOSTBYNAME_R_3
-#include <string.h>
-#include <sys/types.h>
-#include <netdb.h>
-#undef NULL
-#define NULL (void *)0
-
-int
-main ()
-{
-
-struct hostent_data data;
-#ifndef gethostbyname_r
-  (void)gethostbyname_r;
-#endif
-gethostbyname_r(NULL, NULL, NULL);
-  ;
-  return 0;
-}
-#endif
-#ifdef HAVE_GETHOSTBYNAME_R_3_REENTRANT
-#define _REENTRANT
-#include <string.h>
-#include <sys/types.h>
-#include <netdb.h>
-#undef NULL
-#define NULL (void *)0
-
-int
-main ()
-{
-
-struct hostent_data data;
-#ifndef gethostbyname_r
-  (void)gethostbyname_r;
-#endif
-gethostbyname_r(NULL, NULL, NULL);
-  ;
-  return 0;
-}
-#endif
-#ifdef HAVE_GETHOSTBYNAME_R_5
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#undef NULL
-#define NULL (void *)0
-
-int
-main ()
-{
-#ifndef gethostbyname_r
-  (void)gethostbyname_r;
-#endif
-gethostbyname_r(NULL, NULL, NULL, 0, NULL);
-  ;
-  return 0;
-}
-#endif
-#ifdef HAVE_GETHOSTBYNAME_R_5_REENTRANT
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
-#undef NULL
-#define NULL (void *)0
-
-int
-main ()
-{
-
-#ifndef gethostbyname_r
-  (void)gethostbyname_r;
-#endif
-gethostbyname_r(NULL, NULL, NULL, 0, NULL);
-  ;
-  return 0;
-}
-#endif
-#ifdef HAVE_GETHOSTBYNAME_R_6
-#include <sys/types.h>
-#include <netdb.h>
-#undef NULL
-#define NULL (void *)0
-
-int
-main ()
-{
-
-#ifndef gethostbyname_r
-  (void)gethostbyname_r;
-#endif
-gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
-  ;
-  return 0;
-}
-#endif
-#ifdef HAVE_GETHOSTBYNAME_R_6_REENTRANT
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
-#undef NULL
-#define NULL (void *)0
-
-int
-main ()
-{
-
-#ifndef gethostbyname_r
-  (void)gethostbyname_r;
-#endif
-gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
-  ;
-  return 0;
-}
-#endif
 #ifdef HAVE_SOCKLEN_T
 #ifdef _WIN32
 #include <ws2tcpip.h>
