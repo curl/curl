@@ -30,7 +30,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECT_ONLY, long only);
 .SH DESCRIPTION
 Pass a long. If the parameter equals 1, it tells the library to perform all
 the required proxy authentication and connection setup, but no data transfer,
-and then return. This option is implemented for HTTP, SMTP and POP3.
+and then return.
 
 The option can be used to simply test a connection to a server, but is more
 useful when used with the \fICURLINFO_LASTSOCKET\fP option to
