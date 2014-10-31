@@ -1547,6 +1547,10 @@
      d                 c                   10012
      d  CURLMOPT_MAX_TOTAL_CONNECTIONS...
      d                 c                   00013
+     d  CURLMOPT_PIPELINING_POLICY_FUNCTION...
+     d                 c                   00014
+     d  CURLMOPT_PIPELINING_POLICY_DATA...
+     d                 c                   00015
       *
       *  Public API enums for RTSP requests.
       *
@@ -1763,6 +1767,9 @@
      d                 s               *   based(######ptr######) procptr
       *
      d curl_socket_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_pipeline_policy_callback...
      d                 s               *   based(######ptr######) procptr
       *
      d curl_opensocket_callback...

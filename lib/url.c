@@ -2987,25 +2987,20 @@ ConnectionExists(struct SessionHandle *data,
 
   *force_reuse = FALSE;
 
-  /* We can't pipe if the site is blacklisted */
-  if(canPipeline && Curl_pipeline_site_blacklisted(data, needle)) {
-    canPipeline = FALSE;
-  }
-
   /* Look up the bundle with all the connections to this
      particular host */
   bundle = Curl_conncache_find_bundle(data->state.conn_cache,
                                       needle->host.name);
   if(bundle) {
-    size_t max_pipe_len = Curl_multi_max_pipeline_length(data->multi);
+    size_t max_pipe_len = bundle->policy.max_pipeline_length;
     size_t best_pipe_len = max_pipe_len;
     struct curl_llist_element *curr;
 
     infof(data, "Found bundle for host %s: %p\n",
           needle->host.name, (void *)bundle);
 
-    /* We can't pipe if we don't know anything about the server */
-    if(canPipeline && !bundle->server_supports_pipelining) {
+    /* Check if we are pipelining */
+    if(canPipeline && !CURL_CAN_PIPELINE(bundle)) {
       infof(data, "Server doesn't support pipelining\n");
       canPipeline = FALSE;
     }
@@ -5178,7 +5173,6 @@ static CURLcode create_conn(struct SessionHandle *data,
   bool prot_missing = FALSE;
   bool no_connections_available = FALSE;
   bool force_reuse = FALSE;
-  size_t max_host_connections = Curl_multi_max_host_connections(data->multi);
   size_t max_total_connections = Curl_multi_max_total_connections(data->multi);
 
   *async = FALSE;
@@ -5521,7 +5515,8 @@ static CURLcode create_conn(struct SessionHandle *data,
       infof(data, "Found connection %ld, with requests in the pipe (%zu)\n",
             conn_temp->connection_id, pipelen);
 
-      if(conn_temp->bundle->num_connections < max_host_connections &&
+      if(conn_temp->bundle->num_connections <
+          conn_temp->bundle->policy.max_host_connections &&
          data->state.conn_cache->num_connections < max_total_connections) {
         /* We want a new connection anyway */
         reuse = FALSE;
@@ -5560,8 +5555,8 @@ static CURLcode create_conn(struct SessionHandle *data,
 
     bundle = Curl_conncache_find_bundle(data->state.conn_cache,
                                         conn->host.name);
-    if(max_host_connections > 0 && bundle &&
-       (bundle->num_connections >= max_host_connections)) {
+    if(bundle && bundle->policy.max_host_connections > 0 &&
+       (bundle->num_connections >= bundle->policy.max_host_connections)) {
       struct connectdata *conn_candidate;
 
       /* The bundle is full. Let's see if we can kill a connection. */

@@ -289,6 +289,49 @@ CURL_EXTERN CURLMcode curl_multi_socket_action(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle,
                                             int *running_handles);
 
+/*
+ * Name:    curl_pipeline_policy
+ *
+ * Desc:    Contains the per site pipeline policy variables. The values default
+ *          to CURLMOPT_MAX_HOST_CONNECTIONS, CURLMOPT_MAX_PIPELINE_LENGTH,
+ *          and whether or not the site appears in CURLMOPT_PIPELINING_SITE_BL
+ *          respectively. CURL_SUPPORTS_PIPELINING is not set. However, these
+ *          values can be overwritten by the user during the
+ *          curl_pipeline_policy_callback set with
+ *          CURLMOPT_PIPELINE_POLICY_FUNCTION. If CURL_SUPPORTS_PIPELINING and
+ *          CURL_BLACKLISTED are both set then the site is blacklisted from
+ *          pipelining.
+ */
+
+#define CURL_SUPPORTS_PIPELINING 1
+#define CURL_BLACKLISTED         2
+
+struct curl_pipeline_policy {
+  size_t max_host_connections;  /* the maximum number of simultaneous
+                                   connections to the site */
+  long max_pipeline_length;     /* the maximum amount of requests in
+                                   a pipelined connection */
+  int  flags;                   /* bit-mask for CURL_SUPPORTS_PIPELINING
+                                   and CURL_BLACKLISTED */
+};
+
+/* Return TRUE iff bundle supports pipelining and is not blacklisted */
+#define CURL_CAN_PIPELINE(bundle) ((bundle->policy.flags & \
+   (CURL_SUPPORTS_PIPELINING|CURL_BLACKLISTED)) == CURL_SUPPORTS_PIPELINING)
+
+/*
+ * Name:    curl_pipeline_policy_callback
+ *
+ * Desc:    Called by libcurl whenever the library creates a new bundle for
+ *          some hostname:port combination.
+ */
+typedef void (*curl_pipeline_policy_callback)(
+              char const *hostname,                /* connected hostname */
+              int port,                            /* connected port */
+              struct curl_pipeline_policy* policy, /* writable policy */
+              void *userp);                        /* private callback
+                                                      pointer */
+
 #ifndef CURL_ALLOW_OLD_MULTI_SOCKET
 /* This macro below was added in 7.16.3 to push users who recompile to use
    the new curl_multi_socket_action() instead of the old curl_multi_socket()
@@ -364,6 +407,12 @@ typedef enum {
 
   /* maximum number of open connections in total */
   CINIT(MAX_TOTAL_CONNECTIONS, LONG, 13),
+
+  /* This is the pipeline policy callback function pointer */
+  CINIT(PIPELINE_POLICY_FUNCTION, FUNCTIONPOINT, 14),
+
+  /* This is the argument passed to the pipeline policy callback */
+  CINIT(PIPELINE_POLICY_DATA, OBJECTPOINT, 15),
 
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;

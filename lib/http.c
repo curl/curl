@@ -3299,8 +3299,8 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           /* Activate pipelining if needed */
           cb_ptr = conn->bundle;
           if(cb_ptr) {
-            if(!Curl_pipeline_site_blacklisted(data, conn))
-              cb_ptr->server_supports_pipelining = TRUE;
+            if(!(cb_ptr->policy.flags & CURL_BLACKLISTED))
+              cb_ptr->policy.flags |= CURL_SUPPORTS_PIPELINING;
           }
         }
 
@@ -3381,10 +3381,11 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
     else if(checkprefix("Server:", k->p)) {
       char *server_name = Curl_copy_header_value(k->p);
 
-      /* Turn off pipelining if the server version is blacklisted */
-      if(conn->bundle && conn->bundle->server_supports_pipelining) {
+      /* Check if the server version is blacklisted when
+         we're doing pipelining */
+      if(conn->bundle && CURL_CAN_PIPELINE(conn->bundle)) {
         if(Curl_pipeline_server_blacklisted(data, server_name))
-          conn->bundle->server_supports_pipelining = FALSE;
+          conn->bundle->policy.flags |= CURL_BLACKLISTED;
       }
       Curl_safefree(server_name);
     }

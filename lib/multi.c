@@ -1660,7 +1660,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
            to remove the bundle: we need to remember that this server is
            capable of pipelining. */
         bundle = data->easy_conn->bundle;
-        keep_bundle = (bundle->server_supports_pipelining &&
+        keep_bundle = (CURL_CAN_PIPELINE(bundle) &&
                        (data->result == CURLE_OPERATION_TIMEDOUT ||
                         data->easy_conn->bits.retry));
         if(keep_bundle)
@@ -2415,6 +2415,12 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
     break;
   case CURLMOPT_MAX_TOTAL_CONNECTIONS:
     multi->max_total_connections = va_arg(param, long);
+    break;
+  case CURLMOPT_PIPELINE_POLICY_FUNCTION:
+    multi->pipeline_policy_cb = va_arg(param, curl_pipeline_policy_callback);
+    break;
+  case CURLMOPT_PIPELINE_POLICY_DATA:
+    multi->pipeline_policy_userp = va_arg(param, void *);
     break;
   default:
     res = CURLM_UNKNOWN_OPTION;

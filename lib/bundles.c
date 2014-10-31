@@ -46,6 +46,7 @@ static void conn_llist_dtor(void *user, void *element)
 }
 
 CURLcode Curl_bundle_create(struct SessionHandle *data,
+                            struct curl_pipeline_policy *policy,
                             struct connectbundle **cb_ptr)
 {
   (void)data;
@@ -55,7 +56,7 @@ CURLcode Curl_bundle_create(struct SessionHandle *data,
     return CURLE_OUT_OF_MEMORY;
 
   (*cb_ptr)->num_connections = 0;
-  (*cb_ptr)->server_supports_pipelining = FALSE;
+  (*cb_ptr)->policy = *policy;
 
   (*cb_ptr)->conn_list = Curl_llist_alloc((curl_llist_dtor) conn_llist_dtor);
   if(!(*cb_ptr)->conn_list) {

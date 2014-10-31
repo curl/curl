@@ -22,14 +22,16 @@
  *
  ***************************************************************************/
 
+#include <curl/multi.h>
+
 struct connectbundle {
-  bool server_supports_pipelining; /* TRUE if server supports pipelining,
-                                      set after first response */
+  struct curl_pipeline_policy policy; /* connect policy */
   size_t num_connections;       /* Number of connections in the bundle */
   struct curl_llist *conn_list; /* The connectdata members of the bundle */
 };
 
 CURLcode Curl_bundle_create(struct SessionHandle *data,
+                            struct curl_pipeline_policy *policy,
                             struct connectbundle **cb_ptr);
 
 void Curl_bundle_destroy(struct connectbundle *cb_ptr);

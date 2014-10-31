@@ -33,6 +33,7 @@
 #include "rawstr.h"
 #include "bundles.h"
 #include "conncache.h"
+#include "pipeline.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -130,7 +131,23 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   bundle = Curl_conncache_find_bundle(data->state.conn_cache,
                                       conn->host.name);
   if(!bundle) {
-    result = Curl_bundle_create(data, &new_bundle);
+    struct Curl_multi *multi = data->multi;
+    struct curl_pipeline_policy policy = { 0, 0, 0 };
+    if(multi) {
+      /* policy default values */
+      policy.max_host_connections = Curl_multi_max_host_connections(multi);
+      policy.max_pipeline_length = Curl_multi_max_pipeline_length(multi);
+      if(Curl_pipeline_site_blacklisted(data, conn)) {
+        policy.flags = CURL_BLACKLISTED;
+      }
+      /* allow user to tweak the policy */
+      if(multi->pipeline_policy_cb)
+        multi->pipeline_policy_cb(conn->host.name,
+                                  conn->remote_port,
+                                  &policy,
+                                  multi->pipeline_policy_userp);
+    }
+    result = Curl_bundle_create(data, &policy, &new_bundle);
     if(result != CURLE_OK)
       return result;
 

@@ -107,14 +107,18 @@ struct Curl_multi {
   long maxconnects; /* if >0, a fixed limit of the maximum number of entries
                        we're allowed to grow the connection cache to */
 
-  long max_host_connections; /* if >0, a fixed limit of the maximum number
+  long max_host_connections; /* if >0, the default limit of the maximum number
                                 of connections per host */
 
   long max_total_connections; /* if >0, a fixed limit of the maximum number
                                  of connections in total */
 
-  long max_pipeline_length; /* if >0, maximum number of requests in a
-                               pipeline */
+  /* callback function and user data pointer for the pipeline policy API */
+  curl_pipeline_policy_callback pipeline_policy_cb;
+  void *pipeline_policy_userp;
+
+  long max_pipeline_length; /* if >0, the default maximum number of requests
+                               in a pipeline */
 
   long content_length_penalty_size; /* a connection with a
                                        content-length bigger than
