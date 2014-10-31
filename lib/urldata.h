@@ -486,6 +486,7 @@ struct negotiatedata {
 struct ConnectBits {
   /* always modify bits.close with the connclose() and connkeep() macros! */
   bool close; /* if set, we close the connection after this request */
+  bool timedout; /* if set, the transfer timedout */
   bool reuse; /* if set, this is a re-used connection */
   bool proxy; /* if set, this transfer is done through a proxy - any type */
   bool httpproxy;    /* if set, this transfer is done through a http proxy */
@@ -1652,6 +1653,8 @@ struct SessionHandle {
   struct SessionHandle *prev;
 
   struct connectdata *easy_conn;     /* the "unit's" connection */
+  long multi_do_connection_id;       /* the value of easy_conn->connection_id
+                                        at the moment Curl_do was called */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */

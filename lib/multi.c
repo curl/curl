@@ -944,7 +944,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     /* Handle the case when the pipe breaks, i.e., the connection
        we're using gets cleaned up and we're left with nothing. */
     if(data->state.pipe_broke) {
-      infof(data, "Pipe broke: handle 0x%p, url = %s\n",
+      infof(data, "Pipe broke: handle %p, url = %s\n",
             (void *)data, data->state.path);
 
       if(data->mstate < CURLM_STATE_COMPLETED) {
@@ -1009,13 +1009,17 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
         }
 
-        /* Force the connection closed because the server could continue to
+        /* Force the connection closed when the server could continue to
            send us stuff at any time. (The disconnect_conn logic used below
            doesn't work at this point). */
-        connclose(data->easy_conn, "Disconnected with pending data");
+        if(data->multi_do_connection_id == data->easy_conn->connection_id) {
+          connclose(data->easy_conn, "Disconnected with pending data");
+          /* Make sure this connection is no longer considered for
+             pipelining. */
+          data->easy_conn->bits.timedout = TRUE;
+        }
         data->result = CURLE_OPERATION_TIMEDOUT;
-        multistate(data, CURLM_STATE_COMPLETED);
-        break;
+        multistate(data, CURLM_STATE_DONE);
       }
     }
 
@@ -1280,6 +1284,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else {
         /* Perform the protocol's DO action */
         data->result = Curl_do(&data->easy_conn, &dophase_done);
+        /* Remember which connection the data was sent over */
+        data->multi_do_connection_id = data->easy_conn->connection_id;
 
         /* When Curl_do() returns failure, data->easy_conn might be NULL! */
 
@@ -1639,14 +1645,31 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(data->easy_conn) {
         CURLcode res;
+        struct connectbundle *bundle;
+        bool keep_bundle;
 
         /* Remove ourselves from the receive pipeline, if we are there. */
         Curl_removeHandleFromPipeline(data, data->easy_conn->recv_pipe);
         /* Check if we can move pending requests to send pipe */
         Curl_multi_process_pending_handles(multi);
 
+        /* If we're doing pipelining and this connection timed out then we do
+           not want Curl_done -> Curl_disconnect -> Curl_conncache_remove_conn
+           to remove the bundle: we need to remember that this server is
+           capable of pipelining. */
+        bundle = data->easy_conn->bundle;
+        keep_bundle = (bundle->server_supports_pipelining &&
+                       (data->result == CURLE_OPERATION_TIMEDOUT ||
+                        data->easy_conn->bits.retry));
+        if(keep_bundle)
+          ++bundle->num_connections;
+
         /* post-transfer command */
         res = Curl_done(&data->easy_conn, data->result, FALSE);
+
+        /* Restore num_connections to its original value. */
+        if(keep_bundle)
+          --bundle->num_connections;
 
         /* allow a previously set error code take precedence */
         if(!data->result)
@@ -2519,6 +2542,8 @@ void Curl_multi_set_easy_connection(struct SessionHandle *handle,
                                     struct connectdata *conn)
 {
   handle->easy_conn = conn;
+  handle->multi_do_connection_id = -1; /* Nothing was sent over this connection
+                                          by this easy handle yet. */
 }
 
 static bool isHandleAtHead(struct SessionHandle *handle,

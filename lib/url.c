@@ -3226,6 +3226,11 @@ ConnectionExists(struct SessionHandle *data,
              the optimal connection to use, i.e the shortest pipe that is not
              blacklisted. */
 
+          /* We can't use the connection if the connection should be closed
+             due to a timeout. */
+          if(check->bits.timedout)
+            continue;
+
           if(pipeLen == 0) {
             /* We have the optimal connection. Let's stop looking. */
             chosen = check;
@@ -3638,6 +3643,9 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
      connections, so we set this to force-close. Protocols that support
      this need to set this to FALSE in their "curl_do" functions. */
   connclose(conn, "Default to force-close");
+
+  /* This is a fresh connection */
+  conn->bits.timedout = FALSE;
 
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
