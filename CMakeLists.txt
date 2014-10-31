@@ -508,9 +508,6 @@ if(CMAKE_USE_GSSAPI)
   endif()
 endif()
 
-# If we have features.h, then do the _BSD_SOURCE magic
-check_include_file("features.h"       HAVE_FEATURES_H)
-
 # Check for header files
 if(NOT UNIX)
   check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
