@@ -1449,6 +1449,7 @@ select_next_proto_cb(SSL *ssl,
 {
   struct connectdata *conn = (struct connectdata*) arg;
   int retval = nghttp2_select_next_protocol(out, outlen, in, inlen);
+
   (void)ssl;
 
   if(retval == 1) {
@@ -1471,7 +1472,8 @@ select_next_proto_cb(SSL *ssl,
   return SSL_TLSEXT_ERR_OK;
 }
 #endif /* HAS_NPN */
-#endif
+
+#endif /* USE_NGHTTP2 */
 
 static const char *
 get_ssl_version_txt(SSL_SESSION *session)
@@ -2643,13 +2645,12 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
 static Curl_recv ossl_recv;
 static Curl_send ossl_send;
 
-static CURLcode
-ossl_connect_common(struct connectdata *conn,
-                    int sockindex,
-                    bool nonblocking,
-                    bool *done)
+static CURLcode ossl_connect_common(struct connectdata *conn,
+                                    int sockindex,
+                                    bool nonblocking,
+                                    bool *done)
 {
-  CURLcode retcode;
+  CURLcode result;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -2662,7 +2663,7 @@ ossl_connect_common(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  if(ssl_connect_1==connssl->connecting_state) {
+  if(ssl_connect_1 == connssl->connecting_state) {
     /* Find out how much more time we're allowed */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
@@ -2671,9 +2672,10 @@ ossl_connect_common(struct connectdata *conn,
       failf(data, "SSL connection timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
-    retcode = ossl_connect_step1(conn, sockindex);
-    if(retcode)
-      return retcode;
+
+    result = ossl_connect_step1(conn, sockindex);
+    if(result)
+      return result;
   }
 
   while(ssl_connect_2 == connssl->connecting_state ||
@@ -2690,8 +2692,8 @@ ossl_connect_common(struct connectdata *conn,
     }
 
     /* if ssl is expecting something, check if it's available. */
-    if(connssl->connecting_state == ssl_connect_2_reading
-        || connssl->connecting_state == ssl_connect_2_writing) {
+    if(connssl->connecting_state == ssl_connect_2_reading ||
+       connssl->connecting_state == ssl_connect_2_writing) {
 
       curl_socket_t writefd = ssl_connect_2_writing==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
@@ -2724,23 +2726,22 @@ ossl_connect_common(struct connectdata *conn,
      * before step2 has completed while ensuring that a client using select()
      * or epoll() will always have a valid fdset to wait on.
      */
-    retcode = ossl_connect_step2(conn, sockindex);
-    if(retcode || (nonblocking &&
-                   (ssl_connect_2 == connssl->connecting_state ||
-                    ssl_connect_2_reading == connssl->connecting_state ||
-                    ssl_connect_2_writing == connssl->connecting_state)))
-      return retcode;
+    result = ossl_connect_step2(conn, sockindex);
+    if(result || (nonblocking &&
+                  (ssl_connect_2 == connssl->connecting_state ||
+                   ssl_connect_2_reading == connssl->connecting_state ||
+                   ssl_connect_2_writing == connssl->connecting_state)))
+      return result;
 
   } /* repeat step2 until all transactions are done. */
 
-
-  if(ssl_connect_3==connssl->connecting_state) {
-    retcode = ossl_connect_step3(conn, sockindex);
-    if(retcode)
-      return retcode;
+  if(ssl_connect_3 == connssl->connecting_state) {
+    result = ossl_connect_step3(conn, sockindex);
+    if(result)
+      return result;
   }
 
-  if(ssl_connect_done==connssl->connecting_state) {
+  if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = ossl_recv;
     conn->send[sockindex] = ossl_send;
