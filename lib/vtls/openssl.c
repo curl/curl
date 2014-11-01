@@ -2432,7 +2432,7 @@ static CURLcode servercert(struct connectdata *conn,
                            struct ssl_connect_data *connssl,
                            bool strict)
 {
-  CURLcode retcode = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int rc;
   long lerr;
   ASN1_TIME *certdate;
@@ -2452,7 +2452,8 @@ static CURLcode servercert(struct connectdata *conn,
       failf(data, "SSL: couldn't get peer certificate!");
     return CURLE_PEER_FAILED_VERIFICATION;
   }
-  infof (data, "Server certificate:\n");
+
+  infof(data, "Server certificate:\n");
 
   rc = x509_name_oneline(X509_get_subject_name(connssl->server_cert),
                          buffer, BUFSIZE);
@@ -2467,11 +2468,11 @@ static CURLcode servercert(struct connectdata *conn,
   infof(data, "\t expire date: %s\n", buffer);
 
   if(data->set.ssl.verifyhost) {
-    retcode = verifyhost(conn, connssl->server_cert);
-    if(retcode) {
+    result = verifyhost(conn, connssl->server_cert);
+    if(result) {
       X509_free(connssl->server_cert);
       connssl->server_cert = NULL;
-      return retcode;
+      return result;
     }
   }
 
@@ -2480,7 +2481,7 @@ static CURLcode servercert(struct connectdata *conn,
   if(rc) {
     if(strict)
       failf(data, "SSL: couldn't get X509-issuer name!");
-    retcode = CURLE_SSL_CONNECT_ERROR;
+    result = CURLE_SSL_CONNECT_ERROR;
   }
   else {
     infof(data, "\t issuer: %s\n", buffer);
@@ -2490,7 +2491,7 @@ static CURLcode servercert(struct connectdata *conn,
 
     /* e.g. match issuer name with provided issuer certificate */
     if(data->set.str[STRING_SSL_ISSUERCERT]) {
-      fp=fopen(data->set.str[STRING_SSL_ISSUERCERT],"r");
+      fp = fopen(data->set.str[STRING_SSL_ISSUERCERT], "r");
       if(!fp) {
         if(strict)
           failf(data, "SSL: Unable to open issuer cert (%s)",
@@ -2499,7 +2500,8 @@ static CURLcode servercert(struct connectdata *conn,
         connssl->server_cert = NULL;
         return CURLE_SSL_ISSUER_ERROR;
       }
-      issuer = PEM_read_X509(fp,NULL,ZERO_NULL,NULL);
+
+      issuer = PEM_read_X509(fp, NULL, ZERO_NULL, NULL);
       if(!issuer) {
         if(strict)
           failf(data, "SSL: Unable to read issuer cert (%s)",
@@ -2509,7 +2511,9 @@ static CURLcode servercert(struct connectdata *conn,
         fclose(fp);
         return CURLE_SSL_ISSUER_ERROR;
       }
+
       fclose(fp);
+
       if(X509_check_issued(issuer,connssl->server_cert) != X509_V_OK) {
         if(strict)
           failf(data, "SSL: Certificate issuer check failed (%s)",
@@ -2519,13 +2523,15 @@ static CURLcode servercert(struct connectdata *conn,
         connssl->server_cert = NULL;
         return CURLE_SSL_ISSUER_ERROR;
       }
+
       infof(data, "\t SSL certificate issuer check ok (%s)\n",
             data->set.str[STRING_SSL_ISSUERCERT]);
       X509_free(issuer);
     }
 
-    lerr = data->set.ssl.certverifyresult=
+    lerr = data->set.ssl.certverifyresult =
       SSL_get_verify_result(connssl->handle);
+
     if(data->set.ssl.certverifyresult != X509_V_OK) {
       if(data->set.ssl.verifypeer) {
         /* We probably never reach this, because SSL_connect() will fail
@@ -2533,7 +2539,7 @@ static CURLcode servercert(struct connectdata *conn,
         if(strict)
           failf(data, "SSL certificate verify result: %s (%ld)",
                 X509_verify_cert_error_string(lerr), lerr);
-        retcode = CURLE_PEER_FAILED_VERIFICATION;
+        result = CURLE_PEER_FAILED_VERIFICATION;
       }
       else
         infof(data, "\t SSL certificate verify result: %s (%ld),"
@@ -2545,9 +2551,9 @@ static CURLcode servercert(struct connectdata *conn,
   }
 
   ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
-  if(retcode == CURLE_OK && ptr) {
-    retcode = pkp_pin_peer_pubkey(connssl->server_cert, ptr);
-    if(retcode != CURLE_OK)
+  if(!result && ptr) {
+    result = pkp_pin_peer_pubkey(connssl->server_cert, ptr);
+    if(result)
       failf(data, "SSL: public key does not match pinned public key!");
   }
 
@@ -2555,7 +2561,7 @@ static CURLcode servercert(struct connectdata *conn,
   connssl->server_cert = NULL;
   connssl->connecting_state = ssl_connect_done;
 
-  return retcode;
+  return result;
 }
 
 static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
