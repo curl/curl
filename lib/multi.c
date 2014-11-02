@@ -523,7 +523,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
          connection. */
       connclose(data->easy_conn, "Removed with partial response");
       /* Set connection owner so that Curl_done() closes it.
-         We can sefely do this here since connection is killed. */
+         We can safely do this here since connection is killed. */
       data->easy_conn->data = easy;
     }
 
