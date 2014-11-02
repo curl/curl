@@ -9,7 +9,7 @@ Curl and libcurl 7.39.0
 This release includes the following changes:
 
  o CURLOPT_COOKIELIST: Added "RELOAD" command [5]
- o build: Added WinIDN build configuration options
+ o build: Added WinIDN build configuration options to VC8+ projects
  o ssh: improve key file search
  o SSL: public key pinning. Use CURLOPT_PINNEDPUBLICKEY and --pinnedpubkey
  o vtls: remove QsoSSL support, use gskit!
@@ -18,6 +18,7 @@ This release includes the following changes:
  o build: Added VC ssh2 target to main Makefile
  o MinGW: Added support to build with nghttp2
  o NetWare: Added support to build with nghttp2
+ o build: added Watcom support to build with WinSSL
 
 This release includes the following bugfixes:
 
@@ -68,6 +69,9 @@ This release includes the following bugfixes:
  o openssl: Fixed error message since we require ALPN support
  o sasl_sspi: Allow DIGEST-MD5 to use current windows credentials
  o sspi: Return CURLE_LOGIN_DENIED on AcquireCredentialsHandle() failure
+ o openssl: enable NPN separately from ALPN
+ o resume: consider a resume from [content-length] to be OK [8]
+ o sasl: Fixed Kerberos V5 inclusion when CURL_DISABLE_CRYPTO_AUTH is used
 
 This release includes the following known bugs:
 
@@ -78,11 +82,11 @@ advice from friends like these:
 
   Askar Safin, Balaji Salunke, Bill Nagel, Bruno Thomsen, Catalin Patulea,
   Dan Fandrich, Daniel Stenberg, Dimitar Boevski, Fabian Keil, Guenter Knauf,
-  Jakub Zakrzewski, Jeremy Lin, Jonathan Cardoso Machado, Kamil Dudka,
-  Luan Cestari, Marcel Raad, Marc Hoersken, Michael Wallner, Nick Zitzmann,
-  Patrick Monnerat, Paul Howarth, Peter Wu, Ray Satiro, Steve Holme,
-  Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts, Waldek Kozba,
-  Yousuke Kimoto,
+  Hugo Lopez, Jakub Zakrzewski, Jeremy Lin, Jonathan Cardoso Machado,
+  Kamil Dudka, Luan Cestari, Lucas Pardue, Marcel Raad, Marc Hoersken,
+  Michael Wallner, Nick Zitzmann, Patrick Monnerat, Paul Howarth, Peter Wu,
+  Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts,
+  Waldek Kozba, Yousuke Kimoto,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -95,3 +99,4 @@ References to bug reports and discussions on issues:
  [5] = http://curl.haxx.se/libcurl/c/CURLOPT_COOKIELIST.html
  [6] = http://curl.haxx.se/bug/view.cgi?id=1426
  [7] = http://curl.haxx.se/bug/view.cgi?id=1441
+ [8] = http://curl.haxx.se/bug/view.cgi?id=1443
