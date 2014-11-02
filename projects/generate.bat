@@ -21,46 +21,98 @@ rem * KIND, either express or implied.
 rem *
 rem ***************************************************************************
 
-echo Generating VC6 project files
-call :generate dsp Windows\VC6\src\curlsrc.tmpl Windows\VC6\src\curlsrc.dsp
-call :generate dsp Windows\VC6\lib\libcurl.tmpl Windows\VC6\lib\libcurl.dsp
+:begin
+  rem Check we are running on a Windows NT derived OS
+  if not "%OS%" == "Windows_NT" goto nodos
+  setlocal
 
-echo.
-echo Generating VC7 project files
-call :generate vcproj1 Windows\VC7\src\curlsrc.tmpl Windows\VC7\src\curlsrc.vcproj
-call :generate vcproj1 Windows\VC7\lib\libcurl.tmpl Windows\VC7\lib\libcurl.vcproj
+  rem Display the help
+  if /i "%~1" == "-?" goto syntax
+  if /i "%~1" == "-h" goto syntax
+  if /i "%~1" == "-help" goto syntax
 
-echo.
-echo Generating VC7.1 project files
-call :generate vcproj1 Windows\VC7.1\src\curlsrc.tmpl Windows\VC7.1\src\curlsrc.vcproj
-call :generate vcproj1 Windows\VC7.1\lib\libcurl.tmpl Windows\VC7.1\lib\libcurl.vcproj
+:parseArgs
+  if "%~1" == "" goto all
 
-echo.
-echo Generating VC8 project files
-call :generate vcproj2 Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
-call :generate vcproj2 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
+  if /i "%~1" == "vc6" (
+    goto vc6
+  ) else if /i "%~1" == "vc7" (
+    goto vc7
+  ) else if /i "%~1" == "vc7.1" (
+    goto vc71
+  ) else if /i "%~1" == "vc8" (
+    goto vc8
+  ) else if /i "%~1" == "vc9" (
+    goto vc9
+  ) else if /i "%~1" == "vc10" (
+    goto vc10
+  ) else if /i "%~1" == "vc11" (
+    goto vc11
+  ) else if /i "%~1" == "vc12" (
+    goto vc12
+  ) else (
+    goto unknown
+  )
 
-echo.
-echo Generating VC9 project files
-call :generate vcproj2 Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
-call :generate vcproj2 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
+:all
+  set ALL=true
 
-echo.
-echo Generating VC10 project files
-call :generate vcxproj Windows\VC10\src\curlsrc.tmpl Windows\VC10\src\curlsrc.vcxproj
-call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
+:vc6
+  echo.
+  echo Generating VC6 project files
+  call :generate dsp Windows\VC6\src\curlsrc.tmpl Windows\VC6\src\curlsrc.dsp
+  call :generate dsp Windows\VC6\lib\libcurl.tmpl Windows\VC6\lib\libcurl.dsp
+  if not "%ALL%" == "true" goto success
 
-echo.
-echo Generating VC11 project files
-call :generate vcxproj Windows\VC11\src\curlsrc.tmpl Windows\VC11\src\curlsrc.vcxproj
-call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
+:vc7
+  echo.
+  echo Generating VC7 project files
+  call :generate vcproj1 Windows\VC7\src\curlsrc.tmpl Windows\VC7\src\curlsrc.vcproj
+  call :generate vcproj1 Windows\VC7\lib\libcurl.tmpl Windows\VC7\lib\libcurl.vcproj
+  if not "%ALL%" == "true" goto success
 
-echo.
-echo Generating VC12 project files
-call :generate vcxproj Windows\VC12\src\curlsrc.tmpl Windows\VC12\src\curlsrc.vcxproj
-call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
+:vc71
+  echo.
+  echo Generating VC7.1 project files
+  call :generate vcproj1 Windows\VC7.1\src\curlsrc.tmpl Windows\VC7.1\src\curlsrc.vcproj
+  call :generate vcproj1 Windows\VC7.1\lib\libcurl.tmpl Windows\VC7.1\lib\libcurl.vcproj
+  if not "%ALL%" == "true" goto success
 
-goto exit
+:vc8
+  echo.
+  echo Generating VC8 project files
+  call :generate vcproj2 Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
+  call :generate vcproj2 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
+  if not "%ALL%" == "true" goto success
+
+:vc9
+  echo.
+  echo Generating VC9 project files
+  call :generate vcproj2 Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
+  call :generate vcproj2 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
+  if not "%ALL%" == "true" goto success
+
+:vc10
+  echo.
+  echo Generating VC10 project files
+  call :generate vcxproj Windows\VC10\src\curlsrc.tmpl Windows\VC10\src\curlsrc.vcxproj
+  call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
+  if not "%ALL%" == "true" goto success
+
+:vc11
+  echo.
+  echo Generating VC11 project files
+  call :generate vcxproj Windows\VC11\src\curlsrc.tmpl Windows\VC11\src\curlsrc.vcxproj
+  call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
+  if not "%ALL%" == "true" goto success
+
+:vc12
+  echo.
+  echo Generating VC12 project files
+  call :generate vcxproj Windows\VC12\src\curlsrc.tmpl Windows\VC12\src\curlsrc.vcxproj
+  call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
+
+  goto success
 
 rem Main generate function.
 rem
@@ -191,6 +243,37 @@ rem
   set %2=%ename%
   exit /B
 
-:exit
+:syntax
+  rem Display the help
   echo.
-  pause
+  echo Usage: generate [compiler]
+  echo.
+  echo Compiler:
+  echo.
+  echo vc6       - Use Visual Studio 6
+  echo vc7       - Use Visual Studio .NET
+  echo vc7.1     - Use Visual Studio .NET 2003
+  echo vc8       - Use Visual Studio 2005
+  echo vc9       - Use Visual Studio 2008
+  echo vc10      - Use Visual Studio 2010
+  echo vc11      - Use Visual Studio 2012
+  echo vc12      - Use Visual Studio 2013
+  goto error
+
+:unknown
+  echo.
+  echo Error: Unknown argument '%1'
+  goto error
+
+:nodos
+  echo.
+  echo Error: Only a Windows NT based Operating System is supported
+  goto error
+
+:error
+  endlocal
+  exit /B 1
+
+:success
+  endlocal
+  exit /B 0
