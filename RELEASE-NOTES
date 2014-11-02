@@ -9,7 +9,7 @@
 This release includes the following changes:
 
  o CURLOPT_COOKIELIST: Added "RELOAD" command [5]
- o build: Added WinIDN build configuration options to VC7+ projects
+ o build: Added WinIDN build configuration options to Visual Studio projects
  o ssh: improve key file search
  o SSL: public key pinning. Use CURLOPT_PINNEDPUBLICKEY and --pinnedpubkey
  o vtls: remove QsoSSL support, use gskit!

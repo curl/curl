@@ -66,9 +66,20 @@ Building with Visual C++
    part of Visual Studio.
 
    If you are building with VC6 then you will also need the February 2003
-   Edition of the Platform SDK which can be downloaded from:
+   Edition of the Windows Platform SDK which can be downloaded from:
 
     http://www.microsoft.com/en-us/download/details.aspx?id=12261
+
+   If you require support for Internationalized Domain Names via Windows IDN
+   then you will need either:
+
+    * Microsoft Internationalized Domain Name (IDN) Mitigation APIs:
+      http://www.microsoft.com/en-us/download/details.aspx?id=734
+
+    * Microsoft Windows SDK Update for Windows Vista:
+      http://www.microsoft.com/en-us/download/details.aspx?id=23719
+
+    * Microsoft Visual Studio 2010 or above
 
    Once you have VC++ installed you should launch the application and open one
    of the solution or workspace files.
@@ -95,7 +106,6 @@ TODO
    are not 100% complete. This is a list of things that are still todo:
 
    * Support zlib
-   * Support WinIDN
    * Use of static runtime libraries
    * Generate *.vcxproj.filters files for VC10, VC11 and VC12
    * Add the Test Suite components
