@@ -1289,8 +1289,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else {
         /* Perform the protocol's DO action */
         data->result = Curl_do(&data->easy_conn, &dophase_done);
-        /* Remember which connection the data was sent over */
-        data->multi_do_connection_id = data->easy_conn->connection_id;
+        /* Remember which connection data was (possibly) sent over */
+        if(data->easy_conn) /* Might have been reset on send error */
+          data->multi_do_connection_id = data->easy_conn->connection_id;
 
         /* When Curl_do() returns failure, data->easy_conn might be NULL! */
 

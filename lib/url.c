@@ -5202,6 +5202,9 @@ static CURLcode create_conn(struct SessionHandle *data,
      any failure */
   *in_connect = conn;
 
+  /* Nothing was sent over this connection yet, by this handle */
+  data->multi_do_connection_id = -1;
+
   /* This initing continues below, see the comment "Continue connectdata
    * initialization here" */
 
