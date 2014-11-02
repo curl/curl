@@ -28,7 +28,7 @@ struct SessionHandle;
 struct connectdata;
 struct ntlmdata;
 
-#if defined(USE_WINDOWS_SSPI)
+#if defined(USE_KRB5)
 struct kerberos5data;
 #endif
 
@@ -123,7 +123,7 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
 
 #endif /* USE_NTLM */
 
-#if defined(USE_WINDOWS_SSPI)
+#if defined(USE_KRB5)
 /* This is used to generate a base64 encoded GSSAPI (Kerberos V5) user token
    message */
 CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
@@ -142,7 +142,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
                                                   struct kerberos5data *krb5,
                                                   char **outptr,
                                                   size_t *outlen);
-#endif
+#endif /* USE_KRB5 */
 
 /* This is used to generate a base64 encoded XOAUTH2 authentication message
    containing the user name and bearer token */

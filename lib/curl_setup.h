@@ -608,12 +608,18 @@ int netware_init(void);
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
+/* Single point where USE_SPNEGO definition might be defined */
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_SPNEGO
 #endif
 
-/* Single point where USE_NTLM definition might be done */
+/* Single point where USE_KRB5 definition might be defined */
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) && defined(USE_WINDOWS_SSPI)
+#define USE_KRB5
+#endif
+
+/* Single point where USE_NTLM definition might be defined */
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_NTLM) && \
     !defined(CURL_DISABLE_CRYPTO_AUTH)
 #if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI) || \

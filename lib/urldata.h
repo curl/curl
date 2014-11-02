@@ -419,7 +419,7 @@ typedef enum {
 #endif
 
 /* Struct used for GSSAPI (Kerberos V5) authentication */
-#if defined(USE_WINDOWS_SSPI)
+#if defined(USE_KRB5)
 struct kerberos5data {
   CredHandle *credentials;
   CtxtHandle *context;
@@ -980,7 +980,7 @@ struct connectdata {
   struct sockaddr_in local_addr;
 #endif
 
-#if defined(USE_WINDOWS_SSPI) /* Consider moving some of the above GSS-API */
+#if defined(USE_KRB5)         /* Consider moving some of the above GSS-API */
   struct kerberos5data krb5;  /* variables into the structure definition, */
 #endif                        /* however, some of them are ftp specific. */
 

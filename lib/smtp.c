@@ -1150,7 +1150,7 @@ static CURLcode smtp_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 }
 #endif
 
-#if defined(USE_WINDOWS_SSPI)
+#if defined(USE_KRB5)
 /* For AUTH GSSAPI (without initial response) responses */
 static CURLcode smtp_state_auth_gssapi_resp(struct connectdata *conn,
                                             int smtpcode,
@@ -1630,7 +1630,7 @@ static CURLcode smtp_statemach_act(struct connectdata *conn)
       break;
 #endif
 
-#if defined(USE_WINDOWS_SSPI)
+#if defined(USE_KRB5)
     case SMTP_AUTH_GSSAPI:
       result = smtp_state_auth_gssapi_resp(conn, smtpcode, smtpc->state);
       break;
@@ -2221,7 +2221,7 @@ static CURLcode smtp_calc_sasl_details(struct connectdata *conn,
 
   /* Calculate the supported authentication mechanism, by decreasing order of
      security, as well as the initial response where appropriate */
-#if defined(USE_WINDOWS_SSPI)
+#if defined(USE_KRB5)
   if((smtpc->authmechs & SASL_MECH_GSSAPI) &&
      (smtpc->prefmech & SASL_MECH_GSSAPI)) {
     smtpc->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */
