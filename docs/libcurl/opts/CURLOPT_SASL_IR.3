@@ -30,8 +30,14 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SASL_IR, long enable);
 .SH DESCRIPTION
 Pass a long. If the value is 1, curl will send the initial response to the
 server in the first authentication packet in order to reduce the number of
-ping pong requests. Only applicable to supporting SASL authentication
-mechanisms and to the IMAP, POP3 and SMTP protocols.
+ping pong requests. Only applicable to the following supporting SASL
+authentication mechanisms:
+
+* Login
+* Plain
+* GSSAPI
+* NTLM
+* OAuth 2.0
 
 Note: Whilst IMAP supports this option there is no need to explicitly set it,
 as libcurl can determine the feature itself when the server supports the
