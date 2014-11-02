@@ -65,11 +65,10 @@ This release includes the following bugfixes:
  o sspi: Only call CompleteAuthToken() when complete is needed
  o http_negotiate: Fixed missing check for USE_SPNEGO
  o HTTP: return larger than 3 digit response codes too [7]
- o openssl: Check for ALPN via OpenSSL version number
- o openssl: Fixed error message since we require ALPN support
+ o openssl: Check for NPN / ALPN via OpenSSL version number
+ o openssl: enable NPN separately from ALPN
  o sasl_sspi: Allow DIGEST-MD5 to use current windows credentials
  o sspi: Return CURLE_LOGIN_DENIED on AcquireCredentialsHandle() failure
- o openssl: enable NPN separately from ALPN
  o resume: consider a resume from [content-length] to be OK [8]
  o sasl: Fixed Kerberos V5 inclusion when CURL_DISABLE_CRYPTO_AUTH is used
 
