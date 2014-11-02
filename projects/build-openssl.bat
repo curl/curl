@@ -156,7 +156,7 @@ rem ***************************************************************************
   set OUTDIR=build\Win64\%VC_DESC%
   if not exist %OUTDIR% md %OUTDIR%
 
-  if "%BUILD_CONFIG%" == "release" goto x86release
+  if "%BUILD_CONFIG%" == "release" goto x64release
 
 :x64debug
   rem Configuring 64-bit Debug Build
