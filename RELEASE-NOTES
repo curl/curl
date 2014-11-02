@@ -1,4 +1,4 @@
-﻿Curl and libcurl 7.39.0
+Curl and libcurl 7.39.0
 
  Public curl releases:         142
  Command line options:         162
@@ -19,6 +19,7 @@ This release includes the following changes:
  o MinGW: Added support to build with nghttp2
  o NetWare: Added support to build with nghttp2
  o build: added Watcom support to build with WinSSL
+ o build: Added optional specific version generation of VC project files
 
 This release includes the following bugfixes:
 
@@ -39,7 +40,7 @@ This release includes the following bugfixes:
  o Cmake: Check for OpenSSL before OpenLDAP
  o Cmake: Fix library list provided to cURL tests
  o Cmake: Avoid cycle directory dependencies
- o Cmake: Build with GSSAPI (MIT or Heimdal)
+ o Cmake: Build with GSS-API libraries (MIT or Heimdal)
  o vtls: provide backend defines for internal source code
  o nss: fix a connection failure when FTPS handle is reused
  o tests/http_pipe.py: Python 3 support
@@ -71,6 +72,7 @@ This release includes the following bugfixes:
  o sspi: Return CURLE_LOGIN_DENIED on AcquireCredentialsHandle() failure
  o resume: consider a resume from [content-length] to be OK [8]
  o sasl: Fixed Kerberos V5 inclusion when CURL_DISABLE_CRYPTO_AUTH is used
+ o build-openssl.bat: Fix x64 release build
 
 This release includes the following known bugs:
 
