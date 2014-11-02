@@ -2242,7 +2242,8 @@ typedef struct {
 } curl_version_info_data;
 
 #define CURL_VERSION_IPV6      (1<<0)  /* IPv6-enabled */
-#define CURL_VERSION_KERBEROS4 (1<<1)  /* kerberos auth is supported */
+#define CURL_VERSION_KERBEROS4 (1<<1)  /* Kerberos V4 auth is supported
+                                          (deprecated) */
 #define CURL_VERSION_SSL       (1<<2)  /* SSL options are present */
 #define CURL_VERSION_LIBZ      (1<<3)  /* libz features are present */
 #define CURL_VERSION_NTLM      (1<<4)  /* NTLM auth is supported */
