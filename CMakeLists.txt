@@ -411,7 +411,7 @@ if(CURL_ZLIB)
     set(HAVE_ZLIB ON)
     set(HAVE_LIBZ ON)
     list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
-    include_directories(${ZLIB_INCLUDE_DIR})
+    include_directories(${ZLIB_INCLUDE_DIRS})
   endif()
 endif()
 
