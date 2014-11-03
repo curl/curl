@@ -1,0 +1,63 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLMOPT_TIMERFUNCTION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_multi_setopt options"
+.SH NAME
+CURLMOPT_TIMERFUNCTION \- set callback to receive timeout values
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+int timer_callback(CURLM *multi,    /* multi handle */
+                   long timeout_ms, /* see above */
+                   void *userp);    /* private callback pointer */
+
+CURLcode curl_multi_setopt(CURL *handle, CURLMOPT_TIMERFUNCTION, timer_callback);
+.SH DESCRIPTION
+Pass a pointer to your callback function, which should match the prototype
+shown above.
+
+This callback function will be called when the timeout value changes. The
+\fBtimeout_ms\fP value is at what latest time the application should call one
+of the \&"performing" functions of the multi interface
+(\fIcurl_multi_socket_action(3)\fP and \fIcurl_multi_perform(3)\fP) - to allow
+libcurl to keep timeouts and retries etc to work. A \fBtimeout_ms\fP value of
+-1 means that there is no timeout at all, and 0 means that the timeout is
+already expired. libcurl attempts to limit calling this only when the fixed
+future timeout time actually changes.
+
+The \fBuserp\fP pointer is set with \fICURLMOPT_TIMERDATA(3)\fP.
+
+The timer callback should return 0 on success, and -1 on error. This callback
+can be used instead of, or in addition to, \fIcurl_multi_timeout(3)\fP.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.16.0
+.SH RETURN VALUE
+Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLMOPT_TIMERDATA "(3), " CURLMOPT_SOCKETFUNCTION "(3), "

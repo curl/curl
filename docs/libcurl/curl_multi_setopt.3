@@ -27,14 +27,14 @@ curl_multi_setopt \- set options for a curl multi handle
 
 CURLMcode curl_multi_setopt(CURLM * multi_handle, CURLMoption option, param);
 .SH DESCRIPTION
-curl_multi_setopt() is used to tell a libcurl multi handle how to behave. By
-using the appropriate options to \fIcurl_multi_setopt(3)\fP, you can change
-libcurl's behaviour when using that multi handle.  All options are set with
-the \fIoption\fP followed by the parameter \fIparam\fP. That parameter can be
-a \fBlong\fP, a \fBfunction pointer\fP, an \fBobject pointer\fP or a
-\fBcurl_off_t\fP type, depending on what the specific option expects. Read
-this manual carefully as bad input values may cause libcurl to behave badly!
-You can only set one option in each function call.
+\fIcurl_multi_setopt(3)\fP is used to tell a libcurl multi handle how to
+behave. By using the appropriate options to \fIcurl_multi_setopt(3)\fP, you
+can change libcurl's behaviour when using that multi handle.  All options are
+set with the \fIoption\fP followed by the parameter \fIparam\fP. That
+parameter can be a \fBlong\fP, a \fBfunction pointer\fP, an \fBobject
+pointer\fP or a \fBcurl_off_t\fP type, depending on what the specific option
+expects. Read this manual carefully as bad input values may cause libcurl to
+behave badly!  You can only set one option in each function call.
 
 .SH OPTIONS
 .IP CURLMOPT_SOCKETFUNCTION
