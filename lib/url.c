@@ -5197,6 +5197,9 @@ static CURLcode create_conn(struct SessionHandle *data,
     goto out;
   }
 
+  /* Overwriting a non-NULL value would be bad */
+  DEBUGASSERT(*in_connect == NULL);
+
   /* We must set the return variable as soon as possible, so that our
      parent can cleanup any possible allocs we may have done before
      any failure */
@@ -5595,6 +5598,9 @@ static CURLcode create_conn(struct SessionHandle *data,
       infof(data, "No connections available.\n");
 
       conn_free(conn);
+      /* It's ok to set *in_connect to NULL here because it was initially NULL
+         when we entered this function and therefore cannot be shared by
+         multiple easy handles in a pipeline. */
       *in_connect = NULL;
 
       result = CURLE_NO_CONNECTION_AVAILABLE;
@@ -5757,6 +5763,10 @@ CURLcode Curl_connect(struct SessionHandle *data,
 
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
+  /* This is required by create_conn() as well as so that we can reset
+     the value on error without worries, if anything goes wrong */
+  DEBUGASSERT(*in_connect == NULL);
+
   /* call the stuff that needs to be called */
   code = create_conn(data, in_connect, asyncp);
 
@@ -5772,6 +5782,10 @@ CURLcode Curl_connect(struct SessionHandle *data,
       code = Curl_setup_conn(*in_connect, protocol_done);
     }
   }
+
+  /* It's ok to set *in_connect to NULL here because it was initially NULL
+     when we entered this function and therefore cannot be shared by multiple
+     easy handles in a pipeline. */
 
   if(code == CURLE_NO_CONNECTION_AVAILABLE) {
     *in_connect = NULL;
@@ -5902,10 +5916,20 @@ CURLcode Curl_done(struct connectdata **connp,
       data->state.lastconnect = NULL;
   }
 
-  *connp = NULL; /* to make the caller of this function better detect that
-                    this was either closed or handed over to the connection
-                    cache here, and therefore cannot be used from this point on
-                 */
+  /* This is true because we only get here from Curl_reconnect_request
+   * where the exact same assert holds, or from curl_multi_remove_handle
+   * which only calls Curl_done when data->easy_conn->data == data, or from
+   * multi_runsingle with various states (PROTOCONNECT, DO, DOING, DO_MORE,
+   * PERFORM and DONE), all of which set: data->easy_conn->data = data
+   * before calling Curl_done with &data->easy_conn as 'connp' argument,
+   * hence:
+   */
+  DEBUGASSERT(connp == &data->easy_conn);
+
+  data->easy_conn = NULL; /* to make the caller of this function better detect
+                             that this was either closed or handed over to the
+                             connection cache here, and therefore cannot be
+                             used from this point on */
   Curl_free_request_state(data);
 
   return result;

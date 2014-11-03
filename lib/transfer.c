@@ -1814,12 +1814,20 @@ Curl_reconnect_request(struct connectdata **connp)
 
   infof(data, "Re-used connection seems dead, get a new one\n");
 
-  connclose(conn, "Reconnect dead connection"); /* enforce close */
-  result = Curl_done(&conn, result, FALSE); /* we are so done with this */
+  /* This is true because we only get here from Curl_do which is only
+   * called from multi_runsingle in state CURLM_STATE_DO, and for
+   * that state sets: data->easy_conn->data = data before calling
+   * Curl_do with &data->easy_conn as 'connp' argument, hence: */
+  DEBUGASSERT(connp == &data->easy_conn);
 
-  /* conn may no longer be a good pointer, clear it to avoid mistakes by
-     parent functions */
-  *connp = NULL;
+  connclose(conn, "Reconnect dead connection"); /* enforce close */
+  result = Curl_done(connp, result, FALSE); /* we are so done with this */
+
+  /* *connp may no longer be a good pointer, clear it to avoid mistakes by
+     parent functions -- note that Curl_done above might already have
+     done this for us. */
+  if(data->easy_conn)
+    data->easy_conn = NULL;
 
   /*
    * According to bug report #1330310. We need to check for CURLE_SEND_ERROR
