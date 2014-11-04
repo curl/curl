@@ -87,6 +87,9 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* Defined in multi.c */
+void Curl_disassociate_conn(struct SessionHandle*, bool reset_owner);
+
 /*
  * This function will call the read callback to fill our buffer with data
  * to upload.
@@ -1827,7 +1830,7 @@ Curl_reconnect_request(struct connectdata **connp)
      parent functions -- note that Curl_done above might already have
      done this for us. */
   if(data->easy_conn)
-    data->easy_conn = NULL;
+    Curl_disassociate_conn(data, FALSE);
 
   /*
    * According to bug report #1330310. We need to check for CURLE_SEND_ERROR

@@ -51,6 +51,9 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+void Curl_disassociate_conn(struct SessionHandle *data, bool reset_owner);
+void Curl_disassociate_socket(struct SessionHandle *data, curl_socket_t s);
+
 /*
   CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97
   to 911 takes on a 32-bit machine 4 x 804 = 3211 more bytes.  Still, every
@@ -574,10 +577,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
                                   that vanish with this handle */
 
     /* Remove the association between the connection and the handle */
-    if(data->easy_conn) {
-      data->easy_conn->data = NULL;
-      data->easy_conn = NULL;
-    }
+    Curl_disassociate_conn(data, TRUE);
 
     data->multi = NULL; /* clear the association to this multi handle */
 
@@ -628,6 +628,8 @@ bool Curl_multi_pipeline_enabled(const struct Curl_multi *multi)
 
 void Curl_multi_handlePipeBreak(struct SessionHandle *data)
 {
+  /* Just set this to NULL instead of calling Curl_disassociate_conn,
+     because if the pipe broke then the socket should be closed anyway */
   data->easy_conn = NULL;
 }
 
@@ -959,6 +961,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       data->state.pipe_broke = FALSE;
+      /* Set this to NULL (instead of calling Curl_disassociate_conn())
+         because if the pipe broke then the connectdata might be freed
+         and we're not allowed to access it and it's OK to close the
+         socket in any case */
       data->easy_conn = NULL;
       break;
     }
@@ -1140,11 +1146,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         data->result = Curl_async_resolved(data->easy_conn,
                                            &protocol_connect);
 
-        if(CURLE_OK != data->result)
-          /* if Curl_async_resolved() returns failure, the connection struct
-             is already freed and gone */
-          data->easy_conn = NULL;           /* no more connection */
-        else {
+        if(CURLE_OK == data->result) {
           /* call again please so that we get the next socket setup */
           result = CURLM_CALL_MULTI_PERFORM;
           if(protocol_connect)
@@ -1684,8 +1686,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          * access free'd data, if the connection is free'd and the handle
          * removed before we perform the processing in CURLM_STATE_COMPLETED
          */
-        if(data->easy_conn)
-          data->easy_conn = NULL;
+        Curl_disassociate_conn(data, FALSE);
       }
 
       if(data->set.wildcardmatch) {
@@ -1710,7 +1711,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       /* Important: reset the conn pointer so that we don't point to memory
          that could be freed anytime */
-      data->easy_conn = NULL;
+      Curl_disassociate_conn(data, FALSE);
 
       Curl_expire(data, 0); /* stop all timers */
       break;
@@ -1732,6 +1733,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* NOTE: no attempt to disconnect connections must be made
            in the case blocks above - cleanup happens only here */
 
+        /* It would be bad if this flag is set here, because
+           if it is set then data->easy_conn might point to
+           freed memory-- I don't think it CAN be set though */
+        DEBUGASSERT(!data->state.pipe_broke);
+
         data->state.pipe_broke = FALSE;
 
         if(data->easy_conn) {
@@ -1748,11 +1754,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           if(disconnect_conn) {
             /* disconnect properly */
             Curl_disconnect(data->easy_conn, /* dead_connection */ FALSE);
-
-            /* This is where we make sure that the easy_conn pointer is reset.
-               We don't have to do this in every case block above where a
-               failure is detected */
-            data->easy_conn = NULL;
           }
         }
         else if(data->mstate == CURLM_STATE_CONNECT) {
@@ -1984,6 +1985,136 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
 }
 
 /*
+ * Curl_disassociate_socket() disassociates the handle 'data' from
+ * the socket 's'. The reason being that we don't want singlesocket()
+ * to conclude that this socket was in use by this handle (and now
+ * not anymore), possibly causing it to stop monitoring that socket,
+ * which could be an entirely different socket by that time, or
+ * because the socket is still in use by other handles on the same
+ * pipe.
+ */
+void Curl_disassociate_socket(struct SessionHandle *data, curl_socket_t s)
+{
+  int i;
+  for(i = 0; i < data->numsocks; ++i) {
+    if(data->sockets[i] == s) {
+      data->numsocks--;
+      data->sockets[i] = data->sockets[data->numsocks];
+      break;
+    }
+  }
+}
+
+/*
+ * Curl_disassociate_conn() disassociates the handle 'data' from
+ * any connection by setting data->easy_conn to NULL.
+ *
+ * After that is done multi_getsock() will return 0,
+ * indicating that this handle is not using any sockets
+ * anymore. The result of that is that a call to singlesocket()
+ * with this handle would remove all currently associated
+ * sockets EVEN if they are still in use by other requests
+ * in the pipeline of this connection!
+ *
+ * Therefore this function has a second task: to stop that
+ * from happening.
+ */
+void Curl_disassociate_conn(struct SessionHandle *data, bool reset_owner)
+{
+  struct connectdata *conn = data->easy_conn;
+  if(!conn)
+    return; /* Not associated */
+  DEBUGASSERT(conn->data == data);
+  infof(data, "Disassociating handle %p from connection %ld\n",
+        data, conn->connection_id);
+  /* The caller might need this to stay at the current 'active' handle,
+     so only reset it when requested */
+  if(reset_owner)
+    conn->data = NULL;
+  /* And of course, disassociate the handle from this connection */
+  data->easy_conn = NULL;
+
+  /* Check if the connection has a pipeline */
+  if(conn->send_pipe) {
+    size_t nr_of_handles;
+    /* Make sure to unlink the connection between the socket and this handle */
+    curl_socket_t s = conn->sock[FIRSTSOCKET];
+    struct Curl_sh_entry *entry =
+        Curl_hash_pick(data->multi->sockhash, (char *)&s, sizeof(s));
+    if(entry) {
+      int loop = 0;
+      /* Make entry->easy point to one of the pipe heads but
+         not to data. If data is at a head, skip it and pick
+         the next one */
+      while(entry->easy == data) {
+        /* Try recv_pipe first, then send_pipe */
+        struct curl_llist *pipe = loop ? conn->send_pipe : conn->recv_pipe;
+        if(pipe->head) {
+          if(pipe->head->ptr != data) {
+            entry->easy = pipe->head->ptr;
+            break;
+          }
+          else if(pipe->head->next) {
+            entry->easy = pipe->head->next->ptr;
+            break;
+          }
+        }
+        if(++loop == 2) {
+          /* No other handles found - just let singlesocket() do its work */
+          return;
+        }
+      }
+    }
+    /* Check if there are any other handles in either pipe */
+    nr_of_handles = conn->send_pipe->size + conn->recv_pipe->size;
+    if(nr_of_handles > 1 ||
+       (nr_of_handles == 1 &&
+        !(conn->send_pipe->head && conn->send_pipe->head->ptr == data) &&
+        !(conn->recv_pipe->head && conn->recv_pipe->head->ptr == data))) {
+      /* Other handles exist!
+         Remove the socket that is used by the connection from the
+         used sockets array of this handle, so it won't notice that
+         it doesn't use it anymore the next call to singlesocket */
+      /* It's suffienct to only compare with FIRSTSOCKET because
+         pipelining is only used by HTTP, which only uses one socket */
+      Curl_disassociate_socket(data, s);
+    }
+  }
+}
+
+/* Return true if, besides data, there is at least one other handle in pipe */
+static bool additional_handle_in_pipe(struct curl_llist *pipe,
+                                      struct SessionHandle *data)
+{
+  return (pipe &&
+          !(pipe->size == 0 ||
+            (pipe->size == 1 && pipe->head->ptr == data)));
+}
+
+#ifdef DEBUGBUILD
+static void socket_removal_sanity_check(struct SessionHandle *data,
+                                        struct Curl_sh_entry *entry,
+                                        unsigned int action_removal)
+{
+  if((action_removal & CURL_POLL_INOUT)) {
+    /* Find a connection */
+    struct connectdata *conn = data->easy_conn;
+    if(!conn) {
+      conn = entry->easy->easy_conn;
+    }
+    if(conn) {
+      /* Make sure there isn't anything else in
+         the pipe that has its action removed */
+      DEBUGASSERT(!(action_removal & CURL_POLL_OUT) ||
+                  !additional_handle_in_pipe(conn->send_pipe, data));
+      DEBUGASSERT(!(action_removal & CURL_POLL_IN) ||
+                  !additional_handle_in_pipe(conn->recv_pipe, data));
+    }
+  }
+}
+#endif
+
+/*
  * singlesocket() checks what sockets we deal with and their "action state"
  * and if we have a different state in any of those sockets from last time we
  * call the callback accordingly.
@@ -1998,6 +2129,7 @@ static void singlesocket(struct Curl_multi *multi,
   int num;
   unsigned int curraction;
   bool remove_sock_from_hash;
+  struct connectdata *easy_conn = data->easy_conn;
 
   for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++)
     socks[i] = CURL_SOCKET_BAD;
@@ -2021,9 +2153,17 @@ static void singlesocket(struct Curl_multi *multi,
     /* get it from the hash */
     entry = Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
 
-    if(curraction & GETSOCK_READSOCK(i))
+    /*
+     * Construct a new action for socket s.
+     * If this handle has an easy_conn and an additional handle is
+     * found in its send/recv pipe then we are pipelining and
+     * the additional handle requires us to keep polling the socket.
+     */
+    if((curraction & GETSOCK_READSOCK(i)) ||
+       (easy_conn && additional_handle_in_pipe(easy_conn->recv_pipe, data)))
       action |= CURL_POLL_IN;
-    if(curraction & GETSOCK_WRITESOCK(i))
+    if((curraction & GETSOCK_WRITESOCK(i)) ||
+       (easy_conn && additional_handle_in_pipe(easy_conn->send_pipe, data)))
       action |= CURL_POLL_OUT;
 
     if(entry) {
@@ -2039,6 +2179,11 @@ static void singlesocket(struct Curl_multi *multi,
         /* fatal */
         return;
     }
+
+#ifdef DEBUGBUILD
+    /* Sanity check. Are we removing an action? */
+    socket_removal_sanity_check(data, entry, (entry->action & ~action));
+#endif
 
     /* we know (entry != NULL) at this point, see the logic above */
     if(multi->socket_cb)
@@ -2075,9 +2220,8 @@ static void singlesocket(struct Curl_multi *multi,
         /* check if the socket to be removed serves a connection which has
            other easy-s in a pipeline. In this case the socket should not be
            removed. */
-        struct connectdata *easy_conn = data->easy_conn;
         if(easy_conn) {
-          if(easy_conn->recv_pipe && easy_conn->recv_pipe->size > 1) {
+          if(additional_handle_in_pipe(easy_conn->recv_pipe, data)) {
             /* the handle should not be removed from the pipe yet */
             remove_sock_from_hash = FALSE;
 
@@ -2091,7 +2235,7 @@ static void singlesocket(struct Curl_multi *multi,
                 entry->easy = easy_conn->recv_pipe->head->ptr;
             }
           }
-          if(easy_conn->send_pipe  && easy_conn->send_pipe->size > 1) {
+          if(additional_handle_in_pipe(easy_conn->send_pipe, data)) {
             /* the handle should not be removed from the pipe yet */
             remove_sock_from_hash = FALSE;
 
@@ -2112,13 +2256,16 @@ static void singlesocket(struct Curl_multi *multi,
         }
       }
       else
-        /* just a precaution, this socket really SHOULD be in the hash already
-           but in case it isn't, we don't have to tell the app to remove it
-           either since it never got to know about it */
+        /* If the socket is not in the hash then it was already removed
+           before by a call to Curl_multi_closed(). For example as a result
+           of calling Curl_disconnect() called from Curl_done() */
         remove_sock_from_hash = FALSE;
 
       if(remove_sock_from_hash) {
         /* in this case 'entry' is always non-NULL */
+#ifdef DEBUGBUILD
+        socket_removal_sanity_check(data, entry, entry->action);
+#endif
         if(multi->socket_cb)
           multi->socket_cb(data,
                            s,
@@ -2155,6 +2302,9 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
       Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
 
     if(entry) {
+#ifdef DEBUGBUILD
+      socket_removal_sanity_check(conn->data, entry, entry->action);
+#endif
       if(multi->socket_cb)
         multi->socket_cb(conn->data, s, CURL_POLL_REMOVE,
                          multi->socket_userp,
