@@ -224,6 +224,8 @@ my $has_axtls;    # built with axTLS
 my $has_winssl;   # built with WinSSL    (Secure Channel aka Schannel)
 my $has_darwinssl;# build with DarwinSSL (Secure Transport)
 
+my $has_sslpinning; # built with a TLS backend that supports pinning
+
 my $has_shared = "unknown";  # built shared
 
 my $resolver;     # string to hold the resolver backend
@@ -2299,10 +2301,12 @@ sub checksystem {
            }
            elsif ($libcurl =~ /openssl/i) {
                $has_openssl=1;
+               $has_sslpinning=1;
                $ssllib="OpenSSL";
            }
            elsif ($libcurl =~ /gnutls/i) {
                $has_gnutls=1;
+               $has_sslpinning=1;
                $ssllib="GnuTLS";
            }
            elsif ($libcurl =~ /nss/i) {
@@ -2755,6 +2759,11 @@ sub singletest {
 
             if($1 eq "SSL") {
                 if($ssl_version) {
+                    next;
+                }
+            }
+            elsif($1 eq "SSLpinning") {
+                if($has_sslpinning) {
                     next;
                 }
             }

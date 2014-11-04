@@ -213,6 +213,7 @@ NTLM
 OpenSSL
 socks
 SSL
+SSLpinning
 TLS-SRP
 TrackMemory
 unittest

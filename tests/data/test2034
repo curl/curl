@@ -25,6 +25,7 @@ MooMoo
 <client>
 <features>
 SSL
+SSLpinning
 </features>
 <server>
 https Server-localhost-sv.pem
