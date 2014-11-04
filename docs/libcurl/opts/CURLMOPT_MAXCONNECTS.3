@@ -26,7 +26,7 @@ CURLMOPT_MAXCONNECTS \- set size of connection cache
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_multi_setopt(CURL *handle, CURLMOPT_MAXCONNECTS, long max);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAXCONNECTS, long max);
 .SH DESCRIPTION
 Pass a long indicating the \fBmax\fP. The set number will be used as the
 maximum amount of simultaneously open connections that libcurl may keep in its

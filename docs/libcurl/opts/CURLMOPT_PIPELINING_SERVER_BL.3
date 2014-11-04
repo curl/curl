@@ -20,29 +20,41 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLMOPT_TIMERDATA 3 "17 Jun 2014" "libcurl 7.37.0" "curl_multi_setopt options"
+.TH CURLMOPT_PIPELINING_SERVER_BL 3 "4 Nov 2014" "libcurl 7.39.0" "curl_multi_setopt options"
 .SH NAME
-CURLMOPT_TIMERDATA \- custom pointer to pass to timer callback
+CURLMOPT_PIPELINING_SERVER_BL \- pipelining server blacklist
 .SH SYNOPSIS
-.nf
 #include <curl/curl.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_TIMERDATA, void *pointer);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PIPELINING_SERVER_BL, char **servers);
 .SH DESCRIPTION
-A data \fBpointer\fP to pass to the timer callback set with the
-\fICURLMOPT_TIMERFUNCTION(3)\fP option.
+Pass a \fBservers\fP array of char *, ending with a NULL entry. This is a list
+of server types prefixes (in the Server: HTTP header) that are blacklisted
+from pipelining, i.e server types that are known to not support HTTP
+pipelining. The array is copied by libcurl.
 
-This pointer will not be touched by libcurl but will only be passed in to the
-timer callbacks's \fBuserp\fP argument.
+Note that the comparison matches if the Server: header begins with the string
+in the blacklist, i.e "Server: Ninja 1.2.3" and "Server: Ninja 1.4.0" can 
+both be blacklisted by having "Ninja" in the backlist.
+
+Pass a NULL pointer to clear the blacklist.
 .SH DEFAULT
-NULL
+The default value is NULL, which means that there is no blacklist.
 .SH PROTOCOLS
-All
 .SH EXAMPLE
-TODO
+.nf
+  server_blacklist[] =
+  {
+    "Microsoft-IIS/6.0",
+    "nginx/0.8.54",
+    NULL
+  };
+
+  curl_multi_setopt(m, CURLMOPT_PIPELINE_SERVER_BL, server_blacklist);
+.fi
 .SH AVAILABILITY
-Added in 7.16.0
+Added in 7.30.0
 .SH RETURN VALUE
 Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR CURLMOPT_TIMERFUNCTION "(3), " CURLMOPT_SOCKETFUNCTION "(3), "
+.BR CURLMOPT_PIPELINING "(3), " CURLMOPT_PIPELINING_SITE_BL "(3), "

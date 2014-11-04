@@ -33,7 +33,7 @@ int socket_callback(CURL *easy,      /* easy handle */
                     void *userp,     /* private callback pointer */
                     void *socketp);  /* private socket pointer */
 
-CURLcode curl_multi_setopt(CURL *handle, CURLMOPT_SOCKETFUNCTION, socket_callback);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_SOCKETFUNCTION, socket_callback);
 .SH DESCRIPTION
 Pass a pointer to your callback function, which should match the prototype
 shown above.

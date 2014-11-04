@@ -31,7 +31,7 @@ int timer_callback(CURLM *multi,    /* multi handle */
                    long timeout_ms, /* see above */
                    void *userp);    /* private callback pointer */
 
-CURLcode curl_multi_setopt(CURL *handle, CURLMOPT_TIMERFUNCTION, timer_callback);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_TIMERFUNCTION, timer_callback);
 .SH DESCRIPTION
 Pass a pointer to your callback function, which should match the prototype
 shown above.

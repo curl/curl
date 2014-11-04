@@ -26,7 +26,7 @@ CURLMOPT_PIPELINING \- enable/disable HTTP pipelining
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_multi_setopt(CURL *handle, CURLMOPT_PIPELINING, bool onoff);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PIPELINING, bool onoff);
 .SH DESCRIPTION
 Set the \fBonoff\fP parameter to 1 to make libcurl use HTTP pipelining for
 HTTP transfers done using this multi handle, as far as possible. This means
