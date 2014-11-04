@@ -22,6 +22,7 @@ Building from git
 
 UNIX
 ====
+
    A normal unix installation is made in three or four steps (after you've
    unpacked the source archive):
 
@@ -147,6 +148,7 @@ UNIX
 
    SPECIAL CASES
    -------------
+
    Some versions of uClibc require configuring with CPPFLAGS=-D_GNU_SOURCE=1
    to get correct large file support.
 
@@ -154,7 +156,6 @@ UNIX
 
        ./configure CC=owcc AR="$WATCOM/binl/wlib" AR_FLAGS=-q \
            RANLIB=/bin/true STRIP="$WATCOM/binl/wstrip" CFLAGS=-Wextra
-
 
 Win32
 =====
@@ -186,7 +187,6 @@ Win32
    app using the debug multithreaded dynamic C runtime.
 
    If you get linkage errors read section 5.7 of the FAQ document.
-
 
    MingW32
    -------
@@ -233,7 +233,6 @@ Win32
      http://www.gknw.net/mirror/openldap/
    - optional recent Novell CLDAP SDK available from:
      http://developer.novell.com/ndk/cldap.htm
-
 
    Cygwin
    ------
@@ -389,7 +388,6 @@ Win32
    is required, as well as the OpenSSL libeay32.lib and ssleay32.lib
    libraries.
 
-
    OTHER MSVC IDEs
    ---------------
 
@@ -399,7 +397,6 @@ Win32
 
    Make the sources in the src/ drawer be a "win32 console application"
    project. Name it curl.
-
 
    Disabling Specific Protocols in Win32 builds
    --------------------------------------------
@@ -428,7 +425,6 @@ Win32
    - Modify lib/Makefile.vc6
    - Add defines to Project/Settings/C/C++/General/Preprocessor Definitions
      in the vc6libcurl.dsw/vc6libcurl.dsp Visual C++ 6 IDE project.
-
 
    Using BSD-style lwIP instead of Winsock TCP/IP stack in Win32 builds
    --------------------------------------------------------------------
@@ -465,9 +461,9 @@ Win32
    add '-DCURL_STATICLIB' to your CFLAGS.  Otherwise the linker will look for
    dynamic import symbols.
 
-
 Apple iOS and Mac OS X
 ======================
+
    On recent Apple operating systems, curl can be built to use Apple's
    SSL/TLS implementation, Secure Transport, instead of OpenSSL. To build with
    Secure Transport for SSL/TLS, use the configure option --with-darwinssl. (It
@@ -497,9 +493,9 @@ Apple iOS and Mac OS X
       ./configure --with-darwinssl
       make
 
-
 IBM OS/2
 ========
+
    Building under OS/2 is not much different from building under unix.
    You need:
 
@@ -527,9 +523,9 @@ IBM OS/2
    If you're getting huge binaries, probably your makefiles have the -g in
    CFLAGS.
 
-
 VMS
 ===
+
    (The VMS section is in whole contributed by the friendly Nico Baggus)
 
    Curl seems to work with FTP & HTTP other protocols are not tested.  (the
@@ -574,6 +570,7 @@ VMS
    the name can be fetched from external or internal message libraries
    Error code - the err codes assigned by the application
    Sev. - severity: Even = error, off = non error
+
       0 = Warning
       1 = Success
       2 = Error
@@ -595,12 +592,13 @@ VMS
       Compaq C V6.2-003 on OpenVMS Alpha V7.1-1H2
 
    So far for porting notes as of:
+
    13-jul-2001
    N. Baggus
 
-
 QNX
 ===
+
    (This section was graciously brought to us by David Bentham)
 
    As QNX is targeted for resource constrained environments, the QNX headers
@@ -611,11 +609,12 @@ QNX
 
    A good all-round solution to this is to override the default when building
    libcurl, by overriding CFLAGS during configure, example
-   #  configure CFLAGS='-DFD_SETSIZE=64 -g -O2'
 
+   #  configure CFLAGS='-DFD_SETSIZE=64 -g -O2'
 
 RISC OS
 =======
+
    The library can be cross-compiled using gccsdk as follows:
 
         CC=riscos-gcc AR=riscos-ar RANLIB='riscos-ar -s' ./configure \
@@ -625,9 +624,9 @@ RISC OS
    where riscos-gcc and riscos-ar are links to the gccsdk tools.
    You can then link your program with curl/lib/.libs/libcurl.a
 
-
 AmigaOS
 =======
+
    (This section was graciously brought to us by Diego Casorran)
 
    To build cURL/libcurl on AmigaOS just type 'make amiga' ...
@@ -647,10 +646,11 @@ AmigaOS
    To enable SSL support, you need a OpenSSL native version (without ixemul),
    you can find a precompiled package at http://amiga.sourceforge.net/OpenSSL/
 
-
 NetWare
 =======
+
    To compile curl.nlm / libcurl.nlm you need:
+
    - either any gcc / nlmconv, or CodeWarrior 7 PDK 4 or later.
    - gnu make and awk running on the platform you compile on;
      native Win32 versions can be downloaded from:
@@ -691,9 +691,9 @@ NetWare
    the status of these builds can be viewed at the autobuild table:
    http://curl.haxx.se/dev/builds.html
 
-
 eCos
 ====
+
    curl does not use the eCos build system, so you must first build eCos
    separately, then link curl to the resulting eCos library.  Here's a sample
    configure line to do so on an x86 Linux box targeting x86:
@@ -761,9 +761,9 @@ eCos
 
    config.errors = stderr; /* default errors to stderr */
 
-
 Minix
 =====
+
    curl can be compiled on Minix 3 using gcc or ACK (starting with
    ver. 3.1.3).  Ensure that GNU gawk and bash are both installed and
    available in the PATH.
@@ -793,9 +793,9 @@ Minix
      make
      chmem =256000 src/curl
 
-
 Symbian OS
 ==========
+
    The Symbian OS port uses the Symbian build system to compile.  From the
    packages/Symbian/group/ directory, run:
 
@@ -806,9 +806,9 @@ Symbian OS
    SDK doesn't include support for P.I.P.S., you will need to contact
    your SDK vendor to obtain that first.
 
-
 VxWorks
 ========
+
    Build for VxWorks is performed using cross compilation.
    That means you build on Windows machine using VxWorks tools and
    run the built image on the VxWorks device.
@@ -832,13 +832,15 @@ VxWorks
    As a result the libcurl.a library should be created in the 'lib' folder.
    To clean the build results type 'make -f ./Makefile.vxworks clean'.
 
-
 Android
 =======
+
    Method using the static makefile:
+
       - see the build notes in the packages/Android/Android.mk file.
 
    Method using a configure cross-compile (tested with Android NDK r7c, r8):
+
       - prepare the toolchain of the Android NDK for standalone use; this can
         be done by invoking the script:
         ./build/tools/make-standalone-toolchain.sh
@@ -860,7 +862,8 @@ Android
         found in your automake folder:
         find /usr -name config.sub
 
-   Wrapper for pkg-config
+   Wrapper for pkg-config:
+
       - In order to make proper use of pkg-config so that configure is able to
         find all dependencies you should create a wrapper script for pkg-config;
         file /opt/arm-linux-androideabi-4.4.3/bin/arm-linux-androideabi-pkg-config:
@@ -874,9 +877,9 @@ Android
 
         also create a copy or symlink with name arm-unknown-linux-androideabi-pkg-config.
 
-
 CROSS COMPILE
 =============
+
    (This section was graciously brought to us by Jim Duey, with additions by
    Dan Fandrich)
 
@@ -922,9 +925,9 @@ CROSS COMPILE
 
        ./configure --host=ARCH-OS
 
-
 REDUCING SIZE
 =============
+
    There are a number of configure options that can be used to reduce the
    size of libcurl for embedded applications where binary size is an
    important factor.  First, be sure to set the CFLAGS variable when
@@ -961,6 +964,7 @@ REDUCING SIZE
    size of the libcurl dynamic libraries on some platforms even further.
    Specify them by providing appropriate CFLAGS and LDFLAGS variables on the
    configure command-line, e.g.
+
      CFLAGS="-Os -ffunction-sections -fdata-sections \
              -fno-unwind-tables -fno-asynchronous-unwind-tables" \
      LDFLAGS="-Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections"
@@ -989,9 +993,9 @@ REDUCING SIZE
      --disable-manual           !--manual
      --disable-proxy            !HTTP\ proxy !proxytunnel !SOCKS4 !SOCKS5
 
-
 PORTS
 =====
+
    This is a probably incomplete list of known hardware and operating systems
    that curl has been compiled for. If you know a system curl compiles and
    runs on, that isn't listed, please let us know!
