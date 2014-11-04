@@ -136,8 +136,8 @@ UNIX
 
      To build with axTLS for SSL/TLS, use both --without-ssl and --with-axtls.
 
-     To build with GSS-API support, use --with-gssapi and have the MIT or
-     Heimdal Kerberos V5 packages installed.
+     To build with GSS-API support, use --with-gssapi and have the MIT Kerberos
+     or Heimdal packages installed.
 
      To get support for SCP and SFTP, build with --with-libssh2 and have
      libssh2 0.16 or later installed.
