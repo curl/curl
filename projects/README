@@ -101,7 +101,7 @@ Notes
 
    If you are using the source code from the git repository, rather than a
    release archive or nightly build, you will need to generate the project
-   files. Please run "generate -h" for usage details. 
+   files. Please run "generate -help" for usage details. 
 
    Should you wish to help out with some of the items on the TODO list, or
    find bugs in the project files that need correcting, and would like to
