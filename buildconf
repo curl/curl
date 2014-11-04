@@ -190,32 +190,32 @@ else
 fi
 
 #--------------------------------------------------------------------------
-# GNU libtool preliminary check
+# GNU libtoolize preliminary check
 #
 want_lt_major=1
 want_lt_minor=4
 want_lt_patch=2
 want_lt_version=1.4.2
 
-# This approach that tries 'glibtool' first is intended for systems that
-# have GNU libtool named as 'glibtool' and libtool not being GNU's.
+# This approach that tries 'glibtoolize' first is intended for systems that
+# have GNU libtool named as 'glibtoolize' and libtoolize not being GNU's.
 
-libtool=`findtool glibtool 2>/dev/null`
-if test ! -x "$libtool"; then
-  libtool=`findtool ${LIBTOOL:-libtool}`
+libtoolize=`findtool glibtoolize 2>/dev/null`
+if test ! -x "$libtoolize"; then
+  libtoolize=`findtool ${LIBTOOLIZE:-libtoolize}`
 fi
-if test -z "$libtool"; then
-  echo "buildconf: libtool not found."
-  echo "            You need GNU libtool $want_lt_version or newer installed."
+if test -z "$libtoolize"; then
+  echo "buildconf: libtoolize not found."
+  echo "  You need GNU libtoolize $want_lt_version or newer installed."
   exit 1
 fi
 
-lt_pver=`$libtool --version 2>/dev/null|head -n 1`
+lt_pver=`$libtoolize --version 2>/dev/null|head -n 1`
 lt_qver=`echo $lt_pver|sed -e "s/([^)]*)//g" -e "s/^[^0-9]*//g"`
 lt_version=`echo $lt_qver|sed -e "s/[- ].*//" -e "s/\([a-z]*\)$//"`
 if test -z "$lt_version"; then
-  echo "buildconf: libtool not found."
-  echo "            You need GNU libtool $want_lt_version or newer installed."
+  echo "buildconf: libtoolize not found."
+  echo "  You need GNU libtoolize $want_lt_version or newer installed."
   exit 1
 fi
 old_IFS=$IFS; IFS='.'; set $lt_version; IFS=$old_IFS
@@ -245,27 +245,12 @@ else
   lt_status="good"
 fi
 if test "$lt_status" != "good"; then
-  echo "buildconf: libtool version $lt_version found."
-  echo "            You need GNU libtool $want_lt_version or newer installed."
+  echo "buildconf: libtoolize version $lt_version found."
+  echo "  You need GNU libtoolize $want_lt_version or newer installed."
   exit 1
 fi
 
-echo "buildconf: libtool version $lt_version (ok)"
-
-#--------------------------------------------------------------------------
-# GNU libtoolize check
-#
-if test -z "$LIBTOOLIZE"; then
-  # use (g)libtoolize from same location as (g)libtool
-  libtoolize="${libtool}ize"
-else
-  libtoolize=`findtool $LIBTOOLIZE`
-fi
-if test ! -f "$libtoolize"; then
-  echo "buildconf: libtoolize not found."
-  echo "            You need GNU libtoolize $want_lt_version or newer installed."
-  exit 1
-fi
+echo "buildconf: libtoolize version $lt_version (ok)"
 
 #--------------------------------------------------------------------------
 # m4 check
