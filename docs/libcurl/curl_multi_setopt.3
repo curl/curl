@@ -19,7 +19,7 @@
 .\" * KIND, either express or implied.
 .\" *
 .\" **************************************************************************
-.TH curl_multi_setopt 3 "10 Oct 2006" "libcurl 7.16.0" "libcurl Manual"
+.TH curl_multi_setopt 3 "4 Nov 2014" "libcurl 7.39.0" "libcurl Manual"
 .SH NAME
 curl_multi_setopt \- set options for a curl multi handle
 .SH SYNOPSIS
@@ -38,172 +38,29 @@ behave badly!  You can only set one option in each function call.
 
 .SH OPTIONS
 .IP CURLMOPT_SOCKETFUNCTION
-Pass a pointer to a function matching the \fBcurl_socket_callback\fP
-prototype. The \fIcurl_multi_socket_action(3)\fP function informs the
-application about updates in the socket (file descriptor) status by doing
-none, one, or multiple calls to the curl_socket_callback given in the
-\fBparam\fP argument. They update the status with changes since the previous
-time a \fIcurl_multi_socket(3)\fP function was called. If the given callback
-pointer is NULL, no callback will be called. Set the callback's \fBuserp\fP
-argument with \fICURLMOPT_SOCKETDATA\fP.  See \fIcurl_multi_socket(3)\fP for
-more callback details.
+See \fICURLMOPT_SOCKETFUNCTION(3)\fP
 .IP CURLMOPT_SOCKETDATA
-Pass a pointer to whatever you want passed to the \fBcurl_socket_callback\fP's
-fourth argument, the userp pointer. This is not used by libcurl but only
-passed-thru as-is. Set the callback pointer with
-\fICURLMOPT_SOCKETFUNCTION\fP.
+See \fICURLMOPT_SOCKETDATA(3)\fP
 .IP CURLMOPT_PIPELINING
-Pass a long set to 1 to enable or 0 to disable. Enabling pipelining on a multi
-handle will make it attempt to perform HTTP Pipelining as far as possible for
-transfers using this handle. This means that if you add a second request that
-can use an already existing connection, the second request will be \&"piped"
-on the same connection rather than being executed in parallel. (Added in
-7.16.0)
+See \fICURLMOPT_PIPELINING(3)\fP
 .IP CURLMOPT_TIMERFUNCTION
-Pass a pointer to a function matching the \fBcurl_multi_timer_callback\fP
-prototype: int curl_multi_timer_callback(CURLM *multi /* multi handle */,
-long timeout_ms /* timeout in milliseconds */, void *userp /* TIMERDATA */).
-This function will then be called when the timeout value
-changes. The timeout value is at what latest time the application should call
-one of the \&"performing" functions of the multi interface
-(\fIcurl_multi_socket_action(3)\fP and \fIcurl_multi_perform(3)\fP) - to allow
-libcurl to keep timeouts and retries etc to work. A timeout value of -1 means
-that there is no timeout at all, and 0 means that the timeout is already
-reached. Libcurl attempts to limit calling this only when the fixed future
-timeout time actually changes. See also \fICURLMOPT_TIMERDATA\fP. The callback
-should return 0 on success, and -1 on error. This
-callback can be used instead of, or in addition to,
-\fIcurl_multi_timeout(3)\fP. (Added in 7.16.0)
+See \fICURLMOPT_TIMERFUNCTION(3)\fP
 .IP CURLMOPT_TIMERDATA
-Pass a pointer to whatever you want passed to the
-\fBcurl_multi_timer_callback\fP's third argument, the userp pointer.  This is
-not used by libcurl but only passed-thru as-is. Set the callback pointer with
-\fICURLMOPT_TIMERFUNCTION\fP. (Added in 7.16.0)
-.IP CURLMOPT_MAXCONNECTS
-Pass a long. The set number will be used as the maximum amount of
-simultaneously open connections that libcurl may keep in its connection cache
-after completed use. By default libcurl will enlarge the size for each added
-easy handle to make it fit 4 times the number of added easy handles.
-
-By setting this option, you can prevent the cache size from growing beyond the
-limit set by you.
-
-When the cache is full, curl closes the oldest one in the cache to prevent the
-number of open connections from increasing.
-
-This option is for the multi handle's use only, when using the easy interface
-you should instead use the \fICURLOPT_MAXCONNECTS(3)\fP option.
-
-See \fICURLMOPT_MAX_TOTAL_CONNECTIONS\fP for limiting the number of active
-connections.
-
-(Added in 7.16.3)
+See \fICURLMOPT_TIMERDATA(3)\fP
 .IP CURLMOPT_MAX_HOST_CONNECTIONS
-Pass a long. The set number will be used as the maximum amount of
-simultaneously open connections to a single host. For each new session to
-a host, libcurl will open a new connection up to the limit set by
-CURLMOPT_MAX_HOST_CONNECTIONS. When the limit is reached, the sessions will
-be pending until there are available connections. If CURLMOPT_PIPELINING is
-1, libcurl will try to pipeline if the host is capable of it.
-
-The default value is 0, which means that there is no limit.
-However, for backwards compatibility, setting it to 0 when CURLMOPT_PIPELINING
-is 1 will not be treated as unlimited. Instead it will open only 1 connection
-and try to pipeline on it.
-
-(Added in 7.30.0)
+See \fICURLMOPT_MAX_HOST_CONNECTIONS(3)\fP
 .IP CURLMOPT_MAX_PIPELINE_LENGTH
-Pass a long. The set number will be used as the maximum amount of requests
-in a pipelined connection. When this limit is reached, libcurl will use another
-connection to the same host (see CURLMOPT_MAX_HOST_CONNECTIONS), or queue the
-requests until one of the pipelines to the host is ready to accept a request.
-Thus, the total number of requests in-flight is CURLMOPT_MAX_HOST_CONNECTIONS *
-CURLMOPT_MAX_PIPELINE_LENGTH.
-The default value is 5.
-
-(Added in 7.30.0)
+See \fICURLMOPT_MAX_PIPELINE_LENGTH(3)\fP
 .IP CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE
-Pass a long. If a pipelined connection is currently processing a request
-with a Content-Length larger than CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, that
-connection will not be considered for additional requests, even if it is
-shorter than CURLMOPT_MAX_PIPELINE_LENGTH.
-The default value is 0, which means that the penalization is inactive.
-
-(Added in 7.30.0)
+See \fICURLMOPT_CONTENT_LENGTH_PENALTY_SIZE(3)\fP
 .IP CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE
-Pass a long. If a pipelined connection is currently processing a
-chunked (Transfer-encoding: chunked) request with a current chunk length
-larger than CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, that connection will not be
-considered for additional requests, even if it is shorter than
-CURLMOPT_MAX_PIPELINE_LENGTH.
-The default value is 0, which means that the penalization is inactive.
-
-(Added in 7.30.0)
+See \fICURLMOPT_CHUNK_LENGTH_PENALTY_SIZE(3)\fP
 .IP CURLMOPT_PIPELINING_SITE_BL
-Pass an array of char *, ending with NULL. This is a list of sites that are
-blacklisted from pipelining, i.e sites that are known to not support HTTP
-pipelining. The array is copied by libcurl.
-
-The default value is NULL, which means that there is no blacklist.
-
-Pass a NULL pointer to clear the blacklist.
-
-Example:
-
-.nf
-  site_blacklist[] =
-  {
-    "www.haxx.se",
-    "www.example.com:1234",
-    NULL
-  };
-
-  curl_multi_setopt(m, CURLMOPT_PIPELINE_SITE_BL, site_blacklist);
-.fi
-
-(Added in 7.30.0)
+See \fICURLMOPT_PIPELINING_SITE_BL(3)\fP
 .IP CURLMOPT_PIPELINING_SERVER_BL
-Pass an array of char *, ending with NULL. This is a list of server types
-prefixes (in the Server: HTTP header) that are blacklisted from pipelining,
-i.e server types that are known to not support HTTP pipelining. The array is
-copied by libcurl.
-
-Note that the comparison matches if the Server: header begins with the string
-in the blacklist, i.e "Server: Ninja 1.2.3" and "Server: Ninja 1.4.0" can 
-both be blacklisted by having "Ninja" in the backlist.
-
-The default value is NULL, which means that there is no blacklist.
-
-Pass a NULL pointer to clear the blacklist.
-
-Example:
-
-.nf
-  server_blacklist[] =
-  {
-    "Microsoft-IIS/6.0",
-    "nginx/0.8.54",
-    NULL
-  };
-
-  curl_multi_setopt(m, CURLMOPT_PIPELINE_SERVER_BL, server_blacklist);
-.fi
-
-(Added in 7.30.0)
+See \fICURLMOPT_PIPELINING_SERVER_BL(3)\fP
 .IP CURLMOPT_MAX_TOTAL_CONNECTIONS
-Pass a long. The set number will be used as the maximum amount of
-simultaneously open connections in total. For each new session, libcurl
-will open a new connection up to the limit set by
-CURLMOPT_MAX_TOTAL_CONNECTIONS. When the limit is reached, the sessions will
-be pending until there are available connections. If CURLMOPT_PIPELINING is
-1, libcurl will try to pipeline if the host is capable of it.
-
-The default value is 0, which means that there is no limit.
-However, for backwards compatibility, setting it to 0 when CURLMOPT_PIPELINING
-is 1 will not be treated as unlimited. Instead it will open only 1 connection
-and try to pipeline on it.
-
-(Added in 7.30.0)
+See \fICURLMOPT_MAX_TOTAL_CONNECTIONS(3)\fP
 .SH RETURNS
 The standard CURLMcode for multi interface error codes. Note that it returns a
 CURLM_UNKNOWN_OPTION if you try setting an option that this version of libcurl
