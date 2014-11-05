@@ -8,6 +8,7 @@ Curl and libcurl 7.39.0
 
 This release includes the following changes:
 
+ o SSLv3 is disabled by default
  o CURLOPT_COOKIELIST: Added "RELOAD" command [5]
  o build: Added WinIDN build configuration options to Visual Studio projects
  o ssh: improve key file search
@@ -23,6 +24,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl_easy_duphandle: CURLOPT_COPYPOSTFIELDS read out of bounds [9]
  o openssl: build fix for versions < 0.9.8e [1]
  o newlines: fix mixed newlines to LF-only [2]
  o ntlm: Fixed HTTP proxy authentication when using Windows SSPI [3]
@@ -73,6 +75,14 @@ This release includes the following bugfixes:
  o resume: consider a resume from [content-length] to be OK [8]
  o sasl: Fixed Kerberos V5 inclusion when CURL_DISABLE_CRYPTO_AUTH is used
  o build-openssl.bat: Fix x64 release build
+ o cmake: drop _BSD_SOURCE macro usage
+ o cmake: fix gethostby{addr,name}_r in CurlTests
+ o cmake: clean OtherTests, fixing -Werror
+ o cmake: fix struct sockaddr_storage check
+ o Curl_single_getsock: fix hold/pause sock handling
+ o SSL: PolarSSL default min SSL version TLS 1.0
+ o cmake: fix ZLIB_INCLUDE_DIRS use [10]
+ o buildconf: stop checking for libtool
 
 This release includes the following known bugs:
 
@@ -81,13 +91,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Askar Safin, Balaji Salunke, Bill Nagel, Bruno Thomsen, Catalin Patulea,
-  Dan Fandrich, Daniel Stenberg, Dimitar Boevski, Fabian Keil, Guenter Knauf,
-  Hugo Lopez, Jakub Zakrzewski, Jeremy Lin, Jonathan Cardoso Machado,
-  Kamil Dudka, Luan Cestari, Lucas Pardue, Marcel Raad, Marc Hoersken,
-  Michael Wallner, Nick Zitzmann, Patrick Monnerat, Paul Howarth, Peter Wu,
-  Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts,
-  Waldek Kozba, Yousuke Kimoto,
+  Askar Safin, Balaji Salunke, Bill Nagel, Bruno Thomsen, Carlo Wood,
+  Catalin Patulea, Dan Fandrich, Daniel Stenberg, Dimitar Boevski, Fabian Keil,
+  Guenter Knauf, Jakub Zakrzewski, Jeremy Lin, Jonathan Cardoso Machado,
+  Kamil Dudka, K. R. Walker, Luan Cestari, Lucas Pardue, Marcel Raad,
+  Marc Hoersken, Michael Wallner, Nick Zitzmann, Patrick Monnerat,
+  Paul Howarth, Peter Wu, Ray Satiro, Steve Holme, Symeon Paraschoudis,
+  Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts, Waldek Kozba,
+  Yousuke Kimoto,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -101,3 +112,5 @@ References to bug reports and discussions on issues:
  [6] = http://curl.haxx.se/bug/view.cgi?id=1426
  [7] = http://curl.haxx.se/bug/view.cgi?id=1441
  [8] = http://curl.haxx.se/bug/view.cgi?id=1443
+ [9] = http://curl.haxx.se/docs/adv_20141105.html
+ [10] = https://github.com/bagder/curl/pull/123
