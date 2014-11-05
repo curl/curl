@@ -76,7 +76,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   CURLcode result;
   struct SessionHandle *data = conn->data;
   unsigned char *path;
-  unsigned char *tmp;
+  char *tmp;
   char *response;
   size_t len;
 
@@ -137,10 +137,10 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   if(authp->iestyle && ((tmp = strchr((char *)uripath, '?')) != NULL)) {
     size_t urilen = tmp - (char *)uripath;
 
-    path = aprintf("%.*s", urilen, uripath);
+    path = (unsigned char *) aprintf("%.*s", urilen, uripath);
   }
   else
-    path = strdup((char *) uripath);
+    path = (unsigned char *) strdup((char *)uripath);
 
   if(!path)
     return CURLE_OUT_OF_MEMORY;
