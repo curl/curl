@@ -51,11 +51,14 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
 
 /* Forward-declaration of global variables defined in curl_sspi.c */
-
 extern HMODULE s_hSecDll;
 extern PSecurityFunctionTable s_pSecFn;
 
 /* Provide some definitions missing in old headers */
+#define SP_NAME_DIGEST              "WDigest"
+#define SP_NAME_NTLM                "NTLM"
+#define SP_NAME_NEGOTIATE           "Negotiate"
+#define SP_NAME_KERBEROS            "Kerberos"
 
 #ifndef SEC_E_INSUFFICIENT_MEMORY
 # define SEC_E_INSUFFICIENT_MEMORY             ((HRESULT)0x80090300L)

@@ -433,7 +433,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   Curl_ntlm_sspi_cleanup(ntlm);
 
   /* Query the security package for NTLM */
-  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT("NTLM"),
+  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
                                               &SecurityPackage);
   if(status != SEC_E_OK)
     return CURLE_NOT_BUILT_IN;
@@ -472,7 +472,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
 
   /* Acquire our credentials handle */
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
-                                              (TCHAR *) TEXT("NTLM"),
+                                              (TCHAR *) TEXT(SP_NAME_NTLM),
                                               SECPKG_CRED_OUTBOUND, NULL,
                                               ntlm->p_identity, NULL, NULL,
                                               ntlm->credentials, &expiry);

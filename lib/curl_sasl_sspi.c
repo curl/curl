@@ -151,7 +151,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Query the security package for DigestSSP */
-  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT("WDigest"),
+  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_DIGEST),
                                               &SecurityPackage);
   if(status != SEC_E_OK) {
     Curl_safefree(chlg);
@@ -201,7 +201,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   /* Acquire our credentials handle */
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
-                                              (TCHAR *) TEXT("WDigest"),
+                                              (TCHAR *) TEXT(SP_NAME_DIGEST),
                                               SECPKG_CRED_OUTBOUND, NULL,
                                               p_identity, NULL, NULL,
                                               &handle, &expiry);
@@ -321,7 +321,8 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
 
   if(!krb5->credentials) {
     /* Query the security package for Kerberos */
-    status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT("Kerberos"),
+    status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *)
+                                                TEXT(SP_NAME_KERBEROS),
                                                 &SecurityPackage);
     if(status != SEC_E_OK) {
       return CURLE_NOT_BUILT_IN;
@@ -364,7 +365,8 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
 
     /* Acquire our credentials handle */
     status = s_pSecFn->AcquireCredentialsHandle(NULL,
-                                                (TCHAR *) TEXT("Kerberos"),
+                                                (TCHAR *)
+                                                TEXT(SP_NAME_KERBEROS),
                                                 SECPKG_CRED_OUTBOUND, NULL,
                                                 krb5->p_identity, NULL, NULL,
                                                 krb5->credentials, &expiry);
