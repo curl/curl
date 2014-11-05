@@ -154,6 +154,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   *allocuserpwd = aprintf("%sAuthorization: Digest %s\r\n",
                           proxy ? "Proxy-" : "",
                           response);
+  free(response);
   if(!*allocuserpwd)
     return CURLE_OUT_OF_MEMORY;
 
