@@ -69,6 +69,5 @@ char *Curl_memdup(const char *src, size_t length)
 
   memcpy(buffer, src, length);
 
-  /* if length unknown do null termination */
   return buffer;
 }
