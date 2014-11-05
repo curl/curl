@@ -746,6 +746,10 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
     char value[DIGEST_MAX_VALUE_LENGTH];
     char content[DIGEST_MAX_CONTENT_LENGTH];
 
+    /* Pass all additional spaces here */
+    while(*chlg && ISSPACE(*chlg))
+      chlg++;
+
     /* Extract a value=content pair */
     if(!sasl_digest_get_pair(chlg, value, content, &chlg)) {
       if(Curl_raw_equal(value, "nonce")) {
