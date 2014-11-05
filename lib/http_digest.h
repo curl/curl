@@ -23,11 +23,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-enum {
-  CURLDIGESTALGO_MD5,
-  CURLDIGESTALGO_MD5SESS
-};
-
 /* this is for digest header input */
 CURLcode Curl_input_digest(struct connectdata *conn,
                            bool proxy, const char *header);

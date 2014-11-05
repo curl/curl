@@ -56,6 +56,11 @@ struct kerberos5data;
 #define SASL_MECH_STRING_NTLM       "NTLM"
 #define SASL_MECH_STRING_XOAUTH2    "XOAUTH2"
 
+enum {
+  CURLDIGESTALGO_MD5,
+  CURLDIGESTALGO_MD5SESS
+};
+
 /* This is used to test whether the line starts with the given mechanism */
 #define sasl_mech_equal(line, wordlen, mech) \
   (wordlen == (sizeof(mech) - 1) / sizeof(char) && \

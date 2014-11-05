@@ -28,6 +28,7 @@
 #include "rawstr.h"
 #include "curl_base64.h"
 #include "curl_md5.h"
+#include "curl_sasl.h"
 #include "http_digest.h"
 #include "strtok.h"
 #include "curl_memory.h"
