@@ -19,7 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "strdup.h"
+#include "tool_strdup.h"
 
 #ifndef HAVE_STRDUP
 char *strdup(const char *str)
