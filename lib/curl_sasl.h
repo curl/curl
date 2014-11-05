@@ -26,7 +26,14 @@
 
 struct SessionHandle;
 struct connectdata;
+
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+struct digestdata;
+#endif
+
+#if defined(USE_NTLM)
 struct ntlmdata;
+#endif
 
 #if defined(USE_KRB5)
 struct kerberos5data;
