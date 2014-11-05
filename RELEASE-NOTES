@@ -1,88 +1,18 @@
-Curl and libcurl 7.39.0
+Curl and libcurl 7.39.1
 
- Public curl releases:         142
+ Public curl releases:         143
  Command line options:         162
  curl_easy_setopt() options:   208
  Public functions in libcurl:  58
- Contributors:                 1216
+ Contributors:                 1229
 
 This release includes the following changes:
 
- o SSLv3 is disabled by default
- o CURLOPT_COOKIELIST: Added "RELOAD" command [5]
- o build: Added WinIDN build configuration options to Visual Studio projects
- o ssh: improve key file search
- o SSL: public key pinning. Use CURLOPT_PINNEDPUBLICKEY and --pinnedpubkey
- o vtls: remove QsoSSL support, use gskit!
- o mk-ca-bundle: added SHA-384 signature algorithm
- o docs: added many examples for libcurl opts and other doc improvements
- o build: Added VC ssh2 target to main Makefile
- o MinGW: Added support to build with nghttp2
- o NetWare: Added support to build with nghttp2
- o build: added Watcom support to build with WinSSL
- o build: Added optional specific version generation of VC project files
+ o
 
 This release includes the following bugfixes:
 
- o curl_easy_duphandle: CURLOPT_COPYPOSTFIELDS read out of bounds [9]
- o openssl: build fix for versions < 0.9.8e [1]
- o newlines: fix mixed newlines to LF-only [2]
- o ntlm: Fixed HTTP proxy authentication when using Windows SSPI [3]
- o sasl_sspi: Fixed Unicode build [4]
- o file: reject paths using embedded %00
- o threaded-resolver: revert Curl_expire_latest() switch [6]
- o configure: allow --with-ca-path with PolarSSL too
- o HTTP/2: Fix busy loop when EOF is encountered
- o CURLOPT_CAPATH: return failure if set without backend support
- o nss: do not fail if a CRL is already cached
- o smtp: Fixed intermittent "SSL3_WRITE_PENDING: bad write retry" error
- o fixed 20+ nits/memory leaks identified by Coverity scans
- o curl_schannel.c: Fixed possible memory or handle leak
- o multi-uv.c: call curl_multi_info_read() better
- o Cmake: Check for OpenSSL before OpenLDAP
- o Cmake: Fix library list provided to cURL tests
- o Cmake: Avoid cycle directory dependencies
- o Cmake: Build with GSS-API libraries (MIT or Heimdal)
- o vtls: provide backend defines for internal source code
- o nss: fix a connection failure when FTPS handle is reused
- o tests/http_pipe.py: Python 3 support
- o cmake: build tool_hugehelp (ENABLE_MANUAL)
- o cmake: enable IPv6 by default if available
- o tests: move TESTCASES to Makefile.inc, add show for cmake
- o ntlm: Avoid unnecessary buffer allocation for SSPI based type-2 token
- o ntlm: Fixed empty/bad base-64 decoded buffer return codes
- o ntlm: Fixed empty type-2 decoded message info text
- o cmake: add CMake/Macros.cmake to the release tarball
- o cmake: add SUPPORT_FEATURES and SUPPORT_PROTOCOLS
- o cmake: use LIBCURL_VERSION from curlver.h
- o cmake: generate pkg-config and curl-config
- o fixed several superfluous variable assignements identified by cppcheck
- o cleanup of 'CURLcode result' return code
- o pipelining: only output "is not blacklisted" in debug builds
- o SSL: Remove SSLv3 from SSL default due to POODLE attack
- o gskit.c: remove SSLv3 from SSL default
- o darwinssl: detect possible future removal of SSLv3 from the framework
- o ntlm: Only define ntlm data structure when USE_NTLM is defined
- o ntlm: Return CURLcode from Curl_ntlm_core_mk_lm_hash()
- o ntlm: Return all errors from Curl_ntlm_core_mk_nt_hash()
- o sspi: Only call CompleteAuthToken() when complete is needed
- o http_negotiate: Fixed missing check for USE_SPNEGO
- o HTTP: return larger than 3 digit response codes too [7]
- o openssl: Check for NPN / ALPN via OpenSSL version number
- o openssl: enable NPN separately from ALPN
- o sasl_sspi: Allow DIGEST-MD5 to use current windows credentials
- o sspi: Return CURLE_LOGIN_DENIED on AcquireCredentialsHandle() failure
- o resume: consider a resume from [content-length] to be OK [8]
- o sasl: Fixed Kerberos V5 inclusion when CURL_DISABLE_CRYPTO_AUTH is used
- o build-openssl.bat: Fix x64 release build
- o cmake: drop _BSD_SOURCE macro usage
- o cmake: fix gethostby{addr,name}_r in CurlTests
- o cmake: clean OtherTests, fixing -Werror
- o cmake: fix struct sockaddr_storage check
- o Curl_single_getsock: fix hold/pause sock handling
- o SSL: PolarSSL default min SSL version TLS 1.0
- o cmake: fix ZLIB_INCLUDE_DIRS use [10]
- o buildconf: stop checking for libtool
+ o
 
 This release includes the following known bugs:
 
@@ -91,26 +21,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Askar Safin, Balaji Salunke, Bill Nagel, Bruno Thomsen, Carlo Wood,
-  Catalin Patulea, Dan Fandrich, Daniel Stenberg, Dimitar Boevski, Fabian Keil,
-  Guenter Knauf, Jakub Zakrzewski, Jeremy Lin, Jonathan Cardoso Machado,
-  Kamil Dudka, K. R. Walker, Luan Cestari, Lucas Pardue, Marcel Raad,
-  Marc Hoersken, Michael Wallner, Nick Zitzmann, Patrick Monnerat,
-  Paul Howarth, Peter Wu, Ray Satiro, Steve Holme, Symeon Paraschoudis,
-  Tatsuhiro Tsujikawa, Ulrich Telle, Viktor Szakáts, Waldek Kozba,
-  Yousuke Kimoto,
+  
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/mail/lib-2014-09/0064.html
- [2] = http://curl.haxx.se/mail/lib-2014-09/0075.html
- [3] = http://curl.haxx.se/mail/lib-2014-08/0273.html
- [4] = http://curl.haxx.se/bug/view.cgi?id=1422
- [5] = http://curl.haxx.se/libcurl/c/CURLOPT_COOKIELIST.html
- [6] = http://curl.haxx.se/bug/view.cgi?id=1426
- [7] = http://curl.haxx.se/bug/view.cgi?id=1441
- [8] = http://curl.haxx.se/bug/view.cgi?id=1443
- [9] = http://curl.haxx.se/docs/adv_20141105.html
- [10] = https://github.com/bagder/curl/pull/123
+ [1] =
