@@ -94,6 +94,9 @@
 #ifdef WIN32
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
+#  ifndef R_OK
+#    define R_OK 4
+#  endif
 #endif
 
 #ifndef PATH_MAX
