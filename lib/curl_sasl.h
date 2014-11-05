@@ -105,6 +105,10 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              const char *service,
                                              char **outptr, size_t *outlen);
 
+/* This is used to decode a HTTP DIGEST challenge message */
+CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
+                                              struct digestdata *digest);
+
 /* This is used to clean up the digest specific data */
 void Curl_sasl_digest_cleanup(struct digestdata *digest);
 #endif

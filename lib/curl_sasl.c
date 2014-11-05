@@ -19,6 +19,7 @@
  * KIND, either express or implied.
  *
  * RFC2195 CRAM-MD5 authentication
+ * RFC2617 Basic and Digest Access Authentication
  * RFC2831 DIGEST-MD5 authentication
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
@@ -57,15 +58,90 @@
 extern void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
 #endif
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_WINDOWS_SSPI)
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+
+#if !defined(USE_WINDOWS_SSPI)
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
 #define DIGEST_QOP_VALUE_AUTH_CONF        (1 << 2)
+#endif /* !USE_WINDOWS_SSPI */
 
 #define DIGEST_QOP_VALUE_STRING_AUTH      "auth"
 #define DIGEST_QOP_VALUE_STRING_AUTH_INT  "auth-int"
 #define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
 
+#define DIGEST_MAX_VALUE_LENGTH           256
+#define DIGEST_MAX_CONTENT_LENGTH         1024
+
+/*
+ * Return 0 on success and then the buffers are filled in fine.
+ *
+ * Non-zero means failure to parse.
+ */
+static int sasl_digest_get_pair(const char *str, char *value, char *content,
+                                const char **endptr)
+{
+  int c;
+  bool starts_with_quote = FALSE;
+  bool escape = FALSE;
+
+  for(c = DIGEST_MAX_VALUE_LENGTH - 1; (*str && (*str != '=') && c--); )
+    *value++ = *str++;
+  *value=0;
+
+  if('=' != *str++)
+    /* eek, no match */
+    return 1;
+
+  if('\"' == *str) {
+    /* this starts with a quote so it must end with one as well! */
+    str++;
+    starts_with_quote = TRUE;
+  }
+
+  for(c = DIGEST_MAX_CONTENT_LENGTH - 1; *str && c--; str++) {
+    switch(*str) {
+    case '\\':
+      if(!escape) {
+        /* possibly the start of an escaped quote */
+        escape = TRUE;
+        *content++ = '\\'; /* even though this is an escape character, we still
+                              store it as-is in the target buffer */
+        continue;
+      }
+      break;
+    case ',':
+      if(!starts_with_quote) {
+        /* this signals the end of the content if we didn't get a starting
+           quote and then we do "sloppy" parsing */
+        c=0; /* the end */
+        continue;
+      }
+      break;
+    case '\r':
+    case '\n':
+      /* end of string */
+      c=0;
+      continue;
+    case '\"':
+      if(!escape && starts_with_quote) {
+        /* end of string */
+        c=0;
+        continue;
+      }
+      break;
+    }
+    escape = FALSE;
+    *content++ = *str;
+  }
+  *content=0;
+
+  *endptr = str;
+
+  return 0; /* all is fine! */
+}
+
+#if !defined(USE_WINDOWS_SSPI)
 /* Retrieves the value for a corresponding key from the challenge string
  * returns TRUE if the key could be found, FALSE if it does not exists
  */
@@ -122,7 +198,9 @@ static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
 
   return CURLE_OK;
 }
-#endif
+#endif /* !USE_WINDOWS_SSPI */
+
+#endif /* !CURL_DISABLE_CRYPTO_AUTH */
 
 #if !defined(USE_WINDOWS_SSPI)
 /*
@@ -581,6 +659,136 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   return result;
 }
 #endif  /* !USE_WINDOWS_SSPI */
+
+/*
+ * Curl_sasl_decode_digest_http_message()
+ *
+ * This is used to decode a HTTP DIGEST challenge message into the seperate
+ * attributes.
+ *
+ * Parameters:
+ *
+ * chlg    [in]     - Pointer to the challenge message.
+ * digest  [in/out] - The digest data struct being used and modified.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
+                                              struct digestdata *digest)
+{
+  bool before = FALSE; /* got a nonce before */
+  bool foundAuth = FALSE;
+  bool foundAuthInt = FALSE;
+  char *token = NULL;
+  char *tmp = NULL;
+
+  /* If we already have received a nonce, keep that in mind */
+  if(digest->nonce)
+    before = TRUE;
+
+  /* Clean up any former leftovers and initialise to defaults */
+  Curl_sasl_digest_cleanup(digest);
+
+  for(;;) {
+    char value[DIGEST_MAX_VALUE_LENGTH];
+    char content[DIGEST_MAX_CONTENT_LENGTH];
+
+    /* Extract a value=content pair */
+    if(!sasl_digest_get_pair(chlg, value, content, &chlg)) {
+      if(Curl_raw_equal(value, "nonce")) {
+        digest->nonce = strdup(content);
+        if(!digest->nonce)
+          return CURLE_OUT_OF_MEMORY;
+      }
+      else if(Curl_raw_equal(value, "stale")) {
+        if(Curl_raw_equal(content, "true")) {
+          digest->stale = TRUE;
+          digest->nc = 1; /* we make a new nonce now */
+        }
+      }
+      else if(Curl_raw_equal(value, "realm")) {
+        digest->realm = strdup(content);
+        if(!digest->realm)
+          return CURLE_OUT_OF_MEMORY;
+      }
+      else if(Curl_raw_equal(value, "opaque")) {
+        digest->opaque = strdup(content);
+        if(!digest->opaque)
+          return CURLE_OUT_OF_MEMORY;
+      }
+      else if(Curl_raw_equal(value, "qop")) {
+        char *tok_buf;
+        /* Tokenize the list and choose auth if possible, use a temporary
+            clone of the buffer since strtok_r() ruins it */
+        tmp = strdup(content);
+        if(!tmp)
+          return CURLE_OUT_OF_MEMORY;
+
+        token = strtok_r(tmp, ",", &tok_buf);
+        while(token != NULL) {
+          if(Curl_raw_equal(token, DIGEST_QOP_VALUE_STRING_AUTH)) {
+            foundAuth = TRUE;
+          }
+          else if(Curl_raw_equal(token, DIGEST_QOP_VALUE_STRING_AUTH_INT)) {
+            foundAuthInt = TRUE;
+          }
+          token = strtok_r(NULL, ",", &tok_buf);
+        }
+
+        free(tmp);
+
+        /* Select only auth o auth-int. Otherwise, ignore */
+        if(foundAuth) {
+          digest->qop = strdup(DIGEST_QOP_VALUE_STRING_AUTH);
+          if(!digest->qop)
+            return CURLE_OUT_OF_MEMORY;
+        }
+        else if(foundAuthInt) {
+          digest->qop = strdup(DIGEST_QOP_VALUE_STRING_AUTH_INT);
+          if(!digest->qop)
+            return CURLE_OUT_OF_MEMORY;
+        }
+      }
+      else if(Curl_raw_equal(value, "algorithm")) {
+        digest->algorithm = strdup(content);
+        if(!digest->algorithm)
+          return CURLE_OUT_OF_MEMORY;
+
+        if(Curl_raw_equal(content, "MD5-sess"))
+          digest->algo = CURLDIGESTALGO_MD5SESS;
+        else if(Curl_raw_equal(content, "MD5"))
+          digest->algo = CURLDIGESTALGO_MD5;
+        else
+          return CURLE_BAD_CONTENT_ENCODING;
+      }
+      else {
+        /* unknown specifier, ignore it! */
+      }
+    }
+    else
+      break; /* we're done here */
+
+    /* Pass all additional spaces here */
+    while(*chlg && ISSPACE(*chlg))
+      chlg++;
+
+    /* Allow the list to be comma-separated */
+    if(',' == *chlg)
+      chlg++;
+  }
+
+  /* We had a nonce since before, and we got another one now without
+     'stale=true'. This means we provided bad credentials in the previous
+     request */
+  if(before && !digest->stale)
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  /* We got this header without a nonce, that's a bad Digest line! */
+  if(!digest->nonce)
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  return CURLE_OK;
+}
 
 /*
  * Curl_sasl_digest_cleanup()
