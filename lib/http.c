@@ -845,7 +845,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
             infof(data, "Ignoring duplicate digest auth header.\n");
           }
           else {
-            CURLdigest dig;
+            CURLcode result;
             *availp |= CURLAUTH_DIGEST;
             authp->avail |= CURLAUTH_DIGEST;
 
@@ -853,9 +853,8 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
              * authentication isn't activated yet, as we need to store the
              * incoming data from this header in case we are gonna use
              * Digest. */
-            dig = Curl_input_digest(conn, proxy, auth);
-
-            if(CURLDIGEST_FINE != dig) {
+            result = Curl_input_digest(conn, proxy, auth);
+            if(result) {
               infof(data, "Authentication problem. Ignoring this.\n");
               data->state.authproblem = TRUE;
             }
