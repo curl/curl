@@ -45,8 +45,6 @@
 #define MAX_VALUE_LENGTH 256
 #define MAX_CONTENT_LENGTH 1024
 
-static void digest_cleanup_one(struct digestdata *dig);
-
 /*
  * Return 0 on success and then the buffers are filled in fine.
  *
@@ -150,7 +148,7 @@ CURLcode Curl_input_digest(struct connectdata *conn,
       before = TRUE;
 
     /* clear off any former leftovers and init to defaults */
-    digest_cleanup_one(d);
+    Curl_sasl_digest_cleanup(d);
 
     for(;;) {
       char value[MAX_VALUE_LENGTH];
@@ -579,25 +577,10 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static void digest_cleanup_one(struct digestdata *d)
-{
-  Curl_safefree(d->nonce);
-  Curl_safefree(d->cnonce);
-  Curl_safefree(d->realm);
-  Curl_safefree(d->opaque);
-  Curl_safefree(d->qop);
-  Curl_safefree(d->algorithm);
-
-  d->nc = 0;
-  d->algo = CURLDIGESTALGO_MD5; /* default algorithm */
-  d->stale = FALSE; /* default means normal, not stale */
-}
-
-
 void Curl_digest_cleanup(struct SessionHandle *data)
 {
-  digest_cleanup_one(&data->state.digest);
-  digest_cleanup_one(&data->state.proxydigest);
+  Curl_sasl_digest_cleanup(&data->state.digest);
+  Curl_sasl_digest_cleanup(&data->state.proxydigest);
 }
 
 #endif

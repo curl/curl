@@ -582,6 +582,29 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 }
 #endif  /* !USE_WINDOWS_SSPI */
 
+/*
+ * Curl_sasl_digest_cleanup()
+ *
+ * This is used to clean up the digest specific data.
+ *
+ * Parameters:
+ *
+ * digest    [in/out] - The digest data struct being cleaned up.
+ *
+ */
+void Curl_sasl_digest_cleanup(struct digestdata *digest)
+{
+  Curl_safefree(digest->nonce);
+  Curl_safefree(digest->cnonce);
+  Curl_safefree(digest->realm);
+  Curl_safefree(digest->opaque);
+  Curl_safefree(digest->qop);
+  Curl_safefree(digest->algorithm);
+
+  digest->nc = 0;
+  digest->algo = CURLDIGESTALGO_MD5; /* default algorithm */
+  digest->stale = FALSE; /* default means normal, not stale */
+}
 #endif  /* CURL_DISABLE_CRYPTO_AUTH */
 
 #ifdef USE_NTLM

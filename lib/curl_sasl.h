@@ -104,6 +104,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              const char *passwdp,
                                              const char *service,
                                              char **outptr, size_t *outlen);
+
+/* This is used to clean up the digest specific data */
+void Curl_sasl_digest_cleanup(struct digestdata *digest);
 #endif
 
 #ifdef USE_NTLM
