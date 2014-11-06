@@ -12,7 +12,13 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o
+ o OS400: Adjust specific support to last release
+ o THANKS: Remove duplicate names
+ o url.c: Fixed compilation warning
+ o ssh: Fixed build on platforms where R_OK is not defined [1]
+ o tool_strdup.c: include the tool strdup.h
+ o build: Fixed Visual Studio project file generation of strdup.[c|h]
+ o curl_easy_setopt.3: add CURLOPT_PINNEDPUBLICKEY [2]
 
 This release includes the following known bugs:
 
@@ -21,10 +27,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Christian Hägele, Daniel Stenberg, Frank Gevaerts, Gisle Vanem, Jan Ehrhardt,
+  Patrick Monnerat, Steve Holme,
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = http://curl.haxx.se/mail/lib-2014-11/0035.html
+ [2] = http://curl.haxx.se/mail/lib-2014-11/0078.html
+ [3] =
+ 
