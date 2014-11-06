@@ -59,13 +59,10 @@
 extern void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
 #endif
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
-
-#if !defined(USE_WINDOWS_SSPI)
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_WINDOWS_SSPI)
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
 #define DIGEST_QOP_VALUE_AUTH_CONF        (1 << 2)
-#endif /* !USE_WINDOWS_SSPI */
 
 #define DIGEST_QOP_VALUE_STRING_AUTH      "auth"
 #define DIGEST_QOP_VALUE_STRING_AUTH_INT  "auth-int"
@@ -194,7 +191,6 @@ static char *sasl_digest_string_quoted(const char *source)
   return dest;
 }
 
-#if !defined(USE_WINDOWS_SSPI)
 /* Retrieves the value for a corresponding key from the challenge string
  * returns TRUE if the key could be found, FALSE if it does not exists
  */
@@ -251,9 +247,7 @@ static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
 
   return CURLE_OK;
 }
-#endif /* !USE_WINDOWS_SSPI */
-
-#endif /* !CURL_DISABLE_CRYPTO_AUTH */
+#endif /* !CURL_DISABLE_CRYPTO_AUTH && !USE_WINDOWS_SSPI */
 
 #if !defined(USE_WINDOWS_SSPI)
 /*
