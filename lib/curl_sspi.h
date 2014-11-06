@@ -60,6 +60,10 @@ extern PSecurityFunctionTable s_pSecFn;
 #define SP_NAME_NEGOTIATE           "Negotiate"
 #define SP_NAME_KERBEROS            "Kerberos"
 
+#ifndef ISC_REQ_USE_HTTP_STYLE
+#define ISC_REQ_USE_HTTP_STYLE                0x01000000
+#endif
+
 #ifndef SEC_E_INSUFFICIENT_MEMORY
 # define SEC_E_INSUFFICIENT_MEMORY             ((HRESULT)0x80090300L)
 #endif
