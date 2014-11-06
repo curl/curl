@@ -346,7 +346,8 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
  */
 void Curl_sasl_digest_cleanup(struct digestdata *digest)
 {
-  (void) digest;
+  /* Free the input token */
+  Curl_safefree(digest->input_token);
 }
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */
 
