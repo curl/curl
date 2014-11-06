@@ -252,6 +252,8 @@ if(NOT NOT_NEED_LIBNSL)
   check_library_exists_concat("nsl"    gethostbyname  HAVE_LIBNSL)
 endif(NOT NOT_NEED_LIBNSL)
 
+check_function_exists(gethostname HAVE_GETHOSTNAME)
+
 if(WIN32)
   check_library_exists_concat("ws2_32" getch        HAVE_LIBWS2_32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
