@@ -79,6 +79,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   char *tmp;
   char *response;
   size_t len;
+  bool have_chlg;
 
   /* Point to the address of the pointer that holds the string to send to the
      server, which is for a plain host or for a HTTP proxy */
@@ -116,7 +117,13 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   if(!passwdp)
     passwdp="";
 
-  if(!d->nonce) {
+#if defined(USE_WINDOWS_SSPI)
+  have_chlg = d->input_token ? TRUE : FALSE;
+#else
+  have_chlg = d->nonce ? TRUE : FALSE;
+#endif
+
+  if(!have_chlg) {
     authp->done = FALSE;
     return CURLE_OK;
   }
