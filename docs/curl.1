@@ -78,6 +78,11 @@ probably have to put the full URL within double quotes to avoid the shell from
 interfering with it. This also goes for other characters treated special, like
 for example '&', '?' and '*'.
 
+Provide the IPv6 zone index in the URL with an escaped percentage sign and the
+interface name. Like in
+
+  http://[fe80::3%25eth0]/
+
 If you specify URL without protocol:// prefix, curl will attempt to guess what
 protocol you might want. It will then default to HTTP but try other protocols
 based on often-used host name prefixes. For example, for host names starting
