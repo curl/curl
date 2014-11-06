@@ -23,12 +23,8 @@
 #ifdef CURL_STATICLIB
 #  define LIBHOSTNAME_EXTERN
 #elif defined(WIN32) || defined(__SYMBIAN32__)
-#  if defined(BUILDING_LIBCURL)
-#    define LIBHOSTNAME_EXTERN  __declspec(dllexport)
-#  else
-#    define LIBHOSTNAME_EXTERN  __declspec(dllimport)
-#  endif
-#elif defined(BUILDING_LIBCURL) && defined(CURL_HIDDEN_SYMBOLS)
+#  define LIBHOSTNAME_EXTERN  __declspec(dllexport)
+#elif defined(CURL_HIDDEN_SYMBOLS)
 #  define LIBHOSTNAME_EXTERN CURL_EXTERN_SYMBOL
 #else
 #  define LIBHOSTNAME_EXTERN
