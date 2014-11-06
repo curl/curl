@@ -288,10 +288,15 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
                                               struct digestdata *digest)
 {
-  (void) chlg;
-  (void) digest;
+  /* Clean up any former leftovers and initialise to defaults */
+  Curl_sasl_digest_cleanup(digest);
 
-  return CURLE_NOT_BUILT_IN;
+  /* Simply store the challenge for use later */
+  digest->input_token = (BYTE *) strdup(chlg);
+  if(!digest->input_token)
+    return CURLE_OUT_OF_MEMORY;
+
+  return CURLE_OK;
 }
 
 /*
