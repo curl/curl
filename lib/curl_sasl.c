@@ -96,7 +96,7 @@ static int sasl_digest_get_pair(const char *str, char *value, char *content,
 
   for(c = DIGEST_MAX_VALUE_LENGTH - 1; (*str && (*str != '=') && c--); )
     *value++ = *str++;
-  *value=0;
+  *value = 0;
 
   if('=' != *str++)
     /* eek, no match */
@@ -123,19 +123,19 @@ static int sasl_digest_get_pair(const char *str, char *value, char *content,
       if(!starts_with_quote) {
         /* this signals the end of the content if we didn't get a starting
            quote and then we do "sloppy" parsing */
-        c=0; /* the end */
+        c = 0; /* the end */
         continue;
       }
       break;
     case '\r':
     case '\n':
       /* end of string */
-      c=0;
+      c = 0;
       continue;
     case '\"':
       if(!escape && starts_with_quote) {
         /* end of string */
-        c=0;
+        c = 0;
         continue;
       }
       break;
@@ -143,7 +143,7 @@ static int sasl_digest_get_pair(const char *str, char *value, char *content,
     escape = FALSE;
     *content++ = *str;
   }
-  *content=0;
+  *content = 0;
 
   *endptr = str;
 
@@ -787,7 +787,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
 
         free(tmp);
 
-        /* Select only auth o auth-int. Otherwise, ignore */
+        /* Select only auth or auth-int. Otherwise, ignore */
         if(foundAuth) {
           digest->qop = strdup(DIGEST_QOP_VALUE_STRING_AUTH);
           if(!digest->qop)

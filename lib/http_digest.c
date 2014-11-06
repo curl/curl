@@ -48,14 +48,16 @@ CURLcode Curl_input_digest(struct connectdata *conn,
                            const char *header) /* rest of the *-authenticate:
                                                   header */
 {
-  struct SessionHandle *data=conn->data;
-  struct digestdata *d;
+  struct SessionHandle *data = conn->data;
+
+  /* Point to the correct struct with this */
+  struct digestdata *digest;
 
   if(proxy) {
-    d = &data->state.proxydigest;
+    digest = &data->state.proxydigest;
   }
   else {
-    d = &data->state.digest;
+    digest = &data->state.digest;
   }
 
   if(!checkprefix("Digest", header))
@@ -65,7 +67,7 @@ CURLcode Curl_input_digest(struct connectdata *conn,
   while(*header && ISSPACE(*header))
     header++;
 
-  return Curl_sasl_decode_digest_http_message(header, d);
+  return Curl_sasl_decode_digest_http_message(header, digest);
 }
 
 CURLcode Curl_output_digest(struct connectdata *conn,
@@ -90,18 +92,18 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   const char *passwdp;
 
   /* Point to the correct struct with this */
-  struct digestdata *d;
+  struct digestdata *digest;
   struct auth *authp;
 
   if(proxy) {
-    d = &data->state.proxydigest;
+    digest = &data->state.proxydigest;
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->proxyuser;
     passwdp = conn->proxypasswd;
     authp = &data->state.authproxy;
   }
   else {
-    d = &data->state.digest;
+    digest = &data->state.digest;
     allocuserpwd = &conn->allocptr.userpwd;
     userp = conn->user;
     passwdp = conn->passwd;
@@ -112,15 +114,15 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
   /* not set means empty */
   if(!userp)
-    userp="";
+    userp = "";
 
   if(!passwdp)
-    passwdp="";
+    passwdp = "";
 
 #if defined(USE_WINDOWS_SSPI)
-  have_chlg = d->input_token ? TRUE : FALSE;
+  have_chlg = digest->input_token ? TRUE : FALSE;
 #else
-  have_chlg = d->nonce ? TRUE : FALSE;
+  have_chlg = digest->nonce ? TRUE : FALSE;
 #endif
 
   if(!have_chlg) {
@@ -147,13 +149,13 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     path = (unsigned char *) aprintf("%.*s", urilen, uripath);
   }
   else
-    path = (unsigned char *) strdup((char *)uripath);
+    path = (unsigned char *) strdup((char *) uripath);
 
   if(!path)
     return CURLE_OUT_OF_MEMORY;
 
   result = Curl_sasl_create_digest_http_message(data, userp, passwdp, request,
-                                                path, d, &response, &len);
+                                                path, digest, &response, &len);
   free(path);
   if(result)
     return result;
