@@ -711,7 +711,6 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   return result;
 }
-#endif  /* !USE_WINDOWS_SSPI */
 
 /*
  * Curl_sasl_decode_digest_http_message()
@@ -1100,6 +1099,8 @@ void Curl_sasl_digest_cleanup(struct digestdata *digest)
   digest->algo = CURLDIGESTALGO_MD5; /* default algorithm */
   digest->stale = FALSE; /* default means normal, not stale */
 }
+#endif  /* !USE_WINDOWS_SSPI */
+
 #endif  /* CURL_DISABLE_CRYPTO_AUTH */
 
 #ifdef USE_NTLM

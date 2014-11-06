@@ -271,6 +271,83 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 
   return result;
 }
+
+/*
+ * Curl_sasl_decode_digest_http_message()
+ *
+ * This is used to decode a HTTP DIGEST challenge message into the seperate
+ * attributes.
+ *
+ * Parameters:
+ *
+ * chlg    [in]     - Pointer to the challenge message.
+ * digest  [in/out] - The digest data struct being used and modified.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
+                                              struct digestdata *digest)
+{
+  (void) chlg;
+  (void) digest;
+
+  return CURLE_NOT_BUILT_IN;
+}
+
+/*
+ * Curl_sasl_create_digest_http_message()
+ *
+ * This is used to generate a HTTP DIGEST response message ready for sending
+ * to the recipient.
+ *
+ * Parameters:
+ *
+ * data    [in]     - The session handle.
+ * userp   [in]     - The user name.
+ * passdwp [in]     - The user's password.
+ * request [in]     - The HTTP request.
+ * uripath [in]     - The path of the HTTP uri.
+ * digest  [in/out] - The digest data struct being used and modified.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
+                                              const char *userp,
+                                              const char *passwdp,
+                                              const unsigned char *request,
+                                              const unsigned char *uripath,
+                                              struct digestdata *digest,
+                                              char **outptr, size_t *outlen)
+{
+  (void) data;
+  (void) userp;
+  (void) passwdp;
+  (void) request;
+  (void) uripath;
+  (void) digest;
+  (void) outptr;
+  (void) outlen;
+
+  return CURLE_NOT_BUILT_IN;
+}
+
+/*
+ * Curl_sasl_digest_cleanup()
+ *
+ * This is used to clean up the digest specific data.
+ *
+ * Parameters:
+ *
+ * digest    [in/out] - The digest data struct being cleaned up.
+ *
+ */
+void Curl_sasl_digest_cleanup(struct digestdata *digest)
+{
+  (void) digest;
+}
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */
 
 #if defined(USE_KRB5)
