@@ -42,7 +42,6 @@
  5.3 Rearrange request header order
  5.4 SPDY
  5.5 auth= in URLs
- 5.6 Digest via Windows SSPI
 
  6. TELNET
  6.1 ditch stdin
@@ -313,12 +312,6 @@ This is not detailed in any FTP specification.
  test:pass;auth=NTLM or --user test:pass --ntlm from the command line. 
 
  Additionally this should be implemented for proxy base URLs as well.
-
-5.6 Digest via Windows SSPI
-
- libcurl already supports HTTP Digest Authentication via native routines as well
- as SASL Digest via both Windows SSPI and native routines. In addition to this
- libcurl should also support HTTP Digest Authentication via Windows SSPI.
 
 6. TELNET
 
