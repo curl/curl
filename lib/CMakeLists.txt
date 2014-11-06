@@ -57,7 +57,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-if(CURL_USE_ARES)
+if(USE_ARES)
   include_directories(${CARES_INCLUDE_DIR})
 endif()
 
