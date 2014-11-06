@@ -35,6 +35,15 @@ foreach(TEST_NAME ${noinst_PROGRAMS})
   setup_test(${TEST_NAME} ${${TEST_NAME}_SOURCES})
 endforeach()
 
+# Allows for hostname override to make tests machine independent.
+# TODO this cmake build assumes a shared build, detect static linking here!
+if(NOT WIN32)
+  add_library(hostname MODULE sethostname.c sethostname.h)
+  # Output to .libs for compatibility with autotools, the test data expects a
+  # library at (tests)/libtest/.libs/libhostname.so
+  set_target_properties(hostname PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/.libs)
+endif()
 
 # # files used only in some libcurl test programs
 # SET(TESTUTIL testutil.c testutil.h)
