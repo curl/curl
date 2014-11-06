@@ -291,8 +291,10 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
 {
   size_t chlglen = strlen(chlg);
 
-  /* Clean up any former leftovers and initialise to defaults */
-  Curl_sasl_digest_cleanup(digest);
+  /* We had an input token before and we got another one now. This means we
+  provided bad credentials in the previous request. */
+  if(digest->input_token)
+    return CURLE_BAD_CONTENT_ENCODING;
 
   /* Simply store the challenge for use later */
   digest->input_token = (BYTE *) Curl_memdup(chlg, chlglen);
