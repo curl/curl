@@ -71,6 +71,7 @@ moo
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>

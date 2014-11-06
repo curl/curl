@@ -61,6 +61,7 @@ http
 lib547
 </tool>
 <features>
+!SSPI
 crypto
 </features>
  <name>

@@ -63,6 +63,7 @@ This IS the second real page!
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>

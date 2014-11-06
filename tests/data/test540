@@ -58,6 +58,7 @@ http
 lib540
 </tool>
 <features>
+!SSPI
 crypto
 </features>
  <name>

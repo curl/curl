@@ -52,6 +52,7 @@ This is not the real page either
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>

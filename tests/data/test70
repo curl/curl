@@ -52,6 +52,7 @@ This IS the real page!
 # Client-side
 <client>
 <features>
+!SSPI
 NTLM
 </features>
 <server>
