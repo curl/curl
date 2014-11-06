@@ -343,6 +343,8 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   unsigned long attrs;
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
+  (void) data;
+
   /* Query the security package for DigestSSP */
   status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_DIGEST),
                                               &SecurityPackage);
