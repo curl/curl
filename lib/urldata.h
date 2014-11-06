@@ -393,6 +393,7 @@ struct curl_ssl_session {
 struct digestdata {
 #if defined(USE_WINDOWS_SSPI)
   BYTE *input_token;
+  size_t input_token_len;
 #else
   char *nonce;
   char *cnonce;

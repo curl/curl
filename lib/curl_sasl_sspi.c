@@ -37,6 +37,7 @@
 #include "warnless.h"
 #include "curl_memory.h"
 #include "curl_multibyte.h"
+#include "strdup.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -288,13 +289,17 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
                                               struct digestdata *digest)
 {
+  size_t chlglen = strlen(chlg);
+
   /* Clean up any former leftovers and initialise to defaults */
   Curl_sasl_digest_cleanup(digest);
 
   /* Simply store the challenge for use later */
-  digest->input_token = (BYTE *) strdup(chlg);
+  digest->input_token = (BYTE *) Curl_memdup(chlg, chlglen);
   if(!digest->input_token)
     return CURLE_OUT_OF_MEMORY;
+
+  digest->input_token_len = chlglen;
 
   return CURLE_OK;
 }
@@ -392,8 +397,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   chlg_desc.pBuffers     = chlg_buf;
   chlg_buf[0].BufferType = SECBUFFER_TOKEN;
   chlg_buf[0].pvBuffer   = digest->input_token;
-  chlg_buf[0].cbBuffer   = curlx_uztoul(strlen((const char *)
-                                                digest->input_token));
+  chlg_buf[0].cbBuffer   = curlx_uztoul(digest->input_token_len);
   chlg_buf[1].BufferType = SECBUFFER_PKG_PARAMS;
   chlg_buf[1].pvBuffer   = (void *)request;
   chlg_buf[1].cbBuffer   = curlx_uztoul(strlen((const char *) request));
@@ -472,6 +476,9 @@ void Curl_sasl_digest_cleanup(struct digestdata *digest)
 {
   /* Free the input token */
   Curl_safefree(digest->input_token);
+
+  /* Reset any variables */
+  digest->input_token_len = 0;
 }
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */
 
