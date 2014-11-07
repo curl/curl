@@ -26,10 +26,9 @@
 '* Hacked by Guenter Knauf
 '***************************************************************************
 Option Explicit
-Const myVersion = "0.3.8"
+Const myVersion = "0.3.9"
 
-Const myUrl = "http://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1"
-
+Const myUrl = "http://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt"
 Const myOpenssl = "openssl.exe"
 
 Const myCdSavF = FALSE       ' Flag: save downloaded data to file certdata.txt
@@ -48,7 +47,7 @@ Set objHttp = WScript.CreateObject("WinHttp.WinHttpRequest.5.1")
 If objHttp Is Nothing Then Set objHttp = WScript.CreateObject("WinHttp.WinHttpRequest")
 myBase = Left(WScript.ScriptFullName, InstrRev(WScript.ScriptFullName, "\"))
 mySelf = Left(WScript.ScriptName, InstrRev(WScript.ScriptName, ".") - 1) & " " & myVersion
-myCdFile = Mid(myUrl, InstrRev(myUrl, "/") + 1, InstrRev(myUrl, "?") - InstrRev(myUrl, "/") - 1)
+myCdFile = Mid(myUrl, InstrRev(myUrl, "/") + 1)
 myCaFile = "ca-bundle.crt"
 myTmpName = InputBox("Enter output filename:", mySelf, myCaFile)
 If Not (myTmpName = "") Then
@@ -60,8 +59,8 @@ objHttp.SetTimeouts 0, 5000, 10000, 10000
 objHttp.Open "GET", myUrl, FALSE
 objHttp.setRequestHeader "User-Agent", WScript.ScriptName & "/" & myVersion
 objHttp.Send ""
-If Not (objHttp.statusText = "OK") Then
-  MsgBox("Failed to download '" & myCdFile & "': " & objHttp.statusText), vbCritical, mySelf
+If Not (objHttp.Status = 200) Then
+  MsgBox("Failed to download '" & myCdFile & "': " & objHttp.Status & " - " & objHttp.StatusText), vbCritical, mySelf
   WScript.Quit 1
 End If
 ' Convert data from ResponseBody instead of using ResponseText because of UTF-8
