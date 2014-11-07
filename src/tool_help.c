@@ -269,6 +269,7 @@ static const struct feat feats[] = {
   {"NTLM_WB",        CURL_VERSION_NTLM_WB},
   {"SSL",            CURL_VERSION_SSL},
   {"krb4",           CURL_VERSION_KERBEROS4},
+  {"krb5",           CURL_VERSION_KERBEROS5},
   {"libz",           CURL_VERSION_LIBZ},
   {"CharConv",       CURL_VERSION_CONV},
   {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
