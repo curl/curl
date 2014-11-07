@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl_version_info 3 "2 Aug 2014" "libcurl 7.38.0" "libcurl Manual"
+.TH curl_version_info 3 "2 Nov 2014" "libcurl 7.40.0" "libcurl Manual"
 .SH NAME
 curl_version_info - returns run-time libcurl version info
 .SH SYNOPSIS
@@ -96,7 +96,10 @@ bits are:
 .IP CURL_VERSION_IPV6
 supports IPv6
 .IP CURL_VERSION_KERBEROS4
-supports kerberos4 (when using FTP)
+supports Kerberos V4 (when using FTP)
+.IP CURL_VERSION_KERBEROS5
+supports Kerberos V5 authentication for FTP, IMAP, POP3, SMTP and SOCKSv5 proxy
+(Added in 7.40.0)
 .IP CURL_VERSION_SSL
 supports SSL (HTTPS/FTPS) (Added in 7.10)
 .IP CURL_VERSION_LIBZ

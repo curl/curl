@@ -2261,6 +2261,7 @@ typedef struct {
 #define CURL_VERSION_NTLM_WB   (1<<15) /* NTLM delegating to winbind helper */
 #define CURL_VERSION_HTTP2     (1<<16) /* HTTP2 support built-in */
 #define CURL_VERSION_GSSAPI    (1<<17) /* GSS-API is supported */
+#define CURL_VERSION_KERBEROS5 (1<<18) /* Kerberos V5 auth is supported */
 
  /*
  * NAME curl_version_info()
