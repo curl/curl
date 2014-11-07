@@ -1046,20 +1046,20 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   if(digest->opaque) {
     /* Append the opaque */
     tmp = aprintf("%s, opaque=\"%s\"", response, digest->opaque);
+    free(response);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
 
-    free(response);
     response = tmp;
   }
 
   if(digest->algorithm) {
     /* Append the algorithm */
     tmp = aprintf("%s, algorithm=\"%s\"", response, digest->algorithm);
+    free(response);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
 
-    free(response);
     response = tmp;
   }
 
