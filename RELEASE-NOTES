@@ -8,6 +8,7 @@ Curl and libcurl 7.39.1
 
 This release includes the following changes:
 
+ o http_digest: Added support for Windows SSPI based authentication
  o
 
 This release includes the following bugfixes:
@@ -27,8 +28,8 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Christian HÃ¤gele, Daniel Stenberg, Frank Gevaerts, Gisle Vanem, Jan Ehrhardt,
-  Patrick Monnerat, Steve Holme,
+  Christian Hägele, Dan Fandrich, Daniel Stenberg, Frank Gevaerts,
+  Gisle Vanem, Jan Ehrhardt, Patrick Monnerat, Steve Holme,
 
         Thanks! (and sorry if I forgot to mention someone)
 
