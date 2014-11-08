@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -90,18 +90,23 @@ WINDOWS_SDK_PATH = "$(PROGRAMFILES)\Microsoft SDK"
 ########################################################
 ## Nothing more to do below this line!
 
-ZLIB_CFLAGS   = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
-ZLIB_LFLAGS   = "/LIBPATH:$(ZLIB_PATH)"
-ZLIB_LIBS     = zlib.lib
-ZLIB_IMP_LIBS = zdll.lib
+ZLIB_CFLAGS    = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
+ZLIB_LFLAGS    = "/LIBPATH:$(ZLIB_PATH)"
+ZLIB_LIBS      = zlib.lib
+ZLIB_IMP_LIBS  = zdll.lib
 
 SSL_CFLAGS     = /DUSE_SSLEAY
 SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
 SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib
+WINLIBS        = ws2_32.lib wldap32.lib advapi32.lib
 
 WINSSL_CFLAGS  = /DUSE_SCHANNEL
 #WINSSL_LIBS    = gdi32.lib user32.lib
+
+!IFDEF USE_IDN
+WINLIBS        = $(WINLIBS) normaliz.lib
+!ENDIF
 
 # Runtime library configuration
 RTLIB   = /MD
@@ -340,9 +345,8 @@ LINKLIBS_DEBUG = $(LIBCURL_IMP_LIB_DBG) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
-
-LINKLIBS       = $(LINKLIBS) ws2_32.lib wldap32.lib advapi32.lib
-LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) ws2_32.lib wldap32.lib advapi32.lib
+LINKLIBS       = $(LINKLIBS) $(WINLIBS)
+LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) $(WINLIBS)
 
 all : release
 
