@@ -130,6 +130,18 @@ vc-x64: $(VC)
 	cd ..\src
 	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release
 
+vc-sspi: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) cfg=release WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) cfg=release WINDOWS_SSPI=1
+
+vc-x64-sspi: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release WINDOWS_SSPI=1
+
 vc-zlib: $(VC)
 	cd lib
 	nmake /f Makefile.$(VC) cfg=release-zlib
@@ -141,6 +153,18 @@ vc-x64-zlib: $(VC)
 	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-zlib
 	cd ..\src
 	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-zlib
+
+vc-zlib-sspi: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) cfg=release-zlib WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) cfg=release-zlib WINDOWS_SSPI=1
+
+vc-x64-zlib-sspi: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-zlib WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-zlib WINDOWS_SSPI=1
 
 vc-ssl: $(VC)
 	cd lib
@@ -154,6 +178,18 @@ vc-x64-ssl: $(VC)
 	cd ..\src
 	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl
 
+vc-ssl-sspi: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) cfg=release-ssl WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) cfg=release-ssl WINDOWS_SSPI=1
+
+vc-x64-ssl-sspi: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl WINDOWS_SSPI=1
+
 vc-ssl-zlib: $(VC)
 	cd lib
 	nmake /f Makefile.$(VC) cfg=release-ssl-zlib
@@ -166,6 +202,18 @@ vc-x64-ssl-zlib: $(VC)
 	cd ..\src
 	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl-zlib
 
+vc-ssl-zlib-sspi: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) cfg=release-ssl-zlib WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) cfg=release-ssl-zlib WINDOWS_SSPI=1
+
+vc-x64-ssl-zlib-sspi: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl-zlib WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl-zlib WINDOWS_SSPI=1
+
 vc-ssl-ssh2-zlib: $(VC)
 	cd lib
 	nmake /f Makefile.$(VC) cfg=release-ssl-ssh2-zlib
@@ -177,6 +225,18 @@ vc-x64-ssl-ssh2-zlib: $(VC)
 	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl-ssh2-zlib
 	cd ..\src
 	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl-ssh2-zlib
+
+vc-ssl-ssh2-zlib-sspi: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) cfg=release-ssl-ssh2-zlib WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) cfg=release-ssl-ssh2-zlib WINDOWS_SSPI=1
+
+vc-x64-ssl-ssh2-zlib-sspi: $(VC)
+	cd lib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl-ssh2-zlib WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-ssl-ssh2-zlib WINDOWS_SSPI=1
 
 vc-winssl: $(VC)
 	cd lib
@@ -243,12 +303,6 @@ vc-zlib-dll: $(VC)
 	nmake /f Makefile.$(VC) cfg=release-zlib-dll
 	cd ..\src
 	nmake /f Makefile.$(VC) cfg=release-zlib-dll
-
-vc-sspi: $(VC)
-	cd lib
-	nmake /f Makefile.$(VC) cfg=release WINDOWS_SSPI=1
-	cd ..\src
-	nmake /f Makefile.$(VC) cfg=release WINDOWS_SSPI=1
 
 djgpp:
 	$(MAKE) -C lib -f Makefile.dj
