@@ -3373,17 +3373,19 @@ if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
   SUPPORT_FEATURES="$SUPPORT_FEATURES krb5"
 fi
 
-if test "x$CURL_DISABLE_HTTP" != "x1" -a \
-    "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
+if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
   if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
       -o "x$DARWINSSL_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
-    if test "x$NTLM_WB_ENABLED" = "x1"; then
+
+    if test "x$CURL_DISABLE_HTTP" != "x1" -a \
+        "x$NTLM_WB_ENABLED" = "x1"; then
       SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM_WB"
     fi
   fi
 fi
+
 if test "x$USE_TLS_SRP" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES TLS-SRP"
 fi
