@@ -1097,7 +1097,7 @@ void Curl_sasl_digest_cleanup(struct digestdata *digest)
 
 #endif  /* CURL_DISABLE_CRYPTO_AUTH */
 
-#ifdef USE_NTLM
+#if defined(USE_NTLM) && !defined(USE_WINDOWS_SSPI)
 /*
  * Curl_sasl_create_ntlm_type1_message()
  *
@@ -1183,7 +1183,6 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
                                         outlen);
 }
 
-#if !defined(USE_WINDOWS_SSPI)
 /*
  * Curl_sasl_ntlm_cleanup()
  *
@@ -1202,9 +1201,7 @@ void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
   /* Reset any variables */
   ntlm->target_info_len = 0;
 }
-#endif /* !USE_WINDOWS_SSPI */
-
-#endif /* USE_NTLM */
+#endif /* USE_NTLM && !USE_WINDOWS_SSPI*/
 
 /*
  * Curl_sasl_create_xoauth2_message()

@@ -37,6 +37,7 @@
 #include "warnless.h"
 #include "curl_memory.h"
 #include "curl_multibyte.h"
+#include "curl_ntlm_msgs.h"
 #include "strdup.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -486,6 +487,82 @@ void Curl_sasl_digest_cleanup(struct digestdata *digest)
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */
 
 #if defined USE_NTLM
+/*
+* Curl_sasl_create_ntlm_type1_message()
+*
+* This is used to generate an already encoded NTLM type-1 message ready for
+* sending to the recipient.
+*
+* Note: This is a simple wrapper of the NTLM function which means that any
+* SASL based protocols don't have to include the NTLM functions directly.
+*
+* Parameters:
+*
+* userp   [in]     - The user name in the format User or Domain\User.
+* passdwp [in]     - The user's password.
+* ntlm    [in/out] - The ntlm data struct being used and modified.
+* outptr  [in/out] - The address where a pointer to newly allocated memory
+*                    holding the result will be stored upon completion.
+* outlen  [out]    - The length of the output message.
+*
+* Returns CURLE_OK on success.
+*/
+CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
+                                             const char *passwdp,
+                                             struct ntlmdata *ntlm,
+                                             char **outptr, size_t *outlen)
+{
+  return Curl_ntlm_create_type1_message(userp, passwdp, ntlm, outptr, outlen);
+}
+
+/*
+* Curl_sasl_decode_ntlm_type2_message()
+*
+* This is used to decode an already encoded NTLM type-2 message.
+*
+* Parameters:
+*
+* data     [in]     - Pointer to session handle.
+* type2msg [in]     - Pointer to the base64 encoded type-2 message.
+* ntlm     [in/out] - The ntlm data struct being used and modified.
+*
+* Returns CURLE_OK on success.
+*/
+CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+                                             const char *type2msg,
+                                             struct ntlmdata *ntlm)
+{
+  return Curl_ntlm_decode_type2_message(data, type2msg, ntlm);
+}
+
+/*
+* Curl_sasl_create_ntlm_type3_message()
+*
+* This is used to generate an already encoded NTLM type-3 message ready for
+* sending to the recipient.
+*
+* Parameters:
+*
+* data    [in]     - Pointer to session handle.
+* userp   [in]     - The user name in the format User or Domain\User.
+* passdwp [in]     - The user's password.
+* ntlm    [in/out] - The ntlm data struct being used and modified.
+* outptr  [in/out] - The address where a pointer to newly allocated memory
+*                    holding the result will be stored upon completion.
+* outlen  [out]    - The length of the output message.
+*
+* Returns CURLE_OK on success.
+*/
+CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
+                                             const char *userp,
+                                             const char *passwdp,
+                                             struct ntlmdata *ntlm,
+                                             char **outptr, size_t *outlen)
+{
+  return Curl_ntlm_create_type3_message(data, userp, passwdp, ntlm, outptr,
+                                        outlen);
+}
+
 /*
  * Curl_sasl_ntlm_cleanup()
  *
