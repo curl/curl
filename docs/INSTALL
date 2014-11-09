@@ -420,14 +420,17 @@ Win32
    CURL_DISABLE_POP3     disables POP3
    CURL_DISABLE_SMTP     disables SMTP
 
-   If you want to set any of these defines you have the following
-   possibilities:
+   If you want to set any of these defines you have the following options:
 
    - Modify lib/config-win32.h
    - Modify lib/curl_setup.h
    - Modify lib/Makefile.vc6
-   - Add defines to Project/Settings/C/C++/General/Preprocessor Definitions
-     in the vc6libcurl.dsw/vc6libcurl.dsp Visual C++ 6 IDE project.
+   - Modify the "Preprocessor Definitions" in the libcurl project
+
+   Note: The pre-processor settings can be found using the Visual Studio IDE
+   under "Project -> Settings -> C/C++ -> General" in VC6 and "Project ->
+   Properties -> Configuration Properties -> C/C++ -> Preprocessor" in later
+   versions.
 
    Using BSD-style lwIP instead of Winsock TCP/IP stack in Win32 builds
    --------------------------------------------------------------------
@@ -439,8 +442,12 @@ Win32
 
    - Modify lib/config-win32.h and src/config-win32.h
    - Modify lib/Makefile.vc6
-   - Add definition to Project/Settings/C/C++/General/Preprocessor Definitions
-     in the vc6libcurl.dsw/vc6libcurl.dsp Visual C++ 6 IDE project.
+   - Modify the "Preprocessor Definitions" in the libcurl project
+
+   Note: The pre-processor settings can be found using the Visual Studio IDE
+   under "Project -> Settings -> C/C++ -> General" in VC6 and "Project ->
+   Properties -> Configuration Properties -> C/C++ -> Preprocessor" in later
+   versions.
 
    Once that libcurl has been built with BSD-style lwIP TCP/IP stack support,
    in order to use it with your program it is mandatory that your program
