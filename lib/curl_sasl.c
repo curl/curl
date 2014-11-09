@@ -1182,6 +1182,28 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
   return Curl_ntlm_create_type3_message(data, userp, passwdp, ntlm, outptr,
                                         outlen);
 }
+
+#if !defined(USE_WINDOWS_SSPI)
+/*
+ * Curl_sasl_ntlm_cleanup()
+ *
+ * This is used to clean up the ntlm specific data.
+ *
+ * Parameters:
+ *
+ * ntlm    [in/out] - The ntlm data struct being cleaned up.
+ *
+ */
+void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
+{
+  /* Free the target info */
+  Curl_safefree(ntlm->target_info);
+
+  /* Reset any variables */
+  ntlm->target_info_len = 0;
+}
+#endif /* !USE_WINDOWS_SSPI */
+
 #endif /* USE_NTLM */
 
 /*
@@ -1240,13 +1262,16 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
   if(authused == SASL_MECH_GSSAPI) {
     Curl_sasl_gssapi_cleanup(&conn->krb5);
   }
-#ifdef USE_NTLM
+#endif
+
+#if defined(USE_NTLM)
   /* Cleanup the ntlm structure */
-  else if(authused == SASL_MECH_NTLM) {
+  if(authused == SASL_MECH_NTLM) {
     Curl_sasl_ntlm_cleanup(&conn->ntlm);
   }
 #endif
-#else
+
+#if !defined(USE_KRB5) && !defined(USE_NTLM)
   /* Reserved for future use */
   (void)conn;
   (void)authused;

@@ -229,21 +229,11 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
 
 void Curl_http_ntlm_cleanup(struct connectdata *conn)
 {
-#ifdef USE_WINDOWS_SSPI
   Curl_sasl_ntlm_cleanup(&conn->ntlm);
   Curl_sasl_ntlm_cleanup(&conn->proxyntlm);
-#elif defined(NTLM_WB_ENABLED)
+
+#if defined(NTLM_WB_ENABLED)
   Curl_ntlm_wb_cleanup(conn);
-#else
-  (void)conn;
-#endif
-
-#ifndef USE_WINDOWS_SSPI
-  Curl_safefree(conn->ntlm.target_info);
-  conn->ntlm.target_info_len = 0;
-
-  Curl_safefree(conn->proxyntlm.target_info);
-  conn->proxyntlm.target_info_len = 0;
 #endif
 }
 

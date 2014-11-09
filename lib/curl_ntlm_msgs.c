@@ -401,6 +401,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   unsigned long attrs;
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
+  /* Clean up any former leftovers and initialise to defaults */
   Curl_sasl_ntlm_cleanup(ntlm);
 
   /* Query the security package for NTLM */
@@ -493,7 +494,9 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
                                          domain are empty */
   (void)userp;
   (void)passwdp;
-  (void)ntlm;
+
+  /* Clean up any former leftovers and initialise to defaults */
+  Curl_sasl_ntlm_cleanup(ntlm);
 
 #if USE_NTLM2SESSION
 #define NTLM2FLAG NTLMFLAG_NEGOTIATE_NTLM2_KEY
@@ -993,7 +996,11 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
     return CURLE_CONV_FAILED;
 
   /* Return with binary blob encoded into base64 */
-  return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
+  result = Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
+
+  Curl_sasl_ntlm_cleanup(ntlm);
+
+  return result;
 #endif
 }
 
