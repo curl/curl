@@ -22,7 +22,8 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
+    defined(NTLM_WB_ENABLED)
 
 /*
  * NTLM details:
@@ -432,4 +433,4 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#endif /* USE_NTLM && NTLM_WB_ENABLED */
+#endif /* !CURL_DISABLE_HTTP && USE_NTLM && NTLM_WB_ENABLED */

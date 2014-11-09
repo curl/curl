@@ -2597,7 +2597,8 @@ static void conn_free(struct connectdata *conn)
   if(CURL_SOCKET_BAD != conn->tempsock[1])
     Curl_closesocket(conn, conn->tempsock[1]);
 
-#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
+    defined(NTLM_WB_ENABLED)
   Curl_ntlm_wb_cleanup(conn);
 #endif
 
@@ -2663,7 +2664,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 
   Curl_hostcache_prune(data); /* kill old DNS cache entries */
 
-#if defined(USE_NTLM)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
   /* Cleanup NTLM connection-related data */
   Curl_http_ntlm_cleanup(conn);
 #endif
@@ -3691,7 +3692,8 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
 
   conn->ip_version = data->set.ipver;
 
-#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
+    defined(NTLM_WB_ENABLED)
   conn->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
   conn->ntlm_auth_hlpr_pid = 0;
   conn->challenge_header = NULL;

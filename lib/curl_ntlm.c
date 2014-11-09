@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#ifdef USE_NTLM
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
 
 /*
  * NTLM details:
@@ -237,4 +237,4 @@ void Curl_http_ntlm_cleanup(struct connectdata *conn)
 #endif
 }
 
-#endif /* USE_NTLM */
+#endif /* !CURL_DISABLE_HTTP && USE_NTLM */
