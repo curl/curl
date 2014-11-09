@@ -416,6 +416,9 @@ Win32
    CURL_DISABLE_FILE     disables FILE
    CURL_DISABLE_TFTP     disables TFTP
    CURL_DISABLE_HTTP     disables HTTP
+   CURL_DISABLE_IMAP     disables IMAP
+   CURL_DISABLE_POP3     disables POP3
+   CURL_DISABLE_SMTP     disables SMTP
 
    If you want to set any of these defines you have the following
    possibilities:
