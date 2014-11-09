@@ -74,6 +74,7 @@
 #include "conncache.h"
 #include "multiif.h"
 #include "sigpipe.h"
+#include "ssh.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

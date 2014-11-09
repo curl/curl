@@ -2332,12 +2332,6 @@ if test X"$OPT_LIBSSH2" != Xno; then
        dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
        dnl to prevent further configure tests to fail due to this
 
-       dnl libssh2_version is a post 1.0 addition
-       dnl libssh2_init and libssh2_exit were added in 1.2.5
-       dnl libssh2_scp_send64 was added in 1.2.6
-       dnl libssh2_session_handshake was added in 1.2.8
-       AC_CHECK_FUNCS( libssh2_version libssh2_init libssh2_exit \
-                       libssh2_scp_send64 libssh2_session_handshake)
        if test "x$cross_compiling" != "xyes"; then
          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
          export LD_LIBRARY_PATH

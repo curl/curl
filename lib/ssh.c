@@ -99,13 +99,6 @@
 #  endif
 #endif
 
-/* Feature detection based on version numbers to better work with
-   non-configure platforms */
-#if LIBSSH2_VERSION_NUM >= 0x010206
-/* libssh2_knownhost_checkp was added in 1.2.6 */
-#define HAVE_LIBSSH2_KNOWNHOST_CHECKP
-#endif
-
 #ifndef PATH_MAX
 #define PATH_MAX 1024 /* just an extra precaution since there are systems that
                          have their definition hidden well */

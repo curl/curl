@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -158,22 +158,34 @@ struct ssh_conn {
 
 #ifdef USE_LIBSSH2
 
+/* Feature detection based on version numbers to better work with
+   non-configure platforms */
+
 #if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x001000)
 #  error "SCP/SFTP protocols require libssh2 0.16 or later"
 #endif
 
-#if defined(LIBSSH2_VERSION_NUM) && (LIBSSH2_VERSION_NUM >= 0x010000)
-#  define HAVE_LIBSSH2_SFTP_SEEK64 1
-#else
-#  undef HAVE_LIBSSH2_SFTP_SEEK64
+#if LIBSSH2_VERSION_NUM >= 0x010000
+#define HAVE_LIBSSH2_SFTP_SEEK64 1
 #endif
 
-#if defined(LIBSSH2_VERSION_NUM) && (LIBSSH2_VERSION_NUM >= 0x010206)
-#  define HAVE_LIBSSH2_SCP_SEND64 1
-#else
-#  undef HAVE_LIBSSH2_SCP_SEND64
+#if LIBSSH2_VERSION_NUM >= 0x010100
+#define HAVE_LIBSSH2_VERSION 1
 #endif
 
+#if LIBSSH2_VERSION_NUM >= 0x010205
+#define HAVE_LIBSSH2_INIT 1
+#define HAVE_LIBSSH2_EXIT 1
+#endif
+
+#if LIBSSH2_VERSION_NUM >= 0x010206
+#define HAVE_LIBSSH2_KNOWNHOST_CHECKP 1
+#define HAVE_LIBSSH2_SCP_SEND64 1
+#endif
+
+#if LIBSSH2_VERSION_NUM >= 0x010208
+#define HAVE_LIBSSH2_SESSION_HANDSHAKE 1
+#endif
 
 extern const struct Curl_handler Curl_handler_scp;
 extern const struct Curl_handler Curl_handler_sftp;
