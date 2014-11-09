@@ -9,7 +9,8 @@ Curl and libcurl 7.39.1
 This release includes the following changes:
 
  o http_digest: Added support for Windows SSPI based authentication
- o
+ o version info: Added Kerberos V5 to the supported features
+ o Makefile: Added VC targets for WinIDN
 
 This release includes the following bugfixes:
 
@@ -20,6 +21,12 @@ This release includes the following bugfixes:
  o tool_strdup.c: include the tool strdup.h
  o build: Fixed Visual Studio project file generation of strdup.[c|h]
  o curl_easy_setopt.3: add CURLOPT_PINNEDPUBLICKEY [2]
+ o curl.1: show zone index use in a URL
+ o mk-ca-bundle.vbs: switch to new certdata.txt url
+ o Makefile.dist: Added some missing SSPI configurations
+ o build: Fixed no NTLM support for email when CURL_DISABLE_HTTP is defined
+ o SSH: use the port number as well for known_known checks [3]
+ o libssh2: detect features based on version, not configure checks
 
 This release includes the following known bugs:
 
@@ -29,7 +36,8 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Christian Hägele, Dan Fandrich, Daniel Stenberg, Frank Gevaerts,
-  Gisle Vanem, Jan Ehrhardt, Patrick Monnerat, Steve Holme,
+  Gisle Vanem, Guenter Knauf, Jan Ehrhardt, Nobuhiro Ban, Patrick Monnerat,
+  Steve Holme,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -37,5 +45,6 @@ References to bug reports and discussions on issues:
 
  [1] = http://curl.haxx.se/mail/lib-2014-11/0035.html
  [2] = http://curl.haxx.se/mail/lib-2014-11/0078.html
- [3] =
+ [3] = http://curl.haxx.se/bug/view.cgi?id=1448
+ [4] =
  
