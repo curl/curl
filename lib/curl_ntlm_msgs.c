@@ -193,9 +193,6 @@ CURLcode Curl_ntlm_decode_type2_target(struct SessionHandle *data,
   unsigned int target_info_len = 0;
   unsigned int target_info_offset = 0;
 
-  Curl_safefree(ntlm->target_info);
-  ntlm->target_info_len = 0;
-
   if(size >= 48) {
     target_info_len = readshort_le(&buffer[40]);
     target_info_offset = readint_le(&buffer[44]);
@@ -212,11 +209,10 @@ CURLcode Curl_ntlm_decode_type2_target(struct SessionHandle *data,
         return CURLE_OUT_OF_MEMORY;
 
       memcpy(ntlm->target_info, &buffer[target_info_offset], target_info_len);
-      ntlm->target_info_len = target_info_len;
-
     }
-
   }
+
+  ntlm->target_info_len = target_info_len;
 
   return CURLE_OK;
 }
