@@ -55,10 +55,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);
 void Curl_multi_dump(const struct Curl_multi *multi_handle);
 #endif
 
-/* Update the current connection of a One_Easy handle */
-void Curl_multi_set_easy_connection(struct SessionHandle *handle,
-                                    struct connectdata *conn);
-
 void Curl_multi_process_pending_handles(struct Curl_multi *multi);
 
 /* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */

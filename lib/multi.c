@@ -2515,12 +2515,6 @@ static int update_timer(struct Curl_multi *multi)
   return multi->timer_cb((CURLM*)multi, timeout_ms, multi->timer_userp);
 }
 
-void Curl_multi_set_easy_connection(struct SessionHandle *handle,
-                                    struct connectdata *conn)
-{
-  handle->easy_conn = conn;
-}
-
 static bool isHandleAtHead(struct SessionHandle *handle,
                            struct curl_llist *pipeline)
 {
