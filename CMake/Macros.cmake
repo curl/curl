@@ -11,8 +11,11 @@ macro(CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
 endmacro(CHECK_LIBRARY_EXISTS_CONCAT)
 
 # Check if header file exists and add it to the list.
+# This macro is intended to be called multiple times with a sequence of
+# possibly dependent header files.  Some headers depend on others to be
+# compiled correctly.
 macro(CHECK_INCLUDE_FILE_CONCAT FILE VARIABLE)
-  check_include_file("${FILE}" ${VARIABLE})
+  check_include_files("${CURL_INCLUDES};${FILE}" ${VARIABLE})
   if(${VARIABLE})
     set(CURL_INCLUDES ${CURL_INCLUDES} ${FILE})
     set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D${VARIABLE}")
