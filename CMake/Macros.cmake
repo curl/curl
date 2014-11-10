@@ -1,12 +1,15 @@
 #File defines convenience macros for available feature testing
 
 # This macro checks if the symbol exists in the library and if it
-# does, it appends library to the list.
+# does, it prepends library to the list.  It is intended to be called
+# multiple times with a sequence of possibly dependent libraries in
+# order of least-to-most-dependent.  Some libraries depend on others
+# to link correctly.
 macro(CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
-  check_library_exists("${CURL_LIBS};${LIBRARY}" ${SYMBOL} "${CMAKE_LIBRARY_PATH}"
+  check_library_exists("${LIBRARY};${CURL_LIBS}" ${SYMBOL} "${CMAKE_LIBRARY_PATH}"
     ${VARIABLE})
   if(${VARIABLE})
-    list(APPEND CURL_LIBS ${LIBRARY})
+    set(CURL_LIBS ${LIBRARY} ${CURL_LIBS})
   endif(${VARIABLE})
 endmacro(CHECK_LIBRARY_EXISTS_CONCAT)
 
