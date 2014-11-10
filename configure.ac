@@ -3354,7 +3354,7 @@ if test "x$USE_WINDOWS_SSPI" = "x1"; then
 fi
 
 if test "x$HAVE_GSSAPI" = "x1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
+  SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API krb5"
 fi
 
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
