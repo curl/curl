@@ -37,7 +37,8 @@ CURLcode Curl_http2_send_request(struct connectdata *conn);
 CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
                                     struct connectdata *conn);
 CURLcode Curl_http2_setup(struct connectdata *conn);
-CURLcode Curl_http2_switched(struct connectdata *conn);
+CURLcode Curl_http2_switched(struct connectdata *conn,
+                             const char *data, size_t nread);
 #else /* USE_NGHTTP2 */
 #define Curl_http2_init(x) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_send_request(x) CURLE_UNSUPPORTED_PROTOCOL

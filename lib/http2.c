@@ -988,7 +988,8 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   return 0;
 }
 
-CURLcode Curl_http2_switched(struct connectdata *conn)
+CURLcode Curl_http2_switched(struct connectdata *conn,
+                             const char *mem, size_t nread)
 {
   CURLcode rc;
   struct http_conn *httpc = &conn->proto.httpc;
@@ -1036,6 +1037,15 @@ CURLcode Curl_http2_switched(struct connectdata *conn)
       return CURLE_HTTP2;
     }
   }
+
+  rv = (int)nghttp2_session_mem_recv(httpc->h2, (const uint8_t*)mem, nread);
+
+  if(rv != (int)nread) {
+    failf(data, "nghttp2_session_mem_recv() failed: %s(%d)",
+          nghttp2_strerror(rv), rv);
+    return CURLE_HTTP2;
+  }
+
   return CURLE_OK;
 }
 

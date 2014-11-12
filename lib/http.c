@@ -1746,7 +1746,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       if(result)
         return result;
 
-      result = Curl_http2_switched(conn);
+      result = Curl_http2_switched(conn, NULL, 0);
       if(result)
         return result;
       break;
@@ -2993,10 +2993,12 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
             infof(data, "Received 101\n");
             k->upgr101 = UPGR101_RECEIVED;
 
-            /* switch to http2 now */
-            result = Curl_http2_switched(conn);
+            /* switch to http2 now. The bytes after response headers
+               are also processed here, otherwise they are lost. */
+            result = Curl_http2_switched(conn, k->str, *nread);
             if(result)
               return result;
+            *nread = 0;
           }
           break;
         default:
