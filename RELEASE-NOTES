@@ -27,6 +27,15 @@ This release includes the following bugfixes:
  o build: Fixed no NTLM support for email when CURL_DISABLE_HTTP is defined
  o SSH: use the port number as well for known_known checks [3]
  o libssh2: detect features based on version, not configure checks
+ o http2: Deal with HTTP/2 data inside Upgrade response header buffer [4]
+ o multi: removed Curl_multi_set_easy_connection
+ o symbol-scan.pl: do not require autotools
+ o cmake: add ENABLE_THREADED_RESOLVER, rename ARES
+ o cmake: build libhostname for test suite
+ o cmake: fix HAVE_GETHOSTNAME definition
+ o tests: fix libhostname visibility
+ o tests: fix memleak in server/resolve.c
+ o vtls.h: Fixed compiler warning when compiled without SSL
 
 This release includes the following known bugs:
 
@@ -35,9 +44,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Christian Hägele, Dan Fandrich, Daniel Stenberg, Frank Gevaerts,
-  Gisle Vanem, Guenter Knauf, Jan Ehrhardt, Nobuhiro Ban, Patrick Monnerat,
-  Steve Holme,
+  Carlo Wood, Christian HÃ¤gele, Dan Fandrich, Daniel Stenberg, Frank Gevaerts,
+  Gisle Vanem, Guenter Knauf, Jan Ehrhardt, Lucas Pardue, Nobuhiro Ban,
+  Patrick Monnerat, Peter Wu, Sam Hurst, Steve Holme, Tatsuhiro Tsujikawa,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -46,5 +55,6 @@ References to bug reports and discussions on issues:
  [1] = http://curl.haxx.se/mail/lib-2014-11/0035.html
  [2] = http://curl.haxx.se/mail/lib-2014-11/0078.html
  [3] = http://curl.haxx.se/bug/view.cgi?id=1448
- [4] =
+ [4] = https://github.com/tatsuhiro-t/nghttp2/issues/103
+ [5] =
  
