@@ -44,7 +44,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
 #define Curl_http2_send_request(x) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_request_upgrade(x,y) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_setup(x) CURLE_UNSUPPORTED_PROTOCOL
-#define Curl_http2_switched(x) CURLE_UNSUPPORTED_PROTOCOL
+#define Curl_http2_switched(x,y,z) CURLE_UNSUPPORTED_PROTOCOL
 #endif
 
 #endif /* HEADER_CURL_HTTP2_H */
