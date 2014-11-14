@@ -276,17 +276,17 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
                                         (*) -> Optional
   */
 
+  CURLcode result = CURLE_OK;
   size_t size = 0;
   unsigned char *buffer = NULL;
-  CURLcode error;
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS) || defined(USE_WINDOWS_SSPI)
   (void)data;
 #endif
 
-  error = Curl_base64_decode(header, &buffer, &size);
-  if(error)
-    return error;
+  result = Curl_base64_decode(header, &buffer, &size);
+  if(result)
+    return result;
 
   if(!buffer) {
     infof(data, "NTLM handshake failure (empty type-2 message)\n");
@@ -312,11 +312,11 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   memcpy(ntlm->nonce, &buffer[24], 8);
 
   if(ntlm->flags & NTLMFLAG_NEGOTIATE_TARGET_INFO) {
-    error = Curl_ntlm_decode_type2_target(data, buffer, size, ntlm);
-    if(error) {
+    result = Curl_ntlm_decode_type2_target(data, buffer, size, ntlm);
+    if(result) {
       free(buffer);
       infof(data, "NTLM handshake failure (bad type-2 message)\n");
-      return error;
+      return result;
     }
   }
 
@@ -332,7 +332,7 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   free(buffer);
 #endif
 
-  return CURLE_OK;
+  return result;
 }
 
 #ifndef USE_WINDOWS_SSPI
