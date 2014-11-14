@@ -868,15 +868,15 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  /* Not 4 octets long to fail as per RFC4752 Section 3.1 */
+  /* Not 4 octets long so fail as per RFC4752 Section 3.1 */
   if(input_buf[1].cbBuffer != 4) {
     Curl_safefree(chlg);
 
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  /* Copy the data out into a coinput_bufnvenient variable and free the SSPI
-     allocated buffer as it is not required anymore */
+  /* Copy the data out and free the SSPI allocated buffer as it is not required
+     anymore */
   memcpy(&indata, input_buf[1].pvBuffer, 4);
   s_pSecFn->FreeContextBuffer(input_buf[1].pvBuffer);
 
