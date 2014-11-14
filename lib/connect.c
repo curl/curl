@@ -1244,11 +1244,12 @@ int Curl_closesocket(struct connectdata *conn,
     else
       return conn->fclosesocket(conn->closesocket_client, sock);
   }
-  sclose(sock);
 
   if(conn)
     /* tell the multi-socket code about this */
     Curl_multi_closed(conn, sock);
+
+  sclose(sock);
 
   return 0;
 }
