@@ -277,44 +277,48 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   */
 
   CURLcode result = CURLE_OK;
-  size_t size = 0;
-  unsigned char *buffer = NULL;
+  unsigned char *type2 = NULL;
+  size_t type2_len = 0;
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS) || defined(USE_WINDOWS_SSPI)
   (void)data;
 #endif
 
-  result = Curl_base64_decode(header, &buffer, &size);
-  if(result)
-    return result;
+  /* Decode the base-64 encoded type-2 message */
+  if(strlen(header) && *header != '=') {
+    result = Curl_base64_decode(header, &type2, &type2_len);
+    if(result)
+      return result;
+  }
 
-  if(!buffer) {
+  /* Ensure we have a valid type-2 message */
+  if(!type2) {
     infof(data, "NTLM handshake failure (empty type-2 message)\n");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
 #ifdef USE_WINDOWS_SSPI
-  ntlm->input_token = buffer;
-  ntlm->input_token_len = size;
+  ntlm->input_token = type2;
+  ntlm->input_token_len = type2_len;
 #else
   ntlm->flags = 0;
 
-  if((size < 32) ||
-     (memcmp(buffer, NTLMSSP_SIGNATURE, 8) != 0) ||
-     (memcmp(buffer + 8, type2_marker, sizeof(type2_marker)) != 0)) {
+  if((type2_len < 32) ||
+     (memcmp(type2, NTLMSSP_SIGNATURE, 8) != 0) ||
+     (memcmp(type2 + 8, type2_marker, sizeof(type2_marker)) != 0)) {
     /* This was not a good enough type-2 message */
-    free(buffer);
+    free(type2);
     infof(data, "NTLM handshake failure (bad type-2 message)\n");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  ntlm->flags = readint_le(&buffer[20]);
-  memcpy(ntlm->nonce, &buffer[24], 8);
+  ntlm->flags = readint_le(&type2[20]);
+  memcpy(ntlm->nonce, &type2[24], 8);
 
   if(ntlm->flags & NTLMFLAG_NEGOTIATE_TARGET_INFO) {
-    result = Curl_ntlm_decode_type2_target(data, buffer, size, ntlm);
+    result = Curl_ntlm_decode_type2_target(data, type2, type2_len, ntlm);
     if(result) {
-      free(buffer);
+      free(type2);
       infof(data, "NTLM handshake failure (bad type-2 message)\n");
       return result;
     }
@@ -329,7 +333,7 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
     fprintf(stderr, "**** Header %s\n ", header);
   });
 
-  free(buffer);
+  free(type2);
 #endif
 
   return result;
