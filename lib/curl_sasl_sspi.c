@@ -19,6 +19,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * RFC2617 Basic and Digest Access Authentication
  * RFC2831 DIGEST-MD5 authentication
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
