@@ -155,6 +155,7 @@ int main(void)
     fd_set fdexcep;
     int maxfd = -1;
     int rc;
+    CURLMcode mc; /* curl_multi_fdset() return code */
 
     long curl_timeo = -1;
 
@@ -176,15 +177,32 @@ int main(void)
         timeout.tv_usec = (curl_timeo % 1000) * 1000;
     }
 
-    /* Get file descriptors from the transfers */
-    curl_multi_fdset(mcurl, &fdread, &fdwrite, &fdexcep, &maxfd);
+    /* get file descriptors from the transfers */
+    mc = curl_multi_fdset(mcurl, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    /* In a real-world program you OF COURSE check the return code of the
-       function calls.  On success, the value of maxfd is guaranteed to be
-       greater or equal than -1.  We call select(maxfd + 1, ...), specially in
-       case of (maxfd == -1), we call select(0, ...), which is basically equal
-       to sleep. */
-    rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+    if(mc != CURLM_OK)
+    {
+      fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+      break;
+    }
+
+    /* On success the value of maxfd is guaranteed to be >= -1. We call
+       select(maxfd + 1, ...); specially in case of (maxfd == -1) we call
+       select(0, ...), which is basically equal to sleeping the timeout. On
+       Windows we can't sleep via select without a dummy socket and instead
+       we Sleep() for 100ms which is the minimum suggested value in the
+       curl_multi_fdset() doc. */
+
+#ifdef _WIN32
+    if(maxfd == -1) {
+      Sleep(100);
+      rc = 0;
+    }
+    else
+#endif
+    {
+      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+    }
 
     if(tvdiff(tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
       fprintf(stderr,
