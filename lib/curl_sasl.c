@@ -55,10 +55,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#if defined(USE_KRB5)
-extern void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
-#endif
-
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_WINDOWS_SSPI)
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)

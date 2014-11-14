@@ -173,6 +173,9 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
                                                   struct kerberos5data *krb5,
                                                   char **outptr,
                                                   size_t *outlen);
+
+/* This is used to clean up the gssapi specific data */
+void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
 #endif /* USE_KRB5 */
 
 /* This is used to generate a base64 encoded XOAUTH2 authentication message

@@ -47,10 +47,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#if defined(USE_KRB5)
-void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
-#endif
-
 /*
  * Curl_sasl_build_spn()
  *
@@ -1010,6 +1006,16 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   return result;
 }
 
+/*
+* Curl_sasl_gssapi_cleanup()
+*
+* This is used to clean up the gssapi specific data.
+*
+* Parameters:
+*
+* krb5     [in/out] - The kerberos 5 data struct being cleaned up.
+*
+*/
 void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5)
 {
   /* Free our security context */
