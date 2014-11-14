@@ -2276,6 +2276,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     return result;
 
   if(!(conn->handler->flags&PROTOPT_SSL) &&
+     conn->httpversion != 20 &&
      (data->set.httpversion == CURL_HTTP_VERSION_2_0)) {
     /* append HTTP2 upgrade magic stuff to the HTTP request if it isn't done
        over SSL */
