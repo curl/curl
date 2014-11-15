@@ -55,7 +55,7 @@
  * Parameters:
  *
  * serivce  [in] - The service type such as www, smtp, pop or imap.
- * instance [in] - The instance name such as the host nme or realm.
+ * host     [in] - The host name or realm.
  *
  * Returns a pointer to the newly allocated SPN.
  */
