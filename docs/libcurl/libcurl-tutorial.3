@@ -1129,9 +1129,9 @@ analyzer tool and eavesdrop on your passwords. Don't let the fact that HTTP
 Basic uses base64 encoded passwords fool you. They may not look readable at a
 first glance, but they very easily "deciphered" by anyone within seconds.
 
-To avoid this problem, use HTTP authentication methods or other protocols that
-don't let snoopers see your password: HTTP with Digest, NTLM or GSS
-authentication, HTTPS, FTPS, SCP, SFTP and FTP-Kerberos are a few examples.
+To avoid this problem, use an authentication mechanism or other protocol that
+doesn't let snoopers see your password: Digest, CRAM-MD5, Kerberos, SPNEGO or
+NTLM authentication, HTTPS, FTPS, SCP and SFTP are a few examples.
 
 .IP "Redirects"
 The \fICURLOPT_FOLLOWLOCATION(3)\fP option automatically follows HTTP

@@ -973,7 +973,7 @@ struct connectdata {
     char *te; /* TE: request header */
   } allocptr;
 
-  int sec_complete; /* if kerberos is enabled for this connection */
+  int sec_complete; /* if Kerberos is enabled for this connection */
 #ifdef HAVE_GSSAPI
   enum protection_level command_prot;
   enum protection_level data_prot;
@@ -1573,7 +1573,7 @@ struct UserDefined {
   enum CURL_NETRC_OPTION
        use_netrc;        /* defined in include/curl.h */
   bool verbose;          /* output verbosity */
-  bool krb;              /* kerberos connection requested */
+  bool krb;              /* Kerberos connection requested */
   bool reuse_forbid;     /* forbidden to be reused, close after use */
   bool reuse_fresh;      /* do not re-use an existing connection  */
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */

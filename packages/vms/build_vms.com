@@ -40,7 +40,7 @@ $!              VAX must always use DFLOAT
 $!    NOLARGE   Disable large-file support if large file support available.
 $!              (Non-VAX, VMS >= V7.2.)
 $!    NOLDAP    Disable LDAP support if LDAP is available.
-$!    NOKERBEROS   Disable Kerberos support if Kerberos is available.
+$!    NOKERBEROS   Disable Kerberos support if Kerberos is not available.
 $!    LIST      Create C compiler listings and linker maps.
 $!                 /list/show=(expan,includ)/machine
 $!    FULLLIST  Full detailed listing.

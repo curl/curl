@@ -42,7 +42,7 @@ Portability
  libidn       0.4.1
  cyassl       2.0.0
  openldap     2.0
- MIT krb5 lib 1.2.4
+ MIT Kerberos 1.2.4
  GSKit        V5R3M0
  NSS          3.14.x
  axTLS        1.2.7
