@@ -3364,7 +3364,7 @@ fi
 
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
     \( "x$HAVE_GSSAPI" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \); then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES krb5"
+  SUPPORT_FEATURES="$SUPPORT_FEATURES Kerberos"
 fi
 
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
