@@ -973,8 +973,8 @@ struct connectdata {
     char *te; /* TE: request header */
   } allocptr;
 
-  int sec_complete; /* if Kerberos is enabled for this connection */
 #ifdef HAVE_GSSAPI
+  int sec_complete; /* if Kerberos is enabled for this connection */
   enum protection_level command_prot;
   enum protection_level data_prot;
   enum protection_level request_data_prot;
