@@ -217,8 +217,6 @@ CURLcode Curl_ntlm_decode_type2_target(struct SessionHandle *data,
   return CURLE_OK;
 }
 
-#endif
-
 /*
   NTLM message structure notes:
 
@@ -256,9 +254,7 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
                                         const char *header,
                                         struct ntlmdata *ntlm)
 {
-#ifndef USE_WINDOWS_SSPI
   static const char type2_marker[] = { 0x02, 0x00, 0x00, 0x00 };
-#endif
 
   /* NTLM type-2 message structure:
 
@@ -280,7 +276,7 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   unsigned char *type2 = NULL;
   size_t type2_len = 0;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS) || defined(USE_WINDOWS_SSPI)
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void)data;
 #endif
 
@@ -297,10 +293,6 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-#ifdef USE_WINDOWS_SSPI
-  ntlm->input_token = type2;
-  ntlm->input_token_len = type2_len;
-#else
   ntlm->flags = 0;
 
   if((type2_len < 32) ||
@@ -334,12 +326,10 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   });
 
   free(type2);
-#endif
 
   return result;
 }
 
-#ifndef USE_WINDOWS_SSPI
 /* copy the source to the destination and fill in zeroes in every
    other destination byte! */
 static void unicodecpy(unsigned char *dest, const char *src, size_t length)
@@ -350,7 +340,6 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
     dest[2 * i + 1] = '\0';
   }
 }
-#endif
 
 /*
  * Curl_ntlm_create_type1_message()
@@ -472,6 +461,7 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   /* Return with binary blob encoded into base64 */
   return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
 }
+#endif
 
 /*
  * Curl_ntlm_create_type3_message()
