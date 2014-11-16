@@ -146,8 +146,11 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   }
 
   /* Ensure we have a valid challenge message */
-  if(!input_token)
+  if(!input_token) {
+    infof(data, "DIGEST-MD5 handshake failure (empty challenge message)\n");
+
     return CURLE_BAD_CONTENT_ENCODING;
+  }
 
   /* Query the security package for DigestSSP */
   status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_DIGEST),
@@ -873,8 +876,11 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
     }
 
     /* Ensure we have a valid challenge message */
-    if(!chlg)
+    if(!chlg) {
+      infof(data, "GSSAPI handshake failure (empty challenge message)\n");
+
       return CURLE_BAD_CONTENT_ENCODING;
+    }
 
     /* Setup the challenge "input" security buffer */
     chlg_desc.ulVersion = SECBUFFER_VERSION;
@@ -984,8 +990,11 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   }
 
   /* Ensure we have a valid challenge message */
-  if(!chlg)
+  if(!chlg) {
+    infof(data, "GSSAPI handshake failure (empty security message)\n");
+
     return CURLE_BAD_CONTENT_ENCODING;
+  }
 
   /* Get our response size information */
   status = s_pSecFn->QueryContextAttributes(krb5->context,
