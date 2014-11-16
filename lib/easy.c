@@ -491,6 +491,10 @@ static int events_socket(CURL *easy,      /* easy handle */
   struct events *ev = userp;
   struct socketmonitor *m;
   struct socketmonitor *prev=NULL;
+
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void) easy;
+#endif
   (void)socketp;
 
   m = ev->list;
