@@ -493,9 +493,6 @@ void Curl_sasl_digest_cleanup(struct digestdata *digest)
 * This is used to generate an already encoded NTLM type-1 message ready for
 * sending to the recipient.
 *
-* Note: This is a simple wrapper of the NTLM function which means that any
-* SASL based protocols don't have to include the NTLM functions directly.
-*
 * Parameters:
 *
 * userp   [in]     - The user name in the format User or Domain\User.
