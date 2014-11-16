@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,9 +32,17 @@ struct timeval curlx_tvnow(void)
   ** increases monotonically and wraps once 49.7 days have elapsed.
   */
   struct timeval now;
+#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
+    (_WIN32_WINNT < _WIN32_WINNT_VISTA)
   DWORD milliseconds = GetTickCount();
   now.tv_sec = milliseconds / 1000;
   now.tv_usec = (milliseconds % 1000) * 1000;
+#else
+  ULONGLONG milliseconds = GetTickCount64();
+  now.tv_sec = (long) (milliseconds / 1000);
+  now.tv_usec = (long) (milliseconds % 1000) * 1000;
+#endif
+
   return now;
 }
 
