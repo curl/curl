@@ -614,9 +614,9 @@ int netware_init(void);
 #define USE_SPNEGO
 #endif
 
-/* Single point where USE_KRB5 definition might be defined */
+/* Single point where USE_KERBEROS5 definition might be defined */
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && defined(USE_WINDOWS_SSPI)
-#define USE_KRB5
+#define USE_KERBEROS5
 #endif
 
 /* Single point where USE_NTLM definition might be defined */

@@ -1131,7 +1131,7 @@ static CURLcode pop3_state_auth_ntlm_type2msg_resp(struct connectdata *conn,
 }
 #endif
 
-#if defined(USE_KRB5)
+#if defined(USE_KERBEROS5)
 /* For AUTH GSSAPI (without initial response) responses */
 static CURLcode pop3_state_auth_gssapi_resp(struct connectdata *conn,
                                             int pop3code,
@@ -1591,7 +1591,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
       break;
 #endif
 
-#if defined(USE_KRB5)
+#if defined(USE_KERBEROS5)
     case POP3_AUTH_GSSAPI:
       result = pop3_state_auth_gssapi_resp(conn, pop3code, pop3c->state);
       break;
@@ -2121,7 +2121,7 @@ static CURLcode pop3_calc_sasl_details(struct connectdata *conn,
 
   /* Calculate the supported authentication mechanism, by decreasing order of
      security, as well as the initial response where appropriate */
-#if defined(USE_KRB5)
+#if defined(USE_KERBEROS5)
   if((pop3c->authmechs & SASL_MECH_GSSAPI) &&
       (pop3c->prefmech & SASL_MECH_GSSAPI)) {
     pop3c->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */

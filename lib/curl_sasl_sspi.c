@@ -599,7 +599,7 @@ void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
 }
 #endif /* USE_NTLM */
 
-#if defined(USE_KRB5)
+#if defined(USE_KERBEROS5)
 /*
  * Curl_sasl_create_gssapi_user_message()
  *
@@ -1043,6 +1043,6 @@ void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5)
   /* Reset any variables */
   krb5->token_max = 0;
 }
-#endif /* USE_KRB5 */
+#endif /* USE_KERBEROS5 */
 
 #endif /* USE_WINDOWS_SSPI */

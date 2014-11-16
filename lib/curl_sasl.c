@@ -1250,7 +1250,7 @@ CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
  */
 void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
 {
-#if defined(USE_KRB5)
+#if defined(USE_KERBEROS5)
   /* Cleanup the gssapi structure */
   if(authused == SASL_MECH_GSSAPI) {
     Curl_sasl_gssapi_cleanup(&conn->krb5);
@@ -1264,7 +1264,7 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
   }
 #endif
 
-#if !defined(USE_KRB5) && !defined(USE_NTLM)
+#if !defined(USE_KERBEROS5) && !defined(USE_NTLM)
   /* Reserved for future use */
   (void)conn;
   (void)authused;

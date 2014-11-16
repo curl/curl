@@ -35,7 +35,7 @@ struct digestdata;
 struct ntlmdata;
 #endif
 
-#if defined(USE_KRB5)
+#if defined(USE_KERBEROS5)
 struct kerberos5data;
 #endif
 
@@ -154,7 +154,7 @@ void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm);
 
 #endif /* USE_NTLM */
 
-#if defined(USE_KRB5)
+#if defined(USE_KERBEROS5)
 /* This is used to generate a base64 encoded GSSAPI (Kerberos V5) user token
    message */
 CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
@@ -176,7 +176,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
 
 /* This is used to clean up the gssapi specific data */
 void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
-#endif /* USE_KRB5 */
+#endif /* USE_KERBEROS5 */
 
 /* This is used to generate a base64 encoded XOAUTH2 authentication message
    containing the user name and bearer token */
