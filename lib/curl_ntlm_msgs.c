@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#ifdef USE_NTLM
+#if defined(USE_NTLM) && !defined(USE_WINDOWS_SSPI)
 
 /*
  * NTLM details:
@@ -42,10 +42,6 @@
 #include "curl_multibyte.h"
 #include "warnless.h"
 #include "curl_memory.h"
-
-#ifdef USE_WINDOWS_SSPI
-#  include "curl_sspi.h"
-#endif
 
 #include "vtls/vtls.h"
 
@@ -148,7 +144,6 @@ static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
 # define DEBUG_OUT(x) Curl_nop_stmt
 #endif
 
-#ifndef USE_WINDOWS_SSPI
 /*
  * This function converts from the little endian format used in the
  * incoming package to whatever endian format we're using natively.
@@ -461,7 +456,6 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
   /* Return with binary blob encoded into base64 */
   return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
 }
-#endif
 
 /*
  * Curl_ntlm_create_type3_message()
@@ -509,63 +503,6 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
 
   CURLcode result = CURLE_OK;
   size_t size;
-
-#ifdef USE_WINDOWS_SSPI
-  SecBuffer type_2_buf;
-  SecBuffer type_3_buf;
-  SecBufferDesc type_2_desc;
-  SecBufferDesc type_3_desc;
-  SECURITY_STATUS status;
-  unsigned long attrs;
-  TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
-
-  (void)passwdp;
-  (void)userp;
-
-  /* Setup the type-2 "input" security buffer */
-  type_2_desc.ulVersion = SECBUFFER_VERSION;
-  type_2_desc.cBuffers  = 1;
-  type_2_desc.pBuffers  = &type_2_buf;
-  type_2_buf.BufferType = SECBUFFER_TOKEN;
-  type_2_buf.pvBuffer   = ntlm->input_token;
-  type_2_buf.cbBuffer   = curlx_uztoul(ntlm->input_token_len);
-
-  /* Setup the type-3 "output" security buffer */
-  type_3_desc.ulVersion = SECBUFFER_VERSION;
-  type_3_desc.cBuffers  = 1;
-  type_3_desc.pBuffers  = &type_3_buf;
-  type_3_buf.BufferType = SECBUFFER_TOKEN;
-  type_3_buf.pvBuffer   = ntlm->output_token;
-  type_3_buf.cbBuffer   = curlx_uztoul(ntlm->token_max);
-
-  /* Generate our type-3 message */
-  status = s_pSecFn->InitializeSecurityContext(ntlm->credentials,
-                                               ntlm->context,
-                                               (TCHAR *) TEXT(""),
-                                               0, 0, SECURITY_NETWORK_DREP,
-                                               &type_2_desc,
-                                               0, ntlm->context,
-                                               &type_3_desc,
-                                               &attrs, &expiry);
-  if(status != SEC_E_OK) {
-    infof(data, "NTLM handshake failure (type-3 message): Status=%x\n",
-          status);
-
-    return CURLE_RECV_ERROR;
-  }
-
-  size = type_3_buf.cbBuffer;
-
-  /* Return with binary blob encoded into base64 */
-  result = Curl_base64_encode(NULL, (char *)ntlm->output_token, size,
-                              outptr, outlen);
-
-  Curl_sasl_ntlm_cleanup(ntlm);
-
-  return result;
-
-#else
-
   unsigned char ntlmbuf[NTLM_BUFSIZE];
   int lmrespoff;
   unsigned char lmresp[24]; /* fixed-size */
@@ -892,7 +829,6 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   Curl_sasl_ntlm_cleanup(ntlm);
 
   return result;
-#endif
 }
 
-#endif /* USE_NTLM */
+#endif /* USE_NTLM && !USE_WINDOWS_SSPI */
