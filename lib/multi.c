@@ -516,9 +516,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     multi->num_alive--;
 
   if(data->easy_conn &&
-     (data->easy_conn->send_pipe->size +
-      data->easy_conn->recv_pipe->size > 1) &&
-     data->mstate > CURLM_STATE_WAITDO &&
+     data->mstate > CURLM_STATE_DO &&
      data->mstate < CURLM_STATE_COMPLETED) {
     /* If the handle is in a pipeline and has started sending off its
        request but not received its response yet, we need to close
@@ -527,6 +525,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     /* Set connection owner so that Curl_done() closes it.
        We can sefely do this here since connection is killed. */
     data->easy_conn->data = easy;
+    easy_owns_conn = TRUE;
   }
 
   /* The timer must be shut down before data->multi is set to NULL,
@@ -1009,13 +1008,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
         }
 
-        /* Force the connection closed because the server could continue to
-           send us stuff at any time. (The disconnect_conn logic used below
-           doesn't work at this point). */
-        connclose(data->easy_conn, "Disconnected with pending data");
+        /* Force connection closed if the connection has indeed been used */
+        if(data->mstate > CURLM_STATE_DO) {
+          connclose(data->easy_conn, "Disconnected with pending data");
+          disconnect_conn = TRUE;
+        }
         data->result = CURLE_OPERATION_TIMEDOUT;
-        multistate(data, CURLM_STATE_COMPLETED);
-        break;
+        /* Skip the statemachine and go directly to error handling section. */
+        goto statemachine_end;
       }
     }
 
@@ -1695,6 +1695,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     default:
       return CURLM_INTERNAL_ERROR;
     }
+statemachine_end:
 
     if(data->mstate < CURLM_STATE_COMPLETED) {
       if(CURLE_OK != data->result) {
@@ -1720,8 +1721,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           Curl_multi_process_pending_handles(multi);
 
           if(disconnect_conn) {
+            /* Don't attempt to send data over a connection that timed out */
+            bool dead_connection = data->result == CURLE_OPERATION_TIMEDOUT;
             /* disconnect properly */
-            Curl_disconnect(data->easy_conn, /* dead_connection */ FALSE);
+            Curl_disconnect(data->easy_conn, dead_connection);
 
             /* This is where we make sure that the easy_conn pointer is reset.
                We don't have to do this in every case block above where a
