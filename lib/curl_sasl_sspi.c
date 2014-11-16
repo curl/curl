@@ -623,6 +623,10 @@ CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
   unsigned char *type2 = NULL;
   size_t type2_len = 0;
 
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void) data;
+#endif
+
   /* Decode the base-64 encoded type-2 message */
   if(strlen(type2msg) && *type2msg != '=') {
     result = Curl_base64_decode(type2msg, &type2, &type2_len);
@@ -713,7 +717,7 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
   }
 
   /* Base64 encode the response */
-  result = Curl_base64_encode(NULL, (char *) ntlm->output_token,
+  result = Curl_base64_encode(data, (char *) ntlm->output_token,
                               type_3_buf.cbBuffer, outptr, outlen);
 
   Curl_sasl_ntlm_cleanup(ntlm);
