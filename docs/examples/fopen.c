@@ -168,20 +168,24 @@ static int fill_buffer(URL_FILE *file, size_t want)
     }
 
     /* On success the value of maxfd is guaranteed to be >= -1. We call
-       select(maxfd + 1, ...); specially in case of (maxfd == -1) we call
-       select(0, ...), which is basically equal to sleeping the timeout. On
-       Windows we can't sleep via select without a dummy socket and instead
-       we Sleep() for 100ms which is the minimum suggested value in the
+       select(maxfd + 1, ...); specially in case of (maxfd == -1) there are
+       no fds ready yet so we call select(0, ...) --or Sleep() on Windows--
+       to sleep 100ms, which is the minimum suggested value in the
        curl_multi_fdset() doc. */
 
-#ifdef _WIN32
     if(maxfd == -1) {
+#ifdef _WIN32
       Sleep(100);
       rc = 0;
-    }
-    else
+#else
+      /* Portable sleep for platforms other than Windows. */
+      struct timeval wait = { 0, 100 * 1000 }; /* 100ms */
+      rc = select(0, NULL, NULL, NULL, &wait);
 #endif
-    {
+    }
+    else {
+      /* Note that on some platforms 'timeout' may be modified by select().
+         If you need access to the original value save a copy beforehand. */
       rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
     }
 
