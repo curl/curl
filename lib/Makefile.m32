@@ -64,6 +64,8 @@ CFLAGS	= -g -O2 -Wall
 CFLAGS	+= -fno-strict-aliasing
 ifeq ($(ARCH),w64)
 CFLAGS	+= -D_AMD64_
+else
+CFLAGS	+= -m32
 endif
 # comment LDFLAGS below to keep debug info
 LDFLAGS	= -s
