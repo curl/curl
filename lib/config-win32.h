@@ -514,14 +514,23 @@
 
    /* The minimum build target for VS2012 is Vista unless Update 1 is installed
       and the v110_xp toolset is choosen. */
-#  define VS2012_MIN_TARGET 0x0600
+#  if defined(_USING_V110_SDK71_)
+#    define VS2012_MIN_TARGET 0x0501
+#  else
+#    define VS2012_MIN_TARGET 0x0600
+#  endif
 
    /* VS2008 default build target is Windows Vista. We override default target
       to be Windows XP. */
-#  define VS2008_DEF_TARGET  0x0501
+#  define VS2008_DEF_TARGET 0x0501
 
-   /* VS2012 default build target is Windows Vista. */
-#  define VS2012_DEF_TARGET  0x0600
+   /* VS2012 default build target is Windows Vista unless Update 1 is installed
+      and the v110_xp toolset is choosen. */
+#  if defined(_USING_V110_SDK71_)
+#    define VS2012_DEF_TARGET 0x0501
+#  else
+#    define VS2012_DEF_TARGET 0x0600
+#  endif
 #endif
 
 /* VS2008 default target settings and minimum build target check. */
@@ -546,7 +555,11 @@
 #    define WINVER VS2012_DEF_TARGET
 #  endif
 #  if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
-#    error VS2012 does not support Windows build targets prior to Windows Vista
+#    if defined(_USING_V110_SDK71_)
+#      error VS2012 does not support Windows build targets prior to Windows XP
+#    else
+#      error VS2012 does not support Windows build targets prior to Windows Vista
+#    endif
 #  endif
 #endif
 
