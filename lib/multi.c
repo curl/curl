@@ -956,7 +956,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       data->state.pipe_broke = FALSE;
       data->easy_conn = NULL;
-      break;
+      continue;
     }
 
     if(!data->easy_conn &&
@@ -1750,22 +1750,23 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         rc = CURLM_CALL_MULTI_PERFORM;
       }
     }
+
+    if(CURLM_STATE_COMPLETED == data->mstate) {
+      /* now fill in the Curl_message with this info */
+      msg = &data->msg;
+
+      msg->extmsg.msg = CURLMSG_DONE;
+      msg->extmsg.easy_handle = data;
+      msg->extmsg.data.result = result;
+
+      rc = multi_addmsg(multi, msg);
+
+      multistate(data, CURLM_STATE_MSGSENT);
+    }
   } while(rc == CURLM_CALL_MULTI_PERFORM);
 
   data->result = result;
 
-  if(CURLM_STATE_COMPLETED == data->mstate) {
-    /* now fill in the Curl_message with this info */
-    msg = &data->msg;
-
-    msg->extmsg.msg = CURLMSG_DONE;
-    msg->extmsg.easy_handle = data;
-    msg->extmsg.data.result = result;
-
-    rc = multi_addmsg(multi, msg);
-
-    multistate(data, CURLM_STATE_MSGSENT);
-  }
 
   return rc;
 }
