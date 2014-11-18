@@ -927,7 +927,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   bool protocol_connect = FALSE;
   bool dophase_done = FALSE;
   bool done = FALSE;
-  CURLMcode result = CURLM_OK;
+  CURLMcode result;
   struct SingleRequest *k;
   long timeout_ms;
   int control;
@@ -936,9 +936,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     return CURLM_BAD_EASY_HANDLE;
 
   do {
-    /* this is a single-iteration do-while loop just to allow a
-       break to skip to the end of it */
     bool disconnect_conn = FALSE;
+    result = CURLM_OK;
 
     /* Handle the case when the pipe breaks, i.e., the connection
        we're using gets cleaned up and we're left with nothing. */
@@ -1752,7 +1751,7 @@ statemachine_end:
         result = CURLM_CALL_MULTI_PERFORM;
       }
     }
-  } WHILE_FALSE; /* just to break out from! */
+  } while(result == CURLM_CALL_MULTI_PERFORM);
 
   if(CURLM_STATE_COMPLETED == data->mstate) {
     /* now fill in the Curl_message with this info */
@@ -1797,9 +1796,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     }
 
     sigpipe_ignore(data, &pipe_st);
-    do
-      result = multi_runsingle(multi, now, data);
-    while(CURLM_CALL_MULTI_PERFORM == result);
+    result = multi_runsingle(multi, now, data);
     sigpipe_restore(&pipe_st);
 
     if(data->set.wildcardmatch) {
@@ -2269,9 +2266,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         data->easy_conn->cselect_bits = ev_bitmask;
 
       sigpipe_ignore(data, &pipe_st);
-      do
-        result = multi_runsingle(multi, now, data);
-      while(CURLM_CALL_MULTI_PERFORM == result);
+      result = multi_runsingle(multi, now, data);
       sigpipe_restore(&pipe_st);
 
       if(data->easy_conn &&
@@ -2313,9 +2308,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       SIGPIPE_VARIABLE(pipe_st);
 
       sigpipe_ignore(data, &pipe_st);
-      do
-        result = multi_runsingle(multi, now, data);
-      while(CURLM_CALL_MULTI_PERFORM == result);
+      result = multi_runsingle(multi, now, data);
       sigpipe_restore(&pipe_st);
 
       if(CURLM_OK >= result)
