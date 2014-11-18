@@ -180,11 +180,12 @@ static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
   check = calloc(1, sizeof(struct Curl_sh_entry));
   if(!check)
     return NULL; /* major failure */
+
   check->easy = data;
   check->socket = s;
 
   /* make/add new hash entry */
-  if(NULL == Curl_hash_add(sh, (char *)&s, sizeof(curl_socket_t), check)) {
+  if(!Curl_hash_add(sh, (char *)&s, sizeof(curl_socket_t), check)) {
     free(check);
     return NULL; /* major failure */
   }
@@ -1058,7 +1059,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(!result) {
         /* Add this handle to the send or pend pipeline */
         result = Curl_add_handle_to_pipeline(data, data->easy_conn);
-        if(CURLE_OK != result)
+        if(result)
           disconnect_conn = TRUE;
         else {
           if(async)
@@ -1151,7 +1152,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
       }
 
-      if(CURLE_OK != result) {
+      if(result) {
         /* failure detected */
         disconnect_conn = TRUE;
         break;
@@ -1199,7 +1200,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(data, CURLM_STATE_CONNECT);
         break;
       }
-      else if(CURLE_OK != result) {
+      else if(result) {
         /* failure detected */
         /* Just break, the cleaning up is handled all in one place */
         disconnect_conn = TRUE;
@@ -1697,7 +1698,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     statemachine_end:
 
     if(data->mstate < CURLM_STATE_COMPLETED) {
-      if(CURLE_OK != result) {
+      if(result) {
         /*
          * If an error was returned, and we aren't in completed state now,
          * then we go to completed and consider this transfer aborted.
