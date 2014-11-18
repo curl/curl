@@ -81,7 +81,13 @@ endif
 LDFLAGS	= -s
 AR	= $(CROSSPREFIX)ar
 RC	= $(CROSSPREFIX)windres
-RCFLAGS	= --include-dir=$(PROOT)/include -O COFF -i
+RCFLAGS	= --include-dir=$(PROOT)/include -O COFF
+ifeq ($(ARCH),w64)
+RCFLAGS += -F pe-x86-64
+else
+RCFLAGS += -F pe-i386
+endif
+STRIP   = $(CROSSPREFIX)strip -g
 
 # We may need these someday
 # PERL = perl
@@ -320,7 +326,7 @@ tool_hugehelp.c:
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
 %.res: %.rc
-	$(RC) $(RCFLAGS) $< -o $@
+	$(RC) $(RCFLAGS) -i $< -o $@
 
 clean:
 ifeq "$(wildcard tool_hugehelp.c.cvs)" "tool_hugehelp.c.cvs"
