@@ -66,9 +66,14 @@ ifndef LIBCARES_PATH
 LIBCARES_PATH = $(PROOT)/ares
 endif
 
-# Edit the var below to set to your architecture or set environment var.
+# Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
-ARCH = w32
+TARGET  := $(shell $(CC) -dumpmachine)
+ifeq ($(findstring x86_64,$(TARGET)),x86_64)
+ARCH    = w64
+else
+ARCH    = w32
+endif
 endif
 
 CC	= $(CROSSPREFIX)gcc
