@@ -54,16 +54,6 @@ ifndef LIBCARES_PATH
 LIBCARES_PATH = $(PROOT)/ares
 endif
 
-# Set environment var ARCH to your architecture to override autodetection.
-ifndef ARCH
-TARGET	:= $(shell $(CC) -dumpmachine)
-ifeq ($(findstring x86_64,$(TARGET)),x86_64)
-ARCH	= w64
-else
-ARCH	= w32
-endif
-endif
-
 CC	= $(CROSSPREFIX)gcc
 CFLAGS	= -g -O2 -Wall
 CFLAGS	+= -fno-strict-aliasing
@@ -74,6 +64,16 @@ RANLIB	= $(CROSSPREFIX)ranlib
 RC	= $(CROSSPREFIX)windres
 RCFLAGS	= --include-dir=$(PROOT)/include -DDEBUGBUILD=0 -O COFF
 STRIP	= $(CROSSPREFIX)strip -g
+
+# Set environment var ARCH to your architecture to override autodetection.
+ifndef ARCH
+TARGET	:= $(shell $(CC) -dumpmachine)
+ifeq ($(findstring x86_64,$(TARGET)),x86_64)
+ARCH	= w64
+else
+ARCH	= w32
+endif
+endif
 
 ifeq ($(ARCH),w64)
 CFLAGS  += -D_AMD64_
