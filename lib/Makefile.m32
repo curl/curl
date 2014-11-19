@@ -67,23 +67,21 @@ endif
 CC	= $(CROSSPREFIX)gcc
 CFLAGS	= -g -O2 -Wall
 CFLAGS	+= -fno-strict-aliasing
-ifeq ($(ARCH),w64)
-CFLAGS	+= -D_AMD64_
-else
-CFLAGS	+= -m32
-endif
 # comment LDFLAGS below to keep debug info
 LDFLAGS	= -s
 AR	= $(CROSSPREFIX)ar
 RANLIB	= $(CROSSPREFIX)ranlib
 RC	= $(CROSSPREFIX)windres
 RCFLAGS	= --include-dir=$(PROOT)/include -DDEBUGBUILD=0 -O COFF
-ifeq ($(ARCH),w64)
-RCFLAGS	+= -F pe-x86-64
-else
-RCFLAGS	+= -F pe-i386
-endif
 STRIP	= $(CROSSPREFIX)strip -g
+
+ifeq ($(ARCH),w64)
+CFLAGS  += -D_AMD64_
+RCFLAGS += -F pe-x86-64
+else
+CFLAGS  += -m32
+RCFLAGS += -F pe-i386
+endif
 
 # Platform-dependent helper tool macros
 ifeq ($(findstring /sh,$(SHELL)),/sh)
