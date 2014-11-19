@@ -1028,6 +1028,8 @@ _add_if("GSS-API"       HAVE_GSS_API)
 # TODO SSP1 missing for SPNEGO
 _add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSS_API OR USE_WINDOWS_SSPI))
+_add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
+                        (HAVE_GSS_API OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS, DARWINSSL
 if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR
