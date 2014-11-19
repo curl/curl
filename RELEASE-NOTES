@@ -4,13 +4,14 @@ Curl and libcurl 7.39.1
  Command line options:         162
  curl_easy_setopt() options:   208
  Public functions in libcurl:  58
- Contributors:                 1229
+ Contributors:                 1219
 
 This release includes the following changes:
 
  o http_digest: Added support for Windows SSPI based authentication
  o version info: Added Kerberos V5 to the supported features
  o Makefile: Added VC targets for WinIDN
+ o config-win32: Introduce build targets for VS2012+
 
 This release includes the following bugfixes:
 
@@ -36,6 +37,22 @@ This release includes the following bugfixes:
  o tests: fix libhostname visibility
  o tests: fix memleak in server/resolve.c
  o vtls.h: Fixed compiler warning when compiled without SSL
+ o CMake: Restore order-dependent header checks
+ o CMake: Restore order-dependent library checks
+ o tool: Removed krb4 from the supported features
+ o http2: Don't send Upgrade headers when we already do HTTP/2
+ o examples: Don't call select() to sleep on windows [6]
+ o win32: Updated some legacy APIs to use the newer extended versions [5]
+ o easy.c: Fixed compilation warning when no verbose string support
+ o connect.c: Fixed compilation warning when no verbose string support
+ o build: in Makefile.m32 pass -F flag to windres
+ o build: in Makefile.m32 add -m32 flag for 32bit
+ o multi: when leaving for timeout, close accordingly
+ o CMake: Simplify if() conditions on check result variables
+ o build: in Makefile.m32 try to detect 64bit target
+ o multi: inform about closed sockets before they are closed
+ o multi-uv.c: close the file handle after download
+ o examples: Wait recommended 100ms when no file descriptors are ready
 
 This release includes the following known bugs:
 
@@ -44,9 +61,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Carlo Wood, Christian Hägele, Dan Fandrich, Daniel Stenberg, Frank Gevaerts,
-  Gisle Vanem, Guenter Knauf, Jan Ehrhardt, Lucas Pardue, Nobuhiro Ban,
-  Patrick Monnerat, Peter Wu, Sam Hurst, Steve Holme, Tatsuhiro Tsujikawa,
+  Brad King, Carlo Wood, Christian Hägele, Dan Fandrich, Daniel Stenberg,
+  Frank Gevaerts, Gisle Vanem, Guenter Knauf, Jan Ehrhardt, Johan Lantz,
+  Jon Spencer, Lucas Pardue, Michael Osipov, Nobuhiro Ban, Patrick Monnerat,
+  Peter Wu, Ray Satiro, Sam Hurst, Stefan Neis, Steve Holme,
+  Tatsuhiro Tsujikawa, Waldek Kozba,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -56,5 +75,6 @@ References to bug reports and discussions on issues:
  [2] = http://curl.haxx.se/mail/lib-2014-11/0078.html
  [3] = http://curl.haxx.se/bug/view.cgi?id=1448
  [4] = https://github.com/tatsuhiro-t/nghttp2/issues/103
- [5] =
- 
+ [5] = http://sourceforge.net/p/curl/feature-requests/82/
+ [6] = http://curl.haxx.se/mail/lib-2014-11/0221.html
+ [7] =
