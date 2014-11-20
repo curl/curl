@@ -62,7 +62,6 @@ static const char *urls[] = {
   "http://www.uefa.com",
   "http://www.ieee.org",
   "http://www.apple.com",
-  "http://www.sony.com",
   "http://www.symantec.com",
   "http://www.zdnet.com",
   "http://www.fujitsu.com",
