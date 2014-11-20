@@ -3293,6 +3293,16 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           infof(data, "HTTP 1.0, assume close after body\n");
           connclose(conn, "HTTP/1.0 close after body");
         }
+        else if(conn->httpversion == 20 ||
+                (k->upgr101 == UPGR101_REQUESTED && k->httpcode == 101)) {
+          /* Don't enable pipelining for HTTP/2 or upgraded connection. For
+             HTTP/2, we do not support multiplexing. In general, requests
+             cannot be pipelined in upgraded connection, since it is now
+             different protocol. */
+          DEBUGF(infof(data,
+                       "HTTP 2 or upgraded connection do not support "
+                       "pipelining for now\n"));
+        }
         else if(conn->httpversion >= 11 &&
                 !conn->bits.close) {
           struct connectbundle *cb_ptr;
