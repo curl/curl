@@ -196,8 +196,14 @@ Give only one per line.  This subsection is mandatory.
 
 <features>
 A list of features that MUST be present in the client/library for this test to
-be able to run (if these features are not present, the test will be
-SKIPPED). Features testable here are:
+be able to run. If a required feature is not present then the test will be
+SKIPPED.
+
+Alternatively a feature can be prefixed with an exclamation mark to indicate a
+feature is NOT required. If the feature is present then the test will be
+SKIPPED.
+
+Features testable here are:
 
 axTLS
 crypto
