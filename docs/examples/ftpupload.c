@@ -20,6 +20,7 @@
  *
  ***************************************************************************/
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <curl/curl.h>
@@ -31,6 +32,13 @@
 #include <io.h>
 #else
 #include <unistd.h>
+#endif
+
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
 #endif
 
 /*
@@ -76,6 +84,24 @@ int main(void)
   static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
   static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
 
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
+
   /* get the file size of the local file */
   if(stat(LOCAL_FILE, &file_info)) {
     printf("Couldnt open '%s': %s\n", LOCAL_FILE, strerror(errno));
@@ -87,9 +113,6 @@ int main(void)
 
   /* get a FILE * of the same file */
   hd_src = fopen(LOCAL_FILE, "rb");
-
-  /* In windows, this will init the winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
 
   /* get a curl handle */
   curl = curl_easy_init();
@@ -135,6 +158,5 @@ int main(void)
   }
   fclose(hd_src); /* close the local file */
 
-  curl_global_cleanup();
   return 0;
 }

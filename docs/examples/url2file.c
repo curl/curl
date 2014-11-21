@@ -25,6 +25,13 @@
 
 #include <curl/curl.h>
 
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
 static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
@@ -37,12 +44,28 @@ int main(int argc, char *argv[])
   static const char *pagefilename = "page.out";
   FILE *pagefile;
 
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
+
   if(argc < 2 ) {
     printf("Usage: %s <URL>\n", argv[0]);
     return 1;
   }
-
-  curl_global_init(CURL_GLOBAL_ALL);
 
   /* init the curl session */
   curl_handle = curl_easy_init();

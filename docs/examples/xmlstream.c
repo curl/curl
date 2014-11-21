@@ -36,6 +36,13 @@
 #include <expat.h>
 #include <curl/curl.h>
 
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
 struct MemoryStruct {
   char *memory;
   size_t size;
@@ -110,6 +117,24 @@ int main(void)
   XML_Parser parser;
   struct ParserStruct state;
 
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
+
   /* Initialize the state structure for parsing. */
   memset(&state, 0, sizeof(struct ParserStruct));
   state.ok = 1;
@@ -121,7 +146,6 @@ int main(void)
   XML_SetCharacterDataHandler(parser, characterDataHandler);
 
   /* Initalize a libcurl handle. */
-  curl_global_init(CURL_GLOBAL_ALL ^ CURL_GLOBAL_SSL);
   curl_handle = curl_easy_init();
   curl_easy_setopt(curl_handle, CURLOPT_URL, "http://www.w3schools.com/xml/simple.xml");
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, parseStreamCallback);
@@ -152,7 +176,6 @@ int main(void)
   free(state.characters.memory);
   XML_ParserFree(parser);
   curl_easy_cleanup(curl_handle);
-  curl_global_cleanup();
 
   return 0;
 }

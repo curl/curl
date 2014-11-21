@@ -19,8 +19,16 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
+
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
 
 /* This is an example showing how to send mail using libcurl's SMTP
  * capabilities. It builds on the smtp-mail.c example to demonstrate how to use
@@ -102,9 +110,25 @@ int main(void)
   struct curl_slist *recipients = NULL;
   struct upload_status upload_ctx;
 
-  upload_ctx.lines_read = 0;
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
+
+  upload_ctx.lines_read = 0;
 
   curl = curl_easy_init();
   if(!curl)
@@ -229,9 +253,8 @@ int main(void)
 
   /* Always cleanup */
   curl_multi_remove_handle(mcurl, curl);
-  curl_multi_cleanup(mcurl);
   curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  curl_multi_cleanup(mcurl);
 
   return 0;
 }

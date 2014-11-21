@@ -95,6 +95,13 @@
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
 static const char *curlx_usage[]={
   "usage: curlx args\n",
   " -p12 arg         - tia  file ",
@@ -280,12 +287,28 @@ int main(int argc, char **argv) {
   struct curl_slist * headers=NULL;
   int badarg=0;
 
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
+
   binaryptr = malloc(tabLength);
 
   p.verbose = 0;
   p.errorbio = BIO_new_fp (stderr, BIO_NOCLOSE);
-
-  curl_global_init(CURL_GLOBAL_DEFAULT);
 
   /* we need some more for the P12 decoding */
 

@@ -53,6 +53,13 @@
 
 #include <curl/curl.h>
 
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
 enum fcurl_type_e {
   CFTYPE_NONE=0,
   CFTYPE_FILE=1,
@@ -254,9 +261,6 @@ URL_FILE *url_fopen(const char *url,const char *operation)
     curl_easy_setopt(file->handle.curl, CURLOPT_VERBOSE, 0L);
     curl_easy_setopt(file->handle.curl, CURLOPT_WRITEFUNCTION, write_callback);
 
-    if(!multi_handle)
-      multi_handle = curl_multi_init();
-
     curl_multi_add_handle(multi_handle, file->handle.curl);
 
     /* lets start the fetch */
@@ -306,6 +310,7 @@ int url_fclose(URL_FILE *file)
     free(file->buffer);/* free any allocated buffer space */
 
   free(file);
+  file = NULL;
 
   return ret;
 }
@@ -454,12 +459,40 @@ void url_rewind(URL_FILE *file)
  * they contain 0 chars */
 int main(int argc, char *argv[])
 {
-  URL_FILE *handle;
-  FILE *outf;
+  URL_FILE *handle = NULL;
+  FILE *outf = NULL;
 
   int nread;
   char buffer[256];
   const char *url;
+  int exitcode = EXIT_SUCCESS;
+
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
+
+  /* If curl_multi_init returns NULL, something went wrong and you cannot use
+  the other curl functions. */
+  multi_handle = curl_multi_init();
+  if(!multi_handle) {
+    fprintf(stderr, "Fatal: curl_multi_init failed.\n");
+    exitcode = EXIT_FAILURE;
+    goto cleanup;
+  }
 
   if(argc < 2)
     url="http://192.168.7.3/testfile";/* default to testurl */
@@ -470,14 +503,15 @@ int main(int argc, char *argv[])
   outf=fopen("fgets.test","w+");
   if(!outf) {
     perror("couldn't open fgets output file\n");
-    return 1;
+    exitcode = 1;
+    goto cleanup;
   }
 
   handle = url_fopen(url, "r");
   if(!handle) {
     printf("couldn't url_fopen() %s\n", url);
-    fclose(outf);
-    return 2;
+    exitcode = 2;
+    goto cleanup;
   }
 
   while(!url_feof(handle)) {
@@ -486,22 +520,24 @@ int main(int argc, char *argv[])
   }
 
   url_fclose(handle);
+  handle = NULL;
 
   fclose(outf);
-
+  outf = NULL;
 
   /* Copy from url with fread */
   outf=fopen("fread.test","w+");
   if(!outf) {
     perror("couldn't open fread output file\n");
-    return 1;
+    exitcode = 1;
+    goto cleanup;
   }
 
   handle = url_fopen("testfile", "r");
   if(!handle) {
     printf("couldn't url_fopen() testfile\n");
-    fclose(outf);
-    return 2;
+    exitcode = 2;
+    goto cleanup;
   }
 
   do {
@@ -510,22 +546,24 @@ int main(int argc, char *argv[])
   } while(nread);
 
   url_fclose(handle);
+  handle = NULL;
 
   fclose(outf);
-
+  outf = NULL;
 
   /* Test rewind */
   outf=fopen("rewind.test","w+");
   if(!outf) {
     perror("couldn't open fread output file\n");
-    return 1;
+    exitcode = 1;
+    goto cleanup;
   }
 
   handle = url_fopen("testfile", "r");
   if(!handle) {
     printf("couldn't url_fopen() testfile\n");
-    fclose(outf);
-    return 2;
+    exitcode = 2;
+    goto cleanup;
   }
 
   nread = url_fread(buffer, 1,sizeof(buffer), handle);
@@ -538,11 +576,17 @@ int main(int argc, char *argv[])
   nread = url_fread(buffer, 1,sizeof(buffer), handle);
   fwrite(buffer,1,nread,outf);
 
+cleanup:
 
-  url_fclose(handle);
+  if(handle) {
+    url_fclose(handle);
+  }
 
-  fclose(outf);
+  if(outf) {
+    fclose(outf);
+  }
 
+  curl_multi_cleanup(multi_handle);
 
-  return 0;/* all done */
+  return exitcode;
 }

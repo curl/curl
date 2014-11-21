@@ -33,6 +33,13 @@
 #endif
 #include <curl/multi.h>
 
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
 static const char *urls[] = {
   "http://www.microsoft.com",
   "http://www.opensource.org",
@@ -119,7 +126,23 @@ int main(void)
   fd_set R, W, E;
   struct timeval T;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
 
   cm = curl_multi_init();
 
@@ -191,7 +214,6 @@ int main(void)
   }
 
   curl_multi_cleanup(cm);
-  curl_global_cleanup();
 
   return EXIT_SUCCESS;
 }

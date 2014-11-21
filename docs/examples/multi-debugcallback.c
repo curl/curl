@@ -22,6 +22,7 @@
 /* This is an example showing the multi interface and the debug callback. */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* somewhat unix-specific */
@@ -30,6 +31,13 @@
 
 /* curl stuff */
 #include <curl/curl.h>
+
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
 
 typedef char bool;
 #define TRUE 1
@@ -127,6 +135,24 @@ int main(void)
 
   int still_running; /* keep number of running handles */
 
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
+
   http_handle = curl_easy_init();
 
   /* set the options (I left out a few, you'll get the point anyway) */
@@ -218,9 +244,9 @@ int main(void)
     }
   } while(still_running);
 
-  curl_multi_cleanup(multi_handle);
-
+  curl_multi_remove_handle(multi_handle, http_handle);
   curl_easy_cleanup(http_handle);
+  curl_multi_cleanup(multi_handle);
 
   return 0;
 }

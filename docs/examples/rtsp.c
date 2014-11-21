@@ -54,6 +54,14 @@ static int _getch(void)
 
 #include <curl/curl.h>
 
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
+
 #define VERSION_STR  "V1.0"
 
 /* error handling macros */
@@ -180,6 +188,24 @@ int main(int argc, char * const argv[])
   int rc = EXIT_SUCCESS;
   char *base_name = NULL;
 
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
+
   printf("\nRTSP request %s\n", VERSION_STR);
   printf("    Project web site: http://code.google.com/p/rtsprequest/\n");
   printf("    Requires cURL V7.20 or greater\n\n");
@@ -206,62 +232,55 @@ int main(int argc, char * const argv[])
     char *uri = malloc(strlen(url) + 32);
     char *sdp_filename = malloc(strlen(url) + 32);
     char *control = malloc(strlen(url) + 32);
-    CURLcode res;
+    CURLcode res = CURLE_OK;
     get_sdp_filename(url, sdp_filename);
     if (argc == 3) {
       transport = argv[2];
     }
 
-    /* initialize curl */
-    res = curl_global_init(CURL_GLOBAL_ALL);
-    if (res == CURLE_OK) {
-      curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
-      CURL *curl;
-      fprintf(stderr, "    cURL V%s loaded\n", data->version);
+    curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
+    CURL *curl;
+    fprintf(stderr, "    cURL V%s loaded\n", data->version);
 
-      /* initialize this curl session */
-      curl = curl_easy_init();
-      if (curl != NULL) {
-        my_curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
-        my_curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
-        my_curl_easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
-        my_curl_easy_setopt(curl, CURLOPT_URL, url);
+    /* initialize this curl session */
+    curl = curl_easy_init();
+    if (curl != NULL) {
+      my_curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+      my_curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+      my_curl_easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
+      my_curl_easy_setopt(curl, CURLOPT_URL, url);
 
-        /* request server options */
-        sprintf(uri, "%s", url);
-        rtsp_options(curl, uri);
+      /* request server options */
+      sprintf(uri, "%s", url);
+      rtsp_options(curl, uri);
 
-        /* request session description and write response to sdp file */
-        rtsp_describe(curl, uri, sdp_filename);
+      /* request session description and write response to sdp file */
+      rtsp_describe(curl, uri, sdp_filename);
 
-        /* get media control attribute from sdp file */
-        get_media_control_attribute(sdp_filename, control);
+      /* get media control attribute from sdp file */
+      get_media_control_attribute(sdp_filename, control);
 
-        /* setup media stream */
-        sprintf(uri, "%s/%s", url, control);
-        rtsp_setup(curl, uri, transport);
+      /* setup media stream */
+      sprintf(uri, "%s/%s", url, control);
+      rtsp_setup(curl, uri, transport);
 
-        /* start playing media stream */
-        sprintf(uri, "%s/", url);
-        rtsp_play(curl, uri, range);
-        printf("Playing video, press any key to stop ...");
-        _getch();
-        printf("\n");
+      /* start playing media stream */
+      sprintf(uri, "%s/", url);
+      rtsp_play(curl, uri, range);
+      printf("Playing video, press any key to stop ...");
+      _getch();
+      printf("\n");
 
-        /* teardown session */
-        rtsp_teardown(curl, uri);
+      /* teardown session */
+      rtsp_teardown(curl, uri);
 
-        /* cleanup */
-        curl_easy_cleanup(curl);
-        curl = NULL;
-      } else {
-        fprintf(stderr, "curl_easy_init() failed\n");
-      }
-      curl_global_cleanup();
+      /* cleanup */
+      curl_easy_cleanup(curl);
+      curl = NULL;
     } else {
-      fprintf(stderr, "curl_global_init(%s) failed: %d\n",
-              "CURL_GLOBAL_ALL", res);
+      fprintf(stderr, "curl_easy_init() failed\n");
     }
+
     free(control);
     free(sdp_filename);
     free(uri);
