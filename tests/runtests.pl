@@ -198,51 +198,51 @@ my $valgrind_tool;
 my $gdb = checktestcmd("gdb");
 my $httptlssrv = find_httptlssrv();
 
-my $ssl_version; # set if libcurl is built with SSL support
-my $large_file;  # set if libcurl is built with large file support
-my $has_idn;     # set if libcurl is built with IDN support
-my $http_ipv6;   # set if HTTP server has IPv6 support
-my $ftp_ipv6;    # set if FTP server has IPv6 support
-my $tftp_ipv6;   # set if TFTP server has IPv6 support
-my $gopher_ipv6; # set if Gopher server has IPv6 support
-my $has_ipv6;    # set if libcurl is built with IPv6 support
-my $has_libz;    # set if libcurl is built with libz support
+my $ssl_version;    # set if libcurl is built with SSL support
+my $large_file;     # set if libcurl is built with large file support
+my $has_idn;        # set if libcurl is built with IDN support
+my $http_ipv6;      # set if HTTP server has IPv6 support
+my $ftp_ipv6;       # set if FTP server has IPv6 support
+my $tftp_ipv6;      # set if TFTP server has IPv6 support
+my $gopher_ipv6;    # set if Gopher server has IPv6 support
+my $has_ipv6;       # set if libcurl is built with IPv6 support
+my $has_libz;       # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
-my $has_ntlm;    # set if libcurl is built with NTLM support
-my $has_ntlm_wb; # set if libcurl is built with NTLM delegation to winbind
-my $has_sspi;    # set if libcurl is built with SSPI support
-my $has_gssapi;  # set if libcurl is built with a GSS-API library
-my $has_kerberos;# set if libcurl is built with Kerberos support
-my $has_spnego;  # set if libcurl is built with SPNEGO support
-my $has_charconv;# set if libcurl is built with CharConv support
-my $has_tls_srp; # set if libcurl is built with TLS-SRP support
-my $has_metalink;# set if curl is built with Metalink support
-my $has_http2;   # set if libcurl is built with HTTP2 support
+my $has_ntlm;       # set if libcurl is built with NTLM support
+my $has_ntlm_wb;    # set if libcurl is built with NTLM delegation to winbind
+my $has_sspi;       # set if libcurl is built with Windows SSPI
+my $has_gssapi;     # set if libcurl is built with a GSS-API library
+my $has_kerberos;   # set if libcurl is built with Kerberos support
+my $has_spnego;     # set if libcurl is built with SPNEGO support
+my $has_charconv;   # set if libcurl is built with CharConv support
+my $has_tls_srp;    # set if libcurl is built with TLS-SRP support
+my $has_metalink;   # set if curl is built with Metalink support
+my $has_http2;      # set if libcurl is built with HTTP2 support
+my $has_crypto;     # set if libcurl is built with cryptographic support
+my $has_cares;      # set if built with c-ares
+my $has_threadedres;# set if built with threaded resolver
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c-14";
 
-my $has_openssl;  # built with a lib using an OpenSSL-like API
-my $has_gnutls;   # built with GnuTLS
-my $has_nss;      # built with NSS
-my $has_yassl;    # built with yassl
-my $has_polarssl; # built with polarssl
-my $has_axtls;    # built with axTLS
-my $has_winssl;   # built with WinSSL    (Secure Channel aka Schannel)
-my $has_darwinssl;# build with DarwinSSL (Secure Transport)
+my $has_openssl;    # built with a lib using an OpenSSL-like API
+my $has_gnutls;     # built with GnuTLS
+my $has_nss;        # built with NSS
+my $has_yassl;      # built with yassl
+my $has_polarssl;   # built with polarssl
+my $has_axtls;      # built with axTLS
+my $has_winssl;     # built with WinSSL    (Secure Channel aka Schannel)
+my $has_darwinssl;  # build with DarwinSSL (Secure Transport)
 
 my $has_sslpinning; # built with a TLS backend that supports pinning
 
 my $has_shared = "unknown";  # built shared
 
-my $resolver;     # string to hold the resolver backend
-my $has_cares;    # if built with c-ares
-my $has_threadedres; # if built with threaded resolver
+my $resolver;       # name of the resolver backend (for human presentation)
+my $ssllib;         # name of the SSL library we use (for human presentation)
 
-my $ssllib;      # name of the lib we use (for human presentation)
-my $has_crypto;  # set if libcurl is built with cryptographic support
-my $has_textaware; # set if running on a system that has a text mode concept
-  # on files. Windows for example
+my $has_textaware;  # set if running on a system that has a text mode concept
+                    # on files. Windows for example
 
 my @protocols;   # array of lowercase supported protocol servers
 
