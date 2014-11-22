@@ -228,6 +228,7 @@ http2
 SSPI
 GSS-API
 Kerberos
+SPNEGO
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
