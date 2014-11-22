@@ -2390,7 +2390,8 @@ sub checksystem {
             if($feat =~ /NTLM/i) {
                 # NTLM enabled
                 $has_ntlm=1;
-		# Use this as a proxy for any cryptographic authentication
+
+                # Use this as a proxy for any cryptographic authentication
                 $has_crypto=1;
             }
             if($feat =~ /NTLM_WB/i) {
@@ -2408,10 +2409,16 @@ sub checksystem {
             if($feat =~ /Kerberos/i) {
                 # Kerberos enabled
                 $has_kerberos=1;
+
+                # Use this as a proxy for any cryptographic authentication
+                $has_crypto=1;
             }
             if($feat =~ /SPNEGO/i) {
                 # SPNEGO enabled
                 $has_spnego=1;
+
+                # Use this as a proxy for any cryptographic authentication
+                $has_crypto=1;
             }
             if($feat =~ /CharConv/i) {
                 # CharConv enabled
