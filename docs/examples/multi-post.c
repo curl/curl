@@ -22,10 +22,18 @@
 /* This is an example application source code using the multi interface
  * to do a multipart formpost without "blocking". */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 
 #include <curl/curl.h>
+
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
 
 int main(void)
 {
@@ -38,6 +46,24 @@ int main(void)
   struct curl_httppost *lastptr=NULL;
   struct curl_slist *headerlist=NULL;
   static const char buf[] = "Expect:";
+
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
 
   /* Fill in the file upload field. This makes libcurl load data from
      the given file name when curl_easy_perform() is called. */
@@ -154,10 +180,9 @@ int main(void)
       }
     } while(still_running);
 
-    curl_multi_cleanup(multi_handle);
-
-    /* always cleanup */
+    curl_multi_remove_handle(multi_handle, curl);
     curl_easy_cleanup(curl);
+    curl_multi_cleanup(multi_handle);
 
     /* then cleanup the formpost chain */
     curl_formfree(formpost);

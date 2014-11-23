@@ -32,8 +32,16 @@
 #define USE_OPENSSL /* or USE_GNUTLS accordingly */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <curl/curl.h>
+
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
 
 #define NUMT 4
 
@@ -58,7 +66,11 @@ static unsigned long thread_id(void)
 {
   unsigned long ret;
 
+#ifdef _WIN32
+  ret = GetCurrentThreadId();
+#else
   ret=(unsigned long)pthread_self();
+#endif
   return(ret);
 }
 
@@ -134,8 +146,23 @@ int main(int argc, char **argv)
   (void)argc; /* we don't use any arguments in this example */
   (void)argv;
 
-  /* Must initialize libcurl before any threads are started */
-  curl_global_init(CURL_GLOBAL_ALL);
+  /* Call curl_global_init immediately after the program starts, while it is
+  still only one thread and before it uses libcurl at all. If the function
+  returns non-zero, something went wrong and you cannot use the other curl
+  functions. */
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Fatal: The initialization of libcurl has failed.\n");
+    return EXIT_FAILURE;
+  }
+
+  /* Call curl_global_cleanup immediately before the program exits, when the
+  program is again only one thread and after its last use of libcurl. For
+  example, you can use atexit to ensure the cleanup will be called at exit. */
+  if(atexit(curl_global_cleanup)) {
+    fprintf(stderr, "Fatal: atexit failed to register curl_global_cleanup.\n");
+    curl_global_cleanup();
+    return EXIT_FAILURE;
+  }
 
   init_locks();
 
