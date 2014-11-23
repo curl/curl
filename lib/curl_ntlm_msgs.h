@@ -46,12 +46,6 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
                                         const char* header,
                                         struct ntlmdata* ntlm);
 
-/* This is to decode target info received in NTLM type-2 message */
-CURLcode Curl_ntlm_decode_type2_target(struct SessionHandle *data,
-                                       unsigned char* buffer,
-                                       size_t size,
-                                       struct ntlmdata* ntlm);
-
 /* NTLM buffer fixed size, large enough for long user + host + domain */
 #define NTLM_BUFSIZE 1024
 

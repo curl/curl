@@ -166,7 +166,7 @@ static unsigned int readshort_le(unsigned char *buf)
 }
 
 /*
- * Curl_ntlm_decode_type2_target()
+ * ntlm_decode_type2_target()
  *
  * This is used to decode the "target info" in the ntlm type-2 message
  * received.
@@ -180,10 +180,10 @@ static unsigned int readshort_le(unsigned char *buf)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_ntlm_decode_type2_target(struct SessionHandle *data,
-                                       unsigned char *buffer,
-                                       size_t size,
-                                       struct ntlmdata *ntlm)
+static CURLcode ntlm_decode_type2_target(struct SessionHandle *data,
+                                         unsigned char *buffer,
+                                         size_t size,
+                                         struct ntlmdata *ntlm)
 {
   unsigned int target_info_len = 0;
   unsigned int target_info_offset = 0;
@@ -303,7 +303,7 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   memcpy(ntlm->nonce, &type2[24], 8);
 
   if(ntlm->flags & NTLMFLAG_NEGOTIATE_TARGET_INFO) {
-    result = Curl_ntlm_decode_type2_target(data, type2, type2_len, ntlm);
+    result = ntlm_decode_type2_target(data, type2, type2_len, ntlm);
     if(result) {
       free(type2);
       infof(data, "NTLM handshake failure (bad type-2 message)\n");
