@@ -113,10 +113,11 @@ static void mstate(struct SessionHandle *data, CURLMstate state
 #endif
 )
 {
-#ifdef DEBUGBUILD
-  long connection_id = -5000;
-#endif
   CURLMstate oldstate = data->mstate;
+
+#if defined(DEBUGBUILD) && defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void) lineno;
+#endif
 
   if(oldstate == state)
     /* don't bother when the new state is the same as the old state */
@@ -124,9 +125,11 @@ static void mstate(struct SessionHandle *data, CURLMstate state
 
   data->mstate = state;
 
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   if(data->mstate >= CURLM_STATE_CONNECT_PEND &&
      data->mstate < CURLM_STATE_COMPLETED) {
+    long connection_id = -5000;
+
     if(data->easy_conn)
       connection_id = data->easy_conn->connection_id;
 
@@ -136,6 +139,7 @@ static void mstate(struct SessionHandle *data, CURLMstate state
           (void *)data, lineno, connection_id);
   }
 #endif
+
   if(state == CURLM_STATE_COMPLETED)
     /* changing to COMPLETED means there's one less easy handle 'alive' */
     data->multi->num_alive--;
