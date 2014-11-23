@@ -26,26 +26,6 @@
 
 #ifdef USE_NTLM
 
-/* This is to generate a base64 encoded NTLM type-1 message */
-CURLcode Curl_ntlm_create_type1_message(const char *userp,
-                                        const char *passwdp,
-                                        struct ntlmdata *ntlm,
-                                        char **outptr,
-                                        size_t *outlen);
-
-/* This is to generate a base64 encoded NTLM type-3 message */
-CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
-                                        const char *userp,
-                                        const char *passwdp,
-                                        struct ntlmdata *ntlm,
-                                        char **outptr,
-                                        size_t *outlen);
-
-/* This is to decode a NTLM type-2 message */
-CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
-                                        const char* header,
-                                        struct ntlmdata* ntlm);
-
 /* NTLM buffer fixed size, large enough for long user + host + domain */
 #define NTLM_BUFSIZE 1024
 

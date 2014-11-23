@@ -233,13 +233,12 @@ static CURLcode ntlm_decode_type2_target(struct SessionHandle *data,
 */
 
 /*
- * Curl_ntlm_decode_type2_message()
+ * Curl_sasl_decode_ntlm_type2_message()
  *
- * This is used to decode a ntlm type-2 message received from a HTTP or SASL
- * based (such as SMTP, POP3 or IMAP) server. The message is first decoded
- * from a base64 string into a raw ntlm message and checked for validity
- * before the appropriate data for creating a type-3 message is written to
- * the given ntlm data structure.
+ * This is used to decode an already encoded NTLM type-2 message. The message
+ * is first decoded from a base64 string into a raw NTLM message and checked
+ * for validity before the appropriate data for creating a type-3 message is
+ * written to the given NTLM data structure.
  *
  * Parameters:
  *
@@ -249,9 +248,9 @@ static CURLcode ntlm_decode_type2_target(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
-                                        const char *type2msg,
-                                        struct ntlmdata *ntlm)
+CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+                                             const char *type2msg,
+                                             struct ntlmdata *ntlm)
 {
   static const char type2_marker[] = { 0x02, 0x00, 0x00, 0x00 };
 
@@ -346,11 +345,10 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
 }
 
 /*
- * Curl_ntlm_create_type1_message()
+ * Curl_sasl_create_ntlm_type1_message()
  *
  * This is used to generate an already encoded NTLM type-1 message ready for
- * sending to the recipient, be it a HTTP or SASL based (such as SMTP, POP3
- * or IMAP) server, using the appropriate compile time crypo API.
+ * sending to the recipient using the appropriate compile time crypto API.
  *
  * Parameters:
  *
@@ -363,11 +361,10 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_ntlm_create_type1_message(const char *userp,
-                                        const char *passwdp,
-                                        struct ntlmdata *ntlm,
-                                        char **outptr,
-                                        size_t *outlen)
+CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
+                                             const char *passwdp,
+                                             struct ntlmdata *ntlm,
+                                             char **outptr, size_t *outlen)
 {
   /* NTLM type-1 message structure:
 
@@ -467,11 +464,10 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
 }
 
 /*
- * Curl_ntlm_create_type3_message()
+ * Curl_sasl_create_ntlm_type3_message()
  *
  * This is used to generate an already encoded NTLM type-3 message ready for
- * sending to the recipient, be it a HTTP or SASL based (such as SMTP, POP3
- * or IMAP) server, using the appropriate compile time crypo API.
+ * sending to the recipient using the appropriate compile time crypto API.
  *
  * Parameters:
  *
@@ -485,12 +481,12 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
-                                        const char *userp,
-                                        const char *passwdp,
-                                        struct ntlmdata *ntlm,
-                                        char **outptr,
-                                        size_t *outlen)
+CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
+                                             const char *userp,
+                                             const char *passwdp,
+                                             struct ntlmdata *ntlm,
+                                             char **outptr, size_t *outlen)
+
 {
   /* NTLM type-3 message structure:
 
