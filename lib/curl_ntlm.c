@@ -70,12 +70,6 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
   struct ntlmdata *ntlm;
   CURLcode result = CURLE_OK;
 
-#ifdef USE_NSS
-  result = Curl_nss_force_init(conn->data);
-  if(result)
-    return result;
-#endif
-
   ntlm = proxy ? &conn->proxyntlm : &conn->ntlm;
 
   if(checkprefix("NTLM", header)) {
