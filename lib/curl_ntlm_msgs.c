@@ -45,6 +45,10 @@
 
 #include "vtls/vtls.h"
 
+#ifdef USE_NSS
+#include "vtls/nssg.h" /* for Curl_nss_force_init() */
+#endif
+
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "curl_ntlm_msgs.h"
 #include "curl_sasl.h"
@@ -271,7 +275,12 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
   unsigned char *type2 = NULL;
   size_t type2_len = 0;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(USE_NSS)
+  /* Make sure the crypto backend is initialized */
+  result = Curl_nss_force_init(data);
+  if(result)
+    return result;
+#elif defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void)data;
 #endif
 
