@@ -53,6 +53,13 @@ This release includes the following bugfixes:
  o multi: inform about closed sockets before they are closed
  o multi-uv.c: close the file handle after download
  o examples: Wait recommended 100ms when no file descriptors are ready
+ o ntlm: Split the SSPI based messaging code from the native messaging code
+ o cmake: fix NTLM detection when CURL_DISABLE_HTTP defined
+ o cmake: add Kerberos to the supported feature
+ o CURLOPT_POSTFIELDS.3: mention the COPYPOSTFIELDS option
+ o http: Disable pipelining for HTTP/2 and upgraded connections
+ o ntlm: Fixed static'ness of local decode function
+ o sasl: Reduced the need for two sets of NTLM messaging functions
 
 This release includes the following known bugs:
 
@@ -61,10 +68,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad King, Carlo Wood, Christian Hägele, Dan Fandrich, Daniel Stenberg,
-  Frank Gevaerts, Gisle Vanem, Guenter Knauf, Jan Ehrhardt, Johan Lantz,
-  Jon Spencer, Lucas Pardue, Michael Osipov, Nobuhiro Ban, Patrick Monnerat,
-  Peter Wu, Ray Satiro, Sam Hurst, Stefan Neis, Steve Holme,
+  Brad Harder, Brad King, Carlo Wood, Christian Hägele, Dan Fandrich,
+  Daniel Stenberg, Frank Gevaerts, Gisle Vanem, Guenter Knauf, Jan Ehrhardt,
+  Johan Lantz, Jon Spencer, Lucas Pardue, Michael Osipov, Nobuhiro Ban,
+  Patrick Monnerat, Peter Wu, Ray Satiro, Sam Hurst, Stefan Neis, Steve Holme,
   Tatsuhiro Tsujikawa, Waldek Kozba,
 
         Thanks! (and sorry if I forgot to mention someone)
