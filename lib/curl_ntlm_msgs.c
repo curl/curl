@@ -173,10 +173,10 @@ static unsigned int readshort_le(unsigned char *buf)
  *
  * Parameters:
  *
- * data      [in]    - Pointer to the session handle
- * buffer    [in]    - The decoded base64 ntlm header of Type 2
- * size      [in]    - The input buffer size, atleast 32 bytes
- * ntlm      [in]    - Pointer to ntlm data struct being used and modified.
+ * data      [in]     - The session handle.
+ * buffer    [in]     - The decoded type-2 message.
+ * size      [in]     - The input buffer size, at least 32 bytes.
+ * ntlm      [in/out] - The ntlm data struct being used and modified.
  *
  * Returns CURLE_OK on success.
  */
@@ -239,14 +239,14 @@ CURLcode Curl_ntlm_decode_type2_target(struct SessionHandle *data,
  *
  * Parameters:
  *
- * data    [in]     - Pointer to session handle.
- * header  [in]     - Pointer to the input buffer.
- * ntlm    [in]     - Pointer to ntlm data struct being used and modified.
+ * data     [in]     - The session handle.
+ * type2msg [in]     - The base64 encoded type-2 message.
+ * ntlm     [in/out] - The ntlm data struct being used and modified.
  *
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
-                                        const char *header,
+                                        const char *type2msg,
                                         struct ntlmdata *ntlm)
 {
   static const char type2_marker[] = { 0x02, 0x00, 0x00, 0x00 };
@@ -276,8 +276,8 @@ CURLcode Curl_ntlm_decode_type2_message(struct SessionHandle *data,
 #endif
 
   /* Decode the base-64 encoded type-2 message */
-  if(strlen(header) && *header != '=') {
-    result = Curl_base64_decode(header, &type2, &type2_len);
+  if(strlen(type2msg) && *type2msg != '=') {
+    result = Curl_base64_decode(type2msg, &type2, &type2_len);
     if(result)
       return result;
   }
