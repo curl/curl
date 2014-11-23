@@ -357,7 +357,7 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
  *
  * Parameters:
  *
- * chlg64  [in]     - Pointer to the base64 encoded challenge message.
+ * chlg64  [in]     - The base64 encoded challenge message.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
@@ -454,7 +454,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
  *
  * Parameters:
  *
- * chlg64  [in]     - Pointer to the base64 encoded challenge message.
+ * chlg64  [in]     - The base64 encoded challenge message.
  * nonce   [in/out] - The buffer where the nonce will be stored.
  * nlen    [in]     - The length of the nonce buffer.
  * realm   [in/out] - The buffer where the realm will be stored.
@@ -526,7 +526,7 @@ static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
  * Parameters:
  *
  * data    [in]     - The session handle.
- * chlg64  [in]     - Pointer to the base64 encoded challenge message.
+ * chlg64  [in]     - The base64 encoded challenge message.
  * userp   [in]     - The user name.
  * passdwp [in]     - The user's password.
  * service [in]     - The service type such as www, smtp, pop or imap.
@@ -705,7 +705,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
  *
  * Parameters:
  *
- * chlg    [in]     - Pointer to the challenge message.
+ * chlg    [in]     - The challenge message.
  * digest  [in/out] - The digest data struct being used and modified.
  *
  * Returns CURLE_OK on success.
@@ -1155,7 +1155,7 @@ CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
  *
  * Parameters:
  *
- * conn     [in]     - Pointer to the connection data.
+ * conn     [in]     - The connection data.
  * authused [in]     - The authentication mechanism used.
  */
 void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)

@@ -102,8 +102,8 @@ TCHAR *Curl_sasl_build_spn(const char *service, const char *host)
  * Parameters:
  *
  * data    [in]     - The session handle.
- * chlg64  [in]     - Pointer to the base64 encoded challenge message.
- * userp   [in]     - The user name.
+ * chlg64  [in]     - The base64 encoded challenge message.
+ * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
  * service [in]     - The service type such as www, smtp, pop or imap.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
@@ -283,7 +283,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
  *
  * Parameters:
  *
- * chlg    [in]     - Pointer to the challenge message.
+ * chlg    [in]     - The challenge message.
  * digest  [in/out] - The digest data struct being used and modified.
  *
  * Returns CURLE_OK on success.
@@ -317,7 +317,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
  * Parameters:
  *
  * data    [in]     - The session handle.
- * userp   [in]     - The user name.
+ * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
  * request [in]     - The HTTP request.
  * uripath [in]     - The path of the HTTP uri.
@@ -606,8 +606,8 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
 *
 * Parameters:
 *
-* data     [in]     - Pointer to session handle.
-* type2msg [in]     - Pointer to the base64 encoded type-2 message.
+* data     [in]     - The session handle.
+* type2msg [in]     - The base64 encoded type-2 message.
 * ntlm     [in/out] - The ntlm data struct being used and modified.
 *
 * Returns CURLE_OK on success.
@@ -653,7 +653,7 @@ CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
 *
 * Parameters:
 *
-* data    [in]     - Pointer to session handle.
+* data    [in]     - The session handle.
 * userp   [in]     - The user name in the format User or Domain\User.
 * passdwp [in]     - The user's password.
 * ntlm    [in/out] - The ntlm data struct being used and modified.
@@ -771,13 +771,12 @@ void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
  * Parameters:
  *
  * data        [in]     - The session handle.
- * userp       [in]     - The user name.
+ * userp       [in]     - The user name in the format User or Domain\User.
  * passdwp     [in]     - The user's password.
  * service     [in]     - The service type such as www, smtp, pop or imap.
  * mutual_auth [in]     - Flag specifing whether or not mutual authentication
  *                        is enabled.
- * chlg64      [in]     - Pointer to the optional base64 encoded challenge
- *                        message.
+ * chlg64      [in]     - The optional base64 encoded challenge message.
  * krb5        [in/out] - The gssapi data struct being used and modified.
  * outptr      [in/out] - The address where a pointer to newly allocated memory
  *                        holding the result will be stored upon completion.
@@ -945,7 +944,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
  * Parameters:
  *
  * data    [in]     - The session handle.
- * chlg64  [in]     - Pointer to the optional base64 encoded challenge message.
+ * chlg64  [in]     - The optional base64 encoded challenge message.
  * krb5    [in/out] - The gssapi data struct being used and modified.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
