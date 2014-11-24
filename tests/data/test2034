@@ -31,7 +31,7 @@ SSLpinning
 https Server-localhost-sv.pem
 </server>
  <name>
-simple HTTPS GET with public key pinning
+simple HTTPS GET with DER public key pinning
  </name>
  <command>
 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pub.der https://localhost:%HTTPSPORT/2034

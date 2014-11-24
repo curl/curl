@@ -539,14 +539,14 @@ If this option is set, the default capath value will be ignored, and if it is
 used several times, the last one will be used.
 .IP "--pinnedpubkey <pinned public key>"
 (SSL) Tells curl to use the specified public key file to verify the peer. The
-file must contain a single public key in DER format.
+file must contain a single public key in PEM or DER format.
 
 When negotiating a TLS or SSL connection, the server sends a certificate
 indicating its identity. A public key is extracted from this certificate and
 if it does not exactly match the public key provided to this option, curl will
 abort the connection before sending or receiving any data.
 
-This is currently only implemented in the OpenSSL and GnuTLS backends.
+This is currently only implemented in the OpenSSL, GnuTLS and GSKit backends.
 
 If this option is used several times, the last one will be used.
 (Added in 7.39.0)

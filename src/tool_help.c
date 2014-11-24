@@ -152,7 +152,8 @@ static const char *const helptext[] = {
   "     --oauth2-bearer TOKEN  OAuth 2 Bearer Token (IMAP, POP3, SMTP)",
   " -o, --output FILE   Write to FILE instead of stdout",
   "     --pass PASS     Pass phrase for the private key (SSL/SSH)",
-  "     --pinnedpubkey FILE Public key (DER) to verify peer against (OpenSSL)",
+  "     --pinnedpubkey FILE  Public key (PEM/DER) to verify peer against "
+  "(OpenSSL/GnuTLS/GSKit only)",
   "     --post301       "
   "Do not switch to GET after following a 301 redirect (H)",
   "     --post302       "

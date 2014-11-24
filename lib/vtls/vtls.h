@@ -33,6 +33,10 @@
 #include "curl_schannel.h" /* Schannel SSPI version */
 #include "curl_darwinssl.h" /* SecureTransport (Darwin) version */
 
+#ifndef MAX_PINNED_PUBKEY_SIZE
+#define MAX_PINNED_PUBKEY_SIZE 1048576 /* 1MB */
+#endif
+
 #ifndef MD5_DIGEST_LENGTH
 #define MD5_DIGEST_LENGTH 16 /* fixed size */
 #endif

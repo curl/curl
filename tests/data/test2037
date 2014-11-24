@@ -10,6 +10,14 @@ PEM certificate
 #
 # Server-side
 <reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 7
+
+MooMoo
+</data>
 </reply>
 
 #
@@ -23,10 +31,10 @@ SSLpinning
 https Server-localhost-sv.pem
 </server>
  <name>
-HTTPS wrong DER pinnedpubkey but right CN
+simple HTTPS GET with PEM public key pinning
  </name>
  <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.der https://localhost:%HTTPSPORT/2035
+--cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pub.pem https://localhost:%HTTPSPORT/2037
 </command>
 # Ensure that we're running on localhost because we're checking the host name
 <precheck>
@@ -37,8 +45,14 @@ perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0
 #
 # Verify data after the test has been "shot"
 <verify>
-<errorcode>
-90
-</errorcode>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /2037 HTTP/1.1
+Host: localhost:%HTTPSPORT
+Accept: */*
+
+</protocol>
 </verify>
 </testcase>

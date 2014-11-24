@@ -69,6 +69,7 @@
 #include "timeval.h"
 #include "curl_md5.h"
 #include "warnless.h"
+#include "curl_base64.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -684,15 +685,75 @@ int Curl_ssl_random(struct SessionHandle *data,
 }
 
 /*
+ * Public key pem to der conversion
+ */
+
+static CURLcode pubkey_pem_to_der(const char *pem,
+                                  unsigned char **der, size_t *der_len)
+{
+  char *stripped_pem, *begin_pos, *end_pos;
+  size_t pem_count, stripped_pem_count = 0, pem_len;
+  CURLcode result;
+
+  /* if no pem, exit. */
+  if(!pem)
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  begin_pos = strstr(pem, "-----BEGIN PUBLIC KEY-----");
+  if(!begin_pos)
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  pem_count = begin_pos - pem;
+  /* Invalid if not at beginning AND not directly following \n */
+  if(0 != pem_count && '\n' != pem[pem_count - 1])
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  /* 26 is length of "-----BEGIN PUBLIC KEY-----" */
+  pem_count += 26;
+
+  /* Invalid if not directly following \n */
+  end_pos = strstr(pem + pem_count, "\n-----END PUBLIC KEY-----");
+  if(!end_pos)
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  pem_len = end_pos - pem;
+
+  stripped_pem = malloc(pem_len - pem_count + 1);
+  if(!stripped_pem)
+    return CURLE_OUT_OF_MEMORY;
+
+  /*
+   * Here we loop through the pem array one character at a time between the
+   * correct indices, and place each character that is not '\n' or '\r'
+   * into the stripped_pem array, which should represent the raw base64 string
+   */
+  while(pem_count < pem_len) {
+    if('\n' != pem[pem_count] && '\r' != pem[pem_count])
+      stripped_pem[stripped_pem_count++] = pem[pem_count];
+    ++pem_count;
+  }
+  /* Place the null terminator in the correct place */
+  stripped_pem[stripped_pem_count] = '\0';
+
+  result = Curl_base64_decode(stripped_pem, der, der_len);
+
+  Curl_safefree(stripped_pem);
+
+  return result;
+}
+
+/*
  * Generic pinned public key check.
  */
 
 CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
                               const unsigned char *pubkey, size_t pubkeylen)
 {
-  FILE *fp = NULL;
-  unsigned char *buf = NULL;
-  long size = 0;
+  FILE *fp;
+  unsigned char *buf = NULL, *pem_ptr = NULL;
+  long filesize;
+  size_t size, pem_len;
+  CURLcode pem_read;
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
   /* if a path wasn't specified, don't pin */
@@ -708,32 +769,59 @@ CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
     /* Determine the file's size */
     if(fseek(fp, 0, SEEK_END))
       break;
-    size = ftell(fp);
+    filesize = ftell(fp);
     if(fseek(fp, 0, SEEK_SET))
+      break;
+    if(filesize < 0 || filesize > MAX_PINNED_PUBKEY_SIZE)
       break;
 
     /*
-     * if the size of our certificate doesn't match the size of
-     * the file, they can't be the same, don't bother reading it
+     * if the size of our certificate is bigger than the file
+     * size then it can't match
      */
-    if((long) pubkeylen != size)
+    size = curlx_sotouz((curl_off_t) filesize);
+    if(pubkeylen > size)
       break;
 
-    /* Allocate buffer for the pinned key. */
-    buf = malloc(pubkeylen);
+    /*
+     * Allocate buffer for the pinned key
+     * With 1 additional byte for null terminator in case of PEM key
+     */
+    buf = malloc(size + 1);
     if(!buf)
       break;
 
     /* Returns number of elements read, which should be 1 */
-    if((int) fread(buf, pubkeylen, 1, fp) != 1)
+    if((int) fread(buf, size, 1, fp) != 1)
       break;
 
-    /* The one good exit point */
-    if(!memcmp(pubkey, buf, pubkeylen))
+    /* If the sizes are the same, it can't be base64 encoded, must be der */
+    if(pubkeylen == size) {
+      if(!memcmp(pubkey, buf, pubkeylen))
+        result = CURLE_OK;
+      break;
+    }
+
+    /*
+     * Otherwise we will assume it's PEM and try to decode it
+     * after placing null terminator
+     */
+    buf[size] = '\0';
+    pem_read = pubkey_pem_to_der((const char *)buf, &pem_ptr, &pem_len);
+    /* if it wasn't read successfully, exit */
+    if(pem_read)
+      break;
+
+    /*
+     * if the size of our certificate doesn't match the size of
+     * the decoded file, they can't be the same, otherwise compare
+     */
+    if(pubkeylen == pem_len && !memcmp(pubkey, pem_ptr, pubkeylen))
       result = CURLE_OK;
   } while(0);
 
   Curl_safefree(buf);
+  Curl_safefree(pem_ptr);
   fclose(fp);
 
   return result;

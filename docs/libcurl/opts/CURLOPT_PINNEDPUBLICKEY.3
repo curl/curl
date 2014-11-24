@@ -29,7 +29,7 @@ CURLOPT_PINNEDPUBLICKEY \- set pinned public key
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PINNEDPUBLICKEY, char *pinnedpubkey);
 .SH DESCRIPTION
 Pass a pointer to a zero terminated string as parameter. The string should be
-the file name of your pinned public key. The format expected is "DER".
+the file name of your pinned public key. The format expected is "PEM" or "DER".
 
 When negotiating a TLS or SSL connection, the server sends a certificate
 indicating its identity. A public key is extracted from this certificate and
