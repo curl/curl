@@ -2317,12 +2317,30 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       );
 
   /*
-   * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
-   * with basic and digest, it will be freed anyway by the next request
+   * Free userpwd for Negotiate/NTLM (cannot reuse, authenticates all following
+   * requests anyway.)
+   * Basic/Digest are kept in case the connection gets reused in another easy
+   * handle (although digest might break since the challenge and cnonce is not
+   * transferred to the new easy handle).
    */
+  switch (data->state.authhost.picked) {
+  case CURLAUTH_NEGOTIATE:
+  case CURLAUTH_NTLM:
+  case CURLAUTH_NTLM_WB:
+    Curl_safefree(conn->allocptr.userpwd);
+    break;
+  }
 
-  Curl_safefree (conn->allocptr.userpwd);
-  conn->allocptr.userpwd = NULL;
+  /*
+   * Same for proxyuserpwd
+   */
+  switch (data->state.authproxy.picked) {
+  case CURLAUTH_NEGOTIATE:
+  case CURLAUTH_NTLM:
+  case CURLAUTH_NTLM_WB:
+    Curl_safefree(conn->allocptr.proxyuserpwd);
+    break;
+  }
 
   if(result)
     return result;
