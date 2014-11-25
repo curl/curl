@@ -258,7 +258,13 @@ sub get_host_triplet {
   return $triplet;
 }
 
-if (open(F, "$setupfile")) {
+if($name && $email && $desc) {
+  # having these fields set are enough to continue, skip reading the setup
+  # file
+  $infixed=4;
+  $fixed=4;
+}
+elsif (open(F, "$setupfile")) {
   while (<F>) {
     if (/(\w+)=(.*)/) {
       eval "\$$1=$2;";
@@ -266,7 +272,8 @@ if (open(F, "$setupfile")) {
   }
   close(F);
   $infixed=$fixed;
-} else {
+}
+else {
   $infixed=0;    # so that "additional args to configure" works properly first time...
 }
 
