@@ -62,10 +62,10 @@ proceed and call \fIcurl_multi_perform(3)\fP anyway. How long to wait? We
 suggest 100 milliseconds at least, but you may want to test it out in your own
 particular conditions to find a suitable value.
 
-When doing select(), you should use \fBcurl_multi_timeout\fP to figure out how
-long to wait for action. Call \fIcurl_multi_perform(3)\fP even if no activity
-has been seen on the fd_sets after the timeout expires as otherwise internal
-retries and timeouts may not work as you'd think and want.
+When doing select(), you should use \fIcurl_multi_timeout(3)\fP to figure out
+how long to wait for action. Call \fIcurl_multi_perform(3)\fP even if no
+activity has been seen on the fd_sets after the timeout expires as otherwise
+internal retries and timeouts may not work as you'd think and want.
 
 If one of the sockets used by libcurl happens to be larger than what can be
 set in an fd_set, which on POSIX systems means that the file descriptor is
@@ -79,4 +79,5 @@ CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
+.BR curl_multi_wait "(3), "
 .BR curl_multi_timeout "(3), " curl_multi_perform "(3), " select "(2) "
