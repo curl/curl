@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,6 +31,15 @@
 /* curl stuff */
 #include <curl/curl.h>
 
+#ifdef _WIN32
+#define WAITMS(x) Sleep(x)
+#else
+/* Portable sleep for platforms other than Windows. */
+#define WAITMS(x)                               \
+  struct timeval wait = { 0, (x) * 1000 };      \
+  (void)select(0, NULL, NULL, NULL, &wait);
+#endif
+
 /*
  * Simply download a HTTP file.
  */
@@ -40,6 +49,7 @@ int main(void)
   CURLM *multi_handle;
 
   int still_running; /* keep number of running handles */
+  int repeats = 0;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
@@ -58,36 +68,11 @@ int main(void)
   curl_multi_perform(multi_handle, &still_running);
 
   do {
-    struct timeval timeout;
-    int rc; /* select() return code */
-    CURLMcode mc; /* curl_multi_fdset() return code */
+    CURLMcode mc; /* curl_multi_wait() return code */
+    int numfds;
 
-    fd_set fdread;
-    fd_set fdwrite;
-    fd_set fdexcep;
-    int maxfd = -1;
-
-    long curl_timeo = -1;
-
-    FD_ZERO(&fdread);
-    FD_ZERO(&fdwrite);
-    FD_ZERO(&fdexcep);
-
-    /* set a suitable timeout to play around with */
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
-
-    curl_multi_timeout(multi_handle, &curl_timeo);
-    if(curl_timeo >= 0) {
-      timeout.tv_sec = curl_timeo / 1000;
-      if(timeout.tv_sec > 1)
-        timeout.tv_sec = 1;
-      else
-        timeout.tv_usec = (curl_timeo % 1000) * 1000;
-    }
-
-    /* get file descriptors from the transfers */
-    mc = curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+    /* wait for activity, timeout or "nothing" */
+    mc = curl_multi_wait(multi_handle, NULL, 0, 1000, &numfds);
 
     if(mc != CURLM_OK)
     {
@@ -95,40 +80,21 @@ int main(void)
       break;
     }
 
-    /* On success the value of maxfd is guaranteed to be >= -1. We call
-       select(maxfd + 1, ...); specially in case of (maxfd == -1) there are
-       no fds ready yet so we call select(0, ...) --or Sleep() on Windows--
-       to sleep 100ms, which is the minimum suggested value in the
-       curl_multi_fdset() doc. */
+    /* 'numfds' being zero means either a timeout or no file descriptors to
+       wait for. Try timeout on first occurance, then assume no file
+       descriptors and no file descriptors to wait for means wait for 100
+       milliseconds. */
 
-    if(maxfd == -1) {
-#ifdef _WIN32
-      Sleep(100);
-      rc = 0;
-#else
-      /* Portable sleep for platforms other than Windows. */
-      struct timeval wait = { 0, 100 * 1000 }; /* 100ms */
-      rc = select(0, NULL, NULL, NULL, &wait);
-#endif
+    if(!numfds) {
+      repeats++; /* count number of repeated zero numfds */
+      if(repeats > 1) {
+        WAITMS(100); /* sleep 100 milliseconds */
+      }
     }
-    else {
-      /* Note that on some platforms 'timeout' may be modified by select().
-         If you need access to the original value save a copy beforehand. */
-      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
-    }
+    else
+      repeats = 0;
 
-    switch(rc) {
-    case -1:
-      /* select error */
-      still_running = 0;
-      printf("select() returns error, this is badness\n");
-      break;
-    case 0:
-    default:
-      /* timeout or readable/writable sockets */
-      curl_multi_perform(multi_handle, &still_running);
-      break;
-    }
+    curl_multi_perform(multi_handle, &still_running);
   } while(still_running);
 
   curl_multi_remove_handle(multi_handle, http_handle);
