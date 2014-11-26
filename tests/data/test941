@@ -1,0 +1,66 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+--crlf
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP with --crlf
+ </name>
+<file name="log/upload941">
+From: different
+To: another
+
+email
+headers and body
+with unix newlines
+meant to be
+converted
+with
+the
+--crlf option
+</file>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/941 --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/upload941 --crlf
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 941
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+email
+headers and body
+with unix newlines
+meant to be
+converted
+with
+the
+--crlf option
+.
+</upload>
+</verify>
+</testcase>
