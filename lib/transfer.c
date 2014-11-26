@@ -903,15 +903,6 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       /* store number of bytes available for upload */
       data->req.upload_present = nread;
 
-#ifndef CURL_DISABLE_SMTP
-      if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
-        result = Curl_smtp_escape_eob(conn, nread);
-        if(result)
-          return result;
-      }
-      else
-#endif /* CURL_DISABLE_SMTP */
-
       /* convert LF to CRLF if so asked */
       if((!sending_http_headers) && (
 #ifdef CURL_DO_LINEEND_CONV
@@ -961,6 +952,14 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       /* We have a partial buffer left from a previous "round". Use
          that instead of reading more data */
     }
+
+#ifndef CURL_DISABLE_SMTP
+    if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
+      result = Curl_smtp_escape_eob(conn, nread);
+      if(result)
+        return result;
+    }
+#endif /* CURL_DISABLE_SMTP */
 
     /* write to socket (send away data) */
     result = Curl_write(conn,

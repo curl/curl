@@ -2320,13 +2320,17 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
   ssize_t si;
   struct SessionHandle *data = conn->data;
   struct SMTP *smtp = data->req.protop;
+  char *scratch = data->state.scratch;
+  char *oldscratch = NULL;
 
   /* Do we need to allocate the scatch buffer? */
-  if(!data->state.scratch) {
-    data->state.scratch = malloc(2 * BUFSIZE);
+  if(!scratch || data->set.crlf) {
+    oldscratch = scratch;
 
-    if(!data->state.scratch) {
-      failf (data, "Failed to alloc scratch buffer!");
+    scratch = malloc(2 * BUFSIZE);
+    if(!scratch) {
+      failf(data, "Failed to alloc scratch buffer!");
+
       return CURLE_OUT_OF_MEMORY;
     }
   }
@@ -2345,7 +2349,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
     }
     else if(smtp->eob) {
       /* A previous substring matched so output that first */
-      memcpy(&data->state.scratch[si], SMTP_EOB, smtp->eob);
+      memcpy(&scratch[si], SMTP_EOB, smtp->eob);
       si += smtp->eob;
 
       /* Then compare the first byte */
@@ -2361,17 +2365,17 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
     /* Do we have a match for CRLF. as per RFC-5321, sect. 4.5.2 */
     if(SMTP_EOB_FIND_LEN == smtp->eob) {
       /* Copy the replacement data to the target buffer */
-      memcpy(&data->state.scratch[si], SMTP_EOB_REPL, SMTP_EOB_REPL_LEN);
+      memcpy(&scratch[si], SMTP_EOB_REPL, SMTP_EOB_REPL_LEN);
       si += SMTP_EOB_REPL_LEN;
       smtp->eob = 0;
     }
     else if(!smtp->eob)
-      data->state.scratch[si++] = data->req.upload_fromhere[i];
+      scratch[si++] = data->req.upload_fromhere[i];
   }
 
   if(smtp->eob) {
     /* A substring matched before processing ended so output that now */
-    memcpy(&data->state.scratch[si], SMTP_EOB, smtp->eob);
+    memcpy(&scratch[si], SMTP_EOB, smtp->eob);
     si += smtp->eob;
     smtp->eob = 0;
   }
@@ -2381,11 +2385,19 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
     nread = si;
 
     /* Upload from the new (replaced) buffer instead */
-    data->req.upload_fromhere = data->state.scratch;
+    data->req.upload_fromhere = scratch;
+
+    /* Save the buffer so it can be freed later */
+    data->state.scratch = scratch;
+
+    /* Free the old scratch buffer */
+    Curl_safefree(oldscratch);
 
     /* Set the new amount too */
     data->req.upload_present = nread;
   }
+  else
+    Curl_safefree(scratch);
 
   return CURLE_OK;
 }
