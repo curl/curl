@@ -2308,7 +2308,7 @@ static CURLcode smtp_calc_sasl_details(struct connectdata *conn,
   return result;
 }
 
-CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
+CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
 {
   /* When sending a SMTP payload we must detect CRLF. sequences making sure
      they are sent as CRLF.. instead, as a . on the beginning of a line will
@@ -2323,7 +2323,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
   char *scratch = data->state.scratch;
   char *oldscratch = NULL;
 
-  /* Do we need to allocate the scatch buffer? */
+  /* Do we need to allocate a scratch buffer? */
   if(!scratch || data->set.crlf) {
     oldscratch = scratch;
 
@@ -2380,10 +2380,8 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
     smtp->eob = 0;
   }
 
+  /* Only use the new buffer if we replaced something */
   if(si != nread) {
-    /* Only use the new buffer if we replaced something */
-    nread = si;
-
     /* Upload from the new (replaced) buffer instead */
     data->req.upload_fromhere = scratch;
 
@@ -2394,7 +2392,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread)
     Curl_safefree(oldscratch);
 
     /* Set the new amount too */
-    data->req.upload_present = nread;
+    data->req.upload_present = si;
   }
   else
     Curl_safefree(scratch);
