@@ -204,6 +204,7 @@ struct OperationConfig {
   char *xoauth2_bearer;       /* XOAUTH2 bearer token */
   bool nonpn;                 /* enable/disable TLS NPN extension */
   bool noalpn;                /* enable/disable TLS ALPN extension */
+  char *unix_socket_path;     /* path to UNIX domain socket */
 
   struct GlobalConfig *global;
   struct OperationConfig *prev;

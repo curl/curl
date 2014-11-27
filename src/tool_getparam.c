@@ -176,6 +176,7 @@ static const struct LongShort aliases[]= {
   {"$J", "metalink",                 FALSE},
   {"$K", "sasl-ir",                  FALSE},
   {"$L", "test-event",               FALSE},
+  {"$M", "unix-socket",              TRUE},
   {"0",   "http1.0",                 FALSE},
   {"01",  "http1.1",                 FALSE},
   {"02",  "http2",                   FALSE},
@@ -975,6 +976,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 #else
         warnf(config, "--test-event is ignored unless a debug build!\n");
 #endif
+        break;
+      case 'M': /* --unix-socket */
+        GetStr(&config->unix_socket_path, nextarg);
         break;
       }
       break;

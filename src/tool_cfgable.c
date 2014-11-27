@@ -115,6 +115,7 @@ static void free_config_fields(struct OperationConfig *config)
 
   Curl_safefree(config->xoauth2_bearer);
 
+  Curl_safefree(config->unix_socket_path);
   Curl_safefree(config->writeout);
 
   curl_slist_free_all(config->quote);
