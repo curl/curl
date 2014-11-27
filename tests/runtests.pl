@@ -4863,7 +4863,7 @@ if ($gdbthis) {
     if($c eq "#! /") {
         # A shell script. This is typically when built with libtool,
         $libtool = 1;
-        $gdb = "libtool --mode=execute gdb";
+        $gdb = "../libtool --mode=execute gdb";
     }
 }
 
