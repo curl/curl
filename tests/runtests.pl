@@ -4203,7 +4203,7 @@ sub startservers {
         }
         elsif($what eq "http-ipv6") {
             if($torture && $run{'http-ipv6'} &&
-               !responsive_http_server("http", $verbose, "IPv6", $HTTP6PORT)) {
+               !responsive_http_server("http", $verbose, "ipv6", $HTTP6PORT)) {
                 stopserver('http-ipv6');
             }
             if(!$run{'http-ipv6'}) {
@@ -4250,11 +4250,11 @@ sub startservers {
         }
         elsif($what eq "rtsp-ipv6") {
             if($torture && $run{'rtsp-ipv6'} &&
-               !responsive_rtsp_server($verbose, "IPv6")) {
+               !responsive_rtsp_server($verbose, "ipv6")) {
                 stopserver('rtsp-ipv6');
             }
             if(!$run{'rtsp-ipv6'}) {
-                ($pid, $pid2) = runrtspserver($verbose, "IPv6");
+                ($pid, $pid2) = runrtspserver($verbose, "ipv6");
                 if($pid <= 0) {
                     return "failed starting RTSP-IPv6 server";
                 }
@@ -4362,11 +4362,11 @@ sub startservers {
                 return "no gnutls-serv";
             }
             if($torture && $run{'httptls-ipv6'} &&
-               !responsive_httptls_server($verbose, "IPv6")) {
+               !responsive_httptls_server($verbose, "ipv6")) {
                 stopserver('httptls-ipv6');
             }
             if(!$run{'httptls-ipv6'}) {
-                ($pid, $pid2) = runhttptlsserver($verbose, "IPv6");
+                ($pid, $pid2) = runhttptlsserver($verbose, "ipv6");
                 if($pid <= 0) {
                     return "failed starting HTTPTLS-IPv6 server (gnutls-serv)";
                 }
@@ -4391,11 +4391,11 @@ sub startservers {
         }
         elsif($what eq "tftp-ipv6") {
             if($torture && $run{'tftp-ipv6'} &&
-               !responsive_tftp_server("", $verbose, "IPv6")) {
+               !responsive_tftp_server("", $verbose, "ipv6")) {
                 stopserver('tftp-ipv6');
             }
             if(!$run{'tftp-ipv6'}) {
-                ($pid, $pid2) = runtftpserver("", $verbose, "IPv6");
+                ($pid, $pid2) = runtftpserver("", $verbose, "ipv6");
                 if($pid <= 0) {
                     return "failed starting TFTP-IPv6 server";
                 }
