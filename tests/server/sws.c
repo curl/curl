@@ -326,6 +326,21 @@ static void restore_signal_handlers(void)
 #endif
 }
 
+/* returns true if the current socket is an IP one */
+static bool socket_domain_is_ip(void)
+{
+  switch(socket_domain) {
+  case AF_INET:
+#ifdef ENABLE_IPV6
+  case AF_INET6:
+#endif
+    return true;
+  default:
+  /* case AF_UNIX: */
+    return false;
+  }
+}
+
 /* based on the testno, parse the correct server commands */
 static int parse_servercmd(struct httprequest *req)
 {
@@ -1286,9 +1301,6 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   int rc;
   const char *op_br = "";
   const char *cl_br = "";
-#ifdef TCP_NODELAY
-  curl_socklen_t flag;
-#endif
 
 #ifdef ENABLE_IPV6
   if(socket_domain == AF_INET6) {
@@ -1313,13 +1325,15 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   }
 
 #ifdef TCP_NODELAY
-  /* Disable the Nagle algorithm */
-  flag = 1;
-  if(0 != setsockopt(serverfd, IPPROTO_TCP, TCP_NODELAY,
-                     (void *)&flag, sizeof(flag)))
-    logmsg("====> TCP_NODELAY for server conection failed");
-  else
-    logmsg("TCP_NODELAY set for server conection");
+  if(socket_domain_is_ip()) {
+    /* Disable the Nagle algorithm */
+    curl_socklen_t flag = 1;
+    if(0 != setsockopt(serverfd, IPPROTO_TCP, TCP_NODELAY,
+                       (void *)&flag, sizeof(flag)))
+      logmsg("====> TCP_NODELAY for server conection failed");
+    else
+      logmsg("TCP_NODELAY set for server conection");
+  }
 #endif
 
   switch(socket_domain) {
@@ -1402,9 +1416,6 @@ static void http_connect(curl_socket_t *infdp,
   bool poll_server_rd[2] = { TRUE, TRUE };
   bool poll_client_wr[2] = { TRUE, TRUE };
   bool poll_server_wr[2] = { TRUE, TRUE };
-#ifdef TCP_NODELAY
-  curl_socklen_t flag;
-#endif
   bool primary = FALSE;
   bool secondary = FALSE;
   int max_tunnel_idx; /* CTRL or DATA */
@@ -1518,13 +1529,15 @@ static void http_connect(curl_socket_t *infdp,
           memset(&req2, 0, sizeof(req2));
           logmsg("====> Client connect DATA");
 #ifdef TCP_NODELAY
-          /* Disable the Nagle algorithm */
-          flag = 1;
-          if(0 != setsockopt(datafd, IPPROTO_TCP, TCP_NODELAY,
-                             (void *)&flag, sizeof(flag)))
-            logmsg("====> TCP_NODELAY for client DATA conection failed");
-          else
-            logmsg("TCP_NODELAY set for client DATA conection");
+          if(socket_domain_is_ip()) {
+            /* Disable the Nagle algorithm */
+            curl_socklen_t flag = 1;
+            if(0 != setsockopt(datafd, IPPROTO_TCP, TCP_NODELAY,
+                               (void *)&flag, sizeof(flag)))
+              logmsg("====> TCP_NODELAY for client DATA conection failed");
+            else
+              logmsg("TCP_NODELAY set for client DATA conection");
+          }
 #endif
           req2.pipelining = FALSE;
           init_httprequest(&req2);
@@ -1838,15 +1851,17 @@ static curl_socket_t accept_connection(curl_socket_t sock)
   num_sockets += 1;
 
 #ifdef TCP_NODELAY
-  /*
-   * Disable the Nagle algorithm to make it easier to send out a large
-   * response in many small segments to torture the clients more.
-   */
-  if(0 != setsockopt(msgsock, IPPROTO_TCP, TCP_NODELAY,
-                     (void *)&flag, sizeof(flag)))
-    logmsg("====> TCP_NODELAY failed");
-  else
-    logmsg("TCP_NODELAY set");
+  if(socket_domain_is_ip()) {
+    /*
+     * Disable the Nagle algorithm to make it easier to send out a large
+     * response in many small segments to torture the clients more.
+     */
+    if(0 != setsockopt(msgsock, IPPROTO_TCP, TCP_NODELAY,
+                       (void *)&flag, sizeof(flag)))
+      logmsg("====> TCP_NODELAY failed");
+    else
+      logmsg("TCP_NODELAY set");
+  }
 #endif
 
   return msgsock;
