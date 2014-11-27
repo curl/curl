@@ -357,7 +357,7 @@ delete $ENV{'CURL_CA_BUNDLE'} if($ENV{'CURL_CA_BUNDLE'});
 # Load serverpidfile hash with pidfile names for all possible servers.
 #
 sub init_serverpidfile_hash {
-  for my $proto (('ftp', 'http', 'imap', 'pop3', 'smtp', 'http')) {
+  for my $proto (('ftp', 'http', 'imap', 'pop3', 'smtp')) {
     for my $ssl (('', 's')) {
       for my $ipvnum ((4, 6)) {
         for my $idnum ((1, 2, 3)) {
@@ -2764,7 +2764,7 @@ sub singletest {
     $timeprepini{$testnum} = Time::HiRes::time() if($timestats);
 
     if($disttests !~ /test$testnum\W/ ) {
-        logmsg "Warning: test$testnum not present in tests/data/Makefile.am\n";
+        logmsg "Warning: test$testnum not present in tests/data/Makefile.inc\n";
     }
     if($disabled{$testnum}) {
         logmsg "Warning: test$testnum is explicitly disabled\n";
