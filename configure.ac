@@ -154,6 +154,7 @@ dnl initialize all the info variables
 curl_tls_srp_msg="no      (--enable-tls-srp)"
     curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
+curl_unix_sockets_msg="no      (--enable-unix-sockets)"
     curl_idn_msg="no      (--with-{libidn,winidn})"
  curl_manual_msg="no      (--enable-manual)"
 curl_libcurl_msg="enabled (--disable-libcurl-option)"
@@ -3274,6 +3275,39 @@ if test "$want_tls_srp" = "yes" && ( test "x$HAVE_GNUTLS_SRP" = "x1" || test "x$
 fi
 
 dnl ************************************************************
+dnl disable UNIX domain sockets support
+dnl
+AC_MSG_CHECKING([whether to enable UNIX domain sockets])
+AC_ARG_ENABLE(unix-sockets,
+AC_HELP_STRING([--enable-unix-sockets],[Enable UNIX domain sockets])
+AC_HELP_STRING([--disable-unix-sockets],[Disable UNIX domain sockets]),
+[ case "$enableval" in
+  no)  AC_MSG_RESULT(no)
+       want_unix_sockets=no
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       want_unix_sockets=yes
+       ;;
+  esac ], [
+       AC_MSG_RESULT(auto)
+       want_unix_sockets=auto
+       ]
+)
+if test "x$want_unix_sockets" != "xno"; then
+  AC_CHECK_MEMBER([struct sockaddr_un.sun_path], [
+    AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use UNIX domain sockets])
+    AC_SUBST(USE_UNIX_SOCKETS, [1])
+    curl_unix_sockets_msg="enabled"
+  ], [
+    if test "x$want_unix_sockets" = "xyes"; then
+      AC_MSG_ERROR([--enable-unix-sockets is not available on this platform!])
+    fi
+  ], [
+    #include <sys/un.h>
+  ])
+fi
+
+dnl ************************************************************
 dnl disable cookies support
 dnl
 AC_MSG_CHECKING([whether to enable support for cookies])
@@ -3355,6 +3389,9 @@ elif test -n "$SSL_ENABLED"; then
 fi
 if test "x$IPV6_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES IPv6"
+fi
+if test "x$USE_UNIX_SOCKETS" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES unix-sockets"
 fi
 if test "x$HAVE_LIBZ" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES libz"
@@ -3563,6 +3600,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   TLS-SRP support:  ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
   ipv6 support:     ${curl_ipv6_msg}
+  UNIX sockets support: ${curl_unix_sockets_msg}
   IDN support:      ${curl_idn_msg}
   Build libcurl:    Shared=${enable_shared}, Static=${enable_static}
   Built-in manual:  ${curl_manual_msg}

@@ -71,7 +71,7 @@ static enum {
   , socket_domain_inet6 = AF_INET6
 #endif
 #ifdef USE_UNIX_SOCKETS
-  socket_domain_unix = AF_UNIX,
+  , socket_domain_unix = AF_UNIX
 #endif
 } socket_domain = AF_INET;
 static bool use_gopher = FALSE;

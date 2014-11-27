@@ -121,6 +121,8 @@
      d                 c                   X'00020000'
      d CURL_VERSION_KERBEROS5...
      d                 c                   X'00040000'
+     d CURL_VERSION_UNIX_SOCKETS...
+     d                 c                   X'00080000'
       *
      d HTTPPOST_FILENAME...
      d                 c                   X'00000001'
@@ -1199,6 +1201,8 @@
      d                 c                   00229
      d  CURLOPT_PINNEDPUBLICKEY...
      d                 c                   10230
+     d  CURLOPT_UNIX_SOCKET_PATH...
+     d                 c                   10231
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001

@@ -273,7 +273,8 @@ static const struct feat feats[] = {
   {"libz",           CURL_VERSION_LIBZ},
   {"CharConv",       CURL_VERSION_CONV},
   {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
-  {"HTTP2",          CURL_VERSION_HTTP2}
+  {"HTTP2",          CURL_VERSION_HTTP2},
+  {"unix-sockets",   CURL_VERSION_UNIX_SOCKETS},
 };
 
 void tool_help(void)

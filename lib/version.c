@@ -295,6 +295,9 @@ static curl_version_info_data version_info = {
 #if defined(USE_NGHTTP2)
   | CURL_VERSION_HTTP2
 #endif
+#if defined(USE_UNIX_SOCKETS)
+  | CURL_VERSION_UNIX_SOCKETS
+#endif
   ,
   NULL, /* ssl_version */
   0,    /* ssl_version_num, this is kept at zero */

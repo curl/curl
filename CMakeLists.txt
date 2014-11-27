@@ -527,6 +527,14 @@ if(CMAKE_USE_GSSAPI)
   endif()
 endif()
 
+option(ENABLE_UNIX_SOCKETS "Define if you want UNIX domain sockets support" ON)
+if(ENABLE_UNIX_SOCKETS)
+  include(CheckStructHasMember)
+  check_struct_has_member("struct sockaddr_un" sun_path "sys/un.h" USE_UNIX_SOCKETS)
+else()
+  unset(USE_UNIX_SOCKETS CACHE)
+endif()
+
 # Check for header files
 if(NOT UNIX)
   check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)

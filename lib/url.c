@@ -47,6 +47,10 @@
 #include <inet.h>
 #endif
 
+#ifdef HAVE_SYS_UN_H
+#include <sys/un.h>
+#endif
+
 #ifndef HAVE_SOCKET
 #error "We can't compile without socket() support!"
 #endif
@@ -2574,6 +2578,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.ssl_enable_alpn = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
 
+#ifdef USE_UNIX_SOCKETS
+  case CURLOPT_UNIX_SOCKET_PATH:
+    result = setstropt(&data->set.str[STRING_UNIX_SOCKET_PATH],
+                       va_arg(param, char *));
+    break;
+#endif
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;
@@ -5064,6 +5075,32 @@ static CURLcode resolve_server(struct SessionHandle *data,
     /* set a pointer to the hostname we display */
     fix_hostname(data, conn, &conn->host);
 
+#ifdef USE_UNIX_SOCKETS
+    if(data->set.str[STRING_UNIX_SOCKET_PATH]) {
+      /* UNIX domain sockets are local. The host gets ignored, just use the
+       * specified domain socket address. Do not cache "DNS entries". There is
+       * no DNS involved and we already have the filesystem path available */
+      const char *path = data->set.str[STRING_UNIX_SOCKET_PATH];
+
+      hostaddr = calloc(1, sizeof(struct Curl_dns_entry));
+      if(!hostaddr)
+        result = CURLE_OUT_OF_MEMORY;
+      else if((hostaddr->addr = Curl_unix2addr(path)) != NULL)
+        hostaddr->inuse++;
+      else {
+        /* Long paths are not supported for now */
+        if(strlen(path) >= sizeof(((struct sockaddr_un *)0)->sun_path)) {
+          failf(data, "UNIX socket path too long: '%s'", path);
+          result = CURLE_COULDNT_RESOLVE_HOST;
+        }
+        else
+          result = CURLE_OUT_OF_MEMORY;
+        free(hostaddr);
+        hostaddr = NULL;
+      }
+    }
+    else
+#endif
     if(!conn->proxy.name || !*conn->proxy.name) {
       /* If not connecting via a proxy, extract the port from the URL, if it is
        * there, thus overriding any defaults that might have been set above. */
@@ -5378,6 +5415,13 @@ static CURLcode create_conn(struct SessionHandle *data,
   }
   else if(!proxy)
     proxy = detect_proxy(conn);
+
+#ifdef USE_UNIX_SOCKETS
+  if(proxy && data->set.str[STRING_UNIX_SOCKET_PATH]) {
+    free(proxy);  /* UNIX domain sockets cannot be proxied, so disable it */
+    proxy = NULL;
+  }
+#endif
 
   if(proxy && (!*proxy || (conn->handler->flags & PROTOPT_NONETWORK))) {
     free(proxy);  /* Don't bother with an empty proxy string or if the
