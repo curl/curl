@@ -991,6 +991,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
   CURLcode result;
   char ipaddress[MAX_IPADR_LEN];
   long port;
+  bool is_tcp;
 
   *sockp = CURL_SOCKET_BAD;
 
@@ -1013,14 +1014,16 @@ static CURLcode singleipconnect(struct connectdata *conn,
   }
   infof(data, "  Trying %s...\n", ipaddress);
 
-  if(data->set.tcp_nodelay)
+  is_tcp = (addr.family == AF_INET || addr.family == AF_INET6) &&
+           addr.socktype == SOCK_STREAM;
+  if(is_tcp && data->set.tcp_nodelay)
     tcpnodelay(conn, sockfd);
 
   nosigpipe(conn, sockfd);
 
   Curl_sndbufset(sockfd);
 
-  if(data->set.tcp_keepalive)
+  if(is_tcp && data->set.tcp_keepalive)
     tcpkeepalive(data, sockfd);
 
   if(data->set.fsockopt) {
@@ -1038,16 +1041,17 @@ static CURLcode singleipconnect(struct connectdata *conn,
   }
 
   /* possibly bind the local end to an IP, interface or port */
-  result = bindlocal(conn, sockfd, addr.family);
-  if(result) {
-    Curl_closesocket(conn, sockfd); /* close socket and bail out */
-    if(result == CURLE_UNSUPPORTED_PROTOCOL) {
-      /* The address family is not supported on this interface.
-         We can continue trying addresses */
-      return CURLE_OK;
+  if(addr.family == AF_INET || addr.family == AF_INET6) {
+    result = bindlocal(conn, sockfd, addr.family);
+    if(result) {
+      Curl_closesocket(conn, sockfd); /* close socket and bail out */
+      if(result == CURLE_UNSUPPORTED_PROTOCOL) {
+        /* The address family is not supported on this interface.
+           We can continue trying addresses */
+        return CURLE_OK;
+      }
+      return result;
     }
-
-    return result;
   }
 
   /* set socket non-blocking */
