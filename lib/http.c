@@ -556,9 +556,11 @@ output_auth_headers(struct connectdata *conn,
                     const char *path,
                     bool proxy)
 {
-  struct SessionHandle *data = conn->data;
-  const char *auth=NULL;
+  const char *auth = NULL;
   CURLcode result = CURLE_OK;
+#if defined(USE_SPNEGO) || !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  struct SessionHandle *data = conn->data;
+#endif
 #ifdef USE_SPNEGO
   struct negotiatedata *negdata = proxy?
     &data->state.proxyneg:&data->state.negotiate;
@@ -1711,8 +1713,8 @@ CURLcode Curl_add_timecondition(struct SessionHandle *data,
  */
 CURLcode Curl_http(struct connectdata *conn, bool *done)
 {
-  struct SessionHandle *data=conn->data;
-  CURLcode result=CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  CURLcode result = CURLE_OK;
   struct HTTP *http;
   const char *ppath = data->state.path;
   bool paste_ftp_userpwd = FALSE;
@@ -1722,7 +1724,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   const char *ptr;
   const char *request;
   Curl_HttpReq httpreq = data->set.httpreq;
+#if !defined(CURL_DISABLE_COOKIES)
   char *addcookies = NULL;
+#endif
   curl_off_t included_body = 0;
   const char *httpstring;
   Curl_send_buffer *req_buffer;
@@ -1736,7 +1740,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   if(conn->httpversion < 20) { /* unless the connection is re-used and already
                                   http2 */
-    switch (conn->negnpn) {
+    switch(conn->negnpn) {
     case NPN_HTTP2:
       result = Curl_http2_init(conn);
       if(result)
@@ -1844,8 +1848,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   else
     conn->allocptr.ref = NULL;
 
+#if !defined(CURL_DISABLE_COOKIES)
   if(data->set.str[STRING_COOKIE] && !Curl_checkheaders(conn, "Cookie:"))
     addcookies = data->set.str[STRING_COOKIE];
+#endif
 
   if(!Curl_checkheaders(conn, "Accept-Encoding:") &&
      data->set.str[STRING_ENCODING]) {
