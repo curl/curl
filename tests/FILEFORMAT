@@ -177,6 +177,7 @@ ftps
 http
 http-ipv6
 http-proxy
+http-unix
 https
 httptls+srp
 httptls+srp-ipv6
@@ -229,6 +230,7 @@ SSPI
 GSS-API
 Kerberos
 SPNEGO
+unix-sockets
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
@@ -331,6 +333,7 @@ Available substitute variables include:
 %HOSTIP       - IPv4 address of the host running this test
 %HTTP6PORT    - IPv6 port number of the HTTP server
 %HTTPPIPEPORT - Port number of the HTTP pipelining server
+%HTTPUNIXPATH - Path to the UNIX socket of the HTTP server
 %HTTPPORT     - Port number of the HTTP server
 %HTTPSPORT    - Port number of the HTTPS server
 %HTTPTLS6PORT - IPv6 port number of the HTTP TLS server

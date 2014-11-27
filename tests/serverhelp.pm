@@ -109,8 +109,8 @@ sub servername_str {
 
     $ipver = (not $ipver) ? 'ipv4' : lc($ipver);
     die "unsupported IP version: '$ipver'" unless($ipver &&
-        ($ipver =~ /^(4|6|ipv4|ipv6|-ipv4|-ipv6)$/));
-    $ipver = ($ipver =~ /6$/) ? '-IPv6' : '';
+        ($ipver =~ /^(4|6|ipv4|ipv6|-ipv4|-ipv6|unix)$/));
+    $ipver = ($ipver =~ /6$/) ? '-IPv6' : (($ipver =~ /unix$/) ? '-unix' : '');
 
     $idnum = 1 if(not $idnum);
     die "unsupported ID number: '$idnum'" unless($idnum &&
