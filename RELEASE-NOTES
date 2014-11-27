@@ -12,6 +12,8 @@ This release includes the following changes:
  o version info: Added Kerberos V5 to the supported features
  o Makefile: Added VC targets for WinIDN
  o config-win32: Introduce build targets for VS2012+
+ o SSL: Add PEM format support for public key pinning
+ o smtp: Added support for the conversion of Unix newlines during mail send [8]
 
 This release includes the following bugfixes:
 
@@ -60,6 +62,9 @@ This release includes the following bugfixes:
  o http: Disable pipelining for HTTP/2 and upgraded connections
  o ntlm: Fixed static'ness of local decode function
  o sasl: Reduced the need for two sets of NTLM messaging functions
+ o select.c: fix compilation for VxWorks [7]
+ o multi-single.c: switch to use curl_multi_wait
+ o curl_multi_wait.3: clarify numfds being used if not NULL
 
 This release includes the following known bugs:
 
@@ -68,11 +73,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad Harder, Brad King, Carlo Wood, Christian Hägele, Dan Fandrich,
+  Brad Harder, Brad King, Brian, Carlo Wood, Christian Hägele, Dan Fandrich,
   Daniel Stenberg, Frank Gevaerts, Gisle Vanem, Guenter Knauf, Jan Ehrhardt,
-  Johan Lantz, Jon Spencer, Lucas Pardue, Michael Osipov, Nobuhiro Ban,
-  Patrick Monnerat, Peter Wu, Ray Satiro, Sam Hurst, Stefan Neis, Steve Holme,
-  Tatsuhiro Tsujikawa, Waldek Kozba,
+  Johan Lantz, Jon Spencer, Kamil Dudka, Lucas Pardue, Michael Osipov,
+  moparisthebest, Nobuhiro Ban, Patrick Monnerat, Peter Wu, Ray Satiro,
+  Sam Hurst, Stefan Neis, Steve Holme, Tatsuhiro Tsujikawa, Waldek Kozba,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -84,4 +89,6 @@ References to bug reports and discussions on issues:
  [4] = https://github.com/tatsuhiro-t/nghttp2/issues/103
  [5] = http://sourceforge.net/p/curl/feature-requests/82/
  [6] = http://curl.haxx.se/mail/lib-2014-11/0221.html
- [7] =
+ [7] = http://curl.haxx.se/bug/view.cgi?id=1455
+ [8] = http://curl.haxx.se/bug/view.cgi?id=1456
+ [9] =
