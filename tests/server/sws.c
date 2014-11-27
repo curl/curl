@@ -65,11 +65,13 @@
 #define ERANGE  34 /* errno.h value */
 #endif
 
+static enum {
+  socket_domain_inet = AF_INET,
 #ifdef ENABLE_IPV6
-static bool use_ipv6 = FALSE;
+  socket_domain_inet6 = AF_INET6
 #endif
+} socket_domain = AF_INET;
 static bool use_gopher = FALSE;
-static const char *ipv_inuse = "IPv4";
 static int serverlogslocked = 0;
 static bool is_proxy = FALSE;
 
@@ -1289,7 +1291,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 #endif
 
 #ifdef ENABLE_IPV6
-  if(use_ipv6) {
+  if(socket_domain == AF_INET6) {
     op_br = "[";
     cl_br = "]";
   }
@@ -1301,14 +1303,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   logmsg("about to connect to %s%s%s:%hu",
          op_br, ipaddr, cl_br, port);
 
-#ifdef ENABLE_IPV6
-  if(!use_ipv6)
-#endif
-    serverfd = socket(AF_INET, SOCK_STREAM, 0);
-#ifdef ENABLE_IPV6
-  else
-    serverfd = socket(AF_INET6, SOCK_STREAM, 0);
-#endif
+
+  serverfd = socket(socket_domain, SOCK_STREAM, 0);
   if(CURL_SOCKET_BAD == serverfd) {
     error = SOCKERRNO;
     logmsg("Error creating socket for server conection: (%d) %s",
@@ -1326,9 +1322,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     logmsg("TCP_NODELAY set for server conection");
 #endif
 
-#ifdef ENABLE_IPV6
-  if(!use_ipv6) {
-#endif
+  switch(socket_domain) {
+  case AF_INET:
     memset(&serveraddr.sa4, 0, sizeof(serveraddr.sa4));
     serveraddr.sa4.sin_family = AF_INET;
     serveraddr.sa4.sin_port = htons(port);
@@ -1339,9 +1334,9 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     }
 
     rc = connect(serverfd, &serveraddr.sa, sizeof(serveraddr.sa4));
+    break;
 #ifdef ENABLE_IPV6
-  }
-  else {
+  case AF_INET6:
     memset(&serveraddr.sa6, 0, sizeof(serveraddr.sa6));
     serveraddr.sa6.sin6_family = AF_INET6;
     serveraddr.sa6.sin6_port = htons(port);
@@ -1352,8 +1347,9 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     }
 
     rc = connect(serverfd, &serveraddr.sa, sizeof(serveraddr.sa6));
-  }
+    break;
 #endif /* ENABLE_IPV6 */
+  }
 
   if(got_exit_signal) {
     sclose(serverfd);
@@ -1942,6 +1938,9 @@ int main(int argc, char *argv[])
   int arg=1;
   long pid;
   const char *connecthost = "127.0.0.1";
+  const char *socket_type = "IPv4";
+  char port_str[11];
+  const char *location_str = port_str;
 
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
@@ -1950,15 +1949,11 @@ int main(int argc, char *argv[])
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
-      printf("sws IPv4%s"
-             "\n"
-             ,
+      puts("sws IPv4"
 #ifdef ENABLE_IPV6
              "/IPv6"
-#else
-             ""
 #endif
-             );
+          );
       return 0;
     }
     else if(!strcmp("--pidfile", argv[arg])) {
@@ -1977,16 +1972,16 @@ int main(int argc, char *argv[])
       end_of_headers = "\r\n"; /* gopher style is much simpler */
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-#ifdef ENABLE_IPV6
-      ipv_inuse = "IPv4";
-      use_ipv6 = FALSE;
-#endif
+      socket_type = "IPv4";
+      socket_domain = AF_INET;
+      location_str = port_str;
       arg++;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef ENABLE_IPV6
-      ipv_inuse = "IPv6";
-      use_ipv6 = TRUE;
+      socket_type = "IPv6";
+      socket_domain = AF_INET6;
+      location_str = port_str;
 #endif
       arg++;
     }
@@ -2039,6 +2034,8 @@ int main(int argc, char *argv[])
     }
   }
 
+  snprintf(port_str, sizeof(port_str), "port %hu", port);
+
 #ifdef WIN32
   win32_init();
   atexit(win32_cleanup);
@@ -2048,14 +2045,7 @@ int main(int argc, char *argv[])
 
   pid = (long)getpid();
 
-#ifdef ENABLE_IPV6
-  if(!use_ipv6)
-#endif
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-#ifdef ENABLE_IPV6
-  else
-    sock = socket(AF_INET6, SOCK_STREAM, 0);
-#endif
+  sock = socket(socket_domain, SOCK_STREAM, 0);
 
   all_sockets[0] = sock;
   num_sockets = 1;
@@ -2082,33 +2072,33 @@ int main(int argc, char *argv[])
     goto sws_cleanup;
   }
 
-#ifdef ENABLE_IPV6
-  if(!use_ipv6) {
-#endif
+  switch(socket_domain) {
+  case AF_INET:
     memset(&me.sa4, 0, sizeof(me.sa4));
     me.sa4.sin_family = AF_INET;
     me.sa4.sin_addr.s_addr = INADDR_ANY;
     me.sa4.sin_port = htons(port);
     rc = bind(sock, &me.sa, sizeof(me.sa4));
+    break;
 #ifdef ENABLE_IPV6
-  }
-  else {
+  case AF_INET6:
     memset(&me.sa6, 0, sizeof(me.sa6));
     me.sa6.sin6_family = AF_INET6;
     me.sa6.sin6_addr = in6addr_any;
     me.sa6.sin6_port = htons(port);
     rc = bind(sock, &me.sa, sizeof(me.sa6));
-  }
+    break;
 #endif /* ENABLE_IPV6 */
+  }
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu: (%d) %s",
-           port, error, strerror(error));
+    logmsg("Error binding socket on %s: (%d) %s",
+           location_str, error, strerror(error));
     goto sws_cleanup;
   }
 
-  logmsg("Running %s %s version on port %d",
-         use_gopher?"GOPHER":"HTTP", ipv_inuse, (int)port);
+  logmsg("Running %s %s version on %s",
+         use_gopher?"GOPHER":"HTTP", socket_type, location_str);
 
   /* start accepting connections */
   rc = listen(sock, 5);
@@ -2273,8 +2263,8 @@ sws_cleanup:
   restore_signal_handlers();
 
   if(got_exit_signal) {
-    logmsg("========> %s sws (port: %d pid: %ld) exits with signal (%d)",
-           ipv_inuse, (int)port, pid, exit_signal);
+    logmsg("========> %s sws (%s pid: %ld) exits with signal (%d)",
+           socket_type, location_str, pid, exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we
