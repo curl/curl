@@ -610,6 +610,7 @@ X_OBJS= \
 	$(DIROBJ)\sendf.obj \
 	$(DIROBJ)\share.obj \
 	$(DIROBJ)\slist.obj \
+	$(DIROBJ)\smb.obj \
 	$(DIROBJ)\smtp.obj \
 	$(DIROBJ)\socks.obj \
 	$(DIROBJ)\socks_gssapi.obj \
