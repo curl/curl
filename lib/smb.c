@@ -25,6 +25,8 @@
 #if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) && \
     !defined(USE_WINDOWS_SSPI)
 
+#define BUILDING_CURL_SMB_C
+
 #include "smb.h"
 
 /* The last #include file should be: */
