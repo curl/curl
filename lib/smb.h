@@ -27,7 +27,7 @@ enum smb_conn_state {
   SMB_CONNECTING,
   SMB_NEGOTIATE,
   SMB_SETUP,
-  SMB_CONNECTED,
+  SMB_CONNECTED
 };
 
 struct smb_conn {
