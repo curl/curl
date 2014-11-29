@@ -22,4 +22,26 @@
  *
  ***************************************************************************/
 
+enum smb_conn_state {
+  SMB_NOT_CONNECTED = 0,
+  SMB_CONNECTING,
+  SMB_NEGOTIATE,
+  SMB_SETUP,
+  SMB_CONNECTED,
+};
+
+struct smb_conn {
+  enum smb_conn_state state;
+  char *user;
+  char *domain;
+  unsigned char challenge[8];
+  unsigned int session_key;
+  unsigned short uid;
+  char *send_buf;
+  char *recv_buf;
+  size_t send_size;
+  size_t sent;
+  size_t got;
+};
+
 #endif /* HEADER_CURL_SMB_H */
