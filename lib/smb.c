@@ -308,7 +308,8 @@ static void smb_format_message(struct connectdata *conn, struct smb_header *h,
   unsigned int pid;
 
   memset(h, 0, sizeof(*h));
-  h->nbt_length = htons(sizeof(*h) - sizeof(unsigned int) + len);
+  h->nbt_length = htons((unsigned short) (sizeof(*h) - sizeof(unsigned int) +
+                                          len));
   strncpy((char*)h->magic, "\xffSMB", 4);
   h->command = cmd;
   h->flags = SMB_FLAGS_CANONICAL_PATHNAMES | SMB_FLAGS_CASELESS_PATHNAMES;
@@ -422,7 +423,7 @@ static CURLcode smb_send_setup(struct connectdata *conn)
   MSGCATNULL(smbc->domain);
   MSGCATNULL(OS);
   MSGCATNULL(CLIENTNAME);
-  setup.byte_count = smb_swap16(p - setup.bytes);
+  setup.byte_count = smb_swap16((unsigned short) (p - setup.bytes));
 
   return smb_send_message(conn, SMB_COM_SETUP_ANDX, &setup,
                           sizeof(setup) - sizeof(setup.bytes) +
@@ -449,7 +450,7 @@ static CURLcode smb_send_tree_connect(struct connectdata *conn)
   MSGCAT("\\");
   MSGCATNULL(req->share);
   MSGCATNULL(SERVICENAME); /* Match any type of service */
-  tree.byte_count = smb_swap16(p - tree.bytes);
+  tree.byte_count = smb_swap16((unsigned short) (p - tree.bytes));
 
   return smb_send_message(conn, SMB_COM_TREE_CONNECT_ANDX, &tree,
                           sizeof(tree) - sizeof(tree.bytes) + tree.byte_count);
