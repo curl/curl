@@ -159,7 +159,7 @@ enum smb_req_state {
   SMB_UPLOAD,
   SMB_CLOSE,
   SMB_TREE_DISCONNECT,
-  SMB_DONE,
+  SMB_DONE
 };
 
 /* SMB request data */
@@ -466,7 +466,7 @@ static CURLcode smb_send_open(struct connectdata *conn)
   memset(&open, 0, sizeof(open));
   open.word_count = SMB_WC_NT_CREATE_ANDX;
   open.andx.command = SMB_COM_NO_ANDX_COMMAND;
-  open.name_length = smb_swap16(strlen(req->path));
+  open.name_length = smb_swap16((unsigned short) strlen(req->path));
   open.share_access = smb_swap32(SMB_FILE_SHARE_ALL);
   if(conn->data->set.upload) {
     open.access = smb_swap32(SMB_GENERIC_READ | SMB_GENERIC_WRITE);
@@ -514,7 +514,7 @@ static CURLcode smb_send_read(struct connectdata *conn)
   read.word_count = SMB_WC_READ_ANDX;
   read.andx.command = SMB_COM_NO_ANDX_COMMAND;
   read.fid = smb_swap16(req->fid);
-  read.offset = smb_swap32(offset);
+  read.offset = smb_swap32((unsigned int) offset);
   read.offset_high = smb_swap32(offset >> 32);
   read.min_bytes = smb_swap16(MAX_PAYLOAD_SIZE);
   read.max_bytes = smb_swap16(MAX_PAYLOAD_SIZE);
@@ -542,7 +542,7 @@ static CURLcode smb_send_write(struct connectdata *conn)
   write->word_count = SMB_WC_WRITE_ANDX;
   write->andx.command = SMB_COM_NO_ANDX_COMMAND;
   write->fid = smb_swap16(req->fid);
-  write->offset = smb_swap32(offset);
+  write->offset = smb_swap32((unsigned int) offset);
   write->offset_high = smb_swap32(offset >> 32);
   write->data_length = smb_swap16(nread);
   write->data_offset = smb_swap16(sizeof(*write) - sizeof(unsigned int));
