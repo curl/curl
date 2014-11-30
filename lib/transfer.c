@@ -935,6 +935,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           else
             data->state.scratch[si] = data->req.upload_fromhere[i];
         }
+
         if(si != nread) {
           /* only perform the special operation if we really did replace
              anything */
@@ -947,19 +948,19 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           data->req.upload_present = nread;
         }
       }
+
+#ifndef CURL_DISABLE_SMTP
+      if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
+        result = Curl_smtp_escape_eob(conn, nread);
+        if(result)
+          return result;
+      }
+#endif /* CURL_DISABLE_SMTP */
     } /* if 0 == data->req.upload_present */
     else {
       /* We have a partial buffer left from a previous "round". Use
          that instead of reading more data */
     }
-
-#ifndef CURL_DISABLE_SMTP
-    if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
-      result = Curl_smtp_escape_eob(conn, nread);
-      if(result)
-        return result;
-    }
-#endif /* CURL_DISABLE_SMTP */
 
     /* write to socket (send away data) */
     result = Curl_write(conn,
