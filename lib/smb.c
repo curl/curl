@@ -214,6 +214,8 @@ static CURLcode smb_connect(struct connectdata *conn, bool *done)
   struct smb_conn *smbc = &conn->proto.smbc;
   char *slash;
 
+  (void) done;
+
   /* Initialize the connection state */
   memset(smbc, 0, sizeof(*smbc));
   smbc->state = SMB_CONNECTING;
@@ -378,7 +380,7 @@ static CURLcode smb_send_negotiate(struct connectdata *conn)
   const char *msg = "\x00\x0c\x00\x02NT LM 0.12";
 
   return smb_send_message(conn, SMB_COM_NEGOTIATE, msg, 15);
-};
+}
 
 static CURLcode smb_send_setup(struct connectdata *conn)
 {
@@ -814,6 +816,8 @@ static CURLcode smb_done(struct connectdata *conn, CURLcode status,
 {
   struct smb_request *req = conn->data->req.protop;
 
+  (void) premature;
+
   Curl_safefree(req->share);
   Curl_safefree(conn->data->req.protop);
 
@@ -824,6 +828,8 @@ static CURLcode smb_disconnect(struct connectdata *conn, bool dead)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
   struct smb_request *req = conn->data->req.protop;
+
+  (void) dead;
 
   Curl_safefree(smbc->domain);
   Curl_safefree(smbc->send_buf);
