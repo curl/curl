@@ -561,8 +561,9 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
      define since we internally only use the lower 16 bits for the passed
      in bitmask to not conflict with the private bits */
   set->allowed_protocols = CURLPROTO_ALL;
-  set->redir_protocols =
-    CURLPROTO_ALL & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
+  set->redir_protocols = CURLPROTO_ALL &  /* All except FILE, SCP and SMB */
+                          ~(CURLPROTO_FILE | CURLPROTO_SCP | CURLPROTO_SMB |
+                            CURLPROTO_SMBS);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   /*
