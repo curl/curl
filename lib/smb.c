@@ -385,8 +385,8 @@ static CURLcode smb_send_negotiate(struct connectdata *conn)
 static CURLcode smb_send_setup(struct connectdata *conn)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
-  struct smb_setup setup;
-  char *p = setup.bytes;
+  struct smb_setup msg;
+  char *p = msg.bytes;
   unsigned char lm_hash[21];
   unsigned char lm[24];
   unsigned char nt_hash[21];
@@ -395,7 +395,7 @@ static CURLcode smb_send_setup(struct connectdata *conn)
   ssize_t byte_count = sizeof(lm) + sizeof(nt);
   byte_count += strlen(smbc->user) + strlen(smbc->domain);
   byte_count += strlen(OS) + strlen(CLIENTNAME) + 4; /* 4 null chars */
-  if(byte_count > sizeof(setup.bytes))
+  if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
 
   Curl_ntlm_core_mk_lm_hash(conn->data, conn->passwd, lm_hash);
@@ -407,16 +407,16 @@ static CURLcode smb_send_setup(struct connectdata *conn)
   memset(nt, 0, sizeof(nt));
 #endif
 
-  memset(&setup, 0, sizeof(setup));
-  setup.word_count = SMB_WC_SETUP_ANDX;
-  setup.andx.command = SMB_COM_NO_ANDX_COMMAND;
-  setup.max_buffer_size = smb_swap32(MAX_MESSAGE_SIZE);
-  setup.max_mpx_count = smb_swap16(1);
-  setup.vc_number = smb_swap16(1);
-  setup.session_key = smb_swap32(smbc->session_key);
-  setup.capabilities = smb_swap32(SMB_CAP_LARGE_FILES);
-  setup.lengths[0] = smb_swap16(sizeof(lm));
-  setup.lengths[1] = smb_swap16(sizeof(nt));
+  memset(&msg, 0, sizeof(msg));
+  msg.word_count = SMB_WC_SETUP_ANDX;
+  msg.andx.command = SMB_COM_NO_ANDX_COMMAND;
+  msg.max_buffer_size = smb_swap32(MAX_MESSAGE_SIZE);
+  msg.max_mpx_count = smb_swap16(1);
+  msg.vc_number = smb_swap16(1);
+  msg.session_key = smb_swap32(smbc->session_key);
+  msg.capabilities = smb_swap32(SMB_CAP_LARGE_FILES);
+  msg.lengths[0] = smb_swap16(sizeof(lm));
+  msg.lengths[1] = smb_swap16(sizeof(nt));
   memcpy(p, lm, sizeof(lm));
   p += sizeof(lm);
   memcpy(p, nt, sizeof(nt));
@@ -425,135 +425,135 @@ static CURLcode smb_send_setup(struct connectdata *conn)
   MSGCATNULL(smbc->domain);
   MSGCATNULL(OS);
   MSGCATNULL(CLIENTNAME);
-  setup.byte_count = smb_swap16((unsigned short) (p - setup.bytes));
+  msg.byte_count = smb_swap16((unsigned short)(p - msg.bytes));
 
-  return smb_send_message(conn, SMB_COM_SETUP_ANDX, &setup,
-                          sizeof(setup) - sizeof(setup.bytes) +
-                          setup.byte_count);
+  return smb_send_message(conn, SMB_COM_SETUP_ANDX, &msg,
+                          sizeof(msg) - sizeof(msg.bytes) +
+                          msg.byte_count);
 }
 
 static CURLcode smb_send_tree_connect(struct connectdata *conn)
 {
   struct smb_request *req = conn->data->req.protop;
-  struct smb_tree_connect tree;
-  char *p = tree.bytes;
+  struct smb_tree_connect msg;
+  char *p = msg.bytes;
 
   ssize_t byte_count = strlen(conn->host.name) + strlen(req->share);
   byte_count += strlen(SERVICENAME) + 5; /* 2 nulls and 3 backslashes */
-  if(byte_count > sizeof(tree.bytes))
+  if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
 
-  memset(&tree, 0, sizeof(tree));
-  tree.word_count = SMB_WC_TREE_CONNECT_ANDX;
-  tree.andx.command = SMB_COM_NO_ANDX_COMMAND;
-  tree.pw_len = 0;
+  memset(&msg, 0, sizeof(msg));
+  msg.word_count = SMB_WC_TREE_CONNECT_ANDX;
+  msg.andx.command = SMB_COM_NO_ANDX_COMMAND;
+  msg.pw_len = 0;
   MSGCAT("\\\\");
   MSGCAT(conn->host.name);
   MSGCAT("\\");
   MSGCATNULL(req->share);
   MSGCATNULL(SERVICENAME); /* Match any type of service */
-  tree.byte_count = smb_swap16((unsigned short) (p - tree.bytes));
+  msg.byte_count = smb_swap16((unsigned short)(p - msg.bytes));
 
-  return smb_send_message(conn, SMB_COM_TREE_CONNECT_ANDX, &tree,
-                          sizeof(tree) - sizeof(tree.bytes) + tree.byte_count);
+  return smb_send_message(conn, SMB_COM_TREE_CONNECT_ANDX, &msg,
+                          sizeof(msg) - sizeof(msg.bytes) + msg.byte_count);
 }
 
 static CURLcode smb_send_open(struct connectdata *conn)
 {
   struct smb_request *req = conn->data->req.protop;
-  struct smb_nt_create open;
+  struct smb_nt_create msg;
 
-  if((strlen(req->path) + 1) > sizeof(open.bytes))
+  if((strlen(req->path) + 1) > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
 
-  memset(&open, 0, sizeof(open));
-  open.word_count = SMB_WC_NT_CREATE_ANDX;
-  open.andx.command = SMB_COM_NO_ANDX_COMMAND;
-  open.name_length = smb_swap16((unsigned short) strlen(req->path));
-  open.share_access = smb_swap32(SMB_FILE_SHARE_ALL);
+  memset(&msg, 0, sizeof(msg));
+  msg.word_count = SMB_WC_NT_CREATE_ANDX;
+  msg.andx.command = SMB_COM_NO_ANDX_COMMAND;
+  msg.name_length = smb_swap16((unsigned short)strlen(req->path));
+  msg.share_access = smb_swap32(SMB_FILE_SHARE_ALL);
   if(conn->data->set.upload) {
-    open.access = smb_swap32(SMB_GENERIC_READ | SMB_GENERIC_WRITE);
-    open.create_disposition = smb_swap32(SMB_FILE_OVERWRITE_IF);
+    msg.access = smb_swap32(SMB_GENERIC_READ | SMB_GENERIC_WRITE);
+    msg.create_disposition = smb_swap32(SMB_FILE_OVERWRITE_IF);
   }
   else {
-    open.access = smb_swap32(SMB_GENERIC_READ);
-    open.create_disposition = smb_swap32(SMB_FILE_OPEN);
+    msg.access = smb_swap32(SMB_GENERIC_READ);
+    msg.create_disposition = smb_swap32(SMB_FILE_OPEN);
   }
-  open.byte_count = smb_swap16(open.name_length + 1);
-  strcpy(open.bytes, req->path);
+  msg.byte_count = smb_swap16(msg.name_length + 1);
+  strcpy(msg.bytes, req->path);
 
-  return smb_send_message(conn, SMB_COM_NT_CREATE_ANDX, &open,
-                          sizeof(open) - sizeof(open.bytes) + open.byte_count);
+  return smb_send_message(conn, SMB_COM_NT_CREATE_ANDX, &msg,
+                          sizeof(msg) - sizeof(msg.bytes) + msg.byte_count);
 }
 
 static CURLcode smb_send_close(struct connectdata *conn)
 {
   struct smb_request *req = conn->data->req.protop;
-  struct smb_close close;
+  struct smb_close msg;
 
-  memset(&close, 0, sizeof(close));
-  close.word_count = SMB_WC_CLOSE;
-  close.fid = smb_swap16(req->fid);
+  memset(&msg, 0, sizeof(msg));
+  msg.word_count = SMB_WC_CLOSE;
+  msg.fid = smb_swap16(req->fid);
 
-  return smb_send_message(conn, SMB_COM_CLOSE, &close, sizeof(close));
+  return smb_send_message(conn, SMB_COM_CLOSE, &msg, sizeof(msg));
 }
 
 static CURLcode smb_send_tree_disconnect(struct connectdata *conn)
 {
-  struct smb_tree_disconnect tree;
+  struct smb_tree_disconnect msg;
 
-  memset(&tree, 0, sizeof(tree));
+  memset(&msg, 0, sizeof(msg));
 
-  return smb_send_message(conn, SMB_COM_TREE_DISCONNECT, &tree, sizeof(tree));
+  return smb_send_message(conn, SMB_COM_TREE_DISCONNECT, &msg, sizeof(msg));
 }
 
 static CURLcode smb_send_read(struct connectdata *conn)
 {
   struct smb_request *req = conn->data->req.protop;
   curl_off_t offset = conn->data->req.offset;
-  struct smb_read read;
+  struct smb_read msg;
 
-  memset(&read, 0, sizeof(read));
-  read.word_count = SMB_WC_READ_ANDX;
-  read.andx.command = SMB_COM_NO_ANDX_COMMAND;
-  read.fid = smb_swap16(req->fid);
-  read.offset = smb_swap32((unsigned int) offset);
-  read.offset_high = smb_swap32(offset >> 32);
-  read.min_bytes = smb_swap16(MAX_PAYLOAD_SIZE);
-  read.max_bytes = smb_swap16(MAX_PAYLOAD_SIZE);
+  memset(&msg, 0, sizeof(msg));
+  msg.word_count = SMB_WC_READ_ANDX;
+  msg.andx.command = SMB_COM_NO_ANDX_COMMAND;
+  msg.fid = smb_swap16(req->fid);
+  msg.offset = smb_swap32((unsigned int)offset);
+  msg.offset_high = smb_swap32(offset >> 32);
+  msg.min_bytes = smb_swap16(MAX_PAYLOAD_SIZE);
+  msg.max_bytes = smb_swap16(MAX_PAYLOAD_SIZE);
 
-  return smb_send_message(conn, SMB_COM_READ_ANDX, &read, sizeof(read));
+  return smb_send_message(conn, SMB_COM_READ_ANDX, &msg, sizeof(msg));
 }
 
 static CURLcode smb_send_write(struct connectdata *conn)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
-  struct smb_write *write = (struct smb_write*)smbc->send_buf;
+  struct smb_write *msg = (struct smb_write*)smbc->send_buf;
   struct smb_request *req = conn->data->req.protop;
   curl_off_t offset = conn->data->req.offset;
   CURLcode result;
   int nread;
 
-  conn->data->req.upload_fromhere = smbc->send_buf + sizeof(*write);
+  conn->data->req.upload_fromhere = smbc->send_buf + sizeof(*msg);
   result = Curl_fillreadbuffer(conn, MAX_PAYLOAD_SIZE, &nread);
   if(result && result != CURLE_AGAIN)
     return result;
   if(!nread)
     return CURLE_OK;
 
-  memset(write, 0, sizeof(*write));
-  write->word_count = SMB_WC_WRITE_ANDX;
-  write->andx.command = SMB_COM_NO_ANDX_COMMAND;
-  write->fid = smb_swap16(req->fid);
-  write->offset = smb_swap32((unsigned int) offset);
-  write->offset_high = smb_swap32(offset >> 32);
-  write->data_length = smb_swap16(nread);
-  write->data_offset = smb_swap16(sizeof(*write) - sizeof(unsigned int));
+  memset(msg, 0, sizeof(*msg));
+  msg->word_count = SMB_WC_WRITE_ANDX;
+  msg->andx.command = SMB_COM_NO_ANDX_COMMAND;
+  msg->fid = smb_swap16(req->fid);
+  msg->offset = smb_swap32((unsigned int)offset);
+  msg->offset_high = smb_swap32(offset >> 32);
+  msg->data_length = smb_swap16(nread);
+  msg->data_offset = smb_swap16(sizeof(*msg) - sizeof(unsigned int));
 
-  smb_format_message(conn, &write->h, SMB_COM_WRITE_ANDX,
-                     sizeof(*write) - sizeof(write->h) + nread);
+  smb_format_message(conn, &msg->h, SMB_COM_WRITE_ANDX,
+                     sizeof(*msg) - sizeof(msg->h) + nread);
 
-  return smb_send(conn, sizeof(*write) + nread);
+  return smb_send(conn, sizeof(*msg) + nread);
 }
 
 static CURLcode smb_send_and_recv(struct connectdata *conn, void **msg)
