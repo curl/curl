@@ -216,6 +216,13 @@ static const char * const protocols[] = {
 #ifdef USE_LIBSSH2
   "sftp",
 #endif
+#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) && \
+    !defined(USE_WINDOWS_SSPI)
+  "smb",
+#  ifdef USE_SSL
+  "smbs",
+#  endif
+#endif
 #ifndef CURL_DISABLE_SMTP
   "smtp",
 #endif
