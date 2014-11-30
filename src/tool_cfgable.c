@@ -36,8 +36,9 @@ void config_init(struct OperationConfig* config)
   config->maxredirs = DEFAULT_MAXREDIRS;
   config->proto = CURLPROTO_ALL; /* FIXME: better to read from library */
   config->proto_present = FALSE;
-  config->proto_redir =
-    CURLPROTO_ALL & ~(CURLPROTO_FILE|CURLPROTO_SCP); /* not FILE or SCP */
+  config->proto_redir = CURLPROTO_ALL & /* All except FILE, SCP and SMB */
+                        ~(CURLPROTO_FILE | CURLPROTO_SCP | CURLPROTO_SMB |
+                          CURLPROTO_SMBS);
   config->proto_redir_present = FALSE;
 }
 
