@@ -272,6 +272,8 @@ long proto2num(struct OperationConfig *config, long *val, const char *str)
     { "smtps", CURLPROTO_SMTPS },
     { "rtsp", CURLPROTO_RTSP },
     { "gopher", CURLPROTO_GOPHER },
+    { "smb", CURLPROTO_SMB },
+    { "smbs", CURLPROTO_SMBS },
     { NULL, 0 }
   };
 
