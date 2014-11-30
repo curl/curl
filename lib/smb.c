@@ -303,7 +303,7 @@ static void smb_pop_message(struct connectdata *conn)
 }
 
 static void smb_format_message(struct connectdata *conn, struct smb_header *h,
-                               unsigned char cmd, int len)
+                               unsigned char cmd, size_t len)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
   struct smb_request *req = conn->data->req.protop;
@@ -365,7 +365,7 @@ static CURLcode smb_flush(struct connectdata *conn)
 }
 
 static CURLcode smb_send_message(struct connectdata *conn, unsigned char cmd,
-                                 const void *msg, int msg_len)
+                                 const void *msg, size_t msg_len)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
 
