@@ -910,11 +910,12 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
          (data->set.prefer_ascii) ||
 #endif
          (data->set.crlf))) {
-        if(data->state.scratch == NULL)
-          data->state.scratch = malloc(2*BUFSIZE);
         if(data->state.scratch == NULL) {
-          failf (data, "Failed to alloc scratch buffer!");
-          return CURLE_OUT_OF_MEMORY;
+          data->state.scratch = malloc(2*BUFSIZE);
+          if(data->state.scratch == NULL) {
+            failf (data, "Failed to alloc scratch buffer!");
+            return CURLE_OUT_OF_MEMORY;
+          }
         }
         /*
          * ASCII/EBCDIC Note: This is presumably a text (not binary)
