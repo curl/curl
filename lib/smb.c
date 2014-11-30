@@ -392,7 +392,7 @@ static CURLcode smb_send_setup(struct connectdata *conn)
   unsigned char nt_hash[21];
   unsigned char nt[24];
 
-  ssize_t byte_count = sizeof(lm) + sizeof(nt);
+  size_t byte_count = sizeof(lm) + sizeof(nt);
   byte_count += strlen(smbc->user) + strlen(smbc->domain);
   byte_count += strlen(OS) + strlen(CLIENTNAME) + 4; /* 4 null chars */
   if(byte_count > sizeof(msg.bytes))
@@ -438,7 +438,7 @@ static CURLcode smb_send_tree_connect(struct connectdata *conn)
   struct smb_tree_connect msg;
   char *p = msg.bytes;
 
-  ssize_t byte_count = strlen(conn->host.name) + strlen(req->share);
+  size_t byte_count = strlen(conn->host.name) + strlen(req->share);
   byte_count += strlen(SERVICENAME) + 5; /* 2 nulls and 3 backslashes */
   if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
