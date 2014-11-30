@@ -59,6 +59,10 @@ SIMPLE USAGE
 
         curl "http://[2001:1890:1112:1::20]/"
 
+  Get a file from an SMB server:
+
+        curl -u "domain\username:passwd" smb://server.example.com/share/file.txt
+
 DOWNLOAD TO A FILE
 
   Get a web page and store in a local file with a specific name:
@@ -227,6 +231,11 @@ UPLOADING
   a fashion similar to:
 
         curl --proxytunnel -x proxy:port -T localfile ftp.upload.com
+
+SMB / SMBS
+
+        curl -T file.txt -u "domain\username:passwd" 
+         smb://server.example.com/share/
 
  HTTP
 

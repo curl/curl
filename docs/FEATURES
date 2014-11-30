@@ -127,6 +127,12 @@ FILE
  - upload
  - resume
 
+SMB
+ - SMBv1 over TCP and SSL
+ - download
+ - upload
+ - authentication with NTLMv1
+
 SMTP
  - authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9) and Kerberos 5
    (*4)

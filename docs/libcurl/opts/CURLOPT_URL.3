@@ -80,6 +80,8 @@ http://user:password@www.example.com
 
 ftp://user:password@ftp.example.com
 
+smb://domain%2fuser:password@server.example.com
+
 imap://user:password;options@mail.example.com
 
 pop3://user:password;options@mail.example.com
@@ -235,6 +237,20 @@ user's home directory
 
 sftp://ssh.example.com/~/Documents/ - This requests a directory listing
 of the Documents directory under the user's home directory
+
+.IP SMB
+The path part of a SMB request specifies the file to retrieve and from what
+share and directory or the share to upload to and as such, may not be omitted.
+If the user name is not embedded in the URL, it can be set with the
+\fICURLOPT_USERPWD(3)\fP or \fICURLOPT_USERNAME(3)\fP option. If the user name
+is embedded in the URL then it must contain the domain name and as such, the
+backslash must be URL encoded as %2f.
+
+smb://server.example.com/files/issue - This specifies the file "issue" located
+in the root of the "files" share
+
+smb://server.example.com/files/ -T issue - This specifies the file "issue" will
+be uploaded to the root of the "files" share.
 
 .IP LDAP
 The path part of a LDAP request can be used to specify the: Distinguished

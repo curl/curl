@@ -264,6 +264,10 @@ Library
 
  The file:// protocol is dealt with in lib/file.c.
 
+ SMB
+
+ The smb:// protocol is dealt with in lib/smb.c.
+
  LDAP
 
  Everything LDAP is in lib/ldap.c and lib/openldap.c
