@@ -194,6 +194,7 @@
 #include "ssh.h"
 #include "http.h"
 #include "rtsp.h"
+#include "smb.h"
 #include "wildcard.h"
 #include "multihandle.h"
 
@@ -1055,6 +1056,7 @@ struct connectdata {
     struct pop3_conn pop3c;
     struct smtp_conn smtpc;
     struct rtsp_conn rtspc;
+    struct smb_conn smbc;
     void *generic; /* RTMP and LDAP use this */
   } proto;
 
