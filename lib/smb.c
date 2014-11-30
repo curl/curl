@@ -319,8 +319,8 @@ static void smb_format_message(struct connectdata *conn, struct smb_header *h,
   h->uid = smb_swap16(smbc->uid);
   h->tid = smb_swap16(req->tid);
   pid = getpid();
-  h->pid_high = smb_swap16(pid >> 16);
-  h->pid = smb_swap16(pid);
+  h->pid_high = smb_swap16((unsigned short)(pid >> 16));
+  h->pid = smb_swap16((unsigned short) pid);
 }
 
 static CURLcode smb_send(struct connectdata *conn, ssize_t len)
@@ -479,7 +479,7 @@ static CURLcode smb_send_open(struct connectdata *conn)
     msg.access = smb_swap32(SMB_GENERIC_READ);
     msg.create_disposition = smb_swap32(SMB_FILE_OPEN);
   }
-  msg.byte_count = smb_swap16(msg.name_length + 1);
+  msg.byte_count = smb_swap16((unsigned short) (msg.name_length + 1));
   strcpy(msg.bytes, req->path);
 
   return smb_send_message(conn, SMB_COM_NT_CREATE_ANDX, &msg,
@@ -517,8 +517,8 @@ static CURLcode smb_send_read(struct connectdata *conn)
   msg.word_count = SMB_WC_READ_ANDX;
   msg.andx.command = SMB_COM_NO_ANDX_COMMAND;
   msg.fid = smb_swap16(req->fid);
-  msg.offset = smb_swap32((unsigned int)offset);
-  msg.offset_high = smb_swap32(offset >> 32);
+  msg.offset = smb_swap32((unsigned int) offset);
+  msg.offset_high = smb_swap32((unsigned int) (offset >> 32));
   msg.min_bytes = smb_swap16(MAX_PAYLOAD_SIZE);
   msg.max_bytes = smb_swap16(MAX_PAYLOAD_SIZE);
 
@@ -545,9 +545,9 @@ static CURLcode smb_send_write(struct connectdata *conn)
   msg->word_count = SMB_WC_WRITE_ANDX;
   msg->andx.command = SMB_COM_NO_ANDX_COMMAND;
   msg->fid = smb_swap16(req->fid);
-  msg->offset = smb_swap32((unsigned int)offset);
-  msg->offset_high = smb_swap32(offset >> 32);
-  msg->data_length = smb_swap16(nread);
+  msg->offset = smb_swap32((unsigned int) offset);
+  msg->offset_high = smb_swap32((unsigned int) (offset >> 32));
+  msg->data_length = smb_swap16((unsigned short) nread);
   msg->data_offset = smb_swap16(sizeof(*msg) - sizeof(unsigned int));
 
   smb_format_message(conn, &msg->h, SMB_COM_WRITE_ANDX,
