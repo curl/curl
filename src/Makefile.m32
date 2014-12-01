@@ -82,8 +82,7 @@ STRIP   = $(CROSSPREFIX)strip -g
 
 # Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
-TARGET  := $(shell $(CC) -dumpmachine)
-ifeq ($(findstring x86_64,$(TARGET)),x86_64)
+ifeq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),x86_64)
 ARCH    = w64
 else
 ARCH    = w32
