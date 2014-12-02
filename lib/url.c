@@ -220,8 +220,7 @@ static const struct Curl_handler * const protocols[] = {
 #endif
 #endif
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) && \
-    !defined(USE_WINDOWS_SSPI)
+#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM)
   &Curl_handler_smb,
 #ifdef USE_SSL
   &Curl_handler_smbs,

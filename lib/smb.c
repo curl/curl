@@ -22,8 +22,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) && \
-    !defined(USE_WINDOWS_SSPI)
+#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM)
 
 #define BUILDING_CURL_SMB_C
 
@@ -895,4 +894,4 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_SMB && USE_NTLM && USE_WINDOWS_SSPI */
+#endif /* CURL_DISABLE_SMB && USE_NTLM */
