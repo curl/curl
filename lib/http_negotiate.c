@@ -71,36 +71,6 @@ get_gss_name(struct connectdata *conn, bool proxy, gss_name_t *server)
   return GSS_ERROR(major_status) ? -1 : 0;
 }
 
-static void
-log_gss_error(struct connectdata *conn, OM_uint32 error_status,
-              const char *prefix)
-{
-  OM_uint32 maj_stat, min_stat;
-  OM_uint32 msg_ctx = 0;
-  gss_buffer_desc status_string;
-  char buf[1024];
-  size_t len;
-
-  snprintf(buf, sizeof(buf), "%s", prefix);
-  len = strlen(buf);
-  do {
-    maj_stat = gss_display_status(&min_stat,
-                                  error_status,
-                                  GSS_C_MECH_CODE,
-                                  GSS_C_NO_OID,
-                                  &msg_ctx,
-                                  &status_string);
-      if(sizeof(buf) > len + status_string.length + 1) {
-        snprintf(buf + len, sizeof(buf) - len,
-                 ": %s", (char*) status_string.value);
-      len += status_string.length;
-    }
-    gss_release_buffer(&min_stat, &status_string);
-  } while(!GSS_ERROR(maj_stat) && msg_ctx != 0);
-
-  infof(conn->data, "%s\n", buf);
-}
-
 /* returning zero (0) means success, everything else is treated as "failure"
    with no care exactly what the failure was */
 int Curl_input_negotiate(struct connectdata *conn, bool proxy,
@@ -159,7 +129,8 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   if(GSS_ERROR(major_status)) {
     if(output_token.value)
       gss_release_buffer(&discard_st, &output_token);
-    log_gss_error(conn, minor_status, "gss_init_sec_context() failed: ");
+    Curl_gss_log_error(conn->data, minor_status,
+                       "gss_init_sec_context() failed: ");
     return -1;
   }
 
