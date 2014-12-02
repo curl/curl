@@ -216,6 +216,10 @@ static CURLcode smb_connect(struct connectdata *conn, bool *done)
 
   (void) done;
 
+  /* Check we have a username and password to authenticate with */
+  if(!conn->bits.user_passwd)
+    return CURLE_LOGIN_DENIED;
+
   /* Initialize the connection state */
   memset(smbc, 0, sizeof(*smbc));
   smbc->state = SMB_CONNECTING;
