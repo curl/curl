@@ -272,7 +272,7 @@ static CURLcode smb_recv_message(struct connectdata *conn, void **msg)
   if(smbc->got < sizeof(unsigned int))
     return CURLE_OK;
 
-  nbt_size = ntohs(*(unsigned short*)(buf + sizeof(unsigned short))) +
+  nbt_size = ntohs(*(unsigned short *)(buf + sizeof(unsigned short))) +
                    sizeof(unsigned int);
   if(smbc->got < nbt_size)
     return CURLE_OK;
@@ -312,7 +312,7 @@ static void smb_format_message(struct connectdata *conn, struct smb_header *h,
   memset(h, 0, sizeof(*h));
   h->nbt_length = htons((unsigned short) (sizeof(*h) - sizeof(unsigned int) +
                                           len));
-  strncpy((char*)h->magic, "\xffSMB", 4);
+  strncpy((char *)h->magic, "\xffSMB", 4);
   h->command = cmd;
   h->flags = SMB_FLAGS_CANONICAL_PATHNAMES | SMB_FLAGS_CASELESS_PATHNAMES;
   h->flags2 = smb_swap16(SMB_FLAGS2_IS_LONG_NAME | SMB_FLAGS2_KNOWS_LONG_NAME);
@@ -369,7 +369,7 @@ static CURLcode smb_send_message(struct connectdata *conn, unsigned char cmd,
 {
   struct smb_conn *smbc = &conn->proto.smbc;
 
-  smb_format_message(conn, (struct smb_header*)smbc->send_buf, cmd, msg_len);
+  smb_format_message(conn, (struct smb_header *)smbc->send_buf, cmd, msg_len);
   memcpy(smbc->send_buf + sizeof(struct smb_header), msg, msg_len);
 
   return smb_send(conn, sizeof(struct smb_header) + msg_len);
@@ -528,7 +528,7 @@ static CURLcode smb_send_read(struct connectdata *conn)
 static CURLcode smb_send_write(struct connectdata *conn)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
-  struct smb_write *msg = (struct smb_write*)smbc->send_buf;
+  struct smb_write *msg = (struct smb_write *)smbc->send_buf;
   struct smb_request *req = conn->data->req.protop;
   curl_off_t offset = conn->data->req.offset;
   CURLcode result;
@@ -704,7 +704,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_TREE_DISCONNECT;
       break;
     }
-    req->fid = smb_swap16(((struct smb_nt_create_response*)msg)->fid);
+    req->fid = smb_swap16(((struct smb_nt_create_response *)msg)->fid);
     conn->data->req.offset = 0;
     if(conn->data->set.upload) {
       conn->data->req.size = conn->data->state.infilesize;
@@ -713,7 +713,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
     }
     else {
       conn->data->req.size =
-        smb_swap64(((struct smb_nt_create_response*)msg)->end_of_file);
+        smb_swap64(((struct smb_nt_create_response *)msg)->end_of_file);
       Curl_pgrsSetDownloadSize(conn->data, conn->data->req.size);
       next_state = SMB_DOWNLOAD;
     }
@@ -725,13 +725,13 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_CLOSE;
       break;
     }
-    len = smb_swap16(*(unsigned short*)((char*)msg +
+    len = smb_swap16(*(unsigned short *)((char *)msg +
                      sizeof(struct smb_header) + 11));
-    off = smb_swap16(*(unsigned short*)((char*)msg +
+    off = smb_swap16(*(unsigned short *)((char *)msg +
                      sizeof(struct smb_header) + 13));
     if(len > 0)
       Curl_client_write(conn, CLIENTWRITE_BODY,
-                        (char*)msg + off + sizeof(unsigned int), len);
+                        (char *)msg + off + sizeof(unsigned int), len);
     conn->data->req.bytecount += len;
     conn->data->req.offset += len;
     Curl_pgrsSetDownloadCounter(conn->data, conn->data->req.bytecount);
@@ -744,7 +744,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_CLOSE;
       break;
     }
-    len = smb_swap16(*(unsigned short*)((char*)msg +
+    len = smb_swap16(*(unsigned short *)((char *)msg +
                      sizeof(struct smb_header) + 5));
     conn->data->req.bytecount += len;
     conn->data->req.offset += len;
