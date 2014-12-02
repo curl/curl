@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && !defined(USE_WINDOWS_SSPI)
+#if defined(USE_NTLM)
 
 #ifdef USE_SSLEAY
 #  if !defined(OPENSSL_VERSION_NUMBER) && \
@@ -46,7 +46,9 @@
 
 #ifndef USE_NTRESPONSES
 #  define USE_NTRESPONSES 1
-#  define USE_NTLM2SESSION 1
+#  ifndef USE_WIN32_CRYPTO
+#    define USE_NTLM2SESSION 1
+#  endif
 #endif
 
 void Curl_ntlm_core_lm_resp(const unsigned char *keys,
@@ -58,13 +60,15 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
                                    unsigned char *lmbuffer /* 21 bytes */);
 
 #if USE_NTRESPONSES
-CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
-                       const unsigned char *data, unsigned int datalen,
-                       unsigned char *output);
-
 CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
                                    const char *password,
                                    unsigned char *ntbuffer /* 21 bytes */);
+
+#ifndef USE_WINDOWS_SSPI
+
+CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
+                       const unsigned char *data, unsigned int datalen,
+                       unsigned char *output);
 
 CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
                                        const char *domain, size_t domlen,
@@ -82,8 +86,10 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
                                       unsigned char *challenge_server,
                                       unsigned char *lmresp);
 
-#endif
+#endif /* !USE_WINDOWS_SSPI */
 
-#endif /* USE_NTLM && !USE_WINDOWS_SSPI */
+#endif /* USE_NTRESPONSES */
+
+#endif /* USE_NTLM */
 
 #endif /* HEADER_CURL_NTLM_CORE_H */

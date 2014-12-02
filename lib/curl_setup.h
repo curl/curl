@@ -624,7 +624,7 @@ int netware_init(void);
 #if !defined(CURL_DISABLE_NTLM) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 #if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI) || \
     defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_DARWINSSL) || \
-    defined(USE_OS400CRYPTO)
+    defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
 #define USE_NTLM
 #endif
 #endif

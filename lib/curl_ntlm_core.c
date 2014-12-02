@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && !defined(USE_WINDOWS_SSPI)
+#if defined(USE_NTLM)
 
 /*
  * NTLM details:
@@ -90,6 +90,8 @@
 #elif defined(USE_OS400CRYPTO)
 #  include "cipher.mih"  /* mih/cipher */
 #  include "curl_md4.h"
+#elif defined(USE_WIN32_CRYPTO)
+#  include <wincrypt.h>
 #else
 #  error "Can't compile NTLM support without a crypto library."
 #endif
@@ -267,7 +269,51 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   return TRUE;
 }
 
-#endif /* defined(USE_OS400CRYPTO) */
+#elif defined(USE_WIN32_CRYPTO)
+
+static bool encrypt_des(const unsigned char *in, unsigned char *out,
+                        const unsigned char *key_56)
+{
+  HCRYPTPROV hprov;
+  HCRYPTKEY hkey;
+  struct {
+    BLOBHEADER hdr;
+    unsigned int len;
+    char key[8];
+  } blob;
+  unsigned int len = 8;
+
+  /* Acquire the crypto provider */
+  if(!CryptAcquireContext(&hprov, NULL, NULL, PROV_RSA_FULL,
+                          CRYPT_VERIFYCONTEXT))
+    return FALSE;
+
+  memset(&blob, 0, sizeof(blob));
+  extend_key_56_to_64(key_56, blob.key);
+  blob.hdr.bType = PLAINTEXTKEYBLOB;
+  blob.hdr.bVersion = 2;
+  blob.hdr.aiKeyAlg = CALG_DES;
+  blob.len = sizeof(blob.key);
+
+  /* Import the key */
+  if(!CryptImportKey(hprov, (char *) &blob, sizeof(blob), 0, 0, &hkey)) {
+    CryptReleaseContext(hprov, 0);
+
+    return FALSE;
+  }
+
+  memcpy(out, in, 8);
+
+  /* Perform the encryption */
+  CryptEncrypt(hkey, 0, FALSE, 0, out, &len, len);
+
+  CryptDestroyKey(hkey);
+  CryptReleaseContext(hprov, 0);
+
+  return TRUE;
+}
+
+#endif /* defined(USE_WIN32_CRYPTO) */
 
 #endif /* defined(USE_SSLEAY) */
 
@@ -319,7 +365,8 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   setup_des_key(keys + 14, &des);
   gcry_cipher_encrypt(des, results + 16, 8, plaintext, 8);
   gcry_cipher_close(des);
-#elif defined(USE_NSS) || defined(USE_DARWINSSL) || defined(USE_OS400CRYPTO)
+#elif defined(USE_NSS) || defined(USE_DARWINSSL) || defined(USE_OS400CRYPTO) \
+  || defined(USE_WIN32_CRYPTO)
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
   encrypt_des(plaintext, results + 16, keys + 14);
@@ -382,7 +429,8 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
     setup_des_key(pw + 7, &des);
     gcry_cipher_encrypt(des, lmbuffer + 8, 8, magic, 8);
     gcry_cipher_close(des);
-#elif defined(USE_NSS) || defined(USE_DARWINSSL) || defined(USE_OS400CRYPTO)
+#elif defined(USE_NSS) || defined(USE_DARWINSSL) || defined(USE_OS400CRYPTO) \
+  || defined(USE_WIN32_CRYPTO)
     encrypt_des(magic, lmbuffer, pw);
     encrypt_des(magic, lmbuffer + 8, pw + 7);
 #endif
@@ -477,6 +525,19 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
     Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_DARWINSSL)
     (void)CC_MD4(pw, (CC_LONG)(2 * len), ntbuffer);
+#elif defined(USE_WIN32_CRYPTO)
+    HCRYPTPROV hprov;
+    if(CryptAcquireContext(&hprov, NULL, NULL, PROV_RSA_FULL,
+                           CRYPT_VERIFYCONTEXT)) {
+      HCRYPTHASH hhash;
+      if(CryptCreateHash(hprov, CALG_MD4, 0, 0, &hhash)) {
+        unsigned int length = 16;
+        CryptHashData(hhash, pw, (unsigned int)len * 2, 0);
+        CryptGetHashParam(hhash, HP_HASHVAL, ntbuffer, &length, 0);
+        CryptDestroyHash(hhash);
+      }
+      CryptReleaseContext(hprov, 0);
+    }
 #endif
 
     memset(ntbuffer + 16, 0, 21 - 16);
@@ -486,6 +547,8 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
 
   return CURLE_OK;
 }
+
+#ifndef USE_WINDOWS_SSPI
 
 /* This returns the HMAC MD5 digest */
 CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
@@ -667,6 +730,8 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   return result;
 }
 
+#endif /* !USE_WINDOWS_SSPI */
+
 #endif /* USE_NTRESPONSES */
 
-#endif /* USE_NTLM && !USE_WINDOWS_SSPI */
+#endif /* USE_NTLM */

@@ -699,6 +699,9 @@
 #  define CURL_DISABLE_LDAP 1
 #endif
 
+/* Define to use the Windows crypto library. */
+#define USE_WIN32_CRYPTO
+
 /* ---------------------------------------------------------------- */
 /*                       ADDITIONAL DEFINITIONS                     */
 /* ---------------------------------------------------------------- */
