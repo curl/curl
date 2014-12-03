@@ -70,6 +70,9 @@ static enum {
 #ifdef ENABLE_IPV6
   , socket_domain_inet6 = AF_INET6
 #endif
+#ifdef USE_UNIX_SOCKETS
+  socket_domain_unix = AF_UNIX,
+#endif
 } socket_domain = AF_INET;
 static bool use_gopher = FALSE;
 static int serverlogslocked = 0;
@@ -1363,6 +1366,11 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     rc = connect(serverfd, &serveraddr.sa, sizeof(serveraddr.sa6));
     break;
 #endif /* ENABLE_IPV6 */
+#ifdef USE_UNIX_SOCKETS
+  case AF_UNIX:
+    logmsg("Proxying through UNIX socket is not (yet?) supported.");
+    return CURL_SOCKET_BAD;
+#endif /* USE_UNIX_SOCKETS */
   }
 
   if(got_exit_signal) {
@@ -1946,6 +1954,10 @@ int main(int argc, char *argv[])
   int wrotepidfile = 0;
   int flag;
   unsigned short port = DEFAULT_PORT;
+#ifdef USE_UNIX_SOCKETS
+  const char *unix_socket = NULL;
+  bool unlink_socket = false;
+#endif
   char *pidname= (char *)".http.pid";
   struct httprequest req;
   int rc;
@@ -1967,6 +1979,9 @@ int main(int argc, char *argv[])
       puts("sws IPv4"
 #ifdef ENABLE_IPV6
              "/IPv6"
+#endif
+#ifdef USE_UNIX_SOCKETS
+             "/unix"
 #endif
           );
       return 0;
@@ -1999,6 +2014,23 @@ int main(int argc, char *argv[])
       location_str = port_str;
 #endif
       arg++;
+    }
+    else if(!strcmp("--unix-socket", argv[arg])) {
+      arg++;
+      if(argc>arg) {
+#ifdef USE_UNIX_SOCKETS
+        unix_socket = argv[arg];
+        if(strlen(unix_socket) >= sizeof(me.sau.sun_path)) {
+          fprintf(stderr, "sws: socket path must be shorter than %zu chars\n",
+                  sizeof(me.sau.sun_path));
+          return 0;
+        }
+        socket_type = "unix";
+        socket_domain = AF_UNIX;
+        location_str = unix_socket;
+#endif
+        arg++;
+      }
     }
     else if(!strcmp("--port", argv[arg])) {
       arg++;
@@ -2041,6 +2073,7 @@ int main(int argc, char *argv[])
            " --pidfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
+           " --unix-socket [file]\n"
            " --port [port]\n"
            " --srcdir [path]\n"
            " --connect [ip4-addr]\n"
@@ -2104,6 +2137,14 @@ int main(int argc, char *argv[])
     rc = bind(sock, &me.sa, sizeof(me.sa6));
     break;
 #endif /* ENABLE_IPV6 */
+#ifdef USE_UNIX_SOCKETS
+  case AF_UNIX:
+    memset(&me.sau, 0, sizeof(me.sau));
+    me.sau.sun_family = AF_UNIX;
+    strncpy(me.sau.sun_path, unix_socket, sizeof(me.sau.sun_path));
+    rc = bind(sock, &me.sa, sizeof(me.sau));
+    break;
+#endif /* USE_UNIX_SOCKETS */
   }
   if(0 != rc) {
     error = SOCKERRNO;
@@ -2123,6 +2164,11 @@ int main(int argc, char *argv[])
            error, strerror(error));
     goto sws_cleanup;
   }
+
+#ifdef USE_UNIX_SOCKETS
+  /* listen succeeds, so let's assume a valid listening UNIX socket */
+  unlink_socket = true;
+#endif
 
   /*
   ** As soon as this server writes its pid file the test harness will
@@ -2263,6 +2309,13 @@ sws_cleanup:
 
   if(sock != CURL_SOCKET_BAD)
     sclose(sock);
+
+#ifdef USE_UNIX_SOCKETS
+  if(unlink_socket && socket_domain == AF_UNIX) {
+    rc = unlink(unix_socket);
+    logmsg("unlink(%s) = %d (%s)", unix_socket, rc, strerror(rc));
+  }
+#endif
 
   if(got_exit_signal)
     logmsg("signalled to die");
