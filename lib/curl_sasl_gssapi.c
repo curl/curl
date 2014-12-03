@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(HAVE_GSSAPI) && defined(USE_KRB5)
+#if defined(HAVE_GSSAPI) && defined(USE_KERBEROS5)
 
 #include <curl/curl.h>
 
@@ -116,4 +116,4 @@ void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5)
   (void) krb5;
 }
 
-#endif /* HAVE_GSSAPI && USE_KRB5 */
+#endif /* HAVE_GSSAPI && USE_KERBEROS5 */

@@ -265,7 +265,6 @@ static curl_version_info_data version_info = {
   | CURL_VERSION_KERBEROS5
 #endif
 #ifdef HAVE_GSSAPI
-  | CURL_VERSION_KERBEROS5  /* Remove when SASL Kerberos V5 support added */
   | CURL_VERSION_GSSAPI
 #endif
 #ifdef USE_WINDOWS_SSPI
