@@ -66,9 +66,9 @@
 #endif
 
 static enum {
-  socket_domain_inet = AF_INET,
+  socket_domain_inet = AF_INET
 #ifdef ENABLE_IPV6
-  socket_domain_inet6 = AF_INET6
+  , socket_domain_inet6 = AF_INET6
 #endif
 } socket_domain = AF_INET;
 static bool use_gopher = FALSE;
