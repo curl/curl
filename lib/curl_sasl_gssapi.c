@@ -31,8 +31,29 @@
 #include "curl_sasl.h"
 #include "urldata.h"
 
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
 /* The last #include file should be: */
 #include "memdebug.h"
+
+/*
+* Curl_sasl_build_gssapi_spn()
+*
+* This is used to build a SPN string in the format service@host.
+*
+* Parameters:
+*
+* serivce  [in] - The service type such as www, smtp, pop or imap.
+* host     [in] - The host name or realm.
+*
+* Returns a pointer to the newly allocated SPN.
+*/
+static char *Curl_sasl_build_gssapi_spn(const char *service, const char *host)
+{
+  /* Generate and return our SPN */
+  return aprintf("%s@%s", service, host);
+}
 
 /*
  * Curl_sasl_create_gssapi_user_message()
