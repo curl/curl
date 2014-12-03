@@ -430,6 +430,7 @@ typedef enum {
 /* Struct used for GSSAPI (Kerberos V5) authentication */
 #if defined(USE_KERBEROS5)
 struct kerberos5data {
+#if defined(USE_WINDOWS_SSPI)
   CredHandle *credentials;
   CtxtHandle *context;
   TCHAR *spn;
@@ -437,6 +438,10 @@ struct kerberos5data {
   SEC_WINNT_AUTH_IDENTITY *p_identity;
   size_t token_max;
   BYTE *output_token;
+#else
+  gss_ctx_id_t context;
+  gss_name_t spn;
+#endif
 };
 #endif
 
