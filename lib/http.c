@@ -347,6 +347,82 @@ static bool pickoneauth(struct auth *pick)
   return picked;
 }
 
+/* whether to complete request (for authentication) in current connection */
+static bool complete_request(struct connectdata *conn,
+                             curl_off_t remaining_bytes)
+{
+#if defined(USE_NTLM) || defined(USE_SPNEGO)
+  struct SessionHandle *data = conn->data;
+  bool have_ntlm_or_negotiate = FALSE;
+  bool auth_started = FALSE;
+
+  /* don't reset connection when we're in NTLM or Negotiate authentication;
+   * those authenticate the connection - creating a new connection breaks the
+   * authentication.
+   */
+
+#if defined(USE_NTLM)
+  /* proxy NTLM authentication */
+  if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
+      (data->state.authproxy.picked == CURLAUTH_NTLM_WB)) {
+    have_ntlm_or_negotiate = TRUE;
+    auth_started = auth_started
+                 || (conn->proxyntlm.state != NTLMSTATE_NONE);
+  }
+
+  /* normal NTLM authentication */
+  if((data->state.authhost.picked == CURLAUTH_NTLM) ||
+      (data->state.authhost.picked == CURLAUTH_NTLM_WB)) {
+    have_ntlm_or_negotiate = TRUE;
+    auth_started = auth_started
+                 || (conn->ntlm.state != NTLMSTATE_NONE);
+  }
+#endif
+
+#if defined(USE_SPNEGO)
+  /* proxy Negotiate authentication */
+  if(data->state.authproxy.picked == CURLAUTH_NEGOTIATE) {
+    have_ntlm_or_negotiate = TRUE;
+    auth_started = auth_started
+                 || (data->state.proxyneg.state != GSS_AUTHNONE);
+  }
+
+  /* normal Negotiate authentication */
+  if(data->state.authhost.picked == CURLAUTH_NEGOTIATE) {
+    have_ntlm_or_negotiate = TRUE;
+    auth_started = auth_started
+                 || (data->state.negotiate.state != GSS_AUTHNONE);
+  }
+#endif
+
+  if(have_ntlm_or_negotiate) {
+    if(remaining_bytes < 2000 || auth_started) {
+      /* NTLM/Negotiation has started *OR* there is just a little (<2K)
+       * data left to send, keep on sending.
+       */
+
+      /* rewind data when completely done sending! */
+      if(!conn->bits.authneg) {
+        conn->bits.rewindaftersend = TRUE;
+        infof(data, "Rewind stream after send\n");
+      }
+
+      return TRUE;
+    }
+
+    infof(data, "NTLM/Negotiate send, close instead of sending %"
+          CURL_FORMAT_CURL_OFF_T " bytes\n",
+          remaining_bytes);
+  }
+#else
+  /* unused parameters: */
+  (void)conn;
+  (void)remaining_bytes;
+#endif
+
+  return FALSE;
+}
+
 /*
  * Curl_http_perhapsrewind()
  *
@@ -392,10 +468,15 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
 
   bytessent = http->writebytecount;
 
-  if(conn->bits.authneg)
+  if(conn->bits.authneg) {
     /* This is a state where we are known to be negotiating and we don't send
        any data then. */
     expectsend = 0;
+  }
+  else if(!conn->bits.protoconnstart) {
+    /* HTTP CONNECT in progress: there is no body */
+    expectsend = 0;
+  }
   else {
     /* figure out how much data we are expected to send */
     switch(data->set.httpreq) {
@@ -420,36 +501,12 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
   conn->bits.rewindaftersend = FALSE; /* default */
 
   if((expectsend == -1) || (expectsend > bytessent)) {
-#if defined(USE_NTLM)
-    /* There is still data left to send */
-    if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
-       (data->state.authhost.picked == CURLAUTH_NTLM) ||
-       (data->state.authproxy.picked == CURLAUTH_NTLM_WB) ||
-       (data->state.authhost.picked == CURLAUTH_NTLM_WB)) {
-      if(((expectsend - bytessent) < 2000) ||
-         (conn->ntlm.state != NTLMSTATE_NONE) ||
-         (conn->proxyntlm.state != NTLMSTATE_NONE)) {
-        /* The NTLM-negotiation has started *OR* there is just a little (<2K)
-           data left to send, keep on sending. */
+    if(conn->bits.close)
+      /* this is already marked to get closed */
+      return CURLE_OK;
 
-        /* rewind data when completely done sending! */
-        if(!conn->bits.authneg) {
-          conn->bits.rewindaftersend = TRUE;
-          infof(data, "Rewind stream after send\n");
-        }
-
-        return CURLE_OK;
-      }
-
-      if(conn->bits.close)
-        /* this is already marked to get closed */
-        return CURLE_OK;
-
-      infof(data, "NTLM send, close instead of sending %"
-            CURL_FORMAT_CURL_OFF_T " bytes\n",
-            (curl_off_t)(expectsend - bytessent));
-    }
-#endif
+    if(complete_request(conn, (curl_off_t)(expectsend - bytessent)))
+      return CURLE_OK;
 
     /* This is not NTLM or many bytes left to send: close */
     connclose(conn, "Mid-auth HTTP and much data left to send");
@@ -460,7 +517,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
   }
 
   if(bytessent)
-    /* we rewind now at once since if we already sent something */
+    /* we rewind now at once since we already sent something */
     return Curl_readrewind(conn);
 
   return CURLE_OK;
@@ -2271,12 +2328,30 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       );
 
   /*
-   * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
-   * with basic and digest, it will be freed anyway by the next request
+   * Free userpwd for Negotiate/NTLM (cannot reuse, authenticates all following
+   * requests anyway.)
+   * Basic/Digest are kept in case the connection gets reused in another easy
+   * handle (although digest might break since the challenge and cnonce is not
+   * transferred to the new easy handle).
    */
+  switch (data->state.authhost.picked) {
+  case CURLAUTH_NEGOTIATE:
+  case CURLAUTH_NTLM:
+  case CURLAUTH_NTLM_WB:
+    Curl_safefree(conn->allocptr.userpwd);
+    break;
+  }
 
-  Curl_safefree (conn->allocptr.userpwd);
-  conn->allocptr.userpwd = NULL;
+  /*
+   * Same for proxyuserpwd
+   */
+  switch (data->state.authproxy.picked) {
+  case CURLAUTH_NEGOTIATE:
+  case CURLAUTH_NTLM:
+  case CURLAUTH_NTLM_WB:
+    Curl_safefree(conn->allocptr.proxyuserpwd);
+    break;
+  }
 
   if(result)
     return result;
