@@ -185,6 +185,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                                  NULL,
                                                  gss_token,
                                                  &gss_send_token,
+                                                 TRUE,
                                                  &gss_ret_flags);
 
     if(gss_token != GSS_C_NO_BUFFER)

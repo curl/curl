@@ -107,7 +107,6 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
 
   (void) userp;
   (void) passwdp;
-  (void) mutual_auth;
 
   if(krb5->context == GSS_C_NO_CONTEXT) {
     /* Generate our SPN */
@@ -155,6 +154,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
                                                GSS_C_NO_CHANNEL_BINDINGS,
                                                &input_token,
                                                &output_token,
+                                               mutual_auth,
                                                NULL);
 
   Curl_safefree(input_token.value);

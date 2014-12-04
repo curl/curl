@@ -236,6 +236,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
                                       &chan,
                                       gssresp,
                                       &output_buffer,
+                                      TRUE,
                                       NULL);
 
       if(gssresp) {

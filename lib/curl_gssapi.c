@@ -41,9 +41,13 @@ OM_uint32 Curl_gss_init_sec_context(
     gss_channel_bindings_t input_chan_bindings,
     gss_buffer_t input_token,
     gss_buffer_t output_token,
+    const bool mutual_auth,
     OM_uint32 *ret_flags)
 {
-  OM_uint32 req_flags = GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG;
+  OM_uint32 req_flags = GSS_C_REPLAY_FLAG;
+
+  if(mutual_auth)
+    req_flags |= GSS_C_MUTUAL_FLAG;
 
   if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_POLICY_FLAG) {
 #ifdef GSS_C_DELEG_POLICY_FLAG
