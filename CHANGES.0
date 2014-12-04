@@ -17851,7 +17851,7 @@ Version 2.7
    rewrite the former -l kludge in an external script that'll use urlget to
    fetch multipart files like that.
  - '-f' is introduced, it means Fail without output in case of HTTP server
-   errors (return code >=300).
+   errors (return code >=400).
  - Added support for -r, ranges. Specify which part of a document you
    want, and only that part is returned. Only with HTTP/1.1-servers.
  - Split up the source in 3 parts. Now all pure URL functions are in
