@@ -138,8 +138,11 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
     }
 
     /* Ensure we have a valid challenge message */
-    if(!chlg)
+    if(!chlg) {
+      infof(data, "GSSAPI handshake failure (empty challenge message)\n");
+
       return CURLE_BAD_CONTENT_ENCODING;
+    }
 
     /* Setup the challenge "input" security buffer */
     input_token.value = chlg;
