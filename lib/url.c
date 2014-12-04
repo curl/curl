@@ -769,7 +769,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_FAILONERROR:
     /*
-     * Don't output the >=300 error code HTML-page, but instead only
+     * Don't output the >=400 error code HTML-page, but instead only
      * return error.
      */
     data->set.http_fail_on_error = (0 != va_arg(param, long))?TRUE:FALSE;

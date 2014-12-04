@@ -989,7 +989,7 @@ typedef enum {
   CINIT(HEADER, LONG, 42),       /* throw the header out too */
   CINIT(NOPROGRESS, LONG, 43),   /* shut off the progress meter */
   CINIT(NOBODY, LONG, 44),       /* use HEAD to get http document */
-  CINIT(FAILONERROR, LONG, 45),  /* no output on http error codes >= 300 */
+  CINIT(FAILONERROR, LONG, 45),  /* no output on http error codes >= 400 */
   CINIT(UPLOAD, LONG, 46),       /* this is an upload */
   CINIT(POST, LONG, 47),         /* HTTP POST method */
   CINIT(DIRLISTONLY, LONG, 48),  /* bare names when listing directories */

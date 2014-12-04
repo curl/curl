@@ -1572,7 +1572,7 @@ struct UserDefined {
   bool ftp_list_only;    /* switch FTP command for listing directories */
   bool ftp_use_port;     /* use the FTP PORT command */
   bool hide_progress;    /* don't use the progress meter */
-  bool http_fail_on_error;  /* fail on HTTP error codes >= 300 */
+  bool http_fail_on_error;  /* fail on HTTP error codes >= 400 */
   bool http_follow_location; /* follow HTTP redirects */
   bool http_transfer_encoding; /* request compressed HTTP transfer-encoding */
   bool http_disable_hostname_check_before_authentication;
