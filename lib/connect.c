@@ -679,6 +679,7 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     }
 
     len = sizeof(struct Curl_sockaddr_storage);
+    memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(sockfd, (struct sockaddr*) &ssloc, &len)) {
       error = SOCKERRNO;
       failf(data, "getsockname() failed with errno %d: %s",
