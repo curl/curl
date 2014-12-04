@@ -14,6 +14,10 @@ This release includes the following changes:
  o config-win32: Introduce build targets for VS2012+
  o SSL: Add PEM format support for public key pinning
  o smtp: Added support for the conversion of Unix newlines during mail send [8]
+ o Enabled support for the SMB protocol
+ o Added support for HTTP over unix domain sockets, via
+   CURLOPT_UNIX_SOCKET_PATH and --unix-socket
+ o Introduced GSS-API based SASL module
 
 This release includes the following bugfixes:
 
@@ -65,6 +69,7 @@ This release includes the following bugfixes:
  o select.c: fix compilation for VxWorks [7]
  o multi-single.c: switch to use curl_multi_wait
  o curl_multi_wait.3: clarify numfds being used if not NULL
+ o NSS: enable the CAPATH option [9]
 
 This release includes the following known bugs:
 
@@ -73,11 +78,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad Harder, Brad King, Brian, Carlo Wood, Christian Hägele, Dan Fandrich,
-  Daniel Stenberg, Frank Gevaerts, Gisle Vanem, Guenter Knauf, Jan Ehrhardt,
-  Johan Lantz, Jon Spencer, Kamil Dudka, Lucas Pardue, Michael Osipov,
-  moparisthebest, Nobuhiro Ban, Patrick Monnerat, Peter Wu, Ray Satiro,
-  Sam Hurst, Stefan Neis, Steve Holme, Tatsuhiro Tsujikawa, Waldek Kozba,
+  Bill Nagel, Brad Harder, Brad King, Carlo Wood, Christian Hägele,
+  Dan Fandrich, Daniel Stenberg, Dave Reisner, Frank Gevaerts, Gisle Vanem,
+  Guenter Knauf, Jan Ehrhardt, Johan Lantz, Jon Spencer, Kamil Dudka,
+  Lucas Pardue, Michael Osipov, Nobuhiro Ban, Patrick Monnerat, Peter Wu,
+  Ray Satiro, Sam Hurst, Stefan Neis, Steve Holme, Tatsuhiro Tsujikawa,
+  Tomasz Kojm, Waldek Kozba,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -91,4 +97,5 @@ References to bug reports and discussions on issues:
  [6] = http://curl.haxx.se/mail/lib-2014-11/0221.html
  [7] = http://curl.haxx.se/bug/view.cgi?id=1455
  [8] = http://curl.haxx.se/bug/view.cgi?id=1456
- [9] =
+ [9] = http://curl.haxx.se/bug/view.cgi?id=1457
+ [10] =
