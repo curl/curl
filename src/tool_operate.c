@@ -1333,7 +1333,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* new in 7.40.0 */
         if(config->unix_socket_path)
-          my_setopt(curl, CURLOPT_UNIX_SOCKET_PATH, config->unix_socket_path);
+          my_setopt_str(curl, CURLOPT_UNIX_SOCKET_PATH,
+                        config->unix_socket_path);
 
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
