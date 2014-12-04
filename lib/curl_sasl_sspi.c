@@ -1030,6 +1030,8 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   /* Decrypt in the inbound challenge obtaining the qop */
   status = s_pSecFn->DecryptMessage(krb5->context, &input_desc, 0, &qop);
   if(status != SEC_E_OK) {
+    infof(data, "GSSAPI handshake failure (empty security message)\n");
+
     Curl_safefree(chlg);
 
     return CURLE_BAD_CONTENT_ENCODING;
@@ -1037,6 +1039,8 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
 
   /* Not 4 octets long so fail as per RFC4752 Section 3.1 */
   if(input_buf[1].cbBuffer != 4) {
+    infof(data, "GSSAPI handshake failure (invalid security data)\n");
+
     Curl_safefree(chlg);
 
     return CURLE_BAD_CONTENT_ENCODING;
@@ -1050,6 +1054,8 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   /* Extract the security layer */
   sec_layer = indata & 0x000000FF;
   if(!(sec_layer & KERB_WRAP_NO_ENCRYPT)) {
+    infof(data, "GSSAPI handshake failure (invalid security layer)\n");
+
     Curl_safefree(chlg);
 
     return CURLE_BAD_CONTENT_ENCODING;
