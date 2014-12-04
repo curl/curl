@@ -38,6 +38,7 @@
 #include "curl_base64.h"
 #include "curl_gssapi.h"
 #include "curl_memory.h"
+#include "sendf.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
