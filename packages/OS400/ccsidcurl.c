@@ -1114,7 +1114,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if(testwarn) {
     testwarn = 0;
 
-    if((int) STRING_LASTZEROTERMINATED != (int) STRING_BEARER + 1 ||
+    if((int) STRING_LASTZEROTERMINATED != (int) STRING_UNIX_SOCKET_PATH + 1 ||
        (int) STRING_LAST != (int) STRING_COPYPOSTFIELDS + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
@@ -1174,6 +1174,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_TLSAUTH_PASSWORD:
   case CURLOPT_TLSAUTH_TYPE:
   case CURLOPT_TLSAUTH_USERNAME:
+  case CURLOPT_UNIX_SOCKET_PATH:
   case CURLOPT_URL:
   case CURLOPT_USERAGENT:
   case CURLOPT_USERNAME:
