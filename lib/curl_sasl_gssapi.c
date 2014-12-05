@@ -333,15 +333,15 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
 }
 
 /*
-* Curl_sasl_gssapi_cleanup()
-*
-* This is used to clean up the gssapi specific data.
-*
-* Parameters:
-*
-* krb5     [in/out] - The kerberos 5 data struct being cleaned up.
-*
-*/
+ * Curl_sasl_gssapi_cleanup()
+ *
+ * This is used to clean up the gssapi specific data.
+ *
+ * Parameters:
+ *
+ * krb5     [in/out] - The kerberos 5 data struct being cleaned up.
+ *
+ */
 void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5)
 {
   OM_uint32 minor_status;
