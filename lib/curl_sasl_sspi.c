@@ -1027,7 +1027,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   input_buf[1].pvBuffer = NULL;
   input_buf[1].cbBuffer = 0;
 
-  /* Decrypt in the inbound challenge obtaining the qop */
+  /* Decrypt the inbound challenge and obtain the qop */
   status = s_pSecFn->DecryptMessage(krb5->context, &input_desc, 0, &qop);
   if(status != SEC_E_OK) {
     infof(data, "GSSAPI handshake failure (empty security message)\n");
@@ -1063,7 +1063,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   max_size = ntohl(indata & 0xFFFFFF00);
   if(max_size > 0) {
     /* The server has told us it supports a maximum receive buffer, however, as
-       we don't require one unless we are encrypting data we, tell the server
+       we don't require one unless we are encrypting data, we tell the server
        our receive buffer is zero. */
     max_size = 0;
   }
