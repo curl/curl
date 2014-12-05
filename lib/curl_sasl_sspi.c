@@ -1068,8 +1068,6 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
     max_size = 0;
   }
 
-  outdata = htonl(max_size) | sec_layer;
-
   /* Allocate the trailer */
   trailer = malloc(sizes.cbSecurityTrailer);
   if(!trailer)
@@ -1084,7 +1082,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   }
 
   /* Allocate our message */
-  messagelen = 4 + strlen(user_name) + 1;
+  messagelen = sizeof(outdata) + strlen(user_name) + 1;
   message = malloc(messagelen);
   if(!message) {
     Curl_safefree(trailer);
@@ -1098,8 +1096,9 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
      terminator. Note: Dispite RFC4752 Section 3.1 stating "The authorization
      identity is not terminated with the zero-valued (%x00) octet." it seems
      necessary to include it. */
-  memcpy(message, &outdata, 4);
-  strcpy((char *)message + 4, user_name);
+  outdata = htonl(max_size) | sec_layer;
+  memcpy(message, &outdata, sizeof(outdata));
+  strcpy((char *) message + sizeof(outdata), user_name);
   Curl_unicodefree(user_name);
 
   /* Allocate the padding */
