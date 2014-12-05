@@ -14,10 +14,10 @@ This release includes the following changes:
  o config-win32: Introduce build targets for VS2012+
  o SSL: Add PEM format support for public key pinning
  o smtp: Added support for the conversion of Unix newlines during mail send [8]
- o Enabled support for the SMB protocol
+ o smb: Added initial support for the SMB/CIFS protocol
  o Added support for HTTP over unix domain sockets, via
    CURLOPT_UNIX_SOCKET_PATH and --unix-socket
- o Introduced GSS-API based SASL module
+ o sasl: Added support for GSS-API based Kerberos V5 authentication
 
 This release includes the following bugfixes:
 
