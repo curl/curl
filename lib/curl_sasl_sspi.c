@@ -1046,17 +1046,15 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  /* Copy the data out and free the SSPI allocated buffer as it is not required
-     anymore */
+  /* Copy the data out and free the challenge as it is not required anymore */
   memcpy(&indata, input_buf[1].pvBuffer, 4);
   s_pSecFn->FreeContextBuffer(input_buf[1].pvBuffer);
+  Curl_safefree(chlg);
 
   /* Extract the security layer */
   sec_layer = indata & 0x000000FF;
   if(!(sec_layer & KERB_WRAP_NO_ENCRYPT)) {
     infof(data, "GSSAPI handshake failure (invalid security layer)\n");
-
-    Curl_safefree(chlg);
 
     return CURLE_BAD_CONTENT_ENCODING;
   }
@@ -1074,17 +1072,13 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
 
   /* Allocate the trailer */
   trailer = malloc(sizes.cbSecurityTrailer);
-  if(!trailer) {
-    Curl_safefree(chlg);
-
+  if(!trailer)
     return CURLE_OUT_OF_MEMORY;
-  }
 
   /* Convert the user name to UTF8 when operating with Unicode */
   user_name = Curl_convert_tchar_to_UTF8(names.sUserName);
   if(!user_name) {
     Curl_safefree(trailer);
-    Curl_safefree(chlg);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -1094,7 +1088,6 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   message = malloc(messagelen);
   if(!message) {
     Curl_safefree(trailer);
-    Curl_safefree(chlg);
     Curl_unicodefree(user_name);
 
     return CURLE_OUT_OF_MEMORY;
@@ -1114,7 +1107,6 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   if(!padding) {
     Curl_safefree(message);
     Curl_safefree(trailer);
-    Curl_safefree(chlg);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -1140,7 +1132,6 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
     Curl_safefree(padding);
     Curl_safefree(message);
     Curl_safefree(trailer);
-    Curl_safefree(chlg);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -1153,7 +1144,6 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
     Curl_safefree(padding);
     Curl_safefree(message);
     Curl_safefree(trailer);
-    Curl_safefree(chlg);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -1174,7 +1164,6 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   Curl_safefree(padding);
   Curl_safefree(message);
   Curl_safefree(trailer);
-  Curl_safefree(chlg);
 
   return result;
 }
