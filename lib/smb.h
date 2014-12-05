@@ -49,7 +49,7 @@ struct smb_conn {
  */
 #ifdef BUILDING_CURL_SMB_C
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__ILEC400__)
 #  define PACK
 #  pragma pack(push)
 #  pragma pack(1)
@@ -250,7 +250,7 @@ struct smb_tree_disconnect {
   unsigned short byte_count;
 } PACK;
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__ILEC400__)
 #  pragma pack(pop)
 #endif
 
