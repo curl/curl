@@ -2692,24 +2692,24 @@ void Curl_expire(struct SessionHandle *data, long milli)
  */
 void Curl_expire_latest(struct SessionHandle *data, long milli)
 {
-  struct timeval *exp = &data->state.expiretime;
+  struct timeval *expire = &data->state.expiretime;
 
   struct timeval set;
 
   set = Curl_tvnow();
-  set.tv_sec += milli/1000;
-  set.tv_usec += (milli%1000)*1000;
+  set.tv_sec += milli / 1000;
+  set.tv_usec += (milli % 1000) * 1000;
 
   if(set.tv_usec >= 1000000) {
     set.tv_sec++;
     set.tv_usec -= 1000000;
   }
 
-  if(exp->tv_sec || exp->tv_usec) {
+  if(expire->tv_sec || expire->tv_usec) {
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
          is. */
-    long diff = curlx_tvdiff(set, *exp);
+    long diff = curlx_tvdiff(set, *expire);
     if(diff > 0)
       /* the new expire time was later than the top time, so just skip this */
       return;
