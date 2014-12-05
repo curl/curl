@@ -7,6 +7,13 @@ SCRIPTDIR=`dirname "${0}"`
 . "${SCRIPTDIR}/initscript.sh"
 cd "${TOPDIR}/lib"
 
+#       Need to have IFS access to the mih/cipher header file.
+
+if action_needed cipher.mih '/QSYS.LIB/QSYSINC.LIB/MIH.FILE/CIPHER.MBR'
+then    rm -f cipher.mih
+        ln -s '/QSYS.LIB/QSYSINC.LIB/MIH.FILE/CIPHER.MBR' cipher.mih
+fi
+
 
 #      Create and compile the identification source file.
 

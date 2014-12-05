@@ -22,9 +22,9 @@
 
 #include "curl_setup.h"
 
-/* NSS crypto library does not provide the MD4 hash algorithm, so that we have
- * a local implementation of it */
-#ifdef USE_NSS
+/* NSS and OS/400 crypto library do not provide the MD4 hash algorithm, so
+ * that we have a local implementation of it */
+#if defined(USE_NSS) || defined(USE_OS400CRYPTO)
 
 #include "curl_md4.h"
 #include "warnless.h"
@@ -279,4 +279,4 @@ void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
   MD4Update(&ctx, input, curlx_uztoui(len));
   MD4Final(output, &ctx);
 }
-#endif /* USE_NSS */
+#endif /* defined(USE_NSS) || defined(USE_OS400CRYPTO) */

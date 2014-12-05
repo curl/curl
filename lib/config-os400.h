@@ -540,6 +540,9 @@
 /* Define to use the GSKit package. */
 #define USE_GSKIT
 
+/* Define to use the OS/400 crypto library. */
+#define USE_OS400CRYPTO
+
 /* Define to use Unix sockets. */
 #define USE_UNIX_SOCKETS
 

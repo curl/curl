@@ -87,6 +87,9 @@
 #  include <CommonCrypto/CommonCryptor.h>
 #  include <CommonCrypto/CommonDigest.h>
 
+#elif defined(USE_OS400CRYPTO)
+#  include "cipher.mih"  /* mih/cipher */
+#  include "curl_md4.h"
 #else
 #  error "Can't compile NTLM support without a crypto library."
 #endif
@@ -249,7 +252,22 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   return err == kCCSuccess;
 }
 
-#endif /* defined(USE_DARWINSSL) */
+#elif defined(USE_OS400CRYPTO)
+
+static bool encrypt_des(const unsigned char *in, unsigned char *out,
+                        const unsigned char *key_56)
+{
+  char key[8];
+  _CIPHER_Control_T ctl;
+
+  ctl.Func_ID = ENCRYPT_ONLY;
+  ctl.Data_Len = 8;
+  extend_key_56_to_64(key_56, ctl.Crypto_Key);
+  _CIPHER((_SPCPTR *) &out, &ctl, (_SPCPTR *) &in);
+  return TRUE;
+}
+
+#endif /* defined(USE_OS400CRYPTO) */
 
 #endif /* defined(USE_SSLEAY) */
 
@@ -301,7 +319,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   setup_des_key(keys + 14, &des);
   gcry_cipher_encrypt(des, results + 16, 8, plaintext, 8);
   gcry_cipher_close(des);
-#elif defined(USE_NSS) || defined(USE_DARWINSSL)
+#elif defined(USE_NSS) || defined(USE_DARWINSSL) || defined(USE_OS400CRYPTO)
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
   encrypt_des(plaintext, results + 16, keys + 14);
@@ -364,7 +382,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
     setup_des_key(pw + 7, &des);
     gcry_cipher_encrypt(des, lmbuffer + 8, 8, magic, 8);
     gcry_cipher_close(des);
-#elif defined(USE_NSS) || defined(USE_DARWINSSL)
+#elif defined(USE_NSS) || defined(USE_DARWINSSL) || defined(USE_OS400CRYPTO)
     encrypt_des(magic, lmbuffer, pw);
     encrypt_des(magic, lmbuffer + 8, pw + 7);
 #endif
@@ -455,7 +473,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
     gcry_md_write(MD4pw, pw, 2 * len);
     memcpy (ntbuffer, gcry_md_read (MD4pw, 0), MD4_DIGEST_LENGTH);
     gcry_md_close(MD4pw);
-#elif defined(USE_NSS)
+#elif defined(USE_NSS) || defined(USE_OS400CRYPTO)
     Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_DARWINSSL)
     (void)CC_MD4(pw, (CC_LONG)(2 * len), ntbuffer);
