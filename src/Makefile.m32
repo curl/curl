@@ -18,7 +18,7 @@ ZLIB_PATH = ../../zlib-1.2.8
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8y
+OPENSSL_PATH = ../../openssl-0.9.8zc
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
@@ -56,7 +56,7 @@ LDAP_SDK = c:/novell/ndk/cldapsdk/win32
 endif
 # Edit the path below to point to the base of your nghttp2 package.
 ifndef NGHTTP2_PATH
-NGHTTP2_PATH = ../../nghttp2-0.6.4
+NGHTTP2_PATH = ../../nghttp2-0.6.7
 endif
 
 PROOT = ..

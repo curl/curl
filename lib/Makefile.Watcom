@@ -113,7 +113,7 @@ LIBRTMP_ROOT = ../../rtmpdump-2.3
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ../../openssl-0.9.8y
+OPENSSL_ROOT = ../../openssl-0.9.8zc
 !endif
 
 !ifdef %ares_root

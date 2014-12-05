@@ -19,7 +19,7 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8y
+OPENSSL_PATH = ../../openssl-0.9.8zc
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
@@ -44,7 +44,7 @@ endif
 
 # Edit the path below to point to the base of your nghttp2 package.
 ifndef NGHTTP2_PATH
-NGHTTP2_PATH = ../../nghttp2-0.6.4
+NGHTTP2_PATH = ../../nghttp2-0.6.7
 endif
 
 # Edit the path below to point to the base of your fbopenssl package.

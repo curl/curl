@@ -65,7 +65,7 @@
 !INCLUDE ..\winbuild\Makefile.msvc.names
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.8y
+OPENSSL_PATH   = ../../openssl-0.9.8zc
 !ENDIF
 
 !IFNDEF LIBSSH2_PATH
