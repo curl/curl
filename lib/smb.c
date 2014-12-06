@@ -57,6 +57,7 @@ static CURLcode smb_done(struct connectdata *conn, CURLcode status,
 static CURLcode smb_disconnect(struct connectdata *conn, bool dead);
 static int smb_getsock(struct connectdata *conn, curl_socket_t *socks,
                        int numsocks);
+static CURLcode smb_parse_url_path(struct connectdata *conn);
 
 /*
  * SMB handler interface
@@ -176,10 +177,7 @@ struct smb_request {
 
 static CURLcode smb_setup(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
   struct smb_request *req;
-  char *slash;
-  char *path;
 
   /* Initialize the request state */
   conn->data->req.protop = req = calloc(1, sizeof(struct smb_request));
@@ -189,40 +187,8 @@ static CURLcode smb_setup(struct connectdata *conn)
   req->state = SMB_REQUESTING;
   req->result = CURLE_OK;
 
-  /* URL decode the path */
-  result = Curl_urldecode(conn->data, conn->data->state.path, 0, &path, NULL,
-                          TRUE);
-  if(result)
-    return result;
-
-  /* Parse the share and path */
-  req->share = strdup((*path == '/' || *path == '\\') ? path + 1 : path);
-  if(!req->share) {
-    Curl_safefree(path);
-
-    return CURLE_OUT_OF_MEMORY;
-  }
-
-  slash = strchr(req->share, '/');
-  if(!slash)
-    slash = strchr(req->share, '\\');
-
-  if(!slash) {
-    Curl_safefree(path);
-
-    return CURLE_URL_MALFORMAT;
-  }
-
-  *slash++ = 0;
-  req->path = slash;
-  for(; *slash; slash++) {
-    if(*slash == '/')
-      *slash = '\\';
-  }
-
-  Curl_safefree(path);
-
-  return CURLE_OK;
+  /* Parse the URL path */
+  return smb_parse_url_path(conn);
 }
 
 static CURLcode smb_connect(struct connectdata *conn, bool *done)
@@ -881,6 +847,52 @@ static int smb_getsock(struct connectdata *conn, curl_socket_t *socks,
     return GETSOCK_WRITESOCK(0);
 
   return GETSOCK_READSOCK(0);
+}
+
+static CURLcode smb_parse_url_path(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct smb_request *req = data->req.protop;
+  char *path;
+  char *slash;
+
+  /* URL decode the path */
+  result = Curl_urldecode(data, data->state.path, 0, &path, NULL, TRUE);
+  if(result)
+    return result;
+
+  /* Parse the path for the share */
+  req->share = strdup((*path == '/' || *path == '\\') ? path + 1 : path);
+  if(!req->share) {
+    Curl_safefree(path);
+
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  slash = strchr(req->share, '/');
+  if(!slash)
+    slash = strchr(req->share, '\\');
+
+  /* The share must be present */
+  if(!slash) {
+    Curl_safefree(path);
+
+    return CURLE_URL_MALFORMAT;
+  }
+
+  /* Parse the path for the file path converting any forward slashes into
+     backslashes */
+  *slash++ = 0;
+  req->path = slash;
+  for(; *slash; slash++) {
+    if(*slash == '/')
+      *slash = '\\';
+  }
+
+  Curl_safefree(path);
+
+  return CURLE_OK;
 }
 
 #endif /* CURL_DISABLE_SMB && USE_NTLM && USE_WINDOWS_SSPI */
