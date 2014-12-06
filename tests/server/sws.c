@@ -1960,7 +1960,7 @@ int main(int argc, char *argv[])
 #endif
   char *pidname= (char *)".http.pid";
   struct httprequest req;
-  int rc;
+  int rc = 0;
   int error;
   int arg=1;
   long pid;
