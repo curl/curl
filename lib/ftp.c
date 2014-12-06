@@ -1828,9 +1828,15 @@ static CURLcode proxy_magic(struct connectdata *conn,
                             bool *magicdone)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data=conn->data;
+  struct SessionHandle *data = conn->data;
+
+#if defined(CURL_DISABLE_PROXY)
+  (void) newhost;
+  (void) newport;
+#endif
 
   *magicdone = FALSE;
+
   switch(conn->proxytype) {
   case CURLPROXY_SOCKS5:
   case CURLPROXY_SOCKS5_HOSTNAME:
@@ -1888,6 +1894,7 @@ static CURLcode proxy_magic(struct connectdata *conn,
     else
       *magicdone = TRUE;
   }
+
   return result;
 }
 
