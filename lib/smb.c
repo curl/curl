@@ -266,11 +266,11 @@ static CURLcode smb_recv_message(struct connectdata *conn, void **msg)
   msg_size = sizeof(struct smb_header);
   if(nbt_size >= msg_size + 1) {
     /* Add the word count */
-    msg_size += 1 + buf[msg_size] * sizeof(unsigned short);
+    msg_size += 1 + ((unsigned char) buf[msg_size]) * sizeof(unsigned short);
     if(nbt_size >= msg_size + sizeof(unsigned short)) {
       /* Add the byte count */
-      msg_size += sizeof(unsigned short) + buf[msg_size] +
-                  (buf[msg_size + 1] << 8);
+      msg_size += sizeof(unsigned short) + ((unsigned char) buf[msg_size]) +
+                  (((unsigned char) buf[msg_size + 1]) << 8);
       if(nbt_size < msg_size)
         return CURLE_READ_ERROR;
     }
