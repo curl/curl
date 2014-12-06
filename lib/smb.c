@@ -42,6 +42,7 @@
 #include "vtls/vtls.h"
 #include "curl_ntlm_core.h"
 #include "curl_memory.h"
+#include "escape.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -175,6 +176,7 @@ struct smb_request {
 
 static CURLcode smb_setup(struct connectdata *conn)
 {
+  CURLcode result = CURLE_OK;
   struct smb_request *req;
   char *slash;
   char *path;
@@ -187,18 +189,29 @@ static CURLcode smb_setup(struct connectdata *conn)
   req->state = SMB_REQUESTING;
   req->result = CURLE_OK;
 
+  /* URL decode the path */
+  result = Curl_urldecode(conn->data, conn->data->state.path, 0, &path, NULL,
+                          TRUE);
+  if(result)
+    return result;
+
   /* Parse the share and path */
-  path = conn->data->state.path;
   req->share = strdup((*path == '/' || *path == '\\') ? path + 1 : path);
-  if(!req->share)
+  if(!req->share) {
+    Curl_safefree(path);
+
     return CURLE_OUT_OF_MEMORY;
+  }
 
   slash = strchr(req->share, '/');
   if(!slash)
     slash = strchr(req->share, '\\');
 
-  if(!slash)
+  if(!slash) {
+    Curl_safefree(path);
+
     return CURLE_URL_MALFORMAT;
+  }
 
   *slash++ = 0;
   req->path = slash;
@@ -206,6 +219,8 @@ static CURLcode smb_setup(struct connectdata *conn)
     if(*slash == '/')
       *slash = '\\';
   }
+
+  Curl_safefree(path);
 
   return CURLE_OK;
 }
