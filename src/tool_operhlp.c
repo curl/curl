@@ -164,6 +164,8 @@ CURLcode get_url_file_name(char **filename, const char *url)
       Curl_safefree(*filename);
       *filename = strdup(buffer); /* clone the buffer */
       curl_free(tdir);
+      if(!*filename)
+        return CURLE_OUT_OF_MEMORY;
     }
   }
 #endif
