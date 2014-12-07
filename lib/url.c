@@ -1164,6 +1164,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set cookie file name to dump all cookies to when we're done.
      */
+  {
+    struct CookieInfo *newcookies;
     result = setstropt(&data->set.str[STRING_COOKIEJAR],
                        va_arg(param, char *));
 
@@ -1171,8 +1173,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Activate the cookie parser. This may or may not already
      * have been made.
      */
-    data->cookies = Curl_cookie_init(data, NULL, data->cookies,
-                                     data->set.cookiesession);
+    newcookies = Curl_cookie_init(data, NULL, data->cookies,
+                                  data->set.cookiesession);
+    if(!newcookies)
+      result = CURLE_OUT_OF_MEMORY;
+    data->cookies = newcookies;
+  }
     break;
 
   case CURLOPT_COOKIESESSION:
@@ -1227,8 +1233,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
         data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
 
       argptr = strdup(argptr);
-      if(!argptr) {
+      if(!argptr || !data->cookies) {
         result = CURLE_OUT_OF_MEMORY;
+        Curl_safefree(argptr);
       }
       else {
         Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);

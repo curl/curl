@@ -262,7 +262,8 @@ static char *sanitize_cookie_path(const char *cookie_path)
 
 /*
  * Load cookies from all given cookie files (CURLOPT_COOKIEFILE).
- * NOTE: failures are ignored
+ *
+ * NOTE: OOM or cookie parsing failures are ignored.
  */
 void Curl_cookie_loadfiles(struct SessionHandle *data)
 {
@@ -270,10 +271,17 @@ void Curl_cookie_loadfiles(struct SessionHandle *data)
   if(list) {
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     while(list) {
-      data->cookies = Curl_cookie_init(data,
-                                       list->data,
-                                       data->cookies,
-                                       data->set.cookiesession);
+      struct CookieInfo *newcookies = Curl_cookie_init(data,
+                                        list->data,
+                                        data->cookies,
+                                        data->set.cookiesession);
+      if(!newcookies)
+        /* Failure may be due to OOM or a bad cookie; both are ignored
+         * but only the first should be
+         */
+        infof(data, "ignoring failed cookie_init for %s\n", list->data);
+      else
+        data->cookies = newcookies;
       list = list->next;
     }
     curl_slist_free_all(data->change.cookielist); /* clean up list */
@@ -355,6 +363,8 @@ static bool isip(const char *domain)
  * Be aware that sometimes we get an IP-only host name, and that might also be
  * a numerical IPv6 address.
  *
+ * Returns NULL on out of memory or invalid cookie. This is suboptimal,
+ * as they should be treated separately.
  ***************************************************************************/
 
 struct Cookie *
@@ -886,6 +896,7 @@ Curl_cookie_add(struct SessionHandle *data,
  *
  * If 'newsession' is TRUE, discard all "session cookies" on read from file.
  *
+ * Returns NULL on out of memory. Invalid cookies are ignored.
  ****************************************************************************/
 struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
                                     const char *file,
@@ -893,8 +904,9 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
                                     bool newsession)
 {
   struct CookieInfo *c;
-  FILE *fp;
+  FILE *fp = NULL;
   bool fromfile=TRUE;
+  char *line = NULL;
 
   if(NULL == inc) {
     /* we didn't get a struct, create one */
@@ -902,6 +914,8 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
     if(!c)
       return NULL; /* failed to get memory */
     c->filename = strdup(file?file:"none"); /* copy the name just in case */
+    if(!c->filename)
+      goto fail; /* failed to get memory */
   }
   else {
     /* we got an already existing one, use that */
@@ -926,25 +940,26 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
     char *lineptr;
     bool headerline;
 
-    char *line = malloc(MAX_COOKIE_LINE);
-    if(line) {
-      while(fgets(line, MAX_COOKIE_LINE, fp)) {
-        if(checkprefix("Set-Cookie:", line)) {
-          /* This is a cookie line, get it! */
-          lineptr=&line[11];
-          headerline=TRUE;
-        }
-        else {
-          lineptr=line;
-          headerline=FALSE;
-        }
-        while(*lineptr && ISBLANK(*lineptr))
-          lineptr++;
-
-        Curl_cookie_add(data, c, headerline, lineptr, NULL, NULL);
+    line = malloc(MAX_COOKIE_LINE);
+    if(!line)
+      goto fail;
+    while(fgets(line, MAX_COOKIE_LINE, fp)) {
+      if(checkprefix("Set-Cookie:", line)) {
+        /* This is a cookie line, get it! */
+        lineptr=&line[11];
+        headerline=TRUE;
       }
-      free(line); /* free the line buffer */
+      else {
+        lineptr=line;
+        headerline=FALSE;
+      }
+      while(*lineptr && ISBLANK(*lineptr))
+        lineptr++;
+
+      Curl_cookie_add(data, c, headerline, lineptr, NULL, NULL);
     }
+    free(line); /* free the line buffer */
+
     if(fromfile)
       fclose(fp);
   }
@@ -952,6 +967,16 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
   c->running = TRUE;          /* now, we're running */
 
   return c;
+
+fail:
+  Curl_safefree(line);
+  if(!inc)
+    /* Only clean up if we allocated it here, as the original could still be in
+     * use by a share handle */
+    Curl_cookie_cleanup(c);
+  if(fromfile && fp)
+    fclose(fp);
+  return NULL; /* out of memory */
 }
 
 /* sort this so that the longest path gets before the shorter path */

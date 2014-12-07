@@ -328,17 +328,15 @@ int test(char *URL)
   if ( code != CURLE_OK )
   {
     fprintf(stderr, "curl_easy_getinfo() failed\n");
-    curl_share_cleanup(share);
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
   }
   printf("loaded cookies:\n");
   if ( !cookies )
   {
     fprintf(stderr, "  reloading cookies from '%s' failed\n", JAR);
-    curl_share_cleanup(share);
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
   }
   printf("-----------------\n");
   next_cookie = cookies;
