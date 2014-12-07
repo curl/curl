@@ -24,6 +24,8 @@
 
 #if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM)
 
+#if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
+
 #define BUILDING_CURL_SMB_C
 
 #ifdef _WIN32
@@ -893,5 +895,7 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
 
   return CURLE_OK;
 }
+
+#endif /* !USE_WINDOWS_SSPI || USE_WIN32_CRYPTO */
 
 #endif /* CURL_DISABLE_SMB && USE_NTLM */

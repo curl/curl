@@ -26,6 +26,8 @@
 
 #if defined(USE_NTLM)
 
+#if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
+
 #ifdef USE_SSLEAY
 #  if !defined(OPENSSL_VERSION_NUMBER) && \
       !defined(HEADER_SSL_H) && !defined(HEADER_MD5_H)
@@ -89,6 +91,8 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
 #endif /* !USE_WINDOWS_SSPI */
 
 #endif /* USE_NTRESPONSES */
+
+#endif /* !USE_WINDOWS_SSPI || USE_WIN32_CRYPTO */
 
 #endif /* USE_NTLM */
 
