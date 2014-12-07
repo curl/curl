@@ -70,6 +70,14 @@ This release includes the following bugfixes:
  o multi-single.c: switch to use curl_multi_wait
  o curl_multi_wait.3: clarify numfds being used if not NULL
  o NSS: enable the CAPATH option [9]
+ o docs: Fix FAILONERROR typos
+ o HTTP: don't abort connections with pending Negotiate authentication
+ o HTTP: Free (proxy)userpwd for NTLM/Negotiate after sending a request
+ o http_perhapsrewind: don't abort CONNECT requests
+ o get_url_file_name: Fixed crash on OOM on debug build
+ o cookie.c: Refactored cleanup code to simplify
+ o OS400: enable NTLM authentication
+ o ntlm: Use Windows Crypt API
 
 This release includes the following known bugs:
 
@@ -78,12 +86,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Bill Nagel, Brad Harder, Brad King, Carlo Wood, Christian Hägele,
+  Anthon Pang, Bill Nagel, Brad Harder, Brad King, Carlo Wood, Christian Hägele,
   Dan Fandrich, Daniel Stenberg, Dave Reisner, Frank Gevaerts, Gisle Vanem,
   Guenter Knauf, Jan Ehrhardt, Johan Lantz, Jon Spencer, Kamil Dudka,
   Lucas Pardue, Michael Osipov, Nobuhiro Ban, Patrick Monnerat, Peter Wu,
-  Ray Satiro, Sam Hurst, Stefan Neis, Steve Holme, Tatsuhiro Tsujikawa,
-  Tomasz Kojm, Waldek Kozba,
+  Ray Satiro, Sam Hurst, Stefan Bühler, Stefan Neis, Steve Holme,
+  Tatsuhiro Tsujikawa, Tomasz Kojm, Waldek Kozba,
 
         Thanks! (and sorry if I forgot to mention someone)
 
