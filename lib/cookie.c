@@ -26,14 +26,17 @@
 RECEIVING COOKIE INFORMATION
 ============================
 
-struct CookieInfo *cookie_init(char *file);
+struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
+                    const char *file, struct CookieInfo *inc, bool newsession);
 
         Inits a cookie struct to store data in a local file. This is always
         called before any cookies are set.
 
-int cookies_set(struct CookieInfo *cookie, char *cookie_line);
+struct Cookie *Curl_cookie_add(struct SessionHandle *data,
+                 struct CookieInfo *c, bool httpheader, char *lineptr,
+                 const char *domain, const char *path);
 
-        The 'cookie_line' parameter is a full "Set-cookie:" line as
+        The 'lineptr' parameter is a full "Set-cookie:" line as
         received from a server.
 
         The function need to replace previously stored lines that this new
@@ -47,8 +50,8 @@ int cookies_set(struct CookieInfo *cookie, char *cookie_line);
 SENDING COOKIE INFORMATION
 ==========================
 
-struct Cookies *cookie_getlist(struct CookieInfo *cookie,
-                               char *host, char *path, bool secure);
+struct Cookies *Curl_cookie_getlist(struct CookieInfo *cookie,
+                                    char *host, char *path, bool secure);
 
         For a given host and path, return a linked list of cookies that
         the client should send to the server if used now. The secure
@@ -259,6 +262,7 @@ static char *sanitize_cookie_path(const char *cookie_path)
 
 /*
  * Load cookies from all given cookie files (CURLOPT_COOKIEFILE).
+ * NOTE: failures are ignored
  */
 void Curl_cookie_loadfiles(struct SessionHandle *data)
 {
@@ -1127,16 +1131,14 @@ void Curl_cookie_clearall(struct CookieInfo *cookies)
 void Curl_cookie_freelist(struct Cookie *co, bool cookiestoo)
 {
   struct Cookie *next;
-  if(co) {
-    while(co) {
-      next = co->next;
-      if(cookiestoo)
-        freecookie(co);
-      else
-        free(co); /* we only free the struct since the "members" are all just
-                     pointed out in the main cookie list! */
-      co = next;
-    }
+  while(co) {
+    next = co->next;
+    if(cookiestoo)
+      freecookie(co);
+    else
+      free(co); /* we only free the struct since the "members" are all just
+                   pointed out in the main cookie list! */
+    co = next;
   }
 }
 
@@ -1183,23 +1185,15 @@ void Curl_cookie_clearsess(struct CookieInfo *cookies)
  *
  * Curl_cookie_cleanup()
  *
- * Free a "cookie object" previous created with cookie_init().
+ * Free a "cookie object" previous created with Curl_cookie_init().
  *
  ****************************************************************************/
 void Curl_cookie_cleanup(struct CookieInfo *c)
 {
-  struct Cookie *co;
-  struct Cookie *next;
   if(c) {
     if(c->filename)
       free(c->filename);
-    co = c->cookies;
-
-    while(co) {
-      next = co->next;
-      freecookie(co);
-      co = next;
-    }
+    Curl_cookie_freelist(c->cookies, TRUE);
     free(c); /* free the base struct as well */
   }
 }
