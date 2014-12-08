@@ -1742,6 +1742,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
       infof(data, "ALPN, offering %s, %s\n", NGHTTP2_PROTO_VERSION_ID,
             ALPN_HTTP_1_1);
+      connssl->asked_for_h2 = TRUE;
     }
 #endif
   }
@@ -2028,14 +2029,16 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
 
         if(len == NGHTTP2_PROTO_VERSION_ID_LEN &&
            memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len) == 0) {
-             conn->negnpn = NPN_HTTP2;
+          conn->negnpn = NPN_HTTP2;
         }
-        else if(len == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
-            neg_protocol, ALPN_HTTP_1_1_LENGTH) == 0) {
+        else if(len ==
+                ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
+                                               neg_protocol,
+                                               ALPN_HTTP_1_1_LENGTH) == 0) {
           conn->negnpn = NPN_HTTP1_1;
         }
       }
-      else
+      else if(connssl->asked_for_h2)
         infof(data, "ALPN, server did not agree to a protocol\n");
     }
 #endif

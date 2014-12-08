@@ -665,18 +665,19 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
   if(SSL_GetNextProto(sock, &state, buf, &buflen, buflenmax) == SECSuccess) {
 
     switch(state) {
-      case SSL_NEXT_PROTO_NO_SUPPORT:
-      case SSL_NEXT_PROTO_NO_OVERLAP:
+    case SSL_NEXT_PROTO_NO_SUPPORT:
+    case SSL_NEXT_PROTO_NO_OVERLAP:
+      if(connssl->asked_for_h2)
         infof(conn->data, "TLS, neither ALPN nor NPN succeeded\n");
-        return;
+      return;
 #ifdef SSL_ENABLE_ALPN
-      case SSL_NEXT_PROTO_SELECTED:
-        infof(conn->data, "ALPN, server accepted to use %.*s\n", buflen, buf);
-        break;
+    case SSL_NEXT_PROTO_SELECTED:
+      infof(conn->data, "ALPN, server accepted to use %.*s\n", buflen, buf);
+      break;
 #endif
-      case SSL_NEXT_PROTO_NEGOTIATED:
-        infof(conn->data, "NPN, server accepted to use %.*s\n", buflen, buf);
-        break;
+    case SSL_NEXT_PROTO_NEGOTIATED:
+      infof(conn->data, "NPN, server accepted to use %.*s\n", buflen, buf);
+      break;
     }
 
     if(buflen == NGHTTP2_PROTO_VERSION_ID_LEN &&
@@ -1639,6 +1640,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
       if(SSL_SetNextProtoNego(connssl->handle, alpn_protos, alpn_protos_len)
           != SECSuccess)
         goto error;
+      connssl->asked_for_h2 = TRUE;
     }
     else {
       infof(data, "SSL, can't negotiate HTTP/2.0 with neither NPN nor ALPN\n");

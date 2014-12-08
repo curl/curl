@@ -358,6 +358,7 @@ polarssl_connect_step1(struct connectdata *conn,
       ssl_set_alpn_protocols(&connssl->ssl, protocols);
       infof(data, "ALPN, offering %s, %s\n", protocols[0],
             protocols[1]);
+      connssl->asked_for_h2 = TRUE;
     }
   }
 #endif
@@ -466,7 +467,7 @@ polarssl_connect_step2(struct connectdata *conn,
         conn->negnpn = NPN_HTTP1_1;
       }
     }
-    else {
+    else if(connssl->asked_for_h2) {
       infof(data, "ALPN, server did not agree to a protocol\n");
     }
   }

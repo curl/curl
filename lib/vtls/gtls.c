@@ -618,6 +618,7 @@ gtls_connect_step1(struct connectdata *conn,
       gnutls_alpn_set_protocols(session, protocols, protocols_size, 0);
       infof(data, "ALPN, offering %s, %s\n", NGHTTP2_PROTO_VERSION_ID,
             ALPN_HTTP_1_1);
+      connssl->asked_for_h2 = TRUE;
     }
     else {
       infof(data, "SSL, can't negotiate HTTP/2.0 without ALPN\n");
@@ -1047,7 +1048,7 @@ gtls_connect_step3(struct connectdata *conn,
         conn->negnpn = NPN_HTTP1_1;
       }
     }
-    else {
+    else if(connssl->asked_for_h2) {
       infof(data, "ALPN, server did not agree to a protocol\n");
     }
   }
