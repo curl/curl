@@ -397,7 +397,7 @@ static CURLcode smb_send_setup(struct connectdata *conn)
   memset(&msg, 0, sizeof(msg));
   msg.word_count = SMB_WC_SETUP_ANDX;
   msg.andx.command = SMB_COM_NO_ANDX_COMMAND;
-  msg.max_buffer_size = smb_swap32(MAX_MESSAGE_SIZE);
+  msg.max_buffer_size = smb_swap16(MAX_MESSAGE_SIZE);
   msg.max_mpx_count = smb_swap16(1);
   msg.vc_number = smb_swap16(1);
   msg.session_key = smb_swap32(smbc->session_key);
