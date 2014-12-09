@@ -374,25 +374,21 @@ static CURLcode pausewrite(struct SessionHandle *data,
 }
 
 
-/* Curl_client_write() sends data to the write callback(s)
-
-   The bit pattern defines to what "streams" to write to. Body and/or header.
-   The defines are in sendf.h of course.
-
-   If CURL_DO_LINEEND_CONV is enabled, data is converted IN PLACE to the
-   local character encoding.  This is a problem and should be changed in
-   the future to leave the original data alone.
+/* Curl_client_chop_write() writes chunks of data not larger than
+ * CURL_MAX_WRITE_SIZE via client write callback(s) and
+ * takes care of pause requests from the callbacks.
  */
-CURLcode Curl_client_write(struct connectdata *conn,
-                           int type,
-                           char *ptr,
-                           size_t len)
+CURLcode Curl_client_chop_write(struct connectdata *conn,
+                                int type,
+                                char * ptr,
+                                size_t len)
 {
   struct SessionHandle *data = conn->data;
-  size_t wrote;
+  curl_write_callback writeheader = NULL;
+  curl_write_callback writebody = NULL;
 
-  if(0 == len)
-    len = strlen(ptr);
+  if(!len)
+    return CURLE_OK;
 
   /* If reading is actually paused, we're forced to append this chunk of data
      to the already held data, but only if it is the same type as otherwise it
@@ -417,76 +413,105 @@ CURLcode Curl_client_write(struct connectdata *conn,
     /* update the pointer and the size */
     data->state.tempwrite = newptr;
     data->state.tempwritesize = newlen;
-
     return CURLE_OK;
   }
 
-  if(type & CLIENTWRITE_BODY) {
-    if((conn->handler->protocol&PROTO_FAMILY_FTP) &&
-       conn->proto.ftpc.transfertype == 'A') {
-      /* convert from the network encoding */
-      CURLcode result = Curl_convert_from_network(data, ptr, len);
-      /* Curl_convert_from_network calls failf if unsuccessful */
-      if(result)
-        return result;
-
-#ifdef CURL_DO_LINEEND_CONV
-      /* convert end-of-line markers */
-      len = convert_lineends(data, ptr, len);
-#endif /* CURL_DO_LINEEND_CONV */
-    }
-    /* If the previous block of data ended with CR and this block of data is
-       just a NL, then the length might be zero */
-    if(len) {
-      wrote = data->set.fwrite_func(ptr, 1, len, data->set.out);
-    }
-    else {
-      wrote = len;
-    }
-
-    if(CURL_WRITEFUNC_PAUSE == wrote) {
-      if(conn->handler->flags & PROTOPT_NONETWORK) {
-        /* Protocols that work without network cannot be paused. This is
-           actually only FILE:// just now, and it can't pause since the
-           transfer isn't done using the "normal" procedure. */
-        failf(data, "Write callback asked for PAUSE when not supported!");
-        return CURLE_WRITE_ERROR;
-      }
-      else
-        return pausewrite(data, type, ptr, len);
-    }
-    else if(wrote != len) {
-      failf(data, "Failed writing body (%zu != %zu)", wrote, len);
-      return CURLE_WRITE_ERROR;
-    }
-  }
-
+  /* Determine the callback(s) to use. */
+  if(type & CLIENTWRITE_BODY)
+    writebody = data->set.fwrite_func;
   if((type & CLIENTWRITE_HEADER) &&
-     (data->set.fwrite_header || data->set.writeheader) ) {
+     (data->set.fwrite_header || data->set.writeheader)) {
     /*
      * Write headers to the same callback or to the especially setup
      * header callback function (added after version 7.7.1).
      */
-    curl_write_callback writeit=
-      data->set.fwrite_header?data->set.fwrite_header:data->set.fwrite_func;
+    writeheader =
+      data->set.fwrite_header? data->set.fwrite_header: data->set.fwrite_func;
+  }
 
-    /* Note: The header is in the host encoding
-       regardless of the ftp transfer mode (ASCII/Image) */
+  /* Chop data, write chunks. */
+  while(len) {
+    size_t chunklen = len <= CURL_MAX_WRITE_SIZE? len: CURL_MAX_WRITE_SIZE;
 
-    wrote = writeit(ptr, 1, len, data->set.writeheader);
-    if(CURL_WRITEFUNC_PAUSE == wrote)
-      /* here we pass in the HEADER bit only since if this was body as well
-         then it was passed already and clearly that didn't trigger the pause,
-         so this is saved for later with the HEADER bit only */
-      return pausewrite(data, CLIENTWRITE_HEADER, ptr, len);
+    if(writebody) {
+      size_t wrote = writebody(ptr, 1, chunklen, data->set.out);
 
-    if(wrote != len) {
-      failf (data, "Failed writing header");
-      return CURLE_WRITE_ERROR;
+      if(CURL_WRITEFUNC_PAUSE == wrote) {
+        if(conn->handler->flags & PROTOPT_NONETWORK) {
+          /* Protocols that work without network cannot be paused. This is
+             actually only FILE:// just now, and it can't pause since the
+             transfer isn't done using the "normal" procedure. */
+          failf(data, "Write callback asked for PAUSE when not supported!");
+          return CURLE_WRITE_ERROR;
+        }
+        else
+          return pausewrite(data, type, ptr, len);
+      }
+      else if(wrote != chunklen) {
+        failf(data, "Failed writing body (%zu != %zu)", wrote, chunklen);
+        return CURLE_WRITE_ERROR;
+      }
     }
+
+    if(writeheader) {
+      size_t wrote = writeheader(ptr, 1, chunklen, data->set.writeheader);
+
+      if(CURL_WRITEFUNC_PAUSE == wrote)
+        /* here we pass in the HEADER bit only since if this was body as well
+           then it was passed already and clearly that didn't trigger the
+           pause, so this is saved for later with the HEADER bit only */
+        return pausewrite(data, CLIENTWRITE_HEADER, ptr, len);
+
+      if(wrote != chunklen) {
+        failf (data, "Failed writing header");
+        return CURLE_WRITE_ERROR;
+      }
+    }
+
+    ptr += chunklen;
+    len -= chunklen;
   }
 
   return CURLE_OK;
+}
+
+
+/* Curl_client_write() sends data to the write callback(s)
+
+   The bit pattern defines to what "streams" to write to. Body and/or header.
+   The defines are in sendf.h of course.
+
+   If CURL_DO_LINEEND_CONV is enabled, data is converted IN PLACE to the
+   local character encoding.  This is a problem and should be changed in
+   the future to leave the original data alone.
+ */
+CURLcode Curl_client_write(struct connectdata *conn,
+                           int type,
+                           char *ptr,
+                           size_t len)
+{
+  struct SessionHandle *data = conn->data;
+
+  if(0 == len)
+    len = strlen(ptr);
+
+  /* FTP data may need conversion. */
+  if((type & CLIENTWRITE_BODY) &&
+    (conn->handler->protocol & PROTO_FAMILY_FTP) &&
+    conn->proto.ftpc.transfertype == 'A') {
+    /* convert from the network encoding */
+    CURLcode result = Curl_convert_from_network(data, ptr, len);
+    /* Curl_convert_from_network calls failf if unsuccessful */
+    if(result)
+      return result;
+
+#ifdef CURL_DO_LINEEND_CONV
+    /* convert end-of-line markers */
+    len = convert_lineends(data, ptr, len);
+#endif /* CURL_DO_LINEEND_CONV */
+    }
+
+  return Curl_client_chop_write(conn, type, ptr, len);
 }
 
 CURLcode Curl_read_plain(curl_socket_t sockfd,
