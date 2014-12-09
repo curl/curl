@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -91,6 +91,9 @@
 
 #define MAX_STRING              256
 #define MAX_STRING1             MAX_STRING+1
+
+/* Trick Webserver by claiming that you are using Microsoft WinXP SP2, IE8 */
+/* #define UA "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; SV1)" */
 
 typedef struct
 {
@@ -186,9 +189,9 @@ void SyncTime_CURL_Init(CURL *curl, char *proxy_port,
   if (strlen(proxy_user_password) > 0)
     curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, proxy_user_password);
 
-  /* Trick Webserver by claiming that you are using Microsoft WinXP SP2, IE6 */
-  curl_easy_setopt(curl, CURLOPT_USERAGENT,
-                   "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
+#ifdef UA
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, UA);
+#endif
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, *SyncTime_CURL_WriteOutput);
   curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, *SyncTime_CURL_WriteHeader);
 }
