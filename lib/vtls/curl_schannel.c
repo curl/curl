@@ -1013,6 +1013,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
     infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
           connssl->decdata_offset, connssl->decdata_length);
   }
+  else
+    ret = 0;
 
   /* check if the server closed the connection */
   if(ret <= 0 && ( /* special check for Windows 2000 Professional */
