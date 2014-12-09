@@ -168,11 +168,11 @@ const struct Curl_handler Curl_handler_ldaps = {
 
 static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 {
-  CURLcode status = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int rc = 0;
   LDAP *server = NULL;
   LDAPURLDesc *ludp = NULL;
-  LDAPMessage *result = NULL;
+  LDAPMessage *ldapmsg = NULL;
   LDAPMessage *entryIterator;
   int num = 0;
   struct SessionHandle *data=conn->data;
@@ -197,7 +197,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 #endif
   if(rc != 0) {
     failf(data, "LDAP local: %s", ldap_err2string(rc));
-    status = CURLE_LDAP_INVALID_URL;
+    result = CURLE_LDAP_INVALID_URL;
     goto quit;
   }
 
@@ -225,7 +225,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     rc = ldapssl_client_init(NULL, NULL);
     if(rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: ldapssl_client_init %s", ldap_err2string(rc));
-      status = CURLE_SSL_CERTPROBLEM;
+      result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
     if(data->set.ssl.verifypeer) {
@@ -237,7 +237,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       if(!ldap_ca) {
         failf(data, "LDAP local: ERROR %s CA cert not set!",
               (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"));
-        status = CURLE_SSL_CERTPROBLEM;
+        result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
       infof(data, "LDAP local: using %s CA cert '%s'\n",
@@ -248,7 +248,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
         failf(data, "LDAP local: ERROR setting %s CA cert: %s",
                 (cert_type == LDAPSSL_CERT_FILETYPE_DER ? "DER" : "PEM"),
                 ldap_err2string(rc));
-        status = CURLE_SSL_CERTPROBLEM;
+        result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
       ldap_option = LDAPSSL_VERIFY_SERVER;
@@ -259,14 +259,14 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     if(rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: ERROR setting cert verify mode: %s",
               ldap_err2string(rc));
-      status = CURLE_SSL_CERTPROBLEM;
+      result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
     server = ldapssl_init(conn->host.name, (int)conn->port, 1);
     if(server == NULL) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
               conn->host.name, conn->port);
-      status = CURLE_COULDNT_CONNECT;
+      result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
 #elif defined(LDAP_OPT_X_TLS)
@@ -275,12 +275,12 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       if((data->set.str[STRING_CERT_TYPE]) &&
          (!Curl_raw_equal(data->set.str[STRING_CERT_TYPE], "PEM"))) {
         failf(data, "LDAP local: ERROR OpenLDAP only supports PEM cert-type!");
-        status = CURLE_SSL_CERTPROBLEM;
+        result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
       if(!ldap_ca) {
         failf(data, "LDAP local: ERROR PEM CA cert not set!");
-        status = CURLE_SSL_CERTPROBLEM;
+        result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
       infof(data, "LDAP local: using PEM CA cert: %s\n", ldap_ca);
@@ -288,7 +288,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       if(rc != LDAP_SUCCESS) {
         failf(data, "LDAP local: ERROR setting PEM CA cert: %s",
                 ldap_err2string(rc));
-        status = CURLE_SSL_CERTPROBLEM;
+        result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
       ldap_option = LDAP_OPT_X_TLS_DEMAND;
@@ -300,14 +300,14 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     if(rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: ERROR setting cert verify mode: %s",
               ldap_err2string(rc));
-      status = CURLE_SSL_CERTPROBLEM;
+      result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
     server = ldap_init(conn->host.name, (int)conn->port);
     if(server == NULL) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
               conn->host.name, conn->port);
-      status = CURLE_COULDNT_CONNECT;
+      result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
     ldap_option = LDAP_OPT_X_TLS_HARD;
@@ -315,7 +315,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     if(rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: ERROR setting SSL/TLS mode: %s",
               ldap_err2string(rc));
-      status = CURLE_SSL_CERTPROBLEM;
+      result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
 /*
@@ -323,7 +323,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     if(rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: ERROR starting SSL/TLS mode: %s",
               ldap_err2string(rc));
-      status = CURLE_SSL_CERTPROBLEM;
+      result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
 */
@@ -332,7 +332,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
        should check in first place if we can support LDAP SSL/TLS */
     failf(data, "LDAP local: SSL/TLS not supported with this version "
             "of the OpenLDAP toolkit\n");
-    status = CURLE_SSL_CERTPROBLEM;
+    result = CURLE_SSL_CERTPROBLEM;
     goto quit;
 #endif
 #endif
@@ -343,7 +343,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     if(server == NULL) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
               conn->host.name, conn->port);
-      status = CURLE_COULDNT_CONNECT;
+      result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
   }
@@ -363,20 +363,20 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   }
   if(rc != 0) {
     failf(data, "LDAP local: ldap_simple_bind_s %s", ldap_err2string(rc));
-    status = CURLE_LDAP_CANNOT_BIND;
+    result = CURLE_LDAP_CANNOT_BIND;
     goto quit;
   }
 
   rc = ldap_search_s(server, ludp->lud_dn, ludp->lud_scope,
-                     ludp->lud_filter, ludp->lud_attrs, 0, &result);
+                     ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
 
   if(rc != 0 && rc != LDAP_SIZELIMIT_EXCEEDED) {
     failf(data, "LDAP remote: %s", ldap_err2string(rc));
-    status = CURLE_LDAP_SEARCH_FAILED;
+    result = CURLE_LDAP_SEARCH_FAILED;
     goto quit;
   }
 
-  for(num = 0, entryIterator = ldap_first_entry(server, result);
+  for(num = 0, entryIterator = ldap_first_entry(server, ldapmsg);
       entryIterator;
       entryIterator = ldap_next_entry(server, entryIterator), num++) {
     BerElement *ber = NULL;
@@ -418,7 +418,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
               ldap_memfree(dn);
               if(ber)
                 ber_free(ber, 0);
-              status = error;
+              result = error;
               goto quit;
             }
             if(val_b64_sz > 0) {
@@ -450,8 +450,8 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   }
 
 quit:
-  if(result) {
-    ldap_msgfree(result);
+  if(ldapmsg) {
+    ldap_msgfree(ldapmsg);
     LDAP_TRACE (("Received %d entries\n", num));
   }
   if(rc == LDAP_SIZELIMIT_EXCEEDED)
@@ -469,7 +469,7 @@ quit:
   Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
   connclose(conn, "LDAP connection always disable re-use");
 
-  return status;
+  return result;
 }
 
 #ifdef DEBUG_LDAP
