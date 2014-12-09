@@ -1301,7 +1301,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   srvr_sockaddr_union_t serveraddr;
   curl_socket_t serverfd;
   int error;
-  int rc;
+  int rc = 0;
   const char *op_br = "";
   const char *cl_br = "";
 
