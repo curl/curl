@@ -384,15 +384,15 @@ vc-x64-winssl-idn: $(VC)
 
 vc-winssl-zlib: $(VC)
 	cd lib
-	nmake /f Makefile.$(VC) cfg=release-winssl-zlib
+	nmake /f Makefile.$(VC) cfg=release-winssl-zlib WINDOWS_SSPI=1
 	cd ..\src
-	nmake /f Makefile.$(VC) cfg=release-winssl-zlib
+	nmake /f Makefile.$(VC) cfg=release-winssl-zlib WINDOWS_SSPI=1
 
 vc-x64-winssl-zlib: $(VC)
 	cd lib
-	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-winssl-zlib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-winssl-zlib WINDOWS_SSPI=1
 	cd ..\src
-	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-winssl-zlib
+	nmake /f Makefile.$(VC) MACHINE=x64 cfg=release-winssl-zlib WINDOWS_SSPI=1
 
 vc-winssl-zlib-idn: $(VC)
 	cd lib
