@@ -719,9 +719,13 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
                      sizeof(struct smb_header) + 11));
     off = smb_swap16(*(unsigned short *)((char *)msg +
                      sizeof(struct smb_header) + 13));
-    if(len > 0)
-      Curl_client_write(conn, CLIENTWRITE_BODY,
-                        (char *)msg + off + sizeof(unsigned int), len);
+    if(len > 0) {
+      result = Curl_client_write(conn, CLIENTWRITE_BODY,
+                                 (char *)msg + off + sizeof(unsigned int),
+                                 len);
+      if(result)
+        return result;
+    }
     conn->data->req.bytecount += len;
     conn->data->req.offset += len;
     Curl_pgrsSetDownloadCounter(conn->data, conn->data->req.bytecount);
