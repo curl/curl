@@ -384,9 +384,17 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     char  *dn = ldap_get_dn(server, entryIterator);
     int i;
 
-    Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
-    Curl_client_write(conn, CLIENTWRITE_BODY, (char *)dn, 0);
-    Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
+    if(result)
+      goto quit;
+
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)dn, 0);
+    if(result)
+      goto quit;
+
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
+    if(result)
+      goto quit;
 
     dlsize += strlen(dn)+5;
 
@@ -397,9 +405,18 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 
       if(vals != NULL) {
         for(i = 0; (vals[i] != NULL); i++) {
-          Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\t", 1);
-          Curl_client_write(conn, CLIENTWRITE_BODY, (char *) attribute, 0);
-          Curl_client_write(conn, CLIENTWRITE_BODY, (char *)": ", 2);
+          result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\t", 1);
+          if(result)
+            goto quit;
+
+          result = Curl_client_write(conn, CLIENTWRITE_BODY,
+                                     (char *)attribute, 0);
+          if(result)
+            goto quit;
+
+          result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)": ", 2);
+          if(result)
+            goto quit;
           dlsize += strlen(attribute)+3;
 
           if((strlen(attribute) > 7) &&
@@ -422,24 +439,33 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
               goto quit;
             }
             if(val_b64_sz > 0) {
-              Curl_client_write(conn, CLIENTWRITE_BODY, val_b64, val_b64_sz);
+              result = Curl_client_write(conn, CLIENTWRITE_BODY, val_b64,
+                                         val_b64_sz);
               free(val_b64);
+              if(result)
+                goto quit;
               dlsize += val_b64_sz;
             }
           }
           else {
-            Curl_client_write(conn, CLIENTWRITE_BODY, vals[i]->bv_val,
-                              vals[i]->bv_len);
+            result = Curl_client_write(conn, CLIENTWRITE_BODY, vals[i]->bv_val,
+                                       vals[i]->bv_len);
+            if(result)
+              goto quit;
             dlsize += vals[i]->bv_len;
           }
-          Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 0);
+          result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 0);
+          if(result)
+            goto quit;
           dlsize++;
         }
 
         /* Free memory used to store values */
         ldap_value_free_len(vals);
       }
-      Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
+      result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
+      if(result)
+        goto quit;
       dlsize++;
       Curl_pgrsSetDownloadCounter(data, dlsize);
       ldap_memfree(attribute);
