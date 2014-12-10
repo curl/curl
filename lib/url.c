@@ -3075,7 +3075,9 @@ ConnectionExists(struct SessionHandle *data,
     curr = bundle->conn_list->head;
     while(curr) {
       bool match = FALSE;
+#if defined(USE_NTLM)
       bool credentialsMatch = FALSE;
+#endif
       size_t pipeLen;
 
       /*
@@ -3189,7 +3191,9 @@ ConnectionExists(struct SessionHandle *data,
           /* one of them was different */
           continue;
         }
+#if defined(USE_NTLM)
         credentialsMatch = TRUE;
+#endif
       }
 
       if(!needle->bits.httpproxy || needle->handler->flags&PROTOPT_SSL ||
