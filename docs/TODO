@@ -19,6 +19,7 @@
  1.6 Modified buffer size approach
  1.7 Detect when called from within callbacks
  1.8 Allow SSL (HTTPS) to proxy
+ 1.9 Cache negative name resolves
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -192,6 +193,12 @@
 
  ...and by Firefox soon:
  https://bugzilla.mozilla.org/show_bug.cgi?id=378637
+
+1.9 Cache negative name resolves
+
+ A name resolve that has failed is likely to fail when made again within a
+ short period of time. Currently we only cache positive responses.
+
 
 2. libcurl - multi interface
 
