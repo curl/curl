@@ -294,7 +294,7 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
     len_out += size;
     if(buf[len_out - 1] == '\n') {
       buf[len_out - 1] = '\0';
-      goto wrfinish;
+      break;
     }
     newbuf = realloc(buf, len_out + NTLM_BUFSIZE);
     if(!newbuf) {
@@ -303,8 +303,7 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
     }
     buf = newbuf;
   }
-  goto done;
-wrfinish:
+
   /* Samba/winbind installed but not configured */
   if(state == NTLMSTATE_TYPE1 &&
      len_out == 3 &&
