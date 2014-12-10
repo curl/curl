@@ -66,18 +66,31 @@ This release includes the following bugfixes:
  o http: Disable pipelining for HTTP/2 and upgraded connections
  o ntlm: Fixed static'ness of local decode function
  o sasl: Reduced the need for two sets of NTLM messaging functions
+ o multi.c: Fixed compilation warnings when no verbose string support
  o select.c: fix compilation for VxWorks [7]
  o multi-single.c: switch to use curl_multi_wait
  o curl_multi_wait.3: clarify numfds being used if not NULL
+ o http.c: Fixed compilation warnings from features being disabled
  o NSS: enable the CAPATH option [9]
  o docs: Fix FAILONERROR typos
  o HTTP: don't abort connections with pending Negotiate authentication
  o HTTP: Free (proxy)userpwd for NTLM/Negotiate after sending a request
  o http_perhapsrewind: don't abort CONNECT requests
+ o build: updated dependencies in makefiles
+ o multi.c: Fixed compilation warning
+ o ftp.c: Fixed compilation warnings when proxy support disabled
  o get_url_file_name: Fixed crash on OOM on debug build
  o cookie.c: Refactored cleanup code to simplify
  o OS400: enable NTLM authentication
  o ntlm: Use Windows Crypt API
+ o http2: avoid logging neg "failure" if h2 was not requested
+ o schannel_recv: return the correct code [10]
+ o VC build: added sspi define for winssl-zlib builds
+ o Curl_client_write(): chop long data, convert data only once
+ o openldap: do not ignore Curl_client_write() return code
+ o ldap: check Curl_client_write() return codes
+ o parsedate.c: Fixed compilation warning
+ o url.c: Fixed compilation warning when USE_NTLM is not defined
 
 This release includes the following known bugs:
 
@@ -91,7 +104,7 @@ advice from friends like these:
   Guenter Knauf, Jan Ehrhardt, Johan Lantz, Jon Spencer, Kamil Dudka,
   Lucas Pardue, Michael Osipov, Nobuhiro Ban, Patrick Monnerat, Peter Wu,
   Ray Satiro, Sam Hurst, Stefan Bühler, Stefan Neis, Steve Holme,
-  Tatsuhiro Tsujikawa, Tomasz Kojm, Waldek Kozba,
+  Tae Hyoung Ahn, Tatsuhiro Tsujikawa, Tomasz Kojm, Waldek Kozba,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -106,4 +119,5 @@ References to bug reports and discussions on issues:
  [7] = http://curl.haxx.se/bug/view.cgi?id=1455
  [8] = http://curl.haxx.se/bug/view.cgi?id=1456
  [9] = http://curl.haxx.se/bug/view.cgi?id=1457
- [10] =
+ [10] = http://curl.haxx.se/bug/view.cgi?id=1462
+ [11] =
