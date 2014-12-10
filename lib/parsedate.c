@@ -545,7 +545,7 @@ static int parsedate(const char *date, time_t *output)
 
 time_t curl_getdate(const char *p, const time_t *now)
 {
-  time_t parsed;
+  time_t parsed = -1;
   int rc = parsedate(p, &parsed);
   (void)now; /* legacy argument from the past that we ignore */
 
