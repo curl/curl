@@ -710,7 +710,6 @@ static void printsub(struct SessionHandle *data,
                      size_t length)             /* length of suboption data */
 {
   unsigned int i = 0;
-  unsigned short *pval;
 
   if(data->set.verbose) {
     if(direction) {
@@ -763,9 +762,9 @@ static void printsub(struct SessionHandle *data,
 
     switch(pointer[0]) {
     case CURL_TELOPT_NAWS:
-      pval = (unsigned short*)(pointer+1);
-      infof(data, "Width: %hu ; Height: %hu",
-            ntohs(pval[0]), ntohs(pval[1]));
+      if(length > 4)
+        infof(data, "Width: %hu ; Height: %hu", (pointer[1]<<8) | pointer[2],
+              (pointer[3]<<8) | pointer[4]);
       break;
     default:
       switch(pointer[1]) {
