@@ -2372,7 +2372,8 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
     /* Do we have a match for CRLF. as per RFC-5321, sect. 4.5.2 */
     if(SMTP_EOB_FIND_LEN == smtp->eob) {
       /* Copy the replacement data to the target buffer */
-      memcpy(&scratch[si], SMTP_EOB_REPL + eob_sent, SMTP_EOB_REPL_LEN - eob_sent);
+      memcpy(&scratch[si], SMTP_EOB_REPL + eob_sent,
+             SMTP_EOB_REPL_LEN - eob_sent);
       si += SMTP_EOB_REPL_LEN - eob_sent;
       smtp->eob = 0;
       eob_sent = 0;
