@@ -2322,6 +2322,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
   struct SMTP *smtp = data->req.protop;
   char *scratch = data->state.scratch;
   char *oldscratch = NULL;
+  size_t eob_sent;
 
   /* Do we need to allocate a scratch buffer? */
   if(!scratch || data->set.crlf) {
@@ -2334,6 +2335,9 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
       return CURLE_OUT_OF_MEMORY;
     }
   }
+
+  /* Have we already sent part of the EOB? */
+  eob_sent = smtp->eob;
 
   /* This loop can be improved by some kind of Boyer-Moore style of
      approach but that is saved for later... */
@@ -2349,14 +2353,16 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
     }
     else if(smtp->eob) {
       /* A previous substring matched so output that first */
-      memcpy(&scratch[si], SMTP_EOB, smtp->eob);
-      si += smtp->eob;
+      memcpy(&scratch[si], SMTP_EOB + eob_sent, smtp->eob - eob_sent);
+      si += smtp->eob - eob_sent;
 
       /* Then compare the first byte */
       if(SMTP_EOB[0] == data->req.upload_fromhere[i])
         smtp->eob = 1;
       else
         smtp->eob = 0;
+
+      eob_sent = 0;
 
       /* Reset the trailing CRLF flag as there was more data */
       smtp->trailing_crlf = FALSE;
@@ -2365,19 +2371,19 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
     /* Do we have a match for CRLF. as per RFC-5321, sect. 4.5.2 */
     if(SMTP_EOB_FIND_LEN == smtp->eob) {
       /* Copy the replacement data to the target buffer */
-      memcpy(&scratch[si], SMTP_EOB_REPL, SMTP_EOB_REPL_LEN);
-      si += SMTP_EOB_REPL_LEN;
+      memcpy(&scratch[si], SMTP_EOB_REPL + eob_sent, SMTP_EOB_REPL_LEN - eob_sent);
+      si += SMTP_EOB_REPL_LEN - eob_sent;
       smtp->eob = 0;
+      eob_sent = 0;
     }
     else if(!smtp->eob)
       scratch[si++] = data->req.upload_fromhere[i];
   }
 
-  if(smtp->eob) {
+  if(smtp->eob - eob_sent) {
     /* A substring matched before processing ended so output that now */
-    memcpy(&scratch[si], SMTP_EOB, smtp->eob);
-    si += smtp->eob;
-    smtp->eob = 0;
+    memcpy(&scratch[si], SMTP_EOB + eob_sent, smtp->eob - eob_sent);
+    si += smtp->eob - eob_sent;
   }
 
   /* Only use the new buffer if we replaced something */
