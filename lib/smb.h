@@ -256,7 +256,8 @@ struct smb_tree_disconnect {
 
 #endif /* BUILDING_CURL_SMB_C */
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM)
+#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) && \
+    (CURL_SIZEOF_CURL_OFF_T > 4)
 
 #if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
@@ -265,6 +266,6 @@ extern const struct Curl_handler Curl_handler_smbs;
 
 #endif /* !USE_WINDOWS_SSPI || USE_WIN32_CRYPTO */
 
-#endif /* CURL_DISABLE_SMB && USE_NTLM */
+#endif /* CURL_DISABLE_SMB && USE_NTLM && CURL_SIZEOF_CURL_OFF_T > 4 */
 
 #endif /* HEADER_CURL_SMB_H */

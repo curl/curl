@@ -217,6 +217,7 @@ static const char * const protocols[] = {
   "sftp",
 #endif
 #if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) && \
+   (CURL_SIZEOF_CURL_OFF_T > 4) && \
    (!defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO))
   "smb",
 #  ifdef USE_SSL
