@@ -2321,6 +2321,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
   struct SessionHandle *data = conn->data;
   struct SMTP *smtp = data->req.protop;
   char *scratch = data->state.scratch;
+  char *newscratch = NULL;
   char *oldscratch = NULL;
   size_t eob_sent;
 
@@ -2328,8 +2329,8 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
   if(!scratch || data->set.crlf) {
     oldscratch = scratch;
 
-    scratch = malloc(2 * BUFSIZE);
-    if(!scratch) {
+    scratch = newscratch = malloc(2 * BUFSIZE);
+    if(!newscratch) {
       failf(data, "Failed to alloc scratch buffer!");
 
       return CURLE_OUT_OF_MEMORY;
@@ -2401,7 +2402,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
     data->req.upload_present = si;
   }
   else
-    Curl_safefree(scratch);
+    Curl_safefree(newscratch);
 
   return CURLE_OK;
 }
