@@ -91,6 +91,11 @@ This release includes the following bugfixes:
  o ldap: check Curl_client_write() return codes
  o parsedate.c: Fixed compilation warning
  o url.c: Fixed compilation warning when USE_NTLM is not defined
+ o ntlm_wb_response: fix "statement not reached" [11]
+ o telnet: fix "cast increases required alignment of target type"
+ o smtp: Fixed dot stuffing when EOL characters at end of input buffers [12]
+ o ntlm: Allow NTLM2Session messages when USE_NTRESPONSES manually defined
+ o ntlm: Disable NTLM v2 when 64-bit integers are not supported
 
 This release includes the following known bugs:
 
@@ -104,7 +109,7 @@ advice from friends like these:
   Guenter Knauf, Jan Ehrhardt, Johan Lantz, Jon Spencer, Kamil Dudka,
   Lucas Pardue, Michael Osipov, Nobuhiro Ban, Patrick Monnerat, Peter Wu,
   Ray Satiro, Sam Hurst, Stefan Bühler, Stefan Neis, Steve Holme,
-  Tae Hyoung Ahn, Tatsuhiro Tsujikawa, Tomasz Kojm, Waldek Kozba,
+  Tae Hyoung Ahn, Tatsuhiro Tsujikawa, Tomasz Kojm, Tor Arntsen, Waldek Kozba,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -120,4 +125,6 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/bug/view.cgi?id=1456
  [9] = http://curl.haxx.se/bug/view.cgi?id=1457
  [10] = http://curl.haxx.se/bug/view.cgi?id=1462
- [11] =
+ [11] = http://curl.haxx.se/mail/lib-2014-12/0089.html
+ [12] = http://curl.haxx.se/bug/view.cgi?id=1456
+ [13]
