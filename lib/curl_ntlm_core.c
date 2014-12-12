@@ -472,6 +472,7 @@ static void write32_le(const int value, unsigned char *buffer)
   buffer[3] = (char)((value & 0xFF000000) >> 24);
 }
 
+#if (CURL_SIZEOF_CURL_OFF_T > 4)
 #if defined(HAVE_LONGLONG)
 static void write64_le(const long long value, unsigned char *buffer)
 #else
@@ -481,6 +482,7 @@ static void write64_le(const __int64 value, unsigned char *buffer)
   write32_le((int)value, buffer);
   write32_le((int)(value >> 32), buffer + 4);
 }
+#endif
 
 /*
  * Set up nt hashed passwords
@@ -550,7 +552,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
   return CURLE_OK;
 }
 
-#ifndef USE_WINDOWS_SSPI
+#if USE_NTLM_V2 && !defined(USE_WINDOWS_SSPI)
 
 /* This returns the HMAC MD5 digest */
 CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,

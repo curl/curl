@@ -36,6 +36,7 @@
 #  ifdef OPENSSL_NO_MD4
 #    define USE_NTRESPONSES 0
 #    define USE_NTLM2SESSION 0
+#    define USE_NTLM_V2 0
 #  endif
 #endif
 
@@ -52,6 +53,13 @@
 #define USE_NTLM2SESSION 1
 #endif
 
+/* Define USE_NTLM_V2 to 1 in order to allow the type-3 message to include the
+   LMv2 and NTLMv2 response messages, requires USE_NTRESPONSES defined to 1
+   and support for 64-bit integers. */
+#if !defined(USE_NTLM_V2) && USE_NTRESPONSES && (CURL_SIZEOF_CURL_OFF_T > 4)
+#define USE_NTLM_V2 1
+#endif
+
 void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results);
@@ -65,7 +73,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
                                    const char *password,
                                    unsigned char *ntbuffer /* 21 bytes */);
 
-#ifndef USE_WINDOWS_SSPI
+#if USE_NTLM_V2 && !defined(USE_WINDOWS_SSPI)
 
 CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
                        const unsigned char *data, unsigned int datalen,
@@ -87,7 +95,7 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
                                       unsigned char *challenge_server,
                                       unsigned char *lmresp);
 
-#endif /* !USE_WINDOWS_SSPI */
+#endif /* USE_NTLM_V2 && !USE_WINDOWS_SSPI */
 
 #endif /* USE_NTRESPONSES */
 

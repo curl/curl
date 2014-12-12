@@ -554,7 +554,7 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
     hostlen = strlen(host);
   }
 
-#if USE_NTRESPONSES
+#if USE_NTRESPONSES && USE_NTLM_V2
   if(ntlm->target_info_len) {
     unsigned char ntbuffer[0x18];
     unsigned int entropy[2];
