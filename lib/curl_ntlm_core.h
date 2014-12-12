@@ -39,18 +39,17 @@
 #  endif
 #endif
 
-/*
- * Define USE_NTRESPONSES to 1 in order to make the type-3 message include
- * the NT response message. Define USE_NTLM2SESSION to 1 in order to make
- * the type-3 message include the NTLM2Session response message, requires
- * USE_NTRESPONSES defined to 1.
- */
-
+/* Define USE_NTRESPONSES to 1 in order to make the type-3 message include
+ * the NT response message. */
 #ifndef USE_NTRESPONSES
-#  define USE_NTRESPONSES 1
-#  ifndef USE_WIN32_CRYPTO
-#    define USE_NTLM2SESSION 1
-#  endif
+#define USE_NTRESPONSES 1
+#endif
+
+/* Define USE_NTLM2SESSION to 1 in order to make the type-3 message include the
+   NTLM2Session response message, requires USE_NTRESPONSES defined to 1 and a
+   Crypto engine that we have curl_ssl_md5sum() for. */
+#if !defined(USE_NTLM2SESSION) && USE_NTRESPONSES && !defined(USE_WIN32_CRYPTO)
+#define USE_NTLM2SESSION 1
 #endif
 
 void Curl_ntlm_core_lm_resp(const unsigned char *keys,

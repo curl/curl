@@ -396,7 +396,7 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
   /* Clean up any former leftovers and initialise to defaults */
   Curl_sasl_ntlm_cleanup(ntlm);
 
-#if USE_NTLM2SESSION
+#if USE_NTRESPONSES && USE_NTLM2SESSION
 #define NTLM2FLAG NTLMFLAG_NEGOTIATE_NTLM2_KEY
 #else
 #define NTLM2FLAG 0
@@ -591,7 +591,7 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
   else
 #endif
 
-#if USE_NTLM2SESSION
+#if USE_NTRESPONSES && USE_NTLM2SESSION
   /* We don't support NTLM2 if we don't have USE_NTRESPONSES */
   if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
     unsigned char ntbuffer[0x18];
