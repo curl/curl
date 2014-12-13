@@ -164,9 +164,9 @@ static unsigned int readint_le(unsigned char *buf)
  * package to whatever endian format we're using natively. Argument is a
  * pointer to a 2 byte buffer.
  */
-static unsigned int readshort_le(unsigned char *buf)
+static unsigned short readshort_le(unsigned char *buf)
 {
-  return ((unsigned int)buf[0]) | ((unsigned int)buf[1] << 8);
+  return ((unsigned short)buf[0]) | ((unsigned short)buf[1] << 8);
 }
 
 /*
@@ -189,7 +189,7 @@ static CURLcode ntlm_decode_type2_target(struct SessionHandle *data,
                                          size_t size,
                                          struct ntlmdata *ntlm)
 {
-  unsigned int target_info_len = 0;
+  unsigned short target_info_len = 0;
   unsigned int target_info_offset = 0;
 
   if(size >= 48) {
