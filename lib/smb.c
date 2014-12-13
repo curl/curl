@@ -199,7 +199,8 @@ static void conn_state(struct connectdata *conn, enum smb_conn_state newstate)
   smb->state = newstate;
 }
 
-static void request_state(struct connectdata *conn, enum smb_req_state newstate)
+static void request_state(struct connectdata *conn,
+                          enum smb_req_state newstate)
 {
   struct smb_request *req = conn->data->req.protop;
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
