@@ -166,8 +166,8 @@ static unsigned int readint_le(unsigned char *buf)
  */
 static unsigned short readshort_le(unsigned char *buf)
 {
-  return ((unsigned short)((unsigned short)buf[0]) |
-          (unsigned short)((unsigned short)buf[1] << 8));
+  return (unsigned short)((unsigned short)((unsigned short)buf[0]) |
+                          (unsigned short)((unsigned short)buf[1] << 8));
 }
 
 /*
