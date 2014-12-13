@@ -177,6 +177,53 @@ struct smb_request {
   CURLcode result;
 };
 
+static void conn_state(struct connectdata *conn, enum smb_conn_state newstate)
+{
+  struct smb_conn *smb = &conn->proto.smbc;
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  /* For debug purposes */
+  static const char * const names[] = {
+    "SMB_NOT_CONNECTED",
+    "SMB_CONNECTING",
+    "SMB_NEGOTIATE",
+    "SMB_SETUP",
+    "SMB_CONNECTED",
+    /* LAST */
+  };
+
+  if(smb->state != newstate)
+    infof(conn->data, "SMB conn %p state change from %s to %s\n",
+    (void *)smb, names[smb->state], names[newstate]);
+#endif
+
+  smb->state = newstate;
+}
+
+static void request_state(struct connectdata *conn, enum smb_req_state newstate)
+{
+  struct smb_request *req = conn->data->req.protop;
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  /* For debug purposes */
+  static const char * const names[] = {
+    "SMB_REQUESTING",
+    "SMB_TREE_CONNECT",
+    "SMB_OPEN",
+    "SMB_DOWNLOAD",
+    "SMB_UPLOAD",
+    "SMB_CLOSE",
+    "SMB_TREE_DISCONNECT",
+    "SMB_DONE",
+    /* LAST */
+  };
+
+  if(req->state != newstate)
+    infof(conn->data, "SMB request %p state change from %s to %s\n",
+    (void *)req, names[req->state], names[newstate]);
+#endif
+
+  req->state = newstate;
+}
+
 static CURLcode smb_setup(struct connectdata *conn)
 {
   struct smb_request *req;
@@ -592,7 +639,7 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
       return result;
     }
 
-    smbc->state = SMB_NEGOTIATE;
+    conn_state(conn, SMB_NEGOTIATE);
   }
 
   /* Send the previous message and check for a response */
@@ -621,7 +668,7 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
       connclose(conn, "SMB: failed to send setup message");
       return result;
     }
-    smbc->state = SMB_SETUP;
+    conn_state(conn, SMB_SETUP);
     break;
 
   case SMB_SETUP:
@@ -630,7 +677,7 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
       return CURLE_LOGIN_DENIED;
     }
     smbc->uid = smb_swap16(h->uid);
-    smbc->state = SMB_CONNECTED;
+    conn_state(conn, SMB_CONNECTED);
     *done = true;
     break;
 
@@ -662,7 +709,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       return result;
     }
 
-    req->state = SMB_TREE_CONNECT;
+    request_state(conn, SMB_TREE_CONNECT);
   }
 
   /* Send the previous message and check for a response */
@@ -801,7 +848,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
     return result;
   }
 
-  req->state = next_state;
+  request_state(conn, next_state);
 
   return CURLE_OK;
 }
