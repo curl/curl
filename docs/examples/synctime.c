@@ -102,12 +102,11 @@ typedef struct
   char timeserver[MAX_STRING1];
 } conf_t;
 
-const char DefaultTimeServer[4][MAX_STRING1] =
+const char DefaultTimeServer[3][MAX_STRING1] =
 {
   "http://pool.ntp.org/",
   "http://nist.time.gov/",
-  "http://www.google.com/",
-  "http://www.worldtimeserver.com/"
+  "http://www.google.com/"
 };
 
 const char *DayStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
