@@ -324,7 +324,7 @@ if(!$filedate) {
 # get the hash from the download file
 my $newsha1= sha1($txt);
 
-if($oldsha1 eq $newsha1) {
+if(!$opt_f && $oldsha1 eq $newsha1) {
     print STDERR "Downloaded file identical to previous run\'s source file. Exiting\n";
     exit;
 }
