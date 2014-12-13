@@ -104,10 +104,10 @@ typedef struct
 
 const char DefaultTimeServer[4][MAX_STRING1] =
 {
-  "http://nist.time.gov/timezone.cgi?UTC/s/0",
+  "http://pool.ntp.org/",
+  "http://nist.time.gov/",
   "http://www.google.com/",
-  "http://www.worldtimeserver.com/current_time_in_UTC.aspx",
-  "http://www.worldtime.com/cgi-bin/wt.cgi"
+  "http://www.worldtimeserver.com/"
 };
 
 const char *DayStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
