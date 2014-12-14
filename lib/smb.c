@@ -29,7 +29,7 @@
 
 #define BUILDING_CURL_SMB_C
 
-#ifdef _WIN32
+#ifdef HAVE_PROCESS_H
 #include <process.h>
 #define getpid _getpid
 #endif
