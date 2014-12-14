@@ -434,19 +434,21 @@ static bool init_resolve_thread (struct connectdata *conn,
 static CURLcode resolver_error(struct connectdata *conn)
 {
   const char *host_or_proxy;
-  CURLcode rc;
+  CURLcode result;
+
   if(conn->bits.httpproxy) {
     host_or_proxy = "proxy";
-    rc = CURLE_COULDNT_RESOLVE_PROXY;
+    result = CURLE_COULDNT_RESOLVE_PROXY;
   }
   else {
     host_or_proxy = "host";
-    rc = CURLE_COULDNT_RESOLVE_HOST;
+    result = CURLE_COULDNT_RESOLVE_HOST;
   }
 
   failf(conn->data, "Could not resolve %s: %s", host_or_proxy,
         conn->async.hostname);
-  return rc;
+
+  return result;
 }
 
 /*
@@ -463,13 +465,13 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
                                    struct Curl_dns_entry **entry)
 {
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
-  CURLcode rc = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   DEBUGASSERT(conn && td);
 
   /* wait for the thread to resolve the name */
   if(Curl_thread_join(&td->thread_hnd))
-    rc = getaddrinfo_complete(conn);
+    result = getaddrinfo_complete(conn);
   else
     DEBUGASSERT(0);
 
@@ -480,14 +482,14 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 
   if(!conn->async.dns)
     /* a name was not resolved, report error */
-    rc = resolver_error(conn);
+    result = resolver_error(conn);
 
   destroy_async_data(&conn->async);
 
   if(!conn->async.dns)
     connclose(conn, "asynch resolve failed");
 
-  return (rc);
+  return result;
 }
 
 /*
@@ -517,9 +519,9 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
     getaddrinfo_complete(conn);
 
     if(!conn->async.dns) {
-      CURLcode rc = resolver_error(conn);
+      CURLcode result = resolver_error(conn);
       destroy_async_data(&conn->async);
-      return rc;
+      return result;
     }
     destroy_async_data(&conn->async);
     *entry = conn->async.dns;
