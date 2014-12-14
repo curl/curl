@@ -465,8 +465,7 @@ void glob_cleanup(URLGlob* glob)
   size_t i;
   int elem;
 
-  /* the < condition is required since i underflows! */
-  for(i = glob->size - 1; (i >= 0) && (i < glob->size); --i) {
+  for(i = 0; i < glob->size; i++) {
     if((glob->pattern[i].type == UPTSet) &&
        (glob->pattern[i].content.Set.elements)) {
       for(elem = glob->pattern[i].content.Set.size - 1;
@@ -485,7 +484,6 @@ int glob_next_url(char **globbed, URLGlob *glob)
 {
   URLPattern *pat;
   size_t i;
-  size_t j;
   size_t len;
   size_t buflen = glob->urllen + 1;
   char *buf = glob->glob_buffer;
@@ -498,9 +496,8 @@ int glob_next_url(char **globbed, URLGlob *glob)
     bool carry = TRUE;
 
     /* implement a counter over the index ranges of all patterns,
-       starting with the rightmost pattern */
-    /* the < condition is required since i underflows! */
-    for(i = glob->size - 1; carry && (i >= 0) && (i < glob->size); --i) {
+       starting with the leftmost pattern */
+    for(i = 0; carry && (i < glob->size); i++) {
       carry = FALSE;
       pat = &glob->pattern[i];
       switch (pat->type) {
@@ -512,8 +509,9 @@ int glob_next_url(char **globbed, URLGlob *glob)
         }
         break;
       case UPTCharRange:
-        pat->content.CharRange.ptr_c = (char)(pat->content.CharRange.step +
-                           (int)((unsigned char)pat->content.CharRange.ptr_c));
+        pat->content.CharRange.ptr_c =
+          (char)(pat->content.CharRange.step +
+                 (int)((unsigned char)pat->content.CharRange.ptr_c));
         if(pat->content.CharRange.ptr_c > pat->content.CharRange.max_c) {
           pat->content.CharRange.ptr_c = pat->content.CharRange.min_c;
           carry = TRUE;
@@ -537,8 +535,8 @@ int glob_next_url(char **globbed, URLGlob *glob)
     }
   }
 
-  for(j = 0; j < glob->size; ++j) {
-    pat = &glob->pattern[j];
+  for(i = 0; i < glob->size; ++i) {
+    pat = &glob->pattern[i];
     switch(pat->type) {
     case UPTSet:
       if(pat->content.Set.elements) {
