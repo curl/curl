@@ -466,7 +466,7 @@ void glob_cleanup(URLGlob* glob)
   int elem;
 
   /* the < condition is required since i underflows! */
-  for(i = glob->size - 1; i < glob->size; --i) {
+  for(i = glob->size - 1; i >= 0 && i < glob->size; --i) {
     if((glob->pattern[i].type == UPTSet) &&
        (glob->pattern[i].content.Set.elements)) {
       for(elem = glob->pattern[i].content.Set.size - 1;
@@ -500,7 +500,7 @@ int glob_next_url(char **globbed, URLGlob *glob)
     /* implement a counter over the index ranges of all patterns,
        starting with the rightmost pattern */
     /* the < condition is required since i underflows! */
-    for(i = glob->size - 1; carry && (i < glob->size); --i) {
+    for(i = glob->size - 1; carry && i >= 0 && (i < glob->size); --i) {
       carry = FALSE;
       pat = &glob->pattern[i];
       switch (pat->type) {
