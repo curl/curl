@@ -41,7 +41,7 @@ void set_binmode(FILE *stream)
 #  ifdef __HIGHC__
   _setmode(stream, O_BINARY);
 #  else
-  setmode(fileno(stream), O_BINARY);
+  (void)setmode(fileno(stream), O_BINARY);
 #  endif
 #else
   (void)stream;
