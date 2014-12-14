@@ -95,7 +95,6 @@
 
 #define CURL_SCHANNEL_BUFFER_INIT_SIZE   4096
 #define CURL_SCHANNEL_BUFFER_FREE_SIZE   1024
-#define CURL_SCHANNEL_BUFFER_STEP_FACTOR 2
 
 
 CURLcode Curl_schannel_connect(struct connectdata *conn, int sockindex);
