@@ -201,7 +201,7 @@ static CURLcode ntlm_decode_type2_target(struct SessionHandle *data,
          (target_info_offset < 48)) {
         infof(data, "NTLM handshake failure (bad type-2 message). "
                     "Target Info Offset Len is set incorrect by the peer\n");
-        return CURLE_REMOTE_ACCESS_DENIED;
+        return CURLE_BAD_CONTENT_ENCODING;
       }
 
       ntlm->target_info = malloc(target_info_len);
