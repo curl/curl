@@ -1468,7 +1468,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 
   /* Check if there's a cached ID we can/should use here! */
   if(!Curl_ssl_getsessionid(conn, (void **)&ssl_sessionid,
-    &ssl_sessionid_len)) {
+                            &ssl_sessionid_len)) {
     /* we got a session id, use it! */
     err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
     if(err != noErr) {
@@ -1482,10 +1482,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
      to starting the handshake. */
   else {
     CURLcode retcode;
-
-    ssl_sessionid = malloc(256*sizeof(char));
-    ssl_sessionid_len = snprintf(ssl_sessionid, 256, "curl:%s:%hu",
-      conn->host.name, conn->remote_port);
+    ssl_sessionid = aprintf(ssl_sessionid, "curl:%s:%hu",
+                            conn->host.name, conn->remote_port);
+    ssl_sessionid_len = strlen(ssl_sessionid);
     err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
     if(err != noErr) {
       failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
