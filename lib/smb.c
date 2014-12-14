@@ -234,9 +234,6 @@ static CURLcode smb_setup(struct connectdata *conn)
   if(!req)
     return CURLE_OUT_OF_MEMORY;
 
-  req->state = SMB_REQUESTING;
-  req->result = CURLE_OK;
-
   /* Parse the URL path */
   return smb_parse_url_path(conn);
 }
