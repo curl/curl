@@ -35,8 +35,31 @@
 #include "memdebug.h"
 
 #ifdef WANT_IDN_PROTOTYPES
-WINBASEAPI int WINAPI IdnToAscii(DWORD, const WCHAR *, int, WCHAR *, int);
-WINBASEAPI int WINAPI IdnToUnicode(DWORD, const WCHAR *, int, WCHAR *, int);
+#  if defined(_SAL_VERSION)
+WINNORMALIZEAPI int WINAPI
+IdnToAscii(_In_                           DWORD    dwFlags,
+           _In_reads_(cchUnicodeChar)     LPCWSTR  lpUnicodeCharStr,
+           _In_                           int      cchUnicodeChar,
+           _Out_writes_opt_(cchASCIIChar) LPWSTR   lpASCIICharStr,
+           _In_                           int      cchASCIIChar);
+WINNORMALIZEAPI int WINAPI
+IdnToUnicode(_In_                             DWORD   dwFlags,
+             _In_reads_(cchASCIIChar)         LPCWSTR lpASCIICharStr,
+             _In_                             int     cchASCIIChar,
+             _Out_writes_opt_(cchUnicodeChar) LPWSTR  lpUnicodeCharStr,
+             _In_                             int     cchUnicodeChar);
+#  else
+WINBASEAPI int WINAPI IdnToAscii(DWORD dwFlags,
+                                 const WCHAR *lpUnicodeCharStr,
+                                 int cchUnicodeChar,
+                                 WCHAR *lpASCIICharStr,
+                                 int cchASCIIChar);
+WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
+                                   const WCHAR *lpASCIICharStr,
+                                   int cchASCIIChar,
+                                   WCHAR *lpUnicodeCharStr,
+                                   int cchUnicodeChar);
+#  endif
 #endif
 
 #define IDN_MAX_LENGTH 255
