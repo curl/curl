@@ -317,7 +317,7 @@ static CURLcode smb_recv_message(struct connectdata *conn, void **msg)
     if(nbt_size >= msg_size + sizeof(unsigned short)) {
       /* Add the byte count */
       msg_size += sizeof(unsigned short) + ((unsigned char) buf[msg_size]) +
-                  (((unsigned char) buf[msg_size + 1]) << 8);
+                         (((size_t) ((unsigned char) buf[msg_size + 1])) << 8);
       if(nbt_size < msg_size)
         return CURLE_READ_ERROR;
     }
