@@ -1482,7 +1482,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
      to starting the handshake. */
   else {
     CURLcode retcode;
-    ssl_sessionid = aprintf(ssl_sessionid, "curl:%s:%hu",
+    ssl_sessionid = aprintf("curl:%s:%hu",
                             conn->host.name, conn->remote_port);
     ssl_sessionid_len = strlen(ssl_sessionid);
     err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
