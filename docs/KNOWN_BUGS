@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+88. libcurl doesn't support CURLINFO_FILETIME for SFTP transfers and thus
+  curl's -R option also doesn't work then.
+
 87. -J/--remote-header-name doesn't decode %-encoded file names. RFC6266
   details how it should be done. The can of worm is basically that we have no
   charset handling in curl and ascii >=128 is a challenge for us. Not to
