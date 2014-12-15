@@ -1049,7 +1049,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
       if(result == CURLE_UNSUPPORTED_PROTOCOL) {
         /* The address family is not supported on this interface.
            We can continue trying addresses */
-        return CURLE_OK;
+        return CURLE_COULDNT_CONNECT;
       }
       return result;
     }
