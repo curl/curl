@@ -495,9 +495,9 @@ int glob_next_url(char **globbed, URLGlob *glob)
   else {
     bool carry = TRUE;
 
-    /* implement a counter over the index ranges of all patterns,
-       starting with the leftmost pattern */
-    for(i = 0; carry && (i < glob->size); i++) {
+    /* implement a counter over the index ranges of all patterns, starting
+       with the rightmost pattern */
+    for(i = glob->size - 1; carry && (i < glob->size); --i) {
       carry = FALSE;
       pat = &glob->pattern[i];
       switch (pat->type) {
