@@ -2107,10 +2107,14 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      else if(rc) {
+      else if(rc ||
+              !(attrs.flags & LIBSSH2_SFTP_ATTR_SIZE) ||
+              (attrs.filesize == 0)) {
         /*
          * libssh2_sftp_open() didn't return an error, so maybe the server
          * just doesn't support stat()
+         * OR the server doesn't return a file size with a stat()
+         * OR file size is 0
          */
         data->req.size = -1;
         data->req.maxdownload = -1;
