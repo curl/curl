@@ -238,7 +238,7 @@ long Curl_timeleft(struct SessionHandle *data,
 }
 
 static CURLcode bindlocal(struct connectdata *conn,
-                          curl_socket_t sockfd, int af)
+                          curl_socket_t sockfd, int af, unsigned int scope)
 {
   struct SessionHandle *data = conn->data;
 
@@ -286,7 +286,8 @@ static CURLcode bindlocal(struct connectdata *conn,
 
     /* interface */
     if(!is_host) {
-      switch(Curl_if2ip(af, conn->scope, dev, myhost, sizeof(myhost))) {
+      switch(Curl_if2ip(af, scope, conn->scope_id, dev,
+                        myhost, sizeof(myhost))) {
         case IF2IP_NOT_FOUND:
           if(is_interface) {
             /* Do not fall back to treating it as a host name */
@@ -1043,7 +1044,8 @@ static CURLcode singleipconnect(struct connectdata *conn,
 
   /* possibly bind the local end to an IP, interface or port */
   if(addr.family == AF_INET || addr.family == AF_INET6) {
-    result = bindlocal(conn, sockfd, addr.family);
+    result = bindlocal(conn, sockfd, addr.family,
+                       Curl_ipv6_scope((struct sockaddr*)&addr.sa_addr));
     if(result) {
       Curl_closesocket(conn, sockfd); /* close socket and bail out */
       if(result == CURLE_UNSUPPORTED_PROTOCOL) {
@@ -1319,9 +1321,9 @@ CURLcode Curl_socket(struct connectdata *conn,
     return CURLE_COULDNT_CONNECT;
 
 #if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  if(conn->scope && (addr->family == AF_INET6)) {
+  if(conn->scope_id && (addr->family == AF_INET6)) {
     struct sockaddr_in6 * const sa6 = (void *)&addr->sa_addr;
-    sa6->sin6_scope_id = conn->scope;
+    sa6->sin6_scope_id = conn->scope_id;
   }
 #endif
 

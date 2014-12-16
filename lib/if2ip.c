@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -63,6 +63,38 @@
 
 /* ------------------------------------------------------------------ */
 
+/* Return the scope of the given address. */
+unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
+{
+#ifndef ENABLE_IPV6
+  (void) sa;
+#else
+  if(sa->sa_family == AF_INET6) {
+    const struct sockaddr_in6 * sa6 = (const struct sockaddr_in6 *) sa;
+    const unsigned char * b = sa6->sin6_addr.s6_addr;
+    unsigned short w = (unsigned short) ((b[0] << 8) | b[1]);
+
+    switch(w & 0xFFC0) {
+    case 0xFE80:
+      return IPV6_SCOPE_LINKLOCAL;
+    case 0xFEC0:
+      return IPV6_SCOPE_SITELOCAL;
+    case 0x0000:
+      w = b[1] | b[2] | b[3] | b[4] | b[5] | b[6] | b[7] | b[8] | b[9] |
+          b[10] | b[11] | b[12] | b[13] | b[14];
+      if(w || b[15] != 0x01)
+        break;
+      return IPV6_SCOPE_NODELOCAL;
+    default:
+      break;
+    }
+  }
+#endif
+
+  return IPV6_SCOPE_GLOBAL;
+}
+
+
 #if defined(HAVE_GETIFADDRS)
 
 bool Curl_if_is_interface_name(const char *interf)
@@ -84,7 +116,8 @@ bool Curl_if_is_interface_name(const char *interf)
 }
 
 if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          const char *interf, char *buf, int buf_size)
+                          unsigned int remote_scope_id, const char *interf,
+                          char *buf, int buf_size)
 {
   struct ifaddrs *iface, *head;
   if2ip_result_t res = IF2IP_NOT_FOUND;
@@ -105,20 +138,29 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 #ifdef ENABLE_IPV6
             if(af == AF_INET6) {
               unsigned int scopeid = 0;
+              unsigned int ifscope = Curl_ipv6_scope(iface->ifa_addr);
+
+              if(ifscope != remote_scope) {
+                /* We are interested only in interface addresses whose
+                   scope matches the remote address we want to
+                   connect to: global for global, link-local for
+                   link-local, etc... */
+                if(res == IF2IP_NOT_FOUND) res = IF2IP_AF_NOT_SUPPORTED;
+                continue;
+              }
+
               addr = &((struct sockaddr_in6 *)iface->ifa_addr)->sin6_addr;
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
               /* Include the scope of this interface as part of the address */
               scopeid =
                 ((struct sockaddr_in6 *)iface->ifa_addr)->sin6_scope_id;
-#endif
-              if(scopeid != remote_scope) {
-                /* We are interested only in interface addresses whose
-                   scope ID matches the remote address we want to
-                   connect to: global (0) for global, link-local for
-                   link-local, etc... */
+
+              /* If given, scope id should match. */
+              if(remote_scope_id && scopeid != remote_scope_id) {
                 if(res == IF2IP_NOT_FOUND) res = IF2IP_AF_NOT_SUPPORTED;
                 continue;
               }
+#endif
               if(scopeid)
                 snprintf(scope, sizeof(scope), "%%%u", scopeid);
             }
@@ -154,7 +196,8 @@ bool Curl_if_is_interface_name(const char *interf)
 }
 
 if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          const char *interf, char *buf, int buf_size)
+                          unsigned int remote_scope_id, const char *interf,
+                          char *buf, int buf_size)
 {
   struct ifreq req;
   struct in_addr in;
@@ -163,6 +206,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
   size_t len;
 
   (void)remote_scope;
+  (void)remote_scope_id;
 
   if(!interf || (af != AF_INET))
     return IF2IP_NOT_FOUND;
@@ -205,10 +249,12 @@ bool Curl_if_is_interface_name(const char *interf)
 }
 
 if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          const char *interf, char *buf, int buf_size)
+                          unsigned int remote_scope_id, const char *interf,
+                          char *buf, int buf_size)
 {
     (void) af;
     (void) remote_scope;
+    (void) remote_scope_id;
     (void) interf;
     (void) buf;
     (void) buf_size;

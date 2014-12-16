@@ -2369,7 +2369,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * know that an unsigned int will always hold the value so we blindly
      * typecast to this type
      */
-    data->set.scope = curlx_sltoui(va_arg(param, long));
+    data->set.scope_id = curlx_sltoui(va_arg(param, long));
     break;
 
   case CURLOPT_PROTOCOLS:
@@ -4094,7 +4094,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
         /* The address scope was well formed.  Knock it out of the
            hostname. */
         memmove(percent, endp, strlen(endp)+1);
-        conn->scope = (unsigned int)scope;
+        conn->scope_id = (unsigned int)scope;
       }
       else {
         /* Zone identifier is not numeric */
@@ -4120,7 +4120,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
           memmove(percent,
                   percent + identifier_offset + strlen(ifname),
                   identifier_offset + strlen(ifname));
-          conn->scope = scopeidx;
+          conn->scope_id = scopeidx;
         }
         else
 #endif /* HAVE_NET_IF_H && IFNAMSIZ */
@@ -4129,9 +4129,9 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     }
   }
 
-  if(data->set.scope)
+  if(data->set.scope_id)
     /* Override any scope that was set above.  */
-    conn->scope = data->set.scope;
+    conn->scope_id = data->set.scope_id;
 
   /* Remove the fragment part of the path. Per RFC 2396, this is always the
      last part of the URI. We are looking for the first '#' so that we deal

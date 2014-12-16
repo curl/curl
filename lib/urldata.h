@@ -894,7 +894,7 @@ struct connectdata {
      the ip_addr itself. */
   char ip_addr_str[MAX_IPADR_LEN];
 
-  unsigned int scope;    /* address scope for IPv6 */
+  unsigned int scope_id;  /* Scope id for IPv6 */
 
   int socktype;  /* SOCK_STREAM or SOCK_DGRAM */
 
@@ -1618,7 +1618,7 @@ struct UserDefined {
   bool proxy_transfer_mode; /* set transfer mode (;type=<a|i>) when doing FTP
                                via an HTTP proxy */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
-  unsigned int scope;    /* address scope for IPv6 */
+  unsigned int scope_id;  /* Scope id for IPv6 */
   long allowed_protocols;
   long redir_protocols;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
