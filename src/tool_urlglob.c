@@ -494,9 +494,9 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
 
     /* implement a counter over the index ranges of all patterns, starting
        with the rightmost pattern */
-    for(i = glob->size - 1; carry && (i < glob->size); --i) {
+    for(i = 0; carry && (i < glob->size); i++) {
       carry = FALSE;
-      pat = &glob->pattern[i];
+      pat = &glob->pattern[glob->size - 1 - i];
       switch (pat->type) {
       case UPTSet:
         if((pat->content.Set.elements) &&
