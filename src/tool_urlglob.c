@@ -29,18 +29,12 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-typedef enum {
-  GLOB_OK,
-  GLOB_NO_MEM = CURLE_OUT_OF_MEMORY,
-  GLOB_ERROR = CURLE_URL_MALFORMAT
-} GlobCode;
-
 #define GLOBERROR(string, column, code) \
   glob->error = string, glob->pos = column, code
 
 void glob_cleanup(URLGlob* glob);
 
-static GlobCode glob_fixed(URLGlob *glob, char *fixed, size_t len)
+static CURLcode glob_fixed(URLGlob *glob, char *fixed, size_t len)
 {
   URLPattern *pat = &glob->pattern[glob->size];
   pat->type = UPTSet;
@@ -51,16 +45,16 @@ static GlobCode glob_fixed(URLGlob *glob, char *fixed, size_t len)
   pat->content.Set.elements = malloc(sizeof(char*));
 
   if(!pat->content.Set.elements)
-    return GLOBERROR("out of memory", 0, GLOB_NO_MEM);
+    return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
 
   pat->content.Set.elements[0] = malloc(len+1);
   if(!pat->content.Set.elements[0])
-    return GLOBERROR("out of memory", 0, GLOB_NO_MEM);
+    return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
 
   memcpy(pat->content.Set.elements[0], fixed, len);
   pat->content.Set.elements[0][len] = 0;
 
-  return GLOB_OK;
+  return CURLE_OK;
 }
 
 /* multiply
@@ -76,7 +70,7 @@ static int multiply(unsigned long *amount, long with)
   return 0;
 }
 
-static GlobCode glob_set(URLGlob *glob, char **patternp,
+static CURLcode glob_set(URLGlob *glob, char **patternp,
                          size_t *posp, unsigned long *amount,
                          int globindex)
 {
@@ -101,19 +95,20 @@ static GlobCode glob_set(URLGlob *glob, char **patternp,
   while(!done) {
     switch (*pattern) {
     case '\0':                  /* URL ended while set was still open */
-      return GLOBERROR("unmatched brace", opos, GLOB_ERROR);
+      return GLOBERROR("unmatched brace", opos, CURLE_URL_MALFORMAT);
 
     case '{':
     case '[':                   /* no nested expressions at this time */
-      return GLOBERROR("nested brace", *posp, GLOB_ERROR);
+      return GLOBERROR("nested brace", *posp, CURLE_URL_MALFORMAT);
 
     case '}':                           /* set element completed */
       if(opattern == pattern)
-        return GLOBERROR("empty string within braces", *posp, GLOB_ERROR);
+        return GLOBERROR("empty string within braces", *posp,
+                         CURLE_URL_MALFORMAT);
 
       /* add 1 to size since it'll be incremented below */
       if(multiply(amount, pat->content.Set.size+1))
-        return GLOBERROR("range overflow", 0, GLOB_ERROR);
+        return GLOBERROR("range overflow", 0, CURLE_URL_MALFORMAT);
 
       /* fall-through */
     case ',':
@@ -123,7 +118,7 @@ static GlobCode glob_set(URLGlob *glob, char **patternp,
         char **new_arr = realloc(pat->content.Set.elements,
                                  (pat->content.Set.size + 1) * sizeof(char*));
         if(!new_arr)
-          return GLOBERROR("out of memory", 0, GLOB_NO_MEM);
+          return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
 
         pat->content.Set.elements = new_arr;
       }
@@ -131,12 +126,12 @@ static GlobCode glob_set(URLGlob *glob, char **patternp,
         pat->content.Set.elements = malloc(sizeof(char*));
 
       if(!pat->content.Set.elements)
-        return GLOBERROR("out of memory", 0, GLOB_NO_MEM);
+        return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
 
       pat->content.Set.elements[pat->content.Set.size] =
         strdup(glob->glob_buffer);
       if(!pat->content.Set.elements[pat->content.Set.size])
-        return GLOBERROR("out of memory", 0, GLOB_NO_MEM);
+        return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
       ++pat->content.Set.size;
 
       if(*pattern == '}') {
@@ -151,7 +146,7 @@ static GlobCode glob_set(URLGlob *glob, char **patternp,
       break;
 
     case ']':                           /* illegal closing bracket */
-      return GLOBERROR("unexpected close bracket", *posp, GLOB_ERROR);
+      return GLOBERROR("unexpected close bracket", *posp, CURLE_URL_MALFORMAT);
 
     case '\\':                          /* escaped character, skip '\' */
       if(pattern[1]) {
@@ -166,10 +161,10 @@ static GlobCode glob_set(URLGlob *glob, char **patternp,
   }
 
   *patternp = pattern; /* return with the new position */
-  return GLOB_OK;
+  return CURLE_OK;
 }
 
-static GlobCode glob_range(URLGlob *glob, char **patternp,
+static CURLcode glob_range(URLGlob *glob, char **patternp,
                            size_t *posp, unsigned long *amount,
                            int globindex)
 {
@@ -219,7 +214,7 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
     if((rc != 2) || (min_c >= max_c) || ((max_c - min_c) > ('z' - 'a')) ||
        (step < 0) )
       /* the pattern is not well-formed */
-      return GLOBERROR("bad range", *posp, GLOB_ERROR);
+      return GLOBERROR("bad range", *posp, CURLE_URL_MALFORMAT);
 
     /* if there was a ":[num]" thing, use that as step or else use 1 */
     pat->content.CharRange.step = step;
@@ -228,7 +223,7 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
 
     if(multiply(amount, (pat->content.CharRange.max_c -
                          pat->content.CharRange.min_c + 1)))
-      return GLOBERROR("range overflow", *posp, GLOB_ERROR);
+      return GLOBERROR("range overflow", *posp, CURLE_URL_MALFORMAT);
   }
   else if(ISDIGIT(*pattern)) {
     /* numeric range detected */
@@ -283,7 +278,7 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
 
     if(!endp || (min_n > max_n) || (step_n > (max_n - min_n)))
       /* the pattern is not well-formed */
-      return GLOBERROR("bad range", *posp, GLOB_ERROR);
+      return GLOBERROR("bad range", *posp, CURLE_URL_MALFORMAT);
 
     /* typecasting to ints are fine here since we make sure above that we
        are within 31 bits */
@@ -293,13 +288,13 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
 
     if(multiply(amount, (pat->content.NumRange.max_n -
                          pat->content.NumRange.min_n + 1)))
-      return GLOBERROR("range overflow", *posp, GLOB_ERROR);
+      return GLOBERROR("range overflow", *posp, CURLE_URL_MALFORMAT);
   }
   else
-    return GLOBERROR("bad range specification", *posp, GLOB_ERROR);
+    return GLOBERROR("bad range specification", *posp, CURLE_URL_MALFORMAT);
 
   *patternp = pattern;
-  return GLOB_OK;
+  return CURLE_OK;
 }
 
 static bool peek_ipv6(const char *str, size_t *skip)
@@ -332,13 +327,13 @@ static bool peek_ipv6(const char *str, size_t *skip)
   }
 }
 
-static GlobCode glob_parse(URLGlob *glob, char *pattern,
+static CURLcode glob_parse(URLGlob *glob, char *pattern,
                            size_t pos, unsigned long *amount)
 {
   /* processes a literal string component of a URL
      special characters '{' and '[' branch to set/range processing functions
    */
-  GlobCode res = GLOB_OK;
+  CURLcode res = CURLE_OK;
   int globindex = 0; /* count "actual" globs */
 
   *amount = 1;
@@ -360,7 +355,8 @@ static GlobCode glob_parse(URLGlob *glob, char *pattern,
         break;
       }
       if(*pattern == '}' || *pattern == ']')
-        return GLOBERROR("unmatched close brace/bracket", pos, GLOB_ERROR);
+        return GLOBERROR("unmatched close brace/bracket", pos,
+                         CURLE_URL_MALFORMAT);
 
       /* only allow \ to escape known "special letters" */
       if(*pattern == '\\' &&
@@ -402,12 +398,13 @@ static GlobCode glob_parse(URLGlob *glob, char *pattern,
     }
 
     if(++glob->size > GLOB_PATTERN_NUM)
-      return GLOBERROR("too many globs", pos, GLOB_ERROR);
+      return GLOBERROR("too many globs", pos, CURLE_URL_MALFORMAT);
   }
   return res;
 }
 
-int glob_url(URLGlob** glob, char* url, unsigned long *urlnum, FILE *error)
+CURLcode glob_url(URLGlob** glob, char* url, unsigned long *urlnum,
+                  FILE *error)
 {
   /*
    * We can deal with any-size, just make a buffer with the same length
@@ -416,7 +413,7 @@ int glob_url(URLGlob** glob, char* url, unsigned long *urlnum, FILE *error)
   URLGlob *glob_expand;
   unsigned long amount = 0;
   char *glob_buffer;
-  GlobCode res;
+  CURLcode res;
 
   *glob = NULL;
 
@@ -480,7 +477,7 @@ void glob_cleanup(URLGlob* glob)
   Curl_safefree(glob);
 }
 
-int glob_next_url(char **globbed, URLGlob *glob)
+CURLcode glob_next_url(char **globbed, URLGlob *glob)
 {
   URLPattern *pat;
   size_t i;
@@ -571,7 +568,7 @@ int glob_next_url(char **globbed, URLGlob *glob)
   return CURLE_OK;
 }
 
-int glob_match_url(char **result, char *filename, URLGlob *glob)
+CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
 {
   char *target;
   size_t allocsize;

@@ -398,7 +398,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
     if(!config->globoff && infiles) {
       /* Unless explicitly shut off */
-      res = (CURLcode) glob_url(&inglob, infiles, &infilenum,
+      res = glob_url(&inglob, infiles, &infilenum,
                      global->showerror?global->errors:NULL);
       if(res) {
         Curl_safefree(outfiles);
@@ -449,7 +449,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
       if(!config->globoff) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
-        res = (CURLcode) glob_url(&urls, urlnode->url, &urlnum,
+        res = glob_url(&urls, urlnode->url, &urlnum,
                        global->showerror?global->errors:NULL);
         if(res) {
           Curl_safefree(uploadfile);
