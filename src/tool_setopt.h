@@ -28,8 +28,8 @@
  */
 
 #define SETOPT_CHECK(v) do { \
-  res = (v); \
-  if(res) \
+  result = (v); \
+  if(result) \
     goto show_error; \
 } WHILE_FALSE
 
