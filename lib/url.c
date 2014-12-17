@@ -4116,10 +4116,10 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
           }
         }
         if(scopeidx > 0) {
+          char *p = percent + identifier_offset + strlen(ifname);
+
           /* Remove zone identifier from hostname */
-          memmove(percent,
-                  percent + identifier_offset + strlen(ifname),
-                  identifier_offset + strlen(ifname));
+          memmove(percent, p, strlen(p) + 1);
           conn->scope_id = scopeidx;
         }
         else
