@@ -319,21 +319,21 @@ CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form)
   struct FormData *next;
   CURLcode result;
 
-  if(!form)
-    return CURLE_OK;
-
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  do {
-    next=form->next;  /* the following form line */
+  while(form) {
+    next = form->next;  /* the following form line */
     if(form->type == FORM_DATA) {
       result = Curl_convert_to_network(data, form->line, form->length);
       /* Curl_convert_to_network calls failf if unsuccessful */
       if(result)
         return result;
     }
-  } while((form = next) != NULL); /* continue */
+
+    form = next;
+  }
+
   return CURLE_OK;
 }
 
