@@ -33,6 +33,7 @@ BEGIN {
 use strict;
 use warnings;
 use Cwd;
+use Cwd 'abs_path';
 
 use serverhelp qw(
     server_pidfilename
@@ -62,6 +63,7 @@ my $ipvnum = 4;       # default IP version of stunneled server
 my $idnum = 1;        # dafault stunneled server instance number
 my $proto = 'https';  # default secure server protocol
 my $conffile;         # stunnel configuration file
+my $capath;           # certificate chain PEM folder
 my $certfile;         # certificate chain PEM file
 
 #***************************************************************************
@@ -178,7 +180,9 @@ if(!$logfile) {
 
 $conffile = "$path/stunnel.conf";
 
+$capath = abs_path($path);
 $certfile = "$srcdir/". ($stuncert?"certs/$stuncert":"stunnel.pem");
+$certfile = abs_path($certfile);
 
 my $ssltext = uc($proto) ." SSL/TLS:";
 
@@ -254,7 +258,7 @@ if($stunnel_version >= 400) {
     # stunnel configuration file
     if(open(STUNCONF, ">$conffile")) {
         print STUNCONF "
-            CApath = $path
+            CApath = $capath
             cert = $certfile
             debug = $loglevel
             socket = $socketopt";
@@ -285,7 +289,7 @@ if($stunnel_version >= 400) {
     if($verbose) {
         print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
         print "cmd: $cmd\n";
-        print "CApath = $path\n";
+        print "CApath = $capath\n";
         print "cert = $certfile\n";
         print "pid = $pidfile\n";
         print "debug = $loglevel\n";
