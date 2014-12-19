@@ -82,16 +82,15 @@ CURLcode Curl_convert_clone(struct SessionHandle *data,
 CURLcode Curl_convert_to_network(struct SessionHandle *data,
                                  char *buffer, size_t length)
 {
-  CURLcode result;
-
   if(data->set.convtonetwork) {
     /* use translation callback */
-    result = data->set.convtonetwork(buffer, length);
+    CURLcode result = data->set.convtonetwork(buffer, length);
     if(result) {
       failf(data,
             "CURLOPT_CONV_TO_NETWORK_FUNCTION callback returned %d: %s",
             (int)result, curl_easy_strerror(result));
     }
+
     return result;
   }
   else {
@@ -143,16 +142,15 @@ CURLcode Curl_convert_to_network(struct SessionHandle *data,
 CURLcode Curl_convert_from_network(struct SessionHandle *data,
                                    char *buffer, size_t length)
 {
-  CURLcode result;
-
   if(data->set.convfromnetwork) {
     /* use translation callback */
-    result = data->set.convfromnetwork(buffer, length);
+    CURLcode result = data->set.convfromnetwork(buffer, length);
     if(result) {
       failf(data,
             "CURLOPT_CONV_FROM_NETWORK_FUNCTION callback returned %d: %s",
             (int)result, curl_easy_strerror(result));
     }
+
     return result;
   }
   else {
@@ -204,16 +202,15 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
 CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
                                 char *buffer, size_t length)
 {
-  CURLcode result;
-
   if(data->set.convfromutf8) {
     /* use translation callback */
-    result = data->set.convfromutf8(buffer, length);
+    CURLcode result = data->set.convfromutf8(buffer, length);
     if(result) {
       failf(data,
             "CURLOPT_CONV_FROM_UTF8_FUNCTION callback returned %d: %s",
             (int)result, curl_easy_strerror(result));
     }
+
     return result;
   }
   else {
