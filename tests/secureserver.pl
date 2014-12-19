@@ -53,6 +53,7 @@ my $ver_major;
 my $ver_minor;
 my $fips_support;
 my $stunnel_version;
+my $tstunnel_windows;
 my $socketopt;
 my $cmd;
 
@@ -223,6 +224,17 @@ if($stunnel_version < 310) {
 }
 
 #***************************************************************************
+# Find out if we are running on Windows using the tstunnel binary
+#
+if($stunnel =~ /tstunnel(\.exe)?"?$/) {
+    $tstunnel_windows = 1;
+
+    # replace Cygwin and MinGW drives within paths
+    $capath =~ s/^(\/cygdrive)?\/(\w)\//$2\:\//;
+    $certfile =~ s/^(\/cygdrive)?\/(\w)\//$2\:\//;
+}
+
+#***************************************************************************
 # Build command to execute for stunnel 3.X versions
 #
 if($stunnel_version < 400) {
@@ -267,7 +279,7 @@ if($stunnel_version >= 400) {
             print STUNCONF "
             fips = no";
         }
-        if($stunnel !~ /tstunnel(\.exe)?"?$/) {
+        if(!$tstunnel_windows) {
             print STUNCONF "
             output = $logfile
             pid = $pidfile
@@ -311,7 +323,7 @@ chmod(0600, $certfile) if(-f $certfile);
 #***************************************************************************
 # Run tstunnel on Windows.
 #
-if($stunnel =~ /tstunnel(\.exe)?"?$/) {
+if($tstunnel_windows) {
     # Fake pidfile for tstunnel on Windows.
     if(open(OUT, ">$pidfile")) {
         print OUT $$ . "\n";
