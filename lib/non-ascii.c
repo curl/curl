@@ -82,17 +82,17 @@ CURLcode Curl_convert_clone(struct SessionHandle *data,
 CURLcode Curl_convert_to_network(struct SessionHandle *data,
                                  char *buffer, size_t length)
 {
-  CURLcode rc;
+  CURLcode result;
 
   if(data->set.convtonetwork) {
     /* use translation callback */
-    rc = data->set.convtonetwork(buffer, length);
-    if(rc) {
+    result = data->set.convtonetwork(buffer, length);
+    if(result) {
       failf(data,
             "CURLOPT_CONV_TO_NETWORK_FUNCTION callback returned %d: %s",
-            (int)rc, curl_easy_strerror(rc));
+            (int)result, curl_easy_strerror(result));
     }
-    return rc;
+    return result;
   }
   else {
 #ifdef HAVE_ICONV
@@ -143,17 +143,17 @@ CURLcode Curl_convert_to_network(struct SessionHandle *data,
 CURLcode Curl_convert_from_network(struct SessionHandle *data,
                                    char *buffer, size_t length)
 {
-  CURLcode rc;
+  CURLcode result;
 
   if(data->set.convfromnetwork) {
     /* use translation callback */
-    rc = data->set.convfromnetwork(buffer, length);
-    if(rc) {
+    result = data->set.convfromnetwork(buffer, length);
+    if(result) {
       failf(data,
             "CURLOPT_CONV_FROM_NETWORK_FUNCTION callback returned %d: %s",
-            (int)rc, curl_easy_strerror(rc));
+            (int)result, curl_easy_strerror(result));
     }
-    return rc;
+    return result;
   }
   else {
 #ifdef HAVE_ICONV
@@ -204,17 +204,17 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
 CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
                                 char *buffer, size_t length)
 {
-  CURLcode rc;
+  CURLcode result;
 
   if(data->set.convfromutf8) {
     /* use translation callback */
-    rc = data->set.convfromutf8(buffer, length);
-    if(rc) {
+    result = data->set.convfromutf8(buffer, length);
+    if(result) {
       failf(data,
             "CURLOPT_CONV_FROM_UTF8_FUNCTION callback returned %d: %s",
-            (int)rc, curl_easy_strerror(rc));
+            (int)result, curl_easy_strerror(result));
     }
-    return rc;
+    return result;
   }
   else {
 #ifdef HAVE_ICONV
@@ -320,7 +320,7 @@ void Curl_convert_close(struct SessionHandle *data)
 CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form)
 {
   struct FormData *next;
-  CURLcode rc;
+  CURLcode result;
 
   if(!form)
     return CURLE_OK;
@@ -331,10 +331,10 @@ CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form)
   do {
     next=form->next;  /* the following form line */
     if(form->type == FORM_DATA) {
-      rc = Curl_convert_to_network(data, form->line, form->length);
+      result = Curl_convert_to_network(data, form->line, form->length);
       /* Curl_convert_to_network calls failf if unsuccessful */
-      if(rc)
-        return rc;
+      if(result)
+        return result;
     }
   } while((form = next) != NULL); /* continue */
   return CURLE_OK;
