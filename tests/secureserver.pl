@@ -269,26 +269,24 @@ if($stunnel_version >= 400) {
     $SIG{TERM} = \&exit_signal_handler;
     # stunnel configuration file
     if(open(STUNCONF, ">$conffile")) {
-        print STUNCONF "
-            CApath = $capath
-            cert = $certfile
-            debug = $loglevel
-            socket = $socketopt";
+        print STUNCONF "CApath = $capath\n";
+        print STUNCONF "cert = $certfile\n";
+        print STUNCONF "debug = $loglevel\n";
+        print STUNCONF "socket = $socketopt\n";
         if($fips_support) {
             # disable fips in case OpenSSL doesn't support it
-            print STUNCONF "
-            fips = no";
+            print STUNCONF "fips = no\n";
         }
         if(!$tstunnel_windows) {
-            print STUNCONF "
-            output = $logfile
-            pid = $pidfile
-            foreground = yes";
+            # do not use Linux-specific options on Windows
+            print STUNCONF "output = $logfile\n";
+            print STUNCONF "pid = $pidfile\n";
+            print STUNCONF "foreground = yes\n";
         }
-        print STUNCONF "
-            [curltest]
-            accept = $accept_port
-            connect = $target_port";
+        print STUNCONF "\n";
+        print STUNCONF "[curltest]\n";
+        print STUNCONF "accept = $accept_port\n";
+        print STUNCONF "connect = $target_port\n";
         if(!close(STUNCONF)) {
             print "$ssltext Error closing file $conffile\n";
             exit 1;
@@ -303,11 +301,16 @@ if($stunnel_version >= 400) {
         print "cmd: $cmd\n";
         print "CApath = $capath\n";
         print "cert = $certfile\n";
-        print "pid = $pidfile\n";
         print "debug = $loglevel\n";
         print "socket = $socketopt\n";
-        print "output = $logfile\n";
-        print "foreground = yes\n";
+        if($fips_support) {
+            print "fips = no\n";
+        }
+        if(!$tstunnel_windows) {
+            print "pid = $pidfile\n";
+            print "output = $logfile\n";
+            print "foreground = yes\n";
+        }
         print "\n";
         print "[curltest]\n";
         print "accept = $accept_port\n";
