@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2014, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1482,9 +1482,10 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
      to starting the handshake. */
   else {
     CURLcode result;
-
-    ssl_sessionid = aprintf("curl:%s:%hu",
-                            conn->host.name, conn->remote_port);
+    ssl_sessionid =
+      aprintf("%s:%d:%d:%s:%hu", data->set.str[STRING_SSL_CAFILE],
+              data->set.ssl.verifypeer, data->set.ssl.verifyhost,
+              conn->host.name, conn->remote_port);
     ssl_sessionid_len = strlen(ssl_sessionid);
 
     err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
