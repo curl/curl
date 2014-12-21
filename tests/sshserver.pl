@@ -89,6 +89,7 @@ my $path = getcwd();          # current working directory
 my $logdir = $path .'/log';   # directory for log files
 my $username = $ENV{USER};    # default user
 my $pidfile;                  # ssh daemon pid file
+my $identity = 'curl_client_key'; # default identity file
 
 my $error;
 my @cfgarr;
@@ -758,13 +759,13 @@ if((! -e $knownhosts) || (! -s $knownhosts)) {
 #***************************************************************************
 # Convert paths for curl's tests running on Windows using Cygwin OpenSSH
 #
-my $identityf = abs_path("$path/curl_client_key");
-my $knownhostsf = abs_path("$path/$knownhosts");
+my $identity_config = abs_path("$path/$identity");
+my $knownhosts_config = abs_path("$path/$knownhosts");
 
 if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
     # convert MinGW drive paths to Cygwin drive paths
-    $identityf =~ s/^\/(\w)\//\/cygdrive\/$1\//;
-    $knownhostsf =~ s/^\/(\w)\//\/cygdrive\/$1\//;
+    $identity_config =~ s/^\/(\w)\//\/cygdrive\/$1\//;
+    $knownhosts_config =~ s/^\/(\w)\//\/cygdrive\/$1\//;
 }
 
 
@@ -864,8 +865,8 @@ push @cfgarr, '#';
 push @cfgarr, "BindAddress $listenaddr";
 push @cfgarr, "DynamicForward $socksport";
 push @cfgarr, '#';
-push @cfgarr, "IdentityFile $identityf";
-push @cfgarr, "UserKnownHostsFile $knownhostsf";
+push @cfgarr, "IdentityFile $identity_config";
+push @cfgarr, "UserKnownHostsFile $knownhosts_config";
 push @cfgarr, '#';
 push @cfgarr, 'BatchMode yes';
 push @cfgarr, 'ChallengeResponseAuthentication no';
