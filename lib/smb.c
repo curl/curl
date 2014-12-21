@@ -345,7 +345,7 @@ static void smb_format_message(struct connectdata *conn, struct smb_header *h,
   memset(h, 0, sizeof(*h));
   h->nbt_length = htons((unsigned short) (sizeof(*h) - sizeof(unsigned int) +
                                           len));
-  strncpy((char *)h->magic, "\xffSMB", 4);
+  memcpy((char *)h->magic, "\xffSMB", 4);
   h->command = cmd;
   h->flags = SMB_FLAGS_CANONICAL_PATHNAMES | SMB_FLAGS_CASELESS_PATHNAMES;
   h->flags2 = smb_swap16(SMB_FLAGS2_IS_LONG_NAME | SMB_FLAGS2_KNOWS_LONG_NAME);
