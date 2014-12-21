@@ -27,6 +27,7 @@
 use strict;
 use warnings;
 use Cwd;
+use Cwd 'abs_path';
 
 #***************************************************************************
 # Variables and subs imported from sshhelp module
@@ -382,6 +383,22 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
 
 
 #***************************************************************************
+# Convert paths for curl's tests running on Windows using Cygwin OpenSSH
+#
+my $clipubkeyf_config = abs_path("$path/$clipubkeyf");
+my $hstprvkeyf_config = abs_path("$path/$hstprvkeyf");
+my $pidfile_config = $pidfile;
+my $sftpsrv_config = $sftpsrv;
+
+if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+    # convert MinGW drive paths to Cygwin drive paths
+    $clipubkeyf_config =~ s/^\/(\w)\//\/cygdrive\/$1\//;
+    $hstprvkeyf_config =~ s/^\/(\w)\//\/cygdrive\/$1\//;
+    $pidfile_config =~ s/^\/(\w)\//\/cygdrive\/$1\//;
+    $sftpsrv_config = "internal-sftp";
+}
+
+#***************************************************************************
 #  ssh daemon configuration file options we might use and version support
 #
 #  AFSTokenPassing                  : OpenSSH 1.2.1 and later [1]
@@ -479,10 +496,10 @@ push @cfgarr, "AllowUsers $username";
 push @cfgarr, 'DenyGroups';
 push @cfgarr, 'AllowGroups';
 push @cfgarr, '#';
-push @cfgarr, "AuthorizedKeysFile $path/$clipubkeyf";
-push @cfgarr, "AuthorizedKeysFile2 $path/$clipubkeyf";
-push @cfgarr, "HostKey $path/$hstprvkeyf";
-push @cfgarr, "PidFile $pidfile";
+push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
+push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
+push @cfgarr, "HostKey $hstprvkeyf_config";
+push @cfgarr, "PidFile $pidfile_config";
 push @cfgarr, '#';
 push @cfgarr, "Port $port";
 push @cfgarr, "ListenAddress $listenaddr";
@@ -512,7 +529,7 @@ push @cfgarr, 'RhostsRSAAuthentication no';
 push @cfgarr, 'RSAAuthentication no';
 push @cfgarr, 'ServerKeyBits 768';
 push @cfgarr, 'StrictModes no';
-push @cfgarr, "Subsystem sftp \"$sftpsrv\"";
+push @cfgarr, "Subsystem sftp \"$sftpsrv_config\"";
 push @cfgarr, 'SyslogFacility AUTH';
 push @cfgarr, 'UseLogin no';
 push @cfgarr, 'X11Forwarding no';
@@ -739,6 +756,19 @@ if((! -e $knownhosts) || (! -s $knownhosts)) {
 
 
 #***************************************************************************
+# Convert paths for curl's tests running on Windows using Cygwin OpenSSH
+#
+my $identityf = abs_path("$path/curl_client_key");
+my $knownhostsf = abs_path("$path/$knownhosts");
+
+if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+    # convert MinGW drive paths to Cygwin drive paths
+    $identityf =~ s/^\/(\w)\//\/cygdrive\/$1\//;
+    $knownhostsf =~ s/^\/(\w)\//\/cygdrive\/$1\//;
+}
+
+
+#***************************************************************************
 #  ssh client configuration file options we might use and version support
 #
 #  AddressFamily                     : OpenSSH 3.7.0 and later
@@ -834,8 +864,8 @@ push @cfgarr, '#';
 push @cfgarr, "BindAddress $listenaddr";
 push @cfgarr, "DynamicForward $socksport";
 push @cfgarr, '#';
-push @cfgarr, "IdentityFile $path/curl_client_key";
-push @cfgarr, "UserKnownHostsFile $path/$knownhosts";
+push @cfgarr, "IdentityFile $identityf";
+push @cfgarr, "UserKnownHostsFile $knownhostsf";
 push @cfgarr, '#';
 push @cfgarr, 'BatchMode yes';
 push @cfgarr, 'ChallengeResponseAuthentication no';
