@@ -550,11 +550,17 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
       while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
             == WAIT_OBJECT_0 + 1) {
         /* get total size of file */
+        length = 0;
         size.QuadPart = 0;
-        if(GetFileSizeEx(handle, &size)) {
+        size.LowPart = GetFileSize(handle, &length);
+        if((size.LowPart != INVALID_FILE_SIZE) ||
+           (GetLastError() == NO_ERROR)) {
+          size.HighPart = length;
           /* get the current position within the file */
           pos.QuadPart = 0;
-          if(SetFilePointerEx(handle, pos, &pos, FILE_CURRENT)) {
+          pos.LowPart = SetFilePointer(handle, 0, &pos.HighPart, FILE_CURRENT);
+          if((pos.LowPart != INVALID_SET_FILE_POINTER) ||
+             (GetLastError() == NO_ERROR)) {
             /* compare position with size, abort if not equal */
             if(size.QuadPart == pos.QuadPart) {
               /* sleep and continue waiting */
@@ -579,6 +585,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
       while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
             == WAIT_OBJECT_0 + 1) {
         /* check if this is an actual console handle */
+        length = 0;
         if(GetConsoleMode(handle, &length)) {
           /* retrieve an event from the console buffer */
           length = 0;
@@ -607,6 +614,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
       while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
             == WAIT_OBJECT_0 + 1) {
         /* peek into the pipe and retrieve the amount of data available */
+        length = 0;
         if(PeekNamedPipe(handle, NULL, 0, NULL, &length, NULL)) {
           /* if there is no data available, sleep and continue waiting */
           if(length == 0) {
