@@ -58,7 +58,7 @@ LCL_ROOT:,VMS_ROOT:,SRC_ROOT:
 For the make install process to work, it must have write access to the
 directories referenced by the GNU: logical name.
 
-In future releases of GNV, and with GNV Bash 4.2.45 installed, this name
+In future releases of GNV, and with GNV Bash 4.3.30 installed, this name
 should be GNV$GNU:
 
 As directly updating those directories would probably be disruptive to other
@@ -99,10 +99,6 @@ Note to builders:
 GNV currently has a bug where configure scripts take a long time to run.
 Some of the configure steps take a while to complete, and on a 600 Mhz
 DS10 with IDE disks, taking an hour to run the CURL configure is normal.
-The bug appears to be in the SED for GNV 2.1.3 and GNV 3.0.1 where it
-is taking far longer than it should to do I/O.  In addition, there are
-reports that the SED in GNV 3.0.1 is broken so the SED from GNV 2.1.3
-should be used instead.
 
 The following messages can be ignored and may get fixed in a future version
 of GNV.  The GNV$*.OPT files are used to find the libraries as many have
@@ -119,12 +115,50 @@ u unimplemented switch - ignored
 
 
 With these search lists set up and the properly, curl can be built by
-setting your default to PRJ_ROOT:[curl.packages.vms] where the * is
-replaced by the actual version of curl, and then issuing the command:
+setting your default to PRJ_ROOT:[curl.packages.vms] and then issuing
+either the command:
+
+  $ @pcsi_product_gnv_curl.com
+
+or
 
   $ @build_gnv_curl.com.
 
-This command procedure does the following:
+The GNV configure procedure takes considerably longer than the DCL build
+procecure takes.  It is of use for testing the GNV build environment, and
+may not have been kept up to date.
+
+The pcsi_product_gnv_curl.com needs the following logical names which
+are described in the section below:
+
+  gnv_pcsi_producer
+  gnv_pcsi_producer_full_name
+  stage_root
+  vms_root1 (Optional if vms_root is on a NFS volume)
+  src_root1 (Optional if src_root is on a NFS volume)
+
+The pcsi_product_gnv_curl.com is described in more detail below.  It does
+the following steps.  The build steps are only done if they are needed to
+allow using either DCL or GNV based building procedures.
+
+  $ @build_vms list
+
+  $ @gnv_link_curl.com
+
+  $ @build_gnv_curl_release_notes.com
+
+  $ @backup_gnv_curl_src.com
+
+  $ @build_gnv_curl_pcsi_desc.com
+
+  $ @build_gnv_curl_pcsi_text.com
+
+  $ @stage_curl_install remove
+  $ @stage_curl_install
+
+  Then builds the kit.
+
+The build_gnv_curl.com command procedure does the following:
 
   $ @setup_gnv_curl_build.com
 
@@ -140,7 +174,8 @@ This command procedure does the following:
 
   $ purge new_gnu:[*...]/log
 
-To clean up after a build to start over, the following commands are used:
+To clean up after a GNV based build to start over, the following commands are
+used:
 
    $ bash
    bash$ cd ../..

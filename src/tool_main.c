@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef __VMS
-  vms_special_exit(res, vms_show);
+  vms_special_exit(result, vms_show);
 #else
   return (int)result;
 #endif

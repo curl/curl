@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -203,6 +203,19 @@ char * unix_path;
 #define CRYPTO_cleanup_all_ex_data CRYPTO_CLEANUP_ALL_EX_DATA
 #define CRYPTO_free CRYPTO_FREE
 #define CRYPTO_malloc CRYPTO_MALLOC
+#define CONF_modules_load_file CONF_MODULES_LOAD_FILE
+#ifdef __VAX
+#  ifdef VMS_OLD_SSL
+  /* Ancient OpenSSL on VAX/VMS missing this constant */
+#    define CONF_MFLAGS_IGNORE_MISSING_FILE 0x10
+#    undef CONF_modules_load_file
+     static int CONF_modules_load_file(const char *filename,
+                                       const char *appname,
+                                       unsigned long flags) {
+             return 1;
+     }
+#  endif
+#endif
 #define DES_ecb_encrypt DES_ECB_ENCRYPT
 #define DES_set_key DES_SET_KEY
 #define DES_set_odd_parity DES_SET_ODD_PARITY
@@ -228,6 +241,7 @@ char * unix_path;
 #define EVP_PKEY_free EVP_PKEY_FREE
 #define EVP_cleanup EVP_CLEANUP
 #define GENERAL_NAMES_free GENERAL_NAMES_FREE
+#define i2d_X509_PUBKEY I2D_X509_PUBKEY
 #define MD4_Final MD4_FINAL
 #define MD4_Init MD4_INIT
 #define MD4_Update MD4_UPDATE
@@ -274,6 +288,7 @@ char * unix_path;
 #define SSL_get_peer_cert_chain SSL_GET_PEER_CERT_CHAIN
 #define SSL_get_peer_certificate SSL_GET_PEER_CERTIFICATE
 #define SSL_get_privatekey SSL_GET_PRIVATEKEY
+#define SSL_get_session SSL_GET_SESSION
 #define SSL_get_shutdown SSL_GET_SHUTDOWN
 #define SSL_get_verify_result SSL_GET_VERIFY_RESULT
 #define SSL_library_init SSL_LIBRARY_INIT
@@ -291,7 +306,23 @@ char * unix_path;
 #define SSLv23_client_method SSLV23_CLIENT_METHOD
 #define SSLv3_client_method SSLV3_CLIENT_METHOD
 #define TLSv1_client_method TLSV1_CLIENT_METHOD
+#define UI_create_method UI_CREATE_METHOD
+#define UI_destroy_method UI_DESTROY_METHOD
+#define UI_get0_user_data UI_GET0_USER_DATA
+#define UI_get_input_flags UI_GET_INPUT_FLAGS
+#define UI_get_string_type UI_GET_STRING_TYPE
+#define UI_create_method UI_CREATE_METHOD
+#define UI_destroy_method UI_DESTROY_METHOD
+#define UI_method_get_closer UI_METHOD_GET_CLOSER
+#define UI_method_get_opener UI_METHOD_GET_OPENER
+#define UI_method_get_reader UI_METHOD_GET_READER
+#define UI_method_get_writer UI_METHOD_GET_WRITER
+#define UI_method_set_closer UI_METHOD_SET_CLOSER
+#define UI_method_set_opener UI_METHOD_SET_OPENER
+#define UI_method_set_reader UI_METHOD_SET_READER
+#define UI_method_set_writer UI_METHOD_SET_WRITER
 #define UI_OpenSSL UI_OPENSSL
+#define UI_set_result UI_SET_RESULT
 #define X509V3_EXT_print X509V3_EXT_PRINT
 #define X509_EXTENSION_get_critical X509_EXTENSION_GET_CRITICAL
 #define X509_EXTENSION_get_object X509_EXTENSION_GET_OBJECT

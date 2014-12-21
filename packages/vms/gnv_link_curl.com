@@ -354,7 +354,6 @@ $ endif
 $!
 $gnv_libcurl_share = "''default_dir'gnv$libcurl.exe"
 $!
-$set ver
 $ if f$search(gnv_libcurl_share) .eqs. ""
 $ then
 $   if arch_name .nes. "VAX"
@@ -420,19 +419,17 @@ $   curl_dsf = "[.src]curl.dsf"
 $   curl_main = "[.packages.vms.''arch_name']tool_main.obj"
 $   curl_src = "[.packages.vms.''arch_name']curlsrc.olb"
 $   curl_lib = "[.packages.vms.''arch_name']curllib.olb"
-$   strtoofft = "strtoofft"
-$   strdup = "strdup"
 $   rawstr = "rawstr"
 $   nonblock = "nonblock"
+$   warnless = "warnless"
 $!
 $!  Extended parse style requires special quoting
 $!
 $   if (arch_name .nes. "VAX") .and. (parse_style .eqs. "EXTENDED")
 $   then
-$       strtoofft = """strtoofft"""
-$       strdup = """strdup"""
 $       rawstr = """rawstr"""
 $       nonblock = """nonblock"""
+$       warnless = """warnless"""
 $   endif
 $   if f$search(curl_exe) .eqs. ""
 $   then
@@ -440,7 +437,7 @@ $       define/user gnv$libcurl 'gnv_libcurl_share'
 $       link'ldebug'/exe='curl_exe'/dsf='curl_dsf' -
            'curl_main','curl_src'/lib, -
            'curl_lib'/library/include=-
-           ('strtoofft', 'strdup', 'rawstr', 'nonblock'),-
+           ('rawstr','nonblock','warnless'),-
            gnv_packages_vms:curlmsg.obj,-
            sys$input:/opt
 gnv$libcurl/share
@@ -448,7 +445,7 @@ gnv_packages_vms:curl_crtl_init.obj
 $   endif
 $ endif
 $!
-$set nover
+$!
 $!
 $! in6addr_missing so skip building:
 $! [.server]sws.o
