@@ -984,7 +984,7 @@ sub verifysftp {
     }
     # Connect to sftp server, authenticate and run a remote pwd
     # command using our generated configuration and key files
-    my $cmd = "$sftp -b $sftpcmds -F $sftpconfig -S $ssh $ip > $sftplog 2>&1";
+    my $cmd = "\"$sftp\" -b $sftpcmds -F $sftpconfig -S \"$ssh\" $ip > $sftplog 2>&1";
     my $res = runclient($cmd);
     # Search for pwd command response in log file
     if(open(SFTPLOGFILE, "<$sftplog")) {
@@ -2066,7 +2066,7 @@ sub runsocksserver {
     $sshlog  = server_logfilename($LOGDIR, 'socks', $ipvnum, $idnum);
 
     # start our socks server
-    my $cmd="$ssh -N -F $sshconfig $ip > $sshlog 2>&1";
+    my $cmd="\"$ssh\" -N -F $sshconfig $ip > $sshlog 2>&1";
     my ($sshpid, $pid2) = startnew($cmd, $pidfile, 30, 1); # fake pidfile
 
     if($sshpid <= 0 || !pidexists($sshpid)) {

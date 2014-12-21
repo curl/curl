@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -369,12 +369,12 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
     # Make sure all files are gone so ssh-keygen doesn't complain
     unlink($hstprvkeyf, $hstpubkeyf, $cliprvkeyf, $clipubkeyf);
     logmsg 'generating host keys...' if($verbose);
-    if(system "$sshkeygen -q -t dsa -f $hstprvkeyf -C 'curl test server' -N ''") {
+    if(system "\"$sshkeygen\" -q -t dsa -f $hstprvkeyf -C 'curl test server' -N ''") {
         logmsg 'Could not generate host key';
         exit 1;
     }
     logmsg 'generating client keys...' if($verbose);
-    if(system "$sshkeygen -q -t dsa -f $cliprvkeyf -C 'curl test client' -N ''") {
+    if(system "\"$sshkeygen\" -q -t dsa -f $cliprvkeyf -C 'curl test client' -N ''") {
         logmsg 'Could not generate client key';
         exit 1;
     }
@@ -512,7 +512,7 @@ push @cfgarr, 'RhostsRSAAuthentication no';
 push @cfgarr, 'RSAAuthentication no';
 push @cfgarr, 'ServerKeyBits 768';
 push @cfgarr, 'StrictModes no';
-push @cfgarr, "Subsystem sftp $sftpsrv";
+push @cfgarr, "Subsystem sftp \"$sftpsrv\"";
 push @cfgarr, 'SyslogFacility AUTH';
 push @cfgarr, 'UseLogin no';
 push @cfgarr, 'X11Forwarding no';
@@ -540,7 +540,7 @@ sub sshd_supports_opt {
         ($sshdid =~ /SunSSH/)) {
         # ssh daemon supports command line options -t -f and -o
         $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
-                    qx($sshd -t -f $sshdconfig -o $option=$value 2>&1);
+                    qx("$sshd" -t -f $sshdconfig -o $option=$value 2>&1);
         return !$err;
     }
     if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 299)) {
@@ -551,7 +551,7 @@ sub sshd_supports_opt {
             return 0;
         }
         $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
-                    qx($sshd -t -f $sshdconfig 2>&1);
+                    qx("$sshd" -t -f $sshdconfig 2>&1);
         unlink $sshdconfig;
         return !$err;
     }
@@ -697,7 +697,7 @@ if($error) {
 #***************************************************************************
 # Verify that sshd actually supports our generated configuration file
 #
-if(system "$sshd -t -f $sshdconfig > $sshdlog 2>&1") {
+if(system "\"$sshd\" -t -f $sshdconfig > $sshdlog 2>&1") {
     logmsg "sshd configuration file $sshdconfig failed verification";
     display_sshdlog();
     display_sshdconfig();
@@ -1025,16 +1025,16 @@ if($error) {
 # Start the ssh server daemon without forking it
 #
 logmsg "SCP/SFTP server listening on port $port" if($verbose);
-my $rc = system "$sshd -e -D -f $sshdconfig > $sshdlog 2>&1";
+my $rc = system "\"$sshd\" -e -D -f $sshdconfig > $sshdlog 2>&1";
 if($rc == -1) {
-    logmsg "$sshd failed with: $!";
+    logmsg "\"$sshd\" failed with: $!";
 }
 elsif($rc & 127) {
-    logmsg sprintf("$sshd died with signal %d, and %s coredump",
+    logmsg sprintf("\"$sshd\" died with signal %d, and %s coredump",
                    ($rc & 127), ($rc & 128)?'a':'no');
 }
 elsif($verbose && ($rc >> 8)) {
-    logmsg sprintf("$sshd exited with %d", $rc >> 8);
+    logmsg sprintf("\"$sshd\" exited with %d", $rc >> 8);
 }
 
 
