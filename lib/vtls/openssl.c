@@ -63,6 +63,7 @@
 #include <openssl/err.h>
 #include <openssl/md5.h>
 #include <openssl/conf.h>
+#include <openssl/bn.h>
 #else
 #include <rand.h>
 #include <x509v3.h>
@@ -130,7 +131,8 @@
 #define HAVE_ERR_REMOVE_THREAD_STATE 1
 #endif
 
-#ifndef HAVE_SSLV2_CLIENT_METHOD
+#if !defined(HAVE_SSLV2_CLIENT_METHOD) || \
+  OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0+ has no SSLv2 */
 #undef OPENSSL_NO_SSL2 /* undef first to avoid compiler warnings */
 #define OPENSSL_NO_SSL2
 #endif
@@ -1306,6 +1308,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
 
 static const char *ssl_msg_type(int ssl_ver, int msg)
 {
+#ifdef SSL2_VERSION_MAJOR
   if(ssl_ver == SSL2_VERSION_MAJOR) {
     switch (msg) {
       case SSL2_MT_ERROR:
@@ -1328,7 +1331,9 @@ static const char *ssl_msg_type(int ssl_ver, int msg)
         return "Client CERT";
     }
   }
-  else if(ssl_ver == SSL3_VERSION_MAJOR) {
+  else
+#endif
+  if(ssl_ver == SSL3_VERSION_MAJOR) {
     switch (msg) {
       case SSL3_MT_HELLO_REQUEST:
         return "Hello request";
@@ -1384,8 +1389,12 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 
   data = conn->data;
   ssl_ver >>= 8;
+#ifdef SSL2_VERSION_MAJOR
   ver = (ssl_ver == SSL2_VERSION_MAJOR ? '2' :
          ssl_ver == SSL3_VERSION_MAJOR ? '3' : '?');
+#else
+  ver = ssl_ver == SSL3_VERSION_MAJOR ? '3' : '?';
+#endif
 
   /* SSLv2 doesn't seem to have TLS record-type headers, so OpenSSL
    * always pass-up content-type as 0. But the interesting message-type
