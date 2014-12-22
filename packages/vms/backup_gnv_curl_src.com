@@ -52,19 +52,19 @@ $!
 $ kit_name = f$trnlnm("GNV_PCSI_KITNAME")
 $ if kit_name .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_BASH_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $ producer = f$trnlnm("GNV_PCSI_PRODUCER")
 $ if producer .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_BASH_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $ filename_base = f$trnlnm("GNV_PCSI_FILENAME_BASE")
 $ if filename_base .eqs. ""
 $ then
-$   write sys$output "@MAKE_PCSI_BASH_KIT_NAME.COM has not been run."
+$   write sys$output "@MAKE_PCSI_CURL_KIT_NAME.COM has not been run."
 $   goto all_exit
 $ endif
 $!
