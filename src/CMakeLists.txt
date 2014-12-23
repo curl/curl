@@ -27,12 +27,13 @@ if(USE_MANUAL)
 else()
   add_custom_command(
     OUTPUT tool_hugehelp.c
-    COMMAND echo "/* built-in manual is disabled, blank function */" > tool_hugehelp.c
-    COMMAND echo "#include \"tool_hugehelp.h\"" >> tool_hugehelp.c
-    COMMAND echo "void hugehelp(void) {}" >> tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "/* built-in manual is disabled, blank function */" > "tool_hugehelp.c"
+    COMMAND ${CMAKE_COMMAND} -E echo "\#include \"tool_hugehelp.h\"" >> "tool_hugehelp.c"
+    COMMAND ${CMAKE_COMMAND} -E echo "void hugehelp(void) {}" >> "tool_hugehelp.c"
     DEPENDS
       "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
     VERBATIM)
+
 endif()
 
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")

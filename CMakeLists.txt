@@ -238,6 +238,7 @@ include (CheckCSourceCompiles)
 
 # On windows preload settings
 if(WIN32)
+  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WINSOCKAPI_")
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif(WIN32)
 
@@ -384,7 +385,7 @@ if(NOT CURL_DISABLE_LDAP)
         return 0;
       }"
     )
-    set(CMAKE_REQUIRED_DEFINITIONS "-DLDAP_DEPRECATED=1" "-DWIN32_LEAN_AND_MEAN")
+    set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DLDAP_DEPRECATED=1")
     list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LDAP_LIB})
     if(HAVE_LIBLBER)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LBER_LIB})
@@ -537,15 +538,13 @@ endif()
 
 # Check for header files
 if(NOT UNIX)
+  check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
+  check_include_file_concat("winsock.h"      HAVE_WINSOCK_H)
   check_include_file_concat("ws2tcpip.h"     HAVE_WS2TCPIP_H)
   check_include_file_concat("winsock2.h"     HAVE_WINSOCK2_H)
 endif(NOT UNIX)
-check_include_file_concat("stdio.h"          HAVE_STDIO_H)
-if(NOT UNIX)
-  check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
-  check_include_file_concat("winsock.h"      HAVE_WINSOCK_H)
-endif(NOT UNIX)
 
+check_include_file_concat("stdio.h"          HAVE_STDIO_H)
 check_include_file_concat("inttypes.h"       HAVE_INTTYPES_H)
 check_include_file_concat("sys/filio.h"      HAVE_SYS_FILIO_H)
 check_include_file_concat("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
