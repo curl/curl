@@ -1151,12 +1151,12 @@ Curl_gtls_connect(struct connectdata *conn,
                   int sockindex)
 
 {
-  CURLcode retcode;
+  CURLcode result;
   bool done = FALSE;
 
-  retcode = gtls_connect_common(conn, sockindex, FALSE, &done);
-  if(retcode)
-    return retcode;
+  result = gtls_connect_common(conn, sockindex, FALSE, &done);
+  if(result)
+    return result;
 
   DEBUGASSERT(done);
 
@@ -1304,10 +1304,10 @@ static ssize_t gtls_recv(struct connectdata *conn, /* connection data */
   if(ret == GNUTLS_E_REHANDSHAKE) {
     /* BLOCKING call, this is bad but a work-around for now. Fixing this "the
        proper way" takes a whole lot of work. */
-    CURLcode rc = handshake(conn, num, FALSE, FALSE);
-    if(rc)
+    CURLcode result = handshake(conn, num, FALSE, FALSE);
+    if(result)
       /* handshake() writes error message on its own */
-      *curlcode = rc;
+      *curlcode = result;
     else
       *curlcode = CURLE_AGAIN; /* then return as if this was a wouldblock */
     return -1;
