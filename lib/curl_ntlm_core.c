@@ -283,7 +283,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
     unsigned int len;
     char key[8];
   } blob;
-  unsigned int len = 8;
+  DWORD len = 8;
 
   /* Acquire the crypto provider */
   if(!CryptAcquireContext(&hprov, NULL, NULL, PROV_RSA_FULL,
@@ -298,7 +298,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   blob.len = sizeof(blob.key);
 
   /* Import the key */
-  if(!CryptImportKey(hprov, (char *) &blob, sizeof(blob), 0, 0, &hkey)) {
+  if(!CryptImportKey(hprov, (BYTE *) &blob, sizeof(blob), 0, 0, &hkey)) {
     CryptReleaseContext(hprov, 0);
 
     return FALSE;
@@ -535,7 +535,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
                            CRYPT_VERIFYCONTEXT)) {
       HCRYPTHASH hhash;
       if(CryptCreateHash(hprov, CALG_MD4, 0, 0, &hhash)) {
-        unsigned int length = 16;
+        DWORD length = 16;
         CryptHashData(hhash, pw, (unsigned int)len * 2, 0);
         CryptGetHashParam(hhash, HP_HASHVAL, ntbuffer, &length, 0);
         CryptDestroyHash(hhash);
