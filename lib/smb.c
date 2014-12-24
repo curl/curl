@@ -50,7 +50,7 @@
 #include "memdebug.h"
 
 /* Local API functions */
-static CURLcode smb_setup(struct connectdata *conn);
+static CURLcode smb_setup_connection(struct connectdata *conn);
 static CURLcode smb_connect(struct connectdata *conn, bool *done);
 static CURLcode smb_connection_state(struct connectdata *conn, bool *done);
 static CURLcode smb_request_state(struct connectdata *conn, bool *done);
@@ -66,7 +66,7 @@ static CURLcode smb_parse_url_path(struct connectdata *conn);
  */
 const struct Curl_handler Curl_handler_smb = {
   "SMB",                                /* scheme */
-  smb_setup,                            /* setup_connection */
+  smb_setup_connection,                 /* setup_connection */
   ZERO_NULL,                            /* do_it */
   smb_done,                             /* done */
   ZERO_NULL,                            /* do_more */
@@ -90,7 +90,7 @@ const struct Curl_handler Curl_handler_smb = {
  */
 const struct Curl_handler Curl_handler_smbs = {
   "SMBS",                               /* scheme */
-  smb_setup,                            /* setup_connection */
+  smb_setup_connection,                 /* setup_connection */
   ZERO_NULL,                            /* do_it */
   smb_done,                             /* done */
   ZERO_NULL,                            /* do_more */
@@ -225,7 +225,7 @@ static void request_state(struct connectdata *conn,
   req->state = newstate;
 }
 
-static CURLcode smb_setup(struct connectdata *conn)
+static CURLcode smb_setup_connection(struct connectdata *conn)
 {
   struct smb_request *req;
 
