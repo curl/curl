@@ -96,6 +96,35 @@ This release includes the following bugfixes:
  o smtp: Fixed dot stuffing when EOL characters at end of input buffers [12]
  o ntlm: Allow NTLM2Session messages when USE_NTRESPONSES manually defined
  o ntlm: Disable NTLM v2 when 64-bit integers are not supported
+ o ntlm: Use short integer when decoding 16-bit values
+ o ftp.c: Fixed compilation warning when no verbose string support
+ o synctime.c: fixed timeserver URLs
+ o mk-ca-bundle.pl: restored forced run again
+ o ntlm: Fixed return code for bad type-2 Target Info
+ o curl_schannel.c: Data may be available before connection shutdown
+ o curl_schannel: Improvements to memory re-allocation strategy [13]
+ o darwinssl: aprintf() to allocate the session key
+ o tool_util.c: Use GetTickCount64 if it is available
+ o lib: Fixed multiple code analysis warnings if SAL are available
+ o tool_binmode.c: Explicitly ignore the return code of setmode
+ o tool_urlglob.c: Silence warning C6293: Ill-defined for-loop
+ o opts: Warn CURLOPT_TIMEOUT overrides when set after CURLOPT_TIMEOUT_MS
+ o SFTP: work-around servers that return zero size on STAT [14]
+ o connect: singleipconnect(): properly try other address families after failure
+ o IPV6: address scope != scope id [15]
+ o parseurlandfillconn(): fix improper non-numeric scope_id stripping [16]
+ o secureserver.pl: make OpenSSL CApath and cert absolute path values
+ o secureserver.pl: update Windows detection and fix path conversion
+ o secureserver.pl: clean up formatting of config and fix verbose output
+ o tests: Added Windows support using Cygwin-based OpenSSH
+ o sockfilt.c: use non-Ex functions that are available before WinXP
+ o VMS: Updates for 0740-0D1220
+ o openssl: warn for SRP set if SSLv3 is used, not for TLS version
+ o openssl: make it compile against openssl 1.1.0-DEV master branch
+ o openssl: fix SSL/TLS versions in verbose output
+ o curl: show size of inhibited data when using -v
+ o build: Removed WIN32 definition from the Visual Studio projects
+ o build: Removed WIN64 definition from the libcurl Visual Studio projects
 
 This release includes the following known bugs:
 
@@ -106,10 +135,11 @@ advice from friends like these:
 
   Anthon Pang, Bill Nagel, Brad Harder, Brad King, Carlo Wood, Christian Hägele,
   Dan Fandrich, Daniel Stenberg, Dave Reisner, Frank Gevaerts, Gisle Vanem,
-  Guenter Knauf, Jan Ehrhardt, Johan Lantz, Jon Spencer, Kamil Dudka,
-  Lucas Pardue, Michael Osipov, Nobuhiro Ban, Patrick Monnerat, Peter Wu,
-  Ray Satiro, Sam Hurst, Stefan Bühler, Stefan Neis, Steve Holme,
-  Tae Hyoung Ahn, Tatsuhiro Tsujikawa, Tomasz Kojm, Tor Arntsen, Waldek Kozba,
+  Guenter Knauf, Jan Ehrhardt, Johan Lantz, John E. Malmberg, Jon Spencer,
+  Kamil Dudka, Kyle J. McKay, Lucas Pardue, Marc Hoersken, Marc Renault,
+  Michael Osipov, Nobuhiro Ban, Patrick Monnerat, Peter Wu, Ray Satiro,
+  Sam Hurst, Stefan Bühler, Stefan Neis, Steve Holme, Tae Hyoung Ahn,
+  Tatsuhiro Tsujikawa, Tomasz Kojm, Tor Arntsen, Waldek Kozba, Warren Menzer
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -127,4 +157,8 @@ References to bug reports and discussions on issues:
  [10] = http://curl.haxx.se/bug/view.cgi?id=1462
  [11] = http://curl.haxx.se/mail/lib-2014-12/0089.html
  [12] = http://curl.haxx.se/bug/view.cgi?id=1456
- [13]
+ [13] = http://curl.haxx.se/bug/view.cgi?id=1450
+ [14] = http://curl.haxx.se/mail/lib-2014-12/0103.html
+ [15] = http://curl.haxx.se/bug/view.cgi?id=1451
+ [16] = http://curl.haxx.se/bug/view.cgi?id=1449
+ [17] =
