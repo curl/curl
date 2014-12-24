@@ -49,7 +49,7 @@
 
 #define DEF_BUFTIME    (2*60*60*1000)    /* 2 hours */
 
-static CURLcode rtmp_setup(struct connectdata *conn);
+static CURLcode rtmp_setup_connection(struct connectdata *conn);
 static CURLcode rtmp_do(struct connectdata *conn, bool *done);
 static CURLcode rtmp_done(struct connectdata *conn, CURLcode, bool premature);
 static CURLcode rtmp_connect(struct connectdata *conn, bool *done);
@@ -64,7 +64,7 @@ static Curl_send rtmp_send;
 
 const struct Curl_handler Curl_handler_rtmp = {
   "RTMP",                               /* scheme */
-  rtmp_setup,                           /* setup_connection */
+  rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -84,7 +84,7 @@ const struct Curl_handler Curl_handler_rtmp = {
 
 const struct Curl_handler Curl_handler_rtmpt = {
   "RTMPT",                              /* scheme */
-  rtmp_setup,                           /* setup_connection */
+  rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -104,7 +104,7 @@ const struct Curl_handler Curl_handler_rtmpt = {
 
 const struct Curl_handler Curl_handler_rtmpe = {
   "RTMPE",                              /* scheme */
-  rtmp_setup,                           /* setup_connection */
+  rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -124,7 +124,7 @@ const struct Curl_handler Curl_handler_rtmpe = {
 
 const struct Curl_handler Curl_handler_rtmpte = {
   "RTMPTE",                             /* scheme */
-  rtmp_setup,                           /* setup_connection */
+  rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -144,7 +144,7 @@ const struct Curl_handler Curl_handler_rtmpte = {
 
 const struct Curl_handler Curl_handler_rtmps = {
   "RTMPS",                              /* scheme */
-  rtmp_setup,                           /* setup_connection */
+  rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -164,7 +164,7 @@ const struct Curl_handler Curl_handler_rtmps = {
 
 const struct Curl_handler Curl_handler_rtmpts = {
   "RTMPTS",                             /* scheme */
-  rtmp_setup,                           /* setup_connection */
+  rtmp_setup_connection,                /* setup_connection */
   rtmp_do,                              /* do_it */
   rtmp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -182,10 +182,9 @@ const struct Curl_handler Curl_handler_rtmpts = {
   PROTOPT_NONE                          /* flags*/
 };
 
-static CURLcode rtmp_setup(struct connectdata *conn)
+static CURLcode rtmp_setup_connection(struct connectdata *conn)
 {
   RTMP *r = RTMP_Alloc();
-
   if(!r)
     return CURLE_OUT_OF_MEMORY;
 
