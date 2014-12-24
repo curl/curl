@@ -59,7 +59,7 @@ extern int ldap_init_fd(ber_socket_t fd, int proto, const char *url,
                         LDAP **ld);
 #endif
 
-static CURLcode ldap_setup(struct connectdata *conn);
+static CURLcode ldap_setup_connection(struct connectdata *conn);
 static CURLcode ldap_do(struct connectdata *conn, bool *done);
 static CURLcode ldap_done(struct connectdata *conn, CURLcode, bool);
 static CURLcode ldap_connect(struct connectdata *conn, bool *done);
@@ -74,7 +74,7 @@ static Curl_recv ldap_recv;
 
 const struct Curl_handler Curl_handler_ldap = {
   "LDAP",                               /* scheme */
-  ldap_setup,                           /* setup_connection */
+  ldap_setup_connection,                /* setup_connection */
   ldap_do,                              /* do_it */
   ldap_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -99,7 +99,7 @@ const struct Curl_handler Curl_handler_ldap = {
 
 const struct Curl_handler Curl_handler_ldaps = {
   "LDAPS",                              /* scheme */
-  ldap_setup,                           /* setup_connection */
+  ldap_setup_connection,                /* setup_connection */
   ldap_do,                              /* do_it */
   ldap_done,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -148,7 +148,7 @@ typedef struct ldapreqinfo {
   int nument;
 } ldapreqinfo;
 
-static CURLcode ldap_setup(struct connectdata *conn)
+static CURLcode ldap_setup_connection(struct connectdata *conn)
 {
   ldapconninfo *li;
   LDAPURLDesc *lud;
