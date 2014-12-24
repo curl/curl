@@ -310,8 +310,7 @@ static int ssl_ui_reader(UI *ui, UI_STRING *uis)
   case UIT_PROMPT:
   case UIT_VERIFY:
     password = (const char*)UI_get0_user_data(ui);
-    if(NULL != password &&
-       UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD) {
+    if(password && (UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD)) {
       UI_set_result(ui, uis, password);
       return 1;
     }
@@ -329,8 +328,8 @@ static int ssl_ui_writer(UI *ui, UI_STRING *uis)
   switch(UI_get_string_type(uis)) {
   case UIT_PROMPT:
   case UIT_VERIFY:
-    if(NULL != UI_get0_user_data(ui) &&
-       UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD) {
+    if(UI_get0_user_data(ui) &&
+       (UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD)) {
       return 1;
     }
   default:
@@ -352,7 +351,7 @@ int cert_stuff(struct connectdata *conn,
 
   int file_type = do_file_type(cert_type);
 
-  if(cert_file != NULL || file_type == SSL_FILETYPE_ENGINE) {
+  if(cert_file || (file_type == SSL_FILETYPE_ENGINE)) {
     SSL *ssl;
     X509 *x509;
     int cert_done = 0;
@@ -558,7 +557,7 @@ int cert_stuff(struct connectdata *conn,
     case SSL_FILETYPE_PEM:
       if(cert_done)
         break;
-      if(key_file == NULL)
+      if(!key_file)
         /* cert & key can only be in PEM case in the same file */
         key_file=cert_file;
     case SSL_FILETYPE_ASN1:
@@ -576,7 +575,7 @@ int cert_stuff(struct connectdata *conn,
 #ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
           UI_METHOD *ui_method =
             UI_create_method((char *)"cURL user interface");
-          if(NULL == ui_method) {
+          if(!ui_method) {
             failf(data, "unable do create OpenSSL user-interface method");
             return 0;
           }
@@ -628,7 +627,7 @@ int cert_stuff(struct connectdata *conn,
     }
 
     ssl=SSL_new(ctx);
-    if(NULL == ssl) {
+    if(!ssl) {
       failf(data,"unable to create an SSL structure");
       return 0;
     }
@@ -637,7 +636,7 @@ int cert_stuff(struct connectdata *conn,
 
     /* This version was provided by Evan Jordan and is supposed to not
        leak memory as the previous version: */
-    if(x509 != NULL) {
+    if(x509) {
       EVP_PKEY *pktmp = X509_get_pubkey(x509);
       EVP_PKEY_copy_parameters(pktmp,SSL_get_privatekey(ssl));
       EVP_PKEY_free(pktmp);
@@ -1514,7 +1513,7 @@ select_next_proto_cb(SSL *ssl,
 static const char *
 get_ssl_version_txt(SSL_SESSION *session)
 {
-  if(NULL == session)
+  if(!session)
     return "";
 
   switch(session->ssl_version) {
@@ -2128,7 +2127,7 @@ static void pubkey_show(struct SessionHandle *data,
 
 #define print_pubkey_BN(_type, _name, _num)    \
 do {                              \
-  if(pubkey->pkey._type->_name != NULL) { \
+  if(pubkey->pkey._type->_name) { \
     int len = BN_num_bytes(pubkey->pkey._type->_name);  \
     if(len < CERTBUFFERSIZE) {                                    \
       BN_bn2bin(pubkey->pkey._type->_name, (unsigned char*)bufp); \
@@ -2416,10 +2415,10 @@ static CURLcode pkp_pin_peer_pubkey(X509* cert, const char *pinnedpubkey)
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
   /* if a path wasn't specified, don't pin */
-  if(NULL == pinnedpubkey)
+  if(!pinnedpubkey)
     return CURLE_OK;
 
-  if(NULL == cert)
+  if(!cert)
     return result;
 
   do {
@@ -2434,7 +2433,7 @@ static CURLcode pkp_pin_peer_pubkey(X509* cert, const char *pinnedpubkey)
 
     /* http://www.openssl.org/docs/crypto/buffer.html */
     buff1 = temp = OPENSSL_malloc(len1);
-    if(NULL == buff1)
+    if(!buff1)
       break; /* failed */
 
     /* http://www.openssl.org/docs/crypto/d2i_X509.html */
@@ -2445,7 +2444,7 @@ static CURLcode pkp_pin_peer_pubkey(X509* cert, const char *pinnedpubkey)
      * sized the buffer.Its pretty weak since they should always be the
      * same. But it gives us something to test.
      */
-    if(len1 != len2 || temp == NULL || ((temp - buff1) != len1))
+    if((len1 != len2) || !temp || ((temp - buff1) != len1))
       break; /* failed */
 
     /* End Gyrations */
