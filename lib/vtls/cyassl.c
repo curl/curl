@@ -328,7 +328,7 @@ static CURLcode
 cyassl_connect_step3(struct connectdata *conn,
                      int sockindex)
 {
-  CURLcode retcode = CURLE_OK;
+  CURLcode result = CURLE_OK;
   void *old_ssl_sessionid=NULL;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -348,17 +348,17 @@ cyassl_connect_step3(struct connectdata *conn,
     }
   }
   if(!incache) {
-    retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid,
-                                    0 /* unknown size */);
-    if(retcode) {
+    result = Curl_ssl_addsessionid(conn, our_ssl_sessionid,
+                                   0 /* unknown size */);
+    if(result) {
       failf(data, "failed to store ssl session");
-      return retcode;
+      return result;
     }
   }
 
   connssl->connecting_state = ssl_connect_done;
 
-  return retcode;
+  return result;
 }
 
 
@@ -503,7 +503,7 @@ cyassl_connect_common(struct connectdata *conn,
                       bool nonblocking,
                       bool *done)
 {
-  CURLcode retcode;
+  CURLcode result;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -525,9 +525,10 @@ cyassl_connect_common(struct connectdata *conn,
       failf(data, "SSL connection timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
-    retcode = cyassl_connect_step1(conn, sockindex);
-    if(retcode)
-      return retcode;
+
+    result = cyassl_connect_step1(conn, sockindex);
+    if(result)
+      return result;
   }
 
   while(ssl_connect_2 == connssl->connecting_state ||
@@ -579,22 +580,21 @@ cyassl_connect_common(struct connectdata *conn,
      * ensuring that a client using select() or epoll() will always
      * have a valid fdset to wait on.
      */
-    retcode = cyassl_connect_step2(conn, sockindex);
-    if(retcode || (nonblocking &&
-                   (ssl_connect_2 == connssl->connecting_state ||
-                    ssl_connect_2_reading == connssl->connecting_state ||
-                    ssl_connect_2_writing == connssl->connecting_state)))
-      return retcode;
-
+    result = cyassl_connect_step2(conn, sockindex);
+    if(result || (nonblocking &&
+                  (ssl_connect_2 == connssl->connecting_state ||
+                   ssl_connect_2_reading == connssl->connecting_state ||
+                   ssl_connect_2_writing == connssl->connecting_state)))
+      return result;
   } /* repeat step2 until all transactions are done. */
 
-  if(ssl_connect_3==connssl->connecting_state) {
-    retcode = cyassl_connect_step3(conn, sockindex);
-    if(retcode)
-      return retcode;
+  if(ssl_connect_3 == connssl->connecting_state) {
+    result = cyassl_connect_step3(conn, sockindex);
+    if(result)
+      return result;
   }
 
-  if(ssl_connect_done==connssl->connecting_state) {
+  if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = cyassl_recv;
     conn->send[sockindex] = cyassl_send;
@@ -623,12 +623,12 @@ CURLcode
 Curl_cyassl_connect(struct connectdata *conn,
                     int sockindex)
 {
-  CURLcode retcode;
+  CURLcode result;
   bool done = FALSE;
 
-  retcode = cyassl_connect_common(conn, sockindex, FALSE, &done);
-  if(retcode)
-    return retcode;
+  result = cyassl_connect_common(conn, sockindex, FALSE, &done);
+  if(result)
+    return result;
 
   DEBUGASSERT(done);
 
