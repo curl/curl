@@ -127,7 +127,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         conn->host.name, conn->remote_port);
 
   /* check for an existing re-usable credential handle */
-  if(!Curl_ssl_getsessionid(conn, (void**)&old_cred, NULL)) {
+  if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL)) {
     connssl->cred = old_cred;
     infof(data, "schannel: re-using existing credential handle\n");
   }
@@ -542,16 +542,16 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   }
 
   /* save the current session data for possible re-use */
-  incache = !(Curl_ssl_getsessionid(conn, (void**)&old_cred, NULL));
+  incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL));
   if(incache) {
     if(old_cred != connssl->cred) {
       infof(data, "schannel: old credential handle is stale, removing\n");
-      Curl_ssl_delsessionid(conn, (void*)old_cred);
+      Curl_ssl_delsessionid(conn, (void *)old_cred);
       incache = FALSE;
     }
   }
   if(!incache) {
-    result = Curl_ssl_addsessionid(conn, (void*)connssl->cred,
+    result = Curl_ssl_addsessionid(conn, (void *)connssl->cred,
                                    sizeof(struct curl_schannel_cred));
     if(result) {
       failf(data, "schannel: failed to store credential handle");
@@ -713,7 +713,7 @@ schannel_send(struct connectdata *conn, int sockindex,
   /* calculate the complete message length and allocate a buffer for it */
   data_len = connssl->stream_sizes.cbHeader + len +
               connssl->stream_sizes.cbTrailer;
-  data = (unsigned char*) malloc(data_len);
+  data = (unsigned char *) malloc(data_len);
   if(data == NULL) {
     *err = CURLE_OUT_OF_MEMORY;
     return -1;
