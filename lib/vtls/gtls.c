@@ -754,7 +754,7 @@ gtls_connect_step3(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   gnutls_session_t session = conn->ssl[sockindex].session;
   int rc;
-  int incache;
+  bool incache;
   void *ssl_sessionid;
 #ifdef HAS_ALPN
   gnutls_datum_t proto;

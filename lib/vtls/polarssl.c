@@ -488,7 +488,7 @@ polarssl_connect_step3(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   void *old_ssl_sessionid = NULL;
   ssl_session *our_ssl_sessionid = &conn->ssl[sockindex].ssn ;
-  int incache;
+  bool incache;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
@@ -501,6 +501,7 @@ polarssl_connect_step3(struct connectdata *conn,
       incache = FALSE;
     }
   }
+
   if(!incache) {
     void *new_session = malloc(sizeof(ssl_session));
 

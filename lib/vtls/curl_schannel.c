@@ -509,7 +509,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct curl_schannel_cred *old_cred = NULL;
-  int incache;
+  bool incache;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
@@ -550,6 +550,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
       incache = FALSE;
     }
   }
+
   if(!incache) {
     result = Curl_ssl_addsessionid(conn, (void *)connssl->cred,
                                    sizeof(struct curl_schannel_cred));

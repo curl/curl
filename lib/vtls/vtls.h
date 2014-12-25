@@ -23,14 +23,14 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "openssl.h" /* OpenSSL versions */
-#include "gtls.h"   /* GnuTLS versions */
-#include "nssg.h"   /* NSS versions */
-#include "gskit.h"  /* Global Secure ToolKit versions */
-#include "polarssl.h" /* PolarSSL versions */
-#include "axtls.h"  /* axTLS versions */
-#include "cyassl.h"  /* CyaSSL versions */
-#include "curl_schannel.h" /* Schannel SSPI version */
+#include "openssl.h"        /* OpenSSL versions */
+#include "gtls.h"           /* GnuTLS versions */
+#include "nssg.h"           /* NSS versions */
+#include "gskit.h"          /* Global Secure ToolKit versions */
+#include "polarssl.h"       /* PolarSSL versions */
+#include "axtls.h"          /* axTLS versions */
+#include "cyassl.h"         /* CyaSSL versions */
+#include "curl_schannel.h"  /* Schannel SSPI version */
 #include "curl_darwinssl.h" /* SecureTransport (Darwin) version */
 
 #ifndef MAX_PINNED_PUBKEY_SIZE
@@ -92,9 +92,9 @@ CURLcode Curl_ssl_push_certinfo(struct SessionHandle * data, int certnum,
 /* Functions to be used by SSL library adaptation functions */
 
 /* extract a session ID */
-int Curl_ssl_getsessionid(struct connectdata *conn,
-                          void **ssl_sessionid,
-                          size_t *idsize) /* set 0 if unknown */;
+bool Curl_ssl_getsessionid(struct connectdata *conn,
+                           void **ssl_sessionid,
+                           size_t *idsize) /* set 0 if unknown */;
 /* add a new session ID */
 CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                void *ssl_sessionid,

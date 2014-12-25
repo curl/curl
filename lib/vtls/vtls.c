@@ -316,9 +316,9 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
  * Check if there's a session ID for the given connection in the cache, and if
  * there's one suitable, it is provided. Returns TRUE when no entry matched.
  */
-int Curl_ssl_getsessionid(struct connectdata *conn,
-                          void **ssl_sessionid,
-                          size_t *idsize) /* set 0 if unknown */
+bool Curl_ssl_getsessionid(struct connectdata *conn,
+                           void **ssl_sessionid,
+                           size_t *idsize) /* set 0 if unknown */
 {
   struct curl_ssl_session *check;
   struct SessionHandle *data = conn->data;

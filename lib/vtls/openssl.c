@@ -2610,7 +2610,7 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
   void *old_ssl_sessionid = NULL;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  int incache;
+  bool incache;
   SSL_SESSION *our_ssl_sessionid;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
@@ -2646,7 +2646,7 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
 
   if(!incache) {
     result = Curl_ssl_addsessionid(conn, our_ssl_sessionid,
-                                    0 /* unknown size */);
+                                   0 /* unknown size */);
     if(result) {
       failf(data, "failed to store ssl session");
       return result;
