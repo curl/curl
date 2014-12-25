@@ -3842,6 +3842,13 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
 
   *prot_missing = FALSE;
 
+  /* We might pass the entire URL into the request so we need to make sure
+   * there are no bad characters in there.*/
+  if(strpbrk(data->change.url, "\r\n")) {
+    failf(data, "Illegal characters found in URL");
+    return CURLE_URL_MALFORMAT;
+  }
+
   /*************************************************************
    * Parse the URL.
    *
