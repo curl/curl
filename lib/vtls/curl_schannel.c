@@ -505,7 +505,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 static CURLcode
 schannel_connect_step3(struct connectdata *conn, int sockindex)
 {
-  CURLcode retcode = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct curl_schannel_cred *old_cred = NULL;
@@ -551,11 +551,11 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     }
   }
   if(!incache) {
-    retcode = Curl_ssl_addsessionid(conn, (void*)connssl->cred,
-                                    sizeof(struct curl_schannel_cred));
-    if(retcode) {
+    result = Curl_ssl_addsessionid(conn, (void*)connssl->cred,
+                                   sizeof(struct curl_schannel_cred));
+    if(result) {
       failf(data, "schannel: failed to store credential handle");
-      return retcode;
+      return result;
     }
     else {
       connssl->cred->cached = TRUE;
@@ -572,7 +572,7 @@ static CURLcode
 schannel_connect_common(struct connectdata *conn, int sockindex,
                         bool nonblocking, bool *done)
 {
-  CURLcode retcode;
+  CURLcode result;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -595,9 +595,9 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    retcode = schannel_connect_step1(conn, sockindex);
-    if(retcode)
-      return retcode;
+    result = schannel_connect_step1(conn, sockindex);
+    if(result)
+      return result;
   }
 
   while(ssl_connect_2 == connssl->connecting_state ||
@@ -649,19 +649,19 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
      * ensuring that a client using select() or epoll() will always
      * have a valid fdset to wait on.
      */
-    retcode = schannel_connect_step2(conn, sockindex);
-    if(retcode || (nonblocking &&
-                   (ssl_connect_2 == connssl->connecting_state ||
-                    ssl_connect_2_reading == connssl->connecting_state ||
-                    ssl_connect_2_writing == connssl->connecting_state)))
-      return retcode;
+    result = schannel_connect_step2(conn, sockindex);
+    if(result || (nonblocking &&
+                  (ssl_connect_2 == connssl->connecting_state ||
+                   ssl_connect_2_reading == connssl->connecting_state ||
+                   ssl_connect_2_writing == connssl->connecting_state)))
+      return result;
 
   } /* repeat step2 until all transactions are done. */
 
   if(ssl_connect_3 == connssl->connecting_state) {
-    retcode = schannel_connect_step3(conn, sockindex);
-    if(retcode)
-      return retcode;
+    result = schannel_connect_step3(conn, sockindex);
+    if(result)
+      return result;
   }
 
   if(ssl_connect_done == connssl->connecting_state) {
@@ -832,7 +832,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
 {
   size_t size = 0;
   ssize_t nread = 0, ret = -1;
-  CURLcode retcode;
+  CURLcode result;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   unsigned char *reallocated_buffer;
@@ -1011,9 +1011,9 @@ schannel_recv(struct connectdata *conn, int sockindex,
       infof(data, "schannel: renegotiating SSL/TLS connection\n");
       connssl->state = ssl_connection_negotiating;
       connssl->connecting_state = ssl_connect_2_writing;
-      retcode = schannel_connect_common(conn, sockindex, FALSE, &done);
-      if(retcode)
-        *err = retcode;
+      result = schannel_connect_common(conn, sockindex, FALSE, &done);
+      if(result)
+        *err = result;
       else {
         infof(data, "schannel: SSL/TLS connection renegotiated\n");
         /* now retry receiving data */
@@ -1073,12 +1073,12 @@ Curl_schannel_connect_nonblocking(struct connectdata *conn, int sockindex,
 CURLcode
 Curl_schannel_connect(struct connectdata *conn, int sockindex)
 {
-  CURLcode retcode;
+  CURLcode result;
   bool done = FALSE;
 
-  retcode = schannel_connect_common(conn, sockindex, FALSE, &done);
-  if(retcode)
-    return retcode;
+  result = schannel_connect_common(conn, sockindex, FALSE, &done);
+  if(result)
+    return result;
 
   DEBUGASSERT(done);
 
