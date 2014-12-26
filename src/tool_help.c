@@ -231,7 +231,7 @@ static const char *const helptext[] = {
   "     --tlsuser USER  TLS username",
   "     --tlspassword STRING  TLS password",
   "     --tlsauthtype STRING  TLS authentication type (default: SRP)",
-  "     --unix-socket FILE    Connect through this UNIX domain socket",
+  "     --unix-socket FILE    Connect through this Unix domain socket",
   " -A, --user-agent STRING  Send User-Agent STRING to server (H)",
   " -v, --verbose       Make the operation more talkative",
   " -V, --version       Show version number and quit",
@@ -275,7 +275,7 @@ static const struct feat feats[] = {
   {"CharConv",       CURL_VERSION_CONV},
   {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
   {"HTTP2",          CURL_VERSION_HTTP2},
-  {"UNIX-Sockets",   CURL_VERSION_UNIX_SOCKETS},
+  {"UnixSockets",    CURL_VERSION_UNIX_SOCKETS},
 };
 
 void tool_help(void)

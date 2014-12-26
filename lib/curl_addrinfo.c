@@ -482,7 +482,7 @@ Curl_addrinfo *Curl_str2addr(char *address, int port)
 
 #ifdef USE_UNIX_SOCKETS
 /**
- * Given a path to a UNIX domain socket, return a newly allocated Curl_addrinfo
+ * Given a path to a Unix domain socket, return a newly allocated Curl_addrinfo
  * struct initialized with this path.
  */
 Curl_addrinfo *Curl_unix2addr(const char *path)

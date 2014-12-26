@@ -13,7 +13,7 @@ MAKEFILE = Makefile.dj
 OBJ_DIR = djgpp
 
 #
-# Find out if using a UNIX-like shell or a DOS command interpreter
+# Find out if using a Unix-like shell or a DOS command interpreter
 #
 ifneq ($(findstring COMMAND.COM,$(SHELL)),COMMAND.COM)
   ifneq ($(findstring CMD.EXE,$(SHELL)),CMD.EXE)

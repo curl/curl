@@ -3275,12 +3275,12 @@ if test "$want_tls_srp" = "yes" && ( test "x$HAVE_GNUTLS_SRP" = "x1" || test "x$
 fi
 
 dnl ************************************************************
-dnl disable UNIX domain sockets support
+dnl disable Unix domain sockets support
 dnl
-AC_MSG_CHECKING([whether to enable UNIX domain sockets])
+AC_MSG_CHECKING([whether to enable Unix domain sockets])
 AC_ARG_ENABLE(unix-sockets,
-AC_HELP_STRING([--enable-unix-sockets],[Enable UNIX domain sockets])
-AC_HELP_STRING([--disable-unix-sockets],[Disable UNIX domain sockets]),
+AC_HELP_STRING([--enable-unix-sockets],[Enable Unix domain sockets])
+AC_HELP_STRING([--disable-unix-sockets],[Disable Unix domain sockets]),
 [ case "$enableval" in
   no)  AC_MSG_RESULT(no)
        want_unix_sockets=no
@@ -3295,7 +3295,7 @@ AC_HELP_STRING([--disable-unix-sockets],[Disable UNIX domain sockets]),
 )
 if test "x$want_unix_sockets" != "xno"; then
   AC_CHECK_MEMBER([struct sockaddr_un.sun_path], [
-    AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use UNIX domain sockets])
+    AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])
     AC_SUBST(USE_UNIX_SOCKETS, [1])
     curl_unix_sockets_msg="enabled"
   ], [
@@ -3391,7 +3391,7 @@ if test "x$IPV6_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES IPv6"
 fi
 if test "x$USE_UNIX_SOCKETS" = "x1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES UNIX-Sockets"
+  SUPPORT_FEATURES="$SUPPORT_FEATURES UnixSockets"
 fi
 if test "x$HAVE_LIBZ" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES libz"
@@ -3601,7 +3601,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   TLS-SRP support:  ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
   ipv6 support:     ${curl_ipv6_msg}
-  UNIX sockets support: ${curl_unix_sockets_msg}
+  Unix sockets support: ${curl_unix_sockets_msg}
   IDN support:      ${curl_idn_msg}
   Build libcurl:    Shared=${enable_shared}, Static=${enable_static}
   Built-in manual:  ${curl_manual_msg}

@@ -17598,7 +17598,7 @@ Version 4.8.4
  - As Julian Romero Nieto reported, curl reported wrong version number.
  - As Teemu Yli-Elsila pointed out, the win32 version of 4.8 (and probably all
    other versions for win32) didn't work with binary files since I'm too used
-   to the UNIX style fopen() where binary and text don't differ...
+   to the Unix style fopen() where binary and text don't differ...
  - Ralph Beckmann brought me some changes that lets curl compile error and
    warning free with -Wall -pedantic with g++. I also took the opportunity to
    clean off some unused variables and similar.

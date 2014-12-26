@@ -25,7 +25,7 @@ unix-sockets
 http-unix
 </server>
  <name>
-simple HTTP GET over UNIX socket
+simple HTTP GET over Unix socket
  </name>
  <command>
 --unix-socket %HTTPUNIXPATH http://server-interpreted.example.com/1435

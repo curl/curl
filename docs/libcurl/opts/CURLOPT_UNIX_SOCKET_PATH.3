@@ -22,18 +22,18 @@
 .\"
 .TH CURLOPT_UNIX_SOCKET_PATH 3 "09 Oct 2014" "libcurl 7.40.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_UNIX_SOCKET_PATH \- set UNIX domain socket
+CURLOPT_UNIX_SOCKET_PATH \- set Unix domain socket
 .SH SYNOPSIS
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UNIX_SOCKET_PATH, char *path);
 .SH DESCRIPTION
-Enables the use of UNIX domain sockets as connection endpoint and sets the path
-to \fIpath\fP. If \fIpath\fP is NULL, then UNIX domain sockets are disabled. An
+Enables the use of Unix domain sockets as connection endpoint and sets the path
+to \fIpath\fP. If \fIpath\fP is NULL, then Unix domain sockets are disabled. An
 empty string will result in an error at some point, it will not disable use of
-UNIX domain sockets.
+Unix domain sockets.
 
-When enabled, cURL will connect to the UNIX domain socket instead of
+When enabled, cURL will connect to the Unix domain socket instead of
 establishing a TCP connection to a host. Since no TCP connection is created,
 cURL does not need to resolve the DNS hostname in the URL.
 
@@ -45,9 +45,9 @@ Proxy and TCP options such as
 are not supported. Proxy options such as
 .BR CURLOPT_PROXY "(3)
 have no effect either as these are TCP-oriented, and asking a proxy server to
-connect to a certain UNIX domain socket is not possible.
+connect to a certain Unix domain socket is not possible.
 .SH DEFAULT
-Default is NULL, meaning that no UNIX domain sockets are used.
+Default is NULL, meaning that no Unix domain sockets are used.
 .SH PROTOCOLS
 All protocols except for file:// and FTP are supported in theory. HTTP, IMAP,
 POP3 and SMTP should in particular work (including their SSL/TLS variants).

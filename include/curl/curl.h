@@ -1619,7 +1619,7 @@ typedef enum {
      this option is used only if SSL_VERIFYPEER is true */
   CINIT(PINNEDPUBLICKEY, OBJECTPOINT, 230),
 
-  /* Path to UNIX domain socket */
+  /* Path to Unix domain socket */
   CINIT(UNIX_SOCKET_PATH, OBJECTPOINT, 231),
 
   CURLOPT_LASTENTRY /* the last unused */
@@ -2269,7 +2269,7 @@ typedef struct {
 #define CURL_VERSION_HTTP2        (1<<16) /* HTTP2 support built-in */
 #define CURL_VERSION_GSSAPI       (1<<17) /* Built against a GSS-API library */
 #define CURL_VERSION_KERBEROS5    (1<<18) /* Kerberos V5 auth is supported */
-#define CURL_VERSION_UNIX_SOCKETS (1<<19) /* UNIX domain sockets support */
+#define CURL_VERSION_UNIX_SOCKETS (1<<19) /* Unix domain sockets support */
 
  /*
  * NAME curl_version_info()

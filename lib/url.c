@@ -5089,7 +5089,7 @@ static CURLcode resolve_server(struct SessionHandle *data,
 
 #ifdef USE_UNIX_SOCKETS
     if(data->set.str[STRING_UNIX_SOCKET_PATH]) {
-      /* UNIX domain sockets are local. The host gets ignored, just use the
+      /* Unix domain sockets are local. The host gets ignored, just use the
        * specified domain socket address. Do not cache "DNS entries". There is
        * no DNS involved and we already have the filesystem path available */
       const char *path = data->set.str[STRING_UNIX_SOCKET_PATH];
@@ -5102,7 +5102,7 @@ static CURLcode resolve_server(struct SessionHandle *data,
       else {
         /* Long paths are not supported for now */
         if(strlen(path) >= sizeof(((struct sockaddr_un *)0)->sun_path)) {
-          failf(data, "UNIX socket path too long: '%s'", path);
+          failf(data, "Unix socket path too long: '%s'", path);
           result = CURLE_COULDNT_RESOLVE_HOST;
         }
         else
@@ -5430,7 +5430,7 @@ static CURLcode create_conn(struct SessionHandle *data,
 
 #ifdef USE_UNIX_SOCKETS
   if(proxy && data->set.str[STRING_UNIX_SOCKET_PATH]) {
-    free(proxy);  /* UNIX domain sockets cannot be proxied, so disable it */
+    free(proxy);  /* Unix domain sockets cannot be proxied, so disable it */
     proxy = NULL;
   }
 #endif

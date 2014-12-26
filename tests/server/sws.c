@@ -1368,7 +1368,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 #endif /* ENABLE_IPV6 */
 #ifdef USE_UNIX_SOCKETS
   case AF_UNIX:
-    logmsg("Proxying through UNIX socket is not (yet?) supported.");
+    logmsg("Proxying through Unix socket is not (yet?) supported.");
     return CURL_SOCKET_BAD;
 #endif /* USE_UNIX_SOCKETS */
   }
@@ -2163,7 +2163,7 @@ int main(int argc, char *argv[])
         goto sws_cleanup;
       }
       /* socket server is not alive, now check if it was actually a socket.
-       * Systems which have UNIX sockets will also have lstat */
+       * Systems which have Unix sockets will also have lstat */
       rc = lstat(unix_socket, &statbuf);
       if (0 != rc) {
         logmsg("Error binding socket, failed to stat %s: (%d) %s",
@@ -2208,7 +2208,7 @@ int main(int argc, char *argv[])
   }
 
 #ifdef USE_UNIX_SOCKETS
-  /* listen succeeds, so let's assume a valid listening UNIX socket */
+  /* listen succeeds, so let's assume a valid listening Unix socket */
   unlink_socket = true;
 #endif
 

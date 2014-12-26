@@ -25,7 +25,7 @@ ftp
 lib574
 </tool>
 <name>
-FTP wildcard download - changed fnmatch, 2x perform (UNIX LIST response)
+FTP wildcard download - changed fnmatch, 2x perform (Unix LIST response)
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*.txt

@@ -813,12 +813,12 @@ the following places in this order:
 
 1) curl tries to find the "home dir": It first checks for the CURL_HOME and
 then the HOME environment variables. Failing that, it uses getpwuid() on
-UNIX-like systems (which returns the home dir given the current user in your
+Unix-like systems (which returns the home dir given the current user in your
 system). On Windows, it then checks for the APPDATA variable, or as a last
 resort the '%USERPROFILE%\\Application Data'.
 
 2) On windows, if there is no _curlrc file in the home dir, it checks for one
-in the same dir the curl executable is placed. On UNIX-like systems, it will
+in the same dir the curl executable is placed. On Unix-like systems, it will
 simply try to load .curlrc from the determined home dir.
 
 .nf
@@ -1026,7 +1026,7 @@ in Metalink file, hash check will fail.
 .IP "-n, --netrc"
 Makes curl scan the \fI.netrc\fP (\fI_netrc\fP on Windows) file in the user's
 home directory for login name and password. This is typically used for FTP on
-UNIX. If used with HTTP, curl will enable user authentication. See
+Unix. If used with HTTP, curl will enable user authentication. See
 .BR netrc(4)
 or
 .BR ftp(1)
@@ -1663,7 +1663,7 @@ If this option is used several times, the last one will be used.
 Prepends a time stamp to each trace or verbose line that curl displays.
 (Added in 7.14.0)
 .IP "--unix-socket <path>"
-(HTTP) Connect through this UNIX domain socket, instead of using the
+(HTTP) Connect through this Unix domain socket, instead of using the
 network. (Added in 7.40.0)
 .IP "-u, --user <user:password>"
 Specify the user name and password to use for server authentication. Overrides

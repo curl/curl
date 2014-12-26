@@ -39,7 +39,7 @@ unix-sockets
 http-unix
 </server>
  <name>
-HTTP requests with multiple connections over UNIX socket
+HTTP requests with multiple connections over Unix socket
  </name>
  <command>
 --unix-socket %HTTPUNIXPATH http://one.example.com/14360001 http://two.example.com/14360002 http://one.example.com/14360003

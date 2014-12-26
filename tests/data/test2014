@@ -35,7 +35,7 @@ file
 Metalink
 </features>
  <name>
-Metalink local XML file, attempt UNIX path relative to current
+Metalink local XML file, attempt Unix path relative to current
  </name>
 <command option="no-output,no-include">
 --metalink file://%PWD/log/test2014.metalink

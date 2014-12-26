@@ -333,7 +333,7 @@ Available substitute variables include:
 %HOSTIP       - IPv4 address of the host running this test
 %HTTP6PORT    - IPv6 port number of the HTTP server
 %HTTPPIPEPORT - Port number of the HTTP pipelining server
-%HTTPUNIXPATH - Path to the UNIX socket of the HTTP server
+%HTTPUNIXPATH - Path to the Unix socket of the HTTP server
 %HTTPPORT     - Port number of the HTTP server
 %HTTPSPORT    - Port number of the HTTPS server
 %HTTPTLS6PORT - IPv6 port number of the HTTP TLS server

@@ -1420,18 +1420,18 @@ enum dupstring {
   STRING_SSH_KNOWNHOSTS,  /* file name of knownhosts file */
 #endif
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  STRING_SOCKS5_GSSAPI_SERVICE,  /* GSSAPI service name */
+  STRING_SOCKS5_GSSAPI_SERVICE, /* GSSAPI service name */
 #endif
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,
 
 #ifdef USE_TLS_SRP
-  STRING_TLSAUTH_USERNAME,     /* TLS auth <username> */
-  STRING_TLSAUTH_PASSWORD,     /* TLS auth <password> */
+  STRING_TLSAUTH_USERNAME,      /* TLS auth <username> */
+  STRING_TLSAUTH_PASSWORD,      /* TLS auth <password> */
 #endif
-  STRING_BEARER,          /* <bearer>, if used */
+  STRING_BEARER,                /* <bearer>, if used */
 #ifdef USE_UNIX_SOCKETS
-  STRING_UNIX_SOCKET_PATH,  /* path to UNIX socket, if used */
+  STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
 #endif
 
   /* -- end of zero-terminated strings -- */

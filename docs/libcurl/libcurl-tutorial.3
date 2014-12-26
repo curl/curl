@@ -40,7 +40,7 @@ refer to their respective man pages.
 
 .SH "Building"
 There are many different ways to build C programs. This chapter will assume a
-UNIX-style build process. If you use a different build system, you can still
+Unix style build process. If you use a different build system, you can still
 read this to get general information that may apply to your environment as
 well.
 .IP "Compiling the Program"
@@ -412,7 +412,7 @@ similar to the \fICURLOPT_USERPWD(3)\fP option like this:
 
  curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
 
-There's a long time UNIX "standard" way of storing ftp user names and
+There's a long time Unix "standard" way of storing FTP user names and
 passwords, namely in the $HOME/.netrc file. The file should be made private
 so that only the user may read it (see also the "Security Considerations"
 chapter), as it might contain the password in plain text. libcurl has the
@@ -1402,7 +1402,7 @@ This happens on Windows machines when libcurl is built and used as a
 DLL. However, you can still do this on Windows if you link with a static
 library.
 .IP "[3]"
-The curl-config tool is generated at build-time (on UNIX-like systems) and
+The curl-config tool is generated at build-time (on Unix-like systems) and
 should be installed with the 'make install' or similar instruction that
 installs the library, header files, man pages etc.
 .IP "[4]"

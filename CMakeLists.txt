@@ -527,7 +527,7 @@ if(CMAKE_USE_GSSAPI)
   endif()
 endif()
 
-option(ENABLE_UNIX_SOCKETS "Define if you want UNIX domain sockets support" ON)
+option(ENABLE_UNIX_SOCKETS "Define if you want Unix domain sockets support" ON)
 if(ENABLE_UNIX_SOCKETS)
   include(CheckStructHasMember)
   check_struct_has_member("struct sockaddr_un" sun_path "sys/un.h" USE_UNIX_SOCKETS)

@@ -1,4 +1,4 @@
-EPM is a free UNIX software/file packaging program that generates distribution
+EPM is a free Unix software/file packaging program that generates distribution
 archives from a list of files. EPM Can:
 
  * Generate portable script-based distribution packages complete with

@@ -141,7 +141,7 @@ my $HTTPTLSPORT;         # HTTP TLS (non-stunnel) server port
 my $HTTPTLS6PORT;        # HTTP TLS (non-stunnel) IPv6 server port
 my $HTTPPROXYPORT;       # HTTP proxy port, when using CONNECT
 my $HTTPPIPEPORT;        # HTTP pipelining port
-my $HTTPUNIXPATH;        # HTTP server UNIX domain socket path
+my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
@@ -203,12 +203,12 @@ my $ssl_version;    # set if libcurl is built with SSL support
 my $large_file;     # set if libcurl is built with large file support
 my $has_idn;        # set if libcurl is built with IDN support
 my $http_ipv6;      # set if HTTP server has IPv6 support
-my $http_unix;      # set if HTTP server has UNIX sockets support
+my $http_unix;      # set if HTTP server has Unix sockets support
 my $ftp_ipv6;       # set if FTP server has IPv6 support
 my $tftp_ipv6;      # set if TFTP server has IPv6 support
 my $gopher_ipv6;    # set if Gopher server has IPv6 support
 my $has_ipv6;       # set if libcurl is built with IPv6 support
-my $has_unix;       # set if libcurl is built with UNIX sockets support
+my $has_unix;       # set if libcurl is built with Unix sockets support
 my $has_libz;       # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;       # set if libcurl is built with NTLM support
@@ -317,7 +317,7 @@ my $USER = $ENV{USER};          # Linux
 if (!$USER) {
     $USER = $ENV{USERNAME};     # Windows
     if (!$USER) {
-        $USER = $ENV{LOGNAME};  # Some UNIX (I think)
+        $USER = $ENV{LOGNAME};  # Some Unix (I think)
     }
 }
 
@@ -726,7 +726,7 @@ sub verifyhttp {
     my $server = servername_id($proto, $ipvnum, $idnum);
     my $pid = 0;
     my $bonus="";
-    # $port_or_path contains a path for UNIX sockets, sws ignores the port
+    # $port_or_path contains a path for Unix sockets, sws ignores the port
     my $port = ($ipvnum eq "unix") ? 80 : $port_or_path;
 
     my $verifyout = "$LOGDIR/".
@@ -1215,7 +1215,7 @@ sub runhttpserver {
         $verbose_flag .= "1 ";
     }
     elsif($alt eq "unix") {
-        # IP (protocol) is mutually exclusive with UNIX sockets
+        # IP (protocol) is mutually exclusive with Unix sockets
         $ipvnum = "unix";
     }
 
@@ -2118,7 +2118,7 @@ sub responsive_http_server {
         $idnum = 2;
     }
     elsif($alt eq "unix") {
-        # IP (protocol) is mutually exclusive with UNIX sockets
+        # IP (protocol) is mutually exclusive with Unix sockets
         $ipvnum = "unix";
     }
 
@@ -2373,7 +2373,7 @@ sub checksystem {
 
             # Generate a "proto-ipv6" version of each protocol to match the
             # IPv6 <server> name and a "proto-unix" to match the variant which
-            # uses UNIX domain sockets. This works even if support isn't
+            # uses Unix domain sockets. This works even if support isn't
             # compiled in because the <features> test will fail.
             push @protocols, map(("$_-ipv6", "$_-unix"), @protocols);
 
@@ -2548,7 +2548,7 @@ sub checksystem {
     }
 
     if($has_unix) {
-        # client has UNIX sockets support, check whether the HTTP server has it
+        # client has Unix sockets support, check whether the HTTP server has it
         my @sws = `server/sws --version`;
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
@@ -2584,7 +2584,7 @@ sub checksystem {
     logmsg sprintf("  track memory: %s\n", $has_memory_tracking?"ON ":"OFF");
     logmsg sprintf("* valgrind:     %8s", $valgrind?"ON ":"OFF");
     logmsg sprintf("  HTTP IPv6     %s\n", $http_ipv6?"ON ":"OFF");
-    logmsg sprintf("* HTTP UNIX     %s\n", $http_unix?"ON ":"OFF");
+    logmsg sprintf("* HTTP Unix     %s\n", $http_unix?"ON ":"OFF");
     logmsg sprintf("* FTP IPv6      %8s", $ftp_ipv6?"ON ":"OFF");
     logmsg sprintf("  Libtool lib:  %s\n", $libtool?"ON ":"OFF");
     logmsg sprintf("* Shared build:      %-3s", $has_shared);
@@ -2638,9 +2638,9 @@ sub checksystem {
     logmsg sprintf("*   HTTP-PIPE/%d \n", $HTTPPIPEPORT);
 
     if($has_unix) {
-        logmsg "* UNIX socket paths:\n";
+        logmsg "* Unix socket paths:\n";
         if($http_unix) {
-            logmsg sprintf("*   HTTP-UNIX:%s\n", $HTTPUNIXPATH);
+            logmsg sprintf("*   HTTP-Unix:%s\n", $HTTPUNIXPATH);
         }
     }
 
@@ -2692,7 +2692,7 @@ sub subVariables {
   $$thing =~ s/%TFTP6PORT/$TFTP6PORT/g;
   $$thing =~ s/%TFTPPORT/$TFTPPORT/g;
 
-  # server UNIX domain socket paths
+  # server Unix domain socket paths
 
   $$thing =~ s/%HTTPUNIXPATH/$HTTPUNIXPATH/g;
 
@@ -4962,7 +4962,7 @@ $HTTPTLSPORT     = $base++; # HTTP TLS (non-stunnel) server port
 $HTTPTLS6PORT    = $base++; # HTTP TLS (non-stunnel) IPv6 server port
 $HTTPPROXYPORT   = $base++; # HTTP proxy port, when using CONNECT
 $HTTPPIPEPORT    = $base++; # HTTP pipelining port
-$HTTPUNIXPATH    = 'http.sock'; # HTTP server UNIX domain socket path
+$HTTPUNIXPATH    = 'http.sock'; # HTTP server Unix domain socket path
 
 #######################################################################
 # clear and create logging directory:

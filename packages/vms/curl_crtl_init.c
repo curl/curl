@@ -232,7 +232,7 @@ static void set_features(void)
         /* POSIX requires that open files be able to be removed */
         set_feature_default ("DECC$ALLOW_REMOVE_OPEN_FILES", ENABLE);
 
-        /* Default to outputting UNIX filesnames in VMS routines */
+        /* Default to outputting Unix filenames in VMS routines */
         set_feature_default ("DECC$FILENAME_UNIX_ONLY", ENABLE);
         /* FILENAME_UNIX_ONLY Implicitly sets */
         /* decc$disable_to_vms_logname_translation */
@@ -248,7 +248,7 @@ static void set_features(void)
         set_feature_default("DECC$FILENAME_UNIX_REPORT", ENABLE);
     }
 
-    /* When reporting UNIX filenames, glob the same way */
+    /* When reporting Unix filenames, glob the same way */
     set_feature_default ("DECC$GLOB_UNIX_STYLE", ENABLE);
 
     /* The VMS version numbers on Unix filenames is incompatible with most */

@@ -81,7 +81,7 @@ The cURL Test Suite
   machine, or just move the servers in case you have local services on any of
   those ports.
 
-  The HTTP server supports listening on a UNIX domain socket, the default
+  The HTTP server supports listening on a Unix domain socket, the default
   location is 'http.sock'.
 
  1.4 Run

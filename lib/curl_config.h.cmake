@@ -912,7 +912,7 @@
 /* if SSL is enabled */
 #cmakedefine USE_SSLEAY 1
 
-/* if UNIX domain sockets are enabled  */
+/* if Unix domain sockets are enabled  */
 #cmakedefine USE_UNIX_SOCKETS
 
 /* Define to 1 if you are building a Windows target without large file

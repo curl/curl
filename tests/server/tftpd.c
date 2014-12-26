@@ -1371,7 +1371,7 @@ abort:
 
 /*
  * Send a nak packet (error message).  Error code passed in is one of the
- * standard TFTP codes, or a UNIX errno offset by 100.
+ * standard TFTP codes, or a Unix errno offset by 100.
  */
 static void nak(int error)
 {

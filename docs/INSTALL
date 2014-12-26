@@ -20,10 +20,10 @@ Building from git
    If you get your code off a git repository, see the GIT-INFO file in the
    root directory for specific instructions on how to proceed.
 
-UNIX
+Unix
 ====
 
-   A normal unix installation is made in three or four steps (after you've
+   A normal Unix installation is made in three or four steps (after you've
    unpacked the source archive):
 
         ./configure
