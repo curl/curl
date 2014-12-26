@@ -564,7 +564,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
             /* compare position with size, abort if not equal */
             if(size.QuadPart == pos.QuadPart) {
               /* sleep and continue waiting */
-              SleepEx(100, FALSE);
+              SleepEx(0, FALSE);
               continue;
             }
           }
@@ -618,14 +618,14 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
         if(PeekNamedPipe(handle, NULL, 0, NULL, &length, NULL)) {
           /* if there is no data available, sleep and continue waiting */
           if(length == 0) {
-            SleepEx(100, FALSE);
+            SleepEx(0, FALSE);
             continue;
           }
         }
         else {
           /* if the pipe has been closed, sleep and continue waiting */
           if(GetLastError() == ERROR_BROKEN_PIPE) {
-            SleepEx(100, FALSE);
+            SleepEx(0, FALSE);
             continue;
           }
         }
