@@ -2241,6 +2241,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
                                struct ssl_connect_data *connssl)
 
 {
+  CURLcode result;
   STACK_OF(X509) *sk;
   int i;
   char *bufp;
@@ -2258,9 +2259,11 @@ static CURLcode get_cert_chain(struct connectdata *conn,
   }
 
   numcerts = sk_X509_num(sk);
-  if(Curl_ssl_init_certinfo(data, numcerts)) {
+
+  result = Curl_ssl_init_certinfo(data, numcerts);
+  if(result) {
     free(bufp);
-    return CURLE_OUT_OF_MEMORY;
+    return result;
   }
 
   infof(data, "--- Certificate chain\n");

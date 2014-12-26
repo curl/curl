@@ -82,7 +82,7 @@ int Curl_ssl_check_cxn(struct connectdata *conn);
 /* Certificate information list handling. */
 
 void Curl_ssl_free_certinfo(struct SessionHandle *data);
-int Curl_ssl_init_certinfo(struct SessionHandle * data, int num);
+CURLcode Curl_ssl_init_certinfo(struct SessionHandle * data, int num);
 CURLcode Curl_ssl_push_certinfo_len(struct SessionHandle * data, int certnum,
                                     const char * label, const char * value,
                                     size_t valuelen);
