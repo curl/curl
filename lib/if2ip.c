@@ -124,16 +124,21 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 
 #ifndef ENABLE_IPV6
   (void) remote_scope;
+
+#ifndef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
+  (void) remote_scope_id;
+#endif
+
 #endif
 
   if(getifaddrs(&head) >= 0) {
-    for(iface=head; iface != NULL; iface=iface->ifa_next) {
+    for(iface = head; iface != NULL; iface=iface->ifa_next) {
       if(iface->ifa_addr != NULL) {
         if(iface->ifa_addr->sa_family == af) {
           if(curl_strequal(iface->ifa_name, interf)) {
             void *addr;
             char *ip;
-            char scope[12]="";
+            char scope[12] = "";
             char ipstr[64];
 #ifdef ENABLE_IPV6
             if(af == AF_INET6) {
@@ -157,7 +162,9 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 
               /* If given, scope id should match. */
               if(remote_scope_id && scopeid != remote_scope_id) {
-                if(res == IF2IP_NOT_FOUND) res = IF2IP_AF_NOT_SUPPORTED;
+                if(res == IF2IP_NOT_FOUND)
+                  res = IF2IP_AF_NOT_SUPPORTED;
+
                 continue;
               }
 #endif
@@ -179,8 +186,10 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
         }
       }
     }
+
     freeifaddrs(head);
   }
+
   return res;
 }
 
