@@ -23,7 +23,7 @@
 
 /* Purpose
  *
- * 1. Accept a TCP connection on a custom port (ipv4 or ipv6), or connect
+ * 1. Accept a TCP connection on a custom port (IPv4 or IPv6), or connect
  *    to a given (localhost) port.
  *
  * 2. Get commands on STDIN. Pass data on to the TCP stream.

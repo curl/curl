@@ -376,7 +376,7 @@ static CURLcode bindlocal(struct connectdata *conn,
 
     if(done > 0) {
 #ifdef ENABLE_IPV6
-      /* ipv6 address */
+      /* IPv6 address */
       if(af == AF_INET6) {
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
         char *scope_ptr = strchr(myhost, '%');
@@ -399,7 +399,7 @@ static CURLcode bindlocal(struct connectdata *conn,
       }
       else
 #endif
-      /* ipv4 address */
+      /* IPv4 address */
       if((af == AF_INET) &&
          (Curl_inet_pton(AF_INET, myhost, &si4->sin_addr) > 0)) {
         si4->sin_family = AF_INET;

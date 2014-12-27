@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     /* Check that the system has IPv6 enabled before checking the resolver */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)
-      /* an ipv6 address was requested and we can't get/use one */
+      /* an IPv6 address was requested and we can't get/use one */
       rc = -1;
     else {
       sclose(s);

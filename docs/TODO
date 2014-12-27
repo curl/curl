@@ -135,7 +135,7 @@
 
  Use 'struct lifreq' and SIOCGLIFADDR instead of 'struct ifreq' and
  SIOCGIFADDR on newer Solaris versions as they claim the latter is obsolete.
- To support ipv6 interface addresses for network interfaces properly.
+ To support IPv6 interface addresses for network interfaces properly.
 
 1.4 signal-based resolver timeouts
 

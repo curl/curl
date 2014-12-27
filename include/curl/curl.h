@@ -1658,8 +1658,8 @@ typedef enum {
      option might be handy to force libcurl to use a specific IP version. */
 #define CURL_IPRESOLVE_WHATEVER 0 /* default, resolves addresses to all IP
                                      versions that your system allows */
-#define CURL_IPRESOLVE_V4       1 /* resolve to ipv4 addresses */
-#define CURL_IPRESOLVE_V6       2 /* resolve to ipv6 addresses */
+#define CURL_IPRESOLVE_V4       1 /* resolve to IPv4 addresses */
+#define CURL_IPRESOLVE_V6       2 /* resolve to IPv6 addresses */
 
   /* three convenient "aliases" that follow the name scheme better */
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER

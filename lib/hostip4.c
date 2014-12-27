@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,9 +57,9 @@
 #include "memdebug.h"
 
 /***********************************************************************
- * Only for plain-ipv4 builds
+ * Only for plain IPv4 builds
  **********************************************************************/
-#ifdef CURLRES_IPV4 /* plain ipv4 code coming up */
+#ifdef CURLRES_IPV4 /* plain IPv4 code coming up */
 /*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
@@ -67,7 +67,7 @@
 bool Curl_ipvalid(struct connectdata *conn)
 {
   if(conn->ip_version == CURL_IPRESOLVE_V6)
-    /* an ipv6 address was requested and we can't get/use one */
+    /* An IPv6 address was requested and we can't get/use one */
     return FALSE;
 
   return TRUE; /* OK, proceed */
@@ -76,7 +76,7 @@ bool Curl_ipvalid(struct connectdata *conn)
 #ifdef CURLRES_SYNCH
 
 /*
- * Curl_getaddrinfo() - the ipv4 synchronous version.
+ * Curl_getaddrinfo() - the IPv4 synchronous version.
  *
  * The original code to this function was from the Dancer source code, written
  * by Bjorn Reese, it has since been patched and modified considerably.

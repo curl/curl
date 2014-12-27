@@ -711,9 +711,9 @@ else
 	@echo c-ares support:  no
 endif
 ifdef ENABLE_IPV6
-	@echo ipv6 support:    enabled
+	@echo IPv6 support:    enabled
 else
-	@echo ipv6 support:    no
+	@echo IPv6 support:    no
 endif
 
 $(CURL_INC)/curl/curlbuild.h: Makefile.netware FORCE

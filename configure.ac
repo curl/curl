@@ -1064,10 +1064,10 @@ dnl **********************************************************************
 dnl Checks for IPv6
 dnl **********************************************************************
 
-AC_MSG_CHECKING([whether to enable ipv6])
+AC_MSG_CHECKING([whether to enable IPv6])
 AC_ARG_ENABLE(ipv6,
-AC_HELP_STRING([--enable-ipv6],[Enable ipv6 (with ipv4) support])
-AC_HELP_STRING([--disable-ipv6],[Disable ipv6 support]),
+AC_HELP_STRING([--enable-ipv6],[Enable IPv6 (with IPv4) support])
+AC_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -3600,7 +3600,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   GSS-API support:  ${curl_gss_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
-  ipv6 support:     ${curl_ipv6_msg}
+  IPv6 support:     ${curl_ipv6_msg}
   Unix sockets support: ${curl_unix_sockets_msg}
   IDN support:      ${curl_idn_msg}
   Build libcurl:    Shared=${enable_shared}, Static=${enable_static}

@@ -2529,12 +2529,12 @@ sub checksystem {
     }
 
     if($has_ipv6) {
-        # client has ipv6 support
+        # client has IPv6 support
 
         # check if the HTTP server has it!
         my @sws = `server/sws --version`;
         if($sws[0] =~ /IPv6/) {
-            # HTTP server has ipv6 support!
+            # HTTP server has IPv6 support!
             $http_ipv6 = 1;
             $gopher_ipv6 = 1;
         }
@@ -2542,7 +2542,7 @@ sub checksystem {
         # check if the FTP server has it!
         @sws = `server/sockfilt --version`;
         if($sws[0] =~ /IPv6/) {
-            # FTP server has ipv6 support!
+            # FTP server has IPv6 support!
             $ftp_ipv6 = 1;
         }
     }

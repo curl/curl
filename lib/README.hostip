@@ -28,8 +28,8 @@
  hostsyn.c     - functions for synchronous name resolves
  asyn-ares.c   - functions for asynchronous name resolves using c-ares
  asyn-thread.c - functions for asynchronous name resolves using threads
- hostip4.c     - ipv4-specific functions
- hostip6.c     - ipv6-specific functions
+ hostip4.c     - IPv4 specific functions
+ hostip6.c     - IPv6 specific functions
 
  The hostip.h is the single united header file for all this. It defines the
  CURLRES_* defines based on the config*.h and curl_setup.h defines.

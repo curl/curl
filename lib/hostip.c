@@ -98,8 +98,8 @@
  * hostip.c   - method-independent resolver functions and utility functions
  * hostasyn.c - functions for asynchronous name resolves
  * hostsyn.c  - functions for synchronous name resolves
- * hostip4.c  - ipv4-specific functions
- * hostip6.c  - ipv6-specific functions
+ * hostip4.c  - IPv4 specific functions
+ * hostip6.c  - IPv6 specific functions
  *
  * The two asynchronous name resolver backends are implemented in:
  * asyn-ares.c   - functions for ares-using name resolves

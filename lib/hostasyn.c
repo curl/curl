@@ -110,7 +110,7 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
     async struct */
   conn->async.done = TRUE;
 
-  /* ipv4: The input hostent struct will be freed by ares when we return from
+  /* IPv4: The input hostent struct will be freed by ares when we return from
      this function */
   return result;
 }

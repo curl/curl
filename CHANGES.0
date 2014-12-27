@@ -267,7 +267,7 @@ Daniel Stenberg (16 Apr 2010)
 Daniel Stenberg (15 Apr 2010)
 - Rainer Canavan filed bug report #2987196 that identified libcurl doing
   unnecesary reverse name lookups in many cases when built to use IPv4 and
-  getaddrinfo(). The logic for ipv6 is now used for ipv4 too.
+  getaddrinfo(). The logic for IPv6 is now used for IPv4 too.
 
   (http://curl.haxx.se/bug/view.cgi?id=2963679)
 
@@ -4271,7 +4271,7 @@ Daniel S (15 Nov 2007)
   list.
 
 - Michal Marek fixed the test suite to better deal with the case when the HTTP
-  ipv6 server can't run.
+  IPv6 server can't run.
 
 Yang Tse (14 Nov 2007)
 - Fix a variable potential wrapping in add_buffer() when using absolutely
@@ -6109,7 +6109,7 @@ Daniel (22 August 2006)
 - David McCreedy fixed a remaining mistake from the August 19 TYPE change.
 
 - Peter Sylvester pointed out a flaw in the AllowServerConnect() in the FTP
-  code when doing pure ipv6 EPRT connections.
+  code when doing pure IPv6 EPRT connections.
 
 Daniel (19 August 2006)
 - Based on a patch by Armel Asselin, the FTP code no longer re-issues the TYPE
@@ -6666,8 +6666,8 @@ Daniel (24 January 2006)
 
 Daniel (20 January 2006)
 - Duane Cathey was one of our friends who reported that curl -P [IP]
-  (CURLOPT_FTPPORT) didn't work for ipv6-enabed curls if the IP wasn't a
-  "native" IP while it works fine for ipv6-disabled builds!
+  (CURLOPT_FTPPORT) didn't work for IPv6-enabed curls if the IP wasn't a
+  "native" IP while it works fine for IPv6-disabled builds!
 
   In the process of fixing this, I removed the support for LPRT since I can't
   think of many reasons to keep doing it and asking on the mailing list didn't
@@ -6676,7 +6676,7 @@ Daniel (20 January 2006)
 
 Daniel (19 January 2006)
 - Jon Turner pointed out that doing -P [hostname] (CURLOPT_FTPPORT) with curl
-  (built ipv4-only) didn't work.
+  (built IPv4-only) didn't work.
 
 Daniel (18 January 2006)
 - As reported in bug #1408742 (http://curl.haxx.se/bug/view.cgi?id=1408742),
@@ -7557,7 +7557,7 @@ Daniel (29 March 2005)
 Daniel (16 March 2005)
 - Tru64 and some IRIX boxes seem to not like test 237 as it is. Their
   inet_addr() functions seems to use &255 on all numericals in a ipv4 dotted
-  address which makes a different failure... Now I've modified the ipv4
+  address which makes a different failure... Now I've modified the IPv4
   resolve code to use inet_pton() instead in an attempt to make these systems
   better detect this as a bad IP address rather than creating a toally bogus
   address that is then passed on and used.
@@ -7750,7 +7750,7 @@ Daniel (7 February 2005)
 
 Daniel (5 February 2005)
 - Eric Vergnaud found a use of an uninitialised variable in the ftp when doing
-  PORT on ipv6-enabled hosts.
+  PORT on IPv6-enabled hosts.
 
 - David Byron pointed out we could use BUFSIZE to read data (in
   lib/transfer.c) instead of using BUFSIZE -1.
@@ -7822,7 +7822,7 @@ Daniel (28 January 2005)
   8. fetch a URL from the same server as before (re-using the connection)
 
 - Stephen More pointed out that CURLOPT_FTPPORT and the -P option didn't work
-  when built ipv6-enabled. I've now made a fix for it. Writing test cases for
+  when built IPv6-enabled. I've now made a fix for it. Writing test cases for
   custom port hosts turned too tricky so unfortunately there's none.
 
 Daniel (25 January 2005)
@@ -8560,9 +8560,9 @@ Daniel (20 August 2004)
   byte file is downloaded.
 
 Daniel (18 August 2004)
-- Ling Thio pointed out that when libcurl is built ipv6-enabled, it still did
+- Ling Thio pointed out that when libcurl is built IPv6-enabled, it still did
   reverse DNS lookups when fed with a numerical IP-address (like
-  http://127.0.0.1/), although it doesn't when built ipv6-disabled. libcurl
+  http://127.0.0.1/), although it doesn't when built IPv6-disabled. libcurl
   should never do reverse lookups.
 
 Daniel (17 August 2004)
@@ -8714,7 +8714,7 @@ Daniel (27 June 2004)
 Daniel (24 June 2004)
 - The standard curl_version() string now only includes version info about
   involved libraries and not about particular features. Thus it will no longer
-  include info about ipv6 nor GSS. That info is of course still available in
+  include info about IPv6 nor GSS. That info is of course still available in
   the feature bitmask curl_version_info() offers.
 
 - Replaced all occurances of sprintf() with snprintf(). This is mostly because
@@ -8729,8 +8729,8 @@ Daniel (24 June 2004)
 
   Internally, this means amongst other things that we can stop doing the weird
   "increase buffer size until it works" trick when resolving hosts on
-  ipv4-only with gethostbyname_r(), we support socks even on libcurls built
-  with ipv6 enabled (but only to socks servers that resolve to an ipv4
+  IPv4-only with gethostbyname_r(), we support socks even on libcurls built
+  with IPv6 enabled (but only to socks servers that resolve to an IPv4
   address) and we no longer deep-copy or relocate hostent structs (we create
   Curl_addrinfo chains instead).
 
@@ -9074,7 +9074,7 @@ Daniel (27 April 2004)
   and proxy name to the ACE encoded version to use internally for resolves and
   cookies etc. They are now using one 'struct hostname' each that keep both
   the original name and the possibly encoded name. IDN resolves work for me
-  now using ipv6, ipv4 and ares resolving. Even cookies on IDN sites seem to
+  now using IPv6, IPv4 and ares resolving. Even cookies on IDN sites seem to
   do right. I got some failures at first when CHARSET wasn't set at all which
   confused libidn completely and it decided by encoding of choice was
   'ANSI_X3.4-1968'...
@@ -9115,7 +9115,7 @@ Daniel (25 April 2004)
 
   CURLRES_ARES - is defined if libcurl is built to use c-ares for asynchronous
   name resolves. It cannot have ENABLE_IPV6 defined at the same time, as
-  c-ares has no ipv6 support. This can be Windows or *nix.
+  c-ares has no IPv6 support. This can be Windows or *nix.
 
   CURLRES_THREADED - is defined if libcurl is built to run under (native)
   Windows, and then the name resolve will be done in a new thread, and the
@@ -9132,8 +9132,8 @@ Daniel (25 April 2004)
   hostsyn.c  - functions for synchronous name resolves
   hostares.c - functions for ares-using name resolves
   hostthre.c - functions for threaded name resolves
-  hostip4.c  - ipv4-specific functions
-  hostip6.c  - ipv6-specific functions
+  hostip4.c  - IPv4 specific functions
+  hostip6.c  - IPv6 specific functions
 
   The hostip.h is the single united header file for all this. It defines the
   CURLRES_* defines based on the config*.h and setup.h defines.
@@ -9225,7 +9225,7 @@ Daniel (15 April 2004)
   for the typical (not very deep) case.
 
 Daniel (14 April 2004)
-- Asking for CURL_IPRESOLVE_V6 when ipv6 addresses can't be resolved will
+- Asking for CURL_IPRESOLVE_V6 when IPv6 addresses can't be resolved will
   now cause the resolve function to return NULL immediately. This flaw was
   pointed out by Gisle Vanem.
 
@@ -9380,7 +9380,7 @@ Daniel (29 March 2004)
 - The postit2.c source example used the wrong struct name for the post data.
 
 Daniel (26 March 2004)
-- Gisle Vanem improved ipv6 support on windows by making the curl build to use
+- Gisle Vanem improved IPv6 support on Windows by making the curl build use
   the correct getaddrinfo() function.
 
 Daniel (25 March 2004)
@@ -9673,7 +9673,7 @@ Daniel (16 February 2004)
   and re-use that same handle during the entire curl handle's life-time. It
   improves performance.
 
-- Fixed a problem when displaying verbose for ipv6-enabled libcurls and
+- Fixed a problem when displaying verbose for IPv6-enabled libcurls and
   re-used connections. Problem reported and fix verified by Grigory Entin.
 
 - Jeff Lawson fixed the version-check in the SOCKS5 code.
@@ -9725,7 +9725,7 @@ Daniel (9 February 2004)
 
 - Tor Arntsen provided a patch that makes libcurl work-around a bug in the
   AIX5 implementation of getaddrinfo(). This makes the FTP PORT stuff work on
-  ipv6-enabled AIX builds.
+  IPv6-enabled AIX builds.
 
 - Ken Rastatter provided portability fixes for the curlgtk.c example, and now
   it runs on windows with GTK as well!
@@ -9754,7 +9754,7 @@ Daniel (5 February 2004)
   verifies this functionality.
 
 - Tor Arntsen fixed a weird getaddrinfo() usage in the FTP code, preventing
-  the ipv6-code for PORT work on AIX 5.2. We now also provide (better) error
+  the IPv6-code for PORT work on AIX 5.2. We now also provide (better) error
   messages when bailing out in the that function.
 
 - Tor Arntsen now provides AIX and IRIX (using gcc, xlc and the MIPSPro
@@ -10133,10 +10133,10 @@ Daniel (13 November)
   possibly other platforms too.
 
 - Peter Sylvester identified a problem in the connect code, which made the
-  multi interface on a ipv6-enabled solaris box do bad. Test case 504 to be
+  multi interface on a IPv6-enabled Solaris box do bad. Test case 504 to be
   specific. I've spent some time to clean-up the Curl_connecthost() function
-  now to use less duplicated code for the two different sections: ipv6 and
-  ipv4.
+  now to use less duplicated code for the two different sections: IPv6 and
+  IPv4.
 
 Daniel (11 November)
 - Added CURLOPT_NETRC_FILE. Use this to tell libcurl which file to use instead
@@ -10234,7 +10234,7 @@ Daniel (29 October)
 Daniel (28 October)
 - Dan C tracked down yet another weird behavior in the glibc gethostbyname_r()
   function for some specific versions (reported on 2.2.5 and 2.1.1), and
-  provided a fix. On Linux machines with these glibc versions, non-ipv6
+  provided a fix. On Linux machines with these glibc versions, non-IPv6
   builds of libcurl would often fail to resolve perfectly resolvable host
   names.
 
@@ -10353,7 +10353,7 @@ Version 7.10.8-pre3 (8 October 2003)
 
 Daniel (8 October)
 - Frank Ticheler provided a patch that fixes how libcurl connects to multiple
-  addresses, if one of them fails (ipv4-code).
+  addresses, if one of them fails (IPv4 code).
 
 Daniel (7 October)
 - Neil Dunbar provided a patch that now makes libcurl check SSL
@@ -11865,7 +11865,7 @@ Daniel (30 Sep 2002)
   updated the man page accordingly.
 
 - Cris Bailiff found out that the pre-releases crashed on name lookups on
-  names such as "a:" or "baz:" (on Linux versions not being ipv6-enabled) due
+  names such as "a:" or "baz:" (on Linux versions not being IPv6-enabled) due
   to some weird return codes from gethostbyname_r(). I'll blame the complete
   lack of docs in that department. Cris provided a fix, which I modified only
   slightly.

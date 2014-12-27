@@ -1274,7 +1274,7 @@ FAQ
   you want to change name resolver function you must rebuild libcurl and tell
   it to use a different function.
 
-  - The non-ipv6 resolver that can use one out of four host name resolve calls
+  - The non-IPv6 resolver that can use one out of four host name resolve calls
     (depending on what your system supports):
 
       A - gethostbyname()
@@ -1282,15 +1282,15 @@ FAQ
       C - gethostbyname_r() with 5 arguments
       D - gethostbyname_r() with 6 arguments
 
-  - The ipv6-resolver that uses getaddrinfo()
+  - The IPv6-resolver that uses getaddrinfo()
 
   - The c-ares based name resolver that uses the c-ares library for resolves.
     Using this offers asynchronous name resolves.
 
   - The threaded resolver (default option on Windows). It uses:
 
-      A - gethostbyname() on plain ipv4 hosts
-      B - getaddrinfo() on ipv6-enabled hosts
+      A - gethostbyname() on plain IPv4 hosts
+      B - getaddrinfo() on IPv6 enabled hosts
 
   Also note that libcurl never resolves or reverse-lookups addresses given as
   pure numbers, such as 127.0.0.1 or ::1.

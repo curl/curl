@@ -635,7 +635,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   }
 
   if((pf != PF_INET) && !Curl_ipv6works())
-    /* the stack seems to be a non-ipv6 one */
+    /* The stack seems to be a non-IPv6 one */
     pf = PF_INET;
 
 #endif /* CURLRES_IPV6 */
