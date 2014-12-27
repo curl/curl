@@ -725,8 +725,9 @@ static void display_cert_info(struct SessionHandle *data,
   PR_Free(common_name);
 }
 
-static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
+static CURLcode display_conn_info(struct connectdata *conn, PRFileDesc *sock)
 {
+  CURLcode result = CURLE_OK;
   SSLChannelInfo channel;
   SSLCipherSuiteInfo suite;
   CERTCertificate *cert;
@@ -745,7 +746,6 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
   }
 
   cert = SSL_PeerCertificate(sock);
-
   if(cert) {
     infof(conn->data, "Server certificate:\n");
 
@@ -770,21 +770,24 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
           cert2 = cert3;
         }
       }
-      Curl_ssl_init_certinfo(conn->data, i);
-      for(i = 0; cert; cert = cert2) {
-        Curl_extract_certinfo(conn, i++, (char *)cert->derCert.data,
-                              (char *)cert->derCert.data + cert->derCert.len);
-        if(cert->isRoot) {
+
+      result = Curl_ssl_init_certinfo(conn->data, i);
+      if(!result) {
+        for(i = 0; cert; cert = cert2) {
+          Curl_extract_certinfo(conn, i++, (char *)cert->derCert.data,
+            (char *)cert->derCert.data + cert->derCert.len);
+          if(cert->isRoot) {
+            CERT_DestroyCertificate(cert);
+            break;
+          }
+          cert2 = CERT_FindCertIssuer(cert, now, certUsageSSLCA);
           CERT_DestroyCertificate(cert);
-          break;
         }
-        cert2 = CERT_FindCertIssuer(cert, now, certUsageSSLCA);
-        CERT_DestroyCertificate(cert);
       }
     }
   }
 
-  return;
+  return result;
 }
 
 static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
@@ -1694,7 +1697,9 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
     goto error;
   }
 
-  display_conn_info(conn, connssl->handle);
+  result = display_conn_info(conn, connssl->handle);
+  if(result)
+    goto error;
 
   if(data->set.str[STRING_SSL_ISSUERCERT]) {
     SECStatus ret = SECFailure;
