@@ -83,8 +83,7 @@
 
  14. SASL
  14.1 Other authentication mechanisms
- 14.2 GSSAPI via GSS-API libraries
- 14.3 Add QOP support to GSSAPI authentication
+ 14.2 Add QOP support to GSSAPI authentication
  
  15. Client
  15.1 sync
@@ -468,12 +467,7 @@ to provide the data to send.
  Add support for other authentication mechanisms such as EXTERNAL, OLP,
  GSS-SPNEGO and others.
  
-14.2 GSSAPI via GSS-API libraries
-
- Add support for GSSAPI authentication via third-party GSS-API libraries, such
- as Heimdal and MIT Kerberos.
-
-14.3 Add QOP support to GSSAPI authentication
+14.2 Add QOP support to GSSAPI authentication
 
  Currently the GSSAPI authentication only supports the default QOP of auth
  (Authentication), whilst Kerberos V5 supports both auth-int (Authentication

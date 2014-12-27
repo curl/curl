@@ -22,26 +22,24 @@ New stuff - libcurl
    `curl_formget()` and `curl_formfree()` by adding replacement functions and
    deprecating the old ones to allow custom mallocs and more
 
-7. SASL GSSAPI (Kerberos 5) authentication via a GSS-API library
-
-8. add support for third-party SASL libraries such as Cyrus SASL - may need to
+7. add support for third-party SASL libraries such as Cyrus SASL - may need to
    move existing native and SSPI based authentication into vsasl folder after
    reworking HTTP and SASL code
 
-9. SASL authentication in LDAP
+8. SASL authentication in LDAP
 
-10. Simplify the SMTP email interface so that programmers don't have to
-    construct the body of an email that contains all the headers, alternative
-    content, images and attachments - maintain raw interface so that
-    programmers that want to do this can
+9. Simplify the SMTP email interface so that programmers don't have to
+   construct the body of an email that contains all the headers, alternative
+   content, images and attachments - maintain raw interface so that
+   programmers that want to do this can
 
-11. Allow the email protocols to return the capabilities before
+10. Allow the email protocols to return the capabilities before
     authenticating. This will allow an application to decide on the best
     authentication mechanism
 
-12. Allow Windows threading model to be replaced by Win32 pthreads port
+11. Allow Windows threading model to be replaced by Win32 pthreads port
 
-13. Implement a dynamic buffer size to allow SFTP to use much larger buffers
+12. Implement a dynamic buffer size to allow SFTP to use much larger buffers
     and possibly allow the size to be customizable by applications. Use less
     memory when handles are not in use?
 
