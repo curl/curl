@@ -190,9 +190,11 @@ static Sockbuf_IO ldapsb_tls;
 static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 {
   ldapconninfo *li = conn->proto.generic;
-  struct SessionHandle *data=conn->data;
+  struct SessionHandle *data = conn->data;
   int rc, proto = LDAP_VERSION3;
-  char hosturl[1024], *ptr;
+  char hosturl[1024];
+  char *ptr;
+
   (void)done;
 
   strcpy(hosturl, "ldap");
@@ -213,10 +215,10 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 
 #ifdef USE_SSL
   if(conn->handler->flags & PROTOPT_SSL) {
-    CURLcode res;
-    res = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &li->ssldone);
-    if(res)
-      return res;
+    CURLcode result;
+    result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &li->ssldone);
+    if(result)
+      return result;
   }
 #endif
 
@@ -226,7 +228,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
 {
   ldapconninfo *li = conn->proto.generic;
-  struct SessionHandle *data=conn->data;
+  struct SessionHandle *data = conn->data;
   LDAPMessage *msg = NULL;
   struct timeval tv = {0,1}, *tvp;
   int rc, err;
@@ -236,11 +238,12 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
   if(conn->handler->flags & PROTOPT_SSL) {
     /* Is the SSL handshake complete yet? */
     if(!li->ssldone) {
-      CURLcode res = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET,
-                                                  &li->ssldone);
-      if(res || !li->ssldone)
-        return res;
+      CURLcode result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET,
+                                                     &li->ssldone);
+      if(result || !li->ssldone)
+        return result;
     }
+
     /* Have we installed the libcurl SSL handlers into the sockbuf yet? */
     if(!li->sslinst) {
       Sockbuf *sb;
@@ -294,6 +297,7 @@ retry:
     failf(data, "LDAP local: bind ldap_parse_result %s", ldap_err2string(rc));
     return CURLE_LDAP_CANNOT_BIND;
   }
+
   /* Try to fallback to LDAPv2? */
   if(err == LDAP_PROTOCOL_ERROR) {
     int proto;
@@ -322,6 +326,7 @@ retry:
     ldap_memfree(info);
   conn->recv[FIRSTSOCKET] = ldap_recv;
   *done = TRUE;
+
   return CURLE_OK;
 }
 
@@ -390,6 +395,7 @@ static CURLcode ldap_done(struct connectdata *conn, CURLcode res,
                           bool premature)
 {
   ldapreqinfo *lr = conn->data->req.protop;
+
   (void)res;
   (void)premature;
 
@@ -403,6 +409,7 @@ static CURLcode ldap_done(struct connectdata *conn, CURLcode res,
     conn->data->req.protop = NULL;
     free(lr);
   }
+
   return CURLE_OK;
 }
 
