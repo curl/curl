@@ -2411,7 +2411,7 @@ sub checksystem {
             if($feat =~ /IPv6/i) {
                 $has_ipv6 = 1;
             }
-            if($feat =~ /unix-sockets/i) {
+            if($feat =~ /UnixSockets/i) {
                 $has_unix = 1;
             }
             if($feat =~ /libz/i) {
