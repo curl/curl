@@ -227,7 +227,7 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
 {
   ldapconninfo *li = conn->proto.generic;
   struct SessionHandle *data=conn->data;
-  LDAPMessage *result = NULL;
+  LDAPMessage *msg = NULL;
   struct timeval tv = {0,1}, *tvp;
   int rc, err;
   char *info = NULL;
@@ -279,7 +279,7 @@ retry:
       return CURLE_OK;
   }
 
-  rc = ldap_result(li->ld, li->msgid, LDAP_MSG_ONE, tvp, &result);
+  rc = ldap_result(li->ld, li->msgid, LDAP_MSG_ONE, tvp, &msg);
   if(rc < 0) {
     failf(data, "LDAP local: bind ldap_result %s", ldap_err2string(rc));
     return CURLE_LDAP_CANNOT_BIND;
@@ -288,7 +288,8 @@ retry:
     /* timed out */
     return CURLE_OK;
   }
-  rc = ldap_parse_result(li->ld, result, &err, NULL, &info, NULL, NULL, 1);
+
+  rc = ldap_parse_result(li->ld, msg, &err, NULL, &info, NULL, NULL, 1);
   if(rc) {
     failf(data, "LDAP local: bind ldap_parse_result %s", ldap_err2string(rc));
     return CURLE_LDAP_CANNOT_BIND;
@@ -409,18 +410,19 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
                          size_t len, CURLcode *err)
 {
   ldapconninfo *li = conn->proto.generic;
-  struct SessionHandle *data=conn->data;
+  struct SessionHandle *data = conn->data;
   ldapreqinfo *lr = data->req.protop;
   int rc, ret;
-  LDAPMessage *result = NULL;
+  LDAPMessage *msg = NULL;
   LDAPMessage *ent;
   BerElement *ber = NULL;
   struct timeval tv = {0,1};
+
   (void)len;
   (void)buf;
   (void)sockindex;
 
-  rc = ldap_result(li->ld, lr->msgid, LDAP_MSG_RECEIVED, &tv, &result);
+  rc = ldap_result(li->ld, lr->msgid, LDAP_MSG_RECEIVED, &tv, &msg);
   if(rc < 0) {
     failf(data, "LDAP local: search ldap_result %s", ldap_err2string(rc));
     *err = CURLE_RECV_ERROR;
@@ -431,10 +433,10 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
   ret = -1;
 
   /* timed out */
-  if(result == NULL)
+  if(!msg)
     return ret;
 
-  for(ent = ldap_first_message(li->ld, result); ent;
+  for(ent = ldap_first_message(li->ld, msg); ent;
     ent = ldap_next_message(li->ld, ent)) {
     struct berval bv, *bvals, **bvp = &bvals;
     int binary = 0, msgtype;
@@ -546,7 +548,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
           if(error) {
             ber_memfree(bvals);
             ber_free(ber, 0);
-            ldap_msgfree(result);
+            ldap_msgfree(msg);
             *err = error;
             return -1;
           }
@@ -594,7 +596,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
     data->req.bytecount++;
     ber_free(ber, 0);
   }
-  ldap_msgfree(result);
+  ldap_msgfree(msg);
   return ret;
 }
 
