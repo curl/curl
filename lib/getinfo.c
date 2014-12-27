@@ -340,10 +340,10 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   struct curl_slist **param_slistp=NULL;
   int type;
   /* default return code is to error out! */
-  CURLcode ret = CURLE_BAD_FUNCTION_ARGUMENT;
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(!data)
-    return ret;
+    return result;
 
   va_start(arg, info);
 
@@ -352,27 +352,28 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_STRING:
     param_charp = va_arg(arg, char **);
     if(NULL != param_charp)
-      ret = getinfo_char(data, info, param_charp);
+      result = getinfo_char(data, info, param_charp);
     break;
   case CURLINFO_LONG:
     param_longp = va_arg(arg, long *);
     if(NULL != param_longp)
-      ret = getinfo_long(data, info, param_longp);
+      result = getinfo_long(data, info, param_longp);
     break;
   case CURLINFO_DOUBLE:
     param_doublep = va_arg(arg, double *);
     if(NULL != param_doublep)
-      ret = getinfo_double(data, info, param_doublep);
+      result = getinfo_double(data, info, param_doublep);
     break;
   case CURLINFO_SLIST:
     param_slistp = va_arg(arg, struct curl_slist **);
     if(NULL != param_slistp)
-      ret = getinfo_slist(data, info, param_slistp);
+      result = getinfo_slist(data, info, param_slistp);
     break;
   default:
     break;
   }
 
   va_end(arg);
-  return ret;
+
+  return result;
 }
