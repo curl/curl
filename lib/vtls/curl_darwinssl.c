@@ -1481,19 +1481,22 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   /* If there isn't one, then let's make one up! This has to be done prior
      to starting the handshake. */
   else {
-    CURLcode retcode;
+    CURLcode result;
+
     ssl_sessionid = aprintf("curl:%s:%hu",
                             conn->host.name, conn->remote_port);
     ssl_sessionid_len = strlen(ssl_sessionid);
+
     err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
     if(err != noErr) {
       failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
       return CURLE_SSL_CONNECT_ERROR;
     }
-    retcode = Curl_ssl_addsessionid(conn, ssl_sessionid, ssl_sessionid_len);
-    if(retcode!= CURLE_OK) {
+
+    result = Curl_ssl_addsessionid(conn, ssl_sessionid, ssl_sessionid_len);
+    if(result) {
       failf(data, "failed to store ssl session");
-      return retcode;
+      return result;
     }
   }
 
@@ -2072,7 +2075,7 @@ darwinssl_connect_common(struct connectdata *conn,
                          bool nonblocking,
                          bool *done)
 {
-  CURLcode retcode;
+  CURLcode result;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -2094,9 +2097,10 @@ darwinssl_connect_common(struct connectdata *conn,
       failf(data, "SSL connection timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
-    retcode = darwinssl_connect_step1(conn, sockindex);
-    if(retcode)
-      return retcode;
+
+    result = darwinssl_connect_step1(conn, sockindex);
+    if(result)
+      return result;
   }
 
   while(ssl_connect_2 == connssl->connecting_state ||
@@ -2113,8 +2117,8 @@ darwinssl_connect_common(struct connectdata *conn,
     }
 
     /* if ssl is expecting something, check if it's available. */
-    if(connssl->connecting_state == ssl_connect_2_reading
-       || connssl->connecting_state == ssl_connect_2_writing) {
+    if(connssl->connecting_state == ssl_connect_2_reading ||
+       connssl->connecting_state == ssl_connect_2_writing) {
 
       curl_socket_t writefd = ssl_connect_2_writing ==
       connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
@@ -2147,23 +2151,23 @@ darwinssl_connect_common(struct connectdata *conn,
      * before step2 has completed while ensuring that a client using select()
      * or epoll() will always have a valid fdset to wait on.
      */
-    retcode = darwinssl_connect_step2(conn, sockindex);
-    if(retcode || (nonblocking &&
-                   (ssl_connect_2 == connssl->connecting_state ||
-                    ssl_connect_2_reading == connssl->connecting_state ||
-                    ssl_connect_2_writing == connssl->connecting_state)))
-      return retcode;
+    result = darwinssl_connect_step2(conn, sockindex);
+    if(result || (nonblocking &&
+                  (ssl_connect_2 == connssl->connecting_state ||
+                   ssl_connect_2_reading == connssl->connecting_state ||
+                   ssl_connect_2_writing == connssl->connecting_state)))
+      return result;
 
   } /* repeat step2 until all transactions are done. */
 
 
-  if(ssl_connect_3==connssl->connecting_state) {
-    retcode = darwinssl_connect_step3(conn, sockindex);
-    if(retcode)
-      return retcode;
+  if(ssl_connect_3 == connssl->connecting_state) {
+    result = darwinssl_connect_step3(conn, sockindex);
+    if(result)
+      return result;
   }
 
-  if(ssl_connect_done==connssl->connecting_state) {
+  if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = darwinssl_recv;
     conn->send[sockindex] = darwinssl_send;
@@ -2190,13 +2194,13 @@ CURLcode
 Curl_darwinssl_connect(struct connectdata *conn,
                        int sockindex)
 {
-  CURLcode retcode;
+  CURLcode result;
   bool done = FALSE;
 
-  retcode = darwinssl_connect_common(conn, sockindex, FALSE, &done);
+  result = darwinssl_connect_common(conn, sockindex, FALSE, &done);
 
-  if(retcode)
-    return retcode;
+  if(result)
+    return result;
 
   DEBUGASSERT(done);
 
