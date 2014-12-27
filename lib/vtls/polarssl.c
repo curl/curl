@@ -483,7 +483,7 @@ static CURLcode
 polarssl_connect_step3(struct connectdata *conn,
                      int sockindex)
 {
-  CURLcode retcode = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct SessionHandle *data = conn->data;
   void *old_ssl_sessionid = NULL;
@@ -506,19 +506,16 @@ polarssl_connect_step3(struct connectdata *conn,
     void *new_session = malloc(sizeof(ssl_session));
 
     if(new_session) {
-      memcpy(new_session, our_ssl_sessionid,
-             sizeof(ssl_session));
+      memcpy(new_session, our_ssl_sessionid, sizeof(ssl_session));
 
-      retcode = Curl_ssl_addsessionid(conn, new_session,
-                                   sizeof(ssl_session));
+      result = Curl_ssl_addsessionid(conn, new_session, sizeof(ssl_session));
     }
-    else {
-      retcode = CURLE_OUT_OF_MEMORY;
-    }
+    else
+      result = CURLE_OUT_OF_MEMORY;
 
-    if(retcode) {
+    if(result) {
       failf(data, "failed to store ssl session");
-      return retcode;
+      return result;
     }
   }
 
@@ -605,7 +602,7 @@ polarssl_connect_common(struct connectdata *conn,
                         bool nonblocking,
                         bool *done)
 {
-  CURLcode retcode;
+  CURLcode result;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -618,7 +615,7 @@ polarssl_connect_common(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  if(ssl_connect_1==connssl->connecting_state) {
+  if(ssl_connect_1 == connssl->connecting_state) {
     /* Find out how much more time we're allowed */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
@@ -627,9 +624,10 @@ polarssl_connect_common(struct connectdata *conn,
       failf(data, "SSL connection timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
-    retcode = polarssl_connect_step1(conn, sockindex);
-    if(retcode)
-      return retcode;
+
+    result = polarssl_connect_step1(conn, sockindex);
+    if(result)
+      return result;
   }
 
   while(ssl_connect_2 == connssl->connecting_state ||
@@ -646,8 +644,8 @@ polarssl_connect_common(struct connectdata *conn,
     }
 
     /* if ssl is expecting something, check if it's available. */
-    if(connssl->connecting_state == ssl_connect_2_reading
-       || connssl->connecting_state == ssl_connect_2_writing) {
+    if(connssl->connecting_state == ssl_connect_2_reading ||
+       connssl->connecting_state == ssl_connect_2_writing) {
 
       curl_socket_t writefd = ssl_connect_2_writing==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
@@ -681,22 +679,22 @@ polarssl_connect_common(struct connectdata *conn,
      * ensuring that a client using select() or epoll() will always
      * have a valid fdset to wait on.
      */
-    retcode = polarssl_connect_step2(conn, sockindex);
-    if(retcode || (nonblocking &&
-                   (ssl_connect_2 == connssl->connecting_state ||
-                    ssl_connect_2_reading == connssl->connecting_state ||
-                    ssl_connect_2_writing == connssl->connecting_state)))
-      return retcode;
+    result = polarssl_connect_step2(conn, sockindex);
+    if(result || (nonblocking &&
+                  (ssl_connect_2 == connssl->connecting_state ||
+                   ssl_connect_2_reading == connssl->connecting_state ||
+                   ssl_connect_2_writing == connssl->connecting_state)))
+      return result;
 
   } /* repeat step2 until all transactions are done. */
 
-  if(ssl_connect_3==connssl->connecting_state) {
-    retcode = polarssl_connect_step3(conn, sockindex);
-    if(retcode)
-      return retcode;
+  if(ssl_connect_3 == connssl->connecting_state) {
+    result = polarssl_connect_step3(conn, sockindex);
+    if(result)
+      return result;
   }
 
-  if(ssl_connect_done==connssl->connecting_state) {
+  if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = polarssl_recv;
     conn->send[sockindex] = polarssl_send;
@@ -724,12 +722,12 @@ CURLcode
 Curl_polarssl_connect(struct connectdata *conn,
                     int sockindex)
 {
-  CURLcode retcode;
+  CURLcode result;
   bool done = FALSE;
 
-  retcode = polarssl_connect_common(conn, sockindex, FALSE, &done);
-  if(retcode)
-    return retcode;
+  result = polarssl_connect_common(conn, sockindex, FALSE, &done);
+  if(result)
+    return result;
 
   DEBUGASSERT(done);
 
