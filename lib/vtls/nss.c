@@ -774,12 +774,17 @@ static CURLcode display_conn_info(struct connectdata *conn, PRFileDesc *sock)
       result = Curl_ssl_init_certinfo(conn->data, i);
       if(!result) {
         for(i = 0; cert; cert = cert2) {
-          Curl_extract_certinfo(conn, i++, (char *)cert->derCert.data,
-            (char *)cert->derCert.data + cert->derCert.len);
+          result = Curl_extract_certinfo(conn, i++, (char *)cert->derCert.data,
+                                         (char *)cert->derCert.data +
+                                                 cert->derCert.len);
+          if(result)
+            break;
+
           if(cert->isRoot) {
             CERT_DestroyCertificate(cert);
             break;
           }
+
           cert2 = CERT_FindCertIssuer(cert, now, certUsageSSLCA);
           CERT_DestroyCertificate(cert);
         }
