@@ -42,7 +42,7 @@
 CURLcode Curl_initinfo(struct SessionHandle *data)
 {
   struct Progress *pro = &data->progress;
-  struct PureInfo *info =&data->info;
+  struct PureInfo *info = &data->info;
 
   pro->t_nslookup = 0;
   pro->t_connect = 0;
@@ -116,6 +116,7 @@ static CURLcode getinfo_char(struct SessionHandle *data, CURLINFO info,
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
+
   return CURLE_OK;
 }
 
@@ -202,6 +203,7 @@ static CURLcode getinfo_long(struct SessionHandle *data, CURLINFO info,
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
+
   return CURLE_OK;
 }
 
@@ -254,6 +256,7 @@ static CURLcode getinfo_double(struct SessionHandle *data, CURLINFO info,
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
+
   return CURLE_OK;
 }
 
@@ -261,8 +264,8 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
                               struct curl_slist **param_slistp)
 {
   union {
-    struct curl_certinfo * to_certinfo;
-    struct curl_slist    * to_slist;
+    struct curl_certinfo *to_certinfo;
+    struct curl_slist    *to_slist;
   } ptr;
 
   switch(info) {
@@ -328,16 +331,17 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
+
   return CURLE_OK;
 }
 
 CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
 {
   va_list arg;
-  long *param_longp=NULL;
-  double *param_doublep=NULL;
-  char **param_charp=NULL;
-  struct curl_slist **param_slistp=NULL;
+  long *param_longp = NULL;
+  double *param_doublep = NULL;
+  char **param_charp = NULL;
+  struct curl_slist **param_slistp = NULL;
   int type;
   /* default return code is to error out! */
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -351,22 +355,22 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   switch(type) {
   case CURLINFO_STRING:
     param_charp = va_arg(arg, char **);
-    if(NULL != param_charp)
+    if(param_charp)
       result = getinfo_char(data, info, param_charp);
     break;
   case CURLINFO_LONG:
     param_longp = va_arg(arg, long *);
-    if(NULL != param_longp)
+    if(param_longp)
       result = getinfo_long(data, info, param_longp);
     break;
   case CURLINFO_DOUBLE:
     param_doublep = va_arg(arg, double *);
-    if(NULL != param_doublep)
+    if(param_doublep)
       result = getinfo_double(data, info, param_doublep);
     break;
   case CURLINFO_SLIST:
     param_slistp = va_arg(arg, struct curl_slist **);
-    if(NULL != param_slistp)
+    if(param_slistp)
       result = getinfo_slist(data, info, param_slistp);
     break;
   default:
