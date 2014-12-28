@@ -149,6 +149,8 @@ test1500 test1501 test1502 test1503 test1504 test1505 test1506 test1507 \
 test1508 test1509 test1510 test1511 test1512 test1513 test1514 test1515 \
 test1516 \
 \
+test1520 \
+\
 test1525 test1526 test1527 test1528 \
 \
 test1800 test1801 \
