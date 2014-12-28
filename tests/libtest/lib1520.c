@@ -30,16 +30,17 @@
 #define FROM "<sender@example.com>"
 
 static const char *payload_text[] = {
-"From: different\r\n",
-"To: another\r\n",
-"\r\n",
-"\r\n",
-".\r\n",
-".\r\n",
-"\r\n",
-".\r\n",
-"\r\n",
-"body"
+  "From: different\r\n",
+  "To: another\r\n",
+  "\r\n",
+  "\r\n",
+  ".\r\n",
+  ".\r\n",
+  "\r\n",
+  ".\r\n",
+  "\r\n",
+  "body",
+  NULL
 };
 
 struct upload_status {
@@ -103,6 +104,7 @@ int test(char *URL)
 
 test_cleanup:
 
+  curl_slist_free_all(rcpt_list);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

@@ -44,6 +44,9 @@ EHLO 1520
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
+QUIT
+</protocol>
+<upload>
 From: different
 To: another
 
@@ -54,6 +57,7 @@ To: another
 ..
 
 body
-</protocol>
+.
+</upload>
 </verify>
 </testcase>
