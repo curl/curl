@@ -8,6 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2014, Nick Zitzmann, <nickzman@gmail.com>.
+ * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -66,7 +67,7 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
 #define curlssl_version Curl_darwinssl_version
 #define curlssl_check_cxn Curl_darwinssl_check_cxn
 #define curlssl_data_pending(x,y) Curl_darwinssl_data_pending(x, y)
-#define curlssl_random(x,y,z) Curl_darwinssl_random(y,z)
+#define curlssl_random(x,y,z) ((void)x, Curl_darwinssl_random(y,z))
 #define curlssl_md5sum(a,b,c,d) Curl_darwinssl_md5sum(a,b,c,d)
 #define CURL_SSL_BACKEND CURLSSLBACKEND_DARWINSSL
 
