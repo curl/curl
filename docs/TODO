@@ -24,6 +24,7 @@
  2. libcurl - multi interface
  2.1 More non-blocking
  2.2 Fix HTTP Pipelining for PUT
+ 2.3 Better support for same name resolves
 
  3. Documentation
  3.1 Update date and version in man pages
@@ -220,6 +221,15 @@
  HTTP Pipelining can be a way to greatly enhance performance for multiple
  serial requests and currently libcurl only supports that for HEAD and GET
  requests but it should also be possible for PUT.
+
+2.3 Better support for same name resolves
+
+ If a name resolve has been initiated for name NN and a second easy handle
+ wants to resolve that name as well, make it wait for the first resolve to end
+ up in the cache instead of doing a second separate resolve. This is
+ especially needed when adding many simultaneous handles using the same host
+ name when the DNS resolver can get flooded.
+
 
 3. Documentation
 
