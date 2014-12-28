@@ -127,7 +127,6 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
     /* Import the SPN */
     gss_major_status = gss_import_name(&gss_minor_status, &spn_token,
                                        gss_nt_service_name, &krb5->spn);
-
     if(GSS_ERROR(gss_major_status)) {
       Curl_gss_log_error(data, gss_minor_status, "gss_import_name() failed: ");
 
@@ -226,7 +225,8 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   gss_qop_t qop = GSS_C_QOP_DEFAULT;
   unsigned int sec_layer = 0;
   unsigned int max_size = 0;
-  char user_name[] = "dummy.user"; /* FIX: Use real user name */
+  gss_name_t username = GSS_C_NO_NAME;
+  gss_buffer_desc username_token;
 
   /* Decode the base-64 encoded input message */
   if(strlen(chlg64) && *chlg64 != '=') {
@@ -242,6 +242,30 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
+  /* Get the fully qualified username back from the context */
+  gss_major_status = gss_inquire_context(&gss_minor_status, krb5->context,
+                                         &username, NULL, NULL, NULL, NULL,
+                                         NULL, NULL);
+  if(GSS_ERROR(gss_major_status)) {
+    Curl_gss_log_error(data, gss_minor_status,
+                       "gss_inquire_context() failed: ");
+
+    Curl_safefree(chlg);
+
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  /* Convert the username from internal format to a displayable token */
+  gss_major_status = gss_display_name(&gss_minor_status, username,
+                                      &username_token, NULL);
+  if(GSS_ERROR(gss_major_status)) {
+    Curl_gss_log_error(data, gss_minor_status, "gss_display_name() failed: ");
+
+    Curl_safefree(chlg);
+
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   /* Setup the challenge "input" security buffer */
   input_token.value = chlg;
   input_token.length = chlglen;
@@ -252,6 +276,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   if(GSS_ERROR(gss_major_status)) {
     Curl_gss_log_error(data, gss_minor_status, "gss_unwrap() failed: ");
 
+    gss_release_buffer(&gss_status, &username_token);
     Curl_safefree(chlg);
 
     return CURLE_BAD_CONTENT_ENCODING;
@@ -261,6 +286,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   if(output_token.length != 4) {
     infof(data, "GSSAPI handshake failure (invalid security data)\n");
 
+    gss_release_buffer(&gss_status, &username_token);
     Curl_safefree(chlg);
 
     return CURLE_BAD_CONTENT_ENCODING;
@@ -276,6 +302,8 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   if(!(sec_layer & GSSAUTH_P_NONE)) {
     infof(data, "GSSAPI handshake failure (invalid security layer)\n");
 
+    gss_release_buffer(&gss_status, &username_token);
+
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
@@ -289,10 +317,13 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
   }
 
   /* Allocate our message */
-  messagelen = sizeof(outdata) + strlen(user_name) + 1;
+  messagelen = sizeof(outdata) + username_token.length + 1;
   message = malloc(messagelen);
-  if(!message)
+  if(!message) {
+    gss_release_buffer(&gss_status, &username_token);
+
     return CURLE_OUT_OF_MEMORY;
+  }
 
   /* Populate the message with the security layer, client supported receive
      message size and authorization identity including the 0x00 based
@@ -301,7 +332,12 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
      necessary to include it. */
   outdata = htonl(max_size) | sec_layer;
   memcpy(message, &outdata, sizeof(outdata));
-  strcpy((char *) message + sizeof(outdata), user_name);
+  memcpy(message + sizeof(outdata), username_token.value,
+         username_token.length);
+  message[messagelen - 1] = '\0';
+
+  /* Free the username token as it is not required anymore */
+  gss_release_buffer(&gss_status, &username_token);
 
   /* Setup the "authentication data" security buffer */
   input_token.value = message;
