@@ -285,10 +285,10 @@ static ssize_t read_wincon(int fd, void *buf, size_t count)
   }
 
   if(GetConsoleMode(handle, &mode)) {
-    success = ReadConsole(handle, buf, count, &rcount, NULL);
+    success = ReadConsole(handle, buf, curlx_uztoul(count), &rcount, NULL);
   }
   else {
-    success = ReadFile(handle, buf, count, &rcount, NULL);
+    success = ReadFile(handle, buf, curlx_uztoul(count), &rcount, NULL);
   }
   if(success) {
     return rcount;
@@ -320,10 +320,10 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
   }
 
   if(GetConsoleMode(handle, &mode)) {
-    success = WriteConsole(handle, buf, count, &wcount, NULL);
+    success = WriteConsole(handle, buf, curlx_uztoul(count), &wcount, NULL);
   }
   else {
-    success = WriteFile(handle, buf, count, &wcount, NULL);
+    success = WriteFile(handle, buf, curlx_uztoul(count), &wcount, NULL);
   }
   if(success) {
     return wcount;
