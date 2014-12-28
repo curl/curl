@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,7 +28,7 @@
 size_t WriteOutput(void *ptr, size_t size, size_t nmemb, void *stream);
 size_t WriteHeader(void *ptr, size_t size, size_t nmemb, void *stream);
 
-long realHeaderSize = 0;
+unsigned long realHeaderSize = 0;
 
 int test(char *URL)
 {
@@ -90,7 +90,8 @@ size_t WriteHeader(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   (void)ptr;
   (void)stream;
-  realHeaderSize += size * nmemb;
+
+  realHeaderSize += curlx_uztoul(size * nmemb);
 
   return nmemb * size;
 }
