@@ -986,11 +986,10 @@ void Curl_gskit_close(struct connectdata *conn, int sockindex)
 }
 
 
-int Curl_gskit_close_all(struct SessionHandle *data)
+void Curl_gskit_close_all(struct SessionHandle *data)
 {
   /* Unimplemented. */
   (void) data;
-  return 0;
 }
 
 

@@ -1228,10 +1228,9 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
  * This function is called when the 'data' struct is going away. Close
  * down everything and free all resources!
  */
-int Curl_nss_close_all(struct SessionHandle *data)
+void Curl_nss_close_all(struct SessionHandle *data)
 {
   (void)data;
-  return 0;
 }
 
 /* return true if NSS can provide error code (and possibly msg) for the

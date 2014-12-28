@@ -41,7 +41,7 @@ void Curl_ossl_close(struct connectdata *conn, int sockindex);
 
 /* tell OpenSSL to close down all open information regarding connections (and
    thus session ID caching etc) */
-int Curl_ossl_close_all(struct SessionHandle *data);
+void Curl_ossl_close_all(struct SessionHandle *data);
 
 /* Sets an OpenSSL engine */
 CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine);

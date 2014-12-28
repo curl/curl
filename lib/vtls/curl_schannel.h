@@ -120,7 +120,7 @@ int Curl_schannel_random(unsigned char *entropy, size_t length);
 #define curlssl_connect Curl_schannel_connect
 #define curlssl_connect_nonblocking Curl_schannel_connect_nonblocking
 #define curlssl_session_free Curl_schannel_session_free
-#define curlssl_close_all(x) (x=x, CURLE_NOT_BUILT_IN)
+#define curlssl_close_all(x) ((void)x)
 #define curlssl_close Curl_schannel_close
 #define curlssl_shutdown Curl_schannel_shutdown
 #define curlssl_set_engine(x,y) (x=x, y=y, CURLE_NOT_BUILT_IN)

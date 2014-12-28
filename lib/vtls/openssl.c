@@ -1038,7 +1038,7 @@ void Curl_ossl_session_free(void *ptr)
  * This function is called when the 'data' struct is going away. Close
  * down everything and free all resources!
  */
-int Curl_ossl_close_all(struct SessionHandle *data)
+void Curl_ossl_close_all(struct SessionHandle *data)
 {
 #ifdef HAVE_OPENSSL_ENGINE_H
   if(data->state.engine) {
@@ -1049,7 +1049,6 @@ int Curl_ossl_close_all(struct SessionHandle *data)
 #else
   (void)data;
 #endif
-  return 0;
 }
 
 static int asn1_output(const ASN1_UTCTIME *tm,

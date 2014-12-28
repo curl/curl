@@ -39,7 +39,7 @@ void Curl_nss_close(struct connectdata *conn, int sockindex);
 
 /* tell NSS to close down all open information regarding connections (and
    thus session ID caching etc) */
-int Curl_nss_close_all(struct SessionHandle *data);
+void Curl_nss_close_all(struct SessionHandle *data);
 
 int Curl_nss_init(void);
 void Curl_nss_cleanup(void);
