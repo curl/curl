@@ -26,7 +26,7 @@
 /*
  * This is the list of basic details you need to tweak to get things right.
  */
-#define TO "recipient@example.com>"
+#define TO "<recipient@example.com>"
 #define FROM "<sender@example.com>"
 
 static const char *payload_text[] = {
@@ -70,8 +70,10 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 
 int test(char *URL)
 {
-  CURLcode result;
+  CURLcode res;
   CURL *curl;
+  struct curl_slist *rcpt_list = NULL;
+  struct upload_status upload_ctx = {0};
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
