@@ -19,7 +19,7 @@ Building with Visual C++, prerequises
 
     http://www.microsoft.com/en-us/download/details.aspx?id=12261
 
-   If you wish to support zlib, openssl, ssh2, you will have to download
+   If you wish to support zlib, openssl, c-ares, ssh2, you will have to download
    them separately and copy them to the deps directory as shown below:
    
    somedirectory\
@@ -64,6 +64,7 @@ where <options> is one or many of:
                                  Libraries can be fetched at http://windows.php.net/downloads/php-sdk/deps/
                                  Uncompress them into the deps folder.
   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
+  WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
   ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes

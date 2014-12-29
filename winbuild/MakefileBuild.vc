@@ -121,6 +121,27 @@ SSL          = static
 SSL_CFLAGS   = /DUSE_SSLEAY /I"$(DEVEL_INCLUDE)/openssl"
 !ENDIF
 
+!IF "$(WITH_CARES)"=="dll"
+!IF "$(DEBUG)"=="yes"
+CARES_LIBS     = caresd.lib
+!ELSE
+CARES_LIBS     = cares.lib
+!ENDIF
+USE_CARES      = true
+CARES          = dll
+!ELSEIF "$(WITH_CARES)"=="static"
+!IF "$(DEBUG)"=="yes"
+CARES_LIBS     = libcaresd.lib
+!ELSE
+CARES_LIBS     = libcares.lib
+!ENDIF
+USE_CARES      = true
+CARES          = static
+!ENDIF
+
+!IFDEF USE_CARES
+CARES_CFLAGS   = /DUSE_ARES /I"$(DEVEL_INCLUDE)/cares"
+!ENDIF
 
 !IF "$(WITH_ZLIB)"=="dll"
 ZLIB_LIBS   = zlib.lib
@@ -297,6 +318,11 @@ CFLAGS = $(CFLAGS) $(SSL_CFLAGS)
 LFLAGS = $(LFLAGS) $(SSL_LFLAGS) $(SSL_LIBS)
 !ENDIF
 
+!IF "$(USE_CARES)"=="true"
+CFLAGS = $(CFLAGS) $(CARES_CFLAGS)
+LFLAGS = $(LFLAGS) $(CARES_LFLAGS) $(CARES_LIBS)
+!ENDIF
+
 !IF "$(USE_ZLIB)"=="true"
 CFLAGS = $(CFLAGS) $(ZLIB_CFLAGS)
 LFLAGS = $(LFLAGS) $(ZLIB_LFLAGS) $(ZLIB_LIBS)
@@ -376,6 +402,7 @@ package: $(TARGET)
 
 $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo Using SSL: $(USE_SSL)
+	@echo Using c-ares: $(USE_CARES)
 	@echo Using SSH2: $(USE_SSH2)
 	@echo Using ZLIB: $(USE_ZLIB)
 	@echo Using IDN:  $(USE_IDN)
