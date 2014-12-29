@@ -769,8 +769,11 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       result = Curl_client_write(conn, CLIENTWRITE_BODY,
                                  (char *)msg + off + sizeof(unsigned int),
                                  len);
-      if(result)
-        return result;
+      if(result) {
+        req->result = result;
+        next_state = SMB_CLOSE;
+        break;
+      }
     }
     conn->data->req.bytecount += len;
     conn->data->req.offset += len;
