@@ -1636,7 +1636,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
      The "-no_ticket" option was introduced in Openssl0.9.8j. It's a flag to
      disable "rfc4507bis session ticket support".  rfc4507bis was later turned
-     into the proper RFC5077 it seems: http://tools.ietf.org/html/rfc5077
+     into the proper RFC5077 it seems: https://tools.ietf.org/html/rfc5077
 
      The enabled extension concerns the session management. I wonder how often
      libcurl stops a connection and then resumes a TLS session. also, sending
@@ -1656,7 +1656,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
      this option regardless of OpenSSL version and SSL_OP_ALL definition.
 
      OpenSSL added a work-around for a SSL 3.0/TLS 1.0 CBC vulnerability
-     (http://www.openssl.org/~bodo/tls-cbc.txt). In 0.9.6e they added a bit to
+     (https://www.openssl.org/~bodo/tls-cbc.txt). In 0.9.6e they added a bit to
      SSL_OP_ALL that _disables_ that work-around despite the fact that
      SSL_OP_ALL is documented to do "rather harmless" workarounds. In order to
      keep the secure work-around, the SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit
@@ -2427,23 +2427,23 @@ static CURLcode pkp_pin_peer_pubkey(X509* cert, const char *pinnedpubkey)
     /* Begin Gyrations to get the subjectPublicKeyInfo     */
     /* Thanks to Viktor Dukhovni on the OpenSSL mailing list */
 
-    /* http://groups.google.com/group/mailing.openssl.users/browse_thread
+    /* https://groups.google.com/group/mailing.openssl.users/browse_thread
      /thread/d61858dae102c6c7 */
     len1 = i2d_X509_PUBKEY(X509_get_X509_PUBKEY(cert), NULL);
     if(len1 < 1)
       break; /* failed */
 
-    /* http://www.openssl.org/docs/crypto/buffer.html */
+    /* https://www.openssl.org/docs/crypto/buffer.html */
     buff1 = temp = OPENSSL_malloc(len1);
     if(!buff1)
       break; /* failed */
 
-    /* http://www.openssl.org/docs/crypto/d2i_X509.html */
+    /* https://www.openssl.org/docs/crypto/d2i_X509.html */
     len2 = i2d_X509_PUBKEY(X509_get_X509_PUBKEY(cert), &temp);
 
     /*
      * These checks are verifying we got back the same values as when we
-     * sized the buffer.Its pretty weak since they should always be the
+     * sized the buffer. It's pretty weak since they should always be the
      * same. But it gives us something to test.
      */
     if((len1 != len2) || !temp || ((temp - buff1) != len1))
@@ -2455,7 +2455,7 @@ static CURLcode pkp_pin_peer_pubkey(X509* cert, const char *pinnedpubkey)
     result = Curl_pin_peer_pubkey(pinnedpubkey, buff1, len1);
   } while(0);
 
-  /* http://www.openssl.org/docs/crypto/buffer.html */
+  /* https://www.openssl.org/docs/crypto/buffer.html */
   if(buff1)
     OPENSSL_free(buff1);
 
@@ -2912,7 +2912,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
     default:
       /* openssl/ssl.h for SSL_ERROR_SYSCALL says "look at error stack/return
          value/errno" */
-      /* http://www.openssl.org/docs/crypto/ERR_get_error.html */
+      /* https://www.openssl.org/docs/crypto/ERR_get_error.html */
       sslerror = ERR_get_error();
       if((nread < 0) || sslerror) {
         /* If the return code was negative or there actually is an error in the
