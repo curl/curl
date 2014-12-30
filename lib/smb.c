@@ -583,7 +583,7 @@ static CURLcode smb_send_write(struct connectdata *conn)
   msg->offset_high = smb_swap32((unsigned int) (offset >> 32));
   msg->data_length = smb_swap16((unsigned short) upload_size);
   msg->data_offset = smb_swap16(sizeof(*msg) - sizeof(unsigned int));
-  msg->byte_count = smb_swap16((unsigned short) upload_size + 1);
+  msg->byte_count = smb_swap16((unsigned short) (upload_size + 1));
 
   smb_format_message(conn, &msg->h, SMB_COM_WRITE_ANDX,
                      sizeof(*msg) - sizeof(msg->h) + (size_t) upload_size);
