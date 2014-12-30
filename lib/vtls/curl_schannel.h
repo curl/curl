@@ -72,27 +72,6 @@
 #define SECBUFFER_ALERT                 17
 #endif
 
-#ifndef ISC_RET_REPLAY_DETECT
-#define ISC_RET_REPLAY_DETECT           0x00000004
-#endif
-
-#ifndef ISC_RET_SEQUENCE_DETECT
-#define ISC_RET_SEQUENCE_DETECT         0x00000008
-#endif
-
-#ifndef ISC_RET_CONFIDENTIALITY
-#define ISC_RET_CONFIDENTIALITY         0x00000010
-#endif
-
-#ifndef ISC_RET_ALLOCATED_MEMORY
-#define ISC_RET_ALLOCATED_MEMORY        0x00000100
-#endif
-
-#ifndef ISC_RET_STREAM
-#define ISC_RET_STREAM                  0x00008000
-#endif
-
-
 #define CURL_SCHANNEL_BUFFER_INIT_SIZE   4096
 #define CURL_SCHANNEL_BUFFER_FREE_SIZE   1024
 

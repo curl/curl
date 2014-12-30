@@ -64,6 +64,26 @@ extern PSecurityFunctionTable s_pSecFn;
 #define ISC_REQ_USE_HTTP_STYLE                0x01000000
 #endif
 
+#ifndef ISC_RET_REPLAY_DETECT
+#define ISC_RET_REPLAY_DETECT                 0x00000004
+#endif
+
+#ifndef ISC_RET_SEQUENCE_DETECT
+#define ISC_RET_SEQUENCE_DETECT               0x00000008
+#endif
+
+#ifndef ISC_RET_CONFIDENTIALITY
+#define ISC_RET_CONFIDENTIALITY               0x00000010
+#endif
+
+#ifndef ISC_RET_ALLOCATED_MEMORY
+#define ISC_RET_ALLOCATED_MEMORY              0x00000100
+#endif
+
+#ifndef ISC_RET_STREAM
+#define ISC_RET_STREAM                        0x00008000
+#endif
+
 #ifndef SEC_E_INSUFFICIENT_MEMORY
 # define SEC_E_INSUFFICIENT_MEMORY            ((HRESULT)0x80090300L)
 #endif
