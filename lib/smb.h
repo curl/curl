@@ -37,8 +37,8 @@ struct smb_conn {
   unsigned char challenge[8];
   unsigned int session_key;
   unsigned short uid;
-  char *send_buf;
   char *recv_buf;
+  size_t upload_size;
   size_t send_size;
   size_t sent;
   size_t got;
