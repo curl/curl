@@ -125,6 +125,15 @@ This release includes the following bugfixes:
  o curl: show size of inhibited data when using -v
  o build: Removed WIN32 definition from the Visual Studio projects
  o build: Removed WIN64 definition from the libcurl Visual Studio projects
+ o vtls: Use bool for Curl_ssl_getsessionid() return type
+ o sockfilt.c: Replace 100ms sleep with thread throttle
+ o sockfilt.c: Reduce the number of individual memory allocations
+ o vtls: Don't set cert info count until memory allocation is successful
+ o nss: Don't ignore Curl_ssl_init_certinfo() OOM failure
+ o nss: Don't ignore Curl_extract_certinfo() OOM failure
+ o vtls: Fixed compilation warning and an ignored return code
+ o sockfilt.c: Fixed compilation warnings
+ o darwinssl: Fixed compilation warning
 
 This release includes the following known bugs:
 
