@@ -7,8 +7,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, DirecTV
- * contact: Eric Hu <ehu@directv.com>
+ * Copyright (C) 2010, DirecTV, Contact: Eric Hu <ehu@directv.com>
+ * Copyright (C) 2010 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -59,14 +59,15 @@ int Curl_axtls_random(struct SessionHandle *data,
 #define curlssl_close_all Curl_axtls_close_all
 #define curlssl_close Curl_axtls_close
 #define curlssl_shutdown(x,y) Curl_axtls_shutdown(x,y)
-#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) (x=x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
+#define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)
+#define curlssl_set_engine_default(x) ((void)x, CURLE_NOT_BUILT_IN)
+#define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
 #define curlssl_version Curl_axtls_version
 #define curlssl_check_cxn(x) Curl_axtls_check_cxn(x)
-#define curlssl_data_pending(x,y) (x=x, y=y, 0)
+#define curlssl_data_pending(x,y) ((void)x, (void)y, 0)
 #define curlssl_random(x,y,z) Curl_axtls_random(x,y,z)
 #define CURL_SSL_BACKEND CURLSSLBACKEND_AXTLS
+
 #endif /* USE_AXTLS */
 #endif /* HEADER_CURL_AXTLS_H */
 

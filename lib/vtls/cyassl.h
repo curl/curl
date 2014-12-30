@@ -56,11 +56,11 @@ int Curl_cyassl_random(struct SessionHandle *data,
 #define curlssl_close_all Curl_cyassl_close_all
 #define curlssl_close Curl_cyassl_close
 #define curlssl_shutdown(x,y) Curl_cyassl_shutdown(x,y)
-#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) (x=x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
+#define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)
+#define curlssl_set_engine_default(x) ((void)x, CURLE_NOT_BUILT_IN)
+#define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
 #define curlssl_version Curl_cyassl_version
-#define curlssl_check_cxn(x) (x=x, -1)
+#define curlssl_check_cxn(x) ((void)x, -1)
 #define curlssl_data_pending(x,y) Curl_cyassl_data_pending(x,y)
 #define curlssl_random(x,y,z) Curl_cyassl_random(x,y,z)
 #define CURL_SSL_BACKEND CURLSSLBACKEND_CYASSL

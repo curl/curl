@@ -102,11 +102,11 @@ int Curl_schannel_random(unsigned char *entropy, size_t length);
 #define curlssl_close_all(x) ((void)x)
 #define curlssl_close Curl_schannel_close
 #define curlssl_shutdown Curl_schannel_shutdown
-#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) (x=x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
+#define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)
+#define curlssl_set_engine_default(x) ((void)x, CURLE_NOT_BUILT_IN)
+#define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
 #define curlssl_version Curl_schannel_version
-#define curlssl_check_cxn(x) (x=x, -1)
+#define curlssl_check_cxn(x) ((void)x, -1)
 #define curlssl_data_pending Curl_schannel_data_pending
 #define CURL_SSL_BACKEND CURLSSLBACKEND_SCHANNEL
 #define curlssl_random(x,y,z) ((void)x, Curl_schannel_random(y,z))

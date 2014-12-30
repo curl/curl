@@ -8,7 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -60,18 +60,18 @@ int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 #define curlssl_close_all Curl_polarssl_close_all
 #define curlssl_close Curl_polarssl_close
 #define curlssl_shutdown(x,y) 0
-#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) (x=x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
+#define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)
+#define curlssl_set_engine_default(x) ((void)x, CURLE_NOT_BUILT_IN)
+#define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
 #define curlssl_version Curl_polarssl_version
-#define curlssl_check_cxn(x) (x=x, -1)
-#define curlssl_data_pending(x,y) (x=x, y=y, 0)
+#define curlssl_check_cxn(x) ((void)x, -1)
+#define curlssl_data_pending(x,y) ((void)x, (void)y, 0)
 #define CURL_SSL_BACKEND CURLSSLBACKEND_POLARSSL
 
 /* This might cause libcurl to use a weeker random!
    TODO: implement proper use of Polarssl's CTR-DRBG or HMAC-DRBG and use that
 */
-#define curlssl_random(x,y,z) (x=x, y=y, z=z, CURLE_NOT_BUILT_IN)
+#define curlssl_random(x,y,z) ((void)x, (void)y, (void)z, CURLE_NOT_BUILT_IN)
 
 #endif /* USE_POLARSSL */
 #endif /* HEADER_CURL_POLARSSL_H */
