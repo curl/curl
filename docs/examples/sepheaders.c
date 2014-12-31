@@ -62,6 +62,7 @@ int main(void)
   bodyfile = fopen(bodyfilename,"wb");
   if (bodyfile == NULL) {
     curl_easy_cleanup(curl_handle);
+    fclose(headerfile);
     return -1;
   }
 
