@@ -555,6 +555,7 @@ X_OBJS= \
 	$(DIROBJ)\dict.obj \
 	$(DIROBJ)\dotdot.obj \
 	$(DIROBJ)\easy.obj \
+	$(DIROBJ)\endian.obj \
 	$(DIROBJ)\escape.obj \
 	$(DIROBJ)\file.obj \
 	$(DIROBJ)\fileinfo.obj \
