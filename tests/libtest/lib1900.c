@@ -179,7 +179,7 @@ int test(char *URL)
       now = tutil_tvnow();
       msnow = now.tv_sec * 1000 + now.tv_usec / 1000;
       mslast = last_handle_add.tv_sec * 1000 + last_handle_add.tv_usec / 1000;
-      if(msnow - mslast >= urltime[handlenum] && handlenum < num_handles) {
+      if((msnow - mslast) >= urltime[handlenum]) {
         fprintf(stdout, "Adding handle %d\n", handlenum);
         setup_handle(URL, m, handlenum);
         last_handle_add = now;
