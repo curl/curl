@@ -52,7 +52,7 @@
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "curl_ntlm_msgs.h"
 #include "curl_sasl.h"
-#include "endian.h"
+#include "curl_endian.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

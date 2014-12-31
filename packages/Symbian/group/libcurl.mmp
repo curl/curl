@@ -40,7 +40,7 @@ SOURCE \
   curl_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_ntlm_msgs.c         \
   curl_sasl.c vtls/curl_schannel.c curl_multibyte.c                    \
   vtls/curl_darwinssl.c bundles.c conncache.c curl_sasl_sspi.c smb.c   \
-  curl_sasl_gssapi.c endian.c
+  curl_sasl_gssapi.c curl_endian.c
 
 USERINCLUDE   ../../../lib ../../../include/curl
 #ifdef ENABLE_SSL

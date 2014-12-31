@@ -106,7 +106,7 @@
 #include "curl_md5.h"
 #include "curl_hmac.h"
 #include "warnless.h"
-#include "endian.h"
+#include "curl_endian.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

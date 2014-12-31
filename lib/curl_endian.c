@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#include "endian.h"
+#include "curl_endian.h"
 
 /*
  * Curl_read16_le()
