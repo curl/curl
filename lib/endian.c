@@ -23,3 +23,25 @@
 #include "curl_setup.h"
 
 #include "endian.h"
+
+/*
+ * This function converts from the little endian format used in the incoming
+ * package to whatever endian format we're using natively. Argument is a
+ * pointer to a 2 byte buffer.
+ */
+unsigned short readshort_le(unsigned char *buf)
+{
+  return (unsigned short)(((unsigned short)buf[0]) |
+                          ((unsigned short)buf[1] << 8));
+}
+
+/*
+ * This function converts from the little endian format used in the
+ * incoming package to whatever endian format we're using natively.
+ * Argument is a pointer to a 4 byte buffer.
+ */
+unsigned int readint_le(unsigned char *buf)
+{
+  return ((unsigned int)buf[0]) | ((unsigned int)buf[1] << 8) |
+         ((unsigned int)buf[2] << 16) | ((unsigned int)buf[3] << 24);
+}

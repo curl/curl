@@ -52,6 +52,7 @@
 #define BUILDING_CURL_NTLM_MSGS_C
 #include "curl_ntlm_msgs.h"
 #include "curl_sasl.h"
+#include "endian.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -147,28 +148,6 @@ static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
 #else
 # define DEBUG_OUT(x) Curl_nop_stmt
 #endif
-
-/*
- * This function converts from the little endian format used in the
- * incoming package to whatever endian format we're using natively.
- * Argument is a pointer to a 4 byte buffer.
- */
-static unsigned int readint_le(unsigned char *buf)
-{
-  return ((unsigned int)buf[0]) | ((unsigned int)buf[1] << 8) |
-    ((unsigned int)buf[2] << 16) | ((unsigned int)buf[3] << 24);
-}
-
-/*
- * This function converts from the little endian format used in the incoming
- * package to whatever endian format we're using natively. Argument is a
- * pointer to a 2 byte buffer.
- */
-static unsigned short readshort_le(unsigned char *buf)
-{
-  return (unsigned short)(((unsigned short)buf[0]) |
-                          ((unsigned short)buf[1] << 8));
-}
 
 /*
  * ntlm_decode_type2_target()

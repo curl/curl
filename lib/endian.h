@@ -22,4 +22,7 @@
  *
  ***************************************************************************/
 
+unsigned short readshort_le(unsigned char *buf);
+unsigned int readint_le(unsigned char *buf);
+
 #endif /* HEADER_CURL_ENDIAN_H */
