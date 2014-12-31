@@ -29,7 +29,7 @@
  * package to whatever endian format we're using natively. Argument is a
  * pointer to a 2 byte buffer.
  */
-unsigned short readshort_le(unsigned char *buf)
+unsigned short Curl_read16_le(unsigned char *buf)
 {
   return (unsigned short)(((unsigned short)buf[0]) |
                           ((unsigned short)buf[1] << 8));
@@ -40,13 +40,13 @@ unsigned short readshort_le(unsigned char *buf)
  * incoming package to whatever endian format we're using natively.
  * Argument is a pointer to a 4 byte buffer.
  */
-unsigned int readint_le(unsigned char *buf)
+unsigned int Curl_read32_le(unsigned char *buf)
 {
   return ((unsigned int)buf[0]) | ((unsigned int)buf[1] << 8) |
          ((unsigned int)buf[2] << 16) | ((unsigned int)buf[3] << 24);
 }
 
-void write32_le(const int value, unsigned char *buffer)
+void Curl_write32_le(const int value, unsigned char *buffer)
 {
   buffer[0] = (char)(value & 0x000000FF);
   buffer[1] = (char)((value & 0x0000FF00) >> 8);
@@ -56,12 +56,12 @@ void write32_le(const int value, unsigned char *buffer)
 
 #if (CURL_SIZEOF_CURL_OFF_T > 4)
 #if defined(HAVE_LONGLONG)
-void write64_le(const long long value, unsigned char *buffer)
+void Curl_write64_le(const long long value, unsigned char *buffer)
 #else
-void write64_le(const __int64 value, unsigned char *buffer)
+void Curl_write64_le(const __int64 value, unsigned char *buffer)
 #endif
 {
-  write32_le((int)value, buffer);
-  write32_le((int)(value >> 32), buffer + 4);
+  Curl_write32_le((int)value, buffer);
+  Curl_write32_le((int)(value >> 32), buffer + 4);
 }
 #endif

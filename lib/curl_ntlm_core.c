@@ -654,7 +654,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
            "%c%c%c%c",  /* Reserved = 0 */
            0, 0, 0, 0);
 
-  write64_le(tw, ptr + 24);
+  Curl_write64_le(tw, ptr + 24);
   memcpy(ptr + 32, challenge_client, 8);
   memcpy(ptr + 44, ntlm->target_info, ntlm->target_info_len);
 
