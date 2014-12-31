@@ -25,4 +25,14 @@
 unsigned short readshort_le(unsigned char *buf);
 unsigned int readint_le(unsigned char *buf);
 
+void write32_le(const int value, unsigned char *buffer);
+
+#if (CURL_SIZEOF_CURL_OFF_T > 4)
+#if defined(HAVE_LONGLONG)
+void write64_le(const long long value, unsigned char *buffer);
+#else
+void write64_le(const __int64 value, unsigned char *buffer);
+#endif
+#endif
+
 #endif /* HEADER_CURL_ENDIAN_H */
