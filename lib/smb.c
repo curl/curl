@@ -45,6 +45,7 @@
 #include "curl_ntlm_core.h"
 #include "curl_memory.h"
 #include "escape.h"
+#include "curl_endian.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -776,10 +777,8 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_CLOSE;
       break;
     }
-    len = smb_swap16(*(unsigned short *)((char *)msg +
-                     sizeof(struct smb_header) + 11));
-    off = smb_swap16(*(unsigned short *)((char *)msg +
-                     sizeof(struct smb_header) + 13));
+    len = Curl_read16_le(((char *) msg) + sizeof(struct smb_header) + 11);
+    off = Curl_read16_le(((char *) msg) + sizeof(struct smb_header) + 13);
     if(len > 0) {
       result = Curl_client_write(conn, CLIENTWRITE_BODY,
                                  (char *)msg + off + sizeof(unsigned int),
@@ -802,8 +801,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_CLOSE;
       break;
     }
-    len = smb_swap16(*(unsigned short *)((char *)msg +
-                     sizeof(struct smb_header) + 5));
+    len = Curl_read16_le(((char *) msg) + sizeof(struct smb_header) + 5);
     conn->data->req.bytecount += len;
     conn->data->req.offset += len;
     Curl_pgrsSetUploadCounter(conn->data, conn->data->req.bytecount);
