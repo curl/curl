@@ -63,6 +63,23 @@ unsigned int Curl_read32_le(unsigned char *buf)
 }
 
 /*
+ * Curl_write16_le()
+ *
+ * This function converts a 16-bit integer from the native endian format,
+ * to little endian format ready for sending down the wire.
+ *
+ * Parameters:
+ *
+ * value    [in]     - The 16-bit integer value.
+ * buffer   [in]     - A pointer to the output buffer.
+ */
+void Curl_write16_le(const short value, unsigned char *buffer)
+{
+  buffer[0] = (char)(value & 0x00FF);
+  buffer[1] = (char)((value & 0xFF00) >> 8);
+}
+
+/*
  * Curl_write32_le()
  *
  * This function converts a 32-bit integer from the native endian format,

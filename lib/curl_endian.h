@@ -28,6 +28,9 @@ unsigned short Curl_read16_le(unsigned char *buf);
 /* Converts a 32-bit integer from little endian */
 unsigned int Curl_read32_le(unsigned char *buf);
 
+/* Converts a 16-bit integer to little endian */
+void Curl_write16_le(const short value, unsigned char *buffer);
+
 /* Converts a 32-bit integer to little endian */
 void Curl_write32_le(const int value, unsigned char *buffer);
 
