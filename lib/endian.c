@@ -25,9 +25,17 @@
 #include "endian.h"
 
 /*
- * This function converts from the little endian format used in the incoming
- * package to whatever endian format we're using natively. Argument is a
- * pointer to a 2 byte buffer.
+ * Curl_read16_le()
+ *
+ * This function converts a 16-bit integer from the little endian format, as
+ * used in the incoming package to whatever endian format we're using
+ * natively.
+ *
+ * Parameters:
+ *
+ * buf      [in]     - A pointer to a 2 byte buffer.
+ *
+ * Returns the integer.
  */
 unsigned short Curl_read16_le(unsigned char *buf)
 {
@@ -36,9 +44,17 @@ unsigned short Curl_read16_le(unsigned char *buf)
 }
 
 /*
- * This function converts from the little endian format used in the
- * incoming package to whatever endian format we're using natively.
- * Argument is a pointer to a 4 byte buffer.
+ * Curl_read32_le()
+ *
+ * This function converts a 32-bit integer from the little endian format, as
+ * used in the incoming package to whatever endian format we're using
+ * natively.
+ *
+ * Parameters:
+ *
+ * buf      [in]     - A pointer to a 4 byte buffer.
+ *
+ * Returns the integer.
  */
 unsigned int Curl_read32_le(unsigned char *buf)
 {
@@ -46,6 +62,17 @@ unsigned int Curl_read32_le(unsigned char *buf)
          ((unsigned int)buf[2] << 16) | ((unsigned int)buf[3] << 24);
 }
 
+/*
+ * Curl_write32_le()
+ *
+ * This function converts a 32-bit integer from the native endian format,
+ * to little endian format ready for sending down the wire.
+ *
+ * Parameters:
+ *
+ * value    [in]     - The 32-bit integer value.
+ * buffer   [in]     - A pointer to the output buffer.
+ */
 void Curl_write32_le(const int value, unsigned char *buffer)
 {
   buffer[0] = (char)(value & 0x000000FF);
@@ -55,6 +82,17 @@ void Curl_write32_le(const int value, unsigned char *buffer)
 }
 
 #if (CURL_SIZEOF_CURL_OFF_T > 4)
+/*
+ * Curl_write64_le()
+ *
+ * This function converts a 64-bit integer from the native endian format,
+ * to little endian format ready for sending down the wire.
+ *
+ * Parameters:
+ *
+ * value    [in]     - The 64-bit integer value.
+ * buffer   [in]     - A pointer to the output buffer.
+ */
 #if defined(HAVE_LONGLONG)
 void Curl_write64_le(const long long value, unsigned char *buffer)
 #else

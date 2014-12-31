@@ -22,12 +22,17 @@
  *
  ***************************************************************************/
 
+/* Converts a 16-bit integer from little endian */
 unsigned short Curl_read16_le(unsigned char *buf);
+
+/* Converts a 32-bit integer from little endian */
 unsigned int Curl_read32_le(unsigned char *buf);
 
+/* Converts a 32-bit integer to little endian */
 void Curl_write32_le(const int value, unsigned char *buffer);
 
 #if (CURL_SIZEOF_CURL_OFF_T > 4)
+/* Converts a 64-bit integer to little endian */
 #if defined(HAVE_LONGLONG)
 void Curl_write64_le(const long long value, unsigned char *buffer);
 #else
