@@ -306,8 +306,8 @@ static CURLcode smb_recv_message(struct connectdata *conn, void **msg)
   if(smbc->got < sizeof(unsigned int))
     return CURLE_OK;
 
-  nbt_size = ntohs(*(unsigned short *)(buf + sizeof(unsigned short))) +
-                   sizeof(unsigned int);
+  nbt_size = Curl_read16_be((unsigned char *)(buf + sizeof(unsigned short))) +
+             sizeof(unsigned int);
   if(smbc->got < nbt_size)
     return CURLE_OK;
 
@@ -317,8 +317,8 @@ static CURLcode smb_recv_message(struct connectdata *conn, void **msg)
     msg_size += 1 + ((unsigned char) buf[msg_size]) * sizeof(unsigned short);
     if(nbt_size >= msg_size + sizeof(unsigned short)) {
       /* Add the byte count */
-      msg_size += sizeof(unsigned short) + ((unsigned char) buf[msg_size]) +
-                         (((size_t) ((unsigned char) buf[msg_size + 1])) << 8);
+      msg_size += sizeof(unsigned short) +
+                  Curl_read16_le((unsigned char *)&buf[msg_size]);
       if(nbt_size < msg_size)
         return CURLE_READ_ERROR;
     }
