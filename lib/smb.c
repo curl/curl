@@ -6,6 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
+ * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -777,8 +778,10 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_CLOSE;
       break;
     }
-    len = Curl_read16_le(((char *) msg) + sizeof(struct smb_header) + 11);
-    off = Curl_read16_le(((char *) msg) + sizeof(struct smb_header) + 13);
+    len = Curl_read16_le(((unsigned char *) msg) +
+                         sizeof(struct smb_header) + 11);
+    off = Curl_read16_le(((unsigned char *) msg) +
+                         sizeof(struct smb_header) + 13);
     if(len > 0) {
       result = Curl_client_write(conn, CLIENTWRITE_BODY,
                                  (char *)msg + off + sizeof(unsigned int),
@@ -801,7 +804,8 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_CLOSE;
       break;
     }
-    len = Curl_read16_le(((char *) msg) + sizeof(struct smb_header) + 5);
+    len = Curl_read16_le(((unsigned char *) msg) +
+                         sizeof(struct smb_header) + 5);
     conn->data->req.bytecount += len;
     conn->data->req.offset += len;
     Curl_pgrsSetUploadCounter(conn->data, conn->data->req.bytecount);
