@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@
    a script at release-time. This was made its own header file in 7.11.2 */
 
 /* This is the global package copyright */
-#define LIBCURL_COPYRIGHT "1996 - 2014 Daniel Stenberg, <daniel@haxx.se>."
+#define LIBCURL_COPYRIGHT "1996 - 2015 Daniel Stenberg, <daniel@haxx.se>."
 
 /* This is the version number of the libcurl package from which this header
    file origins: */
