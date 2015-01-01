@@ -37,6 +37,21 @@ unsigned __int64 Curl_read64_le(unsigned char *buf);
 #endif
 #endif
 
+/* Converts a 16-bit integer from big endian */
+unsigned short Curl_read16_be(unsigned char *buf);
+
+/* Converts a 32-bit integer from big endian */
+unsigned int Curl_read32_be(unsigned char *buf);
+
+#if (CURL_SIZEOF_CURL_OFF_T > 4)
+/* Converts a 64-bit integer from big endian */
+#if defined(HAVE_LONGLONG)
+unsigned long long Curl_read64_be(unsigned char *buf);
+#else
+unsigned __int64 Curl_read64_be(unsigned char *buf);
+#endif
+#endif
+
 /* Converts a 16-bit integer to little endian */
 void Curl_write16_le(const short value, unsigned char *buffer);
 

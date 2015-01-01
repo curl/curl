@@ -98,6 +98,79 @@ unsigned __int64 Curl_read64_le(unsigned char *buf)
 #endif
 
 /*
+ * Curl_read16_be()
+ *
+ * This function converts a 16-bit integer from the big endian format, as
+ * used in the incoming package to whatever endian format we're using
+ * natively.
+ *
+ * Parameters:
+ *
+ * buf      [in]     - A pointer to a 2 byte buffer.
+ *
+ * Returns the integer.
+ */
+unsigned short Curl_read16_be(unsigned char *buf)
+{
+  return (unsigned short)(((unsigned short)buf[0] << 8) |
+                          ((unsigned short)buf[1]));
+}
+
+/*
+ * Curl_read32_be()
+ *
+ * This function converts a 32-bit integer from the big endian format, as
+ * used in the incoming package to whatever endian format we're using
+ * natively.
+ *
+ * Parameters:
+ *
+ * buf      [in]     - A pointer to a 4 byte buffer.
+ *
+ * Returns the integer.
+ */
+unsigned int Curl_read32_be(unsigned char *buf)
+{
+  return ((unsigned int)buf[0] << 24) | ((unsigned int)buf[1] << 16) |
+         ((unsigned int)buf[2] << 8) | ((unsigned int)buf[3]);
+}
+
+/*
+ * Curl_read64_be()
+ *
+ * This function converts a 64-bit integer from the big endian format, as
+ * used in the incoming package to whatever endian format we're using
+ * natively.
+ *
+ * Parameters:
+ *
+ * buf      [in]     - A pointer to a 8 byte buffer.
+ *
+ * Returns the integer.
+ */
+#if defined(HAVE_LONGLONG)
+unsigned long long Curl_read64_be(unsigned char *buf)
+{
+  return ((unsigned long long)buf[0] << 54) |
+         ((unsigned long long)buf[1] << 48) |
+         ((unsigned long long)buf[2] << 40) |
+         ((unsigned long long)buf[3] << 32) |
+         ((unsigned long long)buf[4] << 24) |
+         ((unsigned long long)buf[5] << 16) |
+         ((unsigned long long)buf[6] << 8) |
+         ((unsigned long long)buf[7]);
+}
+#else
+unsigned __int64 Curl_read64_be(unsigned char *buf)
+{
+  return ((unsigned __int64)buf[0] << 54) | ((unsigned __int64)buf[1] << 48) |
+         ((unsigned __int64)buf[2] << 40) | ((unsigned __int64)buf[3] << 32) |
+         ((unsigned __int64)buf[4] << 24) | ((unsigned __int64)buf[5] << 16) |
+         ((unsigned __int64)buf[6] << 8) | ((unsigned __int64)buf[7]);
+}
+#endif
+
+/*
  * Curl_write16_le()
  *
  * This function converts a 16-bit integer from the native endian format,
