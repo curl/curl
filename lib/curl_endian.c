@@ -85,7 +85,7 @@ unsigned long long Curl_read64_le(unsigned char *buf)
          ((unsigned long long)buf[4] << 32) |
          ((unsigned long long)buf[5] << 40) |
          ((unsigned long long)buf[6] << 48) |
-         ((unsigned long long)buf[7] << 54);
+         ((unsigned long long)buf[7] << 56);
 }
 #else
 unsigned __int64 Curl_read64_le(unsigned char *buf)
@@ -93,7 +93,7 @@ unsigned __int64 Curl_read64_le(unsigned char *buf)
   return ((unsigned __int64)buf[0]) | ((unsigned __int64)buf[1] << 8) |
          ((unsigned __int64)buf[2] << 16) | ((unsigned __int64)buf[3] << 24) |
          ((unsigned __int64)buf[4] << 32) | ((unsigned __int64)buf[5] << 40) |
-         ((unsigned __int64)buf[6] << 48) | ((unsigned __int64)buf[7] << 54);
+         ((unsigned __int64)buf[6] << 48) | ((unsigned __int64)buf[7] << 56);
 }
 #endif
 
@@ -151,7 +151,7 @@ unsigned int Curl_read32_be(unsigned char *buf)
 #if defined(HAVE_LONGLONG)
 unsigned long long Curl_read64_be(unsigned char *buf)
 {
-  return ((unsigned long long)buf[0] << 54) |
+  return ((unsigned long long)buf[0] << 56) |
          ((unsigned long long)buf[1] << 48) |
          ((unsigned long long)buf[2] << 40) |
          ((unsigned long long)buf[3] << 32) |
@@ -163,7 +163,7 @@ unsigned long long Curl_read64_be(unsigned char *buf)
 #else
 unsigned __int64 Curl_read64_be(unsigned char *buf)
 {
-  return ((unsigned __int64)buf[0] << 54) | ((unsigned __int64)buf[1] << 48) |
+  return ((unsigned __int64)buf[0] << 56) | ((unsigned __int64)buf[1] << 48) |
          ((unsigned __int64)buf[2] << 40) | ((unsigned __int64)buf[3] << 32) |
          ((unsigned __int64)buf[4] << 24) | ((unsigned __int64)buf[5] << 16) |
          ((unsigned __int64)buf[6] << 8) | ((unsigned __int64)buf[7]);
