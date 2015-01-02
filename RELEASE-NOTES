@@ -134,6 +134,9 @@ This release includes the following bugfixes:
  o vtls: Fixed compilation warning and an ignored return code
  o sockfilt.c: Fixed compilation warnings
  o darwinssl: Fixed compilation warning
+ o vtls: Use '(void) arg' for unused parameters
+ o sepheaders.c: Fixed resource leak on failure
+ o lib1900.c: Fixed cppcheck error [17]
 
 This release includes the following known bugs:
 
@@ -145,10 +148,11 @@ advice from friends like these:
   Anthon Pang, Bill Nagel, Brad Harder, Brad King, Carlo Wood, Christian Hägele,
   Dan Fandrich, Daniel Stenberg, Dave Reisner, Frank Gevaerts, Gisle Vanem,
   Guenter Knauf, Jan Ehrhardt, Johan Lantz, John E. Malmberg, Jon Spencer,
-  Kamil Dudka, Kyle J. McKay, Lucas Pardue, Marc Hoersken, Marc Renault,
-  Michael Osipov, Nobuhiro Ban, Patrick Monnerat, Peter Wu, Ray Satiro,
-  Sam Hurst, Stefan Bühler, Stefan Neis, Steve Holme, Tae Hyoung Ahn,
-  Tatsuhiro Tsujikawa, Tomasz Kojm, Tor Arntsen, Waldek Kozba, Warren Menzer
+  Julien Nabet, Kamil Dudka, Kyle J. McKay, Lucas Pardue, Marc Hoersken,
+  Marc Renault, Michael Osipov, Nobuhiro Ban, Patrick Monnerat, Peter Wu,
+  Ray Satiro, Sam Hurst, Stefan Bühler, Stefan Neis, Steve Holme,
+  Tae Hyoung Ahn, Tatsuhiro Tsujikawa, Tomasz Kojm, Tor Arntsen, Waldek Kozba,
+  Warren Menzer
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -170,4 +174,5 @@ References to bug reports and discussions on issues:
  [14] = http://curl.haxx.se/mail/lib-2014-12/0103.html
  [15] = http://curl.haxx.se/bug/view.cgi?id=1451
  [16] = http://curl.haxx.se/bug/view.cgi?id=1449
- [17] =
+ [17] = https://github.com/bagder/curl/pull/133
+ [18] =
