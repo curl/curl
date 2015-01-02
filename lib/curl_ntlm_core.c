@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -455,6 +455,8 @@ static void ascii_to_unicode_le(unsigned char *dest, const char *src,
   }
 }
 
+#if USE_NTLM_V2 && !defined(USE_WINDOWS_SSPI)
+
 static void ascii_uppercase_to_unicode_le(unsigned char *dest,
                                           const char *src, size_t srclen)
 {
@@ -464,6 +466,8 @@ static void ascii_uppercase_to_unicode_le(unsigned char *dest,
     dest[2 * i + 1] = '\0';
   }
 }
+
+#endif /* USE_NTLM_V2 && !USE_WINDOWS_SSPI */
 
 /*
  * Set up nt hashed passwords
@@ -715,7 +719,7 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   return result;
 }
 
-#endif /* !USE_WINDOWS_SSPI */
+#endif /* USE_NTLM_V2 && !USE_WINDOWS_SSPI */
 
 #endif /* USE_NTRESPONSES */
 
