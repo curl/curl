@@ -625,7 +625,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
     sni = (char *) NULL;
     break;
   case CURL_SSLVERSION_SSLv3:
-    protoflags = CURL_GSKPROTO_SSLV2_MASK;
+    protoflags = CURL_GSKPROTO_SSLV3_MASK;
     sni = (char *) NULL;
     break;
   case CURL_SSLVERSION_TLSv1:
