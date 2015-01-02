@@ -118,34 +118,9 @@
 #define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
 #define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
 
-#ifdef USE_SSLEAY
 /*
- * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
- * key schedule ks is also set.
- */
-static void setup_des_key(const unsigned char *key_56,
-                          DES_key_schedule DESKEYARG(ks))
-{
-  DES_cblock key;
-
-  key[0] = key_56[0];
-  key[1] = (unsigned char)(((key_56[0] << 7) & 0xFF) | (key_56[1] >> 1));
-  key[2] = (unsigned char)(((key_56[1] << 6) & 0xFF) | (key_56[2] >> 2));
-  key[3] = (unsigned char)(((key_56[2] << 5) & 0xFF) | (key_56[3] >> 3));
-  key[4] = (unsigned char)(((key_56[3] << 4) & 0xFF) | (key_56[4] >> 4));
-  key[5] = (unsigned char)(((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5));
-  key[6] = (unsigned char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
-  key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
-
-  DES_set_odd_parity(&key);
-  DES_set_key(&key, ks);
-}
-
-#else /* defined(USE_SSLEAY) */
-
-/*
- * Turns a 56 bit key into the 64 bit, odd parity key.  Used by GnuTLS and NSS.
- */
+* Turns a 56-bit key into being 64-bit wide.
+*/
 static void extend_key_56_to_64(const unsigned char *key_56, char *key)
 {
   key[0] = key_56[0];
@@ -158,7 +133,22 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
 }
 
-#if defined(USE_GNUTLS_NETTLE)
+#ifdef USE_SSLEAY
+/*
+ * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
+ * key schedule ks is also set.
+ */
+static void setup_des_key(const unsigned char *key_56,
+                          DES_key_schedule DESKEYARG(ks))
+{
+  DES_cblock key;
+
+  extend_key_56_to_64(key_56, key);
+  DES_set_odd_parity(&key);
+  DES_set_key(&key, ks);
+}
+
+#elif defined(USE_GNUTLS_NETTLE)
 
 static void setup_des_key(const unsigned char *key_56,
                           struct des_ctx *des)
@@ -317,8 +307,6 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
 }
 
 #endif /* defined(USE_WIN32_CRYPTO) */
-
-#endif /* defined(USE_SSLEAY) */
 
  /*
   * takes a 21 byte array and treats it as 3 56-bit DES keys. The
