@@ -64,6 +64,7 @@
 #include "strtok.h"
 #include "curl_ldap.h"
 #include "curl_memory.h"
+#include "curl_multibyte.h"
 #include "curl_base64.h"
 #include "rawstr.h"
 #include "connect.h"
@@ -184,6 +185,12 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
   struct timeval ldap_timeout = {10,0}; /* 10 sec connection/search timeout */
 #endif
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+  TCHAR *host = NULL;
+#else
+  char *host = NULL;
+#endif
 
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d\n",
@@ -207,6 +214,18 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   infof(data, "LDAP local: trying to establish %s connection\n",
           ldap_ssl ? "encrypted" : "cleartext");
 
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+  host = Curl_convert_UTF8_to_tchar(conn->host.name);
+  if(!host) {
+    result = CURLE_OUT_OF_MEMORY;
+
+    goto quit;
+  }
+#else
+  host = conn->host.name;
+#endif
+
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
   ldap_set_option(NULL, LDAP_OPT_NETWORK_TIMEOUT, &ldap_timeout);
 #endif
@@ -216,7 +235,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 #ifdef HAVE_LDAP_SSL
 #ifdef CURL_LDAP_WIN
     /* Win32 LDAP SDK doesn't support insecure mode without CA! */
-    server = ldap_sslinit(conn->host.name, (int)conn->port, 1);
+    server = ldap_sslinit(host, (int)conn->port, 1);
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
 #else
     int ldap_option;
@@ -262,7 +281,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-    server = ldapssl_init(conn->host.name, (int)conn->port, 1);
+    server = ldapssl_init(host, (int)conn->port, 1);
     if(server == NULL) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
             conn->host.dispname, conn->port);
@@ -303,7 +322,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-    server = ldap_init(conn->host.name, (int)conn->port);
+    server = ldap_init(host, (int)conn->port);
     if(server == NULL) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
             conn->host.dispname, conn->port);
@@ -339,7 +358,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 #endif /* CURL_LDAP_USE_SSL */
   }
   else {
-    server = ldap_init(conn->host.name, (int)conn->port);
+    server = ldap_init(host, (int)conn->port);
     if(server == NULL) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
             conn->host.dispname, conn->port);
@@ -550,6 +569,11 @@ quit:
   if(ldap_ssl)
     ldapssl_client_deinit();
 #endif /* HAVE_LDAP_SSL && CURL_HAS_NOVELL_LDAPSDK */
+
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+  Curl_unicodefree(host);
+#endif
 
   /* no data to transfer */
   Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
