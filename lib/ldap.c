@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -381,22 +381,37 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       entryIterator = ldap_next_entry(server, entryIterator), num++) {
     BerElement *ber = NULL;
     char  *attribute;       /*! suspicious that this isn't 'const' */
-    char  *dn = ldap_get_dn(server, entryIterator);
     int i;
 
-    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
-    if(result)
-      goto quit;
+    /* Get the DN and write it to the client */
+    {
+      char  *dn = ldap_get_dn(server, entryIterator);
 
-    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)dn, 0);
-    if(result)
-      goto quit;
+      result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
+      if(result) {
+        ldap_memfree(dn);
 
-    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
-    if(result)
-      goto quit;
+        goto quit;
+      }
 
-    dlsize += strlen(dn)+5;
+      result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *) dn, 0);
+      if(result) {
+        ldap_memfree(dn);
+
+        goto quit;
+      }
+
+      result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
+      if(result) {
+        ldap_memfree(dn);
+
+        goto quit;
+      }
+
+      dlsize += strlen(dn) + 5;
+
+      ldap_memfree(dn);
+    }
 
     for(attribute = ldap_first_attribute(server, entryIterator, &ber);
         attribute;
@@ -432,7 +447,6 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
             if(error) {
               ldap_value_free_len(vals);
               ldap_memfree(attribute);
-              ldap_memfree(dn);
               if(ber)
                 ber_free(ber, 0);
               result = error;
@@ -470,7 +484,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       Curl_pgrsSetDownloadCounter(data, dlsize);
       ldap_memfree(attribute);
     }
-    ldap_memfree(dn);
+
     if(ber)
        ber_free(ber, 0);
   }
