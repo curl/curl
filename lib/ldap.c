@@ -386,6 +386,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     /* Get the DN and write it to the client */
     {
       char  *dn = ldap_get_dn(server, entryIterator);
+      size_t dn_len = strlen(dn);
 
       result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
       if(result) {
@@ -394,7 +395,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
         goto quit;
       }
 
-      result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *) dn, 0);
+      result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *) dn, dn_len);
       if(result) {
         ldap_memfree(dn);
 
@@ -408,7 +409,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
         goto quit;
       }
 
-      dlsize += strlen(dn) + 5;
+      dlsize += dn_len + 5;
 
       ldap_memfree(dn);
     }
@@ -417,6 +418,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     for(attribute = ldap_first_attribute(server, entryIterator, &ber);
         attribute;
         attribute = ldap_next_attribute(server, entryIterator, ber)) {
+      size_t attr_len = strlen(attribute);
       BerValue **vals = ldap_get_values_len(server, entryIterator, attribute);
 
       if(vals != NULL) {
@@ -432,7 +434,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
           }
 
           result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                                     (char *)attribute, 0);
+                                     (char *)attribute, attr_len);
           if(result) {
             ldap_value_free_len(vals);
             ldap_memfree(attribute);
@@ -452,12 +454,10 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
             goto quit;
           }
 
-          dlsize += strlen(attribute)+3;
+          dlsize += attr_len + 3;
 
-          if((strlen(attribute) > 7) &&
-              (strcmp(";binary",
-                      (char *)attribute +
-                      (strlen((char *)attribute) - 7)) == 0)) {
+          if((attr_len > 7) &&
+             (strcmp(";binary", (char *) attribute + (attr_len - 7)) == 0)) {
             /* Binary attribute, encode to base64. */
             CURLcode error = Curl_base64_encode(data,
                                                 vals[i]->bv_val,
@@ -504,7 +504,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
             dlsize += vals[i]->bv_len;
           }
 
-          result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 0);
+          result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
           if(result) {
             ldap_value_free_len(vals);
             ldap_memfree(attribute);
