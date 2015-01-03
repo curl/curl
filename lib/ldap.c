@@ -81,7 +81,12 @@
 typedef struct {
   char   *lud_host;
   int     lud_port;
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+  TCHAR  *lud_dn;
+#else
   char   *lud_dn;
+#endif;
   char  **lud_attrs;
   int     lud_scope;
   char   *lud_filter;
@@ -681,15 +686,6 @@ static bool unescape_elements (void *data, LDAPURLDesc *ludp)
     ludp->lud_attrs_dups++;
   }
 
-  if(ludp->lud_dn) {
-    char *dn = ludp->lud_dn;
-    char *new_dn = curl_easy_unescape(data, dn, 0, NULL);
-
-    free(dn);
-    ludp->lud_dn = new_dn;
-    if(!new_dn)
-       return (FALSE);
-  }
   return (TRUE);
 }
 
@@ -709,7 +705,10 @@ static bool unescape_elements (void *data, LDAPURLDesc *ludp)
  */
 static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 {
-  char *p, *q;
+  int rc = LDAP_SUCCESS;
+  char *path;
+  char *p;
+  char *q;
   int i;
 
   if(!conn->data ||
@@ -722,20 +721,47 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   ludp->lud_port  = conn->remote_port;
   ludp->lud_host  = conn->host.name;
 
-  /* parse DN (Distinguished Name).
-   */
-  ludp->lud_dn = strdup(conn->data->state.path+1);
-  if(!ludp->lud_dn)
+  /* Duplicate the path */
+  p = path = strdup(conn->data->state.path + 1);
+  if(!path)
     return LDAP_NO_MEMORY;
 
-  p = strchr(ludp->lud_dn, '?');
-  LDAP_TRACE (("DN '%.*s'\n", p ? (size_t)(p-ludp->lud_dn) :
-               strlen(ludp->lud_dn), ludp->lud_dn));
+  /* Parse the DN (Distinguished Name) */
+  q = strchr(p, '?');
+  if(q)
+    *q++ = '\0';
 
+  if(*p) {
+    char *dn = p;
+    char *unescapped;
+
+    LDAP_TRACE("DN '%s'\n", dn);
+
+    unescapped = curl_easy_unescape(conn->data, dn, 0, NULL);
+    if(!unescapped) {
+      rc = LDAP_NO_MEMORY;
+
+      goto quit;
+    }
+
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+    ludp->lud_dn = Curl_convert_UTF8_to_tchar(unescapped);
+    if(!ludp->lud_dn) {
+      Curl_safefree(unescapped);
+
+      rc = LDAP_NO_MEMORY;
+
+      goto quit;
+    }
+#else
+    ludp->lud_dn = unescapped;
+#endif
+  }
+
+  p = q;
   if(!p)
     goto success;
-
-  *p++ = '\0';
 
   /* parse attributes. skip "??".
    */
@@ -745,8 +771,11 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
   if(*p && *p != '?') {
     ludp->lud_attrs = split_str(p);
-    if(!ludp->lud_attrs)
-      return LDAP_NO_MEMORY;
+    if(!ludp->lud_attrs) {
+      rc = LDAP_NO_MEMORY;
+
+      goto quit;
+    }
 
     for(i = 0; ludp->lud_attrs[i]; i++)
       LDAP_TRACE (("attr[%d] '%s'\n", i, ludp->lud_attrs[i]));
@@ -765,7 +794,9 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   if(*p && *p != '?') {
     ludp->lud_scope = str2scope(p);
     if(ludp->lud_scope == -1) {
-      return LDAP_INVALID_SYNTAX;
+      rc = LDAP_INVALID_SYNTAX;
+
+      goto quit;
     }
     LDAP_TRACE (("scope %d\n", ludp->lud_scope));
   }
@@ -780,16 +811,25 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   if(q)
     *q++ = '\0';
   if(!*p) {
-    return LDAP_INVALID_SYNTAX;
+    rc = LDAP_INVALID_SYNTAX;
+
+    goto quit;
   }
 
   ludp->lud_filter = p;
   LDAP_TRACE (("filter '%s'\n", ludp->lud_filter));
 
-  success:
+success:
   if(!unescape_elements(conn->data, ludp))
-    return LDAP_NO_MEMORY;
-  return LDAP_SUCCESS;
+    rc = LDAP_NO_MEMORY;
+
+quit:
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+  Curl_unicodefree(path);
+#endif
+
+  return rc;
 }
 
 static int _ldap_url_parse (const struct connectdata *conn,
