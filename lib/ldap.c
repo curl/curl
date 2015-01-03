@@ -84,10 +84,11 @@ typedef struct {
 #if defined(CURL_LDAP_WIN) && \
     (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
   TCHAR  *lud_dn;
+  TCHAR **lud_attrs;
 #else
   char   *lud_dn;
-#endif
   char  **lud_attrs;
+#endif
   int     lud_scope;
   char   *lud_filter;
   char  **lud_exts;
@@ -645,24 +646,34 @@ static int str2scope (const char *p)
 
 /*
  * Split 'str' into strings separated by commas.
- * Note: res[] points into 'str'.
+ * Note: out[] points into 'str'.
  */
-static char **split_str (char *str)
+static bool split_str(char *str, char ***out, size_t *count)
 {
-  char **res, *lasts, *s;
-  int  i;
+  char **res;
+  char *lasts;
+  char *s;
+  size_t  i;
+  size_t items = 1;
 
-  for(i = 2, s = strchr(str,','); s; i++)
-    s = strchr(++s,',');
+  s = strchr(str, ',');
+  while(s) {
+    items++;
+    s = strchr(++s, ',');
+  }
 
-  res = calloc(i, sizeof(char*));
+  res = calloc(items, sizeof(char *));
   if(!res)
-    return NULL;
+    return FALSE;
 
-  for(i = 0, s = strtok_r(str, ",", &lasts); s;
+  for(i = 0, s = strtok_r(str, ",", &lasts); s && i < items;
       s = strtok_r(NULL, ",", &lasts), i++)
     res[i] = s;
-  return res;
+
+  *out = res;
+  *count = items;
+
+  return TRUE;
 }
 
 /*
@@ -670,20 +681,10 @@ static char **split_str (char *str)
  */
 static bool unescape_elements (void *data, LDAPURLDesc *ludp)
 {
-  int i;
-
   if(ludp->lud_filter) {
     ludp->lud_filter = curl_easy_unescape(data, ludp->lud_filter, 0, NULL);
     if(!ludp->lud_filter)
        return FALSE;
-  }
-
-  for(i = 0; ludp->lud_attrs && ludp->lud_attrs[i]; i++) {
-    ludp->lud_attrs[i] = curl_easy_unescape(data, ludp->lud_attrs[i],
-                                            0, NULL);
-    if(!ludp->lud_attrs[i])
-      return FALSE;
-    ludp->lud_attrs_dups++;
   }
 
   return (TRUE);
@@ -767,22 +768,73 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   if(!p)
     goto success;
 
-  /* parse attributes. skip "??".
-   */
+  /* Parse the attributes. skip "??" */
   q = strchr(p, '?');
   if(q)
     *q++ = '\0';
 
-  if(*p && *p != '?') {
-    ludp->lud_attrs = split_str(p);
-    if(!ludp->lud_attrs) {
+  if(*p) {
+    char **attributes;
+    size_t count = 0;
+
+    /* Split the string into an array of attributes */
+    if(!split_str(p, &attributes, &count)) {
       rc = LDAP_NO_MEMORY;
 
       goto quit;
     }
 
-    for(i = 0; ludp->lud_attrs[i]; i++)
-      LDAP_TRACE (("attr[%d] '%s'\n", i, ludp->lud_attrs[i]));
+    /* Allocate our array (+1 for the NULL entry) */
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+    ludp->lud_attrs = calloc(count + 1, sizeof(TCHAR *));
+#else
+    ludp->lud_attrs = calloc(count + 1, sizeof(char *));
+#endif
+    if(!ludp->lud_attrs) {
+      Curl_safefree(attributes);
+
+      rc = LDAP_NO_MEMORY;
+
+      goto quit;
+    }
+
+    for(i = 0; i < count; i++) {
+      char *unescapped;
+
+      LDAP_TRACE (("attr[%d] '%s'\n", i, attributes[i]));
+
+      /* Unescape the attribute */
+      unescapped = curl_easy_unescape(conn->data, attributes[i], 0, NULL);
+      if(!unescapped) {
+        Curl_safefree(attributes);
+
+        rc = LDAP_NO_MEMORY;
+
+        goto quit;
+      }
+
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+      /* Convert the unescapped string to a tchar */
+      ludp->lud_attrs[i] = Curl_convert_UTF8_to_tchar(unescapped);
+
+      /* Free the unescapped string as we are done with it */
+      Curl_unicodefree(unescapped);
+
+      if(!ludp->lud_attrs[i]) {
+        Curl_safefree(attributes);
+
+        rc = LDAP_NO_MEMORY;
+
+        goto quit;
+      }
+#else
+      ludp->lud_attrs[i] = unescapped;
+#endif
+
+      ludp->lud_attrs_dups++;
+    }
   }
 
   p = q;
