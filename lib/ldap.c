@@ -90,7 +90,12 @@ typedef struct {
   char  **lud_attrs;
 #endif
   int     lud_scope;
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+  TCHAR  *lud_filter;
+#else
   char   *lud_filter;
+#endif;
   char  **lud_exts;
   size_t    lud_attrs_dups; /* how many were dup'ed, this field is not in the
                                "real" struct so can only be used in code
@@ -681,12 +686,6 @@ static bool split_str(char *str, char ***out, size_t *count)
  */
 static bool unescape_elements (void *data, LDAPURLDesc *ludp)
 {
-  if(ludp->lud_filter) {
-    ludp->lud_filter = curl_easy_unescape(data, ludp->lud_filter, 0, NULL);
-    if(!ludp->lud_filter)
-       return FALSE;
-  }
-
   return (TRUE);
 }
 
@@ -841,13 +840,12 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   if(!p)
     goto success;
 
-  /* parse scope. skip "??"
-   */
+  /* Parse the scope. skip "??" */
   q = strchr(p, '?');
   if(q)
     *q++ = '\0';
 
-  if(*p && *p != '?') {
+  if(*p) {
     ludp->lud_scope = str2scope(p);
     if(ludp->lud_scope == -1) {
       rc = LDAP_INVALID_SYNTAX;
@@ -861,19 +859,49 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   if(!p)
     goto success;
 
-  /* parse filter
-   */
+  /* Parse the filter */
   q = strchr(p, '?');
   if(q)
     *q++ = '\0';
-  if(!*p) {
+
+  if(*p) {
+    char *filter = p;
+    char *unescapped;
+
+    LDAP_TRACE (("filter '%s'\n", filter));
+
+    /* Unescape the filter */
+    unescapped = curl_easy_unescape(conn->data, filter, 0, NULL);
+    if(!unescapped) {
+      rc = LDAP_NO_MEMORY;
+
+      goto quit;
+    }
+
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+    /* Convert the unescapped string to a tchar */
+    ludp->lud_filter = Curl_convert_UTF8_to_tchar(unescapped);
+
+    /* Free the unescapped string as we are done with it */
+    Curl_unicodefree(unescapped);
+
+    if(!ludp->lud_filter) {
+      rc = LDAP_NO_MEMORY;
+
+      goto quit;
+    }
+#else
+    ludp->lud_filter = unescapped;
+#endif
+  }
+
+  p = q;
+  if(p && !*p) {
     rc = LDAP_INVALID_SYNTAX;
 
     goto quit;
   }
-
-  ludp->lud_filter = p;
-  LDAP_TRACE (("filter '%s'\n", ludp->lud_filter));
 
 success:
   if(!unescape_elements(conn->data, ludp))
