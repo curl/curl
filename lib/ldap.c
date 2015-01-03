@@ -81,8 +81,7 @@
 typedef struct {
   char   *lud_host;
   int     lud_port;
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
   TCHAR  *lud_dn;
   TCHAR **lud_attrs;
 #else
@@ -90,8 +89,7 @@ typedef struct {
   char  **lud_attrs;
 #endif
   int     lud_scope;
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
   TCHAR  *lud_filter;
 #else
   char   *lud_filter;
@@ -196,8 +194,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
   struct timeval ldap_timeout = {10,0}; /* 10 sec connection/search timeout */
 #endif
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
   TCHAR *host = NULL;
   TCHAR *user = NULL;
   TCHAR *passwd = NULL;
@@ -229,8 +226,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   infof(data, "LDAP local: trying to establish %s connection\n",
           ldap_ssl ? "encrypted" : "cleartext");
 
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
   host = Curl_convert_UTF8_to_tchar(conn->host.name);
   if(!host) {
     result = CURLE_OUT_OF_MEMORY;
@@ -425,8 +421,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       entryIterator;
       entryIterator = ldap_next_entry(server, entryIterator), num++) {
     BerElement *ber = NULL;
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
     TCHAR *attribute;
 #else
     char  *attribute;       /*! suspicious that this isn't 'const' */
@@ -435,8 +430,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 
     /* Get the DN and write it to the client */
     {
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
       TCHAR *dn = ldap_get_dn(server, entryIterator);
       size_t dn_len = _tcslen(dn);
 #else
@@ -474,8 +468,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     for(attribute = ldap_first_attribute(server, entryIterator, &ber);
         attribute;
         attribute = ldap_next_attribute(server, entryIterator, ber)) {
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
       size_t attr_len = _tcslen(attribute);
 #else
       size_t attr_len = strlen(attribute);
@@ -612,8 +605,7 @@ quit:
     ldapssl_client_deinit();
 #endif /* HAVE_LDAP_SSL && CURL_HAS_NOVELL_LDAPSDK */
 
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
   Curl_unicodefree(passwd);
   Curl_unicodefree(user);
   Curl_unicodefree(host);
@@ -753,8 +745,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
       goto quit;
     }
 
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
     /* Convert the unescapped string to a tchar */
     ludp->lud_dn = Curl_convert_UTF8_to_tchar(unescapped);
 
@@ -792,8 +783,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
     }
 
     /* Allocate our array (+1 for the NULL entry) */
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
     ludp->lud_attrs = calloc(count + 1, sizeof(TCHAR *));
 #else
     ludp->lud_attrs = calloc(count + 1, sizeof(char *));
@@ -821,8 +811,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
         goto quit;
       }
 
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
       /* Convert the unescapped string to a tchar */
       ludp->lud_attrs[i] = Curl_convert_UTF8_to_tchar(unescapped);
 
@@ -888,8 +877,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
       goto quit;
     }
 
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+#if defined(CURL_LDAP_WIN)
     /* Convert the unescapped string to a tchar */
     ludp->lud_filter = Curl_convert_UTF8_to_tchar(unescapped);
 

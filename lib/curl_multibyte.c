@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,8 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_WIN32_IDN) || (defined(USE_WINDOWS_SSPI) && defined(UNICODE))
+#if defined(USE_WIN32_IDN) || ((defined(USE_WINDOWS_SSPI) || \
+                                defined(CURL_LDAP_WIN)) && defined(UNICODE))
 
  /*
   * MultiByte conversions using Windows kernel32 library.
@@ -79,4 +80,4 @@ char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w)
   return str_utf8;
 }
 
-#endif /* USE_WIN32_IDN || (USE_WINDOWS_SSPI && UNICODE) */
+#endif /* USE_WIN32_IDN || ((USE_WINDOWS_SSPI || CURL_LDAP_WIN) && UNICODE) */
