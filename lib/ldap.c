@@ -459,17 +459,17 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
           if((attr_len > 7) &&
              (strcmp(";binary", (char *) attribute + (attr_len - 7)) == 0)) {
             /* Binary attribute, encode to base64. */
-            CURLcode error = Curl_base64_encode(data,
-                                                vals[i]->bv_val,
-                                                vals[i]->bv_len,
-                                                &val_b64,
-                                                &val_b64_sz);
-            if(error) {
+            result = Curl_base64_encode(data,
+                                        vals[i]->bv_val,
+                                        vals[i]->bv_len,
+                                        &val_b64,
+                                        &val_b64_sz);
+            if(result) {
               ldap_value_free_len(vals);
               ldap_memfree(attribute);
               if(ber)
                 ber_free(ber, 0);
-              result = error;
+
               goto quit;
             }
 
