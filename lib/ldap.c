@@ -430,8 +430,14 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 
     /* Get the DN and write it to the client */
     {
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+      TCHAR *dn = ldap_get_dn(server, entryIterator);
+      size_t dn_len = _tcslen(dn);
+#else
       char  *dn = ldap_get_dn(server, entryIterator);
       size_t dn_len = strlen(dn);
+#endif
 
       result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
       if(result) {
