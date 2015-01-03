@@ -265,7 +265,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     server = ldapssl_init(conn->host.name, (int)conn->port, 1);
     if(server == NULL) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
-              conn->host.name, conn->port);
+            conn->host.dispname, conn->port);
       result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
@@ -306,7 +306,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     server = ldap_init(conn->host.name, (int)conn->port);
     if(server == NULL) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
-              conn->host.name, conn->port);
+            conn->host.dispname, conn->port);
       result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
@@ -342,7 +342,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     server = ldap_init(conn->host.name, (int)conn->port);
     if(server == NULL) {
       failf(data, "LDAP local: Cannot connect to %s:%ld",
-              conn->host.name, conn->port);
+            conn->host.dispname, conn->port);
       result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
