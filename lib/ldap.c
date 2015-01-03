@@ -682,14 +682,6 @@ static bool split_str(char *str, char ***out, size_t *count)
 }
 
 /*
- * Unescape the LDAP-URL components
- */
-static bool unescape_elements (void *data, LDAPURLDesc *ludp)
-{
-  return (TRUE);
-}
-
-/*
  * Break apart the pieces of an LDAP URL.
  * Syntax:
  *   ldap://<hostname>:<port>/<base_dn>?<attributes>?<scope>?<filter>?<ext>
@@ -765,7 +757,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
   p = q;
   if(!p)
-    goto success;
+    goto quit;
 
   /* Parse the attributes. skip "??" */
   q = strchr(p, '?');
@@ -838,7 +830,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
   p = q;
   if(!p)
-    goto success;
+    goto quit;
 
   /* Parse the scope. skip "??" */
   q = strchr(p, '?');
@@ -857,7 +849,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
   p = q;
   if(!p)
-    goto success;
+    goto quit;
 
   /* Parse the filter */
   q = strchr(p, '?');
@@ -902,10 +894,6 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
     goto quit;
   }
-
-success:
-  if(!unescape_elements(conn->data, ludp))
-    rc = LDAP_NO_MEMORY;
 
 quit:
 #if defined(CURL_LDAP_WIN) && \
