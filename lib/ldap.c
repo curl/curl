@@ -425,7 +425,12 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       entryIterator;
       entryIterator = ldap_next_entry(server, entryIterator), num++) {
     BerElement *ber = NULL;
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+    TCHAR *attribute;
+#else
     char  *attribute;       /*! suspicious that this isn't 'const' */
+#endif
     int i;
 
     /* Get the DN and write it to the client */
@@ -469,7 +474,12 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     for(attribute = ldap_first_attribute(server, entryIterator, &ber);
         attribute;
         attribute = ldap_next_attribute(server, entryIterator, ber)) {
+#if defined(CURL_LDAP_WIN) && \
+    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+      size_t attr_len = _tcslen(attribute);
+#else
       size_t attr_len = strlen(attribute);
+#endif
       BerValue **vals = ldap_get_values_len(server, entryIterator, attribute);
 
       if(vals != NULL) {
