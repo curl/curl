@@ -710,7 +710,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   char *path;
   char *p;
   char *q;
-  int i;
+  size_t i;
 
   if(!conn->data ||
       !conn->data->state.path ||
