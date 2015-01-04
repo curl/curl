@@ -842,6 +842,8 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
       ludp->lud_attrs_dups++;
     }
+
+    Curl_safefree(attributes);
   }
 
   p = q;
