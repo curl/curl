@@ -735,7 +735,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
     char *dn = p;
     char *unescapped;
 
-    LDAP_TRACE("DN '%s'\n", dn);
+    LDAP_TRACE (("DN '%s'\n", dn));
 
     unescapped = curl_easy_unescape(conn->data, dn, 0, NULL);
     if(!unescapped) {
