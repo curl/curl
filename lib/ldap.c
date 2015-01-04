@@ -914,10 +914,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   }
 
 quit:
-#if defined(CURL_LDAP_WIN) && \
-    (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
-  Curl_unicodefree(path);
-#endif
+  Curl_safefree(path);
 
   return rc;
 }
