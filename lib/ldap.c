@@ -737,6 +737,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
     LDAP_TRACE (("DN '%s'\n", dn));
 
+    /* Unescape the DN */
     unescapped = curl_easy_unescape(conn->data, dn, 0, NULL);
     if(!unescapped) {
       rc = LDAP_NO_MEMORY;
@@ -746,10 +747,13 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
 #if defined(CURL_LDAP_WIN) && \
     (defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI))
+    /* Convert the unescapped string to a tchar */
     ludp->lud_dn = Curl_convert_UTF8_to_tchar(unescapped);
-    if(!ludp->lud_dn) {
-      Curl_safefree(unescapped);
 
+    /* Free the unescapped string as we are done with it */
+    Curl_unicodefree(unescapped);
+
+    if(!ludp->lud_dn) {
       rc = LDAP_NO_MEMORY;
 
       goto quit;
