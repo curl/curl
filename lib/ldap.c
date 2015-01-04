@@ -95,7 +95,7 @@ typedef struct {
   TCHAR  *lud_filter;
 #else
   char   *lud_filter;
-#endif;
+#endif
   char  **lud_exts;
   size_t    lud_attrs_dups; /* how many were dup'ed, this field is not in the
                                "real" struct so can only be used in code
