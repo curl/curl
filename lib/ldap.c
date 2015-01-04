@@ -86,7 +86,7 @@ typedef struct {
   TCHAR  *lud_dn;
 #else
   char   *lud_dn;
-#endif;
+#endif
   char  **lud_attrs;
   int     lud_scope;
   char   *lud_filter;
