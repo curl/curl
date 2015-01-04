@@ -137,6 +137,8 @@ This release includes the following bugfixes:
  o vtls: Use '(void) arg' for unused parameters
  o sepheaders.c: Fixed resource leak on failure
  o lib1900.c: Fixed cppcheck error [17]
+ o ldap: Fixed Unicode connection details in Win32 initialsation / bind calls
+ o ldap: Fixed Unicode DN, attributes and filter in Win32 search calls
 
 This release includes the following known bugs:
 
