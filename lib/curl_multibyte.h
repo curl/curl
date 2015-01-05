@@ -37,7 +37,7 @@ char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w);
 
 
 #if defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI) || \
-    defined(CURL_LDAP_WIN) 
+    defined(CURL_LDAP_WIN)
 
 /*
  * Macros Curl_convert_UTF8_to_tchar(), Curl_convert_tchar_to_UTF8()
