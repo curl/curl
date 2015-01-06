@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1096,13 +1096,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     {
       struct Curl_dns_entry *dns = NULL;
       struct connectdata *conn = data->easy_conn;
-      int stale;
 
       /* check if we have the name resolved by now */
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-      dns = Curl_fetch_addr(conn, conn->host.name, (int)conn->port, &stale);
+      dns = Curl_fetch_addr(conn, conn->host.name, (int)conn->port);
 
       if(dns) {
         dns->inuse++; /* we use it! */
@@ -1113,8 +1112,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         result = CURLE_OK;
         infof(data, "Hostname was found in DNS cache\n");
       }
-      if(stale)
-        infof(data, "Hostname in DNS cache was stale, zapped\n");
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);

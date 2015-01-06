@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -179,9 +179,7 @@ const char *Curl_printable_address(const Curl_addrinfo *ip,
 struct Curl_dns_entry *
 Curl_fetch_addr(struct connectdata *conn,
                 const char *hostname,
-                int port,
-                int *stale);
-
+                int port);
 /*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
  *

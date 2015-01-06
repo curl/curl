@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -332,12 +332,13 @@ sigjmp_buf curl_jmpenv;
 struct Curl_dns_entry *
 Curl_fetch_addr(struct connectdata *conn,
                 const char *hostname,
-                int port, int *stale)
+                int port)
 {
   char *entry_id = NULL;
   struct Curl_dns_entry *dns = NULL;
   size_t entry_len;
   struct SessionHandle *data = conn->data;
+  int stale;
 
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
@@ -354,9 +355,11 @@ Curl_fetch_addr(struct connectdata *conn,
   free(entry_id);
 
   /* See whether the returned entry is stale. Done before we release lock */
-  *stale = remove_entry_if_stale(data, dns);
-  if(*stale)
+  stale = remove_entry_if_stale(data, dns);
+  if(stale) {
+    infof(data, "Hostname in DNS cache was stale, zapped\n");
     dns = NULL; /* the memory deallocation is being handled by the hash */
+  }
 
   return dns;
 }
@@ -448,21 +451,17 @@ int Curl_resolv(struct connectdata *conn,
   struct Curl_dns_entry *dns = NULL;
   struct SessionHandle *data = conn->data;
   CURLcode result;
-  int stale, rc = CURLRESOLV_ERROR; /* default to failure */
+  int rc = CURLRESOLV_ERROR; /* default to failure */
 
   *entry = NULL;
 
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  dns = Curl_fetch_addr(conn, hostname, port, &stale);
-
-  infof(data, "Hostname was %sfound in DNS cache\n", dns||stale?"":"NOT ");
-  if(stale)
-    infof(data, "Hostname in DNS cache was stale, zapped\n");
-
+  dns = Curl_fetch_addr(conn, hostname, port);
 
   if(dns) {
+    infof(data, "Hostname %s was found in DNS cache\n", hostname);
     dns->inuse++; /* we use it! */
     rc = CURLRESOLV_RESOLVED;
   }
