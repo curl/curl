@@ -733,24 +733,24 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
   if(*p) {
     char *dn = p;
-    char *unescapped;
+    char *unescaped;
 
     LDAP_TRACE (("DN '%s'\n", dn));
 
     /* Unescape the DN */
-    unescapped = curl_easy_unescape(conn->data, dn, 0, NULL);
-    if(!unescapped) {
+    unescaped = curl_easy_unescape(conn->data, dn, 0, NULL);
+    if(!unescaped) {
       rc = LDAP_NO_MEMORY;
 
       goto quit;
     }
 
 #if defined(CURL_LDAP_WIN)
-    /* Convert the unescapped string to a tchar */
-    ludp->lud_dn = Curl_convert_UTF8_to_tchar(unescapped);
+    /* Convert the unescaped string to a tchar */
+    ludp->lud_dn = Curl_convert_UTF8_to_tchar(unescaped);
 
-    /* Free the unescapped string as we are done with it */
-    Curl_unicodefree(unescapped);
+    /* Free the unescaped string as we are done with it */
+    Curl_unicodefree(unescaped);
 
     if(!ludp->lud_dn) {
       rc = LDAP_NO_MEMORY;
@@ -758,7 +758,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
       goto quit;
     }
 #else
-    ludp->lud_dn = unescapped;
+    ludp->lud_dn = unescaped;
 #endif
   }
 
@@ -797,13 +797,13 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
     }
 
     for(i = 0; i < count; i++) {
-      char *unescapped;
+      char *unescaped;
 
       LDAP_TRACE (("attr[%d] '%s'\n", i, attributes[i]));
 
       /* Unescape the attribute */
-      unescapped = curl_easy_unescape(conn->data, attributes[i], 0, NULL);
-      if(!unescapped) {
+      unescaped = curl_easy_unescape(conn->data, attributes[i], 0, NULL);
+      if(!unescaped) {
         Curl_safefree(attributes);
 
         rc = LDAP_NO_MEMORY;
@@ -812,11 +812,11 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
       }
 
 #if defined(CURL_LDAP_WIN)
-      /* Convert the unescapped string to a tchar */
-      ludp->lud_attrs[i] = Curl_convert_UTF8_to_tchar(unescapped);
+      /* Convert the unescaped string to a tchar */
+      ludp->lud_attrs[i] = Curl_convert_UTF8_to_tchar(unescaped);
 
-      /* Free the unescapped string as we are done with it */
-      Curl_unicodefree(unescapped);
+      /* Free the unescaped string as we are done with it */
+      Curl_unicodefree(unescaped);
 
       if(!ludp->lud_attrs[i]) {
         Curl_safefree(attributes);
@@ -826,7 +826,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
         goto quit;
       }
 #else
-      ludp->lud_attrs[i] = unescapped;
+      ludp->lud_attrs[i] = unescaped;
 #endif
 
       ludp->lud_attrs_dups++;
@@ -865,24 +865,24 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
   if(*p) {
     char *filter = p;
-    char *unescapped;
+    char *unescaped;
 
     LDAP_TRACE (("filter '%s'\n", filter));
 
     /* Unescape the filter */
-    unescapped = curl_easy_unescape(conn->data, filter, 0, NULL);
-    if(!unescapped) {
+    unescaped = curl_easy_unescape(conn->data, filter, 0, NULL);
+    if(!unescaped) {
       rc = LDAP_NO_MEMORY;
 
       goto quit;
     }
 
 #if defined(CURL_LDAP_WIN)
-    /* Convert the unescapped string to a tchar */
-    ludp->lud_filter = Curl_convert_UTF8_to_tchar(unescapped);
+    /* Convert the unescaped string to a tchar */
+    ludp->lud_filter = Curl_convert_UTF8_to_tchar(unescaped);
 
-    /* Free the unescapped string as we are done with it */
-    Curl_unicodefree(unescapped);
+    /* Free the unescaped string as we are done with it */
+    Curl_unicodefree(unescaped);
 
     if(!ludp->lud_filter) {
       rc = LDAP_NO_MEMORY;
@@ -890,7 +890,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
       goto quit;
     }
 #else
-    ludp->lud_filter = unescapped;
+    ludp->lud_filter = unescaped;
 #endif
   }
 
