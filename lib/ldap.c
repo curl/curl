@@ -430,23 +430,39 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 
     /* Get the DN and write it to the client */
     {
+      char *name;
+      size_t name_len;
 #if defined(CURL_LDAP_WIN)
       TCHAR *dn = ldap_get_dn(server, entryIterator);
-      size_t dn_len = _tcslen(dn);
+      name = Curl_convert_tchar_to_UTF8(dn);
+      if(!name) {
+        ldap_memfree(dn);
+
+        result = CURLE_OUT_OF_MEMORY;
+
+        goto quit;
+      }
 #else
-      char  *dn = ldap_get_dn(server, entryIterator);
-      size_t dn_len = strlen(dn);
+      char *dn = name = ldap_get_dn(server, entryIterator);
 #endif
+      name_len = strlen(name);
 
       result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
       if(result) {
+#if defined(CURL_LDAP_WIN)
+        Curl_unicodefree(name);
+#endif
         ldap_memfree(dn);
 
         goto quit;
       }
 
-      result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *) dn, dn_len);
+      result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *) name,
+                                 name_len);
       if(result) {
+#if defined(CURL_LDAP_WIN)
+        Curl_unicodefree(name);
+#endif
         ldap_memfree(dn);
 
         goto quit;
@@ -454,13 +470,19 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 
       result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
       if(result) {
+#if defined(CURL_LDAP_WIN)
+        Curl_unicodefree(name);
+#endif
         ldap_memfree(dn);
 
         goto quit;
       }
 
-      dlsize += dn_len + 5;
+      dlsize += name_len + 5;
 
+#if defined(CURL_LDAP_WIN)
+      Curl_unicodefree(name);
+#endif
       ldap_memfree(dn);
     }
 
