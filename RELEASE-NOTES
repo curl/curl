@@ -21,6 +21,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o darwinssl: fix session ID keys to only reuse identical sessions [18]
+ o url-parsing: reject CRLFs within URLs [19]
  o OS400: Adjust specific support to last release
  o THANKS: Remove duplicate names
  o url.c: Fixed compilation warning
@@ -147,14 +149,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anthon Pang, Bill Nagel, Brad Harder, Brad King, Carlo Wood, Christian Hägele,
-  Dan Fandrich, Daniel Stenberg, Dave Reisner, Frank Gevaerts, Gisle Vanem,
-  Guenter Knauf, Jan Ehrhardt, Johan Lantz, John E. Malmberg, Jon Spencer,
-  Julien Nabet, Kamil Dudka, Kyle J. McKay, Lucas Pardue, Marc Hoersken,
-  Marc Renault, Michael Osipov, Nick Zitzmann, Nobuhiro Ban, Patrick Monnerat,
-  Peter Wu, Ray Satiro, Sam Hurst, Stefan Bühler, Stefan Neis, Steve Holme,
-  Tae Hyoung Ahn, Tatsuhiro Tsujikawa, Tomasz Kojm, Tor Arntsen, Waldek Kozba,
-  Warren Menzer
+  Andrey Labunets, Anthon Pang, Bill Nagel, Brad Harder, Brad King, Carlo Wood,
+  Christian Hägele, Dan Fandrich, Daniel Stenberg, Dave Reisner, Frank Gevaerts,
+  Gisle Vanem, Guenter Knauf, Jan Ehrhardt, Johan Lantz, John E. Malmberg,
+  Jon Spencer, Julien Nabet, Kamil Dudka, Kyle J. McKay, Lucas Pardue,
+  Marc Hesse, Marc Hoersken, Marc Renault, Michael Osipov, Nick Zitzmann,
+  Nobuhiro Ban, Patrick Monnerat, Peter Wu, Ray Satiro, Sam Hurst,
+  Stefan Bühler, Stefan Neis, Steve Holme, Tae Hyoung Ahn, Tatsuhiro Tsujikawa,
+  Tomasz Kojm, Tor Arntsen, Waldek Kozba, Warren Menzer
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -177,4 +179,5 @@ References to bug reports and discussions on issues:
  [15] = http://curl.haxx.se/bug/view.cgi?id=1451
  [16] = http://curl.haxx.se/bug/view.cgi?id=1449
  [17] = https://github.com/bagder/curl/pull/133
- [18] =
+ [18] = http://curl.haxx.se/docs/adv_20150108A.html
+ [19] = http://curl.haxx.se/docs/adv_20150108B.html
