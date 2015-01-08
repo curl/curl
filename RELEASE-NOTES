@@ -1,146 +1,18 @@
-Curl and libcurl 7.40.0
+Curl and libcurl 7.40.1
 
- Public curl releases:         143
+ Public curl releases:         144
  Command line options:         162
  curl_easy_setopt() options:   208
  Public functions in libcurl:  58
- Contributors:                 1219
+ Contributors:                 1233
 
 This release includes the following changes:
 
- o http_digest: Added support for Windows SSPI based authentication
- o version info: Added Kerberos V5 to the supported features
- o Makefile: Added VC targets for WinIDN
- o config-win32: Introduce build targets for VS2012+
- o SSL: Add PEM format support for public key pinning
- o smtp: Added support for the conversion of Unix newlines during mail send [8]
- o smb: Added initial support for the SMB/CIFS protocol
- o Added support for HTTP over unix domain sockets, via
-   CURLOPT_UNIX_SOCKET_PATH and --unix-socket
- o sasl: Added support for GSS-API based Kerberos V5 authentication
+ o
 
 This release includes the following bugfixes:
 
- o darwinssl: fix session ID keys to only reuse identical sessions [18]
- o url-parsing: reject CRLFs within URLs [19]
- o OS400: Adjust specific support to last release
- o THANKS: Remove duplicate names
- o url.c: Fixed compilation warning
- o ssh: Fixed build on platforms where R_OK is not defined [1]
- o tool_strdup.c: include the tool strdup.h
- o build: Fixed Visual Studio project file generation of strdup.[c|h]
- o curl_easy_setopt.3: add CURLOPT_PINNEDPUBLICKEY [2]
- o curl.1: show zone index use in a URL
- o mk-ca-bundle.vbs: switch to new certdata.txt url
- o Makefile.dist: Added some missing SSPI configurations
- o build: Fixed no NTLM support for email when CURL_DISABLE_HTTP is defined
- o SSH: use the port number as well for known_known checks [3]
- o libssh2: detect features based on version, not configure checks
- o http2: Deal with HTTP/2 data inside Upgrade response header buffer [4]
- o multi: removed Curl_multi_set_easy_connection
- o symbol-scan.pl: do not require autotools
- o cmake: add ENABLE_THREADED_RESOLVER, rename ARES
- o cmake: build libhostname for test suite
- o cmake: fix HAVE_GETHOSTNAME definition
- o tests: fix libhostname visibility
- o tests: fix memleak in server/resolve.c
- o vtls.h: Fixed compiler warning when compiled without SSL
- o CMake: Restore order-dependent header checks
- o CMake: Restore order-dependent library checks
- o tool: Removed krb4 from the supported features
- o http2: Don't send Upgrade headers when we already do HTTP/2
- o examples: Don't call select() to sleep on windows [6]
- o win32: Updated some legacy APIs to use the newer extended versions [5]
- o easy.c: Fixed compilation warning when no verbose string support
- o connect.c: Fixed compilation warning when no verbose string support
- o build: in Makefile.m32 pass -F flag to windres
- o build: in Makefile.m32 add -m32 flag for 32bit
- o multi: when leaving for timeout, close accordingly
- o CMake: Simplify if() conditions on check result variables
- o build: in Makefile.m32 try to detect 64bit target
- o multi: inform about closed sockets before they are closed
- o multi-uv.c: close the file handle after download
- o examples: Wait recommended 100ms when no file descriptors are ready
- o ntlm: Split the SSPI based messaging code from the native messaging code
- o cmake: fix NTLM detection when CURL_DISABLE_HTTP defined
- o cmake: add Kerberos to the supported feature
- o CURLOPT_POSTFIELDS.3: mention the COPYPOSTFIELDS option
- o http: Disable pipelining for HTTP/2 and upgraded connections
- o ntlm: Fixed static'ness of local decode function
- o sasl: Reduced the need for two sets of NTLM messaging functions
- o multi.c: Fixed compilation warnings when no verbose string support
- o select.c: fix compilation for VxWorks [7]
- o multi-single.c: switch to use curl_multi_wait
- o curl_multi_wait.3: clarify numfds being used if not NULL
- o http.c: Fixed compilation warnings from features being disabled
- o NSS: enable the CAPATH option [9]
- o docs: Fix FAILONERROR typos
- o HTTP: don't abort connections with pending Negotiate authentication
- o HTTP: Free (proxy)userpwd for NTLM/Negotiate after sending a request
- o http_perhapsrewind: don't abort CONNECT requests
- o build: updated dependencies in makefiles
- o multi.c: Fixed compilation warning
- o ftp.c: Fixed compilation warnings when proxy support disabled
- o get_url_file_name: Fixed crash on OOM on debug build
- o cookie.c: Refactored cleanup code to simplify
- o OS400: enable NTLM authentication
- o ntlm: Use Windows Crypt API
- o http2: avoid logging neg "failure" if h2 was not requested
- o schannel_recv: return the correct code [10]
- o VC build: added sspi define for winssl-zlib builds
- o Curl_client_write(): chop long data, convert data only once
- o openldap: do not ignore Curl_client_write() return code
- o ldap: check Curl_client_write() return codes
- o parsedate.c: Fixed compilation warning
- o url.c: Fixed compilation warning when USE_NTLM is not defined
- o ntlm_wb_response: fix "statement not reached" [11]
- o telnet: fix "cast increases required alignment of target type"
- o smtp: Fixed dot stuffing when EOL characters at end of input buffers [12]
- o ntlm: Allow NTLM2Session messages when USE_NTRESPONSES manually defined
- o ntlm: Disable NTLM v2 when 64-bit integers are not supported
- o ntlm: Use short integer when decoding 16-bit values
- o ftp.c: Fixed compilation warning when no verbose string support
- o synctime.c: fixed timeserver URLs
- o mk-ca-bundle.pl: restored forced run again
- o ntlm: Fixed return code for bad type-2 Target Info
- o curl_schannel.c: Data may be available before connection shutdown
- o curl_schannel: Improvements to memory re-allocation strategy [13]
- o darwinssl: aprintf() to allocate the session key
- o tool_util.c: Use GetTickCount64 if it is available
- o lib: Fixed multiple code analysis warnings if SAL are available
- o tool_binmode.c: Explicitly ignore the return code of setmode
- o tool_urlglob.c: Silence warning C6293: Ill-defined for-loop
- o opts: Warn CURLOPT_TIMEOUT overrides when set after CURLOPT_TIMEOUT_MS
- o SFTP: work-around servers that return zero size on STAT [14]
- o connect: singleipconnect(): properly try other address families after failure
- o IPV6: address scope != scope id [15]
- o parseurlandfillconn(): fix improper non-numeric scope_id stripping [16]
- o secureserver.pl: make OpenSSL CApath and cert absolute path values
- o secureserver.pl: update Windows detection and fix path conversion
- o secureserver.pl: clean up formatting of config and fix verbose output
- o tests: Added Windows support using Cygwin-based OpenSSH
- o sockfilt.c: use non-Ex functions that are available before WinXP
- o VMS: Updates for 0740-0D1220
- o openssl: warn for SRP set if SSLv3 is used, not for TLS version
- o openssl: make it compile against openssl 1.1.0-DEV master branch
- o openssl: fix SSL/TLS versions in verbose output
- o curl: show size of inhibited data when using -v
- o build: Removed WIN32 definition from the Visual Studio projects
- o build: Removed WIN64 definition from the libcurl Visual Studio projects
- o vtls: Use bool for Curl_ssl_getsessionid() return type
- o sockfilt.c: Replace 100ms sleep with thread throttle
- o sockfilt.c: Reduce the number of individual memory allocations
- o vtls: Don't set cert info count until memory allocation is successful
- o nss: Don't ignore Curl_ssl_init_certinfo() OOM failure
- o nss: Don't ignore Curl_extract_certinfo() OOM failure
- o vtls: Fixed compilation warning and an ignored return code
- o sockfilt.c: Fixed compilation warnings
- o darwinssl: Fixed compilation warning
- o vtls: Use '(void) arg' for unused parameters
- o sepheaders.c: Fixed resource leak on failure
- o lib1900.c: Fixed cppcheck error [17]
- o ldap: Fixed Unicode connection details in Win32 initialsation / bind calls
- o ldap: Fixed Unicode DN, attributes and filter in Win32 search calls
+ o
 
 This release includes the following known bugs:
 
@@ -149,35 +21,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrey Labunets, Anthon Pang, Bill Nagel, Brad Harder, Brad King, Carlo Wood,
-  Christian Hägele, Dan Fandrich, Daniel Stenberg, Dave Reisner, Frank Gevaerts,
-  Gisle Vanem, Guenter Knauf, Jan Ehrhardt, Johan Lantz, John E. Malmberg,
-  Jon Spencer, Julien Nabet, Kamil Dudka, Kyle J. McKay, Lucas Pardue,
-  Marc Hesse, Marc Hoersken, Marc Renault, Michael Osipov, Nick Zitzmann,
-  Nobuhiro Ban, Patrick Monnerat, Peter Wu, Ray Satiro, Sam Hurst,
-  Stefan Bühler, Stefan Neis, Steve Holme, Tae Hyoung Ahn, Tatsuhiro Tsujikawa,
-  Tomasz Kojm, Tor Arntsen, Waldek Kozba, Warren Menzer
+  
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/mail/lib-2014-11/0035.html
- [2] = http://curl.haxx.se/mail/lib-2014-11/0078.html
- [3] = http://curl.haxx.se/bug/view.cgi?id=1448
- [4] = https://github.com/tatsuhiro-t/nghttp2/issues/103
- [5] = http://sourceforge.net/p/curl/feature-requests/82/
- [6] = http://curl.haxx.se/mail/lib-2014-11/0221.html
- [7] = http://curl.haxx.se/bug/view.cgi?id=1455
- [8] = http://curl.haxx.se/bug/view.cgi?id=1456
- [9] = http://curl.haxx.se/bug/view.cgi?id=1457
- [10] = http://curl.haxx.se/bug/view.cgi?id=1462
- [11] = http://curl.haxx.se/mail/lib-2014-12/0089.html
- [12] = http://curl.haxx.se/bug/view.cgi?id=1456
- [13] = http://curl.haxx.se/bug/view.cgi?id=1450
- [14] = http://curl.haxx.se/mail/lib-2014-12/0103.html
- [15] = http://curl.haxx.se/bug/view.cgi?id=1451
- [16] = http://curl.haxx.se/bug/view.cgi?id=1449
- [17] = https://github.com/bagder/curl/pull/133
- [18] = http://curl.haxx.se/docs/adv_20150108A.html
- [19] = http://curl.haxx.se/docs/adv_20150108B.html
+ [1] =
