@@ -6,6 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -126,7 +127,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
 
     /* Import the SPN */
     gss_major_status = gss_import_name(&gss_minor_status, &spn_token,
-                                       gss_nt_service_name, &krb5->spn);
+                                       GSS_C_NT_HOSTBASED_SERVICE, &krb5->spn);
     if(GSS_ERROR(gss_major_status)) {
       Curl_gss_log_error(data, gss_minor_status, "gss_import_name() failed: ");
 
