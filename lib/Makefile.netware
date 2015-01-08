@@ -214,6 +214,11 @@ WITH_SSL =
 else
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
 WITH_SSL = 1
+ifeq ($(findstring -srp,$(CFG)),-srp)
+ifeq "$(wildcard $(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)/openssl/srp.h)" "$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)/openssl/srp.h"
+WITH_SRP = 1
+endif
+endif
 endif
 endif
 ifeq ($(findstring -zlib,$(CFG)),-zlib)
@@ -638,6 +643,10 @@ ifdef WITH_SSL
 	@echo $(DL)#define HAVE_LIBSSL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIBCRYPTO 1$(DL) >> $@
 	@echo $(DL)#define OPENSSL_NO_KRB5 1$(DL) >> $@
+ifdef WITH_SRP
+	@echo $(DL)#define HAVE_SSLEAY_SRP 1$(DL) >> $@
+	@echo $(DL)#define USE_TLS_SRP 1$(DL) >> $@
+endif
 ifdef WITH_SPNEGO
 	@echo $(DL)#define HAVE_SPNEGO 1$(DL) >> $@
 endif
@@ -689,6 +698,11 @@ ifdef WITH_SSL
 	@echo SSL support:     enabled (OpenSSL)
 else
 	@echo SSL support:     no
+endif
+ifdef WITH_SRP
+	@echo SRP support:     enabled
+else
+	@echo SRP support:     no
 endif
 ifdef WITH_SSH2
 	@echo SSH2 support:    enabled (libssh2)
