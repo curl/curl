@@ -8,11 +8,20 @@ Curl and libcurl 7.40.1
 
 This release includes the following changes:
 
- o
+ o NetWare build: added TLS-SRP enabled build
+ o winbuild: Added option to build with c-ares
+ o 
 
 This release includes the following bugfixes:
 
- o
+ o sasl_gssapi: Fixed build on NetBSD with built-in GSS-API [1]
+ o FTP: fix IPv6 host using link-local address [2]
+ o FTP: if EPSV fails on IPV6 connections, bail out
+ o gssapi: Remove need for duplicated GSS_C_NT_HOSTBASED_SERVICE definitions
+ o NSS: fix compiler error when built http2-enabled
+ o mingw build: allow to pass custom CFLAGS [3]
+ o add -m64 CFLAGS when targeting mingw64, add -m32/-m64 to LDFLAGS [4]
+ o 
 
 This release includes the following known bugs:
 
@@ -21,10 +30,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Daniel Stenberg, Guenter Knauf, Sam Schanken, Steve Holme, Thomas Klausner,
+  Viktor Szakats, Vojtěch Král
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = http://curl.haxx.se/bug/view.cgi?id=1469
+ [2] = http://curl.haxx.se/bug/view.cgi?id=1468
+ [3] = https://github.com/bagder/curl/pull/136
+ [4] = https://github.com/bagder/curl/pull/134
+ [5] =
