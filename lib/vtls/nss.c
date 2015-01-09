@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -658,6 +658,8 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
   unsigned char buf[50];
   unsigned int buflen;
   SSLNextProtoState state;
+
+  struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
 
   if(!conn->data->set.ssl_enable_npn && !conn->data->set.ssl_enable_alpn) {
     return;
