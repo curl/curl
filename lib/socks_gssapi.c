@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
- * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,16 +23,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_PROXY
-
-#ifdef HAVE_GSSAPI
-#ifdef HAVE_OLD_GSSMIT
-#define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
-#define NCOMPAT 1
-#endif
-#ifndef gss_nt_service_name
-#define gss_nt_service_name GSS_C_NT_HOSTBASED_SERVICE
-#endif
+#if defined(HAVE_GSSAPI) && !defined(CURL_DISABLE_PROXY)
 
 #include "curl_gssapi.h"
 #include "urldata.h"
@@ -162,7 +153,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
              serviceptr, conn->proxy.name);
 
     gss_major_status = gss_import_name(&gss_minor_status, &service,
-                                       gss_nt_service_name, &server);
+                                       GSS_C_NT_HOSTBASED_SERVICE, &server);
   }
 
   gss_release_buffer(&gss_status, &service); /* clear allocated memory */
@@ -530,6 +521,5 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   return CURLE_OK;
 }
-#endif
 
-#endif /* CURL_DISABLE_PROXY */
+#endif /* HAVE_GSSAPI && !CURL_DISABLE_PROXY */

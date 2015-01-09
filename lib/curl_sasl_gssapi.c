@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2015, Steve Holme, <steve_holme@hotmail.com>.
  * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -26,15 +26,6 @@
 #include "curl_setup.h"
 
 #if defined(HAVE_GSSAPI) && defined(USE_KERBEROS5)
-
-#ifdef HAVE_OLD_GSSMIT
-#define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
-#define NCOMPAT 1
-#endif
-
-#define GSSAUTH_P_NONE      1
-#define GSSAUTH_P_INTEGRITY 2
-#define GSSAUTH_P_PRIVACY   4
 
 #include <curl/curl.h>
 

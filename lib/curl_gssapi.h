@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -58,6 +58,17 @@ OM_uint32 Curl_gss_init_sec_context(
 /* Helper to log a GSS-API error status */
 void Curl_gss_log_error(struct SessionHandle *data, OM_uint32 status,
                         const char *prefix);
+
+/* Provide some definitions missing in old headers */
+#ifdef HAVE_OLD_GSSMIT
+#define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
+#define NCOMPAT 1
+#endif
+
+/* Define our privacy and integrity protection values */
+#define GSSAUTH_P_NONE      1
+#define GSSAUTH_P_INTEGRITY 2
+#define GSSAUTH_P_PRIVACY   4
 
 #endif /* HAVE_GSSAPI */
 

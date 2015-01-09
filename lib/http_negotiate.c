@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,14 +22,7 @@
 
 #include "curl_setup.h"
 
-#ifdef HAVE_GSSAPI
-
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
-
-#ifdef HAVE_OLD_GSSMIT
-#define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
-#define NCOMPAT 1
-#endif
+#if defined(HAVE_GSSAPI) && !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
 
 #include "urldata.h"
 #include "sendf.h"
@@ -211,6 +204,4 @@ void Curl_cleanup_negotiate(struct SessionHandle *data)
   cleanup(&data->state.proxyneg);
 }
 
-#endif /* !CURL_DISABLE_HTTP && USE_SPNEGO */
-
-#endif /* HAVE_GSSAPI */
+#endif /* HAVE_GSSAPI && !CURL_DISABLE_HTTP && USE_SPNEGO */

@@ -2,7 +2,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999, 2013 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2014 Daniel Stenberg
+ * Copyright (c) 2004 - 2015 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,13 +34,7 @@
 
 #include "curl_setup.h"
 
-#ifndef CURL_DISABLE_FTP
-#ifdef HAVE_GSSAPI
-
-#ifdef HAVE_OLD_GSSMIT
-#define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
-#define NCOMPAT 1
-#endif
+#if defined(HAVE_GSSAPI) && !defined(CURL_DISABLE_FTP)
 
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -335,5 +329,4 @@ struct Curl_sec_client_mech Curl_krb5_client_mech = {
     krb5_decode
 };
 
-#endif /* HAVE_GSSAPI */
-#endif /* CURL_DISABLE_FTP */
+#endif /* HAVE_GSSAPI && !CURL_DISABLE_FTP */
