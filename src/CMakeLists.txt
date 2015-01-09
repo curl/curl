@@ -6,18 +6,18 @@ if(USE_MANUAL)
   # embedded text. NROFF and MANOPT are set in the parent CMakeLists.txt
   add_custom_command(
     OUTPUT tool_hugehelp.c
-    COMMAND echo "#include \"tool_setup.h\"" > tool_hugehelp.c
-    COMMAND echo "#ifndef HAVE_LIBZ" >> tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "#ifndef HAVE_LIBZ" >> tool_hugehelp.c
     COMMAND env LC_ALL=C "${NROFF}" ${NROFF_MANOPT}
             "${CURL_SOURCE_DIR}/docs/curl.1" |
             "${PERL}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"
             "${CURL_SOURCE_DIR}/docs/MANUAL" >> tool_hugehelp.c
-    COMMAND echo "#else" >> tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "#else" >> tool_hugehelp.c
     COMMAND env LC_ALL=C "${NROFF}" ${NROFF_MANOPT}
             "${CURL_SOURCE_DIR}/docs/curl.1" |
             "${PERL}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl" -c
             "${CURL_SOURCE_DIR}/docs/MANUAL" >> tool_hugehelp.c
-    COMMAND echo "#endif /* HAVE_LIBZ */" >> tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "#endif /* HAVE_LIBZ */" >> tool_hugehelp.c
     DEPENDS
       "${CURL_SOURCE_DIR}/docs/MANUAL"
       "${CURL_SOURCE_DIR}/docs/curl.1"
@@ -27,9 +27,9 @@ if(USE_MANUAL)
 else()
   add_custom_command(
     OUTPUT tool_hugehelp.c
-    COMMAND ${CMAKE_COMMAND} -E echo "/* built-in manual is disabled, blank function */" > "tool_hugehelp.c"
-    COMMAND ${CMAKE_COMMAND} -E echo "\#include \"tool_hugehelp.h\"" >> "tool_hugehelp.c"
-    COMMAND ${CMAKE_COMMAND} -E echo "void hugehelp(void) {}" >> "tool_hugehelp.c"
+    COMMAND ${CMAKE_COMMAND} -E echo "/* built-in manual is disabled, blank function */" > tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_hugehelp.h\"" >> tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "void hugehelp(void) {}" >> tool_hugehelp.c
     DEPENDS
       "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
     VERBATIM)
