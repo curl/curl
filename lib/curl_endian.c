@@ -138,6 +138,7 @@ unsigned int Curl_read32_be(unsigned char *buf)
          ((unsigned int)buf[2] << 8) | ((unsigned int)buf[3]);
 }
 
+#if (CURL_SIZEOF_CURL_OFF_T > 4)
 /*
  * Curl_read64_be()
  *
@@ -172,6 +173,8 @@ unsigned __int64 Curl_read64_be(unsigned char *buf)
          ((unsigned __int64)buf[6] << 8) | ((unsigned __int64)buf[7]);
 }
 #endif
+
+#endif /* CURL_SIZEOF_CURL_OFF_T > 4 */
 
 /*
  * Curl_write16_le()
