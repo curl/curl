@@ -21,6 +21,12 @@ This release includes the following bugfixes:
  o NSS: fix compiler error when built http2-enabled
  o mingw build: allow to pass custom CFLAGS [3]
  o add -m64 CFLAGS when targeting mingw64, add -m32/-m64 to LDFLAGS [4]
+ o curl_schannel.c: mark session as removed from cache if not freed [5]
+ o Curl_pretransfer: reset expected transfer sizes [6]
+ o curl.h: remove extra space [7]
+ o curl_endian: Fixed build when 64-bit integers are not supported [8]
+ o checksrc.bat: Better detection of Perl installation
+ o build-openssl.bat: Added check for Perl installation
  o 
 
 This release includes the following known bugs:
@@ -30,8 +36,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Guenter Knauf, Sam Schanken, Steve Holme, Thomas Klausner,
-  Viktor Szakats, Vojtěch Král
+  Daniel Stenberg, Guenter Knauf, Jean-Francois Durand, John E. Malmberg,
+  Marc Hoersken, Mohammad AlSaleh, Sam Schanken, Steve Holme, Thomas Klausner,
+  Viktor Szakats, Vojtěch Král, Yun SangHo
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -41,4 +48,8 @@ References to bug reports and discussions on issues:
  [2] = http://curl.haxx.se/bug/view.cgi?id=1468
  [3] = https://github.com/bagder/curl/pull/136
  [4] = https://github.com/bagder/curl/pull/134
- [5] =
+ [5] = http://curl.haxx.se/mail/lib-2015-01/0036.html
+ [6] = http://curl.haxx.se/mail/lib-2015-01/0065.html
+ [7] = https://github.com/bagder/curl/pull/137
+ [8] = http://curl.haxx.se/mail/lib-2015-01/0094.html
+ [9] =
