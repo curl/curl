@@ -1,8 +1,8 @@
-Curl and libcurl 7.40.1
+Curl and libcurl 7.41.0
 
  Public curl releases:         144
- Command line options:         162
- curl_easy_setopt() options:   208
+ Command line options:         163
+ curl_easy_setopt() options:   209
  Public functions in libcurl:  58
  Contributors:                 1233
 
@@ -10,7 +10,8 @@ This release includes the following changes:
 
  o NetWare build: added TLS-SRP enabled build
  o winbuild: Added option to build with c-ares
- o 
+ o Added --cert-status [9]
+ o Added CURLOPT_SSL_VERIFYSTATUS [10]
 
 This release includes the following bugfixes:
 
@@ -52,4 +53,6 @@ References to bug reports and discussions on issues:
  [6] = http://curl.haxx.se/mail/lib-2015-01/0065.html
  [7] = https://github.com/bagder/curl/pull/137
  [8] = http://curl.haxx.se/mail/lib-2015-01/0094.html
- [9] =
+ [9] = http://curl.haxx.se/docs/manpage.html#--cert-status
+ [10] = http://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYSTATUS.html
+ 
