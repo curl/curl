@@ -173,9 +173,17 @@ $       full_version = f$element(1, " ", hp_ssl_version)
 $       ver_maj = f$element(0, ".", full_version)
 $       ver_min = f$element(1, ".", full_version)
 $       ver_patch = f$element(2, ".", full_version)
+$!      ! ver_patch is typically both a number and some letters
 $       ver_patch_len = f$length(ver_patch)
-$       ver_patchnum = f$extract(0, ver_patch_len - 1, ver_patch)
-$       ver_patchltr = f$extract(ver_patch_len - 1, 1, ver_patch)
+$       ver_patchltr = ""
+$ver_patch_loop:
+$           ver_patchltr_c = f$extract(ver_patch_len - 1, 1, ver_patch)
+$           if ver_patchltr_c .les. "9" then goto ver_patch_loop_end
+$           ver_patchltr = ver_patchltr_c + ver_patchltr
+$           ver_patch_len = ver_patch_len - 1
+$           goto ver_patch_loop
+$ver_patch_loop_end:
+$       ver_patchnum = ver_patch - ver_patchltr
 $       if 'ver_maj' .ge. 0
 $       then
 $           if 'ver_min' .ge. 9
@@ -186,6 +194,7 @@ $                   if ver_patchltr .ges. "w" then use_hp_ssl = 1
 $               endif
 $           endif
 $       endif
+$set nover
 $       if use_hp_ssl .eq. 0
 $       then
 $           write sys$output -
