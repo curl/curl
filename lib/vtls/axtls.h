@@ -8,7 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, DirecTV, Contact: Eric Hu <ehu@directv.com>
- * Copyright (C) 2010 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -50,6 +50,9 @@ int Curl_axtls_random(struct SessionHandle *data,
                       unsigned char *entropy,
                       size_t length);
 
+/* Set the API backend definition to axTLS */
+#define CURL_SSL_BACKEND CURLSSLBACKEND_AXTLS
+
 /* API setup for axTLS */
 #define curlssl_init Curl_axtls_init
 #define curlssl_cleanup Curl_axtls_cleanup
@@ -66,7 +69,6 @@ int Curl_axtls_random(struct SessionHandle *data,
 #define curlssl_check_cxn(x) Curl_axtls_check_cxn(x)
 #define curlssl_data_pending(x,y) ((void)x, (void)y, 0)
 #define curlssl_random(x,y,z) Curl_axtls_random(x,y,z)
-#define CURL_SSL_BACKEND CURLSSLBACKEND_AXTLS
 
 #endif /* USE_AXTLS */
 #endif /* HEADER_CURL_AXTLS_H */

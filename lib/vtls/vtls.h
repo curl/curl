@@ -121,6 +121,9 @@ bool Curl_ssl_cert_status_request(void);
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 #else
+/* Set the API backend definition to none */
+#define CURL_SSL_BACKEND CURLSSLBACKEND_NONE
+
 /* When SSL support is not present, just define away these function calls */
 #define Curl_ssl_init() 1
 #define Curl_ssl_cleanup() Curl_nop_stmt
@@ -141,7 +144,6 @@ bool Curl_ssl_cert_status_request(void);
 #define Curl_ssl_connect_nonblocking(x,y,z) CURLE_NOT_BUILT_IN
 #define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
-#define CURL_SSL_BACKEND CURLSSLBACKEND_NONE
 #define Curl_ssl_cert_status_request() FALSE
 #endif
 

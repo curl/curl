@@ -8,7 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2014, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -52,6 +52,9 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
                            unsigned char *md5sum, /* output */
                            size_t md5len);
 
+/* Set the API backend definition to SecureTransport */
+#define CURL_SSL_BACKEND CURLSSLBACKEND_DARWINSSL
+
 /* API setup for SecureTransport */
 #define curlssl_init() (1)
 #define curlssl_cleanup() Curl_nop_stmt
@@ -69,7 +72,6 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
 #define curlssl_data_pending(x,y) Curl_darwinssl_data_pending(x, y)
 #define curlssl_random(x,y,z) ((void)x, Curl_darwinssl_random(y,z))
 #define curlssl_md5sum(a,b,c,d) Curl_darwinssl_md5sum(a,b,c,d)
-#define CURL_SSL_BACKEND CURLSSLBACKEND_DARWINSSL
 
 #endif /* USE_DARWINSSL */
 #endif /* HEADER_CURL_DARWINSSL_H */

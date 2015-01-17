@@ -55,6 +55,9 @@ void Curl_gtls_md5sum(unsigned char *tmp, /* input */
 
 bool Curl_gtls_cert_status_request(void);
 
+/* Set the API backend definition to GnuTLS */
+#define CURL_SSL_BACKEND CURLSSLBACKEND_GNUTLS
+
 /* API setup for GnuTLS */
 #define curlssl_init Curl_gtls_init
 #define curlssl_cleanup Curl_gtls_cleanup
@@ -73,7 +76,6 @@ bool Curl_gtls_cert_status_request(void);
 #define curlssl_random(x,y,z) Curl_gtls_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_gtls_md5sum(a,b,c,d)
 #define curlssl_cert_status_request() Curl_gtls_cert_status_request()
-#define CURL_SSL_BACKEND CURLSSLBACKEND_GNUTLS
 
 #endif /* USE_GNUTLS */
 #endif /* HEADER_CURL_GTLS_H */

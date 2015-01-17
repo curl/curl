@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,6 +73,9 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
                       unsigned char *md5sum /* output */,
                       size_t unused);
 
+/* Set the API backend definition to OpenSSL */
+#define CURL_SSL_BACKEND CURLSSLBACKEND_OPENSSL
+
 /* this backend supports the CAPATH option */
 #define have_curlssl_ca_path 1
 
@@ -99,7 +102,6 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
 #define curlssl_data_pending(x,y) Curl_ossl_data_pending(x,y)
 #define curlssl_random(x,y,z) Curl_ossl_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_ossl_md5sum(a,b,c,d)
-#define CURL_SSL_BACKEND CURLSSLBACKEND_OPENSSL
 
 #define DEFAULT_CIPHER_SELECTION "ALL!EXPORT!EXPORT40!EXPORT56!aNULL!LOW!RC4"
 
