@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,7 +56,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   TimeStamp         expiry;
   int ret;
   size_t len = 0, input_token_len = 0;
-  CURLcode error;
+  CURLcode result;
 
   /* Point to the username and password */
   const char *userp;
@@ -141,8 +141,8 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
     if(userp && *userp) {
       /* Populate our identity structure */
-      error = Curl_create_sspi_identity(userp, passwdp, &neg_ctx->identity);
-      if(error)
+      result = Curl_create_sspi_identity(userp, passwdp, &neg_ctx->identity);
+      if(result)
         return -1;
 
       /* Allow proper cleanup of the identity structure */
@@ -163,10 +163,10 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
       return -1;
   }
   else {
-    error = Curl_base64_decode(header,
-                               (unsigned char **)&input_token,
-                               &input_token_len);
-    if(error || !input_token_len)
+    result = Curl_base64_decode(header,
+                                (unsigned char **)&input_token,
+                                &input_token_len);
+    if(result || !input_token_len)
       return -1;
   }
 
