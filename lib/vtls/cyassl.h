@@ -29,10 +29,6 @@ CURLcode Curl_cyassl_connect(struct connectdata *conn, int sockindex);
 bool Curl_cyassl_data_pending(const struct connectdata* conn,int connindex);
 int Curl_cyassl_shutdown(struct connectdata* conn, int sockindex);
 
-/* tell CyaSSL to close down all open information regarding connections (and
-   thus session ID caching etc) */
-void Curl_cyassl_close_all(struct SessionHandle *data);
-
  /* close a SSL connection */
 void Curl_cyassl_close(struct connectdata *conn, int sockindex);
 
@@ -56,7 +52,7 @@ int Curl_cyassl_random(struct SessionHandle *data,
 #define curlssl_connect Curl_cyassl_connect
 #define curlssl_connect_nonblocking Curl_cyassl_connect_nonblocking
 #define curlssl_session_free(x)  Curl_cyassl_session_free(x)
-#define curlssl_close_all Curl_cyassl_close_all
+#define curlssl_close_all(x) ((void)x)
 #define curlssl_close Curl_cyassl_close
 #define curlssl_shutdown(x,y) Curl_cyassl_shutdown(x,y)
 #define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)

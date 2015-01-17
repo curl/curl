@@ -35,10 +35,6 @@ CURLcode Curl_gtls_connect_nonblocking(struct connectdata *conn,
                                        int sockindex,
                                        bool *done);
 
-/* tell GnuTLS to close down all open information regarding connections (and
-   thus session ID caching etc) */
-void Curl_gtls_close_all(struct SessionHandle *data);
-
  /* close a SSL connection */
 void Curl_gtls_close(struct connectdata *conn, int sockindex);
 
@@ -64,7 +60,7 @@ bool Curl_gtls_cert_status_request(void);
 #define curlssl_connect Curl_gtls_connect
 #define curlssl_connect_nonblocking Curl_gtls_connect_nonblocking
 #define curlssl_session_free(x)  Curl_gtls_session_free(x)
-#define curlssl_close_all Curl_gtls_close_all
+#define curlssl_close_all(x) ((void)x)
 #define curlssl_close Curl_gtls_close
 #define curlssl_shutdown(x,y) Curl_gtls_shutdown(x,y)
 #define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)

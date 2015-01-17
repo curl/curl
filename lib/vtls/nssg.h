@@ -37,10 +37,6 @@ CURLcode Curl_nss_connect_nonblocking(struct connectdata *conn,
 /* close a SSL connection */
 void Curl_nss_close(struct connectdata *conn, int sockindex);
 
-/* tell NSS to close down all open information regarding connections (and
-   thus session ID caching etc) */
-void Curl_nss_close_all(struct SessionHandle *data);
-
 int Curl_nss_init(void);
 void Curl_nss_cleanup(void);
 
@@ -79,7 +75,7 @@ bool Curl_nss_cert_status_request(void);
 
 /* NSS has its own session ID cache */
 #define curlssl_session_free(x) Curl_nop_stmt
-#define curlssl_close_all Curl_nss_close_all
+#define curlssl_close_all(x) ((void)x)
 #define curlssl_close Curl_nss_close
 /* NSS has no shutdown function provided and thus always fail */
 #define curlssl_shutdown(x,y) ((void)x, (void)y, 1)

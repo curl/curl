@@ -2229,12 +2229,6 @@ void Curl_darwinssl_close(struct connectdata *conn, int sockindex)
   connssl->ssl_sockfd = 0;
 }
 
-void Curl_darwinssl_close_all(struct SessionHandle *data)
-{
-  /* SecureTransport doesn't separate sessions from contexts, so... */
-  (void)data;
-}
-
 int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];

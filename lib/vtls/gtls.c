@@ -1217,12 +1217,6 @@ static ssize_t gtls_send(struct connectdata *conn,
   return rc;
 }
 
-void Curl_gtls_close_all(struct SessionHandle *data)
-{
-  /* FIX: make the OpenSSL code more generic and use parts of it here */
-  (void)data;
-}
-
 static void close_one(struct connectdata *conn,
                       int idx)
 {

@@ -35,10 +35,6 @@ CURLcode Curl_axtls_connect_nonblocking(
     int sockindex,
     bool *done);
 
-/* tell axTLS to close down all open information regarding connections (and
-   thus session ID caching etc) */
-void Curl_axtls_close_all(struct SessionHandle *data);
-
  /* close a SSL connection */
 void Curl_axtls_close(struct connectdata *conn, int sockindex);
 
@@ -59,7 +55,7 @@ int Curl_axtls_random(struct SessionHandle *data,
 #define curlssl_connect Curl_axtls_connect
 #define curlssl_connect_nonblocking Curl_axtls_connect_nonblocking
 #define curlssl_session_free(x)  Curl_axtls_session_free(x)
-#define curlssl_close_all Curl_axtls_close_all
+#define curlssl_close_all(x) ((void)x)
 #define curlssl_close Curl_axtls_close
 #define curlssl_shutdown(x,y) Curl_axtls_shutdown(x,y)
 #define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)

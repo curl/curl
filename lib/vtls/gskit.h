@@ -36,7 +36,6 @@ CURLcode Curl_gskit_connect(struct connectdata * conn, int sockindex);
 CURLcode Curl_gskit_connect_nonblocking(struct connectdata * conn,
                                         int sockindex, bool * done);
 void Curl_gskit_close(struct connectdata *conn, int sockindex);
-void Curl_gskit_close_all(struct SessionHandle * data);
 int Curl_gskit_shutdown(struct connectdata * conn, int sockindex);
 
 size_t Curl_gskit_version(char * buffer, size_t size);
@@ -56,7 +55,7 @@ int Curl_gskit_check_cxn(struct connectdata * cxn);
 
 /*  No session handling for GSKit */
 #define curlssl_session_free(x) Curl_nop_stmt
-#define curlssl_close_all Curl_gskit_close_all
+#define curlssl_close_all(x) ((void)x)
 #define curlssl_close Curl_gskit_close
 #define curlssl_shutdown(x,y) Curl_gskit_shutdown(x,y)
 #define curlssl_set_engine(x,y) CURLE_NOT_BUILT_IN

@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, DirecTV, Contact: Eric Hu, <ehu@directv.com>.
- * Copyright (C) 2010 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -513,12 +513,6 @@ static ssize_t axtls_send(struct connectdata *conn,
 
   *err = CURLE_OK;
   return rc;
-}
-
-void Curl_axtls_close_all(struct SessionHandle *data)
-{
-  (void)data;
-  infof(data, "  Curl_axtls_close_all\n");
 }
 
 void Curl_axtls_close(struct connectdata *conn, int sockindex)

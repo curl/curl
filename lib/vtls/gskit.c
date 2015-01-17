@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -983,13 +983,6 @@ void Curl_gskit_close(struct connectdata *conn, int sockindex)
 
   if(connssl->use)
     close_one(connssl, data);
-}
-
-
-void Curl_gskit_close_all(struct SessionHandle *data)
-{
-  /* Unimplemented. */
-  (void) data;
 }
 
 

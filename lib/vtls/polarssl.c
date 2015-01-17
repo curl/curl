@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -542,11 +542,6 @@ static ssize_t polarssl_send(struct connectdata *conn,
   }
 
   return ret;
-}
-
-void Curl_polarssl_close_all(struct SessionHandle *data)
-{
-  (void)data;
 }
 
 void Curl_polarssl_close(struct connectdata *conn, int sockindex)
