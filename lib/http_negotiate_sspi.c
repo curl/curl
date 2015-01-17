@@ -42,10 +42,8 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-/* returning zero (0) means success, everything else is treated as "failure"
-   with no care exactly what the failure was */
-int Curl_input_negotiate(struct connectdata *conn, bool proxy,
-                         const char *header)
+CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
+                              const char *header)
 {
   BYTE              *input_token = NULL;
   SecBufferDesc     out_buff_desc;
@@ -88,20 +86,20 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
     Curl_cleanup_negotiate(conn->data);
-    return -1;
+    return CURLE_LOGIN_DENIED;
   }
 
   if(!neg_ctx->server_name) {
     /* Check proxy auth requested but no given proxy name */
     if(proxy && !conn->proxy.name)
-      return -1;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
 
     /* Generate our SPN */
     neg_ctx->server_name = Curl_sasl_build_spn("HTTP",
                                                 proxy ? conn->proxy.name :
                                                         conn->host.name);
     if(!neg_ctx->server_name)
-      return -1;
+      return CURLE_OUT_OF_MEMORY;
   }
 
   if(!neg_ctx->output_token) {
@@ -110,7 +108,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                                                 TEXT(SP_NAME_NEGOTIATE),
                                                 &SecurityPackage);
     if(status != SEC_E_OK)
-      return -1;
+      return CURLE_NOT_BUILT_IN;
 
     /* Allocate input and output buffers according to the max token size
        as indicated by the security package */
@@ -130,7 +128,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     if(neg_ctx->context) {
       /* The server rejected our authentication and hasn't suppled any more
          negotiation mechanisms */
-      return -1;
+      return CURLE_LOGIN_DENIED;
     }
 
     /* We have to acquire credentials and allocate memory for the context */
@@ -138,13 +136,13 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     neg_ctx->context = malloc(sizeof(CtxtHandle));
 
     if(!neg_ctx->credentials || !neg_ctx->context)
-      return -1;
+      return CURLE_OUT_OF_MEMORY;
 
     if(userp && *userp) {
       /* Populate our identity structure */
       result = Curl_create_sspi_identity(userp, passwdp, &neg_ctx->identity);
       if(result)
-        return -1;
+        return result;
 
       /* Allow proper cleanup of the identity structure */
       neg_ctx->p_identity = &neg_ctx->identity;
@@ -161,14 +159,17 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
                                          neg_ctx->p_identity, NULL, NULL,
                                          neg_ctx->credentials, &expiry);
     if(neg_ctx->status != SEC_E_OK)
-      return -1;
+      return CURLE_LOGIN_DENIED;
   }
   else {
     result = Curl_base64_decode(header,
                                 (unsigned char **)&input_token,
                                 &input_token_len);
-    if(result || !input_token_len)
-      return -1;
+    if(result)
+      return result;
+
+    if(!input_token_len)
+      return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Setup the "output" security buffer */
@@ -207,21 +208,20 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   Curl_safefree(input_token);
 
   if(GSS_ERROR(neg_ctx->status))
-    return -1;
+    return CURLE_OUT_OF_MEMORY;
 
   if(neg_ctx->status == SEC_I_COMPLETE_NEEDED ||
      neg_ctx->status == SEC_I_COMPLETE_AND_CONTINUE) {
     neg_ctx->status = s_pSecFn->CompleteAuthToken(neg_ctx->context,
                                                   &out_buff_desc);
     if(GSS_ERROR(neg_ctx->status))
-      return -1;
+      return CURLE_RECV_ERROR;
   }
 
   neg_ctx->output_token_length = out_sec_buff.cbBuffer;
 
-  return 0;
+  return CURLE_OK;
 }
-
 
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
 {

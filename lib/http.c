@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -834,14 +834,13 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
   while(*auth) {
 #ifdef USE_SPNEGO
     if(checkprefix("Negotiate", auth)) {
-      int neg;
       *availp |= CURLAUTH_NEGOTIATE;
       authp->avail |= CURLAUTH_NEGOTIATE;
 
       if(authp->picked == CURLAUTH_NEGOTIATE) {
         if(negdata->state == GSS_AUTHSENT || negdata->state == GSS_AUTHNONE) {
-          neg = Curl_input_negotiate(conn, proxy, auth);
-          if(neg == 0) {
+          CURLcode result = Curl_input_negotiate(conn, proxy, auth);
+          if(!result) {
             DEBUGASSERT(!data->req.newurl);
             data->req.newurl = strdup(data->change.url);
             if(!data->req.newurl)

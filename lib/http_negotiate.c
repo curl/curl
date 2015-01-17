@@ -64,10 +64,8 @@ get_gss_name(struct connectdata *conn, bool proxy, gss_name_t *server)
   return GSS_ERROR(major_status) ? -1 : 0;
 }
 
-/* returning zero (0) means success, everything else is treated as "failure"
-   with no care exactly what the failure was */
-int Curl_input_negotiate(struct connectdata *conn, bool proxy,
-                         const char *header)
+CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
+                              const char *header)
 {
   struct SessionHandle *data = conn->data;
   struct negotiatedata *neg_ctx = proxy?&data->state.proxyneg:
@@ -85,12 +83,12 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
     Curl_cleanup_negotiate(data);
-    return -1;
+    return CURLE_LOGIN_DENIED;
   }
 
   if(neg_ctx->server_name == NULL &&
-      (ret = get_gss_name(conn, proxy, &neg_ctx->server_name)))
-    return ret;
+      get_gss_name(conn, proxy, &neg_ctx->server_name))
+      return CURLE_OUT_OF_MEMORY;
 
   header += strlen("Negotiate");
   while(*header && ISSPACE(*header))
@@ -100,8 +98,12 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   if(len > 0) {
     result = Curl_base64_decode(header, (unsigned char **)&input_token.value,
                                 &rawlen);
-    if(result || rawlen == 0)
-      return -1;
+    if(result)
+      return result;
+
+    if(!rawlen)
+      return CURLE_BAD_CONTENT_ENCODING;
+
     input_token.length = rawlen;
 
     DEBUGASSERT(input_token.value != NULL);
@@ -125,19 +127,19 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
       gss_release_buffer(&discard_st, &output_token);
     Curl_gss_log_error(conn->data, minor_status,
                        "gss_init_sec_context() failed: ");
-    return -1;
+    return CURLE_OUT_OF_MEMORY;
   }
 
   if(!output_token.value || !output_token.length) {
     if(output_token.value)
       gss_release_buffer(&discard_st, &output_token);
-    return -1;
+    return CURLE_OUT_OF_MEMORY;
   }
 
   neg_ctx->output_token = output_token;
-  return 0;
-}
 
+  return CURLE_OK;
+}
 
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
 {
