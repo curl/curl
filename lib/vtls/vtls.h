@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -142,6 +142,7 @@ bool Curl_ssl_cert_status_request(void);
 #define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define CURL_SSL_BACKEND CURLSSLBACKEND_NONE
+#define Curl_ssl_cert_status_request() FALSE
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */
