@@ -73,7 +73,6 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   OM_uint32 major_status, minor_status, discard_st;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
-  int ret;
   size_t len;
   size_t rawlen = 0;
   CURLcode result;
