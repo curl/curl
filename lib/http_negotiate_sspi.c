@@ -52,9 +52,9 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   SecBuffer         out_sec_buff;
   SecBufferDesc     in_buff_desc;
   SecBuffer         in_sec_buff;
+  SECURITY_STATUS   status;
   unsigned long     context_attributes;
   TimeStamp         expiry;
-  int ret;
   size_t len = 0, input_token_len = 0;
   CURLcode result;
 
@@ -106,9 +106,10 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
   if(!neg_ctx->output_token) {
     PSecPkgInfo SecurityPackage;
-    ret = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NEGOTIATE),
-                                             &SecurityPackage);
-    if(ret != SEC_E_OK)
+    status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *)
+                                                TEXT(SP_NAME_NEGOTIATE),
+                                                &SecurityPackage);
+    if(status != SEC_E_OK)
       return -1;
 
     /* Allocate input and output buffers according to the max token size
