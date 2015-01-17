@@ -53,8 +53,8 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
   SecBufferDesc     in_buff_desc;
   SecBuffer         in_sec_buff;
   SECURITY_STATUS   status;
-  unsigned long     context_attributes;
-  TimeStamp         expiry;
+  unsigned long     attrs;
+  TimeStamp         expiry; /* For Windows 9x compatibility of SSPI calls */
   size_t len = 0, input_token_len = 0;
   CURLcode result;
 
@@ -201,7 +201,7 @@ int Curl_input_negotiate(struct connectdata *conn, bool proxy,
     0,
     neg_ctx->context,
     &out_buff_desc,
-    &context_attributes,
+    &attrs,
     &expiry);
 
   Curl_safefree(input_token);
