@@ -101,8 +101,11 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
     if(result)
       return result;
 
-    if(!rawlen)
+    if(!rawlen) {
+      infof(data, "Negotiate handshake failure (empty challenge message)\n");
+
       return CURLE_BAD_CONTENT_ENCODING;
+    }
 
     input_token.length = rawlen;
 

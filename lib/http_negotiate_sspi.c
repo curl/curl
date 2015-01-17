@@ -168,8 +168,12 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
     if(result)
       return result;
 
-    if(!input_token_len)
+    if(!input_token_len) {
+      infof(conn->data,
+            "Negotiate handshake failure (empty challenge message)\n");
+
       return CURLE_BAD_CONTENT_ENCODING;
+    }
   }
 
   /* Setup the "output" security buffer */
