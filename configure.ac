@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -1046,7 +1046,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
 
   if test "$LDAPLIBNAME" = "wldap32"; then
     curl_ldap_msg="enabled (winldap)"
-    AC_DEFINE(CURL_LDAP_WIN, 1, [Use Windows LDAP implementation])
+    AC_DEFINE(USE_WIN32_LDAP, 1, [Use Windows LDAP implementation])
   else
     curl_ldap_msg="enabled (OpenLDAP)"
     if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then

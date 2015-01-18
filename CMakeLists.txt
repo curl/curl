@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -309,11 +309,11 @@ endif()
 if(NOT CURL_DISABLE_LDAP)
 
   if(WIN32)
-    option(CURL_LDAP_WIN "Use Windows LDAP implementation" ON)
-    if(CURL_LDAP_WIN)
+    option(USE_WIN32_LDAP "Use Windows LDAP implementation" ON)
+    if(USE_WIN32_LDAP)
       check_library_exists("wldap32" cldap_open "" HAVE_WLDAP32)
       if(NOT HAVE_WLDAP32)
-        set(CURL_LDAP_WIN OFF)
+        set(USE_WIN32_LDAP OFF)
       endif()
     endif()
   endif()
@@ -323,12 +323,12 @@ if(NOT CURL_DISABLE_LDAP)
   set(CMAKE_LDAP_LIB "ldap" CACHE STRING "Name or full path to ldap library")
   set(CMAKE_LBER_LIB "lber" CACHE STRING "Name or full path to lber library")
 
-  if(CMAKE_USE_OPENLDAP AND CURL_LDAP_WIN)
-    message(FATAL_ERROR "Cannot use CURL_LDAP_WIN and CMAKE_USE_OPENLDAP at the same time")
+  if(CMAKE_USE_OPENLDAP AND USE_WIN32_LDAP)
+    message(FATAL_ERROR "Cannot use USE_WIN32_LDAP and CMAKE_USE_OPENLDAP at the same time")
   endif()
   
   # Now that we know, we're not using windows LDAP...
-  if(NOT CURL_LDAP_WIN)
+  if(NOT USE_WIN32_LDAP)
     # Check for LDAP
     set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
     check_library_exists_concat(${CMAKE_LDAP_LIB} ldap_init HAVE_LIBLDAP)

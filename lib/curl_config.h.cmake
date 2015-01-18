@@ -53,7 +53,7 @@
 #endif
 
 /* Use Windows LDAP implementation */
-#cmakedefine CURL_LDAP_WIN 1
+#cmakedefine USE_WIN32_LDAP 1
 
 /* when not building a shared library */
 #cmakedefine CURL_STATICLIB 1
