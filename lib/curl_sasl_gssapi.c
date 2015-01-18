@@ -122,8 +122,12 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
     if(GSS_ERROR(gss_major_status)) {
       Curl_gss_log_error(data, gss_minor_status, "gss_import_name() failed: ");
 
+      Curl_safefree(spn);
+
       return CURLE_OUT_OF_MEMORY;
     }
+
+    Curl_safefree(spn);
   }
   else {
     /* Decode the base-64 encoded challenge message */
