@@ -31,6 +31,7 @@
 #include "curl_base64.h"
 #include "http_negotiate.h"
 #include "curl_memory.h"
+#include "curl_sasl.h"
 #include "url.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -39,31 +40,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-static int
-get_gss_name(struct connectdata *conn, bool proxy, gss_name_t *server)
-{
-  OM_uint32 major_status, minor_status;
-  gss_buffer_desc token = GSS_C_EMPTY_BUFFER;
-  char name[2048];
-  const char* service = "HTTP";
-
-  token.length = strlen(service) + 1 + strlen(proxy ? conn->proxy.name :
-                                              conn->host.name) + 1;
-  if(token.length + 1 > sizeof(name))
-    return EMSGSIZE;
-
-  snprintf(name, sizeof(name), "%s@%s", service, proxy ? conn->proxy.name :
-           conn->host.name);
-
-  token.value = (void *) name;
-  major_status = gss_import_name(&minor_status,
-                                 &token,
-                                 GSS_C_NT_HOSTBASED_SERVICE,
-                                 server);
-
-  return GSS_ERROR(major_status) ? -1 : 0;
-}
-
 CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
                               const char *header)
 {
@@ -71,6 +47,7 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   struct negotiatedata *neg_ctx = proxy?&data->state.proxyneg:
     &data->state.negotiate;
   OM_uint32 major_status, minor_status, discard_st;
+  gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
   size_t len;
@@ -85,9 +62,31 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
     return CURLE_LOGIN_DENIED;
   }
 
-  if(neg_ctx->server_name == NULL &&
-      get_gss_name(conn, proxy, &neg_ctx->server_name))
+  if(!neg_ctx->server_name) {
+    /* Generate our SPN */
+    char *spn = Curl_sasl_build_gssapi_spn("HTTP", proxy ? conn->proxy.name :
+                                                           conn->host.name);
+    if(!spn)
       return CURLE_OUT_OF_MEMORY;
+
+    /* Populate the SPN structure */
+    spn_token.value = spn;
+    spn_token.length = strlen(spn);
+
+    /* Import the SPN */
+    major_status = gss_import_name(&minor_status, &spn_token,
+                                   GSS_C_NT_HOSTBASED_SERVICE,
+                                   &neg_ctx->server_name);
+    if(GSS_ERROR(major_status)) {
+      Curl_gss_log_error(data, minor_status, "gss_import_name() failed: ");
+
+      Curl_safefree(spn);
+
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+      Curl_safefree(spn);
+  }
 
   header += strlen("Negotiate");
   while(*header && ISSPACE(*header))
