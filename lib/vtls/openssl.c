@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2592,6 +2592,10 @@ static CURLcode servercert(struct connectdata *conn,
       infof(data, "\t SSL certificate verify ok.\n");
   }
 
+  if(!strict)
+    /* when not strict, we don't bother about the verify cert problems */
+    result = CURLE_OK;
+
   ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
   if(!result && ptr) {
     result = pkp_pin_peer_pubkey(connssl->server_cert, ptr);
@@ -2671,10 +2675,8 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
    * operations.
    */
 
-  if(!data->set.ssl.verifypeer && !data->set.ssl.verifyhost)
-    (void)servercert(conn, connssl, FALSE);
-  else
-    result = servercert(conn, connssl, TRUE);
+  result = servercert(conn, connssl,
+                      (data->set.ssl.verifypeer || data->set.ssl.verifyhost));
 
   if(!result)
     connssl->connecting_state = ssl_connect_done;
