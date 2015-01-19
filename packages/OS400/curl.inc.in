@@ -517,6 +517,8 @@
      d                 c                   89
      d  CURLE_SSL_PINNEDPUBKEYNOTMATCH...
      d                 c                   90
+     d  CURLE_SSL_INVALIDCERTSTATUS...
+     d                 c                   91
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLE_URL_MALFORMAT_USER...
@@ -1203,6 +1205,8 @@
      d                 c                   10230
      d  CURLOPT_UNIX_SOCKET_PATH...
      d                 c                   10231
+     d  CURLOPT_CURLOPT_SSL_VERIFYSTATUS...
+     d                 c                   00232
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
