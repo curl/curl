@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1016,8 +1016,12 @@ static CURLcode singleipconnect(struct connectdata *conn,
   }
   infof(data, "  Trying %s...\n", ipaddress);
 
+#ifdef ENABLE_IPV6
   is_tcp = (addr.family == AF_INET || addr.family == AF_INET6) &&
-           addr.socktype == SOCK_STREAM;
+    addr.socktype == SOCK_STREAM;
+#else
+  is_tcp = (addr.family == AF_INET) && addr.socktype == SOCK_STREAM;
+#endif
   if(is_tcp && data->set.tcp_nodelay)
     tcpnodelay(conn, sockfd);
 
@@ -1043,7 +1047,11 @@ static CURLcode singleipconnect(struct connectdata *conn,
   }
 
   /* possibly bind the local end to an IP, interface or port */
-  if(addr.family == AF_INET || addr.family == AF_INET6) {
+  if(addr.family == AF_INET
+#ifdef ENABLE_IPV6
+     || addr.family == AF_INET6
+#endif
+    ) {
     result = bindlocal(conn, sockfd, addr.family,
                        Curl_ipv6_scope((struct sockaddr*)&addr.sa_addr));
     if(result) {
