@@ -914,26 +914,16 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
 
       /* Do we have a SASL based authentication mechanism? */
       else if(wordlen > 5 && !memcmp(line, "AUTH=", 5)) {
+        size_t llen;
+        unsigned int mechbit;
+
         line += 5;
         wordlen -= 5;
 
         /* Test the word for a matching authentication mechanism */
-        if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_LOGIN))
-          imapc->sasl.authmechs |= SASL_MECH_LOGIN;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_PLAIN))
-          imapc->sasl.authmechs |= SASL_MECH_PLAIN;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_CRAM_MD5))
-          imapc->sasl.authmechs |= SASL_MECH_CRAM_MD5;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_DIGEST_MD5))
-          imapc->sasl.authmechs |= SASL_MECH_DIGEST_MD5;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_GSSAPI))
-          imapc->sasl.authmechs |= SASL_MECH_GSSAPI;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_EXTERNAL))
-          imapc->sasl.authmechs |= SASL_MECH_EXTERNAL;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_NTLM))
-          imapc->sasl.authmechs |= SASL_MECH_NTLM;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_XOAUTH2))
-          imapc->sasl.authmechs |= SASL_MECH_XOAUTH2;
+        if((mechbit = Curl_sasl_decode_mech(line, wordlen, &llen)) &&
+           llen == wordlen)
+          imapc->sasl.authmechs |= mechbit;
       }
 
       line += wordlen;
@@ -2061,7 +2051,7 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
 
   /* Set the default preferred authentication type and mechanism */
   imapc->preftype = IMAP_TYPE_ANY;
-  imapc->sasl.prefmech = SASL_AUTH_ANY;
+  Curl_sasl_init(&imapc->sasl);
 
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
@@ -2548,69 +2538,42 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
-  const char *options = conn->options;
-  const char *ptr = options;
-  bool reset = TRUE;
+  const char *ptr = conn->options;
 
-  while(ptr && *ptr) {
+  imapc->sasl.resetprefs = TRUE;
+
+  while(!result && ptr && *ptr) {
     const char *key = ptr;
+    const char *value;
 
     while(*ptr && *ptr != '=')
         ptr++;
 
-    if(strnequal(key, "AUTH", 4)) {
-      size_t len = 0;
-      const char *value = ++ptr;
+    value = ptr + 1;
 
-      if(reset) {
-        reset = FALSE;
-        imapc->preftype = IMAP_TYPE_NONE;
-        imapc->sasl.prefmech = SASL_AUTH_NONE;
-      }
+    while(*ptr && *ptr != ';')
+      ptr++;
 
-      while(*ptr && *ptr != ';') {
-        ptr++;
-        len++;
-      }
-
-      if(strnequal(value, "*", len)) {
-        imapc->preftype = IMAP_TYPE_ANY;
-        imapc->sasl.prefmech = SASL_AUTH_ANY;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_LOGIN, len)) {
-        imapc->preftype = IMAP_TYPE_SASL;
-        imapc->sasl.prefmech |= SASL_MECH_LOGIN;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_PLAIN, len)) {
-        imapc->preftype = IMAP_TYPE_SASL;
-        imapc->sasl.prefmech |= SASL_MECH_PLAIN;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_CRAM_MD5, len)) {
-        imapc->preftype = IMAP_TYPE_SASL;
-        imapc->sasl.prefmech |= SASL_MECH_CRAM_MD5;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_DIGEST_MD5, len)) {
-        imapc->preftype = IMAP_TYPE_SASL;
-        imapc->sasl.prefmech |= SASL_MECH_DIGEST_MD5;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_GSSAPI, len)) {
-        imapc->preftype = IMAP_TYPE_SASL;
-        imapc->sasl.prefmech |= SASL_MECH_GSSAPI;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_NTLM, len)) {
-        imapc->preftype = IMAP_TYPE_SASL;
-        imapc->sasl.prefmech |= SASL_MECH_NTLM;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_XOAUTH2, len)) {
-        imapc->preftype = IMAP_TYPE_SASL;
-        imapc->sasl.prefmech |= SASL_MECH_XOAUTH2;
-      }
-
-      if(*ptr == ';')
-        ptr++;
-    }
+    if(strnequal(key, "AUTH=", 5))
+      result = Curl_sasl_parse_url_auth_option(&imapc->sasl,
+                                               value, ptr - value);
     else
       result = CURLE_URL_MALFORMAT;
+
+    if(*ptr == ';')
+      ptr++;
+  }
+
+  switch(imapc->sasl.prefmech) {
+  case SASL_AUTH_NONE:
+    imapc->preftype = IMAP_TYPE_NONE;
+    break;
+  case SASL_AUTH_ANY:
+    imapc->preftype = IMAP_TYPE_ANY;
+    break;
+  default:
+    imapc->preftype = IMAP_TYPE_SASL;
+    break;
   }
 
   return result;

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -753,6 +753,9 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
 
       /* Loop through the data line */
       for(;;) {
+        size_t llen;
+        unsigned int mechbit;
+
         while(len &&
               (*line == ' ' || *line == '\t' ||
                *line == '\r' || *line == '\n')) {
@@ -771,22 +774,9 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
           wordlen++;
 
         /* Test the word for a matching authentication mechanism */
-        if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_LOGIN))
-          smtpc->sasl.authmechs |= SASL_MECH_LOGIN;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_PLAIN))
-          smtpc->sasl.authmechs |= SASL_MECH_PLAIN;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_CRAM_MD5))
-          smtpc->sasl.authmechs |= SASL_MECH_CRAM_MD5;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_DIGEST_MD5))
-          smtpc->sasl.authmechs |= SASL_MECH_DIGEST_MD5;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_GSSAPI))
-          smtpc->sasl.authmechs |= SASL_MECH_GSSAPI;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_EXTERNAL))
-          smtpc->sasl.authmechs |= SASL_MECH_EXTERNAL;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_NTLM))
-          smtpc->sasl.authmechs |= SASL_MECH_NTLM;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_XOAUTH2))
-          smtpc->sasl.authmechs |= SASL_MECH_XOAUTH2;
+        if((mechbit = Curl_sasl_decode_mech(line, wordlen, &llen)) &&
+           llen == wordlen)
+          smtpc->sasl.authmechs |= mechbit;
 
         line += wordlen;
         len -= wordlen;
@@ -1767,8 +1757,8 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   pp->endofresp = smtp_endofresp;
   pp->conn = conn;
 
-  /* Set the default preferred authentication mechanism */
-  smtpc->sasl.prefmech = SASL_AUTH_ANY;
+  /* Initialize the SASL storage */
+  Curl_sasl_init(&smtpc->sasl);
 
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
@@ -2107,52 +2097,30 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  const char *options = conn->options;
-  const char *ptr = options;
-  bool reset = TRUE;
+  const char *ptr = conn->options;
 
-  while(ptr && *ptr) {
+  smtpc->sasl.resetprefs = TRUE;
+
+  while(!result && ptr && *ptr) {
     const char *key = ptr;
+    const char *value;
 
     while(*ptr && *ptr != '=')
         ptr++;
 
-    if(strnequal(key, "AUTH", 4)) {
-      size_t len = 0;
-      const char *value = ++ptr;
+    value = ptr + 1;
 
-      if(reset) {
-        reset = FALSE;
-        smtpc->sasl.prefmech = SASL_AUTH_NONE;
-      }
+    while(*ptr && *ptr != ';')
+      ptr++;
 
-      while(*ptr && *ptr != ';') {
-        ptr++;
-        len++;
-      }
-
-      if(strnequal(value, "*", len))
-        smtpc->sasl.prefmech = SASL_AUTH_ANY;
-      else if(strnequal(value, SASL_MECH_STRING_LOGIN, len))
-        smtpc->sasl.prefmech |= SASL_MECH_LOGIN;
-      else if(strnequal(value, SASL_MECH_STRING_PLAIN, len))
-        smtpc->sasl.prefmech |= SASL_MECH_PLAIN;
-      else if(strnequal(value, SASL_MECH_STRING_CRAM_MD5, len))
-        smtpc->sasl.prefmech |= SASL_MECH_CRAM_MD5;
-      else if(strnequal(value, SASL_MECH_STRING_DIGEST_MD5, len))
-        smtpc->sasl.prefmech |= SASL_MECH_DIGEST_MD5;
-      else if(strnequal(value, SASL_MECH_STRING_GSSAPI, len))
-        smtpc->sasl.prefmech |= SASL_MECH_GSSAPI;
-      else if(strnequal(value, SASL_MECH_STRING_NTLM, len))
-        smtpc->sasl.prefmech |= SASL_MECH_NTLM;
-      else if(strnequal(value, SASL_MECH_STRING_XOAUTH2, len))
-        smtpc->sasl.prefmech |= SASL_MECH_XOAUTH2;
-
-      if(*ptr == ';')
-        ptr++;
-    }
+    if(strnequal(key, "AUTH=", 5))
+      result = Curl_sasl_parse_url_auth_option(&smtpc->sasl,
+                                               value, ptr - value);
     else
       result = CURLE_URL_MALFORMAT;
+
+    if(*ptr == ';')
+      ptr++;
   }
 
   return result;

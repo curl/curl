@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -726,6 +726,9 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
 
       /* Loop through the data line */
       for(;;) {
+        size_t llen;
+        unsigned int mechbit;
+
         while(len &&
               (*line == ' ' || *line == '\t' ||
                *line == '\r' || *line == '\n')) {
@@ -744,22 +747,9 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
           wordlen++;
 
         /* Test the word for a matching authentication mechanism */
-        if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_LOGIN))
-          pop3c->sasl.authmechs |= SASL_MECH_LOGIN;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_PLAIN))
-          pop3c->sasl.authmechs |= SASL_MECH_PLAIN;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_CRAM_MD5))
-          pop3c->sasl.authmechs |= SASL_MECH_CRAM_MD5;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_DIGEST_MD5))
-          pop3c->sasl.authmechs |= SASL_MECH_DIGEST_MD5;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_GSSAPI))
-          pop3c->sasl.authmechs |= SASL_MECH_GSSAPI;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_EXTERNAL))
-          pop3c->sasl.authmechs |= SASL_MECH_EXTERNAL;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_NTLM))
-          pop3c->sasl.authmechs |= SASL_MECH_NTLM;
-        else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_XOAUTH2))
-          pop3c->sasl.authmechs |= SASL_MECH_XOAUTH2;
+        if((mechbit = Curl_sasl_decode_mech(line, wordlen, &llen)) &&
+           llen == wordlen)
+          pop3c->sasl.authmechs |= mechbit;
 
         line += wordlen;
         len -= wordlen;
@@ -1727,7 +1717,7 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
 
   /* Set the default preferred authentication type and mechanism */
   pop3c->preftype = POP3_TYPE_ANY;
-  pop3c->sasl.prefmech = SASL_AUTH_ANY;
+  Curl_sasl_init(&pop3c->sasl);
 
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
@@ -1994,74 +1984,51 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  const char *options = conn->options;
-  const char *ptr = options;
-  bool reset = TRUE;
+  const char *ptr = conn->options;
 
-  while(ptr && *ptr) {
+  pop3c->sasl.resetprefs = TRUE;
+
+  while(!result && ptr && *ptr) {
     const char *key = ptr;
+    const char *value;
 
     while(*ptr && *ptr != '=')
         ptr++;
 
-    if(strnequal(key, "AUTH", 4)) {
-      size_t len = 0;
-      const char *value = ++ptr;
+    value = ptr + 1;
 
-      if(reset) {
-        reset = FALSE;
-        pop3c->preftype = POP3_TYPE_NONE;
-        pop3c->sasl.prefmech = SASL_AUTH_NONE;
-      }
+    while(*ptr && *ptr != ';')
+      ptr++;
 
-      while(*ptr && *ptr != ';') {
-        ptr++;
-        len++;
-      }
+    if(strnequal(key, "AUTH=", 5)) {
+      result = Curl_sasl_parse_url_auth_option(&pop3c->sasl,
+                                               value, ptr - value);
 
-      if(strnequal(value, "*", len)) {
-        pop3c->preftype = POP3_TYPE_ANY;
-        pop3c->sasl.prefmech = SASL_AUTH_ANY;
-      }
-      else if(strnequal(value, "+APOP", len)) {
+      if(result && strnequal(value, "+APOP", ptr - value)) {
         pop3c->preftype = POP3_TYPE_APOP;
         pop3c->sasl.prefmech = SASL_AUTH_NONE;
+        result = CURLE_OK;
       }
-      else if(strnequal(value, SASL_MECH_STRING_LOGIN, len)) {
-        pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->sasl.prefmech |= SASL_MECH_LOGIN;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_PLAIN, len)) {
-        pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->sasl.prefmech |= SASL_MECH_PLAIN;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_CRAM_MD5, len)) {
-        pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->sasl.prefmech |= SASL_MECH_CRAM_MD5;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_DIGEST_MD5, len)) {
-        pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->sasl.prefmech |= SASL_MECH_DIGEST_MD5;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_GSSAPI, len)) {
-        pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->sasl.prefmech |= SASL_MECH_GSSAPI;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_NTLM, len)) {
-        pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->sasl.prefmech |= SASL_MECH_NTLM;
-      }
-      else if(strnequal(value, SASL_MECH_STRING_XOAUTH2, len)) {
-        pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->sasl.prefmech |= SASL_MECH_XOAUTH2;
-      }
-
-      if(*ptr == ';')
-        ptr++;
     }
     else
       result = CURLE_URL_MALFORMAT;
+
+    if(*ptr == ';')
+      ptr++;
   }
+
+  if(pop3c->preftype != POP3_TYPE_APOP)
+    switch(pop3c->sasl.prefmech) {
+    case SASL_AUTH_NONE:
+      pop3c->preftype = POP3_TYPE_NONE;
+      break;
+    case SASL_AUTH_ANY:
+      pop3c->preftype = POP3_TYPE_ANY;
+      break;
+    default:
+      pop3c->preftype = POP3_TYPE_SASL;
+      break;
+    }
 
   return result;
 }

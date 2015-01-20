@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,6 +41,7 @@
 #include "warnless.h"
 #include "curl_memory.h"
 #include "strtok.h"
+#include "strequal.h"
 #include "rawstr.h"
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
 
@@ -72,6 +73,24 @@
     free(b); \
     return result; \
   }
+
+
+/* Supported mechanisms */
+const struct {
+  const char *  name;  /* Name */
+  size_t        len;   /* Name length */
+  unsigned int  bit;   /* Flag bit */
+} mechtable[] = {
+  { "LOGIN",      5,  SASL_MECH_LOGIN },
+  { "PLAIN",      5,  SASL_MECH_PLAIN },
+  { "CRAM-MD5",   8,  SASL_MECH_CRAM_MD5 },
+  { "DIGEST-MD5", 10, SASL_MECH_DIGEST_MD5 },
+  { "GSSAPI",     6,  SASL_MECH_GSSAPI },
+  { "EXTERNAL",   8,  SASL_MECH_EXTERNAL },
+  { "NTLM",       4,  SASL_MECH_NTLM },
+  { "XOAUTH2",    7,  SASL_MECH_XOAUTH2 },
+  { ZERO_NULL,    0,  0 }
+};
 
 /*
  * Return 0 on success and then the buffers are filled in fine.
@@ -248,7 +267,7 @@ static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
  *
  * Parameters:
  *
- * serivce  [in] - The service type such as www, smtp, pop or imap.
+ * service  [in] - The service type such as www, smtp, pop or imap.
  * host     [in] - The host name or realm.
  *
  * Returns a pointer to the newly allocated SPN.
@@ -1179,4 +1198,84 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
   (void)conn;
   (void)authused;
 #endif
+}
+
+/*
+ * Curl_sasl_decode_mech()
+ *
+ * Convert an SASL mechanism name to a token.
+ *
+ * Parameters:
+ *
+ * ptr    [in]     - The mechanism string.
+ * maxlen [in]     - Maximum mechanism string length.
+ * len    [out]    - If not NULL, effective name length.
+ *
+ * Return the SASL mechanism token or 0 if no match.
+ */
+unsigned int
+Curl_sasl_decode_mech(const char *ptr, size_t maxlen, size_t *len)
+{
+  unsigned int i;
+  char c;
+
+  for(i = 0; mechtable[i].name; i++) {
+    if(maxlen >= mechtable[i].len &&
+       !memcmp(ptr, mechtable[i].name, mechtable[i].len)) {
+      if(len)
+        *len = mechtable[i].len;
+      if(maxlen == mechtable[i].len)
+        return mechtable[i].bit;
+      c = ptr[mechtable[i].len];
+      if(!ISUPPER(c) && !ISDIGIT(c) && c != '-' && c != '_')
+        return mechtable[i].bit;
+    }
+  }
+
+  return 0;
+}
+
+/*
+ * Curl_sasl_parse_url_auth_option()
+ *
+ * Parse the URL login options.
+ */
+CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
+                                         const char *value, size_t len)
+{
+  CURLcode result = CURLE_OK;
+  unsigned int mechbit;
+  size_t llen;
+
+  if(!len)
+    return CURLE_URL_MALFORMAT;
+
+    if(sasl->resetprefs) {
+      sasl->resetprefs = FALSE;
+      sasl->prefmech = SASL_AUTH_NONE;
+    }
+
+    if(strnequal(value, "*", len))
+      sasl->prefmech = SASL_AUTH_ANY;
+    else if((mechbit = Curl_sasl_decode_mech(value, len, &llen)) &&
+      llen == len)
+      sasl->prefmech |= mechbit;
+    else
+      result = CURLE_URL_MALFORMAT;
+
+  return result;
+}
+
+/*
+ * Curl_sasl_init()
+ *
+ * Initializes an SASL structure.
+ */
+void Curl_sasl_init(struct SASL *sasl)
+{
+  sasl->authmechs = SASL_AUTH_NONE; /* No known authentication mechanism yet */
+  sasl->prefmech = SASL_AUTH_ANY;  /* Prefer all mechanisms */
+  sasl->authused = SASL_AUTH_NONE; /* No the authentication mechanism used */
+  sasl->resetprefs = TRUE;         /* Reset prefmech upon AUTH parsing. */
+  sasl->mutual_auth = FALSE;       /* No mutual authentication (GSSAPI only) */
 }

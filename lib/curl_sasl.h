@@ -73,6 +73,7 @@ struct SASL {
   unsigned int authmechs;  /* Accepted authentication mechanisms */
   unsigned int prefmech;   /* Preferred authentication mechanism */
   unsigned int authused;   /* Auth mechanism used for the connection */
+  bool resetprefs;         /* For URL auth option parsing. */
   bool mutual_auth;        /* Mutual authentication enabled (GSSAPI only) */
 };
 
@@ -200,5 +201,16 @@ CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
 /* This is used to cleanup any libraries or curl modules used by the sasl
    functions */
 void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused);
+
+/* Convert a mechanism name to a token */
+unsigned int Curl_sasl_decode_mech(const char *ptr,
+                                   size_t maxlen, size_t *len);
+
+/* Parse the URL login options */
+CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
+                                         const char *value, size_t len);
+
+/* Initializes an SASL structure */
+void Curl_sasl_init(struct SASL *sasl);
 
 #endif /* HEADER_CURL_SASL_H */
