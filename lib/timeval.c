@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -118,7 +118,7 @@ struct timeval curlx_tvnow(void)
 long curlx_tvdiff(struct timeval newer, struct timeval older)
 {
   return (newer.tv_sec-older.tv_sec)*1000+
-    (newer.tv_usec-older.tv_usec)/1000;
+    (long)(newer.tv_usec-older.tv_usec)/1000;
 }
 
 /*
