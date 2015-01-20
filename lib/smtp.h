@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "pingpong.h"
+#include "curl_sasl.h"
 
 /****************************************************************************
  * SMTP unique setup
@@ -79,14 +80,11 @@ struct smtp_conn {
   smtpstate state;         /* Always use smtp.c:state() to change state! */
   bool ssldone;            /* Is connect() over SSL done? */
   char *domain;            /* Client address/name to send in the EHLO */
-  unsigned int authmechs;  /* Accepted authentication mechanisms */
-  unsigned int prefmech;   /* Preferred authentication mechanism */
-  unsigned int authused;   /* Auth mechanism used for the connection */
+  struct SASL sasl;        /* SASL-related storage */
   bool tls_supported;      /* StartTLS capability supported by server */
   bool size_supported;     /* If server supports SIZE extension according to
                               RFC 1870 */
   bool auth_supported;     /* AUTH capability supported by server */
-  bool mutual_auth;        /* Mutual authentication enabled (GSSAPI only) */
 };
 
 extern const struct Curl_handler Curl_handler_smtp;

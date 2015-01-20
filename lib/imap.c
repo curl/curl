@@ -471,9 +471,9 @@ static CURLcode imap_perform_capability(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
 
-  imapc->authmechs = 0;         /* No known authentication mechanisms yet */
-  imapc->authused = 0;          /* Clear the authentication mechanism used */
-  imapc->tls_supported = FALSE; /* Clear the TLS capability */
+  imapc->sasl.authmechs = SASL_AUTH_NONE; /* No known auth. mechanisms yet */
+  imapc->sasl.authused = SASL_AUTH_NONE;  /* Clear the auth. mechanism used */
+  imapc->tls_supported = FALSE;           /* Clear the TLS capability */
 
   /* Send the CAPABILITY command */
   result = imap_sendf(conn, "CAPABILITY");
@@ -919,21 +919,21 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
 
         /* Test the word for a matching authentication mechanism */
         if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_LOGIN))
-          imapc->authmechs |= SASL_MECH_LOGIN;
+          imapc->sasl.authmechs |= SASL_MECH_LOGIN;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_PLAIN))
-          imapc->authmechs |= SASL_MECH_PLAIN;
+          imapc->sasl.authmechs |= SASL_MECH_PLAIN;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_CRAM_MD5))
-          imapc->authmechs |= SASL_MECH_CRAM_MD5;
+          imapc->sasl.authmechs |= SASL_MECH_CRAM_MD5;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_DIGEST_MD5))
-          imapc->authmechs |= SASL_MECH_DIGEST_MD5;
+          imapc->sasl.authmechs |= SASL_MECH_DIGEST_MD5;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_GSSAPI))
-          imapc->authmechs |= SASL_MECH_GSSAPI;
+          imapc->sasl.authmechs |= SASL_MECH_GSSAPI;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_EXTERNAL))
-          imapc->authmechs |= SASL_MECH_EXTERNAL;
+          imapc->sasl.authmechs |= SASL_MECH_EXTERNAL;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_NTLM))
-          imapc->authmechs |= SASL_MECH_NTLM;
+          imapc->sasl.authmechs |= SASL_MECH_NTLM;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_XOAUTH2))
-          imapc->authmechs |= SASL_MECH_XOAUTH2;
+          imapc->sasl.authmechs |= SASL_MECH_XOAUTH2;
       }
 
       line += wordlen;
@@ -1321,7 +1321,7 @@ static CURLcode imap_state_auth_gssapi_resp(struct connectdata *conn,
     /* Create the initial response message */
     result = Curl_sasl_create_gssapi_user_message(data, conn->user,
                                                   conn->passwd, "imap",
-                                                  imapc->mutual_auth,
+                                                  imapc->sasl.mutual_auth,
                                                   NULL, &conn->krb5,
                                                   &respmsg, &len);
     if(!result && respmsg) {
@@ -1360,11 +1360,11 @@ static CURLcode imap_state_auth_gssapi_token_resp(struct connectdata *conn,
     /* Get the challenge message */
     imap_get_message(data->state.buffer, &chlgmsg);
 
-    if(imapc->mutual_auth)
+    if(imapc->sasl.mutual_auth)
       /* Decode the user token challenge and create the optional response
          message */
       result = Curl_sasl_create_gssapi_user_message(data, NULL, NULL, NULL,
-                                                    imapc->mutual_auth,
+                                                    imapc->sasl.mutual_auth,
                                                     chlgmsg, &conn->krb5,
                                                     &respmsg, &len);
     else
@@ -1390,8 +1390,8 @@ static CURLcode imap_state_auth_gssapi_token_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&imapc->pp, "%s", "");
 
       if(!result)
-        state(conn, (imapc->mutual_auth ? IMAP_AUTHENTICATE_GSSAPI_NO_DATA :
-                                          IMAP_AUTHENTICATE_FINAL));
+        state(conn, imapc->sasl.mutual_auth? IMAP_AUTHENTICATE_GSSAPI_NO_DATA:
+                                             IMAP_AUTHENTICATE_FINAL);
     }
   }
 
@@ -1504,7 +1504,7 @@ static CURLcode imap_state_auth_cancel_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   /* Remove the offending mechanism from the supported list */
-  imapc->authmechs ^= imapc->authused;
+  imapc->sasl.authmechs ^= imapc->sasl.authused;
 
   /* Calculate alternative SASL login details */
   result = imap_calc_sasl_details(conn, &mech, &initresp, &len, &state1,
@@ -2061,7 +2061,7 @@ static CURLcode imap_connect(struct connectdata *conn, bool *done)
 
   /* Set the default preferred authentication type and mechanism */
   imapc->preftype = IMAP_TYPE_ANY;
-  imapc->prefmech = SASL_AUTH_ANY;
+  imapc->sasl.prefmech = SASL_AUTH_ANY;
 
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
@@ -2274,7 +2274,7 @@ static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
   Curl_pp_disconnect(&imapc->pp);
 
   /* Cleanup the SASL module */
-  Curl_sasl_cleanup(conn, imapc->authused);
+  Curl_sasl_cleanup(conn, imapc->sasl.authused);
 
   /* Cleanup our connection based variables */
   Curl_safefree(imapc->mailbox);
@@ -2565,7 +2565,7 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
       if(reset) {
         reset = FALSE;
         imapc->preftype = IMAP_TYPE_NONE;
-        imapc->prefmech = SASL_AUTH_NONE;
+        imapc->sasl.prefmech = SASL_AUTH_NONE;
       }
 
       while(*ptr && *ptr != ';') {
@@ -2575,35 +2575,35 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
 
       if(strnequal(value, "*", len)) {
         imapc->preftype = IMAP_TYPE_ANY;
-        imapc->prefmech = SASL_AUTH_ANY;
+        imapc->sasl.prefmech = SASL_AUTH_ANY;
       }
       else if(strnequal(value, SASL_MECH_STRING_LOGIN, len)) {
         imapc->preftype = IMAP_TYPE_SASL;
-        imapc->prefmech |= SASL_MECH_LOGIN;
+        imapc->sasl.prefmech |= SASL_MECH_LOGIN;
       }
       else if(strnequal(value, SASL_MECH_STRING_PLAIN, len)) {
         imapc->preftype = IMAP_TYPE_SASL;
-        imapc->prefmech |= SASL_MECH_PLAIN;
+        imapc->sasl.prefmech |= SASL_MECH_PLAIN;
       }
       else if(strnequal(value, SASL_MECH_STRING_CRAM_MD5, len)) {
         imapc->preftype = IMAP_TYPE_SASL;
-        imapc->prefmech |= SASL_MECH_CRAM_MD5;
+        imapc->sasl.prefmech |= SASL_MECH_CRAM_MD5;
       }
       else if(strnequal(value, SASL_MECH_STRING_DIGEST_MD5, len)) {
         imapc->preftype = IMAP_TYPE_SASL;
-        imapc->prefmech |= SASL_MECH_DIGEST_MD5;
+        imapc->sasl.prefmech |= SASL_MECH_DIGEST_MD5;
       }
       else if(strnequal(value, SASL_MECH_STRING_GSSAPI, len)) {
         imapc->preftype = IMAP_TYPE_SASL;
-        imapc->prefmech |= SASL_MECH_GSSAPI;
+        imapc->sasl.prefmech |= SASL_MECH_GSSAPI;
       }
       else if(strnequal(value, SASL_MECH_STRING_NTLM, len)) {
         imapc->preftype = IMAP_TYPE_SASL;
-        imapc->prefmech |= SASL_MECH_NTLM;
+        imapc->sasl.prefmech |= SASL_MECH_NTLM;
       }
       else if(strnequal(value, SASL_MECH_STRING_XOAUTH2, len)) {
         imapc->preftype = IMAP_TYPE_SASL;
-        imapc->prefmech |= SASL_MECH_XOAUTH2;
+        imapc->sasl.prefmech |= SASL_MECH_XOAUTH2;
       }
 
       if(*ptr == ';')
@@ -2803,46 +2803,46 @@ static CURLcode imap_calc_sasl_details(struct connectdata *conn,
   /* Calculate the supported authentication mechanism, by decreasing order of
      security, as well as the initial response where appropriate */
 #if defined(USE_KERBEROS5)
-    if((imapc->authmechs & SASL_MECH_GSSAPI) &&
-       (imapc->prefmech & SASL_MECH_GSSAPI)) {
-    imapc->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */
+    if((imapc->sasl.authmechs & SASL_MECH_GSSAPI) &&
+       (imapc->sasl.prefmech & SASL_MECH_GSSAPI)) {
+    imapc->sasl.mutual_auth = FALSE; /* TODO: Calculate mutual auth. */
 
     *mech = SASL_MECH_STRING_GSSAPI;
     *state1 = IMAP_AUTHENTICATE_GSSAPI;
     *state2 = IMAP_AUTHENTICATE_GSSAPI_TOKEN;
-    imapc->authused = SASL_MECH_GSSAPI;
+    imapc->sasl.authused = SASL_MECH_GSSAPI;
 
     if(imapc->ir_supported || data->set.sasl_ir)
       result = Curl_sasl_create_gssapi_user_message(data, conn->user,
                                                     conn->passwd, "imap",
-                                                    imapc->mutual_auth,
+                                                    imapc->sasl.mutual_auth,
                                                     NULL, &conn->krb5,
                                                     initresp, len);
   }
   else
 #endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if((imapc->authmechs & SASL_MECH_DIGEST_MD5) &&
-     (imapc->prefmech & SASL_MECH_DIGEST_MD5)) {
+  if((imapc->sasl.authmechs & SASL_MECH_DIGEST_MD5) &&
+     (imapc->sasl.prefmech & SASL_MECH_DIGEST_MD5)) {
     *mech = SASL_MECH_STRING_DIGEST_MD5;
     *state1 = IMAP_AUTHENTICATE_DIGESTMD5;
-    imapc->authused = SASL_MECH_DIGEST_MD5;
+    imapc->sasl.authused = SASL_MECH_DIGEST_MD5;
   }
-  else if((imapc->authmechs & SASL_MECH_CRAM_MD5) &&
-          (imapc->prefmech & SASL_MECH_CRAM_MD5)) {
+  else if((imapc->sasl.authmechs & SASL_MECH_CRAM_MD5) &&
+          (imapc->sasl.prefmech & SASL_MECH_CRAM_MD5)) {
     *mech = SASL_MECH_STRING_CRAM_MD5;
     *state1 = IMAP_AUTHENTICATE_CRAMMD5;
-    imapc->authused = SASL_MECH_CRAM_MD5;
+    imapc->sasl.authused = SASL_MECH_CRAM_MD5;
   }
   else
 #endif
 #ifdef USE_NTLM
-    if((imapc->authmechs & SASL_MECH_NTLM) &&
-       (imapc->prefmech & SASL_MECH_NTLM)) {
+    if((imapc->sasl.authmechs & SASL_MECH_NTLM) &&
+       (imapc->sasl.prefmech & SASL_MECH_NTLM)) {
     *mech = SASL_MECH_STRING_NTLM;
     *state1 = IMAP_AUTHENTICATE_NTLM;
     *state2 = IMAP_AUTHENTICATE_NTLM_TYPE2MSG;
-    imapc->authused = SASL_MECH_NTLM;
+    imapc->sasl.authused = SASL_MECH_NTLM;
 
     if(imapc->ir_supported || data->set.sasl_ir)
       result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
@@ -2851,35 +2851,35 @@ static CURLcode imap_calc_sasl_details(struct connectdata *conn,
   }
   else
 #endif
-  if(((imapc->authmechs & SASL_MECH_XOAUTH2) &&
-      (imapc->prefmech & SASL_MECH_XOAUTH2) &&
-      (imapc->prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
+  if(((imapc->sasl.authmechs & SASL_MECH_XOAUTH2) &&
+      (imapc->sasl.prefmech & SASL_MECH_XOAUTH2) &&
+      (imapc->sasl.prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
     *mech = SASL_MECH_STRING_XOAUTH2;
     *state1 = IMAP_AUTHENTICATE_XOAUTH2;
     *state2 = IMAP_AUTHENTICATE_FINAL;
-    imapc->authused = SASL_MECH_XOAUTH2;
+    imapc->sasl.authused = SASL_MECH_XOAUTH2;
 
     if(imapc->ir_supported || data->set.sasl_ir)
       result = Curl_sasl_create_xoauth2_message(data, conn->user,
                                                 conn->xoauth2_bearer,
                                                 initresp, len);
   }
-  else if((imapc->authmechs & SASL_MECH_LOGIN) &&
-          (imapc->prefmech & SASL_MECH_LOGIN)) {
+  else if((imapc->sasl.authmechs & SASL_MECH_LOGIN) &&
+          (imapc->sasl.prefmech & SASL_MECH_LOGIN)) {
     *mech = SASL_MECH_STRING_LOGIN;
     *state1 = IMAP_AUTHENTICATE_LOGIN;
     *state2 = IMAP_AUTHENTICATE_LOGIN_PASSWD;
-    imapc->authused = SASL_MECH_LOGIN;
+    imapc->sasl.authused = SASL_MECH_LOGIN;
 
     if(imapc->ir_supported || data->set.sasl_ir)
       result = Curl_sasl_create_login_message(data, conn->user, initresp, len);
   }
-  else if((imapc->authmechs & SASL_MECH_PLAIN) &&
-          (imapc->prefmech & SASL_MECH_PLAIN)) {
+  else if((imapc->sasl.authmechs & SASL_MECH_PLAIN) &&
+          (imapc->sasl.prefmech & SASL_MECH_PLAIN)) {
     *mech = SASL_MECH_STRING_PLAIN;
     *state1 = IMAP_AUTHENTICATE_PLAIN;
     *state2 = IMAP_AUTHENTICATE_FINAL;
-    imapc->authused = SASL_MECH_PLAIN;
+    imapc->sasl.authused = SASL_MECH_PLAIN;
 
     if(imapc->ir_supported || data->set.sasl_ir)
       result = Curl_sasl_create_plain_message(data, conn->user, conn->passwd,

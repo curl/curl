@@ -352,11 +352,11 @@ static CURLcode smtp_perform_ehlo(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
-  smtpc->authmechs = 0;           /* No known authentication mechanisms yet */
-  smtpc->authused = 0;            /* Clear the authentication mechanism used
-                                     for esmtp connections */
-  smtpc->tls_supported = FALSE;   /* Clear the TLS capability */
-  smtpc->auth_supported = FALSE;  /* Clear the AUTH capability */
+  smtpc->sasl.authmechs = SASL_AUTH_NONE; /* No known auth. mechanism yet */
+  smtpc->sasl.authused = SASL_AUTH_NONE;  /* Clear the authentication mechanism
+                                             used for esmtp connections */
+  smtpc->tls_supported = FALSE;           /* Clear the TLS capability */
+  smtpc->auth_supported = FALSE;          /* Clear the AUTH capability */
 
   /* Send the EHLO command */
   result = Curl_pp_sendf(&smtpc->pp, "EHLO %s", smtpc->domain);
@@ -378,8 +378,8 @@ static CURLcode smtp_perform_helo(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
-  smtpc->authused = 0;          /* No authentication mechanism used in smtp
-                                   connections */
+  smtpc->sasl.authused = SASL_AUTH_NONE; /* No authentication mechanism used
+                                            in smtp connections */
 
   /* Send the HELO command */
   result = Curl_pp_sendf(&smtpc->pp, "HELO %s", smtpc->domain);
@@ -571,7 +571,7 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
 
   /* Calculate the optional AUTH parameter */
-  if(data->set.str[STRING_MAIL_AUTH] && conn->proto.smtpc.authused) {
+  if(data->set.str[STRING_MAIL_AUTH] && conn->proto.smtpc.sasl.authused) {
     if(data->set.str[STRING_MAIL_AUTH][0] != '\0')
       auth = aprintf("%s", data->set.str[STRING_MAIL_AUTH]);
     else
@@ -772,21 +772,21 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
 
         /* Test the word for a matching authentication mechanism */
         if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_LOGIN))
-          smtpc->authmechs |= SASL_MECH_LOGIN;
+          smtpc->sasl.authmechs |= SASL_MECH_LOGIN;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_PLAIN))
-          smtpc->authmechs |= SASL_MECH_PLAIN;
+          smtpc->sasl.authmechs |= SASL_MECH_PLAIN;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_CRAM_MD5))
-          smtpc->authmechs |= SASL_MECH_CRAM_MD5;
+          smtpc->sasl.authmechs |= SASL_MECH_CRAM_MD5;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_DIGEST_MD5))
-          smtpc->authmechs |= SASL_MECH_DIGEST_MD5;
+          smtpc->sasl.authmechs |= SASL_MECH_DIGEST_MD5;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_GSSAPI))
-          smtpc->authmechs |= SASL_MECH_GSSAPI;
+          smtpc->sasl.authmechs |= SASL_MECH_GSSAPI;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_EXTERNAL))
-          smtpc->authmechs |= SASL_MECH_EXTERNAL;
+          smtpc->sasl.authmechs |= SASL_MECH_EXTERNAL;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_NTLM))
-          smtpc->authmechs |= SASL_MECH_NTLM;
+          smtpc->sasl.authmechs |= SASL_MECH_NTLM;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_XOAUTH2))
-          smtpc->authmechs |= SASL_MECH_XOAUTH2;
+          smtpc->sasl.authmechs |= SASL_MECH_XOAUTH2;
 
         line += wordlen;
         len -= wordlen;
@@ -1171,7 +1171,8 @@ static CURLcode smtp_state_auth_gssapi_resp(struct connectdata *conn,
     /* Create the initial response message */
     result = Curl_sasl_create_gssapi_user_message(data, conn->user,
                                                   conn->passwd, "smtp",
-                                                  smtpc->mutual_auth, NULL,
+                                                  smtpc->sasl.mutual_auth,
+                                                  NULL,
                                                   &conn->krb5,
                                                   &respmsg, &len);
     if(!result && respmsg) {
@@ -1210,11 +1211,11 @@ static CURLcode smtp_state_auth_gssapi_token_resp(struct connectdata *conn,
     /* Get the challenge message */
     smtp_get_message(data->state.buffer, &chlgmsg);
 
-    if(smtpc->mutual_auth)
+    if(smtpc->sasl.mutual_auth)
       /* Decode the user token challenge and create the optional response
          message */
       result = Curl_sasl_create_gssapi_user_message(data, NULL, NULL, NULL,
-                                                    smtpc->mutual_auth,
+                                                    smtpc->sasl.mutual_auth,
                                                     chlgmsg, &conn->krb5,
                                                     &respmsg, &len);
     else
@@ -1240,7 +1241,7 @@ static CURLcode smtp_state_auth_gssapi_token_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&smtpc->pp, "%s", "");
 
       if(!result)
-        state(conn, (smtpc->mutual_auth ? SMTP_AUTH_GSSAPI_NO_DATA :
+        state(conn, (smtpc->sasl.mutual_auth ? SMTP_AUTH_GSSAPI_NO_DATA :
                                           SMTP_AUTH_FINAL));
     }
   }
@@ -1353,7 +1354,7 @@ static CURLcode smtp_state_auth_cancel_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   /* Remove the offending mechanism from the supported list */
-  smtpc->authmechs ^= smtpc->authused;
+  smtpc->sasl.authmechs ^= smtpc->sasl.authused;
 
   /* Calculate alternative SASL login details */
   result = smtp_calc_sasl_details(conn, &mech, &initresp, &len, &state1,
@@ -1767,7 +1768,7 @@ static CURLcode smtp_connect(struct connectdata *conn, bool *done)
   pp->conn = conn;
 
   /* Set the default preferred authentication mechanism */
-  smtpc->prefmech = SASL_AUTH_ANY;
+  smtpc->sasl.prefmech = SASL_AUTH_ANY;
 
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
@@ -1985,7 +1986,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn, bool dead_connection)
   Curl_pp_disconnect(&smtpc->pp);
 
   /* Cleanup the SASL module */
-  Curl_sasl_cleanup(conn, smtpc->authused);
+  Curl_sasl_cleanup(conn, smtpc->sasl.authused);
 
   /* Cleanup our connection based variables */
   Curl_safefree(smtpc->domain);
@@ -2122,7 +2123,7 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn)
 
       if(reset) {
         reset = FALSE;
-        smtpc->prefmech = SASL_AUTH_NONE;
+        smtpc->sasl.prefmech = SASL_AUTH_NONE;
       }
 
       while(*ptr && *ptr != ';') {
@@ -2131,21 +2132,21 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn)
       }
 
       if(strnequal(value, "*", len))
-        smtpc->prefmech = SASL_AUTH_ANY;
+        smtpc->sasl.prefmech = SASL_AUTH_ANY;
       else if(strnequal(value, SASL_MECH_STRING_LOGIN, len))
-        smtpc->prefmech |= SASL_MECH_LOGIN;
+        smtpc->sasl.prefmech |= SASL_MECH_LOGIN;
       else if(strnequal(value, SASL_MECH_STRING_PLAIN, len))
-        smtpc->prefmech |= SASL_MECH_PLAIN;
+        smtpc->sasl.prefmech |= SASL_MECH_PLAIN;
       else if(strnequal(value, SASL_MECH_STRING_CRAM_MD5, len))
-        smtpc->prefmech |= SASL_MECH_CRAM_MD5;
+        smtpc->sasl.prefmech |= SASL_MECH_CRAM_MD5;
       else if(strnequal(value, SASL_MECH_STRING_DIGEST_MD5, len))
-        smtpc->prefmech |= SASL_MECH_DIGEST_MD5;
+        smtpc->sasl.prefmech |= SASL_MECH_DIGEST_MD5;
       else if(strnequal(value, SASL_MECH_STRING_GSSAPI, len))
-        smtpc->prefmech |= SASL_MECH_GSSAPI;
+        smtpc->sasl.prefmech |= SASL_MECH_GSSAPI;
       else if(strnequal(value, SASL_MECH_STRING_NTLM, len))
-        smtpc->prefmech |= SASL_MECH_NTLM;
+        smtpc->sasl.prefmech |= SASL_MECH_NTLM;
       else if(strnequal(value, SASL_MECH_STRING_XOAUTH2, len))
-        smtpc->prefmech |= SASL_MECH_XOAUTH2;
+        smtpc->sasl.prefmech |= SASL_MECH_XOAUTH2;
 
       if(*ptr == ';')
         ptr++;
@@ -2221,46 +2222,46 @@ static CURLcode smtp_calc_sasl_details(struct connectdata *conn,
   /* Calculate the supported authentication mechanism, by decreasing order of
      security, as well as the initial response where appropriate */
 #if defined(USE_KERBEROS5)
-  if((smtpc->authmechs & SASL_MECH_GSSAPI) &&
-     (smtpc->prefmech & SASL_MECH_GSSAPI)) {
-    smtpc->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */
+  if((smtpc->sasl.authmechs & SASL_MECH_GSSAPI) &&
+     (smtpc->sasl.prefmech & SASL_MECH_GSSAPI)) {
+    smtpc->sasl.mutual_auth = FALSE; /* TODO: Calculate mutual auth. */
 
     *mech = SASL_MECH_STRING_GSSAPI;
     *state1 = SMTP_AUTH_GSSAPI;
     *state2 = SMTP_AUTH_GSSAPI_TOKEN;
-    smtpc->authused = SASL_MECH_GSSAPI;
+    smtpc->sasl.authused = SASL_MECH_GSSAPI;
 
     if(data->set.sasl_ir)
       result = Curl_sasl_create_gssapi_user_message(data, conn->user,
                                                     conn->passwd, "smtp",
-                                                    smtpc->mutual_auth,
+                                                    smtpc->sasl.mutual_auth,
                                                     NULL, &conn->krb5,
                                                     initresp, len);
     }
   else
 #endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if((smtpc->authmechs & SASL_MECH_DIGEST_MD5) &&
-     (smtpc->prefmech & SASL_MECH_DIGEST_MD5)) {
+  if((smtpc->sasl.authmechs & SASL_MECH_DIGEST_MD5) &&
+     (smtpc->sasl.prefmech & SASL_MECH_DIGEST_MD5)) {
     *mech = SASL_MECH_STRING_DIGEST_MD5;
     *state1 = SMTP_AUTH_DIGESTMD5;
-    smtpc->authused = SASL_MECH_DIGEST_MD5;
+    smtpc->sasl.authused = SASL_MECH_DIGEST_MD5;
   }
-  else if((smtpc->authmechs & SASL_MECH_CRAM_MD5) &&
-          (smtpc->prefmech & SASL_MECH_CRAM_MD5)) {
+  else if((smtpc->sasl.authmechs & SASL_MECH_CRAM_MD5) &&
+          (smtpc->sasl.prefmech & SASL_MECH_CRAM_MD5)) {
     *mech = SASL_MECH_STRING_CRAM_MD5;
     *state1 = SMTP_AUTH_CRAMMD5;
-    smtpc->authused = SASL_MECH_CRAM_MD5;
+    smtpc->sasl.authused = SASL_MECH_CRAM_MD5;
   }
   else
 #endif
 #ifdef USE_NTLM
-  if((smtpc->authmechs & SASL_MECH_NTLM) &&
-     (smtpc->prefmech & SASL_MECH_NTLM)) {
+  if((smtpc->sasl.authmechs & SASL_MECH_NTLM) &&
+     (smtpc->sasl.prefmech & SASL_MECH_NTLM)) {
     *mech = SASL_MECH_STRING_NTLM;
     *state1 = SMTP_AUTH_NTLM;
     *state2 = SMTP_AUTH_NTLM_TYPE2MSG;
-    smtpc->authused = SASL_MECH_NTLM;
+    smtpc->sasl.authused = SASL_MECH_NTLM;
 
     if(data->set.sasl_ir)
       result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
@@ -2269,35 +2270,35 @@ static CURLcode smtp_calc_sasl_details(struct connectdata *conn,
     }
   else
 #endif
-  if(((smtpc->authmechs & SASL_MECH_XOAUTH2) &&
-      (smtpc->prefmech & SASL_MECH_XOAUTH2) &&
-      (smtpc->prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
+  if(((smtpc->sasl.authmechs & SASL_MECH_XOAUTH2) &&
+      (smtpc->sasl.prefmech & SASL_MECH_XOAUTH2) &&
+      (smtpc->sasl.prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
     *mech = SASL_MECH_STRING_XOAUTH2;
     *state1 = SMTP_AUTH_XOAUTH2;
     *state2 = SMTP_AUTH_FINAL;
-    smtpc->authused = SASL_MECH_XOAUTH2;
+    smtpc->sasl.authused = SASL_MECH_XOAUTH2;
 
     if(data->set.sasl_ir)
       result = Curl_sasl_create_xoauth2_message(data, conn->user,
                                                 conn->xoauth2_bearer,
                                                 initresp, len);
   }
-  else if((smtpc->authmechs & SASL_MECH_LOGIN) &&
-          (smtpc->prefmech & SASL_MECH_LOGIN)) {
+  else if((smtpc->sasl.authmechs & SASL_MECH_LOGIN) &&
+          (smtpc->sasl.prefmech & SASL_MECH_LOGIN)) {
     *mech = SASL_MECH_STRING_LOGIN;
     *state1 = SMTP_AUTH_LOGIN;
     *state2 = SMTP_AUTH_LOGIN_PASSWD;
-    smtpc->authused = SASL_MECH_LOGIN;
+    smtpc->sasl.authused = SASL_MECH_LOGIN;
 
     if(data->set.sasl_ir)
       result = Curl_sasl_create_login_message(data, conn->user, initresp, len);
   }
-  else if((smtpc->authmechs & SASL_MECH_PLAIN) &&
-          (smtpc->prefmech & SASL_MECH_PLAIN)) {
+  else if((smtpc->sasl.authmechs & SASL_MECH_PLAIN) &&
+          (smtpc->sasl.prefmech & SASL_MECH_PLAIN)) {
     *mech = SASL_MECH_STRING_PLAIN;
     *state1 = SMTP_AUTH_PLAIN;
     *state2 = SMTP_AUTH_FINAL;
-    smtpc->authused = SASL_MECH_PLAIN;
+    smtpc->sasl.authused = SASL_MECH_PLAIN;
 
     if(data->set.sasl_ir)
       result = Curl_sasl_create_plain_message(data, conn->user, conn->passwd,

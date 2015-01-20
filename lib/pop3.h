@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "pingpong.h"
+#include "curl_sasl.h"
 
 /****************************************************************************
  * POP3 unique setup
@@ -77,14 +78,11 @@ struct pop3_conn {
                              have been received so far */
   size_t strip;           /* Number of bytes from the start to ignore as
                              non-body */
+  struct SASL sasl;       /* SASL-related storage */
   unsigned int authtypes; /* Accepted authentication types */
-  unsigned int authmechs; /* Accepted SASL authentication mechanisms */
   unsigned int preftype;  /* Preferred authentication type */
-  unsigned int prefmech;  /* Preferred SASL authentication mechanism */
-  unsigned int authused;  /* SASL auth mechanism used for the connection */
   char *apoptimestamp;    /* APOP timestamp from the server greeting */
   bool tls_supported;     /* StartTLS capability supported by server */
-  bool mutual_auth;       /* Mutual authentication enabled (GSSAPI only) */
 };
 
 extern const struct Curl_handler Curl_handler_pop3;

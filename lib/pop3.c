@@ -354,9 +354,9 @@ static CURLcode pop3_perform_capa(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
-  pop3c->authmechs = 0;         /* No known authentication mechanisms yet */
-  pop3c->authused = 0;          /* Clear the authentication mechanism used */
-  pop3c->tls_supported = FALSE; /* Clear the TLS capability */
+  pop3c->sasl.authmechs = SASL_AUTH_NONE; /* No known auth. mechanisms yet */
+  pop3c->sasl.authused = SASL_AUTH_NONE;  /* Clear the auth. mechanism used */
+  pop3c->tls_supported = FALSE;           /* Clear the TLS capability */
 
   /* Send the CAPA command */
   result = Curl_pp_sendf(&pop3c->pp, "%s", "CAPA");
@@ -745,21 +745,21 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
 
         /* Test the word for a matching authentication mechanism */
         if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_LOGIN))
-          pop3c->authmechs |= SASL_MECH_LOGIN;
+          pop3c->sasl.authmechs |= SASL_MECH_LOGIN;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_PLAIN))
-          pop3c->authmechs |= SASL_MECH_PLAIN;
+          pop3c->sasl.authmechs |= SASL_MECH_PLAIN;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_CRAM_MD5))
-          pop3c->authmechs |= SASL_MECH_CRAM_MD5;
+          pop3c->sasl.authmechs |= SASL_MECH_CRAM_MD5;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_DIGEST_MD5))
-          pop3c->authmechs |= SASL_MECH_DIGEST_MD5;
+          pop3c->sasl.authmechs |= SASL_MECH_DIGEST_MD5;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_GSSAPI))
-          pop3c->authmechs |= SASL_MECH_GSSAPI;
+          pop3c->sasl.authmechs |= SASL_MECH_GSSAPI;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_EXTERNAL))
-          pop3c->authmechs |= SASL_MECH_EXTERNAL;
+          pop3c->sasl.authmechs |= SASL_MECH_EXTERNAL;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_NTLM))
-          pop3c->authmechs |= SASL_MECH_NTLM;
+          pop3c->sasl.authmechs |= SASL_MECH_NTLM;
         else if(sasl_mech_equal(line, wordlen, SASL_MECH_STRING_XOAUTH2))
-          pop3c->authmechs |= SASL_MECH_XOAUTH2;
+          pop3c->sasl.authmechs |= SASL_MECH_XOAUTH2;
 
         line += wordlen;
         len -= wordlen;
@@ -1152,7 +1152,7 @@ static CURLcode pop3_state_auth_gssapi_resp(struct connectdata *conn,
     /* Create the initial response message */
     result = Curl_sasl_create_gssapi_user_message(data, conn->user,
                                                   conn->passwd, "pop",
-                                                  pop3c->mutual_auth,
+                                                  pop3c->sasl.mutual_auth,
                                                   NULL, &conn->krb5,
                                                   &respmsg, &len);
     if(!result && respmsg) {
@@ -1191,11 +1191,11 @@ static CURLcode pop3_state_auth_gssapi_token_resp(struct connectdata *conn,
     /* Get the challenge message */
     pop3_get_message(data->state.buffer, &chlgmsg);
 
-    if(pop3c->mutual_auth)
+    if(pop3c->sasl.mutual_auth)
       /* Decode the user token challenge and create the optional response
          message */
       result = Curl_sasl_create_gssapi_user_message(data, NULL, NULL, NULL,
-                                                    pop3c->mutual_auth,
+                                                    pop3c->sasl.mutual_auth,
                                                     chlgmsg, &conn->krb5,
                                                     &respmsg, &len);
     else
@@ -1221,8 +1221,8 @@ static CURLcode pop3_state_auth_gssapi_token_resp(struct connectdata *conn,
         result = Curl_pp_sendf(&pop3c->pp, "%s", "");
 
       if(!result)
-        state(conn, (pop3c->mutual_auth ? POP3_AUTH_GSSAPI_NO_DATA :
-                                          POP3_AUTH_FINAL));
+        state(conn, (pop3c->sasl.mutual_auth ? POP3_AUTH_GSSAPI_NO_DATA :
+                                               POP3_AUTH_FINAL));
     }
   }
 
@@ -1334,7 +1334,7 @@ static CURLcode pop3_state_auth_cancel_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   /* Remove the offending mechanism from the supported list */
-  pop3c->authmechs ^= pop3c->authused;
+  pop3c->sasl.authmechs ^= pop3c->sasl.authused;
 
   /* Calculate alternative SASL login details */
   result = pop3_calc_sasl_details(conn, &mech, &initresp, &len, &state1,
@@ -1727,7 +1727,7 @@ static CURLcode pop3_connect(struct connectdata *conn, bool *done)
 
   /* Set the default preferred authentication type and mechanism */
   pop3c->preftype = POP3_TYPE_ANY;
-  pop3c->prefmech = SASL_AUTH_ANY;
+  pop3c->sasl.prefmech = SASL_AUTH_ANY;
 
   /* Initialise the pingpong layer */
   Curl_pp_init(pp);
@@ -1879,7 +1879,7 @@ static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
   Curl_pp_disconnect(&pop3c->pp);
 
   /* Cleanup the SASL module */
-  Curl_sasl_cleanup(conn, pop3c->authused);
+  Curl_sasl_cleanup(conn, pop3c->sasl.authused);
 
   /* Cleanup our connection based variables */
   Curl_safefree(pop3c->apoptimestamp);
@@ -2011,7 +2011,7 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
       if(reset) {
         reset = FALSE;
         pop3c->preftype = POP3_TYPE_NONE;
-        pop3c->prefmech = SASL_AUTH_NONE;
+        pop3c->sasl.prefmech = SASL_AUTH_NONE;
       }
 
       while(*ptr && *ptr != ';') {
@@ -2021,39 +2021,39 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
 
       if(strnequal(value, "*", len)) {
         pop3c->preftype = POP3_TYPE_ANY;
-        pop3c->prefmech = SASL_AUTH_ANY;
+        pop3c->sasl.prefmech = SASL_AUTH_ANY;
       }
       else if(strnequal(value, "+APOP", len)) {
         pop3c->preftype = POP3_TYPE_APOP;
-        pop3c->prefmech = SASL_AUTH_NONE;
+        pop3c->sasl.prefmech = SASL_AUTH_NONE;
       }
       else if(strnequal(value, SASL_MECH_STRING_LOGIN, len)) {
         pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->prefmech |= SASL_MECH_LOGIN;
+        pop3c->sasl.prefmech |= SASL_MECH_LOGIN;
       }
       else if(strnequal(value, SASL_MECH_STRING_PLAIN, len)) {
         pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->prefmech |= SASL_MECH_PLAIN;
+        pop3c->sasl.prefmech |= SASL_MECH_PLAIN;
       }
       else if(strnequal(value, SASL_MECH_STRING_CRAM_MD5, len)) {
         pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->prefmech |= SASL_MECH_CRAM_MD5;
+        pop3c->sasl.prefmech |= SASL_MECH_CRAM_MD5;
       }
       else if(strnequal(value, SASL_MECH_STRING_DIGEST_MD5, len)) {
         pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->prefmech |= SASL_MECH_DIGEST_MD5;
+        pop3c->sasl.prefmech |= SASL_MECH_DIGEST_MD5;
       }
       else if(strnequal(value, SASL_MECH_STRING_GSSAPI, len)) {
         pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->prefmech |= SASL_MECH_GSSAPI;
+        pop3c->sasl.prefmech |= SASL_MECH_GSSAPI;
       }
       else if(strnequal(value, SASL_MECH_STRING_NTLM, len)) {
         pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->prefmech |= SASL_MECH_NTLM;
+        pop3c->sasl.prefmech |= SASL_MECH_NTLM;
       }
       else if(strnequal(value, SASL_MECH_STRING_XOAUTH2, len)) {
         pop3c->preftype = POP3_TYPE_SASL;
-        pop3c->prefmech |= SASL_MECH_XOAUTH2;
+        pop3c->sasl.prefmech |= SASL_MECH_XOAUTH2;
       }
 
       if(*ptr == ';')
@@ -2121,46 +2121,46 @@ static CURLcode pop3_calc_sasl_details(struct connectdata *conn,
   /* Calculate the supported authentication mechanism, by decreasing order of
      security, as well as the initial response where appropriate */
 #if defined(USE_KERBEROS5)
-  if((pop3c->authmechs & SASL_MECH_GSSAPI) &&
-      (pop3c->prefmech & SASL_MECH_GSSAPI)) {
-    pop3c->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */
+  if((pop3c->sasl.authmechs & SASL_MECH_GSSAPI) &&
+      (pop3c->sasl.prefmech & SASL_MECH_GSSAPI)) {
+    pop3c->sasl.mutual_auth = FALSE; /* TODO: Calculate mutual auth. */
 
     *mech = SASL_MECH_STRING_GSSAPI;
     *state1 = POP3_AUTH_GSSAPI;
     *state2 = POP3_AUTH_GSSAPI_TOKEN;
-    pop3c->authused = SASL_MECH_GSSAPI;
+    pop3c->sasl.authused = SASL_MECH_GSSAPI;
 
     if(data->set.sasl_ir)
       result = Curl_sasl_create_gssapi_user_message(data, conn->user,
                                                     conn->passwd, "pop",
-                                                    pop3c->mutual_auth,
+                                                    pop3c->sasl.mutual_auth,
                                                     NULL, &conn->krb5,
                                                     initresp, len);
   }
   else
 #endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-  if((pop3c->authmechs & SASL_MECH_DIGEST_MD5) &&
-      (pop3c->prefmech & SASL_MECH_DIGEST_MD5)) {
+  if((pop3c->sasl.authmechs & SASL_MECH_DIGEST_MD5) &&
+      (pop3c->sasl.prefmech & SASL_MECH_DIGEST_MD5)) {
     *mech = SASL_MECH_STRING_DIGEST_MD5;
     *state1 = POP3_AUTH_DIGESTMD5;
-    pop3c->authused = SASL_MECH_DIGEST_MD5;
+    pop3c->sasl.authused = SASL_MECH_DIGEST_MD5;
   }
-  else if((pop3c->authmechs & SASL_MECH_CRAM_MD5) &&
-          (pop3c->prefmech & SASL_MECH_CRAM_MD5)) {
+  else if((pop3c->sasl.authmechs & SASL_MECH_CRAM_MD5) &&
+          (pop3c->sasl.prefmech & SASL_MECH_CRAM_MD5)) {
     *mech = SASL_MECH_STRING_CRAM_MD5;
     *state1 = POP3_AUTH_CRAMMD5;
-    pop3c->authused = SASL_MECH_CRAM_MD5;
+    pop3c->sasl.authused = SASL_MECH_CRAM_MD5;
   }
   else
 #endif
 #ifdef USE_NTLM
-  if((pop3c->authmechs & SASL_MECH_NTLM) &&
-      (pop3c->prefmech & SASL_MECH_NTLM)) {
+  if((pop3c->sasl.authmechs & SASL_MECH_NTLM) &&
+      (pop3c->sasl.prefmech & SASL_MECH_NTLM)) {
     *mech = SASL_MECH_STRING_NTLM;
     *state1 = POP3_AUTH_NTLM;
     *state2 = POP3_AUTH_NTLM_TYPE2MSG;
-    pop3c->authused = SASL_MECH_NTLM;
+    pop3c->sasl.authused = SASL_MECH_NTLM;
 
     if(data->set.sasl_ir)
       result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
@@ -2169,35 +2169,35 @@ static CURLcode pop3_calc_sasl_details(struct connectdata *conn,
   }
   else
 #endif
-  if(((pop3c->authmechs & SASL_MECH_XOAUTH2) &&
-      (pop3c->prefmech & SASL_MECH_XOAUTH2) &&
-      (pop3c->prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
+  if(((pop3c->sasl.authmechs & SASL_MECH_XOAUTH2) &&
+      (pop3c->sasl.prefmech & SASL_MECH_XOAUTH2) &&
+      (pop3c->sasl.prefmech != SASL_AUTH_ANY)) || conn->xoauth2_bearer) {
     *mech = SASL_MECH_STRING_XOAUTH2;
     *state1 = POP3_AUTH_XOAUTH2;
     *state2 = POP3_AUTH_FINAL;
-    pop3c->authused = SASL_MECH_XOAUTH2;
+    pop3c->sasl.authused = SASL_MECH_XOAUTH2;
 
     if(data->set.sasl_ir)
       result = Curl_sasl_create_xoauth2_message(data, conn->user,
                                                 conn->xoauth2_bearer,
                                                 initresp, len);
   }
-  else if((pop3c->authmechs & SASL_MECH_LOGIN) &&
-          (pop3c->prefmech & SASL_MECH_LOGIN)) {
+  else if((pop3c->sasl.authmechs & SASL_MECH_LOGIN) &&
+          (pop3c->sasl.prefmech & SASL_MECH_LOGIN)) {
     *mech = SASL_MECH_STRING_LOGIN;
     *state1 = POP3_AUTH_LOGIN;
     *state2 = POP3_AUTH_LOGIN_PASSWD;
-    pop3c->authused = SASL_MECH_LOGIN;
+    pop3c->sasl.authused = SASL_MECH_LOGIN;
 
     if(data->set.sasl_ir)
       result = Curl_sasl_create_login_message(data, conn->user, initresp, len);
   }
-  else if((pop3c->authmechs & SASL_MECH_PLAIN) &&
-          (pop3c->prefmech & SASL_MECH_PLAIN)) {
+  else if((pop3c->sasl.authmechs & SASL_MECH_PLAIN) &&
+          (pop3c->sasl.prefmech & SASL_MECH_PLAIN)) {
     *mech = SASL_MECH_STRING_PLAIN;
     *state1 = POP3_AUTH_PLAIN;
     *state2 = POP3_AUTH_FINAL;
-    pop3c->authused = SASL_MECH_PLAIN;
+    pop3c->sasl.authused = SASL_MECH_PLAIN;
 
     if(data->set.sasl_ir)
       result = Curl_sasl_create_plain_message(data, conn->user, conn->passwd,

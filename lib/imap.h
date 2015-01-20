@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "pingpong.h"
+#include "curl_sasl.h"
 
 /****************************************************************************
  * IMAP unique setup
@@ -83,16 +84,13 @@ struct imap_conn {
   struct pingpong pp;
   imapstate state;            /* Always use imap.c:state() to change state! */
   bool ssldone;               /* Is connect() over SSL done? */
-  unsigned int authmechs;     /* Accepted authentication mechanisms */
+  struct SASL sasl;           /* SASL-related parameters */
   unsigned int preftype;      /* Preferred authentication type */
-  unsigned int prefmech;      /* Preferred authentication mechanism */
-  unsigned int authused;      /* Auth mechanism used for the connection */
   int cmdid;                  /* Last used command ID */
   char resptag[5];            /* Response tag to wait for */
   bool tls_supported;         /* StartTLS capability supported by server */
   bool login_disabled;        /* LOGIN command disabled by server */
   bool ir_supported;          /* Initial response supported by server */
-  bool mutual_auth;           /* Mutual authentication enabled (GSSAPI only) */
   char *mailbox;              /* The last selected mailbox */
   char *mailbox_uidvalidity;  /* UIDVALIDITY parsed from select response */
 };

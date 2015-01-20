@@ -68,6 +68,14 @@ enum {
   CURLDIGESTALGO_MD5SESS
 };
 
+/* Per-connection parameters */
+struct SASL {
+  unsigned int authmechs;  /* Accepted authentication mechanisms */
+  unsigned int prefmech;   /* Preferred authentication mechanism */
+  unsigned int authused;   /* Auth mechanism used for the connection */
+  bool mutual_auth;        /* Mutual authentication enabled (GSSAPI only) */
+};
+
 /* This is used to test whether the line starts with the given mechanism */
 #define sasl_mech_equal(line, wordlen, mech) \
   (wordlen == (sizeof(mech) - 1) / sizeof(char) && \
