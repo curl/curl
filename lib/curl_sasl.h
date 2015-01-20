@@ -68,13 +68,57 @@ enum {
   CURLDIGESTALGO_MD5SESS
 };
 
+/* SASL machine states */
+typedef enum {
+  SASL_STOP,
+  SASL_PLAIN,
+  SASL_LOGIN,
+  SASL_LOGIN_PASSWD,
+  SASL_CRAMMD5,
+  SASL_DIGESTMD5,
+  SASL_DIGESTMD5_RESP,
+  SASL_NTLM,
+  SASL_NTLM_TYPE2MSG,
+  SASL_GSSAPI,
+  SASL_GSSAPI_TOKEN,
+  SASL_GSSAPI_NO_DATA,
+  SASL_XOAUTH2,
+  SASL_CANCEL,
+  SASL_FINAL
+} saslstate;
+
+/* Progress indicator */
+typedef enum {
+  SASL_IDLE,
+  SASL_INPROGRESS,
+  SASL_DONE
+} saslprogress;
+
+/* Protocol dependent SASL parameters */
+struct SASLproto {
+  const char *service;     /* The service name */
+  int contcode;            /* Code to receive when continuation is expected */
+  int finalcode;           /* Code to receive upon authentication success */
+  size_t maxirlen;         /* Maximum initial response length */
+  CURLcode (*sendauth)(struct connectdata *conn,
+                       const char *mech, const char *ir);
+                           /* Send authentication command */
+  CURLcode (*sendcont)(struct connectdata *conn, const char *contauth);
+                           /* Send authentication continuation */
+  void (*getmessage)(char *buffer, char **outptr);
+                           /* Get SASL response message */
+};
+
 /* Per-connection parameters */
 struct SASL {
+  const struct SASLproto *params; /* Protocol dependent parameters */
+  saslstate state;         /* Current machine state */
   unsigned int authmechs;  /* Accepted authentication mechanisms */
   unsigned int prefmech;   /* Preferred authentication mechanism */
   unsigned int authused;   /* Auth mechanism used for the connection */
   bool resetprefs;         /* For URL auth option parsing. */
   bool mutual_auth;        /* Mutual authentication enabled (GSSAPI only) */
+  bool force_ir;           /* Protocol always supports initial response */
 };
 
 /* This is used to test whether the line starts with the given mechanism */
@@ -211,6 +255,14 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
                                          const char *value, size_t len);
 
 /* Initializes an SASL structure */
-void Curl_sasl_init(struct SASL *sasl);
+void Curl_sasl_init(struct SASL *sasl, const struct SASLproto *params);
+
+/* Calculate the required login details for SASL authentication  */
+CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
+                         bool force_ir, saslprogress *progress);
+
+/* Continue an SASL authentication  */
+CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
+                         int code, saslprogress *progress);
 
 #endif /* HEADER_CURL_SASL_H */
