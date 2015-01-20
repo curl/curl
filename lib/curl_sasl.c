@@ -281,7 +281,7 @@ char *Curl_sasl_build_spn(const char *service, const char *host)
 #endif
 
 /*
- * Curl_sasl_create_plain_message()
+ * create_plain_message()
  *
  * This is used to generate an already encoded PLAIN message ready
  * for sending to the recipient.
@@ -297,10 +297,9 @@ char *Curl_sasl_build_spn(const char *service, const char *host)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
-                                        const char *userp,
-                                        const char *passwdp,
-                                        char **outptr, size_t *outlen)
+static CURLcode create_plain_message(struct SessionHandle *data,
+                                     const char *userp, const char *passwdp,
+                                     char **outptr, size_t *outlen)
 {
   CURLcode result;
   char *plainauth;
@@ -332,7 +331,7 @@ CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
 }
 
 /*
- * Curl_sasl_create_login_message()
+ * create_login_message()
  *
  * This is used to generate an already encoded LOGIN message containing the
  * user name or password ready for sending to the recipient.
@@ -347,9 +346,9 @@ CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
-                                        const char *valuep, char **outptr,
-                                        size_t *outlen)
+static CURLcode create_login_message(struct SessionHandle *data,
+                                     const char *valuep, char **outptr,
+                                     size_t *outlen)
 {
   size_t vlen = strlen(valuep);
 
@@ -371,7 +370,7 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
  /*
- * Curl_sasl_decode_cram_md5_message()
+ * decode_cram_md5_message()
  *
  * This is used to decode an already encoded CRAM-MD5 challenge message.
  *
@@ -384,8 +383,8 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
-                                           size_t *outlen)
+static CURLcode decode_cram_md5_message(const char *chlg64, char **outptr,
+                                        size_t *outlen)
 {
   CURLcode result = CURLE_OK;
   size_t chlg64len = strlen(chlg64);
@@ -401,7 +400,7 @@ CURLcode Curl_sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
  }
 
  /*
- * Curl_sasl_create_cram_md5_message()
+ * create_cram_md5_message()
  *
  * This is used to generate an already encoded CRAM-MD5 response message ready
  * for sending to the recipient.
@@ -418,11 +417,11 @@ CURLcode Curl_sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
-                                           const char *chlg,
-                                           const char *userp,
-                                           const char *passwdp,
-                                           char **outptr, size_t *outlen)
+static CURLcode create_cram_md5_message(struct SessionHandle *data,
+                                        const char *chlg,
+                                        const char *userp,
+                                        const char *passwdp,
+                                        char **outptr, size_t *outlen)
 {
   CURLcode result = CURLE_OK;
   size_t chlglen = 0;
@@ -1130,7 +1129,7 @@ void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
 #endif /* USE_NTLM && !USE_WINDOWS_SSPI*/
 
 /*
- * Curl_sasl_create_xoauth2_message()
+ * create_xoauth2_message()
  *
  * This is used to generate an already encoded OAuth 2.0 message ready for
  * sending to the recipient.
@@ -1146,10 +1145,9 @@ void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
-                                          const char *user,
-                                          const char *bearer,
-                                          char **outptr, size_t *outlen)
+static CURLcode create_xoauth2_message(struct SessionHandle *data,
+                                       const char *user, const char *bearer,
+                                       char **outptr, size_t *outlen)
 {
   CURLcode result = CURLE_OK;
   char *xoauth = NULL;
@@ -1396,9 +1394,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     sasl->authused = SASL_MECH_XOAUTH2;
 
     if(force_ir || data->set.sasl_ir)
-      result = Curl_sasl_create_xoauth2_message(data, conn->user,
-                                                conn->xoauth2_bearer,
-                                                &resp, &len);
+      result = create_xoauth2_message(data, conn->user, conn->xoauth2_bearer,
+                                      &resp, &len);
   }
   else if(enabledmechs & SASL_MECH_LOGIN) {
     mech = SASL_MECH_STRING_LOGIN;
@@ -1407,7 +1404,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     sasl->authused = SASL_MECH_LOGIN;
 
     if(force_ir || data->set.sasl_ir)
-      result = Curl_sasl_create_login_message(data, conn->user, &resp, &len);
+      result = create_login_message(data, conn->user, &resp, &len);
   }
   else if(enabledmechs & SASL_MECH_PLAIN) {
     mech = SASL_MECH_STRING_PLAIN;
@@ -1415,8 +1412,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     sasl->authused = SASL_MECH_PLAIN;
 
     if(force_ir || data->set.sasl_ir)
-      result = Curl_sasl_create_plain_message(data, conn->user, conn->passwd,
-                                              &resp, &len);
+      result = create_plain_message(data, conn->user, conn->passwd,
+                                    &resp, &len);
   }
   else
     state2 = SASL_STOP;    /* No authentication started */
@@ -1478,24 +1475,23 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     *progress = SASL_DONE;
     return result;
   case SASL_PLAIN:
-    result = Curl_sasl_create_plain_message(data, conn->user, conn->passwd,
-                                            &resp, &len);
+    result = create_plain_message(data, conn->user, conn->passwd, &resp, &len);
     break;
   case SASL_LOGIN:
-    result = Curl_sasl_create_login_message(data, conn->user, &resp, &len);
+    result = create_login_message(data, conn->user, &resp, &len);
     newstate = SASL_LOGIN_PASSWD;
     break;
   case SASL_LOGIN_PASSWD:
-    result = Curl_sasl_create_login_message(data, conn->passwd, &resp, &len);
+    result = create_login_message(data, conn->passwd, &resp, &len);
     break;
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
   case SASL_CRAMMD5:
     sasl->params->getmessage(data->state.buffer, &serverdata);
-    result = Curl_sasl_decode_cram_md5_message(serverdata, &chlg, &chlglen);
+    result = decode_cram_md5_message(serverdata, &chlg, &chlglen);
     if(!result)
-      result = Curl_sasl_create_cram_md5_message(data, chlg, conn->user,
-                                                 conn->passwd, &resp, &len);
+      result = create_cram_md5_message(data, chlg, conn->user, conn->passwd,
+                                       &resp, &len);
     Curl_safefree(chlg);
     break;
   case SASL_DIGESTMD5:
@@ -1570,9 +1566,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
 
   case SASL_XOAUTH2:
     /* Create the authorisation message */
-    result = Curl_sasl_create_xoauth2_message(data, conn->user,
-                                              conn->xoauth2_bearer,
-                                              &resp, &len);
+    result = create_xoauth2_message(data, conn->user, conn->xoauth2_bearer,
+                                    &resp, &len);
     break;
   case SASL_CANCEL:
     /* Remove the offending mechanism from the supported list */

@@ -137,29 +137,7 @@ TCHAR *Curl_sasl_build_spn(const char *service, const char *instance);
 char *Curl_sasl_build_gssapi_spn(const char *service, const char *host);
 #endif
 
-/* This is used to generate a base64 encoded PLAIN authentication message */
-CURLcode Curl_sasl_create_plain_message(struct SessionHandle *data,
-                                        const char *userp,
-                                        const char *passwdp,
-                                        char **outptr, size_t *outlen);
-
-/* This is used to generate a base64 encoded LOGIN authentication message
-   containing either the user name or password details */
-CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
-                                        const char *valuep, char **outptr,
-                                        size_t *outlen);
-
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-/* This is used to decode a base64 encoded CRAM-MD5 challange message */
-CURLcode Curl_sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
-                                           size_t *outlen);
-
-/* This is used to generate a base64 encoded CRAM-MD5 response message */
-CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
-                                           const char *chlg,
-                                           const char *user,
-                                           const char *passwdp,
-                                           char **outptr, size_t *outlen);
 
 /* This is used to generate a base64 encoded DIGEST-MD5 response message */
 CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
@@ -234,13 +212,6 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
 /* This is used to clean up the gssapi specific data */
 void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
 #endif /* USE_KERBEROS5 */
-
-/* This is used to generate a base64 encoded XOAUTH2 authentication message
-   containing the user name and bearer token */
-CURLcode Curl_sasl_create_xoauth2_message(struct SessionHandle *data,
-                                          const char *user,
-                                          const char *bearer,
-                                          char **outptr, size_t *outlen);
 
 /* This is used to cleanup any libraries or curl modules used by the sasl
    functions */
