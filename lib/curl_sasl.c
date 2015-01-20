@@ -1450,7 +1450,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   saslstate newstate = SASL_FINAL;
   char *chlg = NULL;
   char *resp = NULL;
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
   char *serverdata;
+#endif
   size_t len = 0;
   size_t chlglen = 0;
 
