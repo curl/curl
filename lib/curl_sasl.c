@@ -52,6 +52,23 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* Supported mechanisms */
+const struct {
+  const char *  name;  /* Name */
+  size_t        len;   /* Name length */
+  unsigned int  bit;   /* Flag bit */
+} mechtable[] = {
+  { "LOGIN",      5,  SASL_MECH_LOGIN },
+  { "PLAIN",      5,  SASL_MECH_PLAIN },
+  { "CRAM-MD5",   8,  SASL_MECH_CRAM_MD5 },
+  { "DIGEST-MD5", 10, SASL_MECH_DIGEST_MD5 },
+  { "GSSAPI",     6,  SASL_MECH_GSSAPI },
+  { "EXTERNAL",   8,  SASL_MECH_EXTERNAL },
+  { "NTLM",       4,  SASL_MECH_NTLM },
+  { "XOAUTH2",    7,  SASL_MECH_XOAUTH2 },
+  { ZERO_NULL,    0,  0 }
+};
+
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_WINDOWS_SSPI)
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
@@ -75,23 +92,6 @@
     return result; \
   }
 
-
-/* Supported mechanisms */
-const struct {
-  const char *  name;  /* Name */
-  size_t        len;   /* Name length */
-  unsigned int  bit;   /* Flag bit */
-} mechtable[] = {
-  { "LOGIN",      5,  SASL_MECH_LOGIN },
-  { "PLAIN",      5,  SASL_MECH_PLAIN },
-  { "CRAM-MD5",   8,  SASL_MECH_CRAM_MD5 },
-  { "DIGEST-MD5", 10, SASL_MECH_DIGEST_MD5 },
-  { "GSSAPI",     6,  SASL_MECH_GSSAPI },
-  { "EXTERNAL",   8,  SASL_MECH_EXTERNAL },
-  { "NTLM",       4,  SASL_MECH_NTLM },
-  { "XOAUTH2",    7,  SASL_MECH_XOAUTH2 },
-  { ZERO_NULL,    0,  0 }
-};
 
 /*
  * Return 0 on success and then the buffers are filled in fine.
