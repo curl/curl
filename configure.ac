@@ -1617,6 +1617,8 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
     AC_MSG_CHECKING([for BoringSSL])
     if test "x$ac_cv_func_DES_set_odd_parity" != "xyes"; then
       curl_ssl_msg="enabled (BoringSSL)"
+      AC_DEFINE_UNQUOTED(HAVE_BORINGSSL, 1,
+        [Define to 1 if using BoringSSL.])
       AC_MSG_RESULT([yes])
     else
       AC_MSG_RESULT([no])

@@ -626,8 +626,8 @@ int netware_init(void);
     defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_DARWINSSL) || \
     defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
 
-#if defined(USE_SSLEAY) && !defined(HAVE_DES_SET_ODD_PARITY)
-/* BoringSSL, not NTLM capable */
+#ifdef HAVE_BORINGSSL /* BoringSSL is not NTLM capable */
+#undef USE_NTLM
 #else
 #define USE_NTLM
 #endif
