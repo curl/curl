@@ -106,8 +106,10 @@
 #undef HAVE_ENGINE_LOAD_FOUR_ARGS
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x00903001L) && defined(HAVE_OPENSSL_PKCS12_H)
-/* OpenSSL has PKCS 12 support */
+#if (OPENSSL_VERSION_NUMBER >= 0x00903001L) && \
+    defined(HAVE_OPENSSL_PKCS12_H) && \
+    !defined(OPENSSL_IS_BORINGSSL)
+/* OpenSSL has PKCS 12 support, BoringSSL does not */
 #define HAVE_PKCS12_SUPPORT
 #else
 /* OpenSSL/SSLEay does not have PKCS12 support */
@@ -131,7 +133,10 @@
 #define X509_STORE_set_flags(x,y) Curl_nop_stmt
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+#ifdef OPENSSL_IS_BORINGSSL
+/* BoringSSL has no ERR_remove_state() */
+#define ERR_remove_state(x)
+#elif (OPENSSL_VERSION_NUMBER >= 0x10000000L)
 #define HAVE_ERR_REMOVE_THREAD_STATE 1
 #endif
 
