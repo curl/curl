@@ -234,6 +234,6 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
 
 /* Continue an SASL authentication  */
 CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
-                         int code, saslprogress *progress);
+                            int code, saslprogress *progress);
 
 #endif /* HEADER_CURL_SASL_H */

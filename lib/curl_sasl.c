@@ -54,7 +54,7 @@
 
 /* Supported mechanisms */
 const struct {
-  const char *  name;  /* Name */
+  const char   *name;  /* Name */
   size_t        len;   /* Name length */
   unsigned int  bit;   /* Flag bit */
 } mechtable[] = {
@@ -91,7 +91,6 @@ const struct {
     free(b); \
     return result; \
   }
-
 
 /*
  * Return 0 on success and then the buffers are filled in fine.
@@ -1212,8 +1211,7 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
  *
  * Return the SASL mechanism token or 0 if no match.
  */
-unsigned int
-Curl_sasl_decode_mech(const char *ptr, size_t maxlen, size_t *len)
+unsigned int Curl_sasl_decode_mech(const char *ptr, size_t maxlen, size_t *len)
 {
   unsigned int i;
   char c;
@@ -1223,8 +1221,10 @@ Curl_sasl_decode_mech(const char *ptr, size_t maxlen, size_t *len)
        !memcmp(ptr, mechtable[i].name, mechtable[i].len)) {
       if(len)
         *len = mechtable[i].len;
+
       if(maxlen == mechtable[i].len)
         return mechtable[i].bit;
+
       c = ptr[mechtable[i].len];
       if(!ISUPPER(c) && !ISDIGIT(c) && c != '-' && c != '_')
         return mechtable[i].bit;
@@ -1244,7 +1244,7 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
 {
   CURLcode result = CURLE_OK;
   unsigned int mechbit;
-  size_t llen;
+  size_t mechlen;
 
   if(!len)
     return CURLE_URL_MALFORMAT;
@@ -1256,8 +1256,8 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
 
     if(strnequal(value, "*", len))
       sasl->prefmech = SASL_AUTH_ANY;
-    else if((mechbit = Curl_sasl_decode_mech(value, len, &llen)) &&
-      llen == len)
+    else if((mechbit = Curl_sasl_decode_mech(value, len, &mechlen)) &&
+            mechlen == len)
       sasl->prefmech |= mechbit;
     else
       result = CURLE_URL_MALFORMAT;
@@ -1434,6 +1434,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   }
 
   Curl_safefree(resp);
+
   return result;
 }
 
@@ -1443,7 +1444,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
  * Continue an SASL authentication.
  */
 CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
-                         int code, saslprogress *progress)
+                            int code, saslprogress *progress)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
@@ -1602,6 +1603,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   }
 
   Curl_safefree(resp);
+
   state(sasl, conn, newstate);
+
   return result;
 }
