@@ -1591,29 +1591,6 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
                     SSLv2_client_method \
                     DES_set_odd_parity )
 
-    dnl Make an attempt to detect if this is actually yassl's headers and
-    dnl OpenSSL emulation layer. We still leave everything else believing
-    dnl and acting like OpenSSL.
-
-    AC_MSG_CHECKING([for yaSSL using OpenSSL compatibility mode])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-#include <openssl/ssl.h>
-      ]],[[
-#if defined(YASSL_VERSION) && defined(OPENSSL_VERSION_NUMBER)
-        int dummy = SSL_ERROR_NONE;
-#else
-        Not the yaSSL OpenSSL compatibility header.
-#endif
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      AC_DEFINE_UNQUOTED(USE_YASSLEMUL, 1,
-        [Define to 1 if using yaSSL in OpenSSL compatibility mode.])
-      curl_ssl_msg="enabled (OpenSSL emulation by yaSSL)"
-    ],[
-      AC_MSG_RESULT([no])
-    ])
     AC_MSG_CHECKING([for BoringSSL])
     if test "x$ac_cv_func_DES_set_odd_parity" != "xyes"; then
       curl_ssl_msg="enabled (BoringSSL)"
