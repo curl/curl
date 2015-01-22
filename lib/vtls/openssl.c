@@ -81,6 +81,10 @@
 #error "OPENSSL_VERSION_NUMBER not defined"
 #endif
 
+#if !defined(SSLEAY_VERSION_NUMBER)
+#define SSLEAY_VERSION_NUMBER OPENSSL_VERSION_NUMBER
+#endif
+
 #if OPENSSL_VERSION_NUMBER >= 0x0090581fL
 #define HAVE_SSL_GET1_SESSION 1
 #else
@@ -93,7 +97,7 @@
 #undef HAVE_USERDATA_IN_PWD_CALLBACK
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x00907001L
+#if OPENSSL_VERSION_NUMBER >= 0x00907001L && !defined(OPENSSL_IS_BORINGSSL)
 /* ENGINE_load_private_key() takes four arguments */
 #define HAVE_ENGINE_LOAD_FOUR_ARGS
 #include <openssl/ui.h>
@@ -137,6 +141,14 @@
 #define OPENSSL_NO_SSL2
 #endif
 
+#if defined(OPENSSL_IS_BORINGSSL)
+#define NO_RAND_SEED 1
+/* In BoringSSL OpenSSL_add_all_algorithms does nothing */
+#define OpenSSL_add_all_algorithms()
+/* BoringSSL does not have CONF_modules_load_file */
+#define CONF_modules_load_file(a,b,c)
+#endif
+
 /*
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have
@@ -177,6 +189,7 @@ static int passwd_callback(char *buf, int num, int encrypting
  * pass in an argument that is never used.
  */
 
+#ifndef NO_RAND_SEED
 #ifdef HAVE_RAND_STATUS
 #define seed_enough(x) rand_enough()
 static bool rand_enough(void)
@@ -261,7 +274,7 @@ static int ossl_seed(struct SessionHandle *data)
   return nread;
 }
 
-static int Curl_ossl_seed(struct SessionHandle *data)
+static void Curl_ossl_seed(struct SessionHandle *data)
 {
   /* we have the "SSL is seeded" boolean static to prevent multiple
      time-consuming seedings in vain */
@@ -272,8 +285,11 @@ static int Curl_ossl_seed(struct SessionHandle *data)
     ossl_seed(data);
     ssl_seeded = TRUE;
   }
-  return 0;
 }
+#else
+/* BoringSSL needs no seeding */
+#define Curl_ossl_seed(x)
+#endif
 
 
 #ifndef SSL_FILETYPE_ENGINE
@@ -756,9 +772,9 @@ int Curl_ossl_init(void)
 #define CONF_MFLAGS_DEFAULT_SECTION 0x0
 #endif
 
-  (void)CONF_modules_load_file(NULL, NULL,
-                               CONF_MFLAGS_DEFAULT_SECTION|
-                               CONF_MFLAGS_IGNORE_MISSING_FILE);
+  CONF_modules_load_file(NULL, NULL,
+                         CONF_MFLAGS_DEFAULT_SECTION|
+                         CONF_MFLAGS_IGNORE_MISSING_FILE);
 
   return 1;
 }
@@ -2937,6 +2953,9 @@ size_t Curl_ossl_version(char *buffer, size_t size)
      to OpenSSL in all other aspects */
   return snprintf(buffer, size, "yassl/%s", YASSL_VERSION);
 #else /* YASSL_VERSION */
+#ifdef OPENSSL_IS_BORINGSSL
+  return snprintf(buffer, size, "BoringSSL");
+#else /* OPENSSL_IS_BORINGSSL */
 
 #if(SSLEAY_VERSION_NUMBER >= 0x905000)
   {
@@ -2966,14 +2985,10 @@ size_t Curl_ossl_version(char *buffer, size_t size)
     }
 
     return snprintf(buffer, size, "%s/%lx.%lx.%lx%s",
-#ifdef OPENSSL_IS_BORINGSSL
-                    "BoringSSL"
-#else
 #ifdef LIBRESSL_VERSION_NUMBER
                     "LibreSSL"
 #else
                     "OpenSSL"
-#endif
 #endif
                     , (ssleay_value>>28)&0xf,
                     (ssleay_value>>20)&0xff,
@@ -3007,6 +3022,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 #endif /* (SSLEAY_VERSION_NUMBER >= 0x900000) */
 #endif /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
 
+#endif /* OPENSSL_IS_BORINGSSL */
 #endif /* YASSL_VERSION */
 }
 
@@ -3014,8 +3030,9 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 int Curl_ossl_random(struct SessionHandle *data, unsigned char *entropy,
                      size_t length)
 {
-  if(data)
+  if(data) {
     Curl_ossl_seed(data); /* Initiate the seed if not already done */
+  }
   RAND_bytes(entropy, curlx_uztosi(length));
   return 0; /* 0 as in no problem */
 }
