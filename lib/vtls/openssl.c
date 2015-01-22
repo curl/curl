@@ -64,7 +64,9 @@
 #include <openssl/md5.h>
 #include <openssl/conf.h>
 #include <openssl/bn.h>
+#ifndef HAVE_BORINGSSL
 #include <openssl/ocsp.h>
+#endif
 #else
 #include <rand.h>
 #include <x509v3.h>
@@ -1321,6 +1323,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
   return result;
 }
 
+#ifndef HAVE_BORINGSSL
 static CURLcode verifystatus(struct connectdata *conn,
                              struct ssl_connect_data *connssl)
 {
@@ -1443,6 +1446,7 @@ end:
 
   return result;
 }
+#endif /* HAVE_BORINGSSL */
 
 #endif /* USE_SSLEAY */
 
@@ -2056,8 +2060,10 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     return CURLE_OUT_OF_MEMORY;
   }
 
+#ifndef HAVE_BORINGSSL
   if(data->set.ssl.verifystatus)
     SSL_set_tlsext_status_type(connssl->handle, TLSEXT_STATUSTYPE_ocsp);
+#endif
 
   SSL_set_connect_state(connssl->handle);
 
@@ -2742,6 +2748,7 @@ static CURLcode servercert(struct connectdata *conn,
       infof(data, "\t SSL certificate verify ok.\n");
   }
 
+#ifndef HAVE_BORINGSSL
   if(data->set.ssl.verifystatus) {
     result = verifystatus(conn, connssl);
     if(result) {
@@ -2750,6 +2757,7 @@ static CURLcode servercert(struct connectdata *conn,
       return result;
     }
   }
+#endif
 
   if(!strict)
     /* when not strict, we don't bother about the verify cert problems */
