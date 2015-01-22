@@ -1579,7 +1579,8 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
               ])
 
     dnl these can only exist if openssl exists
-    dnl yassl doesn't have SSL_get_shutdown
+    dnl Cyassl doesn't have SSL_get_shutdown
+    dnl BoringSSL doesn't have DES_set_odd_parity
 
     AC_CHECK_FUNCS( RAND_status \
                     RAND_screen \
@@ -1587,7 +1588,8 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
                     ENGINE_cleanup \
                     CRYPTO_cleanup_all_ex_data \
                     SSL_get_shutdown \
-                    SSLv2_client_method )
+                    SSLv2_client_method \
+                    DES_set_odd_parity )
 
     dnl Make an attempt to detect if this is actually yassl's headers and
     dnl OpenSSL emulation layer. We still leave everything else believing
@@ -1612,6 +1614,13 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
     ],[
       AC_MSG_RESULT([no])
     ])
+    AC_MSG_CHECKING([for BoringSSL])
+    if test "x$ac_cv_func_des_set_odd_parity" != "xyes"; then
+      curl_ssl_msg="enabled (BoringSSL)"
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
   fi
 
   if test "$OPENSSL_ENABLED" = "1"; then
