@@ -1615,12 +1615,27 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
       AC_MSG_RESULT([no])
     ])
     AC_MSG_CHECKING([for BoringSSL])
-    if test "x$ac_cv_func_des_set_odd_parity" != "xyes"; then
+    if test "x$ac_cv_func_DES_set_odd_parity" != "xyes"; then
       curl_ssl_msg="enabled (BoringSSL)"
       AC_MSG_RESULT([yes])
     else
       AC_MSG_RESULT([no])
     fi
+    AC_MSG_CHECKING([for libressl])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <openssl/opensslv.h>
+      ]],[[
+        int dummy = LIBRESSL_VERSION_NUMBER;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      AC_DEFINE_UNQUOTED(HAVE_LIBRESSL, 1,
+        [Define to 1 if using libressl.])
+      curl_ssl_msg="enabled (libressl)"
+    ],[
+      AC_MSG_RESULT([no])
+    ])
   fi
 
   if test "$OPENSSL_ENABLED" = "1"; then
