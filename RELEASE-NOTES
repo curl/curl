@@ -28,6 +28,21 @@ This release includes the following bugfixes:
  o curl_endian: Fixed build when 64-bit integers are not supported [8]
  o checksrc.bat: Better detection of Perl installation
  o build-openssl.bat: Added check for Perl installation
+ o http_negotiate: Return CURLcode in Curl_input_negotiate() instead of int
+ o http_negotiate: Added empty decoded challenge message info text
+ o vtls: Removed unimplemented overrides of curlssl_close_all()
+ o sasl_gssapi: Fixed memory leak with local SPN variable
+ o http_negotiate: Use dynamic buffer for SPN generation
+ o ldap: Renamed the CURL_LDAP_WIN definition to USE_WIN32_LDAP
+ o openssl: do public key pinning check independently [11]
+ o timeval: typecast for better type (on Amiga)
+ o ipv6: enclose AF_INET6 uses with proper #ifdefs for ipv6
+ o SASL: common URL option and auth capabilities decoders for all protocols
+ o BoringSSL: fix build
+ o BoringSSL: detected by configure, switches off NTLM
+ o openvms: Handle openssl/0.8.9zb version parsing
+ o configure: detect libresssl
+ o configure: remove detection of the old yassl emulation API
  o 
 
 This release includes the following known bugs:
@@ -37,9 +52,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Guenter Knauf, Jean-Francois Durand, John E. Malmberg,
-  Marc Hoersken, Mohammad AlSaleh, Sam Schanken, Steve Holme, Thomas Klausner,
-  Viktor Szakats, Vojtěch Král, Yun SangHo
+  Alessandro Ghedini, Chris Young, Daniel Stenberg, Guenter Knauf,
+  Jean-Francois Durand, Joe Mason, John E. Malmberg, Kyle J. McKay, Leith Bade,
+  Marc Hoersken, Mohammad AlSaleh, Patrick Monnerat, Sam Schanken, Steve Holme,
+  Thomas Klausner, Viktor Szakats, Vojtěch Král, Yun SangHo
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -55,4 +71,5 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/mail/lib-2015-01/0094.html
  [9] = http://curl.haxx.se/docs/manpage.html#--cert-status
  [10] = http://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYSTATUS.html
+ [11] = http://curl.haxx.se/bug/view.cgi?id=1471
  
