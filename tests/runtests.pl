@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -235,7 +235,9 @@ my $has_yassl;      # built with yassl
 my $has_polarssl;   # built with polarssl
 my $has_axtls;      # built with axTLS
 my $has_winssl;     # built with WinSSL    (Secure Channel aka Schannel)
-my $has_darwinssl;  # build with DarwinSSL (Secure Transport)
+my $has_darwinssl;  # built with DarwinSSL (Secure Transport)
+my $has_boringssl;  # built with BoringSSL
+my $has_libressl;   # built with libressl 
 
 my $has_sslpinning; # built with a TLS backend that supports pinning
 
@@ -2361,6 +2363,14 @@ sub checksystem {
            elsif ($libcurl =~ /securetransport/i) {
                $has_darwinssl=1;
                $ssllib="DarwinSSL";
+           }
+           elsif ($libcurl =~ /BoringSSL/i) {
+               $has_boringssl=1;
+               $ssllib="BoringSSL";
+           }
+           elsif ($libcurl =~ /libressl/i) {
+               $has_libressl=1;
+               $ssllib="libressl";
            }
            if ($libcurl =~ /ares/i) {
                $has_cares=1;
