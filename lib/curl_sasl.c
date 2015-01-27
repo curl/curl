@@ -1440,8 +1440,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       }
     else
 #endif
-    if((((enabledmechs & SASL_MECH_XOAUTH2) &&
-        sasl->prefmech != SASL_AUTH_DEFAULT)) || conn->xoauth2_bearer) {
+    if((enabledmechs & SASL_MECH_XOAUTH2) || conn->xoauth2_bearer) {
       mech = SASL_MECH_STRING_XOAUTH2;
       state1 = SASL_XOAUTH2;
       sasl->authused = SASL_MECH_XOAUTH2;

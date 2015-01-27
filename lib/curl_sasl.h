@@ -52,7 +52,8 @@ struct kerberos5data;
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
 #define SASL_AUTH_ANY           ~0U
-#define SASL_AUTH_DEFAULT       (SASL_AUTH_ANY & ~SASL_MECH_EXTERNAL)
+#define SASL_AUTH_DEFAULT       (SASL_AUTH_ANY & \
+                                 ~(SASL_MECH_EXTERNAL | SASL_MECH_XOAUTH2))
 
 /* Authentication mechanism strings */
 #define SASL_MECH_STRING_LOGIN      "LOGIN"
