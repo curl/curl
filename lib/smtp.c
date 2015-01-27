@@ -486,9 +486,10 @@ static CURLcode smtp_perform_authentication(struct connectdata *conn)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   saslprogress progress;
 
-  /* Check we have a username and password to authenticate with, and the
+  /* Check we have enough data to authenticate with, and the
      server supports authentiation, and end the connect phase if not */
-  if(!conn->bits.user_passwd || !smtpc->auth_supported) {
+  if(!smtpc->auth_supported ||
+      !Curl_sasl_can_authenticate(&smtpc->sasl, conn)) {
     state(conn, SMTP_STOP);
     return result;
   }

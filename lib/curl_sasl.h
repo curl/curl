@@ -39,10 +39,6 @@ struct ntlmdata;
 struct kerberos5data;
 #endif
 
-/* Authentication mechanism values */
-#define SASL_AUTH_NONE          0
-#define SASL_AUTH_ANY           ~0U
-
 /* Authentication mechanism flags */
 #define SASL_MECH_LOGIN             (1 << 0)
 #define SASL_MECH_PLAIN             (1 << 1)
@@ -52,6 +48,11 @@ struct kerberos5data;
 #define SASL_MECH_EXTERNAL          (1 << 5)
 #define SASL_MECH_NTLM              (1 << 6)
 #define SASL_MECH_XOAUTH2           (1 << 7)
+
+/* Authentication mechanism values */
+#define SASL_AUTH_NONE          0
+#define SASL_AUTH_ANY           ~0U
+#define SASL_AUTH_DEFAULT       (SASL_AUTH_ANY & ~SASL_MECH_EXTERNAL)
 
 /* Authentication mechanism strings */
 #define SASL_MECH_STRING_LOGIN      "LOGIN"
@@ -74,6 +75,7 @@ typedef enum {
   SASL_PLAIN,
   SASL_LOGIN,
   SASL_LOGIN_PASSWD,
+  SASL_EXTERNAL,
   SASL_CRAMMD5,
   SASL_DIGESTMD5,
   SASL_DIGESTMD5_RESP,
@@ -227,6 +229,9 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
 
 /* Initializes an SASL structure */
 void Curl_sasl_init(struct SASL *sasl, const struct SASLproto *params);
+
+/* Check if we have enough auth data and capabilities to authenticate */
+bool Curl_sasl_can_authenticate(struct SASL *sasl, struct connectdata *conn);
 
 /* Calculate the required login details for SASL authentication  */
 CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,

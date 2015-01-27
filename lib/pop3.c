@@ -543,9 +543,9 @@ static CURLcode pop3_perform_authentication(struct connectdata *conn)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   saslprogress progress = SASL_IDLE;
 
-  /* Check we have a username and password to authenticate with and end the
+  /* Check we have enough data to authenticate with and end the
      connect phase if we don't */
-  if(!conn->bits.user_passwd) {
+  if(!Curl_sasl_can_authenticate(&pop3c->sasl, conn)) {
     state(conn, POP3_STOP);
     return result;
   }
@@ -1425,7 +1425,7 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
     case SASL_AUTH_NONE:
       pop3c->preftype = POP3_TYPE_NONE;
       break;
-    case SASL_AUTH_ANY:
+    case SASL_AUTH_DEFAULT:
       pop3c->preftype = POP3_TYPE_ANY;
       break;
     default:
