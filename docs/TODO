@@ -494,7 +494,7 @@ Currently the SMB authentication uses NTLMv1.
 
 15.1 Other authentication mechanisms
 
- Add support for other authentication mechanisms such as EXTERNAL, OLP,
+ Add support for other authentication mechanisms such as OLP,
  GSS-SPNEGO and others.
  
 15.2 Add QOP support to GSSAPI authentication

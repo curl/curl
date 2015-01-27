@@ -134,8 +134,8 @@ SMB
  - authentication with NTLMv1
 
 SMTP
- - authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9) and Kerberos 5
-   (*4)
+ - authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9), Kerberos 5
+   (*4) and External.
  - send e-mails
  - mail from support
  - mail size support
@@ -150,8 +150,8 @@ SMTPS (*1)
 
 POP3
  - authentication: Clear Text, APOP and SASL
- - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9) and
-   Kerberos 5 (*4)
+ - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9),
+   Kerberos 5 (*4) and External.
  - list e-mails
  - retrieve e-mails
  - enhanced command support for: CAPA, DELE, TOP, STAT, UIDL and NOOP via
@@ -165,8 +165,8 @@ POP3S (*1)
 
 IMAP
  - authentication: Clear Text and SASL
- - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9) and
-   Kerberos 5 (*4)
+ - SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM (*9),
+   Kerberos 5 (*4) and External.
  - list the folders of a mailbox
  - select a mailbox with support for verifying the UIDVALIDITY
  - fetch e-mails with support for specifying the UID and SECTION
