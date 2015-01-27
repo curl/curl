@@ -3202,6 +3202,10 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
 
 bool Curl_ossl_cert_status_request(void)
 {
+#if !defined(HAVE_BORINGSSL) && !defined(OPENSSL_NO_TLSEXT)
   return TRUE;
+#else
+  return FALSE;
+#endif
 }
 #endif /* USE_SSLEAY */
