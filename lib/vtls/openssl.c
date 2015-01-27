@@ -1323,7 +1323,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
   return result;
 }
 
-#ifndef HAVE_BORINGSSL
+#if !defined(HAVE_BORINGSSL) && !defined(OPENSSL_NO_TLSEXT)
 static CURLcode verifystatus(struct connectdata *conn,
                              struct ssl_connect_data *connssl)
 {
@@ -2060,7 +2060,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     return CURLE_OUT_OF_MEMORY;
   }
 
-#ifndef HAVE_BORINGSSL
+#if !defined(HAVE_BORINGSSL) && !defined(OPENSSL_NO_TLSEXT)
   if(data->set.ssl.verifystatus)
     SSL_set_tlsext_status_type(connssl->handle, TLSEXT_STATUSTYPE_ocsp);
 #endif
@@ -2748,7 +2748,7 @@ static CURLcode servercert(struct connectdata *conn,
       infof(data, "\t SSL certificate verify ok.\n");
   }
 
-#ifndef HAVE_BORINGSSL
+#if !defined(HAVE_BORINGSSL) && !defined(OPENSSL_NO_TLSEXT)
   if(data->set.ssl.verifystatus) {
     result = verifystatus(conn, connssl);
     if(result) {
