@@ -15,7 +15,7 @@ RFC4954
 <servercmd>
 AUTH EXTERNAL
 REPLY AUTH 334 EXTERNAL supported
-REPLY dXNlcg== 235 Authenticated
+REPLY = 235 Authenticated
 </servercmd>
 </reply>
 
@@ -26,13 +26,13 @@ REPLY dXNlcg== 235 Authenticated
 smtp
 </server>
  <name>
-SMTP external authentication
+SMTP external authentication without credentials
  </name>
 <stdin>
 mail body
 </stdin>
  <command>
-'smtp://user;AUTH=EXTERNAL@%HOSTIP:%SMTPPORT/950' --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
+'smtp://;AUTH=EXTERNAL@%HOSTIP:%SMTPPORT/943' --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -40,9 +40,9 @@ mail body
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 950
+EHLO 943
 AUTH EXTERNAL
-dXNlcg==
+=
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
