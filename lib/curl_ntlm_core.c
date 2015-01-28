@@ -143,8 +143,13 @@ static void setup_des_key(const unsigned char *key_56,
 {
   DES_cblock key;
 
+  /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, (char *) key);
+
+  /* Set the key parity to odd */
   DES_set_odd_parity(&key);
+
+  /* Set the key */
   DES_set_key(&key, ks);
 }
 
@@ -154,7 +159,11 @@ static void setup_des_key(const unsigned char *key_56,
                           struct des_ctx *des)
 {
   char key[8];
+
+  /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, key);
+
+  /* Set the key */
   des_set_key(des, (const uint8_t*)key);
 }
 
@@ -167,7 +176,11 @@ static void setup_des_key(const unsigned char *key_56,
                           gcry_cipher_hd_t *des)
 {
   char key[8];
+
+  /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, key);
+
+  /* Set the key */
   gcry_cipher_setkey(*des, key, 8);
 }
 
@@ -196,8 +209,10 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   if(!slot)
     return FALSE;
 
-  /* expand the 56 bit key to 64 bit and wrap by NSS */
+  /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, key);
+
+  /* Import the key */
   key_item.data = (unsigned char *)key;
   key_item.len = /* hard-wired */ 8;
   symkey = PK11_ImportSymKey(slot, mech, PK11_OriginUnwrap, CKA_ENCRYPT,
@@ -205,7 +220,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   if(!symkey)
     goto fail;
 
-  /* create DES encryption context */
+  /* Create the DES encryption context */
   param = PK11_ParamFromIV(mech, /* no IV in ECB mode */ NULL);
   if(!param)
     goto fail;
@@ -213,7 +228,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   if(!ctx)
     goto fail;
 
-  /* perform the encryption */
+  /* Perform the encryption */
   if(SECSuccess == PK11_CipherOp(ctx, out, &out_len, /* outbuflen */ 8,
                                  (unsigned char *)in, /* inbuflen */ 8)
       && SECSuccess == PK11_Finalize(ctx))
@@ -240,10 +255,14 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   size_t out_len;
   CCCryptorStatus err;
 
+  /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, key);
+
+  /* Perform the encryption */
   err = CCCrypt(kCCEncrypt, kCCAlgorithmDES, kCCOptionECBMode, key,
                 kCCKeySizeDES, NULL, in, 8 /* inbuflen */, out,
                 8 /* outbuflen */, &out_len);
+
   return err == kCCSuccess;
 }
 
@@ -255,10 +274,16 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   char key[8];
   _CIPHER_Control_T ctl;
 
+  /* Setup the cipher control structure */
   ctl.Func_ID = ENCRYPT_ONLY;
   ctl.Data_Len = 8;
+
+  /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, ctl.Crypto_Key);
+
+  /* Perform the encryption */
   _CIPHER((_SPCPTR *) &out, &ctl, (_SPCPTR *) &in);
+
   return TRUE;
 }
 
@@ -281,12 +306,15 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
                           CRYPT_VERIFYCONTEXT))
     return FALSE;
 
+  /* Setup the key blob structure */
   memset(&blob, 0, sizeof(blob));
-  extend_key_56_to_64(key_56, blob.key);
   blob.hdr.bType = PLAINTEXTKEYBLOB;
   blob.hdr.bVersion = 2;
   blob.hdr.aiKeyAlg = CALG_DES;
   blob.len = sizeof(blob.key);
+
+  /* Expand the 56-bit key to 64-bits */
+  extend_key_56_to_64(key_56, blob.key);
 
   /* Import the key */
   if(!CryptImportKey(hprov, (BYTE *) &blob, sizeof(blob), 0, 0, &hkey)) {
