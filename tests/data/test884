@@ -16,7 +16,7 @@ RFC5034
 <servercmd>
 AUTH EXTERNAL
 REPLY AUTH +
-REPLY dXNlcg== +OK Login successful
+REPLY = +OK Login successful
 </servercmd>
 <data>
 From: me@somewhere
@@ -36,10 +36,10 @@ body
 pop3
 </server>
  <name>
-POP3 external authentication
+POP3 external authentication without credentials
  </name>
  <command>
-'pop3://user;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/946'
+'pop3://;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/884'
 </command>
 </client>
 
@@ -49,8 +49,8 @@ POP3 external authentication
 <protocol>
 CAPA
 AUTH EXTERNAL
-dXNlcg==
-RETR 946
+=
+RETR 884
 QUIT
 </protocol>
 </verify>

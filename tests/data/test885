@@ -36,10 +36,10 @@ body
 pop3
 </server>
  <name>
-POP3 external authentication with initial response without credentials
+POP3 external authentication with initial response
  </name>
  <command>
-'pop3://;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/949' --sasl-ir
+'pop3://user;AUTH=EXTERNAL@%HOSTIP:%POP3PORT/885' --sasl-ir
 </command>
 </client>
 
@@ -48,8 +48,8 @@ POP3 external authentication with initial response without credentials
 <verify>
 <protocol>
 CAPA
-AUTH EXTERNAL =
-RETR 949
+AUTH EXTERNAL dXNlcg==
+RETR 885
 QUIT
 </protocol>
 </verify>
