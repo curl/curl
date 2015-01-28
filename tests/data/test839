@@ -35,10 +35,10 @@ body
 imap
 </server>
  <name>
-IMAP external authentication with initial response without credentials
+IMAP external authentication with initial response
  </name>
  <command>
-'imap://;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/945/;UID=1'
+'imap://user;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/839/;UID=1'
 </command>
 </client>
 
@@ -47,8 +47,8 @@ IMAP external authentication with initial response without credentials
 <verify>
 <protocol>
 A001 CAPABILITY
-A002 AUTHENTICATE EXTERNAL =
-A003 SELECT 945
+A002 AUTHENTICATE EXTERNAL dXNlcg==
+A003 SELECT 839
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>

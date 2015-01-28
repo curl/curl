@@ -4,6 +4,7 @@
 IMAP
 SASL
 SASL AUTH EXTERNAL
+SASL-IR
 RFC4422
 </keywords>
 </info>
@@ -13,8 +14,8 @@ RFC4422
 <reply>
 <servercmd>
 AUTH EXTERNAL
-REPLY AUTHENTICATE +
-REPLY dXNlcg== A002 OK AUTHENTICATE completed
+CAPA SASL-IR
+REPLY AUTHENTICATE A002 OK AUTHENTICATE completed
 </servercmd>
 <data>
 From: me@somewhere
@@ -34,10 +35,10 @@ body
 imap
 </server>
  <name>
-IMAP external authentication
+IMAP external authentication with initial response without credentials
  </name>
  <command>
-'imap://user;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/942/;UID=1'
+'imap://;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/840/;UID=1'
 </command>
 </client>
 
@@ -46,9 +47,8 @@ IMAP external authentication
 <verify>
 <protocol>
 A001 CAPABILITY
-A002 AUTHENTICATE EXTERNAL
-dXNlcg==
-A003 SELECT 942
+A002 AUTHENTICATE EXTERNAL =
+A003 SELECT 840
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>
