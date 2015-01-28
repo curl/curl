@@ -107,6 +107,7 @@
 #include "curl_hmac.h"
 #include "warnless.h"
 #include "curl_endian.h"
+#include "curl_des.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -147,7 +148,11 @@ static void setup_des_key(const unsigned char *key_56,
   extend_key_56_to_64(key_56, (char *) key);
 
   /* Set the key parity to odd */
+#if defined(HAVE_BORINGSSL)
+  Curl_des_set_odd_parity((unsigned char *) &key, sizeof(key));
+#else
   DES_set_odd_parity(&key);
+#endif
 
   /* Set the key */
   DES_set_key(&key, ks);
@@ -162,6 +167,9 @@ static void setup_des_key(const unsigned char *key_56,
 
   /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, key);
+
+  /* Set the key parity to odd */
+  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
 
   /* Set the key */
   des_set_key(des, (const uint8_t *) key);
@@ -179,6 +187,9 @@ static void setup_des_key(const unsigned char *key_56,
 
   /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, key);
+
+  /* Set the key parity to odd */
+  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
 
   /* Set the key */
   gcry_cipher_setkey(*des, key, sizeof(key));
@@ -211,6 +222,9 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
 
   /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, key);
+
+  /* Set the key parity to odd */
+  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
 
   /* Import the key */
   key_item.data = (unsigned char *)key;
@@ -258,6 +272,9 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, key);
 
+  /* Set the key parity to odd */
+  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
+
   /* Perform the encryption */
   err = CCCrypt(kCCEncrypt, kCCAlgorithmDES, kCCOptionECBMode, key,
                 kCCKeySizeDES, NULL, in, 8 /* inbuflen */, out,
@@ -280,6 +297,9 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
 
   /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, ctl.Crypto_Key);
+
+  /* Set the key parity to odd */
+  Curl_des_set_odd_parity((unsigned char *) ctl.Crypto_Key, ctl.Data_Len);
 
   /* Perform the encryption */
   _CIPHER((_SPCPTR *) &out, &ctl, (_SPCPTR *) &in);
@@ -315,6 +335,9 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
 
   /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, blob.key);
+
+  /* Set the key parity to odd */
+  Curl_des_set_odd_parity((unsigned char *) blob.key, sizeof(blob.key));
 
   /* Import the key */
   if(!CryptImportKey(hprov, (BYTE *) &blob, sizeof(blob), 0, 0, &hkey)) {
