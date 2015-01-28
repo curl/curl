@@ -93,7 +93,7 @@ const struct {
   }
 
 /*
- * Return 0 on success and then the buffers are filled in fine.
+ * Returns 0 on success and then the buffers are filled in fine.
  *
  * Non-zero means failure to parse.
  */
@@ -385,8 +385,8 @@ static CURLcode sasl_create_login_message(struct SessionHandle *data,
  * Returns CURLE_OK on success.
  */
 static CURLcode sasl_create_external_message(struct SessionHandle *data,
-                                          const char *user, char **outptr,
-                                          size_t *outlen)
+                                             const char *user, char **outptr,
+                                             size_t *outlen)
 {
   /* This is the same formatting as the login message. */
   return sasl_create_login_message(data, user, outptr, outlen);
@@ -1227,7 +1227,7 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
 /*
  * Curl_sasl_decode_mech()
  *
- * Convert an SASL mechanism name to a token.
+ * Convert a SASL mechanism name into a token.
  *
  * Parameters:
  *
@@ -1235,7 +1235,7 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
  * maxlen [in]     - Maximum mechanism string length.
  * len    [out]    - If not NULL, effective name length.
  *
- * Return the SASL mechanism token or 0 if no match.
+ * Returns the SASL mechanism token or 0 if no match.
  */
 unsigned int Curl_sasl_decode_mech(const char *ptr, size_t maxlen, size_t *len)
 {
@@ -1294,7 +1294,7 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
 /*
  * Curl_sasl_init()
  *
- * Initializes an SASL structure.
+ * Initializes the SASL structure.
  */
 void Curl_sasl_init(struct SASL *sasl, const struct SASLproto *params)
 {
@@ -1386,7 +1386,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   *progress = SASL_IDLE;
 
   /* Calculate the supported authentication mechanism, by decreasing order of
-   *      security, as well as the initial response where appropriate */
+     security, as well as the initial response where appropriate */
   if((enabledmechs & SASL_MECH_EXTERNAL) && !conn->passwd[0]) {
     mech = SASL_MECH_STRING_EXTERNAL;
     state1 = SASL_EXTERNAL;
@@ -1493,7 +1493,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
 /*
  * Curl_sasl_continue()
  *
- * Continue an SASL authentication.
+ * Continue the authentication.
  */
 CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
                             int code, saslprogress *progress)
