@@ -164,7 +164,7 @@ static void setup_des_key(const unsigned char *key_56,
   extend_key_56_to_64(key_56, key);
 
   /* Set the key */
-  des_set_key(des, (const uint8_t*)key);
+  des_set_key(des, (const uint8_t *) key);
 }
 
 #elif defined(USE_GNUTLS)
@@ -181,7 +181,7 @@ static void setup_des_key(const unsigned char *key_56,
   extend_key_56_to_64(key_56, key);
 
   /* Set the key */
-  gcry_cipher_setkey(*des, key, 8);
+  gcry_cipher_setkey(*des, key, sizeof(key));
 }
 
 #elif defined(USE_NSS)
@@ -214,7 +214,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
 
   /* Import the key */
   key_item.data = (unsigned char *)key;
-  key_item.len = /* hard-wired */ 8;
+  key_item.len = sizeof(key);
   symkey = PK11_ImportSymKey(slot, mech, PK11_OriginUnwrap, CKA_ENCRYPT,
                              &key_item, NULL);
   if(!symkey)
@@ -276,7 +276,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
 
   /* Setup the cipher control structure */
   ctl.Func_ID = ENCRYPT_ONLY;
-  ctl.Data_Len = 8;
+  ctl.Data_Len = sizeof(key);
 
   /* Expand the 56-bit key to 64-bits */
   extend_key_56_to_64(key_56, ctl.Crypto_Key);
