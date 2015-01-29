@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -43,10 +43,13 @@ shown above.
 This function gets called by libcurl to seek to a certain position in the
 input stream and can be used to fast forward a file in a resumed upload
 (instead of reading all uploaded bytes with the normal read
-function/callback). It is also called to rewind a stream when doing a HTTP PUT
-or POST with a multi-pass authentication method. The function shall work like
-fseek(3) or lseek(3) and it gets SEEK_SET, SEEK_CUR or SEEK_END as argument
-for \fIorigin\fP, although libcurl currently only passes SEEK_SET.
+function/callback). It is also called to rewind a stream when data has already
+been sent to the server and needs to be sent again. This may happen when doing
+a HTTP PUT or POST with a multi-pass authentication method, or when an
+existing HTTP connection is reused too late and the server closes the
+connection. The function shall work like fseek(3) or lseek(3) and it gets
+SEEK_SET, SEEK_CUR or SEEK_END as argument for \fIorigin\fP, although libcurl
+currently only passes SEEK_SET.
 
 \fIuserp\fP is the pointer you set with \fICURLOPT_SEEKDATA(3)\fP.
 
