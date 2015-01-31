@@ -38,19 +38,6 @@
  * Thanks for code and inspiration!
  */
 
-/*
- * TODO list for TLS/SSL implementation:
- * - implement client certificate authentication
- * - implement custom server certificate validation
- * - implement cipher/algorithm option
- *
- * Related articles on MSDN:
- * - Getting a Certificate for Schannel
- *   http://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
- * - Specifying Schannel Ciphers and Cipher Strengths
- *   http://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
- */
-
 #include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
