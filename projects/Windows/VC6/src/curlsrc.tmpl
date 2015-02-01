@@ -63,8 +63,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\DLL Debug\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_CONSOLE" /D "_DEBUG" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -88,8 +88,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\DLL Debug - DLL OpenSSL\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -113,8 +113,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\DLL Debug - DLL OpenSSL - DLL LibSSH2\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -138,8 +138,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -163,8 +163,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI - DLL WinIDN\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -311,8 +311,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\LIB Debug\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_CONSOLE" /D "_DEBUG" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -336,8 +336,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\LIB Debug - DLL OpenSSL\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -361,8 +361,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\LIB Debug - DLL OpenSSL - DLL LibSSH2\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -386,8 +386,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\LIB Debug - DLL Windows SSPI\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -411,8 +411,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\LIB Debug - DLL Windows SSPI - DLL WinIDN\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -436,8 +436,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -461,8 +461,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL - LIB LibSSH2\src"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "$(ProgramFiles)\Microsoft Platform SDK\Include" /I "..\..\..\..\include" /I "..\..\..\..\lib" /I "..\..\..\..\src" /D "_DEBUG" /D "_CONSOLE" /D "DEBUGBUILD" /D "CURL_STATICLIB" /FD /EHsc /GZ /c
 # ADD BASE RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 # ADD RSC /l 0x409 /i "..\..\..\..\include" /d "_DEBUG"
 BSC32=bscmake.exe
