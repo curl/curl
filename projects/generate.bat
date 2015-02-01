@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2014, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) 2014 - 2015, Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -24,7 +24,11 @@ rem ***************************************************************************
 :begin
   rem Check we are running on a Windows NT derived OS
   if not "%OS%" == "Windows_NT" goto nodos
+
+  rem Set our variables
   setlocal
+  set VERSION=ALL
+  set MODE=GENERATE
 
   rem Display the help
   if /i "%~1" == "-?" goto syntax
@@ -32,85 +36,158 @@ rem ***************************************************************************
   if /i "%~1" == "-help" goto syntax
 
 :parseArgs
-  if "%~1" == "" goto all
+  if "%~1" == "" goto start
 
   if /i "%~1" == "vc6" (
-    goto vc6
+    set VERSION=VC6
   ) else if /i "%~1" == "vc7" (
-    goto vc7
+    set VERSION=VC7
   ) else if /i "%~1" == "vc7.1" (
-    goto vc71
+    set VERSION=VC7.1
   ) else if /i "%~1" == "vc8" (
-    goto vc8
+    set VERSION=VC8
   ) else if /i "%~1" == "vc9" (
-    goto vc9
+    set VERSION=VC9
   ) else if /i "%~1" == "vc10" (
-    goto vc10
+    set VERSION=VC10
   ) else if /i "%~1" == "vc11" (
-    goto vc11
+    set VERSION=VC11
   ) else if /i "%~1" == "vc12" (
-    goto vc12
+    set VERSION=VC12
+  ) else if /i "%~1" == "-clean" (
+    set MODE=CLEAN
   ) else (
     goto unknown
   )
-
-:all
-  set ALL=true
+  shift & goto parseArgs
+ 
+:start
+  if "%VERSION%" == "VC6" goto vc6
+  if "%VERSION%" == "VC7" goto vc7
+  if "%VERSION%" == "VC7.1" goto vc71
+  if "%VERSION%" == "VC8" goto vc8
+  if "%VERSION%" == "VC9" goto vc9
+  if "%VERSION%" == "VC10" goto vc10
+  if "%VERSION%" == "VC11" goto vc11
+  if "%VERSION%" == "VC12" goto vc12
 
 :vc6
   echo.
-  echo Generating VC6 project files
-  call :generate dsp Windows\VC6\src\curlsrc.tmpl Windows\VC6\src\curlsrc.dsp
-  call :generate dsp Windows\VC6\lib\libcurl.tmpl Windows\VC6\lib\libcurl.dsp
-  if not "%ALL%" == "true" goto success
+
+  if "%MODE%" == "GENERATE" (
+    echo Generating VC6 project files
+    call :generate dsp Windows\VC6\src\curlsrc.tmpl Windows\VC6\src\curlsrc.dsp
+    call :generate dsp Windows\VC6\lib\libcurl.tmpl Windows\VC6\lib\libcurl.dsp
+  ) else (
+    echo Removing VC6 project files
+    call :clean Windows\VC6\src\curlsrc.dsp
+    call :clean Windows\VC6\lib\libcurl.dsp
+  )
+
+  if not "%VERSION%" == "ALL" goto success
 
 :vc7
   echo.
-  echo Generating VC7 project files
-  call :generate vcproj1 Windows\VC7\src\curlsrc.tmpl Windows\VC7\src\curlsrc.vcproj
-  call :generate vcproj1 Windows\VC7\lib\libcurl.tmpl Windows\VC7\lib\libcurl.vcproj
-  if not "%ALL%" == "true" goto success
+
+  if "%MODE%" == "GENERATE" (
+    echo Generating VC7 project files
+    call :generate vcproj1 Windows\VC7\src\curlsrc.tmpl Windows\VC7\src\curlsrc.vcproj
+    call :generate vcproj1 Windows\VC7\lib\libcurl.tmpl Windows\VC7\lib\libcurl.vcproj
+  ) else (
+    echo Removing VC7 project files
+    call :clean Windows\VC7\src\curlsrc.vcproj
+    call :clean Windows\VC7\lib\libcurl.vcproj
+  )
+
+  if not "%VERSION%" == "ALL" goto success
 
 :vc71
   echo.
-  echo Generating VC7.1 project files
-  call :generate vcproj1 Windows\VC7.1\src\curlsrc.tmpl Windows\VC7.1\src\curlsrc.vcproj
-  call :generate vcproj1 Windows\VC7.1\lib\libcurl.tmpl Windows\VC7.1\lib\libcurl.vcproj
-  if not "%ALL%" == "true" goto success
+
+  if "%MODE%" == "GENERATE" (
+    echo Generating VC7.1 project files
+    call :generate vcproj1 Windows\VC7.1\src\curlsrc.tmpl Windows\VC7.1\src\curlsrc.vcproj
+    call :generate vcproj1 Windows\VC7.1\lib\libcurl.tmpl Windows\VC7.1\lib\libcurl.vcproj
+  ) else (
+    echo Removing VC7.1 project files
+    call :clean Windows\VC7.1\src\curlsrc.vcproj
+    call :clean Windows\VC7.1\lib\libcurl.vcproj
+  )
+
+  if not "%VERSION%" == "ALL" goto success
 
 :vc8
   echo.
-  echo Generating VC8 project files
-  call :generate vcproj2 Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
-  call :generate vcproj2 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
-  if not "%ALL%" == "true" goto success
+
+  if "%MODE%" == "GENERATE" (
+    echo Generating VC8 project files
+    call :generate vcproj2 Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
+    call :generate vcproj2 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
+  ) else (
+    echo Removing VC8 project files
+    call :clean Windows\VC8\src\curlsrc.vcproj
+    call :clean Windows\VC8\lib\libcurl.vcproj
+  )
+
+  if not "%VERSION%" == "ALL" goto success
 
 :vc9
   echo.
-  echo Generating VC9 project files
-  call :generate vcproj2 Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
-  call :generate vcproj2 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
-  if not "%ALL%" == "true" goto success
+
+  if "%MODE%" == "GENERATE" (
+    echo Generating VC9 project files
+    call :generate vcproj2 Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
+    call :generate vcproj2 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
+  ) else (
+    echo Removing VC9 project files
+    call :clean Windows\VC9\src\curlsrc.vcproj
+    call :clean Windows\VC9\lib\libcurl.vcproj
+  )
+
+  if not "%VERSION%" == "ALL" goto success
 
 :vc10
   echo.
-  echo Generating VC10 project files
-  call :generate vcxproj Windows\VC10\src\curlsrc.tmpl Windows\VC10\src\curlsrc.vcxproj
-  call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
-  if not "%ALL%" == "true" goto success
+
+  if "%MODE%" == "GENERATE" (
+    echo Generating VC10 project files
+    call :generate vcxproj Windows\VC10\src\curlsrc.tmpl Windows\VC10\src\curlsrc.vcxproj
+    call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
+  ) else (
+    echo Removing VC10 project files
+    call :clean Windows\VC10\src\curlsrc.vcxproj
+    call :clean Windows\VC10\lib\libcurl.vcxproj
+  )
+
+  if not "%VERSION%" == "ALL" goto success
 
 :vc11
   echo.
-  echo Generating VC11 project files
-  call :generate vcxproj Windows\VC11\src\curlsrc.tmpl Windows\VC11\src\curlsrc.vcxproj
-  call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
-  if not "%ALL%" == "true" goto success
+
+  if "%MODE%" == "GENERATE" (
+    echo Generating VC11 project files
+    call :generate vcxproj Windows\VC11\src\curlsrc.tmpl Windows\VC11\src\curlsrc.vcxproj
+    call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
+  ) else (
+    echo Removing VC11 project files
+    call :clean Windows\VC11\src\curlsrc.vcxproj
+    call :clean Windows\VC11\lib\libcurl.vcxproj
+  )
+
+  if not "%VERSION%" == "ALL" goto success
 
 :vc12
   echo.
-  echo Generating VC12 project files
-  call :generate vcxproj Windows\VC12\src\curlsrc.tmpl Windows\VC12\src\curlsrc.vcxproj
-  call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
+
+  if "%MODE%" == "GENERATE" (
+    echo Generating VC12 project files
+    call :generate vcxproj Windows\VC12\src\curlsrc.tmpl Windows\VC12\src\curlsrc.vcxproj
+    call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
+  ) else (
+    echo Removing VC12 project files
+    call :clean Windows\VC12\src\curlsrc.vcxproj
+    call :clean Windows\VC12\lib\libcurl.vcxproj
+  )
 
   goto success
 
@@ -241,10 +318,23 @@ rem
   set %2=%ename%
   exit /B
 
+rem Removes the given project file.
+rem
+rem %1 - The filename
+rem
+:clean
+  echo * %CD%\%1
+
+  if exist %1 (  
+    del %1
+  )
+
+  exit /B
+
 :syntax
   rem Display the help
   echo.
-  echo Usage: generate [compiler]
+  echo Usage: generate [compiler] [-clean]
   echo.
   echo Compiler:
   echo.
@@ -256,6 +346,8 @@ rem
   echo vc10      - Use Visual Studio 2010
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013
+  echo.
+  echo -clean    - Removes the project files
   goto error
 
 :unknown
