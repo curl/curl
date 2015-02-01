@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -88,28 +88,28 @@ VC12_SRCVCXPROJ_DEPS = $(VC12_SRCTMPL) Makefile.am src/Makefile.inc
 VC_DIST = projects/README	\
  projects/build-openssl.bat	\
  projects/checksrc.bat	\
- projects/Windows/VC6/curl.dsw	\
+ projects/Windows/VC6/curl-all.dsw	\
  projects/Windows/VC6/lib/libcurl.dsw $(VC6_LIBDSP)	\
  projects/Windows/VC6/src/curlsrc.dsw $(VC6_SRCDSP)	\
- projects/Windows/VC7/curl.sln	\
+ projects/Windows/VC7/curl-all.sln	\
  projects/Windows/VC7/lib/libcurl.sln $(VC7_LIBVCPROJ)	\
  projects/Windows/VC7/src/curlsrc.sln $(VC7_SRCVCPROJ)	\
- projects/Windows/VC7.1/curl.sln	\
+ projects/Windows/VC7.1/curl-all.sln	\
  projects/Windows/VC7.1/lib/libcurl.sln $(VC71_LIBVCPROJ)	\
  projects/Windows/VC7.1/src/curlsrc.sln $(VC71_SRCVCPROJ)	\
- projects/Windows/VC8/curl.sln	\
+ projects/Windows/VC8/curl-all.sln	\
  projects/Windows/VC8/lib/libcurl.sln $(VC8_LIBVCPROJ)	\
  projects/Windows/VC8/src/curlsrc.sln $(VC8_SRCVCPROJ)	\
- projects/Windows/VC9/curl.sln	\
+ projects/Windows/VC9/curl-all.sln	\
  projects/Windows/VC9/lib/libcurl.sln $(VC9_LIBVCPROJ)	\
  projects/Windows/VC9/src/curlsrc.sln $(VC9_SRCVCPROJ)	\
- projects/Windows/VC10/curl.sln	\
+ projects/Windows/VC10/curl-all.sln	\
  projects/Windows/VC10/lib/libcurl.sln $(VC10_LIBVCXPROJ)	\
  projects/Windows/VC10/src/curlsrc.sln $(VC10_SRCVCXPROJ)	\
- projects/Windows/VC11/curl.sln	\
+ projects/Windows/VC11/curl-all.sln	\
  projects/Windows/VC11/lib/libcurl.sln $(VC11_LIBVCXPROJ)	\
  projects/Windows/VC11/src/curlsrc.sln $(VC11_SRCVCXPROJ)	\
- projects/Windows/VC12/curl.sln	\
+ projects/Windows/VC12/curl-all.sln	\
  projects/Windows/VC12/lib/libcurl.sln $(VC12_LIBVCXPROJ)	\
  projects/Windows/VC12/src/curlsrc.sln $(VC12_SRCVCXPROJ)
 
