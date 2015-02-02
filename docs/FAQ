@@ -764,8 +764,9 @@ FAQ
   request-body in a GET request with something like "curl -X GET -d data
   [URL]"
 
-  Note that -X doesn't change curl's behavior. It only modifies the actual
-  string sent in the request.
+  Note that -X doesn't actually change curl's behavior as it only modifies the
+  actual string sent in the request, but that may of course trigger a
+  different set of events.
 
   Accordingly, by using -XPOST on a command line that for example would follow
   a 303 redirect, you will effectively prevent curl from behaving
