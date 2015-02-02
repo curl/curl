@@ -23,5 +23,38 @@ DWORD WINAPI ExpandEnvironmentStringsA(
   return strlen((const char*)lpSrc);
 }
 
+HINSTANCE LoadLibrary(
+  LPCTSTR lpLibFileName
+)
+{
+  return NULL;
+}
+
+HANDLE WINAPI GetStdHandle(
+  _In_  DWORD nStdHandle
+)
+{
+  return INVALID_HANDLE_VALUE;
+}
+
+DWORD WINAPI GetFileType(
+  _In_  HANDLE hFile
+)
+{
+  return FILE_TYPE_UNKNOWN;
+}
+
+BOOL WINAPI PeekNamedPipe(
+  _In_       HANDLE hNamedPipe,
+  _Out_opt_  LPVOID lpBuffer,
+  _In_       DWORD nBufferSize,
+  _Out_opt_  LPDWORD lpBytesRead,
+  _Out_opt_  LPDWORD lpTotalBytesAvail,
+  _Out_opt_  LPDWORD lpBytesLeftThisMessage
+)
+{
+  return 0;
+}
+
 #endif
 #endif
