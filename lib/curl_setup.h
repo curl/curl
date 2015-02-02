@@ -257,6 +257,9 @@
 #  ifdef UNICODE
      typedef wchar_t *(*curl_wcsdup_callback)(const wchar_t *str);
 #  endif
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_PC_APP)
+#    include "curl/winrtdefs.h"
+#  endif
 #endif
 
 /*
