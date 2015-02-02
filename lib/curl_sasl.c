@@ -1313,8 +1313,8 @@ void Curl_sasl_init(struct SASL *sasl, const struct SASLproto *params)
  *
  * This is the ONLY way to change SASL state!
  */
-static void state(struct SASL *sasl,
-                  struct connectdata *conn, saslstate newstate)
+static void state(struct SASL *sasl, struct connectdata *conn,
+                  saslstate newstate)
 {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
@@ -1353,14 +1353,15 @@ static void state(struct SASL *sasl,
  *
  * Check if we have enough auth data and capabilities to authenticate.
  */
-
 bool Curl_sasl_can_authenticate(struct SASL *sasl, struct connectdata *conn)
 {
+  /* Have credentials been provided? */
   if(conn->bits.user_passwd)
-    return TRUE;        /* Credentials provided */
+    return TRUE;
 
+  /* EXTERNAL can authenticate without a user name and/or password */
   if(sasl->authmechs & sasl->prefmech & SASL_MECH_EXTERNAL)
-    return TRUE;        /* Can authenticate without password */
+    return TRUE;
 
   return FALSE;
 }
@@ -1478,6 +1479,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       Curl_safefree(resp);
       resp = NULL;
     }
+
     if(mech) {
       result = sasl->params->sendauth(conn, mech, resp);
       if(!result) {
@@ -1573,15 +1575,14 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   case SASL_NTLM:
     /* Create the type-1 message */
     result = Curl_sasl_create_ntlm_type1_message(conn->user, conn->passwd,
-                                                 &conn->ntlm,
-                                                 &resp, &len);
+                                                 &conn->ntlm, &resp, &len);
     newstate = SASL_NTLM_TYPE2MSG;
     break;
   case SASL_NTLM_TYPE2MSG:
     /* Decode the type-2 message */
     sasl->params->getmessage(data->state.buffer, &serverdata);
-    result = Curl_sasl_decode_ntlm_type2_message(data,
-                                                 serverdata, &conn->ntlm);
+    result = Curl_sasl_decode_ntlm_type2_message(data, serverdata,
+                                                 &conn->ntlm);
     if(!result)
       result = Curl_sasl_create_ntlm_type3_message(data, conn->user,
                                                    conn->passwd, &conn->ntlm,
