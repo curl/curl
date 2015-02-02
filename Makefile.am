@@ -30,88 +30,88 @@ CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in	\
  include/curl/curlbuild.h.cmake CMake/Macros.cmake
 
 VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
-VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp
+VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp.dist
 VC6_LIBDSP_DEPS = $(VC6_LIBTMPL) Makefile.am lib/Makefile.inc
 VC6_SRCTMPL = projects/Windows/VC6/src/curlsrc.tmpl
-VC6_SRCDSP = projects/Windows/VC6/src/curlsrc.dsp
+VC6_SRCDSP = projects/Windows/VC6/src/curlsrc.dsp.dist
 VC6_SRCDSP_DEPS = $(VC6_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC7_LIBTMPL = projects/Windows/VC7/lib/libcurl.tmpl
-VC7_LIBVCPROJ = projects/Windows/VC7/lib/libcurl.vcproj
+VC7_LIBVCPROJ = projects/Windows/VC7/lib/libcurl.vcproj.dist
 VC7_LIBVCPROJ_DEPS = $(VC7_LIBTMPL) Makefile.am lib/Makefile.inc
 VC7_SRCTMPL = projects/Windows/VC7/src/curlsrc.tmpl
-VC7_SRCVCPROJ = projects/Windows/VC7/src/curlsrc.vcproj
+VC7_SRCVCPROJ = projects/Windows/VC7/src/curlsrc.vcproj.dist
 VC7_SRCVCPROJ_DEPS = $(VC7_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC71_LIBTMPL = projects/Windows/VC7.1/lib/libcurl.tmpl
-VC71_LIBVCPROJ = projects/Windows/VC7.1/lib/libcurl.vcproj
+VC71_LIBVCPROJ = projects/Windows/VC7.1/lib/libcurl.vcproj.dist
 VC71_LIBVCPROJ_DEPS = $(VC71_LIBTMPL) Makefile.am lib/Makefile.inc
 VC71_SRCTMPL = projects/Windows/VC7.1/src/curlsrc.tmpl
-VC71_SRCVCPROJ = projects/Windows/VC7.1/src/curlsrc.vcproj
+VC71_SRCVCPROJ = projects/Windows/VC7.1/src/curlsrc.vcproj.dist
 VC71_SRCVCPROJ_DEPS = $(VC71_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC8_LIBTMPL = projects/Windows/VC8/lib/libcurl.tmpl
-VC8_LIBVCPROJ = projects/Windows/VC8/lib/libcurl.vcproj
+VC8_LIBVCPROJ = projects/Windows/VC8/lib/libcurl.vcproj.dist
 VC8_LIBVCPROJ_DEPS = $(VC8_LIBTMPL) Makefile.am lib/Makefile.inc
 VC8_SRCTMPL = projects/Windows/VC8/src/curlsrc.tmpl
-VC8_SRCVCPROJ = projects/Windows/VC8/src/curlsrc.vcproj
+VC8_SRCVCPROJ = projects/Windows/VC8/src/curlsrc.vcproj.dist
 VC8_SRCVCPROJ_DEPS = $(VC8_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC9_LIBTMPL = projects/Windows/VC9/lib/libcurl.tmpl
-VC9_LIBVCPROJ = projects/Windows/VC9/lib/libcurl.vcproj
+VC9_LIBVCPROJ = projects/Windows/VC9/lib/libcurl.vcproj.dist
 VC9_LIBVCPROJ_DEPS = $(VC9_LIBTMPL) Makefile.am lib/Makefile.inc
 VC9_SRCTMPL = projects/Windows/VC9/src/curlsrc.tmpl
-VC9_SRCVCPROJ = projects/Windows/VC9/src/curlsrc.vcproj
+VC9_SRCVCPROJ = projects/Windows/VC9/src/curlsrc.vcproj.dist
 VC9_SRCVCPROJ_DEPS = $(VC9_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC10_LIBTMPL = projects/Windows/VC10/lib/libcurl.tmpl
-VC10_LIBVCXPROJ = projects/Windows/VC10/lib/libcurl.vcxproj
+VC10_LIBVCXPROJ = projects/Windows/VC10/lib/libcurl.vcxproj.dist
 VC10_LIBVCXPROJ_DEPS = $(VC10_LIBTMPL) Makefile.am lib/Makefile.inc
 VC10_SRCTMPL = projects/Windows/VC10/src/curlsrc.tmpl
-VC10_SRCVCXPROJ = projects/Windows/VC10/src/curlsrc.vcxproj
+VC10_SRCVCXPROJ = projects/Windows/VC10/src/curlsrc.vcxproj.dist
 VC10_SRCVCXPROJ_DEPS = $(VC10_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC11_LIBTMPL = projects/Windows/VC11/lib/libcurl.tmpl
-VC11_LIBVCXPROJ = projects/Windows/VC11/lib/libcurl.vcxproj
+VC11_LIBVCXPROJ = projects/Windows/VC11/lib/libcurl.vcxproj.dist
 VC11_LIBVCXPROJ_DEPS = $(VC11_LIBTMPL) Makefile.am lib/Makefile.inc
 VC11_SRCTMPL = projects/Windows/VC11/src/curlsrc.tmpl
-VC11_SRCVCXPROJ = projects/Windows/VC11/src/curlsrc.vcxproj
+VC11_SRCVCXPROJ = projects/Windows/VC11/src/curlsrc.vcxproj.dist
 VC11_SRCVCXPROJ_DEPS = $(VC11_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC12_LIBTMPL = projects/Windows/VC12/lib/libcurl.tmpl
-VC12_LIBVCXPROJ = projects/Windows/VC12/lib/libcurl.vcxproj
+VC12_LIBVCXPROJ = projects/Windows/VC12/lib/libcurl.vcxproj.dist
 VC12_LIBVCXPROJ_DEPS = $(VC12_LIBTMPL) Makefile.am lib/Makefile.inc
 VC12_SRCTMPL = projects/Windows/VC12/src/curlsrc.tmpl
-VC12_SRCVCXPROJ = projects/Windows/VC12/src/curlsrc.vcxproj
+VC12_SRCVCXPROJ = projects/Windows/VC12/src/curlsrc.vcxproj.dist
 VC12_SRCVCXPROJ_DEPS = $(VC12_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC_DIST = projects/README	\
  projects/build-openssl.bat	\
  projects/checksrc.bat	\
  projects/Windows/VC6/curl-all.dsw	\
- projects/Windows/VC6/lib/libcurl.dsw $(VC6_LIBDSP)	\
- projects/Windows/VC6/src/curlsrc.dsw $(VC6_SRCDSP)	\
+ projects/Windows/VC6/lib/libcurl.dsw \
+ projects/Windows/VC6/src/curlsrc.dsw \
  projects/Windows/VC7/curl-all.sln	\
- projects/Windows/VC7/lib/libcurl.sln $(VC7_LIBVCPROJ)	\
- projects/Windows/VC7/src/curlsrc.sln $(VC7_SRCVCPROJ)	\
+ projects/Windows/VC7/lib/libcurl.sln 	\
+ projects/Windows/VC7/src/curlsrc.sln 	\
  projects/Windows/VC7.1/curl-all.sln	\
- projects/Windows/VC7.1/lib/libcurl.sln $(VC71_LIBVCPROJ)	\
- projects/Windows/VC7.1/src/curlsrc.sln $(VC71_SRCVCPROJ)	\
+ projects/Windows/VC7.1/lib/libcurl.sln \
+ projects/Windows/VC7.1/src/curlsrc.sln \
  projects/Windows/VC8/curl-all.sln	\
- projects/Windows/VC8/lib/libcurl.sln $(VC8_LIBVCPROJ)	\
- projects/Windows/VC8/src/curlsrc.sln $(VC8_SRCVCPROJ)	\
+ projects/Windows/VC8/lib/libcurl.sln 	\
+ projects/Windows/VC8/src/curlsrc.sln 	\
  projects/Windows/VC9/curl-all.sln	\
- projects/Windows/VC9/lib/libcurl.sln $(VC9_LIBVCPROJ)	\
- projects/Windows/VC9/src/curlsrc.sln $(VC9_SRCVCPROJ)	\
+ projects/Windows/VC9/lib/libcurl.sln 	\
+ projects/Windows/VC9/src/curlsrc.sln 	\
  projects/Windows/VC10/curl-all.sln	\
- projects/Windows/VC10/lib/libcurl.sln $(VC10_LIBVCXPROJ)	\
- projects/Windows/VC10/src/curlsrc.sln $(VC10_SRCVCXPROJ)	\
+ projects/Windows/VC10/lib/libcurl.sln 	\
+ projects/Windows/VC10/src/curlsrc.sln  \
  projects/Windows/VC11/curl-all.sln	\
- projects/Windows/VC11/lib/libcurl.sln $(VC11_LIBVCXPROJ)	\
- projects/Windows/VC11/src/curlsrc.sln $(VC11_SRCVCXPROJ)	\
+ projects/Windows/VC11/lib/libcurl.sln 	\
+ projects/Windows/VC11/src/curlsrc.sln 	\
  projects/Windows/VC12/curl-all.sln	\
- projects/Windows/VC12/lib/libcurl.sln $(VC12_LIBVCXPROJ)	\
- projects/Windows/VC12/src/curlsrc.sln $(VC12_SRCVCXPROJ)
+ projects/Windows/VC12/lib/libcurl.sln 	\
+ projects/Windows/VC12/src/curlsrc.sln
 
 WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
  winbuild/MakefileBuild.vc winbuild/Makefile.vc				\
