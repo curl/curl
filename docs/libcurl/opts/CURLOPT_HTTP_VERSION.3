@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -41,8 +41,8 @@ Enforce HTTP 1.0 requests.
 .IP CURL_HTTP_VERSION_1_1
 Enforce HTTP 1.1 requests.
 .IP CURL_HTTP_VERSION_2_0
-Attempt HTTP 2.0 requests. libcurl will fall back to HTTP 1.x if HTTP 2.0
-can't be negotiated with the server.
+Attempt HTTP 2 requests. libcurl will fall back to HTTP 1.x if HTTP 2 can't be
+negotiated with the server. (Added in 7.33.0)
 .SH DEFAULT
 CURL_HTTP_VERSION_NONE
 .SH PROTOCOLS
