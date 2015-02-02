@@ -1,0 +1,93 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+CURL_EXTERN
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+# The VMS and OS/400 builds extract the CURL_EXTERN protos and use in
+# the build. We break binary compatibility by changing order. Only add
+# new entries last or bump the SONAME.
+# 
+ <name>
+Verify CURL_EXTERN order
+ </name>
+
+<command type="perl">
+%SRCDIR/extern-scan.pl %SRCDIR/..
+</command>
+</client>
+
+<verify>
+<stdout>
+CURL_EXTERN int (curl_strequal)(const char *s1, const char *s2);
+CURL_EXTERN int (curl_strnequal)(const char *s1, const char *s2, size_t n);
+CURL_EXTERN CURLFORMcode curl_formadd(struct curl_httppost **httppost,
+CURL_EXTERN int curl_formget(struct curl_httppost *form, void *arg,
+CURL_EXTERN void curl_formfree(struct curl_httppost *form);
+CURL_EXTERN char *curl_getenv(const char *variable);
+CURL_EXTERN char *curl_version(void);
+CURL_EXTERN char *curl_easy_escape(CURL *handle,
+CURL_EXTERN char *curl_escape(const char *string,
+CURL_EXTERN char *curl_easy_unescape(CURL *handle,
+CURL_EXTERN char *curl_unescape(const char *string,
+CURL_EXTERN void curl_free(void *p);
+CURL_EXTERN CURLcode curl_global_init(long flags);
+CURL_EXTERN CURLcode curl_global_init_mem(long flags,
+CURL_EXTERN void curl_global_cleanup(void);
+CURL_EXTERN struct curl_slist *curl_slist_append(struct curl_slist *,
+CURL_EXTERN void curl_slist_free_all(struct curl_slist *);
+CURL_EXTERN time_t curl_getdate(const char *p, const time_t *unused);
+CURL_EXTERN CURLSH *curl_share_init(void);
+CURL_EXTERN CURLSHcode curl_share_setopt(CURLSH *, CURLSHoption option, ...);
+CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *);
+CURL_EXTERN curl_version_info_data *curl_version_info(CURLversion);
+CURL_EXTERN const char *curl_easy_strerror(CURLcode);
+CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
+CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
+CURL_EXTERN CURL *curl_easy_init(void);
+CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
+CURL_EXTERN CURLcode curl_easy_perform(CURL *curl);
+CURL_EXTERN void curl_easy_cleanup(CURL *curl);
+CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
+CURL_EXTERN CURL* curl_easy_duphandle(CURL *curl);
+CURL_EXTERN void curl_easy_reset(CURL *curl);
+CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
+CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
+CURL_EXTERN int curl_mprintf(const char *format, ...);
+CURL_EXTERN int curl_mfprintf(FILE *fd, const char *format, ...);
+CURL_EXTERN int curl_msprintf(char *buffer, const char *format, ...);
+CURL_EXTERN int curl_msnprintf(char *buffer, size_t maxlength,
+CURL_EXTERN int curl_mvprintf(const char *format, va_list args);
+CURL_EXTERN int curl_mvfprintf(FILE *fd, const char *format, va_list args);
+CURL_EXTERN int curl_mvsprintf(char *buffer, const char *format, va_list args);
+CURL_EXTERN int curl_mvsnprintf(char *buffer, size_t maxlength,
+CURL_EXTERN char *curl_maprintf(const char *format, ...);
+CURL_EXTERN char *curl_mvaprintf(const char *format, va_list args);
+CURL_EXTERN CURLM *curl_multi_init(void);
+CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
+CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *multi_handle,
+CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
+CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
+CURL_EXTERN CURLMcode curl_multi_socket_action(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_timeout(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_assign(CURLM *multi_handle,
+</stdout>
+</verify>
+
+</testcase>
