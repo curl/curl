@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+unittest
+MD5
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+MD5 unit tests
+ </name>
+<tool>
+unit1601
+</tool>
+</client>
+
+</testcase>
