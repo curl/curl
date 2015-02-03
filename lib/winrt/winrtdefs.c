@@ -56,5 +56,30 @@ BOOL WINAPI PeekNamedPipe(
   return 0;
 }
 
+void WINAPI InitializeCriticalSection(
+  _Out_  LPCRITICAL_SECTION lpCriticalSection
+)
+{
+  InitializeCriticalSectionEx(lpCriticalSection, 0, CRITICAL_SECTION_NO_DEBUG_INFO);
+}
+
+DWORD WaitForSingleObject(
+  HANDLE hHandle,
+  DWORD dwMilliseconds
+)
+{
+  return WaitForSingleObjectEx(hHandle, dwMilliseconds, FALSE);
+}
+
+DWORD WINAPI WaitForMultipleObjects(
+  _In_  DWORD nCount,
+  _In_  const HANDLE *lpHandles,
+  _In_  BOOL bWaitAll,
+  _In_  DWORD dwMilliseconds
+)
+{
+  return WaitForMultipleObjectsEx(nCount, lpHandles, bWaitAll, dwMilliseconds, FALSE);
+}
+
 #endif
 #endif

@@ -36,6 +36,22 @@ BOOL WINAPI PeekNamedPipe(
   _Out_opt_  LPDWORD lpBytesLeftThisMessage
 );
 
+void WINAPI InitializeCriticalSection(
+  _Out_  LPCRITICAL_SECTION lpCriticalSection
+);
+
+DWORD WaitForSingleObject(
+  HANDLE hHandle,
+  DWORD dwMilliseconds
+);
+
+DWORD WINAPI WaitForMultipleObjects(
+  _In_  DWORD nCount,
+  _In_  const HANDLE *lpHandles,
+  _In_  BOOL bWaitAll,
+  _In_  DWORD dwMilliseconds
+);
+
 #ifdef __cplusplus
 }
 #endif
