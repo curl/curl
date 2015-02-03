@@ -510,6 +510,7 @@ static void ascii_uppercase_to_unicode_le(unsigned char *dest,
 
 /*
  * Set up nt hashed passwords
+ * @unittest: 1600
  */
 CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
                                    const char *password,
