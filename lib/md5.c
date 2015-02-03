@@ -486,6 +486,9 @@ const MD5_params Curl_DIGEST_MD5[] = {
   }
 };
 
+/*
+ * @unittest: 1601
+ */
 void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
                 const unsigned char *input)
 {
