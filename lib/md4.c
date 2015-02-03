@@ -3,17 +3,17 @@
  * MD4 Message-Digest Algorithm (RFC 1320).
  *
  * Homepage:
- * http://openwall.info/wiki/people/solar/software/public-domain-source-code/md4
+ http://openwall.info/wiki/people/solar/software/public-domain-source-code/md4
  *
  * Author:
  * Alexander Peslyak, better known as Solar Designer <solar at openwall.com>
  *
  * This software was written by Alexander Peslyak in 2001.  No copyright is
- * claimed, and the software is hereby placed in the public domain.
- * In case this attempt to disclaim copyright and place the software in the
- * public domain is deemed null and void, then the software is
- * Copyright (c) 2001 Alexander Peslyak and it is hereby released to the
- * general public under the following terms:
+ * claimed, and the software is hereby placed in the public domain.  In case
+ * this attempt to disclaim copyright and place the software in the public
+ * domain is deemed null and void, then the software is Copyright (c) 2001
+ * Alexander Peslyak and it is hereby released to the general public under the
+ * following terms:
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted.
@@ -68,16 +68,16 @@ extern void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  * F and G are optimized compared to their RFC 1320 definitions, with the
  * optimization for F borrowed from Colin Plumb's MD5 implementation.
  */
-#define F(x, y, z)			((z) ^ ((x) & ((y) ^ (z))))
-#define G(x, y, z)			(((x) & ((y) | (z))) | ((y) & (z)))
-#define H(x, y, z)			((x) ^ (y) ^ (z))
+#define F(x, y, z)                      ((z) ^ ((x) & ((y) ^ (z))))
+#define G(x, y, z)                      (((x) & ((y) | (z))) | ((y) & (z)))
+#define H(x, y, z)                      ((x) ^ (y) ^ (z))
 
 /*
  * The MD4 transformation for all three rounds.
  */
 #define STEP(f, a, b, c, d, x, s) \
-	(a) += f((b), (c), (d)) + (x); \
-	(a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s))));
+        (a) += f((b), (c), (d)) + (x); \
+        (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s))));
 
 /*
  * SET reads 4 input bytes in little-endian byte order and stores them
@@ -89,18 +89,18 @@ extern void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define SET(n) \
-	(*(MD4_u32plus *)&ptr[(n) * 4])
+        (*(MD4_u32plus *)&ptr[(n) * 4])
 #define GET(n) \
-	SET(n)
+        SET(n)
 #else
 #define SET(n) \
-	(ctx->block[(n)] = \
-	(MD4_u32plus)ptr[(n) * 4] | \
-	((MD4_u32plus)ptr[(n) * 4 + 1] << 8) | \
-	((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
-	((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
+        (ctx->block[(n)] = \
+        (MD4_u32plus)ptr[(n) * 4] | \
+        ((MD4_u32plus)ptr[(n) * 4 + 1] << 8) | \
+        ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
+        ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
 #define GET(n) \
-	(ctx->block[(n)])
+        (ctx->block[(n)])
 #endif
 
 /*
@@ -186,7 +186,7 @@ static const void *body(MD4_CTX *ctx, const void *data, unsigned long size)
     d += saved_d;
 
     ptr += 64;
-  } while (size -= 64);
+  } while(size -= 64);
 
   ctx->a = a;
   ctx->b = b;
@@ -213,16 +213,16 @@ void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
   unsigned long used, available;
 
   saved_lo = ctx->lo;
-  if ((ctx->lo = (saved_lo + size) & 0x1fffffff) < saved_lo)
+  if((ctx->lo = (saved_lo + size) & 0x1fffffff) < saved_lo)
     ctx->hi++;
-  ctx->hi += size >> 29;
+  ctx->hi += (MD4_u32plus)size >> 29;
 
   used = saved_lo & 0x3f;
 
-  if (used) {
+  if(used) {
     available = 64 - used;
 
-    if (size < available) {
+    if(size < available) {
       memcpy(&ctx->buffer[used], data, size);
       return;
     }
@@ -233,7 +233,7 @@ void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
     body(ctx, ctx->buffer, 64);
   }
 
-  if (size >= 64) {
+  if(size >= 64) {
     data = body(ctx, data, size & ~(unsigned long)0x3f);
     size &= 0x3f;
   }
@@ -251,7 +251,7 @@ void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
   available = 64 - used;
 
-  if (available < 8) {
+  if(available < 8) {
     memset(&ctx->buffer[used], 0, available);
     body(ctx, ctx->buffer, 64);
     used = 0;
@@ -261,33 +261,33 @@ void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   memset(&ctx->buffer[used], 0, available - 8);
 
   ctx->lo <<= 3;
-  ctx->buffer[56] = ctx->lo;
-  ctx->buffer[57] = ctx->lo >> 8;
-  ctx->buffer[58] = ctx->lo >> 16;
-  ctx->buffer[59] = ctx->lo >> 24;
-  ctx->buffer[60] = ctx->hi;
-  ctx->buffer[61] = ctx->hi >> 8;
-  ctx->buffer[62] = ctx->hi >> 16;
-  ctx->buffer[63] = ctx->hi >> 24;
+  ctx->buffer[56] = curlx_ultouc((ctx->lo)&0xff);
+  ctx->buffer[57] = curlx_ultouc((ctx->lo >> 8)&0xff);
+  ctx->buffer[58] = curlx_ultouc((ctx->lo >> 16)&0xff);
+  ctx->buffer[59] = curlx_ultouc((ctx->lo >> 24)&0xff);
+  ctx->buffer[60] = curlx_ultouc((ctx->hi)&0xff);
+  ctx->buffer[61] = curlx_ultouc((ctx->hi >> 8)&0xff);
+  ctx->buffer[62] = curlx_ultouc((ctx->hi >> 16)&0xff);
+  ctx->buffer[63] = curlx_ultouc(ctx->hi >> 24);
 
   body(ctx, ctx->buffer, 64);
 
-  result[0] = ctx->a;
-  result[1] = ctx->a >> 8;
-  result[2] = ctx->a >> 16;
-  result[3] = ctx->a >> 24;
-  result[4] = ctx->b;
-  result[5] = ctx->b >> 8;
-  result[6] = ctx->b >> 16;
-  result[7] = ctx->b >> 24;
-  result[8] = ctx->c;
-  result[9] = ctx->c >> 8;
-  result[10] = ctx->c >> 16;
-  result[11] = ctx->c >> 24;
-  result[12] = ctx->d;
-  result[13] = ctx->d >> 8;
-  result[14] = ctx->d >> 16;
-  result[15] = ctx->d >> 24;
+  result[0] = curlx_ultouc((ctx->a)&0xff);
+  result[1] = curlx_ultouc((ctx->a >> 8)&0xff);
+  result[2] = curlx_ultouc((ctx->a >> 16)&0xff);
+  result[3] = curlx_ultouc(ctx->a >> 24);
+  result[4] = curlx_ultouc((ctx->b)&0xff);
+  result[5] = curlx_ultouc((ctx->b >> 8)&0xff);
+  result[6] = curlx_ultouc((ctx->b >> 16)&0xff);
+  result[7] = curlx_ultouc(ctx->b >> 24);
+  result[8] = curlx_ultouc((ctx->c)&0xff);
+  result[9] = curlx_ultouc((ctx->c >> 8)&0xff);
+  result[10] = curlx_ultouc((ctx->c >> 16)&0xff);
+  result[11] = curlx_ultouc(ctx->c >> 24);
+  result[12] = curlx_ultouc((ctx->d)&0xff);
+  result[13] = curlx_ultouc((ctx->d >> 8)&0xff);
+  result[14] = curlx_ultouc((ctx->d >> 16)&0xff);
+  result[15] = curlx_ultouc(ctx->d >> 24);
 
   memset(ctx, 0, sizeof(*ctx));
 }
@@ -297,8 +297,8 @@ void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
 {
   MD4_CTX ctx;
-  MD4Init(&ctx);
-  MD4Update(&ctx, input, curlx_uztoui(len));
-  MD4Final(output, &ctx);
+  MD4_Init(&ctx);
+  MD4_Update(&ctx, input, curlx_uztoui(len));
+  MD4_Final(output, &ctx);
 }
 #endif /* defined(USE_NSS) || defined(USE_OS400CRYPTO) */
