@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,6 +62,8 @@ extern void wait_ms(int ms); /* wait this many milliseconds */
 
 extern int test(char *URL); /* the actual test function provided by each
                                individual libXXX.c file */
+
+extern char *hexdump(unsigned char *buffer, size_t len);
 
 #ifdef UNITTESTS
 extern int unitfail;
