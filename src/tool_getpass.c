@@ -52,7 +52,9 @@
 #  endif
 #endif
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #define _MPRINTF_REPLACE
 #include <curl/mprintf.h>
 
