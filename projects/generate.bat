@@ -108,8 +108,10 @@ rem
       call :element %1 lib "warnless.h" %3
     ) else if "!var!" == "CURL_LIB_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\*.c') do call :element %1 lib "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\winrt\*.c') do call :element %1 lib\winrt "%%c" %3
     ) else if "!var!" == "CURL_LIB_H_FILES" (
       for /f "delims=" %%h in ('dir /b ..\lib\*.h') do call :element %1 lib "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\winrt\*.h') do call :element %1 lib\winrt "%%h" %3
     ) else if "!var!" == "CURL_LIB_RC_FILES" (
       for /f "delims=" %%r in ('dir /b ..\lib\*.rc') do call :element %1 lib "%%r" %3
     ) else if "!var!" == "CURL_LIB_VTLS_C_FILES" (
