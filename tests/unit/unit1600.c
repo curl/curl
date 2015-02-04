@@ -39,6 +39,7 @@ static void unit_stop(void)
 
 UNITTEST_START
 
+#if defined(USE_NTLM) && (!defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO))
   unsigned char output[21];
   unsigned char *testp = output;
   Curl_ntlm_core_mk_nt_hash(easy, "1", output);
@@ -57,5 +58,6 @@ UNITTEST_START
 
   verify_memory(testp,
                 "\x36\x9d\xae\x06\x84\x7e\xe1\xc1\x4a\x94\x39\xea\x6f\x44\x8c\x65\x00\x00\x00\x00\x00", 21);
+#endif
 
 UNITTEST_STOP
