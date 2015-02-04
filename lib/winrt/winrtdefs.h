@@ -9,8 +9,8 @@ int GetTickCount(void);
 char* getenv (const char* name);
 
 DWORD WINAPI ExpandEnvironmentStringsA(
-  _In_       LPCTSTR lpSrc,
-  _Out_opt_  LPTSTR lpDst,
+  _In_       const char* lpSrc,
+  _Out_opt_  char* lpDst,
   _In_       DWORD nSize
 );
 
