@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -108,7 +108,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   struct in6_addr addr6;
 #endif
   TCHAR *host_name;
-  CURLcode code;
+  CURLcode result;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
         conn->host.name, conn->remote_port);
@@ -256,10 +256,10 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         "sending %lu bytes...\n", outbuf.cbBuffer);
 
   /* send initial handshake data which is now stored in output buffer */
-  code = Curl_write_plain(conn, conn->sock[sockindex], outbuf.pvBuffer,
-                          outbuf.cbBuffer, &written);
+  result = Curl_write_plain(conn, conn->sock[sockindex], outbuf.pvBuffer,
+                            outbuf.cbBuffer, &written);
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-  if((code != CURLE_OK) || (outbuf.cbBuffer != (size_t)written)) {
+  if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
     failf(data, "schannel: failed to send initial handshake data: "
           "sent %zd of %lu bytes", written, outbuf.cbBuffer);
     return CURLE_SSL_CONNECT_ERROR;
@@ -289,7 +289,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
   TCHAR *host_name;
-  CURLcode code;
+  CURLcode result;
   bool doread;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
@@ -333,18 +333,20 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   for(;;) {
     if(doread) {
       /* read encrypted handshake data from socket */
-      code = Curl_read_plain(conn->sock[sockindex],
-                (char *) (connssl->encdata_buffer + connssl->encdata_offset),
-                          connssl->encdata_length - connssl->encdata_offset,
-                          &nread);
-      if(code == CURLE_AGAIN) {
+      result = Curl_read_plain(conn->sock[sockindex],
+                               (char *) (connssl->encdata_buffer +
+                                         connssl->encdata_offset),
+                               connssl->encdata_length -
+                               connssl->encdata_offset,
+                               &nread);
+      if(result == CURLE_AGAIN) {
         if(connssl->connecting_state != ssl_connect_2_writing)
           connssl->connecting_state = ssl_connect_2_reading;
         infof(data, "schannel: failed to receive handshake, "
               "need more data\n");
         return CURLE_OK;
       }
-      else if((code != CURLE_OK) || (nread == 0)) {
+      else if((result != CURLE_OK) || (nread == 0)) {
         failf(data, "schannel: failed to receive handshake, "
               "SSL/TLS connection failed");
         return CURLE_SSL_CONNECT_ERROR;
@@ -409,10 +411,11 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
                 "sending %lu bytes...\n", outbuf[i].cbBuffer);
 
           /* send handshake token to server */
-          code = Curl_write_plain(conn, conn->sock[sockindex],
-                                  outbuf[i].pvBuffer, outbuf[i].cbBuffer,
-                                  &written);
-          if((code != CURLE_OK) || (outbuf[i].cbBuffer != (size_t)written)) {
+          result = Curl_write_plain(conn, conn->sock[sockindex],
+                                    outbuf[i].pvBuffer, outbuf[i].cbBuffer,
+                                    &written);
+          if((result != CURLE_OK) ||
+             (outbuf[i].cbBuffer != (size_t) written)) {
             failf(data, "schannel: failed to send next handshake data: "
                   "sent %zd of %lu bytes", written, outbuf[i].cbBuffer);
             return CURLE_SSL_CONNECT_ERROR;
@@ -678,7 +681,7 @@ schannel_send(struct connectdata *conn, int sockindex,
   SecBuffer outbuf[4];
   SecBufferDesc outbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
-  CURLcode code;
+  CURLcode result;
 
   /* check if the maximum stream sizes were queried */
   if(connssl->stream_sizes.cbMaximumMessage == 0) {
@@ -784,12 +787,12 @@ schannel_send(struct connectdata *conn, int sockindex,
       }
       /* socket is writable */
 
-      code = Curl_write_plain(conn, conn->sock[sockindex], data + written,
-                              len - written, &this_write);
-      if(code == CURLE_AGAIN)
+      result = Curl_write_plain(conn, conn->sock[sockindex], data + written,
+                                len - written, &this_write);
+      if(result == CURLE_AGAIN)
         continue;
-      else if(code != CURLE_OK) {
-        *err = code;
+      else if(result != CURLE_OK) {
+        *err = result;
         written = -1;
         break;
       }
@@ -1108,7 +1111,7 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
     SECURITY_STATUS sspi_status;
     SecBuffer outbuf;
     SecBufferDesc outbuf_desc;
-    CURLcode code;
+    CURLcode result;
     TCHAR *host_name;
     DWORD dwshut = SCHANNEL_SHUTDOWN;
 
@@ -1149,13 +1152,13 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */
       ssize_t written;
-      code = Curl_write_plain(conn, conn->sock[sockindex], outbuf.pvBuffer,
-                              outbuf.cbBuffer, &written);
+      result = Curl_write_plain(conn, conn->sock[sockindex], outbuf.pvBuffer,
+                                outbuf.cbBuffer, &written);
 
       s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-      if((code != CURLE_OK) || (outbuf.cbBuffer != (size_t)written)) {
+      if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
         infof(data, "schannel: failed to send close msg: %s"
-              " (bytes written: %zd)\n", curl_easy_strerror(code), written);
+              " (bytes written: %zd)\n", curl_easy_strerror(result), written);
       }
     }
   }
