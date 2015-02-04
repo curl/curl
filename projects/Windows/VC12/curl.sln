@@ -31,6 +31,8 @@ Global
 		DLL Release - DLL Windows SSPI - DLL WinIDN|x64 = DLL Release - DLL Windows SSPI - DLL WinIDN|x64
 		DLL Release - DLL Windows SSPI|Win32 = DLL Release - DLL Windows SSPI|Win32
 		DLL Release - DLL Windows SSPI|x64 = DLL Release - DLL Windows SSPI|x64
+		DLL Release - Windows Store 8.1 OpenSSL|Win32 = DLL Release - Windows Store 8.1 OpenSSL|Win32
+		DLL Release - Windows Store 8.1 OpenSSL|x64 = DLL Release - Windows Store 8.1 OpenSSL|x64
 		DLL Release|Win32 = DLL Release|Win32
 		DLL Release|x64 = DLL Release|x64
 		LIB Debug - DLL OpenSSL - DLL LibSSH2|Win32 = LIB Debug - DLL OpenSSL - DLL LibSSH2|Win32
@@ -103,6 +105,10 @@ Global
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL Windows SSPI|Win32.Build.0 = DLL Release - DLL Windows SSPI|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL Windows SSPI|x64.ActiveCfg = DLL Release - DLL Windows SSPI|x64
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - DLL Windows SSPI|x64.Build.0 = DLL Release - DLL Windows SSPI|x64
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - Windows Store 8.1 OpenSSL|Win32.ActiveCfg = LIB Debug|Win32
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - Windows Store 8.1 OpenSSL|Win32.Build.0 = LIB Debug|Win32
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - Windows Store 8.1 OpenSSL|x64.ActiveCfg = DLL Release - DLL Windows SSPI|x64
+		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release - Windows Store 8.1 OpenSSL|x64.Build.0 = DLL Release - DLL Windows SSPI|x64
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release|Win32.ActiveCfg = DLL Release|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release|Win32.Build.0 = DLL Release|Win32
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Release|x64.ActiveCfg = DLL Release|x64
@@ -203,6 +209,10 @@ Global
 		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}.DLL Release - DLL Windows SSPI|Win32.Build.0 = DLL Release - DLL Windows SSPI|Win32
 		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}.DLL Release - DLL Windows SSPI|x64.ActiveCfg = DLL Release - DLL Windows SSPI|x64
 		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}.DLL Release - DLL Windows SSPI|x64.Build.0 = DLL Release - DLL Windows SSPI|x64
+		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}.DLL Release - Windows Store 8.1 OpenSSL|Win32.ActiveCfg = DLL Release - Windows Store 8.1 OpenSSL|Win32
+		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}.DLL Release - Windows Store 8.1 OpenSSL|Win32.Build.0 = DLL Release - Windows Store 8.1 OpenSSL|Win32
+		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}.DLL Release - Windows Store 8.1 OpenSSL|x64.ActiveCfg = DLL Release - Windows Store 8.1 OpenSSL|x64
+		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}.DLL Release - Windows Store 8.1 OpenSSL|x64.Build.0 = DLL Release - Windows Store 8.1 OpenSSL|x64
 		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}.DLL Release|Win32.ActiveCfg = DLL Release|Win32
 		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}.DLL Release|Win32.Build.0 = DLL Release|Win32
 		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}.DLL Release|x64.ActiveCfg = DLL Release|x64
