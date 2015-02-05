@@ -84,11 +84,29 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 #elif defined(USE_SSLEAY)
 /* When OpenSSL is available we use the MD5-function from OpenSSL */
 
-#  ifdef USE_OPENSSL
-#    include <openssl/md5.h>
-#  else
-#    include <md5.h>
-#  endif
+#include <openssl/evp.h>
+
+/* fips hack */
+#define MD5_CTX EVP_MD_CTX
+static void MD5_Init(MD5_CTX *ctx) 
+{
+	EVP_MD_CTX_init(ctx);
+	/* we will be using MD5, which is not allowed under FIPS */
+#ifdef EVP_MD_CTX_FLAG_NON_FIPS_ALLOW
+	EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
+#endif
+	EVP_DigestInit_ex(ctx, EVP_md5(), NULL);
+}
+
+static void MD5_Update(MD5_CTX *ctx, const void *data, size_t len)
+{
+	EVP_DigestUpdate(ctx, data, len);
+}
+
+static void MD5_Final(unsigned char *md, MD5_CTX *ctx)
+{
+	EVP_DigestFinal(ctx,md,NULL);
+}
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \

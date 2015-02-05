@@ -535,10 +535,16 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
   {
     /* Create NT hashed password. */
 #ifdef USE_SSLEAY
-    MD4_CTX MD4pw;
-    MD4_Init(&MD4pw);
-    MD4_Update(&MD4pw, pw, 2 * len);
-    MD4_Final(ntbuffer, &MD4pw);
+    EVP_MD_CTX MD4pw;
+
+    EVP_MD_CTX_init(&MD4pw);
+    /* we will be using MD4, which is not allowed under FIPS */
+#ifdef EVP_MD_CTX_FLAG_NON_FIPS_ALLOW
+    EVP_MD_CTX_set_flags(&MD4pw, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
+#endif
+    EVP_DigestInit_ex(&MD4pw, EVP_md4(), NULL);
+    EVP_DigestUpdate(&MD4pw, pw, 2 * len);
+    EVP_DigestFinal(&MD4pw, ntbuffer, NULL);
 #elif defined(USE_GNUTLS_NETTLE)
     struct md4_ctx MD4pw;
     md4_init(&MD4pw);
