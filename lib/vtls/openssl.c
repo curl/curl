@@ -1660,12 +1660,12 @@ select_next_proto_cb(SSL *ssl,
 #endif /* USE_NGHTTP2 */
 
 static const char *
-get_ssl_version_txt(SSL_SESSION *session)
+get_ssl_version_txt(SSL *ssl)
 {
-  if(!session)
+  if(!ssl)
     return "";
 
-  switch(session->ssl_version) {
+  switch(SSL_version(ssl)) {
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
   case TLS1_2_VERSION:
     return "TLSv1.2";
@@ -2203,7 +2203,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
 
     /* Informational message */
     infof(data, "SSL connection using %s / %s\n",
-          get_ssl_version_txt(SSL_get_session(connssl->handle)),
+          get_ssl_version_txt(connssl->handle),
           SSL_get_cipher(connssl->handle));
 
 #ifdef HAS_ALPN
