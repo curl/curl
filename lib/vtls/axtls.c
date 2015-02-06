@@ -671,7 +671,7 @@ int Curl_axtls_random(struct SessionHandle *data,
      * race condition is that some global resources will leak. */
     RNG_initialize();
   }
-  get_random(length, entropy);
+  get_random((int)length, entropy);
   return 0;
 }
 
