@@ -743,6 +743,12 @@ Example:
 
 \&# curl -H "X-First-Name: Joe" http://192.168.0.1/
 
+\fBWARNING\fP: headers set with this option will be set in all requests - even
+after redirects are followed, like when told with \fB-L, --location\fP. This
+can lead to the header being sent to other hosts than the original host, so
+sensitive headers should be used with caution combined with following
+redirects.
+
 This option can be used multiple times to add/replace/remove multiple headers.
 .IP "--hostpubmd5 <md5>"
 (SCP/SFTP) Pass a string containing 32 hexadecimal digits. The string should
