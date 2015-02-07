@@ -500,7 +500,9 @@ CURLcode Curl_close(struct SessionHandle *data)
  */
 CURLcode Curl_init_userdefined(struct UserDefined *set)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result_set_gssapi_service = CURLE_OK;
+  CURLcode result_set_ca_bundle = CURLE_OK;
+  CURLcode result_set_ca_path = CURLE_OK;
 
   set->out = stdout; /* default output to stdout */
   set->in  = stdin;  /* default input from stdin */
@@ -577,17 +579,21 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
    */
   set->socks5_gssapi_nec = FALSE;
   /* set default GSS-API service name */
-  result = setstropt(&set->str[STRING_SOCKS5_GSSAPI_SERVICE],
+  result_set_gssapi_service =
+	  setstropt(&set->str[STRING_SOCKS5_GSSAPI_SERVICE],
                      (char *) CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE);
-  if(result)
-    return result;
+  if(result_set_gssapi_service)
+    return result_set_gssapi_service;
 #endif
 
   /* This is our preferred CA cert bundle/path since install time */
 #if defined(CURL_CA_BUNDLE)
-  result = setstropt(&set->str[STRING_SSL_CAFILE], (char *) CURL_CA_BUNDLE);
-#elif defined(CURL_CA_PATH)
-  result = setstropt(&set->str[STRING_SSL_CAPATH], (char *) CURL_CA_PATH);
+  result_set_ca_bundle =
+    setstropt(&set->str[STRING_SSL_CAFILE], (char *) CURL_CA_BUNDLE);
+#endif
+#if defined(CURL_CA_PATH)
+  result_set_ca_path =
+    setstropt(&set->str[STRING_SSL_CAPATH], (char *) CURL_CA_PATH);
 #endif
 
   set->wildcardmatch  = FALSE;
@@ -605,7 +611,13 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->ssl_enable_alpn = TRUE;
 
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
-  return result;
+
+  if (result_set_ca_bundle)
+    return result_set_ca_bundle;
+  if (result_set_ca_path)
+    return result_set_ca_path;
+
+  return CURLE_OK;
 }
 
 /**
