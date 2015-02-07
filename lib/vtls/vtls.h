@@ -30,7 +30,7 @@
 #include "polarssl.h"       /* PolarSSL versions */
 #include "axtls.h"          /* axTLS versions */
 #include "cyassl.h"         /* CyaSSL versions */
-#include "curl_schannel.h"  /* Schannel SSPI version */
+#include "schannel.h"       /* Schannel SSPI version */
 #include "curl_darwinssl.h" /* SecureTransport (Darwin) version */
 
 #ifndef MAX_PINNED_PUBKEY_SIZE
