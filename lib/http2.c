@@ -424,6 +424,11 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   (void)frame;
   (void)flags;
 
+  /* Ignore PUSH_PROMISE for now */
+  if(frame->hd.type != NGHTTP2_HEADERS) {
+    return 0;
+  }
+
   if(frame->hd.stream_id != c->stream_id) {
     return 0;
   }
