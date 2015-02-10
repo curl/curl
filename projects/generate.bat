@@ -59,6 +59,7 @@ echo.
 echo Generating VC12 project files
 call :generate vcxproj Windows\VC12\src\curlsrc.tmpl Windows\VC12\src\curlsrc.vcxproj
 call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
+call :generate vcxproj Windows\VC12\lib\libcurlwsa81.tmpl Windows\VC12\lib\libcurlwsa81.vcxproj
 
 goto exit
 
