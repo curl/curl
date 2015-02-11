@@ -1324,7 +1324,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
 }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-    !defined(HAVE_BORINGSSL)
+    !defined(OPENSSL_IS_BORINGSSL)
 static CURLcode verifystatus(struct connectdata *conn,
                              struct ssl_connect_data *connssl)
 {
@@ -1447,7 +1447,7 @@ end:
 
   return result;
 }
-#endif /* HAVE_BORINGSSL */
+#endif/
 
 #endif /* USE_SSLEAY */
 
@@ -2062,7 +2062,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-    !defined(HAVE_BORINGSSL)
+    !defined(OPENSSL_IS_BORINGSSL)
   if(data->set.ssl.verifystatus)
     SSL_set_tlsext_status_type(connssl->handle, TLSEXT_STATUSTYPE_ocsp);
 #endif
@@ -2751,7 +2751,7 @@ static CURLcode servercert(struct connectdata *conn,
   }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-    !defined(HAVE_BORINGSSL)
+    !defined(OPENSSL_IS_BORINGSSL)
   if(data->set.ssl.verifystatus) {
     result = verifystatus(conn, connssl);
     if(result) {
@@ -3206,7 +3206,7 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
 bool Curl_ossl_cert_status_request(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-    !defined(HAVE_BORINGSSL)
+    !defined(OPENSSL_IS_BORINGSSL)
   return TRUE;
 #else
   return FALSE;
