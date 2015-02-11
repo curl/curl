@@ -86,6 +86,7 @@ static const char * const statename[]={
   "WAITRESOLVE",
   "WAITCONNECT",
   "WAITPROXYCONNECT",
+  "SENDPROTOCONNECT",
   "PROTOCONNECT",
   "WAITDO",
   "DO",
@@ -646,14 +647,24 @@ static int waitconnect_getsock(struct connectdata *conn,
     }
   }
 
+  return rc;
+}
+
+static int waitproxyconnect_getsock(struct connectdata *conn,
+                                    curl_socket_t *sock,
+                                    int numsocks)
+{
+  if(!numsocks)
+    return GETSOCK_BLANK;
+
+  sock[0] = conn->sock[FIRSTSOCKET];
+
   /* when we've sent a CONNECT to a proxy, we should rather wait for the
      socket to become readable to be able to get the response headers */
-  if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT) {
-    sock[0] = conn->sock[FIRSTSOCKET];
-    rc = GETSOCK_READSOCK(0);
-  }
+  if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
+    return GETSOCK_READSOCK(0);
 
-  return rc;
+  return GETSOCK_WRITESOCK(0);
 }
 
 static int domore_getsock(struct connectdata *conn,
@@ -706,6 +717,7 @@ static int multi_getsock(struct SessionHandle *data,
     return Curl_resolver_getsock(data->easy_conn, socks, numsocks);
 
   case CURLM_STATE_PROTOCONNECT:
+  case CURLM_STATE_SENDPROTOCONNECT:
     return Curl_protocol_getsock(data->easy_conn, socks, numsocks);
 
   case CURLM_STATE_DO:
@@ -713,6 +725,8 @@ static int multi_getsock(struct SessionHandle *data,
     return Curl_doing_getsock(data->easy_conn, socks, numsocks);
 
   case CURLM_STATE_WAITPROXYCONNECT:
+    return waitproxyconnect_getsock(data->easy_conn, socks, numsocks);
+
   case CURLM_STATE_WAITCONNECT:
     return waitconnect_getsock(data->easy_conn, socks, numsocks);
 
@@ -1164,40 +1178,28 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* this is HTTP-specific, but sending CONNECT to a proxy is HTTP... */
       result = Curl_http_connect(data->easy_conn, &protocol_connect);
 
+      rc = CURLM_CALL_MULTI_PERFORM;
       if(data->easy_conn->bits.proxy_connect_closed) {
         /* connect back to proxy again */
         result = CURLE_OK;
-        rc = CURLM_CALL_MULTI_PERFORM;
         multistate(data, CURLM_STATE_CONNECT);
       }
       else if(!result) {
         if(data->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_COMPLETE)
-          multistate(data, CURLM_STATE_WAITCONNECT);
+          /* initiate protocol connect phase */
+          multistate(data, CURLM_STATE_SENDPROTOCONNECT);
       }
       break;
 #endif
 
     case CURLM_STATE_WAITCONNECT:
-      /* awaiting a completion of an asynch connect */
-      result = Curl_is_connected(data->easy_conn,
-                                 FIRSTSOCKET,
-                                 &connected);
-      if(connected) {
-
-        if(!result)
-          /* if everything is still fine we do the protocol-specific connect
-             setup */
-          result = Curl_protocol_connect(data->easy_conn,
-                                         &protocol_connect);
-      }
-
-      if(data->easy_conn->bits.proxy_connect_closed) {
-        /* connect back to proxy again since it was closed in a proxy CONNECT
-           setup */
-        result = CURLE_OK;
+      /* awaiting a completion of an asynch TCP connect */
+      result = Curl_is_connected(data->easy_conn, FIRSTSOCKET, &connected);
+      if(connected && !result) {
         rc = CURLM_CALL_MULTI_PERFORM;
-        multistate(data, CURLM_STATE_CONNECT);
-        break;
+        multistate(data, data->easy_conn->bits.tunnel_proxy?
+                   CURLM_STATE_WAITPROXYCONNECT:
+                   CURLM_STATE_SENDPROTOCONNECT);
       }
       else if(result) {
         /* failure detected */
@@ -1205,28 +1207,24 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         disconnect_conn = TRUE;
         break;
       }
+      break;
 
-      if(connected) {
-        if(!protocol_connect) {
-          /* We have a TCP connection, but 'protocol_connect' may be false
-             and then we continue to 'STATE_PROTOCONNECT'. If protocol
-             connect is TRUE, we move on to STATE_DO.
-             BUT if we are using a proxy we must change to WAITPROXYCONNECT
-          */
-#ifndef CURL_DISABLE_HTTP
-          if(data->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
-            multistate(data, CURLM_STATE_WAITPROXYCONNECT);
-          else
-#endif
-            multistate(data, CURLM_STATE_PROTOCONNECT);
-
-        }
-        else
-          /* after the connect has completed, go WAITDO or DO */
-          multistate(data, multi->pipelining_enabled?
-                     CURLM_STATE_WAITDO:CURLM_STATE_DO);
-
+    case CURLM_STATE_SENDPROTOCONNECT:
+      result = Curl_protocol_connect(data->easy_conn, &protocol_connect);
+      if(!protocol_connect)
+        /* switch to waiting state */
+        multistate(data, CURLM_STATE_PROTOCONNECT);
+      else if(!result) {
+        /* protocol connect has completed, go WAITDO or DO */
+        multistate(data, multi->pipelining_enabled?
+                   CURLM_STATE_WAITDO:CURLM_STATE_DO);
         rc = CURLM_CALL_MULTI_PERFORM;
+      }
+      else if(result) {
+        /* failure detected */
+        Curl_posttransfer(data);
+        Curl_done(&data->easy_conn, result, TRUE);
+        disconnect_conn = TRUE;
       }
       break;
 

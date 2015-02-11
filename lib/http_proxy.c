@@ -72,6 +72,7 @@ CURLcode Curl_proxy_connect(struct connectdata *conn)
     conn->data->req.protop = prot_save;
     if(CURLE_OK != result)
       return result;
+    Curl_safefree(conn->allocptr.proxyuserpwd);
 #else
     return CURLE_NOT_BUILT_IN;
 #endif
