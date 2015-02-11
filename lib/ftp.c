@@ -2102,7 +2102,9 @@ static CURLcode ftp_state_port_resp(struct connectdata *conn,
   ftpport fcmd = (ftpport)ftpc->count1;
   CURLcode result = CURLE_OK;
 
-  if(ftpcode != 200) {
+  /* The FTP spec tells a positive response should have code 200.
+     Be more permissive here to tolerate deviant servers. */
+  if(ftpcode / 100 != 2) {
     /* the command failed */
 
     if(EPRT == fcmd) {
