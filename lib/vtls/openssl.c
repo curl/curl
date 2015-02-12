@@ -1447,7 +1447,7 @@ end:
 
   return result;
 }
-#endif/
+#endif
 
 #endif /* USE_SSLEAY */
 
