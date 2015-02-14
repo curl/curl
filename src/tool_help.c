@@ -83,6 +83,7 @@ static const char *const helptext[] = {
   "     --environment   Write results to environment variables (RISC OS)",
 #endif
   " -f, --fail          Fail silently (no output at all) on HTTP errors (H)",
+  "     --false-start   Enable TLS False Start.",
   " -F, --form CONTENT  Specify HTTP multipart POST data (H)",
   "     --form-string STRING  Specify HTTP multipart POST data (H)",
   "     --ftp-account DATA  Account data string (F)",

@@ -562,6 +562,15 @@ or no response at all is received, the verification fails.
 
 This is currently only implemented in the OpenSSL, GnuTLS and NSS backends.
 (Added in 7.41.0)
+.IP "--false-start"
+
+(SSL) Tells curl to use false start during the TLS handshake. False start is a
+mode where a TLS client will start sending application data before verifying
+the server's Finished message, thus saving a round trip when performing a full
+handshake.
+
+This is currently only implemented in the NSS backend.
+(Added in 7.42.0)
 .IP "-f, --fail"
 (HTTP) Fail silently (no output at all) on server errors. This is mostly done
 to better enable scripts etc to better deal with failed attempts. In normal

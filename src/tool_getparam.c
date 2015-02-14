@@ -218,6 +218,7 @@ static const struct LongShort aliases[]= {
   {"Eo", "login-options",            TRUE},
   {"Ep", "pinnedpubkey",             TRUE},
   {"Eq", "cert-status",              FALSE},
+  {"Er", "false-start",              FALSE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -1366,6 +1367,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
       case 'q': /* --cert-status */
         config->verifystatus = TRUE;
+        break;
+
+      case 'r': /* --false-start */
+        config->falsestart = TRUE;
         break;
 
       default: /* certificate file */
