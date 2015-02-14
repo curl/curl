@@ -1626,6 +1626,9 @@ typedef enum {
   /* Set if we should verify the certificate status. */
   CINIT(SSL_VERIFYSTATUS, LONG, 232),
 
+  /* Set if we should enable TLS false start. */
+  CINIT(SSL_FALSESTART, LONG, 233),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

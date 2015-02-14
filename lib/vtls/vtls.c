@@ -857,4 +857,16 @@ bool Curl_ssl_cert_status_request(void)
 #endif
 }
 
+/*
+ * Check whether the SSL backend supports false start.
+ */
+bool Curl_ssl_false_start(void)
+{
+#ifdef curlssl_false_start
+  return curlssl_false_start();
+#else
+  return FALSE;
+#endif
+}
+
 #endif /* USE_SSL */
