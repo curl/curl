@@ -58,6 +58,8 @@ void Curl_nss_md5sum(unsigned char *tmp, /* input */
 
 bool Curl_nss_cert_status_request(void);
 
+bool Curl_nss_false_start(void);
+
 /* Set the API backend definition to NSS */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_NSS
 
@@ -88,6 +90,7 @@ bool Curl_nss_cert_status_request(void);
 #define curlssl_random(x,y,z) Curl_nss_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_nss_md5sum(a,b,c,d)
 #define curlssl_cert_status_request() Curl_nss_cert_status_request()
+#define curlssl_false_start() Curl_nss_false_start()
 
 #endif /* USE_NSS */
 #endif /* HEADER_CURL_NSSG_H */
