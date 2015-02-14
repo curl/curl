@@ -118,6 +118,8 @@ CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
 
 bool Curl_ssl_cert_status_request(void);
 
+bool Curl_ssl_false_start(void);
+
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 #else
@@ -145,6 +147,7 @@ bool Curl_ssl_cert_status_request(void);
 #define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
+#define Curl_ssl_false_start() FALSE
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */

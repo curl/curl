@@ -2027,6 +2027,17 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     result = CURLE_NOT_BUILT_IN;
 #endif
     break;
+  case CURLOPT_SSL_FALSESTART:
+    /*
+     * Enable TLS false start.
+     */
+    if(!Curl_ssl_false_start()) {
+      result = CURLE_NOT_BUILT_IN;
+      break;
+    }
+
+    data->set.ssl.falsestart = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
   case CURLOPT_CERTINFO:
 #ifdef have_curlssl_certinfo
     data->set.ssl.certinfo = (0 != va_arg(param, long))?TRUE:FALSE;
