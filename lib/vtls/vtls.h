@@ -31,7 +31,7 @@
 #include "axtls.h"          /* axTLS versions */
 #include "cyassl.h"         /* CyaSSL versions */
 #include "schannel.h"       /* Schannel SSPI version */
-#include "curl_darwinssl.h" /* SecureTransport (Darwin) version */
+#include "darwinssl.h"      /* SecureTransport (Darwin) version */
 
 #ifndef MAX_PINNED_PUBKEY_SIZE
 #define MAX_PINNED_PUBKEY_SIZE 1048576 /* 1MB */

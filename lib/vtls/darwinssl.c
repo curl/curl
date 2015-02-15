@@ -102,7 +102,7 @@
 #include "connect.h"
 #include "select.h"
 #include "vtls.h"
-#include "curl_darwinssl.h"
+#include "darwinssl.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

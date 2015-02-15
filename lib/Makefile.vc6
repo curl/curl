@@ -534,7 +534,6 @@ X_OBJS= \
 	$(DIROBJ)\content_encoding.obj \
 	$(DIROBJ)\cookie.obj \
 	$(DIROBJ)\curl_addrinfo.obj \
-	$(DIROBJ)\curl_darwinssl.obj \
 	$(DIROBJ)\curl_des.obj \
 	$(DIROBJ)\curl_endian.obj \
 	$(DIROBJ)\curl_fnmatch.obj \
@@ -553,6 +552,7 @@ X_OBJS= \
 	$(DIROBJ)\curl_sspi.obj \
 	$(DIROBJ)\curl_threads.obj \
 	$(DIROBJ)\cyassl.obj \
+	$(DIROBJ)\darwinlssl.obj
 	$(DIROBJ)\dict.obj \
 	$(DIROBJ)\dotdot.obj \
 	$(DIROBJ)\easy.obj \

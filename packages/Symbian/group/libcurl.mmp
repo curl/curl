@@ -38,7 +38,7 @@ SOURCE \
   vtls/axtls.c idn_win32.c http_negotiate_sspi.c vtls/cyassl.c         \
   http_proxy.c non-ascii.c asyn-ares.c asyn-thread.c curl_gssapi.c     \
   curl_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_ntlm_msgs.c         \
-  curl_sasl.c vtls/schannel.c curl_multibyte.c vtls/curl_darwinssl.c   \
+  curl_sasl.c vtls/schannel.c curl_multibyte.c vtls/darwinssl.c        \
   bundles.c conncache.c curl_sasl_sspi.c smb.c curl_sasl_gssapi.c      \
   curl_endian.c curl_des.c
 
