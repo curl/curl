@@ -683,14 +683,15 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
  */
 static void HandshakeCallback(PRFileDesc *sock, void *arg)
 {
-#ifdef USE_NGHTTP2
   struct connectdata *conn = (struct connectdata*) arg;
   unsigned int buflenmax = 50;
   unsigned char buf[50];
   unsigned int buflen;
   SSLNextProtoState state;
 
+#ifdef USE_NGHTTP2
   struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
+#endif
 
   if(!conn->data->set.ssl_enable_npn && !conn->data->set.ssl_enable_alpn) {
     return;
@@ -701,8 +702,7 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
     switch(state) {
     case SSL_NEXT_PROTO_NO_SUPPORT:
     case SSL_NEXT_PROTO_NO_OVERLAP:
-      if(connssl->asked_for_h2)
-        infof(conn->data, "TLS, neither ALPN nor NPN succeeded\n");
+      infof(conn->data, "ALPN/NPN, server did not agree to a protocol\n");
       return;
 #ifdef SSL_ENABLE_ALPN
     case SSL_NEXT_PROTO_SELECTED:
@@ -714,19 +714,18 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
       break;
     }
 
+#ifdef USE_NGHTTP2
     if(buflen == NGHTTP2_PROTO_VERSION_ID_LEN &&
        !memcmp(NGHTTP2_PROTO_VERSION_ID, buf, NGHTTP2_PROTO_VERSION_ID_LEN)) {
       conn->negnpn = NPN_HTTP2;
     }
-    else if(buflen == ALPN_HTTP_1_1_LENGTH &&
-            !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
+    else
+#endif
+    if(buflen == ALPN_HTTP_1_1_LENGTH &&
+       !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
       conn->negnpn = NPN_HTTP1_1;
     }
   }
-#else
-  (void)sock;
-  (void)arg;
-#endif
 }
 
 static void display_cert_info(struct SessionHandle *data,
@@ -1456,16 +1455,6 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     SSL_LIBRARY_VERSION_TLS_1_0   /* max */
   };
 
-#ifdef USE_NGHTTP2
-#if defined(SSL_ENABLE_NPN) || defined(SSL_ENABLE_ALPN)
-  unsigned int alpn_protos_len = NGHTTP2_PROTO_VERSION_ID_LEN +
-      ALPN_HTTP_1_1_LENGTH + 2;
-  unsigned char alpn_protos[NGHTTP2_PROTO_VERSION_ID_LEN + ALPN_HTTP_1_1_LENGTH
-      + 2];
-  int cur = 0;
-#endif
-#endif
-
   connssl->data = data;
 
   /* list of all NSS objects we need to destroy in Curl_nss_close() */
@@ -1653,43 +1642,40 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   }
 #endif
 
-#ifdef USE_NGHTTP2
-  if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
 #ifdef SSL_ENABLE_NPN
-    if(data->set.ssl_enable_npn) {
-      if(SSL_OptionSet(connssl->handle, SSL_ENABLE_NPN, PR_TRUE) != SECSuccess)
-        goto error;
-    }
+  if(data->set.ssl_enable_npn) {
+    if(SSL_OptionSet(connssl->handle, SSL_ENABLE_NPN, PR_TRUE) != SECSuccess)
+      goto error;
+  }
 #endif
 
 #ifdef SSL_ENABLE_ALPN
-    if(data->set.ssl_enable_alpn) {
-      if(SSL_OptionSet(connssl->handle, SSL_ENABLE_ALPN, PR_TRUE)
-          != SECSuccess)
-        goto error;
-    }
+  if(data->set.ssl_enable_alpn) {
+    if(SSL_OptionSet(connssl->handle, SSL_ENABLE_ALPN, PR_TRUE)
+        != SECSuccess)
+      goto error;
+  }
 #endif
 
 #if defined(SSL_ENABLE_NPN) || defined(SSL_ENABLE_ALPN)
-    if(data->set.ssl_enable_npn || data->set.ssl_enable_alpn) {
-      alpn_protos[cur] = NGHTTP2_PROTO_VERSION_ID_LEN;
-      cur++;
-      memcpy(&alpn_protos[cur], NGHTTP2_PROTO_VERSION_ID,
+  if(data->set.ssl_enable_npn || data->set.ssl_enable_alpn) {
+    int cur = 0;
+    unsigned char protocols[128];
+
+#ifdef USE_NGHTTP2
+    if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+      protocols[cur++] = NGHTTP2_PROTO_VERSION_ID_LEN;
+      memcpy(&protocols[cur], NGHTTP2_PROTO_VERSION_ID,
           NGHTTP2_PROTO_VERSION_ID_LEN);
       cur += NGHTTP2_PROTO_VERSION_ID_LEN;
-      alpn_protos[cur] = ALPN_HTTP_1_1_LENGTH;
-      cur++;
-      memcpy(&alpn_protos[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
-
-      if(SSL_SetNextProtoNego(connssl->handle, alpn_protos, alpn_protos_len)
-          != SECSuccess)
-        goto error;
-      connssl->asked_for_h2 = TRUE;
-    }
-    else {
-      infof(data, "SSL, can't negotiate HTTP/2.0 with neither NPN nor ALPN\n");
     }
 #endif
+    protocols[cur++] = ALPN_HTTP_1_1_LENGTH;
+    memcpy(&protocols[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
+    cur += ALPN_HTTP_1_1_LENGTH;
+
+    if(SSL_SetNextProtoNego(connssl->handle, protocols, cur) != SECSuccess)
+      goto error;
   }
 #endif
 
