@@ -542,6 +542,7 @@ static CURLcode trynextip(struct connectdata *conn,
                           int sockindex,
                           int tempindex)
 {
+  const int other = tempindex ^ 1;
   CURLcode result = CURLE_COULDNT_CONNECT;
 
   /* First clean up after the failed socket.
@@ -572,8 +573,11 @@ static CURLcode trynextip(struct connectdata *conn,
     }
 
     while(ai) {
-      while(ai && ai->ai_family != family)
-        ai = ai->ai_next;
+      if(conn->tempaddr[other]) {
+        /* we can safely skip addresses of the other protocol family */
+        while(ai && ai->ai_family != family)
+          ai = ai->ai_next;
+      }
 
       if(ai) {
         result = singleipconnect(conn, ai, &conn->tempsock[tempindex]);
