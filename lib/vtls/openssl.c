@@ -1591,8 +1591,6 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 #  define use_sni(x)  Curl_nop_stmt
 #endif
 
-#ifdef USE_NGHTTP2
-
 /* Check for OpenSSL 1.0.2 which has ALPN support. */
 #undef HAS_ALPN
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L \
@@ -1614,6 +1612,23 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
  * in is a list of lenght prefixed strings. this function has to select
  * the protocol we want to use from the list and write its string into out.
  */
+
+static int
+select_next_protocol(unsigned char **out, unsigned char *outlen,
+                     const unsigned char *in, unsigned int inlen,
+                     const char *key, unsigned int keylen)
+{
+  unsigned int i;
+  for(i = 0; i + keylen <= inlen; i += in[i] + 1) {
+    if(memcmp(&in[i + 1], key, keylen) == 0) {
+      *out = (unsigned char *) &in[i + 1];
+      *outlen = in[i];
+      return 0;
+    }
+  }
+  return -1;
+}
+
 static int
 select_next_proto_cb(SSL *ssl,
                      unsigned char **out, unsigned char *outlen,
@@ -1621,32 +1636,35 @@ select_next_proto_cb(SSL *ssl,
                      void *arg)
 {
   struct connectdata *conn = (struct connectdata*) arg;
-  int retval = nghttp2_select_next_protocol(out, outlen, in, inlen);
 
   (void)ssl;
 
-  if(retval == 1) {
+#ifdef USE_NGHTTP2
+  if(conn->data->set.httpversion == CURL_HTTP_VERSION_2_0 &&
+     !select_next_protocol(out, outlen, in, inlen, NGHTTP2_PROTO_VERSION_ID,
+                           NGHTTP2_PROTO_VERSION_ID_LEN)) {
     infof(conn->data, "NPN, negotiated HTTP2 (%s)\n",
           NGHTTP2_PROTO_VERSION_ID);
     conn->negnpn = NPN_HTTP2;
+    return SSL_TLSEXT_ERR_OK;
   }
-  else if(retval == 0) {
+#endif
+
+  if(!select_next_protocol(out, outlen, in, inlen, ALPN_HTTP_1_1,
+                           ALPN_HTTP_1_1_LENGTH)) {
     infof(conn->data, "NPN, negotiated HTTP1.1\n");
     conn->negnpn = NPN_HTTP1_1;
+    return SSL_TLSEXT_ERR_OK;
   }
-  else {
-    infof(conn->data, "NPN, no overlap, use HTTP1.1\n",
-          NGHTTP2_PROTO_VERSION_ID);
-    *out = (unsigned char*)"http/1.1";
-    *outlen = sizeof("http/1.1") - 1;
-    conn->negnpn = NPN_HTTP1_1;
-  }
+
+  infof(conn->data, "NPN, no overlap, use HTTP1.1\n");
+  *out = (unsigned char *)ALPN_HTTP_1_1;
+  *outlen = ALPN_HTTP_1_1_LENGTH;
+  conn->negnpn = NPN_HTTP1_1;
 
   return SSL_TLSEXT_ERR_OK;
 }
 #endif /* HAS_NPN */
-
-#endif /* USE_NGHTTP2 */
 
 static const char *
 get_ssl_version_txt(SSL *ssl)
@@ -1689,9 +1707,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #else
   struct in_addr addr;
 #endif
-#endif
-#ifdef HAS_ALPN
-  unsigned char protocols[128];
 #endif
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
@@ -1888,36 +1903,36 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
   SSL_CTX_set_options(connssl->ctx, ctx_options);
 
-#ifdef USE_NGHTTP2
-  if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
 #ifdef HAS_NPN
-    if(data->set.ssl_enable_npn) {
-      SSL_CTX_set_next_proto_select_cb(connssl->ctx, select_next_proto_cb,
-                                       conn);
-    }
+  if(data->set.ssl_enable_npn)
+    SSL_CTX_set_next_proto_select_cb(connssl->ctx, select_next_proto_cb, conn);
 #endif
 
 #ifdef HAS_ALPN
-    if(data->set.ssl_enable_alpn) {
-      protocols[0] = NGHTTP2_PROTO_VERSION_ID_LEN;
-      memcpy(&protocols[1], NGHTTP2_PROTO_VERSION_ID,
+  if(data->set.ssl_enable_alpn) {
+    int cur = 0;
+    unsigned char protocols[128];
+
+#ifdef USE_NGHTTP2
+    if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+      protocols[cur++] = NGHTTP2_PROTO_VERSION_ID_LEN;
+
+      memcpy(&protocols[cur], NGHTTP2_PROTO_VERSION_ID,
           NGHTTP2_PROTO_VERSION_ID_LEN);
-
-      protocols[NGHTTP2_PROTO_VERSION_ID_LEN+1] = ALPN_HTTP_1_1_LENGTH;
-      memcpy(&protocols[NGHTTP2_PROTO_VERSION_ID_LEN+2], ALPN_HTTP_1_1,
-          ALPN_HTTP_1_1_LENGTH);
-
-      /* expects length prefixed preference ordered list of protocols in wire
-       * format
-       */
-      SSL_CTX_set_alpn_protos(connssl->ctx, protocols,
-          NGHTTP2_PROTO_VERSION_ID_LEN + ALPN_HTTP_1_1_LENGTH + 2);
-
-      infof(data, "ALPN, offering %s, %s\n", NGHTTP2_PROTO_VERSION_ID,
-            ALPN_HTTP_1_1);
-      connssl->asked_for_h2 = TRUE;
+      cur += NGHTTP2_PROTO_VERSION_ID_LEN;
+      infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
     }
 #endif
+
+    protocols[cur++] = ALPN_HTTP_1_1_LENGTH;
+    memcpy(&protocols[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
+    cur += ALPN_HTTP_1_1_LENGTH;
+    infof(data, "ALPN, offering %s\n", ALPN_HTTP_1_1);
+
+    /* expects length prefixed preference ordered list of protocols in wire
+     * format
+     */
+    SSL_CTX_set_alpn_protos(connssl->ctx, protocols, cur);
   }
 #endif
 
@@ -2207,18 +2222,19 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
       if(len != 0) {
         infof(data, "ALPN, server accepted to use %.*s\n", len, neg_protocol);
 
+#ifdef USE_NGHTTP2
         if(len == NGHTTP2_PROTO_VERSION_ID_LEN &&
-           memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len) == 0) {
+           !memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len)) {
           conn->negnpn = NPN_HTTP2;
         }
-        else if(len ==
-                ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
-                                               neg_protocol,
-                                               ALPN_HTTP_1_1_LENGTH) == 0) {
+        else
+#endif
+        if(len == ALPN_HTTP_1_1_LENGTH &&
+           !memcmp(ALPN_HTTP_1_1, neg_protocol, ALPN_HTTP_1_1_LENGTH)) {
           conn->negnpn = NPN_HTTP1_1;
         }
       }
-      else if(connssl->asked_for_h2)
+      else
         infof(data, "ALPN, server did not agree to a protocol\n");
     }
 #endif
