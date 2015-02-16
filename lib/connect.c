@@ -753,6 +753,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   }
 
   for(i=0; i<2; i++) {
+    const int other = i ^ 1;
     if(conn->tempsock[i] == CURL_SOCKET_BAD)
       continue;
 
@@ -782,7 +783,6 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     else if(rc == CURL_CSELECT_OUT) {
       if(verifyconnect(conn->tempsock[i], &error)) {
         /* we are connected with TCP, awesome! */
-        int other = i ^ 1;
 
         /* use this socket from now on */
         conn->sock[sockindex] = conn->tempsock[i];
@@ -824,6 +824,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       data->state.os_errno = error;
       SET_SOCKERRNO(error);
       if(conn->tempaddr[i]) {
+        CURLcode status;
         char ipaddress[MAX_IPADR_LEN];
         Curl_printable_address(conn->tempaddr[i], ipaddress, MAX_IPADR_LEN);
         infof(data, "connect to %s port %ld failed: %s\n",
@@ -832,7 +833,11 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         conn->timeoutms_per_addr = conn->tempaddr[i]->ai_next == NULL ?
                                    allow : allow / 2;
 
-        result = trynextip(conn, sockindex, i);
+        status = trynextip(conn, sockindex, i);
+        if(status != CURLE_COULDNT_CONNECT
+            || conn->tempsock[other] == CURL_SOCKET_BAD)
+          /* the last attempt failed and no other sockets remain open */
+          result = status;
       }
     }
   }

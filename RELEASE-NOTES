@@ -81,6 +81,7 @@ This release includes the following bugfixes:
  o cmake: Fix generation of tool_hugehelp.c on windows
  o cmake: fix winsock2 detection on windows
  o gnutls: fix build with HTTP2
+ o connect: fix a spurious connect failure on dual-stacked hosts [16]
 
 This release includes the following known bugs:
 
@@ -117,3 +118,4 @@ References to bug reports and discussions on issues:
  [13] = http://curl.haxx.se/mail/lib-2015-02/0034.html
  [14] = http://curl.haxx.se/mail/lib-2015-01/0002.html
  [15] = https://github.com/bagder/curl/pull/139
+ [16] = https://bugzilla.redhat.com/1187531
