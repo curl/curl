@@ -718,12 +718,11 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
     }
 
     if(buflen == NGHTTP2_PROTO_VERSION_ID_LEN &&
-       memcmp(NGHTTP2_PROTO_VERSION_ID, buf, NGHTTP2_PROTO_VERSION_ID_LEN)
-       == 0) {
+       !memcmp(NGHTTP2_PROTO_VERSION_ID, buf, NGHTTP2_PROTO_VERSION_ID_LEN)) {
       conn->negnpn = NPN_HTTP2;
     }
-    else if(buflen == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1, buf,
-                                                     ALPN_HTTP_1_1_LENGTH)) {
+    else if(buflen == ALPN_HTTP_1_1_LENGTH &&
+            !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
       conn->negnpn = NPN_HTTP1_1;
     }
   }
