@@ -90,11 +90,8 @@ static bool gtls_inited = FALSE;
 #    define GNUTLS_MAPS_WINSOCK_ERRORS 1
 #  endif
 
-#  ifdef USE_NGHTTP2
-#    undef HAS_ALPN
-#    if (GNUTLS_VERSION_NUMBER >= 0x030200)
-#      define HAS_ALPN
-#    endif
+#  if (GNUTLS_VERSION_NUMBER >= 0x030200)
+#    define HAS_ALPN
 #  endif
 
 #  if (GNUTLS_VERSION_NUMBER >= 0x03020d)
@@ -398,10 +395,6 @@ gtls_connect_step1(struct connectdata *conn,
   const char* prioritylist;
   const char *err = NULL;
 #endif
-#ifdef HAS_ALPN
-  int protocols_size = 2;
-  gnutls_datum_t protocols[2];
-#endif
 
   if(conn->ssl[sockindex].state == ssl_connection_complete)
     /* to make us tolerant against being called more than once for the
@@ -615,20 +608,25 @@ gtls_connect_step1(struct connectdata *conn,
 #endif
 
 #ifdef HAS_ALPN
-  if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
-    if(data->set.ssl_enable_alpn) {
-      protocols[0].data = NGHTTP2_PROTO_VERSION_ID;
-      protocols[0].size = NGHTTP2_PROTO_VERSION_ID_LEN;
-      protocols[1].data = ALPN_HTTP_1_1;
-      protocols[1].size = ALPN_HTTP_1_1_LENGTH;
-      gnutls_alpn_set_protocols(session, protocols, protocols_size, 0);
-      infof(data, "ALPN, offering %s, %s\n", NGHTTP2_PROTO_VERSION_ID,
-            ALPN_HTTP_1_1);
-      conn->ssl[sockindex].asked_for_h2 = TRUE;
+  if(data->set.ssl_enable_alpn) {
+    int cur = 0;
+    gnutls_datum_t protocols[2];
+
+#ifdef USE_NGHTTP2
+    if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+      protocols[cur].data = NGHTTP2_PROTO_VERSION_ID;
+      protocols[cur].size = NGHTTP2_PROTO_VERSION_ID_LEN;
+      cur++;
+      infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
     }
-    else {
-      infof(data, "SSL, can't negotiate HTTP/2.0 without ALPN\n");
-    }
+#endif
+
+    protocols[cur].data = ALPN_HTTP_1_1;
+    protocols[cur].size = ALPN_HTTP_1_1_LENGTH;
+    cur++;
+    infof(data, "ALPN, offering %s\n", ALPN_HTTP_1_1);
+
+    gnutls_alpn_set_protocols(session, protocols, cur, 0);
   }
 #endif
 
@@ -1071,19 +1069,21 @@ gtls_connect_step3(struct connectdata *conn,
       infof(data, "ALPN, server accepted to use %.*s\n", proto.size,
           proto.data);
 
+#ifdef USE_NGHTTP2
       if(proto.size == NGHTTP2_PROTO_VERSION_ID_LEN &&
-        memcmp(NGHTTP2_PROTO_VERSION_ID, proto.data,
-        NGHTTP2_PROTO_VERSION_ID_LEN) == 0) {
+         !memcmp(NGHTTP2_PROTO_VERSION_ID, proto.data,
+                 NGHTTP2_PROTO_VERSION_ID_LEN)) {
         conn->negnpn = NPN_HTTP2;
       }
-      else if(proto.size == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
-          proto.data, ALPN_HTTP_1_1_LENGTH) == 0) {
+      else
+#endif
+      if(proto.size == ALPN_HTTP_1_1_LENGTH &&
+         !memcmp(ALPN_HTTP_1_1, proto.data, ALPN_HTTP_1_1_LENGTH)) {
         conn->negnpn = NPN_HTTP1_1;
       }
     }
-    else if(conn->ssl[sockindex].asked_for_h2) {
+    else
       infof(data, "ALPN, server did not agree to a protocol\n");
-    }
   }
 #endif
 
