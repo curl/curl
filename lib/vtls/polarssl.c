@@ -468,11 +468,11 @@ polarssl_connect_step2(struct connectdata *conn,
     if(next_protocol != NULL) {
       infof(data, "ALPN, server accepted to use %s\n", next_protocol);
 
-      if(strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
+      if(!strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
                   NGHTTP2_PROTO_VERSION_ID_LEN)) {
         conn->negnpn = NPN_HTTP2;
       }
-      else if(strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH)) {
+      else if(!strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH)) {
         conn->negnpn = NPN_HTTP1_1;
       }
     }
