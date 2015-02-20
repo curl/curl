@@ -8,38 +8,39 @@ possible participation.
 New stuff - libcurl
 -------------------
 
-1. http2 test suite
+1. HTTP/2
 
-2. http2 multiplexing/pipelining
+ - test suite
+ - http2 multiplexing/pipelining
+ - provide option for HTTP/2 "prior knowledge" over clear text
+ - provide option to allow curl to default to HTTP/2 only when using HTTPS
 
-3. SPDY
+2. SRV records
 
-4. SRV records
+3. HTTPS to proxy
 
-5. HTTPS to proxy
-
-6. make sure there's an easy handle passed in to `curl_formadd()`,
+4. make sure there's an easy handle passed in to `curl_formadd()`,
    `curl_formget()` and `curl_formfree()` by adding replacement functions and
    deprecating the old ones to allow custom mallocs and more
 
-7. add support for third-party SASL libraries such as Cyrus SASL - may need to
+5. add support for third-party SASL libraries such as Cyrus SASL - may need to
    move existing native and SSPI based authentication into vsasl folder after
    reworking HTTP and SASL code
 
-8. SASL authentication in LDAP
+6. SASL authentication in LDAP
 
-9. Simplify the SMTP email interface so that programmers don't have to
+7. Simplify the SMTP email interface so that programmers don't have to
    construct the body of an email that contains all the headers, alternative
    content, images and attachments - maintain raw interface so that
    programmers that want to do this can
 
-10. Allow the email protocols to return the capabilities before
+8. Allow the email protocols to return the capabilities before
     authenticating. This will allow an application to decide on the best
     authentication mechanism
 
-11. Allow Windows threading model to be replaced by Win32 pthreads port
+9. Allow Windows threading model to be replaced by Win32 pthreads port
 
-12. Implement a dynamic buffer size to allow SFTP to use much larger buffers
+10. Implement a dynamic buffer size to allow SFTP to use much larger buffers
     and possibly allow the size to be customizable by applications. Use less
     memory when handles are not in use?
 
