@@ -2607,7 +2607,8 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   if test "x$want_ca" != "xno" -a "x$want_ca" != "xunset" -a \
           "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
     dnl both given
-    AC_MSG_ERROR([Can't specify both --with-ca-bundle and --with-ca-path.])
+    ca="$want_ca"
+    capath="$want_capath"
   elif test "x$want_ca" != "xno" -a "x$want_ca" != "xunset"; then
     dnl --with-ca-bundle given
     ca="$want_ca"
@@ -2669,11 +2670,13 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE, "$ca", [Location of default ca bundle])
     AC_SUBST(CURL_CA_BUNDLE)
     AC_MSG_RESULT([$ca])
-  elif test "x$capath" != "xno"; then
+  fi
+  if test "x$capath" != "xno"; then
     CURL_CA_PATH="\"$capath\""
     AC_DEFINE_UNQUOTED(CURL_CA_PATH, "$capath", [Location of default ca path])
     AC_MSG_RESULT([$capath (capath)])
-  else
+  fi
+  if test "x$ca" == "xno" && test "x$capath" == "xno"; then
     AC_MSG_RESULT([no])
   fi
 ])
