@@ -67,7 +67,6 @@ Improve
 
 4. docs (considered "bad" by users but how do we make it better?)
 
-  - split up `curl_easy_setopt.3`
   - split up curl.1
 
 5. authentication framework (consider merging HTTP and SASL authentication to
@@ -80,7 +79,5 @@ Improve
 Remove
 ------
 
-1. cmake support (nobody maintains it)
-
-2. makefile.vc files as there is no point in maintaining two sets of Windows
+1. makefile.vc files as there is no point in maintaining two sets of Windows
    makefiles. Note: These are currently being used by the Windows autobuilds
