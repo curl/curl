@@ -65,6 +65,11 @@ struct kerberos5data;
 #define SASL_MECH_STRING_NTLM       "NTLM"
 #define SASL_MECH_STRING_XOAUTH2    "XOAUTH2"
 
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#define DIGEST_MAX_VALUE_LENGTH           256
+#define DIGEST_MAX_CONTENT_LENGTH         1024
+#endif
+
 enum {
   CURLDIGESTALGO_MD5,
   CURLDIGESTALGO_MD5SESS
@@ -134,6 +139,12 @@ struct SASL {
 char *Curl_sasl_build_spn(const char *service, const char *instance);
 #else
 TCHAR *Curl_sasl_build_spn(const char *service, const char *instance);
+#endif
+
+#if defined(USE_WINDOWS_SSPI)
+/* This is used to extract the realm from a challenge message */
+int sasl_digest_get_pair(const char *str, char *value, char *content,
+	                     const char **endptr);
 #endif
 
 #if defined(HAVE_GSSAPI)
