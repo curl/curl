@@ -1334,8 +1334,6 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     if(0 != setsockopt(serverfd, IPPROTO_TCP, TCP_NODELAY,
                        (void *)&flag, sizeof(flag)))
       logmsg("====> TCP_NODELAY for server conection failed");
-    else
-      logmsg("TCP_NODELAY set for server conection");
   }
 #endif
 
@@ -1543,8 +1541,6 @@ static void http_connect(curl_socket_t *infdp,
             if(0 != setsockopt(datafd, IPPROTO_TCP, TCP_NODELAY,
                                (void *)&flag, sizeof(flag)))
               logmsg("====> TCP_NODELAY for client DATA conection failed");
-            else
-              logmsg("TCP_NODELAY set for client DATA conection");
           }
 #endif
           req2.pipelining = FALSE;
@@ -1867,8 +1863,6 @@ static curl_socket_t accept_connection(curl_socket_t sock)
     if(0 != setsockopt(msgsock, IPPROTO_TCP, TCP_NODELAY,
                        (void *)&flag, sizeof(flag)))
       logmsg("====> TCP_NODELAY failed");
-    else
-      logmsg("TCP_NODELAY set");
   }
 #endif
 
