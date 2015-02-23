@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -83,13 +83,15 @@ int test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running && handles_added >= NUM_HANDLES)
-      break; /* done */
+    if(!running) {
+      if(handles_added >= NUM_HANDLES)
+        break; /* done */
 
-    /* Add the rest of the handles now that the first handle has sent the
-       request. */
-    while(handles_added < NUM_HANDLES)
-      multi_add_handle(m, curl[handles_added++]);
+      /* Add the rest of the handles now that the first handle has completed
+         its request. */
+      while(handles_added < NUM_HANDLES)
+        multi_add_handle(m, curl[handles_added++]);
+    }
 
     FD_ZERO(&rd);
     FD_ZERO(&wr);
