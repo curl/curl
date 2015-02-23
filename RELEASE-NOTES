@@ -74,7 +74,13 @@ This release includes the following bugfixes:
  o polarssl: Fix exclusive SSL protocol version options [14]
  o http2: Fix bug that associated stream canceled on PUSH_PROMISE
  o ftp: accept all 2xx responses to the PORT command
- o 
+ o configure: allow both --with-ca-bundle and --with-ca-path [15]
+ o cmake: install the dll file to the correct directory
+ o nss: fix NPN/ALPN protocol negotiation
+ o polarssl: fix ALPN protocol negotiation
+ o cmake: Fix generation of tool_hugehelp.c on windows
+ o cmake: fix winsock2 detection on windows
+ o gnutls: fix build with HTTP2
 
 This release includes the following known bugs:
 
@@ -83,11 +89,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alexander Peslyak, Brad Spencer, Chris Young,
-  Dan Fandrich, Daniel Stenberg, Gisle Vanem, Guenter Knauf, Jay Satiro,
-  Jean-Francois Durand, Joe Mason, John E. Malmberg, Jon Seymour,
-  Kyle J. McKay, Leith Bade, Marc Hoersken, Michael Kaufmann, Michael Wallner,
-  Mohammad AlSaleh, Patrick Monnerat, Sam Schanken, Steve Holme, Tamir,
+  Alessandro Ghedini, Alexander Peslyak, Ben Boeckel, Brad King, Brad Spencer,
+  Chris Young, Dan Fandrich, Daniel Stenberg, Gisle Vanem, Guenter Knauf,
+  Jean-Francois Durand, Joe Mason, John E. Malmberg, Jon Seymour, Julian Ospald,
+  Kamil Dudka, Kyle J. McKay, Leith Bade, Marc Hoersken, Michael Kaufmann,
+  Michael Wallner, Mohammad AlSaleh, Nick Zitzmann, Patrick Monnerat,
+  Ray Satiro, Rich Burridge, Sam Schanken, Sergei Nikulov, Steve Holme,
   Tatsuhiro Tsujikawa, Thomas Klausner, Viktor Szakats, Vojtěch Král,
   Yun SangHo
 
@@ -109,4 +116,4 @@ References to bug reports and discussions on issues:
  [12] = http://curl.haxx.se/bug/view.cgi?id=1476
  [13] = http://curl.haxx.se/mail/lib-2015-02/0034.html
  [14] = http://curl.haxx.se/mail/lib-2015-01/0002.html
- 
+ [15] = https://github.com/bagder/curl/pull/139
