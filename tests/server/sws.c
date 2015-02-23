@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1427,6 +1427,7 @@ static void http_connect(curl_socket_t *infdp,
   int max_tunnel_idx; /* CTRL or DATA */
   int loop;
   int i;
+  int timeout_count=0;
 
   /* primary tunnel client endpoint already connected */
   clientfd[CTRL] = *infdp;
@@ -1455,7 +1456,7 @@ static void http_connect(curl_socket_t *infdp,
 
     fd_set input;
     fd_set output;
-    struct timeval timeout = {0, 250000L}; /* 250 ms */
+    struct timeval timeout = {1, 0}; /* 1000 ms */
     ssize_t rc;
     curl_socket_t maxfd = (curl_socket_t)-1;
 
@@ -1516,6 +1517,7 @@ static void http_connect(curl_socket_t *infdp,
     if(rc > 0) {
       /* socket action */
       bool tcp_fin_wr;
+      timeout_count=0;
 
       if(got_exit_signal)
         break;
@@ -1757,7 +1759,13 @@ static void http_connect(curl_socket_t *infdp,
         break;
 
     } /* (rc > 0) */
-
+    else {
+      timeout_count++;
+      if(timeout_count > 5) {
+        logmsg("CONNECT proxy timeout after %d idle seconds!", timeout_count);
+        break;
+      }
+    }
   }
 
 http_connect_cleanup:
