@@ -1439,10 +1439,8 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
           if(result == CURL_READFUNC_PAUSE)
             break;
 
-          if(result == 0) { /* no bytes, means end-of-file */
-            keepon = FALSE;
+          if(result == 0)                        /* no bytes */
             break;
-          }
 
           readfile_read = result; /* fall thru with number of bytes read */
         }
