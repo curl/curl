@@ -1918,11 +1918,9 @@ int Curl_nss_random(struct SessionHandle *data,
   if(data)
     Curl_nss_seed(data);  /* Initiate the seed if not already done */
 
-  if(SECSuccess != PK11_GenerateRandom(entropy, curlx_uztosi(length))) {
-    /* no way to signal a failure from here, we have to abort */
-    failf(data, "PK11_GenerateRandom() failed, calling abort()...");
-    abort();
-  }
+  if(SECSuccess != PK11_GenerateRandom(entropy, curlx_uztosi(length)))
+    /* signal a failure */
+    return -1;
 
   return 0;
 }
