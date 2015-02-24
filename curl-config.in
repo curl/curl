@@ -71,7 +71,7 @@ while test $# -gt 0; do
         ;;
 
     --ca)
-        echo "@CURL_CA_BUNDLE@"
+        echo @CURL_CA_BUNDLE@
         ;;
 
     --cc)
