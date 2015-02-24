@@ -1034,6 +1034,7 @@ static PRStatus nspr_io_close(PRFileDesc *fd)
   return close_fn(fd);
 }
 
+/* data might be NULL */
 static CURLcode nss_init_core(struct SessionHandle *data, const char *cert_dir)
 {
   NSSInitParameters initparams;
@@ -1071,6 +1072,7 @@ static CURLcode nss_init_core(struct SessionHandle *data, const char *cert_dir)
   return CURLE_SSL_CACERT_BADFILE;
 }
 
+/* data might be NULL */
 static CURLcode nss_init(struct SessionHandle *data)
 {
   char *cert_dir;
@@ -1149,12 +1151,14 @@ int Curl_nss_init(void)
   return 1;
 }
 
+/* data might be NULL */
 CURLcode Curl_nss_force_init(struct SessionHandle *data)
 {
   CURLcode result;
   if(!nss_initlock) {
-    failf(data, "unable to initialize NSS, curl_global_init() should have "
-                "been called with CURL_GLOBAL_SSL or CURL_GLOBAL_ALL");
+    if(data)
+      failf(data, "unable to initialize NSS, curl_global_init() should have "
+                  "been called with CURL_GLOBAL_SSL or CURL_GLOBAL_ALL");
     return CURLE_FAILED_INIT;
   }
 
@@ -1904,6 +1908,7 @@ size_t Curl_nss_version(char *buffer, size_t size)
   return snprintf(buffer, size, "NSS/%s", NSS_VERSION);
 }
 
+/* data might be NULL */
 int Curl_nss_seed(struct SessionHandle *data)
 {
   /* make sure that NSS is initialized */
@@ -1915,8 +1920,7 @@ int Curl_nss_random(struct SessionHandle *data,
                     unsigned char *entropy,
                     size_t length)
 {
-  if(data)
-    Curl_nss_seed(data);  /* Initiate the seed if not already done */
+  Curl_nss_seed(data);  /* Initiate the seed if not already done */
 
   if(SECSuccess != PK11_GenerateRandom(entropy, curlx_uztosi(length)))
     /* signal a failure */
