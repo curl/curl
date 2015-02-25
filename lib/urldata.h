@@ -262,9 +262,6 @@ struct ssl_connect_data {
      current state of the connection. */
   bool use;
   ssl_connection_state state;
-#ifdef USE_NGHTTP2
-  bool asked_for_h2;
-#endif
 #ifdef USE_OPENSSL
   /* these ones requires specific SSL-types */
   SSL_CTX* ctx;
