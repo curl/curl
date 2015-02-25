@@ -749,12 +749,13 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     return 0;
   }
 
-  DEBUGF(infof(conn->data, "nread=%zd\n", nread));
-
   if(nread == 0) {
-    failf(conn->data, "EOF");
-    return 0;
+    failf(conn->data, "Unexpected EOF");
+    *err = CURLE_RECV_ERROR;
+    return -1;
   }
+
+  DEBUGF(infof(conn->data, "nread=%zd\n", nread));
 
   rv = nghttp2_session_mem_recv(httpc->h2,
                                 (const uint8_t *)httpc->inbuf, nread);
