@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -81,7 +81,7 @@ static CURLcode http2_disconnect(struct connectdata *conn,
   struct http_conn *httpc = &conn->proto.httpc;
   (void)dead_connection;
 
-  infof(conn->data, "HTTP/2 DISCONNECT starts now\n");
+  DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT starts now\n"));
 
   nghttp2_session_del(httpc->h2);
 
@@ -90,7 +90,7 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 
   Curl_safefree(httpc->inbuf);
 
-  infof(conn->data, "HTTP/2 DISCONNECT done\n");
+  DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
 
   return CURLE_OK;
 }
@@ -195,8 +195,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 
   (void)session;
   (void)frame;
-  infof(conn->data, "on_frame_recv() was called with header %x\n",
-        frame->hd.type);
+  DEBUGF(infof(conn->data, "on_frame_recv() was called with header %x\n",
+               frame->hd.type));
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
     /* If body started, then receiving DATA is illegal. */
@@ -280,8 +280,9 @@ static int on_invalid_frame_recv(nghttp2_session *session,
   struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
   (void)frame;
-  infof(conn->data, "on_invalid_frame_recv() was called, error_code = %d\n",
-        error_code);
+  DEBUGF(infof(conn->data,
+               "on_invalid_frame_recv() was called, error_code = %d\n",
+               error_code));
   return 0;
 }
 
@@ -295,8 +296,8 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   (void)session;
   (void)flags;
   (void)data;
-  infof(conn->data, "on_data_chunk_recv() "
-        "len = %u, stream = %x\n", len, stream_id);
+  DEBUGF(infof(conn->data, "on_data_chunk_recv() "
+               "len = %u, stream = %x\n", len, stream_id));
 
   if(stream_id != c->stream_id) {
     return 0;
@@ -308,7 +309,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   c->mem += nread;
   c->len -= nread;
 
-  infof(conn->data, "%zu data written\n", nread);
+  DEBUGF(infof(conn->data, "%zu data written\n", nread));
 
   if(nread < len) {
     c->data = data + nread;
@@ -325,7 +326,7 @@ static int before_frame_send(nghttp2_session *session,
   struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
   (void)frame;
-  infof(conn->data, "before_frame_send() was called\n");
+  DEBUGF(infof(conn->data, "before_frame_send() was called\n"));
   return 0;
 }
 static int on_frame_send(nghttp2_session *session,
@@ -335,7 +336,7 @@ static int on_frame_send(nghttp2_session *session,
   struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
   (void)frame;
-  infof(conn->data, "on_frame_send() was called\n");
+  DEBUGF(infof(conn->data, "on_frame_send() was called\n"));
   return 0;
 }
 static int on_frame_not_send(nghttp2_session *session,
@@ -345,8 +346,9 @@ static int on_frame_not_send(nghttp2_session *session,
   struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
   (void)frame;
-  infof(conn->data, "on_frame_not_send() was called, lib_error_code = %d\n",
-        lib_error_code);
+  DEBUGF(infof(conn->data,
+               "on_frame_not_send() was called, lib_error_code = %d\n",
+               lib_error_code));
   return 0;
 }
 static int on_stream_close(nghttp2_session *session, int32_t stream_id,
@@ -356,8 +358,8 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   struct http_conn *c = &conn->proto.httpc;
   (void)session;
   (void)stream_id;
-  infof(conn->data, "on_stream_close() was called, error_code = %d\n",
-        error_code);
+  DEBUGF(infof(conn->data, "on_stream_close() was called, error_code = %d\n",
+               error_code));
 
   if(stream_id != c->stream_id) {
     return 0;
@@ -374,7 +376,7 @@ static int on_begin_headers(nghttp2_session *session,
   struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
   (void)frame;
-  infof(conn->data, "on_begin_headers() was called\n");
+  DEBUGF(infof(conn->data, "on_begin_headers() was called\n"));
   return 0;
 }
 
@@ -719,7 +721,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     httpc->data += nread;
     httpc->datalen -= nread;
 
-    infof(conn->data, "%zu data written\n", nread);
+    infof(conn->data, "%zu data bytes written\n", nread);
     if(httpc->datalen == 0) {
       httpc->data = NULL;
       httpc->datalen = 0;
@@ -747,7 +749,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     return 0;
   }
 
-  infof(conn->data, "nread=%zd\n", nread);
+  DEBUGF(infof(conn->data, "nread=%zd\n", nread));
 
   if(nread == 0) {
     failf(conn->data, "EOF");
@@ -763,7 +765,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     *err = CURLE_RECV_ERROR;
     return 0;
   }
-  infof(conn->data, "nghttp2_session_mem_recv() returns %zd\n", rv);
+  DEBUGF(infof(conn->data, "nghttp2_session_mem_recv() returns %zd\n", rv));
   /* Always send pending frames in nghttp2 session, because
      nghttp2_session_mem_recv() may queue new frame */
   rv = nghttp2_session_send(httpc->h2);
@@ -812,7 +814,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
 
   (void)sockindex;
 
-  infof(conn->data, "http2_send len=%zu\n", len);
+  DEBUGF(infof(conn->data, "http2_send len=%zu\n", len));
 
   if(httpc->stream_id != -1) {
     /* If stream_id != -1, we have dispatched request HEADERS, and now
@@ -908,7 +910,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
         httpc->upload_left *= 10;
         httpc->upload_left += nva[i].value[j] - '0';
       }
-      infof(conn->data, "request content-length=%zu\n", httpc->upload_left);
+      DEBUGF(infof(conn->data,
+                   "request content-length=%zu\n", httpc->upload_left));
     }
   }
 
