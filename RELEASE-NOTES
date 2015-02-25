@@ -82,6 +82,8 @@ This release includes the following bugfixes:
  o cmake: fix winsock2 detection on windows
  o gnutls: fix build with HTTP2
  o connect: fix a spurious connect failure on dual-stacked hosts [16]
+ o test: test 530 is now less timing dependent
+ o telnet: invalid use of custom read function if not set
 
 This release includes the following known bugs:
 
