@@ -365,6 +365,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
     return 0;
   }
 
+  c->error_code = error_code;
   c->closed = TRUE;
 
   return 0;
@@ -783,6 +784,13 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     /* Reset to FALSE to prevent infinite loop in readwrite_data
        function. */
     httpc->closed = FALSE;
+    if(httpc->error_code != NGHTTP2_NO_ERROR) {
+      failf(conn->data,
+            "HTTP/2 stream = %x was not closed cleanly: error_code = %d",
+            httpc->stream_id, httpc->error_code);
+      *err = CURLE_HTTP2;
+      return -1;
+    }
     return 0;
   }
   *err = CURLE_AGAIN;
@@ -980,6 +988,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 
   infof(conn->data, "Using HTTP2\n");
   httpc->bodystarted = FALSE;
+  httpc->error_code = NGHTTP2_NO_ERROR;
   httpc->closed = FALSE;
   httpc->header_recvbuf = Curl_add_buffer_init();
   httpc->nread_header_recvbuf = 0;
