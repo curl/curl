@@ -239,6 +239,10 @@ rem
       for /f "delims=" %%h in ('dir /b ..\lib\*.h') do call :element %1 lib "%%h" %3
     ) else if "!var!" == "CURL_LIB_RC_FILES" (
       for /f "delims=" %%r in ('dir /b ..\lib\*.rc') do call :element %1 lib "%%r" %3
+    ) else if "!var!" == "CURL_LIB_VAUTH_C_FILES" (
+      for /f "delims=" %%c in ('dir /b ..\lib\vauth\*.c') do call :element %1 lib\vauth "%%c" %3
+    ) else if "!var!" == "CURL_LIB_VAUTH_H_FILES" (
+      for /f "delims=" %%h in ('dir /b ..\lib\vauth\*.h') do call :element %1 lib\vauth "%%h" %3
     ) else if "!var!" == "CURL_LIB_VTLS_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\vtls\*.c') do call :element %1 lib\vtls "%%c" %3
     ) else if "!var!" == "CURL_LIB_VTLS_H_FILES" (
@@ -255,13 +259,15 @@ rem Generates a single file xml element.
 rem
 rem %1 - Project Type (dsp for VC6, vcproj1 for VC7 and VC7.1, vcproj2 for VC8 and VC9
 rem      or vcxproj for VC10, VC11 and VC12)
-rem %2 - Directory (src, lib or lib\vtls)
+rem %2 - Directory (src, lib, lib\vauth or lib\vtls)
 rem %3 - Source filename
 rem %4 - Output project file
 rem
 :element
   set "SPACES=    "
-  if "%2" == "lib\vtls" (
+  if "%2" == "lib\vauth" (
+    set "TABS=				"
+  ) else if "%2" == "lib\vtls" (
     set "TABS=				"
   ) else (
     set "TABS=			"
