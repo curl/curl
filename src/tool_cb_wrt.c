@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,13 +55,14 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
 #ifdef DEBUGBUILD
   if(config->include_headers) {
     if(sz * nmemb > (size_t)CURL_MAX_HTTP_HEADER) {
-      warnf(config, "Header data size exceeds single call write limit!\n");
+      warnf(config->global, "Header data size exceeds single call write "
+            "limit!\n");
       return failure;
     }
   }
   else {
     if(sz * nmemb > (size_t)CURL_MAX_WRITE_SIZE) {
-      warnf(config, "Data size exceeds single call write limit!\n");
+      warnf(config->global, "Data size exceeds single call write limit!\n");
       return failure;
     }
   }
@@ -90,7 +91,7 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
         check_fails = TRUE;
     }
     if(check_fails) {
-      warnf(config, "Invalid output struct data for write callback\n");
+      warnf(config->global, "Invalid output struct data for write callback\n");
       return failure;
     }
   }
@@ -100,7 +101,7 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
     FILE *file;
 
     if(!outs->filename || !*outs->filename) {
-      warnf(config, "Remote filename has no length!\n");
+      warnf(config->global, "Remote filename has no length!\n");
       return failure;
     }
 
@@ -109,7 +110,7 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
       file = fopen(outs->filename, "rb");
       if(file) {
         fclose(file);
-        warnf(config, "Refusing to overwrite %s: %s\n", outs->filename,
+        warnf(config->global, "Refusing to overwrite %s: %s\n", outs->filename,
               strerror(EEXIST));
         return failure;
       }
@@ -118,7 +119,7 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
     /* open file for writing */
     file = fopen(outs->filename, "wb");
     if(!file) {
-      warnf(config, "Failed to create the file %s: %s\n", outs->filename,
+      warnf(config->global, "Failed to create the file %s: %s\n", outs->filename,
             strerror(errno));
       return failure;
     }
@@ -149,4 +150,3 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
 
   return rc;
 }
-

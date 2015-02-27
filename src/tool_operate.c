@@ -320,7 +320,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
     if(!curlx_strequal(config->headerfile, "-")) {
       FILE *newfile = fopen(config->headerfile, "wb");
       if(!newfile) {
-        warnf(config, "Failed to open %s\n", config->headerfile);
+        warnf(config->global, "Failed to open %s\n", config->headerfile);
         result = CURLE_WRITE_ERROR;
         goto quit_curl;
       }
@@ -565,7 +565,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             Curl_safefree(storefile);
             if(result) {
               /* bad globbing */
-              warnf(config, "bad output glob!\n");
+              warnf(config->global, "bad output glob!\n");
               goto quit_urls;
             }
           }
@@ -710,7 +710,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
            * we should warn him/her.
            */
           if(config->proxyanyauth || (authbits>1)) {
-            warnf(config,
+            warnf(config->global,
                   "Using --anyauth or --proxy-anyauth with upload from stdin"
                   " involves a big risk of it not working. Use a temporary"
                   " file or a fixed auth type instead!\n");
@@ -722,7 +722,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           set_binmode(stdin);
           if(curlx_strequal(uploadfile, ".")) {
             if(curlx_nonblock((curl_socket_t)infd, TRUE) < 0)
-              warnf(config,
+              warnf(config->global,
                     "fcntl failed on fd=%d: %s\n", infd, strerror(errno));
           }
         }
@@ -1091,8 +1091,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_COOKIESESSION, config->cookiesession?1L:0L);
 #else
         if(config->cookie || config->cookiefile || config->cookiejar) {
-          warnf(config, "cookie option(s) used even though cookie support "
-                "is disabled!\n");
+          warnf(config->global, "cookie option(s) used even though cookie "
+                "support is disabled!\n");
           return CURLE_NOT_BUILT_IN;
         }
 #endif
@@ -1250,8 +1250,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
           if(config->alivetime != 0) {
 #if !defined(TCP_KEEPIDLE) || !defined(TCP_KEEPINTVL)
-            warnf(config, "Keep-alive functionality somewhat crippled due to "
-                "missing support in your operating system!\n");
+            warnf(config->global, "Keep-alive functionality somewhat crippled "
+                "due to missing support in your operating system!\n");
 #endif
             my_setopt(curl, CURLOPT_TCP_KEEPIDLE, config->alivetime);
             my_setopt(curl, CURLOPT_TCP_KEEPINTVL, config->alivetime);
@@ -1454,7 +1454,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
               static const char * const m[]={
                 NULL, "timeout", "HTTP error", "FTP error"
               };
-              warnf(config, "Transient problem: %s "
+
+              warnf(config->global, "Transient problem: %s "
                     "Will retry in %ld seconds. "
                     "%ld retries left.\n",
                     m[retry], retry_sleep/1000L, retry_numretries);
@@ -1597,7 +1598,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(!result && config->xattr && outs.fopened && outs.stream) {
           int rc = fwrite_xattr(curl, fileno(outs.stream));
           if(rc)
-            warnf(config, "Error setting extended attributes: %s\n",
+            warnf(config->global, "Error setting extended attributes: %s\n",
                   strerror(errno));
         }
 
@@ -1855,9 +1856,6 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 #ifndef CURL_DISABLE_LIBCURL_OPTION
         /* Cleanup the libcurl source output */
         easysrc_cleanup();
-
-        /* set current back to first so that isn't NULL */
-        config->current = config->first;
 
         /* Dump the libcurl code if previously enabled */
         dumpeasysrc(config);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,9 +38,9 @@
  * mute (--silent) was selected.
  */
 
-void warnf(struct OperationConfig *config, const char *fmt, ...)
+void warnf(struct GlobalConfig *config, const char *fmt, ...)
 {
-  if(!config->global->mute) {
+  if(!config->mute) {
     va_list ap;
     int len;
     char *ptr;
@@ -52,7 +52,7 @@ void warnf(struct OperationConfig *config, const char *fmt, ...)
 
     ptr = print_buffer;
     while(len > 0) {
-      fputs(WARN_PREFIX, config->global->errors);
+      fputs(WARN_PREFIX, config->errors);
 
       if(len > (int)WARN_TEXTWIDTH) {
         int cut = WARN_TEXTWIDTH-1;
@@ -65,13 +65,13 @@ void warnf(struct OperationConfig *config, const char *fmt, ...)
              max text width then! */
           cut = WARN_TEXTWIDTH-1;
 
-        (void)fwrite(ptr, cut + 1, 1, config->global->errors);
-        fputs("\n", config->global->errors);
+        (void)fwrite(ptr, cut + 1, 1, config->errors);
+        fputs("\n", config->errors);
         ptr += cut+1; /* skip the space too */
         len -= cut;
       }
       else {
-        fputs(ptr, config->global->errors);
+        fputs(ptr, config->errors);
         len = 0;
       }
     }

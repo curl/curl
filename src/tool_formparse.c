@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -206,7 +206,7 @@ int formparse(struct OperationConfig *config,
             /* verify that this is a fine type specifier */
             if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
                            type_major, type_minor)) {
-              warnf(config, "Illegally formatted content-type field!\n");
+              warnf(config->global, "Illegally formatted content-type field!\n");
               Curl_safefree(contents);
               FreeMultiInfo(&multi_start, &multi_current);
               return 2; /* illegal content-type syntax! */
@@ -246,7 +246,7 @@ int formparse(struct OperationConfig *config,
             semicolon = (';' == *ptr) ? TRUE : FALSE;
             if(*unknown) {
               *word_end = '\0';
-              warnf(config, "skip unknown form field: %s\n", unknown);
+              warnf(config->global, "skip unknown form field: %s\n", unknown);
             }
           }
         }
@@ -257,7 +257,7 @@ int formparse(struct OperationConfig *config,
 
         if(*contp && !AddMultiFiles(contp, type, filename, &multi_start,
                           &multi_current)) {
-          warnf(config, "Error building form post!\n");
+          warnf(config->global, "Error building form post!\n");
           Curl_safefree(contents);
           FreeMultiInfo(&multi_start, &multi_current);
           return 3;
@@ -291,7 +291,7 @@ int formparse(struct OperationConfig *config,
         if(curl_formadd(httppost, last_post,
                         CURLFORM_COPYNAME, name,
                         CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {
-          warnf(config, "curl_formadd failed!\n");
+          warnf(config->global, "curl_formadd failed!\n");
           Curl_safefree(forms);
           Curl_safefree(contents);
           return 5;
@@ -323,8 +323,8 @@ int formparse(struct OperationConfig *config,
 
         if(curl_formadd(httppost, last_post,
                         CURLFORM_ARRAY, info, CURLFORM_END ) != 0) {
-          warnf(config, "curl_formadd failed, possibly the file %s is bad!\n",
-                contp+1);
+          warnf(config->global, "curl_formadd failed, possibly the file %s is "
+                "bad!\n", contp + 1);
           Curl_safefree(contents);
           return 6;
         }
@@ -332,7 +332,7 @@ int formparse(struct OperationConfig *config,
       else {
 #ifdef CURL_DOES_CONVERSIONS
         if(convert_to_network(contp, strlen(contp))) {
-          warnf(config, "curl_formadd failed!\n");
+          warnf(config->global, "curl_formadd failed!\n");
           Curl_safefree(contents);
           return 7;
         }
@@ -343,7 +343,7 @@ int formparse(struct OperationConfig *config,
         info[i].option = CURLFORM_END;
         if(curl_formadd(httppost, last_post,
                         CURLFORM_ARRAY, info, CURLFORM_END) != 0) {
-          warnf(config, "curl_formadd failed!\n");
+          warnf(config->global, "curl_formadd failed!\n");
           Curl_safefree(contents);
           return 8;
         }
@@ -352,10 +352,9 @@ int formparse(struct OperationConfig *config,
 
   }
   else {
-    warnf(config, "Illegally formatted input field!\n");
+    warnf(config->global, "Illegally formatted input field!\n");
     return 1;
   }
   Curl_safefree(contents);
   return 0;
 }
-
