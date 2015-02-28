@@ -119,8 +119,8 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
     /* open file for writing */
     file = fopen(outs->filename, "wb");
     if(!file) {
-      warnf(config->global, "Failed to create the file %s: %s\n", outs->filename,
-            strerror(errno));
+      warnf(config->global, "Failed to create the file %s: %s\n",
+            outs->filename, strerror(errno));
       return failure;
     }
     outs->s_isreg = TRUE;
