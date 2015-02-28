@@ -12,6 +12,17 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o sws: timeout idle CONNECT connections
+ o nss: improve error handling in Curl_nss_random()
+ o nss: do not skip Curl_nss_seed() if data is NULL
+ o curl-config.in: eliminate double quotes around CURL_CA_BUNDLE
+ o http2: move lots of verbose output to be debug-only
+ o dist: add extern-scan.pl to the tarball
+ o http2: return recv error on unexpected EOF [1]
+ o build: Use default RandomizedBaseAddress directive in VC9+ project files
+ o build: Removed DataExecutionPrevention directive from VC9+ project files
+ o tool: Updated the warnf() function to use the GlobalConfig structure
+ o http2: Return error if stream was closed with other than NO_ERROR
  o
 
 This release includes the following known bugs:
@@ -21,10 +32,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Daniel Stenberg, Kamil Dudka, Steve Holme, Tatsuhiro Tsujikawa
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = http://curl.haxx.se/bug/view.cgi?id=1487
+ [2] =
