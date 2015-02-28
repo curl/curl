@@ -50,7 +50,7 @@ The default value is NULL, which means that there is no blacklist.
     NULL
   };
 
-  curl_multi_setopt(m, CURLMOPT_PIPELINE_SERVER_BL, server_blacklist);
+  curl_multi_setopt(m, CURLMOPT_PIPELINING_SERVER_BL, server_blacklist);
 .fi
 .SH AVAILABILITY
 Added in 7.30.0

@@ -46,7 +46,7 @@ HTTP(S)
     NULL
   };
 
-  curl_multi_setopt(m, CURLMOPT_PIPELINE_SITE_BL, site_blacklist);
+  curl_multi_setopt(m, CURLMOPT_PIPELINING_SITE_BL, site_blacklist);
 .fi
 .SH AVAILABILITY
 Added in 7.30.0
