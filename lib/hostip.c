@@ -849,19 +849,27 @@ CURLcode Curl_loadhostpairs(struct SessionHandle *data)
       /* free the allocated entry_id again */
       free(entry_id);
 
-      if(!dns) {
-        /* if not in the cache already, put this host in the cache */
-        dns = Curl_cache_addr(data, addr, hostname, port);
-        if(dns) {
-          dns->timestamp = 0; /* mark as added by CURLOPT_RESOLVE */
-          /* release the returned reference; the cache itself will keep the
-           * entry alive: */
-          dns->inuse--;
+      if(dns) {
+        /* search the entry's address list for addr */
+        Curl_addrinfo *ai = dns->addr;
+        for(;;) {
+          if(Curl_ai_is_equal(ai, addr)) {
+            /* addr is a duplicate, discard it */
+            Curl_freeaddrinfo(addr);
+            addr = NULL;
+            break;
+          }
+          if(!ai->ai_next)
+            break;
+          ai = ai->ai_next;
         }
+        if(addr)
+          /* addr is not a duplicate, append it */
+          ai->ai_next = addr;
       }
       else
-        /* this is a duplicate, free it again */
-        Curl_freeaddrinfo(addr);
+        /* host doesn't have a cache entry, make one */
+        dns = Curl_cache_addr(data, addr, hostname, port);
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
@@ -870,8 +878,8 @@ CURLcode Curl_loadhostpairs(struct SessionHandle *data)
         Curl_freeaddrinfo(addr);
         return CURLE_OUT_OF_MEMORY;
       }
-      infof(data, "Added %s:%d:%s to DNS cache\n",
-            hostname, port, address);
+      if(addr)
+        infof(data, "Added %s:%d:%s to DNS cache\n", hostname, port, address);
     }
   }
   data->change.resolve = NULL; /* dealt with now */
