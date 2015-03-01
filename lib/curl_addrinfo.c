@@ -556,3 +556,54 @@ curl_dogetaddrinfo(const char *hostname,
 }
 #endif /* defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) */
 
+/*
+ * Curl_ai_is_equal()
+ *
+ * This function compares two Curl_addrinfo structures: Family, socktype,
+ * protocol and sockaddr members are compared.
+ * The comparison is for the single ai nodes, not their respective lists.
+ *
+ * [in] 'ai1', 'ai2' : The structures to compare.
+ * [return] (1) : The structures are equal.
+ * [return] (0) : The structures are not equal.
+ */
+
+int
+Curl_ai_is_equal(Curl_addrinfo *ai1, Curl_addrinfo *ai2)
+{
+  if(!ai1 && !ai2)
+    return 1;
+
+  if(!ai1 || !ai2
+     || (ai1->ai_family != ai2->ai_family)
+     || (ai1->ai_socktype != ai2->ai_socktype)
+     || (ai1->ai_protocol != ai2->ai_protocol))
+    return 0;
+
+  switch(ai1->ai_family) {
+  case AF_INET:
+    if(((struct sockaddr_in *)ai1->ai_addr)->sin_addr.s_addr
+       != ((struct sockaddr_in *)ai2->ai_addr)->sin_addr.s_addr)
+      return 0;
+    break;
+#ifdef ENABLE_IPV6
+  case AF_INET6:
+    if(memcmp((&((struct sockaddr_in6 *)ai1->ai_addr)->sin6_addr),
+              (&((struct sockaddr_in6 *)ai2->ai_addr)->sin6_addr), 16))
+      return 0;
+    break;
+#endif
+#ifdef USE_UNIX_SOCKETS
+  case AF_UNIX:
+    if(strncmp(((struct sockaddr_un *)ai1->ai_addr)->sun_path,
+               ((struct sockaddr_un *)ai2->ai_addr)->sun_path,
+               sizeof(((struct sockaddr_un *)ai1->ai_addr)->sun_path)))
+      return 0;
+    break;
+#endif
+  default:
+    return 0;
+  }
+
+  return 1;
+}

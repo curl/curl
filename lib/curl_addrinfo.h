@@ -98,4 +98,7 @@ curl_dogetaddrinfo(const char *hostname,
                    int line, const char *source);
 #endif
 
+int
+Curl_ai_is_equal(Curl_addrinfo *ai1, Curl_addrinfo *ai2);
+
 #endif /* HEADER_CURL_ADDRINFO_H */
