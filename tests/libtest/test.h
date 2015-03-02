@@ -40,6 +40,10 @@
 #  include "select.h"
 #endif
 
+#define _MPRINTF_REPLACE
+#include <curl/mprintf.h>
+
+
 #define test_setopt(A,B,C) \
   if((res = curl_easy_setopt((A),(B),(C))) != CURLE_OK) goto test_cleanup
 

@@ -37,8 +37,6 @@
 #  include <fcntl.h>
 #endif
 
-#include <curl/mprintf.h>
-
 #include "warnless.h"
 #include "memdebug.h"
 

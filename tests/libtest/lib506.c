@@ -20,9 +20,6 @@
  *
  ***************************************************************************/
 #include "test.h"
-
-#include <curl/mprintf.h>
-
 #include "memdebug.h"
 
 static const char *HOSTHEADER = "Host: www.host.foo.com";
