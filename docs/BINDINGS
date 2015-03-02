@@ -90,6 +90,11 @@ Guile:
   Written by Michael L. Gran
   http://www.lonelycactus.com/guile-curl.html
 
+Harbour
+
+  Written by Viktor SzakÃ¡ts
+  https://github.com/vszakats/harbour-core/tree/master/contrib/hbcurl
+
 Haskell
 
   Written by Galois, Inc
@@ -115,7 +120,7 @@ Lua
   luacurl by Alexander Marinov
   http://luacurl.luaforge.net/
 
-  Lua-cURL by Jürgen Hötzel
+  Lua-cURL by JÃ¼rgen HÃ¶tzel
   http://luaforge.net/projects/lua-curl/
 
 Mono
@@ -219,7 +224,7 @@ SPL
 
 Tcl
 
-  Tclcurl by Andrés García
+  Tclcurl by AndrÃ©s GarcÃ­a
   http://mirror.yellow5.com/tclcurl/
 
 Visual Basic
