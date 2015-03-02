@@ -28,8 +28,6 @@
 #include <fcntl.h>
 #endif
 
-#include <curl/mprintf.h>
-
 #include "memdebug.h"
 
 /* build request url */

@@ -20,9 +20,6 @@
  *
  ***************************************************************************/
 #include "test.h"
-
-#include <curl/mprintf.h>
-
 #include "memdebug.h"
 
 /* build request url */
