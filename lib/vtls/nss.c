@@ -38,10 +38,7 @@
 #include "select.h"
 #include "vtls.h"
 #include "llist.h"
-
-#define _MPRINTF_REPLACE /* use the internal *printf() functions */
-#include <curl/mprintf.h>
-
+#include "curl_printf.h"
 #include "nssg.h"
 #include <nspr.h>
 #include <nss.h>

@@ -49,9 +49,7 @@
 #include "vtls.h"
 #include "rawstr.h"
 #include "hostcheck.h"
-
-#define _MPRINTF_REPLACE /* use the internal *printf() functions */
-#include <curl/mprintf.h>
+#include "curl_printf.h"
 
 #ifdef USE_SSLEAY
 
