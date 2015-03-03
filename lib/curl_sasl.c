@@ -45,9 +45,7 @@
 #include "rawstr.h"
 #include "sendf.h"
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
+#include "curl_printf.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"

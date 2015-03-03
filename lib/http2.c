@@ -23,9 +23,7 @@
 #include "curl_setup.h"
 
 #ifdef USE_NGHTTP2
-#define _MPRINTF_REPLACE
-#include <curl/mprintf.h>
-
+#include "curl_printf.h"
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
 #include "http2.h"

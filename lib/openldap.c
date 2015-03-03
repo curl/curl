@@ -5,8 +5,8 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, 2013, Howard Chu, <hyc@openldap.org>
- * Copyright (C) 2011 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
+ * Copyright (C) 2011 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,10 +47,7 @@
 #include "curl_memory.h"
 #include "curl_base64.h"
 #include "connect.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
+#include "curl_printf.h"
 #include "memdebug.h"
 
 #ifndef _LDAP_PVT_H

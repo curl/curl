@@ -64,7 +64,8 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   curl_ntlm.h curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h             \
   curl_ntlm_msgs.h curl_sasl.h curl_multibyte.h hostcheck.h bundles.h   \
   conncache.h curl_setup_once.h multihandle.h setup-vms.h pipeline.h    \
-  dotdot.h x509asn1.h http2.h sigpipe.h smb.h curl_endian.h curl_des.h
+  dotdot.h x509asn1.h http2.h sigpipe.h smb.h curl_endian.h curl_des.h  \
+  curl_printf.h
 
 LIB_RCFILES = libcurl.rc
 

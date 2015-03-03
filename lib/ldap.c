@@ -77,10 +77,7 @@
 #include "curl_base64.h"
 #include "rawstr.h"
 #include "connect.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
+#include "curl_printf.h"
 #include "memdebug.h"
 
 #ifndef HAVE_LDAP_URL_PARSE

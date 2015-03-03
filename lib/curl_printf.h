@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_PRINTF_H
+#define HEADER_CURL_PRINTF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -5,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,31 +22,19 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+/*
+ * This header should be included by ALL code in libcurl that uses any
+ * *rintf() functions.
+ */
 
-#include "strdup.h"
-#include "fileinfo.h"
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
 
-struct curl_fileinfo *Curl_fileinfo_alloc(void)
-{
-  struct curl_fileinfo *tmp = malloc(sizeof(struct curl_fileinfo));
-  if(!tmp)
-    return NULL;
-  memset(tmp, 0, sizeof(struct curl_fileinfo));
-  return tmp;
-}
+/* We define away the sprintf functions unconditonally since we don't want
+   internal code to be using them, intentionally or by mistake!*/
+# undef sprintf
+# undef vsprintf
+# define sprintf sprintf_was_used
+# define vsprintf vsprintf_was_used
 
-void Curl_fileinfo_dtor(void *user, void *element)
-{
-  struct curl_fileinfo *finfo = element;
-  (void) user;
-  if(!finfo)
-    return;
-
-  Curl_safefree(finfo->b_data);
-
-  free(finfo);
-}
+#endif /* HEADER_CURL_PRINTF_H */
