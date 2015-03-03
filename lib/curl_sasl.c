@@ -78,9 +78,6 @@ const struct {
 #define DIGEST_QOP_VALUE_STRING_AUTH_INT  "auth-int"
 #define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
 
-#define DIGEST_MAX_VALUE_LENGTH           256
-#define DIGEST_MAX_CONTENT_LENGTH         1024
-
 /* The CURL_OUTPUT_DIGEST_CONV macro below is for non-ASCII machines.
    It converts digest text to ASCII so the MD5 will be correct for
    what ultimately goes over the network.
@@ -92,13 +89,16 @@ const struct {
     return result; \
   }
 
+#endif
+
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
 /*
  * Returns 0 on success and then the buffers are filled in fine.
  *
  * Non-zero means failure to parse.
  */
-static int sasl_digest_get_pair(const char *str, char *value, char *content,
-                                const char **endptr)
+int sasl_digest_get_pair(const char *str, char *value, char *content,
+                         const char **endptr)
 {
   int c;
   bool starts_with_quote = FALSE;
@@ -159,7 +159,9 @@ static int sasl_digest_get_pair(const char *str, char *value, char *content,
 
   return 0; /* all is fine! */
 }
+#endif
 
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_WINDOWS_SSPI)
 /* Convert md5 chunk to RFC2617 (section 3.1.3) -suitable ascii string*/
 static void sasl_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
                                      unsigned char *dest) /* 33 bytes */
