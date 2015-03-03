@@ -55,9 +55,6 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#define _MPRINTF_REPLACE
-#include <curl/mprintf.h>
-
 #include "tool_getpass.h"
 
 #include "memdebug.h" /* keep this as LAST include */
