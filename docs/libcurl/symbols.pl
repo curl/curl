@@ -71,7 +71,7 @@ while(<F>) {
         my $dep;
 
         # is there removed info?
-        if($vers =~ /([\d.]+)[ \t-]+([\d.]+)[ \t]+([\d.]+)/) {
+        if($vers =~ /([\d.]+)[ \t-]+([\d.-]+)[ \t]+([\d.]+)/) {
             ($intr, $dep, $rm)=($1, $2, $3);
         }
         # is it a dep-only line?
