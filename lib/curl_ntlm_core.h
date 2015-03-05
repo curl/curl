@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,7 +28,7 @@
 
 #if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
-#ifdef USE_SSLEAY
+#ifdef USE_OPENSSL
 #  if !defined(OPENSSL_VERSION_NUMBER) && \
       !defined(HEADER_SSL_H) && !defined(HEADER_MD5_H)
 #    error "curl_ntlm_core.h shall not be included before OpenSSL headers."

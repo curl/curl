@@ -909,9 +909,6 @@
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
-/* if SSL is enabled */
-#cmakedefine USE_SSLEAY 1
-
 /* if Unix domain sockets are enabled  */
 #cmakedefine USE_UNIX_SOCKETS
 

@@ -243,7 +243,7 @@ ifdef SSL
     OPENSSL_LIBS += -lgdi32 -lcrypt32
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
-  CFLAGS += -DUSE_SSLEAY -DUSE_OPENSSL
+  CFLAGS += -DUSE_OPENSSL
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
 endif
 ifdef ZLIB

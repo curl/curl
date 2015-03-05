@@ -808,10 +808,4 @@
 #define HAVE_ZLIB_H 1
 #endif
 
-/* Enable appropriate definitions only when OpenSSL support is enabled */
-#ifdef USE_SSLEAY
-/* if OpenSSL is in use */
-#define USE_OPENSSL
-#endif
-
 #endif /* HEADER_CURL_CONFIG_SYMBIAN_H */

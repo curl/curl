@@ -132,12 +132,11 @@
   #define HAVE_LIBZ              1
 #endif
 
-/* USE_SSLEAY on cmd-line */
-#ifdef USE_SSLEAY
+/* USE_OPENSSL on cmd-line */
+#ifdef USE_OPENSSL
   #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
   #define HAVE_OPENSSL_ENGINE_H  1
   #define OPENSSL_NO_KRB5        1
-  #define USE_OPENSSL            1
 #endif
 
 /* to disable LDAP */

@@ -32,6 +32,8 @@
 
 #include "curl_setup.h"
 
+#ifdef USE_OPENSSL
+
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -51,9 +53,7 @@
 #include "hostcheck.h"
 #include "curl_printf.h"
 
-#ifdef USE_SSLEAY
-
-#ifdef USE_OPENSSL
+#include <openssl/ssl.h>
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
 #include <openssl/dsa.h>
@@ -62,13 +62,14 @@
 #include <openssl/md5.h>
 #include <openssl/conf.h>
 #include <openssl/bn.h>
+#include <openssl/rsa.h>
+
+#ifdef HAVE_OPENSSL_PKCS12_H
+#include <openssl/pkcs12.h>
+#endif
+
 #ifndef HAVE_BORINGSSL
 #include <openssl/ocsp.h>
-#endif
-#else
-#include <rand.h>
-#include <x509v3.h>
-#include <md5.h>
 #endif
 
 #include "warnless.h"
@@ -80,10 +81,6 @@
 
 #ifndef OPENSSL_VERSION_NUMBER
 #error "OPENSSL_VERSION_NUMBER not defined"
-#endif
-
-#if !defined(SSLEAY_VERSION_NUMBER)
-#define SSLEAY_VERSION_NUMBER OPENSSL_VERSION_NUMBER
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090581fL
@@ -113,7 +110,7 @@
 /* OpenSSL has PKCS 12 support, BoringSSL does not */
 #define HAVE_PKCS12_SUPPORT
 #else
-/* OpenSSL/SSLEay does not have PKCS12 support */
+/* OpenSSL does not have PKCS12 support */
 #undef HAVE_PKCS12_SUPPORT
 #endif
 
@@ -741,9 +738,6 @@ static char *SSL_strerror(unsigned long error, char *buf, size_t size)
   return buf;
 }
 
-#endif /* USE_SSLEAY */
-
-#ifdef USE_SSLEAY
 /**
  * Global SSL init
  *
@@ -784,10 +778,6 @@ int Curl_ossl_init(void)
 
   return 1;
 }
-
-#endif /* USE_SSLEAY */
-
-#ifdef USE_SSLEAY
 
 /* Global cleanup */
 void Curl_ossl_cleanup(void)
@@ -843,7 +833,7 @@ int Curl_ossl_check_cxn(struct connectdata *conn)
  */
 CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine)
 {
-#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *e;
 
 #if OPENSSL_VERSION_NUMBER >= 0x00909000L
@@ -911,7 +901,7 @@ CURLcode Curl_ossl_set_engine_default(struct SessionHandle *data)
 struct curl_slist *Curl_ossl_engines_list(struct SessionHandle *data)
 {
   struct curl_slist *list = NULL;
-#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_ENGINE_H)
   struct curl_slist *beg;
   ENGINE *e;
 
@@ -1447,7 +1437,7 @@ end:
 }
 #endif
 
-#endif /* USE_SSLEAY */
+#endif /* USE_OPENSSL */
 
 /* The SSL_CTRL_SET_MSG_CALLBACK doesn't exist in ancient OpenSSL versions
    and thus this cannot be done there. */
@@ -1592,7 +1582,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 }
 #endif
 
-#ifdef USE_SSLEAY
+#ifdef USE_OPENSSL
 /* ====================================================== */
 
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
@@ -3109,7 +3099,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   return snprintf(buffer, size, "BoringSSL");
 #else /* OPENSSL_IS_BORINGSSL */
 
-#if(SSLEAY_VERSION_NUMBER >= 0x905000)
+#if(OPENSSL_VERSION_NUMBER >= 0x905000)
   {
     char sub[3];
     unsigned long ssleay_value;
@@ -3148,31 +3138,31 @@ size_t Curl_ossl_version(char *buffer, size_t size)
                     sub);
   }
 
-#else /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
+#else /* OPENSSL_VERSION_NUMBER is less than 0.9.5 */
 
-#if(SSLEAY_VERSION_NUMBER >= 0x900000)
+#if(OPENSSL_VERSION_NUMBER >= 0x900000)
   return snprintf(buffer, size, "OpenSSL/%lx.%lx.%lx",
-                  (SSLEAY_VERSION_NUMBER>>28)&0xff,
-                  (SSLEAY_VERSION_NUMBER>>20)&0xff,
-                  (SSLEAY_VERSION_NUMBER>>12)&0xf);
+                  (OPENSSL_VERSION_NUMBER>>28)&0xff,
+                  (OPENSSL_VERSION_NUMBER>>20)&0xff,
+                  (OPENSSL_VERSION_NUMBER>>12)&0xf);
 
-#else /* (SSLEAY_VERSION_NUMBER >= 0x900000) */
+#else /* (OPENSSL_VERSION_NUMBER >= 0x900000) */
   {
     char sub[2];
     sub[1]='\0';
-    if(SSLEAY_VERSION_NUMBER&0x0f) {
-      sub[0]=(SSLEAY_VERSION_NUMBER&0x0f) + 'a' -1;
+    if(OPENSSL_VERSION_NUMBER&0x0f) {
+      sub[0]=(OPENSSL_VERSION_NUMBER&0x0f) + 'a' -1;
     }
     else
       sub[0]='\0';
 
     return snprintf(buffer, size, "SSL/%x.%x.%x%s",
-                    (SSLEAY_VERSION_NUMBER>>12)&0xff,
-                    (SSLEAY_VERSION_NUMBER>>8)&0xf,
-                    (SSLEAY_VERSION_NUMBER>>4)&0xf, sub);
+                    (OPENSSL_VERSION_NUMBER>>12)&0xff,
+                    (OPENSSL_VERSION_NUMBER>>8)&0xf,
+                    (OPENSSL_VERSION_NUMBER>>4)&0xf, sub);
   }
-#endif /* (SSLEAY_VERSION_NUMBER >= 0x900000) */
-#endif /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
+#endif /* (OPENSSL_VERSION_NUMBER >= 0x900000) */
+#endif /* OPENSSL_VERSION_NUMBER is less than 0.9.5 */
 
 #endif /* OPENSSL_IS_BORINGSSL */
 #endif /* YASSL_VERSION */
@@ -3210,4 +3200,4 @@ bool Curl_ossl_cert_status_request(void)
   return FALSE;
 #endif
 }
-#endif /* USE_SSLEAY */
+#endif /* USE_OPENSSL */

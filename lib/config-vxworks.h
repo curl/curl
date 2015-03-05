@@ -883,9 +883,6 @@
 /* if OpenSSL is in use */
 #define USE_OPENSSL 1
 
-/* if SSL is enabled */
-#define USE_SSLEAY 1
-
 /* Define to 1 if you are building a Windows target without large file
    support. */
 /* #undef USE_WIN32_LARGE_FILES */

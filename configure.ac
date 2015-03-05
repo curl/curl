@@ -1527,7 +1527,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
 
     else
 
-      dnl Have the libraries--check for SSLeay/OpenSSL headers
+      dnl Have the libraries--check for OpenSSL headers
       AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
                        openssl/pem.h openssl/ssl.h openssl/err.h,
         curl_ssl_msg="enabled (OpenSSL)"
@@ -1551,17 +1551,11 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
     fi
 
     if test X"$OPENSSL_ENABLED" = X"1"; then
-       AC_DEFINE(USE_SSLEAY, 1, [if SSL is enabled])
-
        dnl is there a pkcs12.h header present?
        AC_CHECK_HEADERS(openssl/pkcs12.h)
     else
        LIBS="$CLEANLIBS"
     fi
-    dnl USE_SSLEAY is the historical name for what configure calls
-    dnl OPENSSL_ENABLED; the names should really be unified
-    USE_SSLEAY="$OPENSSL_ENABLED"
-    AC_SUBST(USE_SSLEAY)
 
     if test X"$OPT_SSL" != Xoff &&
        test "$OPENSSL_ENABLED" != "1"; then
@@ -1675,8 +1669,8 @@ dnl ---
 if test "$OPENSSL_ENABLED" = "1"; then
   AC_CHECK_LIB(crypto, SRP_Calc_client_key,
    [
-     AC_DEFINE(HAVE_SSLEAY_SRP, 1, [if you have the function SRP_Calc_client_key])
-     AC_SUBST(HAVE_SSLEAY_SRP, [1])
+     AC_DEFINE(HAVE_OPENSSL_SRP, 1, [if you have the function SRP_Calc_client_key])
+     AC_SUBST(HAVE_OPENSSL_SRP, [1])
    ])
 fi
 
@@ -3271,7 +3265,7 @@ AC_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
        want_tls_srp=yes
 )
 
-if test "$want_tls_srp" = "yes" && ( test "x$HAVE_GNUTLS_SRP" = "x1" || test "x$HAVE_SSLEAY_SRP" = "x1") ; then
+if test "$want_tls_srp" = "yes" && ( test "x$HAVE_GNUTLS_SRP" = "x1" || test "x$HAVE_OPENSSL_SRP" = "x1") ; then
    AC_DEFINE(USE_TLS_SRP, 1, [Use TLS-SRP authentication])
    USE_TLS_SRP=1
    curl_tls_srp_msg="enabled"
@@ -3385,7 +3379,7 @@ dnl For keeping supported features and protocols also in pkg-config file
 dnl since it is more cross-compile friendly than curl-config
 dnl
 
-if test "x$USE_SSLEAY" = "x1"; then
+if test "x$USE_OPENSSL" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSL"
 elif test -n "$SSL_ENABLED"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSL"
@@ -3424,7 +3418,7 @@ if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
 fi
 
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
-  if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
+  if test "x$USE_OPENSSL" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
       -o "x$DARWINSSL_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
@@ -3497,7 +3491,7 @@ if test "x$CURL_DISABLE_IMAP" != "x1"; then
 fi
 if test "x$CURL_DISABLE_SMB" != "x1" \
     -a "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" \
-    -a \( "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
+    -a \( "x$USE_OPENSSL" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
       -o "x$DARWINSSL_ENABLED" = "x1" \); then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMB"

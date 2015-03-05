@@ -701,7 +701,7 @@ Vista
 #endif
 
 /* Define to use the Windows crypto library. */
-#if !defined(USE_SSLEAY) && !defined(USE_NSS)
+#if !defined(USE_OPENSSL) && !defined(USE_NSS)
 #define USE_WIN32_CRYPTO
 #endif
 

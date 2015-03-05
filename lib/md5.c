@@ -81,14 +81,9 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
   gcry_md_close(*ctx);
 }
 
-#elif defined(USE_SSLEAY)
+#elif defined(USE_OPENSSL)
 /* When OpenSSL is available we use the MD5-function from OpenSSL */
-
-#  ifdef USE_OPENSSL
-#    include <openssl/md5.h>
-#  else
-#    include <md5.h>
-#  endif
+#include <openssl/md5.h>
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \

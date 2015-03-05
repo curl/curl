@@ -33,7 +33,7 @@
 
 #if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
-#ifdef USE_SSLEAY
+#ifdef USE_OPENSSL
 
 #  ifdef USE_OPENSSL
 #    include <openssl/des.h>
@@ -132,7 +132,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
 }
 
-#ifdef USE_SSLEAY
+#ifdef USE_OPENSSL
 /*
  * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
  * key schedule ks is also set.
@@ -366,7 +366,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results)
 {
-#ifdef USE_SSLEAY
+#ifdef USE_OPENSSL
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
@@ -441,7 +441,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
   {
     /* Create LanManager hashed password. */
 
-#ifdef USE_SSLEAY
+#ifdef USE_OPENSSL
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));
@@ -532,7 +532,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
 
   {
     /* Create NT hashed password. */
-#ifdef USE_SSLEAY
+#ifdef USE_OPENSSL
     MD4_CTX MD4pw;
     MD4_Init(&MD4pw);
     MD4_Update(&MD4pw, pw, 2 * len);

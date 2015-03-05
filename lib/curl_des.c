@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && (!defined(USE_SSLEAY) || defined(HAVE_BORINGSSL))
+#if defined(USE_NTLM) && (!defined(USE_OPENSSL) || defined(HAVE_BORINGSSL))
 
 #include "curl_des.h"
 
@@ -60,4 +60,4 @@ void Curl_des_set_odd_parity(unsigned char *bytes, size_t len)
   }
 }
 
-#endif /* USE_NTLM && (!USE_SSLEAY || HAVE_BORINGSSL) */
+#endif /* USE_NTLM && (!USE_OPENSSL || HAVE_BORINGSSL) */

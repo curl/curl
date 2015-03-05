@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -82,38 +82,16 @@
 #include "cookie.h"
 #include "formdata.h"
 
-#ifdef USE_SSLEAY
 #ifdef USE_OPENSSL
-#include <openssl/rsa.h>
-#include <openssl/crypto.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
 #include <openssl/ssl.h>
-#include <openssl/err.h>
 #ifdef HAVE_OPENSSL_ENGINE_H
 #include <openssl/engine.h>
 #endif
-#ifdef HAVE_OPENSSL_PKCS12_H
-#include <openssl/pkcs12.h>
-#endif
-#else /* SSLeay-style includes */
-#include <rsa.h>
-#include <crypto.h>
-#include <x509.h>
-#include <pem.h>
-#include <ssl.h>
-#include <err.h>
-#ifdef HAVE_OPENSSL_ENGINE_H
-#include <engine.h>
-#endif
-#ifdef HAVE_OPENSSL_PKCS12_H
-#include <pkcs12.h>
-#endif
 #endif /* USE_OPENSSL */
+
 #ifdef USE_GNUTLS
 #error Configuration error; cannot use GnuTLS *and* OpenSSL.
 #endif
-#endif /* USE_SSLEAY */
 
 #ifdef USE_GNUTLS
 #include <gnutls/gnutls.h>
@@ -291,13 +269,13 @@ struct ssl_connect_data {
 #ifdef USE_NGHTTP2
   bool asked_for_h2;
 #endif
-#ifdef USE_SSLEAY
+#ifdef USE_OPENSSL
   /* these ones requires specific SSL-types */
   SSL_CTX* ctx;
   SSL*     handle;
   X509*    server_cert;
   ssl_connect_state connecting_state;
-#endif /* USE_SSLEAY */
+#endif /* USE_OPENSSL */
 #ifdef USE_GNUTLS
   gnutls_session_t session;
   gnutls_certificate_credentials_t cred;
@@ -1294,9 +1272,9 @@ struct UrlState {
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel f.e. */
 
-#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *engine;
-#endif /* USE_SSLEAY */
+#endif /* USE_OPENSSL */
   struct timeval expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
   struct curl_llist *timeoutlist; /* list of pending timeouts */

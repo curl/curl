@@ -16,7 +16,7 @@ MACRO       BUILDING_LIBCURL
 MACRO       HAVE_LIBZ
 #endif
 #ifdef ENABLE_SSL
-MACRO       USE_SSLEAY
+MACRO       USE_OPENSSL
 #endif
 
 SOURCEPATH  ../../../lib

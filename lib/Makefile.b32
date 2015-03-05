@@ -74,7 +74,7 @@ LINKLIB  = $(LINKLIB) $(ZLIB_PATH)\zlib.lib
 
 # SSL support is enabled setting WITH_SSL=1
 !ifdef WITH_SSL
-DEFINES  = $(DEFINES) -DUSE_SSLEAY
+DEFINES  = $(DEFINES) -DUSE_OPENSSL
 INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)\inc32;$(OPENSSL_PATH)\inc32\openssl
 LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\libeay32.lib
 !endif

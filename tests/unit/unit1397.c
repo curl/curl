@@ -15,7 +15,7 @@ static void unit_stop( void )
 UNITTEST_START
 
 /* only these backends define the tested functions */
-#if defined(USE_SSLEAY) || defined(USE_AXTLS) || defined(USE_GSKIT)
+#if defined(USE_OPENSSL) || defined(USE_AXTLS) || defined(USE_GSKIT)
 
   /* here you start doing things and checking that the results are good */
 

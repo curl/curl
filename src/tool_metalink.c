@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,14 +29,9 @@
 #  include <fcntl.h>
 #endif
 
-#ifdef USE_SSLEAY
-#  ifdef USE_OPENSSL
-#    include <openssl/md5.h>
-#    include <openssl/sha.h>
-#  else
-#    include <md5.h>
-#    include <sha.h>
-#  endif
+#ifdef USE_OPENSSL
+#  include <openssl/md5.h>
+#  include <openssl/sha.h>
 #elif defined(USE_GNUTLS_NETTLE)
 #  include <nettle/md5.h>
 #  include <nettle/sha.h>
@@ -381,7 +376,7 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
   sha256_finish(ctx, digest);
 }
 
-#elif defined(_WIN32) && !defined(USE_SSLEAY)
+#elif defined(_WIN32) && !defined(USE_OPENSSL)
 
 static void win32_crypto_final(struct win32_crypto_hash *ctx,
                                unsigned char *digest,

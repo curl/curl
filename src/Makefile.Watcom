@@ -75,7 +75,7 @@ CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 !endif
 
 !ifdef %use_ssl
-CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I"$(OPENSSL_ROOT)/inc32"
+CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_OPENSSL -I"$(OPENSSL_ROOT)/inc32"
 !endif
 
 !ifdef %curl_static

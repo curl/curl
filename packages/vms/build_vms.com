@@ -549,7 +549,7 @@ $ if (.not. nossl)
 $ then
 $   if (f$trnlnm("OPENSSL") .nes. "")
 $   then
-$!        cc_defs = cc_defs + ", USE_SSLEAY=1"
+$!        cc_defs = cc_defs + ", USE_OPENSSL=1"
 $        if ((f$trnlnm("SSL$INCLUDE") .nes. "") .and. (.not. nohpssl))
 $        then
 $!          Use HP SSL.
