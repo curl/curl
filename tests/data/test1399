@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+unittest
+get_url_file_name
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+get_url_file_name unit tests
+ </name>
+<tool>
+unit1399
+</tool>
+</client>
+
+</testcase>

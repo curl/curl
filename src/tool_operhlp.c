@@ -32,6 +32,7 @@
 #include "tool_operhlp.h"
 #include "tool_metalink.h"
 
+#include "escape.h"
 #include "memdebug.h" /* keep this as LAST include */
 
 void clean_getout(struct OperationConfig *config)
@@ -128,7 +129,9 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
  */
 CURLcode get_url_file_name(char **filename, const char *url)
 {
-  const char *pc;
+  const char *pc, *pc2;
+  char *tofree;
+  CURLcode res;
 
   *filename = NULL;
 
@@ -147,9 +150,34 @@ CURLcode get_url_file_name(char **filename, const char *url)
     /* no slash => empty string */
     pc = "";
 
-  *filename = strdup(pc);
+  *filename = tofree = strdup(pc);
   if(!*filename)
     return CURLE_OUT_OF_MEMORY;
+
+  /* We don't want anything beyond '?' which is the query string, or '#'
+   * which is the fragment identifier.
+   */
+  *filename = strsep(filename, "?#");
+
+  /* URL-decode the filename, stripping control characters */
+  res = Curl_urldecode(NULL, *filename, 0, filename, NULL, TRUE);
+  Curl_safefree(tofree);
+  if(res != CURLE_OK) {
+    *filename = NULL;
+    return res;
+  }
+
+  /* Get everything to the right of any path seperators */
+  pc = strrchr(*filename, '/');
+  pc2 = strrchr(*filename, '\\');
+  pc = pc > pc2 ? pc : pc2;
+  if(pc) {
+    tofree = *filename;
+    *filename = strdup(pc + 1);
+    Curl_safefree(tofree);
+    if(!*filename)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   /* in case we built debug enabled, we allow an environment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a
