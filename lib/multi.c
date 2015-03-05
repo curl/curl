@@ -1016,6 +1016,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           disconnect_conn = TRUE;
         }
         result = CURLE_OPERATION_TIMEDOUT;
+        (void)Curl_done(&data->easy_conn, result, TRUE);
         /* Skip the statemachine and go directly to error handling section. */
         goto statemachine_end;
       }
