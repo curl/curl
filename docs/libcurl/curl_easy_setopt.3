@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -434,8 +434,12 @@ Use identifier with SSL engine. See \fICURLOPT_SSLENGINE(3)\fP
 Default SSL engine. See \fICURLOPT_SSLENGINE_DEFAULT(3)\fP
 .IP CURLOPT_SSLVERSION
 SSL version to use. See \fICURLOPT_SSLVERSION(3)\fP
+.IP CURLOPT_SSL_VERIFYHOST
+Verify the host name in the SSL certificate. See \fICURLOPT_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_SSL_VERIFYPEER
 Verify the SSL certificate. See \fICURLOPT_SSL_VERIFYPEER(3)\fP
+.IP CURLOPT_SSL_VERIFYSTATUS
+Verify the SSL certificate's status. See \fICURLOPT_SSL_VERIFYSTATUS(3)\fP
 .IP CURLOPT_CAINFO
 CA cert bundle. See \fICURLOPT_CAINFO(3)\fP
 .IP CURLOPT_ISSUERCERT
@@ -444,8 +448,6 @@ Issuer certificate. See \fICURLOPT_ISSUERCERT(3)\fP
 Path to CA cert bundle. See \fICURLOPT_CAPATH(3)\fP
 .IP CURLOPT_CRLFILE
 Certificate Revocation List. See \fICURLOPT_CRLFILE(3)\fP
-.IP CURLOPT_SSL_VERIFYHOST
-Verify the host name in the SSL certificate. See \fICURLOPT_SSL_VERIFYHOST(3)\fP
 .IP CURLOPT_CERTINFO
 Extract certificate info. See \fICURLOPT_CERTINFO(3)\fP
 .IP CURLOPT_PINNEDPUBLICKEY
