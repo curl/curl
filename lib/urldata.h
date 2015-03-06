@@ -90,10 +90,6 @@
 #endif /* USE_OPENSSL */
 
 #ifdef USE_GNUTLS
-#error Configuration error; cannot use GnuTLS *and* OpenSSL.
-#endif
-
-#ifdef USE_GNUTLS
 #include <gnutls/gnutls.h>
 #endif
 
