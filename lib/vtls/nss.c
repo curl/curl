@@ -717,13 +717,13 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
 #ifdef USE_NGHTTP2
     if(buflen == NGHTTP2_PROTO_VERSION_ID_LEN &&
        !memcmp(NGHTTP2_PROTO_VERSION_ID, buf, NGHTTP2_PROTO_VERSION_ID_LEN)) {
-      conn->negnpn = NPN_HTTP2;
+      conn->negnpn = CURL_HTTP_VERSION_2_0;
     }
     else
 #endif
     if(buflen == ALPN_HTTP_1_1_LENGTH &&
        !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
-      conn->negnpn = NPN_HTTP1_1;
+      conn->negnpn = CURL_HTTP_VERSION_1_1;
     }
   }
 }

@@ -469,12 +469,12 @@ polarssl_connect_step2(struct connectdata *conn,
 #ifdef USE_NGHTTP2
       if(!strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
                   NGHTTP2_PROTO_VERSION_ID_LEN)) {
-        conn->negnpn = NPN_HTTP2;
+        conn->negnpn = CURL_HTTP_VERSION_2_0;
       }
       else
 #endif
       if(!strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH)) {
-        conn->negnpn = NPN_HTTP1_1;
+        conn->negnpn = CURL_HTTP_VERSION_1_1;
       }
     }
     else

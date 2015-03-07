@@ -1795,7 +1795,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(conn->httpversion < 20) { /* unless the connection is re-used and already
                                   http2 */
     switch(conn->negnpn) {
-    case NPN_HTTP2:
+    case CURL_HTTP_VERSION_2_0:
       result = Curl_http2_init(conn);
       if(result)
         return result;
@@ -1808,7 +1808,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       if(result)
         return result;
       break;
-    case NPN_HTTP1_1:
+    case CURL_HTTP_VERSION_1_1:
       /* continue with HTTP/1.1 when explicitly requested */
       break;
     default:

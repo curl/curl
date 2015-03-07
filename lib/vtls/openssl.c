@@ -1645,7 +1645,7 @@ select_next_proto_cb(SSL *ssl,
                            NGHTTP2_PROTO_VERSION_ID_LEN)) {
     infof(conn->data, "NPN, negotiated HTTP2 (%s)\n",
           NGHTTP2_PROTO_VERSION_ID);
-    conn->negnpn = NPN_HTTP2;
+    conn->negnpn = CURL_HTTP_VERSION_2_0;
     return SSL_TLSEXT_ERR_OK;
   }
 #endif
@@ -1653,14 +1653,14 @@ select_next_proto_cb(SSL *ssl,
   if(!select_next_protocol(out, outlen, in, inlen, ALPN_HTTP_1_1,
                            ALPN_HTTP_1_1_LENGTH)) {
     infof(conn->data, "NPN, negotiated HTTP1.1\n");
-    conn->negnpn = NPN_HTTP1_1;
+    conn->negnpn = CURL_HTTP_VERSION_1_1;
     return SSL_TLSEXT_ERR_OK;
   }
 
   infof(conn->data, "NPN, no overlap, use HTTP1.1\n");
   *out = (unsigned char *)ALPN_HTTP_1_1;
   *outlen = ALPN_HTTP_1_1_LENGTH;
-  conn->negnpn = NPN_HTTP1_1;
+  conn->negnpn = CURL_HTTP_VERSION_1_1;
 
   return SSL_TLSEXT_ERR_OK;
 }
@@ -2225,13 +2225,13 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
 #ifdef USE_NGHTTP2
         if(len == NGHTTP2_PROTO_VERSION_ID_LEN &&
            !memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len)) {
-          conn->negnpn = NPN_HTTP2;
+          conn->negnpn = CURL_HTTP_VERSION_2_0;
         }
         else
 #endif
         if(len == ALPN_HTTP_1_1_LENGTH &&
            !memcmp(ALPN_HTTP_1_1, neg_protocol, ALPN_HTTP_1_1_LENGTH)) {
-          conn->negnpn = NPN_HTTP1_1;
+          conn->negnpn = CURL_HTTP_VERSION_1_1;
         }
       }
       else
