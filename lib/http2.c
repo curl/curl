@@ -504,8 +504,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(c->header_recvbuf, value, valuelen);
     Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
 
-    infof(conn->data, "got http2 header: %.*s: %.*s\n",
-          namelen, name, valuelen, value);
+    DEBUGF(infof(conn->data, "h2 header: %.*s: %.*s\n",
+                 namelen, name, valuelen, value));
   }
 
   return 0; /* 0 is successful */
