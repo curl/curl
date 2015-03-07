@@ -1,5 +1,5 @@
-#ifndef __CURL_MULTI_H
-#define __CURL_MULTI_H
+#ifndef CURL_MULTI_H
+#define CURL_MULTI_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |

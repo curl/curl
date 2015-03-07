@@ -1,5 +1,5 @@
-#ifndef __CURL_TYPECHECK_GCC_H
-#define __CURL_TYPECHECK_GCC_H
+#ifndef CURL_TYPECHECK_GCC_H
+#define CURL_TYPECHECK_GCC_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |

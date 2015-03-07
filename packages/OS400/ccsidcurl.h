@@ -21,8 +21,8 @@
  *
  ***************************************************************************/
 
-#ifndef __CURL_CCSIDCURL_H
-#define __CURL_CCSIDCURL_H
+#ifndef CURL_CCSIDCURL_H
+#define CURL_CCSIDCURL_H
 
 #include "curl.h"
 #include "easy.h"

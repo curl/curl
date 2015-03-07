@@ -1,5 +1,5 @@
-#ifndef __CURL_EASY_H
-#define __CURL_EASY_H
+#ifndef CURL_EASY_H
+#define CURL_EASY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |

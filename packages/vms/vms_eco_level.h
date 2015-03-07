@@ -22,8 +22,8 @@
 /* for a specific cURL x.y-z release. */
 /* When any part of x.y-z is incremented, the ECO should be set back to 0 */
 
-#ifndef _VMS_ECO_LEVEL_H
-#define _VMS_ECO_LEVEL_H
+#ifndef VMS_ECO_LEVEL_H
+#define VMS_ECO_LEVEL_H
 
 #define VMS_ECO_LEVEL "0"
 

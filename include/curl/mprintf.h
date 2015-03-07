@@ -1,5 +1,5 @@
-#ifndef __CURL_MPRINTF_H
-#define __CURL_MPRINTF_H
+#ifndef CURL_MPRINTF_H
+#define CURL_MPRINTF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |

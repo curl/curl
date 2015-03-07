@@ -1,5 +1,5 @@
-#ifndef __CURL_CURLRULES_H
-#define __CURL_CURLRULES_H
+#ifndef CURL_CURLRULES_H
+#define CURL_CURLRULES_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
