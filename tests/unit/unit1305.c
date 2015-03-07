@@ -65,9 +65,7 @@ static void unit_stop( void )
     Curl_freeaddrinfo(data_node->addr);
     free(data_node);
   }
-  if (data_key)
-    free(data_key);
-
+  free(data_key);
   Curl_hash_destroy(hp);
 
   curl_easy_cleanup(data);

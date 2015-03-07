@@ -227,6 +227,5 @@ char *curl_easy_unescape(CURL *handle, const char *string, int length,
    the library's memory system */
 void curl_free(void *p)
 {
-  if(p)
-    free(p);
+  free(p);
 }

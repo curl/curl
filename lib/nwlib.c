@@ -282,9 +282,7 @@ int DisposeLibraryData( void *data )
   if(data) {
     void *tenbytes = ((libdata_t *) data)->tenbytes;
 
-    if(tenbytes)
-      free(tenbytes);
-
+    free(tenbytes);
     free(data);
   }
 
@@ -296,9 +294,7 @@ void DisposeThreadData( void *data )
   if(data) {
     void *twentybytes = ((libthreaddata_t *) data)->twentybytes;
 
-    if(twentybytes)
-      free(twentybytes);
-
+    free(twentybytes);
     free(data);
   }
 }

@@ -216,8 +216,7 @@ static void sh_freeentry(void *freethis)
 {
   struct Curl_sh_entry *p = (struct Curl_sh_entry *) freethis;
 
-  if(p)
-    free(p);
+  free(p);
 }
 
 static size_t fd_key_compare(void *k1, size_t k1_len, void *k2, size_t k2_len)
@@ -1584,8 +1583,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           if(!retry) {
             /* if the URL is a follow-location and not just a retried request
                then figure out the URL here */
-            if(newurl)
-              free(newurl);
+            free(newurl);
             newurl = data->req.newurl;
             data->req.newurl = NULL;
             follow = FOLLOW_REDIR;
@@ -1610,8 +1608,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           /* but first check to see if we got a location info even though we're
              not following redirects */
           if(data->req.location) {
-            if(newurl)
-              free(newurl);
+            free(newurl);
             newurl = data->req.location;
             data->req.location = NULL;
             result = Curl_follow(data, newurl, FOLLOW_FAKE);
@@ -1626,8 +1623,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
       }
 
-      if(newurl)
-        free(newurl);
+      free(newurl);
       break;
     }
 

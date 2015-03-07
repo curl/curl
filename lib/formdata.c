@@ -972,16 +972,14 @@ void curl_formfree(struct curl_httppost *form)
     if(form->more)
       curl_formfree(form->more);
 
-    if(!(form->flags & HTTPPOST_PTRNAME) && form->name)
+    if (!(form->flags & HTTPPOST_PTRNAME))
       free(form->name); /* free the name */
     if(!(form->flags &
-         (HTTPPOST_PTRCONTENTS|HTTPPOST_BUFFER|HTTPPOST_CALLBACK)) &&
-       form->contents)
+         (HTTPPOST_PTRCONTENTS|HTTPPOST_BUFFER|HTTPPOST_CALLBACK))
+      )
       free(form->contents); /* free the contents */
-    if(form->contenttype)
-      free(form->contenttype); /* free the content type */
-    if(form->showfilename)
-      free(form->showfilename); /* free the faked file name */
+    free(form->contenttype); /* free the content type */
+    free(form->showfilename); /* free the faked file name */
     free(form);       /* free the struct */
 
   } while((form = next) != NULL); /* continue */

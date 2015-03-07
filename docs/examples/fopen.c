@@ -210,9 +210,7 @@ static int use_buffer(URL_FILE *file,int want)
   /* sort out buffer */
   if((file->buffer_pos - want) <=0) {
     /* ditch buffer - write will recreate */
-    if(file->buffer)
-      free(file->buffer);
-
+    free(file->buffer);
     file->buffer=NULL;
     file->buffer_pos=0;
     file->buffer_len=0;
@@ -302,9 +300,7 @@ int url_fclose(URL_FILE *file)
     break;
   }
 
-  if(file->buffer)
-    free(file->buffer);/* free any allocated buffer space */
-
+  free(file->buffer);/* free any allocated buffer space */
   free(file);
 
   return ret;
@@ -435,9 +431,7 @@ void url_rewind(URL_FILE *file)
     curl_multi_add_handle(multi_handle, file->handle.curl);
 
     /* ditch buffer - write will recreate - resets stream pos*/
-    if(file->buffer)
-      free(file->buffer);
-
+    free(file->buffer);
     file->buffer=NULL;
     file->buffer_pos=0;
     file->buffer_len=0;
