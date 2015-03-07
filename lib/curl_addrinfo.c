@@ -607,3 +607,98 @@ Curl_ai_is_equal(const Curl_addrinfo *ai1, const Curl_addrinfo *ai2)
 
   return 1;
 }
+
+/*
+ * Curl_ai_deep_copy_single()
+ *
+ * This function makes a deep copy of the address info 'ai', specifically Its
+ * members and any allocated memory.
+ * Only the single addrinfo is copied; the copy's next member is set NULL.
+ *
+ * [in] 'ai' : The address info to copy.
+ * [return][failure] (NULL) : Invalid parameter or out of memory.
+ * [return][success] (Curl_addrinfo *) : The copy of the address info.
+ */
+
+Curl_addrinfo *
+Curl_ai_deep_copy_single(const Curl_addrinfo *ai)
+{
+  Curl_addrinfo *out;
+
+  if(!ai)
+    return NULL;
+
+  out = calloc(1, sizeof(*out));
+  if(!out)
+    return NULL;
+
+  out->ai_flags = ai->ai_flags;
+  out->ai_family = ai->ai_family;
+  out->ai_socktype = ai->ai_socktype;
+  out->ai_protocol = ai->ai_protocol;
+  out->ai_next = NULL;
+
+  if(ai->ai_canonname) {
+    out->ai_canonname = strdup(ai->ai_canonname);
+    if(!out->ai_canonname) {
+      free(out);
+      return NULL;
+    }
+  }
+  else {
+    out->ai_canonname = NULL;
+  }
+
+  if(ai->ai_addr && ai->ai_addrlen) {
+    out->ai_addrlen = ai->ai_addrlen;
+    out->ai_addr = malloc(ai->ai_addrlen);
+    if(!out->ai_addr) {
+      free(out->ai_canonname);
+      free(out);
+      return NULL;
+    }
+    memcpy(out->ai_addr, ai->ai_addr, ai->ai_addrlen);
+  }
+  else {
+    out->ai_addrlen = 0;
+    out->ai_addr = NULL;
+  }
+
+  return out;
+}
+
+/*
+ * Curl_ai_deep_copy_list()
+ *
+ * This function makes a deep copy of the list of address info 'ai',
+ * specifically the members and any allocated memory of all.
+ *
+ * [in] 'ai' : The list of address info to copy.
+ * [return][failure] (NULL) : Invalid parameter or out of memory.
+ * [return][success] (Curl_addrinfo *) : The copy of the list of address info.
+ */
+
+Curl_addrinfo *
+Curl_ai_deep_copy_list(const Curl_addrinfo *ai)
+{
+  Curl_addrinfo *dc, *out;
+
+  if(!ai)
+    return NULL;
+
+  dc = Curl_ai_deep_copy_single(ai);
+  if(!dc)
+    return NULL;
+  out = dc;
+
+  for(ai = ai->ai_next; ai; ai = ai->ai_next) {
+    dc->ai_next = Curl_ai_deep_copy_single(ai);
+    if(!dc->ai_next) {
+      Curl_freeaddrinfo(out);
+      return NULL;
+    }
+    dc = dc->ai_next;
+  }
+
+  return out;
+}

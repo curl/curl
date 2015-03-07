@@ -101,4 +101,10 @@ curl_dogetaddrinfo(const char *hostname,
 int
 Curl_ai_is_equal(const Curl_addrinfo *ai1, const Curl_addrinfo *ai2);
 
+Curl_addrinfo *
+Curl_ai_deep_copy_single(const Curl_addrinfo *ai);
+
+Curl_addrinfo *
+Curl_ai_deep_copy_list(const Curl_addrinfo *ai);
+
 #endif /* HEADER_CURL_ADDRINFO_H */
