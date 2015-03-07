@@ -569,7 +569,7 @@ curl_dogetaddrinfo(const char *hostname,
  */
 
 int
-Curl_ai_is_equal(Curl_addrinfo *ai1, Curl_addrinfo *ai2)
+Curl_ai_is_equal(const Curl_addrinfo *ai1, const Curl_addrinfo *ai2)
 {
   if(!ai1 && !ai2)
     return 1;
