@@ -2150,8 +2150,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
       if(data->share->cookies) {
         /* use shared cookie list, first free own one if any */
-        if(data->cookies)
-          Curl_cookie_cleanup(data->cookies);
+        Curl_cookie_cleanup(data->cookies);
         /* enable cookies since we now use a share that uses cookies! */
         data->cookies = data->share->cookies;
       }

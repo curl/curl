@@ -969,8 +969,7 @@ void curl_formfree(struct curl_httppost *form)
     next=form->next;  /* the following form line */
 
     /* recurse to sub-contents */
-    if(form->more)
-      curl_formfree(form->more);
+    curl_formfree(form->more);
 
     if (!(form->flags & HTTPPOST_PTRNAME))
       free(form->name); /* free the name */
