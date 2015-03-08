@@ -54,6 +54,9 @@ bool Curl_gtls_cert_status_request(void);
 /* Set the API backend definition to GnuTLS */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_GNUTLS
 
+/* this backend supports the CAPATH option */
+#define have_curlssl_ca_path 1
+
 /* API setup for GnuTLS */
 #define curlssl_init Curl_gtls_init
 #define curlssl_cleanup Curl_gtls_cleanup

@@ -43,9 +43,8 @@ All TLS based protocols: HTTPS, FTPS, IMAPS, POP3, SMTPS etc.
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-This option is OpenSSL-specific and does nothing if libcurl is built to use
-GnuTLS. NSS-powered libcurl provides the option only for backward
-compatibility.
+This option is supported by the OpenSSL, GnuTLS and PolarSSL backends. The NSS
+backend provides the option only for backward compatibility.
 .SH RETURN VALUE
 Returns CURLE_OK if TLS enabled, and CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
