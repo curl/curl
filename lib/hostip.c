@@ -396,6 +396,7 @@ Curl_cache_addr(struct SessionHandle *data,
   }
 
   dns->inuse = 1;   /* the cache has the first reference */
+  dns->is_user_specified = 0;
   dns->addr = addr; /* this is the address(es) */
   time(&dns->timestamp);
   if(dns->timestamp == 0)
@@ -777,110 +778,193 @@ CURLcode Curl_loadhostpairs(struct SessionHandle *data)
   char address[256];
   int port;
 
-  for(hostp = data->change.resolve; hostp; hostp = hostp->next ) {
+  for(hostp = data->change.resolve; hostp; hostp = hostp->next) {
+    struct Curl_dns_entry *dns;
+    Curl_addrinfo *addr;
+    char *entry_id;
+    size_t entry_len;
+    int removing;
+
     if(!hostp->data)
       continue;
-    if(hostp->data[0] == '-') {
-      char *entry_id;
-      size_t entry_len;
 
-      if(2 != sscanf(hostp->data + 1, "%255[^:]:%d", hostname, &port)) {
-        infof(data, "Couldn't parse CURLOPT_RESOLVE removal entry '%s'!\n",
-              hostp->data);
-        continue;
-      }
+    address[0] = 0;
+    removing = (hostp->data[0] == '-');
 
-      /* Create an entry id, based upon the hostname and port */
-      entry_id = create_hostcache_id(hostname, port);
-      /* If we can't create the entry id, fail */
-      if(!entry_id) {
-        return CURLE_OUT_OF_MEMORY;
-      }
+    if(2 > sscanf(removing ? &hostp->data[1] : hostp->data,
+                  "%255[^:]:%d:%255s", hostname, &port, address))
+      continue;
 
-      entry_len = strlen(entry_id);
-
-      if(data->share)
-        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-
-      /* delete entry, ignore if it didn't exist */
-      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len+1);
-
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-
-      /* free the allocated entry_id again */
-      free(entry_id);
-    }
-    else {
-      struct Curl_dns_entry *dns;
-      Curl_addrinfo *addr;
-      char *entry_id;
-      size_t entry_len;
-
-      if(3 != sscanf(hostp->data, "%255[^:]:%d:%255s", hostname, &port,
-                     address)) {
-        infof(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'!\n",
-              hostp->data);
-        continue;
-      }
-
+    if(address[0]) {
       addr = Curl_str2addr(address, port);
       if(!addr) {
-        infof(data, "Address in '%s' found illegal!\n", hostp->data);
+        infof(data, "Resolve %s found illegal!\n", hostp->data);
         continue;
       }
+    }
+    else if(!removing) /* no address to add */
+      continue;
+    else
+      addr = NULL;
 
-      /* Create an entry id, based upon the hostname and port */
-      entry_id = create_hostcache_id(hostname, port);
-      /* If we can't create the entry id, fail */
-      if(!entry_id) {
+    /* Create an entry id, based upon the hostname and port */
+    entry_id = create_hostcache_id(hostname, port);
+    /* If we can't create the entry id, fail */
+    if(!entry_id) {
+      Curl_freeaddrinfo(addr);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    entry_len = strlen(entry_id);
+
+    if(data->share)
+      Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
+    /* See if its already in our dns cache */
+    dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
+
+    /* The DNS cache entry 'dns' which was pulled from the hostcache is
+       in use if dns->inuse > 0. However in the special case of an entry
+       that was created via CURLOPT_RESOLVE (ie a prior pass of this
+       code) and is in the hostcache the dns->inuse is always one more;
+       so for example dns->inuse will be 1 even when not actually in
+       use. A result of that is user specified entries will not be
+       removed by normal means. We need to know whether the entry is
+       _actually_ in use (hence the check below) because if it is we
+       can't modify its address list and will have to orphan (ie remove
+       from hostcache) and replace it.
+    */
+    if(dns && (dns->inuse > (dns->is_user_specified ? 1 : 0))) {
+      Curl_dns_entry *old;
+      Curl_addrinfo *copied_addrlist;
+      /* If we have 'addr' we are either adding or removing an address
+         from the address list. In that case we need the existing
+         address list for our replacement entry. However our soon to be
+         orphaned entry (and by extension its address list) is in use so
+         we can't take possession of it.  Instead we make a deep copy of
+         the list for our replacement entry.  One exception though: We
+         do not allow adding addr to an address list that was not user
+         specified so in that case we do not copy.
+      */
+      if(addr && dns->addr && (dns->is_user_specified || removing))
+        copied_addrlist = Curl_ai_deep_copy_list(dns->addr);
+      else
+        copied_addrlist = NULL;
+      /* If it's a user specified entry release our hold on it so that
+         the garbage cleanup can free the memory when it's no longer in
+         use.
+      */
+      if(dns->is_user_specified)
+        --dns->inuse;
+      /* Curl_cache_addr orphans the existing entry and makes a new one
+       */
+      old = dns;
+      dns = Curl_cache_addr(data, copied_addrlist, hostname, port);
+      if(!dns) {
+        free(entry_id);
         Curl_freeaddrinfo(addr);
+        Curl_freeaddrinfo(copied_addrlist);
+        if(data->share)
+          Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
         return CURLE_OUT_OF_MEMORY;
       }
-
-      entry_len = strlen(entry_id);
-
-      if(data->share)
-        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-
-      /* See if its already in our dns cache */
-      dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
-
-      /* free the allocated entry_id again */
-      free(entry_id);
-
-      if(dns) {
-        /* search the entry's address list for addr */
-        Curl_addrinfo *ai = dns->addr;
-        for(;;) {
-          if(Curl_ai_is_equal(ai, addr)) {
-            /* addr is a duplicate, discard it */
-            Curl_freeaddrinfo(addr);
-            addr = NULL;
-            break;
-          }
-          if(!ai->ai_next)
-            break;
-          ai = ai->ai_next;
-        }
-        if(addr)
-          /* addr is not a duplicate, append it */
-          ai->ai_next = addr;
+      /* Curl_cache_addr has set dns->inuse 1, dns->is_user_specified 0.
+         Only if the old entry is user-specified or we'll be adding to
+         the new entry do we consider the new entry to be
+         user-specified.
+      */
+      if(!old->is_user_specified && removing) {
+        --dns->inuse;
+        if(old->timestamp)
+          dns->timestamp = old->timestamp;
       }
       else
-        /* host doesn't have a cache entry, make one */
-        dns = Curl_cache_addr(data, addr, hostname, port);
-
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-
-      if(!dns) {
-        Curl_freeaddrinfo(addr);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      if(addr)
-        infof(data, "Added %s:%d:%s to DNS cache\n", hostname, port, address);
+        dns->is_user_specified = 1;
     }
+
+    if(removing) {
+      if(dns) {
+        if(addr) {   /* -example.com:80:127.0.0.1 */
+          /* remove every occurrence of addr from the entry's address list */
+          Curl_addrinfo *prev = NULL, *ai = dns->addr;
+          for(; ai; prev = ai, ai = (ai ? ai->ai_next : dns->addr)) {
+            if(!Curl_ai_is_equal(ai, addr))
+              continue;
+            if(dns->addr == ai)
+              dns->addr = ai->ai_next;
+            else
+              prev->ai_next = ai->ai_next;
+            ai->ai_next = NULL;
+            Curl_freeaddrinfo(ai);
+            infof(data, "Removed %s:%d:%s from DNS cache\n",
+                  hostname, port, address);
+            ai = prev;
+          }
+        }
+        else {   /* -example.com:80 */
+          if(dns->is_user_specified)
+            --dns->inuse;
+          Curl_hash_delete(data->dns.hostcache, entry_id, entry_len+1);
+          dns = NULL;
+          infof(data, "Removed %s:%d from DNS cache\n",
+                hostname, port);
+        }
+      }
+      Curl_freeaddrinfo(addr);
+      addr = NULL;
+    }
+    else {
+      if(addr) {   /* example.com:80:127.0.0.1 */
+        if(dns && dns->is_user_specified) {
+          if(dns->addr) {
+            /* append addr to the entry's address list if it isn't a dupe */
+            Curl_addrinfo *prev = NULL, *ai = dns->addr;
+            for(; ai; prev = ai, ai = ai->ai_next) {
+              if(Curl_ai_is_equal(ai, addr)) {
+                Curl_freeaddrinfo(addr);
+                addr = NULL;
+                break;
+              }
+            }
+            if(addr)
+              prev->ai_next = addr;
+          }
+          else {
+            dns->addr = addr;
+          }
+        }
+        else {
+          dns = Curl_cache_addr(data, addr, hostname, port);
+          if(!dns) {
+            free(entry_id);
+            Curl_freeaddrinfo(addr);
+            if(data->share)
+              Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+            return CURLE_OUT_OF_MEMORY;
+          }
+          dns->is_user_specified = 1;
+        }
+      }
+      if(addr) {
+        infof(data, "Added %s:%d:%s to DNS cache\n",
+              hostname, port, address);
+        /* addr points to memory that is part of a dns entry now, don't free */
+        addr = NULL;
+      }
+    }
+
+    if(dns && !dns->addr) {
+      if(dns->is_user_specified)
+        --dns->inuse;
+      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len+1);
+      dns = NULL;
+    }
+
+    free(entry_id);
+    entry_id = NULL;
+
+    if(data->share)
+      Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
   }
   data->change.resolve = NULL; /* dealt with now */
 
