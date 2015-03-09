@@ -872,17 +872,17 @@ gtls_connect_step3(struct connectdata *conn,
   if(data->set.ssl.verifystatus) {
     if(gnutls_ocsp_status_request_is_checked(session, 0) == 0) {
       if(verify_status & GNUTLS_CERT_REVOKED)
-        failf(data, "SSL server certificate was REVOKED\n");
+        infof(data, "\t server certificate was REVOKED\n");
       else
-        failf(data, "SSL server certificate status verification FAILED");
+        infof(data, "\t server certificate status verification FAILED\n");
 
       return CURLE_SSL_INVALIDCERTSTATUS;
     }
     else
-      infof(data, "SSL server certificate status verification OK\n");
+      infof(data, "\t server certificate status verification OK\n");
   }
   else
-    infof(data, "SSL server certificate status verification SKIPPED\n");
+    infof(data, "\t server certificate status verification SKIPPED\n");
 #endif
 
   /* initialize an X.509 certificate structure. */
