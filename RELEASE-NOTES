@@ -23,7 +23,20 @@ This release includes the following bugfixes:
  o build: Removed DataExecutionPrevention directive from VC9+ project files
  o tool: Updated the warnf() function to use the GlobalConfig structure
  o http2: Return error if stream was closed with other than NO_ERROR
- o
+ o mprintf.h: remove #ifdef CURLDEBUG
+ o libtest: fixed linker errors on msvc [6]
+ o tool: use ENABLE_CURLX_PRINTF instead of _MPRINTF_REPLACE
+ o curl.1: fix "The the" typo
+ o cmake: handle build definitions CURLDEBUG/DEBUGBUILD
+ o openssl: remove all uses of USE_SSLEAY
+ o multi: fix memory-leak on timeout (regression) [4]
+ o curl_easy_setopt.3: added CURLOPT_SSL_VERIFYSTATUS
+ o metalink: add some error checks [3]
+ o TLS: make it possible to enable ALPN/NPN without HTTP/2
+ o http2: use CURL_HTTP_VERSION_* symbols instead of NPN_*
+ o conncontrol: only log changes to the connection bit
+ o multi: fix *getsock() with CONNECT [2]
+ o symbols.pl: handle '-' in the deprecated field [5]
 
 This release includes the following known bugs:
 
@@ -32,11 +45,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Kamil Dudka, Steve Holme, Tatsuhiro Tsujikawa
+  Alessandro Ghedini, Brad King, Daniel Stenberg, Jeroen Ooms, Jonathan Cardoso,
+  Jon Seymour, Kamil Dudka, Markus Elfring, Michel Promonet, Peter Laser,
+  Ray Satiro, Sergei Nikulov, Steve Havelka, Steve Holme, Tatsuhiro Tsujikawa,
+  Viktor Szakáts,
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
  [1] = http://curl.haxx.se/bug/view.cgi?id=1487
- [2] =
+ [2] = http://curl.haxx.se/mail/lib-2015-01/0170.html
+ [3] = https://github.com/bagder/curl/issues/150
+ [4] = https://github.com/bagder/curl/issues/147
+ [5] = http://curl.haxx.se/mail/lib-2015-03/0052.html
+ [6] = https://github.com/bagder/curl/pull/144
