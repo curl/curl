@@ -108,9 +108,12 @@ while(<FILE>) {
         $linenum = $2;
         $function = $3;
 
-        if($function =~ /free\(0x([0-9a-f]*)/) {
-            $addr = $1;
-            if(!exists $sizeataddr{$addr}) {
+        if($function =~ /free\((\(nil\)|0x([0-9a-f]*))/) {
+            $addr = $2;
+            if($1 eq "(nil)") {
+                ; # do nothing when free(NULL)
+            }
+            elsif(!exists $sizeataddr{$addr}) {
                 print "FREE ERROR: No memory allocated: $line\n";
             }
             elsif(-1 == $sizeataddr{$addr}) {
