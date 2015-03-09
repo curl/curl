@@ -94,7 +94,7 @@ if test ! -z $SDK32; then
   rm -r libcurl.framework
   mkdir -p libcurl.framework/${FRAMEWORK_VERSION}/Resources
   cp lib/.libs/libcurl.dylib libcurl.framework/${FRAMEWORK_VERSION}/libcurl
-  install_name_tool -id @executable_path/../Frameworks/libcurl.framework/${FRAMEWORK_VERSION}/libcurl libcurl.framework/${FRAMEWORK_VERSION}/libcurl
+  install_name_tool -id @rpath/libcurl.framework/${FRAMEWORK_VERSION}/libcurl libcurl.framework/${FRAMEWORK_VERSION}/libcurl
   /usr/bin/sed -e "s/7\.12\.3/$VERSION/" lib/libcurl.plist >libcurl.framework/${FRAMEWORK_VERSION}/Resources/Info.plist
   mkdir -p libcurl.framework/${FRAMEWORK_VERSION}/Headers/curl
   cp include/curl/*.h libcurl.framework/${FRAMEWORK_VERSION}/Headers/curl
@@ -121,7 +121,7 @@ if test ! -z $SDK32; then
 
     echo "----Appending 64 bit framework to 32 bit framework..."
     cp lib/.libs/libcurl.dylib libcurl.framework/${FRAMEWORK_VERSION}/libcurl64
-    install_name_tool -id @executable_path/../Frameworks/libcurl.framework/${FRAMEWORK_VERSION}/libcurl libcurl.framework/${FRAMEWORK_VERSION}/libcurl64
+    install_name_tool -id @rpath/libcurl.framework/${FRAMEWORK_VERSION}/libcurl libcurl.framework/${FRAMEWORK_VERSION}/libcurl64
     cp libcurl.framework/${FRAMEWORK_VERSION}/libcurl libcurl.framework/${FRAMEWORK_VERSION}/libcurl32
     pwd
     lipo libcurl.framework/${FRAMEWORK_VERSION}/libcurl32 libcurl.framework/${FRAMEWORK_VERSION}/libcurl64 -create -output libcurl.framework/${FRAMEWORK_VERSION}/libcurl
