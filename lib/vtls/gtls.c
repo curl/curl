@@ -797,6 +797,16 @@ gtls_connect_step3(struct connectdata *conn,
 #endif
   CURLcode result = CURLE_OK;
 
+  gnutls_protocol_t version = gnutls_protocol_get_version(session);
+
+  /* the name of the cipher suite used, e.g. ECDHE_RSA_AES_256_GCM_SHA384. */
+  ptr = gnutls_cipher_suite_get_name(gnutls_kx_get(session),
+                                     gnutls_cipher_get(session),
+                                     gnutls_mac_get(session));
+
+  infof(data, "SSL connection using %s / %s\n",
+        gnutls_protocol_get_name(version), ptr);
+
   /* This function will return the peer's raw certificate (chain) as sent by
      the peer. These certificates are in raw format (DER encoded for
      X.509). In case of a X.509 then a certificate list may be present. The
@@ -1036,7 +1046,6 @@ gtls_connect_step3(struct connectdata *conn,
 
   /* Show:
 
-  - ciphers used
   - subject
   - start date
   - expire date
@@ -1075,14 +1084,6 @@ gtls_connect_step3(struct connectdata *conn,
   ptr = gnutls_compression_get_name(gnutls_compression_get(session));
   /* the *_get_name() says "NULL" if GNUTLS_COMP_NULL is returned */
   infof(data, "\t compression: %s\n", ptr);
-
-  /* the name of the cipher used. ie 3DES. */
-  ptr = gnutls_cipher_get_name(gnutls_cipher_get(session));
-  infof(data, "\t cipher: %s\n", ptr);
-
-  /* the MAC algorithms name. ie SHA1 */
-  ptr = gnutls_mac_get_name(gnutls_mac_get(session));
-  infof(data, "\t MAC: %s\n", ptr);
 
 #ifdef HAS_ALPN
   if(data->set.ssl_enable_alpn) {
