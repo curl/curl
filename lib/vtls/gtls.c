@@ -636,14 +636,14 @@ gtls_connect_step1(struct connectdata *conn,
 
 #ifdef USE_NGHTTP2
     if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
-      protocols[cur].data = NGHTTP2_PROTO_VERSION_ID;
+      protocols[cur].data = (unsigned char *)NGHTTP2_PROTO_VERSION_ID;
       protocols[cur].size = NGHTTP2_PROTO_VERSION_ID_LEN;
       cur++;
       infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
     }
 #endif
 
-    protocols[cur].data = ALPN_HTTP_1_1;
+    protocols[cur].data = (unsigned char *)ALPN_HTTP_1_1;
     protocols[cur].size = ALPN_HTTP_1_1_LENGTH;
     cur++;
     infof(data, "ALPN, offering %s\n", ALPN_HTTP_1_1);
