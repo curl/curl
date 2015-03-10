@@ -3,6 +3,8 @@ language: c
 before_script:
   - ./buildconf
 
+script: ./configure --enable-debug && make && make test-full
+
 compiler:
   - clang
   - gcc
