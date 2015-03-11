@@ -121,13 +121,11 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       infof(data, "Establish HTTP proxy tunnel to %s:%hu\n",
             hostname, remote_port);
 
-      if(data->req.newurl) {
         /* This only happens if we've looped here due to authentication
            reasons, and we don't really use the newly cloned URL here
            then. Just free() it. */
-        free(data->req.newurl);
-        data->req.newurl = NULL;
-      }
+      free(data->req.newurl);
+      data->req.newurl = NULL;
 
       /* initialize a dynamic send-buffer */
       req_buffer = Curl_add_buffer_init();
@@ -552,11 +550,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       infof(data, "Connect me again please\n");
     }
     else {
-      if(data->req.newurl) {
-        /* this won't be used anymore for the CONNECT so free it now */
-        free(data->req.newurl);
-        data->req.newurl = NULL;
-      }
+      free(data->req.newurl);
+      data->req.newurl = NULL;
       /* failure, close this connection to avoid re-use */
       connclose(conn, "proxy CONNECT failure");
       Curl_closesocket(conn, conn->sock[sockindex]);

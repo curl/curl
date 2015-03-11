@@ -103,23 +103,14 @@ Example set of cookies:
 
 static void freecookie(struct Cookie *co)
 {
-  if(co->expirestr)
-    free(co->expirestr);
-  if(co->domain)
-    free(co->domain);
-  if(co->path)
-    free(co->path);
-  if(co->spath)
-    free(co->spath);
-  if(co->name)
-    free(co->name);
-  if(co->value)
-    free(co->value);
-  if(co->maxage)
-    free(co->maxage);
-  if(co->version)
-    free(co->version);
-
+  free(co->expirestr);
+  free(co->domain);
+  free(co->path);
+  free(co->spath);
+  free(co->name);
+  free(co->value);
+  free(co->maxage);
+  free(co->version);
   free(co);
 }
 
@@ -296,8 +287,7 @@ void Curl_cookie_loadfiles(struct SessionHandle *data)
  */
 static void strstore(char **str, const char *newstr)
 {
-  if(*str)
-    free(*str);
+  free(*str);
   *str = strdup(newstr);
 }
 
@@ -832,21 +822,13 @@ Curl_cookie_add(struct SessionHandle *data,
 
         /* then free all the old pointers */
         free(clist->name);
-        if(clist->value)
-          free(clist->value);
-        if(clist->domain)
-          free(clist->domain);
-        if(clist->path)
-          free(clist->path);
-        if(clist->spath)
-          free(clist->spath);
-        if(clist->expirestr)
-          free(clist->expirestr);
-
-        if(clist->version)
-          free(clist->version);
-        if(clist->maxage)
-          free(clist->maxage);
+        free(clist->value);
+        free(clist->domain);
+        free(clist->path);
+        free(clist->spath);
+        free(clist->expirestr);
+        free(clist->version);
+        free(clist->maxage);
 
         *clist = *co;  /* then store all the new data */
 
@@ -1214,8 +1196,7 @@ void Curl_cookie_clearsess(struct CookieInfo *cookies)
 void Curl_cookie_cleanup(struct CookieInfo *c)
 {
   if(c) {
-    if(c->filename)
-      free(c->filename);
+    free(c->filename);
     Curl_cookie_freelist(c->cookies, TRUE);
     free(c); /* free the base struct as well */
   }

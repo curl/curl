@@ -1245,10 +1245,8 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
        * authentication data from a previous connection. */
       SSL_InvalidateSession(connssl->handle);
 
-    if(connssl->client_nickname != NULL) {
-      free(connssl->client_nickname);
-      connssl->client_nickname = NULL;
-    }
+    free(connssl->client_nickname);
+    connssl->client_nickname = NULL;
     /* destroy all NSS objects in order to avoid failure of NSS shutdown */
     Curl_llist_destroy(connssl->obj_list, NULL);
     connssl->obj_list = NULL;

@@ -165,8 +165,7 @@ test_cleanup:
   if(paramsf)
     fclose(paramsf);
 
-  if(stream_uri)
-    free(stream_uri);
+  free(stream_uri);
 
   if(custom_headers)
     curl_slist_free_all(custom_headers);
