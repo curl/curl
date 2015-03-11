@@ -198,8 +198,7 @@ curl_share_cleanup(CURLSH *sh)
   }
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-  if(share->cookies)
-    Curl_cookie_cleanup(share->cookies);
+  Curl_cookie_cleanup(share->cookies);
 #endif
 
 #ifdef USE_SSL
