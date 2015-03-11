@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,10 +73,12 @@ void Curl_conncache_destroy(struct conncache *connc)
   }
 }
 
-struct connectbundle *Curl_conncache_find_bundle(struct conncache *connc,
-                                                 char *hostname)
+struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
+                                                 struct conncache *connc)
 {
   struct connectbundle *bundle = NULL;
+
+  char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
 
   if(connc)
     bundle = Curl_hash_pick(connc->hash, hostname, strlen(hostname)+1);
@@ -127,15 +129,15 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   struct connectbundle *new_bundle = NULL;
   struct SessionHandle *data = conn->data;
 
-  bundle = Curl_conncache_find_bundle(data->state.conn_cache,
-                                      conn->host.name);
+  bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache);
   if(!bundle) {
+    char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
+
     result = Curl_bundle_create(data, &new_bundle);
     if(result)
       return result;
 
-    if(!conncache_add_bundle(data->state.conn_cache,
-                             conn->host.name, new_bundle)) {
+    if(!conncache_add_bundle(data->state.conn_cache, hostname, new_bundle)) {
       Curl_bundle_destroy(new_bundle);
       return CURLE_OUT_OF_MEMORY;
     }

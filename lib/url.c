@@ -3070,8 +3070,7 @@ ConnectionExists(struct SessionHandle *data,
 
   /* Look up the bundle with all the connections to this
      particular host */
-  bundle = Curl_conncache_find_bundle(data->state.conn_cache,
-                                      needle->host.name);
+  bundle = Curl_conncache_find_bundle(needle, data->state.conn_cache);
   if(bundle) {
     size_t max_pipe_len = Curl_multi_max_pipeline_length(data->multi);
     size_t best_pipe_len = max_pipe_len;
@@ -5658,8 +5657,9 @@ static CURLcode create_conn(struct SessionHandle *data,
     /* set a pointer to the hostname we display */
     fix_hostname(data, conn, &conn->host);
 
-    infof(data, "Re-using existing connection! (#%ld) with host %s\n",
+    infof(data, "Re-using existing connection! (#%ld) with %s %s\n",
           conn->connection_id,
+          conn->bits.proxy?"proxy":"host",
           conn->proxy.name?conn->proxy.dispname:conn->host.dispname);
   }
   else {
@@ -5668,8 +5668,7 @@ static CURLcode create_conn(struct SessionHandle *data,
        connections we are allowed to open. */
     struct connectbundle *bundle;
 
-    bundle = Curl_conncache_find_bundle(data->state.conn_cache,
-                                        conn->host.name);
+    bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache);
     if(max_host_connections > 0 && bundle &&
        (bundle->num_connections >= max_host_connections)) {
       struct connectdata *conn_candidate;
