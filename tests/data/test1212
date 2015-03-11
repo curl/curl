@@ -42,8 +42,8 @@ http://user:secret@%HOSTIP:%HTTPPORT/ulion/1212 --socks5 non-existing-host.haxx.
 </strip>
 <protocol>
 GET /ulion/1212 HTTP/1.1
-Authorization: Basic dXNlcjpzZWNyZXQ=
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjpzZWNyZXQ=
 Accept: */*
 
 </protocol>

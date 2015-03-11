@@ -70,8 +70,8 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /1204 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*
 
 </protocol>

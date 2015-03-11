@@ -62,15 +62,15 @@ http://%HOSTIP:%HTTPPORT/188 -C 50 -L
 </strip>
 <protocol>
 GET /188 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Range: bytes=50-
 User-Agent: curl/7.6 (sparc-sun-solaris2.7) libcurl 7.6-pre4 (SSL 0.9.6) (krb4 enabled)
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /188 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Range: bytes=50-
 User-Agent: curl/7.12.2-CVS (i686-pc-linux-gnu) libcurl/7.12.2-CVS OpenSSL/0.9.7d zlib/1.2.1.2 libidn/0.5.2
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

@@ -51,14 +51,14 @@ http://%HOSTIP:%HTTPPORT/we/want/62 http://%HOSTIP:%HTTPPORT/we/want?hoge=fuga -
 </strip>
 <protocol>
 GET /we/want/62 HTTP/1.1
+Host: www.host.foo.com
 Accept: */*
 Cookie: test2=yes; test=yes
-Host: www.host.foo.com
 
 GET /we/want?hoge=fuga HTTP/1.1
+Host: www.host.foo.com
 Accept: */*
 Cookie: test2=yes; test=yes
-Host: www.host.foo.com
 
 </protocol>
 </verify>

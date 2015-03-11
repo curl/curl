@@ -59,8 +59,8 @@ http://%HOSTIP:%HTTPPORT/want/164 -r 0-10,12-15
 </strip>
 <protocol>
 GET /want/164 HTTP/1.1
-Range: bytes=0-10,12-15
 Host: %HOSTIP:%HTTPPORT
+Range: bytes=0-10,12-15
 Accept: */*
 
 </protocol>

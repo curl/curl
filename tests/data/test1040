@@ -70,8 +70,8 @@ http://%HOSTIP:%HTTPPORT/1040 -C -
 </strip>
 <protocol>
 GET /1040 HTTP/1.1
-Range: bytes=100-
 Host: %HOSTIP:%HTTPPORT
+Range: bytes=100-
 Accept: */*
 
 </protocol>

@@ -43,9 +43,9 @@ http://%HOSTIP:%HTTPPORT/we/want/1401 --libcurl log/test1401.c --basic -u fake:u
 </strip>
 <protocol>
 GET /we/want/1401 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 User-Agent: stripped
 Authorization: Basic ZmFrZTp1c2Vy
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Cookie: chocolate=chip
 X-Files: Mulder

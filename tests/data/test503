@@ -77,8 +77,8 @@ Proxy-Connection: Keep-Alive
 </proxy>
 <protocol>
 GET /503 HTTP/1.1
-Authorization: Basic dGVzdDppbmc=
 Host: machine.503:%HTTPPORT
+Authorization: Basic dGVzdDppbmc=
 Accept: */*
 
 [DISCONNECT]

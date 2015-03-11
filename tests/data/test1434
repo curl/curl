@@ -81,8 +81,8 @@ http://%HOSTIP:%HTTPPORT/1434 -C 100
 </strip>
 <protocol>
 GET /1434 HTTP/1.1
-Range: bytes=100-
 Host: %HOSTIP:%HTTPPORT
+Range: bytes=100-
 Accept: */*
 
 </protocol>

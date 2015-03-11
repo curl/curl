@@ -88,22 +88,22 @@ machine anotherone.com login user2 password passwd2
 </strip>
 <protocol>
 GET http://supersite.com/want/257 HTTP/1.1
+Host: supersite.com
 Authorization: Basic dXNlcjE6cGFzc3dkMQ==
 User-Agent: curl/7.14.0-CVS (i686-pc-linux-gnu) libcurl/7.14.0-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: supersite.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://anotherone.com/2570002 HTTP/1.1
+Host: anotherone.com
 Authorization: Basic dXNlcjI6cGFzc3dkMg==
 User-Agent: curl/7.14.0-CVS (i686-pc-linux-gnu) libcurl/7.14.0-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: anotherone.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://athird.com/2570003 HTTP/1.1
-User-Agent: curl/7.14.0-CVS (i686-pc-linux-gnu) libcurl/7.14.0-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Host: athird.com
+User-Agent: curl/7.14.0-CVS (i686-pc-linux-gnu) libcurl/7.14.0-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 

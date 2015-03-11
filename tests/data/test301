@@ -45,8 +45,8 @@ HTTPS GET with user and password
 </strip>
 <protocol>
 GET /301 HTTP/1.1
-Authorization: Basic ZmFrZTp1c2Vy
 Host: %HOSTIP:%HTTPSPORT
+Authorization: Basic ZmFrZTp1c2Vy
 Accept: */*
 
 </protocol>

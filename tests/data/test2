@@ -41,8 +41,8 @@ HTTP GET with user and password
 </strip>
 <protocol>
 GET /2 HTTP/1.1
-Authorization: Basic ZmFrZTp1c2Vy
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic ZmFrZTp1c2Vy
 Accept: */*
 
 </protocol>

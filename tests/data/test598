@@ -65,8 +65,8 @@ http://%HOSTIP:%HTTPPORT/598
 <verify>
 <protocol>
 GET /598 HTTP/1.1
-User-Agent: the-moo agent next generation
 Host: %HOSTIP:%HTTPPORT
+User-Agent: the-moo agent next generation
 Accept: */*
 Referer: http://example.com/the-moo
 Cookie: name=moo

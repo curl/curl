@@ -36,9 +36,9 @@ http://a.galaxy.far.far.away/170 --proxy http://%HOSTIP:%HTTPPORT --proxy-user f
 </strip>
 <protocol>
 POST http://a.galaxy.far.far.away/170 HTTP/1.1
+Host: a.galaxy.far.far.away
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 libidn/0.4.3
-Host: a.galaxy.far.far.away
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0

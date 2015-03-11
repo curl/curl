@@ -46,8 +46,8 @@ download on.
 </strip>
 <protocol>
 GET /want/38 HTTP/1.1
-Range: bytes=78-
 Host: %HOSTIP:%HTTPPORT
+Range: bytes=78-
 Accept: */*
 
 </protocol>

@@ -133,28 +133,28 @@ chkhostname curlhost
 </strip>
 <protocol>
 GET /20230100 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Accept: */*
 
 GET /20230200 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*
 
 GET /20230300 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Accept: */*
 
 GET /20230400 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Accept: */*
 
 GET /20230500 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*
 
 </protocol>

@@ -45,8 +45,8 @@ http://%HOSTIP:%HTTPPORT/want/92 -C 87
 </strip>
 <protocol>
 GET /want/92 HTTP/1.1
-Range: bytes=87-
 Host: %HOSTIP:%HTTPPORT
+Range: bytes=87-
 Accept: */*
 
 </protocol>

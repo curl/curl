@@ -85,8 +85,8 @@ http://%HOSTIP:%HTTPPORT/1042 -C 200
 </strip>
 <protocol>
 GET /1042 HTTP/1.1
-Range: bytes=200-
 Host: %HOSTIP:%HTTPPORT
+Range: bytes=200-
 Accept: */*
 
 </protocol>

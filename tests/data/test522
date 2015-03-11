@@ -48,8 +48,8 @@ http://%HOSTIP/522 %HTTPPORT
 </strip>
 <protocol>
 GET /522 HTTP/1.1
-Authorization: Basic eHh4Onl5eQ==
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic eHh4Onl5eQ==
 Accept: */*
 
 </protocol>

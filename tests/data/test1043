@@ -75,8 +75,8 @@ http://%HOSTIP:%HTTPPORT/1043 -C -
 </strip>
 <protocol>
 GET /1043 HTTP/1.1
-Range: bytes=40-
 Host: %HOSTIP:%HTTPPORT
+Range: bytes=40-
 Accept: */*
 
 </protocol>

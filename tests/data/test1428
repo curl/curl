@@ -62,17 +62,17 @@ http://test.1428:%HTTPPORT/we/want/that/page/1428 -p -x %HOSTIP:%PROXYPORT --use
 </strip>
 <proxy>
 CONNECT test.1428:%HTTPPORT HTTP/1.1
-User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 Host: test.1428:%HTTPPORT
+User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 Proxy-Connection: Keep-Alive
 header-type: proxy
 
 </proxy>
 <protocol>
 GET /we/want/that/page/1428 HTTP/1.1
+Host: test.1428:%HTTPPORT
 Authorization: Basic aWFtOm15OjtzZWxm
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
-Host: test.1428:%HTTPPORT
 Accept: */*
 header-type: server
 
