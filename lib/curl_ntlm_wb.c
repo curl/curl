@@ -419,10 +419,8 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
      * don't send a header in future requests */
-    if(*allocuserpwd) {
-      free(*allocuserpwd);
-      *allocuserpwd=NULL;
-    }
+    free(*allocuserpwd);
+    *allocuserpwd=NULL;
     authp->done = TRUE;
     break;
   }

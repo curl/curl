@@ -252,8 +252,7 @@ static CURLcode base64_encode(const char *table64,
   *output = '\0';
   *outptr = base64data; /* return pointer to new data, allocated memory */
 
-  if(convbuf)
-    free(convbuf);
+  free(convbuf);
 
   *outlen = strlen(base64data); /* return the length of the new data */
 

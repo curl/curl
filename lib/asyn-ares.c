@@ -186,8 +186,7 @@ void Curl_resolver_cancel(struct connectdata *conn)
  */
 static void destroy_async_data (struct Curl_async *async)
 {
-  if(async->hostname)
-    free(async->hostname);
+  free(async->hostname);
 
   if(async->os_specific) {
     struct ResolverResults *res = (struct ResolverResults *)async->os_specific;
