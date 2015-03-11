@@ -58,8 +58,7 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   info->filetime = -1; /* -1 is an illegal time and thus means unknown */
   info->timecond = FALSE;
 
-  if(info->contenttype)
-    free(info->contenttype);
+  free(info->contenttype);
   info->contenttype = NULL;
 
   info->header_size = 0;

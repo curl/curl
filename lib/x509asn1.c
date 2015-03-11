@@ -1116,8 +1116,7 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
           if(len > 0)
             if(strlen(dnsname) == (size_t) len)
               i = Curl_cert_hostcheck((const char *) dnsname, conn->host.name);
-          if(dnsname)
-            free(dnsname);
+          free(dnsname);
           if(!i)
             return CURLE_PEER_FAILED_VERIFICATION;
           matched = i;

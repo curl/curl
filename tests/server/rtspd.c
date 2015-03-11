@@ -523,8 +523,7 @@ static int ProcessRequest(struct httprequest *req)
           } while(ptr && *ptr);
           logmsg("Done parsing server commands");
         }
-        if(cmd)
-          free(cmd);
+        free(cmd);
       }
     }
     else {
@@ -993,8 +992,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
 
     if(got_exit_signal) {
-      if(ptr)
-        free(ptr);
+      free(ptr);
       return -1;
     }
 
@@ -1005,8 +1003,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
       logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
-      if(ptr)
-        free(ptr);
+      free(ptr);
       return 0;
     }
     else {
@@ -1015,18 +1012,15 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       fclose(stream);
       if(error) {
         logmsg("getpart() failed with error: %d", error);
-        if(ptr)
-          free(ptr);
+        free(ptr);
         return 0;
       }
     }
   }
 
   if(got_exit_signal) {
-    if(ptr)
-      free(ptr);
-    if(cmd)
-      free(cmd);
+    free(ptr);
+    free(cmd);
     return -1;
   }
 
@@ -1050,10 +1044,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", RESPONSE_DUMP);
     logmsg("couldn't create logfile: " RESPONSE_DUMP);
-    if(ptr)
-      free(ptr);
-    if(cmd)
-      free(cmd);
+    free(ptr);
+    free(cmd);
     return -1;
   }
 
@@ -1110,28 +1102,22 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
            RESPONSE_DUMP, error, strerror(error));
 
   if(got_exit_signal) {
-    if(ptr)
-      free(ptr);
-    if(cmd)
-      free(cmd);
+    free(ptr);
+    free(cmd);
     return -1;
   }
 
   if(sendfailure) {
     logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) were sent",
            responsesize-count, responsesize);
-    if(ptr)
-      free(ptr);
-    if(cmd)
-      free(cmd);
+    free(ptr);
+    free(cmd);
     return -1;
   }
 
   logmsg("Response sent (%zu bytes) and written to " RESPONSE_DUMP,
          responsesize);
-
-  if(ptr)
-    free(ptr);
+  free(ptr);
 
   if(cmdsize > 0 ) {
     char command[32];
@@ -1169,9 +1155,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
         ptr = NULL;
     } while(ptr && *ptr);
   }
-  if(cmd)
-    free(cmd);
-
+  free(cmd);
   req->open = persistant;
 
   prevtestno = req->testno;

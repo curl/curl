@@ -1193,10 +1193,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
       }
 
     result = curl_easy_setopt(curl, tag, s);
-
-    if(s)
-      free(s);
-
+    free(s);
     break;
 
   case CURLOPT_COPYPOSTFIELDS:

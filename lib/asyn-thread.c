@@ -190,8 +190,7 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
     free(tsd->mtx);
   }
 
-  if(tsd->hostname)
-    free(tsd->hostname);
+  free(tsd->hostname);
 
   if(tsd->res)
     Curl_freeaddrinfo(tsd->res);
@@ -364,9 +363,7 @@ static void destroy_async_data (struct Curl_async *async)
   }
   async->os_specific = NULL;
 
-  if(async->hostname)
-    free(async->hostname);
-
+  free(async->hostname);
   async->hostname = NULL;
 }
 

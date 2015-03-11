@@ -59,15 +59,10 @@ void Curl_wildcard_dtor(struct WildcardData *wc)
     wc->filelist = NULL;
   }
 
-  if(wc->path) {
-    free(wc->path);
-    wc->path = NULL;
-  }
-
-  if(wc->pattern) {
-    free(wc->pattern);
-    wc->pattern = NULL;
-  }
+  free(wc->path);
+  wc->path = NULL;
+  free(wc->pattern);
+  wc->pattern = NULL;
 
   wc->customptr = NULL;
   wc->state = CURLWC_INIT;

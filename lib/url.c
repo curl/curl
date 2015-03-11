@@ -448,10 +448,8 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_ssl_free_certinfo(data);
 
   /* Cleanup possible redirect junk */
-  if(data->req.newurl) {
-    free(data->req.newurl);
-    data->req.newurl = NULL;
-  }
+  free(data->req.newurl);
+  data->req.newurl = NULL;
 
   if(data->change.referer_alloc) {
     Curl_safefree(data->change.referer);
@@ -668,8 +666,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
   if(result) {
     Curl_resolver_cleanup(data->state.resolver);
-    if(data->state.headerbuff)
-      free(data->state.headerbuff);
+    free(data->state.headerbuff);
     Curl_freeset(data);
     free(data);
     data = NULL;
@@ -2731,10 +2728,9 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
   free(conn->host.encalloc); /* encoded host name buffer, must be freed with
                                 idn_free() since this was allocated by
                                 curl_win32_idn_to_ascii */
-  if(conn->proxy.encalloc)
-    free(conn->proxy.encalloc); /* encoded proxy name buffer, must be freed
-                                   with idn_free() since this was allocated by
-                                   curl_win32_idn_to_ascii */
+  free(conn->proxy.encalloc); /* encoded proxy name buffer, must be freed
+                                 with idn_free() since this was allocated by
+                                 curl_win32_idn_to_ascii */
 #endif
 
   Curl_ssl_close(conn, FIRSTSOCKET);
@@ -4425,8 +4421,7 @@ static char *detect_proxy(struct connectdata *conn)
     }
   } /* if(!check_noproxy(conn->host.name, no_proxy)) - it wasn't specified
        non-proxy */
-  if(no_proxy)
-    free(no_proxy);
+  free(no_proxy);
 
 #else /* !CURL_DISABLE_HTTP */
 
@@ -5189,8 +5184,7 @@ static CURLcode resolve_server(struct SessionHandle *data,
 static void reuse_conn(struct connectdata *old_conn,
                        struct connectdata *conn)
 {
-  if(old_conn->proxy.rawalloc)
-    free(old_conn->proxy.rawalloc);
+  free(old_conn->proxy.rawalloc);
 
   /* free the SSL config struct from this connection struct as this was
      allocated in vain and is targeted for destruction */
@@ -5439,10 +5433,8 @@ static CURLcode create_conn(struct SessionHandle *data,
 
   if(data->set.str[STRING_NOPROXY] &&
      check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY])) {
-    if(proxy) {
-      free(proxy);  /* proxy is in exception list */
-      proxy = NULL;
-    }
+    free(proxy);  /* proxy is in exception list */
+    proxy = NULL;
   }
   else if(!proxy)
     proxy = detect_proxy(conn);
@@ -5931,14 +5923,10 @@ CURLcode Curl_done(struct connectdata **connp,
   conn->bits.done = TRUE; /* called just now! */
 
   /* Cleanup possible redirect junk */
-  if(data->req.newurl) {
-    free(data->req.newurl);
-    data->req.newurl = NULL;
-  }
-  if(data->req.location) {
-    free(data->req.location);
-    data->req.location = NULL;
-  }
+  free(data->req.newurl);
+  data->req.newurl = NULL;
+  free(data->req.location);
+  data->req.location = NULL;
 
   Curl_resolver_cancel(conn);
 
@@ -5971,10 +5959,8 @@ CURLcode Curl_done(struct connectdata **connp,
 
   /* if the transfer was completed in a paused state there can be buffered
      data left to write and then kill */
-  if(data->state.tempwrite) {
-    free(data->state.tempwrite);
-    data->state.tempwrite = NULL;
-  }
+  free(data->state.tempwrite);
+  data->state.tempwrite = NULL;
 
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
      forced us to close this connection. This is ignored for requests taking
