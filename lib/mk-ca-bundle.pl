@@ -185,6 +185,12 @@ sub VERSION_MESSAGE() {
 warning_message() unless ($opt_q || $url =~ m/^(ht|f)tps:/i );
 HELP_MESSAGE() if ($opt_h);
 
+sub report($@) {
+  my $output = shift;
+
+  print STDERR $output . "\n" unless $opt_q;
+}
+
 sub is_in_list($@) {
   my $target = shift;
 
@@ -278,20 +284,20 @@ my $fetched;
 
 my $oldsha1 = oldsha1($crt);
 
-print STDERR "SHA1 of old file: $oldsha1\n" if (!$opt_q);
+report "SHA1 of old file: $oldsha1";
 
-print STDERR "Downloading '$txt' ...\n" if (!$opt_q);
+report "Downloading '$txt' ...";
 
 if($curl && !$opt_n) {
   my $https = $url;
   $https =~ s/^http:/https:/;
-  print STDERR "Get certdata over HTTPS with curl!\n" if (!$opt_q);
+  report "Get certdata over HTTPS with curl!";
   my $quiet = $opt_q ? "-s" : "";
   my @out = `curl -w %{response_code} $quiet -O $https`;
   if(@out && $out[0] == 200) {
     $fetched = 1;
   } else {
-    print STDERR "Failed downloading HTTPS with curl, trying HTTP with LWP\n" if (!$opt_q);
+    report "Failed downloading HTTPS with curl, trying HTTP with LWP";
   }
 }
 
@@ -300,15 +306,14 @@ unless ($fetched || ($opt_n and -e $txt)) {
   $ua->env_proxy();
   $resp = $ua->mirror($url, $txt);
   if ($resp && $resp->code eq '304') {
-    print STDERR "Not modified\n" unless $opt_q;
+    report "Not modified";
     exit 0 if -e $crt && !$opt_f;
   } else {
       $fetched = 1;
   }
   if( !$resp || $resp->code !~ /^(?:200|304)$/ ) {
-      print STDERR "Unable to download latest data: "
-        . ($resp? $resp->code . ' - ' . $resp->message : "LWP failed") . "\n"
-        unless $opt_q;
+      report "Unable to download latest data: "
+        . ($resp? $resp->code . ' - ' . $resp->message : "LWP failed");
       exit 1 if -e $crt || ! -r $txt;
   }
 }
@@ -325,11 +330,11 @@ if(!$filedate) {
 my $newsha1= sha1($txt);
 
 if(!$opt_f && $oldsha1 eq $newsha1) {
-    print STDERR "Downloaded file identical to previous run\'s source file. Exiting\n";
+    report "Downloaded file identical to previous run\'s source file. Exiting";
     exit;
 }
 
-print STDERR "SHA1 of new file: $newsha1\n";
+report "SHA1 of new file: $newsha1";
 
 my $currentdate = scalar gmtime($filedate);
 
@@ -361,7 +366,7 @@ print CRT <<EOT;
 
 EOT
 
-print STDERR "Processing  '$txt' ...\n" if (!$opt_q);
+report "Processing  '$txt' ...";
 my $caname;
 my $certnum = 0;
 my $skipnum = 0;
@@ -413,9 +418,9 @@ while (<TXT>) {
       last if (/^#/);
       if (/^CKA_TRUST_([A-Z_]+)\s+CK_TRUST\s+CKT_NSS_([A-Z_]+)\s*$/) {
         if ( !is_in_list($1,@valid_mozilla_trust_purposes) ) {
-          print STDERR "Warning: Unrecognized trust purpose for cert: $caname. Trust purpose: $1. Trust Level: $2\n" if (!$opt_q);
+          report "Warning: Unrecognized trust purpose for cert: $caname. Trust purpose: $1. Trust Level: $2";
         } elsif ( !is_in_list($2,@valid_mozilla_trust_levels) ) {
-          print STDERR "Warning: Unrecognized trust level for cert: $caname. Trust purpose: $1. Trust Level: $2\n" if (!$opt_q);
+          report "Warning: Unrecognized trust level for cert: $caname. Trust purpose: $1. Trust Level: $2";
         } else {
           push @{$trust_purposes_by_level{$2}}, $1;
         }
@@ -470,7 +475,7 @@ while (<TXT>) {
           open(CRT, ">>$crt.~") or die "Couldn't open $crt.~: $!";
         }
       }
-      print STDERR "Parsing: $caname\n" if ($opt_v);
+      report "Parsing: $caname" if ($opt_v);
       $certnum ++;
       $start_of_cert = 0;
     }
@@ -491,4 +496,4 @@ unless( $stdout ) {
     rename "$crt.~", $crt or die "Failed to rename $crt.~ to $crt: $!\n";
 }
 unlink $txt if ($opt_u);
-print STDERR "Done ($certnum CA certs processed, $skipnum skipped).\n" if (!$opt_q);
+report "Done ($certnum CA certs processed, $skipnum skipped).";
