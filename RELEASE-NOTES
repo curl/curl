@@ -8,7 +8,7 @@ Curl and libcurl 7.42.0
 
 This release includes the following changes:
 
- o
+ o openssl: show the cipher selection to use in verbose text
 
 This release includes the following bugfixes:
 
@@ -37,6 +37,16 @@ This release includes the following bugfixes:
  o conncontrol: only log changes to the connection bit
  o multi: fix *getsock() with CONNECT [2]
  o symbols.pl: handle '-' in the deprecated field [5]
+ o MacOSX-Framework: use @rpath instead of @executable_path [7]
+ o GnuTLS: add support for CURLOPT_CAPATH
+ o GnuTLS: print negotiated TLS version and full cipher suite name
+ o GnuTLS: don't print double newline after certificate dates
+ o memanalyze.pl: handle free(NULL)
+ o proxy: re-use proxy connections (regression) [8]
+ o mk-ca-bundle: Don't report SHA1 numbers with "-q"
+ o http: always send Host: header as first header [9]
+ o openssl: sort ciphers to use based on strength [10]
+ o openssl: use colons properly in the ciphers list
 
 This release includes the following known bugs:
 
@@ -45,9 +55,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Brad King, Daniel Stenberg, Jeroen Ooms, Jonathan Cardoso,
-  Jon Seymour, Kamil Dudka, Markus Elfring, Michel Promonet, Peter Laser,
-  Ray Satiro, Sergei Nikulov, Steve Havelka, Steve Holme, Tatsuhiro Tsujikawa,
+  Alessandro Ghedini, Alexander Pepper, Brad King, Daniel Stenberg, Fabian Keil,
+  Jeroen Ooms, Jonathan Cardoso, Jon Seymour, Kamil Dudka, Markus Elfring,
+  Michel Promonet, Peter Laser, Rainer Canavan, Ray Satiro, Richard Moore,
+  Sergei Nikulov, Steve Havelka, Steve Holme, Tatsuhiro Tsujikawa,
   Viktor Szakáts,
 
         Thanks! (and sorry if I forgot to mention someone)
@@ -60,3 +71,7 @@ References to bug reports and discussions on issues:
  [4] = https://github.com/bagder/curl/issues/147
  [5] = http://curl.haxx.se/mail/lib-2015-03/0052.html
  [6] = https://github.com/bagder/curl/pull/144
+ [7] = https://github.com/bagder/curl/pull/157
+ [8] = http://curl.haxx.se/bug/view.cgi?id=1492
+ [9] = http://curl.haxx.se/bug/view.cgi?id=1491
+ [10] = http://curl.haxx.se/bug/view.cgi?id=1487
