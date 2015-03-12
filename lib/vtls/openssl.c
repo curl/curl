@@ -1955,6 +1955,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     failf(data, "failed setting cipher list: %s", ciphers);
     return CURLE_SSL_CIPHER;
   }
+  infof(data, "Cipher selection: %s\n", ciphers);
 
 #ifdef USE_TLS_SRP
   if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
