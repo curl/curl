@@ -28,8 +28,8 @@ Content-type: text/html
 <TR><TD>Cipher</TD><TD>AES-NNN-CBC</TD></TR>
 <TR><TD>MAC</TD><TD>SHA1</TD></TR>
 <TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_NNN_CBC_SHA1</TD></TR></p></TABLE>
-<hr><P>Your HTTP header was:<PRE>User-Agent: curl/7.21.4-DEV (x86_64-apple-darwin10.5.0) libcurl/7.21.4-DEV GnuTLS/2.10.4 zlib/1.2.5 libidn/1.19
-Host: localhost:9011
+<hr><P>Your HTTP header was:<PRE>Host: localhost:9011
+User-Agent: curl-test-suite
 Accept: */*
 
 </PRE></P>
@@ -50,7 +50,7 @@ TLS-SRP
 simple TLS-SRP HTTPS GET, check user in response
  </name>
 <command>
---insecure --tlsauthtype SRP --tlsuser jsmith --tlspassword abc https://%HOSTIP:%HTTPTLSPORT
+--insecure --tlsauthtype SRP --tlsuser jsmith --tlspassword abc -A curl-test-suite https://%HOSTIP:%HTTPTLSPORT
 </command>
 </client>
 
@@ -77,8 +77,8 @@ Content-type: text/html
 <TR><TD>Cipher</TD><TD>AES-NNN-CBC</TD></TR>
 <TR><TD>MAC</TD><TD>SHA1</TD></TR>
 <TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_NNN_CBC_SHA1</TD></TR></p></TABLE>
-<PRE>
-Host: %HOSTIP:%HTTPTLSPORT
+<hr><P>Your HTTP header was:<PRE>Host: %HOSTIP:%HTTPTLSPORT
+User-Agent: curl-test-suite
 Accept: */*
 
 </PRE></P>
@@ -87,7 +87,6 @@ Accept: */*
 </file>
 <stripfile>
 s/^<p>Session ID:.*//
-s/^<hr><P>Your HTTP header was:<PRE>.*/<PRE>/
 s/Protocol version:.*[0-9]//
 s/GNUTLS/GnuTLS/
 s/(AES[-_])\d\d\d([-_]CBC)/$1NNN$2/
