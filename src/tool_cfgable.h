@@ -226,6 +226,7 @@ struct GlobalConfig {
   FILE *trace_stream;
   bool trace_fopened;
   trace tracetype;
+  bool showCertificateChain;      /* Display server certificate chain for TLS connections? */
   bool tracetime;                 /* include timestamp? */
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
   char *libcurl;                  /* Output libcurl code to this file name */

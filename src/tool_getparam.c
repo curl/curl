@@ -176,7 +176,8 @@ static const struct LongShort aliases[]= {
   {"$J", "metalink",                 FALSE},
   {"$K", "sasl-ir",                  FALSE},
   {"$L", "test-event",               FALSE},
-  {"$M", "unix-socket",              TRUE},
+  {"$M", "unix-socket",              TRUE },
+  {"$N", "show-cert-chain",          FALSE },
   {"0",   "http1.0",                 FALSE},
   {"01",  "http1.1",                 FALSE},
   {"02",  "http2",                   FALSE},
@@ -981,6 +982,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'M': /* --unix-socket */
         GetStr(&config->unix_socket_path, nextarg);
         break;
+      case 'N': /* --show-cert-chain */
+       config->global->showCertificateChain = toggle;
+       break;
       }
       break;
     case '#': /* --progress-bar */
