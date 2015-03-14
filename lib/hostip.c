@@ -607,32 +607,6 @@ int Curl_resolv_timeout(struct connectdata *conn,
        we want to wait less than one second we must bail out already now. */
     return CURLRESOLV_TIMEDOUT;
 
-  /*************************************************************
-   * Set signal handler to catch SIGALRM
-   * Store the old value to be able to set it back later!
-   *************************************************************/
-#ifdef HAVE_SIGACTION
-  sigaction(SIGALRM, NULL, &sigact);
-  keep_sigact = sigact;
-  keep_copysig = TRUE; /* yes, we have a copy */
-  sigact.sa_handler = alarmfunc;
-#ifdef SA_RESTART
-  /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
-  sigact.sa_flags &= ~SA_RESTART;
-#endif
-  /* now set the new struct */
-  sigaction(SIGALRM, &sigact, NULL);
-#else /* HAVE_SIGACTION */
-  /* no sigaction(), revert to the much lamer signal() */
-#ifdef HAVE_SIGNAL
-  keep_sigact = signal(SIGALRM, alarmfunc);
-#endif
-#endif /* HAVE_SIGACTION */
-
-  /* alarm() makes a signal get sent when the timeout fires off, and that
-     will abort system calls */
-  prev_alarm = alarm(curlx_sltoui(timeout/1000L));
-
   /* This allows us to time-out from the name resolver, as the timeout
      will generate a signal and we will siglongjmp() from that here.
      This technique has problems (see alarmfunc).
@@ -644,6 +618,33 @@ int Curl_resolv_timeout(struct connectdata *conn,
     failf(data, "name lookup timed out");
     rc = CURLRESOLV_ERROR;
     goto clean_up;
+  }
+  else {
+    /*************************************************************
+     * Set signal handler to catch SIGALRM
+     * Store the old value to be able to set it back later!
+     *************************************************************/
+#ifdef HAVE_SIGACTION
+    sigaction(SIGALRM, NULL, &sigact);
+    keep_sigact = sigact;
+    keep_copysig = TRUE; /* yes, we have a copy */
+    sigact.sa_handler = alarmfunc;
+#ifdef SA_RESTART
+    /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
+    sigact.sa_flags &= ~SA_RESTART;
+#endif
+    /* now set the new struct */
+    sigaction(SIGALRM, &sigact, NULL);
+#else /* HAVE_SIGACTION */
+    /* no sigaction(), revert to the much lamer signal() */
+#ifdef HAVE_SIGNAL
+    keep_sigact = signal(SIGALRM, alarmfunc);
+#endif
+#endif /* HAVE_SIGACTION */
+
+    /* alarm() makes a signal get sent when the timeout fires off, and that
+       will abort system calls */
+    prev_alarm = alarm(curlx_sltoui(timeout/1000L));
   }
 
 #else
