@@ -102,7 +102,7 @@ const struct Curl_handler Curl_handler_http2 = {
   "HTTP2",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */
-  ZERO_NULL,                            /* done */
+  Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
   ZERO_NULL,                            /* connect_it */
   ZERO_NULL,                            /* connecting */
@@ -122,7 +122,7 @@ const struct Curl_handler Curl_handler_http2_ssl = {
   "HTTP2",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */
-  ZERO_NULL,                            /* done */
+  Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
   ZERO_NULL,                            /* connect_it */
   ZERO_NULL,                            /* connecting */

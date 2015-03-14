@@ -62,5 +62,9 @@ Upgrade: %H2CVER
 HTTP2-Settings: AAMAAABkAAQAAP__
 
 </protocol>
+# nothing is returned, because no HTTP/2 data nor headers was handled
+<errorcode>
+56
+</errorcode>
 </verify>
 </testcase>
