@@ -559,16 +559,14 @@ static CURLcode trynextip(struct connectdata *conn,
       family = conn->tempaddr[tempindex]->ai_family;
       ai = conn->tempaddr[tempindex]->ai_next;
     }
+#ifdef ENABLE_IPV6
     else if(conn->tempaddr[0]) {
       /* happy eyeballs - try the other protocol family */
       int firstfamily = conn->tempaddr[0]->ai_family;
-#ifdef ENABLE_IPV6
       family = (firstfamily == AF_INET) ? AF_INET6 : AF_INET;
-#else
-      family = firstfamily;
-#endif
       ai = conn->tempaddr[0]->ai_next;
     }
+#endif
 
     while(ai) {
       if(conn->tempaddr[other]) {
