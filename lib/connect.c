@@ -1263,8 +1263,10 @@ int Curl_closesocket(struct connectdata *conn,
          accept, then we MUST NOT call the callback but clear the accepted
          status */
       conn->sock_accepted[SECONDARYSOCKET] = FALSE;
-    else
+    else {
+      Curl_multi_closed(conn, sock);
       return conn->fclosesocket(conn->closesocket_client, sock);
+    }
   }
 
   if(conn)
