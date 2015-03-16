@@ -149,7 +149,7 @@ CURLcode Curl_base64_decode(const char *src,
   for(i = 0; i < numQuantums; i++) {
     size_t result = decodeQuantum(pos, src);
     if(!result) {
-      Curl_safefree(newstr);
+      free(newstr);
 
       return CURLE_BAD_CONTENT_ENCODING;
     }

@@ -207,7 +207,7 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
     &attrs,
     &expiry);
 
-  Curl_safefree(input_token);
+  free(input_token);
 
   if(GSS_ERROR(neg_ctx->status))
     return CURLE_OUT_OF_MEMORY;

@@ -1101,7 +1101,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
           Curl_strerror(conn, SOCKERRNO) );
-      Curl_safefree(addr);
+      free(addr);
       return CURLE_FTP_PORT_FAILED;
     }
     switch(sa->sa_family) {
@@ -1133,11 +1133,11 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 
   if(res == NULL) {
     failf(data, "failed to resolve the address provided to PORT: %s", host);
-    Curl_safefree(addr);
+    free(addr);
     return CURLE_FTP_PORT_FAILED;
   }
 
-  Curl_safefree(addr);
+  free(addr);
   host = NULL;
 
   /* step 2, create a socket for the requested address */
@@ -3807,7 +3807,7 @@ static void wc_data_dtor(void *ptr)
   struct ftp_wc_tmpdata *tmp = ptr;
   if(tmp)
     Curl_ftp_parselist_data_free(&tmp->parser);
-  Curl_safefree(tmp);
+  free(tmp);
 }
 
 static CURLcode init_wc_data(struct connectdata *conn)
@@ -3861,7 +3861,7 @@ static CURLcode init_wc_data(struct connectdata *conn)
   ftp_tmp->parser = Curl_ftp_parselist_data_alloc();
   if(!ftp_tmp->parser) {
     Curl_safefree(wildcard->pattern);
-    Curl_safefree(ftp_tmp);
+    free(ftp_tmp);
     return CURLE_OUT_OF_MEMORY;
   }
 

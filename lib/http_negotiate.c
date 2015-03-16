@@ -78,12 +78,12 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
     if(GSS_ERROR(major_status)) {
       Curl_gss_log_error(data, minor_status, "gss_import_name() failed: ");
 
-      Curl_safefree(spn);
+      free(spn);
 
       return CURLE_OUT_OF_MEMORY;
     }
 
-      Curl_safefree(spn);
+    free(spn);
   }
 
   header += strlen("Negotiate");
@@ -179,7 +179,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     conn->allocptr.userpwd = userp;
   }
 
-  Curl_safefree(encoded);
+  free(encoded);
 
   return (userp == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }

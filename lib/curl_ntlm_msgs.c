@@ -758,7 +758,7 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
     ntlm_print_hex(stderr, (char *)&ntlmbuf[ntrespoff], ntresplen);
   });
 
-  Curl_safefree(ntlmv2resp);/* Free the dynamic buffer allocated for NTLMv2 */
+  free(ntlmv2resp);/* Free the dynamic buffer allocated for NTLMv2 */
 
 #endif
 

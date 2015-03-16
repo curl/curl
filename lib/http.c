@@ -301,7 +301,7 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
   if(!authorization)
     return CURLE_REMOTE_ACCESS_DENIED;
 
-  Curl_safefree(*userp);
+  free(*userp);
   *userp = aprintf("%sAuthorization: Basic %s\r\n",
                    proxy?"Proxy-":"",
                    authorization);
@@ -3483,7 +3483,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         if(Curl_pipeline_server_blacklisted(data, server_name))
           conn->bundle->server_supports_pipelining = FALSE;
       }
-      Curl_safefree(server_name);
+      free(server_name);
     }
     else if((conn->httpversion == 10) &&
             conn->bits.httpproxy &&
@@ -3688,7 +3688,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 
       result = Curl_http_input_auth(conn, proxy, auth);
 
-      Curl_safefree(auth);
+      free(auth);
 
       if(result)
         return result;

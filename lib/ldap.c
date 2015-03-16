@@ -852,7 +852,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
     ludp->lud_attrs = calloc(count + 1, sizeof(char *));
 #endif
     if(!ludp->lud_attrs) {
-      Curl_safefree(attributes);
+      free(attributes);
 
       rc = LDAP_NO_MEMORY;
 
@@ -867,7 +867,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
       /* Unescape the attribute */
       unescaped = curl_easy_unescape(conn->data, attributes[i], 0, NULL);
       if(!unescaped) {
-        Curl_safefree(attributes);
+        free(attributes);
 
         rc = LDAP_NO_MEMORY;
 
@@ -882,7 +882,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
       Curl_unicodefree(unescaped);
 
       if(!ludp->lud_attrs[i]) {
-        Curl_safefree(attributes);
+        free(attributes);
 
         rc = LDAP_NO_MEMORY;
 
@@ -895,7 +895,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
       ludp->lud_attrs_dups++;
     }
 
-    Curl_safefree(attributes);
+    free(attributes);
   }
 
   p = q;
@@ -965,7 +965,7 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   }
 
 quit:
-  Curl_safefree(path);
+  free(path);
 
   return rc;
 }

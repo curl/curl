@@ -251,7 +251,7 @@ static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
     token = strtok_r(NULL, ",", &tok_buf);
   }
 
-  Curl_safefree(tmp);
+  free(tmp);
 
   return CURLE_OK;
 }
@@ -324,7 +324,7 @@ static CURLcode sasl_create_plain_message(struct SessionHandle *data,
   /* Base64 encode the reply */
   result = Curl_base64_encode(data, plainauth, 2 * ulen + plen + 2, outptr,
                               outlen);
-  Curl_safefree(plainauth);
+  free(plainauth);
   return result;
 }
 
@@ -481,7 +481,7 @@ static CURLcode sasl_create_cram_md5_message(struct SessionHandle *data,
   /* Base64 encode the response */
   result = Curl_base64_encode(data, response, 0, outptr, outlen);
 
-  Curl_safefree(response);
+  free(response);
 
   return result;
 }
@@ -531,7 +531,7 @@ static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
 
   /* Retrieve nonce string from the challenge */
   if(!sasl_digest_get_key_value((char *)chlg, "nonce=\"", nonce, nlen, '\"')) {
-    Curl_safefree(chlg);
+    free(chlg);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
@@ -543,17 +543,17 @@ static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
 
   /* Retrieve algorithm string from the challenge */
   if(!sasl_digest_get_key_value((char *)chlg, "algorithm=", alg, alen, ',')) {
-    Curl_safefree(chlg);
+    free(chlg);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Retrieve qop-options string from the challenge */
   if(!sasl_digest_get_key_value((char *)chlg, "qop=\"", qop, qlen, '\"')) {
-    Curl_safefree(chlg);
+    free(chlg);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
-  Curl_safefree(chlg);
+  free(chlg);
 
   return CURLE_OK;
 }
@@ -675,7 +675,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
   if(!ctxt) {
-    Curl_safefree(spn);
+    free(spn);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -693,7 +693,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   /* Now calculate the response hash */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
   if(!ctxt) {
-    Curl_safefree(spn);
+    free(spn);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -726,14 +726,14 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                      "qop=%s",
                      userp, realm, nonce,
                      cnonce, nonceCount, spn, resp_hash_hex, qop);
-  Curl_safefree(spn);
+  free(spn);
   if(!response)
     return CURLE_OUT_OF_MEMORY;
 
   /* Base64 encode the response */
   result = Curl_base64_encode(data, response, 0, outptr, outlen);
 
-  Curl_safefree(response);
+  free(response);
 
   return result;
 }
@@ -947,7 +947,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
 
   CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
   Curl_md5it(md5buf, md5this);
-  Curl_safefree(md5this);
+  free(md5this);
   sasl_digest_md5_to_ascii(md5buf, ha1);
 
   if(digest->algo == CURLDIGESTALGO_MD5SESS) {
@@ -958,7 +958,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
 
     CURL_OUTPUT_DIGEST_CONV(data, tmp); /* convert on non-ASCII machines */
     Curl_md5it(md5buf, (unsigned char *)tmp);
-    Curl_safefree(tmp);
+    free(tmp);
     sasl_digest_md5_to_ascii(md5buf, ha1);
   }
 
@@ -982,7 +982,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
        TODO: replace md5 of empty string with entity-body for PUT/POST */
     unsigned char *md5this2 = (unsigned char *)
       aprintf("%s:%s", md5this, "d41d8cd98f00b204e9800998ecf8427e");
-    Curl_safefree(md5this);
+    free(md5this);
     md5this = md5this2;
   }
 
@@ -991,7 +991,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
 
   CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
   Curl_md5it(md5buf, md5this);
-  Curl_safefree(md5this);
+  free(md5this);
   sasl_digest_md5_to_ascii(md5buf, ha2);
 
   if(digest->qop) {
@@ -1015,7 +1015,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
 
   CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
   Curl_md5it(md5buf, md5this);
-  Curl_safefree(md5this);
+  free(md5this);
   sasl_digest_md5_to_ascii(md5buf, request_digest);
 
   /* for test case 64 (snooped from a Mozilla 1.3a request)
@@ -1070,7 +1070,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
                        uripath,
                        request_digest);
   }
-  Curl_safefree(userp_quoted);
+  free(userp_quoted);
   if(!response)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1183,7 +1183,7 @@ static CURLcode sasl_create_xoauth2_message(struct SessionHandle *data,
   /* Base64 encode the reply */
   result = Curl_base64_encode(data, xoauth, strlen(xoauth), outptr, outlen);
 
-  Curl_safefree(xoauth);
+  free(xoauth);
 
   return result;
 }
@@ -1474,7 +1474,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   if(!result) {
     if(resp && sasl->params->maxirlen &&
        strlen(mech) + len > sasl->params->maxirlen) {
-      Curl_safefree(resp);
+      free(resp);
       resp = NULL;
     }
 
@@ -1487,7 +1487,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     }
   }
 
-  Curl_safefree(resp);
+  free(resp);
 
   return result;
 }
@@ -1553,7 +1553,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     if(!result)
       result = sasl_create_cram_md5_message(data, chlg, conn->user,
                                             conn->passwd, &resp, &len);
-    Curl_safefree(chlg);
+    free(chlg);
     break;
   case SASL_DIGESTMD5:
     sasl->params->getmessage(data->state.buffer, &serverdata);
@@ -1659,7 +1659,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     break;
   }
 
-  Curl_safefree(resp);
+  free(resp);
 
   state(sasl, conn, newstate);
 

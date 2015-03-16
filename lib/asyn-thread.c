@@ -393,7 +393,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   if(!init_thread_sync_data(td, hostname, port, hints))
     goto err_exit;
 
-  Curl_safefree(conn->async.hostname);
+  free(conn->async.hostname);
   conn->async.hostname = strdup(hostname);
   if(!conn->async.hostname)
     goto err_exit;

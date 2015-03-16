@@ -173,7 +173,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
       return result;
 
     if(base64) {
-      Curl_safefree(*allocuserpwd);
+      free(*allocuserpwd);
       *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
                               proxy ? "Proxy-" : "",
                               base64);
@@ -193,7 +193,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
       return result;
 
     if(base64) {
-      Curl_safefree(*allocuserpwd);
+      free(*allocuserpwd);
       *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
                               proxy ? "Proxy-" : "",
                               base64);

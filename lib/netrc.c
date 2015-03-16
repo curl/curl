@@ -102,7 +102,7 @@ int Curl_parsenetrc(const char *host,
 
     netrcfile = curl_maprintf("%s%s%s", home, DIR_CHAR, NETRC);
     if(home_alloc)
-      Curl_safefree(home);
+      free(home);
     if(!netrcfile) {
       return -1;
     }
@@ -111,7 +111,7 @@ int Curl_parsenetrc(const char *host,
 
   file = fopen(netrcfile, "r");
   if(netrc_alloc)
-    Curl_safefree(netrcfile);
+    free(netrcfile);
   if(file) {
     char *tok;
     char *tok_buf;

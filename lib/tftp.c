@@ -531,7 +531,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     if(senddata != (ssize_t)sbytes) {
       failf(data, "%s", Curl_strerror(state->conn, SOCKERRNO));
     }
-    Curl_safefree(filename);
+    free(filename);
     break;
 
   case TFTP_EVENT_OACK:

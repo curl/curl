@@ -143,7 +143,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   if(check_sspi_err(conn, status, "AcquireCredentialsHandle")) {
     failf(data, "Failed to acquire credentials.");
-    Curl_safefree(service_name);
+    free(service_name);
     s_pSecFn->FreeCredentialsHandle(&cred_handle);
     return CURLE_COULDNT_CONNECT;
   }
@@ -182,7 +182,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     }
 
     if(check_sspi_err(conn, status, "InitializeSecurityContext")) {
-      Curl_safefree(service_name);
+      free(service_name);
       s_pSecFn->FreeCredentialsHandle(&cred_handle);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       if(sspi_recv_token.pvBuffer)
@@ -200,7 +200,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       code = Curl_write_plain(conn, sock, (char *)socksreq, 4, &written);
       if(code || (4 != written)) {
         failf(data, "Failed to send SSPI authentication request.");
-        Curl_safefree(service_name);
+        free(service_name);
         if(sspi_send_token.pvBuffer)
           s_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
         if(sspi_recv_token.pvBuffer)
@@ -214,7 +214,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                               sspi_send_token.cbBuffer, &written);
       if(code || (sspi_send_token.cbBuffer != (size_t)written)) {
         failf(data, "Failed to send SSPI authentication token.");
-        Curl_safefree(service_name);
+        free(service_name);
         if(sspi_send_token.pvBuffer)
           s_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
         if(sspi_recv_token.pvBuffer)
@@ -254,7 +254,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     result = Curl_blockread_all(conn, sock, (char *)socksreq, 4, &actualread);
     if(result || (actualread != 4)) {
       failf(data, "Failed to receive SSPI authentication response.");
-      Curl_safefree(service_name);
+      free(service_name);
       s_pSecFn->FreeCredentialsHandle(&cred_handle);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
@@ -264,7 +264,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     if(socksreq[1] == 255) { /* status / message type */
       failf(data, "User was rejected by the SOCKS5 server (%u %u).",
             (unsigned int)socksreq[0], (unsigned int)socksreq[1]);
-      Curl_safefree(service_name);
+      free(service_name);
       s_pSecFn->FreeCredentialsHandle(&cred_handle);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
@@ -273,7 +273,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     if(socksreq[1] != 1) { /* status / messgae type */
       failf(data, "Invalid SSPI authentication response type (%u %u).",
             (unsigned int)socksreq[0], (unsigned int)socksreq[1]);
-      Curl_safefree(service_name);
+      free(service_name);
       s_pSecFn->FreeCredentialsHandle(&cred_handle);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
@@ -286,7 +286,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     sspi_recv_token.pvBuffer = malloc(us_length);
 
     if(!sspi_recv_token.pvBuffer) {
-      Curl_safefree(service_name);
+      free(service_name);
       s_pSecFn->FreeCredentialsHandle(&cred_handle);
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_OUT_OF_MEMORY;
@@ -296,7 +296,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
     if(result || (actualread != us_length)) {
       failf(data, "Failed to receive SSPI authentication token.");
-      Curl_safefree(service_name);
+      free(service_name);
       if(sspi_recv_token.pvBuffer)
         s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
       s_pSecFn->FreeCredentialsHandle(&cred_handle);
@@ -307,7 +307,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     context_handle = &sspi_context;
   }
 
-  Curl_safefree(service_name);
+  free(service_name);
 
   /* Everything is good so far, user was authenticated! */
   status = s_pSecFn->QueryCredentialsAttributes(&cred_handle,

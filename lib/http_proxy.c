@@ -212,7 +212,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           failf(data, "Failed sending CONNECT to proxy");
       }
 
-      Curl_safefree(req_buffer);
+      free(req_buffer);
       if(result)
         return result;
 
@@ -463,7 +463,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
                     result = Curl_http_input_auth(conn, proxy, auth);
 
-                    Curl_safefree(auth);
+                    free(auth);
 
                     if(result)
                       return result;

@@ -949,7 +949,7 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
   return c;
 
 fail:
-  Curl_safefree(line);
+  free(line);
   if(!inc)
     /* Only clean up if we allocated it here, as the original could still be in
      * use by a share handle */

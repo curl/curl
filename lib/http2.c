@@ -669,7 +669,7 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
                             "Upgrade: %s\r\n"
                             "HTTP2-Settings: %s\r\n",
                             NGHTTP2_CLEARTEXT_PROTO_VERSION_ID, base64);
-  Curl_safefree(base64);
+  free(base64);
 
   k->upgr101 = UPGR101_REQUESTED;
 
@@ -945,7 +945,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
                                        NULL, NULL);
   }
 
-  Curl_safefree(nva);
+  free(nva);
 
   if(stream_id < 0) {
     *err = CURLE_SEND_ERROR;

@@ -855,7 +855,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
 
         if(out_of_memory || sshc->rsa == NULL) {
-          Curl_safefree(home);
+          free(home);
           Curl_safefree(sshc->rsa);
           Curl_safefree(sshc->rsa_pub);
           state(conn, SSH_SESSION_FREE);
@@ -867,7 +867,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         if(!sshc->passphrase)
           sshc->passphrase = "";
 
-        Curl_safefree(home);
+        free(home);
 
         infof(data, "Using SSH public key file '%s'\n", sshc->rsa_pub);
         infof(data, "Using SSH private key file '%s'\n", sshc->rsa);
@@ -1918,7 +1918,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           }
           result = Curl_client_write(conn, CLIENTWRITE_BODY,
                                      tmpLine, sshc->readdir_len+1);
-          Curl_safefree(tmpLine);
+          free(tmpLine);
 
           if(result) {
             state(conn, SSH_STOP);
@@ -3267,8 +3267,8 @@ get_pathname(const char **cpp, char **path)
   return CURLE_OK;
 
   fail:
-    Curl_safefree(*path);
-    return CURLE_QUOTE_ERROR;
+  Curl_safefree(*path);
+  return CURLE_QUOTE_ERROR;
 }
 
 

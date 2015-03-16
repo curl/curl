@@ -926,7 +926,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   else
     i = 0;
 
-  Curl_safefree(ufds);
+  free(ufds);
   if(ret)
     *ret = i;
   return CURLM_OK;

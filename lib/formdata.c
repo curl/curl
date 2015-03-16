@@ -415,7 +415,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
               else {
                 form = AddFormInfo(fname, NULL, current_form);
                 if(!form) {
-                  Curl_safefree(fname);
+                  free(fname);
                   return_value = CURL_FORMADD_MEMORY;
                 }
                 else {
@@ -504,7 +504,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
               else {
                 form = AddFormInfo(NULL, type, current_form);
                 if(!form) {
-                  Curl_safefree(type);
+                  free(type);
                   return_value = CURL_FORMADD_MEMORY;
                 }
                 else {
@@ -711,7 +711,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
      now by the httppost linked list */
   while(first_form) {
     FormInfo *ptr = first_form->more;
-    Curl_safefree(first_form);
+    free(first_form);
     first_form = ptr;
   }
 
@@ -1068,7 +1068,7 @@ static CURLcode formdata_add_filename(const struct curl_httppost *file,
     /* filename need be escaped */
     filename_escaped = malloc(strlen(filename)*2+1);
     if(!filename_escaped) {
-      Curl_safefree(filebasename);
+      free(filebasename);
       return CURLE_OUT_OF_MEMORY;
     }
     p0 = filename_escaped;
@@ -1084,8 +1084,8 @@ static CURLcode formdata_add_filename(const struct curl_httppost *file,
   result = AddFormDataf(form, size,
                         "; filename=\"%s\"",
                         filename);
-  Curl_safefree(filename_escaped);
-  Curl_safefree(filebasename);
+  free(filename_escaped);
+  free(filebasename);
   return result;
 }
 
@@ -1135,7 +1135,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
                         boundary);
 
   if(result) {
-    Curl_safefree(boundary);
+    free(boundary);
     return result;
   }
   /* we DO NOT include that line in the total size of the POST, since it'll be
@@ -1178,7 +1178,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
       /* If used, this is a link to more file names, we must then do
          the magic to include several files with the same field name */
 
-      Curl_safefree(fileboundary);
+      free(fileboundary);
       fileboundary = formboundary(data);
       if(!fileboundary) {
         result = CURLE_OUT_OF_MEMORY;
@@ -1331,15 +1331,15 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
 
   if(result) {
     Curl_formclean(&firstform);
-    Curl_safefree(fileboundary);
-    Curl_safefree(boundary);
+    free(fileboundary);
+    free(boundary);
     return result;
   }
 
   *sizep = size;
 
-  Curl_safefree(fileboundary);
-  Curl_safefree(boundary);
+  free(fileboundary);
+  free(boundary);
 
   *finalform = firstform;
 

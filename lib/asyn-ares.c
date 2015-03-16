@@ -533,7 +533,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   bufp = strdup(hostname);
   if(bufp) {
     struct ResolverResults *res = NULL;
-    Curl_safefree(conn->async.hostname);
+    free(conn->async.hostname);
     conn->async.hostname = bufp;
     conn->async.port = port;
     conn->async.done = FALSE;   /* not done */
@@ -541,7 +541,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     conn->async.dns = NULL;     /* clear */
     res = calloc(sizeof(struct ResolverResults),1);
     if(!res) {
-      Curl_safefree(conn->async.hostname);
+      free(conn->async.hostname);
       conn->async.hostname = NULL;
       return NULL;
     }

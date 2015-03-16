@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012-2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -74,7 +74,7 @@ void Curl_bundle_destroy(struct connectbundle *cb_ptr)
     Curl_llist_destroy(cb_ptr->conn_list, NULL);
     cb_ptr->conn_list = NULL;
   }
-  Curl_safefree(cb_ptr);
+  free(cb_ptr);
 }
 
 /* Add a connection to a bundle */

@@ -120,7 +120,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     if(!result) { /* Which may not have written it all! */
       result = Curl_client_write(conn, CLIENTWRITE_HEADER, sel, amount);
       if(result) {
-        Curl_safefree(sel_org);
+        free(sel_org);
         return result;
       }
       k -= amount;
@@ -130,7 +130,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     }
     else {
       failf(data, "Failed sending Gopher request");
-      Curl_safefree(sel_org);
+      free(sel_org);
       return result;
     }
     /* Don't busyloop. The entire loop thing is a work-around as it causes a
@@ -145,7 +145,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     Curl_socket_ready(CURL_SOCKET_BAD, sockfd, 100);
   }
 
-  Curl_safefree(sel_org);
+  free(sel_org);
 
   /* We can use Curl_sendf to send the terminal \r\n relatively safely and
      save allocing another string/doing another _write loop. */

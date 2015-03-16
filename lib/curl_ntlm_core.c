@@ -618,7 +618,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   result = Curl_hmac_md5(ntlmhash, 16, identity, curlx_uztoui(identity_len),
                          ntlmv2hash);
 
-  Curl_safefree(identity);
+  free(identity);
 
   return result;
 }
@@ -705,8 +705,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   result = Curl_hmac_md5(ntlmv2hash, NTLM_HMAC_MD5_LEN, ptr + 8,
                          NTLMv2_BLOB_LEN + 8, hmac_output);
   if(result) {
-    Curl_safefree(ptr);
-
+    free(ptr);
     return result;
   }
 

@@ -105,9 +105,9 @@ void Curl_ntlm_wb_cleanup(struct connectdata *conn)
     conn->ntlm_auth_hlpr_pid = 0;
   }
 
-  Curl_safefree(conn->challenge_header);
+  free(conn->challenge_header);
   conn->challenge_header = NULL;
-  Curl_safefree(conn->response_header);
+  free(conn->response_header);
   conn->response_header = NULL;
 }
 
@@ -244,13 +244,13 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
   sclose(sockfds[1]);
   conn->ntlm_auth_hlpr_socket = sockfds[0];
   conn->ntlm_auth_hlpr_pid = child_pid;
-  Curl_safefree(domain);
-  Curl_safefree(ntlm_auth_alloc);
+  free(domain);
+  free(ntlm_auth_alloc);
   return CURLE_OK;
 
 done:
-  Curl_safefree(domain);
-  Curl_safefree(ntlm_auth_alloc);
+  free(domain);
+  free(ntlm_auth_alloc);
   return CURLE_REMOTE_ACCESS_DENIED;
 }
 
@@ -389,12 +389,12 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     if(res)
       return res;
 
-    Curl_safefree(*allocuserpwd);
+    free(*allocuserpwd);
     *allocuserpwd = aprintf("%sAuthorization: %s\r\n",
                             proxy ? "Proxy-" : "",
                             conn->response_header);
     DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
-    Curl_safefree(conn->response_header);
+    free(conn->response_header);
     conn->response_header = NULL;
     break;
   case NTLMSTATE_TYPE2:
@@ -407,7 +407,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     if(res)
       return res;
 
-    Curl_safefree(*allocuserpwd);
+    free(*allocuserpwd);
     *allocuserpwd = aprintf("%sAuthorization: %s\r\n",
                             proxy ? "Proxy-" : "",
                             conn->response_header);

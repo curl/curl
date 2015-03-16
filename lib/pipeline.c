@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2013, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2013-2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013-2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,15 +49,13 @@ static void site_blacklist_llist_dtor(void *user, void *element)
   (void)user;
 
   Curl_safefree(entry->hostname);
-  Curl_safefree(entry);
+  free(entry);
 }
 
 static void server_blacklist_llist_dtor(void *user, void *element)
 {
-  char *server_name = element;
   (void)user;
-
-  Curl_safefree(server_name);
+  free(element);
 }
 
 bool Curl_pipeline_penalized(struct SessionHandle *data,

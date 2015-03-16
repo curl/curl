@@ -73,8 +73,8 @@ curl_thread_t Curl_thread_create(unsigned int (*func) (void*), void *arg)
   return t;
 
 err:
-  Curl_safefree(t);
-  Curl_safefree(ac);
+  free(t);
+  free(ac);
   return curl_thread_t_null;
 }
 

@@ -1235,7 +1235,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       argptr = strdup(argptr);
       if(!argptr || !data->cookies) {
         result = CURLE_OUT_OF_MEMORY;
-        Curl_safefree(argptr);
+        free(argptr);
       }
       else {
         Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
@@ -3780,9 +3780,9 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   conn->send_pipe = NULL;
   conn->recv_pipe = NULL;
 
-  Curl_safefree(conn->master_buffer);
-  Curl_safefree(conn->localdev);
-  Curl_safefree(conn);
+  free(conn->master_buffer);
+  free(conn->localdev);
+  free(conn);
   return NULL;
 }
 
@@ -4508,8 +4508,8 @@ static CURLcode parse_proxy(struct SessionHandle *data,
       }
     }
 
-    Curl_safefree(proxyuser);
-    Curl_safefree(proxypasswd);
+    free(proxyuser);
+    free(proxypasswd);
 
     if(result)
       return result;
@@ -4721,9 +4721,9 @@ static CURLcode parse_url_login(struct SessionHandle *data,
 
   out:
 
-  Curl_safefree(userp);
-  Curl_safefree(passwdp);
-  Curl_safefree(optionsp);
+  free(userp);
+  free(passwdp);
+  free(optionsp);
 
   return result;
 }
@@ -4811,7 +4811,7 @@ static CURLcode parse_login_details(const char *login, const size_t len,
   if(!result && passwdp && plen) {
     pbuf = malloc(plen + 1);
     if(!pbuf) {
-      Curl_safefree(ubuf);
+      free(ubuf);
       result = CURLE_OUT_OF_MEMORY;
     }
   }
@@ -4820,8 +4820,8 @@ static CURLcode parse_login_details(const char *login, const size_t len,
   if(!result && optionsp && olen) {
     obuf = malloc(olen + 1);
     if(!obuf) {
-      Curl_safefree(pbuf);
-      Curl_safefree(ubuf);
+      free(pbuf);
+      free(ubuf);
       result = CURLE_OUT_OF_MEMORY;
     }
   }
@@ -5459,7 +5459,8 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(proxy) {
     result = parse_proxy(data, conn, proxy);
 
-    Curl_safefree(proxy); /* parse_proxy copies the proxy string */
+    free(proxy); /* parse_proxy copies the proxy string */
+    proxy = NULL;
 
     if(result)
       goto out;
@@ -5759,10 +5760,10 @@ static CURLcode create_conn(struct SessionHandle *data,
 
   out:
 
-  Curl_safefree(options);
-  Curl_safefree(passwd);
-  Curl_safefree(user);
-  Curl_safefree(proxy);
+  free(options);
+  free(passwd);
+  free(user);
+  free(proxy);
   return result;
 }
 
