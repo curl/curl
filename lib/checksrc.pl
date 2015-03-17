@@ -26,13 +26,31 @@ my $indent = 2;
 
 my $warnings;
 my $errors;
+my $supressed; # whitelisted problems
 my $file;
 my $dir=".";
 my $wlist;
 
+my %whitelist;
+
+sub readwhitelist {
+    open(W, "<checksrc.whitelist");
+    my @all=<W>;
+    for(@all)  {
+        chomp;
+        $whitelist{$_}=1;
+    }
+    close(W);
+}
+
 sub checkwarn {
     my ($num, $col, $file, $line, $msg, $error) = @_;
 
+    if($whitelist{$line}) {
+        $supressed++;
+        return;
+    }
+    
     my $w=$error?"error":"warning";
 
     if($w) {
@@ -77,6 +95,8 @@ if(!$file) {
     print "  -W[file]  Whitelist the given file - ignore all its flaws\n";
     exit;
 }
+
+readwhitelist();
 
 do {
     if("$wlist" !~ / $file /) {
