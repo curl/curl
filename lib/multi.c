@@ -155,7 +155,6 @@ static void mstate(struct SessionHandle *data, CURLMstate state
 
 struct Curl_sh_entry {
   struct SessionHandle *easy;
-  time_t timestamp;
   int action;  /* what action READ/WRITE this socket waits for */
   curl_socket_t socket; /* mainly to ease debugging */
   void *socketp; /* settable by users with curl_multi_assign() */
