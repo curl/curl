@@ -815,18 +815,52 @@ CURLcode Curl_loadhostpairs(struct SessionHandle *data)
     if(!hostp->data)
       continue;
     if(hostp->data[0] == '-') {
-      /* TODO: mark an entry for removal */
+      char *entry_id;
+      size_t entry_len;
+
+      if(2 != sscanf(hostp->data + 1, "%255[^:]:%d", hostname, &port)) {
+        infof(data, "Couldn't parse CURLOPT_RESOLVE removal entry '%s'!\n",
+              hostp->data);
+        continue;
+      }
+
+      /* Create an entry id, based upon the hostname and port */
+      entry_id = create_hostcache_id(hostname, port);
+      /* If we can't create the entry id, fail */
+      if(!entry_id) {
+        return CURLE_OUT_OF_MEMORY;
+      }
+
+      entry_len = strlen(entry_id);
+
+      if(data->share)
+        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
+      /* delete entry, ignore if it didn't exist */
+      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len+1);
+
+      if(data->share)
+        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+
+      /* free the allocated entry_id again */
+      free(entry_id);
     }
-    else if(3 == sscanf(hostp->data, "%255[^:]:%d:%255s", hostname, &port,
-                        address)) {
+    else {
       struct Curl_dns_entry *dns;
       Curl_addrinfo *addr;
       char *entry_id;
       size_t entry_len;
 
+      if(3 != sscanf(hostp->data, "%255[^:]:%d:%255s", hostname, &port,
+                     address)) {
+        infof(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'!\n",
+              hostp->data);
+        continue;
+      }
+
       addr = Curl_str2addr(address, port);
       if(!addr) {
-        infof(data, "Resolve %s found illegal!\n", hostp->data);
+        infof(data, "Address in '%s' found illegal!\n", hostp->data);
         continue;
       }
 
