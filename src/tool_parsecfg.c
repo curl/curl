@@ -114,7 +114,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #endif
   }
 
-  if(strcmp(filename,"-"))
+  if(strcmp(filename, "-"))
     file = fopen(filename, "r");
   else
     file = stdin;

@@ -2242,7 +2242,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       DEBUGF(infof(data, "SFTP DONE done\n"));
 
       /* Check if nextstate is set and move .nextstate could be POSTQUOTE_INIT
-         After nextstate is executed,the control should come back to
+         After nextstate is executed, the control should come back to
          SSH_SFTP_CLOSE to pass the correct result back  */
       if(sshc->nextstate != SSH_NO_STATE &&
          sshc->nextstate != SSH_SFTP_CLOSE) {

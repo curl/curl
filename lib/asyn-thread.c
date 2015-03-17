@@ -195,7 +195,7 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
   if(tsd->res)
     Curl_freeaddrinfo(tsd->res);
 
-  memset(tsd,0,sizeof(*tsd));
+  memset(tsd, 0, sizeof(*tsd));
 }
 
 /* Initialize resolver thread synchronization data */

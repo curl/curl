@@ -227,7 +227,7 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
   ldapconninfo *li = conn->proto.generic;
   struct SessionHandle *data = conn->data;
   LDAPMessage *msg = NULL;
-  struct timeval tv = {0,1}, *tvp;
+  struct timeval tv = {0, 1}, *tvp;
   int rc, err;
   char *info = NULL;
 
@@ -378,7 +378,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
     failf(data, "LDAP local: ldap_search_ext %s", ldap_err2string(rc));
     return CURLE_LDAP_SEARCH_FAILED;
   }
-  lr = calloc(1,sizeof(ldapreqinfo));
+  lr = calloc(1, sizeof(ldapreqinfo));
   if(!lr)
     return CURLE_OUT_OF_MEMORY;
   lr->msgid = msgid;
@@ -420,7 +420,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
   LDAPMessage *msg = NULL;
   LDAPMessage *ent;
   BerElement *ber = NULL;
-  struct timeval tv = {0,1};
+  struct timeval tv = {0, 1};
 
   (void)len;
   (void)buf;

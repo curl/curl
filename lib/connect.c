@@ -883,7 +883,7 @@ static void tcpnodelay(struct connectdata *conn,
     infof(data, "Could not set TCP_NODELAY: %s\n",
           Curl_strerror(conn, SOCKERRNO));
   else
-    infof(data,"TCP_NODELAY set\n");
+    infof(data, "TCP_NODELAY set\n");
 #else
   (void)conn;
   (void)sockfd;
@@ -1111,7 +1111,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
     default:
       /* unknown error, fallthrough and try another address! */
       infof(data, "Immediate connect fail for %s: %s\n",
-            ipaddress, Curl_strerror(conn,error));
+            ipaddress, Curl_strerror(conn, error));
       data->state.os_errno = error;
 
       /* connect failed */

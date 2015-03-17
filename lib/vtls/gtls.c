@@ -779,7 +779,7 @@ gtls_connect_step3(struct connectdata *conn,
   unsigned int cert_list_size;
   const gnutls_datum_t *chainp;
   unsigned int verify_status;
-  gnutls_x509_crt_t x509_cert,x509_issuer;
+  gnutls_x509_crt_t x509_cert, x509_issuer;
   gnutls_datum_t issuerp;
   char certbuf[256] = ""; /* big enough? */
   size_t size;
@@ -897,7 +897,7 @@ gtls_connect_step3(struct connectdata *conn,
     gnutls_x509_crt_init(&x509_issuer);
     issuerp = load_file(data->set.ssl.issuercert);
     gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
-    rc = gnutls_x509_crt_check_issuer(x509_cert,x509_issuer);
+    rc = gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
     gnutls_x509_crt_deinit(x509_issuer);
     unload_file(issuerp);
     if(rc <= 0) {
@@ -906,7 +906,7 @@ gtls_connect_step3(struct connectdata *conn,
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_ISSUER_ERROR;
     }
-    infof(data,"\t server certificate issuer check OK (Issuer Cert: %s)\n",
+    infof(data, "\t server certificate issuer check OK (Issuer Cert: %s)\n",
           data->set.ssl.issuercert?data->set.ssl.issuercert:"none");
   }
 

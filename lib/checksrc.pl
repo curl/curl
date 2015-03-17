@@ -154,6 +154,38 @@ sub scanfile {
                           "return without space before paren");
             }
         }
+
+        # check for comma without space
+        if($l =~ /^(.*),[^ \n]/) {
+            my $pref=$1;
+            my $ign=0;
+            if($pref =~ / *\#/) {
+                # this is a #if, treat it differently
+                $ign=1;
+            }
+            elsif($pref =~ /\/\*/) {
+                # this is a comment
+                $ign=1;
+            }
+            elsif($pref =~ /[\"\']/) {
+                $ign = 1;
+                # There is a quote here, figure out whether the comma is
+                # within a string or '' or not.
+                if($pref =~ /\"/) {
+                    # withing a string
+                }
+                elsif($pref =~ /\'$/) {
+                    # a single letter
+                }
+                else {
+                    $ign = 0;
+                }
+            }
+            if(!$ign) {
+                checkwarn($line, length($pref)+1, $file, $l,
+                          "comma without following space");
+            }
+        }
         
         # check for "} else"
         if($l =~ /^(.*)\} *else/) {

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1997 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1997 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -101,13 +101,13 @@ struct Curl_tree *Curl_splayinsert(struct timeval i,
                                    struct Curl_tree *t,
                                    struct Curl_tree *node)
 {
-  static const struct timeval KEY_NOTUSED = {-1,-1}; /* will *NEVER* appear */
+  static const struct timeval KEY_NOTUSED = {-1, -1}; /* will *NEVER* appear */
 
   if(node == NULL)
     return t;
 
   if(t != NULL) {
-    t = Curl_splay(i,t);
+    t = Curl_splay(i, t);
     if(compare(i, t->key)==0) {
       /* There already exists a node in the tree with the very same key. Build
          a linked list of nodes. We make the new 'node' struct the new master
@@ -162,7 +162,7 @@ struct Curl_tree *Curl_splaygetbest(struct timeval i,
     return NULL;
   }
 
-  t = Curl_splay(i,t);
+  t = Curl_splay(i, t);
   if(compare(i, t->key) < 0) {
     /* too big node, try the smaller chain */
     if(t->smaller)
@@ -223,7 +223,7 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
                            struct Curl_tree *removenode,
                            struct Curl_tree **newroot)
 {
-  static const struct timeval KEY_NOTUSED = {-1,-1}; /* will *NEVER* appear */
+  static const struct timeval KEY_NOTUSED = {-1, -1}; /* will *NEVER* appear */
   struct Curl_tree *x;
 
   if(!t || !removenode)

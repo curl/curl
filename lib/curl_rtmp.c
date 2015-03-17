@@ -197,7 +197,7 @@ static CURLcode rtmp_setup_connection(struct connectdata *conn)
 static CURLcode rtmp_connect(struct connectdata *conn, bool *done)
 {
   RTMP *r = conn->proto.generic;
-  SET_RCVTIMEO(tv,10);
+  SET_RCVTIMEO(tv, 10);
 
   r->m_sb.sb_socket = conn->sock[FIRSTSOCKET];
 

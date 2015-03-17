@@ -104,8 +104,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     service_name = malloc(strlen(service) + strlen(conn->proxy.name) + 2);
     if(!service_name)
       return CURLE_OUT_OF_MEMORY;
-    snprintf(service_name,strlen(service) +strlen(conn->proxy.name)+2,"%s/%s",
-             service,conn->proxy.name);
+    snprintf(service_name, strlen(service) +strlen(conn->proxy.name)+2,
+             "%s/%s", service, conn->proxy.name);
   }
 
   input_desc.cBuffers = 1;
@@ -402,7 +402,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       return CURLE_OUT_OF_MEMORY;
     }
 
-    memcpy(sspi_w_token[1].pvBuffer,&gss_enc,1);
+    memcpy(sspi_w_token[1].pvBuffer, &gss_enc, 1);
     sspi_w_token[2].BufferType = SECBUFFER_PADDING;
     sspi_w_token[2].cbBuffer = sspi_sizes.cbBlockSize;
     sspi_w_token[2].pvBuffer = malloc(sspi_sizes.cbBlockSize);
@@ -456,7 +456,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     sspi_w_token[2].cbBuffer = 0;
 
     us_length = htons((short)sspi_send_token.cbBuffer);
-    memcpy(socksreq+2,&us_length,sizeof(short));
+    memcpy(socksreq+2, &us_length, sizeof(short));
   }
 
   code = Curl_write_plain(conn, sock, (char *)socksreq, 4, &written);
@@ -469,7 +469,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   }
 
   if(data->set.socks5_gssapi_nec) {
-    memcpy(socksreq,&gss_enc,1);
+    memcpy(socksreq, &gss_enc, 1);
     code = Curl_write_plain(conn, sock, (char *)socksreq, 1, &written);
     if(code || (1 != written)) {
       failf(data, "Failed to send SSPI encryption type.");
@@ -567,7 +567,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       return CURLE_COULDNT_CONNECT;
     }
 
-    memcpy(socksreq,sspi_w_token[1].pvBuffer,sspi_w_token[1].cbBuffer);
+    memcpy(socksreq, sspi_w_token[1].pvBuffer, sspi_w_token[1].cbBuffer);
     s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
     s_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
   }
@@ -579,7 +579,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       s_pSecFn->DeleteSecurityContext(&sspi_context);
       return CURLE_COULDNT_CONNECT;
     }
-    memcpy(socksreq,sspi_w_token[0].pvBuffer,sspi_w_token[0].cbBuffer);
+    memcpy(socksreq, sspi_w_token[0].pvBuffer, sspi_w_token[0].cbBuffer);
     s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
   }
 

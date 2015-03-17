@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,7 +71,7 @@ bool Curl_amiga_init()
 }
 
 #ifdef __libnix__
-ADD2EXIT(Curl_amiga_cleanup,-50);
+ADD2EXIT(Curl_amiga_cleanup, -50);
 #endif
 
 #endif /* __AMIGA__ && ! __ixemul__ */

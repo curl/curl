@@ -3626,7 +3626,7 @@ static void fix_hostname(struct SessionHandle *data,
            stringprep_locale_charset ());
     if(rc != IDNA_SUCCESS)
       infof(data, "Failed to convert %s to ACE; %s\n",
-            host->name, Curl_idn_strerror(conn,rc));
+            host->name, Curl_idn_strerror(conn, rc));
     else {
       /* tld_check_name() displays a warning if the host name contains
          "illegal" characters for this TLD */

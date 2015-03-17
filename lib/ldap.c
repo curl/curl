@@ -198,7 +198,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   size_t val_b64_sz = 0;
   curl_off_t dlsize = 0;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
-  struct timeval ldap_timeout = {10,0}; /* 10 sec connection/search timeout */
+  struct timeval ldap_timeout = {10, 0}; /* 10 sec connection/search timeout */
 #endif
 #if defined(USE_WIN32_LDAP)
   TCHAR *host = NULL;

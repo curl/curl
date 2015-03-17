@@ -159,7 +159,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   fd_set fds_err;
   curl_socket_t maxfd;
 #endif
-  struct timeval initial_tv = {0,0};
+  struct timeval initial_tv = {0, 0};
   int pending_ms = 0;
   int error;
   int r;
@@ -393,7 +393,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   fd_set fds_err;
   curl_socket_t maxfd;
 #endif
-  struct timeval initial_tv = {0,0};
+  struct timeval initial_tv = {0, 0};
   bool fds_none = TRUE;
   unsigned int i;
   int pending_ms = 0;

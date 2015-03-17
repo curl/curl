@@ -164,7 +164,7 @@ void Curl_resolver_cleanup(void *resolver)
 int Curl_resolver_duphandle(void **to, void *from)
 {
   /* Clone the ares channel for the new handle */
-  if(ARES_SUCCESS != ares_dup((ares_channel*)to,(ares_channel)from))
+  if(ARES_SUCCESS != ares_dup((ares_channel*)to, (ares_channel)from))
     return CURLE_FAILED_INIT;
   return CURLE_OK;
 }
@@ -385,7 +385,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       timeout_ms = 1000;
 
     waitperform(conn, timeout_ms);
-    Curl_resolver_is_resolved(conn,&temp_entry);
+    Curl_resolver_is_resolved(conn, &temp_entry);
 
     if(conn->async.done)
       break;
@@ -539,7 +539,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     conn->async.done = FALSE;   /* not done */
     conn->async.status = 0;     /* clear */
     conn->async.dns = NULL;     /* clear */
-    res = calloc(sizeof(struct ResolverResults),1);
+    res = calloc(sizeof(struct ResolverResults), 1);
     if(!res) {
       free(conn->async.hostname);
       conn->async.hostname = NULL;

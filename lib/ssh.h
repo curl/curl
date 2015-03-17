@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,9 +44,9 @@ typedef enum {
   SSH_AUTH_PKEY,
   SSH_AUTH_PASS_INIT,
   SSH_AUTH_PASS,
-  SSH_AUTH_AGENT_INIT,/* initialize then wait for connection to agent */
-  SSH_AUTH_AGENT_LIST,/* ask for list then wait for entire list to come */
-  SSH_AUTH_AGENT,     /* attempt one key at a time */
+  SSH_AUTH_AGENT_INIT, /* initialize then wait for connection to agent */
+  SSH_AUTH_AGENT_LIST, /* ask for list then wait for entire list to come */
+  SSH_AUTH_AGENT,      /* attempt one key at a time */
   SSH_AUTH_HOST_INIT,
   SSH_AUTH_HOST,
   SSH_AUTH_KEY_INIT,

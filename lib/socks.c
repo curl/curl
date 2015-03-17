@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -382,7 +382,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
   if(!socks5_resolve_local && hostname_len > 255) {
-    infof(conn->data,"SOCKS5: server resolving disabled for hostnames of "
+    infof(conn->data, "SOCKS5: server resolving disabled for hostnames of "
           "length > 255 [actual len=%zu]\n", hostname_len);
     socks5_resolve_local = TRUE;
   }

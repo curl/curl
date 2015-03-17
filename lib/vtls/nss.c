@@ -861,7 +861,7 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
 static SECStatus check_issuer_cert(PRFileDesc *sock,
                                    char *issuer_nickname)
 {
-  CERTCertificate *cert,*cert_issuer,*issuer;
+  CERTCertificate *cert, *cert_issuer, *issuer;
   SECStatus res=SECSuccess;
   void *proto_win = NULL;
 
@@ -872,7 +872,7 @@ static SECStatus check_issuer_cert(PRFileDesc *sock,
   */
 
   cert = SSL_PeerCertificate(sock);
-  cert_issuer = CERT_FindCertIssuer(cert,PR_Now(),certUsageObjectSigner);
+  cert_issuer = CERT_FindCertIssuer(cert, PR_Now(), certUsageObjectSigner);
 
   proto_win = SSL_RevealPinArg(sock);
   issuer = PK11_FindCertFromNickname(issuer_nickname, proto_win);
@@ -1734,7 +1734,7 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
     }
 
     if(SECFailure == ret) {
-      infof(data,"SSL certificate issuer check failed\n");
+      infof(data, "SSL certificate issuer check failed\n");
       result = CURLE_SSL_ISSUER_ERROR;
       goto error;
     }

@@ -297,7 +297,7 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
   time(&user.now);
   user.cache_timeout = data->set.dns_cache_timeout;
 
-  if(!hostcache_timestamp_remove(&user,dns) )
+  if(!hostcache_timestamp_remove(&user, dns) )
     return 0;
 
   Curl_hash_clean_with_criterium(data->dns.hostcache,
