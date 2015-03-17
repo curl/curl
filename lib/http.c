@@ -1570,10 +1570,11 @@ static CURLcode expect100(struct SessionHandle *data,
   const char *ptr;
   data->state.expect100header = FALSE; /* default to false unless it is set
                                           to TRUE below */
-  if(use_http_1_1plus(data, conn)) {
-    /* if not doing HTTP 1.0 or disabled explicitly, we add a Expect:
-       100-continue to the headers which actually speeds up post operations
-       (as there is one packet coming back from the web server) */
+  if(use_http_1_1plus(data, conn) &&
+     (conn->httpversion != 20)) {
+    /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
+       Expect: 100-continue to the headers which actually speeds up post
+       operations (as there is one packet coming back from the web server) */
     ptr = Curl_checkheaders(conn, "Expect:");
     if(ptr) {
       data->state.expect100header =
@@ -1793,6 +1794,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                                   http2 */
     switch(conn->negnpn) {
     case CURL_HTTP_VERSION_2_0:
+      conn->httpversion = 20; /* we know we're on HTTP/2 now */
       result = Curl_http2_init(conn);
       if(result)
         return result;
