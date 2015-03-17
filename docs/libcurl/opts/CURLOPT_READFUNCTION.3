@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -34,9 +34,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_READFUNCTION, read_callback);
 Pass a pointer to your callback function, as the prototype shows above.
 
 This callback function gets called by libcurl as soon as it needs to read data
-in order to send it to the peer. The data area pointed at by the pointer
-\fIbuffer\fP should be filled up with at most \fIsize\fP multiplied with
-\fInmemb\fP number of bytes by your function.
+in order to send it to the peer - like if you ask it to upload or post data to
+the server. The data area pointed at by the pointer \fIbuffer\fP should be
+filled up with at most \fIsize\fP multiplied with \fInmemb\fP number of bytes
+by your function.
 
 Your function must then return the actual number of bytes that it stored in
 that memory area. Returning 0 will signal end-of-file to the library and cause
@@ -75,4 +76,4 @@ was added in 7.12.1.
 This will return CURLE_OK.
 .SH "SEE ALSO"
 .BR CURLOPT_READDATA "(3), " CURLOPT_WRITEFUNCTION "(3), "
-.BR CURLOPT_SEEKFUNCTION "(3), "
+.BR CURLOPT_SEEKFUNCTION "(3), " CURLOPT_UPLOAD "(3), " CURLOPT_POST "(3), "

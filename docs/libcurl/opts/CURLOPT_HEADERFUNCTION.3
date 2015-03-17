@@ -80,7 +80,24 @@ Nothing.
 Used for all protocols with headers or meta-data concept: HTTP, FTP, POP3,
 IMAP, SMTP and more.
 .SH EXAMPLE
-TODO
+.nf
+static size_t header_callback(char *buffer, size_t size,
+                              size_t nitems, void *userdata)
+{
+  /* received header is nitems * size long in 'buffer' NOT ZERO TERMINATED */
+  /* 'userdata' is set with CURLOPT_WRITEDATA */
+  return nitems * size;
+}
+
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE
