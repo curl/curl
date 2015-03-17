@@ -34,7 +34,7 @@ my $wlist;
 my %whitelist;
 
 sub readwhitelist {
-    open(W, "<checksrc.whitelist");
+    open(W, "<$dir/checksrc.whitelist");
     my @all=<W>;
     for(@all)  {
         chomp;
