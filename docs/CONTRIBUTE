@@ -82,10 +82,10 @@
 
 1.3 What To Read
 
- Source code, the man pages, the INTERNALS document, TODO, KNOWN_BUGS, the
- most recent CHANGES. Just lurking on the curl-library mailing list is gonna
- give you a lot of insights on what's going on right now. Asking there is a
- good idea too.
+ Source code, the man pages, the INTERNALS document, TODO, KNOWN_BUGS and the
+ most recent changes in the git log. Just lurking on the curl-library mailing
+ list is gonna give you a lot of insights on what's going on right now. Asking
+ there is a good idea too.
 
 2. cURL Coding Standards
 
