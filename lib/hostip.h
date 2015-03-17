@@ -174,6 +174,9 @@ const char *Curl_printable_address(const Curl_addrinfo *ip,
  * Curl_fetch_addr() fetches a 'Curl_dns_entry' already in the DNS cache.
  *
  * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
+ *
+ * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
+ * use, or we'll leak memory!
  */
 struct Curl_dns_entry *
 Curl_fetch_addr(struct connectdata *conn,
