@@ -65,11 +65,10 @@ void Curl_global_host_cache_dtor(void);
 
 struct Curl_dns_entry {
   Curl_addrinfo *addr;
-  /* timestamp == 0 -- entry not in hostcache
-     timestamp != 0 -- entry is in hostcache */
+  /* timestamp == 0 -- CURLOPT_RESOLVE entry, doesn't timeout */
   time_t timestamp;
-  long inuse;      /* use-counter, make very sure you decrease this
-                      when you're done using the address you received */
+  /* use-counter, use Curl_resolv_unlock to release reference */
+  long inuse;
 };
 
 /*
