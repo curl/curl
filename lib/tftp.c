@@ -145,8 +145,8 @@ typedef struct tftp_state_data {
 
 
 /* Forward declarations */
-static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event) ;
-static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event) ;
+static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event);
+static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event);
 static CURLcode tftp_connect(struct connectdata *conn, bool *done);
 static CURLcode tftp_disconnect(struct connectdata *conn,
                                 bool dead_connection);
@@ -218,7 +218,7 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
     state->max_time = state->start_time+maxtime;
 
     /* Set per-block timeout to total */
-    timeout = maxtime ;
+    timeout = maxtime;
 
     /* Average restart after 5 seconds */
     state->retry_max = (int)timeout/5;

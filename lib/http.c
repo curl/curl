@@ -731,7 +731,7 @@ Curl_http_output_auth(struct connectdata *conn,
 
   if((conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
      conn->bits.user_passwd)
-    /* continue please */ ;
+    /* continue please */;
   else {
     authhost->done = TRUE;
     authproxy->done = TRUE;

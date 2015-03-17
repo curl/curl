@@ -216,6 +216,11 @@ sub scanfile {
             checkwarn($line, length($1)+1, $file, $l, "missing space after close paren");
         }
 
+        # check for space before the semicolon last in a line
+        if($l =~ /^(.*[^ ].*) ;$/) {
+            checkwarn($line, length($1), $file, $l, "space before last semicolon");
+        }
+
         # scan for use of banned functions
         if($l =~ /^(.*\W)(sprintf|vsprintf|strcat|strncat|gets)\s*\(/) {
             checkwarn($line, length($1), $file, $l,

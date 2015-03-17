@@ -1236,7 +1236,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
     unsigned char *nulstr = (unsigned char *)"";
     unsigned char *peer_CN = nulstr;
 
-    X509_NAME *name = X509_get_subject_name(server_cert) ;
+    X509_NAME *name = X509_get_subject_name(server_cert);
     if(name)
       while((j = X509_NAME_get_index_by_NID(name, NID_commonName, i))>=0)
         i=j;

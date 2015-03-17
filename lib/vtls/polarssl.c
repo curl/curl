@@ -496,7 +496,7 @@ polarssl_connect_step3(struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct SessionHandle *data = conn->data;
   void *old_ssl_sessionid = NULL;
-  ssl_session *our_ssl_sessionid = &conn->ssl[sockindex].ssn ;
+  ssl_session *our_ssl_sessionid = &conn->ssl[sockindex].ssn;
   bool incache;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
