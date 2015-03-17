@@ -4087,7 +4087,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   result = Curl_convert_to_network(conn->data, s, write_len);
   /* Curl_convert_to_network calls failf if unsuccessful */
   if(result)
-    return(result);
+    return result;
 
   for(;;) {
 #ifdef HAVE_GSSAPI

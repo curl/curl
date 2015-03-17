@@ -52,7 +52,7 @@ static size_t convert_lineends(struct SessionHandle *data,
 
   /* sanity check */
   if((startPtr == NULL) || (size < 1)) {
-    return(size);
+    return size;
   }
 
   if(data->state.prev_block_had_trailing_cr) {
@@ -114,9 +114,9 @@ static size_t convert_lineends(struct SessionHandle *data,
       /* tidy up by null terminating the now shorter data */
       *outPtr = '\0';
 
-    return(outPtr - startPtr);
+    return (outPtr - startPtr);
   }
-  return(size);
+  return size;
 }
 #endif /* CURL_DO_LINEEND_CONV */
 

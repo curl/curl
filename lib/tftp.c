@@ -408,7 +408,7 @@ static size_t tftp_option_add(tftp_state_data_t *state, size_t csize,
   if(( strlen(option) + csize + 1 ) > (size_t)state->blksize)
     return 0;
   strcpy(buf, option);
-  return( strlen(option) + 1 );
+  return strlen(option) + 1;
 }
 
 static CURLcode tftp_connect_for_tx(tftp_state_data_t *state,
@@ -423,7 +423,7 @@ static CURLcode tftp_connect_for_tx(tftp_state_data_t *state,
   state->state = TFTP_STATE_TX;
   result = tftp_set_timeouts(state);
   if(result)
-    return(result);
+    return result;
   return tftp_tx(state, event);
 }
 
@@ -439,7 +439,7 @@ static CURLcode tftp_connect_for_rx(tftp_state_data_t *state,
   state->state = TFTP_STATE_RX;
   result = tftp_set_timeouts(state);
   if(result)
-    return(result);
+    return result;
   return tftp_rx(state, event);
 }
 
@@ -1210,7 +1210,7 @@ static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done)
   else if(event != TFTP_EVENT_NONE) {
     result = tftp_state_machine(state, event);
     if(result)
-      return(result);
+      return result;
     *done = (state->state == TFTP_STATE_FIN) ? TRUE : FALSE;
     if(*done)
       /* Tell curl we're done */
@@ -1229,10 +1229,10 @@ static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done)
     else if(rc != 0) {
       result = tftp_receive_packet(conn);
       if(result)
-        return(result);
+        return result;
       result = tftp_state_machine(state, state->event);
       if(result)
-        return(result);
+        return result;
       *done = (state->state == TFTP_STATE_FIN) ? TRUE : FALSE;
       if(*done)
         /* Tell curl we're done */

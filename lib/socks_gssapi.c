@@ -92,10 +92,10 @@ static int check_gss_err(struct SessionHandle *data,
       gss_release_buffer(&min_stat, &status_string);
     }
     failf(data, "GSS-API error: %s failed:\n%s", function, buf);
-    return(1);
+    return 1;
   }
 
-  return(0);
+  return 0;
 }
 
 CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,

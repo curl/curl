@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2011 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2011 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -144,6 +144,17 @@ sub scanfile {
             }
         }
 
+        # check for "return(" without space
+        if($l =~ /^(.*)return\(/) {
+            if($1 =~ / *\#/) {
+                # this is a #if, treat it differently
+            }
+            else {
+                checkwarn($line, length($1)+6, $file, $l,
+                          "return without space before paren");
+            }
+        }
+        
         # check for "} else"
         if($l =~ /^(.*)\} *else/) {
             checkwarn($line, length($1), $file, $l, "else after closing brace on same line");
