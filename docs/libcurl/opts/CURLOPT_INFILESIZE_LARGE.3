@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -50,7 +50,20 @@ Unset
 .SH PROTOCOLS
 Many
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_off_t uploadsize = FILE_SIZE;
+
+  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/destination.tar.gz");
+
+  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+  curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadsize);
+
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 SMTP support added in 7.23.0
 .SH RETURN VALUE
