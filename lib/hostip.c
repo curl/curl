@@ -311,19 +311,9 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
 sigjmp_buf curl_jmpenv;
 #endif
 
-/*
- * Curl_fetch_addr() fetches a 'Curl_dns_entry' already in the DNS cache.
- *
- * Curl_resolv() checks initially and multi_runsingle() checks each time
- * it discovers the handle in the state WAITRESOLVE whether the hostname
- * has already been resolved and the address has already been stored in
- * the DNS cache. This short circuits waiting for a lot of pending
- * lookups for the same hostname requested by different handles.
- *
- * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
- */
-struct Curl_dns_entry *
-Curl_fetch_addr(struct connectdata *conn,
+/* lookup address, returns entry if found and not stale */
+static struct Curl_dns_entry *
+fetch_addr(struct connectdata *conn,
                 const char *hostname,
                 int port)
 {
@@ -344,15 +334,57 @@ Curl_fetch_addr(struct connectdata *conn,
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
 
+  if(dns && (data->set.dns_cache_timeout != -1))  {
+    /* See whether the returned entry is stale. Done before we release lock */
+    struct hostcache_prune_data user;
+
+    time(&user.now);
+    user.cache_timeout = data->set.dns_cache_timeout;
+
+    if(hostcache_timestamp_remove(&user, dns)) {
+      infof(data, "Hostname in DNS cache was stale, zapped\n");
+      dns = NULL; /* the memory deallocation is being handled by the hash */
+      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len+1);
+    }
+  }
+
   /* free the allocated entry_id again */
   free(entry_id);
 
-  /* See whether the returned entry is stale. Done before we release lock */
-  stale = remove_entry_if_stale(data, dns);
-  if(stale) {
-    infof(data, "Hostname in DNS cache was stale, zapped\n");
-    dns = NULL; /* the memory deallocation is being handled by the hash */
-  }
+  return dns;
+}
+
+/*
+ * Curl_fetch_addr() fetches a 'Curl_dns_entry' already in the DNS cache.
+ *
+ * Curl_resolv() checks initially and multi_runsingle() checks each time
+ * it discovers the handle in the state WAITRESOLVE whether the hostname
+ * has already been resolved and the address has already been stored in
+ * the DNS cache. This short circuits waiting for a lot of pending
+ * lookups for the same hostname requested by different handles.
+ *
+ * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
+ *
+ * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
+ * use, or we'll leak memory!
+ */
+struct Curl_dns_entry *
+Curl_fetch_addr(struct connectdata *conn,
+                const char *hostname,
+                int port)
+{
+  struct SessionHandle *data = conn->data;
+  struct Curl_dns_entry *dns = NULL;
+
+  if(data->share)
+    Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
+  dns = fetch_addr(conn, hostname, port);
+
+  if(dns) dns->inuse++; /* we use it! */
+
+  if(data->share)
+    Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
   return dns;
 }
@@ -451,7 +483,7 @@ int Curl_resolv(struct connectdata *conn,
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  dns = Curl_fetch_addr(conn, hostname, port);
+  dns = fetch_addr(conn, hostname, port);
 
   if(dns) {
     infof(data, "Hostname %s was found in DNS cache\n", hostname);
