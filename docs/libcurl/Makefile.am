@@ -94,7 +94,7 @@ MAN2HTML= roffit --mandir=. < $< >$@
 SUFFIXES = .3 .html
 
 libcurl-symbols.3: $(srcdir)/symbols-in-versions $(srcdir)/mksymbolsmanpage.pl
-	perl $(srcdir)/mksymbolsmanpage.pl < $< > $@
+	perl $(srcdir)/mksymbolsmanpage.pl < $(srcdir)/symbols-in-versions > $@
 
 html: $(HTMLPAGES)
 	cd opts; make html
