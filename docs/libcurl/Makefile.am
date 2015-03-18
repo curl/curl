@@ -85,7 +85,7 @@ PDFPAGES = curl_easy_cleanup.pdf curl_easy_getinfo.pdf			 \
 m4macrodir = $(datadir)/aclocal
 dist_m4macro_DATA = libcurl.m4
 
-CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(TESTS)
+CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(TESTS) libcurl-symbols.3
 
 EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES) ABI \
   symbols-in-versions symbols.pl mksymbolsmanpage.pl
