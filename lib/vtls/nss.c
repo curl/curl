@@ -1641,18 +1641,15 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
 #endif
 
 #ifdef SSL_ENABLE_NPN
-  if(data->set.ssl_enable_npn) {
-    if(SSL_OptionSet(connssl->handle, SSL_ENABLE_NPN, PR_TRUE) != SECSuccess)
-      goto error;
-  }
+  if(SSL_OptionSet(connssl->handle, SSL_ENABLE_NPN, data->set.ssl_enable_npn
+        ? PR_TRUE : PR_FALSE) != SECSuccess)
+    goto error;
 #endif
 
 #ifdef SSL_ENABLE_ALPN
-  if(data->set.ssl_enable_alpn) {
-    if(SSL_OptionSet(connssl->handle, SSL_ENABLE_ALPN, PR_TRUE)
-        != SECSuccess)
-      goto error;
-  }
+  if(SSL_OptionSet(connssl->handle, SSL_ENABLE_ALPN, data->set.ssl_enable_alpn
+        ? PR_TRUE : PR_FALSE) != SECSuccess)
+    goto error;
 #endif
 
 #if defined(SSL_ENABLE_NPN) || defined(SSL_ENABLE_ALPN)
