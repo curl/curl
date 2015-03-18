@@ -153,7 +153,7 @@ html:
 pdf:
 	cd docs; make pdf
 
-check: test examples
+check: test examples check-docs
 
 if CROSSCOMPILING
 test-full: test
@@ -180,6 +180,9 @@ endif
 
 examples:
 	@(cd docs/examples; $(MAKE) check)
+
+check-docs:
+	@(cd docs/libcurl; $(MAKE) check)
 
 # This is a hook to have 'make clean' also clean up the docs and the tests
 # dir. The extra check for the Makefiles being present is necessary because

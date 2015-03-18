@@ -85,7 +85,7 @@ PDFPAGES = curl_easy_cleanup.pdf curl_easy_getinfo.pdf			 \
 m4macrodir = $(datadir)/aclocal
 dist_m4macro_DATA = libcurl.m4
 
-CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
+CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(TESTS)
 
 EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES) ABI \
   symbols-in-versions symbols.pl mksymbolsmanpage.pl
@@ -111,3 +111,17 @@ pdf: $(PDFPAGES)
 	ps2pdf $$foo.ps $@; \
 	rm $$foo.ps; \
 	echo "converted $< to $@")
+
+# Make sure each option man page is referenced in the main man page
+TESTS = check-easy check-multi
+LOG_COMPILER = $(PERL)
+# The test fails if the log file contains any text
+AM_LOG_FLAGS = -p -e 'die "$$_" if ($$_);'
+
+check-easy: $(srcdir)/curl_easy_setopt.3 $(srcdir)/opts/CURLOPT*.3
+	OPTS="$$(ls $(srcdir)/opts/CURLOPT*.3 | $(SED) -e 's,^.*/,,' -e 's,\.3$$,,')" && \
+	for opt in $$OPTS; do grep "^\.IP $$opt$$" $(srcdir)/curl_easy_setopt.3 >/dev/null || echo Missing $$opt; done > $@
+
+check-multi: $(srcdir)/curl_multi_setopt.3 $(srcdir)/opts/CURLMOPT*.3
+	OPTS="$$(ls $(srcdir)/opts/CURLMOPT*.3 | $(SED) -e 's,^.*/,,' -e 's,\.3$$,,')" && \
+	for opt in $$OPTS; do grep "^\.IP $$opt$$" $(srcdir)/curl_multi_setopt.3 >/dev/null || echo Missing $$opt; done > $@
