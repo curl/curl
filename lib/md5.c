@@ -153,6 +153,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
 }
 
 #elif defined(USE_AXTLS)
+#include <axTLS/config.h>
 #include <axTLS/os_int.h>
 #include <axTLS/crypto.h>
 #else

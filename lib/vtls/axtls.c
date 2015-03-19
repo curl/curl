@@ -29,6 +29,7 @@
 #include "curl_setup.h"
 
 #ifdef USE_AXTLS
+#include <axTLS/config.h>
 #include <axTLS/ssl.h>
 #include "axtls.h"
 
