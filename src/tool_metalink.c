@@ -621,8 +621,10 @@ static int check_hash(const char *filename,
   }
 
   result = malloc(digest_def->dparams->digest_resultlen);
-  if(!result)
+  if(!result) {
+    close(fd);
     return -1;
+  }
   while(1) {
     unsigned char buf[4096];
     ssize_t len = read(fd, buf, sizeof(buf));
