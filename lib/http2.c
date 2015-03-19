@@ -640,10 +640,6 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   if(result)
     return result;
 
-  result = Curl_http2_setup(conn);
-  if(result)
-    return result;
-
   /* As long as we have a fixed set of settings, we don't have to dynamically
    * figure out the base64 strings since it'll always be the same. However,
    * the settings will likely not be fixed every time in the future.
@@ -1010,6 +1006,10 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   struct http_conn *httpc = &conn->proto.httpc;
   int rv;
   struct SessionHandle *data = conn->data;
+
+  result = Curl_http2_setup(conn);
+  if(result)
+    return result;
 
   httpc->recv_underlying = (recving)conn->recv[FIRSTSOCKET];
   httpc->send_underlying = (sending)conn->send[FIRSTSOCKET];
