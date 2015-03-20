@@ -63,11 +63,20 @@ Pass a NULL to this option to reset back to no custom headers.
 
 The most commonly replaced headers have "shortcuts" in the options
 \fICURLOPT_COOKIE(3)\fP, \fICURLOPT_USERAGENT(3)\fP and
-\fICURLOPT_REFERER(3)\fP.
+\fICURLOPT_REFERER(3)\fP. We recommand using those.
 
 There's an alternative option that sets or replaces headers only for requests
 that are sent with CONNECT to a proxy: \fICURLOPT_PROXYHEADER(3)\fP. Use
 \fICURLOPT_HEADEROPT(3)\fP to control the behavior.
+.SH SECURITY CONCERNS
+By default, this option makes libcurl send the given headers in all HTTP
+requests done by this handle. You should therefore use this option with
+caution if you for example connect to the remote site using a proxy and a
+CONNECT request, you should to consider if that proxy is supposed to also get
+the headers. They may be private or otherwise sensitive to leak.
+
+Use \fICURLOPT_HEADEROPT(3)\fP to make the headers only get sent to where you
+intend them to get sent.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
