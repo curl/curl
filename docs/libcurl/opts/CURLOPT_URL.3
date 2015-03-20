@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -284,6 +284,29 @@ escape it by providing it as backslash and its ASCII value in hexadecimal:
 .SH DEFAULT
 There is no default URL. If this option isn't set, no transfer can be
 performed.
+.SH SECURITY CONCERNS
+Applications may at times find it convenient to allow users to specify URLs
+for various purposes and that string would then end up feeded to this option.
+
+Getting a URL from an external untrusted party will bring reasons for several
+security concerns:
+
+If you have an application that runs as or in a server application, getting an
+unfiltered URL can easily trick your application to access a local resource
+instead of a remote. Protecting yourself against localhost accesses is very
+hard when accepting user provided URLs.
+
+Such custom URLs can also access other ports than you planned as port numbers
+are part of the regular URL format. The combination of a local host and a
+custom port number can allow external users to play tricks with your local
+services.
+
+Accepting external URLs may also use other protocols than http:// or other
+common ones. Restrict what accept with \fICURLOPT_PROTOCOLS(3)\fP.
+
+User provided URLs can also be made to point to sites that redirect further on
+(possibly to other protocols too). Consider your
+\fICURLOPT_FOLLOWLOCATION(3)\fP and \fICURLOPT_REDIR_PROTOCOLS(3)\fP settings.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
