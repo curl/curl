@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -29,11 +29,10 @@ CURLOPT_CERTINFO \- request SSL certificate information
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CERTINFO, long certinfo);
 .SH DESCRIPTION
 Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
-this enabled, libcurl (if built with OpenSSL, NSS or GSKit) will
-extract lots of information and data about the certificates in the certificate
-chain used in the SSL connection. This data may then be retrieved after a
-transfer using \fIcurl_easy_getinfo(3)\fP and its option
-\fICURLINFO_CERTINFO\fP.
+this enabled, libcurl will extract lots of information and data about the
+certificates in the certificate chain used in the SSL connection. This data may
+then be retrieved after a transfer using \fIcurl_easy_getinfo(3)\fP and its
+option \fICURLINFO_CERTINFO\fP.
 .SH DEFAULT
 0
 .SH PROTOCOLS
@@ -41,7 +40,7 @@ All TLS-based
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-Added in 7.19.1
+This option is supported by the OpenSSL, GnuTLS, NSS and GSKit backends.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

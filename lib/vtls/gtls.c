@@ -53,6 +53,7 @@
 #include "select.h"
 #include "rawstr.h"
 #include "warnless.h"
+#include "x509asn1.h"
 #include "curl_printf.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -835,6 +836,23 @@ gtls_connect_step3(struct connectdata *conn,
 #endif
     }
     infof(data, "\t common name: WARNING couldn't obtain\n");
+  }
+
+  if(data->set.ssl.certinfo) {
+    unsigned int i;
+
+    result = Curl_ssl_init_certinfo(data, cert_list_size);
+    if(result)
+      return result;
+
+    for(i = 0; i < cert_list_size; i++) {
+      const char *beg = (const char *) chainp[i].data;
+      const char *end = beg + chainp[i].size;
+
+      result = Curl_extract_certinfo(conn, i, beg, end);
+      if(result)
+        return result;
+    }
   }
 
   if(data->set.ssl.verifypeer) {
