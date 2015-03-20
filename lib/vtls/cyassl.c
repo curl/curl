@@ -448,7 +448,9 @@ void Curl_cyassl_session_free(void *ptr)
 
 size_t Curl_cyassl_version(char *buffer, size_t size)
 {
-#ifdef CYASSL_VERSION
+#if defined(LIBCYASSL_VERSION_STRING)
+  return snprintf(buffer, size, "CyaSSL/%s", LIBCYASSL_VERSION_STRING);
+#elif defined(CYASSL_VERSION)
   return snprintf(buffer, size, "CyaSSL/%s", CYASSL_VERSION);
 #else
   return snprintf(buffer, size, "CyaSSL/%s", "<1.8.8");
