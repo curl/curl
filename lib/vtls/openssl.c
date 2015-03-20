@@ -1390,16 +1390,14 @@ static CURLcode verifystatus(struct connectdata *conn,
     goto end;
   }
 
-  for(i = 0; i < sk_OCSP_SINGLERESP_num(br->tbsResponseData->responses); i++) {
+  for(i = 0; i < OCSP_resp_count(br); i++) {
     int cert_status, crl_reason;
     OCSP_SINGLERESP *single = NULL;
 
     ASN1_GENERALIZEDTIME *rev, *thisupd, *nextupd;
 
-    if(!sk_OCSP_SINGLERESP_value(br->tbsResponseData->responses, i))
+    if(!(single = OCSP_resp_get0(br, i)))
       continue;
-
-    single = sk_OCSP_SINGLERESP_value(br->tbsResponseData->responses, i);
 
     cert_status = OCSP_single_get0_status(single, &crl_reason, &rev,
                                           &thisupd, &nextupd);
