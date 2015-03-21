@@ -671,13 +671,21 @@ gtls_connect_step1(struct connectdata *conn,
   if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
     rc = gnutls_credentials_set(session, GNUTLS_CRD_SRP,
                                 conn->ssl[sockindex].srp_client_cred);
-    if(rc != GNUTLS_E_SUCCESS)
+    if(rc != GNUTLS_E_SUCCESS) {
       failf(data, "gnutls_credentials_set() failed: %s", gnutls_strerror(rc));
+      return CURLE_SSL_CONNECT_ERROR;
+    }
   }
   else
 #endif
+  {
     rc = gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE,
                                 conn->ssl[sockindex].cred);
+    if(rc != GNUTLS_E_SUCCESS) {
+      failf(data, "gnutls_credentials_set() failed: %s", gnutls_strerror(rc));
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
 
   /* set the connection handle (file descriptor for the socket) */
   gnutls_transport_set_ptr(session,
