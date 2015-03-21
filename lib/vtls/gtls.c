@@ -838,7 +838,7 @@ gtls_connect_step3(struct connectdata *conn,
     infof(data, "\t common name: WARNING couldn't obtain\n");
   }
 
-  if(data->set.ssl.certinfo) {
+  if(data->set.ssl.certinfo && chainp) {
     unsigned int i;
 
     result = Curl_ssl_init_certinfo(data, cert_list_size);
