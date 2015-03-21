@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_GSKIT) || defined(USE_NSS)
+#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS)
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -209,7 +209,6 @@ static const char * octet2str(const char * beg, const char * end)
 }
 
 static const char * bit2str(const char * beg, const char * end)
-
 {
   /* Convert an ASN.1 bit string to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
@@ -1024,7 +1023,7 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
   return CURLE_OK;
 }
 
-#endif /* USE_GSKIT or USE_NSS */
+#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS */
 
 #if defined(USE_GSKIT)
 

@@ -20,28 +20,29 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_CERTINFO 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_SSL_FALSESTART 3 "14 Feb 2015" "libcurl 7.41.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_CERTINFO \- request SSL certificate information
+CURLOPT_SSL_FALSESTART \- enable TLS false start
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CERTINFO, long certinfo);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_FALSESTART, long enable);
 .SH DESCRIPTION
-Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With
-this enabled, libcurl will extract lots of information and data about the
-certificates in the certificate chain used in the SSL connection. This data may
-then be retrieved after a transfer using \fIcurl_easy_getinfo(3)\fP and its
-option \fICURLINFO_CERTINFO\fP.
+Pass a long as parameter set to 1 to enable or 0 to disable.
+
+This option determines whether libcurl should use false start during the TLS
+handshake. False start is a mode where a TLS client will start sending
+application data before verifying the server's Finished message, thus saving a
+round trip when performing a full handshake.
 .SH DEFAULT
 0
 .SH PROTOCOLS
-All TLS-based
+All TLS based protocols: HTTPS, FTPS, IMAPS, POP3, SMTPS etc.
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-This option is supported by the OpenSSL, GnuTLS, NSS and GSKit backends.
+Added in 7.42.0. This option is currently only supported by the NSS TLS
+backend.
 .SH RETURN VALUE
-Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
-.SH "SEE ALSO"
-.BR CURLOPT_CAINFO "(3), " CURLOPT_SSL_VERIFYPEER "(3), "
+Returns CURLE_OK if false start is supported by the SSL backend, otherwise
+returns CURLE_NOT_BUILT_IN.
