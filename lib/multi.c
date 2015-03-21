@@ -1701,14 +1701,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         data->state.pipe_broke = FALSE;
 
+        /* Check if we can move pending requests to send pipe */
+        Curl_multi_process_pending_handles(multi);
+
         if(data->easy_conn) {
           /* if this has a connection, unsubscribe from the pipelines */
           data->easy_conn->writechannel_inuse = FALSE;
           data->easy_conn->readchannel_inuse = FALSE;
           Curl_removeHandleFromPipeline(data, data->easy_conn->send_pipe);
           Curl_removeHandleFromPipeline(data, data->easy_conn->recv_pipe);
-          /* Check if we can move pending requests to send pipe */
-          Curl_multi_process_pending_handles(multi);
 
           if(disconnect_conn) {
             /* Don't attempt to send data over a connection that timed out */
