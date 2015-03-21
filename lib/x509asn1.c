@@ -536,8 +536,6 @@ static const char * UTime2str(const char * beg, const char * end)
 
 const char * Curl_ASN1tostr(curl_asn1Element * elem, int type)
 {
-  static const char zero = '\0';
-
   /* Convert an ASN.1 element to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
 
@@ -558,7 +556,7 @@ const char * Curl_ASN1tostr(curl_asn1Element * elem, int type)
   case CURL_ASN1_OCTET_STRING:
     return octet2str(elem->beg, elem->end);
   case CURL_ASN1_NULL:
-    return strdup(&zero);
+    return strdup("");
   case CURL_ASN1_OBJECT_IDENTIFIER:
     return OID2str(elem->beg, elem->end, TRUE);
   case CURL_ASN1_UTC_TIME:
