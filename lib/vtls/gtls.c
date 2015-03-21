@@ -779,7 +779,7 @@ gtls_connect_step3(struct connectdata *conn,
 {
   unsigned int cert_list_size;
   const gnutls_datum_t *chainp;
-  unsigned int verify_status;
+  unsigned int verify_status = 0;
   gnutls_x509_crt_t x509_cert, x509_issuer;
   gnutls_datum_t issuerp;
   char certbuf[256] = ""; /* big enough? */
