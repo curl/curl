@@ -569,7 +569,8 @@ mode where a TLS client will start sending application data before verifying
 the server's Finished message, thus saving a round trip when performing a full
 handshake.
 
-This is currently only implemented in the NSS backend.
+This is currently only implemented in the NSS and Secure Transport (on iOS 7.0
+or later, or OS X 10.9 or later) backends.
 (Added in 7.42.0)
 .IP "-f, --fail"
 (HTTP) Fail silently (no output at all) on server errors. This is mostly done
