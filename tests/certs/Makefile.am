@@ -23,14 +23,19 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = scripts
 
-CERTFILES = \
-  EdelCurlRoot-ca.cacert \
+CERTCONFIGS = \
+  EdelCurlRoot-ca.prm \
   EdelCurlRoot-ca.cnf \
+  Server-localhost-sv.prm \
+  Server-localhost.nn-sv.prm \
+  Server-localhost0h-sv.prm
+
+GENERATEDCERTS = \
+  EdelCurlRoot-ca.cacert \
   EdelCurlRoot-ca.crt \
   EdelCurlRoot-ca.csr \
   EdelCurlRoot-ca.der \
   EdelCurlRoot-ca.key \
-  EdelCurlRoot-ca.prm \
   Server-localhost-sv.crl \
   Server-localhost-sv.crt \
   Server-localhost-sv.csr \
@@ -39,7 +44,6 @@ CERTFILES = \
   Server-localhost-sv.key \
   Server-localhost-sv.p12 \
   Server-localhost-sv.pem \
-  Server-localhost-sv.prm \
   Server-localhost-sv.pub.der \
   Server-localhost-sv.pub.pem \
   Server-localhost.nn-sv.crl \
@@ -49,7 +53,6 @@ CERTFILES = \
   Server-localhost.nn-sv.dhp \
   Server-localhost.nn-sv.key \
   Server-localhost.nn-sv.pem \
-  Server-localhost.nn-sv.prm \
   Server-localhost.nn-sv.pub.der \
   Server-localhost.nn-sv.pub.pem \
   Server-localhost0h-sv.crl \
@@ -60,7 +63,6 @@ CERTFILES = \
   Server-localhost0h-sv.key \
   Server-localhost0h-sv.p12 \
   Server-localhost0h-sv.pem \
-  Server-localhost0h-sv.prm \
   Server-localhost0h-sv.pub.der \
   Server-localhost0h-sv.pub.pem
 
@@ -68,5 +70,24 @@ SRPFILES = \
   srp-verifier-conf \
   srp-verifier-db
 
-EXTRA_DIST = $(CERTFILES) $(SRPFILES)
+EXTRA_DIST = $(CERTCONFIGS) $(GENERATEDCERTS) $(SRPFILES)
 
+# Rebuild the certificates
+
+clean-certs:
+	cd $(srcdir); rm -f $(GENERATEDCERTS)
+
+build-certs: $(srcdir)/EdelCurlRoot-ca.cacert $(srcdir)/Server-localhost-sv.pem \
+	$(srcdir)/Server-localhost.nn-sv.pem $(srcdir)/Server-localhost0h-sv.pem
+
+$(srcdir)/EdelCurlRoot-ca.cacert:
+	cd $(srcdir); scripts/genroot.sh EdelCurlRoot
+
+$(srcdir)/Server-localhost-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost EdelCurlRoot
+
+$(srcdir)/Server-localhost.nn-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost.nn EdelCurlRoot
+
+$(srcdir)/Server-localhost0h-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost0h EdelCurlRoot
