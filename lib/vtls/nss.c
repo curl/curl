@@ -689,10 +689,6 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
   unsigned int buflen;
   SSLNextProtoState state;
 
-#ifdef USE_NGHTTP2
-  struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
-#endif
-
   if(!conn->data->set.ssl_enable_npn && !conn->data->set.ssl_enable_alpn) {
     return;
   }
