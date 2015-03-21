@@ -88,25 +88,25 @@ $setupfile = 'setup';
 $configurebuild = 1;
 while ($ARGV[0]) {
   if ($ARGV[0] =~ /--target=/) {
-    $targetos = (split(/=/, shift @ARGV))[1];
+    $targetos = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--setup=/) {
-    $setupfile = (split(/=/, shift @ARGV))[1];
+    $setupfile = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--extvercmd=/) {
-    $extvercmd = (split(/=/, shift @ARGV))[1];
+    $extvercmd = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--mktarball=/) {
-    $mktarball = (split(/=/, shift @ARGV))[1];
+    $mktarball = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--name=/) {
-    $name = (split(/=/, shift @ARGV))[1];
+    $name = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--email=/) {
-    $email = (split(/=/, shift @ARGV))[1];
+    $email = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--desc=/) {
-    $desc = (split(/=/, shift @ARGV))[1];
+    $desc = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--configure=(.*)/) {
     $confopts = $1;
