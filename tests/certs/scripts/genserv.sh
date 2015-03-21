@@ -81,9 +81,9 @@ $OPENSSL rsa -in $PREFIX-sv.key -pubout -outform DER -out $PREFIX-sv.pub.der
 echo "openssl rsa -in $PREFIX-sv.key -pubout -outform PEM -out $PREFIX-sv.pub.pem"
 $OPENSSL rsa -in $PREFIX-sv.key -pubout -outform PEM -out $PREFIX-sv.pub.pem
 
-echo "openssl x509 -set_serial $SERIAL -extfile $PREFIX-sv.prm -days $DURATION  -CA $CAPREFIX-ca.cacert -CAkey $CAPREFIX-ca.key -in $PREFIX-sv.csr -req -out $PREFIX-sv.crt -text -nameopt multiline -sha1"
+echo "openssl x509 -set_serial $SERIAL -extfile $PREFIX-sv.prm -days $DURATION  -CA $CAPREFIX-ca.cacert -CAkey $CAPREFIX-ca.key -in $PREFIX-sv.csr -req -text -nameopt multiline -sha1 > $PREFIX-sv.crt "
 
-$OPENSSL x509 -set_serial $SERIAL -extfile $PREFIX-sv.prm -days $DURATION  -CA $CAPREFIX-ca.cacert -CAkey $CAPREFIX-ca.key -in $PREFIX-sv.csr -req -out $PREFIX-sv.crt -text -nameopt multiline -sha1
+$OPENSSL x509 -set_serial $SERIAL -extfile $PREFIX-sv.prm -days $DURATION  -CA $CAPREFIX-ca.cacert -CAkey $CAPREFIX-ca.key -in $PREFIX-sv.csr -req -text -nameopt multiline -sha1 > $PREFIX-sv.crt
 
 if [ "$P12." = YES. ] ; then
 
