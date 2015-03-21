@@ -10,7 +10,7 @@ countryName_value            = NN
 organizationName              = "Organization Name"
 organizationName_value     = Edel Curl Arctic Illudium Research Cloud
 commonName                      = "Common Name"
-commonName_value              = Nothern Nowhere Trust Anchor 
+commonName_value              = Northern Nowhere Trust Anchor
 [ x509v3 ]
 basicConstraints = critical,CA:true
 keyUsage        = critical,keyCertSign,cRLSign
