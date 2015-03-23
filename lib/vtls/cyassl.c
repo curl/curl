@@ -47,6 +47,7 @@
 #include "curl_memory.h"
 
 #include <cyassl/ssl.h>
+#include <cyassl/version.h>
 #ifdef HAVE_CYASSL_ERROR_SSL_H
 #include <cyassl/error-ssl.h>
 #else
