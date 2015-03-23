@@ -2648,6 +2648,9 @@ static CURLcode servercert(struct connectdata *conn,
 
   if(data->set.ssl.certinfo)
     /* we've been asked to gather certificate info! */
+    /* Unfortunately, this cannot be moved to step2, 
+    /* as when OpenSSL fails to verify certs  */
+    /* it does not preserve  server certificate info  */   
     (void)get_cert_chain(conn, connssl);
 
   connssl->server_cert = SSL_get_peer_certificate(connssl->handle);

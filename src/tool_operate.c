@@ -1159,6 +1159,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_VERBOSE, 1L);
         }
 
+        if (global->showCertificateChain) {
+            my_setopt(curl, CURLOPT_CERTINFO, 1L);
+        }
+
         /* new in curl 7.9.3 */
         if(config->engine) {
           result = res_setopt_str(curl, CURLOPT_SSLENGINE, config->engine);
