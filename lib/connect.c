@@ -1202,15 +1202,20 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
 
   DEBUGASSERT(data);
 
-  /* this only works for an easy handle that has been used for
-     curl_easy_perform()! */
-  if(data->state.lastconnect && data->multi_easy) {
+  /* this works for an easy handle:
+   * - that has been used for curl_easy_perform()
+   * - that is associated with a multi handle, and whose connection
+   *   was detached with CURLOPT_CONNECT_ONLY
+   */
+  if(data->state.lastconnect && (data->multi_easy || data->multi)) {
     struct connectdata *c = data->state.lastconnect;
     struct connfind find;
     find.tofind = data->state.lastconnect;
     find.found = FALSE;
 
-    Curl_conncache_foreach(data->multi_easy->conn_cache, &find, conn_is_conn);
+    Curl_conncache_foreach(data->multi_easy?
+                           data->multi_easy->conn_cache:
+                           data->multi->conn_cache, &find, conn_is_conn);
 
     if(!find.found) {
       data->state.lastconnect = NULL;
