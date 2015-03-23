@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -40,8 +40,9 @@ connection set-up.
 The variable \fBn\fP points to will receive the number of sent bytes.
 
 To establish the connection, set \fBCURLOPT_CONNECT_ONLY(3)\fP option before
-calling \fIcurl_easy_perform(3)\fP. Note that \fIcurl_easy_send(3)\fP will not
-work on connections that were created without this option.
+calling \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform()\fP. Note that
+\fIcurl_easy_send(3)\fP will not work on connections that were created without
+this option.
 
 You must ensure that the socket is writable before calling
 \fIcurl_easy_send(3)\fP, otherwise the call will return \fBCURLE_AGAIN\fP -
