@@ -636,10 +636,6 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   struct SingleRequest *k = &conn->data->req;
   uint8_t *binsettings = conn->proto.httpc.binsettings;
 
-  result = Curl_http2_init(conn);
-  if(result)
-    return result;
-
   /* As long as we have a fixed set of settings, we don't have to dynamically
    * figure out the base64 strings since it'll always be the same. However,
    * the settings will likely not be fixed every time in the future.
@@ -974,11 +970,16 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
 
 CURLcode Curl_http2_setup(struct connectdata *conn)
 {
+  CURLcode result;
   struct http_conn *httpc = &conn->proto.httpc;
   if(conn->handler->flags & PROTOPT_SSL)
     conn->handler = &Curl_handler_http2_ssl;
   else
     conn->handler = &Curl_handler_http2;
+
+  result = Curl_http2_init(conn);
+  if(result)
+    return result;
 
   infof(conn->data, "Using HTTP2\n");
   httpc->bodystarted = FALSE;
@@ -996,7 +997,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 
   conn->httpversion = 20;
 
-  return 0;
+  return CURLE_OK;
 }
 
 CURLcode Curl_http2_switched(struct connectdata *conn,
