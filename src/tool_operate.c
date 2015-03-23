@@ -1045,6 +1045,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           if(config->falsestart)
             my_setopt(curl, CURLOPT_SSL_FALSESTART, 1L);
         }
+        if(config->path_as_is)
+          my_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
 
         if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) {
           if(!config->insecure_ok) {

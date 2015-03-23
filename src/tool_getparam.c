@@ -177,6 +177,7 @@ static const struct LongShort aliases[]= {
   {"$K", "sasl-ir",                  FALSE},
   {"$L", "test-event",               FALSE},
   {"$M", "unix-socket",              TRUE},
+  {"$N", "path-as-is",               FALSE},
   {"0",   "http1.0",                 FALSE},
   {"01",  "http1.1",                 FALSE},
   {"02",  "http2",                   FALSE},
@@ -981,6 +982,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'M': /* --unix-socket */
         GetStr(&config->unix_socket_path, nextarg);
+        break;
+      case 'N': /* --path-as-is */
+        config->path_as_is = toggle;
         break;
       }
       break;

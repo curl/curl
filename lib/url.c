@@ -2613,6 +2613,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 #endif
 
+  case CURLOPT_PATH_AS_IS:
+    data->set.path_as_is = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;
@@ -4036,7 +4039,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     path[0] = '/';
     rebuild_url = TRUE;
   }
-  else {
+  else if(!data->set.path_as_is) {
     /* sanitise paths and remove ../ and ./ sequences according to RFC3986 */
     char *newp = Curl_dedotdotify(path);
     if(!newp)
