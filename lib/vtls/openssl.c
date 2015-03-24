@@ -2329,7 +2329,7 @@ static int X509V3_ext(struct SessionHandle *data,
           X509_EXTENSION_get_critical(ext)?"(critical)":"");
 
     if(!X509V3_EXT_print(bio_out, ext, 0, 0))
-      M_ASN1_OCTET_STRING_print(bio_out, ext->value);
+      ASN1_STRING_print(bio_out, (ASN1_STRING *)X509_EXTENSION_get_data(ext));
 
     BIO_get_mem_ptr(bio_out, &biomem);
 
