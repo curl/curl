@@ -1960,6 +1960,13 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
           data->set.str[STRING_SSL_CAPATH] ? data->set.str[STRING_SSL_CAPATH]:
           "none");
   }
+#ifdef CURL_CA_FALLBACK
+  else if(data->set.ssl.verifypeer) {
+    /* verfying the peer without any CA certificates won't
+       work so use openssl's built in default as fallback */
+    SSL_CTX_set_default_verify_paths(connssl->ctx);
+  }
+#endif
 
   if(data->set.str[STRING_SSL_CRLFILE]) {
     /* tell SSL where to find CRL file that is used to check certificate
