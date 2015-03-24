@@ -30,12 +30,12 @@
 #include "rawstr.h"
 #include "curl_base64.h"
 #include "http_negotiate.h"
-#include "curl_memory.h"
 #include "curl_sasl.h"
 #include "url.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,

@@ -58,10 +58,10 @@
 #include "rawstr.h"
 #include "speedcheck.h"
 #include "curl_printf.h"
-#include "curl_memory.h"
 #include "select.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* RFC2348 allows the block size to be negotiated */

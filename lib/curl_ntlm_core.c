@@ -101,7 +101,6 @@
 #include "urldata.h"
 #include "non-ascii.h"
 #include "rawstr.h"
-#include "curl_memory.h"
 #include "curl_ntlm_core.h"
 #include "curl_md5.h"
 #include "curl_hmac.h"
@@ -110,7 +109,8 @@
 #include "curl_des.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #define NTLM_HMAC_MD5_LEN     (16)

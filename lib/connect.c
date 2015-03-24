@@ -62,7 +62,6 @@
 #include "if2ip.h"
 #include "strerror.h"
 #include "connect.h"
-#include "curl_memory.h"
 #include "select.h"
 #include "url.h" /* for Curl_safefree() */
 #include "multiif.h"
@@ -75,7 +74,8 @@
 #include "conncache.h"
 #include "multihandle.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #ifdef __SYMBIAN32__

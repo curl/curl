@@ -39,7 +39,6 @@
 #include "curl_hmac.h"
 #include "curl_sasl.h"
 #include "warnless.h"
-#include "curl_memory.h"
 #include "strtok.h"
 #include "strequal.h"
 #include "rawstr.h"
@@ -47,7 +46,8 @@
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* Supported mechanisms */

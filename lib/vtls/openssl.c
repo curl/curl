@@ -73,10 +73,10 @@
 #endif
 
 #include "warnless.h"
-#include "curl_memory.h"
 #include "non-ascii.h" /* for Curl_convert_from_utf8 prototype */
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #ifndef OPENSSL_VERSION_NUMBER

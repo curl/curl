@@ -44,7 +44,6 @@
 #include "select.h"
 #include "rawstr.h"
 #include "curl_printf.h"
-#include "curl_memory.h"
 
 #include <cyassl/ssl.h>
 #include <cyassl/version.h>
@@ -55,7 +54,8 @@
 #endif
 #include <cyassl/ctaocrypt/random.h>
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 static Curl_recv cyassl_recv;

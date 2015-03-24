@@ -28,11 +28,10 @@
 #include "curl_hmac.h"
 #include "warnless.h"
 
-#include "curl_memory.h"
-
 #if defined(USE_GNUTLS_NETTLE)
 
 #include <nettle/md5.h>
+#include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -58,6 +57,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 #elif defined(USE_GNUTLS)
 
 #include <gcrypt.h>
+#include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -84,6 +84,9 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 #elif defined(USE_OPENSSL)
 /* When OpenSSL is available we use the MD5-function from OpenSSL */
 #include <openssl/md5.h>
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
@@ -98,6 +101,9 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
    reliable than defining COMMON_DIGEST_FOR_OPENSSL on older cats. */
 #  include <CommonCrypto/CommonDigest.h>
 #  define MD5_CTX CC_MD5_CTX
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
 
 static void MD5_Init(MD5_CTX *ctx)
 {
@@ -119,6 +125,9 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
 #elif defined(_WIN32)
 
 #include <wincrypt.h>
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
 
 typedef struct {
   HCRYPTPROV hCryptProv;
@@ -156,6 +165,9 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
 #include <axTLS/config.h>
 #include <axTLS/os_int.h>
 #include <axTLS/crypto.h>
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
 #else
 /* When no other crypto library is available we use this code segment */
 /*
@@ -196,6 +208,10 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
  */
 
 #include <string.h>
+
+/* The last #include files should be: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 /* Any 32-bit or wider unsigned integer data type will do */
 typedef unsigned int MD5_u32plus;
@@ -464,9 +480,6 @@ static void MD5_Final(unsigned char *result, MD5_CTX *ctx)
 }
 
 #endif /* CRYPTO LIBS */
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 const HMAC_params Curl_HMAC_MD5[] = {
   {

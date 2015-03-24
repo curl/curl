@@ -31,11 +31,11 @@
 
 #include "strequal.h"
 #include "strtok.h"
-#include "curl_memory.h"
 #include "rawstr.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* Get user and password from .netrc when given a machine name */

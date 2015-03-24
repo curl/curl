@@ -59,12 +59,12 @@
 #include "getinfo.h"
 #include "transfer.h"
 #include "url.h"
-#include "curl_memory.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "warnless.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__) || \

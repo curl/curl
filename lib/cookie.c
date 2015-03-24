@@ -91,14 +91,14 @@ Example set of cookies:
 #include "strtok.h"
 #include "sendf.h"
 #include "slist.h"
-#include "curl_memory.h"
 #include "share.h"
 #include "strtoofft.h"
 #include "rawstr.h"
 #include "curl_memrchr.h"
 #include "inet_pton.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 static void freecookie(struct Cookie *co)

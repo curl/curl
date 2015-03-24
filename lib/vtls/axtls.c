@@ -40,11 +40,12 @@
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "curl_printf.h"
-#include "curl_memory.h"
-#include <unistd.h>
-/* The last #include file should be: */
-#include "memdebug.h"
 #include "hostcheck.h"
+#include <unistd.h>
+
+/* The last #include files should be: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
 
 /* Global axTLS init, called from Curl_ssl_init() */

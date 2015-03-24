@@ -28,6 +28,9 @@
  * File curl_memory.h must be included by _all_ *.c source files
  * that use memory related functions strdup, malloc, calloc, realloc
  * or free, and given source file is used to build libcurl library.
+ * It should be included immediately before memdebug.h as the last files
+ * included to avoid undesired interaction with other memory function
+ * headers in dependent libraries.
  *
  * There is nearly no exception to above rule. All libcurl source
  * files in 'lib' subdirectory as well as those living deep inside

@@ -51,10 +51,10 @@
 #include "curl_ntlm_wb.h"
 #include "url.h"
 #include "strerror.h"
-#include "curl_memory.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #if DEBUG_ME

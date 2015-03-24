@@ -32,10 +32,10 @@
 #include "multiif.h"
 #include "non-ascii.h"
 #include "curl_printf.h"
-#include "curl_memory.h"
 #include "strerror.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #ifdef CURL_DO_LINEEND_CONV

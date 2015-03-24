@@ -29,12 +29,12 @@
 
 #include "content_encoding.h"
 #include "http.h"
-#include "curl_memory.h"
 #include "non-ascii.h" /* for Curl_convert_to_network prototype */
 #include "strtoofft.h"
 #include "warnless.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /*

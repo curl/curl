@@ -28,10 +28,10 @@
 #include "rawstr.h"
 #include "curl_sasl.h"
 #include "http_digest.h"
-#include "curl_memory.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* Test example headers:

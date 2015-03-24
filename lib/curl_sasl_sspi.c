@@ -36,13 +36,13 @@
 #include "urldata.h"
 #include "curl_base64.h"
 #include "warnless.h"
-#include "curl_memory.h"
 #include "curl_multibyte.h"
 #include "sendf.h"
 #include "strdup.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /*

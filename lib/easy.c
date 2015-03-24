@@ -60,7 +60,6 @@
 #include "hostip.h"
 #include "share.h"
 #include "strdup.h"
-#include "curl_memory.h"
 #include "progress.h"
 #include "easyif.h"
 #include "select.h"
@@ -77,7 +76,8 @@
 #include "ssh.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* win32_cleanup() is for win32 socket cleanup functionality, the opposite

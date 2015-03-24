@@ -63,12 +63,12 @@
 #include <ocsp.h>
 #endif
 
-#include "curl_memory.h"
 #include "rawstr.h"
 #include "warnless.h"
 #include "x509asn1.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #define SSL_DIR "/etc/pki/nssdb"
