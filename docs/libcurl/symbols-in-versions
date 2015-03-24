@@ -431,6 +431,7 @@ CURLOPT_PASSWDDATA              7.4.2         7.11.1      7.15.5
 CURLOPT_PASSWDFUNCTION          7.4.2         7.11.1      7.15.5
 CURLOPT_PASSWORD                7.19.1
 CURLOPT_PASV_HOST               7.12.1        7.16.0      7.15.5
+CURLOPT_PATH_AS_IS              7.42.0
 CURLOPT_PINNEDPUBLICKEY         7.39.0
 CURLOPT_PORT                    7.1
 CURLOPT_POST                    7.1
