@@ -57,13 +57,13 @@
 #define  TELCMDS
 
 #include "arpa_telnet.h"
-#include "curl_memory.h"
 #include "select.h"
 #include "strequal.h"
 #include "rawstr.h"
 #include "warnless.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #define SUBBUFSIZE 512

@@ -34,12 +34,12 @@
 #include "formdata.h"
 #include "vtls/vtls.h"
 #include "strequal.h"
-#include "curl_memory.h"
 #include "sendf.h"
 #include "strdup.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #ifndef HAVE_BASENAME

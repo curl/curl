@@ -41,7 +41,6 @@
 #include "curl_gethostname.h"
 #include "curl_multibyte.h"
 #include "warnless.h"
-#include "curl_memory.h"
 
 #include "vtls/vtls.h"
 
@@ -55,7 +54,8 @@
 #include "curl_endian.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* "NTLMSSP" signature is always in ASCII regardless of the platform */

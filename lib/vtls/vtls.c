@@ -63,7 +63,6 @@
 #include "sendf.h"
 #include "rawstr.h"
 #include "url.h"
-#include "curl_memory.h"
 #include "progress.h"
 #include "share.h"
 #include "timeval.h"
@@ -72,7 +71,8 @@
 #include "curl_base64.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* convenience macro to check if this handle is using a shared SSL session */

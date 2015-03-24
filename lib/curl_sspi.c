@@ -26,11 +26,11 @@
 
 #include <curl/curl.h>
 #include "curl_sspi.h"
-#include "curl_memory.h"
 #include "curl_multibyte.h"
 #include "warnless.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* We use our own typedef here since some headers might lack these */

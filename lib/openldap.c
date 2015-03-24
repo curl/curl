@@ -44,10 +44,12 @@
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "curl_ldap.h"
-#include "curl_memory.h"
 #include "curl_base64.h"
 #include "connect.h"
 #include "curl_printf.h"
+
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #ifndef _LDAP_PVT_H

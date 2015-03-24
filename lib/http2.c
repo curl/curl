@@ -30,11 +30,11 @@
 #include "http.h"
 #include "sendf.h"
 #include "curl_base64.h"
-#include "curl_memory.h"
 #include "rawstr.h"
 #include "multiif.h"
 
-/* include memdebug.h last */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #if (NGHTTP2_VERSION_NUM < 0x000600)
