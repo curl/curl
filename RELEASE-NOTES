@@ -1,14 +1,19 @@
 Curl and libcurl 7.42.0
 
  Public curl releases:         145
- Command line options:         163
- curl_easy_setopt() options:   209
+ Command line options:         173
+ curl_easy_setopt() options:   216
  Public functions in libcurl:  58
- Contributors:                 1233
+ Contributors:                 1244
 
 This release includes the following changes:
 
  o openssl: show the cipher selection to use in verbose text
+ o gtls: implement CURLOPT_CERTINFO
+ o add CURLOPT_SSL_FALSESTART option (darwinssl and NSS)
+ o curl: add --false-start option
+ o add CURLOPT_PATH_AS_IS
+ o curl: add --path-as-is option
 
 This release includes the following bugfixes:
 
@@ -56,6 +61,27 @@ This release includes the following bugfixes:
  o HTTP: don't use Expect: headers when on HTTP/2 [14]
  o Curl_sh_entry: remove unused 'timestamp'
  o docs/libcurl: makefile portability fix
+ o mkhelp: Remove trailing carriage return from every line of input
+ o nss: explicitly tell NSS to disable NPN/ALPN when libcurl disables it
+ o curl_easy_setopt.3: added a few missing options
+ o metalink: fix resource leak in OOM
+ o axtls: version 1.5.2 now requires that config.h be manually included
+ o HTTP: don't switch to HTTP/2 from 1.1 until we get the 101
+ o cyassl: detect the library as renamed wolfssl
+ o CURLOPT_HTTPHEADER.3: add a "SECURITY CONCERNS" section
+ o CURLOPT_URL.3: Added "SECURITY CONCERNS
+ o openssl: try to avoid accessing OCSP structs when possible
+ o test938: added missing closing tags
+ o testcurl: Allow '=' in values given on command line
+ o tests/certs: added make target to rebuild certificates
+ o tests/certs: rebuild certificates with modified key usage bits
+ o gtls: avoid uninitialized variable
+ o gtls: dereferencing NULL pointer
+ o gtls: add check of return code
+ o test1513: eliminated race condition in test run
+ o dict: rename byte to avoid compiler shadowed declaration warning
+ o curl_easy_recv/send: make them work with the multi interface
+ 
 
 This release includes the following known bugs:
 
@@ -65,12 +91,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Alexander Pepper, Ben Darnell, Brad King,
-  Christian Weisgerber, Dan Fandrich, Daniel Stenberg, Fabian Keil, Frank Meier,
-  Jeroen Ooms, Jonathan Cardoso, Jon Seymour, Kamil Dudka, Markus Elfring,
-  Michel Promonet, Peter Laser, Rainer Canavan, Ray Satiro, Richard Moore,
-  Sergei Nikulov, Stefan Bühler, Stefan Eissing, Steve Havelka, Steve Holme,
-  Tatsuhiro Tsujikawa, Tobias Stoeckmann, Viktor Szakáts,
-  (27 contributors)
+  Christian Weisgerber, Dagobert Michelsen, Dan Fandrich, Daniel Stenberg,
+  Fabian Keil, Frank Gevaerts, Frank Meier, Jeroen Ooms, Jonathan Cardoso,
+  Jon Seymour, Kamil Dudka, Markus Elfring, Michel Promonet, Nick Zitzmann,
+  Peter Laser, Rainer Canavan, Ray Satiro, Richard Moore, Sergei Nikulov,
+  Stefan Bühler, Stefan Eissing, Steve Havelka, Steve Holme,
+  Tatsuhiro Tsujikawa, Tobias Stoeckmann, Viktor Szakáts, Yamada Yasuharu,
 
         Thanks! (and sorry if I forgot to mention someone)
 
