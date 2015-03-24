@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -46,6 +46,7 @@
 # --extvercmd=[command]    Command to use for displaying version with cross compiles.
 # --mktarball=[command]    Command to run after completed test
 # --name=[name]            Set name to report as
+# --notes=[notes]          More human-readable information about this configuration
 # --nocvsup                Don't pull from git even though it is a git tree
 # --nogitpull              Don't pull from git even though it is a git tree
 # --nobuildconf            Don't run buildconf
@@ -107,6 +108,9 @@ while ($ARGV[0]) {
   }
   elsif ($ARGV[0] =~ /--desc=/) {
     $desc = (split(/=/, shift @ARGV, 2))[1];
+  }
+  elsif ($ARGV[0] =~ /--notes=/) {
+    $notes = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--configure=(.*)/) {
     $confopts = $1;
