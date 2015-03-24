@@ -827,6 +827,7 @@ CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
   return result;
 }
 
+#ifndef CURL_DISABLE_CRYPTO_AUTH
 void Curl_ssl_md5sum(unsigned char *tmp, /* input */
                      size_t tmplen,
                      unsigned char *md5sum, /* output */
@@ -844,6 +845,7 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
   Curl_MD5_final(MD5pw, md5sum);
 #endif
 }
+#endif
 
 /*
  * Check whether the SSL backend supports the status_request extension.
