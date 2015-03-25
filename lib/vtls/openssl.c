@@ -398,9 +398,6 @@ int cert_stuff(struct connectdata *conn,
     }
 
 
-#define SSL_CLIENT_CERT_ERR \
-    "unable to use client certificate (no key found or wrong pass phrase?)"
-
     switch(file_type) {
     case SSL_FILETYPE_PEM:
       /* SSL_CTX_use_certificate_chain_file() only works on PEM files */
