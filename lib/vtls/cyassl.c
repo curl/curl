@@ -90,20 +90,18 @@ cyassl_connect_step1(struct connectdata *conn,
   if(conssl->state == ssl_connection_complete)
     return CURLE_OK;
 
-  /* CyaSSL doesn't support SSLv2 */
-  if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
-    failf(data, "CyaSSL does not support SSLv2");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-
   /* check to see if we've been told to use an explicit SSL/TLS version */
   switch(data->set.ssl.version) {
-  default:
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
-    infof(data, "CyaSSL cannot be configured to use TLS 1.0-1.2, "
+#if LIBCYASSL_VERSION_HEX >= 0x03003000 /* 3.3.0 */
+    /* the minimum version is set later after the SSL object is created */
+    req_method = SSLv23_client_method();
+#else
+    infof(data, "CyaSSL <3.3.0 cannot be configured to use TLS 1.0-1.2, "
           "TLS 1.0 is used exclusively\n");
     req_method = TLSv1_client_method();
+#endif
     break;
   case CURL_SSLVERSION_TLSv1_0:
     req_method = TLSv1_client_method();
@@ -117,6 +115,12 @@ cyassl_connect_step1(struct connectdata *conn,
   case CURL_SSLVERSION_SSLv3:
     req_method = SSLv3_client_method();
     break;
+  case CURL_SSLVERSION_SSLv2:
+    failf(data, "CyaSSL does not support SSLv2");
+    return CURLE_SSL_CONNECT_ERROR;
+  default:
+    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   if(!req_method) {
@@ -208,6 +212,22 @@ cyassl_connect_step1(struct connectdata *conn,
   if(!conssl->handle) {
     failf(data, "SSL: couldn't create a context (handle)!");
     return CURLE_OUT_OF_MEMORY;
+  }
+
+  switch(data->set.ssl.version) {
+  case CURL_SSLVERSION_DEFAULT:
+  case CURL_SSLVERSION_TLSv1:
+#if LIBCYASSL_VERSION_HEX >= 0x03003000 /* >= 3.3.0 */
+    /* short circuit evaluation to find minimum supported TLS version */
+    if((CyaSSL_SetMinVersion(conssl->handle, CYASSL_TLSV1) != SSL_SUCCESS)
+       &&(CyaSSL_SetMinVersion(conssl->handle, CYASSL_TLSV1_1) != SSL_SUCCESS)
+       &&(CyaSSL_SetMinVersion(conssl->handle, CYASSL_TLSV1_2) != SSL_SUCCESS))
+    {
+      failf(data, "SSL: couldn't set the minimum protocol version");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+#endif
+    break;
   }
 
   /* Check if there's a cached ID we can/should use here! */
