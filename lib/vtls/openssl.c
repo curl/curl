@@ -496,7 +496,7 @@ int cert_stuff(struct connectdata *conn,
       fclose(f);
 
       if(!p12) {
-        failf(data, "error reading PKCS12 file '%s'", cert_file );
+        failf(data, "error reading PKCS12 file '%s'", cert_file);
         return 0;
       }
 
