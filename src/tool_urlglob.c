@@ -196,7 +196,7 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
       char *endp;
       unsigned long lstep;
       errno = 0;
-      lstep = strtoul(&pattern[3], &endp, 10);
+      lstep = strtoul(&pattern[4], &endp, 10);
       if(errno || (*endp != ']'))
         step = -1;
       else {
