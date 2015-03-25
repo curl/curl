@@ -398,32 +398,29 @@ polarssl_connect_step2(struct connectdata *conn,
   conn->recv[sockindex] = polarssl_recv;
   conn->send[sockindex] = polarssl_send;
 
-  for(;;) {
-    if(!(ret = ssl_handshake(&connssl->ssl)))
-      break;
-    else if(ret != POLARSSL_ERR_NET_WANT_READ &&
-            ret != POLARSSL_ERR_NET_WANT_WRITE) {
+  if(!(ret = ssl_handshake(&connssl->ssl)))
+    ;
+  else if(ret != POLARSSL_ERR_NET_WANT_READ &&
+          ret != POLARSSL_ERR_NET_WANT_WRITE) {
 #ifdef POLARSSL_ERROR_C
-     error_strerror(ret, errorbuf, sizeof(errorbuf));
+    error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
-     failf(data, "ssl_handshake returned - PolarSSL: (-0x%04X) %s",
-                                                    -ret, errorbuf);
+    failf(data, "ssl_handshake returned - PolarSSL: (-0x%04X) %s",
+          -ret, errorbuf);
 
-     return CURLE_SSL_CONNECT_ERROR;
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+  else {
+    if(ret == POLARSSL_ERR_NET_WANT_READ) {
+      connssl->connecting_state = ssl_connect_2_reading;
+      return CURLE_OK;
     }
-    else {
-      if(ret == POLARSSL_ERR_NET_WANT_READ) {
-        connssl->connecting_state = ssl_connect_2_reading;
-        return CURLE_OK;
-      }
-      if(ret == POLARSSL_ERR_NET_WANT_WRITE) {
-        connssl->connecting_state = ssl_connect_2_writing;
-        return CURLE_OK;
-      }
-      failf(data, "SSL_connect failed with error %d.", ret);
-      return CURLE_SSL_CONNECT_ERROR;
-
+    if(ret == POLARSSL_ERR_NET_WANT_WRITE) {
+      connssl->connecting_state = ssl_connect_2_writing;
+      return CURLE_OK;
     }
+    failf(data, "SSL_connect failed with error %d.", ret);
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   infof(data, "PolarSSL: Handshake complete, cipher is %s\n",
