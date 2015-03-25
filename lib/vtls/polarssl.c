@@ -398,34 +398,31 @@ polarssl_connect_step2(struct connectdata *conn,
   conn->recv[sockindex] = polarssl_recv;
   conn->send[sockindex] = polarssl_send;
 
-  if(!(ret = ssl_handshake(&connssl->ssl)))
-    ;
-  else if(ret != POLARSSL_ERR_NET_WANT_READ &&
-          ret != POLARSSL_ERR_NET_WANT_WRITE) {
+  ret = ssl_handshake(&connssl->ssl);
+
+  switch(ret) {
+  case 0:
+    break;
+
+  case POLARSSL_ERR_NET_WANT_READ:
+    connssl->connecting_state = ssl_connect_2_reading;
+    return CURLE_OK;
+
+  case POLARSSL_ERR_NET_WANT_WRITE:
+    connssl->connecting_state = ssl_connect_2_writing;
+    return CURLE_OK;
+
+  default:
 #ifdef POLARSSL_ERROR_C
     error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
     failf(data, "ssl_handshake returned - PolarSSL: (-0x%04X) %s",
           -ret, errorbuf);
-
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-  else {
-    if(ret == POLARSSL_ERR_NET_WANT_READ) {
-      connssl->connecting_state = ssl_connect_2_reading;
-      return CURLE_OK;
-    }
-    if(ret == POLARSSL_ERR_NET_WANT_WRITE) {
-      connssl->connecting_state = ssl_connect_2_writing;
-      return CURLE_OK;
-    }
-    failf(data, "SSL_connect failed with error %d.", ret);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
   infof(data, "PolarSSL: Handshake complete, cipher is %s\n",
-        ssl_get_ciphersuite(&conn->ssl[sockindex].ssl)
-    );
+        ssl_get_ciphersuite(&conn->ssl[sockindex].ssl) );
 
   ret = ssl_get_verify_result(&conn->ssl[sockindex].ssl);
 
