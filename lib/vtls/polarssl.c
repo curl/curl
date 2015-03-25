@@ -587,11 +587,15 @@ void Curl_polarssl_session_free(void *ptr)
   free(ptr);
 }
 
+/* 1.3.10 was the first rebranded version. All new releases (in 1.3 branch and
+   higher) will be mbed TLS branded.. */
+
 size_t Curl_polarssl_version(char *buffer, size_t size)
 {
   unsigned int version = version_get_number();
-  return snprintf(buffer, size, "PolarSSL/%d.%d.%d", version>>24,
-                  (version>>16)&0xff, (version>>8)&0xff);
+  return snprintf(buffer, size, "%s/%d.%d.%d",
+                  version >= 0x01030A00?"mbedTLS":"PolarSSL",
+                  version>>24, (version>>16)&0xff, (version>>8)&0xff);
 }
 
 static CURLcode
