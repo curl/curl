@@ -514,7 +514,9 @@ int cert_stuff(struct connectdata *conn,
       PKCS12_free(p12);
 
       if(SSL_CTX_use_certificate(ctx, x509) != 1) {
-        failf(data, SSL_CLIENT_CERT_ERR);
+        failf(data,
+              "could not load PKCS12 client certificate, OpenSSL error %s",
+              ERR_error_string(ERR_get_error(), NULL) );
         goto fail;
       }
 
