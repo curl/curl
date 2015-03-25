@@ -591,11 +591,11 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
     memcpy(tmp, &ntlm->nonce[0], 8);
     memcpy(tmp + 8, entropy, 8);
 
-    Curl_ssl_md5sum(tmp, 16, md5sum, MD5_DIGEST_LENGTH);
-
-    /* We shall only use the first 8 bytes of md5sum, but the des
-       code in Curl_ntlm_core_lm_resp only encrypt the first 8 bytes */
-    result = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
+    result = Curl_ssl_md5sum(tmp, 16, md5sum, MD5_DIGEST_LENGTH);
+    if(!result)
+      /* We shall only use the first 8 bytes of md5sum, but the des code in
+         Curl_ntlm_core_lm_resp only encrypt the first 8 bytes */
+      result = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
     if(result)
       return result;
 
