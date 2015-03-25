@@ -156,7 +156,7 @@ static const char *const helptext[] = {
   "     --pass PASS     Pass phrase for the private key (SSL/SSH)",
   "     --path-as-is    Do not squash .. sequences in URL path",
   "     --pinnedpubkey FILE  Public key (PEM/DER) to verify peer against "
-  "(OpenSSL/GnuTLS/GSKit only)",
+  "(OpenSSL/GnuTLS/NSS/GSKit only)",
   "     --post301       "
   "Do not switch to GET after following a 301 redirect (H)",
   "     --post302       "

@@ -2346,6 +2346,7 @@ sub checksystem {
            }
            elsif ($libcurl =~ /nss/i) {
                $has_nss=1;
+               $has_sslpinning=1;
                $ssllib="NSS";
            }
            elsif ($libcurl =~ /(yassl|wolfssl)/i) {
