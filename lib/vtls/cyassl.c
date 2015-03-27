@@ -201,6 +201,24 @@ cyassl_connect_step1(struct connectdata *conn,
                      data->set.ssl.verifypeer?SSL_VERIFY_PEER:SSL_VERIFY_NONE,
                      NULL);
 
+  /* give application a chance to interfere with SSL set up. */
+  if(data->set.ssl.fsslctx) {
+    CURLcode result = CURLE_OK;
+    result = (*data->set.ssl.fsslctx)(data, conssl->ctx,
+                                       data->set.ssl.fsslctxp);
+    if(result) {
+      failf(data, "error signaled by ssl ctx callback");
+      return result;
+    }
+  }
+#ifdef NO_FILESYSTEM
+  else if(data->set.ssl.verifypeer) {
+    failf(data, "CyaSSL: unable to verify certificate; no certificate",
+          " authorities registered");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+#endif
+
   /* Let's make an SSL structure */
   if(conssl->handle)
     SSL_free(conssl->handle);

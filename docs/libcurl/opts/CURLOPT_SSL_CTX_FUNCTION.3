@@ -32,8 +32,8 @@ CURLcode ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *userptr);
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_FUNCTION,
                           ssl_ctx_callback);
 .SH DESCRIPTION
-This option only works for libcurl powered by OpenSSL. If libcurl was built
-against another SSL library, this functionality is absent.
+This option only works for libcurl powered by OpenSSL and WolfSSL/CyaSSL.
+If libcurl was built against another SSL library, this functionality is absent.
 
 Pass a pointer to your callback function, which should match the prototype
 shown above.
@@ -63,7 +63,7 @@ All TLS based protocols: HTTPS, FTPS, IMAPS, POP3, SMTPS etc.
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-Added in 7.11.0. Only supported when built with OpenSSL.
+Added in 7.11.0. Only supported when built with OpenSSL and WolfSSL/CyaSSL.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
