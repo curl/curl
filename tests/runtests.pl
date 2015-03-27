@@ -603,7 +603,7 @@ sub torture {
 
         my $ret = 0;
         if($gdbthis) {
-            runclient($gdbline)
+            runclient($gdbline);
         }
         else {
             $ret = runclient($testcmd);
@@ -2348,7 +2348,7 @@ sub checksystem {
                $has_nss=1;
                $ssllib="NSS";
            }
-           elsif ($libcurl =~ /yassl/i) {
+           elsif ($libcurl =~ /(yassl|wolfssl)/i) {
                $has_yassl=1;
                $ssllib="yassl";
            }
