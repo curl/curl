@@ -20,8 +20,8 @@ support.
 It is about trust
 -----------------
 
-This system is about trust. In your local CA cert bundle you have certs from
-*trusted* Certificate Authorities that you then can use to verify that the
+This system is about trust. In your local CA certificate store you have certs
+from *trusted* Certificate Authorities that you then can use to verify that the
 server certificates you see are valid. They're signed by one of the CAs you
 trust.
 
@@ -35,16 +35,16 @@ Certificate Verification
 ------------------------
 
 libcurl performs peer SSL certificate verification by default.  This is done
-by using CA cert bundle that the SSL library can use to make sure the peer's
-server certificate is valid.
+by using a CA certificate store that the SSL library can use to make sure the
+peer's server certificate is valid.
 
 If you communicate with HTTPS, FTPS or other TLS-using servers using
-certificates that are signed by CAs present in the bundle, you can be sure
+certificates that are signed by CAs present in the store, you can be sure
 that the remote server really is the one it claims to be.
 
 If the remote server uses a self-signed certificate, if you don't install a CA
-cert bundle, if the server uses a certificate signed by a CA that isn't
-included in the bundle you use or if the remote host is an impostor
+cert store, if the server uses a certificate signed by a CA that isn't
+included in the store you use or if the remote host is an impostor
 impersonating your favorite site, and you want to transfer files from this
 server, do one of the following:
 
@@ -59,12 +59,22 @@ server, do one of the following:
 
     With the curl command line tool: --cacert [file]
 
- 3. Add the CA cert for your server to the existing default CA cert bundle.
-    The default path of the CA bundle used can be changed by running configure
-    with the --with-ca-bundle option pointing out the path of your choice.
+ 3. Add the CA cert for your server to the existing default CA certificate
+    store. The default CA certificate store can changed at compile time with the
+    following configure options:
 
-    To do this, you need to get the CA cert for your server in PEM format and
-    then append that to your CA cert bundle.
+    --with-ca-bundle=FILE: use the specified file as CA certificate store. CA
+    certificates need to be concatenated in PEM format into this file.
+
+    --with-ca-path=PATH: use the specified path as CA certificate store. CA
+    certificates need to be stored as individual PEM files in this directory.
+    You may need to run c_rehash after adding files there.
+
+    If neither of the two options is specified, configure will try to auto-detect
+    a setting. It's also possible to explicitly not hardcode any default store
+    but rely on the built in default the crypto library may provide instead.
+    You can achieve that by passing both --without-ca-bundle and
+    --without-ca-path to the configure script.
 
     If you use Internet Explorer, this is one way to get extract the CA cert
     for a particular server:
@@ -76,7 +86,7 @@ server, do one of the following:
      - Convert it from crt to PEM using the openssl tool:
        openssl x509 -inform DES -in yourdownloaded.crt \
        -out outcert.pem -text
-     - Append the 'outcert.pem' to the CA cert bundle or use it stand-alone
+     - Add the 'outcert.pem' to the CA certificate store or use it stand-alone
        as described below.
 
     If you use the 'openssl' tool, this is one way to get extract the CA cert
@@ -89,9 +99,9 @@ server, do one of the following:
      - If you want to see the data in the certificate, you can do: "openssl
        x509 -inform PEM -in certfile -text -out certdata" where certfile is
        the cert you extracted from logfile. Look in certdata.
-     - If you want to trust the certificate, you can append it to your
-       cert bundle or use it stand-alone as described. Just remember that the
-       security is no better than the way you obtained the certificate.
+     - If you want to trust the certificate, you can add it to your CA
+       certificate store or use it stand-alone as described. Just remember that
+       the security is no better than the way you obtained the certificate.
 
  4. If you're using the curl command line tool, you can specify your own CA
     cert path by setting the environment variable `CURL_CA_BUNDLE` to the path
@@ -113,9 +123,9 @@ server, do one of the following:
 
 Neglecting to use one of the above methods when dealing with a server using a
 certificate that isn't signed by one of the certificates in the installed CA
-cert bundle, will cause SSL to report an error ("certificate verify failed")
-during the handshake and SSL will then refuse further communication with that
-server.
+certificate store, will cause SSL to report an error ("certificate verify
+failed") during the handshake and SSL will then refuse further communication
+with that server.
 
 Certificate Verification with NSS
 ---------------------------------
@@ -123,8 +133,8 @@ Certificate Verification with NSS
 If libcurl was built with NSS support, then depending on the OS distribution,
 it is probably required to take some additional steps to use the system-wide
 CA cert db. RedHat ships with an additional module, libnsspem.so, which
-enables NSS to read the OpenSSL PEM CA bundle. This library is missing in
-OpenSuSE, and without it, NSS can only work with its own internal formats. NSS
+enables NSS to read the OpenSSL PEM CA bundle. On openSUSE you can install
+p11-kit-nss-trust which makes NSS use the system wide CA certificate store. NSS
 also has a new [database format](https://wiki.mozilla.org/NSS_Shared_DB).
 
 Starting with version 7.19.7, libcurl automatically adds the 'sql:' prefix to
