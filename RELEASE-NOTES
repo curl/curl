@@ -81,7 +81,26 @@ This release includes the following bugfixes:
  o test1513: eliminated race condition in test run
  o dict: rename byte to avoid compiler shadowed declaration warning
  o curl_easy_recv/send: make them work with the multi interface
- 
+ o vtls: fix compile with --disable-crypto-auth but with SSL
+ o openssl: adapt to ASN1/X509 things gone opaque in 1.1
+ o openssl: verifystatus: only use the OCSP work-around <= 1.0.2a [15]
+ o curl_memory: make curl_memory.h the second-last header file loaded
+ o testcurl.pl: add the --notes option to supply more info about a build
+ o cyassl: If wolfSSL then identify as such in version string
+ o cyassl: Check for invalid length parameter in Curl_cyassl_random
+ o cyassl: default to highest possible TLS version
+ o Curl_ssl_md5sum: return CURLcode (fixes OOM)
+ o polarssl: remove dead code
+ o polarssl: called mbedTLS in 1.3.10 and later
+ o globbing: fix step parsing for character globbing ranges
+ o globbing: fix url number calculation when using range with step
+ o multi: on a request completion, check all CONNECT_PEND transfers [16]
+ o build: link curl to openssl libraries when openssl support is enabled
+ o url: Don't accept CURLOPT_SSLVERSION unless USE_SSL is defined
+ o vtls: Don't accept unknown CURLOPT_SSLVERSION values
+ o build: Fix libcurl.sln erroneous mixed configurations
+ o cyassl: remove undefined reference to CyaSSL_no_filesystem_verify
+ o cyassl: add SSL context callback support for CyaSSL
 
 This release includes the following known bugs:
 
@@ -92,10 +111,11 @@ advice from friends like these:
 
   Alessandro Ghedini, Alexander Pepper, Ben Darnell, Brad King,
   Christian Weisgerber, Dagobert Michelsen, Dan Fandrich, Daniel Stenberg,
-  Fabian Keil, Frank Gevaerts, Frank Meier, Jeroen Ooms, Jonathan Cardoso,
-  Jon Seymour, Kamil Dudka, Markus Elfring, Michel Promonet, Nick Zitzmann,
-  Peter Laser, Rainer Canavan, Ray Satiro, Richard Moore, Sergei Nikulov,
-  Stefan Bühler, Stefan Eissing, Steve Havelka, Steve Holme,
+  Emil Lerner, Fabian Keil, Frank Gevaerts, Frank Meier, Jeroen Ooms,
+  Jiri Dvorak, Jonathan Cardoso, Jon Seymour, Kamil Dudka, Kyle L. Huff,
+  Markus Elfring, Michel Promonet, Nick Zitzmann, Patrick Monnerat,
+  Paul Howarth, Peter Laser, Rainer Canavan, Ray Satiro, Richard Moore,
+  Sergei Nikulov, Stefan Bühler, Stefan Eissing, Steve Havelka, Steve Holme,
   Tatsuhiro Tsujikawa, Tobias Stoeckmann, Viktor Szakáts, Yamada Yasuharu,
 
         Thanks! (and sorry if I forgot to mention someone)
@@ -116,3 +136,5 @@ References to bug reports and discussions on issues:
  [12] = http://curl.haxx.se/bug/view.cgi?id=1493
  [13] = https://github.com/bagder/curl/pull/168
  [14] = https://github.com/bagder/curl/issues/169
+ [15] = http://curl.haxx.se/mail/lib-2015-03/0205.html
+ [16] = http://curl.haxx.se/bug/view.cgi?id=1465
