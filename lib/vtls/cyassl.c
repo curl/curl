@@ -191,10 +191,6 @@ cyassl_connect_step1(struct connectdata *conn,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
-#else
-  if(CyaSSL_no_filesystem_verify(conssl->ctx)!= SSL_SUCCESS) {
-    return CURLE_SSL_CONNECT_ERROR;
-  }
 #endif /* NO_FILESYSTEM */
 
   /* SSL always tries to verify the peer, this only says whether it should
