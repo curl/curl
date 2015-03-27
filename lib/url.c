@@ -892,7 +892,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set explicit SSL version to try to connect with, as some SSL
      * implementations are lame.
      */
+#ifdef USE_SSL
     data->set.ssl.version = va_arg(param, long);
+#else
+    result = CURLE_UNKNOWN_OPTION;
+#endif
     break;
 
 #ifndef CURL_DISABLE_HTTP
