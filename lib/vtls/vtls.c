@@ -276,10 +276,25 @@ void Curl_ssl_cleanup(void)
   }
 }
 
+static bool ssl_prefs_check(struct SessionHandle *data)
+{
+  /* check for CURLOPT_SSLVERSION invalid parameter value */
+  if((data->set.ssl.version < 0)
+     || (data->set.ssl.version >= CURL_SSLVERSION_LAST)) {
+    failf(data, "Unrecognized parameter value passed via CURLOPT_SSLVERSION");
+    return FALSE;
+  }
+  return TRUE;
+}
+
 CURLcode
 Curl_ssl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
+
+  if(!ssl_prefs_check(conn->data))
+    return CURLE_SSL_CONNECT_ERROR;
+
   /* mark this is being ssl-enabled from here on. */
   conn->ssl[sockindex].use = TRUE;
   conn->ssl[sockindex].state = ssl_connection_negotiating;
@@ -297,6 +312,10 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
                              bool *done)
 {
   CURLcode result;
+
+  if(!ssl_prefs_check(conn->data))
+    return CURLE_SSL_CONNECT_ERROR;
+
   /* mark this is being ssl requested from here on. */
   conn->ssl[sockindex].use = TRUE;
 #ifdef curlssl_connect_nonblocking
