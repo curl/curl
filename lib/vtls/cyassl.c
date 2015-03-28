@@ -191,7 +191,7 @@ cyassl_connect_step1(struct connectdata *conn,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
-#endif /* NO_FILESYSTEM */
+#endif /* !NO_FILESYSTEM */
 
   /* SSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
@@ -205,7 +205,7 @@ cyassl_connect_step1(struct connectdata *conn,
   if(data->set.ssl.fsslctx) {
     CURLcode result = CURLE_OK;
     result = (*data->set.ssl.fsslctx)(data, conssl->ctx,
-                                       data->set.ssl.fsslctxp);
+                                      data->set.ssl.fsslctxp);
     if(result) {
       failf(data, "error signaled by ssl ctx callback");
       return result;
@@ -213,8 +213,10 @@ cyassl_connect_step1(struct connectdata *conn,
   }
 #ifdef NO_FILESYSTEM
   else if(data->set.ssl.verifypeer) {
-    failf(data, "CyaSSL: unable to verify certificate; no certificate",
-          " authorities registered");
+    failf(data, "SSL: Certificates couldn't be loaded because CyaSSL was built"
+          " with \"no filesystem\". Either disable peer verification"
+          " (insecure) or if you are building an application with libcurl you"
+          " can load certificates via CURLOPT_SSL_CTX_FUNCTION.");
     return CURLE_SSL_CONNECT_ERROR;
   }
 #endif

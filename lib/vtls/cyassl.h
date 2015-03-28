@@ -46,7 +46,7 @@ int Curl_cyassl_random(struct SessionHandle *data,
 /* Set the API backend definition to Schannel */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_CYASSL
 
-/* this backend suppots CURLOPT_SSL_CTX_FUNCTION */
+/* this backend supports CURLOPT_SSL_CTX_* */
 #define have_curlssl_ssl_ctx 1
 
 /* API setup for CyaSSL */
