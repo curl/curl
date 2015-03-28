@@ -998,10 +998,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
         else
           my_setopt(curl, CURLOPT_RESUME_FROM_LARGE, CURL_OFF_T_C(0));
 
-        my_setopt_str(curl, CURLOPT_SSLCERT, config->cert);
-        my_setopt_str(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
-        my_setopt_str(curl, CURLOPT_SSLKEY, config->key);
-        my_setopt_str(curl, CURLOPT_SSLKEYTYPE, config->key_type);
         my_setopt_str(curl, CURLOPT_KEYPASSWD, config->key_passwd);
 
         if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) {
@@ -1029,6 +1025,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
 
         if(curlinfo->features & CURL_VERSION_SSL) {
+          my_setopt_str(curl, CURLOPT_SSLCERT, config->cert);
+          my_setopt_str(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
+          my_setopt_str(curl, CURLOPT_SSLKEY, config->key);
+          my_setopt_str(curl, CURLOPT_SSLKEYTYPE, config->key_type);
+
           if(config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
             my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -1044,6 +1045,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
           if(config->falsestart)
             my_setopt(curl, CURLOPT_SSL_FALSESTART, 1L);
+
+          my_setopt_enum(curl, CURLOPT_SSLVERSION, config->ssl_version);
         }
         if(config->path_as_is)
           my_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
@@ -1102,7 +1105,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
 #endif
 
-        my_setopt_enum(curl, CURLOPT_SSLVERSION, config->ssl_version);
         my_setopt_enum(curl, CURLOPT_TIMECONDITION, (long)config->timecond);
         my_setopt(curl, CURLOPT_TIMEVALUE, (long)config->condtime);
         my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
