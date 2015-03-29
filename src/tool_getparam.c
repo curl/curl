@@ -161,6 +161,8 @@ static const struct LongShort aliases[]= {
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   {"$6", "socks5-gssapi-service",    TRUE},
   {"$7", "socks5-gssapi-nec",        FALSE},
+  {"$O", "proxy-service-name",       TRUE},
+  {"$P", "service-name",             TRUE},
 #endif
   {"$8", "proxy1.0",                 TRUE},
   {"$9", "tftp-blksize",             TRUE},
@@ -902,6 +904,12 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case '7': /* --socks5-gssapi-nec*/
         config->socks5_gssapi_nec = toggle;
+        break;
+      case 'O': /* --proxy-service-name */
+        GetStr(&config->proxy_service_name, nextarg);
+        break;
+      case 'P': /* --service-name */
+        GetStr(&config->service_name, nextarg);
         break;
 #endif
       case '8': /* --proxy1.0 */

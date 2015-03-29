@@ -1217,6 +1217,17 @@ static CURLcode operate_do(struct GlobalConfig *global,
           if(config->socks5_gssapi_nec)
             my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_NEC,
                           config->socks5_gssapi_nec);
+
+          /* new in curl 7.43.0 */
+          if(config->proxy_service_name)
+            my_setopt_str(curl, CURLOPT_PROXY_SERVICE_NAME,
+                          config->proxy_service_name);
+
+          /* new in curl 7.43.0 */
+          if(config->service_name)
+            my_setopt_str(curl, CURLOPT_SERVICE_NAME,
+                          config->service_name);
+
         }
 #endif
         /* curl 7.13.0 */

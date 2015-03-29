@@ -1632,6 +1632,12 @@ typedef enum {
   /* Do not squash dot-dot sequences */
   CINIT(PATH_AS_IS, LONG, 234),
 
+  /* Proxy Service Name */
+  CINIT(PROXY_SERVICE_NAME, OBJECTPOINT, 235),
+
+  /* Service Name */
+  CINIT(SERVICE_NAME, OBJECTPOINT, 236),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

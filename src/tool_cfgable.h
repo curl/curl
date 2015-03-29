@@ -166,8 +166,12 @@ struct OperationConfig {
   int socksver;             /* set to CURLPROXY_SOCKS* define */
   char *socks5_gssapi_service;  /* set service name for gssapi principal
                                  * default rcmd */
+  char *proxy_service_name; /* set service name for proxy negotiation
+                             * default HTTP */
   int socks5_gssapi_nec ;   /* The NEC reference server does not protect
                              * the encryption type exchange */
+  char *service_name;       /* set negotiation service name
+                             * default HTTP */
 
   bool tcp_nodelay;
   long req_retry;           /* number of retries */

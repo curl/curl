@@ -576,6 +576,18 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
                      (char *) CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE);
   if(result)
     return result;
+
+  /* set default negotiate proxy service name */
+  result = setstropt(&set->str[STRING_PROXY_SERVICE_NAME],
+                     (char *) CURL_DEFAULT_PROXY_SERVICE_NAME);
+  if(result)
+    return result;
+
+  /* set default negotiate service name */
+  result = setstropt(&set->str[STRING_SERVICE_NAME],
+                     (char *) CURL_DEFAULT_SERVICE_NAME);
+  if(result)
+    return result;
 #endif
 
   /* This is our preferred CA cert bundle/path since install time */
@@ -1472,12 +1484,29 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
                        va_arg(param, char *));
     break;
 
+  case CURLOPT_PROXY_SERVICE_NAME:
+    /*
+     * Set negotiate proxy service name
+     */
+    result = setstropt(&data->set.str[STRING_PROXY_SERVICE_NAME],
+                       va_arg(param, char *));
+    break;
+
   case CURLOPT_SOCKS5_GSSAPI_NEC:
     /*
      * set flag for nec socks5 support
      */
     data->set.socks5_gssapi_nec = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
+
+  case CURLOPT_SERVICE_NAME:
+    /*
+     * Set negotiate service identity
+     */
+    result = setstropt(&data->set.str[STRING_SERVICE_NAME],
+                       va_arg(param, char *));
+    break;
+
 #endif
 
   case CURLOPT_HEADERDATA:
