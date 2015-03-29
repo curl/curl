@@ -504,17 +504,21 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   if(!data->multi)
     return CURLM_OK; /* it is already removed so let's say it is fine! */
 
-
   premature = (data->mstate < CURLM_STATE_COMPLETED) ? TRUE : FALSE;
   easy_owns_conn = (data->easy_conn && (data->easy_conn->data == easy)) ?
     TRUE : FALSE;
 
   /* If the 'state' is not INIT or COMPLETED, we might need to do something
      nice to put the easy_handle in a good known state when this returns. */
-  if(premature)
+  if(premature) {
     /* this handle is "alive" so we need to count down the total number of
        alive connections when this is removed */
     multi->num_alive--;
+
+    /* When this handle gets removed, other handles may be able to get the
+       connection */
+    Curl_multi_process_pending_handles(multi);
+  }
 
   if(data->easy_conn &&
      data->mstate > CURLM_STATE_DO &&
