@@ -1180,6 +1180,8 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_USERNAME:
   case CURLOPT_USERPWD:
   case CURLOPT_XOAUTH2_BEARER:
+  case CURLOPT_PROXY_SERVICE_NAME:
+  case CURLOPT_SERVICE_NAME:
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
 

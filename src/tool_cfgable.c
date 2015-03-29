@@ -136,6 +136,8 @@ static void free_config_fields(struct OperationConfig *config)
 
   Curl_safefree(config->socksproxy);
   Curl_safefree(config->socks5_gssapi_service);
+  Curl_safefree(config->proxy_service_name);
+  Curl_safefree(config->service_name);
 
   Curl_safefree(config->ftp_account);
   Curl_safefree(config->ftp_alternative_to_user);

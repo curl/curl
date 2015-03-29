@@ -1389,6 +1389,8 @@ enum dupstring {
 #endif
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   STRING_SOCKS5_GSSAPI_SERVICE, /* GSSAPI service name */
+  STRING_PROXY_SERVICE_NAME, /* Proxy service name */
+  STRING_SERVICE_NAME,    /* Service name */
 #endif
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,

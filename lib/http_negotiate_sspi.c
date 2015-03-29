@@ -93,9 +93,10 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
     /* Generate our SPN */
-    neg_ctx->server_name = Curl_sasl_build_spn("HTTP",
-                                                proxy ? conn->proxy.name :
-                                                        conn->host.name);
+    neg_ctx->server_name = Curl_sasl_build_spn(
+      proxy ? data->set.str[STRING_PROXY_SERVICE_NAME] :
+      data->set.str[STRING_SERVICE_NAME],
+      proxy ? conn->proxy.name : conn->host.name);
     if(!neg_ctx->server_name)
       return CURLE_OUT_OF_MEMORY;
   }

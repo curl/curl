@@ -270,6 +270,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_DNS_LOCAL_IP4 ||                                       \
    (option) == CURLOPT_DNS_LOCAL_IP6 ||                                       \
    (option) == CURLOPT_LOGIN_OPTIONS ||                                       \
+   (option) == CURLOPT_PROXY_SERVICE_NAME ||                                  \
+   (option) == CURLOPT_SERVICE_NAME ||                                        \
    0)
 
 /* evaluates to true if option takes a curl_write_callback argument */

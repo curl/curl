@@ -1332,6 +1332,11 @@ with a remote host. (Added in 7.17.1)
 .IP "--proxy-ntlm"
 Tells curl to use HTTP NTLM authentication when communicating with the given
 proxy. Use \fI--ntlm\fP for enabling NTLM with a remote host.
+.IP "--proxy-service-name <servicename>"
+This option allows you to change the service name for proxy negotiation.
+
+Examples: --proxy-negotiate proxy-name \fI--proxy-service-name\fP sockd would use
+sockd/proxy-name.  (Added in 7.43.0).
 .IP "--proxy1.0 <proxyhost[:port]>"
 Use the specified HTTP 1.0 proxy. If the port number is not specified, it is
 assumed at port 1080.
@@ -1513,6 +1518,11 @@ terminal/stdout unless you redirect it.
 .IP "--sasl-ir"
 Enable initial response in SASL authentication.
 (Added in 7.31.0)
+.IP "--service-name <servicename>"
+This option allows you to change the service name for SPNEGO.
+
+Examples: --negotiate \fI--service-name\fP sockd would use
+sockd/server-name.  (Added in 7.43.0).
 .IP "-S, --show-error"
 When used with \fI-s\fP it makes curl show an error message if it fails.
 .IP "--ssl"
