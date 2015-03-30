@@ -443,6 +443,6 @@
 #define ENOMEM 2
 #define EAGAIN 3
 
-extern int stat(const char *path,struct stat *buffer );
+extern int stat(const char *path, struct stat *buffer);
 
 #endif /* HEADER_CURL_CONFIG_WIN32CE_H */
