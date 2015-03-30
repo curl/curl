@@ -496,10 +496,7 @@ size_t Curl_cyassl_version(char *buffer, size_t size)
 
 int Curl_cyassl_init(void)
 {
-  if(CyaSSL_Init() == 0)
-    return 1;
-
-  return -1;
+  return (CyaSSL_Init() == SSL_SUCCESS);
 }
 
 
