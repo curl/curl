@@ -14,6 +14,7 @@ This release includes the following changes:
  o curl: add --false-start option
  o add CURLOPT_PATH_AS_IS
  o curl: add --path-as-is option
+ o curl: create output file on successful download of an empty file [21]
 
 This release includes the following bugfixes:
 
@@ -154,3 +155,4 @@ References to bug reports and discussions on issues:
  [18] = http://curl.haxx.se/bug/view.cgi?id=1486
  [19] = https://github.com/bagder/curl/issues/195
  [20] = https://github.com/bagder/curl/issues/192
+ [21] = https://github.com/bagder/curl/issues/183
