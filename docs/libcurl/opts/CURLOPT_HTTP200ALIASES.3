@@ -32,9 +32,11 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP200ALIASES,
 .SH DESCRIPTION
 Pass a pointer to a linked list of \fIaliases\fP to be treated as valid HTTP
 200 responses.  Some servers respond with a custom header response line.  For
-example, IceCast servers respond with "ICY 200 OK".  By including this string
-in your list of aliases, the response will be treated as a valid HTTP header
-line such as "HTTP/1.0 200 OK".
+example, SHOUTcast servers respond with "ICY 200 OK". Also some very old
+Icecast 1.3.x servers will respond like that for certain user agent headers or
+in absence of such. By including this string in your list of aliases,
+the response will be treated as a valid HTTP header line such as
+"HTTP/1.0 200 OK".
 
 The linked list should be a fully valid list of struct curl_slist structs, and
 be properly filled in.  Use \fIcurl_slist_append(3)\fP to create the list and
