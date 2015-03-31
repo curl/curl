@@ -464,9 +464,11 @@ Curl_axtls_connect(struct connectdata *conn,
                   int sockindex)
 
 {
+  struct SessionHandle *data = conn->data;
   CURLcode conn_step = connect_prep(conn, sockindex);
   int ssl_fcn_return;
   SSL *ssl = conn->ssl[sockindex].ssl;
+  long timeout_ms;
 
   if(conn_step != CURLE_OK) {
     Curl_axtls_close(conn, sockindex);
@@ -475,14 +477,23 @@ Curl_axtls_connect(struct connectdata *conn,
 
   /* Check to make sure handshake was ok. */
   while(ssl_handshake_status(ssl) != SSL_OK) {
+    /* check allowed time left */
+    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+
+    if(timeout_ms < 0) {
+      /* no need to continue if time already is up */
+      failf(data, "SSL connection timeout");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+
     ssl_fcn_return = ssl_read(ssl, NULL);
     if(ssl_fcn_return < 0) {
       Curl_axtls_close(conn, sockindex);
       ssl_display_error(ssl_fcn_return); /* goes to stdout. */
       return map_error_to_curl(ssl_fcn_return);
     }
+    /* TODO: avoid polling */
     usleep(10000);
-    /* TODO: check for timeout as this could hang indefinitely otherwise */
   }
   infof (conn->data, "handshake completed successfully\n");
 
