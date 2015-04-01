@@ -407,7 +407,7 @@ Curl_cookie_add(struct SessionHandle *data,
     do {
       /* we have a <what>=<this> pair or a stand-alone word here */
       name[0]=what[0]=0; /* init the buffers */
-      if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^;\r\n =]=%"
+      if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^;\r\n =] =%"
                      MAX_COOKIE_LINE_TXT "[^;\r\n]",
                      name, what)) {
         /* Use strstore() below to properly deal with received cookie

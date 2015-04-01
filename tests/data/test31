@@ -53,6 +53,10 @@ Set-Cookie: test2=yes; domain=se; expires=Sat Feb 2 11:56:27 GMT 2030
 Set-Cookie: magic=yessir; path=/silly/; HttpOnly
 Set-Cookie: blexp=yesyes; domain=127.0.0.1; domain=127.0.0.1; expiry=totally bad;
 Set-Cookie: partialip=nono; domain=.0.0.1;
+Set-Cookie: withspaces=  yes  within and around    ;
+Set-Cookie: withspaces2 =before equals;
+Set-Cookie: prespace=  yes before;
+Set-Cookie: securewithspace=after    ; secure =
 
 boo
 </data>
@@ -124,6 +128,10 @@ Accept: */*
 127.0.0.1	FALSE	/we/want/	FALSE	2054030187	nodomain	value
 #HttpOnly_127.0.0.1	FALSE	/silly/	FALSE	0	magic	yessir
 127.0.0.1	FALSE	/we/want/	FALSE	0	blexp	yesyes
+127.0.0.1	FALSE	/we/want/	FALSE	0	withspaces	yes  within and around
+127.0.0.1	FALSE	/we/want/	FALSE	0	withspaces2	before equals
+127.0.0.1	FALSE	/we/want/	FALSE	0	prespace	yes before
+127.0.0.1	FALSE	/we/want/	TRUE	0	securewithspace	after
 </file>
 </verify>
 </testcase>
