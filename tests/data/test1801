@@ -23,7 +23,6 @@ lies!
 
 <datacheck>
 HTTP/1.1 101 Switching!
-
 </datacheck>
 
 # listen to the upgrade request!
@@ -62,9 +61,9 @@ Upgrade: %H2CVER
 HTTP2-Settings: AAMAAABkAAQAAP__
 
 </protocol>
-# nothing is returned, because no HTTP/2 data nor headers was handled
+# CURLE_HTTP2: Send failure: Broken pipe
 <errorcode>
-56
+16
 </errorcode>
 </verify>
 </testcase>
