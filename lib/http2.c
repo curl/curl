@@ -1062,6 +1062,15 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
     return CURLE_HTTP2;
   }
 
+  /* Try to send some frames since we may read SETTINGS already. */
+  rv = nghttp2_session_send(httpc->h2);
+
+  if(rv != 0) {
+    failf(data, "nghttp2_session_send() failed: %s(%d)",
+          nghttp2_strerror(rv), rv);
+    return CURLE_HTTP2;
+  }
+
   return CURLE_OK;
 }
 
