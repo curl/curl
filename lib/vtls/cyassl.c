@@ -140,9 +140,9 @@ cyassl_connect_step1(struct connectdata *conn,
 #ifndef NO_FILESYSTEM
   /* load trusted cacert */
   if(data->set.str[STRING_SSL_CAFILE]) {
-    if(!SSL_CTX_load_verify_locations(conssl->ctx,
-                                      data->set.str[STRING_SSL_CAFILE],
-                                      data->set.str[STRING_SSL_CAPATH])) {
+    if(1 != SSL_CTX_load_verify_locations(conssl->ctx,
+                                          data->set.str[STRING_SSL_CAFILE],
+                                          data->set.str[STRING_SSL_CAPATH])) {
       if(data->set.ssl.verifypeer) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:\n"
