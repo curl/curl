@@ -101,6 +101,17 @@ This release includes the following bugfixes:
  o build: Fix libcurl.sln erroneous mixed configurations
  o cyassl: remove undefined reference to CyaSSL_no_filesystem_verify
  o cyassl: add SSL context callback support for CyaSSL
+ o tool: only set SSL options if SSL is enabled
+ o multi: remove_handle: move pending connections [17]
+ o configure: Use KRB5CONFIG for krb5-config [18]
+ o axtls: add timeout within Curl_axtls_connect
+ o CURLOPT_HTTP200ALIASES.3: Mainly SHOUTcast servers use "ICY 200"
+ o cyassl: Fix library initialization return value
+ o cookie: handle spaces after the name in Set-Cookie [19]
+ o http2: Fix missing nghttp2_session_send call in Curl_http2_switched [20]
+ o cyassl: Fix certificate load check
+ o build-openssl.bat: Fix mixed line endings
+ o checksrc.bat: Check lib\vtls source
 
 This release includes the following known bugs:
 
@@ -110,13 +121,14 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Alexander Pepper, Ben Darnell, Brad King,
-  Christian Weisgerber, Dagobert Michelsen, Dan Fandrich, Daniel Stenberg,
-  Emil Lerner, Fabian Keil, Frank Gevaerts, Frank Meier, Jeroen Ooms,
-  Jiri Dvorak, Jonathan Cardoso, Jon Seymour, Kamil Dudka, Kyle L. Huff,
-  Markus Elfring, Michel Promonet, Nick Zitzmann, Patrick Monnerat,
-  Paul Howarth, Peter Laser, Rainer Canavan, Ray Satiro, Richard Moore,
-  Sergei Nikulov, Stefan Bühler, Stefan Eissing, Steve Havelka, Steve Holme,
-  Tatsuhiro Tsujikawa, Tobias Stoeckmann, Viktor Szakáts, Yamada Yasuharu,
+  Charles Romestant, Christian Weisgerber, Dagobert Michelsen, Dan Fandrich,
+  Daniel Stenberg, Emil Lerner, Fabian Keil, Frank Gevaerts, Frank Meier,
+  Jeroen Ooms, Jiri Dvorak, Jonathan Cardoso, Jon Seymour, Kamil Dudka,
+  Kyle L. Huff, Markus Elfring, Michel Promonet, Nick Zitzmann,
+  Patrick Monnerat, Paul Howarth, Peter Laser, Rainer Canavan, Ray Satiro,
+  Richard Moore, Sergei Nikulov, Stefan Bühler, Stefan Eissing, Steve Havelka,
+  Steve Holme, Tatsuhiro Tsujikawa, Thomas Ruecker, Tobias Stoeckmann,
+  Viktor Szakáts, Yamada Yasuharu,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -138,3 +150,7 @@ References to bug reports and discussions on issues:
  [14] = https://github.com/bagder/curl/issues/169
  [15] = http://curl.haxx.se/mail/lib-2015-03/0205.html
  [16] = http://curl.haxx.se/bug/view.cgi?id=1465
+ [17] = http://curl.haxx.se/bug/view.cgi?id=1465
+ [18] = http://curl.haxx.se/bug/view.cgi?id=1486
+ [19] = https://github.com/bagder/curl/issues/195
+ [20] = https://github.com/bagder/curl/issues/192
