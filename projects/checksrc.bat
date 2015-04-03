@@ -50,6 +50,8 @@ rem ***************************************************************************
   for /f "delims=" %%i in ('dir %SRC_DIR%\src\*.h.* /b') do @perl %SRC_DIR%\lib\checksrc.pl -D%SRC_DIR%\src "%%i"
   for /f "delims=" %%i in ('dir %SRC_DIR%\lib\*.c.* /b') do @perl %SRC_DIR%\lib\checksrc.pl -D%SRC_DIR%\lib "%%i"
   for /f "delims=" %%i in ('dir %SRC_DIR%\lib\*.h.* /b') do @perl %SRC_DIR%\lib\checksrc.pl -D%SRC_DIR%\lib -Wcurl_config.h.cmake "%%i"
+  for /f "delims=" %%i in ('dir %SRC_DIR%\lib\vtls\*.c.* /b') do @perl %SRC_DIR%\lib\checksrc.pl -D%SRC_DIR%\lib\vtls "%%i"
+  for /f "delims=" %%i in ('dir %SRC_DIR%\lib\vtls\*.h.* /b') do @perl %SRC_DIR%\lib\checksrc.pl -D%SRC_DIR%\lib\vtls "%%i"
   goto success
 
 :syntax
