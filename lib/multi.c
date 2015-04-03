@@ -1112,13 +1112,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       struct connectdata *conn = data->easy_conn;
 
       /* check if we have the name resolved by now */
-      if(data->share)
-        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-
       dns = Curl_fetch_addr(conn, conn->host.name, (int)conn->port);
 
       if(dns) {
-        dns->inuse++; /* we use it! */
 #ifdef CURLRES_ASYNCH
         conn->async.dns = dns;
         conn->async.done = TRUE;
@@ -1126,9 +1122,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         result = CURLE_OK;
         infof(data, "Hostname was found in DNS cache\n");
       }
-
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
       if(!dns)
         result = Curl_resolver_is_resolved(data->easy_conn, &dns);
