@@ -277,33 +277,6 @@ void Curl_hostcache_prune(struct SessionHandle *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 }
 
-/*
- * Check if the entry should be pruned. Assumes a locked cache.
- */
-static int
-remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
-{
-  struct hostcache_prune_data user;
-
-  if(!dns || (data->set.dns_cache_timeout == -1) || !data->dns.hostcache)
-    /* cache forever means never prune, and NULL hostcache means we can't do
-       it */
-    return 0;
-
-  time(&user.now);
-  user.cache_timeout = data->set.dns_cache_timeout;
-
-  if(!hostcache_timestamp_remove(&user, dns) )
-    return 0;
-
-  Curl_hash_clean_with_criterium(data->dns.hostcache,
-                                 (void *) &user,
-                                 hostcache_timestamp_remove);
-
-  return 1;
-}
-
-
 #ifdef HAVE_SIGSETJMP
 /* Beware this is a global and unique instance. This is used to store the
    return address that we can jump back to from inside a signal handler. This
@@ -321,7 +294,6 @@ fetch_addr(struct connectdata *conn,
   struct Curl_dns_entry *dns = NULL;
   size_t entry_len;
   struct SessionHandle *data = conn->data;
-  int stale;
 
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
@@ -777,13 +749,6 @@ struct curl_hash *Curl_mk_dnscache(void)
   return Curl_hash_alloc(7, Curl_hash_str, Curl_str_key_compare, freednsentry);
 }
 
-static int free_all_entries(void *data, void *hc)
-{
-  (void)data;
-  (void)hc;
-  return 1; /* free all entries */
-}
-
 /*
  * Curl_hostcache_clean()
  *
@@ -797,7 +762,7 @@ void Curl_hostcache_clean(struct SessionHandle *data,
   if(data && data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  Curl_hash_clean_with_criterium(hash, NULL, free_all_entries);
+  Curl_hash_clean(hash);
 
   if(data && data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
