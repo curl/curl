@@ -94,8 +94,8 @@ cyassl_connect_step1(struct connectdata *conn,
   switch(data->set.ssl.version) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
-#if LIBCYASSL_VERSION_HEX >= 0x03003000 /* 3.3.0 */
-    /* the minimum version is set later after the SSL object is created */
+#if LIBCYASSL_VERSION_HEX >= 0x03003000 /* >= 3.3.0 */
+    /* minimum protocol version is set later after the CTX object is created */
     req_method = SSLv23_client_method();
 #else
     infof(data, "CyaSSL <3.3.0 cannot be configured to use TLS 1.0-1.2, "
@@ -135,6 +135,27 @@ cyassl_connect_step1(struct connectdata *conn,
   if(!conssl->ctx) {
     failf(data, "SSL: couldn't create a context!");
     return CURLE_OUT_OF_MEMORY;
+  }
+
+  switch(data->set.ssl.version) {
+  case CURL_SSLVERSION_DEFAULT:
+  case CURL_SSLVERSION_TLSv1:
+#if LIBCYASSL_VERSION_HEX > 0x03004006 /* > 3.4.6 */
+    /* Versions 3.3.0 to 3.4.6 we know the minimum protocol version is whatever
+    minimum version of TLS was built in and at least TLS 1.0. For later library
+    versions that could change (eg TLS 1.0 built in but defaults to TLS 1.1) so
+    we have this short circuit evaluation to find the minimum supported TLS
+    version. We use wolfSSL_CTX_SetMinVersion and not CyaSSL_SetMinVersion
+    because only the former will work before the user's CTX callback is called.
+    */
+    if((wolfSSL_CTX_SetMinVersion(conssl->ctx, WOLFSSL_TLSV1) != 1) &&
+       (wolfSSL_CTX_SetMinVersion(conssl->ctx, WOLFSSL_TLSV1_1) != 1) &&
+       (wolfSSL_CTX_SetMinVersion(conssl->ctx, WOLFSSL_TLSV1_2) != 1)) {
+      failf(data, "SSL: couldn't set the minimum protocol version");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+#endif
+    break;
   }
 
 #ifndef NO_FILESYSTEM
@@ -228,21 +249,6 @@ cyassl_connect_step1(struct connectdata *conn,
   if(!conssl->handle) {
     failf(data, "SSL: couldn't create a context (handle)!");
     return CURLE_OUT_OF_MEMORY;
-  }
-
-  switch(data->set.ssl.version) {
-  case CURL_SSLVERSION_DEFAULT:
-  case CURL_SSLVERSION_TLSv1:
-#if LIBCYASSL_VERSION_HEX >= 0x03003000 /* >= 3.3.0 */
-    /* short circuit evaluation to find minimum supported TLS version */
-    if((CyaSSL_SetMinVersion(conssl->handle, CYASSL_TLSV1) != SSL_SUCCESS) &&
-       (CyaSSL_SetMinVersion(conssl->handle, CYASSL_TLSV1_1) != SSL_SUCCESS) &&
-       (CyaSSL_SetMinVersion(conssl->handle, CYASSL_TLSV1_2) != SSL_SUCCESS)) {
-      failf(data, "SSL: couldn't set the minimum protocol version");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-#endif
-    break;
   }
 
   /* Check if there's a cached ID we can/should use here! */
