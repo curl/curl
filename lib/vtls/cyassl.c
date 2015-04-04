@@ -282,9 +282,6 @@ cyassl_connect_step2(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* conssl = &conn->ssl[sockindex];
 
-  infof(data, "CyaSSL: Connecting to %s:%d\n",
-        conn->host.name, conn->remote_port);
-
   conn->recv[sockindex] = cyassl_recv;
   conn->send[sockindex] = cyassl_send;
 
