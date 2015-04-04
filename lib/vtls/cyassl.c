@@ -58,6 +58,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#if LIBCYASSL_VERSION_HEX < 0x02007002 /* < 2.7.2 */
+#define CYASSL_MAX_ERROR_SZ 80
+#endif
+
 static Curl_recv cyassl_recv;
 static Curl_send cyassl_send;
 
@@ -81,6 +85,7 @@ static CURLcode
 cyassl_connect_step1(struct connectdata *conn,
                      int sockindex)
 {
+  char error_buffer[CYASSL_MAX_ERROR_SZ];
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* conssl = &conn->ssl[sockindex];
   SSL_METHOD* req_method = NULL;
@@ -256,7 +261,7 @@ cyassl_connect_step1(struct connectdata *conn,
     /* we got a session id, use it! */
     if(!SSL_set_session(conssl->handle, ssl_sessionid)) {
       failf(data, "SSL: SSL_set_session failed: %s",
-            ERR_error_string(SSL_get_error(conssl->handle, 0), NULL));
+            ERR_error_string(SSL_get_error(conssl->handle, 0), error_buffer));
       return CURLE_SSL_CONNECT_ERROR;
     }
     /* Informational message */
@@ -297,7 +302,7 @@ cyassl_connect_step2(struct connectdata *conn,
 
   ret = SSL_connect(conssl->handle);
   if(ret != 1) {
-    char error_buffer[80];
+    char error_buffer[CYASSL_MAX_ERROR_SZ];
     int  detail = SSL_get_error(conssl->handle, ret);
 
     if(SSL_ERROR_WANT_READ == detail) {
@@ -409,7 +414,7 @@ static ssize_t cyassl_send(struct connectdata *conn,
                            size_t len,
                            CURLcode *curlcode)
 {
-  char error_buffer[80];
+  char error_buffer[CYASSL_MAX_ERROR_SZ];
   int  memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   int  rc     = SSL_write(conn->ssl[sockindex].handle, mem, memlen);
 
@@ -454,7 +459,7 @@ static ssize_t cyassl_recv(struct connectdata *conn,
                            size_t buffersize,
                            CURLcode *curlcode)
 {
-  char error_buffer[80];
+  char error_buffer[CYASSL_MAX_ERROR_SZ];
   int  buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
   int  nread    = SSL_read(conn->ssl[num].handle, buf, buffsize);
 
