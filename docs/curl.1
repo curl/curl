@@ -548,11 +548,10 @@ indicating its identity. A public key is extracted from this certificate and
 if it does not exactly match the public key provided to this option, curl will
 abort the connection before sending or receiving any data.
 
-This is currently only implemented in the OpenSSL, GnuTLS, NSS and GSKit
-backends.
+Added in 7.39.0 for OpenSSL, GnuTLS and GSKit. Added in 7.43.0 for NSS and
+wolfSSL/CyaSSL. Other SSL backends not supported.
 
 If this option is used several times, the last one will be used.
-(Added in 7.39.0)
 .IP "--cert-status"
 (SSL) Tells curl to verify the status of the server certificate by using the
 Certificate Status Request (aka. OCSP stapling) TLS extension.

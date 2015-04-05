@@ -2351,6 +2351,7 @@ sub checksystem {
            }
            elsif ($libcurl =~ /(yassl|wolfssl)/i) {
                $has_yassl=1;
+               $has_sslpinning=1;
                $ssllib="yassl";
            }
            elsif ($libcurl =~ /polarssl/i) {
