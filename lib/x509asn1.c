@@ -820,7 +820,7 @@ static void do_pubkey(struct SessionHandle * data, int certnum,
     /* Compute key length. */
     for(q = elem.beg; !*q && q < elem.end; q++)
       ;
-    len = (elem.end - q) * 8;
+    len = (unsigned long)((elem.end - q) * 8);
     if(len)
       for(i = *(unsigned char *) q; !(i & 0x80); i <<= 1)
         len--;
