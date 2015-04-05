@@ -50,11 +50,22 @@ if(curl) {
   curl_easy_perform(curl);
 }
 .fi
+.SH PUBLIC KEY EXTRACTION
+If you do not have the server's public key file you can extract it from the
+server's certificate.
+.nf
+openssl x509 -in www.test.com.pem -pubkey -noout > www.test.com.pubkey.pem
+.fi
+The public key is output in PEM format and contains a header, base64 data and a
+footer:
+.nf
+-----BEGIN PUBLIC KEY-----
+[BASE 64 DATA]
+-----END PUBLIC KEY-----
+.fi
 .SH AVAILABILITY
-If built TLS enabled. This is currently only implemented in the OpenSSL,
-GnuTLS, NSS and GSKit backends.
-
-Added in libcurl 7.39.0
+Added in 7.39.0 for OpenSSL, GnuTLS and GSKit. Added in 7.43.0 for
+NSS and wolfSSL/CyaSSL. Other SSL backends not supported.
 .SH RETURN VALUE
 Returns CURLE_OK if TLS enabled, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.

@@ -57,6 +57,7 @@ and that's a problem since options.h hasn't been included yet. */
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "rawstr.h"
+#include "x509asn1.h"
 #include "curl_printf.h"
 
 #include <cyassl/ssl.h>
@@ -400,6 +401,44 @@ cyassl_connect_step2(struct connectdata *conn,
       failf(data, "SSL_connect failed with error %d: %s", detail,
           ERR_error_string(detail, error_buffer));
       return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+
+  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+    X509 *x509;
+    const char *x509_der;
+    int x509_der_len;
+    curl_X509certificate x509_parsed;
+    curl_asn1Element *pubkey;
+    CURLcode result;
+
+    x509 = SSL_get_peer_certificate(conssl->handle);
+    if(!x509) {
+      failf(data, "SSL: failed retrieving server certificate");
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
+
+    x509_der = (const char *)CyaSSL_X509_get_der(x509, &x509_der_len);
+    if(!x509_der) {
+      failf(data, "SSL: failed retrieving ASN.1 server certificate");
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
+
+    memset(&x509_parsed, 0, sizeof x509_parsed);
+    Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len);
+
+    pubkey = &x509_parsed.subjectPublicKeyInfo;
+    if(!pubkey->header || pubkey->end <= pubkey->header) {
+      failf(data, "SSL: failed retrieving public key from server certificate");
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
+
+    result = Curl_pin_peer_pubkey(data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+                                  (const unsigned char *)pubkey->header,
+                                  (size_t)(pubkey->end - pubkey->header));
+    if(result) {
+      failf(data, "SSL: public key does not match pinned public key!");
+      return result;
     }
   }
 
