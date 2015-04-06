@@ -1270,7 +1270,7 @@ long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
    * the next packet at the adjusted rate.  We should wait
    * longer when using larger packets, for instance.
    */
-  rv = ((curl_off_t)((pkt_size * 8) * 1000) / rate_bps);
+  rv = ((curl_off_t)(pkt_size * 1000) / rate_bps);
 
   /* Catch rounding errors and always slow down at least 1ms if
    * we are running too fast.
