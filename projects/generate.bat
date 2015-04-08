@@ -21,14 +21,39 @@ rem * KIND, either express or implied.
 rem *
 rem ***************************************************************************
 
+rem NOTES
+rem
+rem Do not set %ERRORLEVEL% to anything. %ERRORLEVEL% is a special variable
+rem that only contains errorlevel when %ERRORLEVEL% is not set. Same for %CD%.
+rem http://blogs.msdn.com/b/oldnewthing/archive/2008/09/26/8965755.aspx
+rem If you need to set the errorlevel do this instead: CALL :seterr [#]
+
 :begin
   rem Check we are running on a Windows NT derived OS
   if not "%OS%" == "Windows_NT" goto nodos
 
+  rem Check we are not running on a network drive
+  if "%~d0."=="\\." goto nonetdrv
+
+  rem Switch to this batch file's directory
+  cd /d "%~0\.." 1>NUL 2>&1
+
   rem Set our variables
-  setlocal
+  setlocal ENABLEEXTENSIONS
   set VERSION=ALL
   set MODE=GENERATE
+
+  rem Detect programs. HAVE_<PROGNAME>
+  rem When not found the variable is set undefined. The undefined pattern
+  rem allows for statements like "if not defined HAVE_PERL (command)"
+  groff --version <NUL 1>NUL 2>&1
+  if %ERRORLEVEL% EQU 0 (set HAVE_GROFF=Y) else (set HAVE_GROFF=)
+  nroff --version <NUL 1>NUL 2>&1
+  if %ERRORLEVEL% EQU 0 (set HAVE_NROFF=Y) else (set HAVE_NROFF=)
+  perl --version <NUL 1>NUL 2>&1
+  if %ERRORLEVEL% EQU 0 (set HAVE_PERL=Y) else (set HAVE_PERL=)
+  gzip --version <NUL 1>NUL 2>&1
+  if %ERRORLEVEL% EQU 0 (set HAVE_GZIP=Y) else (set HAVE_GZIP=)
 
   rem Display the help
   if /i "%~1" == "-?" goto syntax
@@ -62,6 +87,19 @@ rem ***************************************************************************
   shift & goto parseArgs
  
 :start
+  if "%MODE%" == "GENERATE" (
+    echo.
+    echo Generating prerequisite files
+    CALL :gen_curlbuild
+    if errorlevel 1 goto error
+    CALL :gen_hugehelp
+    if errorlevel 1 goto error
+  ) else (
+    echo.
+    echo Removing prerequisite files
+    call :clean ..\include\curl\curlbuild.h
+    call :clean ..\src\tool_hugehelp.c
+  )
   if "%VERSION%" == "VC6" goto vc6
   if "%VERSION%" == "VC7" goto vc7
   if "%VERSION%" == "VC7.1" goto vc71
@@ -337,6 +375,66 @@ rem
 
   exit /B
 
+rem CALL this function to generate ..\src\tool_hugehelp.c
+rem Returns exit code 0 on success or 1 on failure.
+:gen_hugehelp
+  setlocal
+  set LC_ALL=C
+  set ROFFCMD=
+  if defined HAVE_PERL (
+    if defined HAVE_GROFF (
+      set ROFFCMD=groff -mtty-char -Tascii -P-c -man
+    ) else if defined HAVE_NROFF (
+      set ROFFCMD=nroff -c -Tascii -man
+    )
+  )
+  echo * %CD%\..\src\tool_hugehelp.c
+  echo #include "tool_setup.h"> ..\src\tool_hugehelp.c
+  echo #include "tool_hugehelp.h">> ..\src\tool_hugehelp.c
+  if defined ROFFCMD (
+    if defined HAVE_GZIP (
+      echo #ifndef HAVE_LIBZ>> ..\src\tool_hugehelp.c
+    )
+    %ROFFCMD% ..\docs\curl.1 2>NUL | perl ..\src\mkhelp.pl ..\docs\MANUAL >> ..\src\tool_hugehelp.c
+    if defined HAVE_GZIP (
+      echo #else>> ..\src\tool_hugehelp.c
+      %ROFFCMD% ..\docs\curl.1 2>NUL | perl ..\src\mkhelp.pl -c ..\docs\MANUAL >> ..\src\tool_hugehelp.c
+      echo #endif /^* HAVE_LIBZ ^*/>> ..\src\tool_hugehelp.c
+    )
+  ) else (
+    echo.
+    echo Warning: The curl manual could not be integrated in the source. This means when
+    echo you build curl the manual will not be available (curl --man^). Integration of
+    echo the manual is not required and a summary of the options will still be available
+    echo (curl --help^). To integrate the manual your PATH is required to have
+    echo groff/nroff, perl and optionally gzip for compression.
+    echo.
+    echo void hugehelp(void^)>> ..\src\tool_hugehelp.c
+    echo #ifdef USE_MANUAL>> ..\src\tool_hugehelp.c
+    echo { fputs("built-in manual not included\n", stdout^); }>> ..\src\tool_hugehelp.c
+    echo #else>> ..\src\tool_hugehelp.c
+    echo {}>> ..\src\tool_hugehelp.c
+    echo #endif>> ..\src\tool_hugehelp.c
+  )
+  findstr "/C:void hugehelp(void)" ..\src\tool_hugehelp.c 1>NUL 2>&1
+  if %ERRORLEVEL% NEQ 0 (
+    echo Error: Unable to generate ..\src\tool_hugehelp.c
+    exit /B 1
+  )
+  exit /B 0
+
+rem CALL this function to generate ..\include\curl\curlbuild.h
+rem Returns exit code 0 on success or 1 on failure.
+:gen_curlbuild
+  setlocal
+  echo * %CD%\..\include\curl\curlbuild.h
+  copy /y ..\include\curl\curlbuild.h.dist ..\include\curl\curlbuild.h 1>NUL
+  if %ERRORLEVEL% NEQ 0 (
+    echo Error: Unable to generate ..\include\curl\curlbuild.h
+    exit /B 1
+  )
+  exit /B 0
+
 :syntax
   rem Display the help
   echo.
@@ -365,6 +463,23 @@ rem
   echo.
   echo Error: Only a Windows NT based Operating System is supported
   goto error
+
+:nonetdrv
+  echo.
+  echo Error: This batch file cannot run from a network drive
+  goto error
+
+:seterr
+  rem Set the caller's errorlevel.
+  rem %1[opt]: Errorlevel as integer.
+  rem If %1 is empty the errorlevel will be set to 0.
+  rem If %1 is not empty and not an integer the errorlevel will be set to 1.
+  setlocal
+  set EXITCODE=%~1
+  if not defined EXITCODE set EXITCODE=0
+  echo %EXITCODE%|findstr /r "[^0-9\-]" 1>NUL 2>&1
+  if %ERRORLEVEL% EQU 0 set EXITCODE=1
+  exit /b %EXITCODE%
 
 :error
   endlocal
