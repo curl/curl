@@ -2122,18 +2122,37 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
         fi
       fi
     else
-        # Without pkg-config, we'll kludge in some defaults
-        addlib="-L$OPT_NSS/lib -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
-        addcflags="-I$OPT_NSS/include"
-        version="unknown"
-        nssprefix=$OPT_NSS
+      NSS_PCDIR="$OPT_NSS/lib/pkgconfig"
+      if test -f "$NSS_PCDIR/nss.pc"; then
+        CURL_CHECK_PKGCONFIG(nss, [$NSS_PCDIR])
+        if test "$PKGCONFIG" != "no" ; then
+          addld=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --libs-only-L nss`
+          addlib=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --libs-only-l nss`
+          addcflags=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --cflags nss`
+          version=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --modversion nss`
+          nssprefix=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --variable=prefix nss`
+        fi
+      fi
     fi
 
+    if test -z "$addlib"; then
+      # Without pkg-config, we'll kludge in some defaults
+      AC_MSG_WARN([Using hard-wired libraries and compilation flags for NSS.])
+      addld="-L$OPT_NSS/lib"
+      addlib="-lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
+      addcflags="-I$OPT_NSS/include"
+      version="unknown"
+      nssprefix=$OPT_NSS
+    fi
+
+    # the following check is always satisfied
     if test -n "$addlib"; then
 
+      CLEANLDFLAGS="$LDFLAGS"
       CLEANLIBS="$LIBS"
       CLEANCPPFLAGS="$CPPFLAGS"
 
+      LDFLAGS="$addld $LDFLAGS"
       LIBS="$addlib $LIBS"
       if test "$addcflags" != "-I/usr/include"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
@@ -2149,6 +2168,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
        curl_ssl_msg="enabled (NSS)"
        ],
        [
+         LDFLAGS="$CLEANLDFLAGS"
          LIBS="$CLEANLIBS"
          CPPFLAGS="$CLEANCPPFLAGS"
        ])
