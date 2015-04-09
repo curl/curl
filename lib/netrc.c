@@ -137,6 +137,10 @@ int Curl_parsenetrc(const char *host,
                'password'. */
             state=HOSTFOUND;
           }
+          else if(Curl_raw_equal("default", tok)) {
+            state=HOSTVALID;
+            retcode=0; /* we did find our host */
+          }
           break;
         case HOSTFOUND:
           if(Curl_raw_equal(host, tok)) {
