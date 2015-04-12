@@ -2049,6 +2049,9 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
       dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
       AC_CHECK_SIZEOF(long long)
 
+      dnl Versions since at least 2.6.0 may have options.h
+      AC_CHECK_HEADERS(cyassl/options.h)
+
       dnl Versions since at least 2.9.4 renamed error.h to error-ssl.h
       AC_CHECK_HEADERS(cyassl/error-ssl.h)
 
