@@ -45,6 +45,10 @@
 #include "rawstr.h"
 #include "curl_printf.h"
 
+/* The first CyaSSL include should be its build config aka options.h */
+#ifdef HAVE_CYASSL_OPTIONS_H
+#include <cyassl/options.h>
+#endif
 #include <cyassl/ssl.h>
 #include <cyassl/version.h>
 #ifdef HAVE_CYASSL_ERROR_SSL_H
