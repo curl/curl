@@ -95,6 +95,12 @@ cyassl_connect_step1(struct connectdata *conn,
   SSL_METHOD* req_method = NULL;
   void* ssl_sessionid = NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
+#ifdef HAVE_SNI
+  bool sni = FALSE;
+#define use_sni(x)  sni = (x)
+#else
+#define use_sni(x)  Curl_nop_stmt
+#endif
 
   if(conssl->state == ssl_connection_complete)
     return CURLE_OK;
@@ -111,18 +117,23 @@ cyassl_connect_step1(struct connectdata *conn,
           "TLS 1.0 is used exclusively\n");
     req_method = TLSv1_client_method();
 #endif
+    use_sni(TRUE);
     break;
   case CURL_SSLVERSION_TLSv1_0:
     req_method = TLSv1_client_method();
+    use_sni(TRUE);
     break;
   case CURL_SSLVERSION_TLSv1_1:
     req_method = TLSv1_1_client_method();
+    use_sni(TRUE);
     break;
   case CURL_SSLVERSION_TLSv1_2:
     req_method = TLSv1_2_client_method();
+    use_sni(TRUE);
     break;
   case CURL_SSLVERSION_SSLv3:
     req_method = SSLv3_client_method();
+    use_sni(FALSE);
     break;
   case CURL_SSLVERSION_SSLv2:
     failf(data, "CyaSSL does not support SSLv2");
@@ -230,6 +241,26 @@ cyassl_connect_step1(struct connectdata *conn,
   SSL_CTX_set_verify(conssl->ctx,
                      data->set.ssl.verifypeer?SSL_VERIFY_PEER:SSL_VERIFY_NONE,
                      NULL);
+
+#ifdef HAVE_SNI
+  if(sni) {
+    struct in_addr addr4;
+#ifdef ENABLE_IPV6
+    struct in6_addr addr6;
+#endif
+    size_t hostname_len = strlen(conn->host.name);
+    if((hostname_len < USHRT_MAX) &&
+       (0 == Curl_inet_pton(AF_INET, conn->host.name, &addr4)) &&
+#ifdef ENABLE_IPV6
+       (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr6)) &&
+#endif
+       (CyaSSL_CTX_UseSNI(conssl->ctx, CYASSL_SNI_HOST_NAME, conn->host.name,
+                          (unsigned short)hostname_len) != 1)) {
+      infof(data, "WARNING: failed to configure server name indication (SNI) "
+            "TLS extension\n");
+    }
+  }
+#endif
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
