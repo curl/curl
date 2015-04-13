@@ -35,11 +35,9 @@ BUGS
   have a go at a solution. You can optionally also post your bug/problem at
   curl's bug tracking system over at
 
-        https://sourceforge.net/p/curl/bugs/
+        https://github.com/bagder/curl/issues
 
-  Please read the rest of this document below first before doing that! Also,
-  you need to login to your sourceforge account before being able to submit a
-  bug report (necessary evil done to avoid spam).
+  Please read the rest of this document below first before doing that!
 
   If you feel you need to ask around first, find a suitable mailing list and
   post there. The lists are available on http://curl.haxx.se/mail/
