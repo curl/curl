@@ -104,6 +104,7 @@
  17.5 provide formpost headers
  17.6 warning when setting an option
  17.7 warning when sending binary output to terminal
+ 17.8 offer color-coded HTTP header output
 
  18. Build
  18.1 roffit
@@ -600,6 +601,12 @@ Currently the SMB authentication uses NTLMv1.
 
   Provide a way that prompts the user for confirmation before binary data is
   sent to the terminal, much in the style 'less' does it.
+
+17.8 offer color-coded HTTP header output
+
+  By offering different color output on the header name and the header
+  contents, they could be made more readable and thus help users working on
+  HTTP services.
 
 
 18. Build
