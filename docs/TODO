@@ -110,6 +110,7 @@
  17.6 warning when setting an option
  17.7 warning when sending binary output to terminal
  17.8 offer color-coded HTTP header output
+ 17.9 Choose the name of file in braces for complex URLs
 
  18. Build
  18.1 roffit
@@ -612,6 +613,18 @@ Currently the SMB authentication uses NTLMv1.
   By offering different color output on the header name and the header
   contents, they could be made more readable and thus help users working on
   HTTP services.
+
+17.9 Choose the name of file in braces for complex URLs
+
+  When using braces to download a list of URLs and you use complicated names
+  in the list of alternatives, it could be handy to allow curl to use other
+  names when saving.
+
+  Consider a way to offer that. Possibly like
+  {partURL1:name1,partURL2:name2,partURL3:name3} where the name following the
+  colon is the output name.
+
+  See https://github.com/bagder/curl/issues/221
 
 
 18. Build
