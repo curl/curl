@@ -103,6 +103,7 @@
  17.4 simultaneous parallel transfers
  17.5 provide formpost headers
  17.6 warning when setting an option
+ 17.7 warning when sending binary output to terminal
 
  18. Build
  18.1 roffit
@@ -594,6 +595,12 @@ Currently the SMB authentication uses NTLMv1.
   Display a warning when libcurl returns an error when setting an option.
   This can be useful to tell when support for a particular feature hasn't been
   compiled into the library.
+
+17.7 warning when sending binary output to terminal
+
+  Provide a way that prompts the user for confirmation before binary data is
+  sent to the terminal, much in the style 'less' does it.
+
 
 18. Build
 
