@@ -3,6 +3,12 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+90. IMAP "SEARCH ALL" truncates output on large boxes. "A quick search of the
+  code reveals that pingpong.c contains some truncation code, at line 408,
+  when it deems the server response to be too large truncating it to 40
+  characters"
+  http://curl.haxx.se/bug/view.cgi?id=1366
+
 89. Disabling HTTP Pipelining when there are ongoing transfers can lead to
   heap corruption and crash. http://curl.haxx.se/bug/view.cgi?id=1411
 
