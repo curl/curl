@@ -113,6 +113,19 @@ This release includes the following bugfixes:
  o cyassl: Fix certificate load check
  o build-openssl.bat: Fix mixed line endings
  o checksrc.bat: Check lib\vtls source
+ o DNS: fix refreshing of obsolete dns cache entries
+ o CURLOPT_RESOLVE: actually implement removals
+ o checksrc.bat: quotes to support an SRC_DIR with spaces
+ o cyassl: Remove 'Connecting to' message from cyassl_connect_step2
+ o cyassl: Use CYASSL_MAX_ERROR_SZ for error buffer size
+ o lib/transfer.c: Remove factor of 8 from sleep time calculation
+ o lib/makefile.m32: add missing libs to build libcurl.dll
+ o build: Generate source prerequisites for Visual Studio in generate.bat
+ o cyassl: Include the CyaSSL build config
+ o firefox-db2pem: fix wildcard to find Firefox default profile
+ o BUGS: refer to the github issue tracker now as primary
+ o vtls_openssl: improve several certificate error messages
+ o cyassl: Add support for TLS extension SNI
 
 This release includes the following known bugs:
 
@@ -123,13 +136,13 @@ advice from friends like these:
 
   Alessandro Ghedini, Alexander Pepper, Ben Darnell, Brad King,
   Charles Romestant, Christian Weisgerber, Dagobert Michelsen, Dan Fandrich,
-  Daniel Stenberg, Emil Lerner, Fabian Keil, Frank Gevaerts, Frank Meier,
-  Jeroen Ooms, Jiri Dvorak, Jonathan Cardoso, Jon Seymour, Kamil Dudka,
-  Kyle L. Huff, Markus Elfring, Michel Promonet, Nick Zitzmann,
-  Patrick Monnerat, Paul Howarth, Peter Laser, Rainer Canavan, Ray Satiro,
-  Richard Moore, Sergei Nikulov, Stefan Bühler, Stefan Eissing, Steve Havelka,
-  Steve Holme, Tatsuhiro Tsujikawa, Thomas Ruecker, Tobias Stoeckmann,
-  Viktor Szakáts, Yamada Yasuharu,
+  Daniel Stenberg, Da-Yoon Chung, Emil Lerner, Fabian Keil, Frank Gevaerts,
+  Frank Meier, Jeroen Ooms, Jiri Dvorak, Jonathan Cardoso, Jon Seymour,
+  Kamil Dudka, Kyle L. Huff, Markus Elfring, Matthew Hall, Michel Promonet,
+  Nick Zitzmann, Patrick Monnerat, Paul Howarth, Peter Laser, Rainer Canavan,
+  Ray Satiro, Richard Moore, Sergei Nikulov, Stefan Bühler, Stefan Eissing,
+  Steve Havelka, Steve Holme, Tatsuhiro Tsujikawa, Thomas Ruecker,
+  Tobias Stoeckmann, Viktor Szakáts, Yamada Yasuharu,
 
         Thanks! (and sorry if I forgot to mention someone)
 
