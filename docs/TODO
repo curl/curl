@@ -9,6 +9,11 @@
  Things to do in project cURL. Please tell us what you think, contribute and
  send us patches that improve things!
 
+ Be aware that these are things that we could do, or have once been considered
+ things we could do. If you want to work on any of these areas, please
+ consider bringing it up for discussions first on the mailing list so that we
+ all agree it is still a good idea for the project!
+
  All bugs documented in the KNOWN_BUGS document are subject for fixing!
 
  1. libcurl
