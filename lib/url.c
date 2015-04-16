@@ -3627,7 +3627,7 @@ static void fix_hostname(struct SessionHandle *data,
   host->dispname = host->name;
 
   len = strlen(host->name);
-  if(host->name[len-1] == '.')
+  if(len && (host->name[len-1] == '.'))
     /* strip off a single trailing dot if present, primarily for SNI but
        there's no use for it */
     host->name[len-1]=0;
