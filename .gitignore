@@ -47,3 +47,5 @@ CHANGES.dist
 .settings
 .dirstamp
 test-driver
+/build/
+/builds/
