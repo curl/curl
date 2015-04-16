@@ -225,11 +225,14 @@ static char *sanitize_cookie_path(const char *cookie_path)
     return NULL;
 
   /* some stupid site sends path attribute with '"'. */
+  len = strlen(new_path);
   if(new_path[0] == '\"') {
-    memmove((void *)new_path, (const void *)(new_path + 1), strlen(new_path));
+    memmove((void *)new_path, (const void *)(new_path + 1), len);
+    len--;
   }
-  if(new_path[strlen(new_path) - 1] == '\"') {
-    new_path[strlen(new_path) - 1] = 0x0;
+  if(len && (new_path[len - 1] == '\"')) {
+    new_path[len - 1] = 0x0;
+    len--;
   }
 
   /* RFC6265 5.2.4 The Path Attribute */
@@ -241,8 +244,7 @@ static char *sanitize_cookie_path(const char *cookie_path)
   }
 
   /* convert /hoge/ to /hoge */
-  len = strlen(new_path);
-  if(1 < len && new_path[len - 1] == '/') {
+  if(len && new_path[len - 1] == '/') {
     new_path[len - 1] = 0x0;
   }
 
