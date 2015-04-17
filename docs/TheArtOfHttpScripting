@@ -22,6 +22,8 @@ The Art Of Scripting HTTP Requests Using Curl
  3. Fetch a page
  3.1 GET
  3.2 HEAD
+ 3.3 Multiple URLs in a single command line
+ 3.4 Multiple HTTP methods in a single command line
  4. HTML forms
  4.1 Forms explained
  4.2 GET
@@ -135,7 +137,7 @@ The Art Of Scripting HTTP Requests Using Curl
  The Uniform Resource Locator format is how you specify the address of a
  particular resource on the Internet. You know these, you've seen URLs like
  http://curl.haxx.se or https://yourbank.com a million times. RFC 3986 is the
- canonical spec.
+ canonical spec. And yeah, the formal name is not URL, it is URI.
 
  2.2 Host
 
@@ -192,7 +194,6 @@ The Art Of Scripting HTTP Requests Using Curl
  the associated response. The path is what is to the right side of the slash
  that follows the host name and possibly port number.
 
-
 3. Fetch a page
 
  3.1 GET
@@ -222,6 +223,46 @@ The Art Of Scripting HTTP Requests Using Curl
  exactly the way it would do for a GET, but without a body. It means that you
  may see a Content-Length: in the response headers, but there must not be an
  actual body in the HEAD response.
+
+ 3.3 Multiple URLs in a single command line
+
+ A single curl command line may involve one or many URLs. The most common case
+ is probably to just use one, but you can specify any amount of URLs. Yes
+ any. No limits. You'll then get requests repeated over and over for all the
+ given URLs.
+
+ Example, send two GETs:
+
+    curl http://url1.example.com http://url2.example.com
+
+ If you use --data to POST to the URL, using multiple URLs means that you send
+ that same POST to all the given URLs.
+
+ Example, send two POSTs:
+
+    curl --data name=curl http://url1.example.com http://url2.example.com
+
+
+ 3.4 Multiple HTTP methods in a single command line
+
+ Sometimes you need to operate on several URLs in a single command line and do
+ different HTTP methods on each. For this, you'll enjoy the --next option. It
+ is basically a separator that separates a bunch of options from the next. All
+ the URLs before --next will get the same method and will get all the POST
+ data merged into one.
+
+ When curl reaches the --next on the command line, it'll sort of reset the
+ method and the POST data and allow a new set.
+
+ Perhaps this is best shown with a few examples. To send first a HEAD and then
+ a GET:
+
+   curl -I http://example.com --next http://example.com
+
+ To first send a POST and then a GET:
+
+   curl -d score=10 http://example.com/post.cgi --next http://example.com/results.html
+
 
 4. HTML forms
 
@@ -300,6 +341,10 @@ The Art Of Scripting HTTP Requests Using Curl
   Recent curl versions can in fact url-encode POST data for you, like this:
 
         curl --data-urlencode "name=I am Daniel" http://www.example.com
+
+  If you repeat --data several times on the command line, curl will
+  concatenate all the given data pieces - and put a '&' symbol between each
+  data segment.
 
  4.4 File Upload POST
 
@@ -585,6 +630,12 @@ The Art Of Scripting HTTP Requests Using Curl
 
         http://curl.haxx.se/docs/sslcerts.html
 
+  At times you may end up with your own CA cert store and then you can tell
+  curl to use that to verify the server's certificate:
+
+        curl --cacert ca-bundle.pem https://example.com/
+
+
 11. Custom Request Elements
 
 11.1 Modify method and headers
@@ -693,7 +744,7 @@ The Art Of Scripting HTTP Requests Using Curl
 
  14.1 Standards
 
- RFC 2616 is a must to read if you want in-depth understanding of the HTTP
+ RFC 7230 is a must to read if you want in-depth understanding of the HTTP
  protocol
 
  RFC 3986 explains the URL syntax
