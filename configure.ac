@@ -2083,98 +2083,103 @@ dnl Default to compiler & linker defaults for NSS files & libraries.
 OPT_NSS=no
 
 AC_ARG_WITH(nss,dnl
-AC_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the installation root])
+AC_HELP_STRING([--with-nss=yes|no|PREFIX],[Whether or not to look for NSS (using pkg-config or nss-config), or look in a specific PREFIX])
 AC_HELP_STRING([--without-nss], [disable NSS detection]),
   OPT_NSS=$withval)
 
-if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg" ; then
 
-  if test X"$OPT_NSS" != Xno; then
+  if test "$OPT_NSS" != no ; then
+
+    # Some default values, in case neither pkg-config nor nss-config work.
 
     addld=""
-    addlib=""
-    addcflags=""
-    nssprefix=""
-    version=""
+    addlib="-L$OPT_NSS/lib -lnss3 -lnssutil3 -lsmime3 -lssl3 -lplds4 -lplc4 -lnspr4"
+    addcflags="-I$OPT_NSS/include/nss -I$OPT_NSS/include/nspr"
+    nssprefix=$OPT_NSS
+    version="unknown"
 
-    if test "x$OPT_NSS" = "xyes"; then
+    PKGCONFIG=no
+    NSSCONFIG=nss-config
 
+    if test -d "$OPT_NSS" ; then
+
+      # A path was specified. Note that this won't work on most modern
+      # desktop linux distributions, use --with-nss=yes and rely on
+      # pkg-config and PKG_CONFIG_PATH there instead.
+
+      NSS_PCDIR="$OPT_NSS/lib/pkgconfig"
+      CURL_CHECK_PKGCONFIG(nss, [$NSS_PCDIR])
+      NSSCONFIG="$OPT_NSS/bin/nss-config"
+
+    elif test "$OPT_NSS" = yes ; then
       CURL_CHECK_PKGCONFIG(nss)
-
-      if test "$PKGCONFIG" != "no" ; then
-        addlib=`$PKGCONFIG --libs nss`
-        addcflags=`$PKGCONFIG --cflags nss`
-        version=`$PKGCONFIG --modversion nss`
-        nssprefix=`$PKGCONFIG --variable=prefix nss`
-      else
-        dnl Without pkg-config, we check for nss-config
-
-        check=`nss-config --version 2>/dev/null`
-        if test -n "$check"; then
-          addlib=`nss-config --libs`
-          addcflags=`nss-config --cflags`
-          version=`nss-config --version`
-          nssprefix=`nss-config --prefix`
-        else
-          addlib="-lnss3"
-          addcflags=""
-          version="unknown"
-        fi
-      fi
-    else
-        # Without pkg-config, we'll kludge in some defaults
-        addlib="-L$OPT_NSS/lib -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
-        addcflags="-I$OPT_NSS/include"
-        version="unknown"
-        nssprefix=$OPT_NSS
     fi
 
-    if test -n "$addlib"; then
+    if test "$PKGCONFIG" != no ; then
 
-      CLEANLIBS="$LIBS"
-      CLEANCPPFLAGS="$CPPFLAGS"
+      addlib=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) dnl
+        $PKGCONFIG --libs nss`
+      addcflags=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) dnl
+        $PKGCONFIG --cflags nss`
+      version=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) dnl
+        $PKGCONFIG --modversion nss`
+      nssprefix=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) dnl
+        $PKGCONFIG --variable=prefix nss`
 
-      LIBS="$addlib $LIBS"
-      if test "$addcflags" != "-I/usr/include"; then
-         CPPFLAGS="$CPPFLAGS $addcflags"
+    elif test -x "$NSSCONFIG" ; then
+
+      check=`$NSSCONFIG --version 2>/dev/null`
+      if test -n "$check"; then
+        addlib=`$NSSCONFIG --libs`
+        addcflags=`$NSSCONFIG --cflags`
+        nssprefix=`$NSSCONFIG --prefix`
+        version=`$NSSCONFIG --version`
       fi
-
-      dnl The function SSL_VersionRangeSet() is needed to enable TLS > 1.0
-      AC_CHECK_LIB(nss3, SSL_VersionRangeSet,
-       [
-       AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
-       AC_SUBST(USE_NSS, [1])
-       USE_NSS="yes"
-       NSS_ENABLED=1
-       curl_ssl_msg="enabled (NSS)"
-       ],
-       [
-         LIBS="$CLEANLIBS"
-         CPPFLAGS="$CLEANCPPFLAGS"
-       ])
-
-      if test "x$USE_NSS" = "xyes"; then
-        AC_MSG_NOTICE([detected NSS version $version])
-
-        dnl needed when linking the curl tool without USE_EXPLICIT_LIB_DEPS
-        NSS_LIBS=$addlib
-        AC_SUBST([NSS_LIBS])
-
-        dnl when shared libs were found in a path that the run-time
-        dnl linker doesn't search through, we need to add it to
-        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
-        dnl due to this
-        if test "x$cross_compiling" != "xyes"; then
-          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
-          export LD_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH])
-        fi
-      fi
-
     fi
 
+    dnl Now confirm that this works.
+
+    CLEANLIBS="$LIBS"
+    CLEANCPPFLAGS="$CPPFLAGS"
+
+    LIBS="$addlib $LIBS"
+    if test "$addcflags" != "-I/usr/include"; then
+       CPPFLAGS="$CPPFLAGS $addcflags"
+    fi
+
+    dnl The function SSL_VersionRangeSet() is needed to enable TLS > 1.0
+    AC_CHECK_LIB(nss3, SSL_VersionRangeSet,
+     [
+     AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
+     AC_SUBST(USE_NSS, [1])
+     USE_NSS="yes"
+     NSS_ENABLED=1
+     curl_ssl_msg="enabled (NSS)"
+     ],
+     [
+       LIBS="$CLEANLIBS"
+       CPPFLAGS="$CLEANCPPFLAGS"
+     ])
+
+    if test "x$USE_NSS" = "xyes"; then
+      AC_MSG_NOTICE([detected NSS version $version])
+
+      dnl needed when linking the curl tool without USE_EXPLICIT_LIB_DEPS
+      NSS_LIBS=$addlib
+      AC_SUBST([NSS_LIBS])
+
+      dnl when shared libs were found in a path that the run-time
+      dnl linker doesn't search through, we need to add it to
+      dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+      dnl due to this
+      if test "x$cross_compiling" != "xyes"; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
+        export LD_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH])
+      fi
+    fi
   fi dnl NSS not disabled
-
 fi dnl curl_ssl_msg = init_ssl_msg
 
 OPT_AXTLS=off
