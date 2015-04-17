@@ -30,6 +30,20 @@
 
 #ifdef USE_CYASSL
 
+#define WOLFSSL_OPTIONS_IGNORE_SYS
+/* CyaSSL's version.h, which should contain only the version, should come
+before all other CyaSSL includes and be immediately followed by build config
+aka options.h. http://curl.haxx.se/mail/lib-2015-04/0069.html */
+#include <cyassl/version.h>
+#if defined(HAVE_CYASSL_OPTIONS_H) && (LIBCYASSL_VERSION_HEX > 0x03004008)
+#if defined(CYASSL_API) || defined(WOLFSSL_API)
+/* Safety measure. If either is defined some API include was already included
+and that's a problem since options.h hasn't been included yet. */
+#error "CyaSSL API was included before the CyaSSL build options."
+#endif
+#include <cyassl/options.h>
+#endif
+
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -45,12 +59,7 @@
 #include "rawstr.h"
 #include "curl_printf.h"
 
-/* The first CyaSSL include should be its build config aka options.h */
-#ifdef HAVE_CYASSL_OPTIONS_H
-#include <cyassl/options.h>
-#endif
 #include <cyassl/ssl.h>
-#include <cyassl/version.h>
 #ifdef HAVE_CYASSL_ERROR_SSL_H
 #include <cyassl/error-ssl.h>
 #else
