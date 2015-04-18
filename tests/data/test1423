@@ -24,6 +24,7 @@ Content-Type: text/html
 <client>
 <server>
 http
+file
 </server>
 <name>
 HTTP GET -o fname without Content-Disposition (empty file)
