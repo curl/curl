@@ -34,16 +34,16 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 ftp
 </server>
  <name>
-FTP (optional .netrc; no user/pass) dir list PASV
+FTP (optional .netrc with 'default' override; no user/pass) dir list PASV
  </name>
  <command>
---netrc-optional --netrc-file log/netrc130 ftp://%HOSTIP:%FTPPORT/
+--netrc-optional --netrc-file log/netrc2039 ftp://%HOSTIP:%FTPPORT/
 </command>
-<file name="log/netrc130" >
+<file name="log/netrc2039" >
 # the following two lines were created while testing curl
+default login userdef password passwddef
 machine %HOSTIP login user1 password passwd1
 machine %HOSTIP login user2 password passwd2
-default login userdef password passwddef
 </file>
 </client>
 
@@ -51,8 +51,8 @@ default login userdef password passwddef
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-USER user1
-PASS passwd1
+USER userdef
+PASS passwddef
 PWD
 EPSV
 TYPE A
