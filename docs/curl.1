@@ -1167,8 +1167,9 @@ Consequentially, the file will be saved in the current working directory. If
 you want the file saved in a different directory, make sure you change current
 working directory before you invoke curl with the \fB-O, --remote-name\fP flag!
 
-There is no URL decoding done on the file name. If it has %20 or other URL
-encoded parts of the name, they will end up as-is as file name.
+The file name will be URL-decoded. Anything to the left of encoded path
+separators will be stripped, and an error will be returned if the URL contains
+any control characters, %00 - %1F.
 
 You may use this option as many times as the number of URLs you have.
 .IP "--oauth2-bearer"
