@@ -126,6 +126,12 @@ This release includes the following bugfixes:
  o BUGS: refer to the github issue tracker now as primary
  o vtls_openssl: improve several certificate error messages
  o cyassl: Add support for TLS extension SNI
+ o parsecfg: do not continue past a zero termination
+ o configure --with-nss=PATH: query pkg-config if available [22]
+ o configure --with-nss: drop redundant if statement
+ o cyassl: Fix include order [23]
+ o HTTP: fix PUT regression with Negotiate [24]
+ o curl_version_info.3: fixed the 'protocols' variable type
 
 This release includes the following known bugs:
 
@@ -137,8 +143,9 @@ advice from friends like these:
   Alessandro Ghedini, Alexander Pepper, Ben Darnell, Brad King,
   Charles Romestant, Christian Weisgerber, Dagobert Michelsen, Dan Fandrich,
   Daniel Stenberg, Da-Yoon Chung, Emil Lerner, Fabian Keil, Frank Gevaerts,
-  Frank Meier, Jeroen Ooms, Jiri Dvorak, Jonathan Cardoso, Jon Seymour,
-  Kamil Dudka, Kyle L. Huff, Markus Elfring, Matthew Hall, Michel Promonet,
+  Frank Meier, Hanno Böck, Jeroen Ooms, Jiri Dvorak, John Marshall,
+  Jonathan Cardoso, Jon Seymour, Kamil Dudka, Kyle L. Huff, Markus Elfring,
+  Matthew Hall, Michael Osipov, Michael Stapelberg, Michel Promonet,
   Nick Zitzmann, Patrick Monnerat, Paul Howarth, Peter Laser, Rainer Canavan,
   Ray Satiro, Richard Moore, Sergei Nikulov, Stefan Bühler, Stefan Eissing,
   Steve Havelka, Steve Holme, Tatsuhiro Tsujikawa, Thomas Ruecker,
@@ -169,3 +176,7 @@ References to bug reports and discussions on issues:
  [19] = https://github.com/bagder/curl/issues/195
  [20] = https://github.com/bagder/curl/issues/192
  [21] = https://github.com/bagder/curl/issues/183
+ [22] = https://github.com/bagder/curl/pull/171
+ [23] = http://curl.haxx.se/mail/lib-2015-04/0069.html
+ [24] = https://github.com/bagder/curl/issues/223
+ [25] = https://github.com/bagder/curl/issues/225
