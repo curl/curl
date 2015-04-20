@@ -2139,7 +2139,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
       # Without pkg-config, we'll kludge in some defaults
       AC_MSG_WARN([Using hard-wired libraries and compilation flags for NSS.])
       addld="-L$OPT_NSS/lib"
-      addlib="-lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
+      addlib="-lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4"
       addcflags="-I$OPT_NSS/include"
       version="unknown"
       nssprefix=$OPT_NSS
