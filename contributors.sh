@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2013-2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2013-2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -33,7 +33,8 @@
 start=$1
 
 if test -z "$start"; then
-  echo "Usage: $0 <since this tag/hash>"
+    echo "Usage: $0 <since this tag/hash> [--releasenotes]"
+    exit
 fi
 
 # filter out Author:, Commit: and *by: lines
@@ -59,7 +60,7 @@ if echo "$*" | grep -qw -- '--releasenotes';then
     # grep out the list of names from RELEASE-NOTES
     # split on ", "
     # remove leading white spaces
-grep "^  [^ ]" RELEASE-NOTES| \
+grep "^  [^ \(]" RELEASE-NOTES| \
 sed 's/, */\n/g'| \
 sed 's/^ *//'
 fi
