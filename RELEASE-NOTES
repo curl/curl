@@ -4,7 +4,7 @@ Curl and libcurl 7.42.0
  Command line options:         173
  curl_easy_setopt() options:   216
  Public functions in libcurl:  58
- Contributors:                 1244
+ Contributors:                 1265
 
 This release includes the following changes:
 
@@ -18,6 +18,10 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o ConnectionExists: for NTLM re-use, require credentials to match [26]
+ o cookie: cookie parser out of boundary memory access [27]
+ o fix_hostname: zero length host name caused -1 index offset [28]
+ o http_done: close Negotiate connections when done [29]
  o sws: timeout idle CONNECT connections
  o nss: improve error handling in Curl_nss_random()
  o nss: do not skip Curl_nss_seed() if data is NULL
@@ -131,7 +135,7 @@ This release includes the following bugfixes:
  o configure --with-nss: drop redundant if statement
  o cyassl: Fix include order [23]
  o HTTP: fix PUT regression with Negotiate [24]
- o curl_version_info.3: fixed the 'protocols' variable type
+ o curl_version_info.3: fixed the 'protocols' variable type [25]
 
 This release includes the following known bugs:
 
@@ -143,13 +147,15 @@ advice from friends like these:
   Alessandro Ghedini, Alexander Pepper, Ben Darnell, Brad King,
   Charles Romestant, Christian Weisgerber, Dagobert Michelsen, Dan Fandrich,
   Daniel Stenberg, Da-Yoon Chung, Emil Lerner, Fabian Keil, Frank Gevaerts,
-  Frank Meier, Hanno Böck, Jeroen Ooms, Jiri Dvorak, John Marshall,
-  Jonathan Cardoso, Jon Seymour, Kamil Dudka, Kyle L. Huff, Markus Elfring,
-  Matthew Hall, Michael Osipov, Michael Stapelberg, Michel Promonet,
-  Nick Zitzmann, Patrick Monnerat, Paul Howarth, Peter Laser, Rainer Canavan,
+  Frank Meier, Hanno Böck, Isaac Boukris, Jeroen Ooms, Jiri Dvorak,
+  John Marshall, Jonathan Cardoso Machado, Jon Seymour, Kamil Dudka,
+  Kyle L. Huff, Markus Elfring, Matthew Hall, Michael Osipov,
+  Michael Stapelberg, Michel Promonet, Mostyn Bramley-Moore, Nick Zitzmann,
+  Paras Sethia, Patrick Monnerat, Paul Howarth, Peter Laser, Rainer Canavan,
   Ray Satiro, Richard Moore, Sergei Nikulov, Stefan Bühler, Stefan Eissing,
   Steve Havelka, Steve Holme, Tatsuhiro Tsujikawa, Thomas Ruecker,
   Tobias Stoeckmann, Viktor Szakáts, Yamada Yasuharu,
+  (47 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -180,3 +186,7 @@ References to bug reports and discussions on issues:
  [23] = http://curl.haxx.se/mail/lib-2015-04/0069.html
  [24] = https://github.com/bagder/curl/issues/223
  [25] = https://github.com/bagder/curl/issues/225
+ [26] = http://curl.haxx.se/docs/adv_20150422A.html
+ [27] = http://curl.haxx.se/docs/adv_20150422C.html
+ [28] = http://curl.haxx.se/docs/adv_20150422D.html
+ [29] = http://curl.haxx.se/docs/adv_20150422B.html
