@@ -1750,6 +1750,10 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     break;
 #endif
   case CURL_SSLVERSION_SSLv3:
+#ifdef OPENSSL_NO_SSL3_METHOD
+    failf(data, "OpenSSL was built without SSLv3 support");
+    return CURLE_NOT_BUILT_IN;
+#else
 #ifdef USE_TLS_SRP
     if(data->set.ssl.authtype == CURL_TLSAUTH_SRP)
       return CURLE_SSL_CONNECT_ERROR;
@@ -1757,6 +1761,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     req_method = SSLv3_client_method();
     use_sni(FALSE);
     break;
+#endif
   }
 
   if(connssl->ctx)
