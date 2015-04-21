@@ -33,7 +33,8 @@ s/Nick Zitzmann (originally)/Nick Zitzmann/
 s/product-security at Apple//
 s/IT DOES NOT WORK//
 s/Albert Chin/Albert Chin-A-Young/
-s/Paras S/Paras Sethia/
+s/Paras S\z/Paras Sethia/
+s/Paras Sethiaethia/Paras Sethia/
 s/Дмитрий Фалько/Dmitry Falko/
 s/byte_bucket in the #curl IRC channel//
 s/Michal Górny and Anthony G. Basile//
@@ -47,3 +48,4 @@ s/Rodrigo Silva (MestreLion)/Rodrigo Silva/
 s/tetetest tetetest//
 s/Jiří Hruška/Jiri Hruska/
 s/Viktor Szakats/Viktor Szakáts/
+s/Jonathan Cardoso/Jonathan Cardoso Machado/
