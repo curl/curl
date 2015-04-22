@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -34,7 +34,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 config-win32.h	\
  config-os400.h setup-os400.h config-symbian.h Makefile.Watcom		\
  config-tpf.h $(DOCS) mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)	\
  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl	\
- objnames-test08.sh objnames-test10.sh objnames.inc
+ objnames-test08.sh objnames-test10.sh objnames.inc checksrc.whitelist
 
 lib_LTLIBRARIES = libcurl.la
 
