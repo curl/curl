@@ -145,7 +145,7 @@ static const struct LongShort aliases[]= {
   {"$v", "ssl-reqd",                 FALSE},
          /* 'ssl-reqd' new in 7.20.0, previously this was ftp-ssl-reqd */
   {"$w", "sessionid",                FALSE},
-         /* ¡sessionid' listed as --no-sessionid in the help */
+         /* 'sessionid' listed as --no-sessionid in the help */
   {"$x", "ftp-ssl-control",          FALSE},
   {"$y", "ftp-ssl-ccc",              FALSE},
   {"$j", "ftp-ssl-ccc-mode",         TRUE},
