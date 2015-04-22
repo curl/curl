@@ -3069,9 +3069,11 @@ ConnectionExists(struct SessionHandle *data,
   struct connectdata *check;
   struct connectdata *chosen = 0;
   bool canPipeline = IsPipeliningPossible(data, needle);
+#ifdef USE_NTLM
   bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) ||
                        (data->state.authhost.want & CURLAUTH_NTLM_WB)) &&
     (needle->handler->protocol & PROTO_FAMILY_HTTP) ? TRUE : FALSE;
+#endif
   struct connectbundle *bundle;
 
   *force_reuse = FALSE;
@@ -3208,6 +3210,7 @@ ConnectionExists(struct SessionHandle *data,
           continue;
       }
 
+#if defined(USE_NTLM)
       if((!(needle->handler->flags & PROTOPT_CREDSPERREQUEST)) ||
          (wantNTLMhttp || check->ntlm.state != NTLMSTATE_NONE)) {
         /* This protocol requires credentials per connection or is HTTP+NTLM,
@@ -3217,10 +3220,9 @@ ConnectionExists(struct SessionHandle *data,
           /* one of them was different */
           continue;
         }
-#if defined(USE_NTLM)
         credentialsMatch = TRUE;
-#endif
       }
+#endif
 
       if(!needle->bits.httpproxy || needle->handler->flags&PROTOPT_SSL ||
          (needle->bits.httpproxy && check->bits.httpproxy &&
