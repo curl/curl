@@ -1,141 +1,17 @@
-Curl and libcurl 7.42.0
+Curl and libcurl 7.42.1
 
- Public curl releases:         145
+ Public curl releases:         146
  Command line options:         173
  curl_easy_setopt() options:   216
  Public functions in libcurl:  58
  Contributors:                 1265
 
-This release includes the following changes:
-
- o openssl: show the cipher selection to use in verbose text
- o gtls: implement CURLOPT_CERTINFO
- o add CURLOPT_SSL_FALSESTART option (darwinssl and NSS)
- o curl: add --false-start option
- o add CURLOPT_PATH_AS_IS
- o curl: add --path-as-is option
- o curl: create output file on successful download of an empty file [21]
-
 This release includes the following bugfixes:
 
- o ConnectionExists: for NTLM re-use, require credentials to match [26]
- o cookie: cookie parser out of boundary memory access [27]
- o fix_hostname: zero length host name caused -1 index offset [28]
- o http_done: close Negotiate connections when done [29]
- o sws: timeout idle CONNECT connections
- o nss: improve error handling in Curl_nss_random()
- o nss: do not skip Curl_nss_seed() if data is NULL
- o curl-config.in: eliminate double quotes around CURL_CA_BUNDLE
- o http2: move lots of verbose output to be debug-only
- o dist: add extern-scan.pl to the tarball
- o http2: return recv error on unexpected EOF [1]
- o build: Use default RandomizedBaseAddress directive in VC9+ project files
- o build: Removed DataExecutionPrevention directive from VC9+ project files
- o tool: Updated the warnf() function to use the GlobalConfig structure
- o http2: Return error if stream was closed with other than NO_ERROR
- o mprintf.h: remove #ifdef CURLDEBUG
- o libtest: fixed linker errors on msvc [6]
- o tool: use ENABLE_CURLX_PRINTF instead of _MPRINTF_REPLACE
- o curl.1: fix "The the" typo
- o cmake: handle build definitions CURLDEBUG/DEBUGBUILD
- o openssl: remove all uses of USE_SSLEAY
- o multi: fix memory-leak on timeout (regression) [4]
- o curl_easy_setopt.3: added CURLOPT_SSL_VERIFYSTATUS
- o metalink: add some error checks [3]
- o TLS: make it possible to enable ALPN/NPN without HTTP/2
- o http2: use CURL_HTTP_VERSION_* symbols instead of NPN_*
- o conncontrol: only log changes to the connection bit
- o multi: fix *getsock() with CONNECT [2]
- o symbols.pl: handle '-' in the deprecated field [5]
- o MacOSX-Framework: use @rpath instead of @executable_path [7]
- o GnuTLS: add support for CURLOPT_CAPATH
- o GnuTLS: print negotiated TLS version and full cipher suite name
- o GnuTLS: don't print double newline after certificate dates
- o memanalyze.pl: handle free(NULL)
- o proxy: re-use proxy connections (regression) [8]
- o mk-ca-bundle: Don't report SHA1 numbers with "-q"
- o http: always send Host: header as first header [9]
- o openssl: sort ciphers to use based on strength [10]
- o openssl: use colons properly in the ciphers list
- o http2: detect premature close without data transfered [11]
- o hostip: Fix signal race in Curl_resolv_timeout
- o closesocket: call multi socket cb on close even with custom close [12]
- o mksymbolsmanpage.pl: use std header and generate better nroff header
- o connect: Fix happy eyeballs logic for IPv4-only builds [13]
- o curl_easy_perform.3: remove superfluous close brace from example
- o HTTP: don't use Expect: headers when on HTTP/2 [14]
- o Curl_sh_entry: remove unused 'timestamp'
- o docs/libcurl: makefile portability fix
- o mkhelp: Remove trailing carriage return from every line of input
- o nss: explicitly tell NSS to disable NPN/ALPN when libcurl disables it
- o curl_easy_setopt.3: added a few missing options
- o metalink: fix resource leak in OOM
- o axtls: version 1.5.2 now requires that config.h be manually included
- o HTTP: don't switch to HTTP/2 from 1.1 until we get the 101
- o cyassl: detect the library as renamed wolfssl
- o CURLOPT_HTTPHEADER.3: add a "SECURITY CONCERNS" section
- o CURLOPT_URL.3: Added "SECURITY CONCERNS
- o openssl: try to avoid accessing OCSP structs when possible
- o test938: added missing closing tags
- o testcurl: Allow '=' in values given on command line
- o tests/certs: added make target to rebuild certificates
- o tests/certs: rebuild certificates with modified key usage bits
- o gtls: avoid uninitialized variable
- o gtls: dereferencing NULL pointer
- o gtls: add check of return code
- o test1513: eliminated race condition in test run
- o dict: rename byte to avoid compiler shadowed declaration warning
- o curl_easy_recv/send: make them work with the multi interface
- o vtls: fix compile with --disable-crypto-auth but with SSL
- o openssl: adapt to ASN1/X509 things gone opaque in 1.1
- o openssl: verifystatus: only use the OCSP work-around <= 1.0.2a [15]
- o curl_memory: make curl_memory.h the second-last header file loaded
- o testcurl.pl: add the --notes option to supply more info about a build
- o cyassl: If wolfSSL then identify as such in version string
- o cyassl: Check for invalid length parameter in Curl_cyassl_random
- o cyassl: default to highest possible TLS version
- o Curl_ssl_md5sum: return CURLcode (fixes OOM)
- o polarssl: remove dead code
- o polarssl: called mbedTLS in 1.3.10 and later
- o globbing: fix step parsing for character globbing ranges
- o globbing: fix url number calculation when using range with step
- o multi: on a request completion, check all CONNECT_PEND transfers [16]
- o build: link curl to openssl libraries when openssl support is enabled
- o url: Don't accept CURLOPT_SSLVERSION unless USE_SSL is defined
- o vtls: Don't accept unknown CURLOPT_SSLVERSION values
- o build: Fix libcurl.sln erroneous mixed configurations
- o cyassl: remove undefined reference to CyaSSL_no_filesystem_verify
- o cyassl: add SSL context callback support for CyaSSL
- o tool: only set SSL options if SSL is enabled
- o multi: remove_handle: move pending connections [17]
- o configure: Use KRB5CONFIG for krb5-config [18]
- o axtls: add timeout within Curl_axtls_connect
- o CURLOPT_HTTP200ALIASES.3: Mainly SHOUTcast servers use "ICY 200"
- o cyassl: Fix library initialization return value
- o cookie: handle spaces after the name in Set-Cookie [19]
- o http2: Fix missing nghttp2_session_send call in Curl_http2_switched [20]
- o cyassl: Fix certificate load check
- o build-openssl.bat: Fix mixed line endings
- o checksrc.bat: Check lib\vtls source
- o DNS: fix refreshing of obsolete dns cache entries
- o CURLOPT_RESOLVE: actually implement removals
- o checksrc.bat: quotes to support an SRC_DIR with spaces
- o cyassl: Remove 'Connecting to' message from cyassl_connect_step2
- o cyassl: Use CYASSL_MAX_ERROR_SZ for error buffer size
- o lib/transfer.c: Remove factor of 8 from sleep time calculation
- o lib/makefile.m32: add missing libs to build libcurl.dll
- o build: Generate source prerequisites for Visual Studio in generate.bat
- o cyassl: Include the CyaSSL build config
- o firefox-db2pem: fix wildcard to find Firefox default profile
- o BUGS: refer to the github issue tracker now as primary
- o vtls_openssl: improve several certificate error messages
- o cyassl: Add support for TLS extension SNI
- o parsecfg: do not continue past a zero termination
- o configure --with-nss=PATH: query pkg-config if available [22]
- o configure --with-nss: drop redundant if statement
- o cyassl: Fix include order [23]
- o HTTP: fix PUT regression with Negotiate [24]
- o curl_version_info.3: fixed the 'protocols' variable type [25]
+ o dist: include {src,lib}/checksrc.whitelist [1]
+ o connectionexists: fix build without NTLM [2]
+ o docs: distribute the CURLOPT_PINNEDPUBLICKEY(3) man page, too
+ o curl -z: do not write empty file on unmet condition [3]
 
 This release includes the following known bugs:
 
@@ -144,49 +20,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alexander Pepper, Ben Darnell, Brad King,
-  Charles Romestant, Christian Weisgerber, Dagobert Michelsen, Dan Fandrich,
-  Daniel Stenberg, Da-Yoon Chung, Emil Lerner, Fabian Keil, Frank Gevaerts,
-  Frank Meier, Hanno Böck, Isaac Boukris, Jeroen Ooms, Jiri Dvorak,
-  John Marshall, Jonathan Cardoso Machado, Jon Seymour, Kamil Dudka,
-  Kyle L. Huff, Markus Elfring, Matthew Hall, Michael Osipov,
-  Michael Stapelberg, Michel Promonet, Mostyn Bramley-Moore, Nick Zitzmann,
-  Paras Sethia, Patrick Monnerat, Paul Howarth, Peter Laser, Rainer Canavan,
-  Ray Satiro, Richard Moore, Sergei Nikulov, Stefan Bühler, Stefan Eissing,
-  Steve Havelka, Steve Holme, Tatsuhiro Tsujikawa, Thomas Ruecker,
-  Tobias Stoeckmann, Viktor Szakáts, Yamada Yasuharu,
-  (47 contributors)
+  Alexander Elgert, Daniel Stenberg, Kamil Dudka, Patrick Rapin,
+  (4 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/bug/view.cgi?id=1487
- [2] = http://curl.haxx.se/mail/lib-2015-01/0170.html
- [3] = https://github.com/bagder/curl/issues/150
- [4] = https://github.com/bagder/curl/issues/147
- [5] = http://curl.haxx.se/mail/lib-2015-03/0052.html
- [6] = https://github.com/bagder/curl/pull/144
- [7] = https://github.com/bagder/curl/pull/157
- [8] = http://curl.haxx.se/bug/view.cgi?id=1492
- [9] = http://curl.haxx.se/bug/view.cgi?id=1491
- [10] = http://curl.haxx.se/bug/view.cgi?id=1487
- [11] = https://github.com/bagder/curl/issues/166
- [12] = http://curl.haxx.se/bug/view.cgi?id=1493
- [13] = https://github.com/bagder/curl/pull/168
- [14] = https://github.com/bagder/curl/issues/169
- [15] = http://curl.haxx.se/mail/lib-2015-03/0205.html
- [16] = http://curl.haxx.se/bug/view.cgi?id=1465
- [17] = http://curl.haxx.se/bug/view.cgi?id=1465
- [18] = http://curl.haxx.se/bug/view.cgi?id=1486
- [19] = https://github.com/bagder/curl/issues/195
- [20] = https://github.com/bagder/curl/issues/192
- [21] = https://github.com/bagder/curl/issues/183
- [22] = https://github.com/bagder/curl/pull/171
- [23] = http://curl.haxx.se/mail/lib-2015-04/0069.html
- [24] = https://github.com/bagder/curl/issues/223
- [25] = https://github.com/bagder/curl/issues/225
- [26] = http://curl.haxx.se/docs/adv_20150422A.html
- [27] = http://curl.haxx.se/docs/adv_20150422C.html
- [28] = http://curl.haxx.se/docs/adv_20150422D.html
- [29] = http://curl.haxx.se/docs/adv_20150422B.html
+ [1] = http://curl.haxx.se/mail/archive-2015-04/0046.html
+ [2] = http://curl.haxx.se/bug/?i=231
+ [3] = https://github.com/bagder/curl/issues/237
+ 
