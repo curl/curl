@@ -45,7 +45,7 @@ http-proxy
 lib1527
 </tool>
  <name>
-Check same headers are generated without CURLOPT_PROXYHEADER
+Check same headers are generated with CURLOPT_HEADEROPT == CURLHEADER_UNIFIED
  </name>
  <command>
  http://the.old.moo.1527:%HTTPPORT/1527 %HOSTIP:%PROXYPORT
