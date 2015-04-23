@@ -1,0 +1,76 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+If-Modified-Since
+-z
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 1990 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+<datacheck>
+HTTP/1.1 200 OK
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 1990 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET -o fname without Content-Disposition (unmet time condition)
+</name>
+<file name="log/outfile1424">
+original contents
+</file>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/1424 -z "dec 12 11:00:00 1999 GMT" -o log/outfile1424
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1424 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+If-Modified-Since: Sun, 12 Dec 1999 11:00:00 GMT
+
+</protocol>
+
+<file1 name="log/outfile1424">
+original contents
+</file1>
+
+</verify>
+</testcase>
