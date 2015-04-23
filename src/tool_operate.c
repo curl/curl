@@ -1388,12 +1388,17 @@ static CURLcode operate_do(struct GlobalConfig *global,
 #endif
           result = curl_easy_perform(curl);
 
-          if(!result && !outs.stream && !outs.bytes
-              /* we have received no data despite the transfer was successful
-                 ==> force cration of an empty output file (if an output file
-                 was specified) */
-              && !tool_create_output_file(&outs))
-            result = CURLE_WRITE_ERROR;
+          if(!result && !outs.stream && !outs.bytes) {
+            /* we have received no data despite the transfer was successful
+               ==> force cration of an empty output file (if an output file
+               was specified) */
+            long cond_unmet = 0L;
+            /* do not create (or even overwrite) the file in case we get no
+               data because of unmet condition */
+            curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &cond_unmet);
+            if(!cond_unmet && !tool_create_output_file(&outs))
+              result = CURLE_WRITE_ERROR;
+          }
 
           if(outs.is_cd_filename && outs.stream && !global->mute &&
              outs.filename)
