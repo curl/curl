@@ -83,6 +83,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
   test_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
   test_setopt(curl, CURLOPT_INFILESIZE, strlen(data));
+  test_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED);
 
   res = curl_easy_perform(curl);
 
