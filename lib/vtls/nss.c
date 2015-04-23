@@ -725,6 +725,7 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
   }
 }
 
+#if NSSVERNUM >= 0x030f04 /* 3.15.4 */
 static SECStatus CanFalseStartCallback(PRFileDesc *sock, void *client_data,
                                        PRBool *canFalseStart)
 {
@@ -782,6 +783,7 @@ static SECStatus CanFalseStartCallback(PRFileDesc *sock, void *client_data,
 end:
   return SECSuccess;
 }
+#endif
 
 static void display_cert_info(struct SessionHandle *data,
                               CERTCertificate *cert)
@@ -1754,7 +1756,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     goto error;
 #endif
 
-#ifdef SSL_ENABLE_FALSE_START
+#if NSSVERNUM >= 0x030f04 /* 3.15.4 */
   if(data->set.ssl.falsestart) {
     if(SSL_OptionSet(connssl->handle, SSL_ENABLE_FALSE_START, PR_TRUE)
         != SECSuccess)
@@ -2049,7 +2051,7 @@ bool Curl_nss_cert_status_request(void)
 }
 
 bool Curl_nss_false_start(void) {
-#ifdef SSL_ENABLE_FALSE_START
+#if NSSVERNUM >= 0x030f04 /* 3.15.4 */
   return TRUE;
 #else
   return FALSE;
