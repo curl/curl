@@ -315,9 +315,10 @@ presses the submit button. This will cause curl to pass the data to the server
 using the content-type application/x-www-form-urlencoded.  Compare to
 \fI-F, --form\fP.
 
-\fI-d, --data\fP is the same as \fI--data-ascii\fP. To post data purely binary,
-you should instead use the \fI--data-binary\fP option. To URL-encode the value
-of a form field you may use \fI--data-urlencode\fP.
+\fI-d, --data\fP is the same as \fI--data-ascii\fP. \fI--data-raw\fP is almost
+the same but does not have a special interpretation of the @ character. To
+post data purely binary, you should instead use the\fI--data-binary\fP option.
+To URL-encode the value of a form field you may use \fI--data-urlencode\fP.
 
 If any of these options is used more than once on the same command line, the
 data pieces specified will be merged together with a separating
@@ -329,7 +330,9 @@ read the data from, or - if you want curl to read the data from
 stdin. Multiple files can also be specified. Posting data from a file
 named 'foobar' would thus be done with \fI--data\fP @foobar. When --data is
 told to read from a file like that, carriage returns and newlines will be
-stripped out.
+stripped out. If you don't want the @ character to have a special
+interpretation use \fI--data-raw\fP instead.
+
 .IP "-D, --dump-header <file>"
 Write the protocol headers to the specified file.
 
@@ -354,6 +357,12 @@ and carriage returns are preserved and conversions are never done.
 
 If this option is used several times, the ones following the first will append
 data as described in \fI-d, --data\fP.
+
+.IP "--data-raw <data>"
+(HTTP) This posts data similarly to \fI--data\fP but without the special
+interpretation of the @ character. See \fI-d, --data\fP.
+(Added in 7.43.0)
+
 .IP "--data-urlencode <data>"
 (HTTP) This posts data, similar to the other --data options with the exception
 that this performs URL-encoding. (Added in 7.18.0)
