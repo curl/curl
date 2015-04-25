@@ -196,6 +196,7 @@ static const struct LongShort aliases[]= {
   {"c",  "cookie-jar",               TRUE},
   {"C",  "continue-at",              TRUE},
   {"d",  "data",                     TRUE},
+  {"dr", "data-raw",                 TRUE},
   {"da", "data-ascii",               TRUE},
   {"db", "data-binary",              TRUE},
   {"de", "data-urlencode",           TRUE},
@@ -1099,6 +1100,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       char *postdata = NULL;
       FILE *file;
       size_t size = 0;
+      bool raw_mode = (subletter == 'r');
 
       if(subletter == 'e') { /* --data-urlencode*/
         /* [name]=[content], we encode the content part only
@@ -1124,7 +1126,6 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         }
         if('@' == is_file) {
           /* a '@' letter, it means that a file name or - (stdin) follows */
-
           if(curlx_strequal("-", p)) {
             file = stdin;
             set_binmode(stdin);
@@ -1185,7 +1186,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
             return PARAM_NO_MEM;
         }
       }
-      else if('@' == *nextarg) {
+      else if('@' == *nextarg && !raw_mode) {
         /* the data begins with a '@' letter, it means that a file name
            or - (stdin) follows */
         nextarg++; /* pass the @ */
