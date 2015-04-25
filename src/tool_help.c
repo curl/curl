@@ -65,7 +65,7 @@ static const char *const helptext[] = {
   "     --crlf          Convert LF to CRLF in upload",
   "     --crlfile FILE  Get a CRL list in PEM format from the given file",
   " -d, --data DATA     HTTP POST data (H)",
-  "     --data-raw      HTTP POST data (H), '@' allowed",
+  "     --data-raw      HTTP POST data, '@' allowed (H)",
   "     --data-ascii DATA  HTTP POST ASCII data (H)",
   "     --data-binary DATA  HTTP POST binary data (H)",
   "     --data-urlencode DATA  HTTP POST data url encoded (H)",
