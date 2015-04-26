@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -235,6 +235,26 @@ convenient for further processing, such as manual validation. NOTE: this
 option may not be available for all SSL backends; unsupported SSL backends
 will return 'CURLSSLBACKEND_NONE' to indicate that they are not supported;
 this does not mean that no SSL backend was used. (Added in 7.34.0)
+
+.nf
+struct curl_tlssessioninfo {
+  curl_sslbackend backend;
+  void *internals;
+};
+.fi
+
+The \fIinternals\fP struct member will point to a TLS library specific pointer
+with the following underlying types:
+.RS
+.IP OpenSSL
+SSL_CTX *
+.IP GnuTLS
+gnutls_session_t
+.IP NSS
+PRFileDesc *
+.IP gskit
+gsk_handle
+.RE
 
 .IP CURLINFO_CONDITION_UNMET
 Pass a pointer to a long to receive the number 1 if the condition provided in
