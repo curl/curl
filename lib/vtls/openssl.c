@@ -751,6 +751,8 @@ static char *SSL_strerror(unsigned long error, char *buf, size_t size)
  */
 int Curl_ossl_init(void)
 {
+  OPENSSL_load_builtin_modules();
+
 #ifdef HAVE_ENGINE_LOAD_BUILTIN_ENGINES
   ENGINE_load_builtin_engines();
 #endif
