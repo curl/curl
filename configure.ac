@@ -1194,8 +1194,6 @@ if test x"$want_gss" = xyes; then
   if test -z "$GSSAPI_INCS"; then
      if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
-     elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
-        GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
      elif test -f "$KRB5CONFIG"; then
         GSSAPI_INCS=`$KRB5CONFIG --cflags gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
