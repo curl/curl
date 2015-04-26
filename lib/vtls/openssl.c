@@ -2472,25 +2472,19 @@ static CURLcode get_cert_chain(struct connectdata *conn,
     Curl_ssl_push_certinfo(data, i, "Version", bufp); /* hex */
 
     num=X509_get_serialNumber(x);
-    if(num->length <= 4) {
-      value = ASN1_INTEGER_get(num);
-      infof(data, "   Serial Number: %ld (0x%lx)\n", value, value);
-      snprintf(bufp, CERTBUFFERSIZE, "%lx", value);
-    }
-    else {
+    {
       int left = CERTBUFFERSIZE;
 
       ptr = bufp;
-      *ptr++ = 0;
-      if(num->type == V_ASN1_NEG_INTEGER)
+      if(num->type == V_ASN1_NEG_INTEGER) {
         *ptr++='-';
+        left--;
+      }
 
-      for(j=0; (j<num->length) && (left>=4); j++) {
-        /* TODO: length restrictions */
-        snprintf(ptr, 3, "%02x%c",num->data[j],
-                 ((j+1 == num->length)?'\n':':'));
-        ptr += 3;
-        left-=4;
+      for(j=0; (j<num->length) && (left>=3); j++) {
+        snprintf(ptr, left, "%02x", num->data[j]);
+        ptr += 2;
+        left -= 2;
       }
       if(num->length)
         infof(data, "   Serial Number: %s\n", bufp);
