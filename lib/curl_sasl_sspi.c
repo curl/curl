@@ -40,6 +40,7 @@
 #include "sendf.h"
 #include "strdup.h"
 #include "curl_printf.h"
+#include "rawstr.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -274,6 +275,74 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 }
 
 /*
+* Curl_override_sspi_http_realm()
+*
+* This is used to populate the domain in a SSPI identity structure
+* The realm is extracted from the challenge message and used as the
+* domain if it is not already explicitly set.
+*
+* Parameters:
+*
+* chlg     [in]     - The challenge message.
+* identity [in/out] - The identity structure.
+*
+* Returns CURLE_OK on success.
+*/
+CURLcode Curl_override_sspi_http_realm(const char *chlg,
+                                       SEC_WINNT_AUTH_IDENTITY *identity)
+{
+  xcharp_u domain, dup_domain;
+
+  /* If domain is blank or unset, check challenge message for realm */
+  if(!identity->Domain || !identity->DomainLength) {
+    for(;;) {
+      char value[DIGEST_MAX_VALUE_LENGTH];
+      char content[DIGEST_MAX_CONTENT_LENGTH];
+
+      /* Pass all additional spaces here */
+      while(*chlg && ISSPACE(*chlg))
+        chlg++;
+
+      /* Extract a value=content pair */
+      if(!Curl_sasl_digest_get_pair(chlg, value, content, &chlg)) {
+        if(Curl_raw_equal(value, "realm")) {
+
+          /* Setup identity's domain and length */
+          domain.tchar_ptr = Curl_convert_UTF8_to_tchar((char *)content);
+          if(!domain.tchar_ptr)
+            return CURLE_OUT_OF_MEMORY;
+          dup_domain.tchar_ptr = _tcsdup(domain.tchar_ptr);
+          if(!dup_domain.tchar_ptr) {
+            Curl_unicodefree(domain.tchar_ptr);
+            return CURLE_OUT_OF_MEMORY;
+          }
+          identity->Domain = dup_domain.tbyte_ptr;
+          identity->DomainLength = curlx_uztoul(_tcslen(dup_domain.tchar_ptr));
+          dup_domain.tchar_ptr = NULL;
+
+          Curl_unicodefree(domain.tchar_ptr);
+        }
+        else {
+          /* unknown specifier, ignore it! */
+        }
+      }
+      else
+        break; /* we're done here */
+
+      /* Pass all additional spaces here */
+      while(*chlg && ISSPACE(*chlg))
+        chlg++;
+
+      /* Allow the list to be comma-separated */
+      if(',' == *chlg)
+        chlg++;
+    }
+  }
+
+  return CURLE_OK;
+}
+
+/*
  * Curl_sasl_decode_digest_http_message()
  *
  * This is used to decode a HTTP DIGEST challenge message into the seperate
@@ -372,6 +441,11 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   if(userp && *userp) {
     /* Populate our identity structure */
     if(Curl_create_sspi_identity(userp, passwdp, &identity))
+      return CURLE_OUT_OF_MEMORY;
+
+    /* Populate our identity domain */
+    if(Curl_override_sspi_http_realm((const char*)digest->input_token,
+                                     &identity))
       return CURLE_OUT_OF_MEMORY;
 
     /* Allow proper cleanup of the identity structure */
