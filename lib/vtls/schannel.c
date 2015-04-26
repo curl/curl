@@ -1043,7 +1043,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
         connssl->encdata_buffer[0] == 0x15))) {
     infof(data, "schannel: server closed the conunection\n");
     *err = CURLE_OK;
-    retrn 0;
+    return 0;
   }
 
   /* check if something went wrong and we need to return an error */
