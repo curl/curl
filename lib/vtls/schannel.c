@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2015, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
  * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
@@ -368,7 +368,8 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     /* setup output buffers */
     InitSecBuffer(&outbuf[0], SECBUFFER_TOKEN, NULL, 0);
     InitSecBuffer(&outbuf[1], SECBUFFER_ALERT, NULL, 0);
-    InitSecBufferDesc(&outbuf_desc, outbuf, 2);
+    InitSecBuffer(&outbuf[2], SECBUFFER_EMPTY, NULL, 0);
+    InitSecBufferDesc(&outbuf_desc, outbuf, 3);
 
     if(inbuf[0].pvBuffer == NULL) {
       failf(data, "schannel: unable to allocate memory");
