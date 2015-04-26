@@ -100,7 +100,9 @@ The cURL Test Suite
   (like "./runtests.pl 3 4" to test 3 and 4 only). It also supports test case
   ranges with 'to', as in "./runtests 3 to 9" which runs the seven tests from
   3 to 9. Any test numbers starting with ! are disabled, as are any test
-  numbers found in the file data/DISABLED (one per line).
+  numbers found in the files data/DISABLED or data/DISABLED.local (one per
+  line). The latter is meant for local temporary disables and will be ignored
+  by git.
 
   When -s is not present, each successful test will display on one line the
   test number and description and on the next line a set of flags, the test
