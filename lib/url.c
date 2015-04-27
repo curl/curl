@@ -3096,7 +3096,7 @@ ConnectionExists(struct SessionHandle *data,
 
     /* We can't pipe if we don't know anything about the server */
     if(canPipeline && !bundle->server_supports_pipelining) {
-      infof(data, "Server doesn't support pipelining\n");
+      infof(data, "Server doesn't support multi-use (yet)\n");
       canPipeline = FALSE;
     }
 
