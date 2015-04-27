@@ -32,6 +32,7 @@
 #include "curl_base64.h"
 #include "rawstr.h"
 #include "multiif.h"
+#include "bundles.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -972,6 +973,11 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 {
   CURLcode result;
   struct http_conn *httpc = &conn->proto.httpc;
+
+  if((conn->handler == &Curl_handler_http2_ssl) ||
+     (conn->handler == &Curl_handler_http2))
+    return CURLE_OK; /* already done */
+
   if(conn->handler->flags & PROTOPT_SSL)
     conn->handler = &Curl_handler_http2_ssl;
   else
@@ -981,7 +987,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   if(result)
     return result;
 
-  infof(conn->data, "Using HTTP2\n");
+  infof(conn->data, "Using HTTP2, server supports multi-use\n");
   httpc->bodystarted = FALSE;
   httpc->error_code = NGHTTP2_NO_ERROR;
   httpc->closed = FALSE;
@@ -996,6 +1002,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   httpc->status_code = -1;
 
   conn->httpversion = 20;
+  conn->bundle->server_supports_pipelining = TRUE;
 
   return CURLE_OK;
 }
