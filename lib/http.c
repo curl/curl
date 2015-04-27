@@ -3332,13 +3332,11 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         }
         else if(conn->httpversion == 20 ||
                 (k->upgr101 == UPGR101_REQUESTED && k->httpcode == 101)) {
-          /* Don't enable pipelining for HTTP/2 or upgraded connection. For
-             HTTP/2, we do not support multiplexing. In general, requests
-             cannot be pipelined in upgraded connection, since it is now
-             different protocol. */
-          DEBUGF(infof(data,
-                       "HTTP 2 or upgraded connection do not support "
-                       "pipelining for now\n"));
+          DEBUGF(infof(data, "HTTP/2 found, allow multiplexing\n"));
+
+          /* HTTP/2 cannot blacklist multiplexing since it is a core
+             functionality of the protocol */
+          conn->bundle->server_supports_pipelining = TRUE;
         }
         else if(conn->httpversion >= 11 &&
                 !conn->bits.close) {
@@ -3432,14 +3430,17 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
       }
     }
     else if(checkprefix("Server:", k->p)) {
-      char *server_name = Curl_copy_header_value(k->p);
+      if(conn->httpversion < 20) {
+        /* only do this for non-h2 servers */
+        char *server_name = Curl_copy_header_value(k->p);
 
-      /* Turn off pipelining if the server version is blacklisted */
-      if(conn->bundle && conn->bundle->server_supports_pipelining) {
-        if(Curl_pipeline_server_blacklisted(data, server_name))
-          conn->bundle->server_supports_pipelining = FALSE;
+        /* Turn off pipelining if the server version is blacklisted  */
+        if(conn->bundle && conn->bundle->server_supports_pipelining) {
+          if(Curl_pipeline_server_blacklisted(data, server_name))
+            conn->bundle->server_supports_pipelining = FALSE;
+        }
+        free(server_name);
       }
-      free(server_name);
     }
     else if((conn->httpversion == 10) &&
             conn->bits.httpproxy &&
