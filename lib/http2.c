@@ -300,6 +300,9 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
                "len = %u, stream = %x\n", len, stream_id));
 
   if(stream_id != stream->stream_id) {
+    DEBUGF(infof(conn->data, "on_data_chunk_recv() "
+                 "got stream %x, expected stream %x\n",
+                 stream_id, stream->stream_id));
     return 0;
   }
 
@@ -363,6 +366,9 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
                error_code));
 
   if(stream_id != stream->stream_id) {
+    DEBUGF(infof(conn->data, "on_stream_close() "
+                 "got stream %x, expected stream %x\n",
+                 stream_id, stream->stream_id));
     return 0;
   }
 
@@ -435,6 +441,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   }
 
   if(frame->hd.stream_id != stream->stream_id) {
+    DEBUGF(infof(conn->data, "on_header() "
+                 "got stream %x, expected stream %x\n",
+                 frame->hd.stream_id, stream->stream_id));
     return 0;
   }
 
@@ -946,6 +955,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   free(nva);
 
   if(stream_id < 0) {
+    DEBUGF(infof(conn->data, "http2_send() send error\n"));
     *err = CURLE_SEND_ERROR;
     return -1;
   }
