@@ -48,7 +48,7 @@ static int http2_perform_getsock(const struct connectdata *conn,
                                                          sockets */
                                  int numsocks)
 {
-  const struct http_conn *httpc = &conn->proto.httpc;
+  const struct http_conn *c = &conn->proto.httpc;
   int bitmap = GETSOCK_BLANK;
   (void)numsocks;
 
@@ -56,10 +56,10 @@ static int http2_perform_getsock(const struct connectdata *conn,
      because of renegotiation. */
   sock[0] = conn->sock[FIRSTSOCKET];
 
-  if(nghttp2_session_want_read(httpc->h2))
+  if(nghttp2_session_want_read(c->h2))
     bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
 
-  if(nghttp2_session_want_write(httpc->h2))
+  if(nghttp2_session_want_write(c->h2))
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
   return bitmap;
@@ -76,17 +76,17 @@ static int http2_getsock(struct connectdata *conn,
 static CURLcode http2_disconnect(struct connectdata *conn,
                                  bool dead_connection)
 {
-  struct http_conn *httpc = &conn->proto.httpc;
+  struct http_conn *c = &conn->proto.httpc;
   (void)dead_connection;
 
   DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT starts now\n"));
 
-  nghttp2_session_del(httpc->h2);
+  nghttp2_session_del(c->h2);
 
-  Curl_safefree(httpc->header_recvbuf->buffer);
-  Curl_safefree(httpc->header_recvbuf);
+  Curl_safefree(c->header_recvbuf->buffer);
+  Curl_safefree(c->header_recvbuf);
 
-  Curl_safefree(httpc->inbuf);
+  Curl_safefree(c->inbuf);
 
   DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
 
@@ -158,14 +158,14 @@ static ssize_t send_callback(nghttp2_session *h2,
                              void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
-  struct http_conn *httpc = &conn->proto.httpc;
+  struct http_conn *c = &conn->proto.httpc;
   ssize_t written;
   CURLcode result = CURLE_OK;
 
   (void)h2;
   (void)flags;
 
-  written = ((Curl_send*)httpc->send_underlying)(conn, FIRSTSOCKET,
+  written = ((Curl_send*)c->send_underlying)(conn, FIRSTSOCKET,
                                                  data, length, &result);
 
   if(result == CURLE_AGAIN) {
