@@ -12,6 +12,10 @@ This release includes the following bugfixes:
  o connectionexists: fix build without NTLM [2]
  o docs: distribute the CURLOPT_PINNEDPUBLICKEY(3) man page, too
  o curl -z: do not write empty file on unmet condition [3]
+ o openssl: fix serial number output [4]
+ o curl_easy_getinfo.3: document 'internals' in CURLINFO_TLS_SESSION
+ o sws: init http2 state properly
+ o curl.1: fix typo
 
 This release includes the following known bugs:
 
@@ -20,8 +24,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexander Elgert, Daniel Stenberg, Kamil Dudka, Patrick Rapin,
-  (4 contributors)
+  Alessandro Ghedini, Alexander Elgert, Daniel Stenberg, Kamil Dudka,
+  Patrick Rapin, Viktor Szakáts,
+  (6 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -30,4 +35,4 @@ References to bug reports and discussions on issues:
  [1] = http://curl.haxx.se/mail/archive-2015-04/0046.html
  [2] = http://curl.haxx.se/bug/?i=231
  [3] = https://github.com/bagder/curl/issues/237
- 
+ [4] = https://github.com/bagder/curl/issues/235
