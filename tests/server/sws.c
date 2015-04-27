@@ -913,6 +913,8 @@ static void init_httprequest(struct httprequest *req)
   req->callcount = 0;
   req->connect_port = 0;
   req->done_processing = 0;
+  req->upgrade = 0;
+  req->upgrade_request = 0;
 }
 
 /* returns 1 if the connection should be serviced again immediately, 0 if there
