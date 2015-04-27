@@ -152,6 +152,9 @@ struct HTTP {
 
   void *send_buffer; /* used if the request couldn't be sent in one chunk,
                         points to an allocated send_buffer struct */
+
+  /* for HTTP/2 we store stream-local data here */
+  int32_t stream_id; /* stream we are interested in */
 };
 
 typedef int (*sending)(void); /* Curl_send */
@@ -175,7 +178,6 @@ struct http_conn {
                                        response headers into it. */
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf
                                   fed into upper layer */
-  int32_t stream_id; /* stream we are interested in */
   const uint8_t *data; /* pointer to data chunk, received in
                           on_data_chunk */
   size_t datalen; /* the number of bytes left in data */

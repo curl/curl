@@ -291,6 +291,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
+  struct HTTP *stream = conn->data->req.protop;
   size_t nread;
   (void)session;
   (void)flags;
@@ -298,7 +299,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   DEBUGF(infof(conn->data, "on_data_chunk_recv() "
                "len = %u, stream = %x\n", len, stream_id));
 
-  if(stream_id != c->stream_id) {
+  if(stream_id != stream->stream_id) {
     return 0;
   }
 
@@ -355,12 +356,13 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
+  struct HTTP *stream = conn->data->req.protop;
   (void)session;
   (void)stream_id;
   DEBUGF(infof(conn->data, "on_stream_close() was called, error_code = %d\n",
                error_code));
 
-  if(stream_id != c->stream_id) {
+  if(stream_id != stream->stream_id) {
     return 0;
   }
 
@@ -418,6 +420,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
+  struct HTTP *stream = conn->data->req.protop;
   int rv;
   int goodname;
   int goodheader;
@@ -431,7 +434,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
-  if(frame->hd.stream_id != c->stream_id) {
+  if(frame->hd.stream_id != stream->stream_id) {
     return 0;
   }
 
@@ -680,6 +683,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   ssize_t rv;
   ssize_t nread;
   struct http_conn *httpc = &conn->proto.httpc;
+  struct HTTP *stream = conn->data->req.protop;
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
@@ -778,7 +782,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     if(httpc->error_code != NGHTTP2_NO_ERROR) {
       failf(conn->data,
             "HTTP/2 stream = %x was not closed cleanly: error_code = %d",
-            httpc->stream_id, httpc->error_code);
+            stream->stream_id, httpc->error_code);
       *err = CURLE_HTTP2;
       return -1;
     }
@@ -803,6 +807,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
    */
   int rv;
   struct http_conn *httpc = &conn->proto.httpc;
+  struct HTTP *stream = conn->data->req.protop;
   nghttp2_nv *nva;
   size_t nheader;
   size_t i;
@@ -816,12 +821,12 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
 
   DEBUGF(infof(conn->data, "http2_send len=%zu\n", len));
 
-  if(httpc->stream_id != -1) {
+  if(stream->stream_id != -1) {
     /* If stream_id != -1, we have dispatched request HEADERS, and now
        are going to send or sending request body in DATA frame */
     httpc->upload_mem = mem;
     httpc->upload_len = len;
-    nghttp2_session_resume_data(httpc->h2, httpc->stream_id);
+    nghttp2_session_resume_data(httpc->h2, stream->stream_id);
     rv = nghttp2_session_send(httpc->h2);
     if(nghttp2_is_fatal(rv)) {
       *err = CURLE_SEND_ERROR;
@@ -945,7 +950,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     return -1;
   }
 
-  httpc->stream_id = stream_id;
+  infof(conn->data, "Using Stream ID: %x\n", stream_id);
+  stream->stream_id = stream_id;
 
   rv = nghttp2_session_send(httpc->h2);
 
@@ -954,7 +960,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     return -1;
   }
 
-  if(httpc->stream_id != -1) {
+  if(stream->stream_id != -1) {
     /* If whole HEADERS frame was sent off to the underlying socket,
        the nghttp2 library calls data_source_read_callback. But only
        it found that no data available, so it deferred the DATA
@@ -963,7 +969,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
        writable socket check is performed. To workaround this, we
        issue nghttp2_session_resume_data() here to bring back DATA
        transmission from deferred state. */
-    nghttp2_session_resume_data(httpc->h2, httpc->stream_id);
+    nghttp2_session_resume_data(httpc->h2, stream->stream_id);
   }
 
   return len;
@@ -973,6 +979,9 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 {
   CURLcode result;
   struct http_conn *httpc = &conn->proto.httpc;
+  struct HTTP *stream = conn->data->req.protop;
+
+  stream->stream_id = -1;
 
   if((conn->handler == &Curl_handler_http2_ssl) ||
      (conn->handler == &Curl_handler_http2))
@@ -998,7 +1007,6 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   httpc->upload_left = 0;
   httpc->upload_mem = NULL;
   httpc->upload_len = 0;
-  httpc->stream_id = -1;
   httpc->status_code = -1;
 
   conn->httpversion = 20;
@@ -1014,6 +1022,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   struct http_conn *httpc = &conn->proto.httpc;
   int rv;
   struct SessionHandle *data = conn->data;
+  struct HTTP *stream = conn->data->req.protop;
 
   result = Curl_http2_setup(conn);
   if(result)
@@ -1040,7 +1049,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
 
   if(conn->data->req.upgr101 == UPGR101_RECEIVED) {
     /* stream 1 is opened implicitly on upgrade */
-    httpc->stream_id = 1;
+    stream->stream_id = 1;
     /* queue SETTINGS frame (again) */
     rv = nghttp2_session_upgrade(httpc->h2, httpc->binsettings,
                                  httpc->binlen, NULL);
@@ -1052,7 +1061,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   }
   else {
     /* stream ID is unknown at this point */
-    httpc->stream_id = -1;
+    stream->stream_id = -1;
     rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, NULL, 0);
     if(rv != 0) {
       failf(data, "nghttp2_submit_settings() failed: %s(%d)",
