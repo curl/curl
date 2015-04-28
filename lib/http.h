@@ -155,6 +155,11 @@ struct HTTP {
 
   /* for HTTP/2 we store stream-local data here */
   int32_t stream_id; /* stream we are interested in */
+
+  /* We store non-final and final response headers here, per-stream */
+  Curl_send_buffer *header_recvbuf;
+  size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
+                                  upper layer */
 };
 
 typedef int (*sending)(void); /* Curl_send */
@@ -173,11 +178,6 @@ struct http_conn {
   recving recv_underlying; /* underlying recv Curl_recv callback */
   bool closed; /* TRUE on HTTP2 stream close */
   uint32_t error_code; /* HTTP/2 error code */
-  Curl_send_buffer *header_recvbuf; /* store response headers.  We
-                                       store non-final and final
-                                       response headers into it. */
-  size_t nread_header_recvbuf; /* number of bytes in header_recvbuf
-                                  fed into upper layer */
   const uint8_t *data; /* pointer to data chunk, received in
                           on_data_chunk */
   size_t datalen; /* the number of bytes left in data */
