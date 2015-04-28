@@ -191,6 +191,9 @@ struct http_conn {
   size_t upload_len; /* size of the buffer 'upload_mem' points to */
   size_t upload_left; /* number of bytes left to upload */
   int status_code; /* HTTP status code */
+
+  /* this is a hash of all individual streams (SessionHandle structs) */
+  struct curl_hash streamsh;
 #else
   int unused; /* prevent a compiler warning */
 #endif
