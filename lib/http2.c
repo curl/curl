@@ -564,6 +564,11 @@ static nghttp2_settings_entry settings[] = {
 
 #define H2_BUFSIZE 4096
 
+static void freestreamentry(void *freethis)
+{
+  (void)freethis;
+}
+
 /*
  * Initialize nghttp2 for a Curl connection
  */
@@ -625,9 +630,11 @@ CURLcode Curl_http2_init(struct connectdata *conn)
     }
 
     rc = Curl_hash_init(&conn->proto.httpc.streamsh, 7, Curl_hash_str,
-                        Curl_str_key_compare, NULL);
-    if(rc)
+                        Curl_str_key_compare, freestreamentry);
+    if(rc) {
+      failf(conn->data, "Couldn't init stream hash!");
       return CURLE_OUT_OF_MEMORY; /* most likely at least */
+    }
   }
   return CURLE_OK;
 }
@@ -965,8 +972,17 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     return -1;
   }
 
-  infof(conn->data, "Using Stream ID: %x\n", stream_id);
+  infof(conn->data, "Using Stream ID: %x (easy handle %p)\n",
+        stream_id, conn->data);
   stream->stream_id = stream_id;
+
+  /* put the SessionHandle in the hash with the stream_id as key */
+  if(!Curl_hash_add(&httpc->streamsh, &stream->stream_id, sizeof(stream_id),
+                    conn->data)) {
+    failf(conn->data, "Couldn't add stream to hash!");
+    *err = CURLE_OUT_OF_MEMORY;
+    return -1;
+  }
 
   rv = nghttp2_session_send(httpc->h2);
 
