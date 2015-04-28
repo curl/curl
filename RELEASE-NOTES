@@ -8,6 +8,7 @@ Curl and libcurl 7.42.1
 
 This release includes the following bugfixes:
 
+ o CURLOPT_HEADEROPT: default to separate [5]
  o dist: include {src,lib}/checksrc.whitelist [1]
  o connectionexists: fix build without NTLM [2]
  o docs: distribute the CURLOPT_PINNEDPUBLICKEY(3) man page, too
@@ -25,8 +26,8 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Alexander Elgert, Daniel Stenberg, Kamil Dudka,
-  Patrick Rapin, Viktor Szakáts,
-  (6 contributors)
+  Oren Souroujon, Patrick Rapin, Viktor Szakáts, Yehezkel Horowitz,
+  (8 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -36,3 +37,5 @@ References to bug reports and discussions on issues:
  [2] = http://curl.haxx.se/bug/?i=231
  [3] = https://github.com/bagder/curl/issues/237
  [4] = https://github.com/bagder/curl/issues/235
+ [5] = http://curl.haxx.se/docs/adv_20150429.html
+ 
