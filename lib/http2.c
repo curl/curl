@@ -84,9 +84,6 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 
   nghttp2_session_del(c->h2);
 
-  Curl_safefree(c->header_recvbuf->buffer);
-  Curl_safefree(c->header_recvbuf);
-
   Curl_safefree(c->inbuf);
 
   DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
@@ -167,7 +164,7 @@ static ssize_t send_callback(nghttp2_session *h2,
   (void)flags;
 
   written = ((Curl_send*)c->send_underlying)(conn, FIRSTSOCKET,
-                                                 data, length, &result);
+                                             data, length, &result);
 
   if(result == CURLE_AGAIN) {
     return NGHTTP2_ERR_WOULDBLOCK;
@@ -248,6 +245,9 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
 
     c->status_code = -1;
+
+    /* get the stream from the hash based on Stream ID */
+    rv = Curl_hash_pick()
 
     Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
 
@@ -619,8 +619,7 @@ CURLcode Curl_http2_init(struct connectdata *conn)
     nghttp2_session_callbacks_set_on_header_callback(callbacks, on_header);
 
     /* The nghttp2 session is not yet setup, do it */
-    rc = nghttp2_session_client_new(&conn->proto.httpc.h2,
-                                    callbacks, conn);
+    rc = nghttp2_session_client_new(&conn->proto.httpc.h2, callbacks, conn);
 
     nghttp2_session_callbacks_del(callbacks);
 
