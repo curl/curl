@@ -823,7 +823,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
               char *buf, size_t len, CURLcode *err)
 {
   size_t size = 0;
-  ssize_t nread = 0, ret = -1;
+  ssize_t nread = 0, ret = 0;
   CURLcode result;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -884,14 +884,13 @@ schannel_recv(struct connectdata *conn, int sockindex,
                            size, &nread);
     /* check for received data */
     if(*err != CURLE_OK)
-      ret = -1;
+      return -1;
     else {
       if(nread > 0)
         /* increase encrypted data buffer offset */
         connssl->encdata_offset += nread;
-      ret = nread;
     }
-    infof(data, "schannel: encrypted data got %zd\n", ret);
+    infof(data, "schannel: encrypted data got %zd\n", nread);
   }
 
   infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
@@ -1033,8 +1032,6 @@ schannel_recv(struct connectdata *conn, int sockindex,
     infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
           connssl->decdata_offset, connssl->decdata_length);
   }
-  else
-    ret = 0;
 
   /* check if the server closed the connection */
   if(ret <= 0 && ( /* special check for Windows 2000 Professional */
