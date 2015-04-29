@@ -171,6 +171,10 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   http->error_code = NGHTTP2_NO_ERROR;
   http->closed = FALSE;
 
+  /* where to store incoming data for this stream and how big the buffer is */
+  http->mem = conn->data->state.buffer;
+  http->len = BUFSIZE;
+
   return CURLE_OK;
 }
 
