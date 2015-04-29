@@ -427,8 +427,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
     multi->easylp = data; /* the new last node */
   }
   else {
-    /* first node, make both prev and next be NULL! */
-    data->next = NULL;
+    /* first node, make prev NULL! */
     data->prev = NULL;
     multi->easylp = multi->easyp = data; /* both first and last */
   }
