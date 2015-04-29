@@ -76,9 +76,11 @@ endif
 
 ifeq ($(ARCH),w64)
 CFLAGS  += -m64 -D_AMD64_
+LDFLAGS += -m64
 RCFLAGS += -F pe-x86-64
 else
 CFLAGS  += -m32
+LDFLAGS += -m32
 RCFLAGS += -F pe-i386
 endif
 
