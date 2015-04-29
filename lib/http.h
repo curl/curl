@@ -164,6 +164,8 @@ struct HTTP {
   int status_code; /* HTTP status code */
   const uint8_t *data; /* pointer to data chunk, received in on_data_chunk */
   size_t datalen; /* the number of bytes left in data */
+  bool closed; /* TRUE on HTTP2 stream close */
+  uint32_t error_code; /* HTTP/2 error code */
 };
 
 typedef int (*sending)(void); /* Curl_send */
@@ -179,8 +181,6 @@ struct http_conn {
   size_t len;    /* size of the buffer 'mem' points to */
   sending send_underlying; /* underlying send Curl_send callback */
   recving recv_underlying; /* underlying recv Curl_recv callback */
-  bool closed; /* TRUE on HTTP2 stream close */
-  uint32_t error_code; /* HTTP/2 error code */
   char *inbuf; /* buffer to receive data from underlying socket */
   /* We need separate buffer for transmission and reception because we
      may call nghttp2_session_send() after the
