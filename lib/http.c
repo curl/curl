@@ -153,11 +153,21 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
 {
   /* allocate the HTTP-specific struct for the SessionHandle, only to survive
      during this request */
+  struct HTTP *http;
   DEBUGASSERT(conn->data->req.protop == NULL);
 
-  conn->data->req.protop = calloc(1, sizeof(struct HTTP));
-  if(!conn->data->req.protop)
+  http = calloc(1, sizeof(struct HTTP));
+  if(!http)
     return CURLE_OUT_OF_MEMORY;
+
+  conn->data->req.protop = http;
+
+  http->header_recvbuf = Curl_add_buffer_init();
+  http->nread_header_recvbuf = 0;
+  http->bodystarted = FALSE;
+  http->status_code = -1;
+  http->data = NULL;
+  http->datalen = 0;
 
   return CURLE_OK;
 }
