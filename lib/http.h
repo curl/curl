@@ -166,6 +166,9 @@ struct HTTP {
   size_t datalen; /* the number of bytes left in data */
   bool closed; /* TRUE on HTTP2 stream close */
   uint32_t error_code; /* HTTP/2 error code */
+
+  char *mem;     /* points to a buffer in memory to store received data */
+  size_t len;    /* size of the buffer 'mem' points to */
 };
 
 typedef int (*sending)(void); /* Curl_send */
@@ -177,8 +180,6 @@ struct http_conn {
   nghttp2_session *h2;
   uint8_t binsettings[H2_BINSETTINGS_LEN];
   size_t  binlen; /* length of the binsettings data */
-  char *mem;     /* points to a buffer in memory to store */
-  size_t len;    /* size of the buffer 'mem' points to */
   sending send_underlying; /* underlying send Curl_send callback */
   recving recv_underlying; /* underlying recv Curl_recv callback */
   char *inbuf; /* buffer to receive data from underlying socket */

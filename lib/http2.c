@@ -38,6 +38,8 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#define MIN(x,y) ((x)<(y)?(x):(y))
+
 #if (NGHTTP2_VERSION_NUM < 0x000600)
 #error too old nghttp2 version, upgrade!
 #endif
@@ -185,7 +187,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
-  struct http_conn *c = &conn->proto.httpc;
   struct SessionHandle *data_s = NULL;
   struct HTTP *stream = NULL;
   int rv;
@@ -264,14 +265,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
 
     left = stream->header_recvbuf->size_used - stream->nread_header_recvbuf;
-    ncopy = c->len < left ? c->len : left;
+    ncopy = MIN(stream->len, left);
 
-    memcpy(c->mem, stream->header_recvbuf->buffer +
+    memcpy(stream->mem, stream->header_recvbuf->buffer +
            stream->nread_header_recvbuf, ncopy);
     stream->nread_header_recvbuf += ncopy;
 
-    c->mem += ncopy;
-    c->len -= ncopy;
+    stream->mem += ncopy;
+    stream->len -= ncopy;
     break;
   case NGHTTP2_PUSH_PROMISE:
     rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
@@ -303,7 +304,6 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
                               const uint8_t *data, size_t len, void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
-  struct http_conn *c = &conn->proto.httpc;
   struct HTTP *stream;
   struct SessionHandle *data_s;
   size_t nread;
@@ -327,13 +327,15 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   }
   stream = data_s->req.protop;
 
-  nread = c->len < len ? c->len : len;
-  memcpy(c->mem, data, nread);
+  nread = MIN(stream->len, len);
+  memcpy(stream->mem, data, nread);
 
-  c->mem += nread;
-  c->len -= nread;
+  stream->mem += nread;
+  stream->len -= nread;
 
-  DEBUGF(infof(conn->data, "%zu data written\n", nread));
+  DEBUGF(infof(conn->data, "%zu data received for stream %x "
+               "(%zu left in buffer)\n",
+               nread, stream_id, stream->len));
 
   if(nread < len) {
     stream->data = data + nread;
@@ -570,7 +572,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   (void)stream_id;
   (void)source;
 
-  nread = c->upload_len < length ? c->upload_len : length;
+  nread = MIN(c->upload_len, length);
   if(nread > 0) {
     memcpy(buf, c->upload_mem, nread);
     c->upload_mem += nread;
@@ -594,7 +596,7 @@ static nghttp2_settings_entry settings[] = {
   { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, NGHTTP2_INITIAL_WINDOW_SIZE },
 };
 
-#define H2_BUFSIZE 4096
+#define H2_BUFSIZE (1024)
 
 static void freestreamentry(void *freethis)
 {
@@ -761,15 +763,18 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     /* If there is body data pending for this stream to return, do that */
     size_t left =
       stream->header_recvbuf->size_used - stream->nread_header_recvbuf;
-    size_t ncopy = len < left ? len : left;
+    size_t ncopy = MIN(len, left);
     memcpy(mem, stream->header_recvbuf->buffer + stream->nread_header_recvbuf,
            ncopy);
     stream->nread_header_recvbuf += ncopy;
+
+    infof(conn->data, "http2_recv: Got %d bytes from header_recvbuf\n",
+          (int)ncopy);
     return ncopy;
   }
 
   if(stream->data) {
-    nread = len < stream->datalen ? len : stream->datalen;
+    nread = MIN(len, stream->datalen);
     memcpy(mem, stream->data, nread);
 
     stream->data += nread;
@@ -780,14 +785,17 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       stream->data = NULL;
       stream->datalen = 0;
     }
+    infof(conn->data, "http2_recv: Got %d bytes from stream->data\n",
+          (int)nread);
     return nread;
   }
 
-  conn->proto.httpc.mem = mem;
-  conn->proto.httpc.len = len;
+  /* remember where to store incoming data for this stream and how big the
+     buffer is */
+  stream->mem = mem;
+  stream->len = len;
 
-  infof(conn->data, "http2_recv: %d bytes buffer\n",
-        conn->proto.httpc.len);
+  infof(conn->data, "http2_recv: %d bytes buffer\n", stream->len);
 
   nread = ((Curl_recv*)httpc->recv_underlying)(conn, FIRSTSOCKET,
                                                httpc->inbuf, H2_BUFSIZE,
@@ -828,8 +836,11 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     *err = CURLE_SEND_ERROR;
     return 0;
   }
-  if(len != httpc->len) {
-    return len - conn->proto.httpc.len;
+  if(len != stream->len) {
+    infof(conn->data, "http2_recv: returns %d for stream %x (%zu/%zu)\n",
+          len - stream->len, stream->stream_id,
+          len, stream->len);
+    return len - stream->len;
   }
   /* If stream is closed, return 0 to signal the http routine to close
      the connection */
@@ -844,9 +855,11 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       *err = CURLE_HTTP2;
       return -1;
     }
+    DEBUGF(infof(conn->data, "http2_recv returns 0\n"));
     return 0;
   }
   *err = CURLE_AGAIN;
+  DEBUGF(infof(conn->data, "http2_recv returns -1, AGAIN\n"));
   return -1;
 }
 

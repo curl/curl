@@ -5960,6 +5960,8 @@ CURLcode Curl_done(struct connectdata **connp,
   conn = *connp;
   data = conn->data;
 
+  DEBUGF(infof(data, "Curl_done\n"));
+
   if(conn->bits.done)
     /* Stop if Curl_done() has already been called */
     return CURLE_OK;
