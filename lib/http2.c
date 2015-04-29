@@ -186,20 +186,38 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
+  struct SessionHandle *data_s = NULL;
+  struct HTTP *stream = NULL;
   int rv;
   size_t left, ncopy;
+  int32_t stream_id = frame->hd.stream_id;
 
   (void)session;
   (void)frame;
   DEBUGF(infof(conn->data, "on_frame_recv() was called with header %x\n",
                frame->hd.type));
+
+  if(stream_id) {
+    /* get the stream from the hash based on Stream ID, stream ID zero is for
+       connection-oriented stuff */
+    data_s = Curl_hash_pick(&conn->proto.httpc.streamsh, &stream_id,
+                            sizeof(stream_id));
+    if(!data_s) {
+      /* Receiving a Stream ID not in the hash should not happen, this is an
+         internal error more than anything else! */
+      failf(conn->data, "Received frame on Stream ID: %x not in stream hash!",
+            stream_id);
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
+    stream = data_s->req.protop;
+  }
+
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
-    /* If body started, then receiving DATA is illegal. */
-    if(!c->bodystarted) {
+    /* If body started on this stream, then receiving DATA is illegal. */
+    if(!stream->bodystarted) {
       rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                     frame->hd.stream_id,
-                                     NGHTTP2_PROTOCOL_ERROR);
+                                     stream_id, NGHTTP2_PROTOCOL_ERROR);
 
       if(nghttp2_is_fatal(rv)) {
         return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -210,14 +228,13 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     if(frame->headers.cat == NGHTTP2_HCAT_REQUEST)
       break;
 
-    if(c->bodystarted) {
+    if(stream->bodystarted) {
       /* Only valid HEADERS after body started is trailer header,
          which is not fully supported in this code.  If HEADERS is not
          trailer, then it is a PROTOCOL_ERROR. */
       if((frame->hd.flags & NGHTTP2_FLAG_END_STREAM) == 0) {
         rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                       frame->hd.stream_id,
-                                       NGHTTP2_PROTOCOL_ERROR);
+                                       stream_id, NGHTTP2_PROTOCOL_ERROR);
 
         if(nghttp2_is_fatal(rv)) {
           return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -226,11 +243,10 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       break;
     }
 
-    if(c->status_code == -1) {
+    if(stream->status_code == -1) {
       /* No :status header field means PROTOCOL_ERROR. */
       rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                     frame->hd.stream_id,
-                                     NGHTTP2_PROTOCOL_ERROR);
+                                     stream_id, NGHTTP2_PROTOCOL_ERROR);
 
       if(nghttp2_is_fatal(rv)) {
         return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -240,22 +256,19 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
 
     /* Only final status code signals the end of header */
-    if(c->status_code / 100 != 1) {
-      c->bodystarted = TRUE;
-    }
+    if(stream->status_code / 100 != 1)
+      stream->bodystarted = TRUE;
 
-    c->status_code = -1;
+    stream->status_code = -1;
 
-    /* get the stream from the hash based on Stream ID */
-    rv = Curl_hash_pick()
+    Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
 
-    Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
-
-    left = c->header_recvbuf->size_used - c->nread_header_recvbuf;
+    left = stream->header_recvbuf->size_used - stream->nread_header_recvbuf;
     ncopy = c->len < left ? c->len : left;
 
-    memcpy(c->mem, c->header_recvbuf->buffer + c->nread_header_recvbuf, ncopy);
-    c->nread_header_recvbuf += ncopy;
+    memcpy(c->mem, stream->header_recvbuf->buffer +
+           stream->nread_header_recvbuf, ncopy);
+    stream->nread_header_recvbuf += ncopy;
 
     c->mem += ncopy;
     c->len -= ncopy;
@@ -291,7 +304,8 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream;
+  struct SessionHandle *data_s;
   size_t nread;
   (void)session;
   (void)flags;
@@ -299,12 +313,19 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   DEBUGF(infof(conn->data, "on_data_chunk_recv() "
                "len = %u, stream = %x\n", len, stream_id));
 
-  if(stream_id != stream->stream_id) {
-    DEBUGF(infof(conn->data, "on_data_chunk_recv() "
-                 "got stream %x, expected stream %x\n",
-                 stream_id, stream->stream_id));
-    return 0;
+  DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
+
+  /* get the stream from the hash based on Stream ID */
+  data_s = Curl_hash_pick(&conn->proto.httpc.streamsh, &stream_id,
+                          sizeof(stream_id));
+  if(!data_s) {
+    /* Receiving a Stream ID not in the hash should not happen, this is an
+       internal error more than anything else! */
+    failf(conn->data, "Received frame on Stream ID: %x not in stream hash!",
+          stream_id);
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
+  stream = data_s->req.protop;
 
   nread = c->len < len ? c->len : len;
   memcpy(c->mem, data, nread);
@@ -315,8 +336,8 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   DEBUGF(infof(conn->data, "%zu data written\n", nread));
 
   if(nread < len) {
-    c->data = data + nread;
-    c->datalen = len - nread;
+    stream->data = data + nread;
+    stream->datalen = len - nread;
     return NGHTTP2_ERR_PAUSE;
   }
   return 0;
@@ -425,11 +446,12 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                      void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
-  struct http_conn *c = &conn->proto.httpc;
-  struct HTTP *stream = conn->data->req.protop;
+  struct HTTP *stream;
+  struct SessionHandle *data_s;
   int rv;
   int goodname;
   int goodheader;
+  int32_t stream_id = frame->hd.stream_id;
 
   (void)session;
   (void)frame;
@@ -440,31 +462,36 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
-  if(frame->hd.stream_id != stream->stream_id) {
-    DEBUGF(infof(conn->data, "on_header() "
-                 "got stream %x, expected stream %x\n",
-                 frame->hd.stream_id, stream->stream_id));
-    return 0;
-  }
+  DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
-  if(c->bodystarted) {
+  /* get the stream from the hash based on Stream ID */
+  data_s = Curl_hash_pick(&conn->proto.httpc.streamsh, &stream_id,
+                          sizeof(stream_id));
+  if(!data_s) {
+    /* Receiving a Stream ID not in the hash should not happen, this is an
+       internal error more than anything else! */
+    failf(conn->data, "Received frame on Stream ID: %x not in stream hash!",
+          stream_id);
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
+  stream = data_s->req.protop;
+
+  if(stream->bodystarted)
     /* Ignore trailer or HEADERS not mapped to HTTP semantics.  The
        consequence is handled in on_frame_recv(). */
     return 0;
-  }
 
   goodname = nghttp2_check_header_name(name, namelen);
   goodheader = nghttp2_check_header_value(value, valuelen);
 
   if(!goodname || !goodheader) {
 
-    infof(conn->data, "Detected bad incoming header %s%s, reset stream!\n",
+    infof(data_s, "Detected bad incoming header %s%s, reset stream!\n",
           goodname?"":"name",
           goodheader?"":"value");
 
     rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                   frame->hd.stream_id,
-                                   NGHTTP2_PROTOCOL_ERROR);
+                                   stream_id, NGHTTP2_PROTOCOL_ERROR);
 
     if(nghttp2_is_fatal(rv)) {
       return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -477,12 +504,11 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
      memcmp(STATUS, name, namelen) == 0) {
 
     /* :status must appear exactly once. */
-    if(c->status_code != -1 ||
-       (c->status_code = decode_status_code(value, valuelen)) == -1) {
+    if(stream->status_code != -1 ||
+       (stream->status_code = decode_status_code(value, valuelen)) == -1) {
 
       rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                     frame->hd.stream_id,
-                                     NGHTTP2_PROTOCOL_ERROR);
+                                     stream_id, NGHTTP2_PROTOCOL_ERROR);
       if(nghttp2_is_fatal(rv)) {
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       }
@@ -490,9 +516,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
     }
 
-    Curl_add_buffer(c->header_recvbuf, "HTTP/2.0 ", 9);
-    Curl_add_buffer(c->header_recvbuf, value, valuelen);
-    Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
+    Curl_add_buffer(stream->header_recvbuf, "HTTP/2.0 ", 9);
+    Curl_add_buffer(stream->header_recvbuf, value, valuelen);
+    Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
 
     return 0;
   }
@@ -500,10 +526,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     /* Here we are sure that namelen > 0 because of
        nghttp2_check_header_name().  Pseudo header other than :status
        is illegal. */
-    if(c->status_code == -1 || name[0] == ':') {
+    if(stream->status_code == -1 || name[0] == ':') {
       rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                     frame->hd.stream_id,
-                                     NGHTTP2_PROTOCOL_ERROR);
+                                     stream_id, NGHTTP2_PROTOCOL_ERROR);
       if(nghttp2_is_fatal(rv)) {
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       }
@@ -512,12 +537,12 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     }
 
     /* convert to a HTTP1-style header */
-    Curl_add_buffer(c->header_recvbuf, name, namelen);
-    Curl_add_buffer(c->header_recvbuf, ":", 1);
-    Curl_add_buffer(c->header_recvbuf, value, valuelen);
-    Curl_add_buffer(c->header_recvbuf, "\r\n", 2);
+    Curl_add_buffer(stream->header_recvbuf, name, namelen);
+    Curl_add_buffer(stream->header_recvbuf, ":", 1);
+    Curl_add_buffer(stream->header_recvbuf, value, valuelen);
+    Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
 
-    DEBUGF(infof(conn->data, "h2 header: %.*s: %.*s\n",
+    DEBUGF(infof(data_s, "h2 header: %.*s: %.*s\n",
                  namelen, name, valuelen, value));
   }
 
@@ -719,28 +744,34 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   httpc->upload_mem = NULL;
   httpc->upload_len = 0;
 
-  if(httpc->bodystarted &&
-     httpc->nread_header_recvbuf < httpc->header_recvbuf->size_used) {
+  /*
+   * At this point 'stream' is just in the SessionHandle the connection
+   * identifies as its owner at this time.
+   */
+
+  if(stream->bodystarted &&
+     stream->nread_header_recvbuf < stream->header_recvbuf->size_used) {
+    /* If there is body data pending for this stream to return, do that */
     size_t left =
-      httpc->header_recvbuf->size_used - httpc->nread_header_recvbuf;
+      stream->header_recvbuf->size_used - stream->nread_header_recvbuf;
     size_t ncopy = len < left ? len : left;
-    memcpy(mem, httpc->header_recvbuf->buffer + httpc->nread_header_recvbuf,
+    memcpy(mem, stream->header_recvbuf->buffer + stream->nread_header_recvbuf,
            ncopy);
-    httpc->nread_header_recvbuf += ncopy;
+    stream->nread_header_recvbuf += ncopy;
     return ncopy;
   }
 
-  if(httpc->data) {
-    nread = len < httpc->datalen ? len : httpc->datalen;
-    memcpy(mem, httpc->data, nread);
+  if(stream->data) {
+    nread = len < stream->datalen ? len : stream->datalen;
+    memcpy(mem, stream->data, nread);
 
-    httpc->data += nread;
-    httpc->datalen -= nread;
+    stream->data += nread;
+    stream->datalen -= nread;
 
     infof(conn->data, "%zu data bytes written\n", nread);
-    if(httpc->datalen == 0) {
-      httpc->data = NULL;
-      httpc->datalen = 0;
+    if(stream->datalen == 0) {
+      stream->data = NULL;
+      stream->datalen = 0;
     }
     return nread;
   }
@@ -1027,17 +1058,11 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
     return result;
 
   infof(conn->data, "Using HTTP2, server supports multi-use\n");
-  httpc->bodystarted = FALSE;
   httpc->error_code = NGHTTP2_NO_ERROR;
   httpc->closed = FALSE;
-  httpc->header_recvbuf = Curl_add_buffer_init();
-  httpc->nread_header_recvbuf = 0;
-  httpc->data = NULL;
-  httpc->datalen = 0;
   httpc->upload_left = 0;
   httpc->upload_mem = NULL;
   httpc->upload_len = 0;
-  httpc->status_code = -1;
 
   conn->httpversion = 20;
   conn->bundle->server_supports_pipelining = TRUE;

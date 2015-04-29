@@ -153,13 +153,17 @@ struct HTTP {
   void *send_buffer; /* used if the request couldn't be sent in one chunk,
                         points to an allocated send_buffer struct */
 
-  /* for HTTP/2 we store stream-local data here */
+  /*********** for HTTP/2 we store stream-local data here *************/
   int32_t stream_id; /* stream we are interested in */
 
+  bool bodystarted;
   /* We store non-final and final response headers here, per-stream */
   Curl_send_buffer *header_recvbuf;
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
                                   upper layer */
+  int status_code; /* HTTP status code */
+  const uint8_t *data; /* pointer to data chunk, received in on_data_chunk */
+  size_t datalen; /* the number of bytes left in data */
 };
 
 typedef int (*sending)(void); /* Curl_send */
@@ -173,14 +177,10 @@ struct http_conn {
   size_t  binlen; /* length of the binsettings data */
   char *mem;     /* points to a buffer in memory to store */
   size_t len;    /* size of the buffer 'mem' points to */
-  bool bodystarted;
   sending send_underlying; /* underlying send Curl_send callback */
   recving recv_underlying; /* underlying recv Curl_recv callback */
   bool closed; /* TRUE on HTTP2 stream close */
   uint32_t error_code; /* HTTP/2 error code */
-  const uint8_t *data; /* pointer to data chunk, received in
-                          on_data_chunk */
-  size_t datalen; /* the number of bytes left in data */
   char *inbuf; /* buffer to receive data from underlying socket */
   /* We need separate buffer for transmission and reception because we
      may call nghttp2_session_send() after the
@@ -190,7 +190,6 @@ struct http_conn {
   const uint8_t *upload_mem; /* points to a buffer to read from */
   size_t upload_len; /* size of the buffer 'upload_mem' points to */
   size_t upload_left; /* number of bytes left to upload */
-  int status_code; /* HTTP status code */
 
   /* this is a hash of all individual streams (SessionHandle structs) */
   struct curl_hash streamsh;
