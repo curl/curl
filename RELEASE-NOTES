@@ -1,18 +1,29 @@
 Curl and libcurl 7.43.0
 
- Public curl releases:         146
- Command line options:         173
- curl_easy_setopt() options:   216
+ Public curl releases:         147
+ Command line options:         176
+ curl_easy_setopt() options:   218
  Public functions in libcurl:  58
  Contributors:                 1265
 
 This release includes the following changes:
 
- o
+ o New: CURLOPT_PROXY_SERVICE_NAME and CURLOPT_SERVICE_NAME
+ o New curl options: --proxy-service-name and --service-name
+ o New curl option: --data-raw [5]
  
 This release includes the following bugfixes:
 
- o
+ o nss: fix compilation failure with old versions of NSS [1]
+ o curl_easy_getinfo.3: document 'internals' in CURLINFO_TLS_SESSION
+ o schannel.c: Fix possible SEC_E_BUFFER_TOO_SMALL error
+ o Curl_ossl_init: load builtin modules [2]
+ o configure: follow-up fix for krb5-config [3]
+ o sasl_sspi: Populate domain from the realm in the challenge [4]
+ o netrc: support 'default' token
+ o README: convert to UTF-8
+ o cyassl: Implement public key pinning
+ o nss: implement public key pinning for NSS backend
 
 This release includes the following known bugs:
 
@@ -21,9 +32,19 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Alessandro Ghedini, Anthony Avina, Brian Chrisman, Dagobert Michelsen,
+  Dan Fandrich, Daniel Stenberg, Grant Pannell, Jens Rantil, Kamil Dudka,
+  Linus Nielsen, Marc Hoersken, Oren Souroujon, Patrick Rapin, Paul Howarth,
+  Ray Satiro, Viktor Szakáts, Yehezkel Horowitz,
+  (17 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = http://curl.haxx.se/mail/lib-2015-04/0095.html
+ [2] = https://github.com/bagder/curl/pull/206
+ [3] = https://github.com/bagder/curl/commit/5b668606527613179d0349f21b4ab0df2971e3d2#commitcomment-10473445
+ [4] = https://github.com/bagder/curl/pull/141
+ [5] = https://github.com/bagder/curl/issues/198
+ 
