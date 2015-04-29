@@ -168,6 +168,8 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   http->status_code = -1;
   http->data = NULL;
   http->datalen = 0;
+  http->error_code = NGHTTP2_NO_ERROR;
+  http->closed = FALSE;
 
   return CURLE_OK;
 }
