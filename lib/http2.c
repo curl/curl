@@ -379,23 +379,30 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
                            uint32_t error_code, void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
-  struct http_conn *c = &conn->proto.httpc;
-  struct HTTP *stream = conn->data->req.protop;
+  struct SessionHandle *data_s;
+  struct HTTP *stream;
   (void)session;
   (void)stream_id;
-  DEBUGF(infof(conn->data, "on_stream_close() was called, error_code = %d\n",
-               error_code));
+  DEBUGF(infof(conn->data, "on_stream_close(), error_code = %d, stream %x\n",
+               error_code, stream_id));
 
-  if(stream_id != stream->stream_id) {
-    DEBUGF(infof(conn->data, "on_stream_close() "
-                 "got stream %x, expected stream %x\n",
-                 stream_id, stream->stream_id));
-    return 0;
+  if(stream_id) {
+    /* get the stream from the hash based on Stream ID, stream ID zero is for
+       connection-oriented stuff */
+    data_s = Curl_hash_pick(&conn->proto.httpc.streamsh, &stream_id,
+                            sizeof(stream_id));
+    if(!data_s) {
+      /* Receiving a Stream ID not in the hash should not happen, this is an
+         internal error more than anything else! */
+      failf(conn->data, "Received frame on Stream ID: %x not in stream hash!",
+            stream_id);
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
+    stream = data_s->req.protop;
+
+    stream->error_code = error_code;
+    stream->closed = TRUE;
   }
-
-  c->error_code = error_code;
-  c->closed = TRUE;
-
   return 0;
 }
 
@@ -732,10 +739,10 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
-  if(httpc->closed) {
+  if(stream->closed) {
     /* Reset to FALSE to prevent infinite loop in readwrite_data
        function. */
-    httpc->closed = FALSE;
+    stream->closed = FALSE;
     return 0;
   }
 
@@ -826,14 +833,14 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   }
   /* If stream is closed, return 0 to signal the http routine to close
      the connection */
-  if(httpc->closed) {
+  if(stream->closed) {
     /* Reset to FALSE to prevent infinite loop in readwrite_data
        function. */
-    httpc->closed = FALSE;
-    if(httpc->error_code != NGHTTP2_NO_ERROR) {
+    stream->closed = FALSE;
+    if(stream->error_code != NGHTTP2_NO_ERROR) {
       failf(conn->data,
             "HTTP/2 stream = %x was not closed cleanly: error_code = %d",
-            stream->stream_id, httpc->error_code);
+            stream->stream_id, stream->error_code);
       *err = CURLE_HTTP2;
       return -1;
     }
@@ -1058,8 +1065,6 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
     return result;
 
   infof(conn->data, "Using HTTP2, server supports multi-use\n");
-  httpc->error_code = NGHTTP2_NO_ERROR;
-  httpc->closed = FALSE;
   httpc->upload_left = 0;
   httpc->upload_mem = NULL;
   httpc->upload_len = 0;
