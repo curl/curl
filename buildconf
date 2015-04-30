@@ -330,7 +330,7 @@ done
 #
 
 echo "buildconf: running libtoolize"
-${libtoolize} --copy --automake --force || die "libtoolize command failed"
+${libtoolize} --copy --force || die "libtoolize command failed"
 
 # When using libtool 1.5.X (X < 26) we copy libtool.m4 to our local m4
 # subdirectory and this local copy is patched to fix some warnings that
