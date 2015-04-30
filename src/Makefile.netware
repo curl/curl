@@ -19,12 +19,12 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8zc
+OPENSSL_PATH = ../../openssl-1.0.2a
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.4.3
+LIBSSH2_PATH = ../../libssh2-1.5.0
 endif
 
 # Edit the path below to point to the base of your axTLS package.
