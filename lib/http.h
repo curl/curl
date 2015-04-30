@@ -169,6 +169,7 @@ struct HTTP {
 
   char *mem;     /* points to a buffer in memory to store received data */
   size_t len;    /* size of the buffer 'mem' points to */
+  size_t memlen; /* size of data copied to mem */
 };
 
 typedef int (*sending)(void); /* Curl_send */
