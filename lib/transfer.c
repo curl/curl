@@ -1055,6 +1055,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     return CURLE_SEND_ERROR;
   }
 
+  DEBUGF(infof(data, "%s: keepon: %x select_res %x\n", __func__, k->keepon,
+               select_res));
+
   /* We go ahead and do a read if we have a readable socket or if
      the stream was rewound (in which case we have data in a
      buffer) */
