@@ -2893,6 +2893,16 @@ void Curl_getoff_all_pipelines(struct SessionHandle *data,
     conn->readchannel_inuse = FALSE;
   if(Curl_removeHandleFromPipeline(data, conn->send_pipe) && send_head)
     conn->writechannel_inuse = FALSE;
+
+  if(conn->httpversion == 20) {
+    /* delete this handle from the stream hash */
+    struct HTTP *stream = data->req.protop;
+    if(stream && Curl_hash_delete(&conn->proto.httpc.streamsh,
+                                  &stream->stream_id,
+                                  sizeof(stream->stream_id))) {
+      infof(conn->data, "Failed to remove handle from h2 stream hash!!\n");
+    }
+  }
 }
 
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke)
@@ -5970,10 +5980,12 @@ CURLcode Curl_done(struct connectdata **connp,
 
   if((conn->send_pipe->size + conn->recv_pipe->size != 0 &&
       !data->set.reuse_forbid &&
-      !conn->bits.close))
+      !conn->bits.close)) {
     /* Stop if pipeline is not empty and we do not have to close
        connection. */
+    DEBUGF(infof(data, "Connection still in use, no more Curl_done now!\n"));
     return CURLE_OK;
+  }
 
   conn->bits.done = TRUE; /* called just now! */
 

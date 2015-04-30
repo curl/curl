@@ -174,6 +174,7 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   /* where to store incoming data for this stream and how big the buffer is */
   http->mem = conn->data->state.buffer;
   http->len = BUFSIZE;
+  http->memlen = 0;
 
   return CURLE_OK;
 }
