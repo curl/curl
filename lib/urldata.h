@@ -530,6 +530,7 @@ struct ConnectBits {
   bool bound; /* set true if bind() has already been done on this socket/
                  connection */
   bool type_set;  /* type= was used in the URL */
+  bool multiplex; /* connection is multiplexed */
 };
 
 struct hostname {
