@@ -283,7 +283,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   unsigned char *reallocated_buffer;
   size_t reallocated_length;
-  SecBuffer outbuf[2];
+  SecBuffer outbuf[3];
   SecBufferDesc outbuf_desc;
   SecBuffer inbuf[2];
   SecBufferDesc inbuf_desc;
