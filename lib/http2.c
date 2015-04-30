@@ -1120,6 +1120,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   httpc->upload_mem = NULL;
   httpc->upload_len = 0;
 
+  conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 20;
   conn->bundle->server_supports_pipelining = TRUE;
 

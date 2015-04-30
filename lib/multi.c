@@ -1437,9 +1437,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_WAITPERFORM:
       /* Wait for our turn to PERFORM */
-      if(!data->easy_conn->readchannel_inuse &&
-         isHandleAtHead(data,
-                        data->easy_conn->recv_pipe)) {
+      if((!data->easy_conn->readchannel_inuse &&
+          isHandleAtHead(data,
+                         data->easy_conn->recv_pipe)) ||
+         data->easy_conn->bits.multiplex) {
         /* Grab the channel */
         data->easy_conn->readchannel_inuse = TRUE;
         multistate(data, CURLM_STATE_PERFORM);
