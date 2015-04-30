@@ -2676,7 +2676,7 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     AC_DEFINE_UNQUOTED(CURL_CA_PATH, "$capath", [Location of default ca path])
     AC_MSG_RESULT([$capath (capath)])
   fi
-  if test "x$ca" == "xno" && test "x$capath" == "xno"; then
+  if test "x$ca" = "xno" && test "x$capath" = "xno"; then
     AC_MSG_RESULT([no])
   fi
 ])
