@@ -1,7 +1,7 @@
 ###########################################################################
 #
 ## Makefile for building curl.exe with MingW (GCC-3.2 or later)
-## and optionally OpenSSL (0.9.8), libssh2 (1.3), zlib (1.2.5), librtmp (2.3)
+## and optionally OpenSSL (1.0.2a), libssh2 (1.5), zlib (1.2.8), librtmp (2.4)
 ##
 ## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 ## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-spi-winidn
@@ -18,19 +18,19 @@ ZLIB_PATH = ../../zlib-1.2.8
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8zc
+OPENSSL_PATH = ../../openssl-1.0.2a
 endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.4.3
+LIBSSH2_PATH = ../../libssh2-1.5.0
 endif
 # Edit the path below to point to the base of your librtmp package.
 ifndef LIBRTMP_PATH
-LIBRTMP_PATH = ../../librtmp-2.3
+LIBRTMP_PATH = ../../librtmp-2.4
 endif
 # Edit the path below to point to the base of your libmetalink package.
 ifndef LIBMETALINK_PATH
-LIBMETALINK_PATH = ../../libmetalink-0.1.2
+LIBMETALINK_PATH = ../../libmetalink-0.1.3
 endif
 # Edit the path below to point to the base of your libexpat package.
 ifndef LIBEXPAT_PATH
@@ -38,15 +38,15 @@ LIBEXPAT_PATH = ../../expat-2.1.0
 endif
 # Edit the path below to point to the base of your libxml2 package.
 ifndef LIBXML2_PATH
-LIBXML2_PATH = ../../libxml2-2.9.0
+LIBXML2_PATH = ../../libxml2-2.9.2
 endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
-LIBIDN_PATH = ../../libidn-1.18
+LIBIDN_PATH = ../../libidn-1.30
 endif
 # Edit the path below to point to the base of your MS IDN package.
 # Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1
-# http://www.microsoft.com/downloads/en/details.aspx?FamilyID=ad6158d7-ddba-416a-9109-07607425a815
+# https://www.microsoft.com/en-us/download/details.aspx?id=734
 ifndef WINIDN_PATH
 WINIDN_PATH = ../../Microsoft IDN Mitigation APIs
 endif
@@ -56,7 +56,7 @@ LDAP_SDK = c:/novell/ndk/cldapsdk/win32
 endif
 # Edit the path below to point to the base of your nghttp2 package.
 ifndef NGHTTP2_PATH
-NGHTTP2_PATH = ../../nghttp2-0.6.7
+NGHTTP2_PATH = ../../nghttp2-0.7.13
 endif
 
 PROOT = ..

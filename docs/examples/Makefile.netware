@@ -19,12 +19,12 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../../openssl-0.9.8zc
+OPENSSL_PATH = ../../../openssl-1.0.2a
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../../libssh2-1.4.3
+LIBSSH2_PATH = ../../../libssh2-1.5.0
 endif
 
 # Edit the path below to point to the base of your axTLS package.
@@ -34,12 +34,12 @@ endif
 
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
-LIBIDN_PATH = ../../../libidn-1.18
+LIBIDN_PATH = ../../../libidn-1.30
 endif
 
 # Edit the path below to point to the base of your librtmp package.
 ifndef LIBRTMP_PATH
-LIBRTMP_PATH = ../../../librtmp-2.3
+LIBRTMP_PATH = ../../../librtmp-2.4
 endif
 
 # Edit the path below to point to the base of your fbopenssl package.

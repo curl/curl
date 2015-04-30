@@ -65,11 +65,11 @@
 !INCLUDE ..\winbuild\Makefile.msvc.names
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.8zc
+OPENSSL_PATH   = ../../openssl-1.0.2a
 !ENDIF
 
 !IFNDEF LIBSSH2_PATH
-LIBSSH2_PATH   = ../../libssh2-1.4.3
+LIBSSH2_PATH   = ../../libssh2-1.5.0
 !ENDIF
 
 !IFNDEF ZLIB_PATH
@@ -90,7 +90,7 @@ MACHINE  = X86
 # If, for some reason the Windows SDK is installed but not installed
 # in the default location, you can specify WINDOWS_SDK_PATH.
 # It can be downloaded from:
-# http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
+# https://msdn.microsoft.com/windows/bb980924.aspx
 
 # WINDOWS_SSPI = 1
 
@@ -427,7 +427,7 @@ CFGSET   = TRUE
 TARGET = $(LIBCURL_DYN_LIB_DBG)
 DIROBJ = $(CFG)
 LNK    = $(LNKDLL) $(WINLIBS) /DEBUG /out:$(DIROBJ)\$(TARGET) /IMPLIB:$(DIROBJ)\$(LIBCURL_IMP_LIB_DBG) /PDB:$(DIROBJ)\$(LIBCURL_DYN_LIB_PDB)
-CC     = $(CCDEBUG) $(RTLIBD) 
+CC     = $(CCDEBUG) $(RTLIBD)
 CFGSET = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
