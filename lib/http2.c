@@ -278,9 +278,13 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     stream->len -= ncopy;
     stream->memlen += ncopy;
 
-    stream->mem[stream->memlen] = 0; /* DEBUG, remove this */
+    {
+      char backup = stream->mem[stream->memlen];
+      stream->mem[stream->memlen] = 0; /* DEBUG, remove this */
 
-    DEBUGF(infof(data_s, "BUF: %s", stream->mem));
+      DEBUGF(infof(data_s, "BUF: %s", stream->mem));
+      stream->mem[stream->memlen] = backup;
+    }
 
     data_s->state.drain++;
     break;
@@ -348,14 +352,16 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   /* TODO: this may need to set expire for the multi_socket to work for this
      stream */
 
-  DEBUGF(infof(conn->data, "%zu data received for stream %x "
-               "(%zu left in buffer %p)\n",
+  DEBUGF(infof(data_s, "%zu data received for stream %x "
+               "(%zu left in buffer %p, total %zu)\n",
                nread, stream_id,
-               stream->len, stream->mem));
+               stream->len, stream->mem,
+               stream->memlen));
 
   if(nread < len) {
     stream->data = data + nread;
     stream->datalen = len - nread;
+    DEBUGF(infof(data_s, "NGHTTP2_ERR_PAUSE - out of buffer\n"));
     return NGHTTP2_ERR_PAUSE;
   }
   return 0;
@@ -616,7 +622,7 @@ static nghttp2_settings_entry settings[] = {
   { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, NGHTTP2_INITIAL_WINDOW_SIZE },
 };
 
-#define H2_BUFSIZE (1024)
+#define H2_BUFSIZE 1024
 
 static void freestreamentry(void *freethis)
 {
@@ -811,6 +817,9 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     return nread;
   }
 
+  infof(data, "http2_recv: %d bytes buffer at %p (stream %x)\n",
+        len, mem, stream->stream_id);
+
   if(data->state.drain) {
     DEBUGF(infof(data, "http2_recv: DRAIN %zu bytes stream %x!! (%p => %p)\n",
                  stream->memlen, stream->stream_id,
@@ -829,9 +838,6 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     stream->mem = mem;
     stream->len = len;
     stream->memlen = 0;
-
-    infof(data, "http2_recv: %d bytes buffer (stream %x)\n",
-          stream->len, stream->stream_id);
 
     nread = ((Curl_recv*)httpc->recv_underlying)(conn, FIRSTSOCKET,
                                                  httpc->inbuf, H2_BUFSIZE,
@@ -873,12 +879,15 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       return 0;
     }
   }
-  if(len != stream->len) {
+  if(stream->memlen) {
+    ssize_t retlen = stream->memlen;
     infof(data, "http2_recv: returns %d for stream %x (%zu/%zu)\n",
-          len - stream->len, stream->stream_id,
+          retlen, stream->stream_id,
           len, stream->len);
     data->state.drain = 0; /* this stream is hereby drained */
-    return len - stream->len;
+    stream->memlen = 0;
+
+    return retlen;
   }
   /* If stream is closed, return 0 to signal the http routine to close
      the connection */
