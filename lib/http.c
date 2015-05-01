@@ -1436,6 +1436,19 @@ CURLcode Curl_http_done(struct connectdata *conn,
 
   Curl_unencode_cleanup(conn);
 
+#if defined(USE_NTLM)
+  if((!conn->ntlm.persist_auth) &&
+     (data->req.httpcode != 401) &&
+      (conn->ntlm.state == NTLMSTATE_TYPE3))
+        conn->ntlm.persist_auth = TRUE;
+#if !defined(CURL_DISABLE_PROXY)
+  if((!conn->proxyntlm.persist_auth) &&
+     (data->req.httpcode != 407) &&
+      (conn->proxyntlm.state == NTLMSTATE_TYPE3))
+        conn->proxyntlm.persist_auth = TRUE;
+#endif
+#endif
+
 #ifdef USE_SPNEGO
   if(data->state.proxyneg.state == GSS_AUTHSENT ||
      data->state.negotiate.state == GSS_AUTHSENT) {

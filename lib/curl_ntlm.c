@@ -85,10 +85,16 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
     }
     else {
       if(ntlm->state == NTLMSTATE_TYPE3) {
-        infof(conn->data, "NTLM handshake rejected\n");
-        Curl_http_ntlm_cleanup(conn);
-        ntlm->state = NTLMSTATE_NONE;
-        return CURLE_REMOTE_ACCESS_DENIED;
+        if(ntlm->persist_auth) {
+          Curl_http_ntlm_cleanup(conn);
+          ntlm->persist_auth = FALSE;
+        }
+        else {
+          Curl_http_ntlm_cleanup(conn);
+          infof(conn->data, "NTLM handshake rejected\n");
+          ntlm->state = NTLMSTATE_NONE;
+          return CURLE_REMOTE_ACCESS_DENIED;
+        }
       }
       else if(ntlm->state >= NTLMSTATE_TYPE1) {
         infof(conn->data, "NTLM handshake failure (internal error)\n");
