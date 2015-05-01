@@ -405,7 +405,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 
     /* check if the handshake needs to be continued */
     if(sspi_status == SEC_I_CONTINUE_NEEDED || sspi_status == SEC_E_OK) {
-      for(i = 0; i < 2; i++) {
+      for(i = 0; i < 3; i++) {
         /* search for handshake tokens that need to be send */
         if(outbuf[i].BufferType == SECBUFFER_TOKEN && outbuf[i].cbBuffer > 0) {
           infof(data, "schannel: sending next handshake data: "
