@@ -721,7 +721,10 @@ Curl_http_output_auth(struct connectdata *conn,
      !data->state.first_host ||
      data->set.http_disable_hostname_check_before_authentication ||
      Curl_raw_equal(data->state.first_host, conn->host.name)) {
-    result = output_auth_headers(conn, authhost, request, path, FALSE);
+     /* If we expect 407 from proxy as auth isn't done yet with this request
+        then don't bother authenticating to server as it won't reach it */
+      if(authproxy->done)
+        result = output_auth_headers(conn, authhost, request, path, FALSE);
   }
   else
     authhost->done = TRUE;
