@@ -80,6 +80,7 @@ void *Curl_hash_pick(struct curl_hash *, void * key, size_t key_len);
 void Curl_hash_apply(struct curl_hash *h, void *user,
                      void (*cb)(void *user, void *ptr));
 int Curl_hash_count(struct curl_hash *h);
+void Curl_hash_destroy(struct curl_hash *h);
 void Curl_hash_clean(struct curl_hash *h);
 void Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
                                     int (*comp)(void *, void *));
