@@ -126,7 +126,7 @@ int Curl_conncache_init(struct conncache *connc, int size)
 void Curl_conncache_destroy(struct conncache *connc)
 {
   if(connc)
-    Curl_hash_clean(&connc->hash);
+    Curl_hash_destroy(&connc->hash);
 }
 
 /* returns an allocated key to find a bundle for this connection */

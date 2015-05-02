@@ -67,7 +67,7 @@ static void unit_stop( void )
     free(data_node);
   }
   free(data_key);
-  Curl_hash_clean(&hp);
+  Curl_hash_destroy(&hp);
 
   curl_easy_cleanup(data);
   curl_global_cleanup();
