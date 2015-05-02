@@ -993,30 +993,31 @@ schannel_recv(struct connectdata *conn, int sockindex,
         /* reset encrypted buffer offset, because there is no data remaining */
         connssl->encdata_offset = 0;
       }
-    } /* check if something went wrong and we need to return an error */
+
+      /* check if server wants to renegotiate the connection context */
+      if(sspi_status == SEC_I_RENEGOTIATE) {
+        infof(data, "schannel: remote party requests renegotiation\n");
+
+        /* begin renegotiation */
+        infof(data, "schannel: renegotiating SSL/TLS connection\n");
+        connssl->state = ssl_connection_negotiating;
+        connssl->connecting_state = ssl_connect_2_writing;
+        result = schannel_connect_common(conn, sockindex, FALSE, &done);
+        if(result)
+          *err = result;
+        else {
+          infof(data, "schannel: SSL/TLS connection renegotiated\n");
+          /* now retry receiving data */
+          return schannel_recv(conn, sockindex, buf, len, err);
+        }
+      }
+    }
     else {
+      /* something went wrong and we need to return an error */
       infof(data, "schannel: failed to read data from server: %s\n",
             Curl_sspi_strerror(conn, sspi_status));
       *err = CURLE_RECV_ERROR;
       return -1;
-    }
-
-    /* check if server wants to renegotiate the connection context */
-    if(sspi_status == SEC_I_RENEGOTIATE) {
-      infof(data, "schannel: remote party requests SSL/TLS renegotiation\n");
-
-      /* begin renegotiation */
-      infof(data, "schannel: renegotiating SSL/TLS connection\n");
-      connssl->state = ssl_connection_negotiating;
-      connssl->connecting_state = ssl_connect_2_writing;
-      result = schannel_connect_common(conn, sockindex, FALSE, &done);
-      if(result)
-        *err = result;
-      else {
-        infof(data, "schannel: SSL/TLS connection renegotiated\n");
-        /* now retry receiving data */
-        return schannel_recv(conn, sockindex, buf, len, err);
-      }
     }
   }
 
@@ -1036,12 +1037,12 @@ schannel_recv(struct connectdata *conn, int sockindex,
     infof(data, "schannel: decrypted data returned %zd\n", size);
     infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
           connssl->decdata_offset, connssl->decdata_length);
-  } /* check if the server closed the connection */
-  else if(sspi_status == SEC_I_CONTEXT_EXPIRED ||
-          /* special check for Windows 2000 Professional */
-          (sspi_status == SEC_E_OK && connssl->encdata_offset > 0 &&
-           connssl->encdata_buffer[0] == 0x15)) {
-    infof(data, "schannel: server closed the conunection\n");
+  }
+  /* check if the server closed the connection, */
+  /* including special check for Windows 2000 Professional */
+  else if(sspi_status == SEC_I_CONTEXT_EXPIRED || (sspi_status == SEC_E_OK &&
+          connssl->encdata_offset && connssl->encdata_buffer[0] == 0x15)) {
+    infof(data, "schannel: server closed the connection\n");
     *err = CURLE_OK;
   }
 
