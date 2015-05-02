@@ -25,7 +25,6 @@
 #include "curlx.h"
 
 #include "hash.h"
-#include "hostip.h"
 
 #include "memdebug.h" /* LAST include file */
 
@@ -60,6 +59,6 @@ UNITTEST_START
 
   Curl_hash_clean(myhash);
   Curl_hash_add(myhash, &key2, klen, value2);
-  /*free(value);*/
+
   Curl_hash_destroy(myhash);
 UNITTEST_STOP
