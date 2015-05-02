@@ -96,7 +96,7 @@ ZLIB_ROOT = ../../zlib-1.2.8
 !ifdef %libssh2_root
 LIBSSH2_ROOT = $(%libssh2_root)
 !else
-LIBSSH2_ROOT = ../../libssh2-1.4.3
+LIBSSH2_ROOT = ../../libssh2-1.5.0
 !endif
 
 !ifdef %librtmp_root
@@ -108,7 +108,7 @@ LIBRTMP_ROOT = ../../rtmpdump-2.3
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ../../openssl-0.9.8zc
+OPENSSL_ROOT = ../../openssl-1.0.2a
 !endif
 
 !ifdef %ares_root
