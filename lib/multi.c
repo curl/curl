@@ -326,8 +326,8 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   error:
 
-  Curl_hash_clean(&multi->sockhash);
-  Curl_hash_clean(&multi->hostcache);
+  Curl_hash_destroy(&multi->sockhash);
+  Curl_hash_destroy(&multi->hostcache);
   Curl_conncache_destroy(&multi->conn_cache);
   Curl_close(multi->closure_handle);
   multi->closure_handle = NULL;
@@ -1865,7 +1865,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       Curl_close(multi->closure_handle);
     }
 
-    Curl_hash_clean(&multi->sockhash);
+    Curl_hash_destroy(&multi->sockhash);
     Curl_conncache_destroy(&multi->conn_cache);
     Curl_llist_destroy(multi->msglist, NULL);
     Curl_llist_destroy(multi->pending, NULL);
@@ -1888,7 +1888,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       data = nextdata;
     }
 
-    Curl_hash_clean(&multi->hostcache);
+    Curl_hash_destroy(&multi->hostcache);
 
     /* Free the blacklists by setting them to NULL */
     Curl_pipeline_set_site_blacklist(NULL, &multi->pipelining_site_bl);

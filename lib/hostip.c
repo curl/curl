@@ -137,7 +137,7 @@ struct curl_hash *Curl_global_host_cache_init(void)
 void Curl_global_host_cache_dtor(void)
 {
   if(host_cache_initialized) {
-    Curl_hash_clean(&hostname_cache);
+    Curl_hash_destroy(&hostname_cache);
     host_cache_initialized = 0;
   }
 }

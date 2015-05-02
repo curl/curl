@@ -212,8 +212,11 @@ Curl_hash_apply(curl_hash *h, void *user,
 }
 #endif
 
+/* Destroys all the entries in the given hash and resets its attributes,
+ * prepping the given hash for [static|dynamic] deallocation.
+ */
 void
-Curl_hash_clean(struct curl_hash *h)
+Curl_hash_destroy(struct curl_hash *h)
 {
   int i;
 
@@ -227,6 +230,17 @@ Curl_hash_clean(struct curl_hash *h)
   h->slots = 0;
 }
 
+/* Removes all the entries in the given hash.
+ *
+ * @unittest: 1602
+ */
+void
+Curl_hash_clean(struct curl_hash *h)
+{
+  Curl_hash_clean_with_criterium(h, NULL, NULL);
+}
+
+/* Cleans all entries that pass the comp function criteria. */
 void
 Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
                                int (*comp)(void *, void *))
@@ -246,7 +260,7 @@ Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
       struct curl_hash_element *he = le->ptr;
       lnext = le->next;
       /* ask the callback function if we shall remove this entry or not */
-      if(comp(user, he->ptr)) {
+      if(comp == NULL || comp(user, he->ptr)) {
         Curl_llist_remove(list, le, (void *) h);
         --h->size; /* one less entry in the hash now */
       }
