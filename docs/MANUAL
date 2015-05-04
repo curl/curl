@@ -470,8 +470,8 @@ COOKIES
   stored cookies which match the request as it follows the location.  The
   file "empty.txt" may be a nonexistent file.
 
-  Alas, to both read and write cookies from a netscape cookie file, you can
-  set both -b and -c to use the same file:
+  To read and write cookies from a netscape cookie file, you can set both -b
+  and -c to use the same file:
 
         curl -b cookies.txt -c cookies.txt www.example.com
 
