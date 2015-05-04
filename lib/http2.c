@@ -622,7 +622,7 @@ static nghttp2_settings_entry settings[] = {
   { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, NGHTTP2_INITIAL_WINDOW_SIZE },
 };
 
-#define H2_BUFSIZE 1024
+#define H2_BUFSIZE 8192
 
 static void freestreamentry(void *freethis)
 {
