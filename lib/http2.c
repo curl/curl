@@ -278,14 +278,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     stream->len -= ncopy;
     stream->memlen += ncopy;
 
-    {
-      char backup = stream->mem[stream->memlen];
-      stream->mem[stream->memlen] = 0; /* DEBUG, remove this */
-
-      DEBUGF(infof(data_s, "BUF: %s", stream->mem));
-      stream->mem[stream->memlen] = backup;
-    }
-
     data_s->state.drain++;
     break;
   case NGHTTP2_PUSH_PROMISE:
