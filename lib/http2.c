@@ -768,12 +768,15 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
+#if 0
   if(stream->closed) {
     /* Reset to FALSE to prevent infinite loop in readwrite_data
        function. */
     stream->closed = FALSE;
+    DEBUGF(infof(data, "http2_recv2 stream found closed?\n"));
     return 0;
   }
+#endif
 
   /* Nullify here because we call nghttp2_session_send() and they
      might refer to the old buffer. */
