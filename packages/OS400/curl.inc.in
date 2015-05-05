@@ -5,7 +5,7 @@
       *                            | (__| |_| |  _ <| |___
       *                             \___|\___/|_| \_\_____|
       *
-      * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+      * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
@@ -1211,6 +1211,10 @@
      d                 c                   00233
      d  CURLOPT_PATH_AS_IS...
      d                 c                   00234
+     d  CURLOPT_PROXY_SERVICE_NAME...
+     d                 c                   10235
+     d  CURLOPT_SERVICE_NAME...
+     d                 c                   10236
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
