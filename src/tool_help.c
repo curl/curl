@@ -143,7 +143,7 @@ static const char *const helptext[] = {
   " -n, --netrc         Must read .netrc for user name and password",
   "     --netrc-optional  Use either .netrc or URL; overrides -n",
   "     --netrc-file FILE  Specify FILE for netrc",
-  " -:  --next          "
+  " -:, --next          "
   "Allows the following URL to use a separate set of options",
   "     --no-alpn       Disable the ALPN TLS extension (H)",
   " -N, --no-buffer     Disable buffering of the output stream",
