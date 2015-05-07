@@ -813,7 +813,22 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     return ncopy;
   }
 
-  if(stream->data) {
+  infof(data, "http2_recv: %d bytes buffer at %p (stream %x)\n",
+        len, mem, stream->stream_id);
+
+  if(data->state.drain) {
+    DEBUGF(infof(data, "http2_recv: DRAIN %zu bytes stream %x!! (%p => %p)\n",
+                 stream->memlen, stream->stream_id,
+                 stream->mem, mem));
+    if(mem != stream->mem) {
+      /* if we didn't get the same buffer this time, we must move the data to
+         the beginning */
+      memmove(mem, stream->mem, stream->memlen);
+      stream->len = len - stream->memlen;
+      stream->mem = mem;
+    }
+  }
+  else if(stream->data) {
     nread = MIN(len, stream->datalen);
     memcpy(mem, stream->data, nread);
 
@@ -832,22 +847,6 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     infof(data, "http2_recv: Got %d bytes from stream->data\n",
           (int)nread);
     return nread;
-  }
-
-  infof(data, "http2_recv: %d bytes buffer at %p (stream %x)\n",
-        len, mem, stream->stream_id);
-
-  if(data->state.drain) {
-    DEBUGF(infof(data, "http2_recv: DRAIN %zu bytes stream %x!! (%p => %p)\n",
-                 stream->memlen, stream->stream_id,
-                 stream->mem, mem));
-    if(mem != stream->mem) {
-      /* if we didn't get the same buffer this time, we must move the data to
-         the beginning */
-      memmove(mem, stream->mem, stream->memlen);
-      stream->len = len - stream->memlen;
-      stream->mem = mem;
-    }
   }
   else if(httpc->pause_stream_id) {
     /* If a stream paused nghttp2_session_mem_recv previously, and has
