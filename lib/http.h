@@ -175,6 +175,13 @@ struct HTTP {
 typedef int (*sending)(void); /* Curl_send */
 typedef int (*recving)(void); /* Curl_recv */
 
+/* h2 settings for this connection */
+struct h2settings {
+  uint32_t max_concurrent_streams;
+  bool enable_push;
+};
+
+
 struct http_conn {
 #ifdef USE_NGHTTP2
 #define H2_BINSETTINGS_LEN 80
@@ -195,6 +202,7 @@ struct http_conn {
 
   /* this is a hash of all individual streams (SessionHandle structs) */
   struct curl_hash streamsh;
+  struct h2settings settings;
 #else
   int unused; /* prevent a compiler warning */
 #endif
