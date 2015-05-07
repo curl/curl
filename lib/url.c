@@ -2814,13 +2814,20 @@ static bool SocketIsDead(curl_socket_t sock)
 static bool IsPipeliningPossible(const struct SessionHandle *handle,
                                  const struct connectdata *conn)
 {
+  /* If a HTTP protocol and pipelining is enabled */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-     Curl_multi_pipeline_enabled(handle->multi) &&
-     (handle->set.httpreq == HTTPREQ_GET ||
-      handle->set.httpreq == HTTPREQ_HEAD) &&
-     handle->set.httpversion != CURL_HTTP_VERSION_1_0)
-    return TRUE;
+     Curl_multi_pipeline_enabled(handle->multi)) {
 
+    if((handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
+       (handle->set.httpreq == HTTPREQ_GET ||
+        handle->set.httpreq == HTTPREQ_HEAD))
+      /* didn't ask for HTTP/1.0 and a GET or HEAD */
+      return TRUE;
+
+    if(conn->httpversion == 20)
+      /* talking HTTP/2 */
+      return TRUE;
+  }
   return FALSE;
 }
 
