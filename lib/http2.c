@@ -744,6 +744,21 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   return result;
 }
 
+static ssize_t http2_handle_stream_close(struct SessionHandle *data,
+                                         struct HTTP *stream, CURLcode *err) {
+  /* Reset to FALSE to prevent infinite loop in readwrite_data
+   function. */
+  stream->closed = FALSE;
+  if(stream->error_code != NGHTTP2_NO_ERROR) {
+    failf(data, "HTTP/2 stream = %x was not closed cleanly: error_code = %d",
+          stream->stream_id, stream->error_code);
+    *err = CURLE_HTTP2;
+    return -1;
+  }
+  DEBUGF(infof(data, "http2_recv returns 0\n"));
+  return 0;
+}
+
 /*
  * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
  * a regular CURLcode value.
@@ -760,15 +775,13 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
-#if 0
-  if(stream->closed) {
-    /* Reset to FALSE to prevent infinite loop in readwrite_data
-       function. */
-    stream->closed = FALSE;
-    DEBUGF(infof(data, "http2_recv2 stream found closed?\n"));
-    return 0;
+  /* If stream is closed, return 0 to signal the http routine to close
+     the connection.  We need to handle stream closure here,
+     otherwise, we may be going to read from underlying connection,
+     and gets EAGAIN, and we will get stuck there. */
+  if(stream->memlen == 0 && stream->closed) {
+    return http2_handle_stream_close(data, stream, err);
   }
-#endif
 
   /* Nullify here because we call nghttp2_session_send() and they
      might refer to the old buffer. */
@@ -887,18 +900,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   /* If stream is closed, return 0 to signal the http routine to close
      the connection */
   if(stream->closed) {
-    /* Reset to FALSE to prevent infinite loop in readwrite_data
-       function. */
-    stream->closed = FALSE;
-    if(stream->error_code != NGHTTP2_NO_ERROR) {
-      failf(data,
-            "HTTP/2 stream = %x was not closed cleanly: error_code = %d",
-            stream->stream_id, stream->error_code);
-      *err = CURLE_HTTP2;
-      return -1;
-    }
-    DEBUGF(infof(data, "http2_recv returns 0\n"));
-    return 0;
+    return http2_handle_stream_close(data, stream, err);
   }
   *err = CURLE_AGAIN;
   DEBUGF(infof(data, "http2_recv returns -1, AGAIN\n"));
