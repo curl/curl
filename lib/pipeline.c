@@ -92,6 +92,15 @@ bool Curl_pipeline_penalized(struct SessionHandle *data,
   return FALSE;
 }
 
+static CURLcode addHandleToPipeline(struct SessionHandle *data,
+                                    struct curl_llist *pipeline)
+{
+  if(!Curl_llist_insert_next(pipeline, pipeline->tail, data))
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
+}
+
+
 CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
                                      struct connectdata *conn)
 {
@@ -101,7 +110,7 @@ CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
 
   pipeline = conn->send_pipe;
 
-  result = Curl_addHandleToPipeline(handle, pipeline);
+  result = addHandleToPipeline(handle, pipeline);
 
   if(pipeline == conn->send_pipe && sendhead != conn->send_pipe->head) {
     /* this is a new one as head, expire it */
