@@ -140,8 +140,9 @@ static const char *const helptext[] = {
   " -m, --max-time SECONDS  Maximum time allowed for the transfer",
   "     --metalink      Process given URLs as metalink XML file",
   "     --negotiate     Use HTTP Negotiate (SPNEGO) authentication (H)",
-  " -n, --netrc         Must read .netrc for user name and password",
-  "     --netrc-optional  Use either .netrc or URL; overrides -n",
+  " -n, --netrc         Must read " DOT_CHAR
+                       "netrc for user name and password",
+  "     --netrc-optional  Use either " DOT_CHAR "netrc or URL; overrides -n",
   "     --netrc-file FILE  Specify FILE for netrc",
   " -:  --next          "
   "Allows the following URL to use a separate set of options",
