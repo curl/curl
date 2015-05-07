@@ -184,6 +184,8 @@ struct http_conn {
   sending send_underlying; /* underlying send Curl_send callback */
   recving recv_underlying; /* underlying recv Curl_recv callback */
   char *inbuf; /* buffer to receive data from underlying socket */
+  size_t inbuflen; /* number of bytes filled in inbuf */
+  size_t nread_inbuf; /* number of bytes read from in inbuf */
   /* We need separate buffer for transmission and reception because we
      may call nghttp2_session_send() after the
      nghttp2_session_mem_recv() but mem buffer is still not full. In

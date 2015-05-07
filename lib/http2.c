@@ -841,36 +841,47 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     }
   }
   else {
+    char *inbuf;
     /* remember where to store incoming data for this stream and how big the
        buffer is */
     stream->mem = mem;
     stream->len = len;
     stream->memlen = 0;
 
-    nread = ((Curl_recv*)httpc->recv_underlying)(conn, FIRSTSOCKET,
-                                                 httpc->inbuf, H2_BUFSIZE,
-                                                 &result);
-    if(result == CURLE_AGAIN) {
-      *err = result;
-      return -1;
+    if(httpc->inbuflen == 0) {
+      nread = ((Curl_recv *)httpc->recv_underlying)(
+          conn, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, &result);
+
+      if(result == CURLE_AGAIN) {
+        *err = result;
+        return -1;
+      }
+
+      if(nread == -1) {
+        failf(data, "Failed receiving HTTP2 data");
+        *err = result;
+        return 0;
+      }
+
+      if(nread == 0) {
+        failf(data, "Unexpected EOF");
+        *err = CURLE_RECV_ERROR;
+        return -1;
+      }
+
+      DEBUGF(infof(data, "nread=%zd\n", nread));
+
+      httpc->inbuflen = nread;
+      inbuf = httpc->inbuf;
     }
+    else {
+      nread = httpc->inbuflen - httpc->nread_inbuf;
+      inbuf = httpc->inbuf + httpc->nread_inbuf;
 
-    if(nread == -1) {
-      failf(data, "Failed receiving HTTP2 data");
-      *err = result;
-      return 0;
+      DEBUGF(infof(data, "Use data left in connection buffer, nread=%zd\n",
+                   nread));
     }
-
-    if(nread == 0) {
-      failf(data, "Unexpected EOF");
-      *err = CURLE_RECV_ERROR;
-      return -1;
-    }
-
-    DEBUGF(infof(data, "nread=%zd\n", nread));
-
-    rv = nghttp2_session_mem_recv(httpc->h2,
-                                  (const uint8_t *)httpc->inbuf, nread);
+    rv = nghttp2_session_mem_recv(httpc->h2, (const uint8_t *)inbuf, nread);
 
     if(nghttp2_is_fatal((int)rv)) {
       failf(data, "nghttp2_session_mem_recv() returned %d:%s\n",
@@ -879,6 +890,16 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       return 0;
     }
     DEBUGF(infof(data, "nghttp2_session_mem_recv() returns %zd\n", rv));
+    if(nread == rv) {
+      DEBUGF(infof(data, "All data in connection buffer processed\n"));
+      httpc->inbuflen = 0;
+      httpc->nread_inbuf = 0;
+    }
+    else {
+      httpc->nread_inbuf += rv;
+      DEBUGF(infof(data, "%zu bytes left in connection buffer\n",
+                   httpc->inbuflen - httpc->nread_inbuf));
+    }
     /* Always send pending frames in nghttp2 session, because
        nghttp2_session_mem_recv() may queue new frame */
     rv = nghttp2_session_send(httpc->h2);
@@ -1125,6 +1146,9 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   httpc->upload_left = 0;
   httpc->upload_mem = NULL;
   httpc->upload_len = 0;
+
+  httpc->inbuflen = 0;
+  httpc->nread_inbuf = 0;
 
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 20;
