@@ -187,6 +187,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
+  struct http_conn *httpc = &conn->proto.httpc;
   struct SessionHandle *data_s = NULL;
   struct HTTP *stream = NULL;
   int rv;
@@ -201,7 +202,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   if(stream_id) {
     /* get the stream from the hash based on Stream ID, stream ID zero is for
        connection-oriented stuff */
-    data_s = Curl_hash_pick(&conn->proto.httpc.streamsh, &stream_id,
+    data_s = Curl_hash_pick(&httpc->streamsh, &stream_id,
                             sizeof(stream_id));
     if(!data_s) {
       /* Receiving a Stream ID not in the hash should not happen, this is an
@@ -288,6 +289,23 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     if(nghttp2_is_fatal(rv)) {
       return rv;
     }
+    break;
+  case NGHTTP2_SETTINGS:
+    DEBUGF(infof(conn->data, "Got SETTINGS for stream %x!\n", stream_id));
+    httpc->settings.max_concurrent_streams =
+      nghttp2_session_get_remote_settings(
+        session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
+    httpc->settings.enable_push =
+      nghttp2_session_get_remote_settings(
+        session, NGHTTP2_SETTINGS_ENABLE_PUSH);
+    DEBUGF(infof(conn->data, "MAX_CONCURRENT_STREAMS == %d\n",
+                 httpc->settings.max_concurrent_streams));
+    DEBUGF(infof(conn->data, "ENABLE_PUSH == %s\n",
+                 httpc->settings.enable_push?"TRUE":"false"));
+    break;
+  default:
+    DEBUGF(infof(conn->data, "Got frame type %x for stream %x!\n",
+                 frame->hd.type, stream_id));
     break;
   }
   return 0;
@@ -929,6 +947,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   char *end;
   nghttp2_data_provider data_prd;
   int32_t stream_id;
+  nghttp2_session *h2 = httpc->h2;
 
   (void)sockindex;
 
@@ -939,8 +958,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
        are going to send or sending request body in DATA frame */
     httpc->upload_mem = mem;
     httpc->upload_len = len;
-    nghttp2_session_resume_data(httpc->h2, stream->stream_id);
-    rv = nghttp2_session_send(httpc->h2);
+    nghttp2_session_resume_data(h2, stream->stream_id);
+    rv = nghttp2_session_send(h2);
     if(nghttp2_is_fatal(rv)) {
       *err = CURLE_SEND_ERROR;
       return -1;
@@ -1048,11 +1067,11 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   case HTTPREQ_PUT:
     data_prd.read_callback = data_source_read_callback;
     data_prd.source.ptr = NULL;
-    stream_id = nghttp2_submit_request(httpc->h2, NULL, nva, nheader,
+    stream_id = nghttp2_submit_request(h2, NULL, nva, nheader,
                                        &data_prd, NULL);
     break;
   default:
-    stream_id = nghttp2_submit_request(httpc->h2, NULL, nva, nheader,
+    stream_id = nghttp2_submit_request(h2, NULL, nva, nheader,
                                        NULL, NULL);
   }
 
@@ -1076,7 +1095,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     return -1;
   }
 
-  rv = nghttp2_session_send(httpc->h2);
+  rv = nghttp2_session_send(h2);
 
   if(rv != 0) {
     *err = CURLE_SEND_ERROR;
@@ -1092,7 +1111,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
        writable socket check is performed. To workaround this, we
        issue nghttp2_session_resume_data() here to bring back DATA
        transmission from deferred state. */
-    nghttp2_session_resume_data(httpc->h2, stream->stream_id);
+    nghttp2_session_resume_data(h2, stream->stream_id);
   }
 
   return len;
