@@ -184,6 +184,8 @@ struct http_conn {
   sending send_underlying; /* underlying send Curl_send callback */
   recving recv_underlying; /* underlying recv Curl_recv callback */
   char *inbuf; /* buffer to receive data from underlying socket */
+  size_t inbuflen; /* number of bytes filled in inbuf */
+  size_t nread_inbuf; /* number of bytes read from in inbuf */
   /* We need separate buffer for transmission and reception because we
      may call nghttp2_session_send() after the
      nghttp2_session_mem_recv() but mem buffer is still not full. In
@@ -192,9 +194,12 @@ struct http_conn {
   const uint8_t *upload_mem; /* points to a buffer to read from */
   size_t upload_len; /* size of the buffer 'upload_mem' points to */
   size_t upload_left; /* number of bytes left to upload */
+  int32_t pause_stream_id; /* stream ID which paused
+                              nghttp2_session_mem_recv */
 
   /* this is a hash of all individual streams (SessionHandle structs) */
   struct curl_hash streamsh;
+
 #else
   int unused; /* prevent a compiler warning */
 #endif
