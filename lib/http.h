@@ -201,6 +201,8 @@ struct http_conn {
   const uint8_t *upload_mem; /* points to a buffer to read from */
   size_t upload_len; /* size of the buffer 'upload_mem' points to */
   size_t upload_left; /* number of bytes left to upload */
+  int32_t pause_stream_id; /* stream ID which paused
+                              nghttp2_session_mem_recv */
 
   /* this is a hash of all individual streams (SessionHandle structs) */
   struct curl_hash streamsh;
