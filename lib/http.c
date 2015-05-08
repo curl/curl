@@ -163,7 +163,6 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
 
   conn->data->req.protop = http;
 
-  http->header_recvbuf = Curl_add_buffer_init();
   http->nread_header_recvbuf = 0;
   http->bodystarted = FALSE;
   http->status_code = -1;
