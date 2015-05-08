@@ -1168,6 +1168,9 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 
   stream->stream_id = -1;
 
+  if(!stream->header_recvbuf)
+    stream->header_recvbuf = Curl_add_buffer_init();
+
   if((conn->handler == &Curl_handler_http2_ssl) ||
      (conn->handler == &Curl_handler_http2))
     return CURLE_OK; /* already done */
