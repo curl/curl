@@ -2073,9 +2073,8 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
   result = Curl_connecthost(conn, addr);
 
-  Curl_resolv_unlock(data, addr); /* we're done using this address */
-
   if(result) {
+    Curl_resolv_unlock(data, addr); /* we're done using this address */
     if(ftpc->count1 == 0 && ftpcode == 229)
       return ftp_epsv_disable(conn);
 
@@ -2091,8 +2090,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
   if(data->set.verbose)
     /* this just dumps information about this second connection */
-    ftp_pasv_verbose(conn, conn->ip_addr, ftpc->newhost, connectport);
+    ftp_pasv_verbose(conn, addr->addr, ftpc->newhost, connectport);
 
+  Curl_resolv_unlock(data, addr); /* we're done using this address */
   conn->bits.do_more = TRUE;
   state(conn, FTP_STOP); /* this phase is completed */
 
