@@ -2783,7 +2783,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
   Curl_ssl_close(conn, FIRSTSOCKET);
 
   /* Indicate to all handles on the pipe that we're dead */
-  if(Curl_multi_pipeline_enabled(data->multi)) {
+  if(Curl_pipeline_wanted(data->multi, CURLPIPE_ANY)) {
     signalPipeClose(conn->send_pipe, TRUE);
     signalPipeClose(conn->recv_pipe, TRUE);
   }
@@ -2816,7 +2816,7 @@ static bool IsPipeliningPossible(const struct SessionHandle *handle,
 {
   /* If a HTTP protocol and pipelining is enabled */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-     Curl_multi_pipeline_enabled(handle->multi)) {
+     Curl_pipeline_wanted(handle->multi, CURLPIPE_ANY)) {
 
     if((handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
        (handle->set.httpreq == HTTPREQ_GET ||
@@ -2829,11 +2829,6 @@ static bool IsPipeliningPossible(const struct SessionHandle *handle,
       return TRUE;
   }
   return FALSE;
-}
-
-bool Curl_isPipeliningEnabled(const struct SessionHandle *handle)
-{
-  return Curl_multi_pipeline_enabled(handle->multi);
 }
 
 int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
@@ -3801,9 +3796,9 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   conn->response_header = NULL;
 #endif
 
-  if(Curl_multi_pipeline_enabled(data->multi) &&
-      !conn->master_buffer) {
-    /* Allocate master_buffer to be used for pipelining */
+  if(Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1) &&
+     !conn->master_buffer) {
+    /* Allocate master_buffer to be used for HTTP/1 pipelining */
     conn->master_buffer = calloc(BUFSIZE, sizeof (char));
     if(!conn->master_buffer)
       goto error;
