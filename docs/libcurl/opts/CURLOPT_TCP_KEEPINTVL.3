@@ -46,7 +46,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 120L);
 
   /* interval time between keep-alive probes: 60 seconds */
-  curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 60L);
+  curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
 
   curl_easy_perform(curl);
 }
