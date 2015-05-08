@@ -135,7 +135,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
       host_port = aprintf("%s:%hu", hostname, remote_port);
       if(!host_port) {
-        free(req_buffer);
+        Curl_add_buffer_free(req_buffer);
         return CURLE_OUT_OF_MEMORY;
       }
 
@@ -155,7 +155,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                   hostname, conn->bits.ipv6_ip?"]":"",
                   remote_port);
         if(!hostheader) {
-          free(req_buffer);
+          Curl_add_buffer_free(req_buffer);
           return CURLE_OUT_OF_MEMORY;
         }
 
@@ -163,7 +163,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           host = aprintf("Host: %s\r\n", hostheader);
           if(!host) {
             free(hostheader);
-            free(req_buffer);
+            Curl_add_buffer_free(req_buffer);
             return CURLE_OUT_OF_MEMORY;
           }
         }
@@ -212,7 +212,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           failf(data, "Failed sending CONNECT to proxy");
       }
 
-      free(req_buffer);
+      Curl_add_buffer_free(req_buffer);
       if(result)
         return result;
 

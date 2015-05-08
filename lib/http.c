@@ -86,6 +86,7 @@
  * Forward declarations.
  */
 
+static CURLcode http_disconnect(struct connectdata *conn, bool dead);
 static int http_getsock_do(struct connectdata *conn,
                            curl_socket_t *socks,
                            int numsocks);
@@ -116,7 +117,7 @@ const struct Curl_handler Curl_handler_http = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
+  http_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
@@ -140,7 +141,7 @@ const struct Curl_handler Curl_handler_https = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
+  http_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTPS,                           /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
@@ -176,6 +177,17 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   http->len = BUFSIZE;
   http->memlen = 0;
 
+  return CURLE_OK;
+}
+
+static CURLcode http_disconnect(struct connectdata *conn, bool dead_connection)
+{
+  struct HTTP *http = conn->data->req.protop;
+  (void)dead_connection;
+  if(http) {
+    Curl_add_buffer_free(http->header_recvbuf);
+    http->header_recvbuf = NULL; /* clear the pointer */
+  }
   return CURLE_OK;
 }
 
@@ -1044,6 +1056,16 @@ Curl_send_buffer *Curl_add_buffer_init(void)
 }
 
 /*
+ * Curl_add_buffer_free() frees all associated resources.
+ */
+void Curl_add_buffer_free(Curl_send_buffer *buff)
+{
+  if(buff) /* deal with NULL input */
+    free(buff->buffer);
+  free(buff);
+}
+
+/*
  * Curl_add_buffer_send() sends a header buffer and frees all associated
  * memory.  Body data may be appended to the header data if desired.
  *
@@ -1089,8 +1111,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
   /* Curl_convert_to_network calls failf if unsuccessful */
   if(result) {
     /* conversion failed, free memory and return to the caller */
-    free(in->buffer);
-    free(in);
+    Curl_add_buffer_free(in);
     return result;
   }
 
@@ -1192,8 +1213,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
         conn->writechannel_inuse = FALSE;
     }
   }
-  free(in->buffer);
-  free(in);
+  Curl_add_buffer_free(in);
 
   return result;
 }
@@ -1472,11 +1492,14 @@ CURLcode Curl_http_done(struct connectdata *conn,
     return CURLE_OK;
 
   if(http->send_buffer) {
-    Curl_send_buffer *buff = http->send_buffer;
-
-    free(buff->buffer);
-    free(buff);
+    Curl_add_buffer_free(http->send_buffer);
     http->send_buffer = NULL; /* clear the pointer */
+  }
+
+  if(http->header_recvbuf) {
+    DEBUGF(infof(data, "free header_recvbuf!!\n"));
+    Curl_add_buffer_free(http->header_recvbuf);
+    http->header_recvbuf = NULL; /* clear the pointer */
   }
 
   if(HTTPREQ_POST_FORM == data->set.httpreq) {

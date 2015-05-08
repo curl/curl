@@ -5951,35 +5951,17 @@ CURLcode Curl_done(struct connectdata **connp,
 
   DEBUGF(infof(data, "Curl_done\n"));
 
-  if(conn->bits.done)
+  if(data->state.done)
     /* Stop if Curl_done() has already been called */
     return CURLE_OK;
 
   Curl_getoff_all_pipelines(data, conn);
-
-  if((conn->send_pipe->size + conn->recv_pipe->size != 0 &&
-      !data->set.reuse_forbid &&
-      !conn->bits.close)) {
-    /* Stop if pipeline is not empty and we do not have to close
-       connection. */
-    DEBUGF(infof(data, "Connection still in use, no more Curl_done now!\n"));
-    return CURLE_OK;
-  }
-
-  conn->bits.done = TRUE; /* called just now! */
 
   /* Cleanup possible redirect junk */
   free(data->req.newurl);
   data->req.newurl = NULL;
   free(data->req.location);
   data->req.location = NULL;
-
-  Curl_resolver_cancel(conn);
-
-  if(conn->dns_entry) {
-    Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
-    conn->dns_entry = NULL;
-  }
 
   switch(status) {
   case CURLE_ABORTED_BY_CALLBACK:
@@ -6002,6 +5984,23 @@ CURLcode Curl_done(struct connectdata **connp,
 
   if(!result && Curl_pgrsDone(conn))
     result = CURLE_ABORTED_BY_CALLBACK;
+
+  if((conn->send_pipe->size + conn->recv_pipe->size != 0 &&
+      !data->set.reuse_forbid &&
+      !conn->bits.close)) {
+    /* Stop if pipeline is not empty and we do not have to close
+       connection. */
+    DEBUGF(infof(data, "Connection still in use, no more Curl_done now!\n"));
+    return CURLE_OK;
+  }
+
+  data->state.done = TRUE; /* called just now! */
+  Curl_resolver_cancel(conn);
+
+  if(conn->dns_entry) {
+    Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
+    conn->dns_entry = NULL;
+  }
 
   /* if the transfer was completed in a paused state there can be buffered
      data left to write and then kill */
@@ -6072,7 +6071,7 @@ static CURLcode do_init(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct SingleRequest *k = &data->req;
 
-  conn->bits.done = FALSE; /* Curl_done() is not called yet */
+  data->state.done = FALSE; /* Curl_done() is not called yet */
   conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to use */
   data->state.expect100header = FALSE;
 
