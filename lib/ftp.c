@@ -1906,6 +1906,22 @@ static CURLcode proxy_magic(struct connectdata *conn,
   return result;
 }
 
+static char *control_address(struct connectdata *conn)
+{
+  /* Returns the control connection IP address.
+     If a proxy tunnel is used, returns the original host name instead, because
+     the effective control connection address is the proxy address,
+     not the ftp host. */
+  if(conn->bits.tunnel_proxy ||
+     conn->proxytype == CURLPROXY_SOCKS5 ||
+     conn->proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
+     conn->proxytype == CURLPROXY_SOCKS4 ||
+     conn->proxytype == CURLPROXY_SOCKS4A)
+    return conn->host.name;
+
+  return conn->ip_addr_str;
+}
+
 static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
                                     int ftpcode)
 {
@@ -1928,12 +1944,12 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
       unsigned int num;
       char separator[4];
       ptr++;
-      if(5  == sscanf(ptr, "%c%c%c%u%c",
-                      &separator[0],
-                      &separator[1],
-                      &separator[2],
-                      &num,
-                      &separator[3])) {
+      if(5 == sscanf(ptr, "%c%c%c%u%c",
+                     &separator[0],
+                     &separator[1],
+                     &separator[2],
+                     &num,
+                     &separator[3])) {
         const char sep1 = separator[0];
         int i;
 
@@ -1951,9 +1967,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
         }
         if(ptr) {
           ftpc->newport = (unsigned short)(num & 0xffff);
-
-          /* use the original host name again */
-          ftpc->newhost = strdup(conn->host.name);
+          ftpc->newhost = strdup(control_address(conn));
           if(!ftpc->newhost)
             return CURLE_OUT_OF_MEMORY;
         }
@@ -1983,8 +1997,8 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
      */
     while(*str) {
       if(6 == sscanf(str, "%d,%d,%d,%d,%d,%d",
-                      &ip[0], &ip[1], &ip[2], &ip[3],
-                      &port[0], &port[1]))
+                     &ip[0], &ip[1], &ip[2], &ip[3],
+                     &port[0], &port[1]))
         break;
       str++;
     }
@@ -2001,9 +2015,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
       infof(data, "Skip %d.%d.%d.%d for data connection, re-use %s instead\n",
             ip[0], ip[1], ip[2], ip[3],
             conn->host.name);
-
-      /* use the original host name again */
-      ftpc->newhost = strdup(conn->host.name);
+      ftpc->newhost = strdup(control_address(conn));
     }
     else
       ftpc->newhost = aprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
