@@ -558,6 +558,9 @@ CURLPAUSE_RECV                  7.18.0
 CURLPAUSE_RECV_CONT             7.18.0
 CURLPAUSE_SEND                  7.18.0
 CURLPAUSE_SEND_CONT             7.18.0
+CURLPIPE_HTTP1                  7.43.0
+CURLPIPE_MULTIPLEX              7.43.0
+CURLPIPE_NOTHING                7.43.0
 CURLPROTO_ALL                   7.19.4
 CURLPROTO_DICT                  7.19.4
 CURLPROTO_FILE                  7.19.4
