@@ -883,12 +883,12 @@ schannel_recv(struct connectdata *conn, int sockindex,
                                      connssl->encdata_offset),
                            size, &nread);
     /* check for received data */
-    if(*err != CURLE_OK)
+    if(*err != CURLE_OK) {
       return -1;
-    else {
-      if(nread > 0)
-        /* increase encrypted data buffer offset */
-        connssl->encdata_offset += nread;
+    }
+    else if(nread > 0) {
+      /* increase encrypted data buffer offset */
+      connssl->encdata_offset += nread;
     }
     infof(data, "schannel: encrypted data got %zd\n", nread);
   }
@@ -907,7 +907,6 @@ schannel_recv(struct connectdata *conn, int sockindex,
     InitSecBuffer(&inbuf[1], SECBUFFER_EMPTY, NULL, 0);
     InitSecBuffer(&inbuf[2], SECBUFFER_EMPTY, NULL, 0);
     InitSecBuffer(&inbuf[3], SECBUFFER_EMPTY, NULL, 0);
-
     InitSecBufferDesc(&inbuf_desc, inbuf, 4);
 
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375348.aspx */
