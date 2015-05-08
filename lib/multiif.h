@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,8 +27,7 @@
  */
 void Curl_expire(struct SessionHandle *data, long milli);
 void Curl_expire_latest(struct SessionHandle *data, long milli);
-
-bool Curl_multi_pipeline_enabled(const struct Curl_multi* multi);
+bool Curl_pipeline_wanted(const struct Curl_multi* multi, int bits);
 void Curl_multi_handlePipeBreak(struct SessionHandle *data);
 
 /* Internal version of curl_multi_init() accepts size parameters for the

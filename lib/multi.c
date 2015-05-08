@@ -613,9 +613,10 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   return CURLM_OK;
 }
 
-bool Curl_multi_pipeline_enabled(const struct Curl_multi *multi)
+/* Return TRUE if the application asked for a certain set of pipelining */
+bool Curl_pipeline_wanted(const struct Curl_multi *multi, int bits)
 {
-  return (multi && multi->pipelining_enabled) ? TRUE : FALSE;
+  return (multi && (multi->pipelining & bits)) ? TRUE : FALSE;
 }
 
 void Curl_multi_handlePipeBreak(struct SessionHandle *data)
@@ -1082,7 +1083,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             rc = CURLM_CALL_MULTI_PERFORM;
 
             if(protocol_connect)
-              multistate(data, multi->pipelining_enabled?
+              multistate(data, Curl_pipeline_wanted(multi, CURLPIPE_HTTP1)?
                          CURLM_STATE_WAITDO:CURLM_STATE_DO);
             else {
 #ifndef CURL_DISABLE_HTTP
@@ -1139,7 +1140,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           /* call again please so that we get the next socket setup */
           rc = CURLM_CALL_MULTI_PERFORM;
           if(protocol_connect)
-            multistate(data, multi->pipelining_enabled?
+            multistate(data, Curl_pipeline_wanted(multi, CURLPIPE_HTTP1)?
                        CURLM_STATE_WAITDO:CURLM_STATE_DO);
           else {
 #ifndef CURL_DISABLE_HTTP
@@ -1203,7 +1204,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(data, CURLM_STATE_PROTOCONNECT);
       else if(!result) {
         /* protocol connect has completed, go WAITDO or DO */
-        multistate(data, multi->pipelining_enabled?
+        multistate(data, Curl_pipeline_wanted(multi, CURLPIPE_HTTP1)?
                    CURLM_STATE_WAITDO:CURLM_STATE_DO);
         rc = CURLM_CALL_MULTI_PERFORM;
       }
@@ -1220,7 +1221,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       result = Curl_protocol_connecting(data->easy_conn, &protocol_connect);
       if(!result && protocol_connect) {
         /* after the connect has completed, go WAITDO or DO */
-        multistate(data, multi->pipelining_enabled?
+        multistate(data, Curl_pipeline_wanted(multi, CURLPIPE_HTTP1)?
                    CURLM_STATE_WAITDO:CURLM_STATE_DO);
         rc = CURLM_CALL_MULTI_PERFORM;
       }
@@ -2340,7 +2341,7 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
     multi->socket_userp = va_arg(param, void *);
     break;
   case CURLMOPT_PIPELINING:
-    multi->pipelining_enabled = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    multi->pipelining = va_arg(param, long);
     break;
   case CURLMOPT_TIMERFUNCTION:
     multi->timer_cb = va_arg(param, curl_multi_timer_callback);
