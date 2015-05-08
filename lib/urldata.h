@@ -516,11 +516,6 @@ struct ConnectBits {
                          requests */
   bool netrc;         /* name+password provided by netrc */
   bool userpwd_in_url; /* name+password found in url */
-
-  bool done;          /* set to FALSE when Curl_do() is called and set to TRUE
-                         when Curl_done() is called, to prevent Curl_done() to
-                         get invoked twice when the multi interface is
-                         used. */
   bool stream_was_rewound; /* Indicates that the stream was rewound after a
                               request read past the end of its response byte
                               boundary */
@@ -1314,6 +1309,9 @@ struct UrlState {
   int drain; /* Increased when this stream has data to read, even if its
                 socket not necessarily is readable. Decreased when
                 checked. */
+  bool done; /* set to FALSE when Curl_do() is called and set to TRUE when
+                Curl_done() is called, to prevent Curl_done() to get invoked
+                twice when the multi interface is used. */
 };
 
 

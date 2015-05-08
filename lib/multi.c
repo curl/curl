@@ -1170,6 +1170,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(data->easy_conn->bits.proxy_connect_closed) {
         /* connect back to proxy again */
         result = CURLE_OK;
+        Curl_done(&data->easy_conn, CURLE_OK, FALSE);
         multistate(data, CURLM_STATE_CONNECT);
       }
       else if(!result) {
