@@ -62,6 +62,8 @@ typedef enum {
 #define GETSOCK_READABLE (0x00ff)
 #define GETSOCK_WRITABLE (0xff00)
 
+#define CURLPIPE_ANY (CURLPIPE_HTTP1 | CURLPIPE_MULTIPLEX)
+
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
@@ -97,8 +99,8 @@ struct Curl_multi {
      same actual socket) */
   struct curl_hash sockhash;
 
-  /* Whether pipelining is enabled for this multi handle */
-  bool pipelining_enabled;
+  /* pipelining wanted bits (CURLPIPE*) */
+  long pipelining;
 
   /* Shared connection cache (bundles)*/
   struct conncache conn_cache;

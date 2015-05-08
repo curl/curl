@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,6 +73,11 @@ typedef enum {
    for CURLM_CALL_MULTI_SOCKET too in the same style it works for
    curl_multi_perform() and CURLM_CALL_MULTI_PERFORM */
 #define CURLM_CALL_MULTI_SOCKET CURLM_CALL_MULTI_PERFORM
+
+/* bitmask bits for CURLMOPT_PIPELINING */
+#define CURLPIPE_NOTHING   0L
+#define CURLPIPE_HTTP1     1L
+#define CURLPIPE_MULTIPLEX 2L
 
 typedef enum {
   CURLMSG_NONE, /* first, not used */
