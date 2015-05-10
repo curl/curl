@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1154,12 +1154,14 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_PROXYPASSWORD:
   case CURLOPT_PROXYUSERNAME:
   case CURLOPT_PROXYUSERPWD:
+  case CURLOPT_PROXY_SERVICE_NAME:
   case CURLOPT_RANDOM_FILE:
   case CURLOPT_RANGE:
   case CURLOPT_REFERER:
   case CURLOPT_RTSP_SESSION_ID:
   case CURLOPT_RTSP_STREAM_URI:
   case CURLOPT_RTSP_TRANSPORT:
+  case CURLOPT_SERVICE_NAME:
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
   case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
   case CURLOPT_SSH_KNOWNHOSTS:
@@ -1180,8 +1182,6 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_USERNAME:
   case CURLOPT_USERPWD:
   case CURLOPT_XOAUTH2_BEARER:
-  case CURLOPT_PROXY_SERVICE_NAME:
-  case CURLOPT_SERVICE_NAME:
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
 
