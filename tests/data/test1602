@@ -16,7 +16,7 @@ none
 unittest
 </features>
  <name>
-Another internal hash create/add/destroy testing
+Internal hash create/add/destroy testing, exercising clean functions
  </name>
 <tool>
 unit1602

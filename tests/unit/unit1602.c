@@ -56,8 +56,10 @@ UNITTEST_START
   *value = 199;
   *value2 = 204;
   Curl_hash_add(myhash, &key, klen, value);
-
+  
   Curl_hash_clean(myhash);
+
+  /* Attempt to add another key/value pair */
   Curl_hash_add(myhash, &key2, klen, value2);
 
   Curl_hash_destroy(myhash);
