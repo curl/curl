@@ -298,6 +298,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
     break;
   case NGHTTP2_SETTINGS:
+  {
+    uint32_t max_conn = httpc->settings.max_concurrent_streams;
     DEBUGF(infof(conn->data, "Got SETTINGS for stream %x!\n", stream_id));
     httpc->settings.max_concurrent_streams =
       nghttp2_session_get_remote_settings(
@@ -309,10 +311,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                  httpc->settings.max_concurrent_streams));
     DEBUGF(infof(conn->data, "ENABLE_PUSH == %s\n",
                  httpc->settings.enable_push?"TRUE":"false"));
-    infof(conn->data,
-          "Connection state changed (MAX_CONCURRENT_STREAMS updated)!\n");
-    Curl_multi_connchanged(conn->data->multi);
-    break;
+    if(max_conn != httpc->settings.max_concurrent_streams) {
+      /* only signal change if the value actually changed */
+      infof(conn->data,
+            "Connection state changed (MAX_CONCURRENT_STREAMS updated)!\n");
+      Curl_multi_connchanged(conn->data->multi);
+    }
+  }
+  break;
   default:
     DEBUGF(infof(conn->data, "Got frame type %x for stream %x!\n",
                  frame->hd.type, stream_id));
