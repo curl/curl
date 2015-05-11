@@ -388,7 +388,9 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   if(nread < len) {
     stream->pausedata = data + nread;
     stream->pauselen = len - nread;
-    DEBUGF(infof(data_s, "NGHTTP2_ERR_PAUSE - out of buffer\n"));
+    DEBUGF(infof(data_s, "NGHTTP2_ERR_PAUSE - %zu bytes out of buffer"
+                 ", stream %x\n",
+                 len - nread, stream_id));
     conn->proto.httpc.pause_stream_id = stream_id;
     return NGHTTP2_ERR_PAUSE;
   }
@@ -853,7 +855,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   infof(data, "http2_recv: %d bytes buffer at %p (stream %x)\n",
         len, mem, stream->stream_id);
 
-  if(data->state.drain) {
+  if((data->state.drain) && stream->memlen) {
     DEBUGF(infof(data, "http2_recv: DRAIN %zu bytes stream %x!! (%p => %p)\n",
                  stream->memlen, stream->stream_id,
                  stream->mem, mem));
@@ -881,8 +883,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       stream->pausedata = NULL;
       stream->pauselen = 0;
     }
-    infof(data, "http2_recv: returns %zd bytes from stream->data\n",
-          nread);
+    infof(data, "http2_recv: returns unpaused %zd bytes on stream %x\n",
+          nread, stream->stream_id);
     return nread;
   }
   else if(httpc->pause_stream_id) {
@@ -967,11 +969,18 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   }
   if(stream->memlen) {
     ssize_t retlen = stream->memlen;
-    infof(data, "http2_recv: returns %zd for stream %x (%zu/%zu)\n",
-          retlen, stream->stream_id,
-          len, stream->len);
-    data->state.drain = 0; /* this stream is hereby drained */
+    infof(data, "http2_recv: returns %zd for stream %x\n",
+          retlen, stream->stream_id);
     stream->memlen = 0;
+
+    if(httpc->pause_stream_id == stream->stream_id) {
+      /* data for this stream is returned now, but this stream caused a pause
+         already so we need it called again asap */
+      DEBUGF(infof(data, "Data returned for PAUSED stream %x\n",
+                   stream->stream_id));
+    }
+    else
+      data->state.drain = 0; /* this stream is hereby drained */
 
     return retlen;
   }
