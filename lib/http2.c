@@ -386,8 +386,8 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
                stream->memlen));
 
   if(nread < len) {
-    stream->data = data + nread;
-    stream->datalen = len - nread;
+    stream->pausedata = data + nread;
+    stream->pauselen = len - nread;
     DEBUGF(infof(data_s, "NGHTTP2_ERR_PAUSE - out of buffer\n"));
     conn->proto.httpc.pause_stream_id = stream_id;
     return NGHTTP2_ERR_PAUSE;
@@ -865,24 +865,24 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       stream->mem = mem;
     }
   }
-  else if(stream->data) {
-    nread = MIN(len, stream->datalen);
-    memcpy(mem, stream->data, nread);
+  else if(stream->pausedata) {
+    nread = MIN(len, stream->pauselen);
+    memcpy(mem, stream->pausedata, nread);
 
-    stream->data += nread;
-    stream->datalen -= nread;
+    stream->pausedata += nread;
+    stream->pauselen -= nread;
 
     infof(data, "%zu data bytes written\n", nread);
-    if(stream->datalen == 0) {
+    if(stream->pauselen == 0) {
       DEBUGF(infof(data, "Unpaused by stream %x\n", stream->stream_id));
       assert(httpc->pause_stream_id == stream->stream_id);
       httpc->pause_stream_id = 0;
 
-      stream->data = NULL;
-      stream->datalen = 0;
+      stream->pausedata = NULL;
+      stream->pauselen = 0;
     }
-    infof(data, "http2_recv: Got %d bytes from stream->data\n",
-          (int)nread);
+    infof(data, "http2_recv: returns %zd bytes from stream->data\n",
+          nread);
     return nread;
   }
   else if(httpc->pause_stream_id) {
@@ -967,7 +967,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   }
   if(stream->memlen) {
     ssize_t retlen = stream->memlen;
-    infof(data, "http2_recv: returns %d for stream %x (%zu/%zu)\n",
+    infof(data, "http2_recv: returns %zd for stream %x (%zu/%zu)\n",
           retlen, stream->stream_id,
           len, stream->len);
     data->state.drain = 0; /* this stream is hereby drained */
@@ -981,7 +981,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     return http2_handle_stream_close(httpc, data, stream, err);
   }
   *err = CURLE_AGAIN;
-  DEBUGF(infof(data, "http2_recv returns -1, AGAIN\n"));
+  DEBUGF(infof(data, "http2_recv returns AGAIN for stream %x\n",
+               stream->stream_id));
   return -1;
 }
 
