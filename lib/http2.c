@@ -353,7 +353,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   (void)flags;
   (void)data;
   DEBUGF(infof(conn->data, "on_data_chunk_recv() "
-               "len = %u, stream = %x\n", len, stream_id));
+               "len = %u, stream %x\n", len, stream_id));
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
@@ -792,7 +792,7 @@ static ssize_t http2_handle_stream_close(struct http_conn *httpc,
    function. */
   stream->closed = FALSE;
   if(stream->error_code != NGHTTP2_NO_ERROR) {
-    failf(data, "HTTP/2 stream = %x was not closed cleanly: error_code = %d",
+    failf(data, "HTTP/2 stream %x was not closed cleanly: error_code = %d",
           stream->stream_id, stream->error_code);
     *err = CURLE_HTTP2;
     return -1;
