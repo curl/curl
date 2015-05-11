@@ -456,6 +456,11 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
 
     stream->error_code = error_code;
     stream->closed = TRUE;
+
+    /* remove the entry from the hash as the stream is now gone */
+    Curl_hash_delete(&conn->proto.httpc.streamsh,
+                     &stream_id, sizeof(stream_id));
+    DEBUGF(infof(conn->data, "Removed stream %x hash!\n", stream_id));
   }
   return 0;
 }
@@ -799,7 +804,7 @@ static ssize_t http2_handle_stream_close(struct http_conn *httpc,
     *err = CURLE_HTTP2;
     return -1;
   }
-  DEBUGF(infof(data, "http2_recv returns 0\n"));
+  DEBUGF(infof(data, "http2_recv returns 0, http2_handle_stream_close\n"));
   return 0;
 }
 
