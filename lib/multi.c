@@ -935,6 +935,34 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   return CURLM_OK;
 }
 
+/*
+ * Curl_multi_connchanged() is called to tell that there is a connection in
+ * this multi handle that has changed state (pipelining become possible, the
+ * number of allowed streams changed or similar), and a subsequent use of this
+ * multi handle should move CONNECT_PEND handles back to CONNECT to have them
+ * retry.
+ */
+void Curl_multi_connchanged(struct Curl_multi *multi)
+{
+  multi->recheckstate = TRUE;
+}
+
+/*
+ * multi_ischanged() is called
+ *
+ * Returns TRUE/FALSE whether the state is changed to trigger a CONNECT_PEND
+ * => CONNECT action.
+ *
+ * Set 'clear' to TRUE to have it also clear the state variable.
+ */
+static bool multi_ischanged(struct Curl_multi *multi, bool clear)
+{
+  bool retval = multi->recheckstate;
+  if(clear)
+    multi->recheckstate = FALSE;
+  return retval;
+}
+
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct timeval now,
                                  struct SessionHandle *data)
@@ -984,6 +1012,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          analyzers. */
       failf(data, "In state %d with no easy_conn, bail out!\n", data->mstate);
       return CURLM_INTERNAL_ERROR;
+    }
+
+    if(multi_ischanged(multi, TRUE)) {
+      DEBUGF(infof(data, "multi changed, check CONNECT_PEND queue!\n"));
+      Curl_multi_process_pending_handles(multi);
     }
 
     if(data->easy_conn && data->mstate > CURLM_STATE_CONNECT &&
@@ -1757,7 +1790,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       multistate(data, CURLM_STATE_MSGSENT);
     }
-  } while(rc == CURLM_CALL_MULTI_PERFORM);
+  } while((rc == CURLM_CALL_MULTI_PERFORM) || multi_ischanged(multi, FALSE));
 
   data->result = result;
 

@@ -100,6 +100,8 @@ struct Curl_multi {
   /* pipelining wanted bits (CURLPIPE*) */
   long pipelining;
 
+  bool recheckstate; /* see Curl_multi_connchanged */
+
   /* Shared connection cache (bundles)*/
   struct conncache *conn_cache;
 
@@ -142,4 +144,3 @@ struct Curl_multi {
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */
-

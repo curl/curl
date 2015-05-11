@@ -3128,7 +3128,9 @@ ConnectionExists(struct SessionHandle *data,
      particular host */
   bundle = Curl_conncache_find_bundle(needle, data->state.conn_cache);
   if(bundle) {
-    size_t max_pipe_len = max_pipeline_length(data->multi);
+    /* Max pipe length is zero (unlimited) for multiplexed connections */
+    size_t max_pipe_len = (bundle->multiuse != BUNDLE_MULTIPLEX)?
+      max_pipeline_length(data->multi):0;
     size_t best_pipe_len = max_pipe_len;
     struct curl_llist_element *curr;
 
@@ -3353,21 +3355,42 @@ ConnectionExists(struct SessionHandle *data,
           }
 
           /* We can't use the connection if the pipe is full */
-          if(pipeLen >= max_pipe_len) {
-            infof(data, "Pipe is full, skip (%d)\n", pipeLen);
+          if(max_pipe_len && (pipeLen >= max_pipe_len)) {
+            infof(data, "Pipe is full, skip (%zu)\n", pipeLen);
             continue;
           }
 
-          /* We can't use the connection if the pipe is penalized */
-          if(Curl_pipeline_penalized(data, check))
-            continue;
+          /* If multiplexed, make sure we don't go over concurrency limit */
+          if(check->bits.multiplex) {
+            /* Multiplexed connections can only be HTTP/2 for now */
+            struct http_conn *httpc = &check->proto.httpc;
+            if(pipeLen >= httpc->settings.max_concurrent_streams) {
+              infof(data, "MAX_CONCURRENT_STREAMS reached, skip (%zu)\n",
+                    pipeLen);
+              continue;
+            }
+          }
 
-          if(pipeLen < best_pipe_len) {
-            /* This connection has a shorter pipe so far. We'll pick this
-               and continue searching */
-            chosen = check;
-            best_pipe_len = pipeLen;
+          /* We can't use the connection if the pipe is penalized */
+          if(Curl_pipeline_penalized(data, check)) {
+            infof(data, "Penalized, skip\n");
             continue;
+          }
+
+          if(max_pipe_len) {
+            if(pipeLen < best_pipe_len) {
+              /* This connection has a shorter pipe so far. We'll pick this
+                 and continue searching */
+              chosen = check;
+              best_pipe_len = pipeLen;
+              continue;
+            }
+          }
+          else {
+            /* When not pipelining (== multiplexed), we have a match here! */
+            chosen = check;
+            infof(data, "Multiplexed connection found!\n");
+            break;
           }
         }
         else {

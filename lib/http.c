@@ -176,6 +176,8 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   http->len = BUFSIZE;
   http->memlen = 0;
 
+  Curl_http2_setup_conn(conn);
+
   return CURLE_OK;
 }
 
