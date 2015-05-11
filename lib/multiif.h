@@ -59,9 +59,6 @@ void Curl_multi_process_pending_handles(struct Curl_multi *multi);
 /* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */
 size_t Curl_multi_max_host_connections(struct Curl_multi *multi);
 
-/* Return the value of the CURLMOPT_MAX_PIPELINE_LENGTH option */
-size_t Curl_multi_max_pipeline_length(struct Curl_multi *multi);
-
 /* Return the value of the CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE option */
 curl_off_t Curl_multi_content_length_penalty_size(struct Curl_multi *multi);
 

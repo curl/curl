@@ -2736,11 +2736,6 @@ size_t Curl_multi_max_total_connections(struct Curl_multi *multi)
   return multi ? multi->max_total_connections : 0;
 }
 
-size_t Curl_multi_max_pipeline_length(struct Curl_multi *multi)
-{
-  return multi ? multi->max_pipeline_length : 0;
-}
-
 curl_off_t Curl_multi_content_length_penalty_size(struct Curl_multi *multi)
 {
   return multi ? multi->content_length_penalty_size : 0;

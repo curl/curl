@@ -1196,7 +1196,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 20;
-  conn->bundle->server_supports_pipelining = TRUE;
+  conn->bundle->multiuse = BUNDLE_MULTIPLEX;
 
   return CURLE_OK;
 }

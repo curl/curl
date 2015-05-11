@@ -55,7 +55,7 @@ CURLcode Curl_bundle_create(struct SessionHandle *data,
     return CURLE_OUT_OF_MEMORY;
 
   (*cb_ptr)->num_connections = 0;
-  (*cb_ptr)->server_supports_pipelining = FALSE;
+  (*cb_ptr)->multiuse = BUNDLE_UNKNOWN;
 
   (*cb_ptr)->conn_list = Curl_llist_alloc((curl_llist_dtor) conn_llist_dtor);
   if(!(*cb_ptr)->conn_list) {
