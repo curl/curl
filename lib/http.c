@@ -166,8 +166,8 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   http->nread_header_recvbuf = 0;
   http->bodystarted = FALSE;
   http->status_code = -1;
-  http->data = NULL;
-  http->datalen = 0;
+  http->pausedata = NULL;
+  http->pauselen = 0;
   http->error_code = NGHTTP2_NO_ERROR;
   http->closed = FALSE;
 

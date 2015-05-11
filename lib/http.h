@@ -163,8 +163,8 @@ struct HTTP {
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
                                   upper layer */
   int status_code; /* HTTP status code */
-  const uint8_t *data; /* pointer to data chunk, received in on_data_chunk */
-  size_t datalen; /* the number of bytes left in data */
+  const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
+  size_t pauselen; /* the number of bytes left in data */
   bool closed; /* TRUE on HTTP2 stream close */
   uint32_t error_code; /* HTTP/2 error code */
 
