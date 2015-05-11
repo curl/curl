@@ -2886,16 +2886,6 @@ void Curl_getoff_all_pipelines(struct SessionHandle *data,
     conn->readchannel_inuse = FALSE;
   if(Curl_removeHandleFromPipeline(data, conn->send_pipe) && send_head)
     conn->writechannel_inuse = FALSE;
-
-  if(conn->httpversion == 20) {
-    /* delete this handle from the stream hash */
-    struct HTTP *stream = data->req.protop;
-    if(stream && Curl_hash_delete(&conn->proto.httpc.streamsh,
-                                  &stream->stream_id,
-                                  sizeof(stream->stream_id))) {
-      infof(conn->data, "Failed to remove handle from h2 stream hash!!\n");
-    }
-  }
 }
 
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke)
