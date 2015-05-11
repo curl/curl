@@ -287,6 +287,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     stream->memlen += ncopy;
 
     data_s->state.drain++;
+    Curl_expire(data_s, 1);
     break;
   case NGHTTP2_PUSH_PROMISE:
     DEBUGF(infof(data_s, "Got PUSH_PROMISE, RST_STREAM it!\n"));
@@ -375,8 +376,8 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   stream->memlen += nread;
 
   data_s->state.drain++;
-  /* TODO: this may need to set expire for the multi_socket to work for this
-     stream */
+  Curl_expire(data_s, 1); /* TODO: fix so that this can be set to 0 for
+                             immediately? */
 
   DEBUGF(infof(data_s, "%zu data received for stream %x "
                "(%zu left in buffer %p, total %zu)\n",
@@ -578,6 +579,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(stream->header_recvbuf, value, valuelen);
     Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
     data_s->state.drain++;
+    Curl_expire(data_s, 1);
 
     DEBUGF(infof(data_s, "h2 status: HTTP/2 %03d\n",
                  stream->status_code));
@@ -603,6 +605,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(stream->header_recvbuf, value, valuelen);
     Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
     data_s->state.drain++;
+    Curl_expire(data_s, 1);
 
     DEBUGF(infof(data_s, "h2 header: %.*s: %.*s\n",
                  namelen, name, valuelen, value));
