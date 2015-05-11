@@ -93,6 +93,13 @@ static CURLcode http2_disconnect(struct connectdata *conn,
   return CURLE_OK;
 }
 
+/* called from Curl_http_setup_conn */
+void Curl_http2_setup_conn(struct connectdata *conn)
+{
+  conn->proto.httpc.settings.max_concurrent_streams =
+    DEFAULT_MAX_CONCURRENT_STREAMS;
+}
+
 /*
  * HTTP2 handler interface. This isn't added to the general list of protocols
  * but will be used at run-time when the protocol is dynamically switched from
@@ -302,6 +309,9 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                  httpc->settings.max_concurrent_streams));
     DEBUGF(infof(conn->data, "ENABLE_PUSH == %s\n",
                  httpc->settings.enable_push?"TRUE":"false"));
+    infof(conn->data,
+          "Connection state changed (MAX_CONCURRENT_STREAMS updated)!\n");
+    Curl_multi_connchanged(conn->data->multi);
     break;
   default:
     DEBUGF(infof(conn->data, "Got frame type %x for stream %x!\n",
@@ -1197,6 +1207,9 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 20;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+
+  infof(conn->data, "Connection state changed (HTTP/2 confirmed)\n");
+  Curl_multi_connchanged(conn->data->multi);
 
   return CURLE_OK;
 }
