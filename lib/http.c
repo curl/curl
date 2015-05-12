@@ -3381,18 +3381,15 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         }
         else if(conn->httpversion >= 11 &&
                 !conn->bits.close) {
-          struct connectbundle *cb_ptr;
-
           /* If HTTP version is >= 1.1 and connection is persistent
              server supports pipelining. */
           DEBUGF(infof(data,
                        "HTTP 1.1 or later with persistent connection, "
                        "pipelining supported\n"));
           /* Activate pipelining if needed */
-          cb_ptr = conn->bundle;
-          if(cb_ptr) {
+          if(conn->bundle) {
             if(!Curl_pipeline_site_blacklisted(data, conn))
-              cb_ptr->multiuse = BUNDLE_PIPELINING;
+              conn->bundle->multiuse = BUNDLE_PIPELINING;
           }
         }
 
