@@ -30,6 +30,13 @@ struct conncache {
   struct timeval last_cleanup;
 };
 
+struct connectbundle {
+  bool server_supports_pipelining; /* TRUE if server supports pipelining,
+                                      set after first response */
+  size_t num_connections;       /* Number of connections in the bundle */
+  struct curl_llist *conn_list; /* The connectdata members of the bundle */
+};
+
 int Curl_conncache_init(struct conncache *, int size);
 
 void Curl_conncache_destroy(struct conncache *connc);
