@@ -433,6 +433,7 @@ CURLOPT_PASSWORD                7.19.1
 CURLOPT_PASV_HOST               7.12.1        7.16.0      7.15.5
 CURLOPT_PATH_AS_IS              7.42.0
 CURLOPT_PINNEDPUBLICKEY         7.39.0
+CURLOPT_PIPEWAIT                7.43.0
 CURLOPT_PORT                    7.1
 CURLOPT_POST                    7.1
 CURLOPT_POST301                 7.17.1        7.19.1
