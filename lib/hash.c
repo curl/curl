@@ -89,32 +89,6 @@ Curl_hash_init(struct curl_hash *h,
   }
 }
 
-struct curl_hash *
-Curl_hash_alloc(int slots,
-                hash_function hfunc,
-                comp_function comparator,
-                curl_hash_dtor dtor)
-{
-  struct curl_hash *h;
-
-  if(!slots || !hfunc || !comparator ||!dtor) {
-    return NULL; /* failure */
-  }
-
-  h = malloc(sizeof(struct curl_hash));
-  if(h) {
-    if(Curl_hash_init(h, slots, hfunc, comparator, dtor)) {
-      /* failure */
-      free(h);
-      h = NULL;
-    }
-  }
-
-  return h;
-}
-
-
-
 static struct curl_hash_element *
 mk_hash_element(const void *key, size_t key_len, const void *p)
 {
@@ -279,17 +253,6 @@ Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
       le = lnext;
     }
   }
-}
-
-void
-Curl_hash_destroy(struct curl_hash *h)
-{
-  if(!h)
-    return;
-
-  Curl_hash_clean(h);
-
-  free(h);
 }
 
 size_t Curl_hash_str(void* key, size_t key_length, size_t slots_num)

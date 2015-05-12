@@ -742,11 +742,12 @@ static void freednsentry(void *freethis)
 }
 
 /*
- * Curl_mk_dnscache() creates a new DNS cache and returns the handle for it.
+ * Curl_mk_dnscache() inits a new DNS cache and returns success/failure.
  */
-struct curl_hash *Curl_mk_dnscache(void)
+int Curl_mk_dnscache(struct curl_hash *hash)
 {
-  return Curl_hash_alloc(7, Curl_hash_str, Curl_str_key_compare, freednsentry);
+  return Curl_hash_init(hash, 7, Curl_hash_str, Curl_str_key_compare,
+                        freednsentry);
 }
 
 /*
