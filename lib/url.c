@@ -2649,6 +2649,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
   case CURLOPT_PATH_AS_IS:
     data->set.path_as_is = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
+  case CURLOPT_PIPEWAIT:
+    data->set.pipewait = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;
@@ -3099,7 +3102,8 @@ static bool
 ConnectionExists(struct SessionHandle *data,
                  struct connectdata *needle,
                  struct connectdata **usethis,
-                 bool *force_reuse)
+                 bool *force_reuse,
+                 bool *waitpipe)
 {
   struct connectdata *check;
   struct connectdata *chosen = 0;
@@ -3112,6 +3116,7 @@ ConnectionExists(struct SessionHandle *data,
   struct connectbundle *bundle;
 
   *force_reuse = FALSE;
+  *waitpipe = FALSE;
 
   /* We can't pipe if the site is blacklisted */
   if(canPipeline && Curl_pipeline_site_blacklisted(data, needle)) {
@@ -3132,9 +3137,17 @@ ConnectionExists(struct SessionHandle *data,
           needle->host.name, (void *)bundle);
 
     /* We can't pipe if we don't know anything about the server */
-    if(canPipeline && (bundle->multiuse <= BUNDLE_UNKNOWN)) {
-      infof(data, "Server doesn't support multi-use (yet)\n");
-      canPipeline = FALSE;
+    if(canPipeline) {
+      if(bundle->multiuse <= BUNDLE_UNKNOWN) {
+        if((bundle->multiuse == BUNDLE_UNKNOWN) && data->set.pipewait) {
+          infof(data, "Server doesn't support multi-use yet, wait\n");
+          *waitpipe = TRUE;
+          return FALSE; /* no re-use */
+        }
+
+        infof(data, "Server doesn't support multi-use (yet)\n");
+        canPipeline = FALSE;
+      }
     }
 
     curr = bundle->conn_list->head;
@@ -5343,8 +5356,9 @@ static CURLcode create_conn(struct SessionHandle *data,
   bool reuse;
   char *proxy = NULL;
   bool prot_missing = FALSE;
-  bool no_connections_available = FALSE;
+  bool connections_available = TRUE;
   bool force_reuse = FALSE;
+  bool waitpipe = FALSE;
   size_t max_host_connections = Curl_multi_max_host_connections(data->multi);
   size_t max_total_connections = Curl_multi_max_total_connections(data->multi);
 
@@ -5684,7 +5698,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(data->set.reuse_fresh && !data->state.this_is_a_follow)
     reuse = FALSE;
   else
-    reuse = ConnectionExists(data, conn, &conn_temp, &force_reuse);
+    reuse = ConnectionExists(data, conn, &conn_temp, &force_reuse, &waitpipe);
 
   /* If we found a reusable connection, we may still want to
      open a new connection if we are pipelining. */
@@ -5730,9 +5744,15 @@ static CURLcode create_conn(struct SessionHandle *data,
     /* We have decided that we want a new connection. However, we may not
        be able to do that if we have reached the limit of how many
        connections we are allowed to open. */
-    struct connectbundle *bundle;
+    struct connectbundle *bundle = NULL;
 
-    bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache);
+    if(waitpipe)
+      /* There is a connection that *might* become usable for pipelining
+         "soon", and we wait for that */
+      connections_available = FALSE;
+    else
+      bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache);
+
     if(max_host_connections > 0 && bundle &&
        (bundle->num_connections >= max_host_connections)) {
       struct connectdata *conn_candidate;
@@ -5748,11 +5768,12 @@ static CURLcode create_conn(struct SessionHandle *data,
       else {
         infof(data, "No more connections allowed to host: %d\n",
               max_host_connections);
-        no_connections_available = TRUE;
+        connections_available = FALSE;
       }
     }
 
-    if(max_total_connections > 0 &&
+    if(connections_available &&
+       (max_total_connections > 0) &&
        (data->state.conn_cache->num_connections >= max_total_connections)) {
       struct connectdata *conn_candidate;
 
@@ -5766,12 +5787,11 @@ static CURLcode create_conn(struct SessionHandle *data,
       }
       else {
         infof(data, "No connections available in cache\n");
-        no_connections_available = TRUE;
+        connections_available = FALSE;
       }
     }
 
-
-    if(no_connections_available) {
+    if(!connections_available) {
       infof(data, "No connections available.\n");
 
       conn_free(conn);
