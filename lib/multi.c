@@ -302,8 +302,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   if(!multi->sockhash)
     goto error;
 
-  multi->conn_cache = Curl_conncache_init(chashsize);
-  if(!multi->conn_cache)
+  if(Curl_conncache_init(&multi->conn_cache, chashsize))
     goto error;
 
   multi->msglist = Curl_llist_alloc(multi_freeamsg);
@@ -320,7 +319,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
     goto error;
 
   multi->closure_handle->multi = multi;
-  multi->closure_handle->state.conn_cache = multi->conn_cache;
+  multi->closure_handle->state.conn_cache = &multi->conn_cache;
 
   multi->max_pipeline_length = 5;
 
@@ -334,8 +333,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   multi->sockhash = NULL;
   Curl_hash_destroy(multi->hostcache);
   multi->hostcache = NULL;
-  Curl_conncache_destroy(multi->conn_cache);
-  multi->conn_cache = NULL;
+  Curl_conncache_destroy(&multi->conn_cache);
   Curl_close(multi->closure_handle);
   multi->closure_handle = NULL;
   Curl_llist_destroy(multi->msglist, NULL);
@@ -409,7 +407,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   }
 
   /* Point to the multi's connection cache */
-  data->state.conn_cache = multi->conn_cache;
+  data->state.conn_cache = &multi->conn_cache;
 
   data->state.infilesize = data->set.filesize;
 
@@ -1832,7 +1830,7 @@ static void close_all_connections(struct Curl_multi *multi)
 {
   struct connectdata *conn;
 
-  conn = Curl_conncache_find_first_connection(multi->conn_cache);
+  conn = Curl_conncache_find_first_connection(&multi->conn_cache);
   while(conn) {
     SIGPIPE_VARIABLE(pipe_st);
     conn->data = multi->closure_handle;
@@ -1842,7 +1840,7 @@ static void close_all_connections(struct Curl_multi *multi)
     (void)Curl_disconnect(conn, FALSE);
     sigpipe_restore(&pipe_st);
 
-    conn = Curl_conncache_find_first_connection(multi->conn_cache);
+    conn = Curl_conncache_find_first_connection(&multi->conn_cache);
   }
 }
 
@@ -1873,7 +1871,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     }
 
     Curl_hash_destroy(multi->sockhash);
-    Curl_conncache_destroy(multi->conn_cache);
+    Curl_conncache_destroy(&multi->conn_cache);
     Curl_llist_destroy(multi->msglist, NULL);
     Curl_llist_destroy(multi->pending, NULL);
 

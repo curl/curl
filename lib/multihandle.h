@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 
+#include "conncache.h"
+
 struct Curl_message {
   /* the 'CURLMsg' is the part that is visible to the external user */
   struct CURLMsg extmsg;
@@ -99,7 +101,7 @@ struct Curl_multi {
   bool pipelining_enabled;
 
   /* Shared connection cache (bundles)*/
-  struct conncache *conn_cache;
+  struct conncache conn_cache;
 
   /* This handle will be used for closing the cached connections in
      curl_multi_cleanup() */
