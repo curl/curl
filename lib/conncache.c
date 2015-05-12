@@ -32,6 +32,7 @@
 #include "sendf.h"
 #include "rawstr.h"
 #include "conncache.h"
+#include "curl_printf.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -128,28 +129,36 @@ void Curl_conncache_destroy(struct conncache *connc)
     Curl_hash_clean(&connc->hash);
 }
 
+/* returns an allocated key to find a bundle for this connection */
+static char *hashkey(struct connectdata *conn)
+{
+  return aprintf("%s:%d",
+                 conn->bits.proxy?conn->proxy.name:conn->host.name,
+                 conn->localport);
+}
+
 /* Look up the bundle with all the connections to the same host this
    connectdata struct is setup to use. */
 struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
                                                  struct conncache *connc)
 {
   struct connectbundle *bundle = NULL;
-
-  char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
-
-  if(connc)
-    bundle = Curl_hash_pick(&connc->hash, hostname, strlen(hostname)+1);
+  if(connc) {
+    char *key = hashkey(conn);
+    if(key) {
+      bundle = Curl_hash_pick(&connc->hash, key, strlen(key));
+      free(key);
+    }
+  }
 
   return bundle;
 }
 
 static bool conncache_add_bundle(struct conncache *connc,
-                                 char *hostname,
+                                 char *key,
                                  struct connectbundle *bundle)
 {
-  void *p;
-
-  p = Curl_hash_add(&connc->hash, hostname, strlen(hostname)+1, bundle);
+  void *p = Curl_hash_add(&connc->hash, key, strlen(key), bundle);
 
   return p?TRUE:FALSE;
 }
@@ -188,13 +197,20 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
 
   bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache);
   if(!bundle) {
-    char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
+    char *key;
+    int rc;
 
     result = bundle_create(data, &new_bundle);
     if(result)
       return result;
 
-    if(!conncache_add_bundle(data->state.conn_cache, hostname, new_bundle)) {
+    key = hashkey(conn);
+    if(!key)
+      return CURLE_OUT_OF_MEMORY;
+
+    rc = conncache_add_bundle(data->state.conn_cache, key, new_bundle);
+    free(key);
+    if(!rc) {
       bundle_destroy(new_bundle);
       return CURLE_OUT_OF_MEMORY;
     }
