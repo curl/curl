@@ -2944,7 +2944,7 @@ find_oldest_idle_connection(struct SessionHandle *data)
 
   now = Curl_tvnow();
 
-  Curl_hash_start_iterate(bc->hash, &iter);
+  Curl_hash_start_iterate(&bc->hash, &iter);
 
   he = Curl_hash_next_element(&iter);
   while(he) {
