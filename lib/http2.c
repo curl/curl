@@ -32,7 +32,7 @@
 #include "curl_base64.h"
 #include "rawstr.h"
 #include "multiif.h"
-#include "bundles.h"
+#include "conncache.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"

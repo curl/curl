@@ -124,7 +124,6 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "curl_rtmp.h"
 #include "gopher.h"
 #include "http_proxy.h"
-#include "bundles.h"
 #include "conncache.h"
 #include "multihandle.h"
 #include "pipeline.h"
@@ -3450,20 +3449,6 @@ ConnectionDone(struct SessionHandle *data, struct connectdata *conn)
   return (conn_candidate == conn) ? FALSE : TRUE;
 }
 
-/*
- * The given input connection struct pointer is to be stored in the connection
- * cache. If the cache is already full, least interesting existing connection
- * (if any) gets closed.
- *
- * The given connection should be unique. That must've been checked prior to
- * this call.
- */
-static CURLcode ConnectionStore(struct SessionHandle *data,
-                                struct connectdata *conn)
-{
-  return Curl_conncache_add_conn(data->state.conn_cache, conn);
-}
-
 /* after a TCP connection to the proxy has been verified, this function does
    the next magic step.
 
@@ -5648,7 +5633,7 @@ static CURLcode create_conn(struct SessionHandle *data,
       conn->data = data;
       conn->bits.tcpconnect[FIRSTSOCKET] = TRUE; /* we are "connected */
 
-      ConnectionStore(data, conn);
+      Curl_conncache_add_conn(data->state.conn_cache, conn);
 
       /*
        * Setup whatever necessary for a resumed transfer
@@ -5820,7 +5805,7 @@ static CURLcode create_conn(struct SessionHandle *data,
        * This is a brand new connection, so let's store it in the connection
        * cache of ours!
        */
-      ConnectionStore(data, conn);
+      Curl_conncache_add_conn(data->state.conn_cache, conn);
     }
 
 #if defined(USE_NTLM)

@@ -39,7 +39,6 @@
 #include "warnless.h"
 #include "speedcheck.h"
 #include "conncache.h"
-#include "bundles.h"
 #include "multihandle.h"
 #include "pipeline.h"
 #include "sigpipe.h"

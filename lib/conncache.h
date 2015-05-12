@@ -30,6 +30,17 @@ struct conncache {
   struct timeval last_cleanup;
 };
 
+#define BUNDLE_NO_MULTIUSE -1
+#define BUNDLE_UNKNOWN     0  /* initial value */
+#define BUNDLE_PIPELINING  1
+#define BUNDLE_MULTIPLEX   2
+
+struct connectbundle {
+  int multiuse;                 /* supports multi-use */
+  size_t num_connections;       /* Number of connections in the bundle */
+  struct curl_llist *conn_list; /* The connectdata members of the bundle */
+};
+
 int Curl_conncache_init(struct conncache *, int size);
 
 void Curl_conncache_destroy(struct conncache *connc);
