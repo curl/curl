@@ -95,7 +95,7 @@ struct Curl_multi {
   /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
      the pluralis form, there can be more than one easy handle waiting on the
      same actual socket) */
-  struct curl_hash *sockhash;
+  struct curl_hash sockhash;
 
   /* Whether pipelining is enabled for this multi handle */
   bool pipelining_enabled;
