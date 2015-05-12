@@ -294,8 +294,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   multi->type = CURL_MULTI_HANDLE;
 
-  multi->hostcache = Curl_mk_dnscache();
-  if(!multi->hostcache)
+  if(Curl_mk_dnscache(&multi->hostcache))
     goto error;
 
   if(sh_init(&multi->sockhash, hashsize))
@@ -329,8 +328,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   error:
 
   Curl_hash_clean(&multi->sockhash);
-  Curl_hash_destroy(multi->hostcache);
-  multi->hostcache = NULL;
+  Curl_hash_clean(&multi->hostcache);
   Curl_conncache_destroy(&multi->conn_cache);
   Curl_close(multi->closure_handle);
   multi->closure_handle = NULL;
@@ -400,7 +398,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
      easy handle's one is currently not set. */
   else if(!data->dns.hostcache ||
      (data->dns.hostcachetype == HCACHE_NONE)) {
-    data->dns.hostcache = multi->hostcache;
+    data->dns.hostcache = &multi->hostcache;
     data->dns.hostcachetype = HCACHE_MULTI;
   }
 
@@ -1861,7 +1859,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       sigpipe_ignore(multi->closure_handle, &pipe_st);
       restore_pipe = TRUE;
 
-      multi->closure_handle->dns.hostcache = multi->hostcache;
+      multi->closure_handle->dns.hostcache = &multi->hostcache;
       Curl_hostcache_clean(multi->closure_handle,
                            multi->closure_handle->dns.hostcache);
 
@@ -1891,7 +1889,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       data = nextdata;
     }
 
-    Curl_hash_destroy(multi->hostcache);
+    Curl_hash_clean(&multi->hostcache);
 
     /* Free the blacklists by setting them to NULL */
     Curl_pipeline_set_site_blacklist(NULL, &multi->pipelining_site_bl);

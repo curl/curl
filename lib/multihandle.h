@@ -86,7 +86,7 @@ struct Curl_multi {
   void *socket_userp;
 
   /* Hostname cache */
-  struct curl_hash *hostcache;
+  struct curl_hash hostcache;
 
   /* timetree points to the splay-tree of time nodes to figure out expire
      times of all currently set timers */
