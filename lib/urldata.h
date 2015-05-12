@@ -1623,6 +1623,8 @@ struct UserDefined {
   bool ssl_enable_npn;  /* TLS NPN extension? */
   bool ssl_enable_alpn; /* TLS ALPN extension? */
   bool path_as_is;      /* allow dotdots? */
+  bool pipewait;        /* wait for pipe/multiplex status before starting a
+                           new connection */
   long expect_100_timeout; /* in milliseconds */
 };
 
