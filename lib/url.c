@@ -2810,21 +2810,26 @@ static bool SocketIsDead(curl_socket_t sock)
   return ret_val;
 }
 
+/*
+ * IsPipeliningPossible() returns TRUE if the options set would allow
+ * pipelining/multiplexing and the connection is using a HTTP protocol.
+ */
 static bool IsPipeliningPossible(const struct SessionHandle *handle,
                                  const struct connectdata *conn)
 {
   /* If a HTTP protocol and pipelining is enabled */
-  if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-     Curl_pipeline_wanted(handle->multi, CURLPIPE_ANY)) {
+  if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
 
-    if((handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
+    if(Curl_pipeline_wanted(handle->multi, CURLPIPE_HTTP1) &&
+       (handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
        (handle->set.httpreq == HTTPREQ_GET ||
         handle->set.httpreq == HTTPREQ_HEAD))
       /* didn't ask for HTTP/1.0 and a GET or HEAD */
       return TRUE;
 
-    if(conn->httpversion == 20)
-      /* talking HTTP/2 */
+    if(Curl_pipeline_wanted(handle->multi, CURLPIPE_MULTIPLEX) &&
+       (handle->set.httpversion == CURL_HTTP_VERSION_2_0))
+      /* allows HTTP/2 */
       return TRUE;
   }
   return FALSE;
