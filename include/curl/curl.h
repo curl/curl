@@ -1638,6 +1638,9 @@ typedef enum {
   /* Service Name */
   CINIT(SERVICE_NAME, OBJECTPOINT, 236),
 
+  /* Wait/don't wait for pipe/mutex to clarify */
+  CINIT(PIPEWAIT, LONG, 237),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
