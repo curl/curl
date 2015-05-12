@@ -2187,9 +2187,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
       data->share->dirty++;
 
-      if(data->share->hostcache) {
+      if(data->share->specifier & (1<< CURL_LOCK_DATA_DNS)) {
         /* use shared host cache */
-        data->dns.hostcache = data->share->hostcache;
+        data->dns.hostcache = &data->share->hostcache;
         data->dns.hostcachetype = HCACHE_SHARED;
       }
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
@@ -2938,7 +2938,7 @@ find_oldest_idle_connection(struct SessionHandle *data)
 
   now = Curl_tvnow();
 
-  Curl_hash_start_iterate(bc->hash, &iter);
+  Curl_hash_start_iterate(&bc->hash, &iter);
 
   he = Curl_hash_next_element(&iter);
   while(he) {

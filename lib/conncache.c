@@ -45,32 +45,16 @@ static void free_bundle_hash_entry(void *freethis)
   Curl_bundle_destroy(b);
 }
 
-struct conncache *Curl_conncache_init(int size)
+int Curl_conncache_init(struct conncache *connc, int size)
 {
-  struct conncache *connc;
-
-  connc = calloc(1, sizeof(struct conncache));
-  if(!connc)
-    return NULL;
-
-  connc->hash = Curl_hash_alloc(size, Curl_hash_str,
-                                Curl_str_key_compare, free_bundle_hash_entry);
-
-  if(!connc->hash) {
-    free(connc);
-    return NULL;
-  }
-
-  return connc;
+  return Curl_hash_init(&connc->hash, size, Curl_hash_str,
+                        Curl_str_key_compare, free_bundle_hash_entry);
 }
 
 void Curl_conncache_destroy(struct conncache *connc)
 {
-  if(connc) {
-    Curl_hash_destroy(connc->hash);
-    connc->hash = NULL;
-    free(connc);
-  }
+  if(connc)
+    Curl_hash_clean(&connc->hash);
 }
 
 struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
@@ -81,7 +65,7 @@ struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
   char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
 
   if(connc)
-    bundle = Curl_hash_pick(connc->hash, hostname, strlen(hostname)+1);
+    bundle = Curl_hash_pick(&connc->hash, hostname, strlen(hostname)+1);
 
   return bundle;
 }
@@ -92,7 +76,7 @@ static bool conncache_add_bundle(struct conncache *connc,
 {
   void *p;
 
-  p = Curl_hash_add(connc->hash, hostname, strlen(hostname)+1, bundle);
+  p = Curl_hash_add(&connc->hash, hostname, strlen(hostname)+1, bundle);
 
   return p?TRUE:FALSE;
 }
@@ -106,14 +90,14 @@ static void conncache_remove_bundle(struct conncache *connc,
   if(!connc)
     return;
 
-  Curl_hash_start_iterate(connc->hash, &iter);
+  Curl_hash_start_iterate(&connc->hash, &iter);
 
   he = Curl_hash_next_element(&iter);
   while(he) {
     if(he->ptr == bundle) {
       /* The bundle is destroyed by the hash destructor function,
          free_bundle_hash_entry() */
-      Curl_hash_delete(connc->hash, he->key, he->key_len);
+      Curl_hash_delete(&connc->hash, he->key, he->key_len);
       return;
     }
 
@@ -201,7 +185,7 @@ void Curl_conncache_foreach(struct conncache *connc,
   if(!connc)
     return;
 
-  Curl_hash_start_iterate(connc->hash, &iter);
+  Curl_hash_start_iterate(&connc->hash, &iter);
 
   he = Curl_hash_next_element(&iter);
   while(he) {
@@ -232,7 +216,7 @@ Curl_conncache_find_first_connection(struct conncache *connc)
   struct curl_hash_element *he;
   struct connectbundle *bundle;
 
-  Curl_hash_start_iterate(connc->hash, &iter);
+  Curl_hash_start_iterate(&connc->hash, &iter);
 
   he = Curl_hash_next_element(&iter);
   while(he) {

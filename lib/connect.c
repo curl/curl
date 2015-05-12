@@ -1214,8 +1214,8 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
     find.found = FALSE;
 
     Curl_conncache_foreach(data->multi_easy?
-                           data->multi_easy->conn_cache:
-                           data->multi->conn_cache, &find, conn_is_conn);
+                           &data->multi_easy->conn_cache:
+                           &data->multi->conn_cache, &find, conn_is_conn);
 
     if(!find.found) {
       data->state.lastconnect = NULL;

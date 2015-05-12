@@ -124,8 +124,8 @@ void Curl_resolv_unlock(struct SessionHandle *data,
 /* for debugging purposes only: */
 void Curl_scan_cache_used(void *user, void *ptr);
 
-/* make a new dns cache and return the handle */
-struct curl_hash *Curl_mk_dnscache(void);
+/* init a new dns cache and return success */
+int Curl_mk_dnscache(struct curl_hash *hash);
 
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct SessionHandle *data);
