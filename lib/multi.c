@@ -252,10 +252,10 @@ static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
  * per call."
  *
  */
-static struct curl_hash *sh_init(int hashsize)
+static int sh_init(struct curl_hash *hash, int hashsize)
 {
-  return Curl_hash_alloc(hashsize, hash_fd, fd_key_compare,
-                         sh_freeentry);
+  return Curl_hash_init(hash, hashsize, hash_fd, fd_key_compare,
+                        sh_freeentry);
 }
 
 /*
@@ -298,8 +298,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   if(!multi->hostcache)
     goto error;
 
-  multi->sockhash = sh_init(hashsize);
-  if(!multi->sockhash)
+  if(sh_init(&multi->sockhash, hashsize))
     goto error;
 
   if(Curl_conncache_init(&multi->conn_cache, chashsize))
@@ -329,8 +328,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   error:
 
-  Curl_hash_destroy(multi->sockhash);
-  multi->sockhash = NULL;
+  Curl_hash_clean(&multi->sockhash);
   Curl_hash_destroy(multi->hostcache);
   multi->hostcache = NULL;
   Curl_conncache_destroy(&multi->conn_cache);
@@ -1870,7 +1868,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       Curl_close(multi->closure_handle);
     }
 
-    Curl_hash_destroy(multi->sockhash);
+    Curl_hash_clean(&multi->sockhash);
     Curl_conncache_destroy(&multi->conn_cache);
     Curl_llist_destroy(multi->msglist, NULL);
     Curl_llist_destroy(multi->pending, NULL);
@@ -1982,7 +1980,7 @@ static void singlesocket(struct Curl_multi *multi,
     s = socks[i];
 
     /* get it from the hash */
-    entry = Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
+    entry = Curl_hash_pick(&multi->sockhash, (char *)&s, sizeof(s));
 
     if(curraction & GETSOCK_READSOCK(i))
       action |= CURL_POLL_IN;
@@ -1997,7 +1995,7 @@ static void singlesocket(struct Curl_multi *multi,
     }
     else {
       /* this is a socket we didn't have before, add it! */
-      entry = sh_addentry(multi->sockhash, s, data);
+      entry = sh_addentry(&multi->sockhash, s, data);
       if(!entry)
         /* fatal */
         return;
@@ -2033,7 +2031,7 @@ static void singlesocket(struct Curl_multi *multi,
       /* this socket has been removed. Tell the app to remove it */
       remove_sock_from_hash = TRUE;
 
-      entry = Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
+      entry = Curl_hash_pick(&multi->sockhash, (char *)&s, sizeof(s));
       if(entry) {
         /* check if the socket to be removed serves a connection which has
            other easy-s in a pipeline. In this case the socket should not be
@@ -2088,7 +2086,7 @@ static void singlesocket(struct Curl_multi *multi,
                            CURL_POLL_REMOVE,
                            multi->socket_userp,
                            entry->socketp);
-        sh_delentry(multi->sockhash, s);
+        sh_delentry(&multi->sockhash, s);
       }
 
     }
@@ -2115,7 +2113,7 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
     /* this is set if this connection is part of a handle that is added to
        a multi handle, and only then this is necessary */
     struct Curl_sh_entry *entry =
-      Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
+      Curl_hash_pick(&multi->sockhash, (char *)&s, sizeof(s));
 
     if(entry) {
       if(multi->socket_cb)
@@ -2124,7 +2122,7 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
                          entry->socketp);
 
       /* now remove it from the socket hash */
-      sh_delentry(multi->sockhash, s);
+      sh_delentry(&multi->sockhash, s);
     }
   }
 }
@@ -2217,7 +2215,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   else if(s != CURL_SOCKET_TIMEOUT) {
 
     struct Curl_sh_entry *entry =
-      Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
+      Curl_hash_pick(&multi->sockhash, (char *)&s, sizeof(s));
 
     if(!entry)
       /* Unmatched socket, we can't act on it but we ignore this fact.  In
@@ -2709,7 +2707,8 @@ CURLMcode curl_multi_assign(CURLM *multi_handle,
   struct Curl_multi *multi = (struct Curl_multi *)multi_handle;
 
   if(s != CURL_SOCKET_BAD)
-    there = Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(curl_socket_t));
+    there = Curl_hash_pick(&multi->sockhash, (char *)&s,
+                           sizeof(curl_socket_t));
 
   if(!there)
     return CURLM_BAD_SOCKET;
@@ -2793,7 +2792,7 @@ void Curl_multi_dump(const struct Curl_multi *multi_handle)
       for(i=0; i < data->numsocks; i++) {
         curl_socket_t s = data->sockets[i];
         struct Curl_sh_entry *entry =
-          Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
+          Curl_hash_pick(&multi->sockhash, (char *)&s, sizeof(s));
 
         fprintf(stderr, "%d ", (int)s);
         if(!entry) {
