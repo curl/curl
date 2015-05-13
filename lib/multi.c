@@ -69,8 +69,6 @@ static void singlesocket(struct Curl_multi *multi,
                          struct SessionHandle *data);
 static int update_timer(struct Curl_multi *multi);
 
-static bool isHandleAtHead(struct SessionHandle *handle,
-                           struct curl_llist *pipeline);
 static CURLMcode add_next_timeout(struct timeval now,
                                   struct Curl_multi *multi,
                                   struct SessionHandle *d);
@@ -1269,19 +1267,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_WAITDO:
       /* Wait for our turn to DO when we're pipelining requests */
-#ifdef DEBUGBUILD
-      infof(data, "WAITDO: Conn %ld send pipe %zu inuse %s athead %s\n",
-            data->easy_conn->connection_id,
-            data->easy_conn->send_pipe->size,
-            data->easy_conn->writechannel_inuse?"TRUE":"FALSE",
-            isHandleAtHead(data,
-                           data->easy_conn->send_pipe)?"TRUE":"FALSE");
-#endif
-      if(!data->easy_conn->writechannel_inuse &&
-         isHandleAtHead(data,
-                        data->easy_conn->send_pipe)) {
-        /* Grab the channel */
-        data->easy_conn->writechannel_inuse = TRUE;
+      if(Curl_pipeline_checkget_write(data, data->easy_conn)) {
+        /* Grabbed the channel */
         multistate(data, CURLM_STATE_DO);
         rc = CURLM_CALL_MULTI_PERFORM;
       }
@@ -1464,25 +1451,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_WAITPERFORM:
       /* Wait for our turn to PERFORM */
-      if((!data->easy_conn->readchannel_inuse &&
-          isHandleAtHead(data,
-                         data->easy_conn->recv_pipe)) ||
-         data->easy_conn->bits.multiplex) {
-        /* Grab the channel */
-        data->easy_conn->readchannel_inuse = TRUE;
+      if(Curl_pipeline_checkget_read(data, data->easy_conn)) {
+        /* Grabbed the channel */
         multistate(data, CURLM_STATE_PERFORM);
         rc = CURLM_CALL_MULTI_PERFORM;
       }
-#ifdef DEBUGBUILD
-      else {
-        infof(data, "WAITPERFORM: Conn %ld recv pipe %zu inuse %s athead %s\n",
-              data->easy_conn->connection_id,
-              data->easy_conn->recv_pipe->size,
-              data->easy_conn->readchannel_inuse?"TRUE":"FALSE",
-              isHandleAtHead(data,
-                             data->easy_conn->recv_pipe)?"TRUE":"FALSE");
-      }
-#endif
       break;
 
     case CURLM_STATE_TOOFAST: /* limit-rate exceeded in either direction */
@@ -1543,15 +1516,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       k = &data->req;
 
-      if(!(k->keepon & KEEP_RECV)) {
+      if(!(k->keepon & KEEP_RECV))
         /* We're done receiving */
-        data->easy_conn->readchannel_inuse = FALSE;
-      }
+        Curl_pipeline_leave_read(data->easy_conn);
 
-      if(!(k->keepon & KEEP_SEND)) {
+      if(!(k->keepon & KEEP_SEND))
         /* We're done sending */
-        data->easy_conn->writechannel_inuse = FALSE;
-      }
+        Curl_pipeline_leave_write(data->easy_conn);
 
       if(done || (result == CURLE_RECV_ERROR)) {
         /* If CURLE_RECV_ERROR happens early enough, we assume it was a race
@@ -1733,8 +1704,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         if(data->easy_conn) {
           /* if this has a connection, unsubscribe from the pipelines */
-          data->easy_conn->writechannel_inuse = FALSE;
-          data->easy_conn->readchannel_inuse = FALSE;
+          Curl_pipeline_leave_write(data->easy_conn);
+          Curl_pipeline_leave_read(data->easy_conn);
           Curl_removeHandleFromPipeline(data, data->easy_conn->send_pipe);
           Curl_removeHandleFromPipeline(data, data->easy_conn->recv_pipe);
 
@@ -2081,7 +2052,7 @@ static void singlesocket(struct Curl_multi *multi,
                for the recv_pipe, or the first (in case this particular easy
                isn't already) */
             if(entry->easy == data) {
-              if(isHandleAtHead(data, easy_conn->recv_pipe))
+              if(Curl_recvpipe_head(data, easy_conn))
                 entry->easy = easy_conn->recv_pipe->head->next->ptr;
               else
                 entry->easy = easy_conn->recv_pipe->head->ptr;
@@ -2095,7 +2066,7 @@ static void singlesocket(struct Curl_multi *multi,
                for the send_pipe, or the first (in case this particular easy
                isn't already) */
             if(entry->easy == data) {
-              if(isHandleAtHead(data, easy_conn->send_pipe))
+              if(Curl_sendpipe_head(data, easy_conn))
                 entry->easy = easy_conn->send_pipe->head->next->ptr;
               else
                 entry->easy = easy_conn->send_pipe->head->ptr;
@@ -2531,16 +2502,6 @@ static int update_timer(struct Curl_multi *multi)
   multi->timer_lastcall = multi->timetree->key;
 
   return multi->timer_cb((CURLM*)multi, timeout_ms, multi->timer_userp);
-}
-
-static bool isHandleAtHead(struct SessionHandle *handle,
-                           struct curl_llist *pipeline)
-{
-  struct curl_llist_element *curr = pipeline->head;
-  if(curr)
-    return (curr->ptr == handle) ? TRUE : FALSE;
-
-  return FALSE;
 }
 
 /*

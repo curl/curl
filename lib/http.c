@@ -1211,7 +1211,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
         */
         return CURLE_SEND_ERROR;
       else
-        conn->writechannel_inuse = FALSE;
+        Curl_pipeline_leave_write(conn);
     }
   }
   Curl_add_buffer_free(in);

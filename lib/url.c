@@ -2885,15 +2885,14 @@ void Curl_getoff_all_pipelines(struct SessionHandle *data,
                                struct connectdata *conn)
 {
   bool recv_head = (conn->readchannel_inuse &&
-    (gethandleathead(conn->recv_pipe) == data)) ? TRUE : FALSE;
-
+                    Curl_recvpipe_head(data, conn));
   bool send_head = (conn->writechannel_inuse &&
-    (gethandleathead(conn->send_pipe) == data)) ? TRUE : FALSE;
+                    Curl_sendpipe_head(data, conn));
 
   if(Curl_removeHandleFromPipeline(data, conn->recv_pipe) && recv_head)
-    conn->readchannel_inuse = FALSE;
+    Curl_pipeline_leave_read(conn);
   if(Curl_removeHandleFromPipeline(data, conn->send_pipe) && send_head)
-    conn->writechannel_inuse = FALSE;
+    Curl_pipeline_leave_write(conn);
 }
 
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke)
