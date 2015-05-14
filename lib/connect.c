@@ -850,7 +850,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     }
 
     failf(data, "Failed to connect to %s port %ld: %s",
-          conn->bits.proxy?conn->proxy.name:conn->host.name,
+          conn->bits.socksproxy ? conn->socks_proxy.host.name :
+          conn->bits.httpproxy ? conn->http_proxy.host.name : conn->host.name,
           conn->port, Curl_strerror(conn, error));
   }
 

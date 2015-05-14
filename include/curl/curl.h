@@ -612,6 +612,7 @@ typedef enum {
                            CONNECT HTTP/1.1 */
   CURLPROXY_HTTP_1_0 = 1,   /* added in 7.19.4, force to use CONNECT
                                HTTP/1.0  */
+  CURLPROXY_HTTPS = 2, /* added in TBD */
   CURLPROXY_SOCKS4 = 4, /* support added in 7.15.2, enum existed already
                            in 7.10 */
   CURLPROXY_SOCKS5 = 5, /* added in 7.10 */
@@ -1169,7 +1170,8 @@ typedef enum {
   CINIT(SHARE, OBJECTPOINT, 100),
 
   /* indicates type of proxy. accepted values are CURLPROXY_HTTP (default),
-     CURLPROXY_SOCKS4, CURLPROXY_SOCKS4A and CURLPROXY_SOCKS5. */
+     CURLPROXY_HTTPS, CURLPROXY_SOCKS4, CURLPROXY_SOCKS4A and
+     CURLPROXY_SOCKS5. */
   CINIT(PROXYTYPE, LONG, 101),
 
   /* Set the Accept-Encoding string. Use this to tell a server you would like
@@ -1631,6 +1633,70 @@ typedef enum {
 
   /* Do not squash dot-dot sequences */
   CINIT(PATH_AS_IS, LONG, 234),
+
+  /* The CApath or CAfile used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CINIT(PROXY_CAINFO, OBJECTPOINT, 235),
+
+  /* The CApath directory used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CINIT(PROXY_CAPATH, OBJECTPOINT, 236),
+
+  /* Set if we should verify the proxy in ssl handshake,
+     set 1 to verify. */
+  CINIT(PROXY_SSL_VERIFYPEER, LONG, 237),
+
+  /* Set if we should verify the Common name from the proxy certificate in ssl
+   * handshake, set 1 to check existence, 2 to ensure that it matches
+   * the provided hostname. */
+  CINIT(PROXY_SSL_VERIFYHOST, LONG, 238),
+
+  /* What version to specifically try to use for proxy.
+     See CURL_SSLVERSION defines below. */
+  CINIT(PROXY_SSLVERSION, LONG, 239),
+
+  /* Set a username for authenticated TLS for proxy */
+  CINIT(PROXY_TLSAUTH_USERNAME, OBJECTPOINT, 240),
+
+  /* Set a password for authenticated TLS for proxy */
+  CINIT(PROXY_TLSAUTH_PASSWORD, OBJECTPOINT, 241),
+
+  /* Set authentication type for authenticated TLS for proxy */
+  CINIT(PROXY_TLSAUTH_TYPE, OBJECTPOINT, 242),
+
+  /* name of the file keeping your private SSL-certificate for proxy */
+  CINIT(PROXY_SSLCERT, OBJECTPOINT, 243),
+
+  /* type of the file keeping your SSL-certificate ("DER", "PEM", "ENG")
+     for proxy */
+  CINIT(PROXY_SSLCERTTYPE, OBJECTPOINT, 244),
+
+  /* name of the file keeping your private SSL-key for proxy */
+  CINIT(PROXY_SSLKEY, OBJECTPOINT, 245),
+
+  /* type of the file keeping your private SSL-key ("DER", "PEM", "ENG")
+     for proxy */
+  CINIT(PROXY_SSLKEYTYPE, OBJECTPOINT, 246),
+
+  /* password for the SSL private key for proxy */
+  CINIT(PROXY_KEYPASSWD, OBJECTPOINT, 247),
+
+  /* Specify which SSL ciphers to use for proxy */
+  CINIT(PROXY_SSL_CIPHER_LIST, OBJECTPOINT, 248),
+
+  /* CRL file for proxy */
+  CINIT(PROXY_CRLFILE, OBJECTPOINT, 249),
+
+  /* Enable/disable specific SSL features with a bitmask for proxy,
+     see CURLSSLOPT_* */
+  CINIT(PROXY_SSL_OPTIONS, LONG, 250),
+
+  /* Name of socks proxy to use. */
+  CINIT(SOCKS_PROXY, OBJECTPOINT, 251),
+
+  /* indicates type of proxy. accepted values are CURLPROXY_SOCKS4,
+     CURLPROXY_SOCKS4A and CURLPROXY_SOCKS5. */
+  CINIT(SOCKS_PROXYTYPE, LONG, 252),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
@@ -2118,9 +2184,10 @@ typedef enum {
   CURLINFO_LOCAL_IP         = CURLINFO_STRING + 41,
   CURLINFO_LOCAL_PORT       = CURLINFO_LONG   + 42,
   CURLINFO_TLS_SESSION      = CURLINFO_SLIST  + 43,
+  CURLINFO_PROXY_SSL_VERIFYRESULT = CURLINFO_LONG   + 44,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 43
+  CURLINFO_LASTONE          = 44
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

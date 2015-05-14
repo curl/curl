@@ -1055,7 +1055,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   /* check to see if we've been told to use an explicit SSL/TLS version */
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLSetProtocolVersionMax != NULL) {
-    switch(data->set.ssl.version) {
+    switch(conn->ssl_config.version) {
       default:
       case CURL_SSLVERSION_DEFAULT:
       case CURL_SSLVERSION_TLSv1:
@@ -1096,7 +1096,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                        kSSLProtocolAll,
                                        false);
-    switch (data->set.ssl.version) {
+    switch (conn->ssl_config.version) {
       default:
       case CURL_SSLVERSION_DEFAULT:
       case CURL_SSLVERSION_TLSv1:
@@ -1148,7 +1148,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #else
   (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx, kSSLProtocolAll, false);
-  switch(data->set.ssl.version) {
+  switch(conn->ssl_config.version) {
     default:
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
@@ -1293,7 +1293,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #else
   if(SSLSetSessionOption != NULL) {
 #endif /* CURL_BUILD_MAC */
-    bool break_on_auth = !data->set.ssl.verifypeer ||
+    bool break_on_auth = !conn->ssl_config.verifypeer ||
       data->set.str[STRING_SSL_CAFILE];
     err = SSLSetSessionOption(connssl->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
@@ -1306,7 +1306,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   else {
 #if CURL_SUPPORT_MAC_10_8
     err = SSLSetEnableCertVerify(connssl->ssl_ctx,
-                                 data->set.ssl.verifypeer?true:false);
+                                 conn->ssl_config.verifypeer?true:false);
     if(err != noErr) {
       failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
       return CURLE_SSL_CONNECT_ERROR;
@@ -1315,7 +1315,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #else
   err = SSLSetEnableCertVerify(connssl->ssl_ctx,
-                               data->set.ssl.verifypeer?true:false);
+                               conn->ssl_config.verifypeer?true:false);
   if(err != noErr) {
     failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
     return CURLE_SSL_CONNECT_ERROR;
@@ -1340,7 +1340,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   /* Configure hostname check. SNI is used if available.
    * Both hostname check and SNI require SSLSetPeerDomainName().
    * Also: the verifyhost setting influences SNI usage */
-  if(data->set.ssl.verifyhost) {
+  if(conn->ssl_config.verifyhost) {
     err = SSLSetPeerDomainName(connssl->ssl_ctx, conn->host.name,
     strlen(conn->host.name));
 

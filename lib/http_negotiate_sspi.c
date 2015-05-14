@@ -89,13 +89,13 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
   if(!neg_ctx->server_name) {
     /* Check proxy auth requested but no given proxy name */
-    if(proxy && !conn->proxy.name)
+    if(proxy && !conn->http_proxy.host.name)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
     /* Generate our SPN */
-    neg_ctx->server_name = Curl_sasl_build_spn("HTTP",
-                                                proxy ? conn->proxy.name :
-                                                        conn->host.name);
+    neg_ctx->server_name = Curl_sasl_build_spn("HTTP", proxy ?
+                                               conn->http_proxy.host.name :
+                                               conn->host.name);
     if(!neg_ctx->server_name)
       return CURLE_OUT_OF_MEMORY;
   }

@@ -45,11 +45,18 @@
 #define ALPN_HTTP_1_1_LENGTH 8
 #define ALPN_HTTP_1_1 "http/1.1"
 
-bool Curl_ssl_config_matches(struct ssl_config_data* data,
-                             struct ssl_config_data* needle);
+bool Curl_ssl_config_matches(struct ssl_primary_config* data,
+                             struct ssl_primary_config* needle);
+bool Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
+                                   struct ssl_primary_config *dest);
 bool Curl_clone_ssl_config(struct ssl_config_data* source,
                            struct ssl_config_data* dest);
+void Curl_clone_general_ssl_config(struct ssl_general_config *source,
+                                   struct ssl_general_config *dest);
 void Curl_free_ssl_config(struct ssl_config_data* sslc);
+void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc);
+int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
+                     int numsocks);
 
 unsigned int Curl_rand(struct SessionHandle *);
 
@@ -94,11 +101,13 @@ CURLcode Curl_ssl_push_certinfo(struct SessionHandle * data, int certnum,
 /* extract a session ID */
 bool Curl_ssl_getsessionid(struct connectdata *conn,
                            void **ssl_sessionid,
-                           size_t *idsize) /* set 0 if unknown */;
+                           size_t *idsize, /* set 0 if unknown */
+                           int sockindex);
 /* add a new session ID */
 CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                void *ssl_sessionid,
-                               size_t idsize);
+                               size_t idsize,
+                               int sockindex);
 /* Kill a single session ID entry in the cache */
 void Curl_ssl_kill_session(struct curl_ssl_session *session);
 /* delete a session from the cache */
