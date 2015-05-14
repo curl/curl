@@ -205,8 +205,10 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
       return result;
 
     key = hashkey(conn);
-    if(!key)
+    if(!key) {
+      bundle_destroy(new_bundle);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     rc = conncache_add_bundle(data->state.conn_cache, key, new_bundle);
     free(key);
