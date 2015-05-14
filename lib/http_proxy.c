@@ -42,14 +42,49 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-CURLcode Curl_proxy_connect(struct connectdata *conn)
+/*
+ * Perform SSL initialization for HTTPS proxy.  Sets
+ * proxy_ssl_connected connection bit when complete.  Can be
+ * called multiple times.
+ */
+static CURLcode https_proxy_connect(struct connectdata *conn, int sockindex) {
+  DEBUGASSERT(conn->http_proxy.proxytype == CURLPROXY_HTTPS);
+#ifdef USE_SSL
+  CURLcode result = CURLE_OK;
+  if(!conn->bits.proxy_ssl_connected[sockindex]) {
+    /* perform SSL initialization for this socket */
+    result = Curl_ssl_connect_nonblocking(conn, sockindex,
+                                   &conn->bits.proxy_ssl_connected[sockindex]);
+    if(result)
+      conn->bits.close = TRUE; /* a failed connection is marked for closure
+                                  to prevent (bad) re-use or similar */
+  }
+  return result;
+#else
+  return CURLE_NOT_BUILT_IN;
+#endif
+}
+
+CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
 {
+  if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
+    const CURLcode result = https_proxy_connect(conn, sockindex);
+    if(result)
+      return result;
+    if(!conn->bits.proxy_ssl_connected[sockindex])
+      return result; /* wait for HTTPS proxy SSL initialization to complete */
+  }
+
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
 #ifndef CURL_DISABLE_PROXY
     /* for [protocol] tunneled through HTTP proxy */
     struct HTTP http_proxy;
     void *prot_save;
     CURLcode result;
+    const char * const host = sockindex == SECONDARYSOCKET ?
+                              conn->secondaryhostname : conn->host.name;
+    const long port = sockindex == SECONDARYSOCKET ? conn->secondary_port :
+                                                     conn->remote_port;
 
     /* BLOCKING */
     /* We want "seamless" operations through HTTP proxy tunnel */
@@ -67,8 +102,7 @@ CURLcode Curl_proxy_connect(struct connectdata *conn)
     memset(&http_proxy, 0, sizeof(http_proxy));
     conn->data->req.protop = &http_proxy;
     connkeep(conn, "HTTP proxy CONNECT");
-    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
-                               conn->host.name, conn->remote_port);
+    result = Curl_proxyCONNECT(conn, sockindex, host, port);
     conn->data->req.protop = prot_save;
     if(CURLE_OK != result)
       return result;
@@ -148,7 +182,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         char *host=(char *)"";
         const char *proxyconn="";
         const char *useragent="";
-        const char *http = (conn->proxytype == CURLPROXY_HTTP_1_0) ?
+        const char *http = (conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ?
           "1.0" : "1.1";
         char *hostheader= /* host:port with IPv6 support */
           aprintf("%s%s%s:%hu", conn->bits.ipv6_ip?"[":"",

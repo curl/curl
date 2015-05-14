@@ -65,6 +65,7 @@
 #include "url.h"
 #include "progress.h"
 #include "share.h"
+#include "multiif.h"
 #include "timeval.h"
 #include "curl_md5.h"
 #include "warnless.h"
@@ -80,86 +81,84 @@
                                  (data->share->specifier &             \
                                   (1<<CURL_LOCK_DATA_SSL_SESSION)))
 
-static bool safe_strequal(char* str1, char* str2)
-{
-  if(str1 && str2)
-    /* both pointers point to something then compare them */
-    return (0 != Curl_raw_equal(str1, str2)) ? TRUE : FALSE;
-  else
-    /* if both pointers are NULL then treat them as equal */
-    return (!str1 && !str2) ? TRUE : FALSE;
-}
+#define CLONE_STRING(var) if(source->var) { \
+                            dest->var = strdup(source->var); \
+                            if(!dest->var) \
+                               return FALSE; \
+                          } \
+                          else \
+                            dest->var = NULL;
 
 bool
-Curl_ssl_config_matches(struct ssl_config_data* data,
-                        struct ssl_config_data* needle)
+Curl_ssl_config_matches(struct ssl_primary_config* data,
+                        struct ssl_primary_config* needle)
 {
   if((data->version == needle->version) &&
      (data->verifypeer == needle->verifypeer) &&
      (data->verifyhost == needle->verifyhost) &&
-     safe_strequal(data->CApath, needle->CApath) &&
-     safe_strequal(data->CAfile, needle->CAfile) &&
-     safe_strequal(data->random_file, needle->random_file) &&
-     safe_strequal(data->egdsocket, needle->egdsocket) &&
-     safe_strequal(data->cipher_list, needle->cipher_list))
+     Curl_safe_strequal(data->CApath, needle->CApath) &&
+     Curl_safe_strequal(data->CAfile, needle->CAfile) &&
+     Curl_safe_strequal(data->random_file, needle->random_file) &&
+     Curl_safe_strequal(data->egdsocket, needle->egdsocket) &&
+     Curl_safe_strequal(data->cipher_list, needle->cipher_list))
     return TRUE;
 
   return FALSE;
+}
+
+void
+Curl_clone_general_ssl_config(struct ssl_general_config *source,
+                              struct ssl_general_config *dest)
+{
+  dest->sessionid = source->sessionid;
+  dest->max_ssl_sessions = source->max_ssl_sessions;
+}
+
+bool
+Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
+                              struct ssl_primary_config *dest)
+{
+  dest->verifyhost = source->verifyhost;
+  dest->verifypeer = source->verifypeer;
+  dest->version = source->version;
+
+  CLONE_STRING(CAfile);
+  CLONE_STRING(CApath);
+  CLONE_STRING(cipher_list);
+  CLONE_STRING(egdsocket);
+  CLONE_STRING(random_file);
+  return TRUE;
 }
 
 bool
 Curl_clone_ssl_config(struct ssl_config_data *source,
                       struct ssl_config_data *dest)
 {
-  dest->sessionid = source->sessionid;
-  dest->verifyhost = source->verifyhost;
-  dest->verifypeer = source->verifypeer;
-  dest->version = source->version;
+  Curl_clone_primary_ssl_config(&source->primary, &dest->primary);
+  dest->enable_beast = source->enable_beast;
+  dest->certverifyresult = source->certverifyresult;
+  dest->fsslctx = source->fsslctx;
+  dest->fsslctxp = source->fsslctxp;
+  dest->certinfo = source->certinfo;
 
-  if(source->CAfile) {
-    dest->CAfile = strdup(source->CAfile);
-    if(!dest->CAfile)
-      return FALSE;
-  }
-  else
-    dest->CAfile = NULL;
+  CLONE_STRING(CRLfile);
+  CLONE_STRING(issuercert);
+  CLONE_STRING(cert);
+  CLONE_STRING(cert_type);
+  CLONE_STRING(key);
+  CLONE_STRING(key_type);
+  CLONE_STRING(key_passwd);
 
-  if(source->CApath) {
-    dest->CApath = strdup(source->CApath);
-    if(!dest->CApath)
-      return FALSE;
-  }
-  else
-    dest->CApath = NULL;
-
-  if(source->cipher_list) {
-    dest->cipher_list = strdup(source->cipher_list);
-    if(!dest->cipher_list)
-      return FALSE;
-  }
-  else
-    dest->cipher_list = NULL;
-
-  if(source->egdsocket) {
-    dest->egdsocket = strdup(source->egdsocket);
-    if(!dest->egdsocket)
-      return FALSE;
-  }
-  else
-    dest->egdsocket = NULL;
-
-  if(source->random_file) {
-    dest->random_file = strdup(source->random_file);
-    if(!dest->random_file)
-      return FALSE;
-  }
-  else
-    dest->random_file = NULL;
+#ifdef USE_TLS_SRP
+  CLONE_STRING(username);
+  CLONE_STRING(password);
+  dest->authtype = source->authtype;
+#endif
 
   return TRUE;
 }
 
-void Curl_free_ssl_config(struct ssl_config_data* sslc)
+void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc)
 {
   Curl_safefree(sslc->CAfile);
   Curl_safefree(sslc->CApath);
@@ -244,6 +243,23 @@ int Curl_ssl_backend(void)
   return (int)CURL_SSL_BACKEND;
 }
 
+void Curl_free_ssl_config(struct ssl_config_data* sslc)
+{
+  Curl_free_primary_ssl_config(&sslc->primary);
+
+  Curl_safefree(sslc->CRLfile);
+  Curl_safefree(sslc->issuercert);
+  Curl_safefree(sslc->cert);
+  Curl_safefree(sslc->cert_type);
+  Curl_safefree(sslc->key);
+  Curl_safefree(sslc->key_type);
+  Curl_safefree(sslc->key_passwd);
+#ifdef USE_TLS_SRP
+  Curl_safefree(sslc->username);
+  Curl_safefree(sslc->password);
+#endif
+}
+
 #ifdef USE_SSL
 
 /* "global" init done? */
@@ -279,18 +295,39 @@ void Curl_ssl_cleanup(void)
 static bool ssl_prefs_check(struct SessionHandle *data)
 {
   /* check for CURLOPT_SSLVERSION invalid parameter value */
-  if((data->set.ssl.version < 0)
-     || (data->set.ssl.version >= CURL_SSLVERSION_LAST)) {
+  if((data->set.ssl.primary.version < 0)
+     || (data->set.ssl.primary.version >= CURL_SSLVERSION_LAST)) {
     failf(data, "Unrecognized parameter value passed via CURLOPT_SSLVERSION");
     return FALSE;
   }
   return TRUE;
 }
 
+static CURLcode
+ssl_connect_init_proxy(struct connectdata *conn, int sockindex) {
+  DEBUGASSERT(conn->bits.proxy_ssl_connected[sockindex]);
+  if(ssl_connection_complete == conn->ssl[sockindex].state &&
+     !conn->proxy_ssl[sockindex].use) {
+#ifdef USE_OPENSSL
+    conn->proxy_ssl[sockindex] = conn->ssl[sockindex];
+    memset(&conn->ssl[sockindex], 0, sizeof(conn->ssl[sockindex]));
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
+  }
+  return CURLE_OK;
+}
+
 CURLcode
 Curl_ssl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
+
+  if(conn->bits.proxy_ssl_connected[sockindex]) {
+    result = ssl_connect_init_proxy(conn, sockindex);
+    if(result)
+      return result;
+  }
 
   if(!ssl_prefs_check(conn->data))
     return CURLE_SSL_CONNECT_ERROR;
@@ -312,6 +349,11 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
                              bool *done)
 {
   CURLcode result;
+  if(conn->bits.proxy_ssl_connected[sockindex]) {
+    result = ssl_connect_init_proxy(conn, sockindex);
+    if(result)
+      return result;
+  }
 
   if(!ssl_prefs_check(conn->data))
     return CURLE_SSL_CONNECT_ERROR;
@@ -335,7 +377,8 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
  */
 bool Curl_ssl_getsessionid(struct connectdata *conn,
                            void **ssl_sessionid,
-                           size_t *idsize) /* set 0 if unknown */
+                           size_t *idsize, /* set 0 if unknown */
+                           int sockindex)
 {
   struct curl_ssl_session *check;
   struct SessionHandle *data = conn->data;
@@ -344,8 +387,12 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
   bool no_match = TRUE;
 
   *ssl_sessionid = NULL;
+  const bool isProxy = CONNECT_PROXY_SSL();
+  struct ssl_primary_config * const ssl_config = isProxy ?
+                                                 &conn->proxy_ssl_config :
+                                                 &conn->ssl_config;
 
-  if(!conn->ssl_config.sessionid)
+  if(!data->set.general_ssl.sessionid)
     /* session ID re-use is disabled */
     return TRUE;
 
@@ -357,14 +404,17 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
   else
     general_age = &data->state.sessionage;
 
-  for(i = 0; i < data->set.ssl.max_ssl_sessions; i++) {
+  const char * const name = isProxy ? conn->http_proxy.host.name :
+                                      conn->host.name;
+  unsigned int port = isProxy ? conn->port : conn->remote_port;
+  for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
     check = &data->state.session[i];
     if(!check->sessionid)
       /* not session ID means blank entry */
       continue;
-    if(Curl_raw_equal(conn->host.name, check->name) &&
-       (conn->remote_port == check->remote_port) &&
-       Curl_ssl_config_matches(&conn->ssl_config, &check->ssl_config)) {
+    if(Curl_raw_equal(name, check->name) &&
+       (port == check->remote_port) &&
+       Curl_ssl_config_matches(ssl_config, &check->ssl_config)) {
       /* yes, we have a session ID! */
       (*general_age)++;          /* increase general age */
       check->age = *general_age; /* set this as used in this age */
@@ -397,7 +447,7 @@ void Curl_ssl_kill_session(struct curl_ssl_session *session)
     session->sessionid = NULL;
     session->age = 0; /* fresh */
 
-    Curl_free_ssl_config(&session->ssl_config);
+    Curl_free_primary_ssl_config(&session->ssl_config);
 
     Curl_safefree(session->name);
   }
@@ -414,7 +464,7 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
   if(SSLSESSION_SHARED(data))
     Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
 
-  for(i = 0; i < data->set.ssl.max_ssl_sessions; i++) {
+  for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
     struct curl_ssl_session *check = &data->state.session[i];
 
     if(check->sessionid == ssl_sessionid) {
@@ -435,7 +485,8 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
  */
 CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                void *ssl_sessionid,
-                               size_t idsize)
+                               size_t idsize,
+                               int sockindex)
 {
   size_t i;
   struct SessionHandle *data=conn->data; /* the mother of all structs */
@@ -448,7 +499,9 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
      IT. We still store it here in case the re-using is again enabled for an
      upcoming transfer */
 
-  clone_host = strdup(conn->host.name);
+  const bool isProxy = CONNECT_PROXY_SSL();
+
+  clone_host = strdup(isProxy ? conn->http_proxy.host.name : conn->host.name);
   if(!clone_host)
     return CURLE_OUT_OF_MEMORY; /* bail out */
 
@@ -465,14 +518,14 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   }
 
   /* find an empty slot for us, or find the oldest */
-  for(i = 1; (i < data->set.ssl.max_ssl_sessions) &&
+  for(i = 1; (i < data->set.general_ssl.max_ssl_sessions) &&
         data->state.session[i].sessionid; i++) {
     if(data->state.session[i].age < oldest_age) {
       oldest_age = data->state.session[i].age;
       store = &data->state.session[i];
     }
   }
-  if(i == data->set.ssl.max_ssl_sessions)
+  if(i == data->set.general_ssl.max_ssl_sessions)
     /* cache is full, we must "kill" the oldest entry! */
     Curl_ssl_kill_session(store);
   else
@@ -485,14 +538,19 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
     /* free it if there's one already present */
   free(store->name);
   store->name = clone_host;               /* clone host name */
-  store->remote_port = conn->remote_port; /* port number */
+  /* port number */
+  store->remote_port = isProxy ? conn->port : conn->remote_port;
 
 
   /* Unlock */
   if(SSLSESSION_SHARED(data))
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 
-  if(!Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config)) {
+  struct ssl_primary_config * const ssl_config = isProxy ?
+                                           &conn->proxy_ssl_config :
+                                           &conn->ssl_config;
+
+  if(!Curl_clone_primary_ssl_config(ssl_config, &store->ssl_config)) {
     store->sessionid = NULL; /* let caller free sessionid */
     free(clone_host);
     return CURLE_OUT_OF_MEMORY;
@@ -507,7 +565,7 @@ void Curl_ssl_close_all(struct SessionHandle *data)
   size_t i;
   /* kill the session ID cache if not shared */
   if(data->state.session && !SSLSESSION_SHARED(data)) {
-    for(i = 0; i < data->set.ssl.max_ssl_sessions; i++)
+    for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++)
       /* the single-killer function handles empty table slots */
       Curl_ssl_kill_session(&data->state.session[i]);
 
@@ -517,6 +575,43 @@ void Curl_ssl_close_all(struct SessionHandle *data)
 
   curlssl_close_all(data);
 }
+
+#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
+    defined(USE_DARWINSSL) || defined(USE_NSS)
+/* This function is for OpenSSL, GnuTLS, darwinssl, and schannel only. */
+int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
+                     int numsocks)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
+
+  if(!numsocks)
+    return GETSOCK_BLANK;
+
+  if(connssl->connecting_state == ssl_connect_2_writing) {
+    /* write mode */
+    socks[0] = conn->sock[FIRSTSOCKET];
+    return GETSOCK_WRITESOCK(0);
+  }
+  else if(connssl->connecting_state == ssl_connect_2_reading) {
+    /* read mode */
+    socks[0] = conn->sock[FIRSTSOCKET];
+    return GETSOCK_READSOCK(0);
+  }
+
+  return GETSOCK_BLANK;
+}
+#else
+int Curl_ssl_getsock(struct connectdata *conn,
+                          curl_socket_t *socks,
+                          int numsocks)
+{
+  (void)conn;
+  (void)socks;
+  (void)numsocks;
+  return GETSOCK_BLANK;
+}
+/* USE_SSLEAY || USE_GNUTLS || USE_SCHANNEL || USE_DARWINSSL || USE_NSS */
+#endif
 
 void Curl_ssl_close(struct connectdata *conn, int sockindex)
 {
@@ -575,7 +670,7 @@ CURLcode Curl_ssl_initsessions(struct SessionHandle *data, size_t amount)
     return CURLE_OUT_OF_MEMORY;
 
   /* store the info in the SSL section */
-  data->set.ssl.max_ssl_sessions = amount;
+  data->set.general_ssl.max_ssl_sessions = amount;
   data->state.session = session;
   data->state.sessionage = 1; /* this is brand new */
   return CURLE_OK;

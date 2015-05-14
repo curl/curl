@@ -160,7 +160,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
 
   /* axTLS only supports TLSv1 */
   /* check to see if we've been told to use an explicit SSL/TLS version */
-  switch(data->set.ssl.version) {
+  switch(conn->ssl_config.version) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
     break;
@@ -185,17 +185,17 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
   conn->ssl[sockindex].ssl = NULL;
 
   /* Load the trusted CA cert bundle file */
-  if(data->set.ssl.CAfile) {
-    if(ssl_obj_load(ssl_ctx, SSL_OBJ_X509_CACERT, data->set.ssl.CAfile, NULL)
-       != SSL_OK) {
+  if(conn->ssl_config.CAfile) {
+    if(ssl_obj_load(ssl_ctx, SSL_OBJ_X509_CACERT,
+                    conn->ssl_config.CAfile, NULL) != SSL_OK) {
       infof(data, "error reading ca cert file %s \n",
-            data->set.ssl.CAfile);
-      if(data->set.ssl.verifypeer) {
+            conn->ssl_config.CAfile);
+      if(conn->ssl_config.verifypeer) {
         return CURLE_SSL_CACERT_BADFILE;
       }
     }
     else
-      infof(data, "found certificates in %s\n", data->set.ssl.CAfile);
+      infof(data, "found certificates in %s\n", conn->ssl_config.CAfile);
   }
 
   /* gtls.c tasks we're skipping for now:
@@ -207,15 +207,15 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
    */
 
   /* Load client certificate */
-  if(data->set.str[STRING_CERT]) {
+  if(data->set.ssl.cert) {
     i=0;
     /* Instead of trying to analyze cert type here, let axTLS try them all. */
     while(cert_types[i] != 0) {
       ssl_fcn_return = ssl_obj_load(ssl_ctx, cert_types[i],
-                                    data->set.str[STRING_CERT], NULL);
+                                    data->set.ssl.cert, NULL);
       if(ssl_fcn_return == SSL_OK) {
         infof(data, "successfully read cert file %s \n",
-              data->set.str[STRING_CERT]);
+              data->set.ssl.cert);
         break;
       }
       i++;
@@ -223,7 +223,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     /* Tried all cert types, none worked. */
     if(cert_types[i] == 0) {
       failf(data, "%s is not x509 or pkcs12 format",
-            data->set.str[STRING_CERT]);
+            data->set.ssl.cert);
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -231,15 +231,15 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
   /* Load client key.
      If a pkcs12 file successfully loaded a cert, then there's nothing to do
      because the key has already been loaded. */
-  if(data->set.str[STRING_KEY] && cert_types[i] != SSL_OBJ_PKCS12) {
+  if(data->set.ssl.key && cert_types[i] != SSL_OBJ_PKCS12) {
     i=0;
     /* Instead of trying to analyze key type here, let axTLS try them all. */
     while(key_types[i] != 0) {
       ssl_fcn_return = ssl_obj_load(ssl_ctx, key_types[i],
-                                    data->set.str[STRING_KEY], NULL);
+                                    data->set.ssl.key, NULL);
       if(ssl_fcn_return == SSL_OK) {
         infof(data, "successfully read key file %s \n",
-              data->set.str[STRING_KEY]);
+              data->set.ssl.key);
         break;
       }
       i++;
@@ -247,7 +247,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     /* Tried all key types, none worked. */
     if(key_types[i] == 0) {
       failf(data, "Failure: %s is not a supported key file",
-            data->set.str[STRING_KEY]);
+            data->set.ssl.key);
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -259,7 +259,8 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
    */
 
   /* In axTLS, handshaking happens inside ssl_client_new. */
-  if(!Curl_ssl_getsessionid(conn, (void **) &ssl_sessionid, &ssl_idsize)) {
+  if(!Curl_ssl_getsessionid(conn, (void **) &ssl_sessionid, &ssl_idsize,
+                            sockindex)) {
     /* we got a session id, use it! */
     infof (data, "SSL re-using session ID\n");
     ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex],
@@ -293,7 +294,7 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
    */
 
   /* Verify server's certificate */
-  if(data->set.ssl.verifypeer) {
+  if(conn->ssl_config.verifypeer) {
     if(ssl_verify_cert(ssl) != SSL_OK) {
       Curl_axtls_close(conn, sockindex);
       failf(data, "server cert verify failed");
@@ -359,7 +360,7 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
     }
     else {
       if(!Curl_cert_hostcheck((const char *)peer_CN, conn->host.name)) {
-        if(data->set.ssl.verifyhost) {
+        if(conn->ssl_config.verifyhost) {
           /* Break connection ! */
           Curl_axtls_close(conn, sockindex);
           failf(data, "\tcommon name \"%s\" does not match \"%s\"\n",
@@ -381,7 +382,7 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
   /* Put our freshly minted SSL session in cache */
   ssl_idsize = ssl_get_session_id_size(ssl);
   ssl_sessionid = ssl_get_session_id(ssl);
-  if(Curl_ssl_addsessionid(conn, (void *) ssl_sessionid, ssl_idsize)
+  if(Curl_ssl_addsessionid(conn, (void *) ssl_sessionid, ssl_idsize, sockindex)
      != CURLE_OK)
     infof (data, "failed to add session to cache\n");
 

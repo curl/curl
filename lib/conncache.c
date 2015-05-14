@@ -78,7 +78,9 @@ struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
 {
   struct connectbundle *bundle = NULL;
 
-  char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
+  char *hostname = conn->bits.socksproxy ? conn->socks_proxy.host.name :
+                   conn->bits.httpproxy ? conn->http_proxy.host.name :
+                   conn->host.name;
 
   if(connc)
     bundle = Curl_hash_pick(connc->hash, hostname, strlen(hostname)+1);
@@ -131,7 +133,9 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
 
   bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache);
   if(!bundle) {
-    char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
+    char *hostname = conn->bits.socksproxy ? conn->socks_proxy.host.name :
+                     conn->bits.httpproxy ? conn->http_proxy.host.name :
+                     conn->host.name;
 
     result = Curl_bundle_create(data, &new_bundle);
     if(result)

@@ -62,8 +62,9 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
   if(!neg_ctx->server_name) {
     /* Generate our SPN */
-    char *spn = Curl_sasl_build_gssapi_spn("HTTP", proxy ? conn->proxy.name :
-                                                           conn->host.name);
+    char *spn = Curl_sasl_build_gssapi_spn("HTTP", proxy ?
+                                           conn->http_proxy.host.name :
+                                           conn->host.name);
     if(!spn)
       return CURLE_OUT_OF_MEMORY;
 
