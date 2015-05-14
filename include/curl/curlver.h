@@ -53,7 +53,9 @@
    and it is always a greater number in a more recent release. It makes
    comparisons with greater than and less than work.
 */
-#define LIBCURL_VERSION_NUM 0x072B00
+#define LIBCURL_VERSION_NUM CURL_VERSION_BITS(LIBCURL_VERSION_MAJOR,    \
+                                              LIBCURL_VERSION_MINOR,    \
+                                              LIBCURL_VERSION_PATCH)
 
 /*
  * This is the date and time when the full source package was created. The
@@ -65,5 +67,9 @@
  * "Mon Feb 12 11:35:33 UTC 2007"
  */
 #define LIBCURL_TIMESTAMP "DEV"
+
+#define CURL_VERSION_BITS(x,y,z) ((x)<<16|(y)<<8|z)
+#define CURL_AT_LEAST_VERSION(x,y,z) \
+  (LIBCURL_VERSION_NUM >= CURL_VERSION_BITS(x, y, z))
 
 #endif /* __CURL_CURLVER_H */
