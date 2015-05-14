@@ -414,7 +414,8 @@ static int on_frame_send(nghttp2_session *session,
   struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
   (void)frame;
-  DEBUGF(infof(conn->data, "on_frame_send() was called\n"));
+  DEBUGF(infof(conn->data, "on_frame_send() was called, length = %zd\n",
+               frame->hd.length));
   return 0;
 }
 static int on_frame_not_send(nghttp2_session *session,
