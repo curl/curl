@@ -238,37 +238,21 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       break;
 
     if(stream->bodystarted) {
-      /* Only valid HEADERS after body started is trailer header,
-         which is not fully supported in this code.  If HEADERS is not
-         trailer, then it is a PROTOCOL_ERROR. */
-      if((frame->hd.flags & NGHTTP2_FLAG_END_STREAM) == 0) {
-        rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                       stream_id, NGHTTP2_PROTOCOL_ERROR);
-
-        if(nghttp2_is_fatal(rv)) {
-          return NGHTTP2_ERR_CALLBACK_FAILURE;
-        }
-      }
+      /* Only valid HEADERS after body started is trailer HEADERS.  We
+         ignores trailer HEADERS for now.  nghttp2 guarantees that it
+         has END_STREAM flag set. */
       break;
     }
 
-    if(stream->status_code == -1) {
-      /* No :status header field means PROTOCOL_ERROR. */
-      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                     stream_id, NGHTTP2_PROTOCOL_ERROR);
-
-      if(nghttp2_is_fatal(rv)) {
-        return NGHTTP2_ERR_CALLBACK_FAILURE;
-      }
-
-      break;
-    }
+    /* nghttp2 guarantees that :status is received, and we store it to
+       stream->status_code */
+    DEBUGASSERT(stream->status_code != -1);
 
     /* Only final status code signals the end of header */
-    if(stream->status_code / 100 != 1)
+    if(stream->status_code / 100 != 1) {
       stream->bodystarted = TRUE;
-
-    stream->status_code = -1;
+      stream->status_code = -1;
+    }
 
     Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
 
@@ -330,14 +314,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 
 static int on_invalid_frame_recv(nghttp2_session *session,
                                  const nghttp2_frame *frame,
-                                 uint32_t error_code, void *userp)
+                                 int lib_error_code, void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
   (void)frame;
   DEBUGF(infof(conn->data,
-               "on_invalid_frame_recv() was called, error_code = %d\n",
-               error_code));
+               "on_invalid_frame_recv() was called, error=%d:%s\n",
+               lib_error_code, nghttp2_strerror(lib_error_code)));
   return 0;
 }
 
@@ -503,8 +487,6 @@ static int decode_status_code(const uint8_t *value, size_t len)
   return res;
 }
 
-static const char STATUS[] = ":status";
-
 /* frame->hd.type is either NGHTTP2_HEADERS or NGHTTP2_PUSH_PROMISE */
 static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                      const uint8_t *name, size_t namelen,
@@ -515,9 +497,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   struct connectdata *conn = (struct connectdata *)userp;
   struct HTTP *stream;
   struct SessionHandle *data_s;
-  int rv;
-  int goodname;
-  int goodheader;
   int32_t stream_id = frame->hd.stream_id;
 
   (void)session;
@@ -548,40 +527,13 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
        consequence is handled in on_frame_recv(). */
     return 0;
 
-  goodname = nghttp2_check_header_name(name, namelen);
-  goodheader = nghttp2_check_header_value(value, valuelen);
-
-  if(!goodname || !goodheader) {
-
-    infof(data_s, "Detected bad incoming header %s%s, reset stream!\n",
-          goodname?"":"name",
-          goodheader?"":"value");
-
-    rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                   stream_id, NGHTTP2_PROTOCOL_ERROR);
-
-    if(nghttp2_is_fatal(rv)) {
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-    }
-
-    return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
-  }
-
   if(namelen == sizeof(":status") - 1 &&
-     memcmp(STATUS, name, namelen) == 0) {
-
-    /* :status must appear exactly once. */
-    if(stream->status_code != -1 ||
-       (stream->status_code = decode_status_code(value, valuelen)) == -1) {
-
-      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                     stream_id, NGHTTP2_PROTOCOL_ERROR);
-      if(nghttp2_is_fatal(rv)) {
-        return NGHTTP2_ERR_CALLBACK_FAILURE;
-      }
-
-      return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
-    }
+     memcmp(":status", name, namelen) == 0) {
+    /* nghttp2 guarantees :status is received first and only once, and
+       value is 3 digits status code, and decode_status_code always
+       succeeds. */
+    stream->status_code = decode_status_code(value, valuelen);
+    DEBUGASSERT(stream->status_code != -1);
 
     Curl_add_buffer(stream->header_recvbuf, "HTTP/2.0 ", 9);
     Curl_add_buffer(stream->header_recvbuf, value, valuelen);
@@ -593,31 +545,19 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                  stream->status_code));
     return 0;
   }
-  else {
-    /* Here we are sure that namelen > 0 because of
-       nghttp2_check_header_name().  Pseudo header other than :status
-       is illegal. */
-    if(stream->status_code == -1 || name[0] == ':') {
-      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                     stream_id, NGHTTP2_PROTOCOL_ERROR);
-      if(nghttp2_is_fatal(rv)) {
-        return NGHTTP2_ERR_CALLBACK_FAILURE;
-      }
 
-      return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
-    }
+  /* nghttp2 guarantees that namelen > 0, and :status was already
+     received, and this is not pseudo-header field . */
+  /* convert to a HTTP1-style header */
+  Curl_add_buffer(stream->header_recvbuf, name, namelen);
+  Curl_add_buffer(stream->header_recvbuf, ":", 1);
+  Curl_add_buffer(stream->header_recvbuf, value, valuelen);
+  Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
+  data_s->state.drain++;
+  Curl_expire(data_s, 1);
 
-    /* convert to a HTTP1-style header */
-    Curl_add_buffer(stream->header_recvbuf, name, namelen);
-    Curl_add_buffer(stream->header_recvbuf, ":", 1);
-    Curl_add_buffer(stream->header_recvbuf, value, valuelen);
-    Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
-    data_s->state.drain++;
-    Curl_expire(data_s, 1);
-
-    DEBUGF(infof(data_s, "h2 header: %.*s: %.*s\n",
-                 namelen, name, valuelen, value));
-  }
+  DEBUGF(infof(data_s, "h2 header: %.*s: %.*s\n", namelen, name, valuelen,
+               value));
 
   return 0; /* 0 is successful */
 }
@@ -1256,20 +1196,6 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   httpc->send_underlying = (sending)conn->send[FIRSTSOCKET];
   conn->recv[FIRSTSOCKET] = http2_recv;
   conn->send[FIRSTSOCKET] = http2_send;
-
-  rv = (int) ((Curl_send*)httpc->send_underlying)
-    (conn, FIRSTSOCKET,
-     NGHTTP2_CLIENT_CONNECTION_PREFACE,
-     NGHTTP2_CLIENT_CONNECTION_PREFACE_LEN,
-     &result);
-  if(result)
-    /* TODO: This may get CURLE_AGAIN */
-    return result;
-
-  if(rv != 24) {
-    failf(data, "Only sent partial HTTP2 packet");
-    return CURLE_SEND_ERROR;
-  }
 
   if(conn->data->req.upgr101 == UPGR101_RECEIVED) {
     /* stream 1 is opened implicitly on upgrade */
