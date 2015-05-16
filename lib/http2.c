@@ -431,11 +431,13 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
     data_s = Curl_hash_pick(&conn->proto.httpc.streamsh, &stream_id,
                             sizeof(stream_id));
     if(!data_s) {
-      /* Receiving a Stream ID not in the hash should not happen, this is an
-         internal error more than anything else! */
-      failf(conn->data, "Received frame on Stream ID: %x not in stream hash!",
+      /* We could get stream ID not in the hash.  For example, if we
+         decided to reject stream (e.g., PUSH_PROMISE).  We call infof
+         as a debugging purpose for now. */
+      infof(conn->data,
+            "Received frame on Stream ID: %x not in stream hash!\n",
             stream_id);
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
+      return 0;
     }
     stream = data_s->req.protop;
 
