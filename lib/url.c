@@ -3365,7 +3365,7 @@ ConnectionExists(struct SessionHandle *data,
             infof(data, "Pipe is full, skip (%zu)\n", pipeLen);
             continue;
           }
-
+#ifdef USE_NGHTTP2
           /* If multiplexed, make sure we don't go over concurrency limit */
           if(check->bits.multiplex) {
             /* Multiplexed connections can only be HTTP/2 for now */
@@ -3376,7 +3376,7 @@ ConnectionExists(struct SessionHandle *data,
               continue;
             }
           }
-
+#endif
           /* We can't use the connection if the pipe is penalized */
           if(Curl_pipeline_penalized(data, check)) {
             infof(data, "Penalized, skip\n");

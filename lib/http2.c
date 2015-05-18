@@ -96,8 +96,23 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 /* called from Curl_http_setup_conn */
 void Curl_http2_setup_conn(struct connectdata *conn)
 {
+  struct HTTP *http = conn->data->req.protop;
+
   conn->proto.httpc.settings.max_concurrent_streams =
     DEFAULT_MAX_CONCURRENT_STREAMS;
+
+  http->nread_header_recvbuf = 0;
+  http->bodystarted = FALSE;
+  http->status_code = -1;
+  http->pausedata = NULL;
+  http->pauselen = 0;
+  http->error_code = NGHTTP2_NO_ERROR;
+  http->closed = FALSE;
+
+  /* where to store incoming data for this stream and how big the buffer is */
+  http->mem = conn->data->state.buffer;
+  http->len = BUFSIZE;
+  http->memlen = 0;
 }
 
 /*
