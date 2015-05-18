@@ -56,7 +56,7 @@ static CURLcode bundle_create(struct SessionHandle *data,
     return CURLE_OUT_OF_MEMORY;
 
   (*cb_ptr)->num_connections = 0;
-  (*cb_ptr)->server_supports_pipelining = FALSE;
+  (*cb_ptr)->multiuse = BUNDLE_UNKNOWN;
 
   (*cb_ptr)->conn_list = Curl_llist_alloc((curl_llist_dtor) conn_llist_dtor);
   if(!(*cb_ptr)->conn_list) {
@@ -205,10 +205,8 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
       return result;
 
     key = hashkey(conn);
-    if(!key) {
-      bundle_destroy(new_bundle);
+    if(!key)
       return CURLE_OUT_OF_MEMORY;
-    }
 
     rc = conncache_add_bundle(data->state.conn_cache, key, new_bundle);
     free(key);

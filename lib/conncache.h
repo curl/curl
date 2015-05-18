@@ -30,9 +30,13 @@ struct conncache {
   struct timeval last_cleanup;
 };
 
+#define BUNDLE_NO_MULTIUSE -1
+#define BUNDLE_UNKNOWN     0  /* initial value */
+#define BUNDLE_PIPELINING  1
+#define BUNDLE_MULTIPLEX   2
+
 struct connectbundle {
-  bool server_supports_pipelining; /* TRUE if server supports pipelining,
-                                      set after first response */
+  int multiuse;                 /* supports multi-use */
   size_t num_connections;       /* Number of connections in the bundle */
   struct curl_llist *conn_list; /* The connectdata members of the bundle */
 };
