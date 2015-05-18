@@ -136,6 +136,8 @@ Library
  connections performed will get connect-specific data allocated that should be
  used for things related to particular connections/requests.
 
+ curl_easy_cleanup() deallocates an internal struct.
+
  curl_easy_setopt() takes three arguments, where the option stuff must be
  passed in pairs: the parameter-ID and the parameter-value. The list of
  options is documented in the man page. This function mainly sets things in
