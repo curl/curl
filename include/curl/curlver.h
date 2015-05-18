@@ -52,10 +52,12 @@
    This 6-digit (24 bits) hexadecimal number does not show pre-release number,
    and it is always a greater number in a more recent release. It makes
    comparisons with greater than and less than work.
+
+   Note: This define is the full hex number and _does not_ use the
+   CURL_VERSION_BITS() macro since curl's own configure script greps for it
+   and needs it to contain the full number.
 */
-#define LIBCURL_VERSION_NUM CURL_VERSION_BITS(LIBCURL_VERSION_MAJOR,    \
-                                              LIBCURL_VERSION_MINOR,    \
-                                              LIBCURL_VERSION_PATCH)
+#define LIBCURL_VERSION_NUM 0x072B00
 
 /*
  * This is the date and time when the full source package was created. The
