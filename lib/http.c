@@ -3375,7 +3375,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 
           /* HTTP/2 cannot blacklist multiplexing since it is a core
              functionality of the protocol */
-          conn->bundle->server_supports_pipelining = TRUE;
+          conn->bundle->multiuse = BUNDLE_MULTIPLEX;
         }
         else if(conn->httpversion >= 11 &&
                 !conn->bits.close) {
@@ -3390,7 +3390,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           cb_ptr = conn->bundle;
           if(cb_ptr) {
             if(!Curl_pipeline_site_blacklisted(data, conn))
-              cb_ptr->server_supports_pipelining = TRUE;
+              cb_ptr->multiuse = BUNDLE_PIPELINING;
           }
         }
 
@@ -3474,9 +3474,9 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         char *server_name = Curl_copy_header_value(k->p);
 
         /* Turn off pipelining if the server version is blacklisted  */
-        if(conn->bundle && conn->bundle->server_supports_pipelining) {
+        if(conn->bundle && (conn->bundle->multiuse == BUNDLE_PIPELINING)) {
           if(Curl_pipeline_server_blacklisted(data, server_name))
-            conn->bundle->server_supports_pipelining = FALSE;
+            conn->bundle->multiuse = BUNDLE_NO_MULTIUSE;
         }
         free(server_name);
       }

@@ -3081,6 +3081,13 @@ static void prune_dead_connections(struct SessionHandle *data)
   }
 }
 
+
+static size_t max_pipeline_length(struct Curl_multi *multi)
+{
+  return multi ? multi->max_pipeline_length : 0;
+}
+
+
 /*
  * Given one filled in connection struct (named needle), this function should
  * detect if there already is one that has all the significant details
@@ -3120,7 +3127,7 @@ ConnectionExists(struct SessionHandle *data,
      particular host */
   bundle = Curl_conncache_find_bundle(needle, data->state.conn_cache);
   if(bundle) {
-    size_t max_pipe_len = Curl_multi_max_pipeline_length(data->multi);
+    size_t max_pipe_len = max_pipeline_length(data->multi);
     size_t best_pipe_len = max_pipe_len;
     struct curl_llist_element *curr;
 
@@ -3128,7 +3135,7 @@ ConnectionExists(struct SessionHandle *data,
           needle->host.name, (void *)bundle);
 
     /* We can't pipe if we don't know anything about the server */
-    if(canPipeline && !bundle->server_supports_pipelining) {
+    if(canPipeline && (bundle->multiuse <= BUNDLE_UNKNOWN)) {
       infof(data, "Server doesn't support multi-use (yet)\n");
       canPipeline = FALSE;
     }
@@ -3154,16 +3161,19 @@ ConnectionExists(struct SessionHandle *data,
       pipeLen = check->send_pipe->size + check->recv_pipe->size;
 
       if(canPipeline) {
-        /* Make sure the pipe has only GET requests */
-        struct SessionHandle* sh = gethandleathead(check->send_pipe);
-        struct SessionHandle* rh = gethandleathead(check->recv_pipe);
-        if(sh) {
-          if(!IsPipeliningPossible(sh, check))
-            continue;
-        }
-        else if(rh) {
-          if(!IsPipeliningPossible(rh, check))
-            continue;
+
+        if(!check->bits.multiplex) {
+          /* If not multiplexing, make sure the pipe has only GET requests */
+          struct SessionHandle* sh = gethandleathead(check->send_pipe);
+          struct SessionHandle* rh = gethandleathead(check->recv_pipe);
+          if(sh) {
+            if(!IsPipeliningPossible(sh, check))
+              continue;
+          }
+          else if(rh) {
+            if(!IsPipeliningPossible(rh, check))
+              continue;
+          }
         }
       }
       else {
@@ -3342,8 +3352,10 @@ ConnectionExists(struct SessionHandle *data,
           }
 
           /* We can't use the connection if the pipe is full */
-          if(pipeLen >= max_pipe_len)
+          if(pipeLen >= max_pipe_len) {
+            infof(data, "Pipe is full, skip (%d)\n", pipeLen);
             continue;
+          }
 
           /* We can't use the connection if the pipe is penalized */
           if(Curl_pipeline_penalized(data, check))
@@ -5715,8 +5727,11 @@ static CURLcode create_conn(struct SessionHandle *data,
         conn_candidate->data = data;
         (void)Curl_disconnect(conn_candidate, /* dead_connection */ FALSE);
       }
-      else
+      else {
+        infof(data, "No more connections allowed to host: %d\n",
+              max_host_connections);
         no_connections_available = TRUE;
+      }
     }
 
     if(max_total_connections > 0 &&
@@ -5731,8 +5746,10 @@ static CURLcode create_conn(struct SessionHandle *data,
         conn_candidate->data = data;
         (void)Curl_disconnect(conn_candidate, /* dead_connection */ FALSE);
       }
-      else
+      else {
+        infof(data, "No connections available in cache\n");
         no_connections_available = TRUE;
+      }
     }
 
 
