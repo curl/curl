@@ -86,7 +86,7 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 
   nghttp2_session_del(c->h2);
   Curl_safefree(c->inbuf);
-  Curl_hash_clean(&c->streamsh);
+  Curl_hash_destroy(&c->streamsh);
 
   DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
 
