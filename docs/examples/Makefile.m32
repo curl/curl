@@ -64,7 +64,7 @@ LDAP_SDK = c:/novell/ndk/cldapsdk/win32
 endif
 # Edit the path below to point to the base of your nghttp2 package.
 ifndef NGHTTP2_PATH
-NGHTTP2_PATH = ../../../nghttp2-0.7.13
+NGHTTP2_PATH = ../../../nghttp2-1.0.0
 endif
 
 PROOT = ../..
