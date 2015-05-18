@@ -163,19 +163,6 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
 
   conn->data->req.protop = http;
 
-  http->nread_header_recvbuf = 0;
-  http->bodystarted = FALSE;
-  http->status_code = -1;
-  http->pausedata = NULL;
-  http->pauselen = 0;
-  http->error_code = NGHTTP2_NO_ERROR;
-  http->closed = FALSE;
-
-  /* where to store incoming data for this stream and how big the buffer is */
-  http->mem = conn->data->state.buffer;
-  http->len = BUFSIZE;
-  http->memlen = 0;
-
   Curl_http2_setup_conn(conn);
 
   return CURLE_OK;
