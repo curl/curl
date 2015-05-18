@@ -588,23 +588,46 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *c = &conn->proto.httpc;
+  struct SessionHandle *data_s;
+  struct HTTP *stream = NULL;
   size_t nread;
   (void)session;
   (void)stream_id;
   (void)source;
 
-  nread = MIN(c->upload_len, length);
-  if(nread > 0) {
-    memcpy(buf, c->upload_mem, nread);
-    c->upload_mem += nread;
-    c->upload_len -= nread;
-    c->upload_left -= nread;
+  if(stream_id) {
+    /* get the stream from the hash based on Stream ID, stream ID zero is for
+       connection-oriented stuff */
+    data_s = Curl_hash_pick(&c->streamsh, &stream_id, sizeof(stream_id));
+    if(!data_s) {
+      /* Receiving a Stream ID not in the hash should not happen, this is an
+         internal error more than anything else! */
+      failf(conn->data, "Asked for data to stream %x not in hash!", stream_id);
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
+    stream = data_s->req.protop;
+  }
+  else {
+    failf(conn->data, "nghttp2 confusion");
+    return NGHTTP2_ERR_INVALID_ARGUMENT;
   }
 
-  if(c->upload_left == 0)
+  nread = MIN(stream->upload_len, length);
+  if(nread > 0) {
+    memcpy(buf, stream->upload_mem, nread);
+    stream->upload_mem += nread;
+    stream->upload_len -= nread;
+    stream->upload_left -= nread;
+  }
+
+  if(stream->upload_left == 0)
     *data_flags = 1;
   else if(nread == 0)
     return NGHTTP2_ERR_DEFERRED;
+
+  DEBUGF(infof(data_s, "data_source_read_callback: "
+               "returns %zu bytes stream %x\n",
+               nread, stream_id));
 
   return nread;
 }
@@ -792,8 +815,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
   /* Nullify here because we call nghttp2_session_send() and they
      might refer to the old buffer. */
-  httpc->upload_mem = NULL;
-  httpc->upload_len = 0;
+  stream->upload_mem = NULL;
+  stream->upload_len = 0;
 
   /*
    * At this point 'stream' is just in the SessionHandle the connection
@@ -991,15 +1014,19 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   if(stream->stream_id != -1) {
     /* If stream_id != -1, we have dispatched request HEADERS, and now
        are going to send or sending request body in DATA frame */
-    httpc->upload_mem = mem;
-    httpc->upload_len = len;
+    stream->upload_mem = mem;
+    stream->upload_len = len;
     nghttp2_session_resume_data(h2, stream->stream_id);
     rv = nghttp2_session_send(h2);
     if(nghttp2_is_fatal(rv)) {
       *err = CURLE_SEND_ERROR;
       return -1;
     }
-    return len - httpc->upload_len;
+    len -= stream->upload_len;
+
+    DEBUGF(infof(conn->data, "http2_send returns %zu for stream %x\n", len,
+                 stream->stream_id));
+    return len;
   }
 
   /* Calculate number of headers contained in [mem, mem + len) */
@@ -1078,12 +1105,15 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     if(nva[i].namelen == 14 &&
        Curl_raw_nequal("content-length", (char*)nva[i].name, 14)) {
       size_t j;
+      stream->upload_left = 0;
       for(j = 0; j < nva[i].valuelen; ++j) {
-        httpc->upload_left *= 10;
-        httpc->upload_left += nva[i].value[j] - '0';
+        stream->upload_left *= 10;
+        stream->upload_left += nva[i].value[j] - '0';
       }
       DEBUGF(infof(conn->data,
-                   "request content-length=%zu\n", httpc->upload_left));
+                   "request content-length=%"
+                   CURL_FORMAT_CURL_OFF_T
+                   "\n", stream->upload_left));
     }
   }
 
@@ -1177,9 +1207,9 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
     return result;
 
   infof(conn->data, "Using HTTP2, server supports multi-use\n");
-  httpc->upload_left = 0;
-  httpc->upload_mem = NULL;
-  httpc->upload_len = 0;
+  stream->upload_left = 0;
+  stream->upload_mem = NULL;
+  stream->upload_len = 0;
 
   httpc->inbuflen = 0;
   httpc->nread_inbuf = 0;

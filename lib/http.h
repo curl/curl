@@ -171,6 +171,10 @@ struct HTTP {
   char *mem;     /* points to a buffer in memory to store received data */
   size_t len;    /* size of the buffer 'mem' points to */
   size_t memlen; /* size of data copied to mem */
+
+  const uint8_t *upload_mem; /* points to a buffer to read from */
+  size_t upload_len; /* size of the buffer 'upload_mem' points to */
+  curl_off_t upload_left; /* number of bytes left to upload */
 };
 
 typedef int (*sending)(void); /* Curl_send */
@@ -199,9 +203,6 @@ struct http_conn {
      nghttp2_session_mem_recv() but mem buffer is still not full. In
      this case, we wrongly sends the content of mem buffer if we share
      them for both cases. */
-  const uint8_t *upload_mem; /* points to a buffer to read from */
-  size_t upload_len; /* size of the buffer 'upload_mem' points to */
-  size_t upload_left; /* number of bytes left to upload */
   int32_t pause_stream_id; /* stream ID which paused
                               nghttp2_session_mem_recv */
 
