@@ -226,7 +226,7 @@ my $has_cares;      # set if built with c-ares
 my $has_threadedres;# set if built with threaded resolver
 
 # this version is decided by the particular nghttp2 library that is being used
-my $h2cver = "h2c-14";
+my $h2cver = "h2c";
 
 my $has_openssl;    # built with a lib using an OpenSSL-like API
 my $has_gnutls;     # built with GnuTLS
