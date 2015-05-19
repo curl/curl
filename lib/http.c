@@ -172,10 +172,12 @@ static CURLcode http_disconnect(struct connectdata *conn, bool dead_connection)
 {
   struct HTTP *http = conn->data->req.protop;
   (void)dead_connection;
+#ifdef USE_NGHTTP2
   if(http) {
     Curl_add_buffer_free(http->header_recvbuf);
     http->header_recvbuf = NULL; /* clear the pointer */
   }
+#endif
   return CURLE_OK;
 }
 
@@ -1484,11 +1486,13 @@ CURLcode Curl_http_done(struct connectdata *conn,
     http->send_buffer = NULL; /* clear the pointer */
   }
 
+#ifdef USE_NGHTTP2
   if(http->header_recvbuf) {
     DEBUGF(infof(data, "free header_recvbuf!!\n"));
     Curl_add_buffer_free(http->header_recvbuf);
     http->header_recvbuf = NULL; /* clear the pointer */
   }
+#endif
 
   if(HTTPREQ_POST_FORM == data->set.httpreq) {
     data->req.bytecount = http->readbytecount + http->writebytecount;

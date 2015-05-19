@@ -154,6 +154,7 @@ struct HTTP {
   void *send_buffer; /* used if the request couldn't be sent in one chunk,
                         points to an allocated send_buffer struct */
 
+#ifdef USE_NGHTTP2
   /*********** for HTTP/2 we store stream-local data here *************/
   int32_t stream_id; /* stream we are interested in */
 
@@ -175,16 +176,19 @@ struct HTTP {
   const uint8_t *upload_mem; /* points to a buffer to read from */
   size_t upload_len; /* size of the buffer 'upload_mem' points to */
   curl_off_t upload_left; /* number of bytes left to upload */
+#endif
 };
 
 typedef int (*sending)(void); /* Curl_send */
 typedef int (*recving)(void); /* Curl_recv */
 
+#ifdef USE_NGHTTP2
 /* h2 settings for this connection */
 struct h2settings {
   uint32_t max_concurrent_streams;
   bool enable_push;
 };
+#endif
 
 
 struct http_conn {
