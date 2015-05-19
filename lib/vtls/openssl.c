@@ -1805,16 +1805,11 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
 #ifdef SSL_CTRL_SET_MSG_CALLBACK
   if(data->set.fdebug && data->set.verbose) {
-    /* the SSL trace callback is only used for verbose logging so we only
-       inform about failures of setting it */
-    if(!SSL_CTX_callback_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK,
-                               (void (*)(void))ssl_tls_trace)) {
-      infof(data, "SSL: couldn't set callback!\n");
-    }
-    else if(!SSL_CTX_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK_ARG, 0,
-                          conn)) {
-      infof(data, "SSL: couldn't set callback argument!\n");
-    }
+    /* the SSL trace callback is only used for verbose logging */
+    SSL_CTX_set_msg_callback(connssl->ctx,
+                             (void (*)(int, int, int, const void *, size_t,
+                              SSL *, void *))ssl_tls_trace);
+    SSL_CTX_set_msg_callback_arg(connssl->ctx, conn);
   }
 #endif
 
