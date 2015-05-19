@@ -1048,7 +1048,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   if(conn->data->state.drain) {
     select_res |= CURL_CSELECT_IN;
-    DEBUGF(infof(data, "%s: forcibly told to drain data\n", __func__));
+    DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data\n"));
   }
 
   if(!select_res) /* Call for select()/poll() only, if read/write/error
@@ -1060,7 +1060,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     return CURLE_SEND_ERROR;
   }
 
-  DEBUGF(infof(data, "%s: keepon: %x select_res %x\n", __func__, k->keepon,
+  DEBUGF(infof(data, "Curl_readwrite: keepon: %x select_res %x\n", k->keepon,
                select_res));
 
   /* We go ahead and do a read if we have a readable socket or if
