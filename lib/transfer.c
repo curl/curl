@@ -828,13 +828,6 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
 
   *didwhat |= KEEP_SEND;
 
-  /*
-   * We loop here to do the READ and SEND loop until we run out of
-   * data to send or until we get EWOULDBLOCK back
-   *
-   * FIXME: above comment is misleading. Currently no looping is
-   * actually done in do-while loop below.
-   */
   do {
 
     /* only read more data if there's no upload data already
