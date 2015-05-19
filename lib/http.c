@@ -170,14 +170,16 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
 
 static CURLcode http_disconnect(struct connectdata *conn, bool dead_connection)
 {
-  struct HTTP *http = conn->data->req.protop;
-  (void)dead_connection;
 #ifdef USE_NGHTTP2
+  struct HTTP *http = conn->data->req.protop;
   if(http) {
     Curl_add_buffer_free(http->header_recvbuf);
     http->header_recvbuf = NULL; /* clear the pointer */
   }
+#else
+  (void)conn;
 #endif
+  (void)dead_connection;
   return CURLE_OK;
 }
 
