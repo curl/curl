@@ -279,7 +279,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
            ncopy);
     stream->nread_header_recvbuf += ncopy;
 
-    DEBUGF(infof(data_s, "Store %zu bytes headers from stream %x at %p\n",
+    DEBUGF(infof(data_s, "Store %zu bytes headers from stream %u at %p\n",
                  ncopy, stream_id, stream->mem));
 
     stream->len -= ncopy;
@@ -300,7 +300,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   case NGHTTP2_SETTINGS:
   {
     uint32_t max_conn = httpc->settings.max_concurrent_streams;
-    DEBUGF(infof(conn->data, "Got SETTINGS for stream %x!\n", stream_id));
+    DEBUGF(infof(conn->data, "Got SETTINGS for stream %u!\n", stream_id));
     httpc->settings.max_concurrent_streams =
       nghttp2_session_get_remote_settings(
         session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
@@ -320,7 +320,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   }
   break;
   default:
-    DEBUGF(infof(conn->data, "Got frame type %x for stream %x!\n",
+    DEBUGF(infof(conn->data, "Got frame type %x for stream %u!\n",
                  frame->hd.type, stream_id));
     break;
   }
@@ -352,7 +352,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   (void)flags;
   (void)data;
   DEBUGF(infof(conn->data, "on_data_chunk_recv() "
-               "len = %u, stream %x\n", len, stream_id));
+               "len = %u, stream %u\n", len, stream_id));
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
@@ -378,7 +378,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   Curl_expire(data_s, 1); /* TODO: fix so that this can be set to 0 for
                              immediately? */
 
-  DEBUGF(infof(data_s, "%zu data received for stream %x "
+  DEBUGF(infof(data_s, "%zu data received for stream %u "
                "(%zu left in buffer %p, total %zu)\n",
                nread, stream_id,
                stream->len, stream->mem,
@@ -388,7 +388,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
     stream->pausedata = data + nread;
     stream->pauselen = len - nread;
     DEBUGF(infof(data_s, "NGHTTP2_ERR_PAUSE - %zu bytes out of buffer"
-                 ", stream %x\n",
+                 ", stream %u\n",
                  len - nread, stream_id));
     conn->proto.httpc.pause_stream_id = stream_id;
     return NGHTTP2_ERR_PAUSE;
@@ -437,7 +437,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   struct HTTP *stream;
   (void)session;
   (void)stream_id;
-  DEBUGF(infof(conn->data, "on_stream_close(), error_code = %d, stream %x\n",
+  DEBUGF(infof(conn->data, "on_stream_close(), error_code = %d, stream %u\n",
                error_code, stream_id));
 
   if(stream_id) {
@@ -462,7 +462,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
     /* remove the entry from the hash as the stream is now gone */
     Curl_hash_delete(&conn->proto.httpc.streamsh,
                      &stream_id, sizeof(stream_id));
-    DEBUGF(infof(conn->data, "Removed stream %x hash!\n", stream_id));
+    DEBUGF(infof(conn->data, "Removed stream %u hash!\n", stream_id));
   }
   return 0;
 }
@@ -602,7 +602,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
     if(!data_s) {
       /* Receiving a Stream ID not in the hash should not happen, this is an
          internal error more than anything else! */
-      failf(conn->data, "Asked for data to stream %x not in hash!", stream_id);
+      failf(conn->data, "Asked for data to stream %u not in hash!", stream_id);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     }
     stream = data_s->req.protop;
@@ -626,7 +626,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
     return NGHTTP2_ERR_DEFERRED;
 
   DEBUGF(infof(data_s, "data_source_read_callback: "
-               "returns %zu bytes stream %x\n",
+               "returns %zu bytes stream %u\n",
                nread, stream_id));
 
   return nread;
@@ -780,7 +780,7 @@ static ssize_t http2_handle_stream_close(struct http_conn *httpc,
    function. */
   stream->closed = FALSE;
   if(stream->error_code != NGHTTP2_NO_ERROR) {
-    failf(data, "HTTP/2 stream %x was not closed cleanly: error_code = %d",
+    failf(data, "HTTP/2 stream %u was not closed cleanly: error_code = %d",
           stream->stream_id, stream->error_code);
     *err = CURLE_HTTP2;
     return -1;
@@ -838,11 +838,11 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     return ncopy;
   }
 
-  infof(data, "http2_recv: %d bytes buffer at %p (stream %x)\n",
+  infof(data, "http2_recv: %d bytes buffer at %p (stream %u)\n",
         len, mem, stream->stream_id);
 
   if((data->state.drain) && stream->memlen) {
-    DEBUGF(infof(data, "http2_recv: DRAIN %zu bytes stream %x!! (%p => %p)\n",
+    DEBUGF(infof(data, "http2_recv: DRAIN %zu bytes stream %u!! (%p => %p)\n",
                  stream->memlen, stream->stream_id,
                  stream->mem, mem));
     if(mem != stream->mem) {
@@ -862,14 +862,14 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
     infof(data, "%zu data bytes written\n", nread);
     if(stream->pauselen == 0) {
-      DEBUGF(infof(data, "Unpaused by stream %x\n", stream->stream_id));
+      DEBUGF(infof(data, "Unpaused by stream %u\n", stream->stream_id));
       assert(httpc->pause_stream_id == stream->stream_id);
       httpc->pause_stream_id = 0;
 
       stream->pausedata = NULL;
       stream->pauselen = 0;
     }
-    infof(data, "http2_recv: returns unpaused %zd bytes on stream %x\n",
+    infof(data, "http2_recv: returns unpaused %zd bytes on stream %u\n",
           nread, stream->stream_id);
     return nread;
   }
@@ -955,14 +955,14 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   }
   if(stream->memlen) {
     ssize_t retlen = stream->memlen;
-    infof(data, "http2_recv: returns %zd for stream %x\n",
+    infof(data, "http2_recv: returns %zd for stream %u\n",
           retlen, stream->stream_id);
     stream->memlen = 0;
 
     if(httpc->pause_stream_id == stream->stream_id) {
       /* data for this stream is returned now, but this stream caused a pause
          already so we need it called again asap */
-      DEBUGF(infof(data, "Data returned for PAUSED stream %x\n",
+      DEBUGF(infof(data, "Data returned for PAUSED stream %u\n",
                    stream->stream_id));
     }
     else
@@ -976,7 +976,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     return http2_handle_stream_close(httpc, data, stream, err);
   }
   *err = CURLE_AGAIN;
-  DEBUGF(infof(data, "http2_recv returns AGAIN for stream %x\n",
+  DEBUGF(infof(data, "http2_recv returns AGAIN for stream %u\n",
                stream->stream_id));
   return -1;
 }
@@ -1037,7 +1037,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       nghttp2_session_resume_data(h2, stream->stream_id);
     }
 
-    DEBUGF(infof(conn->data, "http2_send returns %zu for stream %x\n", len,
+    DEBUGF(infof(conn->data, "http2_send returns %zu for stream %u\n", len,
                  stream->stream_id));
     return len;
   }
