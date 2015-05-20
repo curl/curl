@@ -29,13 +29,13 @@ curl_easy_escape - URL encodes the given string
 .BI "char *curl_easy_escape( CURL *" curl ", char *" string ", int "length " );"
 .ad
 .SH DESCRIPTION
-This function converts the given input \fBstring\fP to an URL encoded string
+This function converts the given input \fIstring\fP to a URL encoded string
 and returns that as a new allocated string. All input characters that are not
 a-z, A-Z, 0-9, '-', '.', '_' or '~' are converted to their "URL escaped"
 version (%NN where NN is a two-digit hexadecimal number).
 
-If the \fBlength\fP argument is set to 0 (zero), \fIcurl_easy_escape(3)\fP
-uses strlen() on the input \fBurl\fP to find out the size.
+If \fIlength\fP is set to 0 (zero), \fIcurl_easy_escape(3)\fP uses strlen() on
+the input \fIstring\fP to find out the size.
 
 You must \fIcurl_free(3)\fP the returned string when you're done with it.
 .SH AVAILABILITY
