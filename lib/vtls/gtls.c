@@ -327,7 +327,8 @@ static CURLcode handshake(struct connectdata *conn,
       if(strerr == NULL)
         strerr = gnutls_strerror(rc);
 
-      failf(data, "gnutls_handshake() warning: %s", strerr);
+      infof(data, "gnutls_handshake() warning: %s\n", strerr);
+      continue;
     }
     else if(rc < 0) {
       const char *strerr = NULL;
