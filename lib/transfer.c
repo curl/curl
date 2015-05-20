@@ -115,8 +115,8 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 
   /* this function returns a size_t, so we typecast to int to prevent warnings
      with picky compilers */
-  nread = (int)conn->fread_func(data->req.upload_fromhere, 1,
-                                buffersize, conn->fread_in);
+  nread = (int)data->set.fread_func(data->req.upload_fromhere, 1,
+                                    buffersize, data->set.in);
 
   if(nread == CURL_READFUNC_ABORT) {
     failf(data, "operation aborted by callback");
@@ -1013,9 +1013,9 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
  * be read and written to/from the connection.
  */
 CURLcode Curl_readwrite(struct connectdata *conn,
+                        struct SessionHandle *data,
                         bool *done)
 {
-  struct SessionHandle *data = conn->data;
   struct SingleRequest *k = &data->req;
   CURLcode result;
   int didwhat=0;

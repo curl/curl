@@ -1513,7 +1513,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                    __LINE__));
 
       /* read/write data if it is ready to do so */
-      result = Curl_readwrite(data->easy_conn, &done);
+      result = Curl_readwrite(data->easy_conn, data, &done);
 
       k = &data->req;
 

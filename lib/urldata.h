@@ -988,10 +988,6 @@ struct connectdata {
 
   /*************** Request - specific items ************/
 
-  /* previously this was in the urldata struct */
-  curl_read_callback fread_func; /* function that reads the input */
-  void *fread_in;           /* pointer to pass to the fread() above */
-
 #if defined(USE_NTLM)
   struct ntlmdata ntlm;     /* NTLM differs from other authentication schemes
                                because it authenticates connections, not
@@ -1426,8 +1422,8 @@ struct UserDefined {
   long proxyport; /* If non-zero, use this port number by default. If the
                      proxy string features a ":[port]" that one will override
                      this. */
-  void *out;         /* the fetched file goes here */
-  void *in;          /* the uploaded file is read from here */
+  void *out;         /* CURLOPT_WRITEDATA */
+  void *in;          /* CURLOPT_READDATA */
   void *writeheader; /* write the header to this if non-NULL */
   void *rtp_out;     /* write RTP to this if non-NULL */
   long use_port;     /* which port to use (when not using default) */

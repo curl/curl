@@ -5844,8 +5844,6 @@ static CURLcode create_conn(struct SessionHandle *data,
    * Inherit the proper values from the urldata struct AFTER we have arranged
    * the persistent connection stuff
    */
-  conn->fread_func = data->set.fread_func;
-  conn->fread_in = data->set.in;
   conn->seek_func = data->set.seek_func;
   conn->seek_client = data->set.seek_client;
 
