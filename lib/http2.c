@@ -1024,6 +1024,19 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     }
     len -= stream->upload_len;
 
+    /* Nullify here because we call nghttp2_session_send() and they
+       might refer to the old buffer. */
+    stream->upload_mem = NULL;
+    stream->upload_len = 0;
+
+    if(stream->upload_left) {
+      /* we are sure that we have more data to send here.  Calling the
+         following API will make nghttp2_session_want_write() return
+         nonzero if remote window allows it, which then libcurl checks
+         socket is writable or not.  See http2_perform_getsock(). */
+      nghttp2_session_resume_data(h2, stream->stream_id);
+    }
+
     DEBUGF(infof(conn->data, "http2_send returns %zu for stream %x\n", len,
                  stream->stream_id));
     return len;
