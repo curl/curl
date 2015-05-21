@@ -1268,6 +1268,13 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
             nghttp2_strerror(rv), rv);
       return CURLE_HTTP2;
     }
+
+    /* put the SessionHandle in the hash with the stream->stream_id as key */
+    if(!Curl_hash_add(&httpc->streamsh, &stream->stream_id,
+                      sizeof(stream->stream_id), conn->data)) {
+      failf(conn->data, "Couldn't add stream to hash!");
+      return CURLE_OUT_OF_MEMORY;
+    }
   }
   else {
     /* stream ID is unknown at this point */
