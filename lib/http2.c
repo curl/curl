@@ -235,6 +235,9 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
     stream = data_s->req.protop;
   }
+  else
+    /* we do nothing on stream zero */
+    return 0;
 
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
