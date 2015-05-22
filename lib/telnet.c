@@ -1423,7 +1423,8 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       for(;;) {
         if(data->set.is_fread_set) {
           /* read from user-supplied method */
-          result = (int) conn->fread_func(buf, 1, BUFSIZE - 1, data->set.in);
+          result = (int)data->set.fread_func(buf, 1, BUFSIZE - 1,
+                                             data->set.in);
           if(result == CURL_READFUNC_ABORT) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
