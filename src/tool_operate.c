@@ -1497,7 +1497,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 if(retry_sleep > RETRY_SLEEP_MAX)
                   retry_sleep = RETRY_SLEEP_MAX;
               }
-              if(outs.bytes && outs.filename) {
+              if(outs.bytes && outs.filename && outs.stream) {
                 /* We have written data to a output file, we truncate file
                  */
                 if(!global->mute)
