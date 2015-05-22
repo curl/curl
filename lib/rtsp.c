@@ -263,11 +263,10 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
    * Since all RTSP requests are included here, there is no need to
    * support custom requests like HTTP.
    **/
-  DEBUGASSERT((rtspreq > RTSPREQ_NONE && rtspreq < RTSPREQ_LAST));
   data->set.opt_no_body = TRUE; /* most requests don't contain a body */
   switch(rtspreq) {
-  case RTSPREQ_NONE:
-    failf(data, "Got invalid RTSP request: RTSPREQ_NONE");
+  default:
+    failf(data, "Got invalid RTSP request");
     return CURLE_BAD_FUNCTION_ARGUMENT;
   case RTSPREQ_OPTIONS:
     p_request = "OPTIONS";
