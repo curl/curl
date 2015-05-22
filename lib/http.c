@@ -1475,8 +1475,6 @@ CURLcode Curl_http_done(struct connectdata *conn,
 #endif
 
   /* set the proper values (possibly modified on POST) */
-  data->set.fread_func = data->set.fread_func; /* restore */
-  data->set.in = data->set.in; /* restore */
   conn->seek_func = data->set.seek_func; /* restore */
   conn->seek_client = data->set.seek_client; /* restore */
 
