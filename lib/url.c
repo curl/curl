@@ -4518,7 +4518,6 @@ static char *detect_proxy(struct connectdata *conn)
  * If this is supposed to use a proxy, we need to figure out the proxy
  * host name, so that we can re-use an existing connection
  * that may exist registered to the same proxy host.
- * proxy will be freed before this function returns.
  */
 static CURLcode parse_proxy(struct SessionHandle *data,
                             struct connectdata *conn, char *proxy)
@@ -5566,8 +5565,10 @@ static CURLcode create_conn(struct SessionHandle *data,
       conn->bits.httpproxy = TRUE;
 #endif
     }
-    else
+    else {
       conn->bits.httpproxy = FALSE; /* not a HTTP proxy */
+      conn->bits.tunnel_proxy = FALSE; /* no tunneling if not HTTP */
+    }
     conn->bits.proxy = TRUE;
   }
   else {
