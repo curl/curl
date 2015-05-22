@@ -359,7 +359,7 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
      int */
   int decoded_len;
   char *buf;
-  int ret_code;
+  int ret_code = 0;
   size_t decoded_sz = 0;
   CURLcode error;
 
@@ -388,13 +388,13 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
   }
 
   buf[decoded_len] = '\0';
-  DEBUGASSERT(decoded_len > 3);
-  if(buf[3] == '-')
-    ret_code = 0;
-  else {
-    /* Check for error? */
+  if(decoded_len <= 3)
+    /* suspiciously short */
+    return 0;
+
+  if(buf[3] != '-')
+    /* safe to ignore return code */
     (void)sscanf(buf, "%d", &ret_code);
-  }
 
   if(buf[decoded_len - 1] == '\n')
     buf[decoded_len - 1] = '\0';
@@ -437,8 +437,8 @@ static int sec_set_protection_level(struct connectdata *conn)
 
     pbsz = strstr(conn->data->state.buffer, "PBSZ=");
     if(pbsz) {
-      /* FIXME: Checks for errors in sscanf? */
-      sscanf(pbsz, "PBSZ=%u", &buffer_size);
+      /* ignore return code, use default value if it fails */
+      (void)sscanf(pbsz, "PBSZ=%u", &buffer_size);
       if(buffer_size < conn->buffer_size)
         conn->buffer_size = buffer_size;
     }
