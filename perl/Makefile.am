@@ -1,3 +1,0 @@
-SUBDIRS = Curl_easy
-
-EXTRA_DIST = README
