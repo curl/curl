@@ -55,7 +55,46 @@ NULL
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
-TODO
+.nf
+/* This example shows an inline import of a cookie in Netscape format.
+You can set the cookie as HttpOnly to prevent XSS attacks by prepending
+#HttpOnly_ to the hostname. That may be useful if the cookie will later
+be imported by a browser.
+*/
+
+#define SEP  "\\t"  /* Tab separates the fields */
+
+char *my_cookie =
+  "example.com"    /* Hostname */
+  SEP "FALSE"      /* Include subdomains */
+  SEP "/"          /* Path */
+  SEP "FALSE"      /* Secure */
+  SEP "0"          /* Expiry in epoch time format. 0 == Session */
+  SEP "foo"        /* Name */
+  SEP "bar";       /* Value */
+
+/* my_cookie is imported immediately via CURLOPT_COOKIELIST.
+*/
+curl_easy_setopt(curl, CURLOPT_COOKIELIST, my_cookie);
+
+/* The list of cookies in cookies.txt will not be imported until right
+before a transfer is performed. Cookies in the list that have the same
+hostname, path and name as in my_cookie are skipped. That is because
+libcurl has already imported my_cookie and it's considered a "live"
+cookie. A live cookie won't be replaced by one read from a file.
+*/
+curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookies.txt");  /* import */
+
+/* Cookies are exported after curl_easy_cleanup is called. The server
+may have added, deleted or modified cookies by then. The cookies that
+were skipped on import are not exported.
+*/
+curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");  /* export */
+
+res = curl_easy_perform(curl);  /* cookies imported from cookies.txt */
+
+curl_easy_cleanup(curl);  /* cookies exported to cookies.txt */
+.fi
 .SH AVAILABILITY
 ALL was added in 7.14.1
 
