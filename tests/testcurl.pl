@@ -61,7 +61,7 @@
 use strict;
 
 use Cwd;
-use Cwd 'abs_path';
+use File::Spec;
 
 # Turn on warnings (equivalent to -w, which can't be used with /usr/bin/env)
 #BEGIN { $^W = 1; }
@@ -390,7 +390,7 @@ if (-d $CURLDIR) {
 }
 
 # make the path absolute so we can use it everywhere
-$CURLDIR = abs_path("$CURLDIR");
+$CURLDIR = File::Spec->rel2abs("$CURLDIR");
 
 $build="build-$$";
 $buildlogname="buildlog-$$";
@@ -573,7 +573,7 @@ if ($configurebuild) {
 } else {
   logit "copying files to build dir ...";
   if (($^O eq 'MSWin32') && ($targetos !~ /netware/)) {
-    system("xcopy /s /q $CURLDIR .");
+    system("xcopy /s /q \"$CURLDIR\" .");
     system("buildconf.bat");
   }
   elsif ($targetos =~ /netware/) {
