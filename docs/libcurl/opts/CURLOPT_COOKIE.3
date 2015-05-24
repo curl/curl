@@ -40,6 +40,15 @@ This option sets the cookie header explicitly in the outgoing request(s). If
 multiple requests are done due to authentication, followed redirections or
 similar, they will all get this cookie passed on.
 
+The cookies set by this option are separate from the internal cookie storage
+held by the cookie engine and will not be modified by it. If you enable the
+cookie engine and either you've imported a cookie of the same name (e.g. 'foo')
+or the server has set one, it will have no effect on the cookies you set here.
+A request to the server will send both the 'foo' held by the cookie engine and
+the 'foo' held by this option. To set a cookie that is instead held by the
+cookie engine and can be modified by the server use
+\fICURLOPT_COOKIELIST(3)\fP.
+
 Using this option multiple times will only make the latest string override the
 previous ones.
 
