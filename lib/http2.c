@@ -1248,6 +1248,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   CURLcode result;
   struct http_conn *httpc = &conn->proto.httpc;
   int rv;
+  ssize_t nproc;
   struct SessionHandle *data = conn->data;
   struct HTTP *stream = conn->data->req.protop;
 
@@ -1290,12 +1291,41 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
     }
   }
 
-  rv = (int)nghttp2_session_mem_recv(httpc->h2, (const uint8_t*)mem, nread);
-
-  if(rv != (int)nread) {
-    failf(data, "nghttp2_session_mem_recv() failed: %s(%d)",
-          nghttp2_strerror(rv), rv);
+  /* we are going to copy mem to httpc->inbuf.  This is required since
+     mem is part of buffer pointed by stream->mem, and callbacks
+     called by nghttp2_session_mem_recv() will write stream specific
+     data into stream->mem, overwriting data already there. */
+  if(H2_BUFSIZE < nread) {
+    failf(data, "connection buffer size is too small to store data following "
+                "HTTP Upgrade response header: buflen=%zu, datalen=%zu",
+          H2_BUFSIZE, nread);
     return CURLE_HTTP2;
+  }
+
+  infof(conn->data, "Copying HTTP/2 data in stream buffer to connection buffer"
+                    " after upgrade: len=%zu\n",
+        nread);
+
+  memcpy(httpc->inbuf, mem, nread);
+  httpc->inbuflen = nread;
+
+  nproc = nghttp2_session_mem_recv(httpc->h2, (const uint8_t *)httpc->inbuf,
+                                   httpc->inbuflen);
+
+  if(nghttp2_is_fatal((int)nproc)) {
+    failf(data, "nghttp2_session_mem_recv() failed: %s(%d)",
+          nghttp2_strerror((int)nproc), (int)nproc);
+    return CURLE_HTTP2;
+  }
+
+  DEBUGF(infof(data, "nghttp2_session_mem_recv() returns %zd\n", nproc));
+
+  if((ssize_t)nread == nproc) {
+    httpc->inbuflen = 0;
+    httpc->nread_inbuf = 0;
+  }
+  else {
+    httpc->nread_inbuf += nproc;
   }
 
   /* Try to send some frames since we may read SETTINGS already. */
