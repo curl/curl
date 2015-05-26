@@ -21,6 +21,7 @@ FAQ
   1.12 I have a problem who can I chat with?
   1.13 curl's ECCN number?
   1.14 How do I submit my patch?
+  1.15 How do I port libcurl to my OS?
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
@@ -379,6 +380,19 @@ FAQ
     people involved there.
 
   Lots of more details are found in the CONTRIBUTE and INTERNALS docs.
+
+  1.15 How do I port libcurl to my OS?
+
+  Here's a rough step-by-step:
+
+  1. copy a suitable lib/config-*.h file as a start to lib/config-[youros].h
+
+  2. edit lib/config-[youros].h to match your OS and setup
+
+  3. edit lib/curl_setup.h to include config-[youros].h when your OS is
+     detected by the preprocessor, in the style others already exist
+
+  4. compile lib/*.c and make them into a library
 
 
 2. Install Related Problems
