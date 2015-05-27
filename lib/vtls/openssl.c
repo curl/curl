@@ -1759,7 +1759,11 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   case CURL_SSLVERSION_TLSv1_1:
   case CURL_SSLVERSION_TLSv1_2:
     /* it will be handled later with the context options */
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+    req_method = TLS_client_method();
+#else
     req_method = SSLv23_client_method();
+#endif
     use_sni(TRUE);
     break;
   case CURL_SSLVERSION_SSLv2:
