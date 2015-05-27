@@ -99,6 +99,7 @@ static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
 static CURLcode imap_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode imap_setup_connection(struct connectdata *conn);
 static char *imap_atom(const char *str);
+static CURLcode imap_sendr(struct connectdata *conn, const char *fmt, ...);
 static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...);
 static CURLcode imap_parse_url_options(struct connectdata *conn);
 static CURLcode imap_parse_url_path(struct connectdata *conn);
@@ -332,6 +333,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
           return FALSE;
         break;
 
+      case IMAP_IDLE:
       case IMAP_SELECT:
         /* SELECT is special in that its untagged responses do not have a
            common prefix so accept anything! */
@@ -368,6 +370,9 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
       case IMAP_APPEND:
         *resp = '+';
         break;
+
+      case IMAP_IDLE:
+        return FALSE;
 
       default:
         failf(conn->data, "Unexpected continuation response");
@@ -437,6 +442,7 @@ static void state(struct connectdata *conn, imapstate newstate)
     "APPEND_FINAL",
     "SEARCH",
     "LOGOUT",
+    "IDLE",
     /* LAST */
   };
 
@@ -813,6 +819,26 @@ static CURLcode imap_perform_search(struct connectdata *conn)
 
 /***********************************************************************
  *
+ * imap_perform_idle()
+ *
+ * Sends an IDLE command.
+ */
+static CURLcode imap_perform_idle(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct IMAP *imap = conn->data->req.protop;
+
+  /* Send the SEARCH command */
+  result = imap_sendf(conn, "IDLE");
+
+  if(!result)
+    state(conn, IMAP_IDLE);
+
+  return result;
+}
+
+/***********************************************************************
+ *
  * imap_perform_logout()
  *
  * Performs the logout action prior to sclose() being called.
@@ -1072,8 +1098,12 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
       /* Note the currently opened mailbox on this connection */
       imapc->mailbox = strdup(imap->mailbox);
 
-      if(imap->custom)
-        result = imap_perform_list(conn);
+      if(imap->custom) {
+        if (!strcmp(imap->custom,"IDLE"))
+          result = imap_perform_idle(conn);
+        else
+          result = imap_perform_list(conn);
+      }
       else if(imap->query)
         result = imap_perform_search(conn);
       else
@@ -1085,6 +1115,27 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
     result = CURLE_LOGIN_DENIED;
   }
 
+  return result;
+}
+
+/* For IDLE responses */
+static CURLcode imap_state_idle_resp(struct connectdata *conn, int imapcode,
+                                       imapstate instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct IMAP *imap = conn->data->req.protop;
+  struct imap_conn *imapc = &conn->proto.imapc;
+  const char *line = data->state.buffer;
+  char tmp[20];
+
+  (void)instate; /* no use for this yet */
+
+  result = imap_sendr(conn, "DONE");
+
+  state(conn, IMAP_STOP);
+
+  /* Send the DONE command */
   return result;
 }
 
@@ -1348,6 +1399,10 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_SEARCH:
       result = imap_state_search_resp(conn, imapcode, imapc->state);
+      break;
+
+    case IMAP_IDLE:
+      result = imap_state_idle_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGOUT:
@@ -1801,6 +1856,30 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
   va_end(ap);
 
   free(taggedfmt);
+
+  return result;
+}
+
+/***********************************************************************
+ *
+ * imap_sendr()
+ *
+ * Sends the formated string as araw string
+ *
+ * Designed to never block.
+ */
+static CURLcode imap_sendr(struct connectdata *conn, const char *fmt, ...)
+{
+  CURLcode result = CURLE_OK;
+  struct imap_conn *imapc = &conn->proto.imapc;
+  va_list ap;
+
+  DEBUGASSERT(fmt);
+
+  /* Send the data with the tag */
+  va_start(ap, fmt);
+  result = Curl_pp_vsendf(&imapc->pp, fmt, ap);
+  va_end(ap);
 
   return result;
 }
