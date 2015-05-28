@@ -258,8 +258,6 @@ int main(int argc, char **argv)
     curl_multi_add_handle(multi_handle, easy[i]);
   }
 
-  /* For now (at least) we use bit 1 in the pipelining option to switch on
-     HTTP/2 multiplexing */
   curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
   /* We do HTTP/2 so let's stick to one connection per host */

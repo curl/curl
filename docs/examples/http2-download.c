@@ -151,7 +151,7 @@ static void setup(CURL *hnd, int num)
   /* write to this file */
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
 
-  /* get the same URL for now */
+  /* set the same URL */
   curl_easy_setopt(hnd, CURLOPT_URL, "https://localhost:8443/index.html");
 
   /* send it verbose for max debuggaility */
@@ -202,8 +202,6 @@ int main(int argc, char **argv)
     curl_multi_add_handle(multi_handle, easy[i]);
   }
 
-  /* For now (at least) we use bit 1 in the pipelining option to switch on
-     HTTP/2 multiplexing */
   curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
   /* we start some action by calling perform right away */
