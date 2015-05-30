@@ -49,6 +49,7 @@
  5.3 Rearrange request header order
  5.4 SPDY
  5.5 auth= in URLs
+ 5.6 Refuse "downgrade" redirects
 
  6. TELNET
  6.1 ditch stdin
@@ -347,6 +348,14 @@ This is not detailed in any FTP specification.
  test:pass;auth=NTLM or --user test:pass --ntlm from the command line. 
 
  Additionally this should be implemented for proxy base URLs as well.
+
+5.6 Refuse "downgrade" redirects
+
+ See https://github.com/bagder/curl/issues/226
+
+ Consider a way to tell curl to refuse to "downgrade" protocol with a redirect
+ and/or possibly a bit that refuses redirect to change protocol completely.
+
 
 6. TELNET
 
