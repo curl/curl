@@ -1,6 +1,6 @@
 HTTP2 with libcurl
 
- Spec: http://tools.ietf.org/html/draft-ietf-httpbis-http2
+ Spec: http://www.rfc-editor.org/rfc/rfc7540.txt
 
  Document explaining it: http://daniel.haxx.se/http2/
 
@@ -15,9 +15,7 @@ HTTP2 with libcurl
   than HTTP/1.1 (which we implement on our own) and that nghttp2 is an already
   existing and well functional library.
 
-  Right now, nghttp2 implements http2 draft-14
-
-  We require at least version 0.6.0
+  We require at least version 1.0.0.
 
  Over an http:// URL
 
@@ -52,6 +50,35 @@ SSL libs
     GnuTLS:   ALPN
     PolarSSL: ALPN
 
+Multiplexing
+
+  Starting in 7.43.0, libcurl fully supports HTTP/2 multiplexing, which is the
+  term for doing multiple independent transfers over the same physical TCP
+  connection.
+
+  To take advantage of multiplexing, you need to use the multi interface and
+  set CURLMOPT_PIPELINING to CURLPIPE_MULTIPLEX. With that bit set, libcurl
+  will attempt to re-use existing HTTP/2 connections and just add a new stream
+  over that when doing subsequent parallel requests.
+
+  While libcurl sets up a connection to a HTTP server there is a period during
+  which it doesn't know if it can pipeline or do multiplexing and if you add
+  new transfers in that period, libcurl will default to start new connections
+  for those transfers. With the new option CURLOPT_PIPEWAIT (added in 7.43.0),
+  you can ask that a transfer should rather wait and see in case there's a
+  connection for the same host in progress that might end up being possible to
+  multiplex on. It favours keeping the number of connections low to the cost
+  of slightly longer time to first byte transfered.
+
+Applications
+
+  We hide http2's binary nature and convert received http2 traffic to headers
+  in HTTP 1.1 style. This allows applications to work unmodified.
+
+curl tool
+
+  curl offers the --http2 command line option to enable use of http2
+
 HTTP Alternative Services
 
   Alt-Svc is a suggested extension with a corresponding frame (ALTSVC) in
@@ -63,22 +90,7 @@ HTTP Alternative Services
   automatically. Spec:
   http://tools.ietf.org/html/draft-ietf-httpbis-alt-svc-05
 
-Applications
-
-  We hide http2's binary nature and convert received http2 traffic to headers
-  in HTTP 1.1 style. This allows applications to work unmodified.
-
-curl tool
-
-  curl offers the --http2 command line option to enable use of http2
-
 TODO:
-
-  - Implement multiplexing
-
-  - How to tell libcurl when using the multi interface that all or some of the
-    handles are allowed to re-use the same physical connection. Can we just
-    re-use existing pipelining logic?
 
   - Provide API to set priorities / dependencies of individual streams
 
