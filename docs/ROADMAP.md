@@ -18,24 +18,6 @@ HTTP/2
    To decide: if we need to bundle parts of the nghttp2 stuff that probably
    won't be shipped by many distros.
 
-- multiplexing/pipelining
-
-   Add a bit to `CURLMOPT_PIPELINING` which then makes libcurl attempt to
-   multiplex HTTP/2 connections to the same host, using the HTTP1 pipelining
-   host matching logic. Doing multiple transfers to the same host using the
-   multi interface will then make them multiplexed. By default, this will
-   handle flow-control for the streams in an automatic fashion.
-
-   With multiplexed streams, we also need to make sure that we terminate
-   streams correctly when a single easy handle is removed from such a
-   connection.
-
-   Since HTTP/2 is designed to always use a single connection for each host
-   (origin really), it seems fair that with "pipelining" enabled there will be
-   no extra checks for number of streams etc added to the connection apart
-   from the maximum number set over the HTTP/2 protocol (the remote sets a
-   maximum) and only if that is reached, another connection gets created.
-
 - stream properties API
 
    Provide options for setting priorities and dependencies among the streams
