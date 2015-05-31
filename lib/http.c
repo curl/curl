@@ -3087,6 +3087,20 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         }
       }
 
+      /* At this point we have some idea about the fate of the connection.
+         If we are closing the connection it may result auth failure. */
+
+#if defined(USE_NTLM)
+      if(conn->bits.close &&
+          (((data->req.httpcode == 401) &&
+            (conn->ntlm.state == NTLMSTATE_TYPE2)) ||
+              ((data->req.httpcode == 407) &&
+                (conn->proxyntlm.state == NTLMSTATE_TYPE2)))) {
+        infof(data, "Connection closure while negotiating auth (HTTP 1.0?)\n");
+        data->state.authproblem = TRUE;
+      }
+#endif
+
       /*
        * When all the headers have been parsed, see if we should give
        * up and return an error.
