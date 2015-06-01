@@ -176,6 +176,7 @@ struct HTTP {
   const uint8_t *upload_mem; /* points to a buffer to read from */
   size_t upload_len; /* size of the buffer 'upload_mem' points to */
   curl_off_t upload_left; /* number of bytes left to upload */
+  Curl_send_buffer *push_recvbuf; /* store incoming push headers */
 #endif
 };
 

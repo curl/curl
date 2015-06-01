@@ -164,6 +164,7 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   conn->data->req.protop = http;
 
   Curl_http2_setup_conn(conn);
+  Curl_http2_setup_req(conn->data);
 
   return CURLE_OK;
 }

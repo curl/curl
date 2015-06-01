@@ -950,6 +950,21 @@ static bool multi_ischanged(struct Curl_multi *multi, bool clear)
   return retval;
 }
 
+CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
+                                 struct SessionHandle *data,
+                                 struct connectdata *conn)
+{
+  CURLMcode rc;
+
+  rc = curl_multi_add_handle(multi, data);
+  if(!rc) {
+    /* take this handle to the perform state right away */
+    multistate(data, CURLM_STATE_PERFORM);
+    data->easy_conn = conn;
+  }
+  return rc;
+}
+
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct timeval now,
                                  struct SessionHandle *data)
