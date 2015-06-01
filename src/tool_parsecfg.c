@@ -69,7 +69,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         /* Check if the file exists - if not, try CURLRC in the same
          * directory as our executable
          */
-        file = fopen(filebuffer, "r");
+        file = fopen(filebuffer, FOPEN_READTEXT);
         if(file != NULL) {
           fclose(file);
           filename = filebuffer;
@@ -115,7 +115,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   }
 
   if(strcmp(filename, "-"))
-    file = fopen(filename, "r");
+    file = fopen(filename, FOPEN_READTEXT);
   else
     file = stdin;
 

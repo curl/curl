@@ -112,7 +112,7 @@ void curl_memdebug(const char *logname)
 {
   if(!logfile) {
     if(logname && *logname)
-      logfile = fopen(logname, "w");
+      logfile = fopen(logname, FOPEN_WRITETEXT);
     else
       logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
