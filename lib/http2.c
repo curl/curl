@@ -33,6 +33,7 @@
 #include "rawstr.h"
 #include "multiif.h"
 #include "conncache.h"
+#include "url.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -205,6 +206,71 @@ static ssize_t send_callback(nghttp2_session *h2,
   return written;
 }
 
+
+/* We pass a pointer to this struct in the push callback, but the contents of
+   the struct are hidden from the user. */
+struct curl_pushheaders {
+  struct SessionHandle *data;
+  const nghttp2_push_promise *frame;
+};
+
+/*
+ * push header access function. Only to be used from within the push callback
+ */
+struct curl_headerpair *curl_pushheader_bynum(struct curl_pushheaders *h,
+                                              int num)
+{
+  /* Verify that we got a good easy handle in the push header struct, mostly to
+     detect rubbish input fast(er). */
+  if(!h || !GOOD_EASY_HANDLE(h->data))
+    return NULL;
+  (void)num;
+  return NULL;
+}
+
+static int push_promise(struct SessionHandle *data,
+                        const nghttp2_push_promise *frame)
+{
+  int rv;
+  if(data->multi->push_cb) {
+    /* clone the parent */
+    CURL *newhandle = curl_easy_duphandle(data);
+    if(!newhandle) {
+      infof(data, "failed to duplicate handle\n");
+      rv = 1; /* FAIL HARD */
+    }
+    else {
+      struct curl_pushheaders heads;
+      heads.data = data;
+      heads.frame = frame;
+      /* ask the application */
+      DEBUGF(infof(data, "Got PUSH_PROMISE, ask application!\n"));
+      rv = data->multi->push_cb(data, newhandle,
+                                frame->nvlen, &heads,
+                                data->multi->push_userp);
+      if(rv)
+        /* denied, kill off the new handle again */
+        (void)Curl_close(newhandle);
+      else {
+        /* approved, add to the multi handle */
+        CURLMcode rc = curl_multi_add_handle(data->multi, newhandle);
+        if(rc) {
+          infof(data, "failed to add handle to multi\n");
+          Curl_close(newhandle);
+          rv = 1;
+        }
+        else
+          rv = 0;
+      }
+    }
+  }
+  else {
+    DEBUGF(infof(data, "Got PUSH_PROMISE, ignore it!\n"));
+    rv = 1;
+  }
+  return rv;
+}
+
 static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
@@ -292,12 +358,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_expire(data_s, 1);
     break;
   case NGHTTP2_PUSH_PROMISE:
-    DEBUGF(infof(data_s, "Got PUSH_PROMISE, RST_STREAM it!\n"));
-    rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                   frame->push_promise.promised_stream_id,
-                                   NGHTTP2_CANCEL);
-    if(nghttp2_is_fatal(rv)) {
-      return rv;
+    rv = push_promise(data_s, &frame->push_promise);
+    if(rv) { /* deny! */
+      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+                                     frame->push_promise.promised_stream_id,
+                                     NGHTTP2_CANCEL);
+      if(nghttp2_is_fatal(rv)) {
+        return rv;
+      }
     }
     break;
   case NGHTTP2_SETTINGS:
