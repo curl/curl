@@ -95,12 +95,9 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 }
 
 /* called from Curl_http_setup_conn */
-void Curl_http2_setup_conn(struct connectdata *conn)
+void Curl_http2_setup_req(struct SessionHandle *data)
 {
-  struct HTTP *http = conn->data->req.protop;
-
-  conn->proto.httpc.settings.max_concurrent_streams =
-    DEFAULT_MAX_CONCURRENT_STREAMS;
+  struct HTTP *http = data->req.protop;
 
   http->nread_header_recvbuf = 0;
   http->bodystarted = FALSE;
@@ -109,11 +106,16 @@ void Curl_http2_setup_conn(struct connectdata *conn)
   http->pauselen = 0;
   http->error_code = NGHTTP2_NO_ERROR;
   http->closed = FALSE;
-
-  /* where to store incoming data for this stream and how big the buffer is */
-  http->mem = conn->data->state.buffer;
+  http->mem = data->state.buffer;
   http->len = BUFSIZE;
   http->memlen = 0;
+}
+
+/* called from Curl_http_setup_conn */
+void Curl_http2_setup_conn(struct connectdata *conn)
+{
+  conn->proto.httpc.settings.max_concurrent_streams =
+    DEFAULT_MAX_CONCURRENT_STREAMS;
 }
 
 /*
@@ -228,46 +230,98 @@ struct curl_headerpair *curl_pushheader_bynum(struct curl_pushheaders *h,
   return NULL;
 }
 
+static CURL *duphandle(struct SessionHandle *data)
+{
+  struct SessionHandle *second = curl_easy_duphandle(data);
+  if(second) {
+    /* setup the request struct */
+    struct HTTP *http = calloc(1, sizeof(struct HTTP));
+    if(!http) {
+      (void)Curl_close(second);
+      second = NULL;
+    }
+    else {
+      second->req.protop = http;
+      http->header_recvbuf = Curl_add_buffer_init();
+      if(!http->header_recvbuf) {
+        free(http);
+        (void)Curl_close(second);
+        second = NULL;
+      }
+      else
+        Curl_http2_setup_req(second);
+    }
+  }
+  return second;
+}
+
+
 static int push_promise(struct SessionHandle *data,
+                        struct connectdata *conn,
                         const nghttp2_push_promise *frame)
 {
   int rv;
+  DEBUGF(infof(data, "PUSH_PROMISE received, stream %u!\n",
+               frame->promised_stream_id));
   if(data->multi->push_cb) {
+    struct HTTP *stream;
+    struct curl_pushheaders heads;
+    CURLMcode rc;
+    struct http_conn *httpc;
     /* clone the parent */
-    CURL *newhandle = curl_easy_duphandle(data);
+    CURL *newhandle = duphandle(data);
     if(!newhandle) {
       infof(data, "failed to duplicate handle\n");
       rv = 1; /* FAIL HARD */
+      goto fail;
     }
-    else {
-      struct curl_pushheaders heads;
-      heads.data = data;
-      heads.frame = frame;
-      /* ask the application */
-      DEBUGF(infof(data, "Got PUSH_PROMISE, ask application!\n"));
-      rv = data->multi->push_cb(data, newhandle,
-                                frame->nvlen, &heads,
-                                data->multi->push_userp);
-      if(rv)
-        /* denied, kill off the new handle again */
-        (void)Curl_close(newhandle);
-      else {
-        /* approved, add to the multi handle */
-        CURLMcode rc = curl_multi_add_handle(data->multi, newhandle);
-        if(rc) {
-          infof(data, "failed to add handle to multi\n");
-          Curl_close(newhandle);
-          rv = 1;
-        }
-        else
-          rv = 0;
-      }
+
+    heads.data = data;
+    heads.frame = frame;
+    /* ask the application */
+    DEBUGF(infof(data, "Got PUSH_PROMISE, ask application!\n"));
+
+    stream = data->req.protop;
+
+#ifdef CURLDEBUG
+    fprintf(stderr, "PUSHHDR %s\n", stream->push_recvbuf->buffer);
+#endif
+
+    rv = data->multi->push_cb(data, newhandle,
+                              frame->nvlen, &heads,
+                              data->multi->push_userp);
+    if(rv) {
+      /* denied, kill off the new handle again */
+      (void)Curl_close(newhandle);
+      goto fail;
     }
+
+    /* approved, add to the multi handle and immediately switch to PERFORM
+       state with the given connection !*/
+    rc = Curl_multi_add_perform(data->multi, newhandle, conn);
+    if(rc) {
+      infof(data, "failed to add handle to multi\n");
+      Curl_close(newhandle);
+      rv = 1;
+      goto fail;
+    }
+
+    httpc = &conn->proto.httpc;
+    /* put the newhandle in the hash with the stream id as key */
+    if(!Curl_hash_add(&httpc->streamsh,
+                      (size_t *)&frame->promised_stream_id,
+                      sizeof(frame->promised_stream_id), newhandle)) {
+      failf(conn->data, "Couldn't add stream to hash!");
+      rv = 1;
+    }
+    else
+      rv = 0;
   }
   else {
     DEBUGF(infof(data, "Got PUSH_PROMISE, ignore it!\n"));
     rv = 1;
   }
+  fail:
   return rv;
 }
 
@@ -358,7 +412,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_expire(data_s, 1);
     break;
   case NGHTTP2_PUSH_PROMISE:
-    rv = push_promise(data_s, &frame->push_promise);
+    rv = push_promise(data_s, conn, &frame->push_promise);
     if(rv) { /* deny! */
       rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
                                      frame->push_promise.promised_stream_id,
@@ -591,11 +645,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   (void)frame;
   (void)flags;
 
-  /* Ignore PUSH_PROMISE for now */
-  if(frame->hd.type != NGHTTP2_HEADERS) {
-    return 0;
-  }
-
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
   /* get the stream from the hash based on Stream ID */
@@ -614,6 +663,21 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     /* Ignore trailer or HEADERS not mapped to HTTP semantics.  The
        consequence is handled in on_frame_recv(). */
     return 0;
+
+  /* Store received PUSH_PROMISE headers to be used when the subsequent
+     PUSH_PROMISE callback comes */
+  if(frame->hd.type == NGHTTP2_PUSH_PROMISE) {
+    fprintf(stderr, "*** PUSH_PROMISE headers on stream %u for %u\n",
+            stream_id,
+            frame->push_promise.promised_stream_id);
+    if(!stream->push_recvbuf)
+      stream->push_recvbuf = Curl_add_buffer_init();
+    Curl_add_buffer(stream->push_recvbuf, name, namelen);
+    Curl_add_buffer(stream->push_recvbuf, ":", 1);
+    Curl_add_buffer(stream->push_recvbuf, value, valuelen);
+    Curl_add_buffer(stream->push_recvbuf, "\r\n", 2);
+    return 0;
+  }
 
   if(namelen == sizeof(":status") - 1 &&
      memcmp(":status", name, namelen) == 0) {
