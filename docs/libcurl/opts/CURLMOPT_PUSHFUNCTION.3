@@ -27,15 +27,8 @@ CURLMOPT_PUSHFUNCTION \- approve or deny server pushes
 .nf
 #include <curl/curl.h>
 
-struct curl_headerpair {
-   unsigned char *name;   /* zero terminated name */
-   size_t namelen;        /* length of 'name' */
-   unsigned char *value;  /* zero terminated name */
-   size_t valuelen;       /* length of 'value' */
-};
-
-struct curl_headerpair *curl_pushheader_bynum(push_headers, int num);
-struct curl_headerpair *curl_pushheader_byname(push_headers, char *name);
+char *curl_pushheader_bynum(push_headers, int num);
+char *curl_pushheader_byname(push_headers, char *name);
 
 int curl_push_callback(CURL *parent,
                        CURL *easy,
@@ -78,12 +71,12 @@ functions. These functions can only be used from within this callback and they
 can only access the PUSH_PROMISE headers. The normal response headers will be
 pased to the header callback for pushed streams just as for normal streams.
 .IP curl_pushheader_bynum
-Returns the header pair at index 'num' (or NULL). The returned pointer points
-to a struct that will be freed when this callback returns.
+Returns the header at index 'num' (or NULL). The returned pointer points
+to a "name:value" string that will be freed when this callback returns.
 .IP curl_pushheader_byname
-Returns the header pair for the given header name (or NULL). This is a
-shortcut so that the application doesn't have to loop through all headers to
-find the one it is interested in.
+Returns the value for the given header name (or NULL). This is a shortcut so
+that the application doesn't have to loop through all headers to find the one
+it is interested in.
 .SH CALLBACK RETURN VALUE
 .IP "CURL_PUSH_OK (0)"
 The application has accepted the stream and it can now start receiving data,
