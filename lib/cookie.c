@@ -914,7 +914,7 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
     fp = NULL;
   }
   else
-    fp = file?fopen(file, "r"):NULL;
+    fp = file?fopen(file, FOPEN_READTEXT):NULL;
 
   c->newsession = newsession; /* new session? */
 
@@ -1262,7 +1262,7 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
     use_stdout=TRUE;
   }
   else {
-    out = fopen(dumphere, "w");
+    out = fopen(dumphere, FOPEN_WRITETEXT);
     if(!out)
       return 1; /* failure */
   }

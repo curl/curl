@@ -109,11 +109,7 @@ int Curl_parsenetrc(const char *host,
     netrc_alloc = TRUE;
   }
 
-#ifdef __CYGWIN__
-  file = fopen(netrcfile, "rt");
-#else
-  file = fopen(netrcfile, "r");
-#endif
+  file = fopen(netrcfile, FOPEN_READTEXT);
   if(netrc_alloc)
     free(netrcfile);
   if(file) {

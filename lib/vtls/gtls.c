@@ -231,7 +231,7 @@ static gnutls_datum_t load_file (const char *file)
   long filelen;
   void *ptr;
 
-  if(!(f = fopen(file, "r")))
+  if(!(f = fopen(file, "rb")))
     return loaded_file;
   if(fseek(f, 0, SEEK_END) != 0
      || (filelen = ftell(f)) < 0
