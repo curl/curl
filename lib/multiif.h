@@ -88,4 +88,10 @@ void Curl_multi_connchanged(struct Curl_multi *multi);
 
 void Curl_multi_closed(struct connectdata *conn, curl_socket_t s);
 
+/*
+ * Add a handle and move it into PERFORM state at once. For pushed streams.
+ */
+CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
+                                 struct SessionHandle *data,
+                                 struct connectdata *conn);
 #endif /* HEADER_CURL_MULTIIF_H */
