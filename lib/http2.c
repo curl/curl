@@ -219,14 +219,42 @@ struct curl_pushheaders {
 /*
  * push header access function. Only to be used from within the push callback
  */
-struct curl_headerpair *curl_pushheader_bynum(struct curl_pushheaders *h,
-                                              int num)
+char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
 {
   /* Verify that we got a good easy handle in the push header struct, mostly to
      detect rubbish input fast(er). */
   if(!h || !GOOD_EASY_HANDLE(h->data))
     return NULL;
-  (void)num;
+  else {
+    struct HTTP *stream = h->data->req.protop;
+    if(num < stream->push_headers_used)
+      return stream->push_headers[num];
+  }
+  return NULL;
+}
+
+/*
+ * push header access function. Only to be used from within the push callback
+ */
+char *curl_pushheader_byname(struct curl_pushheaders *h, char *header)
+{
+  /* Verify that we got a good easy handle in the push header struct, mostly to
+     detect rubbish input fast(er). */
+  if(!h || !GOOD_EASY_HANDLE(h->data) || !header)
+    return NULL;
+  else {
+    struct HTTP *stream = h->data->req.protop;
+    size_t len = strlen(header);
+    size_t i;
+    for(i=0; i<stream->push_headers_used; i++) {
+      if(!strncmp(header, stream->push_headers[i], len)) {
+        /* sub-match, make sure that it us followed by a colon */
+        if(stream->push_headers[i][len] != ':')
+          continue;
+        return &stream->push_headers[i][len+1];
+      }
+    }
+  }
   return NULL;
 }
 
@@ -283,13 +311,14 @@ static int push_promise(struct SessionHandle *data,
 
     stream = data->req.protop;
 
-#ifdef CURLDEBUG
-    fprintf(stderr, "PUSHHDR %s\n", stream->push_recvbuf->buffer);
-#endif
-
     rv = data->multi->push_cb(data, newhandle,
-                              frame->nvlen, &heads,
+                              stream->push_headers_used, &heads,
                               data->multi->push_userp);
+
+    /* free the headers array again */
+    free(stream->push_headers);
+    stream->push_headers = NULL;
+
     if(rv) {
       /* denied, kill off the new handle again */
       (void)Curl_close(newhandle);
@@ -667,15 +696,30 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   /* Store received PUSH_PROMISE headers to be used when the subsequent
      PUSH_PROMISE callback comes */
   if(frame->hd.type == NGHTTP2_PUSH_PROMISE) {
-    fprintf(stderr, "*** PUSH_PROMISE headers on stream %u for %u\n",
-            stream_id,
-            frame->push_promise.promised_stream_id);
-    if(!stream->push_recvbuf)
-      stream->push_recvbuf = Curl_add_buffer_init();
-    Curl_add_buffer(stream->push_recvbuf, name, namelen);
-    Curl_add_buffer(stream->push_recvbuf, ":", 1);
-    Curl_add_buffer(stream->push_recvbuf, value, valuelen);
-    Curl_add_buffer(stream->push_recvbuf, "\r\n", 2);
+    char *h;
+
+    if(!stream->push_headers) {
+      stream->push_headers_alloc = 10;
+      stream->push_headers = malloc(stream->push_headers_alloc *
+                                    sizeof(char *));
+      stream->push_headers_used = 0;
+    }
+    else if(stream->push_headers_used ==
+            stream->push_headers_alloc) {
+      char **headp;
+      stream->push_headers_alloc *= 2;
+      headp = realloc(stream->push_headers,
+                      stream->push_headers_alloc * sizeof(char *));
+      if(!headp) {
+        free(stream->push_headers);
+        stream->push_headers = NULL;
+        return 1;
+      }
+      stream->push_headers = headp;
+    }
+    h = aprintf("%s:%s", name, value);
+    if(h)
+      stream->push_headers[stream->push_headers_used++] = h;
     return 0;
   }
 

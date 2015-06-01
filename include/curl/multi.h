@@ -294,18 +294,13 @@ typedef int (*curl_multi_timer_callback)(CURLM *multi,    /* multi handle */
 #define CURL_PUSH_OK   0
 #define CURL_PUSH_DENY 1
 
-struct curl_headerpair {
-   unsigned char *name;   /* zero terminated name */
-   size_t namelen;        /* length of 'name' */
-   unsigned char *value;  /* zero terminated name */
-   size_t valuelen;       /* length of 'value' */
-};
-
 struct curl_pushheaders;  /* forward declaration only */
-struct curl_headerpair *curl_pushheader_bynum(struct curl_pushheaders *h,
-                                              int num);
-struct curl_headerpair *curl_pushheader_byname(struct curl_pushheaders *h,
-                                               char *name);
+
+CURL_EXTERN char *curl_pushheader_bynum(struct curl_pushheaders *h,
+                                        size_t num);
+
+CURL_EXTERN char *curl_pushheader_byname(struct curl_pushheaders *h,
+                                         char *name);
 
 typedef int (*curl_push_callback)(CURL *parent,
                                   CURL *easy,
