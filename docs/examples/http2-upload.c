@@ -221,6 +221,11 @@ static void setup(CURL *hnd, int num, const char *upload)
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
 
+#if (CURLPIPE_MULTIPLEX > 0)
+  /* wait for pipe connection to confirm */
+  curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
+#endif
+
   curl_hnd[num] = hnd;
 }
 
