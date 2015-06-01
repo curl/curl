@@ -1,0 +1,108 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLMOPT_PUSHFUNCTION 3 "1 Jun 2015" "libcurl 7.44.0" "curl_multi_setopt options"
+.SH NAME
+CURLMOPT_PUSHFUNCTION \- approve or deny server pushes
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+struct curl_headerpair {
+   unsigned char *name;   /* zero terminated name */
+   size_t namelen;        /* length of 'name' */
+   unsigned char *value;  /* zero terminated name */
+   size_t valuelen;       /* length of 'value' */
+};
+
+struct curl_headerpair *curl_pushheader_bynum(push_headers, int num);
+struct curl_headerpair *curl_pushheader_byname(push_headers, char *name);
+
+int curl_push_callback(CURL *parent,
+                       CURL *easy,
+                       int num_headers,
+                       struct curl_pushheaders *headers,
+                       void *userp);
+
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PUSHFUNCTION,
+                            curl_push_callback func);
+.fi
+.SH DESCRIPTION
+This callback gets called when a new HTTP/2 stream is being pushed by the
+server (using the PUSH_PROMISE frame). If no push callback is set, all offered
+pushes will be denied automatically.
+.SH CALLBACK DESCRIPTION
+The callback gets its arguments like this:
+
+\fIeasy\fP is a newly created handle that represents this new transfer.
+
+\fIparent\fP is the handle of the stream on which this push arrives. The new
+handle has been duphandle()d from the parent, meaning that it has gotten all
+its options inherited. It is then up to the application to alter any options
+if desired.
+
+\fInum_headers\fP is the number of name+value pairs that was received and can
+be accessed
+
+\fIheaders\fP is a handle used to access push headers using the accessor
+functions described below. This only accesses and provides the PUSH_PROMISE
+headers, the normal response headers will be provided in the header callback
+as usual.
+
+\fIuserp\fP is the pointer set with \fICURLMOPT_PUSHDATA(3)\fP
+
+If the callback returns CURL_PUSH_OK, the 'easy' handle will be added to the
+multi handle, the callback must not do that by itself.
+
+The callback can access PUSH_PROMISE headers with two accessor
+functions. These functions can only be used from within this callback and they
+can only access the PUSH_PROMISE headers. The normal response headers will be
+pased to the header callback for pushed streams just as for normal streams.
+.IP curl_pushheader_bynum
+Returns the header pair at index 'num' (or NULL). The returned pointer points
+to a struct that will be freed when this callback returns.
+.IP curl_pushheader_byname
+Returns the header pair for the given header name (or NULL). This is a
+shortcut so that the application doesn't have to loop through all headers to
+find the one it is interested in.
+.SH CALLBACK RETURN VALUE
+.IP "CURL_PUSH_OK (0)"
+The application has accepted the stream and it can now start receiving data,
+the ownership of the CURL handle has been taken over by the application.
+.IP "CURL_PUSH_DENY (1)"
+The callback denies the stream and no data for this will reach the
+application, the easy handle will be destroyed by libcurl.
+.IP *
+All other return codes are reserved for future use.
+.SH DEFAULT
+NULL, no callback
+.SH PROTOCOLS
+HTTP(S) (HTTP/2 only)
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.44.0
+.SH RETURN VALUE
+Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLMOPT_PUSHDATA "(3), " CURLMOPT_PIPELINING "(3), " CURLOPT_PIPEWAIT "(3), "
+.BR RFC 7540
