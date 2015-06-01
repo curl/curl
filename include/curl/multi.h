@@ -302,10 +302,14 @@ struct curl_headerpair {
 };
 
 struct curl_pushheaders;  /* forward declaration only */
+struct curl_headerpair *curl_pushheader_bynum(struct curl_pushheaders *h,
+                                              int num);
+struct curl_headerpair *curl_pushheader_byname(struct curl_pushheaders *h,
+                                               char *name);
 
 typedef int (*curl_push_callback)(CURL *parent,
                                   CURL *easy,
-                                  int num_headers,
+                                  size_t num_headers,
                                   struct curl_pushheaders *headers,
                                   void *userp);
 

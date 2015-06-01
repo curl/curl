@@ -39,7 +39,7 @@ struct curl_headerpair *curl_pushheader_byname(push_headers, char *name);
 
 int curl_push_callback(CURL *parent,
                        CURL *easy,
-                       int num_headers,
+                       size_t num_headers,
                        struct curl_pushheaders *headers,
                        void *userp);
 

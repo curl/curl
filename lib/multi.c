@@ -62,8 +62,6 @@
 
 #define GOOD_MULTI_HANDLE(x) \
   ((x) && (((struct Curl_multi *)(x))->type == CURL_MULTI_HANDLE))
-#define GOOD_EASY_HANDLE(x) \
-  ((x) && (((struct SessionHandle *)(x))->magic == CURLEASY_MAGIC_NUMBER))
 
 static void singlesocket(struct Curl_multi *multi,
                          struct SessionHandle *data);
@@ -2345,6 +2343,12 @@ CURLMcode curl_multi_setopt(CURLM *multi_handle,
     break;
   case CURLMOPT_SOCKETDATA:
     multi->socket_userp = va_arg(param, void *);
+    break;
+  case CURLMOPT_PUSHFUNCTION:
+    multi->push_cb = va_arg(param, curl_push_callback);
+    break;
+  case CURLMOPT_PUSHDATA:
+    multi->push_userp = va_arg(param, void *);
     break;
   case CURLMOPT_PIPELINING:
     multi->pipelining = va_arg(param, long);
