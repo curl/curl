@@ -68,6 +68,23 @@ is done, and then \fBresult\fP contains the return code for the easy handle
 that just completed.
 
 At this point, there are no other \fBmsg\fP types defined.
+.SH EXAMPLE
+struct CURLMsg *m;
+
+/* call curl_multi_perform or curl_multi_socket_action first, then loop
+   through and check if there are any transfers that have completed */
+
+do {
+  int msgq = 0;
+  m = curl_multi_info_read(multi_handle, &msgq);
+  if(m && (m->msg == CURLMSG_DONE)) {
+    CURL *e = m->easy_handle;
+    transfers--;
+    curl_multi_remove_handle(multi_handle, e);
+    curl_easy_cleanup(e);
+  }
+} while(m);
+
 .SH "RETURN VALUE"
 A pointer to a filled-in struct, or NULL if it failed or ran out of
 structs. It also writes the number of messages left in the queue (after this
