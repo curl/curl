@@ -228,6 +228,15 @@ sub scanfile {
                       "use of $2 is banned");
         }
 
+        # scan for use of non-binary fopen without the macro
+        if($l =~ /^(.*\W)fopen\s*\([^"]*\"([^"]*)/) {
+            my $mode = $2;
+            if($mode !~ /b/) {
+                checkwarn($line, length($1), $file, $l,
+                          "use of non-binary fopen without FOPEN_* macro");
+            }
+        }
+
         # check for open brace first on line but not first column
         # only alert if previous line ended with a close paren and wasn't a cpp
         # line
