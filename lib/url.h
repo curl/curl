@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +27,7 @@
  * Prototypes for library-wide functions provided by url.c
  */
 
+CURLcode Curl_init_do(struct SessionHandle *data, struct connectdata *conn);
 CURLcode Curl_open(struct SessionHandle **curl);
 CURLcode Curl_init_userdefined(struct UserDefined *set);
 CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
