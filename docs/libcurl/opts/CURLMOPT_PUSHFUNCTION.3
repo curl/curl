@@ -92,7 +92,38 @@ NULL, no callback
 .SH PROTOCOLS
 HTTP(S) (HTTP/2 only)
 .SH EXAMPLE
-TODO
+.nf
+/* only allow pushes for file names starting with "push-" */
+int push_callback(CURL *parent,
+                  CURL *easy,
+                  size_t num_headers,
+                  struct curl_pushheaders *headers,
+                  void *userp)
+{
+  char *headp;
+  int *transfers = (int *)userp;
+  char filename[128];
+  FILE *out;
+  headp = curl_pushheader_byname(headers, ":path");
+  if(headp && !strncmp(headp, "/push-", 6)) {
+    fprintf(stderr, "The PATH is %s\n", headp);
+
+    /* save the push here */
+    out = fopen("pushed-stream", "wb");
+
+    /* write to this file */
+    curl_easy_setopt(easy, CURLOPT_WRITEDATA, out);
+
+    (*transfers)++; /* one more */
+
+    return CURL_PUSH_OK;
+  }
+  return CURL_PUSH_DENY;
+}
+
+curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, push_callback);
+curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &counter);
+.fi
 .SH AVAILABILITY
 Added in 7.44.0
 .SH RETURN VALUE
