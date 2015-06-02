@@ -296,6 +296,7 @@ static int push_promise(struct SessionHandle *data,
     struct curl_pushheaders heads;
     CURLMcode rc;
     struct http_conn *httpc;
+    size_t i;
     /* clone the parent */
     CURL *newhandle = duphandle(data);
     if(!newhandle) {
@@ -315,7 +316,9 @@ static int push_promise(struct SessionHandle *data,
                               stream->push_headers_used, &heads,
                               data->multi->push_userp);
 
-    /* free the headers array again */
+    /* free the headers again */
+    for(i=0; i<stream->push_headers_used; i++)
+      free(stream->push_headers[i]);
     free(stream->push_headers);
     stream->push_headers = NULL;
 
