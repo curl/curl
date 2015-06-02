@@ -298,9 +298,8 @@ struct curl_pushheaders;  /* forward declaration only */
 
 CURL_EXTERN char *curl_pushheader_bynum(struct curl_pushheaders *h,
                                         size_t num);
-
 CURL_EXTERN char *curl_pushheader_byname(struct curl_pushheaders *h,
-                                         char *name);
+                                         const char *name);
 
 typedef int (*curl_push_callback)(CURL *parent,
                                   CURL *easy,
