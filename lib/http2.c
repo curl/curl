@@ -236,7 +236,7 @@ char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
 /*
  * push header access function. Only to be used from within the push callback
  */
-char *curl_pushheader_byname(struct curl_pushheaders *h, char *header)
+char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
 {
   /* Verify that we got a good easy handle in the push header struct, mostly to
      detect rubbish input fast(er). */
