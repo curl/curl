@@ -22,13 +22,13 @@
 .\"
 .TH CURLMOPT_PUSHFUNCTION 3 "1 Jun 2015" "libcurl 7.44.0" "curl_multi_setopt options"
 .SH NAME
-CURLMOPT_PUSHFUNCTION \- approve or deny server pushes
+CURLMOPT_PUSHFUNCTION \- callback that approves or denies server pushes
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
 
 char *curl_pushheader_bynum(push_headers, int num);
-char *curl_pushheader_byname(push_headers, char *name);
+char *curl_pushheader_byname(push_headers, const char *name);
 
 int curl_push_callback(CURL *parent,
                        CURL *easy,
@@ -46,12 +46,12 @@ pushes will be denied automatically.
 .SH CALLBACK DESCRIPTION
 The callback gets its arguments like this:
 
-\fIeasy\fP is a newly created handle that represents this new transfer.
-
 \fIparent\fP is the handle of the stream on which this push arrives. The new
 handle has been duphandle()d from the parent, meaning that it has gotten all
 its options inherited. It is then up to the application to alter any options
 if desired.
+
+\fIeasy\fP is a newly created handle that represents this upcoming transfer.
 
 \fInum_headers\fP is the number of name+value pairs that was received and can
 be accessed
@@ -71,12 +71,13 @@ functions. These functions can only be used from within this callback and they
 can only access the PUSH_PROMISE headers. The normal response headers will be
 pased to the header callback for pushed streams just as for normal streams.
 .IP curl_pushheader_bynum
-Returns the header at index 'num' (or NULL). The returned pointer points
-to a "name:value" string that will be freed when this callback returns.
+Returns the header at index 'num' (or NULL). The returned pointer points to a
+"name:value" string that will be freed when this callback returns.
 .IP curl_pushheader_byname
 Returns the value for the given header name (or NULL). This is a shortcut so
 that the application doesn't have to loop through all headers to find the one
-it is interested in.
+it is interested in. The data pointed will be freed when this callback
+returns.
 .SH CALLBACK RETURN VALUE
 .IP "CURL_PUSH_OK (0)"
 The application has accepted the stream and it can now start receiving data,
