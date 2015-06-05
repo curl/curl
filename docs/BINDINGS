@@ -50,7 +50,7 @@ Cocoa
 D
 
   Written by Kenneth Bogert
-  http://curl.haxx.se/libcurl/d/
+  http://dlang.org/library/std/net/curl.html
 
 Dylan
 
@@ -60,7 +60,7 @@ Dylan
 Eiffel
 
   Written by Eiffel Software
-  http://curl.haxx.se/libcurl/eiffel/
+  https://room.eiffel.com/library/curl
 
 Euphoria
 
@@ -102,8 +102,7 @@ Haskell
 
 Java
 
-  Maintained by [blank]
-  http://curl.haxx.se/libcurl/java/
+  https://github.com/pjlegato/curl-java
 
 Julia
 
@@ -155,13 +154,13 @@ Pascal
 
 Perl
 
-  Maintained by Cris Bailiff
-  http://curl.haxx.se/libcurl/perl/
+  Maintained by Cris Bailiff and Bálint Szilakszi
+  https://github.com/szbalint/WWW--Curl
 
 PHP
 
   Written by Sterling Hughes
-  http://curl.haxx.se/libcurl/php/
+  http://php.net/curl
 
 PostgreSQL
 
@@ -197,10 +196,15 @@ Ruby
   ruby-curl-multi - written by Kristjan Petursson and Keith Rarick
   http://curl-multi.rubyforge.org/
 
+Rust
+
+  curl-rust - by Carl Lerche
+  https://github.com/carllerche/curl-rust
+
 Scheme
 
   Bigloo binding by Kirill Lisovsky
-  http://curl.haxx.se/libcurl/scheme/
+  http://www.metapaper.net/lisovsky/web/curl/
 
 S-Lang
 

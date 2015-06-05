@@ -43,6 +43,9 @@ transfer to that server, likely not what you intended. Either set a domain in
 Set-Cookie (doing that will include sub domains) or use the Netscape format as
 shown in EXAMPLE.
 
+Starting in 7.43.0 the aforementioned any-domain cookies will not appear in the
+lists exported by \fICURLINFO_COOKIELIST(3)\fP and \fICURLOPT_COOKIEJAR(3)\fP.
+
 Additionally, there are commands available that perform actions if you pass in
 these exact strings:
 .IP ALL

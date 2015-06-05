@@ -83,18 +83,6 @@
 #error "OPENSSL_VERSION_NUMBER not defined"
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x0090581fL
-#define HAVE_SSL_GET1_SESSION 1
-#else
-#undef HAVE_SSL_GET1_SESSION
-#endif
-
-#if OPENSSL_VERSION_NUMBER >= 0x00904100L
-#define HAVE_USERDATA_IN_PWD_CALLBACK 1
-#else
-#undef HAVE_USERDATA_IN_PWD_CALLBACK
-#endif
-
 #if OPENSSL_VERSION_NUMBER >= 0x00907001L && !defined(OPENSSL_IS_BORINGSSL)
 /* ENGINE_load_private_key() takes four arguments */
 #define HAVE_ENGINE_LOAD_FOUR_ARGS
@@ -112,10 +100,6 @@
 #else
 /* OpenSSL does not have PKCS12 support */
 #undef HAVE_PKCS12_SUPPORT
-#endif
-
-#if OPENSSL_VERSION_NUMBER >= 0x00906001L
-#define HAVE_ERR_ERROR_STRING_N 1
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x00909000L
@@ -160,18 +144,8 @@
  */
 #define RAND_LOAD_LENGTH 1024
 
-#ifndef HAVE_USERDATA_IN_PWD_CALLBACK
-static char global_passwd[64];
-#endif
-
-static int passwd_callback(char *buf, int num, int encrypting
-#ifdef HAVE_USERDATA_IN_PWD_CALLBACK
-                           /* This was introduced in 0.9.4, we can set this
-                              using SSL_CTX_set_default_passwd_cb_userdata()
-                              */
-                           , void *global_passwd
-#endif
-                           )
+static int passwd_callback(char *buf, int num, int encrypting,
+                           void *global_passwd)
 {
   DEBUGASSERT(0 == encrypting);
 
@@ -376,23 +350,9 @@ int cert_stuff(struct connectdata *conn,
     int cert_done = 0;
 
     if(data->set.str[STRING_KEY_PASSWD]) {
-#ifndef HAVE_USERDATA_IN_PWD_CALLBACK
-      /*
-       * If password has been given, we store that in the global
-       * area (*shudder*) for a while:
-       */
-      size_t len = strlen(data->set.str[STRING_KEY_PASSWD]);
-      if(len < sizeof(global_passwd))
-        memcpy(global_passwd, data->set.str[STRING_KEY_PASSWD], len+1);
-      else
-        global_passwd[0] = '\0';
-#else
-      /*
-       * We set the password in the callback userdata
-       */
+      /* set the password in the callback userdata */
       SSL_CTX_set_default_passwd_cb_userdata(ctx,
                                              data->set.str[STRING_KEY_PASSWD]);
-#endif
       /* Set passwd callback: */
       SSL_CTX_set_default_passwd_cb(ctx, passwd_callback);
     }
@@ -678,10 +638,6 @@ int cert_stuff(struct connectdata *conn,
       failf(data, "Private key does not match the certificate public key");
       return 0;
     }
-#ifndef HAVE_USERDATA_IN_PWD_CALLBACK
-    /* erase it now */
-    memset(global_passwd, 0, sizeof(global_passwd));
-#endif
   }
   return 1;
 }
@@ -716,30 +672,14 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
 #endif
 }
 
-static
-int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
-{
-  X509 *err_cert;
-  char buf[256];
-
-  err_cert=X509_STORE_CTX_get_current_cert(ctx);
-  (void)x509_name_oneline(X509_get_subject_name(err_cert), buf, sizeof(buf));
-  return ok;
-}
-
 /* Return error string for last OpenSSL error
  */
 static char *SSL_strerror(unsigned long error, char *buf, size_t size)
 {
-#ifdef HAVE_ERR_ERROR_STRING_N
   /* OpenSSL 0.9.6 and later has a function named
      ERR_error_string_n() that takes the size of the buffer as a
      third argument */
   ERR_error_string_n(error, buf, size);
-#else
-  (void) size;
-  ERR_error_string(error, buf);
-#endif
   return buf;
 }
 
@@ -2079,7 +2019,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
    * SSL_get_verify_result() below. */
   SSL_CTX_set_verify(connssl->ctx,
                      data->set.ssl.verifypeer?SSL_VERIFY_PEER:SSL_VERIFY_NONE,
-                     cert_verify_callback);
+                     NULL);
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
@@ -2825,25 +2765,11 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-#ifdef HAVE_SSL_GET1_SESSION
   our_ssl_sessionid = SSL_get1_session(connssl->handle);
 
-  /* SSL_get1_session() will increment the reference
-     count and the session will stay in memory until explicitly freed with
-     SSL_SESSION_free(3), regardless of its state.
-     This function was introduced in openssl 0.9.5a. */
-#else
-  our_ssl_sessionid = SSL_get_session(connssl->handle);
-
-  /* if SSL_get1_session() is unavailable, use SSL_get_session().
-     This is an inferior option because the session can be flushed
-     at any time by openssl. It is included only so curl compiles
-     under versions of openssl < 0.9.5a.
-
-     WARNING: How curl behaves if it's session is flushed is
-     untested.
-  */
-#endif
+  /* SSL_get1_session() will increment the reference count and the session
+     will stay in memory until explicitly freed with SSL_SESSION_free(3),
+     regardless of its state. */
 
   incache = !(Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL));
   if(incache) {
@@ -2862,7 +2788,6 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
       return result;
     }
   }
-#ifdef HAVE_SSL_GET1_SESSION
   else {
     /* Session was incache, so refcount already incremented earlier.
      * Avoid further increments with each SSL_get1_session() call.
@@ -2870,7 +2795,6 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
      */
     SSL_SESSION_free(our_ssl_sessionid);
   }
-#endif
 
   /*
    * We check certificates to authenticate the server; otherwise we risk

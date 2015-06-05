@@ -52,6 +52,9 @@ for older and later versions as things don't change drastically that often.
   The libcurl source code generally use the name 'data' for the variable that
   points to the SessionHandle.
 
+  When doing multiplexed HTTP/2 transfers, each SessionHandle is associated
+  with an individual stream, sharing the same connectdata struct. Multiplexing
+  makes it even more important to keep things associated with the right thing!
 
   1.2 connectdata
 
@@ -70,7 +73,7 @@ for older and later versions as things don't change drastically that often.
   connection or the SessionHandle.
 
   Functions in libcurl will assume that connectdata->data points to the
-  SessionHandle that uses this connection.
+  SessionHandle that uses this connection (for the moment).
 
   As a special complexity, some protocols supported by libcurl require a
   special disconnect procedure that is more than just shutting down the
