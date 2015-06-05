@@ -197,6 +197,11 @@ Ruby
   ruby-curl-multi - written by Kristjan Petursson and Keith Rarick
   http://curl-multi.rubyforge.org/
 
+Rust
+
+  curl-rust - by Carl Lerche
+  https://github.com/carllerche/curl-rust
+
 Scheme
 
   Bigloo binding by Kirill Lisovsky
