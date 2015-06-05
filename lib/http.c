@@ -164,6 +164,7 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   conn->data->req.protop = http;
 
   Curl_http2_setup_conn(conn);
+  Curl_http2_setup_req(conn->data);
 
   return CURLE_OK;
 }
@@ -175,6 +176,8 @@ static CURLcode http_disconnect(struct connectdata *conn, bool dead_connection)
   if(http) {
     Curl_add_buffer_free(http->header_recvbuf);
     http->header_recvbuf = NULL; /* clear the pointer */
+    free(http->push_headers);
+    http->push_headers = NULL;
   }
 #else
   (void)conn;
@@ -1491,6 +1494,8 @@ CURLcode Curl_http_done(struct connectdata *conn,
     DEBUGF(infof(data, "free header_recvbuf!!\n"));
     Curl_add_buffer_free(http->header_recvbuf);
     http->header_recvbuf = NULL; /* clear the pointer */
+    free(http->push_headers);
+    http->push_headers = NULL;
   }
 #endif
 

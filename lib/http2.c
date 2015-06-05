@@ -33,6 +33,7 @@
 #include "rawstr.h"
 #include "multiif.h"
 #include "conncache.h"
+#include "url.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -94,12 +95,9 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 }
 
 /* called from Curl_http_setup_conn */
-void Curl_http2_setup_conn(struct connectdata *conn)
+void Curl_http2_setup_req(struct SessionHandle *data)
 {
-  struct HTTP *http = conn->data->req.protop;
-
-  conn->proto.httpc.settings.max_concurrent_streams =
-    DEFAULT_MAX_CONCURRENT_STREAMS;
+  struct HTTP *http = data->req.protop;
 
   http->nread_header_recvbuf = 0;
   http->bodystarted = FALSE;
@@ -108,11 +106,16 @@ void Curl_http2_setup_conn(struct connectdata *conn)
   http->pauselen = 0;
   http->error_code = NGHTTP2_NO_ERROR;
   http->closed = FALSE;
-
-  /* where to store incoming data for this stream and how big the buffer is */
-  http->mem = conn->data->state.buffer;
+  http->mem = data->state.buffer;
   http->len = BUFSIZE;
   http->memlen = 0;
+}
+
+/* called from Curl_http_setup_conn */
+void Curl_http2_setup_conn(struct connectdata *conn)
+{
+  conn->proto.httpc.settings.max_concurrent_streams =
+    DEFAULT_MAX_CONCURRENT_STREAMS;
 }
 
 /*
@@ -205,6 +208,155 @@ static ssize_t send_callback(nghttp2_session *h2,
   return written;
 }
 
+
+/* We pass a pointer to this struct in the push callback, but the contents of
+   the struct are hidden from the user. */
+struct curl_pushheaders {
+  struct SessionHandle *data;
+  const nghttp2_push_promise *frame;
+};
+
+/*
+ * push header access function. Only to be used from within the push callback
+ */
+char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
+{
+  /* Verify that we got a good easy handle in the push header struct, mostly to
+     detect rubbish input fast(er). */
+  if(!h || !GOOD_EASY_HANDLE(h->data))
+    return NULL;
+  else {
+    struct HTTP *stream = h->data->req.protop;
+    if(num < stream->push_headers_used)
+      return stream->push_headers[num];
+  }
+  return NULL;
+}
+
+/*
+ * push header access function. Only to be used from within the push callback
+ */
+char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
+{
+  /* Verify that we got a good easy handle in the push header struct, mostly to
+     detect rubbish input fast(er). */
+  if(!h || !GOOD_EASY_HANDLE(h->data) || !header)
+    return NULL;
+  else {
+    struct HTTP *stream = h->data->req.protop;
+    size_t len = strlen(header);
+    size_t i;
+    for(i=0; i<stream->push_headers_used; i++) {
+      if(!strncmp(header, stream->push_headers[i], len)) {
+        /* sub-match, make sure that it us followed by a colon */
+        if(stream->push_headers[i][len] != ':')
+          continue;
+        return &stream->push_headers[i][len+1];
+      }
+    }
+  }
+  return NULL;
+}
+
+static CURL *duphandle(struct SessionHandle *data)
+{
+  struct SessionHandle *second = curl_easy_duphandle(data);
+  if(second) {
+    /* setup the request struct */
+    struct HTTP *http = calloc(1, sizeof(struct HTTP));
+    if(!http) {
+      (void)Curl_close(second);
+      second = NULL;
+    }
+    else {
+      second->req.protop = http;
+      http->header_recvbuf = Curl_add_buffer_init();
+      if(!http->header_recvbuf) {
+        free(http);
+        (void)Curl_close(second);
+        second = NULL;
+      }
+      else
+        Curl_http2_setup_req(second);
+    }
+  }
+  return second;
+}
+
+
+static int push_promise(struct SessionHandle *data,
+                        struct connectdata *conn,
+                        const nghttp2_push_promise *frame)
+{
+  int rv;
+  DEBUGF(infof(data, "PUSH_PROMISE received, stream %u!\n",
+               frame->promised_stream_id));
+  if(data->multi->push_cb) {
+    struct HTTP *stream;
+    struct curl_pushheaders heads;
+    CURLMcode rc;
+    struct http_conn *httpc;
+    size_t i;
+    /* clone the parent */
+    CURL *newhandle = duphandle(data);
+    if(!newhandle) {
+      infof(data, "failed to duplicate handle\n");
+      rv = 1; /* FAIL HARD */
+      goto fail;
+    }
+
+    heads.data = data;
+    heads.frame = frame;
+    /* ask the application */
+    DEBUGF(infof(data, "Got PUSH_PROMISE, ask application!\n"));
+
+    stream = data->req.protop;
+
+    rv = data->multi->push_cb(data, newhandle,
+                              stream->push_headers_used, &heads,
+                              data->multi->push_userp);
+
+    /* free the headers again */
+    for(i=0; i<stream->push_headers_used; i++)
+      free(stream->push_headers[i]);
+    free(stream->push_headers);
+    stream->push_headers = NULL;
+
+    if(rv) {
+      /* denied, kill off the new handle again */
+      (void)Curl_close(newhandle);
+      goto fail;
+    }
+
+    /* approved, add to the multi handle and immediately switch to PERFORM
+       state with the given connection !*/
+    rc = Curl_multi_add_perform(data->multi, newhandle, conn);
+    if(rc) {
+      infof(data, "failed to add handle to multi\n");
+      Curl_close(newhandle);
+      rv = 1;
+      goto fail;
+    }
+
+    httpc = &conn->proto.httpc;
+    /* put the newhandle in the hash with the stream id as key */
+    if(!Curl_hash_add(&httpc->streamsh,
+                      (size_t *)&frame->promised_stream_id,
+                      sizeof(frame->promised_stream_id), newhandle)) {
+      failf(conn->data, "Couldn't add stream to hash!");
+      rv = 1;
+    }
+    else
+      rv = 0;
+  }
+  else {
+    DEBUGF(infof(data, "Got PUSH_PROMISE, ignore it!\n"));
+    rv = 1;
+  }
+  fail:
+  return rv;
+}
+
 static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
@@ -292,12 +444,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_expire(data_s, 1);
     break;
   case NGHTTP2_PUSH_PROMISE:
-    DEBUGF(infof(data_s, "Got PUSH_PROMISE, RST_STREAM it!\n"));
-    rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                   frame->push_promise.promised_stream_id,
-                                   NGHTTP2_CANCEL);
-    if(nghttp2_is_fatal(rv)) {
-      return rv;
+    rv = push_promise(data_s, conn, &frame->push_promise);
+    if(rv) { /* deny! */
+      rv = nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+                                     frame->push_promise.promised_stream_id,
+                                     NGHTTP2_CANCEL);
+      if(nghttp2_is_fatal(rv)) {
+        return rv;
+      }
     }
     break;
   case NGHTTP2_SETTINGS:
@@ -523,11 +677,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   (void)frame;
   (void)flags;
 
-  /* Ignore PUSH_PROMISE for now */
-  if(frame->hd.type != NGHTTP2_HEADERS) {
-    return 0;
-  }
-
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
   /* get the stream from the hash based on Stream ID */
@@ -546,6 +695,36 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     /* Ignore trailer or HEADERS not mapped to HTTP semantics.  The
        consequence is handled in on_frame_recv(). */
     return 0;
+
+  /* Store received PUSH_PROMISE headers to be used when the subsequent
+     PUSH_PROMISE callback comes */
+  if(frame->hd.type == NGHTTP2_PUSH_PROMISE) {
+    char *h;
+
+    if(!stream->push_headers) {
+      stream->push_headers_alloc = 10;
+      stream->push_headers = malloc(stream->push_headers_alloc *
+                                    sizeof(char *));
+      stream->push_headers_used = 0;
+    }
+    else if(stream->push_headers_used ==
+            stream->push_headers_alloc) {
+      char **headp;
+      stream->push_headers_alloc *= 2;
+      headp = realloc(stream->push_headers,
+                      stream->push_headers_alloc * sizeof(char *));
+      if(!headp) {
+        free(stream->push_headers);
+        stream->push_headers = NULL;
+        return 1;
+      }
+      stream->push_headers = headp;
+    }
+    h = aprintf("%s:%s", name, value);
+    if(h)
+      stream->push_headers[stream->push_headers_used++] = h;
+    return 0;
+  }
 
   if(namelen == sizeof(":status") - 1 &&
      memcmp(":status", name, namelen) == 0) {
