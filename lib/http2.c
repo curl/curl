@@ -721,7 +721,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       if(!headp) {
         free(stream->push_headers);
         stream->push_headers = NULL;
-        return 1;
+        return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
       }
       stream->push_headers = headp;
     }
