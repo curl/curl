@@ -238,9 +238,14 @@ char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
  */
 char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
 {
-  /* Verify that we got a good easy handle in the push header struct, mostly to
-     detect rubbish input fast(er). */
-  if(!h || !GOOD_EASY_HANDLE(h->data) || !header)
+  /* Verify that we got a good easy handle in the push header struct,
+     mostly to detect rubbish input fast(er). Also empty header name
+     is just a rubbish too. We have to allow ":" at the beginning of
+     the header, but header == ":" must be rejected. If we have ':' in
+     the middle of header, it could be matched in middle of the value,
+     this is because we do prefix match.*/
+  if(!h || !GOOD_EASY_HANDLE(h->data) || !header || !header[0] ||
+     Curl_raw_equal(header, ":") || strchr(header + 1, ':'))
     return NULL;
   else {
     struct HTTP *stream = h->data->req.protop;
