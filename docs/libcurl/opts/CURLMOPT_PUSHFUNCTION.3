@@ -102,7 +102,6 @@ int push_callback(CURL *parent,
 {
   char *headp;
   int *transfers = (int *)userp;
-  char filename[128];
   FILE *out;
   headp = curl_pushheader_byname(headers, ":path");
   if(headp && !strncmp(headp, "/push-", 6)) {
