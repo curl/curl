@@ -495,8 +495,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 
     }
     else {
-      postsize = (data->set.postfieldsize != -1)?
-        data->set.postfieldsize:
+      postsize = (data->state.infilesize != -1)?
+        data->state.infilesize:
         (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
       data->set.httpreq = HTTPREQ_POST;
     }

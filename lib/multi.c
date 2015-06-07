@@ -402,7 +402,10 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* Point to the multi's connection cache */
   data->state.conn_cache = &multi->conn_cache;
 
-  data->state.infilesize = data->set.filesize;
+  if(data->set.httpreq == HTTPREQ_PUT)
+    data->state.infilesize = data->set.filesize;
+  else
+    data->state.infilesize = data->set.postfieldsize;
 
   /* This adds the new entry at the 'end' of the doubly-linked circular
      list of SessionHandle structs to try and maintain a FIFO queue so
