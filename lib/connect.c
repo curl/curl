@@ -1166,8 +1166,11 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     conn->tempaddr[0] = conn->tempaddr[0]->ai_next;
   }
 
-  if(conn->tempsock[0] == CURL_SOCKET_BAD)
+  if(conn->tempsock[0] == CURL_SOCKET_BAD) {
+    if(!result)
+      result = CURLE_COULDNT_CONNECT;
     return result;
+  }
 
   data->info.numconnects++; /* to track the number of connections made */
 
