@@ -120,7 +120,7 @@ int main(void)
   XML_SetElementHandler(parser, startElement, endElement);
   XML_SetCharacterDataHandler(parser, characterDataHandler);
 
-  /* Initalize a libcurl handle. */
+  /* Initialize a libcurl handle. */
   curl_global_init(CURL_GLOBAL_ALL ^ CURL_GLOBAL_SSL);
   curl_handle = curl_easy_init();
   curl_easy_setopt(curl_handle, CURLOPT_URL, "http://www.w3schools.com/xml/simple.xml");
