@@ -73,7 +73,7 @@ those transfers. With the new option `CURLOPT_PIPEWAIT` (added in 7.43.0), you
 can ask that a transfer should rather wait and see in case there's a
 connection for the same host in progress that might end up being possible to
 multiplex on. It favours keeping the number of connections low to the cost of
-slightly longer time to first byte transfered.
+slightly longer time to first byte transferred.
 
 Applications
 ------------

@@ -29,8 +29,8 @@ CURLOPT_CHUNK_DATA \- custom pointer to the FTP chunk callbacks
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CHUNK_DATA, void *pointer);
 .SH DESCRIPTION
 Pass a \fIpointer\fP that will be untouched by libcurl and passed as the ptr
-argument to the \fICURL_CHUNK_BGN_FUNTION(3)\fP and
-\fICURL_CHUNK_END_FUNTION(3)\fP.
+argument to the \fICURL_CHUNK_BGN_FUNCTION(3)\fP and
+\fICURL_CHUNK_END_FUNCTION(3)\fP.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
