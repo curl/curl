@@ -18,6 +18,7 @@ This release includes the following changes:
    with the new CURLPIPE_MULTIPLEX bit for CURLMOPT_PIPELINING [16]
  o HTTP/2: requires nghttp2 1.0.0 or later
  o scripts: add zsh.pl for generating zsh completion
+ o curl.h: add CURL_HTTP_VERSION_2
 
 This release includes the following bugfixes:
 
@@ -61,6 +62,22 @@ This release includes the following bugfixes:
  o CURLOPT_COOKIELIST.3: Explain Set-Cookie without a domain [23]
  o FAQ: How do I port libcurl to my OS?
  o openssl: Use TLS_client_method for OpenSSL 1.1.0+
+ o HTTP-NTLM: fail auth on connection close instead of looping [24]
+ o curl_setup: Add macros for FOPEN_READTEXT, FOPEN_WRITETEXT [25]
+ o curl_getdate.3: update RFC reference
+ o curl_multi_info_read.3: added example
+ o curl_multi_perform.3: added example
+ o curl_multi_timeout.3: added example
+ o cookie: Stop exporting any-domain cookies [26]
+ o openssl: remove dummy callback use from SSL_CTX_set_verify()
+ o openssl: remove SSL_get_session()-using code
+ o openssl: removed USERDATA_IN_PWD_CALLBACK kludge
+ o openssl: removed error string #ifdef
+ o openssl: Fix verification of server-sent legacy intermediates [27]
+ o docs: man page indentation and syntax fixes
+ o docs: Spelling fixes
+ o fopen.c: fix a few compiler warnings
+ o CURLOPT_OPENSOCKETFUNCTION: return error at once [28]
 
 This release includes the following known bugs:
 
@@ -72,12 +89,12 @@ advice from friends like these:
   Alessandro Ghedini, Alexander Dyagilev, Anders Bakken, Anthony Avina,
   Ashish Shukla, Bert Huijben, Brian Chrisman, Brian Prodoehl, Chris Araman,
   Dagobert Michelsen, Dan Fandrich, Daniel Melani, Daniel Stenberg,
-  Dmitry Eremin-Solenikov, Egon Eckert, Fred Stluka, Grant Pannell, Jens Rantil,
-  Kamil Dudka, Linus Nielsen, Liviu Chircu, Marc Hoersken, Michael Osipov,
-  Oren Souroujon, Orgad Shaneh, Patrick Monnerat, Patrick Rapin, Paul Howarth,
-  Ray Satiro, Sean Boudreau, Tatsuhiro Tsujikawa, Viktor Szakáts,
-  Yehezkel Horowitz,
-  (33 contributors)
+  Dmitry Eremin-Solenikov, Egon Eckert, Fred Stluka, Gisle Vanem, Grant Pannell,
+  Isaac Boukris, Jens Rantil, Kamil Dudka, Linus Nielsen, Liviu Chircu,
+  Marc Hoersken, Michael Osipov, Oren Souroujon, Orgad Shaneh, Patrick Monnerat,
+  Patrick Rapin, Paul Howarth, Rafayel Mkrtchyan, Ray Satiro, Sean Boudreau,
+  Tatsuhiro Tsujikawa, Viktor Szakáts, Ville Skyttä, Yehezkel Horowitz,
+  (37 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -106,3 +123,8 @@ References to bug reports and discussions on issues:
  [21] = http://curl.haxx.se/mail/lib-2015-05/0056.html
  [22] = http://curl.haxx.se/mail/lib-2015-05/0115.html
  [23] = http://curl.haxx.se/mail/lib-2015-05/0137.html
+ [24] = https://github.com/bagder/curl/issues/256
+ [25] = https://github.com/bagder/curl/pull/258#issuecomment-107093055
+ [26] = https://github.com/bagder/curl/issues/292
+ [27] = https://rt.openssl.org/Ticket/Display.html?id=3621&user=guest&pass=guest
+ [28] = http://curl.haxx.se/mail/lib-2015-06/0047.html
