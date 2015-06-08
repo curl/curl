@@ -108,7 +108,7 @@ static size_t write_callback(char *buffer,
       size=rembuff;
     }
     else {
-      /* realloc suceeded increase buffer size*/
+      /* realloc succeeded increase buffer size*/
       url->buffer_len+=size - rembuff;
       url->buffer=newbuff;
     }
@@ -131,7 +131,7 @@ static int fill_buffer(URL_FILE *file, size_t want)
   CURLMcode mc; /* curl_multi_fdset() return code */
 
   /* only attempt to fill buffer if transactions still running and buffer
-   * doesnt exceed required size already
+   * doesn't exceed required size already
    */
   if((!file->still_running) || (file->buffer_pos > want))
     return 0;
@@ -229,7 +229,7 @@ static int use_buffer(URL_FILE *file,int want)
 URL_FILE *url_fopen(const char *url,const char *operation)
 {
   /* this code could check for URLs or types in the 'url' and
-     basicly use the real fopen() for standard files */
+     basically use the real fopen() for standard files */
 
   URL_FILE *file;
   (void)operation;

@@ -429,7 +429,7 @@ be the same as/similar to FTP.
 
 11.2 Honor file timestamps
 
-The timestamp of the transfered file should reflect that of the original file.
+The timestamp of the transferred file should reflect that of the original file.
 
 11.3 Use NTLMv2
 

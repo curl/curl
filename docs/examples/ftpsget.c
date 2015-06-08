@@ -55,7 +55,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
   struct FtpFile ftpfile={
-    "yourfile.bin", /* name to store the file as if succesful */
+    "yourfile.bin", /* name to store the file as if successful */
     NULL
   };
 

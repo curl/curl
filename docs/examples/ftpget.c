@@ -53,7 +53,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
   struct FtpFile ftpfile={
-    "curl.tar.gz", /* name to store the file as if succesful */
+    "curl.tar.gz", /* name to store the file as if successful */
     NULL
   };
 

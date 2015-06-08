@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
                CURLFORM_END);
 
   curl = curl_easy_init();
-  /* initalize custom header list (stating that Expect: 100-continue is not
+  /* initialize custom header list (stating that Expect: 100-continue is not
      wanted */
   headerlist = curl_slist_append(headerlist, buf);
   if(curl) {

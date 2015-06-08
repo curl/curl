@@ -39,7 +39,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-    /* This will retreive message 1 from the user's mailbox */
+    /* This will retrieve message 1 from the user's mailbox */
     curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com/1");
 
     /* Perform the retr */
