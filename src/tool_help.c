@@ -174,6 +174,10 @@ static const char *const helptext[] = {
   "     --proxy-negotiate  "
   "Use HTTP Negotiate (SPNEGO) authentication on the proxy (H)",
   "     --proxy-ntlm    Use NTLM authentication on the proxy (H)",
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+  "     --proxy-service-name NAME  SPNEGO proxy service name",
+  "     --service-name NAME  SPNEGO service name",
+#endif
   " -U, --proxy-user USER[:PASSWORD]  Proxy user and password",
   "     --proxy1.0 HOST[:PORT]  Use HTTP/1.0 proxy on given port",
   " -p, --proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
