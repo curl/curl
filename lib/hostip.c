@@ -834,9 +834,11 @@ CURLcode Curl_loadhostpairs(struct SessionHandle *data)
        can't modify its address list and will have to orphan (ie remove
        from hostcache) and replace it.
     */
+
     if(dns && (dns->inuse > (dns->is_user_specified ? 1 : 0))) {
-      Curl_dns_entry *old;
       Curl_addrinfo *copied_addrlist;
+      int old_is_user_specified = 0;
+      time_t old_timestamp = 0;
       /* If we have 'addr' we are either adding or removing an address
          from the address list. In that case we need the existing
          address list for our replacement entry. However our soon to be
@@ -854,11 +856,13 @@ CURLcode Curl_loadhostpairs(struct SessionHandle *data)
          the garbage cleanup can free the memory when it's no longer in
          use.
       */
-      if(dns->is_user_specified)
+      if(dns->is_user_specified) {
+        old_is_user_specified = 1;
         --dns->inuse;
+      }
       /* Curl_cache_addr orphans the existing entry and makes a new one
        */
-      old = dns;
+      old_timestamp = dns->timestamp;
       dns = Curl_cache_addr(data, copied_addrlist, hostname, port);
       if(!dns) {
         free(entry_id);
@@ -873,10 +877,10 @@ CURLcode Curl_loadhostpairs(struct SessionHandle *data)
          the new entry do we consider the new entry to be
          user-specified.
       */
-      if(!old->is_user_specified && removing) {
+      if(!old_is_user_specified && removing) {
         --dns->inuse;
-        if(old->timestamp)
-          dns->timestamp = old->timestamp;
+        if(old_timestamp)
+          dns->timestamp = old_timestamp;
       }
       else
         dns->is_user_specified = 1;
