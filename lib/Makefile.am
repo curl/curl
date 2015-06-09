@@ -21,9 +21,6 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-DOCS = README.encoding README.memoryleak README.ares README.curlx	\
- README.hostip README.multi_socket README.httpauth README.curl_off_t
-
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
 EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 config-win32.h	\
@@ -31,7 +28,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 config-win32.h	\
  makefile.dj config-dos.h libcurl.plist libcurl.rc config-amigaos.h	\
  makefile.amiga Makefile.netware nwlib.c nwos.c config-win32ce.h	\
  config-os400.h setup-os400.h config-symbian.h Makefile.Watcom		\
- config-tpf.h $(DOCS) mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)	\
+ config-tpf.h mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)	\
  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl	\
  objnames-test08.sh objnames-test10.sh objnames.inc checksrc.whitelist
 
