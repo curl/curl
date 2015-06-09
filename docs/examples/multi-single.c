@@ -81,7 +81,7 @@ int main(void)
     }
 
     /* 'numfds' being zero means either a timeout or no file descriptors to
-       wait for. Try timeout on first occurance, then assume no file
+       wait for. Try timeout on first occurrence, then assume no file
        descriptors and no file descriptors to wait for means wait for 100
        milliseconds. */
 

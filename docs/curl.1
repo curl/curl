@@ -667,6 +667,7 @@ curl does one CWD with the full target directory and then operates on the file
 \&"normally" (like in the multicwd case). This is somewhat more standards
 compliant than 'nocwd' but without the full penalty of 'multicwd'.
 .RE
+.IP
 (Added in 7.15.1)
 .IP "--ftp-pasv"
 (FTP) Use passive mode for the data connection. Passive is the internal default
@@ -1227,7 +1228,7 @@ i.e "my.host.domain" to specify the machine
 make curl pick the same IP address that is already used for the control
 connection
 .RE
-
+.IP
 If this option is used several times, the last one will be used. Disable the
 use of PORT with \fI--ftp-pasv\fP. Disable the attempt to use the EPRT command
 instead of PORT by using \fI--disable-eprt\fP. EPRT is really PORT++.
@@ -1434,7 +1435,7 @@ specifies 300 bytes from offset 500(H)
 .B 100-199,500-599
 specifies two separate 100-byte ranges(*)(H)
 .RE
-
+.IP
 (*) = NOTE that this will cause the server to reply with a multipart
 response!
 
@@ -1898,7 +1899,7 @@ displayed with millisecond resolution.
 The URL that was fetched last. This is most meaningful if you've told curl
 to follow location: headers.
 .RE
-
+.IP
 If this option is used several times, the last one will be used.
 .IP "-x, --proxy <[protocol://][user:password@]proxyhost[:port]>"
 Use the specified proxy.

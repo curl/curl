@@ -108,7 +108,7 @@ static size_t write_callback(char *buffer,
       size=rembuff;
     }
     else {
-      /* realloc suceeded increase buffer size*/
+      /* realloc succeeded increase buffer size*/
       url->buffer_len+=size - rembuff;
       url->buffer=newbuff;
     }
@@ -131,7 +131,7 @@ static int fill_buffer(URL_FILE *file, size_t want)
   CURLMcode mc; /* curl_multi_fdset() return code */
 
   /* only attempt to fill buffer if transactions still running and buffer
-   * doesnt exceed required size already
+   * doesn't exceed required size already
    */
   if((!file->still_running) || (file->buffer_pos > want))
     return 0;
@@ -205,7 +205,7 @@ static int fill_buffer(URL_FILE *file, size_t want)
 }
 
 /* use to remove want bytes from the front of a files buffer */
-static int use_buffer(URL_FILE *file,int want)
+static int use_buffer(URL_FILE *file, size_t want)
 {
   /* sort out buffer */
   if((file->buffer_pos - want) <=0) {
@@ -229,7 +229,7 @@ static int use_buffer(URL_FILE *file,int want)
 URL_FILE *url_fopen(const char *url,const char *operation)
 {
   /* this code could check for URLs or types in the 'url' and
-     basicly use the real fopen() for standard files */
+     basically use the real fopen() for standard files */
 
   URL_FILE *file;
   (void)operation;
@@ -375,7 +375,7 @@ char *url_fgets(char *ptr, size_t size, URL_FILE *file)
 
   switch(file->type) {
   case CFTYPE_FILE:
-    ptr = fgets(ptr,size,file->handle.file);
+    ptr = fgets(ptr, (int)size, file->handle.file);
     break;
 
   case CFTYPE_CURL:
@@ -451,7 +451,7 @@ int main(int argc, char *argv[])
   URL_FILE *handle;
   FILE *outf;
 
-  int nread;
+  size_t nread;
   char buffer[256];
   const char *url;
 
@@ -499,7 +499,7 @@ int main(int argc, char *argv[])
   }
 
   do {
-    nread = url_fread(buffer, 1,sizeof(buffer), handle);
+    nread = url_fread(buffer, 1, sizeof(buffer), handle);
     fwrite(buffer,1,nread,outf);
   } while(nread);
 
