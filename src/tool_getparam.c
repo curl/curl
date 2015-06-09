@@ -223,6 +223,24 @@ static const struct LongShort aliases[]= {
   {"Ep", "pinnedpubkey",             TRUE},
   {"Eq", "cert-status",              FALSE},
   {"Er", "false-start",              FALSE},
+  {"Es", "proxy-sslv2",              FALSE},
+  {"Et", "proxy-sslv3",              FALSE},
+  {"Eu", "proxy-tlsuser",            TRUE},
+  {"Ev", "proxy-tlspassword",        TRUE},
+  {"Ew", "proxy-tlsauthtype",        TRUE},
+  {"Ex", "proxy-cert",               TRUE},
+  {"Ey", "proxy-cert-type",          TRUE},
+  {"Ez", "proxy-key",                TRUE},
+  {"E0", "proxy-key-type",           TRUE},
+  {"E1", "proxy-pass",               TRUE},
+  {"E2", "proxy-ciphers",            TRUE},
+  {"E3", "proxy-crlfile",            TRUE},
+  {"E4", "proxy-ssl-allow-beast",    FALSE},
+  {"E5", "login-options",            TRUE},
+  {"E6", "proxy-cacert",             TRUE},
+  {"E7", "proxy-capath",             TRUE},
+  {"E8", "proxy-insecure",           FALSE},
+  {"E9", "proxy-tlsv1",              FALSE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -377,6 +395,37 @@ void parse_cert_parameter(const char *cert_parameter,
   }
 done:
   *certname_place = '\0';
+}
+
+static ParameterError
+GetFileAndPassword(char *nextarg, char **file, char **password)
+{
+  char *ptr = strchr(nextarg, ':');
+  /* Since we live in a world of weirdness and confusion, the win32
+      dudes can use : when using drive letters and thus
+      c:\file:password needs to work. In order not to break
+      compatibility, we still use : as separator, but we try to detect
+      when it is used for a file name! On windows. */
+#ifdef WIN32
+  if(ptr &&
+      (ptr == &nextarg[1]) &&
+      (nextarg[2] == '\\' || nextarg[2] == '/') &&
+      (ISALPHA(nextarg[0])) )
+    /* colon in the second column, followed by a backslash, and the
+        first character is an alphabetic letter:
+
+        this is a drive letter colon */
+    ptr = strchr(&nextarg[3], ':'); /* find the next one instead */
+#endif
+  if(ptr) {
+    /* we have a password too */
+    *ptr = '\0';
+    ptr++;
+    GetStr(password, ptr);
+  }
+  GetStr(file, nextarg);
+  cleanarg(nextarg);
+  return PARAM_OK;
 }
 
 ParameterError getparameter(char *flag,    /* f or -long-flag */
@@ -1305,6 +1354,11 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     break;
     case 'E':
       switch(subletter) {
+      case '\0': /* certificate file */
+        err = GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
+        if(err)
+          return err;
+        break;
       case 'a': /* CA info PEM file */
         /* CA info PEM file */
         GetStr(&config->cacert, nextarg);
@@ -1385,19 +1439,86 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'r': /* --false-start */
         config->falsestart = TRUE;
         break;
-
-      default: /* certificate file */
-      {
-        char *certname, *passphrase;
-        parse_cert_parameter(nextarg, &certname, &passphrase);
-        Curl_safefree(config->cert);
-        config->cert = certname;
-        if(passphrase) {
-          Curl_safefree(config->key_passwd);
-          config->key_passwd = passphrase;
+      case 's':
+        /* SSL version 2 for proxy */
+        config->proxy_ssl_version = CURL_SSLVERSION_SSLv2;
+        break;
+      case 't':
+        /* SSL version 3 for proxy */
+        config->proxy_ssl_version = CURL_SSLVERSION_SSLv3;
+        break;
+      case 'u': /* TLS username for proxy */
+        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)
+          GetStr(&config->proxy_tls_username, nextarg);
+        else
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      case 'v': /* TLS password for proxy */
+        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP)
+          GetStr(&config->proxy_tls_password, nextarg);
+        else
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      case 'w': /* TLS authentication type for proxy */
+        if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
+          GetStr(&config->proxy_tls_authtype, nextarg);
+          if(!strequal(config->proxy_tls_authtype, "SRP"))
+            return PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
         }
+        else
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      case 'x': /* certificate file for proxy */
+        err = GetFileAndPassword(nextarg, &config->proxy_cert,
+                                 &config->proxy_key_passwd);
+        if(err)
+          return err;
+        break;
+      case 'y': /* cert file type for proxy */
+        GetStr(&config->proxy_cert_type, nextarg);
+        break;
+      case 'z': /* private key file for proxy */
+        GetStr(&config->proxy_key, nextarg);
+        break;
+      case '0': /* private key file type for proxy */
+        GetStr(&config->proxy_key_type, nextarg);
+        break;
+      case '1': /* private key passphrase for proxy */
+        GetStr(&config->proxy_key_passwd, nextarg);
         cleanarg(nextarg);
-      }
+        break;
+      case '2': /* ciphers for proxy */
+        GetStr(&config->proxy_cipher_list, nextarg);
+        break;
+      case '3': /* CRL info PEM file for proxy */
+        /* CRL file */
+        GetStr(&config->proxy_crlfile, nextarg);
+        break;
+      case '4': /* no empty SSL fragments for proxy */
+        if(curlinfo->features & CURL_VERSION_SSL)
+          config->proxy_ssl_allow_beast = toggle;
+        break;
+      case '5': /* --login-options */
+        GetStr(&config->login_options, nextarg);
+        break;
+      case '6': /* CA info PEM file for proxy */
+        /* CA info PEM file */
+        GetStr(&config->proxy_cacert, nextarg);
+        break;
+      case '7': /* CA info PEM file for proxy */
+        /* CA cert directory */
+        GetStr(&config->proxy_capath, nextarg);
+        break;
+      case '8': /* allow insecure SSL connects for proxy */
+        config->proxy_insecure_ok = toggle;
+        break;
+      case '9':
+        /* TLS version 1 for proxy */
+        config->proxy_ssl_version = CURL_SSLVERSION_TLSv1;
+        break;
+
+      default: /* unknown flag */
+        return PARAM_OPTION_UNKNOWN;
       }
       break;
     case 'f':

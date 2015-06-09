@@ -110,6 +110,16 @@ int Curl_raw_equal(const char *first, const char *second)
   return (Curl_raw_toupper(*first) == Curl_raw_toupper(*second));
 }
 
+bool Curl_safe_strequal(const char *str1, const char *str2)
+{
+  if(str1 && str2)
+    /* both pointers point to something then compare them */
+    return (0 != Curl_raw_equal(str1, str2)) ? TRUE : FALSE;
+  else
+    /* if both pointers are NULL then treat them as equal */
+    return (!str1 && !str2) ? TRUE : FALSE;
+}
+
 int Curl_raw_nequal(const char *first, const char *second, size_t max)
 {
   while(*first && *second && max) {

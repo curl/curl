@@ -34,6 +34,7 @@
  */
 int Curl_raw_equal(const char *first, const char *second);
 int Curl_raw_nequal(const char *first, const char *second, size_t max);
+bool Curl_safe_strequal(const char *str1, const char *str2);
 
 char Curl_raw_toupper(char in);
 
