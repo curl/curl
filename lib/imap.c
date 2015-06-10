@@ -1099,10 +1099,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
       imapc->mailbox = strdup(imap->mailbox);
 
       if(imap->custom) {
-        if (!strcmp(imap->custom,"IDLE"))
-          result = imap_perform_idle(conn);
-        else
-          result = imap_perform_list(conn);
+        result = imap_perform_list(conn);
       }
       else if(imap->query)
         result = imap_perform_search(conn);
@@ -1624,6 +1621,8 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   if(conn->data->set.upload)
     /* APPEND can be executed directly */
     result = imap_perform_append(conn);
+  else if(imap->custom && !strcmp(imap->custom, "IDLE"))
+    result = imap_perform_idle(conn);
   else if(imap->custom && (selected || !imap->mailbox))
     /* Custom command using the same mailbox or no mailbox */
     result = imap_perform_list(conn);
