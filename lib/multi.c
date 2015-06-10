@@ -1509,9 +1509,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         break;
       }
 
-      DEBUGF(infof(data, "multi_runsingle:%d call Curl_readwrite\n",
-                   __LINE__));
-
       /* read/write data if it is ready to do so */
       result = Curl_readwrite(data->easy_conn, data, &done);
 
