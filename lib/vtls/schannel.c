@@ -403,6 +403,17 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       return CURLE_OK;
     }
 
+    /* If the server has requested a client certificate, attempt to continue
+       the handshake without one. This will allow connections to servers which
+       request a client certificate but do not require it. */
+    if(sspi_status == SEC_I_INCOMPLETE_CREDENTIALS &&
+       !(connssl->req_flags & ISC_REQ_USE_SUPPLIED_CREDS)) {
+      connssl->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
+      connssl->connecting_state = ssl_connect_2_writing;
+      infof(data, "schannel: a client certificate has been requested\n");
+      return CURLE_OK;
+    }
+
     /* check if the handshake needs to be continued */
     if(sspi_status == SEC_I_CONTINUE_NEEDED || sspi_status == SEC_E_OK) {
       for(i = 0; i < 3; i++) {
