@@ -218,7 +218,7 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_LIBRARY], [
   fi
   case $tst_api in
     0x110) tst_show="1.1.0" ;;
-    0x102) tst_chow="1.0.2" ;;
+    0x102) tst_show="1.0.2" ;;
     0x101) tst_show="1.0.1" ;;
     0x100) tst_show="1.0.0" ;;
     0x099) tst_show="0.9.9" ;;
