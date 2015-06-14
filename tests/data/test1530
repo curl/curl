@@ -9,6 +9,9 @@ CURLOPT_OPENSOCKETFUNCTION
 <server>
 none
 </server>
+<features>
+http
+</features>
 <tool>
 lib1530
 </tool>
