@@ -69,6 +69,7 @@ that just completed.
 
 At this point, there are no other \fBmsg\fP types defined.
 .SH EXAMPLE
+.nf
 struct CURLMsg *m;
 
 /* call curl_multi_perform or curl_multi_socket_action first, then loop
@@ -84,7 +85,7 @@ do {
     curl_easy_cleanup(e);
   }
 } while(m);
-
+.fi
 .SH "RETURN VALUE"
 A pointer to a filled-in struct, or NULL if it failed or ran out of
 structs. It also writes the number of messages left in the queue (after this
