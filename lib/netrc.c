@@ -72,6 +72,10 @@ int Curl_parsenetrc(const char *host,
   if(!netrcfile) {
     bool home_alloc = FALSE;
     char *home = curl_getenv("HOME"); /* portable environment reader */
+#if defined(WIN32) || defined(__CYGWIN__)
+    if(!home)
+      home = curl_getenv("USERPROFILE");
+#endif
     if(home) {
       home_alloc = TRUE;
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
