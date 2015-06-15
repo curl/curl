@@ -53,7 +53,7 @@ SSL ciphers
 
   References:
 
-  http://tools.ietf.org/html/draft-popov-tls-prohibiting-rc4-01
+  https://tools.ietf.org/html/draft-popov-tls-prohibiting-rc4-01
   
 Allow BEAST
 
