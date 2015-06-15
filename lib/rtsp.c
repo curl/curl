@@ -322,7 +322,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   if(!p_session_id &&
      (rtspreq & ~(RTSPREQ_OPTIONS | RTSPREQ_DESCRIBE | RTSPREQ_SETUP))) {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
-          p_request ? p_request : "");
+          p_request);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
