@@ -208,7 +208,7 @@
 
  To prevent local users from snooping on your traffic to the proxy. Supported
  by Chrome already:
- http://www.chromium.org/developers/design-documents/secure-web-proxy
+ https://www.chromium.org/developers/design-documents/secure-web-proxy
 
  ...and by Firefox soon:
  https://bugzilla.mozilla.org/show_bug.cgi?id=378637
@@ -265,7 +265,7 @@
  HOST is a command for a client to tell which host name to use, to offer FTP
  servers named-based virtual hosting:
 
- http://tools.ietf.org/html/rfc7151
+ https://tools.ietf.org/html/rfc7151
 
 4.2 Alter passive/active on failure and retry
 
@@ -493,7 +493,7 @@ Currently the SMB authentication uses NTLMv1.
 
  DNS-Based Authentication of Named Entities (DANE) is a way to provide SSL
  keys and certs over DNS using DNSSEC as an alternative to the CA model.
- http://www.rfc-editor.org/rfc/rfc6698.txt
+ https://www.rfc-editor.org/rfc/rfc6698.txt
 
  An initial patch was posted by Suresh Krishnaswamy on March 7th 2013
  (http://curl.haxx.se/mail/lib-2013-03/0075.html) but it was a too simple
@@ -523,7 +523,7 @@ Currently the SMB authentication uses NTLMv1.
  Therefore support for the existing -E/--cert and --key options should be
  implemented by supplying a custom certificate to the SChannel APIs, see:
  - Getting a Certificate for Schannel
-   http://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
+   https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
 
 15.2 Add support for custom server certificate validation
 
@@ -534,7 +534,7 @@ Currently the SMB authentication uses NTLMv1.
  Therefore support for the existing --cacert or --capath options should be
  implemented by supplying a custom certificate to the SChannel APIs, see:
  - Getting a Certificate for Schannel
-   http://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
+   https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
 
 15.3 Add support for the --ciphers option
 
@@ -545,7 +545,7 @@ Currently the SMB authentication uses NTLMv1.
  Therefore support for the existing --ciphers option should be implemented
  by mapping the OpenSSL/GnuTLS cipher suites to the SChannel APIs, see
  - Specifying Schannel Ciphers and Cipher Strengths
-   http://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
+   https://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
 
 16. SASL
 
