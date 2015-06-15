@@ -95,7 +95,7 @@ install instructions may produce erratic behaviour in DevCpp. For further info
 check the following sites
 
 http://aditsu.freeunixhost.com/dev-cpp-faq.html
-http://sourceforge.net/forum/message.php?msg_id=3252213
+https://sourceforge.net/p/dev-cpp/discussion/48211/thread/2a85ea46
 
 As I have mentioned before I will confine this to the SSL Library compilations
 but the process is very similar for compilation of the executable - curl.exe;

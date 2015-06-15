@@ -173,13 +173,13 @@ Win32
    advice given above.
 
    KB94248  - How To Use the C Run-Time
-              http://support.microsoft.com/kb/94248/en-us
+              https://support.microsoft.com/kb/94248/en-us
 
    KB140584 - How to link with the correct C Run-Time (CRT) library
-              http://support.microsoft.com/kb/140584/en-us
+              https://support.microsoft.com/kb/140584/en-us
 
    KB190799 - Potential Errors Passing CRT Objects Across DLL Boundaries
-              http://msdn.microsoft.com/en-us/library/ms235460
+              https://msdn.microsoft.com/en-us/library/ms235460
 
    If your app is misbehaving in some strange way, or it is suffering
    from memory corruption, before asking for further help, please try
@@ -209,8 +209,8 @@ Win32
    environment variables, for example:
 
      set ZLIB_PATH=c:\zlib-1.2.8
-     set OPENSSL_PATH=c:\openssl-0.9.8zc
-     set LIBSSH2_PATH=c:\libssh2-1.4.3
+     set OPENSSL_PATH=c:\openssl-1.0.2c
+     set LIBSSH2_PATH=c:\libssh2-1.6.0
 
    ATTENTION: if you want to build with libssh2 support you have to use latest
    version 0.17 - previous versions will NOT work with 7.17.0 and later!
@@ -232,7 +232,7 @@ Win32
    - optional MingW32-built OpenLDAP SDK available from:
      http://www.gknw.net/mirror/openldap/
    - optional recent Novell CLDAP SDK available from:
-     http://developer.novell.com/ndk/cldap.htm
+     https://www.novell.com/developer/ndk/ldap_libraries_for_c.html
 
    Cygwin
    ------
@@ -254,7 +254,7 @@ Win32
    If you use MSVC 6 it is required that you use the February 2003 edition of
    the 'Platform SDK' which can be downloaded from:
 
-   http://www.microsoft.com/en-us/download/details.aspx?id=12261
+   https://www.microsoft.com/en-us/download/details.aspx?id=12261
 
    Building any software with MSVC 6 without having PSDK installed is just
    asking for trouble down the road once you have released it, you might notice
@@ -263,7 +263,7 @@ Win32
    software built in such way will at some point regret having done so.
 
    If the compiler has been updated with the installation of a service pack as
-   those mentioned in http://support.microsoft.com/kb/194022 the compiler can be
+   those mentioned in https://support.microsoft.com/kb/194022 the compiler can be
    safely used to read source code, translate and make it object code.
 
    But, even with the service packs mentioned above installed, the resulting
@@ -299,7 +299,7 @@ Win32
    Then run 'nmake vc' in curl's root directory.
 
    If you want to compile with zlib support, you will need to build
-   zlib (http://www.gzip.org/zlib/) as well. Please read the zlib
+   zlib (http://www.zlib.net/) as well. Please read the zlib
    documentation on how to compile zlib. Define the ZLIB_PATH environment
    variable to the location of zlib.h and zlib.lib, for example:
 
@@ -665,12 +665,10 @@ NetWare
    - gnu make and awk running on the platform you compile on;
      native Win32 versions can be downloaded from:
      http://www.gknw.net/development/prgtools/
-   - recent Novell LibC SDK available from:
-     http://developer.novell.com/ndk/libc.htm
-   - or recent Novell CLib SDK available from:
-     http://developer.novell.com/ndk/clib.htm
+   - recent Novell LibC or Novell CLib SDK available from:
+     https://www.novell.com/developer/ndk/
    - optional recent Novell CLDAP SDK available from:
-     http://developer.novell.com/ndk/cldap.htm
+     https://www.novell.com/developer/ndk/ldap_libraries_for_c.html
    - optional zlib sources (static or dynamic linking with zlib.imp);
      sources with NetWare Makefile can be obtained from:
      http://www.gknw.net/mirror/zlib/
@@ -825,7 +823,7 @@ VxWorks
 
    To build libcurl for VxWorks you need:
 
-      - CYGWIN (free, http://cygwin.com/)
+      - CYGWIN (free, https://cygwin.com/)
       - Wind River Workbench (commercial)
 
    If you have CYGWIN and Workbench installed on you machine
@@ -1086,18 +1084,18 @@ Useful URLs
 
 axTLS        http://axtls.sourceforge.net/
 c-ares       http://c-ares.haxx.se/
-GNU GSS      http://www.gnu.org/software/gss/
-GnuTLS       http://www.gnu.org/software/gnutls/
-Heimdal      http://www.pdc.kth.se/heimdal/
-libidn       http://www.gnu.org/software/libidn/
+GNU GSS      https://www.gnu.org/software/gss/
+GnuTLS       https://www.gnu.org/software/gnutls/
+Heimdal      http://www.h5l.org/
+libidn       https://www.gnu.org/software/libidn/
 libmetalink  https://launchpad.net/libmetalink/
 libssh2      http://www.libssh2.org/
 MIT Kerberos http://web.mit.edu/kerberos/www/dist/
-NSS          http://www.mozilla.org/projects/security/pki/nss/
+NSS          https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS
 OpenLDAP     http://www.openldap.org/
-OpenSSL      http://www.openssl.org/
-PolarSSL     http://polarssl.org/
-yassl        http://www.yassl.com/
+OpenSSL      https://www.openssl.org/
+PolarSSL     https://tls.mbed.org/
+wolfSSL      https://www.wolfssl.com/wolfSSL/
 Zlib         http://www.zlib.net/
 
 MingW        http://www.mingw.org/
