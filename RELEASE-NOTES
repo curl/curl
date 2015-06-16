@@ -78,6 +78,12 @@ This release includes the following bugfixes:
  o docs: Spelling fixes
  o fopen.c: fix a few compiler warnings
  o CURLOPT_OPENSOCKETFUNCTION: return error at once [28]
+ o schannel: Add support for optional client certificates
+ o build: Properly detect OpenSSL 1.0.2 when using configure
+ o urldata: store POST size in state.infilesize too [29]
+ o security:choose_mech remove dead code
+ o rtsp_do: remove dead code
+ o docs: many HTTP URIs changed to HTTPS
 
 This release includes the following known bugs:
 
@@ -89,12 +95,13 @@ advice from friends like these:
   Alessandro Ghedini, Alexander Dyagilev, Anders Bakken, Anthony Avina,
   Ashish Shukla, Bert Huijben, Brian Chrisman, Brian Prodoehl, Chris Araman,
   Dagobert Michelsen, Dan Fandrich, Daniel Melani, Daniel Stenberg,
-  Dmitry Eremin-Solenikov, Egon Eckert, Fred Stluka, Gisle Vanem, Grant Pannell,
-  Isaac Boukris, Jens Rantil, Kamil Dudka, Linus Nielsen, Liviu Chircu,
-  Marc Hoersken, Michael Osipov, Oren Souroujon, Orgad Shaneh, Patrick Monnerat,
-  Patrick Rapin, Paul Howarth, Rafayel Mkrtchyan, Ray Satiro, Sean Boudreau,
-  Tatsuhiro Tsujikawa, Viktor Szakáts, Ville Skyttä, Yehezkel Horowitz,
-  (37 contributors)
+  Dmitry Eremin-Solenikov, Drake Arconis, Egon Eckert, Frank Meier, Fred Stluka,
+  Gisle Vanem, Grant Pannell, Isaac Boukris, Jens Rantil, Joel Depooter,
+  Kamil Dudka, Linus Nielsen, Liviu Chircu, Marc Hoersken, Michael Osipov,
+  Oren Souroujon, Orgad Shaneh, Patrick Monnerat, Patrick Rapin, Paul Howarth,
+  Rafayel Mkrtchyan, Ray Satiro, Sean Boudreau, Tatsuhiro Tsujikawa,
+  Viktor Szakáts, Ville Skyttä, Yehezkel Horowitz,
+  (40 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -128,3 +135,4 @@ References to bug reports and discussions on issues:
  [26] = https://github.com/bagder/curl/issues/292
  [27] = https://rt.openssl.org/Ticket/Display.html?id=3621&user=guest&pass=guest
  [28] = http://curl.haxx.se/mail/lib-2015-06/0047.html
+ [29] = http://curl.haxx.se/mail/lib-2015-06/0019.html
