@@ -386,11 +386,14 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
   long *general_age;
   bool no_match = TRUE;
 
-  *ssl_sessionid = NULL;
   const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
                                                  &conn->proxy_ssl_config :
                                                  &conn->ssl_config;
+  const char * const name = isProxy ? conn->http_proxy.host.name :
+                                      conn->host.name;
+  int port = isProxy ? (int)conn->port : conn->remote_port;
+  *ssl_sessionid = NULL;
 
   if(!data->set.general_ssl.sessionid)
     /* session ID re-use is disabled */
@@ -404,9 +407,6 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
   else
     general_age = &data->state.sessionage;
 
-  const char * const name = isProxy ? conn->http_proxy.host.name :
-                                      conn->host.name;
-  unsigned int port = isProxy ? conn->port : conn->remote_port;
   for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
     check = &data->state.session[i];
     if(!check->sessionid)
@@ -500,6 +500,9 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
      upcoming transfer */
 
   const bool isProxy = CONNECT_PROXY_SSL();
+  struct ssl_primary_config * const ssl_config = isProxy ?
+                                           &conn->proxy_ssl_config :
+                                           &conn->ssl_config;
 
   clone_host = strdup(isProxy ? conn->http_proxy.host.name : conn->host.name);
   if(!clone_host)
@@ -539,16 +542,12 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   free(store->name);
   store->name = clone_host;               /* clone host name */
   /* port number */
-  store->remote_port = isProxy ? conn->port : conn->remote_port;
+  store->remote_port = isProxy ? (int)conn->port : conn->remote_port;
 
 
   /* Unlock */
   if(SSLSESSION_SHARED(data))
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
-
-  struct ssl_primary_config * const ssl_config = isProxy ?
-                                           &conn->proxy_ssl_config :
-                                           &conn->ssl_config;
 
   if(!Curl_clone_primary_ssl_config(ssl_config, &store->ssl_config)) {
     store->sessionid = NULL; /* let caller free sessionid */

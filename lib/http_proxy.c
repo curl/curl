@@ -37,6 +37,7 @@
 #include "connect.h"
 #include "curl_printf.h"
 #include "curlx.h"
+#include "vtls/vtls.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -48,9 +49,9 @@
  * called multiple times.
  */
 static CURLcode https_proxy_connect(struct connectdata *conn, int sockindex) {
-  DEBUGASSERT(conn->http_proxy.proxytype == CURLPROXY_HTTPS);
 #ifdef USE_SSL
   CURLcode result = CURLE_OK;
+  DEBUGASSERT(conn->http_proxy.proxytype == CURLPROXY_HTTPS);
   if(!conn->bits.proxy_ssl_connected[sockindex]) {
     /* perform SSL initialization for this socket */
     result = Curl_ssl_connect_nonblocking(conn, sockindex,
@@ -83,7 +84,7 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
     CURLcode result;
     const char * const host = sockindex == SECONDARYSOCKET ?
                               conn->secondaryhostname : conn->host.name;
-    const long port = sockindex == SECONDARYSOCKET ? conn->secondary_port :
+    const int port = sockindex == SECONDARYSOCKET ? conn->secondary_port :
                                                      conn->remote_port;
 
     /* BLOCKING */

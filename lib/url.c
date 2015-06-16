@@ -3672,15 +3672,15 @@ CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex)
 
   if(conn->bits.socksproxy) {
 #ifndef CURL_DISABLE_PROXY
-    conn->bits.socksproxy_connecting = TRUE;
     const char * const host = conn->bits.httpproxy ?
                               conn->http_proxy.host.name :
                               sockindex == SECONDARYSOCKET ?
                               conn->secondaryhostname : conn->host.name;
-    const long port = conn->bits.httpproxy ?
-                      conn->http_proxy.port :
+    const int port = conn->bits.httpproxy ?
+                      (int)conn->http_proxy.port :
                       sockindex == SECONDARYSOCKET ?
                       conn->secondary_port : conn->remote_port;
+    conn->bits.socksproxy_connecting = TRUE;
     switch(conn->socks_proxy.proxytype) {
     case CURLPROXY_SOCKS5:
     case CURLPROXY_SOCKS5_HOSTNAME:

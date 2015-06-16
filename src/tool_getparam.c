@@ -397,35 +397,18 @@ done:
   *certname_place = '\0';
 }
 
-static ParameterError
+static void
 GetFileAndPassword(char *nextarg, char **file, char **password)
 {
-  char *ptr = strchr(nextarg, ':');
-  /* Since we live in a world of weirdness and confusion, the win32
-      dudes can use : when using drive letters and thus
-      c:\file:password needs to work. In order not to break
-      compatibility, we still use : as separator, but we try to detect
-      when it is used for a file name! On windows. */
-#ifdef WIN32
-  if(ptr &&
-      (ptr == &nextarg[1]) &&
-      (nextarg[2] == '\\' || nextarg[2] == '/') &&
-      (ISALPHA(nextarg[0])) )
-    /* colon in the second column, followed by a backslash, and the
-        first character is an alphabetic letter:
-
-        this is a drive letter colon */
-    ptr = strchr(&nextarg[3], ':'); /* find the next one instead */
-#endif
-  if(ptr) {
-    /* we have a password too */
-    *ptr = '\0';
-    ptr++;
-    GetStr(password, ptr);
+  char *certname, *passphrase;
+  parse_cert_parameter(nextarg, &certname, &passphrase);
+  Curl_safefree(*file);
+  *file = certname;
+  if(passphrase) {
+    Curl_safefree(*password);
+    *password = passphrase;
   }
-  GetStr(file, nextarg);
   cleanarg(nextarg);
-  return PARAM_OK;
 }
 
 ParameterError getparameter(char *flag,    /* f or -long-flag */
@@ -1355,9 +1338,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     case 'E':
       switch(subletter) {
       case '\0': /* certificate file */
-        err = GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
-        if(err)
-          return err;
+        GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
         break;
       case 'a': /* CA info PEM file */
         /* CA info PEM file */
@@ -1469,10 +1450,8 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
       case 'x': /* certificate file for proxy */
-        err = GetFileAndPassword(nextarg, &config->proxy_cert,
-                                 &config->proxy_key_passwd);
-        if(err)
-          return err;
+        GetFileAndPassword(nextarg, &config->proxy_cert,
+                           &config->proxy_key_passwd);
         break;
       case 'y': /* cert file type for proxy */
         GetStr(&config->proxy_cert_type, nextarg);

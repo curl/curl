@@ -1701,6 +1701,18 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #endif
   long * const certverifyresult = IS_PROXY_SSL() ?
     &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
+  const long int ssl_version = SSL_OPTION_PRIM(version);
+#ifdef USE_TLS_SRP
+  const enum CURL_TLSAUTH ssl_authtype = SSL_OPTION(authtype);
+#endif
+  char * const ssl_cert = SSL_OPTION(cert);
+  const char * const ssl_cert_type = SSL_OPTION(cert_type);
+  const char * const ssl_cafile = SSL_OPTION_PRIM(CAfile);
+  const char * const ssl_capath = SSL_OPTION_PRIM(CApath);
+  const bool verifypeer = SSL_OPTION_PRIM(verifypeer);
+  const char * const ssl_crlfile = SSL_OPTION(CRLfile);
+  const char * const hostname = IS_PROXY_SSL() ? conn->http_proxy.host.name :
+                                                 conn->host.name;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
 
@@ -1710,12 +1722,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   *certverifyresult = !X509_V_OK;
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
-
-  const long int ssl_version = SSL_OPTION_PRIM(version);
-#ifdef USE_TLS_SRP
-  const enum CURL_TLSAUTH ssl_authtype = SSL_OPTION(authtype);
-#endif
-
   switch(ssl_version) {
   default:
   case CURL_SSLVERSION_DEFAULT:
@@ -1937,9 +1943,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 #endif
 
-  char * const ssl_cert = SSL_OPTION(cert);
-  const char * const ssl_cert_type = SSL_OPTION(cert_type);
-
   if(ssl_cert || ssl_cert_type) {
     if(!cert_stuff(conn, connssl->ctx, ssl_cert, ssl_cert_type,
                    SSL_OPTION(key), SSL_OPTION(key_type),
@@ -1983,10 +1986,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 #endif
 
-  const char * const ssl_cafile = SSL_OPTION_PRIM(CAfile);
-  const char * const ssl_capath = SSL_OPTION_PRIM(CApath);
-  const bool verifypeer = SSL_OPTION_PRIM(verifypeer);
-
   if(ssl_cafile || ssl_capath) {
     /* tell SSL where to find CA certificates that are used to verify
        the servers certificate. */
@@ -2017,7 +2016,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
           ssl_capath ? ssl_capath : "none");
   }
 
-  const char * const ssl_crlfile = SSL_OPTION(CRLfile);
   if(ssl_crlfile) {
     /* tell SSL where to find CRL file that is used to check certificate
      * revocation */
@@ -2086,8 +2084,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   SSL_set_connect_state(connssl->handle);
 
   connssl->server_cert = 0x0;
-  const char * const hostname = IS_PROXY_SSL() ? conn->http_proxy.host.name :
-                                                 conn->host.name;
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   if((0 == Curl_inet_pton(AF_INET, hostname, &addr)) &&
 #ifdef ENABLE_IPV6
@@ -2112,9 +2108,9 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 
   if(conn->proxy_ssl[sockindex].use) {
+    BIO *const bio = BIO_new(BIO_f_ssl());
     DEBUGASSERT(ssl_connection_complete == conn->proxy_ssl[sockindex].state);
     DEBUGASSERT(conn->proxy_ssl[sockindex].handle != NULL);
-    BIO *const bio = BIO_new(BIO_f_ssl());
     DEBUGASSERT(bio != NULL);
     BIO_set_ssl(bio, conn->proxy_ssl[sockindex].handle, FALSE);
     SSL_set_bio(connssl->handle, bio, bio);
