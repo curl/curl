@@ -2,9 +2,9 @@ Curl and libcurl 7.43.0
 
  Public curl releases:         147
  Command line options:         176
- curl_easy_setopt() options:   218
+ curl_easy_setopt() options:   219
  Public functions in libcurl:  58
- Contributors:                 1265
+ Contributors:                 1291
 
 This release includes the following changes:
 
@@ -22,6 +22,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2015-3236: lingering HTTP credentials in connection re-use [30]
+ o CVE-2015-3237: SMB send off unrelated memory contents [31]
  o nss: fix compilation failure with old versions of NSS [1]
  o curl_easy_getinfo.3: document 'internals' in CURLINFO_TLS_SESSION
  o schannel.c: Fix possible SEC_E_BUFFER_TOO_SMALL error
@@ -84,6 +86,7 @@ This release includes the following bugfixes:
  o security:choose_mech remove dead code
  o rtsp_do: remove dead code
  o docs: many HTTP URIs changed to HTTPS
+ o schannel: schannel_recv overhaul [32]
 
 This release includes the following known bugs:
 
@@ -97,11 +100,12 @@ advice from friends like these:
   Dagobert Michelsen, Dan Fandrich, Daniel Melani, Daniel Stenberg,
   Dmitry Eremin-Solenikov, Drake Arconis, Egon Eckert, Frank Meier, Fred Stluka,
   Gisle Vanem, Grant Pannell, Isaac Boukris, Jens Rantil, Joel Depooter,
-  Kamil Dudka, Linus Nielsen, Liviu Chircu, Marc Hoersken, Michael Osipov,
-  Oren Souroujon, Orgad Shaneh, Patrick Monnerat, Patrick Rapin, Paul Howarth,
-  Rafayel Mkrtchyan, Ray Satiro, Sean Boudreau, Tatsuhiro Tsujikawa,
-  Viktor Szakáts, Ville Skyttä, Yehezkel Horowitz,
-  (40 contributors)
+  Kamil Dudka, Linus Nielsen Feltzing, Linus Nielsen Feltzing Feltzing,
+  Liviu Chircu, Marc Hoersken, Michael Osipov, Oren Souroujon, Orgad Shaneh,
+  Patrick Monnerat, Patrick Rapin, Paul Howarth, Paul Oliver, Rafayel Mkrtchyan,
+  Ray Satiro, Sean Boudreau, Tatsuhiro Tsujikawa, Tomas Tomecek, Viktor Szakáts,
+  Ville Skyttä, Yehezkel Horowitz,
+  (43 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -136,3 +140,6 @@ References to bug reports and discussions on issues:
  [27] = https://rt.openssl.org/Ticket/Display.html?id=3621&user=guest&pass=guest
  [28] = http://curl.haxx.se/mail/lib-2015-06/0047.html
  [29] = http://curl.haxx.se/mail/lib-2015-06/0019.html
+ [30] = http://curl.haxx.se/docs/adv_20150617A.html
+ [31] = http://curl.haxx.se/docs/adv_20150617B.html
+ [32] = https://github.com/bagder/curl/issues/244
