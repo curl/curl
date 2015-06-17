@@ -3113,7 +3113,7 @@ ConnectionExists(struct SessionHandle *data,
                       (needle->handler->protocol & PROTO_FAMILY_HTTP)?TRUE:FALSE;
 #endif
 #ifdef USE_SPNEGO
-  bool wantNeghttp = (data->state.authhost.want & CURLAUTH_NEGOTIATE) &&
+  bool wantNegHttp = (data->state.authhost.want & CURLAUTH_NEGOTIATE) &&
                      (needle->handler->protocol & PROTO_FAMILY_HTTP)?TRUE:FALSE;
 #endif // USE_SPNEGO
   struct connectbundle *bundle;
@@ -3271,7 +3271,7 @@ ConnectionExists(struct SessionHandle *data,
          || (wantNTLMhttp || check->ntlm.state != NTLMSTATE_NONE)
 #endif
 #ifdef USE_SPNEGO
-         || (wantNeghttp)
+         || (wantNegHttp)
 #endif // USE_SPNEGO
         ) {
         /* This protocol requires credentials per connection or is HTTP+NTLM,
@@ -3359,15 +3359,16 @@ ConnectionExists(struct SessionHandle *data,
         /* If we are looking for an HTTP+Negotiate connection, check if this is
          * already authenticating with the right credentials. If not, keep
          * looking so that we can reuse connections if possible.*/
-        if(wantNeghttp) {
+        if(wantNegHttp) {
           if(credentialsMatch) {
             chosen = check;
             *force_reuse = TRUE;
             break;
           }
-          else if(credentialsMatch)
+          else {
             /* this is a backup choice */
             chosen = check;
+          }
           continue;
         }
 #endif // (USE_SPNEGO)
@@ -3432,6 +3433,13 @@ ConnectionExists(struct SessionHandle *data,
     }
   }
 
+#if defined(USE_SPNEGO)
+  /* if wantNegHttp and chosen connection without forced using then reset GSS_AUTHCOMPLETE */
+  if(wantNegHttp && chosen && !*force_reuse) {
+    chosen->data->state.negotiate.state = GSS_AUTHNONE;
+    chosen->data->state.proxyneg.state = GSS_AUTHNONE;
+  }
+#endif // (USE_SPNEGO)
   if(chosen) {
     *usethis = chosen;
     return TRUE; /* yes, we found one to use! */
