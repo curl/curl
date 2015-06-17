@@ -3434,7 +3434,8 @@ ConnectionExists(struct SessionHandle *data,
   }
 
 #if defined(USE_SPNEGO)
-  /* if wantNegHttp and chosen connection without forced using then reset GSS_AUTHCOMPLETE */
+  /* if wantNegHttp and chosen connection without forced using
+   * then reset GSS_AUTHCOMPLETE */
   if(wantNegHttp && chosen && !*force_reuse) {
     chosen->data->state.negotiate.state = GSS_AUTHNONE;
     chosen->data->state.proxyneg.state = GSS_AUTHNONE;

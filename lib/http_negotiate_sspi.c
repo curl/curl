@@ -396,7 +396,7 @@ static bool can_use_forced_negotiate(struct connectdata *conn, bool proxy)
   struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
                                         &conn->data->state.negotiate;
 
-  if(neg_ctx->state == GSS_AUTHCOMPLETE) 
+  if(neg_ctx->state == GSS_AUTHCOMPLETE)
     return true;
 
   return false;
