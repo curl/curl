@@ -1427,8 +1427,10 @@ static const char *ssl_msg_type(int ssl_ver, int msg)
         return "Client hello";
       case SSL3_MT_SERVER_HELLO:
         return "Server hello";
+#ifdef SSL3_MT_NEWSESSION_TICKET
       case SSL3_MT_NEWSESSION_TICKET:
         return "Newsession Ticket";
+#endif
       case SSL3_MT_CERTIFICATE:
         return "Certificate";
       case SSL3_MT_SERVER_KEY_EXCHANGE:
