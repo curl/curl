@@ -72,6 +72,7 @@
 #define SECBUFFER_ALERT                 17
 #endif
 
+/* Both schannel buffer sizes must be > 0 */
 #define CURL_SCHANNEL_BUFFER_INIT_SIZE   4096
 #define CURL_SCHANNEL_BUFFER_FREE_SIZE   1024
 

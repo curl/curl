@@ -268,6 +268,10 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   infof(data, "schannel: sent initial handshake data: "
         "sent %zd bytes\n", written);
 
+  connssl->recv_unrecoverable_err = CURLE_OK;
+  connssl->recv_sspi_close_notify = false;
+  connssl->recv_connection_closed = false;
+
   /* continue to second handshake step */
   connssl->connecting_state = ssl_connect_2;
 
@@ -299,6 +303,17 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 
   if(!connssl->cred || !connssl->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
+
+  /* buffer to store previously received and decrypted data */
+  if(connssl->decdata_buffer == NULL) {
+    connssl->decdata_offset = 0;
+    connssl->decdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
+    connssl->decdata_buffer = malloc(connssl->decdata_length);
+    if(connssl->decdata_buffer == NULL) {
+      failf(data, "schannel: unable to allocate memory");
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
 
   /* buffer to store previously received and encrypted data */
   if(connssl->encdata_buffer == NULL) {
@@ -834,8 +849,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
               char *buf, size_t len, CURLcode *err)
 {
   size_t size = 0;
-  ssize_t nread = 0;
-  CURLcode result;
+  ssize_t nread = -1;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   unsigned char *reallocated_buffer;
@@ -844,72 +858,103 @@ schannel_recv(struct connectdata *conn, int sockindex,
   SecBuffer inbuf[4];
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
+  /* we want the length of the encrypted buffer to be at least large enough
+     that it can hold all the bytes requested and some TLS record overhead. */
+  size_t min_encdata_length = len + CURL_SCHANNEL_BUFFER_FREE_SIZE;
+
+  /****************************************************************************
+   * Don't return or set connssl->recv_unrecoverable_err unless in the cleanup.
+   * The pattern for return error is set *err, optional infof, goto cleanup.
+   *
+   * Our priority is to always return as much decrypted data to the caller as
+   * possible, even if an error occurs. The state of the decrypted buffer must
+   * always be valid. Transfer of decrypted data to the caller's buffer is
+   * handled in the cleanup.
+   */
 
   infof(data, "schannel: client wants to read %zu bytes\n", len);
   *err = CURLE_OK;
 
-  /* buffer to store previously received and decrypted data */
-  if(connssl->decdata_buffer == NULL) {
-    connssl->decdata_offset = 0;
-    connssl->decdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
-    connssl->decdata_buffer = malloc(connssl->decdata_length);
-    if(connssl->decdata_buffer == NULL) {
-      failf(data, "schannel: unable to allocate memory");
-      *err = CURLE_OUT_OF_MEMORY;
-      return -1;
-    }
+  if(len && len <= connssl->decdata_offset) {
+    infof(data, "schannel: enough decrypted data is already available\n");
+    goto cleanup;
   }
+  else if(connssl->recv_unrecoverable_err) {
+    *err = connssl->recv_unrecoverable_err;
+    infof(data, "schannel: an unrecoverable error occurred in a prior call\n");
+    goto cleanup;
+  }
+  else if(connssl->recv_sspi_close_notify) {
+    /* once a server has indicated shutdown there is no more encrypted data */
+    infof(data, "schannel: server indicated shutdown in a prior call\n");
+    goto cleanup;
+  }
+  else if(!len) {
+    /* It's debatable what to return when !len. Regardless we can't return
+    immediately because there may be data to decrypt (in the case we want to
+    decrypt all encrypted cached data) so handle !len later in cleanup.
+    */
+    ; /* do nothing */
+  }
+  else if(!connssl->recv_connection_closed) {
+    /* increase enc buffer in order to fit the requested amount of data */
+    size = connssl->encdata_length - connssl->encdata_offset;
+    if(size < CURL_SCHANNEL_BUFFER_FREE_SIZE ||
+       connssl->encdata_length < min_encdata_length) {
+      reallocated_length = connssl->encdata_offset +
+                           CURL_SCHANNEL_BUFFER_FREE_SIZE;
+      if(reallocated_length < min_encdata_length) {
+        reallocated_length = min_encdata_length;
+      }
+      reallocated_buffer = realloc(connssl->encdata_buffer,
+                                   reallocated_length);
+      if(reallocated_buffer == NULL) {
+        *err = CURLE_OUT_OF_MEMORY;
+        failf(data, "schannel: unable to re-allocate memory");
+        goto cleanup;
+      }
 
-  /* increase buffer in order to fit the requested amount of data */
-  if(connssl->encdata_length - connssl->encdata_offset <
-     CURL_SCHANNEL_BUFFER_FREE_SIZE || connssl->encdata_length < len) {
-    /* increase internal encrypted data buffer */
-    reallocated_length = connssl->encdata_offset +
-      CURL_SCHANNEL_BUFFER_FREE_SIZE;
-    /* make sure that the requested amount of data fits */
-    if(reallocated_length < len) {
-      reallocated_length = len;
-    }
-    reallocated_buffer = realloc(connssl->encdata_buffer,
-                                 reallocated_length);
-
-    if(reallocated_buffer == NULL) {
-      failf(data, "schannel: unable to re-allocate memory");
-      *err = CURLE_OUT_OF_MEMORY;
-      return -1;
-    }
-    else {
       connssl->encdata_buffer = reallocated_buffer;
       connssl->encdata_length = reallocated_length;
+      size = connssl->encdata_length - connssl->encdata_offset;
+      infof(data, "schannel: encdata_buffer resized %zu\n",
+            connssl->encdata_length);
     }
-  }
 
-  /* read encrypted data from socket */
-  infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
-        connssl->encdata_offset, connssl->encdata_length);
-  size = connssl->encdata_length - connssl->encdata_offset;
-  if(size > 0) {
+    infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
+          connssl->encdata_offset, connssl->encdata_length);
+
+    /* read encrypted data from socket */
     *err = Curl_read_plain(conn->sock[sockindex],
-                           (char *) (connssl->encdata_buffer +
-                                     connssl->encdata_offset),
+                           (char *)(connssl->encdata_buffer +
+                                    connssl->encdata_offset),
                            size, &nread);
-    /* check for received data */
-    if(*err != CURLE_OK) {
-      return -1;
+    if(*err) {
+      nread = -1;
+      if(*err == CURLE_AGAIN)
+        infof(data, "schannel: Curl_read_plain returned CURLE_AGAIN\n");
+      else if(*err == CURLE_RECV_ERROR)
+        infof(data, "schannel: Curl_read_plain returned CURLE_RECV_ERROR\n");
+      else
+        infof(data, "schannel: Curl_read_plain returned error %d\n", *err);
+    }
+    else if(nread == 0) {
+      connssl->recv_connection_closed = true;
+      infof(data, "schannel: server closed the connection\n");
     }
     else if(nread > 0) {
-      /* increase encrypted data buffer offset */
-      connssl->encdata_offset += nread;
+      connssl->encdata_offset += (size_t)nread;
+      infof(data, "schannel: encrypted data got %zd\n", nread);
     }
-    infof(data, "schannel: encrypted data got %zd\n", nread);
   }
 
   infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
         connssl->encdata_offset, connssl->encdata_length);
 
-  /* check if we still have some data in our buffers */
+  /* decrypt loop */
   while(connssl->encdata_offset > 0 && sspi_status == SEC_E_OK &&
-        connssl->decdata_offset < len) {
+        (!len || connssl->decdata_offset < len ||
+         connssl->recv_connection_closed)) {
     /* prepare data buffer for DecryptMessage call */
     InitSecBuffer(&inbuf[0], SECBUFFER_DATA, connssl->encdata_buffer,
                   curlx_uztoul(connssl->encdata_offset));
@@ -924,13 +969,6 @@ schannel_recv(struct connectdata *conn, int sockindex,
     sspi_status = s_pSecFn->DecryptMessage(&connssl->ctxt->ctxt_handle,
                                            &inbuf_desc, 0, NULL);
 
-    /* check if we need more data */
-    if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
-      infof(data, "schannel: failed to decrypt data, need more data\n");
-      *err = CURLE_AGAIN;
-      return -1;
-    }
-
     /* check if everything went fine (server may want to renegotiate
        or shutdown the connection context) */
     if(sspi_status == SEC_E_OK || sspi_status == SEC_I_RENEGOTIATE ||
@@ -943,7 +981,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
 
         /* increase buffer in order to fit the received amount of data */
         size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_FREE_SIZE ?
-          inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_FREE_SIZE;
+               inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_FREE_SIZE;
         if(connssl->decdata_length - connssl->decdata_offset < size ||
            connssl->decdata_length < len) {
           /* increase internal decrypted data buffer */
@@ -954,21 +992,18 @@ schannel_recv(struct connectdata *conn, int sockindex,
           }
           reallocated_buffer = realloc(connssl->decdata_buffer,
                                        reallocated_length);
-
           if(reallocated_buffer == NULL) {
-            failf(data, "schannel: unable to re-allocate memory");
             *err = CURLE_OUT_OF_MEMORY;
-            return -1;
+            failf(data, "schannel: unable to re-allocate memory");
+            goto cleanup;
           }
-          else {
-            connssl->decdata_buffer = reallocated_buffer;
-            connssl->decdata_length = reallocated_length;
-          }
+          connssl->decdata_buffer = reallocated_buffer;
+          connssl->decdata_length = reallocated_length;
         }
 
         /* copy decrypted data to internal buffer */
         size = inbuf[1].cbBuffer;
-        if(size > 0) {
+        if(size) {
           memcpy(connssl->decdata_buffer + connssl->decdata_offset,
                  inbuf[1].pvBuffer, size);
           connssl->decdata_offset += size;
@@ -1007,56 +1042,117 @@ schannel_recv(struct connectdata *conn, int sockindex,
       /* check if server wants to renegotiate the connection context */
       if(sspi_status == SEC_I_RENEGOTIATE) {
         infof(data, "schannel: remote party requests renegotiation\n");
-
+        if(*err && *err != CURLE_AGAIN) {
+          infof(data, "schannel: can't renogotiate, an error is pending\n");
+          goto cleanup;
+        }
+        if(connssl->encdata_offset) {
+          *err = CURLE_RECV_ERROR;
+          infof(data, "schannel: can't renogotiate, "
+                      "encrypted data available\n");
+          goto cleanup;
+        }
         /* begin renegotiation */
         infof(data, "schannel: renegotiating SSL/TLS connection\n");
         connssl->state = ssl_connection_negotiating;
         connssl->connecting_state = ssl_connect_2_writing;
-        result = schannel_connect_common(conn, sockindex, FALSE, &done);
-        if(result)
-          *err = result;
-        else {
-          infof(data, "schannel: SSL/TLS connection renegotiated\n");
-          /* now retry receiving data */
-          return schannel_recv(conn, sockindex, buf, len, err);
+        *err = schannel_connect_common(conn, sockindex, FALSE, &done);
+        if(*err) {
+          infof(data, "schannel: renegotiation failed\n");
+          goto cleanup;
         }
+        /* now retry receiving data */
+        sspi_status = SEC_E_OK;
+        infof(data, "schannel: SSL/TLS connection renegotiated\n");
+        continue;
+      }
+      /* check if the server closed the connection */
+      else if(sspi_status == SEC_I_CONTEXT_EXPIRED) {
+        /* In Windows 2000 SEC_I_CONTEXT_EXPIRED (close_notify) is not
+           returned so we have to work around that in cleanup. */
+        connssl->recv_sspi_close_notify = true;
+        if(!connssl->recv_connection_closed) {
+          connssl->recv_connection_closed = true;
+          infof(data, "schannel: server closed the connection\n");
+        }
+        goto cleanup;
       }
     }
+    else if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
+      if(!*err)
+        *err = CURLE_AGAIN;
+      infof(data, "schannel: failed to decrypt data, need more data\n");
+      goto cleanup;
+    }
     else {
-      /* something went wrong and we need to return an error */
+      *err = CURLE_RECV_ERROR;
       infof(data, "schannel: failed to read data from server: %s\n",
             Curl_sspi_strerror(conn, sspi_status));
-      *err = CURLE_RECV_ERROR;
-      return -1;
+      goto cleanup;
     }
   }
+
+  infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
+        connssl->encdata_offset, connssl->encdata_length);
 
   infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
         connssl->decdata_offset, connssl->decdata_length);
 
-  /* copy requested decrypted data to supplied buffer */
-  size = len < connssl->decdata_offset ? len : connssl->decdata_offset;
-  if(size > 0) {
-    memcpy(buf, connssl->decdata_buffer, size);
+cleanup:
+  /* Warning- there is no guarantee the encdata state is valid at this point */
+  infof(data, "schannel: schannel_recv cleanup\n");
 
-    /* move remaining decrypted data forward to the beginning of buffer */
+  /* Error if the connection has closed without a close_notify.
+  Behavior here is a matter of debate. We don't want to be vulnerable to a
+  truncation attack however there's some browser precedent for ignoring the
+  close_notify for compatibility reasons.
+  Additionally, Windows 2000 (v5.0) is a special case since it seems it doesn't
+  return close_notify. In that case if the connection was closed we assume it
+  was graceful (close_notify) since there doesn't seem to be a way to tell.
+  */
+  if(len && !connssl->decdata_offset && connssl->recv_connection_closed &&
+     !connssl->recv_sspi_close_notify) {
+    DWORD winver_full, winver_major, winver_minor;
+    winver_full = GetVersion();
+    winver_major = (DWORD)(LOBYTE(LOWORD(winver_full)));
+    winver_minor = (DWORD)(HIBYTE(LOWORD(winver_full)));
+
+    if(winver_major == 5 && winver_minor == 0 && sspi_status == SEC_E_OK)
+      connssl->recv_sspi_close_notify = true;
+    else {
+      *err = CURLE_RECV_ERROR;
+      infof(data, "schannel: server closed abruptly (missing close_notify)\n");
+    }
+  }
+
+  /* Any error other than CURLE_AGAIN is an unrecoverable error. */
+  if(*err && *err != CURLE_AGAIN)
+      connssl->recv_unrecoverable_err = *err;
+
+  size = len < connssl->decdata_offset ? len : connssl->decdata_offset;
+  if(size) {
+    memcpy(buf, connssl->decdata_buffer, size);
     memmove(connssl->decdata_buffer, connssl->decdata_buffer + size,
             connssl->decdata_offset - size);
     connssl->decdata_offset -= size;
 
-    infof(data, "schannel: decrypted data returned %zd\n", size);
+    infof(data, "schannel: decrypted data returned %zu\n", size);
     infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
           connssl->decdata_offset, connssl->decdata_length);
-  }
-  /* check if the server closed the connection, */
-  /* including special check for Windows 2000 Professional */
-  else if(sspi_status == SEC_I_CONTEXT_EXPIRED || (sspi_status == SEC_E_OK &&
-          connssl->encdata_offset && connssl->encdata_buffer[0] == 0x15)) {
-    infof(data, "schannel: server closed the connection\n");
     *err = CURLE_OK;
+    return (ssize_t)size;
   }
 
-  return size;
+  if(!*err && !connssl->recv_connection_closed)
+      *err = CURLE_AGAIN;
+
+  /* It's debatable what to return when !len. We could return whatever error we
+  got from decryption but instead we override here so the return is consistent.
+  */
+  if(!len)
+    *err = CURLE_OK;
+
+  return *err ? -1 : 0;
 }
 
 CURLcode
