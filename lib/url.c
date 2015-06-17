@@ -3110,8 +3110,12 @@ ConnectionExists(struct SessionHandle *data,
 #ifdef USE_NTLM
   bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) ||
                        (data->state.authhost.want & CURLAUTH_NTLM_WB)) &&
-    (needle->handler->protocol & PROTO_FAMILY_HTTP) ? TRUE : FALSE;
+                      (needle->handler->protocol & PROTO_FAMILY_HTTP)?TRUE:FALSE;
 #endif
+#ifdef USE_SPNEGO
+  bool wantNeghttp = (data->state.authhost.want & CURLAUTH_NEGOTIATE) &&
+                     (needle->handler->protocol & PROTO_FAMILY_HTTP)?TRUE:FALSE;
+#endif // USE_SPNEGO
   struct connectbundle *bundle;
 
   *force_reuse = FALSE;
@@ -3152,7 +3156,7 @@ ConnectionExists(struct SessionHandle *data,
     curr = bundle->conn_list->head;
     while(curr) {
       bool match = FALSE;
-#if defined(USE_NTLM)
+#if defined(USE_NTLM) || defined(USE_SPNEGO)
       bool credentialsMatch = FALSE;
 #endif
       size_t pipeLen;
@@ -3266,6 +3270,9 @@ ConnectionExists(struct SessionHandle *data,
 #ifdef USE_NTLM
          || (wantNTLMhttp || check->ntlm.state != NTLMSTATE_NONE)
 #endif
+#ifdef USE_SPNEGO
+         || (wantNeghttp)
+#endif // USE_SPNEGO
         ) {
         /* This protocol requires credentials per connection or is HTTP+NTLM,
            so verify that we're using the same name and password as well */
@@ -3274,7 +3281,7 @@ ConnectionExists(struct SessionHandle *data,
           /* one of them was different */
           continue;
         }
-#if defined(USE_NTLM)
+#if defined(USE_NTLM) || defined(USE_SPNEGO)
         credentialsMatch = TRUE;
 #endif
       }
@@ -3348,6 +3355,23 @@ ConnectionExists(struct SessionHandle *data,
           continue;
         }
 #endif
+#if defined(USE_SPNEGO)
+        /* If we are looking for an HTTP+Negotiate connection, check if this is
+         * already authenticating with the right credentials. If not, keep
+         * looking so that we can reuse connections if possible.*/
+        if(wantNeghttp) {
+          if(credentialsMatch) {
+            chosen = check;
+            *force_reuse = TRUE;
+            break;
+          }
+          else if(credentialsMatch)
+            /* this is a backup choice */
+            chosen = check;
+          continue;
+        }
+#endif // (USE_SPNEGO)
+
 
         if(canPipeline) {
           /* We can pipeline if we want to. Let's continue looking for
@@ -5822,6 +5846,19 @@ static CURLcode create_conn(struct SessionHandle *data,
        data->state.authproxy.done) {
       infof(data, "NTLM-proxy picked AND auth done set, clear picked!\n");
       data->state.authproxy.picked = CURLAUTH_NONE;
+    }
+#endif
+
+#if defined(USE_SPNEGO)
+    /* If Negotiate is requested in a part of this connection, 
+     * clear negotiate contexts for new auth requests */
+    if(((data->state.authhost.picked & CURLAUTH_NEGOTIATE) &&
+        data->state.negotiate.state == GSS_AUTHCOMPLETE) ||
+       ((data->state.authproxy.picked & CURLAUTH_NEGOTIATE) &&
+        data->state.proxyneg.state == GSS_AUTHCOMPLETE)) {
+      data->state.negotiate.state = GSS_AUTHNONE;
+      data->state.proxyneg.state = GSS_AUTHNONE;
+      Curl_cleanup_negotiate(data);
     }
 #endif
   }
