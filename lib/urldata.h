@@ -335,32 +335,46 @@ struct ssl_connect_data {
 #endif /* USE_DARWINSSL */
 };
 
-struct ssl_config_data {
+struct ssl_primary_config {
   long version;          /* what version the client wants to use */
-  long certverifyresult; /* result from the certificate verification */
-
   bool verifypeer;       /* set TRUE if this is desired */
   bool verifyhost;       /* set TRUE if CN/SAN must match hostname */
   bool verifystatus;     /* set TRUE if certificate status must be checked */
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */
-  const char *CRLfile;   /* CRL to check certificate revocation */
-  const char *issuercert;/* optional issuer certificate filename */
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
-  size_t max_ssl_sessions; /* SSL session id cache size */
+};
+
+struct ssl_config_data {
+  struct ssl_primary_config primary;
+  bool enable_beast; /* especially allow this flaw for interoperability's
+                            sake*/
+  long certverifyresult; /* result from the certificate verification */
+  char *CRLfile;   /* CRL to check certificate revocation */
+  char *issuercert;/* optional issuer certificate filename */
   curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
   void *fsslctxp;        /* parameter for call back */
-  bool sessionid;        /* cache session IDs or not */
   bool certinfo;         /* gather lots of certificate info */
   bool falsestart;
+
+  char *cert; /* client certificate file name */
+  char *cert_type; /* format for certificate (default: PEM)*/
+  char *key; /* private key file name */
+  char *key_type; /* format for private key (default: PEM) */
+  char *key_passwd; /* plain text private key password */
 
 #ifdef USE_TLS_SRP
   char *username; /* TLS username (for, e.g., SRP) */
   char *password; /* TLS password (for, e.g., SRP) */
   enum CURL_TLSAUTH authtype; /* TLS authentication type (default SRP) */
 #endif
+};
+
+struct ssl_general_config {
+  bool sessionid; /* cache session IDs or not */
+  size_t max_ssl_sessions; /* SSL session id cache size */
 };
 
 /* information stored about one single SSL session */
@@ -370,7 +384,7 @@ struct curl_ssl_session {
   size_t idsize;    /* if known, otherwise 0 */
   long age;         /* just a number, the higher the more recent */
   int remote_port;  /* remote port to connect to */
-  struct ssl_config_data ssl_config; /* setup for this session */
+  struct ssl_primary_config ssl_config; /* setup for this session */
 };
 
 /* Struct used for Digest challenge-response authentication */
@@ -483,6 +497,7 @@ struct ConnectBits {
   bool reuse; /* if set, this is a re-used connection */
   bool proxy; /* if set, this transfer is done through a proxy - any type */
   bool httpproxy;    /* if set, this transfer is done through a http proxy */
+  bool socksproxy;   /* if set, this transfer is done through a socks proxy */
   bool user_passwd;    /* do we use user+password for this connection? */
   bool proxy_user_passwd; /* user+password for the proxy? */
   bool ipv6_ip; /* we communicate with a remote site specified with pure IPv6
@@ -517,6 +532,7 @@ struct ConnectBits {
   bool ftp_use_eprt;  /* As set with CURLOPT_FTP_USE_EPRT, but if we find out
                          EPRT doesn't work we disable it for the forthcoming
                          requests */
+  bool ftp_use_data_ssl; /* Enabled SSL for the data connection */
   bool netrc;         /* name+password provided by netrc */
   bool userpwd_in_url; /* name+password found in url */
   bool stream_was_rewound; /* Indicates that the stream was rewound after a
@@ -529,6 +545,9 @@ struct ConnectBits {
                  connection */
   bool type_set;  /* type= was used in the URL */
   bool multiplex; /* connection is multiplexed */
+  bool proxy_ssl_connected[2]; /* TRUE when SSL initialization for HTTPS proxy
+                                  is complete */
+  bool socksproxy_connecting; /* connecting through a socks proxy */
 };
 
 struct hostname {
@@ -817,6 +836,14 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
                             size_t len,               /* max amount to read */
                             CURLcode *err);           /* error to return */
 
+struct proxy_info {
+  struct hostname host;
+  long port;
+  curl_proxytype proxytype; /* what kind of proxy that is in use */
+  char *user;    /* proxy user name string, allocated */
+  char *passwd;  /* proxy password string, allocated */
+};
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -866,10 +893,15 @@ struct connectdata {
   int socktype;  /* SOCK_STREAM or SOCK_DGRAM */
 
   struct hostname host;
-  struct hostname proxy;
+  char *secondaryhostname; /* secondary socket host name (ftp) */
+
+  struct proxy_info socks_proxy;
+  struct proxy_info http_proxy;
 
   long port;       /* which port to use locally */
   int remote_port; /* what remote port to connect to, not the proxy port! */
+  unsigned short secondary_port; /* secondary socket remote port to connect to
+                                    (ftp) */
 
   /* 'primary_ip' and 'primary_port' get filled with peer's numerical
      ip address and port number whenever an outgoing connection is
@@ -894,10 +926,6 @@ struct connectdata {
 
   char *xoauth2_bearer; /* bearer token for xoauth2, allocated */
 
-  char *proxyuser;    /* proxy user name string, allocated */
-  char *proxypasswd;  /* proxy password string, allocated */
-  curl_proxytype proxytype; /* what kind of proxy that is in use */
-
   int httpversion;        /* the HTTP version*10 reported by the server */
   int rtspversion;        /* the RTSP version*10 reported by the server */
 
@@ -912,7 +940,9 @@ struct connectdata {
   Curl_send *send[2];
 
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
-  struct ssl_config_data ssl_config;
+  struct ssl_connect_data proxy_ssl[2]; /* this is for proxy ssl-stuff */
+  struct ssl_primary_config ssl_config;
+  struct ssl_primary_config proxy_ssl_config;
 
   struct ConnectBits bits;    /* various state-flags for this connection */
 
@@ -1037,9 +1067,6 @@ struct connectdata {
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
 #endif
-
-  bool verifypeer;
-  bool verifyhost;
 
   /* When this connection is created, store the conditions for the local end
      bind. This is stored before the actual bind and before any connection is
@@ -1344,8 +1371,6 @@ struct DynamicStatic {
 struct Curl_multi;    /* declared and used only in multi.c */
 
 enum dupstring {
-  STRING_CERT,            /* client certificate file name */
-  STRING_CERT_TYPE,       /* format for certificate (default: PEM)*/
   STRING_COOKIE,          /* HTTP cookie string to send */
   STRING_COOKIEJAR,       /* dump all cookies to this file */
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
@@ -1354,25 +1379,16 @@ enum dupstring {
   STRING_FTP_ACCOUNT,     /* ftp account data */
   STRING_FTP_ALTERNATIVE_TO_USER, /* command to send if USER/PASS fails */
   STRING_FTPPORT,         /* port to send with the FTP PORT command */
-  STRING_KEY,             /* private key file name */
-  STRING_KEY_PASSWD,      /* plain text private key password */
-  STRING_KEY_TYPE,        /* format for private key (default: PEM) */
   STRING_KRB_LEVEL,       /* krb security level */
   STRING_NETRC_FILE,      /* if not NULL, use this instead of trying to find
                              $HOME/.netrc */
   STRING_PROXY,           /* proxy to use */
+  STRING_SOCKS_PROXY,     /* socks proxy to use */
   STRING_SET_RANGE,       /* range, if used */
   STRING_SET_REFERER,     /* custom string for the HTTP referer field */
   STRING_SET_URL,         /* what original URL to work on */
-  STRING_SSL_CAPATH,      /* CA directory name (doesn't work on windows) */
-  STRING_SSL_CAFILE,      /* certificate file to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY, /* public key file to verify peer against */
-  STRING_SSL_CIPHER_LIST, /* list of ciphers to use */
-  STRING_SSL_EGDSOCKET,   /* path to file containing the EGD daemon socket */
-  STRING_SSL_RANDOM_FILE, /* path to file containing "random" data */
   STRING_USERAGENT,       /* User-Agent string */
-  STRING_SSL_CRLFILE,     /* crl file to check certificate */
-  STRING_SSL_ISSUERCERT,  /* issuer cert file to check certificate */
   STRING_USERNAME,        /* <username>, if used */
   STRING_PASSWORD,        /* <password>, if used */
   STRING_OPTIONS,         /* <options>, if used */
@@ -1397,10 +1413,6 @@ enum dupstring {
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,
 
-#ifdef USE_TLS_SRP
-  STRING_TLSAUTH_USERNAME,      /* TLS auth <username> */
-  STRING_TLSAUTH_PASSWORD,      /* TLS auth <password> */
-#endif
   STRING_BEARER,                /* <bearer>, if used */
 #ifdef USE_UNIX_SOCKETS
   STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
@@ -1514,7 +1526,10 @@ struct UserDefined {
   long httpversion; /* when non-zero, a specific HTTP version requested to
                        be used in the library's request(s) */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
+  struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
+  struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
+  curl_proxytype socks_proxytype; /* what kind of socks proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
   void *private_data; /* application-private data */
@@ -1578,8 +1593,6 @@ struct UserDefined {
   bool ftp_skip_ip;      /* skip the IP address the FTP server passes on to
                             us */
   bool connect_only;     /* make connection, let application use the socket */
-  bool ssl_enable_beast; /* especially allow this flaw for interoperability's
-                            sake*/
   long ssh_auth_types;   /* allowed SSH auth types */
   bool http_te_skip;     /* pass the raw body data to the user, even when
                             transfer-encoded (chunked, compressed) */

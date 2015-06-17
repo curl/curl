@@ -870,8 +870,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
           /* new in libcurl 7.10 */
           if(config->socksproxy) {
-            my_setopt_str(curl, CURLOPT_PROXY, config->socksproxy);
-            my_setopt_enum(curl, CURLOPT_PROXYTYPE, (long)config->socksver);
+            my_setopt_str(curl, CURLOPT_SOCKS_PROXY, config->socksproxy);
+            my_setopt_enum(curl, CURLOPT_SOCKS_PROXYTYPE,
+                           (long)config->socksver);
           }
 
           /* new in libcurl 7.10.6 */
@@ -999,6 +1000,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_RESUME_FROM_LARGE, CURL_OFF_T_C(0));
 
         my_setopt_str(curl, CURLOPT_KEYPASSWD, config->key_passwd);
+        my_setopt_str(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
 
         if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) {
 
@@ -1016,19 +1018,36 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         if(config->cacert)
           my_setopt_str(curl, CURLOPT_CAINFO, config->cacert);
+        if(config->proxy_cacert)
+          my_setopt_str(curl, CURLOPT_PROXY_CAINFO, config->proxy_cacert);
         if(config->capath)
           my_setopt_str(curl, CURLOPT_CAPATH, config->capath);
+        if(config->proxy_capath)
+          my_setopt_str(curl, CURLOPT_PROXY_CAPATH, config->proxy_capath);
+        else if(config->capath) /* CURLOPT_PROXY_CAPATH default is capath */
+          my_setopt_str(curl, CURLOPT_PROXY_CAPATH, config->capath);
+
         if(config->crlfile)
           my_setopt_str(curl, CURLOPT_CRLFILE, config->crlfile);
+        if(config->proxy_crlfile)
+          my_setopt_str(curl, CURLOPT_PROXY_CRLFILE, config->proxy_crlfile);
+        else if(config->crlfile) /* CURLOPT_PROXY_CRLFILE default is crlfile */
+          my_setopt_str(curl, CURLOPT_PROXY_CRLFILE, config->crlfile);
 
         if(config->pinnedpubkey)
           my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
 
         if(curlinfo->features & CURL_VERSION_SSL) {
           my_setopt_str(curl, CURLOPT_SSLCERT, config->cert);
+          my_setopt_str(curl, CURLOPT_PROXY_SSLCERT, config->proxy_cert);
           my_setopt_str(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
+          my_setopt_str(curl, CURLOPT_PROXY_SSLCERTTYPE,
+                        config->proxy_cert_type);
           my_setopt_str(curl, CURLOPT_SSLKEY, config->key);
+          my_setopt_str(curl, CURLOPT_PROXY_SSLKEY, config->proxy_key);
           my_setopt_str(curl, CURLOPT_SSLKEYTYPE, config->key_type);
+          my_setopt_str(curl, CURLOPT_PROXY_SSLKEYTYPE,
+                        config->proxy_key_type);
 
           if(config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -1039,6 +1058,13 @@ static CURLcode operate_do(struct GlobalConfig *global,
             /* libcurl default is strict verifyhost -> 2L   */
             /* my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L); */
           }
+          if(config->proxy_insecure_ok) {
+            my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 0L);
+            my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYHOST, 0L);
+          }
+          else {
+            my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 1L);
+          }
 
           if(config->verifystatus)
             my_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
@@ -1047,6 +1073,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
             my_setopt(curl, CURLOPT_SSL_FALSESTART, 1L);
 
           my_setopt_enum(curl, CURLOPT_SSLVERSION, config->ssl_version);
+          my_setopt_enum(curl, CURLOPT_PROXY_SSLVERSION,
+                         config->proxy_ssl_version);
         }
         if(config->path_as_is)
           my_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
@@ -1146,6 +1174,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         if(config->cipher_list)
           my_setopt_str(curl, CURLOPT_SSL_CIPHER_LIST, config->cipher_list);
+
+        if(config->proxy_cipher_list)
+          my_setopt_str(curl, CURLOPT_PROXY_SSL_CIPHER_LIST,
+                        config->proxy_cipher_list);
 
         /* new in libcurl 7.9.2: */
         if(config->disable_epsv)
@@ -1326,6 +1358,15 @@ static CURLcode operate_do(struct GlobalConfig *global,
           if(config->tls_authtype)
             my_setopt_str(curl, CURLOPT_TLSAUTH_TYPE,
                           config->tls_authtype);
+          if(config->proxy_tls_username)
+            my_setopt_str(curl, CURLOPT_PROXY_TLSAUTH_USERNAME,
+                          config->proxy_tls_username);
+          if(config->proxy_tls_password)
+            my_setopt_str(curl, CURLOPT_PROXY_TLSAUTH_PASSWORD,
+                          config->proxy_tls_password);
+          if(config->proxy_tls_authtype)
+            my_setopt_str(curl, CURLOPT_PROXY_TLSAUTH_TYPE,
+                          config->proxy_tls_authtype);
         }
 
         /* new in 7.22.0 */
@@ -1336,6 +1377,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
         /* new in 7.25.0 */
         if(config->ssl_allow_beast)
           my_setopt(curl, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_ALLOW_BEAST);
+
+        if(config->proxy_ssl_allow_beast)
+          my_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS,
+                    (long)CURLSSLOPT_ALLOW_BEAST);
 
         if(config->mail_auth)
           my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
