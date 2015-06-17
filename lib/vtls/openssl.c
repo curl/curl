@@ -136,6 +136,11 @@
 #define CONF_modules_load_file(a,b,c)
 #endif
 
+#ifdef OPENSSL_IS_BORINGSSL
+/* not present in BoringSSL */
+#define OPENSSL_load_builtin_modules(x)
+#endif
+
 /*
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have
