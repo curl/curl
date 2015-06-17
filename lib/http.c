@@ -3331,13 +3331,13 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 #ifdef USE_SPNEGO
       /* set state GSS_AUTHCOMPLETE for connection when
        * picked auth is Negotiate and
-       * connection is no closed and 
+       * connection is no closed and
        * http result code less 400 (is correct) */
       if(k->httpcode < 400 &&
          !conn->bits.close) {
-        if(data->state.authproxy.picked & CURLAUTH_NEGOTIATE) 
+        if(data->state.authproxy.picked & CURLAUTH_NEGOTIATE)
           data->state.proxyneg.state = GSS_AUTHCOMPLETE;
-        if(data->state.authhost.picked & CURLAUTH_NEGOTIATE) 
+        if(data->state.authhost.picked & CURLAUTH_NEGOTIATE)
           data->state.negotiate.state = GSS_AUTHCOMPLETE;
       }
 #endif

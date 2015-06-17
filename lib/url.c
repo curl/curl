@@ -3110,11 +3110,11 @@ ConnectionExists(struct SessionHandle *data,
 #ifdef USE_NTLM
   bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) ||
                        (data->state.authhost.want & CURLAUTH_NTLM_WB)) &&
-                      (needle->handler->protocol & PROTO_FAMILY_HTTP)?TRUE:FALSE;
+    (needle->handler->protocol & PROTO_FAMILY_HTTP)?TRUE:FALSE;
 #endif
 #ifdef USE_SPNEGO
   bool wantNegHttp = (data->state.authhost.want & CURLAUTH_NEGOTIATE) &&
-                     (needle->handler->protocol & PROTO_FAMILY_HTTP)?TRUE:FALSE;
+    (needle->handler->protocol & PROTO_FAMILY_HTTP)?TRUE:FALSE;
 #endif // USE_SPNEGO
   struct connectbundle *bundle;
 
@@ -5858,7 +5858,7 @@ static CURLcode create_conn(struct SessionHandle *data,
 #endif
 
 #if defined(USE_SPNEGO)
-    /* If Negotiate is requested in a part of this connection, 
+    /* If Negotiate is requested in a part of this connection,
      * clear negotiate contexts for new auth requests */
     if(((data->state.authhost.picked & CURLAUTH_NEGOTIATE) &&
         data->state.negotiate.state == GSS_AUTHCOMPLETE) ||
