@@ -596,7 +596,9 @@ output_auth_headers(struct connectdata *conn,
 #endif
 
 #ifdef USE_SPNEGO
-  negdata->state = GSS_AUTHNONE;
+  if(negdata->state != GSS_AUTHCOMPLETE)
+    negdata->state = GSS_AUTHNONE;
+
   if((authstatus->picked == CURLAUTH_NEGOTIATE) &&
      negdata->context && !GSS_ERROR(negdata->status)) {
     auth="Negotiate";
@@ -3325,6 +3327,21 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           nc = 0;
         }
       }
+
+#ifdef USE_SPNEGO
+      /* set state GSS_AUTHCOMPLETE for connection when
+       * picked auth is Negotiate and
+       * connection is no closed and
+       * http result code less 400 (is correct) */
+      if(k->httpcode < 400 &&
+         !conn->bits.close) {
+        if(data->state.authproxy.picked & CURLAUTH_NEGOTIATE)
+          data->state.proxyneg.state = GSS_AUTHCOMPLETE;
+        if(data->state.authhost.picked & CURLAUTH_NEGOTIATE)
+          data->state.negotiate.state = GSS_AUTHCOMPLETE;
+      }
+#endif
+
 
       if(nc) {
         data->info.httpcode = k->httpcode;
