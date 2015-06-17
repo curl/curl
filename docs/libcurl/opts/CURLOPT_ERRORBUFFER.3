@@ -65,17 +65,18 @@ if(curl) {
   /* perform the request */
   res = curl_easy_perform(curl);
 
-  /* if the request did not complete correctly, show the error information.
-  if no detailed error information was written to errbuf show the more generic
-  information from curl_easy_strerror instead.
+  /* if the request did not complete correctly, show the error
+  information. if no detailed error information was written to errbuf
+  show the more generic information from curl_easy_strerror instead.
   */
   if(res != CURLE_OK) {
     size_t len = strlen(errbuf);
-    fprintf(stderr, "\nlibcurl: (%d) ", res);
+    fprintf(stderr, "\\nlibcurl: (%d) ", res);
     if(len)
-      fprintf(stderr, "%s%s", errbuf, ((errbuf[len - 1] != '\n') ? "\n" : ""));
+      fprintf(stderr, "%s%s", errbuf,
+              ((errbuf[len - 1] != '\\n') ? "\\n" : ""));
     else
-      fprintf(stderr, "%s\n", curl_easy_strerror(res));
+      fprintf(stderr, "%s\\n", curl_easy_strerror(res));
   }
 }
 .fi
