@@ -77,6 +77,9 @@ struct OperationConfig {
   char *tls_username;
   char *tls_password;
   char *tls_authtype;
+  char *proxy_tls_username;
+  char *proxy_tls_password;
+  char *proxy_tls_authtype;
   char *proxyuserpwd;
   char *proxy;
   int proxyver;             /* set to CURLPROXY_HTTP* define */
@@ -105,15 +108,24 @@ struct OperationConfig {
   struct getout *url_get;   /* point to the node to fill in URL */
   struct getout *url_out;   /* point to the node to fill in outfile */
   char *cipher_list;
+  char *proxy_cipher_list;
   char *cert;
+  char *proxy_cert;
   char *cert_type;
+  char *proxy_cert_type;
   char *cacert;
+  char *proxy_cacert;
   char *capath;
+  char *proxy_capath;
   char *crlfile;
+  char *proxy_crlfile;
   char *pinnedpubkey;
   char *key;
+  char *proxy_key;
   char *key_type;
+  char *proxy_key_type;
   char *key_passwd;
+  char *proxy_key_passwd;
   char *pubkey;
   char *hostpubmd5;
   char *engine;
@@ -126,6 +138,8 @@ struct OperationConfig {
   bool globoff;
   bool use_httpget;
   bool insecure_ok;         /* set TRUE to allow insecure SSL connects */
+  bool proxy_insecure_ok;   /* set TRUE to allow insecure SSL connects
+                               for proxy */
   bool verifystatus;
   bool create_dirs;
   bool ftp_create_dirs;
@@ -141,6 +155,7 @@ struct OperationConfig {
   struct curl_slist *postquote;
   struct curl_slist *prequote;
   long ssl_version;
+  long proxy_ssl_version;
   long ip_version;
   curl_TimeCond timecond;
   time_t condtime;
@@ -199,6 +214,7 @@ struct OperationConfig {
   bool xattr;               /* store metadata in extended attributes */
   long gssapi_delegation;
   bool ssl_allow_beast;     /* allow this SSL vulnerability */
+  bool proxy_ssl_allow_beast; /* allow this SSL vulnerability for proxy*/
 
   bool use_metalink;        /* process given URLs as metalink XML file */
   metalinkfile *metalinkfile_list; /* point to the first node */

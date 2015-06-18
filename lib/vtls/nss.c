@@ -313,9 +313,8 @@ static int is_file(const char *filename)
  * should be later deallocated using free().  If the OOM failure occurs, we
  * return NULL, too.
  */
-static char* dup_nickname(struct SessionHandle *data, enum dupstring cert_kind)
+static char* dup_nickname(struct SessionHandle *data, const char *str)
 {
-  const char *str = data->set.str[cert_kind];
   const char *n;
 
   if(!is_file(str))
@@ -566,7 +565,7 @@ static CURLcode nss_load_key(struct connectdata *conn, int sockindex,
   PK11_IsPresent(slot);
 
   status = PK11_Authenticate(slot, PR_TRUE,
-                             conn->data->set.str[STRING_KEY_PASSWD]);
+                             conn->data->set.ssl.key_passwd);
   PK11_FreeSlot(slot);
 
   return (SECSuccess == status) ? CURLE_OK : CURLE_SSL_CERTPROBLEM;
@@ -645,7 +644,7 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
   struct connectdata *conn = (struct connectdata *)arg;
 
 #ifdef SSL_ENABLE_OCSP_STAPLING
-  if(conn->data->set.ssl.verifystatus) {
+  if(conn->ssl_config.verifystatus) {
     SECStatus cacheResult;
 
     const SECItemArray *csa = SSL_PeerStapledOCSPResponses(fd);
@@ -671,7 +670,7 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
   }
 #endif
 
-  if(!conn->data->set.ssl.verifypeer) {
+  if(!conn->ssl_config.verifypeer) {
     infof(conn->data, "skipping SSL peer certificate verification\n");
     return SECSuccess;
   }
@@ -893,7 +892,7 @@ static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
   /* remember the cert verification result */
   data->set.ssl.certverifyresult = err;
 
-  if(err == SSL_ERROR_BAD_CERT_DOMAIN && !data->set.ssl.verifyhost)
+  if(err == SSL_ERROR_BAD_CERT_DOMAIN && !conn->ssl_config.verifyhost)
     /* we are asked not to verify the host name */
     return SECSuccess;
 
@@ -1399,8 +1398,8 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
                                          int sockindex)
 {
   struct SessionHandle *data = conn->data;
-  const char *cafile = data->set.ssl.CAfile;
-  const char *capath = data->set.ssl.CApath;
+  const char *cafile = conn->ssl_config.CAfile;
+  const char *capath = conn->ssl_config.CApath;
 
   if(cafile) {
     CURLcode result = nss_load_cert(&conn->ssl[sockindex], cafile, PR_TRUE);
@@ -1450,7 +1449,7 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
 static CURLcode nss_init_sslver(SSLVersionRange *sslver,
                                 struct SessionHandle *data)
 {
-  switch(data->set.ssl.version) {
+  switch (conn->ssl_config.version) {
   default:
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
@@ -1609,7 +1608,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     goto error;
 
   /* do not use SSL cache if disabled or we are not going to verify peer */
-  ssl_no_cache = (conn->ssl_config.sessionid && data->set.ssl.verifypeer) ?
+  ssl_no_cache = (conn->ssl_config.sessionid && conn->ssl_config.verifypeer) ?
     PR_FALSE : PR_TRUE;
   if(SSL_OptionSet(model, SSL_NO_CACHE, ssl_no_cache) != SECSuccess)
     goto error;
@@ -1620,7 +1619,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   if(SSL_VersionRangeSet(model, &sslver) != SECSuccess)
     goto error;
 
-  ssl_cbc_random_iv = !data->set.ssl_enable_beast;
+  ssl_cbc_random_iv = !data->set.ssl.enable_beast;
 #ifdef SSL_CBC_RANDOM_IV
   /* unless the user explicitly asks to allow the protocol vulnerability, we
      use the work-around */
@@ -1632,14 +1631,14 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     infof(data, "warning: support for SSL_CBC_RANDOM_IV not compiled in\n");
 #endif
 
-  if(data->set.ssl.cipher_list) {
-    if(set_ciphers(data, model, data->set.ssl.cipher_list) != SECSuccess) {
+  if(conn->ssl_config.cipher_list) {
+    if(set_ciphers(data, model, conn->ssl_config.cipher_list) != SECSuccess) {
       result = CURLE_SSL_CIPHER;
       goto error;
     }
   }
 
-  if(!data->set.ssl.verifypeer && data->set.ssl.verifyhost)
+  if(!conn->ssl_config.verifypeer && conn->ssl_config.verifyhost)
     infof(data, "warning: ignoring value of ssl.verifyhost\n");
 
   /* bypass the default SSL_AuthCertificate() hook in case we do not want to
@@ -1654,7 +1653,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   if(SSL_HandshakeCallback(model, HandshakeCallback, conn) != SECSuccess)
     goto error;
 
-  if(data->set.ssl.verifypeer) {
+  if(conn->ssl_config.verifypeer) {
     const CURLcode rv = nss_load_ca_certificates(conn, sockindex);
     if(rv) {
       result = rv;
@@ -1671,15 +1670,15 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     infof(data, "  CRLfile: %s\n", data->set.ssl.CRLfile);
   }
 
-  if(data->set.str[STRING_CERT]) {
-    char *nickname = dup_nickname(data, STRING_CERT);
+  if(data->set.ssl.cert) {
+    char *nickname = dup_nickname(data, data->set.ssl.cert);
     if(nickname) {
       /* we are not going to use libnsspem.so to read the client cert */
       connssl->obj_clicert = NULL;
     }
     else {
-      CURLcode rv = cert_stuff(conn, sockindex, data->set.str[STRING_CERT],
-                               data->set.str[STRING_KEY]);
+      CURLcode rv = cert_stuff(conn, sockindex, data->set.ssl.cert,
+                               data->set.ssl.key);
       if(rv) {
         /* failf() is already done in cert_stuff() */
         result = rv;
@@ -1732,8 +1731,8 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   model = NULL;
 
   /* This is the password associated with the cert that we're using */
-  if(data->set.str[STRING_KEY_PASSWD]) {
-    SSL_SetPKCS11PinArg(connssl->handle, data->set.str[STRING_KEY_PASSWD]);
+  if(data->set.ssl.key_passwd) {
+    SSL_SetPKCS11PinArg(connssl->handle, data->set.ssl.key_passwd);
   }
 
 #ifdef SSL_ENABLE_OCSP_STAPLING
@@ -1837,11 +1836,11 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
   if(result)
     goto error;
 
-  if(data->set.str[STRING_SSL_ISSUERCERT]) {
+  if(data->set.ssl.issuercert) {
     SECStatus ret = SECFailure;
-    char *nickname = dup_nickname(data, STRING_SSL_ISSUERCERT);
+    char *nickname = dup_nickname(data, data->set.ssl.issuercert);
     if(nickname) {
-      /* we support only nicknames in case of STRING_SSL_ISSUERCERT for now */
+      /* we support only nicknames in case of issuercert for now */
       ret = check_issuer_cert(connssl->handle, nickname);
       free(nickname);
     }

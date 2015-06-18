@@ -133,7 +133,9 @@ void Curl_conncache_destroy(struct conncache *connc)
 static char *hashkey(struct connectdata *conn)
 {
   return aprintf("%s:%d",
-                 conn->bits.proxy?conn->proxy.name:conn->host.name,
+                 conn->bits.socksproxy ? conn->socks_proxy.host.name :
+                 conn->bits.httpproxy ? conn->http_proxy.host.name :
+                 conn->host.name,
                  conn->localport);
 }
 

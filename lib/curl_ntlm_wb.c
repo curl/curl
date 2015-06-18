@@ -350,7 +350,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
 
   if(proxy) {
     allocuserpwd = &conn->allocptr.proxyuserpwd;
-    userp = conn->proxyuser;
+    userp = conn->http_proxy.user;
     ntlm = &conn->proxyntlm;
     authp = &conn->data->state.authproxy;
   }

@@ -116,7 +116,7 @@ cyassl_connect_step1(struct connectdata *conn,
     return CURLE_OK;
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
-  switch(data->set.ssl.version) {
+  switch(conn->ssl_config.version) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
 #if LIBCYASSL_VERSION_HEX >= 0x03003000 /* >= 3.3.0 */
@@ -190,18 +190,18 @@ cyassl_connect_step1(struct connectdata *conn,
 
 #ifndef NO_FILESYSTEM
   /* load trusted cacert */
-  if(data->set.str[STRING_SSL_CAFILE]) {
+  if(conn->ssl_config.CAfile) {
     if(1 != SSL_CTX_load_verify_locations(conssl->ctx,
-                                          data->set.str[STRING_SSL_CAFILE],
-                                          data->set.str[STRING_SSL_CAPATH])) {
-      if(data->set.ssl.verifypeer) {
+                                      conn->ssl_config.CAfile,
+                                      conn->ssl_config.CApath)) {
+      if(conn->ssl_config.verifypeer) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:\n"
               "  CAfile: %s\n  CApath: %s",
-              data->set.str[STRING_SSL_CAFILE]?
-              data->set.str[STRING_SSL_CAFILE]: "none",
-              data->set.str[STRING_SSL_CAPATH]?
-              data->set.str[STRING_SSL_CAPATH] : "none");
+              conn->ssl_config.CAfile?
+              conn->ssl_config.CAfile: "none",
+              conn->ssl_config.CApath?
+              conn->ssl_config.CApath : "none");
         return CURLE_SSL_CACERT_BADFILE;
       }
       else {
@@ -218,25 +218,25 @@ cyassl_connect_step1(struct connectdata *conn,
     infof(data,
           "  CAfile: %s\n"
           "  CApath: %s\n",
-          data->set.str[STRING_SSL_CAFILE] ? data->set.str[STRING_SSL_CAFILE]:
+          conn->ssl_config.CAfile ? conn->ssl_config.CAfile:
           "none",
-          data->set.str[STRING_SSL_CAPATH] ? data->set.str[STRING_SSL_CAPATH]:
+          conn->ssl_config.CApath ? conn->ssl_config.CApath:
           "none");
   }
 
   /* Load the client certificate, and private key */
-  if(data->set.str[STRING_CERT] && data->set.str[STRING_KEY]) {
-    int file_type = do_file_type(data->set.str[STRING_CERT_TYPE]);
+  if(data->set.ssl.cert && data->set.ssl.key) {
+    int file_type = do_file_type(data->set.ssl.cert_type);
 
-    if(SSL_CTX_use_certificate_file(conssl->ctx, data->set.str[STRING_CERT],
+    if(SSL_CTX_use_certificate_file(conssl->ctx, data->set.ssl.cert,
                                      file_type) != 1) {
       failf(data, "unable to use client certificate (no key or wrong pass"
             " phrase?)");
       return CURLE_SSL_CONNECT_ERROR;
     }
 
-    file_type = do_file_type(data->set.str[STRING_KEY_TYPE]);
-    if(SSL_CTX_use_PrivateKey_file(conssl->ctx, data->set.str[STRING_KEY],
+    file_type = do_file_type(data->set.ssl.key_type);
+    if(SSL_CTX_use_PrivateKey_file(conssl->ctx, data->set.ssl.key,
                                     file_type) != 1) {
       failf(data, "unable to set private key");
       return CURLE_SSL_CONNECT_ERROR;
@@ -249,7 +249,8 @@ cyassl_connect_step1(struct connectdata *conn,
    * anyway. In the latter case the result of the verification is checked with
    * SSL_get_verify_result() below. */
   SSL_CTX_set_verify(conssl->ctx,
-                     data->set.ssl.verifypeer?SSL_VERIFY_PEER:SSL_VERIFY_NONE,
+                     conn->ssl_config.verifypeer?SSL_VERIFY_PEER:
+                                                 SSL_VERIFY_NONE,
                      NULL);
 
 #ifdef HAVE_SNI
@@ -302,7 +303,7 @@ cyassl_connect_step1(struct connectdata *conn,
   }
 
   /* Check if there's a cached ID we can/should use here! */
-  if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL)) {
+  if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL, sockindex)) {
     /* we got a session id, use it! */
     if(!SSL_set_session(conssl->handle, ssl_sessionid)) {
       failf(data, "SSL: SSL_set_session failed: %s",
@@ -336,7 +337,7 @@ cyassl_connect_step2(struct connectdata *conn,
   conn->send[sockindex] = cyassl_send;
 
   /* Enable RFC2818 checks */
-  if(data->set.ssl.verifyhost) {
+  if(conn->ssl_config.verifyhost) {
     ret = CyaSSL_check_domain_name(conssl->handle, conn->host.name);
     if(ret == SSL_FAILURE)
       return CURLE_OUT_OF_MEMORY;
@@ -369,7 +370,7 @@ cyassl_connect_step2(struct connectdata *conn,
        * CyaSSL version 2.4.0 will fail with an INCOMPLETE_DATA error. The only
        * way to do this is currently to switch the CyaSSL_check_domain_name()
        * in and out based on the 'data->set.ssl.verifyhost' value. */
-      if(data->set.ssl.verifyhost) {
+      if(conn->ssl_config.verifyhost) {
         failf(data,
               "\tsubject alt name(s) or common name do not match \"%s\"\n",
               conn->host.dispname);
@@ -464,7 +465,8 @@ cyassl_connect_step3(struct connectdata *conn,
 
   our_ssl_sessionid = SSL_get_session(connssl->handle);
 
-  incache = !(Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL));
+  incache = !(Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL,
+                                    sockindex));
   if(incache) {
     if(old_ssl_sessionid != our_ssl_sessionid) {
       infof(data, "old SSL session ID is stale, removing\n");
@@ -475,7 +477,7 @@ cyassl_connect_step3(struct connectdata *conn,
 
   if(!incache) {
     result = Curl_ssl_addsessionid(conn, our_ssl_sessionid,
-                                   0 /* unknown size */);
+                                   0 /* unknown size */, sockindex);
     if(result) {
       failf(data, "failed to store ssl session");
       return result;
