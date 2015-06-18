@@ -42,6 +42,10 @@
  *
  * This example requires libcurl 7.9.7 or later.
  */
+/* <DESC>
+ * implements an fopen() abstraction allowing reading from URLs
+ * </DESC>
+ */
 
 #include <stdio.h>
 #include <string.h>

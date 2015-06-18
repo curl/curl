@@ -9,7 +9,10 @@
   certificate presented during ssl session establishment.
 
 */
-
+/* <DESC>
+ * demonstrates use of SSL context callback, requires OpenSSL
+ * </DESC>
+ */
 
 /*
  * Copyright (c) 2003 The OpenEvidence Project.  All rights reserved.
