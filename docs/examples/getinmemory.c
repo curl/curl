@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,8 +19,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* Example source code to show how the callback function can be used to
- * download data into a chunk of memory instead of storing it in a file.
+/* <DESC>
+ * Shows how the write callback function can be used to download data into a
+ * chunk of memory instead of storing it in a file.
+ * </DESC>
  */
 
 #include <stdio.h>
@@ -33,7 +35,6 @@ struct MemoryStruct {
   char *memory;
   size_t size;
 };
-
 
 static size_t
 WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -54,7 +55,6 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 
   return realsize;
 }
-
 
 int main(void)
 {
