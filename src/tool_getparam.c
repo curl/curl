@@ -158,12 +158,10 @@ static const struct LongShort aliases[]= {
   {"$3", "keepalive-time",           TRUE},
   {"$4", "post302",                  FALSE},
   {"$5", "noproxy",                  TRUE},
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   {"$6", "socks5-gssapi-service",    TRUE},
   {"$7", "socks5-gssapi-nec",        FALSE},
   {"$O", "proxy-service-name",       TRUE},
   {"$P", "service-name",             TRUE},
-#endif
   {"$8", "proxy1.0",                 TRUE},
   {"$9", "tftp-blksize",             TRUE},
   {"$A", "mail-from",                TRUE},
@@ -898,7 +896,6 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         /* This specifies the noproxy list */
         GetStr(&config->noproxy, nextarg);
         break;
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
       case '6': /* --socks5-gssapi-service */
         GetStr(&config->socks5_gssapi_service, nextarg);
         break;
@@ -911,7 +908,6 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'P': /* --service-name */
         GetStr(&config->service_name, nextarg);
         break;
-#endif
       case '8': /* --proxy1.0 */
         /* http 1.0 proxy */
         GetStr(&config->proxy, nextarg);

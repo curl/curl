@@ -1204,32 +1204,26 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC,
                          (long)config->ftp_ssl_ccc_mode);
 
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-        {
-          /* TODO: Make this a run-time check instead of compile-time one. */
+        /* new in curl 7.19.4 */
+        if(config->socks5_gssapi_service)
+          my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_SERVICE,
+                        config->socks5_gssapi_service);
 
-          /* new in curl 7.19.4 */
-          if(config->socks5_gssapi_service)
-            my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_SERVICE,
-                          config->socks5_gssapi_service);
+        /* new in curl 7.19.4 */
+        if(config->socks5_gssapi_nec)
+          my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_NEC,
+                        config->socks5_gssapi_nec);
 
-          /* new in curl 7.19.4 */
-          if(config->socks5_gssapi_nec)
-            my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_NEC,
-                          config->socks5_gssapi_nec);
+        /* new in curl 7.43.0 */
+        if(config->proxy_service_name)
+          my_setopt_str(curl, CURLOPT_PROXY_SERVICE_NAME,
+                        config->proxy_service_name);
 
-          /* new in curl 7.43.0 */
-          if(config->proxy_service_name)
-            my_setopt_str(curl, CURLOPT_PROXY_SERVICE_NAME,
-                          config->proxy_service_name);
+        /* new in curl 7.43.0 */
+        if(config->service_name)
+          my_setopt_str(curl, CURLOPT_SERVICE_NAME,
+                        config->service_name);
 
-          /* new in curl 7.43.0 */
-          if(config->service_name)
-            my_setopt_str(curl, CURLOPT_SERVICE_NAME,
-                          config->service_name);
-
-        }
-#endif
         /* curl 7.13.0 */
         my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
 
