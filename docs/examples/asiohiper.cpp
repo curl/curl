@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,11 +20,11 @@
  *
  ***************************************************************************/
 
+/* <DESC>
+ * demonstrate the use of multi socket interface with boost::asio
+ * </DESC>
+ */
 /*
- * file: asiohiper.cpp
- * Example program to demonstrate the use of multi socket interface
- * with boost::asio
- *
  * This program is in c++ and uses boost::asio instead of libevent/libev.
  * Requires boost::asio, boost::bind and boost::system
  *
