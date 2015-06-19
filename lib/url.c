@@ -3355,6 +3355,24 @@ ConnectionExists(struct SessionHandle *data,
           continue;
         }
 #endif
+#if defined(USE_SPNEGO)
+        /* If we are looking for an HTTP+Negotiate connection, check if this is
+         * already authenticating with the right credentials. If not, keep
+         * looking so that we can reuse connections if possible.*/
+        if(wantNegHttp) {
+          if(credentialsMatch) {
+            chosen = check;
+            *force_reuse = TRUE;
+            break;
+          }
+          else {
+            /* this is a backup choice */
+            chosen = check;
+          }
+          continue;
+        }
+#endif // (USE_SPNEGO)
+
 
         if(canPipeline) {
           /* We can pipeline if we want to. Let's continue looking for
@@ -3435,6 +3453,14 @@ ConnectionExists(struct SessionHandle *data,
     }
   }
 
+#if defined(USE_SPNEGO)
+  /* if wantNegHttp and chosen connection without forced using
+   * then reset GSS_AUTHCOMPLETE */
+  if(wantNegHttp && chosen && !*force_reuse) {
+    chosen->data->state.negotiate.state = GSS_AUTHNONE;
+    chosen->data->state.proxyneg.state = GSS_AUTHNONE;
+  }
+#endif // (USE_SPNEGO)
   if(chosen) {
     *usethis = chosen;
     return TRUE; /* yes, we found one to use! */
