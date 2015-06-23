@@ -75,6 +75,8 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
     size_t rc = fwrite(ptr, size, nmemb, heads->stream);
     if(rc != cb)
       return rc;
+    /* flush the stream to send off what we got earlier */
+    (void)fflush(heads->stream);
   }
 
   /*
