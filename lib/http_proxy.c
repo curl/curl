@@ -68,7 +68,7 @@ CURLcode Curl_proxy_connect(struct connectdata *conn)
     conn->data->req.protop = &http_proxy;
     connkeep(conn, "HTTP proxy CONNECT");
     result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
-                               conn->host.name, conn->remote_port);
+                               conn->host.name, conn->remote_port, FALSE);
     conn->data->req.protop = prot_save;
     if(CURLE_OK != result)
       return result;
@@ -85,12 +85,16 @@ CURLcode Curl_proxy_connect(struct connectdata *conn)
  * Curl_proxyCONNECT() requires that we're connected to a HTTP proxy. This
  * function will issue the necessary commands to get a seamless tunnel through
  * this proxy. After that, the socket can be used just as a normal socket.
+ *
+ * 'blocking' set to TRUE means that this function will do the entire CONNECT
+ * + response in a blocking fashion. Should be avoided!
  */
 
 CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            int sockindex,
                            const char *hostname,
-                           int remote_port)
+                           int remote_port,
+                           bool blocking)
 {
   int subversion=0;
   struct SessionHandle *data=conn->data;
@@ -225,12 +229,14 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       return CURLE_RECV_ERROR;
     }
 
-    if(0 == Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD, 0))
-      /* return so we'll be called again polling-style */
-      return CURLE_OK;
-    else {
-      DEBUGF(infof(data,
-                   "Read response immediately from proxy CONNECT\n"));
+    if(!blocking) {
+      if(0 == Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD, 0))
+        /* return so we'll be called again polling-style */
+        return CURLE_OK;
+      else {
+        DEBUGF(infof(data,
+               "Read response immediately from proxy CONNECT\n"));
+      }
     }
 
     /* at this point, the tunnel_connecting phase is over. */

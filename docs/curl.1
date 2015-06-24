@@ -39,8 +39,7 @@ resume, Metalink, and more. As you will see below, the number of features will
 make your head spin!
 
 curl is powered by libcurl for all transfer-related features. See
-.BR libcurl (3)
-for details.
+\fIlibcurl(3)\fP for details.
 .SH URL
 The URL syntax is protocol-dependent. You'll find a detailed description in
 RFC 3986.
@@ -269,11 +268,11 @@ If this option is used several times, the last one will be used.
 .IP "--ciphers <list of ciphers>"
 (SSL) Specifies which ciphers to use in the connection. The list of ciphers
 must specify valid ciphers. Read up on SSL cipher list details on this URL:
-\fIhttp://www.openssl.org/docs/apps/ciphers.html\fP
+\fIhttps://www.openssl.org/docs/apps/ciphers.html\fP
 
 NSS ciphers are done differently than OpenSSL and GnuTLS. The full list of NSS
 ciphers is in the NSSCipherSuite entry at this URL:
-\fIhttp://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html#Directives\fP
+\fIhttps://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html#Directives\fP
 
 If this option is used several times, the last one will be used.
 .IP "--compressed"
@@ -1060,13 +1059,10 @@ in Metalink file, hash check will fail.
 Makes curl scan the \fI.netrc\fP (\fI_netrc\fP on Windows) file in the user's
 home directory for login name and password. This is typically used for FTP on
 Unix. If used with HTTP, curl will enable user authentication. See
-.BR netrc(4)
-or
-.BR ftp(1)
-for details on the file format. Curl will not complain if that file
-doesn't have the right permissions (it should not be either world- or
-group-readable). The environment variable "HOME" is used to find the home
-directory.
+\fInetrc(5)\fP \fIftp(1)\fP for details on the file format. Curl will not
+complain if that file doesn't have the right permissions (it should not be
+either world- or group-readable). The environment variable "HOME" is used to
+find the home directory.
 
 A quick and very simple example of how to setup a \fI.netrc\fP to allow curl
 to FTP to the machine host.domain.com with user name \&'myself' and password

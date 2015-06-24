@@ -1887,7 +1887,7 @@ static CURLcode proxy_magic(struct connectdata *conn,
     memset(&http_proxy, 0, sizeof(http_proxy));
     data->req.protop = &http_proxy;
 
-    result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, newhost, newport);
+    result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, newhost, newport, TRUE);
 
     data->req.protop = ftp_save;
 
@@ -3645,7 +3645,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
     if(conn->tunnel_state[SECONDARYSOCKET] == TUNNEL_CONNECT) {
       /* As we're in TUNNEL_CONNECT state now, we know the proxy name and port
          aren't used so we blank their arguments. TODO: make this nicer */
-      result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, NULL, 0);
+      result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, NULL, 0, FALSE);
 
       return result;
     }

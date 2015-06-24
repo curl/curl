@@ -136,6 +136,11 @@
 #define CONF_modules_load_file(a,b,c)
 #endif
 
+#ifdef OPENSSL_IS_BORINGSSL
+/* not present in BoringSSL */
+#define OPENSSL_load_builtin_modules(x)
+#endif
+
 /*
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have
@@ -1427,8 +1432,10 @@ static const char *ssl_msg_type(int ssl_ver, int msg)
         return "Client hello";
       case SSL3_MT_SERVER_HELLO:
         return "Server hello";
+#ifdef SSL3_MT_NEWSESSION_TICKET
       case SSL3_MT_NEWSESSION_TICKET:
         return "Newsession Ticket";
+#endif
       case SSL3_MT_CERTIFICATE:
         return "Certificate";
       case SSL3_MT_SERVER_KEY_EXCHANGE:
@@ -2130,10 +2137,9 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
     else {
       /* untreated error */
       unsigned long errdetail;
-      char error_buffer[256]; /* OpenSSL documents that this must be at least
-                                 256 bytes long. */
+      char error_buffer[256]=""; /* OpenSSL documents that this must be at
+                                    least 256 bytes long. */
       CURLcode result;
-      const char *cert_problem = NULL;
       long lerr;
 
       connssl->connecting_state = ssl_connect_2; /* the connection failed,
@@ -2165,9 +2171,10 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
                    X509_verify_cert_error_string(lerr));
         }
         else
-          cert_problem = "SSL certificate problem, verify that the CA cert is"
-            " OK.";
-
+          /* strcpy() is fine here as long as the string fits within
+             error_buffer */
+          strcpy(error_buffer,
+                 "SSL certificate problem, check your CA cert");
         break;
       default:
         result = CURLE_SSL_CONNECT_ERROR;
@@ -2188,7 +2195,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
       }
 
       /* Could be a CERT problem */
-      failf(data, "%s%s", cert_problem ? cert_problem : "", error_buffer);
+      failf(data, "%s", error_buffer);
 
       return result;
     }

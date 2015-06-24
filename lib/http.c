@@ -427,8 +427,8 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
     /* figure out how much data we are expected to send */
     switch(data->set.httpreq) {
     case HTTPREQ_POST:
-      if(data->set.postfieldsize != -1)
-        expectsend = data->set.postfieldsize;
+      if(data->state.infilesize != -1)
+        expectsend = data->state.infilesize;
       else if(data->set.postfields)
         expectsend = (curl_off_t)strlen(data->set.postfields);
       break;
@@ -2317,20 +2317,12 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                      te
       );
 
-  /*
-   * Free userpwd for Negotiate/NTLM. Cannot reuse as it is associated with
-   * the connection and shouldn't be repeated over it either.
-   */
-  switch (data->state.authhost.picked) {
-  case CURLAUTH_NEGOTIATE:
-  case CURLAUTH_NTLM:
-  case CURLAUTH_NTLM_WB:
-    Curl_safefree(conn->allocptr.userpwd);
-    break;
-  }
+  /* clear userpwd to avoid re-using credentials from re-used connections */
+  Curl_safefree(conn->allocptr.userpwd);
 
   /*
-   * Same for proxyuserpwd
+   * Free proxyuserpwd for Negotiate/NTLM. Cannot reuse as it is associated
+   * with the connection and shouldn't be repeated over it either.
    */
   switch (data->state.authproxy.picked) {
   case CURLAUTH_NEGOTIATE:
@@ -2577,8 +2569,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       postsize = 0;
     else {
       /* figure out the size of the postfields */
-      postsize = (data->set.postfieldsize != -1)?
-        data->set.postfieldsize:
+      postsize = (data->state.infilesize != -1)?
+        data->state.infilesize:
         (data->set.postfields? (curl_off_t)strlen(data->set.postfields):-1);
     }
 
@@ -2701,7 +2693,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           return result;
       }
 
-      else if(data->set.postfieldsize) {
+      else if(data->state.infilesize) {
         /* set the upload size to the progress meter */
         Curl_pgrsSetUploadSize(data, postsize?postsize:-1);
 

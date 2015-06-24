@@ -324,6 +324,9 @@ struct ssl_connect_data {
   size_t encdata_offset, decdata_offset;
   unsigned char *encdata_buffer, *decdata_buffer;
   unsigned long req_flags, ret_flags;
+  CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
+  bool recv_sspi_close_notify; /* true if connection closed by close_notify */
+  bool recv_connection_closed; /* true if connection closed, regardless how */
 #endif /* USE_SCHANNEL */
 #ifdef USE_DARWINSSL
   SSLContextRef ssl_ctx;

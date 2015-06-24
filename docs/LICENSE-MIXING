@@ -23,29 +23,29 @@ libcurl http://curl.haxx.se/docs/copyright.html
         Uses an MIT (or Modified BSD)-style license that is as liberal as
         possible.
 
-OpenSSL http://www.openssl.org/source/license.html
+OpenSSL https://www.openssl.org/source/license.html
 
         (May be used for SSL/TLS support) Uses an Original BSD-style license
         with an announcement clause that makes it "incompatible" with GPL. You
         are not allowed to ship binaries that link with OpenSSL that includes
         GPL code (unless that specific GPL code includes an exception for
         OpenSSL - a habit that is growing more and more common). If OpenSSL's
-        licensing is a problem for you, consider using GnuTLS or yassl
-        instead.
+        licensing is a problem for you, consider using another TLS library.
 
 GnuTLS  http://www.gnutls.org/
 
         (May be used for SSL/TLS support) Uses the LGPL[3] license. If this is
-        a problem for you, consider using OpenSSL instead. Also note that
+        a problem for you, consider using another TLS library. Also note that
         GnuTLS itself depends on and uses other libs (libgcrypt and
         libgpg-error) and they too are LGPL- or GPL-licensed.
 
-yassl   http://www.yassl.com/
+WolfSSL   https://www.wolfssl.com/
 
-        (May be used for SSL/TLS support) Uses the GPL[1] license. If this is
-        a problem for you, consider using OpenSSL or GnuTLS instead.
+        (May be used for SSL/TLS support) Uses the GPL[1] license or a
+        propietary license. If this is a problem for you, consider using
+        another TLS library.
 
-NSS     http://www.mozilla.org/projects/security/pki/nss/
+NSS     https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS
 
         (May be used for SSL/TLS support) Is covered by the MPL[4] license,
         the GPL[1] license and the LGPL[3] license. You may choose to license
@@ -57,13 +57,29 @@ axTLS   http://axtls.sourceforge.net/
 
         (May be used for SSL/TLS support) Uses a Modified BSD-style license.
 
+mbedTLS https://tls.mbed.org/
+
+        (May be used for SSL/TLS support) Uses the GPL[1] license or a
+        propietary license. If this is a problem for you, consider using
+        another TLS library.
+
+BoringSSL https://boringssl.googlesource.com/
+
+        (May be used for SSL/TLS support) As an OpenSSL fork, it has the same
+        license as that.
+
+libressl http://www.libressl.org/
+
+        (May be used for SSL/TLS support) As an OpenSSL fork, it has the same
+        license as that.
+
 c-ares  http://daniel.haxx.se/projects/c-ares/license.html
 
         (Used for asynchronous name resolves) Uses an MIT license that is very
         liberal and imposes no restrictions on any other library or part you
         may link with.
 
-zlib    http://www.gzip.org/zlib/zlib_license.html
+zlib    http://www.zlib.net/zlib_license.html
 
         (Used for compressed Transfer-Encoding support) Uses an MIT-style
         license that shouldn't collide with any other library.
@@ -73,12 +89,12 @@ MIT Kerberos http://web.mit.edu/kerberos/www/dist/
         (May be used for GSS support) MIT licensed, that shouldn't collide
         with any other parts.
 
-Heimdal http://www.pdc.kth.se/heimdal/
+Heimdal http://www.h5l.org
 
         (May be used for GSS support) Heimdal is Original BSD licensed with
         the announcement clause.
 
-GNU GSS http://www.gnu.org/software/gss/
+GNU GSS https://www.gnu.org/software/gss/
 
         (May be used for GSS support) GNU GSS is GPL licensed. Note that you
         may not distribute binary curl packages that uses this if you build
@@ -105,10 +121,10 @@ libssh2 http://www.libssh2.org/
         (Used for scp and sftp support) libssh2 uses a Modified BSD-style
         license.
 
-[1] = GPL - GNU General Public License: http://www.gnu.org/licenses/gpl.html
-[2] = http://www.fsf.org/licenses/gpl-faq.html#GPLIncompatibleLibs details on
+[1] = GPL - GNU General Public License: https://www.gnu.org/licenses/gpl.html
+[2] = https://www.gnu.org/licenses/gpl-faq.html#GPLIncompatibleLibs details on
       how to write such an exception to the GPL
 [3] = LGPL - GNU Lesser General Public License:
-      http://www.gnu.org/licenses/lgpl.html
+      https://www.gnu.org/licenses/lgpl.html
 [4] = MPL - Mozilla Public License:
-      http://www.mozilla.org/MPL/
+      https://www.mozilla.org/MPL/

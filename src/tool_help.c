@@ -174,10 +174,8 @@ static const char *const helptext[] = {
   "     --proxy-negotiate  "
   "Use HTTP Negotiate (SPNEGO) authentication on the proxy (H)",
   "     --proxy-ntlm    Use NTLM authentication on the proxy (H)",
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   "     --proxy-service-name NAME  SPNEGO proxy service name",
   "     --service-name NAME  SPNEGO service name",
-#endif
   " -U, --proxy-user USER[:PASSWORD]  Proxy user and password",
   "     --proxy1.0 HOST[:PORT]  Use HTTP/1.0 proxy on given port",
   " -p, --proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
@@ -206,10 +204,8 @@ static const char *const helptext[] = {
   "     --socks5 HOST[:PORT]  SOCKS5 proxy on given host + port",
   "     --socks5-hostname HOST[:PORT]  "
   "SOCKS5 proxy, pass host name to proxy",
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   "     --socks5-gssapi-service NAME  SOCKS5 proxy service name for GSS-API",
   "     --socks5-gssapi-nec  Compatibility with NEC SOCKS5 server",
-#endif
   " -Y, --speed-limit RATE  "
   "Stop transfers below RATE for 'speed-time' secs",
   " -y, --speed-time SECONDS  "
@@ -224,7 +220,7 @@ static const char *const helptext[] = {
   " -t, --telnet-option OPT=VAL  Set telnet option",
   "     --tftp-blksize VALUE  Set TFTP BLKSIZE option (must be >512)",
   " -z, --time-cond TIME  Transfer based on a time condition",
-  " -1, --tlsv1         Use => TLSv1 (SSL)",
+  " -1, --tlsv1         Use >= TLSv1 (SSL)",
   "     --tlsv1.0       Use TLSv1.0 (SSL)",
   "     --tlsv1.1       Use TLSv1.1 (SSL)",
   "     --tlsv1.2       Use TLSv1.2 (SSL)",

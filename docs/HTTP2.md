@@ -1,7 +1,7 @@
 HTTP/2 with curl
 ================
 
-[HTTP/2 Spec](http://www.rfc-editor.org/rfc/rfc7540.txt)
+[HTTP/2 Spec](https://www.rfc-editor.org/rfc/rfc7540.txt)
 [http2 explained](http://daniel.haxx.se/http2/)
 
 Build prerequisites
@@ -95,7 +95,7 @@ same origin server that you get the response from. A browser or long-living
 client can use that hint to create a new connection asynchronously.  For
 libcurl, we may introduce a way to bring such clues to the applicaton and/or
 let a subsequent request use the alternate route
-automatically. [Spec](http://tools.ietf.org/html/draft-ietf-httpbis-alt-svc-05)
+automatically. [Spec](https://tools.ietf.org/html/draft-ietf-httpbis-alt-svc-05)
 
 TODO
 ----

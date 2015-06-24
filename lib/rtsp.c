@@ -322,7 +322,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   if(!p_session_id &&
      (rtspreq & ~(RTSPREQ_OPTIONS | RTSPREQ_DESCRIBE | RTSPREQ_SETUP))) {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
-          p_request ? p_request : "");
+          p_request);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
@@ -440,8 +440,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     Curl_add_bufferf(req_buffer,
                      "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
                      "CSeq: %ld\r\n", /* CSeq */
-                     (p_request ? p_request : ""), p_stream_uri,
-                     rtsp->CSeq_sent);
+                     p_request, p_stream_uri, rtsp->CSeq_sent);
   if(result)
     return result;
 
@@ -495,8 +494,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 
     }
     else {
-      postsize = (data->set.postfieldsize != -1)?
-        data->set.postfieldsize:
+      postsize = (data->state.infilesize != -1)?
+        data->state.infilesize:
         (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
       data->set.httpreq = HTTPREQ_POST;
     }

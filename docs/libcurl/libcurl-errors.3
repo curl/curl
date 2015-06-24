@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -74,7 +74,7 @@ After having sent the FTP password to the server, libcurl expects a proper
 reply. This error code indicates that an unexpected code was returned.
 .IP "CURLE_FTP_ACCEPT_TIMEOUT (12)"
 During an active FTP session while waiting for the server to connect, the
-\fICURLOPT_ACCEPTTIMOUT_MS(3)\fP (or the internal default) timeout expired.
+\fICURLOPT_ACCEPTTIMEOUT_MS(3)\fP (or the internal default) timeout expired.
 .IP "CURLE_FTP_WEIRD_PASV_REPLY (13)"
 libcurl failed to get a sensible result back from the server as a response to
 either a PASV or a EPSV command. The server is flawed.

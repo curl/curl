@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,11 +33,10 @@
 #include <unistd.h>
 #endif
 
-/*
- * This example shows an FTP upload, with a rename of the file just after
- * a successful upload.
- *
- * Example based on source code provided by Erick Nuwendam. Thanks!
+/* <DESC>
+ * Performs an FTP upload and renames the file just after a successful
+ * transfer.
+ * </DESC>
  */
 
 #define LOCAL_FILE      "/tmp/uploadthis.txt"
