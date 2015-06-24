@@ -1315,6 +1315,11 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   Curl_safefree(data->info.wouldredirect);
   data->info.wouldredirect = NULL;
 
+  if(data->set.httpreq == HTTPREQ_PUT)
+    data->state.infilesize = data->set.filesize;
+  else
+    data->state.infilesize = data->set.postfieldsize;
+
   /* If there is a list of cookie files to read, do it now! */
   if(data->change.cookielist)
     Curl_cookie_loadfiles(data);
