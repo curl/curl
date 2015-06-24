@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -39,6 +39,9 @@ response codes will slip through, especially when authentication is involved
 You might get some amounts of headers transferred before this situation is
 detected, like when a "100-continue" is received as a response to a POST/PUT
 and a 401 or 407 is received immediately afterwards.
+
+When this option is used and an error is detected, it will cause the
+connection to get closed.
 .SH DEFAULT
 0, do not fail on error
 .SH PROTOCOLS
