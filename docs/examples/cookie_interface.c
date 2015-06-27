@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,7 +19,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* This example shows usage of simple cookie interface. */
+/* <DESC>
+ * Import and export cookies with COOKIELIST.
+ * </DESC>
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -96,7 +99,12 @@ main(void)
       return 1;
     }
 
-    /* HTTP-header style cookie */
+    /* HTTP-header style cookie. If you use the Set-Cookie format and don't
+    specify a domain then the cookie is sent for any domain and will not be
+    modified, likely not what you intended. Starting in 7.43.0 any-domain
+    cookies will not be exported either. For more information refer to the
+    CURLOPT_COOKIELIST documentation.
+    */
     snprintf(nline, sizeof(nline),
       "Set-Cookie: OLD_PREF=3d141414bf4209321; "
       "expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.google.com");

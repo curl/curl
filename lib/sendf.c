@@ -551,7 +551,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
   ssize_t nread = 0;
   size_t bytesfromsocket = 0;
   char *buffertofill = NULL;
-  bool pipelining = Curl_multi_pipeline_enabled(conn->data->multi);
+  bool pipelining = Curl_pipeline_wanted(conn->data->multi, CURLPIPE_HTTP1);
 
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
      If it is the second socket, we set num to 1. Otherwise to 0. This lets

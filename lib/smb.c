@@ -783,9 +783,15 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
     off = Curl_read16_le(((unsigned char *) msg) +
                          sizeof(struct smb_header) + 13);
     if(len > 0) {
-      result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                                 (char *)msg + off + sizeof(unsigned int),
-                                 len);
+      struct smb_conn *smbc = &conn->proto.smbc;
+      if(off + sizeof(unsigned int) + len > smbc->got) {
+        failf(conn->data, "Invalid input packet");
+        result = CURLE_RECV_ERROR;
+      }
+      else
+        result = Curl_client_write(conn, CLIENTWRITE_BODY,
+                                   (char *)msg + off + sizeof(unsigned int),
+                                   len);
       if(result) {
         req->result = result;
         next_state = SMB_CLOSE;

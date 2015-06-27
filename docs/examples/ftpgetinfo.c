@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,9 +24,9 @@
 
 #include <curl/curl.h>
 
-/*
- * This is an example showing how to check a single file's size and mtime
- * from an FTP server.
+/* <DESC>
+ * Checks a single file's size and mtime from an FTP server.
+ * </DESC>
  */
 
 static size_t throw_away(void *ptr, size_t size, size_t nmemb, void *data)

@@ -109,7 +109,7 @@ int Curl_parsenetrc(const char *host,
     netrc_alloc = TRUE;
   }
 
-  file = fopen(netrcfile, "r");
+  file = fopen(netrcfile, FOPEN_READTEXT);
   if(netrc_alloc)
     free(netrcfile);
   if(file) {
@@ -136,6 +136,10 @@ int Curl_parsenetrc(const char *host,
                after this we need to search for 'login' and
                'password'. */
             state=HOSTFOUND;
+          }
+          else if(Curl_raw_equal("default", tok)) {
+            state=HOSTVALID;
+            retcode=0; /* we did find our host */
           }
           break;
         case HOSTFOUND:

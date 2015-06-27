@@ -46,3 +46,6 @@ CHANGES.dist
 .cproject
 .settings
 .dirstamp
+test-driver
+/build/
+/builds/

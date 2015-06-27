@@ -151,7 +151,7 @@ static curl_off_t vms_realfilesize(const char * name,
   int ret_stat;
   FILE * file;
 
-  file = fopen(name, "r");
+  file = fopen(name, "r"); /* VMS */
   if(file == NULL) {
     return 0;
   }
@@ -1204,21 +1204,26 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC,
                          (long)config->ftp_ssl_ccc_mode);
 
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-        {
-          /* TODO: Make this a run-time check instead of compile-time one. */
+        /* new in curl 7.19.4 */
+        if(config->socks5_gssapi_service)
+          my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_SERVICE,
+                        config->socks5_gssapi_service);
 
-          /* new in curl 7.19.4 */
-          if(config->socks5_gssapi_service)
-            my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_SERVICE,
-                          config->socks5_gssapi_service);
+        /* new in curl 7.19.4 */
+        if(config->socks5_gssapi_nec)
+          my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_NEC,
+                        config->socks5_gssapi_nec);
 
-          /* new in curl 7.19.4 */
-          if(config->socks5_gssapi_nec)
-            my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_NEC,
-                          config->socks5_gssapi_nec);
-        }
-#endif
+        /* new in curl 7.43.0 */
+        if(config->proxy_service_name)
+          my_setopt_str(curl, CURLOPT_PROXY_SERVICE_NAME,
+                        config->proxy_service_name);
+
+        /* new in curl 7.43.0 */
+        if(config->service_name)
+          my_setopt_str(curl, CURLOPT_SERVICE_NAME,
+                        config->service_name);
+
         /* curl 7.13.0 */
         my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
 
@@ -1388,6 +1393,18 @@ static CURLcode operate_do(struct GlobalConfig *global,
 #endif
           result = curl_easy_perform(curl);
 
+          if(!result && !outs.stream && !outs.bytes) {
+            /* we have received no data despite the transfer was successful
+               ==> force cration of an empty output file (if an output file
+               was specified) */
+            long cond_unmet = 0L;
+            /* do not create (or even overwrite) the file in case we get no
+               data because of unmet condition */
+            curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &cond_unmet);
+            if(!cond_unmet && !tool_create_output_file(&outs))
+              result = CURLE_WRITE_ERROR;
+          }
+
           if(outs.is_cd_filename && outs.stream && !global->mute &&
              outs.filename)
             printf("curl: Saved to filename '%s'\n", outs.filename);
@@ -1474,7 +1491,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 if(retry_sleep > RETRY_SLEEP_MAX)
                   retry_sleep = RETRY_SLEEP_MAX;
               }
-              if(outs.bytes && outs.filename) {
+              if(outs.bytes && outs.filename && outs.stream) {
                 /* We have written data to a output file, we truncate file
                  */
                 if(!global->mute)

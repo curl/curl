@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -49,6 +49,55 @@ added handle fails very quickly, it may never be counted as a running_handle.
 
 When \fIrunning_handles\fP is set to zero (0) on the return of this function,
 there is no longer any transfers in progress.
+.SH EXAMPLE
+.nf
+#ifdef _WIN32
+#define SHORT_SLEEP Sleep(100)
+#else
+#define SHORT_SLEEP usleep(100000)
+#endif
+
+fd_set fdread;
+fd_set fdwrite;
+fd_set fdexcep;
+int maxfd = -1;
+
+long curl_timeo;
+
+curl_multi_timeout(multi_handle, &curl_timeo);
+if(curl_timeo < 0)
+  curl_timeo = 1000;
+
+timeout.tv_sec = curl_timeo / 1000;
+timeout.tv_usec = (curl_timeo % 1000) * 1000;
+
+FD_ZERO(&fdread);
+FD_ZERO(&fdwrite);
+FD_ZERO(&fdexcep);
+
+/* get file descriptors from the transfers */
+mc = curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+
+if(maxfd == -1) {
+  SHORT_SLEEP;
+  rc = 0;
+}
+else
+  rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+
+switch(rc) {
+case -1:
+  /* select error */
+  break;
+case 0:
+default:
+  /* timeout or readable/writable sockets */
+  curl_multi_perform(multi_handle, &still_running);
+  break;
+}
+
+/* if there are still transfers, loop! */
+.fi
 .SH "RETURN VALUE"
 CURLMcode type, general libcurl multi interface error code.
 

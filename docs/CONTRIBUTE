@@ -203,7 +203,7 @@
 
  You need to first checkout the repository:
 
-     git clone git://github.com/bagder/curl.git
+     git clone https://github.com/bagder/curl.git
 
  You then proceed and edit all the files you like and you commit them to your
  local repository:
@@ -245,8 +245,8 @@
 
  For unix-like operating systems:
 
-     http://www.gnu.org/software/patch/patch.html
-     http://www.gnu.org/directory/diffutils.html
+     https://savannah.gnu.org/projects/patch/
+     https://www.gnu.org/software/diffutils/
 
  For Windows:
 

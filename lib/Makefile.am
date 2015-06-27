@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,10 +21,6 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-DOCS = README.encoding README.memoryleak README.ares README.curlx	\
- README.hostip README.multi_socket README.httpauth README.pipelining    \
- README.curl_off_t README.pingpong
-
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
 EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 config-win32.h	\
@@ -32,9 +28,9 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 config-win32.h	\
  makefile.dj config-dos.h libcurl.plist libcurl.rc config-amigaos.h	\
  makefile.amiga Makefile.netware nwlib.c nwos.c config-win32ce.h	\
  config-os400.h setup-os400.h config-symbian.h Makefile.Watcom		\
- config-tpf.h $(DOCS) mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)	\
+ config-tpf.h mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)	\
  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl	\
- objnames-test08.sh objnames-test10.sh objnames.inc
+ objnames-test08.sh objnames-test10.sh objnames.inc checksrc.whitelist
 
 lib_LTLIBRARIES = libcurl.la
 

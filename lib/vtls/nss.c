@@ -56,6 +56,7 @@
 #include <base64.h>
 #include <cert.h>
 #include <prerror.h>
+#include <keyhi.h>        /* for SECKEY_DestroyPublicKey() */
 
 #define NSSVERNUM ((NSS_VMAJOR<<16)|(NSS_VMINOR<<8)|NSS_VPATCH)
 
@@ -724,6 +725,7 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
   }
 }
 
+#if NSSVERNUM >= 0x030f04 /* 3.15.4 */
 static SECStatus CanFalseStartCallback(PRFileDesc *sock, void *client_data,
                                        PRBool *canFalseStart)
 {
@@ -781,6 +783,7 @@ static SECStatus CanFalseStartCallback(PRFileDesc *sock, void *client_data,
 end:
   return SECSuccess;
 }
+#endif
 
 static void display_cert_info(struct SessionHandle *data,
                               CERTCertificate *cert)
@@ -941,6 +944,53 @@ static SECStatus check_issuer_cert(PRFileDesc *sock,
   CERT_DestroyCertificate(issuer);
   CERT_DestroyCertificate(cert_issuer);
   return res;
+}
+
+static CURLcode cmp_peer_pubkey(struct ssl_connect_data *connssl,
+                                const char *pinnedpubkey)
+{
+  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+  struct SessionHandle *data = connssl->data;
+  CERTCertificate *cert;
+
+  if(!pinnedpubkey)
+    /* no pinned public key specified */
+    return CURLE_OK;
+
+  /* get peer certificate */
+  cert = SSL_PeerCertificate(connssl->handle);
+  if(cert) {
+    /* extract public key from peer certificate */
+    SECKEYPublicKey *pubkey = CERT_ExtractPublicKey(cert);
+    if(pubkey) {
+      /* encode the public key as DER */
+      SECItem *cert_der = PK11_DEREncodePublicKey(pubkey);
+      if(cert_der) {
+        /* compare the public key with the pinned public key */
+        result = Curl_pin_peer_pubkey(pinnedpubkey,
+                                      cert_der->data,
+                                      cert_der->len);
+        SECITEM_FreeItem(cert_der, PR_TRUE);
+      }
+      SECKEY_DestroyPublicKey(pubkey);
+    }
+    CERT_DestroyCertificate(cert);
+  }
+
+  /* report the resulting status */
+  switch(result) {
+  case CURLE_OK:
+    infof(data, "pinned public key verified successfully!\n");
+    break;
+  case CURLE_SSL_PINNEDPUBKEYNOTMATCH:
+    failf(data, "failed to verify pinned public key");
+    break;
+  default:
+    /* OOM, etc. */
+    break;
+  }
+
+  return result;
 }
 
 /**
@@ -1706,7 +1756,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     goto error;
 #endif
 
-#ifdef SSL_ENABLE_FALSE_START
+#if NSSVERNUM >= 0x030f04 /* 3.15.4 */
   if(data->set.ssl.falsestart) {
     if(SSL_OptionSet(connssl->handle, SSL_ENABLE_FALSE_START, PR_TRUE)
         != SECSuccess)
@@ -1805,6 +1855,11 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
       infof(data, "SSL certificate issuer check ok\n");
     }
   }
+
+  result = cmp_peer_pubkey(connssl, data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
+  if(result)
+    /* status already printed */
+    goto error;
 
   return CURLE_OK;
 
@@ -1996,7 +2051,7 @@ bool Curl_nss_cert_status_request(void)
 }
 
 bool Curl_nss_false_start(void) {
-#ifdef SSL_ENABLE_FALSE_START
+#if NSSVERNUM >= 0x030f04 /* 3.15.4 */
   return TRUE;
 #else
   return FALSE;

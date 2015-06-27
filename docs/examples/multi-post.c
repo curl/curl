@@ -64,7 +64,7 @@ int main(void)
   curl = curl_easy_init();
   multi_handle = curl_multi_init();
 
-  /* initalize custom header list (stating that Expect: 100-continue is not
+  /* initialize custom header list (stating that Expect: 100-continue is not
      wanted */
   headerlist = curl_slist_append(headerlist, buf);
   if(curl && multi_handle) {

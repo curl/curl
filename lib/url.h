@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +27,7 @@
  * Prototypes for library-wide functions provided by url.c
  */
 
+CURLcode Curl_init_do(struct SessionHandle *data, struct connectdata *conn);
 CURLcode Curl_open(struct SessionHandle **curl);
 CURLcode Curl_init_userdefined(struct UserDefined *set);
 CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
@@ -69,6 +70,9 @@ void Curl_close_connections(struct SessionHandle *data);
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE "rcmd" /* default socks5 gssapi
                                                      service */
+#define CURL_DEFAULT_PROXY_SERVICE_NAME "HTTP" /* default negotiate proxy
+                                                  service */
+#define CURL_DEFAULT_SERVICE_NAME "HTTP"  /* default negotiate service */
 
 CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex);
 

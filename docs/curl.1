@@ -39,8 +39,7 @@ resume, Metalink, and more. As you will see below, the number of features will
 make your head spin!
 
 curl is powered by libcurl for all transfer-related features. See
-.BR libcurl (3)
-for details.
+\fIlibcurl(3)\fP for details.
 .SH URL
 The URL syntax is protocol-dependent. You'll find a detailed description in
 RFC 3986.
@@ -269,11 +268,11 @@ If this option is used several times, the last one will be used.
 .IP "--ciphers <list of ciphers>"
 (SSL) Specifies which ciphers to use in the connection. The list of ciphers
 must specify valid ciphers. Read up on SSL cipher list details on this URL:
-\fIhttp://www.openssl.org/docs/apps/ciphers.html\fP
+\fIhttps://www.openssl.org/docs/apps/ciphers.html\fP
 
 NSS ciphers are done differently than OpenSSL and GnuTLS. The full list of NSS
 ciphers is in the NSSCipherSuite entry at this URL:
-\fIhttp://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html#Directives\fP
+\fIhttps://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html#Directives\fP
 
 If this option is used several times, the last one will be used.
 .IP "--compressed"
@@ -315,9 +314,10 @@ presses the submit button. This will cause curl to pass the data to the server
 using the content-type application/x-www-form-urlencoded.  Compare to
 \fI-F, --form\fP.
 
-\fI-d, --data\fP is the same as \fI--data-ascii\fP. To post data purely binary,
-you should instead use the \fI--data-binary\fP option. To URL-encode the value
-of a form field you may use \fI--data-urlencode\fP.
+\fI-d, --data\fP is the same as \fI--data-ascii\fP. \fI--data-raw\fP is almost
+the same but does not have a special interpretation of the @ character. To
+post data purely binary, you should instead use the \fI--data-binary\fP option.
+To URL-encode the value of a form field you may use \fI--data-urlencode\fP.
 
 If any of these options is used more than once on the same command line, the
 data pieces specified will be merged together with a separating
@@ -329,7 +329,8 @@ read the data from, or - if you want curl to read the data from
 stdin. Multiple files can also be specified. Posting data from a file
 named 'foobar' would thus be done with \fI--data\fP @foobar. When --data is
 told to read from a file like that, carriage returns and newlines will be
-stripped out.
+stripped out. If you don't want the @ character to have a special
+interpretation use \fI--data-raw\fP instead.
 .IP "-D, --dump-header <file>"
 Write the protocol headers to the specified file.
 
@@ -354,6 +355,10 @@ and carriage returns are preserved and conversions are never done.
 
 If this option is used several times, the ones following the first will append
 data as described in \fI-d, --data\fP.
+.IP "--data-raw <data>"
+(HTTP) This posts data similarly to \fI--data\fP but without the special
+interpretation of the @ character. See \fI-d, --data\fP.
+(Added in 7.43.0)
 .IP "--data-urlencode <data>"
 (HTTP) This posts data, similar to the other --data options with the exception
 that this performs URL-encoding. (Added in 7.18.0)
@@ -548,10 +553,10 @@ indicating its identity. A public key is extracted from this certificate and
 if it does not exactly match the public key provided to this option, curl will
 abort the connection before sending or receiving any data.
 
-This is currently only implemented in the OpenSSL, GnuTLS and GSKit backends.
+Added in 7.39.0 for OpenSSL, GnuTLS and GSKit. Added in 7.43.0 for NSS and
+wolfSSL/CyaSSL. Other SSL backends not supported.
 
 If this option is used several times, the last one will be used.
-(Added in 7.39.0)
 .IP "--cert-status"
 (SSL) Tells curl to verify the status of the server certificate by using the
 Certificate Status Request (aka. OCSP stapling) TLS extension.
@@ -661,6 +666,7 @@ curl does one CWD with the full target directory and then operates on the file
 \&"normally" (like in the multicwd case). This is somewhat more standards
 compliant than 'nocwd' but without the full penalty of 'multicwd'.
 .RE
+.IP
 (Added in 7.15.1)
 .IP "--ftp-pasv"
 (FTP) Use passive mode for the data connection. Passive is the internal default
@@ -1053,13 +1059,10 @@ in Metalink file, hash check will fail.
 Makes curl scan the \fI.netrc\fP (\fI_netrc\fP on Windows) file in the user's
 home directory for login name and password. This is typically used for FTP on
 Unix. If used with HTTP, curl will enable user authentication. See
-.BR netrc(4)
-or
-.BR ftp(1)
-for details on the file format. Curl will not complain if that file
-doesn't have the right permissions (it should not be either world- or
-group-readable). The environment variable "HOME" is used to find the home
-directory.
+\fInetrc(5)\fP \fIftp(1)\fP for details on the file format. Curl will not
+complain if that file doesn't have the right permissions (it should not be
+either world- or group-readable). The environment variable "HOME" is used to
+find the home directory.
 
 A quick and very simple example of how to setup a \fI.netrc\fP to allow curl
 to FTP to the machine host.domain.com with user name \&'myself' and password
@@ -1221,7 +1224,7 @@ i.e "my.host.domain" to specify the machine
 make curl pick the same IP address that is already used for the control
 connection
 .RE
-
+.IP
 If this option is used several times, the last one will be used. Disable the
 use of PORT with \fI--ftp-pasv\fP. Disable the attempt to use the EPRT command
 instead of PORT by using \fI--disable-eprt\fP. EPRT is really PORT++.
@@ -1326,6 +1329,11 @@ with a remote host. (Added in 7.17.1)
 .IP "--proxy-ntlm"
 Tells curl to use HTTP NTLM authentication when communicating with the given
 proxy. Use \fI--ntlm\fP for enabling NTLM with a remote host.
+.IP "--proxy-service-name <servicename>"
+This option allows you to change the service name for proxy negotiation.
+
+Examples: --proxy-negotiate proxy-name \fI--proxy-service-name\fP sockd would use
+sockd/proxy-name.  (Added in 7.43.0).
 .IP "--proxy1.0 <proxyhost[:port]>"
 Use the specified HTTP 1.0 proxy. If the port number is not specified, it is
 assumed at port 1080.
@@ -1423,7 +1431,7 @@ specifies 300 bytes from offset 500(H)
 .B 100-199,500-599
 specifies two separate 100-byte ranges(*)(H)
 .RE
-
+.IP
 (*) = NOTE that this will cause the server to reply with a multipart
 response!
 
@@ -1507,6 +1515,11 @@ terminal/stdout unless you redirect it.
 .IP "--sasl-ir"
 Enable initial response in SASL authentication.
 (Added in 7.31.0)
+.IP "--service-name <servicename>"
+This option allows you to change the service name for SPNEGO.
+
+Examples: --negotiate \fI--service-name\fP sockd would use
+sockd/server-name.  (Added in 7.43.0).
 .IP "-S, --show-error"
 When used with \fI-s\fP it makes curl show an error message if it fails.
 .IP "--ssl"
@@ -1708,7 +1721,7 @@ impossible to use a colon in the user name with this option. The password can,
 still.
 
 When using Kerberos V5 with a Windows based server you should include the
-Windows domain name in the user name, in order for the server to succesfully
+Windows domain name in the user name, in order for the server to successfully
 obtain a Kerberos Ticket. If you don't then the initial authentication
 handshake may fail.
 
@@ -1882,7 +1895,7 @@ displayed with millisecond resolution.
 The URL that was fetched last. This is most meaningful if you've told curl
 to follow location: headers.
 .RE
-
+.IP
 If this option is used several times, the last one will be used.
 .IP "-x, --proxy <[protocol://][user:password@]proxyhost[:port]>"
 Use the specified proxy.

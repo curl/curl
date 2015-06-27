@@ -32,7 +32,6 @@
 #include "pipeline.h"
 #include "sendf.h"
 #include "rawstr.h"
-#include "bundles.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -92,6 +91,15 @@ bool Curl_pipeline_penalized(struct SessionHandle *data,
   return FALSE;
 }
 
+static CURLcode addHandleToPipeline(struct SessionHandle *data,
+                                    struct curl_llist *pipeline)
+{
+  if(!Curl_llist_insert_next(pipeline, pipeline->tail, data))
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
+}
+
+
 CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
                                      struct connectdata *conn)
 {
@@ -101,11 +109,11 @@ CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
 
   pipeline = conn->send_pipe;
 
-  result = Curl_addHandleToPipeline(handle, pipeline);
+  result = addHandleToPipeline(handle, pipeline);
 
   if(pipeline == conn->send_pipe && sendhead != conn->send_pipe->head) {
     /* this is a new one as head, expire it */
-    conn->writechannel_inuse = FALSE; /* not in use yet */
+    Curl_pipeline_leave_write(conn); /* not in use yet */
     Curl_expire(conn->send_pipe->head->ptr, 1);
   }
 
@@ -136,7 +144,7 @@ void Curl_move_handle_from_send_to_recv_pipe(struct SessionHandle *handle,
       if(conn->send_pipe->head) {
         /* Since there's a new easy handle at the start of the send pipeline,
            set its timeout value to 1ms to make it trigger instantly */
-        conn->writechannel_inuse = FALSE; /* not used now */
+        Curl_pipeline_leave_write(conn); /* not used now */
 #ifdef DEBUGBUILD
         infof(conn->data, "%p is at send pipe head B!\n",
               (void *)conn->send_pipe->head->ptr);
@@ -311,6 +319,93 @@ CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
 
   return CURLM_OK;
 }
+
+static bool pipe_head(struct SessionHandle *data,
+                      struct curl_llist *pipeline)
+{
+  struct curl_llist_element *curr = pipeline->head;
+  if(curr)
+    return (curr->ptr == data) ? TRUE : FALSE;
+
+  return FALSE;
+}
+
+/* returns TRUE if the given handle is head of the recv pipe */
+bool Curl_recvpipe_head(struct SessionHandle *data,
+                        struct connectdata *conn)
+{
+  return pipe_head(data, conn->recv_pipe);
+}
+
+/* returns TRUE if the given handle is head of the send pipe */
+bool Curl_sendpipe_head(struct SessionHandle *data,
+                        struct connectdata *conn)
+{
+  return pipe_head(data, conn->send_pipe);
+}
+
+
+/*
+ * Check if the write channel is available and this handle as at the head,
+ * then grab the channel and return TRUE.
+ *
+ * If not available, return FALSE.
+ */
+
+bool Curl_pipeline_checkget_write(struct SessionHandle *data,
+                                  struct connectdata *conn)
+{
+  if(conn->bits.multiplex)
+    /* when multiplexing, we can use it at once */
+    return TRUE;
+
+  if(!conn->writechannel_inuse && Curl_sendpipe_head(data, conn)) {
+    /* Grab the channel */
+    conn->writechannel_inuse = TRUE;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+
+/*
+ * Check if the read channel is available and this handle as at the head, then
+ * grab the channel and return TRUE.
+ *
+ * If not available, return FALSE.
+ */
+
+bool Curl_pipeline_checkget_read(struct SessionHandle *data,
+                                 struct connectdata *conn)
+{
+  if(conn->bits.multiplex)
+    /* when multiplexing, we can use it at once */
+    return TRUE;
+
+  if(!conn->readchannel_inuse && Curl_recvpipe_head(data, conn)) {
+    /* Grab the channel */
+    conn->readchannel_inuse = TRUE;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/*
+ * The current user of the pipeline write channel gives it up.
+ */
+void Curl_pipeline_leave_write(struct connectdata *conn)
+{
+  conn->writechannel_inuse = FALSE;
+}
+
+/*
+ * The current user of the pipeline read channel gives it up.
+ */
+void Curl_pipeline_leave_read(struct connectdata *conn)
+{
+  conn->readchannel_inuse = FALSE;
+}
+
 
 #if 0
 void print_pipeline(struct connectdata *conn)

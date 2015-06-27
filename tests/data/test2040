@@ -1,0 +1,69 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Basic auth
+</keywords>
+</info>
+# Server-side
+<reply>
+
+<!-- First request has Basic auth, right password -->
+<data100>
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data100>
+
+<!-- Second request with Basic auth disabled -->
+<data200>
+HTTP/1.1 401 Sorry wrong password (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+
+This is a bad password page!
+</data200>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP Basic authorization, then without authorization
+</name>
+<command option="no-output,no-include">
+-u testuser:testpass http://%HOSTIP:%HTTPPORT/20400100 --next --no-basic http://%HOSTIP:%HTTPPORT/20400200
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /20400100 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Accept: */*
+
+GET /20400200 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout>
+Finally, this is the real page!
+This is a bad password page!
+</stdout>
+</verify>
+</testcase>

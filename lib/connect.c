@@ -1166,8 +1166,11 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     conn->tempaddr[0] = conn->tempaddr[0]->ai_next;
   }
 
-  if(conn->tempsock[0] == CURL_SOCKET_BAD)
+  if(conn->tempsock[0] == CURL_SOCKET_BAD) {
+    if(!result)
+      result = CURLE_COULDNT_CONNECT;
     return result;
+  }
 
   data->info.numconnects++; /* to track the number of connections made */
 
@@ -1214,8 +1217,8 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
     find.found = FALSE;
 
     Curl_conncache_foreach(data->multi_easy?
-                           data->multi_easy->conn_cache:
-                           data->multi->conn_cache, &find, conn_is_conn);
+                           &data->multi_easy->conn_cache:
+                           &data->multi->conn_cache, &find, conn_is_conn);
 
     if(!find.found) {
       data->state.lastconnect = NULL;

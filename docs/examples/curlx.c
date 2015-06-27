@@ -9,7 +9,10 @@
   certificate presented during ssl session establishment.
 
 */
-
+/* <DESC>
+ * demonstrates use of SSL context callback, requires OpenSSL
+ * </DESC>
+ */
 
 /*
  * Copyright (c) 2003 The OpenEvidence Project.  All rights reserved.
@@ -490,7 +493,7 @@ int main(int argc, char **argv) {
         BIO_printf(p.errorbio,"the response has a correct mimetype : %s\n",
                    response);
       else
-        BIO_printf(p.errorbio,"the reponse doesn\'t has an acceptable "
+        BIO_printf(p.errorbio,"the response doesn\'t have an acceptable "
                    "mime type, it is %s instead of %s\n",
                    response,mimetypeaccept);
   }

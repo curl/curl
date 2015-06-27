@@ -433,6 +433,7 @@ CURLOPT_PASSWORD                7.19.1
 CURLOPT_PASV_HOST               7.12.1        7.16.0      7.15.5
 CURLOPT_PATH_AS_IS              7.42.0
 CURLOPT_PINNEDPUBLICKEY         7.39.0
+CURLOPT_PIPEWAIT                7.43.0
 CURLOPT_PORT                    7.1
 CURLOPT_POST                    7.1
 CURLOPT_POST301                 7.17.1        7.19.1
@@ -454,6 +455,7 @@ CURLOPT_PROXYPORT               7.1
 CURLOPT_PROXYTYPE               7.10
 CURLOPT_PROXYUSERNAME           7.19.1
 CURLOPT_PROXYUSERPWD            7.1
+CURLOPT_PROXY_SERVICE_NAME      7.43.0
 CURLOPT_PROXY_TRANSFER_MODE     7.18.0
 CURLOPT_PUT                     7.1
 CURLOPT_QUOTE                   7.1
@@ -477,6 +479,7 @@ CURLOPT_SASL_IR                 7.31.0
 CURLOPT_SEEKDATA                7.18.0
 CURLOPT_SEEKFUNCTION            7.18.0
 CURLOPT_SERVER_RESPONSE_TIMEOUT 7.20.0
+CURLOPT_SERVICE_NAME            7.43.0
 CURLOPT_SHARE                   7.10
 CURLOPT_SOCKOPTDATA             7.16.0
 CURLOPT_SOCKOPTFUNCTION         7.16.0
@@ -556,6 +559,9 @@ CURLPAUSE_RECV                  7.18.0
 CURLPAUSE_RECV_CONT             7.18.0
 CURLPAUSE_SEND                  7.18.0
 CURLPAUSE_SEND_CONT             7.18.0
+CURLPIPE_HTTP1                  7.43.0
+CURLPIPE_MULTIPLEX              7.43.0
+CURLPIPE_NOTHING                7.43.0
 CURLPROTO_ALL                   7.19.4
 CURLPROTO_DICT                  7.19.4
 CURLPROTO_FILE                  7.19.4
@@ -665,6 +671,7 @@ CURL_GLOBAL_WIN32               7.8.1
 CURL_HTTP_VERSION_1_0           7.9.1
 CURL_HTTP_VERSION_1_1           7.9.1
 CURL_HTTP_VERSION_2_0           7.33.0
+CURL_HTTP_VERSION_2             7.43.0
 CURL_HTTP_VERSION_NONE          7.9.1
 CURL_IPRESOLVE_V4               7.10.8
 CURL_IPRESOLVE_V6               7.10.8

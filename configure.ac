@@ -1184,6 +1184,8 @@ AC_ARG_WITH(gssapi,
   fi
 ])
 
+: ${KRB5CONFIG:="$GSSAPI_ROOT/bin/krb5-config"}
+
 save_CPPFLAGS="$CPPFLAGS"
 AC_MSG_CHECKING([if GSS-API support is requested])
 if test x"$want_gss" = xyes; then
@@ -1192,8 +1194,8 @@ if test x"$want_gss" = xyes; then
   if test -z "$GSSAPI_INCS"; then
      if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
-     elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
-        GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
+     elif test -f "$KRB5CONFIG"; then
+        GSSAPI_INCS=`$KRB5CONFIG --cflags gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
      fi
@@ -1283,10 +1285,10 @@ if test x"$want_gss" = xyes; then
            dnl into LIBS
            gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
            LIBS="$gss_libs $LIBS"
-        elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+        elif test -f "$KRB5CONFIG"; then
            dnl krb5-config doesn't have --libs-only-L or similar, put everything
            dnl into LIBS
-           gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
+           gss_libs=`$KRB5CONFIG --libs gssapi`
            LIBS="$gss_libs $LIBS"
         else
            case $host in
@@ -2045,6 +2047,9 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
       dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
       AC_CHECK_SIZEOF(long long)
 
+      dnl Versions since at least 2.6.0 may have options.h
+      AC_CHECK_HEADERS(cyassl/options.h)
+
       dnl Versions since at least 2.9.4 renamed error.h to error-ssl.h
       AC_CHECK_HEADERS(cyassl/error-ssl.h)
 
@@ -2115,56 +2120,72 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
         fi
       fi
     else
-        # Without pkg-config, we'll kludge in some defaults
-        addlib="-L$OPT_NSS/lib -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
-        addcflags="-I$OPT_NSS/include"
-        version="unknown"
-        nssprefix=$OPT_NSS
-    fi
-
-    if test -n "$addlib"; then
-
-      CLEANLIBS="$LIBS"
-      CLEANCPPFLAGS="$CPPFLAGS"
-
-      LIBS="$addlib $LIBS"
-      if test "$addcflags" != "-I/usr/include"; then
-         CPPFLAGS="$CPPFLAGS $addcflags"
-      fi
-
-      dnl The function SSL_VersionRangeSet() is needed to enable TLS > 1.0
-      AC_CHECK_LIB(nss3, SSL_VersionRangeSet,
-       [
-       AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
-       AC_SUBST(USE_NSS, [1])
-       USE_NSS="yes"
-       NSS_ENABLED=1
-       curl_ssl_msg="enabled (NSS)"
-       ],
-       [
-         LIBS="$CLEANLIBS"
-         CPPFLAGS="$CLEANCPPFLAGS"
-       ])
-
-      if test "x$USE_NSS" = "xyes"; then
-        AC_MSG_NOTICE([detected NSS version $version])
-
-        dnl needed when linking the curl tool without USE_EXPLICIT_LIB_DEPS
-        NSS_LIBS=$addlib
-        AC_SUBST([NSS_LIBS])
-
-        dnl when shared libs were found in a path that the run-time
-        dnl linker doesn't search through, we need to add it to
-        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
-        dnl due to this
-        if test "x$cross_compiling" != "xyes"; then
-          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
-          export LD_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH])
+      NSS_PCDIR="$OPT_NSS/lib/pkgconfig"
+      if test -f "$NSS_PCDIR/nss.pc"; then
+        CURL_CHECK_PKGCONFIG(nss, [$NSS_PCDIR])
+        if test "$PKGCONFIG" != "no" ; then
+          addld=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --libs-only-L nss`
+          addlib=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --libs-only-l nss`
+          addcflags=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --cflags nss`
+          version=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --modversion nss`
+          nssprefix=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --variable=prefix nss`
         fi
       fi
-
     fi
+
+    if test -z "$addlib"; then
+      # Without pkg-config, we'll kludge in some defaults
+      AC_MSG_WARN([Using hard-wired libraries and compilation flags for NSS.])
+      addld="-L$OPT_NSS/lib"
+      addlib="-lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4"
+      addcflags="-I$OPT_NSS/include"
+      version="unknown"
+      nssprefix=$OPT_NSS
+    fi
+
+    CLEANLDFLAGS="$LDFLAGS"
+    CLEANLIBS="$LIBS"
+    CLEANCPPFLAGS="$CPPFLAGS"
+
+    LDFLAGS="$addld $LDFLAGS"
+    LIBS="$addlib $LIBS"
+    if test "$addcflags" != "-I/usr/include"; then
+       CPPFLAGS="$CPPFLAGS $addcflags"
+    fi
+
+    dnl The function SSL_VersionRangeSet() is needed to enable TLS > 1.0
+    AC_CHECK_LIB(nss3, SSL_VersionRangeSet,
+     [
+     AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
+     AC_SUBST(USE_NSS, [1])
+     USE_NSS="yes"
+     NSS_ENABLED=1
+     curl_ssl_msg="enabled (NSS)"
+     ],
+     [
+       LDFLAGS="$CLEANLDFLAGS"
+       LIBS="$CLEANLIBS"
+       CPPFLAGS="$CLEANCPPFLAGS"
+     ])
+
+    if test "x$USE_NSS" = "xyes"; then
+      AC_MSG_NOTICE([detected NSS version $version])
+
+      dnl needed when linking the curl tool without USE_EXPLICIT_LIB_DEPS
+      NSS_LIBS=$addlib
+      AC_SUBST([NSS_LIBS])
+
+      dnl when shared libs were found in a path that the run-time
+      dnl linker doesn't search through, we need to add it to
+      dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+      dnl due to this
+      if test "x$cross_compiling" != "xyes"; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
+        export LD_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH])
+      fi
+
+    fi dnl NSS found
 
   fi dnl NSS not disabled
 
@@ -2820,7 +2841,9 @@ if test X"$want_h2" != Xno; then
     CPPFLAGS="$CPPFLAGS $CPP_H2"
     LIBS="$LIB_H2 $LIBS"
 
-    AC_CHECK_LIB(nghttp2, nghttp2_session_callbacks_set_send_callback,
+    # use nghttp2_option_set_no_recv_client_magic to require nghttp2
+    # >= 1.0.0
+    AC_CHECK_LIB(nghttp2, nghttp2_option_set_no_recv_client_magic,
       [
        AC_CHECK_HEADERS(nghttp2/nghttp2.h,
           curl_h2_msg="enabled (nghttp2)"

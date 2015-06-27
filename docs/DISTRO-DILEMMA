@@ -112,7 +112,7 @@ The Better License, Original BSD, GPL or LGPL?
  In Debian land, there seems to be a common opinion that LGPL is "maximally
  compatible" with apps while Original BSD is not. Like this:
 
-        http://lists.debian.org/debian-devel/2005/09/msg01417.html
+        https://lists.debian.org/debian-devel/2005/09/msg01417.html
 
 More SSL Libraries
 
@@ -163,13 +163,13 @@ Distro Angle of this Problem
 Footnotes
 
  [1] = http://www.xfree86.org/3.3.6/COPYRIGHT2.html#6
- [2] = http://www.fsf.org/licensing/essays/bsd.html
- [3] = http://www.fsf.org/licensing/licenses/gpl.html
+ [2] = https://www.gnu.org/philosophy/bsd.html
+ [3] = https://www.gnu.org/licenses/gpl.html
  [4] = http://curl.haxx.se/docs/copyright.html
- [5] = http://www.openssl.org/source/license.html
- [6] = http://www.fsf.org/licensing/licenses/gpl.html end of section 3
- [7] = http://www.fsf.org/licensing/licenses/lgpl.html
- [8] = http://en.wikipedia.org/wiki/OpenSSL_exception
+ [5] = https://www.openssl.org/source/license.html
+ [6] = https://www.gnu.org/licenses/gpl.html end of section 3
+ [7] = https://www.gnu.org/licenses/lgpl.html
+ [8] = https://en.wikipedia.org/wiki/OpenSSL_exception
 
 Feedback/Updates provided by
 

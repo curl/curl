@@ -30,14 +30,15 @@ my $supressed; # whitelisted problems
 my $file;
 my $dir=".";
 my $wlist;
+my $windows_os = $^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin';
 
 my %whitelist;
 
 sub readwhitelist {
     open(W, "<$dir/checksrc.whitelist");
     my @all=<W>;
-    for(@all)  {
-        chomp;
+    for(@all) {
+        $windows_os ? $_ =~ s/\r?\n$// : chomp;
         $whitelist{$_}=1;
     }
     close(W);
@@ -120,7 +121,7 @@ sub scanfile {
     my $copyright=0;
 
     while(<R>) {
-        chomp;
+        $windows_os ? $_ =~ s/\r?\n$// : chomp;
         my $l = $_;
         my $column = 0;
 
@@ -225,6 +226,15 @@ sub scanfile {
         if($l =~ /^(.*\W)(sprintf|vsprintf|strcat|strncat|gets)\s*\(/) {
             checkwarn($line, length($1), $file, $l,
                       "use of $2 is banned");
+        }
+
+        # scan for use of non-binary fopen without the macro
+        if($l =~ /^(.*\W)fopen\s*\([^"]*\"([^"]*)/) {
+            my $mode = $2;
+            if($mode !~ /b/) {
+                checkwarn($line, length($1), $file, $l,
+                          "use of non-binary fopen without FOPEN_* macro");
+            }
         }
 
         # check for open brace first on line but not first column

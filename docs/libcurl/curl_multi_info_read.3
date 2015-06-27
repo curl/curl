@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -49,8 +49,8 @@ calling \fIcurl_multi_cleanup(3)\fP, \fIcurl_multi_remove_handle(3)\fP or
 \fIcurl_easy_cleanup(3)\fP.
 
 The 'CURLMsg' struct is very simple and only contains very basic information.
-If more involved information is wanted, the particular "easy handle" in
-present in that struct and can thus be used in subsequent regular
+If more involved information is wanted, the particular "easy handle" is
+present in that struct and can be used in subsequent regular
 \fIcurl_easy_getinfo(3)\fP calls (or similar):
 
 .nf
@@ -68,6 +68,24 @@ is done, and then \fBresult\fP contains the return code for the easy handle
 that just completed.
 
 At this point, there are no other \fBmsg\fP types defined.
+.SH EXAMPLE
+.nf
+struct CURLMsg *m;
+
+/* call curl_multi_perform or curl_multi_socket_action first, then loop
+   through and check if there are any transfers that have completed */
+
+do {
+  int msgq = 0;
+  m = curl_multi_info_read(multi_handle, &msgq);
+  if(m && (m->msg == CURLMSG_DONE)) {
+    CURL *e = m->easy_handle;
+    transfers--;
+    curl_multi_remove_handle(multi_handle, e);
+    curl_easy_cleanup(e);
+  }
+} while(m);
+.fi
 .SH "RETURN VALUE"
 A pointer to a filled-in struct, or NULL if it failed or ran out of
 structs. It also writes the number of messages left in the queue (after this

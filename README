@@ -38,12 +38,12 @@ GIT
 
   To download the very latest source off the GIT server do this:
 
-    git clone git://github.com/bagder/curl.git
+    git clone https://github.com/bagder/curl.git
 
   (you'll get a directory named curl created, filled with the source code)
 
 NOTICE
 
   Curl contains pieces of source code that is Copyright (c) 1998, 1999
-  Kungliga Tekniska Högskolan. This notice is included here to comply with the
+  Kungliga Tekniska HÃ¶gskolan. This notice is included here to comply with the
   distribution terms.

@@ -36,14 +36,21 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_TIMERFUNCTION, timer_callbac
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
-This callback function will be called when the timeout value changes. The
-\fBtimeout_ms\fP value is at what latest time the application should call one
-of the \&"performing" functions of the multi interface
-(\fIcurl_multi_socket_action(3)\fP and \fIcurl_multi_perform(3)\fP) - to allow
-libcurl to keep timeouts and retries etc to work. A \fBtimeout_ms\fP value of
--1 means that there is no timeout at all, and 0 means that the timeout is
-already expired. libcurl attempts to limit calling this only when the fixed
-future timeout time actually changes.
+Certain features, such as timeouts and retries, require you to call libcurl
+even when there is no activity on the file descriptors.
+
+Your callback function \fBtimer_callback\fP should install a non-repeating
+timer with an interval of \fBtimeout_ms\fP. Each time that timer fires, call
+either \fIcurl_multi_socket_action(3)\fP or \fIcurl_multi_perform(3)\fP,
+depending on which interface you use.
+
+A \fBtimeout_ms\fP value of -1 means you should delete your timer.
+
+A \fBtimeout_ms\fP value of 0 means you should call
+\fIcurl_multi_socket_action(3)\fP or \fIcurl_multi_perform(3)\fP (once) as soon
+as possible.
+
+\fBtimer_callback\fP will only be called when the \fBtimeout_ms\fP changes.
 
 The \fBuserp\fP pointer is set with \fICURLMOPT_TIMERDATA(3)\fP.
 
@@ -54,7 +61,38 @@ NULL
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+static gboolean timeout_cb(gpointer user_data) {
+    if (user_data) {
+        g_free(user_data);
+        curl_multi_setopt(curl_handle, CURLMOPT_TIMERDATA, NULL);
+    }
+    int running;
+    curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &running);
+    return G_SOURCE_REMOVE;
+}
+
+static int timerfunc(CURLM *multi, long timeout_ms, void *userp) {
+    guint *id = userp;
+
+    if (id)
+        g_source_remove(*id);
+
+    // -1 means we should just delete our timer.
+    if (timeout_ms == -1) {
+        g_free(id);
+        id = NULL;
+    } else {
+        if (!id)
+            id = g_new(guint, 1);
+        *id = g_timeout_add(timeout_ms, timeout_cb, id);
+    }
+    curl_multi_setopt(multi, CURLMOPT_TIMERDATA, id);
+    return 0;
+}
+
+curl_multi_setopt(multi, CURLMOPT_TIMERFUNCTION, timerfunc);
+.fi
 .SH AVAILABILITY
 Added in 7.16.0
 .SH RETURN VALUE

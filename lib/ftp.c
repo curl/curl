@@ -1670,8 +1670,8 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
             BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
 
           size_t actuallyread =
-            conn->fread_func(data->state.buffer, 1, readthisamountnow,
-                             conn->fread_in);
+            data->set.fread_func(data->state.buffer, 1, readthisamountnow,
+                                 data->set.in);
 
           passed += actuallyread;
           if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
@@ -1887,7 +1887,7 @@ static CURLcode proxy_magic(struct connectdata *conn,
     memset(&http_proxy, 0, sizeof(http_proxy));
     data->req.protop = &http_proxy;
 
-    result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, newhost, newport);
+    result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, newhost, newport, TRUE);
 
     data->req.protop = ftp_save;
 
@@ -1904,6 +1904,22 @@ static CURLcode proxy_magic(struct connectdata *conn,
   }
 
   return result;
+}
+
+static char *control_address(struct connectdata *conn)
+{
+  /* Returns the control connection IP address.
+     If a proxy tunnel is used, returns the original host name instead, because
+     the effective control connection address is the proxy address,
+     not the ftp host. */
+  if(conn->bits.tunnel_proxy ||
+     conn->proxytype == CURLPROXY_SOCKS5 ||
+     conn->proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
+     conn->proxytype == CURLPROXY_SOCKS4 ||
+     conn->proxytype == CURLPROXY_SOCKS4A)
+    return conn->host.name;
+
+  return conn->ip_addr_str;
 }
 
 static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
@@ -1928,12 +1944,12 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
       unsigned int num;
       char separator[4];
       ptr++;
-      if(5  == sscanf(ptr, "%c%c%c%u%c",
-                      &separator[0],
-                      &separator[1],
-                      &separator[2],
-                      &num,
-                      &separator[3])) {
+      if(5 == sscanf(ptr, "%c%c%c%u%c",
+                     &separator[0],
+                     &separator[1],
+                     &separator[2],
+                     &num,
+                     &separator[3])) {
         const char sep1 = separator[0];
         int i;
 
@@ -1951,9 +1967,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
         }
         if(ptr) {
           ftpc->newport = (unsigned short)(num & 0xffff);
-
-          /* use the original host name again */
-          ftpc->newhost = strdup(conn->host.name);
+          ftpc->newhost = strdup(control_address(conn));
           if(!ftpc->newhost)
             return CURLE_OUT_OF_MEMORY;
         }
@@ -1983,8 +1997,8 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
      */
     while(*str) {
       if(6 == sscanf(str, "%d,%d,%d,%d,%d,%d",
-                      &ip[0], &ip[1], &ip[2], &ip[3],
-                      &port[0], &port[1]))
+                     &ip[0], &ip[1], &ip[2], &ip[3],
+                     &port[0], &port[1]))
         break;
       str++;
     }
@@ -2001,9 +2015,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
       infof(data, "Skip %d.%d.%d.%d for data connection, re-use %s instead\n",
             ip[0], ip[1], ip[2], ip[3],
             conn->host.name);
-
-      /* use the original host name again */
-      ftpc->newhost = strdup(conn->host.name);
+      ftpc->newhost = strdup(control_address(conn));
     }
     else
       ftpc->newhost = aprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
@@ -2061,9 +2073,8 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
   result = Curl_connecthost(conn, addr);
 
-  Curl_resolv_unlock(data, addr); /* we're done using this address */
-
   if(result) {
+    Curl_resolv_unlock(data, addr); /* we're done using this address */
     if(ftpc->count1 == 0 && ftpcode == 229)
       return ftp_epsv_disable(conn);
 
@@ -2079,8 +2090,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
   if(data->set.verbose)
     /* this just dumps information about this second connection */
-    ftp_pasv_verbose(conn, conn->ip_addr, ftpc->newhost, connectport);
+    ftp_pasv_verbose(conn, addr->addr, ftpc->newhost, connectport);
 
+  Curl_resolv_unlock(data, addr); /* we're done using this address */
   conn->bits.do_more = TRUE;
   state(conn, FTP_STOP); /* this phase is completed */
 
@@ -3633,7 +3645,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
     if(conn->tunnel_state[SECONDARYSOCKET] == TUNNEL_CONNECT) {
       /* As we're in TUNNEL_CONNECT state now, we know the proxy name and port
          aren't used so we blank their arguments. TODO: make this nicer */
-      result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, NULL, 0);
+      result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, NULL, 0, FALSE);
 
       return result;
     }

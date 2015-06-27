@@ -25,7 +25,8 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS)
+#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
+    defined(USE_CYASSL)
 
 #include "urldata.h"
 
@@ -127,5 +128,5 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn, int certnum,
 CURLcode Curl_verifyhost(struct connectdata * conn,
                          const char * beg, const char * end);
 
-#endif /* USE_GSKIT or USE_NSS or  USE_GNUTLS */
+#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_CYASSL */
 #endif /* HEADER_CURL_X509ASN1_H */

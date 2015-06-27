@@ -31,68 +31,134 @@
 #include "multiif.h"
 #include "sendf.h"
 #include "rawstr.h"
-#include "bundles.h"
 #include "conncache.h"
+#include "curl_printf.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
+static void conn_llist_dtor(void *user, void *element)
+{
+  struct connectdata *data = element;
+  (void)user;
+
+  data->bundle = NULL;
+}
+
+static CURLcode bundle_create(struct SessionHandle *data,
+                              struct connectbundle **cb_ptr)
+{
+  (void)data;
+  DEBUGASSERT(*cb_ptr == NULL);
+  *cb_ptr = malloc(sizeof(struct connectbundle));
+  if(!*cb_ptr)
+    return CURLE_OUT_OF_MEMORY;
+
+  (*cb_ptr)->num_connections = 0;
+  (*cb_ptr)->multiuse = BUNDLE_UNKNOWN;
+
+  (*cb_ptr)->conn_list = Curl_llist_alloc((curl_llist_dtor) conn_llist_dtor);
+  if(!(*cb_ptr)->conn_list) {
+    Curl_safefree(*cb_ptr);
+    return CURLE_OUT_OF_MEMORY;
+  }
+  return CURLE_OK;
+}
+
+static void bundle_destroy(struct connectbundle *cb_ptr)
+{
+  if(!cb_ptr)
+    return;
+
+  if(cb_ptr->conn_list) {
+    Curl_llist_destroy(cb_ptr->conn_list, NULL);
+    cb_ptr->conn_list = NULL;
+  }
+  free(cb_ptr);
+}
+
+/* Add a connection to a bundle */
+static CURLcode bundle_add_conn(struct connectbundle *cb_ptr,
+                              struct connectdata *conn)
+{
+  if(!Curl_llist_insert_next(cb_ptr->conn_list, cb_ptr->conn_list->tail, conn))
+    return CURLE_OUT_OF_MEMORY;
+
+  conn->bundle = cb_ptr;
+
+  cb_ptr->num_connections++;
+  return CURLE_OK;
+}
+
+/* Remove a connection from a bundle */
+static int bundle_remove_conn(struct connectbundle *cb_ptr,
+                              struct connectdata *conn)
+{
+  struct curl_llist_element *curr;
+
+  curr = cb_ptr->conn_list->head;
+  while(curr) {
+    if(curr->ptr == conn) {
+      Curl_llist_remove(cb_ptr->conn_list, curr, NULL);
+      cb_ptr->num_connections--;
+      conn->bundle = NULL;
+      return 1; /* we removed a handle */
+    }
+    curr = curr->next;
+  }
+  return 0;
+}
+
 static void free_bundle_hash_entry(void *freethis)
 {
   struct connectbundle *b = (struct connectbundle *) freethis;
 
-  Curl_bundle_destroy(b);
+  bundle_destroy(b);
 }
 
-struct conncache *Curl_conncache_init(int size)
+int Curl_conncache_init(struct conncache *connc, int size)
 {
-  struct conncache *connc;
-
-  connc = calloc(1, sizeof(struct conncache));
-  if(!connc)
-    return NULL;
-
-  connc->hash = Curl_hash_alloc(size, Curl_hash_str,
-                                Curl_str_key_compare, free_bundle_hash_entry);
-
-  if(!connc->hash) {
-    free(connc);
-    return NULL;
-  }
-
-  return connc;
+  return Curl_hash_init(&connc->hash, size, Curl_hash_str,
+                        Curl_str_key_compare, free_bundle_hash_entry);
 }
 
 void Curl_conncache_destroy(struct conncache *connc)
 {
-  if(connc) {
-    Curl_hash_destroy(connc->hash);
-    connc->hash = NULL;
-    free(connc);
-  }
+  if(connc)
+    Curl_hash_destroy(&connc->hash);
 }
 
+/* returns an allocated key to find a bundle for this connection */
+static char *hashkey(struct connectdata *conn)
+{
+  return aprintf("%s:%d",
+                 conn->bits.proxy?conn->proxy.name:conn->host.name,
+                 conn->localport);
+}
+
+/* Look up the bundle with all the connections to the same host this
+   connectdata struct is setup to use. */
 struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
                                                  struct conncache *connc)
 {
   struct connectbundle *bundle = NULL;
-
-  char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
-
-  if(connc)
-    bundle = Curl_hash_pick(connc->hash, hostname, strlen(hostname)+1);
+  if(connc) {
+    char *key = hashkey(conn);
+    if(key) {
+      bundle = Curl_hash_pick(&connc->hash, key, strlen(key));
+      free(key);
+    }
+  }
 
   return bundle;
 }
 
 static bool conncache_add_bundle(struct conncache *connc,
-                                 char *hostname,
+                                 char *key,
                                  struct connectbundle *bundle)
 {
-  void *p;
-
-  p = Curl_hash_add(connc->hash, hostname, strlen(hostname)+1, bundle);
+  void *p = Curl_hash_add(&connc->hash, key, strlen(key), bundle);
 
   return p?TRUE:FALSE;
 }
@@ -106,14 +172,14 @@ static void conncache_remove_bundle(struct conncache *connc,
   if(!connc)
     return;
 
-  Curl_hash_start_iterate(connc->hash, &iter);
+  Curl_hash_start_iterate(&connc->hash, &iter);
 
   he = Curl_hash_next_element(&iter);
   while(he) {
     if(he->ptr == bundle) {
       /* The bundle is destroyed by the hash destructor function,
          free_bundle_hash_entry() */
-      Curl_hash_delete(connc->hash, he->key, he->key_len);
+      Curl_hash_delete(&connc->hash, he->key, he->key_len);
       return;
     }
 
@@ -131,20 +197,29 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
 
   bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache);
   if(!bundle) {
-    char *hostname = conn->bits.proxy?conn->proxy.name:conn->host.name;
+    char *key;
+    int rc;
 
-    result = Curl_bundle_create(data, &new_bundle);
+    result = bundle_create(data, &new_bundle);
     if(result)
       return result;
 
-    if(!conncache_add_bundle(data->state.conn_cache, hostname, new_bundle)) {
-      Curl_bundle_destroy(new_bundle);
+    key = hashkey(conn);
+    if(!key) {
+      bundle_destroy(new_bundle);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    rc = conncache_add_bundle(data->state.conn_cache, key, new_bundle);
+    free(key);
+    if(!rc) {
+      bundle_destroy(new_bundle);
       return CURLE_OUT_OF_MEMORY;
     }
     bundle = new_bundle;
   }
 
-  result = Curl_bundle_add_conn(bundle, conn);
+  result = bundle_add_conn(bundle, conn);
   if(result) {
     if(new_bundle)
       conncache_remove_bundle(data->state.conn_cache, new_bundle);
@@ -169,7 +244,7 @@ void Curl_conncache_remove_conn(struct conncache *connc,
   /* The bundle pointer can be NULL, since this function can be called
      due to a failed connection attempt, before being added to a bundle */
   if(bundle) {
-    Curl_bundle_remove_conn(bundle, conn);
+    bundle_remove_conn(bundle, conn);
     if(bundle->num_connections == 0) {
       conncache_remove_bundle(connc, bundle);
     }
@@ -201,7 +276,7 @@ void Curl_conncache_foreach(struct conncache *connc,
   if(!connc)
     return;
 
-  Curl_hash_start_iterate(connc->hash, &iter);
+  Curl_hash_start_iterate(&connc->hash, &iter);
 
   he = Curl_hash_next_element(&iter);
   while(he) {
@@ -232,7 +307,7 @@ Curl_conncache_find_first_connection(struct conncache *connc)
   struct curl_hash_element *he;
   struct connectbundle *bundle;
 
-  Curl_hash_start_iterate(connc->hash, &iter);
+  Curl_hash_start_iterate(&connc->hash, &iter);
 
   he = Curl_hash_next_element(&iter);
   while(he) {

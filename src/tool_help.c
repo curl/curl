@@ -65,6 +65,7 @@ static const char *const helptext[] = {
   "     --crlf          Convert LF to CRLF in upload",
   "     --crlfile FILE  Get a CRL list in PEM format from the given file",
   " -d, --data DATA     HTTP POST data (H)",
+  "     --data-raw DATA  HTTP POST data, '@' allowed (H)",
   "     --data-ascii DATA  HTTP POST ASCII data (H)",
   "     --data-binary DATA  HTTP POST binary data (H)",
   "     --data-urlencode DATA  HTTP POST data url encoded (H)",
@@ -142,7 +143,7 @@ static const char *const helptext[] = {
   " -n, --netrc         Must read .netrc for user name and password",
   "     --netrc-optional  Use either .netrc or URL; overrides -n",
   "     --netrc-file FILE  Specify FILE for netrc",
-  " -:  --next          "
+  " -:, --next          "
   "Allows the following URL to use a separate set of options",
   "     --no-alpn       Disable the ALPN TLS extension (H)",
   " -N, --no-buffer     Disable buffering of the output stream",
@@ -156,7 +157,7 @@ static const char *const helptext[] = {
   "     --pass PASS     Pass phrase for the private key (SSL/SSH)",
   "     --path-as-is    Do not squash .. sequences in URL path",
   "     --pinnedpubkey FILE  Public key (PEM/DER) to verify peer against "
-  "(OpenSSL/GnuTLS/GSKit only)",
+  "(OpenSSL/GnuTLS/NSS/wolfSSL/CyaSSL/GSKit only)",
   "     --post301       "
   "Do not switch to GET after following a 301 redirect (H)",
   "     --post302       "
@@ -173,6 +174,8 @@ static const char *const helptext[] = {
   "     --proxy-negotiate  "
   "Use HTTP Negotiate (SPNEGO) authentication on the proxy (H)",
   "     --proxy-ntlm    Use NTLM authentication on the proxy (H)",
+  "     --proxy-service-name NAME  SPNEGO proxy service name",
+  "     --service-name NAME  SPNEGO service name",
   " -U, --proxy-user USER[:PASSWORD]  Proxy user and password",
   "     --proxy1.0 HOST[:PORT]  Use HTTP/1.0 proxy on given port",
   " -p, --proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
@@ -201,10 +204,8 @@ static const char *const helptext[] = {
   "     --socks5 HOST[:PORT]  SOCKS5 proxy on given host + port",
   "     --socks5-hostname HOST[:PORT]  "
   "SOCKS5 proxy, pass host name to proxy",
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   "     --socks5-gssapi-service NAME  SOCKS5 proxy service name for GSS-API",
   "     --socks5-gssapi-nec  Compatibility with NEC SOCKS5 server",
-#endif
   " -Y, --speed-limit RATE  "
   "Stop transfers below RATE for 'speed-time' secs",
   " -y, --speed-time SECONDS  "
@@ -219,7 +220,7 @@ static const char *const helptext[] = {
   " -t, --telnet-option OPT=VAL  Set telnet option",
   "     --tftp-blksize VALUE  Set TFTP BLKSIZE option (must be >512)",
   " -z, --time-cond TIME  Transfer based on a time condition",
-  " -1, --tlsv1         Use => TLSv1 (SSL)",
+  " -1, --tlsv1         Use >= TLSv1 (SSL)",
   "     --tlsv1.0       Use TLSv1.0 (SSL)",
   "     --tlsv1.1       Use TLSv1.1 (SSL)",
   "     --tlsv1.2       Use TLSv1.2 (SSL)",

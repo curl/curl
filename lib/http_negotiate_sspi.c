@@ -43,6 +43,7 @@
 CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
                               const char *header)
 {
+  struct SessionHandle *data = conn->data;
   BYTE              *input_token = NULL;
   SecBufferDesc     out_buff_desc;
   SecBuffer         out_sec_buff;
@@ -64,12 +65,12 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   if(proxy) {
     userp = conn->proxyuser;
     passwdp = conn->proxypasswd;
-    neg_ctx = &conn->data->state.proxyneg;
+    neg_ctx = &data->state.proxyneg;
   }
   else {
     userp = conn->user;
     passwdp = conn->passwd;
-    neg_ctx = &conn->data->state.negotiate;
+    neg_ctx = &data->state.negotiate;
   }
 
   /* Not set means empty */
@@ -83,7 +84,7 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
     /* We finished successfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
-    Curl_cleanup_negotiate(conn->data);
+    Curl_cleanup_negotiate(data);
     return CURLE_LOGIN_DENIED;
   }
 
@@ -93,9 +94,10 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
     /* Generate our SPN */
-    neg_ctx->server_name = Curl_sasl_build_spn("HTTP",
-                                                proxy ? conn->proxy.name :
-                                                        conn->host.name);
+    neg_ctx->server_name = Curl_sasl_build_spn(
+      proxy ? data->set.str[STRING_PROXY_SERVICE_NAME] :
+      data->set.str[STRING_SERVICE_NAME],
+      proxy ? conn->proxy.name : conn->host.name);
     if(!neg_ctx->server_name)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -167,7 +169,7 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
       return result;
 
     if(!input_token_len) {
-      infof(conn->data,
+      infof(data,
             "Negotiate handshake failure (empty challenge message)\n");
 
       return CURLE_BAD_CONTENT_ENCODING;

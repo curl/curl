@@ -50,6 +50,8 @@ really \fICURLOPT_POSTFIELDS(3)\fP, but the alternative that copies the string
 \fICURLOPT_COPYPOSTFIELDS(3)\fP has some usage characteristics you need to
 read up on.
 
+The order in which the options are set does not matter.
+
 Before version 7.17.0, strings were not copied. Instead the user was forced
 keep them available until libcurl no longer needed them.
 
@@ -165,6 +167,10 @@ Tunnel through the HTTP proxy. \fICURLOPT_HTTPPROXYTUNNEL(3)\fP
 Socks5 GSSAPI service name. \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_NEC
 Socks5 GSSAPI NEC mode. See \fICURLOPT_SOCKS5_GSSAPI_NEC(3)\fP
+.IP CURLOPT_PROXY_SERVICE_NAME
+Proxy service name. \fICURLOPT_PROXY_SERVICE_NAME(3)\fP
+.IP CURLOPT_SERVICE_NAME
+SPNEGO service name. \fICURLOPT_SERVICE_NAME(3)\fP
 .IP CURLOPT_INTERFACE
 Bind connection locally to this. See \fICURLOPT_INTERFACE(3)\fP
 .IP CURLOPT_LOCALPORT
@@ -287,6 +293,8 @@ Disable Content decoding. See \fICURLOPT_HTTP_CONTENT_DECODING(3)\fP
 Disable Transfer decoding. See \fICURLOPT_HTTP_TRANSFER_DECODING(3)\fP
 .IP CURLOPT_EXPECT_100_TIMEOUT_MS
 100-continue timeout. See \fICURLOPT_EXPECT_100_TIMEOUT_MS(3)\fP
+.IP CURLOPT_PIPEWAIT
+Wait on connection to pipeline on it. See \fICURLOPT_PIPEWAIT(3)\fP
 .SH SMTP OPTIONS
 .IP CURLOPT_MAIL_FROM
 Address of the sender. See \fICURLOPT_MAIL_FROM(3)\fP

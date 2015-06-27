@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,17 +19,11 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* Example using a "in core" PEM certificate to retrieve a https page.
- * Written by Theo Borm
+/* <DESC>
+ * CA cert in memory with OpenSSL to get a HTTPS page.
+ * </DESC>
  */
 
-/* on a netBSD system with OPENSSL& LIBCURL installed from
- * pkgsrc (using default paths) this program can be compiled using:
- * gcc -I/usr/pkg/include -L/usr/pkg/lib -lcurl -Wl,-R/usr/pkg/lib -lssl
- * -lcrypto -lz -o curlcacerttest curlcacerttest.c
- * on other operating systems you may want to change paths to headers
- * and libraries
-*/
 #include <openssl/ssl.h>
 #include <curl/curl.h>
 #include <stdio.h>

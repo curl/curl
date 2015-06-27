@@ -7,6 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2013 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
@@ -40,5 +41,16 @@ bool Curl_pipeline_server_blacklisted(struct SessionHandle *handle,
 
 CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
                                              struct curl_llist **list_ptr);
+
+bool Curl_pipeline_checkget_write(struct SessionHandle *data,
+                                  struct connectdata *conn);
+bool Curl_pipeline_checkget_read(struct SessionHandle *data,
+                                 struct connectdata *conn);
+void Curl_pipeline_leave_write(struct connectdata *conn);
+void Curl_pipeline_leave_read(struct connectdata *conn);
+bool Curl_recvpipe_head(struct SessionHandle *data,
+                        struct connectdata *conn);
+bool Curl_sendpipe_head(struct SessionHandle *data,
+                        struct connectdata *conn);
 
 #endif /* HEADER_CURL_PIPELINE_H */

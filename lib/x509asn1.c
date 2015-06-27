@@ -22,7 +22,8 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS)
+#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
+    defined(USE_CYASSL)
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -820,7 +821,7 @@ static void do_pubkey(struct SessionHandle * data, int certnum,
     /* Compute key length. */
     for(q = elem.beg; !*q && q < elem.end; q++)
       ;
-    len = (elem.end - q) * 8;
+    len = (unsigned long)((elem.end - q) * 8);
     if(len)
       for(i = *(unsigned char *) q; !(i & 0x80); i <<= 1)
         len--;
@@ -1023,7 +1024,7 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
   return CURLE_OK;
 }
 
-#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS */
+#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_CYASSL */
 
 #if defined(USE_GSKIT)
 

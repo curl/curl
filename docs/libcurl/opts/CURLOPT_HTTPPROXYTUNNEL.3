@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -37,6 +37,9 @@ Tunneling essentially means that a CONNECT is sent to the proxy, asking it to
 connect to a remote host on a specific port number and then the traffic is
 just passed through the proxy. Proxies tend to whitelist specific port numbers
 it allows CONNECT requests to and often only port 80 and 443 are allowed.
+
+When using this, it only makes sense to use \fICURLOPT_PROXYTYPE(3)\fP set to
+a HTTP proxy.
 .SH DEFAULT
 0
 .SH PROTOCOLS
@@ -48,4 +51,4 @@ Always
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
-.BR CURLOPT_PROXY "(3), "
+.BR CURLOPT_PROXY "(3), " CURLOPT_PROXYTYPE "(3), " CURLOPT_PROXYPORT "(3), "
