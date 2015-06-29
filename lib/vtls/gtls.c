@@ -91,6 +91,10 @@ static bool gtls_inited = FALSE;
 #    define GNUTLS_MAPS_WINSOCK_ERRORS 1
 #  endif
 
+#  if (GNUTLS_VERSION_NUMBER >= 0x030100)
+#    define HAS_SYSTEM_TRUST
+#  endif
+
 #  if (GNUTLS_VERSION_NUMBER >= 0x030200)
 #    define HAS_ALPN
 #  endif
@@ -424,6 +428,29 @@ gtls_connect_step1(struct connectdata *conn,
     failf(data, "gnutls_cert_all_cred() failed: %s", gnutls_strerror(rc));
     return CURLE_SSL_CONNECT_ERROR;
   }
+
+#ifdef HAS_SYSTEM_TRUST
+  if(
+#ifdef USE_TLS_SRP
+      data->set.ssl.authtype != CURL_TLSAUTH_SRP &&
+#endif
+#ifdef HAS_CAPATH
+     !data->set.ssl.CApath &&
+#endif
+     !data->set.ssl.CAfile) {
+    /* add default system trust on supported systems */
+    rc = gnutls_certificate_set_x509_system_trust(conn->ssl[sockindex].cred);
+
+    if(rc < 0) {
+      infof(data, "error importing system trust storage (%s)\n",
+            gnutls_strerror(rc));
+      if(data->set.ssl.verifypeer)
+        return CURLE_SSL_CACERT_BADFILE;
+    }
+    else
+      infof(data, "found %d certificates in system trust storage\n", rc);
+  }
+#endif
 
 #ifdef USE_TLS_SRP
   if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
