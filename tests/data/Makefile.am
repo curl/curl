@@ -5,7 +5,7 @@ test:
 # TESTCASES are taken from Makefile.inc
 include Makefile.inc
 
-EXTRA_DIST = $(TESTCASES) DISABLED
+EXTRA_DIST = $(TESTCASES) DISABLED CMakeLists.txt
 
 filecheck:
 	@mkdir test-place; \

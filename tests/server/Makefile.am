@@ -60,5 +60,5 @@ endif
 # Makefile.inc provides neat definitions
 include Makefile.inc
 
-EXTRA_DIST = base64.pl Makefile.inc
+EXTRA_DIST = base64.pl Makefile.inc CMakeLists.txt
 

@@ -2659,9 +2659,9 @@ case "$OPT_IDN" in
     ;;
   default)
     dnl configure option not specified
-    want_idn="yes"
+    want_idn="no"
     want_idn_path="default"
-    AC_MSG_RESULT([(assumed) yes])
+    AC_MSG_RESULT([(assumed) no])
     ;;
   yes)
     dnl --with-libidn option used without path
