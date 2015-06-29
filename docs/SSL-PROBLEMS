@@ -26,7 +26,7 @@ CA bundle missing intermediate certificates
   problems if your CA cert does not have the certificates for the
   intermediates in the whole trust chain.
 
-SSL version
+Protocol version
 
   Some broken servers fail to support the protocol negotiation properly that
   SSL servers are supposed to handle. This may cause the connection to fail
@@ -36,7 +36,9 @@ SSL version
   An additional complication can be that modern SSL libraries sometimes are
   built with support for older SSL and TLS versions disabled!
 
-SSL ciphers
+  All versions of SSL are considered insecure and should be avoided. Use TLS.
+
+Ciphers
 
   Clients give servers a list of ciphers to select from. If the list doesn't
   include any ciphers the server wants/can use, the connection handshake
@@ -50,6 +52,10 @@ SSL ciphers
 
   Note that these weak ciphers are identified as flawed. For example, this
   includes symmetric ciphers with less than 128 bit keys and RC4.
+
+  WinSSL in Windows XP is not able to connect to servers that no longer
+  support the legacy handshakes and algorithms used by those versions, so we
+  advice against building curl to use WinSSL on really old Windows versions.
 
   References:
 
