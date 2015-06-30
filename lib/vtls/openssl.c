@@ -1092,8 +1092,7 @@ static int asn1_output(const ASN1_UTCTIME *tm,
    in the certificate and must exactly match the IP in the URI.
 
 */
-static CURLcode verifyhost(struct connectdata *conn,
-                           X509 *server_cert, const int sockindex)
+static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
 {
   int matched = -1; /* -1 is no alternative match yet, 1 means match and 0
                        means mismatch */
@@ -2653,8 +2652,7 @@ static CURLcode pkp_pin_peer_pubkey(X509* cert, const char *pinnedpubkey)
  */
 static CURLcode servercert(struct connectdata *conn,
                            struct ssl_connect_data *connssl,
-                           bool strict,
-                           const int sockindex)
+                           bool strict)
 {
   CURLcode result = CURLE_OK;
   int rc;
@@ -2694,7 +2692,7 @@ static CURLcode servercert(struct connectdata *conn,
   infof(data, "\t expire date: %s\n", buffer);
 
   if(SSL_CONN_CONFIG(verifyhost)) {
-    result = verifyhost(conn, connssl->server_cert, sockindex);
+    result = verifyhost(conn, connssl->server_cert);
     if(result) {
       X509_free(connssl->server_cert);
       connssl->server_cert = NULL;
@@ -2855,9 +2853,8 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
    * operations.
    */
 
-  result = servercert(conn, connssl,
-                      (SSL_CONN_CONFIG(verifypeer) ||
-                       SSL_CONN_CONFIG(verifyhost)), sockindex);
+  result = servercert(conn, connssl, (SSL_CONN_CONFIG(verifypeer) ||
+                                      SSL_CONN_CONFIG(verifyhost)));
 
   if(!result)
     connssl->connecting_state = ssl_connect_done;
