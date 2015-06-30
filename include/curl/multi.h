@@ -283,30 +283,6 @@ typedef int (*curl_multi_timer_callback)(CURLM *multi,    /* multi handle */
                                          void *userp);    /* private callback
                                                              pointer */
 
-/*
- * Name: curl_push_callback
- *
- * Desc: This callback gets called when a new stream is being pushed by the
- *       server. It approves or denies the new stream.
- *
- * Returns: CURL_PUSH_OK or CURL_PUSH_DENY.
- */
-#define CURL_PUSH_OK   0
-#define CURL_PUSH_DENY 1
-
-struct curl_pushheaders;  /* forward declaration only */
-
-CURL_EXTERN char *curl_pushheader_bynum(struct curl_pushheaders *h,
-                                        size_t num);
-CURL_EXTERN char *curl_pushheader_byname(struct curl_pushheaders *h,
-                                         const char *name);
-
-typedef int (*curl_push_callback)(CURL *parent,
-                                  CURL *easy,
-                                  size_t num_headers,
-                                  struct curl_pushheaders *headers,
-                                  void *userp);
-
 CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
                                         int *running_handles);
 
@@ -426,6 +402,31 @@ CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *multi_handle,
  */
 CURL_EXTERN CURLMcode curl_multi_assign(CURLM *multi_handle,
                                         curl_socket_t sockfd, void *sockp);
+
+
+/*
+ * Name: curl_push_callback
+ *
+ * Desc: This callback gets called when a new stream is being pushed by the
+ *       server. It approves or denies the new stream.
+ *
+ * Returns: CURL_PUSH_OK or CURL_PUSH_DENY.
+ */
+#define CURL_PUSH_OK   0
+#define CURL_PUSH_DENY 1
+
+struct curl_pushheaders;  /* forward declaration only */
+
+CURL_EXTERN char *curl_pushheader_bynum(struct curl_pushheaders *h,
+                                        size_t num);
+CURL_EXTERN char *curl_pushheader_byname(struct curl_pushheaders *h,
+                                         const char *name);
+
+typedef int (*curl_push_callback)(CURL *parent,
+                                  CURL *easy,
+                                  size_t num_headers,
+                                  struct curl_pushheaders *headers,
+                                  void *userp);
 
 #ifdef __cplusplus
 } /* end of extern "C" */
