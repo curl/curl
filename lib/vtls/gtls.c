@@ -469,20 +469,20 @@ gtls_connect_step1(struct connectdata *conn,
   }
 
 #ifdef HAS_CAPATH
-  if(data->set.ssl.CApath) {
+  if(data->set.ssl.primary.CApath) {
     /* set the trusted CA cert directory */
     rc = gnutls_certificate_set_x509_trust_dir(conn->ssl[sockindex].cred,
-                                                data->set.ssl.CApath,
-                                                GNUTLS_X509_FMT_PEM);
+                                               data->set.ssl.primary.CApath,
+                                               GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
       infof(data, "error reading ca cert file %s (%s)\n",
-            data->set.ssl.CAfile, gnutls_strerror(rc));
-      if(data->set.ssl.verifypeer)
+            data->set.ssl.primary.CAfile, gnutls_strerror(rc));
+      if(data->set.ssl.primary.verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
     }
     else
       infof(data, "found %d certificates in %s\n",
-            rc, data->set.ssl.CApath);
+            rc, data->set.ssl.primary.CApath);
   }
 #endif
 
@@ -700,7 +700,7 @@ gtls_connect_step1(struct connectdata *conn,
   gnutls_transport_set_lowat(session, 0);
 
 #ifdef HAS_OCSP
-  if(data->set.ssl.verifystatus) {
+  if(data->set.ssl.primary.verifystatus) {
     rc = gnutls_ocsp_status_request_enable_client(session, NULL, 0, NULL);
     if(rc != GNUTLS_E_SUCCESS) {
       failf(data, "gnutls_ocsp_status_request_enable_client() failed: %d", rc);
@@ -897,7 +897,7 @@ gtls_connect_step3(struct connectdata *conn,
     infof(data, "\t server certificate verification SKIPPED\n");
 
 #ifdef HAS_OCSP
-  if(data->set.ssl.verifystatus) {
+  if(data->set.ssl.primary.verifystatus) {
     if(gnutls_ocsp_status_request_is_checked(session, 0) == 0) {
       gnutls_datum_t status_request;
       gnutls_ocsp_resp_t ocsp_resp;
@@ -1113,7 +1113,7 @@ gtls_connect_step3(struct connectdata *conn,
   }
   else {
     if(certclock < time(NULL)) {
-      if(data->set.ssl.verifypeer) {
+      if(data->set.ssl.primary.verifypeer) {
         failf(data, "server certificate expiration date has passed.");
         gnutls_x509_crt_deinit(x509_cert);
         return CURLE_PEER_FAILED_VERIFICATION;
@@ -1138,7 +1138,7 @@ gtls_connect_step3(struct connectdata *conn,
   }
   else {
     if(certclock > time(NULL)) {
-      if(data->set.ssl.verifypeer) {
+      if(data->set.ssl.primary.verifypeer) {
         failf(data, "server certificate not activated yet.");
         gnutls_x509_crt_deinit(x509_cert);
         return CURLE_PEER_FAILED_VERIFICATION;
