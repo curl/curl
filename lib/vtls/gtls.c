@@ -469,20 +469,20 @@ gtls_connect_step1(struct connectdata *conn,
   }
 
 #ifdef HAS_CAPATH
-  if(data->set.ssl.primary.CApath) {
+  if(conn->ssl_config.CApath) {
     /* set the trusted CA cert directory */
     rc = gnutls_certificate_set_x509_trust_dir(conn->ssl[sockindex].cred,
-                                               data->set.ssl.primary.CApath,
+                                               conn->ssl_config.CApath,
                                                GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
       infof(data, "error reading ca cert file %s (%s)\n",
-            data->set.ssl.primary.CAfile, gnutls_strerror(rc));
+            conn->ssl_config.CApath, gnutls_strerror(rc));
       if(data->set.ssl.primary.verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
     }
     else
       infof(data, "found %d certificates in %s\n",
-            rc, data->set.ssl.primary.CApath);
+            rc, conn->ssl_config.CApath);
   }
 #endif
 
