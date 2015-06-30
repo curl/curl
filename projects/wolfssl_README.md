@@ -18,24 +18,21 @@ settings for maximum compatibility (refer to wolfssl_options.h for details).
 
 Run build-wolfssl.bat without any parameters for usage information.
 
-By default the script expects both curl and wolfSSL source folders to be at the
-same directory level:
+By default the script expects the curl folder and the wolfSSL folder to be at
+the same directory level:
 
 |-curl
 |-wolfssl
 
 If you have your wolfSSL repo or release source at some other location you may
-specify a different directory, however the curl and libcurl project files
-depend on the folder containing curl source and the folder containing wolfSSL
-source to be at the same directory level. If you specify a different location
-you'll have to modify the curl and libcurl project files to point to that
-location so that it will find the wolfSSL lib files. Therefore it's recommended
-you have curl and wolfSSL source folders at the same directory level.
+specify a different directory. Though if you do that you'll have to modify the
+curl and libcurl project files to point to that location so that they can find
+the wolfSSL lib files.
 
 Building manually
 -----------------
 The wolfSSL project has two Visual Studio solutions in its repo, both of which
-can be used to build the wolfSSL static library (LIB) for Visual Studio.
+can be used to build wolfSSL.
 
 wolfssl.sln - Visual Studio 2008
 wolfssl64.sln - Visual Studio 2012
@@ -48,8 +45,13 @@ Use wolfssl64.sln to build wolfSSL. It can build x86 as well despite the suffix
 Studio 2010+ although you must change the platform toolset to match your
 version of Visual Studio if you're not using Visual Studio 2012.
 
-Also, after you build wolfSSL you'll have to modify the curl and libcurl
-project files to point to where the wolfSSL lib files are located.
+After you build wolfSSL you'll have to modify the curl and libcurl project
+files to point to where the wolfSSL lib files are located, even if curl and
+wolfSSL folders are at the same directory level. Also, since Visual Studio
+builds of wolfSSL don't generate an options file you'll either have to create
+your own wolfssl-folder/cyassl/options.h and wolfssl-folder/wolfssl/options.h
+(both should have the same contents) or remove HAVE_CYASSL_OPTIONS_H from the
+libcurl project's preprocessor definitions.
 
 DLL specific, Developer specific
 --------------------------------
