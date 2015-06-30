@@ -79,3 +79,7 @@ PATH=..\..\..\..\..\wolfssl\build\Win32\VC10\DLL Release;C:\Windows\system32;C:\
 DLL Release - DLL wolfSSL (x64):
 PATH=..\..\..\..\..\wolfssl\build\Win64\VC10\DLL Release;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
 ```
+
+Note that you will also need curl's certificate bundle curl-ca-bundle.crt in
+your path or to specify the location of your certificate bundle using --cacert.
+Since I use a bundle I have in C:\Windows\curl-ca-bundle.crt this works for me.
