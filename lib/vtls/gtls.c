@@ -402,6 +402,9 @@ gtls_connect_step1(struct connectdata *conn,
   const char *err = NULL;
 #endif
 
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
+
   if(conn->ssl[sockindex].state == ssl_connection_complete)
     /* to make us tolerant against being called more than once for the
        same connection */
@@ -411,11 +414,11 @@ gtls_connect_step1(struct connectdata *conn,
     Curl_gtls_init();
 
   /* GnuTLS only supports SSLv3 and TLSv1 */
-  if(conn->ssl_config.version == CURL_SSLVERSION_SSLv2) {
+  if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2) {
     failf(data, "GnuTLS does not support SSLv2");
     return CURLE_SSL_CONNECT_ERROR;
   }
-  else if(conn->ssl_config.version == CURL_SSLVERSION_SSLv3)
+  else if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv3)
     sni = FALSE; /* SSLv3 has no SNI */
 
   /* allocate a cred struct */
@@ -449,40 +452,40 @@ gtls_connect_step1(struct connectdata *conn,
   }
 #endif
 
-  if(conn->ssl_config.CAfile) {
+  if(SSL_CONN_CONFIG(CAfile)) {
     /* set the trusted CA cert bundle file */
     gnutls_certificate_set_verify_flags(conn->ssl[sockindex].cred,
                                         GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT);
 
     rc = gnutls_certificate_set_x509_trust_file(conn->ssl[sockindex].cred,
-                                                conn->ssl_config.CAfile,
+                                                SSL_CONN_CONFIG(CAfile),
                                                 GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
       infof(data, "error reading ca cert file %s (%s)\n",
-            conn->ssl_config.CAfile, gnutls_strerror(rc));
-      if(conn->ssl_config.verifypeer)
+            SSL_CONN_CONFIG(CAfile), gnutls_strerror(rc));
+      if(SSL_CONN_CONFIG(verifypeer))
         return CURLE_SSL_CACERT_BADFILE;
     }
     else
-      infof(data, "found %d certificates in %s\n",
-            rc, conn->ssl_config.CAfile);
+      infof(data, "found %d certificates in %s\n", rc,
+            SSL_CONN_CONFIG(CAfile));
   }
 
 #ifdef HAS_CAPATH
-  if(conn->ssl_config.CApath) {
+  if(SSL_CONN_CONFIG(CApath)) {
     /* set the trusted CA cert directory */
     rc = gnutls_certificate_set_x509_trust_dir(conn->ssl[sockindex].cred,
-                                               conn->ssl_config.CApath,
+                                               SSL_CONN_CONFIG(CApath),
                                                GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
       infof(data, "error reading ca cert file %s (%s)\n",
-            conn->ssl_config.CApath, gnutls_strerror(rc));
-      if(data->set.ssl.primary.verifypeer)
+            SSL_CONN_CONFIG(CApath), gnutls_strerror(rc));
+      if(SSL_CONN_CONFIG(verifypeer))
         return CURLE_SSL_CACERT_BADFILE;
     }
     else
       infof(data, "found %d certificates in %s\n",
-            rc, conn->ssl_config.CApath);
+            rc, SSL_CONN_CONFIG(CApath));
   }
 #endif
 
@@ -511,13 +514,13 @@ gtls_connect_step1(struct connectdata *conn,
   /* convenient assign */
   session = conn->ssl[sockindex].session;
 
-  if((0 == Curl_inet_pton(AF_INET, conn->host.name, &addr)) &&
+  if((0 == Curl_inet_pton(AF_INET, hostname, &addr)) &&
 #ifdef ENABLE_IPV6
-     (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
+     (0 == Curl_inet_pton(AF_INET6, hostname, &addr)) &&
 #endif
      sni &&
-     (gnutls_server_name_set(session, GNUTLS_NAME_DNS, conn->host.name,
-                             strlen(conn->host.name)) < 0))
+     (gnutls_server_name_set(session, GNUTLS_NAME_DNS, hostname,
+                             strlen(hostname)) < 0))
     infof(data, "WARNING: failed to configure server name indication (SNI) "
           "TLS extension\n");
 
@@ -544,7 +547,7 @@ gtls_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  switch (conn->ssl_config.version) {
+  switch (SSL_CONN_CONFIG(version) {
     case CURL_SSLVERSION_SSLv3:
       protocol_priority[0] = GNUTLS_SSL3;
       break;
@@ -579,7 +582,7 @@ gtls_connect_step1(struct connectdata *conn,
   /* Ensure +SRP comes at the *end* of all relevant strings so that it can be
    * removed if a run-time error indicates that SRP is not supported by this
    * GnuTLS version */
-  switch (conn->ssl_config.version) {
+  switch (SSL_CONN_CONFIG(version)) {
     case CURL_SSLVERSION_SSLv3:
       prioritylist = GNUTLS_CIPHERS ":-VERS-TLS-ALL:+VERS-SSL3.0";
       sni = false;
@@ -700,7 +703,7 @@ gtls_connect_step1(struct connectdata *conn,
   gnutls_transport_set_lowat(session, 0);
 
 #ifdef HAS_OCSP
-  if(data->set.ssl.primary.verifystatus) {
+  if(SSL_CONN_CONFIG(verifystatus)) {
     rc = gnutls_ocsp_status_request_enable_client(session, NULL, 0, NULL);
     if(rc != GNUTLS_E_SUCCESS) {
       failf(data, "gnutls_ocsp_status_request_enable_client() failed: %d", rc);
@@ -806,8 +809,9 @@ gtls_connect_step3(struct connectdata *conn,
   gnutls_datum_t proto;
 #endif
   CURLcode result = CURLE_OK;
-
   gnutls_protocol_t version = gnutls_protocol_get_version(session);
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 
   /* the name of the cipher suite used, e.g. ECDHE_RSA_AES_256_GCM_SHA384. */
   ptr = gnutls_cipher_suite_get_name(gnutls_kx_get(session),
@@ -825,13 +829,13 @@ gtls_connect_step3(struct connectdata *conn,
 
   chainp = gnutls_certificate_get_peers(session, &cert_list_size);
   if(!chainp) {
-    if(conn->ssl_config.verifypeer ||
-       conn->ssl_config.verifyhost ||
+    if(SSL_CONN_CONFIG(verifypeer) ||
+       SSL_CONN_CONFIG(verifyhost) ||
        data->set.ssl.issuercert) {
 #ifdef USE_TLS_SRP
       if(data->set.ssl.authtype == CURL_TLSAUTH_SRP
          && data->set.ssl.username != NULL
-         && !conn->ssl_config.verifypeer
+         && !SSL_CONN_CONFIG(verifypeer)
          && gnutls_cipher_get(session)) {
         /* no peer cert, but auth is ok if we have SRP user and cipher and no
            peer verify */
@@ -864,7 +868,7 @@ gtls_connect_step3(struct connectdata *conn,
     }
   }
 
-  if(conn->ssl_config.verifypeer) {
+  if(SSL_CONN_CONFIG(verifypeer)) {
     /* This function will try to verify the peer's certificate and return its
        status (trusted, invalid etc.). The value of status should be one or
        more of the gnutls_certificate_status_t enumerated elements bitwise
@@ -880,10 +884,10 @@ gtls_connect_step3(struct connectdata *conn,
 
     /* verify_status is a bitmask of gnutls_certificate_status bits */
     if(verify_status & GNUTLS_CERT_INVALID) {
-      if(conn->ssl_config.verifypeer) {
+      if(SSL_CONN_CONFIG(verifypeer)) {
         failf(data, "server certificate verification failed. CAfile: %s "
-              "CRLfile: %s", conn->ssl_config.CAfile ? conn->ssl_config.CAfile:
-                                                       "none",
+              "CRLfile: %s", SSL_CONN_CONFIG(CAfile) ? SSL_CONN_CONFIG(CAfile):
+              "none",
               data->set.ssl.CRLfile?data->set.ssl.CRLfile:"none");
         return CURLE_SSL_CACERT;
       }
@@ -897,7 +901,7 @@ gtls_connect_step3(struct connectdata *conn,
     infof(data, "\t server certificate verification SKIPPED\n");
 
 #ifdef HAS_OCSP
-  if(data->set.ssl.primary.verifystatus) {
+  if(SSL_CONN_CONFIG(verifystatus)) {
     if(gnutls_ocsp_status_request_is_checked(session, 0) == 0) {
       gnutls_datum_t status_request;
       gnutls_ocsp_resp_t ocsp_resp;
@@ -1042,7 +1046,7 @@ gtls_connect_step3(struct connectdata *conn,
      in RFC2818 (HTTPS), which takes into account wildcards, and the subject
      alternative name PKIX extension. Returns non zero on success, and zero on
      failure. */
-  rc = gnutls_x509_crt_check_hostname(x509_cert, conn->host.name);
+  rc = gnutls_x509_crt_check_hostname(x509_cert, hostname);
 #if GNUTLS_VERSION_NUMBER < 0x030306
   /* Before 3.3.6, gnutls_x509_crt_check_hostname() didn't check IP
      addresses. */
@@ -1058,10 +1062,10 @@ gtls_connect_step3(struct connectdata *conn,
     int i;
     int ret = 0;
 
-    if(Curl_inet_pton(AF_INET, conn->host.name, addrbuf) > 0)
+    if(Curl_inet_pton(AF_INET, hostname, addrbuf) > 0)
       addrlen = 4;
 #ifdef ENABLE_IPV6
-    else if(Curl_inet_pton(AF_INET6, conn->host.name, addrbuf) > 0)
+    else if(Curl_inet_pton(AF_INET6, hostname, addrbuf) > 0)
       addrlen = 16;
 #endif
 
@@ -1086,15 +1090,18 @@ gtls_connect_step3(struct connectdata *conn,
   }
 #endif
   if(!rc) {
-    if(conn->ssl_config.verifyhost) {
+    const char * const dispname = SSL_IS_PROXY() ?
+      conn->http_proxy.host.dispname : conn->host.dispname;
+
+    if(SSL_CONN_CONFIG(verifyhost)) {
       failf(data, "SSL: certificate subject name (%s) does not match "
-            "target host name '%s'", certbuf, conn->host.dispname);
+            "target host name '%s'", certbuf, dispname);
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_PEER_FAILED_VERIFICATION;
     }
     else
       infof(data, "\t common name: %s (does not match '%s')\n",
-            certbuf, conn->host.dispname);
+            certbuf, dispname);
   }
   else
     infof(data, "\t common name: %s (matched)\n", certbuf);
@@ -1103,7 +1110,7 @@ gtls_connect_step3(struct connectdata *conn,
   certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
 
   if(certclock == (time_t)-1) {
-    if(conn->ssl_config.verifypeer) {
+    if(SSL_CONN_CONFIG(verifypeer)) {
       failf(data, "server cert expiration date verify failed");
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_CONNECT_ERROR;
@@ -1113,7 +1120,7 @@ gtls_connect_step3(struct connectdata *conn,
   }
   else {
     if(certclock < time(NULL)) {
-      if(data->set.ssl.primary.verifypeer) {
+      if(SSL_CONN_CONFIG(verifypeer)) {
         failf(data, "server certificate expiration date has passed.");
         gnutls_x509_crt_deinit(x509_cert);
         return CURLE_PEER_FAILED_VERIFICATION;
@@ -1128,7 +1135,7 @@ gtls_connect_step3(struct connectdata *conn,
   certclock = gnutls_x509_crt_get_activation_time(x509_cert);
 
   if(certclock == (time_t)-1) {
-    if(conn->ssl_config.verifypeer) {
+    if(SSL_CONN_CONFIG(verifypeer)) {
       failf(data, "server cert activation date verify failed");
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_CONNECT_ERROR;
@@ -1138,7 +1145,7 @@ gtls_connect_step3(struct connectdata *conn,
   }
   else {
     if(certclock > time(NULL)) {
-      if(data->set.ssl.primary.verifypeer) {
+      if(SSL_CONN_CONFIG(verifypeer)) {
         failf(data, "server certificate not activated yet.");
         gnutls_x509_crt_deinit(x509_cert);
         return CURLE_PEER_FAILED_VERIFICATION;
