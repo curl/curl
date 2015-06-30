@@ -249,6 +249,7 @@ char * unix_path;
 #define MD5_Init MD5_INIT
 #define MD5_Update MD5_UPDATE
 #define OPENSSL_add_all_algo_noconf OPENSSL_ADD_ALL_ALGO_NOCONF
+#define OPENSSL_load_builtin_modules OPENSSL_LOAD_BUILTIN_MODULES
 #define PEM_read_X509 PEM_READ_X509
 #define PEM_write_bio_X509 PEM_WRITE_BIO_X509
 #define PKCS12_PBE_add PKCS12_PBE_ADD
@@ -272,6 +273,7 @@ char * unix_path;
 #define SSL_CTX_set_cipher_list SSL_CTX_SET_CIPHER_LIST
 #define SSL_CTX_set_def_passwd_cb_ud SSL_CTX_SET_DEF_PASSWD_CB_UD
 #define SSL_CTX_set_default_passwd_cb SSL_CTX_SET_DEFAULT_PASSWD_CB
+#define SSL_CTX_set_msg_callback SSL_CTX_SET_MSG_CALLBACK
 #define SSL_CTX_set_verify SSL_CTX_SET_VERIFY
 #define SSL_CTX_use_PrivateKey SSL_CTX_USE_PRIVATEKEY
 #define SSL_CTX_use_PrivateKey_file SSL_CTX_USE_PRIVATEKEY_FILE
@@ -301,6 +303,7 @@ char * unix_path;
 #define SSL_set_fd SSL_SET_FD
 #define SSL_set_session SSL_SET_SESSION
 #define SSL_shutdown SSL_SHUTDOWN
+#define SSL_version SSL_VERSION
 #define SSL_write SSL_WRITE
 #define SSLeay SSLEAY
 #define SSLv23_client_method SSLV23_CLIENT_METHOD
@@ -325,6 +328,7 @@ char * unix_path;
 #define UI_set_result UI_SET_RESULT
 #define X509V3_EXT_print X509V3_EXT_PRINT
 #define X509_EXTENSION_get_critical X509_EXTENSION_GET_CRITICAL
+#define X509_EXTENSION_get_data X509_EXTENSION_GET_DATA
 #define X509_EXTENSION_get_object X509_EXTENSION_GET_OBJECT
 #define X509_LOOKUP_file X509_LOOKUP_FILE
 #define X509_NAME_ENTRY_get_data X509_NAME_ENTRY_GET_DATA
