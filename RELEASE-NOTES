@@ -8,12 +8,28 @@ Curl and libcurl 7.44.0
 
 This release includes the following changes:
 
- o
-
+ o http2: added CURLMOPT_PUSHFUNCTION and CURLMOPT_PUSHDATA
+ o examples: added http2-serverpush.c
+ o http2: added curl_pushheader_byname() and curl_pushheader_bynum()
+ o docs: added CODE_OF_CONDUCT.md
+ o configure: disable libidn by default [4]
 
 This release includes the following bugfixes:
 
- o
+ o FTP: fix HTTP CONNECT logic regression [1]
+ o openssl: Fix build with openssl < ~ 0.9.8f
+ o openssl: fix build with BoringSSL
+ o curl_easy_setopt.3: option order doesn't matter
+ o openssl: fix use of uninitialized buffer [2]
+ o RTSP: removed dead code
+ o Makefile.m32: add support for CURL_LDFLAG_EXTRAS
+ o curl: always provide negotiate/kerberos options
+ o cookie: Fix bug in export if any-domain cookie is present
+ o curl_easy_setopt.3: mention CURLOPT_PIPEWAIT
+ o INSTALL: Advise use of non-native SSL for Windows <= XP
+ o tool_help: fix --tlsv1 help text to use >= for TLSv1
+ o HTTP: POSTFIELDSIZE set after added to multi handle [3]
+ o SSL-PROBLEMS: mention WinSSL problems in WinXP
 
 This release includes the following known bugs:
 
@@ -22,10 +38,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-
+  Cédric Connes, Dan Fandrich, Daniel Stenberg, Feist Josselin, Gustavo Grieco,
+  Kamil Dudka, Lior Kaplan, Paul Howarth, Ray Satiro, Roger Leigh,
+  Stefan Bühler, Tatsuhiro Tsujikawa, Viktor Szakáts,
+  (13 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = https://github.com/bagder/curl/issues/278
+ [2] = https://github.com/bagder/curl/issues/318
+ [3] = http://curl.haxx.se/mail/lib-2015-06/0122.html
+ [4] = http://curl.haxx.se/mail/lib-2015-06/0143.html
