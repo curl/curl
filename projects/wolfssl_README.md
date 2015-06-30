@@ -9,44 +9,52 @@ BUILDING FOR WINDOWS
 ====================
 Visual Studio 2010+ project files for libcurl and the curl tool have
 'DLL wolfSSL' and 'LIB wolfSSL' configurations available for both x86 and x64
-platforms. We don't offer a script to automate building the wolfSSL code, you
-must do it manually before building libcurl/curl.
+platforms.
 
+Building automatically
+----------------------
+Use the build-wolfssl.bat script to build wolfSSL automatically using preferred
+settings for maximum compatibility (refer to wolfssl_options.h for details).
+
+Run build-wolfssl.bat without any parameters for usage information.
+
+By default the script expects both curl and wolfSSL source folders to be at the
+same directory level:
+
+|-curl
+|-wolfssl
+
+If you have your wolfSSL repo or release source at some other location you may
+specify a different directory, however the curl and libcurl project files
+depend on the folder containing curl source and the folder containing wolfSSL
+source to be at the same directory level. If you specify a different location
+you'll have to modify the curl and libcurl project files to point to that
+location so that it will find the wolfSSL lib files. Therefore it's recommended
+you have curl and wolfSSL source folders at the same directory level.
+
+Building manually
+-----------------
 The wolfSSL project has two Visual Studio solutions in its repo, both of which
 can be used to build the wolfSSL static library (LIB) for Visual Studio.
 
 wolfssl.sln - Visual Studio 2008
 wolfssl64.sln - Visual Studio 2012
 
+wolfssl.sln has not been tested and the curl and libcurl project files
+currently only support wolfSSL for Visual Studio 2010+.
+
 Use wolfssl64.sln to build wolfSSL. It can build x86 as well despite the suffix
 64. Additionally, wolfssl64.sln and project files can be used by any Visual
 Studio 2010+ although you must change the platform toolset to match your
 version of Visual Studio if you're not using Visual Studio 2012.
 
-To change the platform toolset in wolfssl64.sln, for every project in the
-solution right-click and choose properties. A property pages window will
-appear. Change 'Configuration' to 'All Configurations' and change 'Platform' to
-'All Platforms'. Change the platform toolset via:
-
-Configuration Properties > General > Platform Toolset
-
-These are the most common toolset mappings:
-Visual Studio 2010: v100
-Visual Studio 2012: v110
-Visual Studio 2013: v120
+Also, after you build wolfSSL you'll have to modify the curl and libcurl
+project files to point to where the wolfSSL lib files are located.
 
 DLL specific, Developer specific
 --------------------------------
-wolfSSL can be built as a DLL but their Visual Studio projects currently do not
-have the DLL configurations to do that. I've added them and submitted a pull
-request. As part of that changeset I changed platform toolset to default to the
-current version of Visual Studio, so the above toolset changes aren't
-necessary for either DLL or LIB if you're building based off of my work.
-
-https://github.com/wolfSSL/wolfssl/pull/46
-
 If you are a developer and plan to run the curl tool from Visual Studio (eg you
-are debugging) you will need to add the path to the right wolfSSL DLL to the
+are debugging) you will need to add the path of the right wolfSSL DLL to the
 PATH environment. To do that:
 
 - Open curl-all.sln
@@ -55,19 +63,19 @@ PATH environment. To do that:
 - PATH=`wolfssl-path`;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
 
 ... where `wolfssl-path` is the configuration specific path. For example both
-my curl repo and my wolfssl repo are in the same folder and here's what my PATH
-settings look like:
+my curl repo and my wolfSSL repo are at the same directory level,  and here's
+what my PATH settings look like for Visual Studio 2010 (VC10):
 
 ```
 DLL Debug - DLL wolfSSL (Win32):
-PATH=..\..\..\..\..\wolfSSL\DLL Debug;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+PATH=..\..\..\..\..\wolfssl\build\Win32\VC10\DLL Debug;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
 
 DLL Debug - DLL wolfSSL (x64):
-PATH=..\..\..\..\..\wolfSSL\x64\DLL Debug;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+PATH=..\..\..\..\..\wolfssl\build\Win64\VC10\DLL Debug;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
 
 DLL Release - DLL wolfSSL (Win32):
-PATH=..\..\..\..\..\wolfSSL\DLL Release;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+PATH=..\..\..\..\..\wolfssl\build\Win32\VC10\DLL Release;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
 
 DLL Release - DLL wolfSSL (x64):
-PATH=..\..\..\..\..\wolfSSL\x64\DLL Release;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+PATH=..\..\..\..\..\wolfssl\build\Win64\VC10\DLL Release;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
 ```
