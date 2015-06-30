@@ -45,6 +45,15 @@
 #define ALPN_HTTP_1_1_LENGTH 8
 #define ALPN_HTTP_1_1 "http/1.1"
 
+/* set of helper macros for the backends to access the correct fields. For the
+   proxy or for the remote host - to properly support HTTPS proxy */
+
+#define SSL_IS_PROXY() (CURLPROXY_HTTPS == conn->http_proxy.proxytype)
+#define SSL_SET_OPTION(var) (SSL_IS_PROXY() ? data->set.proxy_ssl.var : \
+                             data->set.ssl.var)
+#define SSL_CONN_CONFIG(var) (SSL_IS_PROXY() ?          \
+  conn->proxy_ssl_config.var : conn->ssl_config.var)
+
 bool Curl_ssl_config_matches(struct ssl_primary_config* data,
                              struct ssl_primary_config* needle);
 bool Curl_clone_primary_ssl_config(struct ssl_primary_config *source,

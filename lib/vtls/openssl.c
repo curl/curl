@@ -149,12 +149,6 @@
  */
 #define RAND_LOAD_LENGTH 1024
 
-#define SSL_IS_PROXY() (CURLPROXY_HTTPS == conn->http_proxy.proxytype)
-#define SSL_SET_OPTION(var) (SSL_IS_PROXY() ? data->set.proxy_ssl.var : \
-                             data->set.ssl.var)
-#define SSL_CONN_CONFIG(var) (SSL_IS_PROXY() ?          \
-  conn->proxy_ssl_config.var : conn->ssl_config.var)
-
 static int passwd_callback(char *buf, int num, int encrypting,
                            void *global_passwd)
 {
