@@ -41,6 +41,10 @@
 #define MD5_DIGEST_LENGTH 16 /* fixed size */
 #endif
 
+#ifndef SHA256_DIGEST_LENGTH
+#define SHA256_DIGEST_LENGTH 32 /* fixed size */
+#endif
+
 /* see http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-04 */
 #define ALPN_HTTP_1_1_LENGTH 8
 #define ALPN_HTTP_1_1 "http/1.1"

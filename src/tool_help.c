@@ -156,8 +156,7 @@ static const char *const helptext[] = {
   " -o, --output FILE   Write to FILE instead of stdout",
   "     --pass PASS     Pass phrase for the private key (SSL/SSH)",
   "     --path-as-is    Do not squash .. sequences in URL path",
-  "     --pinnedpubkey FILE  Public key (PEM/DER) to verify peer against "
-  "(OpenSSL/GnuTLS/NSS/wolfSSL/CyaSSL/GSKit only)",
+  "     --pinnedpubkey FILE/HASHES Public key to verify peer against (SSL)",
   "     --post301       "
   "Do not switch to GET after following a 301 redirect (H)",
   "     --post302       "
