@@ -3616,7 +3616,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
 }
 
 /*
- * Helpers for IDNA convertions.
+ * Helpers for IDNA conversions.
  */
 static bool is_ASCII_name(const char *hostname)
 {
@@ -3627,6 +3627,75 @@ static bool is_ASCII_name(const char *hostname)
       return FALSE;
   }
   return TRUE;
+}
+
+/* utf8len
+Count the number of UTF-8 characters.
+
+This function also tests for valid UTF-8 in accordance with the Unicode
+Standard, Section Conformance 3.9, Table 3-7, Well-Formed UTF-8 Byte Sequences.
+http://www.unicode.org/versions/Unicode7.0.0/ch03.pdf#G7404
+
+Success: Returns the number of UTF-8 characters.
+Failure: Returns -1 if 'str' is NULL or points to invalid UTF-8.
+*/
+static curl_off_t utf8len(const char *str)
+{
+  const unsigned char *ch = (const unsigned char*)str;
+  const curl_off_t error = -1;
+  curl_off_t count = 0;
+  unsigned char first;
+
+  if(!ch)
+    return error;
+
+  for(first = *ch; *ch; first = *++ch) {
+    ++count;
+    /* first byte */
+    if(*ch <= 0x7F)
+      continue;
+    if(*ch < 0xC2 || *ch > 0xF4)
+      return error;
+    if(*++ch)
+      return error;
+    /* second byte */
+    if(first == 0xE0) {
+      if(*ch < 0xA0 || *ch > 0xBF)
+        return error;
+    }
+    else if(first == 0xED) {
+      if(*ch < 0x80 || *ch > 0x9F)
+        return error;
+    }
+    else if(first == 0xF0) {
+      if(*ch < 0x90 || *ch > 0xBF)
+        return error;
+    }
+    else if(first == 0xF4) {
+      if(*ch < 0x80 || *ch > 0x8F)
+        return error;
+    }
+    else {
+      if(*ch < 0x80 || *ch > 0xBF)
+        return error;
+      if(first <= 0xDF)
+        continue;
+    }
+    if(*++ch)
+      return error;
+    /* third byte */
+    if(*ch < 0x80 || *ch > 0xBF)
+      return error;
+    if(first <= 0xEF)
+      continue;
+    if(*++ch)
+      return error;
+    /* fourth byte */
+    if(*ch < 0x80 || *ch > 0xBF)
+      return error;
+  }
+
+  return count;
 }
 
 #ifdef USE_LIBIDN
@@ -3704,7 +3773,14 @@ static void fix_hostname(struct SessionHandle *data,
    *************************************************************/
   if(stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
     char *ace_hostname = NULL;
-    int rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);
+    int rc;
+    /* Don't pass UTF-8 hostname to libidn unless it's valid UTF-8 */
+    if(codepage_is_utf8() && utf8len(host->name) < 0){
+      infof(data, "Hostname contains invalid UTF-8 sequence\n");
+      rc = IDNA_STRINGPREP_ERROR;
+    }
+    else
+      rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);
     infof (data, "Input domain encoded as `%s'\n",
            stringprep_locale_charset ());
     if(rc != IDNA_SUCCESS)
