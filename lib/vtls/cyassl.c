@@ -67,6 +67,7 @@ and that's a problem since options.h hasn't been included yet. */
 #include <cyassl/error.h>
 #endif
 #include <cyassl/ctaocrypt/random.h>
+#include <cyassl/ctaocrypt/sha256.h>
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -768,6 +769,18 @@ int Curl_cyassl_random(struct SessionHandle *data,
   if(RNG_GenerateBlock(&rng, entropy, (unsigned)length))
     return 1;
   return 0;
+}
+
+void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
+                      size_t tmplen,
+                      unsigned char *sha256sum /* output */,
+                      size_t unused)
+{
+  Sha256 SHA256pw;
+  (void)unused;
+  InitSha256(&SHA256pw);
+  Sha256Update(&SHA256pw, tmp, tmplen);
+  Sha256Final(&SHA256pw, sha256sum);
 }
 
 #endif

@@ -72,6 +72,10 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
                       size_t tmplen,
                       unsigned char *md5sum /* output */,
                       size_t unused);
+void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
+                      size_t tmplen,
+                      unsigned char *sha256sum /* output */,
+                      size_t unused);
 
 bool Curl_ossl_cert_status_request(void);
 
@@ -104,6 +108,7 @@ bool Curl_ossl_cert_status_request(void);
 #define curlssl_data_pending(x,y) Curl_ossl_data_pending(x,y)
 #define curlssl_random(x,y,z) Curl_ossl_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_ossl_md5sum(a,b,c,d)
+#define curlssl_sha256sum(a,b,c,d) Curl_ossl_sha256sum(a,b,c,d)
 #define curlssl_cert_status_request() Curl_ossl_cert_status_request()
 
 #define DEFAULT_CIPHER_SELECTION \
