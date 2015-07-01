@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,15 +19,16 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* Example source code to show one way to set the necessary OpenSSL locking
- * callbacks if you want to do multi-threaded transfers with HTTPS/FTPS with
- * libcurl built to use OpenSSL.
- *
+/* <DESC>
+ * one way to set the necessary OpenSSL locking callbacks if you want to do
+ * multi-threaded transfers with HTTPS/FTPS with libcurl built to use OpenSSL.
+ * </DESC>
+ */
+/*
  * This is not a complete stand-alone example.
  *
  * Author: Jeremy Brown
  */
-
 
 #include <stdio.h>
 #include <pthread.h>
