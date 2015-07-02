@@ -249,7 +249,9 @@ char * unix_path;
 #define MD5_Init MD5_INIT
 #define MD5_Update MD5_UPDATE
 #define OPENSSL_add_all_algo_noconf OPENSSL_ADD_ALL_ALGO_NOCONF
+#ifndef __VAX
 #define OPENSSL_load_builtin_modules OPENSSL_LOAD_BUILTIN_MODULES
+#endif
 #define PEM_read_X509 PEM_READ_X509
 #define PEM_write_bio_X509 PEM_WRITE_BIO_X509
 #define PKCS12_PBE_add PKCS12_PBE_ADD
@@ -353,6 +355,12 @@ char * unix_path;
 #define sk_pop SK_POP
 #define sk_pop_free SK_POP_FREE
 #define sk_value SK_VALUE
+#ifdef __VAX
+#define OPENSSL_NO_SHA256
+#endif
+#define SHA256_Final SHA256_FINAL
+#define SHA256_Init SHA256_INIT
+#define SHA256_Update SHA256_UPDATE
 
 #define USE_UPPERCASE_GSSAPI 1
 #define gss_seal GSS_SEAL
