@@ -3656,7 +3656,7 @@ static curl_off_t utf8len(const char *str)
       continue;
     if(*ch < 0xC2 || *ch > 0xF4)
       return error;
-    if(*++ch)
+    if(!*++ch)
       return error;
     /* second byte */
     if(first == 0xE0) {
@@ -3681,14 +3681,14 @@ static curl_off_t utf8len(const char *str)
       if(first <= 0xDF)
         continue;
     }
-    if(*++ch)
+    if(!*++ch)
       return error;
     /* third byte */
     if(*ch < 0x80 || *ch > 0xBF)
       return error;
     if(first <= 0xEF)
       continue;
-    if(*++ch)
+    if(!*++ch)
       return error;
     /* fourth byte */
     if(*ch < 0x80 || *ch > 0xBF)
@@ -3775,12 +3775,15 @@ static void fix_hostname(struct SessionHandle *data,
     char *ace_hostname = NULL;
     int rc;
     /* Don't pass UTF-8 hostname to libidn unless it's valid UTF-8 */
-    if(codepage_is_utf8() && utf8len(host->name) < 0){
+    char *utf8 = stringprep_locale_to_utf8(host->name);
+    if(utf8len(utf8) < 0) {
       infof(data, "Hostname contains invalid UTF-8 sequence\n");
       rc = IDNA_STRINGPREP_ERROR;
     }
     else
-      rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);
+      rc = idna_to_ascii_8z(utf8, &ace_hostname, 0);
+    idn_free(utf8);
+    utf8 = NULL;
     infof (data, "Input domain encoded as `%s'\n",
            stringprep_locale_charset ());
     if(rc != IDNA_SUCCESS)
