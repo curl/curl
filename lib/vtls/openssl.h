@@ -108,7 +108,9 @@ bool Curl_ossl_cert_status_request(void);
 #define curlssl_data_pending(x,y) Curl_ossl_data_pending(x,y)
 #define curlssl_random(x,y,z) Curl_ossl_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_ossl_md5sum(a,b,c,d)
+#ifndef OPENSSL_NO_SHA256
 #define curlssl_sha256sum(a,b,c,d) Curl_ossl_sha256sum(a,b,c,d)
+#endif
 #define curlssl_cert_status_request() Curl_ossl_cert_status_request()
 
 #define DEFAULT_CIPHER_SELECTION \

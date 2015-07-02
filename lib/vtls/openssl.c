@@ -68,7 +68,7 @@
 #include <openssl/pkcs12.h>
 #endif
 
-#ifndef HAVE_BORINGSSL
+#if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_IS_BORINGSSL)
 #include <openssl/ocsp.h>
 #endif
 
@@ -136,8 +136,8 @@
 #define CONF_modules_load_file(a,b,c)
 #endif
 
-#ifdef OPENSSL_IS_BORINGSSL
-/* not present in BoringSSL */
+#if (OPENSSL_VERSION_NUMBER < 0x0090808fL) || defined(OPENSSL_IS_BORINGSSL)
+/* not present in BoringSSL  or older OpenSSL */
 #define OPENSSL_load_builtin_modules(x)
 #endif
 
@@ -3183,6 +3183,7 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
   MD5_Final(md5sum, &MD5pw);
 }
 
+#ifndef OPENSSL_NO_SHA256
 void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
                       size_t tmplen,
                       unsigned char *sha256sum /* output */,
@@ -3194,6 +3195,7 @@ void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
   SHA256_Update(&SHA256pw, tmp, tmplen);
   SHA256_Final(sha256sum, &SHA256pw);
 }
+#endif
 
 bool Curl_ossl_cert_status_request(void)
 {
