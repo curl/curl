@@ -42,7 +42,7 @@ CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
 int Curl_cyassl_random(struct SessionHandle *data,
                        unsigned char *entropy,
                        size_t length);
-void Curl_cyassl_sha256sum(unsigned char *tmp, /* input */
+void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
                      size_t tmplen,
                      unsigned char *sha256sum, /* output */
                      size_t unused);
