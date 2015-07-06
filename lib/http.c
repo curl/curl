@@ -1462,18 +1462,6 @@ CURLcode Curl_http_done(struct connectdata *conn,
 
   Curl_unencode_cleanup(conn);
 
-#ifdef USE_SPNEGO
-  if(data->state.proxyneg.state == GSS_AUTHSENT ||
-     data->state.negotiate.state == GSS_AUTHSENT) {
-    /* add forbid re-use if http-code != 401/407 as a WA only needed for
-     * 401/407 that signal auth failure (empty) otherwise state will be RECV
-     * with current code */
-    if((data->req.httpcode != 401) && (data->req.httpcode != 407))
-      connclose(conn, "Negotiate transfer completed");
-    Curl_cleanup_negotiate(data);
-  }
-#endif
-
   /* set the proper values (possibly modified on POST) */
   conn->seek_func = data->set.seek_func; /* restore */
   conn->seek_client = data->set.seek_client; /* restore */
