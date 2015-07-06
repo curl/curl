@@ -3266,9 +3266,9 @@ ConnectionExists(struct SessionHandle *data,
           continue;
       }
 
-      
+
 #ifdef USE_SPNEGO
-      /* If connection not want use neg auth, 
+      /* If connection not want use neg auth,
        * then not choose neg authenticated connections */
       if(!wantNegHttp && check->data->state.negotiate.state != GSS_AUTHNONE)
         continue;
@@ -3279,7 +3279,8 @@ ConnectionExists(struct SessionHandle *data,
          || (wantNTLMhttp || check->ntlm.state != NTLMSTATE_NONE)
 #endif
 #ifdef USE_SPNEGO
-         || (wantNegHttp || check->data->state.negotiate.state != NTLMSTATE_NONE)
+         || (wantNegHttp 
+             || check->data->state.negotiate.state != NTLMSTATE_NONE)
 #endif
         ) {
         /* This protocol requires credentials per connection or is HTTP+NTLM,
@@ -3364,7 +3365,7 @@ ConnectionExists(struct SessionHandle *data,
         }
 #endif
 #if defined(USE_SPNEGO)
-        /* If we are looking for an HTTP+Negotiate connection, check if this 
+        /* If we are looking for an HTTP+Negotiate connection, check if this
          * with the right credentials. If not, use other connection */
         if(wantNegHttp) {
           if(credentialsMatch) {
