@@ -289,10 +289,93 @@ static void cleanup(struct negotiatedata *neg_ctx)
   neg_ctx->token_max = 0;
 }
 
+/* Cleanup context, SPN, output token */
+void cleanup_ctx(struct negotiatedata *neg_ctx)
+{
+    /* Free our security context */
+    if(neg_ctx->context) {
+      s_pSecFn->DeleteSecurityContext(neg_ctx->context);
+      free(neg_ctx->context);
+      neg_ctx->context = NULL;
+    }
+
+    /* Free the SPN and output token */
+    Curl_safefree(neg_ctx->server_name);
+    Curl_safefree(neg_ctx->output_token);
+
+    /* Reset any variables */
+    neg_ctx->token_max = 0;
+}
+
+void Curl_http_done_negotiate(struct connectdata *conn)
+{
+    /* For SSPI negotiate clear context and token.
+     * mark connection as closed */
+
+    cleanup_ctx(&conn->data->state.negotiate);
+    cleanup_ctx(&conn->data->state.proxyneg);
+}
+
 void Curl_cleanup_negotiate(struct SessionHandle *data)
 {
   cleanup(&data->state.negotiate);
   cleanup(&data->state.proxyneg);
+}
+
+int curl_SEC_CHAR_equal(const SEC_CHAR *first, const SEC_CHAR *second)
+{
+  while(*first && *second) {
+    if(toupper(*first) != toupper(*second)) {
+      break;
+    }
+    first++;
+    second++;
+  }
+  return toupper(*first) == toupper(*second);
+}
+
+bool Curl_compare_default_users(struct connectdata *check,
+                                struct connectdata *needle)
+{
+  struct negotiatedata *neg_ctx_check = &check->data->state.negotiate;
+
+  DWORD status;
+  SEC_WINNT_AUTH_IDENTITY*  p_identity = 0;
+  CredHandle*               credentials = 0;
+  TimeStamp                 lifetime;
+  SecPkgCredentials_Names   secCredNamesNeedle;
+  SecPkgCredentials_Names   secCredNamesCheck;
+
+  /* if connection not have credentials re-use it */
+  if(neg_ctx_check->credentials == 0)
+    return true;
+
+  credentials = malloc(sizeof(CredHandle));
+
+  status = s_pSecFn->AcquireCredentialsHandle(NULL,
+                (TCHAR *) TEXT("Negotiate"),
+                SECPKG_CRED_OUTBOUND, NULL,
+                p_identity, NULL, NULL,
+                credentials, &lifetime);
+  if(status != SEC_E_OK) {
+    free(credentials);
+    return false;
+  }
+
+  s_pSecFn->QueryCredentialsAttributes(
+      credentials,
+      SECPKG_CRED_ATTR_NAMES,
+      &secCredNamesNeedle);
+
+  s_pSecFn->QueryCredentialsAttributes(
+      neg_ctx_check->credentials,
+      SECPKG_CRED_ATTR_NAMES,
+      &secCredNamesCheck);
+
+  free(credentials);
+
+  return curl_SEC_CHAR_equal(secCredNamesCheck.sUserName,
+                             secCredNamesNeedle.sUserName);
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_SPNEGO */

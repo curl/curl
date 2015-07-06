@@ -31,7 +31,15 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
 /* this is for creating Negotiate header output */
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy);
 
+void Curl_http_done_negotiate(struct connectdata *conn);
+
 void Curl_cleanup_negotiate(struct SessionHandle *data);
+
+/* compare current (default) user for negotiate auth
+ * if user in check connection and needle connection is different,
+ * then return false. Comparing by full user name (user@DOMAIN) */
+bool Curl_compare_default_users(struct connectdata *check,
+                                struct connectdata *needle);
 
 #ifdef USE_WINDOWS_SSPI
 #define GSS_ERROR(status) (status & 0x80000000)

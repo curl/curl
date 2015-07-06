@@ -3112,6 +3112,10 @@ ConnectionExists(struct SessionHandle *data,
                        (data->state.authhost.want & CURLAUTH_NTLM_WB)) &&
     (needle->handler->protocol & PROTO_FAMILY_HTTP) ? TRUE : FALSE;
 #endif
+#ifdef USE_SPNEGO
+  bool wantNegHttp = (data->state.authhost.want & CURLAUTH_NEGOTIATE) &&
+      (needle->handler->protocol & PROTO_FAMILY_HTTP) ? TRUE : FALSE;
+#endif
   struct connectbundle *bundle;
 
   *force_reuse = FALSE;
@@ -3152,7 +3156,7 @@ ConnectionExists(struct SessionHandle *data,
     curr = bundle->conn_list->head;
     while(curr) {
       bool match = FALSE;
-#if defined(USE_NTLM)
+#if defined(USE_NTLM) || defined(USE_SPNEGO)
       bool credentialsMatch = FALSE;
 #endif
       size_t pipeLen;
@@ -3262,9 +3266,21 @@ ConnectionExists(struct SessionHandle *data,
           continue;
       }
 
+
+#ifdef USE_SPNEGO
+      /* If connection not want use neg auth,
+       * then not choose neg authenticated connections */
+      if(!wantNegHttp && check->data->state.negotiate.state != GSS_AUTHNONE)
+        continue;
+#endif
+
       if((!(needle->handler->flags & PROTOPT_CREDSPERREQUEST))
 #ifdef USE_NTLM
          || (wantNTLMhttp || check->ntlm.state != NTLMSTATE_NONE)
+#endif
+#ifdef USE_SPNEGO
+         || (wantNegHttp
+             || check->data->state.negotiate.state != NTLMSTATE_NONE)
 #endif
         ) {
         /* This protocol requires credentials per connection or is HTTP+NTLM,
@@ -3274,7 +3290,18 @@ ConnectionExists(struct SessionHandle *data,
           /* one of them was different */
           continue;
         }
-#if defined(USE_NTLM)
+#if defined(USE_SPNEGO)
+        /* if username not submit, then check default users for connections
+         * check only connections without username */
+        if((wantNegHttp ||
+            check->data->state.negotiate.state != NTLMSTATE_NONE) &&
+           strlen(needle->user) == 0) {
+          if(!Curl_compare_default_users(check, needle))
+            continue;
+        }
+#else
+#endif
+#if defined(USE_NTLM) || defined(USE_SPNEGO)
         credentialsMatch = TRUE;
 #endif
       }
@@ -3348,7 +3375,16 @@ ConnectionExists(struct SessionHandle *data,
           continue;
         }
 #endif
-
+#if defined(USE_SPNEGO)
+        /* If we are looking for an HTTP+Negotiate connection, check if this
+         * with the right credentials. If not, use other connection */
+        if(wantNegHttp) {
+          if(credentialsMatch) {
+            chosen = check;
+            break;
+          }
+        }
+#endif
         if(canPipeline) {
           /* We can pipeline if we want to. Let's continue looking for
              the optimal connection to use, i.e the shortest pipe that is not
