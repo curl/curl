@@ -3263,7 +3263,7 @@ ConnectionExists(struct SessionHandle *data,
       }
 
 #if defined(USE_NTLM)
-      /* Don't choose authenticated connections if auth don't set */
+      /* Don't choose authenticated connections if auth wanted auth not NTLM */
       if(!wantNTLMhttp && check->ntlm.state != NTLMSTATE_NONE)
         continue;
 #endif
