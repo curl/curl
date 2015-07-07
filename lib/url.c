@@ -3290,6 +3290,14 @@ ConnectionExists(struct SessionHandle *data,
           /* one of them was different */
           continue;
         }
+#if defined(USE_SPNEGO)
+        /* if username not submint, then check default users for connections */
+        if(wantNegHttp ||
+           check->data->state.negotiate.state != NTLMSTATE_NONE) {
+          if(!Curl_compare_default_users(check, needle))
+            continue;
+        }
+#endif
 #if defined(USE_NTLM) || defined(USE_SPNEGO)
         credentialsMatch = TRUE;
 #endif

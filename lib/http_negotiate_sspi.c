@@ -295,6 +295,58 @@ void Curl_cleanup_negotiate(struct SessionHandle *data)
   cleanup(&data->state.proxyneg);
 }
 
+int curl_SEC_CHAR_equal(const char *first, const char *second)
+{
+  while(*first && *second) {
+    if(toupper(*first) != toupper(*second)) {
+      break;
+    }
+    first++;
+    second++;
+  }
+  return toupper(*first) == toupper(*second);
+}
+
+bool Curl_compare_default_users(struct connectdata *check,
+                                struct connectdata *needle)
+{
+  struct negotiatedata *neg_ctx_check = &check->data->state.negotiate;
+
+  DWORD status;
+  SEC_WINNT_AUTH_IDENTITY*  p_identity = 0;
+  CredHandle*               credentials = 0;
+  TimeStamp                 lifetime;
+  SecPkgCredentials_Names   secCredNamesNeedle;
+  SecPkgCredentials_Names   secCredNamesCheck;
+
+  credentials = malloc(sizeof(CredHandle));
+
+  status = s_pSecFn->AcquireCredentialsHandle(NULL,
+                (TCHAR *) TEXT("Negotiate"),
+                SECPKG_CRED_OUTBOUND, NULL,
+                p_identity, NULL, NULL,
+                credentials, &lifetime);
+  if(status != SEC_E_OK) {
+    free(credentials);
+    return false;
+  }
+
+  s_pSecFn->QueryCredentialsAttributes(
+      credentials,
+      SECPKG_CRED_ATTR_NAMES,
+      &secCredNamesNeedle);
+
+  s_pSecFn->QueryCredentialsAttributes(
+      neg_ctx_check->credentials,
+      SECPKG_CRED_ATTR_NAMES,
+      &secCredNamesCheck);
+
+  free(credentials);
+
+  return curl_SEC_CHAR_equal(secCredNamesCheck.sUserName,
+                             secCredNamesNeedle.sUserName);
+}
+
 #endif /* !CURL_DISABLE_HTTP && USE_SPNEGO */
 
 #endif /* USE_WINDOWS_SSPI */

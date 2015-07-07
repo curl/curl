@@ -207,4 +207,10 @@ void Curl_cleanup_negotiate(struct SessionHandle *data)
   cleanup(&data->state.proxyneg);
 }
 
+bool Curl_compare_default_users(struct connectdata *check,
+                                struct connectdata *needle)
+{
+  return false;
+}
+
 #endif /* HAVE_GSSAPI && !CURL_DISABLE_HTTP && USE_SPNEGO */
