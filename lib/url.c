@@ -3279,7 +3279,7 @@ ConnectionExists(struct SessionHandle *data,
          || (wantNTLMhttp || check->ntlm.state != NTLMSTATE_NONE)
 #endif
 #ifdef USE_SPNEGO
-         || (wantNegHttp 
+         || (wantNegHttp
              || check->data->state.negotiate.state != NTLMSTATE_NONE)
 #endif
         ) {
