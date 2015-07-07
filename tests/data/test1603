@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+unittest
+idn
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+Internal sanitization of idn input testing
+ </name>
+<tool>
+unit1603
+</tool>
+</client>
+
+</testcase>

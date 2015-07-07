@@ -3632,13 +3632,23 @@ static bool is_ASCII_name(const char *hostname)
 /* utf8len: Count the number of UTF-8 characters.
 
 This function also tests for valid UTF-8 in accordance with the Unicode
-Standard, Section Conformance 3.9, Table 3-7, Well-Formed UTF-8 Byte Sequences.
-http://www.unicode.org/versions/Unicode7.0.0/ch03.pdf#G7404
+Standard, Section Conformance 3.9, Table 3-7, Well-Formed UTF-8 Byte
+Sequences. http://www.unicode.org/versions/Unicode7.0.0/ch03.pdf#G7404
 
-Success: Returns the number of UTF-8 characters.
+Success: Returns the number of unicode codepoints encoded in a UTF-8 string.
 Failure: Returns -1 if 'str' is NULL or points to invalid UTF-8.
 */
-static curl_off_t utf8len(const char *str)
+#ifdef USE_LIBIDN
+#ifndef DEBUGBUILD
+static
+#else
+/* We want to declare this function static, but we can't when we invoke
+ * it directly in a unit test. In such cases, some compilers warn about
+ * not seeing a decl before the impl, so provide one...
+ */
+curl_off_t utf8len(const char *str);
+#endif /* DEBUGBUILD */
+curl_off_t utf8len(const char *str)
 {
   const unsigned char *ch = (const unsigned char*)str;
   const curl_off_t error = -1;
@@ -3649,13 +3659,18 @@ static curl_off_t utf8len(const char *str)
 
   for(; *ch; ++ch, ++count) {
     unsigned char first = *ch; /* first byte */
-    if(*ch <= 0x7F)
+    if(first <= 0x7F)
       continue;
-    if(*ch < 0xC2 || *ch > 0xF4)
+    if(first < 0xC2 || first > 0xF4)
       return error;
     ++ch; /* second byte */
-    if(*ch < (first == 0xE0 ? 0xA0 : (first == 0xF0 ? 0x90 : 0x80)) ||
-       *ch > (first == 0xED ? 0x9F : (first == 0xF4 ? 0x8F : 0xBF)))
+    unsigned char first_valid = (first == 0xE0 ? 0xA0 :
+        (first == 0xF0 ? 0x90 : 0x80));
+    if(*ch < first_valid)
+      return error;
+    unsigned char last_valid = (first == 0xED ? 0x9F :
+        (first == 0xF4 ? 0x8F : 0xBF));
+    if(*ch > last_valid)
       return error;
     if(first <= 0xDF)
       continue;
@@ -3672,7 +3687,6 @@ static curl_off_t utf8len(const char *str)
   return count;
 }
 
-#ifdef USE_LIBIDN
 /*
  * Check if characters in hostname is allowed in Top Level Domain.
  */
@@ -3714,7 +3728,7 @@ static bool tld_check_name(struct SessionHandle *data,
 
   return TRUE;
 }
-#endif
+#endif /* USE_LIBIDN */
 
 /*
  * Perform any necessary IDN conversion of hostname
@@ -3748,9 +3762,14 @@ static void fix_hostname(struct SessionHandle *data,
   if(stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
     char *ace_hostname = NULL;
     int rc;
-    /* Don't pass UTF-8 hostname to libidn unless it's valid UTF-8 */
     char *utf8 = stringprep_locale_to_utf8(host->name);
-    if(utf8len(utf8) < 0) {
+    /* Don't pass UTF-8 hostname to libidn unless it's valid UTF-8. This check
+     * is quite picky; in addition to 5- and 6-byte sequences and invalid lead
+     * and continuation bytes, CESU-8 and so-called 'Modified UTF-8' sequences
+     * are also disallowed. This is a security measure; unsanitized UTF-8
+     * could be used to encode embedded null bytes and other undesirable stuff.
+     */
+    if(utf8len(utf8) < 1) {
       infof(data, "Hostname contains invalid UTF-8 sequence\n");
       rc = IDNA_STRINGPREP_ERROR;
     }
