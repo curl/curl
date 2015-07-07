@@ -322,7 +322,7 @@ void Curl_cleanup_negotiate(struct SessionHandle *data)
   cleanup(&data->state.proxyneg);
 }
 
-int curl_SEC_CHAR_equal(const char *first, const char *second)
+int curl_SEC_CHAR_equal(const SEC_CHAR *first, const SEC_CHAR *second)
 {
   while(*first && *second) {
     if(toupper(*first) != toupper(*second)) {
