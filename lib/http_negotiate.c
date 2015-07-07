@@ -223,7 +223,7 @@ void Curl_http_done_negotiate(struct connectdata *conn)
 bool Curl_compare_default_users(struct connectdata *check,
                                 struct connectdata *needle)
 {
-  return false;
+  return true;
 }
 
 #endif /* HAVE_GSSAPI && !CURL_DISABLE_HTTP && USE_SPNEGO */
