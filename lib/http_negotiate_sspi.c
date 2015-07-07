@@ -289,6 +289,33 @@ static void cleanup(struct negotiatedata *neg_ctx)
   neg_ctx->token_max = 0;
 }
 
+/* Cleanup context, SPN, output token */
+void cleanup_ctx(struct negotiatedata *neg_ctx)
+{
+    /* Free our security context */
+    if(neg_ctx->context) {
+      s_pSecFn->DeleteSecurityContext(neg_ctx->context);
+      free(neg_ctx->context);
+      neg_ctx->context = NULL;
+    }
+
+    /* Free the SPN and output token */
+    Curl_safefree(neg_ctx->server_name);
+    Curl_safefree(neg_ctx->output_token);
+
+    /* Reset any variables */
+    neg_ctx->token_max = 0;
+}
+
+void Curl_http_done_negotiate(struct connectdata *conn)
+{
+    /* For SSPI negotiate clear context and token.
+     * mark connection as closed */
+
+    cleanup_ctx(&conn->data->state.negotiate);
+    cleanup_ctx(&conn->data->state.proxyneg);
+}
+
 void Curl_cleanup_negotiate(struct SessionHandle *data)
 {
   cleanup(&data->state.negotiate);

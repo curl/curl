@@ -3295,7 +3295,7 @@ ConnectionExists(struct SessionHandle *data,
          * check only connections without username */
         if((wantNegHttp ||
             check->data->state.negotiate.state != NTLMSTATE_NONE) &&
-           needle->user == 0) {
+           strlen(needle->user) == 0) {
           if(!Curl_compare_default_users(check, needle))
             continue;
         }

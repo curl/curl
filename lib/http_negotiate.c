@@ -207,6 +207,19 @@ void Curl_cleanup_negotiate(struct SessionHandle *data)
   cleanup(&data->state.proxyneg);
 }
 
+void Curl_http_done_negotiate(struct connectdata *conn)
+{
+    /* For not SSPI negotiate clear all.
+     * mark connection as closed */
+
+    /* add forbid re-use if http-code != 401/407 as a WA only needed for
+     * 401/407 that signal auth failure (empty) otherwise state will be RECV
+     * with current code */
+    if((conn->data->req.httpcode != 401) && (conn->data->req.httpcode != 407))
+      connclose(conn, "Negotiate transfer completed");
+    Curl_cleanup_negotiate(data);
+}
+
 bool Curl_compare_default_users(struct connectdata *check,
                                 struct connectdata *needle)
 {

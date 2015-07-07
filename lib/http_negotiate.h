@@ -31,6 +31,8 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
 /* this is for creating Negotiate header output */
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy);
 
+void Curl_http_done_negotiate(struct connectdata *conn);
+
 void Curl_cleanup_negotiate(struct SessionHandle *data);
 
 /* compare current (default) user for negotiate auth
