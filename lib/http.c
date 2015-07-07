@@ -1462,6 +1462,11 @@ CURLcode Curl_http_done(struct connectdata *conn,
 
   Curl_unencode_cleanup(conn);
 
+#ifdef USE_SPNEGO
+  if(data->state.proxyneg.state == GSS_AUTHSENT ||
+     data->state.negotiate.state == GSS_AUTHSENT)
+    Curl_cleanup_negotiate(data);
+#endif
   /* set the proper values (possibly modified on POST) */
   conn->seek_func = data->set.seek_func; /* restore */
   conn->seek_client = data->set.seek_client; /* restore */

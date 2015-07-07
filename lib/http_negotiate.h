@@ -33,7 +33,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy);
 
 void Curl_cleanup_negotiate(struct SessionHandle *data);
 
-/* compare current (default) user for negotiate auth 
+/* compare current (default) user for negotiate auth
  * if user in check connection and needle connection is different,
  * then return false. Comparing by full user name (user@DOMAIN) */
 bool Curl_compare_default_users(struct connectdata *check,

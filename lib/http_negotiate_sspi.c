@@ -319,6 +319,10 @@ bool Curl_compare_default_users(struct connectdata *check,
   SecPkgCredentials_Names   secCredNamesNeedle;
   SecPkgCredentials_Names   secCredNamesCheck;
 
+  /* if connection not have credentials re-use it */
+  if(neg_ctx_check->credentials == 0)
+    return true;
+
   credentials = malloc(sizeof(CredHandle));
 
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
