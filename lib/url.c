@@ -3280,7 +3280,7 @@ ConnectionExists(struct SessionHandle *data,
 #endif
 #ifdef USE_SPNEGO
          || (wantNegHttp
-             || check->data->state.negotiate.state != NTLMSTATE_NONE)
+             || check->data->state.negotiate.state != GSS_AUTHNONE)
 #endif
         ) {
         /* This protocol requires credentials per connection or is HTTP+NTLM,
