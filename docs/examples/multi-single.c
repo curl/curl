@@ -79,7 +79,7 @@ int main(void)
 
     if(mc != CURLM_OK)
     {
-      fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+      fprintf(stderr, "curl_multi_wait() failed, code %d.\n", mc);
       break;
     }
 
