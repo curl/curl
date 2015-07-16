@@ -824,6 +824,9 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
     case SEC_E_OK:
       txt = "No error";
       break;
+    case CRYPT_E_REVOKED:
+      txt = "CRYPT_E_REVOKED";
+      break;
     case SEC_E_ALGORITHM_MISMATCH:
       txt = "SEC_E_ALGORITHM_MISMATCH";
       break;
