@@ -1492,7 +1492,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
   char ssl_buf[1024];
   char unknown[32];
   int msg_type, txt_len;
-  const char *verstr;
+  const char *verstr = NULL;
   struct connectdata *conn = userp;
 
   if(!conn || !conn->data || !conn->data->set.fdebug ||
