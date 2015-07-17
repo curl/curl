@@ -128,16 +128,24 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
         SCH_CRED_IGNORE_REVOCATION_OFFLINE;
 #else
-      schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION |
-        SCH_CRED_REVOCATION_CHECK_CHAIN;
+      schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
+      if(data->set.ssl_no_revoke)
+        schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+                                 SCH_CRED_IGNORE_REVOCATION_OFFLINE;
+      else
+        schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
 #endif
-      infof(data, "schannel: checking server certificate revocation\n");
+      if(data->set.ssl_no_revoke)
+        infof(data, "schannel: disabled server certificate revocation "
+                    "checks\n");
+      else
+        infof(data, "schannel: checking server certificate revocation\n");
     }
     else {
       schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
         SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
         SCH_CRED_IGNORE_REVOCATION_OFFLINE;
-      infof(data, "schannel: disable server certificate revocation checks\n");
+      infof(data, "schannel: disabled server certificate revocation checks\n");
     }
 
     if(!data->set.ssl.verifyhost) {
@@ -1384,7 +1392,8 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
                                 NULL,
                                 pCertContextServer->hCertStore,
                                 &ChainPara,
-                                0,
+                                (data->set.ssl_no_revoke ? 0 :
+                                 CERT_CHAIN_REVOCATION_CHECK_CHAIN),
                                 NULL,
                                 &pChainContext)) {
       failf(data, "schannel: CertGetCertificateChain failed: %s",
@@ -1395,21 +1404,24 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 
     if(result == CURLE_OK) {
       CERT_SIMPLE_CHAIN *pSimpleChain = pChainContext->rgpChain[0];
-      DWORD dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED|
-                                        CERT_TRUST_REVOCATION_STATUS_UNKNOWN);
+      DWORD dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED);
       dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
       if(dwTrustErrorMask) {
-        if(dwTrustErrorMask & CERT_TRUST_IS_PARTIAL_CHAIN)
+        if(dwTrustErrorMask & CERT_TRUST_IS_REVOKED)
+          failf(data, "schannel: CertGetCertificateChain trust error"
+                " CERT_TRUST_IS_REVOKED");
+        else if(dwTrustErrorMask & CERT_TRUST_IS_PARTIAL_CHAIN)
           failf(data, "schannel: CertGetCertificateChain trust error"
                 " CERT_TRUST_IS_PARTIAL_CHAIN");
-        if(dwTrustErrorMask & CERT_TRUST_IS_UNTRUSTED_ROOT)
+        else if(dwTrustErrorMask & CERT_TRUST_IS_UNTRUSTED_ROOT)
           failf(data, "schannel: CertGetCertificateChain trust error"
                 " CERT_TRUST_IS_UNTRUSTED_ROOT");
-        if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
+        else if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
           failf(data, "schannel: CertGetCertificateChain trust error"
                 " CERT_TRUST_IS_NOT_TIME_VALID");
-        failf(data, "schannel: CertGetCertificateChain error mask: 0x%08x",
-              dwTrustErrorMask);
+        else
+          failf(data, "schannel: CertGetCertificateChain error mask: 0x%08x",
+                dwTrustErrorMask);
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
     }
@@ -1425,6 +1437,14 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
       cert_hostname.const_tchar_ptr = cert_hostname_buff;
       hostname.tchar_ptr = Curl_convert_UTF8_to_tchar(conn->host.name);
 
+      /* TODO: Fix this for certificates with multiple alternative names.
+      Right now we're only asking for the first preferred alternative name.
+      Instead we'd need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG
+      (if WinCE supports that?) and run this section in a loop for each.
+      https://msdn.microsoft.com/en-us/library/windows/desktop/aa376086.aspx
+      curl: (51) schannel: CertGetNameString() certificate hostname
+      (.google.com) did not match connection (google.com)
+      */
       len = CertGetNameString(pCertContextServer,
                               CERT_NAME_DNS_TYPE,
                               0,
