@@ -71,7 +71,7 @@ set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 include_directories(${PROJECT_BINARY_DIR}/include/curl)
 include_directories( ${CURL_SOURCE_DIR}/include )
 
-option(BUILD_CURL_EXE "Set to ON to build cURL executable." ON)
+option(BUILD_CURL_EXE "Set to ON to build cURL executable." OFF)
 option(BUILD_CURL_TESTS "Set to ON to build cURL tests." ON)
 option(CURL_STATICLIB "Set to ON to build libcurl with static linking." OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
@@ -200,7 +200,7 @@ if(ENABLE_IPV6)
   endif()
 endif()
 
-option(ENABLE_MANUAL "to provide the built-in manual" ON)
+option(ENABLE_MANUAL "to provide the built-in manual" OFF)
 unset(USE_MANUAL CACHE) # TODO: cache NROFF/NROFF_MANOPT/USE_MANUAL vars?
 if(ENABLE_MANUAL)
   find_program(NROFF NAMES gnroff nroff)
@@ -303,7 +303,7 @@ set(HAVE_LIBCRYPTO OFF)
 set(HAVE_LIBSSL OFF)
 
 if(CMAKE_USE_OPENSSL)
-  find_package(OpenSSL)
+  #find_package(OpenSSL)
   if(OPENSSL_FOUND)
     list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
     set(USE_OPENSSL ON)
@@ -452,7 +452,7 @@ if(CURL_ZLIB)
 endif()
 
 #libSSH2
-option(CMAKE_USE_LIBSSH2 "Use libSSH2" ON)
+option(CMAKE_USE_LIBSSH2 "Use libSSH2" OFF)
 mark_as_advanced(CMAKE_USE_LIBSSH2)
 set(USE_LIBSSH2 OFF)
 set(HAVE_LIBSSH2 OFF)
@@ -988,11 +988,6 @@ set(CURL_PULL_INTTYPES_H ${HAVE_INTTYPES_H})
 include(CMake/OtherTests.cmake)
 
 add_definitions(-DHAVE_CONFIG_H)
-
-# For windows, do not allow the compiler to use default target (Vista).
-if(WIN32)
-  add_definitions(-D_WIN32_WINNT=0x0501)
-endif(WIN32)
 
 if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)

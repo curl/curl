@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "conncache.h"
+#include "curl/multi.h"
 
 struct Curl_message {
   /* the 'CURLMsg' is the part that is visible to the external user */

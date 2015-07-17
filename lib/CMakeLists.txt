@@ -1,4 +1,4 @@
-set(LIB_NAME libcurl)
+set(LIB_NAME libggcurl)
 
 configure_file(${CURL_SOURCE_DIR}/include/curl/curlbuild.h.cmake
   ${CURL_BINARY_DIR}/include/curl/curlbuild.h)
