@@ -1545,6 +1545,10 @@ and TLS1.0 protocols known as BEAST.  If this option isn't used, the SSL layer
 may use workarounds known to cause interoperability problems with some older
 SSL implementations. WARNING: this option loosens the SSL security, and by
 using this flag you ask for exactly that.  (Added in 7.25.0)
+.IP "--ssl-no-revoke"
+(WinSSL) This option tells curl to disable certificate revocation checks.
+WARNING: this option loosens the SSL security, and by using this flag you ask
+for exactly that.  (Added in 7.44.0)
 .IP "--socks4 <host[:port]>"
 Use the specified SOCKS4 proxy. If the port number is not specified, it is
 assumed at port 1080. (Added in 7.15.2)

@@ -1328,8 +1328,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
                         config->gssapi_delegation);
 
         /* new in 7.25.0 */
-        if(config->ssl_allow_beast)
-          my_setopt(curl, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_ALLOW_BEAST);
+        my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS,
+          (long)((config->ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
+                 (config->ssl_no_revoke ? CURLSSLOPT_NO_REVOKE : 0)));
 
         if(config->mail_auth)
           my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
