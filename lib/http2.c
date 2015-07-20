@@ -316,6 +316,11 @@ static int push_promise(struct SessionHandle *data,
     DEBUGF(infof(data, "Got PUSH_PROMISE, ask application!\n"));
 
     stream = data->req.protop;
+    if(!stream) {
+      failf(data, "Internal NULL stream!\n");
+      rv = 1;
+      goto fail;
+    }
 
     rv = data->multi->push_cb(data, newhandle,
                               stream->push_headers_used, &heads,
@@ -391,6 +396,10 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     }
     stream = data_s->req.protop;
+    if(!stream) {
+      failf(conn->data, "Internal NULL stream! 2\n");
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
   }
   else
     /* we do nothing on stream zero */
@@ -529,6 +538,10 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
   stream = data_s->req.protop;
+  if(!stream) {
+    failf(conn->data, "Internal NULL stream! 3\n");
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
 
   nread = MIN(stream->len, len);
   memcpy(&stream->mem[stream->memlen], data, nread);
@@ -617,6 +630,10 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
       return 0;
     }
     stream = data_s->req.protop;
+    if(!stream) {
+      failf(conn->data, "Internal NULL stream! 4\n");
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
 
     stream->error_code = error_code;
     stream->closed = TRUE;
@@ -695,6 +712,10 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
   stream = data_s->req.protop;
+  if(!stream) {
+    failf(conn->data, "Internal NULL stream! 5\n");
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
 
   if(stream->bodystarted)
     /* Ignore trailer or HEADERS not mapped to HTTP semantics.  The
@@ -793,6 +814,10 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     }
     stream = data_s->req.protop;
+    if(!stream) {
+      failf(conn->data, "Internal NULL stream! 6\n");
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
   }
   else {
     failf(conn->data, "nghttp2 confusion");
