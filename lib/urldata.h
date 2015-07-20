@@ -1350,6 +1350,7 @@ enum dupstring {
   STRING_COOKIE,          /* HTTP cookie string to send */
   STRING_COOKIEJAR,       /* dump all cookies to this file */
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
+  STRING_DEFAULT_PROTOCOL, /* Protocol to use when the URL doesn't specify */
   STRING_DEVICE,          /* local network interface/address to use */
   STRING_ENCODING,        /* Accept-Encoding string */
   STRING_FTP_ACCOUNT,     /* ftp account data */

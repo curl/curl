@@ -166,6 +166,7 @@ static const char *const helptext[] = {
   " -#, --progress-bar  Display transfer progress as a progress bar",
   "     --proto PROTOCOLS  Enable/disable PROTOCOLS",
   "     --proto-redir PROTOCOLS  Enable/disable PROTOCOLS on redirect",
+  "     --proto-default PROTOCOL Protocol used when not supplied by the URL",
   " -x, --proxy [PROTOCOL://]HOST[:PORT]  Use proxy on given port",
   "     --proxy-anyauth  Pick \"any\" proxy authentication method (H)",
   "     --proxy-basic   Use Basic authentication on the proxy (H)",

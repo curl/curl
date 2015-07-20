@@ -339,6 +339,26 @@ long proto2num(struct OperationConfig *config, long *val, const char *str)
 }
 
 /**
+ * Check that the given string is a protocol known to curl
+ *
+ * @param str the string to inspect
+ * @return PARAM_OK if the string is a known protocol, else an error code
+ */
+int check_protocol(const char *str)
+{
+  const char * const *pp;
+  const curl_version_info_data *curlinfo = curl_version_info(CURLVERSION_NOW);
+  if(!str)
+    return PARAM_REQUIRES_PARAMETER;
+  for(pp = curlinfo->protocols; *pp; pp++) {
+    if(strcmp(*pp, str) == 0) {
+      return PARAM_OK;
+    }
+  }
+  return PARAM_BAD_USE;
+}
+
+/**
  * Parses the given string looking for an offset (which may be a
  * larger-than-integer value). The offset CANNOT be negative!
  *

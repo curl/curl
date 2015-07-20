@@ -37,6 +37,7 @@ ParameterError str2double(double *val, const char *str);
 ParameterError str2udouble(double *val, const char *str);
 
 long proto2num(struct OperationConfig *config, long *val, const char *str);
+int check_protocol(const char *str);
 
 ParameterError str2offset(curl_off_t *val, const char *str);
 
@@ -51,4 +52,3 @@ int ftpcccmethod(struct OperationConfig *config, const char *str);
 long delegation(struct OperationConfig *config, char *str);
 
 #endif /* HEADER_CURL_TOOL_PARAMHLP_H */
-

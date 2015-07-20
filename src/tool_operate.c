@@ -1290,6 +1290,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_flags(curl, CURLOPT_PROTOCOLS, config->proto);
         if(config->proto_redir_present)
           my_setopt_flags(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
+        my_setopt_str(curl, CURLOPT_DEFAULT_PROTOCOL,
+                      config->proto_default);
 
         if(config->content_disposition
            && (urlnode->flags & GETOUT_USEREMOTE)
