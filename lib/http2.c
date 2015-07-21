@@ -1549,4 +1549,25 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#endif
+#else /* !USE_NGHTTP2 */
+
+/* Satisfy external references even if http2 is not compiled in. */
+
+#define CURL_DISABLE_TYPECHECK
+#include <curl/curl.h>
+
+char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
+{
+  (void) h;
+  (void) num;
+  return NULL;
+}
+
+char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
+{
+  (void) h;
+  (void) header;
+  return NULL;
+}
+
+#endif /* USE_NGHTTP2 */
