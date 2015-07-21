@@ -61,5 +61,11 @@ CURL_EXTERN int curl_formget_ccsid(struct curl_httppost * form, void * arg,
                                    unsigned int ccsid);
 CURL_EXTERN CURLcode curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...);
 CURL_EXTERN void curl_certinfo_free_all(struct curl_certinfo *info);
+CURL_EXTERN char *curl_pushheader_bynum_cssid(struct curl_pushheaders *h,
+                                              size_t num, unsigned int ccsid);
+CURL_EXTERN char *curl_pushheader_byname_ccsid(struct curl_pushheaders *h,
+                                               const char *header,
+                                               unsigned int ccsidin,
+                                               unsigned int ccsidout);
 
 #endif

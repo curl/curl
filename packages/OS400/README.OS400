@@ -148,7 +148,7 @@ parameter/array boundary.
   Please note that CURLFORM_PTRCONTENTS and CURLFORM_BUFFERPTR are considered
 unconvertible strings and thus are NOT followed by a CCSID.
 
-_ curl_easy_getinfo_ccsid
+_ curl_easy_getinfo_ccsid()
   The following options are followed by a 'char * *' and a CCSID. Unlike
 curl_easy_getinfo(), the value returned in the pointer should be freed after
 use:
@@ -168,6 +168,14 @@ Lists returned should be released with curl_slist_free_all() after use.
 CCSID. Returned structures sould be free'ed using curl_certinfo_free_all() after
 use.
   Other options are processed like in curl_easy_getinfo().
+
+_ curl_pushheader_bynum_cssid() and curl_pushheader_byname_ccsid()
+  Although the prototypes are self-explanatory, the returned string pointer
+should be freed after use, as opposite to the non-ccsid versions of these
+procedures.
+  Please note that HTTP2 is not (yet) implemented on OS/400, thus these
+functions will always return NULL.
+
 
   Standard compilation environment does support neither autotools nor make;
 in fact, very few common utilities are available. As a consequence, the
@@ -265,14 +273,14 @@ _ Do not use original source include files unless you know what you are doing.
 ILE/RPG support:
 
   Since 95% of the OS/400 programmers use ILE/RPG exclusively, a definition
-  /COPY member is provided for this language. To include all libcurl
+  /INCLUDE member is provided for this language. To include all libcurl
   definitions in an ILE/RPG module, line
 
      h bnddir('CURL/CURL')
 
 must figure in the program header, and line
 
-     d/copy curl/h,curl.inc
+     d/include curl/h,curl.inc
 
 in the global data section of the module's source code.
 
