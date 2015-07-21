@@ -222,6 +222,8 @@
      d                 c                   2
      d CURL_HTTP_VERSION_2_0...
      d                 c                   3
+     d CURL_HTTP_VERSION_2...
+     d                 c                   3
       *
      d CURL_NETRC_IGNORED...
      d                 c                   0
@@ -275,6 +277,9 @@
      d                 c                   X'00000002'
      d CURL_CSELECT_ERR...
      d                 c                   X'00000004'
+      *
+     d CURL_PUSH_OK    c                   0
+     d CURL_PUSH_DENY  c                   1
       *
      d CURLPAUSE_RECV  c                   X'00000001'
      d CURLPAUSE_RECV_CONT...
@@ -676,7 +681,9 @@
      d                 c                   3
       *
      d CURLSSLOPT_ALLOW_BEAST...
-     d                 c                   1
+     d                 c                   X'0001'
+     d CURLSSLOPT_NO_REVOKE...
+     d                 c                   X'0002'
       *
       /if not defined(CURL_NO_OLDIES)
      d curl_ftpssl     s                   like(curl_usessl)
@@ -1215,6 +1222,8 @@
      d                 c                   10235
      d  CURLOPT_SERVICE_NAME...
      d                 c                   10236
+     d  CURLOPT_PIPEWAIT...
+     d                 c                   00237
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1573,6 +1582,18 @@
      d                 c                   10012
      d  CURLMOPT_MAX_TOTAL_CONNECTIONS...
      d                 c                   00013
+     d  CURLMOPT_PUSHFUNCTION...
+     d                 c                   20014
+     d  CURLMOPT_PUSHDATA...
+     d                 c                   10015
+      *
+      * Bitmask bits for CURLMOPT_PIPELING.
+      *
+     d CURLPIPE_NOTHING...
+     d                 c                   x'00000000'
+     d CURLPIPE_HTTP1  c                   x'00000001'
+     d CURLPIPE_MULTIPLEX...
+     d                 c                   x'00000002'
       *
       *  Public API enums for RTSP requests.
       *
@@ -1789,6 +1810,12 @@
      d                 s               *   based(######ptr######) procptr
       *
      d curl_socket_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_multi_timer_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_push_callback...
      d                 s               *   based(######ptr######) procptr
       *
      d curl_opensocket_callback...
@@ -2106,6 +2133,16 @@
      d                 pr              *   extproc('curl_multi_strerror')       char *
      d  code                               value like(CURLMcode)
       *
+     d curl_pushheader_bynum...
+     d                 pr              *   extproc('curl_pushheader_bynum')     char *
+     d  h                              *   value                                curl_pushheaders *
+     d  num                          10u 0 value
+      *
+     d curl_pushheader_byname...
+     d                 pr              *   extproc('curl_pushheader_byname')    char *
+     d  h                              *   value                                curl_pushheaders *
+     d  header                         *   value options(*string)               const char *
+      *
      d curl_multi_socket...
      d                 pr                  extproc('curl_multi_socket')
      d                                     like(CURLMcode)
@@ -2272,5 +2309,20 @@
      d  option                             value like(CURLoption)
      d  objectarg                      *   value options(*string: *nopass)
      d  ccsid                        10u 0 value options(*nopass)
+      *
+     d curl_pushheader_bynum_ccsid...
+     d                 pr              *   extproc(                             char *
+     d                                       'curl_pushheader_bynum_ccsid')
+     d  h                              *   value                                curl_pushheaders *
+     d  num                          10u 0 value
+     d  ccsid                        10u 0 value
+      *
+     d curl_pushheader_byname_ccsid...
+     d                 pr              *   extproc(                             char *
+     d                                       'curl_pushheader_byname_ccsid')
+     d  h                              *   value                                curl_pushheaders *
+     d  header                         *   value options(*string)               const char *
+     d  ccsidin                      10u 0 value
+     d  ccsidout                     10u 0 value
       *
       /endif
