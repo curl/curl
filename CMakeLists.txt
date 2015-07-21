@@ -351,7 +351,7 @@ if(NOT CURL_DISABLE_LDAP)
     check_library_exists_concat(${CMAKE_LDAP_LIB} ldap_init HAVE_LIBLDAP)
     check_library_exists_concat(${CMAKE_LBER_LIB} ber_init HAVE_LIBLBER)
   else()
-    check_include_file_concat("winldap.h" HAVE_WINLDAP_H)
+    #check_include_file_concat("winldap.h" HAVE_WINLDAP_H)
     check_include_file_concat("winber.h"  HAVE_WINBER_H)
   endif()
   
