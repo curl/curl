@@ -1120,12 +1120,21 @@ cleanup:
   */
   if(len && !connssl->decdata_offset && connssl->recv_connection_closed &&
      !connssl->recv_sspi_close_notify) {
-    DWORD winver_full, winver_major, winver_minor;
-    winver_full = GetVersion();
-    winver_major = (DWORD)(LOBYTE(LOWORD(winver_full)));
-    winver_minor = (DWORD)(HIBYTE(LOWORD(winver_full)));
+    BOOL isWin2k;
+    ULONGLONG cm;
+    OSVERSIONINFOEX osver = { sizeof osver, 5, };
 
-    if(winver_major == 5 && winver_minor == 0 && sspi_status == SEC_E_OK)
+    cm = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
+
+    isWin2k = VerifyVersionInfo(&osver,
+                                (VER_MAJORVERSION | VER_MINORVERSION |
+                                 VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
+                                cm);
+
+    if(isWin2k && sspi_status == SEC_E_OK)
       connssl->recv_sspi_close_notify = true;
     else {
       *err = CURLE_RECV_ERROR;
