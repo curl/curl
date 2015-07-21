@@ -1129,9 +1129,11 @@ cleanup:
     osver.dwMajorVersion = 5;
     osver.dwMinorVersion = 0;
     versionMask = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
-    versionMask = VerSetConditionMask(versionMask, VER_MINORVERSION, VER_EQUAL);
+    versionMask = VerSetConditionMask(versionMask, VER_MINORVERSION,
+                                      VER_EQUAL);
 
-    if(VerifyVersionInfo(&osver, VER_MAJORVERSION | VER_MINORVERSION, versionMask))
+    if(VerifyVersionInfo(&osver, VER_MAJORVERSION | VER_MINORVERSION,
+                         versionMask))
       isWin2k = TRUE;
 
     if(isWin2k && sspi_status == SEC_E_OK)
