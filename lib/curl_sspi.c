@@ -93,20 +93,20 @@ CURLcode Curl_sspi_global_init(void)
        osver.dwPlatformId == platformId)
       securityDll = TRUE;
 #else
-    ULONGLONG majorVersionMask;
-    ULONGLONG platformIdMask;
-    OSVERSIONINFOEX osver;
+    ULONGLONG cm;
+    OSVERSIONINFOEX osver = { sizeof osver, majorVersion, 0, 0, platformId, };
 
-    memset(&osver, 0, sizeof(osver));
-    osver.dwOSVersionInfoSize = sizeof(osver);
-    osver.dwMajorVersion = majorVersion;
-    osver.dwPlatformId = platformId;
-    majorVersionMask = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
-    platformIdMask = VerSetConditionMask(0, VER_PLATFORMID, VER_EQUAL);
+    cm = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
 
     /* Verify the major version number == 4 and platform id == WIN_NT */
-    if(VerifyVersionInfo(&osver, VER_MAJORVERSION, majorVersionMask) &&
-       VerifyVersionInfo(&osver, VER_PLATFORMID, platformIdMask))
+    if(VerifyVersionInfo(&osver, (VER_MAJORVERSION | VER_MINORVERSION |
+                                  VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR |
+                                  VER_PLATFORMID),
+                         cm))
       securityDll = TRUE;
 #endif
 
