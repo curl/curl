@@ -949,16 +949,17 @@ void Curl_sndbufset(curl_socket_t sockfd)
         detectOsState = DETECT_OS_VISTA_OR_LATER;
     }
 #else
-    ULONGLONG majorVersionMask;
-    OSVERSIONINFOEX osver;
+    ULONGLONG cm;
+    OSVERSIONINFOEX osver = { sizeof osver, majorVersion, };
 
-    memset(&osver, 0, sizeof(osver));
-    osver.dwOSVersionInfoSize = sizeof(osver);
-    osver.dwMajorVersion = majorVersion;
-    majorVersionMask = VerSetConditionMask(0, VER_MAJORVERSION,
-                                           VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(0, VER_MAJORVERSION, VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
+    cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
 
-    if(VerifyVersionInfo(&osver, VER_MAJORVERSION, majorVersionMask))
+    if(VerifyVersionInfo(&osver, (VER_MAJORVERSION | VER_MINORVERSION |
+                                  VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
+                         cm))
       detectOsState = DETECT_OS_VISTA_OR_LATER;
     else
       detectOsState = DETECT_OS_PREVISTA;
