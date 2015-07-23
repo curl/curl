@@ -1274,6 +1274,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   }
   /* Extract :method, :path from request line */
   end = strchr(hdbuf, ' ');
+  if(!end)
+    goto fail;
   nva[0].name = (unsigned char *)":method";
   nva[0].namelen = (uint16_t)strlen((char *)nva[0].name);
   nva[0].value = (unsigned char *)hdbuf;
@@ -1283,6 +1285,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   hdbuf = end + 1;
 
   end = strchr(hdbuf, ' ');
+  if(!end)
+    goto fail;
   nva[1].name = (unsigned char *)":path";
   nva[1].namelen = (uint16_t)strlen((char *)nva[1].name);
   nva[1].value = (unsigned char *)hdbuf;
@@ -1299,13 +1303,16 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nva[2].flags = NGHTTP2_NV_FLAG_NONE;
 
   hdbuf = strchr(hdbuf, 0x0a);
+  if(!hdbuf)
+    goto fail;
   ++hdbuf;
 
   authority_idx = 0;
 
   for(i = 3; i < nheader; ++i) {
     end = strchr(hdbuf, ':');
-    assert(end);
+    if(!end)
+      goto fail;
     if(end - hdbuf == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
       authority_idx = i;
       nva[i].name = (unsigned char *)":authority";
@@ -1318,7 +1325,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     hdbuf = end + 1;
     for(; *hdbuf == ' '; ++hdbuf);
     end = strchr(hdbuf, 0x0d);
-    assert(end);
+    if(!end)
+      goto fail;
     nva[i].value = (unsigned char *)hdbuf;
     nva[i].valuelen = (uint16_t)(end - hdbuf);
     nva[i].flags = NGHTTP2_NV_FLAG_NONE;
@@ -1365,7 +1373,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
                                        NULL, NULL);
   }
 
-  free(nva);
+  Curl_safefree(nva);
 
   if(stream_id < 0) {
     DEBUGF(infof(conn->data, "http2_send() send error\n"));
@@ -1405,6 +1413,11 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   }
 
   return len;
+
+  fail:
+  free(nva);
+  *err = CURLE_SEND_ERROR;
+  return -1;
 }
 
 CURLcode Curl_http2_setup(struct connectdata *conn)
