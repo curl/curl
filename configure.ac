@@ -47,6 +47,7 @@ CURL_CHECK_OPTION_WERROR
 CURL_CHECK_OPTION_CURLDEBUG
 CURL_CHECK_OPTION_SYMBOL_HIDING
 CURL_CHECK_OPTION_ARES
+CURL_CHECK_OPTION_RT
 
 XC_CHECK_PATH_SEPARATOR
 
@@ -3217,7 +3218,7 @@ if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
 [Options --enable-threaded-resolver and --enable-ares are mutually exclusive])
 fi
 
-if test "$want_thres" = "yes"; then
+if test "$want_thres" = "yes" && test "$dontwant_rt" = "no"; then
   AC_CHECK_HEADER(pthread.h,
     [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
       save_CFLAGS="$CFLAGS"

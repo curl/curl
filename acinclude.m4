@@ -1851,8 +1851,10 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   AC_REQUIRE([AC_HEADER_TIME])dnl
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
+  #
+  if test "x$dontwant_rt" == "xno" ; then
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -1866,17 +1868,18 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
 #include <time.h>
 #endif
 #endif
-    ]],[[
-      struct timespec ts;
-      (void)clock_gettime(CLOCK_MONOTONIC, &ts);
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    ac_cv_func_clock_gettime="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    ac_cv_func_clock_gettime="no"
-  ])
+      ]],[[
+        struct timespec ts;
+        (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      ac_cv_func_clock_gettime="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      ac_cv_func_clock_gettime="no"
+    ])
+  fi
   dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally postponed
   dnl until library linking and run-time checks for clock_gettime succeed.
 ])
