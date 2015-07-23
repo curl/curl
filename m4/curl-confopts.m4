@@ -316,6 +316,42 @@ dnl     AC_MSG_ERROR([options --enable-ares and --enable-threads are mutually ex
 dnl   fi
 dnl ])
 
+dnl CURL_CHECK_OPTION_RT
+dnl -------------------------------------------------
+dnl Verify if configure has been involed with option
+dnl --disable-rt and set shell variable dontwant_rt
+dnl as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_RT], [
+  AC_BEFORE([$0], [CURL_CHECK_LIB_THREADS])dnl
+  AC_MSG_CHECKING([whether to disable dependency on -lrt])
+  OPT_RT="default"
+  AC_ARG_ENABLE(rt,
+ AC_HELP_STRING([--disable-rt],[disable dependency on -lrt]),
+  OPT_RT=$enableval)
+  case "$OPT_RT" in
+    no)
+      dnl --disable-rt used (reverse logic)
+      dontwant_rt="yes"
+      AC_MSG_RESULT([yes])
+      ;;
+    default)
+      dnl configure option not specified (so not disabled)
+      dontwant_rt="no"
+      AC_MSG_RESULT([(assumed no)]
+      ;;
+    *)
+      dnl --enable-rt option used (reverse logic)
+      dontwant_rt="no"
+      AC_MSG_RESULT([no])
+      ;;
+  esac
+  dnl TODO: may require mutual exclusion
+  if test "$dontwant_rt" = "yes" && test "$want_thres" = "yes" ; then
+    AC_MSG_ERROR([options --disable-rt and --enable-thread-resolver are mutually exclusive, at most one can be selected.])
+  fi
+])
+ 
 
 dnl CURL_CHECK_OPTION_WARNINGS
 dnl -------------------------------------------------
