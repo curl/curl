@@ -3582,14 +3582,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           k->auto_decoding = GZIP;
           start += 6;
         }
-        else if(checkprefix("compress", start)) {
-          k->auto_decoding = COMPRESS;
-          start += 8;
-        }
-        else if(checkprefix("x-compress", start)) {
-          k->auto_decoding = COMPRESS;
-          start += 10;
-        }
         else
           /* unknown! */
           break;
@@ -3622,9 +3614,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
       else if(checkprefix("gzip", start)
               || checkprefix("x-gzip", start))
         k->auto_decoding = GZIP;
-      else if(checkprefix("compress", start)
-              || checkprefix("x-compress", start))
-        k->auto_decoding = COMPRESS;
     }
     else if(checkprefix("Content-Range:", k->p)) {
       /* Content-Range: bytes [num]-
