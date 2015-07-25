@@ -1510,6 +1510,46 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
 
 
   if test X"$HAVECRYPTO" = X"yes"; then
+     AC_MSG_CHECKING([OpenSSL linking without -ldl])
+     saved_libs=$LIBS
+     AC_TRY_LINK(
+        [
+          #include <openssl/evp.h>
+        ],
+        [
+          SSLeay_add_all_algorithms();
+        ],
+        [
+          AC_MSG_RESULT(yes)
+          LIBS="$saved_libs"
+        ],
+        [
+          AC_MSG_RESULT(no)
+          AC_MSG_CHECKING([OpenSSL linking with -ldl])
+          LIBS="-ldl $LIBS"
+          AC_TRY_LINK(
+          [
+            #include <openssl/evp.h>
+          ],
+          [
+            SSLeay_add_all_algorithms();
+          ],
+          [
+            AC_MSG_RESULT(yes)
+            LIBS="$saved_libs -ldl"
+          ],
+          [
+            AC_MSG_RESULT(no)
+            LIBS="$saved_libs"
+          ]
+          )
+
+        ]
+     )
+
+  fi
+
+  if test X"$HAVECRYPTO" = X"yes"; then
     dnl This is only reasonable to do if crypto actually is there: check for
     dnl SSL libs NOTE: it is important to do this AFTER the crypto lib
 
