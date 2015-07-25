@@ -26,6 +26,7 @@
  1.8 Allow SSL (HTTPS) to proxy
  1.9 Cache negative name resolves
  1.10 Support IDNA2008
+ 1.11 minimize dependencies with dynamicly loaded modules
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -225,6 +226,13 @@
  by libidn. libidn implements IDNA2003 which has been superseded by IDNA2008.
  libidn2 is an existing library offering support for IDNA2008.
 
+1.11 minimize dependencies with dynamicly loaded modules
+
+ We can create a system with loadable modules/plug-ins, where these modules
+ would be the ones that link to 3rd party libs. That would allow us to avoid
+ having to load ALL dependencies since only the necessary ones for this
+ app/invoke/used protocols would be necessary to load.  See
+ https://github.com/bagder/curl/issues/349
 
 2. libcurl - multi interface
 
