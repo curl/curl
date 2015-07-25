@@ -27,6 +27,8 @@ rem ***************************************************************************
   if not "%OS%" == "Windows_NT" goto nodos
   setlocal
   set SUCCESSFUL_BUILDS=
+  set VC_VER=
+  set BUILD_PLATFORM=
 
   rem Display the help
   if /i "%~1" == "" goto syntax
@@ -76,6 +78,10 @@ rem ***************************************************************************
   shift & goto parseArgs
 
 :prerequisites
+  rem Compiler and platform are required parameters.
+  if not defined VC_VER goto syntax
+  if not defined BUILD_PLATFORM goto syntax
+
   rem Default the start directory if one isn't specified
   if not defined START_DIR set START_DIR=..\..\wolfssl
 
