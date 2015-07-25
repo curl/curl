@@ -316,6 +316,11 @@ static int push_promise(struct SessionHandle *data,
     DEBUGF(infof(data, "Got PUSH_PROMISE, ask application!\n"));
 
     stream = data->req.protop;
+    if(!stream) {
+      failf(data, "Internal NULL stream!\n");
+      rv = 1;
+      goto fail;
+    }
 
     rv = data->multi->push_cb(data, newhandle,
                               stream->push_headers_used, &heads,
@@ -391,6 +396,10 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     }
     stream = data_s->req.protop;
+    if(!stream) {
+      failf(conn->data, "Internal NULL stream! 2\n");
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
   }
   else
     /* we do nothing on stream zero */
@@ -529,6 +538,10 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
   stream = data_s->req.protop;
+  if(!stream) {
+    failf(conn->data, "Internal NULL stream! 3\n");
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
 
   nread = MIN(stream->len, len);
   memcpy(&stream->mem[stream->memlen], data, nread);
@@ -617,6 +630,10 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
       return 0;
     }
     stream = data_s->req.protop;
+    if(!stream) {
+      failf(conn->data, "Internal NULL stream! 4\n");
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
 
     stream->error_code = error_code;
     stream->closed = TRUE;
@@ -695,6 +712,10 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
   stream = data_s->req.protop;
+  if(!stream) {
+    failf(conn->data, "Internal NULL stream! 5\n");
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
 
   if(stream->bodystarted)
     /* Ignore trailer or HEADERS not mapped to HTTP semantics.  The
@@ -793,6 +814,10 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     }
     stream = data_s->req.protop;
+    if(!stream) {
+      failf(conn->data, "Internal NULL stream! 6\n");
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
+    }
   }
   else {
     failf(conn->data, "nghttp2 confusion");
@@ -1249,6 +1274,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   }
   /* Extract :method, :path from request line */
   end = strchr(hdbuf, ' ');
+  if(!end)
+    goto fail;
   nva[0].name = (unsigned char *)":method";
   nva[0].namelen = (uint16_t)strlen((char *)nva[0].name);
   nva[0].value = (unsigned char *)hdbuf;
@@ -1258,6 +1285,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   hdbuf = end + 1;
 
   end = strchr(hdbuf, ' ');
+  if(!end)
+    goto fail;
   nva[1].name = (unsigned char *)":path";
   nva[1].namelen = (uint16_t)strlen((char *)nva[1].name);
   nva[1].value = (unsigned char *)hdbuf;
@@ -1274,13 +1303,16 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nva[2].flags = NGHTTP2_NV_FLAG_NONE;
 
   hdbuf = strchr(hdbuf, 0x0a);
+  if(!hdbuf)
+    goto fail;
   ++hdbuf;
 
   authority_idx = 0;
 
   for(i = 3; i < nheader; ++i) {
     end = strchr(hdbuf, ':');
-    assert(end);
+    if(!end)
+      goto fail;
     if(end - hdbuf == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
       authority_idx = i;
       nva[i].name = (unsigned char *)":authority";
@@ -1293,7 +1325,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     hdbuf = end + 1;
     for(; *hdbuf == ' '; ++hdbuf);
     end = strchr(hdbuf, 0x0d);
-    assert(end);
+    if(!end)
+      goto fail;
     nva[i].value = (unsigned char *)hdbuf;
     nva[i].valuelen = (uint16_t)(end - hdbuf);
     nva[i].flags = NGHTTP2_NV_FLAG_NONE;
@@ -1340,7 +1373,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
                                        NULL, NULL);
   }
 
-  free(nva);
+  Curl_safefree(nva);
 
   if(stream_id < 0) {
     DEBUGF(infof(conn->data, "http2_send() send error\n"));
@@ -1380,6 +1413,11 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   }
 
   return len;
+
+  fail:
+  free(nva);
+  *err = CURLE_SEND_ERROR;
+  return -1;
 }
 
 CURLcode Curl_http2_setup(struct connectdata *conn)
@@ -1524,4 +1562,25 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#endif
+#else /* !USE_NGHTTP2 */
+
+/* Satisfy external references even if http2 is not compiled in. */
+
+#define CURL_DISABLE_TYPECHECK
+#include <curl/curl.h>
+
+char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
+{
+  (void) h;
+  (void) num;
+  return NULL;
+}
+
+char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
+{
+  (void) h;
+  (void) header;
+  return NULL;
+}
+
+#endif /* USE_NGHTTP2 */

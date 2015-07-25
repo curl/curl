@@ -19,6 +19,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+/* <DESC>
+ * Multiplexed HTTP/2 downloads over a single connection
+ * </DESC>
+ */
 #include <stdio.h>
 #include <stdlib.h>
 

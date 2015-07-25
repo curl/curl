@@ -2234,7 +2234,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_SSL_OPTIONS:
     arg = va_arg(param, long);
-    data->set.ssl_enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.ssl_enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
+    data->set.ssl_no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     break;
 
 #endif

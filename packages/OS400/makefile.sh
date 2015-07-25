@@ -21,7 +21,7 @@ fi
 #       Create the DOCS source file if it does not exist.
 
 if action_needed "${LIBIFSNAME}/DOCS.FILE"
-then    CMD="CRTSRCPF FILE(${TARGETLIB}/DOCS) RCDLEN(112)"
+then    CMD="CRTSRCPF FILE(${TARGETLIB}/DOCS) RCDLEN(240)"
         CMD="${CMD} CCSID(${TGTCCSID}) TEXT('Documentation texts')"
         system "${CMD}"
 fi

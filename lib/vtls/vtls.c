@@ -774,12 +774,78 @@ CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
   size_t size, pem_len;
   CURLcode pem_read;
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+#ifdef curlssl_sha256sum
+  size_t pinkeylen;
+  char *pinkeycopy, *begin_pos, *end_pos;
+  unsigned char *sha256sumdigest = NULL, *expectedsha256sumdigest = NULL;
+#endif
 
   /* if a path wasn't specified, don't pin */
   if(!pinnedpubkey)
     return CURLE_OK;
   if(!pubkey || !pubkeylen)
     return result;
+
+#ifdef curlssl_sha256sum
+  /* only do this if pinnedpubkey starts with "sha256//", length 8 */
+  if(strncmp(pinnedpubkey, "sha256//", 8) == 0) {
+    /* compute sha256sum of public key */
+    sha256sumdigest = malloc(SHA256_DIGEST_LENGTH);
+    if(!sha256sumdigest)
+      return CURLE_OUT_OF_MEMORY;
+    curlssl_sha256sum(pubkey, pubkeylen,
+                      sha256sumdigest, SHA256_DIGEST_LENGTH);
+
+    /* it starts with sha256//, copy so we can modify it */
+    pinkeylen = strlen(pinnedpubkey) + 1;
+    pinkeycopy = malloc(pinkeylen);
+    if(!pinkeycopy) {
+      Curl_safefree(sha256sumdigest);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    memcpy(pinkeycopy, pinnedpubkey, pinkeylen);
+    /* point begin_pos to the copy, and start extracting keys */
+    begin_pos = pinkeycopy;
+    do {
+      end_pos = strstr(begin_pos, ";sha256//");
+      /*
+       * if there is an end_pos, null terminate,
+       * otherwise it'll go to the end of the original string
+       */
+      if(end_pos)
+        end_pos[0] = '\0';
+
+      /* decode base64 pinnedpubkey, 8 is length of "sha256//" */
+      pem_read = Curl_base64_decode(begin_pos + 8,
+                                    &expectedsha256sumdigest, &size);
+      /* if not valid base64, don't bother comparing or freeing */
+      if(!pem_read) {
+        /* compare sha256 digests directly */
+        if(SHA256_DIGEST_LENGTH == size &&
+           !memcmp(sha256sumdigest, expectedsha256sumdigest,
+                   SHA256_DIGEST_LENGTH)) {
+          result = CURLE_OK;
+          Curl_safefree(expectedsha256sumdigest);
+          break;
+        }
+        Curl_safefree(expectedsha256sumdigest);
+      }
+
+      /*
+       * change back the null-terminator we changed earlier,
+       * and look for next begin
+       */
+      if(end_pos) {
+        end_pos[0] = ';';
+        begin_pos = strstr(end_pos, "sha256//");
+      }
+    } while(end_pos && begin_pos);
+    Curl_safefree(sha256sumdigest);
+    Curl_safefree(pinkeycopy);
+    return result;
+  }
+#endif
+
   fp = fopen(pinnedpubkey, "rb");
   if(!fp)
     return result;

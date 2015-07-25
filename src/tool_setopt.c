@@ -107,6 +107,12 @@ const NameValue setopt_nv_CURLUSESSL[] = {
   NVEND,
 };
 
+const NameValueUnsigned setopt_nv_CURLSSLOPT[] = {
+  NV(CURLSSLOPT_ALLOW_BEAST),
+  NV(CURLSSLOPT_NO_REVOKE),
+  NVEND,
+};
+
 const NameValue setopt_nv_CURL_NETRC[] = {
   NV(CURL_NETRC_IGNORED),
   NV(CURL_NETRC_OPTIONAL),

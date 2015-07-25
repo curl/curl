@@ -756,7 +756,6 @@ static CURLcode readwrite_data(struct SessionHandle *data,
               result = Curl_unencode_gzip_write(conn, k, nread);
             break;
 
-          case COMPRESS:
           default:
             failf (data, "Unrecognized content encoding type. "
                    "libcurl understands `identity', `deflate' and `gzip' "

@@ -221,6 +221,7 @@ static const struct LongShort aliases[]= {
   {"Ep", "pinnedpubkey",             TRUE},
   {"Eq", "cert-status",              FALSE},
   {"Er", "false-start",              FALSE},
+  {"Es", "ssl-no-revoke",            FALSE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -1380,6 +1381,11 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
       case 'r': /* --false-start */
         config->falsestart = TRUE;
+        break;
+
+      case 's': /* --ssl-no-revoke */
+        if(curlinfo->features & CURL_VERSION_SSL)
+          config->ssl_no_revoke = TRUE;
         break;
 
       default: /* certificate file */

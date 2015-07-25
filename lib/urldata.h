@@ -660,7 +660,6 @@ struct SingleRequest {
 #define IDENTITY 0              /* No encoding */
 #define DEFLATE 1               /* zlib deflate [RFC 1950 & 1951] */
 #define GZIP 2                  /* gzip algorithm [RFC 1952] */
-#define COMPRESS 3              /* Not handled, added for completeness */
 
 #ifdef HAVE_LIBZ
   zlibInitState zlib_init;      /* possible zlib init state;
@@ -1582,6 +1581,7 @@ struct UserDefined {
   bool connect_only;     /* make connection, let application use the socket */
   bool ssl_enable_beast; /* especially allow this flaw for interoperability's
                             sake*/
+  bool ssl_no_revoke;    /* disable SSL certificate revocation checks */
   long ssh_auth_types;   /* allowed SSH auth types */
   bool http_te_skip;     /* pass the raw body data to the user, even when
                             transfer-encoded (chunked, compressed) */

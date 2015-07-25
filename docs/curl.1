@@ -544,9 +544,11 @@ OpenSSL-powered curl to make SSL-connections much more efficiently than using
 
 If this option is set, the default capath value will be ignored, and if it is
 used several times, the last one will be used.
-.IP "--pinnedpubkey <pinned public key>"
-(SSL) Tells curl to use the specified public key file to verify the peer. The
-file must contain a single public key in PEM or DER format.
+.IP "--pinnedpubkey <pinned public key (hashes)>"
+(SSL) Tells curl to use the specified public key file (or hashes) to verify the
+peer. This can be a path to a file which contains a single public key in PEM or
+DER format, or any number of base64 encoded sha256 hashes preceded by
+\'sha256//\' and seperated by \';\'
 
 When negotiating a TLS or SSL connection, the server sends a certificate
 indicating its identity. A public key is extracted from this certificate and
@@ -554,7 +556,8 @@ if it does not exactly match the public key provided to this option, curl will
 abort the connection before sending or receiving any data.
 
 Added in 7.39.0 for OpenSSL, GnuTLS and GSKit. Added in 7.43.0 for NSS and
-wolfSSL/CyaSSL. Other SSL backends not supported.
+wolfSSL/CyaSSL. sha256 support added in 7.44.0 for OpenSSL,
+GnuTLS, NSS and wolfSSL/CyaSSL. Other SSL backends not supported.
 
 If this option is used several times, the last one will be used.
 .IP "--cert-status"
@@ -1542,6 +1545,10 @@ and TLS1.0 protocols known as BEAST.  If this option isn't used, the SSL layer
 may use workarounds known to cause interoperability problems with some older
 SSL implementations. WARNING: this option loosens the SSL security, and by
 using this flag you ask for exactly that.  (Added in 7.25.0)
+.IP "--ssl-no-revoke"
+(WinSSL) This option tells curl to disable certificate revocation checks.
+WARNING: this option loosens the SSL security, and by using this flag you ask
+for exactly that.  (Added in 7.44.0)
 .IP "--socks4 <host[:port]>"
 Use the specified SOCKS4 proxy. If the port number is not specified, it is
 assumed at port 1080. (Added in 7.15.2)
