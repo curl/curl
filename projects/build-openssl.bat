@@ -69,6 +69,10 @@ rem ***************************************************************************
     set VC_VER=12.0
     set VC_DESC=VC12
     set "VC_PATH=Microsoft Visual Studio 12.0\VC"
+  ) else if /i "%~1" == "vc14" (
+    set VC_VER=14.0
+    set VC_DESC=VC14
+    set "VC_PATH=Microsoft Visual Studio 14.0\VC"
   ) else if /i "%~1%" == "x86" (
     set BUILD_PLATFORM=x86
   ) else if /i "%~1%" == "x64" (
@@ -146,6 +150,7 @@ rem ***************************************************************************
     if "%VC_VER%" == "10.0" set VCVARS_PLATFORM=%BUILD_PLATFORM%
     if "%VC_VER%" == "11.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "12.0" set VCVARS_PLATFORM=amd64
+    if "%VC_VER%" == "14.0" set VCVARS_PLATFORM=amd64
   )
 
 :start
@@ -286,6 +291,7 @@ rem ***************************************************************************
   echo vc10      - Use Visual Studio 2010
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013
+  echo vc14      - Use Visual Studio 2015
   echo.
   echo Platform:
   echo.
