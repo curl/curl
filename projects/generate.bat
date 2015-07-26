@@ -92,9 +92,9 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
   if "%MODE%" == "GENERATE" (
     echo.
     echo Generating prerequisite files
-    CALL :gen_curlbuild
+    call :gen_curlbuild
     if errorlevel 1 goto error
-    CALL :gen_hugehelp
+    call :gen_hugehelp
     if errorlevel 1 goto error
   ) else (
     echo.
@@ -435,7 +435,7 @@ rem Returns exit code 0 on success or 1 on failure.
     echo #endif>> ..\src\tool_hugehelp.c
   )
   findstr "/C:void hugehelp(void)" ..\src\tool_hugehelp.c 1>NUL 2>&1
-  if %ERRORLEVEL% NEQ 0 (
+  if %ERRORLEVEL% neq 0 (
     echo Error: Unable to generate ..\src\tool_hugehelp.c
     exit /B 1
   )
@@ -447,7 +447,7 @@ rem Returns exit code 0 on success or 1 on failure.
   setlocal
   echo * %CD%\..\include\curl\curlbuild.h
   copy /y ..\include\curl\curlbuild.h.dist ..\include\curl\curlbuild.h 1>NUL
-  if %ERRORLEVEL% NEQ 0 (
+  if %ERRORLEVEL% neq 0 (
     echo Error: Unable to generate ..\include\curl\curlbuild.h
     exit /B 1
   )
