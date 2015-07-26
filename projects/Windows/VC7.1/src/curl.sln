@@ -1,34 +1,34 @@
-Microsoft Visual Studio Solution File, Format Version 7.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "curlsrc", "curlsrc.vcproj", "{5228E9CE-A216-422F-A5E6-58E95E2DD71D}"
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "curl", "curl.vcproj", "{5228E9CE-A216-422F-A5E6-58E95E2DD71D}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
-		ConfigName.0 = DLL Debug
-		ConfigName.1 = DLL Debug - DLL OpenSSL
-		ConfigName.2 = DLL Debug - DLL OpenSSL - DLL LibSSH2
-		ConfigName.3 = DLL Debug - DLL Windows SSPI
-		ConfigName.4 = DLL Debug - DLL Windows SSPI - DLL WinIDN
-		ConfigName.5 = DLL Release
-		ConfigName.6 = DLL Release - DLL OpenSSL
-		ConfigName.7 = DLL Release - DLL OpenSSL - DLL LibSSH2
-		ConfigName.8 = DLL Release - DLL Windows SSPI
-		ConfigName.9 = DLL Release - DLL Windows SSPI - DLL WinIDN
-		ConfigName.10 = LIB Debug
-		ConfigName.11 = LIB Debug - DLL OpenSSL
-		ConfigName.12 = LIB Debug - DLL OpenSSL - DLL LibSSH2
-		ConfigName.13 = LIB Debug - DLL Windows SSPI
-		ConfigName.14 = LIB Debug - DLL Windows SSPI - DLL WinIDN
-		ConfigName.15 = LIB Debug - LIB OpenSSL
-		ConfigName.16 = LIB Debug - LIB OpenSSL - LIB LibSSH2
-		ConfigName.17 = LIB Release
-		ConfigName.18 = LIB Release - DLL OpenSSL
-		ConfigName.19 = LIB Release - DLL OpenSSL - DLL LibSSH2
-		ConfigName.20 = LIB Release - DLL Windows SSPI
-		ConfigName.21 = LIB Release - DLL Windows SSPI - DLL WinIDN
-		ConfigName.22 = LIB Release - LIB OpenSSL
-		ConfigName.23 = LIB Release - LIB OpenSSL - LIB LibSSH2
-	EndGlobalSection
-	GlobalSection(ProjectDependencies) = postSolution
+		DLL Debug = DLL Debug
+		DLL Debug - DLL OpenSSL = DLL Debug - DLL OpenSSL
+		DLL Debug - DLL OpenSSL - DLL LibSSH2 = DLL Debug - DLL OpenSSL - DLL LibSSH2
+		DLL Debug - DLL Windows SSPI = DLL Debug - DLL Windows SSPI
+		DLL Debug - DLL Windows SSPI - DLL WinIDN = DLL Debug - DLL Windows SSPI - DLL WinIDN
+		DLL Release = DLL Release
+		DLL Release - DLL OpenSSL = DLL Release - DLL OpenSSL
+		DLL Release - DLL OpenSSL - DLL LibSSH2 = DLL Release - DLL OpenSSL - DLL LibSSH2
+		DLL Release - DLL Windows SSPI = DLL Release - DLL Windows SSPI
+		DLL Release - DLL Windows SSPI - DLL WinIDN = DLL Release - DLL Windows SSPI - DLL WinIDN
+		LIB Debug = LIB Debug
+		LIB Debug - DLL OpenSSL = LIB Debug - DLL OpenSSL
+		LIB Debug - DLL OpenSSL - DLL LibSSH2 = LIB Debug - DLL OpenSSL - DLL LibSSH2
+		LIB Debug - DLL Windows SSPI = LIB Debug - DLL Windows SSPI
+		LIB Debug - DLL Windows SSPI - DLL WinIDN = LIB Debug - DLL Windows SSPI - DLL WinIDN
+		LIB Debug - LIB OpenSSL = LIB Debug - LIB OpenSSL
+		LIB Debug - LIB OpenSSL - LIB LibSSH2 = LIB Debug - LIB OpenSSL - LIB LibSSH2
+		LIB Release = LIB Release
+		LIB Release - DLL OpenSSL = LIB Release - DLL OpenSSL
+		LIB Release - DLL OpenSSL - DLL LibSSH2 = LIB Release - DLL OpenSSL - DLL LibSSH2
+		LIB Release - DLL Windows SSPI = LIB Release - DLL Windows SSPI
+		LIB Release - DLL Windows SSPI - DLL WinIDN = LIB Release - DLL Windows SSPI - DLL WinIDN
+		LIB Release - LIB OpenSSL = LIB Release - LIB OpenSSL
+		LIB Release - LIB OpenSSL - LIB LibSSH2 = LIB Release - LIB OpenSSL - LIB LibSSH2
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{5228E9CE-A216-422F-A5E6-58E95E2DD71D}.DLL Debug.ActiveCfg = DLL Debug|Win32

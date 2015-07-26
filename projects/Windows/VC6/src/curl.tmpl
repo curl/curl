@@ -1,46 +1,46 @@
-# Microsoft Developer Studio Project File - Name="curlsrc" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="curl" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
 
-CFG=curlsrc - Win32 LIB Debug
+CFG=curl - Win32 LIB Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "curlsrc.mak".
+!MESSAGE NMAKE /f "curl.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "curlsrc.mak" CFG="curlsrc - Win32 LIB Debug"
+!MESSAGE NMAKE /f "curl.mak" CFG="curl - Win32 LIB Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "curlsrc - Win32 DLL Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 DLL Debug DLL OpenSSL" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 DLL Debug DLL OpenSSL DLL LibSSH2" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 DLL Debug DLL Windows SSPI" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 DLL Debug DLL Windows SSPI DLL WinIDN" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 DLL Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 DLL Release DLL OpenSSL" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 DLL Release DLL OpenSSL DLL LibSSH2" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 DLL Release DLL Windows SSPI" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 DLL Release DLL Windows SSPI DLL WinIDN" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Debug DLL OpenSSL" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Debug DLL OpenSSL DLL LibSSH2" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Debug DLL Windows SSPI" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Debug DLL Windows SSPI DLL WinIDN" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Debug LIB OpenSSL" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Debug LIB OpenSSL LIB LibSSH2" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Release DLL OpenSSL" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Release DLL OpenSSL DLL LibSSH2" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Release DLL Windows SSPI" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Release DLL Windows SSPI DLL WinIDN" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Release LIB OpenSSL" (based on "Win32 (x86) Console Application")
-!MESSAGE "curlsrc - Win32 LIB Release LIB OpenSSL LIB LibSSH2" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 DLL Debug" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 DLL Debug DLL OpenSSL" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 DLL Debug DLL OpenSSL DLL LibSSH2" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 DLL Debug DLL Windows SSPI" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 DLL Debug DLL Windows SSPI DLL WinIDN" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 DLL Release" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 DLL Release DLL OpenSSL" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 DLL Release DLL OpenSSL DLL LibSSH2" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 DLL Release DLL Windows SSPI" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 DLL Release DLL Windows SSPI DLL WinIDN" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Debug" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Debug DLL OpenSSL" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Debug DLL OpenSSL DLL LibSSH2" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Debug DLL Windows SSPI" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Debug DLL Windows SSPI DLL WinIDN" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Debug LIB OpenSSL" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Debug LIB OpenSSL LIB LibSSH2" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Release" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Release DLL OpenSSL" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Release DLL OpenSSL DLL LibSSH2" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Release DLL Windows SSPI" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Release DLL Windows SSPI DLL WinIDN" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Release LIB OpenSSL" (based on "Win32 (x86) Console Application")
+!MESSAGE "curl - Win32 LIB Release LIB OpenSSL LIB LibSSH2" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -50,7 +50,7 @@ CFG=curlsrc - Win32 LIB Debug
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "curlsrc - Win32 DLL Debug"
+!IF  "$(CFG)" == "curl - Win32 DLL Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -74,7 +74,7 @@ LINK32=link.exe
 # ADD BASE LINK32 wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\DLL Debug" /fixed:no
 # ADD LINK32 wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\DLL Debug" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 DLL Debug DLL OpenSSL"
+!ELSEIF  "$(CFG)" == "curl - Win32 DLL Debug DLL OpenSSL"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -99,7 +99,7 @@ LINK32=link.exe
 # ADD BASE LINK32 wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL OpenSSL\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\DLL Debug..\..\..\..\build\Win32\VC6\DLL Debug - DLL OpenSSL" /fixed:no
 # ADD LINK32 wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL OpenSSL\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL OpenSSL" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 DLL Debug DLL OpenSSL DLL LibSSH2"
+!ELSEIF  "$(CFG)" == "curl - Win32 DLL Debug DLL OpenSSL DLL LibSSH2"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -124,7 +124,7 @@ LINK32=link.exe
 # ADD BASE LINK32 wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL OpenSSL - DLL LibSSH2\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL OpenSSL" /fixed:no
 # ADD LINK32 wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL OpenSSL - DLL LibSSH2\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL OpenSSL" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 DLL Debug DLL Windows SSPI"
+!ELSEIF  "$(CFG)" == "curl - Win32 DLL Debug DLL Windows SSPI"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -149,7 +149,7 @@ LINK32=link.exe
 # ADD BASE LINK32 wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI" /fixed:no
 # ADD LINK32 wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 DLL Debug DLL Windows SSPI DLL WinIDN"
+!ELSEIF  "$(CFG)" == "curl - Win32 DLL Debug DLL Windows SSPI DLL WinIDN"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -174,7 +174,7 @@ LINK32=link.exe
 # ADD BASE LINK32 wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI - DLL WinIDN\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI - DLL WinIDN" /fixed:no
 # ADD LINK32 wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI - DLL WinIDN\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI - DLL WinIDN" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 DLL Release"
+!ELSEIF  "$(CFG)" == "curl - Win32 DLL Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -198,7 +198,7 @@ LINK32=link.exe
 # ADD BASE LINK32 wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Release\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\DLL Release" /fixed:no
 # ADD LINK32 wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Release\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\DLL Release" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 DLL Release DLL OpenSSL"
+!ELSEIF  "$(CFG)" == "curl - Win32 DLL Release DLL OpenSSL"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -223,7 +223,7 @@ LINK32=link.exe
 # ADD BASE LINK32 wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Release - DLL OpenSSL\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\DLL Release - DLL OpenSSL" /fixed:no
 # ADD LINK32 wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Release - DLL OpenSSL\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\DLL Release - DLL OpenSSL" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 DLL Release DLL OpenSSL DLL LibSSH2"
+!ELSEIF  "$(CFG)" == "curl - Win32 DLL Release DLL OpenSSL DLL LibSSH2"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -248,7 +248,7 @@ LINK32=link.exe
 # ADD BASE LINK32 wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Release - DLL OpenSSL - DLL LibSSH2\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\DLL Release - DLL OpenSSL" /fixed:no
 # ADD LINK32 wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Release - DLL OpenSSL - DLL LibSSH2\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\DLL Release - DLL OpenSSL" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 DLL Release DLL Windows SSPI"
+!ELSEIF  "$(CFG)" == "curl - Win32 DLL Release DLL Windows SSPI"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -273,7 +273,7 @@ LINK32=link.exe
 # ADD BASE LINK32 wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Release - DLL Windows SSPI\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\DLL Release - DLL Windows SSPI" /fixed:no
 # ADD LINK32 wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Release - DLL Windows SSPI\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\DLL Release - DLL Windows SSPI" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 DLL Release DLL Windows SSPI DLL WinIDN"
+!ELSEIF  "$(CFG)" == "curl - Win32 DLL Release DLL Windows SSPI DLL WinIDN"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -298,7 +298,7 @@ LINK32=link.exe
 # ADD BASE LINK32 wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Release - DLL Windows SSPI - DLL WinIDN\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\DLL Release - DLL Windows SSPI - DLL WinIDN" /fixed:no
 # ADD LINK32 wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Release - DLL Windows SSPI - DLL WinIDN\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\DLL Release - DLL Windows SSPI - DLL WinIDN" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Debug"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -322,7 +322,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug\curl.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug" /fixed:no
 # ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Debug DLL OpenSSL"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Debug DLL OpenSSL"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -347,7 +347,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL OpenSSL\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL OpenSSL" /fixed:no
 # ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL OpenSSL\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\DLL Debug" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Debug DLL OpenSSL DLL LibSSH2"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Debug DLL OpenSSL DLL LibSSH2"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -372,7 +372,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL OpenSSL - DLL LibSSH2\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\DLL Debug" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\DLL Debug" /fixed:no
 # ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL OpenSSL - DLL LibSSH2\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\DLL Debug" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\DLL Debug" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Debug DLL Windows SSPI"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Debug DLL Windows SSPI"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -397,7 +397,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL Windows SSPI\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL Windows SSPI" /fixed:no
 # ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL Windows SSPI\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL Windows SSPI" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Debug DLL Windows SSPI DLL WinIDN"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Debug DLL Windows SSPI DLL WinIDN"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -422,7 +422,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL Windows SSPI - DLL WinIDN\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL Windows SSPI - DLL WinIDN" /fixed:no
 # ADD LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib libcurld.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL Windows SSPI - DLL WinIDN\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - DLL Windows SSPI - DLL WinIDN" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Debug LIB OpenSSL"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Debug LIB OpenSSL"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -447,7 +447,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /fixed:no
 # ADD LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Debug" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Debug LIB OpenSSL LIB LibSSH2"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Debug LIB OpenSSL LIB LibSSH2"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -472,7 +472,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL - LIB LibSSH2\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Debug" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\LIB Debug" /fixed:no
 # ADD LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL - LIB LibSSH2\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Debug" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\LIB Debug" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Release"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -496,7 +496,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release" /fixed:no
 # ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Release DLL OpenSSL"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Release DLL OpenSSL"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -521,7 +521,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - DLL OpenSSL\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - DLL OpenSSL" /fixed:no
 # ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - DLL OpenSSL\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - DLL OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\DLL Release" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Release DLL OpenSSL DLL LibSSH2"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Release DLL OpenSSL DLL LibSSH2"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -546,7 +546,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - DLL OpenSSL - DLL LibSSH2\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - DLL OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\DLL Release" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\DLL Release" /fixed:no
 # ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - DLL OpenSSL - DLL LibSSH2\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - DLL OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\DLL Release" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\DLL Release" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Release DLL Windows SSPI"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Release DLL Windows SSPI"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -571,7 +571,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - DLL Windows SSPI\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - DLL Windows SSPI" /fixed:no
 # ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - DLL Windows SSPI\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - DLL Windows SSPI" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Release DLL Windows SSPI DLL WinIDN"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Release DLL Windows SSPI DLL WinIDN"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -596,7 +596,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - DLL Windows SSPI - DLL WinIDN\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - DLL Windows SSPI - DLL WinIDN" /fixed:no
 # ADD LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib libcurl.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - DLL Windows SSPI - DLL WinIDN\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - DLL Windows SSPI - DLL WinIDN" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Release LIB OpenSSL"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Release LIB OpenSSL"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -621,7 +621,7 @@ LINK32=link.exe
 # ADD BASE LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL" /fixed:no
 # ADD LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Release" /fixed:no
 
-!ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Release LIB OpenSSL LIB LibSSH2"
+!ELSEIF  "$(CFG)" == "curl - Win32 LIB Release LIB OpenSSL LIB LibSSH2"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -650,30 +650,30 @@ LINK32=link.exe
 
 # Begin Target
 
-# Name "curlsrc - Win32 DLL Debug"
-# Name "curlsrc - Win32 DLL Debug DLL OpenSSL"
-# Name "curlsrc - Win32 DLL Debug DLL OpenSSL DLL LibSSH2"
-# Name "curlsrc - Win32 DLL Debug DLL Windows SSPI"
-# Name "curlsrc - Win32 DLL Debug DLL Windows SSPI DLL WinIDN"
-# Name "curlsrc - Win32 DLL Release"
-# Name "curlsrc - Win32 DLL Release DLL OpenSSL"
-# Name "curlsrc - Win32 DLL Release DLL OpenSSL DLL LibSSH2"
-# Name "curlsrc - Win32 DLL Release DLL Windows SSPI"
-# Name "curlsrc - Win32 DLL Release DLL Windows SSPI DLL WinIDN"
-# Name "curlsrc - Win32 LIB Debug"
-# Name "curlsrc - Win32 LIB Debug DLL OpenSSL"
-# Name "curlsrc - Win32 LIB Debug DLL OpenSSL DLL LibSSH2"
-# Name "curlsrc - Win32 LIB Debug DLL Windows SSPI"
-# Name "curlsrc - Win32 LIB Debug DLL Windows SSPI DLL WinIDN"
-# Name "curlsrc - Win32 LIB Debug LIB OpenSSL"
-# Name "curlsrc - Win32 LIB Debug LIB OpenSSL LIB LibSSH2"
-# Name "curlsrc - Win32 LIB Release"
-# Name "curlsrc - Win32 LIB Release DLL OpenSSL"
-# Name "curlsrc - Win32 LIB Release DLL OpenSSL DLL LibSSH2"
-# Name "curlsrc - Win32 LIB Release DLL Windows SSPI"
-# Name "curlsrc - Win32 LIB Release DLL Windows SSPI DLL WinIDN"
-# Name "curlsrc - Win32 LIB Release LIB OpenSSL"
-# Name "curlsrc - Win32 LIB Release LIB OpenSSL LIB LibSSH2"
+# Name "curl - Win32 DLL Debug"
+# Name "curl - Win32 DLL Debug DLL OpenSSL"
+# Name "curl - Win32 DLL Debug DLL OpenSSL DLL LibSSH2"
+# Name "curl - Win32 DLL Debug DLL Windows SSPI"
+# Name "curl - Win32 DLL Debug DLL Windows SSPI DLL WinIDN"
+# Name "curl - Win32 DLL Release"
+# Name "curl - Win32 DLL Release DLL OpenSSL"
+# Name "curl - Win32 DLL Release DLL OpenSSL DLL LibSSH2"
+# Name "curl - Win32 DLL Release DLL Windows SSPI"
+# Name "curl - Win32 DLL Release DLL Windows SSPI DLL WinIDN"
+# Name "curl - Win32 LIB Debug"
+# Name "curl - Win32 LIB Debug DLL OpenSSL"
+# Name "curl - Win32 LIB Debug DLL OpenSSL DLL LibSSH2"
+# Name "curl - Win32 LIB Debug DLL Windows SSPI"
+# Name "curl - Win32 LIB Debug DLL Windows SSPI DLL WinIDN"
+# Name "curl - Win32 LIB Debug LIB OpenSSL"
+# Name "curl - Win32 LIB Debug LIB OpenSSL LIB LibSSH2"
+# Name "curl - Win32 LIB Release"
+# Name "curl - Win32 LIB Release DLL OpenSSL"
+# Name "curl - Win32 LIB Release DLL OpenSSL DLL LibSSH2"
+# Name "curl - Win32 LIB Release DLL Windows SSPI"
+# Name "curl - Win32 LIB Release DLL Windows SSPI DLL WinIDN"
+# Name "curl - Win32 LIB Release LIB OpenSSL"
+# Name "curl - Win32 LIB Release LIB OpenSSL LIB LibSSH2"
 # Begin Group "Source Files"
 
 # PROP Default_Filter ""
