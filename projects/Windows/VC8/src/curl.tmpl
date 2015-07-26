@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
-	Name="curlsrc"
+	Version="8.00"
+	Name="curl"
 	ProjectGUID="{5228E9CE-A216-422F-A5E6-58E95E2DD71D}"
-	RootNamespace="curlsrc"
-	TargetFrameworkVersion="131072"
+	RootNamespace="curl"
 	>
 	<Platforms>
 		<Platform
@@ -20,7 +19,7 @@
 	<Configurations>
 		<Configuration
 			Name="DLL Release|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -72,7 +71,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -93,6 +92,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -100,7 +102,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -153,7 +155,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -174,6 +176,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -181,7 +186,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Release|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -233,7 +238,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -254,6 +259,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -261,7 +269,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Release|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -314,7 +322,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -335,6 +343,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -342,7 +353,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -394,7 +405,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -417,6 +428,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -424,7 +438,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -477,7 +491,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -500,6 +514,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -507,7 +524,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -559,7 +576,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -582,6 +599,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -589,7 +609,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -642,7 +662,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -665,6 +685,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -672,7 +695,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug - DLL OpenSSL|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -724,7 +747,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -747,6 +770,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -754,7 +780,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug - DLL OpenSSL|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -807,7 +833,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -830,6 +856,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -837,7 +866,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug - DLL Windows SSPI|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -889,7 +918,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -912,6 +941,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -919,7 +951,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug - DLL Windows SSPI|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -972,7 +1004,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -995,6 +1027,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1002,7 +1037,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release - DLL OpenSSL|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1054,7 +1089,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -1075,6 +1110,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1082,7 +1120,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release - DLL OpenSSL|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1135,7 +1173,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -1156,6 +1194,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1163,7 +1204,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release - DLL Windows SSPI|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1215,7 +1256,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -1236,6 +1277,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1243,7 +1287,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release - DLL Windows SSPI|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1296,7 +1340,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -1317,6 +1361,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1324,7 +1371,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug - DLL OpenSSL - DLL LibSSH2|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1376,7 +1423,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -1399,6 +1446,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1406,7 +1456,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug - DLL OpenSSL - DLL LibSSH2|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1459,7 +1509,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -1482,6 +1532,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1489,7 +1542,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release - DLL OpenSSL - DLL LibSSH2|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1541,7 +1594,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -1562,6 +1615,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1569,7 +1625,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release - DLL OpenSSL - DLL LibSSH2|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1622,7 +1678,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -1643,6 +1699,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1650,7 +1709,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - LIB OpenSSL|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1702,7 +1761,7 @@
 				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcurld.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC9\LIB Debug"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC8\LIB Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -1725,6 +1784,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1732,7 +1794,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - LIB OpenSSL|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1785,7 +1847,7 @@
 				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcurld.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC9\LIB Debug"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC8\LIB Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -1808,6 +1870,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1815,7 +1880,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Release - LIB OpenSSL|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1867,7 +1932,7 @@
 				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcurl.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC9\LIB Release"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC8\LIB Release"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -1888,6 +1953,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1895,7 +1963,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Release - LIB OpenSSL|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -1948,7 +2016,7 @@
 				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcurl.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC9\LIB Release"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC8\LIB Release"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -1969,6 +2037,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -1976,7 +2047,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - LIB OpenSSL - LIB LibSSH2|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2028,7 +2099,7 @@
 				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC9\LIB Debug;..\..\..\..\..\libssh2\build\Win32\VC9\LIB Debug"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC8\LIB Debug;..\..\..\..\..\libssh2\build\Win32\VC8\LIB Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -2051,6 +2122,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -2058,7 +2132,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - LIB OpenSSL - LIB LibSSH2|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2111,7 +2185,7 @@
 				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC9\LIB Debug;..\..\..\..\..\libssh2\build\Win64\VC9\LIB Debug"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC8\LIB Debug;..\..\..\..\..\libssh2\build\Win64\VC8\LIB Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -2134,6 +2208,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -2141,7 +2218,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Release - LIB OpenSSL - LIB LibSSH2|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2193,7 +2270,7 @@
 				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC9\LIB Release;..\..\..\..\..\libssh2\build\Win32\VC9\LIB Release"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC8\LIB Release;..\..\..\..\..\libssh2\build\Win32\VC8\LIB Release"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -2214,6 +2291,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -2221,7 +2301,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Release - LIB OpenSSL - LIB LibSSH2|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2274,7 +2354,7 @@
 				AdditionalDependencies="crypt32.lib ws2_32.lib wldap32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC9\LIB Release;..\..\..\..\..\libssh2\build\Win64\VC9\LIB Release"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC8\LIB Release;..\..\..\..\..\libssh2\build\Win64\VC8\LIB Release"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -2295,6 +2375,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -2302,7 +2385,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - DLL OpenSSL|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2354,7 +2437,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC9\DLL Debug"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC8\DLL Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -2377,6 +2460,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -2384,7 +2470,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - DLL OpenSSL|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2437,7 +2523,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC9\DLL Debug"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC8\DLL Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -2460,6 +2546,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -2467,7 +2556,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Release - DLL OpenSSL|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2519,7 +2608,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC9\DLL Release"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC8\DLL Release"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -2540,6 +2629,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -2547,7 +2639,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Release - DLL OpenSSL|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2600,7 +2692,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC9\DLL Release"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC8\DLL Release"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -2623,12 +2715,15 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - DLL OpenSSL - DLL LibSSH2|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2680,7 +2775,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC9\DLL Debug;..\..\..\..\..\libssh2\build\Win32\VC9\DLL Debug"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC8\DLL Debug;..\..\..\..\..\libssh2\build\Win32\VC8\DLL Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -2705,12 +2800,15 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - DLL OpenSSL - DLL LibSSH2|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2763,7 +2861,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC9\DLL Debug;..\..\..\..\..\libssh2\build\Win64\VC9\DLL Debug"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC8\DLL Debug;..\..\..\..\..\libssh2\build\Win64\VC8\DLL Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -2788,12 +2886,15 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="LIB Release - DLL OpenSSL - DLL LibSSH2|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2845,7 +2946,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC9\DLL Release;..\..\..\..\..\libssh2\build\Win32\VC9\DLL Release"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win32\VC8\DLL Release;..\..\..\..\..\libssh2\build\Win32\VC8\DLL Release"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -2868,12 +2969,15 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="LIB Release - DLL OpenSSL - DLL LibSSH2|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -2926,7 +3030,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib libssh2.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC9\DLL Release;..\..\..\..\..\libssh2\build\Win64\VC9\DLL Release"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName);..\..\..\..\..\openssl\build\Win64\VC8\DLL Release;..\..\..\..\..\libssh2\build\Win64\VC8\DLL Release"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -2947,6 +3051,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -2954,7 +3061,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - DLL Windows SSPI|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3006,7 +3113,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -3029,6 +3136,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -3036,7 +3146,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - DLL Windows SSPI|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3089,7 +3199,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -3112,6 +3222,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -3119,7 +3232,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Release - DLL Windows SSPI|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3171,7 +3284,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -3192,6 +3305,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -3199,7 +3315,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Release - DLL Windows SSPI|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3252,7 +3368,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -3273,6 +3389,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -3280,7 +3399,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug - DLL Windows SSPI - DLL WinIDN|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3332,7 +3451,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -3355,6 +3474,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -3362,7 +3484,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug - DLL Windows SSPI - DLL WinIDN|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3415,7 +3537,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -3438,6 +3560,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -3445,7 +3570,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release - DLL Windows SSPI - DLL WinIDN|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3497,7 +3622,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -3518,6 +3643,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -3525,7 +3653,7 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release - DLL Windows SSPI - DLL WinIDN|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3578,7 +3706,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -3599,6 +3727,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -3606,7 +3737,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - DLL Windows SSPI - DLL WinIDN|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3658,7 +3789,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib normaliz.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -3681,6 +3812,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -3688,7 +3822,7 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug - DLL Windows SSPI - DLL WinIDN|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3741,7 +3875,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib normaliz.lib libcurld.lib"
 				OutputFile="$(OutDir)\curld.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
@@ -3766,12 +3900,15 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="LIB Release - DLL Windows SSPI - DLL WinIDN|Win32"
-			OutputDirectory="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3823,7 +3960,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib normaliz.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win32\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -3846,12 +3983,15 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="LIB Release - DLL Windows SSPI - DLL WinIDN|x64"
-			OutputDirectory="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\src"
 			ConfigurationType="1"
 			UseOfMFC="0"
@@ -3904,7 +4044,7 @@
 				AdditionalDependencies="ws2_32.lib wldap32.lib normaliz.lib libcurl.lib"
 				OutputFile="$(OutDir)\curl.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC9\$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\build\Win64\VC8\$(ConfigurationName)"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -3925,6 +4065,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"

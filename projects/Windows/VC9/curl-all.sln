@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "curlsrc", "src\curlsrc.vcproj", "{5228E9CE-A216-422F-A5E6-58E95E2DD71D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "curl", "src\curl.vcproj", "{5228E9CE-A216-422F-A5E6-58E95E2DD71D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{DA6F56B4-06A4-441D-AD70-AC5A7D51FADB} = {DA6F56B4-06A4-441D-AD70-AC5A7D51FADB}
 	EndProjectSection

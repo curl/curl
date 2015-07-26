@@ -114,11 +114,11 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC6 project files
-    call :generate dsp Windows\VC6\src\curlsrc.tmpl Windows\VC6\src\curlsrc.dsp
+    call :generate dsp Windows\VC6\src\curl.tmpl Windows\VC6\src\curl.dsp
     call :generate dsp Windows\VC6\lib\libcurl.tmpl Windows\VC6\lib\libcurl.dsp
   ) else (
     echo Removing VC6 project files
-    call :clean Windows\VC6\src\curlsrc.dsp
+    call :clean Windows\VC6\src\curl.dsp
     call :clean Windows\VC6\lib\libcurl.dsp
   )
 
@@ -129,11 +129,11 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC7 project files
-    call :generate vcproj1 Windows\VC7\src\curlsrc.tmpl Windows\VC7\src\curlsrc.vcproj
+    call :generate vcproj1 Windows\VC7\src\curl.tmpl Windows\VC7\src\curl.vcproj
     call :generate vcproj1 Windows\VC7\lib\libcurl.tmpl Windows\VC7\lib\libcurl.vcproj
   ) else (
     echo Removing VC7 project files
-    call :clean Windows\VC7\src\curlsrc.vcproj
+    call :clean Windows\VC7\src\curl.vcproj
     call :clean Windows\VC7\lib\libcurl.vcproj
   )
 
@@ -144,11 +144,11 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC7.1 project files
-    call :generate vcproj1 Windows\VC7.1\src\curlsrc.tmpl Windows\VC7.1\src\curlsrc.vcproj
+    call :generate vcproj1 Windows\VC7.1\src\curl.tmpl Windows\VC7.1\src\curl.vcproj
     call :generate vcproj1 Windows\VC7.1\lib\libcurl.tmpl Windows\VC7.1\lib\libcurl.vcproj
   ) else (
     echo Removing VC7.1 project files
-    call :clean Windows\VC7.1\src\curlsrc.vcproj
+    call :clean Windows\VC7.1\src\curl.vcproj
     call :clean Windows\VC7.1\lib\libcurl.vcproj
   )
 
@@ -159,11 +159,11 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC8 project files
-    call :generate vcproj2 Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
+    call :generate vcproj2 Windows\VC8\src\curl.tmpl Windows\VC8\src\curl.vcproj
     call :generate vcproj2 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
   ) else (
     echo Removing VC8 project files
-    call :clean Windows\VC8\src\curlsrc.vcproj
+    call :clean Windows\VC8\src\curl.vcproj
     call :clean Windows\VC8\lib\libcurl.vcproj
   )
 
@@ -174,11 +174,11 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC9 project files
-    call :generate vcproj2 Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
+    call :generate vcproj2 Windows\VC9\src\curl.tmpl Windows\VC9\src\curl.vcproj
     call :generate vcproj2 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
   ) else (
     echo Removing VC9 project files
-    call :clean Windows\VC9\src\curlsrc.vcproj
+    call :clean Windows\VC9\src\curl.vcproj
     call :clean Windows\VC9\lib\libcurl.vcproj
   )
 
@@ -189,11 +189,11 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC10 project files
-    call :generate vcxproj Windows\VC10\src\curlsrc.tmpl Windows\VC10\src\curlsrc.vcxproj
+    call :generate vcxproj Windows\VC10\src\curl.tmpl Windows\VC10\src\curl.vcxproj
     call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
   ) else (
     echo Removing VC10 project files
-    call :clean Windows\VC10\src\curlsrc.vcxproj
+    call :clean Windows\VC10\src\curl.vcxproj
     call :clean Windows\VC10\lib\libcurl.vcxproj
   )
 
@@ -204,11 +204,11 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC11 project files
-    call :generate vcxproj Windows\VC11\src\curlsrc.tmpl Windows\VC11\src\curlsrc.vcxproj
+    call :generate vcxproj Windows\VC11\src\curl.tmpl Windows\VC11\src\curl.vcxproj
     call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
   ) else (
     echo Removing VC11 project files
-    call :clean Windows\VC11\src\curlsrc.vcxproj
+    call :clean Windows\VC11\src\curl.vcxproj
     call :clean Windows\VC11\lib\libcurl.vcxproj
   )
 
@@ -219,11 +219,11 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC12 project files
-    call :generate vcxproj Windows\VC12\src\curlsrc.tmpl Windows\VC12\src\curlsrc.vcxproj
+    call :generate vcxproj Windows\VC12\src\curl.tmpl Windows\VC12\src\curl.vcxproj
     call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
   ) else (
     echo Removing VC12 project files
-    call :clean Windows\VC12\src\curlsrc.vcxproj
+    call :clean Windows\VC12\src\curl.vcxproj
     call :clean Windows\VC12\lib\libcurl.vcxproj
   )
 
