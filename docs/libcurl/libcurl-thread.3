@@ -84,9 +84,9 @@ You may need to provide one or two functions to allow it to function properly:
 \fBSignals.\fP Signals are used for timing out name resolves (during DNS
 lookup) - when built without using either the c-ares or threaded resolver
 backends. When using multiple threads you should set the
-\fICURLOPT_NOSIGNAL(3)\fP option to 1 for all handles. Everything will or might
-work fine except that timeouts are not honored during the DNS lookup - which
-you can work around by building libcurl with c-ares support. c-ares is a
+\fICURLOPT_NOSIGNAL(3)\fP option to 1L for all handles. Everything will or
+might work fine except that timeouts are not honored during the DNS lookup -
+which you can work around by building libcurl with c-ares support. c-ares is a
 library that provides asynchronous name resolves. On some platforms, libcurl
 simply will not function properly multi-threaded unless this option is set.
 
