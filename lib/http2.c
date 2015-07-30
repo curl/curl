@@ -80,6 +80,7 @@ static int http2_getsock(struct connectdata *conn,
 static CURLcode http2_disconnect(struct connectdata *conn,
                                  bool dead_connection)
 {
+  struct HTTP *http = conn->data->req.protop;
   struct http_conn *c = &conn->proto.httpc;
   (void)dead_connection;
 
@@ -88,6 +89,16 @@ static CURLcode http2_disconnect(struct connectdata *conn,
   nghttp2_session_del(c->h2);
   Curl_safefree(c->inbuf);
   Curl_hash_destroy(&c->streamsh);
+
+  if(http) {
+    Curl_add_buffer_free(http->header_recvbuf);
+    http->header_recvbuf = NULL; /* clear the pointer */
+    for(; http->push_headers_used > 0; --http->push_headers_used) {
+      free(http->push_headers[http->push_headers_used - 1]);
+    }
+    free(http->push_headers);
+    http->push_headers = NULL;
+  }
 
   DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
 
