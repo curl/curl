@@ -60,8 +60,9 @@ sed -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g'
 # Replace version number in header file:
 sed 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER >$CHEADER.dist
 
-# Generate VC8, VC9, and VC10 versions from the VC6 Makefile versions
-for ver in vc8 vc9 vc10; do
+# Generate VC7, VC8, VC9, VC10, VC11, VC12 and VC14 versions from the VC6
+# Makefile versions
+for ver in vc7 vc8 vc9 vc10 vc11 vc12 vc14; do
   make -f Makefile.dist $ver
   mv src/Makefile.$ver src/Makefile.$ver.dist
   mv lib/Makefile.$ver lib/Makefile.$ver.dist
