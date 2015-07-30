@@ -86,7 +86,6 @@
  * Forward declarations.
  */
 
-static CURLcode http_disconnect(struct connectdata *conn, bool dead);
 static int http_getsock_do(struct connectdata *conn,
                            curl_socket_t *socks,
                            int numsocks);
@@ -117,7 +116,7 @@ const struct Curl_handler Curl_handler_http = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  http_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
@@ -141,7 +140,7 @@ const struct Curl_handler Curl_handler_https = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  http_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTPS,                           /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
@@ -166,26 +165,6 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   Curl_http2_setup_conn(conn);
   Curl_http2_setup_req(conn->data);
 
-  return CURLE_OK;
-}
-
-static CURLcode http_disconnect(struct connectdata *conn, bool dead_connection)
-{
-#ifdef USE_NGHTTP2
-  struct HTTP *http = conn->data->req.protop;
-  if(http) {
-    Curl_add_buffer_free(http->header_recvbuf);
-    http->header_recvbuf = NULL; /* clear the pointer */
-    for(; http->push_headers_used > 0; --http->push_headers_used) {
-      free(http->push_headers[http->push_headers_used - 1]);
-    }
-    free(http->push_headers);
-    http->push_headers = NULL;
-  }
-#else
-  (void)conn;
-#endif
-  (void)dead_connection;
   return CURLE_OK;
 }
 
