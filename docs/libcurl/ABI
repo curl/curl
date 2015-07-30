@@ -5,7 +5,7 @@ ABI - Application Binary Interface
  library. Calling conventions, function arguments, return values, struct
  sizes/defines and more.
 
- [Wikipedia has a longer description](http://en.wikipedia.org/wiki/Application_binary_interface)
+ [Wikipedia has a longer description](https://en.wikipedia.org/wiki/Application_binary_interface)
 
 Upgrades
 --------
