@@ -37,8 +37,9 @@ allows the application to set callbacks to replace the otherwise used internal
 memory functions.
 
 When you use this function, all callback arguments must be set to valid
-function pointers. \fBIf you are using libcurl with multiple threads the
-callback replacement functions must be thread safe.\fP
+function pointers. \fBIf you are using libcurl from multiple threads or with
+the threaded resolver (the default in Windows) the callback replacement
+functions must be thread safe.\fP
 
 The prototypes for the given callbacks should match these:
 .IP "void *malloc_callback(size_t size);"
