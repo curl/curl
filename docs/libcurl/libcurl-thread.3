@@ -101,9 +101,14 @@ are Linux, Solaris and Windows.
 
 \fBcurl_global_* functions.\fP These functions are not thread safe. If you are
 using libcurl with multiple threads it is especially important that before use
-you call \fIcurl_global_init(3)\fP to explicitly initialize the library and its
-dependents, rather than rely on the "lazy" fail-safe initialization that takes
-place the first time \fIcurl_easy_init(3)\fP is called. For an in-depth
-explanation refer to \fIlibcurl(3)\fP section \fBGLOBAL CONSTANTS\fP.
+you call \fIcurl_global_init(3)\fP or \fIcurl_global_init_mem(3)\fP to
+explicitly initialize the library and its dependents, rather than rely on the
+"lazy" fail-safe initialization that takes place the first time
+\fIcurl_easy_init(3)\fP is called. For an in-depth explanation refer to
+\fIlibcurl(3)\fP section \fBGLOBAL CONSTANTS\fP.
+
+\fBMemory functions.\fP These functions, provided either by your operating
+system or your own replacements, must be thread safe. You can use
+\fIcurl_global_init_mem(3)\fP to set your own replacement memory functions.
 
 \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP is not thread-safe.
