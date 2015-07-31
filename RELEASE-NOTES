@@ -49,6 +49,10 @@ This release includes the following bugfixes:
  o build-openssl.bat: Show syntax if required args are missing
  o test1902: attempt to make the test more reliable
  o libcurl-thread.3: Consolidate thread safety info
+ o maketgz: Fixed some VC makefiles missing from the release tarball
+ o libcurl-multi.3: mention curl_multi_wait [10]
+ o ABI doc: use secure URL
+ o http: move HTTP/2 cleanup code off http_disconnect() [11]
 
 This release includes the following known bugs:
 
@@ -61,7 +65,7 @@ advice from friends like these:
   Gustavo Grieco, John E. Malmberg, Kamil Dudka, Lior Kaplan, Marcel Raad,
   Michael Kaufmann, Michał Fita, Patrick Monnerat, Paul Howarth, Ray Satiro,
   Roger Leigh, Stefan Bühler, Štefan Kremeň, Steve Holme, Tatsuhiro Tsujikawa,
-  Terri Oda, TJ Saunders, Viktor Szakáts,
+  Terri Oda, Tim Stack, Tomas Tomecek, TJ Saunders, Viktor Szakáts,
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -76,3 +80,5 @@ References to bug reports and discussions on issues:
  [7] = http://curl.haxx.se/libcurl/c/http2-serverpush.html
  [8] = https://github.com/bagder/curl/blob/master/docs/CODE_OF_CONDUCT.md
  [9] = http://curl.haxx.se/libcurl/c/CURLOPT_SSL_OPTIONS.html
+ [10] = https://github.com/bagder/curl/issues/356
+ [11] = https://bugzilla.redhat.com/1248389
