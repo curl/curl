@@ -607,7 +607,9 @@ input:
 \fBcurl\fP -F password=@/etc/passwd www.mypasswords.com
 
 To read content from stdin instead of a file, use - as the filename. This goes
-for both @ and < constructs.
+for both @ and < constructs. Unfortunately it does not support reading the
+file from a named pipe or similar, as it needs the full size before the
+transfer starts.
 
 You can also tell curl what Content-Type to use by using 'type=', in a manner
 similar to:
