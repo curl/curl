@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,9 +27,9 @@
 #include "curl_gssapi.h"
 #include "sendf.h"
 
-static const char spnego_oid_bytes[] = "\x2b\x06\x01\x05\x05\x02";
+static char spnego_oid_bytes[] = "\x2b\x06\x01\x05\x05\x02";
 gss_OID_desc Curl_spnego_mech_oid = { 6, &spnego_oid_bytes };
-static const char krb5_oid_bytes[] = "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02";
+static char krb5_oid_bytes[] = "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02";
 gss_OID_desc Curl_krb5_mech_oid = { 9, &krb5_oid_bytes };
 
 OM_uint32 Curl_gss_init_sec_context(
