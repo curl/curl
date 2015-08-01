@@ -1122,7 +1122,11 @@ cleanup:
      !connssl->recv_sspi_close_notify) {
     BOOL isWin2k;
     ULONGLONG cm;
-    OSVERSIONINFOEX osver = { sizeof osver, 5, };
+    OSVERSIONINFOEX osver;
+
+    memset(&osver, 0, sizeof(osver));
+    osver.dwOSVersionInfoSize = sizeof(osver);
+    osver.dwMajorVersion = 5;
 
     cm = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
     cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_EQUAL);
