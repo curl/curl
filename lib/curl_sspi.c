@@ -224,7 +224,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 
   Curl_unicodefree(useranddomain.tchar_ptr);
 
-  /* Setup ntlm identity's password and length */
+  /* Setup the identity's password and length */
   passwd.tchar_ptr = Curl_convert_UTF8_to_tchar((char *)passwdp);
   if(!passwd.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
