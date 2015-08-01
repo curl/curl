@@ -94,7 +94,12 @@ CURLcode Curl_sspi_global_init(void)
       securityDll = TRUE;
 #else
     ULONGLONG cm;
-    OSVERSIONINFOEX osver = { sizeof osver, majorVersion, 0, 0, platformId, };
+    OSVERSIONINFOEX osver;
+
+    memset(&osver, 0, sizeof(osver));
+    osver.dwOSVersionInfoSize = sizeof(osver);
+    osver.dwMajorVersion = majorVersion;
+    osver.dwPlatformId = platformId;
 
     cm = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
     cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_GREATER_EQUAL);
