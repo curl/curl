@@ -950,7 +950,11 @@ void Curl_sndbufset(curl_socket_t sockfd)
     }
 #else
     ULONGLONG cm;
-    OSVERSIONINFOEX osver = { sizeof osver, majorVersion, };
+    OSVERSIONINFOEX osver;
+
+    memset(&osver, 0, sizeof(osver));
+    osver.dwOSVersionInfoSize = sizeof(osver);
+    osver.dwMajorVersion = majorVersion;
 
     cm = VerSetConditionMask(0, VER_MAJORVERSION, VER_GREATER_EQUAL);
     cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_GREATER_EQUAL);
