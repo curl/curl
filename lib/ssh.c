@@ -935,6 +935,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       else {
         state(conn, SSH_AUTH_HOST_INIT);
+        rc = 0; /* clear rc and continue */
       }
       break;
 
@@ -1019,11 +1020,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                                     sshc->sshagent_identity);
 
         if(rc < 0) {
-          if(rc != LIBSSH2_ERROR_EAGAIN) {
+          if(rc != LIBSSH2_ERROR_EAGAIN)
             /* tried and failed? go to next identity */
             sshc->sshagent_prev_identity = sshc->sshagent_identity;
-          }
-          break;
+          else
+            break;
         }
       }
 
@@ -1037,8 +1038,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         infof(data, "Agent based authentication successful\n");
         state(conn, SSH_AUTH_DONE);
       }
-      else
+      else {
         state(conn, SSH_AUTH_KEY_INIT);
+        rc = 0; /* clear rc and continue */
+      }
 #endif
       break;
 
