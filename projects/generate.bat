@@ -47,13 +47,13 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
   rem When not found the variable is set undefined. The undefined pattern
   rem allows for statements like "if not defined HAVE_PERL (command)"
   groff --version <NUL 1>NUL 2>&1
-  if %ERRORLEVEL% EQU 0 (set HAVE_GROFF=Y) else (set HAVE_GROFF=)
+  if %ERRORLEVEL% equ 0 (set HAVE_GROFF=Y) else (set HAVE_GROFF=)
   nroff --version <NUL 1>NUL 2>&1
-  if %ERRORLEVEL% EQU 0 (set HAVE_NROFF=Y) else (set HAVE_NROFF=)
+  if %ERRORLEVEL% equ 0 (set HAVE_NROFF=Y) else (set HAVE_NROFF=)
   perl --version <NUL 1>NUL 2>&1
-  if %ERRORLEVEL% EQU 0 (set HAVE_PERL=Y) else (set HAVE_PERL=)
+  if %ERRORLEVEL% equ 0 (set HAVE_PERL=Y) else (set HAVE_PERL=)
   gzip --version <NUL 1>NUL 2>&1
-  if %ERRORLEVEL% EQU 0 (set HAVE_GZIP=Y) else (set HAVE_GZIP=)
+  if %ERRORLEVEL% equ 0 (set HAVE_GZIP=Y) else (set HAVE_GZIP=)
 
   rem Display the help
   if /i "%~1" == "-?" goto syntax
