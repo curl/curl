@@ -431,6 +431,7 @@ struct kerberos5data {
 #if defined(USE_NTLM)
 struct ntlmdata {
   curlntlm state;
+  bool persist_auth;
 #ifdef USE_WINDOWS_SSPI
   CredHandle *credentials;
   CtxtHandle *context;
