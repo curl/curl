@@ -96,7 +96,7 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
     if errorlevel 1 goto nogencurlbuild
     call :gen_hugehelp
     if errorlevel 1 goto nogenhugehelp
-  ) else (
+  ) else if "%VERSION%" == "ALL" (
     echo.
     echo Removing prerequisite files
     call :clean ..\include\curl\curlbuild.h
