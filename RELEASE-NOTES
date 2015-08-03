@@ -53,6 +53,11 @@ This release includes the following bugfixes:
  o libcurl-multi.3: mention curl_multi_wait [10]
  o ABI doc: use secure URL
  o http: move HTTP/2 cleanup code off http_disconnect() [11]
+ o libcurl-thread.3: Warn memory functions must be thread safe [12]
+ o curl_global_init_mem.3: Warn threaded resolver needs thread safe funcs [13]
+ o docs: formpost needs the full size at start of upload [14]
+ o curl_gssapi: remove 'const' to fix compiler warnings
+ o SSH: three state machine fixups [15]
 
 This release includes the following known bugs:
 
@@ -61,11 +66,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Cédric Connes, Dan Fandrich, Daniel Stenberg, David Woodhouse, Feist Josselin,
-  Gustavo Grieco, John E. Malmberg, Kamil Dudka, Lior Kaplan, Marcel Raad,
-  Michael Kaufmann, Michał Fita, Patrick Monnerat, Paul Howarth, Ray Satiro,
-  Roger Leigh, Stefan Bühler, Štefan Kremeň, Steve Holme, Tatsuhiro Tsujikawa,
-  Terri Oda, Tim Stack, Tomas Tomecek, TJ Saunders, Viktor Szakáts,
+  Cédric Connes, Dan Fandrich, Daniel Stenberg, David Woodhouse, Eric Ridge,
+  Feist Josselin, Gustavo Grieco, John E. Malmberg, Kamil Dudka, Lior Kaplan,
+  Marcel Raad, Michael Kaufmann, Michał Fita, Patrick Monnerat, Paul Howarth,
+  Ray Satiro, Roger Leigh, Stefan Bühler, Štefan Kremeň, Steve Holme,
+  Tatsuhiro Tsujikawa, Terri Oda, Tim Stack, TJ Saunders, Tomas Tomecek,
+  Viktor Szakáts,
+  (26 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -82,3 +89,7 @@ References to bug reports and discussions on issues:
  [9] = http://curl.haxx.se/libcurl/c/CURLOPT_SSL_OPTIONS.html
  [10] = https://github.com/bagder/curl/issues/356
  [11] = https://bugzilla.redhat.com/1248389
+ [12] = http://curl.haxx.se/mail/lib-2015-07/0149.html
+ [13] = http://curl.haxx.se/mail/lib-2015-07/0149.html
+ [14] = http://curl.haxx.se/bug/?i=360
+ [15] = http://curl.haxx.se/bug/?i=357
