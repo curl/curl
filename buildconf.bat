@@ -30,6 +30,11 @@ rem This file is not included or required for curl's release archives or daily
 rem snapshot archives.
 
 :begin
+  rem Display the help
+  if /i "%~1" == "-?" goto syntax
+  if /i "%~1" == "-h" goto syntax
+  if /i "%~1" == "-help" goto syntax
+
   if not exist GIT-INFO goto nogitinfo
 
 :start
@@ -55,6 +60,12 @@ call buildconf.bat
 cd ..
 :end_c_ares
 goto success
+
+:syntax
+  rem Display the help
+  echo.
+  echo Usage: buildconf
+  goto error
 
 :nogitinfo
   echo.
