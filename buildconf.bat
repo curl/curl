@@ -29,11 +29,10 @@ rem
 rem This file is not included or required for curl's release archives or daily 
 rem snapshot archives.
 
-if exist GIT-INFO goto start_doing
-echo ERROR: This file shall only be used with a curl git tree checkout.
-goto end_all
-:start_doing
+:begin
+  if not exist GIT-INFO goto nogitinfo
 
+:start
 rem create tool_hugehelp.c
 if not exist src\tool_hugehelp.c.cvs goto end_hugehelp_c
 copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c
@@ -55,6 +54,17 @@ cd ares
 call buildconf.bat
 cd ..
 :end_c_ares
+goto success
 
-:end_all
+:nogitinfo
+  echo.
+  echo ERROR: This file shall only be used with a curl git tree checkout.
+  goto error
 
+:error
+  endlocal
+  exit /B 1
+
+:success
+  endlocal
+  exit /B 0
