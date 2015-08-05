@@ -1,11 +1,33 @@
 @echo off
+rem ***************************************************************************
+rem *                                  _   _ ____  _
+rem *  Project                     ___| | | |  _ \| |
+rem *                             / __| | | | |_) | |
+rem *                            | (__| |_| |  _ <| |___
+rem *                             \___|\___/|_| \_\_____|
+rem *
+rem * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+rem *
+rem * This software is licensed as described in the file COPYING, which
+rem * you should have received as part of this distribution. The terms
+rem * are also available at http://curl.haxx.se/docs/copyright.html.
+rem *
+rem * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+rem * copies of the Software, and permit persons to whom the Software is
+rem * furnished to do so, under the terms of the COPYING file.
+rem *
+rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+rem * KIND, either express or implied.
+rem *
+rem ***************************************************************************
+
+rem NOTES
 rem
+rem This batch file must be used to set up a git tree to build on systems where
+rem there is no autotools support (i.e. Windows).
 rem
-rem This batch file must be used to set up a git tree to build on
-rem systems where there is no autotools support (i.e. Microsoft).
-rem
-rem This file is not included nor needed for curl's release
-rem archives, neither for curl's daily snapshot archives.
+rem This file is not included or required for curl's release archives or daily 
+rem snapshot archives.
 
 if exist GIT-INFO goto start_doing
 echo ERROR: This file shall only be used with a curl git tree checkout.
