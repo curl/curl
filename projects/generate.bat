@@ -97,10 +97,7 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
     call :gen_hugehelp
     if errorlevel 1 goto nogenhugehelp
   ) else if "%VERSION%" == "ALL" (
-    echo.
-    echo Removing prerequisite files
-    call :clean ..\include\curl\curlbuild.h
-    call :clean ..\src\tool_hugehelp.c
+    call ..\buildconf -clean
   )
   if "%VERSION%" == "VC6" goto vc6
   if "%VERSION%" == "VC7" goto vc7
