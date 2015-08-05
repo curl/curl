@@ -37,7 +37,33 @@ rem snapshot archives.
 
   if not exist GIT-INFO goto nogitinfo
 
+  rem Set our variables
+  setlocal
+  set MODE=GENERATE
+
+:parseArgs
+  if "%~1" == "" goto start
+
+  if /i "%~1" == "-clean" (
+    set MODE=CLEAN
+  ) else (
+    goto unknown
+  )
+
+  shift & goto parseArgs
+
 :start
+  if "%MODE%" == "GENERATE" (
+    call :generate
+  ) else (
+    call :clean
+  )
+
+  goto success
+
+rem Main generate function.
+rem
+:generate
   echo.
   echo Generating prerequisite files
 
@@ -68,12 +94,42 @@ rem snapshot archives.
     cd ..
   )
 
-  goto success
+  exit /B
+
+rem Main clean function.
+rem
+:clean
+  echo.
+  echo Removing prerequisite files
+
+  echo * %CD%\Makefile
+  if exist Makefile (
+    del Makefile
+  )
+
+  echo * %CD%\src\tool_hugehelp.c
+  if exist src\tool_hugehelp.c (
+    del src\tool_hugehelp.c
+  )
+
+  echo * %CD%\include\curl\curlbuild.h
+  if exist include\curl\curlbuild.h (
+    del include\curl\curlbuild.h
+  )
+
+  exit /B
 
 :syntax
   rem Display the help
   echo.
-  echo Usage: buildconf
+  echo Usage: buildconf [-clean]
+  echo.
+  echo -clean    - Removes the files
+  goto error
+
+:unknown
+  echo.
+  echo Error: Unknown argument '%1'
   goto error
 
 :nogitinfo
