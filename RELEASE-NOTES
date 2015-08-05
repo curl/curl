@@ -58,6 +58,11 @@ This release includes the following bugfixes:
  o docs: formpost needs the full size at start of upload [14]
  o curl_gssapi: remove 'const' to fix compiler warnings
  o SSH: three state machine fixups [15]
+ o libcurl.3: fix a single typo [16]
+ o generate.bat: Only clean prerequisite files when in ALL mode
+ o curl_slist_append.3: add error checking to the example
+ o buildconf.bat: Added support for file clean-up via -clean
+ o generate.bat: Use buildconf.bat for prerequisite file clean-up
 
 This release includes the following known bugs:
 
@@ -93,3 +98,4 @@ References to bug reports and discussions on issues:
  [13] = http://curl.haxx.se/mail/lib-2015-07/0149.html
  [14] = http://curl.haxx.se/bug/?i=360
  [15] = http://curl.haxx.se/bug/?i=357
+ [16] = https://github.com/bagder/curl/issues/361
