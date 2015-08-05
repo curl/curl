@@ -35,6 +35,9 @@ rem snapshot archives.
   if /i "%~1" == "-h" goto syntax
   if /i "%~1" == "-help" goto syntax
 
+  rem Switch to this batch file's directory
+  cd /d "%~0\.." 1>NUL 2>&1
+
   if not exist GIT-INFO goto nogitinfo
 
   rem Set our variables
