@@ -38,28 +38,29 @@ rem snapshot archives.
   if not exist GIT-INFO goto nogitinfo
 
 :start
-rem create tool_hugehelp.c
-if not exist src\tool_hugehelp.c.cvs goto end_hugehelp_c
-copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c
-:end_hugehelp_c
+  rem create tool_hugehelp.c
+  if exist src\tool_hugehelp.c.cvs (
+    copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c
+  )
 
-rem create Makefile
-if not exist Makefile.dist goto end_makefile
-copy /Y Makefile.dist Makefile
-:end_makefile
+  rem create Makefile
+  if exist Makefile.dist (
+    copy /Y Makefile.dist Makefile
+  )
 
-rem create curlbuild.h
-if not exist include\curl\curlbuild.h.dist goto end_curlbuild_h
-copy /Y include\curl\curlbuild.h.dist include\curl\curlbuild.h
-:end_curlbuild_h
+  rem create curlbuild.h
+  if exist include\curl\curlbuild.h.dist (
+    copy /Y include\curl\curlbuild.h.dist include\curl\curlbuild.h
+  )
 
-rem setup c-ares git tree
-if not exist ares\buildconf.bat goto end_c_ares
-cd ares
-call buildconf.bat
-cd ..
-:end_c_ares
-goto success
+  rem setup c-ares git tree
+  if exist ares\buildconf.bat (
+    cd ares
+    call buildconf.bat
+    cd ..
+  )
+
+  goto success
 
 :syntax
   rem Display the help
