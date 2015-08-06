@@ -38,7 +38,8 @@ rem snapshot archives.
   rem Switch to this batch file's directory
   cd /d "%~0\.." 1>NUL 2>&1
 
-  if not exist GIT-INFO goto nogitinfo
+  rem Check we are running from a curl git repository
+  if not exist GIT-INFO goto norepo
 
   rem Set our variables
   setlocal
@@ -135,9 +136,9 @@ rem
   echo Error: Unknown argument '%1'
   goto error
 
-:nogitinfo
+:norepo
   echo.
-  echo ERROR: This file shall only be used with a curl git tree checkout.
+  echo Error: This batch file should only be used with a curl git repository
   goto error
 
 :error
