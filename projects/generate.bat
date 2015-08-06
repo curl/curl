@@ -38,6 +38,9 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
   rem Switch to this batch file's directory
   cd /d "%~0\.." 1>NUL 2>&1
 
+  rem Check we are running from a curl git repository
+  if not exist ..\GIT-INFO goto norepo
+
   rem Set our variables
   setlocal ENABLEEXTENSIONS
   set VERSION=ALL
@@ -481,6 +484,11 @@ rem Returns exit code 0 on success or 1 on failure.
 :nonetdrv
   echo.
   echo Error: This batch file cannot run from a network drive
+  goto error
+
+:norepo
+  echo.
+  echo Error: This batch file should only be used from a curl git repository
   goto error
 
 :nogencurlbuild
