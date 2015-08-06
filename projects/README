@@ -88,6 +88,46 @@ Building with Visual C++
    well as a configuration that includes both, it is recommend that you use the
    all-in-one configuration.
 
+Running DLL based configurations
+================================
+
+   If you are a developer and plan to run the curl tool from Visual Studio (eg
+   you are debugging) with any third-party libraries (such as OpenSSL, wolfSSL
+   or LibSSH2) then you will need to add the search path of these DLLs to the
+   configuration's PATH environment. To do that:
+
+    * Open the 'curl-all.sln' or 'curl.sln' solutions
+
+    * Right-click on the 'curl' project and select Properties
+
+    * Navigate to 'Configuration Properties > Debugging > Environment'
+
+    * Add PATH='Path to DLL';C:\Windows\system32;C:\Windows;
+               C:\Windows\System32\Wbem
+
+   ... where 'Path to DLL` is the configuration specific path. For example the
+   following configurations in Visual Studio 2010 might be:
+   
+   DLL Debug - DLL OpenSSL (Win32):
+   PATH=..\..\..\..\..\openssl\build\Win32\VC10\DLL Debug;C:\Windows\system32;
+        C:\Windows;C:\Windows\System32\Wbem
+
+   DLL Debug - DLL OpenSSL (x64):
+   PATH=..\..\..\..\..\openssl\build\Win64\VC10\DLL Debug;C:\Windows\system32;
+        C:\Windows;C:\Windows\System32\Wbem
+
+   DLL Debug - DLL wolfSSL (Win32):
+   PATH=..\..\..\..\..\wolfssl\build\Win32\VC10\DLL Debug;C:\Windows\system32;
+        C:\Windows;C:\Windows\System32\Wbem
+
+   DLL Debug - DLL wolfSSL (x64):
+   PATH=..\..\..\..\..\wolfssl\build\Win64\VC10\DLL Debug;C:\Windows\system32;
+        C:\Windows;C:\Windows\System32\Wbem
+
+   If you are using a configuration that uses multiple third-party library DLLs
+   (such as DLL Debug - DLL OpenSSL - DLL LibSSH2) then 'Path to DLL' will need
+   to contain the path to both of these.
+
 Notes
 =====
 
@@ -131,5 +171,6 @@ TODO
    * Generate *.vcxproj.filters files for VC10, VC11 and VC12
    * Add the Test Suite components
    * Support for other development IDEs
+   * Add PATH environment variables for third-party DLLs
 
    Any additional help would be appreciated ;-)
