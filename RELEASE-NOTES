@@ -17,6 +17,7 @@ This release includes the following changes:
  o libcurl: New value CURLSSLOPT_NO_REVOKE for CURLOPT_SSL_OPTIONS [9]
  o makefile: Added support for VC14
  o build: Added Visual Studio 2015 (VC14) project files
+ o build: Added wolfSSL configurations to VC10+ project files [18]
 
 This release includes the following bugfixes:
 
@@ -63,6 +64,7 @@ This release includes the following bugfixes:
  o curl_slist_append.3: add error checking to the example
  o buildconf.bat: Added support for file clean-up via -clean
  o generate.bat: Use buildconf.bat for prerequisite file clean-up
+ o NTLM: handle auth for only a single request [17]
 
 This release includes the following known bugs:
 
@@ -72,12 +74,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Cédric Connes, Dan Fandrich, Daniel Stenberg, David Woodhouse, Eric Ridge,
-  Feist Josselin, Gustavo Grieco, John E. Malmberg, Kamil Dudka, Lior Kaplan,
-  Marcel Raad, Michael Kaufmann, Michał Fita, Patrick Monnerat, Paul Howarth,
-  Ray Satiro, Roger Leigh, Stefan Bühler, Štefan Kremeň, Steve Holme,
-  Tatsuhiro Tsujikawa, Terri Oda, Tim Stack, TJ Saunders, Tomas Tomecek,
-  Viktor Szakáts,
-  (26 contributors)
+  Feist Josselin, Gustavo Grieco, Isaac Boukris, John E. Malmberg, Kamil Dudka,
+  Lior Kaplan, Marcel Raad, Michael Kaufmann, Michał Fita, Patrick Monnerat,
+  Paul Howarth, Ray Satiro, Roger Leigh, Stefan Bühler, Štefan Kremeň,
+  Steve Holme, Tatsuhiro Tsujikawa, Terri Oda, Tim Stack, TJ Saunders,
+  Tomas Tomecek, Viktor Szakáts,
+  (27 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -99,3 +101,5 @@ References to bug reports and discussions on issues:
  [14] = http://curl.haxx.se/bug/?i=360
  [15] = http://curl.haxx.se/bug/?i=357
  [16] = https://github.com/bagder/curl/issues/361
+ [17] = https://github.com/bagder/curl/issues/363
+ [18] = https://github.com/bagder/curl/pull/174
