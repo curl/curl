@@ -2144,7 +2144,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             /* from is relative to end of file */
             from += size;
           }
-          if(from >= size) {
+          if(from > size) {
             failf(data, "Offset (%"
                   CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
                   CURL_FORMAT_CURL_OFF_T ")", from, attrs.filesize);
