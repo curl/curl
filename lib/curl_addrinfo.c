@@ -556,3 +556,149 @@ curl_dogetaddrinfo(const char *hostname,
 }
 #endif /* defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) */
 
+/*
+ * Curl_ai_is_equal()
+ *
+ * This function compares two Curl_addrinfo structures: Family, socktype,
+ * protocol and sockaddr members are compared.
+ * The comparison is for the single ai nodes, not their respective lists.
+ *
+ * [in] 'ai1', 'ai2' : The structures to compare.
+ * [return] (1) : The structures are equal.
+ * [return] (0) : The structures are not equal.
+ */
+
+int
+Curl_ai_is_equal(const Curl_addrinfo *ai1, const Curl_addrinfo *ai2)
+{
+  if(!ai1 && !ai2)
+    return 1;
+
+  if(!ai1 || !ai2
+     || (ai1->ai_family != ai2->ai_family)
+     || (ai1->ai_socktype != ai2->ai_socktype)
+     || (ai1->ai_protocol != ai2->ai_protocol))
+    return 0;
+
+  switch(ai1->ai_family) {
+  case AF_INET:
+    if(((struct sockaddr_in *)ai1->ai_addr)->sin_addr.s_addr
+       != ((struct sockaddr_in *)ai2->ai_addr)->sin_addr.s_addr)
+      return 0;
+    break;
+#ifdef ENABLE_IPV6
+  case AF_INET6:
+    if(memcmp((&((struct sockaddr_in6 *)ai1->ai_addr)->sin6_addr),
+              (&((struct sockaddr_in6 *)ai2->ai_addr)->sin6_addr), 16))
+      return 0;
+    break;
+#endif
+#ifdef USE_UNIX_SOCKETS
+  case AF_UNIX:
+    if(strncmp(((struct sockaddr_un *)ai1->ai_addr)->sun_path,
+               ((struct sockaddr_un *)ai2->ai_addr)->sun_path,
+               sizeof(((struct sockaddr_un *)ai1->ai_addr)->sun_path)))
+      return 0;
+    break;
+#endif
+  default:
+    return 0;
+  }
+
+  return 1;
+}
+
+/*
+ * Curl_ai_deep_copy_single()
+ *
+ * This function makes a deep copy of the address info 'ai', specifically Its
+ * members and any allocated memory.
+ * Only the single addrinfo is copied; the copy's next member is set NULL.
+ *
+ * [in] 'ai' : The address info to copy.
+ * [return][failure] (NULL) : Invalid parameter or out of memory.
+ * [return][success] (Curl_addrinfo *) : The copy of the address info.
+ */
+
+Curl_addrinfo *
+Curl_ai_deep_copy_single(const Curl_addrinfo *ai)
+{
+  Curl_addrinfo *out;
+
+  if(!ai)
+    return NULL;
+
+  out = calloc(1, sizeof(*out));
+  if(!out)
+    return NULL;
+
+  out->ai_flags = ai->ai_flags;
+  out->ai_family = ai->ai_family;
+  out->ai_socktype = ai->ai_socktype;
+  out->ai_protocol = ai->ai_protocol;
+  out->ai_next = NULL;
+
+  if(ai->ai_canonname) {
+    out->ai_canonname = strdup(ai->ai_canonname);
+    if(!out->ai_canonname) {
+      free(out);
+      return NULL;
+    }
+  }
+  else {
+    out->ai_canonname = NULL;
+  }
+
+  if(ai->ai_addr && ai->ai_addrlen) {
+    out->ai_addrlen = ai->ai_addrlen;
+    out->ai_addr = malloc(ai->ai_addrlen);
+    if(!out->ai_addr) {
+      free(out->ai_canonname);
+      free(out);
+      return NULL;
+    }
+    memcpy(out->ai_addr, ai->ai_addr, ai->ai_addrlen);
+  }
+  else {
+    out->ai_addrlen = 0;
+    out->ai_addr = NULL;
+  }
+
+  return out;
+}
+
+/*
+ * Curl_ai_deep_copy_list()
+ *
+ * This function makes a deep copy of the list of address info 'ai',
+ * specifically the members and any allocated memory of all.
+ *
+ * [in] 'ai' : The list of address info to copy.
+ * [return][failure] (NULL) : Invalid parameter or out of memory.
+ * [return][success] (Curl_addrinfo *) : The copy of the list of address info.
+ */
+
+Curl_addrinfo *
+Curl_ai_deep_copy_list(const Curl_addrinfo *ai)
+{
+  Curl_addrinfo *dc, *out;
+
+  if(!ai)
+    return NULL;
+
+  dc = Curl_ai_deep_copy_single(ai);
+  if(!dc)
+    return NULL;
+  out = dc;
+
+  for(ai = ai->ai_next; ai; ai = ai->ai_next) {
+    dc->ai_next = Curl_ai_deep_copy_single(ai);
+    if(!dc->ai_next) {
+      Curl_freeaddrinfo(out);
+      return NULL;
+    }
+    dc = dc->ai_next;
+  }
+
+  return out;
+}

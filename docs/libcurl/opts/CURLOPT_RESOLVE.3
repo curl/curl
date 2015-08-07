@@ -42,16 +42,53 @@ the port number of the service where libcurl wants to connect to the HOST and
 ADDRESS is the numerical IP address. If libcurl is built to support IPv6,
 ADDRESS can of course be either IPv4 or IPv6 style addressing.
 
-This option effectively pre-populates the DNS cache with entries for the
-host+port pair so redirects and everything that operations against the
-HOST+PORT will instead use your provided ADDRESS. Addresses to set with
-\fICURL_RESOLVE\fP will not time-out from the DNS cache like ordinary
-entries.
+This option effectively pre-populates a DNS cache with entries for the
+HOST:PORT pair so all operations against the HOST:PORT will instead use your
+provided ADDRESSes. Addresses added with \fICURLOPT_RESOLVE\fP will not
+time-out from a DNS cache like ordinary entries.
 
-You can remove names from the DNS cache again, to stop providing these fake
-resolves, by including a string in the linked list that uses the format
-\&"-HOST:PORT". The host name must be prefixed with a dash, and the host name
-and port number must exactly match what was already added previously.
+Starting in 7.42.0 it is possible to remove a DNS cache entry or any of its
+addresses, regardless of if they were added by \fICURLOPT_RESOLVE\fP, by
+prefixing with a dash. To remove an individual address use the format
+\fB-\fPHOST:PORT:ADDRESS. To remove an entry entirely use the format
+\fB-\fPHOST:PORT.
+.SH "IMPORTANT BEHAVIOR DETAILS"
+When you add an address any non-user-specified addresses (ie addresses
+provided by the resolver) already in the cache entry for HOST:PORT are
+removed. The cache entry is then marked as user specified and the cache entry
+does not time out.
+
+In contrast to above when you remove an address only that address is removed
+regardless of how it came to be cached. The cache entry is not marked as user
+specified and retains its previously assigned behavior. If a cache entry is
+user-specified it does not time out, if not user-specified it may time out.
+
+If you try to add/remove to HOST:PORT and the existing cache entry is actively
+in use it is not modified and instead a copy is made, modified and replaces
+the existing entry in the cache immediately. The old entry is still held and
+used by whatever is using it and will be deleted once no longer in use. That
+can lead to some unexpected behavior. Consider the following:
+
+- You have one easy handle.
+- You call curl_easy_perform on handle.
+- The URL's host:port is resolved normally (addresses provided by resolver).
+- A connection is made to the host:port and a resource is retrieved.
+- The connection is left open to host:port.
+- You use CURLOPT_RESOLVE on handle to change addresses for host:port.
+- You call curl_easy_perform on handle again.
+- The open connection is reused.
+
+If the connection had died, connection reuse was disabled or a fresh
+connection was specified then your modified DNS cache entry for host:port
+would have been used to make the new connection.
+
+\fBlibcurl handles multiple DNS caches.\fP \fICURLOPT_RESOLVE\fP only modifies
+a single DNS cache, the one associated with your handle. By default each easy
+handle has its own DNS cache, unless the easy handle is part of a multi handle
+in which case it uses a DNS cache shared by all easy handles in the multi
+handle. Alternatively you can create your own DNS cache and share it between
+handles by using creating a shared object of type \fICURL_LOCK_DATA_DNS\fP.
+Refer to \fIlibcurl-share(3)\fP for more information on shared objects.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

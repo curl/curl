@@ -69,7 +69,10 @@ struct Curl_dns_entry {
   time_t timestamp;
   /* use-counter, use Curl_resolv_unlock to release reference */
   long inuse;
+  /* nonzero if user added addresses via CURLOPT_RESOLVE */
+  int is_user_specified;
 };
+typedef struct Curl_dns_entry Curl_dns_entry;
 
 /*
  * Curl_resolv() returns an entry with the info for the specified host
