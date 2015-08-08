@@ -25,6 +25,8 @@ rem ***************************************************************************
 :begin
   rem Check we are running on a Windows NT derived OS
   if not "%OS%" == "Windows_NT" goto nodos
+
+  rem Set our variables
   setlocal
   set SUCCESSFUL_BUILDS=
   set VC_VER=
