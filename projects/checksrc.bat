@@ -29,13 +29,23 @@ rem ***************************************************************************
   setlocal
 
 :parseArgs
+  if "%~1" == "" goto prerequisites
+
   if /i "%~1" == "-?" (
     goto syntax
   ) else if /i "%~1" == "-h" (
     goto syntax
   ) else if /i "%~1" == "-help" (
     goto syntax
+  ) else (
+    if not defined SRC_DIR (
+      set SRC_DIR=%~1%
+    ) else (
+      goto unknown
+    )
   )
+
+  shift & goto parseArgs
 
 :prerequisites
   rem Check we have Perl installed
@@ -47,8 +57,7 @@ rem ***************************************************************************
   )
 
 :configure
-  if "%1" == "" set SRC_DIR=..
-  if not "%1" == "" set SRC_DIR=%~1%
+  if "%SRC_DIR%" == "" set SRC_DIR=..
   if not exist "%SRC_DIR%" goto nosrc
 
 :start
@@ -73,6 +82,11 @@ rem ***************************************************************************
   echo.
   echo directory - Specifies the curl source directory
   goto success
+
+:unknown
+  echo.
+  echo Error: Unknown argument '%1'
+  goto error
 
 :nodos
   echo.
