@@ -32,6 +32,11 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
   rem Check we are running on a Windows NT derived OS
   if not "%OS%" == "Windows_NT" goto nodos
 
+  rem Set our variables
+  setlocal ENABLEEXTENSIONS
+  set VERSION=ALL
+  set MODE=GENERATE
+
   rem Check we are not running on a network drive
   if "%~d0."=="\\." goto nonetdrv
 
@@ -40,11 +45,6 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
   rem Check we are running from a curl git repository
   if not exist ..\GIT-INFO goto norepo
-
-  rem Set our variables
-  setlocal ENABLEEXTENSIONS
-  set VERSION=ALL
-  set MODE=GENERATE
 
   rem Detect programs. HAVE_<PROGNAME>
   rem When not found the variable is set undefined. The undefined pattern
@@ -515,7 +515,7 @@ rem Returns exit code 0 on success or 1 on failure.
   exit /b %EXITCODE%
 
 :error
-  endlocal
+  if "%OS%" == "Windows_NT" endlocal
   exit /B 1
 
 :success

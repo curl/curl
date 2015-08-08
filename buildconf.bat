@@ -30,15 +30,15 @@ rem This file is not included or required for curl's release archives or daily
 rem snapshot archives.
 
 :begin
+  rem Set our variables
+  setlocal
+  set MODE=GENERATE
+
   rem Switch to this batch file's directory
   cd /d "%~0\.." 1>NUL 2>&1
 
   rem Check we are running from a curl git repository
   if not exist GIT-INFO goto norepo
-
-  rem Set our variables
-  setlocal
-  set MODE=GENERATE
 
 :parseArgs
   if "%~1" == "" goto start
