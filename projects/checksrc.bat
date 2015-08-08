@@ -26,10 +26,14 @@ rem ***************************************************************************
   if not "%OS%" == "Windows_NT" goto nodos
   setlocal
 
-  rem Display the help
-  if /i "%~1" == "-?" goto syntax
-  if /i "%~1" == "-h" goto syntax
-  if /i "%~1" == "-help" goto syntax
+:parseArgs
+  if /i "%~1" == "-?" (
+    goto syntax
+  ) else if /i "%~1" == "-h" (
+    goto syntax
+  ) else if /i "%~1" == "-help" (
+    goto syntax
+  )
 
 :prerequisites
   rem Check we have Perl installed

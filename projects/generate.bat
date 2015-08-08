@@ -58,11 +58,6 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
   gzip --version <NUL 1>NUL 2>&1
   if %ERRORLEVEL% equ 0 (set HAVE_GZIP=Y) else (set HAVE_GZIP=)
 
-  rem Display the help
-  if /i "%~1" == "-?" goto syntax
-  if /i "%~1" == "-h" goto syntax
-  if /i "%~1" == "-help" goto syntax
-
 :parseArgs
   if "%~1" == "" goto start
 
@@ -86,6 +81,12 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
     set VERSION=VC14
   ) else if /i "%~1" == "-clean" (
     set MODE=CLEAN
+  ) else if /i "%~1" == "-?" (
+    goto syntax
+  ) else if /i "%~1" == "-h" (
+    goto syntax
+  ) else if /i "%~1" == "-help" (
+    goto syntax
   ) else (
     goto unknown
   )

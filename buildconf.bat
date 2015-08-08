@@ -30,11 +30,6 @@ rem This file is not included or required for curl's release archives or daily
 rem snapshot archives.
 
 :begin
-  rem Display the help
-  if /i "%~1" == "-?" goto syntax
-  if /i "%~1" == "-h" goto syntax
-  if /i "%~1" == "-help" goto syntax
-
   rem Switch to this batch file's directory
   cd /d "%~0\.." 1>NUL 2>&1
 
@@ -50,6 +45,12 @@ rem snapshot archives.
 
   if /i "%~1" == "-clean" (
     set MODE=CLEAN
+  ) else if /i "%~1" == "-?" (
+    goto syntax
+  ) else if /i "%~1" == "-h" (
+    goto syntax
+  ) else if /i "%~1" == "-help" (
+    goto syntax
   ) else (
     goto unknown
   )
