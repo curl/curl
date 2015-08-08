@@ -1,0 +1,2 @@
+$ curl -u juliustjang https://api.github.com/user
+$ curl -u juliustjang:52b1b6634aea2ff361f98484d10008d3cb12eda5 https://api.github.com/user
