@@ -72,16 +72,16 @@ rem
   echo.
   echo Generating prerequisite files
 
-  rem create tool_hugehelp.c
-  if exist src\tool_hugehelp.c.cvs (
-    echo * %CD%\src\tool_hugehelp.c
-    copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c 1>NUL
-  )
-
   rem create Makefile
   if exist Makefile.dist (
     echo * %CD%\Makefile
     copy /Y Makefile.dist Makefile 1>NUL
+  )
+
+  rem create tool_hugehelp.c
+  if exist src\tool_hugehelp.c.cvs (
+    echo * %CD%\src\tool_hugehelp.c
+    copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c 1>NUL
   )
 
   rem create curlbuild.h
