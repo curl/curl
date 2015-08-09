@@ -40,6 +40,18 @@ rem snapshot archives.
   rem Check we are running from a curl git repository
   if not exist GIT-INFO goto norepo
 
+  rem Detect programs. HAVE_<PROGNAME>
+  rem When not found the variable is set undefined. The undefined pattern
+  rem allows for statements like "if not defined HAVE_PERL (command)"
+  groff --version <NUL 1>NUL 2>&1
+  if errorlevel 1 (set HAVE_GROFF=) else (set HAVE_GROFF=Y)
+  nroff --version <NUL 1>NUL 2>&1
+  if errorlevel 1 (set HAVE_NROFF=) else (set HAVE_NROFF=Y)
+  perl --version <NUL 1>NUL 2>&1
+  if errorlevel 1 (set HAVE_PERL=) else (set HAVE_PERL=Y)
+  gzip --version <NUL 1>NUL 2>&1
+  if errorlevel 1 (set HAVE_GZIP=) else (set HAVE_GZIP=Y)
+
 :parseArgs
   if "%~1" == "" goto start
 
@@ -167,6 +179,10 @@ rem Windows 9x as setlocal isn't available until Windows NT
 rem
 :dosCleanup
   set MODE=
+  set HAVE_GROFF=
+  set HAVE_NROFF=
+  set HAVE_PERL=
+  set HAVE_GZIP=
 
   exit /B
 
