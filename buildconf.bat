@@ -24,14 +24,14 @@ rem ***************************************************************************
 rem NOTES
 rem
 rem This batch file must be used to set up a git tree to build on systems where
-rem there is no autotools support (i.e. Windows).
+rem there is no autotools support (i.e. DOS and Windows).
 rem
 rem This file is not included or required for curl's release archives or daily 
 rem snapshot archives.
 
 :begin
   rem Set our variables
-  setlocal
+  if "%OS%" == "Windows_NT" setlocal
   set MODE=GENERATE
 
   rem Switch to this batch file's directory
@@ -143,9 +143,17 @@ rem
   goto error
 
 :error
-  endlocal
+  if "%OS%" == "Windows_NT" (
+    endlocal
+  ) else (
+    set MODE=
+  )
   exit /B 1
 
 :success
-  endlocal
+  if "%OS%" == "Windows_NT" (
+    endlocal
+  ) else (
+    set MODE=
+  )
   exit /B 0
