@@ -51,7 +51,8 @@ entries.
 You can remove names from the DNS cache again, to stop providing these fake
 resolves, by including a string in the linked list that uses the format
 \&"-HOST:PORT". The host name must be prefixed with a dash, and the host name
-and port number must exactly match what was already added previously.
+and port number must exactly match what was already added previously. (Added in
+7.42.0)
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
@@ -75,7 +76,7 @@ if(curl) {
 curl_slist_free_all(host);
 .fi
 .SH AVAILABILITY
-Added in 7.21.3
+Added in 7.21.3. Removal support added in 7.42.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
