@@ -65,6 +65,10 @@ This release includes the following bugfixes:
  o buildconf.bat: Added support for file clean-up via -clean
  o generate.bat: Use buildconf.bat for prerequisite file clean-up
  o NTLM: handle auth for only a single request [17]
+ o curl_multi_remove_handle.3: fix formatting [19]
+ o checksrc.bat: Fixed error when [directory] isn't a curl source directory
+ o checksrc.bat: Fixed error when missing *.c and *.h files
+ o CURLOPT_RESOLVE.3: Note removal support was added in 7.42 [20]
 
 This release includes the following known bugs:
 
@@ -74,12 +78,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Cédric Connes, Dan Fandrich, Daniel Stenberg, David Woodhouse, Eric Ridge,
-  Feist Josselin, Gustavo Grieco, Isaac Boukris, John E. Malmberg, Kamil Dudka,
-  Lior Kaplan, Marcel Raad, Michael Kaufmann, Michał Fita, Patrick Monnerat,
-  Paul Howarth, Ray Satiro, Roger Leigh, Stefan Bühler, Štefan Kremeň,
-  Steve Holme, Tatsuhiro Tsujikawa, Terri Oda, Tim Stack, TJ Saunders,
-  Tomas Tomecek, Viktor Szakáts,
-  (27 contributors)
+  Feist Josselin, Gustavo Grieco, Inca R, Isaac Boukris, John E. Malmberg,
+  Kamil Dudka, Lior Kaplan, Marcel Raad, Michael Kaufmann, Michał Fita,
+  Patrick Monnerat, Paul Howarth, Ray Satiro, Roger Leigh, Stefan Bühler,
+  Štefan Kremeň, Steve Holme, Tatsuhiro Tsujikawa, Terri Oda, Tim Stack,
+  TJ Saunders, Tomas Tomecek, Viktor Szakáts,
+  (28 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -103,3 +107,5 @@ References to bug reports and discussions on issues:
  [16] = https://github.com/bagder/curl/issues/361
  [17] = https://github.com/bagder/curl/issues/363
  [18] = https://github.com/bagder/curl/pull/174
+ [19] = https://github.com/bagder/curl/issues/366
+ [20] = http://curl.haxx.se/mail/lib-2015-08/0019.html
