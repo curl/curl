@@ -98,15 +98,15 @@ rem Returns:
 rem
 rem 0 - success
 rem 1 - success with simplified tool_hugehelp.c 
-rem 2 - failure to generate Makefile
-rem 3 - failure to generate tool_hugehelp.c
-rem 4 - failure to generate curlbuild.h
+rem 2 - failed to generate Makefile
+rem 3 - failed to generate tool_hugehelp.c
+rem 4 - failed to generate curlbuild.h
 rem
 :generate
   if "%OS%" == "Windows_NT" setlocal
   set BASIC_HUGEHELP=0
 
-  rem create Makefile
+  rem Create Makefile
   if exist Makefile.dist (
     echo * %CD%\Makefile
     copy /Y Makefile.dist Makefile 1>NUL 2>&1
@@ -116,7 +116,7 @@ rem
     )
   )
 
-  rem create tool_hugehelp.c
+  rem Create tool_hugehelp.c
   echo * %CD%\src\tool_hugehelp.c
   call :genHugeHelp
   if errorlevel 2 (
@@ -128,7 +128,7 @@ rem
   )
   cmd /c exit 0
 
-  rem create curlbuild.h
+  rem Create curlbuild.h
   if exist include\curl\curlbuild.h.dist (
     echo * %CD%\include\curl\curlbuild.h
     copy /Y include\curl\curlbuild.h.dist include\curl\curlbuild.h 1>NUL 2>&1
@@ -138,7 +138,7 @@ rem
     )
   )
 
-  rem setup c-ares git tree
+  rem Setup c-ares git tree
   if exist ares\buildconf.bat (
     echo.
     echo Configuring c-ares build environment
@@ -160,11 +160,12 @@ rem
 rem Returns:
 rem
 rem 0 - success
-rem 1 - failure to clean Makefile
-rem 2 - failure to clean tool_hugehelp.c
-rem 3 - failure to clean curlbuild.h
+rem 1 - failed to clean Makefile
+rem 2 - failed to clean tool_hugehelp.c
+rem 3 - failed to clean curlbuild.h
 rem
 :clean
+  rem Remove Makefile
   echo * %CD%\Makefile
   if exist Makefile (
     del Makefile 2>NUL
@@ -173,6 +174,7 @@ rem
     )
   )
 
+  rem Remove tool_hugehelp.c
   echo * %CD%\src\tool_hugehelp.c
   if exist src\tool_hugehelp.c (
     del src\tool_hugehelp.c 2>NUL
@@ -181,6 +183,7 @@ rem
     )
   )
 
+  rem Remove curlbuild.h
   echo * %CD%\include\curl\curlbuild.h
   if exist include\curl\curlbuild.h (
     del include\curl\curlbuild.h 2>NUL
