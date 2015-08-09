@@ -59,35 +59,60 @@ rem snapshot archives.
 
 :start
   if "%MODE%" == "GENERATE" (
+    echo.
+    echo Generating prerequisite files
+
     call :generate
+    if errorlevel 3 goto nogencurlbuild
+    if errorlevel 2 goto nogenhugehelp
+    if errorlevel 1 goto nogenmakefile
   ) else (
+    echo.
+    echo Removing prerequisite files
+
     call :clean
+    if errorlevel 3 goto nocleancurlbuild
+    if errorlevel 2 goto nocleanhugehelp
+    if errorlevel 1 goto nocleanmakefile
   )
 
   goto success
 
 rem Main generate function.
+rem Returns:
+rem
+rem 0 - success
+rem 1 - failure to generate Makefile
+rem 2 - failure to generate tool_hugehelp.c
+rem 3 - failure to generate curlbuild.h
+rem
 rem
 :generate
-  echo.
-  echo Generating prerequisite files
-
   rem create Makefile
   if exist Makefile.dist (
     echo * %CD%\Makefile
-    copy /Y Makefile.dist Makefile 1>NUL
+    copy /Y Makefile.dist Makefile 1>NUL 2>&1
+    if errorlevel 1 (
+      exit /B 1
+    )
   )
 
   rem create tool_hugehelp.c
   if exist src\tool_hugehelp.c.cvs (
     echo * %CD%\src\tool_hugehelp.c
-    copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c 1>NUL
+    copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c 1>NUL 2>&1
+    if errorlevel 1 (
+      exit /B 2
+    )
   )
 
   rem create curlbuild.h
   if exist include\curl\curlbuild.h.dist (
     echo * %CD%\include\curl\curlbuild.h
-    copy /Y include\curl\curlbuild.h.dist include\curl\curlbuild.h 1>NUL
+    copy /Y include\curl\curlbuild.h.dist include\curl\curlbuild.h 1>NUL 2>&1
+    if errorlevel 1 (
+      exit /B 3
+    )
   )
 
   rem setup c-ares git tree
@@ -99,30 +124,43 @@ rem
     cd ..
   )
 
-  exit /B
+  exit /B 0
 
 rem Main clean function.
 rem
+rem Returns:
+rem
+rem 0 - success
+rem 1 - failure to clean Makefile
+rem 2 - failure to clean tool_hugehelp.c
+rem 3 - failure to clean curlbuild.h
+rem
 :clean
-  echo.
-  echo Removing prerequisite files
-
   echo * %CD%\Makefile
   if exist Makefile (
-    del Makefile
+    del Makefile 2>NUL
+    if exist Makefile (
+      exit /B 1
+    )
   )
 
   echo * %CD%\src\tool_hugehelp.c
   if exist src\tool_hugehelp.c (
-    del src\tool_hugehelp.c
+    del src\tool_hugehelp.c 2>NUL
+    if exist src\tool_hugehelp.c (
+      exit /B 2
+    )
   )
 
   echo * %CD%\include\curl\curlbuild.h
   if exist include\curl\curlbuild.h (
-    del include\curl\curlbuild.h
+    del include\curl\curlbuild.h 2>NUL
+    if exist include\curl\curlbuild.h (
+      exit /B 3
+    )
   )
 
-  exit /B
+  exit /B 0
 
 :syntax
   rem Display the help
@@ -140,6 +178,36 @@ rem
 :norepo
   echo.
   echo Error: This batch file should only be used with a curl git repository
+  goto error
+
+:nogenmakefile
+  echo.
+  echo Error: Unable to generate Makefile
+  goto error
+
+:nogenhugehelp
+  echo.
+  echo Error: Unable to generate src\tool_hugehelp.c
+  goto error
+
+:nogencurlbuild
+  echo.
+  echo Error: Unable to generate include\curl\curlbuild.h
+  goto error
+
+:nocleanmakefile
+  echo.
+  echo Error: Unable to clean Makefile
+  goto error
+
+:nocleanhugehelp
+  echo.
+  echo Error: Unable to clean src\tool_hugehelp.c
+  goto error
+
+:nocleancurlbuild
+  echo.
+  echo Error: Unable to clean include\curl\curlbuild.h
   goto error
 
 :error
