@@ -79,13 +79,13 @@ rem snapshot archives.
   goto success
 
 rem Main generate function.
+rem
 rem Returns:
 rem
 rem 0 - success
 rem 1 - failure to generate Makefile
 rem 2 - failure to generate tool_hugehelp.c
 rem 3 - failure to generate curlbuild.h
-rem
 rem
 :generate
   rem create Makefile
@@ -162,6 +162,14 @@ rem
 
   exit /B 0
 
+rem Function to clean-up local variables under DOS, Windows 3.x and
+rem Windows 9x as setlocal isn't available until Windows NT
+rem
+:dosCleanup
+  set MODE=
+
+  exit /B
+
 :syntax
   rem Display the help
   echo.
@@ -214,7 +222,7 @@ rem
   if "%OS%" == "Windows_NT" (
     endlocal
   ) else (
-    set MODE=
+    call :dosCleanup
   )
   exit /B 1
 
@@ -222,6 +230,6 @@ rem
   if "%OS%" == "Windows_NT" (
     endlocal
   ) else (
-    set MODE=
+    call :dosCleanup
   )
   exit /B 0
