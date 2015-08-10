@@ -491,7 +491,7 @@ mark_as_advanced(CMAKE_USE_GSSAPI)
 if(CMAKE_USE_GSSAPI)
   find_package(GSS)
 
-  set(HAVE_GSS_API ${GSS_FOUND})
+  set(HAVE_GSSAPI ${GSS_FOUND})
   if(GSS_FOUND)
 
     message(STATUS "Found ${GSS_FLAVOUR} GSSAPI version: \"${GSS_VERSION}\"")
@@ -1046,12 +1046,12 @@ _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX)
 _add_if("IDN"           HAVE_LIBIDN)
 # TODO SSP1 (WinSSL) check is missing
 _add_if("SSPI"          USE_WINDOWS_SSPI)
-_add_if("GSS-API"       HAVE_GSS_API)
+_add_if("GSS-API"       HAVE_GSSAPI)
 # TODO SSP1 missing for SPNEGO
 _add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
-                        (HAVE_GSS_API OR USE_WINDOWS_SSPI))
+                        (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
-                        (HAVE_GSS_API OR USE_WINDOWS_SSPI))
+                        (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS, DARWINSSL
 if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR
