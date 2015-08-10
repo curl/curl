@@ -68,6 +68,10 @@ This release includes the following bugfixes:
  o checksrc.bat: Fixed error when [directory] isn't a curl source directory
  o checksrc.bat: Fixed error when missing *.c and *.h files
  o CURLOPT_RESOLVE.3: Note removal support was added in 7.42 [20]
+ o test46: update cookie expire time
+ o SFTP: fix range request off-by-one in size check [21]
+ o CMake: fix GSSAPI builds [22]
+ o build: refer to fixed libidn versions [4]
 
 This release includes the following known bugs:
 
@@ -77,12 +81,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Cédric Connes, Dan Fandrich, Daniel Stenberg, David Woodhouse, Eric Ridge,
-  Feist Josselin, Gustavo Grieco, Inca R, Isaac Boukris, John E. Malmberg,
-  Kamil Dudka, Lior Kaplan, Marcel Raad, Michael Kaufmann, Michał Fita,
-  Patrick Monnerat, Paul Howarth, Ray Satiro, Roger Leigh, Stefan Bühler,
-  Štefan Kremeň, Steve Holme, Tatsuhiro Tsujikawa, Terri Oda, Tim Stack,
-  TJ Saunders, Tomas Tomecek, Viktor Szakáts,
-  (28 contributors)
+  Feist Josselin, Gustavo Grieco, Inca R, Isaac Boukris, Jakub Zakrzewski,
+  John E. Malmberg, Kamil Dudka, Lior Kaplan, Marcel Raad, Michael Kaufmann,
+  Michał Fita, Patrick Monnerat, Paul Howarth, Ray Satiro, Roger Leigh,
+  Stefan Bühler, Štefan Kremeň, Steve Holme, Tatsuhiro Tsujikawa, Terri Oda,
+  Tim Stack, TJ Saunders, Tomas Tomecek, Viktor Szakáts,
+  (29 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -91,6 +95,7 @@ References to bug reports and discussions on issues:
  [1] = https://github.com/bagder/curl/issues/278
  [2] = https://github.com/bagder/curl/issues/318
  [3] = http://curl.haxx.se/mail/lib-2015-06/0122.html
+ [4] = http://curl.haxx.se/bug/?i=371
  [5] = https://github.com/bagder/curl/issues/264
  [6] = http://curl.haxx.se/libcurl/c/CURLMOPT_PUSHFUNCTION.html
  [7] = http://curl.haxx.se/libcurl/c/http2-serverpush.html
@@ -107,3 +112,5 @@ References to bug reports and discussions on issues:
  [18] = https://github.com/bagder/curl/pull/174
  [19] = https://github.com/bagder/curl/issues/366
  [20] = http://curl.haxx.se/mail/lib-2015-08/0019.html
+ [21] = http://curl.haxx.se/bug/?i=359
+ [22] = http://curl.haxx.se/bug/?i=370
