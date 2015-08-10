@@ -12,7 +12,6 @@ This release includes the following changes:
  o examples: added http2-serverpush.c [7]
  o http2: added curl_pushheader_byname() and curl_pushheader_bynum()
  o docs: added CODE_OF_CONDUCT.md [8]
- o configure: disable libidn by default [4]
  o curl: Add --ssl-no-revoke to disable certificate revocation checks [5]
  o libcurl: New value CURLSSLOPT_NO_REVOKE for CURLOPT_SSL_OPTIONS [9]
  o makefile: Added support for VC14
@@ -92,7 +91,6 @@ References to bug reports and discussions on issues:
  [1] = https://github.com/bagder/curl/issues/278
  [2] = https://github.com/bagder/curl/issues/318
  [3] = http://curl.haxx.se/mail/lib-2015-06/0122.html
- [4] = http://curl.haxx.se/mail/lib-2015-06/0143.html
  [5] = https://github.com/bagder/curl/issues/264
  [6] = http://curl.haxx.se/libcurl/c/CURLMOPT_PUSHFUNCTION.html
  [7] = http://curl.haxx.se/libcurl/c/http2-serverpush.html
