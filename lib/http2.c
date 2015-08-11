@@ -404,7 +404,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
          internal error more than anything else! */
       failf(conn->data, "Received frame on Stream ID: %x not in stream hash!",
             stream_id);
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
+      return 0;
     }
     stream = data_s->req.protop;
     if(!stream) {

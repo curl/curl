@@ -1443,7 +1443,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
                         CURLcode status, bool premature)
 {
   struct SessionHandle *data = conn->data;
-  struct HTTP *http =data->req.protop;
+  struct HTTP *http = data->req.protop;
 
   Curl_unencode_cleanup(conn);
 
@@ -1481,6 +1481,11 @@ CURLcode Curl_http_done(struct connectdata *conn,
     }
     free(http->push_headers);
     http->push_headers = NULL;
+  }
+  if(http->stream_id) {
+    Curl_hash_delete(&conn->proto.httpc.streamsh,
+                     &http->stream_id, sizeof(http->stream_id));
+    http->stream_id = 0;
   }
 #endif
 
