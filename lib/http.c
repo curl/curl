@@ -1443,7 +1443,10 @@ CURLcode Curl_http_done(struct connectdata *conn,
                         CURLcode status, bool premature)
 {
   struct SessionHandle *data = conn->data;
-  struct HTTP *http =data->req.protop;
+  struct HTTP *http = data->req.protop;
+#ifdef USE_NGHTTP2
+  struct http_conn *httpc = &conn->proto.httpc;
+#endif
 
   Curl_unencode_cleanup(conn);
 
@@ -1481,6 +1484,10 @@ CURLcode Curl_http_done(struct connectdata *conn,
     }
     free(http->push_headers);
     http->push_headers = NULL;
+  }
+  if(http->stream_id) {
+    nghttp2_session_set_stream_user_data(httpc->h2, http->stream_id, 0);
+    http->stream_id = 0;
   }
 #endif
 

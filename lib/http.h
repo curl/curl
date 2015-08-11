@@ -215,7 +215,6 @@ struct http_conn {
                               nghttp2_session_mem_recv */
 
   /* this is a hash of all individual streams (SessionHandle structs) */
-  struct curl_hash streamsh;
   struct h2settings settings;
 #else
   int unused; /* prevent a compiler warning */
