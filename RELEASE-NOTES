@@ -72,6 +72,10 @@ This release includes the following bugfixes:
  o SFTP: fix range request off-by-one in size check [21]
  o CMake: fix GSSAPI builds [22]
  o build: refer to fixed libidn versions [4]
+ o http2: discard frames with no SessionHandle [23]
+ o curl_easy_recv.3: fix formatting
+ o libcurl-tutorial.3: fix formatting [24]
+ o curl_formget.3: correct return code [25]
 
 This release includes the following known bugs:
 
@@ -80,13 +84,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Cédric Connes, Dan Fandrich, Daniel Stenberg, David Woodhouse, Eric Ridge,
-  Feist Josselin, Gustavo Grieco, Inca R, Isaac Boukris, Jakub Zakrzewski,
-  John E. Malmberg, Kamil Dudka, Lior Kaplan, Marcel Raad, Michael Kaufmann,
-  Michał Fita, Patrick Monnerat, Paul Howarth, Ray Satiro, Roger Leigh,
-  Stefan Bühler, Štefan Kremeň, Steve Holme, Tatsuhiro Tsujikawa, Terri Oda,
-  Tim Stack, TJ Saunders, Tomas Tomecek, Viktor Szakáts,
-  (29 contributors)
+  Anders Bakken, Cédric Connes, Dan Fandrich, Daniel Stenberg, David Woodhouse,
+  Eric Ridge, Feist Josselin, Gustavo Grieco, Inca R, Isaac Boukris,
+  Jakub Zakrzewski, John E. Malmberg, Kamil Dudka, Lior Kaplan, Marcel Raad,
+  Michael Kaufmann, Michał Fita, Patrick Monnerat, Paul Howarth, Ray Satiro,
+  Roger Leigh, Stefan Bühler, Štefan Kremeň, Steve Holme, Svyatoslav Mishyn,
+  Tatsuhiro Tsujikawa, Terri Oda, Tim Stack, TJ Saunders, Tomas Tomecek,
+  Viktor Szakáts,
+  (31 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -114,3 +119,6 @@ References to bug reports and discussions on issues:
  [20] = http://curl.haxx.se/mail/lib-2015-08/0019.html
  [21] = http://curl.haxx.se/bug/?i=359
  [22] = http://curl.haxx.se/bug/?i=370
+ [23] = http://curl.haxx.se/bug/?i=372
+ [24] = http://curl.haxx.se/bug/?i=374
+ [25] = http://curl.haxx.se/bug/?i=375
