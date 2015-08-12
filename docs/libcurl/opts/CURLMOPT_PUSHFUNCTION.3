@@ -69,7 +69,7 @@ multi handle, the callback must not do that by itself.
 The callback can access PUSH_PROMISE headers with two accessor
 functions. These functions can only be used from within this callback and they
 can only access the PUSH_PROMISE headers. The normal response headers will be
-pased to the header callback for pushed streams just as for normal streams.
+passed to the header callback for pushed streams just as for normal streams.
 .IP curl_pushheader_bynum
 Returns the header at index 'num' (or NULL). The returned pointer points to a
 "name:value" string that will be freed when this callback returns.
