@@ -1,81 +1,18 @@
-Curl and libcurl 7.44.0
+Curl and libcurl 7.45.0
 
- Public curl releases:         148
- Command line options:         176
+ Public curl releases:         149
+ Command line options:         177
  curl_easy_setopt() options:   219
- Public functions in libcurl:  58
- Contributors:                 1291
+ Public functions in libcurl:  61
+ Contributors:                 1303
 
 This release includes the following changes:
 
- o http2: added CURLMOPT_PUSHFUNCTION and CURLMOPT_PUSHDATA [6]
- o examples: added http2-serverpush.c [7]
- o http2: added curl_pushheader_byname() and curl_pushheader_bynum()
- o docs: added CODE_OF_CONDUCT.md [8]
- o curl: Add --ssl-no-revoke to disable certificate revocation checks [5]
- o libcurl: New value CURLSSLOPT_NO_REVOKE for CURLOPT_SSL_OPTIONS [9]
- o makefile: Added support for VC14
- o build: Added Visual Studio 2015 (VC14) project files
- o build: Added wolfSSL configurations to VC10+ project files [18]
+ o
 
 This release includes the following bugfixes:
 
- o FTP: fix HTTP CONNECT logic regression [1]
- o openssl: Fix build with openssl < ~ 0.9.8f
- o openssl: fix build with BoringSSL
- o curl_easy_setopt.3: option order doesn't matter
- o openssl: fix use of uninitialized buffer [2]
- o RTSP: removed dead code
- o Makefile.m32: add support for CURL_LDFLAG_EXTRAS
- o curl: always provide negotiate/kerberos options
- o cookie: Fix bug in export if any-domain cookie is present
- o curl_easy_setopt.3: mention CURLOPT_PIPEWAIT
- o INSTALL: Advise use of non-native SSL for Windows <= XP
- o tool_help: fix --tlsv1 help text to use >= for TLSv1
- o HTTP: POSTFIELDSIZE set after added to multi handle [3]
- o SSL-PROBLEMS: mention WinSSL problems in WinXP
- o setup-vms.h: Symbol case fixups
- o SSL: Pinned public key hash support
- o libtest: call PR_Cleanup() on exit if NSPR is used
- o ntlm_wb: Fix theoretical memory leak
- o runtests: Allow for spaces in curl custom path
- o http2: add stream != NULL checks for reliability
- o schannel: Replace deprecated GetVersion with VerifyVersionInfo
- o http2: verify success of strchr() in http2_send()
- o configure: add --disable-rt option
- o openssl: work around MSVC warning
- o HTTP: ignore "Content-Encoding: compress"
- o configure: check if OpenSSL linking wants -ldl
- o build-openssl.bat: Show syntax if required args are missing
- o test1902: attempt to make the test more reliable
- o libcurl-thread.3: Consolidate thread safety info
- o maketgz: Fixed some VC makefiles missing from the release tarball
- o libcurl-multi.3: mention curl_multi_wait [10]
- o ABI doc: use secure URL
- o http: move HTTP/2 cleanup code off http_disconnect() [11]
- o libcurl-thread.3: Warn memory functions must be thread safe [12]
- o curl_global_init_mem.3: Warn threaded resolver needs thread safe funcs [13]
- o docs: formpost needs the full size at start of upload [14]
- o curl_gssapi: remove 'const' to fix compiler warnings
- o SSH: three state machine fixups [15]
- o libcurl.3: fix a single typo [16]
- o generate.bat: Only clean prerequisite files when in ALL mode
- o curl_slist_append.3: add error checking to the example
- o buildconf.bat: Added support for file clean-up via -clean
- o generate.bat: Use buildconf.bat for prerequisite file clean-up
- o NTLM: handle auth for only a single request [17]
- o curl_multi_remove_handle.3: fix formatting [19]
- o checksrc.bat: Fixed error when [directory] isn't a curl source directory
- o checksrc.bat: Fixed error when missing *.c and *.h files
- o CURLOPT_RESOLVE.3: Note removal support was added in 7.42 [20]
- o test46: update cookie expire time
- o SFTP: fix range request off-by-one in size check [21]
- o CMake: fix GSSAPI builds [22]
- o build: refer to fixed libidn versions [4]
- o http2: discard frames with no SessionHandle [23]
- o curl_easy_recv.3: fix formatting
- o libcurl-tutorial.3: fix formatting [24]
- o curl_formget.3: correct return code [25]
+ o
 
 This release includes the following known bugs:
 
@@ -84,41 +21,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anders Bakken, Cédric Connes, Dan Fandrich, Daniel Stenberg, David Woodhouse,
-  Eric Ridge, Feist Josselin, Gustavo Grieco, Inca R, Isaac Boukris,
-  Jakub Zakrzewski, John E. Malmberg, Kamil Dudka, Lior Kaplan, Marcel Raad,
-  Michael Kaufmann, Michał Fita, Patrick Monnerat, Paul Howarth, Ray Satiro,
-  Roger Leigh, Stefan Bühler, Štefan Kremeň, Steve Holme, Svyatoslav Mishyn,
-  Tatsuhiro Tsujikawa, Terri Oda, Tim Stack, TJ Saunders, Tomas Tomecek,
-  Viktor Szakáts,
-  (31 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://github.com/bagder/curl/issues/278
- [2] = https://github.com/bagder/curl/issues/318
- [3] = http://curl.haxx.se/mail/lib-2015-06/0122.html
- [4] = http://curl.haxx.se/bug/?i=371
- [5] = https://github.com/bagder/curl/issues/264
- [6] = http://curl.haxx.se/libcurl/c/CURLMOPT_PUSHFUNCTION.html
- [7] = http://curl.haxx.se/libcurl/c/http2-serverpush.html
- [8] = https://github.com/bagder/curl/blob/master/docs/CODE_OF_CONDUCT.md
- [9] = http://curl.haxx.se/libcurl/c/CURLOPT_SSL_OPTIONS.html
- [10] = https://github.com/bagder/curl/issues/356
- [11] = https://bugzilla.redhat.com/1248389
- [12] = http://curl.haxx.se/mail/lib-2015-07/0149.html
- [13] = http://curl.haxx.se/mail/lib-2015-07/0149.html
- [14] = http://curl.haxx.se/bug/?i=360
- [15] = http://curl.haxx.se/bug/?i=357
- [16] = https://github.com/bagder/curl/issues/361
- [17] = https://github.com/bagder/curl/issues/363
- [18] = https://github.com/bagder/curl/pull/174
- [19] = https://github.com/bagder/curl/issues/366
- [20] = http://curl.haxx.se/mail/lib-2015-08/0019.html
- [21] = http://curl.haxx.se/bug/?i=359
- [22] = http://curl.haxx.se/bug/?i=370
- [23] = http://curl.haxx.se/bug/?i=372
- [24] = http://curl.haxx.se/bug/?i=374
- [25] = http://curl.haxx.se/bug/?i=375
+ [1] =
