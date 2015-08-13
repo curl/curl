@@ -108,7 +108,7 @@ rem
 
   rem Create Makefile
   if exist Makefile.dist (
-    echo * %CD%\Makefile
+    echo "* %CD%\Makefile"
     copy /Y Makefile.dist Makefile 1>NUL 2>&1
     if errorlevel 1 (
       if "%OS%" == "Windows_NT" endlocal
@@ -117,7 +117,7 @@ rem
   )
 
   rem Create tool_hugehelp.c
-  echo * %CD%\src\tool_hugehelp.c
+  echo "* %CD%\src\tool_hugehelp.c"
   call :genHugeHelp
   if errorlevel 2 (
     if "%OS%" == "Windows_NT" endlocal
@@ -130,7 +130,7 @@ rem
 
   rem Create curlbuild.h
   if exist include\curl\curlbuild.h.dist (
-    echo * %CD%\include\curl\curlbuild.h
+    echo "* %CD%\include\curl\curlbuild.h"
     copy /Y include\curl\curlbuild.h.dist include\curl\curlbuild.h 1>NUL 2>&1
     if errorlevel 1 (
       if "%OS%" == "Windows_NT" endlocal
@@ -166,7 +166,7 @@ rem 3 - failed to clean curlbuild.h
 rem
 :clean
   rem Remove Makefile
-  echo * %CD%\Makefile
+  echo "* %CD%\Makefile"
   if exist Makefile (
     del Makefile 2>NUL
     if exist Makefile (
@@ -175,7 +175,7 @@ rem
   )
 
   rem Remove tool_hugehelp.c
-  echo * %CD%\src\tool_hugehelp.c
+  echo "* %CD%\src\tool_hugehelp.c"
   if exist src\tool_hugehelp.c (
     del src\tool_hugehelp.c 2>NUL
     if exist src\tool_hugehelp.c (
@@ -184,7 +184,7 @@ rem
   )
 
   rem Remove curlbuild.h
-  echo * %CD%\include\curl\curlbuild.h
+  echo "* %CD%\include\curl\curlbuild.h"
   if exist include\curl\curlbuild.h (
     del include\curl\curlbuild.h 2>NUL
     if exist include\curl\curlbuild.h (
