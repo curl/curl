@@ -49,7 +49,9 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 :parseArgs
   if "%~1" == "" goto start
 
-  if /i "%~1" == "vc6" (
+  if /i "%~1" == "pre" (
+    set VERSION=PRE
+  ) else if /i "%~1" == "vc6" (
     set VERSION=VC6
   ) else if /i "%~1" == "vc7" (
     set VERSION=VC7
@@ -91,6 +93,7 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
       call ..\buildconf -clean
     )
   )
+  if "%VERSION%" == "PRE" goto success
   if "%VERSION%" == "VC6" goto vc6
   if "%VERSION%" == "VC7" goto vc7
   if "%VERSION%" == "VC7.1" goto vc71
@@ -385,10 +388,11 @@ rem
 :syntax
   rem Display the help
   echo.
-  echo Usage: generate [compiler] [-clean]
+  echo Usage: generate [what] [-clean]
   echo.
-  echo Compiler:
+  echo What to generate:
   echo.
+  echo pre       - Prerequisites only
   echo vc6       - Use Visual Studio 6
   echo vc7       - Use Visual Studio .NET
   echo vc7.1     - Use Visual Studio .NET 2003
