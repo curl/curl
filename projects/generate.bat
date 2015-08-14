@@ -82,12 +82,14 @@ rem If you need to set the errorlevel do this instead: CALL :seterr [#]
   shift & goto parseArgs
  
 :start
-  if "%MODE%" == "GENERATE" (
-    call ..\buildconf
-  ) else if "%VERSION%" == "PRE" (
-    call ..\buildconf -clean
-  ) else if "%VERSION%" == "ALL" (
-    call ..\buildconf -clean
+  if exist ..\buildconf.bat (
+    if "%MODE%" == "GENERATE" (
+      call ..\buildconf
+    ) else if "%VERSION%" == "PRE" (
+      call ..\buildconf -clean
+    ) else if "%VERSION%" == "ALL" (
+      call ..\buildconf -clean
+    )
   )
   if "%VERSION%" == "VC6" goto vc6
   if "%VERSION%" == "VC7" goto vc7
