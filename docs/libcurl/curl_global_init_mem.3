@@ -36,12 +36,13 @@ This function works exactly as \fIcurl_global_init(3)\fP with one addition: it
 allows the application to set callbacks to replace the otherwise used internal
 memory functions.
 
-When you use this function, all callback arguments must be set to valid
-function pointers. \fBIf you are using libcurl from multiple threads or with
-the threaded resolver (the default in Windows) the callback replacement
-functions must be thread safe.\fP
+If you are using libcurl from multiple threads or libcurl was built with the
+threaded resolver option then the callback functions must be thread safe. The
+threaded resolver is a common build option to enable (and in some cases the
+default) so we strongly urge you to make your callback functions thread safe.
 
-The prototypes for the given callbacks should match these:
+All callback arguments must be set to valid function pointers. The
+prototypes for the given callbacks must match these:
 .IP "void *malloc_callback(size_t size);"
 To replace malloc()
 .IP "void free_callback(void *ptr);"
