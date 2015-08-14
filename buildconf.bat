@@ -107,8 +107,8 @@ rem
   set BASIC_HUGEHELP=0
 
   rem Create Makefile
+  echo * %CD%\Makefile
   if exist Makefile.dist (
-    echo * %CD%\Makefile
     copy /Y Makefile.dist Makefile 1>NUL 2>&1
     if errorlevel 1 (
       if "%OS%" == "Windows_NT" endlocal
@@ -129,8 +129,8 @@ rem
   cmd /c exit 0
 
   rem Create curlbuild.h
+  echo * %CD%\include\curl\curlbuild.h
   if exist include\curl\curlbuild.h.dist (
-    echo * %CD%\include\curl\curlbuild.h
     copy /Y include\curl\curlbuild.h.dist include\curl\curlbuild.h 1>NUL 2>&1
     if errorlevel 1 (
       if "%OS%" == "Windows_NT" endlocal
