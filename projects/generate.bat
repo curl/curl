@@ -244,7 +244,7 @@ rem
 :generate
   if not exist %2 (
     echo.
-    echo Error: Cannot open %CD%\%2
+    echo Error: Cannot open %2
     exit /B
   )
 
