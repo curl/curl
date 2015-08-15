@@ -171,10 +171,11 @@ a level of control).
 .IP "-2, --sslv2"
 (SSL) Forces curl to use SSL version 2 when negotiating with a remote SSL
 server. Sometimes curl is built without SSLv2 support. SSLv2 is widely
-considered insecure.
+considered insecure (see RFC 6176).
 .IP "-3, --sslv3"
 (SSL) Forces curl to use SSL version 3 when negotiating with a remote SSL
-server. Sometimes curl is built without SSLv3 support.
+server. Sometimes curl is built without SSLv3 support. SSLv3 is widely
+considered insecure (see RFC 7568).
 .IP "-4, --ipv4"
 This option tells curl to resolve names to IPv4 addresses only, and not for
 example try IPv6.
