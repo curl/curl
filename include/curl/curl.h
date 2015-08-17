@@ -1673,6 +1673,9 @@ typedef enum {
   /* Set E-xclusive stream dependency on another CURL handle */
   CINIT(STREAM_DEPENDS_E, OBJECTPOINT, 241),
 
+  /* Do not send any tftp option requests to the server */
+  CINIT(TFTP_NO_OPTIONS, LONG, 242),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

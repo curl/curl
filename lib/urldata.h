@@ -1499,7 +1499,8 @@ struct UserDefined {
   long connecttimeout;  /* in milliseconds, 0 means no timeout */
   long accepttimeout;   /* in milliseconds, 0 means no timeout */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
-  long tftp_blksize ; /* in bytes, 0 means use default */
+  long tftp_blksize;    /* in bytes, 0 means use default */
+  bool tftp_no_options; /* do not send TFTP options requests */
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */

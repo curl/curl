@@ -843,9 +843,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.server_response_timeout = va_arg( param , long ) * 1000;
     break;
+  case CURLOPT_TFTP_NO_OPTIONS:
+    /*
+     * Option that prevents libcurl from sending TFTP option requests to the
+     * server.
+     */
+    data->set.tftp_no_options = va_arg(param, long) != 0;
+    break;
   case CURLOPT_TFTP_BLKSIZE:
     /*
-     * TFTP option that specifies the block size to use for data transmission
+     * TFTP option that specifies the block size to use for data transmission.
      */
     data->set.tftp_blksize = va_arg(param, long);
     break;
