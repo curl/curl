@@ -1313,8 +1313,20 @@ as concatenating the protocols into one instance of the option.
 
 (Added in 7.20.2)
 .IP "--proto-redir <protocols>"
-Tells curl to use the listed protocols after a redirect. See --proto for
-how protocols are represented.
+Tells curl to use the listed protocols on redirect. See --proto for how
+protocols are represented.
+
+Example:
+
+.RS
+.IP "--proto-redir -all,http,https"
+Allow only HTTP and HTTPS on redirect.
+.RE
+
+By default curl will allow all protocols on redirect except several disabled
+for security reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0
+SMB and SMBS are also disabled. Specifying \fIall\fP or \fI+all\fP enables all
+protocols on redirect, including those disabled for security.
 
 (Added in 7.20.2)
 .IP "--proxy-anyauth"

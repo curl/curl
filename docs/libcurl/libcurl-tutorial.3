@@ -1086,11 +1086,15 @@ NTLM authentication, HTTPS, FTPS, SCP and SFTP are a few examples.
 .IP "Redirects"
 The \fICURLOPT_FOLLOWLOCATION(3)\fP option automatically follows HTTP
 redirects sent by a remote server.  These redirects can refer to any kind of
-URL, not just HTTP.  A redirect to a file: URL would cause the libcurl to read
-(or write) arbitrary files from the local filesystem.  If the application
-returns the data back to the user (as would happen in some kinds of CGI
-scripts), an attacker could leverage this to read otherwise forbidden data
-(e.g.  file://localhost/etc/passwd).
+URL, not just HTTP. By default libcurl will allow all protocols on redirect
+except several disabled for security reasons: Since 7.19.4 FILE and SCP are
+disabled, and since 7.40.0 SMB and SMBS are also disabled.
+
+A redirect to a file: URL would cause the libcurl to read (or write) arbitrary
+files from the local filesystem.  If the application returns the data back to
+the user (as would happen in some kinds of CGI scripts), an attacker could
+leverage this to read otherwise forbidden data (e.g.
+file://localhost/etc/passwd).
 
 If authentication credentials are stored in the ~/.netrc file, or Kerberos
 is in use, any other URL type (not just file:) that requires

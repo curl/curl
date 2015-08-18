@@ -37,8 +37,10 @@ returned. \fICURLOPT_MAXREDIRS(3)\fP can be used to limit the number of
 redirects libcurl will follow.
 
 libcurl can limit to what protocols it will automatically follow. The accepted
-protocols are set with \fICURLOPT_REDIR_PROTOCOLS(3)\fP and it excludes the
-FILE protocol by default.
+protocols are set with \fICURLOPT_REDIR_PROTOCOLS(3)\fP. By default libcurl
+will allow all protocols on redirect except several disabled for security
+reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0 SMB and SMBS
+are also disabled.
 
 For users who think the existing location following is too naive, too simple
 or just lacks features, it is very easy to instead implement your own redirect
