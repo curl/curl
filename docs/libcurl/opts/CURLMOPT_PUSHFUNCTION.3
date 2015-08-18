@@ -27,8 +27,8 @@ CURLMOPT_PUSHFUNCTION \- callback that approves or denies server pushes
 .nf
 #include <curl/curl.h>
 
-char *curl_pushheader_bynum(push_headers, int num);
-char *curl_pushheader_byname(push_headers, const char *name);
+char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num);
+char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name);
 
 int curl_push_callback(CURL *parent,
                        CURL *easy,
