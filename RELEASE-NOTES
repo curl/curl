@@ -12,7 +12,19 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o
+ o curl_global_init_mem.3: Stronger thread safety warning [1]
+ o buildconf.bat: Fixed issues when ran in directories with special chars [2]
+ o cmake: Fix CurlTests check for gethostbyname_r with 5 arguments
+ o generate.bat: Fixed issues when ran in directories with special chars
+ o generate.bat: Only call buildconf.bat if it exists
+ o generate.bat: Added support for generating only the prerequisite files
+ o curl.1: Document weaknesses in SSLv2 and SSLv3
+ o CURLOPT_HTTP_VERSION.3: connection re-use goes before version
+ o docs: Update the redirect protocols disabled by default
+ o inet_pton.c: Fix MSVC run-time check failure
+ o CURLMOPT_PUSHFUNCTION.3: fix argument types
+ o rtsp: support basic/digest authentication
+ o rtsp: stop reading empty DESCRIBE responses
 
 This release includes the following known bugs:
 
@@ -21,9 +33,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Alessandro Ghedini, Brad King, Daniel Kahn Gillmor, Daniel Seither,
+  Daniel Stenberg, Eric Ridge, Erik Janssen, Jim Hollinger, Marcel Raad,
+  Ray Satiro, Sam Roth, Steve Holme, Svyatoslav Mishyn,
+  (13 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = http://curl.haxx.se/mail/lib-2015-08/0016.html
+ [2] = https://github.com/bagder/curl/pull/379
+ 
