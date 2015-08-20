@@ -3185,6 +3185,16 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
          */
         if(data->set.opt_no_body)
           *stop_reading = TRUE;
+#ifndef CURL_DISABLE_RTSP
+        else if((conn->handler->protocol & CURLPROTO_RTSP) &&
+                (data->set.rtspreq == RTSPREQ_DESCRIBE) &&
+                (k->size <= -1))
+          /* Respect section 4.4 of rfc2326: If the Content-Length header is
+             absent, a length 0 must be assumed.  It will prevent libcurl from
+             hanging on DECRIBE request that got refused for whatever
+             reason */
+          *stop_reading = TRUE;
+#endif
         else {
           /* If we know the expected size of this document, we set the
              maximum download size to the size of the expected
