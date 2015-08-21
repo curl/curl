@@ -1,0 +1,85 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SSL_PSK 3 "21 Aug 2015" "libcurl 7.45.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SSL_PSK \- set client TSL-PSK identity and pre-shared key
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_PSK, char *psk);
+.SH DESCRIPTION
+Pass a pointer to a NULL terminated string as parameter. The string represents
+the PSK identity and the actual pre-shared key (separated by colon [:]).
+
+The format of which is: [identity]:[pre-shared-key].
+
+Note, for PSK cipher-suits employing key-exchange which do not involve
+certificates - such as PSK and DHE_PSK - to work, certificate validation
+must be explicitly disabled as both \fICURLOPT_SSL_VERIFYPEER(3)\fP and
+\fICURLOPT_SSL_VERIFYHOST\fP are enabled by default.
+It is highly recommended in such a case to specify the PSK cipher suite
+explicitly with \fICURLOPT_SSL_CIPHER_LIST\fP (otherwise another cipher
+might get negotiated which employ certificates and there will be no
+mutual-auth of PSK nor the regular certificate verification).
+
+In contrast, with RSA_PSK cipher suites server certificate is available
+and can be verified as usual (so there is no need to disable certificate
+verification nor special need to specify the cipher suite).
+
+For better security, it is advised to use a pre-shared key with the maximum
+length allowed by the TLS implementation.
+According to the specifications (RFC 4279), an implementation MUST at least
+support PSKs up to 64 octets in length (which makes it a good candidate).
+
+See RFC 4279 for more details.
+
+Currently only supported with OpenSSL backend.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All TLS based protocols: HTTPS, FTPS, IMAPS, POP3, SMTPS etc.
+.SH EXAMPLE
+.nf
+CURL *hnd = curl_easy_init();
+if(hnd) {
+  curl_easy_setopt(hnd, CURLOPT_URL, "https://example.com");
+  curl_easy_setopt(hnd, CURLOPT_SSL_PSK, "client_id:jqwertyuiopasdfihjlz");
+
+  /* The following three lines are not necessary with RSA-PSK */
+  curl_easy_setopt(hnd, CURLOPT_SSL_CIPHER_LIST, "PSK-AES256-CBC-SHA");
+  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
+
+  /* Perform the request */
+  curl_easy_perform(hnd);
+}
+.fi
+.SH AVAILABILITY
+If built TLS enabled and the backend support TLS-PSK.
+.SH RETURN VALUE
+Returns CURLE_OK if TLS-PSK is enabled, CURLE_NOT_BUILT_IN if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+.SH "SEE ALSO"
+.BR CURLOPT_SSL_VERIFYPEER "(3), "
+.BR CURLOPT_SSL_VERIFYHOST "(3), "
+.BR CURLOPT_SSL_CIPHER_LIST "(3), "

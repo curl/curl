@@ -230,6 +230,7 @@ static const struct LongShort aliases[]= {
   {"Er", "false-start",              FALSE},
   {"Es", "ssl-no-revoke",            FALSE},
   {"Et", "tcp-fastopen",             FALSE},
+  {"Eu", "tls-psk",                  TRUE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -1418,6 +1419,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
       case 't': /* --tcp-fastopen */
         config->tcp_fastopen = TRUE;
+        break;
+
+      case 'u': /* --tls-psk */
+        GetStr(&config->tlspsk, nextarg);
         break;
 
       default: /* certificate file */

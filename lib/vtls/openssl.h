@@ -91,6 +91,11 @@ bool Curl_ossl_cert_status_request(void);
 /* this backend suppots CURLOPT_SSL_CTX_* */
 #define have_curlssl_ssl_ctx 1
 
+/* this backend supports TLS_PSK */
+#if (OPENSSL_VERSION_NUMBER >= 0x10000000L) && !defined(OPENSSL_NO_PSK)
+#define have_curlssl_tls_psk 1
+#endif
+
 /* API setup for OpenSSL */
 #define curlssl_init Curl_ossl_init
 #define curlssl_cleanup Curl_ossl_cleanup
@@ -112,6 +117,7 @@ bool Curl_ossl_cert_status_request(void);
 #define curlssl_sha256sum(a,b,c,d) Curl_ossl_sha256sum(a,b,c,d)
 #endif
 #define curlssl_cert_status_request() Curl_ossl_cert_status_request()
+#define curlssl_psk() Curl_ossl_psk()
 
 #define DEFAULT_CIPHER_SELECTION \
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"

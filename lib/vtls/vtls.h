@@ -126,6 +126,8 @@ bool Curl_ssl_cert_status_request(void);
 
 bool Curl_ssl_false_start(void);
 
+bool Curl_ssl_psk(void);
+
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 #else

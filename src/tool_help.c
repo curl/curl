@@ -226,6 +226,7 @@ static const char *const helptext[] = {
   "     --tftp-blksize VALUE  Set TFTP BLKSIZE option (must be >512)",
   "     --tftp-no-options  Do not send TFTP options requests",
   " -z, --time-cond TIME   Transfer based on a time condition",
+  "     --tls-psk       TLS-PSK [identity]:[pre-shared-key] (SSL)",
   " -1, --tlsv1         Use >= TLSv1 (SSL)",
   "     --tlsv1.0       Use TLSv1.0 (SSL)",
   "     --tlsv1.1       Use TLSv1.1 (SSL)",

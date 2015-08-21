@@ -1032,6 +1032,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->pinnedpubkey)
           my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
 
+        if(config->tlspsk)
+          my_setopt_str(curl, CURLOPT_SSL_PSK, config->tlspsk);
+
         if(curlinfo->features & CURL_VERSION_SSL) {
           my_setopt_str(curl, CURLOPT_SSLCERT, config->cert);
           my_setopt_str(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
