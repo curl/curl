@@ -1620,7 +1620,8 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
     dnl Older versions of Cyassl (some time before 2.9.4) don't have
     dnl SSL_get_shutdown (but this check won't actually detect it there
     dnl as it's a macro that needs the header files be included)
-    dnl BoringSSL doesn't have DES_set_odd_parity
+    dnl BoringSSL didn't have DES_set_odd_parity for a while but now it is
+    dnl back again.
 
     AC_CHECK_FUNCS( RAND_status \
                     RAND_screen \
@@ -1632,14 +1633,22 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
                     DES_set_odd_parity )
 
     AC_MSG_CHECKING([for BoringSSL])
-    if test "x$ac_cv_func_DES_set_odd_parity" != "xyes"; then
-      curl_ssl_msg="enabled (BoringSSL)"
-      AC_DEFINE_UNQUOTED(HAVE_BORINGSSL, 1,
-        [Define to 1 if using BoringSSL.])
-      AC_MSG_RESULT([yes])
-    else
-      AC_MSG_RESULT([no])
-    fi
+    AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+                #include <openssl/base.h>
+                ]],[[
+                #ifndef OPENSSL_IS_BORINGSSL
+                #error not boringssl
+                #endif
+       ]])
+    ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE_UNQUOTED(HAVE_BORINGSSL, 1,
+                           [Define to 1 if using BoringSSL.])
+    ],[
+        AC_MSG_RESULT([no])
+    ])
+
     AC_MSG_CHECKING([for libressl])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
