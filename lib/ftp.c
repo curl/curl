@@ -340,6 +340,9 @@ static CURLcode AcceptServerConnect(struct connectdata *conn)
     return CURLE_FTP_PORT_FAILED;
   }
   infof(data, "Connection accepted from server\n");
+  /* when this happens within the DO state it is important that we mark us as
+     not needing DO_MORE anymore */
+  conn->bits.do_more = FALSE;
 
   conn->sock[SECONDARYSOCKET] = s;
   (void)curlx_nonblock(s, TRUE); /* enable non-blocking */
