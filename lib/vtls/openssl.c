@@ -1669,6 +1669,50 @@ get_ssl_version_txt(SSL *ssl)
   return "unknown";
 }
 
+#ifdef have_curlssl_tls_psk
+static unsigned int
+set_psk_cb(SSL *ssl,
+           const char *hint,
+           char *id_buffer,
+           unsigned int id_buffer_len,
+           unsigned char *psk_buffer,
+           unsigned int psk_buffer_len)
+{
+  (void)hint;
+  struct connectdata *conn;
+  char *id;
+  char *psk;
+  int id_len, psk_len;
+
+  conn = (struct connectdata *)SSL_get_app_data(ssl);
+  if(conn == NULL || conn->data == NULL)
+    return 0;
+
+  id = conn->data->set.ssl.psk_id;
+  psk = conn->data->set.ssl.psk_key;
+
+  if(!id || !psk) {
+    failf(conn->data, "TLS-PSK no identity or pre-shared key available");
+    return 0;
+  }
+
+  id_len = strlen(id);
+  psk_len = strlen(psk);
+
+  /* For the identity the buffer should hold the NULL terminator */
+  if((id_len >= id_buffer_len) || (psk_len > psk_buffer_len)) {
+    failf(conn->data, "TLS-PSK insufficient buffer provided by TLS engine");
+    return 0;
+  }
+
+  memcpy(id_buffer, id, id_len);
+  memcpy(psk_buffer, psk, psk_len);
+  id_buffer[id_len] = '\0';
+
+  return psk_len;
+}
+#endif
+
 static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 {
   CURLcode result = CURLE_OK;
@@ -2061,6 +2105,13 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     failf(data, "SSL: couldn't create a context (handle)!");
     return CURLE_OUT_OF_MEMORY;
   }
+
+#ifdef have_curlssl_tls_psk
+  if(data->set.ssl.psk_id && data->set.ssl.psk_key) {
+    SSL_set_app_data(connssl->handle, conn);
+    SSL_set_psk_client_callback(connssl->handle, set_psk_cb);
+  }
+#endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
     !defined(OPENSSL_IS_BORINGSSL)
@@ -3208,4 +3259,14 @@ bool Curl_ossl_cert_status_request(void)
   return FALSE;
 #endif
 }
+
+bool Curl_ossl_psk(void)
+{
+#ifdef have_curlssl_tls_psk
+  return TRUE;
+#else
+  return FALSE;
+#endif
+}
+
 #endif /* USE_OPENSSL */

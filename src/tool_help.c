@@ -221,6 +221,7 @@ static const char *const helptext[] = {
   " -t, --telnet-option OPT=VAL  Set telnet option",
   "     --tftp-blksize VALUE  Set TFTP BLKSIZE option (must be >512)",
   " -z, --time-cond TIME  Transfer based on a time condition",
+  "     --tls-psk       TLS-PSK [identity]:[pre-shared-key] (SSL)",
   " -1, --tlsv1         Use >= TLSv1 (SSL)",
   "     --tlsv1.0       Use TLSv1.0 (SSL)",
   "     --tlsv1.1       Use TLSv1.1 (SSL)",
