@@ -1493,13 +1493,13 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
       ;;
   esac
 
-  AC_CHECK_LIB(crypto, CRYPTO_lock,[
+  AC_CHECK_LIB(crypto, HMAC_Init,[
      HAVECRYPTO="yes"
      LIBS="-lcrypto $LIBS"
      ],[
      LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
      CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include/openssl -I$PREFIX_OPENSSL/include"
-     AC_CHECK_LIB(crypto, CRYPTO_add_lock,[
+     AC_CHECK_LIB(crypto, HMAC_Init_Ex,[
        HAVECRYPTO="yes"
        LIBS="-lcrypto $LIBS"], [
        LDFLAGS="$CLEANLDFLAGS"
