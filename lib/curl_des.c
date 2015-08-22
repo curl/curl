@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && (!defined(USE_OPENSSL) || defined(HAVE_BORINGSSL))
+#if defined(USE_NTLM) && !defined(HAVE_DES_SET_ODD_PARITY)
 
 #include "curl_des.h"
 
