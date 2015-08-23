@@ -58,6 +58,8 @@ const char *param2text(int res)
     return "expected a positive numerical parameter";
   case PARAM_LIBCURL_DOESNT_SUPPORT:
     return "the installed libcurl version doesn't support this";
+  case PARAM_LIBCURL_UNSUPPORTED_PROTOCOL:
+    return "a specified protocol is unsupported by libcurl";
   case PARAM_NO_MEM:
     return "out of memory";
   default:

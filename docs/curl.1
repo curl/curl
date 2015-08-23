@@ -1312,6 +1312,25 @@ This option can be used multiple times, in which case the effect is the same
 as concatenating the protocols into one instance of the option.
 
 (Added in 7.20.2)
+.IP "--proto-default <protocol>"
+Tells curl to use \fIprotocol\fP for any URL missing a scheme name.
+
+Example:
+
+.RS
+.IP "--proto-default https ftp.mozilla.org"
+https://ftp.mozilla.org
+.RE
+
+An unknown or unsupported protocol causes error
+\fICURLE_UNSUPPORTED_PROTOCOL\fP.
+
+This option does not change the default proxy protocol (http).
+
+Without this option curl would make a guess based on the host, see \fI--url\fP
+for details.
+
+(Added in 7.45.0)
 .IP "--proto-redir <protocols>"
 Tells curl to use the listed protocols on redirect. See --proto for how
 protocols are represented.
@@ -1772,6 +1791,12 @@ If this option is used several times, the last one will be used.
 .IP "--url <URL>"
 Specify a URL to fetch. This option is mostly handy when you want to specify
 URL(s) in a config file.
+
+If the given URL is missing a scheme name (such as "http://" or "ftp://" etc)
+then curl will make a guess based on the host. If the outermost sub-domain name
+matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that protocol will be used,
+otherwise HTTP will be used. Since 7.45.0 guessing can be disabled by setting a
+default protocol, see \fI--proto-default\fP for details.
 
 This option may be used any number of times. To control where this URL is
 written, use the \fI-o, --output\fP or the \fI-O, --remote-name\fP options.

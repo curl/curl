@@ -1645,6 +1645,9 @@ typedef enum {
   /* Wait/don't wait for pipe/mutex to clarify */
   CINIT(PIPEWAIT, LONG, 237),
 
+  /* Set the protocol used when curl is given a URL without a protocol */
+  CINIT(DEFAULT_PROTOCOL, OBJECTPOINT, 238),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
