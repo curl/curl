@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+--proto-default
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+none
+</features>
+<server>
+none
+</server>
+<name>
+Attempt to set a default protocol that does not exist
+</name>
+<command>
+--proto-default DOESNOTEXIST
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# CURLE_UNSUPPORTED_PROTOCOL is error code 1
+<errorcode>
+1
+</errorcode>
+</verify>
+</testcase>

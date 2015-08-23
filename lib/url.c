@@ -2441,6 +2441,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.redir_protocols = va_arg(param, long);
     break;
 
+  case CURLOPT_DEFAULT_PROTOCOL:
+    /* Set the protocol to use when the URL doesn't include any protocol */
+    result = setstropt(&data->set.str[STRING_DEFAULT_PROTOCOL],
+                       va_arg(param, char *));
+    break;
+
   case CURLOPT_MAIL_FROM:
     /* Set the SMTP mail originator */
     result = setstropt(&data->set.str[STRING_MAIL_FROM],
@@ -4028,27 +4034,30 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
       }
 
       /*
-       * Since there was no protocol part specified, we guess what protocol it
-       * is based on the first letters of the server name.
+       * Since there was no protocol part specified in the URL use the
+       * user-specified default protocol. If we weren't given a default make a
+       * guess by matching some protocols against the host's outermost
+       * sub-domain name. Finally if there was no match use HTTP.
        */
 
-      /* Note: if you add a new protocol, please update the list in
-       * lib/version.c too! */
-
-      if(checkprefix("FTP.", conn->host.name))
-        protop = "ftp";
-      else if(checkprefix("DICT.", conn->host.name))
-        protop = "DICT";
-      else if(checkprefix("LDAP.", conn->host.name))
-        protop = "LDAP";
-      else if(checkprefix("IMAP.", conn->host.name))
-        protop = "IMAP";
-      else if(checkprefix("SMTP.", conn->host.name))
-        protop = "smtp";
-      else if(checkprefix("POP3.", conn->host.name))
-        protop = "pop3";
-      else {
-        protop = "http";
+      protop = data->set.str[STRING_DEFAULT_PROTOCOL];
+      if(!protop) {
+        /* Note: if you add a new protocol, please update the list in
+         * lib/version.c too! */
+        if(checkprefix("FTP.", conn->host.name))
+          protop = "ftp";
+        else if(checkprefix("DICT.", conn->host.name))
+          protop = "DICT";
+        else if(checkprefix("LDAP.", conn->host.name))
+          protop = "LDAP";
+        else if(checkprefix("IMAP.", conn->host.name))
+          protop = "IMAP";
+        else if(checkprefix("SMTP.", conn->host.name))
+          protop = "smtp";
+        else if(checkprefix("POP3.", conn->host.name))
+          protop = "pop3";
+        else
+          protop = "http";
       }
 
       *prot_missing = TRUE; /* not given in URL */

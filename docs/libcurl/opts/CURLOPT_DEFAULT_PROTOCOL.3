@@ -1,0 +1,79 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_DEFAULT_PROTOCOL 3 "18 Aug 2015" "libcurl 7.45.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_DEFAULT_PROTOCOL \- default protocol to use if the URL is missing a
+scheme name
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DEFAULT_PROTOCOL, char
+*protocol);
+.SH DESCRIPTION
+This option tells libcurl to use \fIprotocol\fP if the URL is missing a scheme
+name.
+
+Use one of these protocol (scheme) names:
+
+dict, file, ftp, ftps, gopher, http, https, imap, imaps, ldap, ldaps, pop3,
+pop3s, rtsp, scp, sftp, smb, smbs, smtp, smtps, telnet, tftp
+
+An unknown or unsupported protocol causes error
+\fICURLE_UNSUPPORTED_PROTOCOL\fP when libcurl parses a schemeless URL. Parsing
+happens when \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP is
+called. The protocols supported by libcurl will vary depending on how it was
+built. Use \fIcurl_version_info(3)\fP if you need a list of protocol names
+supported by the build of libcurl that you are using.
+
+This option does not change the default proxy protocol (http).
+
+Without this option libcurl would make a guess based on the host, see
+\fICURLOPT_URL(3)\fP for details.
+.SH DEFAULT
+NULL (make a guess based on the host)
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+curl = curl_easy_init();
+if(curl) {
+  /* set a URL without a scheme */
+  curl_easy_setopt(curl, CURLOPT_URL, "example.com");
+
+  /* set the default protocol (scheme) for schemeless URLs */
+  curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
+
+  /* Perform the request */
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.45.0
+.SH RETURN VALUE
+CURLE_OK if the option is supported.
+
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+
+CURLE_UNKNOWN_OPTION if the option is not supported.
+.SH "SEE ALSO"
+.BR CURLOPT_URL "(3), "
