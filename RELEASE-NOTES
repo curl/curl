@@ -8,7 +8,8 @@ Curl and libcurl 7.45.0
 
 This release includes the following changes:
 
- o
+ o added CURLOPT_DEFAULT_PROTOCOL [6]
+ o added new tool option --proto-default [6]
 
 This release includes the following bugfixes:
 
@@ -25,6 +26,13 @@ This release includes the following bugfixes:
  o CURLMOPT_PUSHFUNCTION.3: fix argument types
  o rtsp: support basic/digest authentication
  o rtsp: stop reading empty DESCRIBE responses
+ o travis: Upgrading to container based build [3]
+ o travis.yml: Add OS X testbot
+ o FTP: make state machine not get stuck in state
+ o openssl: handle lack of server cert when strict checking disabled [4]
+ o configure: change functions to detect openssl (clones) [5]
+ o configure: detect latest boringssl [5]
+ o runtests: Allow for spaces in server-verify curl custom path
 
 This release includes the following known bugs:
 
@@ -33,10 +41,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Brad King, Daniel Kahn Gillmor, Daniel Seither,
-  Daniel Stenberg, Eric Ridge, Erik Janssen, Jim Hollinger, Marcel Raad,
-  Ray Satiro, Sam Roth, Steve Holme, Svyatoslav Mishyn,
-  (13 contributors)
+  Alessandro Ghedini, Bertrand Simonnet, Brad King, Dan Fandrich,
+  Daniel Kahn Gillmor, Daniel Seither, Daniel Stenberg, Eric Ridge,
+  Erik Janssen, Jactry Zeng, Jim Hollinger, Marcel Raad, Nathaniel Waisbrot,
+  Patricia Muscalu, Ray Satiro, Rémy Léone, Sam Roth, Steve Holme,
+  Svyatoslav Mishyn,
+  (19 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -44,4 +54,8 @@ References to bug reports and discussions on issues:
 
  [1] = http://curl.haxx.se/mail/lib-2015-08/0016.html
  [2] = https://github.com/bagder/curl/pull/379
- 
+ [3] = http://curl.haxx.se/bug/?i=388
+ [4] = http://curl.haxx.se/bug/?i=392
+ [5] = https://android.googlesource.com/platform/external/curl/+/f551028d5caab
+29d4b4a4ae8c159c76c3cfd4887%5E!/
+ [6] = http://curl.haxx.se/bug/?i=351
