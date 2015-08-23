@@ -68,6 +68,7 @@ extern const NameValueUnsigned setopt_nv_CURLAUTH[];
 #define setopt_nv_CURLOPT_NETRC setopt_nv_CURL_NETRC
 #define setopt_nv_CURLOPT_PROTOCOLS setopt_nv_CURLPROTO
 #define setopt_nv_CURLOPT_REDIR_PROTOCOLS setopt_nv_CURLPROTO
+#define setopt_nv_CURLOPT_DEFAULT_PROTOCOL setopt_nv_CURLPROTO
 #define setopt_nv_CURLOPT_PROXYTYPE setopt_nv_CURLPROXY
 #define setopt_nv_CURLOPT_PROXYAUTH setopt_nv_CURLAUTH
 

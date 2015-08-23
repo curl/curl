@@ -169,6 +169,7 @@ static const struct LongShort aliases[]= {
   {"$C", "ftp-pret",                 FALSE},
   {"$D", "proto",                    TRUE},
   {"$E", "proto-redir",              TRUE},
+  {"$U", "proto-default",            TRUE},
   {"$F", "resolve",                  TRUE},
   {"$G", "delegation",               TRUE},
   {"$H", "mail-auth",                TRUE},
@@ -940,6 +941,12 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         config->proto_redir_present = TRUE;
         if(proto2num(config, &config->proto_redir, nextarg))
           return PARAM_BAD_USE;
+        break;
+      case 'U': /* --proto-default */
+        GetStr(&config->proto_default, nextarg);
+        err = check_protocol(config->proto_default);
+        if(err)
+          return err;
         break;
       case 'F': /* --resolve */
         err = add2list(&config->resolve, nextarg);

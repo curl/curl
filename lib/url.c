@@ -2441,6 +2441,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.redir_protocols = va_arg(param, long);
     break;
 
+  case CURLOPT_DEFAULT_PROTOCOL:
+    /* Set the protocol to use when the URL doesn't include any protocol */
+    result = setstropt(&data->set.str[STRING_DEFAULT_PROTOCOL],
+                       va_arg(param, char *));
+    break;
+
   case CURLOPT_MAIL_FROM:
     /* Set the SMTP mail originator */
     result = setstropt(&data->set.str[STRING_MAIL_FROM],
@@ -3930,6 +3936,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   const char *protop = "";
   CURLcode result;
   bool rebuild_url = FALSE;
+  const struct Curl_handler * const *pp;
 
   *prot_missing = FALSE;
 
@@ -4028,28 +4035,36 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
       }
 
       /*
-       * Since there was no protocol part specified, we guess what protocol it
-       * is based on the first letters of the server name.
+       * The given URL does not contain a protocol specificaion.
+       * If we have a given default, we use that. If we weren't given
+       * a default, then we follow the older behavior of trying to guess
+       * based on some canonical  hostname prefixes.
+       * If all else fails, just assume HTTP
        */
+      protop = data->set.str[STRING_DEFAULT_PROTOCOL];
+      if(!protop) {
+        /* Note: if you add a new protocol, please update the list in
+         * lib/version.c too! */
 
-      /* Note: if you add a new protocol, please update the list in
-       * lib/version.c too! */
-
-      if(checkprefix("FTP.", conn->host.name))
-        protop = "ftp";
-      else if(checkprefix("DICT.", conn->host.name))
-        protop = "DICT";
-      else if(checkprefix("LDAP.", conn->host.name))
-        protop = "LDAP";
-      else if(checkprefix("IMAP.", conn->host.name))
-        protop = "IMAP";
-      else if(checkprefix("SMTP.", conn->host.name))
-        protop = "smtp";
-      else if(checkprefix("POP3.", conn->host.name))
-        protop = "pop3";
-      else {
-        protop = "http";
+        if(checkprefix("FTP.", conn->host.name))
+          protop = "ftp";
+        else if(checkprefix("DICT.", conn->host.name))
+          protop = "DICT";
+        else if(checkprefix("LDAP.", conn->host.name))
+          protop = "LDAP";
+        else if(checkprefix("IMAP.", conn->host.name))
+          protop = "IMAP";
+        else if(checkprefix("SMTP.", conn->host.name))
+          protop = "smtp";
+        else if(checkprefix("POP3.", conn->host.name))
+          protop = "pop3";
+        else {
+          protop = "http";
+        }
       }
+
+      if(!protop)
+        return CURLE_UNSUPPORTED_PROTOCOL;
 
       *prot_missing = TRUE; /* not given in URL */
     }
