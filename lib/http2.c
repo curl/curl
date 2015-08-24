@@ -373,7 +373,7 @@ static int push_promise(struct SessionHandle *data,
 static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
-  struct connectdata *conn = NULL;
+  struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *httpc = NULL;
   struct SessionHandle *data_s = NULL;
   struct HTTP *stream = NULL;
@@ -381,8 +381,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   int rv;
   size_t left, ncopy;
   int32_t stream_id = frame->hd.stream_id;
-
-  (void)userp;
 
   if(!stream_id) {
     /* stream ID zero is for connection-oriented stuff */
