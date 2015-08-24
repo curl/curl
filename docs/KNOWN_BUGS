@@ -58,11 +58,6 @@ may have been fixed since this was written!
   that can receive data. This is subject for change in the future.
   http://curl.haxx.se/bug/view.cgi?id=1116
 
-78. curl and libcurl don't always signal the client properly when "sending"
-  zero bytes files - it makes for example the command line client not creating
-  any file at all. Like when using FTP.
-  http://curl.haxx.se/bug/view.cgi?id=1063
-
 75. NTLM authentication involving unicode user name or password only works
   properly if built with UNICODE defined together with the WinSSL/schannel
   backend. The original problem was mentioned in:
