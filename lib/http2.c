@@ -904,11 +904,6 @@ CURLcode Curl_http2_init(struct connectdata *conn)
       failf(conn->data, "Couldn't initialize nghttp2!");
       return CURLE_OUT_OF_MEMORY; /* most likely at least */
     }
-
-    if(rc) {
-      failf(conn->data, "Couldn't init stream hash!");
-      return CURLE_OUT_OF_MEMORY; /* most likely at least */
-    }
   }
   return CURLE_OK;
 }
