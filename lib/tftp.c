@@ -978,7 +978,7 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  /* we don't keep TFTP connections up bascially because there's none or very
+  /* we don't keep TFTP connections up basically because there's none or very
    * little gain for UDP */
   connclose(conn, "TFTP");
 

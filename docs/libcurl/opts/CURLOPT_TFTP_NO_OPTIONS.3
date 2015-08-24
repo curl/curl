@@ -20,24 +20,51 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_TFTP_NO_OPTIONS 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_TFTP_NO_OPTIONS 3 "23 Feb 2016" "libcurl 7.48.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_TFTP_NO_OPTIONS \- Prevents TFTP options to be send with RRQs/WRQs
+CURLOPT_TFTP_NO_OPTIONS \- Do not send TFTP options requests.
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TFTP_NO_OPTIONS, long sendoptions);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TFTP_NO_OPTIONS, long onoff);
 .SH DESCRIPTION
-Set \fIsendoptions\fP to 1 to exclude all TFTP options defined in RFC2347,
-RFC2348, RFC2349 from read and write requests.
-libcurl will behave like a client implementing only RFC1350, ignoring any
-protocol extensions.
+Set \fIonoff\fP to 1L to exclude all TFTP options defined in RFC2347, RFC2348
+and RFC2349 from read and write requests (RRQs/WRQs).
+
+This option improves interop with some legacy servers that do not acknowledge
+or properly implement TFTP options. When this option is used
+\fICURLOPT_TFTP_BLKSIZE(3)\fP is ignored.
 .SH DEFAULT
 0
 .SH PROTOCOLS
 TFTP
 .SH EXAMPLE
-TODO
+.nf
+size_t write_callback(char *ptr, size_t size, size_t nmemb, void *fp)
+{
+  return fwrite(ptr, size, nmemb, (FILE *)fp);
+}
+
+CURL *curl = curl_easy_init();
+if(curl) {
+  FILE *fp = fopen("foo.bin", "wb");
+  if(fp) {
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)fp);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+
+    curl_easy_setopt(curl, CURLOPT_URL, "tftp://example.com/foo.bin");
+
+    /* do not send TFTP options requests */
+    curl_easy_setopt(curl, CURLOPT_TFTP_NO_OPTIONS, 1L);
+
+    /* Perform the request */
+    curl_easy_perform(curl);
+
+    fclose(fp);
+  }
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.48.0
 .SH RETURN VALUE
