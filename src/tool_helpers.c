@@ -75,7 +75,7 @@ int SetHTTPrequest(struct OperationConfig *config, HttpReq req, HttpReq *store)
     return 0;
   }
 
-  warnf(config->global, "You can only select one HTTP request!\n");
+  warnf(config->global, "You can only select one HTTP request method!\n");
 
   return 1;
 }
