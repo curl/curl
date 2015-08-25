@@ -1422,7 +1422,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
                    &config->last_post,
                    (subletter=='s')?TRUE:FALSE)) /* 's' means literal string */
         return PARAM_BAD_USE;
-      if(SetHTTPrequest(config, HTTPREQ_POST, &config->httpreq))
+      if(SetHTTPrequest(config, HTTPREQ_FORMPOST, &config->httpreq))
         return PARAM_BAD_USE;
       break;
 
