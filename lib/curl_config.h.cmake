@@ -919,6 +919,9 @@
 /* to enable SSPI support */
 #cmakedefine USE_WINDOWS_SSPI 1
 
+/* to enable Windows SSL  */
+#cmakedefine USE_SCHANNEL 1
+
 /* Define to 1 if using yaSSL in OpenSSL compatibility mode. */
 #cmakedefine USE_YASSLEMUL 1
 
