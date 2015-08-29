@@ -1108,6 +1108,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt_enum(curl, CURLOPT_TIMECONDITION, (long)config->timecond);
         my_setopt(curl, CURLOPT_TIMEVALUE, (long)config->condtime);
         my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
+        customrequest_helper(config, config->httpreq, config->customrequest);
         my_setopt(curl, CURLOPT_STDERR, global->errors);
 
         /* three new ones in libcurl 7.3: */
