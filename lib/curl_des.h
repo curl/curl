@@ -29,6 +29,6 @@
 /* Applies odd parity to the given byte array */
 void Curl_des_set_odd_parity(unsigned char *bytes, size_t length);
 
-#endif /* USE_NTLM && (!USE_OPENSSL || HAVE_BORINGSSL) */
+#endif /* USE_NTLM && !HAVE_DES_SET_ODD_PARITY */
 
 #endif /* HEADER_CURL_DES_H */
