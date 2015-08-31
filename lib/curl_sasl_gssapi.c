@@ -43,19 +43,19 @@
 /*
 * Curl_sasl_build_gssapi_spn()
 *
-* This is used to build a SPN string in the format service@host.
+* This is used to build a SPN string in the format service@instance.
 *
 * Parameters:
 *
-* serivce  [in] - The service type such as www, smtp, pop or imap.
-* host     [in] - The host name or realm.
+* service  [in] - The service type such as www, smtp, pop or imap.
+* instance [in] - The host name or realm.
 *
 * Returns a pointer to the newly allocated SPN.
 */
-char *Curl_sasl_build_gssapi_spn(const char *service, const char *host)
+char *Curl_sasl_build_gssapi_spn(const char *service, const char *instance)
 {
   /* Generate and return our SPN */
-  return aprintf("%s@%s", service, host);
+  return aprintf("%s@%s", service, instance);
 }
 
 /*

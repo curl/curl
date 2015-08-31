@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2014, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2015, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,16 +49,16 @@
 /*
  * Curl_sasl_build_spn()
  *
- * This is used to build a SPN string in the format service/host.
+ * This is used to build a SPN string in the format service/instance.
  *
  * Parameters:
  *
  * serivce  [in] - The service type such as www, smtp, pop or imap.
- * host     [in] - The host name or realm.
+ * instance [in] - The host name or realm.
  *
  * Returns a pointer to the newly allocated SPN.
  */
-TCHAR *Curl_sasl_build_spn(const char *service, const char *host)
+TCHAR *Curl_sasl_build_spn(const char *service, const char *instance)
 {
   char *utf8_spn = NULL;
   TCHAR *tchar_spn = NULL;
@@ -71,7 +71,7 @@ TCHAR *Curl_sasl_build_spn(const char *service, const char *host)
      formulate the SPN instead. */
 
   /* Allocate our UTF8 based SPN */
-  utf8_spn = aprintf("%s/%s", service, host);
+  utf8_spn = aprintf("%s/%s", service, instance);
   if(!utf8_spn) {
     return NULL;
   }

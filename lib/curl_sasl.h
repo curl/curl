@@ -146,7 +146,7 @@ int Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
                               const char **endptr);
 
 #if defined(HAVE_GSSAPI)
-char *Curl_sasl_build_gssapi_spn(const char *service, const char *host);
+char *Curl_sasl_build_gssapi_spn(const char *service, const char *instance);
 #endif
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
