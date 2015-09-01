@@ -45,8 +45,6 @@ include(Macros)
 
 project( CURL C )
 
-message(WARNING "the curl cmake build system is poorly maintained. Be aware")
-
 file (READ ${CURL_SOURCE_DIR}/include/curl/curlver.h CURL_VERSION_H_CONTENTS)
 string (REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*"
   CURL_VERSION ${CURL_VERSION_H_CONTENTS})
@@ -1122,8 +1120,8 @@ set(CURLVERSION             "${CURL_VERSION}")
 set(ENABLE_SHARED           "yes")
 if(CURL_STATICLIB)
   # Broken: LIBCURL_LIBS below; .a lib is not built
-  message(WARNING "Static linking is broken!")
-  set(ENABLE_STATIC         "no")
+  #message(WARNING "Static linking is broken!")
+  set(ENABLE_STATIC         "yes")
 else()
   set(ENABLE_STATIC         "no")
 endif()
