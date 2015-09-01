@@ -959,3 +959,5 @@
 
 /* the signed version of size_t */
 #cmakedefine ssize_t ${ssize_t}
+
+#cmakedefine HAVE_STRUCT_POLLFD

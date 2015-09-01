@@ -9,6 +9,7 @@ macro(add_header_include check header)
 endmacro(add_header_include)
 
 set(signature_call_conv)
+set(linkage )
 if(HAVE_WINDOWS_H)
   add_header_include(HAVE_WINDOWS_H "windows.h")
   add_header_include(HAVE_WINSOCK2_H "winsock2.h")
@@ -16,6 +17,7 @@ if(HAVE_WINDOWS_H)
   set(_source_epilogue
       "${_source_epilogue}\n#ifndef WIN32_LEAN_AND_MEAN\n#define WIN32_LEAN_AND_MEAN\n#endif")
   set(signature_call_conv "PASCAL")
+  set(linkage "WINSOCK_API_LINKAGE")
   if(HAVE_LIBWS2_32)
     set(CMAKE_REQUIRED_LIBRARIES ws2_32)
   endif()
@@ -40,7 +42,7 @@ if(curl_cv_recv)
                 unset(curl_cv_func_recv_test CACHE)
                 check_c_source_compiles("
                   ${_source_epilogue}
-                  extern ${recv_retv} ${signature_call_conv}
+                  extern ${linkage} ${recv_retv} ${signature_call_conv}
                   recv(${recv_arg1}, ${recv_arg2}, ${recv_arg3}, ${recv_arg4});
                   int main(void) {
                     ${recv_arg1} s=0;
@@ -104,7 +106,7 @@ if(curl_cv_send)
                 unset(curl_cv_func_send_test CACHE)
                 check_c_source_compiles("
                   ${_source_epilogue}
-                  extern ${send_retv} ${signature_call_conv}
+                  extern ${linkage} ${send_retv} ${signature_call_conv}
                   send(${send_arg1}, ${send_arg2}, ${send_arg3}, ${send_arg4});
                   int main(void) {
                     ${send_arg1} s=0;
@@ -227,3 +229,13 @@ if(HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE)
   set(HAVE_STRUCT_SOCKADDR_STORAGE 1)
 endif(HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE)
 
+if(HAVE_SYS_POLL_H)
+	set(CMAKE_EXTRA_INCLUDE_FILES "${CMAKE_EXTRA_INCLUDE_FILES};sys/poll.h")
+endif()
+if(HAVE_POLL_H)
+	set(CMAKE_EXTRA_INCLUDE_FILES "${CMAKE_EXTRA_INCLUDE_FILES};poll.h")
+endif()
+check_type_size("struct pollfd" SIZEOF_STRUCT_POLLFD)
+if(HAVE_SIZEOF_STRUCT_POLLFD)
+	set(HAVE_STRUCT_POLLFD 1)
+endif()
