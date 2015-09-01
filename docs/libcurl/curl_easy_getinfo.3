@@ -76,41 +76,21 @@ See \fICURLINFO_SPEED_DOWNLOAD(3)\fP
 .IP CURLINFO_SPEED_UPLOAD
 See \fICURLINFO_SPEED_UPLOAD(3)\fP
 .IP CURLINFO_HEADER_SIZE
-Pass a pointer to a long to receive the total size of all the headers
-received. Measured in number of bytes.
+See \fICURLINFO_HEADER_SIZE(3)\fP
 .IP CURLINFO_REQUEST_SIZE
-Pass a pointer to a long to receive the total size of the issued
-requests. This is so far only for HTTP requests. Note that this may be more
-than one request if FOLLOWLOCATION is true.
+See \fICURLINFO_REQUEST_SIZE(3)\fP
 .IP CURLINFO_SSL_VERIFYRESULT
-Pass a pointer to a long to receive the result of the certification
-verification that was requested (using the \fICURLOPT_SSL_VERIFYPEER(3)\fP
-option to \fIcurl_easy_setopt(3)\fP).
+See \fICURLINFO_SSL_VERIFYRESULT(3)\fP
 .IP CURLINFO_SSL_ENGINES
-Pass the address of a 'struct curl_slist *' to receive a linked-list of
-OpenSSL crypto-engines supported. Note that engines are normally implemented
-in separate dynamic libraries. Hence not all the returned engines may be
-available at run-time. \fBNOTE:\fP you must call \fIcurl_slist_free_all(3)\fP
-on the list pointer once you're done with it, as libcurl will not free the
-data for you. (Added in 7.12.3)
+See \fICURLINFO_SSL_ENGINES(3)\fP
 .IP CURLINFO_CONTENT_LENGTH_DOWNLOAD
-Pass a pointer to a double to receive the content-length of the download. This
-is the value read from the Content-Length: field. Since 7.19.4, this returns -1
-if the size isn't known.
+See \fICURLINFO_CONTENT_LENGTH_DOWNLOAD(3)\fP
 .IP CURLINFO_CONTENT_LENGTH_UPLOAD
-Pass a pointer to a double to receive the specified size of the upload.  Since
-7.19.4, this returns -1 if the size isn't known.
+See \fICURLINFO_CONTENT_LENGTH_UPLOAD(3)\fP
 .IP CURLINFO_CONTENT_TYPE
-Pass a pointer to a char pointer to receive the content-type of the downloaded
-object. This is the value read from the Content-Type: field. If you get NULL,
-it means that the server didn't send a valid Content-Type header or that the
-protocol used doesn't support this.
+See \fICURLINFO_CONTENT_TYPE(3)\fP
 .IP CURLINFO_PRIVATE
-Pass a pointer to a char pointer to receive the pointer to the private data
-associated with the curl handle (set with the \fICURLOPT_PRIVATE(3)\fP option
-to \fIcurl_easy_setopt(3)\fP). Please note that for internal reasons, the
-value is returned as a char pointer, although effectively being a 'void *'.
-(Added in 7.10.3)
+See \fICURLINFO_PRIVATE(3)\fP
 .IP CURLINFO_HTTPAUTH_AVAIL
 Pass a pointer to a long to receive a bitmask indicating the authentication
 method(s) available. The meaning of the bits is explained in the
