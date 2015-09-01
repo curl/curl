@@ -78,6 +78,7 @@
 
 /* The last #include files should be: */
 #include "curl_memory.h"
+#include "memdebug.h"
 
 /* win32_cleanup() is for win32 socket cleanup functionality, the opposite
    of win32_init() */
