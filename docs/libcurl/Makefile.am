@@ -90,7 +90,7 @@ dist_m4macro_DATA = libcurl.m4
 CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(TESTS) libcurl-symbols.3
 
 EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES) ABI \
-  symbols-in-versions symbols.pl mksymbolsmanpage.pl
+  symbols-in-versions mksymbolsmanpage.pl
 MAN2HTML= roffit --mandir=. < $< >$@
 
 SUFFIXES = .3 .html
