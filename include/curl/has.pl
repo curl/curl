@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2011-2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -30,19 +30,18 @@
 # using applications to do preprocessor checks for specific libcurl defines,
 # and yet make the code clearly show what the macro is used for.
 #
-# Run this script and generate libcurl-symbols.h and then use that header in
+# Run this script and generate curl/has.h and then use that header in
 # a fashion similar to:
 #
-# #include "libcurl-symbols.h"
+# #include <curl/has.h>
 #
-# #if LIBCURL_HAS(CURLOPT_MUTE)
+# #if CURL_HAS(CURLOPT_MUTE)
 #   has mute
 # #else
 #   no mute
 # #endif
 #
 #
-open F, "<symbols-in-versions";
 
 sub str2num {
     my ($str)=@_;
@@ -52,17 +51,54 @@ sub str2num {
 }
 
 print <<EOS
+#ifndef __CURL_HAS_H
+#define __CURL_HAS_H
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \\| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \\___|\\___/|_| \\_\\_____|
+ *
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
+/*
+ * This file is generated. Do not edit by hand. Edit
+ * docs/libcurl/symbols-in-versions and regenerate this with has.pl
+ */
+#include <curl/curlver.h>
 
-#include <curl/curl.h>
+/*
+ * #include <curl/has.h>
+ *
+ * #if CURL_HAS(CURLOPT_MUTE)
+ *    use_mute();
+ * #else
+ *    without_mute();
+ * #endif
+ */
+#define CURL_HAS_IN(x,y) \\
+  (defined(CURLHAS_ ## x ) && (CURLHAS_ ## x <= y) && \\
+   (!defined(CURLHAS_ ## x ## _L) || ( CURLHAS_ ## x ## _L >= y)))
 
-#define LIBCURL_HAS(x) \\
-  (defined(x ## _FIRST) && (x ## _FIRST <= LIBCURL_VERSION_NUM) && \\
-   (!defined(x ## _LAST) || ( x ## _LAST >= LIBCURL_VERSION_NUM)))
+#define CURL_HAS(x) CURL_HAS_IN(x, LIBCURL_VERSION_NUM)
 
 EOS
     ;
 
-while(<F>) {
+while(<STDIN>) {
     if(/^(CURL[^ ]*)[ \t]*(.*)/) {
         my ($sym, $vers)=($1, $2);
 
@@ -85,16 +121,22 @@ while(<F>) {
         my $inum = str2num($intr);
 
         print <<EOS
-#define ${sym}_FIRST $inum /* Added in $intr */
+#define CURLHAS_${sym} $inum /* $intr */
 EOS
 ;
         my $irm = str2num($rm);
         if($rm) {
         print <<EOS
-#define ${sym}_LAST $irm /* Last featured in $rm */
+#define CURLHAS_${sym}_L $irm /* Last $rm */
 EOS
 ;
         }
 
     }
 }
+
+print <<EOS
+#endif /* __CURL_HAS_H */
+
+EOS
+    ;
