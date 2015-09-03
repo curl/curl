@@ -186,7 +186,7 @@ option(DISABLED_THREADSAFE "Set to explicitly specify we don't want to use threa
 mark_as_advanced(DISABLED_THREADSAFE)
 option(ENABLE_IPV6 "Define if you want to enable IPv6 support" ON)
 mark_as_advanced(ENABLE_IPV6)
-if(ENABLE_IPV6)
+if(ENABLE_IPV6 AND NOT WIN32)
   include(CheckStructHasMember)
   check_struct_has_member("struct sockaddr_in6" sin6_addr "netinet/in.h"
                           HAVE_SOCKADDR_IN6_SIN6_ADDR)
