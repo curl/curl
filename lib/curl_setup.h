@@ -249,7 +249,7 @@
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
 #    ifdef HAVE_WS2TCPIP_H
-#       include <ws2tcpip.h>
+#      include <ws2tcpip.h>
 #    endif
 #  else
 #    ifdef HAVE_WINSOCK_H
@@ -609,6 +609,11 @@ int netware_init(void);
     defined(USE_CYASSL) || defined(USE_SCHANNEL) || \
     defined(USE_DARWINSSL) || defined(USE_GSKIT)
 #define USE_SSL    /* SSL support has been enabled */
+#endif
+
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS) && \
+    defined(USE_WINDOWS_SSPI)
+#include <wincrypt.h>  /* for CRYPT_E_REVOKED macro */
 #endif
 
 /* Single point where USE_SPNEGO definition might be defined */
