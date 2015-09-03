@@ -1290,10 +1290,14 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   authority_idx = 0;
 
   for(i = 3; i < nheader; ++i) {
+    size_t hlen;
     end = strchr(hdbuf, ':');
     if(!end)
       goto fail;
-    if(end - hdbuf == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
+    hlen = end - hdbuf;
+    if(hlen == 10 && Curl_raw_nequal("connection", hdbuf, 10))
+      ; /* skip Connection: headers! */
+    else if(hlen == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
       authority_idx = i;
       nva[i].name = (unsigned char *)":authority";
       nva[i].namelen = (uint16_t)strlen((char *)nva[i].name);
