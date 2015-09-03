@@ -1,4 +1,5 @@
-log
+*pid
+configurehelp.pm
 curl_client_key
 curl_client_key.pub
 curl_client_knownhosts
@@ -8,10 +9,9 @@ curl_sftp_cmds
 curl_sftp_config
 curl_ssh_config
 curl_sshd_config
-*pid
-stunnel.conf
+log
 runtests.html
 runtests.pdf
+stunnel.conf
 testcurl.html
 testcurl.pdf
-configurehelp.pm

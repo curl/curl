@@ -213,7 +213,7 @@ be in the format "NAME1=VALUE1; NAME2=VALUE2".
 
 If no '=' symbol is used in the line, it is treated as a filename to use to
 read previously stored cookie lines from, which should be used in this session
-if they match. Using this method also activates the "cookie parser" which will
+if they match. Using this method also activates the cookie engine which will
 make curl record incoming cookies too, which may be handy if you're using this
 in combination with the \fI-L, --location\fP option. The file format of the
 file to read cookies from should be plain HTTP headers or the Netscape/Mozilla
@@ -222,6 +222,15 @@ cookie file format.
 The file specified with \fI-b, --cookie\fP is only used as input. No cookies
 will be written to the file. To store cookies, use the \fI-c, --cookie-jar\fP
 option.
+
+Exercise caution if you are using this option and multiple transfers may occur.
+If you use the NAME1=VALUE1; format, or in a file use the Set-Cookie format and
+don't specify a domain, then the cookie is sent for any domain (even after
+redirects are followed) and cannot be modified by a server-set cookie. If the
+cookie engine is enabled and a server sets a cookie of the same name then both
+will be sent on a future transfer to that server, likely not what you intended.
+To address these issues set a domain in Set-Cookie (doing that will include
+sub-domains) or use the Netscape format.
 
 If this option is used several times, the last one will be used.
 .IP "-B, --use-ascii"
@@ -253,6 +262,9 @@ If the cookie jar can't be created or written to, the whole curl operation
 won't fail or even report an error clearly. Using -v will get a warning
 displayed, but that is the only visible feedback you get about this possibly
 lethal situation.
+
+Since 7.43.0 cookies that were imported in the Set-Cookie format without a
+domain name are not exported by this option.
 
 If this option is used several times, the last specified file name will be
 used.
@@ -1312,9 +1324,40 @@ This option can be used multiple times, in which case the effect is the same
 as concatenating the protocols into one instance of the option.
 
 (Added in 7.20.2)
+.IP "--proto-default <protocol>"
+Tells curl to use \fIprotocol\fP for any URL missing a scheme name.
+
+Example:
+
+.RS
+.IP "--proto-default https ftp.mozilla.org"
+https://ftp.mozilla.org
+.RE
+
+An unknown or unsupported protocol causes error
+\fICURLE_UNSUPPORTED_PROTOCOL\fP.
+
+This option does not change the default proxy protocol (http).
+
+Without this option curl would make a guess based on the host, see \fI--url\fP
+for details.
+
+(Added in 7.45.0)
 .IP "--proto-redir <protocols>"
-Tells curl to use the listed protocols after a redirect. See --proto for
-how protocols are represented.
+Tells curl to use the listed protocols on redirect. See --proto for how
+protocols are represented.
+
+Example:
+
+.RS
+.IP "--proto-redir -all,http,https"
+Allow only HTTP and HTTPS on redirect.
+.RE
+
+By default curl will allow all protocols on redirect except several disabled
+for security reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0
+SMB and SMBS are also disabled. Specifying \fIall\fP or \fI+all\fP enables all
+protocols on redirect, including those disabled for security.
 
 (Added in 7.20.2)
 .IP "--proxy-anyauth"
@@ -1760,6 +1803,12 @@ If this option is used several times, the last one will be used.
 .IP "--url <URL>"
 Specify a URL to fetch. This option is mostly handy when you want to specify
 URL(s) in a config file.
+
+If the given URL is missing a scheme name (such as "http://" or "ftp://" etc)
+then curl will make a guess based on the host. If the outermost sub-domain name
+matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that protocol will be used,
+otherwise HTTP will be used. Since 7.45.0 guessing can be disabled by setting a
+default protocol, see \fI--proto-default\fP for details.
 
 This option may be used any number of times. To control where this URL is
 written, use the \fI-o, --output\fP or the \fI-O, --remote-name\fP options.

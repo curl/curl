@@ -58,6 +58,8 @@ const char *param2text(int res)
     return "expected a positive numerical parameter";
   case PARAM_LIBCURL_DOESNT_SUPPORT:
     return "the installed libcurl version doesn't support this";
+  case PARAM_LIBCURL_UNSUPPORTED_PROTOCOL:
+    return "a specified protocol is unsupported by libcurl";
   case PARAM_NO_MEM:
     return "out of memory";
   default:
@@ -67,13 +69,23 @@ const char *param2text(int res)
 
 int SetHTTPrequest(struct OperationConfig *config, HttpReq req, HttpReq *store)
 {
+  /* this mirrors the HttpReq enum in tool_sdecls.h */
+  const char *reqname[]= {
+    "", /* unspec */
+    "GET (-G, --get)",
+    "HEAD (-I, --head)",
+    "multipart formpost (-F, --form)",
+    "POST (-d, --data)"
+  };
+
   if((*store == HTTPREQ_UNSPEC) ||
      (*store == req)) {
     *store = req;
     return 0;
   }
-
-  warnf(config->global, "You can only select one HTTP request!\n");
+  warnf(config->global, "You can only select one HTTP request method! "
+        "You asked for both %s and %s.\n",
+        reqname[req], reqname[*store]);
 
   return 1;
 }

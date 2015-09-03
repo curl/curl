@@ -339,6 +339,27 @@ long proto2num(struct OperationConfig *config, long *val, const char *str)
 }
 
 /**
+ * Check if the given string is a protocol supported by libcurl
+ *
+ * @param str  the protocol name
+ * @return PARAM_OK  protocol supported
+ * @return PARAM_LIBCURL_UNSUPPORTED_PROTOCOL  protocol not supported
+ * @return PARAM_REQUIRES_PARAMETER   missing parameter
+ */
+int check_protocol(const char *str)
+{
+  const char * const *pp;
+  const curl_version_info_data *curlinfo = curl_version_info(CURLVERSION_NOW);
+  if(!str)
+    return PARAM_REQUIRES_PARAMETER;
+  for(pp = curlinfo->protocols; *pp; pp++) {
+    if(curlx_raw_equal(*pp, str))
+      return PARAM_OK;
+  }
+  return PARAM_LIBCURL_UNSUPPORTED_PROTOCOL;
+}
+
+/**
  * Parses the given string looking for an offset (which may be a
  * larger-than-integer value). The offset CANNOT be negative!
  *

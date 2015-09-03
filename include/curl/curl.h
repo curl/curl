@@ -1645,6 +1645,9 @@ typedef enum {
   /* Wait/don't wait for pipe/mutex to clarify */
   CINIT(PIPEWAIT, LONG, 237),
 
+  /* Set the protocol used when curl is given a URL without a protocol */
+  CINIT(DEFAULT_PROTOCOL, OBJECTPOINT, 238),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2088,6 +2091,7 @@ struct curl_tlssessioninfo {
 #define CURLINFO_LONG     0x200000
 #define CURLINFO_DOUBLE   0x300000
 #define CURLINFO_SLIST    0x400000
+#define CURLINFO_SOCKET   0x500000
 #define CURLINFO_MASK     0x0fffff
 #define CURLINFO_TYPEMASK 0xf00000
 
@@ -2136,9 +2140,10 @@ typedef enum {
   CURLINFO_LOCAL_IP         = CURLINFO_STRING + 41,
   CURLINFO_LOCAL_PORT       = CURLINFO_LONG   + 42,
   CURLINFO_TLS_SESSION      = CURLINFO_SLIST  + 43,
+  CURLINFO_ACTIVESOCKET     = CURLINFO_SOCKET + 44,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 43
+  CURLINFO_LASTONE          = 44
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

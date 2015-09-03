@@ -333,7 +333,6 @@ rem
   echo the manual is not required and a summary of the options will still be available
   echo (curl --help^). To integrate the manual your PATH is required to have
   echo groff/nroff, perl and optionally gzip for compression.
-  echo.
   goto success
 
 :error

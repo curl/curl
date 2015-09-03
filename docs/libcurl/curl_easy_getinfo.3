@@ -42,118 +42,55 @@ explicitly mentioned below.
 .SH AVAILABLE INFORMATION
 The following information can be extracted:
 .IP CURLINFO_EFFECTIVE_URL
-Pass a pointer to a char pointer to receive the last used effective URL.
+See \fICURLINFO_EFFECTIVE_URL(3)\fP
 .IP CURLINFO_RESPONSE_CODE
-Pass a pointer to a long to receive the last received HTTP, FTP or SMTP
-response code. This option was previously known as CURLINFO_HTTP_CODE in
-libcurl 7.10.7 and earlier. The value will be zero if no server response code
-has been received. Note that a proxy's CONNECT response should be read with
-\fICURLINFO_HTTP_CONNECTCODE\fP and not this.
-
-Support for SMTP responses added in 7.25.0.
+See \fICURLINFO_RESPONSE_CODE(3)\fP
 .IP CURLINFO_HTTP_CONNECTCODE
-Pass a pointer to a long to receive the last received proxy response code to a
-CONNECT request.
+See \fICURLINFO_HTTP_CONNECTCODE(3)\fP
 .IP CURLINFO_FILETIME
-Pass a pointer to a long to receive the remote time of the retrieved document
-(in number of seconds since 1 jan 1970 in the GMT/UTC time zone). If you get
--1, it can be because of many reasons (unknown, the server hides it or the
-server doesn't support the command that tells document time etc) and the time
-of the document is unknown. Note that you must tell the server to collect this
-information before the transfer is made, by using the
-\fICURLOPT_FILETIME(3)\fP option to \fIcurl_easy_setopt(3)\fP or you will
-unconditionally get a -1 back. (Added in 7.5)
+See \fICURLINFO_FILETIME(3)\fP
 .IP CURLINFO_TOTAL_TIME
-Pass a pointer to a double to receive the total time in seconds for the
-previous transfer, including name resolving, TCP connect etc.
+See \fICURLINFO_TOTAL_TIME(3)\fP
 .IP CURLINFO_NAMELOOKUP_TIME
-Pass a pointer to a double to receive the time, in seconds, it took from the
-start until the name resolving was completed.
+See \fICURLINFO_NAMELOOKUP_TIME(3)\fP
 .IP CURLINFO_CONNECT_TIME
-Pass a pointer to a double to receive the time, in seconds, it took from the
-start until the connect to the remote host (or proxy) was completed.
+See \fICURLINFO_CONNECT_TIME(3)\fP
 .IP CURLINFO_APPCONNECT_TIME
-Pass a pointer to a double to receive the time, in seconds, it took from the
-start until the SSL/SSH connect/handshake to the remote host was completed.
-This time is most often very near to the PRETRANSFER time, except for cases
-such as HTTP pipelining where the pretransfer time can be delayed due to waits
-in line for the pipeline and more. (Added in 7.19.0)
+See \fICURLINFO_APPCONNECT_TIME(3)\fP
 .IP CURLINFO_PRETRANSFER_TIME
-Pass a pointer to a double to receive the time, in seconds, it took from the
-start until the file transfer is just about to begin. This includes all
-pre-transfer commands and negotiations that are specific to the particular
-protocol(s) involved. It does \fInot\fP involve the sending of the protocol-
-specific request that triggers a transfer.
+See \fICURLINFO_PRETRANSFER_TIME(3)\fP
 .IP CURLINFO_STARTTRANSFER_TIME
-Pass a pointer to a double to receive the time, in seconds, it took from the
-start until the first byte is received by libcurl. This includes
-CURLINFO_PRETRANSFER_TIME and also the time the server needs to calculate the
-result.
+See \fICURLINFO_STARTTRANSFER_TIME(3)\fP
 .IP CURLINFO_REDIRECT_TIME
-Pass a pointer to a double to receive the total time, in seconds, it took for
-all redirection steps include name lookup, connect, pretransfer and transfer
-before final transaction was started. CURLINFO_REDIRECT_TIME contains the
-complete execution time for multiple redirections.  (Added in 7.9.7)
+See \fICURLINFO_REDIRECT_TIME(3)\fP
 .IP CURLINFO_REDIRECT_COUNT
-Pass a pointer to a long to receive the total number of redirections that were
-actually followed.  (Added in 7.9.7)
+See \fICURLINFO_REDIRECT_COUNT(3)\fP
 .IP CURLINFO_REDIRECT_URL
-Pass a pointer to a char pointer to receive the URL a redirect \fIwould\fP
-take you to if you would enable \fICURLOPT_FOLLOWLOCATION(3)\fP. This can come
-very handy if you think using the built-in libcurl redirect logic isn't good
-enough for you but you would still prefer to avoid implementing all the magic
-of figuring out the new URL. (Added in 7.18.2)
+See \fICURLINFO_REDIRECT_URL(3)\fP
 .IP CURLINFO_SIZE_UPLOAD
-Pass a pointer to a double to receive the total amount of bytes that were
-uploaded.
+See \fICURLINFO_SIZE_UPLOAD(3)\fP
 .IP CURLINFO_SIZE_DOWNLOAD
-Pass a pointer to a double to receive the total amount of bytes that were
-downloaded. The amount is only for the latest transfer and will be reset again
-for each new transfer. This counts actual payload data, what's also commonly
-called body. All meta and header data are excluded and will not be counted in
-this number.
+See \fICURLINFO_SIZE_DOWNLOAD(3)\fP
 .IP CURLINFO_SPEED_DOWNLOAD
-Pass a pointer to a double to receive the average download speed that curl
-measured for the complete download. Measured in bytes/second.
+See \fICURLINFO_SPEED_DOWNLOAD(3)\fP
 .IP CURLINFO_SPEED_UPLOAD
-Pass a pointer to a double to receive the average upload speed that curl
-measured for the complete upload. Measured in bytes/second.
+See \fICURLINFO_SPEED_UPLOAD(3)\fP
 .IP CURLINFO_HEADER_SIZE
-Pass a pointer to a long to receive the total size of all the headers
-received. Measured in number of bytes.
+See \fICURLINFO_HEADER_SIZE(3)\fP
 .IP CURLINFO_REQUEST_SIZE
-Pass a pointer to a long to receive the total size of the issued
-requests. This is so far only for HTTP requests. Note that this may be more
-than one request if FOLLOWLOCATION is true.
+See \fICURLINFO_REQUEST_SIZE(3)\fP
 .IP CURLINFO_SSL_VERIFYRESULT
-Pass a pointer to a long to receive the result of the certification
-verification that was requested (using the \fICURLOPT_SSL_VERIFYPEER(3)\fP
-option to \fIcurl_easy_setopt(3)\fP).
+See \fICURLINFO_SSL_VERIFYRESULT(3)\fP
 .IP CURLINFO_SSL_ENGINES
-Pass the address of a 'struct curl_slist *' to receive a linked-list of
-OpenSSL crypto-engines supported. Note that engines are normally implemented
-in separate dynamic libraries. Hence not all the returned engines may be
-available at run-time. \fBNOTE:\fP you must call \fIcurl_slist_free_all(3)\fP
-on the list pointer once you're done with it, as libcurl will not free the
-data for you. (Added in 7.12.3)
+See \fICURLINFO_SSL_ENGINES(3)\fP
 .IP CURLINFO_CONTENT_LENGTH_DOWNLOAD
-Pass a pointer to a double to receive the content-length of the download. This
-is the value read from the Content-Length: field. Since 7.19.4, this returns -1
-if the size isn't known.
+See \fICURLINFO_CONTENT_LENGTH_DOWNLOAD(3)\fP
 .IP CURLINFO_CONTENT_LENGTH_UPLOAD
-Pass a pointer to a double to receive the specified size of the upload.  Since
-7.19.4, this returns -1 if the size isn't known.
+See \fICURLINFO_CONTENT_LENGTH_UPLOAD(3)\fP
 .IP CURLINFO_CONTENT_TYPE
-Pass a pointer to a char pointer to receive the content-type of the downloaded
-object. This is the value read from the Content-Type: field. If you get NULL,
-it means that the server didn't send a valid Content-Type header or that the
-protocol used doesn't support this.
+See \fICURLINFO_CONTENT_TYPE(3)\fP
 .IP CURLINFO_PRIVATE
-Pass a pointer to a char pointer to receive the pointer to the private data
-associated with the curl handle (set with the \fICURLOPT_PRIVATE(3)\fP option
-to \fIcurl_easy_setopt(3)\fP). Please note that for internal reasons, the
-value is returned as a char pointer, although effectively being a 'void *'.
-(Added in 7.10.3)
+See \fICURLINFO_PRIVATE(3)\fP
 .IP CURLINFO_HTTPAUTH_AVAIL
 Pass a pointer to a long to receive a bitmask indicating the authentication
 method(s) available. The meaning of the bits is explained in the
@@ -195,8 +132,12 @@ Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
 cookies cURL knows (expired ones, too). Don't forget to
 \fIcurl_slist_free_all(3)\fP the list after it has been used.  If there are no
 cookies (cookies for the handle have not been enabled or simply none have been
-received) 'struct curl_slist *' will be set to point to NULL. (Added in
-7.14.1)
+received) 'struct curl_slist *' will be set to point to NULL.
+
+Since 7.43.0 cookies that were imported in the Set-Cookie format without a
+domain name are not exported by this option.
+
+(Added in 7.14.1)
 .IP CURLINFO_LASTSOCKET
 Pass a pointer to a long to receive the last socket used by this curl
 session. If the socket is no longer valid, -1 is returned. When you finish
@@ -205,8 +146,19 @@ libcurl close the socket and cleanup other resources associated with the
 handle. This is typically used in combination with
 \fICURLOPT_CONNECT_ONLY(3)\fP.  (Added in 7.15.2)
 
-NOTE: this API is not really working on win64, since the SOCKET type on win64
-is 64 bit large while its 'long' is only 32 bits.
+NOTE: this API is deprecated since it is not working on win64 where the SOCKET
+type is 64 bits large while its 'long' is 32 bits. Use the
+\fICURLINFO_ACTIVESOCKET\fP instead, if possible.
+.IP CURLINFO_ACTIVESOCKET
+Pass a pointer to a curl_socket_t to receive the active socket used by this
+curl session. If the socket is no longer valid, -1 is returned. When you
+finish working with the socket, you must call curl_easy_cleanup() as usual and
+let libcurl close the socket and cleanup other resources associated with the
+handle. This is typically used in combination with
+\fICURLOPT_CONNECT_ONLY(3)\fP.
+
+NOTE: this is meant as a cross-platform, safe alternative to
+\fICURLINFO_LASTSOCKET\fP, which does not work on win64.
 .IP CURLINFO_FTP_ENTRY_PATH
 Pass a pointer to a char pointer to receive a pointer to a string holding the
 path of the entry path. That is the initial path libcurl ended up in when

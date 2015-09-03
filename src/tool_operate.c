@@ -935,7 +935,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             my_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
                       config->postfieldsize);
             break;
-          case HTTPREQ_POST:
+          case HTTPREQ_FORMPOST:
             my_setopt_httppost(curl, CURLOPT_HTTPPOST, config->httppost);
             break;
           default:
@@ -1354,6 +1354,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->unix_socket_path)
           my_setopt_str(curl, CURLOPT_UNIX_SOCKET_PATH,
                         config->unix_socket_path);
+
+        /* new in 7.45.0 */
+        if(config->proto_default)
+          my_setopt_str(curl, CURLOPT_DEFAULT_PROTOCOL, config->proto_default);
 
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
@@ -1850,6 +1854,8 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
       /* Check if we were asked to list the SSL engines */
       else if(res == PARAM_ENGINES_REQUESTED)
         tool_list_engines(config->easy);
+      else if(res == PARAM_LIBCURL_UNSUPPORTED_PROTOCOL)
+        result = CURLE_UNSUPPORTED_PROTOCOL;
       else
         result = CURLE_FAILED_INIT;
     }

@@ -66,6 +66,8 @@
      d CURLINFO_DOUBLE...
      d                 c                   X'00300000'
      d CURLINFO_SLIST  c                   X'00400000'
+     d CURLINFO_SOCKET...
+     d                 c                   X'00500000'
      d CURLINFO_MASK   c                   X'000FFFFF'
      d CURLINFO_TYPEMASK...
      d                 c                   X'00F00000'
@@ -1224,6 +1226,8 @@
      d                 c                   10236
      d  CURLOPT_PIPEWAIT...
      d                 c                   00237
+     d  CURLOPT_DEFAULT_PROTOCOL...
+     d                 c                   10238
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1402,6 +1406,8 @@
      d                 c                   X'0020002A'
      d  CURLINFO_TLS_SESSION...                                                 CURLINFO_SLIST + 43
      d                 c                   X'0040002B'
+     d  CURLINFO_ACTIVESOCKET...                                                CURLINFO_SOCKET + 44
+     d                 c                   X'0050002C'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'

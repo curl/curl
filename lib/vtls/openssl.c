@@ -2644,8 +2644,10 @@ static CURLcode servercert(struct connectdata *conn,
 
   connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
   if(!connssl->server_cert) {
-    if(strict)
-      failf(data, "SSL: couldn't get peer certificate!");
+    if(!strict)
+      return CURLE_OK;
+
+    failf(data, "SSL: couldn't get peer certificate!");
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 

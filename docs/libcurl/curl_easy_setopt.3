@@ -153,6 +153,8 @@ Disable squashing /../ and /./ sequences in the path. See \fICURLOPT_PATH_AS_IS(
 Allowed protocols. See \fICURLOPT_PROTOCOLS(3)\fP
 .IP CURLOPT_REDIR_PROTOCOLS
 Protocols to allow redirects to. See \fICURLOPT_REDIR_PROTOCOLS(3)\fP
+.IP CURLOPT_DEFAULT_PROTOCOL
+Default protocol. See \fICURLOPT_DEFAULT_PROTOCOL(3)\fP
 .IP CURLOPT_PROXY
 Proxy to use. See \fICURLOPT_PROXY(3)\fP
 .IP CURLOPT_PROXYPORT
@@ -527,8 +529,8 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
   res = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
-}}
+}
 .fi
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_cleanup "(3), " curl_easy_reset "(3), "
-.BR curl_multi_setopt "(3), "
+.BR curl_easy_getinfo "(3), " curl_multi_setopt "(3), "
