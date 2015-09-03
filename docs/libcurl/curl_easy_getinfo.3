@@ -132,8 +132,12 @@ Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
 cookies cURL knows (expired ones, too). Don't forget to
 \fIcurl_slist_free_all(3)\fP the list after it has been used.  If there are no
 cookies (cookies for the handle have not been enabled or simply none have been
-received) 'struct curl_slist *' will be set to point to NULL. (Added in
-7.14.1)
+received) 'struct curl_slist *' will be set to point to NULL.
+
+Since 7.43.0 cookies that were imported in the Set-Cookie format without a
+domain name are not exported by this option.
+
+(Added in 7.14.1)
 .IP CURLINFO_LASTSOCKET
 Pass a pointer to a long to receive the last socket used by this curl
 session. If the socket is no longer valid, -1 is returned. When you finish
