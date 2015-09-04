@@ -1700,7 +1700,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_XOAUTH2_BEARER:
     /*
-     * XOAUTH2 bearer token to use in the operation
+     * OAuth 2.0 bearer token to use in the operation
      */
     result = setstropt(&data->set.str[STRING_BEARER],
                        va_arg(param, char *));

@@ -915,7 +915,7 @@ struct connectdata {
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */
 
-  char *xoauth2_bearer; /* bearer token for xoauth2, allocated */
+  char *xoauth2_bearer; /* bearer token for OAuth 2.0, allocated */
 
   char *proxyuser;    /* proxy user name string, allocated */
   char *proxypasswd;  /* proxy password string, allocated */
