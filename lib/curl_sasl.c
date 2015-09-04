@@ -24,6 +24,7 @@
  * RFC4422 Simple Authentication and Security Layer (SASL)
  * RFC4616 PLAIN authentication
  * RFC6749 OAuth 2.0 Authorization Framework
+ * RFC7628 A Set of SASL Mechanisms for OAuth
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
@@ -1443,14 +1444,14 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       }
     else
 #endif
-    if((enabledmechs & SASL_MECH_XOAUTH2) || conn->xoauth2_bearer) {
+    if((enabledmechs & SASL_MECH_XOAUTH2) || conn->oauth_bearer) {
       mech = SASL_MECH_STRING_XOAUTH2;
       state1 = SASL_XOAUTH2;
       sasl->authused = SASL_MECH_XOAUTH2;
 
       if(force_ir || data->set.sasl_ir)
         result = sasl_create_xoauth2_message(data, conn->user,
-                                             conn->xoauth2_bearer,
+                                             conn->oauth_bearer,
                                              &resp, &len);
     }
     else if(enabledmechs & SASL_MECH_LOGIN) {
@@ -1629,7 +1630,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   case SASL_XOAUTH2:
     /* Create the authorisation message */
     result = sasl_create_xoauth2_message(data, conn->user,
-                                         conn->xoauth2_bearer, &resp, &len);
+                                         conn->oauth_bearer, &resp, &len);
     break;
   case SASL_CANCEL:
     /* Remove the offending mechanism from the supported list */

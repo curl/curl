@@ -851,8 +851,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
         else if(!config->use_metalink)
           my_setopt(curl, CURLOPT_HEADER, config->include_headers?1L:0L);
 
-        if(config->xoauth2_bearer)
-          my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->xoauth2_bearer);
+        if(config->oauth_bearer)
+          my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
 
 #if !defined(CURL_DISABLE_PROXY)
         {

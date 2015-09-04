@@ -496,7 +496,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         GetStr(&config->egd_file, nextarg);
         break;
       case 'B': /* OAuth 2.0 bearer token */
-        GetStr(&config->xoauth2_bearer, nextarg);
+        GetStr(&config->oauth_bearer, nextarg);
         break;
       case 'c': /* connect-timeout */
         err = str2udouble(&config->connecttimeout, nextarg);

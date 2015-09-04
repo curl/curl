@@ -519,7 +519,7 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
   bool last = (config->next ? FALSE : TRUE);
 
   /* Check we have a password for the given host user */
-  if(config->userpwd && !config->xoauth2_bearer) {
+  if(config->userpwd && !config->oauth_bearer) {
     result = checkpasswd("host", i, last, &config->userpwd);
     if(result)
       return result;
