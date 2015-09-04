@@ -211,16 +211,22 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
   PRBool found;
   char *cipher;
 
+  /* use accessors to avoid dynamic linking issues after an update of NSS */
+  const PRUint16 num_implemented_ciphers = SSL_GetNumImplementedCiphers();
+  const PRUint16 *implemented_ciphers = SSL_GetImplementedCiphers();
+  if(!implemented_ciphers)
+    return SECFailure;
+
   /* First disable all ciphers. This uses a different max value in case
    * NSS adds more ciphers later we don't want them available by
    * accident
    */
-  for(i=0; i<SSL_NumImplementedCiphers; i++) {
-    SSL_CipherPrefSet(model, SSL_ImplementedCiphers[i], PR_FALSE);
+  for(i = 0; i < num_implemented_ciphers; i++) {
+    SSL_CipherPrefSet(model, implemented_ciphers[i], PR_FALSE);
   }
 
   /* Set every entry in our list to false */
-  for(i=0; i<NUM_OF_CIPHERS; i++) {
+  for(i = 0; i < NUM_OF_CIPHERS; i++) {
     cipher_state[i] = PR_FALSE;
   }
 
