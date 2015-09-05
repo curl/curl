@@ -57,15 +57,16 @@ const struct {
   size_t        len;   /* Name length */
   unsigned int  bit;   /* Flag bit */
 } mechtable[] = {
-  { "LOGIN",      5,  SASL_MECH_LOGIN },
-  { "PLAIN",      5,  SASL_MECH_PLAIN },
-  { "CRAM-MD5",   8,  SASL_MECH_CRAM_MD5 },
-  { "DIGEST-MD5", 10, SASL_MECH_DIGEST_MD5 },
-  { "GSSAPI",     6,  SASL_MECH_GSSAPI },
-  { "EXTERNAL",   8,  SASL_MECH_EXTERNAL },
-  { "NTLM",       4,  SASL_MECH_NTLM },
-  { "XOAUTH2",    7,  SASL_MECH_XOAUTH2 },
-  { ZERO_NULL,    0,  0 }
+  { "LOGIN",        5,  SASL_MECH_LOGIN },
+  { "PLAIN",        5,  SASL_MECH_PLAIN },
+  { "CRAM-MD5",     8,  SASL_MECH_CRAM_MD5 },
+  { "DIGEST-MD5",   10, SASL_MECH_DIGEST_MD5 },
+  { "GSSAPI",       6,  SASL_MECH_GSSAPI },
+  { "EXTERNAL",     8,  SASL_MECH_EXTERNAL },
+  { "NTLM",         4,  SASL_MECH_NTLM },
+  { "XOAUTH2",      7,  SASL_MECH_XOAUTH2 },
+  { "OAUTHBEARER",  11, SASL_MECH_OAUTHBEARER },
+  { ZERO_NULL,      0,  0 }
 };
 
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_WINDOWS_SSPI)
@@ -1455,7 +1456,19 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       }
     else
 #endif
-    if((enabledmechs & SASL_MECH_XOAUTH2) && conn->oauth_bearer) {
+    if((enabledmechs & SASL_MECH_OAUTHBEARER) && conn->oauth_bearer) {
+      mech = SASL_MECH_STRING_OAUTHBEARER;
+      state1 = SASL_OAUTH2;
+      sasl->authused = SASL_MECH_OAUTHBEARER;
+
+      if(force_ir || data->set.sasl_ir)
+        result = sasl_create_oauth_bearer_message(data, conn->user,
+                                                  conn->host.name,
+                                                  conn->port,
+                                                  conn->oauth_bearer,
+                                                  &resp, &len);
+    }
+    else if((enabledmechs & SASL_MECH_XOAUTH2) && conn->oauth_bearer) {
       mech = SASL_MECH_STRING_XOAUTH2;
       state1 = SASL_OAUTH2;
       sasl->authused = SASL_MECH_XOAUTH2;
@@ -1641,9 +1654,17 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
 
   case SASL_OAUTH2:
     /* Create the authorisation message */
-    result = sasl_create_oauth_bearer_message(data, conn->user,
-                                              NULL, 0,
-                                              conn->oauth_bearer, &resp, &len);
+    if(sasl->authused == SASL_MECH_OAUTHBEARER)
+      result = sasl_create_oauth_bearer_message(data, conn->user,
+                                                conn->host.name,
+                                                conn->port,
+                                                conn->oauth_bearer,
+                                                &resp, &len);
+    else
+      result = sasl_create_oauth_bearer_message(data, conn->user,
+                                                NULL, 0,
+                                                conn->oauth_bearer,
+                                                &resp, &len);
     break;
   case SASL_CANCEL:
     /* Remove the offending mechanism from the supported list */

@@ -48,6 +48,7 @@ struct kerberos5data;
 #define SASL_MECH_EXTERNAL          (1 << 5)
 #define SASL_MECH_NTLM              (1 << 6)
 #define SASL_MECH_XOAUTH2           (1 << 7)
+#define SASL_MECH_OAUTHBEARER       (1 << 8)
 
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
@@ -55,14 +56,15 @@ struct kerberos5data;
 #define SASL_AUTH_DEFAULT       (SASL_AUTH_ANY & ~SASL_MECH_EXTERNAL)
 
 /* Authentication mechanism strings */
-#define SASL_MECH_STRING_LOGIN      "LOGIN"
-#define SASL_MECH_STRING_PLAIN      "PLAIN"
-#define SASL_MECH_STRING_CRAM_MD5   "CRAM-MD5"
-#define SASL_MECH_STRING_DIGEST_MD5 "DIGEST-MD5"
-#define SASL_MECH_STRING_GSSAPI     "GSSAPI"
-#define SASL_MECH_STRING_EXTERNAL   "EXTERNAL"
-#define SASL_MECH_STRING_NTLM       "NTLM"
-#define SASL_MECH_STRING_XOAUTH2    "XOAUTH2"
+#define SASL_MECH_STRING_LOGIN        "LOGIN"
+#define SASL_MECH_STRING_PLAIN        "PLAIN"
+#define SASL_MECH_STRING_CRAM_MD5     "CRAM-MD5"
+#define SASL_MECH_STRING_DIGEST_MD5   "DIGEST-MD5"
+#define SASL_MECH_STRING_GSSAPI       "GSSAPI"
+#define SASL_MECH_STRING_EXTERNAL     "EXTERNAL"
+#define SASL_MECH_STRING_NTLM         "NTLM"
+#define SASL_MECH_STRING_XOAUTH2      "XOAUTH2"
+#define SASL_MECH_STRING_OAUTHBEARER  "OAUTHBEARER"
 
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)
 #define DIGEST_MAX_VALUE_LENGTH           256
