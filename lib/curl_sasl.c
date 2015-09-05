@@ -1163,6 +1163,8 @@ void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
  *
  * data    [in]     - The session handle.
  * user    [in]     - The user name.
+ * host    [in]     - The host name (for OAUTHBEARER).
+ * port    [in]     - The port (for OAUTHBEARER when not Port 80).
  * bearer  [in]     - The bearer token.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
@@ -1172,21 +1174,30 @@ void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
  */
 static CURLcode sasl_create_oauth_bearer_message(struct SessionHandle *data,
                                                  const char *user,
+                                                 const char *host,
+                                                 const long port,
                                                  const char *bearer,
                                                  char **outptr, size_t *outlen)
 {
   CURLcode result = CURLE_OK;
-  char *xoauth = NULL;
+  char *oauth = NULL;
 
   /* Generate the message */
-  xoauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
-  if(!xoauth)
+  if(host == NULL && (port == 0 || port == 80))
+    oauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
+  else if(port == 0 || port == 80)
+    oauth = aprintf("user=%s\1host=%s\1auth=Bearer %s\1\1", user, host,
+                    bearer);
+  else
+    oauth = aprintf("user=%s\1host=%s\1port=%ld\1auth=Bearer %s\1\1", user,
+                    host, port, bearer);
+  if(!oauth)
     return CURLE_OUT_OF_MEMORY;
 
   /* Base64 encode the reply */
-  result = Curl_base64_encode(data, xoauth, strlen(xoauth), outptr, outlen);
+  result = Curl_base64_encode(data, oauth, strlen(oauth), outptr, outlen);
 
-  free(xoauth);
+  free(oauth);
 
   return result;
 }
@@ -1451,6 +1462,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
 
       if(force_ir || data->set.sasl_ir)
         result = sasl_create_oauth_bearer_message(data, conn->user,
+                                                  NULL, 0,
                                                   conn->oauth_bearer,
                                                   &resp, &len);
     }
@@ -1630,6 +1642,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   case SASL_XOAUTH2:
     /* Create the authorisation message */
     result = sasl_create_oauth_bearer_message(data, conn->user,
+                                              NULL, 0,
                                               conn->oauth_bearer, &resp, &len);
     break;
   case SASL_CANCEL:
