@@ -92,6 +92,7 @@ typedef enum {
   SASL_GSSAPI_TOKEN,
   SASL_GSSAPI_NO_DATA,
   SASL_OAUTH2,
+  SASL_OAUTH2_RESP,
   SASL_CANCEL,
   SASL_FINAL
 } saslstate;

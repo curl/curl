@@ -1346,6 +1346,7 @@ static void state(struct SASL *sasl, struct connectdata *conn,
     "GSSAPI_TOKEN",
     "GSSAPI_NO_DATA",
     "OAUTH2",
+    "OAUTH2_RESP",
     "CANCEL",
     "FINAL",
     /* LAST */
@@ -1459,6 +1460,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     if((enabledmechs & SASL_MECH_OAUTHBEARER) && conn->oauth_bearer) {
       mech = SASL_MECH_STRING_OAUTHBEARER;
       state1 = SASL_OAUTH2;
+      state2 = SASL_OAUTH2_RESP;
       sasl->authused = SASL_MECH_OAUTHBEARER;
 
       if(force_ir || data->set.sasl_ir)
@@ -1549,7 +1551,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     return result;
   }
 
-  if(sasl->state != SASL_CANCEL && code != sasl->params->contcode) {
+  if(sasl->state != SASL_CANCEL && sasl->state != SASL_OAUTH2_RESP &&
+     code != sasl->params->contcode) {
     *progress = SASL_DONE;
     state(sasl, conn, SASL_STOP);
     return CURLE_LOGIN_DENIED;
@@ -1654,18 +1657,43 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
 
   case SASL_OAUTH2:
     /* Create the authorisation message */
-    if(sasl->authused == SASL_MECH_OAUTHBEARER)
+    if(sasl->authused == SASL_MECH_OAUTHBEARER) {
       result = sasl_create_oauth_bearer_message(data, conn->user,
                                                 conn->host.name,
                                                 conn->port,
                                                 conn->oauth_bearer,
                                                 &resp, &len);
+
+      /* Failures maybe sent by the server as continuations for OAUTHBEARER */
+      newstate = SASL_OAUTH2_RESP;
+    }
     else
       result = sasl_create_oauth_bearer_message(data, conn->user,
                                                 NULL, 0,
                                                 conn->oauth_bearer,
                                                 &resp, &len);
     break;
+
+  case SASL_OAUTH2_RESP:
+    /* The continuation is optional so check the response code */
+    if (code == sasl->params->finalcode) {
+      /* Final response was received so we are done */
+      *progress = SASL_DONE;
+      state(sasl, conn, SASL_STOP);
+      return result;
+    }
+    else if (code == sasl->params->contcode) {
+      /* Acknowledge the continuation by sending a 0x01 response base64 encoded */
+      if (!(resp = strdup("AQ==")))
+        result = CURLE_OUT_OF_MEMORY;
+      break;
+    }
+    else {
+      *progress = SASL_DONE;
+      state(sasl, conn, SASL_STOP);
+      return CURLE_LOGIN_DENIED;
+    }
+
   case SASL_CANCEL:
     /* Remove the offending mechanism from the supported list */
     sasl->authmechs ^= sasl->authused;
