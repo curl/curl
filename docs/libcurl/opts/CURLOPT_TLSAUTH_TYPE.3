@@ -26,19 +26,19 @@ CURLOPT_TLSAUTH_TYPE \- set TLS authentication methods
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TLSAUTH_TYPE, long bitmask);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TLSAUTH_TYPE, char *type);
 .SH DESCRIPTION
-Pass a long as parameter, which is set to a bitmask, to tell libcurl which
-authentication method(s) you want it to use for TLS authentication.
+Pass a pointer to a zero terminated string as parameter. The string
+should be the method of the TLS authentication. Supported method is "SRP".
 
-.IP CURL_TLSAUTH_SRP
+.IP SRP
 TLS-SRP authentication. Secure Remote Password authentication for TLS is
 defined in RFC5054 and provides mutual authentication if both sides have a
 shared secret. To use TLS-SRP, you must also set the
 \fICURLOPT_TLSAUTH_USERNAME(3)\fP and \fICURLOPT_TLSAUTH_PASSWORD(3)\fP
 options.
 .SH DEFAULT
-CURL_TLSAUTH_NONE (0)
+blank
 .SH PROTOCOLS
 All TLS-based protocols
 .SH EXAMPLE
