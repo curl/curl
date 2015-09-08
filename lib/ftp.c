@@ -3723,7 +3723,13 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
         return result;
 
       result = ftp_multi_statemach(conn, &complete);
-      *completep = (int)complete;
+      if(ftpc->wait_data_conn)
+        /* if we reach the end of the FTP state machine here, *complete will be
+           TRUE but so is ftpc->wait_data_conn, which says we need to wait for
+           the data connection and therefore we're not actually complete */
+        *completep = 0;
+      else
+        *completep = (int)complete;
     }
     else {
       /* download */
