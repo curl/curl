@@ -189,7 +189,7 @@ rem
     del include\curl\curlbuild.h 2>NUL
     if exist include\curl\curlbuild.h (
       exit /B 3
-    /)
+    )
   )
 
   exit /B
