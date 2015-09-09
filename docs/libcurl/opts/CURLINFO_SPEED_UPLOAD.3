@@ -26,7 +26,7 @@ CURLINFO_SPEED_UPLOAD \- get upload speed
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SPEED_UPLOAD, long *speed);
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SPEED_UPLOAD, double *speed);
 .SH DESCRIPTION
 Pass a pointer to a double to receive the average upload speed that curl
 measured for the complete upload. Measured in bytes/second.
