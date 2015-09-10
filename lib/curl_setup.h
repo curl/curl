@@ -249,7 +249,7 @@
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
 #    ifdef HAVE_WS2TCPIP_H
-#       include <ws2tcpip.h>
+#      include <ws2tcpip.h>
 #    endif
 #  else
 #    ifdef HAVE_WINSOCK_H

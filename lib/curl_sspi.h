@@ -327,6 +327,10 @@ extern PSecurityFunctionTable s_pSecFn;
 # define SEC_I_SIGNATURE_NEEDED               ((HRESULT)0x0009035CL)
 #endif
 
+#ifndef CRYPT_E_REVOKED
+# define CRYPT_E_REVOKED                      ((HRESULT)0x80092010L)
+#endif
+
 #ifdef UNICODE
 #  define SECFLAG_WINNT_AUTH_IDENTITY \
      (unsigned long)SEC_WINNT_AUTH_IDENTITY_UNICODE
