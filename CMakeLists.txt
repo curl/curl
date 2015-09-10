@@ -301,12 +301,11 @@ set(HAVE_LIBCRYPTO OFF)
 set(HAVE_LIBSSL OFF)
 
 if(CMAKE_USE_OPENSSL)
-  set(OPENSSL_LIBRARIES ${LibreSSL_BINARY_DIR}/crypto/libcrypto.a ${LibreSSL_BINARY_DIR}/ssl/libssl.a)
   if(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
     find_library(RT_LIBRARY librt.a rt)
     list(APPEND OPENSSL_LIBRARIES ${RT_LIBRARY})
   endif()
-  set(OPENSSL_INCLUDE_DIR ${LibreSSL_SOURCE_DIR}/include)
+  set(OPENSSL_INCLUDE_DIR ${LibreSSL_SOURCE_DIR}/include ${LibreSSL_SOURCE_DIR}/include/compat)
   list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
   set(USE_OPENSSL ON)
   set(HAVE_LIBCRYPTO ON)
@@ -1001,6 +1000,7 @@ set(CURL_PULL_INTTYPES_H ${HAVE_INTTYPES_H})
 include(CMake/OtherTests.cmake)
 
 add_definitions(-DHAVE_CONFIG_H)
+add_definitions(-DHAVE_DES_SET_ODD_PARITY)
 
 # For windows, do not allow the compiler to use default target (Vista).
 if(WIN32)
@@ -1009,6 +1009,16 @@ endif(WIN32)
 
 if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+
+  # ignore warning C4127: conditional expression is constant
+  # ignore warning C4706: assignment within conditional expression
+  # ignore warning C4310: cast truncates constant value
+  # ignore warning C4245: '=' : conversion from 'int' to 'curl_socket_t', signed/unsigned mismatch
+  set(CURL_CL_ADDITIONAL_OPTIONS "/wd\"4127\" /wd\"4706\" /wd\"4310\" /wd\"4245\"")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CURL_CL_ADDITIONAL_OPTIONS}")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CURL_CL_ADDITIONAL_OPTIONS}")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${CURL_CL_ADDITIONAL_OPTIONS}")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${CURL_CL_ADDITIONAL_OPTIONS}")
 endif(MSVC)
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
