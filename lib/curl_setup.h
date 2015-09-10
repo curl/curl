@@ -689,12 +689,19 @@ int netware_init(void);
 
 /*
  * Portable symbolic names for Winsock shutdown() mode flags.
+ * the inner ifndefs are to allow interoperation with other Windows compatibility shims
  */
 
 #ifdef USE_WINSOCK
-#  define SHUT_RD   0x00
-#  define SHUT_WR   0x01
-#  define SHUT_RDWR 0x02
+  #ifndef SHUT_RD
+    #define SHUT_RD   0x00
+  #endif
+  #ifndef SHUT_WR
+    #define SHUT_WR   0x01
+  #endif
+  #ifndef SHUT_RDWR
+    #define SHUT_RDWR 0x02
+  #endif
 #endif
 
 /* Define S_ISREG if not defined by system headers, f.e. MSVC */
