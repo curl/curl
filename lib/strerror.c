@@ -39,6 +39,10 @@
 #include <idna.h>
 #endif
 
+#ifdef USE_WINDOWS_SSPI
+#include "curl_sspi.h"
+#endif
+
 #include "strerror.h"
 #include "curl_printf.h"
 #include "curl_memory.h"
