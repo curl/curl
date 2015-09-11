@@ -102,7 +102,9 @@ void customrequest_helper(struct OperationConfig *config, HttpReq req,
     "POST"
   };
 
-  if(curl_strequal(method, dflt[req])) {
+  if(!method)
+    ;
+  else if(curl_strequal(method, dflt[req])) {
     notef(config->global, "Unnecessary use of -X or --request, %s is already "
           "inferred.\n", dflt[req]);
   }
