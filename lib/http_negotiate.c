@@ -30,7 +30,7 @@
 #include "rawstr.h"
 #include "curl_base64.h"
 #include "http_negotiate.h"
-#include "curl_sasl.h"
+#include "vauth/vauth.h"
 #include "url.h"
 #include "curl_printf.h"
 

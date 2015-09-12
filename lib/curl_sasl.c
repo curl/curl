@@ -36,6 +36,7 @@
 
 #include "curl_base64.h"
 #include "curl_md5.h"
+#include "vauth/vauth.h"
 #include "vtls/vtls.h"
 #include "curl_hmac.h"
 #include "curl_sasl.h"
@@ -259,26 +260,6 @@ static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
   return CURLE_OK;
 }
 #endif /* !CURL_DISABLE_CRYPTO_AUTH && !USE_WINDOWS_SSPI */
-
-#if !defined(USE_WINDOWS_SSPI)
-/*
- * Curl_sasl_build_spn()
- *
- * This is used to build a SPN string in the format service/instance.
- *
- * Parameters:
- *
- * service  [in] - The service type such as www, smtp, pop or imap.
- * instance [in] - The host name or realm.
- *
- * Returns a pointer to the newly allocated SPN.
- */
-char *Curl_sasl_build_spn(const char *service, const char *instance)
-{
-  /* Generate and return our SPN */
-  return aprintf("%s/%s", service, instance);
-}
-#endif
 
 /*
  * sasl_create_plain_message()

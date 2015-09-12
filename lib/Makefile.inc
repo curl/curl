@@ -20,6 +20,10 @@
 #
 ###########################################################################
 
+LIB_VAUTH_CFILES = vauth/vauth.c
+
+LIB_VAUTH_HFILES = vauth/vauth.h
+
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
   vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c               \
   vtls/cyassl.c vtls/schannel.c vtls/darwinssl.c vtls/gskit.c           \
@@ -71,5 +75,5 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
 
 LIB_RCFILES = libcurl.rc
 
-CSOURCES = $(LIB_CFILES) $(LIB_VTLS_CFILES)
-HHEADERS = $(LIB_HFILES) $(LIB_VTLS_HFILES)
+CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES)
+HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES)

@@ -31,7 +31,7 @@
 #include "rawstr.h"
 #include "warnless.h"
 #include "curl_base64.h"
-#include "curl_sasl.h"
+#include "vauth/vauth.h"
 #include "http_negotiate.h"
 #include "curl_multibyte.h"
 #include "curl_printf.h"

@@ -136,17 +136,6 @@ struct SASL {
   (wordlen == (sizeof(mech) - 1) / sizeof(char) && \
    !memcmp(line, mech, wordlen))
 
-/* This is used to build a SPN string */
-#if !defined(USE_WINDOWS_SSPI)
-char *Curl_sasl_build_spn(const char *service, const char *instance);
-#else
-TCHAR *Curl_sasl_build_spn(const char *service, const char *instance);
-#endif
-
-#if defined(HAVE_GSSAPI)
-char *Curl_sasl_build_gssapi_spn(const char *service, const char *instance);
-#endif
-
 #ifndef CURL_DISABLE_CRYPTO_AUTH
 /* This is used to extract the realm from a challenge message */
 bool Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
