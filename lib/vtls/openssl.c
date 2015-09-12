@@ -1015,49 +1015,6 @@ void Curl_ossl_close_all(struct SessionHandle *data)
 #endif
 }
 
-static int asn1_output(const ASN1_UTCTIME *tm,
-                       char *buf,
-                       size_t sizeofbuf)
-{
-  const char *asn1_string;
-  int gmt=FALSE;
-  int i;
-  int year=0, month=0, day=0, hour=0, minute=0, second=0;
-
-  i=tm->length;
-  asn1_string=(const char *)tm->data;
-
-  if(i < 10)
-    return 1;
-  if(asn1_string[i-1] == 'Z')
-    gmt=TRUE;
-  for(i=0; i<10; i++)
-    if((asn1_string[i] > '9') || (asn1_string[i] < '0'))
-      return 2;
-
-  year= (asn1_string[0]-'0')*10+(asn1_string[1]-'0');
-  if(year < 50)
-    year+=100;
-
-  month= (asn1_string[2]-'0')*10+(asn1_string[3]-'0');
-  if((month > 12) || (month < 1))
-    return 3;
-
-  day= (asn1_string[4]-'0')*10+(asn1_string[5]-'0');
-  hour= (asn1_string[6]-'0')*10+(asn1_string[7]-'0');
-  minute=  (asn1_string[8]-'0')*10+(asn1_string[9]-'0');
-
-  if((asn1_string[10] >= '0') && (asn1_string[10] <= '9') &&
-     (asn1_string[11] >= '0') && (asn1_string[11] <= '9'))
-    second= (asn1_string[10]-'0')*10+(asn1_string[11]-'0');
-
-  snprintf(buf, sizeofbuf,
-           "%04d-%02d-%02d %02d:%02d:%02d %s",
-           year+1900, month, day, hour, minute, second, (gmt?"GMT":""));
-
-  return 0;
-}
-
 /* ====================================================== */
 
 
@@ -2256,43 +2213,35 @@ static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
   return 0;
 }
 
+#define print_certinfo(_label, _num) \
+do {                              \
+  long info_len = BIO_get_mem_data(mem, &ptr); \
+  infof(data, "   %s: %.*s\n", _label, info_len, ptr); \
+  Curl_ssl_push_certinfo_len(data, _num, _label, ptr, info_len); \
+  BIO_reset(mem); \
+} WHILE_FALSE
+
 static void pubkey_show(struct SessionHandle *data,
+                        BIO *mem,
                         int num,
                         const char *type,
                         const char *name,
-                        unsigned char *raw,
-                        int len)
+                        BIGNUM *bn)
 {
-  size_t left;
-  int i;
+  char *ptr;
   char namebuf[32];
-  char *buffer;
 
-  left = len*3 + 1;
-  buffer = malloc(left);
-  if(buffer) {
-    char *ptr=buffer;
-    snprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
-    for(i=0; i< len; i++) {
-      snprintf(ptr, left, "%02x:", raw[i]);
-      ptr += 3;
-      left -= 3;
-    }
-    infof(data, "   %s: %s\n", namebuf, buffer);
-    Curl_ssl_push_certinfo(data, num, namebuf, buffer);
-    free(buffer);
-  }
+  snprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
+
+  BN_print(mem, bn);
+
+  print_certinfo(namebuf, num);
 }
 
 #define print_pubkey_BN(_type, _name, _num)    \
 do {                              \
   if(pubkey->pkey._type->_name) { \
-    int len = BN_num_bytes(pubkey->pkey._type->_name);  \
-    if(len < CERTBUFFERSIZE) {                                    \
-      BN_bn2bin(pubkey->pkey._type->_name, (unsigned char*)bufp); \
-      bufp[len] = 0;                                                    \
-      pubkey_show(data, _num, #_type, #_name, (unsigned char*)bufp, len); \
-    } \
+    pubkey_show(data, mem, _num, #_type, #_name, pubkey->pkey._type->_name); \
   } \
 } WHILE_FALSE
 
@@ -2334,7 +2283,7 @@ static int X509V3_ext(struct SessionHandle *data,
     /* biomem->length bytes at biomem->data, this little loop here is only
        done for the infof() call, we send the "raw" data to the certinfo
        function */
-    for(j=0; j<(size_t)biomem->length; j++) {
+    for(j = 0; j < (size_t)biomem->length; j++) {
       const char *sep="";
       if(biomem->data[j] == '\n') {
         sep=", ";
@@ -2356,46 +2305,6 @@ static int X509V3_ext(struct SessionHandle *data,
   return 0; /* all is fine */
 }
 
-
-static void X509_signature(struct SessionHandle *data,
-                           int numcert,
-                           ASN1_STRING *sig)
-{
-  char buf[1024];
-  char *ptr = buf;
-  int i;
-
-  for(i=0; i<sig->length; i++)
-    ptr+=snprintf(ptr, sizeof(buf)-(ptr-buf), "%02x:", sig->data[i]);
-
-  infof(data, " Signature: %s\n", buf);
-  Curl_ssl_push_certinfo(data, numcert, "Signature", buf);
-}
-
-static void dumpcert(struct SessionHandle *data, X509 *x, int numcert)
-{
-  BIO *bio_out = BIO_new(BIO_s_mem());
-  BUF_MEM *biomem;
-
-  /* this outputs the cert in this 64 column wide style with newlines and
-     -----BEGIN CERTIFICATE----- texts and more */
-  PEM_write_bio_X509(bio_out, x);
-
-  BIO_get_mem_ptr(bio_out, &biomem);
-
-  Curl_ssl_push_certinfo_len(data, numcert,
-                             "Cert", biomem->data, biomem->length);
-
-  BIO_free(bio_out);
-}
-
-/*
- * This size was previously 512 which has been reported "too small" without
- * any specifics, so it was enlarged to allow more data to get shown uncut.
- * The "perfect" size is yet to figure out.
- */
-#define CERTBUFFERSIZE 8192
-
 static CURLcode get_cert_chain(struct connectdata *conn,
                                struct ssl_connect_data *connssl)
 
@@ -2403,17 +2312,12 @@ static CURLcode get_cert_chain(struct connectdata *conn,
   CURLcode result;
   STACK_OF(X509) *sk;
   int i;
-  char *bufp;
   struct SessionHandle *data = conn->data;
   int numcerts;
-
-  bufp = malloc(CERTBUFFERSIZE);
-  if(!bufp)
-    return CURLE_OUT_OF_MEMORY;
+  BIO *mem;
 
   sk = SSL_get_peer_cert_chain(connssl->handle);
   if(!sk) {
-    free(bufp);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -2421,87 +2325,59 @@ static CURLcode get_cert_chain(struct connectdata *conn,
 
   result = Curl_ssl_init_certinfo(data, numcerts);
   if(result) {
-    free(bufp);
     return result;
   }
 
-  infof(data, "--- Certificate chain\n");
-  for(i=0; i<numcerts; i++) {
-    long value;
-    ASN1_INTEGER *num;
-    ASN1_TIME *certdate;
+  mem = BIO_new(BIO_s_mem());
 
-    /* get the certs in "importance order" */
-#if 0
-    X509 *x = sk_X509_value(sk, numcerts - i - 1);
-#else
+  infof(data, "--- Certificate chain\n");
+  for(i = 0; i < numcerts; i++) {
+    long value, len;
+    ASN1_INTEGER *num;
+
     X509 *x = sk_X509_value(sk, i);
-#endif
 
     X509_CINF *cinf;
     EVP_PKEY *pubkey=NULL;
     int j;
     char *ptr;
 
-    (void)x509_name_oneline(X509_get_subject_name(x), bufp, CERTBUFFERSIZE);
-    infof(data, "%2d Subject: %s\n", i, bufp);
-    Curl_ssl_push_certinfo(data, i, "Subject", bufp);
+    X509_NAME_print_ex(mem, X509_get_subject_name(x), 0, XN_FLAG_ONELINE);
+    len = BIO_get_mem_data(mem, &ptr);
+    infof(data, "%2d Subject: %.*s\n", len, i, ptr);
+    Curl_ssl_push_certinfo_len(data, i, "Subject", ptr, len);
+    BIO_reset(mem);
 
-    (void)x509_name_oneline(X509_get_issuer_name(x), bufp, CERTBUFFERSIZE);
-    infof(data, "   Issuer: %s\n", bufp);
-    Curl_ssl_push_certinfo(data, i, "Issuer", bufp);
+    X509_NAME_print_ex(mem, X509_get_issuer_name(x), 0, XN_FLAG_ONELINE);
+    print_certinfo("Issuer", i);
 
     value = X509_get_version(x);
+    BIO_printf(mem, "%lx", value);
+    len = BIO_get_mem_data(mem, &ptr);
     infof(data, "   Version: %lu (0x%lx)\n", value+1, value);
-    snprintf(bufp, CERTBUFFERSIZE, "%lx", value);
-    Curl_ssl_push_certinfo(data, i, "Version", bufp); /* hex */
+    Curl_ssl_push_certinfo_len(data, i, "Version", ptr, len); /* hex */
+    BIO_reset(mem);
 
-    num=X509_get_serialNumber(x);
-    {
-      int left = CERTBUFFERSIZE;
-
-      ptr = bufp;
-      if(num->type == V_ASN1_NEG_INTEGER) {
-        *ptr++='-';
-        left--;
-      }
-
-      for(j=0; (j<num->length) && (left>=3); j++) {
-        snprintf(ptr, left, "%02x", num->data[j]);
-        ptr += 2;
-        left -= 2;
-      }
-      if(num->length)
-        infof(data, "   Serial Number: %s\n", bufp);
-      else
-        bufp[0]=0;
-    }
-    if(bufp[0])
-      Curl_ssl_push_certinfo(data, i, "Serial Number", bufp); /* hex */
+    num = X509_get_serialNumber(x);
+    if(num->type == V_ASN1_NEG_INTEGER)
+      BIO_puts(mem, "-");
+    for(j = 0; j < num->length; j++)
+      BIO_printf(mem, "%02x", num->data[j]);
+    print_certinfo("Serial Number", i);
 
     cinf = x->cert_info;
 
-    j = asn1_object_dump(cinf->signature->algorithm, bufp, CERTBUFFERSIZE);
-    if(!j) {
-      infof(data, "   Signature Algorithm: %s\n", bufp);
-      Curl_ssl_push_certinfo(data, i, "Signature Algorithm", bufp);
-    }
+    i2a_ASN1_OBJECT(mem, cinf->signature->algorithm);
+    print_certinfo("Signature Algorithm", i);
 
-    certdate = X509_get_notBefore(x);
-    asn1_output(certdate, bufp, CERTBUFFERSIZE);
-    infof(data, "   Start date: %s\n", bufp);
-    Curl_ssl_push_certinfo(data, i, "Start date", bufp);
+    ASN1_TIME_print(mem, X509_get_notBefore(x));
+    print_certinfo("Start date", i);
 
-    certdate = X509_get_notAfter(x);
-    asn1_output(certdate, bufp, CERTBUFFERSIZE);
-    infof(data, "   Expire date: %s\n", bufp);
-    Curl_ssl_push_certinfo(data, i, "Expire date", bufp);
+    ASN1_TIME_print(mem, X509_get_notAfter(x));
+    print_certinfo("Expire date", i);
 
-    j = asn1_object_dump(cinf->key->algor->algorithm, bufp, CERTBUFFERSIZE);
-    if(!j) {
-      infof(data, "   Public Key Algorithm: %s\n", bufp);
-      Curl_ssl_push_certinfo(data, i, "Public Key Algorithm", bufp);
-    }
+    i2a_ASN1_OBJECT(mem, cinf->key->algor->algorithm);
+    print_certinfo("Public Key Algorithm", i);
 
     pubkey = X509_get_pubkey(x);
     if(!pubkey)
@@ -2511,8 +2387,10 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       case EVP_PKEY_RSA:
         infof(data,  "   RSA Public Key (%d bits)\n",
               BN_num_bits(pubkey->pkey.rsa->n));
-        snprintf(bufp, CERTBUFFERSIZE, "%d", BN_num_bits(pubkey->pkey.rsa->n));
-        Curl_ssl_push_certinfo(data, i, "RSA Public Key", bufp);
+        BIO_printf(mem, "%d", BN_num_bits(pubkey->pkey.rsa->n));
+        len = BIO_get_mem_data(mem, &ptr);
+        Curl_ssl_push_certinfo_len(data, i, "RSA Public Key", ptr, len);
+        BIO_reset(mem);
 
         print_pubkey_BN(rsa, n, i);
         print_pubkey_BN(rsa, e, i);
@@ -2547,12 +2425,20 @@ static CURLcode get_cert_chain(struct connectdata *conn,
 
     X509V3_ext(data, i, cinf->extensions);
 
-    X509_signature(data, i, x->signature);
+    for(j = 0; j < x->signature->length; j++)
+      BIO_printf(mem, "%02x:", x->signature->data[j]);
+    len = BIO_get_mem_data(mem, &ptr);
+    infof(data, " Signature: %.*s", len, ptr);
+    Curl_ssl_push_certinfo_len(data, i, "Signature", ptr, len);
+    BIO_reset(mem);
 
-    dumpcert(data, x, i);
+    PEM_write_bio_X509(mem, x);
+    len = BIO_get_mem_data(mem, &ptr);
+    Curl_ssl_push_certinfo_len(data, i, "Cert", ptr, len);
+    BIO_reset(mem);
   }
 
-  free(bufp);
+  BIO_free(mem);
 
   return CURLE_OK;
 }
@@ -2630,13 +2516,13 @@ static CURLcode servercert(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   int rc;
-  long lerr;
-  ASN1_TIME *certdate;
+  long lerr, len;
   struct SessionHandle *data = conn->data;
   X509 *issuer;
   FILE *fp;
   char *buffer = data->state.buffer;
   const char *ptr;
+  BIO *mem = BIO_new(BIO_s_mem());
 
   if(data->set.ssl.certinfo)
     /* we've been asked to gather certificate info! */
@@ -2657,13 +2543,17 @@ static CURLcode servercert(struct connectdata *conn,
                          buffer, BUFSIZE);
   infof(data, "\t subject: %s\n", rc?"[NONE]":buffer);
 
-  certdate = X509_get_notBefore(connssl->server_cert);
-  asn1_output(certdate, buffer, BUFSIZE);
-  infof(data, "\t start date: %s\n", buffer);
+  ASN1_TIME_print(mem, X509_get_notBefore(connssl->server_cert));
+  len = BIO_get_mem_data(mem, &ptr);
+  infof(data, "\t start date: %.*s\n", len, ptr);
+  BIO_reset(mem);
 
-  certdate = X509_get_notAfter(connssl->server_cert);
-  asn1_output(certdate, buffer, BUFSIZE);
-  infof(data, "\t expire date: %s\n", buffer);
+  ASN1_TIME_print(mem, X509_get_notAfter(connssl->server_cert));
+  len = BIO_get_mem_data(mem, &ptr);
+  infof(data, "\t expire date: %.*s\n", len, ptr);
+  BIO_reset(mem);
+
+  BIO_free(mem);
 
   if(data->set.ssl.verifyhost) {
     result = verifyhost(conn, connssl->server_cert);
