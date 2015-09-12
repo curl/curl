@@ -12,6 +12,7 @@ This release includes the following changes:
  o added new tool option --proto-default [6]
  o getinfo: added CURLINFO_ACTIVESOCKET
  o turned CURLINFO_* option docs as stand-alone man pages
+ o curl: point out unnecessary uses of -X in verbose mode [17]
 
 This release includes the following bugfixes:
 
@@ -46,7 +47,17 @@ This release includes the following bugfixes:
  o libcurl.m4: Put braces around empty if body [10]
  o buildconf.bat: Fixed double blank line in 'curl manual' warning output
  o sasl: Only define Curl_sasl_digest_get_pair() when CRYPTO_AUTH enabled
- o
+ o inet_pton.c: Fix MSVC run-time check failure
+ o CURLOPT_FOLLOWLOCATION.3: mention methods for redirects
+ o http2: don't pass on Connection: headers [11]
+ o nss: do not directly access SSL_ImplementedCiphers [12]
+ o docs: numerous cleanups and spelling fixes
+ o FTP: do_more: add check for wait_data_conn in upload case [13]
+ o parse_proxy: reject illegal port numbers [14]
+ o cmake: IPv6 : disable Unix header check on Windows platform [15]
+ o winbuild: run buildconf.bat if necessary
+ o buildconf.bat: fix syntax error
+ o curl_sspi: fix possibly undefined CRYPT_E_REVOKED [16]
 
 This release includes the following known bugs:
 
@@ -55,13 +66,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Bertrand Simonnet, Brad King, Dan Fandrich,
-  Daniel Kahn Gillmor, Daniel Seither, Daniel Stenberg, Eric Ridge,
-  Erik Janssen, Jactry Zeng, Jim Hollinger, Marcel Raad, Nathaniel Waisbrot,
-  Nikolai Kondrashov, Patricia Muscalu, Patrick Monnerat, Ray Satiro,
-  Razvan Cojocaru, Rémy Léone, Sam Roth, Sergei Nikulov, Steve Holme,
-  Svyatoslav Mishyn,
-  (23 contributors)
+  Alessandro Ghedini, Benjamin Kircher, Bertrand Simonnet, Brad King,
+  Dan Fandrich, Daniel Kahn Gillmor, Daniel Seither, Daniel Stenberg,
+  Eric Ridge, Erik Janssen, Jactry Zeng, Jim Hollinger, Kamil Dudka,
+  Marcel Raad, Nathaniel Waisbrot, Nikolai Kondrashov, Patricia Muscalu,
+  Patrick Monnerat, Ray Satiro, Razvan Cojocaru, Rémy Léone, Sam Roth,
+  Sergei Nikulov, Steve Holme, Svyatoslav Mishyn, Viktor Szakáts,
+  (26 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -78,3 +89,10 @@ References to bug reports and discussions on issues:
  [8] = http://curl.haxx.se/bug/?i=399
  [9] = http://curl.haxx.se/bug/?i=398
  [10] = http://curl.haxx.se/bug/?i=402
+ [11] = http://curl.haxx.se/bug/?i=401
+ [12] = https://lists.fedoraproject.org/pipermail/devel/2015-September/214117.html
+ [13] = http://curl.haxx.se/bug/?i=405
+ [14] = http://curl.haxx.se/bug/?i=415
+ [15] = http://curl.haxx.se/bug/?i=409
+ [16] = http://curl.haxx.se/bug/?i=411
+ [17] = http://daniel.haxx.se/blog/2015/09/11/unnecessary-use-of-curl-x/
