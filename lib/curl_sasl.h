@@ -27,10 +27,6 @@
 struct SessionHandle;
 struct connectdata;
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
-struct digestdata;
-#endif
-
 #if defined(USE_NTLM)
 struct ntlmdata;
 #endif
@@ -65,16 +61,6 @@ struct kerberos5data;
 #define SASL_MECH_STRING_NTLM         "NTLM"
 #define SASL_MECH_STRING_XOAUTH2      "XOAUTH2"
 #define SASL_MECH_STRING_OAUTHBEARER  "OAUTHBEARER"
-
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
-#define DIGEST_MAX_VALUE_LENGTH           256
-#define DIGEST_MAX_CONTENT_LENGTH         1024
-#endif
-
-enum {
-  CURLDIGESTALGO_MD5,
-  CURLDIGESTALGO_MD5SESS
-};
 
 /* SASL machine states */
 typedef enum {
@@ -135,36 +121,6 @@ struct SASL {
 #define sasl_mech_equal(line, wordlen, mech) \
   (wordlen == (sizeof(mech) - 1) / sizeof(char) && \
    !memcmp(line, mech, wordlen))
-
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-/* This is used to extract the realm from a challenge message */
-bool Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
-                               const char **endptr);
-
-/* This is used to generate a base64 encoded DIGEST-MD5 response message */
-CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
-                                             const char *chlg64,
-                                             const char *userp,
-                                             const char *passwdp,
-                                             const char *service,
-                                             char **outptr, size_t *outlen);
-
-/* This is used to decode a HTTP DIGEST challenge message */
-CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
-                                              struct digestdata *digest);
-
-/* This is used to generate a HTTP DIGEST response message */
-CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
-                                              const char *userp,
-                                              const char *passwdp,
-                                              const unsigned char *request,
-                                              const unsigned char *uri,
-                                              struct digestdata *digest,
-                                              char **outptr, size_t *outlen);
-
-/* This is used to clean up the digest specific data */
-void Curl_sasl_digest_cleanup(struct digestdata *digest);
-#endif
 
 #ifdef USE_NTLM
 /* This is used to generate a base64 encoded NTLM type-1 message */

@@ -20,9 +20,10 @@
 #
 ###########################################################################
 
-LIB_VAUTH_CFILES = vauth/vauth.c vauth/cleartext.c vauth/cram.c
+LIB_VAUTH_CFILES = vauth/vauth.c vauth/cleartext.c vauth/cram.c         \
+  vauth/digest.c vauth/digest_sspi.c
 
-LIB_VAUTH_HFILES = vauth/vauth.h
+LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h
 
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
   vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c               \

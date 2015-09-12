@@ -26,7 +26,7 @@
 
 #include "urldata.h"
 #include "rawstr.h"
-#include "curl_sasl.h"
+#include "vauth/vauth.h"
 #include "http_digest.h"
 #include "curl_printf.h"
 

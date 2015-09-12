@@ -623,6 +623,8 @@ X_OBJS= \
 	$(DIROBJ)\vauth.obj \
 	$(DIROBJ)\cleartext.obj \
 	$(DIROBJ)\cram.obj \
+	$(DIROBJ)\digest.obj \
+	$(DIROBJ)\digest_sspi.obj \
 	$(DIROBJ)\vtls.obj \
 	$(DIROBJ)\openssl.obj \
 	$(DIROBJ)\strdup.obj \
