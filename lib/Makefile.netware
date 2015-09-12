@@ -351,7 +351,7 @@ OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(notdir $(CSOURCES)))) $(OBJDIR)/n
 
 OBJL	= $(OBJS) $(OBJDIR)/nwlib.o $(LDLIBS)
 
-vpath %.c . vtls
+vpath %.c . vauth vtls
 
 all: lib nlm
 

@@ -660,6 +660,9 @@ $(DIROBJ):
 {.\}.c{$(DIROBJ)\}.obj:
 	$(CC) $(CFLAGS) /Fo"$@"  $<
 
+{.\vauth\}.c{$(DIROBJ)\}.obj:
+	$(CC) $(CFLAGS) /Fo"$@"  $<
+
 {.\vtls\}.c{$(DIROBJ)\}.obj:
 	$(CC) $(CFLAGS) /Fo"$@"  $<
 
