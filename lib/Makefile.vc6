@@ -622,6 +622,7 @@ X_OBJS= \
 	$(DIROBJ)\ssh.obj \
 	$(DIROBJ)\vauth.obj \
 	$(DIROBJ)\cleartext.obj \
+	$(DIROBJ)\cram.obj \
 	$(DIROBJ)\vtls.obj \
 	$(DIROBJ)\openssl.obj \
 	$(DIROBJ)\strdup.obj \

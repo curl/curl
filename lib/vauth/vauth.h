@@ -53,4 +53,17 @@ CURLcode sasl_create_external_message(struct SessionHandle *data,
                                       const char *user, char **outptr,
                                       size_t *outlen);
 
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+/* This is used to decode a CRAM-MD5 challenge message */
+CURLcode sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
+                                      size_t *outlen);
+
+/* This is used to generate a CRAM-MD5 response message */
+CURLcode sasl_create_cram_md5_message(struct SessionHandle *data,
+                                      const char *chlg,
+                                      const char *userp,
+                                      const char *passwdp,
+                                      char **outptr, size_t *outlen);
+#endif /* !CURL_DISABLE_CRYPTO_AUTH */
+
 #endif /* HEADER_CURL_VAUTH_H */
