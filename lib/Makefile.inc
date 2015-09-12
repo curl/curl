@@ -20,7 +20,7 @@
 #
 ###########################################################################
 
-LIB_VAUTH_CFILES = vauth/vauth.c
+LIB_VAUTH_CFILES = vauth/vauth.c vauth/cleartext.c
 
 LIB_VAUTH_HFILES = vauth/vauth.h
 

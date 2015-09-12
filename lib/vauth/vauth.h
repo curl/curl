@@ -24,6 +24,8 @@
 
 #include <curl/curl.h>
 
+struct SessionHandle;
+
 /* This is used to build a SPN string */
 #if !defined(USE_WINDOWS_SSPI)
 char *Curl_sasl_build_spn(const char *service, const char *instance);
@@ -34,5 +36,21 @@ TCHAR *Curl_sasl_build_spn(const char *service, const char *instance);
 #if defined(HAVE_GSSAPI)
 char *Curl_sasl_build_gssapi_spn(const char *service, const char *instance);
 #endif
+
+/* This is used to generate a base64 encoded PLAIN cleartext message */
+CURLcode sasl_create_plain_message(struct SessionHandle *data,
+                                   const char *userp,
+                                   const char *passwdp,
+                                   char **outptr, size_t *outlen);
+
+/* This is used to generate a base64 encoded LOGIN cleartext message */
+CURLcode sasl_create_login_message(struct SessionHandle *data,
+                                   const char *valuep, char **outptr,
+                                   size_t *outlen);
+
+/* This is used to generate a base64 encoded EXTERNAL cleartext message */
+CURLcode sasl_create_external_message(struct SessionHandle *data,
+                                      const char *user, char **outptr,
+                                      size_t *outlen);
 
 #endif /* HEADER_CURL_VAUTH_H */
