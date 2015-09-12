@@ -31,10 +31,6 @@ struct connectdata;
 struct ntlmdata;
 #endif
 
-#if defined(USE_KERBEROS5)
-struct kerberos5data;
-#endif
-
 /* Authentication mechanism flags */
 #define SASL_MECH_LOGIN             (1 << 0)
 #define SASL_MECH_PLAIN             (1 << 1)
@@ -146,30 +142,6 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
 void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm);
 
 #endif /* USE_NTLM */
-
-#if defined(USE_KERBEROS5)
-/* This is used to generate a base64 encoded GSSAPI (Kerberos V5) user token
-   message */
-CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
-                                              const char *userp,
-                                              const char *passwdp,
-                                              const char *service,
-                                              const bool mutual,
-                                              const char *chlg64,
-                                              struct kerberos5data *krb5,
-                                              char **outptr, size_t *outlen);
-
-/* This is used to generate a base64 encoded GSSAPI (Kerberos V5) security
-   token message */
-CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
-                                                  const char *input,
-                                                  struct kerberos5data *krb5,
-                                                  char **outptr,
-                                                  size_t *outlen);
-
-/* This is used to clean up the gssapi specific data */
-void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
-#endif /* USE_KERBEROS5 */
 
 /* This is used to cleanup any libraries or curl modules used by the sasl
    functions */

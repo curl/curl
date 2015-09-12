@@ -21,7 +21,8 @@
 ###########################################################################
 
 LIB_VAUTH_CFILES = vauth/vauth.c vauth/cleartext.c vauth/cram.c         \
-  vauth/digest.c vauth/digest_sspi.c
+  vauth/digest.c vauth/digest_sspi.c vauth/krb5_gssapi.c                \
+  vauth/krb5_sspi.c
 
 LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h
 
@@ -52,8 +53,7 @@ LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   asyn-thread.c curl_gssapi.c curl_ntlm.c curl_ntlm_wb.c                \
   curl_ntlm_core.c curl_ntlm_msgs.c curl_sasl.c curl_multibyte.c        \
   hostcheck.c conncache.c pipeline.c dotdot.c x509asn1.c                \
-  http2.c curl_sasl_sspi.c smb.c curl_sasl_gssapi.c curl_endian.c       \
-  curl_des.c
+  http2.c curl_sasl_sspi.c smb.c curl_endian.c curl_des.c
 
 LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h if2ip.h         \
