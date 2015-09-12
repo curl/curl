@@ -765,7 +765,8 @@ static CURLcode pubkey_pem_to_der(const char *pem,
  * Generic pinned public key check.
  */
 
-CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
+CURLcode Curl_pin_peer_pubkey(struct SessionHandle *data,
+                              const char *pinnedpubkey,
                               const unsigned char *pubkey, size_t pubkeylen)
 {
   FILE *fp;
@@ -775,9 +776,10 @@ CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
   CURLcode pem_read;
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 #ifdef curlssl_sha256sum
-  size_t pinkeylen;
-  char *pinkeycopy, *begin_pos, *end_pos;
-  unsigned char *sha256sumdigest = NULL, *expectedsha256sumdigest = NULL;
+  CURLcode encode;
+  size_t encodedlen, pinkeylen;
+  char *encoded, *pinkeycopy, *begin_pos, *end_pos;
+  unsigned char *sha256sumdigest = NULL;
 #endif
 
   /* if a path wasn't specified, don't pin */
@@ -796,11 +798,21 @@ CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
     curlssl_sha256sum(pubkey, pubkeylen,
                       sha256sumdigest, SHA256_DIGEST_LENGTH);
 
+    encode = Curl_base64_encode(data, (char *)sha256sumdigest,
+                                SHA256_DIGEST_LENGTH, &encoded, &encodedlen);
+    Curl_safefree(sha256sumdigest);
+
+    if(!encode) {
+      infof(data, "\t pinnedpubkey: sha256//%s\n", encoded);
+    }
+    else
+      return encode;
+
     /* it starts with sha256//, copy so we can modify it */
     pinkeylen = strlen(pinnedpubkey) + 1;
     pinkeycopy = malloc(pinkeylen);
     if(!pinkeycopy) {
-      Curl_safefree(sha256sumdigest);
+      Curl_safefree(encoded);
       return CURLE_OUT_OF_MEMORY;
     }
     memcpy(pinkeycopy, pinnedpubkey, pinkeylen);
@@ -815,20 +827,11 @@ CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
       if(end_pos)
         end_pos[0] = '\0';
 
-      /* decode base64 pinnedpubkey, 8 is length of "sha256//" */
-      pem_read = Curl_base64_decode(begin_pos + 8,
-                                    &expectedsha256sumdigest, &size);
-      /* if not valid base64, don't bother comparing or freeing */
-      if(!pem_read) {
-        /* compare sha256 digests directly */
-        if(SHA256_DIGEST_LENGTH == size &&
-           !memcmp(sha256sumdigest, expectedsha256sumdigest,
-                   SHA256_DIGEST_LENGTH)) {
-          result = CURLE_OK;
-          Curl_safefree(expectedsha256sumdigest);
-          break;
-        }
-        Curl_safefree(expectedsha256sumdigest);
+      /* compare base64 sha256 digests, 8 is the length of "sha256//" */
+      if(encodedlen == strlen(begin_pos + 8) &&
+         !memcmp(encoded, begin_pos + 8, encodedlen)) {
+        result = CURLE_OK;
+        break;
       }
 
       /*
@@ -840,7 +843,7 @@ CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
         begin_pos = strstr(end_pos, "sha256//");
       }
     } while(end_pos && begin_pos);
-    Curl_safefree(sha256sumdigest);
+    Curl_safefree(encoded);
     Curl_safefree(pinkeycopy);
     return result;
   }
