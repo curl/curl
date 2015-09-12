@@ -92,150 +92,43 @@ See \fICURLINFO_CONTENT_TYPE(3)\fP
 .IP CURLINFO_PRIVATE
 See \fICURLINFO_PRIVATE(3)\fP
 .IP CURLINFO_HTTPAUTH_AVAIL
-Pass a pointer to a long to receive a bitmask indicating the authentication
-method(s) available. The meaning of the bits is explained in the
-\fICURLOPT_HTTPAUTH(3)\fP option for \fIcurl_easy_setopt(3)\fP.  (Added in
-7.10.8)
+See \fICURLINFO_HTTPAUTH_AVAIL(3)\fP
 .IP CURLINFO_PROXYAUTH_AVAIL
-Pass a pointer to a long to receive a bitmask indicating the authentication
-method(s) available for your proxy authentication.  (Added in 7.10.8)
+See \fICURLINFO_PROXYAUTH_AVAIL(3)\fP
 .IP CURLINFO_OS_ERRNO
-Pass a pointer to a long to receive the errno variable from a connect failure.
-Note that the value is only set on failure, it is not reset upon a
-successful operation.  (Added in 7.12.2)
+See \fICURLINFO_OS_ERRNO(3)\fP
 .IP CURLINFO_NUM_CONNECTS
-Pass a pointer to a long to receive how many new connections libcurl had to
-create to achieve the previous transfer (only the successful connects are
-counted).  Combined with \fICURLINFO_REDIRECT_COUNT\fP you are able to know
-how many times libcurl successfully reused existing connection(s) or not.  See
-the Connection Options of \fIcurl_easy_setopt(3)\fP to see how libcurl tries
-to make persistent connections to save time.  (Added in 7.12.3)
+See \fICURLINFO_NUM_CONNECTS(3)\fP
 .IP CURLINFO_PRIMARY_IP
-Pass a pointer to a char pointer to receive the pointer to a zero-terminated
-string holding the IP address of the most recent connection done with this
-\fBcurl\fP handle. This string may be IPv6 if that's enabled. Note that you
-get a pointer to a memory area that will be re-used at next request so you
-need to copy the string if you want to keep the information. (Added in 7.19.0)
+See \fICURLINFO_PRIMARY_IP(3)\fP
 .IP CURLINFO_PRIMARY_PORT
-Pass a pointer to a long to receive the destination port of the most recent
-connection done with this \fBcurl\fP handle. (Added in 7.21.0)
+See \fICURLINFO_PRIMARY_PORT(3)\fP
 .IP CURLINFO_LOCAL_IP
-Pass a pointer to a char pointer to receive the pointer to a zero-terminated
-string holding the local (source) IP address of the most recent connection done
-with this \fBcurl\fP handle. This string may be IPv6 if that's enabled. The
-same restrictions apply as to \fICURLINFO_PRIMARY_IP\fP. (Added in 7.21.0)
+See \fICURLINFO_LOCAL_IP(3)\fP
 .IP CURLINFO_LOCAL_PORT
-Pass a pointer to a long to receive the local (source) port of the most recent
-connection done with this \fBcurl\fP handle. (Added in 7.21.0)
+See \fICURLINFO_LOCAL_PORT(3)\fP
 .IP CURLINFO_COOKIELIST
-Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
-cookies cURL knows (expired ones, too). Don't forget to
-\fIcurl_slist_free_all(3)\fP the list after it has been used.  If there are no
-cookies (cookies for the handle have not been enabled or simply none have been
-received) 'struct curl_slist *' will be set to point to NULL.
-
-Since 7.43.0 cookies that were imported in the Set-Cookie format without a
-domain name are not exported by this option.
-
-(Added in 7.14.1)
+See \fICURLINFO_COOKIELIST(3)\fP
 .IP CURLINFO_LASTSOCKET
-Pass a pointer to a long to receive the last socket used by this curl
-session. If the socket is no longer valid, -1 is returned. When you finish
-working with the socket, you must call curl_easy_cleanup() as usual and let
-libcurl close the socket and cleanup other resources associated with the
-handle. This is typically used in combination with
-\fICURLOPT_CONNECT_ONLY(3)\fP.  (Added in 7.15.2)
-
-NOTE: this API is deprecated since it is not working on win64 where the SOCKET
-type is 64 bits large while its 'long' is 32 bits. Use the
-\fICURLINFO_ACTIVESOCKET\fP instead, if possible.
+See \fICURLINFO_LASTSOCKET(3)\fP
 .IP CURLINFO_ACTIVESOCKET
-Pass a pointer to a curl_socket_t to receive the active socket used by this
-curl session. If the socket is no longer valid, -1 is returned. When you
-finish working with the socket, you must call curl_easy_cleanup() as usual and
-let libcurl close the socket and cleanup other resources associated with the
-handle. This is typically used in combination with
-\fICURLOPT_CONNECT_ONLY(3)\fP.
-
-NOTE: this is meant as a cross-platform, safe alternative to
-\fICURLINFO_LASTSOCKET\fP, which does not work on win64.
+See \fICURLINFO_ACTIVESOCKET(3)\fP
 .IP CURLINFO_FTP_ENTRY_PATH
-Pass a pointer to a char pointer to receive a pointer to a string holding the
-path of the entry path. That is the initial path libcurl ended up in when
-logging on to the remote FTP server. This stores a NULL as pointer if
-something is wrong. (Added in 7.15.4)
-
-Also works for SFTP since 7.21.4
+See \fICURLINFO_FTP_ENTRY_PATH(3)\fP
 .IP CURLINFO_CERTINFO
-Pass a pointer to a 'struct curl_certinfo *' and you'll get it set to point to
-struct that holds a number of linked lists with info about the certificate
-chain, assuming you had \fICURLOPT_CERTINFO(3)\fP enabled when the previous
-request was done. The struct reports how many certs it found and then you can
-extract info for each of those certs by following the linked lists. The info
-chain is provided in a series of data in the format "name:content" where the
-content is for the specific named data. See also the certinfo.c example. NOTE:
-this option is only available in libcurl built with OpenSSL, NSS or GSKit
-support. (Added in 7.19.1)
+See \fICURLINFO_CERTINFO(3)\fP
 .IP CURLINFO_TLS_SESSION
-Pass a pointer to a 'struct curl_tlssessioninfo *'.  The pointer will be
-initialized to refer to a 'struct curl_tlssessioninfo *' that will contain an
-enum indicating the SSL library used for the handshake and the respective
-internal TLS session structure of this underlying SSL library.
-
-This may then be used to extract certificate information in a format
-convenient for further processing, such as manual validation. NOTE: this
-option may not be available for all SSL backends; unsupported SSL backends
-will return 'CURLSSLBACKEND_NONE' to indicate that they are not supported;
-this does not mean that no SSL backend was used. (Added in 7.34.0)
-
-.nf
-struct curl_tlssessioninfo {
-  curl_sslbackend backend;
-  void *internals;
-};
-.fi
-
-The \fIinternals\fP struct member will point to a TLS library specific pointer
-with the following underlying types:
-.RS
-.IP OpenSSL
-SSL_CTX *
-.IP GnuTLS
-gnutls_session_t
-.IP NSS
-PRFileDesc *
-.IP gskit
-gsk_handle
-.RE
-
+See \fICURLINFO_TLS_SESSION(3)\fP
 .IP CURLINFO_CONDITION_UNMET
-Pass a pointer to a long to receive the number 1 if the condition provided in
-the previous request didn't match (see \fICURLOPT_TIMECONDITION(3)\fP). Alas,
-if this returns a 1 you know that the reason you didn't get data in return is
-because it didn't fulfill the condition. The long ths argument points to will
-get a zero stored if the condition instead was met. (Added in 7.19.4)
+See \fICURLINFO_CONDITION_UNMET(3)\fP
 .IP CURLINFO_RTSP_SESSION_ID
-Pass a pointer to a char pointer to receive a pointer to a string holding the
-most recent RTSP Session ID.
-
-Applications wishing to resume an RTSP session on another connection should
-retrieve this info before closing the active connection.
+See \fICURLINFO_RTSP_SESSION_ID(3)\fP
 .IP CURLINFO_RTSP_CLIENT_CSEQ
-Pass a pointer to a long to receive the next CSeq that will be used by the
-application.
+See \fICURLINFO_RTSP_CLIENT_CSEQ(3)\fP
 .IP CURLINFO_RTSP_SERVER_CSEQ
-Pass a pointer to a long to receive the next server CSeq that will be expected
-by the application.
-
-\fI(NOTE: listening for server initiated requests is currently
-unimplemented).\fP
-
-Applications wishing to resume an RTSP session on another connection should
-retrieve this info before closing the active connection.
+See \fICURLINFO_RTSP_SERVER_CSEQ(3)\fP
 .IP CURLINFO_RTSP_CSEQ_RECV
-Pass a pointer to a long to receive the most recently received CSeq from the
-server. If your application encounters a \fICURLE_RTSP_CSEQ_ERROR\fP then you
-may wish to troubleshoot and/or fix the CSeq mismatch by peeking at this value.
+See \fICURLINFO_RTSP_CSEQ_RECV(3)\fP
 .SH TIMES
 .nf
 An overview of the six time values available from curl_easy_getinfo()
