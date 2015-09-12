@@ -5,8 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2016 Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2014 - 2016, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,35 +18,25 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * RFC2617 Basic and Digest Access Authentication
- * RFC2831 DIGEST-MD5 authentication
- * RFC4422 Simple Authentication and Security Layer (SASL)
- * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
- *
  ***************************************************************************/
 
 #include "curl_setup.h"
 
-#if defined(USE_WINDOWS_SSPI)
+#if defined(USE_WINDOWS_SSPI) && defined(USE_NTLM)
 
 #include <curl/curl.h>
 
-#include "curl_sasl.h"
 #include "vauth/vauth.h"
 #include "urldata.h"
 #include "curl_base64.h"
 #include "warnless.h"
 #include "curl_multibyte.h"
 #include "sendf.h"
-#include "strdup.h"
-#include "curl_printf.h"
-#include "rawstr.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined USE_NTLM
 /*
  * Curl_sasl_create_ntlm_type1_message()
  *
@@ -320,6 +309,5 @@ void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
   /* Reset any variables */
   ntlm->token_max = 0;
 }
-#endif /* USE_NTLM */
 
-#endif /* USE_WINDOWS_SSPI */
+#endif /* USE_WINDOWS_SSPI && USE_NTLM */

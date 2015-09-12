@@ -49,8 +49,8 @@
 #endif
 
 #define BUILDING_CURL_NTLM_MSGS_C
-#include "curl_ntlm_msgs.h"
-#include "curl_sasl.h"
+#include "vauth/vauth.h"
+#include "vauth/ntlm.h"
 #include "curl_endian.h"
 #include "curl_printf.h"
 
@@ -138,7 +138,9 @@ static void ntlm_print_flags(FILE *handle, unsigned long flags)
 static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
 {
   const char *p = buf;
-  (void)handle;
+
+  (void) handle;
+
   fprintf(stderr, "0x");
   while(len-- > 0)
     fprintf(stderr, "%02.2x", (unsigned int)*p++);
@@ -816,6 +818,25 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
   Curl_sasl_ntlm_cleanup(ntlm);
 
   return result;
+}
+
+/*
+* Curl_sasl_ntlm_cleanup()
+*
+* This is used to clean up the NTLM specific data.
+*
+* Parameters:
+*
+* ntlm    [in/out] - The NTLM data struct being cleaned up.
+*
+*/
+void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
+{
+  /* Free the target info */
+  Curl_safefree(ntlm->target_info);
+
+  /* Reset any variables */
+  ntlm->target_info_len = 0;
 }
 
 #endif /* USE_NTLM && !USE_WINDOWS_SSPI */

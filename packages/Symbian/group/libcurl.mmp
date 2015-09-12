@@ -37,11 +37,12 @@ SOURCE \
   vtls/polarssl.c curl_rtmp.c openldap.c curl_gethostname.c gopher.c   \
   vtls/axtls.c idn_win32.c http_negotiate_sspi.c vtls/cyassl.c         \
   http_proxy.c non-ascii.c asyn-ares.c asyn-thread.c curl_gssapi.c     \
-  curl_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_ntlm_msgs.c         \
-  curl_sasl.c vtls/schannel.c curl_multibyte.c vtls/darwinssl.c        \
-  conncache.c curl_sasl_sspi.c smb.c curl_endian.c curl_des.c          \
+  curl_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_sasl.c              \
+  vtls/schannel.c curl_multibyte.c vtls/darwinssl.c conncache.c        \
+  curl_sasl_sspi.c smb.c curl_endian.c curl_des.c                      \
   vauth/vauth.c vauth/cleartext.c vauth/cram.c vauth/digest.c          \
-  vauth/digest_sspi.c vauth/krb5_gssapi.c vauth/krb5_sspi.c
+  vauth/digest_sspi.c vauth/krb5_gssapi.c vauth/krb5_sspi.c            \
+  vauth/ntlm.c vauth/ntlm_sspi.c
 
 USERINCLUDE   ../../../lib ../../../include/curl
 #ifdef ENABLE_SSL

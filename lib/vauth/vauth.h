@@ -30,6 +30,10 @@ struct SessionHandle;
 struct digestdata;
 #endif
 
+#if defined(USE_NTLM)
+struct ntlmdata;
+#endif
+
 #if defined(USE_KERBEROS5)
 struct kerberos5data;
 #endif
@@ -97,6 +101,30 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
 /* This is used to clean up the digest specific data */
 void Curl_sasl_digest_cleanup(struct digestdata *digest);
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */
+
+#if defined(USE_NTLM)
+/* This is used to generate a base64 encoded NTLM type-1 message */
+CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
+                                             const char *passwdp,
+                                             struct ntlmdata *ntlm,
+                                             char **outptr,
+                                             size_t *outlen);
+
+/* This is used to decode a base64 encoded NTLM type-2 message */
+CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+                                             const char *type2msg,
+                                             struct ntlmdata *ntlm);
+
+/* This is used to generate a base64 encoded NTLM type-3 message */
+CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
+                                             const char *userp,
+                                             const char *passwdp,
+                                             struct ntlmdata *ntlm,
+                                             char **outptr, size_t *outlen);
+
+/* This is used to clean up the NTLM specific data */
+void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm);
+#endif /* USE_NTLM */
 
 #if defined(USE_KERBEROS5)
 /* This is used to generate a base64 encoded GSSAPI (Kerberos V5) user token

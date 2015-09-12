@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,7 +47,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "select.h"
-#include "curl_ntlm_msgs.h"
+#include "vauth/ntlm.h"
 #include "curl_ntlm_wb.h"
 #include "url.h"
 #include "strerror.h"

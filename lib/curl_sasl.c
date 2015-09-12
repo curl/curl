@@ -70,27 +70,6 @@ const struct {
   { ZERO_NULL,      0,  0 }
 };
 
-#if defined(USE_NTLM) && !defined(USE_WINDOWS_SSPI)
-/*
- * Curl_sasl_ntlm_cleanup()
- *
- * This is used to clean up the NTLM specific data.
- *
- * Parameters:
- *
- * ntlm    [in/out] - The NTLM data struct being cleaned up.
- *
- */
-void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
-{
-  /* Free the target info */
-  Curl_safefree(ntlm->target_info);
-
-  /* Reset any variables */
-  ntlm->target_info_len = 0;
-}
-#endif /* USE_NTLM && !USE_WINDOWS_SSPI*/
-
 /*
  * sasl_create_oauth_bearer_message()
  *

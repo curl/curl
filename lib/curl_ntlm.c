@@ -37,9 +37,8 @@
 #include "sendf.h"
 #include "rawstr.h"
 #include "curl_ntlm.h"
-#include "curl_ntlm_msgs.h"
 #include "curl_ntlm_wb.h"
-#include "curl_sasl.h"
+#include "vauth/vauth.h"
 #include "url.h"
 #include "curl_printf.h"
 
