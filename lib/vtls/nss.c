@@ -973,8 +973,7 @@ static CURLcode cmp_peer_pubkey(struct ssl_connect_data *connssl,
       SECItem *cert_der = PK11_DEREncodePublicKey(pubkey);
       if(cert_der) {
         /* compare the public key with the pinned public key */
-        result = Curl_pin_peer_pubkey(pinnedpubkey,
-                                      cert_der->data,
+        result = Curl_pin_peer_pubkey(data, pinnedpubkey, cert_der->data,
                                       cert_der->len);
         SECITEM_FreeItem(cert_der, PR_TRUE);
       }

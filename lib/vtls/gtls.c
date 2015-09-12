@@ -724,7 +724,8 @@ gtls_connect_step1(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode pkp_pin_peer_pubkey(gnutls_x509_crt_t cert,
+static CURLcode pkp_pin_peer_pubkey(struct SessionHandle *data,
+                                    gnutls_x509_crt_t cert,
                                     const char *pinnedpubkey)
 {
   /* Scratch */
@@ -769,7 +770,7 @@ static CURLcode pkp_pin_peer_pubkey(gnutls_x509_crt_t cert,
     /* End Gyrations */
 
     /* The one good exit point */
-    result = Curl_pin_peer_pubkey(pinnedpubkey, buff1, len1);
+    result = Curl_pin_peer_pubkey(data, pinnedpubkey, buff1, len1);
   } while(0);
 
   if(NULL != key)
@@ -1152,7 +1153,7 @@ gtls_connect_step3(struct connectdata *conn,
 
   ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
   if(ptr) {
-    result = pkp_pin_peer_pubkey(x509_cert, ptr);
+    result = pkp_pin_peer_pubkey(data, x509_cert, ptr);
     if(result != CURLE_OK) {
       failf(data, "SSL: public key does not match pinned public key!");
       gnutls_x509_crt_deinit(x509_cert);

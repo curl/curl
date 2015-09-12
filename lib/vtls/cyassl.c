@@ -434,7 +434,8 @@ cyassl_connect_step2(struct connectdata *conn,
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
     }
 
-    result = Curl_pin_peer_pubkey(data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+    result = Curl_pin_peer_pubkey(data,
+                                  data->set.str[STRING_SSL_PINNEDPUBLICKEY],
                                   (const unsigned char *)pubkey->header,
                                   (size_t)(pubkey->end - pubkey->header));
     if(result) {

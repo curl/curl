@@ -117,7 +117,8 @@ CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
                          unsigned char *md5sum, /* output */
                          size_t md5len);
 /* Check pinned public key. */
-CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
+CURLcode Curl_pin_peer_pubkey(struct SessionHandle *data,
+                              const char *pinnedpubkey,
                               const unsigned char *pubkey, size_t pubkeylen);
 
 bool Curl_ssl_cert_status_request(void);
