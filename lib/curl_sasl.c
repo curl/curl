@@ -71,55 +71,6 @@ const struct {
 };
 
 /*
- * sasl_create_oauth_bearer_message()
- *
- * This is used to generate an already encoded OAuth 2.0 message ready for
- * sending to the recipient.
- *
- * Parameters:
- *
- * data    [in]     - The session handle.
- * user    [in]     - The user name.
- * host    [in]     - The host name (for OAUTHBEARER).
- * port    [in]     - The port (for OAUTHBEARER when not Port 80).
- * bearer  [in]     - The bearer token.
- * outptr  [in/out] - The address where a pointer to newly allocated memory
- *                    holding the result will be stored upon completion.
- * outlen  [out]    - The length of the output message.
- *
- * Returns CURLE_OK on success.
- */
-static CURLcode sasl_create_oauth_bearer_message(struct SessionHandle *data,
-                                                 const char *user,
-                                                 const char *host,
-                                                 const long port,
-                                                 const char *bearer,
-                                                 char **outptr, size_t *outlen)
-{
-  CURLcode result = CURLE_OK;
-  char *oauth = NULL;
-
-  /* Generate the message */
-  if(host == NULL && (port == 0 || port == 80))
-    oauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
-  else if(port == 0 || port == 80)
-    oauth = aprintf("user=%s\1host=%s\1auth=Bearer %s\1\1", user, host,
-                    bearer);
-  else
-    oauth = aprintf("user=%s\1host=%s\1port=%ld\1auth=Bearer %s\1\1", user,
-                    host, port, bearer);
-  if(!oauth)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* Base64 encode the reply */
-  result = Curl_base64_encode(data, oauth, strlen(oauth), outptr, outlen);
-
-  free(oauth);
-
-  return result;
-}
-
-/*
  * Curl_sasl_cleanup()
  *
  * This is used to cleanup any libraries or curl modules used by the sasl

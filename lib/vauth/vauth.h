@@ -126,6 +126,13 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
 void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm);
 #endif /* USE_NTLM */
 
+/* This is used to generate a base64 encoded OAuth 2.0 message */
+CURLcode sasl_create_oauth_bearer_message(struct SessionHandle *data,
+                                          const char *user,
+                                          const char *host,
+                                          const long port,
+                                          const char *bearer,
+                                          char **outptr, size_t *outlen);
 #if defined(USE_KERBEROS5)
 /* This is used to generate a base64 encoded GSSAPI (Kerberos V5) user token
    message */
