@@ -1,0 +1,56 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_STREAM_PRIORITY 3 "13 Sep 2015" "libcurl 7.46.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_STREAM_PRIORITY \- set numerical stream priority
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STREAM_PRIORITY, long prio);
+.SH DESCRIPTION
+Set the long \fIprio\fP to a number between 1 and 256.
+
+For protocols with priorities on streams, such as HTTP/2, this option can be
+used to set an individual priority for this particular stream used by the easy
+\fIhandle\fP. Setting and using priorities really only makes sense and is only
+usable when doing multiple streams over the same connections, which thus
+implies that you use \fICURLMOPT_PIPELINING(3)\fP.
+
+This option can be set during transfer.
+
+See section 5.3 of RFC 7540 for protocol details:
+https://httpwg.github.io/specs/rfc7540.html#StreamPriority
+.SH DEFAULT
+If nothing is set, the HTTP/2 protocol itself will use its own default which
+is 16.
+.SH PROTOCOLS
+HTTP/2
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.46.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_STREAM_DEPENDS "(3), " CURLOPT_STREAM_DEPENDS_E "(3), "
+.BR CURLOPT_PIPEWAIT "(3), " CURLMOPT_PIPELINING "(3), "

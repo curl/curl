@@ -111,6 +111,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "telnet.h"
 #include "tftp.h"
 #include "http.h"
+#include "http2.h"
 #include "file.h"
 #include "curl_ldap.h"
 #include "ssh.h"
@@ -616,6 +617,8 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
   set->sep_headers = TRUE; /* separated header lists by default */
+
+  Curl_http2_init_userset(set);
   return result;
 }
 
@@ -673,6 +676,8 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->wildcard.filelist = NULL;
     data->set.fnmatch = ZERO_NULL;
     data->set.maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
+
+    Curl_http2_init_state(&data->state);
   }
 
   if(result) {
@@ -2658,6 +2663,29 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
   case CURLOPT_PIPEWAIT:
     data->set.pipewait = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
+  case CURLOPT_STREAM_PRIORITY:
+#ifndef USE_NGHTTP2
+    return CURLE_NOT_BUILT_IN;
+#else
+    arg = va_arg(param, long);
+    if((arg>=1) && (arg <= 256))
+      data->set.stream_prio = (int)arg;
+    break;
+#endif
+  case CURLOPT_STREAM_DEPENDS:
+  case CURLOPT_STREAM_DEPENDS_E:
+  {
+#ifndef USE_NGHTTP2
+    return CURLE_NOT_BUILT_IN;
+#else
+    struct SessionHandle *dep = va_arg(param, struct SessionHandle *);
+    if(dep && GOOD_EASY_HANDLE(dep)) {
+      data->set.stream_depends_on = dep;
+      data->set.stream_depends_e = (option == CURLOPT_STREAM_DEPENDS_E);
+    }
+    break;
+#endif
+  }
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

@@ -46,6 +46,24 @@
 #error too old nghttp2 version, upgrade!
 #endif
 
+/*
+ * Curl_http2_init_state() is called when the easy handle is created and
+ * allows for HTTP/2 specific init of state.
+ */
+void Curl_http2_init_state(struct UrlState *state)
+{
+  state->stream_prio = NGHTTP2_DEFAULT_WEIGHT;
+}
+
+/*
+ * Curl_http2_init_userset() is called when the easy handle is created and
+ * allows for HTTP/2 specific user-set fields.
+ */
+void Curl_http2_init_userset(struct UserDefined *set)
+{
+  set->stream_prio = NGHTTP2_DEFAULT_WEIGHT;
+}
+
 static int http2_perform_getsock(const struct connectdata *conn,
                                  curl_socket_t *sock, /* points to
                                                          numsocks
@@ -987,6 +1005,54 @@ static ssize_t http2_handle_stream_close(struct http_conn *httpc,
 }
 
 /*
+ * h2_pri_spec() fills in the pri_spec struct, used by nghttp2 to send weight
+ * and dependency to the peer. It also stores the updated values in the state
+ * struct.
+ */
+
+static void h2_pri_spec(struct SessionHandle *data,
+                        nghttp2_priority_spec *pri_spec)
+{
+  struct HTTP *depstream = (data->set.stream_depends_on?
+                            data->set.stream_depends_on->req.protop:NULL);
+  int32_t depstream_id = depstream? depstream->stream_id:0;
+  nghttp2_priority_spec_init(pri_spec, depstream_id, data->set.stream_prio,
+                             data->set.stream_depends_e);
+  data->state.stream_prio = data->set.stream_prio;
+  data->state.stream_depends_e = data->set.stream_depends_e;
+  data->state.stream_depends_on = data->set.stream_depends_on;
+}
+
+/*
+ * h2_session_send() checks if there's been an update in the priority /
+ * dependency settings and if so it submits a PRIORITY frame with the updated
+ * info.
+ */
+static int h2_session_send(struct SessionHandle *data,
+                           nghttp2_session *h2)
+{
+  struct HTTP *stream = data->req.protop;
+  if((data->set.stream_prio != data->state.stream_prio) ||
+     (data->set.stream_depends_e != data->state.stream_depends_e) ||
+     (data->set.stream_depends_on != data->state.stream_depends_on) ) {
+    /* send new weight and/or dependency */
+    nghttp2_priority_spec pri_spec;
+    int rv;
+
+    h2_pri_spec(data, &pri_spec);
+
+    DEBUGF(infof(data, "Queuing HTTP/2 PRIORITY frame on stream %u!\n",
+                 stream->stream_id));
+    rv = nghttp2_submit_priority(h2, NGHTTP2_FLAG_NONE, stream->stream_id,
+                                 &pri_spec);
+    if(rv)
+      return rv;
+  }
+
+  return nghttp2_session_send(h2);
+}
+
+/*
  * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
  * a regular CURLcode value.
  */
@@ -1140,7 +1206,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     }
     /* Always send pending frames in nghttp2 session, because
        nghttp2_session_mem_recv() may queue new frame */
-    rv = nghttp2_session_send(httpc->h2);
+    rv = h2_session_send(data, httpc->h2);
     if(rv != 0) {
       *err = CURLE_SEND_ERROR;
       return 0;
@@ -1199,6 +1265,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nghttp2_data_provider data_prd;
   int32_t stream_id;
   nghttp2_session *h2 = httpc->h2;
+  nghttp2_priority_spec pri_spec;
 
   (void)sockindex;
 
@@ -1210,7 +1277,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     stream->upload_mem = mem;
     stream->upload_len = len;
     nghttp2_session_resume_data(h2, stream->stream_id);
-    rv = nghttp2_session_send(h2);
+    rv = h2_session_send(conn->data, h2);
     if(nghttp2_is_fatal(rv)) {
       *err = CURLE_SEND_ERROR;
       return -1;
@@ -1351,17 +1418,19 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     nva[i] = authority;
   }
 
+  h2_pri_spec(conn->data, &pri_spec);
+
   switch(conn->data->set.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
   case HTTPREQ_PUT:
     data_prd.read_callback = data_source_read_callback;
     data_prd.source.ptr = NULL;
-    stream_id = nghttp2_submit_request(h2, NULL, nva, nheader,
+    stream_id = nghttp2_submit_request(h2, &pri_spec, nva, nheader,
                                        &data_prd, conn->data);
     break;
   default:
-    stream_id = nghttp2_submit_request(h2, NULL, nva, nheader,
+    stream_id = nghttp2_submit_request(h2, &pri_spec, nva, nheader,
                                        NULL, conn->data);
   }
 
@@ -1377,6 +1446,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
         stream_id, conn->data);
   stream->stream_id = stream_id;
 
+  /* this does not call h2_session_send() since there can not have been any
+   * priority upodate since the nghttp2_submit_request() call above */
   rv = nghttp2_session_send(h2);
 
   if(rv != 0) {
@@ -1536,7 +1607,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   }
 
   /* Try to send some frames since we may read SETTINGS already. */
-  rv = nghttp2_session_send(httpc->h2);
+  rv = h2_session_send(data, httpc->h2);
 
   if(rv != 0) {
     failf(data, "nghttp2_session_send() failed: %s(%d)",
