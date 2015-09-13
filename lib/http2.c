@@ -909,15 +909,6 @@ CURLcode Curl_http2_init(struct connectdata *conn)
 }
 
 /*
- * Send a request using http2
- */
-CURLcode Curl_http2_send_request(struct connectdata *conn)
-{
-  (void)conn;
-  return CURLE_OK;
-}
-
-/*
  * Append headers to ask for a HTTP1.1 to HTTP2 upgrade.
  */
 CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
