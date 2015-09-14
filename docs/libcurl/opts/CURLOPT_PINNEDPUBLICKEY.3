@@ -59,10 +59,24 @@ if(curl) {
 If you do not have the server's public key file you can extract it from the
 server's certificate.
 .nf
+# retrieve the server's certificate if you don't already have it
+#
+# be sure to examine the certificate to see if it is what you expected
+#
+# Windows-specific:
+# - Use NUL instead of /dev/null.
+# - OpenSSL may wait for input instead of disconnecting. Hit enter.
+# - If you don't have sed, then just copy the certificate into a file:
+#   Lines from -----BEGIN CERTIFICATE----- to -----END CERTIFICATE-----.
+#
+openssl s_client -servername www.test.com -connect www.test.com:443 < /dev/null | sed -n "/-----BEGIN/,/-----END/p" > www.test.com.pem
+
 # extract public key in pem format from certificate
 openssl x509 -in www.test.com.pem -pubkey -noout > www.test.com.pubkey.pem
+
 # convert public key from pem to der
 openssl asn1parse -noout -inform pem -in www.test.com.pubkey.pem -out www.test.com.pubkey.der
+
 # sha256 hash and base64 encode der to string for use
 openssl dgst -sha256 -binary www.test.com.pubkey.der | openssl base64
 .fi
