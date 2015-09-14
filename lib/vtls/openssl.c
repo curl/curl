@@ -2213,10 +2213,9 @@ static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
   return 0;
 }
 
-#define print_certinfo(_label, _num) \
+#define push_certinfo(_label, _num) \
 do {                              \
   long info_len = BIO_get_mem_data(mem, &ptr); \
-  infof(data, "   %s: %.*s\n", _label, info_len, ptr); \
   Curl_ssl_push_certinfo_len(data, _num, _label, ptr, info_len); \
   BIO_reset(mem); \
 } WHILE_FALSE
@@ -2234,8 +2233,7 @@ static void pubkey_show(struct SessionHandle *data,
   snprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
 
   BN_print(mem, bn);
-
-  print_certinfo(namebuf, num);
+  push_certinfo(namebuf, num);
 }
 
 #define print_pubkey_BN(_type, _name, _num)    \
@@ -2272,17 +2270,11 @@ static int X509V3_ext(struct SessionHandle *data,
 
     asn1_object_dump(obj, namebuf, sizeof(namebuf));
 
-    infof(data, "%s: %s\n", namebuf,
-          X509_EXTENSION_get_critical(ext)?"(critical)":"");
-
     if(!X509V3_EXT_print(bio_out, ext, 0, 0))
       ASN1_STRING_print(bio_out, (ASN1_STRING *)X509_EXTENSION_get_data(ext));
 
     BIO_get_mem_ptr(bio_out, &biomem);
 
-    /* biomem->length bytes at biomem->data, this little loop here is only
-       done for the infof() call, we send the "raw" data to the certinfo
-       function */
     for(j = 0; j < (size_t)biomem->length; j++) {
       const char *sep="";
       if(biomem->data[j] == '\n') {
@@ -2295,7 +2287,6 @@ static int X509V3_ext(struct SessionHandle *data,
         ptr+=snprintf(ptr, sizeof(buf)-(ptr-buf), "%s%c", sep,
                       biomem->data[j]);
     }
-    infof(data, "  %s\n", buf);
 
     Curl_ssl_push_certinfo(data, certnum, namebuf, buf);
 
@@ -2330,9 +2321,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
 
   mem = BIO_new(BIO_s_mem());
 
-  infof(data, "--- Certificate chain\n");
   for(i = 0; i < numcerts; i++) {
-    long value, len;
     ASN1_INTEGER *num;
 
     X509 *x = sk_X509_value(sk, i);
@@ -2343,41 +2332,34 @@ static CURLcode get_cert_chain(struct connectdata *conn,
     char *ptr;
 
     X509_NAME_print_ex(mem, X509_get_subject_name(x), 0, XN_FLAG_ONELINE);
-    len = BIO_get_mem_data(mem, &ptr);
-    infof(data, "%2d Subject: %.*s\n", len, i, ptr);
-    Curl_ssl_push_certinfo_len(data, i, "Subject", ptr, len);
-    BIO_reset(mem);
+    push_certinfo("Subject", i);
 
     X509_NAME_print_ex(mem, X509_get_issuer_name(x), 0, XN_FLAG_ONELINE);
-    print_certinfo("Issuer", i);
+    push_certinfo("Issuer", i);
 
-    value = X509_get_version(x);
-    BIO_printf(mem, "%lx", value);
-    len = BIO_get_mem_data(mem, &ptr);
-    infof(data, "   Version: %lu (0x%lx)\n", value+1, value);
-    Curl_ssl_push_certinfo_len(data, i, "Version", ptr, len); /* hex */
-    BIO_reset(mem);
+    BIO_printf(mem, "%lx", X509_get_version(x));
+    push_certinfo("Version", i);
 
     num = X509_get_serialNumber(x);
     if(num->type == V_ASN1_NEG_INTEGER)
       BIO_puts(mem, "-");
     for(j = 0; j < num->length; j++)
       BIO_printf(mem, "%02x", num->data[j]);
-    print_certinfo("Serial Number", i);
+    push_certinfo("Serial Number", i);
 
     cinf = x->cert_info;
 
     i2a_ASN1_OBJECT(mem, cinf->signature->algorithm);
-    print_certinfo("Signature Algorithm", i);
+    push_certinfo("Signature Algorithm", i);
 
     ASN1_TIME_print(mem, X509_get_notBefore(x));
-    print_certinfo("Start date", i);
+    push_certinfo("Start date", i);
 
     ASN1_TIME_print(mem, X509_get_notAfter(x));
-    print_certinfo("Expire date", i);
+    push_certinfo("Expire date", i);
 
     i2a_ASN1_OBJECT(mem, cinf->key->algor->algorithm);
-    print_certinfo("Public Key Algorithm", i);
+    push_certinfo("Public Key Algorithm", i);
 
     pubkey = X509_get_pubkey(x);
     if(!pubkey)
@@ -2385,12 +2367,8 @@ static CURLcode get_cert_chain(struct connectdata *conn,
     else {
       switch(pubkey->type) {
       case EVP_PKEY_RSA:
-        infof(data,  "   RSA Public Key (%d bits)\n",
-              BN_num_bits(pubkey->pkey.rsa->n));
         BIO_printf(mem, "%d", BN_num_bits(pubkey->pkey.rsa->n));
-        len = BIO_get_mem_data(mem, &ptr);
-        Curl_ssl_push_certinfo_len(data, i, "RSA Public Key", ptr, len);
-        BIO_reset(mem);
+        push_certinfo("RSA Public Key", i);
 
         print_pubkey_BN(rsa, n, i);
         print_pubkey_BN(rsa, e, i);
@@ -2427,15 +2405,10 @@ static CURLcode get_cert_chain(struct connectdata *conn,
 
     for(j = 0; j < x->signature->length; j++)
       BIO_printf(mem, "%02x:", x->signature->data[j]);
-    len = BIO_get_mem_data(mem, &ptr);
-    infof(data, " Signature: %.*s", len, ptr);
-    Curl_ssl_push_certinfo_len(data, i, "Signature", ptr, len);
-    BIO_reset(mem);
+    push_certinfo("Signature", i);
 
     PEM_write_bio_X509(mem, x);
-    len = BIO_get_mem_data(mem, &ptr);
-    Curl_ssl_push_certinfo_len(data, i, "Cert", ptr, len);
-    BIO_reset(mem);
+    push_certinfo("Cert", i);
   }
 
   BIO_free(mem);
