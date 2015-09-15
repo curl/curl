@@ -25,7 +25,6 @@ else(HAVE_WINDOWS_H)
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
   add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
 endif(HAVE_WINDOWS_H)
-add_header_include(1 "type_traits")
 
 check_cxx_source_compiles("${_source_epilogue}
 int main(void) {
@@ -36,9 +35,12 @@ if(curl_cv_recv)
   if(NOT DEFINED curl_cv_func_recv_args OR "${curl_cv_func_recv_args}" STREQUAL "unknown")
     set(curl_recv_test_head
     "${_source_epilogue}
+    //C++ includes don't work properly with curl, so define is_same ourselves
+    template<class,class>struct is_same{static constexpr bool value=false;};
+    template<class T>struct is_same<T,T>{static constexpr bool value=true;};
     template <class Ret, class Arg1, class Arg2, class Arg3, class Arg4>
     void check_args(Ret(${signature_call_conv} *r)(Arg1,Arg2,Arg3,Arg4)) {
-      static_assert(std::is_same<")
+      static_assert(is_same<")
     set(curl_recv_test_tail
     ">::value,\"\");
       r(0,0,0,0);
@@ -142,9 +144,11 @@ if(curl_cv_send)
   if(NOT DEFINED curl_cv_func_send_args OR "${curl_cv_func_send_args}" STREQUAL "unknown")
     set(curl_send_test_head
             "${_source_epilogue}
+            template <class T, class U>struct is_same{static constexpr bool value=false;};
+            template<class T>struct is_same<T,T>{static constexpr bool value=true;};
             template <class Ret, class Arg1, class Arg2, class Arg3, class Arg4>
             void check_args(Ret(${signature_call_conv} *r)(Arg1,Arg2,Arg3,Arg4)) {
-              static_assert(std::is_same<")
+              static_assert(is_same<")
     set(curl_send_test_tail
             ">::value,\"\");
               r(0,0,0,0);
