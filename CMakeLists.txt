@@ -552,6 +552,8 @@ else()
   unset(USE_UNIX_SOCKETS CACHE)
 endif()
 
+set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR} ${CMAKE_LDAP_INCLUDE_DIR} ${GSS_INCLUDE_DIR})
+
 # Check for header files
 if(NOT UNIX)
   check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
