@@ -309,6 +309,9 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
   /* Call the actual init function first */
   result = curl_global_init(flags);
   if(!result) {
+    /* set openssl allocators first */
+    CRYPTO_set_mem_functions(m,c,r,s,f);
+
     Curl_cmalloc = m;
     Curl_cfree = f;
     Curl_cstrdup = s;
