@@ -3185,7 +3185,7 @@ void Curl_ossl_md5sum(unsigned char *tmp, /* input */
   MD5_Final(md5sum, &MD5pw);
 }
 
-#ifndef OPENSSL_NO_SHA256
+#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
 void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
                       size_t tmplen,
                       unsigned char *sha256sum /* output */,
