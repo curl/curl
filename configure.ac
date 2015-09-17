@@ -1083,7 +1083,11 @@ AC_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
 
   AC_TRY_RUN([ /* is AF_INET6 available? */
 #include <sys/types.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
 #include <sys/socket.h>
+#endif
 #include <stdlib.h> /* for exit() */
 main()
 {
@@ -1110,7 +1114,12 @@ if test "$ipv6" = yes; then
   AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
   AC_TRY_COMPILE([
 #include <sys/types.h>
-#include <netinet/in.h>] ,
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <netinet/in.h>
+#endif] ,
   struct sockaddr_in6 s; s.sin6_scope_id = 0; , have_sin6_scope_id=yes)
   if test "$have_sin6_scope_id" = yes; then
     AC_MSG_RESULT([yes])

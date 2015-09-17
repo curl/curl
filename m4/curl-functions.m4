@@ -44,6 +44,10 @@ curl_includes_arpa_inet="\
 #ifdef HAVE_ARPA_INET_H
 #  include <arpa/inet.h>
 #endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
 /* includes end */"
   AC_CHECK_HEADERS(
     sys/types.h sys/socket.h netinet/in.h arpa/inet.h,
@@ -2097,6 +2101,12 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         struct addrinfo hints;
         struct addrinfo *ai = 0;
         int error;
+
+        #ifdef HAVE_WINSOCK2_H
+        WSADATA wsa;
+        if (WSAStartup(MAKEWORD(2,2), &wsa))
+                exit(2);
+        #endif
 
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_NUMERICHOST;
