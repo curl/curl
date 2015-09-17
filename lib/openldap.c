@@ -446,6 +446,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
     ent = ldap_next_message(li->ld, ent)) {
     struct berval bv, *bvals, **bvp = &bvals;
     int binary = 0, msgtype;
+    CURLcode writeerr;
 
     msgtype = ldap_msgtype(ent);
     if(msgtype == LDAP_RES_SEARCH_RESULT) {
@@ -485,18 +486,24 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
       *err = CURLE_RECV_ERROR;
       return -1;
     }
-    *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
-    if(*err)
+    writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
+    if(writeerr) {
+      *err = writeerr;
       return -1;
+    }
 
-    *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)bv.bv_val,
-                             bv.bv_len);
-    if(*err)
+    writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)bv.bv_val,
+                                 bv.bv_len);
+    if(writeerr) {
+      *err = writeerr;
       return -1;
+    }
 
-    *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
-    if(*err)
+    writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
+    if(writeerr) {
+      *err = writeerr;
       return -1;
+    }
     data->req.bytecount += bv.bv_len + 5;
 
     for(rc = ldap_get_attribute_ber(li->ld, ent, ber, &bv, bvp);
@@ -513,18 +520,24 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
 
       for(i=0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
-        *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\t", 1);
-        if(*err)
+        writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\t", 1);
+        if(writeerr) {
+          *err = writeerr;
           return -1;
+        }
 
-        *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)bv.bv_val,
-                                 bv.bv_len);
-        if(*err)
-          return -1;
+       writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)bv.bv_val,
+                                    bv.bv_len);
+       if(writeerr) {
+         *err = writeerr;
+         return -1;
+       }
 
-        *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)":", 1);
-        if(*err)
-          return -1;
+        writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)":", 1);
+       if(writeerr) {
+         *err = writeerr;
+         return -1;
+       }
         data->req.bytecount += bv.bv_len + 2;
 
         if(!binary) {
@@ -558,47 +571,62 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
             *err = error;
             return -1;
           }
-          *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)": ", 2);
-          if(*err)
+          writeerr = Curl_client_write(conn, CLIENTWRITE_BODY,
+                                       (char *)": ", 2);
+          if(writeerr) {
+            *err = writeerr;
             return -1;
+          }
 
           data->req.bytecount += 2;
           if(val_b64_sz > 0) {
-            *err = Curl_client_write(conn, CLIENTWRITE_BODY, val_b64,
+            writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, val_b64,
                                      val_b64_sz);
-            if(*err)
+            if(writeerr) {
+              *err = writeerr;
               return -1;
+            }
             free(val_b64);
             data->req.bytecount += val_b64_sz;
           }
         }
         else {
-          *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)" ", 1);
-          if(*err)
+          writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)" ", 1);
+          if(writeerr) {
+            *err = writeerr;
             return -1;
+          }
 
-          *err = Curl_client_write(conn, CLIENTWRITE_BODY, bvals[i].bv_val,
-                                   bvals[i].bv_len);
-          if(*err)
+          writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, bvals[i].bv_val,
+                                       bvals[i].bv_len);
+          if(writeerr) {
+            *err = writeerr;
             return -1;
+          }
 
           data->req.bytecount += bvals[i].bv_len + 1;
         }
-        *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 0);
-        if(*err)
+        writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 0);
+        if(writeerr) {
+          *err = writeerr;
           return -1;
+        }
 
         data->req.bytecount++;
       }
       ber_memfree(bvals);
-      *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 0);
-      if(*err)
+      writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 0);
+      if(writeerr) {
+        *err = writeerr;
         return -1;
+      }
       data->req.bytecount++;
     }
-    *err = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 0);
-    if(*err)
+    writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 0);
+    if(writeerr) {
+      *err = writeerr;
       return -1;
+    }
     data->req.bytecount++;
     ber_free(ber, 0);
   }
