@@ -1806,6 +1806,10 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   if(SSL_SetURL(connssl->handle, conn->host.name) != SECSuccess)
     goto error;
 
+  /* prevent NSS from re-using the session for a different hostname */
+  if(SSL_SetSockPeerID(connssl->handle, conn->host.name) != SECSuccess)
+    goto error;
+
   return CURLE_OK;
 
 error:

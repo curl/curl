@@ -58,6 +58,7 @@ This release includes the following bugfixes:
  o winbuild: run buildconf.bat if necessary
  o buildconf.bat: fix syntax error
  o curl_sspi: fix possibly undefined CRYPT_E_REVOKED [16]
+ o nss: prevent NSS from incorrectly re-using a session [18]
 
 This release includes the following known bugs:
 
@@ -96,3 +97,4 @@ References to bug reports and discussions on issues:
  [15] = http://curl.haxx.se/bug/?i=409
  [16] = http://curl.haxx.se/bug/?i=411
  [17] = http://daniel.haxx.se/blog/2015/09/11/unnecessary-use-of-curl-x/
+ [18] = https://bugzilla.mozilla.org/1202264
