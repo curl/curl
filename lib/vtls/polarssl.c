@@ -318,18 +318,10 @@ polarssl_connect_step1(struct connectdata *conn,
   infof(data, "PolarSSL: Connecting to %s:%d\n",
         conn->host.name, conn->remote_port);
 
-#if defined(USE_MBEDTLS)
-  static mbedtls_ssl_config client_config;
-  mbedtls_ssl_config_init(&client_config);
-  ssl_init(&connssl->ssl);
-  mbedtls_ssl_setup(&connssl->ssl, &client_config);
-
-#else // Normal 1.x Call
   if(ssl_init(&connssl->ssl)) {
     failf(data, "PolarSSL: ssl_init failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
-#endif // END USE_MBEDTLS
 
   switch(data->set.ssl.version) {
   default:
