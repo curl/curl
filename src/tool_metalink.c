@@ -51,10 +51,16 @@
 #  define SHA256_CTX void *
    static NSSInitContext *nss_context;
 #elif defined(USE_POLARSSL)
-#  include <mbedtls/compat-1.3.h>
-#  include <mbedtls/md5.h>
-#  include <mbedtls/sha1.h>
-#  include <mbedtls/sha256.h>
+#  if defined(USE_MBEDTLS)
+#    include <mbedtls/compat-1.3.h>
+#    include <mbedtls/md5.h>
+#    include <mbedtls/sha1.h>
+#    include <mbedtls/sha256.h>
+#  else
+#    include <polarssl/md5.h>
+#    include <polarssl/sha1.h>
+#    include <polarssl/sha256.h>
+#  endif
 #  define MD5_CTX    md5_context
 #  define SHA_CTX    sha1_context
 #  define SHA256_CTX sha256_context

@@ -1969,6 +1969,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
        POLARSSL_ENABLED=1
        USE_POLARSSL="yes"
        USE_MBEDTLS="yes"
+       AC_DEFINE(USE_MBEDTLS, 1, [if PolarSSL is enabled])
        curl_ssl_msg="enabled (PolarSSL)"
        ],
        [

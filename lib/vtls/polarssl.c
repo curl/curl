@@ -31,20 +31,32 @@
 
 #ifdef USE_POLARSSL
 
-#include <mbedtls/compat-1.3.h>
-#include <mbedtls/net.h>
-#include <mbedtls/ssl.h>
-#include <mbedtls/certs.h>
-#include <mbedtls/x509.h>
-#include <mbedtls/version.h>
+/* Determine mbedtls 1.x vs. 2.x */
+#if defined(USE_MBEDTLS)
+#  include <mbedtls/compat-1.3.h>
+#  include <mbedtls/net.h>
+#  include <mbedtls/ssl.h>
+#  include <mbedtls/certs.h>
+#  include <mbedtls/x509.h>
+#  include <mbedtls/version.h>
+#  include <mbedtls/error.h>
+#  include <mbedtls/entropy.h>
+#  include <mbedtls/ctr_drbg.h>
+#else
+#  include <polarssl/net.h>
+#  include <polarssl/ssl.h>
+#  include <polarssl/certs.h>
+#  include <polarssl/x509.h>
+#  include <polarssl/version.h>
+#  include <polarssl/error.h>
+#  include <polarssl/entropy.h>
+#  include <polarssl/ctr_drbg.h>
+#endif
 
 #if POLARSSL_VERSION_NUMBER < 0x01030000
 #error too old PolarSSL
 #endif
 
-#include <mbedtls/error.h>
-#include <mbedtls/entropy.h>
-#include <mbedtls/ctr_drbg.h>
 
 #include "urldata.h"
 #include "sendf.h"

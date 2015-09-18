@@ -94,15 +94,26 @@
 #endif
 
 #ifdef USE_POLARSSL
-#include <mbedtls/compat-1.3.h>
-#include <mbedtls/ssl.h>
-#include <mbedtls/version.h>
-#if POLARSSL_VERSION_NUMBER<0x01010000
-#include <mbedtls/havege.h>
+
+/* Determine mbedtls 1.x vs. 2.x */
+#if defined(USE_MBEDTLS)
+#  include <mbedtls/compat-1.3.h>
+#  include <mbedtls/ssl.h>
+#  include <mbedtls/version.h>
+#  include <mbedtls/havege.h>
+#  include <mbedtls/entropy.h>
+#  include <mbedtls/ctr_drbg.h>
 #else
-#include <mbedtls/entropy.h>
-#include <mbedtls/ctr_drbg.h>
-#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
+#  include <polarssl/ssl.h>
+#  include <polarssl/version.h>
+#  if POLARSSL_VERSION_NUMBER<0x01010000
+#    include <polarssl/havege.h>
+#  else
+#    include <polarssl/entropy.h>
+#    include <polarssl/ctr_drbg.h>
+#  endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
+#endif
+
 #endif /* USE_POLARSSL */
 
 #ifdef USE_CYASSL
