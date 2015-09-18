@@ -1921,6 +1921,17 @@ dnl Initial insertion point KDD
          USE_POLARSSL="yes"
          curl_ssl_msg="enabled (PolarSSL)"
         ])
+
+      AC_CHECK_LIB(mbedtls, mbedtls_havege_init,
+      dnl libpolarssl found, set the variable
+       [
+         AC_DEFINE(USE_POLARSSL, 1, [if PolarSSL is enabled])
+         AC_SUBST(USE_POLARSSL, [1])
+         POLARSSL_ENABLED=1
+         USE_POLARSSL="yes"
+         curl_ssl_msg="enabled (PolarSSL)"
+        ])
+
     fi
 
     addld=""
@@ -1949,14 +1960,35 @@ dnl Initial insertion point KDD
        ],
        [
          CPPFLAGS=$_cppflags
-         LDFLAGS=$_ldflags
+         LDFLAGS="$_ldflags"
+         LIBS=" -lmbedtls -lmbedx509 -lmbedcrypto $LIBS"
        ])
+
+      AC_CHECK_LIB(mbedtls, mbedtls_ssl_init, 
+       [
+       AC_DEFINE(USE_POLARSSL, 1, [if PolarSSL is enabled])
+       AC_SUBST(USE_POLARSSL, [1])
+       POLARSSL_ENABLED=1
+       USE_POLARSSL="yes"
+       USE_MBEDTLS="yes"
+       curl_ssl_msg="enabled (PolarSSL)"
+       ],
+       [
+         CPPFLAGS=$_cppflags
+         LDFLAGS=$_ldflags
+       ]
+       )
+
     fi
 
     if test "x$USE_POLARSSL" = "xyes"; then
       AC_MSG_NOTICE([detected PolarSSL])
 
-      LIBS="-lpolarssl $LIBS"
+      if test "x$USE_MBEDTLS" = "xyes"; then
+        LIBS=" $LIBS"
+      else
+        LIBS="-lpolarssl $LIBS"
+      fi
 
       if test -n "$polarssllib"; then
         dnl when shared libs were found in a path that the run-time

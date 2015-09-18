@@ -94,13 +94,14 @@
 #endif
 
 #ifdef USE_POLARSSL
-#include <polarssl/ssl.h>
-#include <polarssl/version.h>
+#include <mbedtls/compat-1.3.h>
+#include <mbedtls/ssl.h>
+#include <mbedtls/version.h>
 #if POLARSSL_VERSION_NUMBER<0x01010000
-#include <polarssl/havege.h>
+#include <mbedtls/havege.h>
 #else
-#include <polarssl/entropy.h>
-#include <polarssl/ctr_drbg.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
 #endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
 #endif /* USE_POLARSSL */
 
