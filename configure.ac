@@ -1910,6 +1910,8 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     if test -z "$OPT_POLARSSL" ; then
       dnl check for lib first without setting any new path
 
+dnl Initial insertion point KDD
+
       AC_CHECK_LIB(polarssl, havege_init,
       dnl libpolarssl found, set the variable
        [
