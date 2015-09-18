@@ -1975,7 +1975,6 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
        [
          CPPFLAGS=$_cppflags
          LDFLAGS=$_ldflags
-         LIBS=$INITIAL_LIBS
        ]
        )
 
