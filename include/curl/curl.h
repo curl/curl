@@ -154,6 +154,7 @@ struct curl_httppost {
                                        is a file part) */
   void *userp;                      /* custom pointer used for
                                        HTTPPOST_CALLBACK posts */
+  curl_off_t contentslength_large;  /* alternative length of contents field */
 };
 
 /* This is the CURLOPT_PROGRESSFUNCTION callback proto. It is now considered
@@ -1822,6 +1823,8 @@ typedef enum {
   CFINIT(OBSOLETE2),
 
   CFINIT(STREAM),
+
+  CFINIT(CONTENTSLENGTH_LARGE),
 
   CURLFORM_LASTENTRY /* the last unused */
 } CURLformoption;
