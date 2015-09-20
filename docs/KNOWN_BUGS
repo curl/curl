@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+91. "curl_easy_perform hangs with imap and PolarSSL"
+  https://github.com/bagder/curl/issues/334
+
 90. IMAP "SEARCH ALL" truncates output on large boxes. "A quick search of the
   code reveals that pingpong.c contains some truncation code, at line 408,
   when it deems the server response to be too large truncating it to 40
