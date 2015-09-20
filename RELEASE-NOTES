@@ -59,6 +59,13 @@ This release includes the following bugfixes:
  o buildconf.bat: fix syntax error
  o curl_sspi: fix possibly undefined CRYPT_E_REVOKED [16]
  o nss: prevent NSS from incorrectly re-using a session [18]
+ o libcurl-errors.3: add two missing error codes
+ o openssl: fix build with < 0.9.8
+ o openssl: refactor certificate parsing to use OpenSSL memory BIO [19]
+ o openldap: only part of LDAP query results received [20]
+ o ssl: add server cert's "sha256//" hash to verbose [21]
+ o NTLM: Reset auth-done when using a fresh connection [22]
+ o curl: generate easysrc only on --libcurl
 
 This release includes the following known bugs:
 
@@ -68,12 +75,14 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Benjamin Kircher, Bertrand Simonnet, Brad King,
-  Dan Fandrich, Daniel Kahn Gillmor, Daniel Seither, Daniel Stenberg,
-  Eric Ridge, Erik Janssen, Jactry Zeng, Jim Hollinger, Kamil Dudka,
-  Marcel Raad, Nathaniel Waisbrot, Nikolai Kondrashov, Patricia Muscalu,
-  Patrick Monnerat, Ray Satiro, Razvan Cojocaru, Rémy Léone, Sam Roth,
+  Dan Fandrich, Daniel Hwang, Daniel Kahn Gillmor, Daniel Lee Hwang,
+  Daniel Seither, Daniel Stenberg, Eric Ridge, Erik Janssen, Isaac Boukris,
+  Jactry Zeng, Jakub Zakrzewski, Jim Hollinger, Kamil Dudka, Marcel Raad,
+  Nathaniel Waisbrot, Nikolai Kondrashov, Patricia Muscalu, Patrick Monnerat,
+  Rajkumar Mandal, Ray Satiro, Razvan Cojocaru, Rémy Léone, Sam Roth,
   Sergei Nikulov, Steve Holme, Svyatoslav Mishyn, Viktor Szakáts,
-  (26 contributors)
+  W. Mark Kubacki,
+  (32 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -98,3 +107,8 @@ References to bug reports and discussions on issues:
  [16] = http://curl.haxx.se/bug/?i=411
  [17] = http://daniel.haxx.se/blog/2015/09/11/unnecessary-use-of-curl-x/
  [18] = https://bugzilla.mozilla.org/1202264
+ [19] = http://curl.haxx.se/bug/?i=427
+ [20] = http://curl.haxx.se/bug/?i=440
+ [21] = http://curl.haxx.se/bug/?i=410
+ [22] = http://curl.haxx.se/bug/?i=435
+ [23] = http://curl.haxx.se/bug/?i=429
