@@ -1369,9 +1369,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
         retrystart = tvnow();
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
-        result = easysrc_perform();
-        if(result) {
-          goto show_error;
+        if(global->libcurl) {
+          result = easysrc_perform();
+          if(result)
+            goto show_error;
         }
 #endif
 
@@ -1863,7 +1864,8 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
     else {
 #ifndef CURL_DISABLE_LIBCURL_OPTION
       /* Initialise the libcurl source output */
-      result = easysrc_init();
+      if(config->libcurl)
+        result = easysrc_init();
 #endif
 
       /* Perform the main operations */
