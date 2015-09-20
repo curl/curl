@@ -71,16 +71,16 @@ server's certificate.
 # - If you don't have sed, then just copy the certificate into a file:
 #   Lines from -----BEGIN CERTIFICATE----- to -----END CERTIFICATE-----.
 #
-openssl s_client -servername www.test.com -connect www.test.com:443 < /dev/null | sed -n "/-----BEGIN/,/-----END/p" > www.test.com.pem
+openssl s_client -servername www.example.com -connect www.example.com:443 < /dev/null | sed -n "/-----BEGIN/,/-----END/p" > www.example.com.pem
 
 # extract public key in pem format from certificate
-openssl x509 -in www.test.com.pem -pubkey -noout > www.test.com.pubkey.pem
+openssl x509 -in www.example.com.pem -pubkey -noout > www.example.com.pubkey.pem
 
 # convert public key from pem to der
-openssl asn1parse -noout -inform pem -in www.test.com.pubkey.pem -out www.test.com.pubkey.der
+openssl asn1parse -noout -inform pem -in www.example.com.pubkey.pem -out www.example.com.pubkey.der
 
 # sha256 hash and base64 encode der to string for use
-openssl dgst -sha256 -binary www.test.com.pubkey.der | openssl base64
+openssl dgst -sha256 -binary www.example.com.pubkey.der | openssl base64
 .fi
 The public key in PEM format contains a header, base64 data and a
 footer:
