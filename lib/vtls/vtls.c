@@ -797,16 +797,14 @@ CURLcode Curl_pin_peer_pubkey(struct SessionHandle *data,
       return CURLE_OUT_OF_MEMORY;
     curlssl_sha256sum(pubkey, pubkeylen,
                       sha256sumdigest, SHA256_DIGEST_LENGTH);
-
     encode = Curl_base64_encode(data, (char *)sha256sumdigest,
                                 SHA256_DIGEST_LENGTH, &encoded, &encodedlen);
     Curl_safefree(sha256sumdigest);
 
-    if(!encode) {
-      infof(data, "\t pinnedpubkey: sha256//%s\n", encoded);
-    }
-    else
+    if(encode)
       return encode;
+
+    infof(data, "\t public key hash: sha256//%s\n", encoded);
 
     /* it starts with sha256//, copy so we can modify it */
     pinkeylen = strlen(pinnedpubkey) + 1;
