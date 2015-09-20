@@ -32,6 +32,7 @@ may have been fixed since this was written!
   CURLINFO_STARTTRANSFER_TIME is wrong. While using POST
   CURLINFO_STARTTRANSFER_TIME minus CURLINFO_PRETRANSFER_TIME is near to zero
   every time.
+  https://github.com/bagder/curl/issues/218
   http://curl.haxx.se/bug/view.cgi?id=1213
 
 84. CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS
