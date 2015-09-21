@@ -36,7 +36,7 @@ struct FormData {
   struct FormData *next;
   enum formtype type;
   char *line;
-  size_t length;
+  curl_off_t length;
 };
 
 struct Form {
@@ -54,7 +54,7 @@ typedef struct FormInfo {
   size_t namelength;
   char *value;
   bool value_alloc;
-  size_t contentslength;
+  curl_off_t contentslength;
   char *contenttype;
   bool contenttype_alloc;
   long flags;

@@ -69,7 +69,7 @@ static char *formboundary(struct SessionHandle *data);
  ***************************************************************************/
 static struct curl_httppost *
 AddHttpPost(char *name, size_t namelength,
-            char *value, size_t contentslength,
+            char *value, curl_off_t contentslength,
             char *buffer, size_t bufferlength,
             char *contenttype,
             long flags,
@@ -85,7 +85,10 @@ AddHttpPost(char *name, size_t namelength,
     post->name = name;
     post->namelength = (long)(name?(namelength?namelength:strlen(name)):0);
     post->contents = value;
-    post->contentslength = (long)contentslength;
+    if(contentslength <= LONG_MAX) /* legacy */
+      post->contentslength = (long)contentslength;
+    else
+      post->contentslength_large = contentslength;
     post->buffer = buffer;
     post->bufferlength = (long)bufferlength;
     post->contenttype = contenttype;
@@ -374,9 +377,26 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     case CURLFORM_CONTENTSLENGTH:
       if(current_form->contentslength)
         return_value = CURL_FORMADD_OPTION_TWICE;
-      else
-        current_form->contentslength =
-          array_state?(size_t)array_value:(size_t)va_arg(params, long);
+      else {
+        long x = array_state?(long)array_value:va_arg(params, long);
+        if(x >= 0)
+          current_form->contentslength = x;
+        else
+          return_value = CURL_FORMADD_INCOMPLETE;
+      }
+      break;
+
+    case CURLFORM_CONTENTSLENGTH_LARGE:
+      if(current_form->contentslength)
+        return_value = CURL_FORMADD_OPTION_TWICE;
+      else {
+        curl_off_t x =
+          array_state?(curl_off_t)array_value:va_arg(params, curl_off_t);
+        if(x >= 0)
+          current_form->contentslength = x;
+        else
+          return_value = CURL_FORMADD_INCOMPLETE;
+      }
       break;
 
       /* Get contents from a given file name */
@@ -808,7 +828,7 @@ static curl_off_t VmsSpecialSize(const char * name,
 static CURLcode AddFormData(struct FormData **formp,
                             enum formtype type,
                             const void *line,
-                            size_t length,
+                            curl_off_t length,
                             curl_off_t *size)
 {
   struct FormData *newform = malloc(sizeof(struct FormData));
@@ -819,7 +839,7 @@ static CURLcode AddFormData(struct FormData **formp,
   if(type <= FORM_CONTENT) {
     /* we make it easier for plain strings: */
     if(!length)
-      length = strlen((char *)line);
+      length = (curl_off_t)strlen((char *)line);
 
     newform->line = malloc(length+1);
     if(!newform->line) {
@@ -1301,11 +1321,17 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
         /* the contents should be read with the callback and the size
            is set with the contentslength */
         result = AddFormData(&form, FORM_CALLBACK, post->userp,
-                             post->contentslength, &size);
+                             (post->contentslength_large ?
+                              post->contentslength_large :
+                              post->contentslength),
+                             &size);
       else
         /* include the contents we got */
         result = AddFormData(&form, FORM_CONTENT, post->contents,
-                             post->contentslength, &size);
+                             (post->contentslength_large ?
+                              post->contentslength_large :
+                              post->contentslength),
+                             &size);
 
       file = file->more;
     } while(file && !result); /* for each specified file for this field */
