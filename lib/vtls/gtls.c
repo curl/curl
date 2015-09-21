@@ -656,15 +656,42 @@ gtls_connect_step1(struct connectdata *conn,
 #endif
 
   if(data->set.str[STRING_CERT]) {
-    if(gnutls_certificate_set_x509_key_file(
-         conn->ssl[sockindex].cred,
-         data->set.str[STRING_CERT],
-         data->set.str[STRING_KEY] ?
-         data->set.str[STRING_KEY] : data->set.str[STRING_CERT],
-         do_file_type(data->set.str[STRING_CERT_TYPE]) ) !=
-       GNUTLS_E_SUCCESS) {
-      failf(data, "error reading X.509 key or certificate file");
-      return CURLE_SSL_CONNECT_ERROR;
+    if(data->set.str[STRING_KEY_PASSWD]) {
+#if HAVE_GNUTLS_CERTIFICATE_SET_X509_KEY_FILE2
+      const unsigned int supported_key_encryption_algorithms =
+        GNUTLS_PKCS_USE_PKCS12_3DES | GNUTLS_PKCS_USE_PKCS12_ARCFOUR |
+        GNUTLS_PKCS_USE_PKCS12_RC2_40 | GNUTLS_PKCS_USE_PBES2_3DES |
+        GNUTLS_PKCS_USE_PBES2_AES_128 | GNUTLS_PKCS_USE_PBES2_AES_192 |
+        GNUTLS_PKCS_USE_PBES2_AES_256;
+      if(gnutls_certificate_set_x509_key_file2(
+           conn->ssl[sockindex].cred,
+           data->set.str[STRING_CERT],
+           data->set.str[STRING_KEY] ?
+           data->set.str[STRING_KEY] : data->set.str[STRING_CERT],
+           do_file_type(data->set.str[STRING_CERT_TYPE]),
+           data->set.str[STRING_KEY_PASSWD],
+           supported_key_encryption_algorithms) !=
+         GNUTLS_E_SUCCESS) {
+        failf(data,
+              "error reading X.509 potentially-encrypted key file");
+        return CURLE_SSL_CONNECT_ERROR;
+#else
+        failf(data, "gnutls lacks support for encrypted key files");
+        return CURLE_SSL_CONNECT_ERROR;
+#endif
+      }
+    }
+    else {
+      if(gnutls_certificate_set_x509_key_file(
+           conn->ssl[sockindex].cred,
+           data->set.str[STRING_CERT],
+           data->set.str[STRING_KEY] ?
+           data->set.str[STRING_KEY] : data->set.str[STRING_CERT],
+           do_file_type(data->set.str[STRING_CERT_TYPE]) ) !=
+         GNUTLS_E_SUCCESS) {
+        failf(data, "error reading X.509 key or certificate file");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
     }
   }
 
