@@ -1863,9 +1863,10 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
     }
     else {
 #ifndef CURL_DISABLE_LIBCURL_OPTION
-      /* Initialise the libcurl source output */
-      if(config->libcurl)
+      if(config->libcurl) {
+        /* Initialise the libcurl source output */
         result = easysrc_init();
+      }
 #endif
 
       /* Perform the main operations */
@@ -1891,11 +1892,13 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
         }
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
-        /* Cleanup the libcurl source output */
-        easysrc_cleanup();
+        if(config->libcurl) {
+          /* Cleanup the libcurl source output */
+          easysrc_cleanup();
 
-        /* Dump the libcurl code if previously enabled */
-        dumpeasysrc(config);
+          /* Dump the libcurl code if previously enabled */
+          dumpeasysrc(config);
+        }
 #endif
       }
       else
