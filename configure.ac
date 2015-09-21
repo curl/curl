@@ -1836,6 +1836,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
             AC_MSG_NOTICE([Added $gtlslib to LD_LIBRARY_PATH])
           fi
         fi
+        AC_CHECK_FUNCS(gnutls_certificate_set_x509_key_file2)
       fi
 
     fi
