@@ -65,7 +65,10 @@ This release includes the following bugfixes:
  o openldap: only part of LDAP query results received [20]
  o ssl: add server cert's "sha256//" hash to verbose [21]
  o NTLM: Reset auth-done when using a fresh connection [22]
- o curl: generate easysrc only on --libcurl
+ o curl: generate easysrc only on --libcurl [23]
+ o tests: disable 1801 until fixed [24]
+ o CURLINFO_TLS_SESSION: always return backend info
+ o gnutls: Support CURLOPT_KEYPASSWD
 
 This release includes the following known bugs:
 
@@ -78,11 +81,11 @@ advice from friends like these:
   Dan Fandrich, Daniel Hwang, Daniel Kahn Gillmor, Daniel Lee Hwang,
   Daniel Seither, Daniel Stenberg, Eric Ridge, Erik Janssen, Isaac Boukris,
   Jactry Zeng, Jakub Zakrzewski, Jim Hollinger, Kamil Dudka, Marcel Raad,
-  Nathaniel Waisbrot, Nikolai Kondrashov, Patricia Muscalu, Patrick Monnerat,
-  Rajkumar Mandal, Ray Satiro, Razvan Cojocaru, Rémy Léone, Sam Roth,
-  Sergei Nikulov, Steve Holme, Svyatoslav Mishyn, Viktor Szakáts,
-  W. Mark Kubacki,
-  (32 contributors)
+  Mike Crowe, Nathaniel Waisbrot, Nikolai Kondrashov, Patricia Muscalu,
+  Patrick Monnerat, Rajkumar Mandal, Ray Satiro, Razvan Cojocaru, Rémy Léone,
+  Richard van den Berg, Sam Roth, Sergei Nikulov, Steve Holme,
+  Svyatoslav Mishyn, Viktor Szakáts, W. Mark Kubacki,
+  (34 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -112,3 +115,4 @@ References to bug reports and discussions on issues:
  [21] = http://curl.haxx.se/bug/?i=410
  [22] = http://curl.haxx.se/bug/?i=435
  [23] = http://curl.haxx.se/bug/?i=429
+ [24] = http://curl.haxx.se/bug/?i=380
