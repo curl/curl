@@ -290,7 +290,7 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
       void *internals = NULL;
 
       *tsip = tsi;
-      tsi->backend = CURLSSLBACKEND_NONE;
+      tsi->backend = Curl_ssl_backend();
       tsi->internals = NULL;
 
       if(!conn)
@@ -318,13 +318,11 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
       internals = conn->ssl[sockindex].handle;
 #endif
       if(internals) {
-        tsi->backend = Curl_ssl_backend();
         tsi->internals = internals;
       }
       /* NOTE: For other SSL backends, it is not immediately clear what data
-         to return from 'struct ssl_connect_data'; thus, for now we keep the
-         backend as CURLSSLBACKEND_NONE in those cases, which should be
-         interpreted as "not supported" */
+         to return from 'struct ssl_connect_data'; thus we keep 'internals' to
+         NULL which should be interpreted as "not supported" */
     }
     break;
   default:
