@@ -1518,6 +1518,7 @@ struct UserDefined {
   struct ssl_config_data ssl;  /* user defined SSL stuff */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */
+  long dns_resolve_first; /* Resolve dns first in create connection */
   long buffer_size;      /* size of receive buffer to use */
   void *private_data; /* application-private data */
 

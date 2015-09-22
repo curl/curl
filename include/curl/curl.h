@@ -1648,6 +1648,9 @@ typedef enum {
   /* Set the protocol used when curl is given a URL without a protocol */
   CINIT(DEFAULT_PROTOCOL, OBJECTPOINT, 238),
 
+  /* Resolve dns earlier in connection creation */
+  CINIT(DNS_RESOLVE_FIRST, LONG, 239),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
