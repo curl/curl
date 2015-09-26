@@ -603,7 +603,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       if(hp->ai_family == AF_INET) {
         socksreq[len++] = 1; /* ATYP: IPv4 = 1 */
 
-        saddr_in = (struct sockaddr_in*)hp->ai_addr;
+        saddr_in = (struct sockaddr_in*)(void*)hp->ai_addr;
         for(i = 0; i < 4; i++) {
           socksreq[len++] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[i];
           infof(data, "%d\n", socksreq[len-1]);
@@ -613,7 +613,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       else if(hp->ai_family == AF_INET6) {
         socksreq[len++] = 4; /* ATYP: IPv6 = 4 */
 
-        saddr_in6 = (struct sockaddr_in6*)hp->ai_addr;
+        saddr_in6 = (struct sockaddr_in6*)(void*)hp->ai_addr;
         for(i = 0; i < 16; i++) {
           socksreq[len++] = ((unsigned char*)&saddr_in6->sin6_addr.s6_addr)[i];
         }
