@@ -923,7 +923,8 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
             if(!data->set.crlf) {
               /* we're here only because FTP is in ASCII mode...
                  bump infilesize for the LF we just added */
-              data->state.infilesize++;
+              if(data->state.infilesize != -1)
+                data->state.infilesize++;
             }
           }
           else
