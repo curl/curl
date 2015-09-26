@@ -338,7 +338,7 @@ AC_DEFUN([CURL_CHECK_OPTION_RT], [
     default)
       dnl configure option not specified (so not disabled)
       dontwant_rt="no"
-      AC_MSG_RESULT([(assumed no)]
+      AC_MSG_RESULT([(assumed no)])
       ;;
     *)
       dnl --enable-rt option used (reverse logic)
