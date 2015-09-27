@@ -459,7 +459,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     stream->memlen += ncopy;
 
     data_s->state.drain++;
-    Curl_expire(data_s, 1);
+    {
+      /* get the pointer from userp again since it was re-assigned above */
+      struct connectdata *conn_s = (struct connectdata *)userp;
+
+      /* if we receive data for another handle, wake that up */
+      if(conn_s->data != data_s)
+        Curl_expire(data_s, 1);
+    }
     break;
   case NGHTTP2_PUSH_PROMISE:
     rv = push_promise(data_s, conn, &frame->push_promise);
@@ -525,10 +532,10 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   struct HTTP *stream;
   struct SessionHandle *data_s;
   size_t nread;
+  struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
   (void)flags;
   (void)data;
-  (void)userp;
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
@@ -550,8 +557,11 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   stream->memlen += nread;
 
   data_s->state.drain++;
-  Curl_expire(data_s, 1); /* TODO: fix so that this can be set to 0 for
-                             immediately? */
+
+  /* if we receive data for another handle, wake that up */
+  if(conn->data != data_s)
+    Curl_expire(data_s, 1); /* TODO: fix so that this can be set to 0 for
+                               immediately? */
 
   DEBUGF(infof(data_s, "%zu data received for stream %u "
                "(%zu left in buffer %p, total %zu)\n",
@@ -698,9 +708,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   struct HTTP *stream;
   struct SessionHandle *data_s;
   int32_t stream_id = frame->hd.stream_id;
-
+  struct connectdata *conn = (struct connectdata *)userp;
   (void)flags;
-  (void)userp;
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
@@ -764,7 +773,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(stream->header_recvbuf, value, valuelen);
     Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
     data_s->state.drain++;
-    Curl_expire(data_s, 1);
+    /* if we receive data for another handle, wake that up */
+    if(conn->data != data_s)
+      Curl_expire(data_s, 1);
 
     DEBUGF(infof(data_s, "h2 status: HTTP/2 %03d\n",
                  stream->status_code));
@@ -779,7 +790,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   Curl_add_buffer(stream->header_recvbuf, value, valuelen);
   Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
   data_s->state.drain++;
-  Curl_expire(data_s, 1);
+  /* if we receive data for another handle, wake that up */
+  if(conn->data != data_s)
+    Curl_expire(data_s, 1);
 
   DEBUGF(infof(data_s, "h2 header: %.*s: %.*s\n", namelen, name, valuelen,
                value));
