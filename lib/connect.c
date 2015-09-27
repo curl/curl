@@ -857,12 +857,11 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   return result;
 }
 
-static void tcpnodelay(struct connectdata *conn,
-                       curl_socket_t sockfd)
+void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
 {
 #ifdef TCP_NODELAY
   struct SessionHandle *data= conn->data;
-  curl_socklen_t onoff = (curl_socklen_t) data->set.tcp_nodelay;
+  curl_socklen_t onoff = (curl_socklen_t) 1;
   int level = IPPROTO_TCP;
 
 #if 0
@@ -1033,7 +1032,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
   is_tcp = (addr.family == AF_INET) && addr.socktype == SOCK_STREAM;
 #endif
   if(is_tcp && data->set.tcp_nodelay)
-    tcpnodelay(conn, sockfd);
+    Curl_tcpnodelay(conn, sockfd);
 
   nosigpipe(conn, sockfd);
 
