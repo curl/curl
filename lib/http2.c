@@ -34,6 +34,7 @@
 #include "multiif.h"
 #include "conncache.h"
 #include "url.h"
+#include "connect.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -1440,6 +1441,10 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 
   infof(conn->data, "Connection state changed (HTTP/2 confirmed)\n");
   Curl_multi_connchanged(conn->data->multi);
+
+  /* switch on TCP_NODELAY as we need to send off packets without delay for
+     maximum throughput */
+  Curl_tcpnodelay(conn, conn->sock[FIRSTSOCKET]);
 
   return CURLE_OK;
 }
