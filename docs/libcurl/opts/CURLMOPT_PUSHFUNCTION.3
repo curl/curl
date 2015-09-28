@@ -105,7 +105,7 @@ int push_callback(CURL *parent,
   FILE *out;
   headp = curl_pushheader_byname(headers, ":path");
   if(headp && !strncmp(headp, "/push-", 6)) {
-    fprintf(stderr, "The PATH is %s\n", headp);
+    fprintf(stderr, "The PATH is %s\\n", headp);
 
     /* save the push here */
     out = fopen("pushed-stream", "wb");
