@@ -167,6 +167,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
   curl_mtlnk_msg="no      (--with-libmetalink)"
+    curl_psl_msg="no      (--with-libpsl)"
 
     init_ssl_msg=${curl_ssl_msg}
 
@@ -2315,6 +2316,27 @@ dnl **********************************************************************
 CURL_CHECK_CA_BUNDLE
 
 dnl **********************************************************************
+dnl Check for libpsl
+dnl **********************************************************************
+
+AC_ARG_WITH(libpsl,
+           AS_HELP_STRING([--without-libpsl],
+           [disable support for libpsl cookie checking]),
+           with_libpsl=$withval,
+           with_libpsl=yes)
+if test $with_libpsl != "no"; then
+  AC_SEARCH_LIBS(psl_builtin, psl,
+    [curl_psl_msg="yes";
+     AC_DEFINE([USE_LIBPSL], [1], [PSL support enabled])
+     ],
+    [curl_psl_msg="no      (libpsl not found)";
+     AC_MSG_WARN([libpsl was not found])
+     ]
+  )
+fi
+AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "yes"])
+
+dnl **********************************************************************
 dnl Check for libmetalink
 dnl **********************************************************************
 
@@ -3742,6 +3764,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
   metalink support: ${curl_mtlnk_msg}
+  PSL support:      ${curl_psl_msg}
   HTTP2 support:    ${curl_h2_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 ])

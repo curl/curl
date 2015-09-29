@@ -224,6 +224,7 @@ my $has_http2;      # set if libcurl is built with HTTP2 support
 my $has_crypto;     # set if libcurl is built with cryptographic support
 my $has_cares;      # set if built with c-ares
 my $has_threadedres;# set if built with threaded resolver
+my $has_psl;        # set if libcurl is built with PSL support
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -2474,6 +2475,10 @@ sub checksystem {
                 # Metalink enabled
                 $has_metalink=1;
             }
+            if($feat =~ /PSL/i) {
+                # PSL enabled
+                $has_psl=1;
+            }
             if($feat =~ /AsynchDNS/i) {
                 if(!$has_cares) {
                     # this means threaded resolver
@@ -2599,8 +2604,9 @@ sub checksystem {
     logmsg sprintf("* HTTP Unix     %s\n", $http_unix?"ON ":"OFF");
     logmsg sprintf("* FTP IPv6      %8s", $ftp_ipv6?"ON ":"OFF");
     logmsg sprintf("  Libtool lib:  %s\n", $libtool?"ON ":"OFF");
-    logmsg sprintf("* Shared build:      %-3s", $has_shared);
+    logmsg sprintf("* PSL:          %8s", $has_psl?"ON ":"OFF");
     logmsg sprintf("  Resolver:     %s\n", $resolver);
+
     if($ssl_version) {
         logmsg sprintf("* SSL library: %13s\n", $ssllib);
     }
@@ -2981,6 +2987,11 @@ sub singletest {
                     next;
                 }
             }
+            elsif($1 eq "PSL") {
+                if($has_psl) {
+                    next;
+                }
+            }
             elsif($1 eq "socks") {
                 next;
             }
@@ -3114,6 +3125,11 @@ sub singletest {
                 }
                 elsif($1 eq "Metalink") {
                     if(!$has_metalink) {
+                        next;
+                    }
+                }
+                elsif($1 eq "PSL") {
+                    if(!$has_psl) {
                         next;
                     }
                 }

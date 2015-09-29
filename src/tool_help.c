@@ -317,6 +317,9 @@ void tool_version_info(void)
 #ifdef USE_METALINK
     printf("Metalink ");
 #endif
+#ifdef USE_LIBPSL
+    printf("PSL ");
+#endif
     puts(""); /* newline */
   }
 }
