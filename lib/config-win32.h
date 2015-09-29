@@ -487,8 +487,9 @@
 #endif
 
 /* Define if the compiler supports the 'long long' data type. */
-#if defined(__MINGW32__) || defined(__WATCOMC__) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 1310))
+#if defined(__MINGW32__) || defined(__WATCOMC__)      || \
+    (defined(_MSC_VER)     && (_MSC_VER     >= 1310)) || \
+    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x561))
 #define HAVE_LONGLONG 1
 #endif
 
