@@ -69,6 +69,18 @@ This release includes the following bugfixes:
  o tests: disable 1801 until fixed [24]
  o CURLINFO_TLS_SESSION: always return backend info
  o gnutls: Support CURLOPT_KEYPASSWD
+ o gnutls: Report actual GnuTLS error message for certificate errors
+ o tests: disable 1510 due to CI-problems on github
+ o cmake: Put "winsock2.h" before "windows.h" during configure checks
+ o cmake: Ensure discovered include dirs are considered
+ o configure: Add missing ')' for CURL_CHECK_OPTION_RT [25]
+ o build: fix failures with -Wcast-align and -Werror [26]
+ o FTP: fix uploading ASCII with unknown size
+ o readwrite_data: set a max number of loops
+ o http2: avoid superfluous Curl_expire() calls
+ o http2: set TCP_NODELAY unconditionally [27]
+ o docs: fix unescaped '\n' in man pages
+ o openssl: Fix algorithm init to make (gost) engines work [28]
 
 This release includes the following known bugs:
 
@@ -79,13 +91,14 @@ advice from friends like these:
 
   Alessandro Ghedini, Benjamin Kircher, Bertrand Simonnet, Brad King,
   Dan Fandrich, Daniel Hwang, Daniel Kahn Gillmor, Daniel Lee Hwang,
-  Daniel Seither, Daniel Stenberg, Eric Ridge, Erik Janssen, Isaac Boukris,
-  Jactry Zeng, Jakub Zakrzewski, Jim Hollinger, Kamil Dudka, Marcel Raad,
-  Mike Crowe, Nathaniel Waisbrot, Nikolai Kondrashov, Patricia Muscalu,
-  Patrick Monnerat, Rajkumar Mandal, Ray Satiro, Razvan Cojocaru, Rémy Léone,
-  Richard van den Berg, Sam Roth, Sergei Nikulov, Steve Holme,
-  Svyatoslav Mishyn, Viktor Szakáts, W. Mark Kubacki,
-  (34 contributors)
+  Daniel Seither, Daniel Stenberg, Denis Feklushkin, Eric Ridge, Erik Janssen,
+  Isaac Boukris, Jactry Zeng, Jakub Zakrzewski, Jim Hollinger, Kamil Dudka,
+  Marcel Raad, Michael Kalinin, Mike Crowe, Nathaniel Waisbrot,
+  Nikolai Kondrashov, Patricia Muscalu, Patrick Monnerat, Rajkumar Mandal,
+  Ray Satiro, Razvan Cojocaru, Rémy Léone, Richard van den Berg, Sam Roth,
+  Sergei Nikulov, Steve Holme, Svyatoslav Mishyn, Tatsuhiro Tsujikawa,
+  Viktor Szakáts, W. Mark Kubacki,
+  (37 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -116,3 +129,7 @@ References to bug reports and discussions on issues:
  [22] = http://curl.haxx.se/bug/?i=435
  [23] = http://curl.haxx.se/bug/?i=429
  [24] = http://curl.haxx.se/bug/?i=380
+ [25] = http://curl.haxx.se/bug/?i=456
+ [26] = http://curl.haxx.se/bug/?i=457
+ [27] = http://curl.haxx.se/mail/lib-2015-09/0097.html
+ [28] = http://curl.haxx.se/bug/?i=447
