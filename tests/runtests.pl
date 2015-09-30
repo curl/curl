@@ -397,7 +397,7 @@ sub init_serverpidfile_hash {
 sub checkdied {
     use POSIX ":sys_wait_h";
     my $pid = $_[0];
-    if(not defined $pid || $pid <= 0) {
+    if((not defined $pid) || $pid <= 0) {
         return 0;
     }
     my $rc = waitpid($pid, &WNOHANG);
