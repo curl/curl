@@ -88,10 +88,10 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   *done = TRUE; /* unconditionally */
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
-  if(strlen(path) <= 2)
+  if(strlen(path) <= 2) {
     sel = (char *)"";
     len = strlen(sel);
-  else {
+  } else {
     char *newp;
     size_t j, i;
 
