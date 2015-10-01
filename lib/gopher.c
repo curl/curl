@@ -91,7 +91,8 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   if(strlen(path) <= 2) {
     sel = (char *)"";
     len = strlen(sel);
-  } else {
+  }
+  else {
     char *newp;
     size_t j, i;
 
