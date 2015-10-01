@@ -113,7 +113,7 @@ static CURLcode getinfo_char(struct SessionHandle *data, CURLINFO info,
     break;
 
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_UNKNOWN_OPTION;
   }
 
   return CURLE_OK;
@@ -200,7 +200,7 @@ static CURLcode getinfo_long(struct SessionHandle *data, CURLINFO info,
     break;
 
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_UNKNOWN_OPTION;
   }
 
   return CURLE_OK;
@@ -253,7 +253,7 @@ static CURLcode getinfo_double(struct SessionHandle *data, CURLINFO info,
     break;
 
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_UNKNOWN_OPTION;
   }
 
   return CURLE_OK;
@@ -326,7 +326,7 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
     }
     break;
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_UNKNOWN_OPTION;
   }
 
   return CURLE_OK;
@@ -351,7 +351,7 @@ static CURLcode getinfo_socket(struct SessionHandle *data, CURLINFO info,
       *param_socketp = -1;
     break;
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_UNKNOWN_OPTION;
   }
 
   return CURLE_OK;
@@ -366,8 +366,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   struct curl_slist **param_slistp = NULL;
   curl_socket_t *param_socketp = NULL;
   int type;
-  /* default return code is to error out! */
-  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+  CURLcode result = CURLE_UNKNOWN_OPTION;
 
   if(!data)
     return result;
