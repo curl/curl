@@ -227,7 +227,7 @@ static char *c_escape(const char *str)
       e += 2;
     }
     else if(! isprint(c)) {
-      snprintf(e, 4, "\\%03o", c);
+      snprintf(e, 5, "\\%03o", (unsigned)c);
       e += 4;
     }
     else
