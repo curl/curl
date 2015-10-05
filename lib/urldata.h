@@ -1312,6 +1312,9 @@ struct UrlState {
   bool done; /* set to FALSE when Curl_do() is called and set to TRUE when
                 Curl_done() is called, to prevent Curl_done() to get invoked
                 twice when the multi interface is used. */
+
+  curl_read_callback fread_func; /* read callback/function */
+  void *in;                      /* CURLOPT_READDATA */
 };
 
 
@@ -1428,7 +1431,7 @@ struct UserDefined {
                      proxy string features a ":[port]" that one will override
                      this. */
   void *out;         /* CURLOPT_WRITEDATA */
-  void *in;          /* CURLOPT_READDATA */
+  void *in_set;      /* CURLOPT_READDATA */
   void *writeheader; /* write the header to this if non-NULL */
   void *rtp_out;     /* write RTP to this if non-NULL */
   long use_port;     /* which port to use (when not using default) */
@@ -1453,7 +1456,7 @@ struct UserDefined {
   curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
-  curl_read_callback fread_func;     /* function that reads the input */
+  curl_read_callback fread_func_set; /* function that reads the input */
   int is_fread_set; /* boolean, has read callback been set to non-NULL? */
   int is_fwrite_set; /* boolean, has write callback been set to non-NULL? */
   curl_progress_callback fprogress; /* OLD and deprecated progress callback  */

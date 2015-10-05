@@ -1001,8 +1001,8 @@ static size_t readmoredata(char *buffer,
       /* move backup data into focus and continue on that */
       http->postdata = http->backup.postdata;
       http->postsize = http->backup.postsize;
-      conn->data->set.fread_func = http->backup.fread_func;
-      conn->data->set.in = http->backup.fread_in;
+      conn->data->state.fread_func = http->backup.fread_func;
+      conn->data->state.in = http->backup.fread_in;
 
       http->sending++; /* move one step up */
 
@@ -1157,14 +1157,14 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
         ptr = in->buffer + amount;
 
         /* backup the currently set pointers */
-        http->backup.fread_func = conn->data->set.fread_func;
-        http->backup.fread_in = conn->data->set.in;
+        http->backup.fread_func = conn->data->state.fread_func;
+        http->backup.fread_in = conn->data->state.in;
         http->backup.postdata = http->postdata;
         http->backup.postsize = http->postsize;
 
         /* set the new pointers for the request-sending */
-        conn->data->set.fread_func = (curl_read_callback)readmoredata;
-        conn->data->set.in = (void *)conn;
+        conn->data->state.fread_func = (curl_read_callback)readmoredata;
+        conn->data->state.in = (void *)conn;
         http->postdata = ptr;
         http->postsize = (curl_off_t)size;
 
@@ -2162,8 +2162,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
               BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
 
             size_t actuallyread =
-              data->set.fread_func(data->state.buffer, 1, readthisamountnow,
-                                   data->set.in);
+              data->state.fread_func(data->state.buffer, 1, readthisamountnow,
+                                     data->state.in);
 
             passed += actuallyread;
             if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
@@ -2437,11 +2437,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        on. The data->set.fread_func pointer itself will be changed for the
        multipart case to the function that returns a multipart formatted
        stream. */
-    http->form.fread_func = data->set.fread_func;
+    http->form.fread_func = data->state.fread_func;
 
     /* Set the read function to read from the generated form data */
-    data->set.fread_func = (curl_read_callback)Curl_FormReader;
-    data->set.in = &http->form;
+    data->state.fread_func = (curl_read_callback)Curl_FormReader;
+    data->state.in = &http->form;
 
     http->sending = HTTPSEND_BODY;
 
@@ -2659,8 +2659,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
         http->sending = HTTPSEND_BODY;
 
-        data->set.fread_func = (curl_read_callback)readmoredata;
-        data->set.in = (void *)conn;
+        data->state.fread_func = (curl_read_callback)readmoredata;
+        data->state.in = (void *)conn;
 
         /* set the upload size to the progress meter */
         Curl_pgrsSetUploadSize(data, http->postsize);

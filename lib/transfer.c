@@ -115,8 +115,8 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 
   /* this function returns a size_t, so we typecast to int to prevent warnings
      with picky compilers */
-  nread = (int)data->set.fread_func(data->req.upload_fromhere, 1,
-                                    buffersize, data->set.in);
+  nread = (int)data->state.fread_func(data->req.upload_fromhere, 1,
+                                      buffersize, data->state.in);
 
   if(nread == CURL_READFUNC_ABORT) {
     failf(data, "operation aborted by callback");
@@ -289,8 +289,8 @@ CURLcode Curl_readrewind(struct connectdata *conn)
       /* If no CURLOPT_READFUNCTION is used, we know that we operate on a
          given FILE * stream and we can actually attempt to rewind that
          ourselves with fseek() */
-      if(data->set.fread_func == (curl_read_callback)fread) {
-        if(-1 != fseek(data->set.in, 0, SEEK_SET))
+      if(data->state.fread_func == (curl_read_callback)fread) {
+        if(-1 != fseek(data->state.in, 0, SEEK_SET))
           /* successful rewind */
           return CURLE_OK;
       }
@@ -1286,8 +1286,18 @@ long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
   return (long)rv;
 }
 
+/* Curl_init_CONNECT() gets called each time the handle switches to CONNECT
+   which means this gets called once for each subsequent redirect etc */
+void Curl_init_CONNECT(struct SessionHandle *data)
+{
+  data->state.fread_func = data->set.fread_func_set;
+  data->state.in = data->set.in_set;
+}
+
 /*
- * Curl_pretransfer() is called immediately before a transfer starts.
+ * Curl_pretransfer() is called immediately before a transfer starts, and only
+ * once for one transfer no matter if it has redirects or do multi-pass
+ * authentication etc.
  */
 CURLcode Curl_pretransfer(struct SessionHandle *data)
 {

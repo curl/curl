@@ -1423,8 +1423,8 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       for(;;) {
         if(data->set.is_fread_set) {
           /* read from user-supplied method */
-          result = (int)data->set.fread_func(buf, 1, BUFSIZE - 1,
-                                             data->set.in);
+          result = (int)data->state.fread_func(buf, 1, BUFSIZE - 1,
+                                               data->state.in);
           if(result == CURL_READFUNC_ABORT) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
@@ -1563,13 +1563,13 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   pfd[0].fd = sockfd;
   pfd[0].events = POLLIN;
 
-  if(data->set.fread_func != (curl_read_callback)fread) {
+  if(data->set.is_fread_set) {
     poll_cnt = 1;
     interval_ms = 100; /* poll user-supplied read function */
   }
   else {
     /* really using fread, so infile is a FILE* */
-    pfd[1].fd = fileno((FILE *)data->set.in);
+    pfd[1].fd = fileno((FILE *)data->state.in);
     pfd[1].events = POLLIN;
     poll_cnt = 2;
     interval_ms = 1 * 1000;
@@ -1628,7 +1628,8 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       }
       else {
         /* read from user-supplied method */
-        nread = (int)data->set.fread_func(buf, 1, BUFSIZE - 1, data->set.in);
+        nread = (int)data->state.fread_func(buf, 1, BUFSIZE - 1,
+                                            data->state.in);
         if(nread == CURL_READFUNC_ABORT) {
           keepon = FALSE;
           break;

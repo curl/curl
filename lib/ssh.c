@@ -1740,8 +1740,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                 BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
 
               size_t actuallyread =
-                data->set.fread_func(data->state.buffer, 1, readthisamountnow,
-                                     data->set.in);
+                data->state.fread_func(data->state.buffer, 1,
+                                       readthisamountnow, data->state.in);
 
               passed += actuallyread;
               if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
