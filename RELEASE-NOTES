@@ -81,6 +81,12 @@ This release includes the following bugfixes:
  o http2: set TCP_NODELAY unconditionally [27]
  o docs: fix unescaped '\n' in man pages
  o openssl: Fix algorithm init to make (gost) engines work [28]
+ o win32: make recent Borland compilers use long long
+ o runtests: Fix pid check in checkdied
+ o gopher: don't send NUL byte [29]
+ o tool_setopt: fix c_escape truncated octal [30]
+ o hiperfifo: fix the pointer passed to WRITEDATA [31]
+ o getinfo: Fix return code for unknown CURLINFO options [32]
 
 This release includes the following known bugs:
 
@@ -93,12 +99,13 @@ advice from friends like these:
   Dan Fandrich, Daniel Hwang, Daniel Kahn Gillmor, Daniel Lee Hwang,
   Daniel Seither, Daniel Stenberg, Denis Feklushkin, Eric Ridge, Erik Janssen,
   Isaac Boukris, Jactry Zeng, Jakub Zakrzewski, Jim Hollinger, Kamil Dudka,
-  Marcel Raad, Michael Kalinin, Mike Crowe, Nathaniel Waisbrot,
-  Nikolai Kondrashov, Patricia Muscalu, Patrick Monnerat, Rajkumar Mandal,
-  Ray Satiro, Razvan Cojocaru, Rémy Léone, Richard van den Berg, Sam Roth,
-  Sergei Nikulov, Steve Holme, Svyatoslav Mishyn, Tatsuhiro Tsujikawa,
-  Viktor Szakáts, W. Mark Kubacki,
-  (37 contributors)
+  Maksim Stsepanenka, Marcel Raad, Michael Kalinin, Mike Crowe,
+  Nathaniel Waisbrot, Nikolai Kondrashov, Orange Tsai, Patricia Muscalu,
+  Patrick Monnerat, Rajkumar Mandal, Ray Satiro, Razvan Cojocaru, Rémy Léone,
+  Richard van den Berg, Sam Roth, Sergei Nikulov, Steve Holme,
+  Svyatoslav Mishyn, Tatsuhiro Tsujikawa, Thorsten Schöning, Viktor Szakáts,
+  W. Mark Kubacki,
+  (40 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -133,3 +140,7 @@ References to bug reports and discussions on issues:
  [26] = http://curl.haxx.se/bug/?i=457
  [27] = http://curl.haxx.se/mail/lib-2015-09/0097.html
  [28] = http://curl.haxx.se/bug/?i=447
+ [29] = http://curl.haxx.se/bug/?i=466
+ [30] = http://curl.haxx.se/bug/?i=469
+ [31] = http://curl.haxx.se/bug/?i=471
+ [32] = http://curl.haxx.se/bug/?i=468
