@@ -496,14 +496,14 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   CURLcode result = CURLE_OK;
 
   set->out = stdout; /* default output to stdout */
-  set->in  = stdin;  /* default input from stdin */
+  set->in_set = stdin;  /* default input from stdin */
   set->err  = stderr;  /* default stderr to stderr */
 
   /* use fwrite as default function to store output */
   set->fwrite_func = (curl_write_callback)fwrite;
 
   /* use fread as default function to read input */
-  set->fread_func = (curl_read_callback)fread;
+  set->fread_func_set = (curl_read_callback)fread;
   set->is_fread_set = 0;
   set->is_fwrite_set = 0;
 
@@ -1567,7 +1567,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * FILE pointer to read the file to be uploaded from. Or possibly
      * used as argument to the read callback.
      */
-    data->set.in = va_arg(param, void *);
+    data->set.in_set = va_arg(param, void *);
     break;
   case CURLOPT_INFILESIZE:
     /*
@@ -1862,11 +1862,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Read data callback
      */
-    data->set.fread_func = va_arg(param, curl_read_callback);
-    if(!data->set.fread_func) {
+    data->set.fread_func_set = va_arg(param, curl_read_callback);
+    if(!data->set.fread_func_set) {
       data->set.is_fread_set = 0;
       /* When set to NULL, reset to our internal default function */
-      data->set.fread_func = (curl_read_callback)fread;
+      data->set.fread_func_set = (curl_read_callback)fread;
     }
     else
       data->set.is_fread_set = 1;
