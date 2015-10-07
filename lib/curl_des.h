@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && (!defined(USE_OPENSSL) || defined(HAVE_BORINGSSL))
+#if defined(USE_NTLM) && !defined(HAVE_DES_SET_ODD_PARITY)
 
 /* Applies odd parity to the given byte array */
 void Curl_des_set_odd_parity(unsigned char *bytes, size_t length);
