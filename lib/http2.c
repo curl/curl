@@ -1094,15 +1094,11 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       nread = ((Curl_recv *)httpc->recv_underlying)(
           conn, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, &result);
 
-      if(result == CURLE_AGAIN) {
+      if(nread == -1) {
+        if(result != CURLE_AGAIN)
+          failf(data, "Failed receiving HTTP2 data");
         *err = result;
         return -1;
-      }
-
-      if(nread == -1) {
-        failf(data, "Failed receiving HTTP2 data");
-        *err = result;
-        return 0;
       }
 
       if(nread == 0) {
