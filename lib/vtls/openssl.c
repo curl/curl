@@ -450,7 +450,6 @@ int cert_stuff(struct connectdata *conn,
       PKCS12 *p12;
       EVP_PKEY *pri;
       STACK_OF(X509) *ca = NULL;
-      int i;
 
       f = fopen(cert_file, "rb");
       if(!f) {
@@ -497,8 +496,8 @@ int cert_stuff(struct connectdata *conn,
         goto fail;
       }
       /* Set Certificate Verification chain */
-      if(ca && sk_X509_num(ca)) {
-        for(i = 0; i < sk_X509_num(ca); i++) {
+      if(ca) {
+        while(sk_X509_num(ca)) {
           /*
            * Note that sk_X509_pop() is used below to make sure the cert is
            * removed from the stack properly before getting passed to
@@ -508,6 +507,7 @@ int cert_stuff(struct connectdata *conn,
            */
           X509 *x = sk_X509_pop(ca);
           if(!SSL_CTX_add_extra_chain_cert(ctx, x)) {
+            X509_free(x);
             failf(data, "cannot add certificate to certificate chain");
             goto fail;
           }
