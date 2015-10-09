@@ -668,6 +668,10 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   CURLcode result = CURLE_OK;
 
+#if CURL_SIZEOF_CURL_OFF_T < 8
+#error "this section needs 64bit support to work"
+#endif
+
   /* Calculate the timestamp */
 #ifdef DEBUGBUILD
   char *force_timestamp = getenv("CURL_FORCETIME");
