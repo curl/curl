@@ -220,20 +220,22 @@ curl_calloc_callback Curl_ccalloc;
  * curl_global_init() globally initializes cURL given a bitwise set of the
  * different features of what to initialize.
  */
-CURLcode curl_global_init(long flags)
+static CURLcode global_init(long flags, bool memoryfuncs)
 {
   if(initialized++)
     return CURLE_OK;
 
-  /* Setup the default memory functions here (again) */
-  Curl_cmalloc = (curl_malloc_callback)malloc;
-  Curl_cfree = (curl_free_callback)free;
-  Curl_crealloc = (curl_realloc_callback)realloc;
-  Curl_cstrdup = (curl_strdup_callback)system_strdup;
-  Curl_ccalloc = (curl_calloc_callback)calloc;
+  if(memoryfuncs) {
+    /* Setup the default memory functions here (again) */
+    Curl_cmalloc = (curl_malloc_callback)malloc;
+    Curl_cfree = (curl_free_callback)free;
+    Curl_crealloc = (curl_realloc_callback)realloc;
+    Curl_cstrdup = (curl_strdup_callback)system_strdup;
+    Curl_ccalloc = (curl_calloc_callback)calloc;
 #if defined(WIN32) && defined(UNICODE)
-  Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
+    Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #endif
+  }
 
   if(flags & CURL_GLOBAL_SSL)
     if(!Curl_ssl_init()) {
@@ -284,6 +286,16 @@ CURLcode curl_global_init(long flags)
   return CURLE_OK;
 }
 
+
+/**
+ * curl_global_init() globally initializes cURL given a bitwise set of the
+ * different features of what to initialize.
+ */
+CURLcode curl_global_init(long flags)
+{
+  return global_init(flags, TRUE);
+}
+
 /*
  * curl_global_init_mem() globally initializes cURL and also registers the
  * user provided callback routines.
@@ -312,8 +324,8 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
   Curl_crealloc = r;
   Curl_ccalloc = c;
 
-  /* Call the actual init function */
-  return curl_global_init(flags);
+  /* Call the actual init function, but without setting */
+  return global_init(flags, FALSE);
 }
 
 /**
