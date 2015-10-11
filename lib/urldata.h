@@ -1385,6 +1385,8 @@ enum dupstring {
   STRING_RTSP_SESSION_ID, /* Session ID to use */
   STRING_RTSP_STREAM_URI, /* Stream URI for this request */
   STRING_RTSP_TRANSPORT,  /* Transport for this session */
+  STRING_TRUSTED_AUTH,    /* List of trusted hosts to send authentication
+                             (user+password) */
 #ifdef USE_LIBSSH2
   STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
   STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */

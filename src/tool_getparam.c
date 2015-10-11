@@ -240,6 +240,7 @@ static const struct LongShort aliases[]= {
   {"l",  "list-only",                FALSE},
   {"L",  "location",                 FALSE},
   {"Lt", "location-trusted",         FALSE},
+  {"Lu", "locations-trusted",        TRUE},
   {"m",  "max-time",                 TRUE},
   {"M",  "manual",                   FALSE},
   {"n",  "netrc",                    FALSE},
@@ -1492,6 +1493,11 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         /* Continue to send authentication (user+password) when following
          * locations, even when hostname changed */
         config->unrestricted_auth = toggle;
+        break;
+      case 'u':
+        /* --locations-trusted overrides --location-trusted */
+        config->unrestricted_auth = !toggle;
+        GetStr(&config->trusted_auth, nextarg);
         break;
       }
       break;

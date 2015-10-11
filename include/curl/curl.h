@@ -1648,6 +1648,18 @@ typedef enum {
   /* Set the protocol used when curl is given a URL without a protocol */
   CINIT(DEFAULT_PROTOCOL, OBJECTPOINT, 238),
 
+  /* Comma separated list of hostnames defining no-proxy zones. These should
+     match both hostnames directly, and hostnames within a domain. For
+     example, local.com will match local.com and www.local.com, but NOT
+     notlocal.com or www.notlocal.com. For compatibility with other
+     implementations of this, .local.com will be considered to be the same as
+     local.com. A single * is the only valid wildcard, and effectively
+     disables the use of proxy. */
+  /* Continue to send authentication (user+password) when following locations,
+     even when hostname changed. This can potentially send off the name
+     and password to whatever host the server decides. */
+  CINIT(TRUSTED_AUTH, OBJECTPOINT, 239),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
