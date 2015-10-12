@@ -950,9 +950,10 @@ REDUCING SIZE
    important factor.  First, be sure to set the CFLAGS variable when
    configuring with any relevant compiler optimization flags to reduce the
    size of the binary.  For gcc, this would mean at minimum the -Os option,
-   and potentially the -march=X and -mdynamic-no-pic options as well, e.g.
+   and potentially the -march=X, -mdynamic-no-pic and -flto options as well,
+   e.g.
 
-      ./configure CFLAGS='-Os' ...
+      ./configure CFLAGS='-Os' LDFLAGS='-Wl,-Bsymbolic'...
 
    Note that newer compilers often produce smaller code than older versions
    due to improved optimization.
@@ -970,7 +971,9 @@ REDUCING SIZE
      --disable-ipv6 (disables support for IPv6)
      --disable-manual (disables support for the built-in documentation)
      --disable-proxy (disables support for HTTP and SOCKS proxies)
+     --disable-unix-sockets (disables support for UNIX sockets)
      --disable-verbose (eliminates debugging strings and error code strings)
+     --disable-versioned-symbols (disables support for versioned symbols)
      --enable-hidden-symbols (eliminates unneeded symbols in the shared library)
      --without-libidn (disables support for the libidn DNS library)
      --without-librtmp (disables support for RTMP)
@@ -983,7 +986,7 @@ REDUCING SIZE
    configure command-line, e.g.
 
      CFLAGS="-Os -ffunction-sections -fdata-sections \
-             -fno-unwind-tables -fno-asynchronous-unwind-tables" \
+             -fno-unwind-tables -fno-asynchronous-unwind-tables -flto" \
      LDFLAGS="-Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections"
 
    Be sure also to strip debugging symbols from your binaries after
@@ -993,9 +996,9 @@ REDUCING SIZE
    .comment section).
 
    Using these techniques it is possible to create a basic HTTP-only shared
-   libcurl library for i386 Linux platforms that is only 114 KiB in size, and
-   an FTP-only library that is 115 KiB in size (as of libcurl version 7.35.0,
-   using gcc 4.8.2).
+   libcurl library for i386 Linux platforms that is only 109 KiB in size, and
+   an FTP-only library that is 109 KiB in size (as of libcurl version 7.45.0,
+   using gcc 4.9.2).
 
    You may find that statically linking libcurl to your application will
    result in a lower total size than dynamically linking.
