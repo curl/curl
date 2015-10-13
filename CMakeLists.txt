@@ -1136,7 +1136,7 @@ set(VERSIONNUM              "${CURL_VERSION_NUM}")
 # Finally generate a "curl-config" matching this config
 configure_file("${CURL_SOURCE_DIR}/curl-config.in"
                "${CURL_BINARY_DIR}/curl-config" @ONLY)
-install(FILES "${CMAKE_BINARY_DIR}/curl-config"
+install(FILES "${CURL_BINARY_DIR}/curl-config"
         DESTINATION bin
         PERMISSIONS
           OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -1146,7 +1146,7 @@ install(FILES "${CMAKE_BINARY_DIR}/curl-config"
 # Finally generate a pkg-config file matching this config
 configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
                "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
-install(FILES "${CMAKE_BINARY_DIR}/libcurl.pc"
+install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
         DESTINATION lib/pkgconfig)
 
 # This needs to be run very last so other parts of the scripts can take advantage of this.
