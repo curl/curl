@@ -21,24 +21,37 @@ rem * KIND, either express or implied.
 rem *
 rem ***************************************************************************
 
+rem NOTES
+rem
+rem Do not set %ERRORLEVEL% to anything. %ERRORLEVEL% is a special variable
+rem that only contains errorlevel when %ERRORLEVEL% is not set. Same for %CD%.
+rem http://blogs.msdn.com/b/oldnewthing/archive/2008/09/26/8965755.aspx
+rem If you need to set the errorlevel do this instead: CALL :seterr [#]
+
 :begin
   rem Check we are running on a Windows NT derived OS
   if not "%OS%" == "Windows_NT" goto nodos
 
   rem Set our variables
-  setlocal
+  setlocal ENABLEEXTENSIONS
   set VERSION=ALL
   set MODE=GENERATE
 
-  rem Display the help
-  if /i "%~1" == "-?" goto syntax
-  if /i "%~1" == "-h" goto syntax
-  if /i "%~1" == "-help" goto syntax
+  rem Check we are not running on a network drive
+  if "%~d0."=="\\." goto nonetdrv
+
+  rem Switch to this batch file's directory
+  cd /d "%~0\.." 1>NUL 2>&1
+
+  rem Check we are running from a curl git repository
+  if not exist ..\GIT-INFO goto norepo
 
 :parseArgs
   if "%~1" == "" goto start
 
-  if /i "%~1" == "vc6" (
+  if /i "%~1" == "pre" (
+    set VERSION=PRE
+  ) else if /i "%~1" == "vc6" (
     set VERSION=VC6
   ) else if /i "%~1" == "vc7" (
     set VERSION=VC7
@@ -54,14 +67,33 @@ rem ***************************************************************************
     set VERSION=VC11
   ) else if /i "%~1" == "vc12" (
     set VERSION=VC12
+  ) else if /i "%~1" == "vc14" (
+    set VERSION=VC14
   ) else if /i "%~1" == "-clean" (
     set MODE=CLEAN
+  ) else if /i "%~1" == "-?" (
+    goto syntax
+  ) else if /i "%~1" == "-h" (
+    goto syntax
+  ) else if /i "%~1" == "-help" (
+    goto syntax
   ) else (
     goto unknown
   )
+
   shift & goto parseArgs
  
 :start
+  if exist ..\buildconf.bat (
+    if "%MODE%" == "GENERATE" (
+      call ..\buildconf
+    ) else if "%VERSION%" == "PRE" (
+      call ..\buildconf -clean
+    ) else if "%VERSION%" == "ALL" (
+      call ..\buildconf -clean
+    )
+  )
+  if "%VERSION%" == "PRE" goto success
   if "%VERSION%" == "VC6" goto vc6
   if "%VERSION%" == "VC7" goto vc7
   if "%VERSION%" == "VC7.1" goto vc71
@@ -70,17 +102,18 @@ rem ***************************************************************************
   if "%VERSION%" == "VC10" goto vc10
   if "%VERSION%" == "VC11" goto vc11
   if "%VERSION%" == "VC12" goto vc12
+  if "%VERSION%" == "VC14" goto vc14
 
 :vc6
   echo.
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC6 project files
-    call :generate dsp Windows\VC6\src\curlsrc.tmpl Windows\VC6\src\curlsrc.dsp
+    call :generate dsp Windows\VC6\src\curl.tmpl Windows\VC6\src\curl.dsp
     call :generate dsp Windows\VC6\lib\libcurl.tmpl Windows\VC6\lib\libcurl.dsp
   ) else (
     echo Removing VC6 project files
-    call :clean Windows\VC6\src\curlsrc.dsp
+    call :clean Windows\VC6\src\curl.dsp
     call :clean Windows\VC6\lib\libcurl.dsp
   )
 
@@ -91,11 +124,11 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC7 project files
-    call :generate vcproj1 Windows\VC7\src\curlsrc.tmpl Windows\VC7\src\curlsrc.vcproj
+    call :generate vcproj1 Windows\VC7\src\curl.tmpl Windows\VC7\src\curl.vcproj
     call :generate vcproj1 Windows\VC7\lib\libcurl.tmpl Windows\VC7\lib\libcurl.vcproj
   ) else (
     echo Removing VC7 project files
-    call :clean Windows\VC7\src\curlsrc.vcproj
+    call :clean Windows\VC7\src\curl.vcproj
     call :clean Windows\VC7\lib\libcurl.vcproj
   )
 
@@ -106,11 +139,11 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC7.1 project files
-    call :generate vcproj1 Windows\VC7.1\src\curlsrc.tmpl Windows\VC7.1\src\curlsrc.vcproj
+    call :generate vcproj1 Windows\VC7.1\src\curl.tmpl Windows\VC7.1\src\curl.vcproj
     call :generate vcproj1 Windows\VC7.1\lib\libcurl.tmpl Windows\VC7.1\lib\libcurl.vcproj
   ) else (
     echo Removing VC7.1 project files
-    call :clean Windows\VC7.1\src\curlsrc.vcproj
+    call :clean Windows\VC7.1\src\curl.vcproj
     call :clean Windows\VC7.1\lib\libcurl.vcproj
   )
 
@@ -121,11 +154,11 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC8 project files
-    call :generate vcproj2 Windows\VC8\src\curlsrc.tmpl Windows\VC8\src\curlsrc.vcproj
+    call :generate vcproj2 Windows\VC8\src\curl.tmpl Windows\VC8\src\curl.vcproj
     call :generate vcproj2 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
   ) else (
     echo Removing VC8 project files
-    call :clean Windows\VC8\src\curlsrc.vcproj
+    call :clean Windows\VC8\src\curl.vcproj
     call :clean Windows\VC8\lib\libcurl.vcproj
   )
 
@@ -136,11 +169,11 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC9 project files
-    call :generate vcproj2 Windows\VC9\src\curlsrc.tmpl Windows\VC9\src\curlsrc.vcproj
+    call :generate vcproj2 Windows\VC9\src\curl.tmpl Windows\VC9\src\curl.vcproj
     call :generate vcproj2 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
   ) else (
     echo Removing VC9 project files
-    call :clean Windows\VC9\src\curlsrc.vcproj
+    call :clean Windows\VC9\src\curl.vcproj
     call :clean Windows\VC9\lib\libcurl.vcproj
   )
 
@@ -151,11 +184,11 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC10 project files
-    call :generate vcxproj Windows\VC10\src\curlsrc.tmpl Windows\VC10\src\curlsrc.vcxproj
+    call :generate vcxproj Windows\VC10\src\curl.tmpl Windows\VC10\src\curl.vcxproj
     call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
   ) else (
     echo Removing VC10 project files
-    call :clean Windows\VC10\src\curlsrc.vcxproj
+    call :clean Windows\VC10\src\curl.vcxproj
     call :clean Windows\VC10\lib\libcurl.vcxproj
   )
 
@@ -166,11 +199,11 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC11 project files
-    call :generate vcxproj Windows\VC11\src\curlsrc.tmpl Windows\VC11\src\curlsrc.vcxproj
+    call :generate vcxproj Windows\VC11\src\curl.tmpl Windows\VC11\src\curl.vcxproj
     call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
   ) else (
     echo Removing VC11 project files
-    call :clean Windows\VC11\src\curlsrc.vcxproj
+    call :clean Windows\VC11\src\curl.vcxproj
     call :clean Windows\VC11\lib\libcurl.vcxproj
   )
 
@@ -181,12 +214,27 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC12 project files
-    call :generate vcxproj Windows\VC12\src\curlsrc.tmpl Windows\VC12\src\curlsrc.vcxproj
+    call :generate vcxproj Windows\VC12\src\curl.tmpl Windows\VC12\src\curl.vcxproj
     call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
   ) else (
     echo Removing VC12 project files
-    call :clean Windows\VC12\src\curlsrc.vcxproj
+    call :clean Windows\VC12\src\curl.vcxproj
     call :clean Windows\VC12\lib\libcurl.vcxproj
+  )
+
+  if not "%VERSION%" == "ALL" goto success
+
+:vc14
+  echo.
+
+  if "%MODE%" == "GENERATE" (
+    echo Generating VC14 project files
+    call :generate vcxproj Windows\VC14\src\curl.tmpl Windows\VC14\src\curl.vcxproj
+    call :generate vcxproj Windows\VC14\lib\libcurl.tmpl Windows\VC14\lib\libcurl.vcxproj
+  ) else (
+    echo Removing VC14 project files
+    call :clean Windows\VC14\src\curl.vcxproj
+    call :clean Windows\VC14\lib\libcurl.vcxproj
   )
 
   goto success
@@ -194,14 +242,14 @@ rem ***************************************************************************
 rem Main generate function.
 rem
 rem %1 - Project Type (dsp for VC6, vcproj1 for VC7 and VC7.1, vcproj2 for VC8 and VC9
-rem      or vcxproj for VC10, VC11 and VC12)
+rem      or vcxproj for VC10, VC11, VC12 and VC14)
 rem %2 - Input template file
 rem %3 - Output project file
 rem
 :generate
   if not exist %2 (
     echo.
-    echo Error: Cannot open %CD%\%2
+    echo Error: Cannot open %2
     exit /B
   )
 
@@ -258,7 +306,7 @@ rem
 rem Generates a single file xml element.
 rem
 rem %1 - Project Type (dsp for VC6, vcproj1 for VC7 and VC7.1, vcproj2 for VC8 and VC9
-rem      or vcxproj for VC10, VC11 and VC12)
+rem      or vcxproj for VC10, VC11, VC12 and VC14)
 rem %2 - Directory (src, lib, lib\vauth or lib\vtls)
 rem %3 - Source filename
 rem %4 - Output project file
@@ -340,10 +388,11 @@ rem
 :syntax
   rem Display the help
   echo.
-  echo Usage: generate [compiler] [-clean]
+  echo Usage: generate [what] [-clean]
   echo.
-  echo Compiler:
+  echo What to generate:
   echo.
+  echo pre       - Prerequisites only
   echo vc6       - Use Visual Studio 6
   echo vc7       - Use Visual Studio .NET
   echo vc7.1     - Use Visual Studio .NET 2003
@@ -352,6 +401,7 @@ rem
   echo vc10      - Use Visual Studio 2010
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013
+  echo vc14      - Use Visual Studio 2015
   echo.
   echo -clean    - Removes the project files
   goto error
@@ -366,8 +416,30 @@ rem
   echo Error: Only a Windows NT based Operating System is supported
   goto error
 
+:nonetdrv
+  echo.
+  echo Error: This batch file cannot run from a network drive
+  goto error
+
+:norepo
+  echo.
+  echo Error: This batch file should only be used from a curl git repository
+  goto error
+
+:seterr
+  rem Set the caller's errorlevel.
+  rem %1[opt]: Errorlevel as integer.
+  rem If %1 is empty the errorlevel will be set to 0.
+  rem If %1 is not empty and not an integer the errorlevel will be set to 1.
+  setlocal
+  set EXITCODE=%~1
+  if not defined EXITCODE set EXITCODE=0
+  echo %EXITCODE%|findstr /r "[^0-9\-]" 1>NUL 2>&1
+  if %ERRORLEVEL% EQU 0 set EXITCODE=1
+  exit /b %EXITCODE%
+
 :error
-  endlocal
+  if "%OS%" == "Windows_NT" endlocal
   exit /B 1
 
 :success

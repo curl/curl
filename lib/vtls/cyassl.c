@@ -30,6 +30,20 @@
 
 #ifdef USE_CYASSL
 
+#define WOLFSSL_OPTIONS_IGNORE_SYS
+/* CyaSSL's version.h, which should contain only the version, should come
+before all other CyaSSL includes and be immediately followed by build config
+aka options.h. http://curl.haxx.se/mail/lib-2015-04/0069.html */
+#include <cyassl/version.h>
+#if defined(HAVE_CYASSL_OPTIONS_H) && (LIBCYASSL_VERSION_HEX > 0x03004008)
+#if defined(CYASSL_API) || defined(WOLFSSL_API)
+/* Safety measure. If either is defined some API include was already included
+and that's a problem since options.h hasn't been included yet. */
+#error "CyaSSL API was included before the CyaSSL build options."
+#endif
+#include <cyassl/options.h>
+#endif
+
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -43,8 +57,8 @@
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "rawstr.h"
+#include "x509asn1.h"
 #include "curl_printf.h"
-#include "curl_memory.h"
 
 #include <cyassl/ssl.h>
 #ifdef HAVE_CYASSL_ERROR_SSL_H
@@ -53,9 +67,15 @@
 #include <cyassl/error.h>
 #endif
 #include <cyassl/ctaocrypt/random.h>
+#include <cyassl/ctaocrypt/sha256.h>
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
+
+#if LIBCYASSL_VERSION_HEX < 0x02007002 /* < 2.7.2 */
+#define CYASSL_MAX_ERROR_SZ 80
+#endif
 
 static Curl_recv cyassl_recv;
 static Curl_send cyassl_send;
@@ -80,42 +100,58 @@ static CURLcode
 cyassl_connect_step1(struct connectdata *conn,
                      int sockindex)
 {
+  char error_buffer[CYASSL_MAX_ERROR_SZ];
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* conssl = &conn->ssl[sockindex];
   SSL_METHOD* req_method = NULL;
   void* ssl_sessionid = NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
+#ifdef HAVE_SNI
+  bool sni = FALSE;
+#define use_sni(x)  sni = (x)
+#else
+#define use_sni(x)  Curl_nop_stmt
+#endif
 
   if(conssl->state == ssl_connection_complete)
     return CURLE_OK;
 
-  /* CyaSSL doesn't support SSLv2 */
-  if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
-    failf(data, "CyaSSL does not support SSLv2");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-
   /* check to see if we've been told to use an explicit SSL/TLS version */
   switch(data->set.ssl.version) {
-  default:
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
-    infof(data, "CyaSSL cannot be configured to use TLS 1.0-1.2, "
+#if LIBCYASSL_VERSION_HEX >= 0x03003000 /* >= 3.3.0 */
+    /* minimum protocol version is set later after the CTX object is created */
+    req_method = SSLv23_client_method();
+#else
+    infof(data, "CyaSSL <3.3.0 cannot be configured to use TLS 1.0-1.2, "
           "TLS 1.0 is used exclusively\n");
     req_method = TLSv1_client_method();
+#endif
+    use_sni(TRUE);
     break;
   case CURL_SSLVERSION_TLSv1_0:
     req_method = TLSv1_client_method();
+    use_sni(TRUE);
     break;
   case CURL_SSLVERSION_TLSv1_1:
     req_method = TLSv1_1_client_method();
+    use_sni(TRUE);
     break;
   case CURL_SSLVERSION_TLSv1_2:
     req_method = TLSv1_2_client_method();
+    use_sni(TRUE);
     break;
   case CURL_SSLVERSION_SSLv3:
     req_method = SSLv3_client_method();
+    use_sni(FALSE);
     break;
+  case CURL_SSLVERSION_SSLv2:
+    failf(data, "CyaSSL does not support SSLv2");
+    return CURLE_SSL_CONNECT_ERROR;
+  default:
+    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   if(!req_method) {
@@ -132,12 +168,33 @@ cyassl_connect_step1(struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
   }
 
+  switch(data->set.ssl.version) {
+  case CURL_SSLVERSION_DEFAULT:
+  case CURL_SSLVERSION_TLSv1:
+#if LIBCYASSL_VERSION_HEX > 0x03004006 /* > 3.4.6 */
+    /* Versions 3.3.0 to 3.4.6 we know the minimum protocol version is whatever
+    minimum version of TLS was built in and at least TLS 1.0. For later library
+    versions that could change (eg TLS 1.0 built in but defaults to TLS 1.1) so
+    we have this short circuit evaluation to find the minimum supported TLS
+    version. We use wolfSSL_CTX_SetMinVersion and not CyaSSL_SetMinVersion
+    because only the former will work before the user's CTX callback is called.
+    */
+    if((wolfSSL_CTX_SetMinVersion(conssl->ctx, WOLFSSL_TLSV1) != 1) &&
+       (wolfSSL_CTX_SetMinVersion(conssl->ctx, WOLFSSL_TLSV1_1) != 1) &&
+       (wolfSSL_CTX_SetMinVersion(conssl->ctx, WOLFSSL_TLSV1_2) != 1)) {
+      failf(data, "SSL: couldn't set the minimum protocol version");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+#endif
+    break;
+  }
+
 #ifndef NO_FILESYSTEM
   /* load trusted cacert */
   if(data->set.str[STRING_SSL_CAFILE]) {
-    if(!SSL_CTX_load_verify_locations(conssl->ctx,
-                                      data->set.str[STRING_SSL_CAFILE],
-                                      data->set.str[STRING_SSL_CAPATH])) {
+    if(1 != SSL_CTX_load_verify_locations(conssl->ctx,
+                                          data->set.str[STRING_SSL_CAFILE],
+                                          data->set.str[STRING_SSL_CAPATH])) {
       if(data->set.ssl.verifypeer) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:\n"
@@ -186,11 +243,7 @@ cyassl_connect_step1(struct connectdata *conn,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
-#else
-  if(CyaSSL_no_filesystem_verify(conssl->ctx)!= SSL_SUCCESS) {
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-#endif /* NO_FILESYSTEM */
+#endif /* !NO_FILESYSTEM */
 
   /* SSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
@@ -199,6 +252,46 @@ cyassl_connect_step1(struct connectdata *conn,
   SSL_CTX_set_verify(conssl->ctx,
                      data->set.ssl.verifypeer?SSL_VERIFY_PEER:SSL_VERIFY_NONE,
                      NULL);
+
+#ifdef HAVE_SNI
+  if(sni) {
+    struct in_addr addr4;
+#ifdef ENABLE_IPV6
+    struct in6_addr addr6;
+#endif
+    size_t hostname_len = strlen(conn->host.name);
+    if((hostname_len < USHRT_MAX) &&
+       (0 == Curl_inet_pton(AF_INET, conn->host.name, &addr4)) &&
+#ifdef ENABLE_IPV6
+       (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr6)) &&
+#endif
+       (CyaSSL_CTX_UseSNI(conssl->ctx, CYASSL_SNI_HOST_NAME, conn->host.name,
+                          (unsigned short)hostname_len) != 1)) {
+      infof(data, "WARNING: failed to configure server name indication (SNI) "
+            "TLS extension\n");
+    }
+  }
+#endif
+
+  /* give application a chance to interfere with SSL set up. */
+  if(data->set.ssl.fsslctx) {
+    CURLcode result = CURLE_OK;
+    result = (*data->set.ssl.fsslctx)(data, conssl->ctx,
+                                      data->set.ssl.fsslctxp);
+    if(result) {
+      failf(data, "error signaled by ssl ctx callback");
+      return result;
+    }
+  }
+#ifdef NO_FILESYSTEM
+  else if(data->set.ssl.verifypeer) {
+    failf(data, "SSL: Certificates couldn't be loaded because CyaSSL was built"
+          " with \"no filesystem\". Either disable peer verification"
+          " (insecure) or if you are building an application with libcurl you"
+          " can load certificates via CURLOPT_SSL_CTX_FUNCTION.");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+#endif
 
   /* Let's make an SSL structure */
   if(conssl->handle)
@@ -214,7 +307,7 @@ cyassl_connect_step1(struct connectdata *conn,
     /* we got a session id, use it! */
     if(!SSL_set_session(conssl->handle, ssl_sessionid)) {
       failf(data, "SSL: SSL_set_session failed: %s",
-            ERR_error_string(SSL_get_error(conssl->handle, 0), NULL));
+            ERR_error_string(SSL_get_error(conssl->handle, 0), error_buffer));
       return CURLE_SSL_CONNECT_ERROR;
     }
     /* Informational message */
@@ -240,9 +333,6 @@ cyassl_connect_step2(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* conssl = &conn->ssl[sockindex];
 
-  infof(data, "CyaSSL: Connecting to %s:%d\n",
-        conn->host.name, conn->remote_port);
-
   conn->recv[sockindex] = cyassl_recv;
   conn->send[sockindex] = cyassl_send;
 
@@ -255,7 +345,7 @@ cyassl_connect_step2(struct connectdata *conn,
 
   ret = SSL_connect(conssl->handle);
   if(ret != 1) {
-    char error_buffer[80];
+    char error_buffer[CYASSL_MAX_ERROR_SZ];
     int  detail = SSL_get_error(conssl->handle, ret);
 
     if(SSL_ERROR_WANT_READ == detail) {
@@ -315,6 +405,45 @@ cyassl_connect_step2(struct connectdata *conn,
     }
   }
 
+  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+    X509 *x509;
+    const char *x509_der;
+    int x509_der_len;
+    curl_X509certificate x509_parsed;
+    curl_asn1Element *pubkey;
+    CURLcode result;
+
+    x509 = SSL_get_peer_certificate(conssl->handle);
+    if(!x509) {
+      failf(data, "SSL: failed retrieving server certificate");
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
+
+    x509_der = (const char *)CyaSSL_X509_get_der(x509, &x509_der_len);
+    if(!x509_der) {
+      failf(data, "SSL: failed retrieving ASN.1 server certificate");
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
+
+    memset(&x509_parsed, 0, sizeof x509_parsed);
+    Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len);
+
+    pubkey = &x509_parsed.subjectPublicKeyInfo;
+    if(!pubkey->header || pubkey->end <= pubkey->header) {
+      failf(data, "SSL: failed retrieving public key from server certificate");
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
+
+    result = Curl_pin_peer_pubkey(data,
+                                  data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+                                  (const unsigned char *)pubkey->header,
+                                  (size_t)(pubkey->end - pubkey->header));
+    if(result) {
+      failf(data, "SSL: public key does not match pinned public key!");
+      return result;
+    }
+  }
+
   conssl->connecting_state = ssl_connect_3;
   infof(data, "SSL connected\n");
 
@@ -367,7 +496,7 @@ static ssize_t cyassl_send(struct connectdata *conn,
                            size_t len,
                            CURLcode *curlcode)
 {
-  char error_buffer[80];
+  char error_buffer[CYASSL_MAX_ERROR_SZ];
   int  memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   int  rc     = SSL_write(conn->ssl[sockindex].handle, mem, memlen);
 
@@ -412,7 +541,7 @@ static ssize_t cyassl_recv(struct connectdata *conn,
                            size_t buffersize,
                            CURLcode *curlcode)
 {
-  char error_buffer[80];
+  char error_buffer[CYASSL_MAX_ERROR_SZ];
   int  buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
   int  nread    = SSL_read(conn->ssl[num].handle, buf, buffsize);
 
@@ -448,7 +577,9 @@ void Curl_cyassl_session_free(void *ptr)
 
 size_t Curl_cyassl_version(char *buffer, size_t size)
 {
-#ifdef CYASSL_VERSION
+#ifdef WOLFSSL_VERSION
+  return snprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
+#elif defined(CYASSL_VERSION)
   return snprintf(buffer, size, "CyaSSL/%s", CYASSL_VERSION);
 #else
   return snprintf(buffer, size, "CyaSSL/%s", "<1.8.8");
@@ -458,10 +589,7 @@ size_t Curl_cyassl_version(char *buffer, size_t size)
 
 int Curl_cyassl_init(void)
 {
-  if(CyaSSL_Init() == 0)
-    return 1;
-
-  return -1;
+  return (CyaSSL_Init() == SSL_SUCCESS);
 }
 
 
@@ -637,9 +765,23 @@ int Curl_cyassl_random(struct SessionHandle *data,
   (void)data;
   if(InitRng(&rng))
     return 1;
-  if(RNG_GenerateBlock(&rng, entropy, length))
+  if(length > UINT_MAX)
+    return 1;
+  if(RNG_GenerateBlock(&rng, entropy, (unsigned)length))
     return 1;
   return 0;
+}
+
+void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
+                      size_t tmplen,
+                      unsigned char *sha256sum /* output */,
+                      size_t unused)
+{
+  Sha256 SHA256pw;
+  (void)unused;
+  InitSha256(&SHA256pw);
+  Sha256Update(&SHA256pw, tmp, tmplen);
+  Sha256Final(&SHA256pw, sha256sum);
 }
 
 #endif

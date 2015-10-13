@@ -41,7 +41,6 @@
 #include "curl_ntlm_wb.h"
 #include "curl_sasl.h"
 #include "url.h"
-#include "curl_memory.h"
 #include "curl_printf.h"
 
 #if defined(USE_NSS)
@@ -50,7 +49,8 @@
 #include "curl_sspi.h"
 #endif
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #if DEBUG_ME
@@ -84,7 +84,11 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
       ntlm->state = NTLMSTATE_TYPE2; /* We got a type-2 message */
     }
     else {
-      if(ntlm->state == NTLMSTATE_TYPE3) {
+      if(ntlm->state == NTLMSTATE_LAST) {
+        infof(conn->data, "NTLM auth restarted\n");
+        Curl_http_ntlm_cleanup(conn);
+      }
+      else if(ntlm->state == NTLMSTATE_TYPE3) {
         infof(conn->data, "NTLM handshake rejected\n");
         Curl_http_ntlm_cleanup(conn);
         ntlm->state = NTLMSTATE_NONE;
@@ -211,6 +215,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
      * don't send a header in future requests */
+    ntlm->state = NTLMSTATE_LAST;
+    /* fall-through */
+  case NTLMSTATE_LAST:
     Curl_safefree(*allocuserpwd);
     authp->done = TRUE;
     break;

@@ -72,12 +72,14 @@
 #include "strequal.h"
 #include "strtok.h"
 #include "curl_ldap.h"
-#include "curl_memory.h"
 #include "curl_multibyte.h"
 #include "curl_base64.h"
 #include "rawstr.h"
 #include "connect.h"
 #include "curl_printf.h"
+
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #ifndef HAVE_LDAP_URL_PARSE

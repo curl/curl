@@ -30,12 +30,12 @@
 #include "rawstr.h"
 #include "curl_base64.h"
 #include "http_negotiate.h"
-#include "curl_memory.h"
 #include "curl_sasl.h"
 #include "url.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
@@ -62,8 +62,10 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
 
   if(!neg_ctx->server_name) {
     /* Generate our SPN */
-    char *spn = Curl_sasl_build_gssapi_spn("HTTP", proxy ? conn->proxy.name :
-                                                           conn->host.name);
+    char *spn = Curl_sasl_build_gssapi_spn(
+      proxy ? data->set.str[STRING_PROXY_SERVICE_NAME] :
+      data->set.str[STRING_SERVICE_NAME],
+      proxy ? conn->proxy.name : conn->host.name);
     if(!spn)
       return CURLE_OUT_OF_MEMORY;
 

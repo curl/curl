@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -62,7 +62,7 @@ LIBS = $(BLANK_AT_MAKETIME)
 if USE_EXPLICIT_LIB_DEPS
 curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBMETALINK_LIBS@ @LIBCURL_LIBS@
 else
-curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBMETALINK_LIBS@ @NSS_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
+curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBMETALINK_LIBS@ @NSS_LIBS@ @SSL_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
 endif
 
 curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
@@ -84,11 +84,11 @@ CLEANFILES = tool_hugehelp.c
 # embedded text.
 NROFF=env LC_ALL=C @NROFF@ @MANOPT@ # figured out by the configure script
 
-EXTRA_DIST = mkhelp.pl makefile.dj Makefile.vc6 Makefile.b32 Makefile.m32 \
-	macos/curl.mcp.xml.sit.hqx                                        \
-	macos/MACINSTALL.TXT macos/src/curl_GUSIConfig.cpp \
-	macos/src/macos_main.cpp makefile.amiga curl.rc                   \
-	Makefile.netware Makefile.inc Makefile.Watcom CMakeLists.txt
+EXTRA_DIST = mkhelp.pl makefile.dj Makefile.vc6 Makefile.b32		\
+ Makefile.m32 macos/curl.mcp.xml.sit.hqx macos/MACINSTALL.TXT		\
+ macos/src/curl_GUSIConfig.cpp macos/src/macos_main.cpp makefile.amiga	\
+ curl.rc Makefile.netware Makefile.inc Makefile.Watcom CMakeLists.txt	\
+ checksrc.whitelist
 
 MANPAGE=$(top_srcdir)/docs/curl.1
 README=$(top_srcdir)/docs/MANUAL

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -679,6 +679,7 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
         break;
 
       case CURLINFO_TLS_SESSION:
+      case CURLINFO_SOCKET:
         break;
 
       default:
@@ -1133,6 +1134,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_COOKIELIST:
   case CURLOPT_CRLFILE:
   case CURLOPT_CUSTOMREQUEST:
+  case CURLOPT_DEFAULT_PROTOCOL:
   case CURLOPT_DNS_SERVERS:
   case CURLOPT_EGDSOCKET:
   case CURLOPT_ENCODING:
@@ -1154,12 +1156,14 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_PROXYPASSWORD:
   case CURLOPT_PROXYUSERNAME:
   case CURLOPT_PROXYUSERPWD:
+  case CURLOPT_PROXY_SERVICE_NAME:
   case CURLOPT_RANDOM_FILE:
   case CURLOPT_RANGE:
   case CURLOPT_REFERER:
   case CURLOPT_RTSP_SESSION_ID:
   case CURLOPT_RTSP_STREAM_URI:
   case CURLOPT_RTSP_TRANSPORT:
+  case CURLOPT_SERVICE_NAME:
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
   case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
   case CURLOPT_SSH_KNOWNHOSTS:
@@ -1275,4 +1279,43 @@ curl_form_long_value(long value)
   /* ILE/RPG cannot cast an integer to a pointer. This procedure does it. */
 
   return (char *) value;
+}
+
+
+char *
+curl_pushheader_bynum_cssid(struct curl_pushheaders *h,
+                            size_t num, unsigned int ccsid)
+
+{
+  char *d = (char *) NULL;
+  char *s = curl_pushheader_bynum(h, num);
+
+  if(s)
+    d = dynconvert(ccsid, s, -1, ASCII_CCSID);
+
+  return d;
+}
+
+
+char *
+curl_pushheader_byname_ccsid(struct curl_pushheaders *h, const char *header,
+                             unsigned int ccsidin, unsigned int ccsidout)
+
+{
+  char *d = (char *) NULL;
+  char *s;
+
+  if(header) {
+    header = dynconvert(ASCII_CCSID, header, -1, ccsidin);
+
+    if(header) {
+      s = curl_pushheader_byname(h, header);
+      free((char *) header);
+
+      if(s)
+        d = dynconvert(ccsidout, s, -1, ASCII_CCSID);
+    }
+  }
+
+  return d;
 }

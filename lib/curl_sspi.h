@@ -43,6 +43,10 @@
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
 
+/* This is used to populate the domain in a SSPI identity structure */
+CURLcode Curl_override_sspi_http_realm(const char *chlg,
+                                       SEC_WINNT_AUTH_IDENTITY *identity);
+
 /* This is used to generate an SSPI identity structure */
 CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
                                    SEC_WINNT_AUTH_IDENTITY *identity);
@@ -321,6 +325,10 @@ extern PSecurityFunctionTable s_pSecFn;
 #endif
 #ifndef SEC_I_SIGNATURE_NEEDED
 # define SEC_I_SIGNATURE_NEEDED               ((HRESULT)0x0009035CL)
+#endif
+
+#ifndef CRYPT_E_REVOKED
+# define CRYPT_E_REVOKED                      ((HRESULT)0x80092010L)
 #endif
 
 #ifdef UNICODE

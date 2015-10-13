@@ -21,6 +21,7 @@ FAQ
   1.12 I have a problem who can I chat with?
   1.13 curl's ECCN number?
   1.14 How do I submit my patch?
+  1.15 How do I port libcurl to my OS?
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
@@ -351,7 +352,7 @@ FAQ
   cryptography. When doing so, the Export Control Classification Number (ECCN)
   is used to identify the level of export control etc.
 
-  ASF gives a good explanation at http://www.apache.org/dev/crypto.html
+  ASF gives a good explanation at https://www.apache.org/dev/crypto.html
 
   We believe curl's number might be ECCN 5D002, another possibility is
   5D992. It seems necessary to write them, asking to confirm.
@@ -379,6 +380,19 @@ FAQ
     people involved there.
 
   Lots of more details are found in the CONTRIBUTE and INTERNALS docs.
+
+  1.15 How do I port libcurl to my OS?
+
+  Here's a rough step-by-step:
+
+  1. copy a suitable lib/config-*.h file as a start to lib/config-[youros].h
+
+  2. edit lib/config-[youros].h to match your OS and setup
+
+  3. edit lib/curl_setup.h to include config-[youros].h when your OS is
+     detected by the preprocessor, in the style others already exist
+
+  4. compile lib/*.c and make them into a library
 
 
 2. Install Related Problems
@@ -1028,7 +1042,7 @@ FAQ
   timeout is set.
 
   See option TcpMaxConnectRetransmissions on this page:
-  http://support.microsoft.com/?scid=kb%3Ben-us%3B175523&x=6&y=7
+  https://support.microsoft.com/en-us/kb/175523/en-us
 
   Also, even on non-Windows systems there may run a firewall or anti-virus
   software or similar that accepts the connection but does not actually do
@@ -1045,7 +1059,7 @@ FAQ
   You'll find that even if D:\blah.txt does exist, cURL returns a 'file
   not found' error.
 
-  According to RFC 1738 (http://www.faqs.org/rfcs/rfc1738.html),
+  According to RFC 1738 (https://www.ietf.org/rfc/rfc1738.txt),
   file:// URLs must contain a host component, but it is ignored by
   most implementations. In the above example, 'D:' is treated as the
   host component, and is taken away. Thus, cURL tries to open '/blah.txt'.
@@ -1149,13 +1163,13 @@ FAQ
   If you use a OpenSSL-powered libcurl in a multi-threaded environment, you
   need to provide one or two locking functions:
 
-    http://www.openssl.org/docs/crypto/threads.html
+    https://www.openssl.org/docs/crypto/threads.html
 
   If you use a GnuTLS-powered libcurl in a multi-threaded environment, you
   need to provide locking function(s) for libgcrypt (which is used by GnuTLS
   for the crypto functions).
 
-    http://www.gnu.org/software/gnutls/manual/html_node/Multi_002dthreaded-applications.html
+    https://web.archive.org/web/20111103083330/http://www.gnu.org/software/gnutls/manual/html_node/Multi_002dthreaded-applications.html
 
   No special locking is needed with a NSS-powered libcurl. NSS is thread-safe.
 
@@ -1331,7 +1345,7 @@ FAQ
   Also note that on many networks NATs or other IP-munging techniques are used
   that makes you see and use a different IP address locally than what the
   remote server will see you coming from. You may also consider using
-  http://www.torproject.org .
+  https://www.torproject.org/ .
 
   5.13 How do I stop an ongoing transfer?
 

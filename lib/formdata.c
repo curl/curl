@@ -34,12 +34,12 @@
 #include "formdata.h"
 #include "vtls/vtls.h"
 #include "strequal.h"
-#include "curl_memory.h"
 #include "sendf.h"
 #include "strdup.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #ifndef HAVE_BASENAME
@@ -538,7 +538,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         /* this "cast increases required alignment of target type" but
            we consider it OK anyway */
         struct curl_slist* list = array_state?
-          (struct curl_slist*)array_value:
+          (struct curl_slist*)(void*)array_value:
           va_arg(params, struct curl_slist*);
 
         if(current_form->contentheader)
@@ -756,7 +756,7 @@ curl_off_t VmsRealFileSize(const char * name,
   int ret_stat;
   FILE * file;
 
-  file = fopen(name, "r");
+  file = fopen(name, "r"); /* VMS */
   if(file == NULL)
     return 0;
 
@@ -1385,7 +1385,7 @@ static FILE * vmsfopenread(const char *file, const char *mode) {
   case FAB$C_VAR:
   case FAB$C_VFC:
   case FAB$C_STMCR:
-    return fopen(file, "r");
+    return fopen(file, "r"); /* VMS */
     break;
   default:
     return fopen(file, "r", "rfm=stmlf", "ctx=stm");

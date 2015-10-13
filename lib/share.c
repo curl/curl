@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,8 +35,14 @@ CURLSH *
 curl_share_init(void)
 {
   struct Curl_share *share = calloc(1, sizeof(struct Curl_share));
-  if(share)
+  if(share) {
     share->specifier |= (1<<CURL_LOCK_DATA_SHARE);
+
+    if(Curl_mk_dnscache(&share->hostcache)) {
+      free(share);
+      return NULL;
+    }
+  }
 
   return share;
 }
@@ -67,11 +73,6 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     share->specifier |= (1<<type);
     switch( type ) {
     case CURL_LOCK_DATA_DNS:
-      if(!share->hostcache) {
-        share->hostcache = Curl_mk_dnscache();
-        if(!share->hostcache)
-          res = CURLSHE_NOMEM;
-      }
       break;
 
     case CURL_LOCK_DATA_COOKIE:
@@ -115,10 +116,6 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     share->specifier &= ~(1<<type);
     switch( type ) {
     case CURL_LOCK_DATA_DNS:
-      if(share->hostcache) {
-        Curl_hash_destroy(share->hostcache);
-        share->hostcache = NULL;
-      }
       break;
 
     case CURL_LOCK_DATA_COOKIE:
@@ -192,10 +189,7 @@ curl_share_cleanup(CURLSH *sh)
     return CURLSHE_IN_USE;
   }
 
-  if(share->hostcache) {
-    Curl_hash_destroy(share->hostcache);
-    share->hostcache = NULL;
-  }
+  Curl_hash_destroy(&share->hostcache);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   Curl_cookie_cleanup(share->cookies);

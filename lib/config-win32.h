@@ -228,6 +228,12 @@
    This is present in OpenSSL versions after 0.9.6b */
 #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
 
+/* Define if you have the 'DES_set_odd_parity' function when using OpenSSL/
+   BoringSSL */
+#if defined(USE_OPENSSL) || defined(HAVE_BORINGSSL)
+#define HAVE_DES_SET_ODD_PARITY 1
+#endif
+
 /* Define if you have the select function. */
 #define HAVE_SELECT 1
 
@@ -481,8 +487,9 @@
 #endif
 
 /* Define if the compiler supports the 'long long' data type. */
-#if defined(__MINGW32__) || defined(__WATCOMC__) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 1310))
+#if defined(__MINGW32__) || defined(__WATCOMC__)      || \
+    (defined(_MSC_VER)     && (_MSC_VER     >= 1310)) || \
+    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x561))
 #define HAVE_LONGLONG 1
 #endif
 

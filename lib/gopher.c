@@ -83,16 +83,18 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   char *sel;
   char *sel_org = NULL;
   ssize_t amount, k;
+  int len;
 
   *done = TRUE; /* unconditionally */
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
-  if(strlen(path) <= 2)
+  if(strlen(path) <= 2) {
     sel = (char *)"";
+    len = (int)strlen(sel);
+  }
   else {
     char *newp;
     size_t j, i;
-    int len;
 
     /* Otherwise, drop / and the first character (i.e., item type) ... */
     newp = path;
@@ -113,7 +115,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
   /* We use Curl_write instead of Curl_sendf to make sure the entire buffer is
      sent, which could be sizeable with long selectors. */
-  k = curlx_uztosz(strlen(sel));
+  k = curlx_uztosz(len);
 
   for(;;) {
     result = Curl_write(conn, sockfd, sel, k, &amount);

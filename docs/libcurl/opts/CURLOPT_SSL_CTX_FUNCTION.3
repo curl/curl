@@ -22,7 +22,7 @@
 .\"
 .TH CURLOPT_SSL_CTX_FUNCTION 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SSL_CTX_FUNCTION \- openssl specific callback to do SSL magic
+CURLOPT_SSL_CTX_FUNCTION \- SSL context callback for OpenSSL or wolfSSL/CyaSSL
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
@@ -32,28 +32,28 @@ CURLcode ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *userptr);
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_FUNCTION,
                           ssl_ctx_callback);
 .SH DESCRIPTION
-This option only works for libcurl powered by OpenSSL. If libcurl was built
-against another SSL library, this functionality is absent.
+This option only works for libcurl powered by OpenSSL or wolfSSL/CyaSSL. If
+libcurl was built against another SSL library this functionality is absent.
 
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
 This callback function gets called by libcurl just before the initialization
-of a SSL connection after having processed all other SSL related options to
-give a last chance to an application to modify the behaviour of openssl's ssl
-initialization. The \fIsslctx\fP parameter is actually a pointer to an openssl
-\fISSL_CTX\fP. If an error is returned from the callback, no attempt to
-establish a connection is made and the perform operation will return the error
-code.  Set the \fIuserptr\fP argument with the \fICURLOPT_SSL_CTX_DATA(3)\fP
-option.
+of an SSL connection after having processed all other SSL related options to
+give a last chance to an application to modify the behaviour of the SSL
+initialization. The \fIssl_ctx\fP parameter is actually a pointer to the SSL
+library's \fISSL_CTX\fP. If an error is returned from the callback no attempt
+to establish a connection is made and the perform operation will return the
+callback's error code. Set the \fIuserptr\fP argument with the
+\fICURLOPT_SSL_CTX_DATA(3)\fP option.
 
 This function will get called on all new connections made to a server, during
 the SSL negotiation. The SSL_CTX pointer will be a new one every time.
 
-To use this properly, a non-trivial amount of knowledge of the openssl
-libraries is necessary. For example, using this function allows you to use
-openssl callbacks to add additional validation code for certificates, and even
-to change the actual URI of a HTTPS request (example used in the lib509 test
+To use this properly, a non-trivial amount of knowledge of your SSL library
+is necessary. For example, you can use this function to call library-specific
+callbacks to add additional validation code for certificates, and even to
+change the actual URI of a HTTPS request (example used in the lib509 test
 case).  See also the example section for a replacement of the key, certificate
 and trust file settings.
 .SH DEFAULT
@@ -63,7 +63,8 @@ All TLS based protocols: HTTPS, FTPS, IMAPS, POP3, SMTPS etc.
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-Added in 7.11.0. Only supported when built with OpenSSL.
+Added in 7.11.0 for OpenSSL. Added in 7.42.0 for wolfSSL/CyaSSL. Other SSL
+backends not supported.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

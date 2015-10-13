@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -31,7 +31,8 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   pop3-dele pop3-top pop3-stat pop3-noop pop3-ssl pop3-tls pop3-multi      \
   imap-list imap-lsub imap-fetch imap-store imap-append imap-examine       \
   imap-search imap-create imap-delete imap-copy imap-noop imap-ssl         \
-  imap-tls imap-multi url2file sftpget ftpsget postinmemory
+  imap-tls imap-multi url2file sftpget ftpsget postinmemory http2-download \
+  http2-upload http2-serverpush
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.

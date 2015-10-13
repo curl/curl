@@ -48,6 +48,10 @@ void Curl_gtls_md5sum(unsigned char *tmp, /* input */
                       size_t tmplen,
                       unsigned char *md5sum, /* output */
                       size_t md5len);
+void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
+                      size_t tmplen,
+                      unsigned char *sha256sum, /* output */
+                      size_t sha256len);
 
 bool Curl_gtls_cert_status_request(void);
 
@@ -77,6 +81,7 @@ bool Curl_gtls_cert_status_request(void);
 #define curlssl_data_pending(x,y) ((void)x, (void)y, 0)
 #define curlssl_random(x,y,z) Curl_gtls_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_gtls_md5sum(a,b,c,d)
+#define curlssl_sha256sum(a,b,c,d) Curl_gtls_sha256sum(a,b,c,d)
 #define curlssl_cert_status_request() Curl_gtls_cert_status_request()
 
 #endif /* USE_GNUTLS */

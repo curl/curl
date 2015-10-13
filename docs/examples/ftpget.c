@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,11 +23,9 @@
 
 #include <curl/curl.h>
 
-/*
- * This is an example showing how to get a single file from an FTP server.
- * It delays the actual destination file creation until the first write
- * callback so that it won't create an empty file in case the remote file
- * doesn't exist or something else fails.
+/* <DESC>
+ * Get a single file from an FTP server.
+ * </DESC>
  */
 
 struct FtpFile {
@@ -53,7 +51,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
   struct FtpFile ftpfile={
-    "curl.tar.gz", /* name to store the file as if succesful */
+    "curl.tar.gz", /* name to store the file as if successful */
     NULL
   };
 

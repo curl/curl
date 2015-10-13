@@ -46,11 +46,11 @@
 #include "curl_gssapi.h"
 #include "sendf.h"
 #include "curl_sec.h"
-#include "curl_memory.h"
 #include "warnless.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #define LOCAL_ADDR (&conn->local_addr)

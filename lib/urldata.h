@@ -198,6 +198,8 @@
 #define HEADERSIZE 256
 
 #define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
+#define GOOD_EASY_HANDLE(x) \
+  ((x) && (((struct SessionHandle *)(x))->magic == CURLEASY_MAGIC_NUMBER))
 
 /* Some convenience macros to get the larger/smaller value out of two given.
    We prefix with CURL to prevent name collisions. */
@@ -322,6 +324,9 @@ struct ssl_connect_data {
   size_t encdata_offset, decdata_offset;
   unsigned char *encdata_buffer, *decdata_buffer;
   unsigned long req_flags, ret_flags;
+  CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
+  bool recv_sspi_close_notify; /* true if connection closed by close_notify */
+  bool recv_connection_closed; /* true if connection closed, regardless how */
 #endif /* USE_SCHANNEL */
 #ifdef USE_DARWINSSL
   SSLContextRef ssl_ctx;
@@ -351,6 +356,7 @@ struct ssl_config_data {
   void *fsslctxp;        /* parameter for call back */
   bool sessionid;        /* cache session IDs or not */
   bool certinfo;         /* gather lots of certificate info */
+  bool falsestart;
 
 #ifdef USE_TLS_SRP
   char *username; /* TLS username (for, e.g., SRP) */
@@ -515,11 +521,6 @@ struct ConnectBits {
                          requests */
   bool netrc;         /* name+password provided by netrc */
   bool userpwd_in_url; /* name+password found in url */
-
-  bool done;          /* set to FALSE when Curl_do() is called and set to TRUE
-                         when Curl_done() is called, to prevent Curl_done() to
-                         get invoked twice when the multi interface is
-                         used. */
   bool stream_was_rewound; /* Indicates that the stream was rewound after a
                               request read past the end of its response byte
                               boundary */
@@ -529,6 +530,7 @@ struct ConnectBits {
   bool bound; /* set true if bind() has already been done on this socket/
                  connection */
   bool type_set;  /* type= was used in the URL */
+  bool multiplex; /* connection is multiplexed */
 };
 
 struct hostname {
@@ -658,7 +660,6 @@ struct SingleRequest {
 #define IDENTITY 0              /* No encoding */
 #define DEFLATE 1               /* zlib deflate [RFC 1950 & 1951] */
 #define GZIP 2                  /* gzip algorithm [RFC 1952] */
-#define COMPRESS 3              /* Not handled, added for completeness */
 
 #ifdef HAVE_LIBZ
   zlibInitState zlib_init;      /* possible zlib init state;
@@ -991,10 +992,6 @@ struct connectdata {
 
   /*************** Request - specific items ************/
 
-  /* previously this was in the urldata struct */
-  curl_read_callback fread_func; /* function that reads the input */
-  void *fread_in;           /* pointer to pass to the fread() above */
-
 #if defined(USE_NTLM)
   struct ntlmdata ntlm;     /* NTLM differs from other authentication schemes
                                because it authenticates connections, not
@@ -1308,6 +1305,13 @@ struct UrlState {
 
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
+
+  int drain; /* Increased when this stream has data to read, even if its
+                socket not necessarily is readable. Decreased when
+                checked. */
+  bool done; /* set to FALSE when Curl_do() is called and set to TRUE when
+                Curl_done() is called, to prevent Curl_done() to get invoked
+                twice when the multi interface is used. */
 };
 
 
@@ -1346,6 +1350,7 @@ enum dupstring {
   STRING_COOKIE,          /* HTTP cookie string to send */
   STRING_COOKIEJAR,       /* dump all cookies to this file */
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
+  STRING_DEFAULT_PROTOCOL, /* Protocol to use when the URL doesn't specify */
   STRING_DEVICE,          /* local network interface/address to use */
   STRING_ENCODING,        /* Accept-Encoding string */
   STRING_FTP_ACCOUNT,     /* ftp account data */
@@ -1388,6 +1393,8 @@ enum dupstring {
 #endif
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   STRING_SOCKS5_GSSAPI_SERVICE, /* GSSAPI service name */
+  STRING_PROXY_SERVICE_NAME, /* Proxy service name */
+  STRING_SERVICE_NAME,    /* Service name */
 #endif
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,
@@ -1420,8 +1427,8 @@ struct UserDefined {
   long proxyport; /* If non-zero, use this port number by default. If the
                      proxy string features a ":[port]" that one will override
                      this. */
-  void *out;         /* the fetched file goes here */
-  void *in;          /* the uploaded file is read from here */
+  void *out;         /* CURLOPT_WRITEDATA */
+  void *in;          /* CURLOPT_READDATA */
   void *writeheader; /* write the header to this if non-NULL */
   void *rtp_out;     /* write RTP to this if non-NULL */
   long use_port;     /* which port to use (when not using default) */
@@ -1575,6 +1582,7 @@ struct UserDefined {
   bool connect_only;     /* make connection, let application use the socket */
   bool ssl_enable_beast; /* especially allow this flaw for interoperability's
                             sake*/
+  bool ssl_no_revoke;    /* disable SSL certificate revocation checks */
   long ssh_auth_types;   /* allowed SSH auth types */
   bool http_te_skip;     /* pass the raw body data to the user, even when
                             transfer-encoded (chunked, compressed) */
@@ -1616,7 +1624,9 @@ struct UserDefined {
 
   bool ssl_enable_npn;  /* TLS NPN extension? */
   bool ssl_enable_alpn; /* TLS ALPN extension? */
-
+  bool path_as_is;      /* allow dotdots? */
+  bool pipewait;        /* wait for pipe/multiplex status before starting a
+                           new connection */
   long expect_100_timeout; /* in milliseconds */
 };
 

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -74,22 +74,16 @@ int Curl_hash_init(struct curl_hash *h,
                    comp_function comparator,
                    curl_hash_dtor dtor);
 
-struct curl_hash *Curl_hash_alloc(int slots,
-                                  hash_function hfunc,
-                                  comp_function comparator,
-                                  curl_hash_dtor dtor);
-
 void *Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p);
 int Curl_hash_delete(struct curl_hash *h, void *key, size_t key_len);
 void *Curl_hash_pick(struct curl_hash *, void * key, size_t key_len);
 void Curl_hash_apply(struct curl_hash *h, void *user,
                      void (*cb)(void *user, void *ptr));
 int Curl_hash_count(struct curl_hash *h);
+void Curl_hash_destroy(struct curl_hash *h);
 void Curl_hash_clean(struct curl_hash *h);
 void Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
                                     int (*comp)(void *, void *));
-void Curl_hash_destroy(struct curl_hash *h);
-
 size_t Curl_hash_str(void* key, size_t key_length, size_t slots_num);
 size_t Curl_str_key_compare(void*k1, size_t key1_len, void*k2,
                             size_t key2_len);

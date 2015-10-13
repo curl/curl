@@ -24,13 +24,14 @@ rem ***************************************************************************
 :begin
   rem Check we are running on a Windows NT derived OS
   if not "%OS%" == "Windows_NT" goto nodos
+
+  rem Set our variables
   setlocal
-  
-  rem Display the help
+  set VC_VER=
+  set BUILD_PLATFORM=
+
+  rem Ensure we have the required arguments
   if /i "%~1" == "" goto syntax
-  if /i "%~1" == "-?" goto syntax
-  if /i "%~1" == "-h" goto syntax
-  if /i "%~1" == "-help" goto syntax
 
 :parseArgs
   if "%~1" == "" goto prerequisites
@@ -67,6 +68,10 @@ rem ***************************************************************************
     set VC_VER=12.0
     set VC_DESC=VC12
     set "VC_PATH=Microsoft Visual Studio 12.0\VC"
+  ) else if /i "%~1" == "vc14" (
+    set VC_VER=14.0
+    set VC_DESC=VC14
+    set "VC_PATH=Microsoft Visual Studio 14.0\VC"
   ) else if /i "%~1%" == "x86" (
     set BUILD_PLATFORM=x86
   ) else if /i "%~1%" == "x64" (
@@ -75,6 +80,12 @@ rem ***************************************************************************
     set BUILD_CONFIG=debug
   ) else if /i "%~1%" == "release" (
     set BUILD_CONFIG=release
+  ) else if /i "%~1" == "-?" (
+    goto syntax
+  ) else if /i "%~1" == "-h" (
+    goto syntax
+  ) else if /i "%~1" == "-help" (
+    goto syntax
   ) else (
     if not defined START_DIR (
       set START_DIR=%~1%
@@ -86,6 +97,10 @@ rem ***************************************************************************
   shift & goto parseArgs
 
 :prerequisites
+  rem Compiler and platform are required parameters.
+  if not defined VC_VER goto syntax
+  if not defined BUILD_PLATFORM goto syntax
+
   rem Default the start directory if one isn't specified
   if not defined START_DIR set START_DIR=..\..\openssl
 
@@ -140,6 +155,7 @@ rem ***************************************************************************
     if "%VC_VER%" == "10.0" set VCVARS_PLATFORM=%BUILD_PLATFORM%
     if "%VC_VER%" == "11.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "12.0" set VCVARS_PLATFORM=amd64
+    if "%VC_VER%" == "14.0" set VCVARS_PLATFORM=amd64
   )
 
 :start
@@ -280,6 +296,7 @@ rem ***************************************************************************
   echo vc10      - Use Visual Studio 2010
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013
+  echo vc14      - Use Visual Studio 2015
   echo.
   echo Platform:
   echo.

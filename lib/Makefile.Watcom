@@ -1,6 +1,28 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2005 - 2009, Gisle Vanem <gvanem@broadpark.no>.
+# Copyright (C) 2005 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at http://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
 #
 #  Watcom / OpenWatcom / Win32 makefile for libcurl.
-#  G. Vanem <gvanem@broadpark.no>
 #
 
 .ERASE
@@ -101,7 +123,7 @@ ZLIB_ROOT = ../../zlib-1.2.8
 !ifdef %libssh2_root
 LIBSSH2_ROOT = $(%libssh2_root)
 !else
-LIBSSH2_ROOT = ../../libssh2-1.4.3
+LIBSSH2_ROOT = ../../libssh2-1.5.0
 !endif
 
 !ifdef %librtmp_root
@@ -113,7 +135,7 @@ LIBRTMP_ROOT = ../../rtmpdump-2.3
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ../../openssl-0.9.8zc
+OPENSSL_ROOT = ../../openssl-1.0.2a
 !endif
 
 !ifdef %ares_root

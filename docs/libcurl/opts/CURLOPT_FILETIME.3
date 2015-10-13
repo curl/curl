@@ -31,8 +31,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FILETIME, long gettime);
 Pass a long. If it is 1, libcurl will attempt to get the modification time of
 the remote document in this operation. This requires that the remote server
 sends the time or replies to a time querying command. The
-\fIcurl_easy_getinfo(3)\fP function with the \fICURLINFO_FILETIME\fP argument
-can be used after a transfer to extract the received time (if any).
+\fIcurl_easy_getinfo(3)\fP function with the \fICURLINFO_FILETIME(3)\fP
+argument can be used after a transfer to extract the received time (if any).
 .SH DEFAULT
 0
 .SH PROTOCOLS

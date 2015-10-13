@@ -1,9 +1,3 @@
-                                  _   _ ____  _
-                              ___| | | |  _ \| |
-                             / __| | | | |_) | |
-                            | (__| |_| |  _ <| |___
-                             \___|\___/|_| \_\_____|
-
 curl release procedure - how to do a release
 ============================================
 
@@ -29,6 +23,8 @@ in the source code repo
 - gpg sign the 4 tarballs as maketgz suggests
 
 - upload the 8 resulting files to the primary download directory
+
+- upload the 4 tarballs to github for the HTTPS download
 
 in the curl-www repo
 --------------------
@@ -84,12 +80,10 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- February 25, 2015 (version 7.41.0)
-- April 22, 2015
-- June 17, 2015
-- August 12, 2015
-- October 7, 2015
+- October 7, 2015 (version 7.45.0)
 - December 2, 2015
 - January 27, 2016
 - March 23, 2016
 - May 18, 2016
+- July 13, 2016
+- September 7, 2016

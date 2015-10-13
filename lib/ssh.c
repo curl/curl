@@ -935,6 +935,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       else {
         state(conn, SSH_AUTH_HOST_INIT);
+        rc = 0; /* clear rc and continue */
       }
       break;
 
@@ -1019,11 +1020,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                                     sshc->sshagent_identity);
 
         if(rc < 0) {
-          if(rc != LIBSSH2_ERROR_EAGAIN) {
+          if(rc != LIBSSH2_ERROR_EAGAIN)
             /* tried and failed? go to next identity */
             sshc->sshagent_prev_identity = sshc->sshagent_identity;
-          }
-          break;
+          else
+            break;
         }
       }
 
@@ -1037,8 +1038,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         infof(data, "Agent based authentication successful\n");
         state(conn, SSH_AUTH_DONE);
       }
-      else
+      else {
         state(conn, SSH_AUTH_KEY_INIT);
+        rc = 0; /* clear rc and continue */
+      }
 #endif
       break;
 
@@ -1737,8 +1740,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                 BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
 
               size_t actuallyread =
-                conn->fread_func(data->state.buffer, 1, readthisamountnow,
-                                 conn->fread_in);
+                data->set.fread_func(data->state.buffer, 1, readthisamountnow,
+                                     data->set.in);
 
               passed += actuallyread;
               if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
@@ -2141,7 +2144,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             /* from is relative to end of file */
             from += size;
           }
-          if(from >= size) {
+          if(from > size) {
             failf(data, "Offset (%"
                   CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
                   CURL_FORMAT_CURL_OFF_T ")", from, attrs.filesize);

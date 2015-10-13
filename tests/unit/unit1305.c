@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,18 +40,19 @@
 #include "memdebug.h" /* LAST include file */
 
 static struct SessionHandle *data;
-static struct curl_hash *hp;
+static struct curl_hash hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
 
 static CURLcode unit_setup( void )
 {
+  int rc;
   data = curl_easy_init();
   if (!data)
     return CURLE_OUT_OF_MEMORY;
 
-  hp = Curl_mk_dnscache();
-  if(!hp) {
+  rc = Curl_mk_dnscache(&hp);
+  if(rc) {
     curl_easy_cleanup(data);
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
@@ -66,7 +67,7 @@ static void unit_stop( void )
     free(data_node);
   }
   free(data_key);
-  Curl_hash_destroy(hp);
+  Curl_hash_destroy(&hp);
 
   curl_easy_cleanup(data);
   curl_global_cleanup();
@@ -128,7 +129,8 @@ UNITTEST_START
     abort_unless(rc == CURLE_OK, "data node creation failed");
     key_len = strlen(data_key);
 
-    nodep = Curl_hash_add(hp, data_key, key_len+1, data_node);
+    data_node->inuse = 1; /* hash will hold the reference */
+    nodep = Curl_hash_add(&hp, data_key, key_len+1, data_node);
     abort_unless(nodep, "insertion into hash failed");
     /* Freeing will now be done by Curl_hash_destroy */
     data_node = NULL;

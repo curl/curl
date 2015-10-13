@@ -63,7 +63,6 @@
 #include "sendf.h"
 #include "rawstr.h"
 #include "url.h"
-#include "curl_memory.h"
 #include "progress.h"
 #include "share.h"
 #include "timeval.h"
@@ -72,7 +71,8 @@
 #include "curl_base64.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* convenience macro to check if this handle is using a shared SSL session */
@@ -276,10 +276,25 @@ void Curl_ssl_cleanup(void)
   }
 }
 
+static bool ssl_prefs_check(struct SessionHandle *data)
+{
+  /* check for CURLOPT_SSLVERSION invalid parameter value */
+  if((data->set.ssl.version < 0)
+     || (data->set.ssl.version >= CURL_SSLVERSION_LAST)) {
+    failf(data, "Unrecognized parameter value passed via CURLOPT_SSLVERSION");
+    return FALSE;
+  }
+  return TRUE;
+}
+
 CURLcode
 Curl_ssl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
+
+  if(!ssl_prefs_check(conn->data))
+    return CURLE_SSL_CONNECT_ERROR;
+
   /* mark this is being ssl-enabled from here on. */
   conn->ssl[sockindex].use = TRUE;
   conn->ssl[sockindex].state = ssl_connection_negotiating;
@@ -297,6 +312,10 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
                              bool *done)
 {
   CURLcode result;
+
+  if(!ssl_prefs_check(conn->data))
+    return CURLE_SSL_CONNECT_ERROR;
+
   /* mark this is being ssl requested from here on. */
   conn->ssl[sockindex].use = TRUE;
 #ifdef curlssl_connect_nonblocking
@@ -746,7 +765,8 @@ static CURLcode pubkey_pem_to_der(const char *pem,
  * Generic pinned public key check.
  */
 
-CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
+CURLcode Curl_pin_peer_pubkey(struct SessionHandle *data,
+                              const char *pinnedpubkey,
                               const unsigned char *pubkey, size_t pubkeylen)
 {
   FILE *fp;
@@ -755,12 +775,78 @@ CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
   size_t size, pem_len;
   CURLcode pem_read;
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+#ifdef curlssl_sha256sum
+  CURLcode encode;
+  size_t encodedlen, pinkeylen;
+  char *encoded, *pinkeycopy, *begin_pos, *end_pos;
+  unsigned char *sha256sumdigest = NULL;
+#endif
 
   /* if a path wasn't specified, don't pin */
   if(!pinnedpubkey)
     return CURLE_OK;
   if(!pubkey || !pubkeylen)
     return result;
+
+#ifdef curlssl_sha256sum
+  /* only do this if pinnedpubkey starts with "sha256//", length 8 */
+  if(strncmp(pinnedpubkey, "sha256//", 8) == 0) {
+    /* compute sha256sum of public key */
+    sha256sumdigest = malloc(SHA256_DIGEST_LENGTH);
+    if(!sha256sumdigest)
+      return CURLE_OUT_OF_MEMORY;
+    curlssl_sha256sum(pubkey, pubkeylen,
+                      sha256sumdigest, SHA256_DIGEST_LENGTH);
+    encode = Curl_base64_encode(data, (char *)sha256sumdigest,
+                                SHA256_DIGEST_LENGTH, &encoded, &encodedlen);
+    Curl_safefree(sha256sumdigest);
+
+    if(encode)
+      return encode;
+
+    infof(data, "\t public key hash: sha256//%s\n", encoded);
+
+    /* it starts with sha256//, copy so we can modify it */
+    pinkeylen = strlen(pinnedpubkey) + 1;
+    pinkeycopy = malloc(pinkeylen);
+    if(!pinkeycopy) {
+      Curl_safefree(encoded);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    memcpy(pinkeycopy, pinnedpubkey, pinkeylen);
+    /* point begin_pos to the copy, and start extracting keys */
+    begin_pos = pinkeycopy;
+    do {
+      end_pos = strstr(begin_pos, ";sha256//");
+      /*
+       * if there is an end_pos, null terminate,
+       * otherwise it'll go to the end of the original string
+       */
+      if(end_pos)
+        end_pos[0] = '\0';
+
+      /* compare base64 sha256 digests, 8 is the length of "sha256//" */
+      if(encodedlen == strlen(begin_pos + 8) &&
+         !memcmp(encoded, begin_pos + 8, encodedlen)) {
+        result = CURLE_OK;
+        break;
+      }
+
+      /*
+       * change back the null-terminator we changed earlier,
+       * and look for next begin
+       */
+      if(end_pos) {
+        end_pos[0] = ';';
+        begin_pos = strstr(end_pos, "sha256//");
+      }
+    } while(end_pos && begin_pos);
+    Curl_safefree(encoded);
+    Curl_safefree(pinkeycopy);
+    return result;
+  }
+#endif
+
   fp = fopen(pinnedpubkey, "rb");
   if(!fp)
     return result;
@@ -827,10 +913,11 @@ CURLcode Curl_pin_peer_pubkey(const char *pinnedpubkey,
   return result;
 }
 
-void Curl_ssl_md5sum(unsigned char *tmp, /* input */
-                     size_t tmplen,
-                     unsigned char *md5sum, /* output */
-                     size_t md5len)
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
+                         size_t tmplen,
+                         unsigned char *md5sum, /* output */
+                         size_t md5len)
 {
 #ifdef curlssl_md5sum
   curlssl_md5sum(tmp, tmplen, md5sum, md5len);
@@ -840,10 +927,14 @@ void Curl_ssl_md5sum(unsigned char *tmp, /* input */
   (void) md5len;
 
   MD5pw = Curl_MD5_init(Curl_DIGEST_MD5);
+  if(!MD5pw)
+    return CURLE_OUT_OF_MEMORY;
   Curl_MD5_update(MD5pw, tmp, curlx_uztoui(tmplen));
   Curl_MD5_final(MD5pw, md5sum);
 #endif
+  return CURLE_OK;
 }
+#endif
 
 /*
  * Check whether the SSL backend supports the status_request extension.
@@ -852,6 +943,18 @@ bool Curl_ssl_cert_status_request(void)
 {
 #ifdef curlssl_cert_status_request
   return curlssl_cert_status_request();
+#else
+  return FALSE;
+#endif
+}
+
+/*
+ * Check whether the SSL backend supports false start.
+ */
+bool Curl_ssl_false_start(void)
+{
+#ifdef curlssl_false_start
+  return curlssl_false_start();
 #else
   return FALSE;
 #endif

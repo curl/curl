@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -46,6 +46,7 @@
 # --extvercmd=[command]    Command to use for displaying version with cross compiles.
 # --mktarball=[command]    Command to run after completed test
 # --name=[name]            Set name to report as
+# --notes=[notes]          More human-readable information about this configuration
 # --nocvsup                Don't pull from git even though it is a git tree
 # --nogitpull              Don't pull from git even though it is a git tree
 # --nobuildconf            Don't run buildconf
@@ -60,6 +61,7 @@
 use strict;
 
 use Cwd;
+use File::Spec;
 
 # Turn on warnings (equivalent to -w, which can't be used with /usr/bin/env)
 #BEGIN { $^W = 1; }
@@ -88,25 +90,28 @@ $setupfile = 'setup';
 $configurebuild = 1;
 while ($ARGV[0]) {
   if ($ARGV[0] =~ /--target=/) {
-    $targetos = (split(/=/, shift @ARGV))[1];
+    $targetos = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--setup=/) {
-    $setupfile = (split(/=/, shift @ARGV))[1];
+    $setupfile = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--extvercmd=/) {
-    $extvercmd = (split(/=/, shift @ARGV))[1];
+    $extvercmd = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--mktarball=/) {
-    $mktarball = (split(/=/, shift @ARGV))[1];
+    $mktarball = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--name=/) {
-    $name = (split(/=/, shift @ARGV))[1];
+    $name = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--email=/) {
-    $email = (split(/=/, shift @ARGV))[1];
+    $email = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--desc=/) {
-    $desc = (split(/=/, shift @ARGV))[1];
+    $desc = (split(/=/, shift @ARGV, 2))[1];
+  }
+  elsif ($ARGV[0] =~ /--notes=/) {
+    $notes = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--configure=(.*)/) {
     $confopts = $1;
@@ -383,6 +388,10 @@ if (-d $CURLDIR) {
     mydie "$CURLDIR is not a daily source dir or checked out from git!"
   }
 }
+
+# make the path absolute so we can use it everywhere
+$CURLDIR = File::Spec->rel2abs("$CURLDIR");
+
 $build="build-$$";
 $buildlogname="buildlog-$$";
 $buildlog="$pwd/$buildlogname";
@@ -455,7 +464,7 @@ if ($git) {
       logit "  $_";
     }
 
-    chdir "$pwd/$CURLDIR";
+    chdir "$CURLDIR";
   }
 
   if($nobuildconf) {
@@ -554,7 +563,7 @@ chdir "$pwd/$build";
 
 if ($configurebuild) {
   # run configure script
-  print `../$CURLDIR/configure $confopts 2>&1`;
+  print `$CURLDIR/configure $confopts 2>&1`;
 
   if (-f "lib/Makefile") {
     logit "configure seems to have finished fine";
@@ -564,26 +573,26 @@ if ($configurebuild) {
 } else {
   logit "copying files to build dir ...";
   if (($^O eq 'MSWin32') && ($targetos !~ /netware/)) {
-    system("xcopy /s /q ..\\$CURLDIR .");
+    system("xcopy /s /q \"$CURLDIR\" .");
     system("buildconf.bat");
   }
   elsif ($targetos =~ /netware/) {
-    system("cp -afr ../$CURLDIR/* .");
-    system("cp -af ../$CURLDIR/Makefile.dist Makefile");
+    system("cp -afr $CURLDIR/* .");
+    system("cp -af $CURLDIR/Makefile.dist Makefile");
     system("$make -i -C lib -f Makefile.netware prebuild");
     system("$make -i -C src -f Makefile.netware prebuild");
-    if (-d "../$CURLDIR/ares") {
+    if (-d "$CURLDIR/ares") {
       system("$make -i -C ares -f Makefile.netware prebuild");
     }
   }
   elsif ($^O eq 'linux') {
-    system("cp -afr ../$CURLDIR/* .");
-    system("cp -af ../$CURLDIR/Makefile.dist Makefile");
-    system("cp -af ../$CURLDIR/include/curl/curlbuild.h.dist ./include/curl/curlbuild.h");
+    system("cp -afr $CURLDIR/* .");
+    system("cp -af $CURLDIR/Makefile.dist Makefile");
+    system("cp -af $CURLDIR/include/curl/curlbuild.h.dist ./include/curl/curlbuild.h");
     system("$make -i -C lib -f Makefile.$targetos prebuild");
     system("$make -i -C src -f Makefile.$targetos prebuild");
-    if (-d "../$CURLDIR/ares") {
-      system("cp -af ../$CURLDIR/ares/ares_build.h.dist ./ares/ares_build.h");
+    if (-d "$CURLDIR/ares") {
+      system("cp -af $CURLDIR/ares/ares_build.h.dist ./ares/ares_build.h");
       system("$make -i -C ares -f Makefile.$targetos prebuild");
     }
   }

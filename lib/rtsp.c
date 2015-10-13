@@ -34,12 +34,12 @@
 #include "progress.h"
 #include "rtsp.h"
 #include "rawstr.h"
-#include "curl_memory.h"
 #include "select.h"
 #include "connect.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /*
@@ -249,6 +249,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   const char *p_stream_uri = NULL;
   const char *p_transport = NULL;
   const char *p_uagent = NULL;
+  const char *p_proxyuserpwd = NULL;
+  const char *p_userpwd = NULL;
 
   *done = TRUE;
 
@@ -263,11 +265,10 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
    * Since all RTSP requests are included here, there is no need to
    * support custom requests like HTTP.
    **/
-  DEBUGASSERT((rtspreq > RTSPREQ_NONE && rtspreq < RTSPREQ_LAST));
   data->set.opt_no_body = TRUE; /* most requests don't contain a body */
   switch(rtspreq) {
-  case RTSPREQ_NONE:
-    failf(data, "Got invalid RTSP request: RTSPREQ_NONE");
+  default:
+    failf(data, "Got invalid RTSP request");
     return CURLE_BAD_FUNCTION_ARGUMENT;
   case RTSPREQ_OPTIONS:
     p_request = "OPTIONS";
@@ -323,11 +324,10 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   if(!p_session_id &&
      (rtspreq & ~(RTSPREQ_OPTIONS | RTSPREQ_DESCRIBE | RTSPREQ_SETUP))) {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
-          p_request ? p_request : "");
+          p_request);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-  /* TODO: auth? */
   /* TODO: proxy? */
 
   /* Stream URI. Default to server '*' if not specified */
@@ -393,6 +393,14 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     p_uagent = conn->allocptr.uagent;
   }
 
+  /* setup the authentication headers */
+  result = Curl_http_output_auth(conn, p_request, p_stream_uri, FALSE);
+  if(result)
+    return result;
+
+  p_proxyuserpwd = conn->allocptr.proxyuserpwd;
+  p_userpwd = conn->allocptr.userpwd;
+
   /* Referrer */
   Curl_safefree(conn->allocptr.ref);
   if(data->change.referer && !Curl_checkheaders(conn, "Referer:"))
@@ -441,8 +449,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     Curl_add_bufferf(req_buffer,
                      "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
                      "CSeq: %ld\r\n", /* CSeq */
-                     (p_request ? p_request : ""), p_stream_uri,
-                     rtsp->CSeq_sent);
+                     p_request, p_stream_uri, rtsp->CSeq_sent);
   if(result)
     return result;
 
@@ -466,13 +473,25 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
                             "%s" /* range */
                             "%s" /* referrer */
                             "%s" /* user-agent */
+                            "%s" /* proxyuserpwd */
+                            "%s" /* userpwd */
                             ,
                             p_transport ? p_transport : "",
                             p_accept ? p_accept : "",
                             p_accept_encoding ? p_accept_encoding : "",
                             p_range ? p_range : "",
                             p_referrer ? p_referrer : "",
-                            p_uagent ? p_uagent : "");
+                            p_uagent ? p_uagent : "",
+                            p_proxyuserpwd ? p_proxyuserpwd : "",
+                            p_userpwd ? p_userpwd : "");
+
+  /*
+   * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
+   * with basic and digest, it will be freed anyway by the next request
+   */
+  Curl_safefree (conn->allocptr.userpwd);
+  conn->allocptr.userpwd = NULL;
+
   if(result)
     return result;
 
@@ -496,8 +515,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 
     }
     else {
-      postsize = (data->set.postfieldsize != -1)?
-        data->set.postfieldsize:
+      postsize = (data->state.infilesize != -1)?
+        data->state.infilesize:
         (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
       data->set.httpreq = HTTPREQ_POST;
     }

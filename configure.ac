@@ -39,6 +39,7 @@ AC_CONFIG_SRCDIR([lib/urldata.h])
 AC_CONFIG_HEADERS(lib/curl_config.h include/curl/curlbuild.h)
 AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 CURL_CHECK_OPTION_DEBUG
 CURL_CHECK_OPTION_OPTIMIZE
@@ -47,6 +48,7 @@ CURL_CHECK_OPTION_WERROR
 CURL_CHECK_OPTION_CURLDEBUG
 CURL_CHECK_OPTION_SYMBOL_HIDING
 CURL_CHECK_OPTION_ARES
+CURL_CHECK_OPTION_RT
 
 XC_CHECK_PATH_SEPARATOR
 
@@ -1184,6 +1186,8 @@ AC_ARG_WITH(gssapi,
   fi
 ])
 
+: ${KRB5CONFIG:="$GSSAPI_ROOT/bin/krb5-config"}
+
 save_CPPFLAGS="$CPPFLAGS"
 AC_MSG_CHECKING([if GSS-API support is requested])
 if test x"$want_gss" = xyes; then
@@ -1192,8 +1196,8 @@ if test x"$want_gss" = xyes; then
   if test -z "$GSSAPI_INCS"; then
      if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
-     elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
-        GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
+     elif test -f "$KRB5CONFIG"; then
+        GSSAPI_INCS=`$KRB5CONFIG --cflags gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
      fi
@@ -1283,10 +1287,10 @@ if test x"$want_gss" = xyes; then
            dnl into LIBS
            gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
            LIBS="$gss_libs $LIBS"
-        elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+        elif test -f "$KRB5CONFIG"; then
            dnl krb5-config doesn't have --libs-only-L or similar, put everything
            dnl into LIBS
-           gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
+           gss_libs=`$KRB5CONFIG --libs gssapi`
            LIBS="$gss_libs $LIBS"
         else
            case $host in
@@ -1451,6 +1455,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
       SSL_CPPFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
         $PKGCONFIG --cflags-only-I openssl 2>/dev/null`
 
+      AC_SUBST(SSL_LIBS)
       AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])
       AC_MSG_NOTICE([pkg-config: SSL_LDFLAGS: "$SSL_LDFLAGS"])
       AC_MSG_NOTICE([pkg-config: SSL_CPPFLAGS: "$SSL_CPPFLAGS"])
@@ -1489,13 +1494,13 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
       ;;
   esac
 
-  AC_CHECK_LIB(crypto, CRYPTO_lock,[
+  AC_CHECK_LIB(crypto, HMAC_Update,[
      HAVECRYPTO="yes"
      LIBS="-lcrypto $LIBS"
      ],[
      LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
      CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include/openssl -I$PREFIX_OPENSSL/include"
-     AC_CHECK_LIB(crypto, CRYPTO_add_lock,[
+     AC_CHECK_LIB(crypto, HMAC_Init_ex,[
        HAVECRYPTO="yes"
        LIBS="-lcrypto $LIBS"], [
        LDFLAGS="$CLEANLDFLAGS"
@@ -1504,6 +1509,46 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
        ])
     ])
 
+
+  if test X"$HAVECRYPTO" = X"yes"; then
+     AC_MSG_CHECKING([OpenSSL linking without -ldl])
+     saved_libs=$LIBS
+     AC_TRY_LINK(
+        [
+          #include <openssl/evp.h>
+        ],
+        [
+          SSLeay_add_all_algorithms();
+        ],
+        [
+          AC_MSG_RESULT(yes)
+          LIBS="$saved_libs"
+        ],
+        [
+          AC_MSG_RESULT(no)
+          AC_MSG_CHECKING([OpenSSL linking with -ldl])
+          LIBS="-ldl $LIBS"
+          AC_TRY_LINK(
+          [
+            #include <openssl/evp.h>
+          ],
+          [
+            SSLeay_add_all_algorithms();
+          ],
+          [
+            AC_MSG_RESULT(yes)
+            LIBS="$saved_libs -ldl"
+          ],
+          [
+            AC_MSG_RESULT(no)
+            LIBS="$saved_libs"
+          ]
+          )
+
+        ]
+     )
+
+  fi
 
   if test X"$HAVECRYPTO" = X"yes"; then
     dnl This is only reasonable to do if crypto actually is there: check for
@@ -1576,7 +1621,8 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
     dnl Older versions of Cyassl (some time before 2.9.4) don't have
     dnl SSL_get_shutdown (but this check won't actually detect it there
     dnl as it's a macro that needs the header files be included)
-    dnl BoringSSL doesn't have DES_set_odd_parity
+    dnl BoringSSL didn't have DES_set_odd_parity for a while but now it is
+    dnl back again.
 
     AC_CHECK_FUNCS( RAND_status \
                     RAND_screen \
@@ -1588,14 +1634,22 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
                     DES_set_odd_parity )
 
     AC_MSG_CHECKING([for BoringSSL])
-    if test "x$ac_cv_func_DES_set_odd_parity" != "xyes"; then
-      curl_ssl_msg="enabled (BoringSSL)"
-      AC_DEFINE_UNQUOTED(HAVE_BORINGSSL, 1,
-        [Define to 1 if using BoringSSL.])
-      AC_MSG_RESULT([yes])
-    else
-      AC_MSG_RESULT([no])
-    fi
+    AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+                #include <openssl/base.h>
+                ]],[[
+                #ifndef OPENSSL_IS_BORINGSSL
+                #error not boringssl
+                #endif
+       ]])
+    ],[
+        AC_MSG_RESULT([yes])
+        AC_DEFINE_UNQUOTED(HAVE_BORINGSSL, 1,
+                           [Define to 1 if using BoringSSL.])
+    ],[
+        AC_MSG_RESULT([no])
+    ])
+
     AC_MSG_CHECKING([for libressl])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -1783,6 +1837,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
             AC_MSG_NOTICE([Added $gtlslib to LD_LIBRARY_PATH])
           fi
         fi
+        AC_CHECK_FUNCS(gnutls_certificate_set_x509_key_file2)
       fi
 
     fi
@@ -2044,6 +2099,9 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
       dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
       AC_CHECK_SIZEOF(long long)
 
+      dnl Versions since at least 2.6.0 may have options.h
+      AC_CHECK_HEADERS(cyassl/options.h)
+
       dnl Versions since at least 2.9.4 renamed error.h to error-ssl.h
       AC_CHECK_HEADERS(cyassl/error-ssl.h)
 
@@ -2114,56 +2172,72 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
         fi
       fi
     else
-        # Without pkg-config, we'll kludge in some defaults
-        addlib="-L$OPT_NSS/lib -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
-        addcflags="-I$OPT_NSS/include"
-        version="unknown"
-        nssprefix=$OPT_NSS
-    fi
-
-    if test -n "$addlib"; then
-
-      CLEANLIBS="$LIBS"
-      CLEANCPPFLAGS="$CPPFLAGS"
-
-      LIBS="$addlib $LIBS"
-      if test "$addcflags" != "-I/usr/include"; then
-         CPPFLAGS="$CPPFLAGS $addcflags"
-      fi
-
-      dnl The function SSL_VersionRangeSet() is needed to enable TLS > 1.0
-      AC_CHECK_LIB(nss3, SSL_VersionRangeSet,
-       [
-       AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
-       AC_SUBST(USE_NSS, [1])
-       USE_NSS="yes"
-       NSS_ENABLED=1
-       curl_ssl_msg="enabled (NSS)"
-       ],
-       [
-         LIBS="$CLEANLIBS"
-         CPPFLAGS="$CLEANCPPFLAGS"
-       ])
-
-      if test "x$USE_NSS" = "xyes"; then
-        AC_MSG_NOTICE([detected NSS version $version])
-
-        dnl needed when linking the curl tool without USE_EXPLICIT_LIB_DEPS
-        NSS_LIBS=$addlib
-        AC_SUBST([NSS_LIBS])
-
-        dnl when shared libs were found in a path that the run-time
-        dnl linker doesn't search through, we need to add it to
-        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
-        dnl due to this
-        if test "x$cross_compiling" != "xyes"; then
-          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
-          export LD_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH])
+      NSS_PCDIR="$OPT_NSS/lib/pkgconfig"
+      if test -f "$NSS_PCDIR/nss.pc"; then
+        CURL_CHECK_PKGCONFIG(nss, [$NSS_PCDIR])
+        if test "$PKGCONFIG" != "no" ; then
+          addld=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --libs-only-L nss`
+          addlib=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --libs-only-l nss`
+          addcflags=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --cflags nss`
+          version=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --modversion nss`
+          nssprefix=`CURL_EXPORT_PCDIR([$NSS_PCDIR]) $PKGCONFIG --variable=prefix nss`
         fi
       fi
-
     fi
+
+    if test -z "$addlib"; then
+      # Without pkg-config, we'll kludge in some defaults
+      AC_MSG_WARN([Using hard-wired libraries and compilation flags for NSS.])
+      addld="-L$OPT_NSS/lib"
+      addlib="-lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4"
+      addcflags="-I$OPT_NSS/include"
+      version="unknown"
+      nssprefix=$OPT_NSS
+    fi
+
+    CLEANLDFLAGS="$LDFLAGS"
+    CLEANLIBS="$LIBS"
+    CLEANCPPFLAGS="$CPPFLAGS"
+
+    LDFLAGS="$addld $LDFLAGS"
+    LIBS="$addlib $LIBS"
+    if test "$addcflags" != "-I/usr/include"; then
+       CPPFLAGS="$CPPFLAGS $addcflags"
+    fi
+
+    dnl The function SSL_VersionRangeSet() is needed to enable TLS > 1.0
+    AC_CHECK_LIB(nss3, SSL_VersionRangeSet,
+     [
+     AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
+     AC_SUBST(USE_NSS, [1])
+     USE_NSS="yes"
+     NSS_ENABLED=1
+     curl_ssl_msg="enabled (NSS)"
+     ],
+     [
+       LDFLAGS="$CLEANLDFLAGS"
+       LIBS="$CLEANLIBS"
+       CPPFLAGS="$CLEANCPPFLAGS"
+     ])
+
+    if test "x$USE_NSS" = "xyes"; then
+      AC_MSG_NOTICE([detected NSS version $version])
+
+      dnl needed when linking the curl tool without USE_EXPLICIT_LIB_DEPS
+      NSS_LIBS=$addlib
+      AC_SUBST([NSS_LIBS])
+
+      dnl when shared libs were found in a path that the run-time
+      dnl linker doesn't search through, we need to add it to
+      dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+      dnl due to this
+      if test "x$cross_compiling" != "xyes"; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
+        export LD_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH])
+      fi
+
+    fi dnl NSS found
 
   fi dnl NSS not disabled
 
@@ -2819,7 +2893,9 @@ if test X"$want_h2" != Xno; then
     CPPFLAGS="$CPPFLAGS $CPP_H2"
     LIBS="$LIB_H2 $LIBS"
 
-    AC_CHECK_LIB(nghttp2, nghttp2_session_callbacks_set_send_callback,
+    # use nghttp2_option_set_no_recv_client_magic to require nghttp2
+    # >= 1.0.0
+    AC_CHECK_LIB(nghttp2, nghttp2_option_set_no_recv_client_magic,
       [
        AC_CHECK_HEADERS(nghttp2/nghttp2.h,
           curl_h2_msg="enabled (nghttp2)"
@@ -3193,7 +3269,7 @@ if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
 [Options --enable-threaded-resolver and --enable-ares are mutually exclusive])
 fi
 
-if test "$want_thres" = "yes"; then
+if test "$want_thres" = "yes" && test "$dontwant_rt" = "no"; then
   AC_CHECK_HEADER(pthread.h,
     [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
       save_CFLAGS="$CFLAGS"

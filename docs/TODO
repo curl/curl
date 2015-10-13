@@ -9,6 +9,11 @@
  Things to do in project cURL. Please tell us what you think, contribute and
  send us patches that improve things!
 
+ Be aware that these are things that we could do, or have once been considered
+ things we could do. If you want to work on any of these areas, please
+ consider bringing it up for discussions first on the mailing list so that we
+ all agree it is still a good idea for the project!
+
  All bugs documented in the KNOWN_BUGS document are subject for fixing!
 
  1. libcurl
@@ -20,6 +25,8 @@
  1.7 Detect when called from within callbacks
  1.8 Allow SSL (HTTPS) to proxy
  1.9 Cache negative name resolves
+ 1.10 Support IDNA2008
+ 1.11 minimize dependencies with dynamicly loaded modules
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -44,6 +51,8 @@
  5.3 Rearrange request header order
  5.4 SPDY
  5.5 auth= in URLs
+ 5.6 Refuse "downgrade" redirects
+ 5.7 More compressions
 
  6. TELNET
  6.1 ditch stdin
@@ -103,6 +112,10 @@
  17.4 simultaneous parallel transfers
  17.5 provide formpost headers
  17.6 warning when setting an option
+ 17.7 warning when sending binary output to terminal
+ 17.8 offer color-coded HTTP header output
+ 17.9 Choose the name of file in braces for complex URLs
+ 17.10 improve how curl works in a windows console window
 
  18. Build
  18.1 roffit
@@ -199,7 +212,7 @@
 
  To prevent local users from snooping on your traffic to the proxy. Supported
  by Chrome already:
- http://www.chromium.org/developers/design-documents/secure-web-proxy
+ https://www.chromium.org/developers/design-documents/secure-web-proxy
 
  ...and by Firefox soon:
  https://bugzilla.mozilla.org/show_bug.cgi?id=378637
@@ -209,6 +222,19 @@
  A name resolve that has failed is likely to fail when made again within a
  short period of time. Currently we only cache positive responses.
 
+1.10 Support IDNA2008
+
+ International Domain Names are supported in libcurl since years back, powered
+ by libidn. libidn implements IDNA2003 which has been superseded by IDNA2008.
+ libidn2 is an existing library offering support for IDNA2008.
+
+1.11 minimize dependencies with dynamicly loaded modules
+
+ We can create a system with loadable modules/plug-ins, where these modules
+ would be the ones that link to 3rd party libs. That would allow us to avoid
+ having to load ALL dependencies since only the necessary ones for this
+ app/invoke/used protocols would be necessary to load.  See
+ https://github.com/bagder/curl/issues/349
 
 2. libcurl - multi interface
 
@@ -256,7 +282,7 @@
  HOST is a command for a client to tell which host name to use, to offer FTP
  servers named-based virtual hosting:
 
- http://tools.ietf.org/html/rfc7151
+ https://tools.ietf.org/html/rfc7151
 
 4.2 Alter passive/active on failure and retry
 
@@ -340,6 +366,22 @@ This is not detailed in any FTP specification.
 
  Additionally this should be implemented for proxy base URLs as well.
 
+5.6 Refuse "downgrade" redirects
+
+ See https://github.com/bagder/curl/issues/226
+
+ Consider a way to tell curl to refuse to "downgrade" protocol with a redirect
+ and/or possibly a bit that refuses redirect to change protocol completely.
+
+5.7 More compressions
+
+ Compression algorithms that perform better than gzip are being considered for
+ use and inclusion in existing browsers. For example 'brotli'. If servers
+ follow along it is a good reason for us to also allow users to take advantage
+ of this. The algorithm: https://github.com/google/brotli The Firefox bug:
+ https://bugzilla.mozilla.org/show_bug.cgi?id=366559
+
+
 6. TELNET
 
 6.1 ditch stdin
@@ -412,7 +454,7 @@ be the same as/similar to FTP.
 
 11.2 Honor file timestamps
 
-The timestamp of the transfered file should reflect that of the original file.
+The timestamp of the transferred file should reflect that of the original file.
 
 11.3 Use NTLMv2
 
@@ -476,7 +518,7 @@ Currently the SMB authentication uses NTLMv1.
 
  DNS-Based Authentication of Named Entities (DANE) is a way to provide SSL
  keys and certs over DNS using DNSSEC as an alternative to the CA model.
- http://www.rfc-editor.org/rfc/rfc6698.txt
+ https://www.rfc-editor.org/rfc/rfc6698.txt
 
  An initial patch was posted by Suresh Krishnaswamy on March 7th 2013
  (http://curl.haxx.se/mail/lib-2013-03/0075.html) but it was a too simple
@@ -506,7 +548,7 @@ Currently the SMB authentication uses NTLMv1.
  Therefore support for the existing -E/--cert and --key options should be
  implemented by supplying a custom certificate to the SChannel APIs, see:
  - Getting a Certificate for Schannel
-   http://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
+   https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
 
 15.2 Add support for custom server certificate validation
 
@@ -517,7 +559,7 @@ Currently the SMB authentication uses NTLMv1.
  Therefore support for the existing --cacert or --capath options should be
  implemented by supplying a custom certificate to the SChannel APIs, see:
  - Getting a Certificate for Schannel
-   http://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
+   https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
 
 15.3 Add support for the --ciphers option
 
@@ -528,7 +570,7 @@ Currently the SMB authentication uses NTLMv1.
  Therefore support for the existing --ciphers option should be implemented
  by mapping the OpenSSL/GnuTLS cipher suites to the SChannel APIs, see
  - Specifying Schannel Ciphers and Cipher Strengths
-   http://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
+   https://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
 
 16. SASL
 
@@ -591,9 +633,39 @@ Currently the SMB authentication uses NTLMv1.
 
 17.6 warning when setting an option
 
-  Display a warning when libcurl returns an error when setting an option.
-  This can be useful to tell when support for a particular feature hasn't been
-  compiled into the library.
+ Display a warning when libcurl returns an error when setting an option.
+ This can be useful to tell when support for a particular feature hasn't been
+ compiled into the library.
+
+17.7 warning when sending binary output to terminal
+
+ Provide a way that prompts the user for confirmation before binary data is
+ sent to the terminal, much in the style 'less' does it.
+
+17.8 offer color-coded HTTP header output
+
+ By offering different color output on the header name and the header
+ contents, they could be made more readable and thus help users working on
+ HTTP services.
+
+17.9 Choose the name of file in braces for complex URLs
+
+ When using braces to download a list of URLs and you use complicated names
+ in the list of alternatives, it could be handy to allow curl to use other
+ names when saving.
+
+ Consider a way to offer that. Possibly like
+ {partURL1:name1,partURL2:name2,partURL3:name3} where the name following the
+ colon is the output name.
+
+ See https://github.com/bagder/curl/issues/221
+
+17.10 improve how curl works in a windows console window
+
+ If you pull the scrollbar when transferring with curl in a Windows console
+ window, the transfer is interrupted and can get disconnected. This can
+ probably be improved. See https://github.com/bagder/curl/issues/322
+
 
 18. Build
 

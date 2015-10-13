@@ -39,7 +39,6 @@
 #include "curl_hmac.h"
 #include "curl_sasl.h"
 #include "warnless.h"
-#include "curl_memory.h"
 #include "strtok.h"
 #include "strequal.h"
 #include "rawstr.h"
@@ -47,7 +46,8 @@
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* Supported mechanisms */
@@ -76,9 +76,6 @@ const struct {
 #define DIGEST_QOP_VALUE_STRING_AUTH_INT  "auth-int"
 #define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
 
-#define DIGEST_MAX_VALUE_LENGTH           256
-#define DIGEST_MAX_CONTENT_LENGTH         1024
-
 /* The CURL_OUTPUT_DIGEST_CONV macro below is for non-ASCII machines.
    It converts digest text to ASCII so the MD5 will be correct for
    what ultimately goes over the network.
@@ -90,13 +87,16 @@ const struct {
     return result; \
   }
 
+#endif
+
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
 /*
  * Returns 0 on success and then the buffers are filled in fine.
  *
  * Non-zero means failure to parse.
  */
-static int sasl_digest_get_pair(const char *str, char *value, char *content,
-                                const char **endptr)
+int Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
+                              const char **endptr)
 {
   int c;
   bool starts_with_quote = FALSE;
@@ -157,7 +157,9 @@ static int sasl_digest_get_pair(const char *str, char *value, char *content,
 
   return 0; /* all is fine! */
 }
+#endif
 
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) && !defined(USE_WINDOWS_SSPI)
 /* Convert md5 chunk to RFC2617 (section 3.1.3) -suitable ascii string*/
 static void sasl_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
                                      unsigned char *dest) /* 33 bytes */
@@ -261,19 +263,19 @@ static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
 /*
  * Curl_sasl_build_spn()
  *
- * This is used to build a SPN string in the format service/host.
+ * This is used to build a SPN string in the format service/instance.
  *
  * Parameters:
  *
  * service  [in] - The service type such as www, smtp, pop or imap.
- * host     [in] - The host name or realm.
+ * instance [in] - The host name or realm.
  *
  * Returns a pointer to the newly allocated SPN.
  */
-char *Curl_sasl_build_spn(const char *service, const char *host)
+char *Curl_sasl_build_spn(const char *service, const char *instance)
 {
   /* Generate and return our SPN */
-  return aprintf("%s/%s", service, host);
+  return aprintf("%s/%s", service, instance);
 }
 #endif
 
@@ -776,7 +778,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
       chlg++;
 
     /* Extract a value=content pair */
-    if(!sasl_digest_get_pair(chlg, value, content, &chlg)) {
+    if(!Curl_sasl_digest_get_pair(chlg, value, content, &chlg)) {
       if(Curl_raw_equal(value, "nonce")) {
         digest->nonce = strdup(content);
         if(!digest->nonce)

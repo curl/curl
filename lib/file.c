@@ -59,12 +59,12 @@
 #include "getinfo.h"
 #include "transfer.h"
 #include "url.h"
-#include "curl_memory.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "warnless.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #if defined(WIN32) || defined(MSDOS) || defined(__EMX__) || \
@@ -315,8 +315,6 @@ static CURLcode file_upload(struct connectdata *conn)
    * Since FILE: doesn't do the full init, we need to provide some extra
    * assignments here.
    */
-  conn->fread_func = data->set.fread_func;
-  conn->fread_in = data->set.in;
   conn->data->req.upload_fromhere = buf;
 
   if(!dir)

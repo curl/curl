@@ -51,10 +51,10 @@
 #include "curl_ntlm_wb.h"
 #include "url.h"
 #include "strerror.h"
-#include "curl_memory.h"
 #include "curl_printf.h"
 
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #if DEBUG_ME
@@ -306,7 +306,7 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
   if(state == NTLMSTATE_TYPE1 &&
      len_out == 3 &&
      buf[0] == 'P' && buf[1] == 'W')
-    return CURLE_REMOTE_ACCESS_DENIED;
+    goto done;
   /* invalid response */
   if(len_out < 4)
     goto done;

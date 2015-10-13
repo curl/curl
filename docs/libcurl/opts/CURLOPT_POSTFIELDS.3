@@ -44,6 +44,9 @@ used by HTML forms. Change Content-Type with \fICURLOPT_HTTPHEADER(3)\fP.
 
 Using \fICURLOPT_POSTFIELDS(3)\fP implies \fICURLOPT_POST(3)\fP.
 
+You can use \fIcurl_easy_escape(3)\fP to url-encode your data, if necessary. It
+returns a pointer to an encoded string that can be passed as \fIpostdata\fP.
+
 If you want to do a zero-byte POST, you need to set
 \fICURLOPT_POSTFIELDSIZE(3)\fP explicitly to zero, as simply setting
 \fICURLOPT_POSTFIELDS(3)\fP to NULL or "" just effectively disables the

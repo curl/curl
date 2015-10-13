@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,7 +19,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* This is a very simple example using the multi interface. */
+/* <DESC>
+ * using the multi interface to do a single download
+ * </DESC>
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -76,12 +79,12 @@ int main(void)
 
     if(mc != CURLM_OK)
     {
-      fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+      fprintf(stderr, "curl_multi_wait() failed, code %d.\n", mc);
       break;
     }
 
     /* 'numfds' being zero means either a timeout or no file descriptors to
-       wait for. Try timeout on first occurance, then assume no file
+       wait for. Try timeout on first occurrence, then assume no file
        descriptors and no file descriptors to wait for means wait for 100
        milliseconds. */
 

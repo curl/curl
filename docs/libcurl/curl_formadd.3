@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -103,6 +103,9 @@ given file match one of the internally known file extensions.  For
 providing multiple \fBCURLFORM_FILE\fP arguments each followed by the filename
 (and each \fICURLFORM_FILE\fP is allowed to have a
 \fICURLFORM_CONTENTTYPE\fP).
+
+The given upload file has to exist in its full in the file system already when
+the upload starts, as libcurl needs to read the correct file size beforehand.
 .IP CURLFORM_CONTENTTYPE
 is used in combination with \fICURLFORM_FILE\fP. Followed by a pointer to a
 string which provides the content-type for this part, possibly instead of an

@@ -50,7 +50,7 @@ Cocoa
 D
 
   Written by Kenneth Bogert
-  http://curl.haxx.se/libcurl/d/
+  http://dlang.org/library/std/net/curl.html
 
 Dylan
 
@@ -60,7 +60,7 @@ Dylan
 Eiffel
 
   Written by Eiffel Software
-  http://curl.haxx.se/libcurl/eiffel/
+  https://room.eiffel.com/library/curl
 
 Euphoria
 
@@ -78,7 +78,7 @@ Ferite
 
 Gambas
 
-  http://gambas.sourceforge.net
+  http://gambas.sourceforge.net/
 
 glib/GTK+
 
@@ -102,8 +102,7 @@ Haskell
 
 Java
 
-  Maintained by [blank]
-  http://curl.haxx.se/libcurl/java/
+  https://github.com/pjlegato/curl-java
 
 Julia
 
@@ -131,7 +130,7 @@ Mono
 .NET
 
   libcurl-net by Jeffrey Phillips
-  http://sourceforge.net/projects/libcurl-net/
+  https://sourceforge.net/projects/libcurl-net/
 
 node.js
 
@@ -146,7 +145,7 @@ Object-Pascal
 O'Caml
 
   Written by Lars Nilsson
-  http://sourceforge.net/projects/ocurl/
+  https://sourceforge.net/projects/ocurl/
 
 Pascal
 
@@ -155,13 +154,13 @@ Pascal
 
 Perl
 
-  Maintained by Cris Bailiff
-  http://curl.haxx.se/libcurl/perl/
+  Maintained by Cris Bailiff and Bálint Szilakszi
+  https://github.com/szbalint/WWW--Curl
 
 PHP
 
   Written by Sterling Hughes
-  http://curl.haxx.se/libcurl/php/
+  https://php.net/curl
 
 PostgreSQL
 
@@ -175,8 +174,7 @@ Python
 
 R
 
-  RCurl by Duncan Temple Lang
-  http://www.omegahat.org/RCurl/
+  http://cran.r-project.org/package=curl
 
 Rexx
 
@@ -197,10 +195,15 @@ Ruby
   ruby-curl-multi - written by Kristjan Petursson and Keith Rarick
   http://curl-multi.rubyforge.org/
 
+Rust
+
+  curl-rust - by Carl Lerche
+  https://github.com/carllerche/curl-rust
+
 Scheme
 
   Bigloo binding by Kirill Lisovsky
-  http://curl.haxx.se/libcurl/scheme/
+  http://www.metapaper.net/lisovsky/web/curl/
 
 S-Lang
 
@@ -230,7 +233,7 @@ Tcl
 Visual Basic
 
   libcurl-vb by Jeffrey Phillips
-  http://sourceforge.net/projects/libcurl-vb/
+  https://sourceforge.net/projects/libcurl-vb/
 
 Visual Foxpro
 
@@ -250,3 +253,8 @@ XBLite
 
   Written by David Szafranski
   http://perso.wanadoo.fr/xblite/libraries.html
+
+Xojo
+
+  Written by Andrew Lambert
+  https://github.com/charonn0/RB-libcURL

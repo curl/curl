@@ -27,12 +27,12 @@
 #include "urldata.h"
 #include "getinfo.h"
 
-#include "curl_memory.h"
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
 #include "progress.h"
 
-/* Make this the last #include */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /*
@@ -113,7 +113,7 @@ static CURLcode getinfo_char(struct SessionHandle *data, CURLINFO info,
     break;
 
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_UNKNOWN_OPTION;
   }
 
   return CURLE_OK;
@@ -200,7 +200,7 @@ static CURLcode getinfo_long(struct SessionHandle *data, CURLINFO info,
     break;
 
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_UNKNOWN_OPTION;
   }
 
   return CURLE_OK;
@@ -253,7 +253,7 @@ static CURLcode getinfo_double(struct SessionHandle *data, CURLINFO info,
     break;
 
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_UNKNOWN_OPTION;
   }
 
   return CURLE_OK;
@@ -290,7 +290,7 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
       void *internals = NULL;
 
       *tsip = tsi;
-      tsi->backend = CURLSSLBACKEND_NONE;
+      tsi->backend = Curl_ssl_backend();
       tsi->internals = NULL;
 
       if(!conn)
@@ -318,17 +318,40 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
       internals = conn->ssl[sockindex].handle;
 #endif
       if(internals) {
-        tsi->backend = Curl_ssl_backend();
         tsi->internals = internals;
       }
       /* NOTE: For other SSL backends, it is not immediately clear what data
-         to return from 'struct ssl_connect_data'; thus, for now we keep the
-         backend as CURLSSLBACKEND_NONE in those cases, which should be
-         interpreted as "not supported" */
+         to return from 'struct ssl_connect_data'; thus we keep 'internals' to
+         NULL which should be interpreted as "not supported" */
     }
     break;
   default:
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_UNKNOWN_OPTION;
+  }
+
+  return CURLE_OK;
+}
+
+static CURLcode getinfo_socket(struct SessionHandle *data, CURLINFO info,
+                               curl_socket_t *param_socketp)
+{
+  curl_socket_t sockfd;
+
+  switch(info) {
+  case CURLINFO_ACTIVESOCKET:
+    sockfd = Curl_getconnectinfo(data, NULL);
+
+    /* note: this is not a good conversion for systems with 64 bit sockets and
+       32 bit longs */
+    if(sockfd != CURL_SOCKET_BAD)
+      *param_socketp = sockfd;
+    else
+      /* this interface is documented to return -1 in case of badness, which
+         may not be the same as the CURL_SOCKET_BAD value */
+      *param_socketp = -1;
+    break;
+  default:
+    return CURLE_UNKNOWN_OPTION;
   }
 
   return CURLE_OK;
@@ -341,9 +364,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   double *param_doublep = NULL;
   char **param_charp = NULL;
   struct curl_slist **param_slistp = NULL;
+  curl_socket_t *param_socketp = NULL;
   int type;
-  /* default return code is to error out! */
-  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+  CURLcode result = CURLE_UNKNOWN_OPTION;
 
   if(!data)
     return result;
@@ -371,6 +394,11 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     param_slistp = va_arg(arg, struct curl_slist **);
     if(param_slistp)
       result = getinfo_slist(data, info, param_slistp);
+    break;
+  case CURLINFO_SOCKET:
+    param_socketp = va_arg(arg, curl_socket_t *);
+    if(param_socketp)
+      result = getinfo_socket(data, info, param_socketp);
     break;
   default:
     break;

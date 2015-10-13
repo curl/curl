@@ -43,7 +43,7 @@ curl, wget and more.
 The following options are supported:
 .IP -b
 backup an existing version of \fIoutputfilename\fP
-.IP -d [name]
+.IP "-d [name]"
 specify which Mozilla tree to pull certdata.txt from (or a custom URL). Valid
 names are: aurora, beta, central, mozilla, nss, release (default). They are
 shortcuts for which source tree to get the cert data from.
@@ -70,7 +70,7 @@ DATA_ENCIPHERMENT, KEY_AGREEMENT, KEY_CERT_SIGN, CRL_SIGN,
 SERVER_AUTH (default), CLIENT_AUTH, CODE_SIGNING, EMAIL_PROTECTION,
 IPSEC_END_SYSTEM, IPSEC_TUNNEL, IPSEC_USER, TIME_STAMPING, STEP_UP_APPROVED
 .RE
-
+.IP
 Valid trust levels are:
 .RS
 ALL, TRUSTED_DELEGATOR (default), NOT_TRUSTED, MUST_VERIFY_TRUST, TRUSTED
