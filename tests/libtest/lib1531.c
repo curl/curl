@@ -49,7 +49,7 @@ int test(char *URL)
 
   /* set the options (I left out a few, you'll get the point anyway) */
   curl_easy_setopt(easy, CURLOPT_URL, URL);
-  curl_easy_setopt(easy, CURLOPT_POSTFIELDSIZE_LARGE, testDataSize);
+  curl_easy_setopt(easy, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)testDataSize);
   curl_easy_setopt(easy, CURLOPT_POSTFIELDS, testData);
 
   /* we start some action by calling perform right away */
