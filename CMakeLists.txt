@@ -254,7 +254,7 @@ include (CheckCSourceCompiles)
 
 # On windows preload settings
 if(WIN32)
-  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WINSOCKAPI_")
+  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WINSOCKAPI_ -DWIN32_LEAN_AND_MEAN")
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
 endif(WIN32)
 
