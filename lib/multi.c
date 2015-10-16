@@ -110,7 +110,7 @@ static void mstate(struct SessionHandle *data, CURLMstate state
 )
 {
   CURLMstate oldstate = data->mstate;
-  static const init_multistate_func finit[CURLM_STATE_LAST-1] = {
+  static const init_multistate_func finit[CURLM_STATE_LAST] = {
     NULL,
     NULL,
     Curl_init_CONNECT, /* CONNECT */
