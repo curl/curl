@@ -35,6 +35,7 @@ static void unit_stop(void)
 
 UNITTEST_START
 
+#ifndef CURL_DISABLE_CRYPTO_AUTH
   unsigned char output[16];
   unsigned char *testp = output;
   Curl_md5it(output, (const unsigned char *)"1");
@@ -46,6 +47,7 @@ UNITTEST_START
 
   verify_memory(testp,
                 "\x88\x67\x0b\x6d\x5d\x74\x2f\xad\xa5\xcd\xf9\xb6\x82\x87\x5f\x22", 16);
+#endif
 
 
 UNITTEST_STOP
