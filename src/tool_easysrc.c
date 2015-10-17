@@ -21,6 +21,8 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#include "slist_wc.h"
+
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
 #define ENABLE_CURLX_PRINTF
@@ -35,11 +37,11 @@
 
 /* global variable definitions, for easy-interface source code generation */
 
-struct curl_slist *easysrc_decl = NULL; /* Variable declarations */
-struct curl_slist *easysrc_data = NULL; /* Build slists, forms etc. */
-struct curl_slist *easysrc_code = NULL; /* Setopt calls */
-struct curl_slist *easysrc_toohard = NULL; /* Unconvertible setopt */
-struct curl_slist *easysrc_clean = NULL;  /* Clean up allocated data */
+struct slist_wc *easysrc_decl = NULL; /* Variable declarations */
+struct slist_wc *easysrc_data = NULL; /* Build slists, forms etc. */
+struct slist_wc *easysrc_code = NULL; /* Setopt calls */
+struct slist_wc *easysrc_toohard = NULL; /* Unconvertible setopt */
+struct slist_wc *easysrc_clean = NULL;  /* Clean up allocated data */
 int easysrc_form_count = 0;
 int easysrc_slist_count = 0;
 
@@ -77,24 +79,23 @@ static const char *const srcend[]={
 /* Clean up all source code if we run out of memory */
 static void easysrc_free(void)
 {
-  curl_slist_free_all(easysrc_decl);
+  slist_wc_free_all(easysrc_decl);
   easysrc_decl = NULL;
-  curl_slist_free_all(easysrc_data);
+  slist_wc_free_all(easysrc_data);
   easysrc_data = NULL;
-  curl_slist_free_all(easysrc_code);
+  slist_wc_free_all(easysrc_code);
   easysrc_code = NULL;
-  curl_slist_free_all(easysrc_toohard);
+  slist_wc_free_all(easysrc_toohard);
   easysrc_toohard = NULL;
-  curl_slist_free_all(easysrc_clean);
+  slist_wc_free_all(easysrc_clean);
   easysrc_clean = NULL;
 }
 
 /* Add a source line to the main code or remarks */
-CURLcode easysrc_add(struct curl_slist **plist, const char *line)
+CURLcode easysrc_add(struct slist_wc **plist, const char *line)
 {
   CURLcode ret = CURLE_OK;
-  struct curl_slist *list =
-    curl_slist_append(*plist, line);
+  struct slist_wc *list = slist_wc_append(*plist, line);
   if(!list) {
     easysrc_free();
     ret = CURLE_OUT_OF_MEMORY;
@@ -104,7 +105,7 @@ CURLcode easysrc_add(struct curl_slist **plist, const char *line)
   return ret;
 }
 
-CURLcode easysrc_addf(struct curl_slist **plist, const char *fmt, ...)
+CURLcode easysrc_addf(struct slist_wc **plist, const char *fmt, ...)
 {
   CURLcode ret;
   char *bufp;
@@ -143,12 +144,14 @@ CURLcode easysrc_perform(void)
     for(i=0; ((c = srchard[i]) != NULL); i++)
       CHKRET(easysrc_add(&easysrc_code, c));
     /* Each unconverted option */
-    for(ptr=easysrc_toohard; ptr; ptr = ptr->next)
-      CHKRET(easysrc_add(&easysrc_code, ptr->data));
+    if(easysrc_toohard) {
+      for(ptr=easysrc_toohard->first; ptr; ptr = ptr->next)
+        CHKRET(easysrc_add(&easysrc_code, ptr->data));
+    }
     CHKRET(easysrc_add(&easysrc_code, ""));
     CHKRET(easysrc_add(&easysrc_code, "*/"));
 
-    curl_slist_free_all(easysrc_toohard);
+    slist_wc_free_all(easysrc_toohard);
     easysrc_toohard = NULL;
   }
 
@@ -190,29 +193,35 @@ void dumpeasysrc(struct GlobalConfig *config)
       fprintf(out, "%s\n", c);
 
     /* Declare variables used for complex setopt values */
-    for(ptr=easysrc_decl; ptr; ptr = ptr->next)
-      fprintf(out, "  %s\n", ptr->data);
+    if(easysrc_decl) {
+      for(ptr=easysrc_decl->first; ptr; ptr = ptr->next)
+        fprintf(out, "  %s\n", ptr->data);
+    }
 
     /* Set up complex values for setopt calls */
     if(easysrc_data) {
       fprintf(out, "\n");
 
-      for(ptr=easysrc_data; ptr; ptr = ptr->next)
+      for(ptr=easysrc_data->first; ptr; ptr = ptr->next)
         fprintf(out, "  %s\n", ptr->data);
     }
 
     fprintf(out, "\n");
-    for(ptr=easysrc_code; ptr; ptr = ptr->next) {
-      if(ptr->data[0]) {
-        fprintf(out, "  %s\n", ptr->data);
-      }
-      else {
-        fprintf(out, "\n");
+    if(easysrc_code) {
+      for(ptr=easysrc_code->first; ptr; ptr = ptr->next) {
+        if(ptr->data[0]) {
+          fprintf(out, "  %s\n", ptr->data);
+        }
+        else {
+          fprintf(out, "\n");
+        }
       }
     }
 
-    for(ptr=easysrc_clean; ptr; ptr = ptr->next)
-      fprintf(out, "  %s\n", ptr->data);
+    if(easysrc_clean) {
+      for(ptr=easysrc_clean->first; ptr; ptr = ptr->next)
+        fprintf(out, "  %s\n", ptr->data);
+    }
 
     for(i=0; ((c = srcend[i]) != NULL); i++)
       fprintf(out, "%s\n", c);

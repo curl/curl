@@ -145,6 +145,7 @@ RELEASE_OBJS= \
 	rawstrr.obj \
 	strtoofftr.obj \
 	warnless.obj \
+	slist_wc.obj \
 	tool_binmoder.obj \
 	tool_bnamer.obj \
 	tool_cb_dbgr.obj \
@@ -190,6 +191,7 @@ DEBUG_OBJS= \
 	rawstrd.obj \
 	strtoofftd.obj \
 	warnlessd.obj \
+	slist_wc.obj \
 	tool_binmoded.obj \
 	tool_bnamed.obj \
 	tool_cb_dbgd.obj \
@@ -367,6 +369,8 @@ strtoofftr.obj: ../lib/strtoofft.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 warnless.obj: ../lib/warnless.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/warnless.c
+slist_wc.obj: slist_wc.c
+	$(CCR) $(CFLAGS) /Fo"$@" slist_wc.c
 tool_binmoder.obj: tool_binmode.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_binmode.c
 tool_bnamer.obj: tool_bname.c
@@ -455,6 +459,8 @@ strtoofftd.obj: ../lib/strtoofft.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 warnlessd.obj: ../lib/warnless.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/warnless.c
+slist_wc.obj: slist_wc.c
+	$(CCD) $(CFLAGS) /Fo"$@" slist_wc.c
 tool_binmoded.obj: tool_binmode.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_binmode.c
 tool_bnamed.obj: tool_bname.c

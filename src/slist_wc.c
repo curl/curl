@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_TOOL_EASYSRC_H
-#define HEADER_CURL_TOOL_EASYSRC_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,29 +19,55 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
 #include "tool_setup.h"
+
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
-/* global variable declarations, for easy-interface source code generation */
+#include "slist_wc.h"
 
-extern struct slist_wc *easysrc_decl; /* Variable declarations */
-extern struct slist_wc *easysrc_data; /* Build slists, forms etc. */
-extern struct slist_wc *easysrc_code; /* Setopt calls etc. */
-extern struct slist_wc *easysrc_toohard; /* Unconvertible setopt */
-extern struct slist_wc *easysrc_clean;  /* Clean up (reverse order) */
+/* The last #include files should be: */
+#include "curl_memory.h"
+#include "memdebug.h"
 
-extern int easysrc_form_count;  /* Number of curl_httppost variables */
-extern int easysrc_slist_count; /* Number of curl_slist variables */
+/*
+ * slist_wc_append() appends a string to the linked list. This function can be
+ * used as an initialization function as well as an append function.
+ */
+struct slist_wc *slist_wc_append(struct slist_wc *list,
+                                 const char *data)
+{
+  struct curl_slist *new_item = curl_slist_append(NULL, data);
 
-extern CURLcode easysrc_init(void);
-extern CURLcode easysrc_add(struct slist_wc **plist, const char *bupf);
-extern CURLcode easysrc_addf(struct slist_wc **plist,
-                             const char *fmt, ...);
-extern CURLcode easysrc_perform(void);
-extern CURLcode easysrc_cleanup(void);
+  if(!new_item)
+    return NULL;
 
-void dumpeasysrc(struct GlobalConfig *config);
+  if(!list) {
+    list = malloc(sizeof(struct slist_wc));
+
+    if(!list) {
+      free(new_item);
+      return NULL;
+    }
+
+    list->first = new_item;
+    list->last = new_item;
+    return list;
+  }
+
+  list->last->next = new_item;
+  list->last = list->last->next;
+  return list;
+}
+
+/* be nice and clean up resources */
+void slist_wc_free_all(struct slist_wc *list)
+{
+  if(!list)
+    return;
+
+  curl_slist_free_all(list->first);
+  free(list);
+}
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
-
-#endif /* HEADER_CURL_TOOL_EASYSRC_H */
