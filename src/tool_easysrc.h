@@ -26,18 +26,19 @@
 
 /* global variable declarations, for easy-interface source code generation */
 
-extern struct curl_slist *easysrc_decl; /* Variable declarations */
-extern struct curl_slist *easysrc_data; /* Build slists, forms etc. */
-extern struct curl_slist *easysrc_code; /* Setopt calls etc. */
-extern struct curl_slist *easysrc_toohard; /* Unconvertible setopt */
-extern struct curl_slist *easysrc_clean;  /* Clean up (reverse order) */
+extern struct curl_slist_wc *easysrc_decl; /* Variable declarations */
+extern struct curl_slist_wc *easysrc_data; /* Build slists, forms etc. */
+extern struct curl_slist_wc *easysrc_code; /* Setopt calls etc. */
+extern struct curl_slist_wc *easysrc_toohard; /* Unconvertible setopt */
+extern struct curl_slist_wc *easysrc_clean;  /* Clean up (reverse order) */
 
 extern int easysrc_form_count;  /* Number of curl_httppost variables */
 extern int easysrc_slist_count; /* Number of curl_slist variables */
 
 extern CURLcode easysrc_init(void);
-extern CURLcode easysrc_add(struct curl_slist **plist, const char *bupf);
-extern CURLcode easysrc_addf(struct curl_slist **plist, const char *fmt, ...);
+extern CURLcode easysrc_add(struct curl_slist_wc **plist, const char *bupf);
+extern CURLcode easysrc_addf(struct curl_slist_wc **plist,
+                             const char *fmt, ...);
 extern CURLcode easysrc_perform(void);
 extern CURLcode easysrc_cleanup(void);
 
