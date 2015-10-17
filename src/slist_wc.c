@@ -27,7 +27,6 @@
 #include "slist_wc.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
 #include "memdebug.h"
 
 /*
