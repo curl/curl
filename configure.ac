@@ -3559,6 +3559,10 @@ if test "x$HAVE_GSSAPI" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
 fi
 
+if test "x$curl_psl_msg" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES PSL"
+fi
+
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
     \( "x$HAVE_GSSAPI" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \); then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
