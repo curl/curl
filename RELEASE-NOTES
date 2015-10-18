@@ -8,11 +8,26 @@ Curl and libcurl 7.46.0
 
 This release includes the following changes:
 
- o
+ o configure: build silently by default
+ o cookies: Add support for Publix Suffix List with libpsl
  
 This release includes the following bugfixes:
 
- o
+ o des: Fix header conditional for Curl_des_set_odd_parity
+ o ntlm: get rid of unconditional use of long long [1]
+ o CURLOPT_CERTINFO.3: fix reference to CURLINFO_CERTINFO
+ o docs: CURLINFO_LASTSOCKET => CURLINFO_ACTIVESOCKET [2]
+ o http2: Fix http2_recv to return -1 if recv returned -1
+ o curl_global_init_mem: set function pointers before doing init
+ o ntlm: error out without 64bit support as the code needs it [1]
+ o openssl: Fix set up of pkcs12 certificate verification chain
+ o acinclude: remove PKGCONFIG override [3]
+ o test1531: case the size to fix the test on non-largefile builds
+ o fread_func: move callback pointer from set to state struct [4]
+ o test1601: fix compilation with --enable-debug and --disable-crypto-auth
+ o http2: Don't pass unitialized name+len pairs to nghttp2_submit_request [5]
+ o curlbuild.h: Fix non-configure compiling to mips and sh4 targets
+ o tool: Generate easysrc with last cache linked-list [6]
 
 This release includes the following known bugs:
 
@@ -21,9 +36,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Anders Bakken, Dan Fandrich, Daniel Hwang, Daniel Stenberg, Erik Johansson,
+  Rainer Jung, Ray Satiro, Richard Hosking, Svyatoslav Mishyn, Tim Rühsen,
+  (10 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = 
+ [1] = http://curl.haxx.se/bug/?i=478
+ [2] = http://curl.haxx.se/bug/?i=479
+ [3] = http://curl.haxx.se/mail/lib-2015-10/0035.html
+ [4] = http://curl.haxx.se/bug/?i=346
+ [5] = http://curl.haxx.se/bug/?i=493
+ [6] = http://curl.haxx.se/bug/?i=452
