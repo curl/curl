@@ -31,6 +31,9 @@ boo
 
 # Client-side
 <client>
+<features>
+PSL
+</features>
 <server>
 http
 </server>
