@@ -359,7 +359,7 @@ mbedtls_connect_step1(struct connectdata *conn,
       static const char* protocols[] = {
         NGHTTP2_PROTO_VERSION_ID, ALPN_HTTP_1_1, NULL
       };
-      mbedtls_ssl_conf_alpn_protocols(&connssl->ssl, protocols);
+      mbedtls_ssl_conf_alpn_protocols(&connssl->config, protocols);
       infof(data, "ALPN, offering %s, %s\n", protocols[0],
             protocols[1]);
     }
