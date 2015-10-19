@@ -157,8 +157,9 @@ mbedtls_connect_step1(struct connectdata *conn,
 #ifdef THREADING_SUPPORT
   entropy_init_mutex(&entropy);
 
-  if((ret = mbedtls_ctr_drbg_init(&connssl->ctr_drbg, entropy_func_mutex, &entropy,
-                               connssl->ssn.id, connssl->ssn.length)) != 0) {
+  if((ret = mbedtls_ctr_drbg_init(&connssl->ctr_drbg, entropy_func_mutex,
+                                  &entropy, connssl->ssn.id,
+                                  connssl->ssn.length)) != 0) {
 #ifdef MBEDTLS_ERROR_C
      mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
@@ -169,8 +170,9 @@ mbedtls_connect_step1(struct connectdata *conn,
   mbedtls_entropy_init(&connssl->entropy);
   mbedtls_ctr_drbg_init(&connssl->ctr_drbg);
 
-  if((ret = mbedtls_ctr_drbg_seed(&connssl->ctr_drbg, mbedtls_entropy_func, &connssl->entropy,
-                                connssl->ssn.id, connssl->ssn.id_len)) != 0) {
+  if((ret = mbedtls_ctr_drbg_seed(&connssl->ctr_drbg, mbedtls_entropy_func,
+                                  &connssl->entropy, connssl->ssn.id,
+                                  connssl->ssn.id_len)) != 0) {
 #ifdef MBEDTLS_ERROR_C
      mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
@@ -234,18 +236,11 @@ mbedtls_connect_step1(struct connectdata *conn,
 
   /* Load the client private key */
   if(data->set.str[STRING_KEY]) {
-	printf("STRING KEY %s\n", data->set.str[STRING_KEY]);
-    //mbedtls_pk_context pk;
     mbedtls_pk_init(&connssl->pk);
     ret = mbedtls_pk_parse_keyfile(&connssl->pk, data->set.str[STRING_KEY],
                            data->set.str[STRING_KEY_PASSWD]);
     if(ret == 0 && !mbedtls_pk_can_do(&connssl->pk, MBEDTLS_PK_RSA))
       ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
-    //if(ret == 0)
-    //  mbedtls_rsa_copy(&connssl->rsa, mbedtls_pk_rsa(pk));
-    //else
-    //  mbedtls_rsa_free(&connssl->rsa);
-    //sbedtls_pk_free(&pk);
 
     if(ret) {
 #ifdef MBEDTLS_ERROR_C
@@ -287,10 +282,12 @@ mbedtls_connect_step1(struct connectdata *conn,
     failf(data, "mbedTLS: ssl_init failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
-  if((ret = mbedtls_ssl_config_defaults(&connssl->config, MBEDTLS_SSL_IS_CLIENT,
-                                         MBEDTLS_SSL_TRANSPORT_STREAM,
-										 MBEDTLS_SSL_PRESET_DEFAULT)) != 0)
-  {
+  if((ret = mbedtls_ssl_config_defaults(&connssl->config, 
+                                        MBEDTLS_SSL_IS_CLIENT,
+                                        MBEDTLS_SSL_TRANSPORT_STREAM,
+                                        MBEDTLS_SSL_PRESET_DEFAULT)) != 0) {
+    failf(data, "mbedTLS: ssl_config failed");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   switch(data->set.ssl.version) {
@@ -316,7 +313,6 @@ mbedtls_connect_step1(struct connectdata *conn,
     break;
   }
 
-  //mbedtls_ssl_conf_endpoint(&connssl->ssl, MBEDTLS_SSL_IS_CLIENT);
   mbedtls_ssl_conf_authmode(&connssl->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
 
   mbedtls_ssl_conf_rng(&connssl->config, mbedtls_ctr_drbg_random,
@@ -324,9 +320,10 @@ mbedtls_connect_step1(struct connectdata *conn,
   mbedtls_ssl_set_bio(&connssl->ssl, &conn->sock[sockindex],
               mbedtls_net_send,
               mbedtls_net_recv,
-			  NULL /*  rev_timeout() */);
+              NULL /*  rev_timeout() */);
 
-  mbedtls_ssl_conf_ciphersuites(&connssl->config, mbedtls_ssl_list_ciphersuites());
+  mbedtls_ssl_conf_ciphersuites(&connssl->config,
+                                mbedtls_ssl_list_ciphersuites());
   if(!Curl_ssl_getsessionid(conn, &old_session, &old_session_size)) {
     memcpy(&connssl->ssn, old_session, old_session_size);
     infof(data, "mbedTLS re-using session\n");
@@ -489,7 +486,7 @@ mbedtls_connect_step3(struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct SessionHandle *data = conn->data;
   void *old_ssl_sessionid = NULL;
-  mbedtls_ssl_session *our_ssl_sessionid = &conn->ssl[sockindex].ssn ;
+  mbedtls_ssl_session *our_ssl_sessionid = &conn->ssl[sockindex].ssn;
   int incache;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
@@ -555,7 +552,7 @@ void Curl_mbedtls_close_all(struct SessionHandle *data)
 
 void Curl_mbedtls_close(struct connectdata *conn, int sockindex)
 {
-  //mbedtls_rsa_free(&conn->ssl[sockindex].rsa);
+  /* mbedtls_rsa_free(&conn->ssl[sockindex].rsa); */
   mbedtls_x509_crt_free(&conn->ssl[sockindex].clicert);
   mbedtls_x509_crt_free(&conn->ssl[sockindex].cacert);
   mbedtls_x509_crl_free(&conn->ssl[sockindex].crl);
@@ -572,7 +569,8 @@ static ssize_t mbedtls_recv(struct connectdata *conn,
   ssize_t len = -1;
 
   memset(buf, 0, buffersize);
-  ret = mbedtls_ssl_read(&conn->ssl[num].ssl, (unsigned char *)buf, buffersize);
+  ret = mbedtls_ssl_read(&conn->ssl[num].ssl, (unsigned char *)buf,
+                         buffersize);
 
   if(ret <= 0) {
     if(ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY)
@@ -655,7 +653,7 @@ mbedtls_connect_common(struct connectdata *conn,
       curl_socket_t readfd = ssl_connect_2_reading==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
-      what = Curl_socket_ready(readfd, writefd, nonblocking?0:timeout_ms);
+      what = Curl_socket_ready(readfd, writefd, nonblocking ? 0 : timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);

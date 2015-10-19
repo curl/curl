@@ -2029,7 +2029,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
       AC_CHECK_LIB(mbedtls, mbedtls_ssl_init,
        [
-       AC_DEFINE(USE_MBEDTLS, 1, [if PolarSSLb is enabled])
+       AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
        AC_SUBST(USE_MBEDTLS, [1])
        MBEDTLS_ENABLED=1
        USE_MBEDTLS="yes"
