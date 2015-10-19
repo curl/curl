@@ -24,7 +24,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_POLARSSL
+#if (defined USE_POLARSSL) || (defined USE_MBEDTLS)
 
 #if defined(USE_THREADS_POSIX)
 #  define POLARSSL_MUTEX_T       pthread_mutex_t
