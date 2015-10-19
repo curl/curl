@@ -282,7 +282,7 @@ mbedtls_connect_step1(struct connectdata *conn,
     failf(data, "mbedTLS: ssl_init failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
-  if((ret = mbedtls_ssl_config_defaults(&connssl->config, 
+  if((ret = mbedtls_ssl_config_defaults(&connssl->config,
                                         MBEDTLS_SSL_IS_CLIENT,
                                         MBEDTLS_SSL_TRANSPORT_STREAM,
                                         MBEDTLS_SSL_PRESET_DEFAULT)) != 0) {
