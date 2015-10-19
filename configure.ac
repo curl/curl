@@ -149,7 +149,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl,darwinssl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,axtls,winssl,darwinssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
     curl_gss_msg="no      (--with-gssapi)"
@@ -1977,6 +1977,93 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 fi
 
 dnl ----------------------------------------------------
+dnl check for mbedTLS
+dnl ----------------------------------------------------
+
+OPT_MBEDTLS=no
+
+_cppflags=$CPPFLAGS
+_ldflags=$LDFLAGS
+AC_ARG_WITH(mbedtls,dnl
+AC_HELP_STRING([--with-mbedtls=PATH],[where to look for mbedTLS, PATH points to the installation root])
+AC_HELP_STRING([--without-mbedtls], [disable mbedTLS detection]),
+  OPT_MBEDTLS=$withval)
+
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+
+  if test X"$OPT_MBEDTLS" != Xno; then
+
+    if test "$OPT_MBEDTLS" = "yes"; then
+      OPT_MBEDTLS=""
+    fi
+
+    if test -z "$OPT_MBEDTLS" ; then
+      dnl check for lib first without setting any new path
+
+      AC_CHECK_LIB(mbedtls, mbedtls_havege_init,
+      dnl libmbedtls found, set the variable
+       [
+         AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
+         AC_SUBST(USE_MBEDTLS, [1])
+         MBEDTLS_ENABLED=1
+         USE_MBEDTLS="yes"
+         curl_ssl_msg="enabled (mbedTLS)"
+        ], [], -lmbedx509 -lmbedcrypto)
+    fi
+
+    addld=""
+    addlib=""
+    addcflags=""
+    mbedtlslib=""
+
+    if test "x$USE_MBEDTLS" != "xyes"; then
+      dnl add the path and test again
+      addld=-L$OPT_MBEDTLS/lib$libsuff
+      addcflags=-I$OPT_MBEDTLS/include
+      mbedtlslib=$OPT_MBEDTLS/lib$libsuff
+
+      LDFLAGS="$LDFLAGS $addld"
+      if test "$addcflags" != "-I/usr/include"; then
+         CPPFLAGS="$CPPFLAGS $addcflags"
+      fi
+
+      AC_CHECK_LIB(mbedtls, mbedtls_ssl_init,
+       [
+       AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
+       AC_SUBST(USE_MBEDTLS, [1])
+       MBEDTLS_ENABLED=1
+       USE_MBEDTLS="yes"
+       curl_ssl_msg="enabled (mbedTLS)"
+       ],
+       [
+         CPPFLAGS=$_cppflags
+         LDFLAGS=$_ldflags
+       ], -lmbedx509 -lmbedcrypto)
+    fi
+
+    if test "x$USE_MBEDTLS" = "xyes"; then
+      AC_MSG_NOTICE([detected mbedTLS])
+
+      LIBS="-lmbedtls -lmbedx509 -lmbedcrypto $LIBS"
+
+      if test -n "$mbedtlslib"; then
+        dnl when shared libs were found in a path that the run-time
+        dnl linker doesn't search through, we need to add it to
+        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+        dnl due to this
+        if test "x$cross_compiling" != "xyes"; then
+          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$mbedtlslib"
+          export LD_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $mbedtlslib to LD_LIBRARY_PATH])
+        fi
+      fi
+    fi
+
+  fi dnl mbedTLS not disabled
+
+fi
+
+dnl ----------------------------------------------------
 dnl check for CyaSSL
 dnl ----------------------------------------------------
 
@@ -2300,7 +2387,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   fi
 fi
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED" = "x"; then
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED" = "x"; then
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
   AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls, --with-winssl, or --with-darwinssl to address this.])
 else
