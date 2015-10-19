@@ -93,7 +93,15 @@
 #include <gnutls/gnutls.h>
 #endif
 
-#ifdef USE_POLARSSL
+#ifdef USE_MBEDTLS
+
+#include <mbedtls/ssl.h>
+#include <mbedtls/version.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
+
+#elif defined USE_POLARSSL
+
 #include <polarssl/ssl.h>
 #include <polarssl/version.h>
 #if POLARSSL_VERSION_NUMBER<0x01010000
@@ -102,6 +110,7 @@
 #include <polarssl/entropy.h>
 #include <polarssl/ctr_drbg.h>
 #endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
+
 #endif /* USE_POLARSSL */
 
 #ifdef USE_CYASSL
@@ -280,6 +289,19 @@ struct ssl_connect_data {
 #endif
   ssl_connect_state connecting_state;
 #endif /* USE_GNUTLS */
+#ifdef USE_MBEDTLS
+  mbedtls_ctr_drbg_context ctr_drbg;
+  mbedtls_entropy_context entropy;
+  mbedtls_ssl_context ssl;
+  mbedtls_ssl_session ssn;
+  int server_fd;
+  mbedtls_x509_crt cacert;
+  mbedtls_x509_crt clicert;
+  mbedtls_x509_crl crl;
+  mbedtls_pk_context pk;
+  ssl_connect_state connecting_state;
+  mbedtls_ssl_config config;
+#endif /* USE_MBEDTLS */
 #ifdef USE_POLARSSL
   ctr_drbg_context ctr_drbg;
   entropy_context entropy;
