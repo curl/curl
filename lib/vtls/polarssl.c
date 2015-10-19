@@ -31,19 +31,32 @@
 
 #ifdef USE_POLARSSL
 
-#include <polarssl/net.h>
-#include <polarssl/ssl.h>
-#include <polarssl/certs.h>
-#include <polarssl/x509.h>
-#include <polarssl/version.h>
+/* Determine mbedtls 1.x vs. 2.x */
+#if defined(USE_MBEDTLS)
+#  include <mbedtls/compat-1.3.h>
+#  include <mbedtls/net.h>
+#  include <mbedtls/ssl.h>
+#  include <mbedtls/certs.h>
+#  include <mbedtls/x509.h>
+#  include <mbedtls/version.h>
+#  include <mbedtls/error.h>
+#  include <mbedtls/entropy.h>
+#  include <mbedtls/ctr_drbg.h>
+#else
+#  include <polarssl/net.h>
+#  include <polarssl/ssl.h>
+#  include <polarssl/certs.h>
+#  include <polarssl/x509.h>
+#  include <polarssl/version.h>
+#  include <polarssl/error.h>
+#  include <polarssl/entropy.h>
+#  include <polarssl/ctr_drbg.h>
+#endif
 
 #if POLARSSL_VERSION_NUMBER < 0x01030000
 #error too old PolarSSL
 #endif
 
-#include <polarssl/error.h>
-#include <polarssl/entropy.h>
-#include <polarssl/ctr_drbg.h>
 
 #include "urldata.h"
 #include "sendf.h"
@@ -156,25 +169,54 @@ polarssl_connect_step1(struct connectdata *conn,
 #ifdef THREADING_SUPPORT
   entropy_init_mutex(&entropy);
 
-  if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func_mutex, &entropy,
+
+#if defined(USE_MBEDTLS)
+    mbedtls_ctr_drbg_init(&connssl->ctr_drbg);
+    if((ret = mbedtls_ctr_drbg_seed(&connssl->ctr_drbg, entropy_func_mutex, &entropy,
+                               connssl->ssn.id, connssl->ssn.id_len)) != 0) 
+    {
+#ifdef POLARSSL_ERROR_C
+       error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+       failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
+                                                            -ret, errorbuf);
+    }
+#else  // Normal mbedtls 1.x Call
+    if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func_mutex, &entropy,
                                connssl->ssn.id, connssl->ssn.length)) != 0) {
 #ifdef POLARSSL_ERROR_C
-     error_strerror(ret, errorbuf, sizeof(errorbuf));
+       error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
-     failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
+       failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
                                                             -ret, errorbuf);
-  }
+    }
+#endif  // END USE_MBEDTLS
+
 #else
   entropy_init(&connssl->entropy);
 
-  if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func, &connssl->entropy,
-                                connssl->ssn.id, connssl->ssn.length)) != 0) {
+#if defined(USE_MBEDTLS)
+    mbedtls_ctr_drbg_init(&connssl->ctr_drbg);
+    if((ret = mbedtls_ctr_drbg_seed(&connssl->ctr_drbg, entropy_func, &connssl->entropy,
+                               connssl->ssn.id, connssl->ssn.id_len)) != 0) 
+    {
 #ifdef POLARSSL_ERROR_C
-     error_strerror(ret, errorbuf, sizeof(errorbuf));
+       error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
-     failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
+       failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
                                                             -ret, errorbuf);
-  }
+    }
+#else  // Normal mbedtls 1.x Call
+    if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func, &connssl->entropy,
+                               connssl->ssn.id, connssl->ssn.length)) != 0) {
+#ifdef POLARSSL_ERROR_C
+       error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+       failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
+                                                            -ret, errorbuf);
+    }
+#endif  // END USE_MBEDTLS
+
 #endif /* THREADING_SUPPORT */
 
   /* Load the trusted CA */
@@ -352,6 +394,12 @@ polarssl_connect_step1(struct connectdata *conn,
      infof(data, "WARNING: failed to configure "
                  "server name indication (SNI) TLS extension\n");
   }
+
+
+
+
+
+
 
 #ifdef HAS_ALPN
   if(data->set.ssl_enable_alpn) {
