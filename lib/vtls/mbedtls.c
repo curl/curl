@@ -37,6 +37,10 @@
 #include <mbedtls/x509.h>
 #include <mbedtls/version.h>
 
+#if MBEDTLS_VERSION_NUMBER < 0x02010200
+#error too old mbedTLS
+#endif
+
 #include <mbedtls/error.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
@@ -460,10 +464,10 @@ mbedtls_connect_step2(struct connectdata *conn,
 
       if(strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
                   NGHTTP2_PROTO_VERSION_ID_LEN)) {
-        conn->negnpn = NPN_HTTP2;
+        conn->negnpn = CURL_HTTP_VERSION_2_0;
       }
       else if(strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH)) {
-        conn->negnpn = NPN_HTTP1_1;
+        conn->negnpn = CURL_HTTP_VERSION_1_1;
       }
     }
     else {
