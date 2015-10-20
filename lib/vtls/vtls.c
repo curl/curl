@@ -845,6 +845,8 @@ CURLcode Curl_pin_peer_pubkey(struct SessionHandle *data,
     Curl_safefree(pinkeycopy);
     return result;
   }
+#else
+  (void)data;
 #endif
 
   fp = fopen(pinnedpubkey, "rb");
