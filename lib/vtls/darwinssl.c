@@ -105,6 +105,11 @@
 #error "The darwinssl back-end requires iOS or OS X."
 #endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
 
+#undef HAS_ALPN
+#if CURL_BUILD_MAC_10_11 || CURL_BUILD_IOS_9
+#  define HAS_ALPN 1
+#endif
+
 #if CURL_BUILD_MAC
 #include <sys/sysctl.h>
 #endif /* CURL_BUILD_MAC */
@@ -125,6 +130,60 @@
 /* From MacTypes.h (which we can't include because it isn't present in iOS: */
 #define ioErr -36
 #define paramErr -50
+
+#ifdef HAS_ALPN
+OSStatus SSLSetALPNData(SSLContextRef, const char*, size_t);
+void SSLSetALPNFunc(SSLContextRef,
+                    void(*)(SSLContextRef, void*, void const*, unsigned long),
+                    void*);
+
+/*
+ * in is a list of length prefixed strings. this function has to select
+ * the protocol we want to use from the list and write its string into out.
+ */
+
+static int
+select_next_protocol(const unsigned char *in, unsigned long inlen,
+                     const char *key, unsigned int keylen)
+{
+  unsigned int i;
+  for(i = 0; i + keylen <= inlen; i += in[i] + 1)
+    if(memcmp(&in[i + 1], key, keylen) == 0)
+      return 0;
+  return -1;
+}
+
+static void
+select_next_proto_cb(SSLContextRef ctx, void *arg, const void *in,
+                     unsigned long inlen)
+{
+  struct connectdata *conn = (struct connectdata*) arg;
+
+  (void)ctx;
+
+#ifdef USE_NGHTTP2
+  if(conn->data->set.httpversion == CURL_HTTP_VERSION_2_0 &&
+     !select_next_protocol(in, inlen, NGHTTP2_PROTO_VERSION_ID,
+                           NGHTTP2_PROTO_VERSION_ID_LEN)) {
+    infof(conn->data, "ALPN, negotiated HTTP2 (%s)\n",
+          NGHTTP2_PROTO_VERSION_ID);
+    conn->negnpn = CURL_HTTP_VERSION_2_0;
+    return;
+  }
+#endif
+
+  if(!select_next_protocol(in, inlen, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH)) {
+    infof(conn->data, "ALPN, negotiated HTTP1.1\n");
+    conn->negnpn = CURL_HTTP_VERSION_1_1;
+    return;
+  }
+
+  infof(conn->data, "ALPN, no overlap, use HTTP1.1\n");
+  conn->negnpn = CURL_HTTP_VERSION_1_1;
+
+  return;
+}
+#endif
 
 /* The following two functions were ripped from Apple sample code,
  * with some modifications: */
@@ -1196,6 +1255,42 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       break;
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
+
+
+#ifdef HAS_ALPN
+  if(data->set.ssl_enable_alpn &&
+     SSLSetALPNData != NULL &&
+     SSLSetALPNFunc != NULL) {
+    int cur = 0;
+    unsigned char protocols[128];
+
+#ifdef USE_NGHTTP2
+    if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+      protocols[cur++] = NGHTTP2_PROTO_VERSION_ID_LEN;
+
+      memcpy(&protocols[cur], NGHTTP2_PROTO_VERSION_ID,
+          NGHTTP2_PROTO_VERSION_ID_LEN);
+      cur += NGHTTP2_PROTO_VERSION_ID_LEN;
+      infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
+    }
+#endif
+
+    protocols[cur++] = ALPN_HTTP_1_1_LENGTH;
+    memcpy(&protocols[cur], ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH);
+    cur += ALPN_HTTP_1_1_LENGTH;
+    infof(data, "ALPN, offering %s\n", ALPN_HTTP_1_1);
+
+    /* expects length prefixed preference ordered list of protocols in wire
+     * format
+     */
+    err = SSLSetALPNData(connssl->ssl_ctx, protocols, cur);
+    if(err != noErr) {
+      failf(data, "SSL: SSLSetALPNData() failed: OSStatus %d", err);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    SSLSetALPNFunc(connssl->ssl_ctx, select_next_proto_cb, conn);
+  }
+#endif
 
   if(data->set.str[STRING_KEY]) {
     infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
