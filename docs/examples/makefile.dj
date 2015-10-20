@@ -19,10 +19,6 @@
 # KIND, either express or implied.
 #
 ###########################################################################
-#
-#  Adapted for djgpp / Watt-32 / DOS by
-#  Gisle Vanem <gvanem@broadpark.no>
-#
 
 TOPDIR = ../..
 
