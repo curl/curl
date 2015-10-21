@@ -123,6 +123,24 @@ static void mbedtls_debug(void *context, int level, const char *line)
 #  endif
 #endif
 
+
+/*
+ *  profile
+ */
+const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
+{
+    /* Hashes from SHA-1 and above */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_RIPEMD160 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA224 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA256 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA384 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA512 ),
+    0xFFFFFFF, /* Any PK alg    */
+    0xFFFFFFF, /* Any curve     */
+    1024,      /* RSA min key len */
+};
+
 static Curl_recv mbedtls_recv;
 static Curl_send mbedtls_send;
 
@@ -274,7 +292,6 @@ mbedtls_connect_step1(struct connectdata *conn,
   infof(data, "mbedTLS: Connecting to %s:%d\n",
         conn->host.name, conn->remote_port);
 
-
   mbedtls_ssl_config_init(&connssl->config);
 
   mbedtls_ssl_init(&connssl->ssl);
@@ -290,6 +307,10 @@ mbedtls_connect_step1(struct connectdata *conn,
     failf(data, "mbedTLS: ssl_config failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
+
+  /* new profile with RSA min key len = 1024 ... */
+  mbedtls_ssl_conf_cert_profile( &connssl->config,
+                                 &mbedtls_x509_crt_profile_fr);
 
   switch(data->set.ssl.version) {
   case CURL_SSLVERSION_SSLv3:
