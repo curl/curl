@@ -424,9 +424,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   DEBUGF(infof(data_s, "on_frame_recv() header %x stream %x\n",
                frame->hd.type, stream_id));
 
-  conn = data_s->easy_conn;
-  assert(conn);
-  assert(conn->data == data_s);
   httpc = &conn->proto.httpc;
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
