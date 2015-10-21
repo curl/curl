@@ -26,12 +26,14 @@
 #
 
 DEPEND_PREREQ = curl_config.h
+VPATH  = vtls
 TOPDIR = ..
 
 include ../packages/DOS/common.dj
 include Makefile.inc
 
-OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CSOURCES)))
+SOURCES = $(sort $(CSOURCES))
+OBJECTS = $(addprefix $(OBJ_DIR)/, $(notdir $(SOURCES:.c=.o)))
 
 CURL_LIB = libcurl.a
 
