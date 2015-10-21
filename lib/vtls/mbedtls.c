@@ -308,7 +308,7 @@ mbedtls_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  // new profile with RSA min key len = 1024 ...
+  /* new profile with RSA min key len = 1024 ... */
   mbedtls_ssl_conf_cert_profile( &connssl->config,
                                  &mbedtls_x509_crt_profile_fr);
 
