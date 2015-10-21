@@ -8,3 +8,4 @@
     return fopen(file, "r"); /* VMS */
     return fopen(file, "r", "rfm=stmlf", "ctx=stm");
     curl_memlog("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
+           a URL as file://localhost//foo must be valid as well, to refer to
