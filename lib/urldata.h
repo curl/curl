@@ -1340,7 +1340,7 @@ struct UrlState {
 
   struct SessionHandle *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
-  int stream_prio;
+  int stream_weight;
 };
 
 
@@ -1660,7 +1660,7 @@ struct UserDefined {
 
   struct SessionHandle *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
-  int stream_prio;
+  int stream_weight;
 };
 
 struct Names {

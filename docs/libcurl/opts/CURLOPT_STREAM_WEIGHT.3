@@ -20,23 +20,25 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_STREAM_PRIORITY 3 "13 Sep 2015" "libcurl 7.46.0" "curl_easy_setopt options"
+.TH CURLOPT_STREAM_WEIGHT 3 "13 Sep 2015" "libcurl 7.46.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_STREAM_PRIORITY \- set numerical stream priority
+CURLOPT_STREAM_WEIGHT \- set numerical stream priority
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STREAM_PRIORITY, long prio);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STREAM_WEIGHT, long prio);
 .SH DESCRIPTION
 Set the long \fIprio\fP to a number between 1 and 256.
 
-For protocols with priorities on streams, such as HTTP/2, this option can be
-used to set an individual priority for this particular stream used by the easy
-\fIhandle\fP. Setting and using priorities really only makes sense and is only
-usable when doing multiple streams over the same connections, which thus
-implies that you use \fICURLMOPT_PIPELINING(3)\fP.
+When using HTTP/2, this option can be used to set an individual weight for
+this particular stream used by the easy \fIhandle\fP. Setting and using
+weights really only makes sense and is only usable when doing multiple streams
+over the same connections, which thus implies that you use
+\fICURLMOPT_PIPELINING(3)\fP.
 
-This option can be set during transfer.
+This option can be set during transfer and will then cause the updated weight
+info get sent to the server the next time a HTTP/2 frame is sent to the
+server.
 
 See section 5.3 of RFC 7540 for protocol details:
 https://httpwg.github.io/specs/rfc7540.html#StreamPriority

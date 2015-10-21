@@ -52,7 +52,7 @@
  */
 void Curl_http2_init_state(struct UrlState *state)
 {
-  state->stream_prio = NGHTTP2_DEFAULT_WEIGHT;
+  state->stream_weight = NGHTTP2_DEFAULT_WEIGHT;
 }
 
 /*
@@ -61,7 +61,7 @@ void Curl_http2_init_state(struct UrlState *state)
  */
 void Curl_http2_init_userset(struct UserDefined *set)
 {
-  set->stream_prio = NGHTTP2_DEFAULT_WEIGHT;
+  set->stream_weight = NGHTTP2_DEFAULT_WEIGHT;
 }
 
 static int http2_perform_getsock(const struct connectdata *conn,
@@ -1013,9 +1013,9 @@ static void h2_pri_spec(struct SessionHandle *data,
   struct HTTP *depstream = (data->set.stream_depends_on?
                             data->set.stream_depends_on->req.protop:NULL);
   int32_t depstream_id = depstream? depstream->stream_id:0;
-  nghttp2_priority_spec_init(pri_spec, depstream_id, data->set.stream_prio,
+  nghttp2_priority_spec_init(pri_spec, depstream_id, data->set.stream_weight,
                              data->set.stream_depends_e);
-  data->state.stream_prio = data->set.stream_prio;
+  data->state.stream_weight = data->set.stream_weight;
   data->state.stream_depends_e = data->set.stream_depends_e;
   data->state.stream_depends_on = data->set.stream_depends_on;
 }
@@ -1029,7 +1029,7 @@ static int h2_session_send(struct SessionHandle *data,
                            nghttp2_session *h2)
 {
   struct HTTP *stream = data->req.protop;
-  if((data->set.stream_prio != data->state.stream_prio) ||
+  if((data->set.stream_weight != data->state.stream_weight) ||
      (data->set.stream_depends_e != data->state.stream_depends_e) ||
      (data->set.stream_depends_on != data->state.stream_depends_on) ) {
     /* send new weight and/or dependency */

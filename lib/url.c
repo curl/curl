@@ -2663,13 +2663,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
   case CURLOPT_PIPEWAIT:
     data->set.pipewait = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
-  case CURLOPT_STREAM_PRIORITY:
+  case CURLOPT_STREAM_WEIGHT:
 #ifndef USE_NGHTTP2
     return CURLE_NOT_BUILT_IN;
 #else
     arg = va_arg(param, long);
     if((arg>=1) && (arg <= 256))
-      data->set.stream_prio = (int)arg;
+      data->set.stream_weight = (int)arg;
     break;
 #endif
   case CURLOPT_STREAM_DEPENDS:

@@ -1648,8 +1648,8 @@ typedef enum {
   /* Set the protocol used when curl is given a URL without a protocol */
   CINIT(DEFAULT_PROTOCOL, OBJECTPOINT, 238),
 
-  /* Set stream priority, 1 - 256 */
-  CINIT(STREAM_PRIORITY, LONG, 239),
+  /* Set stream weight, 1 - 256 (default is 16) */
+  CINIT(STREAM_WEIGHT, LONG, 239),
 
   /* Set stream dependency on another CURL handle */
   CINIT(STREAM_DEPENDS, OBJECTPOINT, 240),
