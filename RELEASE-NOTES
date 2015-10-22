@@ -10,6 +10,7 @@ This release includes the following changes:
 
  o configure: build silently by default
  o cookies: Add support for Publix Suffix List with libpsl
+ o vtls: added support for mbedTLS [7]
  
 This release includes the following bugfixes:
 
@@ -28,6 +29,10 @@ This release includes the following bugfixes:
  o http2: Don't pass unitialized name+len pairs to nghttp2_submit_request [5]
  o curlbuild.h: Fix non-configure compiling to mips and sh4 targets
  o tool: Generate easysrc with last cache linked-list [6]
+ o cmake: Fix for add_subdirectory(curl) use-case
+ o vtls: fix compiler warning for TLS backends without sha256
+ o build: fix for MSDOS/djgpp
+ o checksrc: add crude // detection
 
 This release includes the following known bugs:
 
@@ -37,8 +42,9 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Anders Bakken, Dan Fandrich, Daniel Hwang, Daniel Stenberg, Erik Johansson,
-  Rainer Jung, Ray Satiro, Richard Hosking, Svyatoslav Mishyn, Tim Rühsen,
-  (10 contributors)
+  Gisle Vanem, Javier G. Sogo, Jonas Minnberg, Rainer Jung, Ray Satiro,
+  Richard Hosking, Svyatoslav Mishyn, Tim Rühsen,
+  (13 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -50,3 +56,4 @@ References to bug reports and discussions on issues:
  [4] = http://curl.haxx.se/bug/?i=346
  [5] = http://curl.haxx.se/bug/?i=493
  [6] = http://curl.haxx.se/bug/?i=452
+ [7] = http://curl.haxx.se/bug/?i=496
