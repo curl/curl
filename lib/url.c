@@ -954,6 +954,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       (0 != va_arg(param, long))?TRUE:FALSE;
     break;
 
+  case CURLOPT_TRUSTED_AUTH:
+    /*
+     * Send authentication (user+password) when following trusted locations
+     */
+    result = setstropt(&data->set.str[STRING_TRUSTED_AUTH],
+                       va_arg(param, char *));
+    break;
+
   case CURLOPT_MAXREDIRS:
     /*
      * The maximum amount of hops you allow curl to follow Location:
@@ -4360,52 +4368,45 @@ void Curl_free_request_state(struct SessionHandle *data)
   Curl_safefree(data->req.newurl);
 }
 
-
-#ifndef CURL_DISABLE_PROXY
-/****************************************************************
-* Checks if the host is in the noproxy list. returns true if it matches
-* and therefore the proxy should NOT be used.
-****************************************************************/
-static bool check_noproxy(const char* name, const char* no_proxy)
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
+bool Curl_check_host_in_list(const char* name, const char* list)
 {
-  /* no_proxy=domain1.dom,host.domain2.dom
-   *   (a comma-separated list of hosts which should
-   *   not be proxied, or an asterisk to override
-   *   all proxy variables)
+  /* list=domain1.dom,host.domain2.dom
+   *   (a comma-separated list of hosts or a wildcard asterick)
    */
   size_t tok_start;
   size_t tok_end;
   const char* separator = ", ";
-  size_t no_proxy_len;
+  size_t list_len;
   size_t namelen;
   char *endptr;
 
-  if(no_proxy && no_proxy[0]) {
-    if(Curl_raw_equal("*", no_proxy)) {
+  if(list && list[0]) {
+    if(Curl_raw_equal("*", list)) {
       return TRUE;
     }
 
-    /* NO_PROXY was specified and it wasn't just an asterisk */
+    /* list was specified and it wasn't just an asterisk */
 
-    no_proxy_len = strlen(no_proxy);
+    list_len = strlen(list);
     endptr = strchr(name, ':');
     if(endptr)
       namelen = endptr - name;
     else
       namelen = strlen(name);
 
-    for(tok_start = 0; tok_start < no_proxy_len; tok_start = tok_end + 1) {
-      while(tok_start < no_proxy_len &&
-            strchr(separator, no_proxy[tok_start]) != NULL) {
+    for(tok_start = 0; tok_start < list_len; tok_start = tok_end + 1) {
+      while(tok_start < list_len &&
+            strchr(separator, list[tok_start]) != NULL) {
         /* Look for the beginning of the token. */
         ++tok_start;
       }
 
-      if(tok_start == no_proxy_len)
+      if(tok_start == list_len)
         break; /* It was all trailing separator chars, no more tokens. */
 
-      for(tok_end = tok_start; tok_end < no_proxy_len &&
-            strchr(separator, no_proxy[tok_end]) == NULL; ++tok_end)
+      for(tok_end = tok_start; tok_end < list_len &&
+            strchr(separator, list[tok_end]) == NULL; ++tok_end)
         /* Look for the end of the token. */
         ;
 
@@ -4413,13 +4414,13 @@ static bool check_noproxy(const char* name, const char* no_proxy)
        * ".local.com" to prevent matching "notlocal.com", we will leave
        * the '.' off.
        */
-      if(no_proxy[tok_start] == '.')
+      if(list[tok_start] == '.')
         ++tok_start;
 
       if((tok_end - tok_start) <= namelen) {
         /* Match the last part of the name to the domain we are checking. */
         const char *checkn = name + namelen - (tok_end - tok_start);
-        if(Curl_raw_nequal(no_proxy + tok_start, checkn,
+        if(Curl_raw_nequal(list + tok_start, checkn,
                            tok_end - tok_start)) {
           if((tok_end - tok_start) == namelen || *(checkn - 1) == '.') {
             /* We either have an exact match, or the previous character is a .
@@ -4429,13 +4430,15 @@ static bool check_noproxy(const char* name, const char* no_proxy)
           }
         }
       } /* if((tok_end - tok_start) <= namelen) */
-    } /* for(tok_start = 0; tok_start < no_proxy_len;
+    } /* for(tok_start = 0; tok_start < list_len;
          tok_start = tok_end + 1) */
-  } /* NO_PROXY was specified and it wasn't just an asterisk */
+  } /* list was specified and it wasn't just an asterisk */
 
   return FALSE;
 }
+#endif /* !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY) */
 
+#ifndef CURL_DISABLE_PROXY
 /****************************************************************
 * Detect what (if any) proxy to use. Remember that this selects a host
 * name and is not limited to HTTP proxies only.
@@ -4470,7 +4473,7 @@ static char *detect_proxy(struct connectdata *conn)
   if(!no_proxy)
     no_proxy=curl_getenv("NO_PROXY");
 
-  if(!check_noproxy(conn->host.name, no_proxy)) {
+  if(!Curl_check_host_in_list(conn->host.name, no_proxy)) {
     /* It was not listed as without proxy */
     const char *protop = conn->handler->scheme;
     char *envp = proxy_env;
@@ -4511,8 +4514,8 @@ static char *detect_proxy(struct connectdata *conn)
       if(!proxy)
         proxy=curl_getenv("ALL_PROXY");
     }
-  } /* if(!check_noproxy(conn->host.name, no_proxy)) - it wasn't specified
-       non-proxy */
+  } /* if(!Curl_check_host_in_list(conn->host.name, no_proxy)) - it wasn't
+       specified non-proxy */
   free(no_proxy);
 
 #else /* !CURL_DISABLE_HTTP */
@@ -5538,7 +5541,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   }
 
   if(data->set.str[STRING_NOPROXY] &&
-     check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY])) {
+     Curl_check_host_in_list(conn->host.name, data->set.str[STRING_NOPROXY])) {
     free(proxy);  /* proxy is in exception list */
     proxy = NULL;
   }

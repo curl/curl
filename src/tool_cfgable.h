@@ -96,8 +96,10 @@ struct OperationConfig {
   bool dirlistonly;         /* only get the FTP dir list */
   bool followlocation;      /* follow http redirects */
   bool unrestricted_auth;   /* Continue to send authentication (user+password)
-                               when following ocations, even when hostname
+                               when following locations, even when hostname
                                changed */
+  char *trusted_auth;       /* Continue to send authentication (user+password)
+                               when following trusted locations */
   bool netrc_opt;
   bool netrc;
   char *netrc_file;

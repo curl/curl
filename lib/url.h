@@ -82,5 +82,9 @@ CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex);
 void Curl_verboseconnect(struct connectdata *conn);
 #endif
 
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
+/* Checks whether the host is in the list, or list is a wildcard asterick */
+bool Curl_check_host_in_list(const char* name, const char* list);
+#endif
 
 #endif /* HEADER_CURL_URL_H */

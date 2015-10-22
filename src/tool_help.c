@@ -130,6 +130,8 @@ static const char *const helptext[] = {
   " -L, --location      Follow redirects (H)",
   "     --location-trusted  "
   "Like '--location', and send auth to other hosts (H)",
+  "     --locations-trusted LIST  "
+  "Like '--location', and send auth to trusted hosts (H)",
   "     --login-options OPTIONS  Server login options (IMAP, POP3, SMTP)",
   " -M, --manual        Display the full manual",
   "     --mail-from FROM  Mail from this address (SMTP)",

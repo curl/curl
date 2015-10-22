@@ -726,6 +726,9 @@ Curl_http_output_auth(struct connectdata *conn,
      conn->bits.netrc ||
      !data->state.first_host ||
      data->set.http_disable_hostname_check_before_authentication ||
+     (data->set.str[STRING_TRUSTED_AUTH] &&
+      Curl_check_host_in_list(conn->host.name,
+                              data->set.str[STRING_TRUSTED_AUTH])) ||
      Curl_raw_equal(data->state.first_host, conn->host.name)) {
     result = output_auth_headers(conn, authhost, request, path, FALSE);
   }

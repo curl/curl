@@ -928,6 +928,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_UNRESTRICTED_AUTH,
                     config->unrestricted_auth?1L:0L);
 
+          /* new in libcurl 7.46.0 */
+          my_setopt(curl, CURLOPT_TRUSTED_AUTH, config->trusted_auth);
+
           switch(config->httpreq) {
           case HTTPREQ_SIMPLEPOST:
             my_setopt_str(curl, CURLOPT_POSTFIELDS,
