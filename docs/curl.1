@@ -789,10 +789,12 @@ This option can be used multiple times to add/replace/remove multiple headers.
 be the 128 bit MD5 checksum of the remote host's public key, curl will refuse
 the connection with the host unless the md5sums match. (Added in 7.17.1)
 .IP "--ignore-content-length"
-(HTTP)
-Ignore the Content-Length header. This is particularly useful for servers
-running Apache 1.x, which will report incorrect Content-Length for files
-larger than 2 gigabytes.
+For HTTP, Ignore the Content-Length header. This is particularly useful for
+servers running Apache 1.x, which will report incorrect Content-Length for
+files larger than 2 gigabytes.
+
+For FTP (since 7.46.0), skip the RETR command to figure out the size before
+downloading a file.
 .IP "-i, --include"
 (HTTP) Include the HTTP-header in the output. The HTTP-header includes things
 like server-name, date of the document, HTTP-version and more...
