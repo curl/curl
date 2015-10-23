@@ -83,7 +83,18 @@ to send away. libcurl will use the pointer and refer to the data in your
 application, so you must make sure it remains until curl no longer needs it.
 If the data isn't NUL-terminated, or if you'd like it to contain zero bytes,
 you must set its length  with \fBCURLFORM_CONTENTSLENGTH\fP.
+.IP CURLFORM_CONTENTLEN
+followed by a curl_off_t value giving the length of the contents. Note that
+for \fICURLFORM_STREAM\fP contents, this option is mandatory.
+
+If you pass a 0 (zero) for this option, libcurl will instead do a strlen() on
+the contents to figure out the size. If you really want to send a zero byte
+content then you must make sure strlen() on the data pointer returns zero.
+
+(Option added in 7.46.0)
 .IP CURLFORM_CONTENTSLENGTH
+(This option is deprecated. Use \fICURLFORM_CONTENTLEN\fP instead!)
+
 followed by a long giving the length of the contents. Note that for
 \fICURLFORM_STREAM\fP contents, this option is mandatory.
 

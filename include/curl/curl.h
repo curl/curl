@@ -127,7 +127,8 @@ struct curl_httppost {
   char *name;                       /* pointer to allocated name */
   long namelength;                  /* length of name length */
   char *contents;                   /* pointer to allocated data contents */
-  long contentslength;              /* length of contents field */
+  long contentslength;              /* length of contents field, see also
+                                       CURL_HTTPPOST_LARGE */
   char *buffer;                     /* pointer to allocated buffer contents */
   long bufferlength;                /* length of buffer field */
   char *contenttype;                /* Content-Type */
@@ -152,12 +153,17 @@ struct curl_httppost {
 /* upload file contents by using the regular read callback to get the data and
    pass the given pointer as custom pointer */
 #define CURL_HTTPPOST_CALLBACK (1<<6)
+/* use size in 'contentlen', added in 7.46.0 */
+#define CURL_HTTPPOST_LARGE (1<<7)
 
   char *showfilename;               /* The file name to show. If not set, the
                                        actual file name will be used (if this
                                        is a file part) */
   void *userp;                      /* custom pointer used for
                                        HTTPPOST_CALLBACK posts */
+  curl_off_t contentlen;            /* alternative length of contents
+                                       field. Used if CURL_HTTPPOST_LARGE is
+                                       set. Added in 7.46.0 */
 };
 
 /* This is the CURLOPT_PROGRESSFUNCTION callback proto. It is now considered
@@ -1835,6 +1841,7 @@ typedef enum {
   CFINIT(OBSOLETE2),
 
   CFINIT(STREAM),
+  CFINIT(CONTENTLEN), /* added in 7.46.0, provide a curl_off_t length */
 
   CURLFORM_LASTENTRY /* the last unused */
 } CURLformoption;
