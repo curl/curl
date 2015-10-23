@@ -2092,6 +2092,18 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     result = setstropt(&data->set.str[STRING_SSL_CAFILE],
                        va_arg(param, char *));
     break;
+  case CURLOPT_CABUNDLE:
+    /*
+     * Set CA bundle for SSL connection. Specify pointer to the CA certificate bundle
+     */
+    data->set.ssl_cabundle_data = va_arg(param, void *);
+    break;
+  case CURLOPT_CABUNDLESIZE:
+    /*
+     * Set CA bundle size for SSL connection if strlen() is not suitable.
+     */
+    data->set.ssl_cabundle_size = va_arg(param, long);
+    break;
   case CURLOPT_CAPATH:
 #ifdef have_curlssl_ca_path /* not supported by all backends */
     /*

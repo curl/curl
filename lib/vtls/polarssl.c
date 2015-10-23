@@ -180,6 +180,25 @@ polarssl_connect_step1(struct connectdata *conn,
   /* Load the trusted CA */
   memset(&connssl->cacert, 0, sizeof(x509_crt));
 
+  if(data->set.ssl_cabundle_data) {
+    const unsigned char* bundle = (const unsigned char*)data->set.ssl_cabundle_data;
+    size_t len = data->set.ssl_cabundle_size;
+    if (len == 0)
+        len = strlen(bundle);
+    ret = x509_crt_parse(&connssl->cacert, bundle, len);
+
+    if(ret<0) {
+#ifdef POLARSSL_ERROR_C
+      error_strerror(ret, errorbuf, sizeof(errorbuf));
+#endif /* POLARSSL_ERROR_C */
+      failf(data, "Error reading ca bundle data - PolarSSL: (-0x%04X) %s",
+            -ret, errorbuf);
+
+      if(data->set.ssl.verifypeer)
+        return CURLE_SSL_CACERT_BADFILE;
+    }
+  }
+
   if(data->set.str[STRING_SSL_CAFILE]) {
     ret = x509_crt_parse_file(&connssl->cacert,
                               data->set.str[STRING_SSL_CAFILE]);

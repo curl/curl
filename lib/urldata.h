@@ -1631,6 +1631,8 @@ struct UserDefined {
   bool pipewait;        /* wait for pipe/multiplex status before starting a
                            new connection */
   long expect_100_timeout; /* in milliseconds */
+  void* ssl_cabundle_data; /* SSL CA bundle data pointer */
+  curl_off_t ssl_cabundle_size; /* SSL CA bundle size in bytes */
 };
 
 struct Names {

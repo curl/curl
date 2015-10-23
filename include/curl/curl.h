@@ -1648,6 +1648,12 @@ typedef enum {
   /* Set the protocol used when curl is given a URL without a protocol */
   CINIT(DEFAULT_PROTOCOL, OBJECTPOINT, 238),
 
+  /* This points to a SSL CA Bundle data */
+  CINIT(CABUNDLE, OBJECTPOINT, 239),
+ 
+  /* size of the SSL CA Bundle data, if strlen() is not good to use */
+  CINIT(CABUNDLESIZE, LONG, 240),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
