@@ -72,12 +72,12 @@ static int  entropy_init_initialized  = 0;
 static void entropy_init_mutex(mbedtls_entropy_context *ctx)
 {
   /* lock 0 = entropy_init_mutex() */
-  polarsslthreadlock_lock_function(0);
+  Curl_polarsslthreadlock_lock_function(0);
   if(entropy_init_initialized == 0) {
     mbedtls_entropy_init(ctx);
     entropy_init_initialized = 1;
   }
-  polarsslthreadlock_unlock_function(0);
+  Curl_polarsslthreadlock_unlock_function(0);
 }
 /* end of entropy_init_mutex() */
 
@@ -86,9 +86,9 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 {
   int ret;
   /* lock 1 = entropy_func_mutex() */
-  polarsslthreadlock_lock_function(1);
+  Curl_polarsslthreadlock_lock_function(1);
   ret = mbedtls_entropy_func(data, output, len);
-  polarsslthreadlock_unlock_function(1);
+  Curl_polarsslthreadlock_unlock_function(1);
 
   return ret;
 }
@@ -765,12 +765,12 @@ Curl_mbedtls_connect(struct connectdata *conn,
  */
 int mbedtls_init(void)
 {
-  return polarsslthreadlock_thread_setup();
+  return Curl_polarsslthreadlock_thread_setup();
 }
 
 void mbedtls_cleanup(void)
 {
-  (void)polarsslthreadlock_thread_cleanup();
+  (void)Curl_polarsslthreadlock_thread_cleanup();
 }
 
 #endif /* USE_MBEDTLS */

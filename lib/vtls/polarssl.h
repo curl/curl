@@ -7,8 +7,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,8 +27,8 @@
 #ifdef USE_POLARSSL
 
 /* Called on first use PolarSSL, setup threading if supported */
-int  polarssl_init(void);
-void polarssl_cleanup(void);
+int  Curl_polarssl_init(void);
+void Curl_polarssl_cleanup(void);
 
 
 CURLcode Curl_polarssl_connect(struct connectdata *conn, int sockindex);
@@ -51,8 +51,8 @@ int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 #define have_curlssl_ca_path 1
 
 /* API setup for PolarSSL */
-#define curlssl_init() polarssl_init()
-#define curlssl_cleanup() polarssl_cleanup()
+#define curlssl_init() Curl_polarssl_init()
+#define curlssl_cleanup() Curl_polarssl_cleanup()
 #define curlssl_connect Curl_polarssl_connect
 #define curlssl_connect_nonblocking Curl_polarssl_connect_nonblocking
 #define curlssl_session_free(x)  Curl_polarssl_session_free(x)

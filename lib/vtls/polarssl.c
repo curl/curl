@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -74,12 +74,12 @@ static int  entropy_init_initialized  = 0;
 static void entropy_init_mutex(entropy_context *ctx)
 {
   /* lock 0 = entropy_init_mutex() */
-  polarsslthreadlock_lock_function(0);
+  Curl_polarsslthreadlock_lock_function(0);
   if(entropy_init_initialized == 0) {
     entropy_init(ctx);
     entropy_init_initialized = 1;
   }
-  polarsslthreadlock_unlock_function(0);
+  Curl_polarsslthreadlock_unlock_function(0);
 }
 /* end of entropy_init_mutex() */
 
@@ -88,9 +88,9 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 {
     int ret;
     /* lock 1 = entropy_func_mutex() */
-    polarsslthreadlock_lock_function(1);
+    Curl_polarsslthreadlock_lock_function(1);
     ret = entropy_func(data, output, len);
-    polarsslthreadlock_unlock_function(1);
+    Curl_polarsslthreadlock_unlock_function(1);
 
     return ret;
 }
@@ -740,14 +740,14 @@ Curl_polarssl_connect(struct connectdata *conn,
  * return 0 error initializing SSL
  * return 1 SSL initialized successfully
  */
-int polarssl_init(void)
+int Curl_polarssl_init(void)
 {
-  return polarsslthreadlock_thread_setup();
+  return Curl_polarsslthreadlock_thread_setup();
 }
 
-void polarssl_cleanup(void)
+void Curl_polarssl_cleanup(void)
 {
-  (void)polarsslthreadlock_thread_cleanup();
+  (void)Curl_polarsslthreadlock_thread_cleanup();
 }
 
 #endif /* USE_POLARSSL */
