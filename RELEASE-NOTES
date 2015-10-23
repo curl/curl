@@ -11,6 +11,9 @@ This release includes the following changes:
  o configure: build silently by default
  o cookies: Add support for Publix Suffix List with libpsl
  o vtls: added support for mbedTLS [7]
+ o Added CURLOPT_STREAM_DEPENDS [8]
+ o Added CURLOPT_STREAM_DEPENDS_E [9]
+ o Added CURLOPT_STREAM_WEIGHT [10]
  
 This release includes the following bugfixes:
 
@@ -33,6 +36,9 @@ This release includes the following bugfixes:
  o vtls: fix compiler warning for TLS backends without sha256
  o build: fix for MSDOS/djgpp
  o checksrc: add crude // detection
+ o http2: on_frame_recv: trust the conn/data input
+ o ftp: allow CURLOPT_IGNORE_CONTENT_LENGTH to ignore size [11]
+ o polarssl/mbedtls: fix name space pollution
 
 This release includes the following known bugs:
 
@@ -41,10 +47,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anders Bakken, Dan Fandrich, Daniel Hwang, Daniel Stenberg, Erik Johansson,
-  Gisle Vanem, Javier G. Sogo, Jonas Minnberg, Rainer Jung, Ray Satiro,
-  Richard Hosking, Svyatoslav Mishyn, Tim Rühsen,
-  (13 contributors)
+  Anders Bakken, Dan Fandrich, Daniel Hwang, Daniel Stenberg, Dmitry S. Baikov,
+  Erik Johansson, Gisle Vanem, Javier G. Sogo, Jonas Minnberg, Kurt Fankhauser,
+  Rainer Jung, Ray Satiro, Richard Hosking, Svyatoslav Mishyn,
+  Tatsuhiro Tsujikawa, Tim Rühsen,
+  (16 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -57,3 +64,7 @@ References to bug reports and discussions on issues:
  [5] = http://curl.haxx.se/bug/?i=493
  [6] = http://curl.haxx.se/bug/?i=452
  [7] = http://curl.haxx.se/bug/?i=496
+ [8] = http://curl.haxx.se/libcurl/c/CURLOPT_STREAM_DEPENDS.html
+ [9] = http://curl.haxx.se/libcurl/c/CURLOPT_STREAM_DEPENDS_E.html
+ [10] = http://curl.haxx.se/libcurl/c/CURLOPT_STREAM_WEIGHT.html
+ [11] = http://curl.haxx.se/bug/?i=480
