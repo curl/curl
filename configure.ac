@@ -1399,6 +1399,24 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
+  dnl This is for Msys/Mingw
+  case $host in
+    *-*-msys* | *-*-mingw*)
+      AC_MSG_CHECKING([for gdi32])
+      my_ac_save_LIBS=$LIBS
+      LIBS="-lgdi32 $LIBS"
+      AC_TRY_LINK([#include <windef.h>
+                   #include <wingdi.h>],
+                   [GdiFlush();],
+                   [ dnl worked!
+                   AC_MSG_RESULT([yes])],
+                   [ dnl failed, restore LIBS
+                   LIBS=$my_ac_save_LIBS
+                   AC_MSG_RESULT(no)]
+                  )
+      ;;
+  esac
+
   case "$OPT_SSL" in
   yes)
     dnl --with-ssl (without path) used
@@ -1476,24 +1494,6 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
   dnl finally, set flags to use SSL
   CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
   LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
-
-  dnl This is for Msys/Mingw
-  case $host in
-    *-*-msys* | *-*-mingw*)
-      AC_MSG_CHECKING([for gdi32])
-      my_ac_save_LIBS=$LIBS
-      LIBS="-lgdi32 $LIBS"
-      AC_TRY_LINK([#include <windef.h>
-                   #include <wingdi.h>],
-                   [GdiFlush();],
-                   [ dnl worked!
-                   AC_MSG_RESULT([yes])],
-                   [ dnl failed, restore LIBS
-                   LIBS=$my_ac_save_LIBS
-                   AC_MSG_RESULT(no)]
-                  )
-      ;;
-  esac
 
   AC_CHECK_LIB(crypto, HMAC_Update,[
      HAVECRYPTO="yes"
