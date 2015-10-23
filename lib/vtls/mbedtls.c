@@ -173,15 +173,17 @@ mbedtls_connect_step1(struct connectdata *conn,
 
 #ifdef THREADING_SUPPORT
   entropy_init_mutex(&entropy);
+  mbedtls_ctr_drbg_init(&connssl->ctr_drbg);
 
-  if((ret = mbedtls_ctr_drbg_init(&connssl->ctr_drbg, entropy_func_mutex,
-                                  &entropy, connssl->ssn.id,
-                                  connssl->ssn.length)) != 0) {
+  ret = mbedtls_ctr_drbg_seed(&connssl->ctr_drbg, entropy_func_mutex,
+                              &entropy, connssl->ssn.id,
+                              connssl->ssn.id_len);
+  if(ret) {
 #ifdef MBEDTLS_ERROR_C
-     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
+    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
-     failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s\n",
-                                                            -ret, errorbuf);
+    failf(data, "Failed - mbedTLS: ctr_drbg_init returned (-0x%04X) %s\n",
+          -ret, errorbuf);
   }
 #else
   mbedtls_entropy_init(&connssl->entropy);
