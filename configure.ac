@@ -1482,7 +1482,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
     *-*-msys* | *-*-mingw*)
       AC_MSG_CHECKING([for gdi32])
       my_ac_save_LIBS=$LIBS
-      LIBS="-lgdi32 $LIBS"
+      LIBS="$LIBS -lgdi32"
       AC_TRY_LINK([#include <windef.h>
                    #include <wingdi.h>],
                    [GdiFlush();],
