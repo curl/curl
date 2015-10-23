@@ -22,7 +22,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_POLARSSL) && \
+#if (defined(USE_POLARSSL) || defined(USE_MBEDTLS)) && \
     (defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32))
 
 #if defined(USE_THREADS_POSIX)
@@ -150,4 +150,4 @@ int polarsslthreadlock_unlock_function(int n)
   return 1; /* OK */
 }
 
-#endif /* USE_POLARSSL */
+#endif /* USE_POLARSSL || USE_MBEDTLS */
