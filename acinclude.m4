@@ -3052,12 +3052,9 @@ dnl Optionally PKG_CONFIG_LIBDIR may be given as $pcdir.
 dnl
 
 AC_DEFUN([CURL_CHECK_PKGCONFIG], [
-
-    if test -z "$PKGCONFIG"; then
+    if test -n "$PKG_CONFIG"; then
       PKGCONFIG="$PKG_CONFIG"
-    fi
-
-    if test -z "$PKGCONFIG"; then
+    else
       AC_PATH_TOOL([PKGCONFIG], [pkg-config], [no],
         [$PATH:/usr/bin:/usr/local/bin])
     fi
