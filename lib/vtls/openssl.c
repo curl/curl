@@ -558,7 +558,7 @@ int cert_stuff(struct connectdata *conn,
       break;
     case SSL_FILETYPE_ENGINE:
 #ifdef HAVE_OPENSSL_ENGINE_H
-      {                         /* XXXX still needs some work */
+      {
         EVP_PKEY *priv_key = NULL;
         if(data->state.engine) {
 #ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
@@ -592,7 +592,7 @@ int cert_stuff(struct connectdata *conn,
             EVP_PKEY_free(priv_key);
             return 0;
           }
-          EVP_PKEY_free(priv_key);  /* we don't need the handle any more... */
+          /* ownership of priv_key was handed over, no need to free it here */
         }
         else {
           failf(data, "crypto engine not set, can't load private key");
