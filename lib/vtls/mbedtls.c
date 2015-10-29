@@ -414,27 +414,23 @@ mbedtls_connect_step2(struct connectdata *conn,
   conn->recv[sockindex] = mbedtls_recv;
   conn->send[sockindex] = mbedtls_send;
 
-  for(;;) {
-    ret = mbedtls_ssl_handshake(&connssl->ssl);
-    if(!ret)
-      break;
-    if(ret == MBEDTLS_ERR_SSL_WANT_READ) {
-      connssl->connecting_state = ssl_connect_2_reading;
-      return CURLE_OK;
-    }
-    else if(ret == MBEDTLS_ERR_SSL_WANT_WRITE) {
-      connssl->connecting_state = ssl_connect_2_writing;
-      return CURLE_OK;
-    }
-    else if(ret != MBEDTLS_ERR_SSL_WANT_READ &&
-            ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
+  ret = mbedtls_ssl_handshake(&connssl->ssl);
+
+  if(ret == MBEDTLS_ERR_SSL_WANT_READ) {
+    connssl->connecting_state = ssl_connect_2_reading;
+    return CURLE_OK;
+  }
+  else if(ret == MBEDTLS_ERR_SSL_WANT_WRITE) {
+    connssl->connecting_state = ssl_connect_2_writing;
+    return CURLE_OK;
+  }
+  else if(ret) {
 #ifdef MBEDTLS_ERROR_C
-      mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
+    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
-      failf(data, "ssl_handshake returned - mbedTLS: (-0x%04X) %s",
-            -ret, errorbuf);
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+    failf(data, "ssl_handshake returned - mbedTLS: (-0x%04X) %s",
+          -ret, errorbuf);
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   infof(data, "mbedTLS: Handshake complete, cipher is %s\n",
