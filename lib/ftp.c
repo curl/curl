@@ -1743,7 +1743,7 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
   /*
    * This state uses:
    * 'count1' to iterate over the commands to send
-   * 'count2' to store wether to allow commands to fail
+   * 'count2' to store whether to allow commands to fail
    */
 
   if(init)
@@ -3675,14 +3675,15 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
         result = proxy_magic(conn, ftpc->newhost, ftpc->newport, &connected);
       }
     }
-    else {
-      if(result && (ftpc->count1 == 0)) {
-        *completep = -1; /* go back to DOING please */
-        /* this is a EPSV connect failing, try PASV instead */
-        return ftp_epsv_disable(conn);
-      }
-      return result;
+
+    if(result && (ftpc->count1 == 0)) {
+      *completep = -1; /* go back to DOING please */
+      /* this is a EPSV connect failing, try PASV instead */
+      return ftp_epsv_disable(conn);
     }
+
+    if(!connected)
+      return result;
   }
 
   if(ftpc->state) {
