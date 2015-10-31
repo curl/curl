@@ -136,18 +136,22 @@ struct curl_httppost {
                                        file, this link should link to following
                                        files */
   long flags;                       /* as defined below */
-#define HTTPPOST_FILENAME (1<<0)    /* specified content is a file name */
-#define HTTPPOST_READFILE (1<<1)    /* specified content is a file name */
-#define HTTPPOST_PTRNAME (1<<2)     /* name is only stored pointer
-                                       do not free in formfree */
-#define HTTPPOST_PTRCONTENTS (1<<3) /* contents is only stored pointer
-                                       do not free in formfree */
-#define HTTPPOST_BUFFER (1<<4)      /* upload file from buffer */
-#define HTTPPOST_PTRBUFFER (1<<5)   /* upload file from pointer contents */
-#define HTTPPOST_CALLBACK (1<<6)    /* upload file contents by using the
-                                       regular read callback to get the data
-                                       and pass the given pointer as custom
-                                       pointer */
+
+/* specified content is a file name */
+#define CURL_HTTPPOST_FILENAME (1<<0)
+/* specified content is a file name */
+#define CURL_HTTPPOST_READFILE (1<<1)
+/* name is only stored pointer do not free in formfree */
+#define CURL_HTTPPOST_PTRNAME (1<<2)
+/* contents is only stored pointer do not free in formfree */
+#define CURL_HTTPPOST_PTRCONTENTS (1<<3)
+/* upload file from buffer */
+#define CURL_HTTPPOST_BUFFER (1<<4)
+/* upload file from pointer contents */
+#define CURL_HTTPPOST_PTRBUFFER (1<<5)
+/* upload file contents by using the regular read callback to get the data and
+   pass the given pointer as custom pointer */
+#define CURL_HTTPPOST_CALLBACK (1<<6)
 
   char *showfilename;               /* The file name to show. If not set, the
                                        actual file name will be used (if this
