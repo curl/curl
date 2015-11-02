@@ -1396,16 +1396,18 @@ CURLcode Curl_posttransfer(struct SessionHandle *data)
  */
 static size_t strlen_url(const char *url)
 {
-  const char *ptr;
+  const unsigned char *ptr;
   size_t newlen=0;
   bool left=TRUE; /* left side of the ? */
 
-  for(ptr=url; *ptr; ptr++) {
+  for(ptr=(unsigned char *)url; *ptr; ptr++) {
     switch(*ptr) {
     case '?':
       left=FALSE;
       /* fall through */
     default:
+      if(*ptr >= 0x80)
+        newlen += 2;
       newlen++;
       break;
     case ' ':
@@ -1426,9 +1428,9 @@ static void strcpy_url(char *output, const char *url)
 {
   /* we must add this with whitespace-replacing */
   bool left=TRUE;
-  const char *iptr;
+  const unsigned char *iptr;
   char *optr = output;
-  for(iptr = url;    /* read from here */
+  for(iptr = (unsigned char *)url;    /* read from here */
       *iptr;         /* until zero byte */
       iptr++) {
     switch(*iptr) {
@@ -1436,7 +1438,12 @@ static void strcpy_url(char *output, const char *url)
       left=FALSE;
       /* fall through */
     default:
-      *optr++=*iptr;
+      if(*iptr >= 0x80) {
+        snprintf(optr, 4, "%%%02x", *iptr);
+        optr += 3;
+      }
+      else
+        *optr++=*iptr;
       break;
     case ' ':
       if(left) {
@@ -1684,23 +1691,21 @@ CURLcode Curl_follow(struct SessionHandle *data,
     newurl = absolute;
   }
   else {
+    /* The new URL MAY contain space or high byte values, that means a mighty
+       stupid redirect URL but we still make an effort to do "right". */
+    char *newest;
+    size_t newlen = strlen_url(newurl);
+
     /* This is an absolute URL, don't allow the custom port number */
     disallowport = TRUE;
 
-    if(strchr(newurl, ' ')) {
-      /* This new URL contains at least one space, this is a mighty stupid
-         redirect but we still make an effort to do "right". */
-      char *newest;
-      size_t newlen = strlen_url(newurl);
+    newest = malloc(newlen+1); /* get memory for this */
+    if(!newest)
+      return CURLE_OUT_OF_MEMORY;
+    strcpy_url(newest, newurl); /* create a space-free URL */
 
-      newest = malloc(newlen+1); /* get memory for this */
-      if(!newest)
-        return CURLE_OUT_OF_MEMORY;
-      strcpy_url(newest, newurl); /* create a space-free URL */
-
-      free(newurl); /* that was no good */
-      newurl = newest; /* use this instead now */
-    }
+    free(newurl); /* that was no good */
+    newurl = newest; /* use this instead now */
 
   }
 
