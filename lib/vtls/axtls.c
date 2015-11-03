@@ -160,7 +160,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
 
   /* axTLS only supports TLSv1 */
   /* check to see if we've been told to use an explicit SSL/TLS version */
-  switch(conn->ssl_config.version) {
+  switch(SSL_CONN_CONFIG(version)) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
     break;
@@ -185,17 +185,17 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
   conn->ssl[sockindex].ssl = NULL;
 
   /* Load the trusted CA cert bundle file */
-  if(conn->ssl_config.CAfile) {
+  if(SSL_CONN_CONFIG(CAfile)) {
     if(ssl_obj_load(ssl_ctx, SSL_OBJ_X509_CACERT,
-                    conn->ssl_config.CAfile, NULL) != SSL_OK) {
+                    SSL_CONN_CONFIG(CAfile), NULL) != SSL_OK) {
       infof(data, "error reading ca cert file %s \n",
-            conn->ssl_config.CAfile);
-      if(conn->ssl_config.verifypeer) {
+            SSL_CONN_CONFIG(CAfile));
+      if(SSL_CONN_CONFIG(verifypeer)) {
         return CURLE_SSL_CACERT_BADFILE;
       }
     }
     else
-      infof(data, "found certificates in %s\n", conn->ssl_config.CAfile);
+      infof(data, "found certificates in %s\n", SSL_CONN_CONFIG(CAfile));
   }
 
   /* gtls.c tasks we're skipping for now:
@@ -207,15 +207,15 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
    */
 
   /* Load client certificate */
-  if(data->set.ssl.cert) {
+  if(SSL_SET_OPTION(cert)) {
     i=0;
     /* Instead of trying to analyze cert type here, let axTLS try them all. */
     while(cert_types[i] != 0) {
       ssl_fcn_return = ssl_obj_load(ssl_ctx, cert_types[i],
-                                    data->set.ssl.cert, NULL);
+                                    SSL_SET_OPTION(cert), NULL);
       if(ssl_fcn_return == SSL_OK) {
         infof(data, "successfully read cert file %s \n",
-              data->set.ssl.cert);
+              SSL_SET_OPTION(cert));
         break;
       }
       i++;
@@ -223,7 +223,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     /* Tried all cert types, none worked. */
     if(cert_types[i] == 0) {
       failf(data, "%s is not x509 or pkcs12 format",
-            data->set.ssl.cert);
+            SSL_SET_OPTION(cert));
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -231,15 +231,15 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
   /* Load client key.
      If a pkcs12 file successfully loaded a cert, then there's nothing to do
      because the key has already been loaded. */
-  if(data->set.ssl.key && cert_types[i] != SSL_OBJ_PKCS12) {
+  if(SSL_SET_OPTION(key) && cert_types[i] != SSL_OBJ_PKCS12) {
     i=0;
     /* Instead of trying to analyze key type here, let axTLS try them all. */
     while(key_types[i] != 0) {
       ssl_fcn_return = ssl_obj_load(ssl_ctx, key_types[i],
-                                    data->set.ssl.key, NULL);
+                                    SSL_SET_OPTION(key), NULL);
       if(ssl_fcn_return == SSL_OK) {
         infof(data, "successfully read key file %s \n",
-              data->set.ssl.key);
+              SSL_SET_OPTION(key));
         break;
       }
       i++;
@@ -247,7 +247,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     /* Tried all key types, none worked. */
     if(key_types[i] == 0) {
       failf(data, "Failure: %s is not a supported key file",
-            data->set.ssl.key);
+            SSL_SET_OPTION(key));
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -288,13 +288,17 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
   const char *dns_altname;
   int8_t found_subject_alt_names = 0;
   int8_t found_subject_alt_name_matching_conn = 0;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
+  const char * const dispname = SSL_IS_PROXY() ?
+    conn->http_proxy.host.dispname : conn->host.dispname;
 
   /* Here, gtls.c gets the peer certificates and fails out depending on
    * settings in "data."  axTLS api doesn't have get cert chain fcn, so omit?
    */
 
   /* Verify server's certificate */
-  if(conn->ssl_config.verifypeer) {
+  if(SSL_CONN_CONFIG(verifypeer)) {
     if(ssl_verify_cert(ssl) != SSL_OK) {
       Curl_axtls_close(conn, sockindex);
       failf(data, "server cert verify failed");
@@ -325,8 +329,8 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
     found_subject_alt_names = 1;
 
     infof(data, "\tComparing subject alt name DNS with hostname: %s <-> %s\n",
-          dns_altname, conn->host.name);
-    if(Curl_cert_hostcheck(dns_altname, conn->host.name)) {
+          dns_altname, hostname);
+    if(Curl_cert_hostcheck(dns_altname, hostname)) {
       found_subject_alt_name_matching_conn = 1;
       break;
     }
@@ -334,23 +338,21 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
 
   /* RFC2818 checks */
   if(found_subject_alt_names && !found_subject_alt_name_matching_conn) {
-    if(data->set.ssl.verifyhost) {
+    if(SSL_CONN_CONFIG(verifyhost)) {
       /* Break connection ! */
       Curl_axtls_close(conn, sockindex);
-      failf(data, "\tsubjectAltName(s) do not match %s\n",
-            conn->host.dispname);
+      failf(data, "\tsubjectAltName(s) do not match %s\n", dispname);
       return CURLE_PEER_FAILED_VERIFICATION;
     }
     else
-      infof(data, "\tsubjectAltName(s) do not match %s\n",
-            conn->host.dispname);
+      infof(data, "\tsubjectAltName(s) do not match %s\n", dispname);
   }
   else if(found_subject_alt_names == 0) {
     /* Per RFC2818, when no Subject Alt Names were available, examine the peer
        CN as a legacy fallback */
     peer_CN = ssl_get_cert_dn(ssl, SSL_X509_CERT_COMMON_NAME);
     if(peer_CN == NULL) {
-      if(data->set.ssl.verifyhost) {
+      if(SSL_CONN_CONFIG(verifyhost)) {
         Curl_axtls_close(conn, sockindex);
         failf(data, "unable to obtain common name from peer certificate");
         return CURLE_PEER_FAILED_VERIFICATION;
@@ -359,17 +361,17 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
         infof(data, "unable to obtain common name from peer certificate");
     }
     else {
-      if(!Curl_cert_hostcheck((const char *)peer_CN, conn->host.name)) {
-        if(conn->ssl_config.verifyhost) {
+      if(!Curl_cert_hostcheck((const char *)peer_CN, hostname)) {
+        if(SSL_CONN_CONFIG(verifyhost)) {
           /* Break connection ! */
           Curl_axtls_close(conn, sockindex);
           failf(data, "\tcommon name \"%s\" does not match \"%s\"\n",
-                peer_CN, conn->host.dispname);
+                peer_CN, dispname);
           return CURLE_PEER_FAILED_VERIFICATION;
         }
         else
           infof(data, "\tcommon name \"%s\" does not match \"%s\"\n",
-                peer_CN, conn->host.dispname);
+                peer_CN, dispname);
       }
     }
   }
