@@ -132,6 +132,10 @@ polarssl_connect_step1(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+  const char *capath = SSL_CONN_CONFIG(CApath);
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
+  const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
 
   bool sni = TRUE; /* default is SNI enabled */
   int ret = -1;
@@ -146,11 +150,11 @@ polarssl_connect_step1(struct connectdata *conn,
   errorbuf[0]=0;
 
   /* PolarSSL only supports SSLv3 and TLSv1 */
-  if(conn->ssl_config.version == CURL_SSLVERSION_SSLv2) {
+  if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2) {
     failf(data, "PolarSSL does not support SSLv2");
     return CURLE_SSL_CONNECT_ERROR;
   }
-  else if(conn->ssl_config.version == CURL_SSLVERSION_SSLv3)
+  else if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv3)
     sni = FALSE; /* SSLv3 has no SNI */
 
 #ifdef THREADING_SUPPORT
@@ -180,34 +184,33 @@ polarssl_connect_step1(struct connectdata *conn,
   /* Load the trusted CA */
   memset(&connssl->cacert, 0, sizeof(x509_crt));
 
-  if(conn->ssl_config.CAfile) {
+  if(SSL_CONN_CONFIG(CAfile)) {
     ret = x509_crt_parse_file(&connssl->cacert,
-                              conn->ssl_config.CAfile);
+                              SSL_CONN_CONFIG(CAfile));
 
     if(ret<0) {
 #ifdef POLARSSL_ERROR_C
       error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
       failf(data, "Error reading ca cert file %s - PolarSSL: (-0x%04X) %s",
-            conn->ssl_config.CAfile, -ret, errorbuf);
+            SSL_CONN_CONFIG(CAfile), -ret, errorbuf);
 
-      if(conn->ssl_config.verifypeer)
+      if(SSL_CONN_CONFIG(verifypeer))
         return CURLE_SSL_CACERT_BADFILE;
     }
   }
 
-  if(data->set.str[STRING_SSL_CAPATH]) {
-    ret = x509_crt_parse_path(&connssl->cacert,
-                              data->set.str[STRING_SSL_CAPATH]);
+  if(capath) {
+    ret = x509_crt_parse_path(&connssl->cacert, capath);
 
     if(ret<0) {
 #ifdef POLARSSL_ERROR_C
       error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
       failf(data, "Error reading ca cert path %s - PolarSSL: (-0x%04X) %s",
-            data->set.str[STRING_SSL_CAPATH], -ret, errorbuf);
+            capath, -ret, errorbuf);
 
-      if(data->set.ssl.verifypeer)
+      if(SSL_CONN_CONFIG(verifypeer))
         return CURLE_SSL_CACERT_BADFILE;
     }
   }
@@ -215,27 +218,27 @@ polarssl_connect_step1(struct connectdata *conn,
   /* Load the client certificate */
   memset(&connssl->clicert, 0, sizeof(x509_crt));
 
-  if(data->set.ssl.cert) {
+  if(SSL_SET_OPTION(cert)) {
     ret = x509_crt_parse_file(&connssl->clicert,
-                              data->set.ssl.cert);
+                              SSL_SET_OPTION(cert));
 
     if(ret) {
 #ifdef POLARSSL_ERROR_C
       error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
       failf(data, "Error reading client cert file %s - PolarSSL: (-0x%04X) %s",
-            data->set.ssl.cert, -ret, errorbuf);
+            SSL_SET_OPTION(cert), -ret, errorbuf);
 
       return CURLE_SSL_CERTPROBLEM;
     }
   }
 
   /* Load the client private key */
-  if(data->set.ssl.key) {
+  if(SSL_SET_OPTION(key)) {
     pk_context pk;
     pk_init(&pk);
-    ret = pk_parse_keyfile(&pk, data->set.ssl.key,
-                           data->set.ssl.key_passwd);
+    ret = pk_parse_keyfile(&pk, SSL_SET_OPTION(key),
+                           SSL_SET_OPTION(key_passwd));
     if(ret == 0 && !pk_can_do(&pk, POLARSSL_PK_RSA))
       ret = POLARSSL_ERR_PK_TYPE_MISMATCH;
     if(ret == 0)
@@ -249,7 +252,7 @@ polarssl_connect_step1(struct connectdata *conn,
       error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
       failf(data, "Error reading private key %s - PolarSSL: (-0x%04X) %s",
-            data->set.ssl.key, -ret, errorbuf);
+            SSL_SET_OPTION(key), -ret, errorbuf);
 
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -258,30 +261,29 @@ polarssl_connect_step1(struct connectdata *conn,
   /* Load the CRL */
   memset(&connssl->crl, 0, sizeof(x509_crl));
 
-  if(data->set.ssl.CRLfile) {
+  if(SSL_SET_OPTION(CRLfile)) {
     ret = x509_crl_parse_file(&connssl->crl,
-                              data->set.ssl.CRLfile);
+                              SSL_SET_OPTION(CRLfile));
 
     if(ret) {
 #ifdef POLARSSL_ERROR_C
       error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
       failf(data, "Error reading CRL file %s - PolarSSL: (-0x%04X) %s",
-            data->set.ssl.CRLfile, -ret, errorbuf);
+            SSL_SET_OPTION(CRLfile), -ret, errorbuf);
 
       return CURLE_SSL_CRL_BADFILE;
     }
   }
 
-  infof(data, "PolarSSL: Connecting to %s:%d\n",
-        conn->host.name, conn->remote_port);
+  infof(data, "PolarSSL: Connecting to %s:%d\n", hostname, port);
 
   if(ssl_init(&connssl->ssl)) {
     failf(data, "PolarSSL: ssl_init failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  switch(data->set.ssl.version) {
+  switch(SSL_CONN_CONFIG(version)) {
   default:
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
@@ -340,16 +342,16 @@ polarssl_connect_step1(struct connectdata *conn,
   ssl_set_ca_chain(&connssl->ssl,
                    &connssl->cacert,
                    &connssl->crl,
-                   conn->host.name);
+                   hostname);
 
   ssl_set_own_cert_rsa(&connssl->ssl,
                        &connssl->clicert, &connssl->rsa);
 
-  if(!Curl_inet_pton(AF_INET, conn->host.name, &addr) &&
+  if(!Curl_inet_pton(AF_INET, hostname, &addr) &&
 #ifdef ENABLE_IPV6
-     !Curl_inet_pton(AF_INET6, conn->host.name, &addr) &&
+     !Curl_inet_pton(AF_INET6, hostname, &addr) &&
 #endif
-     sni && ssl_set_hostname(&connssl->ssl, conn->host.name)) {
+     sni && ssl_set_hostname(&connssl->ssl, hostname)) {
      infof(data, "WARNING: failed to configure "
                  "server name indication (SNI) TLS extension\n");
   }
@@ -427,7 +429,7 @@ polarssl_connect_step2(struct connectdata *conn,
 
   ret = ssl_get_verify_result(&conn->ssl[sockindex].ssl);
 
-  if(ret && conn->ssl_config.verifypeer) {
+  if(ret && SSL_CONN_CONFIG(verifypeer)) {
     if(ret & BADCERT_EXPIRED)
       failf(data, "Cert verify failed: BADCERT_EXPIRED");
 
