@@ -48,7 +48,9 @@
 /* set of helper macros for the backends to access the correct fields. For the
    proxy or for the remote host - to properly support HTTPS proxy */
 
-#define SSL_IS_PROXY() (CURLPROXY_HTTPS == conn->http_proxy.proxytype)
+#define SSL_IS_PROXY() (CURLPROXY_HTTPS == conn->http_proxy.proxytype && \
+  ssl_connection_complete != conn->proxy_ssl[conn->sock[SECONDARYSOCKET] == \
+  CURL_SOCKET_BAD ? FIRSTSOCKET : SECONDARYSOCKET].state)
 #define SSL_SET_OPTION(var) (SSL_IS_PROXY() ? data->set.proxy_ssl.var : \
                              data->set.ssl.var)
 #define SSL_CONN_CONFIG(var) (SSL_IS_PROXY() ?          \
