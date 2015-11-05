@@ -4767,6 +4767,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   long port = -1;
   char *proxyuser = NULL;
   char *proxypasswd = NULL;
+  bool sockstype;
 
   /* We do the proxy host string parsing here. We want the host name and the
    * port name. Accept a protocol:// prefix
@@ -4791,10 +4792,10 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   else
     proxyptr = proxy; /* No xxx:// head: It's a HTTP proxy */
 
-  bool sockstype = proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
-                   proxytype == CURLPROXY_SOCKS5 ||
-                   proxytype == CURLPROXY_SOCKS4A ||
-                   proxytype == CURLPROXY_SOCKS4;
+  sockstype = proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
+              proxytype == CURLPROXY_SOCKS5 ||
+              proxytype == CURLPROXY_SOCKS4A ||
+              proxytype == CURLPROXY_SOCKS4;
 
   /* Is there a username and password given in this proxy url? */
   atsign = strchr(proxyptr, '@');
