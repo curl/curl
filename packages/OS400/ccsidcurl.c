@@ -933,6 +933,14 @@ curl_formadd_ccsid(struct curl_httppost * * httppost,
 
       break;
 
+    case CURLFORM_CONTENTLEN:
+      lengthx = nargs;
+
+      if(!forms)
+        value = (char *) va_arg(arg, curl_off_t);
+
+      break;
+
     case CURLFORM_NAMELENGTH:
       namelengthx = nargs;
 
