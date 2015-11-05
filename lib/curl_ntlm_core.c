@@ -676,10 +676,10 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 #ifdef DEBUGBUILD
   char *force_timestamp = getenv("CURL_FORCETIME");
   if(force_timestamp)
-    tw = (curl_off_t)11644473600 * 10000000;
+    tw = CURL_OFF_T_C(11644473600) * 10000000;
   else
 #endif
-    tw = ((curl_off_t)time(NULL) + 11644473600) * 10000000;
+    tw = ((curl_off_t)time(NULL) + CURL_OFF_T_C(11644473600)) * 10000000;
 
   /* Calculate the response len */
   len = NTLM_HMAC_MD5_LEN + NTLMv2_BLOB_LEN;
