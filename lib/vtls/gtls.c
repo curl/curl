@@ -170,6 +170,16 @@ static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
   return ret;
 }
 
+static ssize_t Curl_gtls_push_ssl(void *s, const void *buf, size_t len)
+{
+  return gnutls_record_send((gnutls_session_t) s, buf, len);
+}
+
+static ssize_t Curl_gtls_pull_ssl(void *s, void *buf, size_t len)
+{
+  return gnutls_record_recv((gnutls_session_t) s, buf, len);
+}
+
 /* Curl_gtls_init()
  *
  * Global GnuTLS init, called from Curl_ssl_init(). This calls functions that
@@ -372,6 +382,9 @@ gtls_connect_step1(struct connectdata *conn,
   void *ssl_sessionid;
   size_t ssl_idsize;
   bool sni = TRUE; /* default is SNI enabled */
+  void *transport_ptr = NULL;
+  gnutls_push_func gnutls_transport_push = NULL;
+  gnutls_pull_func gnutls_transport_pull = NULL;
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -429,8 +442,8 @@ gtls_connect_step1(struct connectdata *conn,
   }
 
 #ifdef USE_TLS_SRP
-  if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
-    infof(data, "Using TLS-SRP username: %s\n", data->set.ssl.username);
+  if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP) {
+    infof(data, "Using TLS-SRP username: %s\n", SSL_SET_OPTION(username));
 
     rc = gnutls_srp_allocate_client_credentials(
            &conn->ssl[sockindex].srp_client_cred);
@@ -442,8 +455,8 @@ gtls_connect_step1(struct connectdata *conn,
 
     rc = gnutls_srp_set_client_credentials(conn->ssl[sockindex].
                                            srp_client_cred,
-                                           data->set.ssl.username,
-                                           data->set.ssl.password);
+                                           SSL_SET_OPTION(username),
+                                           SSL_SET_OPTION(password));
     if(rc != GNUTLS_E_SUCCESS) {
       failf(data, "gnutls_srp_set_client_cred() failed: %s",
             gnutls_strerror(rc));
@@ -489,19 +502,19 @@ gtls_connect_step1(struct connectdata *conn,
   }
 #endif
 
-  if(data->set.ssl.CRLfile) {
+  if(SSL_SET_OPTION(CRLfile)) {
     /* set the CRL list file */
     rc = gnutls_certificate_set_x509_crl_file(conn->ssl[sockindex].cred,
-                                              data->set.ssl.CRLfile,
+                                              SSL_SET_OPTION(CRLfile),
                                               GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
       failf(data, "error reading crl file %s (%s)",
-            data->set.ssl.CRLfile, gnutls_strerror(rc));
+            SSL_SET_OPTION(CRLfile), gnutls_strerror(rc));
       return CURLE_SSL_CRL_BADFILE;
     }
     else
       infof(data, "found %d CRL in %s\n",
-            rc, data->set.ssl.CRLfile);
+            rc, SSL_SET_OPTION(CRLfile));
   }
 
   /* Initialize TLS session as a client */
@@ -541,7 +554,7 @@ gtls_connect_step1(struct connectdata *conn,
   if(rc != GNUTLS_E_SUCCESS)
     return CURLE_SSL_CONNECT_ERROR;
 
-  if(data->set.ssl.cipher_list != NULL) {
+  if(SSL_CONN_CONFIG(cipher_list) != NULL) {
     failf(data, "can't pass a custom cipher list to older GnuTLS"
           " versions");
     return CURLE_SSL_CONNECT_ERROR;
@@ -657,13 +670,13 @@ gtls_connect_step1(struct connectdata *conn,
   }
 #endif
 
-  if(data->set.ssl.cert) {
+  if(SSL_SET_OPTION(cert)) {
     if(gnutls_certificate_set_x509_key_file(
          conn->ssl[sockindex].cred,
-         data->set.ssl.cert,
-         data->set.ssl.key ?
-         data->set.ssl.key : data->set.ssl.cert,
-         do_file_type(data->set.ssl.cert_type) ) !=
+         SSL_SET_OPTION(cert),
+         SSL_SET_OPTION(key) ?
+         SSL_SET_OPTION(key) : SSL_SET_OPTION(cert),
+         do_file_type(SSL_SET_OPTION(cert_type)) ) !=
        GNUTLS_E_SUCCESS) {
       failf(data, "error reading X.509 key or certificate file");
       return CURLE_SSL_CONNECT_ERROR;
@@ -672,7 +685,7 @@ gtls_connect_step1(struct connectdata *conn,
 
 #ifdef USE_TLS_SRP
   /* put the credentials to the current session */
-  if(data->set.ssl.authtype == CURL_TLSAUTH_SRP) {
+  if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP) {
     rc = gnutls_credentials_set(session, GNUTLS_CRD_SRP,
                                 conn->ssl[sockindex].srp_client_cred);
     if(rc != GNUTLS_E_SUCCESS) {
@@ -691,13 +704,24 @@ gtls_connect_step1(struct connectdata *conn,
     }
   }
 
-  /* set the connection handle (file descriptor for the socket) */
-  gnutls_transport_set_ptr(session,
-                           GNUTLS_INT_TO_POINTER_CAST(conn->sock[sockindex]));
+  if(conn->proxy_ssl[sockindex].use) {
+    transport_ptr = conn->proxy_ssl[sockindex].session;
+    gnutls_transport_push = Curl_gtls_push_ssl;
+    gnutls_transport_pull = Curl_gtls_pull_ssl;
+  }
+  else {
+    /* file descriptor for the socket */
+    transport_ptr = GNUTLS_INT_TO_POINTER_CAST(conn->sock[sockindex]);
+    gnutls_transport_push = Curl_gtls_push;
+    gnutls_transport_pull = Curl_gtls_pull;
+  }
+
+  /* set the connection handle */
+  gnutls_transport_set_ptr(session, transport_ptr);
 
   /* register callback functions to send and receive data. */
-  gnutls_transport_set_push_function(session, Curl_gtls_push);
-  gnutls_transport_set_pull_function(session, Curl_gtls_pull);
+  gnutls_transport_set_push_function(session, gnutls_transport_push);
+  gnutls_transport_set_pull_function(session, gnutls_transport_pull);
 
   /* lowat must be set to zero when using custom push and pull functions. */
   gnutls_transport_set_lowat(session, 0);
@@ -833,8 +857,8 @@ gtls_connect_step3(struct connectdata *conn,
        SSL_CONN_CONFIG(verifyhost) ||
        data->set.ssl.issuercert) {
 #ifdef USE_TLS_SRP
-      if(data->set.ssl.authtype == CURL_TLSAUTH_SRP
-         && data->set.ssl.username != NULL
+      if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP
+         && SSL_SET_OPTION(username) != NULL
          && !SSL_CONN_CONFIG(verifypeer)
          && gnutls_cipher_get(session)) {
         /* no peer cert, but auth is ok if we have SRP user and cipher and no
@@ -888,7 +912,7 @@ gtls_connect_step3(struct connectdata *conn,
         failf(data, "server certificate verification failed. CAfile: %s "
               "CRLfile: %s", SSL_CONN_CONFIG(CAfile) ? SSL_CONN_CONFIG(CAfile):
               "none",
-              data->set.ssl.CRLfile?data->set.ssl.CRLfile:"none");
+              SSL_SET_OPTION(CRLfile)?SSL_SET_OPTION(CRLfile):"none");
         return CURLE_SSL_CACERT;
       }
       else
@@ -1344,6 +1368,20 @@ Curl_gtls_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
+bool Curl_gtls_data_pending(const struct connectdata *conn, int connindex)
+{
+  bool res = FALSE;
+  if(conn->ssl[connindex].session &&
+     0 != gnutls_record_check_pending(conn->ssl[connindex].session))
+    res = TRUE;
+
+  if(conn->proxy_ssl[connindex].session &&
+     0 != gnutls_record_check_pending(conn->proxy_ssl[connindex].session))
+    res = TRUE;
+
+    return res;
+}
+
 static ssize_t gtls_send(struct connectdata *conn,
                          int sockindex,
                          const void *mem,
@@ -1363,29 +1401,29 @@ static ssize_t gtls_send(struct connectdata *conn,
   return rc;
 }
 
-static void close_one(struct connectdata *conn,
-                      int idx)
+static void close_one(struct ssl_connect_data *ssl)
 {
-  if(conn->ssl[idx].session) {
-    gnutls_bye(conn->ssl[idx].session, GNUTLS_SHUT_RDWR);
-    gnutls_deinit(conn->ssl[idx].session);
-    conn->ssl[idx].session = NULL;
+  if(ssl->session) {
+    gnutls_bye(ssl->session, GNUTLS_SHUT_RDWR);
+    gnutls_deinit(ssl->session);
+    ssl->session = NULL;
   }
-  if(conn->ssl[idx].cred) {
-    gnutls_certificate_free_credentials(conn->ssl[idx].cred);
-    conn->ssl[idx].cred = NULL;
+  if(ssl->cred) {
+    gnutls_certificate_free_credentials(ssl->cred);
+    ssl->cred = NULL;
   }
 #ifdef USE_TLS_SRP
-  if(conn->ssl[idx].srp_client_cred) {
-    gnutls_srp_free_client_credentials(conn->ssl[idx].srp_client_cred);
-    conn->ssl[idx].srp_client_cred = NULL;
+  if(ssl->srp_client_cred) {
+    gnutls_srp_free_client_credentials(ssl->srp_client_cred);
+    ssl->srp_client_cred = NULL;
   }
 #endif
 }
 
 void Curl_gtls_close(struct connectdata *conn, int sockindex)
 {
-  close_one(conn, sockindex);
+  close_one(&conn->ssl[sockindex]);
+  close_one(&conn->proxy_ssl[sockindex]);
 }
 
 /*
@@ -1451,8 +1489,8 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
   gnutls_certificate_free_credentials(conn->ssl[sockindex].cred);
 
 #ifdef USE_TLS_SRP
-  if(data->set.ssl.authtype == CURL_TLSAUTH_SRP
-     && data->set.ssl.username != NULL)
+  if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP
+     && SSL_SET_OPTION(username) != NULL)
     gnutls_srp_free_client_credentials(conn->ssl[sockindex].srp_client_cred);
 #endif
 
