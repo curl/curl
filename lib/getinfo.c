@@ -348,7 +348,7 @@ static CURLcode getinfo_socket(struct SessionHandle *data, CURLINFO info,
     else
       /* this interface is documented to return -1 in case of badness, which
          may not be the same as the CURL_SOCKET_BAD value */
-      *param_socketp = -1;
+      *param_socketp = (curl_socket_t)-1;
     break;
   default:
     return CURLE_UNKNOWN_OPTION;
