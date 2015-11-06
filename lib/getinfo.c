@@ -335,20 +335,9 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
 static CURLcode getinfo_socket(struct SessionHandle *data, CURLINFO info,
                                curl_socket_t *param_socketp)
 {
-  curl_socket_t sockfd;
-
   switch(info) {
   case CURLINFO_ACTIVESOCKET:
-    sockfd = Curl_getconnectinfo(data, NULL);
-
-    /* note: this is not a good conversion for systems with 64 bit sockets and
-       32 bit longs */
-    if(sockfd != CURL_SOCKET_BAD)
-      *param_socketp = sockfd;
-    else
-      /* this interface is documented to return -1 in case of badness, which
-         may not be the same as the CURL_SOCKET_BAD value */
-      *param_socketp = -1;
+    *param_socketp = Curl_getconnectinfo(data, NULL);
     break;
   default:
     return CURLE_UNKNOWN_OPTION;
