@@ -653,8 +653,8 @@ static CURLcode imap_perform_list(struct connectdata *conn)
     result = imap_sendf(conn, "%s%s", imap->custom,
                         imap->custom_params ? imap->custom_params : "");
   else {
-    /* Make sure the mailbox is in the correct atom format */
-    mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
+    /* Make sure the mailbox is in the correct atom format if necessary */
+    mailbox = imap->mailbox ? imap_atom(imap->mailbox) : "";
     if(!mailbox)
       return CURLE_OUT_OF_MEMORY;
 
