@@ -37,8 +37,11 @@ tftp://%HOSTIP:%TFTPPORT//1049 --trace-ascii log/traceit --interface %CLIENTIP
 <verify>
 <protocol>
 opcode: 1
-filename: /1049
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /1049
 </protocol>
 </verify>
 </testcase>

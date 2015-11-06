@@ -36,8 +36,11 @@ tftp://%HOSTIP:%TFTPPORT//271 --trace-ascii log/traceit
 <verify>
 <protocol>
 opcode: 1
-filename: /271
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /271
 </protocol>
 </verify>
 </testcase>

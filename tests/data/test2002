@@ -88,8 +88,11 @@ TYPE I
 SIZE 20020002
 RETR 20020002
 opcode: 1
-filename: /20020003
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /20020003
 QUIT
 </protocol>
 <stdout>

@@ -37,8 +37,11 @@ tftp://%HOSTIP:%TFTPPORT//1009 --local-port 44444-45444
 <verify>
 <protocol>
 opcode: 1
-filename: /1009
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /1009
 </protocol>
 </verify>
 </testcase>
