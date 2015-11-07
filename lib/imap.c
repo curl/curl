@@ -98,7 +98,7 @@ static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode imap_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode imap_setup_connection(struct connectdata *conn);
-static char *imap_atom(const char *str);
+static char *imap_atom(const char *str, bool escape_only);
 static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...);
 static CURLcode imap_parse_url_options(struct connectdata *conn);
 static CURLcode imap_parse_url_path(struct connectdata *conn);
@@ -540,8 +540,8 @@ static CURLcode imap_perform_login(struct connectdata *conn)
   }
 
   /* Make sure the username and password are in the correct atom format */
-  user = imap_atom(conn->user);
-  passwd = imap_atom(conn->passwd);
+  user = imap_atom(conn->user, false);
+  passwd = imap_atom(conn->passwd, false);
 
   /* Send the LOGIN command */
   result = imap_sendf(conn, "LOGIN %s %s", user ? user : "",
@@ -654,7 +654,7 @@ static CURLcode imap_perform_list(struct connectdata *conn)
                         imap->custom_params ? imap->custom_params : "");
   else {
     /* Make sure the mailbox is in the correct atom format if necessary */
-    mailbox = imap->mailbox ? imap_atom(imap->mailbox) : (char *)"";
+    mailbox = imap->mailbox ? imap_atom(imap->mailbox, true) : (char *) "";
     if(!mailbox)
       return CURLE_OUT_OF_MEMORY;
 
@@ -695,7 +695,7 @@ static CURLcode imap_perform_select(struct connectdata *conn)
   }
 
   /* Make sure the mailbox is in the correct atom format */
-  mailbox = imap_atom(imap->mailbox);
+  mailbox = imap_atom(imap->mailbox, false);
   if(!mailbox)
     return CURLE_OUT_OF_MEMORY;
 
@@ -769,7 +769,7 @@ static CURLcode imap_perform_append(struct connectdata *conn)
   }
 
   /* Make sure the mailbox is in the correct atom format */
-  mailbox = imap_atom(imap->mailbox);
+  mailbox = imap_atom(imap->mailbox, false);
   if(!mailbox)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1815,7 +1815,7 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
  * The returned string needs to be freed.
  *
  */
-static char *imap_atom(const char *str)
+static char *imap_atom(const char *str, bool escape_only)
 {
   const char *p1;
   char *p2;
@@ -1835,7 +1835,7 @@ static char *imap_atom(const char *str)
       backsp_count++;
     else if(*p1 == '"')
       quote_count++;
-    else if(*p1 == ' ')
+    else if(!escape_only && (*p1 == ' '))
       space_exists = TRUE;
 
     p1++;
