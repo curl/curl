@@ -1840,7 +1840,7 @@ static char *imap_atom(const char *str, bool escape_only)
     else if(!escape_only) {
       const char *p3 = atom_specials;
 
-      while (*p3 && !others_exists) {
+      while(*p3 && !others_exists) {
         if(*p1 == *p3)
           others_exists = TRUE;
 
