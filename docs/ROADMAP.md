@@ -18,20 +18,6 @@ HTTP/2
    To decide: if we need to bundle parts of the nghttp2 stuff that probably
    won't be shipped by many distros.
 
-- stream properties API
-
-   Provide options for setting priorities and dependencies among the streams
-   (easy handles). They are mostly information set for the stream and sent to
-   the server so we don't have to add much logic for this.
-
-- server push
-
-   Not exactly clear exactly how to support this API-wise, but by adding
-   handles without asking for a resource it could be a way to be prepared to
-   receive pushes in case such are sent. We probably need it to still specify
-   a URL with host name, port etc but we probably need a special option to
-   tell libcurl it is for server push purposes.
-
 - provide option for HTTP/2 "prior knowledge" over clear text
 
    As it would avoid the roundtrip-heavy Upgrade: procedures when you _know_
@@ -117,7 +103,7 @@ Improve
 
 2. curl -h output (considered overwhelming to users)
 
-3. we have > 160 command line options, is there a way to redo things to
+3. we have > 170 command line options, is there a way to redo things to
    simplify or improve the situation as we are likely to keep adding
    features/options in the future too
 
