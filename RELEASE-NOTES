@@ -47,6 +47,15 @@ This release includes the following bugfixes:
  o curl.1: -E: s/private certificate/client certificate
  o curl.h: s/HTTPPOST_/CURL_HTTPOST_ [13]
  o curl_formadd: support >2GB files on windows [14]
+ o http redirects: %-encode bytes outside of ascii range [15]
+ o rawstr: Speed up Curl_raw_toupper by 40%
+ o curl_ntlm_core: fix 2 curl_off_t constant overflows.
+ o getinfo: CURLINFO_ACTIVESOCKET: fix bad socket value
+ o tftp tests: verify sent options too
+ o imap: Don't call imap_atom() when no mailbox specified in LIST command
+ o imap: Fixed double quote in LIST command when mailbox contains spaces
+ o imap: Don't check for continuation when executing a CUSTOMREQUEST [16]
+ o acinclude: Remove check for 16-bit curl_off_t
 
 This release includes the following known bugs:
 
@@ -57,9 +66,10 @@ advice from friends like these:
 
   Anders Bakken, Dan Fandrich, Daniel Hwang, Daniel Stenberg, Dmitry S. Baikov,
   Erik Johansson, Gisle Vanem, Javier G. Sogo, John Levon, Jonas Minnberg,
-  Kang Lin, Kurt Fankhauser, Rainer Jung, Ray Satiro, Richard Hosking,
-  Svyatoslav Mishyn, Tatsuhiro Tsujikawa, Tim Rühsen, xiangbin li,
-  (19 contributors)
+  Justin Ehlert, Kang Lin, Kurt Fankhauser, Lauri Kasanen, Marcel Raad,
+  Patrick Monnerat, Rainer Jung, Ray Satiro, Richard Hosking, Steve Holme,
+  Svyatoslav Mishyn, Tatsuhiro Tsujikawa, Tim Rühsen, Xiangbin Li,
+  (24 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -79,3 +89,5 @@ References to bug reports and discussions on issues:
  [12] = https://github.com/bagder/curl/pull/501
  [13] = http://curl.haxx.se/bug/?i=506
  [14] = http://curl.haxx.se/bug/?i=425
+ [15] = http://curl.haxx.se/bug/?i=473
+ [16] = http://curl.haxx.se/bug/?i=486
