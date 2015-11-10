@@ -2517,12 +2517,12 @@ static CURLcode servercert(struct connectdata *conn,
   infof(data, "\t subject: %s\n", rc?"[NONE]":buffer);
 
   ASN1_TIME_print(mem, X509_get_notBefore(connssl->server_cert));
-  len = BIO_get_mem_data(mem, &ptr);
+  len = BIO_get_mem_data(mem, (char **) &ptr);
   infof(data, "\t start date: %.*s\n", len, ptr);
   BIO_reset(mem);
 
   ASN1_TIME_print(mem, X509_get_notAfter(connssl->server_cert));
-  len = BIO_get_mem_data(mem, &ptr);
+  len = BIO_get_mem_data(mem, (char **) &ptr);
   infof(data, "\t expire date: %.*s\n", len, ptr);
   BIO_reset(mem);
 
