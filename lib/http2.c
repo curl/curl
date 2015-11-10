@@ -42,7 +42,7 @@
 
 #define MIN(x,y) ((x)<(y)?(x):(y))
 
-#if (NGHTTP2_VERSION_NUM < 0x000600)
+#if (NGHTTP2_VERSION_NUM < 0x010000)
 #error too old nghttp2 version, upgrade!
 #endif
 
