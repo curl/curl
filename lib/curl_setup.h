@@ -181,9 +181,6 @@
 #  ifndef CURL_DISABLE_SMTP
 #    define CURL_DISABLE_SMTP
 #  endif
-#  ifndef CURL_DISABLE_RTSP
-#    define CURL_DISABLE_RTSP
-#  endif
 #  ifndef CURL_DISABLE_RTMP
 #    define CURL_DISABLE_RTMP
 #  endif
