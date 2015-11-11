@@ -45,6 +45,15 @@
 /* to disable proxies */
 #cmakedefine CURL_DISABLE_PROXY 1
 
+/* to disable RTSP */
+#cmakedefine CURL_DISABLE_RTSP 1
+
+/* to disable RTMP */
+#cmakedefine CURL_DISABLE_RTMP 1
+
+/* to disable SMB */
+#cmakedefine CURL_DISABLE_SMB 1
+
 /* to disable SMTP */
 #cmakedefine CURL_DISABLE_SMTP 1
 
