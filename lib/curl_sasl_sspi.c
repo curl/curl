@@ -418,6 +418,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   SECURITY_STATUS status;
   unsigned long attrs;
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
+  TCHAR *spn;
 
   (void) data;
 
@@ -489,12 +490,20 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   resp_buf.pvBuffer   = output_token;
   resp_buf.cbBuffer   = curlx_uztoul(token_max);
 
+  spn = Curl_convert_UTF8_to_tchar((char *) uripath);
+  if(!spn) {
+    free(output_token);
+
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   /* Generate our reponse message */
   status = s_pSecFn->InitializeSecurityContext(&credentials, NULL,
-                                               (TCHAR *) uripath,
+                                               spn,
                                                ISC_REQ_USE_HTTP_STYLE, 0, 0,
                                                &chlg_desc, 0, &context,
                                                &resp_desc, &attrs, &expiry);
+  Curl_unicodefree(spn);
 
   if(status == SEC_I_COMPLETE_NEEDED ||
      status == SEC_I_COMPLETE_AND_CONTINUE)
