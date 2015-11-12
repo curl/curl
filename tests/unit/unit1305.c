@@ -134,8 +134,6 @@ UNITTEST_START
     abort_unless(nodep, "insertion into hash failed");
     /* Freeing will now be done by Curl_hash_destroy */
     data_node = NULL;
-
-    /* To do: test retrieval, deletion, edge conditions */
   }
 
 UNITTEST_STOP
