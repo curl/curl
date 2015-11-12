@@ -463,6 +463,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
                                               p_identity, NULL, NULL,
                                               &credentials, &expiry);
   if(status != SEC_E_OK) {
+    Curl_sspi_free_identity(p_identity);
     free(output_token);
 
     return CURLE_LOGIN_DENIED;
@@ -492,6 +493,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
 
   spn = Curl_convert_UTF8_to_tchar((char *) uripath);
   if(!spn) {
+    Curl_sspi_free_identity(p_identity);
     free(output_token);
 
     return CURLE_OUT_OF_MEMORY;
@@ -511,6 +513,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
     s_pSecFn->FreeCredentialsHandle(&credentials);
 
+    Curl_sspi_free_identity(p_identity);
     free(output_token);
 
     return CURLE_OUT_OF_MEMORY;
@@ -521,6 +524,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
     s_pSecFn->DeleteSecurityContext(&context);
     s_pSecFn->FreeCredentialsHandle(&credentials);
 
+    Curl_sspi_free_identity(p_identity);
     free(output_token);
 
     return CURLE_OUT_OF_MEMORY;
