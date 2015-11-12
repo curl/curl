@@ -57,16 +57,15 @@ UNITTEST_START
   char *nodep;
   int rc;
 
-  /* Ensure the key1 hashes are as expected in order to test both hash
-     collisions and a full table */
-  fail_unless(Curl_hash_str(key1, strlen(key1), slots) == 1,
-              "hashes are not computed as expected");
-  fail_unless(Curl_hash_str(key2, strlen(key2), slots) == 0,
-              "hashes are not computed as expected");
-  fail_unless(Curl_hash_str(key3, strlen(key3), slots) == 2,
-              "hashes are not computed as expected");
-  fail_unless(Curl_hash_str(key4, strlen(key4), slots) == 1,
-              "hashes are not computed as expected");
+  /* Ensure the key hashes are as expected in order to test both hash
+     collisions and a full table. Unfortunately, the hashes can vary
+     between architectures. */
+  if(Curl_hash_str(key1, strlen(key1), slots) != 1 ||
+     Curl_hash_str(key2, strlen(key2), slots) != 0 ||
+     Curl_hash_str(key3, strlen(key3), slots) != 2 ||
+     Curl_hash_str(key4, strlen(key4), slots) != 1)
+    fprintf(stderr, "Warning: hashes are not computed as expected on this "
+            "architecture; test coverage will be less comprehensive\n");
 
   nodep = Curl_hash_add(&hash_static, &key1, strlen(key1), &key1);
   fail_unless(nodep, "insertion into hash failed");
