@@ -275,26 +275,6 @@ static void PL_ERROR(struct connectdata *conn, CURLcode err)
   parser->error = err;
 }
 
-static bool ftp_pl_gettime(struct ftp_parselist_data *parser, char *string)
-{
-  (void)parser;
-  (void)string;
-  /* TODO
-   * There could be possible parse timestamp from server. Leaving unimplemented
-   * for now.
-   * If you want implement this, please add CURLFINFOFLAG_KNOWN_TIME flag to
-   * parser->file_data->flags
-   *
-   * Ftp servers are giving usually these formats:
-   *  Apr 11  1998 (unknown time.. set it to 00:00:00?)
-   *  Apr 11 12:21 (unknown year -> set it to NOW() time?)
-   *  08-05-09  02:49PM  (ms-dos format)
-   *  20100421092538 -> for MLST/MLSD response
-   */
-
-  return FALSE;
-}
-
 static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
                                     struct curl_fileinfo *finfo)
 {
@@ -715,9 +695,11 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           if(c == ' ') {
             finfo->b_data[parser->item_offset + parser->item_length -1] = 0;
             parser->offsets.time = parser->item_offset;
-            if(ftp_pl_gettime(parser, finfo->b_data + parser->item_offset)) {
-              parser->file_data->flags |= CURLFINFOFLAG_KNOWN_TIME;
-            }
+            /*
+              if(ftp_pl_gettime(parser, finfo->b_data + parser->item_offset)) {
+                parser->file_data->flags |= CURLFINFOFLAG_KNOWN_TIME;
+              }
+            */
             if(finfo->filetype == CURLFILETYPE_SYMLINK) {
               parser->state.UNIX.main = PL_UNIX_SYMLINK;
               parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_PRESPACE;
