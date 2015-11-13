@@ -294,21 +294,22 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
 
 /* evaluates to true if option takes a data argument to pass to a callback */
 #define _curl_is_cb_data_option(option)                                       \
-  ((option) == CURLOPT_WRITEDATA ||                                           \
-   (option) == CURLOPT_READDATA ||                                            \
-   (option) == CURLOPT_IOCTLDATA ||                                           \
-   (option) == CURLOPT_SOCKOPTDATA ||                                         \
-   (option) == CURLOPT_OPENSOCKETDATA ||                                      \
-   (option) == CURLOPT_PROGRESSDATA ||                                        \
-   (option) == CURLOPT_HEADERDATA ||                                         \
+  ((option) == CURLOPT_CHUNK_DATA ||                                          \
+   (option) == CURLOPT_CLOSESOCKETDATA ||                                     \
    (option) == CURLOPT_DEBUGDATA ||                                           \
-   (option) == CURLOPT_SSL_CTX_DATA ||                                        \
-   (option) == CURLOPT_SEEKDATA ||                                            \
-   (option) == CURLOPT_PRIVATE ||                                             \
-   (option) == CURLOPT_SSH_KEYDATA ||                                         \
-   (option) == CURLOPT_INTERLEAVEDATA ||                                      \
-   (option) == CURLOPT_CHUNK_DATA ||                                          \
    (option) == CURLOPT_FNMATCH_DATA ||                                        \
+   (option) == CURLOPT_HEADERDATA ||                                          \
+   (option) == CURLOPT_INTERLEAVEDATA ||                                      \
+   (option) == CURLOPT_IOCTLDATA ||                                           \
+   (option) == CURLOPT_OPENSOCKETDATA ||                                      \
+   (option) == CURLOPT_PRIVATE ||                                             \
+   (option) == CURLOPT_PROGRESSDATA ||                                        \
+   (option) == CURLOPT_READDATA ||                                            \
+   (option) == CURLOPT_SEEKDATA ||                                            \
+   (option) == CURLOPT_SOCKOPTDATA ||                                         \
+   (option) == CURLOPT_SSH_KEYDATA ||                                         \
+   (option) == CURLOPT_SSL_CTX_DATA ||                                        \
+   (option) == CURLOPT_WRITEDATA ||                                           \
    0)
 
 /* evaluates to true if option takes a POST data argument (void* or char*) */
