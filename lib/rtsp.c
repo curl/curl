@@ -42,16 +42,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/*
- * TODO (general)
- *  -incoming server requests
- *      -server CSeq counter
- *  -digest authentication
- *  -connect thru proxy
- *  -pipelining?
- */
-
-
 #define RTP_PKT_CHANNEL(p)   ((int)((unsigned char)((p)[1])))
 
 #define RTP_PKT_LENGTH(p)  ((((int)((unsigned char)((p)[2]))) << 8) | \
@@ -222,7 +212,6 @@ static CURLcode rtsp_done(struct connectdata *conn,
     else if(data->set.rtspreq == RTSPREQ_RECEIVE &&
             (conn->proto.rtspc.rtp_channel == -1)) {
       infof(data, "Got an RTP Receive with a CSeq of %ld\n", CSeq_recv);
-      /* TODO CPC: Server -> Client logic here */
     }
   }
 
@@ -327,8 +316,6 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
           p_request);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-
-  /* TODO: proxy? */
 
   /* Stream URI. Default to server '*' if not specified */
   if(data->set.str[STRING_RTSP_STREAM_URI]) {

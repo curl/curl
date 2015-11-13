@@ -2382,11 +2382,6 @@ static CURLcode get_cert_chain(struct connectdata *conn,
         print_pubkey_BN(dh, priv_key, i);
         print_pubkey_BN(dh, pub_key, i);
         break;
-#if 0
-      case EVP_PKEY_EC: /* symbol not present in OpenSSL 0.9.6 */
-        /* left TODO */
-        break;
-#endif
       }
       EVP_PKEY_free(pubkey);
     }

@@ -857,11 +857,6 @@ static void do_pubkey(struct SessionHandle * data, int certnum,
     do_pubkey_field(data, certnum, "dh(g)", &elem);
     do_pubkey_field(data, certnum, "dh(pub_key)", &pk);
   }
-#if 0 /* Patent-encumbered. */
-  else if(curl_strequal(algo, "ecPublicKey")) {
-    /* Left TODO. */
-  }
-#endif
 }
 
 CURLcode Curl_extract_certinfo(struct connectdata * conn,

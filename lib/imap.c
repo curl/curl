@@ -842,7 +842,7 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
 
   if(imapcode != 'O') {
     failf(data, "Got unexpected imap-server response");
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
+    result = CURLE_FTP_WEIRD_SERVER_REPLY;
   }
   else
     result = imap_perform_capability(conn);
@@ -1033,7 +1033,7 @@ static CURLcode imap_state_list_resp(struct connectdata *conn, int imapcode,
     line[len] = '\0';
   }
   else if(imapcode != 'O')
-    result = CURLE_QUOTE_ERROR; /* TODO: Fix error code */
+    result = CURLE_QUOTE_ERROR;
   else
     /* End of DO phase */
     state(conn, IMAP_STOP);
@@ -1105,7 +1105,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   if(imapcode != '*') {
     Curl_pgrsSetDownloadSize(data, -1);
     state(conn, IMAP_STOP);
-    return CURLE_REMOTE_FILE_NOT_FOUND; /* TODO: Fix error code */
+    return CURLE_REMOTE_FILE_NOT_FOUND;
   }
 
   /* Something like this is received "* 1 FETCH (BODY[TEXT] {2021}\r" so parse
@@ -1174,7 +1174,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   else {
     /* We don't know how to parse this line */
     failf(pp->conn->data, "Failed to parse FETCH response.");
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
+    result = CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
   /* End of DO phase */
@@ -1193,7 +1193,7 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
   (void)instate; /* No use for this yet */
 
   if(imapcode != 'O')
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: Fix error code */
+    result = CURLE_FTP_WEIRD_SERVER_REPLY;
   else
     /* End of DONE phase */
     state(conn, IMAP_STOP);
@@ -1262,7 +1262,7 @@ static CURLcode imap_state_search_resp(struct connectdata *conn, int imapcode,
     line[len] = '\0';
   }
   else if(imapcode != 'O')
-    result = CURLE_QUOTE_ERROR; /* TODO: Fix error code */
+    result = CURLE_QUOTE_ERROR;
   else
     /* End of DO phase */
     state(conn, IMAP_STOP);
@@ -1506,10 +1506,10 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
 
     /* Run the state-machine
 
-       TODO: when the multi interface is used, this _really_ should be using
-       the imap_multi_statemach function but we have no general support for
-       non-blocking DONE operations, not in the multi state machine and with
-       Curl_done() invokes on several places in the code!
+       This _really_ should be using the imap_multi_statemach function but we
+       have no general support for non-blocking DONE operations. Neither in
+       the multi state machine and there are Curl_done() invokes on several
+       places in the code!
     */
     if(!result)
       result = imap_block_statemach(conn);
