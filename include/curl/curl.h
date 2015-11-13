@@ -828,8 +828,12 @@ typedef enum {
    but 32 */
 #define CURLOPTTYPE_LONG          0
 #define CURLOPTTYPE_OBJECTPOINT   10000
+#define CURLOPTTYPE_STRINGPOINT   10000
 #define CURLOPTTYPE_FUNCTIONPOINT 20000
 #define CURLOPTTYPE_OFF_T         30000
+
+/* *STRINGPOINT is an alias for OBJECTPOINT to allow tools to extract the
+   string options from the header file */
 
 /* name is uppercase CURLOPT_<name>,
    type is one of the defined CURLOPTTYPE_<type>
@@ -844,6 +848,7 @@ typedef enum {
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
 #define LONG          CURLOPTTYPE_LONG
 #define OBJECTPOINT   CURLOPTTYPE_OBJECTPOINT
+#defien STRINGPOINT   CURLOPTTYPE_OBJECTPOINT
 #define FUNCTIONPOINT CURLOPTTYPE_FUNCTIONPOINT
 #define OFF_T         CURLOPTTYPE_OFF_T
 #define CINIT(name,type,number) CURLOPT_/**/name = type + number
@@ -860,22 +865,22 @@ typedef enum {
   CINIT(WRITEDATA, OBJECTPOINT, 1),
 
   /* The full URL to get/put */
-  CINIT(URL, OBJECTPOINT, 2),
+  CINIT(URL, STRINGPOINT, 2),
 
   /* Port number to connect to, if other than default. */
   CINIT(PORT, LONG, 3),
 
   /* Name of proxy to use. */
-  CINIT(PROXY, OBJECTPOINT, 4),
+  CINIT(PROXY, STRINGPOINT, 4),
 
   /* "user:password;options" to use when fetching. */
-  CINIT(USERPWD, OBJECTPOINT, 5),
+  CINIT(USERPWD, STRINGPOINT, 5),
 
   /* "user:password" to use with proxy. */
-  CINIT(PROXYUSERPWD, OBJECTPOINT, 6),
+  CINIT(PROXYUSERPWD, STRINGPOINT, 6),
 
   /* Range to get, specified as an ASCII string. */
-  CINIT(RANGE, OBJECTPOINT, 7),
+  CINIT(RANGE, STRINGPOINT, 7),
 
   /* not used */
 
@@ -912,14 +917,14 @@ typedef enum {
   CINIT(POSTFIELDS, OBJECTPOINT, 15),
 
   /* Set the referrer page (needed by some CGIs) */
-  CINIT(REFERER, OBJECTPOINT, 16),
+  CINIT(REFERER, STRINGPOINT, 16),
 
   /* Set the FTP PORT string (interface name, named or numerical IP address)
      Use i.e '-' to use default address. */
-  CINIT(FTPPORT, OBJECTPOINT, 17),
+  CINIT(FTPPORT, STRINGPOINT, 17),
 
   /* Set the User-Agent string (examined by some CGIs) */
-  CINIT(USERAGENT, OBJECTPOINT, 18),
+  CINIT(USERAGENT, STRINGPOINT, 18),
 
   /* If the download receives less than "low speed limit" bytes/second
    * during "low speed time" seconds, the operations is aborted.
@@ -942,7 +947,7 @@ typedef enum {
   CINIT(RESUME_FROM, LONG, 21),
 
   /* Set cookie in request: */
-  CINIT(COOKIE, OBJECTPOINT, 22),
+  CINIT(COOKIE, STRINGPOINT, 22),
 
   /* This points to a linked list of headers, struct curl_slist kind. This
      list is also used for RTSP (in spite of its name) */
@@ -952,10 +957,10 @@ typedef enum {
   CINIT(HTTPPOST, OBJECTPOINT, 24),
 
   /* name of the file keeping your private SSL-certificate */
-  CINIT(SSLCERT, OBJECTPOINT, 25),
+  CINIT(SSLCERT, STRINGPOINT, 25),
 
   /* password for the SSL or SSH private key */
-  CINIT(KEYPASSWD, OBJECTPOINT, 26),
+  CINIT(KEYPASSWD, STRINGPOINT, 26),
 
   /* send TYPE parameter? */
   CINIT(CRLF, LONG, 27),
@@ -969,7 +974,7 @@ typedef enum {
 
   /* point to a file to read the initial cookies from, also enables
      "cookie awareness" */
-  CINIT(COOKIEFILE, OBJECTPOINT, 31),
+  CINIT(COOKIEFILE, STRINGPOINT, 31),
 
   /* What version to specifically try to use.
      See CURL_SSLVERSION defines below. */
@@ -988,9 +993,9 @@ typedef enum {
      HTTP: DELETE, TRACE and others
      FTP: to use a different list command
      */
-  CINIT(CUSTOMREQUEST, OBJECTPOINT, 36),
+  CINIT(CUSTOMREQUEST, STRINGPOINT, 36),
 
-  /* HTTP request, for odd commands like DELETE, TRACE and others */
+  /* FILE handle to use instead of stderr */
   CINIT(STDERR, OBJECTPOINT, 37),
 
   /* 38 is not used */
@@ -1047,19 +1052,19 @@ typedef enum {
   CINIT(HTTPPROXYTUNNEL, LONG, 61),
 
   /* Set the interface string to use as outgoing network interface */
-  CINIT(INTERFACE, OBJECTPOINT, 62),
+  CINIT(INTERFACE, STRINGPOINT, 62),
 
   /* Set the krb4/5 security level, this also enables krb4/5 awareness.  This
    * is a string, 'clear', 'safe', 'confidential' or 'private'.  If the string
    * is set but doesn't match one of these, 'private' will be used.  */
-  CINIT(KRBLEVEL, OBJECTPOINT, 63),
+  CINIT(KRBLEVEL, STRINGPOINT, 63),
 
   /* Set if we should verify the peer in ssl handshake, set 1 to verify. */
   CINIT(SSL_VERIFYPEER, LONG, 64),
 
   /* The CApath or CAfile used to validate the peer certificate
      this option is used only if SSL_VERIFYPEER is true */
-  CINIT(CAINFO, OBJECTPOINT, 65),
+  CINIT(CAINFO, STRINGPOINT, 65),
 
   /* 66 = OBSOLETE */
   /* 67 = OBSOLETE */
@@ -1093,10 +1098,10 @@ typedef enum {
 
   /* Set to a file name that contains random data for libcurl to use to
      seed the random engine when doing SSL connects. */
-  CINIT(RANDOM_FILE, OBJECTPOINT, 76),
+  CINIT(RANDOM_FILE, STRINGPOINT, 76),
 
   /* Set to the Entropy Gathering Daemon socket pathname */
-  CINIT(EGDSOCKET, OBJECTPOINT, 77),
+  CINIT(EGDSOCKET, STRINGPOINT, 77),
 
   /* Time-out connect operations after this amount of seconds, if connects are
      OK within this time, then fine... This only aborts the connect phase. */
@@ -1118,10 +1123,10 @@ typedef enum {
 
   /* Specify which file name to write all known cookies in after completed
      operation. Set file name to "-" (dash) to make it go to stdout. */
-  CINIT(COOKIEJAR, OBJECTPOINT, 82),
+  CINIT(COOKIEJAR, STRINGPOINT, 82),
 
   /* Specify which SSL ciphers to use */
-  CINIT(SSL_CIPHER_LIST, OBJECTPOINT, 83),
+  CINIT(SSL_CIPHER_LIST, STRINGPOINT, 83),
 
   /* Specify which HTTP version to use! This must be set to one of the
      CURL_HTTP_VERSION* enums set below. */
@@ -1133,16 +1138,16 @@ typedef enum {
   CINIT(FTP_USE_EPSV, LONG, 85),
 
   /* type of the file keeping your SSL-certificate ("DER", "PEM", "ENG") */
-  CINIT(SSLCERTTYPE, OBJECTPOINT, 86),
+  CINIT(SSLCERTTYPE, STRINGPOINT, 86),
 
   /* name of the file keeping your private SSL-key */
-  CINIT(SSLKEY, OBJECTPOINT, 87),
+  CINIT(SSLKEY, STRINGPOINT, 87),
 
   /* type of the file keeping your private SSL-key ("DER", "PEM", "ENG") */
-  CINIT(SSLKEYTYPE, OBJECTPOINT, 88),
+  CINIT(SSLKEYTYPE, STRINGPOINT, 88),
 
   /* crypto engine for the SSL-sub system */
-  CINIT(SSLENGINE, OBJECTPOINT, 89),
+  CINIT(SSLENGINE, STRINGPOINT, 89),
 
   /* set the crypto engine for the SSL-sub system as default
      the param has no meaning...
@@ -1169,7 +1174,7 @@ typedef enum {
 
   /* The CApath directory used to validate the peer certificate
      this option is used only if SSL_VERIFYPEER is true */
-  CINIT(CAPATH, OBJECTPOINT, 97),
+  CINIT(CAPATH, STRINGPOINT, 97),
 
   /* Instruct libcurl to use a smaller receive buffer */
   CINIT(BUFFERSIZE, LONG, 98),
@@ -1189,7 +1194,7 @@ typedef enum {
   /* Set the Accept-Encoding string. Use this to tell a server you would like
      the response to be compressed. Before 7.21.6, this was known as
      CURLOPT_ENCODING */
-  CINIT(ACCEPT_ENCODING, OBJECTPOINT, 102),
+  CINIT(ACCEPT_ENCODING, STRINGPOINT, 102),
 
   /* Set pointer to private data */
   CINIT(PRIVATE, OBJECTPOINT, 103),
@@ -1270,7 +1275,7 @@ typedef enum {
      to parse (using the CURLOPT_NETRC option). If not set, libcurl will do
      a poor attempt to find the user's home directory and check for a .netrc
      file in there. */
-  CINIT(NETRC_FILE, OBJECTPOINT, 118),
+  CINIT(NETRC_FILE, STRINGPOINT, 118),
 
   /* Enable SSL/TLS for FTP, pick one of:
      CURLUSESSL_TRY     - try using SSL, proceed anyway otherwise
@@ -1313,10 +1318,10 @@ typedef enum {
 
   /* zero terminated string for pass on to the FTP server when asked for
      "account" info */
-  CINIT(FTP_ACCOUNT, OBJECTPOINT, 134),
+  CINIT(FTP_ACCOUNT, STRINGPOINT, 134),
 
-  /* feed cookies into cookie engine */
-  CINIT(COOKIELIST, OBJECTPOINT, 135),
+  /* feed cookie into cookie engine */
+  CINIT(COOKIELIST, STRINGPOINT, 135),
 
   /* ignore Content-Length */
   CINIT(IGNORE_CONTENT_LENGTH, LONG, 136),
@@ -1362,7 +1367,7 @@ typedef enum {
   CINIT(MAX_RECV_SPEED_LARGE, OFF_T, 146),
 
   /* Pointer to command string to send if USER/PASS fails. */
-  CINIT(FTP_ALTERNATIVE_TO_USER, OBJECTPOINT, 147),
+  CINIT(FTP_ALTERNATIVE_TO_USER, STRINGPOINT, 147),
 
   /* callback function for setting socket options */
   CINIT(SOCKOPTFUNCTION, FUNCTIONPOINT, 148),
@@ -1376,8 +1381,8 @@ typedef enum {
   CINIT(SSH_AUTH_TYPES, LONG, 151),
 
   /* Used by scp/sftp to do public/private key authentication */
-  CINIT(SSH_PUBLIC_KEYFILE, OBJECTPOINT, 152),
-  CINIT(SSH_PRIVATE_KEYFILE, OBJECTPOINT, 153),
+  CINIT(SSH_PUBLIC_KEYFILE, STRINGPOINT, 152),
+  CINIT(SSH_PRIVATE_KEYFILE, STRINGPOINT, 153),
 
   /* Send CCC (Clear Command Channel) after authentication */
   CINIT(FTP_SSL_CCC, LONG, 154),
@@ -1401,7 +1406,7 @@ typedef enum {
   CINIT(POSTREDIR, LONG, 161),
 
   /* used by scp/sftp to verify the host's public key */
-  CINIT(SSH_HOST_PUBLIC_KEY_MD5, OBJECTPOINT, 162),
+  CINIT(SSH_HOST_PUBLIC_KEY_MD5, STRINGPOINT, 162),
 
   /* Callback function for opening socket (instead of socket(2)). Optionally,
      callback is able change the address or refuse to connect returning
@@ -1421,10 +1426,10 @@ typedef enum {
   CINIT(SEEKDATA, OBJECTPOINT, 168),
 
   /* CRL file */
-  CINIT(CRLFILE, OBJECTPOINT, 169),
+  CINIT(CRLFILE, STRINGPOINT, 169),
 
   /* Issuer certificate */
-  CINIT(ISSUERCERT, OBJECTPOINT, 170),
+  CINIT(ISSUERCERT, STRINGPOINT, 170),
 
   /* (IPv6) Address scope */
   CINIT(ADDRESS_SCOPE, LONG, 171),
@@ -1434,12 +1439,12 @@ typedef enum {
   CINIT(CERTINFO, LONG, 172),
 
   /* "name" and "pwd" to use when fetching. */
-  CINIT(USERNAME, OBJECTPOINT, 173),
-  CINIT(PASSWORD, OBJECTPOINT, 174),
+  CINIT(USERNAME, STRINGPOINT, 173),
+  CINIT(PASSWORD, STRINGPOINT, 174),
 
     /* "name" and "pwd" to use with Proxy when fetching. */
-  CINIT(PROXYUSERNAME, OBJECTPOINT, 175),
-  CINIT(PROXYPASSWORD, OBJECTPOINT, 176),
+  CINIT(PROXYUSERNAME, STRINGPOINT, 175),
+  CINIT(PROXYPASSWORD, STRINGPOINT, 176),
 
   /* Comma separated list of hostnames defining no-proxy zones. These should
      match both hostnames directly, and hostnames within a domain. For
@@ -1448,13 +1453,13 @@ typedef enum {
      implementations of this, .local.com will be considered to be the same as
      local.com. A single * is the only valid wildcard, and effectively
      disables the use of proxy. */
-  CINIT(NOPROXY, OBJECTPOINT, 177),
+  CINIT(NOPROXY, STRINGPOINT, 177),
 
   /* block size for TFTP transfers */
   CINIT(TFTP_BLKSIZE, LONG, 178),
 
   /* Socks Service */
-  CINIT(SOCKS5_GSSAPI_SERVICE, OBJECTPOINT, 179),
+  CINIT(SOCKS5_GSSAPI_SERVICE, STRINGPOINT, 179),
 
   /* Socks Service */
   CINIT(SOCKS5_GSSAPI_NEC, LONG, 180),
@@ -1472,7 +1477,7 @@ typedef enum {
   CINIT(REDIR_PROTOCOLS, LONG, 182),
 
   /* set the SSH knownhost file name to use */
-  CINIT(SSH_KNOWNHOSTS, OBJECTPOINT, 183),
+  CINIT(SSH_KNOWNHOSTS, STRINGPOINT, 183),
 
   /* set the SSH host key callback, must point to a curl_sshkeycallback
      function */
@@ -1482,9 +1487,9 @@ typedef enum {
   CINIT(SSH_KEYDATA, OBJECTPOINT, 185),
 
   /* set the SMTP mail originator */
-  CINIT(MAIL_FROM, OBJECTPOINT, 186),
+  CINIT(MAIL_FROM, STRINGPOINT, 186),
 
-  /* set the SMTP mail receiver(s) */
+  /* set the list of SMTP mail receiver(s) */
   CINIT(MAIL_RCPT, OBJECTPOINT, 187),
 
   /* FTP: send PRET before PASV */
@@ -1494,13 +1499,13 @@ typedef enum {
   CINIT(RTSP_REQUEST, LONG, 189),
 
   /* The RTSP session identifier */
-  CINIT(RTSP_SESSION_ID, OBJECTPOINT, 190),
+  CINIT(RTSP_SESSION_ID, STRINGPOINT, 190),
 
   /* The RTSP stream URI */
-  CINIT(RTSP_STREAM_URI, OBJECTPOINT, 191),
+  CINIT(RTSP_STREAM_URI, STRINGPOINT, 191),
 
   /* The Transport: header to use in RTSP requests */
-  CINIT(RTSP_TRANSPORT, OBJECTPOINT, 192),
+  CINIT(RTSP_TRANSPORT, STRINGPOINT, 192),
 
   /* Manually initialize the client RTSP CSeq for this handle */
   CINIT(RTSP_CLIENT_CSEQ, LONG, 193),
@@ -1538,13 +1543,13 @@ typedef enum {
   CINIT(RESOLVE, OBJECTPOINT, 203),
 
   /* Set a username for authenticated TLS */
-  CINIT(TLSAUTH_USERNAME, OBJECTPOINT, 204),
+  CINIT(TLSAUTH_USERNAME, STRINGPOINT, 204),
 
   /* Set a password for authenticated TLS */
-  CINIT(TLSAUTH_PASSWORD, OBJECTPOINT, 205),
+  CINIT(TLSAUTH_PASSWORD, STRINGPOINT, 205),
 
   /* Set authentication type for authenticated TLS */
-  CINIT(TLSAUTH_TYPE, OBJECTPOINT, 206),
+  CINIT(TLSAUTH_TYPE, STRINGPOINT, 206),
 
   /* Set to 1 to enable the "TE:" header in HTTP requests to ask for
      compressed transfer-encoded responses. Set to 0 to disable the use of TE:
@@ -1567,7 +1572,7 @@ typedef enum {
   CINIT(GSSAPI_DELEGATION, LONG, 210),
 
   /* Set the name servers to use for DNS resolution */
-  CINIT(DNS_SERVERS, OBJECTPOINT, 211),
+  CINIT(DNS_SERVERS, STRINGPOINT, 211),
 
   /* Time-out accept operations (currently for FTP only) after this amount
      of miliseconds. */
@@ -1584,7 +1589,7 @@ typedef enum {
   CINIT(SSL_OPTIONS, LONG, 216),
 
   /* Set the SMTP auth originator */
-  CINIT(MAIL_AUTH, OBJECTPOINT, 217),
+  CINIT(MAIL_AUTH, STRINGPOINT, 217),
 
   /* Enable/disable SASL initial response */
   CINIT(SASL_IR, LONG, 218),
@@ -1595,23 +1600,23 @@ typedef enum {
   CINIT(XFERINFOFUNCTION, FUNCTIONPOINT, 219),
 
   /* The XOAUTH2 bearer token */
-  CINIT(XOAUTH2_BEARER, OBJECTPOINT, 220),
+  CINIT(XOAUTH2_BEARER, STRINGPOINT, 220),
 
   /* Set the interface string to use as outgoing network
    * interface for DNS requests.
    * Only supported by the c-ares DNS backend */
-  CINIT(DNS_INTERFACE, OBJECTPOINT, 221),
+  CINIT(DNS_INTERFACE, STRINGPOINT, 221),
 
   /* Set the local IPv4 address to use for outgoing DNS requests.
    * Only supported by the c-ares DNS backend */
-  CINIT(DNS_LOCAL_IP4, OBJECTPOINT, 222),
+  CINIT(DNS_LOCAL_IP4, STRINGPOINT, 222),
 
   /* Set the local IPv4 address to use for outgoing DNS requests.
    * Only supported by the c-ares DNS backend */
-  CINIT(DNS_LOCAL_IP6, OBJECTPOINT, 223),
+  CINIT(DNS_LOCAL_IP6, STRINGPOINT, 223),
 
   /* Set authentication options directly */
-  CINIT(LOGIN_OPTIONS, OBJECTPOINT, 224),
+  CINIT(LOGIN_OPTIONS, STRINGPOINT, 224),
 
   /* Enable/disable TLS NPN extension (http2 over ssl might fail without) */
   CINIT(SSL_ENABLE_NPN, LONG, 225),
@@ -1632,10 +1637,10 @@ typedef enum {
 
   /* The public key in DER form used to validate the peer public key
      this option is used only if SSL_VERIFYPEER is true */
-  CINIT(PINNEDPUBLICKEY, OBJECTPOINT, 230),
+  CINIT(PINNEDPUBLICKEY, STRINGPOINT, 230),
 
   /* Path to Unix domain socket */
-  CINIT(UNIX_SOCKET_PATH, OBJECTPOINT, 231),
+  CINIT(UNIX_SOCKET_PATH, STRINGPOINT, 231),
 
   /* Set if we should verify the certificate status. */
   CINIT(SSL_VERIFYSTATUS, LONG, 232),
@@ -1647,16 +1652,16 @@ typedef enum {
   CINIT(PATH_AS_IS, LONG, 234),
 
   /* Proxy Service Name */
-  CINIT(PROXY_SERVICE_NAME, OBJECTPOINT, 235),
+  CINIT(PROXY_SERVICE_NAME, STRINGPOINT, 235),
 
   /* Service Name */
-  CINIT(SERVICE_NAME, OBJECTPOINT, 236),
+  CINIT(SERVICE_NAME, STRINGPOINT, 236),
 
   /* Wait/don't wait for pipe/mutex to clarify */
   CINIT(PIPEWAIT, LONG, 237),
 
   /* Set the protocol used when curl is given a URL without a protocol */
-  CINIT(DEFAULT_PROTOCOL, OBJECTPOINT, 238),
+  CINIT(DEFAULT_PROTOCOL, STRINGPOINT, 238),
 
   /* Set stream weight, 1 - 256 (default is 16) */
   CINIT(STREAM_WEIGHT, LONG, 239),
