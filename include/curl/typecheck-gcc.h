@@ -320,13 +320,15 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
 
 /* evaluates to true if option takes a struct curl_slist * argument */
 #define _curl_is_slist_option(option)                                         \
-  ((option) == CURLOPT_HTTPHEADER ||                                          \
-   (option) == CURLOPT_HTTP200ALIASES ||                                      \
-   (option) == CURLOPT_QUOTE ||                                               \
+  ((option) == CURLOPT_HTTP200ALIASES ||                                      \
+   (option) == CURLOPT_HTTPHEADER ||                                          \
+   (option) == CURLOPT_MAIL_RCPT ||                                           \
    (option) == CURLOPT_POSTQUOTE ||                                           \
    (option) == CURLOPT_PREQUOTE ||                                            \
+   (option) == CURLOPT_PROXYHEADER ||                                         \
+   (option) == CURLOPT_QUOTE ||                                               \
+   (option) == CURLOPT_RESOLVE ||                                             \
    (option) == CURLOPT_TELNETOPTIONS ||                                       \
-   (option) == CURLOPT_MAIL_RCPT ||                                           \
    0)
 
 /* groups of curl_easy_getinfo infos that take the same type of argument */
