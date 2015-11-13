@@ -106,13 +106,6 @@
 #define SSL_METHOD_QUAL
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x00907000L
-/* 0.9.6 didn't have X509_STORE_set_flags() */
-#define HAVE_X509_STORE_SET_FLAGS 1
-#else
-#define X509_STORE_set_flags(x,y) Curl_nop_stmt
-#endif
-
 #ifdef OPENSSL_IS_BORINGSSL
 /* BoringSSL has no ERR_remove_state() */
 #define ERR_remove_state(x)
