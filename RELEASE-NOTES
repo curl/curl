@@ -15,7 +15,8 @@ This release includes the following changes:
  o Added CURLOPT_STREAM_DEPENDS_E [9]
  o Added CURLOPT_STREAM_WEIGHT [10]
  o Added CURLFORM_CONTENTLEN [14]
- 
+ o oauth2: Added support for OAUTHBEARER SASL mechanism to IMAP, POP3 and SNMP
+
 This release includes the following bugfixes:
 
  o des: Fix header conditional for Curl_des_set_odd_parity
@@ -58,7 +59,6 @@ This release includes the following bugfixes:
  o acinclude: Remove check for 16-bit curl_off_t
  o BoringSSL: Work with stricter BIO_get_mem_data() [17]
  o cmake: Add missing feature macros in config header [18]
- o oauth2: Introduced support for host and port details
  o sasl_sspi: fixed unicode build for digest authentication [19]
  o sasl_sspi: fix identity memory leak in digest authentication
  o unit1602: Fixed failure in torture test
