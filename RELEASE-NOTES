@@ -56,6 +56,18 @@ This release includes the following bugfixes:
  o imap: Fixed double quote in LIST command when mailbox contains spaces
  o imap: Don't check for continuation when executing a CUSTOMREQUEST [16]
  o acinclude: Remove check for 16-bit curl_off_t
+ o BoringSSL: Work with stricter BIO_get_mem_data() [17]
+ o cmake: Add missing feature macros in config header [18]
+ o oauth2: Introduced support for host and port details
+ o sasl_sspi: fixed unicode build for digest authentication [19]
+ o sasl_sspi: fix identity memory leak in digest authentication
+ o unit1602: Fixed failure in torture test
+ o unit1603: Added unit tests for hash functions
+ o vtls/openssl: remove unused traces of yassl ifdefs
+ o openssl: remove #ifdefs for < 0.9.7 support
+ o typecheck-gcc.h: add some missing options
+ o curl: mark two more options strings for --libcurl output
+ o openssl: Free modules on cleanup [20]
 
 This release includes the following known bugs:
 
@@ -65,11 +77,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Anders Bakken, Dan Fandrich, Daniel Hwang, Daniel Stenberg, Dmitry S. Baikov,
-  Erik Johansson, Gisle Vanem, Javier G. Sogo, John Levon, Jonas Minnberg,
-  Justin Ehlert, Kang Lin, Kurt Fankhauser, Lauri Kasanen, Marcel Raad,
-  Patrick Monnerat, Rainer Jung, Ray Satiro, Richard Hosking, Steve Holme,
-  Svyatoslav Mishyn, Tatsuhiro Tsujikawa, Tim Rühsen, Xiangbin Li,
-  (24 contributors)
+  Douglas Creager, Erik Johansson, Gisle Vanem, Javier G. Sogo, John Levon,
+  Jonas Minnberg, Justin Ehlert, Kamil Dudka, Kang Lin, Kurt Fankhauser,
+  Lauri Kasanen, Marcel Raad, Patrick Monnerat, Rainer Jung, Ray Satiro,
+  Richard Hosking, Sebastian Pohlschmidt, Stefan Bühler, Steve Holme,
+  Svyatoslav Mishyn, Tatsuhiro Tsujikawa, Tim Rühsen, xiangbin li,
+  (28 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -91,3 +104,7 @@ References to bug reports and discussions on issues:
  [14] = http://curl.haxx.se/bug/?i=425
  [15] = http://curl.haxx.se/bug/?i=473
  [16] = http://curl.haxx.se/bug/?i=486
+ [17] = http://curl.haxx.se/bug/?i=524
+ [18] = http://curl.haxx.se/bug/?i=523
+ [19] = http://curl.haxx.se/bug/?i=525
+ [20] = http://curl.haxx.se/bug/?i=526
