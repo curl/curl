@@ -1676,15 +1676,17 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
 
   case SASL_OAUTH2_RESP:
     /* The continuation is optional so check the response code */
-    if (code == sasl->params->finalcode) {
+    if(code == sasl->params->finalcode) {
       /* Final response was received so we are done */
       *progress = SASL_DONE;
       state(sasl, conn, SASL_STOP);
       return result;
     }
-    else if (code == sasl->params->contcode) {
-      /* Acknowledge the continuation by sending a 0x01 response base64 encoded */
-      if (!(resp = strdup("AQ==")))
+    else if(code == sasl->params->contcode) {
+      /* Acknowledge the continuation by sending a 0x01 response base64
+         encoded */
+      resp = strdup("AQ==");
+      if(!resp)
         result = CURLE_OUT_OF_MEMORY;
       break;
     }
