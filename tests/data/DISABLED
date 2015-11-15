@@ -9,6 +9,8 @@
 1512
 836
 882
+889
+890
 938
 # test 1801 causes problems on Mac OS X and github
 # https://github.com/bagder/curl/issues/380
