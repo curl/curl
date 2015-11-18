@@ -45,7 +45,7 @@ sub parse_main_opts {
 
         my $option = '';
 
-        $desc =~ s/'/''/g if defined $desc;
+        $desc =~ s/'/'\\''/g if defined $desc;
         $desc =~ s/\[/\\\[/g if defined $desc;
         $desc =~ s/\]/\\\]/g if defined $desc;
 
