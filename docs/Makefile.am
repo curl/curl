@@ -45,10 +45,10 @@ MAN2HTML= roffit < $< >$@
 SUFFIXES = .1 .html .pdf
 
 html: $(HTMLPAGES)
-	cd libcurl; make html
+	cd libcurl && make html
 
 pdf: $(PDFPAGES)
-	cd libcurl; make pdf
+	cd libcurl && make pdf
 
 .1.html:
 	$(MAN2HTML)
