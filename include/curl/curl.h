@@ -848,7 +848,7 @@ typedef enum {
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
 #define LONG          CURLOPTTYPE_LONG
 #define OBJECTPOINT   CURLOPTTYPE_OBJECTPOINT
-#defien STRINGPOINT   CURLOPTTYPE_OBJECTPOINT
+#define STRINGPOINT   CURLOPTTYPE_OBJECTPOINT
 #define FUNCTIONPOINT CURLOPTTYPE_FUNCTIONPOINT
 #define OFF_T         CURLOPTTYPE_OFF_T
 #define CINIT(name,type,number) CURLOPT_/**/name = type + number
