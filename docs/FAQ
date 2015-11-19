@@ -1536,9 +1536,7 @@ FAQ
 
   7.2 Who wrote PHP/CURL?
 
-  PHP/CURL is a module that comes with the regular PHP package. It depends and
-  uses libcurl, so you need to have libcurl installed properly first before
-  PHP/CURL can be used. PHP/CURL was initially written by Sterling Hughes.
+  PHP/CURL was initially written by Sterling Hughes.
 
   7.3 Can I perform multiple requests using the same handle?
 
@@ -1547,4 +1545,10 @@ FAQ
   unknown to me).
 
   After a transfer, you just set new options in the handle and make another
-  transfer. This will make libcurl to re-use the same connection if it can.
+  transfer. This will make libcurl re-use the same connection if it can.
+
+  7.4 Does PHP/CURL have dependencies?
+
+  PHP/CURL is a module that comes with the regular PHP package. It depends on
+  and uses libcurl, so you need to have libcurl installed properly before
+  PHP/CURL can be used.
