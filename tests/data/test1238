@@ -38,8 +38,11 @@ tftp://%HOSTIP:%TFTPPORT//1238 -Y1000 -y2
 <verify>
 <protocol>
 opcode: 1
-filename: /1238
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /1238
 </protocol>
 # 28 = CURLE_OPERATION_TIMEDOUT
 <errorcode>

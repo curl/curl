@@ -153,6 +153,8 @@ Disable squashing /../ and /./ sequences in the path. See \fICURLOPT_PATH_AS_IS(
 Allowed protocols. See \fICURLOPT_PROTOCOLS(3)\fP
 .IP CURLOPT_REDIR_PROTOCOLS
 Protocols to allow redirects to. See \fICURLOPT_REDIR_PROTOCOLS(3)\fP
+.IP CURLOPT_DEFAULT_PROTOCOL
+Default protocol. See \fICURLOPT_DEFAULT_PROTOCOL(3)\fP
 .IP CURLOPT_PROXY
 Proxy to use. See \fICURLOPT_PROXY(3)\fP
 .IP CURLOPT_PROXYPORT
@@ -295,6 +297,13 @@ Disable Transfer decoding. See \fICURLOPT_HTTP_TRANSFER_DECODING(3)\fP
 100-continue timeout. See \fICURLOPT_EXPECT_100_TIMEOUT_MS(3)\fP
 .IP CURLOPT_PIPEWAIT
 Wait on connection to pipeline on it. See \fICURLOPT_PIPEWAIT(3)\fP
+.IP CURLOPT_STREAM_DEPENDS
+This HTTP/2 stream depends on another. See \fICURLOPT_STREAM_DEPENDS(3)\fP
+.IP CURLOPT_STREAM_DEPENDS_E
+This HTTP/2 stream depends on another exclusively. See
+\fICURLOPT_STREAM_DEPENDS_E(3)\fP
+.IP CURLOPT_STREAM_WEIGHT
+Set this HTTP/2 stream's weight. See \fICURLOPT_STREAM_WEIGHT(3)\fP
 .SH SMTP OPTIONS
 .IP CURLOPT_MAIL_FROM
 Address of the sender. See \fICURLOPT_MAIL_FROM(3)\fP
@@ -527,8 +536,8 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
   res = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
-}}
+}
 .fi
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_cleanup "(3), " curl_easy_reset "(3), "
-.BR curl_multi_setopt "(3), "
+.BR curl_easy_getinfo "(3), " curl_multi_setopt "(3), "

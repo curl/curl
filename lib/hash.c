@@ -46,7 +46,12 @@ hash_element_dtor(void *user, void *element)
   free(e);
 }
 
-/* return 1 on error, 0 is fine */
+/* Initializes a hash structure.
+ * Return 1 on error, 0 is fine.
+ *
+ * @unittest: 1602
+ * @unittest: 1603
+ */
 int
 Curl_hash_init(struct curl_hash *h,
                int slots,
@@ -119,6 +124,8 @@ mk_hash_element(const void *key, size_t key_len, const void *p)
  * that data is replaced.
  *
  * @unittest: 1305
+ * @unittest: 1602
+ * @unittest: 1603
  */
 void *
 Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
@@ -155,7 +162,11 @@ Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
   return NULL; /* failure */
 }
 
-/* remove the identified hash entry, returns non-zero on failure */
+/* Remove the identified hash entry.
+ * Returns non-zero on failure.
+ *
+ * @unittest: 1603
+ */
 int Curl_hash_delete(struct curl_hash *h, void *key, size_t key_len)
 {
   struct curl_llist_element *le;
@@ -173,6 +184,10 @@ int Curl_hash_delete(struct curl_hash *h, void *key, size_t key_len)
   return 1;
 }
 
+/* Retrieves a hash element.
+ *
+ * @unittest: 1603
+ */
 void *
 Curl_hash_pick(struct curl_hash *h, void *key, size_t key_len)
 {
@@ -214,6 +229,10 @@ Curl_hash_apply(curl_hash *h, void *user,
 
 /* Destroys all the entries in the given hash and resets its attributes,
  * prepping the given hash for [static|dynamic] deallocation.
+ *
+ * @unittest: 1305
+ * @unittest: 1602
+ * @unittest: 1603
  */
 void
 Curl_hash_destroy(struct curl_hash *h)

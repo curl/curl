@@ -40,6 +40,10 @@
 #include <stringprep.h>
 #endif
 
+#ifdef USE_LIBPSL
+#include <libpsl.h>
+#endif
+
 #if defined(HAVE_ICONV) && defined(CURL_DOES_CONVERSIONS)
 #include <iconv.h>
 #endif
@@ -99,6 +103,11 @@ char *curl_version(void)
     left -= len;
     ptr += len;
   }
+#endif
+#ifdef USE_LIBPSL
+  len = snprintf(ptr, left, " libpsl/%s", psl_get_version());
+  left -= len;
+  ptr += len;
 #endif
 #ifdef USE_WIN32_IDN
   len = snprintf(ptr, left, " WinIDN");

@@ -93,7 +93,15 @@
 #include <gnutls/gnutls.h>
 #endif
 
-#ifdef USE_POLARSSL
+#ifdef USE_MBEDTLS
+
+#include <mbedtls/ssl.h>
+#include <mbedtls/version.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
+
+#elif defined USE_POLARSSL
+
 #include <polarssl/ssl.h>
 #include <polarssl/version.h>
 #if POLARSSL_VERSION_NUMBER<0x01010000
@@ -102,6 +110,7 @@
 #include <polarssl/entropy.h>
 #include <polarssl/ctr_drbg.h>
 #endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
+
 #endif /* USE_POLARSSL */
 
 #ifdef USE_CYASSL
@@ -280,6 +289,19 @@ struct ssl_connect_data {
 #endif
   ssl_connect_state connecting_state;
 #endif /* USE_GNUTLS */
+#ifdef USE_MBEDTLS
+  mbedtls_ctr_drbg_context ctr_drbg;
+  mbedtls_entropy_context entropy;
+  mbedtls_ssl_context ssl;
+  mbedtls_ssl_session ssn;
+  int server_fd;
+  mbedtls_x509_crt cacert;
+  mbedtls_x509_crt clicert;
+  mbedtls_x509_crl crl;
+  mbedtls_pk_context pk;
+  ssl_connect_state connecting_state;
+  mbedtls_ssl_config config;
+#endif /* USE_MBEDTLS */
 #ifdef USE_POLARSSL
   ctr_drbg_context ctr_drbg;
   entropy_context entropy;
@@ -352,7 +374,8 @@ struct ssl_primary_config {
 struct ssl_config_data {
   struct ssl_primary_config primary;
   bool enable_beast; /* especially allow this flaw for interoperability's
-                            sake*/
+                        sake*/
+  bool no_revoke;    /* disable SSL certificate revocation checks */
   long certverifyresult; /* result from the certificate verification */
   char *CRLfile;   /* CRL to check certificate revocation */
   char *issuercert;/* optional issuer certificate filename */
@@ -679,7 +702,6 @@ struct SingleRequest {
 #define IDENTITY 0              /* No encoding */
 #define DEFLATE 1               /* zlib deflate [RFC 1950 & 1951] */
 #define GZIP 2                  /* gzip algorithm [RFC 1952] */
-#define COMPRESS 3              /* Not handled, added for completeness */
 
 #ifdef HAVE_LIBZ
   zlibInitState zlib_init;      /* possible zlib init state;
@@ -926,7 +948,7 @@ struct connectdata {
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */
 
-  char *xoauth2_bearer; /* bearer token for xoauth2, allocated */
+  char *oauth_bearer; /* bearer token for OAuth 2.0, allocated */
 
   int httpversion;        /* the HTTP version*10 reported by the server */
   int rtspversion;        /* the RTSP version*10 reported by the server */
@@ -1340,6 +1362,13 @@ struct UrlState {
   bool done; /* set to FALSE when Curl_do() is called and set to TRUE when
                 Curl_done() is called, to prevent Curl_done() to get invoked
                 twice when the multi interface is used. */
+
+  curl_read_callback fread_func; /* read callback/function */
+  void *in;                      /* CURLOPT_READDATA */
+
+  struct SessionHandle *stream_depends_on;
+  bool stream_depends_e; /* set or don't set the Exclusive bit */
+  int stream_weight;
 };
 
 
@@ -1376,6 +1405,7 @@ enum dupstring {
   STRING_COOKIE,          /* HTTP cookie string to send */
   STRING_COOKIEJAR,       /* dump all cookies to this file */
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
+  STRING_DEFAULT_PROTOCOL, /* Protocol to use when the URL doesn't specify */
   STRING_DEVICE,          /* local network interface/address to use */
   STRING_ENCODING,        /* Accept-Encoding string */
   STRING_FTP_ACCOUNT,     /* ftp account data */
@@ -1440,7 +1470,7 @@ struct UserDefined {
                      proxy string features a ":[port]" that one will override
                      this. */
   void *out;         /* CURLOPT_WRITEDATA */
-  void *in;          /* CURLOPT_READDATA */
+  void *in_set;      /* CURLOPT_READDATA */
   void *writeheader; /* write the header to this if non-NULL */
   void *rtp_out;     /* write RTP to this if non-NULL */
   long use_port;     /* which port to use (when not using default) */
@@ -1465,7 +1495,7 @@ struct UserDefined {
   curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
-  curl_read_callback fread_func;     /* function that reads the input */
+  curl_read_callback fread_func_set; /* function that reads the input */
   int is_fread_set; /* boolean, has read callback been set to non-NULL? */
   int is_fwrite_set; /* boolean, has write callback been set to non-NULL? */
   curl_progress_callback fprogress; /* OLD and deprecated progress callback  */
@@ -1640,6 +1670,10 @@ struct UserDefined {
   bool pipewait;        /* wait for pipe/multiplex status before starting a
                            new connection */
   long expect_100_timeout; /* in milliseconds */
+
+  struct SessionHandle *stream_depends_on;
+  bool stream_depends_e; /* set or don't set the Exclusive bit */
+  int stream_weight;
 };
 
 struct Names {

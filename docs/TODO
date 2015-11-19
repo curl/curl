@@ -26,6 +26,7 @@
  1.8 Allow SSL (HTTPS) to proxy
  1.9 Cache negative name resolves
  1.10 Support IDNA2008
+ 1.11 minimize dependencies with dynamicly loaded modules
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -51,6 +52,7 @@
  5.4 SPDY
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
+ 5.7 More compressions
 
  6. TELNET
  6.1 ditch stdin
@@ -113,6 +115,7 @@
  17.7 warning when sending binary output to terminal
  17.8 offer color-coded HTTP header output
  17.9 Choose the name of file in braces for complex URLs
+ 17.10 improve how curl works in a windows console window
 
  18. Build
  18.1 roffit
@@ -225,6 +228,13 @@
  by libidn. libidn implements IDNA2003 which has been superseded by IDNA2008.
  libidn2 is an existing library offering support for IDNA2008.
 
+1.11 minimize dependencies with dynamicly loaded modules
+
+ We can create a system with loadable modules/plug-ins, where these modules
+ would be the ones that link to 3rd party libs. That would allow us to avoid
+ having to load ALL dependencies since only the necessary ones for this
+ app/invoke/used protocols would be necessary to load.  See
+ https://github.com/bagder/curl/issues/349
 
 2. libcurl - multi interface
 
@@ -362,6 +372,14 @@ This is not detailed in any FTP specification.
 
  Consider a way to tell curl to refuse to "downgrade" protocol with a redirect
  and/or possibly a bit that refuses redirect to change protocol completely.
+
+5.7 More compressions
+
+ Compression algorithms that perform better than gzip are being considered for
+ use and inclusion in existing browsers. For example 'brotli'. If servers
+ follow along it is a good reason for us to also allow users to take advantage
+ of this. The algorithm: https://github.com/google/brotli The Firefox bug:
+ https://bugzilla.mozilla.org/show_bug.cgi?id=366559
 
 
 6. TELNET
@@ -615,32 +633,38 @@ Currently the SMB authentication uses NTLMv1.
 
 17.6 warning when setting an option
 
-  Display a warning when libcurl returns an error when setting an option.
-  This can be useful to tell when support for a particular feature hasn't been
-  compiled into the library.
+ Display a warning when libcurl returns an error when setting an option.
+ This can be useful to tell when support for a particular feature hasn't been
+ compiled into the library.
 
 17.7 warning when sending binary output to terminal
 
-  Provide a way that prompts the user for confirmation before binary data is
-  sent to the terminal, much in the style 'less' does it.
+ Provide a way that prompts the user for confirmation before binary data is
+ sent to the terminal, much in the style 'less' does it.
 
 17.8 offer color-coded HTTP header output
 
-  By offering different color output on the header name and the header
-  contents, they could be made more readable and thus help users working on
-  HTTP services.
+ By offering different color output on the header name and the header
+ contents, they could be made more readable and thus help users working on
+ HTTP services.
 
 17.9 Choose the name of file in braces for complex URLs
 
-  When using braces to download a list of URLs and you use complicated names
-  in the list of alternatives, it could be handy to allow curl to use other
-  names when saving.
+ When using braces to download a list of URLs and you use complicated names
+ in the list of alternatives, it could be handy to allow curl to use other
+ names when saving.
 
-  Consider a way to offer that. Possibly like
-  {partURL1:name1,partURL2:name2,partURL3:name3} where the name following the
-  colon is the output name.
+ Consider a way to offer that. Possibly like
+ {partURL1:name1,partURL2:name2,partURL3:name3} where the name following the
+ colon is the output name.
 
-  See https://github.com/bagder/curl/issues/221
+ See https://github.com/bagder/curl/issues/221
+
+17.10 improve how curl works in a windows console window
+
+ If you pull the scrollbar when transferring with curl in a Windows console
+ window, the transfer is interrupted and can get disconnected. This can
+ probably be improved. See https://github.com/bagder/curl/issues/322
 
 
 18. Build

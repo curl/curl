@@ -98,7 +98,7 @@ static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
                         int numsocks);
 static CURLcode imap_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode imap_setup_connection(struct connectdata *conn);
-static char *imap_atom(const char *str);
+static char *imap_atom(const char *str, bool escape_only);
 static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...);
 static CURLcode imap_parse_url_options(struct connectdata *conn);
 static CURLcode imap_parse_url_path(struct connectdata *conn);
@@ -360,8 +360,8 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
      a space and optionally some text as per RFC-3501 for the AUTHENTICATE and
      APPEND commands and as outlined in Section 4. Examples of RFC-4959 but
      some e-mail servers ignore this and only send a single + instead. */
-  if((len == 3 && !memcmp("+", line, 1)) ||
-     (len >= 2 && !memcmp("+ ", line, 2))) {
+  if(!imap->custom && ((len == 3 && !memcmp("+", line, 1)) ||
+     (len >= 2 && !memcmp("+ ", line, 2)))) {
     switch(imapc->state) {
       /* States which are interested in continuation responses */
       case IMAP_AUTHENTICATE:
@@ -540,8 +540,8 @@ static CURLcode imap_perform_login(struct connectdata *conn)
   }
 
   /* Make sure the username and password are in the correct atom format */
-  user = imap_atom(conn->user);
-  passwd = imap_atom(conn->passwd);
+  user = imap_atom(conn->user, false);
+  passwd = imap_atom(conn->passwd, false);
 
   /* Send the LOGIN command */
   result = imap_sendf(conn, "LOGIN %s %s", user ? user : "",
@@ -653,8 +653,8 @@ static CURLcode imap_perform_list(struct connectdata *conn)
     result = imap_sendf(conn, "%s%s", imap->custom,
                         imap->custom_params ? imap->custom_params : "");
   else {
-    /* Make sure the mailbox is in the correct atom format */
-    mailbox = imap_atom(imap->mailbox ? imap->mailbox : "");
+    /* Make sure the mailbox is in the correct atom format if necessary */
+    mailbox = imap->mailbox ? imap_atom(imap->mailbox, true) : strdup("");
     if(!mailbox)
       return CURLE_OUT_OF_MEMORY;
 
@@ -695,7 +695,7 @@ static CURLcode imap_perform_select(struct connectdata *conn)
   }
 
   /* Make sure the mailbox is in the correct atom format */
-  mailbox = imap_atom(imap->mailbox);
+  mailbox = imap_atom(imap->mailbox, false);
   if(!mailbox)
     return CURLE_OUT_OF_MEMORY;
 
@@ -769,7 +769,7 @@ static CURLcode imap_perform_append(struct connectdata *conn)
   }
 
   /* Make sure the mailbox is in the correct atom format */
-  mailbox = imap_atom(imap->mailbox);
+  mailbox = imap_atom(imap->mailbox, false);
   if(!mailbox)
     return CURLE_OUT_OF_MEMORY;
 
@@ -842,7 +842,7 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
 
   if(imapcode != 'O') {
     failf(data, "Got unexpected imap-server response");
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
+    result = CURLE_FTP_WEIRD_SERVER_REPLY;
   }
   else
     result = imap_perform_capability(conn);
@@ -1033,7 +1033,7 @@ static CURLcode imap_state_list_resp(struct connectdata *conn, int imapcode,
     line[len] = '\0';
   }
   else if(imapcode != 'O')
-    result = CURLE_QUOTE_ERROR; /* TODO: Fix error code */
+    result = CURLE_QUOTE_ERROR;
   else
     /* End of DO phase */
     state(conn, IMAP_STOP);
@@ -1105,7 +1105,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   if(imapcode != '*') {
     Curl_pgrsSetDownloadSize(data, -1);
     state(conn, IMAP_STOP);
-    return CURLE_REMOTE_FILE_NOT_FOUND; /* TODO: Fix error code */
+    return CURLE_REMOTE_FILE_NOT_FOUND;
   }
 
   /* Something like this is received "* 1 FETCH (BODY[TEXT] {2021}\r" so parse
@@ -1174,7 +1174,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   else {
     /* We don't know how to parse this line */
     failf(pp->conn->data, "Failed to parse FETCH response.");
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
+    result = CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
   /* End of DO phase */
@@ -1193,7 +1193,7 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
   (void)instate; /* No use for this yet */
 
   if(imapcode != 'O')
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: Fix error code */
+    result = CURLE_FTP_WEIRD_SERVER_REPLY;
   else
     /* End of DONE phase */
     state(conn, IMAP_STOP);
@@ -1262,7 +1262,7 @@ static CURLcode imap_state_search_resp(struct connectdata *conn, int imapcode,
     line[len] = '\0';
   }
   else if(imapcode != 'O')
-    result = CURLE_QUOTE_ERROR; /* TODO: Fix error code */
+    result = CURLE_QUOTE_ERROR;
   else
     /* End of DO phase */
     state(conn, IMAP_STOP);
@@ -1506,10 +1506,10 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
 
     /* Run the state-machine
 
-       TODO: when the multi interface is used, this _really_ should be using
-       the imap_multi_statemach function but we have no general support for
-       non-blocking DONE operations, not in the multi state machine and with
-       Curl_done() invokes on several places in the code!
+       This _really_ should be using the imap_multi_statemach function but we
+       have no general support for non-blocking DONE operations. Neither in
+       the multi state machine and there are Curl_done() invokes on several
+       places in the code!
     */
     if(!result)
       result = imap_block_statemach(conn);
@@ -1815,38 +1815,48 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
  * The returned string needs to be freed.
  *
  */
-static char *imap_atom(const char *str)
+static char *imap_atom(const char *str, bool escape_only)
 {
+  const char atom_specials[] = "(){ %*]";
   const char *p1;
   char *p2;
   size_t backsp_count = 0;
   size_t quote_count = 0;
-  bool space_exists = FALSE;
+  bool others_exists = FALSE;
   size_t newlen = 0;
   char *newstr = NULL;
 
   if(!str)
     return NULL;
 
-  /* Count any unescaped characters */
+  /* Look for "atom-specials", counting the backslash and quote characters as
+     these will need escapping */
   p1 = str;
   while(*p1) {
     if(*p1 == '\\')
       backsp_count++;
     else if(*p1 == '"')
       quote_count++;
-    else if(*p1 == ' ')
-      space_exists = TRUE;
+    else if(!escape_only) {
+      const char *p3 = atom_specials;
+
+      while(*p3 && !others_exists) {
+        if(*p1 == *p3)
+          others_exists = TRUE;
+
+        p3++;
+      }
+    }
 
     p1++;
   }
 
-  /* Does the input contain any unescaped characters? */
-  if(!backsp_count && !quote_count && !space_exists)
+  /* Does the input contain any "atom-special" characters? */
+  if(!backsp_count && !quote_count && !others_exists)
     return strdup(str);
 
   /* Calculate the new string length */
-  newlen = strlen(str) + backsp_count + quote_count + (space_exists ? 2 : 0);
+  newlen = strlen(str) + backsp_count + quote_count + (others_exists ? 2 : 0);
 
   /* Allocate the new string */
   newstr = (char *) malloc((newlen + 1) * sizeof(char));
@@ -1855,7 +1865,7 @@ static char *imap_atom(const char *str)
 
   /* Surround the string in quotes if necessary */
   p2 = newstr;
-  if(space_exists) {
+  if(others_exists) {
     newstr[0] = '"';
     newstr[newlen - 1] = '"';
     p2++;

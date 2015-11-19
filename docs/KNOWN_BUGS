@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+91. "curl_easy_perform hangs with imap and PolarSSL"
+  https://github.com/bagder/curl/issues/334
+
 90. IMAP "SEARCH ALL" truncates output on large boxes. "A quick search of the
   code reveals that pingpong.c contains some truncation code, at line 408,
   when it deems the server response to be too large truncating it to 40
@@ -32,6 +35,7 @@ may have been fixed since this was written!
   CURLINFO_STARTTRANSFER_TIME is wrong. While using POST
   CURLINFO_STARTTRANSFER_TIME minus CURLINFO_PRETRANSFER_TIME is near to zero
   every time.
+  https://github.com/bagder/curl/issues/218
   http://curl.haxx.se/bug/view.cgi?id=1213
 
 84. CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS
@@ -57,16 +61,6 @@ may have been fixed since this was written!
   command). Ordinary mail programs would proceed and still send to the ones
   that can receive data. This is subject for change in the future.
   http://curl.haxx.se/bug/view.cgi?id=1116
-
-78. curl and libcurl don't always signal the client properly when "sending"
-  zero bytes files - it makes for example the command line client not creating
-  any file at all. Like when using FTP.
-  http://curl.haxx.se/bug/view.cgi?id=1063
-
-76. The SOCKET type in Win64 is 64 bits large (and thus so is curl_socket_t on
-  that platform), and long is only 32 bits. It makes it impossible for
-  curl_easy_getinfo() to return a socket properly with the CURLINFO_LASTSOCKET
-  option as for all other operating systems.
 
 75. NTLM authentication involving unicode user name or password only works
   properly if built with UNICODE defined together with the WinSSL/schannel
@@ -245,13 +239,3 @@ may have been fixed since this was written!
   it seems HTTP servers send the *uncompressed* length in that header and
   libcurl thinks of it as the *compressed* length. Some explanations are here:
   http://curl.haxx.se/mail/lib-2003-06/0146.html
-
-2. If a HTTP server responds to a HEAD request and includes a body (thus
-  violating the RFC2616), curl won't wait to read the response but just stop
-  reading and return back. If a second request (let's assume a GET) is then
-  immediately made to the same server again, the connection will be re-used
-  fine of course, and the second request will be sent off but when the
-  response is to get read, the previous response-body is what curl will read
-  and havoc is what happens.
-  More details on this is found in this libcurl mailing list thread:
-  http://curl.haxx.se/mail/lib-2002-08/0000.html

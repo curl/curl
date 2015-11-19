@@ -189,7 +189,7 @@ inet_pton6(const char *src, unsigned char *dst)
       if(tp + INT16SZ > endp)
         return (0);
       *tp++ = (unsigned char) (val >> 8) & 0xff;
-      *tp++ = (unsigned char) val & 0xff;
+      *tp++ = (unsigned char) (val & 0xff);
       saw_xdigit = 0;
       val = 0;
       continue;
@@ -206,7 +206,7 @@ inet_pton6(const char *src, unsigned char *dst)
     if(tp + INT16SZ > endp)
       return (0);
     *tp++ = (unsigned char) (val >> 8) & 0xff;
-    *tp++ = (unsigned char) val & 0xff;
+    *tp++ = (unsigned char) (val & 0xff);
   }
   if(colonp != NULL) {
     /*

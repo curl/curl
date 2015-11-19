@@ -48,11 +48,11 @@ http://%HOSTIP:%HTTPPIPEPORT/
 <file name="log/urls.txt">
 0 1k.txt
 1000 connection_close.txt
-0 1k.txt
-0 1k.txt
-0 1k.txt
-0 1k.txt
-0 1k.txt
+1 1k.txt
+2 1k.txt
+3 1k.txt
+4 1k.txt
+5 1k.txt
 </file>
 </client>
 

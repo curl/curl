@@ -38,6 +38,8 @@
 int Curl_http2_ver(char *p, size_t len);
 
 CURLcode Curl_http2_init(struct connectdata *conn);
+void Curl_http2_init_state(struct UrlState *state);
+void Curl_http2_init_userset(struct UserDefined *set);
 CURLcode Curl_http2_send_request(struct connectdata *conn);
 CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
                                     struct connectdata *conn);
@@ -55,6 +57,8 @@ void Curl_http2_setup_req(struct SessionHandle *data);
 #define Curl_http2_switched(x,y,z) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_setup_conn(x)
 #define Curl_http2_setup_req(x)
+#define Curl_http2_init_state(x)
+#define Curl_http2_init_userset(x)
 #endif
 
 #endif /* HEADER_CURL_HTTP2_H */

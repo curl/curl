@@ -1,0 +1,80 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLINFO_TLS_SESSION 3 "12 Sep 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
+.SH NAME
+CURLINFO_TLS_SESSION \- get TLS session info
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SESSION,
+                           struct curl_tlssessioninfo **session);
+.SH DESCRIPTION
+Pass a pointer to a 'struct curl_tlssessioninfo *'.  The pointer will be
+initialized to refer to a 'struct curl_tlssessioninfo *' that will contain an
+enum indicating the SSL library used for the handshake and the respective
+internal TLS session structure of this underlying SSL library.
+
+This may then be used to extract certificate information in a format
+convenient for further processing, such as manual validation. NOTE: this
+option may not be available for all SSL backends; unsupported SSL backends
+will always return NULL in the \fIinternals\fP pointer to indicate that they
+are not supported.
+
+.nf
+struct curl_tlssessioninfo {
+  curl_sslbackend backend;
+  void *internals;
+};
+.fi
+
+The \fIbackend\fP struct member is one of the defines in the CURLSSLBACKEND_*
+series: CURLSSLBACKEND_NONE (when built without TLS support),
+CURLSSLBACKEND_OPENSSL, CURLSSLBACKEND_GNUTLS, CURLSSLBACKEND_NSS,
+CURLSSLBACKEND_GSKIT, CURLSSLBACKEND_POLARSSL, CURLSSLBACKEND_CYASSL,
+CURLSSLBACKEND_SCHANNEL, CURLSSLBACKEND_DARWINSSL or
+CURLSSLBACKEND_AXTLS. (Note that the OpenSSL forks are all reported as just
+OpenSSL here.)
+
+The \fIinternals\fP struct member will point to a TLS library specific pointer
+with the following underlying types:
+.RS
+.IP OpenSSL
+SSL_CTX *
+.IP GnuTLS
+gnutls_session_t
+.IP NSS
+PRFileDesc *
+.IP gskit
+gsk_handle
+.RE
+.SH PROTOCOLS
+All TLS-based
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.34.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "

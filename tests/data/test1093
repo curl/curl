@@ -37,8 +37,11 @@ TFTP retrieve with mode=i
 <verify>
 <protocol>
 opcode: 1
-filename: /1093
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /1093
 </protocol>
 </verify>
 </testcase>

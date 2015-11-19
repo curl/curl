@@ -171,10 +171,11 @@ a level of control).
 .IP "-2, --sslv2"
 (SSL) Forces curl to use SSL version 2 when negotiating with a remote SSL
 server. Sometimes curl is built without SSLv2 support. SSLv2 is widely
-considered insecure.
+considered insecure (see RFC 6176).
 .IP "-3, --sslv3"
 (SSL) Forces curl to use SSL version 3 when negotiating with a remote SSL
-server. Sometimes curl is built without SSLv3 support.
+server. Sometimes curl is built without SSLv3 support. SSLv3 is widely
+considered insecure (see RFC 7568).
 .IP "-4, --ipv4"
 This option tells curl to resolve names to IPv4 addresses only, and not for
 example try IPv6.
@@ -212,7 +213,7 @@ be in the format "NAME1=VALUE1; NAME2=VALUE2".
 
 If no '=' symbol is used in the line, it is treated as a filename to use to
 read previously stored cookie lines from, which should be used in this session
-if they match. Using this method also activates the "cookie parser" which will
+if they match. Using this method also activates the cookie engine which will
 make curl record incoming cookies too, which may be handy if you're using this
 in combination with the \fI-L, --location\fP option. The file format of the
 file to read cookies from should be plain HTTP headers or the Netscape/Mozilla
@@ -221,6 +222,15 @@ cookie file format.
 The file specified with \fI-b, --cookie\fP is only used as input. No cookies
 will be written to the file. To store cookies, use the \fI-c, --cookie-jar\fP
 option.
+
+Exercise caution if you are using this option and multiple transfers may occur.
+If you use the NAME1=VALUE1; format, or in a file use the Set-Cookie format and
+don't specify a domain, then the cookie is sent for any domain (even after
+redirects are followed) and cannot be modified by a server-set cookie. If the
+cookie engine is enabled and a server sets a cookie of the same name then both
+will be sent on a future transfer to that server, likely not what you intended.
+To address these issues set a domain in Set-Cookie (doing that will include
+sub-domains) or use the Netscape format.
 
 If this option is used several times, the last one will be used.
 .IP "-B, --use-ascii"
@@ -252,6 +262,9 @@ If the cookie jar can't be created or written to, the whole curl operation
 won't fail or even report an error clearly. Using -v will get a warning
 displayed, but that is the only visible feedback you get about this possibly
 lethal situation.
+
+Since 7.43.0 cookies that were imported in the Set-Cookie format without a
+domain name are not exported by this option.
 
 If this option is used several times, the last specified file name will be
 used.
@@ -475,10 +488,10 @@ If this option is used several times, the last one will be used.
 (SSL) Tells curl to use the specified client certificate file when getting a
 file with HTTPS, FTPS or another SSL-based protocol. The certificate must be
 in PKCS#12 format if using Secure Transport, or PEM format if using any other
-engine.  If the optional password isn't specified, it will be queried
-for on the terminal. Note that this option assumes a \&"certificate" file that
-is the private key and the private certificate concatenated! See \fI--cert\fP
-and \fI--key\fP to specify them independently.
+engine.  If the optional password isn't specified, it will be queried for on
+the terminal. Note that this option assumes a \&"certificate" file that is the
+private key and the client certificate concatenated! See \fI--cert\fP and
+\fI--key\fP to specify them independently.
 
 If curl is built against the NSS SSL library then this option can tell
 curl the nickname of the certificate to use within the NSS database defined
@@ -544,9 +557,11 @@ OpenSSL-powered curl to make SSL-connections much more efficiently than using
 
 If this option is set, the default capath value will be ignored, and if it is
 used several times, the last one will be used.
-.IP "--pinnedpubkey <pinned public key>"
-(SSL) Tells curl to use the specified public key file to verify the peer. The
-file must contain a single public key in PEM or DER format.
+.IP "--pinnedpubkey <pinned public key (hashes)>"
+(SSL) Tells curl to use the specified public key file (or hashes) to verify the
+peer. This can be a path to a file which contains a single public key in PEM or
+DER format, or any number of base64 encoded sha256 hashes preceded by
+\'sha256//\' and separated by \';\'
 
 When negotiating a TLS or SSL connection, the server sends a certificate
 indicating its identity. A public key is extracted from this certificate and
@@ -554,7 +569,8 @@ if it does not exactly match the public key provided to this option, curl will
 abort the connection before sending or receiving any data.
 
 Added in 7.39.0 for OpenSSL, GnuTLS and GSKit. Added in 7.43.0 for NSS and
-wolfSSL/CyaSSL. Other SSL backends not supported.
+wolfSSL/CyaSSL. sha256 support added in 7.44.0 for OpenSSL,
+GnuTLS, NSS and wolfSSL/CyaSSL. Other SSL backends not supported.
 
 If this option is used several times, the last one will be used.
 .IP "--cert-status"
@@ -604,7 +620,9 @@ input:
 \fBcurl\fP -F password=@/etc/passwd www.mypasswords.com
 
 To read content from stdin instead of a file, use - as the filename. This goes
-for both @ and < constructs.
+for both @ and < constructs. Unfortunately it does not support reading the
+file from a named pipe or similar, as it needs the full size before the
+transfer starts.
 
 You can also tell curl what Content-Type to use by using 'type=', in a manner
 similar to:
@@ -771,10 +789,12 @@ This option can be used multiple times to add/replace/remove multiple headers.
 be the 128 bit MD5 checksum of the remote host's public key, curl will refuse
 the connection with the host unless the md5sums match. (Added in 7.17.1)
 .IP "--ignore-content-length"
-(HTTP)
-Ignore the Content-Length header. This is particularly useful for servers
-running Apache 1.x, which will report incorrect Content-Length for files
-larger than 2 gigabytes.
+For HTTP, Ignore the Content-Length header. This is particularly useful for
+servers running Apache 1.x, which will report incorrect Content-Length for
+files larger than 2 gigabytes.
+
+For FTP (since 7.46.0), skip the RETR command to figure out the size before
+downloading a file.
 .IP "-i, --include"
 (HTTP) Include the HTTP-header in the output. The HTTP-header includes things
 like server-name, date of the document, HTTP-version and more...
@@ -1245,21 +1265,21 @@ this option set you tell it not to do that.
 
 (Added in 7.42.0)
 .IP "--post301"
-(HTTP) Tells curl to respect RFC 2616/10.3.2 and not convert POST requests
+(HTTP) Tells curl to respect RFC 7230/6.4.2 and not convert POST requests
 into GET requests when following a 301 redirection. The non-RFC behaviour is
 ubiquitous in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
 a redirection. This option is meaningful only when using \fI-L, --location\fP
 (Added in 7.17.1)
 .IP "--post302"
-(HTTP) Tells curl to respect RFC 2616/10.3.2 and not convert POST requests
+(HTTP) Tells curl to respect RFC 7230/6.4.3 and not convert POST requests
 into GET requests when following a 302 redirection. The non-RFC behaviour is
 ubiquitous in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
 a redirection. This option is meaningful only when using \fI-L, --location\fP
 (Added in 7.19.1)
 .IP "--post303"
-(HTTP) Tells curl to respect RFC 2616/10.3.2 and not convert POST requests
+(HTTP) Tells curl to respect RFC 7230/6.4.4 and not convert POST requests
 into GET requests when following a 303 redirection. The non-RFC behaviour is
 ubiquitous in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
@@ -1306,9 +1326,40 @@ This option can be used multiple times, in which case the effect is the same
 as concatenating the protocols into one instance of the option.
 
 (Added in 7.20.2)
+.IP "--proto-default <protocol>"
+Tells curl to use \fIprotocol\fP for any URL missing a scheme name.
+
+Example:
+
+.RS
+.IP "--proto-default https ftp.mozilla.org"
+https://ftp.mozilla.org
+.RE
+
+An unknown or unsupported protocol causes error
+\fICURLE_UNSUPPORTED_PROTOCOL\fP.
+
+This option does not change the default proxy protocol (http).
+
+Without this option curl would make a guess based on the host, see \fI--url\fP
+for details.
+
+(Added in 7.45.0)
 .IP "--proto-redir <protocols>"
-Tells curl to use the listed protocols after a redirect. See --proto for
-how protocols are represented.
+Tells curl to use the listed protocols on redirect. See --proto for how
+protocols are represented.
+
+Example:
+
+.RS
+.IP "--proto-redir -all,http,https"
+Allow only HTTP and HTTPS on redirect.
+.RE
+
+By default curl will allow all protocols on redirect except several disabled
+for security reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0
+SMB and SMBS are also disabled. Specifying \fIall\fP or \fI+all\fP enables all
+protocols on redirect, including those disabled for security.
 
 (Added in 7.20.2)
 .IP "--proxy-anyauth"
@@ -1423,13 +1474,10 @@ specifies the last 500 bytes
 specifies the bytes from offset 9500 and forward
 .TP
 .B 0-0,-1
-specifies the first and last byte only(*)(H)
-.TP
-.B 500-700,600-799
-specifies 300 bytes from offset 500(H)
+specifies the first and last byte only(*)(HTTP)
 .TP
 .B 100-199,500-599
-specifies two separate 100-byte ranges(*)(H)
+specifies two separate 100-byte ranges(*) (HTTP)
 .RE
 .IP
 (*) = NOTE that this will cause the server to reply with a multipart
@@ -1542,6 +1590,10 @@ and TLS1.0 protocols known as BEAST.  If this option isn't used, the SSL layer
 may use workarounds known to cause interoperability problems with some older
 SSL implementations. WARNING: this option loosens the SSL security, and by
 using this flag you ask for exactly that.  (Added in 7.25.0)
+.IP "--ssl-no-revoke"
+(WinSSL) This option tells curl to disable certificate revocation checks.
+WARNING: this option loosens the SSL security, and by using this flag you ask
+for exactly that.  (Added in 7.44.0)
 .IP "--socks4 <host[:port]>"
 Use the specified SOCKS4 proxy. If the port number is not specified, it is
 assumed at port 1080. (Added in 7.15.2)
@@ -1750,6 +1802,12 @@ If this option is used several times, the last one will be used.
 .IP "--url <URL>"
 Specify a URL to fetch. This option is mostly handy when you want to specify
 URL(s) in a config file.
+
+If the given URL is missing a scheme name (such as "http://" or "ftp://" etc)
+then curl will make a guess based on the host. If the outermost sub-domain name
+matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that protocol will be used,
+otherwise HTTP will be used. Since 7.45.0 guessing can be disabled by setting a
+default protocol, see \fI--proto-default\fP for details.
 
 This option may be used any number of times. To control where this URL is
 written, use the \fI-o, --output\fP or the \fI-O, --remote-name\fP options.

@@ -218,7 +218,6 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
                                           (ssize_t)piece);
         break;
 
-      case COMPRESS:
       default:
         failf (conn->data,
                "Unrecognized content encoding type. "

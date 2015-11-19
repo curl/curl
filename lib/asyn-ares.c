@@ -416,7 +416,6 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   if(result)
     /* close the connection, since we can't return failure here without
        cleaning up this connection properly.
-       TODO: remove this action from here, it is not a name resolver decision.
     */
     connclose(conn, "c-ares resolve failed");
 

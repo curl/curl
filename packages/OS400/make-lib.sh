@@ -128,6 +128,11 @@ then    CMD="CRTSRVPGM SRVPGM(${TARGETLIB}/${SRVPGM})"
         CMD="${CMD} BNDDIR(${TARGETLIB}/${STATBNDDIR}"
         if [ "${WITH_ZLIB}" != 0 ]
         then    CMD="${CMD} ${ZLIB_LIB}/${ZLIB_BNDDIR}"
+                liblist -a "${ZLIB_LIB}"
+        fi
+        if [ "${WITH_LIBSSH2}" != 0 ]
+        then    CMD="${CMD} ${LIBSSH2_LIB}/${LIBSSH2_BNDDIR}"
+                liblist -a "${LIBSSH2_LIB}"
         fi
         CMD="${CMD})"
         CMD="${CMD} BNDSRVPGM(QADRTTS QGLDCLNT QGLDBRDR)"

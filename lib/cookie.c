@@ -84,6 +84,10 @@ Example set of cookies:
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
 
+#ifdef USE_LIBPSL
+# include <libpsl.h>
+#endif
+
 #include "curl_printf.h"
 #include "urldata.h"
 #include "cookie.h"
@@ -378,6 +382,10 @@ Curl_cookie_add(struct SessionHandle *data,
   time_t now = time(NULL);
   bool replace_old = FALSE;
   bool badcookie = FALSE; /* cookies are good by default. mmmmm yummy */
+
+#ifdef USE_LIBPSL
+  const psl_ctx_t *psl;
+#endif
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
@@ -776,6 +784,19 @@ Curl_cookie_add(struct SessionHandle *data,
 
   /* at first, remove expired cookies */
   remove_expired(c);
+
+#ifdef USE_LIBPSL
+  /* Check if the domain is a Public Suffix and if yes, ignore the cookie.
+     This needs a libpsl compiled with builtin data. */
+  if(co->domain && !isip(co->domain) && (psl = psl_builtin()) != NULL) {
+    if(psl_is_public_suffix(psl, co->domain)) {
+      infof(data, "cookie '%s' dropped, domain '%s' is a public suffix\n",
+            co->name, co->domain);
+      freecookie(co);
+      return NULL;
+    }
+  }
+#endif
 
   clist = c->cookies;
   replace_old = FALSE;

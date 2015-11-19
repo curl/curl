@@ -146,7 +146,7 @@ static void setup_des_key(const unsigned char *key_56,
   extend_key_56_to_64(key_56, (char *) key);
 
   /* Set the key parity to odd */
-#if defined(HAVE_BORINGSSL)
+#ifndef HAVE_DES_SET_ODD_PARITY /* older boringssl */
   Curl_des_set_odd_parity((unsigned char *) &key, sizeof(key));
 #else
   DES_set_odd_parity(&key);
@@ -664,21 +664,22 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   unsigned int len = 0;
   unsigned char *ptr = NULL;
   unsigned char hmac_output[NTLM_HMAC_MD5_LEN];
-#if defined(HAVE_LONGLONG)
-  long long tw;
-#else
-  __int64 tw;
-#endif
+  curl_off_t tw;
+
   CURLcode result = CURLE_OK;
+
+#if CURL_SIZEOF_CURL_OFF_T < 8
+#error "this section needs 64bit support to work"
+#endif
 
   /* Calculate the timestamp */
 #ifdef DEBUGBUILD
   char *force_timestamp = getenv("CURL_FORCETIME");
   if(force_timestamp)
-    tw = 11644473600ULL * 10000000ULL;
+    tw = CURL_OFF_T_C(11644473600) * 10000000;
   else
 #endif
-  tw = ((long long)time(NULL) + 11644473600ULL) * 10000000ULL;
+    tw = ((curl_off_t)time(NULL) + CURL_OFF_T_C(11644473600)) * 10000000;
 
   /* Calculate the response len */
   len = NTLM_HMAC_MD5_LEN + NTLMv2_BLOB_LEN;

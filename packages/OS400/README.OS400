@@ -72,6 +72,7 @@ options:
         CURLOPT_COPYPOSTFIELDS
         CURLOPT_CRLFILE
         CURLOPT_CUSTOMREQUEST
+        CURLOPT_DEFAULT_PROTOCOL
         CURLOPT_DNS_SERVERS
         CURLOPT_EGDSOCKET
         CURLOPT_ENCODING
@@ -102,10 +103,10 @@ options:
         CURLOPT_RTSP_TRANSPORT
         CURLOPT_SERVICE_NAME
         CURLOPT_SOCKS5_GSSAPI_SERVICE
-        CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 Note: SSH not available on OS400.
-        CURLOPT_SSH_KNOWNHOSTS          Note: SSH not available on OS400.
-        CURLOPT_SSH_PRIVATE_KEYFILE     Note: SSH not available on OS400.
-        CURLOPT_SSH_PUBLIC_KEYFILE      Note: SSH not available on OS400.
+        CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
+        CURLOPT_SSH_KNOWNHOSTS
+        CURLOPT_SSH_PRIVATE_KEYFILE
+        CURLOPT_SSH_PUBLIC_KEYFILE
         CURLOPT_SSLCERT
         CURLOPT_SSLCERTTYPE
         CURLOPT_SSL_CIPHER_LIST
@@ -148,7 +149,7 @@ parameter/array boundary.
   Please note that CURLFORM_PTRCONTENTS and CURLFORM_BUFFERPTR are considered
 unconvertible strings and thus are NOT followed by a CCSID.
 
-_ curl_easy_getinfo_ccsid
+_ curl_easy_getinfo_ccsid()
   The following options are followed by a 'char * *' and a CCSID. Unlike
 curl_easy_getinfo(), the value returned in the pointer should be freed after
 use:
@@ -168,6 +169,14 @@ Lists returned should be released with curl_slist_free_all() after use.
 CCSID. Returned structures sould be free'ed using curl_certinfo_free_all() after
 use.
   Other options are processed like in curl_easy_getinfo().
+
+_ curl_pushheader_bynum_cssid() and curl_pushheader_byname_ccsid()
+  Although the prototypes are self-explanatory, the returned string pointer
+should be freed after use, as opposite to the non-ccsid versions of these
+procedures.
+  Please note that HTTP2 is not (yet) implemented on OS/400, thus these
+functions will always return NULL.
+
 
   Standard compilation environment does support neither autotools nor make;
 in fact, very few common utilities are available. As a consequence, the
@@ -195,6 +204,8 @@ _ POP3
 _ POP3S
 _ POP3 with secure transmission
 _ RTSP
+_ SCP if libssh2 is enabled
+_ SFTP if libssh2 is enabled
 _ SMTP
 _ SMTPS
 _ SMTP with secure transmission
@@ -210,13 +221,17 @@ archive extraction. Do not ask questions about these subjects if you're not
 familiar with.
 
 _ As a prerequisite, QADRT development environment must be installed.
+_ If data compression has to be supported, ZLIB development environment must
+  be installed.
+_ Likewise, if SCP and SFTP protocols have to be compiled in, LIBSSH2
+  developent environment must be installed.
 _ Install the curl source directory in IFS.
 _ Enter shell (QSH)
 _ Change current directory to the curl installation directory
 _ Change current directory to ./packages/OS400
 _ Edit file iniscript.sh. You may want to change tunable configuration
   parameters, like debug info generation, optimisation level, listing option,
-  target library, etc.
+  target library, ZLIB/LIBSSH2 availability and location, etc.
 _ Copy any file in the current directory to makelog (i.e.:
   cp initscript.sh makelog): this is intended to create the makelog file with
   an ASCII CCSID!
@@ -245,6 +260,8 @@ _ CURL.INC member in file H. This defines everything needed by an ILE/RPG
   program using libcurl.
 _ LIBxxx modules and programs. Although the test environment is not supported
   on OS/400, the libcurl test programs are compiled for manual tests.
+_ IFS directory /curl/include/curl containg the C header files for IFS source
+  C/C++ compilation and curl.inc.rpgle for IFS source ILE/RPG compilation.
 
 
 
@@ -258,21 +275,22 @@ _ The EBCDIC CCSID used by QADRT is 37 by default, NOT THE JOB'S CCSID. If
   LC_CTYPE, or by setting environment variable QADRT_ENV_LOCALE to the locale
   object path before executing the program.
 _ Do not use original source include files unless you know what you are doing.
-  Use the installed members instead (in /QSYS.LIB/CURL.LIB/H.FILE).
+  Use the installed members instead (in /QSYS.LIB/CURL.LIB/H.FILE and
+  /curl/include/curl).
 
 
 
 ILE/RPG support:
 
   Since 95% of the OS/400 programmers use ILE/RPG exclusively, a definition
-  /COPY member is provided for this language. To include all libcurl
+  /INCLUDE member is provided for this language. To include all libcurl
   definitions in an ILE/RPG module, line
 
      h bnddir('CURL/CURL')
 
 must figure in the program header, and line
 
-     d/copy curl/h,curl.inc
+     d/include curl/h,curl.inc
 
 in the global data section of the module's source code.
 

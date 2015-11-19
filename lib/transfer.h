@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 
+void Curl_init_CONNECT(struct SessionHandle *data);
+
 CURLcode Curl_pretransfer(struct SessionHandle *data);
 CURLcode Curl_second_connect(struct connectdata *conn);
 CURLcode Curl_posttransfer(struct SessionHandle *data);

@@ -32,86 +32,97 @@ CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in	\
 VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
 VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp.dist
 VC6_LIBDSP_DEPS = $(VC6_LIBTMPL) Makefile.am lib/Makefile.inc
-VC6_SRCTMPL = projects/Windows/VC6/src/curlsrc.tmpl
-VC6_SRCDSP = projects/Windows/VC6/src/curlsrc.dsp.dist
+VC6_SRCTMPL = projects/Windows/VC6/src/curl.tmpl
+VC6_SRCDSP = projects/Windows/VC6/src/curl.dsp.dist
 VC6_SRCDSP_DEPS = $(VC6_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC7_LIBTMPL = projects/Windows/VC7/lib/libcurl.tmpl
 VC7_LIBVCPROJ = projects/Windows/VC7/lib/libcurl.vcproj.dist
 VC7_LIBVCPROJ_DEPS = $(VC7_LIBTMPL) Makefile.am lib/Makefile.inc
-VC7_SRCTMPL = projects/Windows/VC7/src/curlsrc.tmpl
-VC7_SRCVCPROJ = projects/Windows/VC7/src/curlsrc.vcproj.dist
+VC7_SRCTMPL = projects/Windows/VC7/src/curl.tmpl
+VC7_SRCVCPROJ = projects/Windows/VC7/src/curl.vcproj.dist
 VC7_SRCVCPROJ_DEPS = $(VC7_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC71_LIBTMPL = projects/Windows/VC7.1/lib/libcurl.tmpl
 VC71_LIBVCPROJ = projects/Windows/VC7.1/lib/libcurl.vcproj.dist
 VC71_LIBVCPROJ_DEPS = $(VC71_LIBTMPL) Makefile.am lib/Makefile.inc
-VC71_SRCTMPL = projects/Windows/VC7.1/src/curlsrc.tmpl
-VC71_SRCVCPROJ = projects/Windows/VC7.1/src/curlsrc.vcproj.dist
+VC71_SRCTMPL = projects/Windows/VC7.1/src/curl.tmpl
+VC71_SRCVCPROJ = projects/Windows/VC7.1/src/curl.vcproj.dist
 VC71_SRCVCPROJ_DEPS = $(VC71_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC8_LIBTMPL = projects/Windows/VC8/lib/libcurl.tmpl
 VC8_LIBVCPROJ = projects/Windows/VC8/lib/libcurl.vcproj.dist
 VC8_LIBVCPROJ_DEPS = $(VC8_LIBTMPL) Makefile.am lib/Makefile.inc
-VC8_SRCTMPL = projects/Windows/VC8/src/curlsrc.tmpl
-VC8_SRCVCPROJ = projects/Windows/VC8/src/curlsrc.vcproj.dist
+VC8_SRCTMPL = projects/Windows/VC8/src/curl.tmpl
+VC8_SRCVCPROJ = projects/Windows/VC8/src/curl.vcproj.dist
 VC8_SRCVCPROJ_DEPS = $(VC8_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC9_LIBTMPL = projects/Windows/VC9/lib/libcurl.tmpl
 VC9_LIBVCPROJ = projects/Windows/VC9/lib/libcurl.vcproj.dist
 VC9_LIBVCPROJ_DEPS = $(VC9_LIBTMPL) Makefile.am lib/Makefile.inc
-VC9_SRCTMPL = projects/Windows/VC9/src/curlsrc.tmpl
-VC9_SRCVCPROJ = projects/Windows/VC9/src/curlsrc.vcproj.dist
+VC9_SRCTMPL = projects/Windows/VC9/src/curl.tmpl
+VC9_SRCVCPROJ = projects/Windows/VC9/src/curl.vcproj.dist
 VC9_SRCVCPROJ_DEPS = $(VC9_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC10_LIBTMPL = projects/Windows/VC10/lib/libcurl.tmpl
 VC10_LIBVCXPROJ = projects/Windows/VC10/lib/libcurl.vcxproj.dist
 VC10_LIBVCXPROJ_DEPS = $(VC10_LIBTMPL) Makefile.am lib/Makefile.inc
-VC10_SRCTMPL = projects/Windows/VC10/src/curlsrc.tmpl
-VC10_SRCVCXPROJ = projects/Windows/VC10/src/curlsrc.vcxproj.dist
+VC10_SRCTMPL = projects/Windows/VC10/src/curl.tmpl
+VC10_SRCVCXPROJ = projects/Windows/VC10/src/curl.vcxproj.dist
 VC10_SRCVCXPROJ_DEPS = $(VC10_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC11_LIBTMPL = projects/Windows/VC11/lib/libcurl.tmpl
 VC11_LIBVCXPROJ = projects/Windows/VC11/lib/libcurl.vcxproj.dist
 VC11_LIBVCXPROJ_DEPS = $(VC11_LIBTMPL) Makefile.am lib/Makefile.inc
-VC11_SRCTMPL = projects/Windows/VC11/src/curlsrc.tmpl
-VC11_SRCVCXPROJ = projects/Windows/VC11/src/curlsrc.vcxproj.dist
+VC11_SRCTMPL = projects/Windows/VC11/src/curl.tmpl
+VC11_SRCVCXPROJ = projects/Windows/VC11/src/curl.vcxproj.dist
 VC11_SRCVCXPROJ_DEPS = $(VC11_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC12_LIBTMPL = projects/Windows/VC12/lib/libcurl.tmpl
 VC12_LIBVCXPROJ = projects/Windows/VC12/lib/libcurl.vcxproj.dist
 VC12_LIBVCXPROJ_DEPS = $(VC12_LIBTMPL) Makefile.am lib/Makefile.inc
-VC12_SRCTMPL = projects/Windows/VC12/src/curlsrc.tmpl
-VC12_SRCVCXPROJ = projects/Windows/VC12/src/curlsrc.vcxproj.dist
+VC12_SRCTMPL = projects/Windows/VC12/src/curl.tmpl
+VC12_SRCVCXPROJ = projects/Windows/VC12/src/curl.vcxproj.dist
 VC12_SRCVCXPROJ_DEPS = $(VC12_SRCTMPL) Makefile.am src/Makefile.inc
+
+VC14_LIBTMPL = projects/Windows/VC14/lib/libcurl.tmpl
+VC14_LIBVCXPROJ = projects/Windows/VC14/lib/libcurl.vcxproj.dist
+VC14_LIBVCXPROJ_DEPS = $(VC14_LIBTMPL) Makefile.am lib/Makefile.inc
+VC14_SRCTMPL = projects/Windows/VC14/src/curl.tmpl
+VC14_SRCVCXPROJ = projects/Windows/VC14/src/curl.vcxproj.dist
+VC14_SRCVCXPROJ_DEPS = $(VC14_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC_DIST = projects/README	\
  projects/build-openssl.bat	\
+ projects/build-wolfssl.bat	\
  projects/checksrc.bat	\
  projects/Windows/VC6/curl-all.dsw	\
  projects/Windows/VC6/lib/libcurl.dsw \
- projects/Windows/VC6/src/curlsrc.dsw \
+ projects/Windows/VC6/src/curl.dsw \
  projects/Windows/VC7/curl-all.sln	\
  projects/Windows/VC7/lib/libcurl.sln 	\
- projects/Windows/VC7/src/curlsrc.sln 	\
+ projects/Windows/VC7/src/curl.sln 	\
  projects/Windows/VC7.1/curl-all.sln	\
  projects/Windows/VC7.1/lib/libcurl.sln \
- projects/Windows/VC7.1/src/curlsrc.sln \
+ projects/Windows/VC7.1/src/curl.sln \
  projects/Windows/VC8/curl-all.sln	\
  projects/Windows/VC8/lib/libcurl.sln 	\
- projects/Windows/VC8/src/curlsrc.sln 	\
+ projects/Windows/VC8/src/curl.sln 	\
  projects/Windows/VC9/curl-all.sln	\
  projects/Windows/VC9/lib/libcurl.sln 	\
- projects/Windows/VC9/src/curlsrc.sln 	\
+ projects/Windows/VC9/src/curl.sln 	\
  projects/Windows/VC10/curl-all.sln	\
  projects/Windows/VC10/lib/libcurl.sln 	\
- projects/Windows/VC10/src/curlsrc.sln  \
+ projects/Windows/VC10/src/curl.sln  \
  projects/Windows/VC11/curl-all.sln	\
  projects/Windows/VC11/lib/libcurl.sln 	\
- projects/Windows/VC11/src/curlsrc.sln 	\
+ projects/Windows/VC11/src/curl.sln 	\
  projects/Windows/VC12/curl-all.sln	\
  projects/Windows/VC12/lib/libcurl.sln 	\
- projects/Windows/VC12/src/curlsrc.sln
+ projects/Windows/VC12/src/curl.sln	\
+ projects/Windows/VC14/curl-all.sln	\
+ projects/Windows/VC14/lib/libcurl.sln 	\
+ projects/Windows/VC14/src/curl.sln
 
 WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
  winbuild/MakefileBuild.vc winbuild/Makefile.vc				\
@@ -124,7 +135,8 @@ EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
 CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP) $(VC7_LIBVCPROJ) $(VC7_SRCVCPROJ)	\
  $(VC71_LIBVCPROJ) $(VC71_SRCVCPROJ) $(VC8_LIBVCPROJ) $(VC8_SRCVCPROJ)	\
  $(VC9_LIBVCPROJ) $(VC9_SRCVCPROJ) $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ)	\
- $(VC11_LIBVCXPROJ) $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ)
+ $(VC11_LIBVCXPROJ) $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ)	\
+ $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ)
 
 bin_SCRIPTS = curl-config
 
@@ -269,7 +281,7 @@ vc-ide: $(VC6_LIBDSP_DEPS) $(VC6_SRCDSP_DEPS) $(VC7_LIBVCPROJ_DEPS)	\
  $(VC8_LIBVCPROJ_DEPS) $(VC8_SRCVCPROJ_DEPS) $(VC9_LIBVCPROJ_DEPS)	\
  $(VC9_SRCVCPROJ_DEPS) $(VC10_LIBVCXPROJ_DEPS) $(VC10_SRCVCXPROJ_DEPS)	\
  $(VC11_LIBVCXPROJ_DEPS) $(VC11_SRCVCXPROJ_DEPS) $(VC12_LIBVCXPROJ_DEPS)	\
- $(VC12_SRCVCXPROJ_DEPS)
+ $(VC12_SRCVCXPROJ_DEPS) $(VC14_LIBVCXPROJ_DEPS) $(VC14_SRCVCXPROJ_DEPS)
 	@(win32_lib_srcs='$(LIB_CFILES)'; \
 	win32_lib_hdrs='$(LIB_HFILES) config-win32.h'; \
 	win32_lib_rc='$(LIB_RCFILES)'; \
@@ -530,4 +542,22 @@ function gen_element(type, dir, file)\
 		-v src_rc="$$win32_src_rc" \
 		-v src_x_srcs="$$sorted_src_x_srcs" \
 		-v src_x_hdrs="$$sorted_src_x_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC12_SRCTMPL) > $(VC12_SRCVCXPROJ) || { exit 1; };)
+		"$$awk_code" $(srcdir)/$(VC12_SRCTMPL) > $(VC12_SRCVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC14_LIBVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC14_LIBTMPL) > $(VC14_LIBVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC14_SRCVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		-v src_x_srcs="$$sorted_src_x_srcs" \
+		-v src_x_hdrs="$$sorted_src_x_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC14_SRCTMPL) > $(VC14_SRCVCXPROJ) || { exit 1; };)

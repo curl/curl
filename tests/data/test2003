@@ -88,11 +88,17 @@ TYPE I
 SIZE 20030002
 RETR 20030002
 opcode: 1
-filename: /20030003
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /20030003
 opcode: 1
-filename: /20030003
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /20030003
 EPSV
 SIZE 20030002
 RETR 20030002

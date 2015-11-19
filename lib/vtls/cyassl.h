@@ -42,6 +42,10 @@ CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
 int Curl_cyassl_random(struct SessionHandle *data,
                        unsigned char *entropy,
                        size_t length);
+void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
+                     size_t tmplen,
+                     unsigned char *sha256sum, /* output */
+                     size_t unused);
 
 /* Set the API backend definition to Schannel */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_CYASSL
@@ -65,6 +69,7 @@ int Curl_cyassl_random(struct SessionHandle *data,
 #define curlssl_check_cxn(x) ((void)x, -1)
 #define curlssl_data_pending(x,y) Curl_cyassl_data_pending(x,y)
 #define curlssl_random(x,y,z) Curl_cyassl_random(x,y,z)
+#define curlssl_sha256sum(a,b,c,d) Curl_cyassl_sha256sum(a,b,c,d)
 
 #endif /* USE_CYASSL */
 #endif /* HEADER_CURL_CYASSL_H */

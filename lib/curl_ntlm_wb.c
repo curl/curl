@@ -306,7 +306,7 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
   if(state == NTLMSTATE_TYPE1 &&
      len_out == 3 &&
      buf[0] == 'P' && buf[1] == 'W')
-    return CURLE_REMOTE_ACCESS_DENIED;
+    goto done;
   /* invalid response */
   if(len_out < 4)
     goto done;

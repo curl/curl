@@ -296,10 +296,6 @@ static CURLcode libssh2_session_error_to_CURLE(int err)
       return CURLE_AGAIN;
   }
 
-  /* TODO: map some more of the libssh2 errors to the more appropriate CURLcode
-     error code, and possibly add a few new SSH-related one. We must however
-     not return or even depend on libssh2 errors in the public libcurl API */
-
   return CURLE_SSH;
 }
 
@@ -935,6 +931,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       else {
         state(conn, SSH_AUTH_HOST_INIT);
+        rc = 0; /* clear rc and continue */
       }
       break;
 
@@ -1019,11 +1016,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                                     sshc->sshagent_identity);
 
         if(rc < 0) {
-          if(rc != LIBSSH2_ERROR_EAGAIN) {
+          if(rc != LIBSSH2_ERROR_EAGAIN)
             /* tried and failed? go to next identity */
             sshc->sshagent_prev_identity = sshc->sshagent_identity;
-          }
-          break;
+          else
+            break;
         }
       }
 
@@ -1037,8 +1034,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         infof(data, "Agent based authentication successful\n");
         state(conn, SSH_AUTH_DONE);
       }
-      else
+      else {
         state(conn, SSH_AUTH_KEY_INIT);
+        rc = 0; /* clear rc and continue */
+      }
 #endif
       break;
 
@@ -1737,8 +1736,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                 BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
 
               size_t actuallyread =
-                data->set.fread_func(data->state.buffer, 1, readthisamountnow,
-                                     data->set.in);
+                data->state.fread_func(data->state.buffer, 1,
+                                       readthisamountnow, data->state.in);
 
               passed += actuallyread;
               if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
@@ -2141,7 +2140,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             /* from is relative to end of file */
             from += size;
           }
-          if(from >= size) {
+          if(from > size) {
             failf(data, "Offset (%"
                   CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
                   CURL_FORMAT_CURL_OFF_T ")", from, attrs.filesize);
@@ -2821,10 +2820,8 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     int rc;
     ssh->kh = libssh2_knownhost_init(ssh->ssh_session);
-    if(!ssh->kh) {
-      /* eeek. TODO: free the ssh_session! */
+    if(!ssh->kh)
       return CURLE_FAILED_INIT;
-    }
 
     /* read all known hosts from there */
     rc = libssh2_knownhost_readfile(ssh->kh,
@@ -2961,10 +2958,8 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
   if(!status) {
     /* run the state-machine
 
-       TODO: when the multi interface is used, this _really_ should be using
-       the ssh_multi_statemach function but we have no general support for
-       non-blocking DONE operations, not in the multi state machine and with
-       Curl_done() invokes on several places in the code!
+       This should be using the ssh_multi_statemach function but we have no
+       support for non-blocking DONE operations!
     */
     result = ssh_block_statemach(conn, FALSE);
   }

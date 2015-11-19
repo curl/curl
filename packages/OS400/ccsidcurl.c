@@ -679,6 +679,7 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
         break;
 
       case CURLINFO_TLS_SESSION:
+      case CURLINFO_SOCKET:
         break;
 
       default:
@@ -932,6 +933,14 @@ curl_formadd_ccsid(struct curl_httppost * * httppost,
 
       break;
 
+    case CURLFORM_CONTENTLEN:
+      lengthx = nargs;
+
+      if(!forms)
+        value = (char *) va_arg(arg, curl_off_t);
+
+      break;
+
     case CURLFORM_NAMELENGTH:
       namelengthx = nargs;
 
@@ -1133,6 +1142,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_COOKIELIST:
   case CURLOPT_CRLFILE:
   case CURLOPT_CUSTOMREQUEST:
+  case CURLOPT_DEFAULT_PROTOCOL:
   case CURLOPT_DNS_SERVERS:
   case CURLOPT_EGDSOCKET:
   case CURLOPT_ENCODING:
@@ -1277,4 +1287,43 @@ curl_form_long_value(long value)
   /* ILE/RPG cannot cast an integer to a pointer. This procedure does it. */
 
   return (char *) value;
+}
+
+
+char *
+curl_pushheader_bynum_cssid(struct curl_pushheaders *h,
+                            size_t num, unsigned int ccsid)
+
+{
+  char *d = (char *) NULL;
+  char *s = curl_pushheader_bynum(h, num);
+
+  if(s)
+    d = dynconvert(ccsid, s, -1, ASCII_CCSID);
+
+  return d;
+}
+
+
+char *
+curl_pushheader_byname_ccsid(struct curl_pushheaders *h, const char *header,
+                             unsigned int ccsidin, unsigned int ccsidout)
+
+{
+  char *d = (char *) NULL;
+  char *s;
+
+  if(header) {
+    header = dynconvert(ASCII_CCSID, header, -1, ccsidin);
+
+    if(header) {
+      s = curl_pushheader_byname(h, header);
+      free((char *) header);
+
+      if(s)
+        d = dynconvert(ccsidout, s, -1, ASCII_CCSID);
+    }
+  }
+
+  return d;
 }

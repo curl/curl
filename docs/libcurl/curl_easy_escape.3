@@ -26,7 +26,8 @@ curl_easy_escape - URL encodes the given string
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "char *curl_easy_escape( CURL *" curl ", char *" string ", int "length " );"
+.BI "char *curl_easy_escape( CURL *" curl ", const char *" string
+.BI ", int "length " );"
 .ad
 .SH DESCRIPTION
 This function converts the given input \fIstring\fP to a URL encoded string
@@ -48,10 +49,10 @@ CURL *curl = curl_easy_init();
 if(curl) {
   char *output = curl_easy_escape(curl, "data to convert", 15);
   if(output) {
-    printf("Encoded: %s\n", output);
+    printf("Encoded: %s\\n", output);
     curl_free(output);
   }
-}}
+}
 .fi
 .SH "SEE ALSO"
 .BR curl_easy_unescape "(3), " curl_free "(3), " RFC 3986

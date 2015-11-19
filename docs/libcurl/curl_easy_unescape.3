@@ -26,8 +26,8 @@ curl_easy_unescape - URL decodes the given string
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "char *curl_easy_unescape( CURL *" curl ", char *" url ", int "inlength
-.BI ", int *" outlength " );"
+.BI "char *curl_easy_unescape( CURL *" curl ", const char *" url
+.BI ", int "inlength ", int *" outlength " );"
 .ad
 .SH DESCRIPTION
 This function converts the given URL encoded input string to a "plain string"

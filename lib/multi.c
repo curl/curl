@@ -100,6 +100,9 @@ static const char * const statename[]={
 
 static void multi_freetimeout(void *a, void *b);
 
+/* function pointer called once when switching TO a state */
+typedef void (*init_multistate_func)(struct SessionHandle *data);
+
 /* always use this function to change state, to make debugging easier */
 static void mstate(struct SessionHandle *data, CURLMstate state
 #ifdef DEBUGBUILD
@@ -108,6 +111,12 @@ static void mstate(struct SessionHandle *data, CURLMstate state
 )
 {
   CURLMstate oldstate = data->mstate;
+  static const init_multistate_func finit[CURLM_STATE_LAST] = {
+    NULL,
+    NULL,
+    Curl_init_CONNECT, /* CONNECT */
+    /* the rest is NULL too */
+  };
 
 #if defined(DEBUGBUILD) && defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void) lineno;
@@ -137,6 +146,10 @@ static void mstate(struct SessionHandle *data, CURLMstate state
   if(state == CURLM_STATE_COMPLETED)
     /* changing to COMPLETED means there's one less easy handle 'alive' */
     data->multi->num_alive--;
+
+  /* if this state has an init-function, run it */
+  if(finit[state])
+    finit[state](data);
 }
 
 #ifndef DEBUGBUILD

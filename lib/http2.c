@@ -34,6 +34,7 @@
 #include "multiif.h"
 #include "conncache.h"
 #include "url.h"
+#include "connect.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -41,9 +42,27 @@
 
 #define MIN(x,y) ((x)<(y)?(x):(y))
 
-#if (NGHTTP2_VERSION_NUM < 0x000600)
+#if (NGHTTP2_VERSION_NUM < 0x010000)
 #error too old nghttp2 version, upgrade!
 #endif
+
+/*
+ * Curl_http2_init_state() is called when the easy handle is created and
+ * allows for HTTP/2 specific init of state.
+ */
+void Curl_http2_init_state(struct UrlState *state)
+{
+  state->stream_weight = NGHTTP2_DEFAULT_WEIGHT;
+}
+
+/*
+ * Curl_http2_init_userset() is called when the easy handle is created and
+ * allows for HTTP/2 specific user-set fields.
+ */
+void Curl_http2_init_userset(struct UserDefined *set)
+{
+  set->stream_weight = NGHTTP2_DEFAULT_WEIGHT;
+}
 
 static int http2_perform_getsock(const struct connectdata *conn,
                                  curl_socket_t *sock, /* points to
@@ -56,8 +75,6 @@ static int http2_perform_getsock(const struct connectdata *conn,
   int bitmap = GETSOCK_BLANK;
   (void)numsocks;
 
-  /* TODO We should check underlying socket state if it is SSL socket
-     because of renegotiation. */
   sock[0] = conn->sock[FIRSTSOCKET];
 
   if(nghttp2_session_want_read(c->h2))
@@ -80,6 +97,7 @@ static int http2_getsock(struct connectdata *conn,
 static CURLcode http2_disconnect(struct connectdata *conn,
                                  bool dead_connection)
 {
+  struct HTTP *http = conn->data->req.protop;
   struct http_conn *c = &conn->proto.httpc;
   (void)dead_connection;
 
@@ -87,7 +105,16 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 
   nghttp2_session_del(c->h2);
   Curl_safefree(c->inbuf);
-  Curl_hash_destroy(&c->streamsh);
+
+  if(http) {
+    Curl_add_buffer_free(http->header_recvbuf);
+    http->header_recvbuf = NULL; /* clear the pointer */
+    for(; http->push_headers_used > 0; --http->push_headers_used) {
+      free(http->push_headers[http->push_headers_used - 1]);
+    }
+    free(http->push_headers);
+    http->push_headers = NULL;
+  }
 
   DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
 
@@ -253,7 +280,7 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
     size_t i;
     for(i=0; i<stream->push_headers_used; i++) {
       if(!strncmp(header, stream->push_headers[i], len)) {
-        /* sub-match, make sure that it us followed by a colon */
+        /* sub-match, make sure that it is followed by a colon */
         if(stream->push_headers[i][len] != ':')
           continue;
         return &stream->push_headers[i][len+1];
@@ -316,6 +343,11 @@ static int push_promise(struct SessionHandle *data,
     DEBUGF(infof(data, "Got PUSH_PROMISE, ask application!\n"));
 
     stream = data->req.protop;
+    if(!stream) {
+      failf(data, "Internal NULL stream!\n");
+      rv = 1;
+      goto fail;
+    }
 
     rv = data->multi->push_cb(data, newhandle,
                               stream->push_headers_used, &heads,
@@ -344,15 +376,8 @@ static int push_promise(struct SessionHandle *data,
     }
 
     httpc = &conn->proto.httpc;
-    /* put the newhandle in the hash with the stream id as key */
-    if(!Curl_hash_add(&httpc->streamsh,
-                      (size_t *)&frame->promised_stream_id,
-                      sizeof(frame->promised_stream_id), newhandle)) {
-      failf(conn->data, "Couldn't add stream to hash!");
-      rv = 1;
-    }
-    else
-      rv = 0;
+    nghttp2_session_set_stream_user_data(httpc->h2,
+                                         frame->promised_stream_id, newhandle);
   }
   else {
     DEBUGF(infof(data, "Got PUSH_PROMISE, ignore it!\n"));
@@ -366,36 +391,38 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
-  struct http_conn *httpc = &conn->proto.httpc;
+  struct http_conn *httpc = NULL;
   struct SessionHandle *data_s = NULL;
   struct HTTP *stream = NULL;
+  static int lastStream = -1;
   int rv;
   size_t left, ncopy;
   int32_t stream_id = frame->hd.stream_id;
 
-  (void)session;
-  (void)frame;
-  DEBUGF(infof(conn->data, "on_frame_recv() header %x stream %x\n",
+  if(!stream_id) {
+    /* stream ID zero is for connection-oriented stuff */
+    return 0;
+  }
+  data_s = nghttp2_session_get_stream_user_data(session,
+                                                frame->hd.stream_id);
+  if(lastStream != frame->hd.stream_id) {
+    lastStream = frame->hd.stream_id;
+  }
+  if(!data_s) {
+    DEBUGF(infof(conn->data,
+                 "No SessionHandle associated with stream: %x\n",
+                 stream_id));
+    return 0;
+  }
+
+  stream = data_s->req.protop;
+  if(!stream)
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+
+  DEBUGF(infof(data_s, "on_frame_recv() header %x stream %x\n",
                frame->hd.type, stream_id));
 
-  if(stream_id) {
-    /* get the stream from the hash based on Stream ID, stream ID zero is for
-       connection-oriented stuff */
-    data_s = Curl_hash_pick(&httpc->streamsh, &stream_id,
-                            sizeof(stream_id));
-    if(!data_s) {
-      /* Receiving a Stream ID not in the hash should not happen, this is an
-         internal error more than anything else! */
-      failf(conn->data, "Received frame on Stream ID: %x not in stream hash!",
-            stream_id);
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-    }
-    stream = data_s->req.protop;
-  }
-  else
-    /* we do nothing on stream zero */
-    return 0;
-
+  httpc = &conn->proto.httpc;
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
     /* If body started on this stream, then receiving DATA is illegal. */
@@ -446,7 +473,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     stream->memlen += ncopy;
 
     data_s->state.drain++;
-    Curl_expire(data_s, 1);
+    {
+      /* get the pointer from userp again since it was re-assigned above */
+      struct connectdata *conn_s = (struct connectdata *)userp;
+
+      /* if we receive data for another handle, wake that up */
+      if(conn_s->data != data_s)
+        Curl_expire(data_s, 1);
+    }
     break;
   case NGHTTP2_PUSH_PROMISE:
     rv = push_promise(data_s, conn, &frame->push_promise);
@@ -493,12 +527,15 @@ static int on_invalid_frame_recv(nghttp2_session *session,
                                  const nghttp2_frame *frame,
                                  int lib_error_code, void *userp)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
-  (void)session;
-  (void)frame;
-  DEBUGF(infof(conn->data,
-               "on_invalid_frame_recv() was called, error=%d:%s\n",
-               lib_error_code, nghttp2_strerror(lib_error_code)));
+  struct SessionHandle *data_s = NULL;
+  (void)userp;
+
+  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
+  if(data_s) {
+    DEBUGF(infof(data_s,
+                 "on_invalid_frame_recv() was called, error=%d:%s\n",
+                 lib_error_code, nghttp2_strerror(lib_error_code)));
+  }
   return 0;
 }
 
@@ -506,29 +543,26 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
                               int32_t stream_id,
                               const uint8_t *data, size_t len, void *userp)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
   struct HTTP *stream;
   struct SessionHandle *data_s;
   size_t nread;
+  struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
   (void)flags;
   (void)data;
-  DEBUGF(infof(conn->data, "on_data_chunk_recv() "
-               "len = %u, stream %u\n", len, stream_id));
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
   /* get the stream from the hash based on Stream ID */
-  data_s = Curl_hash_pick(&conn->proto.httpc.streamsh, &stream_id,
-                          sizeof(stream_id));
-  if(!data_s) {
+  data_s = nghttp2_session_get_stream_user_data(session, stream_id);
+  if(!data_s)
     /* Receiving a Stream ID not in the hash should not happen, this is an
        internal error more than anything else! */
-    failf(conn->data, "Received frame on Stream ID: %x not in stream hash!",
-          stream_id);
     return NGHTTP2_ERR_CALLBACK_FAILURE;
-  }
+
   stream = data_s->req.protop;
+  if(!stream)
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
 
   nread = MIN(stream->len, len);
   memcpy(&stream->mem[stream->memlen], data, nread);
@@ -537,8 +571,10 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   stream->memlen += nread;
 
   data_s->state.drain++;
-  Curl_expire(data_s, 1); /* TODO: fix so that this can be set to 0 for
-                             immediately? */
+
+  /* if we receive data for another handle, wake that up */
+  if(conn->data != data_s)
+    Curl_expire(data_s, 1);
 
   DEBUGF(infof(data_s, "%zu data received for stream %u "
                "(%zu left in buffer %p, total %zu)\n",
@@ -552,7 +588,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
     DEBUGF(infof(data_s, "NGHTTP2_ERR_PAUSE - %zu bytes out of buffer"
                  ", stream %u\n",
                  len - nread, stream_id));
-    conn->proto.httpc.pause_stream_id = stream_id;
+    data_s->easy_conn->proto.httpc.pause_stream_id = stream_id;
     return NGHTTP2_ERR_PAUSE;
   }
   return 0;
@@ -562,69 +598,75 @@ static int before_frame_send(nghttp2_session *session,
                              const nghttp2_frame *frame,
                              void *userp)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
-  (void)session;
-  (void)frame;
-  DEBUGF(infof(conn->data, "before_frame_send() was called\n"));
+  struct SessionHandle *data_s;
+  (void)userp;
+
+  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
+  if(data_s) {
+    DEBUGF(infof(data_s, "before_frame_send() was called\n"));
+  }
+
   return 0;
 }
 static int on_frame_send(nghttp2_session *session,
                          const nghttp2_frame *frame,
                          void *userp)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
-  (void)session;
-  (void)frame;
-  DEBUGF(infof(conn->data, "on_frame_send() was called, length = %zd\n",
-               frame->hd.length));
+  struct SessionHandle *data_s;
+  (void)userp;
+
+  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
+  if(data_s) {
+    DEBUGF(infof(data_s, "on_frame_send() was called, length = %zd\n",
+                 frame->hd.length));
+  }
   return 0;
 }
 static int on_frame_not_send(nghttp2_session *session,
                              const nghttp2_frame *frame,
                              int lib_error_code, void *userp)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
-  (void)session;
-  (void)frame;
-  DEBUGF(infof(conn->data,
-               "on_frame_not_send() was called, lib_error_code = %d\n",
-               lib_error_code));
+  struct SessionHandle *data_s;
+  (void)userp;
+
+  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
+  if(data_s) {
+    DEBUGF(infof(data_s,
+                 "on_frame_not_send() was called, lib_error_code = %d\n",
+                 lib_error_code));
+  }
   return 0;
 }
 static int on_stream_close(nghttp2_session *session, int32_t stream_id,
                            uint32_t error_code, void *userp)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
   struct SessionHandle *data_s;
   struct HTTP *stream;
   (void)session;
   (void)stream_id;
-  DEBUGF(infof(conn->data, "on_stream_close(), error_code = %d, stream %u\n",
-               error_code, stream_id));
+  (void)userp;
 
   if(stream_id) {
     /* get the stream from the hash based on Stream ID, stream ID zero is for
        connection-oriented stuff */
-    data_s = Curl_hash_pick(&conn->proto.httpc.streamsh, &stream_id,
-                            sizeof(stream_id));
+    data_s = nghttp2_session_get_stream_user_data(session, stream_id);
     if(!data_s) {
       /* We could get stream ID not in the hash.  For example, if we
-         decided to reject stream (e.g., PUSH_PROMISE).  We call infof
-         as a debugging purpose for now. */
-      infof(conn->data,
-            "Received frame on Stream ID: %x not in stream hash!\n",
-            stream_id);
+         decided to reject stream (e.g., PUSH_PROMISE). */
       return 0;
     }
+    DEBUGF(infof(data_s, "on_stream_close(), error_code = %d, stream %u\n",
+                 error_code, stream_id));
     stream = data_s->req.protop;
+    if(!stream)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
 
     stream->error_code = error_code;
     stream->closed = TRUE;
 
     /* remove the entry from the hash as the stream is now gone */
-    Curl_hash_delete(&conn->proto.httpc.streamsh,
-                     &stream_id, sizeof(stream_id));
-    DEBUGF(infof(conn->data, "Removed stream %u hash!\n", stream_id));
+    nghttp2_session_set_stream_user_data(session, stream_id, 0);
+    DEBUGF(infof(data_s, "Removed stream %u hash!\n", stream_id));
   }
   return 0;
 }
@@ -632,10 +674,13 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
 static int on_begin_headers(nghttp2_session *session,
                             const nghttp2_frame *frame, void *userp)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
-  (void)session;
-  (void)frame;
-  DEBUGF(infof(conn->data, "on_begin_headers() was called\n"));
+  struct SessionHandle *data_s = NULL;
+  (void)userp;
+
+  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
+  if(data_s) {
+    DEBUGF(infof(data_s, "on_begin_headers() was called\n"));
+  }
   return 0;
 }
 
@@ -673,28 +718,26 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                      uint8_t flags,
                      void *userp)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
   struct HTTP *stream;
   struct SessionHandle *data_s;
   int32_t stream_id = frame->hd.stream_id;
-
-  (void)session;
-  (void)frame;
+  struct connectdata *conn = (struct connectdata *)userp;
   (void)flags;
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
   /* get the stream from the hash based on Stream ID */
-  data_s = Curl_hash_pick(&conn->proto.httpc.streamsh, &stream_id,
-                          sizeof(stream_id));
-  if(!data_s) {
+  data_s = nghttp2_session_get_stream_user_data(session, stream_id);
+  if(!data_s)
     /* Receiving a Stream ID not in the hash should not happen, this is an
        internal error more than anything else! */
-    failf(conn->data, "Received frame on Stream ID: %x not in stream hash!",
-          stream_id);
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+
+  stream = data_s->req.protop;
+  if(!stream) {
+    failf(data_s, "Internal NULL stream! 5\n");
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
-  stream = data_s->req.protop;
 
   if(stream->bodystarted)
     /* Ignore trailer or HEADERS not mapped to HTTP semantics.  The
@@ -743,7 +786,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(stream->header_recvbuf, value, valuelen);
     Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
     data_s->state.drain++;
-    Curl_expire(data_s, 1);
+    /* if we receive data for another handle, wake that up */
+    if(conn->data != data_s)
+      Curl_expire(data_s, 1);
 
     DEBUGF(infof(data_s, "h2 status: HTTP/2 %03d\n",
                  stream->status_code));
@@ -758,7 +803,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   Curl_add_buffer(stream->header_recvbuf, value, valuelen);
   Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
   data_s->state.drain++;
-  Curl_expire(data_s, 1);
+  /* if we receive data for another handle, wake that up */
+  if(conn->data != data_s)
+    Curl_expire(data_s, 1);
 
   DEBUGF(infof(data_s, "h2 header: %.*s: %.*s\n", namelen, name, valuelen,
                value));
@@ -773,31 +820,27 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
                                          nghttp2_data_source *source,
                                          void *userp)
 {
-  struct connectdata *conn = (struct connectdata *)userp;
-  struct http_conn *c = &conn->proto.httpc;
   struct SessionHandle *data_s;
   struct HTTP *stream = NULL;
   size_t nread;
-  (void)session;
-  (void)stream_id;
   (void)source;
+  (void)userp;
 
   if(stream_id) {
     /* get the stream from the hash based on Stream ID, stream ID zero is for
        connection-oriented stuff */
-    data_s = Curl_hash_pick(&c->streamsh, &stream_id, sizeof(stream_id));
-    if(!data_s) {
+    data_s = nghttp2_session_get_stream_user_data(session, stream_id);
+    if(!data_s)
       /* Receiving a Stream ID not in the hash should not happen, this is an
          internal error more than anything else! */
-      failf(conn->data, "Asked for data to stream %u not in hash!", stream_id);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
-    }
+
     stream = data_s->req.protop;
+    if(!stream)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
-  else {
-    failf(conn->data, "nghttp2 confusion");
+  else
     return NGHTTP2_ERR_INVALID_ARGUMENT;
-  }
 
   nread = MIN(stream->upload_len, length);
   if(nread > 0) {
@@ -828,11 +871,6 @@ static nghttp2_settings_entry settings[] = {
 };
 
 #define H2_BUFSIZE 32768
-
-static void freestreamentry(void *freethis)
-{
-  (void)freethis;
-}
 
 /*
  * Initialize nghttp2 for a Curl connection
@@ -892,23 +930,7 @@ CURLcode Curl_http2_init(struct connectdata *conn)
       failf(conn->data, "Couldn't initialize nghttp2!");
       return CURLE_OUT_OF_MEMORY; /* most likely at least */
     }
-
-    rc = Curl_hash_init(&conn->proto.httpc.streamsh, 7, Curl_hash_str,
-                        Curl_str_key_compare, freestreamentry);
-    if(rc) {
-      failf(conn->data, "Couldn't init stream hash!");
-      return CURLE_OUT_OF_MEMORY; /* most likely at least */
-    }
   }
-  return CURLE_OK;
-}
-
-/*
- * Send a request using http2
- */
-CURLcode Curl_http2_send_request(struct connectdata *conn)
-{
-  (void)conn;
   return CURLE_OK;
 }
 
@@ -974,6 +996,54 @@ static ssize_t http2_handle_stream_close(struct http_conn *httpc,
   }
   DEBUGF(infof(data, "http2_recv returns 0, http2_handle_stream_close\n"));
   return 0;
+}
+
+/*
+ * h2_pri_spec() fills in the pri_spec struct, used by nghttp2 to send weight
+ * and dependency to the peer. It also stores the updated values in the state
+ * struct.
+ */
+
+static void h2_pri_spec(struct SessionHandle *data,
+                        nghttp2_priority_spec *pri_spec)
+{
+  struct HTTP *depstream = (data->set.stream_depends_on?
+                            data->set.stream_depends_on->req.protop:NULL);
+  int32_t depstream_id = depstream? depstream->stream_id:0;
+  nghttp2_priority_spec_init(pri_spec, depstream_id, data->set.stream_weight,
+                             data->set.stream_depends_e);
+  data->state.stream_weight = data->set.stream_weight;
+  data->state.stream_depends_e = data->set.stream_depends_e;
+  data->state.stream_depends_on = data->set.stream_depends_on;
+}
+
+/*
+ * h2_session_send() checks if there's been an update in the priority /
+ * dependency settings and if so it submits a PRIORITY frame with the updated
+ * info.
+ */
+static int h2_session_send(struct SessionHandle *data,
+                           nghttp2_session *h2)
+{
+  struct HTTP *stream = data->req.protop;
+  if((data->set.stream_weight != data->state.stream_weight) ||
+     (data->set.stream_depends_e != data->state.stream_depends_e) ||
+     (data->set.stream_depends_on != data->state.stream_depends_on) ) {
+    /* send new weight and/or dependency */
+    nghttp2_priority_spec pri_spec;
+    int rv;
+
+    h2_pri_spec(data, &pri_spec);
+
+    DEBUGF(infof(data, "Queuing HTTP/2 PRIORITY frame on stream %u!\n",
+                 stream->stream_id));
+    rv = nghttp2_submit_priority(h2, NGHTTP2_FLAG_NONE, stream->stream_id,
+                                 &pri_spec);
+    if(rv)
+      return rv;
+  }
+
+  return nghttp2_session_send(h2);
 }
 
 /*
@@ -1084,15 +1154,11 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       nread = ((Curl_recv *)httpc->recv_underlying)(
           conn, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, &result);
 
-      if(result == CURLE_AGAIN) {
+      if(nread == -1) {
+        if(result != CURLE_AGAIN)
+          failf(data, "Failed receiving HTTP2 data");
         *err = result;
         return -1;
-      }
-
-      if(nread == -1) {
-        failf(data, "Failed receiving HTTP2 data");
-        *err = result;
-        return 0;
       }
 
       if(nread == 0) {
@@ -1134,7 +1200,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     }
     /* Always send pending frames in nghttp2 session, because
        nghttp2_session_mem_recv() may queue new frame */
-    rv = nghttp2_session_send(httpc->h2);
+    rv = h2_session_send(data, httpc->h2);
     if(rv != 0) {
       *err = CURLE_SEND_ERROR;
       return 0;
@@ -1193,6 +1259,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nghttp2_data_provider data_prd;
   int32_t stream_id;
   nghttp2_session *h2 = httpc->h2;
+  nghttp2_priority_spec pri_spec;
 
   (void)sockindex;
 
@@ -1204,7 +1271,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     stream->upload_mem = mem;
     stream->upload_len = len;
     nghttp2_session_resume_data(h2, stream->stream_id);
-    rv = nghttp2_session_send(h2);
+    rv = h2_session_send(conn->data, h2);
     if(nghttp2_is_fatal(rv)) {
       *err = CURLE_SEND_ERROR;
       return -1;
@@ -1249,6 +1316,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   }
   /* Extract :method, :path from request line */
   end = strchr(hdbuf, ' ');
+  if(!end)
+    goto fail;
   nva[0].name = (unsigned char *)":method";
   nva[0].namelen = (uint16_t)strlen((char *)nva[0].name);
   nva[0].value = (unsigned char *)hdbuf;
@@ -1258,6 +1327,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   hdbuf = end + 1;
 
   end = strchr(hdbuf, ' ');
+  if(!end)
+    goto fail;
   nva[1].name = (unsigned char *)":path";
   nva[1].namelen = (uint16_t)strlen((char *)nva[1].name);
   nva[1].value = (unsigned char *)hdbuf;
@@ -1274,14 +1345,26 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   nva[2].flags = NGHTTP2_NV_FLAG_NONE;
 
   hdbuf = strchr(hdbuf, 0x0a);
+  if(!hdbuf)
+    goto fail;
   ++hdbuf;
 
   authority_idx = 0;
 
-  for(i = 3; i < nheader; ++i) {
+  i = 3;
+  while(i < nheader) {
+    size_t hlen;
+    int skip = 0;
     end = strchr(hdbuf, ':');
-    assert(end);
-    if(end - hdbuf == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
+    if(!end)
+      goto fail;
+    hlen = end - hdbuf;
+    if(hlen == 10 && Curl_raw_nequal("connection", hdbuf, 10)) {
+      /* skip Connection: headers! */
+      skip = 1;
+      --nheader;
+    }
+    else if(hlen == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
       authority_idx = i;
       nva[i].name = (unsigned char *)":authority";
       nva[i].namelen = (uint16_t)strlen((char *)nva[i].name);
@@ -1293,28 +1376,31 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     hdbuf = end + 1;
     for(; *hdbuf == ' '; ++hdbuf);
     end = strchr(hdbuf, 0x0d);
-    assert(end);
-    nva[i].value = (unsigned char *)hdbuf;
-    nva[i].valuelen = (uint16_t)(end - hdbuf);
-    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
-
-    hdbuf = end + 2;
-    /* Inspect Content-Length header field and retrieve the request
-       entity length so that we can set END_STREAM to the last DATA
-       frame. */
-    if(nva[i].namelen == 14 &&
-       Curl_raw_nequal("content-length", (char*)nva[i].name, 14)) {
-      size_t j;
-      stream->upload_left = 0;
-      for(j = 0; j < nva[i].valuelen; ++j) {
-        stream->upload_left *= 10;
-        stream->upload_left += nva[i].value[j] - '0';
+    if(!end)
+      goto fail;
+    if(!skip) {
+      nva[i].value = (unsigned char *)hdbuf;
+      nva[i].valuelen = (uint16_t)(end - hdbuf);
+      nva[i].flags = NGHTTP2_NV_FLAG_NONE;
+      /* Inspect Content-Length header field and retrieve the request
+         entity length so that we can set END_STREAM to the last DATA
+         frame. */
+      if(nva[i].namelen == 14 &&
+         Curl_raw_nequal("content-length", (char*)nva[i].name, 14)) {
+        size_t j;
+        stream->upload_left = 0;
+        for(j = 0; j < nva[i].valuelen; ++j) {
+          stream->upload_left *= 10;
+          stream->upload_left += nva[i].value[j] - '0';
+        }
+        DEBUGF(infof(conn->data,
+                     "request content-length=%"
+                     CURL_FORMAT_CURL_OFF_T
+                     "\n", stream->upload_left));
       }
-      DEBUGF(infof(conn->data,
-                   "request content-length=%"
-                   CURL_FORMAT_CURL_OFF_T
-                   "\n", stream->upload_left));
+      ++i;
     }
+    hdbuf = end + 2;
   }
 
   /* :authority must come before non-pseudo header fields */
@@ -1326,21 +1412,23 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     nva[i] = authority;
   }
 
+  h2_pri_spec(conn->data, &pri_spec);
+
   switch(conn->data->set.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
   case HTTPREQ_PUT:
     data_prd.read_callback = data_source_read_callback;
     data_prd.source.ptr = NULL;
-    stream_id = nghttp2_submit_request(h2, NULL, nva, nheader,
-                                       &data_prd, NULL);
+    stream_id = nghttp2_submit_request(h2, &pri_spec, nva, nheader,
+                                       &data_prd, conn->data);
     break;
   default:
-    stream_id = nghttp2_submit_request(h2, NULL, nva, nheader,
-                                       NULL, NULL);
+    stream_id = nghttp2_submit_request(h2, &pri_spec, nva, nheader,
+                                       NULL, conn->data);
   }
 
-  free(nva);
+  Curl_safefree(nva);
 
   if(stream_id < 0) {
     DEBUGF(infof(conn->data, "http2_send() send error\n"));
@@ -1352,14 +1440,8 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
         stream_id, conn->data);
   stream->stream_id = stream_id;
 
-  /* put the SessionHandle in the hash with the stream_id as key */
-  if(!Curl_hash_add(&httpc->streamsh, &stream->stream_id, sizeof(stream_id),
-                    conn->data)) {
-    failf(conn->data, "Couldn't add stream to hash!");
-    *err = CURLE_OUT_OF_MEMORY;
-    return -1;
-  }
-
+  /* this does not call h2_session_send() since there can not have been any
+   * priority upodate since the nghttp2_submit_request() call above */
   rv = nghttp2_session_send(h2);
 
   if(rv != 0) {
@@ -1380,6 +1462,11 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   }
 
   return len;
+
+fail:
+  free(nva);
+  *err = CURLE_SEND_ERROR;
+  return -1;
 }
 
 CURLcode Curl_http2_setup(struct connectdata *conn)
@@ -1423,6 +1510,10 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   infof(conn->data, "Connection state changed (HTTP/2 confirmed)\n");
   Curl_multi_connchanged(conn->data->multi);
 
+  /* switch on TCP_NODELAY as we need to send off packets without delay for
+     maximum throughput */
+  Curl_tcpnodelay(conn, conn->sock[FIRSTSOCKET]);
+
   return CURLE_OK;
 }
 
@@ -1457,12 +1548,9 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
       return CURLE_HTTP2;
     }
 
-    /* put the SessionHandle in the hash with the stream->stream_id as key */
-    if(!Curl_hash_add(&httpc->streamsh, &stream->stream_id,
-                      sizeof(stream->stream_id), conn->data)) {
-      failf(conn->data, "Couldn't add stream to hash!");
-      return CURLE_OUT_OF_MEMORY;
-    }
+    nghttp2_session_set_stream_user_data(httpc->h2,
+                                         stream->stream_id,
+                                         conn->data);
   }
   else {
     /* stream ID is unknown at this point */
@@ -1513,7 +1601,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   }
 
   /* Try to send some frames since we may read SETTINGS already. */
-  rv = nghttp2_session_send(httpc->h2);
+  rv = h2_session_send(data, httpc->h2);
 
   if(rv != 0) {
     failf(data, "nghttp2_session_send() failed: %s(%d)",
@@ -1524,4 +1612,25 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#endif
+#else /* !USE_NGHTTP2 */
+
+/* Satisfy external references even if http2 is not compiled in. */
+
+#define CURL_DISABLE_TYPECHECK
+#include <curl/curl.h>
+
+char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
+{
+  (void) h;
+  (void) num;
+  return NULL;
+}
+
+char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
+{
+  (void) h;
+  (void) header;
+  return NULL;
+}
+
+#endif /* USE_NGHTTP2 */

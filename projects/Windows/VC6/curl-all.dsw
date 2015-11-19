@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "curlsrc"=".\src\curlsrc.dsp" - Package Owner=<4>
+Project: "curl"=".\src\curl.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -156,8 +156,7 @@ static const char *const helptext[] = {
   " -o, --output FILE   Write to FILE instead of stdout",
   "     --pass PASS     Pass phrase for the private key (SSL/SSH)",
   "     --path-as-is    Do not squash .. sequences in URL path",
-  "     --pinnedpubkey FILE  Public key (PEM/DER) to verify peer against "
-  "(OpenSSL/GnuTLS/NSS/wolfSSL/CyaSSL/GSKit only)",
+  "     --pinnedpubkey FILE/HASHES Public key to verify peer against (SSL)",
   "     --post301       "
   "Do not switch to GET after following a 301 redirect (H)",
   "     --post302       "
@@ -166,7 +165,8 @@ static const char *const helptext[] = {
   "Do not switch to GET after following a 303 redirect (H)",
   " -#, --progress-bar  Display transfer progress as a progress bar",
   "     --proto PROTOCOLS  Enable/disable PROTOCOLS",
-  "     --proto-redir PROTOCOLS  Enable/disable PROTOCOLS on redirect",
+  "     --proto-default PROTOCOL  Use PROTOCOL for any URL missing a scheme",
+  "     --proto-redir PROTOCOLS   Enable/disable PROTOCOLS on redirect",
   " -x, --proxy [PROTOCOL://]HOST[:PORT]  Use proxy on given port",
   "     --proxy-anyauth  Pick \"any\" proxy authentication method (H)",
   "     --proxy-basic   Use Basic authentication on the proxy (H)",
@@ -241,6 +241,7 @@ static const char *const helptext[] = {
   " -2, --sslv2         Use SSLv2 (SSL)",
   " -3, --sslv3         Use SSLv3 (SSL)",
   "     --ssl-allow-beast  Allow security flaw to improve interop (SSL)",
+  "     --ssl-no-revoke    Disable cert revocation checks (WinSSL)",
   "     --stderr FILE   Where to redirect stderr (use \"-\" for stdout)",
   "     --tcp-nodelay   Use the TCP_NODELAY option",
   " -t, --telnet-option OPT=VAL  Set telnet option",
@@ -341,6 +342,9 @@ void tool_version_info(void)
     }
 #ifdef USE_METALINK
     printf("Metalink ");
+#endif
+#ifdef USE_LIBPSL
+    printf("PSL ");
 #endif
     puts(""); /* newline */
   }

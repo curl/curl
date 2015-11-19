@@ -122,7 +122,7 @@ DELAY [command] [secs]
  - Delay responding to this command for the given time
 RETRWEIRDO
  - Enable the "weirdo" RETR case when multiple response lines appear at once
-   when a file is transfered
+   when a file is transferred
 RETRNOSIZE
  - Make sure the RETR response doesn't contain the size of the file
 NOSAVE
@@ -211,26 +211,28 @@ crypto
 debug
 getrlimit
 GnuTLS
+GSS-API
+http2
 idn
 ipv6
+Kerberos
 large_file
 libz
 Metalink
 NSS
 NTLM
 OpenSSL
+PSL
 socks
+SPNEGO
 SSL
 SSLpinning
+SSPI
 TLS-SRP
 TrackMemory
 unittest
-http2
-SSPI
-GSS-API
-Kerberos
-SPNEGO
 unix-sockets
+WinSSL
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
@@ -290,7 +292,7 @@ If there's no test number found above, the HTTP test server will use the
 number following the last dot in the given hostname (made so that a CONNECT
 can still pass on test number) so that "foo.bar.123" gets treated as test case
 123. Alternatively, if an IPv6 address is provided to CONNECT, the last
-hexadecimal group in the address will be used as the test numer! For example
+hexadecimal group in the address will be used as the test number! For example
 the address "[1234::ff]" would be treated as test case 255.
 
 Set type="perl" to write the test case as a perl script. It implies that
@@ -340,7 +342,7 @@ Available substitute variables include:
 %HTTPTLSPORT  - Port number of the HTTP TLS server
 %IMAP6PORT - IPv6 port number of the IMAP server
 %IMAPPORT  - Port number of the IMAP server
-%POP36PORT - IPv6 ort number of the POP3 server
+%POP36PORT - IPv6 port number of the POP3 server
 %POP3PORT  - Port number of the POP3 server
 %PROXYPORT - Port number of the HTTP proxy
 %PWD       - Current directory

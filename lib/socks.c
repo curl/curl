@@ -305,8 +305,8 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
             ", request rejected or failed.",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            ((socksreq[8] << 8) | socksreq[9]),
-            socksreq[1]);
+            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
+            (unsigned char)socksreq[1]);
       return CURLE_COULDNT_CONNECT;
     case 92:
       failf(data,
@@ -315,8 +315,8 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
             "identd on the client.",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            ((socksreq[8] << 8) | socksreq[9]),
-            socksreq[1]);
+            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
+            (unsigned char)socksreq[1]);
       return CURLE_COULDNT_CONNECT;
     case 93:
       failf(data,
@@ -325,8 +325,8 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
             "report different user-ids.",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            ((socksreq[8] << 8) | socksreq[9]),
-            socksreq[1]);
+            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
+            (unsigned char)socksreq[1]);
       return CURLE_COULDNT_CONNECT;
     default:
       failf(data,
@@ -334,8 +334,8 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
             ", Unknown.",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            ((socksreq[8] << 8) | socksreq[9]),
-            socksreq[1]);
+            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
+            (unsigned char)socksreq[1]);
       return CURLE_COULDNT_CONNECT;
     }
   }
@@ -613,7 +613,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       if(hp->ai_family == AF_INET) {
         socksreq[len++] = 1; /* ATYP: IPv4 = 1 */
 
-        saddr_in = (struct sockaddr_in*)hp->ai_addr;
+        saddr_in = (struct sockaddr_in*)(void*)hp->ai_addr;
         for(i = 0; i < 4; i++) {
           socksreq[len++] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[i];
           infof(data, "%d\n", socksreq[len-1]);
@@ -623,7 +623,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       else if(hp->ai_family == AF_INET6) {
         socksreq[len++] = 4; /* ATYP: IPv6 = 4 */
 
-        saddr_in6 = (struct sockaddr_in6*)hp->ai_addr;
+        saddr_in6 = (struct sockaddr_in6*)(void*)hp->ai_addr;
         for(i = 0; i < 16; i++) {
           socksreq[len++] = ((unsigned char*)&saddr_in6->sin6_addr.s6_addr)[i];
         }
@@ -684,15 +684,15 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
             "Can't complete SOCKS5 connection to %d.%d.%d.%d:%d. (%d)",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            ((socksreq[8] << 8) | socksreq[9]),
-            socksreq[1]);
+            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
+            (unsigned char)socksreq[1]);
     }
     else if(socksreq[3] == 3) {
       failf(data,
             "Can't complete SOCKS5 connection to %s:%d. (%d)",
             hostname,
-            ((socksreq[8] << 8) | socksreq[9]),
-            socksreq[1]);
+            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
+            (unsigned char)socksreq[1]);
     }
     else if(socksreq[3] == 4) {
       failf(data,
@@ -706,8 +706,8 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
             (unsigned char)socksreq[14], (unsigned char)socksreq[15],
             (unsigned char)socksreq[16], (unsigned char)socksreq[17],
             (unsigned char)socksreq[18], (unsigned char)socksreq[19],
-            ((socksreq[8] << 8) | socksreq[9]),
-            socksreq[1]);
+            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
+            (unsigned char)socksreq[1]);
     }
     return CURLE_COULDNT_CONNECT;
   }

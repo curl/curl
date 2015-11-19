@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2014, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2015, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,16 +49,16 @@
 /*
  * Curl_sasl_build_spn()
  *
- * This is used to build a SPN string in the format service/host.
+ * This is used to build a SPN string in the format service/instance.
  *
  * Parameters:
  *
  * serivce  [in] - The service type such as www, smtp, pop or imap.
- * host     [in] - The host name or realm.
+ * instance [in] - The host name or realm.
  *
  * Returns a pointer to the newly allocated SPN.
  */
-TCHAR *Curl_sasl_build_spn(const char *service, const char *host)
+TCHAR *Curl_sasl_build_spn(const char *service, const char *instance)
 {
   char *utf8_spn = NULL;
   TCHAR *tchar_spn = NULL;
@@ -71,7 +71,7 @@ TCHAR *Curl_sasl_build_spn(const char *service, const char *host)
      formulate the SPN instead. */
 
   /* Allocate our UTF8 based SPN */
-  utf8_spn = aprintf("%s/%s", service, host);
+  utf8_spn = aprintf("%s/%s", service, instance);
   if(!utf8_spn) {
     return NULL;
   }
@@ -418,6 +418,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   SECURITY_STATUS status;
   unsigned long attrs;
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
+  TCHAR *spn;
 
   (void) data;
 
@@ -462,6 +463,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
                                               p_identity, NULL, NULL,
                                               &credentials, &expiry);
   if(status != SEC_E_OK) {
+    Curl_sspi_free_identity(p_identity);
     free(output_token);
 
     return CURLE_LOGIN_DENIED;
@@ -489,12 +491,21 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   resp_buf.pvBuffer   = output_token;
   resp_buf.cbBuffer   = curlx_uztoul(token_max);
 
+  spn = Curl_convert_UTF8_to_tchar((char *) uripath);
+  if(!spn) {
+    Curl_sspi_free_identity(p_identity);
+    free(output_token);
+
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   /* Generate our reponse message */
   status = s_pSecFn->InitializeSecurityContext(&credentials, NULL,
-                                               (TCHAR *) uripath,
+                                               spn,
                                                ISC_REQ_USE_HTTP_STYLE, 0, 0,
                                                &chlg_desc, 0, &context,
                                                &resp_desc, &attrs, &expiry);
+  Curl_unicodefree(spn);
 
   if(status == SEC_I_COMPLETE_NEEDED ||
      status == SEC_I_COMPLETE_AND_CONTINUE)
@@ -502,6 +513,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
     s_pSecFn->FreeCredentialsHandle(&credentials);
 
+    Curl_sspi_free_identity(p_identity);
     free(output_token);
 
     return CURLE_OUT_OF_MEMORY;
@@ -512,6 +524,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
     s_pSecFn->DeleteSecurityContext(&context);
     s_pSecFn->FreeCredentialsHandle(&credentials);
 
+    Curl_sspi_free_identity(p_identity);
     free(output_token);
 
     return CURLE_OUT_OF_MEMORY;

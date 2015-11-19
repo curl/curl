@@ -57,6 +57,14 @@ static char *formboundary(struct SessionHandle *data);
 #define FORM_FILE_SEPARATOR ','
 #define FORM_TYPE_SEPARATOR ';'
 
+#define HTTPPOST_PTRNAME CURL_HTTPPOST_PTRNAME
+#define HTTPPOST_FILENAME CURL_HTTPPOST_FILENAME
+#define HTTPPOST_PTRCONTENTS CURL_HTTPPOST_PTRCONTENTS
+#define HTTPPOST_READFILE CURL_HTTPPOST_READFILE
+#define HTTPPOST_PTRBUFFER CURL_HTTPPOST_PTRBUFFER
+#define HTTPPOST_CALLBACK CURL_HTTPPOST_CALLBACK
+#define HTTPPOST_BUFFER CURL_HTTPPOST_BUFFER
+
 /***************************************************************************
  *
  * AddHttpPost()
@@ -69,7 +77,7 @@ static char *formboundary(struct SessionHandle *data);
  ***************************************************************************/
 static struct curl_httppost *
 AddHttpPost(char *name, size_t namelength,
-            char *value, size_t contentslength,
+            char *value, curl_off_t contentslength,
             char *buffer, size_t bufferlength,
             char *contenttype,
             long flags,
@@ -85,14 +93,14 @@ AddHttpPost(char *name, size_t namelength,
     post->name = name;
     post->namelength = (long)(name?(namelength?namelength:strlen(name)):0);
     post->contents = value;
-    post->contentslength = (long)contentslength;
+    post->contentlen = contentslength;
     post->buffer = buffer;
     post->bufferlength = (long)bufferlength;
     post->contenttype = contenttype;
     post->contentheader = contentHeader;
     post->showfilename = showfilename;
     post->userp = userp,
-    post->flags = flags;
+    post->flags = flags | CURL_HTTPPOST_LARGE;
   }
   else
     return NULL;
@@ -372,11 +380,14 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       }
       break;
     case CURLFORM_CONTENTSLENGTH:
-      if(current_form->contentslength)
-        return_value = CURL_FORMADD_OPTION_TWICE;
-      else
-        current_form->contentslength =
-          array_state?(size_t)array_value:(size_t)va_arg(params, long);
+      current_form->contentslength =
+        array_state?(size_t)array_value:(size_t)va_arg(params, long);
+      break;
+
+    case CURLFORM_CONTENTLEN:
+      current_form->flags |= CURL_HTTPPOST_LARGE;
+      current_form->contentslength =
+        array_state?(curl_off_t)array_value:va_arg(params, curl_off_t);
       break;
 
       /* Get contents from a given file name */
@@ -538,7 +549,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         /* this "cast increases required alignment of target type" but
            we consider it OK anyway */
         struct curl_slist* list = array_state?
-          (struct curl_slist*)array_value:
+          (struct curl_slist*)(void*)array_value:
           va_arg(params, struct curl_slist*);
 
         if(current_form->contentheader)
@@ -653,9 +664,12 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
                             HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
                             HTTPPOST_CALLBACK)) && form->value) {
           /* copy value (without strdup; possibly contains null characters) */
-          form->value = Curl_memdup(form->value, form->contentslength?
-                                    form->contentslength:
-                                    strlen(form->value)+1);
+          size_t clen  = (size_t) form->contentslength;
+          if(!clen)
+            clen = strlen(form->value)+1;
+
+          form->value = Curl_memdup(form->value, clen);
+
           if(!form->value) {
             return_value = CURL_FORMADD_MEMORY;
             break;
@@ -808,7 +822,7 @@ static curl_off_t VmsSpecialSize(const char * name,
 static CURLcode AddFormData(struct FormData **formp,
                             enum formtype type,
                             const void *line,
-                            size_t length,
+                            curl_off_t length,
                             curl_off_t *size)
 {
   struct FormData *newform = malloc(sizeof(struct FormData));
@@ -1298,15 +1312,16 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
         result = AddFormData(&form, FORM_CONTENT, post->buffer,
                              post->bufferlength, &size);
       else if(post->flags & HTTPPOST_CALLBACK)
-        /* the contents should be read with the callback and the size
-           is set with the contentslength */
+        /* the contents should be read with the callback and the size is set
+           with the contentslength */
         result = AddFormData(&form, FORM_CALLBACK, post->userp,
-                             post->contentslength, &size);
+                             post->flags&CURL_HTTPPOST_LARGE?
+                             post->contentlen:post->contentslength, &size);
       else
         /* include the contents we got */
         result = AddFormData(&form, FORM_CONTENT, post->contents,
-                             post->contentslength, &size);
-
+                             post->flags&CURL_HTTPPOST_LARGE?
+                             post->contentlen:post->contentslength, &size);
       file = file->more;
     } while(file && !result); /* for each specified file for this field */
 

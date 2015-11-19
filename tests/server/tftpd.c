@@ -951,6 +951,8 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 #ifdef USE_WINSOCK
   DWORD recvtimeout, recvtimeoutbak;
 #endif
+  char *option = (char *)"mode"; /* mode is implicit */
+  int toggle = 1;
 
   /* Open request dump file. */
   server = fopen(REQUEST_DUMP, "ab");
@@ -966,22 +968,48 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 
   cp = (char *)&tp->th_stuff;
   filename = cp;
-again:
-  while (cp < &buf.storage[size]) {
-    if (*cp == '\0')
+  do {
+    bool endofit = true;
+    while (cp < &buf.storage[size]) {
+      if (*cp == '\0') {
+        endofit = false;
+        break;
+      }
+      cp++;
+    }
+    if(endofit)
+      /* no more options */
       break;
-    cp++;
-  }
+
+    /* before increasing pointer, make sure it is still within the legal
+       space */
+    if((cp+1) < &buf.storage[size]) {
+      ++cp;
+      if(first) {
+        /* store the mode since we need it later */
+        mode = cp;
+        first = 0;
+      }
+      if(toggle)
+        /* name/value pair: */
+        fprintf(server, "%s: %s\n", option, cp);
+      else {
+        /* store the name pointer */
+        option = cp;
+      }
+      toggle ^= 1;
+    }
+    else
+      /* No more options */
+      break;
+  } while(1);
+
   if (*cp) {
     nak(EBADOP);
     fclose(server);
     return 3;
   }
-  if (first) {
-    mode = ++cp;
-    first = 0;
-    goto again;
-  }
+
   /* store input protocol */
   fprintf(server, "filename: %s\n", filename);
 
@@ -990,7 +1018,6 @@ again:
       *cp = (char)tolower((int)*cp);
 
   /* store input protocol */
-  fprintf(server, "mode: %s\n", mode);
   fclose(server);
 
   for (pf = formata; pf->f_mode; pf++)

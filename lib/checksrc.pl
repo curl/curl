@@ -143,6 +143,11 @@ sub scanfile {
             checkwarn($line, length($1), $file, $l, "Trailing whitespace");
         }
 
+        # crude attempt to detect // comments without too many false
+        # positives
+        if($l =~ /^([^"\*]*)[^:"]\/\//) {
+            checkwarn($line, length($1), $file, $l, "\/\/ comment");
+        }
         # check spaces after for/if/while
         if($l =~ /^(.*)(for|if|while) \(/) {
             if($1 =~ / *\#/) {

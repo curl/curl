@@ -42,14 +42,14 @@ buffer. The variable \fBn\fP points to will receive the number of received
 bytes.
 
 To establish the connection, set \fBCURLOPT_CONNECT_ONLY(3)\fP option before
-calling \fIcurl_easy_perform(3)\fP or \cIcurl_multi_perform(3)\fP. Note that
+calling \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP. Note that
 \fIcurl_easy_recv(3)\fP does not work on connections that were created without
 this option.
 
 You must ensure that the socket has data to read before calling
 \fIcurl_easy_recv(3)\fP, otherwise the call will return \fBCURLE_AGAIN\fP -
 the socket is used in non-blocking mode internally. Use
-\fIcurl_easy_getinfo(3)\fP with \fBCURLINFO_LASTSOCKET\fP to obtain the
+\fIcurl_easy_getinfo(3)\fP with \fBCURLINFO_ACTIVESOCKET(3)\fP to obtain the
 socket; use your operating system facilities like \fIselect(2)\fP to check if
 it has any data you can read.
 .SH AVAILABILITY

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,6 +20,10 @@
  *
  ***************************************************************************/
 
+/* <DESC>
+ * multi_socket API using libuv
+ * </DESC>
+ */
 /* Example application code using the multi socket interface to download
    multiple files at once, but instead of using curl_multi_perform and
    curl_multi_wait, which uses select(), we use libuv.

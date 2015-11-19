@@ -1256,10 +1256,8 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 
     /* Run the state-machine
 
-       TODO: when the multi interface is used, this _really_ should be using
-       the smtp_multi_statemach function but we have no general support for
-       non-blocking DONE operations, not in the multi state machine and with
-       Curl_done() invokes on several places in the code!
+       this should be using the smtp_multi_statemach function but we have no
+       support for non-blocking DONE operations!
     */
     result = smtp_block_statemach(conn);
   }

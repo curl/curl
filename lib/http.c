@@ -86,7 +86,6 @@
  * Forward declarations.
  */
 
-static CURLcode http_disconnect(struct connectdata *conn, bool dead);
 static int http_getsock_do(struct connectdata *conn,
                            curl_socket_t *socks,
                            int numsocks);
@@ -117,7 +116,7 @@ const struct Curl_handler Curl_handler_http = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  http_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
@@ -141,7 +140,7 @@ const struct Curl_handler Curl_handler_https = {
   http_getsock_do,                      /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  http_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
   PORT_HTTPS,                           /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
@@ -166,23 +165,6 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   Curl_http2_setup_conn(conn);
   Curl_http2_setup_req(conn->data);
 
-  return CURLE_OK;
-}
-
-static CURLcode http_disconnect(struct connectdata *conn, bool dead_connection)
-{
-#ifdef USE_NGHTTP2
-  struct HTTP *http = conn->data->req.protop;
-  if(http) {
-    Curl_add_buffer_free(http->header_recvbuf);
-    http->header_recvbuf = NULL; /* clear the pointer */
-    free(http->push_headers);
-    http->push_headers = NULL;
-  }
-#else
-  (void)conn;
-#endif
-  (void)dead_connection;
   return CURLE_OK;
 }
 
@@ -1019,8 +1001,8 @@ static size_t readmoredata(char *buffer,
       /* move backup data into focus and continue on that */
       http->postdata = http->backup.postdata;
       http->postsize = http->backup.postsize;
-      conn->data->set.fread_func = http->backup.fread_func;
-      conn->data->set.in = http->backup.fread_in;
+      conn->data->state.fread_func = http->backup.fread_func;
+      conn->data->state.in = http->backup.fread_in;
 
       http->sending++; /* move one step up */
 
@@ -1175,14 +1157,14 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
         ptr = in->buffer + amount;
 
         /* backup the currently set pointers */
-        http->backup.fread_func = conn->data->set.fread_func;
-        http->backup.fread_in = conn->data->set.in;
+        http->backup.fread_func = conn->data->state.fread_func;
+        http->backup.fread_in = conn->data->state.in;
         http->backup.postdata = http->postdata;
         http->backup.postsize = http->postsize;
 
         /* set the new pointers for the request-sending */
-        conn->data->set.fread_func = (curl_read_callback)readmoredata;
-        conn->data->set.in = (void *)conn;
+        conn->data->state.fread_func = (curl_read_callback)readmoredata;
+        conn->data->state.in = (void *)conn;
         http->postdata = ptr;
         http->postsize = (curl_off_t)size;
 
@@ -1432,7 +1414,10 @@ CURLcode Curl_http_done(struct connectdata *conn,
                         CURLcode status, bool premature)
 {
   struct SessionHandle *data = conn->data;
-  struct HTTP *http =data->req.protop;
+  struct HTTP *http = data->req.protop;
+#ifdef USE_NGHTTP2
+  struct http_conn *httpc = &conn->proto.httpc;
+#endif
 
   Curl_unencode_cleanup(conn);
 
@@ -1465,8 +1450,18 @@ CURLcode Curl_http_done(struct connectdata *conn,
     DEBUGF(infof(data, "free header_recvbuf!!\n"));
     Curl_add_buffer_free(http->header_recvbuf);
     http->header_recvbuf = NULL; /* clear the pointer */
-    free(http->push_headers);
-    http->push_headers = NULL;
+    if(http->push_headers) {
+      /* if they weren't used and then freed before */
+      for(; http->push_headers_used > 0; --http->push_headers_used) {
+        free(http->push_headers[http->push_headers_used - 1]);
+      }
+      free(http->push_headers);
+      http->push_headers = NULL;
+    }
+  }
+  if(http->stream_id) {
+    nghttp2_session_set_stream_user_data(httpc->h2, http->stream_id, 0);
+    http->stream_id = 0;
   }
 #endif
 
@@ -2022,10 +2017,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       ptr = strstr(url, conn->host.dispname);
       if(ptr) {
         /* This is where the display name starts in the URL, now replace this
-           part with the encoded name. TODO: This method of replacing the host
-           name is rather crude as I believe there's a slight risk that the
-           user has entered a user name or password that contain the host name
-           string. */
+           part with the encoded name. */
         size_t currlen = strlen(conn->host.dispname);
         size_t newlen = strlen(conn->host.name);
         size_t urllen = strlen(url);
@@ -2141,8 +2133,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
               BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
 
             size_t actuallyread =
-              data->set.fread_func(data->state.buffer, 1, readthisamountnow,
-                                   data->set.in);
+              data->state.fread_func(data->state.buffer, 1, readthisamountnow,
+                                     data->state.in);
 
             passed += actuallyread;
             if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
@@ -2416,11 +2408,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
        on. The data->set.fread_func pointer itself will be changed for the
        multipart case to the function that returns a multipart formatted
        stream. */
-    http->form.fread_func = data->set.fread_func;
+    http->form.fread_func = data->state.fread_func;
 
     /* Set the read function to read from the generated form data */
-    data->set.fread_func = (curl_read_callback)Curl_FormReader;
-    data->set.in = &http->form;
+    data->state.fread_func = (curl_read_callback)Curl_FormReader;
+    data->state.in = &http->form;
 
     http->sending = HTTPSEND_BODY;
 
@@ -2638,8 +2630,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
         http->sending = HTTPSEND_BODY;
 
-        data->set.fread_func = (curl_read_callback)readmoredata;
-        data->set.in = (void *)conn;
+        data->state.fread_func = (curl_read_callback)readmoredata;
+        data->state.in = (void *)conn;
 
         /* set the upload size to the progress meter */
         Curl_pgrsSetUploadSize(data, http->postsize);
@@ -3164,6 +3156,16 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
          */
         if(data->set.opt_no_body)
           *stop_reading = TRUE;
+#ifndef CURL_DISABLE_RTSP
+        else if((conn->handler->protocol & CURLPROTO_RTSP) &&
+                (data->set.rtspreq == RTSPREQ_DESCRIBE) &&
+                (k->size <= -1))
+          /* Respect section 4.4 of rfc2326: If the Content-Length header is
+             absent, a length 0 must be assumed.  It will prevent libcurl from
+             hanging on DECRIBE request that got refused for whatever
+             reason */
+          *stop_reading = TRUE;
+#endif
         else {
           /* If we know the expected size of this document, we set the
              maximum download size to the size of the expected
@@ -3297,7 +3299,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           conn->httpversion = 11; /* For us, RTSP acts like HTTP 1.1 */
         }
         else {
-          /* TODO: do we care about the other cases here? */
           nc = 0;
         }
       }
@@ -3528,7 +3529,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         }
 
         if(k->auto_decoding)
-          /* TODO: we only support the first mentioned compression for now */
           break;
 
         if(checkprefix("identity", start)) {
@@ -3546,14 +3546,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         else if(checkprefix("x-gzip", start)) {
           k->auto_decoding = GZIP;
           start += 6;
-        }
-        else if(checkprefix("compress", start)) {
-          k->auto_decoding = COMPRESS;
-          start += 8;
-        }
-        else if(checkprefix("x-compress", start)) {
-          k->auto_decoding = COMPRESS;
-          start += 10;
         }
         else
           /* unknown! */
@@ -3587,9 +3579,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
       else if(checkprefix("gzip", start)
               || checkprefix("x-gzip", start))
         k->auto_decoding = GZIP;
-      else if(checkprefix("compress", start)
-              || checkprefix("x-compress", start))
-        k->auto_decoding = COMPRESS;
     }
     else if(checkprefix("Content-Range:", k->p)) {
       /* Content-Range: bytes [num]-

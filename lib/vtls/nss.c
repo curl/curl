@@ -211,16 +211,22 @@ static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
   PRBool found;
   char *cipher;
 
+  /* use accessors to avoid dynamic linking issues after an update of NSS */
+  const PRUint16 num_implemented_ciphers = SSL_GetNumImplementedCiphers();
+  const PRUint16 *implemented_ciphers = SSL_GetImplementedCiphers();
+  if(!implemented_ciphers)
+    return SECFailure;
+
   /* First disable all ciphers. This uses a different max value in case
    * NSS adds more ciphers later we don't want them available by
    * accident
    */
-  for(i=0; i<SSL_NumImplementedCiphers; i++) {
-    SSL_CipherPrefSet(model, SSL_ImplementedCiphers[i], PR_FALSE);
+  for(i = 0; i < num_implemented_ciphers; i++) {
+    SSL_CipherPrefSet(model, implemented_ciphers[i], PR_FALSE);
   }
 
   /* Set every entry in our list to false */
-  for(i=0; i<NUM_OF_CIPHERS; i++) {
+  for(i = 0; i < NUM_OF_CIPHERS; i++) {
     cipher_state[i] = PR_FALSE;
   }
 
@@ -969,8 +975,7 @@ static CURLcode cmp_peer_pubkey(struct ssl_connect_data *connssl,
       SECItem *cert_der = PK11_DEREncodePublicKey(pubkey);
       if(cert_der) {
         /* compare the public key with the pinned public key */
-        result = Curl_pin_peer_pubkey(pinnedpubkey,
-                                      cert_der->data,
+        result = Curl_pin_peer_pubkey(data, pinnedpubkey, cert_der->data,
                                       cert_der->len);
         SECITEM_FreeItem(cert_der, PR_TRUE);
       }
@@ -1821,10 +1826,20 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
 
 
   /* Force handshake on next I/O */
-  SSL_ResetHandshake(connssl->handle, /* asServer */ PR_FALSE);
+  if(SSL_ResetHandshake(connssl->handle, /* asServer */ PR_FALSE)
+      != SECSuccess)
+    goto error;
 
-  SSL_SetURL(connssl->handle, SSL_IS_PROXY() ? conn->http_proxy.host.name :
-             conn->host.name);
+  /* propagate hostname to the TLS layer */
+  if(SSL_SetURL(connssl->handle, SSL_IS_PROXY() ? conn->http_proxy.host.name :
+                conn->host.name) != SECSuccess)
+    goto error;
+
+  /* prevent NSS from re-using the session for a different hostname */
+  if(SSL_SetSockPeerID(connssl->handle, SSL_IS_PROXY() ?
+                       conn->http_proxy.host.name : conn->host.name)
+     != SECSuccess)
+    goto error;
 
   return CURLE_OK;
 
@@ -2071,6 +2086,19 @@ void Curl_nss_md5sum(unsigned char *tmp, /* input */
   PK11_DigestOp(MD5pw, tmp, curlx_uztoui(tmplen));
   PK11_DigestFinal(MD5pw, md5sum, &MD5out, curlx_uztoui(md5len));
   PK11_DestroyContext(MD5pw, PR_TRUE);
+}
+
+void Curl_nss_sha256sum(const unsigned char *tmp, /* input */
+                     size_t tmplen,
+                     unsigned char *sha256sum, /* output */
+                     size_t sha256len)
+{
+  PK11Context *SHA256pw = PK11_CreateDigestContext(SEC_OID_SHA256);
+  unsigned int SHA256out;
+
+  PK11_DigestOp(SHA256pw, tmp, curlx_uztoui(tmplen));
+  PK11_DigestFinal(SHA256pw, sha256sum, &SHA256out, curlx_uztoui(sha256len));
+  PK11_DestroyContext(SHA256pw, PR_TRUE);
 }
 
 bool Curl_nss_cert_status_request(void)

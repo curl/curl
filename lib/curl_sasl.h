@@ -48,22 +48,23 @@ struct kerberos5data;
 #define SASL_MECH_EXTERNAL          (1 << 5)
 #define SASL_MECH_NTLM              (1 << 6)
 #define SASL_MECH_XOAUTH2           (1 << 7)
+#define SASL_MECH_OAUTHBEARER       (1 << 8)
 
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
 #define SASL_AUTH_ANY           ~0U
-#define SASL_AUTH_DEFAULT       (SASL_AUTH_ANY & \
-                                 ~(SASL_MECH_EXTERNAL | SASL_MECH_XOAUTH2))
+#define SASL_AUTH_DEFAULT       (SASL_AUTH_ANY & ~SASL_MECH_EXTERNAL)
 
 /* Authentication mechanism strings */
-#define SASL_MECH_STRING_LOGIN      "LOGIN"
-#define SASL_MECH_STRING_PLAIN      "PLAIN"
-#define SASL_MECH_STRING_CRAM_MD5   "CRAM-MD5"
-#define SASL_MECH_STRING_DIGEST_MD5 "DIGEST-MD5"
-#define SASL_MECH_STRING_GSSAPI     "GSSAPI"
-#define SASL_MECH_STRING_EXTERNAL   "EXTERNAL"
-#define SASL_MECH_STRING_NTLM       "NTLM"
-#define SASL_MECH_STRING_XOAUTH2    "XOAUTH2"
+#define SASL_MECH_STRING_LOGIN        "LOGIN"
+#define SASL_MECH_STRING_PLAIN        "PLAIN"
+#define SASL_MECH_STRING_CRAM_MD5     "CRAM-MD5"
+#define SASL_MECH_STRING_DIGEST_MD5   "DIGEST-MD5"
+#define SASL_MECH_STRING_GSSAPI       "GSSAPI"
+#define SASL_MECH_STRING_EXTERNAL     "EXTERNAL"
+#define SASL_MECH_STRING_NTLM         "NTLM"
+#define SASL_MECH_STRING_XOAUTH2      "XOAUTH2"
+#define SASL_MECH_STRING_OAUTHBEARER  "OAUTHBEARER"
 
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)
 #define DIGEST_MAX_VALUE_LENGTH           256
@@ -90,7 +91,8 @@ typedef enum {
   SASL_GSSAPI,
   SASL_GSSAPI_TOKEN,
   SASL_GSSAPI_NO_DATA,
-  SASL_XOAUTH2,
+  SASL_OAUTH2,
+  SASL_OAUTH2_RESP,
   SASL_CANCEL,
   SASL_FINAL
 } saslstate;
@@ -141,15 +143,14 @@ char *Curl_sasl_build_spn(const char *service, const char *instance);
 TCHAR *Curl_sasl_build_spn(const char *service, const char *instance);
 #endif
 
-/* This is used to extract the realm from a challenge message */
-int Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
-                              const char **endptr);
-
 #if defined(HAVE_GSSAPI)
-char *Curl_sasl_build_gssapi_spn(const char *service, const char *host);
+char *Curl_sasl_build_gssapi_spn(const char *service, const char *instance);
 #endif
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
+/* This is used to extract the realm from a challenge message */
+int Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
+                              const char **endptr);
 
 /* This is used to generate a base64 encoded DIGEST-MD5 response message */
 CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
