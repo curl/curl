@@ -103,10 +103,10 @@ options:
         CURLOPT_RTSP_TRANSPORT
         CURLOPT_SERVICE_NAME
         CURLOPT_SOCKS5_GSSAPI_SERVICE
-        CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 Note: SSH not available on OS400.
-        CURLOPT_SSH_KNOWNHOSTS          Note: SSH not available on OS400.
-        CURLOPT_SSH_PRIVATE_KEYFILE     Note: SSH not available on OS400.
-        CURLOPT_SSH_PUBLIC_KEYFILE      Note: SSH not available on OS400.
+        CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
+        CURLOPT_SSH_KNOWNHOSTS
+        CURLOPT_SSH_PRIVATE_KEYFILE
+        CURLOPT_SSH_PUBLIC_KEYFILE
         CURLOPT_SSLCERT
         CURLOPT_SSLCERTTYPE
         CURLOPT_SSL_CIPHER_LIST
@@ -204,6 +204,8 @@ _ POP3
 _ POP3S
 _ POP3 with secure transmission
 _ RTSP
+_ SCP if libssh2 is enabled
+_ SFTP if libssh2 is enabled
 _ SMTP
 _ SMTPS
 _ SMTP with secure transmission
@@ -219,13 +221,17 @@ archive extraction. Do not ask questions about these subjects if you're not
 familiar with.
 
 _ As a prerequisite, QADRT development environment must be installed.
+_ If data compression has to be supported, ZLIB development environment must
+  be installed.
+_ Likewise, if SCP and SFTP protocols have to be compiled in, LIBSSH2
+  developent environment must be installed.
 _ Install the curl source directory in IFS.
 _ Enter shell (QSH)
 _ Change current directory to the curl installation directory
 _ Change current directory to ./packages/OS400
 _ Edit file iniscript.sh. You may want to change tunable configuration
   parameters, like debug info generation, optimisation level, listing option,
-  target library, etc.
+  target library, ZLIB/LIBSSH2 availability and location, etc.
 _ Copy any file in the current directory to makelog (i.e.:
   cp initscript.sh makelog): this is intended to create the makelog file with
   an ASCII CCSID!
@@ -254,6 +260,8 @@ _ CURL.INC member in file H. This defines everything needed by an ILE/RPG
   program using libcurl.
 _ LIBxxx modules and programs. Although the test environment is not supported
   on OS/400, the libcurl test programs are compiled for manual tests.
+_ IFS directory /curl/include/curl containg the C header files for IFS source
+  C/C++ compilation and curl.inc.rpgle for IFS source ILE/RPG compilation.
 
 
 
@@ -267,7 +275,8 @@ _ The EBCDIC CCSID used by QADRT is 37 by default, NOT THE JOB'S CCSID. If
   LC_CTYPE, or by setting environment variable QADRT_ENV_LOCALE to the locale
   object path before executing the program.
 _ Do not use original source include files unless you know what you are doing.
-  Use the installed members instead (in /QSYS.LIB/CURL.LIB/H.FILE).
+  Use the installed members instead (in /QSYS.LIB/CURL.LIB/H.FILE and
+  /curl/include/curl).
 
 
 

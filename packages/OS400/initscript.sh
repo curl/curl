@@ -60,6 +60,13 @@ setenv ZLIB_INCLUDE     '/zlib/include'         # ZLIB include IFS directory.
 setenv ZLIB_LIB         'ZLIB'                  # ZLIB library.
 setenv ZLIB_BNDDIR      'ZLIB_A'                # ZLIB binding directory.
 
+#       Define LIBSSH2 availability and locations.
+
+setenv WITH_LIBSSH2     0                       # Define to 1 to enable.
+setenv LIBSSH2_INCLUDE  '/libssh2/include'      # LIBSSH2 include IFS directory.
+setenv LIBSSH2_LIB      'LIBSSH2'               # LIBSSH2 library.
+setenv LIBSSH2_BNDDIR   'LIBSSH2_A'             # LIBSSH2 binding directory.
+
 
 ################################################################################
 
@@ -190,6 +197,10 @@ make_module()
         then    CMD="${CMD} '${ZLIB_INCLUDE}'"
         fi
 
+        if [ "${WITH_LIBSSH2}" != "0" ]
+        then    CMD="${CMD} '${LIBSSH2_INCLUDE}'"
+        fi
+
         CMD="${CMD} ${INCLUDES})"
         CMD="${CMD} TGTCCSID(${TGTCCSID}) TGTRLS(${TGTRLS})"
         CMD="${CMD} OUTPUT(${OUTPUT})"
@@ -200,6 +211,10 @@ make_module()
 
         if [ "${WITH_ZLIB}" != "0" ]
         then    DEFINES="${DEFINES} HAVE_LIBZ HAVE_ZLIB_H"
+        fi
+
+        if [ "${WITH_LIBSSH2}" != "0" ]
+        then    DEFINES="${DEFINES} USE_LIBSSH2 HAVE_LIBSSH2_H"
         fi
 
         if [ "${DEFINES}" ]
