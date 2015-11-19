@@ -160,10 +160,10 @@ dist-hook:
 	done)
 
 html:
-	cd docs; make html
+	cd docs && make html
 
 pdf:
-	cd docs; make pdf
+	cd docs && make pdf
 
 check: test examples check-docs
 
