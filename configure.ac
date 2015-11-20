@@ -3031,6 +3031,31 @@ if test X"$want_h2" != Xno; then
 fi
 
 dnl **********************************************************************
+dnl Check for zsh completion path
+dnl **********************************************************************
+
+OPT_ZSH_FPATH=default
+AC_ARG_WITH(zsh-functions-dir,
+AC_HELP_STRING([--with-zsh-functions-dir=PATH],[Install zsh completions to PATH])
+AC_HELP_STRING([--without-zsh-functions-dir],[Do not install zsh completions]),
+  [OPT_ZSH_FPATH=$withval])
+case "$OPT_ZSH_FPATH" in
+  no)
+    dnl --without-zsh-functions-dir option used
+    ;;
+  default|yes)
+    dnl --with-zsh-functions-dir option used without path
+    ZSH_FUNCTIONS_DIR="$datarootdir/zsh/site-functions"
+    AC_SUBST(ZSH_FUNCTIONS_DIR)
+    ;;
+  *)
+    dnl --with-zsh-functions-dir option used with path
+    ZSH_FUNCTIONS_DIR="$withval"
+    AC_SUBST(ZSH_FUNCTIONS_DIR)
+    ;;
+esac
+
+dnl **********************************************************************
 dnl Back to "normal" configuring
 dnl **********************************************************************
 
@@ -3797,6 +3822,7 @@ AC_CONFIG_FILES([Makefile \
            include/curl/Makefile \
            src/Makefile \
            lib/Makefile \
+           scripts/Makefile \
            lib/libcurl.vers \
            tests/Makefile \
            tests/certs/Makefile \
