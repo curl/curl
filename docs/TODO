@@ -27,11 +27,14 @@
  1.9 Cache negative name resolves
  1.10 Support IDNA2008
  1.11 minimize dependencies with dynamicly loaded modules
+ 1.12 have form functions use CURL handle argument
+ 1.13 Add CURLOPT_MAIL_CLIENT option
+ 1.14 Typesafe curl_easy_setopt()
 
  2. libcurl - multi interface
  2.1 More non-blocking
- 2.2 Fix HTTP Pipelining for PUT
- 2.3 Better support for same name resolves
+ 2.2 Better support for same name resolves
+ 2.3 Non-blocking curl_multi_remove_handle()
 
  3. Documentation
  3.1 Update date and version in man pages
@@ -142,7 +145,6 @@
  21.7 remove progress meter from libcurl
  21.8 remove 'curl_httppost' from public
  21.9 have form functions use CURL handle argument
- 21.10 Add CURLOPT_MAIL_CLIENT option
 
 ==============================================================================
 
@@ -236,6 +238,45 @@
  app/invoke/used protocols would be necessary to load.  See
  https://github.com/bagder/curl/issues/349
 
+1.12 have form functions use CURL handle argument
+
+ curl_formadd() and curl_formget() both currently have no CURL handle
+ argument, but both can use a callback that is set in the easy handle, and
+ thus curl_formget() with callback cannot function without first having
+ curl_easy_perform() (or similar) called - which is hard to grasp and a design
+ mistake.
+
+ The curl_formadd() design can probably also be reconsidered to make it easier
+ to use and less error-prone. Probably easiest by splitting it into several
+ function calls.
+
+1.13 Add CURLOPT_MAIL_CLIENT option
+
+ Rather than use the URL to specify the mail client string to present in the
+ HELO and EHLO commands, libcurl should support a new CURLOPT specifically for
+ specifying this data as the URL is non-standard and to be honest a bit of a
+ hack ;-)
+
+ Please see the following thread for more information:
+ http://curl.haxx.se/mail/lib-2012-05/0178.html
+
+1.14 Typesafe curl_easy_setopt()
+
+ One of the most common problems in libcurl using applications is the lack of
+ type checks for curl_easy_setopt() which happens because it accepts varargs
+ and thus can take any type.
+
+ One possible solution to this is to introduce a few different versions of the
+ setopt version for the different kinds of data you can set.
+
+  curl_easy_set_num() - sets a long value
+
+  curl_easy_set_large() - sets a curl_off_t value
+
+  curl_easy_set_ptr() - sets a pointer
+
+  curl_easy_set_cb() - sets a callback PLUS its callback data
+
 2. libcurl - multi interface
 
 2.1 More non-blocking
@@ -252,19 +293,22 @@
  - The "DONE" operation (post transfer protocol-specific actions) for the
    protocols SFTP, SMTP, FTP. Fixing Curl_done() for this is a worthy task.
 
-2.2 Fix HTTP Pipelining for PUT
-
- HTTP Pipelining can be a way to greatly enhance performance for multiple
- serial requests and currently libcurl only supports that for HEAD and GET
- requests but it should also be possible for PUT.
-
-2.3 Better support for same name resolves
+2.2 Better support for same name resolves
 
  If a name resolve has been initiated for name NN and a second easy handle
  wants to resolve that name as well, make it wait for the first resolve to end
  up in the cache instead of doing a second separate resolve. This is
  especially needed when adding many simultaneous handles using the same host
  name when the DNS resolver can get flooded.
+
+2.3 Non-blocking curl_multi_remove_handle()
+
+ The multi interface has a few API calls that assume a blocking behavior, like
+ add_handle() and remove_handle() which limits what we can do internally. The
+ multi API need to be moved even more into a single function that "drives"
+ everything in a non-blocking manner and signals when something is done. A
+ remove or add would then only ask for the action to get started and then
+ multi_perform() etc still be called until the add/remove is completed.
 
 
 3. Documentation
@@ -815,22 +859,3 @@ Currently the SMB authentication uses NTLMv1.
 
  Changing them to return a private handle will benefit the implementation and
  allow us much greater freedoms while still maintaining a solid API and ABI.
-
-21.9 have form functions use CURL handle argument
-
- curl_formadd() and curl_formget() both currently have no CURL handle
- argument, but both can use a callback that is set in the easy handle, and
- thus curl_formget() with callback cannot function without first having
- curl_easy_perform() (or similar) called - which is hard to grasp and a design
- mistake.
-
-21.10 Add CURLOPT_MAIL_CLIENT option
-
- Rather than use the URL to specify the mail client string to present in the
- HELO and EHLO commands, libcurl should support a new CURLOPT specifically for
- specifying this data as the URL is non-standard and to be honest a bit of a
- hack ;-)
-
- Please see the following thread for more information:
- http://curl.haxx.se/mail/lib-2012-05/0178.html
- 
