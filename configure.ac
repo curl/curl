@@ -3037,7 +3037,7 @@ dnl **********************************************************************
 OPT_ZSH_FPATH=default
 AC_ARG_WITH(zsh-functions-dir,
 AC_HELP_STRING([--with-zsh-functions-dir=PATH],[Install zsh completions to PATH])
-AC_HELP_STRING([--without-nghttp2],[Do not install zsh completions]),
+AC_HELP_STRING([--without-zsh-functions-dir],[Do not install zsh completions]),
   [OPT_ZSH_FPATH=$withval])
 case "$OPT_ZSH_FPATH" in
   no)
@@ -3049,7 +3049,7 @@ case "$OPT_ZSH_FPATH" in
     AC_SUBST(ZSH_FUNCTIONS_DIR)
     ;;
   *)
-    dnl --with-nghttp2 option used with path
+    dnl --with-zsh-functions-dir option used with path
     ZSH_FUNCTIONS_DIR="$withval"
     AC_SUBST(ZSH_FUNCTIONS_DIR)
     ;;
