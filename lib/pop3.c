@@ -256,14 +256,16 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
   if(pop3c->state == POP3_CAPA) {
     /* Do we have the terminating line? */
     if(len >= 1 && !memcmp(line, ".", 1))
+      /* Treat the response as a success */
       *resp = '+';
     else
+      /* Treat the response as an untagged continuation */
       *resp = '*';
 
     return TRUE;
   }
 
-  /* Do we have a command or continuation response? */
+  /* Do we have a success or continuation response? */
   if((len >= 3 && !memcmp("+OK", line, 3)) ||
      (len >= 1 && !memcmp("+", line, 1))) {
     *resp = '+';
@@ -700,7 +702,7 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
 
   (void)instate; /* no use for this yet */
 
-  /* Do we have a untagged response? */
+  /* Do we have a untagged continuation response? */
   if(pop3code == '*') {
     /* Does the server support the STLS capability? */
     if(len >= 4 && !memcmp(line, "STLS", 4))
