@@ -144,7 +144,6 @@
  21.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
  21.7 remove progress meter from libcurl
  21.8 remove 'curl_httppost' from public
- 21.9 have form functions use CURL handle argument
 
 ==============================================================================
 
