@@ -131,7 +131,7 @@ const struct Curl_handler Curl_handler_smbs = {
    defined(__OS400__)
 static unsigned short smb_swap16(unsigned short x)
 {
-  return (x << 8) | ((x >> 8) & 0xff);
+  return (unsigned short) ((x << 8) | ((x >> 8) & 0xff));
 }
 
 static unsigned int smb_swap32(unsigned int x)
@@ -143,12 +143,14 @@ static unsigned int smb_swap32(unsigned int x)
 #ifdef HAVE_LONGLONG
 static unsigned long long smb_swap64(unsigned long long x)
 {
-  return ((unsigned long long)smb_swap32(x) << 32) | smb_swap32(x >> 32);
+  return ((unsigned long long) smb_swap32((unsigned int) x) << 32) |
+          smb_swap32((unsigned int) (x >> 32));
 }
 #else
 static unsigned __int64 smb_swap64(unsigned __int64 x)
 {
-  return ((unsigned __int64)smb_swap32(x) << 32) | smb_swap32(x >> 32);
+  return ((unsigned __int64) smb_swap32((unsigned int) x) << 32) |
+          smb_swap32((unsigned int) (x >> 32));
 }
 #endif
 #else
