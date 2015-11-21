@@ -1120,7 +1120,23 @@ cleanup:
   */
   if(len && !connssl->decdata_offset && connssl->recv_connection_closed &&
      !connssl->recv_sspi_close_notify) {
-    BOOL isWin2k;
+    bool isWin2k = FALSE;
+
+#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \
+    (_WIN32_WINNT < _WIN32_WINNT_WIN2K)
+    OSVERSIONINFO osver;
+
+    memset(&osver, 0, sizeof(osver));
+    osver.dwOSVersionInfoSize = sizeof(osver);
+
+    /* Find out the Windows version */
+    if(!GetVersionEx(&osver))
+      return CURLE_FAILED_INIT;
+
+    /* Verify the version number is 5.0 */
+    if(osver.dwMajorVersion == 5 && osver.dwMinorVersion == 0)
+      isWin2k = TRUE;
+#else
     ULONGLONG cm;
     OSVERSIONINFOEX osver;
 
@@ -1133,10 +1149,11 @@ cleanup:
     cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
     cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
 
-    isWin2k = VerifyVersionInfo(&osver,
-                                (VER_MAJORVERSION | VER_MINORVERSION |
-                                 VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
-                                cm);
+    if(VerifyVersionInfo(&osver, (VER_MAJORVERSION | VER_MINORVERSION |
+                                  VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
+                         cm))
+      isWin2k = TRUE;
+#endif
 
     if(isWin2k && sspi_status == SEC_E_OK)
       connssl->recv_sspi_close_notify = true;
