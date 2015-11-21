@@ -1130,12 +1130,11 @@ cleanup:
     osver.dwOSVersionInfoSize = sizeof(osver);
 
     /* Find out the Windows version */
-    if(!GetVersionEx(&osver))
-      return CURLE_FAILED_INIT;
-
-    /* Verify the version number is 5.0 */
-    if(osver.dwMajorVersion == 5 && osver.dwMinorVersion == 0)
-      isWin2k = TRUE;
+    if(GetVersionEx(&osver)) {
+      /* Verify the version number is 5.0 */
+      if(osver.dwMajorVersion == 5 && osver.dwMinorVersion == 0)
+        isWin2k = TRUE;
+    }
 #else
     ULONGLONG cm;
     OSVERSIONINFOEX osver;
