@@ -35,6 +35,7 @@
  2.1 More non-blocking
  2.2 Better support for same name resolves
  2.3 Non-blocking curl_multi_remove_handle()
+ 2.4 Split connect and authentication process
 
  3. Documentation
  3.1 Update date and version in man pages
@@ -309,6 +310,11 @@
  remove or add would then only ask for the action to get started and then
  multi_perform() etc still be called until the add/remove is completed.
 
+2.4 Split connect and authentication process
+
+ The multi interface treats the authentication process as part of the connect
+ phase. As such any failures during authentication won't trigger the relevant
+ QUIT or LOGOFF for protocols such as IMAP, POP3 and SMTP.
 
 3. Documentation
 
