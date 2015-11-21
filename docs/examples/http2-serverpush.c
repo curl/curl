@@ -25,6 +25,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* somewhat unix-specific */
 #include <sys/time.h>
