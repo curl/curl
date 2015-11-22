@@ -19,10 +19,12 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
 /* <DESC>
- * Simple IMAP APPEND use
+ * IMAP example showing how to send e-mails
  * </DESC>
  */
+
 #include <stdio.h>
 #include <string.h>
 #include <curl/curl.h>
