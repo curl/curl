@@ -30,6 +30,7 @@
  1.12 have form functions use CURL handle argument
  1.13 Add CURLOPT_MAIL_CLIENT option
  1.14 Typesafe curl_easy_setopt()
+ 1.15 TCP Fast Open
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -276,6 +277,12 @@
   curl_easy_set_ptr() - sets a pointer
 
   curl_easy_set_cb() - sets a callback PLUS its callback data
+
+1.15 TCP Fast Open
+
+ RFC 7413 defines how to include data already in the TCP SYN handshake to
+ reduce latency.
+
 
 2. libcurl - multi interface
 
