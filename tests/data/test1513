@@ -42,5 +42,8 @@ http://%HOSTIP:%HTTPPORT/1513
 <errorcode>
 42
 </errorcode>
+<stdout>
+PROGRESSFUNCTION called
+</stdout>
 </verify>
 </testcase>
