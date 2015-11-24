@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -117,8 +117,11 @@ void progressbarinit(struct ProgressData *bar,
   if(config->use_resume)
     bar->initial_size = config->resume_from;
 
+/* TODO: get terminal width through ansi escapes or something similar.
+   try to update width when xterm is resized... - 19990617 larsa */
 #ifndef __EMX__
-  /* OS/2 users most likely won't have this env var set, and besides that
+  /* 20000318 mgs
+   * OS/2 users most likely won't have this env var set, and besides that
    * we're using our own way to determine screen width */
   colp = curlx_getenv("COLUMNS");
   if(colp) {
@@ -133,7 +136,8 @@ void progressbarinit(struct ProgressData *bar,
   else
     bar->width = 79;
 #else
-  /* We use this emx library call to get the screen width, and subtract
+  /* 20000318 mgs
+   * We use this emx library call to get the screen width, and subtract
    * one from what we got in order to avoid a problem with the cursor
    * advancing to the next line if we print a string that is as long as
    * the screen is wide. */

@@ -3659,7 +3659,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
   if(!conn->bits.tcpconnect[SECONDARYSOCKET]) {
     if(conn->tunnel_state[SECONDARYSOCKET] == TUNNEL_CONNECT) {
       /* As we're in TUNNEL_CONNECT state now, we know the proxy name and port
-         aren't used so we blank their arguments. */
+         aren't used so we blank their arguments. TODO: make this nicer */
       result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, NULL, 0, FALSE);
 
       return result;

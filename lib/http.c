@@ -2047,7 +2047,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       ptr = strstr(url, conn->host.dispname);
       if(ptr) {
         /* This is where the display name starts in the URL, now replace this
-           part with the encoded name. */
+           part with the encoded name. TODO: This method of replacing the host
+           name is rather crude as I believe there's a slight risk that the
+           user has entered a user name or password that contain the host name
+           string. */
         size_t currlen = strlen(conn->host.dispname);
         size_t newlen = strlen(conn->host.name);
         size_t urllen = strlen(url);
@@ -3329,6 +3332,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           conn->httpversion = 11; /* For us, RTSP acts like HTTP 1.1 */
         }
         else {
+          /* TODO: do we care about the other cases here? */
           nc = 0;
         }
       }
@@ -3559,6 +3563,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         }
 
         if(k->auto_decoding)
+          /* TODO: we only support the first mentioned compression for now */
           break;
 
         if(checkprefix("identity", start)) {

@@ -75,6 +75,8 @@ static int http2_perform_getsock(const struct connectdata *conn,
   int bitmap = GETSOCK_BLANK;
   (void)numsocks;
 
+  /* TODO We should check underlying socket state if it is SSL socket
+     because of renegotiation. */
   sock[0] = conn->sock[FIRSTSOCKET];
 
   if(nghttp2_session_want_read(c->h2))
@@ -574,7 +576,8 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
 
   /* if we receive data for another handle, wake that up */
   if(conn->data != data_s)
-    Curl_expire(data_s, 1);
+    Curl_expire(data_s, 1); /* TODO: fix so that this can be set to 0 for
+                               immediately? */
 
   DEBUGF(infof(data_s, "%zu data received for stream %u "
                "(%zu left in buffer %p, total %zu)\n",

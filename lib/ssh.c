@@ -296,6 +296,10 @@ static CURLcode libssh2_session_error_to_CURLE(int err)
       return CURLE_AGAIN;
   }
 
+  /* TODO: map some more of the libssh2 errors to the more appropriate CURLcode
+     error code, and possibly add a few new SSH-related one. We must however
+     not return or even depend on libssh2 errors in the public libcurl API */
+
   return CURLE_SSH;
 }
 
@@ -2820,8 +2824,10 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     int rc;
     ssh->kh = libssh2_knownhost_init(ssh->ssh_session);
-    if(!ssh->kh)
+    if(!ssh->kh) {
+      /* eeek. TODO: free the ssh_session! */
       return CURLE_FAILED_INIT;
+    }
 
     /* read all known hosts from there */
     rc = libssh2_knownhost_readfile(ssh->kh,
@@ -2958,8 +2964,10 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
   if(!status) {
     /* run the state-machine
 
-       This should be using the ssh_multi_statemach function but we have no
-       support for non-blocking DONE operations!
+       TODO: when the multi interface is used, this _really_ should be using
+       the ssh_multi_statemach function but we have no general support for
+       non-blocking DONE operations, not in the multi state machine and with
+       Curl_done() invokes on several places in the code!
     */
     result = ssh_block_statemach(conn, FALSE);
   }

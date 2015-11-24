@@ -211,7 +211,7 @@ struct Curl_tree *Curl_splaygetbest(struct timeval i,
 /* Deletes the very node we point out from the tree if it's there. Stores a
  * pointer to the new resulting tree in 'newroot'.
  *
- * Returns zero on success and non-zero on errors!
+ * Returns zero on success and non-zero on errors! TODO: document error codes.
  * When returning error, it does not touch the 'newroot' pointer.
  *
  * NOTE: when the last node of the tree is removed, there's no tree left so
