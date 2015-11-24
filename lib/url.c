@@ -6088,8 +6088,13 @@ CURLcode Curl_done(struct connectdata **connp,
   else
     result = status;
 
-  if(!result && Curl_pgrsDone(conn))
-    result = CURLE_ABORTED_BY_CALLBACK;
+  if(CURLE_ABORTED_BY_CALLBACK != result) {
+    /* avoid this if we already aborted by callback to avoid this calling
+       another callback */
+    CURLcode rc = Curl_pgrsDone(conn);
+    if(!result && rc)
+      result = CURLE_ABORTED_BY_CALLBACK;
+  }
 
   if((conn->send_pipe->size + conn->recv_pipe->size != 0 &&
       !data->set.reuse_forbid &&
