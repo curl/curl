@@ -68,6 +68,19 @@ This release includes the following bugfixes:
  o typecheck-gcc.h: add some missing options
  o curl: mark two more options strings for --libcurl output
  o openssl: Free modules on cleanup [20]
+ o CURLMOPT_PUSHFUNCTION.3: *_byname() returns only the first header
+ o getconnectinfo: Don't call recv(2) if socket == -1
+ o http2: http_done: don't free already-freed push headers
+ o zsh completion: Preserve single quotes in output [21]
+ o os400: Provide options for libssh2 use in compile scripts.
+ o build: Fix theoretical infinite loops [22]
+ o pop3: Differentiate between success and continuation responses
+ o examples: Fixed compilation warnings
+ o schannel: Use GetVersionEx() when VerifyVersionInfo() isn't available
+ o CURLOPT_HEADERFUNCTION.3: fix typo
+ o curl: expanded the -XHEAD warning text
+ o done: make sure the final progress update is made [23]
+ o build: Install zsh completion [24]
 
 This release includes the following known bugs:
 
@@ -76,13 +89,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anders Bakken, Dan Fandrich, Daniel Hwang, Daniel Stenberg, Dmitry S. Baikov,
-  Douglas Creager, Erik Johansson, Gisle Vanem, Javier G. Sogo, John Levon,
-  Jonas Minnberg, Justin Ehlert, Kamil Dudka, Kang Lin, Kurt Fankhauser,
-  Lauri Kasanen, Marcel Raad, Patrick Monnerat, Rainer Jung, Ray Satiro,
-  Richard Hosking, Sebastian Pohlschmidt, Stefan Bühler, Steve Holme,
-  Svyatoslav Mishyn, Tatsuhiro Tsujikawa, Tim Rühsen, xiangbin li,
-  (28 contributors)
+  Anders Bakken, Dan Fandrich, Daniel Hwang, Daniel Shahaf, Daniel Stenberg,
+  Davey Shafik, Dmitry S. Baikov, Douglas Creager, Erik Johansson, Gisle Vanem,
+  Javier G. Sogo, John Levon, Jonas Minnberg, Justin Ehlert, Kamil Dudka,
+  Kang Lin, Kurt Fankhauser, Lauri Kasanen, Lukas Ruzicka, Marcel Raad,
+  Michał Piechowski, Patrick Monnerat, Rainer Jung, Ray Satiro, Richard Hosking,
+  Sebastian Pohlschmidt, Stefan Bühler, Steve Holme, Svyatoslav Mishyn,
+  Tatsuhiro Tsujikawa, Tim Rühsen, xiangbin li,
+  (32 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -108,3 +122,7 @@ References to bug reports and discussions on issues:
  [18] = http://curl.haxx.se/bug/?i=523
  [19] = http://curl.haxx.se/bug/?i=525
  [20] = http://curl.haxx.se/bug/?i=526
+ [21] = http://curl.haxx.se/bug/?i=532
+ [22] = http://curl.haxx.se/bug/?i=535
+ [23] = http://curl.haxx.se/bug/?i=538
+ [24] = http://curl.haxx.se/bug/?i=534
