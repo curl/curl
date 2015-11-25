@@ -1701,7 +1701,13 @@ CURLcode Curl_add_timecondition(struct SessionHandle *data,
   const struct tm *tm;
   char *buf = data->state.buffer;
   struct tm keeptime;
-  CURLcode result = Curl_gmtime(data->set.timevalue, &keeptime);
+  CURLcode result;
+
+  if(data->set.timecondition == CURL_TIMECOND_NONE)
+    /* no condition was asked for */
+    return CURLE_OK;
+
+  result = Curl_gmtime(data->set.timevalue, &keeptime);
   if(result) {
     failf(data, "Invalid TIMEVALUE");
     return result;
@@ -1727,8 +1733,9 @@ CURLcode Curl_add_timecondition(struct SessionHandle *data,
            tm->tm_sec);
 
   switch(data->set.timecondition) {
-  case CURL_TIMECOND_IFMODSINCE:
   default:
+    break;
+  case CURL_TIMECOND_IFMODSINCE:
     result = Curl_add_bufferf(req_buffer,
                               "If-Modified-Since: %s\r\n", buf);
     break;
@@ -2394,11 +2401,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 #endif
 
-  if(data->set.timecondition) {
-    result = Curl_add_timecondition(data, req_buffer);
-    if(result)
-      return result;
-  }
+  result = Curl_add_timecondition(data, req_buffer);
+  if(result)
+    return result;
 
   result = Curl_add_custom_headers(conn, FALSE, req_buffer);
   if(result)
