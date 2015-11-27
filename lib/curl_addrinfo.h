@@ -83,7 +83,8 @@ Curl_addrinfo *Curl_str2addr(char *dotted, int port);
 Curl_addrinfo *Curl_unix2addr(const char *path);
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO)
+#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) && \
+    defined(HAVE_FREEADDRINFO)
 void
 curl_dofreeaddrinfo(struct addrinfo *freethis,
                     int line, const char *source);
