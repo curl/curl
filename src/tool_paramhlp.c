@@ -426,7 +426,7 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
       curlx_msnprintf(prompt, sizeof(prompt),
                       "Enter %s password for user '%s' on URL #%"
                       CURL_FORMAT_CURL_OFF_TU ":",
-                      kind, *userpwd, i + 1);
+                      kind, *userpwd, (curl_off_t) (i + 1));
 
     /* get password */
     getpass_r(prompt, passwd, sizeof(passwd));
