@@ -190,6 +190,8 @@ if(NOT ${CMAKE_CROSSCOMPILING})
   int main(void) {
     return poll((void *)0, 0, 10 /*ms*/);
   }" HAVE_POLL_FINE)
+else()
+  message(STATUS "Performing test for HAVE_POLL_FINE is skipped when cross-compiling")
 endif()
 
 set(HAVE_SIG_ATOMIC_T 1)

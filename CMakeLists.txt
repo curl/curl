@@ -876,14 +876,13 @@ if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
 endif(HAVE_FILE_OFFSET_BITS)
 
-if(NOT ${CMAKE_CROSSCOMPILING})
-  foreach(CURL_TEST
-      HAVE_GLIBC_STRERROR_R
-      HAVE_POSIX_STRERROR_R
-      )
-    curl_internal_test_run(${CURL_TEST})
-  endforeach(CURL_TEST)
-endif()
+foreach(CURL_TEST
+    HAVE_GLIBC_STRERROR_R
+    HAVE_POSIX_STRERROR_R
+    )
+  curl_internal_test_run(${CURL_TEST})
+endforeach(CURL_TEST)
+
 
 # Check for reentrant
 foreach(CURL_TEST
