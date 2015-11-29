@@ -310,8 +310,10 @@ static CURL *duphandle(struct SessionHandle *data)
         (void)Curl_close(second);
         second = NULL;
       }
-      else
+      else {
         Curl_http2_setup_req(second);
+        second->state.stream_weight = data->state.stream_weight;
+      }
     }
   }
   return second;
