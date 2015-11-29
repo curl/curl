@@ -801,8 +801,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     if(conn->data != data_s)
       Curl_expire(data_s, 1);
 
-    DEBUGF(infof(data_s, "h2 status: HTTP/2 %03d\n",
-                 stream->status_code));
+    DEBUGF(infof(data_s, "h2 status: HTTP/2 %03d (easy %p)\n",
+                 stream->status_code, data_s));
     return 0;
   }
 
@@ -1046,8 +1046,8 @@ static int h2_session_send(struct SessionHandle *data,
 
     h2_pri_spec(data, &pri_spec);
 
-    DEBUGF(infof(data, "Queuing HTTP/2 PRIORITY frame on stream %u!\n",
-                 stream->stream_id));
+    DEBUGF(infof(data, "Queuing PRIORITY on stream %u (easy %p)\n",
+                 stream->stream_id, data));
     rv = nghttp2_submit_priority(h2, NGHTTP2_FLAG_NONE, stream->stream_id,
                                  &pri_spec);
     if(rv)
@@ -1101,13 +1101,13 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
            ncopy);
     stream->nread_header_recvbuf += ncopy;
 
-    infof(data, "http2_recv: Got %d bytes from header_recvbuf\n",
-          (int)ncopy);
+    DEBUGF(infof(data, "http2_recv: Got %d bytes from header_recvbuf\n",
+                 (int)ncopy));
     return ncopy;
   }
 
-  infof(data, "http2_recv: %d bytes buffer at %p (stream %u)\n",
-        len, mem, stream->stream_id);
+  DEBUGF(infof(data, "http2_recv: easy %p (stream %u)\n",
+               data, stream->stream_id));
 
   if((data->state.drain) && stream->memlen) {
     DEBUGF(infof(data, "http2_recv: DRAIN %zu bytes stream %u!! (%p => %p)\n",
@@ -1137,8 +1137,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       stream->pausedata = NULL;
       stream->pauselen = 0;
     }
-    infof(data, "http2_recv: returns unpaused %zd bytes on stream %u\n",
-          nread, stream->stream_id);
+    DEBUGF(infof(data, "http2_recv: returns unpaused %zd bytes on stream %u\n",
+                 nread, stream->stream_id));
     return nread;
   }
   else if(httpc->pause_stream_id) {
@@ -1219,8 +1219,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   }
   if(stream->memlen) {
     ssize_t retlen = stream->memlen;
-    infof(data, "http2_recv: returns %zd for stream %u\n",
-          retlen, stream->stream_id);
+    DEBUGF(infof(data, "http2_recv: returns %zd for stream %u\n",
+                 retlen, stream->stream_id));
     stream->memlen = 0;
 
     if(httpc->pause_stream_id == stream->stream_id) {
