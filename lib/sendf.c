@@ -520,11 +520,13 @@ CURLcode Curl_read_plain(curl_socket_t sockfd,
 
   if(-1 == nread) {
     int err = SOCKERRNO;
+    int return_error;
 #ifdef USE_WINSOCK
-    if(WSAEWOULDBLOCK == err)
+    return_error = WSAEWOULDBLOCK == err;
 #else
-    if((EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err))
+    return_error = EWOULDBLOCK == err || EAGAIN == err || EINTR == err;
 #endif
+    if(return_error)
       return CURLE_AGAIN;
     else
       return CURLE_RECV_ERROR;
