@@ -329,12 +329,13 @@ static int push_promise(struct SessionHandle *data,
                frame->promised_stream_id));
   if(data->multi->push_cb) {
     struct HTTP *stream;
+    struct HTTP *newstream;
     struct curl_pushheaders heads;
     CURLMcode rc;
     struct http_conn *httpc;
     size_t i;
     /* clone the parent */
-    CURL *newhandle = duphandle(data);
+    struct SessionHandle *newhandle = duphandle(data);
     if(!newhandle) {
       infof(data, "failed to duplicate handle\n");
       rv = 1; /* FAIL HARD */
@@ -368,6 +369,11 @@ static int push_promise(struct SessionHandle *data,
       (void)Curl_close(newhandle);
       goto fail;
     }
+
+    newstream = newhandle->req.protop;
+    newstream->stream_id = frame->promised_stream_id;
+    newhandle->req.maxdownload = -1;
+    newhandle->req.size = -1;
 
     /* approved, add to the multi handle and immediately switch to PERFORM
        state with the given connection !*/
