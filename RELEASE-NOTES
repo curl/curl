@@ -84,7 +84,6 @@ This release includes the following bugfixes:
  o RTSP: do not add if-modified-since without timecondition [25]
  o curl: Fixed display of URL index in password prompt for --next
  o nonblock: fix setting non-blocking mode for Amiga [26]
- o http2 push: set weight for new stream
  o http2 push: add missing inits of new stream [27]
  o http2: convert some verbose output into debug-only output
  o Curl_read_plain: clean up ifdefs that break statements [28]
