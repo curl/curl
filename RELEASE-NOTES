@@ -81,6 +81,13 @@ This release includes the following bugfixes:
  o curl: expanded the -XHEAD warning text
  o done: make sure the final progress update is made [23]
  o build: Install zsh completion [24]
+ o RTSP: do not add if-modified-since without timecondition [25]
+ o curl: Fixed display of URL index in password prompt for --next
+ o nonblock: fix setting non-blocking mode for Amiga [26]
+ o http2 push: set weight for new stream
+ o http2 push: add missing inits of new stream [27]
+ o http2: convert some verbose output into debug-only output
+ o Curl_read_plain: clean up ifdefs that break statements [28]
 
 This release includes the following known bugs:
 
@@ -90,13 +97,14 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Anders Bakken, Dan Fandrich, Daniel Hwang, Daniel Shahaf, Daniel Stenberg,
-  Davey Shafik, Dmitry S. Baikov, Douglas Creager, Erik Johansson, Gisle Vanem,
-  Javier G. Sogo, John Levon, Jonas Minnberg, Justin Ehlert, Kamil Dudka,
-  Kang Lin, Kurt Fankhauser, Lauri Kasanen, Lukas Ruzicka, Marcel Raad,
-  Michał Piechowski, Patrick Monnerat, Rainer Jung, Ray Satiro, Richard Hosking,
+  Davey Shafik, Dmitry S. Baikov, Douglas Creager, Erik Johansson,
+  Flavio Medeiros, Gisle Vanem, Javier G. Sogo, John Levon, Jonas Minnberg,
+  Justin Ehlert, Kamil Dudka, Kang Lin, Kurt Fankhauser, Lauri Kasanen,
+  Lukas Ruzicka, Marcel Raad, Michał Piechowski, Mohammad AlSaleh, Norbert Kett,
+  Patrick Monnerat, Rainer Jung, Ray Satiro, Richard Hosking,
   Sebastian Pohlschmidt, Stefan Bühler, Steve Holme, Svyatoslav Mishyn,
-  Tatsuhiro Tsujikawa, Tim Rühsen, xiangbin li,
-  (32 contributors)
+  Tatsuhiro Tsujikawa, Tim Rühsen, Xiangbin Li,
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -126,3 +134,7 @@ References to bug reports and discussions on issues:
  [22] = http://curl.haxx.se/bug/?i=535
  [23] = http://curl.haxx.se/bug/?i=538
  [24] = http://curl.haxx.se/bug/?i=534
+ [25] = http://stackoverflow.com/questions/33903982/curl-timecond-none-doesnt-work-how-to-remove-if-modified-since-header
+ [26] = http://curl.haxx.se/mail/lib-2015-11/0088.html
+ [27] = http://curl.haxx.se/bug/?i=530
+ [28] = http://curl.haxx.se/bug/?i=546
