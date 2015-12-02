@@ -27,7 +27,7 @@ REPLY AUTH 235 Authenticated
 smtp
 </server>
  <name>
-SMTP OAuth 2.0 authentication (OAUTHBEARER) with initial response
+SMTP OAuth 2.0 (OAUTHBEARER) authentication with initial response
  </name>
 <stdin>
 mail body
