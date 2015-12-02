@@ -35,6 +35,10 @@ mail body
  <command>
 smtp://%HOSTIP:%SMTPPORT/946 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user --oauth2-bearer mF_9.B5f-4.1JqM -T -
 </command>
+# The data section doesn't do variable substitution, so we must assert this
+<precheck>
+perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%SMTPPORT' ne '9005' );"
+</precheck>
 </client>
 
 #
