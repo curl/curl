@@ -779,6 +779,7 @@ CURL_VERSION_LARGEFILE          7.11.1
 CURL_VERSION_LIBZ               7.10
 CURL_VERSION_NTLM               7.10.6
 CURL_VERSION_NTLM_WB            7.22.0
+CURL_VERSION_PSL                7.47.0
 CURL_VERSION_SPNEGO             7.10.8
 CURL_VERSION_SSL                7.10
 CURL_VERSION_SSPI               7.13.2
