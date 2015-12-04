@@ -1136,6 +1136,15 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
       stream->pausedata = NULL;
       stream->pauselen = 0;
+
+      /* When NGHTTP2_ERR_PAUSE is returned from
+         data_source_read_callback, we might not process DATA frame
+         fully.  Calling nghttp2_session_mem_recv() again will
+         continue to process DATA frame, but if there is no incoming
+         frames, then we have to call it again with 0-length data.
+         Without this, on_stream_close callback will not be called,
+         and stream could be hanged. */
+      nghttp2_session_mem_recv(httpc->h2, NULL, 0);
     }
     DEBUGF(infof(data, "http2_recv: returns unpaused %zd bytes on stream %u\n",
                  nread, stream->stream_id));
