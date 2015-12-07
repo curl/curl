@@ -103,6 +103,7 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #  endif
 #endif
 
+#undef socket
 #define socket(domain,type,protocol)\
  curl_socket(domain, type, protocol, __LINE__, __FILE__)
 #undef accept /* for those with accept as a macro */

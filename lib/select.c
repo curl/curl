@@ -316,15 +316,15 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
        curl_socket_t is unsigned in such cases and thus -1 is the largest
        value).
     */
+#ifdef USE_WINSOCK
     r = select((int)maxfd + 1,
-#ifndef USE_WINSOCK
-               &fds_read,
-               &fds_write,
-#else
                fds_read.fd_count ? &fds_read : NULL,
                fds_write.fd_count ? &fds_write : NULL,
-#endif
                &fds_err, ptimeout);
+#else
+    r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
+#endif
+
     if(r != -1)
       break;
     error = SOCKERRNO;
@@ -505,19 +505,19 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
       pending_tv.tv_sec = 0;
       pending_tv.tv_usec = 0;
     }
+
+#ifdef USE_WINSOCK
     r = select((int)maxfd + 1,
-#ifndef USE_WINSOCK
-               &fds_read, &fds_write, &fds_err,
-#else
                /* WinSock select() can't handle fd_sets with zero bits set, so
                   don't give it such arguments.  See the comment about this in
                   Curl_check_socket().
                */
                fds_read.fd_count ? &fds_read : NULL,
                fds_write.fd_count ? &fds_write : NULL,
-               fds_err.fd_count ? &fds_err : NULL,
+               fds_err.fd_count ? &fds_err : NULL, ptimeout);
+#else
+    r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
 #endif
-               ptimeout);
     if(r != -1)
       break;
     error = SOCKERRNO;

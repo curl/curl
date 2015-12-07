@@ -521,7 +521,11 @@ void
 curl_dofreeaddrinfo(struct addrinfo *freethis,
                     int line, const char *source)
 {
+#ifdef USE_LWIPSOCK
+  lwip_freeaddrinfo(freethis);
+#else
   (freeaddrinfo)(freethis);
+#endif
   curl_memlog("ADDR %s:%d freeaddrinfo(%p)\n",
               source, line, (void *)freethis);
 }
@@ -544,7 +548,11 @@ curl_dogetaddrinfo(const char *hostname,
                    struct addrinfo **result,
                    int line, const char *source)
 {
+#ifdef USE_LWIPSOCK
+  int res=lwip_getaddrinfo(hostname, service, hints, result);
+#else
   int res=(getaddrinfo)(hostname, service, hints, result);
+#endif
   if(0 == res)
     /* success */
     curl_memlog("ADDR %s:%d getaddrinfo() = %p\n",
