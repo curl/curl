@@ -123,8 +123,9 @@
 #define NO_RAND_SEED 1
 /* In BoringSSL OpenSSL_add_all_algorithms does nothing */
 #define OpenSSL_add_all_algorithms()
-/* BoringSSL does not have CONF_modules_load_file */
+/* BoringSSL does not have CONF_modules_load_file, CONF_modules_free */
 #define CONF_modules_load_file(a,b,c)
+#define CONF_modules_free()
 #endif
 
 #if (OPENSSL_VERSION_NUMBER < 0x0090808fL) || defined(OPENSSL_IS_BORINGSSL)
