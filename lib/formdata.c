@@ -830,19 +830,26 @@ static CURLcode AddFormData(struct FormData **formp,
     return CURLE_OUT_OF_MEMORY;
   newform->next = NULL;
 
+  if(length < 0 || (size && *size < 0))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   if(type <= FORM_CONTENT) {
     /* we make it easier for plain strings: */
     if(!length)
       length = strlen((char *)line);
+#if (SIZEOF_SIZE_T < CURL_SIZEOF_CURL_OFF_T)
+    else if(length >= (curl_off_t)(size_t)-1)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+#endif
 
-    newform->line = malloc(length+1);
+    newform->line = malloc((size_t)length+1);
     if(!newform->line) {
       free(newform);
       return CURLE_OUT_OF_MEMORY;
     }
-    memcpy(newform->line, line, length);
-    newform->length = length;
-    newform->line[length]=0; /* zero terminate for easier debugging */
+    memcpy(newform->line, line, (size_t)length);
+    newform->length = (size_t)length;
+    newform->line[(size_t)length]=0; /* zero terminate for easier debugging */
   }
   else
     /* For callbacks and files we don't have any actual data so we just keep a
