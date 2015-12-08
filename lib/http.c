@@ -567,7 +567,7 @@ output_auth_headers(struct connectdata *conn,
 {
   const char *auth = NULL;
   CURLcode result = CURLE_OK;
-#if defined(USE_SPNEGO) || !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(USE_SPNEGO)
   struct SessionHandle *data = conn->data;
 #endif
 #ifdef USE_SPNEGO
