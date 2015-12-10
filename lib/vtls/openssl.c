@@ -119,6 +119,12 @@
 #define OPENSSL_NO_SSL2
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0+ removed "SSLeay"  */
+#define SSLeay_add_ssl_algorithms() SSL_library_init()
+#define SSLeay() OpenSSL_version_num()
+#define SSLEAY_VERSION_NUMBER OPENSSL_VERSION_NUMBER
+#endif
+
 #if defined(OPENSSL_IS_BORINGSSL)
 #define NO_RAND_SEED 1
 /* In BoringSSL OpenSSL_add_all_algorithms does nothing */
