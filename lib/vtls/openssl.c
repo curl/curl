@@ -2217,7 +2217,8 @@ static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
 do {                              \
   long info_len = BIO_get_mem_data(mem, &ptr); \
   Curl_ssl_push_certinfo_len(data, _num, _label, ptr, info_len); \
-  BIO_reset(mem); \
+  if(1!=BIO_reset(mem))                                          \
+    break;                                                       \
 } WHILE_FALSE
 
 static void pubkey_show(struct SessionHandle *data,
@@ -2520,12 +2521,12 @@ static CURLcode servercert(struct connectdata *conn,
   ASN1_TIME_print(mem, X509_get_notBefore(connssl->server_cert));
   len = BIO_get_mem_data(mem, (char **) &ptr);
   infof(data, "\t start date: %.*s\n", len, ptr);
-  BIO_reset(mem);
+  rc = BIO_reset(mem);
 
   ASN1_TIME_print(mem, X509_get_notAfter(connssl->server_cert));
   len = BIO_get_mem_data(mem, (char **) &ptr);
   infof(data, "\t expire date: %.*s\n", len, ptr);
-  BIO_reset(mem);
+  rc = BIO_reset(mem);
 
   BIO_free(mem);
 
