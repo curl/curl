@@ -119,10 +119,15 @@
 #define OPENSSL_NO_SSL2
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0+ removed "SSLeay"  */
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0+ */
 #define SSLeay_add_ssl_algorithms() SSL_library_init()
 #define SSLeay() OpenSSL_version_num()
 #define SSLEAY_VERSION_NUMBER OPENSSL_VERSION_NUMBER
+#define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
+#endif
+
+#if OPENSSL_VERSION_NUMBER >= 0x1000200fL /* 1.0.2 or later */
+#define HAVE_X509_GET0_SIGNATURE 1
 #endif
 
 #if defined(OPENSSL_IS_BORINGSSL)
@@ -2324,13 +2329,11 @@ static CURLcode get_cert_chain(struct connectdata *conn,
 
   for(i = 0; i < numcerts; i++) {
     ASN1_INTEGER *num;
-
     X509 *x = sk_X509_value(sk, i);
-
-    X509_CINF *cinf;
     EVP_PKEY *pubkey=NULL;
     int j;
     char *ptr;
+    ASN1_BIT_STRING *psig;
 
     X509_NAME_print_ex(mem, X509_get_subject_name(x), 0, XN_FLAG_ONELINE);
     push_certinfo("Subject", i);
@@ -2348,19 +2351,42 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       BIO_printf(mem, "%02x", num->data[j]);
     push_certinfo("Serial Number", i);
 
-    cinf = x->cert_info;
+#if defined(HAVE_X509_GET0_SIGNATURE) && defined(HAVE_X509_GET0_EXTENSIONS)
+    {
+      X509_ALGOR *palg;
+      ASN1_STRING *a = ASN1_STRING_new();
+      if(a) {
+        X509_get0_signature(&psig, &palg, x);
+        X509_signature_print(mem, palg, a);
+        ASN1_STRING_free(a);
+      }
+      i2a_ASN1_OBJECT(mem, palg->algorithm);
+      push_certinfo("Public Key Algorithm", i);
 
-    i2a_ASN1_OBJECT(mem, cinf->signature->algorithm);
-    push_certinfo("Signature Algorithm", i);
+      X509V3_ext(data, i, X509_get0_extensions(x));
+    }
+#else
+    {
+      /* before OpenSSL 1.0.2 */
+      X509_CINF *cinf = x->cert_info;
+
+      i2a_ASN1_OBJECT(mem, cinf->signature->algorithm);
+      push_certinfo("Signature Algorithm", i);
+
+      i2a_ASN1_OBJECT(mem, cinf->key->algor->algorithm);
+      push_certinfo("Public Key Algorithm", i);
+
+      X509V3_ext(data, i, cinf->extensions);
+
+      psig = x->signature;
+    }
+#endif
 
     ASN1_TIME_print(mem, X509_get_notBefore(x));
     push_certinfo("Start date", i);
 
     ASN1_TIME_print(mem, X509_get_notAfter(x));
     push_certinfo("Expire date", i);
-
-    i2a_ASN1_OBJECT(mem, cinf->key->algor->algorithm);
-    push_certinfo("Public Key Algorithm", i);
 
     pubkey = X509_get_pubkey(x);
     if(!pubkey)
@@ -2402,10 +2428,8 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       EVP_PKEY_free(pubkey);
     }
 
-    X509V3_ext(data, i, cinf->extensions);
-
-    for(j = 0; j < x->signature->length; j++)
-      BIO_printf(mem, "%02x:", x->signature->data[j]);
+    for(j = 0; j < psig->length; j++)
+      BIO_printf(mem, "%02x:", psig->data[j]);
     push_certinfo("Signature", i);
 
     PEM_write_bio_X509(mem, x);
