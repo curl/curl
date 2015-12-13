@@ -956,9 +956,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
           /* new in libcurl 7.5 */
           my_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs);
 
-          /* new in libcurl 7.9.1 */
           if(config->httpversion)
             my_setopt_enum(curl, CURLOPT_HTTP_VERSION, config->httpversion);
+          else if(curlinfo->features & CURL_VERSION_HTTP2) {
+            my_setopt_enum(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+          }
 
           /* new in libcurl 7.10.6 (default is Basic) */
           if(config->authtype)
