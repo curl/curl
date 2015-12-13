@@ -111,6 +111,8 @@ static CURLcode http2_disconnect(struct connectdata *conn,
   if(http) {
     Curl_add_buffer_free(http->header_recvbuf);
     http->header_recvbuf = NULL; /* clear the pointer */
+    Curl_add_buffer_free(http->trailer_recvbuf);
+    http->trailer_recvbuf = NULL; /* clear the pointer */
     for(; http->push_headers_used > 0; --http->push_headers_used) {
       free(http->push_headers[http->push_headers_used - 1]);
     }
@@ -446,13 +448,9 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
     break;
   case NGHTTP2_HEADERS:
-    if(frame->headers.cat == NGHTTP2_HCAT_REQUEST)
-      break;
-
     if(stream->bodystarted) {
       /* Only valid HEADERS after body started is trailer HEADERS.  We
-         ignores trailer HEADERS for now.  nghttp2 guarantees that it
-         has END_STREAM flag set. */
+         buffer them in on_header callback. */
       break;
     }
 
@@ -685,13 +683,36 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
 static int on_begin_headers(nghttp2_session *session,
                             const nghttp2_frame *frame, void *userp)
 {
+  struct HTTP *stream;
   struct SessionHandle *data_s = NULL;
   (void)userp;
 
   data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
-  if(data_s) {
-    DEBUGF(infof(data_s, "on_begin_headers() was called\n"));
+  if(!data_s) {
+    return 0;
   }
+
+  DEBUGF(infof(data_s, "on_begin_headers() was called\n"));
+
+  if(frame->hd.type != NGHTTP2_HEADERS) {
+    return 0;
+  }
+
+  stream = data_s->req.protop;
+  if(!stream || !stream->bodystarted) {
+    return 0;
+  }
+
+  /* This is trailer HEADERS started.  Allocate buffer for them. */
+  DEBUGF(infof(data_s, "trailer field started\n"));
+
+  assert(stream->trailer_recvbuf == NULL);
+
+  stream->trailer_recvbuf = Curl_add_buffer_init();
+  if(!stream->trailer_recvbuf) {
+    return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+  }
+
   return 0;
 }
 
@@ -750,10 +771,22 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
 
-  if(stream->bodystarted)
-    /* Ignore trailer or HEADERS not mapped to HTTP semantics.  The
-       consequence is handled in on_frame_recv(). */
+  if(stream->bodystarted) {
+    /* This is trailer fields. */
+    /* 3 is for ":" and "\r\n". */
+    uint32_t n = (uint32_t)(namelen + valuelen + 3);
+
+    DEBUGF(infof(data_s, "h2 trailer: %.*s: %.*s\n", namelen, name, valuelen,
+                 value));
+
+    Curl_add_buffer(stream->trailer_recvbuf, &n, sizeof(n));
+    Curl_add_buffer(stream->trailer_recvbuf, name, namelen);
+    Curl_add_buffer(stream->trailer_recvbuf, ":", 1);
+    Curl_add_buffer(stream->trailer_recvbuf, value, valuelen);
+    Curl_add_buffer(stream->trailer_recvbuf, "\r\n\0", 3);
+
     return 0;
+  }
 
   /* Store received PUSH_PROMISE headers to be used when the subsequent
      PUSH_PROMISE callback comes */
@@ -990,9 +1023,13 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   return result;
 }
 
-static ssize_t http2_handle_stream_close(struct http_conn *httpc,
+static ssize_t http2_handle_stream_close(struct connectdata *conn,
                                          struct SessionHandle *data,
                                          struct HTTP *stream, CURLcode *err) {
+  char *trailer_pos, *trailer_end;
+  CURLcode result;
+  struct http_conn *httpc = &conn->proto.httpc;
+
   if(httpc->pause_stream_id == stream->stream_id) {
     httpc->pause_stream_id = 0;
   }
@@ -1005,6 +1042,24 @@ static ssize_t http2_handle_stream_close(struct http_conn *httpc,
     *err = CURLE_HTTP2;
     return -1;
   }
+
+  trailer_pos = stream->trailer_recvbuf->buffer;
+  trailer_end = trailer_pos + stream->trailer_recvbuf->size_used;
+
+  for(; trailer_pos < trailer_end;) {
+    uint32_t n;
+    memcpy(&n, trailer_pos, sizeof(n));
+    trailer_pos += sizeof(n);
+
+    result = Curl_client_write(conn, CLIENTWRITE_HEADER, trailer_pos, n);
+    if(result) {
+      *err = result;
+      return -1;
+    }
+
+    trailer_pos += n + 1;
+  }
+
   DEBUGF(infof(data, "http2_recv returns 0, http2_handle_stream_close\n"));
   return 0;
 }
@@ -1078,7 +1133,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
      otherwise, we may be going to read from underlying connection,
      and gets EAGAIN, and we will get stuck there. */
   if(stream->memlen == 0 && stream->closed) {
-    return http2_handle_stream_close(httpc, data, stream, err);
+    return http2_handle_stream_close(conn, data, stream, err);
   }
 
   /* Nullify here because we call nghttp2_session_send() and they
@@ -1246,7 +1301,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   /* If stream is closed, return 0 to signal the http routine to close
      the connection */
   if(stream->closed) {
-    return http2_handle_stream_close(httpc, data, stream, err);
+    return http2_handle_stream_close(conn, data, stream, err);
   }
   *err = CURLE_AGAIN;
   DEBUGF(infof(data, "http2_recv returns AGAIN for stream %u\n",
