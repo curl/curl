@@ -374,7 +374,7 @@ mbedtls_connect_step1(struct connectdata *conn,
   }
 
 #ifdef HAS_ALPN
-  if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+  if(data->set.httpversion >= CURL_HTTP_VERSION_2) {
     if(data->set.ssl_enable_alpn) {
       static const char* protocols[] = {
         NGHTTP2_PROTO_VERSION_ID, ALPN_HTTP_1_1, NULL
@@ -475,7 +475,7 @@ mbedtls_connect_step2(struct connectdata *conn,
 
       if(strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
                   NGHTTP2_PROTO_VERSION_ID_LEN)) {
-        conn->negnpn = CURL_HTTP_VERSION_2_0;
+        conn->negnpn = CURL_HTTP_VERSION_2;
       }
       else if(strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH)) {
         conn->negnpn = CURL_HTTP_VERSION_1_1;

@@ -638,7 +638,7 @@ gtls_connect_step1(struct connectdata *conn,
     gnutls_datum_t protocols[2];
 
 #ifdef USE_NGHTTP2
-    if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+    if(data->set.httpversion >= CURL_HTTP_VERSION_2) {
       protocols[cur].data = (unsigned char *)NGHTTP2_PROTO_VERSION_ID;
       protocols[cur].size = NGHTTP2_PROTO_VERSION_ID_LEN;
       cur++;
@@ -1242,7 +1242,7 @@ gtls_connect_step3(struct connectdata *conn,
       if(proto.size == NGHTTP2_PROTO_VERSION_ID_LEN &&
          !memcmp(NGHTTP2_PROTO_VERSION_ID, proto.data,
                  NGHTTP2_PROTO_VERSION_ID_LEN)) {
-        conn->negnpn = CURL_HTTP_VERSION_2_0;
+        conn->negnpn = CURL_HTTP_VERSION_2;
       }
       else
 #endif

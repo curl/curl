@@ -45,8 +45,15 @@ Enforce HTTP 1.0 requests.
 .IP CURL_HTTP_VERSION_1_1
 Enforce HTTP 1.1 requests.
 .IP CURL_HTTP_VERSION_2_0
-Attempt HTTP 2 requests. libcurl will fall back to HTTP 1.x if HTTP 2 can't be
+Attempt HTTP 2 requests. libcurl will fall back to HTTP 1.1 if HTTP 2 can't be
 negotiated with the server. (Added in 7.33.0)
+
+The alias \fICURL_HTTP_VERSION_2\fI was added in 7.43.0 to better reflect the
+actual protocol name.
+.IP CURL_HTTP_VERSION_2TLS
+Attempt HTTP 2 over TLS (HTTPS) only. libcurl will fall back to HTTP 1.1 if
+HTTP 2 can't be negotiated with the HTTPS server. For clear text HTTP servers,
+libcurl will use 1.1. (Added in 7.47.0)
 .SH DEFAULT
 CURL_HTTP_VERSION_NONE
 .SH PROTOCOLS

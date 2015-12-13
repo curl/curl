@@ -1539,11 +1539,13 @@ CURLcode Curl_http_done(struct connectdata *conn,
 static bool use_http_1_1plus(const struct SessionHandle *data,
                              const struct connectdata *conn)
 {
-  return ((data->set.httpversion >= CURL_HTTP_VERSION_1_1) ||
-         ((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
-          ((conn->httpversion == 11) ||
-           ((conn->httpversion != 10) &&
-            (data->state.httpversion != 10))))) ? TRUE : FALSE;
+  if((data->state.httpversion == 10) || (conn->httpversion == 10))
+    return FALSE;
+  if((data->set.httpversion == CURL_HTTP_VERSION_1_0) &&
+     (conn->httpversion <= 10))
+    return FALSE;
+  return ((data->set.httpversion == CURL_HTTP_VERSION_NONE) ||
+          (data->set.httpversion >= CURL_HTTP_VERSION_1_1));
 }
 
 /* check and possibly add an Expect: header */
@@ -1785,7 +1787,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(conn->httpversion < 20) { /* unless the connection is re-used and already
                                   http2 */
     switch(conn->negnpn) {
-    case CURL_HTTP_VERSION_2_0:
+    case CURL_HTTP_VERSION_2:
       conn->httpversion = 20; /* we know we're on HTTP/2 now */
       result = Curl_http2_init(conn);
       if(result)
@@ -2338,7 +2340,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   if(!(conn->handler->flags&PROTOPT_SSL) &&
      conn->httpversion != 20 &&
-     (data->set.httpversion == CURL_HTTP_VERSION_2_0)) {
+     (data->set.httpversion == CURL_HTTP_VERSION_2)) {
     /* append HTTP2 upgrade magic stuff to the HTTP request if it isn't done
        over SSL */
     result = Curl_http2_request_upgrade(req_buffer, conn);

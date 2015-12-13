@@ -1294,7 +1294,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     arg = va_arg(param, long);
 #ifndef USE_NGHTTP2
-    if(arg == CURL_HTTP_VERSION_2_0)
+    if(arg >= CURL_HTTP_VERSION_2)
       return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
     data->set.httpversion = arg;
@@ -2865,7 +2865,7 @@ static bool IsPipeliningPossible(const struct SessionHandle *handle,
       return TRUE;
 
     if(Curl_pipeline_wanted(handle->multi, CURLPIPE_MULTIPLEX) &&
-       (handle->set.httpversion == CURL_HTTP_VERSION_2_0))
+       (handle->set.httpversion >= CURL_HTTP_VERSION_2))
       /* allows HTTP/2 */
       return TRUE;
   }

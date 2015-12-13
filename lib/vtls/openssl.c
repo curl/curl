@@ -1582,12 +1582,12 @@ select_next_proto_cb(SSL *ssl,
   (void)ssl;
 
 #ifdef USE_NGHTTP2
-  if(conn->data->set.httpversion == CURL_HTTP_VERSION_2_0 &&
+  if(conn->data->set.httpversion >= CURL_HTTP_VERSION_2 &&
      !select_next_protocol(out, outlen, in, inlen, NGHTTP2_PROTO_VERSION_ID,
                            NGHTTP2_PROTO_VERSION_ID_LEN)) {
     infof(conn->data, "NPN, negotiated HTTP2 (%s)\n",
           NGHTTP2_PROTO_VERSION_ID);
-    conn->negnpn = CURL_HTTP_VERSION_2_0;
+    conn->negnpn = CURL_HTTP_VERSION_2;
     return SSL_TLSEXT_ERR_OK;
   }
 #endif
@@ -1859,7 +1859,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     unsigned char protocols[128];
 
 #ifdef USE_NGHTTP2
-    if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+    if(data->set.httpversion >= CURL_HTTP_VERSION_2) {
       protocols[cur++] = NGHTTP2_PROTO_VERSION_ID_LEN;
 
       memcpy(&protocols[cur], NGHTTP2_PROTO_VERSION_ID,
@@ -2185,7 +2185,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
 #ifdef USE_NGHTTP2
         if(len == NGHTTP2_PROTO_VERSION_ID_LEN &&
            !memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len)) {
-          conn->negnpn = CURL_HTTP_VERSION_2_0;
+          conn->negnpn = CURL_HTTP_VERSION_2;
         }
         else
 #endif

@@ -720,7 +720,7 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
 #ifdef USE_NGHTTP2
     if(buflen == NGHTTP2_PROTO_VERSION_ID_LEN &&
        !memcmp(NGHTTP2_PROTO_VERSION_ID, buf, NGHTTP2_PROTO_VERSION_ID_LEN)) {
-      conn->negnpn = CURL_HTTP_VERSION_2_0;
+      conn->negnpn = CURL_HTTP_VERSION_2;
     }
     else
 #endif
@@ -1779,7 +1779,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     unsigned char protocols[128];
 
 #ifdef USE_NGHTTP2
-    if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+    if(data->set.httpversion >= CURL_HTTP_VERSION_2) {
       protocols[cur++] = NGHTTP2_PROTO_VERSION_ID_LEN;
       memcpy(&protocols[cur], NGHTTP2_PROTO_VERSION_ID,
           NGHTTP2_PROTO_VERSION_ID_LEN);
