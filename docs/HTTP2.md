@@ -100,8 +100,5 @@ automatically. [Spec](https://tools.ietf.org/html/draft-ietf-httpbis-alt-svc-05)
 TODO
 ----
 
-  - Provide API to set priorities / dependencies of individual streams
-
-  - Implement "prior-knowledge" HTTP/2 connecitons over clear text so that
+  - Implement "prior-knowledge" HTTP/2 connections over clear text so that
     curl can connect with HTTP/2 at once without 1.1+Upgrade.
-
