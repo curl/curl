@@ -780,7 +780,7 @@ void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
   Sha256 SHA256pw;
   (void)unused;
   InitSha256(&SHA256pw);
-  Sha256Update(&SHA256pw, tmp, tmplen);
+  Sha256Update(&SHA256pw, tmp, (word32)tmplen);
   Sha256Final(&SHA256pw, sha256sum);
 }
 
