@@ -1358,6 +1358,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->proto_default)
           my_setopt_str(curl, CURLOPT_DEFAULT_PROTOCOL, config->proto_default);
 
+        /* new in 7.47.0 */
+        if(config->expect100timeout > 0)
+          my_setopt_str(curl, CURLOPT_EXPECT_100_TIMEOUT_MS,
+                        (long)(config->expect100timeout*1000));
+
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */

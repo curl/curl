@@ -523,6 +523,13 @@ after having run curl.
 (SSL) Specify the path name to the Entropy Gathering Daemon socket. The socket
 is used to seed the random engine for SSL connections. See also the
 \fI--random-file\fP option.
+.IP "--expect100-timeout <seconds>"
+(HTTP) Maximum time in seconds that you allow curl to wait for a 100-continue
+response when curl emits an Expects: 100-continue header in its request. By
+default curl will wait one second. This option accepts decimal values! When
+curl stops waiting, it will continue as if the response has been received.
+
+(Added in 7.47.0)
 .IP "--cert-type <type>"
 (SSL) Tells curl what certificate type the provided certificate is in. PEM,
 DER and ENG are recognized types.  If not specified, PEM is assumed.

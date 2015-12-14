@@ -214,6 +214,7 @@ struct OperationConfig {
   char *unix_socket_path;         /* path to Unix domain socket */
   bool falsestart;
   bool path_as_is;
+  double expect100timeout;
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
