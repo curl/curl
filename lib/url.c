@@ -296,7 +296,7 @@ void Curl_freeset(struct SessionHandle *data)
   data->change.url = NULL;
 }
 
-static CURLcode setstropt(char **charp, char *s)
+static CURLcode setstropt(char **charp, const char *s)
 {
   /* Release the previous storage at `charp' and replace by a dynamic storage
      copy of `s'. Return CURLE_OK or CURLE_OUT_OF_MEMORY. */
@@ -304,12 +304,12 @@ static CURLcode setstropt(char **charp, char *s)
   Curl_safefree(*charp);
 
   if(s) {
-    s = strdup(s);
+    char *str = strdup(s);
 
-    if(!s)
+    if(!str)
       return CURLE_OUT_OF_MEMORY;
 
-    *charp = s;
+    *charp = str;
   }
 
   return CURLE_OK;
@@ -572,31 +572,31 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->socks5_gssapi_nec = FALSE;
   /* set default GSS-API service name */
   result = setstropt(&set->str[STRING_SOCKS5_GSSAPI_SERVICE],
-                     (char *) CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE);
+                     CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE);
   if(result)
     return result;
 
   /* set default negotiate proxy service name */
   result = setstropt(&set->str[STRING_PROXY_SERVICE_NAME],
-                     (char *) CURL_DEFAULT_PROXY_SERVICE_NAME);
+                     CURL_DEFAULT_PROXY_SERVICE_NAME);
   if(result)
     return result;
 
   /* set default negotiate service name */
   result = setstropt(&set->str[STRING_SERVICE_NAME],
-                     (char *) CURL_DEFAULT_SERVICE_NAME);
+                     CURL_DEFAULT_SERVICE_NAME);
   if(result)
     return result;
 #endif
 
   /* This is our preferred CA cert bundle/path since install time */
 #if defined(CURL_CA_BUNDLE)
-  result = setstropt(&set->str[STRING_SSL_CAFILE], (char *) CURL_CA_BUNDLE);
+  result = setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
   if(result)
     return result;
 #endif
 #if defined(CURL_CA_PATH)
-  result = setstropt(&set->str[STRING_SSL_CAPATH], (char *) CURL_CA_PATH);
+  result = setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
   if(result)
     return result;
 #endif
@@ -936,7 +936,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     argptr = va_arg(param, char *);
     result = setstropt(&data->set.str[STRING_ENCODING],
                        (argptr && !*argptr)?
-                       (char *) ALL_CONTENT_ENCODINGS: argptr);
+                       ALL_CONTENT_ENCODINGS: argptr);
     break;
 
   case CURLOPT_TRANSFER_ENCODING:
