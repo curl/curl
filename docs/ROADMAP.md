@@ -23,13 +23,6 @@ HTTP/2
    As it would avoid the roundtrip-heavy Upgrade: procedures when you _know_
    it speaks HTTP/2.
 
-- provide option to allow curl to default to HTTP/2 only when using HTTPS
-
-   We could switch on HTTP/2 by-default for HTTPS quite easily and it
-   shouldn't hurt anyone, while HTTP/2 for HTTP by default could introduce
-   lots of Upgrade: roundtrips that users won't like. So a separated option
-   alternative makes sense.
-
 SRV records
 -----------
 
