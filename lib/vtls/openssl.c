@@ -119,14 +119,16 @@
 #define OPENSSL_NO_SSL2
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0+ */
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && /* OpenSSL 1.1.0+ */ \
+  !defined(LIBRESSL_VERSION_NUMBER)
 #define SSLeay_add_ssl_algorithms() SSL_library_init()
 #define SSLeay() OpenSSL_version_num()
 #define SSLEAY_VERSION_NUMBER OPENSSL_VERSION_NUMBER
 #define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x1000200fL /* 1.0.2 or later */
+#if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* 1.0.2 or later */ \
+  !defined(LIBRESSL_VERSION_NUMBER)
 #define HAVE_X509_GET0_SIGNATURE 1
 #endif
 
