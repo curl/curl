@@ -1,4 +1,4 @@
-Curl and libcurl 7.46.1
+Curl and libcurl 7.47.0
 
  Public curl releases:         151
  Command line options:         177
@@ -8,11 +8,28 @@ Curl and libcurl 7.46.1
 
 This release includes the following changes:
 
- o
+ o version: Add flag CURL_VERSION_PSL for libpsl
+ o http: added CURL_HTTP_VERSION_2TLS to do HTTP/2 for HTTPS only [8]
+ o curl: use 2TLS by default
+ o curl --expect100-timeout: added [10]
 
 This release includes the following bugfixes:
 
- o
+ o tests: Disable the OAUTHBEARER tests when using a non-default port number [1]
+ o curl: remove keepalive #ifdef checks done on libcurl's behalf
+ o formdata: Check if length is too large for memory [2]
+ o lwip: Fix compatibility issues with later versions [3]
+ o openssl: BoringSSL doesn't have CONF_modules_free
+ o config-win32: Fix warning HAVE_WINSOCK2_H undefined
+ o build: fix compilation error with CURL_DISABLE_VERBOSE_STRINGS [4]
+ o http2: Fix hanging paused stream [5]
+ o scripts/Makefile: fix GNUism and survive no perl [6]
+ o openssl: adapt to 1.1.0+ name changes
+ o openssl: adapt to openssl >= 1.1.0 X509 opaque structs [7]
+ o HTTP2.md: spell fix and remove TODO now implemented
+ o setstropt: const-correctness [9]
+ o cyassl: fix compiler warning on type conversion
+ o gskit: Fix host subject altname verification [11]
 
 This release includes the following known bugs:
 
@@ -21,9 +38,23 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Anders Bakken, Christian Stewart, Daniel Stenberg, Francisco Moraes,
+  Gisle Vanem, John Kohl, Kamil Dudka, Patrick Monnerat, Ray Satiro,
+  Steve Holme, Tatsuhiro Tsujikawa, Thomas Klausner,
+  (12 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = http://curl.haxx.se/mail/lib-2015-12/0003.html
+ [2] = https://github.com/bagder/curl/issues/425#issuecomment-154518679
+ [3] = http://curl.haxx.se/mail/lib-2015-12/0023.html
+ [4] = http://curl.haxx.se/bug/?i=558
+ [5] = http://curl.haxx.se/mail/lib-2015-11/0103.html
+ [6] = http://curl.haxx.se/bug/?i=555
+ [7] = http://curl.haxx.se/bug/?i=491
+ [8] = http://curl.haxx.se/libcurl/c/CURLOPT_HTTP_VERSION.html
+ [9] = http://curl.haxx.se/bug/?i=565
+ [10] = http://curl.haxx.se/docs/manpage.html#--expect100-timeout
+ [11] = http://curl.haxx.se/mail/lib-2015-12/0062.html
