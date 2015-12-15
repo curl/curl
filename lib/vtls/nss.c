@@ -1338,20 +1338,25 @@ Curl_nss_check_cxn(struct connectdata *conn)
 
 static void nss_close(struct ssl_connect_data *connssl)
 {
+  /* before the cleanup, check whether we are using a client certificate */
+  const bool client_cert = (connssl->client_nickname != NULL)
+    || (connssl->obj_clicert != NULL);
+
+  free(connssl->client_nickname);
+  connssl->client_nickname = NULL;
+
+  /* destroy all NSS objects in order to avoid failure of NSS shutdown */
+  Curl_llist_destroy(connssl->obj_list, NULL);
+  connssl->obj_list = NULL;
+  connssl->obj_clicert = NULL;
+
   if(connssl->handle) {
-    if((connssl->client_nickname != NULL) || (connssl->obj_clicert != NULL))
+    if(client_cert)
       /* A server might require different authentication based on the
        * particular path being requested by the client.  To support this
        * scenario, we must ensure that a connection will never reuse the
        * authentication data from a previous connection. */
       SSL_InvalidateSession(connssl->handle);
-
-    free(connssl->client_nickname);
-    connssl->client_nickname = NULL;
-    /* destroy all NSS objects in order to avoid failure of NSS shutdown */
-    Curl_llist_destroy(connssl->obj_list, NULL);
-    connssl->obj_list = NULL;
-    connssl->obj_clicert = NULL;
 
     PR_Close(connssl->handle);
     connssl->handle = NULL;
@@ -1372,6 +1377,11 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
     fake_sclose(conn->sock[sockindex]);
     conn->sock[sockindex] = CURL_SOCKET_BAD;
   }
+
+  if(connssl->handle)
+    /* nss_close(connssl) will transitively close also connssl_proxy->handle
+       if both are used. Clear it to avoid a double close leading to crash. */
+    connssl_proxy->handle = NULL;
 
   nss_close(connssl);
   nss_close(connssl_proxy);
