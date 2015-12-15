@@ -289,10 +289,11 @@ static CURLcode set_callback(struct SessionHandle *data,
 }
 
 
-static CURLcode set_ciphers(struct SessionHandle *data,
+static CURLcode set_ciphers(struct connectdata *conn,
                                         gsk_handle h, unsigned int *protoflags)
 {
-  const char *cipherlist = data->set.str[STRING_SSL_CIPHER_LIST];
+  struct SessionHandle *data = conn->data;
+  const char *cipherlist = SSL_CONN_CONFIG(cipher_list);
   const char *clp;
   const gskit_cipher *ctp;
   int i;
@@ -501,16 +502,16 @@ static void close_async_handshake(struct ssl_connect_data *connssl)
 }
 
 
-static void close_one(struct ssl_connect_data *conn,
+static void close_one(struct ssl_connect_data *connssl,
                       struct SessionHandle *data)
 {
-  if(conn->handle) {
-    gskit_status(data, gsk_secure_soc_close(&conn->handle),
+  if(connssl->handle) {
+    gskit_status(data, gsk_secure_soc_close(&connssl->handle),
               "gsk_secure_soc_close()", 0);
-    conn->handle = (gsk_handle) NULL;
+    connssl->handle = (gsk_handle) NULL;
   }
-  if(conn->iocport >= 0)
-    close_async_handshake(conn);
+  if(connssl->iocport >= 0)
+    close_async_handshake(connssl);
 }
 
 
@@ -560,13 +561,27 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   gsk_handle envir;
   CURLcode result;
   int rc;
-  char *keyringfile;
-  char *keyringpwd;
-  char *keyringlabel;
-  char *sni;
+  const char * const keyringfile = SSL_CONN_CONFIG(CAfile);
+  const char * const keyringpwd = SSL_SET_OPTION(key_passwd);
+  const char * const keyringlabel = SSL_SET_OPTION(cert);
+  const long int ssl_version = SSL_CONN_CONFIG(version);
+  const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
+  const char * const hostname = SSL_IS_PROXY()? conn->http_proxy.host.name:
+    conn->host.name;
+  const char *sni;
   unsigned int protoflags;
   long timeout;
   Qso_OverlappedIO_t commarea;
+
+  /* GSKit does not feature an easy way to manipulate the encrypted data,
+     thus SSL stacking is not yet implemented.
+     GSKit always reads/writes the encrypted data from/to a file descriptor:
+     the stacking could therefore be implemented via a socketpair() and
+     and by periodically calling an interface procedure (no threads, no fork on
+     OS/400 in interactive mode). */
+
+  if(conn->proxy_ssl[sockindex].use)
+    return CURLE_UNSUPPORTED_PROTOCOL;
 
   /* Create SSL environment, start (preferably asynchronous) handshake. */
 
@@ -586,9 +601,6 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
    *  application identifier mode is tried first, as recommended in IBM doc.
    */
 
-  keyringfile = data->set.str[STRING_SSL_CAFILE];
-  keyringpwd = data->set.str[STRING_KEY_PASSWD];
-  keyringlabel = data->set.str[STRING_CERT];
   envir = (gsk_handle) NULL;
 
   if(keyringlabel && *keyringlabel && !keyringpwd &&
@@ -616,15 +628,15 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   /* Determine which SSL/TLS version should be enabled. */
   protoflags = CURL_GSKPROTO_TLSV10_MASK | CURL_GSKPROTO_TLSV11_MASK |
                CURL_GSKPROTO_TLSV12_MASK;
-  sni = conn->host.name;
-  switch (data->set.ssl.version) {
+  sni = hostname;
+  switch (ssl_version) {
   case CURL_SSLVERSION_SSLv2:
     protoflags = CURL_GSKPROTO_SSLV2_MASK;
-    sni = (char *) NULL;
+    sni = NULL;
     break;
   case CURL_SSLVERSION_SSLv3:
     protoflags = CURL_GSKPROTO_SSLV3_MASK;
-    sni = (char *) NULL;
+    sni = NULL;
     break;
   case CURL_SSLVERSION_TLSv1:
     protoflags = CURL_GSKPROTO_TLSV10_MASK |
@@ -663,7 +675,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   if(!result)
     result = set_numeric(data, connssl->handle, GSK_FD, conn->sock[sockindex]);
   if(!result)
-    result = set_ciphers(data, connssl->handle, &protoflags);
+    result = set_ciphers(conn, connssl->handle, &protoflags);
   if(!protoflags) {
     failf(data, "No SSL protocol/cipher combination enabled");
     result = CURLE_SSL_CIPHER;
@@ -706,7 +718,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   }
   if(!result)
     result = set_enum(data, connssl->handle, GSK_SERVER_AUTH_TYPE,
-                      data->set.ssl.verifypeer? GSK_SERVER_AUTH_FULL:
+                      verifypeer? GSK_SERVER_AUTH_FULL:
                       GSK_SERVER_AUTH_PASSTHRU, FALSE);
 
   if(!result) {
@@ -977,10 +989,9 @@ CURLcode Curl_gskit_connect(struct connectdata *conn, int sockindex)
 void Curl_gskit_close(struct connectdata *conn, int sockindex)
 {
   struct SessionHandle *data = conn->data;
-  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  if(connssl->use)
-    close_one(connssl, data);
+  close_one(&conn->ssl[sockindex], data);
+  close_one(&conn->proxy_ssl[sockindex], data);
 }
 
 
