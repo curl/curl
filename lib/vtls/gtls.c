@@ -692,11 +692,11 @@ gtls_connect_step1(struct connectdata *conn,
               "error reading X.509 potentially-encrypted key file: %s",
               gnutls_strerror(rc));
         return CURLE_SSL_CONNECT_ERROR;
-#else
-        failf(data, "gnutls lacks support for encrypted key files");
-        return CURLE_SSL_CONNECT_ERROR;
-#endif
       }
+#else
+      failf(data, "gnutls lacks support for encrypted key files");
+      return CURLE_SSL_CONNECT_ERROR;
+#endif
     }
     else {
       if(gnutls_certificate_set_x509_key_file(
