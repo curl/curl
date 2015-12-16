@@ -413,6 +413,8 @@ cyassl_connect_step2(struct connectdata *conn,
   }
 
   if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+#if defined(HAVE_WOLFSSL_GET_PEER_CERTIFICATE) ||       \
+  defined(HAVE_CYASSL_GET_PEER_CERTIFICATE)
     X509 *x509;
     const char *x509_der;
     int x509_der_len;
@@ -449,6 +451,10 @@ cyassl_connect_step2(struct connectdata *conn,
       failf(data, "SSL: public key does not match pinned public key!");
       return result;
     }
+#else
+    failf(data, "Library lacks pinning support built-in");
+    return CURLE_NOT_BUILT_IN;
+#endif
   }
 
   conssl->connecting_state = ssl_connect_3;

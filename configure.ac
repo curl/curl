@@ -2182,7 +2182,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     fi
 
     if test "x$USE_CYASSL" = "xyes"; then
-      AC_MSG_NOTICE([detected CyaSSL])
+      AC_MSG_NOTICE([detected $cyassllibname])
 
       dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
       AC_CHECK_SIZEOF(long long)
@@ -2195,9 +2195,14 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
       LIBS="-l$cyassllibname -lm $LIBS"
 
-      if test "x$cyassllib" = "xwolfssl"; then
+      if test "x$cyassllibname" = "xwolfssl"; then
         dnl Recent WolfSSL versions build without SSLv3 by default
-        AC_CHECK_FUNCS(wolfSSLv3_client_method)
+        dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
+        AC_CHECK_FUNCS(wolfSSLv3_client_method \
+                       wolfSSL_get_peer_certificate)
+      else
+        dnl Cyassl needs configure --enable-opensslextra to have *get_peer*
+        AC_CHECK_FUNCS(CyaSSL_get_peer_certificate)
       fi
 
       if test -n "$cyassllib"; then
