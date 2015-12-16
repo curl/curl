@@ -558,7 +558,8 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
           size.HighPart = length;
           /* get the current position within the file */
           pos.QuadPart = 0;
-          pos.LowPart = SetFilePointer(handle, 0, &pos.HighPart, FILE_CURRENT);
+          pos.LowPart = SetFilePointer(handle, 0, &pos.HighPart,
+                                       FILE_CURRENT);
           if((pos.LowPart != INVALID_SET_FILE_POINTER) ||
              (GetLastError() == NO_ERROR)) {
             /* compare position with size, abort if not equal */
