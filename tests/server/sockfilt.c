@@ -547,8 +547,8 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
         * Approach: Loop till either the internal event is signalled
         *           or if the end of the file has already been reached.
         */
-      while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
-            == WAIT_OBJECT_0 + 1) {
+      while(WaitForMultipleObjectsEx(1, handles, FALSE, 0, FALSE)
+            == WAIT_TIMEOUT) {
         /* get total size of file */
         length = 0;
         size.QuadPart = 0;
@@ -611,8 +611,8 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
         * Approach: Loop till either the internal event is signalled
         *           or there is data in the pipe available for reading.
         */
-      while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
-            == WAIT_OBJECT_0 + 1) {
+      while(WaitForMultipleObjectsEx(1, handles, FALSE, 0, FALSE)
+            == WAIT_TIMEOUT) {
         /* peek into the pipe and retrieve the amount of data available */
         length = 0;
         if(PeekNamedPipe(handle, NULL, 0, NULL, &length, NULL)) {
