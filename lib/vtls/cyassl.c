@@ -143,8 +143,15 @@ cyassl_connect_step1(struct connectdata *conn,
     use_sni(TRUE);
     break;
   case CURL_SSLVERSION_SSLv3:
+    /* before WolfSSL SSLv3 was enabled by default, and starting in WolfSSL
+       we check for its presence since it is built without it by default */
+#if !defined(WOLFSSL_VERSION) || defined(HAVE_WOLFSSLV3_CLIENT_METHOD)
     req_method = SSLv3_client_method();
     use_sni(FALSE);
+#else
+    failf(data, "No support for SSLv3");
+    return CURLE_NOT_BUILT_IN;
+#endif
     break;
   case CURL_SSLVERSION_SSLv2:
     failf(data, "CyaSSL does not support SSLv2");

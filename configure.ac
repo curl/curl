@@ -2166,11 +2166,11 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 	]])
       ],[
          AC_MSG_RESULT(yes)
-         AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
+         AC_DEFINE(USE_CYASSL, 1, [if CyaSSL/WolfSSL is enabled])
          AC_SUBST(USE_CYASSL, [1])
          CYASSL_ENABLED=1
          USE_CYASSL="yes"
-         curl_ssl_msg="enabled (CyaSSL)"
+         curl_ssl_msg="enabled (WolfSSL)"
        ],
        [
          AC_MSG_RESULT(no)
@@ -2194,6 +2194,11 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
       AC_CHECK_HEADERS(cyassl/error-ssl.h)
 
       LIBS="-l$cyassllibname -lm $LIBS"
+
+      if test "x$cyassllib" = "xwolfssl"; then
+        dnl Recent WolfSSL versions build without SSLv3 by default
+        AC_CHECK_FUNCS(wolfSSLv3_client_method)
+      fi
 
       if test -n "$cyassllib"; then
         dnl when shared libs were found in a path that the run-time
