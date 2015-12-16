@@ -857,6 +857,17 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     }
   }
 
+  for(fds = 0; fds < nfds; fds++) {
+    if(FD_ISSET(fds, readfds))
+      logmsg("select_ws: %d is readable", fds);
+
+    if(FD_ISSET(fds, writefds))
+      logmsg("select_ws: %d is writable", fds);
+
+    if(FD_ISSET(fds, exceptfds))
+      logmsg("select_ws: %d is excepted", fds);
+  }
+
   for(idx = 0; idx < wsa; idx++) {
     WSAEventSelect(data[idx].wsasock, NULL, 0);
     WSACloseEvent(data[idx].wsaevent);
