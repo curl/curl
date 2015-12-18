@@ -487,11 +487,13 @@ gtls_connect_step1(struct connectdata *conn,
   }
 #endif
 
+#if CURL_CA_FALLBACK
   /* use system ca certificate store as fallback */
   if(data->set.ssl.verifypeer
     && !(data->set.ssl.CAfile || data->set.ssl.CApath)) {
     gnutls_certificate_set_x509_system_trust(conn->ssl[sockindex].cred);
   }
+#endif
 
   if(data->set.ssl.CRLfile) {
     /* set the CRL list file */

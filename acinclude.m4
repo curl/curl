@@ -2665,6 +2665,24 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   if test "x$ca" = "xno" && test "x$capath" = "xno"; then
     AC_MSG_RESULT([no])
   fi
+
+  AC_MSG_CHECKING([whether to use builtin CA store of SSL library])
+  AC_ARG_WITH(ca-fallback,
+AC_HELP_STRING([--with-ca-fallback], [Use the built in CA store of the SSL library])
+AC_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the SSL library]),
+  [
+    if test "x$with_ca_fallback" != "xyes" -a "x$with_ca_fallback" != "xno"; then
+      AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
+    fi
+  ],
+  [ with_ca_fallback="no"])
+  AC_MSG_RESULT([$with_ca_fallback])
+  if test "x$with_ca_fallback" = "xyes"; then
+    if test "x$OPENSSL_ENABLED" != "x1" -a "x$GNUTLS_ENABLED" != "x1"; then
+      AC_MSG_ERROR([--with-ca-fallback only works with OpenSSL or GnuTLS])
+    fi
+    AC_DEFINE_UNQUOTED(CURL_CA_FALLBACK, 1, [define "1" to use built in CA store of SSL library ])
+  fi
 ])
 
 
