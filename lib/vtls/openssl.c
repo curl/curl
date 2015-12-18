@@ -189,13 +189,13 @@ static int ossl_seed(struct SessionHandle *data)
 #ifndef RANDOM_FILE
   /* if RANDOM_FILE isn't defined, we only perform this if an option tells
      us to! */
-  if(data->set.ssl.primary.random_file)
+  if(data->set.str[STRING_SSL_RANDOM_FILE])
 #define RANDOM_FILE "" /* doesn't matter won't be used */
 #endif
   {
     /* let the option override the define */
-    nread += RAND_load_file((data->set.ssl.primary.random_file?
-                             data->set.ssl.primary.random_file:
+    nread += RAND_load_file((data->set.str[STRING_SSL_RANDOM_FILE]?
+                             data->set.str[STRING_SSL_RANDOM_FILE]:
                              RANDOM_FILE),
                             RAND_LOAD_LENGTH);
     if(seed_enough(nread))
@@ -208,14 +208,14 @@ static int ossl_seed(struct SessionHandle *data)
 #ifndef EGD_SOCKET
   /* If we don't have the define set, we only do this if the egd-option
      is set */
-  if(data->set.ssl.primary.egdsocket)
+  if(data->set.str[STRING_SSL_EGDSOCKET])
 #define EGD_SOCKET "" /* doesn't matter won't be used */
 #endif
   {
     /* If there's an option and a define, the option overrides the
        define */
-    int ret = RAND_egd(data->set.ssl.primary.egdsocket?
-                       data->set.ssl.primary.egdsocket:EGD_SOCKET);
+    int ret = RAND_egd(data->set.str[STRING_SSL_EGDSOCKET]?
+                       data->set.str[STRING_SSL_EGDSOCKET]:EGD_SOCKET);
     if(-1 != ret) {
       nread += ret;
       if(seed_enough(nread))
@@ -253,8 +253,8 @@ static void Curl_ossl_seed(struct SessionHandle *data)
      time-consuming seedings in vain */
   static bool ssl_seeded = FALSE;
 
-  if(!ssl_seeded || data->set.ssl.primary.random_file ||
-     data->set.ssl.primary.egdsocket) {
+  if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
+     data->set.str[STRING_SSL_EGDSOCKET]) {
     ossl_seed(data);
     ssl_seeded = TRUE;
   }
@@ -2562,12 +2562,12 @@ static CURLcode servercert(struct connectdata *conn,
        deallocating the certificate. */
 
     /* e.g. match issuer name with provided issuer certificate */
-    if(data->set.ssl.issuercert) {
-      fp = fopen(data->set.ssl.issuercert, FOPEN_READTEXT);
+    if(SSL_SET_OPTION(issuercert)) {
+      fp = fopen(SSL_SET_OPTION(issuercert), FOPEN_READTEXT);
       if(!fp) {
         if(strict)
           failf(data, "SSL: Unable to open issuer cert (%s)",
-                data->set.ssl.issuercert);
+                SSL_SET_OPTION(issuercert));
         X509_free(connssl->server_cert);
         connssl->server_cert = NULL;
         return CURLE_SSL_ISSUER_ERROR;
@@ -2577,7 +2577,7 @@ static CURLcode servercert(struct connectdata *conn,
       if(!issuer) {
         if(strict)
           failf(data, "SSL: Unable to read issuer cert (%s)",
-                data->set.ssl.issuercert);
+                SSL_SET_OPTION(issuercert));
         X509_free(connssl->server_cert);
         X509_free(issuer);
         fclose(fp);
@@ -2589,7 +2589,7 @@ static CURLcode servercert(struct connectdata *conn,
       if(X509_check_issued(issuer, connssl->server_cert) != X509_V_OK) {
         if(strict)
           failf(data, "SSL: Certificate issuer check failed (%s)",
-                data->set.ssl.issuercert);
+                SSL_SET_OPTION(issuercert));
         X509_free(connssl->server_cert);
         X509_free(issuer);
         connssl->server_cert = NULL;
@@ -2597,7 +2597,7 @@ static CURLcode servercert(struct connectdata *conn,
       }
 
       infof(data, "\t SSL certificate issuer check ok (%s)\n",
-            data->set.ssl.issuercert);
+            SSL_SET_OPTION(issuercert));
       X509_free(issuer);
     }
 

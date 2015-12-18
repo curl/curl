@@ -284,9 +284,6 @@ void Curl_freeset(struct SessionHandle *data)
     Curl_safefree(data->set.str[i]);
   }
 
-  Curl_free_ssl_config(&data->set.ssl);
-  Curl_free_ssl_config(&data->set.proxy_ssl);
-
   if(data->change.referer_alloc) {
     Curl_safefree(data->change.referer);
     data->change.referer_alloc = FALSE;
@@ -365,11 +362,6 @@ CURLcode Curl_dupset(struct SessionHandle *dst, struct SessionHandle *src)
   /* Copy src->set into dst->set first, then deal with the strings
      afterwards */
   dst->set = src->set;
-
-  Curl_clone_ssl_config(&src->set.ssl, &dst->set.ssl);
-  Curl_clone_ssl_config(&src->set.proxy_ssl, &dst->set.proxy_ssl);
-
-  Curl_clone_general_ssl_config(&src->set.general_ssl, &dst->set.general_ssl);
 
   /* clear all string pointers first */
   memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
@@ -601,20 +593,18 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 
   /* This is our preferred CA cert bundle/path since install time */
 #if defined(CURL_CA_BUNDLE)
-  result = setstropt(&set->ssl.primary.CAfile, (char *) CURL_CA_BUNDLE);
-  if(result)
-    return result;
-
-  result = setstropt(&set->proxy_ssl.primary.CAfile, (char *) CURL_CA_BUNDLE);
+  result = setstropt(&set->str[STRING_SSL_CAFILE_ORIG],
+                     (char *) CURL_CA_BUNDLE);
   if(result)
     return result;
 #endif
 #if defined(CURL_CA_PATH)
-  result = setstropt(&set->ssl.primary.CApath, (char *) CURL_CA_PATH);
+  result = setstropt(&set->str[STRING_SSL_CAPATH_ORIG], (char *) CURL_CA_PATH);
   if(result)
     return result;
 
-  result = setstropt(&set->proxy_ssl.primary.CApath, (char *) CURL_CA_PATH);
+  result = setstropt(&set->str[STRING_SSL_CAPATH_PROXY],
+                     (char *) CURL_CA_PATH);
 #endif
 
   set->wildcardmatch  = FALSE;
@@ -730,12 +720,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection */
-    result = setstropt(&data->set.ssl.primary.cipher_list,
+    result = setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_PROXY_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection for proxy */
-    result = setstropt(&data->set.proxy_ssl.primary.cipher_list,
+    result = setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_PROXY],
                        va_arg(param, char *));
     break;
 
@@ -744,23 +734,15 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * This is the path name to a file that contains random data to seed
      * the random SSL stuff with. The file is only used for reading.
      */
-    result = setstropt(&data->set.ssl.primary.random_file,
+    result = setstropt(&data->set.str[STRING_SSL_RANDOM_FILE],
                        va_arg(param, char *));
-    if(result)
-      break;
-    result = setstropt(&data->set.proxy_ssl.primary.random_file,
-                       data->set.ssl.primary.random_file);
     break;
   case CURLOPT_EGDSOCKET:
     /*
      * The Entropy Gathering Daemon socket pathname
      */
-    result = setstropt(&data->set.ssl.primary.egdsocket,
+    result = setstropt(&data->set.str[STRING_SSL_EGDSOCKET],
                        va_arg(param, char *));
-    if(result)
-      break;
-    result = setstropt(&data->set.proxy_ssl.primary.egdsocket,
-                       data->set.ssl.primary.egdsocket);
     break;
   case CURLOPT_MAXCONNECTS:
     /*
@@ -1981,70 +1963,70 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * String that holds file name of the SSL certificate to use
      */
-    result = setstropt(&data->set.ssl.cert,
+    result = setstropt(&data->set.str[STRING_CERT_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_PROXY_SSLCERT:
     /*
      * String that holds file name of the SSL certificate to use for proxy
      */
-    result = setstropt(&data->set.proxy_ssl.cert,
+    result = setstropt(&data->set.str[STRING_CERT_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_SSLCERTTYPE:
     /*
      * String that holds file type of the SSL certificate to use
      */
-    result = setstropt(&data->set.ssl.cert_type,
+    result = setstropt(&data->set.str[STRING_CERT_TYPE_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_PROXY_SSLCERTTYPE:
     /*
      * String that holds file type of the SSL certificate to use for proxy
      */
-    result = setstropt(&data->set.proxy_ssl.cert_type,
+    result = setstropt(&data->set.str[STRING_CERT_TYPE_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_SSLKEY:
     /*
      * String that holds file name of the SSL key to use
      */
-    result = setstropt(&data->set.ssl.key,
+    result = setstropt(&data->set.str[STRING_KEY_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_PROXY_SSLKEY:
     /*
      * String that holds file name of the SSL key to use for proxy
      */
-    result = setstropt(&data->set.proxy_ssl.key,
+    result = setstropt(&data->set.str[STRING_KEY_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_SSLKEYTYPE:
     /*
      * String that holds file type of the SSL key to use
      */
-    result = setstropt(&data->set.ssl.key_type,
+    result = setstropt(&data->set.str[STRING_KEY_TYPE_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_PROXY_SSLKEYTYPE:
     /*
      * String that holds file type of the SSL key to use for proxy
      */
-    result = setstropt(&data->set.proxy_ssl.key_type,
+    result = setstropt(&data->set.str[STRING_KEY_TYPE_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_KEYPASSWD:
     /*
      * String that holds the SSL or SSH private key password.
      */
-    result = setstropt(&data->set.ssl.key_passwd,
+    result = setstropt(&data->set.str[STRING_KEY_PASSWD_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_PROXY_KEYPASSWD:
     /*
      * String that holds the SSL private key password for proxy.
      */
-    result = setstropt(&data->set.proxy_ssl.key_passwd,
+    result = setstropt(&data->set.str[STRING_KEY_PASSWD_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_SSLENGINE:
@@ -2213,7 +2195,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Set CA info for SSL connection. Specify file name of the CA certificate
      */
-    result = setstropt(&data->set.ssl.primary.CAfile,
+    result = setstropt(&data->set.str[STRING_SSL_CAFILE_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_PROXY_CAINFO:
@@ -2221,7 +2203,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set CA info SSL connection for proxy. Specify file name of the
      * CA certificate
      */
-    result = setstropt(&data->set.proxy_ssl.primary.CAfile,
+    result = setstropt(&data->set.str[STRING_SSL_CAFILE_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_CAPATH:
@@ -2231,7 +2213,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * certificates which have been prepared using openssl c_rehash utility.
      */
     /* This does not work on windows. */
-    result = setstropt(&data->set.ssl.primary.CApath,
+    result = setstropt(&data->set.str[STRING_SSL_CAPATH_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_PROXY_CAPATH:
@@ -2240,7 +2222,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * CA certificates which have been prepared using openssl c_rehash utility.
      */
     /* This does not work on windows. */
-    result = setstropt(&data->set.proxy_ssl.primary.CApath,
+    result = setstropt(&data->set.str[STRING_SSL_CAPATH_PROXY],
                        va_arg(param, char *));
 #else
     result = CURLE_NOT_BUILT_IN;
@@ -2251,7 +2233,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set CRL file info for SSL connection. Specify file name of the CRL
      * to check certificates revocation
      */
-    result = setstropt(&data->set.ssl.CRLfile,
+    result = setstropt(&data->set.str[STRING_SSL_CRLFILE_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_PROXY_CRLFILE:
@@ -2259,7 +2241,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set CRL file info for SSL connection for proxy. Specify file name of the
      * CRL to check certificates revocation
      */
-    result = setstropt(&data->set.proxy_ssl.CRLfile,
+    result = setstropt(&data->set.str[STRING_SSL_CRLFILE_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_ISSUERCERT:
@@ -2267,7 +2249,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set Issuer certificate file
      * to check certificates issuer
      */
-    result = setstropt(&data->set.ssl.issuercert,
+    result = setstropt(&data->set.str[STRING_SSL_ISSUERCERT_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_TELNETOPTIONS:
@@ -2753,28 +2735,28 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 #ifdef USE_TLS_SRP
   case CURLOPT_TLSAUTH_USERNAME:
-    result = setstropt(&data->set.ssl.username,
+    result = setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_ORIG],
                        va_arg(param, char *));
-    if(data->set.ssl.username && !data->set.ssl.authtype)
+    if(data->set.str[STRING_TLSAUTH_USERNAME_ORIG] && !data->set.ssl.authtype)
       data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
   case CURLOPT_PROXY_TLSAUTH_USERNAME:
-    result = setstropt(&data->set.proxy_ssl.username,
+    result = setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_PROXY],
                        va_arg(param, char *));
-    if(data->set.proxy_ssl.username &&
+    if(data->set.str[STRING_TLSAUTH_USERNAME_PROXY] &&
        !data->set.proxy_ssl.authtype)
       data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
   case CURLOPT_TLSAUTH_PASSWORD:
-    result = setstropt(&data->set.ssl.password,
+    result = setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_ORIG],
                        va_arg(param, char *));
-    if(data->set.ssl.username && !data->set.ssl.authtype)
+    if(data->set.str[STRING_TLSAUTH_USERNAME_ORIG] && !data->set.ssl.authtype)
       data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
   case CURLOPT_PROXY_TLSAUTH_PASSWORD:
-    result = setstropt(&data->set.proxy_ssl.password,
+    result = setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_PROXY],
                        va_arg(param, char *));
-    if(data->set.proxy_ssl.username &&
+    if(data->set.str[STRING_TLSAUTH_USERNAME_PROXY] &&
        !data->set.proxy_ssl.authtype)
       data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
@@ -6017,8 +5999,37 @@ static CURLcode create_conn(struct SessionHandle *data,
 #endif
 
   /* Get a cloned copy of the SSL config situation stored in the
-     connection struct.
+     connection struct. But to get this going nicely, we must first make
+     sure that the strings in the master copy are pointing to the correct
+     strings in the session handle strings array!
+
+     Keep in mind that the pointers in the master copy are pointing to strings
+     that will be freed as part of the SessionHandle struct, but all cloned
+     copies will be separately allocated.
   */
+  data->set.ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_ORIG];
+  data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
+  data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_ORIG];
+  data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
+  data->set.ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_ORIG];
+  data->set.proxy_ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_PROXY];
+  data->set.ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_ORIG];
+  data->set.proxy_ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_PROXY];
+  data->set.ssl.primary.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
+  data->set.proxy_ssl.primary.random_file =
+    data->set.str[STRING_SSL_RANDOM_FILE];
+  data->set.ssl.primary.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
+  data->set.proxy_ssl.primary.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
+  data->set.ssl.primary.cipher_list =
+    data->set.str[STRING_SSL_CIPHER_LIST_ORIG];
+  data->set.proxy_ssl.primary.cipher_list =
+    data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
+#ifdef USE_TLS_SRP
+  data->set.ssl.username = data->set.str[STRING_TLSAUTH_USERNAME_ORIG];
+  data->set.proxy_ssl.username = data->set.str[STRING_TLSAUTH_USERNAME_PROXY];
+  data->set.ssl.password = data->set.str[STRING_TLSAUTH_PASSWORD_ORIG];
+  data->set.proxy_ssl.password = data->set.str[STRING_TLSAUTH_PASSWORD_PROXY];
+#endif
 
   if(!Curl_clone_primary_ssl_config(&data->set.ssl.primary,
      &conn->ssl_config)) {

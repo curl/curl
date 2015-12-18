@@ -106,14 +106,6 @@ Curl_ssl_config_matches(struct ssl_primary_config* data,
   return FALSE;
 }
 
-void
-Curl_clone_general_ssl_config(struct ssl_general_config *source,
-                              struct ssl_general_config *dest)
-{
-  dest->sessionid = source->sessionid;
-  dest->max_ssl_sessions = source->max_ssl_sessions;
-}
-
 bool
 Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
                               struct ssl_primary_config *dest)
@@ -127,34 +119,6 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   CLONE_STRING(cipher_list);
   CLONE_STRING(egdsocket);
   CLONE_STRING(random_file);
-  return TRUE;
-}
-
-bool
-Curl_clone_ssl_config(struct ssl_config_data *source,
-                      struct ssl_config_data *dest)
-{
-  Curl_clone_primary_ssl_config(&source->primary, &dest->primary);
-  dest->enable_beast = source->enable_beast;
-  dest->certverifyresult = source->certverifyresult;
-  dest->fsslctx = source->fsslctx;
-  dest->fsslctxp = source->fsslctxp;
-  dest->certinfo = source->certinfo;
-
-  CLONE_STRING(CRLfile);
-  CLONE_STRING(issuercert);
-  CLONE_STRING(cert);
-  CLONE_STRING(cert_type);
-  CLONE_STRING(key);
-  CLONE_STRING(key_type);
-  CLONE_STRING(key_passwd);
-
-#ifdef USE_TLS_SRP
-  CLONE_STRING(username);
-  CLONE_STRING(password);
-  dest->authtype = source->authtype;
-#endif
-
   return TRUE;
 }
 
@@ -241,23 +205,6 @@ unsigned int Curl_rand(struct SessionHandle *data)
 int Curl_ssl_backend(void)
 {
   return (int)CURL_SSL_BACKEND;
-}
-
-void Curl_free_ssl_config(struct ssl_config_data* sslc)
-{
-  Curl_free_primary_ssl_config(&sslc->primary);
-
-  Curl_safefree(sslc->CRLfile);
-  Curl_safefree(sslc->issuercert);
-  Curl_safefree(sslc->cert);
-  Curl_safefree(sslc->cert_type);
-  Curl_safefree(sslc->key);
-  Curl_safefree(sslc->key_type);
-  Curl_safefree(sslc->key_passwd);
-#ifdef USE_TLS_SRP
-  Curl_safefree(sslc->username);
-  Curl_safefree(sslc->password);
-#endif
 }
 
 #ifdef USE_SSL
