@@ -1701,6 +1701,7 @@ struct SessionHandle {
      socket is to be removed from the hash. See singlesocket(). */
   curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
   int numsocks;
+  curl_socket_t activeSocket;
 
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle

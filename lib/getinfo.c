@@ -172,10 +172,14 @@ static CURLcode getinfo_long(struct SessionHandle *data, CURLINFO info,
        32 bit longs */
     if(sockfd != CURL_SOCKET_BAD)
       *param_longp = (long)sockfd;
-    else
+    else if(data->activeSocket != CURL_SOCKET_BAD) {
+      *param_longp = (long)data->activeSocket;
+    }
+    else {
       /* this interface is documented to return -1 in case of badness, which
          may not be the same as the CURL_SOCKET_BAD value */
       *param_longp = -1;
+    }
     break;
   case CURLINFO_PRIMARY_PORT:
     /* Return the (remote) port of the most recent (primary) connection */
@@ -338,6 +342,8 @@ static CURLcode getinfo_socket(struct SessionHandle *data, CURLINFO info,
   switch(info) {
   case CURLINFO_ACTIVESOCKET:
     *param_socketp = Curl_getconnectinfo(data, NULL);
+    if(*param_socketp == CURL_SOCKET_BAD)
+      *param_socketp = data->activeSocket;
     break;
   default:
     return CURLE_UNKNOWN_OPTION;

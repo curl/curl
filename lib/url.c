@@ -675,6 +675,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->wildcard.state = CURLWC_INIT;
     data->wildcard.filelist = NULL;
     data->set.fnmatch = ZERO_NULL;
+    data->activeSocket = CURL_SOCKET_BAD;
     data->set.maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
 
     Curl_http2_init_state(&data->state);
@@ -6068,6 +6069,7 @@ CURLcode Curl_done(struct connectdata **connp,
   data->req.newurl = NULL;
   free(data->req.location);
   data->req.location = NULL;
+  data->activeSocket = conn->sock[FIRSTSOCKET];
 
   switch(status) {
   case CURLE_ABORTED_BY_CALLBACK:
