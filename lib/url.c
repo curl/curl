@@ -3140,6 +3140,7 @@ ConnectionExists(struct SessionHandle *data,
 {
   struct connectdata *check;
   struct connectdata *chosen = 0;
+  bool foundPendingCandidate = FALSE;
   bool canPipeline = IsPipeliningPossible(data, needle);
 #ifdef USE_NTLM
   bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) ||
@@ -3239,6 +3240,8 @@ ConnectionExists(struct SessionHandle *data,
 
         if((check->sock[FIRSTSOCKET] == CURL_SOCKET_BAD) ||
            check->bits.close) {
+          if(!check->bits.close)
+            foundPendingCandidate = TRUE;
           /* Don't pick a connection that hasn't connected yet or that is going
              to get closed. */
           infof(data, "Connection #%ld isn't open enough, can't reuse\n",
@@ -3339,6 +3342,7 @@ ConnectionExists(struct SessionHandle *data,
               continue;
             }
             else if(check->ssl[FIRSTSOCKET].state != ssl_connection_complete) {
+              foundPendingCandidate = TRUE;
               DEBUGF(infof(data,
                            "Connection #%ld has not started SSL connect, "
                            "can't reuse\n",
@@ -3445,6 +3449,12 @@ ConnectionExists(struct SessionHandle *data,
   if(chosen) {
     *usethis = chosen;
     return TRUE; /* yes, we found one to use! */
+  }
+
+  if(foundPendingCandidate && data->set.pipewait) {
+    infof(data,
+          "Found pending candidate for reuse and CURLOPT_PIPEWAIT is set");
+    *waitpipe = TRUE;
   }
 
   return FALSE; /* no matching connecting exists */
