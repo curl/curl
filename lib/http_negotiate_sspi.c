@@ -63,8 +63,8 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   struct negotiatedata *neg_ctx;
 
   if(proxy) {
-    userp = conn->proxyuser;
-    passwdp = conn->proxypasswd;
+    userp = conn->http_proxy.user;
+    passwdp = conn->http_proxy.passwd;
     neg_ctx = &data->state.proxyneg;
   }
   else {
