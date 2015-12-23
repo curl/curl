@@ -523,25 +523,26 @@ inetsocketpair(int sv[2])
   int sfd;      /* Server socket. */
   int cfd;      /* Client socket. */
   int len;
-  struct sockaddr_in laddr;
+  struct sockaddr_in addr1;
+  struct sockaddr_in addr2;
 
   /* Create listening socket on a local dynamic port. */
   lfd = socket(AF_INET, SOCK_STREAM, 0);
   if(lfd < 0)
     return -1;
-  memset((char *) &laddr, 0, sizeof laddr);
-  laddr.sin_family = AF_INET;
-  laddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-  laddr.sin_port = 0;
-  if(bind(lfd, (struct sockaddr *) &laddr, sizeof laddr) ||
-     listen(lfd, 0) < 0) {
+  memset((char *) &addr1, 0, sizeof addr1);
+  addr1.sin_family = AF_INET;
+  addr1.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  addr1.sin_port = 0;
+  if(bind(lfd, (struct sockaddr *) &addr1, sizeof addr1) ||
+     listen(lfd, 2) < 0) {
     close(lfd);
     return -1;
   }
 
   /* Get the allocated port. */
-  len = sizeof laddr;
-  if(getsockname(lfd, (struct sockaddr *) &laddr, &len) < 0) {
+  len = sizeof addr1;
+  if(getsockname(lfd, (struct sockaddr *) &addr1, &len) < 0) {
     close(lfd);
     return -1;
   }
@@ -555,22 +556,43 @@ inetsocketpair(int sv[2])
 
   /* Request unblocking connection to the listening socket. */
   curlx_nonblock(cfd, TRUE);
-  if(connect(cfd, (struct sockaddr *) &laddr, sizeof laddr) < 0 &&
+  if(connect(cfd, (struct sockaddr *) &addr1, sizeof addr1) < 0 &&
      errno != EINPROGRESS) {
     close(lfd);
     close(cfd);
     return -1;
   }
 
-  /* Accept the incoming connection and get the server socket. */
-  sfd = accept(lfd, NULL, NULL);
-  close(lfd);
-  if(sfd < 0) {
+  /* Get the client dynamic port for intrusion check below. */
+  len = sizeof addr2;
+  if(getsockname(cfd, (struct sockaddr *) &addr2, &len) < 0) {
+    close(lfd);
     close(cfd);
     return -1;
   }
 
+  /* Accept the incoming connection and get the server socket. */
+  curlx_nonblock(lfd, TRUE);
+  for (;;) {
+    len = sizeof addr1;
+    sfd = accept(lfd, (struct sockaddr *) &addr1, &len);
+    if(sfd < 0) {
+      close(lfd);
+      close(cfd);
+      return -1;
+    }
+
+    /* Check for possible intrusion from an external process. */
+    if(addr1.sin_addr.s_addr == addr2.sin_addr.s_addr &&
+       addr1.sin_port == addr2.sin_port)
+      break;
+
+    /* Intrusion: reject incoming connection. */
+    close(sfd);
+  }
+
   /* Done, return sockets and succeed. */
+  close(lfd);
   curlx_nonblock(cfd, FALSE);
   sv[0] = cfd;
   sv[1] = sfd;
@@ -587,6 +609,7 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
   int n;
   int m;
   int i;
+  int ret = 0;
   struct timeval tv = {0, 0};
   char buf[CURL_MAX_WRITE_SIZE];
 
@@ -621,9 +644,10 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
         i = write(connssl->remotefd, buf, n);
         if(i < 0)
           return -1;
+        ret = 1;
       }
       break;
-    case GSK_INVALID_STATE:
+    case GSK_OS400_ERROR_TIMED_OUT:
     case GSK_WOULD_BLOCK:
       break;
     default:
@@ -641,19 +665,23 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
       i = gsk_secure_soc_write(connproxyssl->handle, buf, n, &m);
       if(i != GSK_OK || n != m)
         return -1;
+      ret = 1;
     }
   }
 
-  return 0;  /* OK */
+  return ret;  /* OK */
 }
 
 
 static void close_one(struct ssl_connect_data *connssl,
-                      struct SessionHandle *data)
+                      struct connectdata *conn, int sockindex)
 {
   if(connssl->handle) {
-    gskit_status(data, gsk_secure_soc_close(&connssl->handle),
+    gskit_status(conn->data, gsk_secure_soc_close(&connssl->handle),
               "gsk_secure_soc_close()", 0);
+    /* Last chance to drain output. */
+    while(pipe_ssloverssl(conn, sockindex, SOS_WRITE) > 0)
+      ;
     connssl->handle = (gsk_handle) NULL;
     if(connssl->localfd >= 0) {
       close(connssl->localfd);
@@ -676,13 +704,13 @@ static ssize_t gskit_send(struct connectdata *conn, int sockindex,
   CURLcode cc = CURLE_SEND_ERROR;
   int written;
 
-  if(!pipe_ssloverssl(conn, sockindex, SOS_WRITE)) {
+  if(pipe_ssloverssl(conn, sockindex, SOS_WRITE) >= 0) {
     cc = gskit_status(data,
                       gsk_secure_soc_write(conn->ssl[sockindex].handle,
                                            (char *) mem, (int) len, &written),
                       "gsk_secure_soc_write()", CURLE_SEND_ERROR);
     if(cc == CURLE_OK)
-      if(pipe_ssloverssl(conn, sockindex, SOS_WRITE))
+      if(pipe_ssloverssl(conn, sockindex, SOS_WRITE) < 0)
         cc = CURLE_SEND_ERROR;
   }
   if(cc != CURLE_OK) {
@@ -701,15 +729,21 @@ static ssize_t gskit_recv(struct connectdata *conn, int num, char *buf,
   int nread;
   CURLcode cc = CURLE_RECV_ERROR;
 
-  if(!pipe_ssloverssl(conn, num, SOS_READ)) {
+  if(pipe_ssloverssl(conn, num, SOS_READ) >= 0) {
     buffsize = buffersize > (size_t) INT_MAX? INT_MAX: (int) buffersize;
     cc = gskit_status(data, gsk_secure_soc_read(conn->ssl[num].handle,
                                                 buf, buffsize, &nread),
                       "gsk_secure_soc_read()", CURLE_RECV_ERROR);
   }
-  if(cc != CURLE_OK) {
+  switch(cc) {
+  case CURLE_OK:
+    break;
+  case CURLE_OPERATION_TIMEDOUT:
+    cc = CURLE_AGAIN;
+  default:
     *curlcode = cc;
     nread = -1;
+    break;
   }
   return (ssize_t) nread;
 }
@@ -846,6 +880,8 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
                            (timeout + 999) / 1000);
   }
   if(!result)
+    result = set_numeric(data, connssl->handle, GSK_OS400_READ_TIMEOUT, 1);
+  if(!result)
     result = set_numeric(data, connssl->handle, GSK_FD, connssl->localfd >= 0?
                          connssl->localfd: conn->sock[sockindex]);
   if(!result)
@@ -916,6 +952,10 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
     else if(errno != ENOBUFS)
       result = gskit_status(data, GSK_ERROR_IO,
                             "QsoCreateIOCompletionPort()", 0);
+    else if(conn->proxy_ssl[sockindex].use) {
+      /* Cannot pipeline while handshaking synchronously. */
+      result = CURLE_SSL_CONNECT_ERROR;
+    }
     else {
       /* No more completion port available. Use synchronous IO. */
       result = gskit_status(data, gsk_secure_soc_init(connssl->handle),
@@ -928,7 +968,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   }
 
   /* Error: rollback. */
-  close_one(connssl, data);
+  close_one(connssl, conn, sockindex);
   return result;
 }
 
@@ -1101,7 +1141,7 @@ static CURLcode gskit_connect_common(struct connectdata *conn, int sockindex,
 
   /* Handle handshake pipelining. */
   if(!result)
-    if(pipe_ssloverssl(conn, sockindex, SOS_READ | SOS_WRITE))
+    if(pipe_ssloverssl(conn, sockindex, SOS_READ | SOS_WRITE) < 0)
       result = CURLE_SSL_CONNECT_ERROR;
 
   /* Step 2: check if handshake is over. */
@@ -1120,7 +1160,7 @@ static CURLcode gskit_connect_common(struct connectdata *conn, int sockindex,
 
   /* Handle handshake pipelining. */
   if(!result)
-    if(pipe_ssloverssl(conn, sockindex, SOS_READ | SOS_WRITE))
+    if(pipe_ssloverssl(conn, sockindex, SOS_READ | SOS_WRITE) < 0)
       result = CURLE_SSL_CONNECT_ERROR;
 
   /* Step 3: gather certificate info, verify host. */
@@ -1128,7 +1168,7 @@ static CURLcode gskit_connect_common(struct connectdata *conn, int sockindex,
     result = gskit_connect_step3(conn, sockindex);
 
   if(result)
-    close_one(connssl, data);
+    close_one(connssl, conn, sockindex);
   else if(connssl->connecting_state == ssl_connect_done) {
     connssl->state = ssl_connection_complete;
     connssl->connecting_state = ssl_connect_1;
@@ -1172,10 +1212,8 @@ CURLcode Curl_gskit_connect(struct connectdata *conn, int sockindex)
 
 void Curl_gskit_close(struct connectdata *conn, int sockindex)
 {
-  struct SessionHandle *data = conn->data;
-
-  close_one(&conn->ssl[sockindex], data);
-  close_one(&conn->proxy_ssl[sockindex], data);
+  close_one(&conn->ssl[sockindex], conn, sockindex);
+  close_one(&conn->proxy_ssl[sockindex], conn, sockindex);
 }
 
 
@@ -1194,7 +1232,7 @@ int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
   if(data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
     return 0;
 
-  close_one(connssl, data);
+  close_one(connssl, conn, sockindex);
   rc = 0;
   what = Curl_socket_ready(conn->sock[sockindex],
                            CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
