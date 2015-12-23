@@ -95,7 +95,8 @@ int test(char *URL)
 
   curl_easy_getinfo(c, CURLINFO_CONNECT_TIME, &connect_time);
   if (connect_time < dbl_epsilon) {
-    fprintf(stderr, "connect time is < epsilon\n");
+    fprintf(stderr, "connect time %e is < epsilon %e\n",
+            connect_time, dbl_epsilon);
     res = TEST_ERR_MAJOR_BAD;
   }
 
