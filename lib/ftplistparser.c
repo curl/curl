@@ -728,7 +728,6 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         case PL_UNIX_FILENAME_NAME:
           parser->item_length++;
           if(c == '\r') {
-            parser->item_length--;
             parser->state.UNIX.sub.filename = PL_UNIX_FILENAME_WINDOWSEOL;
           }
           else if(c == '\n') {
@@ -744,7 +743,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           break;
         case PL_UNIX_FILENAME_WINDOWSEOL:
           if(c == '\n') {
-            finfo->b_data[parser->item_offset + parser->item_length] = 0;
+            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
             parser->offsets.filename = parser->item_offset;
             parser->state.UNIX.main = PL_UNIX_FILETYPE;
             result = ftp_pl_insert_finfo(conn, finfo);
@@ -835,9 +834,8 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           }
           break;
         case PL_UNIX_SYMLINK_TARGET:
-          parser->item_length ++;
+          parser->item_length++;
           if(c == '\r') {
-            parser->item_length --;
             parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_WINDOWSEOL;
           }
           else if(c == '\n') {
