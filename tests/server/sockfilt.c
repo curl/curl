@@ -696,7 +696,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* check if we got descriptors, sleep in case we got none */
   if(!nfds) {
-    Sleep((timeout->tv_sec * 1000) + (timeout->tv_usec / 1000));
+    Sleep((timeout->tv_sec*1000)+(DWORD)(((double)timeout->tv_usec)/1000.0));
     return 0;
   }
 
