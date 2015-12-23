@@ -43,9 +43,10 @@ if(MSVC)
   list(APPEND CURL_SOURCE curl.rc)
 endif()
 
+# CURL_FILES comes from Makefile.inc
 add_executable(
   ${EXE_NAME}
-  ${curl_SOURCES}
+  ${CURL_FILES}
   )
 
 source_group("cURLX source files" FILES ${CURLX_CFILES})

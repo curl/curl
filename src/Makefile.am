@@ -53,6 +53,9 @@ endif
 
 include Makefile.inc
 
+# CURL_FILES comes from Makefile.inc
+curl_SOURCES = $(CURL_FILES)
+
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
 

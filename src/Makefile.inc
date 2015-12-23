@@ -111,5 +111,5 @@ CURL_HFILES = \
 
 CURL_RCFILES = curl.rc
 
-curl_SOURCES = $(CURL_CFILES) $(CURLX_CFILES) $(CURL_HFILES)
-
+# curl_SOURCES is special and gets assigned in src/Makefile.am
+CURL_FILES = $(CURL_CFILES) $(CURLX_CFILES) $(CURL_HFILES)
