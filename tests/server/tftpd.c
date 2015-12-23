@@ -565,7 +565,11 @@ static ssize_t write_behind(struct testcase *test, int convert)
   if(!test->ofile) {
     char outfile[256];
     snprintf(outfile, sizeof(outfile), "log/upload.%ld", test->testno);
+#ifdef WIN32
+    test->ofile=open(outfile, O_CREAT|O_RDWR|O_BINARY, 0777);
+#else
     test->ofile=open(outfile, O_CREAT|O_RDWR, 0777);
+#endif
     if(test->ofile == -1) {
       logmsg("Couldn't create and/or open file %s for upload!", outfile);
       return -1; /* failure! */
