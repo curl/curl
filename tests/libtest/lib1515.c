@@ -130,7 +130,7 @@ int test(char *URL)
 
   for(i = 1; i <= count; i++) {
     char target_url[256];
-    snprintf(target_url, sizeof(target_url), "http://testserver.example.com:%s%s%04d", port, path, i);
+    snprintf(target_url, sizeof(target_url), "http://testserver.example.com:%s/%s%04d", port, path, i);
 
     /* second request must succeed like the first one */
     if((res = do_one_request(multi, target_url, dns_entry)))

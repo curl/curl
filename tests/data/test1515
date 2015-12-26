@@ -45,7 +45,7 @@ lib1515
 caching of manual libcurl DNS entries after DNS cache timeout
 </name>
 <command>
-/path/1515 %HOSTIP %HTTPPORT
+path/1515 %HOSTIP %HTTPPORT
 </command>
 </client>
 
