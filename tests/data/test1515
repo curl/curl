@@ -32,6 +32,10 @@ Content-Length: 6
 
 hello
 </data2>
+<datacheck>
+hello
+hello
+</datacheck>
 </reply>
 
 <client>
