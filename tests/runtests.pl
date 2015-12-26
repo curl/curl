@@ -3284,17 +3284,49 @@ sub singletest {
 
     if (@replycheck) {
         # we use this file instead to check the final output against
-
+        # get the mode attribute
+        my $filemode=$replycheckattr{'mode'};
+        if($filemode && ($filemode eq "text") && $has_textaware) {
+            # text mode when running on windows: fix line endings
+            map s/\r\n/\n/g, @replycheck;
+            map s/\n/\r\n/g, @replycheck;
+        }
         if($replycheckattr{'nonewline'}) {
             # Yes, we must cut off the final newline from the final line
             # of the datacheck
             chomp($replycheck[$#replycheck]);
         }
-        if($replycheckattr{'mode'}) {
-            $replyattr{'mode'} = $replycheckattr{'mode'};
+
+        for my $partsuffix (('1', '2', '3', '4')) {
+            my @replycheckpart = getpart("reply", "datacheck".$partsuffix);
+            if(@replycheckpart || partexists("reply", "datacheck".$partsuffix) ) {
+                my %replycheckpartattr = getpartattr("reply", "datacheck".$partsuffix);
+                # get the mode attribute
+                my $filemode=$replycheckpartattr{'mode'};
+                if($filemode && ($filemode eq "text") && $has_textaware) {
+                    # text mode when running on windows: fix line endings
+                    map s/\r\n/\n/g, @replycheckpart;
+                    map s/\n/\r\n/g, @replycheckpart;
+                }
+                if($replycheckpartattr{'nonewline'}) {
+                    # Yes, we must cut off the final newline from the final line
+                    # of the datacheck
+                    chomp($replycheckpart[$#replycheckpart]);
+                }
+                push(@replycheck, @replycheckpart);
+            }
         }
 
         @reply=@replycheck;
+    }
+    else {
+        # get the mode attribute
+        my $filemode=$replyattr{'mode'};
+        if($filemode && ($filemode eq "text") && $has_textaware) {
+            # text mode when running on windows: fix line endings
+            map s/\r\n/\n/g, @reply;
+            map s/\n/\r\n/g, @reply;
+        }
     }
 
     # this is the valid protocol blurb curl should generate
@@ -3831,14 +3863,6 @@ sub singletest {
     if(!$replyattr{'nocheck'} && (@reply || $replyattr{'sendzero'})) {
         # verify the received data
         my @out = loadarray($CURLOUT);
-        # get the mode attribute
-        my $filemode=$replyattr{'mode'};
-        if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
-            map s/\r\n/\n/g, @reply;
-            map s/\n/\r\n/g, @reply;
-        }
-
         $res = compare($testnum, $testname, "data", \@out, \@reply);
         if ($res) {
             return 1;
