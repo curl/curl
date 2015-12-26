@@ -12,6 +12,7 @@ This release includes the following changes:
  o http: added CURL_HTTP_VERSION_2TLS to do HTTP/2 for HTTPS only [8]
  o curl: use 2TLS by default
  o curl --expect100-timeout: added [10]
+ o Add .dir-locals and set c-basic-offset to 2 (for emacs) [16]
 
 This release includes the following bugfixes:
 
@@ -30,6 +31,24 @@ This release includes the following bugfixes:
  o setstropt: const-correctness [9]
  o cyassl: fix compiler warning on type conversion
  o gskit: Fix host subject altname verification [11]
+ o http2: Support trailer fields [12]
+ o wolfssl: handle builds without SSLv3 support
+ o cyassl: deal with lack of *get_peer_certificate [13]
+ o sockfilt: do not wait on unreliable file or pipe handle
+ o make: build zsh script even in an out-of-tree build
+ o test 1326: fix getting stuck on Windows
+ o configure: allow static builds on mingw [14]
+ o configure: detect IPv6 support on Windows [15]
+ o ConnectionExists: with *PIPEWAIT, wait for connections [17]
+ o Makefile.inc: s/curl_SOURCES/CURL_FILES [18]
+ o test 16: fixed for Windows
+ o test 252-255: use datacheck mode text for ASCII-mode LISTings
+ o tftpd server: add Windows support by writing files in binary mode
+ o ftplistparser: fix handling of file LISTings using Windows EOL
+ o tests first.c: fix calculation of sleep timeout on Windows
+ o tests (several): use datacheck mode text for ASCII-mode LISTings
+ o CURLOPT_RANGE.3: for HTTP servers, range support is optional
+ o test 1515: add MSYS support by passing a relative path
 
 This release includes the following known bugs:
 
@@ -38,10 +57,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anders Bakken, Christian Stewart, Daniel Stenberg, Francisco Moraes,
-  Gisle Vanem, John Kohl, Kamil Dudka, Patrick Monnerat, Ray Satiro,
-  Steve Holme, Tatsuhiro Tsujikawa, Thomas Klausner,
-  (12 contributors)
+  Anders Bakken, Christian Stewart, Dan Fandrich, Daniel Stenberg,
+  Francisco Moraes, Gisle Vanem, Johannes Schindelin, John Kohl, Kamil Dudka,
+  Marc Hoersken, Patrick Monnerat, Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa,
+  Thomas Klausner,
+  (15 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -58,3 +78,10 @@ References to bug reports and discussions on issues:
  [9] = http://curl.haxx.se/bug/?i=565
  [10] = http://curl.haxx.se/docs/manpage.html#--expect100-timeout
  [11] = http://curl.haxx.se/mail/lib-2015-12/0062.html
+ [12] = http://curl.haxx.se/bug/?i=564
+ [13] = http://curl.haxx.se/bug/?i=565
+ [14] = https://github.com/Alexpux/MINGW-packages/tree/master/mingw-w64-curl
+ [15] = https://github.com/Alexpux/MINGW-packages/commit/9253d0bf58a1486e91f7efb5316e7fdb48fa4007
+ [16] = http://curl.haxx.se/bug/?i=574
+ [17] = http://curl.haxx.se/bug/?i=575
+ [18] = http://curl.haxx.se/bug/?i=577
