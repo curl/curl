@@ -28,7 +28,7 @@ all-local: $(ZSH_COMPLETION_FUNCTION_FILENAME)
 
 $(ZSH_COMPLETION_FUNCTION_FILENAME): zsh.pl
 	@if ! test -x "$(PERL)"; then echo "No perl: can't install zsh.pl"; exit 0; fi
-	$(PERL) $(srcdir)/zsh.pl > $@
+	$(PERL) $(srcdir)/zsh.pl $(top_builddir)/src/curl > $@
 
 install-data-local:
 	$(MKDIR_P) $(DESTDIR)$(ZSH_FUNCTIONS_DIR)
