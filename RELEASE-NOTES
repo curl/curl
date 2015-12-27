@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o sockfilt: do not wait on unreliable file or pipe handle
  o make: build zsh script even in an out-of-tree build
  o test 1326: fix getting stuck on Windows
+ o test 87: fix file check on Windows
  o configure: allow static builds on mingw [14]
  o configure: detect IPv6 support on Windows [15]
  o ConnectionExists: with *PIPEWAIT, wait for connections [17]
