@@ -63,6 +63,7 @@ int Curl_mbedtls_shutdown(struct connectdata *conn, int sockindex);
 #define curlssl_check_cxn(x) (x=x, -1)
 #define curlssl_data_pending(x,y) (x=x, y=y, 0)
 #define CURL_SSL_BACKEND CURLSSLBACKEND_MBEDTLS
+#define curlssl_sha256sum(a,b,c,d) mbedtls_sha256(a,b,c,0)
 
 /* This might cause libcurl to use a weeker random!
    TODO: implement proper use of Polarssl's CTR-DRBG or HMAC-DRBG and use that

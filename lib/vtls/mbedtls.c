@@ -141,6 +141,44 @@ const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
     1024,      /* RSA min key len */
 };
 
+static int
+mbedtls_verify_pinned_crt(void *p, mbedtls_x509_crt *crt,
+                          int depth, unsigned int *flags)
+{
+  struct SessionHandle *data = p;
+  unsigned char pubkey[1024];
+  unsigned int i;
+  int ret;
+  int size;
+  unsigned char *pinned_cert = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+
+  /* Skip intermediate and root certificates */
+  if (depth){
+    return 0;
+  }
+
+  if(pinned_cert == NULL || crt == NULL) {
+    *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
+    return 1;
+  }
+
+  /* Extract pubkey */
+  size = mbedtls_pk_write_pubkey_der(&crt->pk, pubkey, 1024);
+  if(size <= 0) {
+    *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
+    return 1;
+  }
+
+  /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer */
+  ret = Curl_pin_peer_pubkey(data, pinned_cert, &pubkey[1024 - size], size);
+  if(ret == CURLE_OK) {
+    return 0;
+  }
+
+  *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
+  return 1;
+}
+
 static Curl_recv mbedtls_recv;
 static Curl_send mbedtls_send;
 
@@ -625,6 +663,10 @@ mbedtls_connect_common(struct connectdata *conn,
   curl_socket_t sockfd = conn->sock[sockindex];
   long timeout_ms;
   int what;
+
+  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+    mbedtls_ssl_conf_verify(&connssl->config, mbedtls_verify_pinned_crt, data);
+  }
 
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
