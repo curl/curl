@@ -21,8 +21,8 @@
  ***************************************************************************/
 /* <DESC>
  * A basic application source code using the multi interface doing two
- * transfers in parallel. */
-* </DESC>
+ * transfers in parallel.
+ * </DESC>
  */
 
 #include <stdio.h>
