@@ -162,7 +162,7 @@ mbedtls_verify_pinned_crt(void *p, mbedtls_x509_crt *crt,
     return 1;
   }
 
-  /* Determine pubkey size in bits */
+  /* Determine pubkey size in bytes */
   pubkey_len = mbedtls_pk_get_len(&crt->pk);
   if(pubkey_len <= 0) {
     *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
