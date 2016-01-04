@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Use the progress callbacks, old and/or new one depending on avaiable
+ * Use the progress callbacks, old and/or new one depending on available
  * libcurl version.
  * </DESC>
  */
