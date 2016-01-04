@@ -146,8 +146,8 @@ mbedtls_verify_pinned_crt(void *p, mbedtls_x509_crt *crt,
                           int depth, unsigned int *flags)
 {
   struct SessionHandle *data = p;
-  unsigned char pubkey[1024];
-  unsigned int i;
+  unsigned char *pubkey;
+  size_t pubkey_len;
   int ret;
   int size;
   unsigned char *pinned_cert = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
@@ -162,20 +162,39 @@ mbedtls_verify_pinned_crt(void *p, mbedtls_x509_crt *crt,
     return 1;
   }
 
-  /* Extract pubkey */
-  size = mbedtls_pk_write_pubkey_der(&crt->pk, pubkey, 1024);
-  if(size <= 0) {
+  /* Determine pubkey size in bits */
+  pubkey_len = mbedtls_pk_get_len(&crt->pk);
+  if(pubkey_len <= 0) {
     *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
     return 1;
   }
 
-  /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer */
-  ret = Curl_pin_peer_pubkey(data, pinned_cert, &pubkey[1024 - size], size);
+  /* FIXME: How to determine the exact size necessary? */
+  pubkey_len *= 2;
+
+  pubkey = malloc(pubkey_len);
+  if(pubkey == NULL) {
+    *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
+    return 1;
+  }
+
+  /* Extract pubkey */
+  size = mbedtls_pk_write_pubkey_der(&crt->pk, pubkey, pubkey_len);
+  if(size <= 0) {
+    *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
+    free(pubkey);
+    return 1;
+  }
+
+  /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer. */
+  ret = Curl_pin_peer_pubkey(data, pinned_cert, &pubkey[pubkey_len - size], size);
   if(ret == CURLE_OK) {
+    free(pubkey);
     return 0;
   }
 
   *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
+  free(pubkey);
   return 1;
 }
 
