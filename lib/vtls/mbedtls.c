@@ -153,7 +153,7 @@ mbedtls_verify_pinned_crt(void *p, mbedtls_x509_crt *crt,
   unsigned char *pinned_cert = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 
   /* Skip intermediate and root certificates */
-  if (depth){
+  if(depth) {
     return 0;
   }
 
