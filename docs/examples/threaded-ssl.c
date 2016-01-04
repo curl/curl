@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,6 +19,11 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+/* <DESC>
+ * Show the required mutex callback setups for GnuTLS and OpenSSL when using
+ * libcurl multi-threaded.
+ * </DESC>
+ */
 /* A multi-threaded example that uses pthreads and fetches 4 remote files at
  * once over HTTPS. The lock callbacks and stuff assume OpenSSL or GnuTLS
  * (libgcrypt) so far.

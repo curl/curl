@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,10 +19,13 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+/* <DESC>
+ * This is a simple example showing how a program on a non-ASCII platform
+ * would invoke callbacks to do its own codeset conversions instead of
+ * using the built-in iconv functions in libcurl.
+ * </DESC>
+ */
 /*
-   This is a simple example showing how a program on a non-ASCII platform
-   would invoke callbacks to do its own codeset conversions instead of
-   using the built-in iconv functions in libcurl.
 
    The IBM-1047 EBCDIC codeset is used for this example but the code
    would be similar for other non-ASCII codesets.

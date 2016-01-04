@@ -27,6 +27,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+/* <DESC>
+ * A basic RTSP transfer
+ * </DESC>
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,7 +19,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* An example of curl_easy_send() and curl_easy_recv() usage. */
+/* <DESC>
+ * An example of curl_easy_send() and curl_easy_recv() usage.
+ * </DESC>
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -65,6 +68,14 @@ int main(void)
   long sockextr;
   size_t iolen;
   curl_off_t nread;
+
+  /* A general note of caution here: if you're using curl_easy_recv() or
+     curl_easy_send() to implement HTTP or _any_ other protocol libcurl
+     supports "natively", you're doing it wrong and you should stop.
+
+     This example uses HTTP only to show how to use this API, it does not
+     suggest that writing an application doing this is sensible.
+  */
 
   curl = curl_easy_init();
   if(curl) {
