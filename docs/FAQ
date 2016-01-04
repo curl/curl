@@ -352,13 +352,15 @@ FAQ
   cryptography. When doing so, the Export Control Classification Number (ECCN)
   is used to identify the level of export control etc.
 
-  ASF gives a good explanation at https://www.apache.org/dev/crypto.html
+  Apache Software Foundation gives a good explanation of ECCNs at
+  https://www.apache.org/dev/crypto.html
 
   We believe curl's number might be ECCN 5D002, another possibility is
-  5D992. It seems necessary to write them, asking to confirm.
+  5D992. It seems necessary to write them (the authority that administers ECCN
+  numbers), asking to confirm.
 
-  Comprehensible explanations of the meaning of such numbers and how to
-  obtain them (resp.) are here
+  Comprehensible explanations of the meaning of such numbers and how to obtain
+  them (resp.) are here
 
   http://www.bis.doc.gov/licensing/exportingbasics.htm
   http://www.bis.doc.gov/licensing/do_i_needaneccn.html
