@@ -3454,7 +3454,7 @@ ConnectionExists(struct SessionHandle *data,
 
   if(foundPendingCandidate && data->set.pipewait) {
     infof(data,
-          "Found pending candidate for reuse and CURLOPT_PIPEWAIT is set");
+          "Found pending candidate for reuse and CURLOPT_PIPEWAIT is set\n");
     *waitpipe = TRUE;
   }
 
