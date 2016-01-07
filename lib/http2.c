@@ -1043,21 +1043,23 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
     return -1;
   }
 
-  trailer_pos = stream->trailer_recvbuf->buffer;
-  trailer_end = trailer_pos + stream->trailer_recvbuf->size_used;
+  if(stream->trailer_recvbuf && stream->trailer_recvbuf->buffer) {
+    trailer_pos = stream->trailer_recvbuf->buffer;
+    trailer_end = trailer_pos + stream->trailer_recvbuf->size_used;
 
-  for(; trailer_pos < trailer_end;) {
-    uint32_t n;
-    memcpy(&n, trailer_pos, sizeof(n));
-    trailer_pos += sizeof(n);
+    for(; trailer_pos < trailer_end;) {
+      uint32_t n;
+      memcpy(&n, trailer_pos, sizeof(n));
+      trailer_pos += sizeof(n);
 
-    result = Curl_client_write(conn, CLIENTWRITE_HEADER, trailer_pos, n);
-    if(result) {
-      *err = result;
-      return -1;
+      result = Curl_client_write(conn, CLIENTWRITE_HEADER, trailer_pos, n);
+      if(result) {
+        *err = result;
+        return -1;
+      }
+
+      trailer_pos += n + 1;
     }
-
-    trailer_pos += n + 1;
   }
 
   DEBUGF(infof(data, "http2_recv returns 0, http2_handle_stream_close\n"));
