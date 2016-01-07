@@ -142,6 +142,7 @@ static struct connectdata *
 find_oldest_idle_connection_in_bundle(struct SessionHandle *data,
                                       struct connectbundle *bundle);
 static void conn_free(struct connectdata *conn);
+static void free_fixed_hostname(struct hostname *host);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 static CURLcode parse_url_login(struct SessionHandle *data,
                                 struct connectdata *conn,
@@ -2798,23 +2799,8 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
   infof(data, "Closing connection %ld\n", conn->connection_id);
   Curl_conncache_remove_conn(data->state.conn_cache, conn);
 
-#if defined(USE_LIBIDN)
-  if(conn->host.encalloc)
-    idn_free(conn->host.encalloc); /* encoded host name buffer, must be freed
-                                      with idn_free() since this was allocated
-                                      by libidn */
-  if(conn->proxy.encalloc)
-    idn_free(conn->proxy.encalloc); /* encoded proxy name buffer, must be
-                                       freed with idn_free() since this was
-                                       allocated by libidn */
-#elif defined(USE_WIN32_IDN)
-  free(conn->host.encalloc); /* encoded host name buffer, must be freed with
-                                idn_free() since this was allocated by
-                                curl_win32_idn_to_ascii */
-  free(conn->proxy.encalloc); /* encoded proxy name buffer, must be freed
-                                 with idn_free() since this was allocated by
-                                 curl_win32_idn_to_ascii */
-#endif
+  free_fixed_hostname(&conn->host);
+  free_fixed_hostname(&conn->proxy);
 
   Curl_ssl_close(conn, FIRSTSOCKET);
 
@@ -3784,6 +3770,24 @@ static void fix_hostname(struct SessionHandle *data,
     infof(data, "IDN support not present, can't parse Unicode domains\n");
 #endif
   }
+}
+
+/*
+ * Frees data allocated by fix_hostname()
+ */
+static void free_fixed_hostname(struct hostname *host)
+{
+#if defined(USE_LIBIDN)
+  if(host->encalloc) {
+    idn_free(host->encalloc); /* must be freed with idn_free() since this was
+                                 allocated by libidn */
+    host->encalloc = NULL;
+  }
+#elif defined(USE_WIN32_IDN)
+  free(host->encalloc); /* must be freed withidn_free() since this was
+                           allocated by curl_win32_idn_to_ascii */
+  host->encalloc = NULL;
+#endif
 }
 
 static void llist_dtor(void *user, void *element)
@@ -5242,9 +5246,6 @@ static CURLcode resolve_server(struct SessionHandle *data,
     int rc;
     struct Curl_dns_entry *hostaddr;
 
-    /* set a pointer to the hostname we display */
-    fix_hostname(data, conn, &conn->host);
-
 #ifdef USE_UNIX_SOCKETS
     if(data->set.str[STRING_UNIX_SOCKET_PATH]) {
       /* Unix domain sockets are local. The host gets ignored, just use the
@@ -5294,9 +5295,6 @@ static CURLcode resolve_server(struct SessionHandle *data,
     else {
       /* This is a proxy that hasn't been resolved yet. */
 
-      /* IDN-fix the proxy name */
-      fix_hostname(data, conn, &conn->proxy);
-
       /* resolve proxy */
       rc = Curl_resolv_timeout(conn, conn->proxy.name, (int)conn->port,
                                &hostaddr, timeout_ms);
@@ -5328,6 +5326,7 @@ static CURLcode resolve_server(struct SessionHandle *data,
 static void reuse_conn(struct connectdata *old_conn,
                        struct connectdata *conn)
 {
+  free_fixed_hostname(&old_conn->proxy);
   free(old_conn->proxy.rawalloc);
 
   /* free the SSL config struct from this connection struct as this was
@@ -5362,6 +5361,7 @@ static void reuse_conn(struct connectdata *old_conn,
 
   /* host can change, when doing keepalive with a proxy or if the case is
      different this time etc */
+  free_fixed_hostname(&conn->host);
   Curl_safefree(conn->host.rawalloc);
   conn->host=old_conn->host;
 
@@ -5651,6 +5651,13 @@ static CURLcode create_conn(struct SessionHandle *data,
     conn->bits.tunnel_proxy = TRUE;
 
   /*************************************************************
+   * IDN-fix the hostnames
+   *************************************************************/
+  fix_hostname(data, conn, &conn->host);
+  if(conn->proxy.name && *conn->proxy.name)
+    fix_hostname(data, conn, &conn->proxy);
+
+  /*************************************************************
    * Figure out the remote port number and fix it in the URL
    *************************************************************/
   result = parse_remote_port(data, conn);
@@ -5793,9 +5800,6 @@ static CURLcode create_conn(struct SessionHandle *data,
     free(conn);          /* we don't need this anymore */
     conn = conn_temp;
     *in_connect = conn;
-
-    /* set a pointer to the hostname we display */
-    fix_hostname(data, conn, &conn->host);
 
     infof(data, "Re-using existing connection! (#%ld) with %s %s\n",
           conn->connection_id,
