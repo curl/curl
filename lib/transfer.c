@@ -410,7 +410,18 @@ static CURLcode readwrite_data(struct SessionHandle *data,
       data->set.buffer_size : BUFSIZE;
     size_t bytestoread = buffersize;
 
-    if(k->size != -1 && !k->header) {
+    if(
+#if defined(USE_NGHTTP2)
+       /* For HTTP/2, read data without caring about the content
+          length. This is safe because body in HTTP/2 is always
+          segmented thanks to its framing layer. Meanwhile, we have to
+          call Curl_read to ensure that http2_handle_stream_close is
+          called when we read all incoming bytes for a particular
+          stream. */
+       !((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+         conn->httpversion == 20) &&
+#endif
+       k->size != -1 && !k->header) {
       /* make sure we don't read "too much" if we can help it since we
          might be pipelining and then someone else might want to read what
          follows! */
