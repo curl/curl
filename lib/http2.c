@@ -771,23 +771,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
 
-  if(stream->bodystarted) {
-    /* This is trailer fields. */
-    /* 3 is for ":" and "\r\n". */
-    uint32_t n = (uint32_t)(namelen + valuelen + 3);
-
-    DEBUGF(infof(data_s, "h2 trailer: %.*s: %.*s\n", namelen, name, valuelen,
-                 value));
-
-    Curl_add_buffer(stream->trailer_recvbuf, &n, sizeof(n));
-    Curl_add_buffer(stream->trailer_recvbuf, name, namelen);
-    Curl_add_buffer(stream->trailer_recvbuf, ":", 1);
-    Curl_add_buffer(stream->trailer_recvbuf, value, valuelen);
-    Curl_add_buffer(stream->trailer_recvbuf, "\r\n\0", 3);
-
-    return 0;
-  }
-
   /* Store received PUSH_PROMISE headers to be used when the subsequent
      PUSH_PROMISE callback comes */
   if(frame->hd.type == NGHTTP2_PUSH_PROMISE) {
@@ -815,6 +798,23 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     h = aprintf("%s:%s", name, value);
     if(h)
       stream->push_headers[stream->push_headers_used++] = h;
+    return 0;
+  }
+
+  if(stream->bodystarted) {
+    /* This is trailer fields. */
+    /* 3 is for ":" and "\r\n". */
+    uint32_t n = (uint32_t)(namelen + valuelen + 3);
+
+    DEBUGF(infof(data_s, "h2 trailer: %.*s: %.*s\n", namelen, name, valuelen,
+                 value));
+
+    Curl_add_buffer(stream->trailer_recvbuf, &n, sizeof(n));
+    Curl_add_buffer(stream->trailer_recvbuf, name, namelen);
+    Curl_add_buffer(stream->trailer_recvbuf, ":", 1);
+    Curl_add_buffer(stream->trailer_recvbuf, value, valuelen);
+    Curl_add_buffer(stream->trailer_recvbuf, "\r\n\0", 3);
+
     return 0;
   }
 
