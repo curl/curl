@@ -374,15 +374,21 @@ mbedtls_connect_step1(struct connectdata *conn,
   }
 
 #ifdef HAS_ALPN
-  if(data->set.httpversion >= CURL_HTTP_VERSION_2) {
-    if(data->set.ssl_enable_alpn) {
-      static const char* protocols[] = {
-        NGHTTP2_PROTO_VERSION_ID, ALPN_HTTP_1_1, NULL
-      };
-      mbedtls_ssl_conf_alpn_protocols(&connssl->config, protocols);
-      infof(data, "ALPN, offering %s, %s\n", protocols[0],
-            protocols[1]);
+  if(data->set.ssl_enable_alpn) {
+    const char *protocols[3];
+    const char **p = protocols;
+#ifdef USE_NGHTTP2
+    if(data->set.httpversion >= CURL_HTTP_VERSION_2)
+      *p++ = NGHTTP2_PROTO_VERSION_ID;
+#endif
+    *p++ = ALPN_HTTP_1_1;
+    *p = NULL;
+    if(mbedtls_ssl_conf_alpn_protocols(&connssl->config, protocols)) {
+      failf(data, "Failed setting ALPN protocols");
+      return CURLE_SSL_CONNECT_ERROR;
     }
+    for(p = protocols; *p; ++p)
+      infof(data, "ALPN, offering %s\n", *p);
   }
 #endif
 
@@ -470,14 +476,18 @@ mbedtls_connect_step2(struct connectdata *conn,
   if(data->set.ssl_enable_alpn) {
     next_protocol = mbedtls_ssl_get_alpn_protocol(&connssl->ssl);
 
-    if(next_protocol != NULL) {
+    if(next_protocol) {
       infof(data, "ALPN, server accepted to use %s\n", next_protocol);
-
-      if(strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
-                  NGHTTP2_PROTO_VERSION_ID_LEN)) {
+#ifdef USE_NGHTTP2
+      if(!strncmp(next_protocol, NGHTTP2_PROTO_VERSION_ID,
+                  NGHTTP2_PROTO_VERSION_ID_LEN) &&
+         !next_protocol[NGHTTP2_PROTO_VERSION_ID_LEN]) {
         conn->negnpn = CURL_HTTP_VERSION_2;
       }
-      else if(strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH)) {
+      else
+#endif
+      if(!strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH) &&
+         !next_protocol[ALPN_HTTP_1_1_LENGTH]) {
         conn->negnpn = CURL_HTTP_VERSION_1_1;
       }
     }
