@@ -5509,6 +5509,7 @@ static CURLcode create_conn(struct SessionHandle *data,
        we're gonna follow a Location: later or... then we need the protocol
        part added so that we have a valid URL. */
     char *reurl;
+    char *ch_lower;
 
     reurl = aprintf("%s://%s", conn->handler->scheme, data->change.url);
 
@@ -5516,6 +5517,10 @@ static CURLcode create_conn(struct SessionHandle *data,
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
+
+    /* Change protocol prefix to lower-case */
+    for(ch_lower = reurl; *ch_lower != ':'; ch_lower++)
+      *ch_lower = (char)TOLOWER(*ch_lower);
 
     if(data->change.url_alloc) {
       Curl_safefree(data->change.url);
