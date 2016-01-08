@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2851,9 +2851,8 @@ static bool IsPipeliningPossible(const struct SessionHandle *handle,
       return TRUE;
 
     if(Curl_pipeline_wanted(handle->multi, CURLPIPE_MULTIPLEX) &&
-       (handle->set.httpversion >= CURL_HTTP_VERSION_2) &&
-       (conn->httpversion >= 20))
-      /* allows and uses HTTP/2 */
+       (handle->set.httpversion >= CURL_HTTP_VERSION_2))
+      /* allows HTTP/2 */
       return TRUE;
   }
   return FALSE;
