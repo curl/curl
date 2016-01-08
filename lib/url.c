@@ -5652,13 +5652,6 @@ static CURLcode create_conn(struct SessionHandle *data,
     conn->bits.tunnel_proxy = TRUE;
 
   /*************************************************************
-   * IDN-fix the hostnames
-   *************************************************************/
-  fix_hostname(data, conn, &conn->host);
-  if(conn->proxy.name && *conn->proxy.name)
-    fix_hostname(data, conn, &conn->proxy);
-
-  /*************************************************************
    * Figure out the remote port number and fix it in the URL
    *************************************************************/
   result = parse_remote_port(data, conn);
@@ -5673,6 +5666,13 @@ static CURLcode create_conn(struct SessionHandle *data,
   result = set_login(conn, user, passwd, options);
   if(result)
     goto out;
+
+  /*************************************************************
+   * IDN-fix the hostnames
+   *************************************************************/
+  fix_hostname(data, conn, &conn->host);
+  if(conn->proxy.name && *conn->proxy.name)
+    fix_hostname(data, conn, &conn->proxy);
 
   /*************************************************************
    * Setup internals depending on protocol. Needs to be done after
