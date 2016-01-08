@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -403,7 +403,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
-  struct http_conn *httpc = NULL;
+  struct http_conn *httpc = &conn->proto.httpc;
   struct SessionHandle *data_s = NULL;
   struct HTTP *stream = NULL;
   static int lastStream = -1;
@@ -413,12 +413,31 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 
   if(!stream_id) {
     /* stream ID zero is for connection-oriented stuff */
+    if(frame->hd.type == NGHTTP2_SETTINGS) {
+      uint32_t max_conn = httpc->settings.max_concurrent_streams;
+      DEBUGF(infof(conn->data, "Got SETTINGS\n"));
+      httpc->settings.max_concurrent_streams =
+        nghttp2_session_get_remote_settings(
+          session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
+      httpc->settings.enable_push =
+        nghttp2_session_get_remote_settings(
+          session, NGHTTP2_SETTINGS_ENABLE_PUSH);
+      DEBUGF(infof(conn->data, "MAX_CONCURRENT_STREAMS == %d\n",
+                   httpc->settings.max_concurrent_streams));
+      DEBUGF(infof(conn->data, "ENABLE_PUSH == %s\n",
+                   httpc->settings.enable_push?"TRUE":"false"));
+      if(max_conn != httpc->settings.max_concurrent_streams) {
+        /* only signal change if the value actually changed */
+        infof(conn->data,
+              "Connection state changed (MAX_CONCURRENT_STREAMS updated)!\n");
+        Curl_multi_connchanged(conn->data->multi);
+      }
+    }
     return 0;
   }
-  data_s = nghttp2_session_get_stream_user_data(session,
-                                                frame->hd.stream_id);
-  if(lastStream != frame->hd.stream_id) {
-    lastStream = frame->hd.stream_id;
+  data_s = nghttp2_session_get_stream_user_data(session, stream_id);
+  if(lastStream != stream_id) {
+    lastStream = stream_id;
   }
   if(!data_s) {
     DEBUGF(infof(conn->data,
@@ -434,7 +453,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   DEBUGF(infof(data_s, "on_frame_recv() header %x stream %x\n",
                frame->hd.type, stream_id));
 
-  httpc = &conn->proto.httpc;
   switch(frame->hd.type) {
   case NGHTTP2_DATA:
     /* If body started on this stream, then receiving DATA is illegal. */
@@ -501,28 +519,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       }
     }
     break;
-  case NGHTTP2_SETTINGS:
-  {
-    uint32_t max_conn = httpc->settings.max_concurrent_streams;
-    DEBUGF(infof(conn->data, "Got SETTINGS for stream %u!\n", stream_id));
-    httpc->settings.max_concurrent_streams =
-      nghttp2_session_get_remote_settings(
-        session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
-    httpc->settings.enable_push =
-      nghttp2_session_get_remote_settings(
-        session, NGHTTP2_SETTINGS_ENABLE_PUSH);
-    DEBUGF(infof(conn->data, "MAX_CONCURRENT_STREAMS == %d\n",
-                 httpc->settings.max_concurrent_streams));
-    DEBUGF(infof(conn->data, "ENABLE_PUSH == %s\n",
-                 httpc->settings.enable_push?"TRUE":"false"));
-    if(max_conn != httpc->settings.max_concurrent_streams) {
-      /* only signal change if the value actually changed */
-      infof(conn->data,
-            "Connection state changed (MAX_CONCURRENT_STREAMS updated)!\n");
-      Curl_multi_connchanged(conn->data->multi);
-    }
-  }
-  break;
   default:
     DEBUGF(infof(conn->data, "Got frame type %x for stream %u!\n",
                  frame->hd.type, stream_id));
