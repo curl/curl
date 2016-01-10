@@ -238,7 +238,8 @@ my $has_axtls;      # built with axTLS
 my $has_winssl;     # built with WinSSL    (Secure Channel aka Schannel)
 my $has_darwinssl;  # built with DarwinSSL (Secure Transport)
 my $has_boringssl;  # built with BoringSSL
-my $has_libressl;   # built with libressl 
+my $has_libressl;   # built with libressl
+my $has_mbedtls;    # built with mbedTLS
 
 my $has_sslpinning; # built with a TLS backend that supports pinning
 
@@ -2369,11 +2370,18 @@ sub checksystem {
            }
            elsif ($libcurl =~ /BoringSSL/i) {
                $has_boringssl=1;
+               $has_sslpinning=1;
                $ssllib="BoringSSL";
            }
            elsif ($libcurl =~ /libressl/i) {
                $has_libressl=1;
+               $has_sslpinning=1;
                $ssllib="libressl";
+           }
+           elsif ($libcurl =~ /mbedTLS/i) {
+               $has_mbedtls=1;
+               $has_sslpinning=1;
+               $ssllib="mbedTLS";
            }
            if ($libcurl =~ /ares/i) {
                $has_cares=1;
