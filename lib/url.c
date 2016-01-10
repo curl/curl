@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -3153,8 +3153,12 @@ ConnectionExists(struct SessionHandle *data,
     size_t best_pipe_len = max_pipe_len;
     struct curl_llist_element *curr;
 
-    infof(data, "Found bundle for host %s: %p\n",
-          needle->host.name, (void *)bundle);
+    infof(data, "Found bundle for host %s: %p [%s]\n",
+          needle->host.name, (void *)bundle,
+          (bundle->multiuse== BUNDLE_PIPELINING?
+           "can pipeline":
+           (bundle->multiuse== BUNDLE_MULTIPLEX?
+            "can multiplex":"serially")));
 
     /* We can't pipe if we don't know anything about the server */
     if(canPipeline) {
@@ -3166,6 +3170,17 @@ ConnectionExists(struct SessionHandle *data,
         }
 
         infof(data, "Server doesn't support multi-use (yet)\n");
+        canPipeline = FALSE;
+      }
+      if((bundle->multiuse == BUNDLE_PIPELINING) &&
+         !Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1)) {
+        /* not asked for, switch off */
+        infof(data, "Could pipeline, but not asked to!\n");
+        canPipeline = FALSE;
+      }
+      else if((bundle->multiuse == BUNDLE_MULTIPLEX) &&
+              !Curl_pipeline_wanted(data->multi, CURLPIPE_MULTIPLEX)) {
+        infof(data, "Could multiplex, but not asked to!\n");
         canPipeline = FALSE;
       }
     }
