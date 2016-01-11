@@ -150,44 +150,6 @@ const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
 #define PUB_DER_MAX_BYTES   (RSA_PUB_DER_MAX_BYTES > ECP_PUB_DER_MAX_BYTES ? \
                             RSA_PUB_DER_MAX_BYTES : ECP_PUB_DER_MAX_BYTES)
 
-static int
-mbedtls_verify_pinned_crt(void *p, mbedtls_x509_crt *crt,
-                          int depth, unsigned int *flags)
-{
-  struct SessionHandle *data = p;
-  unsigned char pubkey[PUB_DER_MAX_BYTES];
-  int ret;
-  int size;
-  char *pinned_cert = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
-
-  /* Skip intermediate and root certificates */
-  if(depth) {
-    return 0;
-  }
-
-  if(pinned_cert == NULL || crt == NULL) {
-    *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
-    return 1;
-  }
-
-  /* Extract pubkey */
-  size = mbedtls_pk_write_pubkey_der(&crt->pk, pubkey, PUB_DER_MAX_BYTES);
-  if(size <= 0) {
-    *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
-    return 1;
-  }
-
-  /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer. */
-  ret = Curl_pin_peer_pubkey(data, pinned_cert,
-                             &pubkey[PUB_DER_MAX_BYTES - size], size);
-  if(ret == CURLE_OK) {
-    return 0;
-  }
-
-  *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
-  return 1;
-}
-
 static Curl_recv mbedtls_recv;
 static Curl_send mbedtls_send;
 
@@ -455,7 +417,7 @@ mbedtls_connect_step2(struct connectdata *conn,
   int ret;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
-  char buffer[1024];
+  const mbedtls_x509_crt *peercert;
 
 #ifdef HAS_ALPN
   const char* next_protocol;
@@ -510,13 +472,35 @@ mbedtls_connect_step2(struct connectdata *conn,
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
-  if(mbedtls_ssl_get_peer_cert(&(connssl->ssl))) {
-    /* If the session was resumed, there will be no peer certs */
-    memset(buffer, 0, sizeof(buffer));
+  /* If the session was resumed, there will be no peer cert */
+  peercert = mbedtls_ssl_get_peer_cert(&connssl->ssl);
 
-    if(mbedtls_x509_crt_info(buffer, sizeof(buffer), (char *)"* ",
-                     mbedtls_ssl_get_peer_cert(&(connssl->ssl))) != -1)
+  if(peercert && data->set.verbose) {
+    char buffer[16384];
+
+    if(mbedtls_x509_crt_info(buffer, sizeof(buffer), "* ", peercert) > 0)
       infof(data, "Dumping cert info:\n%s\n", buffer);
+  }
+
+  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+    int size;
+    CURLcode ret;
+    unsigned char pubkey[PUB_DER_MAX_BYTES];
+
+    if(!peercert)
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+
+    size = mbedtls_pk_write_pubkey_der(&peercert->pk, pubkey,
+                                       PUB_DER_MAX_BYTES);
+    if(size <= 0)
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+
+    /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer. */
+    ret = Curl_pin_peer_pubkey(data,
+                               data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+                               &pubkey[PUB_DER_MAX_BYTES - size], size);
+    if(ret)
+      return ret;
   }
 
 #ifdef HAS_ALPN
@@ -682,10 +666,6 @@ mbedtls_connect_common(struct connectdata *conn,
   curl_socket_t sockfd = conn->sock[sockindex];
   long timeout_ms;
   int what;
-
-  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
-    mbedtls_ssl_conf_verify(&connssl->config, mbedtls_verify_pinned_crt, data);
-  }
 
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
