@@ -3128,12 +3128,17 @@ ConnectionExists(struct SessionHandle *data,
   struct connectdata *chosen = 0;
   bool foundPendingCandidate = FALSE;
   bool canPipeline = IsPipeliningPossible(data, needle);
-#ifdef USE_NTLM
-  bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) ||
-                       (data->state.authhost.want & CURLAUTH_NTLM_WB)) &&
-    (needle->handler->protocol & PROTO_FAMILY_HTTP) ? TRUE : FALSE;
-#endif
   struct connectbundle *bundle;
+
+#ifdef USE_NTLM
+  bool wantNTLMhttp = ((data->state.authhost.want &
+                      (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+                      (needle->handler->protocol & PROTO_FAMILY_HTTP));
+  bool wantProxyNTLMhttp = (needle->bits.proxy_user_passwd &&
+                           ((data->state.authproxy.want &
+                           (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+                           (needle->handler->protocol & PROTO_FAMILY_HTTP)));
+#endif
 
   *force_reuse = FALSE;
   *waitpipe = FALSE;
@@ -3188,9 +3193,6 @@ ConnectionExists(struct SessionHandle *data,
     curr = bundle->conn_list->head;
     while(curr) {
       bool match = FALSE;
-#if defined(USE_NTLM)
-      bool credentialsMatch = FALSE;
-#endif
       size_t pipeLen;
 
       /*
@@ -3300,21 +3302,14 @@ ConnectionExists(struct SessionHandle *data,
           continue;
       }
 
-      if((!(needle->handler->flags & PROTOPT_CREDSPERREQUEST))
-#ifdef USE_NTLM
-         || (wantNTLMhttp || check->ntlm.state != NTLMSTATE_NONE)
-#endif
-        ) {
-        /* This protocol requires credentials per connection or is HTTP+NTLM,
+      if(!(needle->handler->flags & PROTOPT_CREDSPERREQUEST)) {
+        /* This protocol requires credentials per connection,
            so verify that we're using the same name and password as well */
         if(!strequal(needle->user, check->user) ||
            !strequal(needle->passwd, check->passwd)) {
           /* one of them was different */
           continue;
         }
-#if defined(USE_NTLM)
-        credentialsMatch = TRUE;
-#endif
       }
 
       if(!needle->bits.httpproxy || needle->handler->flags&PROTOPT_SSL ||
@@ -3374,20 +3369,43 @@ ConnectionExists(struct SessionHandle *data,
            possible. (Especially we must not reuse the same connection if
            partway through a handshake!) */
         if(wantNTLMhttp) {
-          if(credentialsMatch && check->ntlm.state != NTLMSTATE_NONE) {
-            chosen = check;
+          if(!strequal(needle->user, check->user) ||
+             !strequal(needle->passwd, check->passwd))
+            continue;
+        }
+        else if(check->ntlm.state != NTLMSTATE_NONE) {
+          /* Connection is using NTLM auth but we don't want NTLM */
+          continue;
+        }
 
+        /* Same for Proxy NTLM authentication */
+        if(wantProxyNTLMhttp) {
+          if(!strequal(needle->proxyuser, check->proxyuser) ||
+             !strequal(needle->proxypasswd, check->proxypasswd))
+            continue;
+        }
+        else if(check->proxyntlm.state != NTLMSTATE_NONE) {
+          /* Proxy connection is using NTLM auth but we don't want NTLM */
+          continue;
+        }
+
+        if(wantNTLMhttp || wantProxyNTLMhttp) {
+          /* Credentials are already checked, we can use this connection */
+          chosen = check;
+
+          if((wantNTLMhttp &&
+             (check->ntlm.state != NTLMSTATE_NONE)) ||
+              (wantProxyNTLMhttp &&
+               (check->proxyntlm.state != NTLMSTATE_NONE))) {
             /* We must use this connection, no other */
             *force_reuse = TRUE;
             break;
           }
-          else if(credentialsMatch)
-            /* this is a backup choice */
-            chosen = check;
+
+          /* Continue look up for a better connection */
           continue;
         }
 #endif
-
         if(canPipeline) {
           /* We can pipeline if we want to. Let's continue looking for
              the optimal connection to use, i.e the shortest pipe that is not
