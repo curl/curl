@@ -2104,27 +2104,22 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
                                     least 256 bytes long. */
       CURLcode result;
       long lerr;
+      int lib;
+      int reason;
 
-      connssl->connecting_state = ssl_connect_2; /* the connection failed,
-                                                    we're not waiting for
-                                                    anything else. */
+      /* the connection failed, we're not waiting for anything else. */
+      connssl->connecting_state = ssl_connect_2;
 
-      errdetail = ERR_get_error(); /* Gets the earliest error code from the
-                                      thread's error queue and removes the
-                                      entry. */
+      /* Get the earliest error code from the thread's error queue and removes
+         the entry. */
+      errdetail = ERR_get_error();
 
-      switch(errdetail) {
-      case 0x1407E086:
-        /* 1407E086:
-           SSL routines:
-           SSL2_SET_CERTIFICATE:
-           certificate verify failed */
-        /* fall-through */
-      case 0x14090086:
-        /* 14090086:
-           SSL routines:
-           SSL3_GET_SERVER_CERTIFICATE:
-           certificate verify failed */
+      /* Extract which lib and reason */
+      lib = ERR_GET_LIB(errdetail);
+      reason = ERR_GET_REASON(errdetail);
+
+      if((lib == ERR_LIB_SSL) &&
+         (reason == SSL_R_CERTIFICATE_VERIFY_FAILED)) {
         result = CURLE_SSL_CACERT;
 
         lerr = SSL_get_verify_result(connssl->handle);
@@ -2136,13 +2131,11 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
         else
           /* strcpy() is fine here as long as the string fits within
              error_buffer */
-          strcpy(error_buffer,
-                 "SSL certificate problem, check your CA cert");
-        break;
-      default:
+          strcpy(error_buffer, "SSL certificate verification failed");
+      }
+      else {
         result = CURLE_SSL_CONNECT_ERROR;
         SSL_strerror(errdetail, error_buffer, sizeof(error_buffer));
-        break;
       }
 
       /* detail is already set to the SSL error above */
