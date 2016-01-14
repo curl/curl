@@ -50,6 +50,24 @@ This release includes the following bugfixes:
  o tests (several): use datacheck mode text for ASCII-mode LISTings
  o CURLOPT_RANGE.3: for HTTP servers, range support is optional
  o test 1515: add MSYS support by passing a relative path
+ o curl_global_init.3: Add Windows-specific info for init via DLL [19]
+ o http2: Fix client write for trailers on stream close [20]
+ o mbedtls: Fix ALPN support
+ o connection reuse: IDN host names fixed [21]
+ o http2: Fix PUSH_PROMISE headers being treated as trailers [22]
+ o http2: handle the received SETTINGS frame [23]
+ o http2: Ensure that http2_handle_stream_close is called [24]
+ o mbedtls: implement CURLOPT_PINNEDPUBLICKEY
+ o runtests: Add mbedTLS to the SSL backends
+ o IDN host names: Remove the port number before converting to ACE [25]
+ o zsh.pl: fail if no curl is found
+ o scripts: fix zsh completion generation
+ o scripts: don't generate and install zsh completion when cross-compiling [26]
+ o lib: Prefix URLs with lower-case protocol names/schemes [27]
+ o ConnectionExists: only do pipelining/multiplexing when asked [28]
+ o configure: assume IPv6 works when cross-compiled [29]
+ o openssl: for 1.1.0+ they now provide a SSLeay() macro of their own
+ o openssl: improved error detection/reporting
 
 This release includes the following known bugs:
 
@@ -58,11 +76,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anders Bakken, Christian Stewart, Dan Fandrich, Daniel Stenberg,
-  Francisco Moraes, Gisle Vanem, Johannes Schindelin, John Kohl, Kamil Dudka,
-  Marc Hoersken, Patrick Monnerat, Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa,
-  Thomas Klausner,
-  (15 contributors)
+  Alessandro Ghedini, Anders Bakken, Christian Stewart, Dan Fandrich,
+  Daniel Stenberg, Francisco Moraes, Gisle Vanem, Johannes Schindelin,
+  John Kohl, Kamil Dudka, Marc Hoersken, Michael Kaufmann, Mohammad AlSaleh,
+  Patrick Monnerat, Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa,
+  Thomas Glanzmann, Thomas Klausner,
+  (19 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -86,3 +105,15 @@ References to bug reports and discussions on issues:
  [16] = http://curl.haxx.se/bug/?i=574
  [17] = http://curl.haxx.se/bug/?i=575
  [18] = http://curl.haxx.se/bug/?i=577
+ [19] = http://curl.haxx.se/bug/?i=586
+ [20] = http://curl.haxx.se/bug/?i=564
+ [21] = http://curl.haxx.se/bug/?i=592
+ [22] = http://curl.haxx.se/bug/?i=564
+ [23] = http://curl.haxx.se/mail/lib-2016-01/0031.html
+ [24] = http://curl.haxx.se/bug/?i=564
+ [25] = http://curl.haxx.se/bug/?i=596
+ [26] = http://curl.haxx.se/bug/?i=582
+ [27] = http://curl.haxx.se/bug/?i=597
+ [28] = http://curl.haxx.se/bug/?i=584
+ [29] = http://curl.haxx.se/bug/?i=594
+
