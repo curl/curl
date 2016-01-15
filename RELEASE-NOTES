@@ -68,6 +68,7 @@ This release includes the following bugfixes:
  o configure: assume IPv6 works when cross-compiled [29]
  o openssl: for 1.1.0+ they now provide a SSLeay() macro of their own
  o openssl: improved error detection/reporting
+ o ssh: CURLOPT_SSH_PUBLIC_KEYFILE now treats "" as NULL again [30]
 
 This release includes the following known bugs:
 
@@ -116,4 +117,5 @@ References to bug reports and discussions on issues:
  [27] = http://curl.haxx.se/bug/?i=597
  [28] = http://curl.haxx.se/bug/?i=584
  [29] = http://curl.haxx.se/bug/?i=594
+ [30] = http://curl.haxx.se/mail/lib-2016-01/0072.html
 
