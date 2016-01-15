@@ -480,18 +480,42 @@ mbedtls_connect_step2(struct connectdata *conn,
 
     if(mbedtls_x509_crt_info(buffer, sizeof(buffer), "* ", peercert) > 0)
       infof(data, "Dumping cert info:\n%s\n", buffer);
+    else
+      infof(data, "Unable to dump certificate information.\n");
   }
 
   if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
     int size;
     CURLcode ret;
+    mbedtls_x509_crt *p;
     unsigned char pubkey[PUB_DER_MAX_BYTES];
 
-    if(!peercert)
+    if(!peercert || !peercert->raw.p || !peercert->raw.len)
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
-    size = mbedtls_pk_write_pubkey_der(&peercert->pk, pubkey,
-                                       PUB_DER_MAX_BYTES);
+    p = calloc(1, sizeof(*p));
+
+    if(!p)
+      return CURLE_OUT_OF_MEMORY;
+
+    mbedtls_x509_crt_init(p);
+
+    /* Make a copy of our const peercert because mbedtls_pk_write_pubkey_der
+       needs a non-const key, for now.
+       https://github.com/ARMmbed/mbedtls/issues/396 */
+    if(mbedtls_x509_crt_parse_der(p, peercert->raw.p, peercert->raw.len)) {
+      failf(data, "Failed parsing peer certificate");
+      mbedtls_x509_crt_free(p);
+      free(p);
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
+
+    size = mbedtls_pk_write_pubkey_der(&p->pk, pubkey, PUB_DER_MAX_BYTES);
+
+    mbedtls_x509_crt_free(p);
+    free(p);
+    p = NULL;
+
     if(size <= 0)
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
