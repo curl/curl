@@ -148,7 +148,7 @@ const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
 #define ECP_PUB_DER_MAX_BYTES   (30 + 2 * MBEDTLS_ECP_MAX_BYTES)
 
 #define PUB_DER_MAX_BYTES   (RSA_PUB_DER_MAX_BYTES > ECP_PUB_DER_MAX_BYTES ? \
-                            RSA_PUB_DER_MAX_BYTES : ECP_PUB_DER_MAX_BYTES)
+                             RSA_PUB_DER_MAX_BYTES : ECP_PUB_DER_MAX_BYTES)
 
 static Curl_recv mbedtls_recv;
 static Curl_send mbedtls_send;
@@ -472,26 +472,33 @@ mbedtls_connect_step2(struct connectdata *conn,
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
-  /* If the session was resumed, there will be no peer cert */
   peercert = mbedtls_ssl_get_peer_cert(&connssl->ssl);
 
   if(peercert && data->set.verbose) {
-    char buffer[16384];
+    const size_t bufsize = 16384;
+    char *buffer = malloc(bufsize);
 
-    if(mbedtls_x509_crt_info(buffer, sizeof(buffer), "* ", peercert) > 0)
+    if(!buffer)
+      return CURLE_OUT_OF_MEMORY;
+
+    if(mbedtls_x509_crt_info(buffer, bufsize, "* ", peercert) > 0)
       infof(data, "Dumping cert info:\n%s\n", buffer);
     else
       infof(data, "Unable to dump certificate information.\n");
+
+    free(buffer);
   }
 
   if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
     int size;
-    CURLcode ret;
+    CURLcode result;
     mbedtls_x509_crt *p;
     unsigned char pubkey[PUB_DER_MAX_BYTES];
 
-    if(!peercert || !peercert->raw.p || !peercert->raw.len)
+    if(!peercert || !peercert->raw.p || !peercert->raw.len) {
+      failf(data, "Failed due to missing peer certificate");
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
 
     p = calloc(1, sizeof(*p));
 
@@ -504,7 +511,7 @@ mbedtls_connect_step2(struct connectdata *conn,
        needs a non-const key, for now.
        https://github.com/ARMmbed/mbedtls/issues/396 */
     if(mbedtls_x509_crt_parse_der(p, peercert->raw.p, peercert->raw.len)) {
-      failf(data, "Failed parsing peer certificate");
+      failf(data, "Failed copying peer certificate");
       mbedtls_x509_crt_free(p);
       free(p);
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
@@ -512,19 +519,25 @@ mbedtls_connect_step2(struct connectdata *conn,
 
     size = mbedtls_pk_write_pubkey_der(&p->pk, pubkey, PUB_DER_MAX_BYTES);
 
-    mbedtls_x509_crt_free(p);
-    free(p);
-    p = NULL;
-
-    if(size <= 0)
+    if(size <= 0) {
+      failf(data, "Failed copying public key from peer certificate");
+      mbedtls_x509_crt_free(p);
+      free(p);
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
 
     /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer. */
-    ret = Curl_pin_peer_pubkey(data,
-                               data->set.str[STRING_SSL_PINNEDPUBLICKEY],
-                               &pubkey[PUB_DER_MAX_BYTES - size], size);
-    if(ret)
-      return ret;
+    result = Curl_pin_peer_pubkey(data,
+                                  data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+                                  &pubkey[PUB_DER_MAX_BYTES - size], size);
+    if(result) {
+      mbedtls_x509_crt_free(p);
+      free(p);
+      return result;
+    }
+
+    mbedtls_x509_crt_free(p);
+    free(p);
   }
 
 #ifdef HAS_ALPN
