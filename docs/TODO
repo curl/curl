@@ -31,6 +31,7 @@
  1.13 Add CURLOPT_MAIL_CLIENT option
  1.14 Typesafe curl_easy_setopt()
  1.15 TCP Fast Open
+ 1.16 Try to URL encode given URL
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -283,6 +284,14 @@
  RFC 7413 defines how to include data already in the TCP SYN handshake to
  reduce latency.
 
+1.16 Try to URL encode given URL
+
+ Given a URL that for example contains spaces, libcurl could have an option
+ that would try somewhat harder than it does now and convert spaces to %20 and
+ perhaps URL encoded byte values over 128 etc (basically do what the redirect
+ following code already does).
+
+ https://github.com/bagder/curl/issues/514
 
 2. libcurl - multi interface
 

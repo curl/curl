@@ -848,7 +848,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          * libssh2 extract the public key from the private key file.
          * This is done by simply passing sshc->rsa_pub = NULL.
          */
-        if(data->set.str[STRING_SSH_PUBLIC_KEY]) {
+        if(data->set.str[STRING_SSH_PUBLIC_KEY]
+            /* treat empty string the same way as NULL */
+            && data->set.str[STRING_SSH_PUBLIC_KEY][0]) {
           sshc->rsa_pub = strdup(data->set.str[STRING_SSH_PUBLIC_KEY]);
           if(!sshc->rsa_pub)
             out_of_memory = TRUE;
@@ -869,7 +871,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
         free(home);
 
-        infof(data, "Using SSH public key file '%s'\n", sshc->rsa_pub);
+        if(sshc->rsa_pub)
+          infof(data, "Using SSH public key file '%s'\n", sshc->rsa_pub);
         infof(data, "Using SSH private key file '%s'\n", sshc->rsa);
 
         state(conn, SSH_AUTH_PKEY);

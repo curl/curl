@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -44,15 +44,14 @@ ADDRESS can of course be either IPv4 or IPv6 style addressing.
 
 This option effectively pre-populates the DNS cache with entries for the
 host+port pair so redirects and everything that operations against the
-HOST+PORT will instead use your provided ADDRESS. Addresses to set with
-\fICURL_RESOLVE\fP will not time-out from the DNS cache like ordinary
-entries.
+HOST+PORT will instead use your provided ADDRESS. Addresses set with
+\fICURL_RESOLVE\fP will not time-out from the DNS cache like ordinary entries.
 
-You can remove names from the DNS cache again, to stop providing these fake
-resolves, by including a string in the linked list that uses the format
+Remove names from the DNS cache again, to stop providing these fake resolves,
+by including a string in the linked list that uses the format
 \&"-HOST:PORT". The host name must be prefixed with a dash, and the host name
-and port number must exactly match what was already added previously. (Added in
-7.42.0)
+and port number must exactly match what was already added previously. (Added
+in 7.42.0)
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
