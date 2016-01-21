@@ -84,6 +84,7 @@
  11.1 File listing support
  11.2 Honor file timestamps
  11.3 Use NTLMv2
+ 11.4 Create remote directories
  
  12. New protocols
  12.1 RSYNC
@@ -524,6 +525,11 @@ The timestamp of the transferred file should reflect that of the original file.
 11.3 Use NTLMv2
 
 Currently the SMB authentication uses NTLMv1.
+
+11.4 Create remote directories
+
+Support for creating remote directories when uploading a file to a directory
+that doesn't exist on the server, just like --ftp-create-dirs.
 
 12. New protocols
 
