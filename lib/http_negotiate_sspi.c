@@ -40,6 +40,169 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+static void cleanup(struct negotiatedata *neg_ctx)
+{
+  /* Free our security context */
+  if(neg_ctx->context) {
+    s_pSecFn->DeleteSecurityContext(neg_ctx->context);
+    free(neg_ctx->context);
+    neg_ctx->context = NULL;
+  }
+
+  /* Free our credentials handle */
+  if(neg_ctx->credentials) {
+    s_pSecFn->FreeCredentialsHandle(neg_ctx->credentials);
+    free(neg_ctx->credentials);
+    neg_ctx->credentials = NULL;
+  }
+
+  /* Free our identity */
+  Curl_sspi_free_identity(neg_ctx->p_identity);
+  neg_ctx->p_identity = NULL;
+
+  /* Free the SPN and output token */
+  Curl_safefree(neg_ctx->server_name);
+  Curl_safefree(neg_ctx->output_token);
+
+  /* Reset any variables */
+  neg_ctx->token_max = 0;
+}
+
+
+/* init context for forced negotiate auth in re-used connection */
+static CURLcode create_negotiate_ctx(struct connectdata *conn, bool proxy)
+{
+  SecBufferDesc     out_buff_desc;
+  SecBuffer         out_sec_buff;
+  SECURITY_STATUS   status;
+  unsigned long     attrs;
+  TimeStamp         expiry; /* For Windows 9x compatibility of SSPI calls */
+  CURLcode          result;
+
+  /* Point to the username and password */
+  const char *userp;
+  const char *passwdp;
+
+  /* Point to the correct struct with this */
+  struct negotiatedata *neg_ctx;
+
+  if(proxy) {
+    userp = conn->proxyuser;
+    passwdp = conn->proxypasswd;
+    neg_ctx = &conn->data->state.proxyneg;
+  }
+  else {
+    userp = conn->user;
+    passwdp = conn->passwd;
+    neg_ctx = &conn->data->state.negotiate;
+  }
+
+  /* clear old data */
+  cleanup(neg_ctx);
+
+  /* Check proxy auth requested but no given proxy name */
+  if(proxy && !conn->proxy.name)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  /* restore server name */
+  /* Generate our SPN */
+  neg_ctx->server_name = Curl_sasl_build_spn("HTTP",
+                                             proxy ? conn->proxy.name :
+                                                     conn->host.name);
+  if(!neg_ctx->server_name)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Not set means empty */
+  if(!userp)
+    userp = "";
+
+  if(!passwdp)
+    passwdp = "";
+
+  if(!neg_ctx->output_token) {
+    PSecPkgInfo       SecurityPackage;
+    status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *)
+                                                TEXT(SP_NAME_NEGOTIATE),
+                                                &SecurityPackage);
+    if(status != SEC_E_OK)
+      return CURLE_NOT_BUILT_IN;
+
+    /* Allocate input and output buffers according to the max token size
+       as indicated by the security package */
+    neg_ctx->token_max = SecurityPackage->cbMaxToken;
+    neg_ctx->output_token = malloc(neg_ctx->token_max);
+    s_pSecFn->FreeContextBuffer(SecurityPackage);
+  }
+
+  /* We have to acquire credentials and allocate memory for the context */
+  neg_ctx->credentials = malloc(sizeof(CredHandle));
+  neg_ctx->context = malloc(sizeof(CtxtHandle));
+
+  if(!neg_ctx->credentials || !neg_ctx->context)
+    return CURLE_OUT_OF_MEMORY;
+
+  if(userp && *userp) {
+    /* Populate our identity structure */
+    result = Curl_create_sspi_identity(userp, passwdp, &neg_ctx->identity);
+    if(result)
+      return result;
+
+    /* Allow proper cleanup of the identity structure */
+    neg_ctx->p_identity = &neg_ctx->identity;
+  }
+  else
+    /* Use the current Windows user */
+    neg_ctx->p_identity = NULL;
+
+  /* Acquire our credientials handle */
+  neg_ctx->status =
+    s_pSecFn->AcquireCredentialsHandle(NULL,
+                                       (TCHAR *) TEXT(SP_NAME_NEGOTIATE),
+                                       SECPKG_CRED_OUTBOUND, NULL,
+                                       neg_ctx->p_identity, NULL, NULL,
+                                       neg_ctx->credentials, &expiry);
+  if(neg_ctx->status != SEC_E_OK)
+    return CURLE_LOGIN_DENIED;
+
+  /* Setup the "output" security buffer */
+  out_buff_desc.ulVersion = SECBUFFER_VERSION;
+  out_buff_desc.cBuffers  = 1;
+  out_buff_desc.pBuffers  = &out_sec_buff;
+  out_sec_buff.BufferType = SECBUFFER_TOKEN;
+  out_sec_buff.pvBuffer   = neg_ctx->output_token;
+  out_sec_buff.cbBuffer   = curlx_uztoul(neg_ctx->token_max);
+
+  /* Generate our message */
+  neg_ctx->status = s_pSecFn->InitializeSecurityContext(
+    neg_ctx->credentials,
+    NULL,
+    neg_ctx->server_name,
+    ISC_REQ_CONFIDENTIALITY,
+    0,
+    SECURITY_NATIVE_DREP,
+    NULL,
+    0,
+    neg_ctx->context,
+    &out_buff_desc,
+    &attrs,
+    &expiry);
+
+  if(GSS_ERROR(neg_ctx->status))
+    return CURLE_OUT_OF_MEMORY;
+
+  if(neg_ctx->status == SEC_I_COMPLETE_NEEDED ||
+     neg_ctx->status == SEC_I_COMPLETE_AND_CONTINUE) {
+    neg_ctx->status = s_pSecFn->CompleteAuthToken(neg_ctx->context,
+                                                  &out_buff_desc);
+    if(GSS_ERROR(neg_ctx->status))
+      return CURLE_RECV_ERROR;
+  }
+
+  neg_ctx->output_token_length = out_sec_buff.cbBuffer;
+
+  return CURLE_OK;
+}
+
 CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
                               const char *header)
 {
@@ -227,14 +390,33 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   return CURLE_OK;
 }
 
+static bool can_use_forced_negotiate(struct connectdata *conn, bool proxy)
+{
+  /* can be reused if last auth is complete */
+  struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
+                                        &conn->data->state.negotiate;
+
+  if(neg_ctx->state == GSS_AUTHCOMPLETE)
+    return true;
+
+  return false;
+}
+
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
 {
   struct negotiatedata *neg_ctx = proxy?&conn->data->state.proxyneg:
-    &conn->data->state.negotiate;
+                                        &conn->data->state.negotiate;
   char *encoded = NULL;
   size_t len = 0;
   char *userp;
   CURLcode error;
+
+  /* forced create new token for re-use connections; */
+  if(can_use_forced_negotiate(conn, proxy)) {
+    CURLcode res = create_negotiate_ctx(conn, proxy);
+    if(res)
+      return res;
+  }
 
   error = Curl_base64_encode(conn->data,
                              (const char*)neg_ctx->output_token,
@@ -259,34 +441,6 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   }
   free(encoded);
   return (userp == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
-}
-
-static void cleanup(struct negotiatedata *neg_ctx)
-{
-  /* Free our security context */
-  if(neg_ctx->context) {
-    s_pSecFn->DeleteSecurityContext(neg_ctx->context);
-    free(neg_ctx->context);
-    neg_ctx->context = NULL;
-  }
-
-  /* Free our credentials handle */
-  if(neg_ctx->credentials) {
-    s_pSecFn->FreeCredentialsHandle(neg_ctx->credentials);
-    free(neg_ctx->credentials);
-    neg_ctx->credentials = NULL;
-  }
-
-  /* Free our identity */
-  Curl_sspi_free_identity(neg_ctx->p_identity);
-  neg_ctx->p_identity = NULL;
-
-  /* Free the SPN and output token */
-  Curl_safefree(neg_ctx->server_name);
-  Curl_safefree(neg_ctx->output_token);
-
-  /* Reset any variables */
-  neg_ctx->token_max = 0;
 }
 
 void Curl_cleanup_negotiate(struct SessionHandle *data)
