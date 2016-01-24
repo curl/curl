@@ -9,7 +9,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -46,7 +46,7 @@ HEADER=include/curl/curlver.h
 CHEADER=src/tool_version.h
 
 # requires a date command that knows -u for UTC time zone
-datestamp=`date -u`
+datestamp=`LC_TIME=C date -u`
 
 # Replace version number in header file:
 sed -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g' \
