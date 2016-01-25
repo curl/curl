@@ -1176,6 +1176,14 @@ effectively disables the proxy. Each name in this list is matched as either
 a domain which contains the hostname, or the hostname itself. For example,
 local.com would match local.com, local.com:80, and www.local.com, but not
 www.notlocal.com.  (Added in 7.19.4).
+.IP "--connect-to-host <host:port>"
+Connect to this host and port instead of the URL's host and port.
+This option is only used to establish the network connection. It does not
+affect the hostname/port that is used for TLS/SSL or for the application
+protocols.
+This is suitable to direct the request at a specific server, e.g. at a specific
+cluster node in a cluster of servers.
+An IP address and port may also be specified.  (Added in 7.48.0).
 .IP "--ntlm"
 (HTTP) Enables NTLM authentication. The NTLM authentication method was
 designed by Microsoft and is used by IIS web servers. It is a proprietary

@@ -890,6 +890,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
 #endif
 
+        my_setopt_str(curl, CURLOPT_CONNECT_TO_HOST, config->conn_to_host);
+
         my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror?1L:0L);
         my_setopt(curl, CURLOPT_UPLOAD, uploadfile?1L:0L);
         my_setopt(curl, CURLOPT_DIRLISTONLY, config->dirlistonly?1L:0L);

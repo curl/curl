@@ -70,6 +70,8 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->proxyuserpwd);
   Curl_safefree(config->proxy);
 
+  Curl_safefree(config->conn_to_host);
+
   Curl_safefree(config->dns_ipv6_addr);
   Curl_safefree(config->dns_ipv4_addr);
   Curl_safefree(config->dns_interface);

@@ -132,9 +132,16 @@ void Curl_conncache_destroy(struct conncache *connc)
 /* returns an allocated key to find a bundle for this connection */
 static char *hashkey(struct connectdata *conn)
 {
-  return aprintf("%s:%d",
-                 conn->bits.proxy?conn->proxy.name:conn->host.name,
-                 conn->localport);
+  const char *hostname;
+
+  if(conn->bits.proxy)
+    hostname = conn->proxy.name;
+  else if(conn->bits.conn_to_host)
+    hostname = conn->conn_to_host.name;
+  else
+    hostname = conn->host.name;
+
+  return aprintf("%s:%d", hostname, conn->localport);
 }
 
 /* Look up the bundle with all the connections to the same host this

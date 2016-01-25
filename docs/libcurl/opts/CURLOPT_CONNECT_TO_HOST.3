@@ -1,0 +1,62 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_CONNECT_TO_HOST 3 "20 Jan 2016" "libcurl 7.48.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_CONNECT_TO_HOST \- Connect to a specific host and port instead of the URL's host and port
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECT_TO_HOST, char *host);
+.SH DESCRIPTION
+Pass a pointer to a zero terminated string holding the hostname and port that
+are used to establish the network connection for the upcoming request.
+The hostname and the port must be separated using a colon ":".
+Dotted numerical IP addresses are supported. A numerical IPv6 address must be
+written within [brackets].
+
+This option is suitable to direct the request at a specific server, e.g. at a
+specific cluster node in a cluster of servers. 
+
+The specified host name and port are only used to establish the network
+connection. They do NOT affect the hostname and port that are used for TLS/SSL
+or for the application protocols.
+
+In contrast to \fICURLOPT_RESOLVE\fP, the option \fICURLOPT_CONNECT_TO_HOST\fP
+does not pre-populate the DNS cache and therefore it does not affect future
+transfers of other easy handles that have been added to the same multi handle.
+
+If an HTTP proxy is used for a request having a \fIconnect to host\fP, the HTTP
+proxy is automatically switched to tunnel mode for this specific request.
+
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.48.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_RESOLVE "(3), " CURLOPT_HTTPPROXYTUNNEL  "(3), "

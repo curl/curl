@@ -1678,6 +1678,10 @@ typedef enum {
   /* Do not send any tftp option requests to the server */
   CINIT(TFTP_NO_OPTIONS, LONG, 242),
 
+  /* Host:port to connect to, overrides the URL's host:port
+     (only for the network layer) */
+  CINIT(CONNECT_TO_HOST, STRINGPOINT, 243),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
