@@ -2674,6 +2674,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 #endif
   }
+  case CURLOPT_CONNECT_TO:
+    data->set.connect_to = va_arg(param, struct curl_slist *);
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;
@@ -2729,6 +2732,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->allocptr.rtsp_transport);
   Curl_safefree(conn->trailer);
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
+  Curl_safefree(conn->conn_to_host.rawalloc); /* host name buffer */
   Curl_safefree(conn->proxy.rawalloc); /* proxy name buffer */
   Curl_safefree(conn->master_buffer);
 
@@ -2787,6 +2791,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
   Curl_conncache_remove_conn(data->state.conn_cache, conn);
 
   free_fixed_hostname(&conn->host);
+  free_fixed_hostname(&conn->conn_to_host);
   free_fixed_hostname(&conn->proxy);
 
   Curl_ssl_close(conn, FIRSTSOCKET);
@@ -3146,9 +3151,15 @@ ConnectionExists(struct SessionHandle *data,
       max_pipeline_length(data->multi):0;
     size_t best_pipe_len = max_pipe_len;
     struct curl_llist_element *curr;
+    const char *hostname;
+
+    if(needle->bits.conn_to_host)
+      hostname = needle->conn_to_host.name;
+    else
+      hostname = needle->host.name;
 
     infof(data, "Found bundle for host %s: %p [%s]\n",
-          needle->host.name, (void *)bundle,
+          hostname, (void *)bundle,
           (bundle->multiuse== BUNDLE_PIPELINING?
            "can pipeline":
            (bundle->multiuse== BUNDLE_MULTIPLEX?
@@ -3267,6 +3278,16 @@ ConnectionExists(struct SessionHandle *data,
         /* don't do mixed proxy and non-proxy connections */
         continue;
 
+      if(needle->bits.conn_to_host != check->bits.conn_to_host)
+        /* don't mix connections that use the "connect to host" feature and
+         * connections that don't use this feature */
+        continue;
+
+      if(needle->bits.conn_to_port != check->bits.conn_to_port)
+        /* don't mix connections that use the "connect to port" feature and
+         * connections that don't use this feature */
+        continue;
+
       if(!canPipeline && check->inuse)
         /* this request can't be pipelined but the checked connection is
            already in use so we skip it */
@@ -3302,7 +3323,7 @@ ConnectionExists(struct SessionHandle *data,
         }
       }
 
-      if(!needle->bits.httpproxy || needle->handler->flags&PROTOPT_SSL ||
+      if(!needle->bits.httpproxy || (needle->handler->flags&PROTOPT_SSL) ||
          (needle->bits.httpproxy && check->bits.httpproxy &&
           needle->bits.tunnel_proxy && check->bits.tunnel_proxy &&
           Curl_raw_equal(needle->proxy.name, check->proxy.name) &&
@@ -3313,6 +3334,10 @@ ConnectionExists(struct SessionHandle *data,
         if((Curl_raw_equal(needle->handler->scheme, check->handler->scheme) ||
             (get_protocol_family(check->handler->protocol) ==
              needle->handler->protocol && check->tls_upgraded)) &&
+           (!needle->bits.conn_to_host || Curl_raw_equal(
+            needle->conn_to_host.name, check->conn_to_host.name)) &&
+           (!needle->bits.conn_to_port ||
+             needle->conn_to_port == check->conn_to_port) &&
            Curl_raw_equal(needle->host.name, check->host.name) &&
            needle->remote_port == check->remote_port) {
           /* The schemes match or the the protocol family is the same and the
@@ -3490,16 +3515,27 @@ CURLcode Curl_connected_proxy(struct connectdata *conn,
   case CURLPROXY_SOCKS5:
   case CURLPROXY_SOCKS5_HOSTNAME:
     return Curl_SOCKS5(conn->proxyuser, conn->proxypasswd,
-                       conn->host.name, conn->remote_port,
+                       conn->bits.conn_to_host ? conn->conn_to_host.name :
+                       conn->host.name,
+                       conn->bits.conn_to_port ? conn->conn_to_port :
+                       conn->remote_port,
                        FIRSTSOCKET, conn);
 
   case CURLPROXY_SOCKS4:
-    return Curl_SOCKS4(conn->proxyuser, conn->host.name,
-                       conn->remote_port, FIRSTSOCKET, conn, FALSE);
+    return Curl_SOCKS4(conn->proxyuser,
+                       conn->bits.conn_to_host ? conn->conn_to_host.name :
+                       conn->host.name,
+                       conn->bits.conn_to_port ? conn->conn_to_port :
+                       conn->remote_port,
+                       FIRSTSOCKET, conn, FALSE);
 
   case CURLPROXY_SOCKS4A:
-    return Curl_SOCKS4(conn->proxyuser, conn->host.name,
-                       conn->remote_port, FIRSTSOCKET, conn, TRUE);
+    return Curl_SOCKS4(conn->proxyuser,
+                       conn->bits.conn_to_host ? conn->conn_to_host.name :
+                       conn->host.name,
+                       conn->bits.conn_to_port ? conn->conn_to_port :
+                       conn->remote_port,
+                       FIRSTSOCKET, conn, TRUE);
 
 #endif /* CURL_DISABLE_PROXY */
   case CURLPROXY_HTTP:
@@ -4373,11 +4409,6 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
        was very likely already set to the proxy port */
     conn->port = p->defport;
 
-  /* only if remote_port was not already parsed off the URL we use the
-     default port number */
-  if(conn->remote_port < 0)
-    conn->remote_port = (unsigned short)conn->given->defport;
-
   return CURLE_OK;
 }
 
@@ -4652,7 +4683,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
       if(strncmp("%25", ptr, 3))
         infof(data, "Please URL encode %% as %%25, see RFC 6874.\n");
       ptr++;
-      /* Allow unresered characters as defined in RFC 3986 */
+      /* Allow unreserved characters as defined in RFC 3986 */
       while(*ptr && (ISALPHA(*ptr) || ISXDIGIT(*ptr) || (*ptr == '-') ||
                      (*ptr == '.') || (*ptr == '_') || (*ptr == '~')))
         ptr++;
@@ -4679,7 +4710,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
     /* now set the local port number */
     port = strtol(prox_portno, &endp, 10);
     if((endp && *endp && (*endp != '/') && (*endp != ' ')) ||
-       (port >= 65536) ) {
+       (port < 0) || (port > 65535)) {
       /* meant to detect for example invalid IPv6 numerical addresses without
          brackets: "2a00:fac0:a000::7:13". Accept a trailing slash only
          because we then allow "URL style" with the number followed by a
@@ -4702,7 +4733,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
        a slash so we strip everything from the first slash */
     atsign = strchr(proxyptr, '/');
     if(atsign)
-      *atsign = 0x0; /* cut off path part from host name */
+      *atsign = '\0'; /* cut off path part from host name */
 
     if(data->set.proxyport)
       /* None given in the proxy string, then get the default one if it is
@@ -5106,6 +5137,12 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
          use the default port. Firefox and Chrome both do that. */
       *portptr = '\0';
   }
+
+  /* only if remote_port was not already parsed off the URL we use the
+     default port number */
+  if(conn->remote_port < 0)
+    conn->remote_port = (unsigned short)conn->given->defport;
+
   return CURLE_OK;
 }
 
@@ -5211,6 +5248,214 @@ static CURLcode set_login(struct connectdata *conn,
   return result;
 }
 
+/*
+ * Parses a "host:port" string to connect to.
+ * The hostname and the port may be empty; in this case, NULL is returned for
+ * the hostname and -1 for the port.
+ */
+static CURLcode parse_connect_to_host_port(struct SessionHandle *data,
+                                           const char *host,
+                                           char **hostname_result,
+                                           int *port_result)
+{
+  char *host_dup;
+  char *hostptr;
+  char *host_portno;
+  char *portptr;
+  int port = -1;
+
+  *hostname_result = NULL;
+  *port_result = -1;
+
+  if(!host || !*host)
+    return CURLE_OK;
+
+  host_dup = strdup(host);
+  if(!host_dup)
+    return CURLE_OUT_OF_MEMORY;
+
+  hostptr = host_dup;
+
+  /* start scanning for port number at this point */
+  portptr = hostptr;
+
+  /* detect and extract RFC6874-style IPv6-addresses */
+  if(*hostptr == '[') {
+    char *ptr = ++hostptr; /* advance beyond the initial bracket */
+    while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':') || (*ptr == '.')))
+      ptr++;
+    if(*ptr == '%') {
+      /* There might be a zone identifier */
+      if(strncmp("%25", ptr, 3))
+        infof(data, "Please URL encode %% as %%25, see RFC 6874.\n");
+      ptr++;
+      /* Allow unreserved characters as defined in RFC 3986 */
+      while(*ptr && (ISALPHA(*ptr) || ISXDIGIT(*ptr) || (*ptr == '-') ||
+                     (*ptr == '.') || (*ptr == '_') || (*ptr == '~')))
+        ptr++;
+    }
+    if(*ptr == ']')
+      /* yeps, it ended nicely with a bracket as well */
+      *ptr++ = '\0';
+    else
+      infof(data, "Invalid IPv6 address format\n");
+    portptr = ptr;
+    /* Note that if this didn't end with a bracket, we still advanced the
+     * hostptr first, but I can't see anything wrong with that as no host
+     * name nor a numeric can legally start with a bracket.
+     */
+  }
+
+  /* Get port number off server.com:1080 */
+  host_portno = strchr(portptr, ':');
+  if(host_portno) {
+    char *endp = NULL;
+    *host_portno = '\0'; /* cut off number from host name */
+    host_portno++;
+    if(*host_portno) {
+      long portparse = strtol(host_portno, &endp, 10);
+      if((endp && *endp) || (portparse < 0) || (portparse > 65535)) {
+        infof(data, "No valid port number in connect to host string (%s)\n",
+              host_portno);
+        hostptr = NULL;
+        port = -1;
+      }
+      else
+        port = (int)portparse; /* we know it will fit */
+    }
+  }
+
+  /* now, clone the cleaned host name */
+  if(hostptr) {
+    *hostname_result = strdup(hostptr);
+    if(!*hostname_result) {
+      free(host_dup);
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
+
+  *port_result = port;
+
+  free(host_dup);
+  return CURLE_OK;
+}
+
+/*
+ * Parses one "connect to" string in the form:
+ * "HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT".
+ */
+static CURLcode parse_connect_to_string(struct SessionHandle *data,
+                                        struct connectdata *conn,
+                                        const char *conn_to_host,
+                                        char **host_result,
+                                        int *port_result)
+{
+  CURLcode result = CURLE_OK;
+  const char *ptr = conn_to_host;
+  int host_match = FALSE;
+  int port_match = FALSE;
+
+  if(*ptr == ':') {
+    /* an empty hostname always matches */
+    host_match = TRUE;
+    ptr++;
+  }
+  else {
+    /* check whether the URL's hostname matches */
+    size_t hostname_to_match_len;
+    char *hostname_to_match = aprintf("%s%s%s",
+                                      conn->bits.ipv6_ip ? "[" : "",
+                                      conn->host.name,
+                                      conn->bits.ipv6_ip ? "]" : "");
+    if(!hostname_to_match)
+      return CURLE_OUT_OF_MEMORY;
+    hostname_to_match_len = strlen(hostname_to_match);
+    host_match = curl_strnequal(ptr, hostname_to_match, hostname_to_match_len);
+    free(hostname_to_match);
+    ptr += hostname_to_match_len;
+
+    host_match = host_match && *ptr == ':';
+    ptr++;
+  }
+
+  if(host_match) {
+    if(*ptr == ':') {
+      /* an empty port always matches */
+      port_match = TRUE;
+      ptr++;
+    }
+    else {
+      /* check whether the URL's port matches */
+      char *ptr_next = strchr(ptr, ':');
+      if(ptr_next) {
+        char *endp = NULL;
+        long port_to_match = strtol(ptr, &endp, 10);
+        if((endp == ptr_next) && (port_to_match == conn->remote_port)) {
+          port_match = TRUE;
+          ptr = ptr_next + 1;
+        }
+      }
+    }
+  }
+
+  if(host_match && port_match) {
+    /* parse the hostname and port to connect to */
+    result = parse_connect_to_host_port(data, ptr, host_result, port_result);
+  }
+
+  return result;
+}
+
+/*
+ * Processes all strings in the "connect to" slist, and uses the "connect
+ * to host" and "connect to port" of the first string that matches.
+ */
+static CURLcode parse_connect_to_slist(struct SessionHandle *data,
+                                       struct connectdata *conn,
+                                       struct curl_slist *conn_to_host)
+{
+  CURLcode result = CURLE_OK;
+  char *host = NULL;
+  int port = 0;
+
+  while(conn_to_host && !host) {
+    result = parse_connect_to_string(data, conn, conn_to_host->data,
+                                     &host, &port);
+    if(result)
+      return result;
+
+    if(host && *host) {
+      bool ipv6host;
+      conn->conn_to_host.rawalloc = host;
+      conn->conn_to_host.name = host;
+      conn->bits.conn_to_host = TRUE;
+
+      ipv6host = strchr(host, ':') != NULL;
+      infof(data, "Connecting to hostname: %s%s%s\n",
+            ipv6host ? "[" : "", host, ipv6host ? "]" : "");
+    }
+    else {
+      /* no "connect to host" */
+      conn->bits.conn_to_host = FALSE;
+      free(host);
+    }
+
+    if(port >= 0) {
+      conn->conn_to_port = port;
+      conn->bits.conn_to_port = TRUE;
+      infof(data, "Connecting to port: %d\n", port);
+    }
+    else {
+      /* no "connect to port" */
+      conn->bits.conn_to_port = FALSE;
+    }
+
+    conn_to_host = conn_to_host->next;
+  }
+
+  return result;
+}
+
 /*************************************************************
  * Resolve the address of the server or proxy
  *************************************************************/
@@ -5262,12 +5507,21 @@ static CURLcode resolve_server(struct SessionHandle *data,
     else
 #endif
     if(!conn->proxy.name || !*conn->proxy.name) {
+      struct hostname *connhost;
+      if(conn->bits.conn_to_host)
+        connhost = &conn->conn_to_host;
+      else
+        connhost = &conn->host;
+
       /* If not connecting via a proxy, extract the port from the URL, if it is
        * there, thus overriding any defaults that might have been set above. */
-      conn->port =  conn->remote_port; /* it is the same port */
+      if(conn->bits.conn_to_port)
+        conn->port = conn->conn_to_port;
+      else
+        conn->port = conn->remote_port; /* it is the same port */
 
       /* Resolve target host right on */
-      rc = Curl_resolv_timeout(conn, conn->host.name, (int)conn->port,
+      rc = Curl_resolv_timeout(conn, connhost->name, (int)conn->port,
                                &hostaddr, timeout_ms);
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
@@ -5276,7 +5530,7 @@ static CURLcode resolve_server(struct SessionHandle *data,
         result = CURLE_OPERATION_TIMEDOUT;
 
       else if(!hostaddr) {
-        failf(data, "Couldn't resolve host '%s'", conn->host.dispname);
+        failf(data, "Couldn't resolve host '%s'", connhost->dispname);
         result =  CURLE_COULDNT_RESOLVE_HOST;
         /* don't return yet, we need to clean up the timeout first */
       }
@@ -5351,8 +5605,14 @@ static void reuse_conn(struct connectdata *old_conn,
   /* host can change, when doing keepalive with a proxy or if the case is
      different this time etc */
   free_fixed_hostname(&conn->host);
+  free_fixed_hostname(&conn->conn_to_host);
   Curl_safefree(conn->host.rawalloc);
+  Curl_safefree(conn->conn_to_host.rawalloc);
   conn->host=old_conn->host;
+  conn->bits.conn_to_host = old_conn->bits.conn_to_host;
+  conn->conn_to_host = old_conn->conn_to_host;
+  conn->bits.conn_to_port = old_conn->bits.conn_to_port;
+  conn->conn_to_port = old_conn->conn_to_port;
 
   /* persist connection info in session handle */
   Curl_persistconninfo(conn);
@@ -5661,11 +5921,46 @@ static CURLcode create_conn(struct SessionHandle *data,
     goto out;
 
   /*************************************************************
+   * Process the "connect to" linked list of hostname/port mappings.
+   * Do this after the remote port number has been fixed in the URL.
+   *************************************************************/
+  result = parse_connect_to_slist(data, conn, data->set.connect_to);
+  if(result)
+    goto out;
+
+  /*************************************************************
    * IDN-fix the hostnames
    *************************************************************/
   fix_hostname(data, conn, &conn->host);
+  if(conn->bits.conn_to_host)
+    fix_hostname(data, conn, &conn->conn_to_host);
   if(conn->proxy.name && *conn->proxy.name)
     fix_hostname(data, conn, &conn->proxy);
+
+  /*************************************************************
+   * Check whether the host and the "connect to host" are equal.
+   * Do this after the hostnames have been IDN-fixed .
+   *************************************************************/
+  if(conn->bits.conn_to_host &&
+      Curl_raw_equal(conn->conn_to_host.name, conn->host.name)) {
+    conn->bits.conn_to_host = FALSE;
+  }
+
+  /*************************************************************
+   * Check whether the port and the "connect to port" are equal.
+   * Do this after the remote port number has been fixed in the URL.
+   *************************************************************/
+  if(conn->bits.conn_to_port && conn->conn_to_port == conn->remote_port) {
+    conn->bits.conn_to_port = FALSE;
+  }
+
+  /*************************************************************
+   * If the "connect to" feature is used with an HTTP proxy,
+   * we set the tunnel_proxy bit.
+   *************************************************************/
+  if((conn->bits.conn_to_host || conn->bits.conn_to_port) &&
+      conn->bits.httpproxy)
+    conn->bits.tunnel_proxy = TRUE;
 
   /*************************************************************
    * Setup internals depending on protocol. Needs to be done after

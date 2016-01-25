@@ -1832,6 +1832,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     data->state.first_host = strdup(conn->host.name);
     if(!data->state.first_host)
       return CURLE_OUT_OF_MEMORY;
+
+    data->state.first_remote_port = conn->remote_port;
   }
   http->writebytecount = http->readbytecount = 0;
 

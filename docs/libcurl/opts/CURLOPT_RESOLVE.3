@@ -45,7 +45,7 @@ ADDRESS can of course be either IPv4 or IPv6 style addressing.
 This option effectively pre-populates the DNS cache with entries for the
 host+port pair so redirects and everything that operations against the
 HOST+PORT will instead use your provided ADDRESS. Addresses set with
-\fICURL_RESOLVE\fP will not time-out from the DNS cache like ordinary entries.
+\fICURLOPT_RESOLVE\fP will not time-out from the DNS cache like ordinary entries.
 
 Remove names from the DNS cache again, to stop providing these fake resolves,
 by including a string in the linked list that uses the format
@@ -79,4 +79,4 @@ Added in 7.21.3. Removal support added in 7.42.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR CURLOPT_IPRESOLVE "(3), " CURLOPT_DNS_CACHE_TIMEOUT "(3), "
+.BR CURLOPT_IPRESOLVE "(3), " CURLOPT_DNS_CACHE_TIMEOUT "(3), " CURLOPT_CONNECT_TO "(3), "

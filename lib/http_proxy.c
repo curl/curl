@@ -49,6 +49,8 @@ CURLcode Curl_proxy_connect(struct connectdata *conn)
     /* for [protocol] tunneled through HTTP proxy */
     struct HTTP http_proxy;
     void *prot_save;
+    const char *hostname;
+    int remote_port;
     CURLcode result;
 
     /* BLOCKING */
@@ -67,8 +69,16 @@ CURLcode Curl_proxy_connect(struct connectdata *conn)
     memset(&http_proxy, 0, sizeof(http_proxy));
     conn->data->req.protop = &http_proxy;
     connkeep(conn, "HTTP proxy CONNECT");
-    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
-                               conn->host.name, conn->remote_port, FALSE);
+    if(conn->bits.conn_to_host)
+      hostname = conn->conn_to_host.name;
+    else
+      hostname = conn->host.name;
+    if(conn->bits.conn_to_port)
+      remote_port = conn->conn_to_port;
+    else
+      remote_port = conn->remote_port;
+    result = Curl_proxyCONNECT(conn, FIRSTSOCKET, hostname,
+                               remote_port, FALSE);
     conn->data->req.protop = prot_save;
     if(CURLE_OK != result)
       return result;
@@ -153,9 +163,14 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         const char *useragent="";
         const char *http = (conn->proxytype == CURLPROXY_HTTP_1_0) ?
           "1.0" : "1.1";
-        char *hostheader= /* host:port with IPv6 support */
-          aprintf("%s%s%s:%hu", conn->bits.ipv6_ip?"[":"",
-                  hostname, conn->bits.ipv6_ip?"]":"",
+        bool ipv6_ip = conn->bits.ipv6_ip;
+        char *hostheader;
+
+        /* the hostname may be different */
+        if(hostname != conn->host.name)
+          ipv6_ip = (strchr(hostname, ':') != NULL);
+        hostheader= /* host:port with IPv6 support */
+          aprintf("%s%s%s:%hu", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
                   remote_port);
         if(!hostheader) {
           Curl_add_buffer_free(req_buffer);
