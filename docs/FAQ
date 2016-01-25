@@ -1092,7 +1092,7 @@ FAQ
 
   In such cases, the TCP/IP stack is responsible for detecting when the
   network connection is irrevocably lost. Since with some protocols it is
-  perfectly legal for the client wait indefinitely for data, the stack may
+  perfectly legal for the client to wait indefinitely for data, the stack may
   never report a problem, and even when it does, it can take up to 20 minutes
   for it to detect an issue.  The curl option --keepalive-time enables
   keep-alive support in the TCP/IP stack which makes it periodically probe the
