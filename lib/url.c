@@ -3300,6 +3300,12 @@ ConnectionExists(struct SessionHandle *data,
           continue;
       }
 
+#if defined(USE_NTLM)
+      /* Don't choose authenticated connections if auth wanted auth not NTLM */
+      if(!wantNTLMhttp && check->ntlm.state != NTLMSTATE_NONE)
+        continue;
+#endif
+
       if((!(needle->handler->flags & PROTOPT_CREDSPERREQUEST))
 #ifdef USE_NTLM
          || (wantNTLMhttp || check->ntlm.state != NTLMSTATE_NONE)
