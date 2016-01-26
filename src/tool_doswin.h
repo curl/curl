@@ -25,7 +25,7 @@
 
 #if defined(MSDOS) || defined(WIN32)
 
-char *sanitize_dos_name(char *file_name);
+CURLcode sanitize_file_name(char **filename);
 
 #if defined(MSDOS) && (defined(__DJGPP__) || defined(__GO32__))
 

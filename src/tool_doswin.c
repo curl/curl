@@ -85,42 +85,106 @@ __pragma(warning(pop))
 #  include <fcntl.h>                /* _use_lfn(f) prototype */
 #endif
 
-static const char *msdosify (const char *file_name);
-static char *rename_if_dos_device_name (char *file_name);
+static char *msdosify(const char *file_name);
+static char *rename_if_dos_device_name(const char *file_name);
+
 
 /*
- * sanitize_dos_name: returns a newly allocated string holding a
- * valid file name which will be a transformation of given argument
- * in case this wasn't already a valid file name.
- *
- * This function takes ownership of given argument, free'ing it before
- * returning. Caller is responsible of free'ing returned string. Upon
- * out of memory condition function returns NULL.
- */
-
-char *sanitize_dos_name(char *file_name)
+Sanitize *file_name.
+Success: (CURLE_OK) *file_name points to a sanitized version of the original.
+         This function takes ownership of the original *file_name and frees it.
+Failure: (!= CURLE_OK) *file_name is unchanged.
+*/
+CURLcode sanitize_file_name(char **file_name)
 {
-  char new_name[PATH_MAX];
+  size_t len;
+  char *p, *sanitized;
 
-  if(!file_name)
-    return NULL;
+  /* Calculate the maximum length of a filename.
+     FILENAME_MAX is often the same as PATH_MAX, in other words it does not
+     discount the path information. PATH_MAX size is calculated based on:
+     <drive-letter><colon><path-sep><max-filename-len><NULL> */
+  const size_t max_filename_len = PATH_MAX - 3 - 1;
 
-  if(strlen(file_name) >= PATH_MAX)
-    file_name[PATH_MAX-1] = '\0'; /* truncate it */
+  if(!file_name || !*file_name)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  strcpy(new_name, msdosify(file_name));
+  len = strlen(*file_name);
 
-  Curl_safefree(file_name);
+  if(len >= max_filename_len)
+    len = max_filename_len - 1;
 
-  return strdup(rename_if_dos_device_name(new_name));
+  sanitized = malloc(len + 1);
+
+  if(!sanitized)
+    return CURLE_OUT_OF_MEMORY;
+
+  strncpy(sanitized, *file_name, len);
+  sanitized[len] = '\0';
+
+  for(p = sanitized; *p; ++p ) {
+    const char *banned;
+    if(1 <= *p && *p <= 31) {
+      *p = '_';
+      continue;
+    }
+    for(banned = "|<>/\\\":?*"; *banned; ++banned) {
+      if(*p == *banned) {
+        *p = '_';
+        break;
+      }
+    }
+  }
+
+#ifdef MSDOS
+  /* msdosify checks for more banned characters for MSDOS, however it allows
+     for some path information to pass through. since we are sanitizing only a
+     filename and cannot allow a path it's important this call be done in
+     addition to and not instead of the banned character check above. */
+  p = msdosify(sanitized);
+  if(!p) {
+    free(sanitized);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  sanitized = p;
+  len = strlen(sanitized);
+#endif
+
+  p = rename_if_dos_device_name(sanitized);
+  if(!p) {
+    free(sanitized);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  sanitized = p;
+  len = strlen(sanitized);
+
+  /* dos_device_name rename will rename a device name, possibly changing the
+     length. If the length is too long now we can't truncate it because we
+     could end up with a device name. In practice this shouldn't be a problem
+     because device names are short, but you never know. */
+  if(len >= max_filename_len) {
+    free(sanitized);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
+  *file_name = sanitized;
+  return CURLE_OK;
 }
 
-/* The following functions are taken with modification from the DJGPP
- * port of tar 1.12. They use algorithms originally from DJTAR. */
+/* The functions msdosify, rename_if_dos_device_name and __crt0_glob_function
+ * were taken with modification from the DJGPP port of tar 1.12. They use
+ * algorithms originally from DJTAR.
+ */
 
-static const char *msdosify (const char *file_name)
+/*
+Extra sanitization MSDOS for file_name.
+Returns a copy of file_name that is sanitized by MSDOS standards.
+Warning: path information may pass through. For sanitizing a filename use
+sanitize_file_name which calls this function after sanitizing path info.
+*/
+static char *msdosify(const char *file_name)
 {
-  static char dos_name[PATH_MAX];
+  char dos_name[PATH_MAX];
   static const char illegal_chars_dos[] = ".+, ;=[]" /* illegal in DOS */
     "|<>\\\":?*"; /* illegal in DOS & W95 */
   static const char *illegal_chars_w95 = &illegal_chars_dos[8];
@@ -201,15 +265,20 @@ static const char *msdosify (const char *file_name)
   }
 
   *d = '\0';
-  return dos_name;
+  return strdup(dos_name);
 }
 
-static char *rename_if_dos_device_name (char *file_name)
+/*
+Rename file_name if it's a representation of a device name.
+Returns a copy of file_name, and the copy will have contents different from the
+original if a device name was found.
+*/
+static char *rename_if_dos_device_name(const char *file_name)
 {
   /* We could have a file whose name is a device on MS-DOS.  Trying to
    * retrieve such a file would fail at best and wedge us at worst.  We need
    * to rename such files. */
-  char *base;
+  char *p, *base;
   struct_stat st_buf;
   char fname[PATH_MAX];
 
@@ -219,7 +288,7 @@ static char *rename_if_dos_device_name (char *file_name)
   if(((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
     size_t blen = strlen(base);
 
-    if(strlen(fname) >= PATH_MAX-1) {
+    if(strlen(fname) == PATH_MAX-1) {
       /* Make room for the '_' */
       blen--;
       base[blen] = '\0';
@@ -227,9 +296,54 @@ static char *rename_if_dos_device_name (char *file_name)
     /* Prepend a '_'.  */
     memmove(base + 1, base, blen + 1);
     base[0] = '_';
-    strcpy(file_name, fname);
   }
-  return file_name;
+
+  /* The above stat check does not identify devices for me in Windows 7. For
+     example a stat on COM1 returns a regular file S_IFREG. According to MSDN
+     stat doc that is the correct behavior, so I assume the above code is
+     legacy, maybe MSDOS or DJGPP specific? */
+
+  /* Rename devices.
+     Examples: CON => _CON, CON.EXT => CON_EXT, CON:ADS => CON_ADS */
+  for(p = fname; p; p = (p == fname && fname != base ? base : NULL)) {
+    size_t p_len;
+    int x = (curl_strnequal(p, "CON", 3) ||
+             curl_strnequal(p, "PRN", 3) ||
+             curl_strnequal(p, "AUX", 3) ||
+             curl_strnequal(p, "NUL", 3)) ? 3 :
+            (curl_strnequal(p, "CLOCK$", 6)) ? 6 :
+            (curl_strnequal(p, "COM", 3) || curl_strnequal(p, "LPT", 3)) ?
+              (('1' <= p[3] && p[3] <= '9') ? 4 : 3) : 0;
+
+    if(!x)
+      continue;
+
+    /* the devices may be accessible with an extension or ADS, for
+       example CON.AIR and CON:AIR both access console */
+    if(p[x] == '.' || p[x] == ':') {
+      p[x] = '_';
+      continue;
+    }
+    else if(p[x]) /* no match */
+      continue;
+
+    p_len = strlen(p);
+
+    if(strlen(fname) == PATH_MAX-1) {
+      /* Make room for the '_' */
+      p_len--;
+      p[p_len] = '\0';
+    }
+    /* Prepend a '_'.  */
+    memmove(p + 1, p, p_len + 1);
+    p[0] = '_';
+
+    /* if fname was just modified then the basename pointer must be updated */
+    if(p == fname)
+      base = basename(fname);
+  }
+
+  return strdup(fname);
 }
 
 #if defined(MSDOS) && (defined(__DJGPP__) || defined(__GO32__))

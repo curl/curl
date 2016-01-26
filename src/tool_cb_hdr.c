@@ -28,6 +28,7 @@
 #include "curlx.h"
 
 #include "tool_cfgable.h"
+#include "tool_doswin.h"
 #include "tool_msgs.h"
 #include "tool_cb_hdr.h"
 
@@ -114,18 +115,24 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
       */
       len = (ssize_t)cb - (p - str);
       filename = parse_filename(p, len);
-      if(filename) {
-        outs->filename = filename;
-        outs->alloc_filename = TRUE;
-        outs->is_cd_filename = TRUE;
-        outs->s_isreg = TRUE;
-        outs->fopened = FALSE;
-        outs->stream = NULL;
-        hdrcbdata->honor_cd_filename = FALSE;
-        break;
-      }
-      else
+      if(!filename)
         return failure;
+
+#if defined(MSDOS) || defined(WIN32)
+      if(sanitize_file_name(&filename)) {
+        free(filename);
+        return failure;
+      }
+#endif /* MSDOS || WIN32 */
+
+      outs->filename = filename;
+      outs->alloc_filename = TRUE;
+      outs->is_cd_filename = TRUE;
+      outs->s_isreg = TRUE;
+      outs->fopened = FALSE;
+      outs->stream = NULL;
+      hdrcbdata->honor_cd_filename = FALSE;
+      break;
     }
   }
 
@@ -181,15 +188,12 @@ static char *parse_filename(const char *ptr, size_t len)
   }
 
   /* scan for the end letter and stop there */
-  q = p;
-  while(*q) {
-    if(q[1] && (q[0] == '\\'))
-      q++;
-    else if(q[0] == stop)
+  for(q = p; *q; ++q) {
+    if(*q == stop) {
+      *q = '\0';
       break;
-    q++;
+    }
   }
-  *q = '\0';
 
   /* make sure the file name doesn't end in \r or \n */
   q = strchr(p, '\r');
