@@ -16,6 +16,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl: avoid local drive traversal when saving file on Windows [33]
+ o NTLM: do not resuse proxy connections without diff proxy credentials [34]
  o tests: Disable the OAUTHBEARER tests when using a non-default port number [1]
  o curl: remove keepalive #ifdef checks done on libcurl's behalf
  o formdata: Check if length is too large for memory [2]
@@ -70,6 +72,7 @@ This release includes the following bugfixes:
  o openssl: improved error detection/reporting
  o ssh: CURLOPT_SSH_PUBLIC_KEYFILE now treats "" as NULL again [30]
  o mbedtls: Fix pinned key return value on fail [31]
+ o maketgz: generate date stamp with LC_TIME=C [32]
 
 This release includes the following known bugs:
 
@@ -80,10 +83,10 @@ advice from friends like these:
 
   Alessandro Ghedini, Anders Bakken, Christian Stewart, Dan Fandrich,
   Daniel Schauenberg, Daniel Stenberg, Francisco Moraes, Gisle Vanem,
-  Johannes Schindelin, John Kohl, Kamil Dudka, Marc Hoersken, Michael Kaufmann,
-  Mohammad AlSaleh, Patrick Monnerat, Ray Satiro, Steve Holme,
+  Isaac Boukris, Johannes Schindelin, John Kohl, Kamil Dudka, Marc Hoersken,
+  Michael Kaufmann, Mohammad AlSaleh, Patrick Monnerat, Ray Satiro, Steve Holme,
   Tatsuhiro Tsujikawa, Thomas Glanzmann, Thomas Klausner,
-  (20 contributors)
+  (21 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -120,3 +123,6 @@ References to bug reports and discussions on issues:
  [29] = http://curl.haxx.se/bug/?i=594
  [30] = http://curl.haxx.se/mail/lib-2016-01/0072.html
  [31] = http://curl.haxx.se/bug/?i=601
+ [32] = http://curl.haxx.se/mail/lib-2016-01/0123.html
+ [33] = http://curl.haxx.se/docs/adv_20160127B.html
+ [34] = http://curl.haxx.se/docs/adv_20160127A.html
