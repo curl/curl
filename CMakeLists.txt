@@ -323,6 +323,16 @@ if(CMAKE_USE_OPENSSL)
   endif()
 endif()
 
+option(CMAKE_USE_WINSSL "Use WinSSL code. Experimental" OFF)
+mark_as_advanced(CMAKE_USE_WINSSL)
+
+set(USE_WINSSL OFF)
+
+if (CMAKE_USE_WINSSL)
+  set(USE_SCHANNEL ON)
+  set(USE_WINDOWS_SSPI ON)
+endif()
+
 if(NOT CURL_DISABLE_LDAP)
 
   if(WIN32)
@@ -1018,7 +1028,7 @@ if(BUILD_CURL_TESTS)
 endif()
 
 # TODO support GNUTLS, NSS, POLARSSL, AXTLS, CYASSL, WINSSL, DARWINSSL
-if(USE_OPENSSL)
+if(USE_OPENSSL OR USE_SCHANNEL)
   set(SSL_ENABLED 1)
 endif()
 
