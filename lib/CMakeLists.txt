@@ -72,6 +72,7 @@ endif()
 add_library(
   ${LIB_NAME}
   ${CURL_USER_DEFINED_DYNAMIC_OR_STATIC}
+  ${version_rc}
   ${HHEADERS} ${CSOURCES}
   )
 
