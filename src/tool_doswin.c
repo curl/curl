@@ -85,7 +85,9 @@ __pragma(warning(pop))
 #  include <fcntl.h>                /* _use_lfn(f) prototype */
 #endif
 
+#ifdef MSDOS
 static char *msdosify(const char *file_name);
+#endif
 static char *rename_if_dos_device_name(const char *file_name);
 
 
@@ -182,6 +184,7 @@ Returns a copy of file_name that is sanitized by MSDOS standards.
 Warning: path information may pass through. For sanitizing a filename use
 sanitize_file_name which calls this function after sanitizing path info.
 */
+#ifdef MSDOS
 static char *msdosify(const char *file_name)
 {
   char dos_name[PATH_MAX];
@@ -267,6 +270,7 @@ static char *msdosify(const char *file_name)
   *d = '\0';
   return strdup(dos_name);
 }
+#endif
 
 /*
 Rename file_name if it's a representation of a device name.
