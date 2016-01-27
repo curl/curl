@@ -122,11 +122,6 @@ endif()
 option(CURL_HIDDEN_SYMBOLS "Set to ON to hide libcurl internal symbols (=hide all symbols that aren't officially external)." ON)
 mark_as_advanced(CURL_HIDDEN_SYMBOLS)
 
-IF(WIN32)
-  OPTION(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON)
-  MARK_AS_ADVANCED(CURL_WINDOWS_SSPI)
-ENDIF()
-
 option(HTTP_ONLY "disables all protocols except HTTP (This overrides all CURL_DISABLE_* options)" OFF)
 mark_as_advanced(HTTP_ONLY)
 option(CURL_DISABLE_FTP "disables FTP" OFF)
@@ -253,6 +248,7 @@ include (CheckLibraryExists)
 include (CheckSymbolExists)
 include (CheckTypeSize)
 include (CheckCSourceCompiles)
+include (CMakeDependentOption)
 
 # On windows preload settings
 if(WIN32)
@@ -290,13 +286,21 @@ endif(NOT NOT_NEED_LIBNSL)
 
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
+set(OPENSSL_DEFAULT ON)
 if(WIN32)
+  set(OPENSSL_DEFAULT OFF)
   check_library_exists_concat("ws2_32" getch        HAVE_LIBWS2_32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
 endif()
 
-option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ON)
+option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${OPENSSL_DEFAULT})
 mark_as_advanced(CMAKE_USE_OPENSSL)
+
+if(WIN32)
+  CMAKE_DEPENDENT_OPTION(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON
+    "NOT CMAKE_USE_OPENSSL" OFF)
+  mark_as_advanced(CURL_WINDOWS_SSPI)
+endif()
 
 set(USE_OPENSSL OFF)
 set(HAVE_LIBCRYPTO OFF)
@@ -320,6 +324,8 @@ if(CMAKE_USE_OPENSSL)
     check_include_file("openssl/ssl.h"    HAVE_OPENSSL_SSL_H)
     check_include_file("openssl/x509.h"   HAVE_OPENSSL_X509_H)
     check_include_file("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
+  elseif(WIN32)
+    set(CURL_WINDOWS_SSPI ON)
   endif()
 endif()
 
@@ -1055,7 +1061,8 @@ endfunction()
 
 # Clear list and try to detect available features
 set(_items)
-_add_if("SSL"           SSL_ENABLED)
+_add_if("WinSSL"        SSL_ENABLED AND USE_WINDOWS_SSPI)
+_add_if("OpenSSL"       SSL_ENABLED AND USE_OPENSSL)
 _add_if("IPv6"          ENABLE_IPV6)
 _add_if("unix-sockets"  USE_UNIX_SOCKETS)
 _add_if("libz"          HAVE_LIBZ)
