@@ -32,7 +32,7 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   imap-list imap-lsub imap-fetch imap-store imap-append imap-examine       \
   imap-search imap-create imap-delete imap-copy imap-noop imap-ssl         \
   imap-tls imap-multi url2file sftpget ftpsget postinmemory http2-download \
-  http2-upload http2-serverpush getredirect.c
+  http2-upload http2-serverpush getredirect
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.
