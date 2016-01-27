@@ -274,12 +274,12 @@ struct ssl_connect_data {
      current state of the connection. */
   bool use;
   ssl_connection_state state;
+  ssl_connect_state connecting_state;
 #ifdef USE_OPENSSL
   /* these ones requires specific SSL-types */
   SSL_CTX* ctx;
   SSL*     handle;
   X509*    server_cert;
-  ssl_connect_state connecting_state;
 #endif /* USE_OPENSSL */
 #ifdef USE_GNUTLS
   gnutls_session_t session;
@@ -287,7 +287,6 @@ struct ssl_connect_data {
 #ifdef USE_TLS_SRP
   gnutls_srp_client_credentials_t srp_client_cred;
 #endif
-  ssl_connect_state connecting_state;
 #endif /* USE_GNUTLS */
 #ifdef USE_MBEDTLS
   mbedtls_ctr_drbg_context ctr_drbg;
@@ -299,7 +298,6 @@ struct ssl_connect_data {
   mbedtls_x509_crt clicert;
   mbedtls_x509_crl crl;
   mbedtls_pk_context pk;
-  ssl_connect_state connecting_state;
   mbedtls_ssl_config config;
 #endif /* USE_MBEDTLS */
 #ifdef USE_POLARSSL
@@ -312,12 +310,10 @@ struct ssl_connect_data {
   x509_crt clicert;
   x509_crl crl;
   rsa_context rsa;
-  ssl_connect_state connecting_state;
 #endif /* USE_POLARSSL */
 #ifdef USE_CYASSL
   SSL_CTX* ctx;
   SSL*     handle;
-  ssl_connect_state connecting_state;
 #endif /* USE_CYASSL */
 #ifdef USE_NSS
   PRFileDesc *handle;
@@ -325,23 +321,19 @@ struct ssl_connect_data {
   struct SessionHandle *data;
   struct curl_llist *obj_list;
   PK11GenericObject *obj_clicert;
-  ssl_connect_state connecting_state;
 #endif /* USE_NSS */
 #ifdef USE_GSKIT
   gsk_handle handle;
   int iocport;
-  ssl_connect_state connecting_state;
 #endif
 #ifdef USE_AXTLS
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
-  ssl_connect_state connecting_state;
 #endif /* USE_AXTLS */
 #ifdef USE_SCHANNEL
   struct curl_schannel_cred *cred;
   struct curl_schannel_ctxt *ctxt;
   SecPkgContext_StreamSizes stream_sizes;
-  ssl_connect_state connecting_state;
   size_t encdata_length, decdata_length;
   size_t encdata_offset, decdata_offset;
   unsigned char *encdata_buffer, *decdata_buffer;
@@ -353,7 +345,6 @@ struct ssl_connect_data {
 #ifdef USE_DARWINSSL
   SSLContextRef ssl_ctx;
   curl_socket_t ssl_sockfd;
-  ssl_connect_state connecting_state;
   bool ssl_direction; /* true if writing, false if reading */
   size_t ssl_write_buffered_length;
 #endif /* USE_DARWINSSL */
