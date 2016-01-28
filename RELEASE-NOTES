@@ -1,79 +1,19 @@
-Curl and libcurl 7.47.0
+Curl and libcurl 7.47.1
 
- Public curl releases:         151
+ Public curl releases:         152
  Command line options:         179
  curl_easy_setopt() options:   221
  Public functions in libcurl:  61
- Contributors:                 1340
+ Contributors:                 1346
 
 This release includes the following changes:
 
- o version: Add flag CURL_VERSION_PSL for libpsl
- o http: added CURL_HTTP_VERSION_2TLS to do HTTP/2 for HTTPS only [8]
- o curl: use 2TLS by default
- o curl --expect100-timeout: added [10]
- o Add .dir-locals and set c-basic-offset to 2 (for emacs) [16]
+ o
 
 This release includes the following bugfixes:
 
- o curl: avoid local drive traversal when saving file on Windows [33]
- o NTLM: do not resuse proxy connections without diff proxy credentials [34]
- o tests: Disable the OAUTHBEARER tests when using a non-default port number [1]
- o curl: remove keepalive #ifdef checks done on libcurl's behalf
- o formdata: Check if length is too large for memory [2]
- o lwip: Fix compatibility issues with later versions [3]
- o openssl: BoringSSL doesn't have CONF_modules_free
- o config-win32: Fix warning HAVE_WINSOCK2_H undefined
- o build: fix compilation error with CURL_DISABLE_VERBOSE_STRINGS [4]
- o http2: Fix hanging paused stream [5]
- o scripts/Makefile: fix GNUism and survive no perl [6]
- o openssl: adapt to 1.1.0+ name changes
- o openssl: adapt to openssl >= 1.1.0 X509 opaque structs [7]
- o HTTP2.md: spell fix and remove TODO now implemented
- o setstropt: const-correctness [9]
- o cyassl: fix compiler warning on type conversion
- o gskit: Fix host subject altname verification [11]
- o http2: Support trailer fields [12]
- o wolfssl: handle builds without SSLv3 support
- o cyassl: deal with lack of *get_peer_certificate [13]
- o sockfilt: do not wait on unreliable file or pipe handle
- o make: build zsh script even in an out-of-tree build
- o test 1326: fix getting stuck on Windows
- o test 87: fix file check on Windows
- o configure: allow static builds on mingw [14]
- o configure: detect IPv6 support on Windows [15]
- o ConnectionExists: with *PIPEWAIT, wait for connections [17]
- o Makefile.inc: s/curl_SOURCES/CURL_FILES [18]
- o test 16: fixed for Windows
- o test 252-255: use datacheck mode text for ASCII-mode LISTings
- o tftpd server: add Windows support by writing files in binary mode
- o ftplistparser: fix handling of file LISTings using Windows EOL
- o tests first.c: fix calculation of sleep timeout on Windows
- o tests (several): use datacheck mode text for ASCII-mode LISTings
- o CURLOPT_RANGE.3: for HTTP servers, range support is optional
- o test 1515: add MSYS support by passing a relative path
- o curl_global_init.3: Add Windows-specific info for init via DLL [19]
- o http2: Fix client write for trailers on stream close [20]
- o mbedtls: Fix ALPN support
- o connection reuse: IDN host names fixed [21]
- o http2: Fix PUSH_PROMISE headers being treated as trailers [22]
- o http2: handle the received SETTINGS frame [23]
- o http2: Ensure that http2_handle_stream_close is called [24]
- o mbedtls: implement CURLOPT_PINNEDPUBLICKEY
- o runtests: Add mbedTLS to the SSL backends
- o IDN host names: Remove the port number before converting to ACE [25]
- o zsh.pl: fail if no curl is found
- o scripts: fix zsh completion generation
- o scripts: don't generate and install zsh completion when cross-compiling [26]
- o lib: Prefix URLs with lower-case protocol names/schemes [27]
- o ConnectionExists: only do pipelining/multiplexing when asked [28]
- o configure: assume IPv6 works when cross-compiled [29]
- o openssl: for 1.1.0+ they now provide a SSLeay() macro of their own
- o openssl: improved error detection/reporting
- o ssh: CURLOPT_SSH_PUBLIC_KEYFILE now treats "" as NULL again [30]
- o mbedtls: Fix pinned key return value on fail [31]
- o maketgz: generate date stamp with LC_TIME=C [32]
-
+ o
+ 
 This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (http://curl.haxx.se/docs/knownbugs.html)
@@ -81,48 +21,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Anders Bakken, Christian Stewart, Dan Fandrich,
-  Daniel Schauenberg, Daniel Stenberg, Francisco Moraes, Gisle Vanem,
-  Isaac Boukris, Johannes Schindelin, John Kohl, Kamil Dudka, Marc Hoersken,
-  Michael Kaufmann, Mohammad AlSaleh, Patrick Monnerat, Ray Satiro, Steve Holme,
-  Tatsuhiro Tsujikawa, Thomas Glanzmann, Thomas Klausner,
-  (21 contributors)
+  
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/mail/lib-2015-12/0003.html
- [2] = https://github.com/bagder/curl/issues/425#issuecomment-154518679
- [3] = http://curl.haxx.se/mail/lib-2015-12/0023.html
- [4] = http://curl.haxx.se/bug/?i=558
- [5] = http://curl.haxx.se/mail/lib-2015-11/0103.html
- [6] = http://curl.haxx.se/bug/?i=555
- [7] = http://curl.haxx.se/bug/?i=491
- [8] = http://curl.haxx.se/libcurl/c/CURLOPT_HTTP_VERSION.html
- [9] = http://curl.haxx.se/bug/?i=565
- [10] = http://curl.haxx.se/docs/manpage.html#--expect100-timeout
- [11] = http://curl.haxx.se/mail/lib-2015-12/0062.html
- [12] = http://curl.haxx.se/bug/?i=564
- [13] = http://curl.haxx.se/bug/?i=565
- [14] = https://github.com/Alexpux/MINGW-packages/tree/master/mingw-w64-curl
- [15] = https://github.com/Alexpux/MINGW-packages/commit/9253d0bf58a1486e91f7efb5316e7fdb48fa4007
- [16] = http://curl.haxx.se/bug/?i=574
- [17] = http://curl.haxx.se/bug/?i=575
- [18] = http://curl.haxx.se/bug/?i=577
- [19] = http://curl.haxx.se/bug/?i=586
- [20] = http://curl.haxx.se/bug/?i=564
- [21] = http://curl.haxx.se/bug/?i=592
- [22] = http://curl.haxx.se/bug/?i=564
- [23] = http://curl.haxx.se/mail/lib-2016-01/0031.html
- [24] = http://curl.haxx.se/bug/?i=564
- [25] = http://curl.haxx.se/bug/?i=596
- [26] = http://curl.haxx.se/bug/?i=582
- [27] = http://curl.haxx.se/bug/?i=597
- [28] = http://curl.haxx.se/bug/?i=584
- [29] = http://curl.haxx.se/bug/?i=594
- [30] = http://curl.haxx.se/mail/lib-2016-01/0072.html
- [31] = http://curl.haxx.se/bug/?i=601
- [32] = http://curl.haxx.se/mail/lib-2016-01/0123.html
- [33] = http://curl.haxx.se/docs/adv_20160127B.html
- [34] = http://curl.haxx.se/docs/adv_20160127A.html
+ [1] =
+ 
