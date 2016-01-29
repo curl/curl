@@ -828,8 +828,17 @@ cookies when they're closed down.
 server-specified Content-Disposition filename instead of extracting a filename
 from the URL.
 
+If the server specifies a file name and a file with that name already exists
+in the current working directory it will not be overwritten and an error will
+occur. If the server doesn't specify a file name then this option has no
+effect.
+
 There's no attempt to decode %-sequences (yet) in the provided file name, so
 this option may provide you with rather unexpected file names.
+
+\fBWARNING\fP: Exercise judicious use of this option, especially on Windows. A
+rogue server could send you the name of a DLL or other file that could possibly
+be loaded automatically by Windows or some third party software.
 .IP "-k, --insecure"
 (SSL) This option explicitly allows curl to perform "insecure" SSL connections
 and transfers. All SSL connections are attempted to be made secure by using
@@ -1190,12 +1199,15 @@ output to be done to stdout.
 Write output to a local file named like the remote file we get. (Only the file
 part of the remote file is used, the path is cut off.)
 
-The remote file name to use for saving is extracted from the given URL,
-nothing else.
+The file will be saved in the current working directory. If you want the file
+saved in a different directory, make sure you change the current working
+directory before invoking curl with this option.
 
-Consequentially, the file will be saved in the current working directory. If
-you want the file saved in a different directory, make sure you change current
-working directory before you invoke curl with the \fB-O, --remote-name\fP flag!
+The remote file name to use for saving is extracted from the given URL, nothing
+else, and if it already exists it will be overwritten. If you want the server
+to be able to choose the file name refer to \fI-J, --remote-header-name\fP
+which can be used in addition to this option. If the server chooses a file name
+and that name already exists it will not be overwritten.
 
 There is no URL decoding done on the file name. If it has %20 or other URL
 encoded parts of the name, they will end up as-is as file name.
