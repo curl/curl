@@ -563,17 +563,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
             char *storefile = outfile;
             result = glob_match_url(&outfile, storefile, urls);
             Curl_safefree(storefile);
-
-#if defined(MSDOS) || defined(WIN32)
-            if(!result) {
-              result = sanitize_file_name(&outfile);
-              if(result) {
-                Curl_safefree(outfile);
-                goto show_error;
-              }
-            }
-#endif /* MSDOS || WIN32 */
-
             if(result) {
               /* bad globbing */
               warnf(config->global, "bad output glob!\n");
