@@ -136,7 +136,7 @@ The Art Of Scripting HTTP Requests Using Curl
 
  The Uniform Resource Locator format is how you specify the address of a
  particular resource on the Internet. You know these, you've seen URLs like
- http://curl.haxx.se or https://yourbank.com a million times. RFC 3986 is the
+ https://curl.haxx.se or https://yourbank.com a million times. RFC 3986 is the
  canonical spec. And yeah, the formal name is not URL, it is URI.
 
  2.2 Host
@@ -203,7 +203,7 @@ The Art Of Scripting HTTP Requests Using Curl
  issues a GET request to the server and receives the document it asked for.
  If you issue the command line
 
-        curl http://curl.haxx.se
+        curl https://curl.haxx.se
 
  you get a web page returned in your terminal window. The entire HTML document
  that that URL holds.
@@ -628,7 +628,7 @@ The Art Of Scripting HTTP Requests Using Curl
   More about server certificate verification and ca cert bundles can be read
   in the SSLCERTS document, available online here:
 
-        http://curl.haxx.se/docs/sslcerts.html
+        https://curl.haxx.se/docs/sslcerts.html
 
   At times you may end up with your own CA cert store and then you can tell
   curl to use that to verify the server's certificate:
@@ -755,4 +755,4 @@ The Art Of Scripting HTTP Requests Using Curl
 
  14.2 Sites
 
- http://curl.haxx.se is the home of the cURL project
+ https://curl.haxx.se is the home of the cURL project

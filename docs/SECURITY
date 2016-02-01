@@ -14,7 +14,7 @@ Publishing Information
 ----------------------
 
 All known and public curl or libcurl related vulnerabilities are listed on
-[the curl web site security page](http://curl.haxx.se/docs/security.html).
+[the curl web site security page](https://curl.haxx.se/docs/security.html).
 
 Security vulnerabilities should not be entered in the project's public bug
 tracker unless the necessary configuration is in place to limit access to the

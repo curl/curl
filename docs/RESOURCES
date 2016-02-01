@@ -36,7 +36,7 @@ This document lists documents and standards used by curl.
 
   RFC 2109 - HTTP State Management Mechanism (cookie stuff)
            - Also, read Netscape's specification at
-             http://curl.haxx.se/rfc/cookie_spec.html
+             https://curl.haxx.se/rfc/cookie_spec.html
 
   RFC 2183 - The Content-Disposition Header Field
 

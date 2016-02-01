@@ -172,7 +172,7 @@
  signal handler back into the library with a sigsetjmp, which effectively
  causes libcurl to continue running within the signal handler. This is
  non-portable and could cause problems on some platforms. A discussion on the
- problem is available at http://curl.haxx.se/mail/lib-2008-09/0197.html
+ problem is available at https://curl.haxx.se/mail/lib-2008-09/0197.html
 
  Also, alarm() provides timeout resolution only to the nearest second. alarm
  ought to be replaced by setitimer on systems that support it.
@@ -261,7 +261,7 @@
  hack ;-)
 
  Please see the following thread for more information:
- http://curl.haxx.se/mail/lib-2012-05/0178.html
+ https://curl.haxx.se/mail/lib-2012-05/0178.html
 
 1.14 Typesafe curl_easy_setopt()
 
@@ -355,7 +355,7 @@
  When trying to connect passively to a server which only supports active
  connections, libcurl returns CURLE_FTP_WEIRD_PASV_REPLY and closes the
  connection. There could be a way to fallback to an active connection (and
- vice versa). http://curl.haxx.se/bug/feature.cgi?id=1754793
+ vice versa). https://curl.haxx.se/bug/feature.cgi?id=1754793
 
 4.3 Earlier bad letter detection
 
@@ -392,13 +392,13 @@ This is not detailed in any FTP specification.
 5.1 Better persistency for HTTP 1.0
 
  "Better" support for persistent connections over HTTP 1.0
- http://curl.haxx.se/bug/feature.cgi?id=1089001
+ https://curl.haxx.se/bug/feature.cgi?id=1089001
 
 5.2 support FF3 sqlite cookie files
 
  Firefox 3 is changing from its former format to a a sqlite database instead.
  We should consider how (lib)curl can/should support this.
- http://curl.haxx.se/bug/feature.cgi?id=1871388
+ https://curl.haxx.se/bug/feature.cgi?id=1871388
 
 5.3 Rearrange request header order
 
@@ -543,7 +543,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 13.1 Disable specific versions
 
  Provide an option that allows for disabling specific SSL versions, such as
- SSLv2 http://curl.haxx.se/bug/feature.cgi?id=1767276
+ SSLv2 https://curl.haxx.se/bug/feature.cgi?id=1767276
 
 13.2 Provide mutex locking API
 
@@ -554,7 +554,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 13.3 Evaluate SSL patches
 
  Evaluate/apply Gertjan van Wingerde's SSL patches:
- http://curl.haxx.se/mail/lib-2004-03/0087.html
+ https://curl.haxx.se/mail/lib-2004-03/0087.html
 
 13.4 Cache OpenSSL contexts
 
@@ -592,9 +592,9 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  https://www.rfc-editor.org/rfc/rfc6698.txt
 
  An initial patch was posted by Suresh Krishnaswamy on March 7th 2013
- (http://curl.haxx.se/mail/lib-2013-03/0075.html) but it was a too simple
+ (https://curl.haxx.se/mail/lib-2013-03/0075.html) but it was a too simple
  approach. See Daniel's comments:
- http://curl.haxx.se/mail/lib-2013-03/0103.html . libunbound may be the
+ https://curl.haxx.se/mail/lib-2013-03/0103.html . libunbound may be the
  correct library to base this development on.
 
 14. GnuTLS
@@ -686,7 +686,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  The client could be told to use maximum N simultaneous parallel transfers and
  then just make sure that happens. It should of course not make more than one
  connection to the same remote host. This would require the client to use the
- multi interface. http://curl.haxx.se/bug/feature.cgi?id=1558595
+ multi interface. https://curl.haxx.se/bug/feature.cgi?id=1558595
 
 17.5 provide formpost headers
 

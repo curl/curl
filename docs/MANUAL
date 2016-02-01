@@ -3,7 +3,7 @@ LATEST VERSION
   You always find news about what's going on as well as the latest versions
   from the curl web pages, located at:
 
-        http://curl.haxx.se
+        https://curl.haxx.se
 
 SIMPLE USAGE
 
@@ -824,7 +824,7 @@ LDAP
   Working with LDAP URLs":
   http://developer.netscape.com/docs/manuals/dirsdk/csdk30/url.htm
 
-  RFC 2255, "The LDAP URL Format" http://curl.haxx.se/rfc/rfc2255.txt
+  RFC 2255, "The LDAP URL Format" https://curl.haxx.se/rfc/rfc2255.txt
 
   To show you an example, this is how I can get all people from my local LDAP
   server that has a certain sub-domain in their email address:
@@ -1011,7 +1011,7 @@ MAILING LISTS
 
   For your convenience, we have several open mailing lists to discuss curl,
   its development and things relevant to this. Get all info at
-  http://curl.haxx.se/mail/. Some of the lists available are:
+  https://curl.haxx.se/mail/. Some of the lists available are:
 
   curl-users
 

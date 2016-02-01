@@ -27,7 +27,7 @@ Basic
 
 C
   libcurl is a C library in itself!
-  http://curl.haxx.se/libcurl/
+  https://curl.haxx.se/libcurl/
 
 C++
 
@@ -184,7 +184,7 @@ Rexx
 RPG
 
   Support for ILE/RPG on OS/400 is included in source distribution
-  http://curl.haxx.se/libcurl/
+  https://curl.haxx.se/libcurl/
   See packages/OS400/README.OS400 and packages/OS400/curl.inc.in
 
 Ruby
