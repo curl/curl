@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,6 +35,7 @@
 
 /*
  * Curl_dedotdotify()
+ * @unittest: 1395
  *
  * This function gets a zero-terminated path with dot and dotdot sequences
  * passed in and strips them off according to the rules in RFC 3986 section
@@ -67,6 +68,12 @@ char *Curl_dedotdotify(const char *input)
   }
   orgclone = clone;
   outptr = out;
+
+  if(!*clone) {
+    /* zero length string, return that */
+    free(out);
+    return clone;
+  }
 
   /*
    * To handle query-parts properly, we must find it and remove it during the
