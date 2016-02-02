@@ -6,14 +6,15 @@ Curl and libcurl 7.47.1
  Public functions in libcurl:  61
  Contributors:                 1346
 
-This release includes the following changes:
-
- o
-
 This release includes the following bugfixes:
 
- o
- 
+ o getredirect.c: fix variable name
+ o tool_doswin: silence unused function warning [1]
+ o cmake: fixed when OpenSSL enabled on Windows and schannel detected [2]
+ o curl.1: Explain remote-name behavior if file already exists
+ o tool_operate: Don't sanitize --output path (Windows) [3]
+ o URLs: change all http:// URLs to https://
+
 This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
@@ -21,11 +22,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Bernard Spil, Daniel Stenberg, Gisle Vanem, Octavio Schroeder, Ray Satiro,
+  Sergei Nikulov, Viktor Szakáts,
+  (7 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
- 
+ [1] = https://github.com/bagder/curl/pull/616
+ [2] = https://curl.haxx.se/bug/?i=617
+ [3] = https://curl.haxx.se/bug/?i=624
