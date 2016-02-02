@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,7 @@
 #define WOLFSSL_OPTIONS_IGNORE_SYS
 /* CyaSSL's version.h, which should contain only the version, should come
 before all other CyaSSL includes and be immediately followed by build config
-aka options.h. http://curl.haxx.se/mail/lib-2015-04/0069.html */
+aka options.h. https://curl.haxx.se/mail/lib-2015-04/0069.html */
 #include <cyassl/version.h>
 #if defined(HAVE_CYASSL_OPTIONS_H) && (LIBCYASSL_VERSION_HEX > 0x03004008)
 #if defined(CYASSL_API) || defined(WOLFSSL_API)

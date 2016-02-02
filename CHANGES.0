@@ -40,7 +40,7 @@ Daniel Stenberg (2 June 2010)
   think addressed the issue better and also uses the connect timeout for the
   initial part of the SSH/SFTP done during the "protocol connect" phase.
 
-  (http://curl.haxx.se/bug/view.cgi?id=3006786)
+  (https://curl.haxx.se/bug/view.cgi?id=3006786)
 
 Yang Tse (2 June 2010)
 - Added missing new libcurl files to non-configure targets. Adjusted
@@ -96,13 +96,13 @@ Daniel Stenberg (21 May 2010)
   fix the problem) as it now actually allows for easier (future) customization
   of the timeout.
 
-  (http://curl.haxx.se/bug/view.cgi?id=3003705)
+  (https://curl.haxx.se/bug/view.cgi?id=3003705)
 
 - Douglas Kilpatrick filed bug report #3004787 and pointed out that the TFTP
   code didn't handle block id wraps correctly. His suggested fix inspired the
   fix I committed.
 
-  (http://curl.haxx.se/bug/view.cgi?id=3004787)
+  (https://curl.haxx.se/bug/view.cgi?id=3004787)
 
 Daniel Stenberg (20 May 2010)
 - Tanguy Fautre brought a fix to allow curl to build with Microsoft VC10.
@@ -112,7 +112,7 @@ Daniel Stenberg (18 May 2010)
   code was not sending the timeout option properly to the server, and
   suggested a fix.
 
-  (http://curl.haxx.se/bug/view.cgi?id=3003005)
+  (https://curl.haxx.se/bug/view.cgi?id=3003005)
 
 Kamil Dudka (16 May 2010)
 - Pavel Raiskup introduced a new option CURLOPT_FNMATCH_DATA in order to pass
@@ -138,14 +138,14 @@ Daniel Stenberg (14 May 2010)
   never obtain a valid fdset, and thus not drive the multi handle, resulting
   in a hang.
 
-  (http://curl.haxx.se/bug/view.cgi?id=3000052)
+  (https://curl.haxx.se/bug/view.cgi?id=3000052)
 
 - Sebastian V reported bug #3000056 identifying a problem with redirect
   following. It showed that when curl followed redirects it didn't properly
   ignore the response body of the 30X response if that response was using
   compressed Content-Encoding!
 
-  (http://curl.haxx.se/bug/view.cgi?id=3000056)
+  (https://curl.haxx.se/bug/view.cgi?id=3000056)
 
 Daniel Stenberg (12 May 2010)
 - Howard Chu brought support for RTMP. This is powered by the underlying
@@ -269,7 +269,7 @@ Daniel Stenberg (15 Apr 2010)
   unnecesary reverse name lookups in many cases when built to use IPv4 and
   getaddrinfo(). The logic for IPv6 is now used for IPv4 too.
 
-  (http://curl.haxx.se/bug/view.cgi?id=2963679)
+  (https://curl.haxx.se/bug/view.cgi?id=2963679)
 
 Version 7.20.1 (14 April 2010)
 
@@ -340,7 +340,7 @@ Daniel Stenberg (23 Mar 2010)
   PROXYTUNNEL. He found a case where it would connect fine but bits.tcpconnect
   was not set correct so libcurl didn't work properly.
 
-  (http://curl.haxx.se/bug/view.cgi?id=2963679)
+  (https://curl.haxx.se/bug/view.cgi?id=2963679)
 
 - Akos Pasztory filed debian bug report #572276
   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=572276 mentioning a problem
@@ -382,7 +382,7 @@ Daniel Stenberg (21 Mar 2010)
 - Ben Greear improved TFTP: the error code returning and the treatment
   of TSIZE == 0 when uploading.
 
-- We've switched from CVS to git. See http://curl.haxx.se/source.html
+- We've switched from CVS to git. See https://curl.haxx.se/source.html
 
 Kamil Dudka (19 Mar 2010)
 - Improved Curl_read() to not ignore the error returned from Curl_ssl_recv().
@@ -391,7 +391,7 @@ Daniel Stenberg (15 Mar 2010)
 - Constantine Sapuntzakis brought a patch:
 
   The problem mentioned on Dec 10 2009
-  (http://curl.haxx.se/bug/view.cgi?id=2905220) was only partially fixed.
+  (https://curl.haxx.se/bug/view.cgi?id=2905220) was only partially fixed.
   Partially because an easy handle can be associated with many connections in
   the cache (e.g. if there is a redirect during the lifetime of the easy
   handle).  The previous patch only cleaned up the first one. The new fix now
@@ -433,13 +433,13 @@ Daniel Stenberg (2 Mar 2010)
   CURLOPT_CERTINFO feature leaked memory due to a missing OpenSSL function
   call. He provided the patch to fix it too.
 
-  http://curl.haxx.se/bug/view.cgi?id=2956698
+  https://curl.haxx.se/bug/view.cgi?id=2956698
 
 - Markus Duft pointed out in bug #2961796 that even though Interix has a
   poll() function it doesn't quite work the way we want it so we must disable
   it, and he also provided a patch for it.
 
-  http://curl.haxx.se/bug/view.cgi?id=2961796
+  https://curl.haxx.se/bug/view.cgi?id=2961796
 
 - Made the pingpong timeout code properly deal with the response timeout AND
   the global timeout if set. Also, as was reported in the bug report #2956437
@@ -448,7 +448,7 @@ Daniel Stenberg (2 Mar 2010)
   that just now. This was a regression compared to 7.19.7 due to the
   conversion of FTP code over to the generic pingpong concepts.
 
-  http://curl.haxx.se/bug/view.cgi?id=2956437
+  https://curl.haxx.se/bug/view.cgi?id=2956437
 
 Daniel Stenberg (1 Mar 2010)
 - Ben Greear provided an update for TFTP that fixes upload.
@@ -457,20 +457,20 @@ Daniel Stenberg (1 Mar 2010)
   OpenSSL based SSL handshaking even though the multi interface was used and
   there was no good reason for it.
 
-  http://curl.haxx.se/bug/view.cgi?id=2958179
+  https://curl.haxx.se/bug/view.cgi?id=2958179
 
 Daniel Stenberg (26 Feb 2010)
 - Pat Ray in bug #2958474 pointed out an off-by-one case when receiving a
   chunked-encoding trailer.
 
-  http://curl.haxx.se/bug/view.cgi?id=2958474
+  https://curl.haxx.se/bug/view.cgi?id=2958474
 
 Daniel Fandrich (25 Feb 2010)
 - Fixed a couple of out of memory leaks and a segfault in the SMTP & IMAP code.
 
 Yang Tse (25 Feb 2010)
 - I fixed bug report #2958074 indicating
-  (http://curl.haxx.se/bug/view.cgi?id=2958074) that curl on Windows with
+  (https://curl.haxx.se/bug/view.cgi?id=2958074) that curl on Windows with
   option --trace-time did not use local time when timestamping trace lines.
   This could also happen on other systems depending on time souurce.
 
@@ -501,11 +501,11 @@ Yang Tse (14 Feb 2010)
 Daniel Stenberg (13 Feb 2010)
 - Martin Hager reported and fixed a problem with a missing quote in libcurl.m4
 
-  (http://curl.haxx.se/bug/view.cgi?id=2951319)
+  (https://curl.haxx.se/bug/view.cgi?id=2951319)
 
 - Tom Donovan fixed the CURL_FORMAT_* defines when building with cmake.
 
-  (http://curl.haxx.se/bug/view.cgi?id=2951269)
+  (https://curl.haxx.se/bug/view.cgi?id=2951269)
 
 Daniel Stenberg (12 Feb 2010)
 - Jack Zhang reported a problem with SMTP: we wrongly used multiple addresses
@@ -532,7 +532,7 @@ Daniel Stenberg (9 Feb 2010)
   This is further detailed and explained in the libcurl security advisory
   20100209 at
 
-    http://curl.haxx.se/docs/adv_20100209.html
+    https://curl.haxx.se/docs/adv_20100209.html
 
 Daniel Fandrich (3 Feb 2010)
 - Changed the Watcom makefiles to make them easier to keep in sync with
@@ -685,7 +685,7 @@ Daniel Stenberg (9 Jan 2010)
   SSL_SESSION_free() after each consecutive SSL_get1_session() to avoid
   introducing a memory leak.
 
-  (http://curl.haxx.se/bug/view.cgi?id=2926284)
+  (https://curl.haxx.se/bug/view.cgi?id=2926284)
 
 Daniel Stenberg (7 Jan 2010)
 - Make sure the progress callback is called repeatedly even during very slow
@@ -727,7 +727,7 @@ Daniel Stenberg (26 Dec 2009)
 - Renato Botelho and Peter Pentchev brought a patch that makes the libcurl
   headers work correctly even on FreeBSD systems before v8.
 
-  (http://curl.haxx.se/bug/view.cgi?id=2916915)
+  (https://curl.haxx.se/bug/view.cgi?id=2916915)
 
 Daniel Stenberg (17 Dec 2009)
 - David Byron fixed Curl_ossl_cleanup to actually call ENGINE_cleanup when
@@ -755,7 +755,7 @@ Daniel Stenberg (15 Dec 2009)
   from '[protocol]_proxy'. Obviously this broke after 7.19.4. I now also added
   test case 1106 that verifies this functionality.
 
-  (http://curl.haxx.se/bug/view.cgi?id=2913886)
+  (https://curl.haxx.se/bug/view.cgi?id=2913886)
 
 Daniel Stenberg (12 Dec 2009)
 - IMAP, POP3 and SMTP support and their TLS versions (including IMAPS, POP3S
@@ -774,14 +774,14 @@ Daniel Stenberg (10 Dec 2009)
   Now the retry code retries on all FTP transfer failures that ended with a
   4xx response.
 
-  (http://curl.haxx.se/bug/view.cgi?id=2911279)
+  (https://curl.haxx.se/bug/view.cgi?id=2911279)
 
 - Constantine Sapuntzakis figured out a case which would lead to libcurl
   accessing alredy freed memory and thus crash when using HTTPS (with
   OpenSSL), multi interface and the CURLOPT_DEBUGFUNCTION and a certain order
   of cleaning things up. I fixed it.
 
-  (http://curl.haxx.se/bug/view.cgi?id=2905220)
+  (https://curl.haxx.se/bug/view.cgi?id=2905220)
 
 Daniel Stenberg (7 Dec 2009)
 - Martin Storsjo made libcurl use the Expect: 100-continue header for posts
@@ -856,12 +856,12 @@ Daniel Stenberg (17 Nov 2009)
   After the curl_easy_cleanup call, there will be curl dns entries hanging
   around with in_use != 0.
 
-  (http://curl.haxx.se/bug/view.cgi?id=2891591)
+  (https://curl.haxx.se/bug/view.cgi?id=2891591)
 
 - Marc Kleine-Budde fixed: curl saved the LDFLAGS set during configure into
   its pkg-config file.  So -Wl stuff ended up in the .pc file, which is really
   bad, and breaks if there are multiple -Wl in our LDFLAGS (which are in
-  PTXdist). bug #2893592 (http://curl.haxx.se/bug/view.cgi?id=2893592)
+  PTXdist). bug #2893592 (https://curl.haxx.se/bug/view.cgi?id=2893592)
 
 Kamil Dudka (15 Nov 2009)
 - David Byron improved the configure script to use pkg-config to find OpenSSL
@@ -919,7 +919,7 @@ Yang Tse (11 Nov 2009)
 
 Daniel Stenberg (11 Nov 2009)
 - Constantine Sapuntzakis posted bug #2891595
-  (http://curl.haxx.se/bug/view.cgi?id=2891595) which identified how an entry
+  (https://curl.haxx.se/bug/view.cgi?id=2891595) which identified how an entry
   in the DNS cache would linger too long if the request that added it was in
   use that long. He also provided the patch that now makes libcurl capable of
   still doing a request while the DNS hash entry may get timed out.
@@ -980,7 +980,7 @@ Daniel Stenberg (21 Oct 2009)
 - Attempt to use pkg-config for finding out libssh2 installation details
   during configure.
 
-- A patch in bug report #2883177 (http://curl.haxx.se/bug/view.cgi?id=2883177)
+- A patch in bug report #2883177 (https://curl.haxx.se/bug/view.cgi?id=2883177)
   by Johan van Selst introduced the --crlfile option to curl, which makes curl
   tell libcurl about a file with CRL (certificate revocation list) data to
   read.
@@ -995,7 +995,7 @@ Daniel Stenberg (18 Oct 2009)
   data!
 
 - John Dennis filed bug report #2873666
-  (http://curl.haxx.se/bug/view.cgi?id=2873666) which identified a problem
+  (https://curl.haxx.se/bug/view.cgi?id=2873666) which identified a problem
   which made libcurl loop infinitely when given incorrect credentials when
   using HTTP GSS negotiate authentication. He also provided a small and simple
   patch for it.
@@ -1006,14 +1006,14 @@ Daniel Stenberg (18 Oct 2009)
 
 Yang Tse (17 Oct 2009)
 - Bug report #2866724 indicated
-  (http://curl.haxx.se/bug/view.cgi?id=2866724) that curl on Windows failed
+  (https://curl.haxx.se/bug/view.cgi?id=2866724) that curl on Windows failed
   when writing files whose file names originally contained characters which
   are not valid for file names on Windows. Dan Fandrich provided an initial
   patch and another revised one to fix this issue.
 
 Daniel Stenberg (1 Oct 2009)
 - Tom Mueller correctly reported in bug report #2870221
-  (http://curl.haxx.se/bug/view.cgi?id=2870221) that libcurl returned an
+  (https://curl.haxx.se/bug/view.cgi?id=2870221) that libcurl returned an
   incorrect return code from the internal trynextip() function which caused
   him grief. This is a regression that was introduced in 7.19.1 and I find it
   strange it hasn't hit us harder, but I won't persue into figuring out
@@ -1049,7 +1049,7 @@ Kamil Dudka (26 Sep 2009)
 
 Daniel Stenberg (25 Sep 2009)
 - Chris Mumford filed bug report #2861587
-  (http://curl.haxx.se/bug/view.cgi?id=2861587) identifying that libcurl used
+  (https://curl.haxx.se/bug/view.cgi?id=2861587) identifying that libcurl used
   the OpenSSL function X509_load_crl_file() wrongly and failed if it would
   load a CRL file with more than one certificate within. This is now fixed.
 
@@ -1128,7 +1128,7 @@ Patrick Monnerat (24 Aug 2009)
 
 Daniel Stenberg (24 Aug 2009)
 - Marc de Bruin pointed out that configure --with-gnutls=PATH didn't work
-  properly and provided a fix. http://curl.haxx.se/bug/view.cgi?id=2843008
+  properly and provided a fix. https://curl.haxx.se/bug/view.cgi?id=2843008
 
 - Eric Wong introduced support for the new option -T. (dot) that makes curl
   read stdin in a non-blocking fashion. This also brings back -T- (minus) to
@@ -1182,7 +1182,7 @@ Daniel Stenberg (11 Aug 2009)
   in test 311.
 
 - Benbuck Nason posted the bug report #2835196
-  (http://curl.haxx.se/bug/view.cgi?id=2835196), fixing a few compiler
+  (https://curl.haxx.se/bug/view.cgi?id=2835196), fixing a few compiler
   warnings when mixing ints and bools.
 
 Daniel Fandrich (10 Aug 2009)
@@ -1202,7 +1202,7 @@ Daniel Stenberg (2 Aug 2009)
 
 Daniel Stenberg (1 Aug 2009)
 - Scott Cantor posted the bug report #2829955
-  (http://curl.haxx.se/bug/view.cgi?id=2829955) mentioning the recent SSL cert
+  (https://curl.haxx.se/bug/view.cgi?id=2829955) mentioning the recent SSL cert
   verification flaw found and exploited by Moxie Marlinspike. The presentation
   he did at Black Hat is available here:
   https://www.blackhat.com/html/bh-usa-09/bh-usa-09-archives.html#Marlinspike
@@ -1237,7 +1237,7 @@ Daniel Stenberg (27 Jul 2009)
 
 Daniel Stenberg (26 Jul 2009)
 - Johan van Selst posted bug report #2825989
-  (http://curl.haxx.se/bug/view.cgi?id=2825989) pointing out that
+  (https://curl.haxx.se/bug/view.cgi?id=2825989) pointing out that
   OpenSSL-powered libcurl didn't support the SHA-2 digest algorithm, and
   provided the solution too: to use OpenSSL_add_all_algorithms() in addition
   to the older SSLeay_* alternative. OpenSSL_add_all_algorithms was added in
@@ -1283,7 +1283,7 @@ Daniel Stenberg (9 Jul 2009)
 
 Daniel Stenberg (8 Jul 2009)
 - Constantine Sapuntzakis posted bug report #2813123
-  (http://curl.haxx.se/bug/view.cgi?id=2813123) and an a patch that fixes the
+  (https://curl.haxx.se/bug/view.cgi?id=2813123) and an a patch that fixes the
   problem:
 
   Url A is accessed using auth. Url A redirects to Url B (on a different
@@ -1378,7 +1378,7 @@ Yang Tse (9 Jun 2009)
 Daniel Stenberg (8 Jun 2009)
 - Claes Jakobsson provided a patch for libcurl-NSS that fixed a bad refcount
   issue with client certs that caused issues like segfaults.
-  http://curl.haxx.se/mail/lib-2009-05/0316.html
+  https://curl.haxx.se/mail/lib-2009-05/0316.html
 
 - Triggered by bug report #2798852 and the patch in there, I fixed configure
   to detect gnutls build options with pkg-config only and not libgnutls-config
@@ -1421,7 +1421,7 @@ Daniel Stenberg (4 June 2009)
   knows it will just get a 401/407 back. If the app then replaced the
   Content-Length header, it caused the server to wait for input that libcurl
   wouldn't send. Aaron Oneal reported this problem in bug report #2799008
-  (http://curl.haxx.se/bug/view.cgi?id=2799008) and helped us verify the fix.
+  (https://curl.haxx.se/bug/view.cgi?id=2799008) and helped us verify the fix.
 
 Yang Tse (4 Jun 2009)
 - Igor Novoseltsev provided patches and information, that after some
@@ -1461,7 +1461,7 @@ Daniel Stenberg (27 May 2009)
   PK11_CreateGenericObject() function.
 
 Daniel Stenberg (25 May 2009)
-- bug report #2796358 (http://curl.haxx.se/bug/view.cgi?id=2796358) pointed
+- bug report #2796358 (https://curl.haxx.se/bug/view.cgi?id=2796358) pointed
   out that the cookie parser would leak memory when it parses cookies that are
   received with domain, path etc set multiple times in the same header. While
   such a cookie is questionable, they occur in the wild and libcurl no longer
@@ -1492,7 +1492,7 @@ Daniel Stenberg (11 May 2009)
 - Balint Szilakszi reported a memory leak when libcurl did gzip decompression
   of streams that had some parts (legitimately) missing. We now provide and use
   a proper cleanup function for the content encoding submodule.
-  http://curl.haxx.se/mail/lib-2009-05/0092.html
+  https://curl.haxx.se/mail/lib-2009-05/0092.html
 
 - Kamil Dudka provided a fix for libcurl-NSS reported by Michael Cronenworth
   at https://bugzilla.redhat.com/show_bug.cgi?id=453612#c12
@@ -1523,7 +1523,7 @@ Yang Tse (8 May 2009)
 
 Daniel Stenberg (8 May 2009)
 - Constantine Sapuntzakis fixed bug report #2784055
-  (http://curl.haxx.se/bug/view.cgi?id=2784055) identifying a problem to
+  (https://curl.haxx.se/bug/view.cgi?id=2784055) identifying a problem to
   connect to SOCKS proxies when using the multi interface. It turned out to
   almost not work at all previously. We need to wait for the TCP connect to
   be properly verified before doing the SOCKS magic.
@@ -1543,7 +1543,7 @@ Daniel Stenberg (7 May 2009)
   reported in the Debian package.
 
 - Vijay G filed bug report #2723236
-  (http://curl.haxx.se/bug/view.cgi?id=2723236) identifying a problem with
+  (https://curl.haxx.se/bug/view.cgi?id=2723236) identifying a problem with
   libcurl's TFTP code and its lack of dealing with the OACK packet.
 
 Yang Tse (5 May 2009)
@@ -1557,7 +1557,7 @@ Daniel Stenberg (5 May 2009)
 
 Daniel Stenberg (4 May 2009)
 - Michael Smith posted bug report #2786255
-  (http://curl.haxx.se/bug/view.cgi?id=2786255) with a patch, identifying how
+  (https://curl.haxx.se/bug/view.cgi?id=2786255) with a patch, identifying how
   libcurl did not deal with SSL session ids properly if the server rejected a
   re-use of one. Starting now, it will forget the rejected one and remember
   the new. This change was for OpenSSL only, it is likely that other SSL lib
@@ -1597,7 +1597,7 @@ Daniel Stenberg (30 Apr 2009)
   this bug so I hereby consider it not a bug anymore!
 
 Daniel Stenberg (29 Apr 2009)
-- Based on bug report #2723219 (http://curl.haxx.se/bug/view.cgi?id=2723219)
+- Based on bug report #2723219 (https://curl.haxx.se/bug/view.cgi?id=2723219)
   I've now made TFTP "connections" not being kept for re-use within libcurl.
   TFTP is UDP-based so the benefit was really low (if even existing) to begin
   with so instead of tracking down to fix this problem we instead removed the
@@ -1606,12 +1606,12 @@ Daniel Stenberg (29 Apr 2009)
 
 Daniel Stenberg (28 Apr 2009)
 - Constantine Sapuntzakis filed bug report #2783090
-  (http://curl.haxx.se/bug/view.cgi?id=2783090) pointing out that on windows
+  (https://curl.haxx.se/bug/view.cgi?id=2783090) pointing out that on windows
   we need to grow the SO_SNDBUF buffer somewhat to get really good upload
   speeds. http://support.microsoft.com/kb/823764 has the details. Friends
   confirmed that simply adding 32 to CURL_MAX_WRITE_SIZE is enough.
 
-- Bug report #2709004 (http://curl.haxx.se/bug/view.cgi?id=2709004) by Tim
+- Bug report #2709004 (https://curl.haxx.se/bug/view.cgi?id=2709004) by Tim
   Chen pointed out how curl couldn't upload with resume when reading from a
   pipe.
 
@@ -1623,14 +1623,14 @@ Daniel Stenberg (28 Apr 2009)
   from a stream!
 
 Daniel Stenberg (26 Apr 2009)
-- Bug report #2779733 (http://curl.haxx.se/bug/view.cgi?id=2779733) by Sven
+- Bug report #2779733 (https://curl.haxx.se/bug/view.cgi?id=2779733) by Sven
   Wegener pointed out that CURLINFO_APPCONNECT_TIME didn't work with the multi
   interface and provided a patch that fixed the problem!
 
 Daniel Stenberg (24 Apr 2009)
 - Kamil Dudka fixed another NSS-related leak when client certs were used.
 
-- Bug report #2779245 (http://curl.haxx.se/bug/view.cgi?id=2779245) by Rainer
+- Bug report #2779245 (https://curl.haxx.se/bug/view.cgi?id=2779245) by Rainer
   Koenig pointed out that the man page didn't tell that the *_proxy
   environment variables can be specified lower case or UPPER CASE and the
   lower case takes precedence,
@@ -1647,7 +1647,7 @@ Yang Tse (21 Apr 2009)
 
 Daniel Stenberg (20 Apr 2009)
 - Leanic Lefever reported a crash and did some detailed research on why and
-  how it occurs (http://curl.haxx.se/mail/lib-2009-04/0289.html). The
+  how it occurs (https://curl.haxx.se/mail/lib-2009-04/0289.html). The
   conclusion was that if an error is detected and Curl_done() is called for
   the connection, ftp_done() could at times return another error code that
   then would take precedence and that new code confused existing logic that
@@ -1670,7 +1670,7 @@ Daniel Stenberg (17 Apr 2009)
   stderr output after a test run to see that it truly did the right thing.
 
 Daniel Stenberg (13 Apr 2009)
-- bug report #2727981 (http://curl.haxx.se/bug/view.cgi?id=2727981) by Martin
+- bug report #2727981 (https://curl.haxx.se/bug/view.cgi?id=2727981) by Martin
   Storsjö pointed out how setting CURLOPT_NOBODY to 0 could be downright
   confusing as it set the method to either GET or HEAD. The example he showed
   looked like:
@@ -1786,7 +1786,7 @@ Daniel Stenberg (8 Mar 2009)
   when the man pages state that GNUTLS_E_SUCCESS is returned on success and
   other values indicate error conditions.
 
-- Bill Egert pointed out (http://curl.haxx.se/bug/view.cgi?id=2671602) that
+- Bill Egert pointed out (https://curl.haxx.se/bug/view.cgi?id=2671602) that
   curl didn't use sprintf() in a way that is documented to work in POSIX but
   since we use our own printf() code (from libcurl) that shouldn't be a
   problem. Nonetheless I modified the code to not rely on such particular
@@ -1820,7 +1820,7 @@ Version 7.19.4 (3 March 2009)
 
 Daniel Stenberg (3 Mar 2009)
 - David Kierznowski notified us about a security flaw
-  (http://curl.haxx.se/docs/adv_20090303.html also known as CVE-2009-0037) in
+  (https://curl.haxx.se/docs/adv_20090303.html also known as CVE-2009-0037) in
   which previous libcurl versions (by design) can be tricked to access an
   arbitrary local/different file instead of a remote one when
   CURLOPT_FOLLOWLOCATION is enabled. This flaw is now fixed in this release
@@ -1929,7 +1929,7 @@ Daniel Stenberg (11 Feb 2009)
   the condition in the previous request was unmet. This is typically a time
   condition set with CURLOPT_TIMECONDITION and was previously not possible to
   reliably figure out. From bug report #2565128
-  (http://curl.haxx.se/bug/view.cgi?id=2565128) filed by Jocelyn Jaubert.
+  (https://curl.haxx.se/bug/view.cgi?id=2565128) filed by Jocelyn Jaubert.
 
 Daniel Fandrich (4 Feb 2009)
 - Don't add the standard /usr/lib or /usr/include paths to LDFLAGS and CPPFLAGS
@@ -1968,7 +1968,7 @@ Daniel Stenberg (31 Jan 2009)
 
 Daniel Stenberg (30 Jan 2009)
 - Scott Cantor filed bug report #2550061
-  (http://curl.haxx.se/bug/view.cgi?id=2550061) mentioning that I failed to
+  (https://curl.haxx.se/bug/view.cgi?id=2550061) mentioning that I failed to
   properly make sure that the VC9 makefiles got included in the latest
   release. I've now fixed the release script and verified it so next release
   will hopefully include them properly!
@@ -2012,7 +2012,7 @@ Daniel Stenberg (26 Jan 2009)
   on the proper action.
 
 - Alexey Borzov filed bug report #2535504
-  (http://curl.haxx.se/bug/view.cgi?id=2535504) pointing out that realms with
+  (https://curl.haxx.se/bug/view.cgi?id=2535504) pointing out that realms with
   quoted quotation marks in HTTP Digest headers didn't work. I've now added
   test case 1095 that verifies my fix.
 
@@ -2095,7 +2095,7 @@ Daniel Stenberg (13 Jan 2009)
   SunPro compilers.
 
 Daniel Stenberg (12 Jan 2009)
-- Based on bug report #2498665 (http://curl.haxx.se/bug/view.cgi?id=2498665)
+- Based on bug report #2498665 (https://curl.haxx.se/bug/view.cgi?id=2498665)
   by Daniel Black, I've now added magic to the configure script that makes it
   use pkg-config to detect gnutls details as well if the existing method
   (using libgnutls-config) fails. While doing this, I cleaned up and unified
@@ -2147,13 +2147,13 @@ Daniel Stenberg (1 Jan 2009)
 - 'reconf' is removed since we rather have users use 'buildconf'
 
 Daniel Stenberg (31 Dec 2008)
-- Bas Mevissen reported http://curl.haxx.se/bug/view.cgi?id=2479030 pointing
+- Bas Mevissen reported https://curl.haxx.se/bug/view.cgi?id=2479030 pointing
   out that 'reconf' didn't properly point out the m4 subdirectory when running
   aclocal.
 
 Daniel Stenberg (29 Dec 2008)
  - Phil Lisiecki filed bug report #2413067
-  (http://curl.haxx.se/bug/view.cgi?id=2413067) that identified a problem that
+  (https://curl.haxx.se/bug/view.cgi?id=2413067) that identified a problem that
   would cause libcurl to mark a DNS cache entry "in use" eternally if the
   subsequence TCP connect failed. It would thus never get pruned and refreshed
   as it should've been.
@@ -2218,7 +2218,7 @@ Daniel Stenberg (12 Dec 2008)
 - More work with Igor Novoseltsev to first fix the remaining stuff for
   removing easy handles from multi handles when the easy handle is/was within
   a HTTP pipeline. His bug report #2351653
-  (http://curl.haxx.se/bug/view.cgi?id=2351653) was also related and was
+  (https://curl.haxx.se/bug/view.cgi?id=2351653) was also related and was
   eventually fixed by a patch by Igor himself.
 
 Yang Tse (12 Dec 2008)
@@ -2228,7 +2228,7 @@ Yang Tse (12 Dec 2008)
 Daniel Stenberg (12 Dec 2008)
 - Mark Karpeles filed bug report #2416182 titled "crash in ConnectionExists
   when using duphandle+curl_mutli"
-  (http://curl.haxx.se/bug/view.cgi?id=2416182) which showed that
+  (https://curl.haxx.se/bug/view.cgi?id=2416182) which showed that
   curl_easy_duphandle() wrongly also copied the pointer to the connection
   cache, which was plain wrong and caused a segfault if the handle would be
   used in a different multi handle than the handle it was duplicated from.
@@ -2281,7 +2281,7 @@ Daniel Stenberg (8 Dec 2008)
   NOT take a 550 response from SIZE as a hint that the file doesn't exist.
 
 - Christian Krause filed bug #2221237
-  (http://curl.haxx.se/bug/view.cgi?id=2221237) that identified an infinite
+  (https://curl.haxx.se/bug/view.cgi?id=2221237) that identified an infinite
   loop during GSS authentication given some specific conditions. With his
   patience and great feedback I managed to narrow down the problem and
   eventually fix it although I can't test any of this myself!
@@ -2292,13 +2292,13 @@ Daniel Fandrich (3 Dec 2008)
 
 Daniel Stenberg (3 Dec 2008)
 - Igor Novoseltsev filed bug #2351645
-  (http://curl.haxx.se/bug/view.cgi?id=2351645) that identified a problem with
+  (https://curl.haxx.se/bug/view.cgi?id=2351645) that identified a problem with
   the multi interface that occured if you removed an easy handle while in
   progress and the handle was used in a HTTP pipeline.
 
 - Pawel Kierski pointed out a mistake in the cookie code that could lead to a
   bad fclose() after a fatal error had occured.
-  (http://curl.haxx.se/bug/view.cgi?id=2382219)
+  (https://curl.haxx.se/bug/view.cgi?id=2382219)
 
 Daniel Fandrich (25 Nov 2008)
 - If a HTTP request is Basic and num is already >=1000, the HTTP test
@@ -2331,7 +2331,7 @@ Daniel Stenberg (19 Nov 2008)
   whatever you see fit
 
 - Christian Krause reported and fixed a memory leak that would occur with HTTP
-  GSS/kerberos authentication (http://curl.haxx.se/bug/view.cgi?id=2284386)
+  GSS/kerberos authentication (https://curl.haxx.se/bug/view.cgi?id=2284386)
 
 - Andreas Wurf and Markus Koetter helped me analyze a problem that Andreas got
   when uploading files to a single FTP server using multiple easy handle
@@ -2392,7 +2392,7 @@ Michal Marek (13 Nov 2008)
 
 Daniel Stenberg (11 Nov 2008)
 - Rainer Canavan filed bug #2255627
-  (http://curl.haxx.se/bug/view.cgi?id=2255627) which pointed out that a
+  (https://curl.haxx.se/bug/view.cgi?id=2255627) which pointed out that a
   program using libcurl's multi interface to download a HTTPS page with a
   libcurl built powered by OpenSSL, would easily get silly and instead hand
   over SSL details as data instead of the actual HTTP headers and body. This
@@ -2406,7 +2406,7 @@ Daniel Stenberg (11 Nov 2008)
   unfortunately it didn't trigger it even before this fix!
 
 Yang Tse (11 Nov 2008)
-- Related with bug #2230535 (http://curl.haxx.se/bug/view.cgi?id=2230535)
+- Related with bug #2230535 (https://curl.haxx.se/bug/view.cgi?id=2230535)
   Daniel Fandrich noticed that curl_addrinfo was also missing in the build
   process of other four non-configure platforms. Added now.
 
@@ -2419,7 +2419,7 @@ Yang Tse (6 Nov 2008)
 - Merged existing IPv4 and IPv6 Curl_ip2addr functions into a single one
   which now also takes a protocol address family argument.
 
-- Bug #2230535 (http://curl.haxx.se/bug/view.cgi?id=2230535) pointed out a
+- Bug #2230535 (https://curl.haxx.se/bug/view.cgi?id=2230535) pointed out a
   problem with MSVC 6 makefile that caused a build failure. It was noted that
   the curl_addrinfo.obj reference was missing. I took the opportunity to sort
   the list in which this was missing. Issue submitted by John Wilkinson.
@@ -2430,7 +2430,7 @@ Daniel Stenberg (4 Nov 2008)
 - CURLINFO_FILETIME now works for file:// transfers as well
 
 Daniel Stenberg (3 Nov 2008)
-- Bug #2218480 (http://curl.haxx.se/bug/view.cgi?id=2218480) pointed out a
+- Bug #2218480 (https://curl.haxx.se/bug/view.cgi?id=2218480) pointed out a
   problem with my CURLINFO_PRIMARY_IP fix from October 7th that caused a NULL
   pointer read. I also took the opportunity to clean up this logic (storing of
   the connection's IP address) somewhat as we had it stored in two different
@@ -2507,7 +2507,7 @@ Daniel Stenberg (16 Oct 2008)
 
 Daniel Stenberg (15 Oct 2008)
 - Pascal Terjan filed bug #2154627
-  (http://curl.haxx.se/bug/view.cgi?id=2154627) which pointed out that libcurl
+  (https://curl.haxx.se/bug/view.cgi?id=2154627) which pointed out that libcurl
   uses strcasecmp() in multiple places where it causes failures when the
   Turkish locale is used. This is because 'i' and 'I' isn't the same letter so
   strcasecmp() on those letters are different in Turkish than in English (or
@@ -2524,7 +2524,7 @@ Daniel Fandrich (15 Oct 2008)
 
 Daniel Stenberg (15 Oct 2008)
 - John Wilkinson filed bug #2155496
-  (http://curl.haxx.se/bug/view.cgi?id=2155496) pointing out an error case
+  (https://curl.haxx.se/bug/view.cgi?id=2155496) pointing out an error case
   without a proper human-readable error message. When a read callback returns
   a too large value (like when trying to return a negative number) it would
   trigger and the generic error message then makes the proplem slightly
@@ -2545,7 +2545,7 @@ Daniel Fandrich (8 Oct 2008)
 
 Daniel Stenberg (8 Oct 2008)
 - John Wilkinson filed bug #2152270
-  (http://curl.haxx.se/bug/view.cgi?id=2152270) which identified and fixed a
+  (https://curl.haxx.se/bug/view.cgi?id=2152270) which identified and fixed a
   CURLINFO_REDIRECT_URL memory leak and an additional wrong-doing:
 
   Any subsequent transfer with a redirect leaks memory, eventually crashing
@@ -2555,7 +2555,7 @@ Daniel Stenberg (8 Oct 2008)
   that DID occur on some previous transfer to still be reported.
 
 - Igor Novoseltsev filed bug #2111613
-  (http://curl.haxx.se/bug/view.cgi?id=2111613) that eventually identified a
+  (https://curl.haxx.se/bug/view.cgi?id=2111613) that eventually identified a
   flaw in how the multi_socket interface in some cases missed to call the
   timeout callback when easy interfaces are removed and added within the same
   millisecond.
@@ -2620,13 +2620,13 @@ Daniel Stenberg (29 Sep 2008)
   downloads!
 
 - Maxim Ivanov filed bug report #2107803
-  (http://curl.haxx.se/bug/view.cgi?id=2107803) "no CURLINFO_REDIRECT_URL in
+  (https://curl.haxx.se/bug/view.cgi?id=2107803) "no CURLINFO_REDIRECT_URL in
   multi mode" together with a patch that fixed the problem.
 
 Daniel Stenberg (25 Sep 2008)
 - Emanuele Bovisio submitted bug report #2126435. We fixed the HTTP Digest
   auth code to not behave badly when getting a blank realm with
-  realm="". http://curl.haxx.se/bug/view.cgi?id=2126435
+  realm="". https://curl.haxx.se/bug/view.cgi?id=2126435
 
 Daniel Fandrich (23 Sep 2008)
 - Make sure not to dereference the wrong UrlState proto union member when
@@ -2659,14 +2659,14 @@ Daniel Stenberg (23 Sep 2008)
 
 Daniel Stenberg (22 Sep 2008)
 - Made the SOCKS code use the new Curl_read_plain() function to fix the bug
-  Markus Moeller reported: http://curl.haxx.se/mail/archive-2008-09/0016.html
+  Markus Moeller reported: https://curl.haxx.se/mail/archive-2008-09/0016.html
 
 - recv() errors other than those equal to EAGAIN now cause proper
   CURLE_RECV_ERROR to get returned. This made test case 160 fail so I've now
   disabled it until we can figure out another way to exercise that logic.
 
 - Michael Goffioul filed bug report #2107377 "Problem with multi + GnuTLS +
-  proxy" (http://curl.haxx.se/bug/view.cgi?id=2107377) that showed how a multi
+  proxy" (https://curl.haxx.se/bug/view.cgi?id=2107377) that showed how a multi
   interface using program didn't work when built with GnuTLS and a CONNECT
   request was done over a proxy (basically test 502 over a proxy to a HTTPS
   site). It turned out the ssl connect function would get called twice which
@@ -2812,19 +2812,19 @@ Daniel Stenberg (29 Aug 2008)
   "Connection: close" and actually close the connection after the
   response-body, libcurl could still have outstanding data to send and it
   would not properly notice this and stop sending. This caused weirdness and
-  sad faces. http://curl.haxx.se/bug/view.cgi?id=2080222
+  sad faces. https://curl.haxx.se/bug/view.cgi?id=2080222
 
   Note that there are still reasons to consider libcurl's behavior when
   getting a >= 400 response code while sending data, as Craig Perras' note
   "http upload: how to stop on error" specifies:
-  http://curl.haxx.se/mail/archive-2008-08/0138.html
+  https://curl.haxx.se/mail/archive-2008-08/0138.html
 
 Daniel Stenberg (28 Aug 2008)
 - Dengminwen reported that libcurl would lock a (cookie) share twice (without
   an unlock in between) for a certain case and that in fact works when using
   regular windows mutexes but not with pthreads'! Locks should of course not
   get locked again so this is now fixed.
-  http://curl.haxx.se/mail/lib-2008-08/0422.html
+  https://curl.haxx.se/mail/lib-2008-08/0422.html
 
 - I'm abandoning the system with the web site mirrors (but keeping download
   files bing mirrored) and thus I've changed the URL in the cookiejar header
@@ -2861,7 +2861,7 @@ Daniel Stenberg (23 Aug 2008)
 
 - Constantine Sapuntzakis fixed a bug when doing proxy CONNECT with the multi
   interface, and the proxy would send Connection: close during the
-  authentication phase.  http://curl.haxx.se/bug/view.cgi?id=2069047
+  authentication phase.  https://curl.haxx.se/bug/view.cgi?id=2069047
 
 Daniel Fandrich (22 Aug 2008)
 - Fixed a problem when --dump-header - was given with more than one URL,
@@ -2959,13 +2959,13 @@ Daniel Fandrich (11 Aug 2008)
 
 Daniel Stenberg (11 Aug 2008)
 - Constantine Sapuntzakis filed bug report #2042430
-  (http://curl.haxx.se/bug/view.cgi?id=2042430) with a patch. "NTLM Windows
+  (https://curl.haxx.se/bug/view.cgi?id=2042430) with a patch. "NTLM Windows
   SSPI code is not thread safe". This was due to libcurl using static
   variables to tell wether to load the necessary SSPI DLL, but now the loading
   has been moved to the more suitable curl_global_init() call.
 
 - Constantine Sapuntzakis filed bug report #2042440
-  (http://curl.haxx.se/bug/view.cgi?id=2042440) with a patch. He identified a
+  (https://curl.haxx.se/bug/view.cgi?id=2042440) with a patch. He identified a
   problem when using NTLM over a proxy but the end-point does Basic, and then
   libcurl would do wrong when the host sent "Connection: close" as the proxy's
   NTLM state was erroneously cleared.
@@ -3115,7 +3115,7 @@ Daniel Fandrich (28 Jul 2008)
 
 Daniel Stenberg (26 Jul 2008)
 - David Bau filed bug report #2026240 "CURL_READFUNC_PAUSE leads to buffer
-  overrun" (http://curl.haxx.se/bug/view.cgi?id=2026240) identifying two
+  overrun" (https://curl.haxx.se/bug/view.cgi?id=2026240) identifying two
   problems, and providing the fix for them:
 
   - CURL_READFUNC_PAUSE did in fact not pause the _sending_ of data that it is
@@ -3208,7 +3208,7 @@ Daniel Fandrich (10 Jul 2008)
 
 Yang Tse (10 Jul 2008)
 - Peter Lamberg filed bug report #2015126: "poll gives WSAEINVAL when POLLPRI
-  is set in fdset.events" (http://curl.haxx.se/bug/view.cgi?id=2015126) which
+  is set in fdset.events" (https://curl.haxx.se/bug/view.cgi?id=2015126) which
   exactly pinpointed the problem only triggered on Windows Vista, provided
   reference to docs and also a fix. There is much work behind Peter Lamberg's
   excellent bug report. Thank You!
@@ -3276,7 +3276,7 @@ Daniel Stenberg (30 Jun 2008)
 
 Yang Tse (29 Jun 2008)
 - John Lightsey filed bug report #1999181: "CLOCK_MONOTONIC always fails on
-  some systems" (http://curl.haxx.se/bug/view.cgi?id=1999181). The problem was
+  some systems" (https://curl.haxx.se/bug/view.cgi?id=1999181). The problem was
   that the configure script did not use the _POSIX_MONOTONIC_CLOCK feature test
   macro when checking monotonic clock availability. This is now fixed and the
   monotonic clock will not be used unless the feature test macro is defined
@@ -3427,10 +3427,10 @@ Daniel Stenberg (28 May 2008)
 - Jeff Weber reported memory leaks with aborted SCP and SFTP transfers and
   provided excellent repeat recipes. I fixed the cases I managed to reproduce
   but Jeff still got some (SCP) problems even after these fixes:
-  http://curl.haxx.se/mail/lib-2008-05/0342.html
+  https://curl.haxx.se/mail/lib-2008-05/0342.html
 
 Daniel Stenberg (26 May 2008)
-- Bug report #1973352 (http://curl.haxx.se/bug/view.cgi?id=1973352) identified
+- Bug report #1973352 (https://curl.haxx.se/bug/view.cgi?id=1973352) identified
   how the HTTP redirect following code didn't properly follow to a new URL if
   the new url was but a query string such as "Location: ?moo=foo". Test case
   1031 was added to verify this fix.
@@ -3499,7 +3499,7 @@ Daniel Stenberg (4 May 2008)
 
 Daniel Stenberg (3 May 2008)
 - Ben Van Hof filed bug report #1945240: "libcurl sometimes sends body twice
-  when using CURL_AUTH_ANY" (http://curl.haxx.se/bug/view.cgi?id=1945240).
+  when using CURL_AUTH_ANY" (https://curl.haxx.se/bug/view.cgi?id=1945240).
   The problem was that when libcurl rewound a stream meant for upload when it
   would prepare for a second request, it could accidentally continue the
   sending of the rewound data on the first request instead of on the second.
@@ -3510,7 +3510,7 @@ Daniel Stenberg (3 May 2008)
   since libcurl used getprotobyname() and that isn't thread-safe. We now
   switched to use IPPROTO_TCP unconditionally, but perhaps the proper fix is
   to detect the thread-safe version of the function and use that.
-  http://curl.haxx.se/mail/lib-2008-05/0011.html
+  https://curl.haxx.se/mail/lib-2008-05/0011.html
 
 Daniel Stenberg (1 May 2008)
 - Bart Whiteley provided a patch that made libcurl work properly when an app
@@ -3534,9 +3534,9 @@ Daniel Fandrich (28 Apr 2008)
 
 Daniel Stenberg (28 Apr 2008)
 - Norbert Frese filed bug report #1951588: "Problem with curlftpfs and
-  libcurl" (http://curl.haxx.se/bug/view.cgi?id=1951588) which seems to be an
+  libcurl" (https://curl.haxx.se/bug/view.cgi?id=1951588) which seems to be an
   identical report to what Denis Golovan reported in
-  http://curl.haxx.se/mail/lib-2008-02/0108.html The FTP code didn't reset the
+  https://curl.haxx.se/mail/lib-2008-02/0108.html The FTP code didn't reset the
   user/password pointers properly even though there might've been a new
   struct/cconnection getting used.
 
@@ -3544,8 +3544,8 @@ Daniel Stenberg (26 Apr 2008)
 - Reverted back to use automake 1.9.6 in the next release (from automake
   1.10.1) since it *still* suffers from Solaris-related bugs. Our previous
   automake 1.10 problem was reported in bug #1701360
-  (http://curl.haxx.se/bug/view.cgi?id=1701360) and this recent problem was
-  bug #1944825 (http://curl.haxx.se/bug/view.cgi?id=1944825). I have not
+  (https://curl.haxx.se/bug/view.cgi?id=1701360) and this recent problem was
+  bug #1944825 (https://curl.haxx.se/bug/view.cgi?id=1944825). I have not
   personally approached the automake team about either one of these but I
   figure we need a Solaris 10 guy to do it!
 
@@ -3569,7 +3569,7 @@ Daniel Fandrich (18 Apr 2008)
 
 Michal Marek (14 Apr 2008)
 - allow disabling the typechecker by defining CURL_DISABLE_TYPECHECK, as
-  discussed in http://curl.haxx.se/mail/lib-2008-04/0291.html
+  discussed in https://curl.haxx.se/mail/lib-2008-04/0291.html
 
 Daniel Stenberg (14 Apr 2008)
 - Stefan Krause reported a case where the OpenSSL handshake phase wasn't
@@ -3580,7 +3580,7 @@ Daniel Stenberg (14 Apr 2008)
   return code in the Negotiate code.
 
 - Sandor Feldi reported bug #1942022
-  (http://curl.haxx.se/bug/view.cgi?id=1942022) pointing out a mistake in the
+  (https://curl.haxx.se/bug/view.cgi?id=1942022) pointing out a mistake in the
   lib/Makefile.vc[68] makefiles' release-ssl-dll target.
 
 - Brock Noland reported that curl behaved differently depending on which order
@@ -3708,7 +3708,7 @@ Daniel Stenberg (13 Mar 2008)
 
 Daniel Stenberg (11 Mar 2008)
 - Dmitry Popov filed bug report #1911069
-  (http://curl.haxx.se/bug/view.cgi?id=1911069) that identified a race
+  (https://curl.haxx.se/bug/view.cgi?id=1911069) that identified a race
   condition in the name resolver code when the DNS cache is shared between
   multiple easy handles, each running in simultaneous threads that could cause
   crashes.
@@ -3720,8 +3720,8 @@ Daniel Stenberg (11 Mar 2008)
 
 Michal Marek (11 Mar 2008)
 - Added a type checking macro for curl_easy_setopt(), needs gcc-4.3 and only
-  works in C mode atm (http://curl.haxx.se/mail/lib-2008-02/0267.html ,
-  http://curl.haxx.se/mail/lib-2008-02/0292.html )
+  works in C mode atm (https://curl.haxx.se/mail/lib-2008-02/0267.html ,
+  https://curl.haxx.se/mail/lib-2008-02/0292.html )
 
 Daniel Fandrich (10 Mar 2008)
 - Added tests 618-621 to test SFTP/SCP transfers of more than one file
@@ -3768,7 +3768,7 @@ Daniel S (25 Feb 2008)
 
 Daniel S (23 Feb 2008)
 - Sam Listopad provided a patch in feature-request #1900014
-  http://curl.haxx.se/bug/feature.cgi?id=1900014 that makes libcurl (built to
+  https://curl.haxx.se/bug/feature.cgi?id=1900014 that makes libcurl (built to
   use OpenSSL) support a full chain of certificates in a given PKCS12
   certificate.
 
@@ -3780,7 +3780,7 @@ Daniel S (21 Feb 2008)
 - Zmey Petroff found a crash when libcurl accessed a NULL pointer, which
   happened if you set the connection cache size to 1 and for example failed to
   login to an FTP site. Bug report #1896698
-  (http://curl.haxx.se/bug/view.cgi?id=1896698)
+  (https://curl.haxx.se/bug/view.cgi?id=1896698)
 
 Daniel S (20 Feb 2008)
 - Fixed test case 405 to not fail when libcurl is built with GnuTLS
@@ -3811,7 +3811,7 @@ Daniel Fandrich (19 Feb 2008)
 Daniel S (18 Feb 2008)
 - We're no longer providing a very old ca-bundle in the curl tarball. You can
   get a fresh one downloaded and created with 'make ca-bundle' or you can get
-  one from here => http://curl.haxx.se/docs/caextract.html if you want a fresh
+  one from here => https://curl.haxx.se/docs/caextract.html if you want a fresh
   new one extracted from Mozilla's recent list of ca certs.
 
   The configure option --with-ca-bundle now lets you specify what file to use
@@ -3846,7 +3846,7 @@ Daniel S (11 Feb 2008)
   problems but now they should be fixed.
 
 Yang Tse (10 Feb 2008)
-- Bug report #1888932 (http://curl.haxx.se/bug/view.cgi?id=1888932) points out
+- Bug report #1888932 (https://curl.haxx.se/bug/view.cgi?id=1888932) points out
   and provides test program that demonstrates that libcurl might not set error
   description message for error CURLE_COULDNT_RESOLVE_HOST for Windows threaded
   name resolver builds. Fixed now.
@@ -3857,7 +3857,7 @@ Daniel Fandrich (8 Feb 2008)
 
 Daniel S (8 Feb 2008)
 - Mike Hommey filed and fixed bug report #1889856
-  (http://curl.haxx.se/bug/view.cgi?id=1889856): When using the gnutls ssl
+  (https://curl.haxx.se/bug/view.cgi?id=1889856): When using the gnutls ssl
   layer, cleaning-up and reinitializing curl ends up with https requests
   failing with "ASN1 parser: Element was not found" errors. Obviously a
   regression added in 7.16.3.
@@ -3923,7 +3923,7 @@ Daniel S (27 Jan 2008)
 
 Daniel S (26 Jan 2008)
 - Kevin Reed filed bug report #1879375
-  (http://curl.haxx.se/bug/view.cgi?id=1879375) which describes how libcurl
+  (https://curl.haxx.se/bug/view.cgi?id=1879375) which describes how libcurl
   got lost in this scenario: proxy tunnel (or HTTPS over proxy), ask to do any
   proxy authentication and the proxy replies with an auth (like NTLM) and then
   closes the connection after that initial informational response.
@@ -3986,7 +3986,7 @@ Daniel S (15 Jan 2008)
 
 Daniel S (14 Jan 2008)
 - Joe Malicki filed bug report #1871269
-  (http://curl.haxx.se/bug/view.cgi?id=1871269) and we could fix his hang-
+  (https://curl.haxx.se/bug/view.cgi?id=1871269) and we could fix his hang-
   problem that occurred when doing a large HTTP POST request with the
   response-body read from a callback.
 
@@ -4030,7 +4030,7 @@ Daniel S (10 Jan 2008)
   doing multi-stage HTTP auth with POST/PUT.
 
 - Nikitinskit Dmitriy filed bug report #1868255
-  (http://curl.haxx.se/bug/view.cgi?id=1868255) with a patch. It identifies
+  (https://curl.haxx.se/bug/view.cgi?id=1868255) with a patch. It identifies
   and fixes a problem with parsing WWW-Authenticate: headers with additional
   spaces in the line that the parser wasn't written to deal with.
 
@@ -4041,7 +4041,7 @@ Daniel S (8 Jan 2008)
 
 Daniel S (6 Jan 2008)
 - Jeff Johnson filed bug report #1863171
-  (http://curl.haxx.se/bug/view.cgi?id=1863171) where he pointed out that
+  (https://curl.haxx.se/bug/view.cgi?id=1863171) where he pointed out that
   libcurl's date parser didn't accept a +1300 time zone which actually is used
   fairly often (like New Zealand's Dailight Savings Time), so I modified the
   parser to now accept up to and including -1400 to +1400.
@@ -4097,13 +4097,13 @@ Daniel S (1 Jan 2008)
 
 Daniel S (27 Dec 2007)
 - Dmitry Kurochkin mentioned a flaw
-  (http://curl.haxx.se/mail/lib-2007-12/0252.html) in detect_proxy() which
+  (https://curl.haxx.se/mail/lib-2007-12/0252.html) in detect_proxy() which
   failed to set the bits.proxy variable properly when an environment variable
   told libcurl to use a http proxy.
 
 Daniel S (26 Dec 2007)
 - In an attempt to repeat the problem in bug report #1850730
-  (http://curl.haxx.se/bug/view.cgi?id=1850730) I wrote up test case 552. The
+  (https://curl.haxx.se/bug/view.cgi?id=1850730) I wrote up test case 552. The
   test is doing a 70K POST with a read callback and an ioctl callback over a
   proxy requiring Digest auth. The test case code is more or less identical to
   the test recipe code provided by Spacen Jasset (who submitted the bug
@@ -4111,7 +4111,7 @@ Daniel S (26 Dec 2007)
 
 Daniel S (25 Dec 2007)
 - Gary Maxwell filed bug report #1856628
-  (http://curl.haxx.se/bug/view.cgi?id=1856628) and provided a fix for the
+  (https://curl.haxx.se/bug/view.cgi?id=1856628) and provided a fix for the
   (small) memory leak in the SSL session ID caching code. It happened when a
   previous entry in the cache was re-used.
 
@@ -4125,7 +4125,7 @@ Yang Tse (18 Dec 2007)
   if no build target has been defined we will target WinXP when building
   curl/libcurl with MSVC 9.0 (VS2008).
 
-- (http://curl.haxx.se/mail/archive-2007-12/0039.html) reported and fixed
+- (https://curl.haxx.se/mail/archive-2007-12/0039.html) reported and fixed
   a file truncation problem on Windows build targets triggered when retrying
   a download with curl.
 
@@ -4136,7 +4136,7 @@ Daniel S (17 Dec 2007)
 
 Daniel S (13 Dec 2007)
 - David Wright filed bug report #1849764
-  (http://curl.haxx.se/bug/view.cgi?id=1849764) with an included fix. He
+  (https://curl.haxx.se/bug/view.cgi?id=1849764) with an included fix. He
   identified a problem for re-used connections that previously had sent
   Expect: 100-continue and in some situations the subsequent POST (that didn't
   use Expect:) still had the internal flag set for its use. David's fix (that
@@ -4149,7 +4149,7 @@ Daniel S (12 Dec 2007)
 
 Daniel S (9 Dec 2007)
 - Andrew Moise filed bug report #1847501
-  (http://curl.haxx.se/bug/view.cgi?id=1847501) and pointed out a memcpy()
+  (https://curl.haxx.se/bug/view.cgi?id=1847501) and pointed out a memcpy()
   that should be memmove() in the convert_lineends() function.
 
 Daniel S (8 Dec 2007)
@@ -4178,7 +4178,7 @@ Daniel S (5 Dec 2007)
 
 Daniel S (3 Dec 2007)
 - Ray Pekowski filed bug report #1842029
-  (http://curl.haxx.se/bug/view.cgi?id=1842029) in which he identified a
+  (https://curl.haxx.se/bug/view.cgi?id=1842029) in which he identified a
   problem with SSL session caching that prevent it from working, and provided
   the associated fix!
 
@@ -4263,7 +4263,7 @@ Daniel S (16 Nov 2007)
   callback was used, as it could wrongly pass on a bad size for the outgoing
   HTTP header. The bad size would be a very large value as it was a wrapped
   size_t content. This happened when the whole HTTP request failed to get sent
-  in one single send.  http://curl.haxx.se/mail/lib-2007-11/0165.html
+  in one single send.  https://curl.haxx.se/mail/lib-2007-11/0165.html
 
 Daniel S (15 Nov 2007)
 - Fixed yet another remaining problem with doing SFTP directory listings on a
@@ -4282,7 +4282,7 @@ Daniel S (13 Nov 2007)
   persistent connection. Mentioned by Immanuel Gregoire on the mailing list.
 
 Daniel S (12 Nov 2007)
-- Bug report #1830637 (http://curl.haxx.se/bug/view.cgi?id=1830637), which was
+- Bug report #1830637 (https://curl.haxx.se/bug/view.cgi?id=1830637), which was
   forwarded from the Gentoo bug tracker by Daniel Black and was originally
   submitted by Robin Johnson, pointed out that libcurl would do bad memory
   references when it failed and bailed out before the handler thing was
@@ -4291,12 +4291,12 @@ Daniel S (12 Nov 2007)
   member.
 
 Yang Tse (10 Nov 2007)
-- Vikram Saxena (http://curl.haxx.se/mail/lib-2007-11/0096.html) pointed out
+- Vikram Saxena (https://curl.haxx.se/mail/lib-2007-11/0096.html) pointed out
   that the pollfd struct was being multi defined when using VS2008. This is
   now fixed in /curl/lib/select.h
 
 Daniel S (8 Nov 2007)
-- Bug report #1823487 (http://curl.haxx.se/bug/view.cgi?id=1823487) pointed
+- Bug report #1823487 (https://curl.haxx.se/bug/view.cgi?id=1823487) pointed
   out that SFTP requests didn't use persistent connections. Neither did SCP
   ones.  I gave the SSH code a good beating and now both SCP and SFTP should
   use persistent connections fine. I also did a bunch of indent changes as
@@ -4308,7 +4308,7 @@ Dan F (6 Nov 2007)
   is now as little as one per segment.
 
 Yang Tse (6 Nov 2007)
-- Bug report #1824894 (http://curl.haxx.se/bug/view.cgi?id=1824894) pointed
+- Bug report #1824894 (https://curl.haxx.se/bug/view.cgi?id=1824894) pointed
   out a problem in curl.h when building C++ apps with MSVC. To fix it, the
   inclusion of header files in curl.h is moved outside of the C++ extern "C"
   linkage block.
@@ -4383,7 +4383,7 @@ Daniel S (24 October 2007)
   accordingly.
 
 Daniel S (23 October 2007)
-- Bug report #1812190 (http://curl.haxx.se/bug/view.cgi?id=1812190) points out
+- Bug report #1812190 (https://curl.haxx.se/bug/view.cgi?id=1812190) points out
   that libcurl tried to re-use connections a bit too much when using non-SSL
   protocols tunneled over a HTTP proxy.
 
@@ -4405,7 +4405,7 @@ Daniel S (22 October 2007)
   A long-term goal is of course to somehow get rid of how the reqdata struct
   is used, as it is too error-prone.
 
-- Bug report #1815530 (http://curl.haxx.se/bug/view.cgi?id=1815530) points out
+- Bug report #1815530 (https://curl.haxx.se/bug/view.cgi?id=1815530) points out
   that specifying a proxy with a trailing slash didn't work (unless it also
   contained a port number).
 
@@ -4574,7 +4574,7 @@ Dan F (13 September 2007)
 Version 7.17.0 (13 September 2007)
 
 Daniel S (12 September 2007)
-- Bug report #1792649 (http://curl.haxx.se/bug/view.cgi?id=1792649) pointed
+- Bug report #1792649 (https://curl.haxx.se/bug/view.cgi?id=1792649) pointed
   out a problem with doing an empty upload over FTP on a re-used connection.
   I added test case 541 to reproduce it and to verify the fix.
 
@@ -4593,7 +4593,7 @@ Dan F (5 September 2007)
 
 Daniel S (5 September 2007)
 - Continued the work on a fix for #1779054
-  (http://curl.haxx.se/bug/view.cgi?id=1779054). My previous fix from August
+  (https://curl.haxx.se/bug/view.cgi?id=1779054). My previous fix from August
   24 was not complete (either) but could accidentally "forget" parts of a
   server response which led to faulty server response time-out errors.
 
@@ -4668,7 +4668,7 @@ Dan F (28 August 2007)
 - Some minor internal type and const changes based on a splint scan.
 
 Daniel S (24 August 2007)
-- Bug report #1779054 (http://curl.haxx.se/bug/view.cgi?id=1779054) pointed
+- Bug report #1779054 (https://curl.haxx.se/bug/view.cgi?id=1779054) pointed
   out that libcurl didn't deal with large responses from server commands, when
   the single response was consisting of multiple lines but of a total size of
   16KB or more. Dan Fandrich improved the ftp test script and provided test
@@ -4680,12 +4680,12 @@ Patrick M (23 August 2007)
   See packages/OS400/README.OS400.
 
 Daniel S (23 August 2007)
-- Bug report #1779751 (http://curl.haxx.se/bug/view.cgi?id=1779751) pointed
+- Bug report #1779751 (https://curl.haxx.se/bug/view.cgi?id=1779751) pointed
   out that doing first a file:// upload and then an FTP upload crashed libcurl
   or at best caused furious valgrind complaints. Fixed now!
 
 Daniel S (22 August 2007)
-- Bug report #1779054 (http://curl.haxx.se/bug/view.cgi?id=1779054) pointed
+- Bug report #1779054 (https://curl.haxx.se/bug/view.cgi?id=1779054) pointed
   out that libcurl didn't deal with very long (>16K) FTP server response lines
   properly. Starting now, libcurl will chop them off (thus the client app will
   not get the full line) but survive and deal with them fine otherwise. Test
@@ -4699,12 +4699,12 @@ Daniel S (20 August 2007)
 
 Daniel S (18 August 2007)
 - Robson Braga Araujo filed bug report #1776232
-  (http://curl.haxx.se/bug/view.cgi?id=1776232) about libcurl calling
+  (https://curl.haxx.se/bug/view.cgi?id=1776232) about libcurl calling
   Curl_client_write(), passing on a const string that the caller may not
   modify and yet it does (on some platforms).
 
 - Robson Braga Araujo filed bug report #1776235
-  (http://curl.haxx.se/bug/view.cgi?id=1776235) about ftp requests with NOBODY
+  (https://curl.haxx.se/bug/view.cgi?id=1776235) about ftp requests with NOBODY
   on a directory would do a "SIZE (null)" request. This is now fixed and test
   case 1000 was added to verify.
 
@@ -4746,7 +4746,7 @@ Daniel S (3 August 2007)
 
 Daniel S (2 August 2007)
 - Scott Cantor filed bug report #1766320
-  (http://curl.haxx.se/bug/view.cgi?id=1766320) pointing out that the libcurl
+  (https://curl.haxx.se/bug/view.cgi?id=1766320) pointing out that the libcurl
   code accessed two curl_easy_setopt() options (CURLOPT_DNS_CACHE_TIMEOUT and
   CURLOPT_DNS_USE_GLOBAL_CACHE) as ints even though they're documented to be
   passed in as longs, and that makes a difference on 64 bit architectures.
@@ -4782,7 +4782,7 @@ Daniel S (31 July 2007)
 
 Daniel S (29 July 2007)
 - Jayesh A Shah filed bug report #1759542
-  (http://curl.haxx.se/bug/view.cgi?id=1759542) identifying a rather serious
+  (https://curl.haxx.se/bug/view.cgi?id=1759542) identifying a rather serious
   problem with FTPS: libcurl closed the data connection socket and then later
   in the flow it would call the SSL layer to do SSL shutdown which then would
   use a socket that had already been closed - so if the application had opened
@@ -4842,7 +4842,7 @@ Daniel S (20 July 2007)
 - James Housley fixed the SFTP PWD command to work.
 
 - Ralf S. Engelschall filed bug report #1757328
-  (http://curl.haxx.se/bug/view.cgi?id=1757328) and submitted a patch. It
+  (https://curl.haxx.se/bug/view.cgi?id=1757328) and submitted a patch. It
   turns out we broke login to FTP servers that don't require (nor understand)
   PASS after the USER command. The breakage was done as part of the krb5
   commit so a krb-using person needs to verify that the current version now
@@ -4864,7 +4864,7 @@ Daniel S (17 July 2007)
 
 Daniel S (13 July 2007)
 - Colin Hogben filed bug report #1750274
-  (http://curl.haxx.se/bug/view.cgi?id=1750274) and submitted a patch for the
+  (https://curl.haxx.se/bug/view.cgi?id=1750274) and submitted a patch for the
   case where libcurl did a connect attempt to a non-listening port and didn't
   provide a human readable error string back.
 
@@ -4914,7 +4914,7 @@ Version 7.16.4 (10 July 2007)
 
 Daniel S (10 July 2007)
 - Kees Cook notified us about a security flaw
-  (http://curl.haxx.se/docs/adv_20070710.html) in which libcurl failed to
+  (https://curl.haxx.se/docs/adv_20070710.html) in which libcurl failed to
   properly reject some outdated or not yet valid server certificates when
   built with GnuTLS. Kees also provided the patch.
 
@@ -4960,8 +4960,8 @@ Daniel S (25 June 2007)
 Version 7.16.3 (25 June 2007)
 
 Daniel S (23 June 2007)
-- As reported by "Tro" in http://curl.haxx.se/mail/lib-2007-06/0161.html and
-  http://curl.haxx.se/mail/lib-2007-06/0238.html, libcurl didn't properly do
+- As reported by "Tro" in https://curl.haxx.se/mail/lib-2007-06/0161.html and
+  https://curl.haxx.se/mail/lib-2007-06/0238.html, libcurl didn't properly do
   no-body requests on FTP files on re-used connections properly, or at least
   it didn't provide the info back in the header callback properly in the
   subsequent requests.
@@ -4973,14 +4973,14 @@ Daniel S (21 June 2007)
 
 Daniel S (20 June 2007)
 - Adam Piggott filed bug report #1740263
-  (http://curl.haxx.se/bug/view.cgi?id=1740263). Adam discovered that when
+  (https://curl.haxx.se/bug/view.cgi?id=1740263). Adam discovered that when
   getting a large amount of URLs with curl, they were fetched slower and
   slower... which turned out to be because the --libcurl data collecting which
   wrongly always was enabled, but no longer is...
 
 Daniel S (18 June 2007)
 - Robson Braga Araujo filed bug report #1739100
-  (http://curl.haxx.se/bug/view.cgi?id=1739100) that mentioned that libcurl
+  (https://curl.haxx.se/bug/view.cgi?id=1739100) that mentioned that libcurl
   could not actually list the contents of the root directory of a given FTP
   server if the login directory isn't root. I fixed the problem and added
   three test cases (one is disabled for now since I identified KNOWN_BUGS #44,
@@ -5014,9 +5014,9 @@ Daniel S (14 June 2007)
   very important)
 
 - Dave Vasilevsky filed bug report #1736875
-  (http://curl.haxx.se/bug/view.cgi?id=1736875) almost simultanouesly as Dan
+  (https://curl.haxx.se/bug/view.cgi?id=1736875) almost simultanouesly as Dan
   Fandrich mentioned a related build problem on the libcurl mailing list:
-  http://curl.haxx.se/mail/lib-2007-06/0131.html. Both problems had the same
+  https://curl.haxx.se/mail/lib-2007-06/0131.html. Both problems had the same
   reason: the definitions of the POLL* defines and the pollfd struct in the
   libcurl code was depending on HAVE_POLL instead of HAVE_SYS_POLL_H.
 
@@ -5026,7 +5026,7 @@ Daniel S (13 June 2007)
   ones.
 
 - Rich Rauenzahn filed bug report #1733119
-  (http://curl.haxx.se/bug/view.cgi?id=1733119) and we collaborated on the
+  (https://curl.haxx.se/bug/view.cgi?id=1733119) and we collaborated on the
   fix.  The problem is that for 64bit HPUX builds, several socket-related
   functions would still assume int (32 bit) arguments and not socklen_t (64
   bit) ones.
@@ -5079,16 +5079,16 @@ Daniel S (27 May 2007)
 
 Daniel S (25 May 2007)
 - Rob Crittenden fixed bug #1705802
-  (http://curl.haxx.se/bug/view.cgi?id=1705802), which was filed by Daniel
+  (https://curl.haxx.se/bug/view.cgi?id=1705802), which was filed by Daniel
   Black identifying several FTP-SSL test cases fail when we build libcurl with
   NSS for TLS/SSL. Listed as #42 in KNOWN_BUGS.
 
 Daniel S (24 May 2007)
 - Song Ma filed bug report #1724016
-  (http://curl.haxx.se/bug/view.cgi?id=1724016) noticing that downloading
+  (https://curl.haxx.se/bug/view.cgi?id=1724016) noticing that downloading
   glob-ranges for TFTP was broken in CVS. Fixed now.
 
-- 'mytx' in bug report #1723194 (http://curl.haxx.se/bug/view.cgi?id=1723194)
+- 'mytx' in bug report #1723194 (https://curl.haxx.se/bug/view.cgi?id=1723194)
   pointed out that the warnf() function in the curl tool didn't properly deal
   with the cases when excessively long words were used in the string to chop
   up.
@@ -5101,14 +5101,14 @@ Daniel S (22 May 2007)
 
 Daniel S (18 May 2007)
 - Feng Tu reported that curl -w did wrong on TFTP transfers in bug report
-  #1715394 (http://curl.haxx.se/bug/view.cgi?id=1715394), and the
+  #1715394 (https://curl.haxx.se/bug/view.cgi?id=1715394), and the
   transfer-related info "variables" were indeed overwritten with zeroes
   wrongly and have now been adjusted. The upload size still isn't accurate.
 
 Daniel S (17 May 2007)
 - Feng Tu pointed out a division by zero error in the TFTP connect timeout
   code for timeouts less than five seconds, and also provided a fix for it.
-  Bug report #1715392 (http://curl.haxx.se/bug/view.cgi?id=1715392)
+  Bug report #1715392 (https://curl.haxx.se/bug/view.cgi?id=1715392)
 
 Dan F (16 May 2007)
 - Added support for compiling under Minix 3.1.3 using ACK.
@@ -5217,13 +5217,13 @@ Daniel S (22 April 2007)
   the man page now.
 
 - Daniel Black filed bug #1705177
-  (http://curl.haxx.se/bug/view.cgi?id=1705177) where --without-ssl
+  (https://curl.haxx.se/bug/view.cgi?id=1705177) where --without-ssl
   --with-gnutl outputs a warning about SSL not being enabled even though GnuTLS
   was found and used.
 
 Daniel S (21 April 2007)
 - Daniel Black filed bug #1704675
-  (http://curl.haxx.se/bug/view.cgi?id=1704675) identifying a double-free
+  (https://curl.haxx.se/bug/view.cgi?id=1704675) identifying a double-free
   problem in the SSL-dealing layer, telling GnuTLS to free NULL credentials on
   closedown after a failure and a bad #ifdef for NSS when closing down SSL.
 
@@ -5274,7 +5274,7 @@ Daniel S (12 April 2007)
 - Song Ma found a memory leak in the if2ip code if you pass in an interface
   name longer than the name field of the ifreq struct (typically 6 bytes), as
   then it wouldn't close the used dummy socket. Bug #1698974
-  (http://curl.haxx.se/bug/view.cgi?id=1698974)
+  (https://curl.haxx.se/bug/view.cgi?id=1698974)
 
 Version 7.16.2 (11 April 2007)
 
@@ -5429,7 +5429,7 @@ Daniel (9 March 2007)
 
 - Justin Fletcher fixed a file descriptor leak in the curl tool when trying to
   upload a file it couldn't open. Bug #1676581
-  (http://curl.haxx.se/bug/view.cgi?id=1676581)
+  (https://curl.haxx.se/bug/view.cgi?id=1676581)
 
 Dan F (9 March 2007)
 - Updated the test harness to check for protocol support before running each
@@ -5684,7 +5684,7 @@ Daniel (3 January 2007)
 
 Daniel (2 January 2007)
 - Victor Snezhko helped us fix bug report #1603712
-  (http://curl.haxx.se/bug/view.cgi?id=1603712) (known bug #36) --limit-rate
+  (https://curl.haxx.se/bug/view.cgi?id=1603712) (known bug #36) --limit-rate
   (CURLOPT_MAX_SEND_SPEED_LARGE and CURLOPT_MAX_RECV_SPEED_LARGE) are broken
   on Windows (since 7.16.0, but that's when they were introduced as previous
   to that the limiting logic was made in the application only and not in the
@@ -5717,7 +5717,7 @@ Daniel (22 December 2006)
 
 Daniel (21 December 2006)
 - Robson Braga Araujo reported bug #1618359
-  (http://curl.haxx.se/bug/view.cgi?id=1618359) and subsequently provided a
+  (https://curl.haxx.se/bug/view.cgi?id=1618359) and subsequently provided a
   patch for it: when downloading 2 zero byte files in a row, curl 7.16.0
   enters an infinite loop, while curl 7.16.1-20061218 does one additional
   unnecessary request.
@@ -5745,7 +5745,7 @@ Daniel (11 December 2006)
 
 Daniel (6 December 2006)
 - Sebastien Willemijns reported bug #1603712
-  (http://curl.haxx.se/bug/view.cgi?id=1603712) which is about connections
+  (https://curl.haxx.se/bug/view.cgi?id=1603712) which is about connections
   getting cut off prematurely when --limit-rate is used. While I found no such
   problems in my tests nor in my reading of the code, I found that the
   --limit-rate code was severly flawed (since it was moved into the lib, since
@@ -5766,7 +5766,7 @@ Daniel (5 December 2006)
   the code.
 
 - Jared Lundell filed bug report #1604956
-  (http://curl.haxx.se/bug/view.cgi?id=1604956) which identified setting
+  (https://curl.haxx.se/bug/view.cgi?id=1604956) which identified setting
   CURLOPT_MAXCONNECTS to zero caused libcurl to SIGSEGV. Starting now, libcurl
   will always internally use no less than 1 entry in the connection cache.
 
@@ -5774,12 +5774,12 @@ Daniel (5 December 2006)
   the 7.16.0 release.
 
 - Martin Skinner brought back bug report #1230118 to haunt us once again.
-  (http://curl.haxx.se/bug/view.cgi?id=1230118) curl_getdate() did not work
+  (https://curl.haxx.se/bug/view.cgi?id=1230118) curl_getdate() did not work
   properly for all input dates on Windows. It was mostly seen on some TZ time
   zones using DST. Luckily, Martin also provided a fix.
 
 - Alexey Simak filed bug report #1600447
-  (http://curl.haxx.se/bug/view.cgi?id=1600447) in which he noted that active
+  (https://curl.haxx.se/bug/view.cgi?id=1600447) in which he noted that active
   FTP connections don't work with the multi interface. The problem is here
   that the multi interface state machine has a state during which it can wait
   for the data connection to connect, but the active connection is not done in
@@ -5829,7 +5829,7 @@ Daniel (24 November 2006)
 - James Housley did lots of work and introduced SFTP downloads.
 
 Daniel (13 November 2006)
-- Ron in bug #1595348 (http://curl.haxx.se/bug/view.cgi?id=1595348) pointed
+- Ron in bug #1595348 (https://curl.haxx.se/bug/view.cgi?id=1595348) pointed
   out a stack overwrite (and the corresponding fix) on 64bit Windows when
   dealing with HTTP chunked encoding.
 
@@ -5987,7 +5987,7 @@ Daniel (29 September 2006)
   version info for the lib.
 
 Daniel (28 September 2006)
-- Reported in #1561470 (http://curl.haxx.se/bug/view.cgi?id=1561470), libcurl
+- Reported in #1561470 (https://curl.haxx.se/bug/view.cgi?id=1561470), libcurl
   would crash if a bad function sequence was used when shutting down after
   using the multi interface (i.e using easy_cleanup after multi_cleanup) so
   precautions have been added to make sure it doesn't any more - test case 529
@@ -6014,7 +6014,7 @@ Daniel (23 September 2006)
 
 Daniel (21 September 2006)
 - Added test case 531 in an attempt to repeat bug report #1561470
-  (http://curl.haxx.se/bug/view.cgi?id=1561470) that is said to crash when an
+  (https://curl.haxx.se/bug/view.cgi?id=1561470) that is said to crash when an
   FTP upload fails with the multi interface. It did not, but I made a failed
   upload still assume the control connection to be fine.
 
@@ -6080,7 +6080,7 @@ Daniel (6 September 2006)
   This is a major change.
 
 Daniel (4 September 2006)
-- Dmitry Rechkin (http://curl.haxx.se/bug/view.cgi?id=1551412) provided a
+- Dmitry Rechkin (https://curl.haxx.se/bug/view.cgi?id=1551412) provided a
   patch that while not fixing things very nicely, it does make the SOCKS5
   proxy connection slightly better as it now acknowledges the timeout for
   connection and it no longer segfaults in the case when SOCKS requires
@@ -6147,12 +6147,12 @@ Version 7.15.5 (7 August 2006)
 Daniel (2 August 2006)
 - Mark Lentczner fixed how libcurl was not properly doing chunked encoding
   if the header "Transfer-Encoding: chunked" was set by the application.
-  http://curl.haxx.se/bug/view.cgi?id=1531838
+  https://curl.haxx.se/bug/view.cgi?id=1531838
 
 Daniel (1 August 2006)
 - Maciej Karpiuk fixed a crash that would occur if we passed Curl_strerror()
   an unknown error number on glibc systems.
-  http://curl.haxx.se/bug/view.cgi?id=1532289
+  https://curl.haxx.se/bug/view.cgi?id=1532289
 
 Daniel (31 July 2006)
 - *ALERT* curl_multi_socket() and curl_multi_socket_all() got modified
@@ -6384,7 +6384,7 @@ Daniel (8 May 2006)
 
 Daniel (5 May 2006)
 - Roland Blom filed bug report #1481217
-  (http://curl.haxx.se/bug/view.cgi?id=1481217), with follow-ups by Michele
+  (https://curl.haxx.se/bug/view.cgi?id=1481217), with follow-ups by Michele
   Bini and David Byron. libcurl previously wrongly used GetLastError() on
   windows to get error details after socket-related function calls, when it
   really should use WSAGetLastError() instead.
@@ -6395,7 +6395,7 @@ Daniel (5 May 2006)
 
 Daniel (4 May 2006)
 - Mark Eichin submitted bug report #1480821
-  (http://curl.haxx.se/bug/view.cgi?id=1480821) He found and identified a
+  (https://curl.haxx.se/bug/view.cgi?id=1480821) He found and identified a
   problem with how libcurl dealt with GnuTLS and a case where gnutls returned
   GNUTLS_E_AGAIN indicating it would block. It would then return an unexpected
   return code, making Curl_ssl_send() confuse the upper layer - causing random
@@ -6445,7 +6445,7 @@ Daniel (19 April 2006)
   attempt from April 10.
 
 Daniel (11 April 2006)
-- #1468330 (http://curl.haxx.se/bug/view.cgi?id=1468330) pointed out a bad
+- #1468330 (https://curl.haxx.se/bug/view.cgi?id=1468330) pointed out a bad
   typecast in the curl tool leading to a crash with (64bit?) VS2005 (at least)
   since the struct timeval field tv_sec is an int while time_t is 64bit.
 
@@ -6454,7 +6454,7 @@ Daniel (10 April 2006)
   CURLOPT_TIMEOUT, the _longer_ time would wrongly be used for the SSL
   connection time-out!
 
-- I merged my hiper patch (http://curl.haxx.se/libcurl/hiper/) into the main
+- I merged my hiper patch (https://curl.haxx.se/libcurl/hiper/) into the main
   sources. See the lib/README.multi_socket for implementation story with
   details. Don't expect it to work fully yet. I don't intend to blow any
   whistles or ring any bells about it until I'm more convinced it works at
@@ -6470,7 +6470,7 @@ Daniel (7 April 2006)
 
 Daniel (5 April 2006)
 - Michele Bini modified the NTLM code to work for his "weird IIS case"
-  (http://curl.haxx.se/mail/lib-2006-02/0154.html) by adding the NTLM hash
+  (https://curl.haxx.se/mail/lib-2006-02/0154.html) by adding the NTLM hash
   function in addition to the LM one and making some other adjustments in the
   order the different parts of the data block are sent in the Type-2 reply.
   Inspiration for this work was taken from the Firefox NTLM implementation.
@@ -6480,7 +6480,7 @@ Daniel (5 April 2006)
   the test cases now only compare parts of that chunk.
 
 Daniel (28 March 2006)
-- #1451929 (http://curl.haxx.se/bug/view.cgi?id=1451929) detailed a bug that
+- #1451929 (https://curl.haxx.se/bug/view.cgi?id=1451929) detailed a bug that
   occurred when asking libcurl to follow HTTP redirects and the original URL
   had more than one question mark (?). Added test case 276 to verify.
 
@@ -6589,7 +6589,7 @@ Version 7.15.2 (27 February 2006)
 
 Daniel (22 February 2006)
 - Lots of work and analysis by "xbx___" in bug #1431750
-  (http://curl.haxx.se/bug/view.cgi?id=1431750) helped me identify and fix two
+  (https://curl.haxx.se/bug/view.cgi?id=1431750) helped me identify and fix two
   different but related bugs:
 
   1) Removing an easy handle from a multi handle before the transfer is done
@@ -6679,7 +6679,7 @@ Daniel (19 January 2006)
   (built IPv4-only) didn't work.
 
 Daniel (18 January 2006)
-- As reported in bug #1408742 (http://curl.haxx.se/bug/view.cgi?id=1408742),
+- As reported in bug #1408742 (https://curl.haxx.se/bug/view.cgi?id=1408742),
   the configure script complained about a missing "missing" script if you ran
   configure within a path whose name included one or more spaces. This is due
   to a flaw in automake (1.9.6 and earlier). I've now worked around it by
@@ -6799,7 +6799,7 @@ Daniel (12 December 2005)
 Version 7.15.1 (7 December 2005)
 
 Daniel (6 December 2005)
-- Full text here: http://curl.haxx.se/docs/adv_20051207.html Pointed out by
+- Full text here: https://curl.haxx.se/docs/adv_20051207.html Pointed out by
   Stefan Esser.
 
   VULNERABILITY
@@ -6851,7 +6851,7 @@ Daniel (16 November 2005)
 Daniel (14 November 2005)
 - Quagmire reported that he needed to raise a NTLM buffer for SSPI to work
   properly for a case, and so we did. We raised it even for non-SSPI builds
-  but it should not do any harm. http://curl.haxx.se/bug/view.cgi?id=1356715
+  but it should not do any harm. https://curl.haxx.se/bug/view.cgi?id=1356715
 
 - Jan Kunder's debian bug report
   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=338680 identified a weird
@@ -6875,12 +6875,12 @@ Daniel (13 November 2005)
 
 Daniel (12 November 2005)
 - Eugene Kotlyarov found out that cygwin's poll() function isn't doing things
-  right: http://curl.haxx.se/mail/archive-2005-11/0045.html so we now disable
+  right: https://curl.haxx.se/mail/archive-2005-11/0045.html so we now disable
   poll() and use select() on cygwin too (we already do the same choice on Mac
   OS X)
 
 - Dima Barsky patched problem #1348930: the GnuTLS code completely ignored
-  client certificates! (http://curl.haxx.se/bug/view.cgi?id=1348930).
+  client certificates! (https://curl.haxx.se/bug/view.cgi?id=1348930).
 
 Daniel (10 November 2005)
 - David Lang fixed IPv6 support for TFTP!
@@ -6931,14 +6931,14 @@ Daniel (31 October 2005)
 
 Daniel (27 October 2005)
 - Nis Jorgensen filed bug report #1338648
-  (http://curl.haxx.se/bug/view.cgi?id=1338648) which really is more of a
+  (https://curl.haxx.se/bug/view.cgi?id=1338648) which really is more of a
   feature request, but anyway. It pointed out that --max-redirs did not allow
   it to be set to 0, which then would return an error code on the first
   Location: found. Based on Nis' patch, now libcurl supports CURLOPT_MAXREDIRS
   set to 0, or -1 for infinity. Added test case 274 to verify.
 
 - tommink[at]post.pl reported in bug report #1337723
-  (http://curl.haxx.se/bug/view.cgi?id=1337723) that curl could not upload
+  (https://curl.haxx.se/bug/view.cgi?id=1337723) that curl could not upload
   binary data from stdin on Windows if the data contained control-Z (hex 1a)
   since that is treated as end-of-file when read in text mode. Gisle Vanem
   pointed out the fix, and I made both -T and --data-binary take advantage of
@@ -6952,7 +6952,7 @@ Daniel (27 October 2005)
 
 Daniel (25 October 2005)
 - Amol Pattekar reported a bug with great detail and a fine example in bug
-  #1326306 (http://curl.haxx.se/bug/view.cgi?id=1326306). When using the multi
+  #1326306 (https://curl.haxx.se/bug/view.cgi?id=1326306). When using the multi
   interface and connecting to a host with multiple IP addresses, and one of
   the addresses fails to connect (the server must exist and respond, just not
   accept connections) libcurl leaks a socket descriptor. Thanks to the fine
@@ -6960,7 +6960,7 @@ Daniel (25 October 2005)
 
 Daniel (22 October 2005)
 - Dima Barsky reported a problem with GnuTLS-enabled libcurl in bug report
-  #1334338 (http://curl.haxx.se/bug/view.cgi?id=1334338). When reading an SSL
+  #1334338 (https://curl.haxx.se/bug/view.cgi?id=1334338). When reading an SSL
   stream from a server and the server requests a "rehandshake", the current
   code simply returns this as an error. I have no good way to test this, but
   I've added a crude attempt of dealing with this situation slightly better -
@@ -6972,11 +6972,11 @@ Daniel (22 October 2005)
 Daniel (21 October 2005)
 - "Ofer" reported a problem when libcurl re-used a connection and failed to do
   it, it could then accidentally actually crash. Presumably, this concerns FTP
-  connections.  http://curl.haxx.se/bug/view.cgi?id=1330310
+  connections.  https://curl.haxx.se/bug/view.cgi?id=1330310
 
 - Temprimus improved the MSVC makefile so that the static debug SSL libs are
   linked to the executable and not to the libcurld.lib
-  http://curl.haxx.se/bug/view.cgi?id=1326676
+  https://curl.haxx.se/bug/view.cgi?id=1326676
 
 - Bradford Bruce made the windows resolver code properly return
   CURLE_COULDNT_RESOLVE_PROXY and CURLE_COULDNT_RESOLVE_HOST on resolving
@@ -6991,7 +6991,7 @@ Daniel (20 October 2005)
 - Temprimus improved the MSVC makefile: "makes a build option available so if
   you set rtlibcfg=static for the make, then it would build with /MT. The
   default behaviour is /MD (the original)."
-  http://curl.haxx.se/bug/view.cgi?id=1326665
+  https://curl.haxx.se/bug/view.cgi?id=1326665
 
 Daniel (14 October 2005)
 - Reverted the LIBCURL_VERSION_NUM change from October 6. As Dave Dribin
@@ -7013,7 +7013,7 @@ Daniel (12 October 2005)
       appropriate HTTP 30x response code) and the new URL contains a URL with
       a user name and domain name that together are longer than 192 bytes
 
-  See http://curl.haxx.se/docs/security.html for further details and updates
+  See https://curl.haxx.se/docs/security.html for further details and updates
 
 Daniel (5 October 2005)
 - Darryl House reported a problem with using -z to download files from FTP.
@@ -7029,7 +7029,7 @@ Daniel (4 October 2005)
   the MEST and CEST time zones.
 
 Daniel (27 September 2005)
-- David Yan filed bug #1299181 (http://curl.haxx.se/bug/view.cgi?id=1299181)
+- David Yan filed bug #1299181 (https://curl.haxx.se/bug/view.cgi?id=1299181)
   that identified a silly problem with Content-Range: headers with the 'bytes'
   keyword written in a different case than all lowercase! It would cause a
   segfault!
@@ -7179,7 +7179,7 @@ Daniel (9 August 2005)
 
 Daniel (8 August 2005)
 - Jon Grubbs filed bug report #1249962
-  (http://curl.haxx.se/bug/view.cgi?id=1249962) which identified a problem
+  (https://curl.haxx.se/bug/view.cgi?id=1249962) which identified a problem
   with NTLM on a HTTP proxy if an FTP URL was given. libcurl now properly
   switches to pure HTTP internally when an HTTP proxy is used, even for FTP
   URLs. The problem would also occur with other multi-pass auth methods.
@@ -7212,7 +7212,7 @@ Daniel (12 July 2005)
 
 Daniel (5 July 2005)
 - Gisle Vanem came up with a nice little work-around for bug #1230118
-  (http://curl.haxx.se/bug/view.cgi?id=1230118). It seems the Windows (MSVC)
+  (https://curl.haxx.se/bug/view.cgi?id=1230118). It seems the Windows (MSVC)
   libc time functions may return data one hour off if TZ is not set and
   automatic DST adjustment is enabled. This made curl_getdate() return wrong
   value, and it also concerned internal cookie expirations etc.
@@ -7252,8 +7252,8 @@ Daniel (22 June 2005)
 
 Daniel (14 June 2005)
 - Gisle Vanem fixed a potential thread handle leak. Bug report #1216500
-  (http://curl.haxx.se/bug/view.cgi?id=1216500).  Comment in
-  http://curl.haxx.se/mail/lib-2005-06/0059.html
+  (https://curl.haxx.se/bug/view.cgi?id=1216500).  Comment in
+  https://curl.haxx.se/mail/lib-2005-06/0059.html
 
 Daniel (13 June 2005)
 - Made buildconf run libtoolize in the ares dir too (inspired by Tupone's
@@ -7281,7 +7281,7 @@ Daniel (6 June 2005)
 
 Daniel (3 June 2005)
 - Added docs/libcurl/getinfo-times, based on feedback from 'Edi':
-  http://curl.haxx.se/feedback/display.cgi?id=11178325798299&support=yes
+  https://curl.haxx.se/feedback/display.cgi?id=11178325798299&support=yes
 
 - Andres Garcia provided yet another text mode patch for several test cases so
   that they do text comparisions better on Windows (newline-wise).
@@ -7289,7 +7289,7 @@ Daniel (3 June 2005)
 Daniel (1 June 2005)
 - The configure check for c-ares now adds the cares lib before the other libs,
   to make it build fine with mingw. Inspired by Tupone Alfredo's bug report
-  and patch: http://curl.haxx.se/bug/view.cgi?id=1212940
+  and patch: https://curl.haxx.se/bug/view.cgi?id=1212940
 
 Daniel (31 May 2005)
 - Todd Kulesza reported a flaw in the proxy option, since a numerical IPv6
@@ -7324,7 +7324,7 @@ Daniel (20 May 2005)
 
 Daniel (18 May 2005)
 - John McGowan identified a problem in bug report #1204435
-  (http://curl.haxx.se/bug/view.cgi?id=1204435) with malformed URLs like
+  (https://curl.haxx.se/bug/view.cgi?id=1204435) with malformed URLs like
   "http://somehost?data" as it added a slash too much in the request ("GET
   /?data/"...). Added test case 260 to verify.
 
@@ -7350,7 +7350,7 @@ Daniel (12 May 2005)
   over a proxy that uses NTLM authentication, libcurl failed to use NTLM again
   properly (the auth method was accidentally reset to the same as had been set
   for host auth, which defaults to Basic). Bug report #1200661
-  (http://curl.haxx.se/bug/view.cgi?id=1200661) identified the the problem and
+  (https://curl.haxx.se/bug/view.cgi?id=1200661) identified the the problem and
   the fix.
 
 - If -z/--time-cond is used with an invalid date syntax, this is no longer
@@ -7389,7 +7389,7 @@ Daniel (11 May 2005)
 Daniel (10 May 2005)
 - Half-baked attempt to bail out if select() returns _only_ errorfds when the
   transfer is in progress. An attempt to fix Allan's problem. See
-  http://curl.haxx.se/mail/lib-2005-05/0073.html and the rest of that thread
+  https://curl.haxx.se/mail/lib-2005-05/0073.html and the rest of that thread
   for details.
 
   I'm still not sure this is the right fix, but...
@@ -7719,7 +7719,7 @@ Daniel (10 February 2005)
 
 Daniel (9 February 2005)
 - David Byron fixed his SSL problems, initially mentioned here:
-  http://curl.haxx.se/mail/lib-2005-01/0240.html. It turned out we didn't use
+  https://curl.haxx.se/mail/lib-2005-01/0240.html. It turned out we didn't use
   SSL_pending() as we should.
 
 - Converted lots of FTP code to a statemachine, so that the multi interface
@@ -7931,7 +7931,7 @@ Daniel (11 January 2005)
   using a custom Host: header and curl fails to send a request on a re-used
   persistent connection and thus creates a new connection and resends it. It
   then sent two Host: headers. Cyrill's analysis was posted here:
-  http://curl.haxx.se/mail/archive-2005-01/0022.html
+  https://curl.haxx.se/mail/archive-2005-01/0022.html
 
 - Bruce Mitchener identified (bug report #1099640) the never-ending SOCKS5
   problem with the version byte and the check for bad versions. Bruce has lots
@@ -8487,7 +8487,7 @@ Daniel (16 September 2004)
   http://bsdftpd-ssl.sc.ru/" which accordingly doesn't properly work with curl
   when "AUTH SSL" is issued (although the server responds fine and everything)
   but requires that curl issues "AUTH TLS" instead. See
-  http://curl.haxx.se/feedback/display.cgi?id=10951944937603&support=yes
+  https://curl.haxx.se/feedback/display.cgi?id=10951944937603&support=yes
 
   Introducing CURLOPT_FTPSSLAUTH that allows the application to select which
   of the AUTH strings to attempt first.
@@ -9656,7 +9656,7 @@ Daniel (19 February 2004)
   curlx_strtoll() function. This is made to allow the app to use existing code,
   but without polluting the libcurl API. Further explanations posted here:
 
-    http://curl.haxx.se/mail/lib-2004-02/0215.html
+    https://curl.haxx.se/mail/lib-2004-02/0215.html
 
 Daniel (18 February 2004)
 - Fixed buildconf to not use "which" as AIX and Tru64 have what have been
@@ -9758,7 +9758,7 @@ Daniel (5 February 2004)
   messages when bailing out in the that function.
 
 - Tor Arntsen now provides AIX and IRIX (using gcc, xlc and the MIPSPro
-  compilers) automated build logs (http://curl.haxx.se/auto/) and we've fixed
+  compilers) automated build logs (https://curl.haxx.se/auto/) and we've fixed
   numerous minor quirks to make less warnings appear.
 
 Daniel (4 February 2004)
@@ -10107,7 +10107,7 @@ Daniel (19 November)
   problems related to ftp partial downloads: if a partial transfer is
   detected, we must close the connection as we cannot know in what state it is
   anymore. This looks like a ProFTPD bug:
-  http://curl.haxx.se/mail/lib-2003-11/0079.html
+  https://curl.haxx.se/mail/lib-2003-11/0079.html
 
 Daniel (17 November)
 - Maciej W. Rozycki made the configure script use a cache variable for the
@@ -10808,7 +10808,7 @@ Daniel (23 June)
   comments and clarified the current code more. Using the new knowledge, we
   should be able to make the NTLM stuff work even better.
   Eric's original URL: http://davenport.sourceforge.net/ntlm.html
-  Version stored and provided at curl site: http://curl.haxx.se/rfc/ntlm.html
+  Version stored and provided at curl site: https://curl.haxx.se/rfc/ntlm.html
 
 - Fixed the minor compile problems pre3 had if built without GSSAPI and/or
   SSL.
@@ -11494,7 +11494,7 @@ Version 7.10.3-pre4 (9 Jan 2003)
 
 Daniel (9 Jan 2003)
 - Updated lib/share.c quite a bit to match the design document at
-  http://curl.haxx.se/dev/sharing.txt a lot more.
+  https://curl.haxx.se/dev/sharing.txt a lot more.
 
   I'll try to update the document soonish. share.c is still not actually used
   by libcurl, but the API is slowly getting there and we can start
@@ -11935,7 +11935,7 @@ Daniel (4 Sep 2002)
 
 Daniel (3 Sep 2002)
 - Updated all source code headers to use MIT-license references only, and
-  point to the COPYING file and the http://curl.haxx.se/docs/copyright.html
+  point to the COPYING file and the https://curl.haxx.se/docs/copyright.html
   URL. I've cut out all references to MPL that I could find.
 
 - Corected the makefiles to not always use -lz when linking
@@ -12503,7 +12503,7 @@ Daniel (22 March 2002)
   windows makefiles.
 
 - Jon Dillon provided us with several good-looking curl images for
-  promotion. View them here http://curl.haxx.se/icons.html
+  promotion. View them here https://curl.haxx.se/icons.html
 
 Daniel (20 March 2002)
 - Peter Verhas found out that CRLF replacement in uploads was not working. I
@@ -12971,7 +12971,7 @@ Daniel (9 January 2002)
 - Posted the curl questionnaire on the web site. If you haven't posted your
   opinions there yet, go there and do it now while it is still there:
 
-        http://curl.haxx.se/q/
+        https://curl.haxx.se/q/
 
 - Georg Horn quickly found out that the SSL reading no longer worked as
   supposed since the switch to non-blocking sockets. I've made a quick patch
@@ -13379,7 +13379,7 @@ Daniel (1 November 2001)
 
 - Minor updates to the FAQ, added a brand new section to the web site about
   the name issue (who owns "curl"? will someone sue us? etc etc):
-  http://curl.haxx.se/legal/thename.html
+  https://curl.haxx.se/legal/thename.html
 
 Version 7.9.1-pre7
 
@@ -16359,7 +16359,7 @@ Daniel (17 January 2000):
    progress deal better with larger files and added a "Time" field which shows
    the time spent on the download so far.
  - I'm now using the CVS repository on sourceforge.net, which also allows web
-   browsing. See http://curl.haxx.nu.
+   browsing. See https://curl.haxx.nu.
 
 Daniel (10 January 2000):
  - Renumbered some enums in curl/curl.h since tag number 35 was used twice!
@@ -16748,7 +16748,7 @@ Version 5.10
  - I corrected a few minor things that made the compiler complain when
    -Wall -pedantic was used.
 
- - I'm moving the official curl web page to http://curl.haxx.nu. I think it
+ - I'm moving the official curl web page to https://curl.haxx.nu. I think it
    will make it easier to remember as it is a lot shorter and less cryptic.
    The old one still works and shows the same info.
 

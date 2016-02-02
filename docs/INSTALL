@@ -706,7 +706,7 @@ NetWare
    Builds automatically created 8 times a day from current git are here:
    http://www.gknw.net/mirror/curl/autobuilds/
    the status of these builds can be viewed at the autobuild table:
-   http://curl.haxx.se/dev/builds.html
+   https://curl.haxx.se/dev/builds.html
 
 eCos
 ====

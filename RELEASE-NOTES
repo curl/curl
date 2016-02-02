@@ -16,7 +16,7 @@ This release includes the following bugfixes:
  
 This release includes the following known bugs:
 
- o see docs/KNOWN_BUGS (http://curl.haxx.se/docs/knownbugs.html)
+ o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:

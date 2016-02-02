@@ -248,7 +248,7 @@ SSL Files
 openssl-0.9.7e-win32-bin.zip for the minimalist package of the openssl-0.9.7e
 binaries ported to MS Windows 95/98/NT/XP using the MingW32/GCC-3.1
 development environment. The file may be downloaded at
-http://curl.haxx.se/download/.
+https://curl.haxx.se/download/.
 
 2- Open the above zip file. You will find two files - SDL.dll,
 SDL_mixer.dll. Install them in the directory C:\WINDOWS\SYSTEM32 for Win 9x
