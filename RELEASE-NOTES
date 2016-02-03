@@ -13,7 +13,7 @@ This release includes the following bugfixes:
  o cmake: fixed when OpenSSL enabled on Windows and schannel detected [2]
  o curl.1: Explain remote-name behavior if file already exists
  o tool_operate: Don't sanitize --output path (Windows) [3]
- o URLs: change all http:// URLs to https://
+ o URLs: change all http:// URLs to https:// in documentation & comments
 
 This release includes the following known bugs:
 

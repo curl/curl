@@ -35,7 +35,7 @@
  *
  * If you think that something actually needs to be changed, adjusted
  * or fixed in this file, then, report it on the libcurl development
- * mailing list: http://cool.haxx.se/mailman/listinfo/curl-library/
+ * mailing list: https://cool.haxx.se/mailman/listinfo/curl-library/
  *
  * This header file shall only export symbols which are 'curl' or 'CURL'
  * prefixed, otherwise public name space would be polluted.

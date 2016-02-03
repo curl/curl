@@ -2,7 +2,7 @@ HTTP/2 with curl
 ================
 
 [HTTP/2 Spec](https://www.rfc-editor.org/rfc/rfc7540.txt)
-[http2 explained](http://daniel.haxx.se/http2/)
+[http2 explained](https://daniel.haxx.se/http2/)
 
 Build prerequisites
 -------------------

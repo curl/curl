@@ -94,7 +94,7 @@ char Curl_raw_toupper(char in)
 /*
  * Curl_raw_equal() is for doing "raw" case insensitive strings. This is meant
  * to be locale independent and only compare strings we know are safe for
- * this.  See http://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for
+ * this.  See https://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for
  * some further explanation to why this function is necessary.
  *
  * The function is capable of comparing a-z case insensitively even for

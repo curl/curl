@@ -47,7 +47,7 @@
  * library is properly built and used.
  *
  * You can find further help on the libcurl development mailing list:
- * http://cool.haxx.se/mailman/listinfo/curl-library/
+ * https://cool.haxx.se/mailman/listinfo/curl-library/
  *
  * NOTE 2
  * ------

@@ -66,7 +66,7 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
 ***
 *** If you wish to help the cURL project to better support your compiler
 *** you can report this and the required info on the libcurl development
-*** mailing list: http://cool.haxx.se/mailman/listinfo/curl-library/
+*** mailing list: https://cool.haxx.se/mailman/listinfo/curl-library/
 ***
 _EOF
   fi
