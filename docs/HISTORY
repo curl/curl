@@ -65,7 +65,7 @@ OpenSSL took over where SSLeay was abandoned.
 May, first Debian package.
 
 August, LDAP:// and FILE:// support added. The curl web site gets 1300 visits
-weekly.
+weekly. Moved site to curl.haxx.nu.
 
 Released curl 6.0 in September. 15000 lines of code.
 
@@ -80,6 +80,8 @@ The first non-beta release was named 7.1 and arrived in August. This offered
 the easy interface and turned out to be the beginning of actually getting
 other software and programs to get based on and powered by libcurl. Almost
 20000 lines of code.
+
+June 2000: the curl site moves to "curl.haxx.se"
 
 August, the curl web site gets 4000 visits weekly.
 
