@@ -41,7 +41,7 @@
    defines/macros #defined by the lib-specific header files.
 
    "SSL/TLS Strong Encryption: An Introduction"
-   http://httpd.apache.org/docs-2.0/ssl/ssl_intro.html
+   https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
 */
 
 #include "curl_setup.h"

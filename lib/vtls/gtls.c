@@ -62,7 +62,7 @@
 
 /*
  Some hackish cast macros based on:
- http://library.gnome.org/devel/glib/unstable/glib-Type-Conversion-Macros.html
+ https://developer.gnome.org/glib/unstable/glib-Type-Conversion-Macros.html
 */
 #ifndef GNUTLS_POINTER_TO_INT_CAST
 #define GNUTLS_POINTER_TO_INT_CAST(p) ((int) (long) (p))

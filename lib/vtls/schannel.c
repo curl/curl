@@ -189,7 +189,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     }
     memset(connssl->cred, 0, sizeof(struct curl_schannel_cred));
 
-    /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx */
+    /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx
+       */
     sspi_status =
       s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR *)UNISP_NAME,
                                          SECPKG_CRED_OUTBOUND, NULL,
@@ -240,7 +241,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   if(!host_name)
     return CURLE_OUT_OF_MEMORY;
 
-  /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
+  /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
 
   sspi_status = s_pSecFn->InitializeSecurityContext(
     &connssl->cred->cred_handle, NULL, host_name,
@@ -407,8 +408,8 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
-    /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
-
+    /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
+       */
     sspi_status = s_pSecFn->InitializeSecurityContext(
       &connssl->cred->cred_handle, &connssl->ctxt->ctxt_handle,
       host_name, connssl->req_flags, 0, 0, &inbuf_desc, 0, NULL,
@@ -759,7 +760,7 @@ schannel_send(struct connectdata *conn, int sockindex,
   /* copy data into output buffer */
   memcpy(outbuf[1].pvBuffer, buf, len);
 
-  /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375390.aspx */
+  /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375390.aspx */
   sspi_status = s_pSecFn->EncryptMessage(&connssl->ctxt->ctxt_handle, 0,
                                          &outbuf_desc, 0);
 
@@ -973,7 +974,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
     InitSecBuffer(&inbuf[3], SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&inbuf_desc, inbuf, 4);
 
-    /* http://msdn.microsoft.com/en-us/library/windows/desktop/aa375348.aspx */
+    /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375348.aspx
+       */
     sspi_status = s_pSecFn->DecryptMessage(&connssl->ctxt->ctxt_handle,
                                            &inbuf_desc, 0, NULL);
 
@@ -1234,7 +1236,7 @@ void Curl_schannel_close(struct connectdata *conn, int sockindex)
 
 int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 {
-  /* See http://msdn.microsoft.com/en-us/library/windows/desktop/aa380138.aspx
+  /* See https://msdn.microsoft.com/en-us/library/windows/desktop/aa380138.aspx
    * Shutting Down an Schannel Connection
    */
   struct SessionHandle *data = conn->data;
