@@ -16359,7 +16359,7 @@ Daniel (17 January 2000):
    progress deal better with larger files and added a "Time" field which shows
    the time spent on the download so far.
  - I'm now using the CVS repository on sourceforge.net, which also allows web
-   browsing. See https://curl.haxx.nu.
+   browsing.
 
 Daniel (10 January 2000):
  - Renumbered some enums in curl/curl.h since tag number 35 was used twice!
@@ -16748,7 +16748,7 @@ Version 5.10
  - I corrected a few minor things that made the compiler complain when
    -Wall -pedantic was used.
 
- - I'm moving the official curl web page to https://curl.haxx.nu. I think it
+ - I'm moving the official curl web page to curl.haxx.nu. I think it
    will make it easier to remember as it is a lot shorter and less cryptic.
    The old one still works and shows the same info.
 
