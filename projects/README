@@ -68,16 +68,16 @@ Building with Visual C++
    If you are building with VC6 then you will also need the February 2003
    Edition of the Windows Platform SDK which can be downloaded from:
 
-    http://www.microsoft.com/en-us/download/details.aspx?id=12261
+    https://www.microsoft.com/en-us/download/details.aspx?id=12261
 
    If you require support for Internationalized Domain Names via Windows IDN
    then you will need either:
 
     * Microsoft Internationalized Domain Name (IDN) Mitigation APIs:
-      http://www.microsoft.com/en-us/download/details.aspx?id=734
+      https://www.microsoft.com/en-us/download/details.aspx?id=734
 
     * Microsoft Windows SDK Update for Windows Vista:
-      http://www.microsoft.com/en-us/download/details.aspx?id=23719
+      https://www.microsoft.com/en-us/download/details.aspx?id=23719
 
     * Microsoft Visual Studio 2010 or above
 

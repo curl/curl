@@ -36,7 +36,7 @@
   If you intend to use a SSL-based protocol here you MUST setup the OpenSSL
   callback functions as described here:
 
-  http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+  https://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
 
 */
 const char * const urls[NUMT]= {
