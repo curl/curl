@@ -239,7 +239,7 @@
  would be the ones that link to 3rd party libs. That would allow us to avoid
  having to load ALL dependencies since only the necessary ones for this
  app/invoke/used protocols would be necessary to load.  See
- https://github.com/bagder/curl/issues/349
+ https://github.com/curl/curl/issues/349
 
 1.12 have form functions use CURL handle argument
 
@@ -292,7 +292,7 @@
  perhaps URL encoded byte values over 128 etc (basically do what the redirect
  following code already does).
 
- https://github.com/bagder/curl/issues/514
+ https://github.com/curl/curl/issues/514
 
 2. libcurl - multi interface
 
@@ -434,7 +434,7 @@ This is not detailed in any FTP specification.
 
 5.6 Refuse "downgrade" redirects
 
- See https://github.com/bagder/curl/issues/226
+ See https://github.com/curl/curl/issues/226
 
  Consider a way to tell curl to refuse to "downgrade" protocol with a redirect
  and/or possibly a bit that refuses redirect to change protocol completely.
@@ -729,13 +729,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  {partURL1:name1,partURL2:name2,partURL3:name3} where the name following the
  colon is the output name.
 
- See https://github.com/bagder/curl/issues/221
+ See https://github.com/curl/curl/issues/221
 
 17.10 improve how curl works in a windows console window
 
  If you pull the scrollbar when transferring with curl in a Windows console
  window, the transfer is interrupted and can get disconnected. This can
- probably be improved. See https://github.com/bagder/curl/issues/322
+ probably be improved. See https://github.com/curl/curl/issues/322
 
 
 18. Build

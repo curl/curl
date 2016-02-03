@@ -4,7 +4,7 @@ changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
 91. "curl_easy_perform hangs with imap and PolarSSL"
-  https://github.com/bagder/curl/issues/334
+  https://github.com/curl/curl/issues/334
 
 90. IMAP "SEARCH ALL" truncates output on large boxes. "A quick search of the
   code reveals that pingpong.c contains some truncation code, at line 408,
@@ -35,7 +35,7 @@ may have been fixed since this was written!
   CURLINFO_STARTTRANSFER_TIME is wrong. While using POST
   CURLINFO_STARTTRANSFER_TIME minus CURLINFO_PRETRANSFER_TIME is near to zero
   every time.
-  https://github.com/bagder/curl/issues/218
+  https://github.com/curl/curl/issues/218
   https://curl.haxx.se/bug/view.cgi?id=1213
 
 84. CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS

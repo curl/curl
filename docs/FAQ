@@ -226,7 +226,7 @@ FAQ
   considerable time already on maintaining and developing curl. In order to
   get more out of us, you should consider trading in some of your time and
   efforts in return. Simply go to the GitHub repo which resides at
-  https://github.com/bagder/curl, fork the project, and create pull requests
+  https://github.com/curl/curl, fork the project, and create pull requests
   with your proposed changes.
 
   If you write the code, chances are bigger that it will get into curl faster.
@@ -254,7 +254,7 @@ FAQ
   We still get help from companies. Haxx provides web site, bandwidth, mailing
   lists etc, sourceforge.net hosts project services we take advantage from,
   like the bug tracker, and GitHub hosts the primary git repository at
-  https://github.com/bagder/curl. Also again, some companies have sponsored
+  https://github.com/curl/curl. Also again, some companies have sponsored
   certain parts of the development in the past and I hope some will continue to
   do so in the future.
 

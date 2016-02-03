@@ -707,7 +707,7 @@ int netware_init(void);
 #endif
 
 /* In Windows the default file mode is text but an application can override it.
-Therefore we specify it explicitly. https://github.com/bagder/curl/pull/258
+Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 */
 #if defined(WIN32) || defined(MSDOS)
 #define FOPEN_READTEXT "rt"
