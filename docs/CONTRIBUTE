@@ -203,7 +203,7 @@
 
  You need to first checkout the repository:
 
-     git clone https://github.com/bagder/curl.git
+     git clone https://github.com/curl/curl.git
 
  You then proceed and edit all the files you like and you commit them to your
  local repository:
