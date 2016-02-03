@@ -29,9 +29,9 @@
  * (libgcrypt) so far.
  *
  * OpenSSL docs for this:
- *   http://www.openssl.org/docs/crypto/threads.html
+ *   https://www.openssl.org/docs/crypto/threads.html
  * gcrypt docs for this:
- *   http://gnupg.org/documentation/manuals/gcrypt/Multi_002dThreading.html
+ *   https://gnupg.org/documentation/manuals/gcrypt/Multi_002dThreading.html
  */
 
 #define USE_OPENSSL /* or USE_GNUTLS accordingly */

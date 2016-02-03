@@ -36,7 +36,7 @@
  *    "This product includes software developed by the Openevidence Project
  *    for use in the OpenEvidence Toolkit. (http://www.openevidence.org/)"
  *    This product includes software developed by the OpenSSL Project
- *    for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+ *    for use in the OpenSSL Toolkit (https://www.openssl.org/)"
  *    This product includes cryptographic software written by Eric Young
  *    (eay@cryptsoft.com).  This product includes software written by Tim
  *    Hudson (tjh@cryptsoft.com)."
@@ -55,7 +55,7 @@
  *    "This product includes software developed by the OpenEvidence Project
  *    for use in the OpenEvidence Toolkit (http://www.openevidence.org/)
  *    This product includes software developed by the OpenSSL Project
- *    for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+ *    for use in the OpenSSL Toolkit (https://www.openssl.org/)"
  *    This product includes cryptographic software written by Eric Young
  *    (eay@cryptsoft.com).  This product includes software written by Tim
  *    Hudson (tjh@cryptsoft.com)."
@@ -75,7 +75,7 @@
  * ====================================================================
  *
  * This product includes software developed by the OpenSSL Project
- * for use in the OpenSSL Toolkit (http://www.openssl.org/)
+ * for use in the OpenSSL Toolkit (https://www.openssl.org/)
  * This product includes cryptographic software written by Eric Young
  * (eay@cryptsoft.com).  This product includes software written by Tim
  * Hudson (tjh@cryptsoft.com).
