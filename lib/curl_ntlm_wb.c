@@ -373,8 +373,8 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
      * by delegating the NTLM challenge/response protocal to a helper
      * in ntlm_auth.
      * http://devel.squid-cache.org/ntlm/squid_helper_protocol.html
-     * http://www.samba.org/samba/docs/man/manpages-3/winbindd.8.html
-     * http://www.samba.org/samba/docs/man/manpages-3/ntlm_auth.1.html
+     * https://www.samba.org/samba/docs/man/manpages-3/winbindd.8.html
+     * https://www.samba.org/samba/docs/man/manpages-3/ntlm_auth.1.html
      * Preprocessor symbol 'NTLM_WB_ENABLED' is defined when this
      * feature is enabled and 'NTLM_WB_FILE' symbol holds absolute
      * filename of ntlm_auth helper.

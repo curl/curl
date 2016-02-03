@@ -509,8 +509,8 @@ static void lograw(unsigned char *buffer, ssize_t len)
  * other handle types supported by WaitForMultipleObjectsEx() as
  * well as disk files, anonymous and names pipes, and character input.
  *
- * http://msdn.microsoft.com/en-us/library/windows/desktop/ms687028.aspx
- * http://msdn.microsoft.com/en-us/library/windows/desktop/ms741572.aspx
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/ms687028.aspx
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/ms741572.aspx
  */
 struct select_ws_wait_data {
   HANDLE handle; /* actual handle to wait for during select */

@@ -25,7 +25,7 @@ rem NOTES
 rem
 rem Do not set %ERRORLEVEL% to anything. %ERRORLEVEL% is a special variable
 rem that only contains errorlevel when %ERRORLEVEL% is not set. Same for %CD%.
-rem http://blogs.msdn.com/b/oldnewthing/archive/2008/09/26/8965755.aspx
+rem https://blogs.msdn.microsoft.com/oldnewthing/20080926-00/?p=20743/
 rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
 :begin
