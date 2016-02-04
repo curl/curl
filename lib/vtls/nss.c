@@ -328,8 +328,8 @@ static char* dup_nickname(struct SessionHandle *data, enum dupstring cert_kind)
     /* no such file exists, use the string as nickname */
     return strdup(str);
 
-  /* search the last slash; we require at least one slash in a file name */
-  n = strrchr(str, '/');
+  /* search the first slash; we require at least one slash in a file name */
+  n = strchr(str, '/');
   if(!n) {
     infof(data, "warning: certificate file name \"%s\" handled as nickname; "
           "please use \"./%s\" to force file name\n", str, str);
@@ -927,12 +927,6 @@ static SECStatus check_issuer_cert(PRFileDesc *sock,
   CERTCertificate *cert, *cert_issuer, *issuer;
   SECStatus res=SECSuccess;
   void *proto_win = NULL;
-
-  /*
-    PRArenaPool   *tmpArena = NULL;
-    CERTAuthKeyID *authorityKeyID = NULL;
-    SECITEM       *caname = NULL;
-  */
 
   cert = SSL_PeerCertificate(sock);
   cert_issuer = CERT_FindCertIssuer(cert, PR_Now(), certUsageObjectSigner);
