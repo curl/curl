@@ -56,7 +56,6 @@ HTTP 1.0 CONNECT with proxytunnel and downgrade GET to HTTP/1.0
 <proxy>
 CONNECT %HOSTIP.1078:%HTTPPORT HTTP/1.0
 Host: %HOSTIP.1078:%HTTPPORT
-Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>

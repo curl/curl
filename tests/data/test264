@@ -42,7 +42,6 @@ GET http://we.want.that.site.com/264 HTTP/1.1
 Host: we.want.that.site.com
 Proxy-Authorization: Basic ZmFrZTp1c2Vy
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

@@ -51,7 +51,6 @@ Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: Basic ZGFuaWVsOnN0ZW5iZXJn
 Range: bytes=78-
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 </protocol>
 

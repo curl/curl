@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -150,7 +150,6 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
       if(!result) {
         char *host=(char *)"";
-        const char *proxyconn="";
         const char *useragent="";
         const char *http = (conn->proxytype == CURLPROXY_HTTP_1_0) ?
           "1.0" : "1.1";
@@ -171,9 +170,6 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
             return CURLE_OUT_OF_MEMORY;
           }
         }
-        if(!Curl_checkProxyheaders(conn, "Proxy-Connection:"))
-          proxyconn = "Proxy-Connection: Keep-Alive\r\n";
-
         if(!Curl_checkProxyheaders(conn, "User-Agent:") &&
            data->set.str[STRING_USERAGENT])
           useragent = conn->allocptr.uagent;
@@ -183,15 +179,13 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            "CONNECT %s HTTP/%s\r\n"
                            "%s"  /* Host: */
                            "%s"  /* Proxy-Authorization */
-                           "%s"  /* User-Agent */
-                           "%s", /* Proxy-Connection */
+                           "%s", /* User-Agent */
                            hostheader,
                            http,
                            host,
                            conn->allocptr.proxyuserpwd?
                            conn->allocptr.proxyuserpwd:"",
-                           useragent,
-                           proxyconn);
+                           useragent);
 
         if(host && *host)
           free(host);

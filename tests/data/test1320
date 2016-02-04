@@ -66,7 +66,6 @@ body
 CONNECT smtp.1320:%SMTPPORT HTTP/1.1
 Host: smtp.1320:%SMTPPORT
 User-Agent: curl/7.24.0-DEV (i686-pc-linux-gnu) libcurl/7.24.0-DEV OpenSSL/1.0.0e zlib/1.2.3.4 c-ares/1.7.6-DEV libidn/1.23 libssh2/1.4.0_DEV librtmp/2.2e
-Proxy-Connection: Keep-Alive
 
 </proxy>
 </verify>

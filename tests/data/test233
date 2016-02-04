@@ -81,13 +81,11 @@ Host: first.host.it.is
 Proxy-Authorization: Basic dGVzdGluZzp0aGlz
 Authorization: Basic aWFtOm15c2VsZg==
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 GET http://goto.second.host.now/2330002 HTTP/1.1
 Host: goto.second.host.now
 Proxy-Authorization: Basic dGVzdGluZzp0aGlz
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

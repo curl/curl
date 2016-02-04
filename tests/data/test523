@@ -54,7 +54,6 @@ GET HTTP://www.example.com:19999/523 HTTP/1.1
 Host: www.example.com:19999
 Authorization: Basic eHh4Onl5eQ==
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 </protocol>
 <stdout>

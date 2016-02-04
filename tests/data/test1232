@@ -53,12 +53,10 @@ HTTP URL with dotdot removal from path using an HTTP proxy
 GET http://test.remote.haxx.se.1232:8990/hej/but/1232?stupid=me/../1232 HTTP/1.1
 Host: test.remote.haxx.se.1232:8990
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 GET http://test.remote.haxx.se.1232:8990/hej/but/12320001 HTTP/1.1
 Host: test.remote.haxx.se.1232:8990
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

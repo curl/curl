@@ -92,18 +92,15 @@ http://first.host.it.is/we/want/that/page/10871000 -x %HOSTIP:%HTTPPORT --user i
 GET http://first.host.it.is/we/want/that/page/10871000 HTTP/1.1
 Host: first.host.it.is
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 GET http://first.host.it.is/we/want/that/page/10871000 HTTP/1.1
 Host: first.host.it.is
 Authorization: Basic aWFtOm15c2VsZg==
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 GET http://goto.second.host.now/10871002 HTTP/1.1
 Host: goto.second.host.now
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

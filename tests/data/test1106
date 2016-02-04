@@ -50,7 +50,6 @@ ftp://%HOSTIP:23456/1106
 GET ftp://%HOSTIP:23456/1106 HTTP/1.1
 Host: %HOSTIP:23456
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

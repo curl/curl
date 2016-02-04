@@ -57,7 +57,6 @@ PUT ftp://daniel:mysecret@host.com/we/want/208 HTTP/1.1
 Host: host.com:21
 Authorization: Basic ZGFuaWVsOm15c2VjcmV0
 Accept: */*
-Proxy-Connection: Keep-Alive
 Content-Length: 78
 Expect: 100-continue
 

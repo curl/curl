@@ -51,7 +51,6 @@ Separately specified proxy/server headers sent in a proxy GET
 GET http://the.old.moo:%HTTPPORT/1528 HTTP/1.1
 Host: the.old.moo:%HTTPPORT
 Accept: */*
-Proxy-Connection: Keep-Alive
 User-Agent: Http Agent
 Proxy-User-Agent: Http Agent2
 

@@ -56,7 +56,6 @@ FTP RETR with CURLOPT_PROXY_TRANSFER_MODE, ASCII transfer and type=i
 GET ftp://www.example.com/moo/561;type=i HTTP/1.1
 Host: www.example.com:21
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 </protocol>
 <stdout>

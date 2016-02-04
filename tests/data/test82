@@ -49,7 +49,6 @@ Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Accept: */*
-Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>
