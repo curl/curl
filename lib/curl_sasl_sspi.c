@@ -316,6 +316,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
             Curl_unicodefree(domain.tchar_ptr);
             return CURLE_OUT_OF_MEMORY;
           }
+          free(identity->Domain);
           identity->Domain = dup_domain.tbyte_ptr;
           identity->DomainLength = curlx_uztoul(_tcslen(dup_domain.tchar_ptr));
           dup_domain.tchar_ptr = NULL;
