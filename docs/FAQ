@@ -1402,7 +1402,7 @@ FAQ
   to do "LIST -a" or similar to see them.
 
   The application thus needs to parse the LIST output. One such existing
-  list parser is available at http://cr.yp.to/ftpparse.html  Versions of
+  list parser is available at https://cr.yp.to/ftpparse.html  Versions of
   libcurl since 7.21.0 also provide the ability to specify a wildcard to
   download multiple files from one FTP directory.
 

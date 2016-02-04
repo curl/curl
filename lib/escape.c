@@ -39,7 +39,7 @@
 
 /* Portable character check (remember EBCDIC). Do not use isalnum() because
    its behavior is altered by the current locale.
-   See http://tools.ietf.org/html/rfc3986#section-2.3
+   See https://tools.ietf.org/html/rfc3986#section-2.3
 */
 static bool Curl_isunreserved(unsigned char in)
 {

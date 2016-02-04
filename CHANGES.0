@@ -343,7 +343,7 @@ Daniel Stenberg (23 Mar 2010)
   (https://curl.haxx.se/bug/view.cgi?id=2963679)
 
 - Akos Pasztory filed debian bug report #572276
-  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=572276 mentioning a problem
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=572276 mentioning a problem
   with a resource that returns chunked-encoded _and_ with a Content-Length
   and libcurl failed to properly ignore the latter information.
 
@@ -1608,7 +1608,7 @@ Daniel Stenberg (28 Apr 2009)
 - Constantine Sapuntzakis filed bug report #2783090
   (https://curl.haxx.se/bug/view.cgi?id=2783090) pointing out that on windows
   we need to grow the SO_SNDBUF buffer somewhat to get really good upload
-  speeds. http://support.microsoft.com/kb/823764 has the details. Friends
+  speeds. https://support.microsoft.com/kb/823764 has the details. Friends
   confirmed that simply adding 32 to CURL_MAX_WRITE_SIZE is enough.
 
 - Bug report #2709004 (https://curl.haxx.se/bug/view.cgi?id=2709004) by Tim
@@ -3290,7 +3290,7 @@ Daniel Fandrich (25 Jun 2008)
 
 Daniel Stenberg (22 Jun 2008)
 - Eduard Bloch filed the debian bug report #487567
-  (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=487567) pointing out that
+  (https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=487567) pointing out that
   libcurl used Content-Range: instead of Range when doing a range request with
   --head (CURLOPT_NOBODY). This is now fixed and test case 1032 was added to
   verify.
@@ -3486,7 +3486,7 @@ Michal Marek (9 May 2008)
 
 Daniel Stenberg (7 May 2008)
 - Liam Healy filed the debian bug report #480044
-  (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=480044) identifying a
+  (https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=480044) identifying a
   segfault when using krb5 ftp, but the krb4 code had the same problem.
 
 Yang Tse (7 May 2008)
@@ -3896,7 +3896,7 @@ Daniel S (3 Feb 2008)
 Daniel S (31 Jan 2008)
 - Niklas Angebrand made the cookie support in libcurl properly deal with the
   "HttpOnly" feature introduced by Microsoft and apparently also supported by
-  Firefox: http://msdn2.microsoft.com/en-us/library/ms533046.aspx . HttpOnly
+  Firefox: https://msdn.microsoft.com/en-us/library/ms533046.aspx . HttpOnly
   is now supported when received from servers in HTTP headers, when written to
   cookie jars and when read from existing cookie jars.
 
@@ -5538,7 +5538,7 @@ Daniel (13 February 2007)
 
 Daniel (12 February 2007)
 - Rob Crittenden added support for NSS (Network Security Service) for the
-  SSL/TLS layer. http://www.mozilla.org/projects/security/pki/nss/
+  SSL/TLS layer. https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS
 
   This is the fourth supported library for TLS/SSL that libcurl supports!
 
@@ -5696,7 +5696,7 @@ Daniel (2 January 2007)
 - Modified libcurl.pc.in to use Libs.private for the libs libcurl itself needs
   to get built static. It has been mentioned before and was again brought to
   our attention by Nathanael Nerode who filed debian bug report #405226
-  (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=405226).
+  (https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=405226).
 
 Daniel (29 December 2006)
 - Make curl_easy_duphandle() set the magic number in the new handle.
@@ -6287,7 +6287,7 @@ Daniel (8 June 2006)
   route of skipping them for *-*-cygwin*.
 
   The third patch replaces all uses of the ancient and obsolete __CYGWIN32__
-  with __CYGWIN__. Ref: <http://cygwin.com/ml/cygwin/2003-09/msg01520.html>.
+  with __CYGWIN__. Ref: <https://cygwin.com/ml/cygwin/2003-09/msg01520.html>.
 
 Daniel (7 June 2006)
 - Mikael Sennerholm provided a patch that added NTLM2 session response support
@@ -6854,7 +6854,7 @@ Daniel (14 November 2005)
   but it should not do any harm. https://curl.haxx.se/bug/view.cgi?id=1356715
 
 - Jan Kunder's debian bug report
-  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=338680 identified a weird
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=338680 identified a weird
   error message for when you try to upload a file and the requested directory
   doesn't exist on the target server.
 
@@ -6864,7 +6864,7 @@ Daniel (14 November 2005)
 Daniel (13 November 2005)
 - Debian bug report 338681 by Jan Kunder: make curl better detect and report
   bad limit-rate units:
-  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=338681 Now curl will return
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=338681 Now curl will return
   error if a bad unit is used.
 
 - Thanks to this nice summary of poll() implementations:
@@ -7040,15 +7040,15 @@ Daniel (27 September 2005)
 
 Daniel (21 September 2005)
 - Fixed "cut off" sentence in the libcurl-tutorial man page:
-  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=329305
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=329305
 
 - Clarified in the curl_easy_setopt man page what the default
   CURLOPT_WRITEFUNCTION and CURLOPT_WRITEDATA mean:
-  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=329311
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=329311
 
 - Clarified in the curl_easy_setopt man page that CURLOPT_ERRORBUFFER
   sometimes doesn't fill in the buffer even though it is supposed to:
-  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=329313
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=329313
 
 - When CURLE_URL_MALFORMAT is returned due to a missing URL, it now has an
   error string set.
@@ -7075,7 +7075,7 @@ Daniel (6 September 2005)
 Daniel (4 September 2005)
 - I applied Nicolas François' man page patch he posted to the Debian bug
   tracker. It corrected two lines that started with apostrophes, which isn't
-  legal nroff format. http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=326511
+  legal nroff format. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=326511
 
 - Added --ftp-skip-pasv-ip to the command line tool, that sets the new
   CURLOPT_FTP_SKIP_PASV_IP option. It makes libcurl re-use the control
@@ -7301,7 +7301,7 @@ Daniel (30 May 2005)
 - Eric Cooper reported about a problem with HTTP servers that responds with
   binary zeroes within the headers. They confused libcurl to do wrong so the
   downloaded headers become incomplete. The fix is now verified with test case
-  262. http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=310948
+  262. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=310948
 
 Daniel (25 May 2005)
 - Fixed problems with the test suite, and in particular the FTP test cases
@@ -7658,7 +7658,7 @@ Daniel (4 March 2005)
 Daniel (22 February 2005)
 - NTLM and ftp-krb4 buffer overflow fixed, as reported here:
   http://www.securityfocus.com/archive/1/391042 and the CAN report here:
-  http://cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2005-0490
+  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2005-0490
 
   If these security guys were serious, we'd been notified in advance and we
   could've saved a few of you a little surprise, but now we weren't.
@@ -7918,7 +7918,7 @@ Daniel (13 January 2005)
   http://www.greenhills.co.uk/mak/gentoo/curl-eintr-bug.c, I now made the
   select() and poll() calls properly loop if they return -1 and errno is
   EINTR. glibc docs for this is found here:
-  http://www.gnu.org/software/libc/manual/html_node/Interrupted-Primitives.html
+  https://www.gnu.org/software/libc/manual/html_node/Interrupted-Primitives.html
 
   This last link says BSD doesn't have this "effect". Will there be a problem
   if we do this unconditionally?
@@ -12542,7 +12542,7 @@ Daniel (16 March 2002)
   PASV ftp transfers. It could make libcurl crash.
 
   Details in bug report #530562:
-  http://sourceforge.net/tracker/?func=detail&atid=100976&aid=530562&group_id=976
+  https://sourceforge.net/p/curl/bugs/178/
 
 Daniel (15 March 2002)
 - Jun-ichiro itojun Hagino filed bug report #530204 that clearly pointed out
@@ -12922,7 +12922,7 @@ Daniel (17 January 2002)
 
 - Richard Archer brought back the ability to compile and build with OpenSSL
   versions before 0.9.5.
-  [http://sourceforge.net/tracker/?func=detail&atid=100976&aid=504163&group_id=976]
+  [https://sourceforge.net/p/curl/bugs/149/]
 
 - The DNS cache code didn't take the port number into account, which made it
   work rather bad on IPv6-enabled hosts (especially when doing passive

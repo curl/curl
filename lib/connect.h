@@ -56,7 +56,7 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
 /* When you run a program that uses the Windows Sockets API, you may
    experience slow performance when you copy data to a TCP server.
 
-   http://support.microsoft.com/kb/823764
+   https://support.microsoft.com/kb/823764
 
    Work-around: Make the Socket Send Buffer Size Larger Than the Program Send
    Buffer Size
