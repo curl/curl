@@ -32,7 +32,7 @@
 
 static CURLcode unit_setup(void)
 {
-  return SANITIZE_ERR_OK;
+  return CURLE_OK;
 }
 
 static void unit_stop(void)
