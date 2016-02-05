@@ -65,44 +65,40 @@ WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
 #define IDN_MAX_LENGTH 255
 
 int curl_win32_idn_to_ascii(const char *in, char **out);
-int curl_win32_ascii_to_idn(const char *in, size_t in_len, char **out_utf8);
+int curl_win32_ascii_to_idn(const char *in, char **out);
 
 int curl_win32_idn_to_ascii(const char *in, char **out)
 {
+  int ret = 0;
   wchar_t *in_w = Curl_convert_UTF8_to_wchar(in);
   if(in_w) {
     wchar_t punycode[IDN_MAX_LENGTH];
-    if(IdnToAscii(0, in_w, -1, punycode, IDN_MAX_LENGTH) == 0) {
-      wprintf(L"ERROR %d converting to Punycode\n", GetLastError());
-      free(in_w);
-      return 0;
-    }
+    int chars = IdnToAscii(0, in_w, -1, punycode, IDN_MAX_LENGTH);
     free(in_w);
-
-    *out = Curl_convert_wchar_to_UTF8(punycode);
-    if(!*out)
-      return 0;
+    if(chars) {
+      *out = Curl_convert_wchar_to_UTF8(punycode);
+      if(*out)
+        ret = 1; /* success */
+    }
   }
-  return 1;
+  return ret;
 }
 
-int curl_win32_ascii_to_idn(const char *in, size_t in_len, char **out_utf8)
+int curl_win32_ascii_to_idn(const char *in, char **out)
 {
-  (void)in_len; /* unused */
-  if(in) {
-    WCHAR unicode[IDN_MAX_LENGTH];
-
-    if(IdnToUnicode(0, (wchar_t *)in, -1, unicode, IDN_MAX_LENGTH) == 0) {
-      wprintf(L"ERROR %d converting to Punycode\n", GetLastError());
-      return 0;
-    }
-    else {
-      *out_utf8 = Curl_convert_wchar_to_UTF8(unicode);
-      if(!*out_utf8)
-        return 0;
+  int ret = 0;
+  wchar_t *in_w = Curl_convert_UTF8_to_wchar(in);
+  if(in_w) {
+    wchar_t unicode[IDN_MAX_LENGTH];
+    int chars = IdnToUnicode(0, in_w, wcslen(in_w)+1, unicode, IDN_MAX_LENGTH);
+    free(in_w);
+    if(chars) {
+      *out = Curl_convert_wchar_to_UTF8(unicode);
+      if(*out)
+        ret = 1; /* success */
     }
   }
-  return 1;
+  return ret;
 }
 
 #endif /* USE_WIN32_IDN */
