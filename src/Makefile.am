@@ -75,8 +75,9 @@ curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 # if unit tests are enabled, build a static library to link them with
 if BUILD_UNITTESTS
 noinst_LTLIBRARIES = libcurltool.la
-libcurltool_la_CPPFLAGS = $(LIBMETALINK_CPPFLAGS) $(AM_CPPFLAGS)
-libcurltool_la_CFLAGS = -DUNITTESTS
+libcurltool_la_CPPFLAGS = $(LIBMETALINK_CPPFLAGS) $(AM_CPPFLAGS) \
+                          -DCURL_STATICLIB -DUNITTESTS
+libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
 libcurltool_la_SOURCES = $(curl_SOURCES)
 endif

@@ -29,6 +29,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_convert.h"
+#include "tool_doswin.h"
 #include "tool_operhlp.h"
 #include "tool_metalink.h"
 
@@ -150,6 +151,17 @@ CURLcode get_url_file_name(char **filename, const char *url)
   *filename = strdup(pc);
   if(!*filename)
     return CURLE_OUT_OF_MEMORY;
+
+#if defined(MSDOS) || defined(WIN32)
+  {
+    char *sanitized;
+    SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
+    Curl_safefree(*filename);
+    if(sc)
+      return CURLE_URL_MALFORMAT;
+    *filename = sanitized;
+  }
+#endif /* MSDOS || WIN32 */
 
   /* in case we built debug enabled, we allow an environment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a

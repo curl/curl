@@ -115,24 +115,18 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
       */
       len = (ssize_t)cb - (p - str);
       filename = parse_filename(p, len);
-      if(!filename)
-        return failure;
-
-#if defined(MSDOS) || defined(WIN32)
-      if(sanitize_file_name(&filename)) {
-        free(filename);
-        return failure;
+      if(filename) {
+        outs->filename = filename;
+        outs->alloc_filename = TRUE;
+        outs->is_cd_filename = TRUE;
+        outs->s_isreg = TRUE;
+        outs->fopened = FALSE;
+        outs->stream = NULL;
+        hdrcbdata->honor_cd_filename = FALSE;
+        break;
       }
-#endif /* MSDOS || WIN32 */
-
-      outs->filename = filename;
-      outs->alloc_filename = TRUE;
-      outs->is_cd_filename = TRUE;
-      outs->s_isreg = TRUE;
-      outs->fopened = FALSE;
-      outs->stream = NULL;
-      hdrcbdata->honor_cd_filename = FALSE;
-      break;
+      else
+        return failure;
     }
   }
 
@@ -206,6 +200,17 @@ static char *parse_filename(const char *ptr, size_t len)
 
   if(copy != p)
     memmove(copy, p, strlen(p) + 1);
+
+#if defined(MSDOS) || defined(WIN32)
+  {
+    char *sanitized;
+    SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
+    Curl_safefree(copy);
+    if(sc)
+      return NULL;
+    copy = sanitized;
+  }
+#endif /* MSDOS || WIN32 */
 
   /* in case we built debug enabled, we allow an evironment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a
