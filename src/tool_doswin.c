@@ -137,7 +137,7 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 {
   char *p, *target;
   size_t len;
-  CURLcode res;
+  SANITIZEcode sc;
   size_t max_sanitized_len;
 
   if(!sanitized)
@@ -218,10 +218,10 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
   }
 
 #ifdef MSDOS
-  res = msdosify(&p, target, flags);
+  sc = msdosify(&p, target, flags);
   free(target);
-  if(res)
-    return res;
+  if(sc)
+    return sc;
   target = p;
   len = strlen(target);
 
@@ -232,10 +232,10 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 #endif
 
   if(!(flags & SANITIZE_ALLOW_RESERVED)) {
-    res = rename_if_reserved_dos_device_name(&p, target, flags);
+    sc = rename_if_reserved_dos_device_name(&p, target, flags);
     free(target);
-    if(res)
-      return res;
+    if(sc)
+      return sc;
     target = p;
     len = strlen(target);
 
