@@ -123,6 +123,7 @@
  17.8 offer color-coded HTTP header output
  17.9 Choose the name of file in braces for complex URLs
  17.10 improve how curl works in a windows console window
+ 17.11 -w output to stderr
 
  18. Build
  18.1 roffit
@@ -736,6 +737,14 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  If you pull the scrollbar when transferring with curl in a Windows console
  window, the transfer is interrupted and can get disconnected. This can
  probably be improved. See https://github.com/curl/curl/issues/322
+
+17.11 -w output to stderr
+
+ -w is quite useful, but not to those of us who use curl without -o or -O
+ (such as for scripting through a higher level language). It would be nice to
+ have an option that is exactly like -w but sends it to stderr
+ instead. Proposed name: --write-stderr. See
+ https://github.com/curl/curl/issues/613
 
 
 18. Build
