@@ -48,6 +48,7 @@
 #include <curl/curl.h>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <iostream>
 
 #define MSG_OUT stdout /* Send info to stdout, change to stderr if you want */
 
@@ -378,9 +379,9 @@ static curl_socket_t opensocket(void *clientp, curlsocktype purpose,
 }
 
 /* CURLOPT_CLOSESOCKETFUNCTION */
-static int closesocket(void *clientp, curl_socket_t item)
+static int close_socket(void *clientp, curl_socket_t item)
 {
-  fprintf(MSG_OUT, "\nclosesocket : %d", item);
+  fprintf(MSG_OUT, "\nclose_socket : %d", item);
 
   std::map<curl_socket_t, boost::asio::ip::tcp::socket *>::iterator it = socket_map.find(item);
 
@@ -427,7 +428,7 @@ static void new_conn(char *url, GlobalInfo *g)
   curl_easy_setopt(conn->easy, CURLOPT_OPENSOCKETFUNCTION, opensocket);
 
   /* call this function to close a socket */
-  curl_easy_setopt(conn->easy, CURLOPT_CLOSESOCKETFUNCTION, closesocket);
+  curl_easy_setopt(conn->easy, CURLOPT_CLOSESOCKETFUNCTION, close_socket);
 
   fprintf(MSG_OUT,
           "\nAdding easy %p to multi %p (%s)", conn->easy, g->multi, url);
@@ -441,7 +442,6 @@ static void new_conn(char *url, GlobalInfo *g)
 int main(int argc, char **argv)
 {
   GlobalInfo g;
-  CURLMcode rc;
 
   (void)argc;
   (void)argv;
