@@ -14,6 +14,12 @@ This release includes the following bugfixes:
  o curl.1: Explain remote-name behavior if file already exists
  o tool_operate: Don't sanitize --output path (Windows) [3]
  o URLs: change all http:// URLs to https:// in documentation & comments
+ o sasl_sspi: Fix memory leak in domain populate [4]
+ o COPYING: clarify that Daniel is not the sole author
+ o examples/htmltitle: Use _stricmp on Windows [5]
+ o examples/asiohiper: Avoid function name collision on Windows [6]
+ o idn_win32: Better error checking [7]
+ o openssl: Fix signed/unsigned mismatch warning in X509V3_ext [8]
 
 This release includes the following known bugs:
 
@@ -22,9 +28,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Bernard Spil, Daniel Stenberg, Gisle Vanem, Octavio Schroeder, Ray Satiro,
-  Sergei Nikulov, Viktor Szakáts,
-  (7 contributors)
+  Bernard Spil, Dan Fandrich, Daniel Stenberg, Gisle Vanem, Michael Kaufmann,
+  Octavio Schroeder, Ray Satiro, Sergei Nikulov, Viktor Szakáts,
+  (9 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -33,3 +39,8 @@ References to bug reports and discussions on issues:
  [1] = https://github.com/curl/curl/pull/616
  [2] = https://curl.haxx.se/bug/?i=617
  [3] = https://curl.haxx.se/bug/?i=624
+ [4] = https://github.com/curl/curl/issues/635
+ [5] = https://curl.haxx.se/mail/lib-2016-02/0017.html
+ [6] = https://curl.haxx.se/mail/lib-2016-02/0016.html
+ [7] = https://github.com/curl/curl/pull/637
+ [8] = https://github.com/curl/curl/commit/dd1b44c#commitcomment-15913896
