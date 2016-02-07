@@ -129,7 +129,7 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
  */
 CURLcode get_url_file_name(char **filename, const char *url)
 {
-  const char *pc;
+  const char *pc, *pc2;
 
   *filename = NULL;
 
@@ -139,7 +139,11 @@ CURLcode get_url_file_name(char **filename, const char *url)
     pc += 3;
   else
     pc = url;
+
+  pc2 = strrchr(pc, '\\');
   pc = strrchr(pc, '/');
+  if(pc2 && (!pc || pc < pc2))
+    pc = pc2;
 
   if(pc)
     /* duplicate the string beyond the slash */
