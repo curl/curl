@@ -20,6 +20,7 @@ This release includes the following bugfixes:
  o examples/asiohiper: Avoid function name collision on Windows [6]
  o idn_win32: Better error checking [7]
  o openssl: Fix signed/unsigned mismatch warning in X509V3_ext [8]
+ o curl save files: check for backslashes on cygwin [9]
 
 This release includes the following known bugs:
 
@@ -44,3 +45,4 @@ References to bug reports and discussions on issues:
  [6] = https://curl.haxx.se/mail/lib-2016-02/0016.html
  [7] = https://github.com/curl/curl/pull/637
  [8] = https://github.com/curl/curl/commit/dd1b44c#commitcomment-15913896
+ [9] = https://curl.haxx.se/docs/adv_20160127B.html
