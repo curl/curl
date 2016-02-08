@@ -3895,6 +3895,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   SSPI support:     ${curl_sspi_msg}
   ca cert bundle:   ${ca}
   ca cert path:     ${capath}
+  ca fallback:      ${with_ca_fallback}
   LDAP support:     ${curl_ldap_msg}
   LDAPS support:    ${curl_ldaps_msg}
   RTSP support:     ${curl_rtsp_msg}
