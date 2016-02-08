@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -417,7 +417,7 @@ Curl_cookie_add(struct SessionHandle *data,
     do {
       /* we have a <what>=<this> pair or a stand-alone word here */
       name[0]=what[0]=0; /* init the buffers */
-      if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^;\r\n =] =%"
+      if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^;\r\n=] =%"
                      MAX_COOKIE_LINE_TXT "[^;\r\n]",
                      name, what)) {
         /* Use strstore() below to properly deal with received cookie
@@ -427,14 +427,23 @@ Curl_cookie_add(struct SessionHandle *data,
         bool done = FALSE;
         bool sep;
         size_t len=strlen(what);
-        const char *endofn = &ptr[ strlen(name) ];
-
-        /* skip trailing spaces in name */
-        while(*endofn && ISBLANK(*endofn))
-          endofn++;
+        size_t nlen = strlen(name);
+        const char *endofn = &ptr[ nlen ];
 
         /* name ends with a '=' ? */
         sep = (*endofn == '=')?TRUE:FALSE;
+
+        if(nlen) {
+          endofn--; /* move to the last character */
+          if(ISBLANK(*endofn)) {
+            /* skip trailing spaces in name */
+            while(*endofn && ISBLANK(*endofn) && nlen) {
+              endofn--;
+              nlen--;
+            }
+            name[nlen]=0; /* new end of name */
+          }
+        }
 
         /* Strip off trailing whitespace from the 'what' */
         while(len && ISBLANK(what[len-1])) {
