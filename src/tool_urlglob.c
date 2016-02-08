@@ -673,7 +673,8 @@ CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
   {
     char *sanitized;
     SANITIZEcode sc = sanitize_file_name(&sanitized, target,
-                                         SANITIZE_ALLOW_PATH);
+                                         (SANITIZE_ALLOW_PATH |
+                                          SANITIZE_ALLOW_RESERVED));
     Curl_safefree(target);
     if(sc)
       return CURLE_URL_MALFORMAT;
