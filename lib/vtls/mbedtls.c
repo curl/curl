@@ -211,7 +211,7 @@ mbedtls_connect_step1(struct connectdata *conn,
 #endif /* THREADING_SUPPORT */
 
   /* Load the trusted CA */
-  memset(&connssl->cacert, 0, sizeof(mbedtls_x509_crt));
+  mbedtls_x509_crt_init(&connssl->cacert);
 
   if(data->set.str[STRING_SSL_CAFILE]) {
     ret = mbedtls_x509_crt_parse_file(&connssl->cacert,
@@ -246,7 +246,7 @@ mbedtls_connect_step1(struct connectdata *conn,
   }
 
   /* Load the client certificate */
-  memset(&connssl->clicert, 0, sizeof(mbedtls_x509_crt));
+  mbedtls_x509_crt_init(&connssl->clicert);
 
   if(data->set.str[STRING_CERT]) {
     ret = mbedtls_x509_crt_parse_file(&connssl->clicert,
@@ -264,8 +264,9 @@ mbedtls_connect_step1(struct connectdata *conn,
   }
 
   /* Load the client private key */
+  mbedtls_pk_init(&connssl->pk);
+
   if(data->set.str[STRING_KEY]) {
-    mbedtls_pk_init(&connssl->pk);
     ret = mbedtls_pk_parse_keyfile(&connssl->pk, data->set.str[STRING_KEY],
                                    data->set.str[STRING_KEY_PASSWD]);
     if(ret == 0 && !mbedtls_pk_can_do(&connssl->pk, MBEDTLS_PK_RSA))
@@ -283,7 +284,7 @@ mbedtls_connect_step1(struct connectdata *conn,
   }
 
   /* Load the CRL */
-  memset(&connssl->crl, 0, sizeof(mbedtls_x509_crl));
+  mbedtls_x509_crl_init(&connssl->crl);
 
   if(data->set.str[STRING_SSL_CRLFILE]) {
     ret = mbedtls_x509_crl_parse_file(&connssl->crl,
@@ -384,19 +385,21 @@ mbedtls_connect_step1(struct connectdata *conn,
 
 #ifdef HAS_ALPN
   if(data->set.ssl_enable_alpn) {
-    const char *protocols[3];
-    const char **p = protocols;
+    const char **p = &connssl->protocols[0];
 #ifdef USE_NGHTTP2
     if(data->set.httpversion >= CURL_HTTP_VERSION_2)
       *p++ = NGHTTP2_PROTO_VERSION_ID;
 #endif
     *p++ = ALPN_HTTP_1_1;
     *p = NULL;
-    if(mbedtls_ssl_conf_alpn_protocols(&connssl->config, protocols)) {
+    /* this function doesn't clone the protocols array, which is why we need
+       to keep it around */
+    if(mbedtls_ssl_conf_alpn_protocols(&connssl->config,
+                                       &connssl->protocols[0])) {
       failf(data, "Failed setting ALPN protocols");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    for(p = protocols; *p; ++p)
+    for(p = &connssl->protocols[0]; *p; ++p)
       infof(data, "ALPN, offering %s\n", *p);
   }
 #endif
@@ -645,11 +648,16 @@ void Curl_mbedtls_close_all(struct SessionHandle *data)
 
 void Curl_mbedtls_close(struct connectdata *conn, int sockindex)
 {
-  /* mbedtls_rsa_free(&conn->ssl[sockindex].rsa); */
+  mbedtls_pk_free(&conn->ssl[sockindex].pk);
   mbedtls_x509_crt_free(&conn->ssl[sockindex].clicert);
   mbedtls_x509_crt_free(&conn->ssl[sockindex].cacert);
   mbedtls_x509_crl_free(&conn->ssl[sockindex].crl);
+  mbedtls_ssl_config_free(&conn->ssl[sockindex].config);
   mbedtls_ssl_free(&conn->ssl[sockindex].ssl);
+  mbedtls_ctr_drbg_free(&conn->ssl[sockindex].ctr_drbg);
+#ifndef THREADING_SUPPORT
+  mbedtls_entropy_free(&conn->ssl[sockindex].entropy);
+#endif /* THREADING_SUPPORT */
 }
 
 static ssize_t mbedtls_recv(struct connectdata *conn,
