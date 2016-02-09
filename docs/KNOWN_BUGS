@@ -3,13 +3,16 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
-92. curl tool 7.47.1 in Windows will not --output to any device unless the
-  device prefix is used. To send output to a device that has a reserved dos
-  device name use the Windows device prefix \\.\ (eg: --output \\.\NUL) or use
-  the redirection operator at the end of your curl command (eg: > NUL).
-  The next release of curl will support --output in Windows to reserved device
-  names without the device prefix for backwards compatibility.
+92. curl tool 7.47.1 in Windows will not --output to literal paths \\?\ or to
+  reserved dos device names unless the device prefix \\.\ is used. To send
+  output to a device that has a reserved dos device name you can use the
+  Windows device prefix (eg: --output \\.\NUL). You can also use the
+  redirection operator to send output to a literal path or a reserved device
+  name (eg: > NUL).
+  The next release of curl will support --output in Windows to literal paths
+  and to reserved device names without the device prefix.
   https://github.com/curl/curl/commit/c3aac48
+  https://github.com/curl/curl/commit/4fc80f3
 
 91. "curl_easy_perform hangs with imap and PolarSSL"
   https://github.com/curl/curl/issues/334
