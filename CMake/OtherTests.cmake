@@ -177,19 +177,22 @@ int main(void) {
   return 0;
 }" HAVE_STRUCT_TIMEVAL)
 
-
-include(CheckCSourceRuns)
-set(CMAKE_REQUIRED_FLAGS)
-if(HAVE_SYS_POLL_H)
-  set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
-endif(HAVE_SYS_POLL_H)
-check_c_source_runs("
+if(NOT ${CMAKE_CROSSCOMPILING})
+  include(CheckCSourceRuns)
+  set(CMAKE_REQUIRED_FLAGS)
+  if(HAVE_SYS_POLL_H)
+    set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
+  endif(HAVE_SYS_POLL_H)
+  check_c_source_runs("
   #ifdef HAVE_SYS_POLL_H
   #  include <sys/poll.h>
   #endif
   int main(void) {
     return poll((void *)0, 0, 10 /*ms*/);
   }" HAVE_POLL_FINE)
+else()
+  message(STATUS "Performing test for HAVE_POLL_FINE is skipped when cross-compiling")
+endif()
 
 set(HAVE_SIG_ATOMIC_T 1)
 set(CMAKE_REQUIRED_FLAGS)

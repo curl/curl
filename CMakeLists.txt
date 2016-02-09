@@ -791,7 +791,14 @@ endif(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
 check_symbol_exists(uname          "${CURL_INCLUDES}" HAVE_UNAME)
 check_symbol_exists(strtoll        "${CURL_INCLUDES}" HAVE_STRTOLL)
 check_symbol_exists(_strtoi64      "${CURL_INCLUDES}" HAVE__STRTOI64)
-check_symbol_exists(strerror_r     "${CURL_INCLUDES}" HAVE_STRERROR_R)
+
+if(NOT ${CMAKE_CROSSCOMPILING})
+  # We can't tell which version of strerror_r we have unless we can run
+  # a test program; so if we are cross compiling just assume we don't have
+  # strerror_r. 
+  check_symbol_exists(strerror_r     "${CURL_INCLUDES}" HAVE_STRERROR_R)
+endif()
+
 check_symbol_exists(siginterrupt   "${CURL_INCLUDES}" HAVE_SIGINTERRUPT)
 check_symbol_exists(perror         "${CURL_INCLUDES}" HAVE_PERROR)
 check_symbol_exists(fork           "${CURL_INCLUDES}" HAVE_FORK)
@@ -874,12 +881,14 @@ endforeach(CURL_TEST)
 if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
 endif(HAVE_FILE_OFFSET_BITS)
+
 foreach(CURL_TEST
     HAVE_GLIBC_STRERROR_R
     HAVE_POSIX_STRERROR_R
     )
   curl_internal_test_run(${CURL_TEST})
 endforeach(CURL_TEST)
+
 
 # Check for reentrant
 foreach(CURL_TEST
