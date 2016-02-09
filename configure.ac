@@ -1653,6 +1653,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
         AC_MSG_RESULT([yes])
         AC_DEFINE_UNQUOTED(HAVE_BORINGSSL, 1,
                            [Define to 1 if using BoringSSL.])
+        curl_ssl_msg="enabled (BoringSSL)"
     ],[
         AC_MSG_RESULT([no])
     ])
