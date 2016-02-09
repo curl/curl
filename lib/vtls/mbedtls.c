@@ -384,19 +384,21 @@ mbedtls_connect_step1(struct connectdata *conn,
 
 #ifdef HAS_ALPN
   if(data->set.ssl_enable_alpn) {
-    const char *protocols[3];
-    const char **p = protocols;
+    const char **p = &connssl->protocols[0];
 #ifdef USE_NGHTTP2
     if(data->set.httpversion >= CURL_HTTP_VERSION_2)
       *p++ = NGHTTP2_PROTO_VERSION_ID;
 #endif
     *p++ = ALPN_HTTP_1_1;
     *p = NULL;
-    if(mbedtls_ssl_conf_alpn_protocols(&connssl->config, protocols)) {
+    /* this function doesn't clone the protocols array, which is why we need
+       to keep it around */
+    if(mbedtls_ssl_conf_alpn_protocols(&connssl->config,
+                                       &connssl->protocols[0])) {
       failf(data, "Failed setting ALPN protocols");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    for(p = protocols; *p; ++p)
+    for(p = &connssl->protocols[0]; *p; ++p)
       infof(data, "ALPN, offering %s\n", *p);
   }
 #endif
