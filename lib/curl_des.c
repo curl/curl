@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && !defined(HAVE_DES_SET_ODD_PARITY)
+#if defined(USE_NTLM) && !defined(USE_OPENSSL)
 
 #include "curl_des.h"
 
@@ -60,4 +60,4 @@ void Curl_des_set_odd_parity(unsigned char *bytes, size_t len)
   }
 }
 
-#endif /* USE_NTLM && !HAVE_DES_SET_ODD_PARITY */
+#endif /* USE_NTLM && !USE_OPENSSL */

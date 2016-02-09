@@ -68,7 +68,7 @@
 #include <openssl/pkcs12.h>
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_IS_BORINGSSL)
+#if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_OCSP)
 #include <openssl/ocsp.h>
 #endif
 
@@ -83,21 +83,8 @@
 #error "OPENSSL_VERSION_NUMBER not defined"
 #endif
 
-#if !defined(OPENSSL_IS_BORINGSSL)
-/* ENGINE_load_private_key() takes four arguments */
-#define HAVE_ENGINE_LOAD_FOUR_ARGS
+#if defined(HAVE_OPENSSL_ENGINE_H)
 #include <openssl/ui.h>
-#else
-/* ENGINE_load_private_key() takes three arguments */
-#undef HAVE_ENGINE_LOAD_FOUR_ARGS
-#endif
-
-#if defined(HAVE_OPENSSL_PKCS12_H) && !defined(OPENSSL_IS_BORINGSSL)
-/* OpenSSL has PKCS 12 support, BoringSSL does not */
-#define HAVE_PKCS12_SUPPORT
-#else
-/* OpenSSL does not have PKCS12 support */
-#undef HAVE_PKCS12_SUPPORT
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x00909000L
@@ -106,10 +93,7 @@
 #define SSL_METHOD_QUAL
 #endif
 
-#ifdef OPENSSL_IS_BORINGSSL
-/* BoringSSL has no ERR_remove_state() */
-#define ERR_remove_state(x)
-#elif (OPENSSL_VERSION_NUMBER >= 0x10000000L)
+#if (OPENSSL_VERSION_NUMBER >= 0x10000000L)
 #define HAVE_ERR_REMOVE_THREAD_STATE 1
 #endif
 
@@ -131,17 +115,8 @@
 #define HAVE_X509_GET0_SIGNATURE 1
 #endif
 
-#if defined(OPENSSL_IS_BORINGSSL)
-#define NO_RAND_SEED 1
-/* In BoringSSL OpenSSL_add_all_algorithms does nothing */
-#define OpenSSL_add_all_algorithms()
-/* BoringSSL does not have CONF_modules_load_file, CONF_modules_free */
-#define CONF_modules_load_file(a,b,c)
-#define CONF_modules_free()
-#endif
-
-#if (OPENSSL_VERSION_NUMBER < 0x0090808fL) || defined(OPENSSL_IS_BORINGSSL)
-/* not present in BoringSSL  or older OpenSSL */
+#if (OPENSSL_VERSION_NUMBER < 0x0090808fL)
+/* not present in older OpenSSL */
 #define OPENSSL_load_builtin_modules(x)
 #endif
 
@@ -175,7 +150,6 @@ static int passwd_callback(char *buf, int num, int encrypting,
  * pass in an argument that is never used.
  */
 
-#ifndef NO_RAND_SEED
 #ifdef HAVE_RAND_STATUS
 #define seed_enough(x) rand_enough()
 static bool rand_enough(void)
@@ -272,11 +246,6 @@ static void Curl_ossl_seed(struct SessionHandle *data)
     ssl_seeded = TRUE;
   }
 }
-#else
-/* BoringSSL needs no seeding */
-#define Curl_ossl_seed(x)
-#endif
-
 
 #ifndef SSL_FILETYPE_ENGINE
 #define SSL_FILETYPE_ENGINE 42
@@ -299,7 +268,7 @@ static int do_file_type(const char *type)
   return -1;
 }
 
-#if defined(HAVE_OPENSSL_ENGINE_H) && defined(HAVE_ENGINE_LOAD_FOUR_ARGS)
+#if defined(HAVE_OPENSSL_ENGINE_H)
 /*
  * Supply default password to the engine user interface conversation.
  * The password is passed by OpenSSL engine from ENGINE_load_private_key()
@@ -449,7 +418,7 @@ int cert_stuff(struct connectdata *conn,
 
     case SSL_FILETYPE_PKCS12:
     {
-#ifdef HAVE_PKCS12_SUPPORT
+#ifdef HAVE_OPENSSL_PKCS12_H
       FILE *f;
       PKCS12 *p12;
       EVP_PKEY *pri;
@@ -565,7 +534,6 @@ int cert_stuff(struct connectdata *conn,
       {                         /* XXXX still needs some work */
         EVP_PKEY *priv_key = NULL;
         if(data->state.engine) {
-#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
           UI_METHOD *ui_method =
             UI_create_method((char *)"cURL user interface");
           if(!ui_method) {
@@ -576,17 +544,12 @@ int cert_stuff(struct connectdata *conn,
           UI_method_set_closer(ui_method, UI_method_get_closer(UI_OpenSSL()));
           UI_method_set_reader(ui_method, ssl_ui_reader);
           UI_method_set_writer(ui_method, ssl_ui_writer);
-#endif
           /* the typecast below was added to please mingw32 */
           priv_key = (EVP_PKEY *)
             ENGINE_load_private_key(data->state.engine, key_file,
-#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
                                     ui_method,
-#endif
                                     data->set.str[STRING_KEY_PASSWD]);
-#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
           UI_destroy_method(ui_method);
-#endif
           if(!priv_key) {
             failf(data, "failed to load private key from crypto engine");
             return 0;
@@ -1228,7 +1191,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
 }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-    !defined(OPENSSL_IS_BORINGSSL)
+    !defined(OPENSSL_NO_OCSP)
 static CURLcode verifystatus(struct connectdata *conn,
                              struct ssl_connect_data *connssl)
 {
@@ -1670,7 +1633,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   case CURL_SSLVERSION_TLSv1_2:
     /* it will be handled later with the context options */
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
-    !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_IS_BORINGSSL)
+    !defined(LIBRESSL_VERSION_NUMBER)
     req_method = TLS_client_method();
 #else
     req_method = SSLv23_client_method();
@@ -2033,7 +1996,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-    !defined(OPENSSL_IS_BORINGSSL)
+    !defined(OPENSSL_NO_OCSP)
   if(data->set.ssl.verifystatus)
     SSL_set_tlsext_status_type(connssl->handle, TLSEXT_STATUSTYPE_ocsp);
 #endif
@@ -2639,7 +2602,7 @@ static CURLcode servercert(struct connectdata *conn,
   }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-    !defined(OPENSSL_IS_BORINGSSL)
+    !defined(OPENSSL_NO_OCSP)
   if(data->set.ssl.verifystatus) {
     result = verifystatus(conn, connssl);
     if(result) {
@@ -3055,7 +3018,7 @@ void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
 bool Curl_ossl_cert_status_request(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-    !defined(OPENSSL_IS_BORINGSSL)
+    !defined(OPENSSL_NO_OCSP)
   return TRUE;
 #else
   return FALSE;
