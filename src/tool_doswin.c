@@ -150,9 +150,8 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 
   if((flags & SANITIZE_ALLOW_PATH)) {
 #ifndef MSDOS
-    if((flags & SANITIZE_ALLOW_PATH) &&
-       file_name[0] == '\\' && file_name[1] == '\\')
-      /* UNC prefixed path, eg \\?\C:\foo */
+    if(file_name[0] == '\\' && file_name[1] == '\\')
+      /* UNC prefixed path \\ (eg \\?\C:\foo) */
       max_sanitized_len = 32767-1;
     else
 #endif
@@ -180,8 +179,16 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
   strncpy(target, file_name, len);
   target[len] = '\0';
 
+#ifndef MSDOS
+  if((flags & SANITIZE_ALLOW_PATH) && !strncmp(target, "\\\\?\\", 4))
+    /* Skip the literal path prefix \\?\ */
+    p = target + 4;
+  else
+#endif
+    p = target;
+
   /* replace control characters and other banned characters */
-  for(p = target; *p; ++p) {
+  for(; *p; ++p) {
     const char *banned;
 
     if((1 <= *p && *p <= 31) ||

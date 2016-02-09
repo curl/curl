@@ -110,6 +110,14 @@ UNITTEST_START
     { "f:/foo", SANITIZE_ALLOW_PATH,
       "f:/foo", SANITIZE_ERR_OK
     },
+#ifndef MSDOS
+    { "\\\\?\\C:\\foo", SANITIZE_ALLOW_PATH,
+      "\\\\?\\C:\\foo", SANITIZE_ERR_OK
+    },
+    { "\\\\?\\C:\\foo", 0,
+      "____C__foo", SANITIZE_ERR_OK
+    },
+#endif
     { "foo:bar", 0,
       "foo_bar", SANITIZE_ERR_OK
     },
@@ -164,6 +172,17 @@ UNITTEST_START
     { "com1:\\com1", SANITIZE_ALLOW_RESERVED,
       "com1__com1", SANITIZE_ERR_OK
     },
+#ifndef MSDOS
+    { "\\com1", SANITIZE_ALLOW_PATH,
+      "\\_com1", SANITIZE_ERR_OK
+    },
+    { "\\\\com1", SANITIZE_ALLOW_PATH,
+      "\\\\com1", SANITIZE_ERR_OK
+    },
+    { "\\\\?\\C:\\com1", SANITIZE_ALLOW_PATH,
+      "\\\\?\\C:\\com1", SANITIZE_ERR_OK
+    },
+#endif
     { "CoM1", 0,
       "_CoM1", SANITIZE_ERR_OK
     },
