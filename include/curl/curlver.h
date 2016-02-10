@@ -30,13 +30,22 @@
 
 /* This is the version number of the libcurl package from which this header
    file origins: */
+<<<<<<< HEAD
 #define LIBCURL_VERSION "7.47.2-DEV"
+=======
+#define LIBCURL_VERSION "7.42.1"
+>>>>>>> refs/remotes/curl/7_42
 
 /* The numeric version number is also available "in parts" by using these
    defines: */
 #define LIBCURL_VERSION_MAJOR 7
+<<<<<<< HEAD
 #define LIBCURL_VERSION_MINOR 47
 #define LIBCURL_VERSION_PATCH 2
+=======
+#define LIBCURL_VERSION_MINOR 42
+#define LIBCURL_VERSION_PATCH 1
+>>>>>>> refs/remotes/curl/7_42
 
 /* This is the numeric version of the libcurl version number, meant for easier
    parsing and comparions by programs. The LIBCURL_VERSION_NUM define will
@@ -57,7 +66,11 @@
    CURL_VERSION_BITS() macro since curl's own configure script greps for it
    and needs it to contain the full number.
 */
+<<<<<<< HEAD
 #define LIBCURL_VERSION_NUM 0x072F02
+=======
+#define LIBCURL_VERSION_NUM 0x072A01
+>>>>>>> refs/remotes/curl/7_42
 
 /*
  * This is the date and time when the full source package was created. The
