@@ -2308,12 +2308,37 @@ static CURLcode get_cert_chain(struct connectdata *conn,
     BIO_printf(mem, "%lx", X509_get_version(x));
     push_certinfo("Version", i);
 
+<<<<<<< HEAD
     num = X509_get_serialNumber(x);
     if(num->type == V_ASN1_NEG_INTEGER)
       BIO_puts(mem, "-");
     for(j = 0; j < num->length; j++)
       BIO_printf(mem, "%02x", num->data[j]);
     push_certinfo("Serial Number", i);
+=======
+    num=X509_get_serialNumber(x);
+    {
+      int left = CERTBUFFERSIZE;
+
+      ptr = bufp;
+      if(num->type == V_ASN1_NEG_INTEGER) {
+        *ptr++='-';
+        left--;
+      }
+
+      for(j=0; (j<num->length) && (left>=3); j++) {
+        snprintf(ptr, left, "%02x", num->data[j]);
+        ptr += 2;
+        left -= 2;
+      }
+      if(num->length)
+        infof(data, "   Serial Number: %s\n", bufp);
+      else
+        bufp[0]=0;
+    }
+    if(bufp[0])
+      Curl_ssl_push_certinfo(data, i, "Serial Number", bufp); /* hex */
+>>>>>>> refs/remotes/curl/7_42
 
 #if defined(HAVE_X509_GET0_SIGNATURE) && defined(HAVE_X509_GET0_EXTENSIONS)
     {

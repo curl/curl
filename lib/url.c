@@ -618,8 +618,11 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
   set->sep_headers = TRUE; /* separated header lists by default */
+<<<<<<< HEAD
 
   Curl_http2_init_userset(set);
+=======
+>>>>>>> refs/remotes/curl/7_42
   return result;
 }
 
@@ -3128,6 +3131,14 @@ ConnectionExists(struct SessionHandle *data,
   struct connectdata *chosen = 0;
   bool foundPendingCandidate = FALSE;
   bool canPipeline = IsPipeliningPossible(data, needle);
+<<<<<<< HEAD
+=======
+#ifdef USE_NTLM
+  bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) ||
+                       (data->state.authhost.want & CURLAUTH_NTLM_WB)) &&
+    (needle->handler->protocol & PROTO_FAMILY_HTTP) ? TRUE : FALSE;
+#endif
+>>>>>>> refs/remotes/curl/7_42
   struct connectbundle *bundle;
 
 #ifdef USE_NTLM
@@ -3302,8 +3313,17 @@ ConnectionExists(struct SessionHandle *data,
           continue;
       }
 
+<<<<<<< HEAD
       if(!(needle->handler->flags & PROTOPT_CREDSPERREQUEST)) {
         /* This protocol requires credentials per connection,
+=======
+      if((!(needle->handler->flags & PROTOPT_CREDSPERREQUEST))
+#ifdef USE_NTLM
+         || (wantNTLMhttp || check->ntlm.state != NTLMSTATE_NONE)
+#endif
+        ) {
+        /* This protocol requires credentials per connection or is HTTP+NTLM,
+>>>>>>> refs/remotes/curl/7_42
            so verify that we're using the same name and password as well */
         if(!strequal(needle->user, check->user) ||
            !strequal(needle->passwd, check->passwd)) {

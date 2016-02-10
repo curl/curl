@@ -198,6 +198,26 @@ See \fICURLINFO_CERTINFO(3)\fP
 TLS session info that can be used for further processing.
 See \fICURLINFO_TLS_SESSION(3)\fP
 
+.nf
+struct curl_tlssessioninfo {
+  curl_sslbackend backend;
+  void *internals;
+};
+.fi
+
+The \fIinternals\fP struct member will point to a TLS library specific pointer
+with the following underlying types:
+.RS
+.IP OpenSSL
+SSL_CTX *
+.IP GnuTLS
+gnutls_session_t
+.IP NSS
+PRFileDesc *
+.IP gskit
+gsk_handle
+.RE
+
 .IP CURLINFO_CONDITION_UNMET
 Whether or not a time conditional was met.
 See \fICURLINFO_CONDITION_UNMET(3)\fP
