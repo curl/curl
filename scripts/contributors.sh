@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2013-2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2013-2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -72,7 +72,7 @@ awk '{
  num++;
  n = sprintf("%s%s%s,", n, length(n)?" ":"", $0);
  #print n;
- if(length(n) > 78) {
+ if(length(n) > 77) {
    printf("  %s\n", p);
    n=sprintf("%s,", $0);
  }
