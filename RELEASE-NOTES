@@ -8,11 +8,18 @@ Curl and libcurl 7.47.2
 
 This release includes the following changes:
 
- o
+ o configure: --with-ca-fallback: use built-in TLS CA fallback [2]
 
 This release includes the following bugfixes:
 
- o
+ o Proxy-Connection: stop sending this header by default [1]
+ o os400: sync ILE/RPG definitions with latest public header files
+ o cookies: allow spaces in cookie names, cut of trailing spaces [3]
+ o tool_urlglob: Allow reserved dos device names (Windows) [4]
+ o openssl: remove most BoringSSL #ifdefs [5]
+ o tool_doswin: Support for literal path prefix \\?\
+ o mbedtls: fix ALPN usage segfault [6]
+ o mbedtls: fix memory leak when destroying SSL connection data [7]
 
 This release includes the following known bugs:
 
@@ -21,10 +28,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-
+  Brad Fitzpatrick, Daniel Stenberg, David Benjamin, Gisle Vanem,
+  Ludwig Nussel, Patrick Monnerat, Rafael Antonio, Ray Satiro, Timotej Lazar,
+  (9 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = 
+ [1] = https://curl.haxx.se/bug/?i=633
+ [2] = https://curl.haxx.se/bug/?i=569
+ [3] = https://curl.haxx.se/bug/?i=639
+ [4] = https://github.com/curl/curl/commit/4520534#commitcomment-15954863
+ [5] = https://curl.haxx.se/bug/?i=640
+ [6] = https://curl.haxx.se/bug/?i=642
+ [7] = https://curl.haxx.se/bug/?i=626
