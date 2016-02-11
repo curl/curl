@@ -98,7 +98,7 @@ int main(void)
       return 1;
     }
 
-    sockfd = sockextr;
+    sockfd = (curl_socket_t)sockextr;
 
     /* wait for the socket to become ready for sending */
     if(!wait_on_socket(sockfd, 0, 60000L)) {
