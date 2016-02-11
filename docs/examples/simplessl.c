@@ -47,7 +47,6 @@
 
 int main(void)
 {
-  int i;
   CURL *curl;
   CURLcode res;
   FILE *headerfile;
@@ -55,7 +54,7 @@ int main(void)
 
   static const char *pCertFile = "testcert.pem";
   static const char *pCACertFile="cacert.pem";
-  static const char *pHeaderFile = "dumpit"
+  static const char *pHeaderFile = "dumpit";
 
   const char *pKeyName;
   const char *pKeyType;
@@ -131,10 +130,10 @@ int main(void)
                 curl_easy_strerror(res));
 
       /* we are done... */
-    }
+    } while (0);
     /* always cleanup */
     curl_easy_cleanup(curl);
-  } while(0);
+  }
 
   curl_global_cleanup();
 
