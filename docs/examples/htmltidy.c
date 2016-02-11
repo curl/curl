@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,23 +38,21 @@ uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
   uint r;
   r = size * nmemb;
   tidyBufAppend( out, in, r );
-  return(r);
+  return r;
 }
 
 /* Traverse the document tree */
 void dumpNode(TidyDoc doc, TidyNode tnod, int indent )
 {
   TidyNode child;
-  for ( child = tidyGetChild(tnod); child; child = tidyGetNext(child) )
-  {
+  for(child = tidyGetChild(tnod); child; child = tidyGetNext(child) ) {
     ctmbstr name = tidyNodeGetName( child );
-    if ( name )
-    {
+    if(name) {
       /* if it has a name, then it's an HTML tag ... */
       TidyAttr attr;
       printf( "%*.*s%s ", indent, indent, "<", name);
       /* walk the attribute list */
-      for ( attr=tidyAttrFirst(child); attr; attr=tidyAttrNext(attr) ) {
+      for(attr=tidyAttrFirst(child); attr; attr=tidyAttrNext(attr) ) {
         printf(tidyAttrName(attr));
         tidyAttrValue(attr)?printf("=\"%s\" ",
                                    tidyAttrValue(attr)):printf(" ");
@@ -82,7 +80,7 @@ int main(int argc, char **argv )
   TidyBuffer docbuf = {0};
   TidyBuffer tidy_errbuf = {0};
   int err;
-  if ( argc == 2) {
+  if(argc == 2) {
     curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_errbuf);
@@ -98,13 +96,13 @@ int main(int argc, char **argv )
 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &docbuf);
     err=curl_easy_perform(curl);
-    if ( !err ) {
+    if(!err) {
       err = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
-      if ( err >= 0 ) {
+      if(err >= 0) {
         err = tidyCleanAndRepair(tdoc); /* fix any problems */
-        if ( err >= 0 ) {
+        if(err >= 0) {
           err = tidyRunDiagnostics(tdoc); /* load tidy error buffer */
-          if ( err >= 0 ) {
+          if(err >= 0) {
             dumpNode( tdoc, tidyGetRoot(tdoc), 0 ); /* walk the tree */
             fprintf(stderr, "%s\n", tidy_errbuf.bp); /* show errors */
           }
@@ -119,11 +117,11 @@ int main(int argc, char **argv )
     tidyBufFree(&docbuf);
     tidyBufFree(&tidy_errbuf);
     tidyRelease(tdoc);
-    return(err);
+    return err;
 
   }
   else
     printf( "usage: %s <url>\n", argv[0] );
 
-  return(0);
+  return 0;
 }

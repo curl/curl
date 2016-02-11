@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -92,7 +92,7 @@ int main(void)
   WSADATA wsaData;
   int initwsa;
 
-  if((initwsa = WSAStartup(MAKEWORD(2,0), &wsaData)) != 0) {
+  if((initwsa = WSAStartup(MAKEWORD(2, 0), &wsaData)) != 0) {
     printf("WSAStartup failed: %d\n", initwsa);
     return 1;
   }
@@ -107,7 +107,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
 
     /* Create the socket "manually" */
-    if( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) == CURL_SOCKET_BAD ) {
+    if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == CURL_SOCKET_BAD ) {
       printf("Error creating listening socket.\n");
       return 3;
     }
@@ -116,10 +116,10 @@ int main(void)
     servaddr.sin_family = AF_INET;
     servaddr.sin_port   = htons(PORTNUM);
 
-    if (INADDR_NONE == (servaddr.sin_addr.s_addr = inet_addr(IPADDR)))
+    if(INADDR_NONE == (servaddr.sin_addr.s_addr = inet_addr(IPADDR)))
       return 2;
 
-    if(connect(sockfd,(struct sockaddr *) &servaddr, sizeof(servaddr)) ==
+    if(connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) ==
        -1) {
       close(sockfd);
       printf("client error: connect: %s\n", strerror(errno));

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,10 +71,12 @@ int main(void)
         time_t file_time = (time_t)filetime;
         printf("filetime %s: %s", filename, ctime(&file_time));
       }
-      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &filesize);
+      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
+                              &filesize);
       if((CURLE_OK == res) && (filesize>0.0))
         printf("filesize %s: %0.0f bytes\n", filename, filesize);
-    } else {
+    }
+    else {
       /* we failed */
       fprintf(stderr, "curl told us %d\n", res);
     }

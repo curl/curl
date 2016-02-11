@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 {
   CURL *curl;
   CURLcode res;
-  intptr_t hd ;
+  intptr_t hd;
   struct stat file_info;
 
   char *file;
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
   url = argv[2];
 
   /* get the file size of the local file */
-  hd = open(file, O_RDONLY) ;
+  hd = open(file, O_RDONLY);
   fstat(hd, &file_info);
 
   /* In windows, this will init the winsock stuff */
@@ -154,11 +154,11 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_IOCTLDATA, (void*)hd);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L) ;
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     /* specify target URL, and note that this URL should also include a file
        name, not only a directory (as you can do with GTP uploads) */
-    curl_easy_setopt(curl,CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
 
     /* and give the size of the upload, this supports large file sizes
        on systems that have general support for it */

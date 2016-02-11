@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -63,7 +63,7 @@ int main(void)
      * You better replace the URL with one that works!
      */
     curl_easy_setopt(curl, CURLOPT_URL,
-                     "ftp://ftp.example.com/pub/www/utilities/curl/curl-7.9.2.tar.gz");
+                     "ftp://ftp.example.com/curl/curl-7.9.2.tar.gz");
     /* Define our callback to get called when there's data to be written */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
     /* Set a pointer to our struct to pass to the callback */

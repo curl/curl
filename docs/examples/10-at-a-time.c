@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -127,41 +127,42 @@ int main(void)
      uses */
   curl_multi_setopt(cm, CURLMOPT_MAXCONNECTS, (long)MAX);
 
-  for (C = 0; C < MAX; ++C) {
+  for(C = 0; C < MAX; ++C) {
     init(cm, C);
   }
 
-  while (U) {
+  while(U) {
     curl_multi_perform(cm, &U);
 
-    if (U) {
+    if(U) {
       FD_ZERO(&R);
       FD_ZERO(&W);
       FD_ZERO(&E);
 
-      if (curl_multi_fdset(cm, &R, &W, &E, &M)) {
+      if(curl_multi_fdset(cm, &R, &W, &E, &M)) {
         fprintf(stderr, "E: curl_multi_fdset\n");
         return EXIT_FAILURE;
       }
 
-      if (curl_multi_timeout(cm, &L)) {
+      if(curl_multi_timeout(cm, &L)) {
         fprintf(stderr, "E: curl_multi_timeout\n");
         return EXIT_FAILURE;
       }
-      if (L == -1)
+      if(L == -1)
         L = 100;
 
-      if (M == -1) {
+      if(M == -1) {
 #ifdef WIN32
         Sleep(L);
 #else
         sleep(L / 1000);
 #endif
-      } else {
+      }
+      else {
         T.tv_sec = L/1000;
         T.tv_usec = (L%1000)*1000;
 
-        if (0 > select(M+1, &R, &W, &E, &T)) {
+        if(0 > select(M+1, &R, &W, &E, &T)) {
           fprintf(stderr, "E: select(%i,,,,%li): %i: %s\n",
               M+1, L, errno, strerror(errno));
           return EXIT_FAILURE;
@@ -169,8 +170,8 @@ int main(void)
       }
     }
 
-    while ((msg = curl_multi_info_read(cm, &Q))) {
-      if (msg->msg == CURLMSG_DONE) {
+    while((msg = curl_multi_info_read(cm, &Q))) {
+      if(msg->msg == CURLMSG_DONE) {
         char *url;
         CURL *e = msg->easy_handle;
         curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &url);
@@ -182,7 +183,7 @@ int main(void)
       else {
         fprintf(stderr, "E: CURLMsg (%d)\n", msg->msg);
       }
-      if (C < CNT) {
+      if(C < CNT) {
         init(cm, C++);
         U++; /* just to prevent it from remaining at 0 if there are more
                 URLs to get */

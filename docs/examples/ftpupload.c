@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -104,7 +104,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     /* specify target */
-    curl_easy_setopt(curl,CURLOPT_URL, REMOTE_URL);
+    curl_easy_setopt(curl, CURLOPT_URL, REMOTE_URL);
 
     /* pass in that last of FTP commands to run after the transfer */
     curl_easy_setopt(curl, CURLOPT_POSTQUOTE, headerlist);

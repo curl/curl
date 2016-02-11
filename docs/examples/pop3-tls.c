@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,12 +61,13 @@ int main(void)
      * CURLOPT_SSL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST options to 0 (false).
      *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
      *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+     *
      * That is, in general, a bad idea. It is still better than sending your
-     * authentication details in plain text though.
-     * Instead, you should get the issuer certificate (or the host certificate
-     * if the certificate is self-signed) and add it to the set of certificates
-     * that are known to libcurl using CURLOPT_CAINFO and/or CURLOPT_CAPATH. See
-     * docs/SSLCERTS for more information. */
+     * authentication details in plain text though.  Instead, you should get
+     * the issuer certificate (or the host certificate if the certificate is
+     * self-signed) and add it to the set of certificates that are known to
+     * libcurl using CURLOPT_CAINFO and/or CURLOPT_CAPATH. See docs/SSLCERTS
+     * for more information. */
     curl_easy_setopt(curl, CURLOPT_CAINFO, "/path/to/certificate.pem");
 
     /* Since the traffic will be encrypted, it is very useful to turn on debug

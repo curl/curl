@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,7 +46,8 @@ static const char *payload_text[] = {
   "To: " TO "\r\n",
   "From: " FROM "(Example User)\r\n",
   "Cc: " CC "(Another example User)\r\n",
-  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n",
+  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
+  "rfcpedant.example.org>\r\n",
   "Subject: SMTP TLS example message\r\n",
   "\r\n", /* empty line to divide headers from body, see RFC5322 */
   "The body of the message starts here.\r\n",
@@ -116,18 +117,19 @@ int main(void)
      *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
      *   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
      * That is, in general, a bad idea. It is still better than sending your
-     * authentication details in plain text though.
-     * Instead, you should get the issuer certificate (or the host certificate
-     * if the certificate is self-signed) and add it to the set of certificates
-     * that are known to libcurl using CURLOPT_CAINFO and/or CURLOPT_CAPATH. See
-     * docs/SSLCERTS for more information. */
+     * authentication details in plain text though.  Instead, you should get
+     * the issuer certificate (or the host certificate if the certificate is
+     * self-signed) and add it to the set of certificates that are known to
+     * libcurl using CURLOPT_CAINFO and/or CURLOPT_CAPATH. See docs/SSLCERTS
+     * for more information. */
     curl_easy_setopt(curl, CURLOPT_CAINFO, "/path/to/certificate.pem");
 
-    /* Note that this option isn't strictly required, omitting it will result in
-     * libcurl sending the MAIL FROM command with empty sender data. All
+    /* Note that this option isn't strictly required, omitting it will result
+     * in libcurl sending the MAIL FROM command with empty sender data. All
      * autoresponses should have an empty reverse-path, and should be directed
-     * to the address in the reverse-path which triggered them. Otherwise, they
-     * could cause an endless loop. See RFC 5321 Section 4.5.5 for more details.
+     * to the address in the reverse-path which triggered them. Otherwise,
+     * they could cause an endless loop. See RFC 5321 Section 4.5.5 for more
+     * details.
      */
     curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
 

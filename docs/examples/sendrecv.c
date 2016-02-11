@@ -44,12 +44,10 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
 
   FD_SET(sockfd, &errfd); /* always check for error */
 
-  if(for_recv)
-  {
+  if(for_recv) {
     FD_SET(sockfd, &infd);
   }
-  else
-  {
+  else {
     FD_SET(sockfd, &outfd);
   }
 
@@ -84,8 +82,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
     res = curl_easy_perform(curl);
 
-    if(CURLE_OK != res)
-    {
+    if(CURLE_OK != res) {
       printf("Error: %s\n", strerror(res));
       return 1;
     }
@@ -96,8 +93,7 @@ int main(void)
      */
     res = curl_easy_getinfo(curl, CURLINFO_LASTSOCKET, &sockextr);
 
-    if(CURLE_OK != res)
-    {
+    if(CURLE_OK != res) {
       printf("Error: %s\n", curl_easy_strerror(res));
       return 1;
     }
@@ -105,8 +101,7 @@ int main(void)
     sockfd = sockextr;
 
     /* wait for the socket to become ready for sending */
-    if(!wait_on_socket(sockfd, 0, 60000L))
-    {
+    if(!wait_on_socket(sockfd, 0, 60000L)) {
       printf("Error: timeout.\n");
       return 1;
     }
@@ -116,16 +111,14 @@ int main(void)
      * to see if all the request has been sent */
     res = curl_easy_send(curl, request, strlen(request), &iolen);
 
-    if(CURLE_OK != res)
-    {
+    if(CURLE_OK != res) {
       printf("Error: %s\n", curl_easy_strerror(res));
       return 1;
     }
     puts("Reading response.");
 
     /* read the response */
-    for(;;)
-    {
+    for(;;) {
       char buf[1024];
 
       wait_on_socket(sockfd, 1, 60000L);

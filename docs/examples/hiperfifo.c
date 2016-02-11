@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -126,7 +126,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
 /* Die if we get a bad CURLMcode somewhere */
 static void mcode_or_die(const char *where, CURLMcode code)
 {
-  if ( CURLM_OK != code ) {
+  if(CURLM_OK != code) {
     const char *s;
     switch (code) {
       case     CURLM_BAD_HANDLE:         s="CURLM_BAD_HANDLE";         break;
@@ -160,8 +160,8 @@ static void check_multi_info(GlobalInfo *g)
   CURLcode res;
 
   fprintf(MSG_OUT, "REMAINING: %d\n", g->still_running);
-  while ((msg = curl_multi_info_read(g->multi, &msgs_left))) {
-    if (msg->msg == CURLMSG_DONE) {
+  while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
+    if(msg->msg == CURLMSG_DONE) {
       easy = msg->easy_handle;
       res = msg->data.result;
       curl_easy_getinfo(easy, CURLINFO_PRIVATE, &conn);
@@ -191,9 +191,9 @@ static void event_cb(int fd, short kind, void *userp)
   mcode_or_die("event_cb: curl_multi_socket_action", rc);
 
   check_multi_info(g);
-  if ( g->still_running <= 0 ) {
+  if(g->still_running <= 0 ) {
     fprintf(MSG_OUT, "last transfer done, kill timeout\n");
-    if (evtimer_pending(g->timer_event, NULL)) {
+    if(evtimer_pending(g->timer_event, NULL)) {
       evtimer_del(g->timer_event);
     }
   }
@@ -220,8 +220,8 @@ static void timer_cb(int fd, short kind, void *userp)
 /* Clean up the SockInfo structure */
 static void remsock(SockInfo *f)
 {
-  if (f) {
-    if (f->evset)
+  if(f) {
+    if(f->evset)
       event_free(f->ev);
     free(f);
   }
@@ -238,7 +238,7 @@ static void setsock(SockInfo*f, curl_socket_t s, CURL*e, int act, GlobalInfo*g)
   f->sockfd = s;
   f->action = act;
   f->easy = e;
-  if (f->evset)
+  if(f->evset)
     event_free(f->ev);
   f->ev = event_new(g->evbase, f->sockfd, kind, event_cb, g);
   f->evset = 1;
@@ -266,12 +266,12 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 
   fprintf(MSG_OUT,
           "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
-  if (what == CURL_POLL_REMOVE) {
+  if(what == CURL_POLL_REMOVE) {
     fprintf(MSG_OUT, "\n");
     remsock(fdp);
   }
   else {
-    if (!fdp) {
+    if(!fdp) {
       fprintf(MSG_OUT, "Adding data: %s\n", whatstr[what]);
       addsock(s, e, what, g);
     }
@@ -322,7 +322,7 @@ static void new_conn(char *url, GlobalInfo *g )
   conn->error[0]='\0';
 
   conn->easy = curl_easy_init();
-  if (!conn->easy) {
+  if(!conn->easy) {
     fprintf(MSG_OUT, "curl_easy_init() failed, exiting!\n");
     exit(2);
   }
@@ -360,10 +360,12 @@ static void fifo_cb(int fd, short event, void *arg)
     s[0]='\0';
     rv=fscanf(g->input, "%1023s%n", s, &n);
     s[n]='\0';
-    if ( n && s[0] ) {
-      new_conn(s,arg);  /* if we read a URL, go get it! */
-    } else break;
-  } while ( rv != EOF);
+    if(n && s[0] ) {
+      new_conn(s, arg);  /* if we read a URL, go get it! */
+    }
+    else
+      break;
+  } while(rv != EOF);
 }
 
 /* Create a named pipe and tell libevent to monitor it */
@@ -374,20 +376,20 @@ static int init_fifo (GlobalInfo *g)
   curl_socket_t sockfd;
 
   fprintf(MSG_OUT, "Creating named pipe \"%s\"\n", fifo);
-  if (lstat (fifo, &st) == 0) {
-    if ((st.st_mode & S_IFMT) == S_IFREG) {
+  if(lstat (fifo, &st) == 0) {
+    if((st.st_mode & S_IFMT) == S_IFREG) {
       errno = EEXIST;
       perror("lstat");
       exit (1);
     }
   }
   unlink(fifo);
-  if (mkfifo (fifo, 0600) == -1) {
+  if(mkfifo (fifo, 0600) == -1) {
     perror("mkfifo");
     exit (1);
   }
   sockfd = open(fifo, O_RDWR | O_NONBLOCK, 0);
-  if (sockfd == -1) {
+  if(sockfd == -1) {
     perror("open");
     exit (1);
   }

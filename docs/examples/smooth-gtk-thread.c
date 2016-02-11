@@ -74,8 +74,7 @@ void *pull_one_url(void *NaN)
 
   /* Stop threads from entering unless j is incremented */
   pthread_mutex_lock(&lock);
-  while ( j < num_urls )
-  {
+  while(j < num_urls) {
     printf("j = %d\n", j);
 
     http =
@@ -85,11 +84,9 @@ void *pull_one_url(void *NaN)
     printf( "http %s", http );
 
     curl = curl_easy_init();
-    if(curl)
-    {
+    if(curl) {
 
-      outfile = fopen(urls[j], "w");
-      /* printf("fopen\n"); */
+      outfile = fopen(urls[j], "wb");
 
       /* Set the URL and transfer type */
       curl_easy_setopt(curl, CURLOPT_URL, http);
@@ -219,7 +216,7 @@ int main(int argc, char **argv)
   g_signal_connect(G_OBJECT (top_window), "delete-event",
                    G_CALLBACK(cb_delete), NULL);
 
-  if (!g_thread_create(&create_thread, progress_bar, FALSE, NULL) != 0)
+  if(!g_thread_create(&create_thread, progress_bar, FALSE, NULL) != 0)
     g_warning("can't create the thread");
 
   gtk_main();
@@ -228,4 +225,3 @@ int main(int argc, char **argv)
 
   return 0;
 }
-

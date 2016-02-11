@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -84,9 +84,9 @@ void add_download(const char *url, int num)
   FILE *file;
   CURL *handle;
 
-  sprintf(filename, "%d.download", num);
+  snprintf(filename, 50, "%d.download", num);
 
-  file = fopen(filename, "w");
+  file = fopen(filename, "wb");
   if(!file) {
     fprintf(stderr, "Error opening %s\n", filename);
     return;

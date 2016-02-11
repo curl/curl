@@ -55,8 +55,8 @@ int main(void)
   int msgs_left; /* how many messages are left */
 
   /* Allocate one CURL handle per transfer */
-  for (i=0; i<HANDLECOUNT; i++)
-      handles[i] = curl_easy_init();
+  for(i=0; i<HANDLECOUNT; i++)
+    handles[i] = curl_easy_init();
 
   /* set the options (I left out a few, you'll get the point anyway) */
   curl_easy_setopt(handles[HTTP_HANDLE], CURLOPT_URL, "http://example.com");
@@ -68,8 +68,8 @@ int main(void)
   multi_handle = curl_multi_init();
 
   /* add the individual transfers */
-  for (i=0; i<HANDLECOUNT; i++)
-      curl_multi_add_handle(multi_handle, handles[i]);
+  for(i=0; i<HANDLECOUNT; i++)
+    curl_multi_add_handle(multi_handle, handles[i]);
 
   /* we start some action by calling perform right away */
   curl_multi_perform(multi_handle, &still_running);
@@ -106,8 +106,7 @@ int main(void)
     /* get file descriptors from the transfers */
     mc = curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != CURLM_OK)
-    {
+    if(mc != CURLM_OK) {
       fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
       break;
     }
@@ -146,12 +145,12 @@ int main(void)
   } while(still_running);
 
   /* See how the transfers went */
-  while ((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
-    if (msg->msg == CURLMSG_DONE) {
+  while((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
+    if(msg->msg == CURLMSG_DONE) {
       int idx, found = 0;
 
       /* Find out which handle this message is about */
-      for (idx=0; idx<HANDLECOUNT; idx++) {
+      for(idx=0; idx<HANDLECOUNT; idx++) {
         found = (msg->easy_handle == handles[idx]);
         if(found)
           break;
@@ -171,8 +170,8 @@ int main(void)
   curl_multi_cleanup(multi_handle);
 
   /* Free the CURL handles */
-  for (i=0; i<HANDLECOUNT; i++)
-      curl_easy_cleanup(handles[i]);
+  for(i=0; i<HANDLECOUNT; i++)
+    curl_easy_cleanup(handles[i]);
 
   return 0;
 }

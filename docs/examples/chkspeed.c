@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -68,63 +68,78 @@ int main(int argc, char *argv[])
   const char *url = URL_1M;
   char *appname = argv[0];
 
-  if (argc > 1) {
+  if(argc > 1) {
     /* parse input parameters */
-    for (argc--, argv++; *argv; argc--, argv++) {
-      if (strncasecmp(*argv, "-", 1) == 0) {
-        if (strncasecmp(*argv, "-H", 2) == 0) {
+    for(argc--, argv++; *argv; argc--, argv++) {
+      if(strncasecmp(*argv, "-", 1) == 0) {
+        if(strncasecmp(*argv, "-H", 2) == 0) {
           fprintf(stderr,
                   "\rUsage: %s [-m=1|2|5|10|20|50|100] [-t] [-x] [url]\n",
                   appname);
           exit(1);
-        } else if (strncasecmp(*argv, "-V", 2) == 0) {
+        }
+        else if(strncasecmp(*argv, "-V", 2) == 0) {
           fprintf(stderr, "\r%s %s - %s\n",
                   appname, CHKSPEED_VERSION, curl_version());
           exit(1);
-        } else if (strncasecmp(*argv, "-A", 2) == 0) {
+        }
+        else if(strncasecmp(*argv, "-A", 2) == 0) {
           prtall = 1;
-        } else if (strncasecmp(*argv, "-X", 2) == 0) {
+        }
+        else if(strncasecmp(*argv, "-X", 2) == 0) {
           prtsep = 1;
-        } else if (strncasecmp(*argv, "-T", 2) == 0) {
+        }
+        else if(strncasecmp(*argv, "-T", 2) == 0) {
           prttime = 1;
-        } else if (strncasecmp(*argv, "-M=", 3) == 0) {
+        }
+        else if(strncasecmp(*argv, "-M=", 3) == 0) {
           long m = strtol((*argv)+3, NULL, 10);
           switch(m) {
-            case   1: url = URL_1M;
-                      break;
-            case   2: url = URL_2M;
-                      break;
-            case   5: url = URL_5M;
-                      break;
-            case  10: url = URL_10M;
-                      break;
-            case  20: url = URL_20M;
-                      break;
-            case  50: url = URL_50M;
-                      break;
-            case 100: url = URL_100M;
-                      break;
-            default:  fprintf(stderr, "\r%s: invalid parameter %s\n",
-                              appname, *argv + 3);
-                      exit(1);
+          case 1:
+            url = URL_1M;
+            break;
+          case 2:
+            url = URL_2M;
+            break;
+          case 5:
+            url = URL_5M;
+            break;
+          case 10:
+            url = URL_10M;
+            break;
+          case 20:
+            url = URL_20M;
+            break;
+          case 50:
+            url = URL_50M;
+            break;
+          case 100:
+            url = URL_100M;
+            break;
+          default:
+            fprintf(stderr, "\r%s: invalid parameter %s\n",
+                    appname, *argv + 3);
+            exit(1);
           }
-        } else {
+        }
+        else {
           fprintf(stderr, "\r%s: invalid or unknown option %s\n",
                   appname, *argv);
           exit(1);
         }
-      } else {
+      }
+      else {
         url = *argv;
       }
     }
   }
 
   /* print separator line */
-  if (prtsep) {
+  if(prtsep) {
     printf("-------------------------------------------------\n");
   }
   /* print localtime */
-  if (prttime) {
+  if(prttime) {
     time_t t = time(NULL);
     printf("Localtime: %s", ctime(&t));
   }
@@ -167,7 +182,7 @@ int main(int argc, char *argv[])
     if((CURLE_OK == res) && (val>0))
       printf("Average download speed: %0.3f kbyte/sec.\n", val / 1024);
 
-    if (prtall) {
+    if(prtall) {
       /* check for name resolution time */
       res = curl_easy_getinfo(curl_handle, CURLINFO_NAMELOOKUP_TIME, &val);
       if((CURLE_OK == res) && (val>0))
@@ -178,8 +193,8 @@ int main(int argc, char *argv[])
       if((CURLE_OK == res) && (val>0))
         printf("Connect time: %0.3f sec.\n", val);
     }
-
-  } else {
+  }
+  else {
     fprintf(stderr, "Error while fetching '%s' : %s\n",
             url, curl_easy_strerror(res));
   }

@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
   /* open the file */
   pagefile = fopen(pagefilename, "wb");
-  if (pagefile) {
+  if(pagefile) {
 
     /* write the page body to this file handle */
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);

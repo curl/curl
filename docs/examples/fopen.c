@@ -80,7 +80,7 @@ struct fcurl_data
 typedef struct fcurl_data URL_FILE;
 
 /* exported functions */
-URL_FILE *url_fopen(const char *url,const char *operation);
+URL_FILE *url_fopen(const char *url, const char *operation);
 int url_fclose(URL_FILE *file);
 int url_feof(URL_FILE *file);
 size_t url_fread(void *ptr, size_t size, size_t nmemb, URL_FILE *file);
@@ -106,9 +106,9 @@ static size_t write_callback(char *buffer,
 
   if(size > rembuff) {
     /* not enough space in buffer */
-    newbuff=realloc(url->buffer,url->buffer_len + (size - rembuff));
+    newbuff=realloc(url->buffer, url->buffer_len + (size - rembuff));
     if(newbuff==NULL) {
-      fprintf(stderr,"callback buffer grow failed\n");
+      fprintf(stderr, "callback buffer grow failed\n");
       size=rembuff;
     }
     else {
@@ -165,8 +165,7 @@ static int fill_buffer(URL_FILE *file, size_t want)
     /* get file descriptors from the transfers */
     mc = curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != CURLM_OK)
-    {
+    if(mc != CURLM_OK) {
       fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
       break;
     }
@@ -230,7 +229,7 @@ static int use_buffer(URL_FILE *file, size_t want)
   return 0;
 }
 
-URL_FILE *url_fopen(const char *url,const char *operation)
+URL_FILE *url_fopen(const char *url, const char *operation)
 {
   /* this code could check for URLs or types in the 'url' and
      basically use the real fopen() for standard files */
@@ -244,7 +243,7 @@ URL_FILE *url_fopen(const char *url,const char *operation)
 
   memset(file, 0, sizeof(URL_FILE));
 
-  if((file->handle.file=fopen(url,operation)))
+  if((file->handle.file=fopen(url, operation)))
     file->type = CFTYPE_FILE; /* marked as URL */
 
   else {
@@ -338,13 +337,13 @@ size_t url_fread(void *ptr, size_t size, size_t nmemb, URL_FILE *file)
 
   switch(file->type) {
   case CFTYPE_FILE:
-    want=fread(ptr,size,nmemb,file->handle.file);
+    want=fread(ptr, size, nmemb, file->handle.file);
     break;
 
   case CFTYPE_CURL:
     want = nmemb * size;
 
-    fill_buffer(file,want);
+    fill_buffer(file, want);
 
     /* check if theres data in the buffer - if not fill_buffer()
      * either errored or EOF */
@@ -358,7 +357,7 @@ size_t url_fread(void *ptr, size_t size, size_t nmemb, URL_FILE *file)
     /* xfer data to caller */
     memcpy(ptr, file->buffer, want);
 
-    use_buffer(file,want);
+    use_buffer(file, want);
 
     want = want / size;     /* number of items */
     break;
@@ -383,7 +382,7 @@ char *url_fgets(char *ptr, size_t size, URL_FILE *file)
     break;
 
   case CFTYPE_CURL:
-    fill_buffer(file,want);
+    fill_buffer(file, want);
 
     /* check if theres data in the buffer - if not fill either errored or
      * EOF */
@@ -407,7 +406,7 @@ char *url_fgets(char *ptr, size_t size, URL_FILE *file)
     memcpy(ptr, file->buffer, want);
     ptr[want]=0;/* allways null terminate */
 
-    use_buffer(file,want);
+    use_buffer(file, want);
 
     break;
 
@@ -447,6 +446,10 @@ void url_rewind(URL_FILE *file)
   }
 }
 
+#define FGETSFILE "fgets.test"
+#define FREADFILE "fread.test"
+#define REWINDFILE "rewind.test"
+
 /* Small main program to retrive from a url using fgets and fread saving the
  * output to two test files (note the fgets method will corrupt binary files if
  * they contain 0 chars */
@@ -465,7 +468,7 @@ int main(int argc, char *argv[])
     url=argv[1];/* use passed url */
 
   /* copy from url line by line with fgets */
-  outf=fopen("fgets.test","w+");
+  outf=fopen(FGETSFILE, "wb+");
   if(!outf) {
     perror("couldn't open fgets output file\n");
     return 1;
@@ -479,8 +482,8 @@ int main(int argc, char *argv[])
   }
 
   while(!url_feof(handle)) {
-    url_fgets(buffer,sizeof(buffer),handle);
-    fwrite(buffer,1,strlen(buffer),outf);
+    url_fgets(buffer, sizeof(buffer), handle);
+    fwrite(buffer, 1, strlen(buffer), outf);
   }
 
   url_fclose(handle);
@@ -489,7 +492,7 @@ int main(int argc, char *argv[])
 
 
   /* Copy from url with fread */
-  outf=fopen("fread.test","w+");
+  outf=fopen(FREADFILE, "wb+");
   if(!outf) {
     perror("couldn't open fread output file\n");
     return 1;
@@ -504,7 +507,7 @@ int main(int argc, char *argv[])
 
   do {
     nread = url_fread(buffer, 1, sizeof(buffer), handle);
-    fwrite(buffer,1,nread,outf);
+    fwrite(buffer, 1, nread, outf);
   } while(nread);
 
   url_fclose(handle);
@@ -513,7 +516,7 @@ int main(int argc, char *argv[])
 
 
   /* Test rewind */
-  outf=fopen("rewind.test","w+");
+  outf=fopen(REWINDFILE, "wb+");
   if(!outf) {
     perror("couldn't open fread output file\n");
     return 1;
@@ -526,21 +529,19 @@ int main(int argc, char *argv[])
     return 2;
   }
 
-  nread = url_fread(buffer, 1,sizeof(buffer), handle);
-  fwrite(buffer,1,nread,outf);
+  nread = url_fread(buffer, 1, sizeof(buffer), handle);
+  fwrite(buffer, 1, nread, outf);
   url_rewind(handle);
 
   buffer[0]='\n';
-  fwrite(buffer,1,1,outf);
+  fwrite(buffer, 1, 1, outf);
 
-  nread = url_fread(buffer, 1,sizeof(buffer), handle);
-  fwrite(buffer,1,nread,outf);
-
+  nread = url_fread(buffer, 1, sizeof(buffer), handle);
+  fwrite(buffer, 1, nread, outf);
 
   url_fclose(handle);
 
   fclose(outf);
-
 
   return 0;/* all done */
 }

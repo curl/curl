@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,7 +46,8 @@ static const char *payload_text[] = {
   "To: " TO "\r\n",
   "From: " FROM "(Example User)\r\n",
   "Cc: " CC "(Another example User)\r\n",
-  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n",
+  "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
+  "rfcpedant.example.org>\r\n",
   "Subject: SMTP multi example message\r\n",
   "\r\n", /* empty line to divide headers from body, see RFC5322 */
   "The body of the message starts here.\r\n",
@@ -186,8 +187,7 @@ int main(void)
     /* get file descriptors from the transfers */
     mc = curl_multi_fdset(mcurl, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != CURLM_OK)
-    {
+    if(mc != CURLM_OK) {
       fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
       break;
     }
