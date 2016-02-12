@@ -430,6 +430,9 @@ the traditional PORT command.
 \fB--eprt\fP can be used to explicitly enable EPRT again and \fB--no-eprt\fP
 is an alias for \fB--disable-eprt\fP.
 
+If the server is an IPv6 host, this option will have no effect as EPRT is
+necessary then.
+
 Disabling EPRT only changes the active behavior. If you want to switch to
 passive mode you need to not use \fI-P, --ftp-port\fP or force it with
 \fI--ftp-pasv\fP.
@@ -440,6 +443,9 @@ but with this option, it will not try using EPSV.
 
 \fB--epsv\fP can be used to explicitly enable EPSV again and \fB--no-epsv\fP
 is an alias for \fB--disable-epsv\fP.
+
+If the server is an IPv6 host, this option will have no effect as EPSV is
+necessary then.
 
 Disabling EPSV only changes the passive behavior. If you want to switch to
 active mode you need to use \fI-P, --ftp-port\fP.
