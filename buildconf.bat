@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+rem * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -26,8 +26,6 @@ rem
 rem This batch file must be used to set up a git tree to build on systems where
 rem there is no autotools support (i.e. DOS and Windows).
 rem
-rem This file is not included or required for curl's release archives or daily 
-rem snapshot archives.
 
 :begin
   rem Set our variables
