@@ -21,13 +21,6 @@ rem * KIND, either express or implied.
 rem *
 rem ***************************************************************************
 
-rem NOTES
-rem
-rem Do not set %ERRORLEVEL% to anything. %ERRORLEVEL% is a special variable
-rem that only contains errorlevel when %ERRORLEVEL% is not set. Same for %CD%.
-rem https://blogs.msdn.microsoft.com/oldnewthing/20080926-00/?p=20743/
-rem If you need to set the errorlevel do this instead: CALL :seterr [#]
-
 :begin
   rem Check we are running on a Windows NT derived OS
   if not "%OS%" == "Windows_NT" goto nodos
