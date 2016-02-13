@@ -2208,8 +2208,8 @@ static void pubkey_show(struct SessionHandle *data,
 
 #define print_pubkey_BN(_type, _name, _num)    \
 do {                              \
-  if(pubkey->pkey._type->_name) { \
-    pubkey_show(data, mem, _num, #_type, #_name, pubkey->pkey._type->_name); \
+  if(_type->_name) { \
+    pubkey_show(data, mem, _num, #_type, #_name, _type->_name); \
   } \
 } WHILE_FALSE
 
@@ -2356,9 +2356,24 @@ static CURLcode get_cert_chain(struct connectdata *conn,
     if(!pubkey)
       infof(data, "   Unable to load public key\n");
     else {
-      switch(pubkey->type) {
+      int pktype;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+    !defined(LIBRESSL_VERSION_NUMBER)
+      pktype = EVP_PKEY_id(pubkey);
+#else
+      pktype = pubkey->type;
+#endif
+      switch(pktype) {
       case EVP_PKEY_RSA:
-        BIO_printf(mem, "%d", BN_num_bits(pubkey->pkey.rsa->n));
+      {
+        RSA *rsa;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+    !defined(LIBRESSL_VERSION_NUMBER)
+        rsa = EVP_PKEY_get0_RSA(pubkey);
+#else
+        rsa = pubkey->pkey.rsa;
+#endif
+        BIO_printf(mem, "%d", BN_num_bits(rsa->n));
         push_certinfo("RSA Public Key", i);
 
         print_pubkey_BN(rsa, n, i);
@@ -2370,19 +2385,38 @@ static CURLcode get_cert_chain(struct connectdata *conn,
         print_pubkey_BN(rsa, dmq1, i);
         print_pubkey_BN(rsa, iqmp, i);
         break;
+      }
       case EVP_PKEY_DSA:
+      {
+        DSA *dsa;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+    !defined(LIBRESSL_VERSION_NUMBER)
+        dsa = EVP_PKEY_get0_DSA(pubkey);
+#else
+        dsa = pubkey->pkey.dsa;
+#endif
         print_pubkey_BN(dsa, p, i);
         print_pubkey_BN(dsa, q, i);
         print_pubkey_BN(dsa, g, i);
         print_pubkey_BN(dsa, priv_key, i);
         print_pubkey_BN(dsa, pub_key, i);
         break;
+      }
       case EVP_PKEY_DH:
+      {
+        DH *dh;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+    !defined(LIBRESSL_VERSION_NUMBER)
+        dh = EVP_PKEY_get0_DH(pubkey);
+#else
+        dh = pubkey->pkey.dh;
+#endif
         print_pubkey_BN(dh, p, i);
         print_pubkey_BN(dh, g, i);
         print_pubkey_BN(dh, priv_key, i);
         print_pubkey_BN(dh, pub_key, i);
         break;
+      }
 #if 0
       case EVP_PKEY_EC: /* symbol not present in OpenSSL 0.9.6 */
         /* left TODO */
