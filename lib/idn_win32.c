@@ -29,6 +29,7 @@
 #ifdef USE_WIN32_IDN
 
 #include "curl_multibyte.h"
+#include "non-ascii.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -64,18 +65,33 @@ WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
 
 #define IDN_MAX_LENGTH 255
 
-int curl_win32_idn_to_ascii(const char *in, char **out);
-int curl_win32_ascii_to_idn(const char *in, char **out);
+int curl_win32_idn_to_punycode(const char *in, char **out);
+int curl_win32_punycode_to_idn(const char *in, unsigned output_codepage,
+                               char **out);
 
-int curl_win32_idn_to_ascii(const char *in, char **out)
+/* IDN => punycode
+
+Success: (1) *out points to punycode (the IDN in ascii-encoded format).
+Failure: (!= 1) *out is NULL.
+*/
+int curl_win32_idn_to_punycode(const char *in, char **out)
 {
   int ret = 0;
-  wchar_t *in_w = Curl_convert_UTF8_to_wchar(in);
+  wchar_t *in_w = NULL;
+
+  *out = NULL;
+
+  if(utf8_strict_codepoint_count(in) > 0)
+    in_w = Curl_convert_UTF8_to_wchar(in);
+  if(!in_w) /* The IDN is not UTF-8 encoded, fallback to ANSI */
+    in_w = Curl_convert_ACP_to_wchar(in);
   if(in_w) {
     wchar_t punycode[IDN_MAX_LENGTH];
     int chars = IdnToAscii(0, in_w, -1, punycode, IDN_MAX_LENGTH);
     free(in_w);
     if(chars) {
+      /* 'punycode' should be ascii wchar so it doesn't really matter what
+         codepage we use to convert it to char. */
       *out = Curl_convert_wchar_to_UTF8(punycode);
       if(*out)
         ret = 1; /* success */
@@ -84,16 +100,29 @@ int curl_win32_idn_to_ascii(const char *in, char **out)
   return ret;
 }
 
-int curl_win32_ascii_to_idn(const char *in, char **out)
+/* punycode => IDN
+
+Success: (1) *out points to the IDN encoded in the output codepage.
+Failure: (!= 1) *out is NULL.
+*/
+int curl_win32_punycode_to_idn(const char *in, unsigned output_codepage,
+                               char **out)
 {
   int ret = 0;
-  wchar_t *in_w = Curl_convert_UTF8_to_wchar(in);
+  wchar_t *in_w = NULL;
+
+  *out = NULL;
+
+  /* 'in' should be ascii char so it doesn't really matter what codepage we use
+     to convert it to wchar. */
+  in_w = Curl_convert_UTF8_to_wchar(in);
   if(in_w) {
     wchar_t unicode[IDN_MAX_LENGTH];
-    int chars = IdnToUnicode(0, in_w, wcslen(in_w)+1, unicode, IDN_MAX_LENGTH);
+    int chars = IdnToUnicode(0, in_w, (int)wcslen(in_w) + 1,
+                             unicode, IDN_MAX_LENGTH);
     free(in_w);
     if(chars) {
-      *out = Curl_convert_wchar_to_UTF8(unicode);
+      *out = Curl_convert_wchar_to_multibyte(unicode, output_codepage);
       if(*out)
         ret = 1; /* success */
     }

@@ -30,8 +30,21 @@
   * MultiByte conversions using Windows kernel32 library.
   */
 
-wchar_t *Curl_convert_UTF8_to_wchar(const char *str_utf8);
-char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w);
+wchar_t *Curl_convert_multibyte_to_wchar(const char *str_mb,
+                                         unsigned codepage);
+char *Curl_convert_wchar_to_multibyte(const wchar_t *str_w, unsigned codepage);
+
+#define Curl_convert_UTF8_to_wchar(x) \
+  Curl_convert_multibyte_to_wchar((x), CP_UTF8)
+
+#define Curl_convert_wchar_to_UTF8(x) \
+  Curl_convert_wchar_to_multibyte((x), CP_UTF8)
+
+#define Curl_convert_ACP_to_wchar(x) \
+  Curl_convert_multibyte_to_wchar((x), CP_ACP)
+
+#define Curl_convert_wchar_to_ACP(x) \
+  Curl_convert_wchar_to_multibyte((x), CP_ACP)
 
 #endif /* USE_WIN32_IDN || ((USE_WINDOWS_SSPI || USE_WIN32_LDAP) && UNICODE) */
 

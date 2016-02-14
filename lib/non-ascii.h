@@ -60,4 +60,15 @@ CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form);
 #define Curl_convert_form(a,b) CURLE_OK
 #endif
 
+#if defined(USE_WIN32_IDN) || ((defined(USE_WINDOWS_SSPI) || \
+                                defined(USE_WIN32_LDAP)) && defined(UNICODE))
+/*
+ * utf8_strict_codepoint_count returns the Unicode codepoint count from a UTF-8
+ * string or -1 if invalid UTF-8 is encountered. Note that a UTF-8 BOM is a
+ * codepoint and is counted as such.
+ * Refer to comment block above this function's definition for more detail.
+ */
+curl_off_t utf8_strict_codepoint_count(const char *str);
+#endif /* USE_WIN32_IDN || ((USE_WINDOWS_SSPI || USE_WIN32_LDAP) && UNICODE) */
+
 #endif /* HEADER_CURL_NON_ASCII_H */
