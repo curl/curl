@@ -20,6 +20,17 @@ This release includes the following bugfixes:
  o tool_doswin: Support for literal path prefix \\?\
  o mbedtls: fix ALPN usage segfault [6]
  o mbedtls: fix memory leak when destroying SSL connection data [7]
+ o nss: do not count enabled cipher-suites
+ o examples/cookie_interface.c: add cleanup call
+ o examples: adhere to curl code style
+ o curlx_tvdiff: handle 32bit time_t overflows [8]
+ o dist: ship buildconf.bat too
+ o curl.1: --disable-{eprt,epsv} are ignored for IPv6 hosts [9]
+ o generate.bat: Fix comment bug by removing old comments [10]
+ o test1604: Add to Makefile.inc so it gets run
+ o gtls: fix for builds lacking encrypted key file support [11]
+ o SCP: use libssh2_scp_recv2 to support > 2GB files on windows [12]
+ o CURLOPT_CONNECTTIMEOUT_MS.3: Fix example to use milliseconds option [13]
 
 This release includes the following known bugs:
 
@@ -28,9 +39,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad Fitzpatrick, Daniel Stenberg, David Benjamin, Gisle Vanem,
-  Ludwig Nussel, Patrick Monnerat, Rafael Antonio, Ray Satiro, Timotej Lazar,
-  (9 contributors)
+  Anders Bakken, Brad Fitzpatrick, Clint Clayton, Dan Fandrich,
+  Daniel Stenberg, David Benjamin, David Byron, Gisle Vanem, Kamil Dudka,
+  Ludwig Nussel, Patrick Monnerat, Rafael Antonio, Ray Satiro, Shine Fan,
+  Timotej Lazar,
+  (15 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -43,3 +56,9 @@ References to bug reports and discussions on issues:
  [5] = https://curl.haxx.se/bug/?i=640
  [6] = https://curl.haxx.se/bug/?i=642
  [7] = https://curl.haxx.se/bug/?i=626
+ [8] = https://curl.haxx.se/bug/?i=646
+ [9] = https://bugzilla.redhat.com/1305970
+ [10] = https://curl.haxx.se/bug/?i=649
+ [11] = https://curl.haxx.se/bug/?i=651
+ [12] = https://curl.haxx.se/bug/?i=451
+ [13] = https://curl.haxx.se/bug/?i=653
