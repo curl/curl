@@ -108,6 +108,7 @@
 #define SSLeay_add_ssl_algorithms() SSL_library_init()
 #define SSLEAY_VERSION_NUMBER OPENSSL_VERSION_NUMBER
 #define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
+#define HAVE_OPAQUE_EVP_PKEY 1 /* since 1.1.0 -pre3 */
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* 1.0.2 or later */ \
@@ -2357,8 +2358,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       infof(data, "   Unable to load public key\n");
     else {
       int pktype;
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-    !defined(LIBRESSL_VERSION_NUMBER)
+#ifdef HAVE_OPAQUE_EVP_PKEY
       pktype = EVP_PKEY_id(pubkey);
 #else
       pktype = pubkey->type;
@@ -2367,8 +2367,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       case EVP_PKEY_RSA:
       {
         RSA *rsa;
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-    !defined(LIBRESSL_VERSION_NUMBER)
+#ifdef HAVE_OPAQUE_EVP_PKEY
         rsa = EVP_PKEY_get0_RSA(pubkey);
 #else
         rsa = pubkey->pkey.rsa;
@@ -2389,8 +2388,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       case EVP_PKEY_DSA:
       {
         DSA *dsa;
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-    !defined(LIBRESSL_VERSION_NUMBER)
+#ifdef HAVE_OPAQUE_EVP_PKEY
         dsa = EVP_PKEY_get0_DSA(pubkey);
 #else
         dsa = pubkey->pkey.dsa;
@@ -2405,8 +2403,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       case EVP_PKEY_DH:
       {
         DH *dh;
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-    !defined(LIBRESSL_VERSION_NUMBER)
+#ifdef HAVE_OPAQUE_EVP_PKEY
         dh = EVP_PKEY_get0_DH(pubkey);
 #else
         dh = pubkey->pkey.dh;
