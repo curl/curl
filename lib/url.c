@@ -595,6 +595,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->tcp_keepalive = FALSE;
   set->tcp_keepintvl = 60;
   set->tcp_keepidle = 60;
+  set->tcp_fastopen = FALSE;
 
   set->ssl_enable_npn = TRUE;
   set->ssl_enable_alpn = TRUE;
@@ -2630,6 +2631,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
   case CURLOPT_TCP_KEEPINTVL:
     data->set.tcp_keepintvl = va_arg(param, long);
+    break;
+  case CURLOPT_TCP_FASTOPEN:
+#if defined(CONNECT_DATA_IDEMPOTENT)
+    data->set.tcp_fastopen = (0 != va_arg(param, long))?TRUE:FALSE;
+#else
+    result = CURLE_NOT_BUILT_IN;
+#endif
     break;
   case CURLOPT_SSL_ENABLE_NPN:
     data->set.ssl_enable_npn = (0 != va_arg(param, long)) ? TRUE : FALSE;
@@ -5974,6 +5982,8 @@ static CURLcode create_conn(struct SessionHandle *data,
   conn->send[FIRSTSOCKET] = Curl_send_plain;
   conn->recv[SECONDARYSOCKET] = Curl_recv_plain;
   conn->send[SECONDARYSOCKET] = Curl_send_plain;
+
+  conn->bits.tcp_fastopen = data->set.tcp_fastopen;
 
   /***********************************************************************
    * file: is a special case in that it doesn't need a network connection

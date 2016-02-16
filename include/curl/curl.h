@@ -1686,6 +1686,9 @@ typedef enum {
      overrides the URL's host:port (only for the network layer) */
   CINIT(CONNECT_TO, STRINGPOINT, 243),
 
+  /* Set TCP Fast Open */
+  CINIT(TCP_FASTOPEN, LONG, 244),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

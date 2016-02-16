@@ -544,6 +544,8 @@ struct ConnectBits {
                  connection */
   bool type_set;  /* type= was used in the URL */
   bool multiplex; /* connection is multiplexed */
+
+  bool tcp_fastopen; /* use TCP Fast Open */
 };
 
 struct hostname {
@@ -1650,6 +1652,7 @@ struct UserDefined {
   bool tcp_keepalive;    /* use TCP keepalives */
   long tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   long tcp_keepintvl;    /* seconds between TCP keepalive probes */
+  bool tcp_fastopen;     /* use TCP Fast Open */
 
   size_t maxconnects;  /* Max idle connections in the connection cache */
 
