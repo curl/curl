@@ -1091,7 +1091,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
   }
 
 
-  if(conn->handler->flags & PROTOPT_SSL) {
+  if((conn->handler->flags & PROTOPT_SSL) && conn->httpversion != 20) {
     /* We never send more than CURL_MAX_WRITE_SIZE bytes in one single chunk
        when we speak HTTPS, as if only a fraction of it is sent now, this data
        needs to fit into the normal read-callback buffer later on and that
