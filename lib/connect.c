@@ -1097,7 +1097,24 @@ static CURLcode singleipconnect(struct connectdata *conn,
 
   /* Connect TCP sockets, bind UDP */
   if(!isconnected && (conn->socktype == SOCK_STREAM)) {
-    rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+    if(conn->bits.tcp_fastopen) {
+#if defined(CONNECT_DATA_IDEMPOTENT) /* OS X */
+      sa_endpoints_t endpoints;
+      endpoints.sae_srcif = 0;
+      endpoints.sae_srcaddr = NULL;
+      endpoints.sae_srcaddrlen = 0;
+      endpoints.sae_dstaddr = &addr.sa_addr;
+      endpoints.sae_dstaddrlen = addr.addrlen;
+
+      rc = connectx(sockfd, &endpoints, SAE_ASSOCID_ANY,
+                    CONNECT_RESUME_ON_READ_WRITE | CONNECT_DATA_IDEMPOTENT,
+                    NULL, 0, NULL, NULL);
+#endif
+    }
+    else {
+      rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+    }
+
     if(-1 == rc)
       error = SOCKERRNO;
   }
