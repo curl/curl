@@ -229,6 +229,7 @@ static const struct LongShort aliases[]= {
   {"Eq", "cert-status",              FALSE},
   {"Er", "false-start",              FALSE},
   {"Es", "ssl-no-revoke",            FALSE},
+  {"Et", "tcp-fastopen",             FALSE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -1413,6 +1414,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 's': /* --ssl-no-revoke */
         if(curlinfo->features & CURL_VERSION_SSL)
           config->ssl_no_revoke = TRUE;
+        break;
+
+      case 't': /* --tcp-fastopen */
+        config->tcp_fastopen = TRUE;
         break;
 
       default: /* certificate file */

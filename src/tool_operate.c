@@ -794,6 +794,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 1L);
 
+        if(config->tcp_fastopen)
+          my_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
+
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
         if(metalink || !config->use_metalink)
