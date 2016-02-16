@@ -1742,6 +1742,8 @@ curl -T "img[1-1000].png" ftp://ftp.example.com/upload/
 .IP "--tcp-nodelay"
 Turn on the TCP_NODELAY option. See the \fIcurl_easy_setopt(3)\fP man page for
 details about this option. (Added in 7.11.2)
+.IP "--tcp-fastopen"
+Enable use of TCP Fast Open (RFC7413). (Added in 7.49.0)
 .IP "--tftp-blksize <value>"
 (TFTP) Set TFTP BLKSIZE option (must be >512). This is the block size that
 curl will try to use when transferring data to or from a TFTP server. By
