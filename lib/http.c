@@ -3592,8 +3592,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 
     }
     else if(checkprefix("Content-Encoding:", k->p) &&
-            (data->set.str[STRING_ENCODING] ||
-             conn->httpversion == 20)) {
+            data->set.str[STRING_ENCODING]) {
       /*
        * Process Content-Encoding. Look for the values: identity,
        * gzip, deflate, compress, x-gzip and x-compress. x-gzip and
