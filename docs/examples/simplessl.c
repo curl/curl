@@ -130,7 +130,7 @@ int main(void)
                 curl_easy_strerror(res));
 
       /* we are done... */
-    } while (0);
+    } while(0);
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
