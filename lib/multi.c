@@ -1880,7 +1880,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          * happened in the data connection.
          */
 
-        if(!(data->easy_conn->handler->flags & PROTOPT_DUAL))
+        if(!(data->easy_conn->handler->flags & PROTOPT_DUAL) &&
+           result != CURLE_HTTP2_STREAM)
           connclose(data->easy_conn, "Transfer returned error");
 
         Curl_posttransfer(data);

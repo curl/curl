@@ -1059,7 +1059,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
   if(stream->error_code != NGHTTP2_NO_ERROR) {
     failf(data, "HTTP/2 stream %u was not closed cleanly: error_code = %d",
           stream->stream_id, stream->error_code);
-    *err = CURLE_HTTP2;
+    *err = CURLE_HTTP2_STREAM;
     return -1;
   }
 
@@ -1229,6 +1229,13 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
        notified with its drain property, and socket is read again
        quickly. */
     *err = CURLE_AGAIN;
+    return -1;
+  }
+  else if(!nghttp2_session_want_read(httpc->h2) &&
+          !nghttp2_session_want_write(httpc->h2)) {
+    DEBUGF(infof(data,
+                 "http2_recv: nothing to do in this session\n"));
+    *err = CURLE_HTTP2;
     return -1;
   }
   else {
