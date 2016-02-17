@@ -148,7 +148,7 @@ typedef struct sslctxparm_st {
 
 /* some helper function. */
 
-static char *i2s_ASN1_IA5STRING( ASN1_IA5STRING *ia5)
+static char *ia5string(ASN1_IA5STRING *ia5)
 {
   char *tmp;
   if(!ia5 || !ia5->length)
@@ -160,7 +160,7 @@ static char *i2s_ASN1_IA5STRING( ASN1_IA5STRING *ia5)
 }
 
 /* A conveniance routine to get an access URI. */
-static unsigned char *my_get_ext(X509 * cert, const int type,
+static unsigned char *my_get_ext(X509 *cert, const int type,
                                  int extensiontype)
 {
   int i;
@@ -173,7 +173,7 @@ static unsigned char *my_get_ext(X509 * cert, const int type,
     ACCESS_DESCRIPTION * ad = sk_ACCESS_DESCRIPTION_value(accessinfo, i);
     if(OBJ_obj2nid(ad->method) == type) {
       if(ad->location->type == GEN_URI) {
-        return i2s_ASN1_IA5STRING(ad->location->d.ia5);
+        return ia5string(ad->location->d.ia5);
       }
       return NULL;
     }
