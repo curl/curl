@@ -155,7 +155,7 @@ int main(void)
 #ifdef WIN32
         Sleep(L);
 #else
-        sleep(L / 1000);
+        sleep((unsigned int)L / 1000);
 #endif
       }
       else {
