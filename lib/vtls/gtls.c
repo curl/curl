@@ -692,11 +692,11 @@ gtls_connect_step1(struct connectdata *conn,
               "error reading X.509 potentially-encrypted key file: %s",
               gnutls_strerror(rc));
         return CURLE_SSL_CONNECT_ERROR;
-#else
-        failf(data, "gnutls lacks support for encrypted key files");
-        return CURLE_SSL_CONNECT_ERROR;
-#endif
       }
+#else
+      failf(data, "gnutls lacks support for encrypted key files");
+      return CURLE_SSL_CONNECT_ERROR;
+#endif
     }
     else {
       if(gnutls_certificate_set_x509_key_file(
@@ -885,7 +885,7 @@ gtls_connect_step3(struct connectdata *conn,
   if(!chainp) {
     if(SSL_CONN_CONFIG(verifypeer) ||
        SSL_CONN_CONFIG(verifyhost) ||
-       data->set.ssl.issuercert) {
+       SSL_SET_OPTION(issuercert)) {
 #ifdef USE_TLS_SRP
       if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP
          && SSL_SET_OPTION(username) != NULL
@@ -1067,21 +1067,21 @@ gtls_connect_step3(struct connectdata *conn,
        gnutls_x509_crt_t format */
     gnutls_x509_crt_import(x509_cert, chainp, GNUTLS_X509_FMT_DER);
 
-  if(data->set.ssl.issuercert) {
+  if(SSL_SET_OPTION(issuercert)) {
     gnutls_x509_crt_init(&x509_issuer);
-    issuerp = load_file(data->set.ssl.issuercert);
+    issuerp = load_file(SSL_SET_OPTION(issuercert));
     gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
     rc = gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
     gnutls_x509_crt_deinit(x509_issuer);
     unload_file(issuerp);
     if(rc <= 0) {
       failf(data, "server certificate issuer check failed (IssuerCert: %s)",
-            data->set.ssl.issuercert?data->set.ssl.issuercert:"none");
+            SSL_SET_OPTION(issuercert)?SSL_SET_OPTION(issuercert):"none");
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_ISSUER_ERROR;
     }
     infof(data, "\t server certificate issuer check OK (Issuer Cert: %s)\n",
-          data->set.ssl.issuercert?data->set.ssl.issuercert:"none");
+          SSL_SET_OPTION(issuercert)?SSL_SET_OPTION(issuercert):"none");
   }
 
   size=sizeof(certbuf);
@@ -1586,8 +1586,8 @@ static int Curl_gtls_seed(struct SessionHandle *data)
   /* Quickly add a bit of entropy */
   gcry_fast_random_poll();
 
-  if(!ssl_seeded || data->set.ssl.primary.random_file ||
-     data->set.ssl.primary.egdsocket) {
+  if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
+     data->set.str[STRING_SSL_EGDSOCKET]) {
     ssl_seeded = TRUE;
   }
   return 0;
