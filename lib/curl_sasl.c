@@ -844,8 +844,11 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
           digest->algo = CURLDIGESTALGO_MD5SESS;
         else if(Curl_raw_equal(content, "MD5"))
           digest->algo = CURLDIGESTALGO_MD5;
-        else
+        else {
+          free(digest->algorithm);
+          digest->algorithm = NULL;
           return CURLE_BAD_CONTENT_ENCODING;
+        }
       }
       else {
         /* unknown specifier, ignore it! */
