@@ -6011,10 +6011,6 @@ static CURLcode create_conn(struct SessionHandle *data,
   data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
   data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_ORIG];
   data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
-  data->set.ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_ORIG];
-  data->set.proxy_ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_PROXY];
-  data->set.ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_ORIG];
-  data->set.proxy_ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_PROXY];
   data->set.ssl.primary.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
   data->set.proxy_ssl.primary.random_file =
     data->set.str[STRING_SSL_RANDOM_FILE];
@@ -6024,6 +6020,21 @@ static CURLcode create_conn(struct SessionHandle *data,
     data->set.str[STRING_SSL_CIPHER_LIST_ORIG];
   data->set.proxy_ssl.primary.cipher_list =
     data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
+
+  data->set.ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_ORIG];
+  data->set.proxy_ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_PROXY];
+  data->set.ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_ORIG];
+  data->set.proxy_ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_PROXY];
+  data->set.ssl.cert = data->set.str[STRING_CERT_ORIG];
+  data->set.proxy_ssl.cert = data->set.str[STRING_CERT_PROXY];
+  data->set.ssl.cert_type = data->set.str[STRING_CERT_TYPE_ORIG];
+  data->set.proxy_ssl.cert_type = data->set.str[STRING_CERT_TYPE_PROXY];
+  data->set.ssl.key = data->set.str[STRING_KEY_ORIG];
+  data->set.proxy_ssl.key = data->set.str[STRING_KEY_PROXY];
+  data->set.ssl.key_type = data->set.str[STRING_KEY_TYPE_ORIG];
+  data->set.proxy_ssl.key_type = data->set.str[STRING_KEY_TYPE_PROXY];
+  data->set.ssl.key_passwd = data->set.str[STRING_KEY_PASSWD_ORIG];
+  data->set.proxy_ssl.key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
 #ifdef USE_TLS_SRP
   data->set.ssl.username = data->set.str[STRING_TLSAUTH_USERNAME_ORIG];
   data->set.proxy_ssl.username = data->set.str[STRING_TLSAUTH_USERNAME_PROXY];
