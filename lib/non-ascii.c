@@ -343,6 +343,15 @@ CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form)
 
 #if defined(USE_WIN32_IDN) || ((defined(USE_WINDOWS_SSPI) || \
                                 defined(USE_WIN32_LDAP)) && defined(UNICODE))
+#if (CURL_SIZEOF_CURL_OFF_T == 4)
+#  define CURL_OFF_T_MAX  CURL_OFF_T_C(0x7FFFFFFF)
+#elif (CURL_SIZEOF_CURL_OFF_T == 8)
+#  define CURL_OFF_T_MAX  CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+#elif (CURL_SIZEOF_CURL_OFF_T == 16)
+#  define CURL_OFF_T_MAX  CURL_OFF_T_C(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+#else
+#  error "CURL_SIZEOF_CURL_OFF_T size unknown"
+#endif
 /* utf8_strict_codepoint_count:
 Count the number of Unicode codepoints encoded in a UTF-8 string.
 
@@ -370,6 +379,8 @@ curl_off_t utf8_strict_codepoint_count(const char *str)
 
   for(; *ch; ++ch, ++count) {
     unsigned char first = *ch; /* first byte */
+    if(count == CURL_OFF_T_MAX)
+      return error;
     if(*ch <= 0x7F)
       continue;
     if(*ch < 0xC2 || *ch > 0xF4)

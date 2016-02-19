@@ -66,7 +66,7 @@ WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
 #define IDN_MAX_LENGTH 255
 
 int curl_win32_idn_to_punycode(const char *in, char **out);
-int curl_win32_punycode_to_idn(const char *in, unsigned output_codepage,
+int curl_win32_punycode_to_idn(const char *in, unsigned int output_codepage,
                                char **out);
 
 /* IDN => punycode
@@ -105,7 +105,7 @@ int curl_win32_idn_to_punycode(const char *in, char **out)
 Success: (1) *out points to the IDN encoded in the output codepage.
 Failure: (!= 1) *out is NULL.
 */
-int curl_win32_punycode_to_idn(const char *in, unsigned output_codepage,
+int curl_win32_punycode_to_idn(const char *in, unsigned int output_codepage,
                                char **out)
 {
   int ret = 0;

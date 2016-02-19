@@ -35,7 +35,8 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-wchar_t *Curl_convert_multibyte_to_wchar(const char *str_mb, unsigned codepage)
+wchar_t *Curl_convert_multibyte_to_wchar(const char *str_mb,
+                                         unsigned int codepage)
 {
   wchar_t *str_w = NULL;
 
@@ -57,7 +58,8 @@ wchar_t *Curl_convert_multibyte_to_wchar(const char *str_mb, unsigned codepage)
   return str_w;
 }
 
-char *Curl_convert_wchar_to_multibyte(const wchar_t *str_w, unsigned codepage)
+char *Curl_convert_wchar_to_multibyte(const wchar_t *str_w,
+                                      unsigned int codepage)
 {
   char *str_mb = NULL;
 
