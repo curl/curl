@@ -833,6 +833,20 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
                             size_t len,               /* max amount to read */
                             CURLcode *err);           /* error to return */
 
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+struct postponed_data {
+  char *buffer;          /* Temporal store for received data during
+                            sending, must be freed */
+  size_t allocated_size; /* Size of temporal store */
+  size_t recv_size;      /* Size of received data during sending */
+  size_t recv_processed; /* Size of processed part of postponed data */
+#ifdef DEBUGBUILD
+  curl_socket_t bindsock;/* Structure must be bound to specific socket,
+                            used only for DEBUGASSERT */
+#endif /* DEBUGBUILD */
+};
+#endif /* USE_RECV_BEFORE_SEND_WORKAROUND */
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -931,6 +945,9 @@ struct connectdata {
   Curl_recv *recv[2];
   Curl_send *send[2];
 
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+  struct postponed_data postponed[2]; /* two buffers for two sockets */
+#endif /* USE_RECV_BEFORE_SEND_WORKAROUND */
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
   struct ssl_config_data ssl_config;
   bool tls_upgraded;

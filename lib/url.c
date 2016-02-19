@@ -2694,6 +2694,43 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
   return result;
 }
 
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+static void conn_reset_postponed_data(struct connectdata *conn, int num)
+{
+  struct postponed_data * const psnd = &(conn->postponed[num]);
+  if(psnd->buffer) {
+    DEBUGASSERT(psnd->allocated_size > 0);
+    DEBUGASSERT(psnd->recv_size <= psnd->allocated_size);
+    DEBUGASSERT(psnd->recv_processed < psnd->recv_size);
+    DEBUGASSERT(psnd->bindsock != CURL_SOCKET_BAD);
+    free(psnd->buffer);
+    psnd->buffer = NULL;
+    psnd->allocated_size = 0;
+    psnd->recv_size = 0;
+    psnd->recv_processed = 0;
+#ifdef DEBUGBUILD
+    psnd->bindsock = CURL_SOCKET_BAD; /* used only for DEBUGASSERT */
+#endif /* DEBUGBUILD */
+  }
+  else {
+    DEBUGASSERT (psnd->allocated_size == 0);
+    DEBUGASSERT (psnd->recv_size == 0);
+    DEBUGASSERT (psnd->recv_processed == 0);
+    DEBUGASSERT (psnd->bindsock == CURL_SOCKET_BAD);
+  }
+}
+
+static void conn_reset_all_postponed_data(struct connectdata *conn)
+{
+  conn_reset_postponed_data(conn, 0);
+  conn_reset_postponed_data(conn, 1);
+}
+#else  /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
+/* Use "do-nothing" macros instead of functions when workaround not used */
+#define conn_reset_postponed_data(c,n) do {} WHILE_FALSE
+#define conn_reset_all_postponed_data(c) do {} WHILE_FALSE
+#endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
+
 static void conn_free(struct connectdata *conn)
 {
   if(!conn)
@@ -2743,6 +2780,8 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->conn_to_host.rawalloc); /* host name buffer */
   Curl_safefree(conn->proxy.rawalloc); /* proxy name buffer */
   Curl_safefree(conn->master_buffer);
+
+  conn_reset_all_postponed_data(conn);
 
   Curl_llist_destroy(conn->send_pipe, NULL);
   Curl_llist_destroy(conn->recv_pipe, NULL);
@@ -3851,6 +3890,10 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   conn->connection_id = -1;    /* no ID */
   conn->port = -1; /* unknown at this point */
   conn->remote_port = -1; /* unknown */
+#if defined(USE_RECV_BEFORE_SEND_WORKAROUND) && defined(DEBUGBUILD)
+  conn->postponed[0].bindsock = CURL_SOCKET_BAD; /* no file descriptor */
+  conn->postponed[1].bindsock = CURL_SOCKET_BAD; /* no file descriptor */
+#endif /* USE_RECV_BEFORE_SEND_WORKAROUND && DEBUGBUILD */
 
   /* Default protocol-independent behavior doesn't support persistent
      connections, so we set this to force-close. Protocols that support
@@ -5624,6 +5667,9 @@ static void reuse_conn(struct connectdata *old_conn,
 
   /* persist connection info in session handle */
   Curl_persistconninfo(conn);
+
+  conn_reset_all_postponed_data(old_conn); /* free buffers */
+  conn_reset_all_postponed_data(conn);     /* reset unprocessed data */
 
   /* re-use init */
   conn->bits.reuse = TRUE; /* yes, we're re-using here */
