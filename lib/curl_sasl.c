@@ -782,6 +782,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
     /* Extract a value=content pair */
     if(!Curl_sasl_digest_get_pair(chlg, value, content, &chlg)) {
       if(Curl_raw_equal(value, "nonce")) {
+        free(digest->nonce);
         digest->nonce = strdup(content);
         if(!digest->nonce)
           return CURLE_OUT_OF_MEMORY;
@@ -793,11 +794,13 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
         }
       }
       else if(Curl_raw_equal(value, "realm")) {
+        free(digest->realm);
         digest->realm = strdup(content);
         if(!digest->realm)
           return CURLE_OUT_OF_MEMORY;
       }
       else if(Curl_raw_equal(value, "opaque")) {
+        free(digest->opaque);
         digest->opaque = strdup(content);
         if(!digest->opaque)
           return CURLE_OUT_OF_MEMORY;
@@ -825,17 +828,20 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
 
         /* Select only auth or auth-int. Otherwise, ignore */
         if(foundAuth) {
+          free(digest->qop);
           digest->qop = strdup(DIGEST_QOP_VALUE_STRING_AUTH);
           if(!digest->qop)
             return CURLE_OUT_OF_MEMORY;
         }
         else if(foundAuthInt) {
+          free(digest->qop);
           digest->qop = strdup(DIGEST_QOP_VALUE_STRING_AUTH_INT);
           if(!digest->qop)
             return CURLE_OUT_OF_MEMORY;
         }
       }
       else if(Curl_raw_equal(value, "algorithm")) {
+        free(digest->algorithm);
         digest->algorithm = strdup(content);
         if(!digest->algorithm)
           return CURLE_OUT_OF_MEMORY;
