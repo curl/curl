@@ -216,8 +216,8 @@ read previously stored cookie lines from, which should be used in this session
 if they match. Using this method also activates the cookie engine which will
 make curl record incoming cookies too, which may be handy if you're using this
 in combination with the \fI-L, --location\fP option. The file format of the
-file to read cookies from should be plain HTTP headers or the Netscape/Mozilla
-cookie file format.
+file to read cookies from should be plain HTTP headers (Set-Cookie style) or
+the Netscape/Mozilla cookie file format.
 
 The file specified with \fI-b, --cookie\fP is only used as input. No cookies
 will be written to the file. To store cookies, use the \fI-c, --cookie-jar\fP
