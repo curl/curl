@@ -30,8 +30,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIEFILE, char *filename);
 .SH DESCRIPTION
 Pass a pointer to a zero terminated string as parameter. It should point to
 the file name of your file holding cookie data to read. The cookie data can be
-in either the old Netscape / Mozilla cookie data format or just regular
-HTTP-style headers dumped to a file.
+in either the old Netscape / Mozilla cookie data format or just regular HTTP
+headers (Set-Cookie style) dumped to a file.
 
 It also enables the cookie engine, making libcurl parse and send cookies on
 subsequent requests with this handle.
