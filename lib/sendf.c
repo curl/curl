@@ -33,6 +33,7 @@
 #include "non-ascii.h"
 #include "curl_printf.h"
 #include "strerror.h"
+#include "select.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -119,6 +120,90 @@ static size_t convert_lineends(struct SessionHandle *data,
   return size;
 }
 #endif /* CURL_DO_LINEEND_CONV */
+
+#ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+static void pre_receive_plain(struct connectdata *conn, int num)
+{
+  const curl_socket_t sockfd = conn->sock[num];
+  struct postponed_data * const psnd = &(conn->postponed[num]);
+  size_t bytestorecv = psnd->allocated_size - psnd->recv_size;
+  /* WinSock will destroy unread received data if send() is
+     failed.
+     To avoid lossage of received data, recv() must be
+     performed before every send() if any incoming data is
+     available. However, skip this, if buffer is already full. */
+  if((conn->handler->protocol&PROTO_FAMILY_HTTP) != 0 &&
+     conn->recv[num] == Curl_recv_plain &&
+     (!psnd->buffer || bytestorecv)) {
+    const int readymask = Curl_socket_check(sockfd, CURL_SOCKET_BAD,
+                                            CURL_SOCKET_BAD, 0);
+    if(readymask != -1 && (readymask & CURL_CSELECT_IN) != 0) {
+      /* Have some incoming data */
+      if(!psnd->buffer) {
+        /* Use buffer double default size for intermediate buffer */
+        psnd->allocated_size = 2 * BUFSIZE;
+        psnd->buffer = malloc(psnd->allocated_size);
+        psnd->recv_size = 0;
+        psnd->recv_processed = 0;
+#ifdef DEBUGBUILD
+        psnd->bindsock = sockfd; /* Used only for DEBUGASSERT */
+#endif /* DEBUGBUILD */
+        bytestorecv = psnd->allocated_size;
+      }
+      if(psnd->buffer) {
+        ssize_t recvedbytes;
+        DEBUGASSERT(psnd->bindsock == sockfd);
+        recvedbytes = sread(sockfd, psnd->buffer + psnd->recv_size,
+                            bytestorecv);
+        if(recvedbytes > 0)
+          psnd->recv_size += recvedbytes;
+      }
+      else
+        psnd->allocated_size = 0;
+    }
+  }
+}
+
+static ssize_t get_pre_recved(struct connectdata *conn, int num, char *buf,
+                              size_t len)
+{
+  struct postponed_data * const psnd = &(conn->postponed[num]);
+  size_t copysize;
+  if(!psnd->buffer)
+    return 0;
+
+  DEBUGASSERT(psnd->allocated_size > 0);
+  DEBUGASSERT(psnd->recv_size <= psnd->allocated_size);
+  DEBUGASSERT(psnd->recv_processed <= psnd->recv_size);
+  /* Check and process data that already received and storied in internal
+     intermediate buffer */
+  if(psnd->recv_size > psnd->recv_processed) {
+    DEBUGASSERT(psnd->bindsock == conn->sock[num]);
+    copysize = CURLMIN(len, psnd->recv_size - psnd->recv_processed);
+    memcpy(buf, psnd->buffer + psnd->recv_processed, copysize);
+    psnd->recv_processed += copysize;
+  }
+  else
+    copysize = 0; /* buffer was allocated, but nothing was received */
+
+  /* Free intermediate buffer if it has no unprocessed data */
+  if(psnd->recv_processed == psnd->recv_size) {
+    free(psnd->buffer);
+    psnd->buffer = NULL;
+    psnd->allocated_size = 0;
+    psnd->recv_size = 0;
+    psnd->recv_processed = 0;
+#ifdef DEBUGBUILD
+    psnd->bindsock = CURL_SOCKET_BAD;
+#endif /* DEBUGBUILD */
+  }
+  return (ssize_t)copysize;
+}
+#else  /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
+/* Use "do-nothing" macros instead of functions when workaround not used */
+#define pre_receive_plain(c,n) do {} WHILE_FALSE
+#define get_pre_recved(c,n,b,l) 0
+#endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
 /* Curl_infof() is for info message along the way */
 
@@ -255,6 +340,12 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
 {
   curl_socket_t sockfd = conn->sock[num];
   ssize_t bytes_written;
+  /* WinSock will destroy unread received data if send() is
+     failed.
+     To avoid lossage of received data, recv() must be
+     performed before every send() if any incoming data is
+     available. */
+  pre_receive_plain(conn, num);
 
 #ifdef MSG_FASTOPEN /* Linux */
   if(conn->bits.tcp_fastopen) {
@@ -322,7 +413,16 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
                         size_t len, CURLcode *code)
 {
   curl_socket_t sockfd = conn->sock[num];
-  ssize_t nread = sread(sockfd, buf, len);
+  ssize_t nread;
+  /* Check and return data that already received and storied in internal
+     intermediate buffer */
+  nread = get_pre_recved(conn, num, buf, len);
+  if(nread > 0) {
+    *code = CURLE_OK;
+    return nread;
+  }
+
+  nread = sread(sockfd, buf, len);
 
   *code = CURLE_OK;
   if(-1 == nread) {
