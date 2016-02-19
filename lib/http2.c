@@ -1150,6 +1150,14 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
+  if(!nghttp2_session_want_read(httpc->h2) &&
+     !nghttp2_session_want_write(httpc->h2)) {
+    DEBUGF(infof(data,
+                 "http2_recv: nothing to do in this session\n"));
+    *err = CURLE_HTTP2;
+    return -1;
+  }
+
   /* Nullify here because we call nghttp2_session_send() and they
      might refer to the old buffer. */
   stream->upload_mem = NULL;
@@ -1229,13 +1237,6 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
        notified with its drain property, and socket is read again
        quickly. */
     *err = CURLE_AGAIN;
-    return -1;
-  }
-  else if(!nghttp2_session_want_read(httpc->h2) &&
-          !nghttp2_session_want_write(httpc->h2)) {
-    DEBUGF(infof(data,
-                 "http2_recv: nothing to do in this session\n"));
-    *err = CURLE_HTTP2;
     return -1;
   }
   else {
