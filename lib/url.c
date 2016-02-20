@@ -3209,10 +3209,11 @@ ConnectionExists(struct SessionHandle *data,
       pipeLen = check->send_pipe->size + check->recv_pipe->size;
 
       if(canPipeline) {
-        /* We can not use this connection if the connection can not be reused,
-         * or is marked for closure due to an error (ie. a timeout)
+        /* 
+		 * We can not use this connection if the connection is marked for 
+		 * closure due to an error (ie. a timeout)
          */
-        if (check->bits.close)
+        if(check->bits.close)
             continue;
 
         if(!check->bits.multiplex) {
