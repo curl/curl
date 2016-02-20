@@ -2639,7 +2639,18 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         else {
           if(postsize) {
             /* Append the POST data chunky-style */
-            result = Curl_add_bufferf(req_buffer, "%x\r\n", (int)postsize);
+            if(sizeof(curl_off_t) == sizeof(long))
+              result = Curl_add_bufferf(req_buffer, "%lx\r\n",
+                                        (long)postsize);
+#ifdef HAVE_LONGLONG
+            else if(sizeof (curl_off_t) == sizeof (long long))
+              result = Curl_add_bufferf(req_buffer, "%llx\r\n",
+                                        (long long)postsize);
+#endif /* HAVE_LONGLONG */
+            else
+              result = Curl_add_bufferf (req_buffer, "%x\r\n",
+                                         (int)postsize);
+
             if(!result) {
               result = Curl_add_buffer(req_buffer, data->set.postfields,
                                        (size_t)postsize);

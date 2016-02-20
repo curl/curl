@@ -67,6 +67,7 @@
 #include "rawstr.h"
 #include "warnless.h"
 #include "x509asn1.h"
+#include "curl_limits.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -1951,6 +1952,9 @@ static ssize_t nss_send(struct connectdata *conn,  /* connection data */
                         size_t len,                /* amount to write */
                         CURLcode *curlcode)
 {
+  if(len > (size_t)INT_MAX)
+    len = (size_t)INT_MAX;
+
   ssize_t rc = PR_Send(conn->ssl[sockindex].handle, mem, (int)len, 0,
                        PR_INTERVAL_NO_WAIT);
   if(rc < 0) {
@@ -1982,6 +1986,9 @@ static ssize_t nss_recv(struct connectdata * conn, /* connection data */
                         size_t buffersize,         /* max amount to read */
                         CURLcode *curlcode)
 {
+  if(buffersize > (size_t)INT_MAX)
+    buffersize = (size_t)INT_MAX;
+
   ssize_t nread = PR_Recv(conn->ssl[num].handle, buf, (int)buffersize, 0,
                           PR_INTERVAL_NO_WAIT);
   if(nread < 0) {

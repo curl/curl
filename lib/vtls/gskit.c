@@ -61,10 +61,6 @@
 #endif
 
 
-#ifdef HAVE_LIMITS_H
-#  include <limits.h>
-#endif
-
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
@@ -75,6 +71,7 @@
 #include "strequal.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
+#include "curl_limits.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -521,6 +518,8 @@ static ssize_t gskit_send(struct connectdata *conn, int sockindex,
   CURLcode cc;
   int written;
 
+  if(len > (size_t)INT_MAX)
+    len = (size_t)INT_MAX;
   cc = gskit_status(data,
                     gsk_secure_soc_write(conn->ssl[sockindex].handle,
                                          (char *) mem, (int) len, &written),

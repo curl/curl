@@ -127,7 +127,7 @@ tcpkeepalive(struct SessionHandle *data,
     if(WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, (LPVOID) &vals, sizeof(vals),
                 NULL, 0, &dummy, NULL, NULL) != 0) {
       infof(data, "Failed to set SIO_KEEPALIVE_VALS on fd %d: %d\n",
-            (int)sockfd, WSAGetLastError());
+            curlx_sktosi(sockfd), WSAGetLastError());
     }
 #else
 #ifdef TCP_KEEPIDLE

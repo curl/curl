@@ -78,6 +78,7 @@
 #include "http_proxy.h"
 #include "non-ascii.h"
 #include "curl_printf.h"
+#include "curl_limits.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -3993,8 +3994,10 @@ static CURLcode wc_statemach(struct connectdata *conn)
 
     infof(conn->data, "Wildcard - START of \"%s\"\n", finfo->filename);
     if(conn->data->set.chunk_bgn) {
+      const int list_size = (wildcard->filelist->size > (size_t)INT_MAX) ?
+                            INT_MAX : (int)wildcard->filelist->size;
       long userresponse = conn->data->set.chunk_bgn(
-          finfo, wildcard->customptr, (int)wildcard->filelist->size);
+          finfo, wildcard->customptr, list_size);
       switch(userresponse) {
       case CURL_CHUNK_BGN_FUNC_SKIP:
         infof(conn->data, "Wildcard - \"%s\" skipped by user\n",

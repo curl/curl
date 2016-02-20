@@ -50,10 +50,6 @@
 #include <netdb.h>
 #endif
 
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
-
 #include "urldata.h"
 #include "curl_base64.h"
 #include "curl_memory.h"
@@ -62,6 +58,7 @@
 #include "sendf.h"
 #include "rawstr.h"
 #include "warnless.h"
+#include "curl_limits.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"

@@ -22,9 +22,6 @@
 
 #include "curl_setup.h"
 
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -69,6 +66,7 @@
 #include "select.h"
 #include "progress.h"
 #include "curl_printf.h"
+#include "curl_limits.h"
 
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) && \
      (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__))
