@@ -602,8 +602,18 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
                  ", stream %u\n",
                  len - nread, stream_id));
     data_s->easy_conn->proto.httpc.pause_stream_id = stream_id;
+
     return NGHTTP2_ERR_PAUSE;
   }
+
+  /* pause execution of nghttp2 if we received data for another handle
+     in order to process them first. */
+  if(conn->data != data_s) {
+    data_s->easy_conn->proto.httpc.pause_stream_id = stream_id;
+
+    return NGHTTP2_ERR_PAUSE;
+  }
+
   return 0;
 }
 
@@ -1043,6 +1053,67 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   return result;
 }
 
+static int h2_session_send(struct SessionHandle *data,
+                           nghttp2_session *h2);
+
+/*
+ * h2_process_pending_input() processes pending input left in
+ * httpc->inbuf.  Then, call h2_session_send() to send pending data.
+ * This function returns 0 if it succeeds, or -1 and error code will
+ * be assigned to *err.
+ */
+static int h2_process_pending_input(struct SessionHandle *data,
+                                    struct http_conn *httpc,
+                                    CURLcode *err) {
+  ssize_t nread;
+  char *inbuf;
+  ssize_t rv;
+
+  nread = httpc->inbuflen - httpc->nread_inbuf;
+  inbuf = httpc->inbuf + httpc->nread_inbuf;
+
+  rv = nghttp2_session_mem_recv(httpc->h2, (const uint8_t *)inbuf, nread);
+  if(rv < 0) {
+    failf(data,
+          "h2_process_pending_input: nghttp2_session_mem_recv() returned "
+          "%d:%s\n", rv, nghttp2_strerror((int)rv));
+    *err = CURLE_RECV_ERROR;
+    return -1;
+  }
+
+  if(nread == rv) {
+    DEBUGF(infof(data,
+                 "h2_process_pending_input: All data in connection buffer "
+                 "processed\n"));
+    httpc->inbuflen = 0;
+    httpc->nread_inbuf = 0;
+  }
+  else {
+    httpc->nread_inbuf += rv;
+    DEBUGF(infof(data,
+                 "h2_process_pending_input: %zu bytes left in connection "
+                 "buffer\n",
+                 httpc->inbuflen - httpc->nread_inbuf));
+  }
+
+  rv = h2_session_send(data, httpc->h2);
+  if(rv != 0) {
+    *err = CURLE_SEND_ERROR;
+    return -1;
+  }
+
+  if(httpc->pause_stream_id == 0 &&
+     !nghttp2_session_want_read(httpc->h2) &&
+     !nghttp2_session_want_write(httpc->h2)) {
+    DEBUGF(infof(data,
+                 "h2_process_pending_input: nothing to do in this session\n"));
+    *err = CURLE_HTTP2;
+    return -1;
+  }
+
+  return 0;
+}
+
 static ssize_t http2_handle_stream_close(struct connectdata *conn,
                                          struct SessionHandle *data,
                                          struct HTTP *stream, CURLcode *err) {
@@ -1053,6 +1124,13 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
   if(httpc->pause_stream_id == stream->stream_id) {
     httpc->pause_stream_id = 0;
   }
+
+  if(httpc->pause_stream_id == 0) {
+    if(h2_process_pending_input(data, httpc, err) != 0) {
+      return -1;
+    }
+  }
+
   /* Reset to FALSE to prevent infinite loop in readwrite_data
    function. */
   stream->closed = FALSE;
@@ -1150,7 +1228,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
-  if(!nghttp2_session_want_read(httpc->h2) &&
+  if(httpc->pause_stream_id == 0 &&
+     !nghttp2_session_want_read(httpc->h2) &&
      !nghttp2_session_want_write(httpc->h2)) {
     DEBUGF(infof(data,
                  "http2_recv: nothing to do in this session\n"));
@@ -1197,8 +1276,18 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       stream->len = len - stream->memlen;
       stream->mem = mem;
     }
+    if(httpc->pause_stream_id == stream->stream_id && !stream->pausedata) {
+      /* We have paused nghttp2, but we have no pause data (see
+         on_data_chunk_recv). */
+      httpc->pause_stream_id = 0;
+      if(h2_process_pending_input(data, httpc, &result) != 0) {
+        *err = result;
+        return -1;
+      }
+    }
   }
   else if(stream->pausedata) {
+    DEBUGASSERT(httpc->pause_stream_id == stream->stream_id);
     nread = MIN(len, stream->pauselen);
     memcpy(mem, stream->pausedata, nread);
 
@@ -1221,7 +1310,10 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
          frames, then we have to call it again with 0-length data.
          Without this, on_stream_close callback will not be called,
          and stream could be hanged. */
-      nghttp2_session_mem_recv(httpc->h2, NULL, 0);
+      if(h2_process_pending_input(data, httpc, &result) != 0) {
+        *err = result;
+        return -1;
+      }
     }
     DEBUGF(infof(data, "http2_recv: returns unpaused %zd bytes on stream %u\n",
                  nread, stream->stream_id));
@@ -1306,6 +1398,14 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       *err = CURLE_SEND_ERROR;
       return 0;
     }
+
+    if(httpc->pause_stream_id == 0 &&
+       !nghttp2_session_want_read(httpc->h2) &&
+       !nghttp2_session_want_write(httpc->h2)) {
+      DEBUGF(infof(data, "http2_recv: nothing to do in this session\n"));
+      *err = CURLE_HTTP2;
+      return -1;
+    }
   }
   if(stream->memlen) {
     ssize_t retlen = stream->memlen;
@@ -1383,6 +1483,14 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
        might refer to the old buffer. */
     stream->upload_mem = NULL;
     stream->upload_len = 0;
+
+    if(httpc->pause_stream_id == 0 &&
+       !nghttp2_session_want_read(httpc->h2) &&
+       !nghttp2_session_want_write(httpc->h2)) {
+      DEBUGF(infof(conn->data, "http2_send: nothing to do in this session\n"));
+      *err = CURLE_HTTP2;
+      return -1;
+    }
 
     if(stream->upload_left) {
       /* we are sure that we have more data to send here.  Calling the
@@ -1550,6 +1658,14 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     return -1;
   }
 
+  if(httpc->pause_stream_id == 0 &&
+     !nghttp2_session_want_read(httpc->h2) &&
+     !nghttp2_session_want_write(httpc->h2)) {
+    DEBUGF(infof(conn->data, "http2_send: nothing to do in this session\n"));
+    *err = CURLE_HTTP2;
+    return -1;
+  }
+
   if(stream->stream_id != -1) {
     /* If whole HEADERS frame was sent off to the underlying socket,
        the nghttp2 library calls data_source_read_callback. But only
@@ -1707,6 +1823,13 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   if(rv != 0) {
     failf(data, "nghttp2_session_send() failed: %s(%d)",
           nghttp2_strerror(rv), rv);
+    return CURLE_HTTP2;
+  }
+
+  if(!nghttp2_session_want_read(httpc->h2) &&
+     !nghttp2_session_want_write(httpc->h2)) {
+    DEBUGF(infof(data,
+                 "nghttp2_session_send(): nothing to do in this session\n"));
     return CURLE_HTTP2;
   }
 
