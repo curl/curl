@@ -40,6 +40,8 @@ use serverhelp qw(
     server_logfilename
     );
 
+use pathhelp;
+
 my $stunnel = "stunnel";
 
 my $verbose=0; # set to 1 for debugging
@@ -229,9 +231,9 @@ if($stunnel_version < 310) {
 if($stunnel =~ /tstunnel(\.exe)?"?$/) {
     $tstunnel_windows = 1;
 
-    # replace Cygwin and MinGW drives within paths
-    $capath =~ s/^(\/cygdrive)?\/(\w)\//$2\:\//;
-    $certfile =~ s/^(\/cygdrive)?\/(\w)\//$2\:\//;
+    # convert Cygwin/MinGW paths to Win32 format
+    $capath = pathhelp::sys_native_abs_path($capath);
+    $certfile = pathhelp::sys_native_abs_path($certfile);
 }
 
 #***************************************************************************
