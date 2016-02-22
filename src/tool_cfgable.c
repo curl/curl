@@ -110,6 +110,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->pubkey);
   Curl_safefree(config->hostpubmd5);
   Curl_safefree(config->engine);
+  Curl_safefree(config->tlspsk);
 
   Curl_safefree(config->customrequest);
   Curl_safefree(config->krblevel);

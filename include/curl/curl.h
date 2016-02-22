@@ -1673,6 +1673,9 @@ typedef enum {
   /* Set E-xclusive stream dependency on another CURL handle */
   CINIT(STREAM_DEPENDS_E, OBJECTPOINT, 241),
 
+  /* TLS-PSK identity and pre-shared key */
+  CINIT(SSL_PSK, OBJECTPOINT, 239),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

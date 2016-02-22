@@ -101,7 +101,9 @@ Curl_ssl_config_matches(struct ssl_config_data* data,
      safe_strequal(data->CAfile, needle->CAfile) &&
      safe_strequal(data->random_file, needle->random_file) &&
      safe_strequal(data->egdsocket, needle->egdsocket) &&
-     safe_strequal(data->cipher_list, needle->cipher_list))
+     safe_strequal(data->cipher_list, needle->cipher_list) &&
+     safe_strequal(data->psk_id, needle->psk_id) &&
+     safe_strequal(data->psk_key, needle->psk_key))
     return TRUE;
 
   return FALSE;
@@ -156,6 +158,22 @@ Curl_clone_ssl_config(struct ssl_config_data *source,
   else
     dest->random_file = NULL;
 
+  if(source->psk_id) {
+    dest->psk_id = strdup(source->psk_id);
+    if(!dest->psk_id)
+      return FALSE;
+  }
+  else
+    dest->psk_id = NULL;
+
+  if(source->psk_key) {
+    dest->psk_key = strdup(source->psk_key);
+    if(!dest->psk_key)
+      return FALSE;
+  }
+  else
+    dest->psk_key = NULL;
+
   return TRUE;
 }
 
@@ -166,6 +184,8 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc)
   Curl_safefree(sslc->cipher_list);
   Curl_safefree(sslc->egdsocket);
   Curl_safefree(sslc->random_file);
+  Curl_safefree(sslc->psk_id);
+  Curl_safefree(sslc->psk_key);
 }
 
 
@@ -957,6 +977,18 @@ bool Curl_ssl_false_start(void)
 {
 #ifdef curlssl_false_start
   return curlssl_false_start();
+#else
+  return FALSE;
+#endif
+}
+
+/*
+ * Check whether the SSL backend supports TLS-PSK.
+ */
+bool Curl_ssl_psk(void)
+{
+#ifdef curlssl_psk
+  return curlssl_psk();
 #else
   return FALSE;
 #endif

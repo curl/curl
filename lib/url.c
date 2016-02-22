@@ -2622,6 +2622,18 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       data->set.ssl.authtype = CURL_TLSAUTH_NONE;
     break;
 #endif
+#ifdef USE_SSL
+  case CURLOPT_SSL_PSK:
+    if(!Curl_ssl_psk()) {
+      result = CURLE_NOT_BUILT_IN;
+      break;
+    }
+    /* identity:pre-shared-key to use for TLS-PSK */
+    result = setstropt_userpwd(va_arg(param, char *),
+                               &data->set.str[STRING_TLSPSK_ID],
+                               &data->set.str[STRING_TLSPSK_KEY]);
+    break;
+#endif
   case CURLOPT_DNS_SERVERS:
     result = Curl_set_dns_servers(data, va_arg(param, char *));
     break;
@@ -5784,6 +5796,11 @@ static CURLcode create_conn(struct SessionHandle *data,
 #ifdef USE_TLS_SRP
   data->set.ssl.username = data->set.str[STRING_TLSAUTH_USERNAME];
   data->set.ssl.password = data->set.str[STRING_TLSAUTH_PASSWORD];
+#endif
+
+#ifdef USE_SSL
+  data->set.ssl.psk_id = data->set.str[STRING_TLSPSK_ID];
+  data->set.ssl.psk_key = data->set.str[STRING_TLSPSK_KEY];
 #endif
 
   if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config)) {

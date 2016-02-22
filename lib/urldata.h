@@ -370,6 +370,10 @@ struct ssl_config_data {
   char *password; /* TLS password (for, e.g., SRP) */
   enum CURL_TLSAUTH authtype; /* TLS authentication type (default SRP) */
 #endif
+#ifdef USE_SSL
+  char *psk_id;
+  char *psk_key;
+#endif
 };
 
 /* information stored about one single SSL session */
@@ -1417,6 +1421,12 @@ enum dupstring {
   STRING_TLSAUTH_USERNAME,      /* TLS auth <username> */
   STRING_TLSAUTH_PASSWORD,      /* TLS auth <password> */
 #endif
+
+#ifdef USE_SSL
+  STRING_TLSPSK_ID,     /* TLS PSK identity */
+  STRING_TLSPSK_KEY,    /* TLS PSK pre-shared key */
+#endif
+
   STRING_BEARER,                /* <bearer>, if used */
 #ifdef USE_UNIX_SOCKETS
   STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
