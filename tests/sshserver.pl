@@ -558,7 +558,7 @@ sub sshd_supports_opt {
         ($sshdid =~ /SunSSH/)) {
         # ssh daemon supports command line options -t -f and -o
         $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
-                    qx("$sshd" -t -f $sshdconfig -o $option=$value 2>&1);
+                    qx("$sshd" -t -f $sshdconfig -o "$option=$value" 2>&1);
         return !$err;
     }
     if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 299)) {
