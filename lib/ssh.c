@@ -362,6 +362,7 @@ static void state(struct connectdata *conn, sshstate nowstate)
     "SSH_SFTP_QUOTE_RENAME",
     "SSH_SFTP_QUOTE_RMDIR",
     "SSH_SFTP_QUOTE_UNLINK",
+    "SSH_SFTP_QUOTE_STATVFS",
     "SSH_SFTP_GETINFO",
     "SSH_SFTP_FILETIME",
     "SSH_SFTP_TRANS_INIT",
@@ -1363,6 +1364,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           state(conn, SSH_SFTP_QUOTE_UNLINK);
           break;
         }
+        else if(curl_strnequal(cmd, "statvfs ", 8)) {
+          state(conn, SSH_SFTP_QUOTE_STATVFS);
+          break;
+        }
 
         failf(data, "Unknown SFTP command");
         Curl_safefree(sshc->quote_path1);
@@ -1612,6 +1617,58 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       state(conn, SSH_SFTP_NEXT_QUOTE);
       break;
+
+    case SSH_SFTP_QUOTE_STATVFS:
+    {
+      LIBSSH2_SFTP_STATVFS statvfs;
+      rc = libssh2_sftp_statvfs(sshc->sftp_session, sshc->quote_path1,
+                                curlx_uztoui(strlen(sshc->quote_path1)),
+                                &statvfs);
+
+      if(rc == LIBSSH2_ERROR_EAGAIN) {
+        break;
+      }
+      else if(rc != 0 && !sshc->acceptfail) {
+        err = sftp_libssh2_last_error(sshc->sftp_session);
+        Curl_safefree(sshc->quote_path1);
+        failf(data, "statvfs command failed: %s", sftp_libssh2_strerror(err));
+        state(conn, SSH_SFTP_CLOSE);
+        sshc->nextstate = SSH_NO_STATE;
+        sshc->actualcode = CURLE_QUOTE_ERROR;
+        break;
+      }
+      else if(rc == 0) {
+        char *tmp = aprintf("statvfs:\n"
+                            "f_bsize: %llu\n" "f_frsize: %llu\n"
+                            "f_blocks: %llu\n" "f_bfree: %llu\n"
+                            "f_bavail: %llu\n" "f_files: %llu\n"
+                            "f_ffree: %llu\n" "f_favail: %llu\n"
+                            "f_fsid: %llu\n" "f_flag: %llu\n"
+                            "f_namemax: %llu\n",
+                            statvfs.f_bsize, statvfs.f_frsize,
+                            statvfs.f_blocks, statvfs.f_bfree,
+                            statvfs.f_bavail, statvfs.f_files,
+                            statvfs.f_ffree, statvfs.f_favail,
+                            statvfs.f_fsid, statvfs.f_flag,
+                            statvfs.f_namemax);
+        if(!tmp) {
+          result = CURLE_OUT_OF_MEMORY;
+          state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
+          break;
+        }
+
+        result = Curl_client_write(conn, CLIENTWRITE_HEADER, tmp, strlen(tmp));
+        free(tmp);
+        if(result) {
+          state(conn, SSH_SFTP_CLOSE);
+          sshc->nextstate = SSH_NO_STATE;
+          sshc->actualcode = result;
+        }
+      }
+      state(conn, SSH_SFTP_NEXT_QUOTE);
+      break;
+    }
 
     case SSH_SFTP_GETINFO:
     {
