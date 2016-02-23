@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -537,12 +537,6 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
      curl_easy_cleanup is called. */
   Curl_expire(data, 0);
 
-  /* destroy the timeout list that is held in the easy handle */
-  if(data->state.timeoutlist) {
-    Curl_llist_destroy(data->state.timeoutlist, NULL);
-    data->state.timeoutlist = NULL;
-  }
-
   if(data->dns.hostcachetype == HCACHE_MULTI) {
     /* stop using the multi handle's DNS cache */
     data->dns.hostcache = NULL;
@@ -568,6 +562,13 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   }
 
   Curl_wildcard_dtor(&data->wildcard);
+
+  /* destroy the timeout list that is held in the easy handle, do this *after*
+     Curl_done() as that may actuall call Curl_expire that uses this */
+  if(data->state.timeoutlist) {
+    Curl_llist_destroy(data->state.timeoutlist, NULL);
+    data->state.timeoutlist = NULL;
+  }
 
   /* as this was using a shared connection cache we clear the pointer to that
      since we're not part of that multi handle anymore */
