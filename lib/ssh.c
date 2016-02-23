@@ -362,6 +362,8 @@ static void state(struct connectdata *conn, sshstate nowstate)
     "SSH_SFTP_QUOTE_RENAME",
     "SSH_SFTP_QUOTE_RMDIR",
     "SSH_SFTP_QUOTE_UNLINK",
+    "SSH_SFTP_GETINFO",
+    "SSH_SFTP_FILETIME",
     "SSH_SFTP_TRANS_INIT",
     "SSH_SFTP_UPLOAD_INIT",
     "SSH_SFTP_CREATE_DIRS_INIT",
@@ -1183,7 +1185,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         state(conn, SSH_SFTP_QUOTE);
       }
       else {
-        state(conn, SSH_SFTP_TRANS_INIT);
+        state(conn, SSH_SFTP_GETINFO);
       }
       break;
 
@@ -1372,7 +1374,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
     }
     if(!sshc->quote_item) {
-      state(conn, SSH_SFTP_TRANS_INIT);
+      state(conn, SSH_SFTP_GETINFO);
     }
     break;
 
@@ -1391,7 +1393,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->nextstate = SSH_NO_STATE;
         }
         else {
-          state(conn, SSH_SFTP_TRANS_INIT);
+          state(conn, SSH_SFTP_GETINFO);
         }
       }
       break;
@@ -1610,6 +1612,35 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       state(conn, SSH_SFTP_NEXT_QUOTE);
       break;
+
+    case SSH_SFTP_GETINFO:
+    {
+      if(data->set.get_filetime) {
+        state(conn, SSH_SFTP_FILETIME);
+      }
+      else {
+        state(conn, SSH_SFTP_TRANS_INIT);
+      }
+      break;
+    }
+
+    case SSH_SFTP_FILETIME:
+    {
+      LIBSSH2_SFTP_ATTRIBUTES attrs;
+
+      rc = libssh2_sftp_stat_ex(sshc->sftp_session, sftp_scp->path,
+                                curlx_uztoui(strlen(sftp_scp->path)),
+                                LIBSSH2_SFTP_STAT, &attrs);
+      if(rc == LIBSSH2_ERROR_EAGAIN) {
+        break;
+      }
+      else if(rc == 0) {
+        data->info.filetime = (long)attrs.mtime;
+      }
+
+      state(conn, SSH_SFTP_TRANS_INIT);
+      break;
+    }
 
     case SSH_SFTP_TRANS_INIT:
       if(data->set.upload)
