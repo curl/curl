@@ -3,8 +3,8 @@ configurehelp.pm
 curl_client_key
 curl_client_key.pub
 curl_client_knownhosts
-curl_host_dsa_key
-curl_host_dsa_key.pub
+curl_host_rsa_key
+curl_host_rsa_key.pub
 curl_sftp_cmds
 curl_sftp_config
 curl_ssh_config

@@ -371,12 +371,12 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
     # Make sure all files are gone so ssh-keygen doesn't complain
     unlink($hstprvkeyf, $hstpubkeyf, $cliprvkeyf, $clipubkeyf);
     logmsg 'generating host keys...' if($verbose);
-    if(system "\"$sshkeygen\" -q -t dsa -f $hstprvkeyf -C 'curl test server' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -f $hstprvkeyf -C 'curl test server' -N ''") {
         logmsg 'Could not generate host key';
         exit 1;
     }
     logmsg 'generating client keys...' if($verbose);
-    if(system "\"$sshkeygen\" -q -t dsa -f $cliprvkeyf -C 'curl test client' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -f $cliprvkeyf -C 'curl test client' -N ''") {
         logmsg 'Could not generate client key';
         exit 1;
     }
@@ -729,11 +729,11 @@ if(system "\"$sshd\" -t -f $sshdconfig > $sshdlog 2>&1") {
 if((! -e $knownhosts) || (! -s $knownhosts)) {
     logmsg 'generating ssh client known hosts file...' if($verbose);
     unlink($knownhosts);
-    if(open(DSAKEYFILE, "<$hstpubkeyf")) {
-        my @dsahostkey = do { local $/ = ' '; <DSAKEYFILE> };
-        if(close(DSAKEYFILE)) {
+    if(open(RSAKEYFILE, "<$hstpubkeyf")) {
+        my @rsahostkey = do { local $/ = ' '; <RSAKEYFILE> };
+        if(close(RSAKEYFILE)) {
             if(open(KNOWNHOSTS, ">$knownhosts")) {
-                print KNOWNHOSTS "$listenaddr ssh-dss $dsahostkey[1]\n";
+                print KNOWNHOSTS "$listenaddr ssh-rsa $rsahostkey[1]\n";
                 if(!close(KNOWNHOSTS)) {
                     $error = "Error: cannot close file $knownhosts";
                 }
