@@ -214,6 +214,7 @@ struct http_conn {
      them for both cases. */
   int32_t pause_stream_id; /* stream ID which paused
                               nghttp2_session_mem_recv */
+  int drain_total; /* sum of all stream's UrlState.drain */
 
   /* this is a hash of all individual streams (SessionHandle structs) */
   struct h2settings settings;
