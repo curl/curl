@@ -47,7 +47,7 @@ static size_t write_callback(void *buffer, size_t size, size_t nmemb,
           printf("%s\n", html_parser_val(hsp));
         }
   }
-  return realsize;
+  return nmemb;
 }
 
 int main(int argc, char *argv[])
