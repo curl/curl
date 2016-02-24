@@ -1426,6 +1426,8 @@
      d                 c                   X'0040002B'
      d  CURLINFO_ACTIVESOCKET...                                                CURLINFO_SOCKET + 44
      d                 c                   X'0050002C'
+     d  CURLINFO_TLS_SSL_PTR...                                                 CURLINFO_SLIST + 45
+     d                 c                   X'0040002D'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'

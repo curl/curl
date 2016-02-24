@@ -679,6 +679,7 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
         break;
 
       case CURLINFO_TLS_SESSION:
+      case CURLINFO_TLS_SSL_PTR:
       case CURLINFO_SOCKET:
         break;
 
