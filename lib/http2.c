@@ -848,8 +848,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(stream->header_recvbuf, value, valuelen);
     /* the space character after the status code is mandatory */
     Curl_add_buffer(stream->header_recvbuf, " \r\n", 3);
-    data_s->state.drain++;
-    conn->proto.httpc.drain_total++;
     /* if we receive data for another handle, wake that up */
     if(conn->data != data_s)
       Curl_expire(data_s, 1);
@@ -866,8 +864,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   Curl_add_buffer(stream->header_recvbuf, ":", 1);
   Curl_add_buffer(stream->header_recvbuf, value, valuelen);
   Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
-  data_s->state.drain++;
-  conn->proto.httpc.drain_total++;
   /* if we receive data for another handle, wake that up */
   if(conn->data != data_s)
     Curl_expire(data_s, 1);
