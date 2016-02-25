@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -426,6 +426,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
                           Windows version to have a different struct without
                           having to redefine the simple word 'stat' */
   curl_off_t expected_size=0;
+  bool size_known;
   bool fstated=FALSE;
   ssize_t nread;
   struct SessionHandle *data = conn->data;
@@ -531,8 +532,10 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   if(data->req.maxdownload > 0)
     expected_size = data->req.maxdownload;
 
-  if(fstated && (expected_size == 0))
-    return CURLE_OK;
+  if(!fstated || (expected_size == 0))
+    size_known = FALSE;
+  else
+    size_known = TRUE;
 
   /* The following is a shortcut implementation of file reading
      this is both more efficient than the former call to download() and
@@ -551,20 +554,27 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
 
   while(!result) {
     /* Don't fill a whole buffer if we want less than all data */
-    size_t bytestoread =
-      (expected_size < CURL_OFF_T_C(BUFSIZE) - CURL_OFF_T_C(1)) ?
-      curlx_sotouz(expected_size) : BUFSIZE - 1;
+    size_t bytestoread;
+
+    if(size_known) {
+      bytestoread =
+        (expected_size < CURL_OFF_T_C(BUFSIZE) - CURL_OFF_T_C(1)) ?
+        curlx_sotouz(expected_size) : BUFSIZE - 1;
+    }
+    else
+      bytestoread = BUFSIZE-1;
 
     nread = read(fd, buf, bytestoread);
 
     if(nread > 0)
       buf[nread] = 0;
 
-    if(nread <= 0 || expected_size == 0)
+    if(nread <= 0 || (size_known && (expected_size == 0)))
       break;
 
     bytecount += nread;
-    expected_size -= nread;
+    if(size_known)
+      expected_size -= nread;
 
     result = Curl_client_write(conn, CLIENTWRITE_BODY, buf, nread);
     if(result)
