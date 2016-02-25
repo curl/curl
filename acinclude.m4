@@ -2570,7 +2570,8 @@ AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
   AC_MSG_CHECKING([default CA cert bundle/path])
 
   AC_ARG_WITH(ca-bundle,
-AC_HELP_STRING([--with-ca-bundle=FILE], [File name to use as CA bundle])
+AC_HELP_STRING([--with-ca-bundle=FILE],
+[Path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
 AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   [
     want_ca="$withval"
@@ -2580,7 +2581,11 @@ AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   ],
   [ want_ca="unset" ])
   AC_ARG_WITH(ca-path,
-AC_HELP_STRING([--with-ca-path=DIRECTORY], [Directory to use as CA path])
+AC_HELP_STRING([--with-ca-path=DIRECTORY],
+[Path to a directory containing CA certificates stored individually, with \
+their filenames in a hash format. This option can be used with OpenSSL, \
+GnuTLS and PolarSSL backends. Refer to OpenSSL c_rehash for details. \
+(example: /etc/certificates)])
 AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   [
     want_capath="$withval"
@@ -2589,6 +2594,10 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     fi
   ],
   [ want_capath="unset"])
+
+  ca_warning="   (warning: certs not found)"
+  capath_warning="   (warning: certs not found)"
+  check_capath=""
 
   if test "x$want_ca" != "xno" -a "x$want_ca" != "xunset" -a \
           "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
@@ -2638,17 +2647,36 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
       fi
       if test "x$want_capath" = "xunset" -a "x$ca" = "xno" -a \
               "x$OPENSSL_ENABLED" = "x1"; then
-        for a in /etc/ssl/certs/; do
-          if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
-            capath="$a"
-            break
-          fi
-        done
+        check_capath="/etc/ssl/certs/"
       fi
     else
       dnl no option given and cross-compiling
       AC_MSG_WARN([skipped the ca-cert path detection when cross-compiling])
     fi
+  fi
+
+  if test "x$ca" = "xno" || test -f "$ca"; then
+    ca_warning=""
+  fi
+
+  if test "x$capath" != "xno"; then
+    check_capath="$capath"
+  fi
+
+  if test ! -z "$check_capath"; then
+    for a in "$check_capath"; do
+      if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
+        if test "x$capath" = "xno"; then
+          capath="$a"
+        fi
+        capath_warning=""
+        break
+      fi
+    done
+  fi
+
+  if test "x$capath" = "xno"; then
+    capath_warning=""
   fi
 
   if test "x$ca" != "xno"; then
