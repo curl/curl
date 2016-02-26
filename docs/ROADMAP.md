@@ -23,6 +23,19 @@ HTTP/2
    As it would avoid the roundtrip-heavy Upgrade: procedures when you _know_
    it speaks HTTP/2.
 
+HTTP cookies
+------------
+
+Two cookie drafts have been adopted by the httpwg in IETF and we should
+support them as the popular browsers will as well:
+
+[Deprecate modification of 'secure' cookies from non-secure
+origins](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-00)
+
+[Cookie Prefixes](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-prefixes-00)
+
+[Firefox bug report about secure cookies](https://bugzilla.mozilla.org/show_bug.cgi?id=976073)
+
 SRV records
 -----------
 
@@ -31,7 +44,9 @@ How to find services for specific domains/hosts.
 HTTPS to proxy
 --------------
 
-To avoid network traffic to/from the proxy getting snooped on.
+To avoid network traffic to/from the proxy getting snooped on. There's a git
+branch in the public git repository for this that we need to make sure works
+for all TLS backends and then merge!
 
 curl_formadd()
 --------------
