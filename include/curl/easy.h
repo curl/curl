@@ -27,6 +27,10 @@ extern "C" {
 
 CURL_EXTERN CURL *curl_easy_init(void);
 CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
+CURL_EXTERN CURLcode curl_easy_setopt_bool(CURL *curl, CURLoption option, int value);
+CURL_EXTERN CURLcode curl_easy_setopt_headers(CURL *curl, struct curl_slist *headers);
+CURL_EXTERN CURLcode curl_easy_setopt_int(CURL *curl, CURLoption option, long data);
+CURL_EXTERN CURLcode curl_easy_setopt_string(CURL *curl, CURLoption option, char *data);
 CURL_EXTERN CURLcode curl_easy_perform(CURL *curl);
 CURL_EXTERN void curl_easy_cleanup(CURL *curl);
 

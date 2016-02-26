@@ -411,6 +411,26 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
   return result;
 }
 
+CURL_EXTERN CURLcode curl_easy_setopt_bool(CURL *curl, CURLoption option, int value)
+{
+  return curl_easy_setopt(curl, option, value == 1 ? 1L : 0L);
+}
+
+CURL_EXTERN CURLcode curl_easy_setopt_headers(CURL *curl, struct curl_slist *headers)
+{
+    return curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+}
+
+CURL_EXTERN CURLcode curl_easy_setopt_int(CURL *curl, CURLoption option, long data)
+{
+    return curl_easy_setopt(curl, option, data);
+}
+
+CURL_EXTERN CURLcode curl_easy_setopt_string(CURL *curl, CURLoption option, char *data)
+{
+    return curl_easy_setopt(curl, option, data);
+}
+
 #ifdef CURLDEBUG
 
 struct socketmonitor {
