@@ -432,8 +432,9 @@ CURL_EXTERN CURLcode curl_easy_setopt_string(CURL *curl, CURLoption option, char
 }
 
 CURL_EXTERN CURLcode curl_easy_setopt_read_function(CURL *curl, void *userData,
-                                                    size_t (*read_cb) (char *buffer, size_t size, size_t nitems,
-                                                                       void *userdata)) {
+    size_t (*read_cb) (char *buffer, size_t size, size_t nitems,
+      void *userdata)) 
+{
   CURLcode rc = curl_easy_setopt(curl, CURLOPT_READDATA, userData);
   if  (rc == CURLE_OK) {
     rc = curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
@@ -442,8 +443,9 @@ CURL_EXTERN CURLcode curl_easy_setopt_read_function(CURL *curl, void *userData,
 }
 
 CURL_EXTERN CURLcode curl_easy_setopt_write_function(CURL *curl, void *userData,
-                                                     size_t (*write_cb) (char *buffer, size_t size, size_t nitems,
-                                                                         void *userdata)) {
+    size_t (*write_cb) (char *buffer, size_t size, size_t nitems,
+      void *userdata)) 
+{
   CURLcode rc = curl_easy_setopt(curl, CURLOPT_HEADER, 1);
   if  (rc == CURLE_OK)  {
     rc = curl_easy_setopt(curl, CURLOPT_WRITEDATA, userData);

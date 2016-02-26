@@ -31,12 +31,12 @@ CURL_EXTERN CURLcode curl_easy_setopt_bool(CURL *curl, CURLoption option, int va
 CURL_EXTERN CURLcode curl_easy_setopt_headers(CURL *curl, struct curl_slist *headers);
 CURL_EXTERN CURLcode curl_easy_setopt_int(CURL *curl, CURLoption option, long data);
 CURL_EXTERN CURLcode curl_easy_setopt_string(CURL *curl, CURLoption option, char *data);
-  CURL_EXTERN CURLcode curl_easy_setopt_read_function(CURL *curl, void *userData,
-                                                      size_t (*read_cb) (char *buffer, size_t size, size_t nitems,
-                                                                         void *userdata));
+CURL_EXTERN CURLcode curl_easy_setopt_read_function(CURL *curl, void *userData,
+    size_t (*read_cb) (char *buffer, size_t size, size_t nitems,
+      void *userdata));
 CURL_EXTERN CURLcode curl_easy_setopt_write_function(CURL *curl, void *userData,
-                                                     size_t (*write_cb) (char *buffer, size_t size, size_t nitems,
-                                                                         void *userdata));
+    size_t (*write_cb) (char *buffer, size_t size, size_t nitems,
+      void *userdata));
 
 CURL_EXTERN CURLcode curl_easy_perform(CURL *curl);
 CURL_EXTERN void curl_easy_cleanup(CURL *curl);
