@@ -81,6 +81,8 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
       if(result)
         return result;
 
+      conn->data->state.ntlm_conn = conn; /* Attach to this connection */
+
       ntlm->state = NTLMSTATE_TYPE2; /* We got a type-2 message */
     }
     else {
