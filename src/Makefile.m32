@@ -92,7 +92,7 @@ CC	= $(CROSSPREFIX)gcc
 CFLAGS	= $(CURL_CFLAG_EXTRAS) -g -O2 -Wall
 CFLAGS	+= -fno-strict-aliasing
 # comment LDFLAGS below to keep debug info
-LDFLAGS	= $(CURL_LDFLAG_EXTRAS) -s
+LDFLAGS	= $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE) -s
 AR	= $(CROSSPREFIX)ar
 RC	= $(CROSSPREFIX)windres
 RCFLAGS	= --include-dir=$(PROOT)/include -O COFF
