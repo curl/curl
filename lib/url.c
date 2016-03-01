@@ -6157,7 +6157,8 @@ CURLcode Curl_done(struct connectdata **connp,
       result = CURLE_ABORTED_BY_CALLBACK;
   }
 
-  if((conn->send_pipe->size + conn->recv_pipe->size != 0 &&
+  if((!premature &&
+      conn->send_pipe->size + conn->recv_pipe->size != 0 &&
       !data->set.reuse_forbid &&
       !conn->bits.close)) {
     /* Stop if pipeline is not empty and we do not have to close
