@@ -153,7 +153,9 @@ ZLIB = 1
 endif
 ifeq ($(findstring -ssh2,$(CFG)),-ssh2)
 SSH2 = 1
+ifneq ($(findstring -winssl,$(CFG)),-winssl)
 SSL = 1
+endif
 ZLIB = 1
 endif
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
