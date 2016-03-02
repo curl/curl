@@ -58,6 +58,7 @@ http://www.example.ck/1136 http://www.ck/1136 http://z-1.compute-1.amazonaws.com
 
 .www.example.ck	TRUE	/	FALSE	0	test2	allowed2
 .www.ck	TRUE	/	FALSE	0	test4	allowed4
+.z-1.compute-1.amazonaws.com	TRUE	/	FALSE	0	test5	forbidden5
 </file>
 </verify>
 </testcase>

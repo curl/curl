@@ -31,6 +31,7 @@ This release includes the following bugfixes:
  o gtls: fix for builds lacking encrypted key file support [11]
  o SCP: use libssh2_scp_recv2 to support > 2GB files on windows [12]
  o CURLOPT_CONNECTTIMEOUT_MS.3: Fix example to use milliseconds option [13]
+ o cookie: do not refuse cookies to localhost [14]
 
 This release includes the following known bugs:
 
@@ -62,3 +63,4 @@ References to bug reports and discussions on issues:
  [11] = https://curl.haxx.se/bug/?i=651
  [12] = https://curl.haxx.se/bug/?i=451
  [13] = https://curl.haxx.se/bug/?i=653
+ [14] = https://curl.haxx.se/bug/?i=658
