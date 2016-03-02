@@ -66,7 +66,10 @@ Set this option to NULL to get the internal default function used instead of
 your callback. The internal default function will write the data to the FILE *
 given with \fICURLOPT_WRITEDATA(3)\fP.
 .SH DEFAULT
-libcurl will use 'fwrite' as a callback by default.
+libcurl will use 'fwrite()' as a callback by default.
+
+\fBNote\fP: fwrite() returns the number of items it wrote but not the bytes,
+no worries, because the argument \fIsize\fP is always 1.
 .SH PROTOCOLS
 For all protocols
 .SH AVAILABILITY
