@@ -35,6 +35,7 @@
 #include "conncache.h"
 #include "url.h"
 #include "connect.h"
+#include "strtoofft.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -1491,6 +1492,9 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
    field list. */
 #define AUTHORITY_DST_IDX 3
 
+#define HEADER_OVERFLOW(x) \
+  (x.namelen > (uint16_t)-1 || x.valuelen > (uint16_t)-1 - x.namelen)
+
 /* return number of received (decrypted) bytes */
 static ssize_t http2_send(struct connectdata *conn, int sockindex,
                           const void *mem, size_t len, CURLcode *err)
@@ -1503,12 +1507,12 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   int rv;
   struct http_conn *httpc = &conn->proto.httpc;
   struct HTTP *stream = conn->data->req.protop;
-  nghttp2_nv *nva;
+  nghttp2_nv *nva = NULL;
   size_t nheader;
   size_t i;
   size_t authority_idx;
   char *hdbuf = (char*)mem;
-  char *end;
+  char *end, *line_end;
   nghttp2_data_provider data_prd;
   int32_t stream_id;
   nghttp2_session *h2 = httpc->h2;
@@ -1559,12 +1563,16 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   /* Here, we assume the curl http code generate *correct* HTTP header
      field block */
   nheader = 0;
-  for(i = 0; i < len; ++i) {
-    if(hdbuf[i] == 0x0a) {
+  for(i = 1; i < len; ++i) {
+    if(hdbuf[i] == '\n' && hdbuf[i - 1] == '\r') {
       ++nheader;
+      ++i;
     }
   }
-  /* We counted additional 2 \n in the first and last line. We need 3
+  if(nheader < 2)
+    goto fail;
+
+  /* We counted additional 2 \r\n in the first and last line. We need 3
      new headers: :method, :path and :scheme. Therefore we need one
      more space. */
   nheader += 1;
@@ -1573,51 +1581,84 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     *err = CURLE_OUT_OF_MEMORY;
     return -1;
   }
+
   /* Extract :method, :path from request line */
-  end = strchr(hdbuf, ' ');
-  if(!end)
+  line_end = strstr(hdbuf, "\r\n");
+
+  /* Method does not contain spaces */
+  end = memchr(hdbuf, ' ', line_end - hdbuf);
+  if(!end || end == hdbuf)
     goto fail;
   nva[0].name = (unsigned char *)":method";
-  nva[0].namelen = (uint16_t)strlen((char *)nva[0].name);
+  nva[0].namelen = strlen((char *)nva[0].name);
   nva[0].value = (unsigned char *)hdbuf;
-  nva[0].valuelen = (uint16_t)(end - hdbuf);
+  nva[0].valuelen = (size_t)(end - hdbuf);
   nva[0].flags = NGHTTP2_NV_FLAG_NONE;
+  if(HEADER_OVERFLOW(nva[0])) {
+    failf(conn->data, "Failed sending HTTP request: Header overflow");
+    goto fail;
+  }
 
   hdbuf = end + 1;
 
-  end = strchr(hdbuf, ' ');
-  if(!end)
+  /* Path may contain spaces so scan backwards */
+  end = NULL;
+  for(i = (size_t)(line_end - hdbuf); i; --i) {
+    if(hdbuf[i - 1] == ' ') {
+      end = &hdbuf[i - 1];
+      break;
+    }
+  }
+  if(!end || end == hdbuf)
     goto fail;
   nva[1].name = (unsigned char *)":path";
-  nva[1].namelen = (uint16_t)strlen((char *)nva[1].name);
+  nva[1].namelen = strlen((char *)nva[1].name);
   nva[1].value = (unsigned char *)hdbuf;
-  nva[1].valuelen = (uint16_t)(end - hdbuf);
+  nva[1].valuelen = (size_t)(end - hdbuf);
   nva[1].flags = NGHTTP2_NV_FLAG_NONE;
+  if(HEADER_OVERFLOW(nva[1])) {
+    failf(conn->data, "Failed sending HTTP request: Header overflow");
+    goto fail;
+  }
 
+  hdbuf = end + 1;
+
+  end = line_end;
   nva[2].name = (unsigned char *)":scheme";
-  nva[2].namelen = (uint16_t)strlen((char *)nva[2].name);
+  nva[2].namelen = strlen((char *)nva[2].name);
   if(conn->handler->flags & PROTOPT_SSL)
     nva[2].value = (unsigned char *)"https";
   else
     nva[2].value = (unsigned char *)"http";
-  nva[2].valuelen = (uint16_t)strlen((char *)nva[2].value);
+  nva[2].valuelen = strlen((char *)nva[2].value);
   nva[2].flags = NGHTTP2_NV_FLAG_NONE;
-
-  hdbuf = strchr(hdbuf, 0x0a);
-  if(!hdbuf)
+  if(HEADER_OVERFLOW(nva[2])) {
+    failf(conn->data, "Failed sending HTTP request: Header overflow");
     goto fail;
-  ++hdbuf;
+  }
 
   authority_idx = 0;
-
   i = 3;
   while(i < nheader) {
     size_t hlen;
     int skip = 0;
-    end = strchr(hdbuf, ':');
-    if(!end)
+
+    hdbuf = line_end + 2;
+
+    line_end = strstr(hdbuf, "\r\n");
+    if(line_end == hdbuf)
+      goto fail;
+
+    /* header continuation lines are not supported */
+    if(*hdbuf == ' ' || *hdbuf == '\t')
+      goto fail;
+
+    for(end = hdbuf; end < line_end && *end != ':'; ++end)
+      ;
+    if(end == hdbuf || end == line_end)
       goto fail;
     hlen = end - hdbuf;
+
     if(hlen == 10 && Curl_raw_nequal("connection", hdbuf, 10)) {
       /* skip Connection: headers! */
       skip = 1;
@@ -1626,21 +1667,24 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     else if(hlen == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
       authority_idx = i;
       nva[i].name = (unsigned char *)":authority";
-      nva[i].namelen = (uint16_t)strlen((char *)nva[i].name);
+      nva[i].namelen = strlen((char *)nva[i].name);
     }
     else {
       nva[i].name = (unsigned char *)hdbuf;
-      nva[i].namelen = (uint16_t)(end - hdbuf);
+      nva[i].namelen = (size_t)(end - hdbuf);
     }
     hdbuf = end + 1;
-    for(; *hdbuf == ' '; ++hdbuf);
-    end = strchr(hdbuf, 0x0d);
-    if(!end)
-      goto fail;
+    while(*hdbuf == ' ' || *hdbuf == '\t')
+      ++hdbuf;
+    end = line_end;
     if(!skip) {
       nva[i].value = (unsigned char *)hdbuf;
-      nva[i].valuelen = (uint16_t)(end - hdbuf);
+      nva[i].valuelen = (size_t)(end - hdbuf);
       nva[i].flags = NGHTTP2_NV_FLAG_NONE;
+      if(HEADER_OVERFLOW(nva[i])) {
+        failf(conn->data, "Failed sending HTTP request: Header overflow");
+        goto fail;
+      }
       /* Inspect Content-Length header field and retrieve the request
          entity length so that we can set END_STREAM to the last DATA
          frame. */
@@ -1648,7 +1692,13 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
          Curl_raw_nequal("content-length", (char*)nva[i].name, 14)) {
         size_t j;
         stream->upload_left = 0;
+        if(!nva[i].valuelen)
+          goto fail;
         for(j = 0; j < nva[i].valuelen; ++j) {
+          if(nva[i].value[j] < '0' || nva[i].value[j] > '9')
+            goto fail;
+          if(stream->upload_left >= CURL_OFF_T_MAX / 10)
+            goto fail;
           stream->upload_left *= 10;
           stream->upload_left += nva[i].value[j] - '0';
         }
@@ -1659,7 +1709,6 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       }
       ++i;
     }
-    hdbuf = end + 2;
   }
 
   /* :authority must come before non-pseudo header fields */
@@ -1669,6 +1718,29 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       nva[i] = nva[i - 1];
     }
     nva[i] = authority;
+  }
+
+  /* Warn stream may be rejected if cumulative length of headers is too large.
+     It appears nghttp2 will not send a header frame larger than 64KB. */
+  {
+    size_t acc = 0;
+    const size_t max_acc = 60000;  /* <64KB to account for some overhead */
+
+    for(i = 0; i < nheader; ++i) {
+      if(nva[i].namelen > max_acc - acc)
+        break;
+      acc += nva[i].namelen;
+
+      if(nva[i].valuelen > max_acc - acc)
+        break;
+      acc += nva[i].valuelen;
+    }
+
+    if(i != nheader) {
+      infof(conn->data, "http2_send: Warning: The cumulative length of all "
+                        "headers exceeds %zu bytes and that could cause the "
+                        "stream to be rejected.\n", max_acc);
+    }
   }
 
   h2_pri_spec(conn->data, &pri_spec);
