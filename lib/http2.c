@@ -46,6 +46,10 @@
 #error too old nghttp2 version, upgrade!
 #endif
 
+#if (NGHTTP2_VERSION_NUM > 0x010800)
+#define NGHTTP2_HAS_HTTP2_STRERROR 1
+#endif
+
 #if (NGHTTP2_VERSION_NUM >= 0x010900)
 /* nghttp2_session_callbacks_set_error_callback is present in nghttp2 1.9.0 or
    later */
@@ -210,6 +214,34 @@ int Curl_http2_ver(char *p, size_t len)
 {
   nghttp2_info *h2 = nghttp2_version(0);
   return snprintf(p, len, " nghttp2/%s", h2->version_str);
+}
+
+/* HTTP/2 error code to name based on the Error Code Registry.
+https://tools.ietf.org/html/rfc7540#page-77
+nghttp2_error_code enums are identical.
+*/
+const char *Curl_http2_strerror(uint32_t err) {
+#ifndef NGHTTP2_HAS_HTTP2_STRERROR
+  const char *str[] = {
+    "NO_ERROR",             /* 0x0 */
+    "PROTOCOL_ERROR",       /* 0x1 */
+    "INTERNAL_ERROR",       /* 0x2 */
+    "FLOW_CONTROL_ERROR",   /* 0x3 */
+    "SETTINGS_TIMEOUT",     /* 0x4 */
+    "STREAM_CLOSED",        /* 0x5 */
+    "FRAME_SIZE_ERROR",     /* 0x6 */
+    "REFUSED_STREAM",       /* 0x7 */
+    "CANCEL",               /* 0x8 */
+    "COMPRESSION_ERROR",    /* 0x9 */
+    "CONNECT_ERROR",        /* 0xA */
+    "ENHANCE_YOUR_CALM",    /* 0xB */
+    "INADEQUATE_SECURITY",  /* 0xC */
+    "HTTP_1_1_REQUIRED"     /* 0xD */
+  };
+  return (err < sizeof str / sizeof str[0]) ? str[err] : "unknown";
+#else
+  return nghttp2_http2_strerror(err);
+#endif
 }
 
 /*
@@ -680,8 +712,8 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
          decided to reject stream (e.g., PUSH_PROMISE). */
       return 0;
     }
-    DEBUGF(infof(data_s, "on_stream_close(), error_code = %d, stream %u\n",
-                 error_code, stream_id));
+    DEBUGF(infof(data_s, "on_stream_close(), %s (err %d), stream %u\n",
+                 Curl_http2_strerror(error_code), error_code, stream_id));
     stream = data_s->req.protop;
     if(!stream)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -1148,8 +1180,9 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
    function. */
   stream->closed = FALSE;
   if(stream->error_code != NGHTTP2_NO_ERROR) {
-    failf(data, "HTTP/2 stream %u was not closed cleanly: error_code = %d",
-          stream->stream_id, stream->error_code);
+    failf(data, "HTTP/2 stream %u was not closed cleanly: %s (err %d)",
+          stream->stream_id, Curl_http2_strerror(stream->error_code),
+          stream->error_code);
     *err = CURLE_HTTP2_STREAM;
     return -1;
   }
