@@ -151,6 +151,8 @@ static CURLcode parse_url_login(struct SessionHandle *data,
 static CURLcode parse_login_details(const char *login, const size_t len,
                                     char **userptr, char **passwdptr,
                                     char **optionsptr);
+static unsigned int get_protocol_family(unsigned int protocol);
+
 /*
  * Protocol table.
  */
@@ -3272,7 +3274,8 @@ ConnectionExists(struct SessionHandle *data,
       if((needle->handler->flags&PROTOPT_SSL) !=
          (check->handler->flags&PROTOPT_SSL))
         /* don't do mixed SSL and non-SSL connections */
-        if(!(needle->handler->protocol & check->handler->protocol))
+        if(get_protocol_family(check->handler->protocol) !=
+           needle->handler->protocol || !check->tls_upgraded)
           /* except protocols that have been upgraded via TLS */
           continue;
 
@@ -3327,14 +3330,16 @@ ConnectionExists(struct SessionHandle *data,
           Curl_raw_equal(needle->proxy.name, check->proxy.name) &&
           (needle->port == check->port))) {
         /* The requested connection does not use a HTTP proxy or it uses SSL or
-           it is a non-SSL protocol tunneled over the same http proxy name and
-           port number or it is a non-SSL protocol which is allowed to be
-           upgraded via TLS */
-
+           it is a non-SSL protocol tunneled over the same HTTP proxy name and
+           port number */
         if((Curl_raw_equal(needle->handler->scheme, check->handler->scheme) ||
-            needle->handler->protocol & check->handler->protocol) &&
+            (get_protocol_family(check->handler->protocol) ==
+             needle->handler->protocol && check->tls_upgraded)) &&
            Curl_raw_equal(needle->host.name, check->host.name) &&
            needle->remote_port == check->remote_port) {
+          /* The schemes match or the the protocol family is the same and the
+             previous connection was TLS upgraded, and the hostname and host
+             port match */
           if(needle->handler->flags & PROTOPT_SSL) {
             /* This is a SSL connection so verify that we're using the same
                SSL options as well */
@@ -6361,4 +6366,114 @@ CURLcode Curl_do_more(struct connectdata *conn, int *complete)
     do_complete(conn);
 
   return result;
+}
+
+/*
+* get_protocol_family()
+*
+* This is used to return the protocol family for a given protocol.
+*
+* Parameters:
+*
+* protocol  [in]  - A single bit protocol identifier such as HTTP or HTTPS.
+*
+* Returns the family as a single bit protocol identifier.
+*/
+
+unsigned int get_protocol_family(unsigned int protocol)
+{
+  unsigned int family;
+
+  switch(protocol) {
+  case CURLPROTO_HTTP:
+  case CURLPROTO_HTTPS:
+    family = CURLPROTO_HTTP;
+    break;
+
+  case CURLPROTO_FTP:
+  case CURLPROTO_FTPS:
+    family = CURLPROTO_IMAP;
+    break;
+
+  case CURLPROTO_SCP:
+    family = CURLPROTO_SCP;
+    break;
+
+  case CURLPROTO_SFTP:
+    family = CURLPROTO_SFTP;
+    break;
+
+  case CURLPROTO_TELNET:
+    family = CURLPROTO_TELNET;
+    break;
+
+  case CURLPROTO_LDAP:
+  case CURLPROTO_LDAPS:
+    family = CURLPROTO_IMAP;
+    break;
+
+  case CURLPROTO_DICT:
+    family = CURLPROTO_DICT;
+    break;
+
+  case CURLPROTO_FILE:
+    family = CURLPROTO_FILE;
+    break;
+
+  case CURLPROTO_TFTP:
+    family = CURLPROTO_TFTP;
+    break;
+
+  case CURLPROTO_IMAP:
+  case CURLPROTO_IMAPS:
+    family = CURLPROTO_IMAP;
+    break;
+
+  case CURLPROTO_POP3:
+  case CURLPROTO_POP3S:
+    family = CURLPROTO_POP3;
+    break;
+
+  case CURLPROTO_SMTP:
+  case CURLPROTO_SMTPS:
+      family = CURLPROTO_SMTP;
+      break;
+
+  case CURLPROTO_RTSP:
+    family = CURLPROTO_RTSP;
+    break;
+
+  case CURLPROTO_RTMP:
+  case CURLPROTO_RTMPS:
+    family = CURLPROTO_RTMP;
+    break;
+
+  case CURLPROTO_RTMPT:
+  case CURLPROTO_RTMPTS:
+    family = CURLPROTO_RTMPT;
+    break;
+
+  case CURLPROTO_RTMPE:
+    family = CURLPROTO_RTMPE;
+    break;
+
+  case CURLPROTO_RTMPTE:
+    family = CURLPROTO_RTMPTE;
+    break;
+
+  case CURLPROTO_GOPHER:
+    family = CURLPROTO_GOPHER;
+    break;
+
+  case CURLPROTO_SMB:
+  case CURLPROTO_SMBS:
+    family = CURLPROTO_SMB;
+    break;
+
+  default:
+      family = 0;
+      break;
+  }
+
+  return family;
 }

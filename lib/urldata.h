@@ -921,6 +921,7 @@ struct connectdata {
 
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
   struct ssl_config_data ssl_config;
+  bool tls_upgraded;
 
   struct ConnectBits bits;    /* various state-flags for this connection */
 

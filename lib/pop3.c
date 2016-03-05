@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -225,7 +225,11 @@ static const struct SASLproto saslpop3 = {
 #ifdef USE_SSL
 static void pop3_to_pop3s(struct connectdata *conn)
 {
+  /* Change the connection handler */
   conn->handler = &Curl_handler_pop3s;
+
+  /* Set the connection's upgraded to TLS flag */
+  conn->tls_upgraded = TRUE;
 }
 #else
 #define pop3_to_pop3s(x) Curl_nop_stmt
@@ -1354,6 +1358,10 @@ static CURLcode pop3_setup_connection(struct connectdata *conn)
   if(result)
     return result;
 
+  /* Clear the TLS upgraded flag */
+  conn->tls_upgraded = FALSE;
+
+  /* Set up the proxy if necessary */
   if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
     /* Unless we have asked to tunnel POP3 operations through the proxy, we
        switch and use HTTP operations only */

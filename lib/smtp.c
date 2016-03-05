@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -224,7 +224,11 @@ static const struct SASLproto saslsmtp = {
 #ifdef USE_SSL
 static void smtp_to_smtps(struct connectdata *conn)
 {
+  /* Change the connection handler */
   conn->handler = &Curl_handler_smtps;
+
+  /* Set the connection's upgraded to TLS flag */
+  conn->tls_upgraded = TRUE;
 }
 #else
 #define smtp_to_smtps(x) Curl_nop_stmt
@@ -1450,6 +1454,10 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   CURLcode result;
 
+  /* Clear the TLS upgraded flag */
+  conn->tls_upgraded = FALSE;
+
+  /* Set up the proxy if necessary */
   if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
     /* Unless we have asked to tunnel SMTP operations through the proxy, we
        switch and use HTTP operations only */
