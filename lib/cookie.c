@@ -309,7 +309,7 @@ static void remove_expired(struct CookieInfo *cookies)
   pv = NULL;
   while(co) {
     nx = co->next;
-    if((co->expirestr || co->maxage) && co->expires < now) {
+    if(co->expires && co->expires < now) {
       if(co == cookies->cookies) {
         cookies->cookies = co->next;
       }
