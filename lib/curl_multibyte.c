@@ -35,18 +35,19 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-wchar_t *Curl_convert_UTF8_to_wchar(const char *str_utf8)
+wchar_t *Curl_convert_multibyte_to_wchar(const char *str_mb,
+                                         unsigned int codepage)
 {
   wchar_t *str_w = NULL;
 
-  if(str_utf8) {
-    int str_w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
-                                        str_utf8, -1, NULL, 0);
+  if(str_mb) {
+    int str_w_len = MultiByteToWideChar(codepage, MB_ERR_INVALID_CHARS,
+                                        str_mb, -1, NULL, 0);
     if(str_w_len > 0) {
       str_w = malloc(str_w_len * sizeof(wchar_t));
       if(str_w) {
-        if(MultiByteToWideChar(CP_UTF8, 0, str_utf8, -1, str_w,
-                               str_w_len) == 0) {
+        if(MultiByteToWideChar(codepage, 0, str_mb, -1,
+                               str_w, str_w_len) == 0) {
           free(str_w);
           return NULL;
         }
@@ -57,26 +58,27 @@ wchar_t *Curl_convert_UTF8_to_wchar(const char *str_utf8)
   return str_w;
 }
 
-char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w)
+char *Curl_convert_wchar_to_multibyte(const wchar_t *str_w,
+                                      unsigned int codepage)
 {
-  char *str_utf8 = NULL;
+  char *str_mb = NULL;
 
   if(str_w) {
-    int str_utf8_len = WideCharToMultiByte(CP_UTF8, 0, str_w, -1, NULL,
-                                           0, NULL, NULL);
-    if(str_utf8_len > 0) {
-      str_utf8 = malloc(str_utf8_len * sizeof(wchar_t));
-      if(str_utf8) {
-        if(WideCharToMultiByte(CP_UTF8, 0, str_w, -1, str_utf8, str_utf8_len,
-                               NULL, FALSE) == 0) {
-          free(str_utf8);
+    int str_mb_len = WideCharToMultiByte(codepage, 0, str_w, -1,
+                                         NULL, 0, NULL, NULL);
+    if(str_mb_len > 0) {
+      str_mb = malloc(str_mb_len * sizeof(wchar_t));
+      if(str_mb) {
+        if(WideCharToMultiByte(codepage, 0, str_w, -1,
+                               str_mb, str_mb_len, NULL, FALSE) == 0) {
+          free(str_mb);
           return NULL;
         }
       }
     }
   }
 
-  return str_utf8;
+  return str_mb;
 }
 
 #endif /* USE_WIN32_IDN || ((USE_WINDOWS_SSPI || USE_WIN32_LDAP) && UNICODE) */

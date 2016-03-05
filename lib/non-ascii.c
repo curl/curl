@@ -22,18 +22,22 @@
 
 #include "curl_setup.h"
 
-#ifdef CURL_DOES_CONVERSIONS
-
 #include <curl/curl.h>
 
 #include "non-ascii.h"
+
+#ifdef CURL_DOES_CONVERSIONS
 #include "formdata.h"
 #include "sendf.h"
 #include "urldata.h"
+#endif /* CURL_DOES_CONVERSIONS */
 
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
+
+
+#ifdef CURL_DOES_CONVERSIONS
 
 #ifdef HAVE_ICONV
 #include <iconv.h>
@@ -336,3 +340,67 @@ CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form)
 }
 
 #endif /* CURL_DOES_CONVERSIONS */
+
+#if defined(USE_WIN32_IDN) || ((defined(USE_WINDOWS_SSPI) || \
+                                defined(USE_WIN32_LDAP)) && defined(UNICODE))
+#if (CURL_SIZEOF_CURL_OFF_T == 4)
+#  define CURL_OFF_T_MAX  CURL_OFF_T_C(0x7FFFFFFF)
+#elif (CURL_SIZEOF_CURL_OFF_T == 8)
+#  define CURL_OFF_T_MAX  CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+#elif (CURL_SIZEOF_CURL_OFF_T == 16)
+#  define CURL_OFF_T_MAX  CURL_OFF_T_C(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+#else
+#  error "CURL_SIZEOF_CURL_OFF_T size unknown"
+#endif
+/* utf8_strict_codepoint_count:
+Count the number of Unicode codepoints encoded in a UTF-8 string.
+
+Note that a UTF-8 BOM is a codepoint and is counted as such.
+
+This function also tests for valid UTF-8 in accordance with the Unicode
+Standard, Section Conformance 3.9, Table 3-7, Well-Formed UTF-8 Byte Sequences.
+http://www.unicode.org/versions/Unicode7.0.0/ch03.pdf#G7404
+
+The UTF-8 conformance in this function must remain strict, its purpose is to
+test for exactly that. If we encounter any byte sequence that is not
+well-formed then we error.
+
+Success: (>= 0) The number of Unicode codepoints encoded in UTF-8 string 'str'.
+Failure: (-1) 'str' is NULL or points to invalid UTF-8.
+*/
+curl_off_t utf8_strict_codepoint_count(const char *str)
+{
+  const unsigned char *ch = (const unsigned char*)str;
+  const curl_off_t error = -1;
+  curl_off_t count = 0;
+
+  if(!ch)
+    return error;
+
+  for(; *ch; ++ch, ++count) {
+    unsigned char first = *ch; /* first byte */
+    if(count == CURL_OFF_T_MAX)
+      return error;
+    if(*ch <= 0x7F)
+      continue;
+    if(*ch < 0xC2 || *ch > 0xF4)
+      return error;
+    ++ch; /* second byte */
+    if(*ch < (first == 0xE0 ? 0xA0 : (first == 0xF0 ? 0x90 : 0x80)) ||
+       *ch > (first == 0xED ? 0x9F : (first == 0xF4 ? 0x8F : 0xBF)))
+      return error;
+    if(first <= 0xDF)
+      continue;
+    ++ch; /* third byte */
+    if(*ch < 0x80 || *ch > 0xBF)
+      return error;
+    if(first <= 0xEF)
+      continue;
+    ++ch; /* fourth byte */
+    if(*ch < 0x80 || *ch > 0xBF)
+      return error;
+  }
+
+  return count;
+}
+#endif /* USE_WIN32_IDN || ((USE_WINDOWS_SSPI || USE_WIN32_LDAP) && UNICODE) */

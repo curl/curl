@@ -74,8 +74,8 @@ void idn_free (void *ptr);
 #define idn_free(x) (free)(x)
 #endif
 #elif defined(USE_WIN32_IDN)
-/* prototype for curl_win32_idn_to_ascii() */
-int curl_win32_idn_to_ascii(const char *in, char **out);
+/* prototype for curl_win32_idn_to_punycode() */
+int curl_win32_idn_to_punycode(const char *in, char **out);
 #endif  /* USE_LIBIDN */
 
 #include "urldata.h"
@@ -3796,7 +3796,7 @@ static void fix_hostname(struct SessionHandle *data,
    * Check name for non-ASCII and convert hostname to ACE form.
    *************************************************************/
     char *ace_hostname = NULL;
-    int rc = curl_win32_idn_to_ascii(host->name, &ace_hostname);
+    int rc = curl_win32_idn_to_punycode(host->name, &ace_hostname);
     if(rc == 0)
       infof(data, "Failed to convert %s to ACE;\n",
             host->name);
@@ -3823,8 +3823,7 @@ static void free_fixed_hostname(struct hostname *host)
     host->encalloc = NULL;
   }
 #elif defined(USE_WIN32_IDN)
-  free(host->encalloc); /* must be freed withidn_free() since this was
-                           allocated by curl_win32_idn_to_ascii */
+  free(host->encalloc);
   host->encalloc = NULL;
 #else
   (void)host;
