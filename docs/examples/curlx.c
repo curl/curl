@@ -228,8 +228,8 @@ static int ssl_app_verify_callback(X509_STORE_CTX *ctx, void *arg)
    - an application verification callback (the function above)
 */
 
-static CURLcode sslctxfun(CURL * curl, void * sslctx, void * parm) {
-
+static CURLcode sslctxfun(CURL * curl, void * sslctx, void * parm)
+{
   sslctxparm * p = (sslctxparm *) parm;
   SSL_CTX * ctx = (SSL_CTX *) sslctx;
 
@@ -255,11 +255,8 @@ static CURLcode sslctxfun(CURL * curl, void * sslctx, void * parm) {
                       sk_X509_value(p->ca, sk_X509_num(p->ca)-1));
 
   SSL_CTX_set_verify_depth(ctx, 2);
-
   SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ZERO_NULL);
-
   SSL_CTX_set_cert_verify_callback(ctx, ssl_app_verify_callback, parm);
-
 
   return CURLE_OK;
   err:
@@ -268,8 +265,8 @@ static CURLcode sslctxfun(CURL * curl, void * sslctx, void * parm) {
 
 }
 
-int main(int argc, char **argv) {
-
+int main(int argc, char **argv)
+{
   BIO* in=NULL;
   BIO* out=NULL;
 
@@ -305,8 +302,6 @@ int main(int argc, char **argv) {
   OpenSSL_add_all_ciphers();
   OpenSSL_add_all_digests();
   ERR_load_crypto_strings();
-
-
 
   while(*args && *args[0] == '-') {
     if(!strcmp (*args, "-in")) {
@@ -384,8 +379,6 @@ int main(int argc, char **argv) {
     goto err;
   }
 
-
-
   /* set input */
 
   if((in=BIO_new(BIO_s_file())) == NULL) {
@@ -421,8 +414,6 @@ int main(int argc, char **argv) {
     BIO_printf(p.errorbio, "Cannot init curl lib\n");
     goto err;
   }
-
-
 
   if(!(p12bio = BIO_new_file(p.p12file , "rb"))) {
     BIO_printf(p.errorbio, "Error opening P12 file %s\n", p.p12file);
