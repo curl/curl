@@ -325,26 +325,43 @@ mbedtls_connect_step1(struct connectdata *conn,
                                  &mbedtls_x509_crt_profile_fr);
 
   switch(data->set.ssl.version) {
+  case CURL_SSLVERSION_DEFAULT:
+  case CURL_SSLVERSION_TLSv1:
+    mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
+                                 MBEDTLS_SSL_MINOR_VERSION_1);
+    infof(data, "mbedTLS: Set min SSL version to TLS 1.0\n");
+    break;
   case CURL_SSLVERSION_SSLv3:
     mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                  MBEDTLS_SSL_MINOR_VERSION_0);
-    infof(data, "mbedTLS: Forced min. SSL Version to be SSLv3\n");
+    mbedtls_ssl_conf_max_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
+                                 MBEDTLS_SSL_MINOR_VERSION_0);
+    infof(data, "mbedTLS: Set SSL version to SSLv3\n");
     break;
   case CURL_SSLVERSION_TLSv1_0:
     mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                  MBEDTLS_SSL_MINOR_VERSION_1);
-    infof(data, "mbedTLS: Forced min. SSL Version to be TLS 1.0\n");
+    mbedtls_ssl_conf_max_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
+                                 MBEDTLS_SSL_MINOR_VERSION_1);
+    infof(data, "mbedTLS: Set SSL version to TLS 1.0\n");
     break;
   case CURL_SSLVERSION_TLSv1_1:
     mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                  MBEDTLS_SSL_MINOR_VERSION_2);
-    infof(data, "mbedTLS: Forced min. SSL Version to be TLS 1.1\n");
+    mbedtls_ssl_conf_max_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
+                                 MBEDTLS_SSL_MINOR_VERSION_2);
+    infof(data, "mbedTLS: Set SSL version to TLS 1.1\n");
     break;
   case CURL_SSLVERSION_TLSv1_2:
     mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                  MBEDTLS_SSL_MINOR_VERSION_3);
-    infof(data, "mbedTLS: Forced min. SSL Version to be TLS 1.2\n");
+    mbedtls_ssl_conf_max_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
+                                 MBEDTLS_SSL_MINOR_VERSION_3);
+    infof(data, "mbedTLS: Set SSL version to TLS 1.2\n");
     break;
+  default:
+    failf(data, "mbedTLS: Unsupported SSL protocol version");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   mbedtls_ssl_conf_authmode(&connssl->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
