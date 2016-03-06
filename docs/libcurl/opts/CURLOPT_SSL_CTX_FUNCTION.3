@@ -59,6 +59,7 @@ NULL
 .SH PROTOCOLS
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .SH EXAMPLE
+.nf
 /* OpenSSL specific */
 
 #include <openssl/ssl.h>
@@ -130,7 +131,7 @@ int main(void)
   curl_global_cleanup();
   return rv;
 }
-
+.fi
 .SH AVAILABILITY
 Added in 7.11.0 for OpenSSL. Added in 7.42.0 for wolfSSL/CyaSSL. Other SSL
 backends not supported.
