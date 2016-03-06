@@ -53,7 +53,7 @@ rem ***************************************************************************
   if errorlevel 1 (
     rem It isn't so check we have it installed and set the path if it is
     if exist "%SystemDrive%\Perl" (
-      set "PATH=%PATH%;%SystemDrive%\Perl\bin"
+      set "PATH=%SystemDrive%\Perl\bin;%PATH%"
     ) else (
       if exist "%SystemDrive%\Perl64" (
         set "PATH=%SystemDrive%\Perl64\bin;%PATH%"
