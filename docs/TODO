@@ -69,23 +69,23 @@
  7. SMTP
  7.1 Pipelining
  7.2 Enhanced capability support
- 
+
  8. POP3
  8.1 Pipelining
  8.2 Enhanced capability support
- 
+
  9. IMAP
  9.1 Enhanced capability support
- 
+
  10. LDAP
  10.1 SASL based authentication mechanisms
- 
+
  11. SMB
  11.1 File listing support
  11.2 Honor file timestamps
  11.3 Use NTLMv2
  11.4 Create remote directories
- 
+
  12. New protocols
  12.1 RSYNC
 
@@ -111,8 +111,8 @@
  16. SASL
  16.1 Other authentication mechanisms
  16.2 Add QOP support to GSSAPI authentication
- 
- 17. Client
+
+ 17. Command line tool
  17.1 sync
  17.2 glob posts
  17.3 prevent file overwriting
@@ -124,6 +124,7 @@
  17.9 Choose the name of file in braces for complex URLs
  17.10 improve how curl works in a windows console window
  17.11 -w output to stderr
+ 17.12 keep running, read instructions from pipe/socket
 
  18. Build
  18.1 roffit
@@ -429,7 +430,7 @@ This is not detailed in any FTP specification.
  For example:
 
  http://test:pass;auth=NTLM@example.com would be equivalent to specifying --user
- test:pass;auth=NTLM or --user test:pass --ntlm from the command line. 
+ test:pass;auth=NTLM or --user test:pass --ntlm from the command line.
 
  Additionally this should be implemented for proxy base URLs as well.
 
@@ -650,7 +651,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  Add support for other authentication mechanisms such as OLP,
  GSS-SPNEGO and others.
- 
+
 16.2 Add QOP support to GSSAPI authentication
 
  Currently the GSSAPI authentication only supports the default QOP of auth
@@ -658,7 +659,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  with integrity protection) and auth-conf (Authentication with integrity and
  privacy protection).
 
-17. Client
+17. Command line tool
 
 17.1 sync
 
@@ -746,6 +747,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  instead. Proposed name: --write-stderr. See
  https://github.com/curl/curl/issues/613
 
+17.12 keep running, read instructions from pipe/socket
+
+ Provide an option that makes curl not exit after the last URL (or even work
+ without a given URL), and then make it read instructions passed on a pipe or
+ over a socket to make further instructions so that a second subsequent curl
+ invoke can talk to the still running instance and ask for transfers to get
+ done, and thus maintain its connection pool, DNS cache and more.
 
 18. Build
 
