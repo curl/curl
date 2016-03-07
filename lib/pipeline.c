@@ -323,10 +323,11 @@ CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
 static bool pipe_head(struct SessionHandle *data,
                       struct curl_llist *pipeline)
 {
-  struct curl_llist_element *curr = pipeline->head;
-  if(curr)
-    return (curr->ptr == data) ? TRUE : FALSE;
-
+  if(pipeline) {
+    struct curl_llist_element *curr = pipeline->head;
+    if(curr)
+      return (curr->ptr == data) ? TRUE : FALSE;
+  }
   return FALSE;
 }
 
