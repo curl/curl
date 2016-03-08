@@ -121,6 +121,14 @@
 #define OPENSSL_load_builtin_modules(x)
 #endif
 
+#if defined(LIBRESSL_VERSION_NUMBER)
+#define OSSL_PACKAGE "LibreSSL"
+#elif defined(OPENSSL_IS_BORINGSSL)
+#define OSSL_PACKAGE "BoringSSL"
+#else
+#define OSSL_PACKAGE "OpenSSL"
+#endif
+
 /*
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have
@@ -343,7 +351,8 @@ int cert_stuff(struct connectdata *conn,
       if(SSL_CTX_use_certificate_chain_file(ctx,
                                             cert_file) != 1) {
         failf(data,
-              "could not load PEM client certificate, OpenSSL error %s, "
+              "could not load PEM client certificate, " OSSL_PACKAGE
+              " error %s, "
               "(no key found, wrong pass phrase, or wrong file format?)",
               ERR_error_string(ERR_get_error(), NULL) );
         return 0;
@@ -358,7 +367,8 @@ int cert_stuff(struct connectdata *conn,
                                       cert_file,
                                       file_type) != 1) {
         failf(data,
-              "could not load ASN1 client certificate, OpenSSL error %s, "
+              "could not load ASN1 client certificate, " OSSL_PACKAGE
+              " error %s, "
               "(no key found, wrong pass phrase, or wrong file format?)",
               ERR_error_string(ERR_get_error(), NULL) );
         return 0;
@@ -443,7 +453,8 @@ int cert_stuff(struct connectdata *conn,
       if(!PKCS12_parse(p12, data->set.str[STRING_KEY_PASSWD], &pri, &x509,
                        &ca)) {
         failf(data,
-              "could not parse PKCS12 file, check password, OpenSSL error %s",
+              "could not parse PKCS12 file, check password, " OSSL_PACKAGE
+              " error %s",
               ERR_error_string(ERR_get_error(), NULL) );
         PKCS12_free(p12);
         return 0;
@@ -453,7 +464,8 @@ int cert_stuff(struct connectdata *conn,
 
       if(SSL_CTX_use_certificate(ctx, x509) != 1) {
         failf(data,
-              "could not load PKCS12 client certificate, OpenSSL error %s",
+              "could not load PKCS12 client certificate, " OSSL_PACKAGE
+              " error %s",
               ERR_error_string(ERR_get_error(), NULL) );
         goto fail;
       }
@@ -538,7 +550,8 @@ int cert_stuff(struct connectdata *conn,
           UI_METHOD *ui_method =
             UI_create_method((char *)"cURL user interface");
           if(!ui_method) {
-            failf(data, "unable do create OpenSSL user-interface method");
+            failf(data, "unable do create " OSSL_PACKAGE
+                  " user-interface method");
             return 0;
           }
           UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
@@ -919,7 +932,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
         default:
           /* openssl/ssl.h says "look at error stack/return value/errno" */
           sslerror = ERR_get_error();
-          failf(conn->data, "SSL read: %s, errno %d",
+          failf(conn->data, OSSL_PACKAGE " SSL read: %s, errno %d",
                 ERR_error_string(sslerror, buf),
                 SOCKERRNO);
           done = 1;
@@ -1643,7 +1656,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     break;
   case CURL_SSLVERSION_SSLv2:
 #ifdef OPENSSL_NO_SSL2
-    failf(data, "OpenSSL was built without SSLv2 support");
+    failf(data, OSSL_PACKAGE " was built without SSLv2 support");
     return CURLE_NOT_BUILT_IN;
 #else
 #ifdef USE_TLS_SRP
@@ -1656,7 +1669,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #endif
   case CURL_SSLVERSION_SSLv3:
 #ifdef OPENSSL_NO_SSL3_METHOD
-    failf(data, "OpenSSL was built without SSLv3 support");
+    failf(data, OSSL_PACKAGE " was built without SSLv3 support");
     return CURLE_NOT_BUILT_IN;
 #else
 #ifdef USE_TLS_SRP
@@ -2969,7 +2982,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
 size_t Curl_ossl_version(char *buffer, size_t size)
 {
 #ifdef OPENSSL_IS_BORINGSSL
-  return snprintf(buffer, size, "BoringSSL");
+  return snprintf(buffer, size, OSSL_PACKAGE);
 #else /* OPENSSL_IS_BORINGSSL */
   char sub[3];
   unsigned long ssleay_value;
@@ -2997,12 +3010,8 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   }
 
   return snprintf(buffer, size, "%s/%lx.%lx.%lx%s",
-#ifdef LIBRESSL_VERSION_NUMBER
-                  "LibreSSL"
-#else
-                  "OpenSSL"
-#endif
-                  , (ssleay_value>>28)&0xf,
+                  OSSL_PACKAGE,
+                  (ssleay_value>>28)&0xf,
                   (ssleay_value>>20)&0xff,
                   (ssleay_value>>12)&0xff,
                   sub);
