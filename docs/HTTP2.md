@@ -86,7 +86,9 @@ in HTTP 1.1 style. This allows applications to work unmodified.
 curl tool
 ---------
 
-curl offers the `--http2` command line option to enable use of HTTP/2
+curl offers the `--http2` command line option to enable use of HTTP/2.
+
+Since 7.47.0, the curl tool enables HTTP/2 by default for HTTPS connections.
 
 HTTP Alternative Services
 -------------------------
