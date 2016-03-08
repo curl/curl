@@ -158,6 +158,30 @@ const struct Curl_handler Curl_handler_imaps = {
   CURLPROTO_IMAPS,                  /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
 };
+
+/*
+ * IMAP Upgraded to TLS protocol handler
+ */
+const struct Curl_handler Curl_handler_imap_tls = {
+  "IMAP",                           /* scheme */
+  imap_setup_connection,            /* setup_connection */
+  imap_do,                          /* do_it */
+  imap_done,                        /* done */
+  ZERO_NULL,                        /* do_more */
+  imap_connect,                     /* connect_it */
+  imap_multi_statemach,             /* connecting */
+  imap_doing,                       /* doing */
+  imap_getsock,                     /* proto_getsock */
+  imap_getsock,                     /* doing_getsock */
+  ZERO_NULL,                        /* domore_getsock */
+  ZERO_NULL,                        /* perform_getsock */
+  imap_disconnect,                  /* disconnect */
+  ZERO_NULL,                        /* readwrite */
+  PORT_IMAP,                        /* defport */
+  CURLPROTO_IMAP,                   /* protocol */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
+};
+
 #endif
 
 #ifndef CURL_DISABLE_HTTP
@@ -225,12 +249,12 @@ static const struct SASLproto saslimap = {
 
 
 #ifdef USE_SSL
-static void imap_to_imaps(struct connectdata *conn)
+static void imap_to_imap_tls(struct connectdata *conn)
 {
-  conn->handler = &Curl_handler_imaps;
+  conn->handler = &Curl_handler_imap_tls;
 }
 #else
-#define imap_to_imaps(x) Curl_nop_stmt
+#define imap_to_imap_tls(x) Curl_nop_stmt
 #endif
 
 /***********************************************************************
@@ -511,7 +535,7 @@ static CURLcode imap_perform_upgrade_tls(struct connectdata *conn)
       state(conn, IMAP_UPGRADETLS);
 
     if(imapc->ssldone) {
-      imap_to_imaps(conn);
+      imap_to_imap_tls(conn);
       result = imap_perform_capability(conn);
     }
   }
