@@ -811,6 +811,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   unsigned int curlfds;
   struct pollfd *ufds = NULL;
   long timeout_internal;
+  int retcode = 0;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -903,18 +904,20 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   }
 
   if(nfds) {
+    int pollrc;
     /* wait... */
-    infof(data, "Curl_poll(%d ds, %d ms)\n", nfds, timeout_ms);
-    i = Curl_poll(ufds, nfds, timeout_ms);
+    pollrc = Curl_poll(ufds, nfds, timeout_ms);
+    DEBUGF(infof(data, "Curl_poll(%d ds, %d ms) == %d\n",
+                 nfds, timeout_ms, pollrc));
 
-    if(i) {
-      unsigned int j;
+    if(pollrc > 0) {
+      retcode = pollrc;
       /* copy revents results from the poll to the curl_multi_wait poll
          struct, the bit values of the actual underlying poll() implementation
          may not be the same as the ones in the public libcurl API! */
-      for(j = 0; j < extra_nfds; j++) {
+      for(i = 0; i < extra_nfds; i++) {
         unsigned short mask = 0;
-        unsigned r = ufds[curlfds + j].revents;
+        unsigned r = ufds[curlfds + i].revents;
 
         if(r & POLLIN)
           mask |= CURL_WAIT_POLLIN;
@@ -923,16 +926,14 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
         if(r & POLLPRI)
           mask |= CURL_WAIT_POLLPRI;
 
-        extra_fds[j].revents = mask;
+        extra_fds[i].revents = mask;
       }
     }
   }
-  else
-    i = 0;
 
   free(ufds);
   if(ret)
-    *ret = i;
+    *ret = retcode;
   return CURLM_OK;
 }
 
