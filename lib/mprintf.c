@@ -460,22 +460,24 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
       if(flags & FLAGS_WIDTHPARAM) {
         /* we have the width specified from a parameter, so we make that
            parameter's info setup properly */
-        vto[i].width = width - 1;
-        i = width - 1;
-        vto[i].type = FORMAT_WIDTH;
-        vto[i].flags = FLAGS_NEW;
-        vto[i].precision = vto[i].width = 0; /* can't use width or precision
-                                                of width! */
+        long k = width - 1;
+        vto[i].width = k;
+        vto[k].type = FORMAT_WIDTH;
+        vto[k].flags = FLAGS_NEW;
+        /* can't use width or precision of width! */
+        vto[k].width = 0;
+        vto[k].precision = 0;
       }
       if(flags & FLAGS_PRECPARAM) {
         /* we have the precision specified from a parameter, so we make that
            parameter's info setup properly */
-        vto[i].precision = precision - 1;
-        i = precision - 1;
-        vto[i].type = FORMAT_WIDTH;
-        vto[i].flags = FLAGS_NEW;
-        vto[i].precision = vto[i].width = 0; /* can't use width or precision
-                                                of width! */
+        long k = precision - 1;
+        vto[i].precision = k;
+        vto[k].type = FORMAT_WIDTH;
+        vto[k].flags = FLAGS_NEW;
+        /* can't use width or precision of width! */
+        vto[k].width = 0;
+        vto[k].precision = 0;
       }
       *endpos++ = fmt + 1; /* end of this sequence */
     }
@@ -483,11 +485,15 @@ static long dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
   /* Read the arg list parameters into our data list */
   for(i=0; i<max_param; i++) {
-    if((i + 1 < max_param) && (vto[i + 1].type == FORMAT_WIDTH)) {
-      /* Width/precision arguments must be read before the main argument
-       * they are attached to
-       */
-      vto[i + 1].data.num.as_signed = (mp_intmax_t)va_arg(arglist, int);
+    /* Width/precision arguments must be read before the main argument
+       they are attached to */
+    if(vto[i].flags & FLAGS_WIDTHPARAM) {
+      vto[vto[i].width].data.num.as_signed =
+        (mp_intmax_t)va_arg(arglist, int);
+    }
+    if(vto[i].flags & FLAGS_PRECPARAM) {
+      vto[vto[i].precision].data.num.as_signed =
+        (mp_intmax_t)va_arg(arglist, int);
     }
 
     switch (vto[i].type) {
@@ -640,16 +646,30 @@ static int dprintf_formatf(
     p = &vto[param];
 
     /* pick up the specified width */
-    if(p->flags & FLAGS_WIDTHPARAM)
+    if(p->flags & FLAGS_WIDTHPARAM) {
       width = (long)vto[p->width].data.num.as_signed;
+      param_num++; /* since the width is extracted from a parameter, we
+                      must skip that to get to the next one properly */
+      if(width < 0) {
+        /* "A negative field width is taken as a '-' flag followed by a
+           positive field width." */
+        width = -width;
+        p->flags |= FLAGS_LEFT;
+        p->flags &= ~FLAGS_PAD_NIL;
+      }
+    }
     else
       width = p->width;
 
     /* pick up the specified precision */
     if(p->flags & FLAGS_PRECPARAM) {
       prec = (long)vto[p->precision].data.num.as_signed;
-      param_num++; /* since the precision is extraced from a parameter, we
+      param_num++; /* since the precision is extracted from a parameter, we
                       must skip that to get to the next one properly */
+      if(prec < 0)
+        /* "A negative precision is taken as if the precision were
+           omitted." */
+        prec = -1;
     }
     else if(p->flags & FLAGS_PREC)
       prec = p->precision;
@@ -804,7 +824,7 @@ static int dprintf_formatf(
         else
           len = strlen(str);
 
-        width -= (long)len;
+        width -= (len > LONG_MAX) ? LONG_MAX : (long)len;
 
         if(p->flags & FLAGS_ALT)
           OUTCHAR('"');

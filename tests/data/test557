@@ -39,6 +39,7 @@ All curl_mprintf() signed int tests OK!
 All curl_mprintf() unsigned long tests OK!
 All curl_mprintf() signed long tests OK!
 All curl_mprintf() curl_off_t tests OK!
+All curl_mprintf() strings tests OK!
 </stdout>
 </verify>
 
