@@ -456,7 +456,16 @@ Curl_cookie_add(struct SessionHandle *data,
         while(*whatptr && ISBLANK(*whatptr))
           whatptr++;
 
-        if(!len) {
+        if(!co->name && sep) {
+          /* The very first name/value pair is the actual cookie name */
+          co->name = strdup(name);
+          co->value = strdup(whatptr);
+          if(!co->name || !co->value) {
+            badcookie = TRUE;
+            break;
+          }
+        }
+        else if(!len) {
           /* this was a "<name>=" with no content, and we must allow
              'secure' and 'httponly' specified this weirdly */
           done = TRUE;
@@ -546,14 +555,6 @@ Curl_cookie_add(struct SessionHandle *data,
         else if(Curl_raw_equal("expires", name)) {
           strstore(&co->expirestr, whatptr);
           if(!co->expirestr) {
-            badcookie = TRUE;
-            break;
-          }
-        }
-        else if(!co->name) {
-          co->name = strdup(name);
-          co->value = strdup(whatptr);
-          if(!co->name || !co->value) {
             badcookie = TRUE;
             break;
           }
