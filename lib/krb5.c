@@ -2,7 +2,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2015 Daniel Stenberg
+ * Copyright (c) 2004 - 2016 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,6 @@
 /* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
-
-#define LOCAL_ADDR (&conn->local_addr)
-#define REMOTE_ADDR conn->ip_addr->ai_addr
 
 static int
 krb5_init(void *app_data)
@@ -162,19 +159,19 @@ krb5_auth(void *app_data, struct connectdata *conn)
   gss_ctx_id_t *context = app_data;
   struct gss_channel_bindings_struct chan;
   size_t base64_sz = 0;
+  struct sockaddr_in **remote_addr =
+    (struct sockaddr_in **)&conn->ip_addr->ai_addr;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
-                 (struct sockaddr *)LOCAL_ADDR, &l) < 0)
+                 (struct sockaddr *)&conn->local_addr, &l) < 0)
     perror("getsockname()");
 
   chan.initiator_addrtype = GSS_C_AF_INET;
   chan.initiator_address.length = l - 4;
-  chan.initiator_address.value =
-    &((struct sockaddr_in *)LOCAL_ADDR)->sin_addr.s_addr;
+  chan.initiator_address.value = &conn->local_addr.sin_addr.s_addr;
   chan.acceptor_addrtype = GSS_C_AF_INET;
   chan.acceptor_address.length = l - 4;
-  chan.acceptor_address.value =
-    &((struct sockaddr_in *)REMOTE_ADDR)->sin_addr.s_addr;
+  chan.acceptor_address.value = &(*remote_addr)->sin_addr.s_addr;
   chan.application_data.length = 0;
   chan.application_data.value = NULL;
 
