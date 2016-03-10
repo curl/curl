@@ -79,6 +79,11 @@ void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
 
 bool Curl_ossl_cert_status_request(void);
 
+bool Curl_ossl_session_load(struct connectdata *conn, char *sess_file,
+                            void **ssl_sessionid);
+void Curl_ossl_session_save(struct connectdata *conn, char *sess_file,
+                            void *ssl_sessionid);
+
 /* Set the API backend definition to OpenSSL */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_OPENSSL
 
@@ -112,6 +117,8 @@ bool Curl_ossl_cert_status_request(void);
 #define curlssl_sha256sum(a,b,c,d) Curl_ossl_sha256sum(a,b,c,d)
 #endif
 #define curlssl_cert_status_request() Curl_ossl_cert_status_request()
+#define curlssl_session_load(x,y,z) Curl_ossl_session_load(x,y,z)
+#define curlssl_session_save(x,y,z) Curl_ossl_session_save(x,y,z)
 
 #define DEFAULT_CIPHER_SELECTION \
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"

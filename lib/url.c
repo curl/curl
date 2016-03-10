@@ -2349,6 +2349,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.ssl.sessionid = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
 
+  case CURLOPT_SSL_FILE_SESSIONID:
+    result = setstropt(&data->set.str[STRING_SSL_FILE_SESSIONID],
+                       va_arg(param, char *));
+    break;
+
+
 #ifdef USE_LIBSSH2
     /* we only include SSH options if explicitly built to support SSH */
   case CURLOPT_SSH_AUTH_TYPES:

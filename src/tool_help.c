@@ -150,6 +150,7 @@ static const char *const helptext[] = {
   " -N, --no-buffer     Disable buffering of the output stream",
   "     --no-keepalive  Disable keepalive use on the connection",
   "     --no-npn        Disable the NPN TLS extension (H)",
+  "     --file-sessionid  Persist SSL session-ID in a file (SSL)",
   "     --no-sessionid  Disable SSL session-ID reusing (SSL)",
   "     --noproxy       List of hosts which do not use proxy",
   "     --ntlm          Use HTTP NTLM authentication (H)",

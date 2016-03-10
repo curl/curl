@@ -380,6 +380,10 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
   if(SSLSESSION_SHARED(data))
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 
+  if(no_match) {
+    return curlssl_session_load(conn, data->set.str[STRING_SSL_FILE_SESSIONID],
+                                ssl_sessionid);
+  }
   return no_match;
 }
 
@@ -498,6 +502,8 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
   }
 
+  curlssl_session_save(conn, data->set.str[STRING_SSL_FILE_SESSIONID],
+                       store->sessionid);
   return CURLE_OK;
 }
 

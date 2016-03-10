@@ -3064,4 +3064,49 @@ bool Curl_ossl_cert_status_request(void)
   return FALSE;
 #endif
 }
+
+static void session_file(struct connectdata *conn, char *path,
+                         char *file, int size)
+{
+  char user[64];
+  getlogin_r(user, sizeof(user));
+  /* <path>.<user>_<hostname>_<port>.session */
+  snprintf(file, size, "%s.%s_%s_%d.session", path,
+           user, conn->host.name, conn->remote_port);
+}
+
+bool Curl_ossl_session_load(struct connectdata *conn, char *sess_file,
+                            void **ssl_sessionid)
+{
+  if(sess_file) {
+    BIO *stmp;
+    char file[512];
+    session_file(conn, sess_file, file, sizeof(file));
+    stmp = BIO_new_file(file, "r");
+    if(stmp) {
+      *ssl_sessionid = PEM_read_bio_SSL_SESSION(stmp, NULL, 0, NULL);
+      BIO_free(stmp);
+      if(*ssl_sessionid) {
+        return FALSE;
+      }
+    }
+  }
+  return TRUE;
+}
+
+void Curl_ossl_session_save(struct connectdata *conn, char *sess_file,
+                            void *ssl_sessionid)
+{
+  if(sess_file) {
+    BIO *stmp;
+    char file[512];
+    session_file(conn, sess_file, file, sizeof(file));
+    stmp = BIO_new_file(file, "w");
+    if(stmp) {
+      chmod(file, S_IRUSR|S_IWUSR); /* 0600 */
+      PEM_write_bio_SSL_SESSION(stmp, ssl_sessionid);
+      BIO_free(stmp);
+    }
+  }
+}
 #endif /* USE_OPENSSL */

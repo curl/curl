@@ -184,6 +184,7 @@ struct OperationConfig {
   int ftp_filemethod;
   long tftp_blksize;        /* TFTP BLKSIZE option */
   bool tftp_no_options;     /* do not send TFTP options requests */
+  char *file_sessionid;     /* set sessionid file name */
   bool ignorecl;            /* --ignore-content-length */
   bool disable_sessionid;
 
