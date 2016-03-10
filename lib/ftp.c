@@ -4273,16 +4273,17 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       the first condition in the if() right here, is there just in case
       someone decides to set path to NULL one day
    */
-    if(data->state.path &&
-       data->state.path[0] &&
-       (data->state.path[strlen(data->state.path) - 1] != '/') )
-      filename = data->state.path;  /* this is a full file path */
-      /*
+    if(path_to_use[0] &&
+       (path_to_use[strlen(path_to_use) - 1] != '/') )
+      filename = path_to_use;  /* this is a full file path */
+    /*
+      else {
         ftpc->file is not used anywhere other than for operations on a file.
         In other words, never for directory operations.
         So we can safely leave filename as NULL here and use it as a
         argument in dir/file decisions.
-      */
+      }
+    */
     break;
 
   case FTPFILE_SINGLECWD:
