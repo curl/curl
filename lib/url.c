@@ -75,7 +75,7 @@ void idn_free (void *ptr);
 #endif
 #elif defined(USE_WIN32_IDN)
 /* prototype for curl_win32_idn_to_ascii() */
-int curl_win32_idn_to_ascii(const char *in, char **out);
+bool curl_win32_idn_to_ascii(const char *in, char **out);
 #endif  /* USE_LIBIDN */
 
 #include "urldata.h"
@@ -3803,15 +3803,14 @@ static void fix_hostname(struct SessionHandle *data,
    * Check name for non-ASCII and convert hostname to ACE form.
    *************************************************************/
     char *ace_hostname = NULL;
-    int rc = curl_win32_idn_to_ascii(host->name, &ace_hostname);
-    if(rc == 0)
-      infof(data, "Failed to convert %s to ACE;\n",
-            host->name);
-    else {
+
+    if(curl_win32_idn_to_ascii(host->name, &ace_hostname)) {
       host->encalloc = ace_hostname;
       /* change the name pointer to point to the encoded hostname */
       host->name = host->encalloc;
     }
+    else
+      infof(data, "Failed to convert %s to ACE;\n", host->name);
 #else
     infof(data, "IDN support not present, can't parse Unicode domains\n");
 #endif
