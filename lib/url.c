@@ -3775,33 +3775,29 @@ static void fix_hostname(struct SessionHandle *data,
        there's no use for it */
     host->name[len-1]=0;
 
+  /* Check name for non-ASCII and convert hostname to ACE form if we can */
   if(!is_ASCII_name(host->name)) {
 #ifdef USE_LIBIDN
-  /*************************************************************
-   * Check name for non-ASCII and convert hostname to ACE form.
-   *************************************************************/
-  if(stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
-    char *ace_hostname = NULL;
-    int rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);
-    infof (data, "Input domain encoded as `%s'\n",
-           stringprep_locale_charset ());
-    if(rc != IDNA_SUCCESS)
-      infof(data, "Failed to convert %s to ACE; %s\n",
-            host->name, Curl_idn_strerror(conn, rc));
-    else {
-      /* tld_check_name() displays a warning if the host name contains
-         "illegal" characters for this TLD */
-      (void)tld_check_name(data, ace_hostname);
+    if(stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
+      char *ace_hostname = NULL;
 
-      host->encalloc = ace_hostname;
-      /* change the name pointer to point to the encoded hostname */
-      host->name = host->encalloc;
+      int rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);
+      infof(data, "Input domain encoded as `%s'\n",
+            stringprep_locale_charset());
+      if(rc == IDNA_SUCCESS) {
+        /* tld_check_name() displays a warning if the host name contains
+           "illegal" characters for this TLD */
+        (void)tld_check_name(data, ace_hostname);
+
+        host->encalloc = ace_hostname;
+        /* change the name pointer to point to the encoded hostname */
+        host->name = host->encalloc;
+      }
+      else
+        infof(data, "Failed to convert %s to ACE; %s\n", host->name,
+              Curl_idn_strerror(conn, rc));
     }
-  }
 #elif defined(USE_WIN32_IDN)
-  /*************************************************************
-   * Check name for non-ASCII and convert hostname to ACE form.
-   *************************************************************/
     char *ace_hostname = NULL;
 
     if(curl_win32_idn_to_ascii(host->name, &ace_hostname)) {
