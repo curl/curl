@@ -940,14 +940,14 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   }
 
   /*
-    if the algorithm is "MD5" or unspecified (which then defaults to MD5):
+    If the algorithm is "MD5" or unspecified (which then defaults to MD5):
 
-    A1 = unq(username-value) ":" unq(realm-value) ":" passwd
+      A1 = unq(username-value) ":" unq(realm-value) ":" passwd
 
-    if the algorithm is "MD5-sess" then:
+    If the algorithm is "MD5-sess" then:
 
-    A1 = H( unq(username-value) ":" unq(realm-value) ":" passwd )
-         ":" unq(nonce-value) ":" unq(cnonce-value)
+      A1 = H( unq(username-value) ":" unq(realm-value) ":" passwd ) ":"
+            unq(nonce-value) ":" unq(cnonce-value)
   */
 
   md5this = (unsigned char *)
@@ -975,11 +975,11 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   /*
     If the "qop" directive's value is "auth" or is unspecified, then A2 is:
 
-      A2       = Method ":" digest-uri-value
+      A2 = Method ":" digest-uri-value
 
-          If the "qop" value is "auth-int", then A2 is:
+    If the "qop" value is "auth-int", then A2 is:
 
-      A2       = Method ":" digest-uri-value ":" H(entity-body)
+      A2 = Method ":" digest-uri-value ":" H(entity-body)
 
     (The "Method" value is the HTTP request method as specified in section
     5.1.1 of RFC 2616)
@@ -1039,7 +1039,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
     are copied as is from the server, escapes and all.  cnonce is generated
     with web-safe characters.  uri is already percent encoded.  nc is 8 hex
     characters.  algorithm and qop with standard values only contain web-safe
-    chracters.
+    characters.
   */
   userp_quoted = sasl_digest_string_quoted(userp);
   if(!userp_quoted)
