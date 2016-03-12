@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2014 - 2016 Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2014 - 2015, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
@@ -583,7 +583,7 @@ void Curl_sasl_digest_cleanup(struct digestdata *digest)
 *
 * userp   [in]     - The user name in the format User or Domain\User.
 * passdwp [in]     - The user's password.
-* ntlm    [in/out] - The ntlm data struct being used and modified.
+* ntlm    [in/out] - The NTLM data struct being used and modified.
 * outptr  [in/out] - The address where a pointer to newly allocated memory
 *                    holding the result will be stored upon completion.
 * outlen  [out]    - The length of the output message.
@@ -694,7 +694,7 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
 *
 * data     [in]     - The session handle.
 * type2msg [in]     - The base64 encoded type-2 message.
-* ntlm     [in/out] - The ntlm data struct being used and modified.
+* ntlm     [in/out] - The NTLM data struct being used and modified.
 *
 * Returns CURLE_OK on success.
 */
@@ -742,7 +742,7 @@ CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
 * data    [in]     - The session handle.
 * userp   [in]     - The user name in the format User or Domain\User.
 * passdwp [in]     - The user's password.
-* ntlm    [in/out] - The ntlm data struct being used and modified.
+* ntlm    [in/out] - The NTLM data struct being used and modified.
 * outptr  [in/out] - The address where a pointer to newly allocated memory
 *                    holding the result will be stored upon completion.
 * outlen  [out]    - The length of the output message.
@@ -811,11 +811,11 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
 /*
  * Curl_sasl_ntlm_cleanup()
  *
- * This is used to clean up the ntlm specific data.
+ * This is used to clean up the NTLM specific data.
  *
  * Parameters:
  *
- * ntlm    [in/out] - The ntlm data struct being cleaned up.
+ * ntlm    [in/out] - The NTLM data struct being cleaned up.
  *
  */
 void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)

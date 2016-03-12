@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1143,11 +1143,11 @@ void Curl_sasl_digest_cleanup(struct digestdata *digest)
 /*
  * Curl_sasl_ntlm_cleanup()
  *
- * This is used to clean up the ntlm specific data.
+ * This is used to clean up the NTLM specific data.
  *
  * Parameters:
  *
- * ntlm    [in/out] - The ntlm data struct being cleaned up.
+ * ntlm    [in/out] - The NTLM data struct being cleaned up.
  *
  */
 void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
@@ -1230,7 +1230,7 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
 #endif
 
 #if defined(USE_NTLM)
-  /* Cleanup the ntlm structure */
+  /* Cleanup the NTLM structure */
   if(authused == SASL_MECH_NTLM) {
     Curl_sasl_ntlm_cleanup(&conn->ntlm);
   }
