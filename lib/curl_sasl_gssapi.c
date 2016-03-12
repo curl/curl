@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2015, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2016, Steve Holme, <steve_holme@hotmail.com>.
  * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -74,7 +74,7 @@ char *Curl_sasl_build_gssapi_spn(const char *service, const char *instance)
  *                        is enabled.
  * chlg64      [in]     - Pointer to the optional base64 encoded challenge
  *                        message.
- * krb5        [in/out] - The gssapi data struct being used and modified.
+ * krb5        [in/out] - The Kerberos 5 data struct being used and modified.
  * outptr      [in/out] - The address where a pointer to newly allocated memory
  *                        holding the result will be stored upon completion.
  * outlen      [out]    - The length of the output message.
@@ -191,7 +191,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
  *
  * data    [in]     - The session handle.
  * chlg64  [in]     - Pointer to the optional base64 encoded challenge message.
- * krb5    [in/out] - The gssapi data struct being used and modified.
+ * krb5    [in/out] - The Kerberos 5 data struct being used and modified.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
@@ -365,11 +365,11 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
 /*
  * Curl_sasl_gssapi_cleanup()
  *
- * This is used to clean up the gssapi specific data.
+ * This is used to clean up the GSSAPI (Kerberos V5) specific data.
  *
  * Parameters:
  *
- * krb5     [in/out] - The kerberos 5 data struct being cleaned up.
+ * krb5     [in/out] - The Kerberos 5 data struct being cleaned up.
  *
  */
 void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5)
