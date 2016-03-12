@@ -304,7 +304,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
         chlg++;
 
       /* Extract a value=content pair */
-      if(!Curl_sasl_digest_get_pair(chlg, value, content, &chlg)) {
+      if(Curl_sasl_digest_get_pair(chlg, value, content, &chlg)) {
         if(Curl_raw_equal(value, "realm")) {
 
           /* Setup identity's domain and length */

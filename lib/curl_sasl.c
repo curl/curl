@@ -92,13 +92,8 @@ const struct {
 #endif
 
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)
-/*
- * Returns 0 on success and then the buffers are filled in fine.
- *
- * Non-zero means failure to parse.
- */
-int Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
-                              const char **endptr)
+bool Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
+                               const char **endptr)
 {
   int c;
   bool starts_with_quote = FALSE;
@@ -110,7 +105,7 @@ int Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
 
   if('=' != *str++)
     /* eek, no match */
-    return 1;
+    return FALSE;
 
   if('\"' == *str) {
     /* this starts with a quote so it must end with one as well! */
@@ -129,6 +124,7 @@ int Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
         continue;
       }
       break;
+
     case ',':
       if(!starts_with_quote) {
         /* this signals the end of the content if we didn't get a starting
@@ -137,11 +133,13 @@ int Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
         continue;
       }
       break;
+
     case '\r':
     case '\n':
       /* end of string */
       c = 0;
       continue;
+
     case '\"':
       if(!escape && starts_with_quote) {
         /* end of string */
@@ -150,14 +148,15 @@ int Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
       }
       break;
     }
+
     escape = FALSE;
     *content++ = *str;
   }
-  *content = 0;
 
+  *content = 0;
   *endptr = str;
 
-  return 0; /* all is fine! */
+  return TRUE;
 }
 #endif
 
@@ -780,7 +779,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
       chlg++;
 
     /* Extract a value=content pair */
-    if(!Curl_sasl_digest_get_pair(chlg, value, content, &chlg)) {
+    if(Curl_sasl_digest_get_pair(chlg, value, content, &chlg)) {
       if(Curl_raw_equal(value, "nonce")) {
         free(digest->nonce);
         digest->nonce = strdup(content);
