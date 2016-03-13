@@ -43,7 +43,7 @@
 #include "memdebug.h"
 
 /*
- * sasl_create_plain_message()
+ * Curl_auth_create_plain_message()
  *
  * This is used to generate an already encoded PLAIN message ready
  * for sending to the recipient.
@@ -59,10 +59,10 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode sasl_create_plain_message(struct SessionHandle *data,
-                                   const char *userp,
-                                   const char *passwdp,
-                                   char **outptr, size_t *outlen)
+CURLcode Curl_auth_create_plain_message(struct SessionHandle *data,
+                                        const char *userp,
+                                        const char *passwdp,
+                                        char **outptr, size_t *outlen)
 {
   CURLcode result;
   char *plainauth;
@@ -95,7 +95,7 @@ CURLcode sasl_create_plain_message(struct SessionHandle *data,
 }
 
 /*
- * sasl_create_login_message()
+ * Curl_auth_create_login_message()
  *
  * This is used to generate an already encoded LOGIN message containing the
  * user name or password ready for sending to the recipient.
@@ -110,9 +110,9 @@ CURLcode sasl_create_plain_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode sasl_create_login_message(struct SessionHandle *data,
-                                   const char *valuep, char **outptr,
-                                   size_t *outlen)
+CURLcode Curl_auth_create_login_message(struct SessionHandle *data,
+                                        const char *valuep, char **outptr,
+                                        size_t *outlen)
 {
   size_t vlen = strlen(valuep);
 
@@ -133,7 +133,7 @@ CURLcode sasl_create_login_message(struct SessionHandle *data,
 }
 
 /*
- * sasl_create_external_message()
+ * Curl_auth_create_external_message()
  *
  * This is used to generate an already encoded EXTERNAL message containing
  * the user name ready for sending to the recipient.
@@ -148,10 +148,10 @@ CURLcode sasl_create_login_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode sasl_create_external_message(struct SessionHandle *data,
-                                      const char *user, char **outptr,
-                                      size_t *outlen)
+CURLcode Curl_auth_create_external_message(struct SessionHandle *data,
+                                           const char *user, char **outptr,
+                                           size_t *outlen)
 {
   /* This is the same formatting as the login message */
-  return sasl_create_login_message(data, user, outptr, outlen);
+  return Curl_auth_create_login_message(data, user, outptr, outlen);
 }

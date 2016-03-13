@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -94,7 +94,7 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
     /* Generate our SPN */
-    neg_ctx->server_name = Curl_sasl_build_spn(
+    neg_ctx->server_name = Curl_auth_build_spn(
       proxy ? data->set.str[STRING_PROXY_SERVICE_NAME] :
       data->set.str[STRING_SERVICE_NAME],
       proxy ? conn->proxy.name : conn->host.name);

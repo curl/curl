@@ -41,7 +41,7 @@
 #include "memdebug.h"
 
 /*
- * sasl_decode_cram_md5_message()
+ * Curl_auth_decode_cram_md5_message()
  *
  * This is used to decode an already encoded CRAM-MD5 challenge message.
  *
@@ -54,8 +54,8 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
-                                      size_t *outlen)
+CURLcode Curl_auth_decode_cram_md5_message(const char *chlg64, char **outptr,
+                                           size_t *outlen)
 {
   CURLcode result = CURLE_OK;
   size_t chlg64len = strlen(chlg64);
@@ -71,7 +71,7 @@ CURLcode sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
 }
 
 /*
- * sasl_create_cram_md5_message()
+ * Curl_auth_create_cram_md5_message()
  *
  * This is used to generate an already encoded CRAM-MD5 response message ready
  * for sending to the recipient.
@@ -88,11 +88,11 @@ CURLcode sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode sasl_create_cram_md5_message(struct SessionHandle *data,
-                                      const char *chlg,
-                                      const char *userp,
-                                      const char *passwdp,
-                                      char **outptr, size_t *outlen)
+CURLcode Curl_auth_create_cram_md5_message(struct SessionHandle *data,
+                                           const char *chlg,
+                                           const char *userp,
+                                           const char *passwdp,
+                                           char **outptr, size_t *outlen)
 {
   CURLcode result = CURLE_OK;
   size_t chlglen = 0;

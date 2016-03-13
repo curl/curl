@@ -66,7 +66,7 @@
   }
 #endif /* !USE_WINDOWS_SSPI */
 
-bool Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
+bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
                                const char **endptr)
 {
   int c;
@@ -135,7 +135,7 @@ bool Curl_sasl_digest_get_pair(const char *str, char *value, char *content,
 
 #if !defined(USE_WINDOWS_SSPI)
 /* Convert md5 chunk to RFC2617 (section 3.1.3) -suitable ascii string*/
-static void sasl_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
+static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
                                      unsigned char *dest) /* 33 bytes */
 {
   int i;
@@ -144,7 +144,7 @@ static void sasl_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
 }
 
 /* Perform quoted-string escaping as described in RFC2616 and its errata */
-static char *sasl_digest_string_quoted(const char *source)
+static char *auth_digest_string_quoted(const char *source)
 {
   char *dest, *d;
   const char *s = source;
@@ -178,7 +178,7 @@ static char *sasl_digest_string_quoted(const char *source)
 /* Retrieves the value for a corresponding key from the challenge string
  * returns TRUE if the key could be found, FALSE if it does not exists
  */
-static bool sasl_digest_get_key_value(const char *chlg,
+static bool auth_digest_get_key_value(const char *chlg,
                                       const char *key,
                                       char *value,
                                       size_t max_val_len,
@@ -200,7 +200,7 @@ static bool sasl_digest_get_key_value(const char *chlg,
   return TRUE;
 }
 
-static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
+static CURLcode auth_digest_get_qop_values(const char *options, int *value)
 {
   char *tmp;
   char *token;
@@ -233,7 +233,7 @@ static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
 }
 
 /*
- * sasl_decode_digest_md5_message()
+ * auth_decode_digest_md5_message()
  *
  * This is used internally to decode an already encoded DIGEST-MD5 challenge
  * message into the seperate attributes.
@@ -252,7 +252,7 @@ static CURLcode sasl_digest_get_qop_values(const char *options, int *value)
  *
  * Returns CURLE_OK on success.
  */
-static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
+static CURLcode auth_decode_digest_md5_message(const char *chlg64,
                                                char *nonce, size_t nlen,
                                                char *realm, size_t rlen,
                                                char *alg, size_t alen,
@@ -275,27 +275,27 @@ static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Retrieve nonce string from the challenge */
-  if(!sasl_digest_get_key_value((char *) chlg, "nonce=\"", nonce, nlen,
+  if(!auth_digest_get_key_value((char *) chlg, "nonce=\"", nonce, nlen,
                                 '\"')) {
     free(chlg);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Retrieve realm string from the challenge */
-  if(!sasl_digest_get_key_value((char *) chlg, "realm=\"", realm, rlen,
+  if(!auth_digest_get_key_value((char *) chlg, "realm=\"", realm, rlen,
                                 '\"')) {
     /* Challenge does not have a realm, set empty string [RFC2831] page 6 */
     strcpy(realm, "");
   }
 
   /* Retrieve algorithm string from the challenge */
-  if(!sasl_digest_get_key_value((char *) chlg, "algorithm=", alg, alen, ',')) {
+  if(!auth_digest_get_key_value((char *) chlg, "algorithm=", alg, alen, ',')) {
     free(chlg);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Retrieve qop-options string from the challenge */
-  if(!sasl_digest_get_key_value((char *) chlg, "qop=\"", qop, qlen, '\"')) {
+  if(!auth_digest_get_key_value((char *) chlg, "qop=\"", qop, qlen, '\"')) {
     free(chlg);
     return CURLE_BAD_CONTENT_ENCODING;
   }
@@ -306,7 +306,7 @@ static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
 }
 
 /*
- * Curl_sasl_create_digest_md5_message()
+ * Curl_auth_create_digest_md5_message()
  *
  * This is used to generate an already encoded DIGEST-MD5 response message
  * ready for sending to the recipient.
@@ -324,7 +324,7 @@ static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_digest_md5_message(struct SessionHandle *data,
                                              const char *chlg64,
                                              const char *userp,
                                              const char *passwdp,
@@ -352,7 +352,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char *spn         = NULL;
 
   /* Decode the challange message */
-  result = sasl_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
+  result = auth_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
                                           realm, sizeof(realm),
                                           algorithm, sizeof(algorithm),
                                           qop_options, sizeof(qop_options));
@@ -364,7 +364,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Get the qop-values from the qop-options */
-  result = sasl_digest_get_qop_values(qop_options, &qop_values);
+  result = auth_digest_get_qop_values(qop_options, &qop_values);
   if(result)
     return result;
 
@@ -415,7 +415,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
     snprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Generate our SPN */
-  spn = Curl_sasl_build_spn(service, realm);
+  spn = Curl_auth_build_spn(service, realm);
   if(!spn)
     return CURLE_OUT_OF_MEMORY;
 
@@ -486,7 +486,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 }
 
 /*
- * Curl_sasl_decode_digest_http_message()
+ * Curl_auth_decode_digest_http_message()
  *
  * This is used to decode a HTTP DIGEST challenge message into the seperate
  * attributes.
@@ -498,7 +498,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
+CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
                                               struct digestdata *digest)
 {
   bool before = FALSE; /* got a nonce before */
@@ -512,7 +512,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
     before = TRUE;
 
   /* Clean up any former leftovers and initialise to defaults */
-  Curl_sasl_digest_cleanup(digest);
+  Curl_auth_digest_cleanup(digest);
 
   for(;;) {
     char value[DIGEST_MAX_VALUE_LENGTH];
@@ -523,7 +523,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
       chlg++;
 
     /* Extract a value=content pair */
-    if(Curl_sasl_digest_get_pair(chlg, value, content, &chlg)) {
+    if(Curl_auth_digest_get_pair(chlg, value, content, &chlg)) {
       if(Curl_raw_equal(value, "nonce")) {
         free(digest->nonce);
         digest->nonce = strdup(content);
@@ -626,7 +626,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
 }
 
 /*
- * Curl_sasl_create_digest_http_message()
+ * Curl_auth_create_digest_http_message()
  *
  * This is used to generate a HTTP DIGEST response message ready for sending
  * to the recipient.
@@ -645,7 +645,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_digest_http_message(struct SessionHandle *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const unsigned char *request,
@@ -701,7 +701,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
   Curl_md5it(md5buf, md5this);
   free(md5this);
-  sasl_digest_md5_to_ascii(md5buf, ha1);
+  auth_digest_md5_to_ascii(md5buf, ha1);
 
   if(digest->algo == CURLDIGESTALGO_MD5SESS) {
     /* nonce and cnonce are OUTSIDE the hash */
@@ -712,7 +712,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
     CURL_OUTPUT_DIGEST_CONV(data, tmp); /* Convert on non-ASCII machines */
     Curl_md5it(md5buf, (unsigned char *) tmp);
     free(tmp);
-    sasl_digest_md5_to_ascii(md5buf, ha1);
+    auth_digest_md5_to_ascii(md5buf, ha1);
   }
 
   /*
@@ -745,7 +745,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
   Curl_md5it(md5buf, md5this);
   free(md5this);
-  sasl_digest_md5_to_ascii(md5buf, ha2);
+  auth_digest_md5_to_ascii(md5buf, ha2);
 
   if(digest->qop) {
     md5this = (unsigned char *) aprintf("%s:%s:%08x:%s:%s:%s",
@@ -769,7 +769,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
   CURL_OUTPUT_DIGEST_CONV(data, md5this); /* convert on non-ASCII machines */
   Curl_md5it(md5buf, md5this);
   free(md5this);
-  sasl_digest_md5_to_ascii(md5buf, request_digest);
+  auth_digest_md5_to_ascii(md5buf, request_digest);
 
   /* For test case 64 (snooped from a Mozilla 1.3a request)
 
@@ -784,7 +784,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
      characters.  algorithm and qop with standard values only contain web-safe
      characters.
   */
-  userp_quoted = sasl_digest_string_quoted(userp);
+  userp_quoted = auth_digest_string_quoted(userp);
   if(!userp_quoted)
     return CURLE_OUT_OF_MEMORY;
 
@@ -856,7 +856,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
 }
 
 /*
- * Curl_sasl_digest_cleanup()
+ * Curl_auth_digest_cleanup()
  *
  * This is used to clean up the digest specific data.
  *
@@ -865,7 +865,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
  * digest    [in/out] - The digest data struct being cleaned up.
  *
  */
-void Curl_sasl_digest_cleanup(struct digestdata *digest)
+void Curl_auth_digest_cleanup(struct digestdata *digest)
 {
   Curl_safefree(digest->nonce);
   Curl_safefree(digest->cnonce);

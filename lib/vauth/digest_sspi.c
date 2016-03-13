@@ -44,7 +44,7 @@
 #include "memdebug.h"
 
 /*
- * Curl_sasl_create_digest_md5_message()
+ * Curl_auth_create_digest_md5_message()
  *
  * This is used to generate an already encoded DIGEST-MD5 response message
  * ready for sending to the recipient.
@@ -62,7 +62,7 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_digest_md5_message(struct SessionHandle *data,
                                              const char *chlg64,
                                              const char *userp,
                                              const char *passwdp,
@@ -125,7 +125,7 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   }
 
   /* Generate our SPN */
-  spn = Curl_sasl_build_spn(service, data->easy_conn->host.name);
+  spn = Curl_auth_build_spn(service, data->easy_conn->host.name);
   if(!spn) {
     free(output_token);
     free(input_token);
@@ -255,7 +255,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
         chlg++;
 
       /* Extract a value=content pair */
-      if(Curl_sasl_digest_get_pair(chlg, value, content, &chlg)) {
+      if(Curl_auth_digest_get_pair(chlg, value, content, &chlg)) {
         if(Curl_raw_equal(value, "realm")) {
 
           /* Setup identity's domain and length */
@@ -297,7 +297,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
 }
 
 /*
- * Curl_sasl_decode_digest_http_message()
+ * Curl_auth_decode_digest_http_message()
  *
  * This is used to decode a HTTP DIGEST challenge message into the seperate
  * attributes.
@@ -309,7 +309,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
+CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
                                               struct digestdata *digest)
 {
   size_t chlglen = strlen(chlg);
@@ -330,7 +330,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
 }
 
 /*
- * Curl_sasl_create_digest_http_message()
+ * Curl_auth_create_digest_http_message()
  *
  * This is used to generate a HTTP DIGEST response message ready for sending
  * to the recipient.
@@ -349,7 +349,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_digest_http_message(struct SessionHandle *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const unsigned char *request,
@@ -506,7 +506,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
 }
 
 /*
- * Curl_sasl_digest_cleanup()
+ * Curl_auth_digest_cleanup()
  *
  * This is used to clean up the digest specific data.
  *
@@ -515,7 +515,7 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
  * digest    [in/out] - The digest data struct being cleaned up.
  *
  */
-void Curl_sasl_digest_cleanup(struct digestdata *digest)
+void Curl_auth_digest_cleanup(struct digestdata *digest)
 {
   /* Free the input token */
   Curl_safefree(digest->input_token);

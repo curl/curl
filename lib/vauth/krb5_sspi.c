@@ -40,7 +40,7 @@
 #include "memdebug.h"
 
 /*
- * Curl_sasl_create_gssapi_user_message()
+ * Curl_auth_create_gssapi_user_message()
  *
  * This is used to generate an already encoded GSSAPI (Kerberos V5) user token
  * message ready for sending to the recipient.
@@ -61,7 +61,7 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const char *service,
@@ -103,7 +103,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
       return CURLE_OUT_OF_MEMORY;
 
     /* Generate our SPN */
-    krb5->spn = Curl_sasl_build_spn(service, data->easy_conn->host.name);
+    krb5->spn = Curl_auth_build_spn(service, data->easy_conn->host.name);
     if(!krb5->spn)
       return CURLE_OUT_OF_MEMORY;
 
@@ -213,7 +213,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
 }
 
 /*
- * Curl_sasl_create_gssapi_security_message()
+ * Curl_auth_create_gssapi_security_message()
  *
  * This is used to generate an already encoded GSSAPI (Kerberos V5) security
  * token message ready for sending to the recipient.
@@ -229,7 +229,7 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
                                                   const char *chlg64,
                                                   struct kerberos5data *krb5,
                                                   char **outptr,
@@ -445,7 +445,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
 }
 
 /*
- * Curl_sasl_gssapi_cleanup()
+ * Curl_auth_gssapi_cleanup()
  *
  * This is used to clean up the GSSAPI (Kerberos V5) specific data.
  *
@@ -454,7 +454,7 @@ CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
  * krb5     [in/out] - The Kerberos 5 data struct being cleaned up.
  *
  */
-void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5)
+void Curl_auth_gssapi_cleanup(struct kerberos5data *krb5)
 {
   /* Free our security context */
   if(krb5->context) {

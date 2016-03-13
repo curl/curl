@@ -38,7 +38,7 @@
 #include "memdebug.h"
 
 /*
- * Curl_sasl_create_ntlm_type1_message()
+ * Curl_auth_create_ntlm_type1_message()
  *
  * This is used to generate an already encoded NTLM type-1 message ready for
  * sending to the recipient.
@@ -54,7 +54,7 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
+CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
@@ -67,7 +67,7 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
   /* Clean up any former leftovers and initialise to defaults */
-  Curl_sasl_ntlm_cleanup(ntlm);
+  Curl_auth_ntlm_cleanup(ntlm);
 
   /* Query the security package for NTLM */
   status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
@@ -150,7 +150,7 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
 }
 
 /*
- * Curl_sasl_decode_ntlm_type2_message()
+ * Curl_auth_decode_ntlm_type2_message()
  *
  * This is used to decode an already encoded NTLM type-2 message.
  *
@@ -162,7 +162,7 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+CURLcode Curl_auth_decode_ntlm_type2_message(struct SessionHandle *data,
                                              const char *type2msg,
                                              struct ntlmdata *ntlm)
 {
@@ -196,7 +196,8 @@ CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
 }
 
 /*
- * Curl_sasl_create_ntlm_type3_message()
+* Curl_auth_create_ntlm_type3_message()
+ * Curl_auth_create_ntlm_type3_message()
  *
  * This is used to generate an already encoded NTLM type-3 message ready for
  * sending to the recipient.
@@ -213,7 +214,7 @@ CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_ntlm_type3_message(struct SessionHandle *data,
                                              const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
@@ -267,13 +268,13 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
   result = Curl_base64_encode(data, (char *) ntlm->output_token,
                               type_3_buf.cbBuffer, outptr, outlen);
 
-  Curl_sasl_ntlm_cleanup(ntlm);
+  Curl_auth_ntlm_cleanup(ntlm);
 
   return result;
 }
 
 /*
- * Curl_sasl_ntlm_cleanup()
+ * Curl_auth_ntlm_cleanup()
  *
  * This is used to clean up the NTLM specific data.
  *
@@ -282,7 +283,7 @@ CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
  * ntlm    [in/out] - The NTLM data struct being cleaned up.
  *
  */
-void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm)
+void Curl_auth_ntlm_cleanup(struct ntlmdata *ntlm)
 {
   /* Free our security context */
   if(ntlm->context) {

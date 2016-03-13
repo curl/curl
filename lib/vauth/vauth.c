@@ -33,7 +33,7 @@
 #include "memdebug.h"
 
 /*
- * Curl_sasl_build_spn()
+ * Curl_auth_build_spn()
  *
  * This is used to build a SPN string in the format service/instance.
  *
@@ -45,13 +45,13 @@
  * Returns a pointer to the newly allocated SPN.
  */
 #if !defined(USE_WINDOWS_SSPI)
-char *Curl_sasl_build_spn(const char *service, const char *instance)
+char *Curl_auth_build_spn(const char *service, const char *instance)
 {
   /* Generate and return our SPN */
   return aprintf("%s/%s", service, instance);
 }
 #else
-TCHAR *Curl_sasl_build_spn(const char *service, const char *instance)
+TCHAR *Curl_auth_build_spn(const char *service, const char *instance)
 {
   char *utf8_spn = NULL;
   TCHAR *tchar_spn = NULL;
@@ -87,7 +87,7 @@ TCHAR *Curl_sasl_build_spn(const char *service, const char *instance)
 
 #if defined(HAVE_GSSAPI)
 /*
- * Curl_sasl_build_gssapi_spn()
+ * Curl_auth_build_gssapi_spn()
  *
  * This is used to build a SPN string in the format service@instance.
  *
@@ -98,7 +98,7 @@ TCHAR *Curl_sasl_build_spn(const char *service, const char *instance)
  *
  * Returns a pointer to the newly allocated SPN.
  */
-char *Curl_sasl_build_gssapi_spn(const char *service, const char *instance)
+char *Curl_auth_build_gssapi_spn(const char *service, const char *instance)
 {
   /* Generate and return our SPN */
   return aprintf("%s@%s", service, instance);

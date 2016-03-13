@@ -37,7 +37,7 @@
 #include "memdebug.h"
 
 /*
- * sasl_create_oauth_bearer_message()
+ * Curl_auth_create_oauth_bearer_message()
  *
  * This is used to generate an already encoded OAuth 2.0 message ready for
  * sending to the recipient.
@@ -55,12 +55,12 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode sasl_create_oauth_bearer_message(struct SessionHandle *data,
-                                          const char *user,
-                                          const char *host,
-                                          const long port,
-                                          const char *bearer,
-                                          char **outptr, size_t *outlen)
+CURLcode Curl_auth_create_oauth_bearer_message(struct SessionHandle *data,
+                                               const char *user,
+                                               const char *host,
+                                               const long port,
+                                               const char *bearer,
+                                               char **outptr, size_t *outlen)
 {
   CURLcode result = CURLE_OK;
   char *oauth = NULL;

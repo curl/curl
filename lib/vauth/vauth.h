@@ -40,45 +40,45 @@ struct kerberos5data;
 
 /* This is used to build a SPN string */
 #if !defined(USE_WINDOWS_SSPI)
-char *Curl_sasl_build_spn(const char *service, const char *instance);
+char *Curl_auth_build_spn(const char *service, const char *instance);
 #else
-TCHAR *Curl_sasl_build_spn(const char *service, const char *instance);
+TCHAR *Curl_auth_build_spn(const char *service, const char *instance);
 #endif
 
 #if defined(HAVE_GSSAPI)
-char *Curl_sasl_build_gssapi_spn(const char *service, const char *instance);
+char *Curl_auth_build_gssapi_spn(const char *service, const char *instance);
 #endif
 
 /* This is used to generate a base64 encoded PLAIN cleartext message */
-CURLcode sasl_create_plain_message(struct SessionHandle *data,
-                                   const char *userp,
-                                   const char *passwdp,
-                                   char **outptr, size_t *outlen);
+CURLcode Curl_auth_create_plain_message(struct SessionHandle *data,
+                                        const char *userp,
+                                        const char *passwdp,
+                                        char **outptr, size_t *outlen);
 
 /* This is used to generate a base64 encoded LOGIN cleartext message */
-CURLcode sasl_create_login_message(struct SessionHandle *data,
-                                   const char *valuep, char **outptr,
-                                   size_t *outlen);
+CURLcode Curl_auth_create_login_message(struct SessionHandle *data,
+                                        const char *valuep, char **outptr,
+                                        size_t *outlen);
 
 /* This is used to generate a base64 encoded EXTERNAL cleartext message */
-CURLcode sasl_create_external_message(struct SessionHandle *data,
-                                      const char *user, char **outptr,
-                                      size_t *outlen);
+CURLcode Curl_auth_create_external_message(struct SessionHandle *data,
+                                           const char *user, char **outptr,
+                                           size_t *outlen);
 
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)
 /* This is used to decode a CRAM-MD5 challenge message */
-CURLcode sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
-                                      size_t *outlen);
+CURLcode Curl_auth_decode_cram_md5_message(const char *chlg64, char **outptr,
+                                           size_t *outlen);
 
 /* This is used to generate a CRAM-MD5 response message */
-CURLcode sasl_create_cram_md5_message(struct SessionHandle *data,
-                                      const char *chlg,
-                                      const char *userp,
-                                      const char *passwdp,
-                                      char **outptr, size_t *outlen);
+CURLcode Curl_auth_create_cram_md5_message(struct SessionHandle *data,
+                                           const char *chlg,
+                                           const char *userp,
+                                           const char *passwdp,
+                                           char **outptr, size_t *outlen);
 
 /* This is used to generate a base64 encoded DIGEST-MD5 response message */
-CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_digest_md5_message(struct SessionHandle *data,
                                              const char *chlg64,
                                              const char *userp,
                                              const char *passwdp,
@@ -86,11 +86,11 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              char **outptr, size_t *outlen);
 
 /* This is used to decode a HTTP DIGEST challenge message */
-CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
+CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
                                               struct digestdata *digest);
 
 /* This is used to generate a HTTP DIGEST response message */
-CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_digest_http_message(struct SessionHandle *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const unsigned char *request,
@@ -99,44 +99,44 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
                                               char **outptr, size_t *outlen);
 
 /* This is used to clean up the digest specific data */
-void Curl_sasl_digest_cleanup(struct digestdata *digest);
+void Curl_auth_digest_cleanup(struct digestdata *digest);
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */
 
 #if defined(USE_NTLM)
 /* This is used to generate a base64 encoded NTLM type-1 message */
-CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
+CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
                                              char **outptr,
                                              size_t *outlen);
 
 /* This is used to decode a base64 encoded NTLM type-2 message */
-CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+CURLcode Curl_auth_decode_ntlm_type2_message(struct SessionHandle *data,
                                              const char *type2msg,
                                              struct ntlmdata *ntlm);
 
 /* This is used to generate a base64 encoded NTLM type-3 message */
-CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_ntlm_type3_message(struct SessionHandle *data,
                                              const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen);
 
 /* This is used to clean up the NTLM specific data */
-void Curl_sasl_ntlm_cleanup(struct ntlmdata *ntlm);
+void Curl_auth_ntlm_cleanup(struct ntlmdata *ntlm);
 #endif /* USE_NTLM */
 
 /* This is used to generate a base64 encoded OAuth 2.0 message */
-CURLcode sasl_create_oauth_bearer_message(struct SessionHandle *data,
-                                          const char *user,
-                                          const char *host,
-                                          const long port,
-                                          const char *bearer,
-                                          char **outptr, size_t *outlen);
+CURLcode Curl_auth_create_oauth_bearer_message(struct SessionHandle *data,
+                                               const char *user,
+                                               const char *host,
+                                               const long port,
+                                               const char *bearer,
+                                               char **outptr, size_t *outlen);
 #if defined(USE_KERBEROS5)
 /* This is used to generate a base64 encoded GSSAPI (Kerberos V5) user token
    message */
-CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const char *service,
@@ -147,14 +147,14 @@ CURLcode Curl_sasl_create_gssapi_user_message(struct SessionHandle *data,
 
 /* This is used to generate a base64 encoded GSSAPI (Kerberos V5) security
    token message */
-CURLcode Curl_sasl_create_gssapi_security_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
                                                   const char *input,
                                                   struct kerberos5data *krb5,
                                                   char **outptr,
                                                   size_t *outlen);
 
 /* This is used to clean up the GSSAPI specific data */
-void Curl_sasl_gssapi_cleanup(struct kerberos5data *krb5);
+void Curl_auth_gssapi_cleanup(struct kerberos5data *krb5);
 #endif /* USE_KERBEROS5 */
 
 #endif /* HEADER_CURL_VAUTH_H */
