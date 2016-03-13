@@ -135,6 +135,7 @@
  19.3 more protocols supported
  19.4 more platforms supported
  19.5 Add support for concurrent connections
+ 19.6 Use the RFC6265 test suite
 
  20. Next SONAME bump
  20.1 http-style HEAD output for FTP
@@ -798,6 +799,16 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  been dropped (unless it has been forced - which we shouldn't do in these tests)
  and thus the wait for connections loop is never entered to receive the second
  connection.
+
+19.6 Use the RFC6265 test suite
+
+ A test suite made for HTTP cookies (RFC 6265) by Adam Barth is available at
+ https://github.com/abarth/http-state/tree/master/tests
+
+ It'd be really awesome if someone would write a script/setup that would run
+ curl with that test suite and detect deviances. Ideally, that would even be
+ incorporated into our regular test suite.
+
 
 20. Next SONAME bump
 
