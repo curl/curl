@@ -627,6 +627,7 @@ X_OBJS= \
 	$(DIROBJ)\ntlm.obj \
 	$(DIROBJ)\ntlm_sspi.obj \
 	$(DIROBJ)\oauth2.obj \
+	$(DIROBJ)\spnego_gssapi.obj \
 	$(DIROBJ)\spnego_sspi.obj \
 	$(DIROBJ)\vtls.obj \
 	$(DIROBJ)\openssl.obj \

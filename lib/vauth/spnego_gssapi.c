@@ -24,13 +24,14 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_WINDOWS_SSPI) && defined(USE_SPNEGO)
+#if defined(HAVE_GSSAPI) && defined(USE_SPNEGO)
 
 #include <curl/curl.h>
 
 #include "vauth/vauth.h"
 #include "urldata.h"
 #include "curl_base64.h"
+#include "curl_gssapi.h"
 #include "warnless.h"
 #include "curl_multibyte.h"
 #include "sendf.h"
@@ -68,19 +69,17 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
   CURLcode result = CURLE_OK;
   size_t chlglen = 0;
   unsigned char *chlg = NULL;
-  PSecPkgInfo SecurityPackage;
-  SecBuffer chlg_buf;
-  SecBuffer resp_buf;
-  SecBufferDesc chlg_desc;
-  SecBufferDesc resp_desc;
-  unsigned long attrs;
-  TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
+  OM_uint32 major_status;
+  OM_uint32 minor_status;
+  OM_uint32 unused_status;
+  gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
+  gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
+  gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) data;
-#endif
+  (void) user;
+  (void) password;
 
-  if(nego->context && nego->status == SEC_E_OK) {
+  if(nego->context && nego->status == GSS_S_COMPLETE) {
     /* We finished successfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
@@ -90,67 +89,27 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
 
   /* Generate our SPN */
   if(!nego->server_name) {
-    nego->server_name = Curl_auth_build_spn(service, host);
-    if(!nego->server_name)
+    char *spn = Curl_auth_build_gssapi_spn(service, host);
+    if(!spn)
       return CURLE_OUT_OF_MEMORY;
-  }
 
-  if(!nego->output_token) {
-    /* Query the security package for Negotiate */
-    nego->status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *)
-                                                      TEXT(SP_NAME_NEGOTIATE),
-                                                      &SecurityPackage);
-    if(nego->status != SEC_E_OK)
-      return CURLE_NOT_BUILT_IN;
+    /* Populate the SPN structure */
+    spn_token.value = spn;
+    spn_token.length = strlen(spn);
 
-    nego->token_max = SecurityPackage->cbMaxToken;
+    /* Import the SPN */
+    major_status = gss_import_name(&minor_status, &spn_token,
+                                   GSS_C_NT_HOSTBASED_SERVICE,
+                                   &nego->server_name);
+    if(GSS_ERROR(major_status)) {
+      Curl_gss_log_error(data, minor_status, "gss_import_name() failed: ");
 
-    /* Release the package buffer as it is not required anymore */
-    s_pSecFn->FreeContextBuffer(SecurityPackage);
+      free(spn);
 
-    /* Allocate our output buffer */
-    nego->output_token = malloc(nego->token_max);
-    if(!nego->output_token)
       return CURLE_OUT_OF_MEMORY;
- }
-
-  if(!nego->credentials) {
-    if(user && *user) {
-      /* Populate our identity structure */
-      result = Curl_create_sspi_identity(user, password, &nego->identity);
-      if(result)
-        return result;
-
-      /* Allow proper cleanup of the identity structure */
-      nego->p_identity = &nego->identity;
     }
-    else
-      /* Use the current Windows user */
-      nego->p_identity = NULL;
 
-    /* Allocate our credentials handle */
-    nego->credentials = malloc(sizeof(CredHandle));
-    if(!nego->credentials)
-      return CURLE_OUT_OF_MEMORY;
-
-    memset(nego->credentials, 0, sizeof(CredHandle));
-
-    /* Acquire our credentials handle */
-    nego->status =
-      s_pSecFn->AcquireCredentialsHandle(NULL,
-                                         (TCHAR *)TEXT(SP_NAME_NEGOTIATE),
-                                         SECPKG_CRED_OUTBOUND, NULL,
-                                         nego->p_identity, NULL, NULL,
-                                         nego->credentials, &expiry);
-    if(nego->status != SEC_E_OK)
-      return CURLE_LOGIN_DENIED;
-
-    /* Allocate our new context handle */
-    nego->context = malloc(sizeof(CtxtHandle));
-    if(!nego->context)
-      return CURLE_OUT_OF_MEMORY;
-
-    memset(nego->context, 0, sizeof(CtxtHandle));
+    free(spn);
   }
 
   if(chlg64 && strlen(chlg64)) {
@@ -169,54 +128,44 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
     }
 
     /* Setup the challenge "input" security buffer */
-    chlg_desc.ulVersion = SECBUFFER_VERSION;
-    chlg_desc.cBuffers  = 1;
-    chlg_desc.pBuffers  = &chlg_buf;
-    chlg_buf.BufferType = SECBUFFER_TOKEN;
-    chlg_buf.pvBuffer   = chlg;
-    chlg_buf.cbBuffer   = curlx_uztoul(chlglen);
+    input_token.value = chlg;
+    input_token.length = chlglen;
   }
 
-  /* Setup the response "output" security buffer */
-  resp_desc.ulVersion = SECBUFFER_VERSION;
-  resp_desc.cBuffers  = 1;
-  resp_desc.pBuffers  = &resp_buf;
-  resp_buf.BufferType = SECBUFFER_TOKEN;
-  resp_buf.pvBuffer   = nego->output_token;
-  resp_buf.cbBuffer   = curlx_uztoul(nego->token_max);
-
   /* Generate our challenge-response message */
-  nego->status = s_pSecFn->InitializeSecurityContext(nego->credentials,
-                                                     chlg ? nego->context :
-                                                            NULL,
-                                                     nego->server_name,
-                                                     ISC_REQ_CONFIDENTIALITY,
-                                                     0, SECURITY_NATIVE_DREP,
-                                                     chlg ? &chlg_desc : NULL,
-                                                     0, nego->context,
-                                                     &resp_desc, &attrs,
-                                                     &expiry);
+  major_status = Curl_gss_init_sec_context(data,
+                                           &minor_status,
+                                           &nego->context,
+                                           nego->server_name,
+                                           &Curl_spnego_mech_oid,
+                                           GSS_C_NO_CHANNEL_BINDINGS,
+                                           &input_token,
+                                           &output_token,
+                                           TRUE,
+                                           NULL);
+  Curl_safefree(input_token.value);
 
-  if(GSS_ERROR(nego->status)) {
-    free(chlg);
+  nego->status = major_status;
+  if(GSS_ERROR(major_status)) {
+    if(output_token.value)
+      gss_release_buffer(&unused_status, &output_token);
+
+    Curl_gss_log_error(data, minor_status,
+                       "gss_init_sec_context() failed: ");
+
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(nego->status == SEC_I_COMPLETE_NEEDED ||
-     nego->status == SEC_I_COMPLETE_AND_CONTINUE) {
-    nego->status = s_pSecFn->CompleteAuthToken(nego->context, &resp_desc);
-    if(GSS_ERROR(nego->status)) {
-      free(chlg);
-      return CURLE_RECV_ERROR;
-    }
+  if(!output_token.value || !output_token.length) {
+    if(output_token.value)
+      gss_release_buffer(&unused_status, &output_token);
+
+    return CURLE_OUT_OF_MEMORY;
   }
 
-  nego->output_token_length = resp_buf.cbBuffer;
+  nego->output_token = output_token;
 
-  /* Free the decoded challenge */
-  free(chlg);
-
-  return result;
+  return CURLE_OK;
 }
 
 /*
@@ -240,18 +189,29 @@ CURLcode Curl_auth_create_spnego_message(struct SessionHandle *data,
                                          char **outptr, size_t *outlen)
 {
   CURLcode result;
+  OM_uint32 minor_status;
 
   /* Base64 encode the already generated response */
   result = Curl_base64_encode(data,
-                              (const char*) nego->output_token,
-                              nego->output_token_length,
+                              nego->output_token.value,
+                              nego->output_token.length,
                               outptr, outlen);
 
-  if(result)
-    return result;
+  if(result) {
+    gss_release_buffer(&minor_status, &nego->output_token);
+    nego->output_token.value = NULL;
+    nego->output_token.length = 0;
 
-  if(!*outptr || !*outlen)
+    return result;
+  }
+
+  if(!*outptr || !*outlen) {
+    gss_release_buffer(&minor_status, &nego->output_token);
+    nego->output_token.value = NULL;
+    nego->output_token.length = 0;
+
     return CURLE_REMOTE_ACCESS_DENIED;
+  }
 
   return CURLE_OK;
 }
@@ -268,31 +228,30 @@ CURLcode Curl_auth_create_spnego_message(struct SessionHandle *data,
  */
 void Curl_auth_spnego_cleanup(struct negotiatedata* nego)
 {
+  OM_uint32 minor_status;
+
   /* Free our security context */
-  if(nego->context) {
-    s_pSecFn->DeleteSecurityContext(nego->context);
-    free(nego->context);
-    nego->context = NULL;
+  if(nego->context != GSS_C_NO_CONTEXT) {
+    gss_delete_sec_context(&minor_status, &nego->context, GSS_C_NO_BUFFER);
+    nego->context = GSS_C_NO_CONTEXT;
   }
 
-  /* Free our credentials handle */
-  if(nego->credentials) {
-    s_pSecFn->FreeCredentialsHandle(nego->credentials);
-    free(nego->credentials);
-    nego->credentials = NULL;
+  /* Free the output token */
+  if(nego->output_token.value) {
+    gss_release_buffer(&minor_status, &nego->output_token);
+    nego->output_token.value = NULL;
+    nego->output_token.length = 0;
+
   }
 
-  /* Free our identity */
-  Curl_sspi_free_identity(nego->p_identity);
-  nego->p_identity = NULL;
-
-  /* Free the SPN and output token */
-  Curl_safefree(nego->server_name);
-  Curl_safefree(nego->output_token);
+  /* Free the SPN */
+  if(nego->server_name != GSS_C_NO_NAME) {
+    gss_release_name(&minor_status, &nego->server_name);
+    nego->server_name = GSS_C_NO_NAME;
+  }
 
   /* Reset any variables */
   nego->status = 0;
-  nego->token_max = 0;
 }
 
-#endif /* USE_WINDOWS_SSPI && USE_SPNEGO */
+#endif /* HAVE_GSSAPI && USE_SPNEGO */
