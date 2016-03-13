@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -173,7 +173,7 @@ static CURLcode base64_encode(const char *table64,
                               const char *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
-  CURLcode error;
+  CURLcode result;
   unsigned char ibuf[3];
   unsigned char obuf[4];
   int i;
@@ -199,10 +199,10 @@ static CURLcode base64_encode(const char *table64,
    * not the host encoding.  And we can't change the actual input
    * so we copy it to a buffer, translate it, and use that instead.
    */
-  error = Curl_convert_clone(data, indata, insize, &convbuf);
-  if(error) {
+  result = Curl_convert_clone(data, indata, insize, &convbuf);
+  if(result) {
     free(output);
-    return error;
+    return result;
   }
 
   if(convbuf)
