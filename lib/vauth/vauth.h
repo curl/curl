@@ -38,6 +38,14 @@ struct ntlmdata;
 struct kerberos5data;
 #endif
 
+#if defined(USE_WINDOWS_SSPI) && defined(USE_SPNEGO)
+struct negotiatedata;
+#endif
+
+#if defined(USE_WINDOWS_SSPI)
+#define GSS_ERROR(status) (status & 0x80000000)
+#endif
+
 /* This is used to build a SPN string */
 #if !defined(USE_WINDOWS_SSPI)
 char *Curl_auth_build_spn(const char *service, const char *instance);
@@ -156,5 +164,27 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
 /* This is used to clean up the GSSAPI specific data */
 void Curl_auth_gssapi_cleanup(struct kerberos5data *krb5);
 #endif /* USE_KERBEROS5 */
+
+#if defined(USE_WINDOWS_SSPI) && defined(USE_SPNEGO)
+/* This is used to decode a base64 encoded SPNEGO (Negotiate) challenge
+   message */
+CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
+                                         const char *user,
+                                         const char *passwood,
+                                         const char *service,
+                                         const char *host,
+                                         const char *chlg64,
+                                         struct negotiatedata *nego);
+
+/* This is used to generate a base64 encoded SPNEGO (Negotiate) response
+   message */
+CURLcode Curl_auth_create_spnego_message(struct SessionHandle *data,
+                                         struct negotiatedata *nego,
+                                         char **outptr, size_t *outlen);
+
+/* This is used to clean up the SPNEGO specifiec data */
+void Curl_auth_spnego_cleanup(struct negotiatedata* nego);
+
+#endif /* USE_WINDOWS_SSPI && USE_SPNEGO */
 
 #endif /* HEADER_CURL_VAUTH_H */

@@ -33,10 +33,6 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy);
 
 void Curl_cleanup_negotiate(struct SessionHandle *data);
 
-#ifdef USE_WINDOWS_SSPI
-#define GSS_ERROR(status) (status & 0x80000000)
-#endif
-
 #endif /* USE_SPNEGO */
 
 #endif /* HEADER_CURL_HTTP_NEGOTIATE_H */
