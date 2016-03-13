@@ -574,7 +574,6 @@ X_OBJS= \
 	$(DIROBJ)\http_chunks.obj \
 	$(DIROBJ)\http_digest.obj \
 	$(DIROBJ)\http_negotiate.obj \
-	$(DIROBJ)\http_negotiate_sspi.obj \
 	$(DIROBJ)\http_proxy.obj \
 	$(DIROBJ)\idn_win32.obj \
 	$(DIROBJ)\if2ip.obj \
