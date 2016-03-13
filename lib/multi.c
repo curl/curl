@@ -231,15 +231,15 @@ static size_t fd_key_compare(void *k1, size_t k1_len, void *k2, size_t k2_len)
 {
   (void) k1_len; (void) k2_len;
 
-  return (*((int *) k1)) == (*((int *) k2));
+  return (*((curl_socket_t *) k1)) == (*((curl_socket_t *) k2));
 }
 
 static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
 {
-  int fd = *((int *) key);
+  curl_socket_t fd = *((curl_socket_t *) key);
   (void) key_length;
 
-  return (fd % (int)slots_num);
+  return (fd % slots_num);
 }
 
 /*
