@@ -234,14 +234,14 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   char *encoded = NULL;
   size_t len = 0;
   char *userp;
-  CURLcode error;
+  CURLcode result;
 
-  error = Curl_base64_encode(conn->data,
-                             (const char*)neg_ctx->output_token,
-                             neg_ctx->output_token_length,
-                             &encoded, &len);
-  if(error)
-    return error;
+  result = Curl_base64_encode(conn->data,
+                              (const char*)neg_ctx->output_token,
+                              neg_ctx->output_token_length,
+                              &encoded, &len);
+  if(result)
+    return result;
 
   if(!len)
     return CURLE_REMOTE_ACCESS_DENIED;
@@ -257,7 +257,9 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     Curl_safefree(conn->allocptr.userpwd);
     conn->allocptr.userpwd = userp;
   }
+
   free(encoded);
+
   return (userp == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }
 
