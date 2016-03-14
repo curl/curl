@@ -130,6 +130,25 @@ and NEVER:
     if(a) return TRUE;
     else if(b) return FALSE;
 
+## Space around operators
+
+Please use spaces on both sides of operators in C expressions.  Postfix `(),
+[], ->, ., ++, --` and Unary `+, - !, ~, &` operators excluded they should
+have no space.
+
+Examples:
+
+    bla = func();
+    who = name[0];
+    age += 1;
+    true = !false;
+    size += -2 + 3 * (a + b);
+    ptr->member = a++;
+    struct.field = b--;
+    ptr = &address;
+    contents = *pointer;
+    complement = ~bits;
+
 ## Platform dependent code
 
 Use `#ifdef HAVE_FEATURE` to do conditional code. We avoid checking for
