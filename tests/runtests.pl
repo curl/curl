@@ -2608,7 +2608,8 @@ sub checksystem {
     logmsg sprintf("%s", $http_unix?"HTTP-unix ":"");
     logmsg sprintf("%s\n", $ftp_ipv6?"FTP-IPv6 ":"OFF");
 
-    logmsg sprintf("* Env: %s", $valgrind?"Valgrind ":"");
+    logmsg sprintf("* Env: %s%s", $valgrind?"Valgrind ":"",
+                   $run_event_based?"event-based ":"");
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
 
     if($verbose) {
