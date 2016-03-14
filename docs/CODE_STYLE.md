@@ -35,6 +35,12 @@ See the INTERNALS document on how we name non-exported library-global symbols.
 We use only spaces for indentation, never TABs. We use two spaces for each new
 open brace.
 
+    if(something_is_true) {
+      while(second_statement == fine) {
+        moo();
+      }
+    }
+
 ## Comments
 
 Since we write C89 code, `//` comments are not allowed. They weren't
