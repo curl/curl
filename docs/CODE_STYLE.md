@@ -56,7 +56,7 @@ resolution screens:
    code windows next to each other on the same screen - as well as multiple
    terminal and debugging windows.
 
-## Open brace on the same line
+## Braces
 
 In if/while/do/for expressions, we write the open brace on the same line as
 the keyword and we then set the closing brace on the same indentation level as
@@ -64,6 +64,14 @@ the initial keyword. Like this:
 
     if(age < 40) {
       /* clearly a youngster */
+    }
+
+When we write functions however, the opening brace should be in the first
+column of the first line:
+
+    int main(int argc, char **argv)
+    {
+      return 1;
     }
 
 ## 'else' on the following line
@@ -75,7 +83,7 @@ it on a new line after the closing brace. Like this:
       /* clearly a youngster */
     }
     else {
-      /* probably intelligent */
+      /* probably grumpy */
     }
 
 ## No space before parentheses
