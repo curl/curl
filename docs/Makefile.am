@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@ EXTRA_DIST = MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS SSLCERTS	\
  KNOWN_BUGS BINDINGS $(man_MANS) $(HTMLPAGES) HISTORY INSTALL		\
  $(PDFPAGES) LICENSE-MIXING README.netware INSTALL.devcpp		\
  MAIL-ETIQUETTE HTTP-COOKIES SECURITY RELEASE-PROCEDURE SSL-PROBLEMS	\
- HTTP2.md ROADMAP.md CODE_OF_CONDUCT.md
+ HTTP2.md ROADMAP.md CODE_OF_CONDUCT.md CODE_STYLE.md
 
 MAN2HTML= roffit < $< >$@
 
