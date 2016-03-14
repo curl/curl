@@ -394,7 +394,7 @@ static CURLcode sasl_create_external_message(struct SessionHandle *data,
 }
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
- /*
+/*
  * sasl_decode_cram_md5_message()
  *
  * This is used to decode an already encoded CRAM-MD5 challenge message.
@@ -421,10 +421,10 @@ static CURLcode sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
   if(chlg64len && *chlg64 != '=')
     result = Curl_base64_decode(chlg64, (unsigned char **) outptr, outlen);
 
-    return result;
- }
+  return result;
+}
 
- /*
+/*
  * sasl_create_cram_md5_message()
  *
  * This is used to generate an already encoded CRAM-MD5 response message ready
@@ -474,10 +474,10 @@ static CURLcode sasl_create_cram_md5_message(struct SessionHandle *data,
 
   /* Generate the response */
   response = aprintf(
-      "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-           userp, digest[0], digest[1], digest[2], digest[3], digest[4],
-           digest[5], digest[6], digest[7], digest[8], digest[9], digest[10],
-           digest[11], digest[12], digest[13], digest[14], digest[15]);
+    "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+    userp, digest[0], digest[1], digest[2], digest[3], digest[4],
+    digest[5], digest[6], digest[7], digest[8], digest[9], digest[10],
+    digest[11], digest[12], digest[13], digest[14], digest[15]);
   if(!response)
     return CURLE_OUT_OF_MEMORY;
 
@@ -807,7 +807,7 @@ CURLcode Curl_sasl_decode_digest_http_message(const char *chlg,
       else if(Curl_raw_equal(value, "qop")) {
         char *tok_buf;
         /* Tokenize the list and choose auth if possible, use a temporary
-            clone of the buffer since strtok_r() ruins it */
+           clone of the buffer since strtok_r() ruins it */
         tmp = strdup(content);
         if(!tmp)
           return CURLE_OUT_OF_MEMORY;
@@ -1029,16 +1029,16 @@ CURLcode Curl_sasl_create_digest_http_message(struct SessionHandle *data,
 
   /* for test case 64 (snooped from a Mozilla 1.3a request)
 
-    Authorization: Digest username="testuser", realm="testrealm", \
-    nonce="1053604145", uri="/64", response="c55f7f30d83d774a3d2dcacf725abaca"
+     Authorization: Digest username="testuser", realm="testrealm",      \
+     nonce="1053604145", uri="/64", response="c55f7f30d83d774a3d2dcacf725abaca"
 
-    Digest parameters are all quoted strings.  Username which is provided by
-    the user will need double quotes and backslashes within it escaped.  For
-    the other fields, this shouldn't be an issue.  realm, nonce, and opaque
-    are copied as is from the server, escapes and all.  cnonce is generated
-    with web-safe characters.  uri is already percent encoded.  nc is 8 hex
-    characters.  algorithm and qop with standard values only contain web-safe
-    characters.
+     Digest parameters are all quoted strings.  Username which is provided by
+     the user will need double quotes and backslashes within it escaped.  For
+     the other fields, this shouldn't be an issue.  realm, nonce, and opaque
+     are copied as is from the server, escapes and all.  cnonce is generated
+     with web-safe characters.  uri is already percent encoded.  nc is 8 hex
+     characters.  algorithm and qop with standard values only contain web-safe
+     characters.
   */
   userp_quoted = sasl_digest_string_quoted(userp);
   if(!userp_quoted)
@@ -1293,18 +1293,18 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
   if(!len)
     return CURLE_URL_MALFORMAT;
 
-    if(sasl->resetprefs) {
-      sasl->resetprefs = FALSE;
-      sasl->prefmech = SASL_AUTH_NONE;
-    }
+  if(sasl->resetprefs) {
+    sasl->resetprefs = FALSE;
+    sasl->prefmech = SASL_AUTH_NONE;
+  }
 
-    if(strnequal(value, "*", len))
-      sasl->prefmech = SASL_AUTH_DEFAULT;
-    else if((mechbit = Curl_sasl_decode_mech(value, len, &mechlen)) &&
-            mechlen == len)
-      sasl->prefmech |= mechbit;
-    else
-      result = CURLE_URL_MALFORMAT;
+  if(strnequal(value, "*", len))
+    sasl->prefmech = SASL_AUTH_DEFAULT;
+  else if((mechbit = Curl_sasl_decode_mech(value, len, &mechlen)) &&
+          mechlen == len)
+    sasl->prefmech |= mechbit;
+  else
+    result = CURLE_URL_MALFORMAT;
 
   return result;
 }
