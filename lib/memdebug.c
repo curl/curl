@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -146,6 +146,7 @@ static bool countcheck(const char *func, int line, const char *source)
         /* log to stderr also */
         fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
                 source, line, func);
+        fflush(logfile); /* because it might crash now */
       }
       SET_ERRNO(ENOMEM);
       return TRUE; /* RETURN ERROR! */
@@ -153,10 +154,6 @@ static bool countcheck(const char *func, int line, const char *source)
     else
       memsize--; /* countdown */
 
-    /* log the countdown */
-    if(source)
-      curl_memlog("LIMIT %s:%d %ld ALLOCS left\n",
-                  source, line, memsize);
 
   }
 
