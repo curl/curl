@@ -2000,7 +2000,6 @@ static void singlesocket(struct Curl_multi *multi,
   curl_socket_t s;
   int num;
   unsigned int curraction;
-  bool remove_sock_from_hash;
 
   for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++)
     socks[i] = CURL_SOCKET_BAD;
@@ -2068,57 +2067,50 @@ static void singlesocket(struct Curl_multi *multi,
         break;
       }
     }
-    if(s != CURL_SOCKET_BAD) {
 
+    entry = sh_getentry(&multi->sockhash, s);
+    if(entry) {
       /* this socket has been removed. Tell the app to remove it */
-      remove_sock_from_hash = TRUE;
+      bool remove_sock_from_hash = TRUE;
 
-      entry = sh_getentry(&multi->sockhash, s);
-      if(entry) {
-        /* check if the socket to be removed serves a connection which has
-           other easy-s in a pipeline. In this case the socket should not be
-           removed. */
-        struct connectdata *easy_conn = data->easy_conn;
-        if(easy_conn) {
-          if(easy_conn->recv_pipe && easy_conn->recv_pipe->size > 1) {
-            /* the handle should not be removed from the pipe yet */
-            remove_sock_from_hash = FALSE;
+      /* check if the socket to be removed serves a connection which has
+         other easy-s in a pipeline. In this case the socket should not be
+         removed. */
+      struct connectdata *easy_conn = data->easy_conn;
+      if(easy_conn) {
+        if(easy_conn->recv_pipe && easy_conn->recv_pipe->size > 1) {
+          /* the handle should not be removed from the pipe yet */
+          remove_sock_from_hash = FALSE;
 
-            /* Update the sockhash entry to instead point to the next in line
-               for the recv_pipe, or the first (in case this particular easy
-               isn't already) */
-            if(entry->easy == data) {
-              if(Curl_recvpipe_head(data, easy_conn))
-                entry->easy = easy_conn->recv_pipe->head->next->ptr;
-              else
-                entry->easy = easy_conn->recv_pipe->head->ptr;
-            }
+          /* Update the sockhash entry to instead point to the next in line
+             for the recv_pipe, or the first (in case this particular easy
+             isn't already) */
+          if(entry->easy == data) {
+            if(Curl_recvpipe_head(data, easy_conn))
+              entry->easy = easy_conn->recv_pipe->head->next->ptr;
+            else
+              entry->easy = easy_conn->recv_pipe->head->ptr;
           }
-          if(easy_conn->send_pipe  && easy_conn->send_pipe->size > 1) {
-            /* the handle should not be removed from the pipe yet */
-            remove_sock_from_hash = FALSE;
-
-            /* Update the sockhash entry to instead point to the next in line
-               for the send_pipe, or the first (in case this particular easy
-               isn't already) */
-            if(entry->easy == data) {
-              if(Curl_sendpipe_head(data, easy_conn))
-                entry->easy = easy_conn->send_pipe->head->next->ptr;
-              else
-                entry->easy = easy_conn->send_pipe->head->ptr;
-            }
-          }
-          /* Don't worry about overwriting recv_pipe head with send_pipe_head,
-             when action will be asked on the socket (see multi_socket()), the
-             head of the correct pipe will be taken according to the
-             action. */
         }
+        if(easy_conn->send_pipe  && easy_conn->send_pipe->size > 1) {
+          /* the handle should not be removed from the pipe yet */
+          remove_sock_from_hash = FALSE;
+
+          /* Update the sockhash entry to instead point to the next in line
+             for the send_pipe, or the first (in case this particular easy
+             isn't already) */
+          if(entry->easy == data) {
+            if(Curl_sendpipe_head(data, easy_conn))
+              entry->easy = easy_conn->send_pipe->head->next->ptr;
+            else
+              entry->easy = easy_conn->send_pipe->head->ptr;
+          }
+        }
+        /* Don't worry about overwriting recv_pipe head with send_pipe_head,
+           when action will be asked on the socket (see multi_socket()), the
+           head of the correct pipe will be taken according to the
+           action. */
       }
-      else
-        /* just a precaution, this socket really SHOULD be in the hash already
-           but in case it isn't, we don't have to tell the app to remove it
-           either since it never got to know about it */
-        remove_sock_from_hash = FALSE;
 
       if(remove_sock_from_hash) {
         /* in this case 'entry' is always non-NULL */
@@ -2130,9 +2122,8 @@ static void singlesocket(struct Curl_multi *multi,
                            entry->socketp);
         sh_delentry(&multi->sockhash, s);
       }
-
-    }
-  }
+    } /* if sockhash entry existed */
+  } /* for loop over numsocks */
 
   memcpy(data->sockets, socks, num*sizeof(curl_socket_t));
   data->numsocks = num;
