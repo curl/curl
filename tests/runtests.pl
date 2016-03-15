@@ -105,6 +105,8 @@ use sshhelp qw(
     sshversioninfo
     );
 
+use pathhelp;
+
 require "getpart.pm"; # array functions
 require "valgrind.pm"; # valgrind report parser
 require "ftp.pm";
@@ -2311,27 +2313,11 @@ sub checksystem {
             $curl =~ s/^(.*)(libcurl.*)/$1/g;
 
             $libcurl = $2;
-            if($curl =~ /mingw(32|64)/) {
-                # This is a windows minw32 build, we need to translate the
-                # given path to the "actual" windows path. The MSYS shell
-                # has a builtin 'pwd -W' command which converts the path.
-                $pwd = `sh -c "echo \$(pwd -W)"`;
-                chomp($pwd);
+            if($curl =~ /win32|mingw(32|64)/) {
+                # This is a Windows MinGW build or native build, we need to use
+                # Win32-style path.
+                $pwd = pathhelp::sys_native_current_path();
             }
-            elsif ($curl =~ /win32/) {
-               # Native Windows builds don't understand the
-               # output of cygwin's pwd.  It will be
-               # something like /cygdrive/c/<some path>.
-               #
-               # Use the cygpath utility to convert the
-               # working directory to a Windows friendly
-               # path.  The -m option converts to use drive
-               # letter:, but it uses / instead \.  Forward
-               # slashes (/) are easier for us.  We don't
-               # have to escape them to get them to curl
-               # through a shell.
-               chomp($pwd = `cygpath -m $pwd`);
-           }
            if ($libcurl =~ /winssl/i) {
                $has_winssl=1;
                $ssllib="WinSSL";
