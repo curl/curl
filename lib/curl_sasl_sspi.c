@@ -275,19 +275,19 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
 }
 
 /*
-* Curl_override_sspi_http_realm()
-*
-* This is used to populate the domain in a SSPI identity structure
-* The realm is extracted from the challenge message and used as the
-* domain if it is not already explicitly set.
-*
-* Parameters:
-*
-* chlg     [in]     - The challenge message.
-* identity [in/out] - The identity structure.
-*
-* Returns CURLE_OK on success.
-*/
+ * Curl_override_sspi_http_realm()
+ *
+ * This is used to populate the domain in a SSPI identity structure
+ * The realm is extracted from the challenge message and used as the
+ * domain if it is not already explicitly set.
+ *
+ * Parameters:
+ *
+ * chlg     [in]     - The challenge message.
+ * identity [in/out] - The identity structure.
+ *
+ * Returns CURLE_OK on success.
+ */
 CURLcode Curl_override_sspi_http_realm(const char *chlg,
                                        SEC_WINNT_AUTH_IDENTITY *identity)
 {
@@ -574,22 +574,22 @@ void Curl_sasl_digest_cleanup(struct digestdata *digest)
 
 #if defined USE_NTLM
 /*
-* Curl_sasl_create_ntlm_type1_message()
-*
-* This is used to generate an already encoded NTLM type-1 message ready for
-* sending to the recipient.
-*
-* Parameters:
-*
-* userp   [in]     - The user name in the format User or Domain\User.
-* passdwp [in]     - The user's password.
-* ntlm    [in/out] - The NTLM data struct being used and modified.
-* outptr  [in/out] - The address where a pointer to newly allocated memory
-*                    holding the result will be stored upon completion.
-* outlen  [out]    - The length of the output message.
-*
-* Returns CURLE_OK on success.
-*/
+ * Curl_sasl_create_ntlm_type1_message()
+ *
+ * This is used to generate an already encoded NTLM type-1 message ready for
+ * sending to the recipient.
+ *
+ * Parameters:
+ *
+ * userp   [in]     - The user name in the format User or Domain\User.
+ * passdwp [in]     - The user's password.
+ * ntlm    [in/out] - The NTLM data struct being used and modified.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
 CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
@@ -686,18 +686,18 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
 }
 
 /*
-* Curl_sasl_decode_ntlm_type2_message()
-*
-* This is used to decode an already encoded NTLM type-2 message.
-*
-* Parameters:
-*
-* data     [in]     - The session handle.
-* type2msg [in]     - The base64 encoded type-2 message.
-* ntlm     [in/out] - The NTLM data struct being used and modified.
-*
-* Returns CURLE_OK on success.
-*/
+ * Curl_sasl_decode_ntlm_type2_message()
+ *
+ * This is used to decode an already encoded NTLM type-2 message.
+ *
+ * Parameters:
+ *
+ * data     [in]     - The session handle.
+ * type2msg [in]     - The base64 encoded type-2 message.
+ * ntlm     [in/out] - The NTLM data struct being used and modified.
+ *
+ * Returns CURLE_OK on success.
+ */
 CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
                                              const char *type2msg,
                                              struct ntlmdata *ntlm)
@@ -732,23 +732,23 @@ CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
 }
 
 /*
-* Curl_sasl_create_ntlm_type3_message()
-*
-* This is used to generate an already encoded NTLM type-3 message ready for
-* sending to the recipient.
-*
-* Parameters:
-*
-* data    [in]     - The session handle.
-* userp   [in]     - The user name in the format User or Domain\User.
-* passdwp [in]     - The user's password.
-* ntlm    [in/out] - The NTLM data struct being used and modified.
-* outptr  [in/out] - The address where a pointer to newly allocated memory
-*                    holding the result will be stored upon completion.
-* outlen  [out]    - The length of the output message.
-*
-* Returns CURLE_OK on success.
-*/
+ * Curl_sasl_create_ntlm_type3_message()
+ *
+ * This is used to generate an already encoded NTLM type-3 message ready for
+ * sending to the recipient.
+ *
+ * Parameters:
+ *
+ * data    [in]     - The session handle.
+ * userp   [in]     - The user name in the format User or Domain\User.
+ * passdwp [in]     - The user's password.
+ * ntlm    [in/out] - The NTLM data struct being used and modified.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
 CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
                                              const char *userp,
                                              const char *passwdp,
