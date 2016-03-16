@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,9 +64,11 @@
 #define CURL_LIBSSH2_VERSION LIBSSH2_VERSION
 #endif
 
+void Curl_version_init(void);
+
 /* For thread safety purposes this function is called by global_init so that
    the static data in both version functions is initialized. */
-void curl_version_init()
+void Curl_version_init(void)
 {
   curl_version();
   curl_version_info(CURLVERSION_NOW);
