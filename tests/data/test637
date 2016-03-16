@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+Range
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+ <name>
+SFTP retrieval with invalid X- range
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/file637.txt -r 99- --insecure
+</command>
+<file name="log/file637.txt">
+Test data
+for ssh test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+36
+</errorcode>
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>

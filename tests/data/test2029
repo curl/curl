@@ -1,0 +1,240 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Basic auth
+HTTP NTLM auth
+</keywords>
+</info>
+# Server-side
+<reply>
+
+<!-- Alternate the order that Basic and NTLM headers appear in responses to
+ensure that the order doesn't matter. -->
+
+<!-- First request has NTLM auth, wrong password -->
+<data100>
+HTTP/1.1 401 Need Basic or NTLM auth
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: NTLM
+WWW-Authenticate: Basic realm="testrealm"
+
+This is not the real page!
+</data100>
+
+<data1101>
+HTTP/1.1 401 NTLM intermediate
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 33
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAAAGggEAq6U1NAWaJCIAAAAAAAAAAAAAAAA4AAAATlRMTUF1dGg=
+
+This is still not the real page!
+</data1101>
+
+<data1102>
+HTTP/1.1 401 Sorry wrong password
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: NTLM
+
+This is a bad password page!
+</data1102>
+
+<!-- Second request has Basic auth, right password -->
+<data200>
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data200>
+
+<!-- Third request has NTLM auth, wrong password -->
+<data300>
+HTTP/1.1 401 Need Basic or NTLM auth (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: NTLM
+WWW-Authenticate: Basic realm="testrealm"
+
+This is not the real page!
+</data300>
+
+<data1301>
+HTTP/1.1 401 NTLM intermediate (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 33
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAAAGggEAq6U1NAWaJCIAAAAAAAAAAAAAAAA4AAAATlRMTUF1dGg=
+
+This is still not the real page!
+</data1301>
+
+<data1302>
+HTTP/1.1 401 Sorry wrong password (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: NTLM
+
+This is a bad password page!
+</data1302>
+
+<!-- Fourth request has Basic auth, wrong password -->
+<data400>
+HTTP/1.1 401 Sorry wrong password (3)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: NTLM
+WWW-Authenticate: Basic realm="testrealm"
+
+This is a bad password page!
+</data400>
+
+<!-- Fifth request has Basic auth, right password -->
+<data500>
+HTTP/1.1 200 Things are fine in server land (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data500>
+
+<datacheck>
+HTTP/1.1 401 NTLM intermediate
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 33
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAAAGggEAq6U1NAWaJCIAAAAAAAAAAAAAAAA4AAAATlRMTUF1dGg=
+
+HTTP/1.1 401 Sorry wrong password
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: NTLM
+
+This is a bad password page!
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+HTTP/1.1 401 NTLM intermediate (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 33
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAAAGggEAq6U1NAWaJCIAAAAAAAAAAAAAAAA4AAAATlRMTUF1dGg=
+
+HTTP/1.1 401 Sorry wrong password (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: NTLM
+
+This is a bad password page!
+HTTP/1.1 401 Sorry wrong password (3)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: NTLM
+WWW-Authenticate: Basic realm="testrealm"
+
+This is a bad password page!
+HTTP/1.1 200 Things are fine in server land (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<features>
+NTLM
+!SSPI
+</features>
+<server>
+http
+</server>
+<tool>
+libauthretry
+</tool>
+
+ <name>
+HTTP authorization retry (NTLM switching to Basic)
+ </name>
+ <setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+ </setenv>
+ <command>
+http://%HOSTIP:%HTTPPORT/2029 ntlm basic
+</command>
+<precheck>
+chkhostname curlhost
+</precheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /20290100 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+Accept: */*
+
+GET /20290100 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoIBANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyY3VybGhvc3Q=
+Accept: */*
+
+GET /20290200 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Accept: */*
+
+GET /20290300 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+Accept: */*
+
+GET /20290300 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoIBANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyY3VybGhvc3Q=
+Accept: */*
+
+GET /20290400 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
+Accept: */*
+
+GET /20290500 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

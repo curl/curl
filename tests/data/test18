@@ -1,0 +1,91 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+{} list
+</keywords>
+</info>
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+moo
+</data>
+<data2>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+foo
+</data2>
+<data3>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+hoo
+</data3>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+multiple requests using {} in URL
+ </name>
+ <command>
+"%HOSTIP:%HTTPPORT/{18,180002,180003}"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /18 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /180002 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /180003 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout>
+--_curl_--%HOSTIP:%HTTPPORT/18
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+moo
+--_curl_--%HOSTIP:%HTTPPORT/180002
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+foo
+--_curl_--%HOSTIP:%HTTPPORT/180003
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+hoo
+</stdout>
+</verify>
+</testcase>

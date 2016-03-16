@@ -1,0 +1,113 @@
+<testcase>
+<info>
+<keywords>
+Metalink
+HTTP
+HTTP GET
+-J
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 21 Jun 2012 14:50:02 GMT
+Server: test-server/fake
+Content-Length: 42
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name2007; charset=funny; option=strange
+Funny-head: yesyes
+
+Something delivered from an HTTP resource
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+# This relies on the debug feature to allow us to set directory to store the
+# -O and -J output in, using the CURL_TESTDIR variable. This test might use
+# it upon failure only, successful execution won't actually use it.
+<features>
+debug
+file
+Metalink
+</features>
+<server>
+http
+</server>
+ <name>
+Metalink local XML file, HTTP resource, using -O -J -D file
+ </name>
+<setenv>
+CURL_TESTDIR=%PWD/log
+</setenv>
+<command option="no-output,no-include">
+--metalink file://%PWD/log/test2007.metalink -J -O -D log/heads2007
+</command>
+# local metalink file written before test command runs
+<file name="log/test2007.metalink">
+<?xml version="1.0" encoding="utf-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/">
+ <files>
+  <file name="log/download2007">
+   <verification>
+    <hash type="md5">we-only-check-the-strongest-hash-provided</hash>
+    <hash type="sha256">52899e30f80e3490632d505653204e1fb5b02bda141048704ce9a0ed00b8a3f5</hash>
+   </verification>
+   <resources maxconnections="1">
+    <url type="http" preference="90">http://%HOSTIP:%HTTPPORT/2007</url>
+   </resources>
+  </file>
+ </files>
+</metalink>
+</file>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl log/2007 log/name2007
+</postcheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /2007 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<file1 name="log/download2007">
+Something delivered from an HTTP resource
+</file1>
+<file2 name="log/heads2007">
+HTTP/1.1 200 OK
+Date: Thu, 21 Jun 2012 14:50:02 GMT
+Server: test-server/fake
+Content-Length: 42
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name2007; charset=funny; option=strange
+Funny-head: yesyes
+
+</file2>
+<file3 name="log/stdout2007">
+</file3>
+<file4 name="log/stderr2007">
+Metalink: parsing (file://%PWD/log/test2007.metalink) metalink/XML...
+Metalink: parsing (file://%PWD/log/test2007.metalink) OK
+Metalink: fetching (log/download2007) from (http://%HOSTIP:%HTTPPORT/2007)...
+Metalink: fetching (log/download2007) from (http://%HOSTIP:%HTTPPORT/2007) OK
+Metalink: validating (log/download2007)...
+Metalink: validating (log/download2007) [sha-256] OK
+</file4>
+<stripfile4>
+$_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))
+</stripfile4>
+</verify>
+</testcase>

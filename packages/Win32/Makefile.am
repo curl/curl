@@ -1,0 +1,3 @@
+SUBDIRS = cygwin
+
+EXTRA_DIST = README

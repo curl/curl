@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+build system
+source analysis
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+<name>
+8 chars object name generation testing
+</name>
+<command option="no-output,no-include" type="shell">
+%SRCDIR/../lib/objnames-test08.sh %SRCDIR
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<file1 name="log/stderr1222">
+</file1>
+<file2 name="log/stdout1222">
+Testing curl_8char_object_name...
+
+result: 16AFKPQR expected: 16AFKPQR input: 123__678__ABC__FGH__KLM__PQRSTUV
+result: 16AFKPQ expected: 16AFKPQ input: 123__678__ABC__FGH__KLM__PQ.S.UV
+result: 16ABC expected: 16ABC input: 123__678__ABC..FGH..KLM..PQRSTUV
+result: 16 expected: 16 input: 123__678_.ABC._FGH__KLM__PQRSTUV
+result: 123 expected: 123 input: 123.567.90ABCDEFGHIJKLMNOPQRSTUV
+result: 1234567 expected: 1234567 input: 1234567.90A.CDEFGHIJKLMNOPQRSTUV
+result: 12345678 expected: 12345678 input: 1234567890.BCD.FGHIJKLMNOPQRSTUV
+result: 1470AB expected: 1470AB input: 12=45-78+0AB.DE.GHIJKLMNOPQRSTUV
+result: 12345678 expected: 12345678 input: 1234567890ABCDEFGHIJKLMNOPQRSTUV
+result: 159CGHIJ expected: 159CGHIJ input: 123_567_90A_CDE_GHIJKLMNOPQRSTUV
+result: 159CDEFG expected: 159CDEFG input: 123_567_90A_CDEFGHIJKLMNOPQRSTUV
+result: 1590ABCD expected: 1590ABCD input: 123_567_90ABCDEFGHIJKLMNOPQRSTUV
+result: 1567890A expected: 1567890A input: 123_567890ABCDEFGHIJKLMNOPQRSTUV
+result: 12345678 expected: 12345678 input: 1234567890ABCDEFGHIJKLMNOPQRSTUV
+
+
+
+8-characters-or-less generated object names are unique.
+</file2>
+</verify>
+
+</testcase>

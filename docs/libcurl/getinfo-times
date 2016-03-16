@@ -1,0 +1,27 @@
+An overview of the six time values available from curl_easy_getinfo()
+
+curl_easy_perform()
+    |
+    |--NT
+    |--|--CT
+    |--|--|--PT
+    |--|--|--|--ST
+          |--|--|--TT
+    |--|--|--|--|--RT
+
+NT = CURLINFO_NAMELOOKUP_TIME. The time it took from the start until the name
+     resolving was completed.
+CT = CURLINFO_CONNECT_TIME. The time it took from the start until the connect
+     to the remote host (or proxy) was completed.
+PT = CURLINFO_PRETRANSFER_TIME. The time it took from the start until the file
+     transfer is just about to begin. This includes all pre-transfer commands
+     and negotiations that are specific to the particular protocol(s)
+     involved.
+ST = CURLINFO_STARTTRANSFER_TIME. The time it took from the start until the
+     first byte is just about to be transferred.
+TT = CURLINFO_TOTAL_TIME. Time of the previous transfer. This time does not
+     include the connect time (CT), so if you want the complete operation
+     time, you should add that.
+RT = CURLINFO_REDIRECT_TIME. The time it took for all redirection steps
+     include name lookup, connect, pretransfer and transfer before final
+     transaction was started. So, this is zero if no redirection took place.

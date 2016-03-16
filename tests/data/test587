@@ -1,0 +1,58 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib587
+</tool>
+
+ <name>
+HTTP multi-part formpost with aborted read callback
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/587
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+POST /587 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 718
+Expect: 100-continue
+Content-Type: multipart/form-data; boundary=----------------------------
+
+------------------------------
+Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
+
+</protocol>
+# CURLE_ABORTED_BY_CALLBACK (42)
+<errorcode>
+42
+</errorcode>
+</verify>
+</testcase>

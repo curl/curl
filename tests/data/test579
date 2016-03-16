@@ -1,0 +1,87 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP Digest auth
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 100 Continue
+Server: Microsoft-IIS/5.0
+Date: Sun, 03 Apr 2005 14:57:45 GMT
+X-Powered-By: ASP.NET
+
+HTTP/1.1 401 authentication please swsbounce
+Server: Microsoft-IIS/6.0
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604144"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
+
+</data>
+<data1>
+HTTP/1.1 200 A OK
+Server: Microsoft-IIS/6.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 3
+
+ok
+</data1>
+<datacheck>
+HTTP/1.1 100 Continue
+Server: Microsoft-IIS/5.0
+Date: Sun, 03 Apr 2005 14:57:45 GMT
+X-Powered-By: ASP.NET
+
+HTTP/1.1 401 authentication please swsbounce
+Server: Microsoft-IIS/6.0
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604144"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
+
+HTTP/1.1 200 A OK
+Server: Microsoft-IIS/6.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 3
+
+ok
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+crypto
+</features>
+# tool is what to use instead of 'curl'
+<tool>
+lib579
+</tool>
+
+ <name>
+small chunked HTTP POSTs with digest auth. and progress callback
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/579 log/ip579
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<file name="log/ip579">
+Progress callback called with UL 0 out of 0
+Progress callback called with UL 8 out of 0
+Progress callback called with UL 16 out of 0
+Progress callback called with UL 26 out of 0
+Progress callback called with UL 61 out of 0
+Progress callback called with UL 66 out of 0
+</file>
+</verify>
+</testcase>

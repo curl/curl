@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+EXPN
+CUSTOMREQUEST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+250-Joe Smith <joe.smith@example.com>
+250-Harry Smith <harry.smith@example.com>
+250 Melvin Smith <melvin.smith@example.com>
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP mailing list EXPN (CUSTOMREQUEST)
+ </name>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/927 --mail-rcpt Friends -X EXPN
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 927
+EXPN Friends
+QUIT
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,54 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP custom request
+config file
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 27
+
+This is the proof it works
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP with config file on stdin
+ </name>
+ <stdin>
+#
+# Use a silly request without '--':
+request MOOO
+#
+# Set the user-agent using a short-option:
+-A "agent007 license to drill\t"
+#
+# long option *with* '--':
+--max-time 180
+ </stdin>
+ <command>
+-K - %HOSTIP:%HTTPPORT/that.site.com/17
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+MOOO /that.site.com/17 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: agent007 license to drill	
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

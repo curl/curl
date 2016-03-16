@@ -1,0 +1,80 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP set cookie
+cookies
+CURLOPT_REFERER
+curl_easy_reset
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data>
+
+# since the request runs twice
+<datacheck>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib598
+</tool>
+
+ <name>
+curl_easy_reset with referer and other strings set
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/598
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /598 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: the-moo agent next generation
+Accept: */*
+Referer: http://example.com/the-moo
+Cookie: name=moo
+
+GET /598 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

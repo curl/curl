@@ -1,0 +1,29 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+CRLF-in-URL
+</keywords>
+</info>
+
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP with URL-encoded CR LF in the URL
+ </name>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/%0d%0a/931
+</command>
+</client>
+
+#
+<verify>
+# 3 - CURLE_URL_MALFORMAT
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

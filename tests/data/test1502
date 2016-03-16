@@ -1,0 +1,58 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+multi
+CURLOPT_RESOLVE
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib1502
+</tool>
+ <name>
+HTTP multi with CURLOPT_RESOLVE, cleanup sequence UA
+ </name>
+ <command>
+http://google.com:%HTTPPORT/1502 %HTTPPORT %HOSTIP
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1502 HTTP/1.1
+Host: google.com:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

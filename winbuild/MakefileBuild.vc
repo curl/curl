@@ -1,0 +1,503 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1999 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
+###########################################################################
+#
+# Makefile for building libcurl with MSVC 6, 7, 8, 9, 10, 11, 12 and 14
+#
+# Usage: see usage message below
+#        Should be invoked from winbuild directory
+#        Edit the paths and desired library name
+#        SSL path is only required if you intend compiling
+#        with SSL.
+#
+# This make file leaves the result either a .lib or .dll file
+# in the \lib directory. It should be called from the \lib
+# directory.
+#
+# An option would have been to allow the source directory to
+# be specified, but I saw no requirement.
+#
+# Another option would have been to leave the .lib and .dll
+# files in the "cfg" directory, but then the make file
+# in \src would need to be changed.
+#
+##############################################################
+
+CFGSET=FALSE
+WINBUILD_DIR=`cd`
+ZIP        = zip.exe
+
+!IF "$(VC)"=="6"
+CC_NODEBUG  = cl.exe /O2 /DNDEBUG
+CC_DEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
+CFLAGS     = /I. /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
+!ELSE
+CC_NODEBUG  = cl.exe /O2 /DNDEBUG
+CC_DEBUG    = cl.exe /Od /D_DEBUG /RTC1 /Z7 /LDd /W3
+CFLAGS      = /I. /I ../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
+!ENDIF
+
+LFLAGS     = /nologo /machine:$(MACHINE)
+LNKDLL     = link.exe /DLL
+LNKLIB     = link.exe /lib
+
+CFLAGS_PDB = /Zi
+LFLAGS_PDB = /incremental:no /opt:ref,icf
+
+CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
+
+WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
+
+BASE_NAME              = libcurl
+BASE_NAME_DEBUG        = $(BASE_NAME)_debug
+BASE_NAME_STATIC       = $(BASE_NAME)_a
+BASE_NAME_STATIC_DEBUG = $(BASE_NAME_STATIC)_debug
+
+LIB_NAME_STATIC        = $(BASE_NAME_STATIC).lib
+LIB_NAME_STATIC_DEBUG  = $(BASE_NAME_STATIC_DEBUG).lib
+LIB_NAME_DLL           = $(BASE_NAME).dll
+LIB_NAME_IMP           = $(BASE_NAME).lib
+LIB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).dll
+LIB_NAME_IMP_DEBUG     = $(BASE_NAME_DEBUG).lib
+
+PDB_NAME_STATIC        = $(BASE_NAME_STATIC).pdb
+PDB_NAME_STATIC_DEBUG  = $(BASE_NAME_STATIC_DEBUG).pdb
+PDB_NAME_DLL           = $(BASE_NAME).pdb
+PDB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).pdb
+
+# CURL Command section
+PROGRAM_NAME = curl.exe
+CURL_CFLAGS   =  /I../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c
+CURL_LFLAGS   = /nologo /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
+CURL_RESFLAGS = /i../include
+
+#############################################################
+## Nothing more to do below this line!
+LIBCURL_SRC_DIR = ..\lib
+CURL_SRC_DIR = ..\src
+
+!IFNDEF WITH_DEVEL
+WITH_DEVEL          = ../../deps
+!ENDIF
+DEVEL_INCLUDE  = $(WITH_DEVEL)/include
+DEVEL_LIB      = $(WITH_DEVEL)/lib
+DEVEL_BIN      = $(WITH_DEVEL)/bin
+
+CFLAGS         = $(CFLAGS) /I"$(DEVEL_INCLUDE)"
+LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
+
+
+!IF "$(WITH_SSL)"=="dll"
+SSL_LIBS     = libeay32.lib ssleay32.lib
+USE_SSL      = true
+SSL          = dll
+!ELSEIF "$(WITH_SSL)"=="static"
+SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib crypt32.lib
+USE_SSL      = true
+SSL          = static
+!ENDIF
+
+!IFDEF USE_SSL
+SSL_CFLAGS   = /DUSE_OPENSSL /I"$(DEVEL_INCLUDE)/openssl"
+!ENDIF
+
+!IF "$(WITH_CARES)"=="dll"
+!IF "$(DEBUG)"=="yes"
+CARES_LIBS     = caresd.lib
+!ELSE
+CARES_LIBS     = cares.lib
+!ENDIF
+USE_CARES      = true
+CARES          = dll
+!ELSEIF "$(WITH_CARES)"=="static"
+!IF "$(DEBUG)"=="yes"
+CARES_LIBS     = libcaresd.lib
+!ELSE
+CARES_LIBS     = libcares.lib
+!ENDIF
+USE_CARES      = true
+CARES          = static
+!ENDIF
+
+!IFDEF USE_CARES
+CARES_CFLAGS   = /DUSE_ARES /I"$(DEVEL_INCLUDE)/cares"
+!ENDIF
+
+!IF "$(WITH_ZLIB)"=="dll"
+ZLIB_LIBS   = zlib.lib
+USE_ZLIB    = true
+ZLIB        = dll
+!ELSEIF "$(WITH_ZLIB)"=="static"
+ZLIB_LIBS   = zlib_a.lib
+USE_ZLIB    = true
+ZLIB        = static
+!ENDIF
+
+!IFDEF USE_ZLIB
+ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+!ENDIF
+
+
+!IF "$(WITH_SSH2)"=="dll"
+SSH2_LIBS   = libssh2.lib
+USE_SSH2    = true
+SSH2        = dll
+!ELSEIF "$(WITH_SSH2)"=="static"
+SSH2_LIBS   = libssh2_a.lib user32.lib
+USE_SSH2    = true
+SSH2        = static
+!ENDIF
+
+!IFDEF USE_SSH2
+SSH2_CFLAGS = /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /DUSE_LIBSSH2
+SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
+!ENDIF
+
+
+!IFNDEF USE_IDN
+USE_IDN   = true
+!ELSEIF "$(USE_IDN)"=="yes"
+USE_IDN   = true
+!ENDIF
+
+!IF "$(USE_IDN)"=="true"
+IDN_CFLAGS = $(IDN_CFLAGS) /DUSE_WIN32_IDN /DWANT_IDN_PROTOTYPES
+WIN_LIBS   = $(WIN_LIBS) Normaliz.lib
+!ENDIF
+
+
+!IFNDEF USE_IPV6
+USE_IPV6  = true
+!ELSEIF "$(USE_IPV6)"=="yes"
+USE_IPV6  = true
+!ENDIF
+
+!IF "$(USE_IPV6)"=="true"
+IPV6_CFLAGS = $(IPV6_CFLAGS) /DUSE_IPV6
+!ENDIF
+
+
+!IFNDEF USE_SSPI
+USE_SSPI  = true
+!ELSEIF "$(USE_SSPI)"=="yes"
+USE_SSPI  = true
+!ENDIF
+
+!IF "$(USE_SSPI)"=="true"
+SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_WINDOWS_SSPI
+!ENDIF
+
+
+!IFNDEF USE_WINSSL
+!IF "$(USE_SSL)"=="true"
+USE_WINSSL  = false
+!ELSE
+USE_WINSSL  = $(USE_SSPI)
+!ENDIF
+!ELSEIF "$(USE_WINSSL)"=="yes"
+USE_WINSSL  = true
+!ENDIF
+
+
+!IF "$(USE_WINSSL)"=="true"
+!IF "$(USE_SSPI)"!="true"
+!ERROR cannot build with WinSSL without SSPI
+!ENDIF
+SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_SCHANNEL
+!ENDIF
+
+
+!IF "$(GEN_PDB)"=="yes"
+GEN_PDB = true
+!ENDIF
+
+
+!IFDEF EMBEND_MANIFEST
+MANIFESTTOOL = mt -manifest $(DIRDIST)\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\$(PROGRAM_NAME);1
+!ENDIF
+
+# Runtime library configuration
+!IF "$(RTLIBCFG)"=="static"
+RTLIB = /MT
+RTLIB_DEBUG = /MTd
+!ELSE
+RTLIB = /MD
+RTLIB_DEBUG  = /MDd
+!ENDIF
+
+!IF "$(MODE)"=="static"
+TARGET = $(LIB_NAME_STATIC)
+CURL_LIBCURL_LIBNAME=$(LIB_NAME_STATIC)
+AS_DLL = false
+CFGSET = true
+!ELSEIF "$(MODE)"=="dll"
+TARGET = $(LIB_NAME_DLL)
+CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
+AS_DLL = true
+CFGSET = true
+!ENDIF
+
+!IF "$(CFGSET)" == "FALSE"
+!ERROR please choose a valid mode
+!ENDIF
+
+
+
+# CURL_XX macros are for the curl.exe command
+
+!IF "$(DEBUG)"=="yes"
+RC_FLAGS = /dDEBUGBUILD=1 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+CC              = $(CC_DEBUG) $(RTLIB_DEBUG)
+
+CURL_CC         = $(CC)
+CURL_RC_FLAGS = /i../include /dDEBUGBUILD=1 /Fo $@ $(CURL_SRC_DIR)\curl.rc
+!ELSE
+RC_FLAGS = /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+CC              = $(CC_NODEBUG) $(RTLIB)
+
+CURL_CC         = $(CC)
+CURL_RC_FLAGS = /i../include /dDEBUGBUILD=0 /Fo $@ $(CURL_SRC_DIR)\curl.rc
+!ENDIF
+
+CURL_CC = $(CURL_CC) $(CURL_CFLAGS)
+
+!IF "$(AS_DLL)" == "true"
+
+LNK       = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
+!IF "$(DEBUG)"=="yes"
+TARGET    = $(LIB_NAME_DLL_DEBUG)
+LNK       = $(LNK) /DEBUG /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
+PDB       = $(PDB_NAME_DLL_DEBUG)
+CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
+!ELSE
+TARGET    = $(LIB_NAME_DLL)
+LNK       = $(LNK)  /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
+PDB       = $(PDB_NAME_DLL)
+CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
+!ENDIF
+RESOURCE  = $(LIB_DIROBJ)\libcurl.res
+
+# AS_DLL
+!ELSE
+
+!IF "$(DEBUG)"=="yes"
+TARGET   = $(LIB_NAME_STATIC_DEBUG)
+PDB      = $(PDB_NAME_STATIC_DEBUG)
+!ELSE
+TARGET   = $(LIB_NAME_STATIC)
+PDB      = $(PDB_NAME_STATIC)
+!ENDIF
+LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
+CC       = $(CC) $(CFLAGS_LIBCURL_STATIC)
+
+# AS_DLL
+!ENDIF
+
+!IF "$(USE_SSL)"=="true"
+CFLAGS = $(CFLAGS) $(SSL_CFLAGS)
+LFLAGS = $(LFLAGS) $(SSL_LFLAGS) $(SSL_LIBS)
+!ENDIF
+
+!IF "$(USE_CARES)"=="true"
+CFLAGS = $(CFLAGS) $(CARES_CFLAGS)
+LFLAGS = $(LFLAGS) $(CARES_LFLAGS) $(CARES_LIBS)
+!ENDIF
+
+!IF "$(USE_ZLIB)"=="true"
+CFLAGS = $(CFLAGS) $(ZLIB_CFLAGS)
+LFLAGS = $(LFLAGS) $(ZLIB_LFLAGS) $(ZLIB_LIBS)
+!ENDIF
+
+!IF "$(USE_SSH2)"=="true"
+CFLAGS = $(CFLAGS) $(SSH2_CFLAGS)
+LFLAGS = $(LFLAGS) $(SSH2_LFLAGS) $(SSH2_LIBS)
+!ENDIF
+
+!IF "$(USE_IDN)"=="true"
+CFLAGS = $(CFLAGS) $(IDN_CFLAGS)
+!ENDIF
+
+!IF "$(USE_IPV6)"=="true"
+CFLAGS = $(CFLAGS) $(IPV6_CFLAGS)
+!ENDIF
+
+!IF "$(USE_SSPI)"=="true"
+CFLAGS = $(CFLAGS) $(SSPI_CFLAGS)
+!ENDIF
+
+!IF "$(GEN_PDB)"=="true"
+CFLAGS = $(CFLAGS) $(CFLAGS_PDB) /Fd"$(LIB_DIROBJ)\$(PDB)"
+LFLAGS = $(LFLAGS) $(LFLAGS_PDB)
+!ENDIF
+
+LIB_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-lib
+CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
+DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
+
+#
+# curl.exe
+#
+CURL_LINK = link.exe /incremental:no /libpath:"$(DIRDIST)\lib"
+
+#!IF "$(CFG)" == "release-ssh2-ssl-dll-zlib"
+#TARGET   = $(LIB_NAME_STATIC)
+#LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBS)  $(SSH2LIBS) $(SSL_LFLAGS) $(ZLIB_LFLAGS) $(LFLAGSSSH) /out:$(LIB_DIROBJ)\$(TARGET)
+#CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(ZLIB_CFLAGS) $(CFLAGSLIB)  $(SSH2_CFLAGS)
+#CFGSET   = TRUE
+#!ENDIF
+
+#######################
+# Only the clean target can be used if a config was not provided.
+#
+!IF "$(CFGSET)" == "FALSE"
+clean:
+	@-erase /s *.dll 2> NUL
+	@-erase /s *.exp 2> NUL
+	@-erase /s *.idb 2> NUL
+	@-erase /s *.lib 2> NUL
+	@-erase /s *.obj 2> NUL
+	@-erase /s *.pch 2> NUL
+	@-erase /s *.pdb 2> NUL
+	@-erase /s *.res 2> NUL
+!ELSE
+# A mode was provided, so the library can be built.
+#
+!include CURL_OBJS.inc
+!include LIBCURL_OBJS.inc
+
+!IF "$(AS_DLL)" == "true"
+LIB_OBJS = $(LIBCURL_OBJS) $(RESOURCE)
+!ELSE
+LIB_OBJS = $(LIBCURL_OBJS)
+!ENDIF
+
+EXE_OBJS = $(CURL_OBJS) $(CURL_DIROBJ)\curl.res
+
+all : $(TARGET) $(PROGRAM_NAME)
+
+package: $(TARGET)
+	@cd $(DIRDIST)
+	@-$(ZIP) -9 -q -r ..\$(CONFIG_NAME_LIB).zip .>nul 2<&1
+	@cd $(MAKEDIR)
+
+$(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
+	@echo Using SSL: $(USE_SSL)
+	@echo Using c-ares: $(USE_CARES)
+	@echo Using SSH2: $(USE_SSH2)
+	@echo Using ZLIB: $(USE_ZLIB)
+	@echo Using IDN:  $(USE_IDN)
+	@echo Using IPv6: $(USE_IPV6)
+	@echo Using SSPI: $(USE_SSPI)
+	@echo Using WinSSL: $(USE_WINSSL)
+	@echo CFLAGS:     $(CFLAGS)
+	@echo LFLAGS:     $(LFLAGS)
+	@echo GenPDB:     $(GEN_PDB)
+	@echo Debug:      $(DEBUG)
+	@echo Machine:    $(MACHINE)
+	$(LNK) $(LFLAGS) $(LIB_OBJS)
+	@echo Copying libs...
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_DLL) copy $(LIB_DIROBJ)\$(LIB_NAME_DLL)       $(DIRDIST)\bin\ /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_STATIC) copy $(LIB_DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\lib\ /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_DLL_DEBUG) copy $(LIB_DIROBJ)\$(LIB_NAME_DLL_DEBUG) $(DIRDIST)\bin\ /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_STATIC_DEBUG) copy $(LIB_DIROBJ)\$(LIB_NAME_STATIC_DEBUG) $(DIRDIST)\lib\ /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_IMP) copy $(LIB_DIROBJ)\$(LIB_NAME_IMP)       $(DIRDIST)\lib\ /y >nul 2<&1
+	@if exist $(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG) copy $(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG) $(DIRDIST)\lib >nul 2<&1
+	@-copy $(LIB_DIROBJ)\*.exp                 $(DIRDIST)\lib /y >nul 2<&1
+	@-copy $(LIB_DIROBJ)\*.pdb                 $(DIRDIST)\lib /y >nul 2<&1
+	@-copy ..\include\curl\*.h   $(DIRDIST)\include\curl\ /y  >nul 2<&1
+
+$(LIB_OBJS): $(LIB_DIROBJ) $(DIRDIST)
+
+$(DIRDIST):
+	@if not exist "$(DIRDIST)\bin" mkdir $(DIRDIST)\bin
+	@if not exist "$(DIRDIST)\include" mkdir $(DIRDIST)\include
+	@if not exist "$(DIRDIST)\include\curl" mkdir $(DIRDIST)\include\curl
+	@if not exist "$(DIRDIST)\lib" mkdir $(DIRDIST)\lib
+
+$(LIB_DIROBJ):
+	@if not exist "$(LIB_DIROBJ)" mkdir $(LIB_DIROBJ)
+	@if not exist "$(LIB_DIROBJ)\vtls" mkdir $(LIB_DIROBJ)\vtls
+
+$(CURL_DIROBJ):
+	@if not exist "$(CURL_DIROBJ)" mkdir $(CURL_DIROBJ)
+# we need a lib dir for the portability functions from libcurl
+# we use the .c directly here
+	@if not exist "$(CURL_DIROBJ)" mkdir $(CURL_DIROBJ)\lib
+
+.SUFFIXES: .c .obj .res
+
+{$(LIBCURL_SRC_DIR)\}.c{$(LIB_DIROBJ)\}.obj:
+	$(CC) $(CFLAGS) /Fo"$@"  $<
+
+{$(LIBCURL_SRC_DIR)\vtls\}.c{$(LIB_DIROBJ)\vtls\}.obj:
+	$(CC) $(CFLAGS) /Fo"$@"  $<
+
+$(LIB_DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
+	rc $(RC_FLAGS)
+
+#
+# curl.exe
+#
+
+
+!IF "$(MODE)"=="static"
+!IF "$(DEBUG)"=="yes"
+CURL_LIBCURL_LIBNAME=$(LIB_NAME_STATIC_DEBUG)
+!ELSE
+CURL_LIBCURL_LIBNAME=$(LIB_NAME_STATIC)
+!ENDIF
+!ELSEIF "$(MODE)"=="dll"
+!IF "$(DEBUG)"=="yes"
+CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP_DEBUG)
+!ELSE
+CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
+!ENDIF
+!ENDIF
+
+CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
+ $(CURL_DIROBJ)\nonblock.obj \
+ $(CURL_DIROBJ)\rawstr.obj \
+ $(CURL_DIROBJ)\strtoofft.obj \
+ $(CURL_DIROBJ)\warnless.obj
+ 
+$(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
+	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
+	$(MANIFESTTOOL)
+
+{$(CURL_SRC_DIR)\}.c{$(CURL_DIROBJ)\}.obj:
+	$(CC) $(CURL_CFLAGS) /Fo"$@"  $<
+
+$(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
+	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\tool_hugehelp.c
+$(CURL_DIROBJ)\nonblock.obj: ../lib/nonblock.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/nonblock.c
+$(CURL_DIROBJ)\rawstr.obj: ../lib/rawstr.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/rawstr.c
+$(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strtoofft.c
+$(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/warnless.c
+$(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
+	rc $(CURL_RC_FLAGS)
+
+!ENDIF  # End of case where a config was provided.

@@ -1,0 +1,60 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_slist_append 3 "19 Jun 2003" "libcurl 7.10.4" "libcurl Manual"
+.SH NAME
+curl_slist_append - add a string to an slist
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "struct curl_slist *curl_slist_append(struct curl_slist *" list,
+.BI "const char * "string ");"
+.ad
+.SH DESCRIPTION
+curl_slist_append() appends a specified string to a linked list of
+strings. The existing \fIlist\fP should be passed as the first argument while
+the new list is returned from this function. The specified \fIstring\fP has
+been appended when this function returns. curl_slist_append() copies the
+string.
+
+The list should be freed again (after usage) with
+\fBcurl_slist_free_all(3)\fP.
+.SH RETURN VALUE
+A null pointer is returned if anything went wrong, otherwise the new list
+pointer is returned.
+.SH EXAMPLE
+.nf
+ CURL handle;
+ struct curl_slist *slist=NULL;
+
+ slist = curl_slist_append(slist, "pragma:");
+
+ if (slist == NULL)
+   return -1;
+
+ curl_easy_setopt(handle, CURLOPT_HTTPHEADER, slist);
+
+ curl_easy_perform(handle);
+
+ curl_slist_free_all(slist); /* free the list again */
+.fi
+.SH "SEE ALSO"
+.BR curl_slist_free_all "(3), "

@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+LIST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+* LIST () "/" /806/blurdybloop
+* LIST (\Noselect) "/" /806/foo
+* LIST () "/" /806/foo/bar
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP LIST mailbox
+ </name>
+ <command>
+imap://%HOSTIP:%IMAPPORT/806 -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 LIST "806" *
+A004 LOGOUT
+</protocol>
+</verify>
+</testcase>

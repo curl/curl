@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data sendzero="yes">
+</data>
+<size>
+0
+</size>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<name>
+FTP download an empty file
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/182
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+SIZE 182
+RETR 182
+QUIT
+</protocol>
+</verify>
+</testcase>

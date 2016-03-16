@@ -1,0 +1,37 @@
+<testcase>
+<info>
+<keywords>
+FTP
+CONNECT_ONLY
+</keywords>
+</info>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib597
+</tool>
+ <name>
+FTP connect only option
+ </name>
+
+<command>
+ftp://%HOSTIP:%FTPPORT
+</command>
+
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+QUIT
+</protocol>
+</verify>
+</testcase>

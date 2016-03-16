@@ -1,0 +1,69 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+compressed
+Transfer-Encoding
+chunked Transfer-Encoding
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data base64="yes">
+SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBNb24sIDI5IE5vdiAyMDI0IDIxOjU2OjUzIEdNVA0KU2Vy
+dmVyOiBTb21ldGhpbmctVEUtZnJpZW5kbHkvMC4xDQpWYXJ5OiBBY2NlcHQtRW5jb2RpbmcNCkNv
+bnRlbnQtVHlwZTogdGV4dC9odG1sOyBjaGFyc2V0PUlTTy04ODU5LTENClRyYW5zZmVyLUVuY29k
+aW5nOiBnemlwLCBjaHVua2VkDQoNCjE0DQofiwgIeZ6rQQADbGFsYWxhAMvJzA0KMTgNCktVMORS
+yAHRRlwKEIYxFwAKAnFgGAAAAA0KMA0KDQo=
+</data>
+
+<datacheck>
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2024 21:56:53 GMT
+Server: Something-TE-friendly/0.1
+Vary: Accept-Encoding
+Content-Type: text/html; charset=ISO-8859-1
+Transfer-Encoding: gzip, chunked
+
+line 1
+ line 2
+  line 3
+</datacheck>
+
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+libz
+</features>
+<server>
+http
+</server>
+ <name>
+HTTP GET gzip+chunked transfer-encoded content
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1124 --tr-encoding
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1124 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Connection: TE
+TE: gzip
+
+</protocol>
+</verify>
+</testcase>

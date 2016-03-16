@@ -1,0 +1,109 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+FTP
+PASV
+FILE
+multiprotocol
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data1 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data1>
+<data2 nocheck="yes">
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data2>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+ftp
+file
+</server>
+ <name>
+HTTP GET followed by FTP RETR followed by FILE
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/20010001 ftp://%HOSTIP:%FTPPORT/20010002 file://localhost/%PWD/log/test2001.txt
+</command>
+<file name="log/test2001.txt">
+foo
+   bar
+bar
+   foo
+moo
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /20010001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+SIZE 20010002
+RETR 20010002
+QUIT
+</protocol>
+<stdout>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+data
+    to
+      see
+that FTP
+works
+  so does it?
+foo
+   bar
+bar
+   foo
+moo
+</stdout>
+</verify>
+</testcase>

@@ -1,0 +1,34 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+FAILURE
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+OpenSSL
+</features>
+<server>
+https
+</server>
+ <name>
+simple HTTPS GET with invalid crypto engine
+ </name>
+ <command>
+--engine invalid-crypto-engine-xyzzy -k https://%HOSTIP:%HTTPSPORT/308
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+53
+</errorcode>
+</verify>
+</testcase>

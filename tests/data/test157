@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--anyauth
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 No Authorization Required swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Connection: close
+
+GET received and served just fine. Thank you very much
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP GET with --anyauth (when the server requires none)
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/157 -u testuser:testpass --anyauth
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /157 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+If-Modified-Since
+-z
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2010 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP with -z "older date"
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/77 -z "dec 12 12:00:00 1999 GMT"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /77 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+If-Modified-Since: Sun, 12 Dec 1999 12:00:00 GMT
+
+</protocol>
+</verify>
+</testcase>

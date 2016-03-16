@@ -1,0 +1,53 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_FTPSSLAUTH 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_FTPSSLAUTH \- set order in which to attempt TLS vs SSL when using FTP
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTPSSLAUTH, long order);
+.SH DESCRIPTION
+Pass a long using one of the values from below, to alter how libcurl issues
+\&"AUTH TLS" or "AUTH SSL" when FTP over SSL is activated. This is only
+interesting if \fICURLOPT_USE_SSL(3)\fP is also set.
+
+Possible \fIorder\fP values:
+.IP CURLFTPAUTH_DEFAULT
+Allow libcurl to decide.
+.IP CURLFTPAUTH_SSL
+Try "AUTH SSL" first, and only if that fails try "AUTH TLS".
+.IP CURLFTPAUTH_TLS
+Try "AUTH TLS" first, and only if that fails try "AUTH SSL".
+.SH DEFAULT
+CURLFTPAUTH_DEFAULT
+.SH PROTOCOLS
+FTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.12.2
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_USE_SSL "(3), " CURLOPT_FTP_SSL_CCC "(3), "

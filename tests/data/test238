@@ -1,0 +1,42 @@
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<servercmd>
+REPLY EPSV 229 Entering Passiv Mode (|||1000000|)
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP getting bad port in response to EPSV
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/238
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 13 = CURLE_FTP_WEIRD_PASV_REPLY
+<errorcode>
+13
+</errorcode>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+QUIT
+</protocol>
+</verify>
+</testcase>

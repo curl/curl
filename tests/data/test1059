@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP CONNECT
+proxytunnel
+FTP
+FAILURE
+</keywords>
+
+</info>
+#
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 501 Method not implemented swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Connection: close
+Content-Length: 0
+
+</connect>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+ftp
+</features>
+<server>
+http
+</server>
+ <name>
+HTTP CONNECT with proxytunnel to unsupported FTP URL
+ </name>
+ <command>
+ftp://test-number:1059/wanted/page -p -x %HOSTIP:%HTTPPORT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# The server doesn't implement CONNECT for ftp, so this must be a failure test
+<errorcode>
+56
+</errorcode>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+CONNECT test-number:1059 HTTP/1.1
+Host: test-number:1059
+
+</protocol>
+</verify>
+</testcase>

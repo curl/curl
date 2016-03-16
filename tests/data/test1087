@@ -1,0 +1,107 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+HTTP Basic auth
+HTTP proxy Basic auth
+followlocation
+--anyauth
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data1000 nocheck="yes">
+HTTP/1.1 401 Authorization Required
+WWW-Authenticate: Basic
+Content-Type: text/plain
+Content-Length: 0
+
+</data1000>
+<data1001 nocheck="yes">
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/plain
+Funny-head: yesyes
+Location: http://goto.second.host.now/10871002
+Content-Length: 0
+Connection: close
+
+</data1001>
+<data1002 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/plain
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</data1002>
+
+<datacheck>
+HTTP/1.1 401 Authorization Required
+WWW-Authenticate: Basic
+Content-Type: text/plain
+Content-Length: 0
+
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/plain
+Funny-head: yesyes
+Location: http://goto.second.host.now/10871002
+Content-Length: 0
+Connection: close
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/plain
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP, proxy with --anyauth and Location: to new host
+ </name>
+ <command>
+http://first.host.it.is/we/want/that/page/10871000 -x %HOSTIP:%HTTPPORT --user iam:myself --location --anyauth
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET http://first.host.it.is/we/want/that/page/10871000 HTTP/1.1
+Host: first.host.it.is
+Accept: */*
+
+GET http://first.host.it.is/we/want/that/page/10871000 HTTP/1.1
+Host: first.host.it.is
+Authorization: Basic aWFtOm15c2VsZg==
+Accept: */*
+
+GET http://goto.second.host.now/10871002 HTTP/1.1
+Host: goto.second.host.now
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

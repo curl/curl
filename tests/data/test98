@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+chunked Transfer-Encoding
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.0 200 OK
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 6
+
+blaha
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP PUT from stdin with set size, disabling chunked transfer-encoding
+ </name>
+ <command>
+ -T - -H "Transfer-Encoding:" -H "Content-Length: 14" http://%HOSTIP:%HTTPPORT/98
+</command>
+<stdin>
+data on stdin
+</stdin>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+PUT /98 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 14
+Expect: 100-continue
+
+data on stdin
+</protocol>
+</verify>
+</testcase>

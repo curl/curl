@@ -1,0 +1,93 @@
+<testcase>
+<info>
+<keywords>
+Metalink
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Wed, 20 Jun 2012 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 37
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name2011; charset=funny; option=strange
+Funny-head: yesyes
+
+Data delivered from an HTTP resource
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+file
+Metalink
+</features>
+ <name>
+Metalink local XML file, HTTP resource, hash mismatch
+ </name>
+<command option="no-output,no-include">
+--metalink file://%PWD/log/test2011.metalink
+</command>
+# local metalink file written before test command runs
+<file name="log/test2011.metalink">
+<?xml version="1.0" encoding="utf-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/">
+ <files>
+  <file name="log/download2011">
+   <verification>
+    <hash type="sha256">badbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadb</hash>
+   </verification>
+   <resources maxconnections="1">
+    <url type="http" preference="90">http://%HOSTIP:%HTTPPORT/2011</url>
+   </resources>
+  </file>
+ </files>
+</metalink>
+</file>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl log/2011 log/name2011
+</postcheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /2011 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<file1 name="log/download2011">
+Data delivered from an HTTP resource
+</file1>
+<file2 name="log/stdout2011">
+</file2>
+<file3 name="log/stderr2011">
+Metalink: parsing (file://%PWD/log/test2011.metalink) metalink/XML...
+Metalink: parsing (file://%PWD/log/test2011.metalink) OK
+Metalink: fetching (log/download2011) from (http://%HOSTIP:%HTTPPORT/2011)...
+Metalink: fetching (log/download2011) from (http://%HOSTIP:%HTTPPORT/2011) OK
+Metalink: validating (log/download2011)...
+Metalink: validating (log/download2011) [sha-256] FAILED (digest mismatch)
+</file3>
+<stripfile3>
+$_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))
+</stripfile3>
+</verify>
+</testcase>

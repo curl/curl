@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<servercmd>
+REPLY PASV 227 Entering Passiv Mode (1216,256,2,127,127,127)
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP getting bad host in 227-response to PASV
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/237 --disable-epsv
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+# The bogus address used here is chosen specifically so that when processed on
+# certain hosts with buggy resolver code, the resulting address (192.0.2.127)
+# is from an address block that is guaranteed never to be assigned (RFC3330).
+<verify>
+# curl: (15) Can't resolve new host 1216.256.2.127:32639
+# 15 => CURLE_FTP_CANT_GET_HOST
+# some systems just don't fail on the illegal host name/address but instead
+# moves on and attempt to connect to... yes, to what?
+# 7= CURLE_COULDNT_CONNECT
+<errorcode>
+15, 7
+</errorcode>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+PASV
+</protocol>
+</verify>
+</testcase>

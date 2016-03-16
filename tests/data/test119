@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PORT
+RETR
+FAILURE
+</keywords>
+</info>
+# Server-side
+<reply>
+<servercmd>
+REPLY RETR 314 bluah you f00l!
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP download, failed RETR with PORT
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/119 -P -
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+19
+</errorcode>
+# Strip all valid kinds of PORT and EPRT that curl can send
+<strip>
+^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
+^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
+</strip>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+TYPE I
+SIZE 119
+RETR 119
+QUIT
+</protocol>
+</verify>
+</testcase>

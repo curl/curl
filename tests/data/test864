@@ -1,0 +1,54 @@
+<testcase>
+<info>
+<keywords>
+POP3
+APOP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+CAPA APOP
+REPLY welcome +OK cURL POP3 server ready to serve <1972.987654321\@curl>
+</servercmd>
+<data>
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+pop3
+</server>
+<features>
+crypto
+</features>
+ <name>
+POP3 APOP authentication
+ </name>
+ <command>
+pop3://%HOSTIP:%POP3PORT/864 -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+CAPA
+APOP user 7501b4cdc224d469940e65e7b5e4d6eb
+RETR 864
+QUIT
+</protocol>
+</verify>
+</testcase>

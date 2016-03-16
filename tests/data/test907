@@ -1,0 +1,63 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+SASL
+SASL AUTH DIGEST-MD5
+RFC2831
+RFC4954
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH DIGEST-MD5
+REPLY AUTH 334 cmVhbG09ImN1cmwiLG5vbmNlPSI1MzAwZDE3YTFkNjk1YmQ0MTFlNGNkZjk2Zjk1NDhjMjNjZWQ2MTc1IixhbGdvcml0aG09bWQ1LXNlc3MscW9wPSJhdXRoIg==
+REPLY dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM0MzMzMjMyMzQzMzMyMzMzNDMzMzIzNCIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJzbXRwL2N1cmwiLHJlc3BvbnNlPWJkYmExNzYwOGY4NmMyZjEzYTczMTM1NzdkZjkyMzNkLHFvcD1hdXRo 334
+REPLY  235 Authenticated
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<features>
+!SSPI
+debug
+crypto
+</features>
+ <name>
+SMTP DIGEST-MD5 authentication
+ </name>
+<stdin>
+mail body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/907 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user:secret -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 907
+AUTH DIGEST-MD5
+dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM0MzMzMjMyMzQzMzMyMzMzNDMzMzIzNCIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJzbXRwL2N1cmwiLHJlc3BvbnNlPWJkYmExNzYwOGY4NmMyZjEzYTczMTM1NzdkZjkyMzNkLHFvcD1hdXRo
+
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+mail body
+.
+</upload>
+</verify>
+</testcase>

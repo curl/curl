@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+</keywords>
+</info>
+
+# Server-side
+<reply>
+
+<connect nocheck="yes">
+HTTP/1.1 405 Method Not Allowed swsclose
+
+And you should ignore this data.
+</connect>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP proxy CONNECT with custom User-Agent header
+ </name>
+ <command>
+http://test.remote.example.com.287:%HTTPPORT/path/287 -H "User-Agent: looser/2015" --proxy http://%HOSTIP:%HTTPPORT --proxytunnel --proxy-header "User-Agent: looser/2007"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+CONNECT test.remote.example.com.287:%HTTPPORT HTTP/1.1
+Host: test.remote.example.com.287:%HTTPPORT
+User-Agent: looser/2007
+
+</protocol>
+# CURLE_RECV_ERROR
+<errorcode>
+56
+</errorcode>
+<stdout>
+HTTP/1.1 405 Method Not Allowed swsclose
+
+</stdout>
+</verify>
+</testcase>

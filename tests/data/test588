@@ -1,0 +1,69 @@
+<testcase>
+#
+# This test is exactly like 525 but the server rejects the EPRT command.
+# Written up to make sure that there's nothing in the multi interface
+# active connection case that differs between PORT and EPRT use
+#
+<info>
+<keywords>
+FTP
+PORT
+STOR
+multi
+EPRT refused
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+<servercmd>
+REPLY EPRT 500 we don't like EPRT now
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib525
+</tool>
+ <name>
+FTP PORT upload using multi interface, EPRT doesn't work
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/path/588 log/upload588
+</command>
+<file name="log/upload588">
+Moooooooooooo
+ upload this
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# Strip off parts of the PORT and EPRT commands that might differ
+<strippart>
+s/^PORT (.*)/PORT/
+s/^EPRT \|1\|(.*)/EPRT \|1\|/
+</strippart>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD path
+EPRT |1|
+PORT
+TYPE I
+STOR 588
+QUIT
+</protocol>
+<upload>
+Moooooooooooo
+ upload this
+</upload>
+</verify>
+</testcase>

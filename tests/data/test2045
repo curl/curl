@@ -1,0 +1,54 @@
+<testcase>
+<info>
+<keywords>
+FTP
+--proto-default
+</keywords>
+</info>
+
+
+#
+# Server-side
+<reply>
+<!--
+The purpose of this test is to make sure the --proto-default option works
+properly. We specify a default protocol of FTP and if the option works properly
+curl will use the FTP protocol. If the option is broken however curl will use
+the HTTP protocol.
+In the broken scenario curl would use HTTP to talk to our FTP server. We handle
+that by replying with something that both protocols can understand. Our FTP
+server allows a custom welcome message, so we use that feature to make an HTTP
+reply that contains an FTP reply (think polyglot). In the case of FTP we expect
+curl will return CURLE_FTP_WEIRD_SERVER_REPLY so we test for that return code.
+-->
+<servercmd>
+REPLY welcome HTTP/1.1 200 OK\r\nContent-Length: 21\r\n\r\n500 Weird FTP Reply
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+none
+</features>
+<server>
+ftp
+</server>
+<name>
+Set the default protocol to ftp for a schemeless URL
+</name>
+<command>
+-H "User-Agent:" -H "Host:" -H "Accept:" --proto-default ftp %HOSTIP:%FTPPORT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# CURLE_FTP_WEIRD_SERVER_REPLY is error code 8
+<errorcode>
+8
+</errorcode>
+</verify>
+</testcase>

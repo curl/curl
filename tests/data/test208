@@ -1,0 +1,74 @@
+<testcase>
+<info>
+<keywords>
+FTP
+HTTP
+HTTP PUT
+HTTP proxy
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.0 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+ftp
+</features>
+ <name>
+HTTP PUT to a FTP URL with username+password - over HTTP proxy
+ </name>
+ <command>
+-x http://%HOSTIP:%HTTPPORT ftp://daniel:mysecret@host.com/we/want/208 -T log/test208.txt
+</command>
+<file name="log/test208.txt">
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+PUT ftp://daniel:mysecret@host.com/we/want/208 HTTP/1.1
+Host: host.com:21
+Authorization: Basic ZGFuaWVsOm15c2VjcmV0
+Accept: */*
+Content-Length: 78
+Expect: 100-continue
+
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+</protocol>
+</verify>
+</testcase>

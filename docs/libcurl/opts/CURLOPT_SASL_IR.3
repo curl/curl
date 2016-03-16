@@ -1,0 +1,56 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SASL_IR 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SASL_IR \- enable sending initial response in first packet
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SASL_IR, long enable);
+.SH DESCRIPTION
+Pass a long. If the value is 1, curl will send the initial response to the
+server in the first authentication packet in order to reduce the number of
+ping pong requests. Only applicable to the following supporting SASL
+authentication mechanisms:
+
+* Login
+* Plain
+* GSSAPI
+* NTLM
+* OAuth 2.0
+
+Note: Whilst IMAP supports this option there is no need to explicitly set it,
+as libcurl can determine the feature itself when the server supports the
+SASL-IR CAPABILITY.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+IMAP, POP3 and SMTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.31.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_MAIL_AUTH "(3), " CURLOPT_MAIL_FROM "(3), "

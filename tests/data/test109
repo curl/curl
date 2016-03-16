@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+FTP
+EPSV
+APPE
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP PASV upload append
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/109 -T log/upload109 --append
+</command>
+<file name="log/upload109">
+Moooooooooooo
+ upload this
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+APPE 109
+QUIT
+</protocol>
+<upload>
+Moooooooooooo
+ upload this
+</upload>
+</verify>
+</testcase>

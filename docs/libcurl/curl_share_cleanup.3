@@ -1,0 +1,40 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_share_cleanup 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.SH NAME
+curl_share_cleanup - Clean up a shared object
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "CURLSHcode curl_share_cleanup(CURLSH *" share_handle ");"
+.ad
+.SH DESCRIPTION
+This function deletes a shared object. The share handle cannot be used anymore
+when this function has been called.
+
+.SH RETURN VALUE
+CURLSHE_OK (zero) means that the option was set properly, non-zero means an
+error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP
+man page for the full list with descriptions. If an error occurs, then the
+share object will not be deleted.
+.SH "SEE ALSO"
+.BR curl_share_init "(3), " curl_share_setopt "(3)"

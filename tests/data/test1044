@@ -1,0 +1,58 @@
+<testcase>
+# Similar to test141
+<info>
+<keywords>
+FTP
+NOBODY
+Largefile
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+<size>
+9999999999
+</size>
+<mdtm>
+213 20080726102659
+</mdtm>
+</reply>
+
+# Client-side
+<client>
+<features>
+large_file
+</features>
+<server>
+ftp
+</server>
+ <name>
+FTP download large file info with -I
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/blalbla/1044 -I
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD blalbla
+MDTM 1044
+TYPE I
+SIZE 1044
+REST 0
+QUIT
+</protocol>
+<stdout>
+Last-Modified: Sat, 26 Jul 2008 10:26:59 GMT
+Content-Length: 9999999999
+Accept-ranges: bytes
+</stdout>
+</verify>
+</testcase>

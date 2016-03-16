@@ -1,0 +1,67 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+SASL
+SASL AUTH DIGEST-MD5
+SASL AUTH PLAIN
+SASL DOWNGRADE
+RFC2831
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH DIGEST-MD5 PLAIN
+REPLY "AUTHENTICATE DIGEST-MD5" + Rubbish
+REPLY * A002 NO AUTH exchange cancelled by client
+REPLY "AUTHENTICATE PLAIN" +
+REPLY dXNlcgB1c2VyAHNlY3JldA== A003 OK AUTHENTICATE completed
+</servercmd>
+<data>
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+<features>
+!SSPI
+debug
+crypto
+</features>
+ <name>
+IMAP DIGEST-MD5 authentication with SASL downgrade
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/835/;UID=1' -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 AUTHENTICATE DIGEST-MD5
+*
+A003 AUTHENTICATE PLAIN
+dXNlcgB1c2VyAHNlY3JldA==
+A004 SELECT 835
+A005 FETCH 1 BODY[]
+A006 LOGOUT
+</protocol>
+</verify>
+</testcase>

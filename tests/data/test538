@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+FTP
+FAILURE
+multi
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<servercmd>
+REPLY PASS 314 bluah you f00l!
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+# NOTE that we use the 504 tool for this case
+<tool>
+lib504
+</tool>
+ <name>
+FTP multi-interface download, failed login: PASS not valid
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/538
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+# TEST_ERR_SUCCESS is errorcode 120
+<verify>
+<errorcode>
+120
+</errorcode>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+</protocol>
+</verify>
+</testcase>

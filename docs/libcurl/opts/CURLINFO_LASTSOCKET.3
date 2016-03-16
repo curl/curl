@@ -1,0 +1,53 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLINFO_LASTSOCKET 3 "12 Sep 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
+.SH NAME
+CURLINFO_LASTSOCKET \- get the last socket used
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_LASTSOCKET, long *socket);
+.SH DESCRIPTION
+Deprecated since 7.45.0. Use \fICURLINFO_ACTIVESOCKET(3)\fP instead.
+
+Pass a pointer to a long to receive the last socket used by this curl
+session. If the socket is no longer valid, -1 is returned. When you finish
+working with the socket, you must call curl_easy_cleanup() as usual and let
+libcurl close the socket and cleanup other resources associated with the
+handle. This is typically used in combination with
+\fICURLOPT_CONNECT_ONLY(3)\fP.
+
+NOTE: this API is deprecated since it is not working on win64 where the SOCKET
+type is 64 bits large while its 'long' is 32 bits. Use the
+\fICURLINFO_ACTIVESOCKET(3)\fP instead, if possible.
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.15.2
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
+.BR CURLINFO_ACTIVESOCKET "(3), "

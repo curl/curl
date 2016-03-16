@@ -1,0 +1,69 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+multi
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 404 Badness
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+ETag: "21025-dc7-39462498"
+Content-Length: 6
+Content-Type: text/html
+Funny-head: yesyes
+
+hejsan
+</data>
+<data1>
+HTTP/1.1 200 Fine
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 13
+Connection: close
+Content-Type: text/html
+
+fine content
+</data1>
+
+<datacheck>
+fine content
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib533
+</tool>
+
+ <name>
+HTTP GET multi two files with FAILONERROR
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/535 http://%HOSTIP:%HTTPPORT/5350001
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /535 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /5350001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

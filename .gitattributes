@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Auto detect text files and perform LF normalization
 * text=auto
 
@@ -15,3 +16,10 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+=======
+*.dsw -crlf
+buildconf eol=lf
+configure.ac eol=lf
+*.m4 eol=lf
+*.in eol=lf
+>>>>>>> 3cb3affb2c7c1cec1069452306baa6f51d8bb65a

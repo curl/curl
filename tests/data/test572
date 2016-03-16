@@ -1,0 +1,122 @@
+<testcase>
+
+#Informational
+<info>
+<keywords>
+RTSP
+GET_PARAMETER
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data1>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+Session: getparams-test
+CSeq: 1
+
+</data1>
+
+<data2>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+Session: getparams-test
+Content-Type: text/parameters
+Content-Length: 32
+Cseq: 2
+
+scale=enormous
+speed=ludicrous
+
+</data2>
+
+<data3>
+RTSP/1.0 204 OK
+Server: RTSPD/libcurl-test
+Session: getparams-test
+Cseq: 3
+
+</data3>
+
+<data4>
+RTSP/1.0 200 Okie Dokie
+Server: RTSPD/libcurl-test
+Session: getparams-test
+Cseq: 4
+Content-Length: 37
+
+packets_received: 1000
+jitter: 0.314
+</data4>
+<data5>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+Session: getparams-test
+CSeq: 5
+Curl-private: swsclose
+Informational: Empty Options Response
+
+</data5>
+</reply>
+
+# Client-Side
+<client>
+<server>
+rtsp
+</server>
+<tool>
+lib572
+</tool>
+
+<name>
+RTSP GET_PARAMETER (Put/Heartbeat/Post)
+</name>
+<command>
+rtsp://%HOSTIP:%RTSPPORT/572
+</command>
+# file written before test command runs
+<file name="log/file572.txt">
+scale
+speed
+</file>
+</client>
+
+<verify>
+<strip>
+^If-Modified-Since:.*
+</strip>
+<protocol>
+SETUP rtsp://%HOSTIP:%RTSPPORT/5720001 RTSP/1.0
+CSeq: 1
+Transport: Planes/Trains/Automobiles
+
+GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/5720002 RTSP/1.0
+CSeq: 2
+Session: getparams-test
+Content-Length: 12
+Content-Type: text/parameters
+
+scale
+speed
+GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/5720003 RTSP/1.0
+CSeq: 3
+Session: getparams-test
+
+GET_PARAMETER rtsp://%HOSTIP:%RTSPPORT/5720004 RTSP/1.0
+CSeq: 4
+Session: getparams-test
+Content-Length: 24
+Content-Type: text/parameters
+
+packets_received
+jitter
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/5720005 RTSP/1.0
+CSeq: 5
+Session: getparams-test
+
+</protocol>
+</verify>
+
+</testcase>
+

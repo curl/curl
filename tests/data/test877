@@ -1,0 +1,68 @@
+<testcase>
+<info>
+<keywords>
+POP3
+SASL
+SASL AUTH NTLM
+SASL CANCELLATION
+RFC1734
+RFC5034
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH NTLM
+REPLY AUTH +
+REPLY TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA= + Rubbish
+REPLY * -ERR AUTH exchange cancelled by client
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+pop3
+</server>
+<features>
+NTLM
+!SSPI
+</features>
+ <name>
+POP3 NTLM graceful cancellation
+ </name>
+ <setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+ </setenv>
+ <command>
+pop3://%HOSTIP:%POP3PORT/877 -u testuser:testpass
+</command>
+<precheck>
+chkhostname curlhost
+</precheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 67 - CURLE_LOGIN_DENIED
+<errorcode>
+67
+</errorcode>
+#
+# The multi interface considers a broken "CONNECT" as a prematurely broken
+# transfer and such a connection will not get a "QUIT"
+<protocol>
+CAPA
+AUTH NTLM
+TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+*
+</protocol>
+</verify>
+</testcase>

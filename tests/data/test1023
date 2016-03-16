@@ -1,0 +1,37 @@
+<testcase>
+<info>
+<keywords>
+curl-config
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+Compare curl --version with curl-config --vernum
+ </name>
+ <command>
+--version
+</command>
+<postcheck>
+%SRCDIR/libtest/test1022.pl ../curl-config log/stdout1023 vernum
+</postcheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

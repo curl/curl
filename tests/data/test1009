@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+TFTP
+TFTP RRQ
+--local-port
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+a chunk of
+data
+returned
+ to client
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+tftp
+</server>
+ <name>
+TFTP retrieve with --local-port
+ </name>
+ <command>
+tftp://%HOSTIP:%TFTPPORT//1009 --local-port 44444-45444
+</command>
+</client>
+
+#
+# Verify pseudo protocol after the test has been "shot"
+<verify>
+<protocol>
+opcode: 1
+mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /1009
+</protocol>
+</verify>
+</testcase>

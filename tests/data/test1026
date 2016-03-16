@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+--manual
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+curl --manual 
+ </name>
+ <command>
+--manual
+</command>
+# Search for these two sentinel lines in the manual output; if they are found,
+# then chances are good the entire manual is there.
+<postcheck>
+perl -e 'open(IN,$ARGV[0]); my $lines=grep(/(a\s*tool\s*to\s*transfer\s*data)|(mailing\s*lists\s*to\s*discuss\s*curl)/, <IN>); exit ($lines != 2); # Let this file pass an XML syntax check: </IN>' log/stdout1026
+</postcheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

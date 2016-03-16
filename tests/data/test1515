@@ -1,0 +1,62 @@
+<testcase>
+
+<info>
+<keywords>
+HTTP
+multi
+FAILURE
+resolve
+</keywords>
+</info>
+
+<reply>
+# Close the connection after the first request. Second request will happen after
+# the DNS cache timeout elapses and must succeed exactly like the first one.
+<data1>
+HTTP/1.1 200 OK
+Date: Thu, 03 Feb 2014 17:04:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+Content-Length: 6
+
+hello
+</data1>
+<data2>
+HTTP/1.1 200 OK
+Date: Thu, 03 Feb 2014 17:04:02 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+Content-Length: 6
+
+hello
+</data2>
+<datacheck>
+hello
+hello
+</datacheck>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<tool>
+lib1515
+</tool>
+<name>
+caching of manual libcurl DNS entries after DNS cache timeout
+</name>
+<command>
+path/1515 %HOSTIP %HTTPPORT
+</command>
+</client>
+
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+
+</testcase>

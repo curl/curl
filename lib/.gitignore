@@ -1,0 +1,13 @@
+*.a
+*.imp
+*.nlm
+*.orig
+*.rej
+*.res
+Makefile.vc*.dist
+TAGS
+curl_config.h
+curl_config.h.in
+libcurl.plist.dist
+libcurl.vers
+stamp-h1

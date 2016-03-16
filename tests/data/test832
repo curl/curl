@@ -1,0 +1,58 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+SASL
+SASL AUTH DIGEST-MD5
+SASL CANCELLATION
+RFC2831
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH DIGEST-MD5
+CAPA LOGINDISABLED
+REPLY AUTHENTICATE + Rubbish
+REPLY * A002 NO AUTH exchange cancelled by client
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+<features>
+!SSPI
+debug
+crypto
+</features>
+ <name>
+IMAP DIGEST-MD5 graceful cancellation
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/832/;UID=1' -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 67 - CURLE_LOGIN_DENIED
+<errorcode>
+67
+</errorcode>
+#
+# The multi interface considers a broken "CONNECT" as a prematurely broken
+# transfer and such a connection will not get a "LOGOUT"
+<protocol>
+A001 CAPABILITY
+A002 AUTHENTICATE DIGEST-MD5
+*
+</protocol>
+</verify>
+</testcase>

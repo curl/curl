@@ -1,0 +1,550 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1999 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
+# All files in the Makefile.vc* series are generated automatically from the
+# one made for MSVC version 6. Alas, if you want to do changes to any of the
+# files and send back to the project, edit the version six, make your diff and
+# mail curl-users.
+
+#############################################################
+#
+## Makefile for building curl.exe with MSVC6
+## Use: nmake -f makefile.vc6 [release | debug] [CFG=release-ssl]
+##      (default is release)
+## "nmake -f makefile.vc6 CFG=release-ssl" statically links OpenSSL
+## into curl.exe producing a standalone SSL-enabled executable.
+##
+#
+#############################################################
+
+PROGRAM_NAME = curl.exe
+
+# -------------------------------------------
+# Verify that current subdir is curl's 'src'
+# -------------------------------------------
+
+!IF ! EXIST(.\tool_main.c)
+!  MESSAGE Can not process this makefile from outside of curl's 'src' subdirectory.
+!  MESSAGE Change to curl's 'src' subdirectory, and try again.
+!  ERROR   See previous message.
+!ENDIF
+
+# ------------------------------------------------
+# Makefile.msvc.names provides libcurl file names
+# ------------------------------------------------
+
+!INCLUDE ..\winbuild\Makefile.msvc.names
+
+
+!IFNDEF OPENSSL_PATH
+OPENSSL_PATH = ../../openssl-1.0.2a
+!ENDIF
+
+!IFNDEF ZLIB_PATH
+ZLIB_PATH = ../../zlib-1.2.8
+!ENDIF
+
+!IFNDEF MACHINE
+MACHINE  = X86
+!ENDIF
+
+# USE_WINDOWS_SSPI uses windows libraries to allow NTLM authentication
+# without an openssl installation and offers the ability to authenticate
+# using the "current logged in user". Since at least with MSVC6 the sspi.h
+# header is broken it is either required to install the Windows SDK,
+# or to fix sspi.h with adding this define at the beginning of sspi.h:
+# #define FreeCredentialHandle FreeCredentialsHandle
+#
+# If, for some reason the Windows SDK is installed but not installed
+# in the default location, you can specify WINDOWS_SDK_PATH.
+# It can be downloaded from:
+# https://msdn.microsoft.com/windows/bb980924.aspx
+
+# WINDOWS_SSPI = 1
+
+!IFDEF WINDOWS_SSPI
+!IFNDEF WINDOWS_SDK_PATH
+WINDOWS_SDK_PATH = "$(PROGRAMFILES)\Microsoft SDK"
+!ENDIF
+!ENDIF
+
+########################################################
+## Nothing more to do below this line!
+
+ZLIB_CFLAGS    = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
+ZLIB_LFLAGS    = "/LIBPATH:$(ZLIB_PATH)"
+ZLIB_LIBS      = zlib.lib
+ZLIB_IMP_LIBS  = zdll.lib
+
+SSL_CFLAGS     = /DUSE_OPENSSL
+SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
+SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
+SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib
+WINLIBS        = ws2_32.lib wldap32.lib advapi32.lib
+
+WINSSL_CFLAGS  = /DUSE_SCHANNEL
+#WINSSL_LIBS    = gdi32.lib user32.lib
+
+!IFDEF USE_IDN
+WINLIBS        = $(WINLIBS) normaliz.lib
+!ENDIF
+
+# Runtime library configuration
+RTLIB   = /MD
+RTLIBD  = /MDd
+
+!IF "$(RTLIBCFG)" == "static"
+RTLIB  = /MT
+RTLIBD = /MTd
+!ENDIF
+
+## Release
+CCR   = cl.exe $(RTLIB) /O2 /DNDEBUG
+LINKR = link.exe /incremental:no /libpath:"../lib"
+RCR   = rc.exe /dDEBUGBUILD=0
+
+## Debug
+CCD   = cl.exe $(RTLIBD) /Gm /ZI /Od /D_DEBUG /GZ
+LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
+RCD   = rc.exe /dDEBUGBUILD=1
+
+CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /D_BIND_TO_CURRENT_VCLIBS_VERSION=1
+LFLAGS   = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
+RESFLAGS = /i../include
+
+# This manifest thing is for VC8, enabled by the maketgz script that
+# builds the VC8 version of this makefile. Left commented out in the VC6
+# version!
+#MANIFESTTOOL = mt -manifest $(PROGRAM_NAME).manifest -outputresource:$(PROGRAM_NAME);1
+
+!IFDEF WINDOWS_SSPI
+CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
+!ENDIF
+
+RELEASE_OBJS= \
+	nonblockr.obj \
+	rawstrr.obj \
+	strtoofftr.obj \
+	warnless.obj \
+	slist_wc.obj \
+	tool_binmoder.obj \
+	tool_bnamer.obj \
+	tool_cb_dbgr.obj \
+	tool_cb_hdrr.obj \
+	tool_cb_prgr.obj \
+	tool_cb_rear.obj \
+	tool_cb_seer.obj \
+	tool_cb_wrtr.obj \
+	tool_cfgabler.obj \
+	tool_convertr.obj \
+	tool_dirhier.obj \
+	tool_doswinr.obj \
+	tool_easysrcr.obj \
+	tool_formparser.obj \
+	tool_getparamr.obj \
+	tool_getpassr.obj \
+	tool_helpr.obj \
+	tool_helpersr.obj \
+	tool_homedirr.obj \
+	tool_hugehelpr.obj \
+	tool_libinfor.obj \
+	tool_mainr.obj \
+	tool_metalinkr.obj \
+	tool_mfilesr.obj \
+	tool_msgsr.obj \
+	tool_operater.obj \
+	tool_operhlpr.obj \
+	tool_panykeyr.obj \
+	tool_paramhlpr.obj \
+	tool_parsecfgr.obj \
+	tool_setoptr.obj \
+	tool_sleepr.obj \
+	tool_urlglobr.obj \
+	tool_utilr.obj \
+	tool_vmsr.obj \
+	tool_writeenvr.obj \
+	tool_writeoutr.obj \
+	tool_xattrr.obj \
+	curlr.res
+
+DEBUG_OBJS= \
+	nonblockd.obj \
+	rawstrd.obj \
+	strtoofftd.obj \
+	warnlessd.obj \
+	slist_wc.obj \
+	tool_binmoded.obj \
+	tool_bnamed.obj \
+	tool_cb_dbgd.obj \
+	tool_cb_hdrd.obj \
+	tool_cb_prgd.obj \
+	tool_cb_read.obj \
+	tool_cb_seed.obj \
+	tool_cb_wrtd.obj \
+	tool_cfgabled.obj \
+	tool_convertd.obj \
+	tool_dirhied.obj \
+	tool_doswind.obj \
+	tool_easysrcd.obj \
+	tool_formparsed.obj \
+	tool_getparamd.obj \
+	tool_getpassd.obj \
+	tool_helpd.obj \
+	tool_helpersd.obj \
+	tool_homedird.obj \
+	tool_hugehelpd.obj \
+	tool_libinfod.obj \
+	tool_maind.obj \
+	tool_metalinkd.obj \
+	tool_mfilesd.obj \
+	tool_msgsd.obj \
+	tool_operated.obj \
+	tool_operhlpd.obj \
+	tool_panykeyd.obj \
+	tool_paramhlpd.obj \
+	tool_parsecfgd.obj \
+	tool_setoptd.obj \
+	tool_sleepd.obj \
+	tool_urlglobd.obj \
+	tool_utild.obj \
+	tool_vmsd.obj \
+	tool_writeenvd.obj \
+	tool_writeoutd.obj \
+	tool_xattrd.obj \
+	curld.res
+
+#################################################
+# If CFG not specified, use static libs
+
+CFLAGS         = $(CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = $(LIBCURL_STA_LIB_REL)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG)
+
+#################################################
+# release dynamic library
+
+!IF "$(CFG)" == "release-dll"
+LINKLIBS       = $(LIBCURL_IMP_LIB_REL)
+LINKLIBS_DEBUG = $(LIBCURL_IMP_LIB_DBG)
+!ENDIF
+
+#################################################
+# release static library with zlib
+
+!IF "$(CFG)" == "release-zlib"
+CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(ZLIB_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(ZLIB_LIBS)
+LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with ssl
+
+!IF "$(CFG)" == "release-ssl"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_LFLAGS)
+!ENDIF
+
+#################################################
+# release dynamic library with dynamic ssl
+
+!IF "$(CFG)" == "release-dll-ssl-dll"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS)
+LINKLIBS       = $(LIBCURL_IMP_LIB_REL) $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_IMP_LIB_DBG) $(SSL_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with ssl and zlib
+
+!IF "$(CFG)" == "release-ssl-zlib"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS) $(ZLIB_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS) $(ZLIB_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with winssl and zlib
+
+!IF "$(CFG)" == "release-winssl-zlib"
+CFLAGS         = $(CFLAGS) $(WINSSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(WINSSL_LIBS) $(ZLIB_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(WINSSL_LIBS) $(ZLIB_LIBS)
+LFLAGS         = $(LFLAGS) $(WINSSL_LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with dynamic ssl
+
+!IF "$(CFG)" == "release-ssl-dll"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with dynamic zlib
+
+!IF "$(CFG)" == "release-zlib-dll"
+CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(ZLIB_IMP_LIBS)
+LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release dynamic library with dynamic zlib
+
+!IF "$(CFG)" == "release-dll-zlib-dll"
+CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS)
+LINKLIBS       = $(LIBCURL_IMP_LIB_REL) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_IMP_LIB_DBG) $(ZLIB_IMP_LIBS)
+LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with dynamic ssl and dynamic zlib
+
+!IF "$(CFG)" == "release-ssl-dll-zlib-dll"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = $(LIBCURL_STA_LIB_REL) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_STA_LIB_DBG) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release dynamic library with dynamic ssl and dynamic zlib
+
+!IF "$(CFG)" == "release-dll-ssl-dll-zlib-dll"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS)
+LINKLIBS       = $(LIBCURL_IMP_LIB_REL) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = $(LIBCURL_IMP_LIB_DBG) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+LINKLIBS       = $(LINKLIBS) $(WINLIBS)
+LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) $(WINLIBS)
+
+all : release
+
+release: $(RELEASE_OBJS)
+	$(LINKR) $(LFLAGS) $(LINKLIBS) $(RELEASE_OBJS)
+        $(MANIFESTTOOL)
+
+debug: $(DEBUG_OBJS)
+	$(LINKD) $(LFLAGS) $(LINKLIBS_DEBUG) $(DEBUG_OBJS)
+        $(MANIFESTTOOL)
+
+## Release
+nonblockr.obj: ../lib/nonblock.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
+rawstrr.obj: ../lib/rawstr.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
+strtoofftr.obj: ../lib/strtoofft.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+warnless.obj: ../lib/warnless.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/warnless.c
+slist_wc.obj: slist_wc.c
+	$(CCR) $(CFLAGS) /Fo"$@" slist_wc.c
+tool_binmoder.obj: tool_binmode.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_binmode.c
+tool_bnamer.obj: tool_bname.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_bname.c
+tool_cb_dbgr.obj: tool_cb_dbg.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_dbg.c
+tool_cb_hdrr.obj: tool_cb_hdr.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_hdr.c
+tool_cb_prgr.obj: tool_cb_prg.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_prg.c
+tool_cb_rear.obj: tool_cb_rea.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_rea.c
+tool_cb_seer.obj: tool_cb_see.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_see.c
+tool_cb_wrtr.obj: tool_cb_wrt.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cb_wrt.c
+tool_cfgabler.obj: tool_cfgable.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_cfgable.c
+tool_convertr.obj: tool_convert.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_convert.c
+tool_dirhier.obj: tool_dirhie.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_dirhie.c
+tool_doswinr.obj: tool_doswin.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_doswin.c
+tool_easysrcr.obj: tool_easysrc.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_easysrc.c
+tool_formparser.obj: tool_formparse.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_formparse.c
+tool_getparamr.obj: tool_getparam.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_getparam.c
+tool_getpassr.obj: tool_getpass.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_getpass.c
+tool_helpr.obj: tool_help.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_help.c
+tool_helpersr.obj: tool_helpers.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_helpers.c
+tool_homedirr.obj: tool_homedir.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_homedir.c
+tool_hugehelpr.obj: tool_hugehelp.c
+	$(CCR) $(CFLAGS) /Zm200 /Fo"$@" tool_hugehelp.c
+tool_libinfor.obj: tool_libinfo.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_libinfo.c
+tool_mainr.obj: tool_main.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_main.c
+tool_metalinkr.obj: tool_metalink.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_metalink.c
+tool_mfilesr.obj: tool_mfiles.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_mfiles.c
+tool_msgsr.obj: tool_msgs.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_msgs.c
+tool_operater.obj: tool_operate.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_operate.c
+tool_operhlpr.obj: tool_operhlp.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_operhlp.c
+tool_panykeyr.obj: tool_panykey.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_panykey.c
+tool_paramhlpr.obj: tool_paramhlp.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_paramhlp.c
+tool_parsecfgr.obj: tool_parsecfg.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_parsecfg.c
+tool_setoptr.obj: tool_setopt.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_setopt.c
+tool_sleepr.obj: tool_sleep.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_sleep.c
+tool_urlglobr.obj: tool_urlglob.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_urlglob.c
+tool_utilr.obj: tool_util.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_util.c
+tool_vmsr.obj: tool_vms.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_vms.c
+tool_writeenvr.obj: tool_writeenv.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_writeenv.c
+tool_writeoutr.obj: tool_writeout.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_writeout.c
+tool_xattrr.obj: tool_xattr.c
+	$(CCR) $(CFLAGS) /Fo"$@" tool_xattr.c
+curlr.res : curl.rc
+	$(RCR) $(RESFLAGS) /Fo"$@" curl.rc
+
+## Debug
+nonblockd.obj: ../lib/nonblock.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
+rawstrd.obj: ../lib/rawstr.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
+strtoofftd.obj: ../lib/strtoofft.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+warnlessd.obj: ../lib/warnless.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/warnless.c
+slist_wc.obj: slist_wc.c
+	$(CCD) $(CFLAGS) /Fo"$@" slist_wc.c
+tool_binmoded.obj: tool_binmode.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_binmode.c
+tool_bnamed.obj: tool_bname.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_bname.c
+tool_cb_dbgd.obj: tool_cb_dbg.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_dbg.c
+tool_cb_hdrd.obj: tool_cb_hdr.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_hdr.c
+tool_cb_prgd.obj: tool_cb_prg.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_prg.c
+tool_cb_read.obj: tool_cb_rea.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_rea.c
+tool_cb_seed.obj: tool_cb_see.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_see.c
+tool_cb_wrtd.obj: tool_cb_wrt.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cb_wrt.c
+tool_cfgabled.obj: tool_cfgable.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_cfgable.c
+tool_convertd.obj: tool_convert.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_convert.c
+tool_dirhied.obj: tool_dirhie.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_dirhie.c
+tool_doswind.obj: tool_doswin.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_doswin.c
+tool_easysrcd.obj: tool_easysrc.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_easysrc.c
+tool_formparsed.obj: tool_formparse.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_formparse.c
+tool_getparamd.obj: tool_getparam.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_getparam.c
+tool_getpassd.obj: tool_getpass.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_getpass.c
+tool_helpd.obj: tool_help.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_help.c
+tool_helpersd.obj: tool_helpers.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_helpers.c
+tool_homedird.obj: tool_homedir.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_homedir.c
+tool_hugehelpd.obj: tool_hugehelp.c
+	$(CCD) $(CFLAGS) /Zm200 /Fo"$@" tool_hugehelp.c
+tool_libinfod.obj: tool_libinfo.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_libinfo.c
+tool_maind.obj: tool_main.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_main.c
+tool_metalinkd.obj: tool_metalink.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_metalink.c
+tool_mfilesd.obj: tool_mfiles.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_mfiles.c
+tool_msgsd.obj: tool_msgs.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_msgs.c
+tool_operated.obj: tool_operate.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_operate.c
+tool_operhlpd.obj: tool_operhlp.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_operhlp.c
+tool_panykeyd.obj: tool_panykey.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_panykey.c
+tool_paramhlpd.obj: tool_paramhlp.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_paramhlp.c
+tool_parsecfgd.obj: tool_parsecfg.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_parsecfg.c
+tool_setoptd.obj: tool_setopt.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_setopt.c
+tool_sleepd.obj: tool_sleep.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_sleep.c
+tool_urlglobd.obj: tool_urlglob.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_urlglob.c
+tool_utild.obj: tool_util.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_util.c
+tool_vmsd.obj: tool_vms.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_vms.c
+tool_writeenvd.obj: tool_writeenv.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_writeenv.c
+tool_writeoutd.obj: tool_writeout.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_writeout.c
+tool_xattrd.obj: tool_xattr.c
+	$(CCD) $(CFLAGS) /Fo"$@" tool_xattr.c
+curld.res : curl.rc
+	$(RCD) $(RESFLAGS) /Fo"$@" curl.rc
+
+clean:
+	@-erase $(PROGRAM_NAME) 2> NUL
+	@-erase $(RELEASE_OBJS) 2> NUL
+	@-erase $(DEBUG_OBJS) 2> NUL
+	@-erase *.idb 2> NUL
+	@-erase *.pdb 2> NUL
+	@-erase *.pch 2> NUL
+	@-erase *.ilk 2> NUL

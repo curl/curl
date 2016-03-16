@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+--help
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+curl --help
+ </name>
+ <command>
+--help
+</command>
+# Search for these two sentinel lines in the help output; if they are found,
+# then chances are good the entire help is there.
+<postcheck>
+perl -e 'open(IN,$ARGV[0]); my $lines=grep(/(Usage: curl )|(--version\s*Show version)/, <IN>); exit ($lines != 2); # Let this file pass an XML syntax check: </IN>' log/stdout1027
+</postcheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

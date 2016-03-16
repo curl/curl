@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PORT
+STOR
+multi
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+<servercmd>
+REPLY STOR 425 Permission Denied. File Exists.
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib525
+</tool>
+ <name>
+FTP PORT upload using multi interface and get 425 response
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/path/531 log/upload531
+</command>
+<file name="log/upload531">
+Moooooooooooo
+don't upload this
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# Strip all valid kinds of PORT and EPRT that curl can send
+<strip>
+^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
+^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
+</strip>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD path
+PORT 127,0,0,1,5,109
+TYPE I
+STOR 531
+QUIT
+</protocol>
+
+</verify>
+</testcase>

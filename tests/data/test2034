@@ -1,0 +1,58 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+PEM certificate
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 7
+
+MooMoo
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+SSL
+SSLpinning
+</features>
+<server>
+https Server-localhost-sv.pem
+</server>
+ <name>
+simple HTTPS GET with DER public key pinning
+ </name>
+ <command>
+--cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pub.der https://localhost:%HTTPSPORT/2034
+</command>
+# Ensure that we're running on localhost because we're checking the host name
+<precheck>
+perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
+</precheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /2034 HTTP/1.1
+Host: localhost:%HTTPSPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

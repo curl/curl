@@ -1,0 +1,25 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+memory-includes
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+ <name>
+Verify memory #include files in libcurl's C source files
+ </name>
+
+<command type="perl">
+%SRCDIR/mem-include-scan.pl %SRCDIR/../lib
+</command>
+</client>
+
+</testcase>

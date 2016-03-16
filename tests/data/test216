@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP upload two files to the same dir
+ </name>
+ <command>
+-T log/upload.216 ftp://%HOSTIP:%FTPPORT/a/path/216/ -T log/upload.216 ftp://%HOSTIP:%FTPPORT/a/path/216/%2e%2eanotherup
+</command>
+<file name="log/upload.216">
+upload this file twice
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD a
+CWD path
+CWD 216
+EPSV
+TYPE I
+STOR upload.216
+EPSV
+STOR ..anotherup
+QUIT
+</protocol>
+</verify>
+</testcase>

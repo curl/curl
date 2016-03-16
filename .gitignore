@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
@@ -45,3 +46,57 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+=======
+*.asc
+*.dll
+*.exe
+*.exp
+*.la
+*.lib
+*.lo
+*.o
+*.obj
+*.pdb
+*~
+.*.swp
+.cproject
+.deps
+.dirstamp
+.libs
+.project
+.settings
+/build/
+/builds/
+CHANGES.dist
+Debug
+INSTALL
+Makefile
+Makefile.in
+Release
+TAGS
+aclocal.m4
+aclocal.m4.bak
+autom4te.cache
+compile
+config.cache
+config.guess
+config.log
+config.status
+config.sub
+configure
+curl-*.tar.bz2
+curl-*.tar.gz
+curl-*.tar.lzma
+curl-*.zip
+curl-config
+depcomp
+install-sh
+libcurl.pc
+libtool
+ltmain.sh
+missing
+mkinstalldirs
+tags
+test-driver
+scripts/_curl
+>>>>>>> 3cb3affb2c7c1cec1069452306baa6f51d8bb65a
