@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+TFTP
+TFTP WRQ
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+tftp
+</server>
+ <name>
+TFTP send
+ </name>
+ <command>
+-T log/test285.txt tftp://%HOSTIP:%TFTPPORT// --trace-ascii log/traceit
+</command>
+<file name="log/test285.txt">
+a chunk of
+data
+sent
+ to server
+</file>
+</client>
+
+#
+# Verify pseudo protocol after the test has been "shot"
+<verify>
+<upload>
+a chunk of
+data
+sent
+ to server
+</upload>
+<protocol>
+opcode: 2
+mode: octet
+tsize: 32
+blksize: 512
+timeout: 6
+filename: /test285.txt
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+LSUB
+CUSTOMREQUEST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+* LSUB () "/" /807/blurdybloop
+* LSUB (\Noselect) "/" /807/foo
+* LSUB () "/" /807/foo/bar
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP LSUB mailbox
+ </name>
+ <command>
+imap://%HOSTIP:%IMAPPORT -u user:secret -X 'LSUB "807" *'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 LSUB "807" *
+A004 LOGOUT
+</protocol>
+</verify>
+</testcase>

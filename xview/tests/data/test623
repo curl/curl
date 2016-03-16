@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+SCP
+SCP upload
+FAILURE
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+scp
+</server>
+ <name>
+SCP upload failure
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file623.txt scp://%HOSTIP:%SSHPORT%PWD/log/nonexistent-directory/nonexistent-file --insecure
+</command>
+<file name="log/file623.txt">
+Test data
+for ssh upload test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<valgrind>
+disable
+</valgrind>
+<errorcode>
+79
+</errorcode>
+
+</verify>
+</testcase>

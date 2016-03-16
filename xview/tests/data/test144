@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PORT
+NLST
+--data-binary
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+</data>
+<servercmd>
+REPLY NLST 450 No files found
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP NLST dir list without contents, using PORT
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/ -P - -l
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# Strip all valid kinds of PORT and EPRT that curl can send
+<strip>
+^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
+^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
+</strip>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+PORT 127,0,0,1,243,212
+TYPE A
+NLST
+QUIT
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,208 @@
+!IF "$(MODE)"=="static"
+TARGET = $(LIB_NAME_STATIC)
+AS_DLL = false
+CFGSET=true
+!ELSEIF "$(MODE)"=="dll"
+TARGET = $(LIB_NAME_DLL)
+AS_DLL = true
+CFGSET=true
+!ELSE
+!MESSAGE Invalid mode: $(MODE)
+
+#######################
+# Usage
+#
+
+!MESSAGE Usage: nmake /f Makefile.vc mode=<static or dll> <options>
+!MESSAGE where <options> is one or many of:
+!MESSAGE   VC=<6,7,8,9,10,11,12,14>     - VC versions
+!MESSAGE   WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
+!MESSAGE                                  Defaults to sibbling directory deps: ../deps
+!MESSAGE                                  Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
+!MESSAGE                                  Uncompress them into the deps folder.
+!MESSAGE   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
+!MESSAGE   WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
+!MESSAGE   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
+!MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
+!MESSAGE   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
+!MESSAGE                                  Requires Windows Vista or later, or installation from:
+!MESSAGE                                  http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
+!MESSAGE   ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
+!MESSAGE   ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes
+!MESSAGE   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
+!MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
+!MESSAGE   DEBUG=<yes or no>            - Debug builds
+!MESSAGE   MACHINE=<x86 or x64>         - Target architecture (default x64 on AMD64, x86 on others)
+!ERROR please choose a valid mode
+
+!ENDIF
+
+!INCLUDE "../lib/Makefile.inc"
+LIBCURL_OBJS=$(CSOURCES:.c=.obj)
+
+!INCLUDE "../src/Makefile.inc"
+
+# tool_hugehelp has a special rule
+CURL_OBJS=$(CURL_CFILES:tool_hugehelp.c=)
+
+CURL_OBJS=$(CURL_OBJS:.c=.obj)
+
+
+# backwards compatible check for USE_SSPI
+!IFDEF USE_SSPI
+ENABLE_SSPI = $(USE_SSPI)
+!ENDIF
+
+# default options
+!IFNDEF MACHINE
+!IF "$(PROCESSOR_ARCHITECTURE)"=="AMD64"
+MACHINE = x64
+!ELSE
+MACHINE = x86
+!ENDIF
+!ENDIF
+
+!IFNDEF ENABLE_IDN
+USE_IDN = true
+!ELSEIF "$(ENABLE_IDN)"=="yes"
+USE_IDN = true
+!ELSEIF "$(ENABLE_IDN)"=="no"
+USE_IDN = false
+!ENDIF
+
+!IFNDEF ENABLE_IPV6
+USE_IPV6 = true
+!ELSEIF "$(ENABLE_IPV6)"=="yes"
+USE_IPV6 = true
+!ELSEIF "$(ENABLE_IPV6)"=="no"
+USE_IPV6 = false
+!ENDIF
+
+!IFNDEF ENABLE_SSPI
+USE_SSPI = true
+!ELSEIF "$(ENABLE_SSPI)"=="yes"
+USE_SSPI = true
+!ELSEIF "$(ENABLE_SSPI)"=="no"
+USE_SSPI = false
+!ENDIF
+
+!IFNDEF ENABLE_WINSSL
+!IFDEF WITH_SSL
+USE_WINSSL = false
+!ELSE
+USE_WINSSL = $(USE_SSPI)
+!ENDIF
+!ELSEIF "$(ENABLE_WINSSL)"=="yes"
+USE_WINSSL = true
+!ELSEIF "$(ENABLE_WINSSL)"=="no"
+USE_WINSSL = false
+!ENDIF
+
+CONFIG_NAME_LIB = libcurl
+
+!IF "$(WITH_SSL)"=="dll"
+USE_SSL = true
+SSL     = dll
+!ELSEIF "$(WITH_SSL)"=="static"
+USE_SSL = true
+SSL     = static
+!ENDIF
+
+!IF "$(WITH_CARES)"=="dll"
+USE_CARES = true
+CARES     = dll
+!ELSEIF "$(WITH_CARES)"=="static"
+USE_CARES = true
+CARES     = static
+!ENDIF
+
+!IF "$(WITH_ZLIB)"=="dll"
+USE_ZLIB = true
+ZLIB     = dll
+!ELSEIF "$(WITH_ZLIB)"=="static"
+USE_ZLIB = true
+ZLIB     = static
+!ENDIF
+
+!IF "$(WITH_SSH2)"=="dll"
+USE_SSH2 = true
+SSH2     = dll
+!ELSEIF "$(WITH_SSH2)"=="static"
+USE_SSH2 = true
+SSH2     = static
+!ENDIF
+
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-vc$(VC)-$(MACHINE)
+
+!IF "$(DEBUG)"=="yes"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-debug
+!ELSE
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-release
+!ENDIF
+
+!IF "$(AS_DLL)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-dll
+!ELSE
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-static
+!ENDIF
+
+!IF "$(USE_SSL)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssl-$(SSL)
+!ENDIF
+
+!IF "$(USE_CARES)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-cares-$(CARES)
+!ENDIF
+
+!IF "$(USE_ZLIB)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-zlib-$(ZLIB)
+!ENDIF
+
+!IF "$(USE_SSH2)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssh2-$(SSH2)
+!ENDIF
+
+!IF "$(USE_IPV6)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ipv6
+!ENDIF
+
+!IF "$(USE_SSPI)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
+!ENDIF
+
+!IF "$(USE_WINSSL)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-winssl
+!ENDIF
+
+!MESSAGE configuration name: $(CONFIG_NAME_LIB)
+
+BUILD_DIR=../builds/$(CONFIG_NAME_LIB)
+LIBCURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-lib
+CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
+DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
+
+$(MODE):
+	@IF NOT EXIST ..\include\curl\curlbuild.h ( \
+	   CALL ..\buildconf.bat \
+	)
+	@SET DIROBJ=$(LIBCURL_DIROBJ)
+	@SET MACRO_NAME=LIBCURL_OBJS
+	@SET OUTFILE=LIBCURL_OBJS.inc
+	@gen_resp_file.bat $(LIBCURL_OBJS)
+
+	@SET DIROBJ=$(CURL_DIROBJ)
+	@SET MACRO_NAME=CURL_OBJS
+	@SET OUTFILE=CURL_OBJS.inc
+	@gen_resp_file.bat $(CURL_OBJS)
+
+	@SET CONFIG_NAME_LIB=$(CONFIG_NAME_LIB)
+	@SET MACHINE=$(MACHINE)
+	@SET USE_IDN=$(USE_IDN)
+	@SET USE_IPV6=$(USE_IPV6)
+	@SET USE_SSPI=$(USE_SSPI)
+	@SET USE_WINSSL=$(USE_WINSSL)
+	@$(MAKE) /NOLOGO /F MakefileBuild.vc
+
+copy_from_lib:
+	echo copying .c...
+	FOR %%i IN ($(CURLX_CFILES:/=\)) DO copy %%i ..\src\

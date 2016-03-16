@@ -1,0 +1,68 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+12345
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET -o fname without Content-Disposition, -D stdout
+</name>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/1365 -o log/outfile1365 -D -
+</command>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl log/1365
+</postcheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1365 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+
+<file1 name="log/outfile1365">
+12345
+</file1>
+
+<file2 name="log/stdout1365">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+</file2>
+
+</verify>
+</testcase>

@@ -1,0 +1,3 @@
+ * 'name=@filename,filename2,filename3'
+ * 'name=@filename;type=image/gif,filename2,filename3'
+  file = fopen(name, "r"); /* VMS */

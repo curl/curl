@@ -1,0 +1,97 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_REDIR_PROTOCOLS 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_REDIR_PROTOCOLS \- set protocols allowed to redirect to
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REDIR_PROTOCOLS, long bitmask);
+.SH DESCRIPTION
+Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
+limits what protocols libcurl may use in a transfer that it follows to in a
+redirect when \fICURLOPT_FOLLOWLOCATION(3)\fP is enabled. This allows you to
+limit specific transfers to only be allowed to use a subset of protocols in
+redirections.
+
+By default libcurl will allow all protocols on redirect except several disabled
+for security reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0
+SMB and SMBS are also disabled. \fICURLPROTO_ALL\fP enables all protocols on
+redirect, including those disabled for security.
+
+These are the available protocol defines:
+.nf
+CURLPROTO_DICT
+CURLPROTO_FILE
+CURLPROTO_FTP
+CURLPROTO_FTPS
+CURLPROTO_GOPHER
+CURLPROTO_HTTP
+CURLPROTO_HTTPS
+CURLPROTO_IMAP
+CURLPROTO_IMAPS
+CURLPROTO_LDAP
+CURLPROTO_LDAPS
+CURLPROTO_POP3
+CURLPROTO_POP3S
+CURLPROTO_RTMP
+CURLPROTO_RTMPE
+CURLPROTO_RTMPS
+CURLPROTO_RTMPT
+CURLPROTO_RTMPTE
+CURLPROTO_RTMPTS
+CURLPROTO_RTSP
+CURLPROTO_SCP
+CURLPROTO_SFTP
+CURLPROTO_SMB
+CURLPROTO_SMBS
+CURLPROTO_SMTP
+CURLPROTO_SMTPS
+CURLPROTO_TELNET
+CURLPROTO_TFTP
+.fi
+.SH DEFAULT
+All protocols except for FILE, SCP and since 7.40.0 SMB and SMBS.
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+curl = curl_easy_init();
+if(curl) {
+  /* pass in the URL from an external source */
+  curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
+
+  /* only allow redirects to HTTP and HTTPS URLs */
+  curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS,
+                   CURLPROTO_HTTP | CURLPROTO_HTTPS);
+
+  /* Perform the request */
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.19.4, before then it would follow all protocols.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_PROTOCOLS "(3), "

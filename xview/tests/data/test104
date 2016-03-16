@@ -1,0 +1,43 @@
+<testcase>
+<info>
+<keywords>
+FTP
+NOBODY
+</keywords>
+</info>
+# Server-side
+<reply>
+<size>
+51
+</size>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP --head to get file size only
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/a/path/104 --head
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD a
+CWD path
+MDTM 104
+TYPE I
+SIZE 104
+REST 0
+QUIT
+</protocol>
+</verify>
+</testcase>

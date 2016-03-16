@@ -1,0 +1,188 @@
+#! /bin/sh
+# Script to build release-archives with. Note that this requires a checkout
+# from git and you should first run ./buildconf and build curl once.
+#
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
+
+version=$1
+
+if [ -z "$version" ]; then
+  echo "Specify a version number!"
+  exit
+fi
+
+libversion="$version"
+
+# we make curl the same version as libcurl
+curlversion=$libversion
+
+major=`echo $libversion |cut -d. -f1 | sed -e "s/[^0-9]//g"`
+minor=`echo $libversion |cut -d. -f2 | sed -e "s/[^0-9]//g"`
+patch=`echo $libversion |cut -d. -f3 | cut -d- -f1 | sed -e "s/[^0-9]//g"`
+
+numeric=`perl -e 'printf("%02x%02x%02x\n", '"$major, $minor, $patch);"`
+
+HEADER=include/curl/curlver.h
+CHEADER=src/tool_version.h
+
+# requires a date command that knows -u for UTC time zone
+datestamp=`LC_TIME=C date -u`
+
+# Replace version number in header file:
+sed -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g' \
+    -e 's/^#define LIBCURL_VERSION_NUM .*/#define LIBCURL_VERSION_NUM 0x'$numeric'/g' \
+    -e 's/^#define LIBCURL_VERSION_MAJOR .*/#define LIBCURL_VERSION_MAJOR '$major'/g' \
+    -e 's/^#define LIBCURL_VERSION_MINOR .*/#define LIBCURL_VERSION_MINOR '$minor'/g' \
+    -e 's/^#define LIBCURL_VERSION_PATCH .*/#define LIBCURL_VERSION_PATCH '$patch'/g' \
+    -e "s/^#define LIBCURL_TIMESTAMP .*/#define LIBCURL_TIMESTAMP \"$datestamp\"/g" \
+ $HEADER >$HEADER.dist
+
+# Replace version number in header file:
+sed 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER >$CHEADER.dist
+
+# Generate VC7, VC8, VC9, VC10, VC11, VC12 and VC14 versions from the VC6
+# Makefile versions
+for ver in vc7 vc8 vc9 vc10 vc11 vc12 vc14; do
+  make -f Makefile.dist $ver
+  mv src/Makefile.$ver src/Makefile.$ver.dist
+  mv lib/Makefile.$ver lib/Makefile.$ver.dist
+done
+
+# Replace version number in plist file:
+PLIST=lib/libcurl.plist
+sed "s/7\.12\.3/$libversion/g" $PLIST > $PLIST.dist
+
+echo "curl version $curlversion"
+echo "libcurl version $libversion"
+echo "libcurl numerical $numeric"
+echo "datestamp $datestamp"
+
+findprog()
+{
+  file="$1"
+  for part in `echo $PATH| tr ':' ' '`; do
+    path="$part/$file"
+    if [ -x "$path" ]; then
+      # there it is!
+      return 1
+    fi
+  done
+
+  # no such executable
+  return 0
+}
+
+############################################################################
+#
+# Enforce a rerun of configure (updates the VERSION)
+#
+
+echo "Re-running config.status"
+./config.status --recheck >/dev/null
+
+############################################################################
+#
+# automake is needed to run to make a non-GNU Makefile.in if Makefile.am has
+# been modified.
+#
+
+if { findprog automake >/dev/null 2>/dev/null; } then
+  echo "- Could not find or run automake, I hope you know what you're doing!"
+else
+  echo "Runs automake --include-deps"
+  automake --include-deps Makefile >/dev/null
+fi
+
+############################################################################
+#
+# Make sure we have updated HTML versions of all man pages:
+#
+echo "make html"
+make -s html
+
+# And the PDF versions
+echo "make pdf"
+make -s pdf
+
+# And the IDE files
+echo "make vc-ide"
+make -s vc-ide
+
+echo "produce CHANGES"
+git log --pretty=fuller --no-color --date=short --decorate=full -1000 | ./scripts/log2changes.pl > CHANGES.dist
+
+############################################################################
+#
+# Now run make dist to generate a tar.gz archive
+#
+
+echo "make dist"
+targz="curl-$version.tar.gz"
+make -s dist VERSION=$version
+
+############################################################################
+#
+# Now make a bz2 archive from the tar.gz original
+#
+
+bzip2="curl-$version.tar.bz2"
+echo "Generating $bzip2"
+gzip -dc $targz | bzip2 --best > $bzip2
+
+############################################################################
+#
+# Now make an lzma archive from the tar.gz original
+#
+
+lzma="curl-$version.tar.lzma"
+echo "Generating $lzma"
+gzip -dc $targz | lzma --best - > $lzma
+
+############################################################################
+#
+# Now make a zip archive from the tar.gz original
+#
+makezip ()
+{
+  rm -rf $tempdir
+  mkdir $tempdir
+  cd $tempdir
+  gzip -dc ../$targz | tar -xf -
+  find . | zip $zip -@ >/dev/null
+  mv $zip ../
+  cd ..
+  rm -rf $tempdir
+}
+
+zip="curl-$version.zip"
+echo "Generating $zip"
+tempdir=".builddir"
+makezip
+
+echo "------------------"
+echo "maketgz report:"
+echo ""
+ls -l $targz $bzip2 $zip $lzma
+
+echo "Run this:"
+echo "gpg -b -a $targz && gpg -b -a $bzip2 && gpg -b -a $zip && gpg -b -a $lzma"

@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+TLS-SRP
+FAILURE
+</keywords>
+</info>
+
+# Client-side
+<client>
+<server>
+httptls+srp
+</server>
+<features>
+TLS-SRP
+</features>
+ <name>
+TLS-SRP with bad username and password
+ </name>
+<command>
+--insecure --tlsauthtype SRP --tlsuser baduser --tlspassword badpass https://%HOSTIP:%HTTPTLSPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+35
+</errorcode>
+</verify>
+
+</testcase>

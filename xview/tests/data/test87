@@ -1,0 +1,61 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+[] range
+FAILURE
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data1>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 15
+
+the number one
+</data1>
+<data2>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 16
+
+two is nice too
+</data2>
+
+</reply>
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+ <name>
+urlglob with out of range -o #[num] usage
+ </name>
+ <command option="no-output">
+"http://%HOSTIP:%HTTPPORT/[870001-870002]" -o "log/dumpit#2.dump"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot". Note that the command line
+# will write both responses into the same file name so only the second
+# survives
+#
+<verify>
+<file name="log/dumpit#2.dump">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 16
+
+two is nice too
+</file>
+</verify>
+</testcase>

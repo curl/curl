@@ -1,0 +1,87 @@
+<testcase>
+# Test case inspired by this question on stackoverflow:
+#
+# http://stackoverflow.com/questions/10017165/use-libcurl-with-bluecoat-cookie-proxy
+#
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+cookies
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 407 Me not know you swsbounce
+Date: Tue, 25 Sep 2001 19:37:44 GMT
+Content-Type: text/html
+Set-Cookie: proxycookie=weirdo; Path=/
+Cache-control: private
+Content-Length: 62
+Proxy-Authenticate: Basic realm="moo on you"
+
+This server reply is for testing a simple cookie test case...
+</data>
+
+<data1>
+HTTP/1.1 200 Fine!
+Content-Type: text/html
+Content-Length: 6
+
+hello
+</data1>
+
+<datacheck>
+HTTP/1.1 407 Me not know you swsbounce
+Date: Tue, 25 Sep 2001 19:37:44 GMT
+Content-Type: text/html
+Set-Cookie: proxycookie=weirdo; Path=/
+Cache-control: private
+Content-Length: 62
+Proxy-Authenticate: Basic realm="moo on you"
+
+HTTP/1.1 200 Fine!
+Content-Type: text/html
+Content-Length: 6
+
+hello
+</datacheck>
+
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP --proxy-anyauth and 407 with cookies
+ </name>
+ <command>
+-U myname:mypassword -x %HOSTIP:%HTTPPORT http://z.x.com/1331 --proxy-anyauth -c log/dump1331
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET http://z.x.com/1331 HTTP/1.1
+Host: z.x.com
+Accept: */*
+
+GET http://z.x.com/1331 HTTP/1.1
+Host: z.x.com
+Proxy-Authorization: Basic bXluYW1lOm15cGFzc3dvcmQ=
+Accept: */*
+Cookie: proxycookie=weirdo
+
+</protocol>
+</verify>
+</testcase>

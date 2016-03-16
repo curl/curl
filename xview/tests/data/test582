@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+multi
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+sftp
+</server>
+<tool>
+lib582
+</tool>
+ <name>
+SFTP upload using multi interface
+ </name>
+ <command>
+Sftp://%HOSTIP:%SSHPORT%PWD/log/upload582.txt %PWD/log/file582.txt %USER:
+</command>
+<file name="log/file582.txt">
+Moooooooooooo
+ upload this
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<valgrind>
+disable
+</valgrind>
+<strip>
+</strip>
+<protocol>
+</protocol>
+<file name="log/file582.txt">
+Moooooooooooo
+ upload this
+</file>
+</verify>
+</testcase>

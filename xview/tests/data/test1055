@@ -1,0 +1,100 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+followlocation
+FTP
+EPSV
+STOR
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 307 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Location: ftp://127.0.0.1:8992/1055
+Content-Length: 0
+Connection: close
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+ftp
+</server>
+ <name>
+HTTP PUT Location: redirect to FTP URL
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1055 -L -T log/test1055.txt
+</command>
+# The data section doesn't do variable substitution, so we must assert this
+<precheck>
+perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%FTPPORT' ne '8992' );"
+</precheck>
+<file name="log/test1055.txt">
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+PUT /1055 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 78
+Expect: 100-continue
+
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+STOR 1055
+QUIT
+</protocol>
+<upload>
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+</upload>
+</verify>
+</testcase>

@@ -1,0 +1,91 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+followlocation
+--write-out
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK swsbounce swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 8
+Connection: close
+Content-Type: text/plain
+Location: ./10890001
+
+monster
+</data>
+<data1 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 15
+Connection: close
+Content-Type: text/plain; charset=us-ascii
+
+bigger monster
+</data1>
+
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP GET --write-out with redirected fetch
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1089 -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1089 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /10890001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+
+<stdout>
+HTTP/1.1 302 OK swsbounce swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 8
+Connection: close
+Content-Type: text/plain
+Location: ./10890001
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 15
+Connection: close
+Content-Type: text/plain; charset=us-ascii
+
+bigger monster
+2
+1
+15
+http://%HOSTIP:%HTTPPORT/10890001
+text/plain; charset=us-ascii
+200
+</stdout>
+
+</verify>
+</testcase>

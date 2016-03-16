@@ -1,0 +1,87 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_POSTFIELDS 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_POSTFIELDS \- specify data to POST to server
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTFIELDS, char *postdata);
+.SH DESCRIPTION
+Pass a char * as parameter, pointing to the full data to send in a HTTP POST
+operation. You must make sure that the data is formatted the way you want the
+server to receive it. libcurl will not convert or encode it for you in any
+way. For example, the web server may assume that this data is url-encoded.
+
+The data pointed to is NOT copied by the library: as a consequence, it must be
+preserved by the calling application until the associated transfer finishes.
+This behaviour can be changed (so libcurl does copy the data) by setting the
+\fICURLOPT_COPYPOSTFIELDS(3)\fP option.
+
+This POST is a normal application/x-www-form-urlencoded kind (and libcurl will
+set that Content-Type by default when this option is used), which is commonly
+used by HTML forms. Change Content-Type with \fICURLOPT_HTTPHEADER(3)\fP.
+
+Using \fICURLOPT_POSTFIELDS(3)\fP implies \fICURLOPT_POST(3)\fP.
+
+You can use \fIcurl_easy_escape(3)\fP to url-encode your data, if necessary. It
+returns a pointer to an encoded string that can be passed as \fIpostdata\fP.
+
+If you want to do a zero-byte POST, you need to set
+\fICURLOPT_POSTFIELDSIZE(3)\fP explicitly to zero, as simply setting
+\fICURLOPT_POSTFIELDS(3)\fP to NULL or "" just effectively disables the
+sending of the specified string. libcurl will instead assume that you'll send
+the POST data using the read callback!
+
+Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
+You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
+
+To make multipart/formdata posts (aka RFC2388-posts), check out the
+\fICURLOPT_HTTPPOST(3)\fP option combined with \fIcurl_formadd(3)\fP.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  const char *data = "data to send";
+
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  /* size of the POST data */
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 12L);
+
+  /* pass in a pointer to the data - libcurl will not copy */
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_POSTFIELDSIZE "(3), " CURLOPT_READFUNCTION "(3), "

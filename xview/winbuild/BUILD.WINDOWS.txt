@@ -1,0 +1,98 @@
+Building with Visual C++, prerequisites
+=======================================
+
+   This document describes how to compile, build and install curl and libcurl
+   from sources using the Visual C++ build tool. To build with VC++, you will
+   of course have to first install VC++. The minimum required version of
+   VC is 6 (part of Visual Studio 6). However using a more recent version is
+   strongly recommended.
+
+   VC++ is also part of the Windows Platform SDK. You do not have to install
+   the full Visual Studio or Visual C++ if all you want is to build curl.
+
+   The latest Platform SDK can be downloaded freely from:
+
+    https://msdn.microsoft.com/en-us/windows/bb980924
+
+   If you are building with VC6 then you will also need the February 2003
+   Edition of the Platform SDK which can be downloaded from:
+
+    https://www.microsoft.com/en-us/download/details.aspx?id=12261
+
+   If you wish to support zlib, openssl, c-ares, ssh2, you will have to download
+   them separately and copy them to the deps directory as shown below:
+   
+   somedirectory\
+    |_curl-src
+    | |_winbuild
+    |
+    |_deps
+      |_ lib
+      |_ include
+      |_ bin
+
+   It is also possible to create the deps directory in some other random
+   places and tell the Makefile its location using the WITH_DEVEL option.
+
+Building with Visual C++
+========================
+
+Open a Visual Studio Command prompt or the SDK CMD shell.
+
+    Using the CMD Shell:
+     choose the right environment via the setenv command (see setenv /?)
+     for the full list of options. setenv /xp /x86 /release for example.
+
+    Using the Visual Studio command prompt Shell:
+     Everything is already pre-configured by calling one of the command
+     prompt.
+
+Once you are in the console, go to the winbuild directory in the Curl 
+sources:
+    cd curl-src\winbuild
+
+Then you can call nmake /f Makefile.vc with the desired options (see below).
+The builds will be in the top src directory, builds\ directory, in 
+a directory named using the options given to the nmake call.
+
+nmake /f Makefile.vc mode=<static or dll> <options>
+
+where <options> is one or many of:
+  VC=<6,7,8,9,10,11,12,14>     - VC versions
+  WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
+                                 Defaults to sibbling directory deps: ../deps
+                                 Libraries can be fetched at http://windows.php.net/downloads/php-sdk/deps/
+                                 Uncompress them into the deps folder.
+  WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
+  WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
+  WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
+  WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
+  ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes
+  ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
+  ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
+                                 Requires Windows Vista or later, or installation from:
+                                 https://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
+  ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
+  GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
+  DEBUG=<yes or no>            - Debug builds
+  MACHINE=<x86 or x64>         - Target architecture (default is x86)
+
+Static linking of Microsoft's C RunTime (CRT):
+==============================================
+If you are using mode=static nmake will create and link to the static build of
+libcurl but *not* the static CRT. If you must you can force nmake to link in
+the static CRT by passing RTLIBCFG=static. Typically you shouldn't use that
+option, and nmake will default to the DLL CRT. RTLIBCFG is rarely used and
+therefore rarely tested. When passing RTLIBCFG for a configuration that was
+already built but not with that option, or if the option was specified
+differently, you must destroy the build directory containing the configuration
+so that nmake can build it from scratch.
+
+Legacy Windows and SSL
+======================
+When you build curl using the build files in this directory the default SSL
+backend will be WinSSL (Windows SSPI, more specifically Schannel), the native
+SSL library that comes with the Windows OS. WinSSL in Windows <= XP is not able
+to connect to servers that no longer support the legacy handshakes and
+algorithms used by those versions. If you will be using curl in one of those
+earlier versions of Windows you should choose another SSL backend like OpenSSL.

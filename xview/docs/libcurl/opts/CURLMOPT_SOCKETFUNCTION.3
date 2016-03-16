@@ -1,0 +1,62 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLMOPT_SOCKETFUNCTION 3 "3 Nov 2014" "libcurl 7.39.0" "curl_multi_setopt options"
+.SH NAME
+CURLMOPT_SOCKETFUNCTION \- callback informed about what to wait for
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+int socket_callback(CURL *easy,      /* easy handle */
+                    curl_socket_t s, /* socket */
+                    int what,        /* see above */
+                    void *userp,     /* private callback pointer */
+                    void *socketp);  /* private socket pointer */
+
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_SOCKETFUNCTION, socket_callback);
+.SH DESCRIPTION
+Pass a pointer to your callback function, which should match the prototype
+shown above.
+
+When the \fIcurl_multi_socket_action(3)\fP function runs, it informs the
+application about updates in the socket (file descriptor) status by doing
+none, one, or multiple calls to the \fBsocket_callback\fP. The callback gets
+status updates with changes since the previous time the callback was called.
+If the given callback pointer is NULL, no callback will be called. Set the
+callback's \fBuserp\fP argument with \fICURLMOPT_SOCKETDATA(3)\fP.  See
+\fIcurl_multi_socket_action(3)\fP for more details on how the callback is used
+and should work.
+.SH DEFAULT
+NULL (no callback)
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.15.4
+.SH RETURN VALUE
+Returns CURLM_OK.
+.SH "SEE ALSO"
+.BR CURLMOPT_SOCKETDATA "(3), " curl_multi_socket_action "(3), "
+.BR CURLMOPT_TIMERFUNCTION "(3) "
+

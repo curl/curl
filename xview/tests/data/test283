@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+TFTP
+TFTP RRQ
+FAILURE
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+tftp
+</server>
+ <name>
+TFTP retrieve on invalid file
+ </name>
+ <command>
+tftp://%HOSTIP:%TFTPPORT//invalid-file --trace-ascii log/traceit --tftp-blksize 1024
+</command>
+</client>
+
+#
+# Verify pseudo protocol after the test has been "shot"
+<verify>
+<errorcode>
+69
+</errorcode>
+<protocol>
+opcode: 1
+mode: octet
+tsize: 0
+blksize: 1024
+timeout: 6
+filename: /invalid-file
+</protocol>
+</verify>
+</testcase>

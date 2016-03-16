@@ -1,0 +1,80 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP CONNECT
+proxytunnel
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</data>
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+
+</connect>
+<datacheck>
+HTTP/1.1 200 Mighty fine indeed
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+ <name>
+HTTP over proxytunnel using POST
+ </name>
+ <command>
+http://test.95:%HTTPPORT/we/want/that/page/95 -p -x %HOSTIP:%PROXYPORT -d "datatopost=ohthatsfunyesyes"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<proxy>
+CONNECT test.95:%HTTPPORT HTTP/1.1
+User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
+Host: test.95:%HTTPPORT
+
+</proxy>
+<protocol nonewline="yes">
+POST /we/want/that/page/95 HTTP/1.1
+User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
+Host: test.95:%HTTPPORT
+Accept: */*
+Content-Length: 27
+Content-Type: application/x-www-form-urlencoded
+
+datatopost=ohthatsfunyesyes
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+FAILURE
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+ <name>
+SFTP retrieval of nonexistent file
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/not-a-valid-file-moooo --insecure
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<valgrind>
+disable
+</valgrind>
+<errorcode>
+78
+</errorcode>
+</verify>
+</testcase>

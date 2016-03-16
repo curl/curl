@@ -1,0 +1,60 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_CRLFILE 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_CRLFILE \- specify a Certificate Revocation List file
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CRLFILE, char *file);
+.SH DESCRIPTION
+Pass a char * to a zero terminated string naming a \fIfile\fP with the
+concatenation of CRL (in PEM format) to use in the certificate validation that
+occurs during the SSL exchange.
+
+When curl is built to use NSS or GnuTLS, there is no way to influence the use
+of CRL passed to help in the verification process. When libcurl is built with
+OpenSSL support, X509_V_FLAG_CRL_CHECK and X509_V_FLAG_CRL_CHECK_ALL are both
+set, requiring CRL check against all the elements of the certificate chain if
+a CRL file is passed.
+
+This option makes sense only when used in combination with the
+\fICURLOPT_SSL_VERIFYPEER(3)\fP option.
+
+A specific error code (\fICURLE_SSL_CRL_BADFILE\fP) is defined with the
+option. It is returned when the SSL exchange fails because the CRL file cannot
+be loaded.  A failure in certificate verification due to a revocation
+information found in the CRL does not trigger this specific error.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All TLS-based protocols
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.19.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+.SH "SEE ALSO"
+.BR CURLOPT_SSL_VERIFYPEER "(3), " CURLOPT_SSL_VERIFYHOST "(3), "

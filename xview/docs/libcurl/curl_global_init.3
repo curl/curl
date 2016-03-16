@@ -1,0 +1,90 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_global_init 3 "11 May 2004" "libcurl 7.12" "libcurl Manual"
+.SH NAME
+curl_global_init - Global libcurl initialisation
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "CURLcode curl_global_init(long " flags ");"
+.ad
+.SH DESCRIPTION
+This function sets up the program environment that libcurl needs.  Think of it
+as an extension of the library loader.
+
+This function must be called at least once within a program (a program is all
+the code that shares a memory space) before the program calls any other
+function in libcurl.  The environment it sets up is constant for the life of
+the program and is the same for every program, so multiple calls have the same
+effect as one call.
+
+The flags option is a bit pattern that tells libcurl exactly what features to
+init, as described below. Set the desired bits by ORing the values together.
+In normal operation, you must specify CURL_GLOBAL_ALL.  Don't use any other
+value unless you are familiar with it and mean to control internal operations of
+libcurl.
+
+\fBThis function is not thread safe.\fP You must not call it when any other
+thread in the program (i.e. a thread sharing the same memory) is running.
+This doesn't just mean no other thread that is using libcurl.  Because
+\fIcurl_global_init(3)\fP calls functions of other libraries that are
+similarly thread unsafe, it could conflict with any other thread that uses
+these other libraries.
+
+If you are initializing libcurl from a Windows DLL you should not initialize it
+from DllMain or a static initializer because Windows holds the loader lock
+during that time and it could cause a deadlock.
+
+See the description in \fBlibcurl(3)\fP of global environment requirements for
+details of how to use this function.
+
+.SH FLAGS
+.TP 5
+.B CURL_GLOBAL_ALL
+Initialize everything possible. This sets all known bits except
+\fBCURL_GLOBAL_ACK_EINTR\fP.
+.TP
+.B CURL_GLOBAL_SSL
+Initialize SSL
+.TP
+.B CURL_GLOBAL_WIN32
+Initialize the Win32 socket libraries.
+.TP
+.B CURL_GLOBAL_NOTHING
+Initialise nothing extra. This sets no bit.
+.TP
+.B CURL_GLOBAL_DEFAULT
+A sensible default. It will init both SSL and Win32. Right now, this equals
+the functionality of the \fBCURL_GLOBAL_ALL\fP mask.
+.TP
+.B CURL_GLOBAL_ACK_EINTR
+When this flag is set, curl will acknowledge EINTR condition when connecting
+or when waiting for data.  Otherwise, curl waits until full timeout
+elapses. (Added in 7.30.0)
+.SH RETURN VALUE
+If this function returns non-zero, something went wrong and you cannot use the
+other curl functions.
+.SH "SEE ALSO"
+.BR curl_global_init_mem "(3), "
+.BR curl_global_cleanup "(3), "
+.BR curl_easy_init "(3) "
+.BR libcurl "(3) "

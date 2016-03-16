@@ -1,0 +1,46 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+pre-quote
+NOBODY
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data sendzero="yes">
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+ <name>
+SFTP quote remove file with NOBODY
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: -I -Q "rm %PWD/log/file627.txt" sftp://%HOSTIP:%SSHPORT --insecure
+</command>
+<postcheck>
+perl %SRCDIR/libtest/test610.pl gone %PWD/log/test627.txt
+</postcheck>
+<file name="log/file627.txt">
+Dummy test file for remove test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<valgrind>
+disable
+</valgrind>
+<protocol>
+</protocol>
+</verify>
+</testcase>

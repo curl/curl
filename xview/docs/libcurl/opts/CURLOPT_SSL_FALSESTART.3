@@ -1,0 +1,48 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SSL_FALSESTART 3 "14 Feb 2015" "libcurl 7.41.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SSL_FALSESTART \- enable TLS false start
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_FALSESTART, long enable);
+.SH DESCRIPTION
+Pass a long as parameter set to 1 to enable or 0 to disable.
+
+This option determines whether libcurl should use false start during the TLS
+handshake. False start is a mode where a TLS client will start sending
+application data before verifying the server's Finished message, thus saving a
+round trip when performing a full handshake.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.42.0. This option is currently only supported by the NSS and
+Secure Transport (on iOS 7.0 or later, or OS X 10.9 or later) TLS backends.
+.SH RETURN VALUE
+Returns CURLE_OK if false start is supported by the SSL backend, otherwise
+returns CURLE_NOT_BUILT_IN.

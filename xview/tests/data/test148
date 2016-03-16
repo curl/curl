@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<servercmd>
+REPLY CWD 550 I won't allow this on my server
+REPLY MKD 550 We will have no such thing
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP with --ftp-create-dirs (failing MKD)
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/attempt/to/get/this/148 --ftp-create-dirs
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# Strip all valid kinds of PORT and EPRT that curl can send
+<strip>
+^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
+^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
+</strip>
+<errorcode>
+9
+</errorcode>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD attempt
+MKD attempt
+QUIT
+</protocol>
+</verify>
+</testcase>

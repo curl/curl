@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+SOCKS5
+NO_PROXY
+noproxy
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Content-Type: text/html
+
+boo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+noproxy setting together with socks proxy
+ </name>
+
+<command>
+http://user:secret@%HOSTIP:%HTTPPORT/ulion/1212 --socks5 non-existing-host.haxx.se:1080 --noproxy %HOSTIP --max-time 5
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /ulion/1212 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjpzZWNyZXQ=
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

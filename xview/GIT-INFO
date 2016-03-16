@@ -1,0 +1,67 @@
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
+                             \___|\___/|_| \_\_____|
+
+GIT-INFO
+
+This file is only present in git - never in release archives. It contains
+information about other files and things that the git repository keeps in its
+inner sanctum.
+
+Compile and build instructions follow below.
+
+  CHANGES.0     contains ancient changes
+  CHANGES       contains the most recent changes
+
+  Makefile.dist is included as the root Makefile in distribution archives
+
+  perl/         is a subdirectory with various perl scripts
+
+To build in environments that support configure, after having extracted
+everything from git, do this:
+
+./buildconf
+./configure
+make
+
+  Daniel uses a ./configure line similar to this for easier development:
+
+  ./configure --disable-shared --enable-debug --enable-maintainer-mode
+
+In environments that don't support configure (i.e. Microsoft), do this:
+
+buildconf.bat
+
+
+REQUIREMENTS
+
+ For buildconf (not buildconf.bat) to work, you need the following software
+installed:
+
+ o autoconf 2.57  (or later)
+ o automake 1.7   (or later)
+ o libtool  1.4.2 (or later)
+ o GNU m4 (required by autoconf)
+
+ o nroff + perl
+
+   If you don't have nroff and perl and you for some reason don't want to
+   install them, you can rename the source file src/tool_hugehelp.c.cvs to
+   src/tool_hugehelp.c and avoid having to generate this file. This will
+   give you a stubbed version of the file that doesn't contain actual content.
+
+MAC OS X
+
+ With Mac OS X 10.2 and the associated Developer Tools, the installed versions
+ of the build tools are adequate.  For Mac OS X 10.1 users, Guido Neitzer
+ wrote the following step-by-step guide:
+
+ 1. Install fink (http://fink.sourceforge.net)
+ 2. Update fink to the newest version (with the installed fink)
+ 3. Install the latest version of autoconf, automake and m4 with fink
+ 4. Install version 1.4.1 of libtool - you find it in the "unstable" section
+    (read the manual to see how to get unstable versions)
+ 5. Get cURL from git
+ 6. Build cURL with "./buildconf", "./configure", "make", "sudo make install"

@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+multi
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<tool>
+lib1507
+</tool>
+
+# based on bug report #1184
+ <name>
+SMTP with multi interface and CURLE_ABORTED_BY_CALLBACK
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/1507
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 1507
+MAIL FROM:<1507-realuser@example.com>
+RCPT TO:<1507-recipient@example.com>
+DATA
+</protocol>
+<upload>
+</upload>
+</verify>
+</testcase>

@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+SCP
+FAILURE
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+scp
+</server>
+ <name>
+SCP invalid user login
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u not-a-valid-user: scp://%HOSTIP:%SSHPORT%PWD/not-a-valid-file-moooo --insecure
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+67
+</errorcode>
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>

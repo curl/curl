@@ -1,0 +1,106 @@
+<testcase>
+<info>
+<keywords>
+Metalink
+HTTP
+HTTP GET
+-J
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 21 Jun 2012 16:27:17 GMT
+Server: test-server/fake
+Content-Length: 46
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name2009; charset=funny; option=strange
+Funny-head: yesyes
+
+Some contents delivered from an HTTP resource
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+file
+Metalink
+</features>
+<server>
+http
+</server>
+ <name>
+Metalink local XML file, HTTP resource, using -o fname -J -D file
+ </name>
+<command option="no-output,no-include">
+--metalink file://%PWD/log/test2009.metalink -J -o log/outfile2009 -D log/heads2009
+</command>
+# local metalink file written before test command runs
+<file name="log/test2009.metalink">
+<?xml version="1.0" encoding="utf-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/">
+ <files>
+  <file name="log/download2009">
+   <verification>
+    <hash type="md5">we-only-check-the-strongest-hash-provided</hash>
+    <hash type="sha256">e4c5b83384ba7d5f8e201d61747a14f29baacd7dfadce0fbd56661db4bba72b2</hash>
+   </verification>
+   <resources maxconnections="1">
+    <url type="http" preference="90">http://%HOSTIP:%HTTPPORT/2009</url>
+   </resources>
+  </file>
+ </files>
+</metalink>
+</file>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl log/2009 log/name2009 log/outfile2009
+</postcheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /2009 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<file1 name="log/download2009">
+Some contents delivered from an HTTP resource
+</file1>
+<file2 name="log/heads2009">
+HTTP/1.1 200 OK
+Date: Thu, 21 Jun 2012 16:27:17 GMT
+Server: test-server/fake
+Content-Length: 46
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name2009; charset=funny; option=strange
+Funny-head: yesyes
+
+</file2>
+<file3 name="log/stdout2009">
+</file3>
+<file4 name="log/stderr2009">
+Metalink: parsing (file://%PWD/log/test2009.metalink) metalink/XML...
+Metalink: parsing (file://%PWD/log/test2009.metalink) OK
+Metalink: fetching (log/download2009) from (http://%HOSTIP:%HTTPPORT/2009)...
+Metalink: fetching (log/download2009) from (http://%HOSTIP:%HTTPPORT/2009) OK
+Metalink: validating (log/download2009)...
+Metalink: validating (log/download2009) [sha-256] OK
+</file4>
+<stripfile4>
+$_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))
+</stripfile4>
+</verify>
+</testcase>

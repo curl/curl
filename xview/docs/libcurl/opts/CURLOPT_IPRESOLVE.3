@@ -1,0 +1,51 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_IPRESOLVE 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_IPRESOLVE \- specify which IP protocol version to use
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_IPRESOLVE, long resolve);
+.SH DESCRIPTION
+Allows an application to select what kind of IP addresses to use when
+resolving host names. This is only interesting when using host names that
+resolve addresses using more than one version of IP. The allowed values are:
+.IP CURL_IPRESOLVE_WHATEVER
+Default, resolves addresses to all IP versions that your system allows.
+.IP CURL_IPRESOLVE_V4
+Resolve to IPv4 addresses.
+.IP CURL_IPRESOLVE_V6
+Resolve to IPv6 addresses.
+.SH DEFAULT
+CURL_IPRESOLVE_WHATEVER
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_HTTP_VERSION "(3), " CURLOPT_SSLVERSION "(3), "

@@ -1,0 +1,27 @@
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
+                             \___|\___/|_| \_\_____|
+
+README.netware
+
+  Read the README file first.
+
+  Curl has been successfully compiled with gcc / nlmconv on different flavours
+  of Linux as well as with the official Metrowerks CodeWarrior compiler.
+  While not being the main development target, a continuously growing share of
+  curl users are NetWare-based, specially also consuming the lib from PHP.
+
+  The unix-style man pages are tricky to read on windows, so therefore are all
+  those pages converted to HTML as well as pdf, and included in the release
+  archives.
+
+  The main curl.1 man page is also "built-in" in the command line tool. Use a
+  command line similar to this in order to extract a separate text file:
+
+        curl -M >manual.txt
+
+  Read the INSTALL file for instructions how to compile curl self.
+
+

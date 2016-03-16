@@ -1,0 +1,73 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_POSTREDIR 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_POSTREDIR \- how to act on a HTTP POST redirect
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTREDIR,
+                          long bitmask);
+.SH DESCRIPTION
+Pass a bitmask to control how libcurl acts on redirects after POSTs that get a
+301, 302 or 303 response back.  A parameter with bit 0 set (value
+\fBCURL_REDIR_POST_301\fP) tells the library to respect RFC 7231 (section
+6.4.2 to 6.4.4) and not convert POST requests into GET requests when following
+a 301 redirection.  Setting bit 1 (value \fBCURL_REDIR_POST_302\fP) makes
+libcurl maintain the request method after a 302 redirect whilst setting bit 2
+(value \fBCURL_REDIR_POST_303\fP) makes libcurl maintain the request method
+after a 303 redirect. The value \fBCURL_REDIR_POST_ALL\fP is a convenience
+define that sets all three bits.
+
+The non-RFC behaviour is ubiquitous in web browsers, so the library does the
+conversion by default to maintain consistency. However, a server may require a
+POST to remain a POST after such a redirection. This option is meaningful only
+when setting \fICURLOPT_FOLLOWLOCATION(3)\fP.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+HTTP(S)
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  /* a silly POST example */
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "data=true");
+
+  /* example.com is redirected, so we tell libcurl to send POST on 301, 302 and
+     303 HTTP response codes */
+  curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
+
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.17.1. This option was known as CURLOPT_POST301 up to 7.19.0 as it
+only supported the 301 then. CURL_REDIR_POST_303 was added in 7.26.0.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_FOLLOWLOCATION "(3), " CURLOPT_POSTFIELDS "(3), "

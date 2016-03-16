@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP with no mail data
+ </name>
+
+<stdin nonewline="yes">
+
+</stdin>
+
+ <command>
+smtp://%HOSTIP:%SMTPPORT/911 --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 911
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+
+.
+</upload>
+</verify>
+</testcase>

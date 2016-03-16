@@ -1,0 +1,5 @@
+*.dsw -crlf
+buildconf eol=lf
+configure.ac eol=lf
+*.m4 eol=lf
+*.in eol=lf
