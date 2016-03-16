@@ -64,12 +64,24 @@
 #define CURL_LIBSSH2_VERSION LIBSSH2_VERSION
 #endif
 
+/* For thread safety purposes this function is called by global_init so that
+   the static data in both version functions is initialized. */
+void curl_version_init()
+{
+  curl_version();
+  curl_version_info(CURLVERSION_NOW);
+}
+
 char *curl_version(void)
 {
+  static bool initialized;
   static char version[200];
   char *ptr = version;
   size_t len;
   size_t left = sizeof(version);
+
+  if(initialized)
+    return version;
 
   strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION);
   len = strlen(ptr);
@@ -160,6 +172,7 @@ char *curl_version(void)
   }
 #endif
 
+  initialized = true;
   return version;
 }
 
@@ -323,12 +336,18 @@ static curl_version_info_data version_info = {
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
 {
+  static bool initialized;
 #ifdef USE_LIBSSH2
   static char ssh_buffer[80];
 #endif
-
 #ifdef USE_SSL
   static char ssl_buffer[80];
+#endif
+
+  if(initialized)
+    return &version_info;
+
+#ifdef USE_SSL
   Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
   version_info.ssl_version = ssl_buffer;
 #endif
@@ -370,5 +389,6 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 
   (void)stamp; /* avoid compiler warnings, we don't use this */
 
+  initialized = true;
   return &version_info;
 }

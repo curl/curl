@@ -79,6 +79,8 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+void curl_version_init();
+
 /* win32_cleanup() is for win32 socket cleanup functionality, the opposite
    of win32_init() */
 static void win32_cleanup(void)
@@ -280,7 +282,9 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   if(flags & CURL_GLOBAL_ACK_EINTR)
     Curl_ack_eintr = 1;
 
-  init_flags  = flags;
+  init_flags = flags;
+
+  curl_version_init();
 
   return CURLE_OK;
 }
