@@ -654,6 +654,10 @@ struct SingleRequest {
   struct timeval start100;      /* time stamp to wait for the 100 code from */
   enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
+  enum {
+          HTTP2_101,
+          WEBSOCKETS_101,
+  } proto101;                   /* Protocol to upgrade to */
 
   int auto_decoding;            /* What content encoding. sec 3.5, RFC2616. */
 
