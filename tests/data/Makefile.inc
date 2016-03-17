@@ -151,7 +151,7 @@ test1436 test1437 \
 \
 test1500 test1501 test1502 test1503 test1504 test1505 test1506 test1507 \
 test1508 test1509 test1510 test1511 test1512 test1513 test1514 test1515 \
-test1516 \
+test1516 test1517 \
 \
 test1520 \
 \
