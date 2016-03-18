@@ -1792,13 +1792,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     switch(conn->negnpn) {
     case CURL_HTTP_VERSION_2:
       conn->httpversion = 20; /* we know we're on HTTP/2 now */
-      result = Curl_http2_init(conn);
-      if(result)
-        return result;
-
-      result = Curl_http2_setup(conn);
-      if(result)
-        return result;
 
       result = Curl_http2_switched(conn, NULL, 0);
       if(result)
@@ -1808,7 +1801,18 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       /* continue with HTTP/1.1 when explicitly requested */
       break;
     default:
-      /* and as fallback */
+      /* Check if user wants to use HTTP/2 with clear TCP*/
+#ifdef USE_NGHTTP2
+      if(conn->data->set.httpversion ==
+         CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
+        DEBUGF(infof(data, "HTTP/2 over clean TCP\n"));
+        conn->httpversion = 20;
+
+        result = Curl_http2_switched(conn, NULL, 0);
+        if(result)
+          return result;
+      }
+#endif
       break;
     }
   }
