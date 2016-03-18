@@ -387,7 +387,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     case CURLFORM_CONTENTLEN:
       current_form->flags |= CURL_HTTPPOST_LARGE;
       current_form->contentslength =
-        array_state?(curl_off_t)array_value:va_arg(params, curl_off_t);
+        array_state?(curl_off_t)(size_t)array_value:va_arg(params, curl_off_t);
       break;
 
       /* Get contents from a given file name */
