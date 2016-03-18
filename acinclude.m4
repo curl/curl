@@ -20,7 +20,6 @@
 #
 #***************************************************************************
 
-
 dnl CURL_CHECK_DEF (SYMBOL, [INCLUDES], [SILENT])
 dnl -------------------------------------------------
 dnl Use the C preprocessor to find out if the given object-style symbol
@@ -31,6 +30,10 @@ dnl result in a set of double-quoted strings the returned expansion will
 dnl actually be a single double-quoted string concatenating all them.
 
 AC_DEFUN([CURL_CHECK_DEF], [
+  AC_REQUIRE([CURL_CPP_P])dnl
+  OLDCPPFLAGS=$CPPFLAGS
+  # CPPPFLAGS comes from CURL_CPP_P
+  CPPFLAGS="$CPPPFLAGS"
   AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
   AS_VAR_PUSHDEF([ac_Def], [curl_cv_def_$1])dnl
   if test -z "$SED"; then
@@ -67,6 +70,7 @@ CURL_DEF_TOKEN $1
   fi
   AS_VAR_POPDEF([ac_Def])dnl
   AS_VAR_POPDEF([ac_HaveDef])dnl
+  CPPFLAGS=$OLDCPPFLAGS
 ])
 
 
@@ -3146,4 +3150,49 @@ use vars qw(
 
 1;
 _EOF
+])
+
+dnl CURL_CPP_P
+dnl
+dnl Check if $cpp -P should be used for extract define values due to gcc 5
+dnl splitting up strings and defines between line outputs. gcc by default
+dnl (without -P) will show TEST EINVAL TEST as
+dnl
+dnl # 13 "conftest.c"
+dnl TEST
+dnl # 13 "conftest.c" 3 4
+dnl     22
+dnl # 13 "conftest.c"
+dnl            TEST
+
+AC_DEFUN([CURL_CPP_P], [
+  AC_MSG_CHECKING([if cpp -P is needed])
+  AC_EGREP_CPP([TEST.*TEST], [
+ #include <errno.h>
+TEST EINVAL TEST
+  ], [cpp=no], [cpp=yes])
+  AC_MSG_RESULT([$cpp])
+
+  dnl we need cpp -P so check if it works then
+  if test "x$cpp" = "xyes"; then
+    AC_MSG_CHECKING([if cpp -P works])
+    OLDCPPFLAGS=$CPPFLAGS
+    CPPFLAGS="$CPPFLAGS -P"
+    AC_EGREP_CPP([TEST.*TEST], [
+ #include <errno.h>
+TEST EINVAL TEST
+    ], [cpp_p=yes], [cpp_p=no])
+    AC_MSG_RESULT([$cpp_p])
+
+    if test "x$cpp_p" = "xno"; then
+      AC_MSG_WARN([failed to figure out cpp -P alternative])
+      # without -P
+      CPPPFLAGS=$OLDCPPFLAGS
+    else
+      # with -P
+      CPPPFLAGS=$CPPFLAGS
+    fi
+    dnl restore CPPFLAGS
+    CPPFLAGS=$OLDCPPFLAGS
+  fi
 ])
