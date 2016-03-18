@@ -111,6 +111,7 @@ static const char *const helptext[] = {
   " -0, --http1.0       Use HTTP 1.0 (H)",
   "     --http1.1       Use HTTP 1.1 (H)",
   "     --http2         Use HTTP 2 (H)",
+  "     --http2-prior-knowledge  Use HTTP 2 without HTTP/1.1 Upgrade (H)",
   "     --ignore-content-length  Ignore the HTTP Content-Length header",
   " -i, --include       Include protocol headers in the output (H/F)",
   " -k, --insecure      Allow connections to SSL sites without certs (H)",
