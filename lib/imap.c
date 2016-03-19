@@ -1102,7 +1102,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   struct pingpong *pp = &imapc->pp;
   const char *ptr = data->state.buffer;
   bool parsed = FALSE;
-  curl_off_t size;
+  curl_off_t size = 0;
 
   (void)instate; /* no use for this yet */
 
