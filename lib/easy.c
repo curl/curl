@@ -697,21 +697,22 @@ static CURLcode easy_transfer(CURLM *multi)
 
   while(!done && !mcode) {
     int still_running = 0;
-    int ret;
+    int rc;
 
     before = curlx_tvnow();
-    mcode = curl_multi_wait(multi, NULL, 0, 1000, &ret);
+    mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
 
-    if(mcode == CURLM_OK) {
-      if(ret == 0) {
+    if(!mcode) {
+      if(!rc) {
         struct timeval after = curlx_tvnow();
+
         /* If it returns without any filedescriptor instantly, we need to
            avoid busy-looping during periods where it has nothing particular
            to wait for */
         if(curlx_tvdiff(after, before) <= 10) {
           without_fds++;
           if(without_fds > 2) {
-            int sleep_ms = without_fds < 10 ? (1 << (without_fds-1)): 1000;
+            int sleep_ms = without_fds < 10 ? (1 << (without_fds - 1)) : 1000;
             Curl_wait_ms(sleep_ms);
           }
         }
@@ -727,8 +728,7 @@ static CURLcode easy_transfer(CURLM *multi)
     }
 
     /* only read 'still_running' if curl_multi_perform() return OK */
-    if((mcode == CURLM_OK) && !still_running) {
-      int rc;
+    if(!mcode && !still_running) {
       CURLMsg *msg = curl_multi_info_read(multi, &rc);
       if(msg) {
         result = msg->data.result;
@@ -739,10 +739,10 @@ static CURLcode easy_transfer(CURLM *multi)
 
   /* Make sure to return some kind of error if there was a multi problem */
   if(mcode) {
-    return (mcode == CURLM_OUT_OF_MEMORY) ? CURLE_OUT_OF_MEMORY :
-            /* The other multi errors should never happen, so return
-               something suitably generic */
-            CURLE_BAD_FUNCTION_ARGUMENT;
+    result = (mcode == CURLM_OUT_OF_MEMORY) ? CURLE_OUT_OF_MEMORY :
+              /* The other multi errors should never happen, so return
+                 something suitably generic */
+              CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   return result;
