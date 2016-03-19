@@ -92,37 +92,45 @@ VC14_SRCTMPL = projects/Windows/VC14/src/curl.tmpl
 VC14_SRCVCXPROJ = projects/Windows/VC14/src/curl.vcxproj.dist
 VC14_SRCVCXPROJ_DEPS = $(VC14_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC_DIST = projects/README	\
- projects/build-openssl.bat	\
- projects/build-wolfssl.bat	\
- projects/checksrc.bat	\
- projects/Windows/VC6/curl-all.dsw	\
- projects/Windows/VC6/lib/libcurl.dsw \
- projects/Windows/VC6/src/curl.dsw \
- projects/Windows/VC7/curl-all.sln	\
- projects/Windows/VC7/lib/libcurl.sln 	\
- projects/Windows/VC7/src/curl.sln 	\
- projects/Windows/VC7.1/curl-all.sln	\
- projects/Windows/VC7.1/lib/libcurl.sln \
- projects/Windows/VC7.1/src/curl.sln \
- projects/Windows/VC8/curl-all.sln	\
- projects/Windows/VC8/lib/libcurl.sln 	\
- projects/Windows/VC8/src/curl.sln 	\
- projects/Windows/VC9/curl-all.sln	\
- projects/Windows/VC9/lib/libcurl.sln 	\
- projects/Windows/VC9/src/curl.sln 	\
- projects/Windows/VC10/curl-all.sln	\
- projects/Windows/VC10/lib/libcurl.sln 	\
- projects/Windows/VC10/src/curl.sln  \
- projects/Windows/VC11/curl-all.sln	\
- projects/Windows/VC11/lib/libcurl.sln 	\
- projects/Windows/VC11/src/curl.sln 	\
- projects/Windows/VC12/curl-all.sln	\
- projects/Windows/VC12/lib/libcurl.sln 	\
- projects/Windows/VC12/src/curl.sln	\
- projects/Windows/VC14/curl-all.sln	\
- projects/Windows/VC14/lib/libcurl.sln 	\
- projects/Windows/VC14/src/curl.sln
+VC_DIST = projects/README                           \
+ projects/build-openssl.bat                         \
+ projects/build-wolfssl.bat                         \
+ projects/checksrc.bat                              \
+ projects/Windows/VC6/curl-all.dsw                  \
+ projects/Windows/VC6/lib/libcurl.dsw               \
+ projects/Windows/VC6/src/curl.dsw                  \
+ projects/Windows/VC7/curl-all.sln                  \
+ projects/Windows/VC7/lib/libcurl.sln               \
+ projects/Windows/VC7/src/curl.sln                  \
+ projects/Windows/VC7.1/curl-all.sln                \
+ projects/Windows/VC7.1/lib/libcurl.sln             \
+ projects/Windows/VC7.1/src/curl.sln                \
+ projects/Windows/VC8/curl-all.sln                  \
+ projects/Windows/VC8/lib/libcurl.sln               \
+ projects/Windows/VC8/src/curl.sln                  \
+ projects/Windows/VC9/curl-all.sln                  \
+ projects/Windows/VC9/lib/libcurl.sln               \
+ projects/Windows/VC9/src/curl.sln                  \
+ projects/Windows/VC10/curl-all.sln                 \
+ projects/Windows/VC10/lib/libcurl.sln              \
+ projects/Windows/VC10/lib/libcurl.vcxproj.filters  \
+ projects/Windows/VC10/src/curl.sln                 \
+ projects/Windows/VC10/src/curl.vcxproj.filters     \
+ projects/Windows/VC11/curl-all.sln                 \
+ projects/Windows/VC11/lib/libcurl.sln              \
+ projects/Windows/VC11/lib/libcurl.vcxproj.filters  \
+ projects/Windows/VC11/src/curl.sln                 \
+ projects/Windows/VC11/src/curl.vcxproj.filters     \
+ projects/Windows/VC12/curl-all.sln                 \
+ projects/Windows/VC12/lib/libcurl.sln              \
+ projects/Windows/VC12/lib/libcurl.vcxproj.filters  \
+ projects/Windows/VC12/src/curl.sln                 \
+ projects/Windows/VC12/src/curl.vcxproj.filters     \
+ projects/Windows/VC14/curl-all.sln                 \
+ projects/Windows/VC14/lib/libcurl.sln              \
+ projects/Windows/VC14/lib/libcurl.vcxproj.filters  \
+ projects/Windows/VC14/src/curl.sln                 \
+ projects/Windows/VC14/src/curl.vcxproj.filters
 
 WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
  winbuild/MakefileBuild.vc winbuild/Makefile.vc				\

@@ -168,7 +168,6 @@ TODO
 
    * Support zlib
    * Use of static runtime libraries
-   * Generate *.vcxproj.filters files for VC10, VC11 and VC12
    * Add the Test Suite components
    * Support for other development IDEs
    * Add PATH environment variables for third-party DLLs
