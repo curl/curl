@@ -71,6 +71,22 @@ This release includes the following bugfixes:
  o url.c: fix clang warning: no newline at end of file
  o krb5: improved type handling to avoid clang compiler warnings
  o cookies: first n/v pair in Set-Cookie: is the cookie, then parameters [41]
+ o multi: avoid blocking during CURLM_STATE_WAITPROXYCONNECT [42]
+ o multi hash: ensure modulo performed on curl_socket_t [43]
+ o curl: glob_range: no need to check unsigned variable for negative
+ o easy: add check to malloc() when running event-based
+ o CURLOPT_SSLENGINE.3: Only for OpenSSL built with engine support [44]
+ o version: thread safety
+ o openssl: verbose: show matching SAN pattern
+ o openssl: adapt to OpenSSL 1.1.0 API breakage in ERR_remove_thread_state()
+ o formdata.c: Fixed compilation warning
+ o configure: use cpp -P when needed [45]
+ o imap.c: Fixed compilation warning with /Wall enabled
+ o config-w32.h: Fixed compilation warning when /Wall enabled
+ o ftp/imap/pop3/smtp: Fixed compilation warning when /Wall enabled
+ o build: Added missing Visual Studio filter files for VC10 onwards
+ o easy: Remove poll failure check in easy_transfer
+ o mbedtls: fix compiler warning
 
 This release includes the following known bugs:
 
@@ -81,11 +97,12 @@ advice from friends like these:
 
   Anders Bakken, Brad Fitzpatrick, Clint Clayton, Dan Fandrich,
   Daniel Stenberg, David Benjamin, David Byron, Emil Lerner, Eric S. Raymond,
-  Gisle Vanem, Jeffrey Walton, Jesse Tan, Justin Ehlert, Kamil Dudka,
-  Kazuho Oku, Ludwig Nussel, Michael König, Patrick Monnerat, Rafael Antonio,
-  Ray Satiro, Seth Mos, Shine Fan, Steve Holme, Tatsuhiro Tsujikawa,
-  Timotej Lazar, Tim Rühsen, Viktor Szakáts,
-  (27 contributors)
+  Gisle Vanem, Jaime Fullaondo, Jeffrey Walton, Jesse Tan, Justin Ehlert,
+  Kamil Dudka, Kazuho Oku, Ludwig Nussel, Maksim Kuzevanov, Michael König,
+  Oliver Graute, Patrick Monnerat, Rafael Antonio, Ray Satiro, Seth Mos,
+  Shine Fan, Steve Holme, Tatsuhiro Tsujikawa, Timotej Lazar, Tim Rühsen,
+  Viktor Szakáts,
+  (30 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -132,4 +149,7 @@ References to bug reports and discussions on issues:
  [39] = https://curl.haxx.se/bug/?i=422
  [40] = https://curl.haxx.se/bug/?i=707
  [41] = https://curl.haxx.se/bug/?i=709
- 
+ [42] = https://curl.haxx.se/bug/?i=703
+ [43] = https://curl.haxx.se/bug/?i=712
+ [44] = https://curl.haxx.se/mail/lib-2016-03/0150.html
+ [45] = https://curl.haxx.se/bug/?i=719
