@@ -910,8 +910,8 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
         wordlen -= 5;
 
         /* Test the word for a matching authentication mechanism */
-        if((mechbit = Curl_sasl_decode_mech(line, wordlen, &llen)) &&
-           llen == wordlen)
+        mechbit = Curl_sasl_decode_mech(line, wordlen, &llen);
+        if(mechbit && llen == wordlen)
           imapc->sasl.authmechs |= mechbit;
       }
 

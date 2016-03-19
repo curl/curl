@@ -770,8 +770,8 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
           wordlen++;
 
         /* Test the word for a matching authentication mechanism */
-        if((mechbit = Curl_sasl_decode_mech(line, wordlen, &llen)) &&
-           llen == wordlen)
+        mechbit = Curl_sasl_decode_mech(line, wordlen, &llen);
+        if(mechbit && llen == wordlen)
           smtpc->sasl.authmechs |= mechbit;
 
         line += wordlen;

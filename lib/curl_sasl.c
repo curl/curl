@@ -1300,11 +1300,13 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
 
   if(strnequal(value, "*", len))
     sasl->prefmech = SASL_AUTH_DEFAULT;
-  else if((mechbit = Curl_sasl_decode_mech(value, len, &mechlen)) &&
-          mechlen == len)
-    sasl->prefmech |= mechbit;
-  else
-    result = CURLE_URL_MALFORMAT;
+  else {
+    mechbit = Curl_sasl_decode_mech(value, len, &mechlen);
+    if(mechbit && mechlen == len)
+      sasl->prefmech |= mechbit;
+    else
+      result = CURLE_URL_MALFORMAT;
+  }
 
   return result;
 }
@@ -1600,7 +1602,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     newstate = SASL_DIGESTMD5_RESP;
     break;
   case SASL_DIGESTMD5_RESP:
-    if(!(resp = strdup("")))
+    resp = strdup("");
+    if(!resp)
       result = CURLE_OUT_OF_MEMORY;
     break;
 #endif
