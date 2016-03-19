@@ -703,12 +703,7 @@ static CURLcode easy_transfer(CURLM *multi)
     mcode = curl_multi_wait(multi, NULL, 0, 1000, &ret);
 
     if(mcode == CURLM_OK) {
-      if(ret == -1) {
-        /* poll() failed not on EINTR, indicate a network problem */
-        result = CURLE_RECV_ERROR;
-        break;
-      }
-      else if(ret == 0) {
+      if(ret == 0) {
         struct timeval after = curlx_tvnow();
         /* If it returns without any filedescriptor instantly, we need to
            avoid busy-looping during periods where it has nothing particular
