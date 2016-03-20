@@ -170,6 +170,10 @@ static CURLcode ntlm_decode_type2_target(struct SessionHandle *data,
   unsigned short target_info_len = 0;
   unsigned int target_info_offset = 0;
 
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void) data;
+#endif
+
   if(size >= 48) {
     target_info_len = Curl_read16_le(&buffer[40]);
     target_info_offset = Curl_read32_le(&buffer[44]);

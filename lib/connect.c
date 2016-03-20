@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -859,8 +859,10 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
 void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
 {
-#ifdef TCP_NODELAY
-  struct SessionHandle *data= conn->data;
+#if defined(TCP_NODELAY)
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  struct SessionHandle *data = conn->data;
+#endif
   curl_socklen_t onoff = (curl_socklen_t) 1;
   int level = IPPROTO_TCP;
 
@@ -875,6 +877,10 @@ void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
   struct protoent *pe = getprotobyname("tcp");
   if(pe)
     level = pe->p_proto;
+#endif
+
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void) conn;
 #endif
 
   if(setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff,

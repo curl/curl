@@ -567,10 +567,12 @@ output_auth_headers(struct connectdata *conn,
 {
   const char *auth = NULL;
   CURLcode result = CURLE_OK;
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS) || defined(USE_SPNEGO)
   struct SessionHandle *data = conn->data;
+#endif
 #ifdef USE_SPNEGO
-  struct negotiatedata *negdata = proxy?
-    &data->state.proxyneg:&data->state.negotiate;
+  struct negotiatedata *negdata = proxy ?
+    &data->state.proxyneg : &data->state.negotiate;
 #endif
 
 #ifdef CURL_DISABLE_CRYPTO_AUTH
