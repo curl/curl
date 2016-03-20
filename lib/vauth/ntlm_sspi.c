@@ -38,6 +38,22 @@
 #include "memdebug.h"
 
 /*
+ * Curl_auth_is_ntlm_supported()
+ *
+ * This is used to evaluate if NTLM is supported.
+ *
+ * Parameters: None
+ *
+ * Returns TRUE if NTLM is supported by Windows SSPI.
+ */
+bool Curl_auth_is_ntlm_supported(void)
+{
+  /* TODO: Return true for now which maintains compatability with the existing
+     code */
+  return TRUE;
+}
+
+/*
  * Curl_auth_create_ntlm_type1_message()
  *
  * This is used to generate an already encoded NTLM type-1 message ready for

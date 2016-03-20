@@ -83,6 +83,9 @@ CURLcode Curl_auth_create_cram_md5_message(struct Curl_easy *data,
                                            const char *passwdp,
                                            char **outptr, size_t *outlen);
 
+/* This is used to evaluate if DIGEST is supported */
+bool Curl_auth_is_digest_supported(void);
+
 /* This is used to generate a base64 encoded DIGEST-MD5 response message */
 CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const char *chlg64,
@@ -109,6 +112,9 @@ void Curl_auth_digest_cleanup(struct digestdata *digest);
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */
 
 #if defined(USE_NTLM)
+/* This is used to evaluate if NTLM is supported */
+bool Curl_auth_is_ntlm_supported(void);
+
 /* This is used to generate a base64 encoded NTLM type-1 message */
 CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
                                              const char *passwdp,
@@ -140,6 +146,9 @@ CURLcode Curl_auth_create_oauth_bearer_message(struct Curl_easy *data,
                                                const char *bearer,
                                                char **outptr, size_t *outlen);
 #if defined(USE_KERBEROS5)
+/* This is used to evaluate if GSSAPI (Kerberos V5) is supported */
+bool Curl_auth_is_gssapi_supported(void);
+
 /* This is used to generate a base64 encoded GSSAPI (Kerberos V5) user token
    message */
 CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
@@ -165,6 +174,9 @@ void Curl_auth_gssapi_cleanup(struct kerberos5data *krb5);
 #endif /* USE_KERBEROS5 */
 
 #if defined(USE_SPNEGO)
+/* This is used to evaluate if SPNEGO (Negotiate) is supported */
+bool Curl_auth_is_spnego_supported(void);
+
 /* This is used to decode a base64 encoded SPNEGO (Negotiate) challenge
    message */
 CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,

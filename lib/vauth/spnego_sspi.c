@@ -40,6 +40,22 @@
 #include "memdebug.h"
 
 /*
+ * Curl_auth_is_spnego_supported()
+ *
+ * This is used to evaluate if SPNEGO (Negotiate) is supported.
+ *
+ * Parameters: None
+ *
+ * Returns TRUE if Negotiate is supported by Windows SSPI.
+ */
+bool Curl_auth_is_spnego_supported(void)
+{
+  /* TODO: Return true for now which maintains compatability with the existing
+     code */
+  return TRUE;
+}
+
+/*
  * Curl_auth_decode_spnego_message()
  *
  * This is used to decode an already encoded SPNEGO (Negotiate) challenge

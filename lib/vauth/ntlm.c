@@ -217,6 +217,20 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
 */
 
 /*
+ * Curl_auth_is_ntlm_supported()
+ *
+ * This is used to evaluate if NTLM is supported.
+ *
+ * Parameters: None
+ *
+ * Returns TRUE as NTLM as handled by libcurl.
+ */
+bool Curl_auth_is_ntlm_supported(void)
+{
+  return TRUE;
+}
+
+/*
  * Curl_auth_decode_ntlm_type2_message()
  *
  * This is used to decode an already encoded NTLM type-2 message. The message
