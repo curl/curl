@@ -44,10 +44,6 @@ and that's a problem since options.h hasn't been included yet. */
 #include <cyassl/options.h>
 #endif
 
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
-
 #include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"
@@ -59,6 +55,8 @@ and that's a problem since options.h hasn't been included yet. */
 #include "rawstr.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
+#include "warnless.h"
+#include "curl_limits.h"
 
 #include <cyassl/ssl.h>
 #ifdef HAVE_CYASSL_ERROR_SSL_H
@@ -322,7 +320,7 @@ cyassl_connect_step1(struct connectdata *conn,
   }
 
   /* pass the raw socket into the SSL layer */
-  if(!SSL_set_fd(conssl->handle, (int)sockfd)) {
+  if(!SSL_set_fd(conssl->handle, curlx_sktosi(sockfd))) {
     failf(data, "SSL: SSL_set_fd failed");
     return CURLE_SSL_CONNECT_ERROR;
   }

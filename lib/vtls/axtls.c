@@ -42,6 +42,7 @@
 #include "curl_printf.h"
 #include "hostcheck.h"
 #include <unistd.h>
+#include "curl_limits.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -513,6 +514,9 @@ static ssize_t axtls_send(struct connectdata *conn,
                           size_t len,
                           CURLcode *err)
 {
+  if(len > (size_t)INT_MAX)
+    len = INT_MAX; /* trim to largest possible value */
+
   /* ssl_write() returns 'int' while write() and send() returns 'size_t' */
   int rc = ssl_write(conn->ssl[sockindex].ssl, mem, (int)len);
 

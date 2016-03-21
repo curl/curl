@@ -60,6 +60,12 @@ int curlx_sktosi(curl_socket_t s);
 
 curl_socket_t curlx_sitosk(int i);
 
+#else  /* USE_WINSOCK */
+
+#define curlx_sktosi(s) ((int)(s))
+
+#define  curlx_sitosk(i) ((curl_socket_t)(i))
+
 #endif /* USE_WINSOCK */
 
 #if defined(WIN32) || defined(_WIN32)

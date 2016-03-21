@@ -90,6 +90,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   struct SessionHandle *data = conn->data;
   size_t buffersize = (size_t)bytes;
   int nread;
+  size_t res; /* temporal store for returned value */
 #ifdef CURL_DOES_CONVERSIONS
   bool sending_http_headers = FALSE;
 
@@ -109,17 +110,15 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     data->req.upload_fromhere += (8 + 2); /* 32bit hex + CRLF */
   }
 
-  /* this function returns a size_t, so we typecast to int to prevent warnings
-     with picky compilers */
-  nread = (int)data->state.fread_func(data->req.upload_fromhere, 1,
+  res = data->state.fread_func(data->req.upload_fromhere, 1,
                                       buffersize, data->state.in);
 
-  if(nread == CURL_READFUNC_ABORT) {
+  if(res == CURL_READFUNC_ABORT) {
     failf(data, "operation aborted by callback");
     *nreadp = 0;
     return CURLE_ABORTED_BY_CALLBACK;
   }
-  else if(nread == CURL_READFUNC_PAUSE) {
+  else if(res == CURL_READFUNC_PAUSE) {
 
     if(conn->handler->flags & PROTOPT_NONETWORK) {
       /* protocols that work without network cannot be paused. This is
@@ -140,12 +139,13 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     }
     return CURLE_OK; /* nothing was read */
   }
-  else if((size_t)nread > buffersize) {
+  else if(res > buffersize) {
     /* the read function returned a too large value */
     *nreadp = 0;
     failf(data, "read function returned funny value");
     return CURLE_READ_ERROR;
   }
+  nread = (int)res; /* already checked that data fits int */
 
   if(!data->req.forbidchunk && data->req.upload_chunky) {
     /* if chunked Transfer-Encoding

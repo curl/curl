@@ -74,6 +74,7 @@
 #include "sigpipe.h"
 #include "ssh.h"
 #include "curl_printf.h"
+#include "curl_limits.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -601,6 +602,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     int i;
     struct timeval before;
     struct timeval after;
+    int timeout_ms;
 
     /* populate the fds[] array */
     for(m = ev->list, f=&fds[0]; m; m = m->next) {
@@ -615,8 +617,10 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     /* get the time stamp to use to figure out how long poll takes */
     before = curlx_tvnow();
 
+    timeout_ms = (ev->ms > (long)INT_MAX) ? INT_MAX : ev->ms;
+
     /* wait for activity or timeout */
-    pollrc = Curl_poll(fds, numfds, (int)ev->ms);
+    pollrc = Curl_poll(fds, numfds, timeout_ms);
 
     after = curlx_tvnow();
 

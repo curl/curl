@@ -34,10 +34,6 @@
 
 #ifdef USE_OPENSSL
 
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
-
 #include "urldata.h"
 #include "sendf.h"
 #include "formdata.h" /* for the boundary function */
@@ -52,6 +48,8 @@
 #include "rawstr.h"
 #include "hostcheck.h"
 #include "curl_printf.h"
+#include "warnless.h"
+#include "curl_limits.h"
 
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
@@ -2053,7 +2051,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 
   /* pass the raw socket into the SSL layers */
-  if(!SSL_set_fd(connssl->handle, (int)sockfd)) {
+  if(!SSL_set_fd(connssl->handle, curlx_sktosi(sockfd))) {
     failf(data, "SSL: SSL_set_fd failed: %s",
           ERR_error_string(ERR_get_error(), NULL));
     return CURLE_SSL_CONNECT_ERROR;
@@ -2195,8 +2193,10 @@ static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
 {
   int i, ilen;
 
-  if((ilen = (int)len) < 0)
+  if(len > (size_t)INT_MAX)
     return 1; /* buffer too big */
+
+  ilen = (int)len;
 
   i = i2t_ASN1_OBJECT(buf, ilen, a);
 

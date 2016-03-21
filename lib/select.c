@@ -49,6 +49,7 @@
 #include "connect.h"
 #include "select.h"
 #include "warnless.h"
+#include "curl_limits.h"
 
 /* Convenience local macros */
 
@@ -164,6 +165,9 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   int error;
   int r;
   int ret;
+
+  if(timeout_ms > (long)INT_MAX)
+    timeout_ms = (long)INT_MAX; /* this is too long for real cases */
 
   if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&
      (writefd == CURL_SOCKET_BAD)) {

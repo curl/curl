@@ -83,7 +83,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   char *sel;
   char *sel_org = NULL;
   ssize_t amount, k;
-  int len;
+  size_t len;
 
   *done = TRUE; /* unconditionally */
 
@@ -94,6 +94,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   }
   else {
     char *newp;
+    int len_int;
     size_t j, i;
 
     /* Otherwise, drop / and the first character (i.e., item type) ... */
@@ -107,10 +108,11 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
         newp[i] = '\x09';
 
     /* ... and finally unescape */
-    sel = curl_easy_unescape(data, newp, 0, &len);
+    sel = curl_easy_unescape(data, newp, 0, &len_int);
     if(!sel)
       return CURLE_OUT_OF_MEMORY;
     sel_org = sel;
+    len = (size_t)len_int;
   }
 
   /* We use Curl_write instead of Curl_sendf to make sure the entire buffer is
