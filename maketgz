@@ -138,7 +138,7 @@ git log --pretty=fuller --no-color --date=short --decorate=full -1000 | ./script
 
 echo "make dist"
 targz="curl-$version.tar.gz"
-make -s dist VERSION=$version
+make -sj dist VERSION=$version
 
 ############################################################################
 #
