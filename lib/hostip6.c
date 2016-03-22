@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,6 +51,7 @@
 #include "connect.h"
 #include "curl_printf.h"
 #include "curl_memory.h"
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -58,7 +59,6 @@
  * Only for IPv6-enabled builds
  **********************************************************************/
 #ifdef CURLRES_IPV6
-
 
 #if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
 /* These are strictly for memory tracing and are using the same style as the
@@ -124,6 +124,7 @@ bool Curl_ipvalid(struct connectdata *conn)
 {
   if(conn->ip_version == CURL_IPRESOLVE_V6)
     return Curl_ipv6works();
+
   return TRUE;
 }
 
@@ -169,13 +170,13 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   char *sbufptr = NULL;
   char addrbuf[128];
   int pf;
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
   struct SessionHandle *data = conn->data;
+#endif
 
   *waitp = 0; /* synchronous response only */
 
-  /*
-   * Check if a limited name resolve has been requested.
-   */
+  /* Check if a limited name resolve has been requested */
   switch(conn->ip_version) {
   case CURL_IPRESOLVE_V4:
     pf = PF_INET;
@@ -206,6 +207,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     snprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr=sbuf;
   }
+
   error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &res);
   if(error) {
     infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);
@@ -217,5 +219,5 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   return res;
 }
 #endif /* CURLRES_SYNCH */
-#endif /* CURLRES_IPV6 */
 
+#endif /* CURLRES_IPV6 */
