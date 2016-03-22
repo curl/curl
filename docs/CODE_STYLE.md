@@ -107,13 +107,11 @@ Rather than test a conditional value such as a bool against TRUE or FALSE, a
 pointer against NULL or != NULL and an int against zero or not zero in
 if/while conditions we prefer:
 
-CURLcode result = CURLE_OK;
-
-result = do_something();
-if(!result) {
-  /* something went wrong */
-  return result;
-}
+    result = do_something();
+    if(!result) {
+      /* something went wrong */
+      return result;
+    }
 
 ## No assignments in conditions
 
