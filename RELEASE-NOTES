@@ -4,13 +4,14 @@ Curl and libcurl 7.48.0
  Command line options:         179
  curl_easy_setopt() options:   221
  Public functions in libcurl:  61
- Contributors:                 1348
+ Contributors:                 1364
 
 This release includes the following changes:
 
  o configure: --with-ca-fallback: use built-in TLS CA fallback [2]
  o TFTP: add --tftp-no-options to expose CURLOPT_TFTP_NO_OPTIONS [22]
  o getinfo: CURLINFO_TLS_SSL_PTR supersedes CURLINFO_TLS_SESSION [25]
+ o added CODE_STYLE.md [47]
 
 This release includes the following bugfixes:
 
@@ -87,6 +88,8 @@ This release includes the following bugfixes:
  o build: Added missing Visual Studio filter files for VC10 onwards
  o easy: Remove poll failure check in easy_transfer
  o mbedtls: fix compiler warning
+ o build-wolfssl: Update VS properties for wolfSSL v3.9.0
+ o Fixed various compilation warnings when verbose strings disabled
 
 This release includes the following known bugs:
 
@@ -153,3 +156,4 @@ References to bug reports and discussions on issues:
  [43] = https://curl.haxx.se/bug/?i=712
  [44] = https://curl.haxx.se/mail/lib-2016-03/0150.html
  [45] = https://curl.haxx.se/bug/?i=719
+ [47] = https://curl.haxx.se/dev/code-style.html
