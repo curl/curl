@@ -41,6 +41,11 @@ in the curl-www repo
 
   (the web site then updates its contents automatically)
 
+on github
+---------
+
+- edit the newly made release tag so that it is listed as the latest release
+
 inform
 ------
 
@@ -78,10 +83,10 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- October 7, 2015 (version 7.45.0)
-- December 2, 2015
-- January 27, 2016
-- March 23, 2016
+- March 23, 2016 (version 7.48.0)
 - May 18, 2016
 - July 13, 2016
 - September 7, 2016
+- November 2, 2016
+- December 28, 2016
+- February 22, 2017
