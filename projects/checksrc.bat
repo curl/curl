@@ -103,9 +103,9 @@ rem ***************************************************************************
 :syntax
   rem Display the help
   echo.
-  echo Usage: checksrc [product] [directory]
+  echo Usage: checksrc [what] [directory]
   echo.
-  echo Product:
+  echo What to scan:
   echo.
   echo lib       - Scan the libcurl source
   echo src       - Scan the command-line tool source
