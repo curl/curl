@@ -1075,7 +1075,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             failf(data, "Operation timed out after %ld milliseconds with %"
                   CURL_FORMAT_CURL_OFF_T " out of %"
                   CURL_FORMAT_CURL_OFF_T " bytes received",
-                  Curl_tvdiff(k->now, data->progress.t_startsingle),
+                  Curl_tvdiff(now, data->progress.t_startsingle),
                   k->bytecount, k->size);
           }
           else {
