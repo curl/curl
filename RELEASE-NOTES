@@ -1,6 +1,6 @@
-Curl and libcurl 7.48.0
+Curl and libcurl 7.48.1
 
- Public curl releases:         153
+ Public curl releases:         154
  Command line options:         179
  curl_easy_setopt() options:   221
  Public functions in libcurl:  61
@@ -8,88 +8,11 @@ Curl and libcurl 7.48.0
 
 This release includes the following changes:
 
- o configure: --with-ca-fallback: use built-in TLS CA fallback [2]
- o TFTP: add --tftp-no-options to expose CURLOPT_TFTP_NO_OPTIONS [22]
- o getinfo: CURLINFO_TLS_SSL_PTR supersedes CURLINFO_TLS_SESSION [25]
- o added CODE_STYLE.md [47]
+ o
 
 This release includes the following bugfixes:
 
- o Proxy-Connection: stop sending this header by default [1]
- o os400: sync ILE/RPG definitions with latest public header files
- o cookies: allow spaces in cookie names, cut of trailing spaces [3]
- o tool_urlglob: Allow reserved dos device names (Windows) [4]
- o openssl: remove most BoringSSL #ifdefs [5]
- o tool_doswin: Support for literal path prefix \\?\
- o mbedtls: fix ALPN usage segfault [6]
- o mbedtls: fix memory leak when destroying SSL connection data [7]
- o nss: do not count enabled cipher-suites
- o examples/cookie_interface.c: add cleanup call
- o examples: adhere to curl code style
- o curlx_tvdiff: handle 32bit time_t overflows [8]
- o dist: ship buildconf.bat too
- o curl.1: --disable-{eprt,epsv} are ignored for IPv6 hosts [9]
- o generate.bat: Fix comment bug by removing old comments [10]
- o test1604: Add to Makefile.inc so it gets run
- o gtls: fix for builds lacking encrypted key file support [11]
- o SCP: use libssh2_scp_recv2 to support > 2GB files on windows [12]
- o CURLOPT_CONNECTTIMEOUT_MS.3: Fix example to use milliseconds option [13]
- o cookie: do not refuse cookies to localhost [14]
- o openssl: avoid direct PKEY access with OpenSSL 1.1.0 [15]
- o http: Don't break the header into chunks if HTTP/2 [16]
- o http2: don't decompress gzip decoding automatically [17]
- o curlx.c: i2s_ASN1_IA5STRING() clashes with an openssl function
- o curl.1: add a missing dash
- o curl.1: HTTP headers for --cookie must be Set-Cookie style [18]
- o CURLOPT_COOKIEFILE.3: HTTP headers must be Set-Cookie style [18]
- o curl_sasl: Fix memory leak in digest parser [19]
- o src/Makefile.m32: add CURL_{LD,C}FLAGS_EXTRAS support [20]
- o CURLOPT_DEBUGFUNCTION.3: Fix example
- o runtests: Fixed usage of %PWD on MinGW64 [21]
- o tests/sshserver.pl: use RSA instead of DSA for host auth [23]
- o multi_remove_handle: keep the timeout list until after disconnect [24]
- o Curl_read: check for activated HTTP/1 pipelining, not only requested
- o configure: warn on invalid ca bundle or path [26]
- o file: try reading from files with no size [27]
- o getinfo: Add support for mbedTLS TLS session info
- o formpost: fix memory leaks in AddFormData error branches [28]
- o makefile.m32: allow to pass .dll/.exe-specific LDFLAGS [29]
- o url: if Curl_done is premature then pipeline not in use [30]
- o cookie: remove redundant check [31]
- o cookie: Don't expire session cookies in remove_expired [32]
- o makefile.m32: fix to allow -ssh2-winssl combination [33]
- o checksrc.bat: Fixed cannot find perl if installed but not in path
- o build-openssl.bat: Fixed cannot find perl if installed but not in path
- o mbedtls: fix user-specified SSL protocol version
- o makefile.m32: add missing libs for static -winssl-ssh2 builds [34]
- o test46: change cookie expiry date [35]
- o pipeline: Sanity check pipeline pointer before accessing it [36]
- o openssl: use the correct OpenSSL/BoringSSL/LibreSSL in messages
- o ftp_done: clear tunnel_state when secondary socket closes [37]
- o opt-docs: fix heading macros [38]
- o imap/pop3/smtp: Fixed connections upgraded with TLS are not reused [39]
- o curl_multi_wait: never return -1 in 'numfds' [40]
- o url.c: fix clang warning: no newline at end of file
- o krb5: improved type handling to avoid clang compiler warnings
- o cookies: first n/v pair in Set-Cookie: is the cookie, then parameters [41]
- o multi: avoid blocking during CURLM_STATE_WAITPROXYCONNECT [42]
- o multi hash: ensure modulo performed on curl_socket_t [43]
- o curl: glob_range: no need to check unsigned variable for negative
- o easy: add check to malloc() when running event-based
- o CURLOPT_SSLENGINE.3: Only for OpenSSL built with engine support [44]
- o version: thread safety
- o openssl: verbose: show matching SAN pattern
- o openssl: adapt to OpenSSL 1.1.0 API breakage in ERR_remove_thread_state()
- o formdata.c: Fixed compilation warning
- o configure: use cpp -P when needed [45]
- o imap.c: Fixed compilation warning with /Wall enabled
- o config-w32.h: Fixed compilation warning when /Wall enabled
- o ftp/imap/pop3/smtp: Fixed compilation warning when /Wall enabled
- o build: Added missing Visual Studio filter files for VC10 onwards
- o easy: Remove poll failure check in easy_transfer
- o mbedtls: fix compiler warning
- o build-wolfssl: Update VS properties for wolfSSL v3.9.0
- o Fixed various compilation warnings when verbose strings disabled
+ o
 
 This release includes the following known bugs:
 
@@ -98,62 +21,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anders Bakken, Brad Fitzpatrick, Clint Clayton, Dan Fandrich,
-  Daniel Stenberg, David Benjamin, David Byron, Emil Lerner, Eric S. Raymond,
-  Gisle Vanem, Jaime Fullaondo, Jeffrey Walton, Jesse Tan, Justin Ehlert,
-  Kamil Dudka, Kazuho Oku, Ludwig Nussel, Maksim Kuzevanov, Michael König,
-  Oliver Graute, Patrick Monnerat, Rafael Antonio, Ray Satiro, Seth Mos,
-  Shine Fan, Steve Holme, Tatsuhiro Tsujikawa, Timotej Lazar, Tim Rühsen,
-  Viktor Szakáts,
-  (30 contributors)
+  none yet
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=633
- [2] = https://curl.haxx.se/bug/?i=569
- [3] = https://curl.haxx.se/bug/?i=639
- [4] = https://github.com/curl/curl/commit/4520534#commitcomment-15954863
- [5] = https://curl.haxx.se/bug/?i=640
- [6] = https://curl.haxx.se/bug/?i=642
- [7] = https://curl.haxx.se/bug/?i=626
- [8] = https://curl.haxx.se/bug/?i=646
- [9] = https://bugzilla.redhat.com/1305970
- [10] = https://curl.haxx.se/bug/?i=649
- [11] = https://curl.haxx.se/bug/?i=651
- [12] = https://curl.haxx.se/bug/?i=451
- [13] = https://curl.haxx.se/bug/?i=653
- [14] = https://curl.haxx.se/bug/?i=658
- [15] = https://curl.haxx.se/bug/?i=650
- [16] = https://curl.haxx.se/bug/?i=659
- [17] = https://curl.haxx.se/bug/?i=661
- [18] = https://curl.haxx.se/bug/?i=666
- [19] = https://curl.haxx.se/bug/?i=667
- [20] = https://curl.haxx.se/bug/?i=670
- [21] = https://curl.haxx.se/bug/?i=672
- [22] = https://curl.haxx.se/bug/?i=481
- [23] = https://curl.haxx.se/bug/?i=676
- [24] = https://curl.haxx.se/mail/lib-2016-02/0097.html
- [25] = https://curl.haxx.se/libcurl/c/CURLINFO_TLS_SSL_PTR.html
- [26] = https://curl.haxx.se/bug/?i=404
- [27] = https://curl.haxx.se/bug/?i=681
- [28] = https://curl.haxx.se/bug/?i=688
- [29] = https://curl.haxx.se/bug/?i=689
- [30] = https://curl.haxx.se/bug/?i=690
- [31] = https://curl.haxx.se/bug/?i=695
- [32] = https://curl.haxx.se/bug/?i=697
- [33] = https://curl.haxx.se/bug/?i=692
- [34] = https://curl.haxx.se/bug/?i=693
- [35] = https://curl.haxx.se/bug/?i=697
- [36] = https://curl.haxx.se/bug/?i=704
- [37] = https://curl.haxx.se/bug/?i=701
- [38] = https://curl.haxx.se/bug/?i=705
- [39] = https://curl.haxx.se/bug/?i=422
- [40] = https://curl.haxx.se/bug/?i=707
- [41] = https://curl.haxx.se/bug/?i=709
- [42] = https://curl.haxx.se/bug/?i=703
- [43] = https://curl.haxx.se/bug/?i=712
- [44] = https://curl.haxx.se/mail/lib-2016-03/0150.html
- [45] = https://curl.haxx.se/bug/?i=719
- [47] = https://curl.haxx.se/dev/code-style.html
+ [1] =
