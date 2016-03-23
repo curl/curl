@@ -3382,6 +3382,16 @@ ConnectionExists(struct SessionHandle *data,
            looking so that we can reuse NTLM connections if
            possible. (Especially we must not reuse the same connection if
            partway through a handshake!) */
+
+        /* If we are engaged to a connection, don't use another one */
+        if(data->state.ntlm_conn && (data->state.ntlm_conn != check))
+          continue;
+        /* Otherwise, don't use a connection that's negotiating */
+        if(!data->state.ntlm_conn &&
+           ((check->ntlm.state == NTLMSTATE_TYPE2) ||
+            (check->proxyntlm.state == NTLMSTATE_TYPE2)))
+          continue;
+
         if(wantNTLMhttp) {
           if(!strequal(needle->user, check->user) ||
              !strequal(needle->passwd, check->passwd))

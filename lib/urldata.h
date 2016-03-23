@@ -1327,6 +1327,8 @@ struct UrlState {
   struct SessionHandle *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
+
+  struct connectdata *ntlm_conn; /* Connection to use for NTLM negitiation */
 };
 
 
