@@ -125,6 +125,7 @@
  17.10 improve how curl works in a windows console window
  17.11 -w output to stderr
  17.12 keep running, read instructions from pipe/socket
+ 17.13 support metalink in http headers
 
  18. Build
  18.1 roffit
@@ -755,6 +756,19 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  over a socket to make further instructions so that a second subsequent curl
  invoke can talk to the still running instance and ask for transfers to get
  done, and thus maintain its connection pool, DNS cache and more.
+
+17.13 support metalink in http headers
+
+ Curl has support for downloading a metalink xml file, processing it, and then
+ downloading the target of the metalink. This is done via the --metalink option.
+ It would be nice if metalink also supported downloading via metalink
+ information that is stored in HTTP headers (RFC 6249). Theoretically this could
+ also be supported with the --metalink option.
+
+ See http://tools.ietf.org/html/rfc6249
+
+ See also https://lists.gnu.org/archive/html/bug-wget/2015-06/msg00034.html for
+ an implematation of this in wget.
 
 18. Build
 
