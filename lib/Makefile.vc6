@@ -626,7 +626,7 @@ X_OBJS= \
 	$(DIROBJ)\krb5_sspi.obj \
 	$(DIROBJ)\ntlm.obj \
 	$(DIROBJ)\ntlm_sspi.obj \
-	$(DIROBJ)\oauth.obj \
+	$(DIROBJ)\oauth2.obj \
 	$(DIROBJ)\vtls.obj \
 	$(DIROBJ)\openssl.obj \
 	$(DIROBJ)\strdup.obj \

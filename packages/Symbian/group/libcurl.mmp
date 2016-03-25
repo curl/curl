@@ -42,7 +42,7 @@ SOURCE \
   curl_sasl_sspi.c smb.c curl_endian.c curl_des.c                      \
   vauth/vauth.c vauth/cleartext.c vauth/cram.c vauth/digest.c          \
   vauth/digest_sspi.c vauth/krb5_gssapi.c vauth/krb5_sspi.c            \
-  vauth/ntlm.c vauth/ntlm_sspi.c vauth/oauth.c
+  vauth/ntlm.c vauth/ntlm_sspi.c vauth/oauth2.c
 
 USERINCLUDE   ../../../lib ../../../include/curl
 #ifdef ENABLE_SSL
