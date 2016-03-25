@@ -62,7 +62,7 @@ LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
 
 CFLAGS_PDB = /Zi
-LFLAGS_PDB = /incremental:no /opt:ref,icf
+LFLAGS_PDB = /DEBUG /incremental:no /opt:ref,icf
 
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
@@ -286,12 +286,12 @@ CURL_CC = $(CURL_CC) $(CURL_CFLAGS)
 LNK       = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
 !IF "$(DEBUG)"=="yes"
 TARGET    = $(LIB_NAME_DLL_DEBUG)
-LNK       = $(LNK) /DEBUG /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
+LNK       = $(LNK) /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
 PDB       = $(PDB_NAME_DLL_DEBUG)
 CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
 !ELSE
 TARGET    = $(LIB_NAME_DLL)
-LNK       = $(LNK)  /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
+LNK       = $(LNK) /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
 PDB       = $(PDB_NAME_DLL)
 CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
 !ENDIF
@@ -424,6 +424,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@if exist $(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG) copy $(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG) $(DIRDIST)\lib >nul 2<&1
 	@-copy $(LIB_DIROBJ)\*.exp                 $(DIRDIST)\lib /y >nul 2<&1
 	@-copy $(LIB_DIROBJ)\*.pdb                 $(DIRDIST)\lib /y >nul 2<&1
+	if exist $(DIRDIST)\bin\$(LIB_NAME_DLL) move /y $(DIRDIST)\lib\*.pdb $(DIRDIST)\bin\ >nul 2<&1
 	@-copy ..\include\curl\*.h   $(DIRDIST)\include\curl\ /y  >nul 2<&1
 
 $(LIB_OBJS): $(LIB_DIROBJ) $(DIRDIST)
