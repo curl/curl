@@ -275,13 +275,15 @@ static CURLcode sasl_decode_digest_md5_message(const char *chlg64,
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Retrieve nonce string from the challenge */
-  if(!sasl_digest_get_key_value((char *) chlg, "nonce=\"", nonce, nlen, '\"')) {
+  if(!sasl_digest_get_key_value((char *) chlg, "nonce=\"", nonce, nlen,
+                                '\"')) {
     free(chlg);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
   /* Retrieve realm string from the challenge */
-  if(!sasl_digest_get_key_value((char *) chlg, "realm=\"", realm, rlen, '\"')) {
+  if(!sasl_digest_get_key_value((char *) chlg, "realm=\"", realm, rlen,
+                                '\"')) {
     /* Challenge does not have a realm, set empty string [RFC2831] page 6 */
     strcpy(realm, "");
   }
