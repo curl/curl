@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2012 - 2015, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -268,7 +268,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     cur += ALPN_HTTP_1_1_LENGTH;
     infof(data, "schannel: ALPN, offering %s\n", ALPN_HTTP_1_1);
 
-    *list_len = cur - list_start_index;
+    *list_len = curlx_uitous(cur - list_start_index);
     *extension_len = *list_len + sizeof(unsigned int) + sizeof(unsigned short);
 
     InitSecBuffer(&inbuf, SECBUFFER_APPLICATION_PROTOCOLS, alpn_buffer, cur);
