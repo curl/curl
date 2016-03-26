@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_CONNECT_TO_HOST 3 "20 Jan 2016" "libcurl 7.48.0" "curl_easy_setopt options"
+.TH CURLOPT_CONNECT_TO_HOST 3 "26 Mar 2016" "libcurl 7.49.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_CONNECT_TO_HOST \- Connect to a specific host and port instead of the URL's host and port
 .SH SYNOPSIS
@@ -45,8 +45,19 @@ In contrast to \fICURLOPT_RESOLVE\fP, the option \fICURLOPT_CONNECT_TO_HOST\fP
 does not pre-populate the DNS cache and therefore it does not affect future
 transfers of other easy handles that have been added to the same multi handle.
 
-If an HTTP proxy is used for a request having a \fIconnect to host\fP, the HTTP
-proxy is automatically switched to tunnel mode for this specific request.
+If \fICURLOPT_FOLLOWLOCATION\fP is enabled, the \fIconnect to host\fP is also used
+for redirected requests if the hostname and port of the redirect URL are the same
+as the hostname and port of the original URL.
+
+The \fIconnect to host\fP is ignored if it is equal to the hostname and the
+port in the request URL, because connecting to the hostname and the port in the
+request URL is the default behavior.
+
+If an HTTP proxy is used for a request having a \fIconnect to host\fP, and the
+\fIconnect to host\fP differs from the host and port in the request URL, the
+HTTP proxy is automatically switched to tunnel mode for this specific request.
+This is necessary because it is not possible to connect to a specific host in
+normal (non-tunnel) mode.
 
 .SH DEFAULT
 NULL
@@ -55,8 +66,8 @@ All
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-Added in 7.48.0
+Added in 7.49.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR CURLOPT_RESOLVE "(3), " CURLOPT_HTTPPROXYTUNNEL  "(3), "
+.BR CURLOPT_URL "(3), " CURLOPT_RESOLVE "(3), " CURLOPT_FOLLOWLOCATION "(3), " CURLOPT_HTTPPROXYTUNNEL  "(3), "
