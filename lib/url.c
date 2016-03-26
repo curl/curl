@@ -3728,17 +3728,16 @@ static bool tld_check_name(struct SessionHandle *data,
   if(rc != IDNA_SUCCESS)
     return FALSE;
 
+  /* Warning: err_pos receives "the decoded character offset rather than the
+     byte position in the string." And as of libidn 1.32 that character offset
+     is for UTF-8, even if the passed in string is another locale. */
   rc = tld_check_lz(uc_name, &err_pos, NULL);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 #ifdef HAVE_TLD_STRERROR
   if(rc != TLD_SUCCESS)
     tld_errmsg = tld_strerror((Tld_rc)rc);
 #endif
-  if(rc == TLD_INVALID)
-    infof(data, "WARNING: %s; pos %u = `%c'/0x%02X\n",
-          tld_errmsg, err_pos, uc_name[err_pos],
-          uc_name[err_pos] & 255);
-  else if(rc != TLD_SUCCESS)
+  if(rc != TLD_SUCCESS)
     infof(data, "WARNING: TLD check for %s failed; %s\n",
           uc_name, tld_errmsg);
 #endif /* CURL_DISABLE_VERBOSE_STRINGS */
