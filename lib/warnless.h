@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -52,6 +52,12 @@ size_t curlx_sotouz(curl_off_t sonum);
 
 int curlx_sztosi(ssize_t sznum);
 
+unsigned short curlx_uitous(unsigned int uinum);
+
+unsigned char curlx_uitouc(unsigned int uinum);
+
+int curlx_uitosi(unsigned int uinum);
+
 size_t curlx_sitouz(int sinum);
 
 #ifdef USE_WINSOCK
@@ -82,7 +88,7 @@ ssize_t curlx_write(int fd, const void *buf, size_t count);
 int curlx_FD_ISSET(int fd, fd_set *fdset);
 
 void curlx_FD_SET(int fd, fd_set *fdset);
-
+3
 void curlx_FD_ZERO(fd_set *fdset);
 
 unsigned short curlx_htons(unsigned short usnum);
