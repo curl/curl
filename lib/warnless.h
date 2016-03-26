@@ -88,7 +88,7 @@ ssize_t curlx_write(int fd, const void *buf, size_t count);
 int curlx_FD_ISSET(int fd, fd_set *fdset);
 
 void curlx_FD_SET(int fd, fd_set *fdset);
-3
+
 void curlx_FD_ZERO(fd_set *fdset);
 
 unsigned short curlx_htons(unsigned short usnum);
