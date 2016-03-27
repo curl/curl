@@ -8,10 +8,19 @@ Curl and libcurl 7.48.1
 
 This release includes the following changes:
 
+ o schannel: Add ALPN support [2]
+ o SSH: support CURLINFO_FILETIME
+ o SSH: new CURLOPT_QUOTE command "statvfs" [5]
  o
 
 This release includes the following bugfixes:
 
+ o checksrc.bat: Updated the help to be consistent with generate.bat
+ o openssl: fix ERR_remove_thread_state() for boringssl/libressl [1]
+ o openssl: boringssl provides the same numbering as openssl
+ o multi: fix "Operation timed out after" timer [3]
+ o url: don't use bad offset in tld_check_name to show error [4]
+ o sshserver.pl: use quotes for given options
  o
 
 This release includes the following known bugs:
@@ -21,10 +30,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  none yet
+  Dan Cristian, Daniel Stenberg, David Benjamin, Dusty Mabe, Evgeny Grin,
+  Jay Satiro, Joel Depooter, Juan RP, marquis-de-muesli, Steve Holme
+  (10 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = https://twitter.com/xtraemeat/status/712564874098917376
+ [2] = https://curl.haxx.se/bug/?i=724
+ [3] = https://curl.haxx.se/bug/?i=619
+ [4] = https://curl.haxx.se/bug/?i=731
+ [5] = https://curl.haxx.se/bug/?i=677
+ [6] =
