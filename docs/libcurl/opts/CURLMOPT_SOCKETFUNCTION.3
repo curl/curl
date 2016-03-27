@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2014, 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLMOPT_SOCKETFUNCTION 3 "3 Nov 2014" "libcurl 7.39.0" "curl_multi_setopt options"
+.TH CURLMOPT_SOCKETFUNCTION 3 "3 Nov 2016" "libcurl 7.39.0" "curl_multi_setopt options"
 .SH NAME
 CURLMOPT_SOCKETFUNCTION \- callback informed about what to wait for
 .SH SYNOPSIS
@@ -29,7 +29,7 @@ CURLMOPT_SOCKETFUNCTION \- callback informed about what to wait for
 
 int socket_callback(CURL *easy,      /* easy handle */
                     curl_socket_t s, /* socket */
-                    int what,        /* see above */
+                    int what,        /* describes the socket */
                     void *userp,     /* private callback pointer */
                     void *socketp);  /* private socket pointer */
 
@@ -46,6 +46,18 @@ If the given callback pointer is NULL, no callback will be called. Set the
 callback's \fBuserp\fP argument with \fICURLMOPT_SOCKETDATA(3)\fP.  See
 \fIcurl_multi_socket_action(3)\fP for more details on how the callback is used
 and should work.
+
+The \fBwhat\fP parameter informs the callback on the status of the given
+socket. It can hold one of these values:
+.IP CURL_POLL_IN
+Wait for incoming data. For the socket to become readable.
+.IP CURL_POLL_OUT
+Wait for outgoing data. For the socket to become writable.
+.IP CURL_POLL_INOUT
+Wait for incoming abd outgoing data. For the socket to become readable or
+writable.
+.IP CURL_POLL_REMOVE
+The specified socket/file descriptor is no longer used by libcurl.
 .SH DEFAULT
 NULL (no callback)
 .SH PROTOCOLS
