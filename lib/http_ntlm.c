@@ -36,7 +36,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "rawstr.h"
-#include "curl_ntlm.h"
+#include "http_ntlm.h"
 #include "curl_ntlm_wb.h"
 #include "vauth/vauth.h"
 #include "url.h"

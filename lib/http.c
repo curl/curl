@@ -57,7 +57,7 @@
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"
 #include "http_digest.h"
-#include "curl_ntlm.h"
+#include "http_ntlm.h"
 #include "curl_ntlm_wb.h"
 #include "http_negotiate.h"
 #include "url.h"
