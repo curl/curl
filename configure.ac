@@ -2206,7 +2206,8 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
         dnl Recent WolfSSL versions build without SSLv3 by default
         dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
         AC_CHECK_FUNCS(wolfSSLv3_client_method \
-                       wolfSSL_get_peer_certificate)
+                       wolfSSL_get_peer_certificate \
+                       wolfSSL_UseALPN)
       else
         dnl Cyassl needs configure --enable-opensslextra to have *get_peer*
         AC_CHECK_FUNCS(CyaSSL_get_peer_certificate)

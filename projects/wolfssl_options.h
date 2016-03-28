@@ -19,6 +19,7 @@ These configure flags were used in MinGW to generate the options in this file:
 --enable-sessioncerts
 --enable-certgen
 --enable-testcert
+--enable-alpn
 C_EXTRA_FLAGS="-DFP_MAX_BITS=16384 -DTFM_TIMING_RESISTANT"
 
 Two generated options HAVE_THREAD_LS and _POSIX_THREADS were removed since they
@@ -129,6 +130,8 @@ extern "C" {
 #undef  USE_FAST_MATH
 #define USE_FAST_MATH
 
+#undef  HAVE_ALPN
+#define HAVE_ALPN
 
 #ifdef __cplusplus
 }
