@@ -204,6 +204,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
   CURLcode result = CURLE_OK;
   unsigned long li;
+  bool capath_from_env;
 
   /* Save the values of noprogress and isatty to restore them later on */
   bool orig_noprogress = global->noprogress;
@@ -239,7 +240,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
    * We support the environment variable thing for non-Windows platforms
    * too. Just for the sake of it.
    */
-  bool capath_from_env = false;
+  capath_from_env = false;
   if(!config->cacert &&
      !config->capath &&
      !config->insecure_ok) {
