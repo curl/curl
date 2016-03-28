@@ -38,6 +38,7 @@
  2.2 Better support for same name resolves
  2.3 Non-blocking curl_multi_remove_handle()
  2.4 Split connect and authentication process
+ 2.5 Edge-triggered sockets should work
 
  3. Documentation
  3.1 Update date and version in man pages
@@ -336,6 +337,12 @@
  The multi interface treats the authentication process as part of the connect
  phase. As such any failures during authentication won't trigger the relevant
  QUIT or LOGOFF for protocols such as IMAP, POP3 and SMTP.
+
+2.5 Edge-triggered sockets should work
+
+ The multi_socket API should work with edge-triggered socket events. One of
+ the internal actions that need to be improved for this to work perfectly is
+ the 'maxloops' handling in transfer.c:readwrite_data().
 
 3. Documentation
 
