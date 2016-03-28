@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -239,6 +239,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
    * We support the environment variable thing for non-Windows platforms
    * too. Just for the sake of it.
    */
+  bool capath_from_env = false;
   if(!config->cacert &&
      !config->capath &&
      !config->insecure_ok) {
@@ -263,6 +264,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           result = CURLE_OUT_OF_MEMORY;
           goto quit_curl;
         }
+        capath_from_env = true;
       }
       else {
         env = curlx_getenv("SSL_CERT_FILE");
@@ -1009,8 +1011,16 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         if(config->cacert)
           my_setopt_str(curl, CURLOPT_CAINFO, config->cacert);
-        if(config->capath)
-          my_setopt_str(curl, CURLOPT_CAPATH, config->capath);
+        if(config->capath) {
+          result = res_setopt_str(curl, CURLOPT_CAPATH, config->capath);
+          if(result == CURLE_NOT_BUILT_IN) {
+            warnf(config->global, "ignoring %s, not supported by libcurl\n",
+                  capath_from_env?
+                  "SSL_CERT_DIR environment variable":"--capath");
+          }
+          else if(result)
+            goto show_error;
+        }
         if(config->crlfile)
           my_setopt_str(curl, CURLOPT_CRLFILE, config->crlfile);
 
