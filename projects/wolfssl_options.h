@@ -30,6 +30,7 @@ C_EXTRA_FLAGS="\
   --enable-sha512 \
   --enable-sni \
   --enable-sslv3 \
+  --enable-supportedcurves \
   --enable-testcert \
   > config.out 2>&1
 
@@ -157,6 +158,9 @@ extern "C" {
 
 #undef  HAVE_TLS_EXTENSIONS
 #define HAVE_TLS_EXTENSIONS
+
+#undef  HAVE_SUPPORTED_CURVES
+#define HAVE_SUPPORTED_CURVES
 
 #undef  WOLFSSL_TEST_CERT
 #define WOLFSSL_TEST_CERT

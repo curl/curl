@@ -112,6 +112,15 @@ and that's a problem since options.h hasn't been included yet. */
 #endif
 #endif
 
+/* HAVE_SUPPORTED_CURVES is wolfSSL's build time symbol for enabling the ECC
+   supported curve extension in options.h. Note ECC is enabled separately. */
+#ifndef HAVE_SUPPORTED_CURVES
+#if defined(HAVE_CYASSL_CTX_USESUPPORTEDCURVE) || \
+    defined(HAVE_WOLFSSL_CTX_USESUPPORTEDCURVE)
+#define HAVE_SUPPORTED_CURVES
+#endif
+#endif
+
 static Curl_recv cyassl_recv;
 static Curl_send cyassl_send;
 
@@ -311,6 +320,16 @@ cyassl_connect_step1(struct connectdata *conn,
             "TLS extension\n");
     }
   }
+#endif
+
+#ifdef HAVE_SUPPORTED_CURVES
+  /* CyaSSL/wolfSSL does not send the supported ECC curves ext automatically:
+     https://github.com/wolfSSL/wolfssl/issues/366
+     The supported curves below are those also supported by OpenSSL 1.0.2 and
+     in the same order. */
+  CyaSSL_CTX_UseSupportedCurve(conssl->ctx, 0x17); /* secp256r1 */
+  CyaSSL_CTX_UseSupportedCurve(conssl->ctx, 0x19); /* secp521r1 */
+  CyaSSL_CTX_UseSupportedCurve(conssl->ctx, 0x18); /* secp384r1 */
 #endif
 
   /* give application a chance to interfere with SSL set up. */
