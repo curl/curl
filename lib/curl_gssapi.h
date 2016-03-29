@@ -56,8 +56,8 @@ OM_uint32 Curl_gss_init_sec_context(
     OM_uint32 *ret_flags);
 
 /* Helper to log a GSS-API error status */
-void Curl_gss_log_error(struct SessionHandle *data, OM_uint32 status,
-                        const char *prefix);
+void Curl_gss_log_error(struct SessionHandle *data, const char *prefix,
+                        OM_uint32 major, OM_uint32 minor);
 
 /* Provide some definitions missing in old headers */
 #ifdef HAVE_OLD_GSSMIT

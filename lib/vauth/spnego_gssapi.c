@@ -102,7 +102,8 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
                                    GSS_C_NT_HOSTBASED_SERVICE,
                                    &nego->server_name);
     if(GSS_ERROR(major_status)) {
-      Curl_gss_log_error(data, minor_status, "gss_import_name() failed: ");
+      Curl_gss_log_error(data, "gss_import_name() failed: ",
+                         major_status, minor_status);
 
       free(spn);
 
@@ -150,8 +151,8 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
     if(output_token.value)
       gss_release_buffer(&unused_status, &output_token);
 
-    Curl_gss_log_error(data, minor_status,
-                       "gss_init_sec_context() failed: ");
+    Curl_gss_log_error(data, "gss_init_sec_context() failed: ",
+                       major_status, minor_status);
 
     return CURLE_OUT_OF_MEMORY;
   }
