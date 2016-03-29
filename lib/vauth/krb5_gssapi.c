@@ -101,7 +101,8 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     gss_major_status = gss_import_name(&gss_minor_status, &spn_token,
                                        GSS_C_NT_HOSTBASED_SERVICE, &krb5->spn);
     if(GSS_ERROR(gss_major_status)) {
-      Curl_gss_log_error(data, gss_minor_status, "gss_import_name() failed: ");
+      Curl_gss_log_error(data, "gss_import_name() failed: ",
+                         gss_major_status, gss_minor_status);
 
       free(spn);
 
@@ -147,8 +148,8 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     if(output_token.value)
       gss_release_buffer(&gss_status, &output_token);
 
-    Curl_gss_log_error(data, gss_minor_status,
-                       "gss_init_sec_context() failed: ");
+    Curl_gss_log_error(data, "gss_init_sec_context() failed: ",
+                       gss_major_status, gss_minor_status);
 
     return CURLE_RECV_ERROR;
   }
@@ -224,8 +225,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
                                          &username, NULL, NULL, NULL, NULL,
                                          NULL, NULL);
   if(GSS_ERROR(gss_major_status)) {
-    Curl_gss_log_error(data, gss_minor_status,
-                       "gss_inquire_context() failed: ");
+    Curl_gss_log_error(data, "gss_inquire_context() failed: ",
+                       gss_major_status, gss_minor_status);
 
     free(chlg);
 
@@ -236,7 +237,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
   gss_major_status = gss_display_name(&gss_minor_status, username,
                                       &username_token, NULL);
   if(GSS_ERROR(gss_major_status)) {
-    Curl_gss_log_error(data, gss_minor_status, "gss_display_name() failed: ");
+    Curl_gss_log_error(data, "gss_display_name() failed: ",
+                       gss_major_status, gss_minor_status);
 
     free(chlg);
 
@@ -251,7 +253,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
   gss_major_status = gss_unwrap(&gss_minor_status, krb5->context, &input_token,
                                 &output_token, NULL, &qop);
   if(GSS_ERROR(gss_major_status)) {
-    Curl_gss_log_error(data, gss_minor_status, "gss_unwrap() failed: ");
+    Curl_gss_log_error(data, "gss_unwrap() failed: ",
+                       gss_major_status, gss_minor_status);
 
     gss_release_buffer(&gss_status, &username_token);
     free(chlg);
@@ -325,7 +328,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
                               GSS_C_QOP_DEFAULT, &input_token, NULL,
                               &output_token);
   if(GSS_ERROR(gss_major_status)) {
-    Curl_gss_log_error(data, gss_minor_status, "gss_wrap() failed: ");
+    Curl_gss_log_error(data, "gss_wrap() failed: ",
+                       gss_major_status, gss_minor_status);
 
     free(message);
 
