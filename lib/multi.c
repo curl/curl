@@ -990,6 +990,85 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
   return rc;
 }
 
+/*
+ * do_complete is called when the DO actions are complete.
+ *
+ * We init chunking and trailer bits to their default values here immediately
+ * before receiving any header data for the current request in the pipeline.
+ */
+static void do_complete(struct connectdata *conn)
+{
+  conn->data->req.chunk=FALSE;
+  conn->data->req.maxfd = (conn->sockfd>conn->writesockfd?
+                           conn->sockfd:conn->writesockfd)+1;
+  Curl_pgrsTime(conn->data, TIMER_PRETRANSFER);
+}
+
+static CURLcode multi_do(struct connectdata **connp, bool *done)
+{
+  CURLcode result=CURLE_OK;
+  struct connectdata *conn = *connp;
+  struct SessionHandle *data = conn->data;
+
+  if(conn->handler->do_it) {
+    /* generic protocol-specific function pointer set in curl_connect() */
+    result = conn->handler->do_it(conn, done);
+
+    /* This was formerly done in transfer.c, but we better do it here */
+    if((CURLE_SEND_ERROR == result) && conn->bits.reuse) {
+      /*
+       * If the connection is using an easy handle, call reconnect
+       * to re-establish the connection.  Otherwise, let the multi logic
+       * figure out how to re-establish the connection.
+       */
+      if(!data->multi) {
+        result = Curl_reconnect_request(connp);
+
+        if(!result) {
+          /* ... finally back to actually retry the DO phase */
+          conn = *connp; /* re-assign conn since Curl_reconnect_request
+                            creates a new connection */
+          result = conn->handler->do_it(conn, done);
+        }
+      }
+      else
+        return result;
+    }
+
+    if(!result && *done)
+      /* do_complete must be called after the protocol-specific DO function */
+      do_complete(conn);
+  }
+  return result;
+}
+
+/*
+ * multi_do_more() is called during the DO_MORE multi state. It is basically a
+ * second stage DO state which (wrongly) was introduced to support FTP's
+ * second connection.
+ *
+ * TODO: A future libcurl should be able to work away this state.
+ *
+ * 'complete' can return 0 for incomplete, 1 for done and -1 for go back to
+ * DOING state there's more work to do!
+ */
+
+static CURLcode multi_do_more(struct connectdata *conn, int *complete)
+{
+  CURLcode result=CURLE_OK;
+
+  *complete = 0;
+
+  if(conn->handler->do_more)
+    result = conn->handler->do_more(conn, complete);
+
+  if(!result && (*complete == 1))
+    /* do_complete must be called after the protocol-specific DO function */
+    do_complete(conn);
+
+  return result;
+}
+
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct timeval now,
                                  struct SessionHandle *data)
@@ -1322,9 +1401,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else {
         /* Perform the protocol's DO action */
-        result = Curl_do(&data->easy_conn, &dophase_done);
+        result = multi_do(&data->easy_conn, &dophase_done);
 
-        /* When Curl_do() returns failure, data->easy_conn might be NULL! */
+        /* When multi_do() returns failure, data->easy_conn might be NULL! */
 
         if(!result) {
           if(!dophase_done) {
@@ -1446,7 +1525,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /*
        * When we are connected, DO MORE and then go DO_DONE
        */
-      result = Curl_do_more(data->easy_conn, &control);
+      result = multi_do_more(data->easy_conn, &control);
 
       /* No need to remove this handle from the send pipeline here since that
          is done in Curl_done() */
