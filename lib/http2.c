@@ -155,7 +155,7 @@ void Curl_http2_setup_conn(struct connectdata *conn)
  * HTTP to HTTP2.
  */
 const struct Curl_handler Curl_handler_http2 = {
-  "HTTP2",                              /* scheme */
+  "HTTP",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
@@ -175,7 +175,7 @@ const struct Curl_handler Curl_handler_http2 = {
 };
 
 const struct Curl_handler Curl_handler_http2_ssl = {
-  "HTTP2",                              /* scheme */
+  "HTTPS",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
