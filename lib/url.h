@@ -37,7 +37,6 @@ void Curl_freeset(struct SessionHandle * data);
 CURLcode Curl_close(struct SessionHandle *data); /* opposite of curl_open() */
 CURLcode Curl_connect(struct SessionHandle *, struct connectdata **,
                       bool *async, bool *protocol_connect);
-CURLcode Curl_done(struct connectdata **, CURLcode, bool premature);
 CURLcode Curl_disconnect(struct connectdata *, bool dead_connection);
 CURLcode Curl_protocol_connect(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_connecting(struct connectdata *conn, bool *done);
@@ -58,6 +57,8 @@ CURLcode Curl_addHandleToPipeline(struct SessionHandle *handle,
                                   struct curl_llist *pipeline);
 int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
                                   struct curl_llist *pipeline);
+struct connectdata *
+Curl_oldest_idle_connection(struct SessionHandle *data);
 /* remove the specified connection from all (possible) pipelines and related
    queues */
 void Curl_getoff_all_pipelines(struct SessionHandle *data,

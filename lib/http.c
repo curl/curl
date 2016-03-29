@@ -1434,8 +1434,8 @@ static int https_getsock(struct connectdata *conn,
 #endif /* USE_OPENSSL || USE_GNUTLS || USE_SCHANNEL */
 
 /*
- * Curl_http_done() gets called from Curl_done() after a single HTTP request
- * has been performed.
+ * Curl_http_done() gets called after a single HTTP request has been
+ * performed.
  */
 
 CURLcode Curl_http_done(struct connectdata *conn,

@@ -1204,10 +1204,6 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
   (void)premature;
 
   if(!smtp || !pp->conn)
-    /* When the easy handle is removed from the multi interface while libcurl
-       is still trying to resolve the host name, the SMTP struct is not yet
-       initialized. However, the removal action calls Curl_done() which in
-       turn calls this function, so we simply return success. */
     return CURLE_OK;
 
   if(status) {
@@ -1262,8 +1258,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 
        TODO: when the multi interface is used, this _really_ should be using
        the smtp_multi_statemach function but we have no general support for
-       non-blocking DONE operations, not in the multi state machine and with
-       Curl_done() invokes on several places in the code!
+       non-blocking DONE operations!
     */
     result = smtp_block_statemach(conn);
   }

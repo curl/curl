@@ -1486,10 +1486,6 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
   (void)premature;
 
   if(!imap)
-    /* When the easy handle is removed from the multi interface while libcurl
-       is still trying to resolve the host name, the IMAP struct is not yet
-       initialized. However, the removal action calls Curl_done() which in
-       turn calls this function, so we simply return success. */
     return CURLE_OK;
 
   if(status) {
@@ -1512,8 +1508,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
 
        TODO: when the multi interface is used, this _really_ should be using
        the imap_multi_statemach function but we have no general support for
-       non-blocking DONE operations, not in the multi state machine and with
-       Curl_done() invokes on several places in the code!
+       non-blocking DONE operations!
     */
     if(!result)
       result = imap_block_statemach(conn);

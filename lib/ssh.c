@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -3068,8 +3068,7 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
 
        TODO: when the multi interface is used, this _really_ should be using
        the ssh_multi_statemach function but we have no general support for
-       non-blocking DONE operations, not in the multi state machine and with
-       Curl_done() invokes on several places in the code!
+       non-blocking DONE operations!
     */
     result = ssh_block_statemach(conn, FALSE);
   }

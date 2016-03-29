@@ -1166,10 +1166,6 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
   (void)premature;
 
   if(!pop3)
-    /* When the easy handle is removed from the multi interface while libcurl
-       is still trying to resolve the host name, the POP3 struct is not yet
-       initialized. However, the removal action calls Curl_done() which in
-       turn calls this function, so we simply return success. */
     return CURLE_OK;
 
   if(status) {
