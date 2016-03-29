@@ -7,7 +7,7 @@ HTTP/2 with curl
 Build prerequisites
 -------------------
   - nghttp2
-  - OpenSSL, NSS, GnutTLS, PolarSSL, wolfSSL or SChannel with a new enough
+  - OpenSSL, NSS, GnutTLS, mbedTLS, wolfSSL or SChannel with a new enough
     version.
 
 [nghttp2](https://nghttp2.org/)
@@ -58,7 +58,7 @@ provide the necessary TLS features. Right now we support:
   - OpenSSL:  ALPN and NPN
   - NSS:      ALPN and NPN
   - GnuTLS:   ALPN
-  - PolarSSL: ALPN
+  - mbedTLS:  ALPN
   - SChannel: ALPN
   - wolfSSL:  ALPN
 
