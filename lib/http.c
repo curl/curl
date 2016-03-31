@@ -1515,9 +1515,9 @@ CURLcode Curl_http_done(struct connectdata *conn,
                       entire operation is complete */
      !conn->bits.retry &&
      !data->set.connect_only &&
-     ((http->readbytecount +
-       data->req.headerbytecount -
-       data->req.deductheadercount)) <= 0) {
+     (http->readbytecount +
+      data->req.headerbytecount -
+      data->req.deductheadercount) <= 0) {
     /* If this connection isn't simply closed to be retried, AND nothing was
        read from the HTTP server (that counts), this can't be right so we
        return an error here */
