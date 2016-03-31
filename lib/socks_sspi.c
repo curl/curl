@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -70,7 +70,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   /* Needs GSS-API authentication */
   SECURITY_STATUS status;
   unsigned long sspi_ret_flags = 0;
-  int gss_enc;
+  unsigned char gss_enc;
   SecBuffer sspi_send_token, sspi_recv_token, sspi_w_token[3];
   SecBufferDesc input_desc, output_desc, wrap_desc;
   SecPkgContext_Sizes sspi_sizes;
