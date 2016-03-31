@@ -151,10 +151,13 @@ version. (Added in 7.33.0)
 (HTTP) Tells curl to issue its requests using HTTP 2. This requires that the
 underlying libcurl was built to support it. (Added in 7.33.0)
 .IP "--http2-prior-knowledge"
-(HTTP) Tells curl to issue its requests using HTTP 2 without HTTP/1.1 Upgrade. 
-This requires prior knowledge that the server supports HTTP 2.
-This requires that the underlying libcurl was built to support it. 
-(Added in 7.49.0)
+(HTTP) Tells curl to issue its non-TLS HTTP requests using HTTP/2 without
+HTTP/1.1 Upgrade. It requires prior knowledge that the server supports HTTP/2
+straight away. HTTPS requests will still do HTTP/2 the standard way with
+negotiated protocol version in the TLS handshake.
+
+HTTP/2 support in general also requires that the underlying libcurl was built
+to support it. (Added in 7.49.0)
 .IP "--no-npn"
 Disable the NPN TLS extension. NPN is enabled by default if libcurl was built
 with an SSL library that supports NPN. NPN is used by a libcurl that supports

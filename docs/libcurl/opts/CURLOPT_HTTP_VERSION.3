@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -54,6 +54,11 @@ actual protocol name.
 Attempt HTTP 2 over TLS (HTTPS) only. libcurl will fall back to HTTP 1.1 if
 HTTP 2 can't be negotiated with the HTTPS server. For clear text HTTP servers,
 libcurl will use 1.1. (Added in 7.47.0)
+.IP CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE
+Issue non-TLS HTTP requests using HTTP/2 without HTTP/1.1 Upgrade. It requires
+prior knowledge that the server supports HTTP/2 straight away. HTTPS requests
+will still do HTTP/2 the standard way with negotiated protocol version in the
+TLS handshake.
 .SH DEFAULT
 CURL_HTTP_VERSION_NONE
 .SH PROTOCOLS
