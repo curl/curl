@@ -1133,10 +1133,6 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
                    ptr+headlen, bodylen, conn);
       }
     }
-    if(bodylen)
-      /* since we sent a piece of the body here, up the byte counter for it
-         accordingly */
-      http->writebytecount += bodylen;
 
     /* 'amount' can never be a very large value here so typecasting it so a
        signed 31 bit value should not cause problems even if ssize_t is
@@ -1144,6 +1140,10 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
     *bytes_written += (long)amount;
 
     if(http) {
+      /* if we sent a piece of the body here, up the byte counter for it
+         accordingly */
+      http->writebytecount += bodylen;
+
       if((size_t)amount != size) {
         /* The whole request could not be sent in one system call. We must
            queue it up and send it later when we get the chance. We must not
