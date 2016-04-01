@@ -54,14 +54,14 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
     userp = conn->proxyuser;
     passwdp = conn->proxypasswd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME];
-    host = conn->host.name;
+    host = conn->proxy.name;
     neg_ctx = &data->state.proxyneg;
   }
   else {
     userp = conn->user;
     passwdp = conn->passwd;
     service = data->set.str[STRING_SERVICE_NAME];
-    host = conn->proxy.name;
+    host = conn->host.name;
     neg_ctx = &data->state.negotiate;
   }
 
