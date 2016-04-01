@@ -816,6 +816,20 @@ static CURLcode readwrite_data(struct SessionHandle *data,
   return CURLE_OK;
 }
 
+static CURLcode done_sending(struct connectdata *conn,
+                             struct SingleRequest *k)
+{
+  k->keepon &= ~KEEP_SEND; /* we're done writing */
+
+  if(conn->bits.rewindaftersend) {
+    CURLcode result = Curl_readrewind(conn);
+    if(result)
+      return result;
+  }
+  return CURLE_OK;
+}
+
+
 /*
  * Send data to upload to the server, when the socket is writable.
  */
@@ -887,14 +901,9 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
         break;
       }
       else if(nread<=0) {
-        /* done */
-        k->keepon &= ~KEEP_SEND; /* we're done writing */
-
-        if(conn->bits.rewindaftersend) {
-          result = Curl_readrewind(conn);
-          if(result)
-            return result;
-        }
+        result = done_sending(conn, k);
+        if(result)
+          return result;
         break;
       }
 
@@ -1004,8 +1013,9 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       data->req.upload_present = 0; /* no more bytes left */
 
       if(k->upload_done) {
-        /* switch off writing, we're done! */
-        k->keepon &= ~KEEP_SEND; /* we're done writing */
+        result = done_sending(conn, k);
+        if(result)
+          return result;
       }
     }
 
