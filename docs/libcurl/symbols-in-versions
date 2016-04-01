@@ -662,6 +662,7 @@ CURL_CHUNK_END_FUNC_OK          7.21.0
 CURL_CSELECT_ERR                7.16.3
 CURL_CSELECT_IN                 7.16.3
 CURL_CSELECT_OUT                7.16.3
+CURL_DID_MEMORY_FUNC_TYPEDEFS   7.49.0
 CURL_EASY_NONE                  7.14.0        -           7.15.4
 CURL_EASY_TIMEOUT               7.14.0        -           7.15.4
 CURL_ERROR_SIZE                 7.1
