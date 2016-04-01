@@ -46,6 +46,14 @@
 #error too old nghttp2 version, upgrade!
 #endif
 
+#if (NGHTTP2_VERSION_NUM >= 0x010900)
+/* nghttp2_session_callbacks_set_error_callback is present in nghttp2 1.9.0 or
+   later */
+#define NGHTTP2_HAS_ERROR_CALLBACK 1
+#else
+#define nghttp2_session_callbacks_set_error_callback(x,y)
+#endif
+
 /*
  * Curl_http2_init_state() is called when the easy handle is created and
  * allows for HTTP/2 specific init of state.
@@ -912,6 +920,19 @@ static nghttp2_settings_entry settings[] = {
 
 #define H2_BUFSIZE 32768
 
+#ifdef NGHTTP2_HAS_ERROR_CALLBACK
+static int error_callback(nghttp2_session *session,
+                          const char *msg,
+                          size_t len,
+                          void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  (void)session;
+  infof(conn->data, "http2 error: %.*s\n", len, msg);
+  return 0;
+}
+#endif
+
 /*
  * Initialize nghttp2 for a Curl connection
  */
@@ -960,6 +981,8 @@ CURLcode Curl_http2_init(struct connectdata *conn)
       (callbacks, on_begin_headers);
     /* nghttp2_on_header_callback */
     nghttp2_session_callbacks_set_on_header_callback(callbacks, on_header);
+
+    nghttp2_session_callbacks_set_error_callback(callbacks, error_callback);
 
     /* The nghttp2 session is not yet setup, do it */
     rc = nghttp2_session_client_new(&conn->proto.httpc.h2, callbacks, conn);
