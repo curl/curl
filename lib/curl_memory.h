@@ -83,6 +83,7 @@
 
 #ifndef CURLX_NO_MEMORY_CALLBACKS
 
+#ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
 /*
  * The following memory funciton replacement typedef's are COPIED from
  * curl/curl.h and MUST match the originals. We copy them to avoid having to
@@ -94,7 +95,7 @@ typedef void (*curl_free_callback)(void *ptr);
 typedef void *(*curl_realloc_callback)(void *ptr, size_t size);
 typedef char *(*curl_strdup_callback)(const char *str);
 typedef void *(*curl_calloc_callback)(size_t nmemb, size_t size);
-
+#endif
 
 extern curl_malloc_callback Curl_cmalloc;
 extern curl_free_callback Curl_cfree;
