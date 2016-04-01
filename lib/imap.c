@@ -364,7 +364,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
      a space and optionally some text as per RFC-3501 for the AUTHENTICATE and
      APPEND commands and as outlined in Section 4. Examples of RFC-4959 but
      some e-mail servers ignore this and only send a single + instead. */
-  if(!imap->custom && ((len == 3 && !memcmp("+", line, 1)) ||
+  if(imap && !imap->custom && ((len == 3 && !memcmp("+", line, 1)) ||
      (len >= 2 && !memcmp("+ ", line, 2)))) {
     switch(imapc->state) {
       /* States which are interested in continuation responses */
