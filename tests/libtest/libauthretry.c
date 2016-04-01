@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,13 +32,14 @@ static CURLcode send_request(CURL *curl, const char *url, int seq,
                              long auth_scheme, const char *userpwd)
 {
   CURLcode res;
-  char* full_url = malloc(strlen(url) + 4 + 1);
+  size_t len = strlen(url) + 4 + 1;
+  char* full_url = malloc(len);
   if (!full_url) {
     fprintf(stderr, "Not enough memory for full url\n");
     return CURLE_OUT_OF_MEMORY;
   }
 
-  sprintf(full_url, "%s%04d", url, seq);
+  snprintf(full_url, len, "%s%04d", url, seq);
   fprintf(stderr, "Sending new request %d to %s with credential %s "
           "(auth %ld)\n", seq, full_url, userpwd, auth_scheme);
   test_setopt(curl, CURLOPT_URL, full_url);

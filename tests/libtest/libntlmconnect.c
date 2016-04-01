@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -103,11 +103,12 @@ int test(char *url)
   int i, j;
   int num_handles = 0;
   enum HandleState state = ReadyForNewHandle;
-  char* full_url = malloc(strlen(url) + 4 + 1);
+  size_t urllen = strlen(url) + 4 + 1;
+  char* full_url = malloc(urllen);
 
   start_test_timing();
 
-  if (!full_url) {
+  if(!full_url) {
     fprintf(stderr, "Not enough memory for full url\n");
     return TEST_ERR_MAJOR_BAD;
   }
@@ -141,14 +142,14 @@ int test(char *url)
     bool found_new_socket = FALSE;
 
     /* Start a new handle if we aren't at the max */
-    if (state == ReadyForNewHandle) {
+    if(state == ReadyForNewHandle) {
       easy_init(easy[num_handles]);
 
-      if (num_handles % 3 == 2) {
-        sprintf(full_url, "%s0200", url);
+      if(num_handles % 3 == 2) {
+        snprintf(full_url, urllen, "%s0200", url);
         easy_setopt(easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
       } else {
-        sprintf(full_url, "%s0100", url);
+        snprintf(full_url, urllen, "%s0100", url);
         easy_setopt(easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
       }
       easy_setopt(easy[num_handles], CURLOPT_FRESH_CONNECT, 1L);
@@ -185,30 +186,30 @@ int test(char *url)
       bool socket_exists = FALSE;
       curl_socket_t curfd = (curl_socket_t)i;
 
-      if (!FD_ISSET(curfd, &fdread)) {
+      if(!FD_ISSET(curfd, &fdread)) {
         continue;
       }
 
       /* Check if this socket was already detected for an earlier handle (or
          for this handle, num_handles-1, in the callback */
       for (j = 0; j < num_handles; ++j) {
-        if (sockets[j] == curfd) {
+        if(sockets[j] == curfd) {
           socket_exists = TRUE;
           break;
         }
       }
-      if (socket_exists) {
+      if(socket_exists) {
         continue;
       }
 
-      if (found_new_socket || state != NeedSocketForNewHandle) {
+      if(found_new_socket || state != NeedSocketForNewHandle) {
         fprintf(stderr, "Unexpected new socket\n");
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
 
       /* Now we know the socket is for the most recent handle, num_handles-1 */
-      if (sockets[num_handles-1] != CURL_SOCKET_BAD) {
+      if(sockets[num_handles-1] != CURL_SOCKET_BAD) {
         /* A socket for this handle was already detected in the callback; if it
            matched socket_exists should be true and we would never get here */
         assert(curfd != sockets[num_handles-1]);
@@ -224,7 +225,7 @@ int test(char *url)
       }
     }
 
-    if (state == NeedSocketForNewHandle) {
+    if(state == NeedSocketForNewHandle) {
       if(maxfd != -1 && !found_new_socket) {
         fprintf(stderr, "Warning: socket did not open immediately for new "
                 "handle (trying again)\n");
