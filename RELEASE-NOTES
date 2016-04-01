@@ -11,7 +11,9 @@ This release includes the following changes:
  o schannel: Add ALPN support [2]
  o SSH: support CURLINFO_FILETIME
  o SSH: new CURLOPT_QUOTE command "statvfs" [5]
- o
+ o wolfssl: Add ALPN support
+ o http2: support prior knowledge, no upgrade from HTTP/1.1
+   --http2-prior-knowledge and CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE
 
 This release includes the following bugfixes:
 
@@ -21,7 +23,22 @@ This release includes the following bugfixes:
  o multi: fix "Operation timed out after" timer [3]
  o url: don't use bad offset in tld_check_name to show error [4]
  o sshserver.pl: use quotes for given options
- o
+ o Makefile.am: skip the scripts dir [6]
+ o curl: warn for --capath use if not supported by libcurl [7]
+ o http2: fix connection reuse [8]
+ o GSS: make Curl_gss_log_error more verbose [9]
+ o build-wolfssl: Allow a broader range of ciphers (Visual Studio)
+ o wolfssl: Use ECC supported curves extension [10]
+ o openssl: Fix compilation warnings
+ o Curl_add_buffer_send: avoid possible NULL dereference
+ o SOCKS5_gssapi_negotiate: don't assume little-endian ints
+ o strerror: don't bit shift a signed integer [11]
+ o url: Corrected get protocol family for FTP and LDAP
+ o curl/mprintf.h: remove support for _MPRINTF_REPLACE
+ o upload: missing rewind call could make libcurl hang [12]
+ o IMAP: check pointer before dereferencing it [13]
+ o build: Changed the Visual Studio projects warning level from 3 to 4
+ o http_negotiate: Corrected host and proxy host name being wrong way round
 
 This release includes the following known bugs:
 
@@ -30,9 +47,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Cristian, Daniel Stenberg, David Benjamin, Dusty Mabe, Evgeny Grin,
-  Jay Satiro, Joel Depooter, Juan RP, marquis-de-muesli, Steve Holme
-  (10 contributors)
+  Alexis La Goutte, Anatol Belski, Dan Cristian, Daniel Stenberg,
+  David Benjamin, Diego Bes, Dusty Mabe, Evgeny Grin, Isaac Boukris,
+  Joel Depooter, Juan RP, Marcel Raad, Marquis de Muesli, Michael Osipov,
+  Ray Satiro, Steve Holme, Viktor Szakáts,
+  (17 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -43,4 +62,11 @@ References to bug reports and discussions on issues:
  [3] = https://curl.haxx.se/bug/?i=619
  [4] = https://curl.haxx.se/bug/?i=731
  [5] = https://curl.haxx.se/bug/?i=677
- [6] =
+ [6] = https://curl.haxx.se/bug/?i=620
+ [7] = https://curl.haxx.se/bug/?i=492
+ [8] = https://curl.haxx.se/bug/?i=736
+ [9] = https://curl.haxx.se/bug/?i=738
+ [10] = https://github.com/wolfSSL/wolfssl/issues/366
+ [11] = https://curl.haxx.se/bug/?i=744
+ [12] = https://curl.haxx.se/bug/?i=741
+ [13] = https://curl.haxx.se/bug/?i=747
