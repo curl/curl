@@ -38,7 +38,6 @@ This release includes the following bugfixes:
  o upload: missing rewind call could make libcurl hang [12]
  o IMAP: check pointer before dereferencing it [13]
  o build: Changed the Visual Studio projects warning level from 3 to 4
- o http_negotiate: Corrected host and proxy host name being wrong way round
 
 This release includes the following known bugs:
 
