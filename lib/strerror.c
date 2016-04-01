@@ -1076,14 +1076,13 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
     strncpy(outbuf, txt, outmax);
   else if(err == SEC_E_ILLEGAL_MESSAGE)
     snprintf(outbuf, outmax,
-             "SEC_E_ILLEGAL_MESSAGE (0x%04X%04X) - This error usually occurs "
+             "SEC_E_ILLEGAL_MESSAGE (0x%08X) - This error usually occurs "
              "when a fatal SSL/TLS alert is received (e.g. handshake failed). "
              "More detail may be available in the Windows System event log.",
-             (err >> 16) & 0xffff, err & 0xffff);
+             err);
   else {
     str = txtbuf;
-    snprintf(txtbuf, sizeof(txtbuf), "%s (0x%04X%04X)",
-             txt, (err >> 16) & 0xffff, err & 0xffff);
+    snprintf(txtbuf, sizeof(txtbuf), "%s (0x%08X)", txt, err);
     txtbuf[sizeof(txtbuf)-1] = '\0';
 
 #ifdef _WIN32_WCE
