@@ -6144,7 +6144,7 @@ unsigned int get_protocol_family(unsigned int protocol)
 
   case CURLPROTO_FTP:
   case CURLPROTO_FTPS:
-    family = CURLPROTO_IMAP;
+    family = CURLPROTO_FTP;
     break;
 
   case CURLPROTO_SCP:
@@ -6161,7 +6161,7 @@ unsigned int get_protocol_family(unsigned int protocol)
 
   case CURLPROTO_LDAP:
   case CURLPROTO_LDAPS:
-    family = CURLPROTO_IMAP;
+    family = CURLPROTO_LDAP;
     break;
 
   case CURLPROTO_DICT:
