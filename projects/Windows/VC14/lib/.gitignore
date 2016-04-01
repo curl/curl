@@ -1,5 +1,6 @@
 /*.opensdf
 /*.sdf
-/*.vcxproj
 /*.user
+/*.vc.db
+/*.vcxproj
 /.vs
