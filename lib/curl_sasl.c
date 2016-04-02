@@ -295,6 +295,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
         result = Curl_auth_create_gssapi_user_message(data, conn->user,
                                                       conn->passwd,
                                                       sasl->params->service,
+                                                      data->easy_conn->
+                                                            host.name,
                                                       sasl->mutual_auth,
                                                       NULL, &conn->krb5,
                                                       &resp, &len);
@@ -496,6 +498,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     result = Curl_auth_create_gssapi_user_message(data, conn->user,
                                                   conn->passwd,
                                                   sasl->params->service,
+                                                  data->easy_conn->host.name,
                                                   sasl->mutual_auth, NULL,
                                                   &conn->krb5,
                                                   &resp, &len);
@@ -506,7 +509,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     if(sasl->mutual_auth) {
       /* Decode the user token challenge and create the optional response
          message */
-      result = Curl_auth_create_gssapi_user_message(data, NULL, NULL, NULL,
+      result = Curl_auth_create_gssapi_user_message(data, NULL, NULL,
+                                                    NULL, NULL,
                                                     sasl->mutual_auth,
                                                     serverdata, &conn->krb5,
                                                     &resp, &len);

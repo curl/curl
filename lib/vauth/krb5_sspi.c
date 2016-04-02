@@ -51,6 +51,7 @@
  * userp       [in]     - The user name in the format User or Domain\User.
  * passdwp     [in]     - The user's password.
  * service     [in]     - The service type such as www, smtp, pop or imap.
+ * host        [in]     - The host name.
  * mutual_auth [in]     - Flag specifing whether or not mutual authentication
  *                        is enabled.
  * chlg64      [in]     - The optional base64 encoded challenge message.
@@ -65,6 +66,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const char *service,
+                                              const char *host,
                                               const bool mutual_auth,
                                               const char *chlg64,
                                               struct kerberos5data *krb5,
@@ -103,7 +105,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
       return CURLE_OUT_OF_MEMORY;
 
     /* Generate our SPN */
-    krb5->spn = Curl_auth_build_spn(service, data->easy_conn->host.name);
+    krb5->spn = Curl_auth_build_spn(service, host);
     if(!krb5->spn)
       return CURLE_OUT_OF_MEMORY;
 
