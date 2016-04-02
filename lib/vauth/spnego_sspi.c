@@ -89,9 +89,9 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
   }
 
   /* Generate our SPN */
-  if(!nego->server_name) {
-    nego->server_name = Curl_auth_build_spn(service, host);
-    if(!nego->server_name)
+  if(!nego->spn) {
+    nego->spn = Curl_auth_build_spn(service, host);
+    if(!nego->spn)
       return CURLE_OUT_OF_MEMORY;
   }
 
@@ -189,7 +189,7 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
   nego->status = s_pSecFn->InitializeSecurityContext(nego->credentials,
                                                      chlg ? nego->context :
                                                             NULL,
-                                                     nego->server_name,
+                                                     nego->spn,
                                                      ISC_REQ_CONFIDENTIALITY,
                                                      0, SECURITY_NATIVE_DREP,
                                                      chlg ? &chlg_desc : NULL,
@@ -287,7 +287,7 @@ void Curl_auth_spnego_cleanup(struct negotiatedata* nego)
   nego->p_identity = NULL;
 
   /* Free the SPN and output token */
-  Curl_safefree(nego->server_name);
+  Curl_safefree(nego->spn);
   Curl_safefree(nego->output_token);
 
   /* Reset any variables */

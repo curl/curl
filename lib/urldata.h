@@ -464,7 +464,7 @@ struct negotiatedata {
 #ifdef HAVE_GSSAPI
   OM_uint32 status;
   gss_ctx_id_t context;
-  gss_name_t server_name;
+  gss_name_t spn;
   gss_buffer_desc output_token;
 #else
 #ifdef USE_WINDOWS_SSPI
@@ -473,7 +473,7 @@ struct negotiatedata {
   CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY identity;
   SEC_WINNT_AUTH_IDENTITY *p_identity;
-  TCHAR *server_name;
+  TCHAR *spn;
   size_t token_max;
   BYTE *output_token;
   size_t output_token_length;

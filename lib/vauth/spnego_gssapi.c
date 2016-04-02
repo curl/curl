@@ -88,7 +88,7 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
   }
 
   /* Generate our SPN */
-  if(!nego->server_name) {
+  if(!nego->spn) {
     char *spn = Curl_auth_build_gssapi_spn(service, host);
     if(!spn)
       return CURLE_OUT_OF_MEMORY;
@@ -100,7 +100,7 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
     /* Import the SPN */
     major_status = gss_import_name(&minor_status, &spn_token,
                                    GSS_C_NT_HOSTBASED_SERVICE,
-                                   &nego->server_name);
+                                   &nego->spn);
     if(GSS_ERROR(major_status)) {
       Curl_gss_log_error(data, "gss_import_name() failed: ",
                          major_status, minor_status);
@@ -137,7 +137,7 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
   major_status = Curl_gss_init_sec_context(data,
                                            &minor_status,
                                            &nego->context,
-                                           nego->server_name,
+                                           nego->spn,
                                            &Curl_spnego_mech_oid,
                                            GSS_C_NO_CHANNEL_BINDINGS,
                                            &input_token,
@@ -246,9 +246,9 @@ void Curl_auth_spnego_cleanup(struct negotiatedata* nego)
   }
 
   /* Free the SPN */
-  if(nego->server_name != GSS_C_NO_NAME) {
-    gss_release_name(&minor_status, &nego->server_name);
-    nego->server_name = GSS_C_NO_NAME;
+  if(nego->spn != GSS_C_NO_NAME) {
+    gss_release_name(&minor_status, &nego->spn);
+    nego->spn = GSS_C_NO_NAME;
   }
 
   /* Reset any variables */
