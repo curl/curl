@@ -78,9 +78,9 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
   CURLcode result = CURLE_OK;
   size_t chlglen = 0;
   unsigned char *chlg = NULL;
-  OM_uint32 gss_status;
-  OM_uint32 gss_major_status;
-  OM_uint32 gss_minor_status;
+  OM_uint32 major_status;
+  OM_uint32 minor_status;
+  OM_uint32 unused_status;
   gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
@@ -99,11 +99,11 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     spn_token.length = strlen(spn);
 
     /* Import the SPN */
-    gss_major_status = gss_import_name(&gss_minor_status, &spn_token,
-                                       GSS_C_NT_HOSTBASED_SERVICE, &krb5->spn);
-    if(GSS_ERROR(gss_major_status)) {
+    major_status = gss_import_name(&minor_status, &spn_token,
+                                   GSS_C_NT_HOSTBASED_SERVICE, &krb5->spn);
+    if(GSS_ERROR(major_status)) {
       Curl_gss_log_error(data, "gss_import_name() failed: ",
-                         gss_major_status, gss_minor_status);
+                         major_status, minor_status);
 
       free(spn);
 
@@ -132,25 +132,25 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     input_token.length = chlglen;
   }
 
-  gss_major_status = Curl_gss_init_sec_context(data,
-                                               &gss_minor_status,
-                                               &krb5->context,
-                                               krb5->spn,
-                                               &Curl_krb5_mech_oid,
-                                               GSS_C_NO_CHANNEL_BINDINGS,
-                                               &input_token,
-                                               &output_token,
-                                               mutual_auth,
-                                               NULL);
+  major_status = Curl_gss_init_sec_context(data,
+                                           &minor_status,
+                                           &krb5->context,
+                                           krb5->spn,
+                                           &Curl_krb5_mech_oid,
+                                           GSS_C_NO_CHANNEL_BINDINGS,
+                                           &input_token,
+                                           &output_token,
+                                           mutual_auth,
+                                           NULL);
 
   free(input_token.value);
 
-  if(GSS_ERROR(gss_major_status)) {
+  if(GSS_ERROR(major_status)) {
     if(output_token.value)
-      gss_release_buffer(&gss_status, &output_token);
+      gss_release_buffer(&unused_status, &output_token);
 
     Curl_gss_log_error(data, "gss_init_sec_context() failed: ",
-                       gss_major_status, gss_minor_status);
+                       major_status, minor_status);
 
     return CURLE_RECV_ERROR;
   }
@@ -160,7 +160,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     result = Curl_base64_encode(data, (char *) output_token.value,
                                 output_token.length, outptr, outlen);
 
-    gss_release_buffer(&gss_status, &output_token);
+    gss_release_buffer(&unused_status, &output_token);
   }
 
   return result;
@@ -194,9 +194,9 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
   size_t messagelen = 0;
   unsigned char *chlg = NULL;
   unsigned char *message = NULL;
-  OM_uint32 gss_status;
-  OM_uint32 gss_major_status;
-  OM_uint32 gss_minor_status;
+  OM_uint32 major_status;
+  OM_uint32 minor_status;
+  OM_uint32 unused_status;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
   unsigned int indata = 0;
@@ -222,12 +222,12 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
   }
 
   /* Get the fully qualified username back from the context */
-  gss_major_status = gss_inquire_context(&gss_minor_status, krb5->context,
-                                         &username, NULL, NULL, NULL, NULL,
-                                         NULL, NULL);
-  if(GSS_ERROR(gss_major_status)) {
+  major_status = gss_inquire_context(&minor_status, krb5->context,
+                                     &username, NULL, NULL, NULL, NULL,
+                                     NULL, NULL);
+  if(GSS_ERROR(major_status)) {
     Curl_gss_log_error(data, "gss_inquire_context() failed: ",
-                       gss_major_status, gss_minor_status);
+                       major_status, minor_status);
 
     free(chlg);
 
@@ -235,11 +235,11 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
   }
 
   /* Convert the username from internal format to a displayable token */
-  gss_major_status = gss_display_name(&gss_minor_status, username,
-                                      &username_token, NULL);
-  if(GSS_ERROR(gss_major_status)) {
+  major_status = gss_display_name(&minor_status, username,
+                                  &username_token, NULL);
+  if(GSS_ERROR(major_status)) {
     Curl_gss_log_error(data, "gss_display_name() failed: ",
-                       gss_major_status, gss_minor_status);
+                       major_status, minor_status);
 
     free(chlg);
 
@@ -251,13 +251,13 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
   input_token.length = chlglen;
 
   /* Decrypt the inbound challenge and obtain the qop */
-  gss_major_status = gss_unwrap(&gss_minor_status, krb5->context, &input_token,
-                                &output_token, NULL, &qop);
-  if(GSS_ERROR(gss_major_status)) {
+  major_status = gss_unwrap(&minor_status, krb5->context, &input_token,
+                            &output_token, NULL, &qop);
+  if(GSS_ERROR(major_status)) {
     Curl_gss_log_error(data, "gss_unwrap() failed: ",
-                       gss_major_status, gss_minor_status);
+                       major_status, minor_status);
 
-    gss_release_buffer(&gss_status, &username_token);
+    gss_release_buffer(&unused_status, &username_token);
     free(chlg);
 
     return CURLE_BAD_CONTENT_ENCODING;
@@ -267,7 +267,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
   if(output_token.length != 4) {
     infof(data, "GSSAPI handshake failure (invalid security data)\n");
 
-    gss_release_buffer(&gss_status, &username_token);
+    gss_release_buffer(&unused_status, &username_token);
     free(chlg);
 
     return CURLE_BAD_CONTENT_ENCODING;
@@ -275,7 +275,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
 
   /* Copy the data out and free the challenge as it is not required anymore */
   memcpy(&indata, output_token.value, 4);
-  gss_release_buffer(&gss_status, &output_token);
+  gss_release_buffer(&unused_status, &output_token);
   free(chlg);
 
   /* Extract the security layer */
@@ -283,7 +283,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
   if(!(sec_layer & GSSAUTH_P_NONE)) {
     infof(data, "GSSAPI handshake failure (invalid security layer)\n");
 
-    gss_release_buffer(&gss_status, &username_token);
+    gss_release_buffer(&unused_status, &username_token);
 
     return CURLE_BAD_CONTENT_ENCODING;
   }
@@ -301,7 +301,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
   messagelen = sizeof(outdata) + username_token.length + 1;
   message = malloc(messagelen);
   if(!message) {
-    gss_release_buffer(&gss_status, &username_token);
+    gss_release_buffer(&unused_status, &username_token);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -318,19 +318,19 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
   message[messagelen - 1] = '\0';
 
   /* Free the username token as it is not required anymore */
-  gss_release_buffer(&gss_status, &username_token);
+  gss_release_buffer(&unused_status, &username_token);
 
   /* Setup the "authentication data" security buffer */
   input_token.value = message;
   input_token.length = messagelen;
 
   /* Encrypt the data */
-  gss_major_status = gss_wrap(&gss_minor_status, krb5->context, 0,
-                              GSS_C_QOP_DEFAULT, &input_token, NULL,
-                              &output_token);
-  if(GSS_ERROR(gss_major_status)) {
+  major_status = gss_wrap(&minor_status, krb5->context, 0,
+                          GSS_C_QOP_DEFAULT, &input_token, NULL,
+                          &output_token);
+  if(GSS_ERROR(major_status)) {
     Curl_gss_log_error(data, "gss_wrap() failed: ",
-                       gss_major_status, gss_minor_status);
+                       major_status, minor_status);
 
     free(message);
 
@@ -342,7 +342,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
                               output_token.length, outptr, outlen);
 
   /* Free the output buffer */
-  gss_release_buffer(&gss_status, &output_token);
+  gss_release_buffer(&unused_status, &output_token);
 
   /* Free the message buffer */
   free(message);
