@@ -212,6 +212,11 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     result = Curl_base64_encode(data, (char *) resp_buf.pvBuffer,
                                 resp_buf.cbBuffer, outptr, outlen);
   }
+  else if(mutual_auth) {
+    *outptr = strdup("");
+    if(!*outptr)
+      result = CURLE_OUT_OF_MEMORY;
+  }
 
   /* Free the decoded challenge */
   free(chlg);

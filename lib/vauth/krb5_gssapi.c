@@ -163,6 +163,11 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
 
     gss_release_buffer(&unused_status, &output_token);
   }
+  else if(mutual_auth) {
+    *outptr = strdup("");
+    if(!*outptr)
+      result = CURLE_OUT_OF_MEMORY;
+  }
 
   return result;
 }
