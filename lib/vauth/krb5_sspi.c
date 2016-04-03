@@ -150,9 +150,10 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
 
     memset(krb5->context, 0, sizeof(CtxtHandle));
   }
-  else {
+
+  if(chlg64 && strlen(chlg64)) {
     /* Decode the base-64 encoded challenge message */
-    if(strlen(chlg64) && *chlg64 != '=') {
+    if(*chlg64 != '=') {
       result = Curl_base64_decode(chlg64, &chlg, &chlglen);
       if(result)
         return result;
