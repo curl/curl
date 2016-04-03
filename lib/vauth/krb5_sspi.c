@@ -92,7 +92,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
       return CURLE_OUT_OF_MEMORY;
   }
 
-  if(!krb5->credentials) {
+  if(!krb5->output_token) {
     /* Query the security package for Kerberos */
     status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *)
                                                 TEXT(SP_NAME_KERBEROS),
@@ -110,7 +110,9 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     krb5->output_token = malloc(krb5->token_max);
     if(!krb5->output_token)
       return CURLE_OUT_OF_MEMORY;
+  }
 
+  if(!krb5->credentials) {
     if(userp && *userp) {
       /* Populate our identity structure */
       result = Curl_create_sspi_identity(userp, passwdp, &krb5->identity);
