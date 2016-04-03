@@ -283,6 +283,7 @@ checksrc:
 	cd lib && $(MAKE) checksrc
 	cd src && $(MAKE) checksrc
 	cd tests && $(MAKE) checksrc
+	cd include/curl && $(MAKE) checksrc
 
 .PHONY: vc-ide
 
