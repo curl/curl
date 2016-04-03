@@ -373,19 +373,17 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     }
   }
 
-  if(!result) {
+  if(!result && mech) {
     if(resp && sasl->params->maxirlen &&
        strlen(mech) + len > sasl->params->maxirlen) {
       free(resp);
       resp = NULL;
     }
 
-    if(mech) {
-      result = sasl->params->sendauth(conn, mech, resp);
-      if(!result) {
-        *progress = SASL_INPROGRESS;
-        state(sasl, conn, resp? state2: state1);
-      }
+    result = sasl->params->sendauth(conn, mech, resp);
+    if(!result) {
+      *progress = SASL_INPROGRESS;
+      state(sasl, conn, resp ? state2 : state1);
     }
   }
 
