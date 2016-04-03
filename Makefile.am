@@ -282,6 +282,7 @@ ca-firefox: lib/firefox-db2pem.sh
 checksrc:
 	cd lib && $(MAKE) checksrc
 	cd src && $(MAKE) checksrc
+	cd tests && $(MAKE) checksrc
 
 .PHONY: vc-ide
 

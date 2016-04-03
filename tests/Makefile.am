@@ -92,3 +92,7 @@ torture-test: perlcheck all
 	ps2pdf $$foo.ps $@; \
 	rm $$foo.ps; \
 	echo "converted $< to $@")
+
+checksrc:
+	cd libtest && $(MAKE) checksrc
+	cd unit && $(MAKE) checksrc
