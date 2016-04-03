@@ -86,7 +86,6 @@ sub checkwarn {
         $nowarn = 1;
         if(!$ignore{$name}) {
             # reached zero, enable again
-            print "FOO\n";
             enable_warn($name, $line, $file, $l);
         }
     }
