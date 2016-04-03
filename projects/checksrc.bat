@@ -29,7 +29,7 @@ rem ***************************************************************************
   setlocal
   set CHECK_LIB=TRUE
   set CHECK_SRC=TRUE
-  set CHECK_TESTS=TRUE
+  set CHECK_TESTS=FALSE
 
 :parseArgs
   if "%~1" == "" goto prerequisites
