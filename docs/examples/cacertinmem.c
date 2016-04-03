@@ -28,7 +28,7 @@
 #include <curl/curl.h>
 #include <stdio.h>
 
-size_t writefunction( void *ptr, size_t size, size_t nmemb, void *stream)
+size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
   return (nmemb*size);

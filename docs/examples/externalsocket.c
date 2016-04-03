@@ -107,7 +107,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
 
     /* Create the socket "manually" */
-    if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == CURL_SOCKET_BAD ) {
+    if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == CURL_SOCKET_BAD) {
       printf("Error creating listening socket.\n");
       return 3;
     }

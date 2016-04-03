@@ -247,7 +247,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
     if(!fdp) {
       MSG_OUT("Adding data: %s%s\n",
               what&CURL_POLL_IN?"READ":"",
-              what&CURL_POLL_OUT?"WRITE":"" );
+              what&CURL_POLL_OUT?"WRITE":"");
       addsock(s, e, what, g);
     }
     else {
@@ -279,7 +279,7 @@ static int prog_cb (void *p, double dltotal, double dlnow, double ult,
 }
 
 /* Create a new easy handle, and add it to the global curl_multi */
-static void new_conn(char *url, GlobalInfo *g )
+static void new_conn(char *url, GlobalInfo *g)
 {
   ConnInfo *conn;
   CURLMcode rc;

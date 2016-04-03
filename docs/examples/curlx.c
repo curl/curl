@@ -415,7 +415,7 @@ int main(int argc, char **argv)
     goto err;
   }
 
-  if(!(p12bio = BIO_new_file(p.p12file , "rb"))) {
+  if(!(p12bio = BIO_new_file(p.p12file, "rb"))) {
     BIO_printf(p.errorbio, "Error opening P12 file %s\n", p.p12file);
     goto err;
   }
@@ -505,7 +505,7 @@ int main(int argc, char **argv)
 
   {
     int lu; int i=0;
-    while((lu = BIO_read (in, &binaryptr[i], tabLength-i)) >0 ) {
+    while((lu = BIO_read (in, &binaryptr[i], tabLength-i)) >0) {
       i+=lu;
       if(i== tabLength) {
         tabLength+=100;

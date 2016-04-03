@@ -329,7 +329,7 @@ static int prog_cb (void *p, double dltotal, double dlnow, double ult,
 
 
 /* Create a new easy handle, and add it to the global curl_multi */
-static void new_conn(char *url, GlobalInfo *g )
+static void new_conn(char *url, GlobalInfo *g)
 {
   ConnInfo *conn;
   CURLMcode rc;

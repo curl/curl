@@ -39,7 +39,7 @@
 #define MUTEX_CLEANUP(x) pthread_mutex_destroy(&(x))
 #define MUTEX_LOCK(x)    pthread_mutex_lock(&(x))
 #define MUTEX_UNLOCK(x)  pthread_mutex_unlock(&(x))
-#define THREAD_ID        pthread_self(  )
+#define THREAD_ID        pthread_self()
 
 
 void handle_error(const char *file, int lineno, const char *msg)
@@ -69,10 +69,10 @@ int thread_setup(void)
 {
   int i;
 
-  mutex_buf = malloc(CRYPTO_num_locks(  ) * sizeof(MUTEX_TYPE));
+  mutex_buf = malloc(CRYPTO_num_locks() * sizeof(MUTEX_TYPE));
   if(!mutex_buf)
     return 0;
-  for(i = 0;  i < CRYPTO_num_locks(  );  i++)
+  for(i = 0;  i < CRYPTO_num_locks();  i++)
     MUTEX_SETUP(mutex_buf[i]);
   CRYPTO_set_id_callback(id_function);
   CRYPTO_set_locking_callback(locking_function);
@@ -87,7 +87,7 @@ int thread_cleanup(void)
     return 0;
   CRYPTO_set_id_callback(NULL);
   CRYPTO_set_locking_callback(NULL);
-  for(i = 0;  i < CRYPTO_num_locks(  );  i++)
+  for(i = 0;  i < CRYPTO_num_locks();  i++)
     MUTEX_CLEANUP(mutex_buf[i]);
   free(mutex_buf);
   mutex_buf = NULL;

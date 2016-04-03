@@ -191,7 +191,7 @@ static void event_cb(int fd, short kind, void *userp)
   mcode_or_die("event_cb: curl_multi_socket_action", rc);
 
   check_multi_info(g);
-  if(g->still_running <= 0 ) {
+  if(g->still_running <= 0) {
     fprintf(MSG_OUT, "last transfer done, kill timeout\n");
     if(evtimer_pending(g->timer_event, NULL)) {
       evtimer_del(g->timer_event);
@@ -312,7 +312,7 @@ static int prog_cb (void *p, double dltotal, double dlnow, double ult,
 
 
 /* Create a new easy handle, and add it to the global curl_multi */
-static void new_conn(char *url, GlobalInfo *g )
+static void new_conn(char *url, GlobalInfo *g)
 {
   ConnInfo *conn;
   CURLMcode rc;
@@ -360,7 +360,7 @@ static void fifo_cb(int fd, short event, void *arg)
     s[0]='\0';
     rv=fscanf(g->input, "%1023s%n", s, &n);
     s[n]='\0';
-    if(n && s[0] ) {
+    if(n && s[0]) {
       new_conn(s, arg);  /* if we read a URL, go get it! */
     }
     else

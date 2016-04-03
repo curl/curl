@@ -187,7 +187,7 @@ static int server_push_callback(CURL *parent,
 
   headp = curl_pushheader_byname(headers, ":path");
   if(headp) {
-    fprintf(stderr, "**** The PATH is %s\n", headp /* skip :path + colon */ );
+    fprintf(stderr, "**** The PATH is %s\n", headp /* skip :path + colon */);
   }
 
   (*transfers)++; /* one more */

@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   static const char *pagefilename = "page.out";
   FILE *pagefile;
 
-  if(argc < 2 ) {
+  if(argc < 2) {
     printf("Usage: %s <URL>\n", argv[0]);
     return 1;
   }

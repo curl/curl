@@ -81,7 +81,7 @@ void *pull_one_url(void *NaN)
       g_strdup_printf("xoap.weather.com/weather/local/%s?cc=*&dayf=5&unit=i\n",
                       urls[j]);
 
-    printf( "http %s", http );
+    printf("http %s", http);
 
     curl = curl_easy_init();
     if(curl) {
