@@ -31,7 +31,7 @@ my $file;
 my $dir=".";
 my $wlist;
 my $windows_os = $^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin';
-
+my $verbose;
 my %whitelist;
 
 my %warnings = (
@@ -51,7 +51,9 @@ my %warnings = (
     'BRACEPOS'         => 'wrong position for an open brace',
     'INDENTATION'      => 'wrong start column for code',
     'COPYRIGHT'        => 'file missing a copyright statement',
-);
+    'BADCOMMAND'       => 'bad !checksrc! instruction',
+    'UNUSEDIGNORE'     => 'a warning ignore was not used'
+    );
 
 sub readwhitelist {
     open(W, "<$dir/checksrc.whitelist");
@@ -67,8 +69,29 @@ sub checkwarn {
     my ($name, $num, $col, $file, $line, $msg, $error) = @_;
 
     my $w=$error?"error":"warning";
+    my $nowarn=0;
 
+    #if(!$warnings{$name}) {
+    #    print STDERR "Dev! there's no description for $name!\n";
+    #}
+
+    # checksrc.whitelist
     if($whitelist{$line}) {
+        $nowarn = 1;
+    }
+    # !checksrc! controlled
+    elsif($ignore{$name}) {
+        $ignore{$name}--;
+        $ignore_used{$name}++;
+        $nowarn = 1;
+        if(!$ignore{$name}) {
+            # reached zero, enable again
+            print "FOO\n";
+            enable_warn($name, $line, $file, $l);
+        }
+    }
+
+    if($nowarn) {
         $supressed++;
         if($w) {
             $swarnings++;
@@ -122,6 +145,7 @@ if(!$file) {
     print "checksrc.pl [option] <file1> [file2] ...\n";
     print " Options:\n";
     print "  -D[DIR]   Directory to prepend file names\n";
+    print "  -h        Show help output\n";
     print "  -W[file]  Whitelist the given file - ignore all its flaws\n";
     print "\nDetects and warns for these problems:\n";
     for(sort keys %warnings) {
@@ -142,6 +166,78 @@ do {
 
 } while($file);
 
+sub checksrc_clear {
+    undef %ignore;
+    undef %ignore_set;
+    undef @ignore_line;
+}
+
+sub checksrc_endoffile {
+    my ($file) = @_;
+    for(keys %ignore_set) {
+        if($ignore_set{$_} && !$ignore_used{$_}) {
+            checkwarn("UNUSEDIGNORE", $ignore_set{$_},
+                      length($_)+11, $file,
+                      $ignore_line[$ignore_set{$_}],
+                      "Unused ignore: $_");
+        }
+    }
+}
+
+sub enable_warn {
+    my ($what, $line, $file, $l) = @_;
+
+    # switch it back on, but warn if not triggered!
+    if(!$ignore_used{$what}) {
+        checkwarn("UNUSEDIGNORE",
+                  $line, length($what) + 11, $file, $l,
+                  "No warning was inhibited!");
+    }
+    $ignore_set{$what}=0;
+    $ignore_used{$what}=0;
+    $ignore{$what}=0;
+}
+sub checksrc {
+    my ($cmd, $line, $file, $l) = @_;
+    if($cmd =~ / *([^ ]*) *(.*)/) {
+        my ($enable, $what) = ($1, $2);
+        $what =~ s: *\*/$::; # cut off end of C comment
+        # print "ENABLE $enable WHAT $what\n";
+        if($enable eq "disable") {
+            my ($warn, $scope)=($1, $2);
+            if($what =~ /([^ ]*) +(.*)/) {
+                ($warn, $scope)=($1, $2);
+            }
+            else {
+                $warn = $what;
+                $scope = 1;
+            }
+            # print "IGNORE $warn for SCOPE $scope\n";
+            if($scope eq "all") {
+                $scope=999999;
+            }
+
+            if($ignore_set{$warn}) {
+                checkwarn("BADCOMMAND",
+                          $line, 0, $file, $l,
+                          "$warn already disabled from line $ignore_set{$warn}");
+            }
+            else {
+                $ignore{$warn}=$scope;
+                $ignore_set{$warn}=$line;
+                $ignore_line[$line]=$l;
+            }
+        }
+        elsif($enable eq "enable") {
+            enable_warn($what, $line, $file, $l);
+        }
+        else {
+            checkwarn("BADCOMMAND",
+                      $line, 0, $file, $l,
+                      "Illegal !checksrc! command");
+        }
+    }
+}
 
 sub scanfile {
     my ($file) = @_;
@@ -152,11 +248,18 @@ sub scanfile {
     open(R, "<$file") || die "failed to open $file";
 
     my $copyright=0;
+    checksrc_clear(); # for file based ignores
 
     while(<R>) {
         $windows_os ? $_ =~ s/\r?\n$// : chomp;
         my $l = $_;
         my $column = 0;
+
+        # check for !checksrc! commands
+        if($l =~ /\!checksrc\! (.*)/) {
+            my $cmd = $1;
+            checksrc($cmd, $line, $file, $l)
+        }
 
         # check for a copyright statement
         if(!$copyright && ($l =~ /copyright .* \d\d\d\d/i)) {
@@ -319,6 +422,8 @@ sub scanfile {
     if(!$copyright) {
         checkwarn("COPYRIGHT", 1, 0, $file, "", "Missing copyright statement", 1);
     }
+
+    checksrc_endoffile($file);
 
     close(R);
 
