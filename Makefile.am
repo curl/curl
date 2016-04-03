@@ -284,6 +284,7 @@ checksrc:
 	cd src && $(MAKE) checksrc
 	cd tests && $(MAKE) checksrc
 	cd include/curl && $(MAKE) checksrc
+	cd docs/examples && $(MAKE) checksrc
 
 .PHONY: vc-ide
 
