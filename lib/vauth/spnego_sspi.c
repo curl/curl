@@ -88,8 +88,8 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
     return CURLE_LOGIN_DENIED;
   }
 
-  /* Generate our SPN */
   if(!nego->spn) {
+    /* Generate our SPN */
     nego->spn = Curl_auth_build_spn(service, host);
     if(!nego->spn)
       return CURLE_OUT_OF_MEMORY;
@@ -115,6 +115,7 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
  }
 
   if(!nego->credentials) {
+    /* Do we have credientials to use or are we using single sign-on? */
     if(user && *user) {
       /* Populate our identity structure */
       result = Curl_create_sspi_identity(user, password, &nego->identity);
@@ -153,7 +154,7 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
     memset(nego->context, 0, sizeof(CtxtHandle));
   }
 
-  if(chlg64 && strlen(chlg64)) {
+  if(chlg64 && *chlg64) {
     /* Decode the base-64 encoded challenge message */
     if(*chlg64 != '=') {
       result = Curl_base64_decode(chlg64, &chlg, &chlglen);
@@ -197,8 +198,10 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
                                                      &resp_desc, &attrs,
                                                      &expiry);
 
+  /* Free the decoded challenge as it is not required anymore */
+  free(chlg);
+
   if(GSS_ERROR(nego->status)) {
-    free(chlg);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -206,15 +209,11 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
      nego->status == SEC_I_COMPLETE_AND_CONTINUE) {
     nego->status = s_pSecFn->CompleteAuthToken(nego->context, &resp_desc);
     if(GSS_ERROR(nego->status)) {
-      free(chlg);
       return CURLE_RECV_ERROR;
     }
   }
 
   nego->output_token_length = resp_buf.cbBuffer;
-
-  /* Free the decoded challenge */
-  free(chlg);
 
   return result;
 }

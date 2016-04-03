@@ -87,8 +87,8 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
     return CURLE_LOGIN_DENIED;
   }
 
-  /* Generate our SPN */
   if(!nego->spn) {
+    /* Generate our SPN */
     char *spn = Curl_auth_build_gssapi_spn(service, host);
     if(!spn)
       return CURLE_OUT_OF_MEMORY;
@@ -113,7 +113,7 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
     free(spn);
   }
 
-  if(chlg64 && strlen(chlg64)) {
+  if(chlg64 && *chlg64) {
     /* Decode the base-64 encoded challenge message */
     if(*chlg64 != '=') {
       result = Curl_base64_decode(chlg64, &chlg, &chlglen);
@@ -144,6 +144,8 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
                                            &output_token,
                                            TRUE,
                                            NULL);
+
+  /* Free the decoded challenge as it is not required anymore */
   Curl_safefree(input_token.value);
 
   nego->status = major_status;
