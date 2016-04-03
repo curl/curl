@@ -48,13 +48,11 @@ struct negotiatedata;
 
 /* This is used to build a SPN string */
 #if !defined(USE_WINDOWS_SSPI)
-char *Curl_auth_build_spn(const char *service, const char *instance);
+char *Curl_auth_build_spn(const char *service, const char *host,
+                          const char *realm);
 #else
-TCHAR *Curl_auth_build_spn(const char *service, const char *instance);
-#endif
-
-#if defined(HAVE_GSSAPI)
-char *Curl_auth_build_gssapi_spn(const char *service, const char *instance);
+TCHAR *Curl_auth_build_spn(const char *service, const char *host,
+                           const char *realm);
 #endif
 
 /* This is used to generate a base64 encoded PLAIN cleartext message */

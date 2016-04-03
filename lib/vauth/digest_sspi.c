@@ -125,7 +125,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct SessionHandle *data,
   }
 
   /* Generate our SPN */
-  spn = Curl_auth_build_spn(service, data->easy_conn->host.name);
+  spn = Curl_auth_build_spn(service, data->easy_conn->host.name, NULL);
   if(!spn) {
     free(output_token);
     free(input_token);

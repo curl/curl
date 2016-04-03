@@ -90,7 +90,7 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
 
   if(!nego->spn) {
     /* Generate our SPN */
-    nego->spn = Curl_auth_build_spn(service, host);
+    nego->spn = Curl_auth_build_spn(service, host, NULL);
     if(!nego->spn)
       return CURLE_OUT_OF_MEMORY;
   }

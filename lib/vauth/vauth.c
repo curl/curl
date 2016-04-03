@@ -35,26 +35,45 @@
 /*
  * Curl_auth_build_spn()
  *
- * This is used to build a SPN string in the format service/instance.
+ * This is used to build a SPN string in the following formats:
+ *
+ * service/host@realm (Not currently used)
+ * service/host       (Not used by GSS-API)
+ * service@realm      (Not used by Windows SSPI)
  *
  * Parameters:
  *
  * service  [in] - The service type such as www, smtp, pop or imap.
- * instance [in] - The host name or realm.
+ * host     [in] - The host name.
+ * realm    [in] - The realm.
  *
  * Returns a pointer to the newly allocated SPN.
  */
 #if !defined(USE_WINDOWS_SSPI)
-char *Curl_auth_build_spn(const char *service, const char *instance)
+char *Curl_auth_build_spn(const char *service, const char *host,
+                          const char *realm)
 {
-  /* Generate and return our SPN */
-  return aprintf("%s/%s", service, instance);
+  char *spn = NULL;
+
+  /* Generate our SPN */
+  if(host && realm)
+    spn = aprintf("%s/%s@%s", service, host, realm);
+  else if(host)
+    spn = aprintf("%s/%s", service, host);
+  else if(realm)
+    spn = aprintf("%s@%s", service, realm);
+
+  /* Return our newly allocated SPN */
+  return spn;
 }
 #else
-TCHAR *Curl_auth_build_spn(const char *service, const char *instance)
+TCHAR *Curl_auth_build_spn(const char *service, const char *host,
+                           const char *realm)
 {
   char *utf8_spn = NULL;
   TCHAR *tchar_spn = NULL;
+
+  (void) realm;
 
   /* Note: We could use DsMakeSPN() or DsClientMakeSpnForTargetServer() rather
      than doing this ourselves but the first is only available in Windows XP
@@ -63,8 +82,8 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *instance)
      Client Extensions are installed. As such it is far simpler for us to
      formulate the SPN instead. */
 
-  /* Allocate our UTF8 based SPN */
-  utf8_spn = aprintf("%s/%s", service, instance);
+  /* Generate our UTF8 based SPN */
+  utf8_spn = aprintf("%s/%s", service, host);
   if(!utf8_spn) {
     return NULL;
   }
@@ -85,22 +104,3 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *instance)
 }
 #endif /* USE_WINDOWS_SSPI */
 
-#if defined(HAVE_GSSAPI)
-/*
- * Curl_auth_build_gssapi_spn()
- *
- * This is used to build a SPN string in the format service@instance.
- *
- * Parameters:
- *
- * service  [in] - The service type such as www, smtp, pop or imap.
- * instance [in] - The host name or realm.
- *
- * Returns a pointer to the newly allocated SPN.
- */
-char *Curl_auth_build_gssapi_spn(const char *service, const char *instance)
-{
-  /* Generate and return our SPN */
-  return aprintf("%s@%s", service, instance);
-}
-#endif /* HAVE_GSSAPI */
