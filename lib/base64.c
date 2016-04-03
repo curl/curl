@@ -246,7 +246,7 @@ static CURLcode base64_encode(const char *table64,
                table64[obuf[0]],
                table64[obuf[1]],
                table64[obuf[2]],
-               table64[obuf[3]] );
+               table64[obuf[3]]);
       break;
     }
     output += 4;

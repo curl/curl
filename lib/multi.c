@@ -1798,7 +1798,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         result = Curl_speedcheck(data, now);
 
       if(( (data->set.max_send_speed == 0) ||
-           (data->progress.ulspeed < data->set.max_send_speed ))  &&
+           (data->progress.ulspeed < data->set.max_send_speed))  &&
          ( (data->set.max_recv_speed == 0) ||
            (data->progress.dlspeed < data->set.max_recv_speed)))
         multistate(data, CURLM_STATE_PERFORM);
@@ -2478,7 +2478,7 @@ static CURLMcode add_next_timeout(struct timeval now,
   /* move over the timeout list for this specific handle and remove all
      timeouts that are now passed tense and store the next pending
      timeout in *tv */
-  for(e = list->head; e; ) {
+  for(e = list->head; e;) {
     struct curl_llist_element *n = e->next;
     long diff = curlx_tvdiff(*(struct timeval *)e->ptr, now);
     if(diff <= 0)

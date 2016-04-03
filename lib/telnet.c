@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -91,7 +91,7 @@
 
 #ifdef USE_WINSOCK
 typedef FARPROC WSOCK2_FUNC;
-static CURLcode check_wsock2 ( struct SessionHandle *data );
+static CURLcode check_wsock2 (struct SessionHandle *data);
 #endif
 
 static
@@ -198,7 +198,7 @@ const struct Curl_handler Curl_handler_telnet = {
 
 #ifdef USE_WINSOCK
 static CURLcode
-check_wsock2 ( struct SessionHandle *data )
+check_wsock2(struct SessionHandle *data)
 {
   int err;
   WORD wVersionRequested;

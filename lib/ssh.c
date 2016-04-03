@@ -417,7 +417,7 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
   if(!working_path)
     return CURLE_OUT_OF_MEMORY;
 
-  /* Check for /~/ , indicating relative to the user's home directory */
+  /* Check for /~/, indicating relative to the user's home directory */
   if(conn->handler->protocol & CURLPROTO_SCP) {
     real_path = malloc(working_path_len+1);
     if(real_path == NULL) {

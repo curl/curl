@@ -80,7 +80,7 @@ static void my_lock(CURL *handle, curl_lock_data data,
 }
 
 /* unlock callback */
-static void my_unlock(CURL *handle, curl_lock_data data, void *useptr )
+static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
@@ -345,7 +345,7 @@ int test(char *URL)
   /* try to free share, expect to fail because share is in use*/
   printf("try SHARE_CLEANUP...\n");
   scode = curl_share_cleanup(share);
-  if(scode==CURLSHE_OK ) {
+  if(scode==CURLSHE_OK) {
     fprintf(stderr, "curl_share_cleanup succeed but error expected\n");
     share = NULL;
   }
@@ -364,7 +364,7 @@ test_cleanup:
   /* free share */
   printf("SHARE_CLEANUP\n");
   scode = curl_share_cleanup(share);
-  if(scode!=CURLSHE_OK )
+  if(scode!=CURLSHE_OK)
     fprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
             (int)scode);
 

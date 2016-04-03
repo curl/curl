@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, DirecTV, Contact: Eric Hu, <ehu@directv.com>.
- * Copyright (C) 2010 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -518,7 +518,7 @@ static ssize_t axtls_send(struct connectdata *conn,
 
   infof(conn->data, "  axtls_send\n");
 
-  if(rc < 0 ) {
+  if(rc < 0) {
     *err = map_error_to_curl(rc);
     rc = -1; /* generic error code for send failure */
   }

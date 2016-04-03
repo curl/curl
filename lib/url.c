@@ -841,7 +841,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Option that specifies how quickly an server response must be obtained
      * before it is considered failure. For pingpong protocols.
      */
-    data->set.server_response_timeout = va_arg( param , long ) * 1000;
+    data->set.server_response_timeout = va_arg(param, long) * 1000;
     break;
   case CURLOPT_TFTP_NO_OPTIONS:
     /*
@@ -2148,7 +2148,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.buffer_size = va_arg(param, long);
 
-    if((data->set.buffer_size> (BUFSIZE -1 )) ||
+    if((data->set.buffer_size> (BUFSIZE -1)) ||
        (data->set.buffer_size < 1))
       data->set.buffer_size = 0; /* huge internal default */
 
@@ -5167,7 +5167,7 @@ static CURLcode override_login(struct SessionHandle *data,
             DOT_CHAR "netrc file; using defaults\n",
             conn->host.name);
     }
-    else if(ret < 0 ) {
+    else if(ret < 0) {
       return CURLE_OUT_OF_MEMORY;
     }
     else {

@@ -632,7 +632,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       else {
         if(((form->flags & HTTPPOST_FILENAME) ||
             (form->flags & HTTPPOST_BUFFER)) &&
-           !form->contenttype ) {
+           !form->contenttype) {
           char *f = form->flags & HTTPPOST_BUFFER?
             form->showfilename : form->value;
 
@@ -1273,7 +1273,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
       curList = file->contentheader;
       while(curList) {
         /* Process the additional headers specified for this form */
-        result = AddFormDataf( &form, &size, "\r\n%s", curList->data );
+        result = AddFormDataf(&form, &size, "\r\n%s", curList->data);
         if(result)
           break;
         curList = curList->next;
@@ -1386,7 +1386,7 @@ CURLcode Curl_getformdata(struct SessionHandle *data,
  * Curl_FormInit() inits the struct 'form' points to with the 'formdata'
  * and resets the 'sent' counter.
  */
-int Curl_FormInit(struct Form *form, struct FormData *formdata )
+int Curl_FormInit(struct Form *form, struct FormData *formdata)
 {
   if(!formdata)
     return 1; /* error */
@@ -1499,9 +1499,9 @@ size_t Curl_FormReader(char *buffer,
   }
   do {
 
-    if((form->data->length - form->sent ) > wantedsize - gotsize) {
+    if((form->data->length - form->sent) > wantedsize - gotsize) {
 
-      memcpy(buffer + gotsize , form->data->line + form->sent,
+      memcpy(buffer + gotsize, form->data->line + form->sent,
              wantedsize - gotsize);
 
       form->sent += wantedsize-gotsize;

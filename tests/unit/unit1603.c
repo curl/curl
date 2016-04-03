@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2015 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,13 +37,13 @@ static void mydtor(void *p)
  (void)p; /* unused */
 }
 
-static CURLcode unit_setup( void )
+static CURLcode unit_setup(void)
 {
   return Curl_hash_init(&hash_static, slots, Curl_hash_str,
                         Curl_str_key_compare, mydtor);
 }
 
-static void unit_stop( void )
+static void unit_stop(void)
 {
   Curl_hash_destroy(&hash_static);
 }

@@ -150,7 +150,7 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb,
 static curlioerr ioctl_callback(CURL * handle, int cmd, void *clientp)
 {
   (void)clientp;
-  if(cmd == CURLIOCMD_RESTARTREAD ) {
+  if(cmd == CURLIOCMD_RESTARTREAD) {
     printf("APPLICATION: recieved a CURLIOCMD_RESTARTREAD request\n");
     printf("APPLICATION: ** REWINDING! **\n");
     current_offset = 0;

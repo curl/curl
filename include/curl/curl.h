@@ -473,9 +473,9 @@ typedef enum {
   CURLE_OBSOLETE44,              /* 44 - NOT USED */
   CURLE_INTERFACE_FAILED,        /* 45 - CURLOPT_INTERFACE failed */
   CURLE_OBSOLETE46,              /* 46 - NOT USED */
-  CURLE_TOO_MANY_REDIRECTS ,     /* 47 - catch endless re-direct loops */
+  CURLE_TOO_MANY_REDIRECTS,      /* 47 - catch endless re-direct loops */
   CURLE_UNKNOWN_OPTION,          /* 48 - User specified an unknown option */
-  CURLE_TELNET_OPTION_SYNTAX ,   /* 49 - Malformed telnet option */
+  CURLE_TELNET_OPTION_SYNTAX,    /* 49 - Malformed telnet option */
   CURLE_OBSOLETE50,              /* 50 - NOT USED */
   CURLE_PEER_FAILED_VERIFICATION, /* 51 - peer's certificate or fingerprint
                                      wasn't verified fine */

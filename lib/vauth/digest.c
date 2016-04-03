@@ -73,7 +73,7 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
   bool starts_with_quote = FALSE;
   bool escape = FALSE;
 
-  for(c = DIGEST_MAX_VALUE_LENGTH - 1; (*str && (*str != '=') && c--); )
+  for(c = DIGEST_MAX_VALUE_LENGTH - 1; (*str && (*str != '=') && c--);)
     *value++ = *str++;
   *value = 0;
 
@@ -689,7 +689,7 @@ CURLcode Curl_auth_create_digest_http_message(struct SessionHandle *data,
 
     If the algorithm is "MD5-sess" then:
 
-      A1 = H( unq(username-value) ":" unq(realm-value) ":" passwd ) ":"
+      A1 = H(unq(username-value) ":" unq(realm-value) ":" passwd) ":"
            unq(nonce-value) ":" unq(cnonce-value)
   */
 

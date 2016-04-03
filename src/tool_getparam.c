@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -106,8 +106,8 @@ static const struct LongShort aliases[]= {
   {"*u", "crlf",                     FALSE},
   {"*v", "stderr",                   TRUE},
   {"*w", "interface",                TRUE},
-  {"*x", "krb" ,                     TRUE},
-  {"*x", "krb4" ,                    TRUE},
+  {"*x", "krb",                      TRUE},
+  {"*x", "krb4",                     TRUE},
          /* 'krb4' is the previous name */
   {"*y", "max-filesize",             TRUE},
   {"*z", "disable-eprt",             FALSE},

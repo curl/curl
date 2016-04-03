@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -228,7 +228,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     goto quit;
   }
 
-  /* Get the URL scheme ( either ldap or ldaps ) */
+  /* Get the URL scheme (either ldap or ldaps) */
   if(conn->given->flags & PROTOPT_SSL)
     ldap_ssl = 1;
   infof(data, "LDAP local: trying to establish %s connection\n",
@@ -717,7 +717,7 @@ static int str2scope (const char *p)
      return LDAP_SCOPE_BASE;
   if(strequal(p, "sub"))
      return LDAP_SCOPE_SUBTREE;
-  if(strequal( p, "subtree"))
+  if(strequal(p, "subtree"))
      return LDAP_SCOPE_SUBTREE;
   return (-1);
 }

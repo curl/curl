@@ -2148,7 +2148,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      * file size before we continue this venture in the dark lands of HTTP.
      *********************************************************************/
 
-    if(data->state.resume_from < 0 ) {
+    if(data->state.resume_from < 0) {
       /*
        * This is meant to get the size of the present remote-file by itself.
        * We don't support this now. Bail out!

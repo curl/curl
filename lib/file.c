@@ -368,7 +368,7 @@ static CURLcode file_upload(struct connectdata *conn)
 
     /*skip bytes before resume point*/
     if(data->state.resume_from) {
-      if((curl_off_t)nread <= data->state.resume_from ) {
+      if((curl_off_t)nread <= data->state.resume_from) {
         data->state.resume_from -= nread;
         nread = 0;
         buf2 = buf;

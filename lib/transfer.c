@@ -694,7 +694,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
         }
 
         nread = (ssize_t) (k->maxdownload - k->bytecount);
-        if(nread < 0 ) /* this should be unusual */
+        if(nread < 0) /* this should be unusual */
           nread = 0;
 
         k->keepon &= ~KEEP_RECV; /* we're done reading */
@@ -779,7 +779,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
           return result;
       }
 
-    } /* if(! header and data to read ) */
+    } /* if(!header and data to read) */
 
     if(conn->handler->readwrite &&
        (excess > 0 && !conn->bits.stream_was_rewound)) {
@@ -805,7 +805,7 @@ static CURLcode readwrite_data(struct SessionHandle *data,
   } while(data_pending(conn) && maxloops--);
 
   if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
-     conn->bits.close ) {
+     conn->bits.close) {
     /* When we've read the entire thing and the close bit is set, the server
        may now close the connection. If there's now any kind of sending going
        on from our side, we need to stop that immediately. */

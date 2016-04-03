@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,17 +57,17 @@ CURL_EXTERN void curl_memlog(const char *format, ...);
 
 /* file descriptor manipulators */
 CURL_EXTERN curl_socket_t curl_socket(int domain, int type, int protocol,
-                                      int line , const char *source);
+                                      int line, const char *source);
 CURL_EXTERN void curl_mark_sclose(curl_socket_t sockfd,
-                                  int line , const char *source);
+                                  int line, const char *source);
 CURL_EXTERN int curl_sclose(curl_socket_t sockfd,
-                            int line , const char *source);
+                            int line, const char *source);
 CURL_EXTERN curl_socket_t curl_accept(curl_socket_t s, void *a, void *alen,
                                       int line, const char *source);
 #ifdef HAVE_SOCKETPAIR
 CURL_EXTERN int curl_socketpair(int domain, int type, int protocol,
                                 curl_socket_t socket_vector[2],
-                                int line , const char *source);
+                                int line, const char *source);
 #endif
 
 /* FILE functions */

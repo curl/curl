@@ -1520,7 +1520,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 fflush(outs.stream);
                 /* truncate file at the position where we started appending */
 #ifdef HAVE_FTRUNCATE
-                if(ftruncate( fileno(outs.stream), outs.init)) {
+                if(ftruncate(fileno(outs.stream), outs.init)) {
                   /* when truncate fails, we can't just append as then we'll
                      create something strange, bail out */
                   if(!global->mute)

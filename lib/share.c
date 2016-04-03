@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,14 +71,14 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     /* this is a type this share will share */
     type = va_arg(param, int);
     share->specifier |= (1<<type);
-    switch( type ) {
+    switch(type) {
     case CURL_LOCK_DATA_DNS:
       break;
 
     case CURL_LOCK_DATA_COOKIE:
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
       if(!share->cookies) {
-        share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE );
+        share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE);
         if(!share->cookies)
           res = CURLSHE_NOMEM;
       }
@@ -114,7 +114,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     /* this is a type this share will no longer share */
     type = va_arg(param, int);
     share->specifier &= ~(1<<type);
-    switch( type ) {
+    switch(type) {
     case CURL_LOCK_DATA_DNS:
       break;
 

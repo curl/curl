@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2015, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
  * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
@@ -1326,7 +1326,7 @@ bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex)
 
   if(connssl->use) /* SSL/TLS is in use */
     return (connssl->encdata_offset > 0 ||
-            connssl->decdata_offset > 0 ) ? TRUE : FALSE;
+            connssl->decdata_offset > 0) ? TRUE : FALSE;
   else
     return FALSE;
 }

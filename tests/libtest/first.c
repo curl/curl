@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -69,7 +69,7 @@ void wait_ms(int ms)
   t.tv_sec = ms/1000;
   ms -= (int)t.tv_sec * 1000;
   t.tv_usec = ms * 1000;
-  select_wrapper(0, NULL, NULL , NULL, &t);
+  select_wrapper(0, NULL, NULL, NULL, &t);
 }
 
 char *libtest_arg2=NULL;
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
   setlocale(LC_ALL, "");
 #endif
 
-  if(argc< 2 ) {
+  if(argc< 2) {
     fprintf(stderr, "Pass URL as argument please\n");
     return 1;
   }

@@ -131,12 +131,12 @@ static void mbedtls_debug(void *context, int level, const char *line)
 const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
 {
   /* Hashes from SHA-1 and above */
-  MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA1 ) |
-  MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_RIPEMD160 ) |
-  MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA224 ) |
-  MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA256 ) |
-  MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA384 ) |
-  MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA512 ),
+  MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_SHA1) |
+  MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_RIPEMD160) |
+  MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_SHA224) |
+  MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_SHA256) |
+  MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_SHA384) |
+  MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_SHA512),
   0xFFFFFFF, /* Any PK alg    */
   0xFFFFFFF, /* Any curve     */
   1024,      /* RSA min key len */
@@ -322,8 +322,8 @@ mbedtls_connect_step1(struct connectdata *conn,
   }
 
   /* new profile with RSA min key len = 1024 ... */
-  mbedtls_ssl_conf_cert_profile( &connssl->config,
-                                 &mbedtls_x509_crt_profile_fr);
+  mbedtls_ssl_conf_cert_profile(&connssl->config,
+                                &mbedtls_x509_crt_profile_fr);
 
   switch(data->set.ssl.version) {
   case CURL_SSLVERSION_DEFAULT:

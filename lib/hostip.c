@@ -778,7 +778,7 @@ CURLcode Curl_loadhostpairs(struct SessionHandle *data)
   char address[256];
   int port;
 
-  for(hostp = data->change.resolve; hostp; hostp = hostp->next ) {
+  for(hostp = data->change.resolve; hostp; hostp = hostp->next) {
     if(!hostp->data)
       continue;
     if(hostp->data[0] == '-') {

@@ -28,7 +28,7 @@
 
 static struct SessionHandle *data;
 
-static CURLcode unit_setup( void )
+static CURLcode unit_setup(void)
 {
   data = curl_easy_init();
   if(!data)
@@ -36,7 +36,7 @@ static CURLcode unit_setup( void )
   return CURLE_OK;
 }
 
-static void unit_stop( void )
+static void unit_stop(void)
 {
   curl_easy_cleanup(data);
 }
@@ -52,50 +52,50 @@ CURLcode rc;
 rc = Curl_base64_encode(data, "i", 1, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
 fail_unless(size == 4, "size should be 4");
-verify_memory( output, "aQ==", 4);
+verify_memory(output, "aQ==", 4);
 Curl_safefree(output);
 
 rc = Curl_base64_encode(data, "ii", 2, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
 fail_unless(size == 4, "size should be 4");
-verify_memory( output, "aWk=", 4);
+verify_memory(output, "aWk=", 4);
 Curl_safefree(output);
 
 rc = Curl_base64_encode(data, "iii", 3, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
 fail_unless(size == 4, "size should be 4");
-verify_memory( output, "aWlp", 4);
+verify_memory(output, "aWlp", 4);
 Curl_safefree(output);
 
 rc = Curl_base64_encode(data, "iiii", 4, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
 fail_unless(size == 8, "size should be 8");
-verify_memory( output, "aWlpaQ==", 8);
+verify_memory(output, "aWlpaQ==", 8);
 Curl_safefree(output);
 
 rc = Curl_base64_encode(data, "\xff\x01\xfe\x02", 4, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
 fail_unless(size == 8, "size should be 8");
-verify_memory( output, "/wH+Ag==", 8);
+verify_memory(output, "/wH+Ag==", 8);
 Curl_safefree(output);
 
 rc = Curl_base64url_encode(data, "\xff\x01\xfe\x02", 4, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
 fail_unless(size == 8, "size should be 8");
-verify_memory( output, "_wH-Ag==", 8);
+verify_memory(output, "_wH-Ag==", 8);
 Curl_safefree(output);
 
 rc = Curl_base64url_encode(data, "iiii", 4, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
 fail_unless(size == 8, "size should be 8");
-verify_memory( output, "aWlpaQ==", 8);
+verify_memory(output, "aWlpaQ==", 8);
 Curl_safefree(output);
 
 /* 0 length makes it do strlen() */
 rc = Curl_base64_encode(data, "iiii", 0, &output, &size);
 fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
 fail_unless(size == 8, "size should be 8");
-verify_memory( output, "aWlpaQ==", 8);
+verify_memory(output, "aWlpaQ==", 8);
 Curl_safefree(output);
 
 rc = Curl_base64_decode("aWlpaQ==", &decoded, &size);

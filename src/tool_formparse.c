@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -323,7 +323,7 @@ int formparse(struct OperationConfig *config,
         info[i].option = CURLFORM_END;
 
         if(curl_formadd(httppost, last_post,
-                        CURLFORM_ARRAY, info, CURLFORM_END ) != 0) {
+                        CURLFORM_ARRAY, info, CURLFORM_END) != 0) {
           warnf(config->global, "curl_formadd failed, possibly the file %s is "
                 "bad!\n", contp + 1);
           Curl_safefree(contents);

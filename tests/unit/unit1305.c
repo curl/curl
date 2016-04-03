@@ -44,7 +44,7 @@ static struct curl_hash hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
 
-static CURLcode unit_setup( void )
+static CURLcode unit_setup(void)
 {
   int rc;
   data = curl_easy_init();
@@ -60,7 +60,7 @@ static CURLcode unit_setup( void )
   return CURLE_OK;
 }
 
-static void unit_stop( void )
+static void unit_stop(void)
 {
   if(data_node) {
     Curl_freeaddrinfo(data_node->addr);

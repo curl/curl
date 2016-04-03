@@ -27,7 +27,7 @@
 
 static struct SessionHandle *data;
 
-static CURLcode unit_setup( void )
+static CURLcode unit_setup(void)
 {
   data = curl_easy_init();
   if(!data)
@@ -35,7 +35,7 @@ static CURLcode unit_setup( void )
   return CURLE_OK;
 }
 
-static void unit_stop( void )
+static void unit_stop(void)
 {
   curl_easy_cleanup(data);
 }
