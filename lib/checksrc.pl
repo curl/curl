@@ -39,8 +39,10 @@ my %warnings = (
     'TABS' =>             'TAB characters not allowed',
     'TRAILINGSPACE' =>    'Trailing white space on the line',
     'CPPCOMMENTS' =>      '// comment detected',
-    'SPACEBEFOREPAREN' => 'bad space before an open parenthesis',
-    'SPACEAFTERPAREN'  => 'bad space after open parenthesis',
+    'SPACEBEFOREPAREN' => 'space before an open parenthesis',
+    'SPACEAFTERPAREN'  => 'space after open parenthesis',
+    'SPACEBEFORECLOSE' => 'space before a close parenthesis',
+    'SPACEBEFORECOMMA' => 'space before a comma',
     'RETURNNOSPACE'    => 'return without space',
     'COMMANOSPACE'     => 'comma without following space',
     'BRACEELSE'        => '} else on the same line',
@@ -298,16 +300,26 @@ sub scanfile {
             }
         }
 
-        # check spaces after open paren after for/if/while
-        if($l =~ /^(.*)(for|if|while)\( /) {
-            if($1 =~ / *\#/) {
-                # this is a #if, treat it differently
-            }
-            else {
-                checkwarn("SPACEAFTERPAREN",
-                          $line, length($1)+length($2)+1, $file, $l,
-                          "$2 with space first in condition");
-            }
+        # check spaces after open parentheses
+        if($l =~ /^(.*[a-z])\( /i) {
+            checkwarn("SPACEAFTERPAREN",
+                      $line, length($1)+1, $file, $l,
+                      "space after open parenthesis");
+        }
+
+        # check spaces before close parentheses, unless it was a space or a
+        # close parenthesis!
+        if($l =~ /(.*[^\) ]) \)/) {
+            checkwarn("SPACEBEFORECLOSE",
+                      $line, length($1)+1, $file, $l,
+                      "space before close parenthesis");
+        }
+
+        # check spaces before comma!
+        if($l =~ /(.*[^ ]) ,/) {
+            checkwarn("SPACEBEFORECOMMA",
+                      $line, length($1)+1, $file, $l,
+                      "space before comma");
         }
 
         # check for "return(" without space
