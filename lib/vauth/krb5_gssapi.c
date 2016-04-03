@@ -88,7 +88,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
   (void) userp;
   (void) passwdp;
 
-  if(krb5->context == GSS_C_NO_CONTEXT) {
+  if(!krb5->spn) {
     /* Generate our SPN */
     char *spn = Curl_auth_build_gssapi_spn(service, host);
     if(!spn)
@@ -112,7 +112,8 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
 
     free(spn);
   }
-  else {
+
+  if(krb5->context != GSS_C_NO_CONTEXT) {
     /* Decode the base-64 encoded challenge message */
     if(strlen(chlg64) && *chlg64 != '=') {
       result = Curl_base64_decode(chlg64, &chlg, &chlglen);

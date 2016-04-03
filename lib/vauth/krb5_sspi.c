@@ -85,6 +85,13 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
   unsigned long attrs;
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
+  if(!krb5->spn) {
+    /* Generate our SPN */
+    krb5->spn = Curl_auth_build_spn(service, host);
+    if(!krb5->spn)
+      return CURLE_OUT_OF_MEMORY;
+  }
+
   if(!krb5->credentials) {
     /* Query the security package for Kerberos */
     status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *)
@@ -102,11 +109,6 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     /* Allocate our response buffer */
     krb5->output_token = malloc(krb5->token_max);
     if(!krb5->output_token)
-      return CURLE_OUT_OF_MEMORY;
-
-    /* Generate our SPN */
-    krb5->spn = Curl_auth_build_spn(service, host);
-    if(!krb5->spn)
       return CURLE_OUT_OF_MEMORY;
 
     if(userp && *userp) {
