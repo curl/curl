@@ -66,9 +66,9 @@ static void store_errmsg(const char *msg, int err)
 
 static void close_file_descriptors(void)
 {
-  for (num_open.rlim_cur = 0;
-       num_open.rlim_cur < num_open.rlim_max;
-       num_open.rlim_cur++)
+  for(num_open.rlim_cur = 0;
+      num_open.rlim_cur < num_open.rlim_max;
+      num_open.rlim_cur++)
     if(fd[num_open.rlim_cur] > 0)
       close(fd[num_open.rlim_cur]);
   free(fd);
@@ -81,19 +81,19 @@ static int fopen_works(void)
   int i;
   int ret = 1;
 
-  for (i = 0; i < 3; i++) {
+  for(i = 0; i < 3; i++) {
     fpa[i] = NULL;
   }
-  for (i = 0; i < 3; i++) {
-    fpa[i] = fopen(DEV_NULL, "r");
+  for(i = 0; i < 3; i++) {
+    fpa[i] = fopen(DEV_NULL, FOPEN_READTEXT);
     if(fpa[i] == NULL) {
-      store_errmsg("fopen() failed", ERRNO);
+      store_errmsg("fopen failed", ERRNO);
       fprintf(stderr, "%s\n", msgbuff);
       ret = 0;
       break;
     }
   }
-  for (i = 0; i < 3; i++) {
+  for(i = 0; i < 3; i++) {
     if(fpa[i] != NULL)
       fclose(fpa[i]);
   }
@@ -227,7 +227,7 @@ static int rlimit(int keep_open)
    * that it becomes available to the test.
    */
 
-  for (nitems = i = 1; nitems <= i; i *= 2)
+  for(nitems = i = 1; nitems <= i; i *= 2)
     nitems = i;
   if(nitems > 0x7fff)
     nitems = 0x40000;
@@ -240,7 +240,7 @@ static int rlimit(int keep_open)
       fprintf(stderr, "memchunk, malloc() failed\n");
       nitems /= 2;
     }
-  } while (nitems && !memchunk);
+  } while(nitems && !memchunk);
   if(!memchunk) {
     store_errmsg("memchunk, malloc() failed", ERRNO);
     fprintf(stderr, "%s\n", msgbuff);
@@ -251,7 +251,7 @@ static int rlimit(int keep_open)
 
   fprintf(stderr, "initializing memchunk array\n");
 
-  for (i = 0; i < nitems; i++)
+  for(i = 0; i < nitems; i++)
     memchunk[i] = -1;
 
   /* set the number of file descriptors we will try to open */
@@ -266,7 +266,7 @@ static int rlimit(int keep_open)
   }
   else {
     /* a huge number of file descriptors */
-    for (nitems = i = 1; nitems <= i; i *= 2)
+    for(nitems = i = 1; nitems <= i; i *= 2)
       nitems = i;
     if(nitems > 0x7fff)
       nitems = 0x40000;
@@ -295,7 +295,7 @@ static int rlimit(int keep_open)
       fprintf(stderr, "fd, malloc() failed\n");
       num_open.rlim_max /= 2;
     }
-  } while (num_open.rlim_max && !fd);
+  } while(num_open.rlim_max && !fd);
   if(!fd) {
     store_errmsg("fd, malloc() failed", ERRNO);
     fprintf(stderr, "%s\n", msgbuff);
@@ -307,9 +307,9 @@ static int rlimit(int keep_open)
 
   fprintf(stderr, "initializing fd array\n");
 
-  for (num_open.rlim_cur = 0;
-       num_open.rlim_cur < num_open.rlim_max;
-       num_open.rlim_cur++)
+  for(num_open.rlim_cur = 0;
+      num_open.rlim_cur < num_open.rlim_max;
+      num_open.rlim_cur++)
     fd[num_open.rlim_cur] = -1;
 
   snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
@@ -330,9 +330,9 @@ static int rlimit(int keep_open)
 
   /* create a bunch of file descriptors */
 
-  for (num_open.rlim_cur = 1;
-       num_open.rlim_cur < num_open.rlim_max;
-       num_open.rlim_cur++) {
+  for(num_open.rlim_cur = 1;
+      num_open.rlim_cur < num_open.rlim_max;
+      num_open.rlim_cur++) {
 
     fd[num_open.rlim_cur] = dup(fd[0]);
 
@@ -345,19 +345,21 @@ static int rlimit(int keep_open)
       fprintf(stderr, "%s\n", strbuff);
 
       snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
-      snprintf(strbuff, sizeof(strbuff), "fds system limit seems close to %s", strbuff1);
+      snprintf(strbuff, sizeof(strbuff), "fds system limit seems close to %s",
+               strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
       num_open.rlim_max = num_open.rlim_cur - SAFETY_MARGIN;
 
       num_open.rlim_cur -= num_open.rlim_max;
       snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
-      snprintf(strbuff, sizeof(strbuff), "closing %s file descriptors", strbuff1);
+      snprintf(strbuff, sizeof(strbuff), "closing %s file descriptors",
+               strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
-      for (num_open.rlim_cur = num_open.rlim_max;
-           fd[num_open.rlim_cur] >= 0;
-           num_open.rlim_cur++) {
+      for(num_open.rlim_cur = num_open.rlim_max;
+          fd[num_open.rlim_cur] >= 0;
+          num_open.rlim_cur++) {
         close(fd[num_open.rlim_cur]);
         fd[num_open.rlim_cur] = -1;
       }
@@ -399,7 +401,8 @@ static int rlimit(int keep_open)
 
   num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
   if(num_open.rlim_max > num_open.rlim_cur) {
-    snprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d", FD_SETSIZE);
+    snprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
+             FD_SETSIZE);
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
     close_file_descriptors();
@@ -408,12 +411,13 @@ static int rlimit(int keep_open)
   }
 
   num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
-  for (rl.rlim_cur = 0;
-       rl.rlim_cur < num_open.rlim_max;
-       rl.rlim_cur++) {
+  for(rl.rlim_cur = 0;
+      rl.rlim_cur < num_open.rlim_max;
+      rl.rlim_cur++) {
     if((fd[rl.rlim_cur] > 0) &&
        ((unsigned int)fd[rl.rlim_cur] > num_open.rlim_cur)) {
-      snprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d", FD_SETSIZE);
+      snprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
+               FD_SETSIZE);
       store_errmsg(strbuff, 0);
       fprintf(stderr, "%s\n", msgbuff);
       close_file_descriptors();
@@ -435,10 +439,10 @@ static int rlimit(int keep_open)
 
   if(!fopen_works()) {
     snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_max);
-    snprintf(strbuff, sizeof(strbuff), "stdio fopen() fails with %s fds open()",
+    snprintf(strbuff, sizeof(strbuff), "fopen fails with %s fds open",
             strbuff1);
     fprintf(stderr, "%s\n", msgbuff);
-    snprintf(strbuff, sizeof(strbuff), "stdio fopen() fails with lots of fds open()");
+    snprintf(strbuff, sizeof(strbuff), "fopen fails with lots of fds open");
     store_errmsg(strbuff, 0);
     close_file_descriptors();
     free(memchunk);

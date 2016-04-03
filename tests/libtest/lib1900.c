@@ -192,12 +192,12 @@ int test(char *URL)
     abort_on_test_timeout();
 
     /* See how the transfers went */
-    while ((msg = curl_multi_info_read(m, &msgs_left))) {
-      if (msg->msg == CURLMSG_DONE) {
+    while((msg = curl_multi_info_read(m, &msgs_left))) {
+      if(msg->msg == CURLMSG_DONE) {
         int i, found = 0;
 
         /* Find out which handle this message is about */
-        for (i = 0; i < num_handles; i++) {
+        for(i = 0; i < num_handles; i++) {
           found = (msg->easy_handle == handles[i]);
           if(found)
             break;

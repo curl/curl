@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,8 +36,8 @@ struct userdata {
 };
 
 /* lock callback */
-static void my_lock(CURL *handle, curl_lock_data data, curl_lock_access laccess,
-          void *useptr )
+static void my_lock(CURL *handle, curl_lock_data data,
+                    curl_lock_access laccess, void *useptr)
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
@@ -101,7 +101,7 @@ static void *fire(void *ptr)
   CURL *curl;
   int i=0;
 
-  if ((curl = curl_easy_init()) == NULL) {
+  if((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
     return NULL;
   }
@@ -114,7 +114,7 @@ static void *fire(void *ptr)
 
   printf( "PERFORM\n" );
   code = curl_easy_perform(curl);
-  if( code != CURLE_OK ) {
+  if(code != CURLE_OK ) {
     fprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
             tdata->url, i, (int)code);
   }
@@ -141,37 +141,38 @@ int test(char *URL)
   user.counter = 0;
 
   printf( "GLOBAL_INIT\n" );
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* prepare share */
   printf( "SHARE_INIT\n" );
-  if ((share = curl_share_init()) == NULL) {
+  if((share = curl_share_init()) == NULL) {
     fprintf(stderr, "curl_share_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if ( CURLSHE_OK == scode ) {
+  if(CURLSHE_OK == scode ) {
     printf( "CURLSHOPT_LOCKFUNC\n" );
     scode = curl_share_setopt( share, CURLSHOPT_LOCKFUNC, my_lock);
   }
-  if ( CURLSHE_OK == scode ) {
+  if(CURLSHE_OK == scode ) {
     printf( "CURLSHOPT_UNLOCKFUNC\n" );
     scode = curl_share_setopt( share, CURLSHOPT_UNLOCKFUNC, my_unlock);
   }
-  if ( CURLSHE_OK == scode ) {
+  if(CURLSHE_OK == scode ) {
     printf( "CURLSHOPT_USERDATA\n" );
     scode = curl_share_setopt( share, CURLSHOPT_USERDATA, &user);
   }
-  if ( CURLSHE_OK == scode ) {
+  if(CURLSHE_OK == scode ) {
     printf( "CURL_LOCK_DATA_SSL_SESSION\n" );
-    scode = curl_share_setopt( share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
+    scode = curl_share_setopt( share, CURLSHOPT_SHARE,
+                               CURL_LOCK_DATA_SSL_SESSION);
   }
 
-  if ( CURLSHE_OK != scode ) {
+  if(CURLSHE_OK != scode ) {
     fprintf(stderr, "curl_share_setopt() failed\n");
     curl_share_cleanup(share);
     curl_global_cleanup();
@@ -182,7 +183,7 @@ int test(char *URL)
   res = 0;
 
   /* start treads */
-  for (i=1; i<=THREADS; i++ ) {
+  for(i=1; i<=THREADS; i++ ) {
 
     /* set thread data */
     tdata.url   = URL;
@@ -196,7 +197,7 @@ int test(char *URL)
 
   /* fetch a another one */
   printf( "*** run %d\n", i );
-  if ((curl = curl_easy_init()) == NULL) {
+  if((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_share_cleanup(share);
     curl_global_cleanup();
@@ -214,11 +215,11 @@ int test(char *URL)
   /* try to free share, expect to fail because share is in use*/
   printf( "try SHARE_CLEANUP...\n" );
   scode = curl_share_cleanup( share );
-  if ( scode==CURLSHE_OK )
-  {
+  if(scode==CURLSHE_OK) {
     fprintf(stderr, "curl_share_cleanup succeed but error expected\n");
     share = NULL;
-  } else {
+  }
+  else {
     printf( "SHARE_CLEANUP failed, correct\n" );
   }
 
@@ -231,7 +232,7 @@ test_cleanup:
   /* free share */
   printf( "SHARE_CLEANUP\n" );
   scode = curl_share_cleanup( share );
-  if ( scode!=CURLSHE_OK )
+  if(scode!=CURLSHE_OK )
     fprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
             (int)scode);
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -92,19 +92,19 @@ int test(char *URL)
   struct WriteThis pooh;
   pooh.counter = 0;
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if ((curl = curl_easy_init()) == NULL) {
+  if((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   slist = curl_slist_append(slist, "Transfer-Encoding: chunked");
-  if (slist == NULL) {
+  if(slist == NULL) {
     fprintf(stderr, "curl_slist_append() failed\n");
     curl_easy_cleanup(curl);
     curl_global_cleanup();

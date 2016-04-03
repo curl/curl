@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,7 +44,7 @@ int test(char *URL)
   dbl_epsilon = 1.0;
   do {
     dbl_epsilon /= 2.0;
-  } while ((double)(1.0 + (dbl_epsilon/2.0)) > (double)1.0);
+  } while((double)(1.0 + (dbl_epsilon/2.0)) > (double)1.0);
 
   start_test_timing();
 
@@ -65,7 +65,7 @@ int test(char *URL)
 
   multi_add_handle(m, c);
 
-  while (running) {
+  while(running) {
     struct timeval timeout;
     fd_set fdread, fdwrite, fdexcep;
     int maxfd = -99;
@@ -94,7 +94,7 @@ int test(char *URL)
   }
 
   curl_easy_getinfo(c, CURLINFO_CONNECT_TIME, &connect_time);
-  if (connect_time < dbl_epsilon) {
+  if(connect_time < dbl_epsilon) {
     fprintf(stderr, "connect time %e is < epsilon %e\n",
             connect_time, dbl_epsilon);
     res = TEST_ERR_MAJOR_BAD;

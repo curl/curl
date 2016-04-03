@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,7 +56,7 @@ int test(char *URL)
   while(still_running) {
     int num;
     res = curl_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
-    if (res != CURLM_OK) {
+    if(res != CURLM_OK) {
       printf("curl_multi_wait() returned %d\n", res);
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;

@@ -47,7 +47,7 @@ static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
   const size_t failure = (size * nmemb) ? 0 : 1;
 
   char *output = malloc(size * nmemb + 1);
-  if (!output) {
+  if(!output) {
     fprintf(stderr, "output, malloc() failed\n");
     res = TEST_ERR_MAJOR_BAD;
     return failure;
@@ -60,25 +60,25 @@ static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
 
   /* Get socket being used for this easy handle, otherwise CURL_SOCKET_BAD */
   code = curl_easy_getinfo(easy[idx], CURLINFO_LASTSOCKET, &longdata);
-  if (CURLE_OK != code) {
+  if(CURLE_OK != code) {
     fprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
             "with code %d (%s)\n",
             __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
     res = TEST_ERR_MAJOR_BAD;
     return failure;
   }
-  if (longdata == -1L)
+  if(longdata == -1L)
     sock = CURL_SOCKET_BAD;
   else
     sock = (curl_socket_t)longdata;
 
-  if (sock != CURL_SOCKET_BAD) {
+  if(sock != CURL_SOCKET_BAD) {
     /* Track relationship between this easy handle and the socket. */
-    if (sockets[idx] == CURL_SOCKET_BAD) {
+    if(sockets[idx] == CURL_SOCKET_BAD) {
       /* An easy handle without previous socket, record the socket. */
       sockets[idx] = sock;
     }
-    else if (sock != sockets[idx]) {
+    else if(sock != sockets[idx]) {
       /* An easy handle with a socket different to previously
          tracked one, log and fail right away. Known bug #37. */
       fprintf(stderr, "Handle %d started on socket %d and moved to %d\n",
@@ -113,7 +113,7 @@ int test(char *url)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for (i = 0; i < MAX_EASY_HANDLES; ++i) {
+  for(i = 0; i < MAX_EASY_HANDLES; ++i) {
     easy[i] = NULL;
     sockets[i] = CURL_SOCKET_BAD;
   }
@@ -148,7 +148,8 @@ int test(char *url)
       if(num_handles % 3 == 2) {
         snprintf(full_url, urllen, "%s0200", url);
         easy_setopt(easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
-      } else {
+      }
+      else {
         snprintf(full_url, urllen, "%s0100", url);
         easy_setopt(easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
       }
@@ -182,7 +183,7 @@ int test(char *url)
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
     /* Any socket which is new in fdread is associated with the new handle */
-    for (i = 0; i <= maxfd; ++i) {
+    for(i = 0; i <= maxfd; ++i) {
       bool socket_exists = FALSE;
       curl_socket_t curfd = (curl_socket_t)i;
 
@@ -192,7 +193,7 @@ int test(char *url)
 
       /* Check if this socket was already detected for an earlier handle (or
          for this handle, num_handles-1, in the callback */
-      for (j = 0; j < num_handles; ++j) {
+      for(j = 0; j < num_handles; ++j) {
         if(sockets[j] == curfd) {
           socket_exists = TRUE;
           break;

@@ -49,7 +49,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  snprintf(dnsentry, sizeof(dnsentry), "server.example.curl:%s:%s", port, address);
+  snprintf(dnsentry, sizeof(dnsentry), "server.example.curl:%s:%s",
+           port, address);
   printf("%s\n", dnsentry);
   slist = curl_slist_append(slist, dnsentry);
 

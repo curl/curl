@@ -39,7 +39,7 @@ static size_t myreadfunc(void *ptr, size_t size, size_t nmemb, void *stream)
   memset(buf, 'A', sizeof(buf));
 
   size *= nmemb;
-  if (size > total)
+  if(size > total)
     size = total;
 
   if(size > sizeof(buf))
@@ -73,18 +73,18 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for (i = 0; i < NUM_HEADERS; i++) {
+  for(i = 0; i < NUM_HEADERS; i++) {
     int len = snprintf(buf, sizeof(buf), "Header%d: ", i);
     memset(&buf[len], 'A', SIZE_HEADERS);
     buf[len + SIZE_HEADERS]=0; /* zero terminate */
     hl = curl_slist_append(headerlist,  buf);
-    if (!hl)
+    if(!hl)
       goto test_cleanup;
     headerlist = hl;
   }
 
   hl = curl_slist_append(headerlist, "Expect: ");
-  if (!hl)
+  if(!hl)
     goto test_cleanup;
   headerlist = hl;
 

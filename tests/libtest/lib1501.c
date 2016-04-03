@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,7 +41,7 @@ static int elapsed(struct timeval *before,
 
   result = (after->tv_sec - before->tv_sec) * 1000000 +
     after->tv_usec - before->tv_usec;
-  if (result < 0)
+  if(result < 0)
     result = 0;
 
   return curlx_sztosi(result);

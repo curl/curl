@@ -44,7 +44,8 @@ int test(char *URL)
 
   /* Create fake DNS entries for serverX.example.com for all handles */
   for(i=0; i < NUM_URLS; i++) {
-    snprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s", i + 1, port, address);
+    snprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s", i + 1,
+             port, address);
     printf("%s\n", dnsentry);
     slist2 = curl_slist_append(slist, dnsentry);
     if(!slist2) {

@@ -113,7 +113,7 @@ static int loop(int num, CURLM *cm, const char* url, const char* userpwd,
   if(res)
     return res;
 
-  while (U) {
+  while(U) {
 
     int M = -99;
 
@@ -125,7 +125,7 @@ static int loop(int num, CURLM *cm, const char* url, const char* userpwd,
     if(res)
       return res;
 
-    if (U) {
+    if(U) {
       FD_ZERO(&R);
       FD_ZERO(&W);
       FD_ZERO(&E);
