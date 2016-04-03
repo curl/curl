@@ -24,7 +24,7 @@
 /* The fail macros mark the current test step as failed, and continue */
 #define fail_if(expr, msg)                              \
   if(expr) {                                            \
-    fprintf(stderr, "%s:%d Assertion '%s' met: %s\n" ,  \
+    fprintf(stderr, "%s:%d Assertion '%s' met: %s\n",   \
             __FILE__, __LINE__, #expr, msg);            \
     unitfail++;                                         \
   }
@@ -57,7 +57,7 @@
 /* The abort macros mark the current test step as failed, and exit the test */
 #define abort_if(expr, msg)                                   \
   if(expr) {                                                  \
-    fprintf(stderr, "%s:%d Abort assertion '%s' met: %s\n" ,  \
+    fprintf(stderr, "%s:%d Abort assertion '%s' met: %s\n",   \
             __FILE__, __LINE__, #expr, msg);                  \
     unitfail++;                                               \
     goto unit_test_abort;                                     \

@@ -355,7 +355,7 @@ extern int unitfail;
 
 #define exe_select_test(A, B, C, D, E, Y, Z) do {               \
     int ec;                                                     \
-    if(select_wrapper((A), (B), (C), (D), (E)) == -1 ) {        \
+    if(select_wrapper((A), (B), (C), (D), (E)) == -1) {         \
       ec = SOCKERRNO;                                           \
       fprintf(stderr, "%s:%d select() failed, with "            \
               "errno %d (%s)\n",                                \
