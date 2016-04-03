@@ -34,6 +34,25 @@ my $windows_os = $^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin';
 
 my %whitelist;
 
+my %warnings = (
+    'LONGLINE' =>         "Line longer than $max_column",
+    'TABS' =>             'TAB characters not allowed',
+    'TRAILINGSPACE' =>    'Trailing white space on the line',
+    'CPPCOMMENTS' =>      '// comment detected',
+    'SPACEBEFOREPAREN' => 'bad space before an open parenthesis',
+    'SPACEAFTERPAREN'  => 'bad space after open parenthesis',
+    'RETURNNOSPACE'    => 'return without space',
+    'COMMANOSPACE'     => 'comma without following space',
+    'BRACEELSE'        => '} else on the same line',
+    'PARENBRACE'       => '){ without sufficient space',
+    'SPACESEMILCOLON'  => 'space before semicolon',
+    'BANNEDFUNC'       => 'a banned function was used',
+    'FOPENMODE'        => 'fopen needs a macro for the mode string',
+    'BRACEPOS'         => 'wrong position for an open brace',
+    'INDENTATION'      => 'wrong start column for code',
+    'COPYRIGHT'        => 'file missing a copyright statement',
+);
+
 sub readwhitelist {
     open(W, "<$dir/checksrc.whitelist");
     my @all=<W>;
@@ -45,14 +64,20 @@ sub readwhitelist {
 }
 
 sub checkwarn {
-    my ($num, $col, $file, $line, $msg, $error) = @_;
+    my ($name, $num, $col, $file, $line, $msg, $error) = @_;
+
+    my $w=$error?"error":"warning";
 
     if($whitelist{$line}) {
         $supressed++;
+        if($w) {
+            $swarnings++;
+        }
+        else {
+            $serrors++;
+        }
         return;
     }
-
-    my $w=$error?"error":"warning";
 
     if($w) {
         $warnings++;
@@ -62,7 +87,7 @@ sub checkwarn {
     }
 
     $col++;
-    print "$file:$num:$col: $w: $msg\n";
+    print "$file:$num:$col: $w: $msg ($name)\n";
     print " $line\n";
 
     if($col < 80) {
@@ -85,6 +110,10 @@ while(1) {
         $file = shift @ARGV;
         next;
     }
+    elsif($file =~ /^(-h|--help)/) {
+        undef $file;
+        last;
+    }
 
     last;
 }
@@ -94,6 +123,10 @@ if(!$file) {
     print " Options:\n";
     print "  -D[DIR]   Directory to prepend file names\n";
     print "  -W[file]  Whitelist the given file - ignore all its flaws\n";
+    print "\nDetects and warns for these problems:\n";
+    for(sort keys %warnings) {
+        printf (" %-18s: %s\n", $_, $warnings{$_});
+    }
     exit;
 }
 
@@ -132,21 +165,25 @@ sub scanfile {
 
         # detect long lines
         if(length($l) > $max_column) {
-            checkwarn($line, length($l), $file, $l, "Longer than $max_column columns");
+            checkwarn("LONGLINE", $line, length($l), $file, $l,
+                      "Longer than $max_column columns");
         }
         # detect TAB characters
         if($l =~ /^(.*)\t/) {
-            checkwarn($line, length($1), $file, $l, "Contains TAB character", 1);
+            checkwarn("TABS",
+                      $line, length($1), $file, $l, "Contains TAB character", 1);
         }
         # detect trailing white space
         if($l =~ /^(.*)[ \t]+\z/) {
-            checkwarn($line, length($1), $file, $l, "Trailing whitespace");
+            checkwarn("TRAILINGSPACE",
+                      $line, length($1), $file, $l, "Trailing whitespace");
         }
 
         # crude attempt to detect // comments without too many false
         # positives
         if($l =~ /^([^"\*]*)[^:"]\/\//) {
-            checkwarn($line, length($1), $file, $l, "\/\/ comment");
+            checkwarn("CPPCOMMENTS",
+                      $line, length($1), $file, $l, "\/\/ comment");
         }
         # check spaces after for/if/while
         if($l =~ /^(.*)(for|if|while) \(/) {
@@ -154,7 +191,7 @@ sub scanfile {
                 # this is a #if, treat it differently
             }
             else {
-                checkwarn($line, length($1)+length($2), $file, $l,
+                checkwarn("SPACEBEFOREPAREN", $line, length($1)+length($2), $file, $l,
                           "$2 with space");
             }
         }
@@ -165,7 +202,8 @@ sub scanfile {
                 # this is a #if, treat it differently
             }
             else {
-                checkwarn($line, length($1)+length($2)+1, $file, $l,
+                checkwarn("SPACEAFTERPAREN",
+                          $line, length($1)+length($2)+1, $file, $l,
                           "$2 with space first in condition");
             }
         }
@@ -176,7 +214,7 @@ sub scanfile {
                 # this is a #if, treat it differently
             }
             else {
-                checkwarn($line, length($1)+6, $file, $l,
+                checkwarn("RETURNNOSPACE", $line, length($1)+6, $file, $l,
                           "return without space before paren");
             }
         }
@@ -208,28 +246,32 @@ sub scanfile {
                 }
             }
             if(!$ign) {
-                checkwarn($line, length($pref)+1, $file, $l,
+                checkwarn("COMMANOSPACE", $line, length($pref)+1, $file, $l,
                           "comma without following space");
             }
         }
 
         # check for "} else"
         if($l =~ /^(.*)\} *else/) {
-            checkwarn($line, length($1), $file, $l, "else after closing brace on same line");
+            checkwarn("BRACEELSE",
+                      $line, length($1), $file, $l, "else after closing brace on same line");
         }
         # check for "){"
         if($l =~ /^(.*)\)\{/) {
-            checkwarn($line, length($1)+1, $file, $l, "missing space after close paren");
+            checkwarn("PARENBRACE",
+                      $line, length($1)+1, $file, $l, "missing space after close paren");
         }
 
         # check for space before the semicolon last in a line
         if($l =~ /^(.*[^ ].*) ;$/) {
-            checkwarn($line, length($1), $file, $l, "space before last semicolon");
+            checkwarn("SPACESEMILCOLON",
+                      $line, length($1), $file, $l, "space before last semicolon");
         }
 
         # scan for use of banned functions
         if($l =~ /^(.*\W)(sprintf|vsprintf|strcat|strncat|gets)\s*\(/) {
-            checkwarn($line, length($1), $file, $l,
+            checkwarn("BANNEDFUNC",
+                      $line, length($1), $file, $l,
                       "use of $2 is banned");
         }
 
@@ -237,7 +279,8 @@ sub scanfile {
         if($l =~ /^(.*\W)fopen\s*\([^,]*, *\"([^"]*)/) {
             my $mode = $2;
             if($mode !~ /b/) {
-                checkwarn($line, length($1), $file, $l,
+                checkwarn("FOPENMODE",
+                          $line, length($1), $file, $l,
                           "use of non-binary fopen without FOPEN_* macro: $mode");
             }
         }
@@ -246,7 +289,8 @@ sub scanfile {
         # only alert if previous line ended with a close paren and wasn't a cpp
         # line
         if((($prevl =~ /\)\z/) && ($prevl !~ /^ *#/)) && ($l =~ /^( +)\{/)) {
-            checkwarn($line, length($1), $file, $l, "badly placed open brace");
+            checkwarn("BRACEPOS",
+                      $line, length($1), $file, $l, "badly placed open brace");
         }
 
         # if the previous line starts with if/while/for AND ends with an open
@@ -261,7 +305,7 @@ sub scanfile {
                 my $expect = $first+$indent;
                 if($expect != $second) {
                     my $diff = $second - $first;
-                    checkwarn($line, length($1), $file, $l,
+                    checkwarn("INDENTATION", $line, length($1), $file, $l,
                               "not indented $indent steps, uses $diff)");
 
                 }
@@ -273,7 +317,7 @@ sub scanfile {
     }
 
     if(!$copyright) {
-        checkwarn(1, 0, $file, "", "Missing copyright statement", 1);
+        checkwarn("COPYRIGHT", 1, 0, $file, "", "Missing copyright statement", 1);
     }
 
     close(R);
@@ -281,7 +325,12 @@ sub scanfile {
 }
 
 
-if($errors || $warnings) {
+if($errors || $warnings || $verbose) {
     printf "checksrc: %d errors and %d warnings\n", $errors, $warnings;
+    if($supressed) {
+        printf "checksrc: %d errors and %d warnings suppressed\n",
+        $serrors,
+        $swarnings;
+    }
     exit 5; # return failure
 }
