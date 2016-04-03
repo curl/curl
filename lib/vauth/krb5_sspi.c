@@ -113,6 +113,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
   }
 
   if(!krb5->credentials) {
+    /* Do we have credientials to use or are we using single sign-on? */
     if(userp && *userp) {
       /* Populate our identity structure */
       result = Curl_create_sspi_identity(userp, passwdp, &krb5->identity);
@@ -151,7 +152,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     memset(krb5->context, 0, sizeof(CtxtHandle));
   }
 
-  if(chlg64 && strlen(chlg64)) {
+  if(chlg64 && *chlg64) {
     /* Decode the base-64 encoded challenge message */
     if(*chlg64 != '=') {
       result = Curl_base64_decode(chlg64, &chlg, &chlglen);
@@ -195,9 +196,10 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
                                                &resp_desc, &attrs,
                                                &expiry);
 
-  if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
-    free(chlg);
+  /* Free the decoded challenge as it is not required anymore */
+  free(chlg);
 
+  if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
     return CURLE_RECV_ERROR;
   }
 
@@ -217,9 +219,6 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     if(!*outptr)
       result = CURLE_OUT_OF_MEMORY;
   }
-
-  /* Free the decoded challenge */
-  free(chlg);
 
   return result;
 }

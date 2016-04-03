@@ -113,7 +113,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
     free(spn);
   }
 
-  if(chlg64 && strlen(chlg64)) {
+  if(chlg64 && *chlg64) {
     /* Decode the base-64 encoded challenge message */
     if(*chlg64 != '=') {
       result = Curl_base64_decode(chlg64, &chlg, &chlglen);
@@ -144,6 +144,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
                                            mutual_auth,
                                            NULL);
 
+  /* Free the decoded challenge as it is not required anymore */
   free(input_token.value);
 
   if(GSS_ERROR(major_status)) {
