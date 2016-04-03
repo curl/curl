@@ -770,7 +770,7 @@ curl_off_t VmsRealFileSize(const char * name,
   int ret_stat;
   FILE * file;
 
-  file = fopen(name, "r"); /* VMS */
+  file = fopen(name, FOPEN_READTEXT); /* VMS */
   if(file == NULL)
     return 0;
 
@@ -1421,10 +1421,10 @@ static FILE * vmsfopenread(const char *file, const char *mode) {
   case FAB$C_VAR:
   case FAB$C_VFC:
   case FAB$C_STMCR:
-    return fopen(file, "r"); /* VMS */
+    return fopen(file, FOPEN_READTEXT); /* VMS */
     break;
   default:
-    return fopen(file, "r", "rfm=stmlf", "ctx=stm");
+    return fopen(file, FOPEN_READTEXT, "rfm=stmlf", "ctx=stm");
   }
 }
 #endif
