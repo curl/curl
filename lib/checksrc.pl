@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2011 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2011 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -51,7 +51,7 @@ sub checkwarn {
         $supressed++;
         return;
     }
-    
+
     my $w=$error?"error":"warning";
 
     if($w) {
@@ -212,7 +212,7 @@ sub scanfile {
                           "comma without following space");
             }
         }
-        
+
         # check for "} else"
         if($l =~ /^(.*)\} *else/) {
             checkwarn($line, length($1), $file, $l, "else after closing brace on same line");
@@ -234,11 +234,11 @@ sub scanfile {
         }
 
         # scan for use of non-binary fopen without the macro
-        if($l =~ /^(.*\W)fopen\s*\([^"]*\"([^"]*)/) {
+        if($l =~ /^(.*\W)fopen\s*\([^,]*, *\"([^"]*)/) {
             my $mode = $2;
             if($mode !~ /b/) {
                 checkwarn($line, length($1), $file, $l,
-                          "use of non-binary fopen without FOPEN_* macro");
+                          "use of non-binary fopen without FOPEN_* macro: $mode");
             }
         }
 
