@@ -96,4 +96,4 @@ torture-test: perlcheck all
 checksrc:
 	cd libtest && $(MAKE) checksrc
 	cd unit && $(MAKE) checksrc
-	cd server && $(MARK) checksrc
+	cd server && $(MAKE) checksrc
