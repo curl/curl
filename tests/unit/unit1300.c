@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,8 +41,8 @@ static CURLcode unit_setup(void)
     return CURLE_OUT_OF_MEMORY;
   llist_destination = Curl_llist_alloc(test_curl_llist_dtor);
   if(!llist_destination) {
-      Curl_llist_destroy(llist, NULL);
-      return CURLE_OUT_OF_MEMORY;
+    Curl_llist_destroy(llist, NULL);
+    return CURLE_OUT_OF_MEMORY;
   }
 
   return CURLE_OK;

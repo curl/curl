@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -126,7 +126,8 @@ Curl_safefree(decoded);
 size = 1; /* not zero */
 decoded = &anychar; /* not NULL */
 rc = Curl_base64_decode("aQ", &decoded, &size);
-fail_unless(rc == CURLE_BAD_CONTENT_ENCODING, "return code should be CURLE_BAD_CONTENT_ENCODING");
+fail_unless(rc == CURLE_BAD_CONTENT_ENCODING,
+            "return code should be CURLE_BAD_CONTENT_ENCODING");
 fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
 
@@ -134,7 +135,8 @@ fail_if(decoded, "returned pointer should be NULL");
 size = 1; /* not zero */
 decoded = &anychar; /* not NULL */
 rc = Curl_base64_decode("a===", &decoded, &size);
-fail_unless(rc == CURLE_BAD_CONTENT_ENCODING, "return code should be CURLE_BAD_CONTENT_ENCODING");
+fail_unless(rc == CURLE_BAD_CONTENT_ENCODING,
+            "return code should be CURLE_BAD_CONTENT_ENCODING");
 fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
 
@@ -142,7 +144,8 @@ fail_if(decoded, "returned pointer should be NULL");
 size = 1; /* not zero */
 decoded = &anychar; /* not NULL */
 rc = Curl_base64_decode("a=Q=", &decoded, &size);
-fail_unless(rc == CURLE_BAD_CONTENT_ENCODING, "return code should be CURLE_BAD_CONTENT_ENCODING");
+fail_unless(rc == CURLE_BAD_CONTENT_ENCODING,
+            "return code should be CURLE_BAD_CONTENT_ENCODING");
 fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
 
@@ -150,7 +153,8 @@ fail_if(decoded, "returned pointer should be NULL");
 size = 1; /* not zero */
 decoded = &anychar; /* not NULL */
 rc = Curl_base64_decode("a\x1f==", &decoded, &size);
-fail_unless(rc == CURLE_BAD_CONTENT_ENCODING, "return code should be CURLE_BAD_CONTENT_ENCODING");
+fail_unless(rc == CURLE_BAD_CONTENT_ENCODING,
+            "return code should be CURLE_BAD_CONTENT_ENCODING");
 fail_unless(size == 0, "size should be 0");
 fail_if(decoded, "returned pointer should be NULL");
 
