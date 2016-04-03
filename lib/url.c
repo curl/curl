@@ -2633,7 +2633,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.tcp_keepintvl = va_arg(param, long);
     break;
   case CURLOPT_TCP_FASTOPEN:
-#if defined(CONNECT_DATA_IDEMPOTENT)
+#if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN)
     data->set.tcp_fastopen = (0 != va_arg(param, long))?TRUE:FALSE;
 #else
     result = CURLE_NOT_BUILT_IN;
