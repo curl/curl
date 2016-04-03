@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -77,11 +77,11 @@ char *data_to_hex(char *data, size_t len)
     if((data[i] >= 0x20) && (data[i] < 0x7f))
       *optr++ = *iptr++;
     else {
-      sprintf(optr, "%%%02x", *iptr++);
+      snprintf(optr, 4, "%%%02x", *iptr++);
       optr+=3;
     }
   }
-  *optr=0; /* in case no sprintf() was used */
+  *optr=0; /* in case no sprintf was used */
 
   return buf;
 }
@@ -99,7 +99,7 @@ void logmsg(const char *msg, ...)
   static time_t epoch_offset;
   static int    known_offset;
 
-  if (!serverlogfile) {
+  if(!serverlogfile) {
     fprintf(stderr, "Error: serverlogfile not set\n");
     return;
   }
@@ -140,11 +140,11 @@ void win32_perror (const char *msg)
   char buf[512];
   DWORD err = SOCKERRNO;
 
-  if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
-                     LANG_NEUTRAL, buf, sizeof(buf), NULL))
+  if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+                    LANG_NEUTRAL, buf, sizeof(buf), NULL))
      snprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
-  if (msg)
-     fprintf(stderr, "%s: ", msg);
+  if(msg)
+    fprintf(stderr, "%s: ", msg);
   fprintf(stderr, "%s\n", buf);
 }
 #endif  /* WIN32 */
@@ -159,15 +159,14 @@ void win32_init(void)
 
   err = WSAStartup(wVersionRequested, &wsaData);
 
-  if (err != 0) {
+  if(err != 0) {
     perror("Winsock init failed");
     logmsg("Error initialising winsock -- aborting");
     exit(1);
   }
 
-  if ( LOBYTE( wsaData.wVersion ) != USE_WINSOCK ||
-       HIBYTE( wsaData.wVersion ) != USE_WINSOCK ) {
-
+  if(LOBYTE(wsaData.wVersion) != USE_WINSOCK ||
+     HIBYTE(wsaData.wVersion) != USE_WINSOCK) {
     WSACleanup();
     perror("Winsock init failed");
     logmsg("No suitable winsock.dll found -- aborting");

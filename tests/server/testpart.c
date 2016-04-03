@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
   else {
     rc = getpart(&part, &partlen, argv[1], argv[2], stdin);
     if(rc)
-      return(rc);
+      return rc;
     for(i = 0; i < partlen; i++)
       printf("%c", part[i]);
     free(part);

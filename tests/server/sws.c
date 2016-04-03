@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -491,11 +491,11 @@ static int ProcessRequest(struct httprequest *req)
     /* get the number after it */
     if(ptr) {
       if((strlen(doc) + strlen(request)) < 400)
-        sprintf(logbuf, "Got request: %s %s HTTP/%d.%d",
-                request, doc, prot_major, prot_minor);
+        snprintf(logbuf, sizeof(logbuf), "Got request: %s %s HTTP/%d.%d",
+                 request, doc, prot_major, prot_minor);
       else
-        sprintf(logbuf, "Got a *HUGE* request HTTP/%d.%d",
-                prot_major, prot_minor);
+        snprintf(logbuf, sizeof(logbuf), "Got a *HUGE* request HTTP/%d.%d",
+                 prot_major, prot_minor);
       logmsg("%s", logbuf);
 
       if(!strncmp("/verifiedserver", ptr, 15)) {
@@ -527,8 +527,8 @@ static int ProcessRequest(struct httprequest *req)
 
       if(req->testno) {
 
-        sprintf(logbuf, "Requested test number %ld part %ld",
-                req->testno, req->partno);
+        snprintf(logbuf, sizeof(logbuf), "Requested test number %ld part %ld",
+                 req->testno, req->partno);
         logmsg("%s", logbuf);
 
         /* find and parse <servercmd> for this test */
@@ -548,8 +548,9 @@ static int ProcessRequest(struct httprequest *req)
         char *portp = NULL;
         unsigned long part=0;
 
-        sprintf(logbuf, "Received a CONNECT %s HTTP/%d.%d request",
-                doc, prot_major, prot_minor);
+        snprintf(logbuf, sizeof(logbuf),
+                 "Received a CONNECT %s HTTP/%d.%d request",
+                 doc, prot_major, prot_minor);
         logmsg("%s", logbuf);
 
         req->connect_request = TRUE;
@@ -571,7 +572,7 @@ static int ProcessRequest(struct httprequest *req)
           }
           if(*p != ']')
             logmsg("Invalid CONNECT IPv6 address format");
-          else if (*(p+1) != ':')
+          else if(*(p+1) != ':')
             logmsg("Invalid CONNECT IPv6 port format");
           else
             portp = p+1;
@@ -618,8 +619,9 @@ static int ProcessRequest(struct httprequest *req)
         else
           req->partno = 0;
 
-        sprintf(logbuf, "Requested test number %ld part %ld (from host name)",
-                req->testno, req->partno);
+        snprintf(logbuf, sizeof(logbuf),
+                 "Requested test number %ld part %ld (from host name)",
+                 req->testno, req->partno);
         logmsg("%s", logbuf);
 
       }
@@ -668,8 +670,9 @@ static int ProcessRequest(struct httprequest *req)
       else
         req->partno = 0;
 
-      sprintf(logbuf, "Requested GOPHER test number %ld part %ld",
-              req->testno, req->partno);
+      snprintf(logbuf, sizeof(logbuf),
+               "Requested GOPHER test number %ld part %ld",
+               req->testno, req->partno);
       logmsg("%s", logbuf);
     }
   }
@@ -843,15 +846,15 @@ static void storerequest(char *reqbuf, size_t totalsize)
   FILE *dump;
   const char *dumpfile=is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP;
 
-  if (reqbuf == NULL)
+  if(reqbuf == NULL)
     return;
-  if (totalsize == 0)
+  if(totalsize == 0)
     return;
 
   do {
     dump = fopen(dumpfile, "ab");
-  } while ((dump == NULL) && ((error = errno) == EINTR));
-  if (dump == NULL) {
+  } while((dump == NULL) && ((error = errno) == EINTR));
+  if(dump == NULL) {
     logmsg("[2] Error opening file %s error: %d %s",
            dumpfile, error, strerror(error));
     logmsg("Failed to write request input ");
@@ -866,7 +869,7 @@ static void storerequest(char *reqbuf, size_t totalsize)
       goto storerequest_cleanup;
     if(written > 0)
       writeleft -= written;
-  } while ((writeleft > 0) && ((error = errno) == EINTR));
+  } while((writeleft > 0) && ((error = errno) == EINTR));
 
   if(writeleft == 0)
     logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
@@ -968,7 +971,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     }
     else if(got < 0) {
       error = SOCKERRNO;
-      if (EAGAIN == error || EWOULDBLOCK == error) {
+      if(EAGAIN == error || EWOULDBLOCK == error) {
         /* nothing to read at the moment */
         return 0;
       }
@@ -1013,7 +1016,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     reqbuf[req->offset] = '\0';
 
   /* at the end of a request dump it to an external file */
-  if (fail || req->done_processing)
+  if(fail || req->done_processing)
     storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
   if(got_exit_signal)
     return -1;
@@ -1047,7 +1050,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   case RCMD_STREAM:
 #define STREAMTHIS "a string to stream 01234567890\n"
     count = strlen(STREAMTHIS);
-    for (;;) {
+    for(;;) {
       written = swrite(sock, STREAMTHIS, count);
       if(got_exit_signal)
         return -1;
@@ -1076,13 +1079,14 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
       logmsg("Identifying ourselves as friends");
-      sprintf(msgbuf, "WE ROOLZ: %ld\r\n", (long)getpid());
+      snprintf(msgbuf, sizeof(msgbuf), "WE ROOLZ: %ld\r\n", (long)getpid());
       msglen = strlen(msgbuf);
       if(use_gopher)
-        sprintf(weare, "%s", msgbuf);
+        snprintf(weare, sizeof(weare), "%s", msgbuf);
       else
-        sprintf(weare, "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
-                msglen, msgbuf);
+        snprintf(weare, sizeof(weare),
+                 "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
+                 msglen, msgbuf);
       buffer = weare;
       break;
     case DOCNUMBER_404:
@@ -1103,9 +1107,9 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     const char *section= req->connect_request?"connect":"data";
 
     if(req->partno)
-      sprintf(partbuf, "%s%ld", section, req->partno);
+      snprintf(partbuf, sizeof(partbuf), "%s%ld", section, req->partno);
     else
-      sprintf(partbuf, "%s", section);
+      snprintf(partbuf, sizeof(partbuf), "%s", section);
 
     logmsg("Send response test%ld section <%s>", req->testno, partbuf);
 
@@ -1191,7 +1195,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     if(num > 200)
       num = 200;
     written = swrite(sock, buffer, num);
-    if (written < 0) {
+    if(written < 0) {
       sendfailure = TRUE;
       break;
     }
@@ -1228,7 +1232,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   }
 
   if(sendfailure) {
-    logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) were sent",
+    logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) "
+           "were sent",
            responsesize-count, responsesize);
     free(ptr);
     free(cmd);
@@ -1239,7 +1244,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
          responsesize, responsedump);
   free(ptr);
 
-  if(cmdsize > 0 ) {
+  if(cmdsize > 0) {
     char command[32];
     int quarters;
     int num;
@@ -1552,7 +1557,8 @@ static void http_connect(curl_socket_t *infdp,
                 /* connect to the server */
                 serverfd[DATA] = connect_to(ipaddr, req2.connect_port);
                 if(serverfd[DATA] != CURL_SOCKET_BAD) {
-                  /* secondary tunnel established, now we have two connections */
+                  /* secondary tunnel established, now we have two
+                     connections */
                   poll_client_rd[DATA] = TRUE;
                   poll_client_wr[DATA] = TRUE;
                   poll_server_rd[DATA] = TRUE;
@@ -1874,7 +1880,7 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
 
   while(!req->done_processing) {
     int rc = get_request(msgsock, req);
-    if (rc <= 0) {
+    if(rc <= 0) {
       /* Nothing further to read now (possibly because the socket was closed */
       return rc;
     }
@@ -2153,7 +2159,7 @@ int main(int argc, char *argv[])
       /* socket server is not alive, now check if it was actually a socket.
        * Systems which have Unix sockets will also have lstat */
       rc = lstat(unix_socket, &statbuf);
-      if (0 != rc) {
+      if(0 != rc) {
         logmsg("Error binding socket, failed to stat %s: (%d) %s",
                unix_socket, errno, strerror(errno));
         goto sws_cleanup;
@@ -2223,8 +2229,8 @@ int main(int argc, char *argv[])
     curl_socket_t maxfd = (curl_socket_t)-1;
 
     /* Clear out closed sockets */
-    for (socket_idx = num_sockets - 1; socket_idx >= 1; --socket_idx) {
-      if (CURL_SOCKET_BAD == all_sockets[socket_idx]) {
+    for(socket_idx = num_sockets - 1; socket_idx >= 1; --socket_idx) {
+      if(CURL_SOCKET_BAD == all_sockets[socket_idx]) {
         char* dst = (char *) (all_sockets + socket_idx);
         char* src = (char *) (all_sockets + socket_idx + 1);
         char* end = (char *) (all_sockets + num_sockets);
@@ -2240,7 +2246,7 @@ int main(int argc, char *argv[])
     FD_ZERO(&input);
     FD_ZERO(&output);
 
-    for (socket_idx = 0; socket_idx < num_sockets; ++socket_idx) {
+    for(socket_idx = 0; socket_idx < num_sockets; ++socket_idx) {
       /* Listen on all sockets */
       FD_SET(all_sockets[socket_idx], &input);
       if(all_sockets[socket_idx] > maxfd)
@@ -2251,7 +2257,7 @@ int main(int argc, char *argv[])
       goto sws_cleanup;
 
     rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
-    if (rc < 0) {
+    if(rc < 0) {
       error = SOCKERRNO;
       logmsg("select() failed with error: (%d) %s",
              error, strerror(error));
@@ -2261,26 +2267,26 @@ int main(int argc, char *argv[])
     if(got_exit_signal)
       goto sws_cleanup;
 
-    if (rc == 0) {
+    if(rc == 0) {
       /* Timed out - try again*/
       continue;
     }
 
     /* Check if the listening socket is ready to accept */
-    if (FD_ISSET(all_sockets[0], &input)) {
+    if(FD_ISSET(all_sockets[0], &input)) {
       /* Service all queued connections */
       curl_socket_t msgsock;
       do {
         msgsock = accept_connection(sock);
         logmsg("accept_connection %d returned %d", sock, msgsock);
-        if (CURL_SOCKET_BAD == msgsock)
+        if(CURL_SOCKET_BAD == msgsock)
           goto sws_cleanup;
-      } while (msgsock > 0);
+      } while(msgsock > 0);
     }
 
     /* Service all connections that are ready */
-    for (socket_idx = 1; socket_idx < num_sockets; ++socket_idx) {
-      if (FD_ISSET(all_sockets[socket_idx], &input)) {
+    for(socket_idx = 1; socket_idx < num_sockets; ++socket_idx) {
+      if(FD_ISSET(all_sockets[socket_idx], &input)) {
         if(got_exit_signal)
           goto sws_cleanup;
 
@@ -2291,7 +2297,7 @@ int main(int argc, char *argv[])
           if(got_exit_signal)
             goto sws_cleanup;
 
-          if (rc < 0) {
+          if(rc < 0) {
             logmsg("====> Client disconnect %d", req.connmon);
 
             if(req.connmon) {
@@ -2315,14 +2321,14 @@ int main(int argc, char *argv[])
             if(!serverlogslocked)
               clear_advisor_read_lock(SERVERLOGS_LOCK);
 
-            if (req.testno == DOCNUMBER_QUIT)
+            if(req.testno == DOCNUMBER_QUIT)
               goto sws_cleanup;
           }
 
           /* Reset the request, unless we're still in the middle of reading */
-          if (rc != 0)
+          if(rc != 0)
             init_httprequest(&req);
-        } while (rc > 0);
+        } while(rc > 0);
       }
     }
 
@@ -2332,7 +2338,7 @@ int main(int argc, char *argv[])
 
 sws_cleanup:
 
-  for (socket_idx = 1; socket_idx < num_sockets; ++socket_idx)
+  for(socket_idx = 1; socket_idx < num_sockets; ++socket_idx)
     if((all_sockets[socket_idx] != sock) &&
      (all_sockets[socket_idx] != CURL_SOCKET_BAD))
       sclose(all_sockets[socket_idx]);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -101,7 +101,7 @@ static int readline(char **buffer, size_t *bufsize, FILE *stream)
     int bytestoread = curlx_uztosi(*bufsize - offset);
 
     if(!fgets(*buffer + offset, bytestoread, stream))
-      return (offset != 0) ? GPE_OK : GPE_END_OF_FILE ;
+      return (offset != 0) ? GPE_OK : GPE_END_OF_FILE;
 
     length = offset + strlen(*buffer + offset);
     if(*(*buffer + length - 1) == '\n')

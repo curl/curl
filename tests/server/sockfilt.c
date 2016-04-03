@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,31 +53,34 @@
  *
  * This program is a single-threaded process.
  *
- * This program is intended to be highly portable and as such it must be kept as
- * simple as possible, due to this the only signal handling mechanisms used will
- * be those of ANSI C, and used only in the most basic form which is good enough
- * for the purpose of this program.
+ * This program is intended to be highly portable and as such it must be kept
+ * as simple as possible, due to this the only signal handling mechanisms used
+ * will be those of ANSI C, and used only in the most basic form which is good
+ * enough for the purpose of this program.
  *
  * For the above reason and the specific needs of this program signals SIGHUP,
- * SIGPIPE and SIGALRM will be simply ignored on systems where this can be done.
- * If possible, signals SIGINT and SIGTERM will be handled by this program as an
- * indication to cleanup and finish execution as soon as possible.  This will be
- * achieved with a single signal handler 'exit_signal_handler' for both signals.
+ * SIGPIPE and SIGALRM will be simply ignored on systems where this can be
+ * done.  If possible, signals SIGINT and SIGTERM will be handled by this
+ * program as an indication to cleanup and finish execution as soon as
+ * possible.  This will be achieved with a single signal handler
+ * 'exit_signal_handler' for both signals.
  *
  * The 'exit_signal_handler' upon the first SIGINT or SIGTERM received signal
  * will just set to one the global var 'got_exit_signal' storing in global var
  * 'exit_signal' the signal that triggered this change.
  *
  * Nothing fancy that could introduce problems is used, the program at certain
- * points in its normal flow checks if var 'got_exit_signal' is set and in case
- * this is true it just makes its way out of loops and functions in structured
- * and well behaved manner to achieve proper program cleanup and termination.
+ * points in its normal flow checks if var 'got_exit_signal' is set and in
+ * case this is true it just makes its way out of loops and functions in
+ * structured and well behaved manner to achieve proper program cleanup and
+ * termination.
  *
- * Even with the above mechanism implemented it is worthwile to note that other
- * signals might still be received, or that there might be systems on which it
- * is not possible to trap and ignore some of the above signals.  This implies
- * that for increased portability and reliability the program must be coded as
- * if no signal was being ignored or handled at all.  Enjoy it!
+ * Even with the above mechanism implemented it is worthwile to note that
+ * other signals might still be received, or that there might be systems on
+ * which it is not possible to trap and ignore some of the above signals.
+ * This implies that for increased portability and reliability the program
+ * must be coded as if no signal was being ignored or handled at all.  Enjoy
+ * it!
  */
 
 #ifdef HAVE_SIGNAL_H
@@ -469,23 +472,28 @@ static void lograw(unsigned char *buffer, ssize_t len)
   unsigned char *ptr = buffer;
   char *optr = data;
   ssize_t width=0;
+  int left = sizeof(data);
 
   for(i=0; i<len; i++) {
     switch(ptr[i]) {
     case '\n':
-      sprintf(optr, "\\n");
+      snprintf(optr, left, "\\n");
       width += 2;
       optr += 2;
+      left-=2;
       break;
     case '\r':
-      sprintf(optr, "\\r");
+      snprintf(optr, left, "\\r");
       width += 2;
       optr += 2;
+      left-=2;
       break;
     default:
-      sprintf(optr, "%c", (ISGRAPH(ptr[i]) || ptr[i]==0x20) ?ptr[i]:'.');
+      snprintf(optr, left, "%c", (ISGRAPH(ptr[i]) ||
+                                  ptr[i]==0x20) ?ptr[i]:'.');
       width++;
       optr++;
+      left--;
       break;
     }
 
@@ -493,6 +501,7 @@ static void lograw(unsigned char *buffer, ssize_t len)
       logmsg("'%s'", data);
       width = 0;
       optr = data;
+      left = sizeof(data);
     }
   }
   if(width)
@@ -1038,7 +1047,7 @@ static bool juggle(curl_socket_t *sockfdp,
       return FALSE;
 
     logmsg("Received %c%c%c%c (on stdin)",
-           buffer[0], buffer[1], buffer[2], buffer[3] );
+           buffer[0], buffer[1], buffer[2], buffer[3]);
 
     if(!memcmp("PING", buffer, 4)) {
       /* send reply on stdout, just proving we are alive */
@@ -1049,7 +1058,7 @@ static bool juggle(curl_socket_t *sockfdp,
     else if(!memcmp("PORT", buffer, 4)) {
       /* Question asking us what PORT number we are listening to.
          Replies to PORT with "IPv[num]/[port]" */
-      sprintf((char *)buffer, "%s/%hu\n", ipv_inuse, port);
+      snprintf((char *)buffer, sizeof(buffer), "%s/%hu\n", ipv_inuse, port);
       buffer_len = (ssize_t)strlen((char *)buffer);
       snprintf(data, sizeof(data), "PORT\n%04zx\n", buffer_len);
       if(!write_stdout(data, 10))
@@ -1071,7 +1080,7 @@ static bool juggle(curl_socket_t *sockfdp,
       buffer[5] = '\0';
 
       buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
-      if (buffer_len > (ssize_t)sizeof(buffer)) {
+      if(buffer_len > (ssize_t)sizeof(buffer)) {
         logmsg("ERROR: Buffer size (%zu bytes) too small for data size "
                "(%zd bytes)", sizeof(buffer), buffer_len);
         return FALSE;
@@ -1469,7 +1478,7 @@ int main(int argc, char *argv[])
       me.sa4.sin_family = AF_INET;
       me.sa4.sin_port = htons(connectport);
       me.sa4.sin_addr.s_addr = INADDR_ANY;
-      if (!addr)
+      if(!addr)
         addr = "127.0.0.1";
       Curl_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
 
@@ -1480,7 +1489,7 @@ int main(int argc, char *argv[])
       memset(&me.sa6, 0, sizeof(me.sa6));
       me.sa6.sin6_family = AF_INET6;
       me.sa6.sin6_port = htons(connectport);
-      if (!addr)
+      if(!addr)
         addr = "::1";
       Curl_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
 
