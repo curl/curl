@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -453,6 +453,7 @@ static int test_unsigned_int_formatting(void)
 
 #elif (SIZEOF_INT == 8)
 
+  /* !checksrc! disable LONGLINE all */
   i=1; ui_test[i].num = 0xFFFFFFFFFFFFFFFFU; ui_test[i].expected = "18446744073709551615";
   i++; ui_test[i].num = 0xFFFFFFFF00000000U; ui_test[i].expected = "18446744069414584320";
   i++; ui_test[i].num = 0x00000000FFFFFFFFU; ui_test[i].expected = "4294967295";
@@ -1344,6 +1345,7 @@ static int test_curl_off_t_formatting(void)
   num_cofft_tests = i;
 
 #endif
+  /* !checksrc! enable LONGLINE */
 
   for(i=1; i<=num_cofft_tests; i++) {
 
@@ -1351,11 +1353,12 @@ static int test_curl_off_t_formatting(void)
       co_test[i].result[j] = 'X';
     co_test[i].result[BUFSZ-1] = '\0';
 
-    (void)curl_msprintf(co_test[i].result, "%" CURL_FORMAT_CURL_OFF_T, co_test[i].num);
+    (void)curl_msprintf(co_test[i].result, "%" CURL_FORMAT_CURL_OFF_T,
+                        co_test[i].num);
 
     if(memcmp(co_test[i].result,
-               co_test[i].expected,
-               strlen(co_test[i].expected))) {
+              co_test[i].expected,
+              strlen(co_test[i].expected))) {
       printf("curl_off_t test #%.2d: Failed (Expected: %s Got: %s)\n",
              i, co_test[i].expected, co_test[i].result);
       failed++;
