@@ -11,9 +11,9 @@ This release includes the following changes:
  o schannel: Add ALPN support [2]
  o SSH: support CURLINFO_FILETIME
  o SSH: new CURLOPT_QUOTE command "statvfs" [5]
- o wolfssl: Add ALPN support
- o http2: support prior knowledge, no upgrade from HTTP/1.1
-   --http2-prior-knowledge and CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE
+ o wolfssl: Add ALPN support [18]
+ o http2: added --http2-prior-knowledge [16]
+ o http2: added CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE [17]
 
 This release includes the following bugfixes:
 
@@ -38,6 +38,16 @@ This release includes the following bugfixes:
  o upload: missing rewind call could make libcurl hang [12]
  o IMAP: check pointer before dereferencing it [13]
  o build: Changed the Visual Studio projects warning level from 3 to 4
+ o checksrc: now stricter, wider checks, code cleaned up
+ o checksrc: added docs/CHECKSRC.md
+ o curl_sasl: Fixed potential null pointer utilisation [14]
+ o krb5_gssapi: Only process challenge when present
+ o krb5: Fixed missing client response when mutual authentication enabled
+ o krb5_sspi: Only process challenge when present
+ o krb5: Only generate a SPN when its not known
+ o formdata: use appropriate fopen() macros
+ o curl.1: -w filename_effective was introduced in 7.26.0
+ o http2: make use of the nghttp2 error callback [15]
 
 This release includes the following known bugs:
 
@@ -69,3 +79,8 @@ References to bug reports and discussions on issues:
  [11] = https://curl.haxx.se/bug/?i=744
  [12] = https://curl.haxx.se/bug/?i=741
  [13] = https://curl.haxx.se/bug/?i=747
+ [14] = https://curl.haxx.se/bug/?i=745
+ [15] = https://curl.haxx.se/bug/?i=722
+ [16] = https://curl.haxx.se/docs/manpage.html#--http2-prior-knowledge
+ [17] = https://curl.haxx.se/libcurl/c/CURLOPT_HTTP_VERSION.html
+ [18] = https://curl.haxx.se/docs/http2.html
