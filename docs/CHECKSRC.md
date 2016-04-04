@@ -5,7 +5,16 @@ check that it adheres to our [Source Code Style guide](CODE_STYLE.md).
 
 ## Usage
 
-    checksrc.pl [file1] [file2] ...
+    checksrc.pl [options] [file1] [file2] ...
+
+## Command line options
+
+`-W[file]` whitelists that file and exculudes it from being checked. Helpful
+when for example one of the files are generated.
+
+`-D[dir]` directory name to prepend to file names when accessing them.
+
+`-h` shows the help output, that also lists all recognized warnings
 
 ## What does checksrc warn for?
 
@@ -21,52 +30,52 @@ Lists how to use the script and it lists all existing warnings it has and
 problems it detects. At the time of this writing, the existing checksrc
 warnings are:
 
- o `BADCOMMAND`: There's a bad !checksrc! instruction in the code. See the
+- `BADCOMMAND`: There's a bad !checksrc! instruction in the code. See the
    **Ignore certain warnings** section below for details.
 
- o `BANNEDFUNC`: A banned function was used. The funtions sprintf, vsprintf,
+- `BANNEDFUNC`: A banned function was used. The funtions sprintf, vsprintf,
    strcat, strncat, gets are **never** allowed in curl source code.
 
- o `BRACEELSE`: '} else' on the same line. The else is supposed to be on the
+- `BRACEELSE`: '} else' on the same line. The else is supposed to be on the
   following line.
 
- o `BRACEPOS`: wrong position for an open brace (`{`).
+- `BRACEPOS`: wrong position for an open brace (`{`).
 
- o `COMMANOSPACE`: a comma without following space
+- `COMMANOSPACE`: a comma without following space
 
- o `COPYRIGHT`: the file iis missing a copyright statement!
+- `COPYRIGHT`: the file iis missing a copyright statement!
 
- o `CPPCOMMENTS`: `//` comment detected, that's not C89 compliant
+- `CPPCOMMENTS`: `//` comment detected, that's not C89 compliant
 
- o `FOPENMODE`: `fopen()` needs a macro for the mode string, use it
+- `FOPENMODE`: `fopen()` needs a macro for the mode string, use it
 
- o `INDENTATION`: detected a wrong start column for code. Note that this warning
+- `INDENTATION`: detected a wrong start column for code. Note that this warning
    only checks some specific places and will certainly miss many bad
    indentations.
 
- o `LONGLINE`: A line is longer than 79 columns.
+- `LONGLINE`: A line is longer than 79 columns.
 
- o `PARENBRACE`: `){` was used without sufficient space in between.
+- `PARENBRACE`: `){` was used without sufficient space in between.
 
- o `RETURNNOSPACE`: `return` was used without space between the keyword and the
+- `RETURNNOSPACE`: `return` was used without space between the keyword and the
    following value.
 
- o `SPACEAFTERPAREN`: there was a space after open parenthesis, `( text`.
+- `SPACEAFTERPAREN`: there was a space after open parenthesis, `( text`.
 
- o `SPACEBEFORECLOSE`: there was a space before a close parenthesis, `text )`.
+- `SPACEBEFORECLOSE`: there was a space before a close parenthesis, `text )`.
 
- o `SPACEBEFORECOMMA`: there was a space before a comma, `one , two`.
+- `SPACEBEFORECOMMA`: there was a space before a comma, `one , two`.
 
- o `SPACEBEFOREPAREN`: there was a space before an open parenthesis, `if (`,
+- `SPACEBEFOREPAREN`: there was a space before an open parenthesis, `if (`,
    where one was not expected
 
- o `SPACESEMILCOLON`: there was a space before semicolon, ` ;`.
+- `SPACESEMILCOLON`: there was a space before semicolon, ` ;`.
 
- o `TABS`: TAB characters are not allowed!
+- `TABS`: TAB characters are not allowed!
 
- o `TRAILINGSPACE`: Trailing white space on the line
+- `TRAILINGSPACE`: Trailing white space on the line
 
- o `UNUSEDIGNORE`: a checksrc inlined warning ignore was asked for but not used,
+- `UNUSEDIGNORE`: a checksrc inlined warning ignore was asked for but not used,
    that's an ignore that should be removed or changed to get used.
 
 ## Ignore certain warnings
