@@ -3,6 +3,11 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+94. Replies to IMAP custom requests other than LIST do not appear in the body.
+  If you send a custom request such as FETCH the server's reply will be parsed
+  as if it is a reply to a LIST.
+  https://github.com/curl/curl/issues/536
+
 93. It is not possible to pass a 64-bit value using CURLFORM_CONTENTLEN with
   CURLFORM_ARRAY, when compiled on 32-bit platforms that support 64-bit
   integers. This is because the underlying structure 'curl_forms' uses a dual
