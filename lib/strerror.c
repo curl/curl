@@ -305,6 +305,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_SSL_INVALIDCERTSTATUS:
     return "SSL server certificate status verification FAILED";
 
+  case CURLE_HTTP2_STREAM:
+    return "Stream error in the HTTP/2 framing layer";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:

@@ -507,6 +507,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     stream->memlen += ncopy;
 
     data_s->state.drain++;
+    httpc->drain_total++;
     {
       /* get the pointer from userp again since it was re-assigned above */
       struct connectdata *conn_s = (struct connectdata *)userp;
@@ -583,6 +584,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   stream->memlen += nread;
 
   data_s->state.drain++;
+  conn->proto.httpc.drain_total++;
 
   /* if we receive data for another handle, wake that up */
   if(conn->data != data_s)
@@ -602,8 +604,18 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
                  ", stream %u\n",
                  len - nread, stream_id));
     data_s->easy_conn->proto.httpc.pause_stream_id = stream_id;
+
     return NGHTTP2_ERR_PAUSE;
   }
+
+  /* pause execution of nghttp2 if we received data for another handle
+     in order to process them first. */
+  if(conn->data != data_s) {
+    data_s->easy_conn->proto.httpc.pause_stream_id = stream_id;
+
+    return NGHTTP2_ERR_PAUSE;
+  }
+
   return 0;
 }
 
@@ -655,9 +667,9 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
 {
   struct SessionHandle *data_s;
   struct HTTP *stream;
+  struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
   (void)stream_id;
-  (void)userp;
 
   if(stream_id) {
     /* get the stream from the hash based on Stream ID, stream ID zero is for
@@ -676,6 +688,8 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
 
     stream->error_code = error_code;
     stream->closed = TRUE;
+    data_s->state.drain++;
+    conn->proto.httpc.drain_total++;
 
     /* remove the entry from the hash as the stream is now gone */
     nghttp2_session_set_stream_user_data(session, stream_id, 0);
@@ -833,7 +847,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(stream->header_recvbuf, "HTTP/2.0 ", 9);
     Curl_add_buffer(stream->header_recvbuf, value, valuelen);
     Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
-    data_s->state.drain++;
     /* if we receive data for another handle, wake that up */
     if(conn->data != data_s)
       Curl_expire(data_s, 1);
@@ -850,7 +863,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   Curl_add_buffer(stream->header_recvbuf, ":", 1);
   Curl_add_buffer(stream->header_recvbuf, value, valuelen);
   Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
-  data_s->state.drain++;
   /* if we receive data for another handle, wake that up */
   if(conn->data != data_s)
     Curl_expire(data_s, 1);
@@ -1042,6 +1054,73 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   return result;
 }
 
+/*
+ * Returns nonzero if current HTTP/2 session should be closed.
+ */
+static int should_close_session(struct http_conn *httpc) {
+  return httpc->drain_total == 0 && !nghttp2_session_want_read(httpc->h2) &&
+         !nghttp2_session_want_write(httpc->h2);
+}
+
+static int h2_session_send(struct SessionHandle *data,
+                           nghttp2_session *h2);
+
+/*
+ * h2_process_pending_input() processes pending input left in
+ * httpc->inbuf.  Then, call h2_session_send() to send pending data.
+ * This function returns 0 if it succeeds, or -1 and error code will
+ * be assigned to *err.
+ */
+static int h2_process_pending_input(struct SessionHandle *data,
+                                    struct http_conn *httpc,
+                                    CURLcode *err) {
+  ssize_t nread;
+  char *inbuf;
+  ssize_t rv;
+
+  nread = httpc->inbuflen - httpc->nread_inbuf;
+  inbuf = httpc->inbuf + httpc->nread_inbuf;
+
+  rv = nghttp2_session_mem_recv(httpc->h2, (const uint8_t *)inbuf, nread);
+  if(rv < 0) {
+    failf(data,
+          "h2_process_pending_input: nghttp2_session_mem_recv() returned "
+          "%d:%s\n", rv, nghttp2_strerror((int)rv));
+    *err = CURLE_RECV_ERROR;
+    return -1;
+  }
+
+  if(nread == rv) {
+    DEBUGF(infof(data,
+                 "h2_process_pending_input: All data in connection buffer "
+                 "processed\n"));
+    httpc->inbuflen = 0;
+    httpc->nread_inbuf = 0;
+  }
+  else {
+    httpc->nread_inbuf += rv;
+    DEBUGF(infof(data,
+                 "h2_process_pending_input: %zu bytes left in connection "
+                 "buffer\n",
+                 httpc->inbuflen - httpc->nread_inbuf));
+  }
+
+  rv = h2_session_send(data, httpc->h2);
+  if(rv != 0) {
+    *err = CURLE_SEND_ERROR;
+    return -1;
+  }
+
+  if(should_close_session(httpc)) {
+    DEBUGF(infof(data,
+                 "h2_process_pending_input: nothing to do in this session\n"));
+    *err = CURLE_HTTP2;
+    return -1;
+  }
+
+  return 0;
+}
+
 static ssize_t http2_handle_stream_close(struct connectdata *conn,
                                          struct SessionHandle *data,
                                          struct HTTP *stream, CURLcode *err) {
@@ -1052,13 +1131,33 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
   if(httpc->pause_stream_id == stream->stream_id) {
     httpc->pause_stream_id = 0;
   }
+
+  httpc->drain_total -= data->state.drain;
+  data->state.drain = 0;
+
+  if(httpc->pause_stream_id == 0) {
+    if(h2_process_pending_input(data, httpc, err) != 0) {
+      return -1;
+    }
+  }
+
+  DEBUGASSERT(data->state.drain == 0);
+
   /* Reset to FALSE to prevent infinite loop in readwrite_data
    function. */
   stream->closed = FALSE;
   if(stream->error_code != NGHTTP2_NO_ERROR) {
     failf(data, "HTTP/2 stream %u was not closed cleanly: error_code = %d",
           stream->stream_id, stream->error_code);
-    *err = CURLE_HTTP2;
+    *err = CURLE_HTTP2_STREAM;
+    return -1;
+  }
+
+  if(!stream->bodystarted) {
+    failf(data, "HTTP/2 stream %u was closed cleanly, but before getting "
+          " all response header fields, teated as error",
+          stream->stream_id);
+    *err = CURLE_HTTP2_STREAM;
     return -1;
   }
 
@@ -1157,6 +1256,13 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     return http2_handle_stream_close(conn, data, stream, err);
   }
 
+  if(should_close_session(httpc)) {
+    DEBUGF(infof(data,
+                 "http2_recv: nothing to do in this session\n"));
+    *err = CURLE_HTTP2;
+    return -1;
+  }
+
   /* Nullify here because we call nghttp2_session_send() and they
      might refer to the old buffer. */
   stream->upload_mem = NULL;
@@ -1196,8 +1302,18 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       stream->len = len - stream->memlen;
       stream->mem = mem;
     }
+    if(httpc->pause_stream_id == stream->stream_id && !stream->pausedata) {
+      /* We have paused nghttp2, but we have no pause data (see
+         on_data_chunk_recv). */
+      httpc->pause_stream_id = 0;
+      if(h2_process_pending_input(data, httpc, &result) != 0) {
+        *err = result;
+        return -1;
+      }
+    }
   }
   else if(stream->pausedata) {
+    DEBUGASSERT(httpc->pause_stream_id == stream->stream_id);
     nread = MIN(len, stream->pauselen);
     memcpy(mem, stream->pausedata, nread);
 
@@ -1220,7 +1336,10 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
          frames, then we have to call it again with 0-length data.
          Without this, on_stream_close callback will not be called,
          and stream could be hanged. */
-      nghttp2_session_mem_recv(httpc->h2, NULL, 0);
+      if(h2_process_pending_input(data, httpc, &result) != 0) {
+        *err = result;
+        return -1;
+      }
     }
     DEBUGF(infof(data, "http2_recv: returns unpaused %zd bytes on stream %u\n",
                  nread, stream->stream_id));
@@ -1301,6 +1420,12 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       *err = CURLE_SEND_ERROR;
       return 0;
     }
+
+    if(should_close_session(httpc)) {
+      DEBUGF(infof(data, "http2_recv: nothing to do in this session\n"));
+      *err = CURLE_HTTP2;
+      return -1;
+    }
   }
   if(stream->memlen) {
     ssize_t retlen = stream->memlen;
@@ -1314,8 +1439,10 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       DEBUGF(infof(data, "Data returned for PAUSED stream %u\n",
                    stream->stream_id));
     }
-    else
+    else if(!stream->closed) {
+      httpc->drain_total -= data->state.drain;
       data->state.drain = 0; /* this stream is hereby drained */
+    }
 
     return retlen;
   }
@@ -1378,6 +1505,12 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
        might refer to the old buffer. */
     stream->upload_mem = NULL;
     stream->upload_len = 0;
+
+    if(should_close_session(httpc)) {
+      DEBUGF(infof(conn->data, "http2_send: nothing to do in this session\n"));
+      *err = CURLE_HTTP2;
+      return -1;
+    }
 
     if(stream->upload_left) {
       /* we are sure that we have more data to send here.  Calling the
@@ -1545,6 +1678,12 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     return -1;
   }
 
+  if(should_close_session(httpc)) {
+    DEBUGF(infof(conn->data, "http2_send: nothing to do in this session\n"));
+    *err = CURLE_HTTP2;
+    return -1;
+  }
+
   if(stream->stream_id != -1) {
     /* If whole HEADERS frame was sent off to the underlying socket,
        the nghttp2 library calls data_source_read_callback. But only
@@ -1598,6 +1737,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   httpc->nread_inbuf = 0;
 
   httpc->pause_stream_id = 0;
+  httpc->drain_total = 0;
 
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 20;
@@ -1702,6 +1842,12 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   if(rv != 0) {
     failf(data, "nghttp2_session_send() failed: %s(%d)",
           nghttp2_strerror(rv), rv);
+    return CURLE_HTTP2;
+  }
+
+  if(should_close_session(httpc)) {
+    DEBUGF(infof(data,
+                 "nghttp2_session_send(): nothing to do in this session\n"));
     return CURLE_HTTP2;
   }
 
