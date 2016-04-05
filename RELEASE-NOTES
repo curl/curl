@@ -18,6 +18,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o checksrc.bat: Updated the help to be consistent with generate.bat
+ o checksrc.bat: Added support for scanning the tests and examples
  o openssl: fix ERR_remove_thread_state() for boringssl/libressl [1]
  o openssl: boringssl provides the same numbering as openssl
  o multi: fix "Operation timed out after" timer [3]
@@ -41,9 +42,8 @@ This release includes the following bugfixes:
  o checksrc: now stricter, wider checks, code cleaned up
  o checksrc: added docs/CHECKSRC.md
  o curl_sasl: Fixed potential null pointer utilisation [14]
- o krb5_gssapi: Only process challenge when present
  o krb5: Fixed missing client response when mutual authentication enabled
- o krb5_sspi: Only process challenge when present
+ o krb5: Only process challenge when present
  o krb5: Only generate a SPN when its not known
  o formdata: use appropriate fopen() macros
  o curl.1: -w filename_effective was introduced in 7.26.0
