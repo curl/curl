@@ -136,7 +136,7 @@ static void mstate(struct SessionHandle *data, CURLMstate state
       connection_id = data->easy_conn->connection_id;
 
     infof(data,
-          "STATE: %s => %s handle %p; line %d (connection #%ld) \n",
+          "STATE: %s => %s handle %p; line %d (connection #%ld)\n",
           statename[oldstate], statename[data->mstate],
           (void *)data, lineno, connection_id);
   }
