@@ -82,15 +82,6 @@ may have been fixed since this was written!
   connect phase to most people. Brought up (and is being misunderstood) in:
   https://curl.haxx.se/bug/view.cgi?id=856
 
-72. "Pausing pipeline problems."
-  https://curl.haxx.se/mail/lib-2009-07/0214.html
-
-70. Problem re-using easy handle after call to curl_multi_remove_handle
-  https://curl.haxx.se/mail/lib-2009-07/0249.html
-
-68. "More questions about ares behavior".
-  https://curl.haxx.se/mail/lib-2009-08/0012.html
-
 67. When creating multipart formposts. The file name part can be encoded with
   something beyond ascii but currently libcurl will only pass in the verbatim
   string the app provides. There are several browsers that already do this
