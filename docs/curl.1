@@ -634,11 +634,10 @@ the symbol <. The difference between @ and < is then that @ makes a file get
 attached in the post as a file upload, while the < makes a text field and just
 get the contents for that text field from a file.
 
-Example, to send your password file to the server, where
-\&'password' is the name of the form-field to which /etc/passwd will be the
-input:
+Example: to send an image to a server, where \&'profile' is the name of the
+form-field to which portrait.jpg will be the input:
 
-\fBcurl\fP -F password=@/etc/passwd www.mypasswords.com
+\fBcurl\fP -F profile=@portrait.jpg https://example.com/upload.cgi
 
 To read content from stdin instead of a file, use - as the filename. This goes
 for both @ and < constructs. Unfortunately it does not support reading the
