@@ -43,7 +43,7 @@
  *
  * Parameters:
  *
- * service  [in] - The service type such as www, smtp, pop or imap.
+ * service  [in] - The service type such as http, smtp, pop or imap.
  * host     [in] - The host name.
  * realm    [in] - The realm.
  *

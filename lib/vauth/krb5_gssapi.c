@@ -52,7 +52,7 @@
  * data        [in]     - The session handle.
  * userp       [in]     - The user name.
  * passdwp     [in]     - The user's password.
- * service     [in]     - The service type such as www, smtp, pop or imap.
+ * service     [in]     - The service type such as http, smtp, pop or imap.
  * host        [in[     - The host name.
  * mutual_auth [in]     - Flag specifing whether or not mutual authentication
  *                        is enabled.
@@ -315,7 +315,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
 
   /* Populate the message with the security layer, client supported receive
      message size and authorization identity including the 0x00 based
-     terminator. Note: Dispite RFC4752 Section 3.1 stating "The authorization
+     terminator. Note: Despite RFC4752 Section 3.1 stating "The authorization
      identity is not terminated with the zero-valued (%x00) octet." it seems
      necessary to include it. */
   outdata = htonl(max_size) | sec_layer;

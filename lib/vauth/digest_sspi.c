@@ -55,7 +55,7 @@
  * chlg64  [in]     - The base64 encoded challenge message.
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
- * service [in]     - The service type such as www, smtp, pop or imap.
+ * service [in]     - The service type such as http, smtp, pop or imap.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
