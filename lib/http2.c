@@ -1149,14 +1149,6 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
 
-  /* If stream is closed, return 0 to signal the http routine to close
-     the connection.  We need to handle stream closure here,
-     otherwise, we may be going to read from underlying connection,
-     and gets EAGAIN, and we will get stuck there. */
-  if(stream->memlen == 0 && stream->closed) {
-    return http2_handle_stream_close(conn, data, stream, err);
-  }
-
   /* Nullify here because we call nghttp2_session_send() and they
      might refer to the old buffer. */
   stream->upload_mem = NULL;
