@@ -9,8 +9,8 @@ check that it adheres to our [Source Code Style guide](CODE_STYLE.md).
 
 ## Command line options
 
-`-W[file]` whitelists that file and exculudes it from being checked. Helpful
-when for example one of the files are generated.
+`-W[file]` whitelists that file and excludes it from being checked. Helpful
+when, for example, one of the files is generated.
 
 `-D[dir]` directory name to prepend to file names when accessing them.
 
@@ -43,7 +43,7 @@ warnings are:
 
 - `COMMANOSPACE`: a comma without following space
 
-- `COPYRIGHT`: the file iis missing a copyright statement!
+- `COPYRIGHT`: the file is missing a copyright statement!
 
 - `CPPCOMMENTS`: `//` comment detected, that's not C89 compliant
 
@@ -80,9 +80,9 @@ warnings are:
 
 ## Ignore certain warnings
 
-Due to the nature of source code and the flaws of the checksrc tool, there are
-sometimes a need to ignore specific warnings. checksrc allows a few different
-ways to do this.
+Due to the nature of the source code and the flaws of the checksrc tool, there
+is sometimes a need to ignore specific warnings. checksrc allows a few
+different ways to do this.
 
 ### Inline ignore
 
@@ -98,13 +98,12 @@ Example
 
     /* !checksrc! disable LONGLINE all */
 
-This will ignore the warning for overly long lines until later in the code it
-is enabled again:
+This will ignore the warning for overly long lines until it is re-enabled with:
 
     /* !checksrc! enable LONGLINE */
 
-If the enabling isn't done before the end of the file, it will be enabled
-automatically for the next file anyway.
+If the enabling isn't performed before the end of the file, it will be enabled
+automatically for the next file.
 
 You can also opt to ignore just N violations so that if you have a single long
 line you just can't shorten and is agreed to be fine anyway:
