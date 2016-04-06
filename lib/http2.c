@@ -832,7 +832,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 
     Curl_add_buffer(stream->header_recvbuf, "HTTP/2.0 ", 9);
     Curl_add_buffer(stream->header_recvbuf, value, valuelen);
-    Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
+    /* the space character after the status code is mandatory */
+    Curl_add_buffer(stream->header_recvbuf, " \r\n", 3);
     data_s->state.drain++;
     /* if we receive data for another handle, wake that up */
     if(conn->data != data_s)
