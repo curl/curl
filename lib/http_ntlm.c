@@ -28,7 +28,7 @@
  * NTLM details:
  *
  * http://davenport.sourceforge.net/ntlm.html
- * http://www.innovation.ch/java/ntlm.html
+ * https://www.innovation.ch/java/ntlm.html
  */
 
 #define DEBUG_ME 0
