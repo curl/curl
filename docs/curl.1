@@ -51,16 +51,16 @@ braces as in:
 
 or you can get sequences of alphanumeric series by using [] as in:
 
-  ftp://ftp.numericals.com/file[1-100].txt
+  ftp://ftp.example.com/file[1-100].txt
 
-  ftp://ftp.numericals.com/file[001-100].txt    (with leading zeros)
+  ftp://ftp.example.com/file[001-100].txt    (with leading zeros)
 
-  ftp://ftp.letters.com/file[a-z].txt
+  ftp://ftp.example.com/file[a-z].txt
 
 Nested sequences are not supported, but you can use several ones next to each
 other:
 
-  http://any.org/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
+  http://example.com/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
 
 You can specify any amount of URLs on the command line. They will be fetched
 in a sequential manner in the specified order.
@@ -68,9 +68,9 @@ in a sequential manner in the specified order.
 You can specify a step counter for the ranges to get every Nth number or
 letter:
 
-  http://www.numericals.com/file[1-100:10].txt
+  http://example.com/file[1-100:10].txt
 
-  http://www.letters.com/file[a-z:2].txt
+  http://example.com/file[a-z:2].txt
 
 When using [] or {} sequences when invoked from a command line prompt, you
 probably have to put the full URL within double quotes to avoid the shell from
@@ -647,24 +647,24 @@ transfer starts.
 You can also tell curl what Content-Type to use by using 'type=', in a manner
 similar to:
 
-\fBcurl\fP -F "web=@index.html;type=text/html" url.com
+\fBcurl\fP -F "web=@index.html;type=text/html" example.com
 
 or
 
-\fBcurl\fP -F "name=daniel;type=text/foo" url.com
+\fBcurl\fP -F "name=daniel;type=text/foo" example.com
 
 You can also explicitly change the name field of a file upload part by setting
 filename=, like this:
 
-\fBcurl\fP -F "file=@localfile;filename=nameinpost" url.com
+\fBcurl\fP -F "file=@localfile;filename=nameinpost" example.com
 
 If filename/path contains ',' or ';', it must be quoted by double-quotes like:
 
-\fBcurl\fP -F "file=@\\"localfile\\";filename=\\"nameinpost\\"" url.com
+\fBcurl\fP -F "file=@\\"localfile\\";filename=\\"nameinpost\\"" example.com
 
 or
 
-\fBcurl\fP -F 'file=@"localfile";filename="nameinpost"' url.com
+\fBcurl\fP -F 'file=@"localfile";filename="nameinpost"' example.com
 
 Note that if a filename/path is quoted by double-quotes, any double-quote
 or backslash within the filename must be escaped by backslash.
@@ -795,7 +795,7 @@ intended for a proxy.
 
 Example:
 
-\&# curl -H "X-First-Name: Joe" http://192.168.0.1/
+\&# curl -H "X-First-Name: Joe" http://example.com/
 
 \fBWARNING\fP: headers set with this option will be set in all requests - even
 after redirects are followed, like when told with \fB-L, --location\fP. This
@@ -828,7 +828,7 @@ time only.
 Perform an operation using a specified interface. You can enter interface
 name, IP address or host name. An example could look like:
 
- curl --interface eth0:1 http://www.netscape.com/
+ curl --interface eth0:1 https://www.example.com/
 
 If this option is used several times, the last one will be used.
 .IP "-j, --junk-session-cookies"
@@ -905,14 +905,14 @@ simply try to load .curlrc from the determined home dir.
 .nf
 # --- Example file ---
 # this is a comment
-url = "curl.haxx.se"
+url = "example.com"
 output = "curlhere.html"
 user-agent = "superagent/1.0"
 
 # and fetch another URL too
-url = "curl.haxx.se/docs/manpage.html"
+url = "example.com/docs/manpage.html"
 -O
-referer = "http://nowhereatall.com/"
+referer = "http://nowhereatall.example.com/"
 # --- End of example file ---
 .fi
 
@@ -1197,7 +1197,7 @@ multiple documents, you can use '#' followed by a number in the <file>
 specifier. That variable will be replaced with the current string for the URL
 being fetched. Like in:
 
-  curl http://{one,two}.site.com -o "file_#1.txt"
+  curl http://{one,two}.example.com -o "file_#1.txt"
 
 or use several variables like:
 
@@ -1721,11 +1721,11 @@ specifies what to upload and to where. curl also supports "globbing" of the -T
 argument, meaning that you can upload multiple files to a single URL by using
 the same URL globbing style supported in the URL, like this:
 
-curl -T "{file1,file2}" http://www.uploadtothissite.com
+curl -T "{file1,file2}" http://www.example.com
 
 or even
 
-curl -T "img[1-1000].png" ftp://ftp.picturemania.com/upload/
+curl -T "img[1-1000].png" ftp://ftp.example.com/upload/
 .IP "--tcp-nodelay"
 Turn on the TCP_NODELAY option. See the \fIcurl_easy_setopt(3)\fP man page for
 details about this option. (Added in 7.11.2)
