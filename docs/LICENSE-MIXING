@@ -116,7 +116,7 @@ OpenLDAP http://www.openldap.org/software/release/license.html
         libcurl uses OpenLDAP as a shared library only, I have not heard of
         anyone that ships OpenLDAP linked with libcurl in an app.
 
-libssh2 http://www.libssh2.org/
+libssh2 https://www.libssh2.org/
 
         (Used for scp and sftp support) libssh2 uses a Modified BSD-style
         license.
