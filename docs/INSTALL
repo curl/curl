@@ -1101,7 +1101,7 @@ GnuTLS       https://www.gnu.org/software/gnutls/
 Heimdal      http://www.h5l.org/
 libidn       https://www.gnu.org/software/libidn/
 libmetalink  https://launchpad.net/libmetalink/
-libssh2      http://www.libssh2.org/
+libssh2      https://www.libssh2.org/
 MIT Kerberos http://web.mit.edu/kerberos/www/dist/
 NSS          https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS
 OpenLDAP     http://www.openldap.org/

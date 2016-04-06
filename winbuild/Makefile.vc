@@ -26,7 +26,7 @@ CFGSET=true
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
 !MESSAGE   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
 !MESSAGE                                  Requires Windows Vista or later, or installation from:
-!MESSAGE                                  http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
+!MESSAGE                                  https://www.microsoft.com/en-us/download/details.aspx?id=734
 !MESSAGE   ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
 !MESSAGE   ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes
 !MESSAGE   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
