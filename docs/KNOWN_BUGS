@@ -3,6 +3,15 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+95. curl in Windows can't handle Unicode arguments.
+  If a URL or filename can't be encoded using the user's current codepage then
+  it can only be encoded properly in the Unicode character set. Windows uses
+  UTF-16 encoding for Unicode and stores it in wide characters, however curl
+  and libcurl are not equipped for that at the moment. And, except for Cygwin,
+  Windows can't use UTF-8 as a locale.
+  https://curl.haxx.se/bug/?i=345
+  https://curl.haxx.se/bug/?i=731
+
 94. Replies to IMAP custom requests other than LIST do not appear in the body.
   If you send a custom request such as FETCH the server's reply will be parsed
   as if it is a reply to a LIST.
