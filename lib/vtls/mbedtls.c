@@ -67,7 +67,7 @@
 #if defined(THREADING_SUPPORT)
 static mbedtls_entropy_context entropy;
 
-static int  entropy_init_initialized  = 0;
+static int entropy_init_initialized = 0;
 
 /* start of entropy_init_mutex() */
 static void entropy_init_mutex(mbedtls_entropy_context *ctx)
@@ -101,7 +101,7 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 #undef MBEDTLS_DEBUG
 
 #ifdef MBEDTLS_DEBUG
-static void mbedtls_debug(void *context, int level, const char *line)
+static void mbed_debug(void *context, int level, const char *line)
 {
   struct SessionHandle *data = NULL;
 
@@ -151,12 +151,12 @@ const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
 #define PUB_DER_MAX_BYTES   (RSA_PUB_DER_MAX_BYTES > ECP_PUB_DER_MAX_BYTES ? \
                              RSA_PUB_DER_MAX_BYTES : ECP_PUB_DER_MAX_BYTES)
 
-static Curl_recv mbedtls_recv;
-static Curl_send mbedtls_send;
+static Curl_recv mbed_recv;
+static Curl_send mbed_send;
 
 static CURLcode
-mbedtls_connect_step1(struct connectdata *conn,
-                      int sockindex)
+mbed_connect_step1(struct connectdata *conn,
+                   int sockindex)
 {
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
@@ -432,8 +432,8 @@ mbedtls_connect_step1(struct connectdata *conn,
 }
 
 static CURLcode
-mbedtls_connect_step2(struct connectdata *conn,
-                      int sockindex)
+mbed_connect_step2(struct connectdata *conn,
+                   int sockindex)
 {
   int ret;
   struct SessionHandle *data = conn->data;
@@ -447,8 +447,8 @@ mbedtls_connect_step2(struct connectdata *conn,
   char errorbuf[128];
   errorbuf[0] = 0;
 
-  conn->recv[sockindex] = mbedtls_recv;
-  conn->send[sockindex] = mbedtls_send;
+  conn->recv[sockindex] = mbed_recv;
+  conn->send[sockindex] = mbed_send;
 
   ret = mbedtls_ssl_handshake(&connssl->ssl);
 
@@ -593,8 +593,8 @@ mbedtls_connect_step2(struct connectdata *conn,
 }
 
 static CURLcode
-mbedtls_connect_step3(struct connectdata *conn,
-                      int sockindex)
+mbed_connect_step3(struct connectdata *conn,
+                   int sockindex)
 {
   CURLcode retcode = CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -639,11 +639,9 @@ mbedtls_connect_step3(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static ssize_t mbedtls_send(struct connectdata *conn,
-                            int sockindex,
-                            const void *mem,
-                            size_t len,
-                            CURLcode *curlcode)
+static ssize_t mbed_send(struct connectdata *conn, int sockindex,
+                         const void *mem, size_t len,
+                         CURLcode *curlcode)
 {
   int ret = -1;
 
@@ -678,11 +676,9 @@ void Curl_mbedtls_close(struct connectdata *conn, int sockindex)
 #endif /* THREADING_SUPPORT */
 }
 
-static ssize_t mbedtls_recv(struct connectdata *conn,
-                            int num,
-                            char *buf,
-                            size_t buffersize,
-                            CURLcode *curlcode)
+static ssize_t mbed_recv(struct connectdata *conn, int num,
+                         char *buf, size_t buffersize,
+                         CURLcode *curlcode)
 {
   int ret = -1;
   ssize_t len = -1;
@@ -718,10 +714,10 @@ size_t Curl_mbedtls_version(char *buffer, size_t size)
 }
 
 static CURLcode
-mbedtls_connect_common(struct connectdata *conn,
-                       int sockindex,
-                       bool nonblocking,
-                       bool *done)
+mbed_connect_common(struct connectdata *conn,
+                    int sockindex,
+                    bool nonblocking,
+                    bool *done)
 {
   CURLcode retcode;
   struct SessionHandle *data = conn->data;
@@ -745,7 +741,7 @@ mbedtls_connect_common(struct connectdata *conn,
       failf(data, "SSL connection timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
-    retcode = mbedtls_connect_step1(conn, sockindex);
+    retcode = mbed_connect_step1(conn, sockindex);
     if(retcode)
       return retcode;
   }
@@ -799,7 +795,7 @@ mbedtls_connect_common(struct connectdata *conn,
      * ensuring that a client using select() or epoll() will always
      * have a valid fdset to wait on.
      */
-    retcode = mbedtls_connect_step2(conn, sockindex);
+    retcode = mbed_connect_step2(conn, sockindex);
     if(retcode || (nonblocking &&
                    (ssl_connect_2 == connssl->connecting_state ||
                     ssl_connect_2_reading == connssl->connecting_state ||
@@ -809,15 +805,15 @@ mbedtls_connect_common(struct connectdata *conn,
   } /* repeat step2 until all transactions are done. */
 
   if(ssl_connect_3==connssl->connecting_state) {
-    retcode = mbedtls_connect_step3(conn, sockindex);
+    retcode = mbed_connect_step3(conn, sockindex);
     if(retcode)
       return retcode;
   }
 
   if(ssl_connect_done==connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
-    conn->recv[sockindex] = mbedtls_recv;
-    conn->send[sockindex] = mbedtls_send;
+    conn->recv[sockindex] = mbed_recv;
+    conn->send[sockindex] = mbed_send;
     *done = TRUE;
   }
   else
@@ -834,7 +830,7 @@ Curl_mbedtls_connect_nonblocking(struct connectdata *conn,
                                  int sockindex,
                                  bool *done)
 {
-  return mbedtls_connect_common(conn, sockindex, TRUE, done);
+  return mbed_connect_common(conn, sockindex, TRUE, done);
 }
 
 
@@ -845,7 +841,7 @@ Curl_mbedtls_connect(struct connectdata *conn,
   CURLcode retcode;
   bool done = FALSE;
 
-  retcode = mbedtls_connect_common(conn, sockindex, FALSE, &done);
+  retcode = mbed_connect_common(conn, sockindex, FALSE, &done);
   if(retcode)
     return retcode;
 
