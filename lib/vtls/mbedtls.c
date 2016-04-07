@@ -854,14 +854,16 @@ Curl_mbedtls_connect(struct connectdata *conn,
  * return 0 error initializing SSL
  * return 1 SSL initialized successfully
  */
-int mbedtls_init(void)
+int Curl_mbedtls_init(void)
 {
   return Curl_polarsslthreadlock_thread_setup();
 }
 
-void mbedtls_cleanup(void)
+void Curl_mbedtls_cleanup(void)
 {
   (void)Curl_polarsslthreadlock_thread_cleanup();
 }
+
+
 
 #endif /* USE_MBEDTLS */
