@@ -31,6 +31,7 @@
 /* Called on first use mbedTLS, setup threading if supported */
 int  Curl_mbedtls_init(void);
 void Curl_mbedtls_cleanup(void);
+int Curl_mbedtls_data_pending(const struct connectdata *conn, int sockindex);
 
 CURLcode Curl_mbedtls_connect(struct connectdata *conn, int sockindex);
 
@@ -63,7 +64,7 @@ int Curl_mbedtls_shutdown(struct connectdata *conn, int sockindex);
 #define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
 #define curlssl_version Curl_mbedtls_version
 #define curlssl_check_cxn(x) (x=x, -1)
-#define curlssl_data_pending(x,y) (x=x, y=y, 0)
+#define curlssl_data_pending(x,y) Curl_mbedtls_data_pending(x, y)
 #define CURL_SSL_BACKEND CURLSSLBACKEND_MBEDTLS
 #define curlssl_sha256sum(a,b,c,d) mbedtls_sha256(a,b,c,0)
 

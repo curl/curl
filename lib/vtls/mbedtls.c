@@ -864,6 +864,11 @@ void Curl_mbedtls_cleanup(void)
   (void)Curl_polarsslthreadlock_thread_cleanup();
 }
 
-
+int Curl_mbedtls_data_pending(const struct connectdata *conn, int sockindex)
+{
+  mbedtls_ssl_context *ssl =
+    (mbedtls_ssl_context *)&conn->ssl[sockindex].ssl;
+  return ssl->in_msglen != 0;
+}
 
 #endif /* USE_MBEDTLS */
