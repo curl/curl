@@ -26,6 +26,8 @@
 
 #ifdef USE_MBEDTLS
 
+#include <mbedtls/sha256.h>
+
 /* Called on first use mbedTLS, setup threading if supported */
 int  mbedtls_init(void);
 void mbedtls_cleanup(void);
