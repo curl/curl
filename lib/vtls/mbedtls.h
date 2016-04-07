@@ -29,9 +29,8 @@
 #include <mbedtls/sha256.h>
 
 /* Called on first use mbedTLS, setup threading if supported */
-int  mbedtls_init(void);
-void mbedtls_cleanup(void);
-
+int  Curl_mbedtls_init(void);
+void Curl_mbedtls_cleanup(void);
 
 CURLcode Curl_mbedtls_connect(struct connectdata *conn, int sockindex);
 
@@ -51,8 +50,8 @@ size_t Curl_mbedtls_version(char *buffer, size_t size);
 int Curl_mbedtls_shutdown(struct connectdata *conn, int sockindex);
 
 /* API setup for mbedTLS */
-#define curlssl_init() mbedtls_init()
-#define curlssl_cleanup() mbedtls_cleanup()
+#define curlssl_init() Curl_mbedtls_init()
+#define curlssl_cleanup() Curl_mbedtls_cleanup()
 #define curlssl_connect Curl_mbedtls_connect
 #define curlssl_connect_nonblocking Curl_mbedtls_connect_nonblocking
 #define curlssl_session_free(x)  Curl_mbedtls_session_free(x)
