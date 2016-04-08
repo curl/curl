@@ -19,6 +19,7 @@ problems may have been fixed or changed somewhat since this was written!
  1.5 Expect-100 meets 417
  1.6 Unnecessary close when 401 received waiting for 100
  1.7 CONNECT response larger than 16KB
+ 1.8 DNS timing is wrong for HTTP redirects
 
  2. TLS
  2.1 Hangs with PolarSSL
@@ -125,6 +126,12 @@ problems may have been fixed or changed somewhat since this was written!
  connection is meant to be kept alive (like for NTLM proxy auth), the function
  will return prematurely and will confuse the rest of the HTTP protocol
  code. This should be very rare.
+
+1.8 DNS timing is wrong for HTTP redirects
+
+ When extracting timing information after HTTP redirects, only the last
+ transfer's results are returned and not the totals:
+ https://github.com/curl/curl/issues/522
 
 
 2. TLS
