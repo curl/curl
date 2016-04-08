@@ -71,6 +71,9 @@ problems may have been fixed or changed somewhat since this was written!
  10.3 FTPS over SOCKS
  10.4 active FTP over a SOCKS
 
+ 11. Internals
+ 11.1 Curl leaks .onion hostnames in DNS
+
 ==============================================================================
 
 1. HTTP
@@ -393,3 +396,14 @@ problems may have been fixed or changed somewhat since this was written!
 10.4 active FTP over a SOCKS
 
  libcurl doesn't support active FTP over a SOCKS proxy
+
+
+11. Internals
+
+11.1 Curl leaks .onion hostnames in DNS
+
+ Curl sends DNS requests for hostnames with a .onion TLD. This leaks
+ information about what the user is attempting to access, and violates this
+ requirement of RFC7686: https://tools.ietf.org/html/rfc7686
+
+ Issue: https://github.com/curl/curl/issues/543
