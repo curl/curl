@@ -576,18 +576,6 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
                      CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE);
   if(result)
     return result;
-
-  /* set default negotiate proxy service name */
-  result = setstropt(&set->str[STRING_PROXY_SERVICE_NAME],
-                     CURL_DEFAULT_PROXY_SERVICE_NAME);
-  if(result)
-    return result;
-
-  /* set default negotiate service name */
-  result = setstropt(&set->str[STRING_SERVICE_NAME],
-                     CURL_DEFAULT_SERVICE_NAME);
-  if(result)
-    return result;
 #endif
 
   /* This is our preferred CA cert bundle/path since install time */
