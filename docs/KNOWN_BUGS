@@ -73,6 +73,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  11. Internals
  11.1 Curl leaks .onion hostnames in DNS
+ 11.2 error buffer not set if connection to multiple addresses fails
 
 ==============================================================================
 
@@ -407,3 +408,10 @@ problems may have been fixed or changed somewhat since this was written!
  requirement of RFC7686: https://tools.ietf.org/html/rfc7686
 
  Issue: https://github.com/curl/curl/issues/543
+
+11.2 error buffer not set if connection to multiple addresses fails
+
+ If you ask libcurl to resolve a hostname like example.com to IPv6 addresses
+ only. But you only have IPv4 connectivity. libcurl will correctly fail with
+ CURLE_COULDNT_CONNECT. But the error buffer set by CURLOPT_ERRORBUFFER
+ remains empty. Issue: https://github.com/curl/curl/issues/544
