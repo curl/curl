@@ -50,12 +50,10 @@ make sure there's an easy handle passed in to `curl_formadd()`,
 `curl_formget()` and `curl_formfree()` by adding replacement functions and
 deprecating the old ones to allow custom mallocs and more
 
-third-party SASL
+Third-party SASL
 ----------------
 
-add support for third-party SASL libraries such as Cyrus SASL - may need to
-move existing native and SSPI based authentication into vsasl folder after
-reworking HTTP and SASL code
+Add support for third-party SASL libraries such as Cyrus SASL.
 
 SASL authentication in LDAP
 ---------------------------
