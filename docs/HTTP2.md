@@ -111,9 +111,3 @@ client can use that hint to create a new connection asynchronously.  For
 libcurl, we may introduce a way to bring such clues to the applicaton and/or
 let a subsequent request use the alternate route
 automatically. [Spec](https://tools.ietf.org/html/draft-ietf-httpbis-alt-svc-14)
-
-TODO
-----
-
-  - Implement "prior-knowledge" HTTP/2 connections over clear text so that
-    curl can connect with HTTP/2 at once without 1.1+Upgrade.

@@ -18,11 +18,6 @@ HTTP/2
    To decide: if we need to bundle parts of the nghttp2 stuff that probably
    won't be shipped by many distros.
 
-- provide option for HTTP/2 "prior knowledge" over clear text
-
-   As it would avoid the roundtrip-heavy Upgrade: procedures when you _know_
-   it speaks HTTP/2.
-
 HTTP cookies
 ------------
 
