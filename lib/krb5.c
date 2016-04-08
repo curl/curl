@@ -152,7 +152,10 @@ krb5_auth(void *app_data, struct connectdata *conn)
   curl_socklen_t l = sizeof(conn->local_addr);
   struct SessionHandle *data = conn->data;
   CURLcode result;
-  const char *service = "ftp", *srv_host = "host";
+  const char *service = data->set.str[STRING_SERVICE_NAME] ?
+                        data->set.str[STRING_SERVICE_NAME] :
+                        "ftp";
+  const char *srv_host = "host";
   gss_buffer_desc input_buffer, output_buffer, _gssresp, *gssresp;
   OM_uint32 maj, min;
   gss_name_t gssname;
@@ -180,9 +183,9 @@ krb5_auth(void *app_data, struct connectdata *conn)
     /* this really shouldn't be repeated here, but can't help it */
     if(service == srv_host) {
       result = Curl_ftpsendf(conn, "AUTH GSSAPI");
-
       if(result)
         return -2;
+
       if(Curl_GetFTPResponse(&nread, conn, NULL))
         return -1;
 

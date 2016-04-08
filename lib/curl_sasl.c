@@ -265,6 +265,9 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   size_t len = 0;
   saslstate state1 = SASL_STOP;
   saslstate state2 = SASL_FINAL;
+  const char* service = data->set.str[STRING_SERVICE_NAME] ?
+                        data->set.str[STRING_SERVICE_NAME] :
+                        sasl->params->service;
 
   sasl->force_ir = force_ir;    /* Latch for future use */
   sasl->authused = 0;           /* No mechanism used yet */
@@ -294,7 +297,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       if(force_ir || data->set.sasl_ir)
         result = Curl_auth_create_gssapi_user_message(data, conn->user,
                                                       conn->passwd,
-                                                      sasl->params->service,
+                                                      service,
                                                       data->easy_conn->
                                                             host.name,
                                                       sasl->mutual_auth,
@@ -410,6 +413,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   size_t chlglen = 0;
 #endif
   size_t len = 0;
+  const char *service = data->set.str[STRING_SERVICE_NAME] ?
+                        data->set.str[STRING_SERVICE_NAME] :
+                        sasl->params->service;
 
   *progress = SASL_INPROGRESS;
 
@@ -461,7 +467,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     sasl->params->getmessage(data->state.buffer, &serverdata);
     result = Curl_auth_create_digest_md5_message(data, serverdata,
                                                  conn->user, conn->passwd,
-                                                 sasl->params->service,
+                                                 service,
                                                  &resp, &len);
     newstate = SASL_DIGESTMD5_RESP;
     break;
@@ -495,7 +501,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   case SASL_GSSAPI:
     result = Curl_auth_create_gssapi_user_message(data, conn->user,
                                                   conn->passwd,
-                                                  sasl->params->service,
+                                                  service,
                                                   data->easy_conn->host.name,
                                                   sasl->mutual_auth, NULL,
                                                   &conn->krb5,
