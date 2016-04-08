@@ -112,6 +112,7 @@
  16. SASL
  16.1 Other authentication mechanisms
  16.2 Add QOP support to GSSAPI authentication
+ 16.3 Support binary messages (i.e.: non-base64)
 
  17. Command line tool
  17.1 sync
@@ -667,6 +668,10 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  (Authentication), whilst Kerberos V5 supports both auth-int (Authentication
  with integrity protection) and auth-conf (Authentication with integrity and
  privacy protection).
+
+16.3 Support binary messages (i.e.: non-base64)
+
+  Mandatory to support LDAP SASL authentication.
 
 17. Command line tool
 

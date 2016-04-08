@@ -76,6 +76,9 @@ problems may have been fixed or changed somewhat since this was written!
  11.1 Curl leaks .onion hostnames in DNS
  11.2 error buffer not set if connection to multiple addresses fails
 
+ 12. LDAP and OpenLDAP
+ 12.1 OpenLDAP hangs after returning results
+
 ==============================================================================
 
 1. HTTP
@@ -423,3 +426,25 @@ problems may have been fixed or changed somewhat since this was written!
  only. But you only have IPv4 connectivity. libcurl will correctly fail with
  CURLE_COULDNT_CONNECT. But the error buffer set by CURLOPT_ERRORBUFFER
  remains empty. Issue: https://github.com/curl/curl/issues/544
+
+
+12. LDAP and OpenLDAP
+
+12.1 OpenLDAP hangs after returning results
+
+ By configuration defaults, openldap automatically chase referrals on
+ secondary socket descriptors. The OpenLDAP backend is asynchronous and thus
+ should monitor all socket descriptors involved. Currently, these secondary
+ descriptors are not monitored, causing openldap library to never receive
+ data from them.
+
+ As a temporary workaround, disable referrals chasing by configuration.
+
+ The fix is not easy: proper automatic referrals chasing requires a
+ synchronous bind callback and monitoring an arbitrary number of socket
+ descriptors for a single easy handle (currently limited to 5).
+
+ Generic LDAP is synchronous: OK.
+
+ See https://github.com/curl/curl/issues/622 and
+     https://curl.haxx.se/mail/lib-2016-01/0101.html
