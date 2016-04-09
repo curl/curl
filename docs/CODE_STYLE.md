@@ -160,6 +160,7 @@ Examples:
     ptr = &address;
     contents = *pointer;
     complement = ~bits;
+    empty = (!*string) ? TRUE : FALSE;
 
 ## Platform dependent code
 
