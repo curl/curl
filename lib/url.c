@@ -1501,7 +1501,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_SERVICE_NAME:
     /*
-     * Set negotiate service identity
+     * Set authentication service name for DIGEST-MD5, Kerberos 5 and SPNEGO
      */
     result = setstropt(&data->set.str[STRING_SERVICE_NAME],
                        va_arg(param, char *));

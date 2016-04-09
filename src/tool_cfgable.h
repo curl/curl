@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -171,8 +171,8 @@ struct OperationConfig {
                              * default HTTP */
   int socks5_gssapi_nec ;   /* The NEC reference server does not protect
                              * the encryption type exchange */
-  char *service_name;       /* set negotiation service name
-                             * default HTTP */
+  char *service_name;       /* set authentication service name for DIGEST-MD5,
+                               Kerberos 5 and SPNEGO */
 
   bool tcp_nodelay;
   long req_retry;           /* number of retries */
