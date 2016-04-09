@@ -83,7 +83,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   unsigned short us_length;
   unsigned long qop;
   unsigned char socksreq[4]; /* room for GSS-API exchange header only */
-  char *service = data->set.str[STRING_SOCKS5_GSSAPI_SERVICE];
+  const char *service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
+                        data->set.str[STRING_PROXY_SERVICE_NAME]  : "rcmd";
 
   /*   GSS-API request looks like
    * +----+------+-----+----------------+

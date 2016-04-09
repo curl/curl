@@ -165,12 +165,10 @@ struct OperationConfig {
 
   char *socksproxy;         /* set to server string */
   int socksver;             /* set to CURLPROXY_SOCKS* define */
-  char *socks5_gssapi_service;  /* set service name for gssapi principal
-                                 * default rcmd */
-  char *proxy_service_name; /* set service name for proxy negotiation
-                             * default HTTP */
-  int socks5_gssapi_nec ;   /* The NEC reference server does not protect
-                             * the encryption type exchange */
+  int socks5_gssapi_nec;    /* The NEC reference server does not protect the
+                               encryption type exchange */
+  char *proxy_service_name; /* set authentication service name for HTTP and
+                               SOCKS5 proxies */
   char *service_name;       /* set authentication service name for DIGEST-MD5,
                                Kerberos 5 and SPNEGO */
 

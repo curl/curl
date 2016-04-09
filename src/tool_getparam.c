@@ -158,7 +158,6 @@ static const struct LongShort aliases[]= {
   {"$3", "keepalive-time",           TRUE},
   {"$4", "post302",                  FALSE},
   {"$5", "noproxy",                  TRUE},
-  {"$6", "socks5-gssapi-service",    TRUE},
   {"$7", "socks5-gssapi-nec",        FALSE},
   {"$8", "proxy1.0",                 TRUE},
   {"$9", "tftp-blksize",             TRUE},
@@ -176,6 +175,9 @@ static const struct LongShort aliases[]= {
   {"$L", "test-event",               FALSE},
   {"$M", "unix-socket",              TRUE},
   {"$N", "path-as-is",               FALSE},
+  {"$O", "socks5-gssapi-service",    TRUE},
+         /* 'socks5-gssapi-service' merged with'proxy-service-name' and
+            deprecated since 7.49.0 */
   {"$O", "proxy-service-name",       TRUE},
   {"$P", "service-name",             TRUE},
   {"$Q", "proto-default",            TRUE},
@@ -901,10 +903,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         /* This specifies the noproxy list */
         GetStr(&config->noproxy, nextarg);
         break;
-      case '6': /* --socks5-gssapi-service */
-        GetStr(&config->socks5_gssapi_service, nextarg);
-        break;
-      case '7': /* --socks5-gssapi-nec*/
+       case '7': /* --socks5-gssapi-nec*/
         config->socks5_gssapi_nec = toggle;
         break;
       case '8': /* --proxy1.0 */

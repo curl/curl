@@ -1210,11 +1210,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
                          (long)config->ftp_ssl_ccc_mode);
 
         /* new in curl 7.19.4 */
-        if(config->socks5_gssapi_service)
-          my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_SERVICE,
-                        config->socks5_gssapi_service);
-
-        /* new in curl 7.19.4 */
         if(config->socks5_gssapi_nec)
           my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_NEC,
                         config->socks5_gssapi_nec);

@@ -571,11 +571,6 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
    * seem not to follow rfc1961 section 4.3/4.4
    */
   set->socks5_gssapi_nec = FALSE;
-  /* set default GSS-API service name */
-  result = setstropt(&set->str[STRING_SOCKS5_GSSAPI_SERVICE],
-                     CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE);
-  if(result)
-    return result;
 #endif
 
   /* This is our preferred CA cert bundle/path since install time */
@@ -1478,27 +1473,20 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #endif   /* CURL_DISABLE_PROXY */
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  case CURLOPT_SOCKS5_GSSAPI_SERVICE:
+  case CURLOPT_SOCKS5_GSSAPI_NEC:
     /*
-     * Set GSS-API service name
+     * Set flag for NEC SOCK5 support
      */
-    result = setstropt(&data->set.str[STRING_SOCKS5_GSSAPI_SERVICE],
-                       va_arg(param, char *));
+    data->set.socks5_gssapi_nec = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
 
+  case CURLOPT_SOCKS5_GSSAPI_SERVICE:
   case CURLOPT_PROXY_SERVICE_NAME:
     /*
-     * Set negotiate proxy service name
+     * Set proxy authentication service name for Kerberos 5 and SPNEGO
      */
     result = setstropt(&data->set.str[STRING_PROXY_SERVICE_NAME],
                        va_arg(param, char *));
-    break;
-
-  case CURLOPT_SOCKS5_GSSAPI_NEC:
-    /*
-     * set flag for nec socks5 support
-     */
-    data->set.socks5_gssapi_nec = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
 #endif
 
