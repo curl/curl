@@ -1616,7 +1616,7 @@ struct UserDefined {
   long allowed_protocols;
   long redir_protocols;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  long socks5_gssapi_nec; /* flag to support nec socks5 server */
+  bool socks5_gssapi_nec; /* Flag to support NEC SOCKS5 server */
 #endif
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
   bool sasl_ir;         /* Enable/disable SASL initial response */
