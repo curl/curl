@@ -265,9 +265,11 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   size_t len = 0;
   saslstate state1 = SASL_STOP;
   saslstate state2 = SASL_FINAL;
+#if defined(USE_KERBEROS5)
   const char* service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :
                         sasl->params->service;
+#endif
 
   sasl->force_ir = force_ir;    /* Latch for future use */
   sasl->authused = 0;           /* No mechanism used yet */
@@ -412,10 +414,12 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   char *chlg = NULL;
   size_t chlglen = 0;
 #endif
-  size_t len = 0;
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :
                         sasl->params->service;
+#endif
+  size_t len = 0;
 
   *progress = SASL_INPROGRESS;
 
