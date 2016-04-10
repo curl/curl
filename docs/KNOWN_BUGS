@@ -160,6 +160,10 @@ problems may have been fixed or changed somewhat since this was written!
  "curl_easy_perform hangs with imap and PolarSSL"
  https://github.com/curl/curl/issues/334
 
+ Most likely, a fix similar to commit c111178bd4 (for mbedTLS) is
+ necessary. Or if we just wait a little longer we'll rip out all support for
+ PolarSSL instead...
+
 2.2 CURLINFO_SSL_VERIFYRESULT has limited support
 
  CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS
