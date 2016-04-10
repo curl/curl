@@ -20,6 +20,7 @@ problems may have been fixed or changed somewhat since this was written!
  1.6 Unnecessary close when 401 received waiting for 100
  1.7 CONNECT response larger than 16KB
  1.8 DNS timing is wrong for HTTP redirects
+ 1.9 HTTP/2 frames while in the connection pool kill reuse
 
  2. TLS
  2.1 Hangs with PolarSSL
@@ -140,6 +141,16 @@ problems may have been fixed or changed somewhat since this was written!
  When extracting timing information after HTTP redirects, only the last
  transfer's results are returned and not the totals:
  https://github.com/curl/curl/issues/522
+
+1.9 HTTP/2 frames while in the connection pool kill reuse
+
+ If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
+ curl while the connection is held in curl's connection pool, the socket will
+ be found readable when considered for reuse and that makes curl think it is
+ dead and then it will be closed and a new connection gets created instead.
+
+ This is *best* fixed by adding monitoring to connections while they are kept
+ in the pool so that pings can be responded to appropriately.
 
 
 2. TLS
