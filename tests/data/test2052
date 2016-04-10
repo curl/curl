@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-CURLOPT_CONNECT_TO_HOST
+CURLOPT_CONNECT_TO
 </keywords>
 </info>
 
@@ -31,7 +31,7 @@ Connect to specific host: Do not mix connections with and without a "connect to 
  </name>
 
  <command>
-http://www.example.com:%HTTPPORT/2052 --resolve www.example.com:%HTTPPORT:%HOSTIP -w "%{num_connects}\n" --next --resolve -www.example.com:%HTTPPORT --connect-to-host %HOSTIP:%HTTPPORT http://www.example.com:%HTTPPORT/2052 -w "%{num_connects}\n"
+http://www.example.com:%HTTPPORT/2052 --resolve www.example.com:%HTTPPORT:%HOSTIP -w "%{num_connects}\n" --next --resolve -www.example.com:%HTTPPORT --connect-to ::%HOSTIP:%HTTPPORT http://www.example.com:%HTTPPORT/2052 -w "%{num_connects}\n"
 </command>
 </client>
 

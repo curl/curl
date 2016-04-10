@@ -890,8 +890,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
 #endif
 
-        my_setopt_str(curl, CURLOPT_CONNECT_TO_HOST, config->conn_to_host);
-
         my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror?1L:0L);
         my_setopt(curl, CURLOPT_UPLOAD, uploadfile?1L:0L);
         my_setopt(curl, CURLOPT_DIRLISTONLY, config->dirlistonly?1L:0L);
@@ -1306,6 +1304,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->resolve)
           /* new in 7.21.3 */
           my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
+
+        if(config->connect_to)
+          /* new in 7.49.0 */
+          my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
 
         /* new in 7.21.4 */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {

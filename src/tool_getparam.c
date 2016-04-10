@@ -183,7 +183,7 @@ static const struct LongShort aliases[]= {
   {"$Q", "proto-default",            TRUE},
   {"$R", "expect100-timeout",        TRUE},
   {"$S", "tftp-no-options",          FALSE},
-  {"$U", "connect-to-host",          TRUE},
+  {"$U", "connect-to",               TRUE},
   {"0",   "http1.0",                 FALSE},
   {"01",  "http1.1",                 FALSE},
   {"02",  "http2",                   FALSE},
@@ -1010,8 +1010,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'S': /* --tftp-no-options */
         config->tftp_no_options = toggle;
         break;
-      case 'U': /* --connect-to-host */
-        GetStr(&config->conn_to_host, nextarg);
+      case 'U': /* --connect-to */
+        err = add2list(&config->connect_to, nextarg);
+        if(err)
+          return err;
         break;
       }
       break;

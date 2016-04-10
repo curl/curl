@@ -1374,7 +1374,6 @@ struct Curl_multi;    /* declared and used only in multi.c */
 enum dupstring {
   STRING_CERT,            /* client certificate file name */
   STRING_CERT_TYPE,       /* format for certificate (default: PEM)*/
-  STRING_CONNECT_TO_HOST, /* host and port to connect to */
   STRING_COOKIE,          /* HTTP cookie string to send */
   STRING_COOKIEJAR,       /* dump all cookies to this file */
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
@@ -1541,6 +1540,8 @@ struct UserDefined {
   struct curl_slist *telnet_options; /* linked list of telnet options */
   struct curl_slist *resolve;     /* list of names to add/remove from
                                      DNS cache */
+  struct curl_slist *connect_to; /* list of host:port mappings to override
+                                    the hostname and port to connect to */
   curl_TimeCond timecondition; /* kind of time/date comparison */
   time_t timevalue;       /* what time to compare with */
   Curl_HttpReq httpreq;   /* what kind of HTTP request (if any) is this */

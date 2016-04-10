@@ -6,7 +6,7 @@ HTTP GET
 HTTP CONNECT
 HTTP proxy
 proxytunnel
-CURLOPT_CONNECT_TO_HOST
+CURLOPT_CONNECT_TO
 </keywords>
 </info>
 
@@ -51,7 +51,7 @@ Connect to specific host via HTTP proxy (switch to tunnel mode automatically)
  </name>
 
  <command>
-http://www.example.com.2050/2050 --connect-to-host connect.example.com.2050:%HTTPPORT -x %HOSTIP:%PROXYPORT
+http://www.example.com.2050/2050 --connect-to ::connect.example.com.2050:%HTTPPORT -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 

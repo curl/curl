@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-CURLOPT_CONNECT_TO_HOST
+CURLOPT_CONNECT_TO
 </keywords>
 </info>
 
@@ -31,7 +31,7 @@ Connect to specific host: Re-use existing connections if possible
  </name>
 
  <command>
-http://%HOSTIP:%HTTPPORT/2051 -w "%{num_connects}\n" --next --connect-to-host %HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/2051 -w "%{num_connects}\n" --next http://%HOSTIP:%HTTPPORT/2051 -w "%{num_connects}\n"
+http://%HOSTIP:%HTTPPORT/2051 -w "%{num_connects}\n" --next --connect-to ::%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/2051 -w "%{num_connects}\n" --next http://%HOSTIP:%HTTPPORT/2051 -w "%{num_connects}\n"
 </command>
 </client>
 

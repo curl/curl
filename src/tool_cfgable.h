@@ -82,7 +82,6 @@ struct OperationConfig {
   char *proxy;
   int proxyver;             /* set to CURLPROXY_HTTP* define */
   char *noproxy;
-  char* conn_to_host;
   char *mail_from;
   struct curl_slist *mail_rcpt;
   char *mail_auth;
@@ -152,6 +151,7 @@ struct OperationConfig {
   struct curl_httppost *last_post;
   struct curl_slist *telnet_options;
   struct curl_slist *resolve;
+  struct curl_slist *connect_to;
   HttpReq httpreq;
 
   /* for bandwidth limiting features: */
