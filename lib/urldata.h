@@ -1314,9 +1314,9 @@ struct UrlState {
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
 
-  int drain; /* Increased when this stream has data to read, even if its
-                socket not necessarily is readable. Decreased when
-                checked. */
+  size_t drain; /* Increased when this stream has data to read, even if its
+                   socket is not necessarily is readable. Decreased when
+                   checked. */
   bool done; /* set to FALSE when Curl_do() is called and set to TRUE when
                 Curl_done() is called, to prevent Curl_done() to get invoked
                 twice when the multi interface is used. */
