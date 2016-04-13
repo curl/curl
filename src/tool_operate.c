@@ -1364,6 +1364,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->tftp_no_options)
           my_setopt(curl, CURLOPT_TFTP_NO_OPTIONS, 1L);
 
+        if(config->file_sessionid)
+          my_setopt_str(curl, CURLOPT_SSL_FILE_SESSIONID,
+                        config->file_sessionid);
+
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */

@@ -1680,6 +1680,9 @@ typedef enum {
   /* Do not send any tftp option requests to the server */
   CINIT(TFTP_NO_OPTIONS, LONG, 242),
 
+  /* Path to file to persist sessionid */
+  CINIT(SSL_FILE_SESSIONID, STRINGPOINT, 243),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

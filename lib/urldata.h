@@ -1390,6 +1390,7 @@ enum dupstring {
   STRING_USERAGENT,       /* User-Agent string */
   STRING_SSL_CRLFILE,     /* crl file to check certificate */
   STRING_SSL_ISSUERCERT,  /* issuer cert file to check certificate */
+  STRING_SSL_FILE_SESSIONID,  /* path to file to persist sessionid */
   STRING_USERNAME,        /* <username>, if used */
   STRING_PASSWORD,        /* <password>, if used */
   STRING_OPTIONS,         /* <options>, if used */
