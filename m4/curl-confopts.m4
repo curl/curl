@@ -464,7 +464,7 @@ AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
   AC_MSG_CHECKING([whether hiding of library internal symbols will actually happen])
   CFLAG_CURL_SYMBOL_HIDING=""
   doing_symbol_hiding="no"
-  if test x"$ac_cv_native_windows" != "xyes" &&
+  if test x"$curl_cv_native_windows" != "xyes" &&
     test "$want_symbol_hiding" = "yes" &&
     test "$supports_symbol_hiding" = "yes"; then
     doing_symbol_hiding="yes"
@@ -611,7 +611,7 @@ AC_DEFUN([CURL_CHECK_NTLM_WB], [
   AC_REQUIRE([CURL_CHECK_OPTION_NTLM_WB])dnl
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_MSG_CHECKING([whether to enable NTLM delegation to winbind's helper])
-  if test "$ac_cv_native_windows" = "yes" ||
+  if test "$curl_cv_native_windows" = "yes" ||
     test "x$SSL_ENABLED" = "x"; then
     want_ntlm_wb_file=""
     want_ntlm_wb="no"

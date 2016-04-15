@@ -2208,7 +2208,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         ;;
     esac
     if test "$tst_tsafe_getaddrinfo" = "unknown" &&
-       test "$ac_cv_native_windows" = "yes"; then
+       test "$curl_cv_native_windows" = "yes"; then
       tst_tsafe_getaddrinfo="yes"
     fi
     if test "$tst_tsafe_getaddrinfo" = "unknown"; then
