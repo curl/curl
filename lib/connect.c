@@ -841,6 +841,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   if(result) {
     /* no more addresses to try */
 
+    const char* hostname;
+
     /* if the first address family runs out of addresses to try before
        the happy eyeball timeout, go ahead and try the next family now */
     if(conn->tempaddr[1] == NULL) {
@@ -849,9 +851,15 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         return result;
     }
 
+    if(conn->bits.proxy)
+      hostname = conn->proxy.name;
+    else if(conn->bits.conn_to_host)
+      hostname = conn->conn_to_host.name;
+    else
+      hostname = conn->host.name;
+
     failf(data, "Failed to connect to %s port %ld: %s",
-          conn->bits.proxy?conn->proxy.name:conn->host.name,
-          conn->port, Curl_strerror(conn, error));
+        hostname, conn->port, Curl_strerror(conn, error));
   }
 
   return result;

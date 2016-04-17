@@ -1305,6 +1305,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
           /* new in 7.21.3 */
           my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
 
+        if(config->connect_to)
+          /* new in 7.49.0 */
+          my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
+
         /* new in 7.21.4 */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
           if(config->tls_username)
