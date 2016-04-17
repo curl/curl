@@ -1158,7 +1158,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       #
       AC_DEFINE_UNQUOTED(HAVE_GETNAMEINFO, 1,
         [Define to 1 if you have the getnameinfo function.])
-      ac_cv_func_getnameinfo="yes"
+      curl_cv_func_getnameinfo="yes"
     fi
   fi
 ])
@@ -1427,7 +1427,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
       #
       AC_DEFINE_UNQUOTED(HAVE_RECV, 1,
         [Define to 1 if you have the recv function.])
-      ac_cv_func_recv="yes"
+      curl_cv_func_recv="yes"
     fi
   else
     AC_MSG_ERROR([Unable to link function recv])
@@ -1594,7 +1594,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       #
       AC_DEFINE_UNQUOTED(HAVE_SEND, 1,
         [Define to 1 if you have the send function.])
-      ac_cv_func_send="yes"
+      curl_cv_func_send="yes"
     fi
   else
     AC_MSG_ERROR([Unable to link function send])
@@ -2453,7 +2453,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
       #
       AC_DEFINE_UNQUOTED(HAVE_SELECT, 1,
         [Define to 1 if you have the select function.])
-      ac_cv_func_select="yes"
+      curl_cv_func_select="yes"
     fi
   fi
 ])
