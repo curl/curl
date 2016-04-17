@@ -1097,11 +1097,11 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FCNTL, 1,
       [Define to 1 if you have the fcntl function.])
-    ac_cv_func_fcntl="yes"
+    curl_cv_func_fcntl="yes"
     CURL_CHECK_FUNC_FCNTL_O_NONBLOCK
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_fcntl="no"
+    curl_cv_func_fcntl="no"
   fi
 ])
 
@@ -1125,7 +1125,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
       ;;
   esac
   #
-  if test "$ac_cv_func_fcntl" = "yes"; then
+  if test "$curl_cv_func_fcntl" = "yes"; then
     AC_MSG_CHECKING([if fcntl O_NONBLOCK is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -1161,10 +1161,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FCNTL_O_NONBLOCK, 1,
       [Define to 1 if you have a working fcntl O_NONBLOCK function.])
-    ac_cv_func_fcntl_o_nonblock="yes"
+    curl_cv_func_fcntl_o_nonblock="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_fcntl_o_nonblock="no"
+    curl_cv_func_fcntl_o_nonblock="no"
   fi
 ])
 
@@ -2148,14 +2148,14 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO, 1,
       [Define to 1 if you have a working getaddrinfo function.])
-    ac_cv_func_getaddrinfo="yes"
+    curl_cv_func_getaddrinfo="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_getaddrinfo="no"
     ac_cv_func_getaddrinfo_threadsafe="no"
+    curl_cv_func_getaddrinfo="no"
   fi
   #
-  if test "$ac_cv_func_getaddrinfo" = "yes"; then
+  if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
     case $host_os in
       aix[[1234]].* | aix5.[[01]].*)
@@ -3966,12 +3966,12 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTL, 1,
       [Define to 1 if you have the ioctl function.])
-    ac_cv_func_ioctl="yes"
+    curl_cv_func_ioctl="yes"
     CURL_CHECK_FUNC_IOCTL_FIONBIO
     CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctl="no"
+    curl_cv_func_ioctl="no"
   fi
 ])
 
@@ -3988,7 +3988,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_FIONBIO], [
   tst_compi_ioctl_fionbio="unknown"
   tst_allow_ioctl_fionbio="unknown"
   #
-  if test "$ac_cv_func_ioctl" = "yes"; then
+  if test "$curl_cv_func_ioctl" = "yes"; then
     AC_MSG_CHECKING([if ioctl FIONBIO is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4024,10 +4024,10 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_FIONBIO], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTL_FIONBIO, 1,
       [Define to 1 if you have a working ioctl FIONBIO function.])
-    ac_cv_func_ioctl_fionbio="yes"
+    curl_cv_func_ioctl_fionbio="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctl_fionbio="no"
+    curl_cv_func_ioctl_fionbio="no"
   fi
 ])
 
@@ -4044,7 +4044,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
   tst_compi_ioctl_siocgifaddr="unknown"
   tst_allow_ioctl_siocgifaddr="unknown"
   #
-  if test "$ac_cv_func_ioctl" = "yes"; then
+  if test "$curl_cv_func_ioctl" = "yes"; then
     AC_MSG_CHECKING([if ioctl SIOCGIFADDR is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4081,10 +4081,10 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTL_SIOCGIFADDR, 1,
       [Define to 1 if you have a working ioctl SIOCGIFADDR function.])
-    ac_cv_func_ioctl_siocgifaddr="yes"
+    curl_cv_func_ioctl_siocgifaddr="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctl_siocgifaddr="no"
+    curl_cv_func_ioctl_siocgifaddr="no"
   fi
 ])
 
@@ -4171,11 +4171,11 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET, 1,
       [Define to 1 if you have the ioctlsocket function.])
-    ac_cv_func_ioctlsocket="yes"
+    curl_cv_func_ioctlsocket="yes"
     CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctlsocket="no"
+    curl_cv_func_ioctlsocket="no"
   fi
 ])
 
@@ -4192,7 +4192,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
   tst_compi_ioctlsocket_fionbio="unknown"
   tst_allow_ioctlsocket_fionbio="unknown"
   #
-  if test "$ac_cv_func_ioctlsocket" = "yes"; then
+  if test "$curl_cv_func_ioctlsocket" = "yes"; then
     AC_MSG_CHECKING([if ioctlsocket FIONBIO is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4228,10 +4228,10 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_FIONBIO, 1,
       [Define to 1 if you have a working ioctlsocket FIONBIO function.])
-    ac_cv_func_ioctlsocket_fionbio="yes"
+    curl_cv_func_ioctlsocket_fionbio="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctlsocket_fionbio="no"
+    curl_cv_func_ioctlsocket_fionbio="no"
   fi
 ])
 
@@ -4313,11 +4313,11 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_CAMEL, 1,
       [Define to 1 if you have the IoctlSocket camel case function.])
-    ac_cv_func_ioctlsocket_camel="yes"
+    curl_cv_func_ioctlsocket_camel="yes"
     CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctlsocket_camel="no"
+    curl_cv_func_ioctlsocket_camel="no"
   fi
 ])
 
@@ -4333,7 +4333,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
   tst_compi_ioctlsocket_camel_fionbio="unknown"
   tst_allow_ioctlsocket_camel_fionbio="unknown"
   #
-  if test "$ac_cv_func_ioctlsocket_camel" = "yes"; then
+  if test "$curl_cv_func_ioctlsocket_camel" = "yes"; then
     AC_MSG_CHECKING([if IoctlSocket FIONBIO is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4369,10 +4369,10 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_CAMEL_FIONBIO, 1,
       [Define to 1 if you have a working IoctlSocket camel case FIONBIO function.])
-    ac_cv_func_ioctlsocket_camel_fionbio="yes"
+    curl_cv_func_ioctlsocket_camel_fionbio="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_ioctlsocket_camel_fionbio="no"
+    curl_cv_func_ioctlsocket_camel_fionbio="no"
   fi
 ])
 
@@ -5057,11 +5057,11 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SETSOCKOPT, 1,
       [Define to 1 if you have the setsockopt function.])
-    ac_cv_func_setsockopt="yes"
+    curl_cv_func_setsockopt="yes"
     CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_setsockopt="no"
+    curl_cv_func_setsockopt="no"
   fi
 ])
 
@@ -5078,7 +5078,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK], [
   tst_compi_setsockopt_so_nonblock="unknown"
   tst_allow_setsockopt_so_nonblock="unknown"
   #
-  if test "$ac_cv_func_setsockopt" = "yes"; then
+  if test "$curl_cv_func_setsockopt" = "yes"; then
     AC_MSG_CHECKING([if setsockopt SO_NONBLOCK is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -5114,10 +5114,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK], [
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SETSOCKOPT_SO_NONBLOCK, 1,
       [Define to 1 if you have a working setsockopt SO_NONBLOCK function.])
-    ac_cv_func_setsockopt_so_nonblock="yes"
+    curl_cv_func_setsockopt_so_nonblock="yes"
   else
     AC_MSG_RESULT([no])
-    ac_cv_func_setsockopt_so_nonblock="no"
+    curl_cv_func_setsockopt_so_nonblock="no"
   fi
 ])
 
