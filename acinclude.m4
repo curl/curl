@@ -1878,10 +1878,10 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
       ]])
     ],[
       AC_MSG_RESULT([yes])
-      ac_cv_func_clock_gettime="yes"
+      curl_func_clock_gettime="yes"
     ],[
       AC_MSG_RESULT([no])
-      ac_cv_func_clock_gettime="no"
+      curl_func_clock_gettime="no"
     ])
   fi
   dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally postponed
@@ -1897,7 +1897,7 @@ dnl check and prepended to LIBS any needed libraries.
 AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
   AC_REQUIRE([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC])dnl
   #
-  if test "$ac_cv_func_clock_gettime" = "yes"; then
+  if test "$curl_func_clock_gettime" = "yes"; then
     #
     AC_MSG_CHECKING([for clock_gettime in libraries])
     #
@@ -1942,11 +1942,11 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
       X-unknown)
         AC_MSG_RESULT([cannot find clock_gettime])
         AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
-        ac_cv_func_clock_gettime="no"
+        curl_func_clock_gettime="no"
         ;;
       X-)
         AC_MSG_RESULT([no additional lib required])
-        ac_cv_func_clock_gettime="yes"
+        curl_func_clock_gettime="yes"
         ;;
       *)
         if test -z "$curl_cv_save_LIBS"; then
@@ -1955,13 +1955,13 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
         fi
         AC_MSG_RESULT([$curl_cv_gclk_LIBS])
-        ac_cv_func_clock_gettime="yes"
+        curl_func_clock_gettime="yes"
         ;;
     esac
     #
     dnl only do runtime verification when not cross-compiling
     if test "x$cross_compiling" != "xyes" &&
-      test "$ac_cv_func_clock_gettime" = "yes"; then
+      test "$curl_func_clock_gettime" = "yes"; then
       AC_MSG_CHECKING([if monotonic clock_gettime works])
       AC_RUN_IFELSE([
         AC_LANG_PROGRAM([[
@@ -1993,12 +1993,12 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
       ],[
         AC_MSG_RESULT([no])
         AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
-        ac_cv_func_clock_gettime="no"
+        curl_func_clock_gettime="no"
         LIBS="$curl_cv_save_LIBS"
       ])
     fi
     #
-    case "$ac_cv_func_clock_gettime" in
+    case "$curl_func_clock_gettime" in
       yes)
         AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME_MONOTONIC, 1,
           [Define to 1 if you have the clock_gettime function and monotonic timer.])
