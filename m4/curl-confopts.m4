@@ -433,15 +433,15 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
   tst_method="unknown"
 
   AC_MSG_CHECKING([how to set a socket into non-blocking mode])
-  if test "x$ac_cv_func_fcntl_o_nonblock" = "xyes"; then
+  if test "x$curl_cv_func_fcntl_o_nonblock" = "xyes"; then
     tst_method="fcntl O_NONBLOCK"
-  elif test "x$ac_cv_func_ioctl_fionbio" = "xyes"; then
+  elif test "x$curl_cv_func_ioctl_fionbio" = "xyes"; then
     tst_method="ioctl FIONBIO"
-  elif test "x$ac_cv_func_ioctlsocket_fionbio" = "xyes"; then
+  elif test "x$curl_cv_func_ioctlsocket_fionbio" = "xyes"; then
     tst_method="ioctlsocket FIONBIO"
-  elif test "x$ac_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
+  elif test "x$curl_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
     tst_method="IoctlSocket FIONBIO"
-  elif test "x$ac_cv_func_setsockopt_so_nonblock" = "xyes"; then
+  elif test "x$curl_cv_func_setsockopt_so_nonblock" = "xyes"; then
     tst_method="setsockopt SO_NONBLOCK"
   fi
   AC_MSG_RESULT([$tst_method])

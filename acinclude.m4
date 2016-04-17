@@ -1740,13 +1740,13 @@ AC_DEFUN([TYPE_SIG_ATOMIC_T], [
         ]])
       ],[
         AC_MSG_RESULT([no])
-        ac_cv_sig_atomic_t_volatile="no"
+        curl_cv_sig_atomic_t_volatile="no"
       ],[
         AC_MSG_RESULT([yes])
-        ac_cv_sig_atomic_t_volatile="yes"
+        curl_cv_sig_atomic_t_volatile="yes"
       ])
       #
-      if test "$ac_cv_sig_atomic_t_volatile" = "yes"; then
+      if test "$curl_cv_sig_atomic_t_volatile" = "yes"; then
         AC_DEFINE(HAVE_SIG_ATOMIC_T_VOLATILE, 1,
           [Define to 1 if sig_atomic_t is already defined as volatile.])
       fi

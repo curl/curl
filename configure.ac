@@ -3341,7 +3341,7 @@ dnl and get the types of five of its arguments.
 CURL_CHECK_FUNC_GETNAMEINFO
 
 if test "$ipv6" = "yes"; then
-  if test "$ac_cv_func_getaddrinfo" = "yes"; then
+  if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_DEFINE(ENABLE_IPV6, 1, [Define if you want to enable IPv6 support])
     IPV6_ENABLED=1
     AC_SUBST(IPV6_ENABLED)
