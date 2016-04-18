@@ -146,8 +146,8 @@ libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
 libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
 
 checksrc:
-	@PERL@ $(top_srcdir)/lib/checksrc.pl -W$(top_srcdir)/lib/curl_config.h \
-	$(top_srcdir)/lib/*.[ch] $(top_srcdir)/lib/vauth/*.[ch] $(top_srcdir)/lib/vtls/*.[ch]
+	@PERL@ $(srcdir)/checksrc.pl -D$(srcdir) -W$(srcdir)/curl_config.h      \
+	$(srcdir)/*.[ch] $(srcdir)/vauth/*.[ch] $(srcdir)/vtls/*.[ch]
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes

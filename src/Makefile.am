@@ -130,7 +130,8 @@ endif
 # ignore tool_hugehelp.c since it is generated source code and it plays
 # by slightly different rules!
 checksrc:
-	@PERL@ $(top_srcdir)/lib/checksrc.pl -W$(top_srcdir)/src/tool_hugehelp.c $(top_srcdir)/src/*.[ch]
+	@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir)        \
+	-W$(srcdir)/tool_hugehelp.c $(srcdir)/*.[ch]
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes
