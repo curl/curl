@@ -1565,8 +1565,10 @@ otherwise normally resolved address to be used. Consider it a sort of
 /etc/hosts alternative provided on the command line. The port number should be
 the number used for the specific protocol the host will be used for. It means
 you need several entries if you want to provide address for the same host but
-different ports.
-
+different ports. The definitions from --resolve supersede /etc/hosts and
+network name resolution mechanisms. this option will not disable DNS name
+resolutions, so --resolve host:port:address just ensures that when curl
+attempts to resolve (host, port), it will get the answer 'address'.
 This option can be used many times to add many host names to resolve.
 
 (Added in 7.21.3)
