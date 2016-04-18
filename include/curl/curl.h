@@ -373,6 +373,7 @@ typedef curlioerr (*curl_ioctl_callback)(CURL *handle,
                                          int cmd,
                                          void *clientp);
 
+#ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS
 /*
  * The following typedef's are signatures of malloc, free, realloc, strdup and
  * calloc respectively.  Function pointers of these types can be passed to the
@@ -386,6 +387,7 @@ typedef char *(*curl_strdup_callback)(const char *str);
 typedef void *(*curl_calloc_callback)(size_t nmemb, size_t size);
 
 #define CURL_DID_MEMORY_FUNC_TYPEDEFS
+#endif
 
 /* the kind of data that is passed to information_callback*/
 typedef enum {
