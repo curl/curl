@@ -1,8 +1,8 @@
 Curl and libcurl 7.49.0
 
  Public curl releases:         154
- Command line options:         182
- curl_easy_setopt() options:   223
+ Command line options:         183
+ curl_easy_setopt() options:   224
  Public functions in libcurl:  61
  Contributors:                 1364
 
@@ -14,8 +14,10 @@ This release includes the following changes:
  o wolfssl: Add ALPN support [18]
  o http2: added --http2-prior-knowledge [16]
  o http2: added CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE [17]
- o connect: added CURLOPT_CONNECT_TO [26]
+ o libcurl: added CURLOPT_CONNECT_TO [26]
  o curl: added --connect-to [27]
+ o libcurl: added CURLOPT_TCP_FASTOPEN [28]
+ o curl: added --tcp-fastopen [29]
 
 This release includes the following bugfixes:
 
@@ -63,6 +65,8 @@ This release includes the following bugfixes:
  o http2: Add handling stream level error [23]
  o http2: Improve header parsing [24]
  o makefile.vc6: use d suffix on debug object [25]
+ o configure: remove check for libresolve [30]
+ o scripts/make: use $(EXEEXT) for executables [31]
 
 This release includes the following known bugs:
 
@@ -71,13 +75,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexis La Goutte, Anatol Belski, Damien Vielpeau, Dan Cristian,
-  Daniel Stenberg, David Benjamin, Diego Bes, Dusty Mabe, Evgeny Grin,
-  Isaac Boukris, Joel Depooter, Joonas Kuorilehto, Juan RP, Marcel Raad,
-  Marquis de Muesli, Michael Kaufmann, Michael Osipov, Patrick Monnerat,
-  Ray Satiro, Rod Widdowson, Steve Holme, Tatsuhiro Tsujikawa, Theodore Dubois,
-  Viktor Szakáts,
-  (24 contributors)
+  Alessandro Ghedini, Alexis La Goutte, Anatol Belski, Damien Vielpeau,
+  Dan Cristian, Daniel Stenberg, David Benjamin, Diego Bes, Dusty Mabe,
+  Evgeny Grin, Irfan Adilovic, Isaac Boukris, Joel Depooter, Joonas Kuorilehto,
+  Juan RP, Marcel Raad, Marquis de Muesli, Michael Kaufmann, Michael Osipov,
+  Patrick Monnerat, Ray Satiro, Rod Widdowson, Steve Holme,
+  Tatsuhiro Tsujikawa, Theodore Dubois, Viktor Szakáts,
+  (26 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -110,3 +114,7 @@ References to bug reports and discussions on issues:
  [25] = https://curl.haxx.se/bug/?i=769
  [26] = https://curl.haxx.se/libcurl/c/CURLOPT_CONNECT_TO.html
  [27] = https://curl.haxx.se/docs/manpage.html#--connect-to
+ [28] = https://curl.haxx.se/libcurl/c/CURLOPT_TCP_FASTOPEN.html
+ [29] = https://curl.haxx.se/docs/manpage.html#--tcp-fastopen
+ [30] = https://curl.haxx.se/bug/?i=770
+ [31] = https://curl.haxx.se/bug/?i=771
