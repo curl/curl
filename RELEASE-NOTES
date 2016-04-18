@@ -1,8 +1,8 @@
 Curl and libcurl 7.49.0
 
  Public curl releases:         154
- Command line options:         179
- curl_easy_setopt() options:   221
+ Command line options:         182
+ curl_easy_setopt() options:   223
  Public functions in libcurl:  61
  Contributors:                 1364
 
@@ -14,6 +14,8 @@ This release includes the following changes:
  o wolfssl: Add ALPN support [18]
  o http2: added --http2-prior-knowledge [16]
  o http2: added CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE [17]
+ o connect: added CURLOPT_CONNECT_TO [26]
+ o curl: added --connect-to [27]
 
 This release includes the following bugfixes:
 
@@ -48,6 +50,19 @@ This release includes the following bugfixes:
  o formdata: use appropriate fopen() macros
  o curl.1: -w filename_effective was introduced in 7.26.0
  o http2: make use of the nghttp2 error callback [15]
+ o http2: fix connection reuse when PING comes after last DATA [19]
+ o curl.1: change example for -F [20]
+ o HTTP2: Add a space character after the status code [21]
+ o curl.1: use example.com more
+ o mbedtls.c: changed private prefix to mbed_
+ o mbedtls: implement and provide *_data_pending() to avoid hang [22]
+ o mbedtls: fix MBEDTLS_DEBUG builds
+ o ftp/imap/pop3/smtp: Allow the service name to be overridden
+ o CURLOPT_SOCKS5_GSSAPI_SERVICE: Merged with CURLOPT_PROXY_SERVICE_NAME
+ o build: include scripts/ in the dist
+ o http2: Add handling stream level error [23]
+ o http2: Improve header parsing [24]
+ o makefile.vc6: use d suffix on debug object [25]
 
 This release includes the following known bugs:
 
@@ -56,11 +71,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexis La Goutte, Anatol Belski, Dan Cristian, Daniel Stenberg,
-  David Benjamin, Diego Bes, Dusty Mabe, Evgeny Grin, Isaac Boukris,
-  Joel Depooter, Juan RP, Marcel Raad, Marquis de Muesli, Michael Osipov,
-  Ray Satiro, Steve Holme, Viktor Szakáts,
-  (17 contributors)
+  Alexis La Goutte, Anatol Belski, Damien Vielpeau, Dan Cristian,
+  Daniel Stenberg, David Benjamin, Diego Bes, Dusty Mabe, Evgeny Grin,
+  Isaac Boukris, Joel Depooter, Joonas Kuorilehto, Juan RP, Marcel Raad,
+  Marquis de Muesli, Michael Kaufmann, Michael Osipov, Patrick Monnerat,
+  Ray Satiro, Rod Widdowson, Steve Holme, Tatsuhiro Tsujikawa, Theodore Dubois,
+  Viktor Szakáts,
+  (24 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -84,3 +101,12 @@ References to bug reports and discussions on issues:
  [16] = https://curl.haxx.se/docs/manpage.html#--http2-prior-knowledge
  [17] = https://curl.haxx.se/libcurl/c/CURLOPT_HTTP_VERSION.html
  [18] = https://curl.haxx.se/docs/http2.html
+ [19] = https://curl.haxx.se/bug/?i=750
+ [20] = https://curl.haxx.se/bug/?i=752
+ [21] = https://curl.haxx.se/bug/?i=755
+ [22] = https://curl.haxx.se/bug/?i=737
+ [23] = https://curl.haxx.se/bug/?i=663
+ [24] = https://curl.haxx.se/bug/?i=663
+ [25] = https://curl.haxx.se/bug/?i=769
+ [26] = https://curl.haxx.se/libcurl/c/CURLOPT_CONNECT_TO.html
+ [27] = https://curl.haxx.se/docs/manpage.html#--connect-to
