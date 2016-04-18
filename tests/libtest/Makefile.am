@@ -117,4 +117,4 @@ libhostname_la_LIBADD =
 libhostname_la_DEPENDENCIES =
 
 checksrc:
-	@@PERL@ $(top_srcdir)/lib/checksrc.pl $(top_srcdir)/tests/libtest/*.c
+	@PERL@ $(top_srcdir)/lib/checksrc.pl $(top_srcdir)/tests/libtest/*.c
