@@ -1796,6 +1796,7 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
  */
 static char *imap_atom(const char *str, bool escape_only)
 {
+  /* !checksrc! disable PARENBRACE 1 */
   const char atom_specials[] = "(){ %*]";
   const char *p1;
   char *p2;
