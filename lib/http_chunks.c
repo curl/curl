@@ -37,7 +37,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* !checksrc! disable SPACEBEFORECLOSE 1 */
 /*
  * Chunk format (simplified):
  *
