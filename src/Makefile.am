@@ -91,8 +91,7 @@ NROFF=env LC_ALL=C @NROFF@ @MANOPT@ # figured out by the configure script
 EXTRA_DIST = mkhelp.pl makefile.dj Makefile.vc6 Makefile.b32		\
  Makefile.m32 macos/curl.mcp.xml.sit.hqx macos/MACINSTALL.TXT		\
  macos/src/curl_GUSIConfig.cpp macos/src/macos_main.cpp makefile.amiga	\
- curl.rc Makefile.netware Makefile.inc Makefile.Watcom CMakeLists.txt	\
- checksrc.whitelist
+ curl.rc Makefile.netware Makefile.inc Makefile.Watcom CMakeLists.txt
 
 MANPAGE=$(top_srcdir)/docs/curl.1
 README=$(top_srcdir)/docs/MANUAL
