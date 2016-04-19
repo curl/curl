@@ -151,6 +151,7 @@ static curl_off_t vms_realfilesize(const char * name,
   int ret_stat;
   FILE * file;
 
+  /* !checksrc! disable FOPENMODE 1 */
   file = fopen(name, "r"); /* VMS */
   if(file == NULL) {
     return 0;
