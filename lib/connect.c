@@ -1008,7 +1008,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
                                 curl_socket_t *sockp)
 {
   struct Curl_sockaddr_ex addr;
-  int rc;
+  int rc = -1;
   int error = 0;
   bool isconnected = FALSE;
   struct SessionHandle *data = conn->data;
