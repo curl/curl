@@ -30,7 +30,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 config-win32.h	\
  config-os400.h setup-os400.h config-symbian.h Makefile.Watcom		\
  config-tpf.h mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)	\
  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl	\
- objnames-test08.sh objnames-test10.sh objnames.inc checksrc.whitelist
+ objnames-test08.sh objnames-test10.sh objnames.inc
 
 lib_LTLIBRARIES = libcurl.la
 
