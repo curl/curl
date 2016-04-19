@@ -63,4 +63,4 @@ include Makefile.inc
 all: $(check_PROGRAMS)
 
 checksrc:
-	@PERL@ $(top_srcdir)/lib/checksrc.pl $(top_srcdir)/docs/examples/*.c
+	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c

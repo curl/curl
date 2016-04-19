@@ -72,7 +72,7 @@ AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 include Makefile.inc
 
 checksrc:
-	@PERL@ $(top_srcdir)/lib/checksrc.pl $(top_srcdir)/tests/unit/*.c
+	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
 
 if BUILD_UNITTESTS
 noinst_PROGRAMS = $(UNITPROGS)

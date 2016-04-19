@@ -63,4 +63,4 @@ include Makefile.inc
 EXTRA_DIST = base64.pl Makefile.inc CMakeLists.txt
 
 checksrc:
-	@PERL@ $(top_srcdir)/lib/checksrc.pl $(top_srcdir)/tests/libtest/*.c
+	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
