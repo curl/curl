@@ -54,7 +54,8 @@ my %warnings = (
     'INDENTATION'      => 'wrong start column for code',
     'COPYRIGHT'        => 'file missing a copyright statement',
     'BADCOMMAND'       => 'bad !checksrc! instruction',
-    'UNUSEDIGNORE'     => 'a warning ignore was not used'
+    'UNUSEDIGNORE'     => 'a warning ignore was not used',
+    'OPENCOMMENT'      => 'file ended with a /* comment still "open"'
     );
 
 sub readwhitelist {
@@ -248,12 +249,14 @@ sub scanfile {
     my $l;
     open(R, "<$file") || die "failed to open $file";
 
+    my $incomment=0;
     my $copyright=0;
     checksrc_clear(); # for file based ignores
 
     while(<R>) {
         $windows_os ? $_ =~ s/\r?\n$// : chomp;
         my $l = $_;
+        my $ol = $l; # keep the unmodified line for error reporting
         my $column = 0;
 
         # check for !checksrc! commands
@@ -283,12 +286,47 @@ sub scanfile {
                       $line, length($1), $file, $l, "Trailing whitespace");
         }
 
+        # ------------------------------------------------------------
+        # Above this marker, the checks were done on lines *including*
+        # comments
+        # ------------------------------------------------------------
+
+        # strip off C89 comments
+
+      comment:
+        if(!$incomment) {
+            if($l =~ s/\/\*.*\*\// /g) {
+                # full /* comments */ were removed!
+            }
+            if($l =~ s/\/\*.*//) {
+                # start of /* comment was removed
+                $incomment = 1;
+            }
+        }
+        else {
+            if($l =~ s/.*\*\///) {
+                # end of comment */ was removed
+                $incomment = 0;
+                goto comment;
+            }
+            else {
+                # still within a comment
+                $l="";
+            }
+        }
+
+        # ------------------------------------------------------------
+        # Below this marker, the checks were done on lines *without*
+        # comments
+        # ------------------------------------------------------------
+
         # crude attempt to detect // comments without too many false
         # positives
         if($l =~ /^([^"\*]*)[^:"]\/\//) {
             checkwarn("CPPCOMMENTS",
                       $line, length($1), $file, $l, "\/\/ comment");
         }
+
         # check spaces after for/if/while
         if($l =~ /^(.*)(for|if|while) \(/) {
             if($1 =~ / *\#/) {
@@ -379,13 +417,13 @@ sub scanfile {
         # check for space before the semicolon last in a line
         if($l =~ /^(.*[^ ].*) ;$/) {
             checkwarn("SPACESEMILCOLON",
-                      $line, length($1), $file, $l, "space before last semicolon");
+                      $line, length($1), $file, $ol, "space before last semicolon");
         }
 
         # scan for use of banned functions
         if($l =~ /^(.*\W)(sprintf|vsprintf|strcat|strncat|gets)\s*\(/) {
             checkwarn("BANNEDFUNC",
-                      $line, length($1), $file, $l,
+                      $line, length($1), $file, $ol,
                       "use of $2 is banned");
         }
 
@@ -394,7 +432,7 @@ sub scanfile {
             my $mode = $2;
             if($mode !~ /b/) {
                 checkwarn("FOPENMODE",
-                          $line, length($1), $file, $l,
+                          $line, length($1), $file, $ol,
                           "use of non-binary fopen without FOPEN_* macro: $mode");
             }
         }
@@ -404,7 +442,7 @@ sub scanfile {
         # line
         if((($prevl =~ /\)\z/) && ($prevl !~ /^ *#/)) && ($l =~ /^( +)\{/)) {
             checkwarn("BRACEPOS",
-                      $line, length($1), $file, $l, "badly placed open brace");
+                      $line, length($1), $file, $ol, "badly placed open brace");
         }
 
         # if the previous line starts with if/while/for AND ends with an open
@@ -419,7 +457,7 @@ sub scanfile {
                 my $expect = $first+$indent;
                 if($expect != $second) {
                     my $diff = $second - $first;
-                    checkwarn("INDENTATION", $line, length($1), $file, $l,
+                    checkwarn("INDENTATION", $line, length($1), $file, $ol,
                               "not indented $indent steps, uses $diff)");
 
                 }
@@ -427,11 +465,14 @@ sub scanfile {
         }
 
         $line++;
-        $prevl = $l;
+        $prevl = $ol;
     }
 
     if(!$copyright) {
         checkwarn("COPYRIGHT", 1, 0, $file, "", "Missing copyright statement", 1);
+    }
+    if($incomment) {
+        checkwarn("OPENCOMMENT", 1, 0, $file, "", "Missing closing comment", 1);
     }
 
     checksrc_endoffile($file);
