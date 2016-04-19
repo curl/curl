@@ -781,7 +781,7 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
   int mib[2];
   char *os_version;
   size_t os_version_len;
-  char *os_version_major, *os_version_minor/*, *os_version_point*/;
+  char *os_version_major, *os_version_minor;
   char *tok_buf;
 
   /* Get the Darwin kernel version from the kernel using sysctl(): */
@@ -800,7 +800,6 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
   /* Parse the version: */
   os_version_major = strtok_r(os_version, ".", &tok_buf);
   os_version_minor = strtok_r(NULL, ".", &tok_buf);
-  /*os_version_point = strtok_r(NULL, ".", &tok_buf);*/
   *major = atoi(os_version_major);
   *minor = atoi(os_version_minor);
   free(os_version);
