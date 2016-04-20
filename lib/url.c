@@ -3444,8 +3444,8 @@ ConnectionExists(struct SessionHandle *data,
 
         /* Same for Proxy NTLM authentication */
         if(wantProxyNTLMhttp) {
-          /* Both check->proxyuser and check->proxypasswd could be NULL */
-          if(check->proxyuser == NULL || check->proxypasswd == NULL)
+          /* Both check->proxyuser and check->proxypasswd can be NULL */
+          if(!check->proxyuser || !check->proxypasswd)
             continue;
 
           if(!strequal(needle->proxyuser, check->proxyuser) ||
