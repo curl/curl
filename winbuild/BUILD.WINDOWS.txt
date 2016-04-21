@@ -64,6 +64,7 @@ where <options> is one or many of:
                                  Libraries can be fetched at http://windows.php.net/downloads/php-sdk/deps/
                                  Uncompress them into the deps folder.
   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
+  WITH_MBEDTLS=<dll or static> - Enable mbedTLS support, DLL or static
   WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static

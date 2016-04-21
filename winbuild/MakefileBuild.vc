@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -120,6 +120,14 @@ SSL          = static
 !IFDEF USE_SSL
 SSL_CFLAGS   = /DUSE_OPENSSL /I"$(DEVEL_INCLUDE)/openssl"
 !ENDIF
+
+!IF "$(WITH_MBEDTLS)"=="dll" || "$(WITH_MBEDTLS)"=="static"
+USE_MBEDTLS    = true
+MBEDTLS        = $(WITH_MBEDTLS)
+MBEDTLS_CFLAGS = /DUSE_MBEDTLS
+MBEDTLS_LIBS   = mbedtls.lib mbedcrypto.lib mbedx509.lib
+!ENDIF
+
 
 !IF "$(WITH_CARES)"=="dll"
 !IF "$(DEBUG)"=="yes"
@@ -316,6 +324,11 @@ CC       = $(CC) $(CFLAGS_LIBCURL_STATIC)
 !IF "$(USE_SSL)"=="true"
 CFLAGS = $(CFLAGS) $(SSL_CFLAGS)
 LFLAGS = $(LFLAGS) $(SSL_LFLAGS) $(SSL_LIBS)
+!ENDIF
+
+!IF "$(USE_MBEDTLS)"=="true"
+CFLAGS = $(CFLAGS) $(MBEDTLS_CFLAGS)
+LFLAGS = $(LFLAGS) $(MBEDTLS_LFLAGS) $(MBEDTLS_LIBS)
 !ENDIF
 
 !IF "$(USE_CARES)"=="true"
