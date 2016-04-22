@@ -234,6 +234,8 @@
      d                 c                   3
      d CURL_HTTP_VERSION_2TLS...
      d                 c                   4
+     d CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE...
+     d                 c                   5
       *
      d CURL_NETRC_IGNORED...
      d                 c                   0
@@ -1246,6 +1248,10 @@
      d                 c                   10241
      d  CURLOPT_TFTP_NO_OPTIONS...
      d                 c                   00242
+     d  CURLOPT_CONNECT_TO...
+     d                 c                   10243
+     d  CURLOPT_TCP_FASTOPEN...
+     d                 c                   00244
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
