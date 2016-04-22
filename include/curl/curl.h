@@ -1684,7 +1684,7 @@ typedef enum {
 
   /* Linked-list of host:port:connect-to-host:connect-to-port,
      overrides the URL's host:port (only for the network layer) */
-  CINIT(CONNECT_TO, STRINGPOINT, 243),
+  CINIT(CONNECT_TO, OBJECTPOINT, 243),
 
   /* Set TCP Fast Open */
   CINIT(TCP_FASTOPEN, LONG, 244),
