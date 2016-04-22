@@ -2358,6 +2358,7 @@ sub checksystem {
            }
            elsif ($libcurl =~ /polarssl/i) {
                $has_polarssl=1;
+               $has_sslpinning=1;
                $ssllib="polarssl";
            }
            elsif ($libcurl =~ /axtls/i) {

@@ -26,6 +26,8 @@
 
 #ifdef USE_POLARSSL
 
+#include <polarssl/sha256.h>
+
 /* Called on first use PolarSSL, setup threading if supported */
 int  Curl_polarssl_init(void);
 void Curl_polarssl_cleanup(void);
@@ -65,6 +67,7 @@ int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 #define curlssl_version Curl_polarssl_version
 #define curlssl_check_cxn(x) ((void)x, -1)
 #define curlssl_data_pending(x,y) ((void)x, (void)y, 0)
+#define curlssl_sha256sum(a,b,c,d) sha256(a,b,c,0)
 
 /* This might cause libcurl to use a weeker random!
    TODO: implement proper use of Polarssl's CTR-DRBG or HMAC-DRBG and use that

@@ -36,6 +36,7 @@
 #include <polarssl/certs.h>
 #include <polarssl/x509.h>
 #include <polarssl/version.h>
+#include <polarssl/sha256.h>
 
 #if POLARSSL_VERSION_NUMBER < 0x01030000
 #error too old PolarSSL
@@ -59,6 +60,15 @@
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
+
+/* See https://tls.mbed.org/discussions/generic/
+   howto-determine-exact-buffer-len-for-mbedtls_pk_write_pubkey_der
+*/
+#define RSA_PUB_DER_MAX_BYTES   (38 + 2 * POLARSSL_MPI_MAX_SIZE)
+#define ECP_PUB_DER_MAX_BYTES   (30 + 2 * POLARSSL_ECP_MAX_BYTES)
+
+#define PUB_DER_MAX_BYTES   (RSA_PUB_DER_MAX_BYTES > ECP_PUB_DER_MAX_BYTES ? \
+                             RSA_PUB_DER_MAX_BYTES : ECP_PUB_DER_MAX_BYTES)
 
 /* apply threading? */
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
@@ -451,6 +461,61 @@ polarssl_connect_step2(struct connectdata *conn,
     if(x509_crt_info(buffer, sizeof(buffer), (char *)"* ",
                      ssl_get_peer_cert(&(connssl->ssl))) != -1)
       infof(data, "Dumping cert info:\n%s\n", buffer);
+  }
+
+  /* adapted from mbedtls.c */
+  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+    int size;
+    CURLcode result;
+    x509_crt *p;
+    unsigned char pubkey[PUB_DER_MAX_BYTES];
+    const x509_crt *peercert;
+
+    peercert = ssl_get_peer_cert(&connssl->ssl);
+
+    if(!peercert || !peercert->raw.p || !peercert->raw.len) {
+      failf(data, "Failed due to missing peer certificate");
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
+
+    p = calloc(1, sizeof(*p));
+
+    if(!p)
+      return CURLE_OUT_OF_MEMORY;
+
+    x509_crt_init(p);
+
+    /* Make a copy of our const peercert because pk_write_pubkey_der
+       needs a non-const key, for now.
+       https://github.com/ARMmbed/mbedtls/issues/396 */
+    if(x509_crt_parse_der(p, peercert->raw.p, peercert->raw.len)) {
+      failf(data, "Failed copying peer certificate");
+      x509_crt_free(p);
+      free(p);
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
+
+    size = pk_write_pubkey_der(&p->pk, pubkey, PUB_DER_MAX_BYTES);
+
+    if(size <= 0) {
+      failf(data, "Failed copying public key from peer certificate");
+      x509_crt_free(p);
+      free(p);
+      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+    }
+
+    /* pk_write_pubkey_der writes data at the end of the buffer. */
+    result = Curl_pin_peer_pubkey(data,
+                                  data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+                                  &pubkey[PUB_DER_MAX_BYTES - size], size);
+    if(result) {
+      x509_crt_free(p);
+      free(p);
+      return result;
+    }
+
+    x509_crt_free(p);
+    free(p);
   }
 
 #ifdef HAS_ALPN

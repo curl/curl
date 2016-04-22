@@ -90,10 +90,16 @@ footer:
 -----END PUBLIC KEY-----
 .fi
 .SH AVAILABILITY
-Added in 7.39.0 for OpenSSL, GnuTLS and GSKit. Added in 7.43.0 for
-NSS and wolfSSL/CyaSSL. Added for mbedtls in 7.47.0, sha256 support
-added in 7.44.0 for OpenSSL, GnuTLS, NSS and wolfSSL/CyaSSL. Other
-SSL backends not supported.
+PEM/DER support:
+  7.39.0: OpenSSL, GnuTLS and GSKit
+  7.43.0: NSS and wolfSSL/CyaSSL
+  7.47.0: mbedtls
+  7.49.0: PolarSSL
+sha256 support:
+  7.44.0: OpenSSL, GnuTLS, NSS and wolfSSL/CyaSSL.
+  7.47.0: mbedtls
+  7.49.0: PolarSSL
+Other SSL backends not supported.
 .SH RETURN VALUE
 Returns CURLE_OK if TLS enabled, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
