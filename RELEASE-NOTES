@@ -67,6 +67,13 @@ This release includes the following bugfixes:
  o makefile.vc6: use d suffix on debug object [25]
  o configure: remove check for libresolve [30]
  o scripts/make: use $(EXEEXT) for executables [31]
+ o checksrc: got rid of the whitelist files
+ o sendf: added ability to call recv() before send() as workaround [32]
+ o NTLM: check for NULL pointer before dereferencing [33]
+ o openssl: builds with OpenSSL 1.1.0-pre5 [34]
+ o configure: ac_cv_ -> curl_cv_ for all cached vars [35]
+ o winbuild: add mbedtls support [36]
+ o curl: make --ftp-create-dirs retry on failure [37]
 
 This release includes the following known bugs:
 
@@ -77,11 +84,12 @@ advice from friends like these:
 
   Alessandro Ghedini, Alexis La Goutte, Anatol Belski, Damien Vielpeau,
   Dan Cristian, Daniel Stenberg, David Benjamin, Diego Bes, Dusty Mabe,
-  Evgeny Grin, Irfan Adilovic, Isaac Boukris, Joel Depooter, Joonas Kuorilehto,
-  Juan RP, Marcel Raad, Marquis de Muesli, Michael Kaufmann, Michael Osipov,
-  Patrick Monnerat, Ray Satiro, Rod Widdowson, Steve Holme,
-  Tatsuhiro Tsujikawa, Theodore Dubois, Viktor Szakáts,
-  (26 contributors)
+  Evgeny Grin, Henrik Gaßmann, Irfan Adilovic, Isaac Boukris, Joel Depooter,
+  John Wanghui, Joonas Kuorilehto, Juan RP, Kamil Dudka, Leif W, Marcel Raad,
+  Marquis de Muesli, Michael Kaufmann, Michael Osipov, Patrick Monnerat,
+  Ray Satiro, Rod Widdowson, Steve Holme, Tatsuhiro Tsujikawa, Theodore Dubois,
+  Viktor Szakáts,
+  (30 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -118,3 +126,9 @@ References to bug reports and discussions on issues:
  [29] = https://curl.haxx.se/docs/manpage.html#--tcp-fastopen
  [30] = https://curl.haxx.se/bug/?i=770
  [31] = https://curl.haxx.se/bug/?i=771
+ [32] = https://curl.haxx.se/bug/?i=657
+ [33] = https://curl.haxx.se/bug/?i=765
+ [34] = https://curl.haxx.se/bug/?i=763
+ [35] = https://curl.haxx.se/bug/?i=766
+ [36] = https://curl.haxx.se/bug/?i=606
+ [37] = https://curl.haxx.se/mail/archive-2016-04/0021.html
