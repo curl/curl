@@ -22,12 +22,9 @@
 ###########################################################################
 
 #
-# This script shows all mentioned contributors from <hash> until HEAD. To aid
-# when writing RELEASE-NOTES and THANKS.
-#
-# Use --releasenotes to also include the names from the existing RELEASE-NOTES
-# file, which is handy when we've added names manually in there that should be
-# included in an updated list.
+# This script shows all mentioned contributors from the given <hash>/<tag>
+# until HEAD and adds the contributors already mentioned in the existing
+# RELEASE-NOTES.
 #
 
 start=$1
@@ -55,15 +52,10 @@ tr , '\012' | \
 sed 's/ and /\n/' | \
 sed -e 's/^ //' -e 's/ $//g'
 
-if echo "$*" | grep -qw -- '--releasenotes';then
-    # if --releasenotes was used
-    # grep out the list of names from RELEASE-NOTES
-    # split on ", "
-    # remove leading white spaces
 grep "^  [^ \(]" RELEASE-NOTES| \
 sed 's/, */\n/g'| \
 sed 's/^ *//'
-fi
+
 )| \
 sed -f ./docs/THANKS-filter | \
 grep ' ' | \
