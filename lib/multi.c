@@ -1466,7 +1466,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       struct connectdata *conn = data->easy_conn;
       const char *hostname;
 
-      if(conn->bits.conn_to_host)
+      if(conn->bits.proxy)
+        hostname = conn->proxy.name;
+      else if(conn->bits.conn_to_host)
         hostname = conn->conn_to_host.name;
       else
         hostname = conn->host.name;
@@ -1480,7 +1482,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         conn->async.done = TRUE;
 #endif
         result = CURLE_OK;
-        infof(data, "Hostname was found in DNS cache\n");
+        infof(data, "Hostname '%s' was found in DNS cache\n", hostname);
       }
 
       if(!dns)
