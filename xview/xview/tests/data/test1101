@@ -1,0 +1,54 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Basic auth
+NO_PROXY
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Content-Type: text/html
+
+boo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+NO_PROXY test, with user name in URL
+ </name>
+
+<setenv>
+no_proxy=%HOSTIP
+http_proxy=http://non-existing-host.haxx.se:3128/
+</setenv>
+ <command>
+http://user:secret@%HOSTIP:%HTTPPORT/gimme/1101
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /gimme/1101 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjpzZWNyZXQ=
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

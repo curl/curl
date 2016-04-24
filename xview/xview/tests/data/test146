@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+FTP
+RETR
+persistent connection
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+this is file contents
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+persistent FTP with different paths
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/first/dir/here/146 ftp://%HOSTIP:%FTPPORT/146
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# Strip all valid kinds of PORT and EPRT that curl can send
+<strip>
+^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
+^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
+</strip>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD first
+CWD dir
+CWD here
+EPSV
+TYPE I
+SIZE 146
+RETR 146
+CWD /
+EPSV
+SIZE 146
+RETR 146
+QUIT
+</protocol>
+</verify>
+</testcase>

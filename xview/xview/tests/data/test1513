@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+PROGRESSFUNCTION
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 204 PARTIAL
+X-Comment: partial response to keep the client waiting
+</data>
+<postcmd>
+wait 10
+</postcmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib1513
+</tool>
+ <name>
+return failure immediately from progress callback
+ </name>
+
+# this server/host won't be used for real
+ <command>
+http://%HOSTIP:%HTTPPORT/1513
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+</protocol>
+# 42 == CURLE_ABORTED_BY_CALLBACK
+<errorcode>
+42
+</errorcode>
+<stdout>
+PROGRESSFUNCTION called
+</stdout>
+</verify>
+</testcase>

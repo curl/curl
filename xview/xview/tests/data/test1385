@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+FTP
+RETR
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+fooo
+mooo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<name>
+FTP DL, file without C-D inside, using -o fname -i, without -D
+</name>
+<command option="no-output,no-include">
+ftp://%HOSTIP:%FTPPORT/path/file1385 -o log/download1385 -i
+</command>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl log/file1385
+</postcheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD path
+EPSV
+TYPE I
+SIZE file1385
+RETR file1385
+QUIT
+</protocol>
+
+<file1 name="log/download1385">
+fooo
+mooo
+</file1>
+
+<file2 name="log/stdout1385">
+</file2>
+
+</verify>
+</testcase>

@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PASV
+CWD
+--ftp-method
+nocwd
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+bla bla bla
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP CWD with --ftp-method nocwd
+ </name>
+ <command>
+--ftp-method nocwd ftp://%HOSTIP:%FTPPORT/first/second/third/298
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+SIZE first/second/third/298
+RETR first/second/third/298
+QUIT
+</protocol>
+</verify>
+</testcase>

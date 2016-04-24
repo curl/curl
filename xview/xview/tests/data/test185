@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+followlocation
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 301 OK swsbounce
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 4
+Location: go/west/185
+
+moo
+</data>
+<data1>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 4
+
+moo
+</data1>
+<datacheck>
+HTTP/1.1 301 OK swsbounce
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 4
+Location: go/west/185
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 4
+
+moo
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP replace Host: when following Location: on the same host
+ </name>
+ <command>
+http://deathstar.another.galaxy/185 -L -H "Host: another.visitor.stay.a.while.stay.foreeeeeever" --proxy http://%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol>
+GET http://deathstar.another.galaxy/185 HTTP/1.1
+Host: another.visitor.stay.a.while.stay.foreeeeeever
+User-Agent: curl/7.12.2-CVS (i686-pc-linux-gnu) libcurl/7.12.2-CVS OpenSSL/0.9.6b zlib/1.1.4 libidn/0.4.6
+Accept: */*
+
+GET http://deathstar.another.galaxy/go/west/185 HTTP/1.1
+Host: another.visitor.stay.a.while.stay.foreeeeeever
+Accept: */*
+
+</protocol>
+
+</verify>
+</testcase>

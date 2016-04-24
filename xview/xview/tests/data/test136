@@ -1,0 +1,42 @@
+<testcase>
+<info>
+<keywords>
+FTP
+EPSV
+RETR
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+0123456789abcdef
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP with user and no password
+ </name>
+ <command>
+-u user: ftp://%HOSTIP:%FTPPORT/136
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER user
+PASS 
+PWD
+EPSV
+TYPE I
+SIZE 136
+RETR 136
+QUIT
+</protocol>
+</verify>
+</testcase>

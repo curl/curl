@@ -1,0 +1,60 @@
+<testcase>
+#
+# This test is like 585 but uses active FTP instead of HTTP
+#
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+moo
+</data>
+<datacheck>
+[OPEN] counter: 1
+[OPEN] counter: 2
+[CLOSE] counter: 2
+moo
+[CLOSE] counter: 1
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib585
+</tool>
+
+ <name>
+verify close callbacks with active FTP
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/596 log/ip596 activeftp
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^(EPRT \|1\|)(.*)/$1/
+</strippart>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPRT |1|
+TYPE I
+SIZE 596
+RETR 596
+QUIT
+</protocol>
+</verify>
+</testcase>

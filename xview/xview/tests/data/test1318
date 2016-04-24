@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--resolve
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+
+</data>
+<data1>
+HTTP/1.1 200 second version
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+
+</data1>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP with --resolve and same host name using different cases
+ </name>
+ <command>
+--resolve MiXeDcAsE.cOm:%HTTPPORT:%HOSTIP http://MiXeDcAsE.cOm:%HTTPPORT/1318 http://mixedcase.com:%HTTPPORT/13180001
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1318 HTTP/1.1
+Host: MiXeDcAsE.cOm:%HTTPPORT
+Accept: */*
+
+GET /13180001 HTTP/1.1
+Host: mixedcase.com:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,72 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP FORMPOST
+HTTP replaced headers
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.0 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP RFC1867-type formposting without Expect: header
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/44 -F name=daniel -F tool=curl -F file=@log/test44.txt -H "Expect:"
+</command>
+# We create this file before the command is invoked!
+<file name="log/test44.txt">
+foo-
+This is a moo-
+bar
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^(User-Agent:|Content-Type: multipart/form-data;|------).*
+</strip>
+<protocol>
+POST /we/want/44 HTTP/1.1
+User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 408
+Content-Type: multipart/form-data; boundary=----------------------------7c633d5c27ce
+
+------------------------------7c633d5c27ce
+Content-Disposition: form-data; name="name"
+
+daniel
+------------------------------7c633d5c27ce
+Content-Disposition: form-data; name="tool"
+
+curl
+------------------------------7c633d5c27ce
+Content-Disposition: form-data; name="file"; filename="test44.txt"
+Content-Type: text/plain
+
+foo-
+This is a moo-
+bar
+
+------------------------------7c633d5c27ce--
+</protocol>
+</verify>
+</testcase>

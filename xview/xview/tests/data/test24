@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.0 404 BAD BOY
+Content-Type: text/html
+
+This silly page doesn't reaaaaaly exist so you should not get it.
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP GET fail silently on HTTP error return
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/24 --fail --silent --show-error
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol>
+GET /24 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<errorcode>
+22
+</errorcode>
+<file2 name="log/stderr24" mode="text">
+curl: (22) The requested URL returned error: 404 BAD BOY
+</file2>
+</verify>
+</testcase>

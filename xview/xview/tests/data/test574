@@ -1,0 +1,98 @@
+<testcase>
+<info>
+<keywords>
+FTP
+LIST
+RETR
+wildcardmatch
+ftplistparser
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data mode="text">
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib574
+</tool>
+<name>
+FTP wildcard download - changed fnmatch, 2x perform (Unix LIST response)
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*.txt
+</command>
+</client>
+
+############################################
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+# THERE SHOULD NOT BE "SIZE"! and one "USER/PASS"
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD fully_simulated
+CWD UNIX
+EPSV
+TYPE A
+LIST
+EPSV
+TYPE I
+RETR chmod1
+EPSV
+RETR chmod2
+EPSV
+RETR chmod3
+EPSV
+RETR empty_file.dat
+EPSV
+RETR file.txt
+EPSV
+RETR someothertext.txt
+CWD /
+CWD fully_simulated
+CWD UNIX
+EPSV
+TYPE A
+LIST
+EPSV
+TYPE I
+RETR chmod1
+EPSV
+RETR chmod2
+EPSV
+RETR chmod3
+EPSV
+RETR empty_file.dat
+EPSV
+RETR file.txt
+EPSV
+RETR someothertext.txt
+QUIT
+</protocol>
+<stdout>
+This file should have permissions 444
+This file should have permissions 666
+This file should have permissions 777
+This is content of file "file.txt"
+Some junk ;-) This file does not really exist.
+This file should have permissions 444
+This file should have permissions 666
+This file should have permissions 777
+This is content of file "file.txt"
+Some junk ;-) This file does not really exist.
+</stdout>
+</verify>
+</testcase>

@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+SASL
+SASL AUTH OAUTH2
+SASL-IR
+RFC6749
+RFC7628
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH OAUTHBEARER
+CAPA SASL-IR
+REPLY AUTHENTICATE A002 OK AUTHENTICATE completed
+</servercmd>
+<data>
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP OAuth 2.0 (OAUTHBEARER) authentication with initial response
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/843/;UID=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
+</command>
+# The protocol section doesn't support ways of specifing the raw data in the
+# base64 encoded message so we must assert this
+<precheck>
+perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%IMAPPORT' ne '9003' );"
+</precheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 AUTHENTICATE OAUTHBEARER dXNlcj11c2VyAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+A003 SELECT 843
+A004 FETCH 1 BODY[]
+A005 LOGOUT
+</protocol>
+</verify>
+</testcase>
