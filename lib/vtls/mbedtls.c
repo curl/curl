@@ -391,13 +391,12 @@ mbed_connect_step1(struct connectdata *conn,
     mbedtls_ssl_conf_own_cert(&connssl->config,
                               &connssl->clicert, &connssl->pk);
   }
-  if(!Curl_inet_pton(AF_INET, conn->host.name, &addr) &&
-#ifdef ENABLE_IPV6
-     !Curl_inet_pton(AF_INET6, conn->host.name, &addr) &&
-#endif
-     sni && mbedtls_ssl_set_hostname(&connssl->ssl, conn->host.name)) {
-    infof(data, "WARNING: failed to configure "
-          "server name indication (SNI) TLS extension\n");
+  if(mbedtls_ssl_set_hostname(&connssl->ssl, conn->host.name)) {
+    /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks *and*
+       the name to set in the SNI extension. So even if curl connects to a
+       host specified as an IP address, this function must be used. */
+    failf(data, "couldn't set hostname in mbedTLS");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
 #ifdef HAS_ALPN
