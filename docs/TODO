@@ -32,6 +32,7 @@
  1.14 Typesafe curl_easy_setopt()
  1.15 TCP Fast Open
  1.16 Try to URL encode given URL
+ 1.17 Add support for IRIs
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -299,6 +300,16 @@
  following code already does).
 
  https://github.com/curl/curl/issues/514
+
+1.17 Add support for IRIs
+
+ IRIs (RFC 3987) allow localized, non-ascii, names in the URL. To properly
+ support this, curl/libcurl would need to translate/encode the given input
+ from the input string encoding into percent encoded output "over the wire".
+
+ To make that work smoothly for curl users even on Windows, curl would
+ probably need to be able to convert from several input encodings.
+
 
 2. libcurl - multi interface
 
