@@ -22,7 +22,7 @@
  ***************************************************************************/
 
 /*
- * Source file for all mbedTSL-specific code for the TLS/SSL layer. No code
+ * Source file for all mbedTLS-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
  *
  */
