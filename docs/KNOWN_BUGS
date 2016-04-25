@@ -21,6 +21,7 @@ problems may have been fixed or changed somewhat since this was written!
  1.7 CONNECT response larger than 16KB
  1.8 DNS timing is wrong for HTTP redirects
  1.9 HTTP/2 frames while in the connection pool kill reuse
+ 1.10 Strips trailing dot from host name
 
  2. TLS
  2.1 Hangs with PolarSSL
@@ -154,6 +155,41 @@ problems may have been fixed or changed somewhat since this was written!
 
  This is *best* fixed by adding monitoring to connections while they are kept
  in the pool so that pings can be responded to appropriately.
+
+1.10 Strips trailing dot from host name
+
+ When given a URL wit a trailing dot for the host name part:
+ "https://example.com./", libcurl will strip off the dot and use the name
+ without a dot internally and send it dot-less in HTTP Host: headers and in
+ the TLS SNI field.
+
+ The HTTP part violates RFC 7230 section 5.4 but the SNI part is accordance
+ with RFC 6066 section 3.
+
+ URLs using these trailing dots are very rare in the wild and we have not seen
+ or gotten any real-world problems with such URLs reported. The popular
+ browsers seem to have stayed with not stripping the dot for both uses (thus
+ they violate RFC 6066 instead of RFC 7230).
+
+ Daniel took the discussion to the HTTPbis mailing list in March 2016:
+ https://lists.w3.org/Archives/Public/ietf-http-wg/2016JanMar/0430.html but
+ there was not major rush or interest to fix this. The impression I get is
+ that most HTTP people rather not rock the boat now and instead prioritize web
+ compatibility rather than to strictly adhere to these RFCs.
+
+ Our current approach allows a knowing client to send a custom HTTP header
+ with the dot added.
+
+ It can also be noted that while adding a trailing dot to the host name in
+ most (all?) cases will make the name resolve to the same set of IP addresses,
+ many HTTP servers will not happily accept the trailing dot there unless that
+ has been specificly configured to be a fine virtual host.
+
+ If URLs with trailing dots for host names become more popular or even just
+ used more than for just plain fun experiments, I'm sure we will have reason
+ to go back and reconsider.
+
+ See https://github.com/curl/curl/issues/716 for the discussion.
 
 
 2. TLS
