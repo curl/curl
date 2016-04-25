@@ -79,6 +79,10 @@ problems may have been fixed or changed somewhat since this was written!
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
 
+ 13 TCP/IP
+ 13.1 --interface for ipv6 binds to unusable IP address
+
+
 ==============================================================================
 
 1. HTTP
@@ -455,3 +459,14 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/622 and
      https://curl.haxx.se/mail/lib-2016-01/0101.html
+
+
+13 TCP/IP
+
+13.1 --interface for ipv6 binds to unusable IP address
+
+ Since IPv6 provides a lot of addresses with different scope, binding to an
+ IPv6 address needs to take the proper care so that it doesn't bind to a
+ locally scoped address as that is bound to fail.
+
+ https://github.com/curl/curl/issues/686
