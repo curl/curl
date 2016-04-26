@@ -100,7 +100,7 @@ were skipped on import are not exported.
 */
 curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");  /* export */
 
-res = curl_easy_perform(curl);  /* cookies imported from cookies.txt */
+curl_easy_perform(curl);  /* cookies imported from cookies.txt */
 
 curl_easy_cleanup(curl);  /* cookies exported to cookies.txt */
 .fi
