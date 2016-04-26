@@ -2228,7 +2228,8 @@ static void pubkey_show(struct SessionHandle *data,
 
   snprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
 
-  BN_print(mem, bn);
+  if(bn)
+    BN_print(mem, bn);
   push_certinfo(namebuf, num);
 }
 
