@@ -74,6 +74,11 @@ This release includes the following bugfixes:
  o configure: ac_cv_ -> curl_cv_ for all cached vars [35]
  o winbuild: add mbedtls support [36]
  o curl: make --ftp-create-dirs retry on failure [37]
+ o PolarSSL: implement public key pinning
+ o multi: accidentally used resolved host name instead of proxy [38]
+ o CURLINFO_TLS_SESSION.3: clarify TLS library support before 7.48.0
+ o CONNECT_ONLY: don't close connection on GSS 401/407 reponses [39]
+ o opts: Fix some syntax errors in example code fragments [40]
 
 This release includes the following known bugs:
 
@@ -85,11 +90,11 @@ advice from friends like these:
   Alessandro Ghedini, Alexis La Goutte, Anatol Belski, Damien Vielpeau,
   Dan Cristian, Daniel Stenberg, David Benjamin, Diego Bes, Dusty Mabe,
   Evgeny Grin, Henrik Gaßmann, Irfan Adilovic, Isaac Boukris, Joel Depooter,
-  John Wanghui, Joonas Kuorilehto, Juan RP, Kamil Dudka, Leif W, Marcel Raad,
-  Marquis de Muesli, Michael Kaufmann, Michael Osipov, Patrick Monnerat,
-  Ray Satiro, Rod Widdowson, Steve Holme, Tatsuhiro Tsujikawa, Theodore Dubois,
-  Viktor Szakáts,
-  (30 contributors)
+  John Wanghui, Joonas Kuorilehto, Juan RP, Kamil Dudka, Leif W,
+  Linus Nordberg, Marcel Raad, Marquis de Muesli, Michael Kaufmann,
+  Michael Osipov, Patrick Monnerat, Ray Satiro, Rod Widdowson, Steve Holme,
+  Tatsuhiro Tsujikawa, Theodore Dubois, Travis Burtrum, Viktor Szakáts,
+  (32 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -132,3 +137,6 @@ References to bug reports and discussions on issues:
  [35] = https://curl.haxx.se/bug/?i=766
  [36] = https://curl.haxx.se/bug/?i=606
  [37] = https://curl.haxx.se/mail/archive-2016-04/0021.html
+ [38] = https://curl.haxx.se/mail/lib-2016-04/0084.html
+ [39] = https://curl.haxx.se/bug/?i=655
+ [40] = https://curl.haxx.se/bug/?i=779
