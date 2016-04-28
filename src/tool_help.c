@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -177,6 +177,7 @@ static const char *const helptext[] = {
   "     --proxy-negotiate  "
   "Use HTTP Negotiate (SPNEGO) authentication on the proxy (H)",
   "     --proxy-ntlm    Use NTLM authentication on the proxy (H)",
+  "     --proxy-header LINE Pass custom header LINE to proxy (H)",
   "     --proxy-service-name NAME  SPNEGO proxy service name",
   "     --service-name NAME  SPNEGO service name",
   " -U, --proxy-user USER[:PASSWORD]  Proxy user and password",
