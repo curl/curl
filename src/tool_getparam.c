@@ -259,8 +259,6 @@ static const struct LongShort aliases[]= {
   {"O",  "remote-name",              FALSE},
   {"Oa", "remote-name-all",          FALSE},
   {"p",  "proxytunnel",              FALSE},
-  {"P",  "ftpport",                  TRUE},
-         /* 'ftpport' old version */
   {"P",  "ftp-port",                 TRUE},
   {"q",  "disable",                  FALSE},
   {"Q",  "quote",                    TRUE},
