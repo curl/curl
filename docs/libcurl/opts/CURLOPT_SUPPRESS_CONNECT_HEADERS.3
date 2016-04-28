@@ -1,0 +1,99 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_CONNECT_TO 3 "29 April 2016" "libcurl 7.49.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SUPPRESS_CONNECT_HEADERS \- Suppress the HTTP response inserted by proxy
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SUPPRESS_CONNECT_HEADERS, long onoff);
+.fi
+.SH DESCRIPTION
+When connecting to an HTTPS URL through a proxy, \fICURLOPT_HEADER(3)\fP would display
+the following response:
+
+.nf
+HTTP/1.1 200 Connection established
+{headers}...
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{headers}...
+
+{body}...
+.fi
+
+This makes the parse script difficult to detect the header part in the
+response. To suppress the \&"Connection established" part of the response, use
+this option with \fICURLOPT_HEADER\fP together.
+
+Note 1: this option only takes effect when \fICURLOPT_HEADER\fP is used.
+
+Note 2: this option doesn't restore any header fields overridden by the
+proxy. For example, the original response is:
+
+.nf
+HTTP/1.1 200 OK
+X-Header-1: foo
+
+{body}...
+.fi
+
+Then the proxy overrides the response to:
+
+.nf
+HTTP/1.1 200 OK
+X-Header-1: bar
+X-Header-2: baz
+
+{body}...
+.fi
+
+This option will not restore the value of \&"X-Header-1" to \&"foo" and not
+remove \&"X-Header-2".
+.SH DEFAULT
+0
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+  curl_easy_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADER, 1L);
+
+  curl_easy_perform(curl);
+
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.49.0
+.SH RETURN VALUE
+Returns CURLE_OK.
+.SH "SEE ALSO"
+.BR CURLOPT_HEADER "(3), "

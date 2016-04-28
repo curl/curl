@@ -1689,6 +1689,9 @@ typedef enum {
   /* Set TCP Fast Open */
   CINIT(TCP_FASTOPEN, LONG, 244),
 
+  /* Suppress the HTTP response inserted by proxy in the output */
+  CINIT(SUPPRESS_CONNECT_HEADERS, LONG, 245),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

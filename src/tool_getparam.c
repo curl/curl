@@ -182,6 +182,7 @@ static const struct LongShort aliases[]= {
   {"$R", "expect100-timeout",        TRUE},
   {"$S", "tftp-no-options",          FALSE},
   {"$U", "connect-to",               TRUE},
+  {"$V", "suppress-connect-headers", FALSE},
   {"0",   "http1.0",                 FALSE},
   {"01",  "http1.1",                 FALSE},
   {"02",  "http2",                   FALSE},
@@ -1009,6 +1010,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         err = add2list(&config->connect_to, nextarg);
         if(err)
           return err;
+        break;
+      case 'V': /* --suppress-connect-headers */
+        config->suppress_connect_headers = toggle;
         break;
       }
       break;

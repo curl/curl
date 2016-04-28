@@ -276,6 +276,7 @@ man_MANS =                                      \
  CURLOPT_STREAM_DEPENDS.3                       \
  CURLOPT_STREAM_DEPENDS_E.3                     \
  CURLOPT_STREAM_WEIGHT.3                        \
+ CURLOPT_SUPPRESS_CONNECT_HEADERS.3             \
  CURLOPT_TCP_FASTOPEN.3                         \
  CURLOPT_TCP_KEEPALIVE.3                        \
  CURLOPT_TCP_KEEPIDLE.3                         \
@@ -563,6 +564,7 @@ HTMLPAGES =                                     \
  CURLOPT_STREAM_DEPENDS.html                    \
  CURLOPT_STREAM_DEPENDS_E.html                  \
  CURLOPT_STREAM_WEIGHT.html                     \
+ CURLOPT_SUPPRESS_CONNECT_HEADERS.html          \
  CURLOPT_TCP_FASTOPEN.html                      \
  CURLOPT_TCP_KEEPALIVE.html                     \
  CURLOPT_TCP_KEEPIDLE.html                      \
@@ -850,6 +852,7 @@ PDFPAGES =                                      \
  CURLOPT_STREAM_DEPENDS.pdf                     \
  CURLOPT_STREAM_DEPENDS_E.pdf                   \
  CURLOPT_STREAM_WEIGHT.pdf                      \
+ CURLOPT_SUPPRESS_CONNECT_HEADERS.pdf           \
  CURLOPT_TCP_FASTOPEN.pdf                       \
  CURLOPT_TCP_KEEPALIVE.pdf                      \
  CURLOPT_TCP_KEEPIDLE.pdf                       \
