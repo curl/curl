@@ -275,8 +275,6 @@ static const struct LongShort aliases[]= {
   {"w",  "write-out",                TRUE},
   {"x",  "proxy",                    TRUE},
   {"X",  "request",                  TRUE},
-  {"X",  "http-request",             TRUE},
-         /* 'http-request' OBSOLETE VERSION */
   {"Y",  "speed-limit",              TRUE},
   {"y",  "speed-time",               TRUE},
   {"z",  "time-cond",                TRUE},
