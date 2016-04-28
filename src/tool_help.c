@@ -252,7 +252,7 @@ static const char *const helptext[] = {
 #endif
   " -w, --write-out FORMAT  Use output FORMAT after completion",
   "     --xattr         Store metadata in extended file attributes",
-  " -q                  Disable .curlrc (must be first parameter)",
+  " -q, --disable       Disable .curlrc (must be first parameter)",
   NULL
 };
 
