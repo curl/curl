@@ -29,6 +29,11 @@
 # curl_easy_getinfo and curl_multi_setopt are also mentioned in their
 # corresponding main (index) man page.
 #
+# src/tool_getparam.c lists all options curl can parse
+# docs/curl.1 documents all command line options
+# src/tool_help.c outputs all options with curl -h
+# - make sure they're all in sync
+#
 # Output all deviances to stderr.
 
 use strict;
@@ -38,7 +43,7 @@ use warnings;
 my $root=$ARGV[0] || ".";
 my $syms = "$root/docs/libcurl/symbols-in-versions";
 my $curlh = "$root/include/curl/curl.h";
-my $errors;
+my $errors=0;
 
 # the prepopulated alias list is the CURLINFO_* defines that are used for the
 # debug function callback and the fact that they use the same prefix as the
@@ -123,5 +128,160 @@ close(R);
 scanmanpage("$root/docs/libcurl/curl_easy_setopt.3", @curlopt);
 scanmanpage("$root/docs/libcurl/curl_easy_getinfo.3", @curlinfo);
 scanmanpage("$root/docs/libcurl/curl_multi_setopt.3", @curlmopt);
+
+# using this hash array, we can whitelist specific options
+my %opts = (
+    # pretend these --no options exists in tool_getparam.c
+    '--no-alpn' => 1,
+    '--no-npn' => 1,
+    '-N, --no-buffer' => 1,
+    '--no-sessionid' => 1,
+    '--no-keepalive' => 1,
+
+    # pretend these options without -no exist in curl.1 and tool_help.c
+    '--alpn' => 6,
+    '--npn' => 6,
+    '--eprt' => 6,
+    '--epsv' => 6,
+    '--keepalive' => 6,
+    '-N, --buffer' => 6,
+    '--sessionid' => 6,
+
+    # deprecated options do not need to be in curl -h output
+    '--krb4' => 4,
+    '--ftp-ssl' => 4,
+    '--ftp-ssl-reqd' => 4,
+
+    # for tests and debug only, can remain hidden
+    '--test-event' => 6,
+    '--wdebug' => 6,
+    );
+
+
+#########################################################################
+# parse the curl code that parses the command line arguments!
+open(R, "<$root/src/tool_getparam.c") ||
+    die "no input file";
+my $list;
+my @getparam; # store all parsed parameters
+
+while(<R>) {
+    chomp;
+    my $l= $_;
+    if(/struct LongShort aliases/) {
+        $list=1;
+    }
+    elsif($list) {
+        if( /^  \{([^,]*), *([^ ]*)/) {
+            my ($s, $l)=($1, $2);
+            my $sh;
+            my $lo;
+            my $title;
+            if($l =~ /\"(.*)\"/) {
+                # long option
+                $lo = $1;
+                $title="--$lo";
+            }
+            if($s =~ /\"(.)\"/) {
+                # a short option
+                $sh = $1;
+                $title="-$sh, $title";
+            }
+            push @getparam, $title;
+            $opts{$title} |= 1;
+        }
+    }
+}
+close(R);
+
+#########################################################################
+# parse the curl.1 man page, extract all documented command line options
+open(R, "<$root/docs/curl.1") ||
+    die "no input file";
+my @manpage; # store all parsed parameters
+while(<R>) {
+    chomp;
+    my $l= $_;
+    if(/^\.IP \"(-[^\"]*)\"/) {
+        my $str = $1;
+        my $combo;
+        if($str =~ /^-(.), --([a-z0-9.-]*)/) {
+            # figure out the -short, --long combo
+            $combo = "-$1, --$2";
+        }
+        elsif($str =~ /^--([a-z0-9.-]*)/) {
+            # figure out the --long name
+            $combo = "--$1";
+        }
+        if($combo) {
+            push @manpage, $combo;
+            $opts{$combo} |= 2;
+        }
+    }
+}
+close(R);
+
+
+#########################################################################
+# parse the curl code that outputs the curl -h list
+open(R, "<$root/src/tool_help.c") ||
+    die "no input file";
+my @toolhelp; # store all parsed parameters
+while(<R>) {
+    chomp;
+    my $l= $_;
+    if(/^  \" *(.*)/) {
+        my $str=$1;
+        my $combo;
+        if($str =~ /^-(.), --([a-z0-9.-]*)/) {
+            # figure out the -short, --long combo
+            $combo = "-$1, --$2";
+        }
+        elsif($str =~ /^--([a-z0-9.-]*)/) {
+            # figure out the --long name
+            $combo = "--$1";
+        }
+        if($combo) {
+            push @toolhelp, $combo;
+            $opts{$combo} |= 4;
+        }
+
+    }
+}
+close(R);
+
+#
+# Now we have three arrays with options to cross-reference.
+
+foreach my $o (keys %opts) {
+    my $where = $opts{$o};
+
+    if($where != 7) {
+        # this is not in all three places
+        $errors++;
+        my $exists;
+        my $missing;
+        if($where & 1) {
+            $exists=" tool_getparam.c";
+        }
+        else {
+            $missing=" tool_getparam.c";
+        }
+        if($where & 2) {
+            $exists.= " curl.1";
+        }
+        else {
+            $missing.= " curl.1";
+        }
+        if($where & 4) {
+            $exists .= " tool_help.c";
+        }
+        else {
+            $missing .= " tool_help.c";
+        }
+
+        print STDERR "$o is not in$missing (but in$exists)\n";
+    }
+}
 
 exit $errors;
