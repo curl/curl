@@ -316,8 +316,6 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       perline = 0;
 
       while(nread < BUFSIZE && keepon && !error) {
-        int writetype;
-
         if(Curl_pgrsUpdate(conn))
           return CURLE_ABORTED_BY_CALLBACK;
 
@@ -419,18 +417,19 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           Curl_debug(data, CURLINFO_HEADER_IN,
                      line_start, (size_t)perline, conn);
 
-        /* send the header to the callback */
-        writetype = CLIENTWRITE_HEADER;
-        if(data->set.include_header)
-          writetype |= CLIENTWRITE_BODY;
+        if(!data->set.suppress_connect_headers) {
+          /* send the header to the callback */
+          int writetype = CLIENTWRITE_HEADER;
+          if(data->set.include_header)
+            writetype |= CLIENTWRITE_BODY;
 
-        result = Curl_client_write(conn, writetype, line_start, perline);
+          result = Curl_client_write(conn, writetype, line_start, perline);
+          if(result)
+            return result;
+        }
 
         data->info.header_size += (long)perline;
         data->req.headerbytecount += (long)perline;
-
-        if(result)
-          return result;
 
         /* Newlines are CRLF, so the CR is ignored as the line isn't
            really terminated until the LF comes. Treat a following CR

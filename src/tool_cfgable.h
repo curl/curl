@@ -235,6 +235,8 @@ struct OperationConfig {
   bool falsestart;
   bool path_as_is;
   double expect100timeout;
+  bool suppress_connect_headers;  /* suppress proxy CONNECT response headers
+                                     from user callbacks */
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */

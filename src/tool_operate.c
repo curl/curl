@@ -886,8 +886,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
           /* new in libcurl 7.19.4 */
           my_setopt_str(curl, CURLOPT_NOPROXY, config->noproxy);
+
+          my_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS,
+                    config->suppress_connect_headers?1L:0L);
         }
-#endif
+#endif /* !CURL_DISABLE_PROXY */
 
         my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror?1L:0L);
         my_setopt(curl, CURLOPT_UPLOAD, uploadfile?1L:0L);

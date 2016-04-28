@@ -185,6 +185,7 @@ static const struct LongShort aliases[]= {
   {"$U", "connect-to",               TRUE},
   {"$W", "abstract-unix-socket",     TRUE},
   {"$X", "tls-max",                  TRUE},
+  {"$Y", "suppress-connect-headers", FALSE},
   {"0",   "http1.0",                 FALSE},
   {"01",  "http1.1",                 FALSE},
   {"02",  "http2",                   FALSE},
@@ -1065,6 +1066,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         err = str2tls_max(&config->ssl_version_max, nextarg);
         if(err)
           return err;
+        break;
+      case 'Y': /* --suppress-connect-headers */
+        config->suppress_connect_headers = toggle;
         break;
       }
       break;

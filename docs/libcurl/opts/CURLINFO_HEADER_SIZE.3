@@ -30,6 +30,9 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_HEADER_SIZE, long *sizep);
 .SH DESCRIPTION
 Pass a pointer to a long to receive the total size of all the headers
 received. Measured in number of bytes.
+
+The total includes the size of any received headers suppressed by
+\fICURLOPT_SUPPRESS_CONNECT_HEADERS(3)\fP.
 .SH PROTOCOLS
 All
 .SH EXAMPLE

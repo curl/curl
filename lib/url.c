@@ -2894,6 +2894,9 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_CONNECT_TO:
     data->set.connect_to = va_arg(param, struct curl_slist *);
     break;
+  case CURLOPT_SUPPRESS_CONNECT_HEADERS:
+    data->set.suppress_connect_headers = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

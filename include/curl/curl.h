@@ -1778,6 +1778,9 @@ typedef enum {
   /* Path to an abstract Unix domain socket */
   CINIT(ABSTRACT_UNIX_SOCKET, STRINGPOINT, 264),
 
+  /* Suppress proxy CONNECT response headers from user callbacks */
+  CINIT(SUPPRESS_CONNECT_HEADERS, LONG, 265),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

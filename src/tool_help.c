@@ -249,6 +249,7 @@ static const char *const helptext[] = {
   "     --ssl-allow-beast  Allow security flaw to improve interop (SSL)",
   "     --ssl-no-revoke    Disable cert revocation checks (WinSSL)",
   "     --stderr FILE   Where to redirect stderr (use \"-\" for stdout)",
+  "     --suppress-connect-headers  Suppress proxy CONNECT response headers",
   "     --tcp-nodelay   Use the TCP_NODELAY option",
   "     --tcp-fastopen  Use TCP Fast Open",
   " -t, --telnet-option OPT=VAL  Set telnet option",

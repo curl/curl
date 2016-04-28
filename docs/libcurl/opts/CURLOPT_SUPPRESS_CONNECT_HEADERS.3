@@ -1,0 +1,95 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SUPPRESS_CONNECT_HEADERS 3 "13 February 2017" "libcurl 7.54.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SUPPRESS_CONNECT_HEADERS \- Suppress proxy CONNECT response headers from user callbacks
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SUPPRESS_CONNECT_HEADERS, long onoff);
+.fi
+.SH DESCRIPTION
+When \fICURLOPT_HTTPPROXYTUNNEL(3)\fP is used and a CONNECT request is made,
+suppress proxy CONNECT response headers from the user callback functions
+\fICURLOPT_HEADERFUNCTION(3)\fP and \fICURLOPT_WRITEFUNCTION(3)\fP.
+
+Proxy CONNECT response headers can complicate header processing since it's
+essentially a separate set of headers. You can enable this option to suppress
+those headers.
+
+For example let's assume an HTTPS URL is to be retrieved via CONNECT. On
+success there would normally be two sets of headers, and each header line sent
+to the header function and/or the write function. The data given to the
+callbacks would look like this:
+
+.nf
+HTTP/1.1 200 Connection established
+{headers}...
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{headers}...
+
+{body}...
+.fi
+
+However by enabling this option the CONNECT response headers are suppressed, so
+the data given to the callbacks would look like this:
+
+.nf
+HTTP/1.1 200 OK
+Content-Type: application/json
+{headers}...
+
+{body}...
+.fi
+
+.SH DEFAULT
+0
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+  curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+  curl_easy_setopt(curl, CURLOPT_PROXY, "http://foo:3128");
+  curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
+  curl_easy_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
+
+  curl_easy_perform(curl);
+
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.54.0
+.SH RETURN VALUE
+CURLE_OK or an error such as CURLE_UNKNOWN_OPTION.
+.SH "SEE ALSO"
+.BR CURLOPT_HEADER "(3), " CURLOPT_PROXY "(3), "
+.BR CURLOPT_HTTPPROXYTUNNEL "(3), "

@@ -40,6 +40,9 @@ it allows CONNECT requests to and often only port 80 and 443 are allowed.
 
 When using this, it only makes sense to use \fICURLOPT_PROXYTYPE(3)\fP set to
 a HTTP proxy.
+
+To suppress proxy CONNECT response headers from user callbacks use
+\fICURLOPT_SUPPRESS_CONNECT_HEADERS(3)\fP.
 .SH DEFAULT
 0
 .SH PROTOCOLS
