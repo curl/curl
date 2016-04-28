@@ -64,9 +64,9 @@ struct LongShort {
 };
 
 static const struct LongShort aliases[]= {
-  /* all these ones, starting with "*" or "$" as a short-option have *no*
-     short option to mention. */
-  {"*",  "url",                      TRUE},
+  /* 'letter' strings with more than one character have *no* short option to
+     mention. */
+  {"*@", "url",                      TRUE},
   {"*4", "dns-ipv4-addr",            TRUE},
   {"*6", "dns-ipv6-addr",            TRUE},
   {"*a", "random-file",              TRUE},
@@ -114,6 +114,7 @@ static const struct LongShort aliases[]= {
   {"*Z", "eprt",                     FALSE},
          /* 'eprt' made like this to make --no-eprt and --eprt to work
              although --disable-eprt is the documented option */
+  {"*~", "xattr",                    FALSE},
   {"$a", "ftp-ssl",                  FALSE},
          /* 'ftp-ssl' deprecated name since 7.20.0 */
   {"$a", "ssl",                      FALSE},
@@ -284,7 +285,6 @@ static const struct LongShort aliases[]= {
   {"z",  "time-cond",                TRUE},
   {"#",  "progress-bar",             FALSE},
   {":",  "next",                     FALSE},
-  {"~",  "xattr",                    FALSE},
 };
 
 /* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
@@ -723,8 +723,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'Z': /* --eprt */
         config->disable_eprt = (!toggle)?TRUE:FALSE;
         break;
-
-      default: /* the URL! */
+      case '~': /* --xattr */
+        config->xattr = toggle;
+        break;
+      case '@': /* the URL! */
       {
         struct getout *url;
         if(config->url_get || ((config->url_get = config->url_list) != NULL)) {
@@ -1026,9 +1028,6 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       break;
     case ':': /* --next */
       return PARAM_NEXT_OPERATION;
-    case '~': /* --xattr */
-      config->xattr = toggle;
-      break;
     case '0': /* --http* options */
       switch(subletter) {
       case '\0':
