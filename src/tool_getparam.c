@@ -217,7 +217,7 @@ static const struct LongShort aliases[]= {
   {"Ed", "key-type",                 TRUE},
   {"Ee", "pass",                     TRUE},
   {"Ef", "engine",                   TRUE},
-  {"Eg", "capath ",                  TRUE},
+  {"Eg", "capath",                   TRUE},
   {"Eh", "pubkey",                   TRUE},
   {"Ei", "hostpubmd5",               TRUE},
   {"Ej", "crlfile",                  TRUE},
