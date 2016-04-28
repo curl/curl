@@ -755,6 +755,9 @@ waits for a reply from the server.
 authentication, but non-encrypted data transfers for efficiency.  Fails the
 transfer if the server doesn't support SSL/TLS.  (Added in 7.16.0)
 that can still be used but will be removed in a future version.
+.IP "--ftp-ssl-reqd"
+(FTP) This deprecated option is now known as \fI--ssl-reqd\fP (added in
+7.15.5).  This option name will be removed in a future version.
 .IP "--form-string <name=string>"
 (HTTP) Similar to \fI--form\fP except that the value string for the named
 parameter is used literally. Leading \&'@' and \&'<' characters, and the
@@ -1634,8 +1637,7 @@ option name can still be used but will be removed in a future version.
 (FTP, POP3, IMAP, SMTP) Require SSL/TLS for the connection.  Terminates the
 connection if the server doesn't support SSL/TLS. (Added in 7.20.0)
 
-This option was formerly known as \fI--ftp-ssl-reqd\fP (added in 7.15.5). That
-option name can still be used but will be removed in a future version.
+This option was formerly known as \fI--ftp-ssl-reqd\fP.
 .IP "--ssl-allow-beast"
 (SSL) This option tells curl to not work around a security flaw in the SSL3
 and TLS1.0 protocols known as BEAST.  If this option isn't used, the SSL layer
