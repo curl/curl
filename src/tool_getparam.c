@@ -121,9 +121,6 @@ static const struct LongShort aliases[]= {
          /* 'ssl' new option name in 7.20.0, previously this was ftp-ssl */
   {"$b", "ftp-pasv",                 FALSE},
   {"$c", "socks5",                   TRUE},
-  {"$c", "socks",                    TRUE},
-         /* 'socks' is how the option once was documented but we prefer
-            the --socks5 version for explicit version */
   {"$d", "tcp-nodelay",              FALSE},
   {"$e", "proxy-digest",             FALSE},
   {"$f", "proxy-basic",              FALSE},
