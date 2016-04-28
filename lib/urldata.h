@@ -290,7 +290,6 @@ struct ssl_connect_data {
   mbedtls_ctr_drbg_context ctr_drbg;
   mbedtls_entropy_context entropy;
   mbedtls_ssl_context ssl;
-  mbedtls_ssl_session ssn;
   int server_fd;
   mbedtls_x509_crt cacert;
   mbedtls_x509_crt clicert;
@@ -302,7 +301,6 @@ struct ssl_connect_data {
   ctr_drbg_context ctr_drbg;
   entropy_context entropy;
   ssl_context ssl;
-  ssl_session ssn;
   int server_fd;
   x509_crt cacert;
   x509_crt clicert;

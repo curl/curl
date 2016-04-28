@@ -307,7 +307,7 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
 #elif defined(USE_GSKIT)
             tsi->internals = (void *)conn->ssl[i].handle;
 #elif defined(USE_MBEDTLS)
-            tsi->internals = (void *)&conn->ssl[i].ssn;
+            tsi->internals = (void *)&conn->ssl[i].ssl;
 #elif defined(USE_NSS)
             tsi->internals = (void *)conn->ssl[i].handle;
 #elif defined(USE_OPENSSL)
@@ -316,7 +316,7 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
                               (void *)conn->ssl[i].ctx :
                               (void *)conn->ssl[i].handle);
 #elif defined(USE_POLARSSL)
-            tsi->internals = (void *)&conn->ssl[i].ssn;
+            tsi->internals = (void *)&conn->ssl[i].ssl;
 #elif defined(USE_SCHANNEL)
             tsi->internals = (void *)&conn->ssl[i].ctxt->ctxt_handle;
 #elif defined(USE_SSL)

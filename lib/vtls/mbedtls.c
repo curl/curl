@@ -170,7 +170,6 @@ mbed_connect_step1(struct connectdata *conn,
   struct in_addr addr;
 #endif
   void *old_session = NULL;
-  size_t old_session_size = 0;
   char errorbuf[128];
   errorbuf[0]=0;
 
@@ -187,8 +186,7 @@ mbed_connect_step1(struct connectdata *conn,
   mbedtls_ctr_drbg_init(&connssl->ctr_drbg);
 
   ret = mbedtls_ctr_drbg_seed(&connssl->ctr_drbg, entropy_func_mutex,
-                              &entropy, connssl->ssn.id,
-                              connssl->ssn.id_len);
+                              &entropy, NULL, 0);
   if(ret) {
 #ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -201,8 +199,7 @@ mbed_connect_step1(struct connectdata *conn,
   mbedtls_ctr_drbg_init(&connssl->ctr_drbg);
 
   ret = mbedtls_ctr_drbg_seed(&connssl->ctr_drbg, mbedtls_entropy_func,
-                              &connssl->entropy, connssl->ssn.id,
-                              connssl->ssn.id_len);
+                              &connssl->entropy, NULL, 0);
   if(ret) {
 #ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -377,13 +374,14 @@ mbed_connect_step1(struct connectdata *conn,
 
   mbedtls_ssl_conf_ciphersuites(&connssl->config,
                                 mbedtls_ssl_list_ciphersuites());
-  if(!Curl_ssl_getsessionid(conn, &old_session, &old_session_size)) {
-    memcpy(&connssl->ssn, old_session, old_session_size);
+  if(!Curl_ssl_getsessionid(conn, &old_session, NULL)) {
+    ret = mbedtls_ssl_set_session(&connssl->ssl, old_session);
+    if(ret) {
+      failf(data, "mbedtls_ssl_set_session returned -0x%x", -ret);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
     infof(data, "mbedTLS re-using session\n");
   }
-
-  mbedtls_ssl_set_session(&connssl->ssl,
-                          &connssl->ssn);
 
   mbedtls_ssl_conf_ca_chain(&connssl->config,
                             &connssl->cacert,
@@ -601,38 +599,32 @@ mbed_connect_step3(struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct SessionHandle *data = conn->data;
   void *old_ssl_sessionid = NULL;
-  mbedtls_ssl_session *our_ssl_sessionid = &conn->ssl[sockindex].ssn;
-  int incache;
+  mbedtls_ssl_session *our_ssl_sessionid;
+  int ret;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-  /* Save the current session data for possible re-use */
-  incache = !(Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL));
-  if(incache) {
-    if(old_ssl_sessionid != our_ssl_sessionid) {
-      infof(data, "old SSL session ID is stale, removing\n");
-      Curl_ssl_delsessionid(conn, old_ssl_sessionid);
-      incache = FALSE;
-    }
+  our_ssl_sessionid = malloc(sizeof(mbedtls_ssl_session));
+  if(!our_ssl_sessionid)
+    return CURLE_OUT_OF_MEMORY;
+
+  mbedtls_ssl_session_init(our_ssl_sessionid);
+
+  ret = mbedtls_ssl_get_session(&connssl->ssl, our_ssl_sessionid);
+  if(ret) {
+    failf(data, "mbedtls_ssl_get_session returned -0x%x", -ret);
+    return CURLE_SSL_CONNECT_ERROR;
   }
-  if(!incache) {
-    void *new_session = malloc(sizeof(mbedtls_ssl_session));
 
-    if(new_session) {
-      memcpy(new_session, our_ssl_sessionid,
-             sizeof(mbedtls_ssl_session));
+  /* If there's already a matching session in the cache, delete it */
+  if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL))
+    Curl_ssl_delsessionid(conn, old_ssl_sessionid);
 
-      retcode = Curl_ssl_addsessionid(conn, new_session,
-                                      sizeof(mbedtls_ssl_session));
-    }
-    else {
-      retcode = CURLE_OUT_OF_MEMORY;
-    }
-
-    if(retcode) {
-      failf(data, "failed to store ssl session");
-      return retcode;
-    }
+  retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0);
+  if(retcode) {
+    free(our_ssl_sessionid);
+    failf(data, "failed to store ssl session");
+    return retcode;
   }
 
   connssl->connecting_state = ssl_connect_done;
@@ -704,6 +696,7 @@ static ssize_t mbed_recv(struct connectdata *conn, int num,
 
 void Curl_mbedtls_session_free(void *ptr)
 {
+  mbedtls_ssl_session_free(ptr);
   free(ptr);
 }
 

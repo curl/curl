@@ -151,7 +151,6 @@ polarssl_connect_step1(struct connectdata *conn,
   struct in_addr addr;
 #endif
   void *old_session = NULL;
-  size_t old_session_size = 0;
   char errorbuf[128];
   errorbuf[0]=0;
 
@@ -167,7 +166,7 @@ polarssl_connect_step1(struct connectdata *conn,
   entropy_init_mutex(&entropy);
 
   if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func_mutex, &entropy,
-                               connssl->ssn.id, connssl->ssn.length)) != 0) {
+                          NULL, 0)) != 0) {
 #ifdef POLARSSL_ERROR_C
      error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
@@ -178,7 +177,7 @@ polarssl_connect_step1(struct connectdata *conn,
   entropy_init(&connssl->entropy);
 
   if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func, &connssl->entropy,
-                                connssl->ssn.id, connssl->ssn.length)) != 0) {
+                          NULL, 0)) != 0) {
 #ifdef POLARSSL_ERROR_C
      error_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* POLARSSL_ERROR_C */
@@ -338,13 +337,14 @@ polarssl_connect_step1(struct connectdata *conn,
               net_send, &conn->sock[sockindex]);
 
   ssl_set_ciphersuites(&connssl->ssl, ssl_list_ciphersuites());
-  if(!Curl_ssl_getsessionid(conn, &old_session, &old_session_size)) {
-    memcpy(&connssl->ssn, old_session, old_session_size);
+  if(!Curl_ssl_getsessionid(conn, &old_session, NULL)) {
+    ret = ssl_set_session(&connssl->ssl, old_session);
+    if(ret) {
+      failf(data, "ssl_set_session returned -0x%x", -ret);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
     infof(data, "PolarSSL re-using session\n");
   }
-
-  ssl_set_session(&connssl->ssl,
-                  &connssl->ssn);
 
   ssl_set_ca_chain(&connssl->ssl,
                    &connssl->cacert,
@@ -551,40 +551,36 @@ static CURLcode
 polarssl_connect_step3(struct connectdata *conn,
                      int sockindex)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode retcode = CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct SessionHandle *data = conn->data;
   void *old_ssl_sessionid = NULL;
-  ssl_session *our_ssl_sessionid = &conn->ssl[sockindex].ssn;
-  bool incache;
+  ssl_session *our_ssl_sessionid;
+  int ret;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-  /* Save the current session data for possible re-use */
-  incache = !(Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL));
-  if(incache) {
-    if(old_ssl_sessionid != our_ssl_sessionid) {
-      infof(data, "old SSL session ID is stale, removing\n");
-      Curl_ssl_delsessionid(conn, old_ssl_sessionid);
-      incache = FALSE;
-    }
+  our_ssl_sessionid = malloc(sizeof(ssl_session));
+  if(!our_ssl_sessionid)
+    return CURLE_OUT_OF_MEMORY;
+
+  ssl_session_init(our_ssl_sessionid);
+
+  ret = ssl_get_session(&connssl->ssl, our_ssl_sessionid);
+  if(ret) {
+    failf(data, "ssl_get_session returned -0x%x", -ret);
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(!incache) {
-    void *new_session = malloc(sizeof(ssl_session));
+  /* If there's already a matching session in the cache, delete it */
+  if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL))
+    Curl_ssl_delsessionid(conn, old_ssl_sessionid);
 
-    if(new_session) {
-      memcpy(new_session, our_ssl_sessionid, sizeof(ssl_session));
-
-      result = Curl_ssl_addsessionid(conn, new_session, sizeof(ssl_session));
-    }
-    else
-      result = CURLE_OUT_OF_MEMORY;
-
-    if(result) {
-      failf(data, "failed to store ssl session");
-      return result;
-    }
+  retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0);
+  if(retcode) {
+    free(our_ssl_sessionid);
+    failf(data, "failed to store ssl session");
+    return retcode;
   }
 
   connssl->connecting_state = ssl_connect_done;
@@ -649,6 +645,7 @@ static ssize_t polarssl_recv(struct connectdata *conn,
 
 void Curl_polarssl_session_free(void *ptr)
 {
+  ssl_session_free(ptr);
   free(ptr);
 }
 
