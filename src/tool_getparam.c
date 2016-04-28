@@ -266,8 +266,7 @@ static const struct LongShort aliases[]= {
   {"R",  "remote-time",              FALSE},
   {"s",  "silent",                   FALSE},
   {"S",  "show-error",               FALSE},
-  {"t",  "telnet-options",           TRUE},
-         /* 'telnet-options' documented as telnet-option */
+  {"t",  "telnet-option",            TRUE},
   {"T",  "upload-file",              TRUE},
   {"u",  "user",                     TRUE},
   {"U",  "proxy-user",               TRUE},
