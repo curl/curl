@@ -1216,6 +1216,10 @@ This option requires a library built with SSL support. Use
 \fI-V, --version\fP to see if your curl supports NTLM.
 
 If this option is used several times, only the first one is used.
+.IP "--ntlm-wb"
+(HTTP) Enables NTLM much in the style \fI--ntlm\fP does, but hand over the
+authentication to the separate binary ntlmauth application that is executed
+when needed.
 .IP "-o, --output <file>"
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
 multiple documents, you can use '#' followed by a number in the <file>
