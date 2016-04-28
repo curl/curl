@@ -155,6 +155,7 @@ static const char *const helptext[] = {
   "     --no-sessionid  Disable SSL session-ID reusing (SSL)",
   "     --noproxy       List of hosts which do not use proxy",
   "     --ntlm          Use HTTP NTLM authentication (H)",
+  "     --ntlm-wb       Use HTTP NTLM authentication with winbind (H)",
   "     --oauth2-bearer TOKEN  OAuth 2 Bearer Token (IMAP, POP3, SMTP)",
   " -o, --output FILE   Write to FILE instead of stdout",
   "     --pass PASS     Pass phrase for the private key (SSL/SSH)",
