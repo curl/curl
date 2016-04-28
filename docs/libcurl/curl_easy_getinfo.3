@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -197,6 +197,11 @@ See \fICURLINFO_CERTINFO(3)\fP
 .IP CURLINFO_TLS_SSL_PTR
 TLS session info that can be used for further processing.
 See \fICURLINFO_TLS_SSL_PTR(3)\fP
+
+.IP CURLINFO_TLS_SESSION
+TLS session info that can be used for further processing.  See
+\fICURLINFO_TLS_SESSION(3)\fP. Deprecated option, use
+\fICURLINFO_TLS_SSL_PTR(3)\fP instead!
 
 .IP CURLINFO_CONDITION_UNMET
 Whether or not a time conditional was met.
