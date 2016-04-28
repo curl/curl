@@ -1843,7 +1843,9 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 #endif
 
   /* Parse .curlrc if necessary */
-  if((argc == 1) || (!curlx_strequal(argv[1], "-q"))) {
+  if((argc == 1) ||
+     (!curlx_strequal(argv[1], "-q") ||
+      !curlx_strequal(argv[1], "--disable"))) {
     parseconfig(NULL, config); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
