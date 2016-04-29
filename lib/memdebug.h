@@ -28,10 +28,6 @@
  * as well as the library. Do not mix with library internals!
  */
 
-#include "curl_setup.h"
-
-#include <curl/curl.h>
-
 #define CURL_MT_LOGFNAME_BUFSIZE 512
 
 #define logfile curl_debuglogfile
