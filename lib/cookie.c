@@ -88,7 +88,6 @@ Example set of cookies:
 # include <libpsl.h>
 #endif
 
-#include "curl_printf.h"
 #include "urldata.h"
 #include "cookie.h"
 #include "strequal.h"
@@ -101,7 +100,8 @@ Example set of cookies:
 #include "curl_memrchr.h"
 #include "inet_pton.h"
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 

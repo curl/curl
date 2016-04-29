@@ -56,7 +56,6 @@
 #include <inet.h>
 #endif
 
-#include "curl_printf.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "if2ip.h"
@@ -74,7 +73,8 @@
 #include "conncache.h"
 #include "multihandle.h"
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 

@@ -42,9 +42,9 @@
 #include "multihandle.h"
 #include "pipeline.h"
 #include "sigpipe.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /*

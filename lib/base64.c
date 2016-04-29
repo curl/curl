@@ -23,13 +23,13 @@
 /* Base64 encoding/decoding */
 
 #include "curl_setup.h"
-#include "curl_printf.h"
 #include "urldata.h" /* for the SessionHandle definition */
 #include "warnless.h"
 #include "curl_base64.h"
 #include "non-ascii.h"
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 

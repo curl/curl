@@ -23,7 +23,6 @@
 #include "curl_setup.h"
 
 #ifdef USE_NGHTTP2
-#include "curl_printf.h"
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
 #include "http2.h"
@@ -37,7 +36,8 @@
 #include "connect.h"
 #include "strtoofft.h"
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 

@@ -51,7 +51,6 @@
 #include "telnet.h"
 #include "connect.h"
 #include "progress.h"
-#include "curl_printf.h"
 
 #define  TELOPTS
 #define  TELCMDS
@@ -62,7 +61,8 @@
 #include "rawstr.h"
 #include "warnless.h"
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 

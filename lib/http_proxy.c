@@ -35,11 +35,11 @@
 #include "progress.h"
 #include "non-ascii.h"
 #include "connect.h"
-#include "curl_printf.h"
 #include "curlx.h"
 
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 CURLcode Curl_proxy_connect(struct connectdata *conn)

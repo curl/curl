@@ -28,9 +28,8 @@
 #include "rawstr.h"
 #include "vauth/vauth.h"
 #include "http_digest.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-
-/* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
