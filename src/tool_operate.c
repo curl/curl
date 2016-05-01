@@ -1295,12 +1295,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_flags(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
 
         if(config->content_disposition
-           && (urlnode->flags & GETOUT_USEREMOTE)
-           && (checkprefix("http://", this_url) ||
-               checkprefix("https://", this_url) ||
-               (!strstr(this_url, "://") &&
-                (!config->proto_default ||
-                 checkprefix("http", config->proto_default)))))
+           && (urlnode->flags & GETOUT_USEREMOTE))
           hdrcbdata.honor_cd_filename = TRUE;
         else
           hdrcbdata.honor_cd_filename = FALSE;

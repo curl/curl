@@ -48,6 +48,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
   const char *str = ptr;
   const size_t cb = size * nmemb;
   const char *end = (char*)ptr + cb;
+  char *url = NULL;
 
   /*
    * Once that libcurl has called back tool_header_cb() the returned value
@@ -88,7 +89,9 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
    */
 
   if(hdrcbdata->honor_cd_filename &&
-     (cb > 20) && checkprefix("Content-disposition:", str)) {
+     (cb > 20) && checkprefix("Content-disposition:", str) &&
+     !curl_easy_getinfo(outs->config->easy, CURLINFO_EFFECTIVE_URL, &url) &&
+     url && (checkprefix("http://", url) || checkprefix("https://", url))) {
     const char *p = str + 20;
 
     /* look for the 'filename=' parameter
