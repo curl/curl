@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -34,10 +34,10 @@ single session may be controlling \fIrtsp://foo/twister/audio\fP and
 appropriate stream using this option. If unset, libcurl will default to
 operating on generic server options by passing '*' in the place of the RTSP
 Stream URI. This option is distinct from \fICURLOPT_URL(3)\fP. When working
-with RTSP, the \fICURLOPT_STREAM_URI(3)\fP indicates what URL to send to the
-server in the request header while the \fICURLOPT_URL(3)\fP indicates where to
-make the connection to.  (e.g. the \fICURLOPT_URL(3)\fP for the above examples
-might be set to \fIrtsp://foo/twister\fP
+with RTSP, the \fICURLOPT_RTSP_STREAM_URI(3)\fP indicates what URL to send to
+the server in the request header while the \fICURLOPT_URL(3)\fP indicates
+where to make the connection to.  (e.g. the \fICURLOPT_URL(3)\fP for the above
+examples might be set to \fIrtsp://foo/twister\fP
 .SH DEFAULT
 '*'
 .SH PROTOCOLS
