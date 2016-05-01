@@ -22,7 +22,7 @@
 ###########################################################################
 #
 # scan nroff pages to find basic syntactic problems such as unbalanced \f
-# codes
+# codes or references to non-existing curl man pages.
 
 my $docsroot = $ARGV[0];
 
@@ -38,6 +38,20 @@ my @f = @ARGV;
 
 my %manp;
 
+sub manpresent {
+    my ($man) = @_;
+    if($manp{$man}) {
+        return 1;
+    }
+    elsif(-r "$docsroot/$man" ||
+          -r "$docsroot/libcurl/$man" ||
+          -r "$docsroot/libcurl/opts/$man") {
+        $manp{$man}=1;
+        return 1;
+    }
+    return 0;
+}
+
 sub file {
     my ($f) = @_;
     open(F, "<$f") ||
@@ -50,24 +64,29 @@ sub file {
             my ($pre, $str, $post)=($1, $2, $3);
             if($post ne "P") {
                 print STDERR "error: $f:$line: missing \\fP after $str\n";
+                $errrors++;
             }
-            if($str =~ /(curl([^ ]*))\(3\)/i) {
+            if($str =~ /((libcurl|curl)([^ ]*))\(3\)/i) {
                 my $man = "$1.3";
-                if($manp{$man}) {
-                    ;
-                }
-                elsif(-r "$docsroot/$man" ||
-                      -r "$docsroot/libcurl/$man" ||
-                      -r "$docsroot/libcurl/opts/$man") {
-                    $manp{$man}=1;
-                }
-                else {
+                if(!manpresent($man)) {
                     print STDERR "error: $f:$line: refering to non-existing man page $man\n";
+                    $errors++;
                 }
             }
         }
         if($l =~ /(curl([^ ]*)\(3\))/i) {
             print STDERR "error: $f:$line: non-referencing $1\n";
+            $errors++;
+        }
+        if($l =~ /^\.BR (.*)/) {
+            my $i= $1;
+            while($i =~ s/((lib|)curl([^ ]*)) *\"\(3\)(,|) *\" *//i ) {
+                my $man = "$1.3";
+                if(!manpresent($man)) {
+                    print STDERR "error: $f:$line: refering to non-existing man page $man\n";
+                    $errors++;
+                }
+            }
         }
         $line++;
     }
@@ -77,3 +96,5 @@ sub file {
 foreach my $f (@f) {
     file($f);
 }
+
+    exit $errors?1:0;
