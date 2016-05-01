@@ -1,7 +1,7 @@
 Curl and libcurl 7.49.0
 
  Public curl releases:         154
- Command line options:         183
+ Command line options:         185
  curl_easy_setopt() options:   224
  Public functions in libcurl:  61
  Contributors:                 1364
@@ -18,6 +18,8 @@ This release includes the following changes:
  o curl: added --connect-to [27]
  o libcurl: added CURLOPT_TCP_FASTOPEN [28]
  o curl: added --tcp-fastopen [29]
+ o curl: remove support for --ftpport, -http-request and --socks
+   (deprecated versions since around 10 years)
 
 This release includes the following bugfixes:
 
@@ -79,6 +81,21 @@ This release includes the following bugfixes:
  o CURLINFO_TLS_SESSION.3: clarify TLS library support before 7.48.0
  o CONNECT_ONLY: don't close connection on GSS 401/407 reponses [39]
  o opts: Fix some syntax errors in example code fragments [40]
+ o mbedtls: Fix session resume [41]
+ o test1139: verifies libcurl option man page presence
+ o CURLINFO_TLS_SSL_PTR.3: Clarify SSL pointer availability [42]
+ o curl: make --disable work as long form of -q
+ o curl: use --telnet-option as documented
+ o curl.1: document --ftp-ssl-reqd, --krb4 and --ntlm-wb
+ o curl: -h output lacked --proxy-header and --ntlm-wb
+ o curl -J: make it work even without http:// scheme on URL [43]
+ o lib: include curl_printf.h as one of the last headers [44]
+ o tests: handle path properly on Msys/Cygwin [45]
+ o curl.1: --mail-rcpt can be used multiple times [46]
+ o CURLOPT_ACCEPT_ENCODING.3: clarified [47]
+ o docs: fixed lots of broken man page references
+ o tls: make setting pinnedkey option fail if not supported [48]
+ o test1140: run nroff-scan to verify man pages
 
 This release includes the following known bugs:
 
@@ -87,14 +104,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alexis La Goutte, Anatol Belski, Damien Vielpeau,
-  Dan Cristian, Daniel Stenberg, David Benjamin, Diego Bes, Dusty Mabe,
-  Evgeny Grin, Henrik Gaßmann, Irfan Adilovic, Isaac Boukris, Joel Depooter,
-  John Wanghui, Joonas Kuorilehto, Juan RP, Kamil Dudka, Leif W,
-  Linus Nordberg, Marcel Raad, Marquis de Muesli, Michael Kaufmann,
-  Michael Osipov, Patrick Monnerat, Ray Satiro, Rod Widdowson, Steve Holme,
-  Tatsuhiro Tsujikawa, Theodore Dubois, Travis Burtrum, Viktor Szakáts,
-  (32 contributors)
+  Alessandro Ghedini, Alexis La Goutte, Anatol Belski, Bru Rom,
+  Damien Vielpeau, Dan Cristian, Daniel Stenberg, David Benjamin, Diego Bes,
+  Dusty Mabe, Evgeny Grin, Henrik Gaßmann, Irfan Adilovic, Isaac Boukris,
+  Joel Depooter, John Wanghui, Joonas Kuorilehto, Juan RP, Kai Noda,
+  Kamil Dudka, Leif W, Linus Nordberg, Marcel Raad, Marquis de Muesli,
+  Michael Kaufmann, Michael Osipov, Moti Avrahami, Patrick Monnerat,
+  Ray Satiro, Rod Widdowson, Steve Holme, Tatsuhiro Tsujikawa, Theodore Dubois,
+  Thomas Glanzmann, Travis Burtrum, Viktor Szakáts,
+  (36 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -140,3 +158,11 @@ References to bug reports and discussions on issues:
  [38] = https://curl.haxx.se/mail/lib-2016-04/0084.html
  [39] = https://curl.haxx.se/bug/?i=655
  [40] = https://curl.haxx.se/bug/?i=779
+ [41] = https://curl.haxx.se/mail/lib-2016-04/0095.html
+ [42] = https://curl.haxx.se/mail/lib-2016-04/0126.html
+ [43] = https://curl.haxx.se/bug/?i=760
+ [44] = https://curl.haxx.se/bug/?i=743
+ [45] = https://curl.haxx.se/bug/?i=675
+ [46] = https://curl.haxx.se/bug/?i=784
+ [47] = https://curl.haxx.se/bug/?i=785
+ [48] = https://curl.haxx.se/bug/?i=781
