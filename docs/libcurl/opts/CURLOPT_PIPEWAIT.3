@@ -36,7 +36,7 @@ libcurl will check for existing connections to re-use and pipeline on. If no
 such connection exists it will immediately continue and create a fresh new
 connection to use.
 
-By setting this option to 1 - and having \fICURLMOPT_PIPELINE(3)\fP enabled
+By setting this option to 1 - and having \fICURLMOPT_PIPELINING(3)\fP enabled
 for the multi handle this transfer is associated with - libcurl will instead
 wait for the connection to reveal if it is possible to pipeline/multiplex on
 before it continues. This enables libcurl to much better keep the number of
