@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,7 +51,6 @@ and that's a problem since options.h hasn't been included yet. */
 #include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"
-#include "cyassl.h"
 #include "vtls.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
@@ -68,6 +67,8 @@ and that's a problem since options.h hasn't been included yet. */
 #endif
 #include <cyassl/ctaocrypt/random.h>
 #include <cyassl/ctaocrypt/sha256.h>
+
+#include "cyassl.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -97,18 +98,6 @@ and that's a problem since options.h hasn't been included yet. */
 #if (LIBCYASSL_VERSION_HEX < 0x03006006) || \
     defined(HAVE_WOLFSSLV3_CLIENT_METHOD)
 #define WOLFSSL_ALLOW_SSLV3
-#endif
-#endif
-
-/* KEEP_PEER_CERT is a product of the presence of build time symbol
-   OPENSSL_EXTRA without NO_CERTS, depending on the version. KEEP_PEER_CERT is
-   in wolfSSL's settings.h, and the latter two are build time symbols in
-   options.h. */
-#ifndef KEEP_PEER_CERT
-#if defined(HAVE_CYASSL_GET_PEER_CERTIFICATE) || \
-    defined(HAVE_WOLFSSL_GET_PEER_CERTIFICATE) || \
-    (defined(OPENSSL_EXTRA) && !defined(NO_CERTS))
-#define KEEP_PEER_CERT
 #endif
 #endif
 

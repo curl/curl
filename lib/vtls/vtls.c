@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -815,9 +815,9 @@ CURLcode Curl_pin_peer_pubkey(struct SessionHandle *data,
   if(!pubkey || !pubkeylen)
     return result;
 
-#ifdef curlssl_sha256sum
   /* only do this if pinnedpubkey starts with "sha256//", length 8 */
   if(strncmp(pinnedpubkey, "sha256//", 8) == 0) {
+#ifdef curlssl_sha256sum
     /* compute sha256sum of public key */
     sha256sumdigest = malloc(SHA256_DIGEST_LENGTH);
     if(!sha256sumdigest)
@@ -870,11 +870,12 @@ CURLcode Curl_pin_peer_pubkey(struct SessionHandle *data,
     } while(end_pos && begin_pos);
     Curl_safefree(encoded);
     Curl_safefree(pinkeycopy);
+#else
+    /* without sha256 support, this cannot match */
+    (void)data;
+#endif
     return result;
   }
-#else
-  (void)data;
-#endif
 
   fp = fopen(pinnedpubkey, "rb");
   if(!fp)

@@ -50,6 +50,9 @@ void Curl_mbedtls_session_free(void *ptr);
 size_t Curl_mbedtls_version(char *buffer, size_t size);
 int Curl_mbedtls_shutdown(struct connectdata *conn, int sockindex);
 
+/* this backends supports CURLOPT_PINNEDPUBLICKEY */
+#define have_curlssl_pinnedpubkey 1
+
 /* API setup for mbedTLS */
 #define curlssl_init() Curl_mbedtls_init()
 #define curlssl_cleanup() Curl_mbedtls_cleanup()

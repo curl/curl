@@ -2072,12 +2072,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #endif
     break;
   case CURLOPT_PINNEDPUBLICKEY:
+#ifdef have_curlssl_pinnedpubkey /* only by supported backends */
     /*
      * Set pinned public key for SSL connection.
      * Specify file name of the public key in DER format.
      */
     result = setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY],
                        va_arg(param, char *));
+#else
+    result = CURLE_NOT_BUILT_IN;
+#endif
     break;
   case CURLOPT_CAINFO:
     /*

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -51,6 +51,9 @@ int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 
 /* this backend supports the CAPATH option */
 #define have_curlssl_ca_path 1
+
+/* this backends supports CURLOPT_PINNEDPUBLICKEY */
+#define have_curlssl_pinnedpubkey 1
 
 /* API setup for PolarSSL */
 #define curlssl_init() Curl_polarssl_init()
