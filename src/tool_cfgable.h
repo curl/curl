@@ -122,6 +122,7 @@ struct OperationConfig {
   char *customrequest;
   char *krblevel;
   long httpversion;
+  char *customhttpversion;
   bool nobuffer;
   bool readbusy;            /* set when reading input returns EAGAIN */
   bool globoff;

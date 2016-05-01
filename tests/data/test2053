@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_CUSTOMHTTPVERSION
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain
+
+OK
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Send custom HTTP version to host
+ </name>
+
+ <command>
+http://www.example.com:%HTTPPORT/2053 --resolve www.example.com:%HTTPPORT:%HOSTIP --custom-http-version 9.8
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /2053 HTTP/9.8
+Host: www.example.com:%HTTPPORT
+Accept: */*
+
+</protocol>
+
+</verify>
+</testcase>

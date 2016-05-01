@@ -959,6 +959,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
           else if(curlinfo->features & CURL_VERSION_HTTP2) {
             my_setopt_enum(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
           }
+          if(config->customhttpversion)
+          my_setopt_str(curl, CURLOPT_CUSTOMHTTPVERSION,
+                        config->customhttpversion);
 
           /* new in libcurl 7.10.6 (default is Basic) */
           if(config->authtype)

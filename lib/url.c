@@ -1293,6 +1293,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     data->set.httpversion = arg;
     break;
 
+  case CURLOPT_CUSTOMHTTPVERSION:
+    /*
+     * String to use in the HTTP version field
+     */
+    result = setstropt(&data->set.str[STRING_CUSTOMHTTPVERSION],
+                       va_arg(param, char *));
+    break;
+
   case CURLOPT_HTTPAUTH:
     /*
      * Set HTTP Authentication type BITMASK.

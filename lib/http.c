@@ -2265,6 +2265,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   /* Use 1.1 unless the user specifically asked for 1.0 or the server only
      supports 1.0 */
   httpstring= use_http_1_1plus(data, conn)?"1.1":"1.0";
+  if(data->set.str[STRING_CUSTOMHTTPVERSION])
+    httpstring = data->set.str[STRING_CUSTOMHTTPVERSION];
 
   /* initialize a dynamic send-buffer */
   req_buffer = Curl_add_buffer_init();

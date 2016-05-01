@@ -1689,6 +1689,9 @@ typedef enum {
   /* Set TCP Fast Open */
   CINIT(TCP_FASTOPEN, LONG, 244),
 
+  /* Custom HTTP Version */
+  CINIT(CUSTOMHTTPVERSION, STRINGPOINT, 245),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

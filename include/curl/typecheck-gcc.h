@@ -226,6 +226,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_COOKIEJAR ||                                           \
    (option) == CURLOPT_COOKIELIST ||                                          \
    (option) == CURLOPT_CRLFILE ||                                             \
+   (option) == CURLOPT_CUSTOMHTTPVERSION ||                                   \
    (option) == CURLOPT_CUSTOMREQUEST ||                                       \
    (option) == CURLOPT_DEFAULT_PROTOCOL ||                                    \
    (option) == CURLOPT_DNS_INTERFACE ||                                       \
