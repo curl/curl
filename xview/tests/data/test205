@@ -1,0 +1,38 @@
+<testcase>
+<info>
+<keywords>
+FILE
+FAILURE
+</keywords>
+</info>
+
+# no Server-side
+
+# Client-side
+<client>
+<server>
+file
+</server>
+ <name>
+"upload" with file://
+ </name>
+ <command>
+file://localhost/%PWD/log/nonexisting/result205.txt -T log/upload205.txt
+</command>
+<file name="log/upload205.txt">
+data
+in
+file
+to
+write
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 23 => CURLE_WRITE_ERROR
+<errorcode>
+23
+</errorcode>
+</verify>
+</testcase>

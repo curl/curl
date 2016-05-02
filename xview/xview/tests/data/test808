@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+EXAMINE
+CUSTOMREQUEST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+* 17 EXISTS
+* 2 RECENT
+* OK [UNSEEN 8] Message 8 is first unseen
+* OK [UIDVALIDITY 3857529045] UIDs valid
+* OK [UIDNEXT 4392] Predicted next UID
+* FLAGS (\Answered \Flagged \Deleted \Seen \Draft)
+* OK [PERMANENTFLAGS ()] No permanent flags permitted
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP EXAMINE mailbox (CUSTOMREQUEST)
+ </name>
+ <command>
+imap://%HOSTIP:%IMAPPORT -u user:secret -X 'EXAMINE 808'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 EXAMINE 808
+A004 LOGOUT
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+unittest
+hash
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+Internal hash create/add/destroy testing, exercising clean functions
+ </name>
+<tool>
+unit1602
+</tool>
+</client>
+
+</testcase>

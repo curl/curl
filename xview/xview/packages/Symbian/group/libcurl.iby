@@ -1,0 +1,14 @@
+//
+// libcurl file transfer DLL
+//
+// Use this file with buildrom to add libcurl to a device ROM
+//
+
+#ifndef LIBCURL_IBY
+#define LIBCURL_IBY
+
+#include <openenv.iby>
+
+file=ABI_DIR\BUILD_DIR\libcurl.dll        \sys\bin\libcurl.dll
+
+#endif // LIBCURL_IBY

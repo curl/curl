@@ -1,0 +1,250 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 2013, Linus Nielsen Feltzing, <linus@haxx.se>
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
+#include "test.h"
+
+#include "testutil.h"
+#include "warnless.h"
+#include "memdebug.h"
+
+#define TEST_HANG_TIMEOUT 60 * 1000
+#define MAX_URLS 200
+#define MAX_BLACKLIST 20
+
+int urltime[MAX_URLS];
+char *urlstring[MAX_URLS];
+CURL *handles[MAX_URLS];
+char *site_blacklist[MAX_BLACKLIST];
+char *server_blacklist[MAX_BLACKLIST];
+int num_handles;
+int blacklist_num_servers;
+int blacklist_num_sites;
+
+static size_t
+write_callback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+  size_t realsize = size * nmemb;
+  (void)contents;
+  (void)userp;
+
+  return realsize;
+}
+
+static int parse_url_file(const char *filename)
+{
+  FILE *f;
+  int filetime;
+  char buf[200];
+
+  num_handles = 0;
+  blacklist_num_sites = 0;
+  blacklist_num_servers = 0;
+
+  f = fopen(filename, "rb");
+  if(!f)
+    return 0;
+
+  while(!feof(f)) {
+    if(fscanf(f, "%d %s\n", &filetime, buf)) {
+      urltime[num_handles] = filetime;
+      urlstring[num_handles] = strdup(buf);
+      num_handles++;
+      continue;
+    }
+
+    if(fscanf(f, "blacklist_site %s\n", buf)) {
+      site_blacklist[blacklist_num_sites] = strdup(buf);
+      blacklist_num_sites++;
+      continue;
+    }
+
+    break;
+  }
+  fclose(f);
+
+  site_blacklist[blacklist_num_sites] = NULL;
+  server_blacklist[blacklist_num_servers] = NULL;
+  return num_handles;
+}
+
+static void free_urls(void)
+{
+  int i;
+  for(i = 0;i < num_handles;i++) {
+    Curl_safefree(urlstring[i]);
+  }
+  for(i = 0;i < blacklist_num_servers;i++) {
+    Curl_safefree(server_blacklist[i]);
+  }
+  for(i = 0;i < blacklist_num_sites;i++) {
+    Curl_safefree(site_blacklist[i]);
+  }
+}
+
+static int create_handles(void)
+{
+  int i;
+
+  for(i = 0;i < num_handles;i++) {
+    handles[i] = curl_easy_init();
+  }
+  return 0;
+}
+
+static void setup_handle(char *base_url, CURLM *m, int handlenum)
+{
+  char urlbuf[256];
+
+  sprintf(urlbuf, "%s%s", base_url, urlstring[handlenum]);
+  curl_easy_setopt(handles[handlenum], CURLOPT_URL, urlbuf);
+  curl_easy_setopt(handles[handlenum], CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(handles[handlenum], CURLOPT_FAILONERROR, 1L);
+  curl_easy_setopt(handles[handlenum], CURLOPT_WRITEFUNCTION, write_callback);
+  curl_easy_setopt(handles[handlenum], CURLOPT_WRITEDATA, NULL);
+  curl_multi_add_handle(m, handles[handlenum]);
+}
+
+static void remove_handles(void)
+{
+  int i;
+
+  for(i = 0;i < num_handles;i++) {
+    if(handles[i])
+      curl_easy_cleanup(handles[i]);
+  }
+}
+
+int test(char *URL)
+{
+  int res = 0;
+  CURLM *m = NULL;
+  CURLMsg *msg; /* for picking up messages with the transfer status */
+  int msgs_left; /* how many messages are left */
+  int running;
+  int handlenum = 0;
+  struct timeval last_handle_add;
+
+  if(parse_url_file("log/urls.txt") <= 0)
+    goto test_cleanup;
+
+  start_test_timing();
+
+  curl_global_init(CURL_GLOBAL_ALL);
+
+  multi_init(m);
+
+  create_handles();
+
+  multi_setopt(m, CURLMOPT_PIPELINING, 1L);
+  multi_setopt(m, CURLMOPT_MAX_HOST_CONNECTIONS, 2L);
+  multi_setopt(m, CURLMOPT_MAX_PIPELINE_LENGTH, 3L);
+  multi_setopt(m, CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, 15000L);
+  multi_setopt(m, CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, 10000L);
+
+  multi_setopt(m, CURLMOPT_PIPELINING_SITE_BL, site_blacklist);
+  multi_setopt(m, CURLMOPT_PIPELINING_SERVER_BL, server_blacklist);
+
+  last_handle_add = tutil_tvnow();
+
+  for(;;) {
+    struct timeval interval;
+    struct timeval now;
+    long int msnow, mslast;
+    fd_set rd, wr, exc;
+    int maxfd = -99;
+    long timeout;
+
+    interval.tv_sec = 1;
+    interval.tv_usec = 0;
+
+    if(handlenum < num_handles) {
+      now = tutil_tvnow();
+      msnow = now.tv_sec * 1000 + now.tv_usec / 1000;
+      mslast = last_handle_add.tv_sec * 1000 + last_handle_add.tv_usec / 1000;
+      if((msnow - mslast) >= urltime[handlenum]) {
+        fprintf(stdout, "Adding handle %d\n", handlenum);
+        setup_handle(URL, m, handlenum);
+        last_handle_add = now;
+        handlenum++;
+      }
+    }
+
+    curl_multi_perform(m, &running);
+
+    abort_on_test_timeout();
+
+    /* See how the transfers went */
+    while ((msg = curl_multi_info_read(m, &msgs_left))) {
+      if (msg->msg == CURLMSG_DONE) {
+        int i, found = 0;
+
+        /* Find out which handle this message is about */
+        for (i = 0; i < num_handles; i++) {
+          found = (msg->easy_handle == handles[i]);
+          if(found)
+            break;
+        }
+
+        printf("Handle %d Completed with status %d\n", i, msg->data.result);
+        curl_multi_remove_handle(m, handles[i]);
+      }
+    }
+
+    if(handlenum == num_handles && !running) {
+      break; /* done */
+    }
+
+    FD_ZERO(&rd);
+    FD_ZERO(&wr);
+    FD_ZERO(&exc);
+
+    curl_multi_fdset(m, &rd, &wr, &exc, &maxfd);
+
+    /* At this point, maxfd is guaranteed to be greater or equal than -1. */
+
+    curl_multi_timeout(m, &timeout);
+
+    if(timeout < 0)
+      timeout = 1;
+
+    interval.tv_sec = timeout / 1000;
+    interval.tv_usec = (timeout % 1000) * 1000;
+
+    interval.tv_sec = 0;
+    interval.tv_usec = 1000;
+
+    select_test(maxfd+1, &rd, &wr, &exc, &interval);
+
+    abort_on_test_timeout();
+  }
+
+test_cleanup:
+
+  remove_handles();
+
+  /* undocumented cleanup sequence - type UB */
+
+  curl_multi_cleanup(m);
+  curl_global_cleanup();
+
+  free_urls();
+  return res;
+}

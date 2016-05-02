@@ -1,0 +1,44 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_multi_remove_handle 3 "6 March 2002" "libcurl 7.9.5" "libcurl Manual"
+.SH NAME
+curl_multi_remove_handle - remove an easy handle from a multi session
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLMcode curl_multi_remove_handle(CURLM *multi_handle, CURL *easy_handle);
+.ad
+.SH DESCRIPTION
+Removes a given \fIeasy_handle\fP from the \fImulti_handle\fP. This will make
+the specified easy handle be removed from this multi handle's control.
+
+When the easy handle has been removed from a multi stack, it is again
+perfectly legal to invoke \fIcurl_easy_perform(3)\fP on this easy handle.
+
+Removing an easy handle while being used is perfectly legal and will
+effectively halt the transfer in progress involving that easy handle. All
+other easy handles and transfers will remain unaffected.
+.SH RETURN VALUE
+CURLMcode type, general libcurl multi interface error code.
+.SH "SEE ALSO"
+.BR curl_multi_cleanup "(3)," curl_multi_init "(3), "
+.BR curl_multi_add_handle "(3) "

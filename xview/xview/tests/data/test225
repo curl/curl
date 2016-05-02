@@ -1,0 +1,28 @@
+<testcase>
+<info>
+<keywords>
+FTP
+FAILURE
+</keywords>
+</info>
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP %0a-code in URL's name part
+ </name>
+ <command>
+ftp://bad%0auser:passwd@%HOSTIP:%FTPPORT/225%0a
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 3 == CURLE_URL_MALFORMAT
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

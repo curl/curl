@@ -1,0 +1,220 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Basic auth
+HTTP Digest auth
+</keywords>
+</info>
+# Server-side
+<reply>
+
+<!-- Alternate the order that Basic and Digest headers appear in responses to
+ensure that the order doesn't matter. -->
+
+<!-- First request has Digest auth, wrong password -->
+<data100>
+HTTP/1.1 401 Need Basic or Digest auth
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: Digest realm="testrealm", nonce="1"
+WWW-Authenticate: Basic realm="testrealm"
+
+This is not the real page!
+</data100>
+
+<data1100>
+HTTP/1.1 401 Sorry wrong password
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="2"
+
+This is a bad password page!
+</data1100>
+
+<!-- Second request has Basic auth, right password -->
+<data200>
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data200>
+
+<!-- Third request has Digest auth, wrong password -->
+<data300>
+HTTP/1.1 401 Need Basic or Digest auth (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: Digest realm="testrealm", nonce="3"
+WWW-Authenticate: Basic realm="testrealm"
+
+This is not the real page!
+</data300>
+
+<data1300>
+HTTP/1.1 401 Sorry wrong password (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="4"
+
+This is a bad password page!
+</data1300>
+
+<!-- Fourth request has Basic auth, wrong password -->
+<data400>
+HTTP/1.1 401 Sorry wrong password (3)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Digest realm="testrealm", nonce="5"
+WWW-Authenticate: Basic realm="testrealm"
+
+This is a bad password page!
+</data400>
+
+<!-- Fifth request has Basic auth, right password -->
+<data500>
+HTTP/1.1 200 Things are fine in server land (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data500>
+
+<datacheck>
+HTTP/1.1 401 Need Basic or Digest auth
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: Digest realm="testrealm", nonce="1"
+WWW-Authenticate: Basic realm="testrealm"
+
+HTTP/1.1 401 Sorry wrong password
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="2"
+
+This is a bad password page!
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+HTTP/1.1 401 Need Basic or Digest auth (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 27
+WWW-Authenticate: Digest realm="testrealm", nonce="3"
+WWW-Authenticate: Basic realm="testrealm"
+
+HTTP/1.1 401 Sorry wrong password (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Basic realm="testrealm"
+WWW-Authenticate: Digest realm="testrealm", nonce="4"
+
+This is a bad password page!
+HTTP/1.1 401 Sorry wrong password (3)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 29
+WWW-Authenticate: Digest realm="testrealm", nonce="5"
+WWW-Authenticate: Basic realm="testrealm"
+
+This is a bad password page!
+HTTP/1.1 200 Things are fine in server land (2)
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+</features>
+<tool>
+libauthretry
+</tool>
+
+ <name>
+HTTP authorization retry (Digest switching to Basic)
+ </name>
+ <setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+ </setenv>
+ <command>
+http://%HOSTIP:%HTTPPORT/2026 digest basic
+</command>
+<precheck>
+chkhostname curlhost
+</precheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /20260100 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /20260100 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/20260100", response="5f992a2e761ab926256419f7c685f85b"
+Accept: */*
+
+GET /20260200 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Accept: */*
+
+GET /20260300 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /20260300 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="3", uri="/20260300", response="132242e602882251929be93228c830ae"
+Accept: */*
+
+GET /20260400 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
+Accept: */*
+
+GET /20260500 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

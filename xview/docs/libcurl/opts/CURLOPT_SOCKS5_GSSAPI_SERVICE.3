@@ -1,0 +1,46 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SOCKS5_GSSAPI_SERVICE 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SOCKS5_GSSAPI_SERVICE \- proxy socks gssapi service name
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SOCKS5_GSSAPI_SERVICE, char *name);
+.SH DESCRIPTION
+Pass a char * as parameter to a string holding the \fIname\fP of the
+service. The default service name for a SOCKS5 server is
+rcmd/server-fqdn. This option allows you to change it.
+.SH DEFAULT
+See above
+.SH PROTOCOLS
+Most
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.19.4
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+.SH "SEE ALSO"
+.BR CURLOPT_PROXY "(3), " CURLOPT_PROXYTYPE "(3), "

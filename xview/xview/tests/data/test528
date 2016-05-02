@@ -1,0 +1,65 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+multi
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 47
+
+file contents should appear once for each file
+</data>
+<datacheck>
+file contents should appear once for each file
+file contents should appear once for each file
+file contents should appear once for each file
+file contents should appear once for each file
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib526
+</tool>
+ <name>
+HTTP GET same file using different handles but same connection
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/path/528
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /path/528 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /path/528 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /path/528 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /path/528 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

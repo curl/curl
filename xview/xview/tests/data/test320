@@ -1,0 +1,96 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+TLS-SRP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.0 200 OK
+Content-type: text/html
+
+
+<HTML><BODY>
+<CENTER><H1>This is <a href="http://www.gnu.org/software/gnutls">GnuTLS</a></H1></CENTER>
+
+
+<p>Session ID: <i>003030000100000001000000000000000030330001000000B062410001000000</i></p>
+<h5>If your browser supports session resuming, then you should see the same session ID, when you press the <b>reload</b> button.</h5>
+<p>Connected as user 'jsmith'.</p>
+<P>
+<TABLE border=1><TR><TD>Protocol version:</TD><TD>TLS1.2</TD></TR>
+<TR><TD>Key Exchange:</TD><TD>SRP</TD></TR>
+<TR><TD>Compression</TD><TD>NULL</TD></TR>
+<TR><TD>Cipher</TD><TD>AES-NNN-CBC</TD></TR>
+<TR><TD>MAC</TD><TD>SHA1</TD></TR>
+<TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_NNN_CBC_SHA1</TD></TR></p></TABLE>
+<hr><P>Your HTTP header was:<PRE>Host: localhost:9011
+User-Agent: curl-test-suite
+Accept: */*
+
+</PRE></P>
+</BODY></HTML>
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+httptls+srp
+</server>
+<features>
+TLS-SRP
+</features>
+ <name>
+simple TLS-SRP HTTPS GET, check user in response
+ </name>
+<command>
+--insecure --tlsauthtype SRP --tlsuser jsmith --tlspassword abc -A curl-test-suite https://%HOSTIP:%HTTPTLSPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+</protocol>
+<file name="log/curl320.out" mode="text">
+HTTP/1.0 200 OK
+Content-type: text/html
+
+
+<HTML><BODY>
+<CENTER><H1>This is <a href="http://www.gnu.org/software/gnutls">GnuTLS</a></H1></CENTER>
+
+
+
+<h5>If your browser supports session resuming, then you should see the same session ID, when you press the <b>reload</b> button.</h5>
+<p>Connected as user 'jsmith'.</p>
+<P>
+<TABLE border=1><TR><TD></TD></TR>
+<TR><TD>Key Exchange:</TD><TD>SRP</TD></TR>
+<TR><TD>Compression</TD><TD>NULL</TD></TR>
+<TR><TD>Cipher</TD><TD>AES-NNN-CBC</TD></TR>
+<TR><TD>MAC</TD><TD>SHA1</TD></TR>
+<TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_NNN_CBC_SHA1</TD></TR></p></TABLE>
+<hr><P>Your HTTP header was:<PRE>Host: %HOSTIP:%HTTPTLSPORT
+User-Agent: curl-test-suite
+Accept: */*
+
+</PRE></P>
+</BODY></HTML>
+
+</file>
+<stripfile>
+s/^<p>Session ID:.*//
+s/Protocol version:.*[0-9]//
+s/GNUTLS/GnuTLS/
+s/(AES[-_])\d\d\d([-_]CBC)/$1NNN$2/
+</stripfile>
+</verify>
+
+</testcase>

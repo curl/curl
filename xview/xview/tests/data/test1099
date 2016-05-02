@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+TFTP
+TFTP RRQ
+FAILURE
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+data for 1099
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+tftp
+</server>
+ <name>
+TFTP get first a non-existing file then an existing
+ </name>
+ <command>
+tftp://%HOSTIP:%TFTPPORT/an/invalid-file tftp://%HOSTIP:%TFTPPORT//1099 --trace-ascii log/traceit
+</command>
+</client>
+
+#
+# Verify pseudo protocol after the test has been "shot"
+<verify>
+<protocol>
+opcode: 1
+mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: an/invalid-file
+opcode: 1
+mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /1099
+</protocol>
+<stdout>
+data for 1099
+</stdout>
+</verify>
+</testcase>

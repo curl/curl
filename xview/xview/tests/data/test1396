@@ -1,0 +1,27 @@
+<testcase>
+<info>
+<keywords>
+unittest
+curl_easy_escape
+curl_easy_unescape
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+curl_easy_escape and curl_easy_unescape
+ </name>
+<tool>
+unit1396
+</tool>
+</client>
+
+</testcase>

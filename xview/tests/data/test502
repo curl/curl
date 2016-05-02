@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+FILE
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+foo
+   bar swsclose
+bar
+   foo
+moo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+file
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib502
+</tool>
+
+ <name>
+simple multi file:// get
+ </name>
+ <command>
+file://%PWD/log/test502.txt
+</command>
+<file name="log/test502.txt">
+foo
+   bar swsclose
+bar
+   foo
+moo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

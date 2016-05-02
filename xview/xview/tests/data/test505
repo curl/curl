@@ -1,0 +1,66 @@
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib505
+</tool>
+
+ <name>
+FTP upload with rename after transfer
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/505 log/upload505
+</command>
+<file name="log/upload505">
+Contents
+of
+a file
+to verify
+ftp
+upload
+
+
+works?
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<upload>
+Contents
+of
+a file
+to verify
+ftp
+upload
+
+
+works?
+</upload>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+STOR 505
+RNFR 505
+RNTO 505-forreal
+QUIT
+</protocol>
+</verify>
+</testcase>

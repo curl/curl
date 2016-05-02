@@ -1,0 +1,226 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+cookies
+shared cookies
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data1>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Set-Cookie: test1=one; domain=foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
+Set-Cookie: test2=two; domain=host.foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
+Set-Cookie: test3=three; domain=foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
+Content-Length: 29
+
+run 1: set cookie 1, 2 and 3
+</data1>
+<data2>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:01 GMT
+Server: test-server/fake
+Content-Type: text/html
+Set-Cookie: test4=four; domain=host.foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
+Set-Cookie: test5=five; domain=host.foo.com; expires=Sat Feb 2 11:56:27 GMT 2030
+Content-Length: 26
+
+run 2: set cookie 4 and 5
+</data2>
+<data3>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:02 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Set-Cookie: test4=overwritten4; domain=host.foo.com; expires=Sat May 5 GMT 11:56:27 2035
+Set-Cookie: test1=overwritten1; domain=foo.com; expires=Thu Mar 3 GMT 11:56:27 2033
+Content-Type: text/html
+Content-Length: 32
+
+run 3: overwrite cookie 1 and 4
+</data3>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP with shared cookie list (and dns cache)
+</name>
+# Explicitly set the time zone to a known good one, in case the user is
+# using one of the 'right' zones that take into account leap seconds
+# which causes the cookie expiry times to be different.
+<setenv>
+TZ=GMT
+</setenv>
+<tool>
+lib506
+</tool>
+<command>
+http://%HOSTIP:%HTTPPORT/506
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+GLOBAL_INIT
+SHARE_INIT
+CURLSHOPT_LOCKFUNC
+CURLSHOPT_UNLOCKFUNC
+CURLSHOPT_USERDATA
+CURL_LOCK_DATA_COOKIE
+CURL_LOCK_DATA_DNS
+CURLOPT_SHARE
+lock:   share  [Pigs in space]: 0
+unlock: share  [Pigs in space]: 1
+CURLOPT_COOKIELIST injected_and_clobbered
+lock:   cookie [Pigs in space]: 2
+unlock: cookie [Pigs in space]: 3
+CURLOPT_COOKIELIST ALL
+lock:   cookie [Pigs in space]: 4
+unlock: cookie [Pigs in space]: 5
+CURLOPT_COOKIELIST session
+lock:   cookie [Pigs in space]: 6
+unlock: cookie [Pigs in space]: 7
+CURLOPT_COOKIELIST injected
+lock:   cookie [Pigs in space]: 8
+unlock: cookie [Pigs in space]: 9
+CURLOPT_COOKIELIST SESS
+lock:   cookie [Pigs in space]: 10
+unlock: cookie [Pigs in space]: 11
+CLEANUP
+lock:   cookie [Pigs in space]: 12
+unlock: cookie [Pigs in space]: 13
+lock:   share  [Pigs in space]: 14
+unlock: share  [Pigs in space]: 15
+*** run 1
+CURLOPT_SHARE
+lock:   share  [Pigs in space]: 16
+unlock: share  [Pigs in space]: 17
+PERFORM
+lock:   dns    [Pigs in space]: 18
+unlock: dns    [Pigs in space]: 19
+lock:   dns    [Pigs in space]: 20
+unlock: dns    [Pigs in space]: 21
+lock:   cookie [Pigs in space]: 22
+unlock: cookie [Pigs in space]: 23
+lock:   cookie [Pigs in space]: 24
+unlock: cookie [Pigs in space]: 25
+lock:   cookie [Pigs in space]: 26
+unlock: cookie [Pigs in space]: 27
+lock:   cookie [Pigs in space]: 28
+unlock: cookie [Pigs in space]: 29
+run 1: set cookie 1, 2 and 3
+lock:   dns    [Pigs in space]: 30
+unlock: dns    [Pigs in space]: 31
+CLEANUP
+lock:   cookie [Pigs in space]: 32
+unlock: cookie [Pigs in space]: 33
+lock:   share  [Pigs in space]: 34
+unlock: share  [Pigs in space]: 35
+*** run 2
+CURLOPT_SHARE
+lock:   share  [Pigs in space]: 36
+unlock: share  [Pigs in space]: 37
+PERFORM
+lock:   dns    [Pigs in space]: 38
+unlock: dns    [Pigs in space]: 39
+lock:   cookie [Pigs in space]: 40
+unlock: cookie [Pigs in space]: 41
+lock:   cookie [Pigs in space]: 42
+unlock: cookie [Pigs in space]: 43
+lock:   cookie [Pigs in space]: 44
+unlock: cookie [Pigs in space]: 45
+run 2: set cookie 4 and 5
+lock:   dns    [Pigs in space]: 46
+unlock: dns    [Pigs in space]: 47
+CLEANUP
+lock:   cookie [Pigs in space]: 48
+unlock: cookie [Pigs in space]: 49
+lock:   share  [Pigs in space]: 50
+unlock: share  [Pigs in space]: 51
+*** run 3
+CURLOPT_SHARE
+lock:   share  [Pigs in space]: 52
+unlock: share  [Pigs in space]: 53
+CURLOPT_COOKIEJAR
+CURLOPT_COOKIELIST FLUSH
+lock:   cookie [Pigs in space]: 54
+unlock: cookie [Pigs in space]: 55
+PERFORM
+lock:   dns    [Pigs in space]: 56
+unlock: dns    [Pigs in space]: 57
+lock:   cookie [Pigs in space]: 58
+unlock: cookie [Pigs in space]: 59
+lock:   cookie [Pigs in space]: 60
+unlock: cookie [Pigs in space]: 61
+lock:   cookie [Pigs in space]: 62
+unlock: cookie [Pigs in space]: 63
+run 3: overwrite cookie 1 and 4
+lock:   dns    [Pigs in space]: 64
+unlock: dns    [Pigs in space]: 65
+CLEANUP
+lock:   cookie [Pigs in space]: 66
+unlock: cookie [Pigs in space]: 67
+lock:   share  [Pigs in space]: 68
+unlock: share  [Pigs in space]: 69
+CURLOPT_SHARE
+lock:   share  [Pigs in space]: 70
+unlock: share  [Pigs in space]: 71
+CURLOPT_COOKIELIST ALL
+lock:   cookie [Pigs in space]: 72
+unlock: cookie [Pigs in space]: 73
+CURLOPT_COOKIEJAR
+CURLOPT_COOKIELIST RELOAD
+lock:   cookie [Pigs in space]: 74
+unlock: cookie [Pigs in space]: 75
+loaded cookies:
+-----------------
+  .host.foo.com	TRUE	/	FALSE	1896263787	injected	yes
+  .foo.com	TRUE	/	FALSE	1993463787	test1	overwritten1
+  .host.foo.com	TRUE	/	FALSE	1896263787	test2	two
+  .foo.com	TRUE	/	FALSE	1896263787	test3	three
+  .host.foo.com	TRUE	/	FALSE	2061978987	test4	overwritten4
+  .host.foo.com	TRUE	/	FALSE	1896263787	test5	five
+-----------------
+try SHARE_CLEANUP...
+lock:   share  [Pigs in space]: 76
+unlock: share  [Pigs in space]: 77
+SHARE_CLEANUP failed, correct
+CLEANUP
+lock:   cookie [Pigs in space]: 78
+unlock: cookie [Pigs in space]: 79
+lock:   share  [Pigs in space]: 80
+unlock: share  [Pigs in space]: 81
+SHARE_CLEANUP
+lock:   share  [Pigs in space]: 82
+unlock: share  [Pigs in space]: 83
+GLOBAL_CLEANUP
+</stdout>
+<stderr>
+http://%HOSTIP:%HTTPPORT/506 
+</stderr>
+<file name="log/jar506" mode="text">
+# Netscape HTTP Cookie File
+# https://curl.haxx.se/docs/http-cookies.html
+# This file was generated by libcurl! Edit at your own risk.
+
+.host.foo.com	TRUE	/	FALSE	1896263787	injected	yes
+.foo.com	TRUE	/	FALSE	1993463787	test1	overwritten1
+.host.foo.com	TRUE	/	FALSE	1896263787	test2	two
+.foo.com	TRUE	/	FALSE	1896263787	test3	three
+.host.foo.com	TRUE	/	FALSE	2061978987	test4	overwritten4
+.host.foo.com	TRUE	/	FALSE	1896263787	test5	five
+</file>
+</verify>
+</testcase>

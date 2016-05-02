@@ -1,0 +1,51 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_TIMECONDITION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_TIMECONDITION \- select condition for a time request
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMECONDITION, long cond);
+.SH DESCRIPTION
+Pass a long as parameter. This defines how the \fICURLOPT_TIMEVALUE(3)\fP time
+value is treated. You can set this parameter to \fICURL_TIMECOND_IFMODSINCE\fP
+or \fICURL_TIMECOND_IFUNMODSINCE\fP.
+
+The last modification time of a file is not always known and in such instances
+this feature will have no effect even if the given time condition would not
+have been met. \fIcurl_easy_getinfo(3)\fP with the
+\fICURLINFO_CONDITION_UNMET\fP option can be used after a transfer to learn if
+a zero-byte successful "transfer" was due to this condition not matching.
+.SH DEFAULT
+CURL_TIMECOND_NONE (0)
+.SH PROTOCOLS
+HTTP, FTP, RTSP, and FILE
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_TIMEVALUE "(3), "

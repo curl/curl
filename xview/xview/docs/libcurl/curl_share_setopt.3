@@ -1,0 +1,85 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_share_setopt 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.SH NAME
+curl_share_setopt - Set options for a shared object
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
+.ad
+.SH DESCRIPTION
+Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
+.SH OPTIONS
+.IP CURLSHOPT_LOCKFUNC
+The \fIparameter\fP must be a pointer to a function matching the following
+prototype:
+
+void lock_function(CURL *handle, curl_lock_data data, curl_lock_access access,
+void *userptr);
+
+\fIdata\fP defines what data libcurl wants to lock, and you must make sure that
+only one lock is given at any time for each kind of data.
+
+\fIaccess\fP defines what access type libcurl wants, shared or single.
+
+\fIuserptr\fP is the pointer you set with \fICURLSHOPT_USERDATA\fP.
+.IP CURLSHOPT_UNLOCKFUNC
+The \fIparameter\fP must be a pointer to a function matching the following
+prototype:
+
+void unlock_function(CURL *handle, curl_lock_data data, void *userptr);
+
+\fIdata\fP defines what data libcurl wants to unlock, and you must make sure
+that only one lock is given at any time for each kind of data.
+
+\fIuserptr\fP is the pointer you set with \fICURLSHOPT_USERDATA\fP.
+.IP CURLSHOPT_SHARE
+The \fIparameter\fP specifies a type of data that should be shared. This may
+be set to one of the values described below.
+.RS
+.IP CURL_LOCK_DATA_COOKIE
+Cookie data will be shared across the easy handles using this shared object.
+.IP CURL_LOCK_DATA_DNS
+Cached DNS hosts will be shared across the easy handles using this shared
+object. Note that when you use the multi interface, all easy handles added to
+the same multi handle will share DNS cache by default without this having to
+be used!
+.IP CURL_LOCK_DATA_SSL_SESSION
+SSL session IDs will be shared across the easy handles using this shared
+object. This will reduce the time spent in the SSL handshake when reconnecting
+to the same server. Note SSL session IDs are reused within the same easy handle
+by default.
+.RE
+.IP CURLSHOPT_UNSHARE
+This option does the opposite of \fICURLSHOPT_SHARE\fP. It specifies that
+the specified \fIparameter\fP will no longer be shared. Valid values are
+the same as those for \fICURLSHOPT_SHARE\fP.
+.IP CURLSHOPT_USERDATA
+The \fIparameter\fP allows you to specify a pointer to data that will be passed
+to the lock_function and unlock_function each time it is called.
+.SH RETURN VALUE
+CURLSHE_OK (zero) means that the option was set properly, non-zero means an
+error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP
+man page for the full list with descriptions.
+.SH "SEE ALSO"
+.BR curl_share_cleanup "(3), " curl_share_init "(3)"

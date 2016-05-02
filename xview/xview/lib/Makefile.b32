@@ -1,0 +1,184 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2000, Jaepil Kim, <pit@paradise.net.nz>.
+# Copyright (C) 2001 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
+############################################################
+#
+#  Makefile.b32 - Borland's C++ Compiler 5.X
+#
+#  'BCCDIR' has to be set up to point to the base directory
+#  of the compiler, i.e. SET BCCDIR = c:\Borland\BCC55
+#
+############################################################
+
+!if "$(__MAKE__)" == ""
+!error __MAKE__ not defined. Use Borlands's MAKE to process this makefile.
+!endif
+
+# Borland's $(MAKEDIR) expands to the path where make.exe is located,
+# use this feature to define BCCDIR when user has not defined BCCDIR.
+!ifndef BCCDIR
+BCCDIR = $(MAKEDIR)\..
+!endif
+
+# Edit the path below to point to the base of your Zlib sources.
+!ifndef ZLIB_PATH
+ZLIB_PATH = ..\..\zlib-1.2.8
+!endif
+
+# Edit the path below to point to the base of your OpenSSL package.
+!ifndef OPENSSL_PATH
+OPENSSL_PATH = ..\..\openssl-1.0.2a
+!endif
+
+# Set libcurl static lib, dll and import lib
+LIBCURL_LIB    = libcurl.lib
+LIBCURL_DLL    = libcurl.dll
+LIBCURL_IMPLIB = libcurl_imp.lib
+
+# Setup environment
+PP_CMD   = cpp32 -q -P-
+CC_CMD   = bcc32 -q -c
+LD       = bcc32
+RM       = del 2>NUL
+MKDIR    = md
+RMDIR    = rd /q
+LIB      = tlib
+IMPLIB   = implib
+
+CC_FLAGS = -5 -O2 -tWM -w -w-aus -w-ccc -w-dup -w-prc -w-pro -w-rch -w-sig -w-spa -w-inl -w-pia -w-pin -Dinline=__inline
+LIBFLAGS = /C /P32
+LDFLAGS  = -q -lq -laa -tWD
+
+SRCDIR   = .;.\vtls
+OBJDIR   = .\BCC_objs
+INCDIRS  = -I.;.\lib;..\include
+LINKLIB  = $(BCCDIR)\lib\cw32mt.lib $(BCCDIR)\lib\ws2_32.lib
+DEFINES  = -DNDEBUG -DWIN32 -DBUILDING_LIBCURL
+
+# By default SSPI support is enabled for BCC
+!ifndef DISABLE_SSPI
+DEFINES  = $(DEFINES) -DUSE_WINDOWS_SSPI
+!endif
+
+# By default LDAP support is disabled for BCC
+!ifndef WITH_LDAP
+DEFINES  = $(DEFINES) -DCURL_DISABLE_LDAP
+!endif
+
+# ZLIB support is enabled setting WITH_ZLIB=1
+!ifdef WITH_ZLIB
+DEFINES  = $(DEFINES) -DHAVE_LIBZ -DHAVE_ZLIB_H
+INCDIRS  = $(INCDIRS);$(ZLIB_PATH)
+LINKLIB  = $(LINKLIB) $(ZLIB_PATH)\zlib.lib
+!endif
+
+# SSL support is enabled setting WITH_SSL=1
+!ifdef WITH_SSL
+DEFINES  = $(DEFINES) -DUSE_OPENSSL
+INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)\inc32;$(OPENSSL_PATH)\inc32\openssl
+LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\libeay32.lib
+!endif
+
+.autodepend
+
+.path.c   = $(SRCDIR)
+.path.obj = $(OBJDIR)
+.path.int = $(OBJDIR)
+
+# Makefile.inc provides the CSOURCES and HHEADERS defines
+!include Makefile.inc
+
+# Borland's command line librarian program TLIB version 4.5 is not capable
+# of building a library when any of its objects contains an hypen in its
+# name, due to a command line parsing bug. In order to workaround this, we
+# build source files with hyphens in their name as objects with underscores
+# using explicit compilation build rules instead of implicit ones.
+
+NOHYPHEN1 = $(CSOURCES:-=_)
+NOHYPHEN2 = $(NOHYPHEN1:vtls/=)
+
+OBJECTS = $(NOHYPHEN2:.c=.obj)
+PREPROCESSED = $(NOHYPHEN2:.c=.int)
+
+# Borland's command line compiler (BCC32) version 5.5.1 integrated
+# preprocessor has a bug which results in silently generating wrong
+# definitions for libcurl macros such as CURL_OFF_T_C, on the other
+# hand Borland's command line preprocessor (CPP32) version 5.5.1 does
+# not have the bug and achieves proper results. In order to avoid the
+# silent bug we first preprocess source files and later compile the
+# preprocessed result.
+
+.c.obj:
+	@-$(RM) $(@R).int
+	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(<)
+	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
+
+all:	$(OBJDIR) $(LIBCURL_LIB) $(LIBCURL_DLL)
+
+asyn_ares.obj: asyn-ares.c
+	@-$(RM) $(@R).int
+	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(?)
+	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
+
+asyn_thread.obj: asyn-thread.c
+	@-$(RM) $(@R).int
+	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(?)
+	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
+
+non_ascii.obj: non-ascii.c
+	@-$(RM) $(@R).int
+	$(PP_CMD) $(CC_FLAGS) $(INCDIRS) $(DEFINES) -o$(@R).int $(?)
+	$(CC_CMD) $(CC_FLAGS) -o$(@) $(@R).int
+
+clean:
+	cd $(OBJDIR)
+	@-$(RM) $(OBJECTS)
+	@-$(RM) $(PREPROCESSED)
+	cd ..
+	@-$(RMDIR) $(OBJDIR)
+	@-$(RM) $(LIBCURL_LIB)
+	@-$(RM) $(LIBCURL_IMPLIB)
+	@-$(RM) libcurl.tds
+
+$(OBJDIR):
+	@-$(RMDIR) $(OBJDIR)
+	@-$(MKDIR) $(OBJDIR)
+
+$(LIBCURL_LIB): $(OBJECTS)
+	@-$(RM) $(LIBCURL_LIB)
+	$(LIB) $(LIBFLAGS) $@ @&&!
++$(**: = &^
++)
+!
+
+$(LIBCURL_DLL) $(LIBCURL_IMPLIB): $(OBJECTS) $(LINKLIB)
+	@-$(RM) $(LIBCURL_DLL)
+	@-$(RM) $(LIBCURL_IMPLIB)
+	$(LD) $(LDFLAGS) -e$(LIBCURL_DLL) @&&!
+$(**: = ^
+)
+!
+	$(IMPLIB) $(LIBCURL_IMPLIB) $(LIBCURL_DLL)
+
+
+# End of Makefile.b32

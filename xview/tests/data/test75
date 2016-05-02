@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+FAILURE
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+http
+</features>
+ <name>
+HTTP, urlglob retrieval with bad range
+ </name>
+ <command option="no-output">
+"http://a-site-never-accessed.example.org/[2-1]" -o "log/weee#1.dump" --stderr -
+</command>
+# The error message on stdout implicitly depends on the length of the
+# URL, so refuse to run if the length is unexpected.
+<precheck>
+perl %SRCDIR/libtest/test75.pl http://%HOSTIP:%HTTPPORT/ 22
+</precheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<errorcode>
+3
+</errorcode>
+<stdout mode="text">
+curl: (3) [globbing] bad range in column 47
+</stdout>
+</verify>
+</testcase>

@@ -1,0 +1,84 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 14269504311616 (0xcfa60bc5140)
+    Signature Algorithm: sha1WithRSAEncryption
+        Issuer:
+            countryName               = NN
+            organizationName          = Edel Curl Arctic Illudium Research Cloud
+            commonName                = Northern Nowhere Trust Anchor
+        Validity
+            Not Before: Mar 21 15:07:11 2015 GMT
+            Not After : Aug 24 15:07:11 2031 GMT
+        Subject:
+            countryName               = NN
+            organizationName          = Edel Curl Arctic Illudium Research Cloud
+            commonName                = Northern Nowhere Trust Anchor
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:e1:4c:d9:74:1a:a4:a3:42:57:a4:7a:2e:74:02:
+                    08:49:6a:6a:1d:db:de:c3:43:d6:48:60:12:30:ed:
+                    d6:6e:74:16:81:16:4e:50:b9:6c:b9:36:0d:19:a4:
+                    f7:85:99:40:46:26:46:33:86:ce:0c:27:71:e4:8f:
+                    0f:b4:3a:99:6d:af:78:48:b7:cb:c4:d3:60:7d:d0:
+                    17:6f:23:bc:89:c0:bc:16:b8:94:f0:b2:10:8d:c8:
+                    e0:35:97:ed:8f:c6:db:9b:cd:aa:f6:8c:45:dc:0f:
+                    ee:a0:78:12:be:f6:7d:f4:f7:b6:8c:4e:e5:7d:32:
+                    e8:f7:f7:1e:04:46:9e:08:cd:cb:ec:e2:9a:c3:35:
+                    3f:ce:a1:01:e3:10:0a:ec:d9:ab:13:09:eb:e6:39:
+                    6b:92:30:c7:08:bd:8a:32:ef:0b:b2:61:6f:11:43:
+                    95:cf:31:ea:19:01:cc:1a:6d:d2:d5:57:35:da:c0:
+                    ae:46:39:d3:33:ed:f8:c0:1e:ad:3d:68:6f:a8:53:
+                    24:ac:d6:f9:dd:2b:51:50:77:e4:b7:5d:ad:48:80:
+                    5d:65:57:e5:eb:07:82:7d:cb:72:4f:06:6a:34:d4:
+                    38:c8:6b:ed:8a:3a:68:5e:35:e3:78:14:da:5d:86:
+                    9f:e5:d4:1c:dd:90:c2:7c:a2:00:d4:95:65:04:85:
+                    ff:83
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+            X509v3 Subject Key Identifier: 
+                12:CA:BA:4B:46:04:A7:75:8A:2C:E8:0E:54:94:BC:12:65:A6:7B:CE
+    Signature Algorithm: sha1WithRSAEncryption
+         d4:d0:22:19:78:2e:2e:1d:83:c6:79:89:c1:a8:23:43:4e:86:
+         76:16:31:bd:b7:c0:44:2c:b9:2c:79:99:2f:02:48:33:1e:a7:
+         d7:0e:d9:f1:cb:ed:39:1a:34:b3:50:af:c9:8d:64:bf:ff:72:
+         1b:1d:e0:5d:40:3b:b5:00:7c:d1:78:ff:45:ee:d9:05:3f:32:
+         f6:cd:f4:d3:79:58:d8:44:94:65:f5:c3:a9:5d:d8:13:d9:57:
+         e7:13:18:fa:f3:72:0b:cf:a3:4a:f4:6e:5e:74:30:3c:cb:76:
+         28:f9:44:9a:ba:3e:b7:3e:01:79:3e:cb:5c:df:5a:d4:6c:34:
+         aa:bd:c0:6d:25:85:e5:28:f6:15:e1:9d:af:a7:f7:a7:6c:2a:
+         1d:1d:93:1e:89:71:66:c7:0b:e4:ce:36:c1:21:c4:73:5d:2b:
+         24:a9:3d:26:df:1c:e8:60:69:e3:82:98:c3:5b:91:9e:da:bd:
+         27:ee:e0:fd:64:ea:7d:35:91:fd:5e:1e:33:82:24:39:7b:49:
+         af:23:05:fc:6e:53:7e:07:69:f4:e7:e3:1f:f0:1c:59:87:4c:
+         b6:74:c9:60:ed:f5:ab:a0:31:8a:05:d4:64:9f:1e:16:b6:9f:
+         f8:7e:0d:ac:b7:d9:16:b9:b3:bc:0b:03:6b:24:e9:46:81:dc:
+         d8:52:63:75
+-----BEGIN CERTIFICATE-----
+MIIDkjCCAnqgAwIBAgIGDPpgvFFAMA0GCSqGSIb3DQEBBQUAMGgxCzAJBgNVBAYT
+Ak5OMTEwLwYDVQQKDChFZGVsIEN1cmwgQXJjdGljIElsbHVkaXVtIFJlc2VhcmNo
+IENsb3VkMSYwJAYDVQQDDB1Ob3J0aGVybiBOb3doZXJlIFRydXN0IEFuY2hvcjAe
+Fw0xNTAzMjExNTA3MTFaFw0zMTA4MjQxNTA3MTFaMGgxCzAJBgNVBAYTAk5OMTEw
+LwYDVQQKDChFZGVsIEN1cmwgQXJjdGljIElsbHVkaXVtIFJlc2VhcmNoIENsb3Vk
+MSYwJAYDVQQDDB1Ob3J0aGVybiBOb3doZXJlIFRydXN0IEFuY2hvcjCCASIwDQYJ
+KoZIhvcNAQEBBQADggEPADCCAQoCggEBAOFM2XQapKNCV6R6LnQCCElqah3b3sND
+1khgEjDt1m50FoEWTlC5bLk2DRmk94WZQEYmRjOGzgwnceSPD7Q6mW2veEi3y8TT
+YH3QF28jvInAvBa4lPCyEI3I4DWX7Y/G25vNqvaMRdwP7qB4Er72ffT3toxO5X0y
+6Pf3HgRGngjNy+zimsM1P86hAeMQCuzZqxMJ6+Y5a5Iwxwi9ijLvC7JhbxFDlc8x
+6hkBzBpt0tVXNdrArkY50zPt+MAerT1ob6hTJKzW+d0rUVB35LddrUiAXWVX5esH
+gn3Lck8GajTUOMhr7Yo6aF4143gU2l2Gn+XUHN2QwnyiANSVZQSF/4MCAwEAAaNC
+MEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMCAQYwHQYDVR0OBBYEFBLK
+uktGBKd1iizoDlSUvBJlpnvOMA0GCSqGSIb3DQEBBQUAA4IBAQDU0CIZeC4uHYPG
+eYnBqCNDToZ2FjG9t8BELLkseZkvAkgzHqfXDtnxy+05GjSzUK/JjWS//3IbHeBd
+QDu1AHzReP9F7tkFPzL2zfTTeVjYRJRl9cOpXdgT2VfnExj683ILz6NK9G5edDA8
+y3Yo+USauj63PgF5Pstc31rUbDSqvcBtJYXlKPYV4Z2vp/enbCodHZMeiXFmxwvk
+zjbBIcRzXSskqT0m3xzoYGnjgpjDW5Ge2r0n7uD9ZOp9NZH9Xh4zgiQ5e0mvIwX8
+blN+B2n05+Mf8BxZh0y2dMlg7fWroDGKBdRknx4Wtp/4fg2st9kWubO8CwNrJOlG
+gdzYUmN1
+-----END CERTIFICATE-----

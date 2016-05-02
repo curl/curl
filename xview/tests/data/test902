@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+SMTP HELO
+RFC821
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY EHLO 500 Command unrecognized
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+RFC821-only SMTP server (EHLO not supported)
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/902 --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 902
+HELO 902
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+body
+.
+</upload>
+</verify>
+</testcase>

@@ -1,0 +1,53 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_LOGIN_OPTIONS 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_LOGIN_OPTIONS \- set login options
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LOGIN_OPTIONS, char *options);
+.SH DESCRIPTION
+Pass a char * as parameter, which should be pointing to the zero terminated
+\fIoptions\fP string to use for the transfer.
+
+For more information about the login options please see RFC2384, RFC5092 and
+IETF draft draft-earhart-url-smtp-00.txt
+
+\fBCURLOPT_LOGIN_OPTIONS(3)\fP can be used to set protocol specific login
+options, such as the preferred authentication mechanism via "AUTH=NTLM" or
+"AUTH=*", and should be used in conjunction with the \fICURLOPT_USERNAME(3)\fP
+option.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+Only IMAP, POP3 and SMTP support login options.
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.34.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+.SH "SEE ALSO"
+.BR CURLOPT_USERNAME "(3), " CURLOPT_PASSWORD "(3), "

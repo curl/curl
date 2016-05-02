@@ -1,0 +1,11 @@
+*.a
+*.nlm
+*.res
+Makefile.vc*.dist
+config-win32.h
+curl
+curl_config.h
+curl_config.h.in
+stamp-h2
+tool_hugehelp.c
+tool_version.h.dist

@@ -1,0 +1,70 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_FTP_CREATE_MISSING_DIRS 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_FTP_CREATE_MISSING_DIRS \- create missing dirs for FTP and SFTP
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+typedef enum {
+  CURLFTP_CREATE_DIR_NONE,
+  CURLFTP_CREATE_DIR,
+  CURLFTP_CREATE_DIR_RETRY
+} curl_ftpcreatedir;
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_CREATE_MISSING_DIRS,
+                          long create);
+.SH DESCRIPTION
+Pass a long telling libcurl to \fIcreate\fP the dir. If the value is
+\fICURLFTP_CREATE_DIR\fP (1), libcurl will attempt to create any remote
+directory that it fails to "move" into.
+
+For FTP requests, that means a CWD command fails. CWD being the command that
+changes working directory.
+
+For SFTP requests, libcurl will attempt to create the remote directory if it
+can't obtain a handle to the target-location. The creation will fail if a file
+of the same name as the directory to create already exists or lack of
+permissions prevents creation.
+
+Setting \fIcreate\fP to \fICURLFTP_CREATE_DIR_RETRY\fP (2), tells libcurl to
+retry the CWD command again if the subsequent MKD command fails. This is
+especially useful if you're doing many simultaneous connections against the
+same server and they all have this option enabled, as then CWD may first fail
+but then another connection does MKD before this connection and thus MKD fails
+but trying CWD works!
+.SH DEFAULT
+CURLFTP_CREATE_DIR_NONE (0)
+.SH PROTOCOLS
+FTP and SFTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.10.7. SFTP support added in 7.16.3. The retry option was added in
+7.19.4.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if the
+create value is not.
+.SH "SEE ALSO"
+.BR CURLOPT_FTP_FILEMETHOD "(3), " CURLOPT_FTP_USE_EPSV "(3), "

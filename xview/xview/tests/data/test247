@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
+<reply>
+<mdtm>
+213 20030409102659
+</mdtm>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP upload time condition evaluates TRUE => skip upload
+ </name>
+<file name="log/test247.txt">
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</file>
+ <command>
+ftp://%HOSTIP:%FTPPORT/247 -T log/test247.txt -z "apr 1 2005 08:00:00"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<upload>
+</upload>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+MDTM 247
+QUIT
+</protocol>
+</verify>
+</testcase>

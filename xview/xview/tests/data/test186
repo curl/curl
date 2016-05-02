@@ -1,0 +1,63 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 11
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP RFC1867-type formposting with types on text fields
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/186 -F "name=daniel;type=moo/foo" -F "html= <body>hello</body>;type=text/html;charset=verymoo"
+</command>
+# We create this file before the command is invoked!
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^(User-Agent:|Content-Type: multipart/form-data;|------------).*
+</strip>
+<protocol>
+POST /we/want/186 HTTP/1.1
+User-Agent: curl/7.12.2-CVS (i686-pc-linux-gnu) libcurl/7.12.2-CVS OpenSSL/0.9.7d zlib/1.2.1.1 c-ares/1.2.0 libidn/0.5.2
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 321
+Expect: 100-continue
+Content-Type: multipart/form-data; boundary=----------------------------212d9006ceb5
+
+------------------------------212d9006ceb5
+Content-Disposition: form-data; name="name"
+Content-Type: moo/foo
+
+daniel
+------------------------------212d9006ceb5
+Content-Disposition: form-data; name="html"
+Content-Type: text/html;charset=verymoo
+
+ <body>hello</body>
+------------------------------212d9006ceb5--
+</protocol>
+</verify>
+</testcase>

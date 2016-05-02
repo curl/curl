@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+printf
+unittest
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib557
+</tool>
+
+<name>
+curl_mprintf() testing
+</name>
+<command>
+nothing
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+All curl_mprintf() unsigned short tests OK!
+All curl_mprintf() signed short tests OK!
+All curl_mprintf() unsigned int tests OK!
+All curl_mprintf() signed int tests OK!
+All curl_mprintf() unsigned long tests OK!
+All curl_mprintf() signed long tests OK!
+All curl_mprintf() curl_off_t tests OK!
+</stdout>
+</verify>
+
+</testcase>

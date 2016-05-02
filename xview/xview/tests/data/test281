@@ -1,0 +1,65 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 100 Continue
+
+HTTP/1.1 401 Bad Auth swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+WWW-Authenticate: Basic Realm=authenticate
+Server: test-server/fake
+</data>
+<datacheck>
+HTTP/1.1 100 Continue
+
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP PUT from file with 100 + 401 responses and -f without auth given
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/281 -f -T log/test281.txt
+</command>
+<file name="log/test281.txt">
+Weird
+     file
+         to
+   upload
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+22
+</errorcode>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+PUT /we/want/281 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 38
+Expect: 100-continue
+
+Weird
+     file
+         to
+   upload
+</protocol>
+</verify>
+</testcase>

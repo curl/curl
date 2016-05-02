@@ -1,0 +1,23 @@
+os:
+  - linux
+  - osx
+
+sudo: false
+
+language: c
+
+install:
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install openssl libidn rtmpdump libssh2 c-ares libmetalink libressl nghttp2; fi
+
+before_script:
+  - ./buildconf
+
+script: ./configure --enable-debug && make && make test-full
+
+compiler:
+  - clang
+  - gcc
+
+notifications:
+  email: false

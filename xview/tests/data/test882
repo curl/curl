@@ -1,0 +1,58 @@
+<testcase>
+<info>
+<keywords>
+POP3
+Clear Text
+RETR
+connection re-use
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY "PASS secret" +OK Login successful
+</servercmd>
+<data>
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+pop3
+</server>
+ <name>
+POP3 multiple connection authentication
+ </name>
+ <command>
+pop3://%HOSTIP:%POP3PORT/882001 -u user.one:secret -: pop3://%HOSTIP:%POP3PORT/882002 -u user.two:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+CAPA
+USER user.one
+PASS secret
+RETR 882001
+QUIT
+CAPA
+USER user.two
+PASS secret
+RETR 882002
+QUIT
+</protocol>
+</verify>
+</testcase>

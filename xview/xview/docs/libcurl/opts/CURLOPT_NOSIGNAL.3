@@ -1,0 +1,55 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_NOSIGNAL 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_NOSIGNAL \- skip all signal handling
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOSIGNAL, long onoff);
+.SH DESCRIPTION
+If \fIonoff\fP is 1, libcurl will not use any functions that install signal
+handlers or any functions that cause signals to be sent to the process. This
+option is here to allow multi-threaded unix applications to still set/use all
+timeout options etc, without risking getting signals.
+
+If this option is set and libcurl has been built with the standard name
+resolver, timeouts will not occur while the name resolve takes place.
+Consider building libcurl with the c-ares or threaded resolver backends to
+enable asynchronous DNS lookups, to enable timeouts for name resolves without
+the use of signals.
+
+Setting \fICURLOPT_NOSIGNAL(3)\fP to 1 makes libcurl NOT ask the system to
+ignore SIGPIPE signals, which otherwise are sent by the system when trying to
+send data to a socket which is closed in the other end. libcurl makes an
+effort to never cause such SIGPIPEs to trigger, but some operating systems
+have no way to avoid them and even on those that have there are some corner
+cases when they may still happen, contrary to our desire. In addition, using
+\fICURLAUTH_NTLM_WB\fP authentication could cause a SIGCHLD signal to be
+raised.
+.SH DEFAULT
+0
+.SH AVAILABILITY
+Added in 7.10
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

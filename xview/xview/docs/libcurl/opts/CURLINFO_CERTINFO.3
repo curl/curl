@@ -1,0 +1,51 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLINFO_CERTINFO 3 "12 Sep 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
+.SH NAME
+CURLINFO_CERTINFO \- get the TLS certificate chain
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CERTINFO,
+                           struct curl_certinfo *chainp);
+.SH DESCRIPTION
+Pass a pointer to a 'struct curl_certinfo *' and you'll get it set to point to
+struct that holds a number of linked lists with info about the certificate
+chain, assuming you had \fICURLOPT_CERTINFO(3)\fP enabled when the request was
+made. The struct reports how many certs it found and then you can extract info
+for each of those certs by following the linked lists. The info chain is
+provided in a series of data in the format "name:content" where the content is
+for the specific named data. See also the certinfo.c example.
+.SH PROTOCOLS
+All TLS-based
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+This option is only working in libcurl built with OpenSSL, NSS or GSKit
+support.
+
+Added in 7.19.1
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "

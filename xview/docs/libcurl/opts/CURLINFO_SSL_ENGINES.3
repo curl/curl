@@ -1,0 +1,47 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLINFO_SSL_ENGINES 3 "1 Sep 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
+.SH NAME
+CURLINFO_SSL_ENGINES \- get an slist of OpenSSL crypto-engines
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SSL_ENGINES,
+                           struct curl_slist **engine_list);
+.SH DESCRIPTION
+Pass the address of a 'struct curl_slist *' to receive a linked-list of
+OpenSSL crypto-engines supported. Note that engines are normally implemented
+in separate dynamic libraries. Hence not all the returned engines may be
+available at run-time. \fBNOTE:\fP you must call \fIcurl_slist_free_all(3)\fP
+on the list pointer once you're done with it, as libcurl will not free the
+data for you.
+.SH PROTOCOLS
+All TLS based ones.
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.12.3. Available in OpenSSL builds with "engine" support.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "

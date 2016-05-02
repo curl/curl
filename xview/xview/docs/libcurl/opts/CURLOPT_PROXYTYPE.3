@@ -1,0 +1,54 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_PROXYTYPE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_PROXYTYPE \- proxy protocol type
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYTYPE, long type);
+.SH DESCRIPTION
+Pass a long with this option to set type of the proxy. Available options for
+this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_HTTP_1_0\fP
+\fICURLPROXY_SOCKS4\fP, \fICURLPROXY_SOCKS5\fP, \fICURLPROXY_SOCKS4A\fP and
+\fICURLPROXY_SOCKS5_HOSTNAME\fP. The HTTP type is default.
+
+If you set \fBCURLOPT_PROXYTYPE(3)\fP to \fICURLPROXY_HTTP_1_0\fP, it will
+only affect how libcurl speaks to a proxy when CONNECT is used. The HTTP
+version used for "regular" HTTP requests is instead controlled with
+\fICURLOPT_HTTP_VERSION(3)\fP.
+
+Often it is more convenient to specify the proxy type with the scheme part of
+the \fICURLOPT_PROXY(3)\fP string.
+.SH DEFAULT
+CURLPROXY_HTTP
+.SH PROTOCOLS
+Most
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_PROXY "(3), " CURLOPT_PROXYPORT "(3), "

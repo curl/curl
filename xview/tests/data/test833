@@ -1,0 +1,65 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+SASL
+SASL AUTH CRAM-MD5
+SASL AUTH PLAIN
+SASL DOWNGRADE
+RFC2195
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH CRAM-MD5 PLAIN
+REPLY "AUTHENTICATE CRAM-MD5" + Rubbish
+REPLY * A002 NO AUTH exchange cancelled by client
+REPLY "AUTHENTICATE PLAIN" +
+REPLY dXNlcgB1c2VyAHNlY3JldA== A003 OK AUTHENTICATE completed
+</servercmd>
+<data>
+From: me@somewhere
+To: fake@nowhere
+
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+<features>
+crypto
+</features>
+ <name>
+IMAP CRAM-MD5 authentication with SASL downgrade
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/833/;UID=1' -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 AUTHENTICATE CRAM-MD5
+*
+A003 AUTHENTICATE PLAIN
+dXNlcgB1c2VyAHNlY3JldA==
+A004 SELECT 833
+A005 FETCH 1 BODY[]
+A006 LOGOUT
+</protocol>
+</verify>
+</testcase>

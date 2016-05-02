@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+SASL
+SASL AUTH OAUTH2
+RFC6749
+RFC7628
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+AUTH OAUTHBEARER
+REPLY AUTHENTICATE +
+REPLY dXNlcj11c2VyAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ== + eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIiwic2NvcGUiOiJleGFtcGxlX3Njb3BlIiwib3BlbmlkLWNvbmZpZ3VyYXRpb24iOiJodHRwczovL2V4YW1wbGUuY29tLy53ZWxsLWtub3duL29wZW5pZC1jb25maWd1cmF0aW9uIn0=
+REPLY AQ== A002 NO Authentication failed
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP OAuth 2.0 (OAUTHBEARER) failure as continuation
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/844/;UID=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
+</command>
+# The protocol section doesn't support ways of specifing the raw data in the
+# base64 encoded message so we must assert this
+<precheck>
+perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%IMAPPORT' ne '9003' );"
+</precheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# 67 - CURLE_LOGIN_DENIED
+<errorcode>
+67
+</errorcode>
+#
+# The multi interface considers a broken "CONNECT" as a prematurely broken
+# transfer and such a connection will not get a "LOGOUT"
+<protocol>
+A001 CAPABILITY
+A002 AUTHENTICATE OAUTHBEARER
+dXNlcj11c2VyAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+AQ==
+</protocol>
+</verify>
+</testcase>

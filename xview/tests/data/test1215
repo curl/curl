@@ -1,0 +1,104 @@
+<testcase>
+<info>
+# This test is a copy of test 67, modified to use a HTTP proxy.
+<keywords>
+HTTP
+HTTP GET
+HTTP NTLM auth
+HTTP proxy
+</keywords>
+</info>
+# Server-side
+<reply>
+
+<!-- no <data> in this test since we have NTLM from the start
+
+This is supposed to be returned when the server gets a first
+Authorization: NTLM line passed-in from the client -->
+
+<data1001>
+HTTP/1.1 401 Now gimme that second request of crap
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+
+This is not the real page either!
+</data1001>
+
+# This is supposed to be returned when the server gets the second
+# Authorization: NTLM line passed-in from the client
+<data1002>
+HTTP/1.1 200 Things are fine in server land swsclose
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</data1002>
+
+<datacheck>
+HTTP/1.1 401 Now gimme that second request of crap
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+
+HTTP/1.1 200 Things are fine in server land swsclose
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 32
+
+Finally, this is the real page!
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<features>
+NTLM
+!SSPI
+debug
+</features>
+<server>
+http
+</server>
+ <name>
+HTTP with server NTLM authorization using a proxy
+ </name>
+ <setenv>
+# we force our own host name, in order to make the test machine independent
+CURL_GETHOSTNAME=curlhost
+# we try to use the LD_PRELOAD hack, if not a debug build
+LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
+ </setenv>
+ <command>
+http://%HOSTIP:%HTTPPORT/1215 -u testuser:testpass --ntlm --proxy http://%HOSTIP:%HTTPPORT
+</command>
+<precheck>
+chkhostname curlhost
+</precheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET http://%HOSTIP:%HTTPPORT/1215 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+User-Agent: curl/7.30.0-DEV
+Accept: */*
+
+GET http://%HOSTIP:%HTTPPORT/1215 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAACeAJ4AWAAAAAAAAAD2AAAACAAIAPYAAAAIAAgA/gAAAAAAAAAAAAAABoKBAL9LNW5+nkyHZRmyFaL/LJ4xMjM0MjIzNGUCyhgQ9hw6eWAT13EbDa0BAQAAAAAAAACAPtXesZ0BMTIzNDIyMzQAAAAAAgAEAEMAQwABABIARQBMAEkAUwBBAEIARQBUAEgABAAYAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAMALABlAGwAaQBzAGEAYgBlAHQAaAAuAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAAAAAAAAAAAdGVzdHVzZXJjdXJsaG9zdA==
+User-Agent: curl/7.30.0-DEV
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

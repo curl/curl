@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+POP3
+Clear Text
+LIST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+REPLY LIST +OK but no messages\r\n.
+</servercmd>
+<datacheck>
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+pop3
+</server>
+ <name>
+POP3 LIST no messages available
+ </name>
+ <command>
+pop3://%HOSTIP:%POP3PORT/ -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+CAPA
+USER user
+PASS secret
+LIST
+QUIT
+</protocol>
+</verify>
+</testcase>

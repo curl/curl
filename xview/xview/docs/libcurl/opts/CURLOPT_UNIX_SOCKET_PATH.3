@@ -1,0 +1,78 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_UNIX_SOCKET_PATH 3 "09 Oct 2014" "libcurl 7.40.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_UNIX_SOCKET_PATH \- set Unix domain socket
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UNIX_SOCKET_PATH, char *path);
+.SH DESCRIPTION
+Enables the use of Unix domain sockets as connection endpoint and sets the path
+to \fIpath\fP. If \fIpath\fP is NULL, then Unix domain sockets are disabled. An
+empty string will result in an error at some point, it will not disable use of
+Unix domain sockets.
+
+When enabled, cURL will connect to the Unix domain socket instead of
+establishing a TCP connection to a host. Since no TCP connection is created,
+cURL does not need to resolve the DNS hostname in the URL.
+
+The maximum path length on Cygwin, Linux and Solaris is 107. On other platforms
+it might be even less.
+
+Proxy and TCP options such as
+.BR CURLOPT_TCP_NODELAY "(3)
+are not supported. Proxy options such as
+.BR CURLOPT_PROXY "(3)
+have no effect either as these are TCP-oriented, and asking a proxy server to
+connect to a certain Unix domain socket is not possible.
+.SH DEFAULT
+Default is NULL, meaning that no Unix domain sockets are used.
+.SH PROTOCOLS
+All protocols except for file:// and FTP are supported in theory. HTTP, IMAP,
+POP3 and SMTP should in particular work (including their SSL/TLS variants).
+.SH EXAMPLE
+Given that you have an nginx server running, listening on /tmp/nginx.sock, you
+can request a HTTP resource with:
+
+.nf
+    curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, "/tmp/nginx.sock");
+    curl_easy_setopt(curl_handle, CURLOPT_URL, "http://localhost/");
+.fi
+
+If you are on Linux and somehow have a need for paths larger than 107 bytes, you
+could use the proc filesystem to bypass the limitation:
+
+.nf
+    int dirfd = open(long_directory_path_to_socket, O_DIRECTORY | O_RDONLY);
+    char path[108];
+    snprintf(path, sizeof(path), "/proc/self/fd/%d/nginx.sock", dirfd);
+    curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, path);
+    /* Be sure to keep dirfd valid until you discard the handle */
+.fi
+.SH AVAILABILITY
+Since 7.40.0.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_OPENSOCKETFUNCTION "(3), " unix "(7), "

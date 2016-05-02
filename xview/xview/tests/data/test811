@@ -1,0 +1,40 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+CREATE
+CUSTOMREQUEST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP CREATE mailbox (CUSTOMREQUEST)
+ </name>
+ <command>
+imap://%HOSTIP:%IMAPPORT -u user:secret -X 'CREATE 811'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 CREATE 811
+A004 LOGOUT
+</protocol>
+</verify>
+</testcase>

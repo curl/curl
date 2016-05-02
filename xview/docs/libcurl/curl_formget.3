@@ -1,0 +1,70 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_formget 3 "20 June 2006" "libcurl 7.15.5" "libcurl Manual"
+.SH NAME
+curl_formget - serialize a previously built multipart/formdata HTTP POST chain
+.SH SYNOPSIS
+.nf
+.B #include <curl/curl.h>
+
+int curl_formget(struct curl_httppost * form, void *userp,
+                  curl_formget_callback append );
+.SH DESCRIPTION
+curl_formget() is used to serialize data previously built/appended with
+\fIcurl_formadd(3)\fP. Accepts a void pointer as second argument named
+\fIuserp\fP which will be passed as the first argument to the
+curl_formget_callback function.
+
+.BI "typedef size_t (*curl_formget_callback)(void *" userp, " const char *" buf,
+.BI " size_t " len ");"
+
+The curl_formget_callback will be executed for each part of the HTTP POST
+chain. The character buffer passed to the callback must not be freed. The
+callback should return the buffer length passed to it on success.
+
+If the \fBCURLFORM_STREAM\fP option is used in the formpost, it will prevent
+\fIcurl_formget(3)\fP from working until you've performed the actual HTTP
+request as only then will libcurl get the actual read callback to use!
+.SH RETURN VALUE
+0 means everything was ok, non-zero means an error occurred
+.SH EXAMPLE
+.nf
+
+ size_t print_httppost_callback(void *arg, const char *buf, size_t len)
+ {
+   fwrite(buf, len, 1, stdout);
+   (*(size_t *) arg) += len;
+   return len;
+ }
+
+ size_t print_httppost(struct curl_httppost *post)
+ {
+   size_t total_size = 0;
+   if(curl_formget(post, &total_size, print_httppost_callback)) {
+     return (size_t) -1;
+   }
+   return total_size;
+ }
+.SH AVAILABILITY
+This function was added in libcurl 7.15.5
+.SH "SEE ALSO"
+.BR curl_formadd "(3) "

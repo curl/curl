@@ -1,0 +1,50 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_BUFFERSIZE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_BUFFERSIZE \- set preferred receive buffer size
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_BUFFERSIZE, long size);
+.SH DESCRIPTION
+Pass a long specifying your preferred \fIsize\fP (in bytes) for the receive
+buffer in libcurl.  The main point of this would be that the write callback
+gets called more often and with smaller chunks. This is just treated as a
+request, not an order. You cannot be guaranteed to actually get the given
+size.
+
+This size is by default set as big as possible (\fICURL_MAX_WRITE_SIZE\fP), so
+it only makes sense to use this option if you want it smaller.
+.SH DEFAULT
+CURL_MAX_WRITE_SIZE
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.10
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_MAX_RECV_SPEED "(3), " CURLOPT_WRITEFUNCTION "(3), "

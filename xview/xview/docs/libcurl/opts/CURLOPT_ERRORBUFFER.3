@@ -1,0 +1,90 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_ERRORBUFFER 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_ERRORBUFFER \- set error buffer for error messages
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ERRORBUFFER, char *buf);
+.SH DESCRIPTION
+Pass a char * to a buffer that the libcurl may store human readable error
+messages in on failures or problems. This may be more helpful than just the
+return code from \fIcurl_easy_perform(3)\fP and related functions. The buffer
+\fBmust be at least CURL_ERROR_SIZE bytes big\fP.
+
+You must keep the associated buffer available until libcurl no longer needs
+it. Failing to do so will cause very odd behavior or even crashes. libcurl
+will need it until you call \fIcurl_easy_cleanup(3)\fP or you set the same
+option again to use a different pointer.
+
+Consider \fICURLOPT_VERBOSE(3)\fP and \fICURLOPT_DEBUGFUNCTION(3)\fP to better
+debug and trace why errors happen.
+
+If the library does not return an error, the buffer may not have been
+touched. Do not rely on the contents in those cases.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+curl = curl_easy_init();
+if(curl) {
+  CURLcode res;
+  char errbuf[CURL_ERROR_SIZE];
+
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  /* provide a buffer to store errors in */
+  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+
+  /* set the error buffer as empty before performing a request */
+  errbuf[0] = 0;
+
+  /* perform the request */
+  res = curl_easy_perform(curl);
+
+  /* if the request did not complete correctly, show the error
+  information. if no detailed error information was written to errbuf
+  show the more generic information from curl_easy_strerror instead.
+  */
+  if(res != CURLE_OK) {
+    size_t len = strlen(errbuf);
+    fprintf(stderr, "\\nlibcurl: (%d) ", res);
+    if(len)
+      fprintf(stderr, "%s%s", errbuf,
+              ((errbuf[len - 1] != '\\n') ? "\\n" : ""));
+    else
+      fprintf(stderr, "%s\\n", curl_easy_strerror(res));
+  }
+}
+.fi
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_DEBUGFUNCTION "(3), " CURLOPT_VERBOSE "(3), "
+.BR curl_easy_strerror "(3), " curl_multi_strerror "(3), "
+.BR curl_share_strerror "(3) "

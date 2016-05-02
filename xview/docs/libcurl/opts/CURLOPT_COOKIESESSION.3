@@ -1,0 +1,51 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_COOKIESESSION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_COOKIESESSION \- start a new cookie session
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIESESSION, long init);
+.SH DESCRIPTION
+Pass a long set to 1 to mark this as a new cookie "session". It will force
+libcurl to ignore all cookies it is about to load that are "session cookies"
+from the previous session. By default, libcurl always stores and loads all
+cookies, independent if they are session cookies or not. Session cookies are
+cookies without expiry date and they are meant to be alive and existing for
+this "session" only.
+
+A "session" is usually defined in browser land for as long as you have your
+browser up, more or less.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Along with HTTP
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_COOKIEFILE "(3), " CURLOPT_COOKIE "(3), "

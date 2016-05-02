@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+SFTP put
+--ftp-create-dirs
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+ <name>
+SFTP put with --ftp-create-dirs
+ </name>
+ <command>
+--ftp-create-dirs --key curl_client_key --pubkey curl_client_key.pub -u %USER: -T log/file624.txt sftp://%HOSTIP:%SSHPORT%PWD/log/test624.dir/upload.624 --insecure
+</command>
+<postcheck>
+perl %SRCDIR/libtest/test610.pl move %PWD/log/test624.dir/upload.624 %PWD/log/upload.624 rmdir %PWD/log/test624.dir
+</postcheck>
+<file name="log/file624.txt">
+Test data
+for ssh upload test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<upload>
+Test data
+for ssh upload test
+</upload>
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>

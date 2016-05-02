@@ -1,0 +1,12 @@
+    227 Entering Passive Mode (a1,a2,a3,a4,p1,p2)
+    228 Entering Long Passive Mode (4,4,a1,a2,a3,a4,2,p1,p2)
+      150 ASCII data connection for /bin/ls (137.167.104.91,37445) (0 bytes).
+      150 Opening ASCII mode data connection for [file] (0.0.0.0,0) (545 bytes)
+   * no_proxy=domain1.dom,host.domain2.dom
+     Default values are (0,0) initialized by calloc.
+  file = fopen(name, "r"); /* VMS */
+    return fopen(file, "r"); /* VMS */
+    return fopen(file, "r", "rfm=stmlf", "ctx=stm");
+    curl_memlog("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
+           a URL as file://localhost//foo must be valid as well, to refer to
+  const char atom_specials[] = "(){ %*]";

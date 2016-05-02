@@ -1,0 +1,47 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+SELECT
+UIDVALIDITY
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+body
+
+--
+  yours sincerely
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP SELECT UIDVALIDITY Success
+ </name>
+ <command>
+'imap://%HOSTIP:%IMAPPORT/802;UIDVALIDITY=3857529045/;UID=123/;SECTION=TEXT' -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT 802
+A004 FETCH 123 BODY[TEXT]
+A005 LOGOUT
+</protocol>
+</verify>
+</testcase>

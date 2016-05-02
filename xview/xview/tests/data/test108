@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PORT
+STOR
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP PORT upload with CWD
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/CWD/STOR/RETR/108 -T log/upload108 -P -
+</command>
+<file name="log/upload108">
+Moooooooooooo
+ upload this
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# Strip all valid kinds of PORT and EPRT that curl can send
+<strip>
+^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
+^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
+</strip>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD CWD
+CWD STOR
+CWD RETR
+PORT 127,0,0,1,5,109
+TYPE I
+STOR 108
+QUIT
+</protocol>
+<upload>
+Moooooooooooo
+ upload this
+</upload>
+</verify>
+</testcase>

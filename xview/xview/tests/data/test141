@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+FTP
+NOBODY
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+</data>
+<size>
+42
+</size>
+<mdtm>
+213 20030409102659
+</mdtm>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP download info with -I
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/blalbla/141 -I
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD blalbla
+MDTM 141
+TYPE I
+SIZE 141
+REST 0
+QUIT
+</protocol>
+<stdout>
+Last-Modified: Wed, 09 Apr 2003 10:26:59 GMT
+Content-Length: 42
+Accept-ranges: bytes
+</stdout>
+</verify>
+</testcase>

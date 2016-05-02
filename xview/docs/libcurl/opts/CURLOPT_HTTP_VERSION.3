@@ -1,0 +1,68 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_HTTP_VERSION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_HTTP_VERSION \- specify HTTP protocol version to use
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP_VERSION, long version);
+.SH DESCRIPTION
+Pass \fIversion\fP a long, set to one of the values described below. They ask
+libcurl to use the specific HTTP versions. This is not sensible to do unless
+you have a good reason. You have to set this option if you want to use
+libcurl's HTTP/2 support.
+
+Note that the HTTP version is just a request. libcurl will still prioritize to
+re-use an existing connection so it might then re-use a connection using a
+HTTP version you haven't asked for.
+
+.IP CURL_HTTP_VERSION_NONE
+We don't care about what version the library uses. libcurl will use whatever
+it thinks fit.
+.IP CURL_HTTP_VERSION_1_0
+Enforce HTTP 1.0 requests.
+.IP CURL_HTTP_VERSION_1_1
+Enforce HTTP 1.1 requests.
+.IP CURL_HTTP_VERSION_2_0
+Attempt HTTP 2 requests. libcurl will fall back to HTTP 1.1 if HTTP 2 can't be
+negotiated with the server. (Added in 7.33.0)
+
+The alias \fICURL_HTTP_VERSION_2\fI was added in 7.43.0 to better reflect the
+actual protocol name.
+.IP CURL_HTTP_VERSION_2TLS
+Attempt HTTP 2 over TLS (HTTPS) only. libcurl will fall back to HTTP 1.1 if
+HTTP 2 can't be negotiated with the HTTPS server. For clear text HTTP servers,
+libcurl will use 1.1. (Added in 7.47.0)
+.SH DEFAULT
+CURL_HTTP_VERSION_NONE
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Along with HTTP
+.SH RETURN VALUE
+Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_SSLVERSION "(3), " CURLOPT_HTTP200ALIASES "(3), "
