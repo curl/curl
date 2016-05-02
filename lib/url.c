@@ -3376,7 +3376,7 @@ ConnectionExists(struct SessionHandle *data,
         }
       }
 
-      if(!needle->bits.httpproxy || (needle->handler->flags&PROTOPT_SSL) ||
+      if(!needle->bits.proxy || (needle->handler->flags&PROTOPT_SSL) ||
          (needle->bits.httpproxy && check->bits.httpproxy &&
           needle->bits.tunnel_proxy && check->bits.tunnel_proxy &&
           Curl_raw_equal(needle->proxy.name, check->proxy.name) &&
