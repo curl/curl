@@ -1917,6 +1917,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(!conn->allocptr.accept_encoding)
       return CURLE_OUT_OF_MEMORY;
   }
+  else {
+    Curl_safefree(conn->allocptr.accept_encoding);
+    conn->allocptr.accept_encoding = NULL;
+  }
 
 #ifdef HAVE_LIBZ
   /* we only consider transfer-encoding magic if libz support is built-in */
