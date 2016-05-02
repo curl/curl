@@ -64,12 +64,16 @@ sub file {
             my ($pre, $str, $post)=($1, $2, $3);
             if($post ne "P") {
                 print STDERR "error: $f:$line: missing \\fP after $str\n";
-                $errrors++;
+                $errors++;
             }
             if($str =~ /((libcurl|curl)([^ ]*))\(3\)/i) {
                 my $man = "$1.3";
                 if(!manpresent($man)) {
                     print STDERR "error: $f:$line: refering to non-existing man page $man\n";
+                    $errors++;
+                }
+                if($pre ne "I") {
+                    print STDERR "error: $f:$line: use \\fI before $str\n";
                     $errors++;
                 }
             }
@@ -97,4 +101,4 @@ foreach my $f (@f) {
     file($f);
 }
 
-    exit $errors?1:0;
+exit $errors?1:0;
