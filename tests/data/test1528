@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 200 OK
+We-are: good
+
+</connect>
+<data>
+HTTP/1.1 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Content-Length: 5
+
+stop
+</data>
+
+</reply>
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+<tool>
+lib1528
+</tool>
+ <name>
+Separately specified proxy/server headers sent in a proxy GET
+ </name>
+ <command>
+ http://the.old.moo:%HTTPPORT/1528 %HOSTIP:%PROXYPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<proxy>
+GET http://the.old.moo:%HTTPPORT/1528 HTTP/1.1
+Host: the.old.moo:%HTTPPORT
+Accept: */*
+User-Agent: Http Agent
+Proxy-User-Agent: Http Agent2
+
+</proxy>
+</verify>
+</testcase>

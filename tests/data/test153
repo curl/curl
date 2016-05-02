@@ -1,0 +1,134 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Digest auth
+</keywords>
+</info>
+
+# Server-side
+<reply>
+# reply back and ask for Digest auth
+<data1>
+HTTP/1.1 401 Authorization Required swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604145"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+This is not the real page
+</data1>
+
+# This is supposed to be returned when the server gets a
+# Authorization: Digest line passed-in from the client
+<data1001>
+HTTP/1.1 200 OK
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 23
+
+This IS the real page!
+</data1001>
+
+#
+# This is the second request, and this sends back a response saying that
+# the request contained stale data. We want an update. Set swsbounce to
+# bounce on to data1003 on the second request.
+<data1002>
+HTTP/1.1 401 Authorization re-negotiation please swsbounce
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", algorithm=MD5, nonce="999999", stale=true, qop="auth"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 25
+
+This is not the real page
+</data1002>
+
+# The second request to the 1002 section will bounce this one back instead
+# thanks to the swsbounce keyword up there
+<data1003>
+HTTP/1.1 200 OK
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 30
+
+This IS the second real page!
+</data1003>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+</features>
+ <name>
+HTTP with Digest authorization with stale=true
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1530001 -u testuser:testpass --digest http://%HOSTIP:%HTTPPORT/1530002
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^Authorization.*cnonce
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1530001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /1530001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/1530001", response="f4f83139396995bac665f24a1f1055c7"
+User-Agent: curl/7.10.5 (i686-pc-linux-gnu) libcurl/7.10.5 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Accept: */*
+
+GET /1530002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/1530002", response="f84511b014fdd0ba6494f42871079c32"
+User-Agent: curl/7.11.0-CVS (i686-pc-linux-gnu) libcurl/7.11.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS
+Accept: */*
+
+GET /1530002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="999999", uri="/1530002", cnonce="MTA4MzIy", nc="00000001", qop="auth", response="25291c357671604a16c0242f56721c07", algorithm="MD5"
+User-Agent: curl/7.11.0-CVS (i686-pc-linux-gnu) libcurl/7.11.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS
+Accept: */*
+
+</protocol>
+<stdout>
+HTTP/1.1 401 Authorization Required swsclose
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604145"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+HTTP/1.1 200 OK
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 23
+
+This IS the real page!
+HTTP/1.1 401 Authorization re-negotiation please swsbounce
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", algorithm=MD5, nonce="999999", stale=true, qop="auth"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 25
+
+HTTP/1.1 200 OK
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 30
+
+This IS the second real page!
+</stdout>
+</verify>
+</testcase>

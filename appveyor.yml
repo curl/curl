@@ -1,0 +1,35 @@
+version: 7.47.0.{build}
+
+environment:
+    matrix:
+      - PRJ_GEN: "Visual Studio 11 2012 Win64"
+        BDIR: msvc2012
+        PRJ_CFG: Release
+        OPENSSL: OFF
+      - PRJ_GEN: "Visual Studio 12 2013 Win64"
+        BDIR: msvc2013
+        PRJ_CFG: Release
+        OPENSSL: OFF
+      - PRJ_GEN: "Visual Studio 14 2015 Win64"
+        BDIR: msvc2015
+        PRJ_CFG: Release
+        OPENSSL: OFF
+      - PRJ_GEN: "Visual Studio 11 2012 Win64"
+        BDIR: msvc2012
+        PRJ_CFG: Release
+        OPENSSL: ON
+      - PRJ_GEN: "Visual Studio 12 2013 Win64"
+        BDIR: msvc2013
+        PRJ_CFG: Release
+        OPENSSL: ON
+      - PRJ_GEN: "Visual Studio 14 2015 Win64"
+        BDIR: msvc2015
+        PRJ_CFG: Release
+        OPENSSL: ON
+
+
+build_script:
+    - mkdir build.%BDIR%
+    - cd build.%BDIR%
+    - cmake .. -G"%PRJ_GEN%" -DCMAKE_USE_OPENSSL=%OPENSSL%
+    - cmake --build . --config %PRJ_CFG% --clean-first

@@ -1,0 +1,192 @@
+<testcase>
+<info>
+<keywords>
+FTP
+wildcardmatch
+ftplistparser
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib576
+</tool>
+ <name>
+FTP wildcard download - skip/parser_correctness/CURLOPT_FNMATCH_FUNCTION (Unix)
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+<stdout>
+=============================================================
+Remains:      14
+Filename:     .
+Permissions:  rwxrwxrwx (parsed => 777)
+Size:         20480B
+User:         ftp-default
+Group:        ftp-default
+Time:         Apr 27  5:12
+Filetype:     directory
+=============================================================
+Remains:      13
+Filename:     ..
+Permissions:  rwxrwxrwx (parsed => 777)
+Size:         20480B
+User:         ftp-default
+Group:        ftp-default
+Time:         Apr 23  3:12
+Filetype:     directory
+=============================================================
+Remains:      12
+Filename:     chmod1
+Permissions:  r--r--r-- (parsed => 444)
+Size:         38B
+User:         ftp-default
+Group:        ftp-default
+Time:         Jan 11 10:00
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+This file should have permissions 444
+-------------------------------------------------------------
+=============================================================
+Remains:      11
+Filename:     chmod2
+Permissions:  rw-rw-rw- (parsed => 666)
+Size:         38B
+User:         ftp-default
+Group:        ftp-default
+Time:         Feb  1  8:00
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+This file should have permissions 666
+-------------------------------------------------------------
+=============================================================
+Remains:      10
+Filename:     chmod3
+Permissions:  rwxrwxrwx (parsed => 777)
+Size:         38B
+User:         ftp-default
+Group:        ftp-default
+Time:         Feb  1  8:00
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+This file should have permissions 777
+-------------------------------------------------------------
+=============================================================
+Remains:      9
+Filename:     chmod4
+Permissions:  --S--S--t (parsed => 7001)
+Size:         4096B
+User:         ftp-default
+Group:        ftp-default
+Time:         May  4  4:31
+Filetype:     directory
+=============================================================
+Remains:      8
+Filename:     chmod5
+Permissions:  --s--s--T (parsed => 7110)
+Size:         4096B
+User:         ftp-default
+Group:        ftp-default
+Time:         May  4  4:31
+Filetype:     directory
+=============================================================
+Remains:      7
+Filename:     empty_file.dat
+Permissions:  rw-r--r-- (parsed => 644)
+Size:         0B
+User:         ftp-default
+Group:        ftp-default
+Time:         Apr 27 11:01
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+-------------------------------------------------------------
+=============================================================
+Remains:      6
+Filename:     file.txt
+Permissions:  rw-r--r-- (parsed => 644)
+Size:         35B
+User:         ftp-default
+Group:        ftp-default
+Time:         Apr 27 11:01
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+This is content of file "file.txt"
+-------------------------------------------------------------
+=============================================================
+Remains:      5
+Filename:     link
+Permissions:  rwxrwxrwx (parsed => 777)
+Size:         0B
+User:         ftp-default
+Group:        ftp-default
+Time:         Jan  6  4:42
+Filetype:     symlink
+Target:       file.txt
+=============================================================
+Remains:      4
+Filename:     link_absolute
+Permissions:  rwxrwxrwx (parsed => 777)
+Size:         0B
+User:         ftp-default
+Group:        ftp-default
+Time:         Jan  6  4:45
+Filetype:     symlink
+Target:       /data/ftp/file.txt
+=============================================================
+Remains:      3
+Filename:     .NeXT
+Permissions:  rwxrwxrwx (parsed => 777)
+Size:         4096B
+User:         ftp-default
+Group:        ftp-default
+Time:         Jan 23  2:05
+Filetype:     directory
+=============================================================
+Remains:      2
+Filename:     someothertext.txt
+Permissions:  rw-r--r-- (parsed => 644)
+Size:         47B
+User:         ftp-default
+Group:        ftp-default
+Time:         Apr 27 11:01
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+# THIS CONTENT WAS SKIPPED IN CHUNK_BGN CALLBACK #
+-------------------------------------------------------------
+=============================================================
+Remains:      1
+Filename:     weirddir.txt
+Permissions:  rwxr-xrwx (parsed => 757)
+Size:         4096B
+User:         ftp-default
+Group:        ftp-default
+Time:         Apr 23  3:12
+Filetype:     directory
+=============================================================
+</stdout>
+</verify>
+</testcase>

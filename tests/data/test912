@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+SIZE
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<servercmd>
+CAPA SIZE
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP with SIZE support
+ </name>
+<file name="log/test912.eml">
+From: different
+To: another
+
+body
+</file>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/912 --mail-rcpt recipient@example.com --mail-from sender@example.com -T log/test912.eml
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+EHLO 912
+MAIL FROM:<sender@example.com> SIZE=38
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
+
+body
+.
+</upload>
+</verify>
+</testcase>

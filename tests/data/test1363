@@ -1,0 +1,79 @@
+<testcase>
+<info>
+<keywords>
+FTP
+RETR
+</keywords>
+</info>
+
+# Server-side
+<reply>
+# file1363 contents...
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name1363; charset=funny; option=strange
+
+MOOOO
+</data>
+</reply>
+
+# Client-side
+<client>
+# this relies on the debug feature to allow us to set directory to store the
+# -O output in, using the CURL_TESTDIR variable
+<features>
+debug
+</features>
+<server>
+ftp
+</server>
+<name>
+FTP download, file with C-D inside, using -O -i, without -D
+</name>
+<setenv>
+CURL_TESTDIR=%PWD/log
+</setenv>
+<command option="no-output,no-include">
+ftp://%HOSTIP:%FTPPORT/path/file1363 -O -i
+</command>
+<postcheck>
+perl %SRCDIR/libtest/notexists.pl log/name1363
+</postcheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD path
+EPSV
+TYPE I
+SIZE file1363
+RETR file1363
+QUIT
+</protocol>
+
+<file1 name="log/file1363">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name1363; charset=funny; option=strange
+
+MOOOO
+</file1>
+
+<file2 name="log/stdout1363">
+</file2>
+
+</verify>
+</testcase>

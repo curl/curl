@@ -1,0 +1,136 @@
+#
+# Common defines for curl (djgpp/Watt-32)
+#
+# Assumes you've unpacked cURL with long-file names
+# I.e use "set LFN=y" before untaring on Win9x/XP.
+# Requires sed, yacc, rm and the usual stuff.
+#
+# Define TOPDIR before including this file.
+
+.SUFFIXES: .exe .y
+
+MAKEFILE = Makefile.dj
+OBJ_DIR = djgpp
+
+#
+# Find out if using a Unix-like shell or a DOS command interpreter
+#
+ifneq ($(findstring COMMAND.COM,$(SHELL)),COMMAND.COM)
+  ifneq ($(findstring CMD.EXE,$(SHELL)),CMD.EXE)
+    ifneq ($(findstring 4DOS.COM,$(SHELL)),4DOS.COM)
+      IS_UNIX_SHELL = 1
+    endif
+  endif
+endif
+
+#
+# Define shell dependent commands and vars
+#
+ifeq ($(IS_UNIX_SHELL),1)
+  COPY   = cp -f
+  DELETE = rm -f
+  MKDIR  = mkdir
+  RMDIR  = rm -f -r
+  DS     = /
+else
+  COPY   = copy
+  DELETE = del
+  MKDIR  = mkdir
+  RMDIR  = rmdir
+  DS     = \$(NOTHING)
+endif
+
+#
+# OpenSSL is available from www.openssl.org and builds okay
+# with djgpp/Watt-32. Set to 0 if you don't need https URLs
+# (reduces curl.exe with approx 700 kB)
+#
+USE_SSL = 0
+
+#
+# Use zlib for contents encoding
+#
+USE_ZLIB = 0
+
+#
+# Use libidn for international domain names
+#
+USE_IDNA = 0
+
+#
+# Use Watt-32 IPv6 stack (only IPv6 name resolution working at the moment)
+#
+USE_IPV6 = 0
+
+#
+# Use C-Ares resolver library
+#
+USE_ARES = 0
+
+#
+# Enable debug code in libcurl/curl
+#
+USE_DEBUG = 0
+
+#
+# Enable memory tracking code in libcurl/curl
+#
+USE_CURLDEBUG = 0
+
+default: all
+
+#
+# Root directory for Waterloo tcp/ip etc. Change to suite.
+# WATT_ROOT should be set during Watt-32 install.
+#
+WATT32_ROOT  = $(subst \,/,$(WATT_ROOT))
+OPENSSL_ROOT = e:/net/openssl.099
+ZLIB_ROOT    = $(DJDIR)/contrib/zlib
+LIBIDN_ROOT  = $(TOPDIR)/../IDN/libidn
+ARES_ROOT    = $(TOPDIR)/ares
+
+CC   = gcc
+YACC = bison -y
+
+CFLAGS = -g -O2 -I. -I$(TOPDIR)/include -I$(TOPDIR)/lib \
+         -I$(WATT32_ROOT)/inc -Wall -DHAVE_CONFIG_H
+
+ifeq ($(USE_SSL),1)
+  CFLAGS += -DUSE_SSLEAY -DUSE_OPENSSL -I$(OPENSSL_ROOT)
+endif
+
+ifeq ($(USE_ZLIB),1)
+  CFLAGS += -DUSE_ZLIB -I$(ZLIB_ROOT)
+endif
+
+ifeq ($(USE_IPV6),1)
+  CFLAGS += -DENABLE_IPV6
+endif
+
+ifeq ($(USE_ARES),1)
+  CFLAGS += -DUSE_ARES -I$(ARES_ROOT)
+endif
+
+ifeq ($(USE_IDNA),1)
+  CFLAGS += -DHAVE_LIBIDN -DHAVE_IDN_FREE_H -DHAVE_IDN_FREE -DHAVE_TLD_H \
+            -DHAVE_TLD_STRERROR -I$(LIBIDN_ROOT)/lib
+endif
+
+ifeq ($(USE_DEBUG),1)
+  CFLAGS += -DDEBUG=1 -DDEBUGBUILD
+endif
+
+ifeq ($(USE_CURLDEBUG),1)
+  CFLAGS += -DCURLDEBUG
+endif
+
+$(OBJ_DIR):
+	$(MKDIR) $(OBJ_DIR)
+
+$(OBJ_DIR)/%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+	@echo
+
+depend: $(DEPEND_PREREQ) $(MAKEFILE)
+	$(CC) -MM $(CFLAGS) $(CSOURCES) | \
+	sed -e 's/^\([a-zA-Z0-9_-]*\.o:\)/$$(OBJ_DIR)\/\1/' > depend.dj

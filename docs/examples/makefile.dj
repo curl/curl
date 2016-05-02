@@ -1,0 +1,56 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
+
+TOPDIR = ../..
+
+include $(TOPDIR)/packages/DOS/common.dj
+
+CFLAGS += -DFALSE=0 -DTRUE=1
+
+LIBS = $(TOPDIR)/lib/libcurl.a
+
+ifeq ($(USE_SSL),1)
+  LIBS += $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
+endif
+
+ifeq ($(USE_IDNA),1)
+  LIBS += $(LIBIDN_ROOT)/lib/dj_obj/libidn.a -liconv
+endif
+
+LIBS += $(WATT32_ROOT)/lib/libwatt.a $(ZLIB_ROOT)/libz.a
+
+include Makefile.inc
+
+PROGRAMS = $(patsubst %,%.exe,$(check_PROGRAMS))
+
+all: $(PROGRAMS)
+	@echo Welcome to libcurl example program
+
+%.exe: %.c
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+	@echo
+
+clean vclean realclean:
+	- rm -f $(PROGRAMS) depend.dj
+
+-include depend.dj
+

@@ -1,0 +1,118 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+followlocation
+</keywords>
+
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 301 Redirect swsclose
+Date: Thu, 29 Jul 2008 14:49:00 GMT
+Server: test-server/fake
+Location: data/10510002.txt?coolsite=yes
+Content-Length: 0
+Connection: close
+
+</data>
+<data2>
+HTTP/1.1 100 Continue
+
+HTTP/1.1 200 Followed here fine swsclose
+Date: Thu, 29 Jul 2008 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 51
+
+If this is received, the location following worked
+</data2>
+<datacheck>
+HTTP/1.1 301 Redirect swsclose
+Date: Thu, 29 Jul 2008 14:49:00 GMT
+Server: test-server/fake
+Location: data/10510002.txt?coolsite=yes
+Content-Length: 0
+Connection: close
+
+HTTP/1.1 100 Continue
+
+HTTP/1.1 200 Followed here fine swsclose
+Date: Thu, 29 Jul 2008 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 51
+
+If this is received, the location following worked
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP PUT with Location: following
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/want/1051 -L -T log/test1051.txt
+</command>
+<file name="log/test1051.txt">
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+
+# The primary reason libcurl sends the data part twice in this test is that
+# the test HTTP server is blocking until it has read the entire request,
+# including the full request-body before it responds. So in this test the
+# server says 301 and 100 _after_ the entire PUT body has been sent.
+
+<protocol>
+PUT /want/1051 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 78
+Expect: 100-continue
+
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+PUT /want/data/10510002.txt?coolsite=yes HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 78
+Expect: 100-continue
+
+Weird
+     file
+         to
+   upload
+for
+   testing
+the
+   PUT
+      feature
+</protocol>
+</verify>
+</testcase>

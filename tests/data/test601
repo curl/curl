@@ -1,0 +1,42 @@
+<testcase>
+<info>
+<keywords>
+SCP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+Test data
+for ssh test
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+scp
+</server>
+ <name>
+SCP retrieval
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%PWD/log/file601.txt --insecure
+</command>
+<file name="log/file601.txt">
+Test data
+for ssh test
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>

@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+FILE
+Range
+</keywords>
+</info>
+
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+file
+</features>
+ <name>
+X-X range on a file:// URL to stdout
+ </name>
+ <command>
+-r 4-4 file://localhost/%PWD/log/test1018.txt 
+</command>
+<file name="log/test1018.txt">
+1234567890
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout nonewline="yes">
+5
+</stdout>
+</verify>
+</testcase>

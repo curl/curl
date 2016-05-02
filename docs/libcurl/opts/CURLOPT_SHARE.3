@@ -1,0 +1,59 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SHARE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SHARE \- specify share handle to use
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SHARE, CURLSH *share);
+.SH DESCRIPTION
+Pass a \fIshare\fP handle as a parameter. The share handle must have been
+created by a previous call to \fIcurl_share_init(3)\fP. Setting this option,
+will make this curl handle use the data from the shared handle instead of
+keeping the data to itself. This enables several curl handles to share
+data. If the curl handles are used simultaneously in multiple threads, you
+\fBMUST\fP use the locking methods in the share handle. See
+\fIcurl_share_setopt(3)\fP for details.
+
+If you add a share that is set to share cookies, your easy handle will use
+that cookie cache and get the cookie engine enabled. If you unshare an object
+that was using cookies (or change to another object that doesn't share
+cookies), the easy handle will get its cookie engine disabled.
+
+Data that the share object is not set to share will be dealt with the usual
+way, as if no share was used.
+
+Set this option to NULL again to stop using that share object.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_COOKIE "(3), "

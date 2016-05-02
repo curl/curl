@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-G
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP with -d and -G
+ </name>
+ <command>
+-d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/32 -G
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /32?foo=moo&moo=poo HTTP/1.1
+User-Agent: curl/7.9.5 (i686-pc-linux-gnu) libcurl 7.9.5-cvs (OpenSSL 0.9.5) (ipv6 enabled)
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

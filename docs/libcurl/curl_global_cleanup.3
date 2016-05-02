@@ -1,0 +1,49 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_global_cleanup 3 "17 Feb 2006" "libcurl 7.8" "libcurl Manual"
+.SH NAME
+curl_global_cleanup - global libcurl cleanup
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "void curl_global_cleanup(void);"
+.ad
+.SH DESCRIPTION
+This function releases resources acquired by \fBcurl_global_init(3)\fP.
+
+You should call \fIcurl_global_cleanup(3)\fP once for each call you make to
+\fIcurl_global_init(3)\fP, after you are done using libcurl.
+
+\fBThis function is not thread safe.\fP You must not call it when any other
+thread in the program (i.e. a thread sharing the same memory) is running.
+This doesn't just mean no other thread that is using libcurl.  Because
+\fBcurl_global_cleanup(3)\fP calls functions of other libraries that are
+similarly thread unsafe, it could conflict with any other thread that uses
+these other libraries.
+
+See the description in \fBlibcurl(3)\fP of global environment requirements for
+details of how to use this function.
+
+.SH "SEE ALSO"
+.BR curl_global_init "(3), "
+.BR libcurl "(3), "
+

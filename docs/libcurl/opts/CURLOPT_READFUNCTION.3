@@ -1,0 +1,79 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_READFUNCTION 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_READFUNCTION \- read callback for data uploads
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+size_t read_callback(char *buffer, size_t size, size_t nitems, void *instream);
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_READFUNCTION, read_callback);
+
+.SH DESCRIPTION
+Pass a pointer to your callback function, as the prototype shows above.
+
+This callback function gets called by libcurl as soon as it needs to read data
+in order to send it to the peer - like if you ask it to upload or post data to
+the server. The data area pointed at by the pointer \fIbuffer\fP should be
+filled up with at most \fIsize\fP multiplied with \fInmemb\fP number of bytes
+by your function.
+
+Your function must then return the actual number of bytes that it stored in
+that memory area. Returning 0 will signal end-of-file to the library and cause
+it to stop the current transfer.
+
+If you stop the current transfer by returning 0 "pre-maturely" (i.e before the
+server expected it, like when you've said you will upload N bytes and you
+upload less than N bytes), you may experience that the server "hangs" waiting
+for the rest of the data that won't come.
+
+The read callback may return \fICURL_READFUNC_ABORT\fP to stop the current
+operation immediately, resulting in a \fICURLE_ABORTED_BY_CALLBACK\fP error
+code from the transfer.
+
+The callback can return \fICURL_READFUNC_PAUSE\fP to cause reading from this
+connection to pause. See \fIcurl_easy_pause(3)\fP for further details.
+
+\fBBugs\fP: when doing TFTP uploads, you must return the exact amount of data
+that the callback wants, or it will be considered the final packet by the
+server end and the transfer will end there.
+
+If you set this callback pointer to NULL, or don't set it at all, the default
+internal read function will be used. It is doing an fread() on the FILE *
+userdata set with \fICURLOPT_READDATA(3)\fP.
+.SH DEFAULT
+The default internal read callback is fread().
+.SH PROTOCOLS
+This is used for all protocols when doing uploads.
+.SH EXAMPLE
+Here's an example setting a read callback for reading that to upload to an FTP
+site: https://curl.haxx.se/libcurl/c/ftpupload.html
+.SH AVAILABILITY
+CURL_READFUNC_PAUSE return code was added in 7.18.0 and CURL_READFUNC_ABORT
+was added in 7.12.1.
+.SH RETURN VALUE
+This will return CURLE_OK.
+.SH "SEE ALSO"
+.BR CURLOPT_READDATA "(3), " CURLOPT_WRITEFUNCTION "(3), "
+.BR CURLOPT_SEEKFUNCTION "(3), " CURLOPT_UPLOAD "(3), " CURLOPT_POST "(3), "

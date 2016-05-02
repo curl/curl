@@ -1,0 +1,49 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_getenv 3 "30 April 2004" "libcurl 7.12" "libcurl Manual"
+.SH NAME
+curl_getenv - return value for environment name
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "char *curl_getenv(const char *" name ");"
+.ad
+.SH DESCRIPTION
+curl_getenv() is a portable wrapper for the getenv() function, meant to
+emulate its behaviour and provide an identical interface for all operating
+systems libcurl builds on (including win32).
+.SH AVAILABILITY
+This function will be removed from the public libcurl API in a near future. It
+will instead be made "available" by source code access only, and then as
+curlx_getenv().
+.SH RETURN VALUE
+If successful, curl_getenv() returns a pointer to the value of the specified
+environment. The memory it refers to is malloc()ed so the application must
+free() this when the data is no longer needed. When \fIcurl_getenv(3)\fP fails
+to find the specified name, it returns a null pointer.
+.SH NOTE
+Under unix operating systems, there isn't any point in returning an allocated
+memory, although other systems won't work properly if this isn't done. The
+unix implementation thus has to suffer slightly from the drawbacks of other
+systems.
+.SH "SEE ALSO"
+.BR getenv "(3C), "

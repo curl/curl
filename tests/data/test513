@@ -1,0 +1,49 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib513
+</tool>
+
+ <name>
+send HTTP POST using read callback that returns CURL_READFUNC_ABORT
+ </name>
+# the 1s post-command delay helps to prevent a spurious failure on s390
+ <command delay="1">
+http://%HOSTIP:%HTTPPORT/513
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+POST /513 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 1
+Content-Type: application/x-www-form-urlencoded
+
+</protocol>
+# 42 - aborted by callback
+<errorcode>
+42
+</errorcode>
+</verify>
+</testcase>

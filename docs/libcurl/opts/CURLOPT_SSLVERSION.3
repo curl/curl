@@ -1,0 +1,78 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SSLVERSION 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SSLVERSION \- set preferred TLS/SSL version
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLVERSION, long version);
+.SH DESCRIPTION
+Pass a long as parameter to control which version of SSL/TLS to attempt to
+use.
+
+Use one of the available defines for this purpose. The available options are:
+.RS
+.IP CURL_SSLVERSION_DEFAULT
+The default action. This will attempt to figure out the remote SSL protocol
+version.
+.IP CURL_SSLVERSION_TLSv1
+TLSv1.x
+.IP CURL_SSLVERSION_SSLv2
+SSLv2
+.IP CURL_SSLVERSION_SSLv3
+SSLv3
+.IP CURL_SSLVERSION_TLSv1_0
+TLSv1.0 (Added in 7.34.0)
+.IP CURL_SSLVERSION_TLSv1_1
+TLSv1.1 (Added in 7.34.0)
+.IP CURL_SSLVERSION_TLSv1_2
+TLSv1.2 (Added in 7.34.0)
+.RE
+.SH DEFAULT
+CURL_SSLVERSION_DEFAULT
+.SH PROTOCOLS
+All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
+  /* ask libcurl to use TLS version 1.0 or later */
+  curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
+
+  /* Perform the request */
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+SSLv2 is disabled by default since 7.18.1. Other SSL versions availability may
+vary depending on which backend libcurl has been built to use.
+
+SSLv3 is disabled by default since 7.39.0.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_USE_SSL "(3), " CURLOPT_HTTP_VERSION "(3), "
+.BR CURLOPT_IPRESOLVE "(3) "

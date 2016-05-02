@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+FTP
+SYST
+SITE
+OS400
+</keywords>
+</info>
+# Server-side
+<reply>
+<data nocheck="yes">
+blabla
+</data>
+<servercmd>
+REPLY PWD 257 "QGPL" is the current library
+REPLY SYST 215  OS/400 runs this server
+REPLY SITE 250 Name format set to 1
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP OS/400 server name format check
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/1102
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+SYST
+SITE NAMEFMT 1
+PWD
+EPSV
+TYPE I
+SIZE 1102
+RETR 1102
+QUIT
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PASV
+RETR
+multi
+non-existing host
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+
+<servercmd>
+REPLY RETR 550 the file doesn't exist
+REPLY SIZE 550 Can't check for file existence
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib533
+</tool>
+ <name>
+FTP RETR twice using multi: non-existing host and non-existing file
+ </name>
+ <command>
+ftp://non-existing-host.haxx.se/path/534 ftp://%HOSTIP:%FTPPORT/path/534
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD path
+EPSV
+TYPE I
+SIZE 534
+RETR 534
+QUIT
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,83 @@
+<testcase>
+# Based on tests 186 and 1053
+<info>
+<keywords>
+HTTP
+HTTP FORMPOST
+HTTP file upload
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 29 Jul 2008 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+Connection: close
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP RFC1867-type formposting - -F with three files, one with explicit type
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/1315 -F name=value -F 'file=@log/test1315.txt,log/test1315.txt;type=magic/content,log/test1315.txt'
+</command>
+# We create this file before the command is invoked!
+<file name="log/test1315.txt">
+dummy data
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+(^User-Agent:.*|-----+\w+)
+</strip>
+<protocol>
+POST /we/want/1315 HTTP/1.1
+User-Agent: curl/7.18.2 (i686-pc-linux-gnu) libcurl/7.18.2 OpenSSL/0.9.7a ipv6 zlib/1.1.4
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 795
+Expect: 100-continue
+Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
+
+------------------------------9ef8d6205763
+Content-Disposition: form-data; name="name"
+
+value
+------------------------------9ef8d6205763
+Content-Disposition: form-data; name="file"
+Content-Type: multipart/mixed; boundary=----------------------------aaaaaaaaaaaa
+
+Content-Disposition: attachment; filename="test1315.txt"
+Content-Type: text/plain
+
+dummy data
+
+------------------------------9ef8d6205763
+Content-Disposition: attachment; filename="test1315.txt"
+Content-Type: magic/content
+
+dummy data
+
+------------------------------9ef8d6205763
+Content-Disposition: attachment; filename="test1315.txt"
+Content-Type: text/plain
+
+dummy data
+
+------------------------------aaaaaaaaaaaa--
+------------------------------9ef8d6205763--
+</protocol>
+</verify>
+</testcase>

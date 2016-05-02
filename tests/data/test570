@@ -1,0 +1,77 @@
+<testcase>
+
+#Informational
+<info>
+<keywords>
+RTSP
+Mismatch checking
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data1>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 2
+Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
+Informational: CSeq Mismatch
+
+</data1>
+<data2>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+Session: asdf
+CSeq: 999
+
+</data2>
+<data3>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+Session: asdfWRONG
+Informational: Session ID mismatch
+Curl-Private: swsclose
+CSeq: 1000
+
+</data3>
+
+</reply>
+
+# Client-Side
+<client>
+<server>
+rtsp
+</server>
+<tool>
+lib570
+</tool>
+
+<name>
+RTSP CSeq and Session Mismatch checks
+</name>
+<command>
+rtsp://%HOSTIP:%RTSPPORT/570
+</command>
+</client>
+
+<verify>
+<strip>
+^If-Modified-Since:.*
+</strip>
+<protocol>
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/5700001 RTSP/1.0
+CSeq: 1
+
+SETUP rtsp://%HOSTIP:%RTSPPORT/5700002 RTSP/1.0
+CSeq: 999
+Transport: RAW/RAW/UDP;unicast;client_port=3056-3057
+
+PLAY rtsp://%HOSTIP:%RTSPPORT/5700003 RTSP/1.0
+CSeq: 1000
+Session: asdf
+
+</protocol>
+</verify>
+
+</testcase>
+

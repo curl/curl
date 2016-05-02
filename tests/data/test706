@@ -1,0 +1,59 @@
+<testcase>
+#based off test 100
+<info>
+<keywords>
+FTP
+PASV
+LIST
+SOCKS4
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+# When doing LIST, we get the default list output hard-coded in the test
+# FTP server
+<datacheck mode="text">
+total 20
+drwxr-xr-x   8 98       98           512 Oct 22 13:06 .
+drwxr-xr-x   8 98       98           512 Oct 22 13:06 ..
+drwxr-xr-x   2 98       98           512 May  2  1996 .NeXT
+-r--r--r--   1 0        1             35 Jul 16  1996 README
+lrwxrwxrwx   1 0        1              7 Dec  9  1999 bin -> usr/bin
+dr-xr-xr-x   2 0        1            512 Oct  1  1997 dev
+drwxrwxrwx   2 98       98           512 May 29 16:04 download.html
+dr-xr-xr-x   2 0        1            512 Nov 30  1995 etc
+drwxrwxrwx   2 98       1            512 Oct 30 14:33 pub
+dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+ftp
+socks4
+</server>
+ <name>
+FTP dir list PASV via SOCKS4
+ </name>
+ <command>
+--socks4 %HOSTIP:%SOCKSPORT ftp://%HOSTIP:%FTPPORT/
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE A
+LIST
+QUIT
+</protocol>
+</verify>
+</testcase>

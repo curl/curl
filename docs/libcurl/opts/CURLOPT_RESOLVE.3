@@ -1,0 +1,82 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_RESOLVE 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_RESOLVE \- provide custom host name to IP address resolves
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RESOLVE,
+                          struct curl_slist *hosts);
+.SH DESCRIPTION
+Pass a pointer to a linked list of strings with host name resolve information
+to use for requests with this handle. The linked list should be a fully valid
+list of \fBstruct curl_slist\fP structs properly filled in. Use
+\fIcurl_slist_append(3)\fP to create the list and \fIcurl_slist_free_all(3)\fP
+to clean up an entire list.
+
+Each single name resolve string should be written using the format
+HOST:PORT:ADDRESS where HOST is the name libcurl will try to resolve, PORT is
+the port number of the service where libcurl wants to connect to the HOST and
+ADDRESS is the numerical IP address. If libcurl is built to support IPv6,
+ADDRESS can of course be either IPv4 or IPv6 style addressing.
+
+This option effectively pre-populates the DNS cache with entries for the
+host+port pair so redirects and everything that operations against the
+HOST+PORT will instead use your provided ADDRESS. Addresses set with
+\fICURL_RESOLVE\fP will not time-out from the DNS cache like ordinary entries.
+
+Remove names from the DNS cache again, to stop providing these fake resolves,
+by including a string in the linked list that uses the format
+\&"-HOST:PORT". The host name must be prefixed with a dash, and the host name
+and port number must exactly match what was already added previously. (Added
+in 7.42.0)
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl;
+struct curl_slist *host = NULL;
+host = curl_slist_append(NULL, "example.com:80:127.0.0.1");
+
+curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  res = curl_easy_perform(curl);
+
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+}
+
+curl_slist_free_all(host);
+.fi
+.SH AVAILABILITY
+Added in 7.21.3. Removal support added in 7.42.0.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_IPRESOLVE "(3), " CURLOPT_DNS_CACHE_TIMEOUT "(3), "

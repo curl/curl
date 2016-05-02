@@ -1,0 +1,42 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_NOPROGRESS 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_NOPROGRESS \- switch off the progress meter
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOPROGRESS, long onoff);
+.SH DESCRIPTION
+If \fIonoff\fP is to 1, it tells the library to shut off the progress meter
+completely for requests done with this \fIhandle\fP. It will also prevent the
+\fICURLOPT_PROGRESSFUNCTION(3)\fP from getting called.
+
+Future versions of libcurl are likely to not have any built-in progress meter
+at all.
+.SH DEFAULT
+1, meaning it normally runs without a progress meter.
+.SH RETURN VALUE
+Returns CURLE_OK.
+.SH "SEE ALSO"
+.BR CURLOPT_PROGRESSFUNCTION "(3), "

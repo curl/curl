@@ -1,0 +1,78 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+HTTP GET
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 A OK
+Server: curl test
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 3
+
+ok
+</data>
+<data2 nocheck="yes">
+HTTP/1.1 200 A OK
+Server: curl test
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 9
+
+still ok
+</data2>
+</reply>
+
+# Client-side
+<client>
+# 
+<server>
+http
+</server>
+ <name>
+HTTP PUT with one file but two URLs
+ </name>
+ <command>
+-H "Expect:" -T log/1065 http://%HOSTIP:%HTTPPORT/1065.upload1 http://%HOSTIP:%HTTPPORT/10650002.url2
+</command>
+<file name="log/1065">
+test
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+PUT /1065.upload1 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 5
+
+test
+GET /10650002.url2 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout>
+HTTP/1.1 200 A OK
+Server: curl test
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 3
+
+ok
+HTTP/1.1 200 A OK
+Server: curl test
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 9
+
+still ok
+</stdout>
+</verify>
+</testcase>

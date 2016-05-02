@@ -1,0 +1,54 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP added headers
+HTTP replaced headers
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Replaced internal and added custom HTTP headers
+ </name>
+ <command>
+ -H "extra-header: here" -H "Accept: replaced" -H "X-Custom-Header;" -H "X-Test: foo; " -H "X-Test:" -H "X-Test2: foo;" -H "X-Test3:  " -H "X-Test4;  " -H "X-Test5;ignored" http://%HOSTIP:%HTTPPORT/4
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /4 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+extra-header: here
+Accept: replaced
+X-Custom-Header:
+X-Test: foo; 
+X-Test2: foo;
+
+</protocol>
+</verify>
+</testcase>

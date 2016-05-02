@@ -1,0 +1,95 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_CUSTOMREQUEST 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_CUSTOMREQUEST \- custom string for request
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CUSTOMREQUEST, char *request);
+.SH DESCRIPTION
+Pass a pointer to a zero terminated string as parameter.
+
+When you change the request method by setting \fBCURLOPT_CUSTOMREQUEST(3)\fP
+to something, you don't actually change how libcurl behaves or acts in regards
+to the particular request method, it will only change the actual string sent
+in the request.
+
+Restore to the internal default by setting this to NULL.
+
+This option can be used to specify the request:
+.IP HTTP
+Instead of GET or HEAD when performing HTTP based requests. This is
+particularly useful, for example, for performing a HTTP DELETE request.
+
+For example:
+
+When you tell libcurl to do a HEAD request, but then specify a GET though a
+custom request libcurl will still act as if it sent a HEAD. To switch to a
+proper HEAD use \fICURLOPT_NOBODY(3)\fP, to switch to a proper POST use
+\fICURLOPT_POST(3)\fP or \fICURLOPT_POSTFIELDS(3)\fP and to switch to a proper
+GET use \fICURLOPT_HTTPGET(3)\fP.
+
+Many people have wrongly used this option to replace the entire request with
+their own, including multiple headers and POST contents. While that might work
+in many cases, it will cause libcurl to send invalid requests and it could
+possibly confuse the remote server badly. Use \fICURLOPT_POST(3)\fP and
+\fICURLOPT_POSTFIELDS(3)\fP to set POST data. Use \fICURLOPT_HTTPHEADER(3)\fP
+to replace or extend the set of headers sent by libcurl. Use
+\fICURLOPT_HTTP_VERSION(3)\fP to change HTTP version.
+
+.IP FTP
+Instead of LIST and NLST when performing FTP directory listings.
+.IP IMAP
+Instead of LIST when issuing IMAP based requests.
+.IP POP3
+Instead of LIST and RETR when issuing POP3 based requests.
+
+For example:
+
+When you tell libcurl to use a custom request it will behave like a LIST or
+RETR command was sent where it expects data to be returned by the server. As
+such \fICURLOPT_NOBODY(3)\fP should be used when specifying commands such as
+DELE and NOOP for example.
+.IP SMTP
+Instead of a HELP or VRFY when issuing SMTP based requests.
+
+For example:
+
+Normally a multiline response is returned which can be used, in conjunction
+with \fICURLOPT_MAIL_RCPT(3)\fP, to specify an EXPN request. If the
+\fICURLOPT_NOBODY(3)\fP option is specified then the request can be used to
+issue NOOP and RSET commands.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+HTTP, FTP, IMAP, POP3 and SMTP
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+IMAP is supported since 7.30.0, POP3 since 7.26.0 and SMTP since 7.34.0.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+.SH "SEE ALSO"
+.BR CURLOPT_HTTPHEADER "(3), " CURLOPT_NOBODY "(3), "
