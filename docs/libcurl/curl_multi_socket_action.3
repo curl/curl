@@ -61,7 +61,7 @@ called.
 Get the timeout time by setting the \fICURLMOPT_TIMERFUNCTION(3)\fP option
 with \fIcurl_multi_setopt(3)\fP. Your application will then get called with
 information on how long to wait for socket actions at most before doing the
-timeout action: call the \fBcurl_multi_socket_action(3)\fP function with the
+timeout action: call the \fIcurl_multi_socket_action(3)\fP function with the
 \fBsockfd\fP argument set to CURL_SOCKET_TIMEOUT. You can also use the
 \fIcurl_multi_timeout(3)\fP function to poll the value at any given time, but
 for an event-based system using the callback is far better than relying on
@@ -78,7 +78,7 @@ The socket \fBcallback\fP function uses a prototype like this
                            void *socketp); /* private socket pointer,
                                               \fBNULL\fP if not
                                               previously assigned with
-                                              \fBcurl_multi_assign(3)\fP */
+                                              \fIcurl_multi_assign(3)\fP */
 
 .fi
 The callback MUST return 0.
