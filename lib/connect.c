@@ -749,6 +749,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   }
 
   for(i=0; i<2; i++) {
+    error = 0;
     const int other = i ^ 1;
     if(conn->tempsock[i] == CURL_SOCKET_BAD)
       continue;
