@@ -1185,25 +1185,9 @@ FAQ
   your system has such.  Note that you must never share the same handle in
   multiple threads.
 
-  libcurl's implementation of timeouts might use signals (depending on what it
-  was built to use for name resolving), and signal handling is generally not
-  thread-safe.  Multi-threaded Applicationss that call libcurl from different
-  threads (on different handles) might want to use CURLOPT_NOSIGNAL, e.g.:
-
-    curl_easy_setopt(handle, CURLOPT_NOSIGNAL, true);
-
-  If you use a OpenSSL-powered libcurl in a multi-threaded environment, you
-  need to provide one or two locking functions:
-
-    https://www.openssl.org/docs/crypto/threads.html
-
-  If you use a GnuTLS-powered libcurl in a multi-threaded environment, you
-  need to provide locking function(s) for libgcrypt (which is used by GnuTLS
-  for the crypto functions).
-
-    https://web.archive.org/web/20111103083330/http://www.gnu.org/software/gnutls/manual/html_node/Multi_002dthreaded-applications.html
-
-  No special locking is needed with a NSS-powered libcurl. NSS is thread-safe.
+  There may be some exceptions to thread safety depending on how libcurl was
+  built. Please review the guidelines for thread safety to learn more:
+  https://curl.haxx.se/libcurl/c/threadsafe.html
 
   5.2 How can I receive all data into a large memory chunk?
 
