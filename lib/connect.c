@@ -764,6 +764,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     rc = Curl_socket_ready(CURL_SOCKET_BAD, conn->tempsock[i], 0);
 
     if(rc == 0) { /* no connection yet */
+      error = 0;
       if(curlx_tvdiff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
         infof(data, "After %ldms connect time, move on!\n",
               conn->timeoutms_per_addr);
