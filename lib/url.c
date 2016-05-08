@@ -4141,12 +4141,17 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   }
   else {
     /* clear path */
+    char slashbuf[4];
     path[0]=0;
 
-    if(2 > sscanf(data->change.url,
-                   "%15[^\n:]://%[^\n/?]%[^\n]",
-                   protobuf,
-                   conn->host.name, path)) {
+    rc = sscanf(data->change.url,
+                "%15[^\n:]:%3[/]%[^\n/?]%[^\n]",
+                protobuf, slashbuf, conn->host.name, path);
+    if(2 == rc) {
+      failf(data, "Bad URL");
+      return CURLE_URL_MALFORMAT;
+    }
+    if(3 > rc) {
 
       /*
        * The URL was badly formatted, let's try the browser-style _without_
@@ -4197,8 +4202,23 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
 
       *prot_missing = TRUE; /* not given in URL */
     }
-    else
+    else {
+      size_t s = strlen(slashbuf);
       protop = protobuf;
+      if(s != 2) {
+        infof(data, "Unwillingly accepted illegal URL using %d slash%s!\n",
+              s, s>1?"es":"");
+
+        if(data->change.url_alloc)
+          free(data->change.url);
+        /* repair the URL to use two slashes */
+        data->change.url = aprintf("%s://%s%s",
+                                   protobuf, conn->host.name, path);
+        if(!data->change.url)
+          return CURLE_OUT_OF_MEMORY;
+        data->change.url_alloc = TRUE;
+      }
+    }
   }
 
   /* We search for '?' in the host name (but only on the right side of a
