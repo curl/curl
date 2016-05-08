@@ -44,6 +44,8 @@ or two functions to allow it to function properly:
 https://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
 
 https://curl.haxx.se/libcurl/c/opensslthreadlock.html
+
+For OpenSSL versions starting with 1.1.0, no particular action is required.
 .IP GnuTLS
 http://gnutls.org/manual/html_node/Thread-safety.html
 .IP NSS
@@ -59,6 +61,8 @@ The engine is used by libcurl in a way that is fully thread-safe.
 .IP WinSSL
 The engine is used by libcurl in a way that is fully thread-safe.
 .IP wolfSSL
+The engine is used by libcurl in a way that is fully thread-safe.
+.IP BoringSSL
 The engine is used by libcurl in a way that is fully thread-safe.
 .SH "Other areas of caution"
 .IP Signals
