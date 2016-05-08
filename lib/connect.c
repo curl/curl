@@ -722,7 +722,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   CURLcode result = CURLE_OK;
   long allow;
-  int error = 0;
+  int error_save = 0;
   struct timeval now;
   int rc;
   int i;
@@ -749,6 +749,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   }
 
   for(i=0; i<2; i++) {
+    int error = 0;
     const int other = i ^ 1;
     if(conn->tempsock[i] == CURL_SOCKET_BAD)
       continue;
@@ -818,6 +819,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
      * address" for the given host. But first remember the latest error.
      */
     if(error) {
+      error_save = error;
       data->state.os_errno = error;
       SET_SOCKERRNO(error);
       if(conn->tempaddr[i]) {
@@ -860,7 +862,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       hostname = conn->host.name;
 
     failf(data, "Failed to connect to %s port %ld: %s",
-        hostname, conn->port, Curl_strerror(conn, error));
+        hostname, conn->port, Curl_strerror(conn, error_save));
   }
 
   return result;
