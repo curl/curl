@@ -544,6 +544,8 @@ struct ConnectBits {
   bool multiplex; /* connection is multiplexed */
 
   bool tcp_fastopen; /* use TCP Fast Open */
+  bool tls_enable_npn;  /* TLS NPN extension? */
+  bool tls_enable_alpn; /* TLS ALPN extension? */
 };
 
 struct hostname {
@@ -815,7 +817,7 @@ struct Curl_handler {
                                         url query strings (?foo=bar) ! */
 #define PROTOPT_CREDSPERREQUEST (1<<7) /* requires login credentials per
                                           request instead of per connection */
-
+#define PROTOPT_ALPN_NPN (1<<8) /* set ALPN and/or NPN for this */
 
 /* return the count of bytes sent, or -1 on error */
 typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
@@ -1671,8 +1673,8 @@ struct UserDefined {
 
   size_t maxconnects;  /* Max idle connections in the connection cache */
 
-  bool ssl_enable_npn;  /* TLS NPN extension? */
-  bool ssl_enable_alpn; /* TLS ALPN extension? */
+  bool ssl_enable_npn;      /* TLS NPN extension? */
+  bool ssl_enable_alpn;     /* TLS ALPN extension? */
   bool path_as_is;      /* allow dotdots? */
   bool pipewait;        /* wait for pipe/multiplex status before starting a
                            new connection */

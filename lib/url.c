@@ -6167,6 +6167,15 @@ static CURLcode create_conn(struct SessionHandle *data,
        connections we are allowed to open. */
     struct connectbundle *bundle = NULL;
 
+    if(conn->handler->flags & PROTOPT_ALPN_NPN) {
+      /* The protocol wants it, so set the bits if enabled in the easy handle
+         (default) */
+      if(data->set.ssl_enable_alpn)
+        conn->bits.tls_enable_alpn = TRUE;
+      if(data->set.ssl_enable_npn)
+        conn->bits.tls_enable_npn = TRUE;
+    }
+
     if(waitpipe)
       /* There is a connection that *might* become usable for pipelining
          "soon", and we wait for that */

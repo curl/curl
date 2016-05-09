@@ -351,7 +351,7 @@ cyassl_connect_step1(struct connectdata *conn,
   }
 
 #ifdef HAVE_ALPN
-  if(data->set.ssl_enable_alpn) {
+  if(conn->bits.tls_enable_alpn) {
     char protocols[128];
     *protocols = '\0';
 
@@ -525,7 +525,7 @@ cyassl_connect_step2(struct connectdata *conn,
   }
 
 #ifdef HAVE_ALPN
-  if(data->set.ssl_enable_alpn) {
+  if(conn->bits.tls_enable_alpn) {
     int rc;
     char *protocol = NULL;
     unsigned short protocol_len = 0;
