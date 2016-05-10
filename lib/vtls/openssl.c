@@ -759,17 +759,17 @@ void Curl_ossl_cleanup(void)
  */
 int Curl_ossl_check_cxn(struct connectdata *conn)
 {
-  int rc;
+#ifdef MSG_PEEK
   char buf;
-
-  rc = SSL_peek(conn->ssl[FIRSTSOCKET].handle, (void*)&buf, 1);
-  if(rc > 0)
-    return 1; /* connection still in place */
-
-  if(rc == 0)
+  if(recv((RECV_TYPE_ARG1)conn->sock[FIRSTSOCKET], (RECV_TYPE_ARG2)&buf,
+          (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK) == 0) {
     return 0; /* connection has been closed */
-
+  }
+  else
+    return 1; /* connection still in place */
+#else
   return -1; /* connection status unknown */
+#endif
 }
 
 /* Selects an OpenSSL crypto engine
