@@ -862,7 +862,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 
     Curl_add_buffer(stream->trailer_recvbuf, &n, sizeof(n));
     Curl_add_buffer(stream->trailer_recvbuf, name, namelen);
-    Curl_add_buffer(stream->trailer_recvbuf, ":", 1);
+    Curl_add_buffer(stream->trailer_recvbuf, ": ", 2);
     Curl_add_buffer(stream->trailer_recvbuf, value, valuelen);
     Curl_add_buffer(stream->trailer_recvbuf, "\r\n\0", 3);
 
@@ -894,7 +894,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
      received, and this is not pseudo-header field . */
   /* convert to a HTTP1-style header */
   Curl_add_buffer(stream->header_recvbuf, name, namelen);
-  Curl_add_buffer(stream->header_recvbuf, ":", 1);
+  Curl_add_buffer(stream->header_recvbuf, ": ", 2);
   Curl_add_buffer(stream->header_recvbuf, value, valuelen);
   Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
   /* if we receive data for another handle, wake that up */
