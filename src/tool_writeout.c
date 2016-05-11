@@ -57,6 +57,7 @@ typedef enum {
   VAR_PRIMARY_PORT,
   VAR_LOCAL_IP,
   VAR_LOCAL_PORT,
+  VAR_HTTP_VERSION,
   VAR_NUM_OF_VARS /* must be the last */
 } replaceid;
 
@@ -95,6 +96,7 @@ static const struct variable replacements[]={
   {"remote_port", VAR_PRIMARY_PORT},
   {"local_ip", VAR_LOCAL_IP},
   {"local_port", VAR_LOCAL_PORT},
+  {"http_version", VAR_HTTP_VERSION},
   {NULL, VAR_NONE}
 };
 
@@ -277,6 +279,26 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                    curl_easy_getinfo(curl, CURLINFO_LOCAL_PORT,
                                      &longinfo))
                   fprintf(stream, "%ld", longinfo);
+                break;
+              case VAR_HTTP_VERSION:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_HTTP_VERSION,
+                                     &longinfo)) {
+                  char *version = "0";
+                  switch (longinfo) {
+                  case CURL_HTTP_VERSION_1_0:
+                    version = "1.0";
+                    break;
+                  case CURL_HTTP_VERSION_1_1:
+                    version = "1.1";
+                    break;
+                  case CURL_HTTP_VERSION_2_0:
+                    version = "2";
+                    break;
+                  }
+
+                  fprintf(stream, version);
+                }
                 break;
               default:
                 break;
