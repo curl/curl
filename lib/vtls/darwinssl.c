@@ -1281,8 +1281,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #if CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS
   /* Snow Leopard introduced the SSLSetSessionOption() function, but due to
      a library bug with the way the kSSLSessionOptionBreakOnServerAuth flag
-     works, it doesn't work as expected under Snow Leopard, Lion or 
-	 Mountain Lion.
+     works, it doesn't work as expected under Snow Leopard, Lion or
+     Mountain Lion.
      So we need to call SSLSetEnableCertVerify() on those older cats in order
      to disable certificate validation if the user turned that off.
      (SecureTransport will always validate the certificate chain by
