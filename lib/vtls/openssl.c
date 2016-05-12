@@ -763,7 +763,7 @@ int Curl_ossl_check_cxn(struct connectdata *conn)
      recv MSG_PEEK instead. Bug #795 */
 #ifdef MSG_PEEK
   char buf;
-  int nread;
+  ssize_t nread;
   nread = recv((RECV_TYPE_ARG1)conn->sock[FIRSTSOCKET], (RECV_TYPE_ARG2)&buf,
                (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK);
   if(nread == 0)
