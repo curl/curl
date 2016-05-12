@@ -96,6 +96,14 @@ This release includes the following bugfixes:
  o docs: fixed lots of broken man page references
  o tls: make setting pinnedkey option fail if not supported [48]
  o test1140: run nroff-scan to verify man pages
+ o http: make sure a blank header overrides accept_decoding [49]
+ o connections: do not reuse non-HTTP proxies on different ports [50]
+ o connect: fix invalid "Network is unreachable" errors [51]
+ o TLS: move the ALPN/NPN enable bits to the connection [52]
+ o TLS: SSL_peek is not a const operation [53]
+ o http2: Add space between colon and header value [54]
+ o darwinssl: fix certificate verification disable on OS X 10.8 [55]
+ o mprintf: Fix processing of width and prec args
 
 This release includes the following known bugs:
 
@@ -104,15 +112,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alexis La Goutte, Anatol Belski, Bru Rom,
-  Damien Vielpeau, Dan Cristian, Daniel Stenberg, David Benjamin, Diego Bes,
-  Dusty Mabe, Evgeny Grin, Henrik Gaßmann, Irfan Adilovic, Isaac Boukris,
-  Joel Depooter, John Wanghui, Joonas Kuorilehto, Juan RP, Kai Noda,
-  Kamil Dudka, Leif W, Linus Nordberg, Marcel Raad, Marquis de Muesli,
-  Michael Kaufmann, Michael Osipov, Moti Avrahami, Patrick Monnerat,
-  Ray Satiro, Rod Widdowson, Steve Holme, Tatsuhiro Tsujikawa, Theodore Dubois,
+  Alessandro Ghedini, Alexis La Goutte, Anatol Belski, Anders Bakken,
+  Antonio Larrosa, Bru Rom, Cory Benfield, Damien Vielpeau, Dan Cristian,
+  Daniel Stenberg, David Benjamin, Diego Bes, Dusty Mabe, Evgeny Grin,
+  Henrik Gaßmann, Irfan Adilovic, Isaac Boukris, Joel Depooter, John Wanghui,
+  Joonas Kuorilehto, Juan RP, Kai Noda, Kamil Dudka, Leif W, Linus Nordberg,
+  Marcel Raad, Marquis de Muesli, Michael Kaufmann, Michael Osipov,
+  Moti Avrahami, Oleg Pudeyev, Patrick Monnerat, Per Malmberg, Ray Satiro,
+  Rod Widdowson, Steve Holme, Tatsuhiro Tsujikawa, Theodore Dubois,
   Thomas Glanzmann, Travis Burtrum, Viktor Szakáts,
-  (36 contributors)
+  (41 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -166,3 +175,10 @@ References to bug reports and discussions on issues:
  [46] = https://curl.haxx.se/bug/?i=784
  [47] = https://curl.haxx.se/bug/?i=785
  [48] = https://curl.haxx.se/bug/?i=781
+ [49] = https://curl.haxx.se/bug/?i=785
+ [50] = https://curl.haxx.se/bug/?i=648
+ [51] = https://curl.haxx.se/bug/?i=794
+ [52] = https://curl.haxx.se/bug/?i=789
+ [53] = https://curl.haxx.se/bug/?i=795
+ [54] = https://curl.haxx.se/bug/?i=797
+ [55] = https://curl.haxx.se/bug/?i=802
