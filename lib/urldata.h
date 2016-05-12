@@ -1231,6 +1231,15 @@ struct auth {
                    be RFC compliant */
 };
 
+
+struct tmp_writebuf {
+  char *buf;        /* buffer to store data when the connection is paused */
+  size_t memsize;   /* the allocated size of buf */
+  size_t offset;    /* the offset into buf where the unwritten data starts */
+  size_t len;       /* the length of the unwritten data starting from offset */
+  int type;         /* CLIENTWRITE_ bitmask */
+};
+
 struct UrlState {
 
   /* Points to the connection cache */
@@ -1264,11 +1273,8 @@ struct UrlState {
   int first_remote_port; /* remote port of the first (not followed) request */
   struct curl_ssl_session *session; /* array of 'max_ssl_sessions' size */
   long sessionage;                  /* number of the most recent session */
-  char *tempwrite;      /* allocated buffer to keep data in when a write
-                           callback returns to make the connection paused */
-  size_t tempwritesize; /* size of the 'tempwrite' allocated buffer */
-  int tempwritetype;    /* type of the 'tempwrite' buffer as a bitmask that is
-                           used with Curl_client_write() */
+  struct curl_llist *tmp_writebuf_list; /* a chronological list of tmp_writebuf
+                                           that stores data when paused */
   char *scratch; /* huge buffer[BUFSIZE*2] when doing upload CRLF replacing */
   bool errorbuf; /* Set to TRUE if the error buffer is already filled in.
                     This must be set to FALSE every time _easy_perform() is
