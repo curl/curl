@@ -750,7 +750,7 @@ void Curl_ossl_cleanup(void)
 }
 
 /*
- * This function uses SSL_peek to determine connection status.
+ * This function is used to determine connection status.
  *
  * Return codes:
  *     1 means the connection is still in place
@@ -759,17 +759,46 @@ void Curl_ossl_cleanup(void)
  */
 int Curl_ossl_check_cxn(struct connectdata *conn)
 {
+  /* SSL_peek takes data out of the raw recv buffer without peeking so we use
+     recv MSG_PEEK instead. Bug #795 */
 #ifdef MSG_PEEK
   char buf;
-  if(recv((RECV_TYPE_ARG1)conn->sock[FIRSTSOCKET], (RECV_TYPE_ARG2)&buf,
-          (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK) == 0) {
+  int nread;
+  nread = recv((RECV_TYPE_ARG1)conn->sock[FIRSTSOCKET], (RECV_TYPE_ARG2)&buf,
+               (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK);
+  if(nread == 0)
     return 0; /* connection has been closed */
-  }
-  else
+  else if(nread == 1)
     return 1; /* connection still in place */
-#else
-  return -1; /* connection status unknown */
+  else if(nread == -1) {
+      int err = SOCKERRNO;
+      if(err == EINPROGRESS ||
+#if defined(EAGAIN) && (EAGAIN != EWOULDBLOCK)
+         err == EAGAIN ||
 #endif
+         err == EWOULDBLOCK)
+        return 1; /* connection still in place */
+      if(err == ECONNRESET ||
+#ifdef ECONNABORTED
+         err == ECONNABORTED ||
+#endif
+#ifdef ENETDOWN
+         err == ENETDOWN ||
+#endif
+#ifdef ENETRESET
+         err == ENETRESET ||
+#endif
+#ifdef ESHUTDOWN
+         err == ESHUTDOWN ||
+#endif
+#ifdef ETIMEDOUT
+         err == ETIMEDOUT ||
+#endif
+         err == ENOTCONN)
+        return 0; /* connection has been closed */
+  }
+#endif
+  return -1; /* connection status unknown */
 }
 
 /* Selects an OpenSSL crypto engine
