@@ -3249,8 +3249,8 @@ ConnectionExists(struct SessionHandle *data,
       size_t pipeLen;
 
       /*
-       * Note that if we use a HTTP proxy, we check connections to that
-       * proxy and not to the actual remote server.
+       * Note that if we use a HTTP proxy in normal mode (no tunneling), we
+       * check connections to that proxy and not to the actual remote server.
        */
       check = curr->ptr;
       curr = curr->next;
@@ -3331,6 +3331,15 @@ ConnectionExists(struct SessionHandle *data,
         /* don't do mixed proxy and non-proxy connections */
         continue;
 
+      if(needle->bits.proxy &&
+         (needle->proxytype != check->proxytype ||
+          needle->bits.httpproxy != check->bits.httpproxy ||
+          needle->bits.tunnel_proxy != check->bits.tunnel_proxy ||
+          !Curl_raw_equal(needle->proxy.name, check->proxy.name) ||
+          needle->port != check->port))
+        /* don't mix connections that use different proxies */
+        continue;
+
       if(needle->bits.conn_to_host != check->bits.conn_to_host)
         /* don't mix connections that use the "connect to host" feature and
          * connections that don't use this feature */
@@ -3376,11 +3385,8 @@ ConnectionExists(struct SessionHandle *data,
         }
       }
 
-      if(!needle->bits.proxy || (needle->handler->flags&PROTOPT_SSL) ||
-         (needle->bits.httpproxy && check->bits.httpproxy &&
-          needle->bits.tunnel_proxy && check->bits.tunnel_proxy &&
-          Curl_raw_equal(needle->proxy.name, check->proxy.name) &&
-          (needle->port == check->port))) {
+      if(!needle->bits.httpproxy || (needle->handler->flags&PROTOPT_SSL) ||
+         (needle->bits.httpproxy && needle->bits.tunnel_proxy)) {
         /* The requested connection does not use a HTTP proxy or it uses SSL or
            it is a non-SSL protocol tunneled over the same HTTP proxy name and
            port number */
@@ -3419,16 +3425,10 @@ ConnectionExists(struct SessionHandle *data,
           match = TRUE;
         }
       }
-      else { /* The requested needle connection is using a proxy,
-                is the checked one using the same host, port and type? */
-        if(check->bits.proxy &&
-           (needle->proxytype == check->proxytype) &&
-           (needle->bits.tunnel_proxy == check->bits.tunnel_proxy) &&
-           Curl_raw_equal(needle->proxy.name, check->proxy.name) &&
-           needle->port == check->port) {
-          /* This is the same proxy connection, use it! */
-          match = TRUE;
-        }
+      else {
+        /* The requested connection is using the same HTTP proxy in normal
+           mode (no tunneling) */
+        match = TRUE;
       }
 
       if(match) {
