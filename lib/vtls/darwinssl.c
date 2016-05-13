@@ -1290,7 +1290,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   Note:
   Darwin 11.x.x is Lion (10.7)
   Darwin 12.x.x is Mountain Lion (10.8)
-  Darwin 13.x.x is Maverik (10.9)
+  Darwin 13.x.x is Mavericks (10.9)
   Darwin 14.x.x is Yosemite (10.10)
   Darwin 15.x.x is El Capitan (10.11)
   */
