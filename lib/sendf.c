@@ -505,10 +505,11 @@ static CURLcode pausewrite(struct connectdata *conn,
       t = data->state.tmp_writebuf_list->tail->ptr;
 
     /* If the tail write buffer does not exist, is not of the same type or
-       can't be appended to then add a new write buffer as the tail. */
+       can't be appended to (ie header doesn't end in network encoded linefeed)
+       then add a new write buffer as the tail. */
     if(!t || t->type != type ||
        ((t->type & CLIENTWRITE_HEADER) && t->len &&
-        t->buf[t->offset + t->len - 1] != '\n')) {
+        t->buf[t->offset + t->len - 1] != 0x0A)) {
       t = calloc(1, sizeof *t);
       if(!t)
         return CURLE_OUT_OF_MEMORY;
@@ -614,16 +615,19 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
       if(t->type & CLIENTWRITE_HEADER) {
         /* For compatibility this function and pausewrite were written to work
            with whole header lines regardless of whether or not they end in a
-           linefeed. However headers passed to this function typically end in a
-           linefeed which allows them to be concatenated together on pause and
-           later separated here. */
+           network encoded linefeed (0x0A). However headers passed to this
+           function typically end in a linefeed which allows them to be
+           concatenated together on pause and later separated here. */
         char *p = &t->buf[t->offset];
         char *end = &t->buf[t->offset + t->len];
 
-        while(p != end && *p != '\n')
+        while(p != end && *p != 0x0A)
           ++p;
 
         chunksize = p - &t->buf[t->offset];
+
+        if(p != end)
+          ++chunksize;
 
         if(chunksize > CURL_MAX_HTTP_HEADER) {
           failf(data, "Header line is too long");
@@ -640,8 +644,8 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
                                    data->set.writeheader);
 
         if(CURL_WRITEFUNC_PAUSE == wrote)
-          sdfdsf this is a problem if ours.buf does not exist. we have to allow a null buf
-          return pausewrite(conn, ours.type, &ours.buf[ours.offset], ours.len);
+          return pausewrite(conn, ours.type,
+                            ours.len ? &ours.buf[ours.offset] : NULL, ours.len);
 
         if(wrote != chunksize) {
           failf(data, "Failed writing header (%zu != %zu)", wrote, chunksize);
@@ -688,7 +692,8 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
               t->offset += chunksize, t->len -= chunksize;
             }
           }
-          return pausewrite(conn, ours.type, &ours.buf[ours.offset], ours.len);
+          return pausewrite(conn, ours.type,
+                            ours.len ? &ours.buf[ours.offset] : NULL, ours.len);
         }
         
         if(wrote != chunksize) {
