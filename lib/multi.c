@@ -2116,26 +2116,11 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   data=multi->easyp;
   while(data) {
     CURLMcode result;
-    struct WildcardData *wc = &data->wildcard;
     SIGPIPE_VARIABLE(pipe_st);
-
-    if(data->set.wildcardmatch) {
-      if(!wc->filelist) {
-        CURLcode ret = Curl_wildcard_init(wc); /* init wildcard structures */
-        if(ret)
-          return CURLM_OUT_OF_MEMORY;
-      }
-    }
 
     sigpipe_ignore(data, &pipe_st);
     result = multi_runsingle(multi, now, data);
     sigpipe_restore(&pipe_st);
-
-    if(data->set.wildcardmatch) {
-      /* destruct wildcard structures if it is needed */
-      if(wc->state == CURLWC_DONE || result)
-        Curl_wildcard_dtor(wc);
-    }
 
     if(result)
       returncode = result;

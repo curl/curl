@@ -1385,6 +1385,16 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
        consider to be fine */
     data->state.authhost.picked &= data->state.authhost.want;
     data->state.authproxy.picked &= data->state.authproxy.want;
+
+    if(data->set.wildcardmatch) {
+      struct WildcardData *wc = &data->wildcard;
+      if(!wc->filelist) {
+        result = Curl_wildcard_init(wc); /* init wildcard structures */
+        if(result)
+          return CURLM_OUT_OF_MEMORY;
+      }
+    }
+
   }
 
   return result;

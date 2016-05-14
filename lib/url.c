@@ -484,6 +484,12 @@ CURLcode Curl_close(struct SessionHandle *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
+  if(data->set.wildcardmatch) {
+    /* destruct wildcard structures if it is needed */
+    struct WildcardData *wc = &data->wildcard;
+    Curl_wildcard_dtor(wc);
+  }
+
   Curl_freeset(data);
   free(data);
   return CURLE_OK;
