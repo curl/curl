@@ -458,6 +458,7 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
 static void destroy_tmp_writebuf(void *user, void *ptr)
 {
   struct tmp_writebuf *x = (struct tmp_writebuf *)ptr;
+  (void)user;
   if(x) {
     free(x->buf);
     free(x);
@@ -503,9 +504,11 @@ static CURLcode pausewrite(struct connectdata *conn,
     if(data->state.tmp_writebuf_list->tail)
       t = data->state.tmp_writebuf_list->tail->ptr;
 
-    /* If the tail write buffer does not exist or is not of the same type then
-       add a new write buffer as the tail. */
-    if(!t || t->type != type) {
+    /* If the tail write buffer does not exist, is not of the same type or
+       can't be appended to then add a new write buffer as the tail. */
+    if(!t || t->type != type ||
+       ((t->type & CLIENTWRITE_HEADER) && t->len &&
+        t->buf[t->offset + t->len - 1] != '\n')) {
       t = calloc(1, sizeof *t);
       if(!t)
         return CURLE_OUT_OF_MEMORY;
@@ -515,24 +518,27 @@ static CURLcode pausewrite(struct connectdata *conn,
       t->type = type;
     }
 
-    if(t->buf && t->offset && t->len) {
-      memmove(t->buf, t->buf + t->offset, t->len);
+    /* We can move the memory to reclaim space however there could be a
+       performance hit if the amount of memory is large. */
+#if 0
+    if(t->offset && t->len) {
+      memmove(t->buf, &t->buf[t->offset], t->len);
       t->offset = 0;
     }
+#endif
 
-    newsize = t->len + len;
+    newsize = t->offset + t->len + len;
     newbuf = realloc(t->buf, newsize);
     if(!newbuf)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(newbuf + t->len, ptr, len);
+    memcpy(&newbuf[t->offset + t->len], ptr, len);
     t->buf = newbuf;
     t->memsize = newsize;
     t->len = newsize;
-    t->offset = 0;
   }
 
+  /* mark the connection as RECV paused */
   if(!(k->keepon & KEEP_RECV_PAUSE)) {
-    /* mark the connection as RECV paused */
     k->keepon |= KEEP_RECV_PAUSE;
 
     DEBUGF(infof(data, "Pausing with %zu bytes in buffer for type %02x\n",
@@ -557,6 +563,7 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   struct tmp_writebuf ours, *t;
+  size_t chunksize;
 
   /* If we're already paused save the buffer in the queue */
   if(data->req.keepon & KEEP_RECV_PAUSE)
@@ -601,28 +608,29 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
     if(!writeheader && !writebody)
       continue;
 
-    if(t->type & CLIENTWRITE_HEADER) {
-      /* The buffer contains at least one header. All header lines must end in
-         CRLF. Also, we rely on that later for strstr since buf isn't zero
-         terminated. */
-      if(t->len < 2 || strncmp(&t->buf[t->offset + t->len - 2], "\r\n", 2)) {
-        failf(data, "Header line doesn't end in CRLF");
-        return CURLE_WRITE_ERROR;
-      }
-    }
-
-    while(t->len) {
-      size_t chunksize;
+    for(; t->len; t->offset += chunksize, t->len -= chunksize) {
+      chunksize = 0;
 
       if(t->type & CLIENTWRITE_HEADER) {
-        chunksize = strstr(&t->buf[t->offset], "\r\n") - &t->buf[t->offset] + 2;
+        /* For compatibility this function and pausewrite were written to work
+           with whole header lines regardless of whether or not they end in a
+           linefeed. However headers passed to this function typically end in a
+           linefeed which allows them to be concatenated together on pause and
+           later separated here. */
+        char *p = &t->buf[t->offset];
+        char *end = &t->buf[t->offset + t->len];
+
+        while(p != end && *p != '\n')
+          ++p;
+
+        chunksize = p - &t->buf[t->offset];
 
         if(chunksize > CURL_MAX_HTTP_HEADER) {
           failf(data, "Header line is too long");
           return CURLE_WRITE_ERROR;
         }
       }
-      else {
+      else { /* body only */
         chunksize = ((t->len <= CURL_MAX_WRITE_SIZE) ?
                      t->len : CURL_MAX_WRITE_SIZE);
       }
@@ -631,13 +639,9 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
         size_t wrote = writeheader(&t->buf[t->offset], 1, chunksize,
                                    data->set.writeheader);
 
-        if(CURL_WRITEFUNC_PAUSE == wrote) {
-          if(t == &ours)
-            return pausewrite(conn, t->type, &t->buf[t->offset], t->len);
-          else
-            /* data already in queue, just signal pause */
-            return pausewrite(conn, 0, NULL, 0);
-        }
+        if(CURL_WRITEFUNC_PAUSE == wrote)
+          sdfdsf this is a problem if ours.buf does not exist. we have to allow a null buf
+          return pausewrite(conn, ours.type, &ours.buf[ours.offset], ours.len);
 
         if(wrote != chunksize) {
           failf(data, "Failed writing header (%zu != %zu)", wrote, chunksize);
@@ -651,15 +655,16 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
 
         if(CURL_WRITEFUNC_PAUSE == wrote) {
           if(t->type & CLIENTWRITE_HEADER) {
-            /* we have already sent this chunk to the header. if this chunk is
-               the whole thing then we can remove the header bit. but if not,
-               then we have to separate the failed chunk as body only. */
+            /* we have already sent this chunk to the user's header function.
+               if this chunk is the whole thing then we can remove the header
+               bit. if not then we have to separate this chunk as body only. */
             if(chunksize == t->len) {
-              t->type = CLIENTWRITE_BODY;
+              t->type &= ~CLIENTWRITE_HEADER;
             }
             else {
               struct tmp_writebuf *d;
 
+              //what about this, what if it's ours?
               DEBUGASSERT(t == data->state.tmp_writebuf_list->head->ptr);
 
               d = calloc(1, sizeof *d);
@@ -670,6 +675,7 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
               if(!d->buf)
                 return CURLE_OUT_OF_MEMORY;
 
+              memcpy(d->buf, &t->buf[t->offset], chunksize);
               d->memsize = chunksize;
               d->len = chunksize;
               d->type = CLIENTWRITE_BODY;
@@ -678,20 +684,11 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
               if(!Curl_llist_insert_next(data->state.tmp_writebuf_list,
                                          NULL, d))
                 return CURLE_OUT_OF_MEMORY;
+
+              t->offset += chunksize, t->len -= chunksize;
             }
           }
-
-          /* FIX THIS: must adjust buffer before returning pausewrite */
-          if(t == &ours) {
-            /* pass in the BODY bit only since if this was header as well then
-               it was passed already and clearly that didn't trigger the pause,
-               so this is saved for later with the BODY bit only */
-            return pausewrite(conn, CLIENTWRITE_BODY, start, length);
-          }
-          else {
-            /* data already in queue, just signal pause */
-            return pausewrite(conn, 0, NULL, 0);
-          }
+          return pausewrite(conn, ours.type, &ours.buf[ours.offset], ours.len);
         }
         
         if(wrote != chunksize) {
@@ -699,10 +696,8 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
           return CURLE_WRITE_ERROR;
         }
       }
-    }
-
-    /* FIX THIS: must adjust buffer before continuing */
-  }
+    } /* for each chunk */
+  } /* for each buffer */
 
   return CURLE_OK;
 }
