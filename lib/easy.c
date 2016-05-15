@@ -1030,8 +1030,11 @@ CURLcode curl_easy_pause(CURL *curl, int action)
   /* put it back in the keepon */
   k->keepon = newstate;
 
+  /* write any saved write data to the user callbacks. this may pause again. */
   if(!(newstate & KEEP_RECV_PAUSE))
     result = Curl_client_chop_write(data->easy_conn, 0, NULL, 0);
+
+  /* FIXME: What to do if it pauses again? */
 
   /* if there's no error and we're not pausing both directions, we want
      to have this handle checked soon */

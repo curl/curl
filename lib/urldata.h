@@ -1233,7 +1233,8 @@ struct auth {
 
 
 struct tmp_writebuf {
-  char *buf;        /* buffer to store data when the connection is paused */
+  char *buf;        /* buffer to store data when the connection is paused.
+                       data is not terminated and may contain null chars. */
   size_t memsize;   /* the allocated size of buf */
   size_t offset;    /* the offset into buf where the unwritten data starts */
   size_t len;       /* the length of the unwritten data starting from offset */
