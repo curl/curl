@@ -104,6 +104,7 @@ This release includes the following bugfixes:
  o http2: Add space between colon and header value [54]
  o darwinssl: fix certificate verification disable on OS X 10.8 [55]
  o mprintf: Fix processing of width and prec args
+ o ftp wildcard: segfault due to init only in multi_perform [56]
 
 This release includes the following known bugs:
 
@@ -116,12 +117,12 @@ advice from friends like these:
   Antonio Larrosa, Bru Rom, Cory Benfield, Damien Vielpeau, Dan Cristian,
   Daniel Stenberg, David Benjamin, Diego Bes, Dusty Mabe, Evgeny Grin,
   Henrik Gaßmann, Irfan Adilovic, Isaac Boukris, Joel Depooter, John Wanghui,
-  Joonas Kuorilehto, Juan RP, Kai Noda, Kamil Dudka, Leif W, Linus Nordberg,
-  Marcel Raad, Marquis de Muesli, Michael Kaufmann, Michael Osipov,
-  Moti Avrahami, Oleg Pudeyev, Patrick Monnerat, Per Malmberg, Ray Satiro,
-  Rod Widdowson, Steve Holme, Tatsuhiro Tsujikawa, Theodore Dubois,
+  Jonathan Cardoso Machado, Joonas Kuorilehto, Juan RP, Kai Noda, Kamil Dudka,
+  Leif W, Linus Nordberg, Marcel Raad, Marquis de Muesli, Michael Kaufmann,
+  Michael Osipov, Moti Avrahami, Oleg Pudeyev, Patrick Monnerat, Per Malmberg,
+  Ray Satiro, Rod Widdowson, Steve Holme, Tatsuhiro Tsujikawa, Theodore Dubois,
   Thomas Glanzmann, Travis Burtrum, Viktor Szakáts,
-  (41 contributors)
+  (42 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -182,3 +183,4 @@ References to bug reports and discussions on issues:
  [53] = https://curl.haxx.se/bug/?i=795
  [54] = https://curl.haxx.se/bug/?i=797
  [55] = https://curl.haxx.se/bug/?i=802
+ [56] = https://curl.haxx.se/bug/?i=800
