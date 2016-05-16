@@ -1391,7 +1391,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
       if(!wc->filelist) {
         result = Curl_wildcard_init(wc); /* init wildcard structures */
         if(result)
-          return CURLM_OUT_OF_MEMORY;
+          return CURLE_OUT_OF_MEMORY;
       }
     }
 
