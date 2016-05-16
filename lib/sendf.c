@@ -465,6 +465,11 @@ static void destroy_tmp_writebuf(void *user, void *ptr)
   }
 }
 
+static struct curl_llist *new_tmp_writebuf_list()
+{
+  return Curl_llist_alloc(destroy_tmp_writebuf);
+}
+
 /*
 Save the write buffer and pause.
 Function can be called without a buffer.
@@ -491,7 +496,7 @@ static CURLcode pausewrite(struct connectdata *conn,
   }
 
   if(!data->state.tmp_writebuf_list) {
-    data->state.tmp_writebuf_list = Curl_llist_alloc(destroy_tmp_writebuf);
+    data->state.tmp_writebuf_list = new_tmp_writebuf_list();
     if(!data->state.tmp_writebuf_list)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -657,8 +662,14 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
             else {
               struct tmp_writebuf *d;
 
-              //what about this, what if it's ours?
-              DEBUGASSERT(t == data->state.tmp_writebuf_list->head->ptr);
+              if(!data->state.tmp_writebuf_list) {
+                data->state.tmp_writebuf_list = new_tmp_writebuf_list();
+                if(!data->state.tmp_writebuf_list)
+                  return CURLE_OUT_OF_MEMORY;
+              }
+
+              DEBUGASSERT(t == &ours ||
+                          t == data->state.tmp_writebuf_list->head->ptr);
 
               d = calloc(1, sizeof *d);
               if(!d)
@@ -669,9 +680,10 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
                 return CURLE_OUT_OF_MEMORY;
 
               memcpy(d->buf, &t->buf[t->offset], chunksize);
+
               d->memsize = chunksize;
               d->len = chunksize;
-              d->type = CLIENTWRITE_BODY;
+              d->type = (t->type & ~CLIENTWRITE_HEADER);
 
               /* insert first in the list, so it will be processed first */
               if(!Curl_llist_insert_next(data->state.tmp_writebuf_list,
