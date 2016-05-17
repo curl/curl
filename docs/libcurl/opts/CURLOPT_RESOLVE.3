@@ -48,11 +48,13 @@ HOST+PORT will instead use your provided ADDRESS. Addresses set with
 \fICURLOPT_RESOLVE(3)\fP will not time-out from the DNS cache like ordinary
 entries.
 
+The provided ADDRESS set by this option will be used even if
+\cICURLOPT_IPRESOLVE(3)\fP is set to make libcurl use another IP version.
+
 Remove names from the DNS cache again, to stop providing these fake resolves,
 by including a string in the linked list that uses the format
 \&"-HOST:PORT". The host name must be prefixed with a dash, and the host name
-and port number must exactly match what was already added previously. (Added
-in 7.42.0)
+and port number must exactly match what was already added previously.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
