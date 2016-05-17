@@ -2550,9 +2550,11 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       EVP_PKEY_free(pubkey);
     }
 
-    for(j = 0; j < psig->length; j++)
-      BIO_printf(mem, "%02x:", psig->data[j]);
-    push_certinfo("Signature", i);
+    if(psig) {
+      for(j = 0; j < psig->length; j++)
+        BIO_printf(mem, "%02x:", psig->data[j]);
+      push_certinfo("Signature", i);
+    }
 
     PEM_write_bio_X509(mem, x);
     push_certinfo("Cert", i);
