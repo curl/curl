@@ -4,7 +4,7 @@ Curl and libcurl 7.49.0
  Command line options:         185
  curl_easy_setopt() options:   224
  Public functions in libcurl:  61
- Contributors:                 1364
+ Contributors:                 1388
 
 This release includes the following changes:
 
@@ -23,6 +23,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2016-3739: TLS certificate check bypass with mbedTLS/PolarSSL [57]
  o checksrc.bat: Updated the help to be consistent with generate.bat
  o checksrc.bat: Added support for scanning the tests and examples
  o openssl: fix ERR_remove_thread_state() for boringssl/libressl [1]
@@ -184,3 +185,4 @@ References to bug reports and discussions on issues:
  [54] = https://curl.haxx.se/bug/?i=797
  [55] = https://curl.haxx.se/bug/?i=802
  [56] = https://curl.haxx.se/bug/?i=800
+ [57] = https://curl.haxx.se/docs/adv_20160518.html
