@@ -581,6 +581,11 @@ static int dprintf_formatf(
 
   va_stack_t *p;
 
+  /* 'workend' points to the final buffer byte position, but with an extra
+     byte as margin to avoid the (false?) warning Coverity gives us
+     otherwise */
+  char *workend = &work[sizeof(work) - 2];
+
   /* Do the actual %-code parsing */
   dprintf_Pass1(format, vto, endpos, ap_save);
 
@@ -609,6 +614,8 @@ static int dprintf_formatf(
 
     /* Used to convert negative in positive.  */
     mp_intmax_t signed_num;
+
+    char *w;
 
     if(*f != '%') {
       /* This isn't a format spec, so write everything out until the next one
@@ -730,72 +737,68 @@ static int dprintf_formatf(
 
       number:
       /* Number of base BASE.  */
-      {
-        char *workend = &work[sizeof(work) - 1];
-        char *w;
 
-        /* Supply a default precision if none was given.  */
-        if(prec == -1)
-          prec = 1;
+      /* Supply a default precision if none was given.  */
+      if(prec == -1)
+        prec = 1;
 
-        /* Put the number in WORK.  */
-        w = workend;
-        while(num > 0) {
-          *w-- = digits[num % base];
-          num /= base;
-        }
-        width -= (long)(workend - w);
-        prec -= (long)(workend - w);
+      /* Put the number in WORK.  */
+      w = workend;
+      while(num > 0) {
+        *w-- = digits[num % base];
+        num /= base;
+      }
+      width -= (long)(workend - w);
+      prec -= (long)(workend - w);
 
-        if(is_alt && base == 8 && prec <= 0) {
+      if(is_alt && base == 8 && prec <= 0) {
+        *w-- = '0';
+        --width;
+      }
+
+      if(prec > 0) {
+        width -= prec;
+        while(prec-- > 0)
           *w-- = '0';
-          --width;
-        }
+      }
 
-        if(prec > 0) {
-          width -= prec;
-          while(prec-- > 0)
-            *w-- = '0';
-        }
+      if(is_alt && base == 16)
+        width -= 2;
 
-        if(is_alt && base == 16)
-          width -= 2;
+      if(is_neg || (p->flags & FLAGS_SHOWSIGN) || (p->flags & FLAGS_SPACE))
+        --width;
 
-        if(is_neg || (p->flags & FLAGS_SHOWSIGN) || (p->flags & FLAGS_SPACE))
-          --width;
-
-        if(!(p->flags & FLAGS_LEFT) && !(p->flags & FLAGS_PAD_NIL))
-          while(width-- > 0)
-            OUTCHAR(' ');
-
-        if(is_neg)
-          OUTCHAR('-');
-        else if(p->flags & FLAGS_SHOWSIGN)
-          OUTCHAR('+');
-        else if(p->flags & FLAGS_SPACE)
+      if(!(p->flags & FLAGS_LEFT) && !(p->flags & FLAGS_PAD_NIL))
+        while(width-- > 0)
           OUTCHAR(' ');
 
-        if(is_alt && base == 16) {
-          OUTCHAR('0');
-          if(p->flags & FLAGS_UPPER)
-            OUTCHAR('X');
-          else
-            OUTCHAR('x');
-        }
+      if(is_neg)
+        OUTCHAR('-');
+      else if(p->flags & FLAGS_SHOWSIGN)
+        OUTCHAR('+');
+      else if(p->flags & FLAGS_SPACE)
+        OUTCHAR(' ');
 
-        if(!(p->flags & FLAGS_LEFT) && (p->flags & FLAGS_PAD_NIL))
-          while(width-- > 0)
-            OUTCHAR('0');
-
-        /* Write the number.  */
-        while(++w <= workend) {
-          OUTCHAR(*w);
-        }
-
-        if(p->flags & FLAGS_LEFT)
-          while(width-- > 0)
-            OUTCHAR(' ');
+      if(is_alt && base == 16) {
+        OUTCHAR('0');
+        if(p->flags & FLAGS_UPPER)
+          OUTCHAR('X');
+        else
+          OUTCHAR('x');
       }
+
+      if(!(p->flags & FLAGS_LEFT) && (p->flags & FLAGS_PAD_NIL))
+        while(width-- > 0)
+          OUTCHAR('0');
+
+      /* Write the number.  */
+      while(++w <= workend) {
+        OUTCHAR(*w);
+      }
+
+      if(p->flags & FLAGS_LEFT)
+        while(width-- > 0)
+          OUTCHAR(' ');
       break;
 
     case FORMAT_STRING:
