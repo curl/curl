@@ -1,6 +1,6 @@
-Curl and libcurl 7.49.0
+Curl and libcurl 7.49.1
 
- Public curl releases:         154
+ Public curl releases:         155
  Command line options:         185
  curl_easy_setopt() options:   224
  Public functions in libcurl:  61
@@ -8,104 +8,11 @@ Curl and libcurl 7.49.0
 
 This release includes the following changes:
 
- o schannel: Add ALPN support [2]
- o SSH: support CURLINFO_FILETIME
- o SSH: new CURLOPT_QUOTE command "statvfs" [5]
- o wolfssl: Add ALPN support [18]
- o http2: added --http2-prior-knowledge [16]
- o http2: added CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE [17]
- o libcurl: added CURLOPT_CONNECT_TO [26]
- o curl: added --connect-to [27]
- o libcurl: added CURLOPT_TCP_FASTOPEN [28]
- o curl: added --tcp-fastopen [29]
- o curl: remove support for --ftpport, -http-request and --socks
-   (deprecated versions since around 10 years)
+ o
 
 This release includes the following bugfixes:
 
- o CVE-2016-3739: TLS certificate check bypass with mbedTLS/PolarSSL [57]
- o checksrc.bat: Updated the help to be consistent with generate.bat
- o checksrc.bat: Added support for scanning the tests and examples
- o openssl: fix ERR_remove_thread_state() for boringssl/libressl [1]
- o openssl: boringssl provides the same numbering as openssl
- o multi: fix "Operation timed out after" timer [3]
- o url: don't use bad offset in tld_check_name to show error [4]
- o sshserver.pl: use quotes for given options
- o Makefile.am: skip the scripts dir [6]
- o curl: warn for --capath use if not supported by libcurl [7]
- o http2: fix connection reuse [8]
- o GSS: make Curl_gss_log_error more verbose [9]
- o build-wolfssl: Allow a broader range of ciphers (Visual Studio)
- o wolfssl: Use ECC supported curves extension [10]
- o openssl: Fix compilation warnings
- o Curl_add_buffer_send: avoid possible NULL dereference
- o SOCKS5_gssapi_negotiate: don't assume little-endian ints
- o strerror: don't bit shift a signed integer [11]
- o url: Corrected get protocol family for FTP and LDAP
- o curl/mprintf.h: remove support for _MPRINTF_REPLACE
- o upload: missing rewind call could make libcurl hang [12]
- o IMAP: check pointer before dereferencing it [13]
- o build: Changed the Visual Studio projects warning level from 3 to 4
- o checksrc: now stricter, wider checks, code cleaned up
- o checksrc: added docs/CHECKSRC.md
- o curl_sasl: Fixed potential null pointer utilisation [14]
- o krb5: Fixed missing client response when mutual authentication enabled
- o krb5: Only process challenge when present
- o krb5: Only generate a SPN when its not known
- o formdata: use appropriate fopen() macros
- o curl.1: -w filename_effective was introduced in 7.26.0
- o http2: make use of the nghttp2 error callback [15]
- o http2: fix connection reuse when PING comes after last DATA [19]
- o curl.1: change example for -F [20]
- o HTTP2: Add a space character after the status code [21]
- o curl.1: use example.com more
- o mbedtls.c: changed private prefix to mbed_
- o mbedtls: implement and provide *_data_pending() to avoid hang [22]
- o mbedtls: fix MBEDTLS_DEBUG builds
- o ftp/imap/pop3/smtp: Allow the service name to be overridden
- o CURLOPT_SOCKS5_GSSAPI_SERVICE: Merged with CURLOPT_PROXY_SERVICE_NAME
- o build: include scripts/ in the dist
- o http2: Add handling stream level error [23]
- o http2: Improve header parsing [24]
- o makefile.vc6: use d suffix on debug object [25]
- o configure: remove check for libresolve [30]
- o scripts/make: use $(EXEEXT) for executables [31]
- o checksrc: got rid of the whitelist files
- o sendf: added ability to call recv() before send() as workaround [32]
- o NTLM: check for NULL pointer before dereferencing [33]
- o openssl: builds with OpenSSL 1.1.0-pre5 [34]
- o configure: ac_cv_ -> curl_cv_ for all cached vars [35]
- o winbuild: add mbedtls support [36]
- o curl: make --ftp-create-dirs retry on failure [37]
- o PolarSSL: implement public key pinning
- o multi: accidentally used resolved host name instead of proxy [38]
- o CURLINFO_TLS_SESSION.3: clarify TLS library support before 7.48.0
- o CONNECT_ONLY: don't close connection on GSS 401/407 reponses [39]
- o opts: Fix some syntax errors in example code fragments [40]
- o mbedtls: Fix session resume [41]
- o test1139: verifies libcurl option man page presence
- o CURLINFO_TLS_SSL_PTR.3: Clarify SSL pointer availability [42]
- o curl: make --disable work as long form of -q
- o curl: use --telnet-option as documented
- o curl.1: document --ftp-ssl-reqd, --krb4 and --ntlm-wb
- o curl: -h output lacked --proxy-header and --ntlm-wb
- o curl -J: make it work even without http:// scheme on URL [43]
- o lib: include curl_printf.h as one of the last headers [44]
- o tests: handle path properly on Msys/Cygwin [45]
- o curl.1: --mail-rcpt can be used multiple times [46]
- o CURLOPT_ACCEPT_ENCODING.3: clarified [47]
- o docs: fixed lots of broken man page references
- o tls: make setting pinnedkey option fail if not supported [48]
- o test1140: run nroff-scan to verify man pages
- o http: make sure a blank header overrides accept_decoding [49]
- o connections: do not reuse non-HTTP proxies on different ports [50]
- o connect: fix invalid "Network is unreachable" errors [51]
- o TLS: move the ALPN/NPN enable bits to the connection [52]
- o TLS: SSL_peek is not a const operation [53]
- o http2: Add space between colon and header value [54]
- o darwinssl: fix certificate verification disable on OS X 10.8 [55]
- o mprintf: Fix processing of width and prec args
- o ftp wildcard: segfault due to init only in multi_perform [56]
+ o
 
 This release includes the following known bugs:
 
@@ -114,75 +21,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alexis La Goutte, Anatol Belski, Anders Bakken,
-  Antonio Larrosa, Bru Rom, Cory Benfield, Damien Vielpeau, Dan Cristian,
-  Daniel Stenberg, David Benjamin, Diego Bes, Dusty Mabe, Evgeny Grin,
-  Henrik Gaßmann, Irfan Adilovic, Isaac Boukris, Joel Depooter, John Wanghui,
-  Jonathan Cardoso Machado, Joonas Kuorilehto, Juan RP, Kai Noda, Kamil Dudka,
-  Leif W, Linus Nordberg, Marcel Raad, Marquis de Muesli, Michael Kaufmann,
-  Michael Osipov, Moti Avrahami, Oleg Pudeyev, Patrick Monnerat, Per Malmberg,
-  Ray Satiro, Rod Widdowson, Steve Holme, Tatsuhiro Tsujikawa, Theodore Dubois,
-  Thomas Glanzmann, Travis Burtrum, Viktor Szakáts,
-  (42 contributors)
+  none yet
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://twitter.com/xtraemeat/status/712564874098917376
- [2] = https://curl.haxx.se/bug/?i=724
- [3] = https://curl.haxx.se/bug/?i=619
- [4] = https://curl.haxx.se/bug/?i=731
- [5] = https://curl.haxx.se/bug/?i=677
- [6] = https://curl.haxx.se/bug/?i=620
- [7] = https://curl.haxx.se/bug/?i=492
- [8] = https://curl.haxx.se/bug/?i=736
- [9] = https://curl.haxx.se/bug/?i=738
- [10] = https://github.com/wolfSSL/wolfssl/issues/366
- [11] = https://curl.haxx.se/bug/?i=744
- [12] = https://curl.haxx.se/bug/?i=741
- [13] = https://curl.haxx.se/bug/?i=747
- [14] = https://curl.haxx.se/bug/?i=745
- [15] = https://curl.haxx.se/bug/?i=722
- [16] = https://curl.haxx.se/docs/manpage.html#--http2-prior-knowledge
- [17] = https://curl.haxx.se/libcurl/c/CURLOPT_HTTP_VERSION.html
- [18] = https://curl.haxx.se/docs/http2.html
- [19] = https://curl.haxx.se/bug/?i=750
- [20] = https://curl.haxx.se/bug/?i=752
- [21] = https://curl.haxx.se/bug/?i=755
- [22] = https://curl.haxx.se/bug/?i=737
- [23] = https://curl.haxx.se/bug/?i=663
- [24] = https://curl.haxx.se/bug/?i=663
- [25] = https://curl.haxx.se/bug/?i=769
- [26] = https://curl.haxx.se/libcurl/c/CURLOPT_CONNECT_TO.html
- [27] = https://curl.haxx.se/docs/manpage.html#--connect-to
- [28] = https://curl.haxx.se/libcurl/c/CURLOPT_TCP_FASTOPEN.html
- [29] = https://curl.haxx.se/docs/manpage.html#--tcp-fastopen
- [30] = https://curl.haxx.se/bug/?i=770
- [31] = https://curl.haxx.se/bug/?i=771
- [32] = https://curl.haxx.se/bug/?i=657
- [33] = https://curl.haxx.se/bug/?i=765
- [34] = https://curl.haxx.se/bug/?i=763
- [35] = https://curl.haxx.se/bug/?i=766
- [36] = https://curl.haxx.se/bug/?i=606
- [37] = https://curl.haxx.se/mail/archive-2016-04/0021.html
- [38] = https://curl.haxx.se/mail/lib-2016-04/0084.html
- [39] = https://curl.haxx.se/bug/?i=655
- [40] = https://curl.haxx.se/bug/?i=779
- [41] = https://curl.haxx.se/mail/lib-2016-04/0095.html
- [42] = https://curl.haxx.se/mail/lib-2016-04/0126.html
- [43] = https://curl.haxx.se/bug/?i=760
- [44] = https://curl.haxx.se/bug/?i=743
- [45] = https://curl.haxx.se/bug/?i=675
- [46] = https://curl.haxx.se/bug/?i=784
- [47] = https://curl.haxx.se/bug/?i=785
- [48] = https://curl.haxx.se/bug/?i=781
- [49] = https://curl.haxx.se/bug/?i=785
- [50] = https://curl.haxx.se/bug/?i=648
- [51] = https://curl.haxx.se/bug/?i=794
- [52] = https://curl.haxx.se/bug/?i=789
- [53] = https://curl.haxx.se/bug/?i=795
- [54] = https://curl.haxx.se/bug/?i=797
- [55] = https://curl.haxx.se/bug/?i=802
- [56] = https://curl.haxx.se/bug/?i=800
- [57] = https://curl.haxx.se/docs/adv_20160518.html
+ [1] =
