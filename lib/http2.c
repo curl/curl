@@ -877,7 +877,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     stream->status_code = decode_status_code(value, valuelen);
     DEBUGASSERT(stream->status_code != -1);
 
-    Curl_add_buffer(stream->header_recvbuf, "HTTP/2.0 ", 9);
+    Curl_add_buffer(stream->header_recvbuf, "HTTP/2 ", 7);
     Curl_add_buffer(stream->header_recvbuf, value, valuelen);
     /* the space character after the status code is mandatory */
     Curl_add_buffer(stream->header_recvbuf, " \r\n", 3);
