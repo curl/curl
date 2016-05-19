@@ -38,10 +38,6 @@ CFGSET=true
 
 !ENDIF
 
-!IF DEFINED(WITH_SSL) && DEFINED(ENABLE_WINSSL) || DEFINED(WITH_SSL) && DEFINED(WITH_MBEDTLS) || DEFINED(WITH_MBEDTLS) && DEFINED(ENABLE_WINSSL)
-!ERROR WITH_SSL, WITH_MBEDTLS and ENABLE_WINSSL are mutual exclusive options.
-!ENDIF
-
 !INCLUDE "../lib/Makefile.inc"
 LIBCURL_OBJS=$(CSOURCES:.c=.obj)
 
@@ -116,6 +112,12 @@ SSL     = static
 !IF "$(WITH_MBEDTLS)"=="dll" || "$(WITH_MBEDTLS)"=="static"
 USE_MBEDTLS = true
 MBEDTLS     = $(WITH_MBEDTLS)
+!ENDIF
+
+!IF ( "$(USE_SSL)"=="true" && "$(USE_WINSSL)"=="true" ) \
+ || ( "$(USE_SSL)"=="true" && "$(USE_MBEDTLS)"=="true" ) \
+ || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WINSSL)"=="true" )
+!ERROR SSL, MBEDTLS and WINSSL are mutual exclusive options.
 !ENDIF
 
 !IF "$(WITH_CARES)"=="dll"
