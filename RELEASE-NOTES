@@ -12,7 +12,12 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o
+ o dist: include manpage-scan.pl, nroff-scan.pl and CHECKSRC.md [1]
+ o schannel: fix compile break with MSVC XP toolset [2]
+ o curlbuild.h.dist: check __LP64__ as well to fix MIPS build [3]
+ o dist: include curl_multi_socket_all.3 [4]
+ o http2: use HTTP/2 in the HTTP/1.1-alike response
+ o openssl: ERR_remove_thread_state() is deprecated in latest 1.1.0
 
 This release includes the following known bugs:
 
@@ -21,10 +26,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  none yet
+  Daniel Stenberg, Marcel Raad, Paul Howarth, Ray Satiro, Steve Holme,
+  Tomas Jakobsson,
+  (6 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = https://curl.haxx.se/mail/lib-2016-05/0113.html
+ [2] = https://curl.haxx.se/bug/?i=812
+ [3] = https://curl.haxx.se/bug/?i=813
+ [4] = https://curl.haxx.se/bug/?i=816
