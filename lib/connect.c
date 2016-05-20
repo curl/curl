@@ -962,6 +962,9 @@ void Curl_sndbufset(curl_socket_t sockfd)
       if(osver.dwMajorVersion >= majorVersion)
         detectOsState = DETECT_OS_VISTA_OR_LATER;
     }
+#elif defined(CURL_WINDOWS_APP)
+    (void)majorVersion;
+    detectOsState = DETECT_OS_VISTA_OR_LATER;
 #else
     ULONGLONG cm;
     OSVERSIONINFOEX osver;
