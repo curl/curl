@@ -747,6 +747,11 @@ void Curl_ossl_cleanup(void)
 
   /* Free all memory allocated by all configuration modules */
   CONF_modules_free();
+
+#if OPENSSL_VERSION_NUMBER >= 0x10002003L && \
+    OPENSSL_VERSION_NUMBER <= 0x10002FFFL
+  SSL_COMP_free_compression_methods();
+#endif
 }
 
 /*
