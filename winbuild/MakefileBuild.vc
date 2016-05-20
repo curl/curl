@@ -232,6 +232,7 @@ USE_WINSSL  = true
 !ERROR cannot build with WinSSL without SSPI
 !ENDIF
 SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_SCHANNEL
+WIN_LIBS    = $(WIN_LIBS) Crypt32.lib
 !ENDIF
 
 
