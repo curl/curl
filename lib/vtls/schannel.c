@@ -602,7 +602,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct curl_schannel_cred *old_cred = NULL;
   SECURITY_STATUS sspi_status = SEC_E_OK;
-  CERT_CONTEXT *ccert_context = NULL;  
+  CERT_CONTEXT *ccert_context = NULL;
 #ifdef HAS_ALPN
   SecPkgContext_ApplicationProtocol alpn_result;
 #endif
