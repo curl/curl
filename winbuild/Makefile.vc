@@ -114,7 +114,9 @@ USE_MBEDTLS = true
 MBEDTLS     = $(WITH_MBEDTLS)
 !ENDIF
 
-!IF ( "$(USE_SSL)"=="true" && "$(USE_WINSSL)"=="true" ) || ( "$(USE_SSL)"=="true" && "$(USE_MBEDTLS)"=="true" ) || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WINSSL)"=="true" )
+!IF ( "$(USE_SSL)"=="true" && "$(USE_WINSSL)"=="true" ) \
+ || ( "$(USE_SSL)"=="true" && "$(USE_MBEDTLS)"=="true" ) \
+ || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WINSSL)"=="true" )
 !ERROR SSL, MBEDTLS and WINSSL are mutual exclusive options.
 !ENDIF
 
