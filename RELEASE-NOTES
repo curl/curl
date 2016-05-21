@@ -18,6 +18,11 @@ This release includes the following bugfixes:
  o dist: include curl_multi_socket_all.3 [4]
  o http2: use HTTP/2 in the HTTP/1.1-alike response
  o openssl: ERR_remove_thread_state() is deprecated in latest 1.1.0
+ o CURLOPT_CONNECT_TO.3: user must not free the list prematurely [5]
+ o libcurl.m4: Avoid obsolete warning [6]
+ o winbuild/Makefile.vc: Fix check on SSL, MBEDTLS, WINSSL exclusivity [7]
+ o curl_multibyte: fix compiler error
+ o openssl: cleanup must free compression methods (memory leak) [8]
 
 This release includes the following known bugs:
 
@@ -26,9 +31,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Marcel Raad, Paul Howarth, Ray Satiro, Steve Holme,
-  Tomas Jakobsson,
-  (6 contributors)
+  Alexander Traud, Daniel Stenberg, Gisle Vanem, Jan Ehrhardt, Marcel Raad,
+  Michael Kaufmann, Paul Howarth, Ray Satiro, Steve Holme, Tomas Jakobsson,
+  (10 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -38,3 +43,7 @@ References to bug reports and discussions on issues:
  [2] = https://curl.haxx.se/bug/?i=812
  [3] = https://curl.haxx.se/bug/?i=813
  [4] = https://curl.haxx.se/bug/?i=816
+ [5] = https://curl.haxx.se/bug/?i=819
+ [6] = https://curl.haxx.se/bug/?i=821
+ [7] = https://curl.haxx.se/bug/?i=818
+ [8] = https://curl.haxx.se/bug/?i=817
