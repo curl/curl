@@ -292,7 +292,7 @@ static void smtp_get_message(char *buffer, char** outptr)
   /* Find the end of the message */
   for(len = strlen(message); len--;)
     if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-        message[len] != '\t')
+       message[len] != '\t')
       break;
 
   /* Terminate the message */
@@ -490,7 +490,7 @@ static CURLcode smtp_perform_authentication(struct connectdata *conn)
   /* Check we have enough data to authenticate with, and the
      server supports authentiation, and end the connect phase if not */
   if(!smtpc->auth_supported ||
-      !Curl_sasl_can_authenticate(&smtpc->sasl, conn)) {
+     !Curl_sasl_can_authenticate(&smtpc->sasl, conn)) {
     state(conn, SMTP_STOP);
     return result;
   }
@@ -526,9 +526,9 @@ static CURLcode smtp_perform_command(struct connectdata *conn)
   /* Send the command */
   if(smtp->rcpt)
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s %s",
-                            smtp->custom && smtp->custom[0] != '\0' ?
-                            smtp->custom : "VRFY",
-                            smtp->rcpt->data);
+                           smtp->custom && smtp->custom[0] != '\0' ?
+                           smtp->custom : "VRFY",
+                           smtp->rcpt->data);
   else
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s",
                            smtp->custom && smtp->custom[0] != '\0' ?
@@ -633,10 +633,10 @@ static CURLcode smtp_perform_rcpt_to(struct connectdata *conn)
   /* Send the RCPT TO command */
   if(smtp->rcpt->data[0] == '<')
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
-                            smtp->rcpt->data);
+                           smtp->rcpt->data);
   else
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>",
-                            smtp->rcpt->data);
+                           smtp->rcpt->data);
   if(!result)
     state(conn, SMTP_RCPT);
 
@@ -1505,7 +1505,7 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn)
     const char *value;
 
     while(*ptr && *ptr != '=')
-        ptr++;
+      ptr++;
 
     value = ptr + 1;
 
