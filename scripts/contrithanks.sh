@@ -54,4 +54,4 @@ sed 's/^ *//'
 sed -f ./docs/THANKS-filter | \
 grep -a ' ' | \
 sort -fu | \
-grep -axvf ./docs/THANKS
+grep -aixvf ./docs/THANKS
