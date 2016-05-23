@@ -421,7 +421,7 @@ sub scanfile {
         }
 
         # scan for use of banned functions
-        if($l =~ /^(.*\W)(sprintf|vsprintf|strcat|strncat|gets)\s*\(/) {
+        if($l =~ /^(.*\W)(sprintf|vsprintf|strcat|strncat|_mbscat|_mbsncat|_tcscat|_tcsncat|wcscat|wcsncat|gets)\s*\(/) {
             checkwarn("BANNEDFUNC",
                       $line, length($1), $file, $ol,
                       "use of $2 is banned");
