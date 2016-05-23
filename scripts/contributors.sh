@@ -45,20 +45,20 @@ fi
 # awk them into RELEASE-NOTES format
 (
 git log $start..HEAD | \
-egrep -i '(Author|Commit|by):' | \
+egrep -ai '(^Author|^Commit|by):' | \
 cut -d: -f2- | \
 cut '-d<' -f1 | \
 tr , '\012' | \
 sed 's/ and /\n/' | \
 sed -e 's/^ //' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/'
 
-grep "^  [^ \(]" RELEASE-NOTES| \
+grep -a "^  [^ \(]" RELEASE-NOTES| \
 sed 's/, */\n/g'| \
 sed 's/^ *//'
 
 )| \
 sed -f ./docs/THANKS-filter | \
-grep ' ' | \
+grep -a ' ' | \
 sort -fu | \
 awk '{
  num++;
