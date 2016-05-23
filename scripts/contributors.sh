@@ -50,7 +50,7 @@ cut -d: -f2- | \
 cut '-d<' -f1 | \
 tr , '\012' | \
 sed 's/ and /\n/' | \
-sed -e 's/^ //' -e 's/ $//g'
+sed -e 's/^ //' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/'
 
 grep "^  [^ \(]" RELEASE-NOTES| \
 sed 's/, */\n/g'| \
