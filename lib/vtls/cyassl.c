@@ -378,9 +378,11 @@ cyassl_connect_step1(struct connectdata *conn,
 #endif /* HAVE_ALPN */
 
   /* Check if there's a cached ID we can/should use here! */
+  Curl_ssl_sessionid_lock(conn);
   if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL)) {
     /* we got a session id, use it! */
     if(!SSL_set_session(conssl->handle, ssl_sessionid)) {
+      Curl_ssl_sessionid_unlock(conn);
       failf(data, "SSL: SSL_set_session failed: %s",
             ERR_error_string(SSL_get_error(conssl->handle, 0), error_buffer));
       return CURLE_SSL_CONNECT_ERROR;
@@ -388,6 +390,7 @@ cyassl_connect_step1(struct connectdata *conn,
     /* Informational message */
     infof (data, "SSL re-using session ID\n");
   }
+  Curl_ssl_sessionid_unlock(conn);
 
   /* pass the raw socket into the SSL layer */
   if(!SSL_set_fd(conssl->handle, (int)sockfd)) {
@@ -581,6 +584,7 @@ cyassl_connect_step3(struct connectdata *conn,
 
   our_ssl_sessionid = SSL_get_session(connssl->handle);
 
+  Curl_ssl_sessionid_lock(conn);
   incache = !(Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL));
   if(incache) {
     if(old_ssl_sessionid != our_ssl_sessionid) {
@@ -594,10 +598,12 @@ cyassl_connect_step3(struct connectdata *conn,
     result = Curl_ssl_addsessionid(conn, our_ssl_sessionid,
                                    0 /* unknown size */);
     if(result) {
+      Curl_ssl_sessionid_unlock(conn);
       failf(data, "failed to store ssl session");
       return result;
     }
   }
+  Curl_ssl_sessionid_unlock(conn);
 
   connssl->connecting_state = ssl_connect_done;
 

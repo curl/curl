@@ -1474,10 +1474,12 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
 
   /* Check if there's a cached ID we can/should use here! */
+  Curl_ssl_sessionid_lock(conn);
   if(!Curl_ssl_getsessionid(conn, (void **)&ssl_sessionid,
                             &ssl_sessionid_len)) {
     /* we got a session id, use it! */
     err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
+    Curl_ssl_sessionid_unlock(conn);
     if(err != noErr) {
       failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
       return CURLE_SSL_CONNECT_ERROR;
@@ -1497,11 +1499,13 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 
     err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
     if(err != noErr) {
+      Curl_ssl_sessionid_unlock(conn);
       failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
       return CURLE_SSL_CONNECT_ERROR;
     }
 
     result = Curl_ssl_addsessionid(conn, ssl_sessionid, ssl_sessionid_len);
+    Curl_ssl_sessionid_unlock(conn);
     if(result) {
       failf(data, "failed to store ssl session");
       return result;

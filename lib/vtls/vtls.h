@@ -96,17 +96,48 @@ CURLcode Curl_ssl_push_certinfo(struct SessionHandle * data, int certnum,
 
 /* Functions to be used by SSL library adaptation functions */
 
-/* extract a session ID */
+/* Lock session cache mutex.
+ * Call this before calling other Curl_ssl_*session* functions
+ * Caller should unlock this mutex as soon as possible, as it may block
+ * other SSL connection from making progress.
+ * The purpose of explicitly locking SSL session cache data is to allow
+ * individual SSL engines to manage session lifetime in their specific way.
+ */
+void Curl_ssl_sessionid_lock(struct connectdata *conn);
+
+/* Unlock session cache mutex */
+void Curl_ssl_sessionid_unlock(struct connectdata *conn);
+
+/* extract a session ID
+ * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
+ * Caller must make sure that the ownership of returned sessionid object
+ * is properly taken (e.g. its refcount is incremented
+ * under sessionid mutex).
+ */
 bool Curl_ssl_getsessionid(struct connectdata *conn,
                            void **ssl_sessionid,
                            size_t *idsize); /* set 0 if unknown */
-/* add a new session ID */
+/* add a new session ID
+ * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
+ * Caller must ensure that it has properly shared ownership of this sessionid
+ * object with cache (e.g. incrementing refcount on success)
+ */
 CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                void *ssl_sessionid,
                                size_t idsize);
-/* Kill a single session ID entry in the cache */
+/* Kill a single session ID entry in the cache
+ * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
+ * This will call engine-specific curlssl_session_free function, which must
+ * take sessionid object ownership from sessionid cache
+ * (e.g. decrement refcount).
+ */
 void Curl_ssl_kill_session(struct curl_ssl_session *session);
-/* delete a session from the cache */
+/* delete a session from the cache
+ * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
+ * This will call engine-specific curlssl_session_free function, which must
+ * take sessionid object ownership from sessionid cache
+ * (e.g. decrement refcount).
+ */
 void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
 
 /* get N random bytes into the buffer, return 0 if a find random is filled
