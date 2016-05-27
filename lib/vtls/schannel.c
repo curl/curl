@@ -708,7 +708,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     result = Curl_ssl_init_certinfo(data, 1);
     if(!result) {
       if(((ccert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
-        (ccert_context->cbCertEncoded > 0)) {
+         (ccert_context->cbCertEncoded > 0)) {
 
         const char *beg = (const char *) ccert_context->pbCertEncoded;
         const char *end = beg + ccert_context->cbCertEncoded;
