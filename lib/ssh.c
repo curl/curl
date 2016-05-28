@@ -102,6 +102,11 @@
                          have their definition hidden well */
 #endif
 
+#if LIBSSH2_VERSION_NUM >= x010206
+/* libssh2_sftp_statvfs and friends were added in 1.2.6 */
+#define HAS_STATVFS_SUPPORT 1
+#endif
+
 #define sftp_libssh2_last_error(s) curlx_ultosi(libssh2_sftp_last_error(s))
 
 #define sftp_libssh2_realpath(s,p,t,m) \
@@ -1365,10 +1370,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           state(conn, SSH_SFTP_QUOTE_UNLINK);
           break;
         }
+#ifdef HAS_STATVFS_SUPPORT
         else if(curl_strnequal(cmd, "statvfs ", 8)) {
           state(conn, SSH_SFTP_QUOTE_STATVFS);
           break;
         }
+#endif
 
         failf(data, "Unknown SFTP command");
         Curl_safefree(sshc->quote_path1);
@@ -1619,6 +1626,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       state(conn, SSH_SFTP_NEXT_QUOTE);
       break;
 
+#ifdef HAS_STATVFS_SUPPORT
     case SSH_SFTP_QUOTE_STATVFS:
     {
       LIBSSH2_SFTP_STATVFS statvfs;
@@ -1670,7 +1678,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       state(conn, SSH_SFTP_NEXT_QUOTE);
       break;
     }
-
+#endif
     case SSH_SFTP_GETINFO:
     {
       if(data->set.get_filetime) {
