@@ -198,6 +198,22 @@ static CURLcode getinfo_long(struct SessionHandle *data, CURLINFO info,
   case CURLINFO_RTSP_CSEQ_RECV:
     *param_longp = data->state.rtsp_CSeq_recv;
     break;
+  case CURLINFO_HTTP_VERSION:
+    switch (data->info.httpversion) {
+    case 10:
+      *param_longp = CURL_HTTP_VERSION_1_0;
+      break;
+    case 11:
+      *param_longp = CURL_HTTP_VERSION_1_1;
+      break;
+    case 20:
+      *param_longp = CURL_HTTP_VERSION_2_0;
+      break;
+    default:
+      *param_longp = CURL_HTTP_VERSION_NONE;
+      break;
+    }
+    break;
 
   default:
     return CURLE_UNKNOWN_OPTION;
