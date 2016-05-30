@@ -119,7 +119,7 @@ void curl_memdebug(const char *logname)
       logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
     /* Flush the log file after every line so the log isn't lost in a crash */
-    setvbuf(logfile, (char *)NULL, _IOLBF, 0);
+    setbuf(logfile, (char *)NULL);
 #endif
   }
 }
