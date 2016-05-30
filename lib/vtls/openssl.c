@@ -122,6 +122,12 @@
 #define HAVE_X509_GET0_SIGNATURE 1
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10002003L && \
+  OPENSSL_VERSION_NUMBER <= 0x10002FFFL && \
+  !defined(OPENSSL_NO_COMP)
+#define HAVE_SSL_COMP_FREE_COMPRESSION_METHODS 1
+#endif
+
 #if (OPENSSL_VERSION_NUMBER < 0x0090808fL)
 /* not present in older OpenSSL */
 #define OPENSSL_load_builtin_modules(x)
@@ -748,8 +754,7 @@ void Curl_ossl_cleanup(void)
   /* Free all memory allocated by all configuration modules */
   CONF_modules_free();
 
-#if OPENSSL_VERSION_NUMBER >= 0x10002003L && \
-    OPENSSL_VERSION_NUMBER <= 0x10002FFFL
+#ifdef HAVE_SSL_COMP_FREE_COMPRESSION_METHODS
   SSL_COMP_free_compression_methods();
 #endif
 }
