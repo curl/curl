@@ -915,6 +915,9 @@
 /* if PolarSSL is enabled */
 #cmakedefine USE_POLARSSL 1
 
+/* if mbedTLS is enabled */
+#cmakedefine USE_MBEDTLS 1
+
 /* if libSSH2 is in use */
 #cmakedefine USE_LIBSSH2 1
 
