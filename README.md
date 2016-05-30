@@ -1,5 +1,5 @@
 
-Curl is a command line tool for transferring data specified with URL
+Curl is a command-line tool for transferring data specified with URL
 syntax. Find out how to use curl by reading [the curl.1 man
 page](https://curl.haxx.se/docs/manpage.html) or [the MANUAL
 document](https://curl.haxx.se/docs/manual.html). Find out how to install Curl
@@ -17,7 +17,7 @@ distribution terms and similar. If you distribute curl binaries or other
 binaries that involve libcurl, you might enjoy [the LICENSE-MIXING
 document](https://curl.haxx.se/legal/licmix.html).
 
-## CONTACT
+## Contact
 
 If you have problems, questions, ideas or suggestions, please contact us by
 posting to a suitable [mailing list](https://curl.haxx.se/mail/).
@@ -25,20 +25,20 @@ posting to a suitable [mailing list](https://curl.haxx.se/mail/).
 All contributors to the project are listed in [the THANKS
 document](https://curl.haxx.se/docs/thanks.html).
 
-## WEB SITE
+## Website
 
 Visit the [curl web site](https://curl.haxx.se/) for the latest news and
 downloads.
 
-## GIT
+## Git
 
-To download the very latest source off the GIT server do this:
+To download the very latest source off the Git server do this:
 
     git clone https://github.com/curl/curl.git
 
 (you'll get a directory named curl created, filled with the source code)
 
-## NOTICE
+## Notice
 
 Curl contains pieces of source code that is Copyright (c) 1998, 1999 Kungliga
 Tekniska Högskolan. This notice is included here to comply with the
