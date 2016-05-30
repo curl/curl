@@ -102,7 +102,7 @@
                          have their definition hidden well */
 #endif
 
-#if LIBSSH2_VERSION_NUM >= x010206
+#if LIBSSH2_VERSION_NUM >= 0x010206
 /* libssh2_sftp_statvfs and friends were added in 1.2.6 */
 #define HAS_STATVFS_SUPPORT 1
 #endif
