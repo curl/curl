@@ -161,13 +161,7 @@ mbed_connect_step1(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
 
-  bool sni = TRUE; /* default is SNI enabled */
   int ret = -1;
-#ifdef ENABLE_IPV6
-  struct in6_addr addr;
-#else
-  struct in_addr addr;
-#endif
   void *old_session = NULL;
   char errorbuf[128];
   errorbuf[0]=0;
@@ -177,8 +171,6 @@ mbed_connect_step1(struct connectdata *conn,
     failf(data, "mbedTLS does not support SSLv2");
     return CURLE_SSL_CONNECT_ERROR;
   }
-  else if(data->set.ssl.version == CURL_SSLVERSION_SSLv3)
-    sni = FALSE; /* SSLv3 has no SNI */
 
 #ifdef THREADING_SUPPORT
   entropy_init_mutex(&entropy);
