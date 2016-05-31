@@ -8,11 +8,17 @@ Curl and libcurl 7.50.0
 
 This release includes the following changes:
 
- o
+ o http: add CURLINFO_HTTP_VERSION and %{http_version} [3]
 
 This release includes the following bugfixes:
 
- o
+ o memdebug: fix MSVC crash with -DMEMDEBUG_LOG_SYNC [1]
+ o openssl: fix build with OPENSSL_NO_COMP [2]
+ o mbedtls: removed unused variables [4]
+ o cmake: Added missing mbedTLS support [5]
+ o URL parser: allow URLs to use one, two or three slashes [6]
+ o curl: fix -q [regression] [7]
+ o openssl: Use correct buffer sizes for error messages [8]
 
 This release includes the following known bugs:
 
@@ -21,9 +27,19 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Daniel Stenberg, Frank Gevaerts, Gisle Vanem, Marcel Raad, Michael Kaufmann,
+  Renaud Lehoux, vanillajonathan on github
+  (7 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] =
+ [1] = https://curl.haxx.se/bug/?i=828
+ [2] = https://curl.haxx.se/bug/?i=836
+ [3] = https://curl.haxx.se/bug/?i=799
+ [4] = https://curl.haxx.se/bug/?i=838
+ [5] = https://curl.haxx.se/bug/?i=837
+ [6] = https://curl.haxx.se/bug/?i=791
+ [7] = https://curl.haxx.se/bug/?i=842
+ [8] = https://curl.haxx.se/bug/?i=844
