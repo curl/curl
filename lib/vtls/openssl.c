@@ -672,7 +672,7 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
 
 /* Return error string for last OpenSSL error
  */
-static char *SSL_strerror(unsigned long error, char *buf, size_t size)
+static char *ossl_strerror(unsigned long error, char *buf, size_t size)
 {
   /* OpenSSL 0.9.6 and later has a function named
      ERR_error_string_n() that takes the size of the buffer as a
@@ -844,7 +844,7 @@ CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine)
 
     ENGINE_free(e);
     failf(data, "Failed to initialise SSL Engine '%s':\n%s",
-          engine, SSL_strerror(ERR_get_error(), buf, sizeof(buf)));
+          engine, ossl_strerror(ERR_get_error(), buf, sizeof(buf)));
     return CURLE_SSL_ENGINE_INITFAILED;
   }
   data->state.engine = e;
@@ -980,7 +980,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
           /* openssl/ssl.h says "look at error stack/return value/errno" */
           sslerror = ERR_get_error();
           failf(conn->data, OSSL_PACKAGE " SSL read: %s, errno %d",
-                SSL_strerror(sslerror, buf, sizeof(buf)),
+                ossl_strerror(sslerror, buf, sizeof(buf)),
                 SOCKERRNO);
           done = 1;
           break;
@@ -2170,7 +2170,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
       }
       else {
         result = CURLE_SSL_CONNECT_ERROR;
-        SSL_strerror(errdetail, error_buffer, sizeof(error_buffer));
+        ossl_strerror(errdetail, error_buffer, sizeof(error_buffer));
       }
 
       /* detail is already set to the SSL error above */
@@ -3044,7 +3044,7 @@ static ssize_t ossl_send(struct connectdata *conn,
           The OpenSSL error queue contains more information on the error. */
       sslerror = ERR_get_error();
       failf(conn->data, "SSL_write() error: %s",
-            SSL_strerror(sslerror, error_buffer, sizeof(error_buffer)));
+            ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)));
       *curlcode = CURLE_SEND_ERROR;
       return -1;
     }
@@ -3095,7 +3095,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
         /* If the return code was negative or there actually is an error in the
            queue */
         failf(conn->data, "SSL read: %s, errno %d",
-              SSL_strerror(sslerror, error_buffer, sizeof(error_buffer)),
+              ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)),
               SOCKERRNO);
         *curlcode = CURLE_RECV_ERROR;
         return -1;
