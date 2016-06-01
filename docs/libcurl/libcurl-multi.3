@@ -153,7 +153,7 @@ timeout expires, your application should call the
 \fIcurl_multi_socket_action(3)\fP function saying it was due to a timeout.
 
 This API is typically used with an event-driven underlying functionality (like
-libevent, libev, kqueue, epoll or similar) which which the application
+libevent, libev, kqueue, epoll or similar) with which the application
 "subscribes" on socket changes. This allows applications and libcurl to much
 better scale upward and beyond thousands of simultaneous transfers without
 losing performance.
