@@ -123,11 +123,21 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         conn->host.name, conn->remote_port);
 
   /* check for an existing re-usable credential handle */
+  Curl_ssl_sessionid_lock(conn);
   if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL)) {
     connssl->cred = old_cred;
     infof(data, "schannel: re-using existing credential handle\n");
+
+    /* increment the reference counter of the credential/session handle */
+    connssl->cred->refcount++;
+    infof(data, "schannel: incremented credential handle refcount = %d\n",
+          connssl->cred->refcount);
+
+    Curl_ssl_sessionid_unlock(conn);
   }
   else {
+    Curl_ssl_sessionid_unlock(conn);
+
     /* setup Schannel API options */
     memset(&schannel_cred, 0, sizeof(schannel_cred));
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
@@ -200,6 +210,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       return CURLE_OUT_OF_MEMORY;
     }
     memset(connssl->cred, 0, sizeof(struct curl_schannel_cred));
+    connssl->cred->refcount = 1;
 
     /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx
        */
@@ -666,18 +677,13 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   }
 #endif
 
-  /* increment the reference counter of the credential/session handle */
-  if(connssl->cred && connssl->ctxt) {
-    connssl->cred->refcount++;
-    infof(data, "schannel: incremented credential handle refcount = %d\n",
-          connssl->cred->refcount);
-  }
-
   /* save the current session data for possible re-use */
+  Curl_ssl_sessionid_lock(conn);
   incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL));
   if(incache) {
     if(old_cred != connssl->cred) {
       infof(data, "schannel: old credential handle is stale, removing\n");
+      /* we're not taking old_cred ownership here, no refcount++ is needed */
       Curl_ssl_delsessionid(conn, (void *)old_cred);
       incache = FALSE;
     }
@@ -687,14 +693,17 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     result = Curl_ssl_addsessionid(conn, (void *)connssl->cred,
                                    sizeof(struct curl_schannel_cred));
     if(result) {
+      Curl_ssl_sessionid_unlock(conn);
       failf(data, "schannel: failed to store credential handle");
       return result;
     }
     else {
-      connssl->cred->cached = TRUE;
+      /* this cred session is now also referenced by sessionid cache */
+      connssl->cred->refcount++;
       infof(data, "schannel: stored credential handle in session cache\n");
     }
   }
+  Curl_ssl_sessionid_unlock(conn);
 
   if(data->set.ssl.certinfo) {
     sspi_status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
@@ -1442,19 +1451,10 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 
   /* free SSPI Schannel API credential handle */
   if(connssl->cred) {
-    /* decrement the reference counter of the credential/session handle */
-    if(connssl->cred->refcount > 0) {
-      connssl->cred->refcount--;
-      infof(data, "schannel: decremented credential handle refcount = %d\n",
-            connssl->cred->refcount);
-    }
-
-    /* if the handle was not cached and the refcount is zero */
-    if(!connssl->cred->cached && connssl->cred->refcount == 0) {
-      infof(data, "schannel: clear credential handle\n");
-      s_pSecFn->FreeCredentialsHandle(&connssl->cred->cred_handle);
-      Curl_safefree(connssl->cred);
-    }
+    Curl_ssl_sessionid_lock(conn);
+    Curl_schannel_session_free(connssl->cred);
+    Curl_ssl_sessionid_unlock(conn);
+    connssl->cred = NULL;
   }
 
   /* free internal buffer for received encrypted data */
@@ -1476,16 +1476,13 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 
 void Curl_schannel_session_free(void *ptr)
 {
+  /* this is expected to be called under sessionid lock */
   struct curl_schannel_cred *cred = ptr;
 
-  if(cred && cred->cached) {
-    if(cred->refcount == 0) {
-      s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
-      Curl_safefree(cred);
-    }
-    else {
-      cred->cached = FALSE;
-    }
+  cred->refcount--;
+  if(cred->refcount == 0) {
+    s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
+    Curl_safefree(cred);
   }
 }
 

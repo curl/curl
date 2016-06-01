@@ -2082,9 +2082,11 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #endif
 
   /* Check if there's a cached ID we can/should use here! */
+  Curl_ssl_sessionid_lock(conn);
   if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL)) {
     /* we got a session id, use it! */
     if(!SSL_set_session(connssl->handle, ssl_sessionid)) {
+      Curl_ssl_sessionid_unlock(conn);
       failf(data, "SSL: SSL_set_session failed: %s",
             ERR_error_string(ERR_get_error(), NULL));
       return CURLE_SSL_CONNECT_ERROR;
@@ -2092,6 +2094,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     /* Informational message */
     infof (data, "SSL re-using session ID\n");
   }
+  Curl_ssl_sessionid_unlock(conn);
 
   /* pass the raw socket into the SSL layers */
   if(!SSL_set_fd(connssl->handle, (int)sockfd)) {
@@ -2818,6 +2821,7 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
      will stay in memory until explicitly freed with SSL_SESSION_free(3),
      regardless of its state. */
 
+  Curl_ssl_sessionid_lock(conn);
   incache = !(Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL));
   if(incache) {
     if(old_ssl_sessionid != our_ssl_sessionid) {
@@ -2831,6 +2835,7 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
     result = Curl_ssl_addsessionid(conn, our_ssl_sessionid,
                                    0 /* unknown size */);
     if(result) {
+      Curl_ssl_sessionid_unlock(conn);
       failf(data, "failed to store ssl session");
       return result;
     }
@@ -2842,6 +2847,7 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
      */
     SSL_SESSION_free(our_ssl_sessionid);
   }
+  Curl_ssl_sessionid_unlock(conn);
 
   /*
    * We check certificates to authenticate the server; otherwise we risk

@@ -337,8 +337,10 @@ polarssl_connect_step1(struct connectdata *conn,
               net_send, &conn->sock[sockindex]);
 
   ssl_set_ciphersuites(&connssl->ssl, ssl_list_ciphersuites());
+  Curl_ssl_sessionid_lock(conn);
   if(!Curl_ssl_getsessionid(conn, &old_session, NULL)) {
     ret = ssl_set_session(&connssl->ssl, old_session);
+    Curl_ssl_sessionid_unlock(conn);
     if(ret) {
       failf(data, "ssl_set_session returned -0x%x", -ret);
       return CURLE_SSL_CONNECT_ERROR;
@@ -572,10 +574,12 @@ polarssl_connect_step3(struct connectdata *conn,
   }
 
   /* If there's already a matching session in the cache, delete it */
+  Curl_ssl_sessionid_lock(conn);
   if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL))
     Curl_ssl_delsessionid(conn, old_ssl_sessionid);
 
   retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0);
+  Curl_ssl_sessionid_unlock(conn);
   if(retcode) {
     free(our_ssl_sessionid);
     failf(data, "failed to store ssl session");
