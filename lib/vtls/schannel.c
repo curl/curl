@@ -56,6 +56,7 @@
 #include "inet_pton.h" /* for IP addr SNI check */
 #include "curl_multibyte.h"
 #include "warnless.h"
+#include "x509asn1.h"
 #include "curl_printf.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -600,8 +601,9 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct curl_schannel_cred *old_cred = NULL;
-#ifdef HAS_ALPN
   SECURITY_STATUS sspi_status = SEC_E_OK;
+  CERT_CONTEXT *ccert_context = NULL;
+#ifdef HAS_ALPN
   SecPkgContext_ApplicationProtocol alpn_result;
 #endif
   bool incache;
@@ -692,6 +694,30 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
       connssl->cred->cached = TRUE;
       infof(data, "schannel: stored credential handle in session cache\n");
     }
+  }
+
+  if(data->set.ssl.certinfo) {
+    sspi_status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
+      SECPKG_ATTR_REMOTE_CERT_CONTEXT, &ccert_context);
+
+    if((sspi_status != SEC_E_OK) || (ccert_context == NULL)) {
+      failf(data, "schannel: failed to retrieve remote cert context");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+
+    result = Curl_ssl_init_certinfo(data, 1);
+    if(!result) {
+      if(((ccert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
+         (ccert_context->cbCertEncoded > 0)) {
+
+        const char *beg = (const char *) ccert_context->pbCertEncoded;
+        const char *end = beg + ccert_context->cbCertEncoded;
+        result = Curl_extract_certinfo(conn, 0, beg, end);
+      }
+    }
+    CertFreeCertificateContext(ccert_context);
+    if(result)
+      return result;
   }
 
   connssl->connecting_state = ssl_connect_done;
