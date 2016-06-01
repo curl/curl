@@ -330,6 +330,25 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
 }
 
 /*
+ * Lock shared SSL session data
+ */
+void Curl_ssl_sessionid_lock(struct connectdata *conn)
+{
+  if(SSLSESSION_SHARED(conn->data))
+    Curl_share_lock(conn->data,
+                    CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
+}
+
+/*
+ * Unlock shared SSL session data
+ */
+void Curl_ssl_sessionid_unlock(struct connectdata *conn)
+{
+  if(SSLSESSION_SHARED(conn->data))
+    Curl_share_unlock(conn->data, CURL_LOCK_DATA_SSL_SESSION);
+}
+
+/*
  * Check if there's a session ID for the given connection in the cache, and if
  * there's one suitable, it is provided. Returns TRUE when no entry matched.
  */
@@ -350,10 +369,8 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
     return TRUE;
 
   /* Lock if shared */
-  if(SSLSESSION_SHARED(data)) {
-    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
+  if(SSLSESSION_SHARED(data))
     general_age = &data->share->sessionage;
-  }
   else
     general_age = &data->state.sessionage;
 
@@ -381,10 +398,6 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
       break;
     }
   }
-
-  /* Unlock */
-  if(SSLSESSION_SHARED(data))
-    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 
   return no_match;
 }
@@ -418,9 +431,6 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
   size_t i;
   struct SessionHandle *data=conn->data;
 
-  if(SSLSESSION_SHARED(data))
-    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
-
   for(i = 0; i < data->set.ssl.max_ssl_sessions; i++) {
     struct curl_ssl_session *check = &data->state.session[i];
 
@@ -429,9 +439,6 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
       break;
     }
   }
-
-  if(SSLSESSION_SHARED(data))
-    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 }
 
 /*
@@ -481,7 +488,6 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 
   /* If using shared SSL session, lock! */
   if(SSLSESSION_SHARED(data)) {
-    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
     general_age = &data->share->sessionage;
   }
   else {
@@ -513,10 +519,6 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   store->conn_to_host = clone_conn_to_host; /* clone connect to host name */
   store->conn_to_port = conn_to_port; /* connect to port number */
   store->remote_port = conn->remote_port; /* port number */
-
-  /* Unlock */
-  if(SSLSESSION_SHARED(data))
-    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 
   if(!Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config)) {
     store->sessionid = NULL; /* let caller free sessionid */

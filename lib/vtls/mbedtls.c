@@ -365,14 +365,17 @@ mbed_connect_step1(struct connectdata *conn,
 
   mbedtls_ssl_conf_ciphersuites(&connssl->config,
                                 mbedtls_ssl_list_ciphersuites());
+  Curl_ssl_sessionid_lock(conn);
   if(!Curl_ssl_getsessionid(conn, &old_session, NULL)) {
     ret = mbedtls_ssl_set_session(&connssl->ssl, old_session);
     if(ret) {
+      Curl_ssl_sessionid_unlock(conn);
       failf(data, "mbedtls_ssl_set_session returned -0x%x", -ret);
       return CURLE_SSL_CONNECT_ERROR;
     }
     infof(data, "mbedTLS re-using session\n");
   }
+  Curl_ssl_sessionid_unlock(conn);
 
   mbedtls_ssl_conf_ca_chain(&connssl->config,
                             &connssl->cacert,
@@ -607,10 +610,12 @@ mbed_connect_step3(struct connectdata *conn,
   }
 
   /* If there's already a matching session in the cache, delete it */
+  Curl_ssl_sessionid_lock(conn);
   if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL))
     Curl_ssl_delsessionid(conn, old_ssl_sessionid);
 
   retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0);
+  Curl_ssl_sessionid_unlock(conn);
   if(retcode) {
     free(our_ssl_sessionid);
     failf(data, "failed to store ssl session");
