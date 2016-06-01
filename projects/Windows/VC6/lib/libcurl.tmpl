@@ -165,8 +165,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI\libcurld.dll" /pdbtype:con /fixed:no
-# ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI\libcurld.dll" /pdbtype:con /fixed:no
+# ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib crypt32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI\libcurld.dll" /pdbtype:con /fixed:no
+# ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib crypt32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI\libcurld.dll" /pdbtype:con /fixed:no
 
 !ELSEIF  "$(CFG)" == "libcurl - Win32 DLL Debug DLL Windows SSPI DLL WinIDN"
 
@@ -195,8 +195,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI - DLL WinIDN\libcurld.dll" /pdbtype:con /fixed:no
-# ADD LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI - DLL WinIDN\libcurld.dll" /pdbtype:con /fixed:no
+# ADD BASE LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib crypt32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI - DLL WinIDN\libcurld.dll" /pdbtype:con /fixed:no
+# ADD LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib crypt32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\DLL Debug - DLL Windows SSPI - DLL WinIDN\libcurld.dll" /pdbtype:con /fixed:no
 
 !ELSEIF  "$(CFG)" == "libcurl - Win32 DLL Release"
 
@@ -314,8 +314,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib /nologo /dll /pdb:none /machine:I386 /fixed:no /release
-# ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib /nologo /dll /pdb:none /machine:I386 /fixed:no /release
+# ADD BASE LINK32 advapi32.lib wldap32.lib ws2_32.lib crypt32.lib /nologo /dll /pdb:none /machine:I386 /fixed:no /release
+# ADD LINK32 advapi32.lib wldap32.lib ws2_32.lib crypt32.lib /nologo /dll /pdb:none /machine:I386 /fixed:no /release
 
 !ELSEIF  "$(CFG)" == "libcurl - Win32 DLL Release DLL Windows SSPI DLL WinIDN"
 
@@ -344,8 +344,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib /nologo /dll /pdb:none /machine:I386 /fixed:no /release
-# ADD LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib /nologo /dll /pdb:none /machine:I386 /fixed:no /release
+# ADD BASE LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib crypt32.lib /nologo /dll /pdb:none /machine:I386 /fixed:no /release
+# ADD LINK32 advapi32.lib normaliz.lib wldap32.lib ws2_32.lib crypt32.lib /nologo /dll /pdb:none /machine:I386 /fixed:no /release
 
 !ELSEIF  "$(CFG)" == "libcurl - Win32 LIB Debug"
 
