@@ -2879,7 +2879,7 @@ parse_http_status_line(const char *buf,
   *httpversion_minorp = 0;
   *httpcodep = 0;
 
-  if (!buf) {
+  if(!buf) {
     return FALSE;
   }
 
@@ -2889,14 +2889,15 @@ parse_http_status_line(const char *buf,
 
   /* Check that the expected protocol name exists.
    */
-  if (!checkprefix("HTTP", name)) {
+  if(!checkprefix("HTTP", name)) {
     return FALSE;
   }
 
   vers = strchr(name, '/');
   if(vers) {
     vers++;
-  } else {
+  }
+  else {
     /* NCSA 1.5.x returns "HTTP 200" when asked for HTTP/1.1
      */
     vers = name;
@@ -3384,10 +3385,10 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 #endif /* CURL_DOES_CONVERSIONS */
 
       if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
-        if (parse_http_status_line(HEADER1,
-                                   &httpversion_major,
-                                   &conn->httpversion,
-                                   &k->httpcode)) {
+        if(parse_http_status_line(HEADER1,
+                                  &httpversion_major,
+                                  &conn->httpversion,
+                                  &k->httpcode)) {
           nc = 1;
           conn->httpversion += 10 * httpversion_major;
 
@@ -3396,7 +3397,8 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
             if(conn->httpversion != 20)
               infof(data, "Lying server, not serving HTTP/2\n");
           }
-        } else if(checkhttpprefix(data, HEADER1)) {
+        }
+        else if(checkhttpprefix(data, HEADER1)) {
           /* If user has set option HTTP200ALIASES,
            * compare header line against list of aliases
            */
