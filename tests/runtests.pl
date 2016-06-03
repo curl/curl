@@ -3841,6 +3841,23 @@ sub singletest {
         # verify redirected stdout
         my @actual = loadarray($STDOUT);
 
+        # what parts to cut off from stdout
+        my @stripfile = getpart("verify", "stripfile");
+
+        foreach my $strip (@stripfile) {
+            chomp $strip;
+            my @newgen;
+            for(@actual) {
+                eval $strip;
+                if($_) {
+                    push @newgen, $_;
+                }
+            }
+            # this is to get rid of array entries that vanished (zero
+            # length) because of replacements
+            @actual = @newgen;
+        }
+
         # variable-replace in the stdout we have from the test case file
         @validstdout = fixarray(@validstdout);
 

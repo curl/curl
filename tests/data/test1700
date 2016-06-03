@@ -46,7 +46,7 @@ http2
 HTTP/2 GET with Upgrade:
  </name>
  <command>
-http://%HOSTIP:9015/1700 --http2 http://%HOSTIP:9015/17000001
+http://%HOSTIP:%HTTP2PORT/1700 --http2 http://%HOSTIP:%HTTP2PORT/17000001
 </command>
 </client>
 
@@ -60,11 +60,11 @@ http://%HOSTIP:9015/1700 --http2 http://%HOSTIP:9015/17000001
 </strip>
 <protocol>
 GET /1700 HTTP/1.1
-Host: %HOSTIP:9015
+Host: %HOSTIP:%HTTP2PORT
 Accept: */*
 
 GET /17000001 HTTP/1.1
-Host: %HOSTIP:9015
+Host: %HOSTIP:%HTTP2PORT
 Accept: */*
 
 </protocol>
@@ -81,7 +81,7 @@ accept-ranges: bytes
 content-length: 6
 content-type: text/html
 funny-head: yesyes
-server: nghttpx nghttp2/1.12.0-DEV
+server: cut-out
 via: 1.1 nghttpx
 
 -foo-
@@ -89,10 +89,13 @@ HTTP/2 200
 date: Thu, 09 Nov 2010 14:49:00 GMT
 content-length: 6
 content-type: text/html
-server: nghttpx nghttp2/1.12.0-DEV
+server: cut-out
 via: 1.1 nghttpx
 
 -maa-
 </stdout>
+<stripfile>
+s/^server:.*/server: cut-out/
+</stripfile>
 </verify>
 </testcase>

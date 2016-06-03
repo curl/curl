@@ -72,4 +72,4 @@ my $cmdline="$nghttpx --backend=127.0.0.1,8990 ".
     "--pid-file=$pidfile ".
     "--errorlog-file=$logfile";
 print "RUN: $cmdline\n" if($verbose);
-system("$cmdline");
+system("$cmdline 2>/dev/null");
