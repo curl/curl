@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -144,6 +144,7 @@ my $HTTPTLS6PORT;        # HTTP TLS (non-stunnel) IPv6 server port
 my $HTTPPROXYPORT;       # HTTP proxy port, when using CONNECT
 my $HTTPPIPEPORT;        # HTTP pipelining port
 my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
+my $HTTP2PORT;           # HTTP/2 server port
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
@@ -1187,6 +1188,64 @@ sub responsiveserver {
     my $srvrname = servername_str($proto, $ipvnum, $idnum);
     logmsg " server precheck FAILED (unresponsive $srvrname server)\n";
     return 0;
+}
+
+#######################################################################
+# start the http2 server
+#
+sub runhttp2server {
+    my ($verbose, $port) = @_;
+    my $server;
+    my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
+    my $proto="http2";
+    my $ipvnum = 4;
+    my $idnum = 0;
+    my $exe = "$perl $srcdir/http2-server.pl";
+    my $verbose_flag = "--verbose ";
+
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
+
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
+    my $pid = processexists($pidfile);
+    if($pid > 0) {
+        stopserver($server, "$pid");
+    }
+    unlink($pidfile) if(-f $pidfile);
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
+
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--port $HTTP2PORT ";
+    $flags .= $verbose_flag if($debugprotocol);
+
+    my $cmd = "$exe $flags";
+    my ($http2pid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+
+    if($http2pid <= 0 || !pidexists($http2pid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the $srvrname server\n";
+        stopserver($server, "$pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    if($verbose) {
+        logmsg "RUN: $srvrname server is now running PID $http2pid\n";
+    }
+
+    return ($http2pid, $pid2);
 }
 
 #######################################################################
@@ -2484,6 +2543,8 @@ sub checksystem {
             if($feat =~ /HTTP2/) {
                 # http2 enabled
                 $has_http2=1;
+
+                push @protocols, 'http2';
             }
         }
         #
@@ -2677,6 +2738,7 @@ sub subVariables {
   $$thing =~ s/%HTTPTLSPORT/$HTTPTLSPORT/g;
   $$thing =~ s/%HTTP6PORT/$HTTP6PORT/g;
   $$thing =~ s/%HTTPSPORT/$HTTPSPORT/g;
+  $$thing =~ s/%HTTP2PORT/$HTTP2PORT/g;
   $$thing =~ s/%HTTPPORT/$HTTPPORT/g;
   $$thing =~ s/%HTTPPIPEPORT/$HTTPPIPEPORT/g;
   $$thing =~ s/%PROXYPORT/$HTTPPROXYPORT/g;
@@ -4263,6 +4325,17 @@ sub startservers {
                 $run{'gopher-ipv6'}="$pid $pid2";
             }
         }
+        elsif($what eq "http2") {
+            if(!$run{'http2'}) {
+                ($pid, $pid2) = runhttp2server($verbose, $HTTP2PORT);
+                if($pid <= 0) {
+                    return "failed starting HTTP/2 server";
+                }
+                logmsg sprintf ("* pid http => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'http2'}="$pid $pid2";
+            }
+        }
         elsif($what eq "http") {
             if($torture && $run{'http'} &&
                !responsive_http_server("http", $verbose, 0, $HTTPPORT)) {
@@ -5003,6 +5076,7 @@ $HTTPTLSPORT     = $base++; # HTTP TLS (non-stunnel) server port
 $HTTPTLS6PORT    = $base++; # HTTP TLS (non-stunnel) IPv6 server port
 $HTTPPROXYPORT   = $base++; # HTTP proxy port, when using CONNECT
 $HTTPPIPEPORT    = $base++; # HTTP pipelining port
+$HTTP2PORT       = $base++; # HTTP/2 port
 $HTTPUNIXPATH    = 'http.sock'; # HTTP server Unix domain socket path
 
 #######################################################################
