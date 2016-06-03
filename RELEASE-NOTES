@@ -19,6 +19,7 @@ This release includes the following bugfixes:
  o URL parser: allow URLs to use one, two or three slashes [6]
  o curl: fix -q [regression] [7]
  o openssl: Use correct buffer sizes for error messages [8]
+ o curl: fix SIGSEGV while parsing URL with too many globs [9]
 
 This release includes the following known bugs:
 
@@ -43,3 +44,4 @@ References to bug reports and discussions on issues:
  [6] = https://curl.haxx.se/bug/?i=791
  [7] = https://curl.haxx.se/bug/?i=842
  [8] = https://curl.haxx.se/bug/?i=844
+ [9] = https://bugzilla.redhat.com/1340757
