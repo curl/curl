@@ -30,7 +30,8 @@
 static
 char *GetEnv(const char *variable)
 {
-#ifdef _WIN32_WCE
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
+  (void)variable;
   return NULL;
 #else
 #ifdef WIN32
