@@ -58,8 +58,10 @@
 #include "warnless.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
+#include "system_win32.h"
+
+ /* The last #include file should be: */
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /* ALPN requires version 8.1 of the  Windows SDK, which was
@@ -1261,39 +1263,8 @@ cleanup:
   */
   if(len && !connssl->decdata_offset && connssl->recv_connection_closed &&
      !connssl->recv_sspi_close_notify) {
-    bool isWin2k = FALSE;
-
-#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \
-    (_WIN32_WINNT < _WIN32_WINNT_WIN2K)
-    OSVERSIONINFO osver;
-
-    memset(&osver, 0, sizeof(osver));
-    osver.dwOSVersionInfoSize = sizeof(osver);
-
-    /* Find out the Windows version */
-    if(GetVersionEx(&osver)) {
-      /* Verify the version number is 5.0 */
-      if(osver.dwMajorVersion == 5 && osver.dwMinorVersion == 0)
-        isWin2k = TRUE;
-    }
-#else
-    ULONGLONG cm;
-    OSVERSIONINFOEX osver;
-
-    memset(&osver, 0, sizeof(osver));
-    osver.dwOSVersionInfoSize = sizeof(osver);
-    osver.dwMajorVersion = 5;
-
-    cm = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
-    cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_EQUAL);
-    cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
-    cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
-
-    if(VerifyVersionInfo(&osver, (VER_MAJORVERSION | VER_MINORVERSION |
-                                  VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
-                         cm))
-      isWin2k = TRUE;
-#endif
+    bool isWin2k = Curl_verify_windows_version(5, 0, PLATFORM_WINNT,
+                                               VERSION_EQUAL);
 
     if(isWin2k && sspi_status == SEC_E_OK)
       connssl->recv_sspi_close_notify = true;

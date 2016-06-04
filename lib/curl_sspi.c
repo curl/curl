@@ -67,7 +67,6 @@ PSecurityFunctionTable s_pSecFn = NULL;
  */
 CURLcode Curl_sspi_global_init(void)
 {
-  bool securityDll = FALSE;
   INITSECURITYINTERFACE_FN pInitSecurityInterface;
 
   /* If security interface is not yet initialized try to do this */
@@ -75,49 +74,9 @@ CURLcode Curl_sspi_global_init(void)
     /* Security Service Provider Interface (SSPI) functions are located in
      * security.dll on WinNT 4.0 and in secur32.dll on Win9x. Win2K and XP
      * have both these DLLs (security.dll forwards calls to secur32.dll) */
-    DWORD majorVersion = 4;
-    DWORD platformId = VER_PLATFORM_WIN32_NT;
-
-#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \
-    (_WIN32_WINNT < _WIN32_WINNT_WIN2K)
-    OSVERSIONINFO osver;
-
-    memset(&osver, 0, sizeof(osver));
-    osver.dwOSVersionInfoSize = sizeof(osver);
-
-    /* Find out Windows version */
-    if(!GetVersionEx(&osver))
-      return CURLE_FAILED_INIT;
-
-    /* Verify the major version number == 4 and platform id == WIN_NT */
-    if(osver.dwMajorVersion == majorVersion &&
-       osver.dwPlatformId == platformId)
-      securityDll = TRUE;
-#else
-    ULONGLONG cm;
-    OSVERSIONINFOEX osver;
-
-    memset(&osver, 0, sizeof(osver));
-    osver.dwOSVersionInfoSize = sizeof(osver);
-    osver.dwMajorVersion = majorVersion;
-    osver.dwPlatformId = platformId;
-
-    cm = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
-    cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_GREATER_EQUAL);
-    cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
-    cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
-    cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
-
-    /* Verify the major version number == 4 and platform id == WIN_NT */
-    if(VerifyVersionInfo(&osver, (VER_MAJORVERSION | VER_MINORVERSION |
-                                  VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR |
-                                  VER_PLATFORMID),
-                         cm))
-      securityDll = TRUE;
-#endif
 
     /* Load SSPI dll into the address space of the calling process */
-    if(securityDll)
+    if(Curl_verify_windows_version(4, 0, PLATFORM_WINNT, VERSION_EQUAL))
       s_hSecDll = Curl_load_library(TEXT("security.dll"));
     else
       s_hSecDll = Curl_load_library(TEXT("secur32.dll"));
