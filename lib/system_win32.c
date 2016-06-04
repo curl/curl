@@ -24,15 +24,16 @@
 
 #if defined(WIN32)
 
-#if defined(USE_WINDOWS_SSPI) || (!defined(CURL_DISABLE_TELNET) && \
-                                  defined(USE_WINSOCK))
-
 #include <curl/curl.h>
 #include "system_win32.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#if defined(USE_WINDOWS_SSPI) || (!defined(CURL_DISABLE_TELNET) && \
+                                  defined(USE_WINSOCK))
+
 
 #if !defined(LOAD_WITH_ALTERED_SEARCH_PATH)
 #define LOAD_WITH_ALTERED_SEARCH_PATH  0x00000008
@@ -55,6 +56,41 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 #else
 #  define LOADLIBARYEX    "LoadLibraryExA"
 #endif
+
+#endif /* USE_WINDOWS_SSPI || (!CURL_DISABLE_TELNET && USE_WINSOCK) */
+
+/*
+ * Curl_verify_windows_version()
+ *
+ * This is used to verify if we are running on a specific windows version.
+ *
+ * Parameters:
+ *
+ * majorVersion [in] - The major version number.
+ * minorVersion [in] - The minor version number.
+ * platform     [in] - The optional platform identifer.
+ * condition    [in] - The test condition used to specifier whether we are
+ *                     checking a version less then, equal to or greater than
+ *                     what is specified in the major and minor version
+ *                     numbers.
+ *
+ * Returns TRUE if matched; otherwise FALSE.
+ */
+bool Curl_verify_windows_version(const unsigned int majorVersion,
+                                 const unsigned int minorVersion,
+                                 const PlatformIdentifier platform,
+                                 const VersionCondition condition)
+{
+  (void) majorVersion;
+  (void) minorVersion;
+  (void) platform;
+  (void) condition;
+
+  return FALSE;
+}
+
+#if defined(USE_WINDOWS_SSPI) || (!defined(CURL_DISABLE_TELNET) && \
+                                  defined(USE_WINSOCK))
 
 /*
  * Curl_load_library()

@@ -26,6 +26,28 @@
 
 #if defined(WIN32)
 
+/* Version condition */
+typedef enum {
+  VERSION_LESS_THAN,
+  VERSION_LESS_THAN_EQUAL,
+  VERSION_EQUAL,
+  VERSION_GREATER_THAN_EQUAL,
+  VERSION_GREATER_THAN
+} VersionCondition;
+
+/* Platform identifier */
+typedef enum {
+  PLATFORM_DONT_CARE,
+  PLATFORM_WINDOWS,
+  PLATFORM_WINNT
+} PlatformIdentifier;
+
+/* This is used to verify if we are running on a specific windows version */
+bool Curl_verify_windows_version(const unsigned int majorVersion,
+                                 const unsigned int minorVersion,
+                                 const PlatformIdentifier platform,
+                                 const VersionCondition condition);
+
 #if defined(USE_WINDOWS_SSPI) || (!defined(CURL_DISABLE_TELNET) && \
                                   defined(USE_WINSOCK))
 
