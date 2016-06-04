@@ -2858,6 +2858,95 @@ checkprotoprefix(struct SessionHandle *data, struct connectdata *conn,
 }
 
 /*
+ * parse_http_status_line()
+ *
+ * Returns TRUE if it was able to parse the line correctly.
+ * Ignores reason-phrase, so this must be handled elsewhere.
+ */
+static bool
+parse_http_status_line(const char *buf,
+                       int *httpversion_majorp,
+                       int *httpversion_minorp,
+                       int *httpcodep)
+{
+  int nc = 0;
+  const char *name = buf;
+  const char *vers;
+  const char *code;
+
+  /* Default is 'HTTP/1.0 000' */
+  *httpversion_majorp = 1;
+  *httpversion_minorp = 0;
+  *httpcodep = 0;
+
+  if(!buf) {
+    return FALSE;
+  }
+
+  /* Skip whitespace */
+  while(*name && ISSPACE(*name))
+    name++;
+
+  /* Check that the expected protocol name exists.
+   */
+  if(!checkprefix("HTTP", name)) {
+    return FALSE;
+  }
+
+  vers = strchr(name, '/');
+  if(vers) {
+    vers++;
+  }
+  else {
+    /* NCSA 1.5.x returns "HTTP 200" when asked for HTTP/1.1
+     */
+    vers = name;
+  }
+  code = vers;
+
+  /* Skip non-whitespace */
+  while(*code && !ISSPACE(*code))
+    code++;
+
+  /* The reponse code is always a three-digit number in HTTP as the spec
+   * says. We try to allow any number here, but we cannot make
+   * guarantees on future behaviors since it isn't within the protocol.
+   * We could increment 'code' again, until the first non-whitespace
+   * character, but then we would screw up the strlen() calculation:
+   * (code - vers), so we handle this with sscanf() instead.
+   */
+  nc = sscanf(code, " %d", httpcodep);
+  if(nc != 1) {
+    return FALSE;
+  }
+
+  /* HTTP/2 drafts started out with a decimal point, but later versions
+   * removed the decimal point so we must accept both here. HTTP/2 is a
+   * binary protocol, but libcurl implements it as a wrapper around nghttp2,
+   * which converts the binary protocol to a text version of it, so here,
+   * we are just parsing the output of nghttp2, so that we can understand
+   * it in terms of the HTTP/1.1-style text version of it.
+   */
+  switch (code - vers) {
+  case 3:
+    nc = sscanf(vers, "%d.%d",
+                httpversion_majorp,
+                httpversion_minorp);
+    if(nc == 2)
+      return TRUE;
+    break;
+  case 1:
+    nc = sscanf(vers, "%d",
+                httpversion_majorp);
+    if(nc == 1)
+      return TRUE;
+    break;
+  }
+
+  return FALSE;
+}
+
+/*
  * header_append() copies a chunk of data to the end of the already received
  * header. We make sure that the full string fit in the allocated header
  * buffer, or else we enlarge it.
@@ -3296,19 +3385,11 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 #endif /* CURL_DOES_CONVERSIONS */
 
       if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
-        /*
-         * https://tools.ietf.org/html/rfc7230#section-3.1.2
-         *
-         * The reponse code is always a three-digit number in HTTP as the spec
-         * says. We try to allow any number here, but we cannot make
-         * guarantees on future behaviors since it isn't within the protocol.
-         */
-        nc = sscanf(HEADER1,
-                    " HTTP/%d.%d %d",
-                    &httpversion_major,
-                    &conn->httpversion,
-                    &k->httpcode);
-        if(nc==3) {
+        if(parse_http_status_line(HEADER1,
+                                  &httpversion_major,
+                                  &conn->httpversion,
+                                  &k->httpcode)) {
+          nc = 1;
           conn->httpversion += 10 * httpversion_major;
 
           if(k->upgr101 == UPGR101_RECEIVED) {
@@ -3317,23 +3398,12 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
               infof(data, "Lying server, not serving HTTP/2\n");
           }
         }
-        else {
-          /* this is the real world, not a Nirvana
-             NCSA 1.5.x returns this crap when asked for HTTP/1.1
-          */
-          nc=sscanf(HEADER1, " HTTP %3d", &k->httpcode);
-          conn->httpversion = 10;
-
+        else if(checkhttpprefix(data, HEADER1)) {
           /* If user has set option HTTP200ALIASES,
-             compare header line against list of aliases
-          */
-          if(!nc) {
-            if(checkhttpprefix(data, k->p)) {
-              nc = 1;
-              k->httpcode = 200;
-              conn->httpversion = 10;
-            }
-          }
+           * compare header line against list of aliases
+           */
+          nc = 1;
+          k->httpcode = 200;
         }
       }
       else if(conn->handler->protocol & CURLPROTO_RTSP) {
