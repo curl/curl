@@ -81,12 +81,137 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
                                  const PlatformIdentifier platform,
                                  const VersionCondition condition)
 {
-  (void) majorVersion;
-  (void) minorVersion;
-  (void) platform;
-  (void) condition;
+  bool matched = FALSE;
 
-  return FALSE;
+#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \
+    (_WIN32_WINNT < _WIN32_WINNT_WIN2K)
+  OSVERSIONINFO osver;
+
+  memset(&osver, 0, sizeof(osver));
+  osver.dwOSVersionInfoSize = sizeof(osver);
+
+  /* Find out Windows version */
+  if(GetVersionEx(&osver)) {
+    /* Verify the Operating System version number */
+    switch(condition) {
+    case VERSION_LESS_THAN:
+      if(osver.dwMajorVersion < majorVersion ||
+        (osver.dwMajorVersion == majorVersion &&
+         osver.dwMinorVersion < minorVersion))
+        matched = TRUE;
+      break;
+
+    case VERSION_LESS_THAN_EQUAL:
+      if(osver.dwMajorVersion <= majorVersion &&
+         osver.dwMinorVersion <= minorVersion)
+        matched = TRUE;
+      break;
+
+    case VERSION_EQUAL:
+      if(osver.dwMajorVersion == majorVersion &&
+         osver.dwMinorVersion == minorVersion)
+        matched = TRUE;
+      break;
+
+    case VERSION_GREATER_THAN_EQUAL:
+      if(osver.dwMajorVersion >= majorVersion &&
+         osver.dwMinorVersion >= minorVersion)
+        matched = TRUE;
+      break;
+
+    case VERSION_GREATER_THAN:
+      if(osver.dwMajorVersion > majorVersion ||
+        (osver.dwMajorVersion == majorVersion &&
+         osver.dwMinorVersion > minorVersion))
+        matched = TRUE;
+      break;
+    }
+
+    /* Verify the platform identifier (if necessary) */
+    if(matched && platform != PLATFORM_DONT_CARE) {
+      switch(platform) {
+      case PLATFORM_WINDOWS:
+        if(osver.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
+          matched = FALSE;
+        break;
+
+      case PLATFORM_WINNT:
+        if(osver.dwPlatformId != VER_PLATFORM_WIN32_NT)
+          matched = FALSE;
+      }
+    }
+  }
+#else
+  ULONGLONG cm = 0;
+  OSVERSIONINFOEX osver;
+  BYTE majorCondition;
+  BYTE minorCondition;
+  BYTE spMajorCondition;
+  BYTE spMinorCondition;
+
+  switch(condition) {
+  case VERSION_LESS_THAN:
+    majorCondition = VER_LESS;
+    minorCondition = VER_LESS;
+    spMajorCondition = VER_LESS_EQUAL;
+    spMinorCondition = VER_LESS_EQUAL;
+    break;
+
+  case VERSION_LESS_THAN_EQUAL:
+    majorCondition = VER_LESS_EQUAL;
+    minorCondition = VER_LESS_EQUAL;
+    spMajorCondition = VER_LESS_EQUAL;
+    spMinorCondition = VER_LESS_EQUAL;
+    break;
+
+  case VERSION_EQUAL:
+    majorCondition = VER_EQUAL;
+    minorCondition = VER_EQUAL;
+    spMajorCondition = VER_GREATER_EQUAL;
+    spMinorCondition = VER_GREATER_EQUAL;
+    break;
+
+  case VERSION_GREATER_THAN_EQUAL:
+    majorCondition = VER_GREATER_EQUAL;
+    minorCondition = VER_GREATER_EQUAL;
+    spMajorCondition = VER_GREATER_EQUAL;
+    spMinorCondition = VER_GREATER_EQUAL;
+    break;
+
+  case VERSION_GREATER_THAN:
+    majorCondition = VER_GREATER;
+    minorCondition = VER_GREATER;
+    spMajorCondition = VER_GREATER_EQUAL;
+    spMinorCondition = VER_GREATER_EQUAL;
+    break;
+
+  default:
+    return FALSE;
+  }
+
+  memset(&osver, 0, sizeof(osver));
+  osver.dwOSVersionInfoSize = sizeof(osver);
+  osver.dwMajorVersion = majorVersion;
+  osver.dwMinorVersion = minorVersion;
+  if(platform == PLATFORM_WINDOWS)
+    osver.dwPlatformId = VER_PLATFORM_WIN32_WINDOWS;
+  else if(platform == PLATFORM_WINNT)
+    osver.dwPlatformId = VER_PLATFORM_WIN32_NT;
+
+  cm = VerSetConditionMask(cm, VER_MAJORVERSION, majorCondition);
+  cm = VerSetConditionMask(cm, VER_MINORVERSION, minorCondition);
+  cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, spMajorCondition);
+  cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, spMinorCondition);
+  if(platform != PLATFORM_DONT_CARE)
+    cm = VerSetConditionMask(cm, VER_PLATFORMID, VER_EQUAL);
+
+  if(VerifyVersionInfo(&osver, (VER_MAJORVERSION | VER_MINORVERSION |
+                                VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
+                       cm))
+    matched = TRUE;
+#endif
+
+  return matched;
 }
 
 #if defined(USE_WINDOWS_SSPI) || (!defined(CURL_DISABLE_TELNET) && \
