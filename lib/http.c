@@ -3308,6 +3308,13 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
                     &httpversion_major,
                     &conn->httpversion,
                     &k->httpcode);
+
+        if(nc == 1 && httpversion_major == 2 &&
+           1 == sscanf(HEADER1, " HTTP/2 %d", &k->httpcode)) {
+          conn->httpversion = 0;
+          nc = 3;
+        }
+
         if(nc==3) {
           conn->httpversion += 10 * httpversion_major;
 
