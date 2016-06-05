@@ -1236,7 +1236,6 @@ sub runhttp2server {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
         stopserver($server, "$pid2");
-        displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
