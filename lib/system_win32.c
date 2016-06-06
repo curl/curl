@@ -249,10 +249,12 @@ HMODULE Curl_load_library(LPCTSTR filename)
      there is. Note: Both back slashes and forward slashes have been supported
      since the earlier days of DOS at an API level although they are not
      supported by command prompt */
-  if(_tcspbrk(filename, TEXT("\\/")))
+  if(_tcspbrk(filename, TEXT("\\/"))) {
+    /** !checksrc! disable BANNEDFUNC 1 **/
     hModule = pLoadLibraryEx ?
       pLoadLibraryEx(filename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
       LoadLibrary(filename);
+  }
   /* Detect if KB2533623 is installed, as LOAD_LIBARY_SEARCH_SYSTEM32 is only
      supported on Windows Vista, Windows Server 2008, Windows 7 and Windows
      Server 2008 R2 with this patch or natively on Windows 8 and above */
@@ -274,6 +276,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
         _tcscpy(path + _tcslen(path), filename);
 
         /* Load the DLL from the Windows system directory */
+        /** !checksrc! disable BANNEDFUNC 1 **/
         hModule = pLoadLibraryEx ?
           pLoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
           LoadLibrary(path);
