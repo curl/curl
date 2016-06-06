@@ -20,6 +20,11 @@ This release includes the following bugfixes:
  o curl: fix -q [regression] [7]
  o openssl: Use correct buffer sizes for error messages [8]
  o curl: fix SIGSEGV while parsing URL with too many globs [9]
+ o schannel: add CURLOPT_CERTINFO support [10]
+ o vtls: fix ssl session cache race condition [11]
+ o http: Fix HTTP/2 connection reuse [regression] [12]
+ o checksrc: Add LoadLibrary to the banned functions list
+ o schannel: Disable ALPN on Windows < 8.1 [13]
 
 This release includes the following known bugs:
 
@@ -28,9 +33,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Frank Gevaerts, Gisle Vanem, Marcel Raad, Michael Kaufmann,
-  Renaud Lehoux, vanillajonathan on github
-  (7 contributors)
+  Andrew Kurushin, Andrew Robbins, Benjamin Kircher, Daniel Seither,
+  Daniel Stenberg, Frank Gevaerts, Gisle Vanem, Ivan Avdeev, Kamil Dudka,
+  Marcel Raad, Michael Kaufmann, Ray Satiro, Renaud Lehoux, Romain Coltel,
+  Steve Holme, vanillajonathan on github, Viktor Szakáts,
+  (17 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -45,3 +52,7 @@ References to bug reports and discussions on issues:
  [7] = https://curl.haxx.se/bug/?i=842
  [8] = https://curl.haxx.se/bug/?i=844
  [9] = https://bugzilla.redhat.com/1340757
+ [10] = https://curl.haxx.se/bug/?i=822
+ [11] = https://curl.haxx.se/bug/?i=815
+ [12] = https://curl.haxx.se/bug/?i=855
+ [13] = https://curl.haxx.se/bug/?i=840
