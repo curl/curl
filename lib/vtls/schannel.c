@@ -64,8 +64,11 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* ALPN requires version 8.1 of the  Windows SDK, which was
-   shipped with Visual Studio 2013, aka _MSC_VER 1800*/
+/* ALPN requires version 8.1 of the Windows SDK, which was
+   shipped with Visual Studio 2013, aka _MSC_VER 1800:
+
+   https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
+*/
 #if defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_)
 #  define HAS_ALPN 1
 #endif
@@ -245,7 +248,10 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
 
 #ifdef HAS_ALPN
-  if(conn->bits.tls_enable_alpn) {
+  /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above */
+  if(conn->bits.tls_enable_alpn &&
+     Curl_verify_windows_version(6, 3, PLATFORM_WINNT,
+                                 VERSION_GREATER_THAN_EQUAL)) {
     int cur = 0;
     int list_start_index = 0;
     unsigned int* extension_len = NULL;
@@ -645,7 +651,10 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   }
 
 #ifdef HAS_ALPN
-  if(conn->bits.tls_enable_alpn) {
+  /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above */
+  if(conn->bits.tls_enable_alpn &&
+     Curl_verify_windows_version(6, 3, PLATFORM_WINNT,
+                                 VERSION_GREATER_THAN_EQUAL)) {
     sspi_status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
       SECPKG_ATTR_APPLICATION_PROTOCOL, &alpn_result);
 
