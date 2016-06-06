@@ -68,6 +68,7 @@
    shipped with Visual Studio 2013, aka _MSC_VER 1800*/
 #if defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_)
 #  define HAS_ALPN 1
+#  include <VersionHelpers.h>
 #endif
 
 /* Uncomment to force verbose output
@@ -97,6 +98,15 @@ static void InitSecBufferDesc(SecBufferDesc *desc, SecBuffer *BufArr,
   desc->pBuffers = BufArr;
   desc->cBuffers = NumArrElem;
 }
+
+#ifdef HAS_ALPN
+static __inline bool alpn_supported()
+{
+  /* ALPN support has been added to schannel in Windows 8.1
+     https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx */
+  return IsWindows8Point1OrGreater();
+}
+#endif
 
 static CURLcode
 schannel_connect_step1(struct connectdata *conn, int sockindex)
@@ -245,7 +255,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
 
 #ifdef HAS_ALPN
-  if(conn->bits.tls_enable_alpn) {
+  if(conn->bits.tls_enable_alpn && alpn_supported()) {
     int cur = 0;
     int list_start_index = 0;
     unsigned int* extension_len = NULL;
@@ -645,7 +655,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   }
 
 #ifdef HAS_ALPN
-  if(conn->bits.tls_enable_alpn) {
+  if(conn->bits.tls_enable_alpn && alpn_supported()) {
     sspi_status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
       SECPKG_ATTR_APPLICATION_PROTOCOL, &alpn_result);
 
