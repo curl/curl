@@ -99,4 +99,9 @@ curl_dogetaddrinfo(const char *hostname,
                    int line, const char *source);
 #endif
 
+#ifdef HAVE_GETADDRINFO
+void Curl_addrinfo_set_port(Curl_addrinfo *addrinfo,
+                            int port);
+#endif
+
 #endif /* HEADER_CURL_ADDRINFO_H */
