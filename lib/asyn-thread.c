@@ -616,7 +616,10 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0)
     /* This is an IPv6 address literal */
     return Curl_ip2addr(AF_INET6, &in6, hostname, port);
+#endif /* CURLRES_IPV6 */
+#endif /* !USE_RESOLVE_ON_IPS */
 
+#ifdef CURLRES_IPV6
   /*
    * Check if a limited name resolve has been requested.
    */
@@ -635,9 +638,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   if((pf != PF_INET) && !Curl_ipv6works())
     /* The stack seems to be a non-IPv6 one */
     pf = PF_INET;
-
 #endif /* CURLRES_IPV6 */
-#endif /* USE_RESOLVE_ON_IPS */
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
