@@ -279,6 +279,11 @@ static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
     if(tsd->sock_error == 0)
       tsd->sock_error = RESOLVER_ENOMEM;
   }
+#ifdef USE_RESOLVE_ON_IPS
+  else {
+    Curl_addrinfo_set_port(tsd->res, tsd->port);
+  }
+#endif
 
   Curl_mutex_acquire(tsd->mtx);
   if(tsd->done) {
@@ -602,12 +607,15 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
   *waitp = 0; /* default to synchronous response */
 
+  memset(&hints, 0, sizeof(hints));
+
+#ifndef CURLRES_IPV6
   /* First check if this is an IPv4 address string */
   if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(AF_INET, &in, hostname, port);
 
-#ifdef CURLRES_IPV6
+#else
   /* check if this is an IPv6 address string */
   if(Curl_inet_pton (AF_INET6, hostname, &in6) > 0)
     /* This is an IPv6 address literal */
@@ -632,9 +640,17 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     /* The stack seems to be a non-IPv6 one */
     pf = PF_INET;
 
+  /* Check if this is an IPv4 address string */
+  if(Curl_inet_pton(AF_INET, hostname, &in) > 0) {
+    /* This is a dotted IP address 123.123.123.123-style */
+#ifndef USE_RESOLVE_ON_IPS
+    if(pf == PF_INET)
+#endif
+      return Curl_ip2addr(AF_INET, &in, hostname, port);
+  }
+
 #endif /* CURLRES_IPV6 */
 
-  memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
   hints.ai_socktype = conn->socktype;
 
@@ -656,6 +672,11 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
           hostname, port, Curl_strerror(conn, SOCKERRNO));
     return NULL;
   }
+#ifdef USE_RESOLVE_ON_IPS
+  else {
+      Curl_addrinfo_set_port(res, port);
+  }
+#endif
   return res;
 }
 
