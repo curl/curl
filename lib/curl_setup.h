@@ -222,6 +222,15 @@
 #endif
 
 /*
+ * Use getaddrinfo to resolve the IPv4 address literal. If the current network
+ * interface doesn’t support IPv4, but supports IPv6, NAT64, and DNS64,
+ * performing this task will result in a synthesized IPv6 address.
+ */
+#ifdef  __APPLE__
+#define USE_RESOLVE_ON_IPS 1
+#endif
+
+/*
  * Include header files for windows builds before redefining anything.
  * Use this preprocessor block only to include or exclude windows.h,
  * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
