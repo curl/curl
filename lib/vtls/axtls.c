@@ -143,8 +143,6 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
   int cert_types[] = {SSL_OBJ_X509_CERT, SSL_OBJ_PKCS12, 0};
   int key_types[] = {SSL_OBJ_RSA_KEY, SSL_OBJ_PKCS8, SSL_OBJ_PKCS12, 0};
   int i, ssl_fcn_return;
-  const uint8_t *ssl_sessionid;
-  size_t ssl_idsize;
 
   /* Assuming users will not compile in custom key/cert to axTLS.
   *  Also, even for blocking connects, use axTLS non-blocking feature.
@@ -258,19 +256,23 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
    * 2) setting up callbacks.  these seem gnutls specific
    */
 
-  /* In axTLS, handshaking happens inside ssl_client_new. */
-  Curl_ssl_sessionid_lock(conn);
-  if(!Curl_ssl_getsessionid(conn, (void **) &ssl_sessionid, &ssl_idsize)) {
-    /* we got a session id, use it! */
-    infof (data, "SSL re-using session ID\n");
-    ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex],
-                         ssl_sessionid, (uint8_t)ssl_idsize);
+  if(conn->ssl_config.sessionid) {
+    const uint8_t *ssl_sessionid;
+    size_t ssl_idsize;
+
+    /* In axTLS, handshaking happens inside ssl_client_new. */
+    Curl_ssl_sessionid_lock(conn);
+    if(!Curl_ssl_getsessionid(conn, (void **) &ssl_sessionid, &ssl_idsize)) {
+      /* we got a session id, use it! */
+      infof (data, "SSL re-using session ID\n");
+      ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex],
+                           ssl_sessionid, (uint8_t)ssl_idsize);
+    }
     Curl_ssl_sessionid_unlock(conn);
   }
-  else {
-    Curl_ssl_sessionid_unlock(conn);
+
+  if(!ssl)
     ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex], NULL, 0);
-  }
 
   conn->ssl[sockindex].ssl = ssl;
   return CURLE_OK;
@@ -284,8 +286,6 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
 {
   struct SessionHandle *data = conn->data;
   SSL *ssl = conn->ssl[sockindex].ssl;
-  const uint8_t *ssl_sessionid;
-  size_t ssl_idsize;
   const char *peer_CN;
   uint32_t dns_altname_index;
   const char *dns_altname;
@@ -383,13 +383,15 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
   conn->send[sockindex] = axtls_send;
 
   /* Put our freshly minted SSL session in cache */
-  ssl_idsize = ssl_get_session_id_size(ssl);
-  ssl_sessionid = ssl_get_session_id(ssl);
-  Curl_ssl_sessionid_lock(conn);
-  if(Curl_ssl_addsessionid(conn, (void *) ssl_sessionid, ssl_idsize)
-     != CURLE_OK)
-    infof (data, "failed to add session to cache\n");
-  Curl_ssl_sessionid_unlock(conn);
+  if(conn->ssl_config.sessionid) {
+    const uint8_t *ssl_sessionid = ssl_get_session_id_size(ssl);
+    size_t ssl_idsize = ssl_get_session_id(ssl);
+    Curl_ssl_sessionid_lock(conn);
+    if(Curl_ssl_addsessionid(conn, (void *) ssl_sessionid, ssl_idsize)
+       != CURLE_OK)
+      infof (data, "failed to add session to cache\n");
+    Curl_ssl_sessionid_unlock(conn);
+  }
 
   return CURLE_OK;
 }

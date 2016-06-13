@@ -364,6 +364,8 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
 
   *ssl_sessionid = NULL;
 
+  DEBUGASSERT(conn->ssl_config.sessionid);
+
   if(!conn->ssl_config.sessionid)
     /* session ID re-use is disabled */
     return TRUE;
@@ -460,9 +462,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   int conn_to_port;
   long *general_age;
 
-  /* Even though session ID re-use might be disabled, that only disables USING
-     IT. We still store it here in case the re-using is again enabled for an
-     upcoming transfer */
+  DEBUGASSERT(conn->ssl_config.sessionid);
 
   clone_host = strdup(conn->host.name);
   if(!clone_host)

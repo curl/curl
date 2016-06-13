@@ -370,8 +370,6 @@ gtls_connect_step1(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   gnutls_session_t session;
   int rc;
-  void *ssl_sessionid;
-  size_t ssl_idsize;
   bool sni = TRUE; /* default is SNI enabled */
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
@@ -749,16 +747,20 @@ gtls_connect_step1(struct connectdata *conn,
 
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things */
+  if(conn->ssl_config.sessionid) {
+    void *ssl_sessionid;
+    size_t ssl_idsize;
 
-  Curl_ssl_sessionid_lock(conn);
-  if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, &ssl_idsize)) {
-    /* we got a session id, use it! */
-    gnutls_session_set_data(session, ssl_sessionid, ssl_idsize);
+    Curl_ssl_sessionid_lock(conn);
+    if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, &ssl_idsize)) {
+      /* we got a session id, use it! */
+      gnutls_session_set_data(session, ssl_sessionid, ssl_idsize);
 
-    /* Informational message */
-    infof (data, "SSL re-using session ID\n");
+      /* Informational message */
+      infof (data, "SSL re-using session ID\n");
+    }
+    Curl_ssl_sessionid_unlock(conn);
   }
-  Curl_ssl_sessionid_unlock(conn);
 
   return CURLE_OK;
 }
@@ -841,8 +843,6 @@ gtls_connect_step3(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   gnutls_session_t session = conn->ssl[sockindex].session;
   int rc;
-  bool incache;
-  void *ssl_sessionid;
 #ifdef HAS_ALPN
   gnutls_datum_t proto;
 #endif
@@ -1270,11 +1270,13 @@ gtls_connect_step3(struct connectdata *conn,
   conn->recv[sockindex] = gtls_recv;
   conn->send[sockindex] = gtls_send;
 
-  {
+  if(conn->ssl_config.sessionid) {
     /* we always unconditionally get the session id here, as even if we
        already got it from the cache and asked to use it in the connection, it
        might've been rejected and then a new one is in use now and we need to
        detect that. */
+    bool incache;
+    void *ssl_sessionid;
     void *connect_sessionid;
     size_t connect_idsize = 0;
 

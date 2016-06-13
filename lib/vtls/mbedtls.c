@@ -162,7 +162,6 @@ mbed_connect_step1(struct connectdata *conn,
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
 
   int ret = -1;
-  void *old_session = NULL;
   char errorbuf[128];
   errorbuf[0]=0;
 
@@ -365,17 +364,23 @@ mbed_connect_step1(struct connectdata *conn,
 
   mbedtls_ssl_conf_ciphersuites(&connssl->config,
                                 mbedtls_ssl_list_ciphersuites());
-  Curl_ssl_sessionid_lock(conn);
-  if(!Curl_ssl_getsessionid(conn, &old_session, NULL)) {
-    ret = mbedtls_ssl_set_session(&connssl->ssl, old_session);
-    if(ret) {
-      Curl_ssl_sessionid_unlock(conn);
-      failf(data, "mbedtls_ssl_set_session returned -0x%x", -ret);
-      return CURLE_SSL_CONNECT_ERROR;
+
+  /* Check if there's a cached ID we can/should use here! */
+  if(conn->ssl_config.sessionid) {
+    void *old_session = NULL;
+
+    Curl_ssl_sessionid_lock(conn);
+    if(!Curl_ssl_getsessionid(conn, &old_session, NULL)) {
+      ret = mbedtls_ssl_set_session(&connssl->ssl, old_session);
+      if(ret) {
+        Curl_ssl_sessionid_unlock(conn);
+        failf(data, "mbedtls_ssl_set_session returned -0x%x", -ret);
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      infof(data, "mbedTLS re-using session\n");
     }
-    infof(data, "mbedTLS re-using session\n");
+    Curl_ssl_sessionid_unlock(conn);
   }
-  Curl_ssl_sessionid_unlock(conn);
 
   mbedtls_ssl_conf_ca_chain(&connssl->config,
                             &connssl->cacert,
@@ -591,35 +596,38 @@ mbed_connect_step3(struct connectdata *conn,
   CURLcode retcode = CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct SessionHandle *data = conn->data;
-  void *old_ssl_sessionid = NULL;
-  mbedtls_ssl_session *our_ssl_sessionid;
-  int ret;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-  our_ssl_sessionid = malloc(sizeof(mbedtls_ssl_session));
-  if(!our_ssl_sessionid)
-    return CURLE_OUT_OF_MEMORY;
+  if(conn->ssl_config.sessionid) {
+    int ret;
+    mbedtls_ssl_session *our_ssl_sessionid;
+    void *old_ssl_sessionid = NULL;
 
-  mbedtls_ssl_session_init(our_ssl_sessionid);
+    our_ssl_sessionid = malloc(sizeof(mbedtls_ssl_session));
+    if(!our_ssl_sessionid)
+      return CURLE_OUT_OF_MEMORY;
 
-  ret = mbedtls_ssl_get_session(&connssl->ssl, our_ssl_sessionid);
-  if(ret) {
-    failf(data, "mbedtls_ssl_get_session returned -0x%x", -ret);
-    return CURLE_SSL_CONNECT_ERROR;
-  }
+    mbedtls_ssl_session_init(our_ssl_sessionid);
 
-  /* If there's already a matching session in the cache, delete it */
-  Curl_ssl_sessionid_lock(conn);
-  if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL))
-    Curl_ssl_delsessionid(conn, old_ssl_sessionid);
+    ret = mbedtls_ssl_get_session(&connssl->ssl, our_ssl_sessionid);
+    if(ret) {
+      failf(data, "mbedtls_ssl_get_session returned -0x%x", -ret);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
 
-  retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0);
-  Curl_ssl_sessionid_unlock(conn);
-  if(retcode) {
-    free(our_ssl_sessionid);
-    failf(data, "failed to store ssl session");
-    return retcode;
+    /* If there's already a matching session in the cache, delete it */
+    Curl_ssl_sessionid_lock(conn);
+    if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL))
+      Curl_ssl_delsessionid(conn, old_ssl_sessionid);
+
+    retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0);
+    Curl_ssl_sessionid_unlock(conn);
+    if(retcode) {
+      free(our_ssl_sessionid);
+      failf(data, "failed to store ssl session");
+      return retcode;
+    }
   }
 
   connssl->connecting_state = ssl_connect_done;

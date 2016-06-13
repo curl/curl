@@ -127,22 +127,24 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
         conn->host.name, conn->remote_port);
 
+  connssl->cred = NULL;
+
   /* check for an existing re-usable credential handle */
-  Curl_ssl_sessionid_lock(conn);
-  if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL)) {
-    connssl->cred = old_cred;
-    infof(data, "schannel: re-using existing credential handle\n");
+  if(conn->ssl_config.sessionid) {
+    Curl_ssl_sessionid_lock(conn);
+    if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL)) {
+      connssl->cred = old_cred;
+      infof(data, "schannel: re-using existing credential handle\n");
 
-    /* increment the reference counter of the credential/session handle */
-    connssl->cred->refcount++;
-    infof(data, "schannel: incremented credential handle refcount = %d\n",
-          connssl->cred->refcount);
-
+      /* increment the reference counter of the credential/session handle */
+      connssl->cred->refcount++;
+      infof(data, "schannel: incremented credential handle refcount = %d\n",
+            connssl->cred->refcount);
+    }
     Curl_ssl_sessionid_unlock(conn);
   }
-  else {
-    Curl_ssl_sessionid_unlock(conn);
 
+  if(!connssl->cred) {
     /* setup Schannel API options */
     memset(&schannel_cred, 0, sizeof(schannel_cred));
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
@@ -619,13 +621,11 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  struct curl_schannel_cred *old_cred = NULL;
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
 #ifdef HAS_ALPN
   SecPkgContext_ApplicationProtocol alpn_result;
 #endif
-  bool incache;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
@@ -689,32 +689,36 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
 #endif
 
   /* save the current session data for possible re-use */
-  Curl_ssl_sessionid_lock(conn);
-  incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL));
-  if(incache) {
-    if(old_cred != connssl->cred) {
-      infof(data, "schannel: old credential handle is stale, removing\n");
-      /* we're not taking old_cred ownership here, no refcount++ is needed */
-      Curl_ssl_delsessionid(conn, (void *)old_cred);
-      incache = FALSE;
-    }
-  }
+  if(conn->ssl_config.sessionid) {
+    bool incache;
+    struct curl_schannel_cred *old_cred = NULL;
 
-  if(!incache) {
-    result = Curl_ssl_addsessionid(conn, (void *)connssl->cred,
-                                   sizeof(struct curl_schannel_cred));
-    if(result) {
-      Curl_ssl_sessionid_unlock(conn);
-      failf(data, "schannel: failed to store credential handle");
-      return result;
+    Curl_ssl_sessionid_lock(conn);
+    incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL));
+    if(incache) {
+      if(old_cred != connssl->cred) {
+        infof(data, "schannel: old credential handle is stale, removing\n");
+        /* we're not taking old_cred ownership here, no refcount++ is needed */
+        Curl_ssl_delsessionid(conn, (void *)old_cred);
+        incache = FALSE;
+      }
     }
-    else {
-      /* this cred session is now also referenced by sessionid cache */
-      connssl->cred->refcount++;
-      infof(data, "schannel: stored credential handle in session cache\n");
+    if(!incache) {
+      result = Curl_ssl_addsessionid(conn, (void *)connssl->cred,
+                                     sizeof(struct curl_schannel_cred));
+      if(result) {
+        Curl_ssl_sessionid_unlock(conn);
+        failf(data, "schannel: failed to store credential handle");
+        return result;
+      }
+      else {
+        /* this cred session is now also referenced by sessionid cache */
+        connssl->cred->refcount++;
+        infof(data, "schannel: stored credential handle in session cache\n");
+      }
     }
+    Curl_ssl_sessionid_unlock(conn);
   }
-  Curl_ssl_sessionid_unlock(conn);
 
   if(data->set.ssl.certinfo) {
     sspi_status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,

@@ -150,7 +150,6 @@ polarssl_connect_step1(struct connectdata *conn,
 #else
   struct in_addr addr;
 #endif
-  void *old_session = NULL;
   char errorbuf[128];
   errorbuf[0]=0;
 
@@ -337,15 +336,21 @@ polarssl_connect_step1(struct connectdata *conn,
               net_send, &conn->sock[sockindex]);
 
   ssl_set_ciphersuites(&connssl->ssl, ssl_list_ciphersuites());
-  Curl_ssl_sessionid_lock(conn);
-  if(!Curl_ssl_getsessionid(conn, &old_session, NULL)) {
-    ret = ssl_set_session(&connssl->ssl, old_session);
-    Curl_ssl_sessionid_unlock(conn);
-    if(ret) {
-      failf(data, "ssl_set_session returned -0x%x", -ret);
-      return CURLE_SSL_CONNECT_ERROR;
+
+  /* Check if there's a cached ID we can/should use here! */
+  if(conn->ssl_config.sessionid) {
+    void *old_session = NULL;
+
+    Curl_ssl_sessionid_lock(conn);
+    if(!Curl_ssl_getsessionid(conn, &old_session, NULL)) {
+      ret = ssl_set_session(&connssl->ssl, old_session);
+      Curl_ssl_sessionid_unlock(conn);
+      if(ret) {
+        failf(data, "ssl_set_session returned -0x%x", -ret);
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      infof(data, "PolarSSL re-using session\n");
     }
-    infof(data, "PolarSSL re-using session\n");
   }
 
   ssl_set_ca_chain(&connssl->ssl,
@@ -555,35 +560,38 @@ polarssl_connect_step3(struct connectdata *conn,
   CURLcode retcode = CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct SessionHandle *data = conn->data;
-  void *old_ssl_sessionid = NULL;
-  ssl_session *our_ssl_sessionid;
-  int ret;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-  our_ssl_sessionid = malloc(sizeof(ssl_session));
-  if(!our_ssl_sessionid)
-    return CURLE_OUT_OF_MEMORY;
+  if(conn->ssl_config.sessionid) {
+    int ret;
+    ssl_session *our_ssl_sessionid;
+    void *old_ssl_sessionid = NULL;
 
-  ssl_session_init(our_ssl_sessionid);
+    our_ssl_sessionid = malloc(sizeof(ssl_session));
+    if(!our_ssl_sessionid)
+      return CURLE_OUT_OF_MEMORY;
 
-  ret = ssl_get_session(&connssl->ssl, our_ssl_sessionid);
-  if(ret) {
-    failf(data, "ssl_get_session returned -0x%x", -ret);
-    return CURLE_SSL_CONNECT_ERROR;
-  }
+    ssl_session_init(our_ssl_sessionid);
 
-  /* If there's already a matching session in the cache, delete it */
-  Curl_ssl_sessionid_lock(conn);
-  if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL))
-    Curl_ssl_delsessionid(conn, old_ssl_sessionid);
+    ret = ssl_get_session(&connssl->ssl, our_ssl_sessionid);
+    if(ret) {
+      failf(data, "ssl_get_session returned -0x%x", -ret);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
 
-  retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0);
-  Curl_ssl_sessionid_unlock(conn);
-  if(retcode) {
-    free(our_ssl_sessionid);
-    failf(data, "failed to store ssl session");
-    return retcode;
+    /* If there's already a matching session in the cache, delete it */
+    Curl_ssl_sessionid_lock(conn);
+    if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL))
+      Curl_ssl_delsessionid(conn, old_ssl_sessionid);
+
+    retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0);
+    Curl_ssl_sessionid_unlock(conn);
+    if(retcode) {
+      free(our_ssl_sessionid);
+      failf(data, "failed to store ssl session");
+      return retcode;
+    }
   }
 
   connssl->connecting_state = ssl_connect_done;
