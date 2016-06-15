@@ -181,6 +181,44 @@ const struct Curl_handler Curl_handler_ldaps = {
 };
 #endif
 
+#ifdef USE_WIN32_LDAP
+static int ldap_win_bind(struct connectdata *conn, LDAP *server,
+                         const char *user, const char *passwd)
+{
+  int rc = 0;
+  ULONG method = LDAP_AUTH_NEGOTIATE;
+  SEC_WINNT_AUTH_IDENTITY cred = { 0, };
+  PTCHAR inuser = NULL;
+  PTCHAR inpass = NULL;
+
+  if(user && passwd && !Curl_create_sspi_identity(user, passwd, &cred)) {
+
+    if(conn->data->set.httpauth & CURLAUTH_BASIC) {
+      method = LDAP_AUTH_SIMPLE;
+      inuser = Curl_convert_UTF8_to_tchar((char*)user);
+      inpass = cred.Password;
+    }
+    else if(conn->data->set.httpauth & CURLAUTH_DIGEST) {
+      method = LDAP_AUTH_DIGEST;
+      inpass = (TCHAR*)(&cred);
+    }
+    else if(conn->data->set.httpauth & CURLAUTH_NTLM) {
+      method = LDAP_AUTH_NTLM;
+      inpass = (TCHAR*)(&cred);
+    }
+    else {
+      inpass = (TCHAR*)(&cred);
+    }
+  }
+
+  rc = ldap_bind_s(server, inuser, inpass, method);
+
+  Curl_sspi_free_identity(&cred);
+  Curl_unicodefree(inuser);
+
+  return rc;
+}
+#endif
 
 static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 {
@@ -202,13 +240,11 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 #endif
 #if defined(USE_WIN32_LDAP)
   TCHAR *host = NULL;
-  TCHAR *user = NULL;
-  TCHAR *passwd = NULL;
 #else
   char *host = NULL;
+#endif
   char *user = NULL;
   char *passwd = NULL;
-#endif
 
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d\n",
@@ -239,24 +275,14 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 
     goto quit;
   }
-
-  if(conn->bits.user_passwd) {
-    user = Curl_convert_UTF8_to_tchar(conn->user);
-    passwd = Curl_convert_UTF8_to_tchar(conn->passwd);
-    if(!user || !passwd) {
-      result = CURLE_OUT_OF_MEMORY;
-
-      goto quit;
-    }
-  }
 #else
   host = conn->host.name;
+#endif
 
   if(conn->bits.user_passwd) {
     user = conn->user;
     passwd = conn->passwd;
   }
-#endif
 
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
   ldap_set_option(NULL, LDAP_OPT_NETWORK_TIMEOUT, &ldap_timeout);
@@ -402,11 +428,19 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
 #endif
 
+#ifdef USE_WIN32_LDAP
+  rc = ldap_win_bind(conn, server, user, passwd);
+#else
   rc = ldap_simple_bind_s(server, user, passwd);
+#endif
   if(!ldap_ssl && rc != 0) {
     ldap_proto = LDAP_VERSION2;
     ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
+#ifdef USE_WIN32_LDAP
+    rc = ldap_win_bind(conn, server, user, passwd);
+#else
     rc = ldap_simple_bind_s(server, user, passwd);
+#endif
   }
   if(rc != 0) {
     failf(data, "LDAP local: ldap_simple_bind_s %s", ldap_err2string(rc));
@@ -669,8 +703,6 @@ quit:
 #endif /* HAVE_LDAP_SSL && CURL_HAS_NOVELL_LDAPSDK */
 
 #if defined(USE_WIN32_LDAP)
-  Curl_unicodefree(passwd);
-  Curl_unicodefree(user);
   Curl_unicodefree(host);
 #endif
 
