@@ -971,10 +971,10 @@ CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
 /*
  * Check whether the SSL backend supports the status_request extension.
  */
-bool Curl_ssl_cert_status_request(void)
+bool Curl_ssl_supports_cert_status_request(void)
 {
-#ifdef curlssl_cert_status_request
-  return curlssl_cert_status_request();
+#ifdef curlssl_supports_cert_status_request
+  return curlssl_supports_cert_status_request();
 #else
   return FALSE;
 #endif
@@ -983,10 +983,22 @@ bool Curl_ssl_cert_status_request(void)
 /*
  * Check whether the SSL backend supports false start.
  */
-bool Curl_ssl_false_start(void)
+bool Curl_ssl_supports_false_start(void)
 {
-#ifdef curlssl_false_start
-  return curlssl_false_start();
+#ifdef curlssl_supports_false_start
+  return curlssl_supports_false_start();
+#else
+  return FALSE;
+#endif
+}
+
+/*
+ * Check whether the SSL backend supports pinned public keys.
+ */
+bool Curl_ssl_supports_pinnedpubkey(void)
+{
+#ifdef curlssl_supports_pinnedpubkey
+  return curlssl_supports_pinnedpubkey();
 #else
   return FALSE;
 #endif

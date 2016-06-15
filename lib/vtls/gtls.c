@@ -1619,7 +1619,7 @@ void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
 #endif
 }
 
-bool Curl_gtls_cert_status_request(void)
+bool Curl_gtls_supports_cert_status_request(void)
 {
 #ifdef HAS_OCSP
   return TRUE;

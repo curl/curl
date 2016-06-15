@@ -47,6 +47,9 @@ int Curl_gskit_check_cxn(struct connectdata *cxn);
 /* this backend supports CURLOPT_CERTINFO */
 #define have_curlssl_certinfo 1
 
+/* this backend supports CURLOPT_PINNEDPUBLICKEY */
+#define curlssl_supports_pinnedpubkey() (1)
+
 /* API setup for GSKit */
 #define curlssl_init Curl_gskit_init
 #define curlssl_cleanup Curl_gskit_cleanup

@@ -52,8 +52,8 @@ int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 /* this backend supports the CAPATH option */
 #define have_curlssl_ca_path 1
 
-/* this backends supports CURLOPT_PINNEDPUBLICKEY */
-#define have_curlssl_pinnedpubkey 1
+/* this backend supports CURLOPT_PINNEDPUBLICKEY */
+#define curlssl_supports_pinnedpubkey() (1)
 
 /* API setup for PolarSSL */
 #define curlssl_init() Curl_polarssl_init()

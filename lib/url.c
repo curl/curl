@@ -2032,7 +2032,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Enable certificate status verifying.
      */
-    if(!Curl_ssl_cert_status_request()) {
+    if(!Curl_ssl_supports_cert_status_request()) {
       result = CURLE_NOT_BUILT_IN;
       break;
     }
@@ -2063,11 +2063,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     /*
      * Enable TLS false start.
      */
-    if(!Curl_ssl_false_start()) {
+    if(!Curl_ssl_supports_false_start()) {
       result = CURLE_NOT_BUILT_IN;
       break;
     }
-
     data->set.ssl.falsestart = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
   case CURLOPT_CERTINFO:
@@ -2078,16 +2077,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #endif
     break;
   case CURLOPT_PINNEDPUBLICKEY:
-#ifdef have_curlssl_pinnedpubkey /* only by supported backends */
     /*
      * Set pinned public key for SSL connection.
      * Specify file name of the public key in DER format.
      */
+    if(!Curl_ssl_supports_pinnedpubkey()) {
+      result = CURLE_NOT_BUILT_IN;
+      break;
+    }
     result = setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY],
                        va_arg(param, char *));
-#else
-    result = CURLE_NOT_BUILT_IN;
-#endif
     break;
   case CURLOPT_CAINFO:
     /*

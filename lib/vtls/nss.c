@@ -2061,7 +2061,7 @@ void Curl_nss_sha256sum(const unsigned char *tmp, /* input */
   PK11_DestroyContext(SHA256pw, PR_TRUE);
 }
 
-bool Curl_nss_cert_status_request(void)
+bool Curl_nss_supports_cert_status_request(void)
 {
 #ifdef SSL_ENABLE_OCSP_STAPLING
   return TRUE;
@@ -2070,7 +2070,7 @@ bool Curl_nss_cert_status_request(void)
 #endif
 }
 
-bool Curl_nss_false_start(void) {
+bool Curl_nss_supports_false_start(void) {
 #if NSSVERNUM >= 0x030f04 /* 3.15.4 */
   return TRUE;
 #else

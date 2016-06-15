@@ -53,7 +53,7 @@ void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
                       unsigned char *sha256sum, /* output */
                       size_t sha256len);
 
-bool Curl_gtls_cert_status_request(void);
+bool Curl_gtls_supports_cert_status_request(void);
 
 /* Set the API backend definition to GnuTLS */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_GNUTLS
@@ -64,8 +64,12 @@ bool Curl_gtls_cert_status_request(void);
 /* this backend supports CURLOPT_CERTINFO */
 #define have_curlssl_certinfo 1
 
+/* this backend may support CURLOPT_SSL_VERIFYSTATUS */
+#define curlssl_supports_cert_status_request() \
+  Curl_gtls_supports_cert_status_request()
+
 /* this backend supports CURLOPT_PINNEDPUBLICKEY */
-#define have_curlssl_pinnedpubkey 1
+#define curlssl_supports_pinnedpubkey() (1)
 
 /* API setup for GnuTLS */
 #define curlssl_init Curl_gtls_init
@@ -85,7 +89,6 @@ bool Curl_gtls_cert_status_request(void);
 #define curlssl_random(x,y,z) Curl_gtls_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_gtls_md5sum(a,b,c,d)
 #define curlssl_sha256sum(a,b,c,d) Curl_gtls_sha256sum(a,b,c,d)
-#define curlssl_cert_status_request() Curl_gtls_cert_status_request()
 
 #endif /* USE_GNUTLS */
 #endif /* HEADER_CURL_GTLS_H */

@@ -2377,7 +2377,7 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
   (void)CC_MD5(tmp, (CC_LONG)tmplen, md5sum);
 }
 
-bool Curl_darwinssl_false_start(void) {
+bool Curl_darwinssl_supports_false_start(void) {
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   if(SSLSetSessionOption != NULL)
     return TRUE;
