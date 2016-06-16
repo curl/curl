@@ -98,7 +98,10 @@ specified on a single command line and cannot be used between separate curl
 invokes.
 .SH "PROGRESS METER"
 curl normally displays a progress meter during operations, indicating the
-amount of transferred data, transfer speeds and estimated time left, etc.
+amount of transferred data, transfer speeds and estimated time left, etc. The
+progress meter displays number of bytes and the speeds are in bytes per
+second. The suffixes (K, M, G, P) are 1024 based. For example 1K is 1024
+bytes. 1M is 1048576 bytes.
 
 curl displays this data to the terminal by default, so if you invoke curl to
 do an operation and it is about to write data to the terminal, it
