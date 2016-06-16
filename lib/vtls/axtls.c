@@ -499,7 +499,7 @@ Curl_axtls_connect(struct connectdata *conn,
       return map_error_to_curl(ssl_fcn_return);
     }
     /* TODO: avoid polling */
-    usleep(10000);
+    Curl_wait_ms(10);
   }
   infof (conn->data, "handshake completed successfully\n");
 
