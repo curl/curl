@@ -265,10 +265,10 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     infof (data, "SSL re-using session ID\n");
     ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex],
                          ssl_sessionid, (uint8_t)ssl_idsize);
-    Curl_ssl_sessionid_unlock();
+    Curl_ssl_sessionid_unlock(conn);
   }
   else {
-    Curl_ssl_sessionid_unlock();
+    Curl_ssl_sessionid_unlock(conn);
     ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex], NULL, 0);
   }
 
