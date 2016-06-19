@@ -40,7 +40,7 @@ Content-Type: text/html
 <client>
 <server>
 http
-http2
+http/2
 </server>
  <name>
 HTTP/2 GET with Upgrade:

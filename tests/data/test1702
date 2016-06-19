@@ -30,7 +30,7 @@ Funny-head: yesyes
 <client>
 <server>
 http
-http2
+http/2
 </server>
  <name>
 HTTP/2 HEAD with Upgrade:

@@ -181,6 +181,7 @@ http-unix
 https
 httptls+srp
 httptls+srp-ipv6
+http/2
 imap
 none
 pop3
