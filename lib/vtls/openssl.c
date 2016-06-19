@@ -2276,6 +2276,9 @@ static void pubkey_show(struct SessionHandle *data,
                         int num,
                         const char *type,
                         const char *name,
+#ifdef HAVE_OPAQUE_RSA_DSA_DH
+                        const
+#endif
                         BIGNUM *bn)
 {
   char *ptr;
@@ -2464,14 +2467,14 @@ static CURLcode get_cert_chain(struct connectdata *conn,
 
 #ifdef HAVE_OPAQUE_RSA_DSA_DH
         {
-          BIGNUM *n;
-          BIGNUM *e;
-          BIGNUM *d;
-          BIGNUM *p;
-          BIGNUM *q;
-          BIGNUM *dmp1;
-          BIGNUM *dmq1;
-          BIGNUM *iqmp;
+          const BIGNUM *n;
+          const BIGNUM *e;
+          const BIGNUM *d;
+          const BIGNUM *p;
+          const BIGNUM *q;
+          const BIGNUM *dmp1;
+          const BIGNUM *dmq1;
+          const BIGNUM *iqmp;
 
           RSA_get0_key(rsa, &n, &e, &d);
           RSA_get0_factors(rsa, &p, &q);
@@ -2512,11 +2515,11 @@ static CURLcode get_cert_chain(struct connectdata *conn,
 #endif
 #ifdef HAVE_OPAQUE_RSA_DSA_DH
         {
-          BIGNUM *p;
-          BIGNUM *q;
-          BIGNUM *g;
-          BIGNUM *priv_key;
-          BIGNUM *pub_key;
+          const BIGNUM *p;
+          const BIGNUM *q;
+          const BIGNUM *g;
+          const BIGNUM *priv_key;
+          const BIGNUM *pub_key;
 
           DSA_get0_pqg(dsa, &p, &q, &g);
           DSA_get0_key(dsa, &pub_key, &priv_key);
@@ -2546,11 +2549,11 @@ static CURLcode get_cert_chain(struct connectdata *conn,
 #endif
 #ifdef HAVE_OPAQUE_RSA_DSA_DH
         {
-          BIGNUM *p;
-          BIGNUM *q;
-          BIGNUM *g;
-          BIGNUM *priv_key;
-          BIGNUM *pub_key;
+          const BIGNUM *p;
+          const BIGNUM *q;
+          const BIGNUM *g;
+          const BIGNUM *priv_key;
+          const BIGNUM *pub_key;
           DH_get0_pqg(dh, &p, &q, &g);
           DH_get0_key(dh, &pub_key, &priv_key);
           print_pubkey_BN(dh, p, i);
