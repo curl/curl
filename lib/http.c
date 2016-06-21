@@ -3054,7 +3054,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         switch(k->httpcode) {
         case 100:
           /* if we did wait for this do enable write now! */
-          if(k->exp100) {
+          if(k->exp100 > EXP100_SEND_DATA) {
             k->exp100 = EXP100_SEND_DATA;
             k->keepon |= KEEP_SEND;
           }
@@ -3138,52 +3138,50 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       data->req.deductheadercount =
         (100 <= k->httpcode && 199 >= k->httpcode)?data->req.headerbytecount:0;
 
-      if(!*stop_reading) {
-        /* Curl_http_auth_act() checks what authentication methods
-         * that are available and decides which one (if any) to
-         * use. It will set 'newurl' if an auth method was picked. */
-        result = Curl_http_auth_act(conn);
+      /* Curl_http_auth_act() checks what authentication methods
+       * that are available and decides which one (if any) to
+       * use. It will set 'newurl' if an auth method was picked. */
+      result = Curl_http_auth_act(conn);
 
-        if(result)
-          return result;
+      if(result)
+        return result;
 
-        if(k->httpcode >= 300) {
-          if((!conn->bits.authneg) && !conn->bits.close &&
-             !conn->bits.rewindaftersend) {
-            /*
-             * General treatment of errors when about to send data. Including :
-             * "417 Expectation Failed", while waiting for 100-continue.
-             *
-             * The check for close above is done simply because of something
-             * else has already deemed the connection to get closed then
-             * something else should've considered the big picture and we
-             * avoid this check.
-             *
-             * rewindaftersend indicates that something has told libcurl to
-             * continue sending even if it gets discarded
+      if(k->httpcode >= 300) {
+        if((!conn->bits.authneg) && !conn->bits.close &&
+           !conn->bits.rewindaftersend) {
+          /*
+           * General treatment of errors when about to send data. Including :
+           * "417 Expectation Failed", while waiting for 100-continue.
+           *
+           * The check for close above is done simply because of something
+           * else has already deemed the connection to get closed then
+           * something else should've considered the big picture and we
+           * avoid this check.
+           *
+           * rewindaftersend indicates that something has told libcurl to
+           * continue sending even if it gets discarded
+           */
+
+          switch(data->set.httpreq) {
+          case HTTPREQ_PUT:
+          case HTTPREQ_POST:
+          case HTTPREQ_POST_FORM:
+            /* We got an error response. If this happened before the whole
+             * request body has been sent we stop sending and mark the
+             * connection for closure after we've read the entire response.
              */
-
-            switch(data->set.httpreq) {
-            case HTTPREQ_PUT:
-            case HTTPREQ_POST:
-            case HTTPREQ_POST_FORM:
-              /* We got an error response. If this happened before the whole
-               * request body has been sent we stop sending and mark the
-               * connection for closure after we've read the entire response.
-               */
-              if(!k->upload_done) {
-                infof(data, "HTTP error before end of send, stop sending\n");
-                connclose(conn, "Stop sending data before everything sent");
-                k->upload_done = TRUE;
-                k->keepon &= ~KEEP_SEND; /* don't send */
-                if(data->state.expect100header)
-                  k->exp100 = EXP100_FAILED;
-              }
-              break;
-
-            default: /* default label present to avoid compiler warnings */
-              break;
+            if(!k->upload_done) {
+              infof(data, "HTTP error before end of send, stop sending\n");
+              connclose(conn, "Stop sending data before everything sent");
+              k->upload_done = TRUE;
+              k->keepon &= ~KEEP_SEND; /* don't send */
+              if(data->state.expect100header)
+                k->exp100 = EXP100_FAILED;
             }
+            break;
+
+          default: /* default label present to avoid compiler warnings */
+            break;
           }
         }
 
@@ -3210,7 +3208,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                 (k->size <= -1))
           /* Respect section 4.4 of rfc2326: If the Content-Length header is
              absent, a length 0 must be assumed.  It will prevent libcurl from
-             hanging on DECRIBE request that got refused for whatever
+             hanging on DESCRIBE request that got refused for whatever
              reason */
           *stop_reading = TRUE;
 #endif
@@ -3761,7 +3759,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     k->hbufp = data->state.headerbuff;
     k->hbuflen = 0;
   }
-  while(!*stop_reading && *k->str); /* header line within buffer */
+  while(*k->str); /* header line within buffer */
 
   /* We might have reached the end of the header part here, but
      there might be a non-header part left in the end of the read
