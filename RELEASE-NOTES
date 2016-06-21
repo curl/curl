@@ -25,6 +25,7 @@ This release includes the following bugfixes:
  o http: Fix HTTP/2 connection reuse [regression] [12]
  o checksrc: Add LoadLibrary to the banned functions list
  o schannel: Disable ALPN on Windows < 8.1 [13]
+ o configure: occasional ignorance of --enable-symbol-hiding with GCC
 
 This release includes the following known bugs:
 
