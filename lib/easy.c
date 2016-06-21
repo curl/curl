@@ -1030,20 +1030,11 @@ CURLcode curl_easy_pause(CURL *curl, int action)
   /* put it back in the keepon */
   k->keepon = newstate;
 
-  if(!(newstate & KEEP_RECV_PAUSE) && data->state.tempwrite) {
-    /* we have a buffer for sending that we now seem to be able to deliver
-       since the receive pausing is lifted! */
+  /* write any saved write data to the user callbacks. this may pause again. */
+  if(!(newstate & KEEP_RECV_PAUSE))
+    result = Curl_client_chop_write(data->easy_conn, 0, NULL, 0);
 
-    /* get the pointer in local copy since the function may return PAUSE
-       again and then we'll get a new copy allocted and stored in
-       the tempwrite variables */
-    char *tempwrite = data->state.tempwrite;
-
-    data->state.tempwrite = NULL;
-    result = Curl_client_chop_write(data->easy_conn, data->state.tempwritetype,
-                                    tempwrite, data->state.tempwritesize);
-    free(tempwrite);
-  }
+  /* FIXME: What to do if it pauses again? */
 
   /* if there's no error and we're not pausing both directions, we want
      to have this handle checked soon */
