@@ -91,7 +91,7 @@
 extern "C" {
 #endif
 
-typedef void CURL;
+typedef struct SessionHandle CURL;
 
 /*
  * libcurl external API function linkage decorations.
@@ -2258,7 +2258,7 @@ typedef void (*curl_unlock_function)(CURL *handle,
                                      curl_lock_data data,
                                      void *userptr);
 
-typedef void CURLSH;
+typedef struct Curl_share CURLSH;
 
 typedef enum {
   CURLSHE_OK,  /* all is fine */
