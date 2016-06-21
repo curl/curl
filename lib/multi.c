@@ -61,7 +61,7 @@
 #define CURL_MULTI_HANDLE 0x000bab1e
 
 #define GOOD_MULTI_HANDLE(x) \
-  ((x) && (((struct Curl_multi *)(x))->type == CURL_MULTI_HANDLE))
+  ((x) && (x)->type == CURL_MULTI_HANDLE)
 
 static void singlesocket(struct Curl_multi *multi,
                          struct Curl_easy *data);
@@ -334,7 +334,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   /* -1 means it not set by user, use the default value */
   multi->maxconnects = -1;
-  return (CURLM *) multi;
+  return multi;
 
   error:
 
@@ -350,13 +350,14 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   return NULL;
 }
 
-CURLM *curl_multi_init(void)
+struct Curl_multi *curl_multi_init(void)
 {
   return Curl_multi_handle(CURL_SOCKET_HASH_TABLE_SIZE,
                            CURL_CONNECTION_HASH_SIZE);
 }
 
-CURLMcode curl_multi_add_handle(CURLM *multi, CURL *data)
+CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
+                                struct Curl_easy *data)
 {
   struct curl_llist *timeoutlist;
 
@@ -642,7 +643,8 @@ static CURLcode multi_done(struct connectdata **connp,
   return result;
 }
 
-CURLMcode curl_multi_remove_handle(CURLM *multi, CURL *data)
+CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
+                                   struct Curl_easy *data)
 {
   struct Curl_easy *easy = data;
   bool premature;
@@ -904,7 +906,7 @@ static int multi_getsock(struct Curl_easy *data,
 
 }
 
-CURLMcode curl_multi_fdset(CURLM *multi,
+CURLMcode curl_multi_fdset(struct Curl_multi *multi,
                            fd_set *read_fd_set, fd_set *write_fd_set,
                            fd_set *exc_fd_set, int *max_fd)
 {
@@ -953,7 +955,7 @@ CURLMcode curl_multi_fdset(CURLM *multi,
   return CURLM_OK;
 }
 
-CURLMcode curl_multi_wait(CURLM *multi,
+CURLMcode curl_multi_wait(struct Curl_multi *multi,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
                           int timeout_ms,
@@ -2094,7 +2096,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 }
 
 
-CURLMcode curl_multi_perform(CURLM *multi, int *running_handles)
+CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
 {
   struct Curl_easy *data;
   CURLMcode returncode=CURLM_OK;
@@ -2163,7 +2165,7 @@ static void close_all_connections(struct Curl_multi *multi)
   }
 }
 
-CURLMcode curl_multi_cleanup(CURLM *multi)
+CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 {
   struct Curl_easy *data;
   struct Curl_easy *nextdata;
@@ -2237,7 +2239,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi)
  * beyond. The current design is fully O(1).
  */
 
-CURLMsg *curl_multi_info_read(CURLM *multi, int *msgs_in_queue)
+CURLMsg *curl_multi_info_read(struct Curl_multi *multi, int *msgs_in_queue)
 {
   struct Curl_message *msg;
 
@@ -2628,7 +2630,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 }
 
 #undef curl_multi_setopt
-CURLMcode curl_multi_setopt(CURLM *multi,
+CURLMcode curl_multi_setopt(struct Curl_multi *multi,
                             CURLMoption option, ...)
 {
   CURLMcode res = CURLM_OK;
@@ -2698,7 +2700,7 @@ CURLMcode curl_multi_setopt(CURLM *multi,
 /* we define curl_multi_socket() in the public multi.h header */
 #undef curl_multi_socket
 
-CURLMcode curl_multi_socket(CURLM *multi, curl_socket_t s,
+CURLMcode curl_multi_socket(struct Curl_multi *multi, curl_socket_t s,
                             int *running_handles)
 {
   CURLMcode result = multi_socket(multi, FALSE, s, 0, running_handles);
@@ -2707,7 +2709,7 @@ CURLMcode curl_multi_socket(CURLM *multi, curl_socket_t s,
   return result;
 }
 
-CURLMcode curl_multi_socket_action(CURLM *multi, curl_socket_t s,
+CURLMcode curl_multi_socket_action(struct Curl_multi *multi, curl_socket_t s,
                                    int ev_bitmask, int *running_handles)
 {
   CURLMcode result = multi_socket(multi, FALSE, s,
@@ -2717,7 +2719,7 @@ CURLMcode curl_multi_socket_action(CURLM *multi, curl_socket_t s,
   return result;
 }
 
-CURLMcode curl_multi_socket_all(CURLM *multi, int *running_handles)
+CURLMcode curl_multi_socket_all(struct Curl_multi *multi, int *running_handles)
 
 {
   CURLMcode result = multi_socket(multi, TRUE, CURL_SOCKET_BAD, 0,
@@ -2762,7 +2764,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-CURLMcode curl_multi_timeout(CURLM *multi,
+CURLMcode curl_multi_timeout(struct Curl_multi *multi,
                              long *timeout_ms)
 {
   /* First, make some basic checks that the CURLM handle is a good handle */
@@ -3000,7 +3002,8 @@ void Curl_expire_latest(struct Curl_easy *data, long milli)
   Curl_expire(data, milli);
 }
 
-CURLMcode curl_multi_assign(CURLM *multi, curl_socket_t s, void *hashp)
+CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,
+                            void *hashp)
 {
   struct Curl_sh_entry *there = NULL;
 

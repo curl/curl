@@ -75,7 +75,8 @@ char *curl_unescape(const char *string, int length)
   return curl_easy_unescape(NULL, string, length, NULL);
 }
 
-char *curl_easy_escape(CURL *handle, const char *string, int inlength)
+char *curl_easy_escape(struct Curl_easy *data, const char *string,
+                       int inlength)
 {
   size_t alloc = (inlength?(size_t)inlength:strlen(string))+1;
   char *ns;
@@ -112,7 +113,7 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
         }
       }
 
-      result = Curl_convert_to_network(handle, &in, 1);
+      result = Curl_convert_to_network(data, &in, 1);
       if(result) {
         /* Curl_convert_to_network calls failf if unsuccessful */
         free(ns);
@@ -206,13 +207,13 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
  * If length == 0, the length is assumed to be strlen(string).
  * If olen == NULL, no output length is stored.
  */
-char *curl_easy_unescape(CURL *handle, const char *string, int length,
-                         int *olen)
+char *curl_easy_unescape(struct Curl_easy *data, const char *string,
+                         int length, int *olen)
 {
   char *str = NULL;
   size_t inputlen = length;
   size_t outputlen;
-  CURLcode res = Curl_urldecode(handle, string, inputlen, &str, &outputlen,
+  CURLcode res = Curl_urldecode(data, string, inputlen, &str, &outputlen,
                                 FALSE);
   if(res)
     return NULL;

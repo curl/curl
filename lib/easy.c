@@ -365,7 +365,7 @@ void curl_global_cleanup(void)
  * curl_easy_init() is the external interface to alloc, setup and init an
  * easy handle that is returned. If anything goes wrong, NULL is returned.
  */
-CURL *curl_easy_init(void)
+struct Curl_easy *curl_easy_init(void)
 {
   CURLcode result;
   struct Curl_easy *data;
@@ -396,7 +396,7 @@ CURL *curl_easy_init(void)
  */
 
 #undef curl_easy_setopt
-CURLcode curl_easy_setopt(CURL *data, CURLoption tag, ...)
+CURLcode curl_easy_setopt(struct Curl_easy *data, CURLoption tag, ...)
 {
   va_list arg;
   CURLcode result;
@@ -433,7 +433,7 @@ struct events {
  * updated.
  */
 
-static int events_timer(CURLM *multi,    /* multi handle */
+static int events_timer(struct Curl_multi *multi,    /* multi handle */
                         long timeout_ms, /* see above */
                         void *userp)    /* private callback pointer */
 {
@@ -488,7 +488,7 @@ static short socketcb2poll(int pollmask)
  * Callback that gets called with information about socket activity to
  * monitor.
  */
-static int events_socket(CURL *easy,      /* easy handle */
+static int events_socket(struct Curl_easy *easy,      /* easy handle */
                          curl_socket_t s, /* socket */
                          int what,        /* see above */
                          void *userp,     /* private callback
@@ -566,7 +566,7 @@ static int events_socket(CURL *easy,      /* easy handle */
  *
  * Do the multi handle setups that only event-based transfers need.
  */
-static void events_setup(CURLM *multi, struct events *ev)
+static void events_setup(struct Curl_multi *multi, struct events *ev)
 {
   /* timer callback */
   curl_multi_setopt(multi, CURLMOPT_TIMERFUNCTION, events_timer);
@@ -670,7 +670,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
  *
  * Runs a transfer in a blocking manner using the events-based API
  */
-static CURLcode easy_events(CURLM *multi)
+static CURLcode easy_events(struct Curl_multi *multi)
 {
   struct events evs= {2, FALSE, 0, NULL, 0};
 
@@ -684,7 +684,7 @@ static CURLcode easy_events(CURLM *multi)
 #define easy_events(x) CURLE_NOT_BUILT_IN
 #endif
 
-static CURLcode easy_transfer(CURLM *multi)
+static CURLcode easy_transfer(struct Curl_multi *multi)
 {
   bool done = FALSE;
   CURLMcode mcode = CURLM_OK;
@@ -766,7 +766,7 @@ static CURLcode easy_transfer(CURLM *multi)
  */
 static CURLcode easy_perform(struct Curl_easy *data, bool events)
 {
-  CURLM *multi;
+  struct Curl_multi *multi;
   CURLMcode mcode;
   CURLcode result = CURLE_OK;
   SIGPIPE_VARIABLE(pipe_st);
@@ -826,7 +826,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
  * curl_easy_perform() is the external interface that performs a blocking
  * transfer as previously setup.
  */
-CURLcode curl_easy_perform(CURL *data)
+CURLcode curl_easy_perform(struct Curl_easy *data)
 {
   return easy_perform(data, FALSE);
 }
@@ -836,7 +836,7 @@ CURLcode curl_easy_perform(CURL *data)
  * curl_easy_perform_ev() is the external interface that performs a blocking
  * transfer using the event-based API internally.
  */
-CURLcode curl_easy_perform_ev(CURL *data)
+CURLcode curl_easy_perform_ev(struct Curl_easy *data)
 {
   return easy_perform(data, TRUE);
 }
@@ -847,7 +847,7 @@ CURLcode curl_easy_perform_ev(CURL *data)
  * curl_easy_cleanup() is the external interface to cleaning/freeing the given
  * easy handle.
  */
-void curl_easy_cleanup(CURL *data)
+void curl_easy_cleanup(struct Curl_easy *data)
 {
   SIGPIPE_VARIABLE(pipe_st);
 
@@ -864,7 +864,7 @@ void curl_easy_cleanup(CURL *data)
  * information from a performed transfer and similar.
  */
 #undef curl_easy_getinfo
-CURLcode curl_easy_getinfo(CURL *data, CURLINFO info, ...)
+CURLcode curl_easy_getinfo(struct Curl_easy *data, CURLINFO info, ...)
 {
   va_list arg;
   void *paramp;
@@ -884,7 +884,7 @@ CURLcode curl_easy_getinfo(CURL *data, CURLINFO info, ...)
  * given input easy handle. The returned handle will be a new working handle
  * with all options set exactly as the input source handle.
  */
-CURL *curl_easy_duphandle(CURL *data)
+struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
 {
   struct Curl_easy *outcurl = calloc(1, sizeof(struct Curl_easy));
   if(NULL == outcurl)
@@ -977,7 +977,7 @@ CURL *curl_easy_duphandle(CURL *data)
  * curl_easy_reset() is an external interface that allows an app to re-
  * initialize a session handle to the default values.
  */
-void curl_easy_reset(CURL *data)
+void curl_easy_reset(struct Curl_easy *data)
 {
   Curl_safefree(data->state.pathbuffer);
 
@@ -1007,7 +1007,7 @@ void curl_easy_reset(CURL *data)
  *
  * Action is a bitmask consisting of CURLPAUSE_* bits in curl/curl.h
  */
-CURLcode curl_easy_pause(CURL *data, int action)
+CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 {
   struct SingleRequest *k = &data->req;
   CURLcode result = CURLE_OK;
@@ -1076,7 +1076,8 @@ static CURLcode easy_connection(struct Curl_easy *data,
  * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
  * Returns CURLE_OK on success, error code on error.
  */
-CURLcode curl_easy_recv(CURL *data, void *buffer, size_t buflen, size_t *n)
+CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
+                        size_t *n)
 {
   curl_socket_t sfd;
   CURLcode result;
@@ -1102,8 +1103,8 @@ CURLcode curl_easy_recv(CURL *data, void *buffer, size_t buflen, size_t *n)
  * Sends data over the connected socket. Use after successful
  * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
  */
-CURLcode curl_easy_send(CURL *data, const void *buffer, size_t buflen,
-                        size_t *n)
+CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
+                        size_t buflen, size_t *n)
 {
   curl_socket_t sfd;
   CURLcode result;

@@ -473,7 +473,7 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
 }
 
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
-static int sshkeycallback(CURL *easy,
+static int sshkeycallback(struct Curl_easy *easy,
                           const struct curl_khkey *knownkey, /* known */
                           const struct curl_khkey *foundkey, /* found */
                           enum curl_khmatch match,

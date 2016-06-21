@@ -335,7 +335,7 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
   return NULL;
 }
 
-static CURL *duphandle(struct Curl_easy *data)
+static struct Curl_easy *duphandle(struct Curl_easy *data)
 {
   struct Curl_easy *second = curl_easy_duphandle(data);
   if(second) {
