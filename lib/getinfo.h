@@ -21,7 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...);
-CURLcode Curl_initinfo(struct SessionHandle *data);
+CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...);
+CURLcode Curl_initinfo(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_GETINFO_H */

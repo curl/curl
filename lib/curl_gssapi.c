@@ -33,7 +33,7 @@ static char krb5_oid_bytes[] = "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02";
 gss_OID_desc Curl_krb5_mech_oid = { 9, &krb5_oid_bytes };
 
 OM_uint32 Curl_gss_init_sec_context(
-    struct SessionHandle *data,
+    struct Curl_easy *data,
     OM_uint32 *minor_status,
     gss_ctx_id_t *context,
     gss_name_t target_name,
@@ -114,7 +114,7 @@ static size_t display_gss_error(OM_uint32 status, int type,
  * major   [in] - The major status code.
  * minor   [in] - The minor status code.
  */
-void Curl_gss_log_error(struct SessionHandle *data, const char *prefix,
+void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
                         OM_uint32 major, OM_uint32 minor)
 {
   char buf[GSS_LOG_BUFFER_LEN];

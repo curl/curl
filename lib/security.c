@@ -476,7 +476,7 @@ Curl_sec_request_prot(struct connectdata *conn, const char *level)
 static CURLcode choose_mech(struct connectdata *conn)
 {
   int ret;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   void *tmp_allocation;
   const struct Curl_sec_client_mech *mech = &Curl_krb5_client_mech;
 

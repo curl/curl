@@ -137,7 +137,7 @@ static void free_ssl_structs(struct ssl_connect_data *connssl)
  */
 static CURLcode connect_prep(struct connectdata *conn, int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   SSL_CTX *ssl_ctx;
   SSL *ssl = NULL;
   int cert_types[] = {SSL_OBJ_X509_CERT, SSL_OBJ_PKCS12, 0};
@@ -284,7 +284,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
  */
 static CURLcode connect_finish(struct connectdata *conn, int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   SSL *ssl = conn->ssl[sockindex].ssl;
   const char *peer_CN;
   uint32_t dns_altname_index;
@@ -472,7 +472,7 @@ Curl_axtls_connect(struct connectdata *conn,
                   int sockindex)
 
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   CURLcode conn_step = connect_prep(conn, sockindex);
   int ssl_fcn_return;
   SSL *ssl = conn->ssl[sockindex].ssl;
@@ -562,7 +562,7 @@ int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
    */
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   uint8_t *buf;
   ssize_t nread;
 
@@ -678,7 +678,7 @@ size_t Curl_axtls_version(char *buffer, size_t size)
   return snprintf(buffer, size, "axTLS/%s", ssl_version());
 }
 
-int Curl_axtls_random(struct SessionHandle *data,
+int Curl_axtls_random(struct Curl_easy *data,
                       unsigned char *entropy,
                       size_t length)
 {

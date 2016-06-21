@@ -139,7 +139,7 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
  * *olen. If length == 0, the length is assumed to be strlen(string).
  *
  */
-CURLcode Curl_urldecode(struct SessionHandle *data,
+CURLcode Curl_urldecode(struct Curl_easy *data,
                         const char *string, size_t length,
                         char **ostring, size_t *olen,
                         bool reject_ctrl)

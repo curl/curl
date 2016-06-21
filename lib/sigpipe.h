@@ -38,10 +38,10 @@ struct sigpipe_ignore {
  * internals, and then sigpipe_restore() will restore the situation when we
  * return from libcurl again.
  */
-static void sigpipe_ignore(struct SessionHandle *data,
+static void sigpipe_ignore(struct Curl_easy *data,
                            struct sigpipe_ignore *ig)
 {
-  /* get a local copy of no_signal because the SessionHandle might not be
+  /* get a local copy of no_signal because the Curl_easy might not be
      around when we restore */
   ig->no_signal = data->set.no_signal;
   if(!data->set.no_signal) {

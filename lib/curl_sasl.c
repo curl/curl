@@ -257,7 +257,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
                          bool force_ir, saslprogress *progress)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   unsigned int enabledmechs;
   const char *mech = NULL;
   char *resp = NULL;
@@ -405,7 +405,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
                             int code, saslprogress *progress)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   saslstate newstate = SASL_FINAL;
   char *resp = NULL;
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)

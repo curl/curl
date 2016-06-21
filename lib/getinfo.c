@@ -39,7 +39,7 @@
  * This is supposed to be called in the beginning of a perform() session
  * and should reset all session-info variables
  */
-CURLcode Curl_initinfo(struct SessionHandle *data)
+CURLcode Curl_initinfo(struct Curl_easy *data)
 {
   struct Progress *pro = &data->progress;
   struct PureInfo *info = &data->info;
@@ -73,7 +73,7 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   return CURLE_OK;
 }
 
-static CURLcode getinfo_char(struct SessionHandle *data, CURLINFO info,
+static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
                              char **param_charp)
 {
   switch(info) {
@@ -119,7 +119,7 @@ static CURLcode getinfo_char(struct SessionHandle *data, CURLINFO info,
   return CURLE_OK;
 }
 
-static CURLcode getinfo_long(struct SessionHandle *data, CURLINFO info,
+static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
                              long *param_longp)
 {
   curl_socket_t sockfd;
@@ -222,7 +222,7 @@ static CURLcode getinfo_long(struct SessionHandle *data, CURLINFO info,
   return CURLE_OK;
 }
 
-static CURLcode getinfo_double(struct SessionHandle *data, CURLINFO info,
+static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
                                double *param_doublep)
 {
   switch(info) {
@@ -275,7 +275,7 @@ static CURLcode getinfo_double(struct SessionHandle *data, CURLINFO info,
   return CURLE_OK;
 }
 
-static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
+static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
                               struct curl_slist **param_slistp)
 {
   union {
@@ -351,7 +351,7 @@ static CURLcode getinfo_slist(struct SessionHandle *data, CURLINFO info,
   return CURLE_OK;
 }
 
-static CURLcode getinfo_socket(struct SessionHandle *data, CURLINFO info,
+static CURLcode getinfo_socket(struct Curl_easy *data, CURLINFO info,
                                curl_socket_t *param_socketp)
 {
   switch(info) {
@@ -365,7 +365,7 @@ static CURLcode getinfo_socket(struct SessionHandle *data, CURLINFO info,
   return CURLE_OK;
 }
 
-CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
+CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
 {
   va_list arg;
   long *param_longp = NULL;

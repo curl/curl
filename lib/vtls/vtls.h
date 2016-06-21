@@ -56,7 +56,7 @@ bool Curl_clone_ssl_config(struct ssl_config_data* source,
                            struct ssl_config_data* dest);
 void Curl_free_ssl_config(struct ssl_config_data* sslc);
 
-unsigned int Curl_rand(struct SessionHandle *);
+unsigned int Curl_rand(struct Curl_easy *);
 
 int Curl_ssl_backend(void);
 
@@ -69,16 +69,16 @@ CURLcode Curl_ssl_connect_nonblocking(struct connectdata *conn,
                                       bool *done);
 /* tell the SSL stuff to close down all open information regarding
    connections (and thus session ID caching etc) */
-void Curl_ssl_close_all(struct SessionHandle *data);
+void Curl_ssl_close_all(struct Curl_easy *data);
 void Curl_ssl_close(struct connectdata *conn, int sockindex);
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex);
-CURLcode Curl_ssl_set_engine(struct SessionHandle *data, const char *engine);
+CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine);
 /* Sets engine as default for all SSL operations */
-CURLcode Curl_ssl_set_engine_default(struct SessionHandle *data);
-struct curl_slist *Curl_ssl_engines_list(struct SessionHandle *data);
+CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data);
+struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data);
 
 /* init the SSL session ID cache */
-CURLcode Curl_ssl_initsessions(struct SessionHandle *, size_t);
+CURLcode Curl_ssl_initsessions(struct Curl_easy *, size_t);
 size_t Curl_ssl_version(char *buffer, size_t size);
 bool Curl_ssl_data_pending(const struct connectdata *conn,
                            int connindex);
@@ -86,12 +86,12 @@ int Curl_ssl_check_cxn(struct connectdata *conn);
 
 /* Certificate information list handling. */
 
-void Curl_ssl_free_certinfo(struct SessionHandle *data);
-CURLcode Curl_ssl_init_certinfo(struct SessionHandle * data, int num);
-CURLcode Curl_ssl_push_certinfo_len(struct SessionHandle * data, int certnum,
+void Curl_ssl_free_certinfo(struct Curl_easy *data);
+CURLcode Curl_ssl_init_certinfo(struct Curl_easy * data, int num);
+CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy * data, int certnum,
                                     const char * label, const char * value,
                                     size_t valuelen);
-CURLcode Curl_ssl_push_certinfo(struct SessionHandle * data, int certnum,
+CURLcode Curl_ssl_push_certinfo(struct Curl_easy * data, int certnum,
                                 const char * label, const char * value);
 
 /* Functions to be used by SSL library adaptation functions */
@@ -142,14 +142,14 @@ void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
 
 /* get N random bytes into the buffer, return 0 if a find random is filled
    in */
-int Curl_ssl_random(struct SessionHandle *data, unsigned char *buffer,
+int Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
                     size_t length);
 CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
                          size_t tmplen,
                          unsigned char *md5sum, /* output */
                          size_t md5len);
 /* Check pinned public key. */
-CURLcode Curl_pin_peer_pubkey(struct SessionHandle *data,
+CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                               const char *pinnedpubkey,
                               const unsigned char *pubkey, size_t pubkeylen);
 

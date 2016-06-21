@@ -497,7 +497,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
                                    struct Curl_dns_entry **entry)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   int done = 0;
 
@@ -671,7 +671,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
 #endif /* !HAVE_GETADDRINFO */
 
-CURLcode Curl_set_dns_servers(struct SessionHandle *data,
+CURLcode Curl_set_dns_servers(struct Curl_easy *data,
                               char *servers)
 {
   (void)data;
@@ -680,7 +680,7 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data,
 
 }
 
-CURLcode Curl_set_dns_interface(struct SessionHandle *data,
+CURLcode Curl_set_dns_interface(struct Curl_easy *data,
                                 const char *interf)
 {
   (void)data;
@@ -688,7 +688,7 @@ CURLcode Curl_set_dns_interface(struct SessionHandle *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-CURLcode Curl_set_dns_local_ip4(struct SessionHandle *data,
+CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
                                 const char *local_ip4)
 {
   (void)data;
@@ -696,7 +696,7 @@ CURLcode Curl_set_dns_local_ip4(struct SessionHandle *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-CURLcode Curl_set_dns_local_ip6(struct SessionHandle *data,
+CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
                                 const char *local_ip6)
 {
   (void)data;

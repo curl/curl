@@ -135,7 +135,7 @@ static CURLcode file_range(struct connectdata *conn)
   curl_off_t totalsize=-1;
   char *ptr;
   char *ptr2;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   if(data->state.use_range && data->state.range) {
     from=curlx_strtoofft(data->state.range, &ptr, 0);
@@ -185,7 +185,7 @@ static CURLcode file_range(struct connectdata *conn)
  */
 static CURLcode file_connect(struct connectdata *conn, bool *done)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   char *real_path;
   struct FILEPROTO *file = data->req.protop;
   int fd;
@@ -301,7 +301,7 @@ static CURLcode file_upload(struct connectdata *conn)
   int fd;
   int mode;
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;
   size_t nread;
   size_t nwrite;
@@ -428,7 +428,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   bool size_known;
   bool fstated=FALSE;
   ssize_t nread;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;
   curl_off_t bytecount = 0;
   int fd;

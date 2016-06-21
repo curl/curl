@@ -139,7 +139,7 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 }
 
 /* called from Curl_http_setup_conn */
-void Curl_http2_setup_req(struct SessionHandle *data)
+void Curl_http2_setup_req(struct Curl_easy *data)
 {
   struct HTTP *http = data->req.protop;
 
@@ -284,7 +284,7 @@ static ssize_t send_callback(nghttp2_session *h2,
 /* We pass a pointer to this struct in the push callback, but the contents of
    the struct are hidden from the user. */
 struct curl_pushheaders {
-  struct SessionHandle *data;
+  struct Curl_easy *data;
   const nghttp2_push_promise *frame;
 };
 
@@ -335,9 +335,9 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
   return NULL;
 }
 
-static CURL *duphandle(struct SessionHandle *data)
+static CURL *duphandle(struct Curl_easy *data)
 {
-  struct SessionHandle *second = curl_easy_duphandle(data);
+  struct Curl_easy *second = curl_easy_duphandle(data);
   if(second) {
     /* setup the request struct */
     struct HTTP *http = calloc(1, sizeof(struct HTTP));
@@ -363,7 +363,7 @@ static CURL *duphandle(struct SessionHandle *data)
 }
 
 
-static int push_promise(struct SessionHandle *data,
+static int push_promise(struct Curl_easy *data,
                         struct connectdata *conn,
                         const nghttp2_push_promise *frame)
 {
@@ -378,7 +378,7 @@ static int push_promise(struct SessionHandle *data,
     struct http_conn *httpc;
     size_t i;
     /* clone the parent */
-    struct SessionHandle *newhandle = duphandle(data);
+    struct Curl_easy *newhandle = duphandle(data);
     if(!newhandle) {
       infof(data, "failed to duplicate handle\n");
       rv = 1; /* FAIL HARD */
@@ -445,7 +445,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *httpc = &conn->proto.httpc;
-  struct SessionHandle *data_s = NULL;
+  struct Curl_easy *data_s = NULL;
   struct HTTP *stream = NULL;
   static int lastStream = -1;
   int rv;
@@ -482,7 +482,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   }
   if(!data_s) {
     DEBUGF(infof(conn->data,
-                 "No SessionHandle associated with stream: %x\n",
+                 "No Curl_easy associated with stream: %x\n",
                  stream_id));
     return 0;
   }
@@ -573,7 +573,7 @@ static int on_invalid_frame_recv(nghttp2_session *session,
                                  const nghttp2_frame *frame,
                                  int lib_error_code, void *userp)
 {
-  struct SessionHandle *data_s = NULL;
+  struct Curl_easy *data_s = NULL;
   (void)userp;
 
   data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
@@ -590,7 +590,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
                               const uint8_t *data, size_t len, void *userp)
 {
   struct HTTP *stream;
-  struct SessionHandle *data_s;
+  struct Curl_easy *data_s;
   size_t nread;
   struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
@@ -656,7 +656,7 @@ static int before_frame_send(nghttp2_session *session,
                              const nghttp2_frame *frame,
                              void *userp)
 {
-  struct SessionHandle *data_s;
+  struct Curl_easy *data_s;
   (void)userp;
 
   data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
@@ -670,7 +670,7 @@ static int on_frame_send(nghttp2_session *session,
                          const nghttp2_frame *frame,
                          void *userp)
 {
-  struct SessionHandle *data_s;
+  struct Curl_easy *data_s;
   (void)userp;
 
   data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
@@ -684,7 +684,7 @@ static int on_frame_not_send(nghttp2_session *session,
                              const nghttp2_frame *frame,
                              int lib_error_code, void *userp)
 {
-  struct SessionHandle *data_s;
+  struct Curl_easy *data_s;
   (void)userp;
 
   data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
@@ -698,7 +698,7 @@ static int on_frame_not_send(nghttp2_session *session,
 static int on_stream_close(nghttp2_session *session, int32_t stream_id,
                            uint32_t error_code, void *userp)
 {
-  struct SessionHandle *data_s;
+  struct Curl_easy *data_s;
   struct HTTP *stream;
   struct connectdata *conn = (struct connectdata *)userp;
   (void)session;
@@ -735,7 +735,7 @@ static int on_begin_headers(nghttp2_session *session,
                             const nghttp2_frame *frame, void *userp)
 {
   struct HTTP *stream;
-  struct SessionHandle *data_s = NULL;
+  struct Curl_easy *data_s = NULL;
   (void)userp;
 
   data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
@@ -802,7 +802,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                      void *userp)
 {
   struct HTTP *stream;
-  struct SessionHandle *data_s;
+  struct Curl_easy *data_s;
   int32_t stream_id = frame->hd.stream_id;
   struct connectdata *conn = (struct connectdata *)userp;
   (void)flags;
@@ -914,7 +914,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
                                          nghttp2_data_source *source,
                                          void *userp)
 {
-  struct SessionHandle *data_s;
+  struct Curl_easy *data_s;
   struct HTTP *stream = NULL;
   size_t nread;
   (void)source;
@@ -1096,7 +1096,7 @@ static int should_close_session(struct http_conn *httpc) {
          !nghttp2_session_want_write(httpc->h2);
 }
 
-static int h2_session_send(struct SessionHandle *data,
+static int h2_session_send(struct Curl_easy *data,
                            nghttp2_session *h2);
 
 /*
@@ -1105,7 +1105,7 @@ static int h2_session_send(struct SessionHandle *data,
  * This function returns 0 if it succeeds, or -1 and error code will
  * be assigned to *err.
  */
-static int h2_process_pending_input(struct SessionHandle *data,
+static int h2_process_pending_input(struct Curl_easy *data,
                                     struct http_conn *httpc,
                                     CURLcode *err) {
   ssize_t nread;
@@ -1156,7 +1156,7 @@ static int h2_process_pending_input(struct SessionHandle *data,
 }
 
 static ssize_t http2_handle_stream_close(struct connectdata *conn,
-                                         struct SessionHandle *data,
+                                         struct Curl_easy *data,
                                          struct HTTP *stream, CURLcode *err) {
   char *trailer_pos, *trailer_end;
   CURLcode result;
@@ -1226,7 +1226,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
  * struct.
  */
 
-static void h2_pri_spec(struct SessionHandle *data,
+static void h2_pri_spec(struct Curl_easy *data,
                         nghttp2_priority_spec *pri_spec)
 {
   struct HTTP *depstream = (data->set.stream_depends_on?
@@ -1244,7 +1244,7 @@ static void h2_pri_spec(struct SessionHandle *data,
  * dependency settings and if so it submits a PRIORITY frame with the updated
  * info.
  */
-static int h2_session_send(struct SessionHandle *data,
+static int h2_session_send(struct Curl_easy *data,
                            nghttp2_session *h2)
 {
   struct HTTP *stream = data->req.protop;
@@ -1279,7 +1279,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   ssize_t rv;
   ssize_t nread;
   struct http_conn *httpc = &conn->proto.httpc;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct HTTP *stream = data->req.protop;
 
   (void)sockindex; /* we always do HTTP2 on sockindex 0 */
@@ -1297,7 +1297,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   stream->upload_len = 0;
 
   /*
-   * At this point 'stream' is just in the SessionHandle the connection
+   * At this point 'stream' is just in the Curl_easy the connection
    * identifies as its owner at this time.
    */
 
@@ -1864,7 +1864,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   struct http_conn *httpc = &conn->proto.httpc;
   int rv;
   ssize_t nproc;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct HTTP *stream = conn->data->req.protop;
 
   result = Curl_http2_setup(conn);

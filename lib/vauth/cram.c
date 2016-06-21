@@ -88,7 +88,7 @@ CURLcode Curl_auth_decode_cram_md5_message(const char *chlg64, char **outptr,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_cram_md5_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_cram_md5_message(struct Curl_easy *data,
                                            const char *chlg,
                                            const char *userp,
                                            const char *passwdp,

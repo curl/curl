@@ -150,7 +150,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
   const char *host = conn->host.name;
   ssize_t nread;
   curl_socklen_t l = sizeof(conn->local_addr);
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   CURLcode result;
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :

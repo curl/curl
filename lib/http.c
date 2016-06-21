@@ -151,7 +151,7 @@ const struct Curl_handler Curl_handler_https = {
 
 CURLcode Curl_http_setup_conn(struct connectdata *conn)
 {
-  /* allocate the HTTP-specific struct for the SessionHandle, only to survive
+  /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */
   struct HTTP *http;
   DEBUGASSERT(conn->data->req.protop == NULL);
@@ -179,7 +179,7 @@ char *Curl_checkheaders(const struct connectdata *conn,
 {
   struct curl_slist *head;
   size_t thislen = strlen(thisheader);
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   for(head = data->set.headers;head; head=head->next) {
     if(Curl_raw_nequal(head->data, thisheader, thislen))
@@ -194,7 +194,7 @@ char *Curl_checkheaders(const struct connectdata *conn,
  * if proxy headers are not available, then it will lookup into http header
  * link list
  *
- * It takes a connectdata struct as input instead of the SessionHandle simply
+ * It takes a connectdata struct as input instead of the Curl_easy simply
  * to know if this is a proxy request or not, as it then might check a
  * different header list.
  */
@@ -203,7 +203,7 @@ char *Curl_checkProxyheaders(const struct connectdata *conn,
 {
   struct curl_slist *head;
   size_t thislen = strlen(thisheader);
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   for(head = (conn->bits.proxy && data->set.sep_headers) ?
         data->set.proxyheaders : data->set.headers;
@@ -280,7 +280,7 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
 {
   size_t size = 0;
   char *authorization = NULL;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   char **userp;
   const char *user;
   const char *pwd;
@@ -377,7 +377,7 @@ static bool pickoneauth(struct auth *pick)
  */
 static CURLcode http_perhapsrewind(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct HTTP *http = data->req.protop;
   curl_off_t bytessent;
   curl_off_t expectsend = -1; /* default is unknown */
@@ -485,7 +485,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
 
 CURLcode Curl_http_auth_act(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   bool pickhost = FALSE;
   bool pickproxy = FALSE;
   CURLcode result = CURLE_OK;
@@ -567,7 +567,7 @@ output_auth_headers(struct connectdata *conn,
   const char *auth = NULL;
   CURLcode result = CURLE_OK;
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS) || defined(USE_SPNEGO)
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 #endif
 #ifdef USE_SPNEGO
   struct negotiatedata *negdata = proxy ?
@@ -674,7 +674,7 @@ Curl_http_output_auth(struct connectdata *conn,
                                            up the proxy tunnel */
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct auth *authhost;
   struct auth *authproxy;
 
@@ -747,7 +747,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
   /*
    * This resource requires authentication
    */
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
 #ifdef USE_SPNEGO
   struct negotiatedata *negdata = proxy?
@@ -907,7 +907,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
  */
 static int http_should_fail(struct connectdata *conn)
 {
-  struct SessionHandle *data;
+  struct Curl_easy *data;
   int httpcode;
 
   DEBUGASSERT(conn);
@@ -1441,7 +1441,7 @@ static int https_getsock(struct connectdata *conn,
 CURLcode Curl_http_done(struct connectdata *conn,
                         CURLcode status, bool premature)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct HTTP *http = data->req.protop;
 #ifdef USE_NGHTTP2
   struct http_conn *httpc = &conn->proto.httpc;
@@ -1539,7 +1539,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
  * - if any server previously contacted to handle this request only supports
  * 1.0.
  */
-static bool use_http_1_1plus(const struct SessionHandle *data,
+static bool use_http_1_1plus(const struct Curl_easy *data,
                              const struct connectdata *conn)
 {
   if((data->state.httpversion == 10) || (conn->httpversion == 10))
@@ -1552,7 +1552,7 @@ static bool use_http_1_1plus(const struct SessionHandle *data,
 }
 
 /* check and possibly add an Expect: header */
-static CURLcode expect100(struct SessionHandle *data,
+static CURLcode expect100(struct Curl_easy *data,
                           struct connectdata *conn,
                           Curl_send_buffer *req_buffer)
 {
@@ -1595,7 +1595,7 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
   struct curl_slist *h[2];
   struct curl_slist *headers;
   int numlists=1; /* by default */
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   int i;
 
   enum proxy_use proxy;
@@ -1700,7 +1700,7 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode Curl_add_timecondition(struct SessionHandle *data,
+CURLcode Curl_add_timecondition(struct Curl_easy *data,
                                 Curl_send_buffer *req_buffer)
 {
   const struct tm *tm;
@@ -1764,7 +1764,7 @@ CURLcode Curl_add_timecondition(struct SessionHandle *data,
  */
 CURLcode Curl_http(struct connectdata *conn, bool *done)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
   struct HTTP *http;
   const char *ppath = data->state.path;
@@ -2777,7 +2777,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
  * Returns TRUE if member of the list matches prefix of string
  */
 static bool
-checkhttpprefix(struct SessionHandle *data,
+checkhttpprefix(struct Curl_easy *data,
                 const char *s)
 {
   struct curl_slist *head = data->set.http200aliases;
@@ -2816,7 +2816,7 @@ checkhttpprefix(struct SessionHandle *data,
 
 #ifndef CURL_DISABLE_RTSP
 static bool
-checkrtspprefix(struct SessionHandle *data,
+checkrtspprefix(struct Curl_easy *data,
                 const char *s)
 {
 
@@ -2844,7 +2844,7 @@ checkrtspprefix(struct SessionHandle *data,
 #endif /* CURL_DISABLE_RTSP */
 
 static bool
-checkprotoprefix(struct SessionHandle *data, struct connectdata *conn,
+checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
                  const char *s)
 {
 #ifndef CURL_DISABLE_RTSP
@@ -2862,7 +2862,7 @@ checkprotoprefix(struct SessionHandle *data, struct connectdata *conn,
  * header. We make sure that the full string fit in the allocated header
  * buffer, or else we enlarge it.
  */
-static CURLcode header_append(struct SessionHandle *data,
+static CURLcode header_append(struct Curl_easy *data,
                               struct SingleRequest *k,
                               size_t length)
 {
@@ -2900,7 +2900,7 @@ static CURLcode header_append(struct SessionHandle *data,
   return CURLE_OK;
 }
 
-static void print_http_error(struct SessionHandle *data)
+static void print_http_error(struct Curl_easy *data)
 {
   struct SingleRequest *k = &data->req;
   char *beg = k->p;
@@ -2940,7 +2940,7 @@ static void print_http_error(struct SessionHandle *data)
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
-CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
+CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                                        struct connectdata *conn,
                                        ssize_t *nread,
                                        bool *stop_reading)

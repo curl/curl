@@ -45,7 +45,7 @@ static void conn_llist_dtor(void *user, void *element)
   data->bundle = NULL;
 }
 
-static CURLcode bundle_create(struct SessionHandle *data,
+static CURLcode bundle_create(struct Curl_easy *data,
                               struct connectbundle **cb_ptr)
 {
   (void)data;
@@ -199,7 +199,7 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   CURLcode result;
   struct connectbundle *bundle;
   struct connectbundle *new_bundle = NULL;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache);
   if(!bundle) {

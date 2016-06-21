@@ -597,7 +597,7 @@ static CURLcode pop3_perform_authentication(struct connectdata *conn)
 static CURLcode pop3_perform_command(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct POP3 *pop3 = data->req.protop;
   const char *command = NULL;
 
@@ -653,7 +653,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
                                             pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *line = data->state.buffer;
   size_t len = strlen(line);
@@ -704,7 +704,7 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *line = data->state.buffer;
   size_t len = strlen(line);
@@ -795,7 +795,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
                                          pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   (void)instate; /* no use for this yet */
 
@@ -819,7 +819,7 @@ static CURLcode pop3_state_auth_resp(struct connectdata *conn,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   saslprogress progress;
 
@@ -859,7 +859,7 @@ static CURLcode pop3_state_apop_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   (void)instate; /* no use for this yet */
 
@@ -880,7 +880,7 @@ static CURLcode pop3_state_user_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   (void)instate; /* no use for this yet */
 
@@ -903,7 +903,7 @@ static CURLcode pop3_state_pass_resp(struct connectdata *conn, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   (void)instate; /* no use for this yet */
 
@@ -924,7 +924,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
                                         pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct POP3 *pop3 = data->req.protop;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
@@ -1078,12 +1078,12 @@ static CURLcode pop3_block_statemach(struct connectdata *conn)
   return result;
 }
 
-/* Allocate and initialize the POP3 struct for the current SessionHandle if
+/* Allocate and initialize the POP3 struct for the current Curl_easy if
    required */
 static CURLcode pop3_init(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct POP3 *pop3;
 
   pop3 = data->req.protop = calloc(sizeof(struct POP3), 1);
@@ -1160,7 +1160,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
                           bool premature)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct POP3 *pop3 = data->req.protop;
 
   (void)premature;
@@ -1324,7 +1324,7 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   bool connected = FALSE;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   /* Make sure size is unknown at this point */
   data->req.size = -1;
@@ -1347,7 +1347,7 @@ static CURLcode pop3_regular_transfer(struct connectdata *conn,
 
 static CURLcode pop3_setup_connection(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   /* Initialise the POP3 layer */
   CURLcode result = pop3_init(conn);
@@ -1454,7 +1454,7 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
 static CURLcode pop3_parse_url_path(struct connectdata *conn)
 {
   /* The POP3 struct is already initialised in pop3_connect() */
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct POP3 *pop3 = data->req.protop;
   const char *path = data->state.path;
 
@@ -1471,7 +1471,7 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
 static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct POP3 *pop3 = data->req.protop;
   const char *custom = data->set.str[STRING_CUSTOMREQUEST];
 
@@ -1493,7 +1493,7 @@ CURLcode Curl_pop3_write(struct connectdata *conn, char *str, size_t nread)
 {
   /* This code could be made into a special function in the handler struct */
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct SingleRequest *k = &data->req;
 
   struct pop3_conn *pop3c = &conn->proto.pop3c;

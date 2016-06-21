@@ -92,7 +92,7 @@
 
 #ifdef USE_WINSOCK
 typedef FARPROC WSOCK2_FUNC;
-static CURLcode check_wsock2 (struct SessionHandle *data);
+static CURLcode check_wsock2 (struct Curl_easy *data);
 #endif
 
 static
@@ -101,7 +101,7 @@ CURLcode telrcv(struct connectdata *,
                 ssize_t count);             /* Number of bytes received */
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-static void printoption(struct SessionHandle *data,
+static void printoption(struct Curl_easy *data,
                         const char *direction,
                         int cmd, int option);
 #endif
@@ -111,7 +111,7 @@ static void send_negotiation(struct connectdata *, int cmd, int option);
 static void set_local_option(struct connectdata *, int cmd, int option);
 static void set_remote_option(struct connectdata *, int cmd, int option);
 
-static void printsub(struct SessionHandle *data,
+static void printsub(struct Curl_easy *data,
                      int direction, unsigned char *pointer,
                      size_t length);
 static void suboption(struct connectdata *);
@@ -199,7 +199,7 @@ const struct Curl_handler Curl_handler_telnet = {
 
 #ifdef USE_WINSOCK
 static CURLcode
-check_wsock2(struct SessionHandle *data)
+check_wsock2(struct Curl_easy *data)
 {
   int err;
   WORD wVersionRequested;
@@ -306,7 +306,7 @@ static void negotiate(struct connectdata *conn)
 }
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-static void printoption(struct SessionHandle *data,
+static void printoption(struct Curl_easy *data,
                         const char *direction, int cmd, int option)
 {
   const char *fmt;
@@ -347,7 +347,7 @@ static void send_negotiation(struct connectdata *conn, int cmd, int option)
    unsigned char buf[3];
    ssize_t bytes_written;
    int err;
-   struct SessionHandle *data = conn->data;
+   struct Curl_easy *data = conn->data;
 
    buf[0] = CURL_IAC;
    buf[1] = (unsigned char)cmd;
@@ -703,7 +703,7 @@ void rec_dont(struct connectdata *conn, int option)
 }
 
 
-static void printsub(struct SessionHandle *data,
+static void printsub(struct Curl_easy *data,
                      int direction,             /* '<' or '>' */
                      unsigned char *pointer,    /* where suboption data is */
                      size_t length)             /* length of suboption data */
@@ -822,7 +822,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
   struct curl_slist *beg;
   char option_keyword[128] = "";
   char option_arg[256] = "";
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct TELNET *tn = (struct TELNET *)conn->data->req.protop;
   CURLcode result = CURLE_OK;
   int binary_option;
@@ -932,7 +932,7 @@ static void suboption(struct connectdata *conn)
   int err;
   char varname[128] = "";
   char varval[128] = "";
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct TELNET *tn = (struct TELNET *)data->req.protop;
 
   printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn)+2);
@@ -1007,7 +1007,7 @@ static void sendsuboption(struct connectdata *conn, int option)
   unsigned short x, y;
   unsigned char*uc1, *uc2;
 
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct TELNET *tn = (struct TELNET *)data->req.protop;
 
   switch (option) {
@@ -1065,7 +1065,7 @@ CURLcode telrcv(struct connectdata *conn,
   CURLcode result;
   int in = 0;
   int startwrite=-1;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct TELNET *tn = (struct TELNET *)data->req.protop;
 
 #define startskipping()                                       \
@@ -1282,7 +1282,7 @@ static CURLcode telnet_done(struct connectdata *conn,
 static CURLcode telnet_do(struct connectdata *conn, bool *done)
 {
   CURLcode result;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 #ifdef USE_WINSOCK
   HMODULE wsock2;

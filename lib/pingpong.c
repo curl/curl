@@ -47,7 +47,7 @@
 long Curl_pp_state_timeout(struct pingpong *pp)
 {
   struct connectdata *conn = pp->conn;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   long timeout_ms; /* in milliseconds */
   long timeout2_ms; /* in milliseconds */
   long response_time= (data->set.server_response_timeout)?
@@ -85,7 +85,7 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block)
   int rc;
   long interval_ms;
   long timeout_ms = Curl_pp_state_timeout(pp);
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   CURLcode result = CURLE_OK;
 
   if(timeout_ms <=0) {
@@ -165,7 +165,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   char *s;
   CURLcode result;
   struct connectdata *conn = pp->conn;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
 #ifdef HAVE_GSSAPI
   enum protection_level data_sec = conn->data_prot;
@@ -271,7 +271,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
   ssize_t gotbytes;
   char *ptr;
   struct connectdata *conn = pp->conn;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   char * const buf = data->state.buffer;
   CURLcode result = CURLE_OK;
 

@@ -150,7 +150,7 @@ static CURLcode ldap_setup_connection(struct connectdata *conn)
 {
   ldapconninfo *li;
   LDAPURLDesc *lud;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   int rc, proto;
   CURLcode status;
 
@@ -188,7 +188,7 @@ static Sockbuf_IO ldapsb_tls;
 static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 {
   ldapconninfo *li = conn->proto.generic;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   int rc, proto = LDAP_VERSION3;
   char hosturl[1024];
   char *ptr;
@@ -226,7 +226,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
 {
   ldapconninfo *li = conn->proto.generic;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   LDAPMessage *msg = NULL;
   struct timeval tv = {0, 1}, *tvp;
   int rc, err;
@@ -352,7 +352,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
   int rc = 0;
   LDAPURLDesc *ludp = NULL;
   int msgid;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
 
   connkeep(conn, "OpenLDAP do");
 
@@ -415,7 +415,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
                          size_t len, CURLcode *err)
 {
   ldapconninfo *li = conn->proto.generic;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   ldapreqinfo *lr = data->req.protop;
   int rc, ret;
   LDAPMessage *msg = NULL;

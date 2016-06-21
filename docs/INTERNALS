@@ -166,8 +166,8 @@ Windows vs Unix
 Library
 =======
 
- (See `LIBCURL-STRUCTS` for a separate document describing all major internal
- structs and their purposes.)
+ (See [Structs in libcurl](#structs) for the separate section describing all
+ major internal structs and their purposes.)
 
  There are plenty of entry points to the library, namely each publicly defined
  function that libcurl offers to applications. All of those functions are
@@ -184,14 +184,14 @@ Library
 
  [ `curl_easy_init()`][2] allocates an internal struct and makes some
  initializations.  The returned handle does not reveal internals. This is the
- 'SessionHandle' struct which works as an "anchor" struct for all `curl_easy`
+ 'Curl_easy' struct which works as an "anchor" struct for all `curl_easy`
  functions. All connections performed will get connect-specific data allocated
  that should be used for things related to particular connections/requests.
 
  [`curl_easy_setopt()`][1] takes three arguments, where the option stuff must
  be passed in pairs: the parameter-ID and the parameter-value. The list of
  options is documented in the man page. This function mainly sets things in
- the 'SessionHandle' struct.
+ the 'Curl_easy' struct.
 
  `curl_easy_perform()` is just a wrapper function that makes use of the multi
  API.  It basically calls `curl_multi_init()`, `curl_multi_add_handle()`,
@@ -218,7 +218,7 @@ Curl_connect()
    This function makes sure there's an allocated and initiated 'connectdata'
    struct that is used for this particular connection only (although there may
    be several requests performed on the same connect). A bunch of things are
-   inited/inherited from the SessionHandle struct.
+   inited/inherited from the Curl_easy struct.
 
 <a name="Curl_do"></a>
 Curl_do()
@@ -385,11 +385,11 @@ Persistent Connections
  The persistent connection support in libcurl requires some considerations on
  how to do things inside of the library.
 
- - The 'SessionHandle' struct returned in the [`curl_easy_init()`][2] call
+ - The 'Curl_easy' struct returned in the [`curl_easy_init()`][2] call
    must never hold connection-oriented data. It is meant to hold the root data
    as well as all the options etc that the library-user may choose.
 
- - The 'SessionHandle' struct holds the "connection cache" (an array of
+ - The 'Curl_easy' struct holds the "connection cache" (an array of
    pointers to 'connectdata' structs).
 
  - This enables the 'curl handle' to be reused on subsequent transfers.
@@ -856,38 +856,38 @@ Structs in libcurl
 This section should cover 7.32.0 pretty accurately, but will make sense even
 for older and later versions as things don't change drastically that often.
 
-## SessionHandle
+## Curl_easy
 
-  The SessionHandle handle struct is the one returned to the outside in the
-  external API as a "CURL *". This is usually known as an easy handle in API
-  documentations and examples.
+  The Curl_easy struct is the one returned to the outside in the external API
+  as a "CURL *". This is usually known as an easy handle in API documentations
+  and examples.
 
   Information and state that is related to the actual connection is in the
   'connectdata' struct. When a transfer is about to be made, libcurl will
   either create a new connection or re-use an existing one. The particular
   connectdata that is used by this handle is pointed out by
-  SessionHandle->easy_conn.
+  Curl_easy->easy_conn.
 
   Data and information that regard this particular single transfer is put in
   the SingleRequest sub-struct.
 
-  When the SessionHandle struct is added to a multi handle, as it must be in
-  order to do any transfer, the ->multi member will point to the `Curl_multi`
-  struct it belongs to. The ->prev and ->next members will then be used by the
-  multi code to keep a linked list of SessionHandle structs that are added to
-  that same multi handle. libcurl always uses multi so ->multi *will* point to
-  a `Curl_multi` when a transfer is in progress.
+  When the Curl_easy struct is added to a multi handle, as it must be in order
+  to do any transfer, the ->multi member will point to the `Curl_multi` struct
+  it belongs to. The ->prev and ->next members will then be used by the multi
+  code to keep a linked list of Curl_easy structs that are added to that same
+  multi handle. libcurl always uses multi so ->multi *will* point to a
+  `Curl_multi` when a transfer is in progress.
 
-  ->mstate is the multi state of this particular SessionHandle. When
+  ->mstate is the multi state of this particular Curl_easy. When
   `multi_runsingle()` is called, it will act on this handle according to which
   state it is in. The mstate is also what tells which sockets to return for a
-  specific SessionHandle when [`curl_multi_fdset()`][12] is called etc.
+  specific Curl_easy when [`curl_multi_fdset()`][12] is called etc.
 
   The libcurl source code generally use the name 'data' for the variable that
-  points to the SessionHandle.
+  points to the Curl_easy.
 
-  When doing multiplexed HTTP/2 transfers, each SessionHandle is associated
-  with an individual stream, sharing the same connectdata struct. Multiplexing
+  When doing multiplexed HTTP/2 transfers, each Curl_easy is associated with
+  an individual stream, sharing the same connectdata struct. Multiplexing
   makes it even more important to keep things associated with the right thing!
 
 ## connectdata
@@ -901,22 +901,21 @@ for older and later versions as things don't change drastically that often.
   the connection can't be kept alive, the connection will be closed after use
   and then this struct can be removed from the cache and freed.
 
-  Thus, the same SessionHandle can be used multiple times and each time select
+  Thus, the same Curl_easy can be used multiple times and each time select
   another connectdata struct to use for the connection. Keep this in mind, as
   it is then important to consider if options or choices are based on the
-  connection or the SessionHandle.
+  connection or the Curl_easy.
 
   Functions in libcurl will assume that connectdata->data points to the
-  SessionHandle that uses this connection (for the moment).
+  Curl_easy that uses this connection (for the moment).
 
   As a special complexity, some protocols supported by libcurl require a
   special disconnect procedure that is more than just shutting down the
   socket. It can involve sending one or more commands to the server before
   doing so. Since connections are kept in the connection cache after use, the
-  original SessionHandle may no longer be around when the time comes to shut
-  down a particular connection. For this purpose, libcurl holds a special
-  dummy `closure_handle` SessionHandle in the `Curl_multi` struct to use when
-  needed.
+  original Curl_easy may no longer be around when the time comes to shut down
+  a particular connection. For this purpose, libcurl holds a special dummy
+  `closure_handle` Curl_easy in the `Curl_multi` struct to use when needed.
 
   FTP uses two TCP connections for a typical transfer but it keeps both in
   this single struct and thus can be considered a single connection for most
@@ -932,25 +931,25 @@ for older and later versions as things don't change drastically that often.
 
   `Curl_multi` is the multi handle struct exposed as "CURLM *" in external APIs.
 
-  This struct holds a list of SessionHandle structs that have been added to
-  this handle with [`curl_multi_add_handle()`][13]. The start of the list is
-  ->easyp and ->num_easy is a counter of added SessionHandles.
+  This struct holds a list of Curl_easy structs that have been added to this
+  handle with [`curl_multi_add_handle()`][13]. The start of the list is
+  ->easyp and ->num_easy is a counter of added Curl_easys.
 
   ->msglist is a linked list of messages to send back when
   [`curl_multi_info_read()`][14] is called. Basically a node is added to that
-  list when an individual SessionHandle's transfer has completed.
+  list when an individual Curl_easy's transfer has completed.
 
   ->hostcache points to the name cache. It is a hash table for looking up name
   to IP. The nodes have a limited life time in there and this cache is meant
   to reduce the time for when the same name is wanted within a short period of
   time.
 
-  ->timetree points to a tree of SessionHandles, sorted by the remaining time
-  until it should be checked - normally some sort of timeout. Each
-  SessionHandle has one node in the tree.
+  ->timetree points to a tree of Curl_easys, sorted by the remaining time
+  until it should be checked - normally some sort of timeout. Each Curl_easy
+  has one node in the tree.
 
   ->sockhash is a hash table to allow fast lookups of socket descriptor to
-  which SessionHandle that uses that descriptor. This is necessary for the
+  which Curl_easy that uses that descriptor. This is necessary for the
   `multi_socket` API.
 
   ->conn_cache points to the connection cache. It keeps track of all
@@ -977,11 +976,11 @@ for older and later versions as things don't change drastically that often.
   setup so HTTPS separate from HTTP.
 
   ->setup_connection is called to allow the protocol code to allocate protocol
-  specific data that then gets associated with that SessionHandle for the rest
-  of this transfer. It gets freed again at the end of the transfer. It will be
+  specific data that then gets associated with that Curl_easy for the rest of
+  this transfer. It gets freed again at the end of the transfer. It will be
   called before the 'connectdata' for the transfer has been selected/created.
   Most protocols will allocate its private 'struct [PROTOCOL]' here and assign
-  SessionHandle->req.protop to point to it.
+  Curl_easy->req.protop to point to it.
 
   ->connect_it allows a protocol to do some specific actions after the TCP
   connect is done, that can still be considered part of the connection phase.
@@ -1036,7 +1035,7 @@ for older and later versions as things don't change drastically that often.
   - `PROTOPT_CLOSEACTION` - this protocol has actions to do before closing the
     connection. This flag is no longer used by code, yet still set for a bunch
     protocol handlers.
-  
+
   - `PROTOPT_DIRLOCK` - "direction lock". The SSH protocols set this bit to
     limit which "direction" of socket actions that the main engine will
     concern itself about.
@@ -1051,21 +1050,21 @@ for older and later versions as things don't change drastically that often.
 
 ## conncache
 
-  Is a hash table with connections for later re-use. Each SessionHandle has
-  a pointer to its connection cache. Each multi handle sets up a connection
-  cache that all added SessionHandles share by default.
+  Is a hash table with connections for later re-use. Each Curl_easy has a
+  pointer to its connection cache. Each multi handle sets up a connection
+  cache that all added Curl_easys share by default.
 
 ## Curl_share
-  
+
   The libcurl share API allocates a `Curl_share` struct, exposed to the
   external API as "CURLSH *".
 
   The idea is that the struct can have a set of own versions of caches and
   pools and then by providing this struct in the `CURLOPT_SHARE` option, those
-  specific SessionHandles will use the caches/pools that this share handle
+  specific Curl_easys will use the caches/pools that this share handle
   holds.
 
-  Then individual SessionHandle structs can be made to share specific things
+  Then individual Curl_easy structs can be made to share specific things
   that they otherwise wouldn't, such as cookies.
 
   The `Curl_share` struct can currently hold cookies, DNS cache and the SSL
@@ -1074,7 +1073,7 @@ for older and later versions as things don't change drastically that often.
 ## CookieInfo
 
   This is the main cookie struct. It holds all known cookies and related
-  information. Each SessionHandle has its own private CookieInfo even when
+  information. Each Curl_easy has its own private CookieInfo even when
   they are added to a multi handle. They can be made to share cookies by using
   the share API.
 

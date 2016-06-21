@@ -172,7 +172,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 #endif
   int pf;
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 #endif
 
   *waitp = 0; /* synchronous response only */

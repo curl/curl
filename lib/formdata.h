@@ -70,7 +70,7 @@ typedef struct FormInfo {
 
 int Curl_FormInit(struct Form *form, struct FormData *formdata);
 
-CURLcode Curl_getformdata(struct SessionHandle *data,
+CURLcode Curl_getformdata(struct Curl_easy *data,
                           struct FormData **,
                           struct curl_httppost *post,
                           const char *custom_contenttype,
@@ -93,6 +93,6 @@ char *Curl_FormBoundary(void);
 
 void Curl_formclean(struct FormData **);
 
-CURLcode Curl_formconvert(struct SessionHandle *, struct FormData *);
+CURLcode Curl_formconvert(struct Curl_easy *, struct FormData *);
 
 #endif /* HEADER_CURL_FORMDATA_H */

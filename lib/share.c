@@ -213,7 +213,7 @@ curl_share_cleanup(CURLSH *sh)
 
 
 CURLSHcode
-Curl_share_lock(struct SessionHandle *data, curl_lock_data type,
+Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
                 curl_lock_access accesstype)
 {
   struct Curl_share *share = data->share;
@@ -231,7 +231,7 @@ Curl_share_lock(struct SessionHandle *data, curl_lock_data type,
 }
 
 CURLSHcode
-Curl_share_unlock(struct SessionHandle *data, curl_lock_data type)
+Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
 {
   struct Curl_share *share = data->share;
 

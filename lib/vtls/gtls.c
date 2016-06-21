@@ -201,7 +201,7 @@ int Curl_gtls_cleanup(void)
   return 1;
 }
 
-static void showtime(struct SessionHandle *data,
+static void showtime(struct Curl_easy *data,
                      const char *text,
                      time_t stamp)
 {
@@ -262,7 +262,7 @@ static CURLcode handshake(struct connectdata *conn,
                           bool duringconnect,
                           bool nonblocking)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   gnutls_session_t session = conn->ssl[sockindex].session;
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -367,7 +367,7 @@ static CURLcode
 gtls_connect_step1(struct connectdata *conn,
                    int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   gnutls_session_t session;
   int rc;
   bool sni = TRUE; /* default is SNI enabled */
@@ -765,7 +765,7 @@ gtls_connect_step1(struct connectdata *conn,
   return CURLE_OK;
 }
 
-static CURLcode pkp_pin_peer_pubkey(struct SessionHandle *data,
+static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                     gnutls_x509_crt_t cert,
                                     const char *pinnedpubkey)
 {
@@ -840,7 +840,7 @@ gtls_connect_step3(struct connectdata *conn,
   unsigned int bits;
   time_t certclock;
   const char *ptr;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   gnutls_session_t session = conn->ssl[sockindex].session;
   int rc;
 #ifdef HAS_ALPN
@@ -1431,7 +1431,7 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
 {
   ssize_t result;
   int retval = 0;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   int done = 0;
   char buf[120];
 
@@ -1544,7 +1544,7 @@ size_t Curl_gtls_version(char *buffer, size_t size)
 }
 
 #ifndef USE_GNUTLS_NETTLE
-static int Curl_gtls_seed(struct SessionHandle *data)
+static int Curl_gtls_seed(struct Curl_easy *data)
 {
   /* we have the "SSL is seeded" boolean static to prevent multiple
      time-consuming seedings in vain */
@@ -1568,7 +1568,7 @@ static int Curl_gtls_seed(struct SessionHandle *data)
 #endif
 
 /* data might be NULL! */
-int Curl_gtls_random(struct SessionHandle *data,
+int Curl_gtls_random(struct Curl_easy *data,
                      unsigned char *entropy,
                      size_t length)
 {

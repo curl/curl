@@ -53,6 +53,6 @@ struct WildcardData {
 CURLcode Curl_wildcard_init(struct WildcardData *wc);
 void Curl_wildcard_dtor(struct WildcardData *wc);
 
-struct SessionHandle;
+struct Curl_easy;
 
 #endif /* HEADER_CURL_WILDCARD_H */

@@ -42,12 +42,12 @@ void Curl_nss_cleanup(void);
 
 size_t Curl_nss_version(char *buffer, size_t size);
 int Curl_nss_check_cxn(struct connectdata *cxn);
-int Curl_nss_seed(struct SessionHandle *data);
+int Curl_nss_seed(struct Curl_easy *data);
 
 /* initialize NSS library if not already */
-CURLcode Curl_nss_force_init(struct SessionHandle *data);
+CURLcode Curl_nss_force_init(struct Curl_easy *data);
 
-int Curl_nss_random(struct SessionHandle *data,
+int Curl_nss_random(struct Curl_easy *data,
                     unsigned char *entropy,
                     size_t length);
 

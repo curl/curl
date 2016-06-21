@@ -22,11 +22,11 @@
  *
  ***************************************************************************/
 
-void Curl_init_CONNECT(struct SessionHandle *data);
+void Curl_init_CONNECT(struct Curl_easy *data);
 
-CURLcode Curl_pretransfer(struct SessionHandle *data);
+CURLcode Curl_pretransfer(struct Curl_easy *data);
 CURLcode Curl_second_connect(struct connectdata *conn);
-CURLcode Curl_posttransfer(struct SessionHandle *data);
+CURLcode Curl_posttransfer(struct Curl_easy *data);
 
 typedef enum {
   FOLLOW_NONE,  /* not used within the function, just a placeholder to
@@ -38,19 +38,19 @@ typedef enum {
   FOLLOW_LAST   /* never used */
 } followtype;
 
-CURLcode Curl_follow(struct SessionHandle *data, char *newurl,
+CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
                      followtype type);
 
 
 CURLcode Curl_readwrite(struct connectdata *conn,
-                        struct SessionHandle *data, bool *done);
+                        struct Curl_easy *data, bool *done);
 int Curl_single_getsock(const struct connectdata *conn,
                         curl_socket_t *socks,
                         int numsocks);
 CURLcode Curl_readrewind(struct connectdata *conn);
 CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp);
 CURLcode Curl_retry_request(struct connectdata *conn, char **url);
-bool Curl_meets_timecondition(struct SessionHandle *data, time_t timeofdoc);
+bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
 
 /* This sets up a forthcoming transfer */
 void

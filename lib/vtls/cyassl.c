@@ -134,7 +134,7 @@ cyassl_connect_step1(struct connectdata *conn,
                      int sockindex)
 {
   char error_buffer[CYASSL_MAX_ERROR_SZ];
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data* conssl = &conn->ssl[sockindex];
   SSL_METHOD* req_method = NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -412,7 +412,7 @@ cyassl_connect_step2(struct connectdata *conn,
                      int sockindex)
 {
   int ret = -1;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data* conssl = &conn->ssl[sockindex];
 
   conn->recv[sockindex] = cyassl_recv;
@@ -578,7 +578,7 @@ cyassl_connect_step3(struct connectdata *conn,
                      int sockindex)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
@@ -754,7 +754,7 @@ cyassl_connect_common(struct connectdata *conn,
                       bool *done)
 {
   CURLcode result;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   long timeout_ms;
@@ -885,7 +885,7 @@ Curl_cyassl_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-int Curl_cyassl_random(struct SessionHandle *data,
+int Curl_cyassl_random(struct Curl_easy *data,
                        unsigned char *entropy,
                        size_t length)
 {

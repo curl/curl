@@ -50,7 +50,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
                              const char *data, size_t nread);
 /* called from Curl_http_setup_conn */
 void Curl_http2_setup_conn(struct connectdata *conn);
-void Curl_http2_setup_req(struct SessionHandle *data);
+void Curl_http2_setup_req(struct Curl_easy *data);
 #else /* USE_NGHTTP2 */
 #define Curl_http2_init(x) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_send_request(x) CURLE_UNSUPPORTED_PROTOCOL

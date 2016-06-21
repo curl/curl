@@ -35,7 +35,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,
 
 /* generic function that returns how much time there's left to run, according
    to the timeouts set */
-long Curl_timeleft(struct SessionHandle *data,
+long Curl_timeleft(struct Curl_easy *data,
                    struct timeval *nowp,
                    bool duringconnect);
 
@@ -45,11 +45,11 @@ long Curl_timeleft(struct SessionHandle *data,
 
 /*
  * Used to extract socket and connectdata struct for the most recent
- * transfer on the given SessionHandle.
+ * transfer on the given Curl_easy.
  *
  * The returned socket will be CURL_SOCKET_BAD in case of failure!
  */
-curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
+curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
 
 #ifdef USE_WINSOCK

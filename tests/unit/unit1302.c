@@ -26,7 +26,7 @@
 #include "curl_base64.h"
 #include "memdebug.h" /* LAST include file */
 
-static struct SessionHandle *data;
+static struct Curl_easy *data;
 
 static CURLcode unit_setup(void)
 {

@@ -107,7 +107,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            bool blocking)
 {
   int subversion=0;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   struct SingleRequest *k = &data->req;
   CURLcode result;
   curl_socket_t tunnelsocket = conn->sock[sockindex];

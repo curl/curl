@@ -91,7 +91,7 @@
 extern "C" {
 #endif
 
-typedef struct SessionHandle CURL;
+typedef struct Curl_easy CURL;
 
 /*
  * libcurl external API function linkage decorations.

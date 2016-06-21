@@ -73,7 +73,7 @@ static int rtsp_getsock_do(struct connectdata *conn,
  *        data is parsed and k->str is moved up
  * readmore: whether or not the RTP parser needs more data right away
  */
-static CURLcode rtsp_rtp_readwrite(struct SessionHandle *data,
+static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                                    struct connectdata *conn,
                                    ssize_t *nread,
                                    bool *readmore);
@@ -158,7 +158,7 @@ bool Curl_rtsp_connisdead(struct connectdata *check)
   }
   else if((sval & CURL_CSELECT_IN) && check->data) {
     /* readable with no error. could be closed or could be alive but we can
-       only check if we have a proper SessionHandle for the connection */
+       only check if we have a proper Curl_easy for the connection */
     curl_socket_t connectinfo = Curl_getconnectinfo(check->data, &check);
     if(connectinfo != CURL_SOCKET_BAD)
       ret_val = FALSE;
@@ -170,7 +170,7 @@ bool Curl_rtsp_connisdead(struct connectdata *check)
 static CURLcode rtsp_connect(struct connectdata *conn, bool *done)
 {
   CURLcode httpStatus;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   httpStatus = Curl_http_connect(conn, done);
 
@@ -196,7 +196,7 @@ static CURLcode rtsp_disconnect(struct connectdata *conn, bool dead)
 static CURLcode rtsp_done(struct connectdata *conn,
                           CURLcode status, bool premature)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct RTSP *rtsp = data->req.protop;
   CURLcode httpStatus;
   long CSeq_sent;
@@ -230,7 +230,7 @@ static CURLcode rtsp_done(struct connectdata *conn,
 
 static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   CURLcode result=CURLE_OK;
   Curl_RtspReq rtspreq = data->set.rtspreq;
   struct RTSP *rtsp = data->req.protop;
@@ -600,7 +600,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 }
 
 
-static CURLcode rtsp_rtp_readwrite(struct SessionHandle *data,
+static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
                                    struct connectdata *conn,
                                    ssize_t *nread,
                                    bool *readmore) {
@@ -731,7 +731,7 @@ static CURLcode rtsp_rtp_readwrite(struct SessionHandle *data,
 static
 CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   size_t wrote;
   curl_write_callback writeit;
 
@@ -759,7 +759,7 @@ CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
 CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
                                char *header)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   long CSeq = 0;
 
   if(checkprefix("CSeq:", header)) {

@@ -133,7 +133,7 @@ static char *max5data(curl_off_t bytes, char *max5)
 int Curl_pgrsDone(struct connectdata *conn)
 {
   int rc;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   data->progress.lastshow=0;
   rc = Curl_pgrsUpdate(conn); /* the final (forced) update */
   if(rc)
@@ -150,7 +150,7 @@ int Curl_pgrsDone(struct connectdata *conn)
 }
 
 /* reset all times except redirect, and reset the known transfer sizes */
-void Curl_pgrsResetTimesSizes(struct SessionHandle *data)
+void Curl_pgrsResetTimesSizes(struct Curl_easy *data)
 {
   data->progress.t_nslookup = 0.0;
   data->progress.t_connect = 0.0;
@@ -161,7 +161,7 @@ void Curl_pgrsResetTimesSizes(struct SessionHandle *data)
   Curl_pgrsSetUploadSize(data, -1);
 }
 
-void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
+void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
   struct timeval now = Curl_tvnow();
 
@@ -212,7 +212,7 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
   }
 }
 
-void Curl_pgrsStartNow(struct SessionHandle *data)
+void Curl_pgrsStartNow(struct Curl_easy *data)
 {
   data->progress.speeder_c = 0; /* reset the progress meter display */
   data->progress.start = Curl_tvnow();
@@ -220,17 +220,17 @@ void Curl_pgrsStartNow(struct SessionHandle *data)
   data->progress.flags &= PGRS_HIDE|PGRS_HEADERS_OUT;
 }
 
-void Curl_pgrsSetDownloadCounter(struct SessionHandle *data, curl_off_t size)
+void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
   data->progress.downloaded = size;
 }
 
-void Curl_pgrsSetUploadCounter(struct SessionHandle *data, curl_off_t size)
+void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size)
 {
   data->progress.uploaded = size;
 }
 
-void Curl_pgrsSetDownloadSize(struct SessionHandle *data, curl_off_t size)
+void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size)
 {
   if(size >= 0) {
     data->progress.size_dl = size;
@@ -242,7 +242,7 @@ void Curl_pgrsSetDownloadSize(struct SessionHandle *data, curl_off_t size)
   }
 }
 
-void Curl_pgrsSetUploadSize(struct SessionHandle *data, curl_off_t size)
+void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
 {
   if(size >= 0) {
     data->progress.size_ul = size;
@@ -269,7 +269,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   curl_off_t total_transfer;
   curl_off_t total_expected_transfer;
   curl_off_t timespent;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   int nowindex = data->progress.speeder_c% CURR_TIME;
   int checkindex;
   int countindex; /* amount of seconds stored in the speeder array */

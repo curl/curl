@@ -114,12 +114,12 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 #ifdef POLARSSL_DEBUG
 static void polarssl_debug(void *context, int level, const char *line)
 {
-  struct SessionHandle *data = NULL;
+  struct Curl_easy *data = NULL;
 
   if(!context)
     return;
 
-  data = (struct SessionHandle *)context;
+  data = (struct Curl_easy *)context;
 
   infof(data, "%s", line);
   (void) level;
@@ -140,7 +140,7 @@ static CURLcode
 polarssl_connect_step1(struct connectdata *conn,
                      int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
 
   bool sni = TRUE; /* default is SNI enabled */
@@ -404,7 +404,7 @@ polarssl_connect_step2(struct connectdata *conn,
                      int sockindex)
 {
   int ret;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   char buffer[1024];
 
@@ -559,7 +559,7 @@ polarssl_connect_step3(struct connectdata *conn,
 {
   CURLcode retcode = CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
@@ -678,7 +678,7 @@ polarssl_connect_common(struct connectdata *conn,
                         bool *done)
 {
   CURLcode result;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   long timeout_ms;

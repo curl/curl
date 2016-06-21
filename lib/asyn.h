@@ -27,7 +27,7 @@
 
 struct addrinfo;
 struct hostent;
-struct SessionHandle;
+struct Curl_easy;
 struct connectdata;
 struct Curl_dns_entry;
 

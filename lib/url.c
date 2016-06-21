@@ -137,12 +137,12 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 
 /* Local static prototypes */
 static struct connectdata *
-find_oldest_idle_connection_in_bundle(struct SessionHandle *data,
+find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
                                       struct connectbundle *bundle);
 static void conn_free(struct connectdata *conn);
 static void free_fixed_hostname(struct hostname *host);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
-static CURLcode parse_url_login(struct SessionHandle *data,
+static CURLcode parse_url_login(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 char **userptr, char **passwdptr,
                                 char **optionsptr);
@@ -277,7 +277,7 @@ static const struct Curl_handler Curl_handler_dummy = {
   PROTOPT_NONE                          /* flags */
 };
 
-void Curl_freeset(struct SessionHandle *data)
+void Curl_freeset(struct Curl_easy *data)
 {
   /* Free all dynamic strings stored in the data->set substructure. */
   enum dupstring i;
@@ -355,7 +355,7 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
   return result;
 }
 
-CURLcode Curl_dupset(struct SessionHandle *dst, struct SessionHandle *src)
+CURLcode Curl_dupset(struct Curl_easy *dst, struct Curl_easy *src)
 {
   CURLcode result = CURLE_OK;
   enum dupstring i;
@@ -398,7 +398,7 @@ CURLcode Curl_dupset(struct SessionHandle *dst, struct SessionHandle *src)
  * when curl_easy_perform() is invoked.
  */
 
-CURLcode Curl_close(struct SessionHandle *data)
+CURLcode Curl_close(struct Curl_easy *data)
 {
   struct Curl_multi *m;
 
@@ -496,8 +496,8 @@ CURLcode Curl_close(struct SessionHandle *data)
 }
 
 /*
- * Initialize the UserDefined fields within a SessionHandle.
- * This may be safely called on a new or existing SessionHandle.
+ * Initialize the UserDefined fields within a Curl_easy.
+ * This may be safely called on a new or existing Curl_easy.
  */
 CURLcode Curl_init_userdefined(struct UserDefined *set)
 {
@@ -621,16 +621,16 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
  * @return CURLcode
  */
 
-CURLcode Curl_open(struct SessionHandle **curl)
+CURLcode Curl_open(struct Curl_easy **curl)
 {
   CURLcode result;
-  struct SessionHandle *data;
+  struct Curl_easy *data;
 
   /* Very simple start-up: alloc the struct, init it with zeroes and return */
-  data = calloc(1, sizeof(struct SessionHandle));
+  data = calloc(1, sizeof(struct Curl_easy));
   if(!data) {
     /* this is a very serious error */
-    DEBUGF(fprintf(stderr, "Error: calloc of SessionHandle failed\n"));
+    DEBUGF(fprintf(stderr, "Error: calloc of Curl_easy failed\n"));
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -684,7 +684,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
   return result;
 }
 
-CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
+CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
                      va_list param)
 {
   char *argptr;
@@ -2684,7 +2684,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 #ifndef USE_NGHTTP2
     return CURLE_NOT_BUILT_IN;
 #else
-    struct SessionHandle *dep = va_arg(param, struct SessionHandle *);
+    struct Curl_easy *dep = va_arg(param, struct Curl_easy *);
     if(dep && GOOD_EASY_HANDLE(dep)) {
       data->set.stream_depends_on = dep;
       data->set.stream_depends_e = (option == CURLOPT_STREAM_DEPENDS_E);
@@ -2812,14 +2812,14 @@ static void conn_free(struct connectdata *conn)
  * primary connection, like when freeing room in the connection cache or
  * killing of a dead old connection.
  *
- * This function MUST NOT reset state in the SessionHandle struct if that
+ * This function MUST NOT reset state in the Curl_easy struct if that
  * isn't strictly bound to the life-time of *this* particular connection.
  *
  */
 
 CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 {
-  struct SessionHandle *data;
+  struct Curl_easy *data;
   if(!conn)
     return CURLE_OK; /* this is closed and fine already */
   data = conn->data;
@@ -2888,7 +2888,7 @@ static bool SocketIsDead(curl_socket_t sock)
  * IsPipeliningPossible() returns TRUE if the options set would allow
  * pipelining/multiplexing and the connection is using a HTTP protocol.
  */
-static bool IsPipeliningPossible(const struct SessionHandle *handle,
+static bool IsPipeliningPossible(const struct Curl_easy *handle,
                                  const struct connectdata *conn)
 {
   /* If a HTTP protocol and pipelining is enabled */
@@ -2909,7 +2909,7 @@ static bool IsPipeliningPossible(const struct SessionHandle *handle,
   return FALSE;
 }
 
-int Curl_removeHandleFromPipeline(struct SessionHandle *handle,
+int Curl_removeHandleFromPipeline(struct Curl_easy *handle,
                                   struct curl_llist *pipeline)
 {
   if(pipeline) {
@@ -2935,18 +2935,18 @@ static void Curl_printPipeline(struct curl_llist *pipeline)
 
   curr = pipeline->head;
   while(curr) {
-    struct SessionHandle *data = (struct SessionHandle *) curr->ptr;
+    struct Curl_easy *data = (struct Curl_easy *) curr->ptr;
     infof(data, "Handle in pipeline: %s\n", data->state.path);
     curr = curr->next;
   }
 }
 #endif
 
-static struct SessionHandle* gethandleathead(struct curl_llist *pipeline)
+static struct Curl_easy* gethandleathead(struct curl_llist *pipeline)
 {
   struct curl_llist_element *curr = pipeline->head;
   if(curr) {
-    return (struct SessionHandle *) curr->ptr;
+    return (struct Curl_easy *) curr->ptr;
   }
 
   return NULL;
@@ -2954,7 +2954,7 @@ static struct SessionHandle* gethandleathead(struct curl_llist *pipeline)
 
 /* remove the specified connection from all (possible) pipelines and related
    queues */
-void Curl_getoff_all_pipelines(struct SessionHandle *data,
+void Curl_getoff_all_pipelines(struct Curl_easy *data,
                                struct connectdata *conn)
 {
   bool recv_head = (conn->readchannel_inuse &&
@@ -2978,7 +2978,7 @@ static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke)
   curr = pipeline->head;
   while(curr) {
     struct curl_llist_element *next = curr->next;
-    struct SessionHandle *data = (struct SessionHandle *) curr->ptr;
+    struct Curl_easy *data = (struct Curl_easy *) curr->ptr;
 
 #ifdef DEBUGBUILD /* debug-only code */
     if(data->magic != CURLEASY_MAGIC_NUMBER) {
@@ -3003,7 +3003,7 @@ static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke)
  * found.
  */
 struct connectdata *
-Curl_oldest_idle_connection(struct SessionHandle *data)
+Curl_oldest_idle_connection(struct Curl_easy *data)
 {
   struct conncache *bc = data->state.conn_cache;
   struct curl_hash_iterator iter;
@@ -3055,7 +3055,7 @@ Curl_oldest_idle_connection(struct SessionHandle *data)
  * found.
  */
 static struct connectdata *
-find_oldest_idle_connection_in_bundle(struct SessionHandle *data,
+find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
                                       struct connectbundle *bundle)
 {
   struct curl_llist_element *curr;
@@ -3095,7 +3095,7 @@ find_oldest_idle_connection_in_bundle(struct SessionHandle *data,
  * Returns TRUE if the connection actually was dead and disconnected.
  */
 static bool disconnect_if_dead(struct connectdata *conn,
-                               struct SessionHandle *data)
+                               struct Curl_easy *data)
 {
   size_t pipeLen = conn->send_pipe->size + conn->recv_pipe->size;
   if(!pipeLen && !conn->inuse) {
@@ -3129,7 +3129,7 @@ static bool disconnect_if_dead(struct connectdata *conn,
 static int call_disconnect_if_dead(struct connectdata *conn,
                                       void *param)
 {
-  struct SessionHandle* data = (struct SessionHandle*)param;
+  struct Curl_easy* data = (struct Curl_easy*)param;
   disconnect_if_dead(conn, data);
   return 0; /* continue iteration */
 }
@@ -3139,7 +3139,7 @@ static int call_disconnect_if_dead(struct connectdata *conn,
  * closes and removes them.
  * The cleanup is done at most once per second.
  */
-static void prune_dead_connections(struct SessionHandle *data)
+static void prune_dead_connections(struct Curl_easy *data)
 {
   struct timeval now = Curl_tvnow();
   long elapsed = Curl_tvdiff(now, data->state.conn_cache->last_cleanup);
@@ -3171,7 +3171,7 @@ static size_t max_pipeline_length(struct Curl_multi *multi)
  * the pipelining strategy wants to open a new connection instead of reusing.
  */
 static bool
-ConnectionExists(struct SessionHandle *data,
+ConnectionExists(struct Curl_easy *data,
                  struct connectdata *needle,
                  struct connectdata **usethis,
                  bool *force_reuse,
@@ -3270,8 +3270,8 @@ ConnectionExists(struct SessionHandle *data,
 
         if(!check->bits.multiplex) {
           /* If not multiplexing, make sure the pipe has only GET requests */
-          struct SessionHandle* sh = gethandleathead(check->send_pipe);
-          struct SessionHandle* rh = gethandleathead(check->recv_pipe);
+          struct Curl_easy* sh = gethandleathead(check->send_pipe);
+          struct Curl_easy* rh = gethandleathead(check->recv_pipe);
           if(sh) {
             if(!IsPipeliningPossible(sh, check))
               continue;
@@ -3756,7 +3756,7 @@ static bool is_ASCII_name(const char *hostname)
 /*
  * Check if characters in hostname is allowed in Top Level Domain.
  */
-static bool tld_check_name(struct SessionHandle *data,
+static bool tld_check_name(struct Curl_easy *data,
                            const char *ace_hostname)
 {
   size_t err_pos;
@@ -3798,7 +3798,7 @@ static bool tld_check_name(struct SessionHandle *data,
 /*
  * Perform any necessary IDN conversion of hostname
  */
-static void fix_hostname(struct SessionHandle *data,
+static void fix_hostname(struct Curl_easy *data,
                          struct connectdata *conn, struct hostname *host)
 {
   size_t len;
@@ -3887,7 +3887,7 @@ static void llist_dtor(void *user, void *element)
 /*
  * Allocate and initialize a new connectdata object.
  */
-static struct connectdata *allocate_conn(struct SessionHandle *data)
+static struct connectdata *allocate_conn(struct Curl_easy *data)
 {
   struct connectdata *conn = calloc(1, sizeof(struct connectdata));
   if(!conn)
@@ -3920,7 +3920,7 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   conn->created = Curl_tvnow();
 
   conn->data = data; /* Setup the association between this connection
-                        and the SessionHandle */
+                        and the Curl_easy */
 
   conn->proxytype = data->set.proxytype; /* type */
 
@@ -3992,7 +3992,7 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   conn->localport = data->set.localport;
 
   /* the close socket stuff needs to be copied to the connection struct as
-     it may live on without (this specific) SessionHandle */
+     it may live on without (this specific) Curl_easy */
   conn->fclosesocket = data->set.fclosesocket;
   conn->closesocket_client = data->set.closesocket_client;
 
@@ -4011,7 +4011,7 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   return NULL;
 }
 
-static CURLcode findprotocol(struct SessionHandle *data,
+static CURLcode findprotocol(struct Curl_easy *data,
                              struct connectdata *conn,
                              const char *protostr)
 {
@@ -4056,7 +4056,7 @@ static CURLcode findprotocol(struct SessionHandle *data,
 /*
  * Parse URL and fill in the relevant members of the connection struct.
  */
-static CURLcode parseurlandfillconn(struct SessionHandle *data,
+static CURLcode parseurlandfillconn(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     bool *prot_missing,
                                     char **userp, char **passwdp,
@@ -4424,7 +4424,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
  * If we're doing a resumed transfer, we need to setup our stuff
  * properly.
  */
-static CURLcode setup_range(struct SessionHandle *data)
+static CURLcode setup_range(struct Curl_easy *data)
 {
   struct UrlState *s = &data->state;
   s->resume_from = data->set.set_resume_from;
@@ -4456,7 +4456,7 @@ static CURLcode setup_range(struct SessionHandle *data)
  * setup_connection_internals() -
  *
  * Setup connection internals specific to the requested protocol in the
- * SessionHandle. This is inited and setup before the connection is made but
+ * Curl_easy. This is inited and setup before the connection is made but
  * is about the particular protocol that is to be used.
  *
  * This MUST get called after proxy magic has been figured out.
@@ -4465,7 +4465,7 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
 {
   const struct Curl_handler * p;
   CURLcode result;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   /* in some case in the multi state-machine, we go back to the CONNECT state
      and then a second (or third or...) call to this function will be made
@@ -4501,10 +4501,10 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
 
 /*
  * Curl_free_request_state() should free temp data that was allocated in the
- * SessionHandle for this single request.
+ * Curl_easy for this single request.
  */
 
-void Curl_free_request_state(struct SessionHandle *data)
+void Curl_free_request_state(struct Curl_easy *data)
 {
   Curl_safefree(data->req.protop);
   Curl_safefree(data->req.newurl);
@@ -4678,7 +4678,7 @@ static char *detect_proxy(struct connectdata *conn)
  * host name, so that we can re-use an existing connection
  * that may exist registered to the same proxy host.
  */
-static CURLcode parse_proxy(struct SessionHandle *data,
+static CURLcode parse_proxy(struct Curl_easy *data,
                             struct connectdata *conn, char *proxy)
 {
   char *prox_portno;
@@ -4841,7 +4841,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
 /*
  * Extract the user and password from the authentication string
  */
-static CURLcode parse_proxy_auth(struct SessionHandle *data,
+static CURLcode parse_proxy_auth(struct Curl_easy *data,
                                  struct connectdata *conn)
 {
   char proxyuser[MAX_CURL_USER_LENGTH]="";
@@ -4886,7 +4886,7 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
  *          options                 - non-zero length if defined
  *          conn->host.name         - remove user name and password
  */
-static CURLcode parse_url_login(struct SessionHandle *data,
+static CURLcode parse_url_login(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 char **user, char **passwd, char **options)
 {
@@ -5125,7 +5125,7 @@ static CURLcode parse_login_details(const char *login, const size_t len,
  *
  * The port number embedded in the URL is replaced, if necessary.
  *************************************************************/
-static CURLcode parse_remote_port(struct SessionHandle *data,
+static CURLcode parse_remote_port(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
   char *portptr;
@@ -5237,7 +5237,7 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
  * Override the login details from the URL with that in the CURLOPT_USERPWD
  * option or a .netrc file, if applicable.
  */
-static CURLcode override_login(struct SessionHandle *data,
+static CURLcode override_login(struct Curl_easy *data,
                                struct connectdata *conn,
                                char **userp, char **passwdp, char **optionsp)
 {
@@ -5340,7 +5340,7 @@ static CURLcode set_login(struct connectdata *conn,
  * The hostname and the port may be empty; in this case, NULL is returned for
  * the hostname and -1 for the port.
  */
-static CURLcode parse_connect_to_host_port(struct SessionHandle *data,
+static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
                                            const char *host,
                                            char **hostname_result,
                                            int *port_result)
@@ -5431,7 +5431,7 @@ static CURLcode parse_connect_to_host_port(struct SessionHandle *data,
  * Parses one "connect to" string in the form:
  * "HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT".
  */
-static CURLcode parse_connect_to_string(struct SessionHandle *data,
+static CURLcode parse_connect_to_string(struct Curl_easy *data,
                                         struct connectdata *conn,
                                         const char *conn_to_host,
                                         char **host_result,
@@ -5497,7 +5497,7 @@ static CURLcode parse_connect_to_string(struct SessionHandle *data,
  * Processes all strings in the "connect to" slist, and uses the "connect
  * to host" and "connect to port" of the first string that matches.
  */
-static CURLcode parse_connect_to_slist(struct SessionHandle *data,
+static CURLcode parse_connect_to_slist(struct Curl_easy *data,
                                        struct connectdata *conn,
                                        struct curl_slist *conn_to_host)
 {
@@ -5546,7 +5546,7 @@ static CURLcode parse_connect_to_slist(struct SessionHandle *data,
 /*************************************************************
  * Resolve the address of the server or proxy
  *************************************************************/
-static CURLcode resolve_server(struct SessionHandle *data,
+static CURLcode resolve_server(struct Curl_easy *data,
                                struct connectdata *conn,
                                bool *async)
 {
@@ -5741,7 +5741,7 @@ static void reuse_conn(struct connectdata *old_conn,
  * *NOTE* this function assigns the conn->data pointer!
  */
 
-static CURLcode create_conn(struct SessionHandle *data,
+static CURLcode create_conn(struct Curl_easy *data,
                             struct connectdata **in_connect,
                             bool *async)
 {
@@ -6113,7 +6113,7 @@ static CURLcode create_conn(struct SessionHandle *data,
      strings in the session handle strings array!
 
      Keep in mind that the pointers in the master copy are pointing to strings
-     that will be freed as part of the SessionHandle struct, but all cloned
+     that will be freed as part of the Curl_easy struct, but all cloned
      copies will be separately allocated.
   */
   data->set.ssl.CApath = data->set.str[STRING_SSL_CAPATH];
@@ -6332,7 +6332,7 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
                          bool *protocol_done)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
@@ -6406,7 +6406,7 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
   return result;
 }
 
-CURLcode Curl_connect(struct SessionHandle *data,
+CURLcode Curl_connect(struct Curl_easy *data,
                       struct connectdata **in_connect,
                       bool *asyncp,
                       bool *protocol_done)
@@ -6449,14 +6449,14 @@ CURLcode Curl_connect(struct SessionHandle *data,
 /*
  * Curl_init_do() inits the readwrite session. This is inited each time (in
  * the DO function before the protocol-specific DO functions are invoked) for
- * a transfer, sometimes multiple times on the same SessionHandle. Make sure
+ * a transfer, sometimes multiple times on the same Curl_easy. Make sure
  * nothing in here depends on stuff that are setup dynamically for the
  * transfer.
  *
  * Allow this function to get called with 'conn' set to NULL.
  */
 
-CURLcode Curl_init_do(struct SessionHandle *data, struct connectdata *conn)
+CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 {
   struct SingleRequest *k = &data->req;
 

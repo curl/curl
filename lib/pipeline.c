@@ -57,7 +57,7 @@ static void server_blacklist_llist_dtor(void *user, void *element)
   free(element);
 }
 
-bool Curl_pipeline_penalized(struct SessionHandle *data,
+bool Curl_pipeline_penalized(struct Curl_easy *data,
                              struct connectdata *conn)
 {
   if(data) {
@@ -70,7 +70,7 @@ bool Curl_pipeline_penalized(struct SessionHandle *data,
 
     /* Find the head of the recv pipe, if any */
     if(conn->recv_pipe && conn->recv_pipe->head) {
-      struct SessionHandle *recv_handle = conn->recv_pipe->head->ptr;
+      struct Curl_easy *recv_handle = conn->recv_pipe->head->ptr;
 
       recv_size = recv_handle->req.size;
 
@@ -91,7 +91,7 @@ bool Curl_pipeline_penalized(struct SessionHandle *data,
   return FALSE;
 }
 
-static CURLcode addHandleToPipeline(struct SessionHandle *data,
+static CURLcode addHandleToPipeline(struct Curl_easy *data,
                                     struct curl_llist *pipeline)
 {
   if(!Curl_llist_insert_next(pipeline, pipeline->tail, data))
@@ -100,7 +100,7 @@ static CURLcode addHandleToPipeline(struct SessionHandle *data,
 }
 
 
-CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
+CURLcode Curl_add_handle_to_pipeline(struct Curl_easy *handle,
                                      struct connectdata *conn)
 {
   struct curl_llist_element *sendhead = conn->send_pipe->head;
@@ -130,7 +130,7 @@ CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
    checked to update what sockets it acts on.
 
 */
-void Curl_move_handle_from_send_to_recv_pipe(struct SessionHandle *handle,
+void Curl_move_handle_from_send_to_recv_pipe(struct Curl_easy *handle,
                                              struct connectdata *conn)
 {
   struct curl_llist_element *curr;
@@ -162,7 +162,7 @@ void Curl_move_handle_from_send_to_recv_pipe(struct SessionHandle *handle,
   }
 }
 
-bool Curl_pipeline_site_blacklisted(struct SessionHandle *handle,
+bool Curl_pipeline_site_blacklisted(struct Curl_easy *handle,
                                     struct connectdata *conn)
 {
   if(handle->multi) {
@@ -254,7 +254,7 @@ CURLMcode Curl_pipeline_set_site_blacklist(char **sites,
   return CURLM_OK;
 }
 
-bool Curl_pipeline_server_blacklisted(struct SessionHandle *handle,
+bool Curl_pipeline_server_blacklisted(struct Curl_easy *handle,
                                       char *server_name)
 {
   if(handle->multi && server_name) {
@@ -320,7 +320,7 @@ CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
   return CURLM_OK;
 }
 
-static bool pipe_head(struct SessionHandle *data,
+static bool pipe_head(struct Curl_easy *data,
                       struct curl_llist *pipeline)
 {
   if(pipeline) {
@@ -332,14 +332,14 @@ static bool pipe_head(struct SessionHandle *data,
 }
 
 /* returns TRUE if the given handle is head of the recv pipe */
-bool Curl_recvpipe_head(struct SessionHandle *data,
+bool Curl_recvpipe_head(struct Curl_easy *data,
                         struct connectdata *conn)
 {
   return pipe_head(data, conn->recv_pipe);
 }
 
 /* returns TRUE if the given handle is head of the send pipe */
-bool Curl_sendpipe_head(struct SessionHandle *data,
+bool Curl_sendpipe_head(struct Curl_easy *data,
                         struct connectdata *conn)
 {
   return pipe_head(data, conn->send_pipe);
@@ -353,7 +353,7 @@ bool Curl_sendpipe_head(struct SessionHandle *data,
  * If not available, return FALSE.
  */
 
-bool Curl_pipeline_checkget_write(struct SessionHandle *data,
+bool Curl_pipeline_checkget_write(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
   if(conn->bits.multiplex)
@@ -376,7 +376,7 @@ bool Curl_pipeline_checkget_write(struct SessionHandle *data,
  * If not available, return FALSE.
  */
 
-bool Curl_pipeline_checkget_read(struct SessionHandle *data,
+bool Curl_pipeline_checkget_read(struct Curl_easy *data,
                                  struct connectdata *conn)
 {
   if(conn->bits.multiplex)
@@ -413,7 +413,7 @@ void print_pipeline(struct connectdata *conn)
 {
   struct curl_llist_element *curr;
   struct connectbundle *cb_ptr;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   cb_ptr = conn->bundle;
 

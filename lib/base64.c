@@ -23,7 +23,7 @@
 /* Base64 encoding/decoding */
 
 #include "curl_setup.h"
-#include "urldata.h" /* for the SessionHandle definition */
+#include "urldata.h" /* for the Curl_easy definition */
 #include "warnless.h"
 #include "curl_base64.h"
 #include "non-ascii.h"
@@ -169,7 +169,7 @@ CURLcode Curl_base64_decode(const char *src,
 }
 
 static CURLcode base64_encode(const char *table64,
-                              struct SessionHandle *data,
+                              struct Curl_easy *data,
                               const char *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
@@ -283,7 +283,7 @@ static CURLcode base64_encode(const char *table64,
  *
  * @unittest: 1302
  */
-CURLcode Curl_base64_encode(struct SessionHandle *data,
+CURLcode Curl_base64_encode(struct Curl_easy *data,
                             const char *inputbuff, size_t insize,
                             char **outptr, size_t *outlen)
 {
@@ -307,7 +307,7 @@ CURLcode Curl_base64_encode(struct SessionHandle *data,
  *
  * @unittest: 1302
  */
-CURLcode Curl_base64url_encode(struct SessionHandle *data,
+CURLcode Curl_base64url_encode(struct Curl_easy *data,
                                const char *inputbuff, size_t insize,
                                char **outptr, size_t *outlen)
 {

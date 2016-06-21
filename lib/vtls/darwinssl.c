@@ -28,7 +28,7 @@
 
 #include "curl_setup.h"
 
-#include "urldata.h" /* for the SessionHandle definition */
+#include "urldata.h" /* for the Curl_easy definition */
 #include "curl_base64.h"
 #include "strtok.h"
 
@@ -999,7 +999,7 @@ CF_INLINE bool is_file(const char *filename)
 static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                         int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 #ifdef ENABLE_IPV6
@@ -1633,7 +1633,7 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
   return 0;
 }
 
-static int sslerr_to_curlerr(struct SessionHandle *data, int err)
+static int sslerr_to_curlerr(struct Curl_easy *data, int err)
 {
   switch(err) {
     case errSSLXCertChainInvalid:
@@ -1662,7 +1662,7 @@ static int sslerr_to_curlerr(struct SessionHandle *data, int err)
   }
 }
 
-static int append_cert_to_array(struct SessionHandle *data,
+static int append_cert_to_array(struct Curl_easy *data,
                                 unsigned char *buf, size_t buflen,
                                 CFMutableArrayRef array)
 {
@@ -1707,7 +1707,7 @@ static int append_cert_to_array(struct SessionHandle *data,
     return CURLE_OK;
 }
 
-static int verify_cert(const char *cafile, struct SessionHandle *data,
+static int verify_cert(const char *cafile, struct Curl_easy *data,
                        SSLContextRef ctx)
 {
   int n = 0, rc;
@@ -1827,7 +1827,7 @@ static int verify_cert(const char *cafile, struct SessionHandle *data,
 static CURLcode
 darwinssl_connect_step2(struct connectdata *conn, int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   OSStatus err;
   SSLCipherSuite cipher;
@@ -1967,7 +1967,7 @@ static CURLcode
 darwinssl_connect_step3(struct connectdata *conn,
                         int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CFStringRef server_cert_summary;
   char server_cert_summary_c[128];
@@ -2091,7 +2091,7 @@ darwinssl_connect_common(struct connectdata *conn,
                          bool *done)
 {
   CURLcode result;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   long timeout_ms;
@@ -2246,7 +2246,7 @@ void Curl_darwinssl_close(struct connectdata *conn, int sockindex)
 int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   ssize_t nread;
   int what;
   int rc;
@@ -2394,7 +2394,7 @@ static ssize_t darwinssl_send(struct connectdata *conn,
                               size_t len,
                               CURLcode *curlcode)
 {
-  /*struct SessionHandle *data = conn->data;*/
+  /*struct Curl_easy *data = conn->data;*/
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   size_t processed = 0UL;
   OSStatus err;
@@ -2460,7 +2460,7 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
                               size_t buffersize,
                               CURLcode *curlcode)
 {
-  /*struct SessionHandle *data = conn->data;*/
+  /*struct Curl_easy *data = conn->data;*/
   struct ssl_connect_data *connssl = &conn->ssl[num];
   size_t processed = 0UL;
   OSStatus err = SSLRead(connssl->ssl_ctx, buf, buffersize, &processed);

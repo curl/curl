@@ -43,7 +43,7 @@ static gss_ctx_id_t gss_context = GSS_C_NO_CONTEXT;
 /*
  * Helper GSS-API error functions.
  */
-static int check_gss_err(struct SessionHandle *data,
+static int check_gss_err(struct Curl_easy *data,
                          OM_uint32 major_status,
                          OM_uint32 minor_status,
                          const char* function)
@@ -102,7 +102,7 @@ static int check_gss_err(struct SessionHandle *data,
 CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                       struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   curl_socket_t sock = conn->sock[sockindex];
   CURLcode code;
   ssize_t actualread;

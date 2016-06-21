@@ -41,7 +41,7 @@ void Curl_gtls_close(struct connectdata *conn, int sockindex);
 void Curl_gtls_session_free(void *ptr);
 size_t Curl_gtls_version(char *buffer, size_t size);
 int Curl_gtls_shutdown(struct connectdata *conn, int sockindex);
-int Curl_gtls_random(struct SessionHandle *data,
+int Curl_gtls_random(struct Curl_easy *data,
                      unsigned char *entropy,
                      size_t length);
 void Curl_gtls_md5sum(unsigned char *tmp, /* input */

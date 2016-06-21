@@ -58,7 +58,7 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
+CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                          const char *user,
                                          const char *password,
                                          const char *service,
@@ -187,7 +187,7 @@ CURLcode Curl_auth_decode_spnego_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_spnego_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
                                          struct negotiatedata *nego,
                                          char **outptr, size_t *outlen)
 {

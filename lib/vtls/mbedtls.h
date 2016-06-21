@@ -41,7 +41,7 @@ CURLcode Curl_mbedtls_connect_nonblocking(struct connectdata *conn,
 
 /* tell mbedTLS to close down all open information regarding connections (and
    thus session ID caching etc) */
-void Curl_mbedtls_close_all(struct SessionHandle *data);
+void Curl_mbedtls_close_all(struct Curl_easy *data);
 
  /* close a SSL connection */
 void Curl_mbedtls_close(struct connectdata *conn, int sockindex);

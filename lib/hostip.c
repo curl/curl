@@ -254,7 +254,7 @@ hostcache_prune(struct curl_hash *hostcache, long cache_timeout, time_t now)
  * Library-wide function for pruning the DNS cache. This function takes and
  * returns the appropriate locks.
  */
-void Curl_hostcache_prune(struct SessionHandle *data)
+void Curl_hostcache_prune(struct Curl_easy *data)
 {
   time_t now;
 
@@ -293,7 +293,7 @@ fetch_addr(struct connectdata *conn,
   char *entry_id = NULL;
   struct Curl_dns_entry *dns = NULL;
   size_t entry_len;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
@@ -345,7 +345,7 @@ Curl_fetch_addr(struct connectdata *conn,
                 const char *hostname,
                 int port)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct Curl_dns_entry *dns = NULL;
 
   if(data->share)
@@ -372,7 +372,7 @@ Curl_fetch_addr(struct connectdata *conn,
  * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
  */
 struct Curl_dns_entry *
-Curl_cache_addr(struct SessionHandle *data,
+Curl_cache_addr(struct Curl_easy *data,
                 Curl_addrinfo *addr,
                 const char *hostname,
                 int port)
@@ -447,7 +447,7 @@ int Curl_resolv(struct connectdata *conn,
                 struct Curl_dns_entry **entry)
 {
   struct Curl_dns_entry *dns = NULL;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   CURLcode result;
   int rc = CURLRESOLV_ERROR; /* default to failure */
 
@@ -582,7 +582,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #endif /* HAVE_SIGACTION */
   volatile long timeout;
   volatile unsigned int prev_alarm = 0;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
   int rc;
 
@@ -716,7 +716,7 @@ clean_up:
  *
  * May be called with 'data' == NULL for global cache.
  */
-void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
+void Curl_resolv_unlock(struct Curl_easy *data, struct Curl_dns_entry *dns)
 {
   if(data && data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
@@ -758,7 +758,7 @@ int Curl_mk_dnscache(struct curl_hash *hash)
  * can be done!
  */
 
-void Curl_hostcache_clean(struct SessionHandle *data,
+void Curl_hostcache_clean(struct Curl_easy *data,
                           struct curl_hash *hash)
 {
   if(data && data->share)
@@ -771,7 +771,7 @@ void Curl_hostcache_clean(struct SessionHandle *data,
 }
 
 
-CURLcode Curl_loadhostpairs(struct SessionHandle *data)
+CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 {
   struct curl_slist *hostp;
   char hostname[256];

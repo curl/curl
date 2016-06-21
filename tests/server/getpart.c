@@ -29,7 +29,7 @@
 #include "curlx.h" /* from the private lib dir */
 
 /* just to please curl_base64.h we create a fake struct */
-struct SessionHandle {
+struct Curl_easy {
   int fake;
 };
 

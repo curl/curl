@@ -47,9 +47,9 @@ typedef enum {
   SMTP_LAST         /* never used */
 } smtpstate;
 
-/* This SMTP struct is used in the SessionHandle. All SMTP data that is
+/* This SMTP struct is used in the Curl_easy. All SMTP data that is
    connection-oriented must be in smtp_conn to properly deal with the fact that
-   perhaps the SessionHandle is changed between the times the connection is
+   perhaps the Curl_easy is changed between the times the connection is
    used. */
 struct SMTP {
   curl_pp_transfer transfer;

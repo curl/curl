@@ -39,7 +39,7 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static struct SessionHandle *data;
+static struct Curl_easy *data;
 static struct curl_hash hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;

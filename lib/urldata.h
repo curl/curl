@@ -208,13 +208,12 @@
 
 #define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
 #define GOOD_EASY_HANDLE(x) \
-  ((x) && (((struct SessionHandle *)(x))->magic == CURLEASY_MAGIC_NUMBER))
+  ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
 
 /* Some convenience macros to get the larger/smaller value out of two given.
    We prefix with CURL to prevent name collisions. */
 #define CURLMAX(x,y) ((x)>(y)?(x):(y))
 #define CURLMIN(x,y) ((x)<(y)?(x):(y))
-
 
 #ifdef HAVE_GSSAPI
 /* Types needed for krb5-ftp connections */
@@ -311,7 +310,7 @@ struct ssl_connect_data {
 #elif defined(USE_NSS)
   PRFileDesc *handle;
   char *client_nickname;
-  struct SessionHandle *data;
+  struct Curl_easy *data;
   struct curl_llist *obj_list;
   PK11GenericObject *obj_clicert;
 #elif defined(USE_GSKIT)
@@ -618,9 +617,9 @@ enum upgrade101 {
 };
 
 /*
- * Request specific data in the easy handle (SessionHandle).  Previously,
+ * Request specific data in the easy handle (Curl_easy).  Previously,
  * these members were on the connectdata struct but since a conn struct may
- * now be shared between different SessionHandles, we store connection-specific
+ * now be shared between different Curl_easys, we store connection-specific
  * data here. This struct only keeps stuff that's interesting for *this*
  * request, as it will be cleared between multiple ones
  */
@@ -791,7 +790,7 @@ struct Curl_handler {
 
   /* If used, this function gets called from transfer.c:readwrite_data() to
      allow the protocol to do extra reads/writes */
-  CURLcode (*readwrite)(struct SessionHandle *data, struct connectdata *conn,
+  CURLcode (*readwrite)(struct Curl_easy *data, struct connectdata *conn,
                         ssize_t *nread, bool *readmore);
 
   long defport;           /* Default port. */
@@ -851,10 +850,10 @@ struct postponed_data {
  * unique for an entire connection.
  */
 struct connectdata {
-  /* 'data' is the CURRENT SessionHandle using this connection -- take great
+  /* 'data' is the CURRENT Curl_easy using this connection -- take great
      caution that this might very well vary between different times this
      connection is used! */
-  struct SessionHandle *data;
+  struct Curl_easy *data;
 
   /* chunk is for HTTP chunked encoding, but is in the general connectdata
      struct only because we can do just about any protocol through a HTTP proxy
@@ -965,7 +964,7 @@ struct connectdata {
   const struct Curl_handler *handler; /* Connection's protocol handler */
   const struct Curl_handler *given;   /* The protocol first given */
 
-  long ip_version; /* copied from the SessionHandle at creation time */
+  long ip_version; /* copied from the Curl_easy at creation time */
 
   /**** curl_get() phase fields */
 
@@ -1208,7 +1207,7 @@ typedef enum {
 /*
  * Values that are generated, temporary or calculated internally for a
  * "session handle" must be defined within the 'struct UrlState'.  This struct
- * will be used within the SessionHandle struct. When the 'SessionHandle'
+ * will be used within the Curl_easy struct. When the 'Curl_easy'
  * struct is cloned, this data MUST NOT be copied.
  *
  * Remember that any "state" information goes globally for the curl handle.
@@ -1354,7 +1353,7 @@ struct UrlState {
   curl_read_callback fread_func; /* read callback/function */
   void *in;                      /* CURLOPT_READDATA */
 
-  struct SessionHandle *stream_depends_on;
+  struct Curl_easy *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
 };
@@ -1679,7 +1678,7 @@ struct UserDefined {
                            new connection */
   long expect_100_timeout; /* in milliseconds */
 
-  struct SessionHandle *stream_depends_on;
+  struct Curl_easy *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
 };
@@ -1704,10 +1703,10 @@ struct Names {
  * 'struct UrlState' instead.
  */
 
-struct SessionHandle {
+struct Curl_easy {
   /* first, two fields for the linked list of these */
-  struct SessionHandle *next;
-  struct SessionHandle *prev;
+  struct Curl_easy *next;
+  struct Curl_easy *prev;
 
   struct connectdata *easy_conn;     /* the "unit's" connection */
 

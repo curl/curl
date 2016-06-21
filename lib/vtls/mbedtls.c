@@ -103,12 +103,12 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 static void mbed_debug(void *context, int level, const char *f_name,
                        int line_nb, const char *line)
 {
-  struct SessionHandle *data = NULL;
+  struct Curl_easy *data = NULL;
 
   if(!context)
     return;
 
-  data = (struct SessionHandle *)context;
+  data = (struct Curl_easy *)context;
 
   infof(data, "%s", line);
   (void) level;
@@ -158,7 +158,7 @@ static CURLcode
 mbed_connect_step1(struct connectdata *conn,
                    int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
 
   int ret = -1;
@@ -433,7 +433,7 @@ mbed_connect_step2(struct connectdata *conn,
                    int sockindex)
 {
   int ret;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   const mbedtls_x509_crt *peercert;
 
@@ -595,7 +595,7 @@ mbed_connect_step3(struct connectdata *conn,
 {
   CURLcode retcode = CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
@@ -653,7 +653,7 @@ static ssize_t mbed_send(struct connectdata *conn, int sockindex,
   return ret;
 }
 
-void Curl_mbedtls_close_all(struct SessionHandle *data)
+void Curl_mbedtls_close_all(struct Curl_easy *data)
 {
   (void)data;
 }
@@ -717,7 +717,7 @@ mbed_connect_common(struct connectdata *conn,
                     bool *done)
 {
   CURLcode retcode;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   long timeout_ms;

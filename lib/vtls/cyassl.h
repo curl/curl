@@ -51,7 +51,7 @@ int Curl_cyassl_init(void);
 CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
                                          int sockindex,
                                          bool *done);
-int Curl_cyassl_random(struct SessionHandle *data,
+int Curl_cyassl_random(struct Curl_easy *data,
                        unsigned char *entropy,
                        size_t length);
 void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */

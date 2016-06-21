@@ -55,7 +55,7 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_oauth_bearer_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_oauth_bearer_message(struct Curl_easy *data,
                                                const char *user,
                                                const char *host,
                                                const long port,

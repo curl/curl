@@ -31,7 +31,7 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
 /* this is for creating Negotiate header output */
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy);
 
-void Curl_cleanup_negotiate(struct SessionHandle *data);
+void Curl_cleanup_negotiate(struct Curl_easy *data);
 
 #endif /* USE_SPNEGO */
 

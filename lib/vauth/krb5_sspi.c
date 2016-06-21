@@ -62,7 +62,7 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const char *service,
@@ -240,7 +240,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
                                                   const char *chlg64,
                                                   struct kerberos5data *krb5,
                                                   char **outptr,

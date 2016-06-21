@@ -324,7 +324,7 @@ static CURLcode auth_decode_digest_md5_message(const char *chlg64,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_digest_md5_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const char *chlg64,
                                              const char *userp,
                                              const char *passwdp,
@@ -645,7 +645,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_digest_http_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const unsigned char *request,
