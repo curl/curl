@@ -1347,9 +1347,9 @@ struct UrlState {
   size_t drain; /* Increased when this stream has data to read, even if its
                    socket is not necessarily is readable. Decreased when
                    checked. */
-  bool done; /* set to FALSE when Curl_do() is called and set to TRUE when
-                Curl_done() is called, to prevent Curl_done() to get invoked
-                twice when the multi interface is used. */
+  bool done; /* set to FALSE when Curl_init_do() is called and set to TRUE
+                when multi_done() is called, to prevent multi_done() to get
+                invoked twice when the multi interface is used. */
 
   curl_read_callback fread_func; /* read callback/function */
   void *in;                      /* CURLOPT_READDATA */

@@ -1758,7 +1758,7 @@ CURLcode Curl_add_timecondition(struct SessionHandle *data,
 }
 
 /*
- * Curl_http() gets called from the generic Curl_do() function when a HTTP
+ * Curl_http() gets called from the generic multi_do() function when a HTTP
  * request is to be performed. This creates and sends a properly constructed
  * HTTP request.
  */
