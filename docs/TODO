@@ -288,10 +288,19 @@
 
   curl_easy_set_cb() - sets a callback PLUS its callback data
 
-1.15 TCP Fast Open
+1.15 Monitor connections in the connection pool
 
- RFC 7413 defines how to include data already in the TCP SYN handshake to
- reduce latency.
+ libcurl's connection cache or pool holds a number of open connections for the
+ purpose of possible subsequent connection reuse. It may contain a few up to a
+ significant amount of connections. Currently, libcurl leaves all connections
+ as they are and first when a connection is iterated over for matching or
+ reuse purpose it is verified that it is still alive.
+
+ Those connections may get closed by the server side for idleness or they may
+ get a HTTP/2 ping from the peer to verify that they're still alive. By adding
+ monitoring of the connections while in the pool, libcurl can detect dead
+ connections (and close them) better and earlier, and it can handle HTTP/2
+ pings to keep such ones alive even when not actively doing transfers on them.
 
 1.16 Try to URL encode given URL
 
