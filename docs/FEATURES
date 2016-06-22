@@ -185,7 +185,7 @@ FOOTNOTES
 
   *1 = requires OpenSSL, GnuTLS, NSS, yassl, axTLS, PolarSSL, WinSSL (native
        Windows), Secure Transport (native iOS/OS X) or GSKit (native IBM i)
-  *2 = requires OpenLDAP
+  *2 = requires OpenLDAP or WinLDAP
   *3 = requires a GSS-API implementation (such as Heimdal or MIT Kerberos) or
        SSPI (native Windows)
   *4 = requires a GSS-API implementation, however, only Windows SSPI is
