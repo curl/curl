@@ -644,6 +644,7 @@ X_OBJS= \
 	$(DIROBJ)\version.obj \
 	$(DIROBJ)\warnless.obj \
 	$(DIROBJ)\wildcard.obj \
+        $(DIROBJ)\x509asn1.obj \
 	$(RESOURCE)
 
 all : $(TARGET)
