@@ -1348,6 +1348,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
     AC_SUBST(USE_WINDOWS_SSPI, [1])
     curl_sspi_msg="enabled"
+    LIBS="crypt32.lib $LIBS"
   else
     AC_MSG_RESULT(no)
   fi
