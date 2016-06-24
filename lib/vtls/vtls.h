@@ -126,7 +126,10 @@ bool Curl_ssl_cert_status_request(void);
 
 bool Curl_ssl_false_start(void);
 
-bool Curl_ssl_psk(void);
+#ifdef have_curlssl_tls_psk
+CURLcode Curl_ssl_psk_parse(const char *psk, char **identity,
+                            unsigned char **keybin, unsigned int *keybin_len);
+#endif
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 

@@ -90,6 +90,14 @@ static bool safe_strequal(char* str1, char* str2)
     return (!str1 && !str2) ? TRUE : FALSE;
 }
 
+static int safe_memcmp(const void *ptr1, const void *ptr2, size_t num)
+{
+  return !ptr1 && !ptr2 ? 0 :
+         !ptr1 && ptr2 ? -1 :
+         ptr1 && !ptr2 ? 1 :
+         memcmp(ptr1, ptr2, num);
+}
+
 bool
 Curl_ssl_config_matches(struct ssl_config_data* data,
                         struct ssl_config_data* needle)
@@ -102,8 +110,9 @@ Curl_ssl_config_matches(struct ssl_config_data* data,
      safe_strequal(data->random_file, needle->random_file) &&
      safe_strequal(data->egdsocket, needle->egdsocket) &&
      safe_strequal(data->cipher_list, needle->cipher_list) &&
-     safe_strequal(data->psk_id, needle->psk_id) &&
-     safe_strequal(data->psk_key, needle->psk_key))
+     safe_strequal(data->psk_identity, needle->psk_identity) &&
+     (data->psk_keybin_len == needle->psk_keybin_len) &&
+     !safe_memcmp(data->psk_keybin, needle->psk_keybin, data->psk_keybin_len))
     return TRUE;
 
   return FALSE;
@@ -158,21 +167,25 @@ Curl_clone_ssl_config(struct ssl_config_data *source,
   else
     dest->random_file = NULL;
 
-  if(source->psk_id) {
-    dest->psk_id = strdup(source->psk_id);
-    if(!dest->psk_id)
+  if(source->psk_identity) {
+    dest->psk_identity = strdup(source->psk_identity);
+    if(!dest->psk_identity)
       return FALSE;
   }
   else
-    dest->psk_id = NULL;
+    dest->psk_identity = NULL;
 
-  if(source->psk_key) {
-    dest->psk_key = strdup(source->psk_key);
-    if(!dest->psk_key)
+  if(source->psk_keybin) {
+    dest->psk_keybin = malloc(source->psk_keybin_len);
+    if(!dest->psk_keybin)
       return FALSE;
+    memcpy(dest->psk_keybin, source->psk_keybin, source->psk_keybin_len);
+    dest->psk_keybin_len = source->psk_keybin_len;
   }
-  else
-    dest->psk_key = NULL;
+  else {
+    dest->psk_keybin = NULL;
+    dest->psk_keybin_len = 0;
+  }
 
   return TRUE;
 }
@@ -184,8 +197,8 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc)
   Curl_safefree(sslc->cipher_list);
   Curl_safefree(sslc->egdsocket);
   Curl_safefree(sslc->random_file);
-  Curl_safefree(sslc->psk_id);
-  Curl_safefree(sslc->psk_key);
+  Curl_safefree(sslc->psk_identity);
+  Curl_safefree(sslc->psk_keybin);
 }
 
 
@@ -1009,16 +1022,39 @@ bool Curl_ssl_false_start(void)
 #endif
 }
 
-/*
- * Check whether the SSL backend supports TLS-PSK.
- */
-bool Curl_ssl_psk(void)
+#ifdef have_curlssl_tls_psk
+CURLcode Curl_ssl_psk_parse(const char *psk, char **identity,
+                            unsigned char **keybin, unsigned int *keybin_len)
 {
-#ifdef curlssl_psk
-  return curlssl_psk();
-#else
-  return FALSE;
-#endif
+  bool is_hex;
+  const char *p;
+  size_t id_len;
+
+  p = strchr(psk, ':');
+  if(!p)
+    return CURLE_CONV_FAILED;
+
+  id_len = p - psk;
+  *identity = malloc(id_len + 1);
+  if(!*identity)
+    return CURLE_OUT_OF_MEMORY;
+  memcpy(*identity, psk, id_len);
+  *identity[id_len] = '\0';
+
+  ++p;
+  if(!strncmp(p, "hex:", 4)) {
+    is_hex = true;
+    p += 4;
+  }
+  else if(!strncmp(p, "text:", 5)) {
+    is_hex = false;
+    p += 5;
+  }
+  else /* default to text */
+    is_hex = false;
+
+
 }
+#endif
 
 #endif /* USE_SSL */

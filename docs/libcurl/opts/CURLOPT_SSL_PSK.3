@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SSL_PSK 3 "21 Aug 2015" "libcurl 7.45.0" "curl_easy_setopt options"
+.TH CURLOPT_SSL_PSK 3 "21 Apr 2016" "libcurl 7.50.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_SSL_PSK \- set client TSL-PSK identity and pre-shared key
 .SH SYNOPSIS
@@ -75,7 +75,7 @@ if(hnd) {
 }
 .fi
 .SH AVAILABILITY
-If built TLS enabled and the backend support TLS-PSK.
+Added in 7.50.0. OpenSSL w/ built-in PSK support only.
 .SH RETURN VALUE
 Returns CURLE_OK if TLS-PSK is enabled, CURLE_NOT_BUILT_IN if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.

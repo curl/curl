@@ -117,7 +117,6 @@ bool Curl_ossl_cert_status_request(void);
 #define curlssl_sha256sum(a,b,c,d) Curl_ossl_sha256sum(a,b,c,d)
 #endif
 #define curlssl_cert_status_request() Curl_ossl_cert_status_request()
-#define curlssl_psk() Curl_ossl_psk()
 
 #define DEFAULT_CIPHER_SELECTION \
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"

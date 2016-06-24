@@ -126,6 +126,10 @@
 #define OPENSSL_load_builtin_modules(x)
 #endif
 
+#ifdef have_curlssl_tls_psk
+static bool is_cipher_key_exchange_psk(const SSL_CIPHER *c);
+#endif
+
 #if defined(LIBRESSL_VERSION_NUMBER)
 #define OSSL_PACKAGE "LibreSSL"
 #elif defined(OPENSSL_IS_BORINGSSL)
@@ -1629,11 +1633,12 @@ set_psk_cb(SSL *ssl,
            unsigned char *psk_buffer,
            unsigned int psk_buffer_len)
 {
-  (void)hint;
   struct connectdata *conn;
   char *id;
   char *psk;
-  int id_len, psk_len;
+  unsigned int id_len, psk_len;
+
+  (void)hint;
 
   conn = (struct connectdata *)SSL_get_app_data(ssl);
   if(conn == NULL || conn->data == NULL)
@@ -2065,8 +2070,11 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 
 #ifdef have_curlssl_tls_psk
-  if(data->set.ssl.psk_id && data->set.ssl.psk_key) {
-    SSL_set_app_data(connssl->handle, conn);
+  if(data->set.ssl.psk_identity && data->set.ssl.psk_keybin) {
+    if(SSL_set_app_data(connssl->handle, conn) != 1) {
+      failf(data, "SSL: Failed setting app data.");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
     SSL_set_psk_client_callback(connssl->handle, set_psk_cb);
   }
 #endif
@@ -2602,6 +2610,16 @@ static CURLcode servercert(struct connectdata *conn,
     if(!strict)
       return CURLE_OK;
 
+    /* If the user offered a psk id/key and the server chose a cipher that uses
+       the psk key exchange then it's expected there's no certificate. */
+#ifdef have_curlssl_tls_psk
+    if(data->set.ssl.psk_id && data->set.ssl.psk_key) {
+      const SSL_CIPHER *c = SSL_get_current_cipher(connssl->handle);
+      if(c && is_cipher_key_exchange_psk(c))
+        return CURLE_OK;
+    }
+#endif
+
     failf(data, "SSL: couldn't get peer certificate!");
     return CURLE_PEER_FAILED_VERIFICATION;
   }
@@ -3127,13 +3145,39 @@ bool Curl_ossl_cert_status_request(void)
 #endif
 }
 
-bool Curl_ossl_psk(void)
-{
 #ifdef have_curlssl_tls_psk
-  return TRUE;
+bool is_cipher_key_exchange_psk(const SSL_CIPHER *c)
+{
+#if (OPENSSL_VERSION_NUMBER >= 0x10100005L)
+  return (SSL_CIPHER_get_kx_nid(c) == NID_kx_psk);
 #else
-  return FALSE;
+  int id = c->id & 0xFFFFFF;
+  return (id == 0x2C   ||   /* TLS_PSK_WITH_NULL_SHA */
+          id == 0x8A   ||   /* TLS_PSK_WITH_RC4_128_SHA */
+          id == 0x8B   ||   /* TLS_PSK_WITH_3DES_EDE_CBC_SHA */
+          id == 0x8C   ||   /* TLS_PSK_WITH_AES_128_CBC_SHA */
+          id == 0x8D   ||   /* TLS_PSK_WITH_AES_256_CBC_SHA */
+          id == 0xA8   ||   /* TLS_PSK_WITH_AES_128_GCM_SHA256 */
+          id == 0xA9   ||   /* TLS_PSK_WITH_AES_256_GCM_SHA384 */
+          id == 0xAE   ||   /* TLS_PSK_WITH_AES_128_CBC_SHA256 */
+          id == 0xAF   ||   /* TLS_PSK_WITH_AES_256_CBC_SHA384 */
+          id == 0xB0   ||   /* TLS_PSK_WITH_NULL_SHA256 */
+          id == 0xB1   ||   /* TLS_PSK_WITH_NULL_SHA384 */
+          id == 0xC064 ||   /* TLS_PSK_WITH_ARIA_128_CBC_SHA256 */
+          id == 0xC065 ||   /* TLS_PSK_WITH_ARIA_256_CBC_SHA384 */
+          id == 0xC06A ||   /* TLS_PSK_WITH_ARIA_128_GCM_SHA256 */
+          id == 0xC06B ||   /* TLS_PSK_WITH_ARIA_256_GCM_SHA384 */
+          id == 0xC08E ||   /* TLS_PSK_WITH_CAMELLIA_128_GCM_SHA256 */
+          id == 0xC08F ||   /* TLS_PSK_WITH_CAMELLIA_256_GCM_SHA384 */
+          id == 0xC094 ||   /* TLS_PSK_WITH_CAMELLIA_128_CBC_SHA256 */
+          id == 0xC095 ||   /* TLS_PSK_WITH_CAMELLIA_256_CBC_SHA384 */
+          id == 0xC0A4 ||   /* TLS_PSK_WITH_AES_128_CCM */
+          id == 0xC0A5 ||   /* TLS_PSK_WITH_AES_256_CCM */
+          id == 0xC0A8 ||   /* TLS_PSK_WITH_AES_128_CCM_8 */
+          id == 0xC0A9 ||   /* TLS_PSK_WITH_AES_256_CCM_8 */
+          id == 0xCCAB);    /* TLS_PSK_WITH_CHACHA20_POLY1305_SHA256 */
 #endif
 }
+#endif /* have_curlssl_tls_psk */
 
 #endif /* USE_OPENSSL */

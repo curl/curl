@@ -1690,7 +1690,7 @@ typedef enum {
   CINIT(TCP_FASTOPEN, LONG, 244),
 
   /* TLS-PSK identity and pre-shared key */
-  CINIT(SSL_PSK, OBJECTPOINT, 239),
+  CINIT(SSL_PSK, OBJECTPOINT, 245),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
