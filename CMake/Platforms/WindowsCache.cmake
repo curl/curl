@@ -118,6 +118,11 @@ if(NOT UNIX)
 
     set(HAVE_SIGACTION 0)
     set(HAVE_MACRO_SIGSETJMP 0)
+
+    if(${CMAKE_CL_64})
+      add_definitions(/D_AMD64 /Damd64)
+    endif()
+
   else(WIN32)
     message("This file should be included on Windows platform only")
   endif(WIN32)

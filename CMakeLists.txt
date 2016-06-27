@@ -112,6 +112,17 @@ if(MSVC)
   mark_as_advanced(BUILD_RELEASE_DEBUG_DIRS)
 endif()
 
+set(LIBRARY_BUILD_TYPE      SHARED)
+if(CURL_STATICLIB)
+  # Broken: LIBCURL_LIBS below; .a lib is not built
+  message(WARNING "Static linking is broken!")
+  set(LIBRARY_BUILD_TYPE    STATIC)
+else()
+  set(LIBRARY_BUILD_TYPE    SHARED)
+endif()
+SET_BUILD_TYPE_FLAGS(${LIBRARY_BUILD_TYPE})
+set(exec_prefix             "\${prefix}")
+
 option(CURL_HIDDEN_SYMBOLS "Set to ON to hide libcurl internal symbols (=hide all symbols that aren't officially external)." ON)
 mark_as_advanced(CURL_HIDDEN_SYMBOLS)
 
@@ -1020,9 +1031,9 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
   string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
   string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
 
-  string(REGEX REPLACE "\\\\\n" "§!§" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
+  string(REGEX REPLACE "\\\\\n" "ï¿½!ï¿½" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
   string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "SET(\\1 \\2)" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
-  string(REPLACE "§!§" "\n" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
+  string(REPLACE "ï¿½!ï¿½" "\n" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
 
   string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace $() with ${}
   string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace @@ with ${}, even if that may not be read by CMake scripts.
@@ -1121,20 +1132,9 @@ message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
 set(CC                      "${CMAKE_C_COMPILER}")
 # TODO probably put a -D... options here?
 set(CONFIGURE_OPTIONS       "")
-# TODO when to set "-DCURL_STATICLIB" for CPPFLAG_CURL_STATICLIB?
-set(CPPFLAG_CURL_STATICLIB  "")
 # TODO need to set this (see CURL_CHECK_CA_BUNDLE in acinclude.m4)
 set(CURL_CA_BUNDLE          "")
 set(CURLVERSION             "${CURL_VERSION}")
-set(ENABLE_SHARED           "yes")
-if(CURL_STATICLIB)
-  # Broken: LIBCURL_LIBS below; .a lib is not built
-  message(WARNING "Static linking is broken!")
-  set(ENABLE_STATIC         "no")
-else()
-  set(ENABLE_STATIC         "no")
-endif()
-set(exec_prefix             "\${prefix}")
 set(includedir              "\${prefix}/include")
 set(LDFLAGS                 "${CMAKE_SHARED_LINKER_FLAGS}")
 set(LIBCURL_LIBS            "")

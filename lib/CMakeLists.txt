@@ -61,17 +61,9 @@ if(USE_ARES)
   include_directories(${CARES_INCLUDE_DIR})
 endif()
 
-if(CURL_STATICLIB)
-  # Static lib
-  set(CURL_USER_DEFINED_DYNAMIC_OR_STATIC STATIC)
-else()
-  # DLL / so dynamic lib
-  set(CURL_USER_DEFINED_DYNAMIC_OR_STATIC SHARED)
-endif()
-
 add_library(
   ${LIB_NAME}
-  ${CURL_USER_DEFINED_DYNAMIC_OR_STATIC}
+  ${LIBRARY_BUILD_TYPE}
   ${HHEADERS} ${CSOURCES}
   )
 
@@ -90,6 +82,7 @@ set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS BUILDING_LIBCUR
 # Remove the "lib" prefix since the library is already named "libcurl".
 set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
 set_target_properties(${LIB_NAME} PROPERTIES IMPORT_PREFIX "")
+set_target_properties(${LIB_NAME} PROPERTIES VERSION ${CURL_VERSION} SOVERSION ${CURL_VERSION})
 
 if(WIN32)
   if(NOT CURL_STATICLIB)
