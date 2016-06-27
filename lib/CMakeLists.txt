@@ -61,17 +61,9 @@ if(USE_ARES)
   include_directories(${CARES_INCLUDE_DIR})
 endif()
 
-if(CURL_STATICLIB)
-  # Static lib
-  set(CURL_USER_DEFINED_DYNAMIC_OR_STATIC STATIC)
-else()
-  # DLL / so dynamic lib
-  set(CURL_USER_DEFINED_DYNAMIC_OR_STATIC SHARED)
-endif()
-
 add_library(
   ${LIB_NAME}
-  ${CURL_USER_DEFINED_DYNAMIC_OR_STATIC}
+  ${LIBRARY_BUILD_TYPE}
   ${HHEADERS} ${CSOURCES}
   )
 
