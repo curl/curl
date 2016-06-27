@@ -26,6 +26,18 @@ This release includes the following bugfixes:
  o checksrc: Add LoadLibrary to the banned functions list
  o schannel: Disable ALPN on Windows < 8.1 [13]
  o configure: occasional ignorance of --enable-symbol-hiding with GCC
+ o http2: test17xx are the first real HTTP/2 tests
+ o resolve: add support for IPv6 DNS64/NAT64 Networks on OS X + iOS [14]
+ o curl_multi_socket_action.3: rewording [15]
+ o CURLOPT_POSTFIELDS.3: Clarify what happens when set empty [16]
+ o cmake: Fix build with winldap [17]
+ o openssl: fix cert check with non-DNS name fields present [18]
+ o curl.1: mention the units for the progress meter [20]
+ o openssl: use more 'const' to fix build warnings with 1.1.0 branch
+ o cmake: now using BUILD_TESTING=ON/OFF [19]
+ o vtls: Only call add/getsession if session id is enabled
+ o headers: forward declare CURL, CURLM and CURLSH as structs [21]
+ o configure: improve detection of CA bundle path on FreeBSD [22]
 
 This release includes the following known bugs:
 
@@ -34,11 +46,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrew Kurushin, Andrew Robbins, Benjamin Kircher, Daniel Seither,
-  Daniel Stenberg, Frank Gevaerts, Gisle Vanem, Ivan Avdeev, Kamil Dudka,
-  Marcel Raad, Michael Kaufmann, Ray Satiro, Renaud Lehoux, Romain Coltel,
-  Steve Holme, vanillajonathan on github, Viktor Szakáts,
-  (17 contributors)
+  Andrew Kurushin, Andrew Robbins, Askar Safin, Benjamin Kircher, Brad King,
+  Dan Fandrich, Daniel Seither, Daniel Stenberg, Fabian Ruff, Frank Gevaerts,
+  Gisle Vanem, Ivan Avdeev, Joel Depooter, Kamil Dudka, Luo Jinghua,
+  Marcel Raad, Michael Kaufmann, Michael Osipov, Michael Wallner,
+  Patrick Monnerat, Ray Satiro, Reinhard Max, Renaud Lehoux, Romain Coltel,
+  Sergei Nikulov, Steve Holme, vanillajonathan on github, Viktor Szakáts,
+  (28 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -57,3 +71,12 @@ References to bug reports and discussions on issues:
  [11] = https://curl.haxx.se/bug/?i=815
  [12] = https://curl.haxx.se/bug/?i=855
  [13] = https://curl.haxx.se/bug/?i=840
+ [14] = https://curl.haxx.se/bug/?i=863
+ [15] = https://curl.haxx.se/bug/?i=865
+ [16] = https://curl.haxx.se/bug/?i=862
+ [17] = https://curl.haxx.se/bug/?i=874
+ [18] = https://curl.haxx.se/bug/?i=875
+ [19] = https://curl.haxx.se/bug/?i=882
+ [20] = https://curl.haxx.se/bug/?i=883
+ [21] = https://curl.haxx.se/mail/lib-2016-06/0100.html
+ [22] = https://curl.haxx.se/bug/?i=894
