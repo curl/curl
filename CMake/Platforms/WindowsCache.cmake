@@ -120,7 +120,7 @@ if(NOT UNIX)
     set(HAVE_MACRO_SIGSETJMP 0)
 
     if(${CMAKE_CL_64})
-      add_definitions(D_AMD64 /Damd64)
+      add_definitions(/D_AMD64 /Damd64)
     endif()
 
   else(WIN32)
