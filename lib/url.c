@@ -1507,7 +1507,24 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
                        va_arg(param, char *));
     break;
 
-#endif
+#ifdef HAVE_GSS_CRED_STORE
+  case CURLOPT_KRB5_CCNAME:
+    /*
+     * Set Kerberos credential-cache
+     */
+    result = setstropt(&data->set.str[STRING_KRB5_CCNAME],
+                       va_arg(param, char *));
+    break;
+
+  case CURLOPT_KRB5_CLIENT_KTNAME:
+    /*
+     * Set Kerberos client keytab
+     */
+    result = setstropt(&data->set.str[STRING_KRB5_CLIENT_KTNAME],
+                       va_arg(param, char *));
+    break;
+#endif /* HAVE_GSS_CRED_STORE */
+#endif /* HAVE_GSSAPI */
 
   case CURLOPT_HEADERDATA:
     /*

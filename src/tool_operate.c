@@ -798,6 +798,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->tcp_fastopen)
           my_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
 
+        if(config->ccache)
+          my_setopt_str(curl, CURLOPT_KRB5_CCNAME, config->ccache);
+
+        if(config->keytab)
+          my_setopt_str(curl, CURLOPT_KRB5_CLIENT_KTNAME, config->keytab);
+
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
         if(metalink || !config->use_metalink)

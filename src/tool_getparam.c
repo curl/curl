@@ -228,6 +228,8 @@ static const struct LongShort aliases[]= {
   {"Er", "false-start",              FALSE},
   {"Es", "ssl-no-revoke",            FALSE},
   {"Et", "tcp-fastopen",             FALSE},
+  {"Eu", "ccache",                   TRUE},
+  {"Ev", "keytab",                   TRUE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -1409,6 +1411,14 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
       case 't': /* --tcp-fastopen */
         config->tcp_fastopen = TRUE;
+        break;
+
+      case 'u': /* --ccache */
+        GetStr(&config->ccache, nextarg);
+        break;
+
+      case 'v': /* --keytab */
+        GetStr(&config->keytab, nextarg);
         break;
 
       default: /* certificate file */

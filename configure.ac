@@ -1260,6 +1260,13 @@ AC_INCLUDES_DEFAULT
           AC_DEFINE(HAVE_OLD_GSSMIT, 1,
             [if you have an old MIT Kerberos version, lacking GSS_C_NT_HOSTBASED_SERVICE])
         ])
+        dnl check for credential-store support
+        AC_CHECK_HEADERS(gssapi/gssapi_ext.h,[
+        AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+#include <gssapi/gssapi_ext.h>
+        ]],[[ gss_acquire_cred_from(0,0,0,0,0,0,0,0,0); ]])],[
+        AC_DEFINE(HAVE_GSS_CRED_STORE, 1, [if gssapi cred-store is available])])])
       fi
     ]
   )

@@ -120,6 +120,8 @@ struct OperationConfig {
   char *engine;
   bool crlf;
   char *customrequest;
+  char *ccache;
+  char *keytab;
   char *krblevel;
   long httpversion;
   bool nobuffer;

@@ -51,6 +51,7 @@ static const char *const helptext[] = {
   "     --basic         Use HTTP Basic Authentication (H)",
   "     --cacert FILE   CA certificate to verify peer against (SSL)",
   "     --capath DIR    CA directory to verify peer against (SSL)",
+  "     --ccache FILE   Kerberos credential cache to use (KRB5)",
   " -E, --cert CERT[:PASSWD]  Client certificate file and password (SSL)",
   "     --cert-status   Verify the status of the server certificate (SSL)",
   "     --cert-type TYPE  Certificate file type (DER/PEM/ENG) (SSL)",
@@ -123,6 +124,7 @@ static const char *const helptext[] = {
   "     --keepalive-time SECONDS  Wait SECONDS between keepalive probes",
   "     --key KEY       Private key file name (SSL/SSH)",
   "     --key-type TYPE  Private key file type (DER/PEM/ENG) (SSL)",
+  "     --keytab FILE   Kerberos client keytab to use (KRB5)",
   "     --krb LEVEL     Enable Kerberos with security LEVEL (F)",
 #ifndef CURL_DISABLE_LIBCURL_OPTION
   "     --libcurl FILE  Dump libcurl equivalent code of this command line",

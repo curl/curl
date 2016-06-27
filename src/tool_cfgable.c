@@ -113,6 +113,8 @@ static void free_config_fields(struct OperationConfig *config)
 
   Curl_safefree(config->customrequest);
   Curl_safefree(config->krblevel);
+  Curl_safefree(config->ccache);
+  Curl_safefree(config->keytab);
 
   Curl_safefree(config->oauth_bearer);
 
