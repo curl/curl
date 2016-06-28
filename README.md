@@ -1,4 +1,4 @@
-![curl logo](https://rawgit.com/curl/curl-www/master/logo/curl-logo.svg)
+![curl logo](https://cdn.rawgit.com/curl/curl-www/master/logo/curl-logo.svg)
 
 Curl is a command-line tool for transferring data specified with URL
 syntax. Find out how to use curl by reading [the curl.1 man
