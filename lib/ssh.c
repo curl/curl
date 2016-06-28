@@ -1161,8 +1161,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       else {
         /* Return the error type */
         err = sftp_libssh2_last_error(sshc->sftp_session);
-        result = sftp_libssh2_error_to_CURLE(err);
-        sshc->actualcode = result?result:CURLE_SSH;
+        if(err)
+          result = sftp_libssh2_error_to_CURLE(err);
+        else
+          /* in this case, the error wasn't in the SFTP level but for example
+             a time-out or similar */
+          result = CURLE_SSH;
+        sshc->actualcode = result;
         DEBUGF(infof(data, "error = %d makes libcurl = %d\n",
                      err, (int)result));
         state(conn, SSH_STOP);
