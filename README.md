@@ -1,3 +1,4 @@
+<img src="https://raw.githubusercontent.com/curl/curl-www/master/logo/curl-logo.png" width="350">
 
 Curl is a command-line tool for transferring data specified with URL
 syntax. Find out how to use curl by reading [the curl.1 man
