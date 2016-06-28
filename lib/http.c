@@ -3054,19 +3054,19 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 #endif /* CURL_DOES_CONVERSIONS */
 
       if(100 <= k->httpcode && 199 >= k->httpcode) {
-        /*
-         * We have made a HTTP PUT or POST and this is 1.1-lingo
-         * that tells us that the server is OK with this and ready
-         * to receive the data.
-         * However, we'll get more headers now so we must get
-         * back into the header-parsing state!
-         */
-        k->header = TRUE;
-        k->headerline = 0; /* restart the header line counter */
-
         /* "A user agent MAY ignore unexpected 1xx status responses." */
         switch(k->httpcode) {
         case 100:
+          /*
+           * We have made a HTTP PUT or POST and this is 1.1-lingo
+           * that tells us that the server is OK with this and ready
+           * to receive the data.
+           * However, we'll get more headers now so we must get
+           * back into the header-parsing state!
+           */
+          k->header = TRUE;
+          k->headerline = 0; /* restart the header line counter */
+
           /* if we did wait for this do enable write now! */
           if(k->exp100 > EXP100_SEND_DATA) {
             k->exp100 = EXP100_SEND_DATA;
@@ -3076,8 +3076,13 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         case 101:
           /* Switching Protocols */
           if(k->upgr101 == UPGR101_REQUESTED) {
+            /* Switching to HTTP/2 */
             infof(data, "Received 101\n");
             k->upgr101 = UPGR101_RECEIVED;
+
+            /* we'll get more headers (HTTP/2 response) */
+            k->header = TRUE;
+            k->headerline = 0; /* restart the header line counter */
 
             /* switch to http2 now. The bytes after response headers
                are also processed here, otherwise they are lost. */
@@ -3086,8 +3091,16 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
               return result;
             *nread = 0;
           }
+          else {
+            /* Switching to another protocol (e.g. WebSocket) */
+            k->header = FALSE; /* no more header to parse! */
+          }
           break;
         default:
+          /* the status code 1xx indicates a provisional response, so
+             we'll get another set of headers */
+          k->header = TRUE;
+          k->headerline = 0; /* restart the header line counter */
           break;
         }
       }
