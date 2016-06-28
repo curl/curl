@@ -424,7 +424,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@if exist $(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG) copy $(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG) $(DIRDIST)\lib >nul 2<&1
 	@-copy $(LIB_DIROBJ)\*.exp                 $(DIRDIST)\lib /y >nul 2<&1
 	@-copy $(LIB_DIROBJ)\*.pdb                 $(DIRDIST)\lib /y >nul 2<&1
-	if exist $(DIRDIST)\bin\$(LIB_NAME_DLL) move /y $(DIRDIST)\lib\*.pdb $(DIRDIST)\bin\ >nul 2<&1
+	@if exist $(DIRDIST)\bin\$(LIB_NAME_DLL) move /y $(DIRDIST)\lib\*.pdb $(DIRDIST)\bin\ >nul 2<&1
 	@-copy ..\include\curl\*.h   $(DIRDIST)\include\curl\ /y  >nul 2<&1
 
 $(LIB_OBJS): $(LIB_DIROBJ) $(DIRDIST)
