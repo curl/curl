@@ -33,6 +33,7 @@ problems may have been fixed or changed somewhat since this was written!
  3.1 IMAP SEARCH ALL truncated response
  3.2 No disconnect command
  3.3 SMTP to multiple recipients
+ 3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
 
  4. Command line
  4.1 -J with %-encoded file nameas
@@ -242,6 +243,12 @@ problems may have been fixed or changed somewhat since this was written!
  command). Ordinary mail programs would proceed and still send to the ones
  that can receive data. This is subject for change in the future.
  https://curl.haxx.se/bug/view.cgi?id=1116
+
+3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
+
+ You have to tell libcurl not to expect a body, when dealing with one line
+ response commands. Please see the POP3 examples and test cases which show
+ this for the NOOP and DELE commands. https://curl.haxx.se/bug/?i=740
 
 
 4. Command line
