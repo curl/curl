@@ -905,7 +905,6 @@ static CURLcode smb_disconnect(struct connectdata *conn, bool dead)
   /* smb_done is not always called, so cleanup the request */
   if(req) {
     Curl_safefree(req->share);
-    Curl_safefree(conn->data->req.protop);
   }
 
   return CURLE_OK;

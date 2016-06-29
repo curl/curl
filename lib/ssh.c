@@ -3057,8 +3057,6 @@ static CURLcode scp_disconnect(struct connectdata *conn, bool dead_connection)
   struct ssh_conn *ssh = &conn->proto.sshc;
   (void) dead_connection;
 
-  Curl_safefree(conn->data->req.protop);
-
   if(ssh->ssh_session) {
     /* only if there's a session still around to use! */
 
@@ -3219,8 +3217,6 @@ static CURLcode sftp_disconnect(struct connectdata *conn, bool dead_connection)
   (void) dead_connection;
 
   DEBUGF(infof(conn->data, "SSH DISCONNECT starts now\n"));
-
-  Curl_safefree(conn->data->req.protop);
 
   if(conn->proto.sshc.ssh_session) {
     /* only if there's a session still around to use! */
