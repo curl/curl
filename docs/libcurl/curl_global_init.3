@@ -64,10 +64,23 @@ Initialize everything possible. This sets all known bits except
 \fBCURL_GLOBAL_ACK_EINTR\fP.
 .TP
 .B CURL_GLOBAL_SSL
-Initialize SSL
+Initialize SSL.
+
+The implication here is that if this bit is not set, the initialization of the
+SSL layer needs to be done by the application or at least outside of
+libcurl. The exact procedure how to do SSL initializtion depends on the TLS
+backend libcurl uses.
+
+Doing TLS based transfers without having the TLS layer initialized may lead to
+unexpected behaviors.
 .TP
 .B CURL_GLOBAL_WIN32
 Initialize the Win32 socket libraries.
+
+The implication here is that if this bit is not set, the initialization of
+winsock has to be done by the application or you risk getting undefined
+behaviors. This option exists for when the initialization is handled outside
+of libcurl so there's no need for libcurl to do it again.
 .TP
 .B CURL_GLOBAL_NOTHING
 Initialise nothing extra. This sets no bit.
