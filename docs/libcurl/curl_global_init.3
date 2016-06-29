@@ -56,14 +56,12 @@ during that time and it could cause a deadlock.
 
 See the description in \fIlibcurl(3)\fP of global environment requirements for
 details of how to use this function.
-
 .SH FLAGS
-.TP 5
-.B CURL_GLOBAL_ALL
+.IP CURL_GLOBAL_ALL
 Initialize everything possible. This sets all known bits except
 \fBCURL_GLOBAL_ACK_EINTR\fP.
-.TP
-.B CURL_GLOBAL_SSL
+
+.IP CURL_GLOBAL_SSL
 Initialize SSL.
 
 The implication here is that if this bit is not set, the initialization of the
@@ -73,23 +71,19 @@ backend libcurl uses.
 
 Doing TLS based transfers without having the TLS layer initialized may lead to
 unexpected behaviors.
-.TP
-.B CURL_GLOBAL_WIN32
+.IP CURL_GLOBAL_WIN32
 Initialize the Win32 socket libraries.
 
 The implication here is that if this bit is not set, the initialization of
 winsock has to be done by the application or you risk getting undefined
 behaviors. This option exists for when the initialization is handled outside
 of libcurl so there's no need for libcurl to do it again.
-.TP
-.B CURL_GLOBAL_NOTHING
+.IP CURL_GLOBAL_NOTHING
 Initialise nothing extra. This sets no bit.
-.TP
-.B CURL_GLOBAL_DEFAULT
+.IP CURL_GLOBAL_DEFAULT
 A sensible default. It will init both SSL and Win32. Right now, this equals
 the functionality of the \fBCURL_GLOBAL_ALL\fP mask.
-.TP
-.B CURL_GLOBAL_ACK_EINTR
+.IP CURL_GLOBAL_ACK_EINTR
 When this flag is set, curl will acknowledge EINTR condition when connecting
 or when waiting for data.  Otherwise, curl waits until full timeout
 elapses. (Added in 7.30.0)
