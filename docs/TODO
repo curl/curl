@@ -33,6 +33,7 @@
  1.15 TCP Fast Open
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
+ 1.18 try next proxy if one doesn't work
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -319,6 +320,15 @@
 
  To make that work smoothly for curl users even on Windows, curl would
  probably need to be able to convert from several input encodings.
+
+1.18 try next proxy if one doesn't work
+
+ Allow an application to specify a list of proxies to try, and failing to
+ connect to the first go on and try the next instead until the list is
+ exhausted. Browsers support this feature at least when they specify proxies
+ using PACs.
+
+ https://github.com/curl/curl/issues/896
 
 
 2. libcurl - multi interface
