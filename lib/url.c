@@ -602,6 +602,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->tcp_keepintvl = 60;
   set->tcp_keepidle = 60;
   set->tcp_fastopen = FALSE;
+  set->tcp_nodelay = TRUE;
 
   set->ssl_enable_npn = TRUE;
   set->ssl_enable_alpn = TRUE;

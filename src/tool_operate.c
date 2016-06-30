@@ -792,8 +792,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           set_binmode(stdout);
         }
 
-        if(config->tcp_nodelay)
-          my_setopt(curl, CURLOPT_TCP_NODELAY, 1L);
+        if(!config->tcp_nodelay)
+          my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
 
         if(config->tcp_fastopen)
           my_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
