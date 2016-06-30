@@ -735,6 +735,9 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  connection to the same remote host. This would require the client to use the
  multi interface. https://curl.haxx.se/bug/feature.cgi?id=1558595
 
+ Using the multi interface would also allow properly using parallel transfers
+ with HTTP/2 and supporting HTTP/2 server push from the command line.
+
 17.5 provide formpost headers
 
  Extending the capabilities of the multipart formposting. How about leaving
