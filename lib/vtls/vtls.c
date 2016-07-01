@@ -156,6 +156,15 @@ Curl_clone_ssl_config(struct ssl_config_data *source,
   else
     dest->random_file = NULL;
 
+  if(source->clientcert) {
+    dest->clientcert = strdup(source->clientcert);
+    if(!dest->clientcert)
+      return FALSE;
+    dest->sessionid = FALSE;
+  }
+  else
+    dest->clientcert = NULL;
+
   return TRUE;
 }
 
@@ -166,6 +175,7 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc)
   Curl_safefree(sslc->cipher_list);
   Curl_safefree(sslc->egdsocket);
   Curl_safefree(sslc->random_file);
+  Curl_safefree(sslc->clientcert);
 }
 
 

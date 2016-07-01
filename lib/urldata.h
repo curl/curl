@@ -351,6 +351,7 @@ struct ssl_config_data {
   char *CAfile;          /* certificate to verify peer against */
   const char *CRLfile;   /* CRL to check certificate revocation */
   const char *issuercert;/* optional issuer certificate filename */
+  char *clientcert;
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
