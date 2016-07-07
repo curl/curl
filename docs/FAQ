@@ -968,8 +968,8 @@ FAQ
 
   4.9 Curl can't authenticate to the server that requires NTLM?
 
-  NTLM support requires OpenSSL, GnuTLS, NSS, Secure Transport, or Microsoft
-  Windows libraries at build-time to provide this functionality.
+  NTLM support requires OpenSSL, GnuTLS, mbedTLS, NSS, Secure Transport, or
+  Microsoft Windows libraries at build-time to provide this functionality.
 
   NTLM is a Microsoft proprietary protocol. Proprietary formats are evil. You
   should not use such ones.
