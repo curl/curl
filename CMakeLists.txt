@@ -79,6 +79,8 @@ option(ENABLE_THREADED_RESOLVER "Set to ON to enable POSIX threaded DNS lookup" 
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
 
+option(WITH_MT "Build the project with /MT Runtime in Visual Studio" OFF)
+
 if (ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
   if(NOT CMAKE_VERSION VERSION_LESS 3.0)

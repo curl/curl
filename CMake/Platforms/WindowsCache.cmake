@@ -118,8 +118,35 @@ if(NOT UNIX)
 
     set(HAVE_SIGACTION 0)
     set(HAVE_MACRO_SIGSETJMP 0)
+
+    #-------------------------------------------------
+    # Set MT flag in Visual Studio if requested
+    #-------------------------------------------------
+
+    if(MSVC)
+        set(CompilerFlags
+            CMAKE_C_FLAGS
+            CMAKE_C_FLAGS_DEBUG
+            CMAKE_C_FLAGS_MINSIZEREL
+            CMAKE_C_FLAGS_RELEASE
+            CMAKE_C_FLAGS_RELWITHDEBINFO
+            CMAKE_CXX_FLAGS
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_MINSIZEREL
+            CMAKE_CXX_FLAGS_RELEASE
+            CMAKE_CXX_FLAGS_RELWITHDEBINFO
+        )
+        if(WITH_MT)
+            foreach(CompilerFlag ${CompilerFlags})
+                string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+            endforeach()
+        else()
+            foreach(CompilerFlag ${CompilerFlags})
+                string(REPLACE "/MT" "/MD" ${CompilerFlag} "${${CompilerFlag}}")
+            endforeach()
+        endif()
+    endif()
   else(WIN32)
     message("This file should be included on Windows platform only")
   endif(WIN32)
 endif(NOT UNIX)
-
