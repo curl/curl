@@ -136,7 +136,7 @@ if(NOT UNIX)
             CMAKE_CXX_FLAGS_RELEASE
             CMAKE_CXX_FLAGS_RELWITHDEBINFO
         )
-        if(WITH_MT)
+        if(WITH_STATIC_RT)
             foreach(CompilerFlag ${CompilerFlags})
                 string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
             endforeach()
