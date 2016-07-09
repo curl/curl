@@ -42,6 +42,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
+include(CheckCCompilerFlag)
 
 project( CURL C )
 
@@ -1132,7 +1133,11 @@ set(ENABLE_SHARED           "yes")
 if(CURL_STATICLIB)
   # Broken: LIBCURL_LIBS below; .a lib is not built
   message(WARNING "Static linking is broken!")
-  set(ENABLE_STATIC         "no")
+  set(ENABLE_STATIC         "yes")
+
+  if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+  endif()
 else()
   set(ENABLE_STATIC         "no")
 endif()

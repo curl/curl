@@ -86,6 +86,7 @@ if(WIN32)
 endif()
 
 set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS BUILDING_LIBCURL)
+set_target_properties(${LIB_NAME} PROPERTIES VERSION ${CURL_VERSION} SOVERSION ${CURL_VERSION})
 
 # Remove the "lib" prefix since the library is already named "libcurl".
 set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
