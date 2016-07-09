@@ -1402,17 +1402,27 @@ FAQ
   CURLOPT_CUSTOMREQUEST to alter what exact listing command libcurl would use
   to list the files.
 
-  The follow-up question that tend to follow the previous one, is how a
-  program is supposed to parse the directory listing. How does it know what's
-  a file and what's a dir and what's a symlink etc. The harsh reality is that
-  FTP provides no such fine and easy-to-parse output. The output format FTP
-  servers respond to LIST commands are entirely at the server's own liking and
-  the NLST output doesn't reveal any types and in many cases don't even
-  include all the directory entries. Also, both LIST and NLST tend to hide
-  unix-style hidden files (those that start with a dot) by default so you need
-  to do "LIST -a" or similar to see them.
+  The follow-up question tends to be how is a program supposed to parse the
+  directory listing. How does it know what's a file and what's a dir and what's
+  a symlink etc. If the FTP server supports the MLSD command then it will
+  return data in a machine-readable format that can be parsed for type. The
+  types are specified by RFC3659 section 7.5.1. If MLSD is not supported then
+  you have to work with what you're given. The LIST output format is entirely
+  at the server's own liking and the NLST output doesn't reveal any types and
+  in many cases doesn't even include all the directory entries. Also, both LIST
+  and NLST tend to hide unix-style hidden files (those that start with a dot)
+  by default so you need to do "LIST -a" or similar to see them.
 
-  The application thus needs to parse the LIST output. One such existing
+  Example - List only directories.
+  ftp.funet.fi supports MLSD and ftp.kernel.org does not:
+
+     curl -s ftp.funet.fi/pub/ -X MLSD | \
+       perl -lne 'print if s/(?:^|;)type=dir;[^ ]+ (.+)$/$1/'
+
+     curl -s ftp.kernel.org/pub/linux/kernel/ | \
+       perl -lne 'print if s/^d[-rwx]{9}(?: +[^ ]+){7} (.+)$/$1/'
+
+  If you need to parse LIST output in libcurl one such existing
   list parser is available at https://cr.yp.to/ftpparse.html  Versions of
   libcurl since 7.21.0 also provide the ability to specify a wildcard to
   download multiple files from one FTP directory.
