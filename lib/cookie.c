@@ -704,7 +704,7 @@ Curl_cookie_add(struct Curl_easy *data,
         break;
       case 1:
         /* This field got its explanation on the 23rd of May 2001 by
-           Andrés García:
+           AndrÃ©s GarcÃ­a:
 
            flag: A TRUE/FALSE value indicating if all machines within a given
            domain can access the variable. This value is set automatically by
@@ -718,7 +718,7 @@ Curl_cookie_add(struct Curl_easy *data,
       case 2:
         /* It turns out, that sometimes the file format allows the path
            field to remain not filled in, we try to detect this and work
-           around it! Andrés García made us aware of this... */
+           around it! AndrÃ©s GarcÃ­a made us aware of this... */
         if(strcmp("TRUE", ptr) && strcmp("FALSE", ptr)) {
           /* only if the path doesn't look like a boolean option! */
           co->path = strdup(ptr);
@@ -1314,7 +1314,7 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
       fprintf(out, "#\n# Fatal libcurl error\n");
       if(!use_stdout)
         fclose(out);
-        return 1;
+      return 1;
     }
     fprintf(out, "%s\n", format_ptr);
     free(format_ptr);
