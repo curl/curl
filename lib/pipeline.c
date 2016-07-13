@@ -299,11 +299,16 @@ CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
       char *server_name;
 
       server_name = strdup(*servers);
-      if(!server_name)
+      if(!server_name) {
+        Curl_llist_destroy(new_list, NULL);
         return CURLM_OUT_OF_MEMORY;
+      }
 
-      if(!Curl_llist_insert_next(new_list, new_list->tail, server_name))
+      if(!Curl_llist_insert_next(new_list, new_list->tail, server_name)) {
+        Curl_llist_destroy(new_list, NULL);
+        Curl_safefree(server_name);
         return CURLM_OUT_OF_MEMORY;
+      }
 
       servers++;
     }
