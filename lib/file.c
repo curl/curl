@@ -227,15 +227,19 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   for(i=0; i < real_path_len; ++i)
     if(actual_path[i] == '/')
       actual_path[i] = '\\';
-    else if(!actual_path[i]) /* binary zero */
+    else if(!actual_path[i]) { /* binary zero */
+      Curl_safefree(real_path);
       return CURLE_URL_MALFORMAT;
+    }
 
   fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
   file->path = actual_path;
 #else
-  if(memchr(real_path, 0, real_path_len))
+  if(memchr(real_path, 0, real_path_len)) {
     /* binary zeroes indicate foul play */
+    Curl_safefree(real_path);
     return CURLE_URL_MALFORMAT;
+  }
 
   fd = open_readonly(real_path, O_RDONLY);
   file->path = real_path;
