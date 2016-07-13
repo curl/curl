@@ -34,6 +34,7 @@
 #include "curl_sspi.h"
 #include "curl_multibyte.h"
 #include "warnless.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -96,10 +97,9 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   /* prepare service name */
   if(strchr(service, '/')) {
-    service_name = malloc(strlen(service));
+    service_name = strdup(service);
     if(!service_name)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(service_name, service, strlen(service));
   }
   else {
     service_name = malloc(strlen(service) + strlen(conn->proxy.name) + 2);
