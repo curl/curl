@@ -105,6 +105,9 @@ int Curl_resolver_global_init(void)
     return CURLE_FAILED_INIT;
   }
 #endif
+#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+  Curl_ipv6works();
+#endif
   return CURLE_OK;
 }
 
