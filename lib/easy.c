@@ -271,6 +271,10 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     return CURLE_FAILED_INIT;
   }
 
+#ifdef ENABLE_IPV6
+  Curl_ipv6works();
+#endif
+
 #if defined(USE_LIBSSH2) && defined(HAVE_LIBSSH2_INIT)
   if(libssh2_init(0)) {
     DEBUGF(fprintf(stderr, "Error: libssh2_init failed\n"));
