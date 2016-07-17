@@ -465,7 +465,8 @@ int cert_stuff(struct connectdata *conn,
 
       if(!data->set.str[STRING_KEY_PASSWD]) {
         /* See if an empty password will do */
-        if(!(PKCS12_verify_mac(p12, "", 0) || PKCS12_verify_mac(p12, NULL, 0))) {
+        if(!(PKCS12_verify_mac(p12, "", 0) ||
+             PKCS12_verify_mac(p12, NULL, 0))) {
           /* ??? EVP_set_pw_prompt("Enter PKCS12 pass phrase:"); */
           PEM_def_callback(pass, PEM_BUFSIZE, 0, NULL);
         }
