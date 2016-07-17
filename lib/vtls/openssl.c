@@ -446,6 +446,7 @@ int cert_stuff(struct connectdata *conn,
       PKCS12 *p12;
       EVP_PKEY *pri;
       STACK_OF(X509) *ca = NULL;
+      char pass[PEM_BUFSIZE] = "";
 
       f = fopen(cert_file, "rb");
       if(!f) {
@@ -462,6 +463,14 @@ int cert_stuff(struct connectdata *conn,
 
       PKCS12_PBE_add();
 
+      if(!data->set.str[STRING_KEY_PASSWD]) {
+        /* See if an empty password will do */
+        if(!(PKCS12_verify_mac(p12, "", 0) || PKCS12_verify_mac(p12, NULL, 0))) {
+          /* ??? EVP_set_pw_prompt("Enter PKCS12 pass phrase:"); */
+          PEM_def_callback(pass, PEM_BUFSIZE, 0, NULL);
+        }
+        data->set.str[STRING_KEY_PASSWD] = strdup(pass);
+      }
       if(!PKCS12_parse(p12, data->set.str[STRING_KEY_PASSWD], &pri, &x509,
                        &ca)) {
         failf(data,
