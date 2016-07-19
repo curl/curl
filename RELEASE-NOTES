@@ -38,6 +38,13 @@ This release includes the following bugfixes:
  o vtls: Only call add/getsession if session id is enabled
  o headers: forward declare CURL, CURLM and CURLSH as structs [21]
  o configure: improve detection of CA bundle path on FreeBSD [22]
+ o SFTP: set a generic error when no SFTP one exists [23]
+ o curl_global_init.3: expand on the SSL and WIN32 bits purpose [24]
+ o conn: don't free easy handle data in handler->disconnect [25]
+ o cookie.c: Fix misleading indentation [26]
+ o library: Fix memory leaks found during static analysis [27]
+ o CURLMOPT_SOCKETFUNCTION.3: fix typo [28]
+ o curl_global_init: moved the "IPv6 works" check here [29]
 
 This release includes the following known bugs:
 
@@ -47,12 +54,13 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andrew Kurushin, Andrew Robbins, Askar Safin, Benjamin Kircher, Brad King,
-  Dan Fandrich, Daniel Seither, Daniel Stenberg, Fabian Ruff, Frank Gevaerts,
-  Gisle Vanem, Ivan Avdeev, Joel Depooter, Kamil Dudka, Luo Jinghua,
-  Marcel Raad, Michael Kaufmann, Michael Osipov, Michael Wallner,
-  Patrick Monnerat, Ray Satiro, Reinhard Max, Renaud Lehoux, Romain Coltel,
-  Sergei Nikulov, Steve Holme, vanillajonathan on github, Viktor Szakáts,
-  (28 contributors)
+  Brian Prodoehl, Dan Fandrich, Daniel Seither, Daniel Stenberg, Fabian Ruff,
+  Frank Gevaerts, Gisle Vanem, Gou Lingfeng, Ivan Avdeev, Joel Depooter,
+  Kamil Dudka, Luo Jinghua, Marcel Raad, Michael Kaufmann, Michael Osipov,
+  Michael Wallner, Miroslav Franc, Patrick Monnerat, Ray Satiro, Reinhard Max,
+  Renaud Lehoux, Richard Gray, Romain Coltel, Sergei Nikulov, Steve Holme,
+  Timothy Polich, vanillajonathan on github, Viktor Szakáts,
+  (33 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -80,3 +88,10 @@ References to bug reports and discussions on issues:
  [20] = https://curl.haxx.se/bug/?i=883
  [21] = https://curl.haxx.se/mail/lib-2016-06/0100.html
  [22] = https://curl.haxx.se/bug/?i=894
+ [23] = https://curl.haxx.se/mail/lib-2016-06/0052.html
+ [24] = https://curl.haxx.se/mail/lib-2016-06/0136.html
+ [25] = https://curl.haxx.se/mail/lib-2016-06/0139.html
+ [26] = https://curl.haxx.se/bug/?i=911
+ [27] = https://curl.haxx.se/bug/?i=913
+ [28] = https://curl.haxx.se/bug/?i=914
+ [29] = https://curl.haxx.se/bug/?i=915
