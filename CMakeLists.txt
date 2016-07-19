@@ -571,6 +571,10 @@ else()
   unset(USE_UNIX_SOCKETS CACHE)
 endif()
 
+option(CURL_XATTR "Set to ON to enable building cURL with xattr support." ON)
+mark_as_advanced(CURL_XATTR)
+set(HAVE_FSETXATTR_5 OFF)
+set(HAVE_FSETXATTR_6 OFF)
 
 # Check for header files
 if(NOT UNIX)
@@ -609,6 +613,7 @@ check_include_file_concat("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file_concat("sys/uio.h"        HAVE_SYS_UIO_H)
 check_include_file_concat("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file_concat("sys/utime.h"      HAVE_SYS_UTIME_H)
+check_include_file_concat("sys/xattr.h"      HAVE_SYS_XATTR_H)
 check_include_file_concat("alloca.h"         HAVE_ALLOCA_H)
 check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
 check_include_file_concat("arpa/tftp.h"      HAVE_ARPA_TFTP_H)
@@ -819,6 +824,24 @@ check_symbol_exists(setsockopt     "${CURL_INCLUDES}" HAVE_SETSOCKOPT)
 
 # symbol exists in win32, but function does not.
 check_function_exists(inet_pton HAVE_INET_PTON)
+
+if(CURL_XATTR)
+  check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
+  if(HAVE_FSETXATTR)
+    add_definitions(-DHAVE_FSETXATTR)
+    foreach(CURL_TEST HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
+      curl_internal_test_run(${CURL_TEST})
+    endforeach(CURL_TEST)
+    if(HAVE_FSETXATTR_5)
+      set_source_files_properties(tool_xattr.c PROPERTIES
+        COMPILE_FLAGS "-DHAVE_FSETXATTR_5")
+    endif()
+    if(HAVE_FSETXATTR_6)
+      set_source_files_properties(tool_xattr.c PROPERTIES
+        COMPILE_FLAGS "-DHAVE_FSETXATTR_6")
+    endif()
+  endif()
+endif()
 
 # sigaction and sigsetjmp are special. Use special mechanism for
 # detecting those, but only if previous attempt failed.
