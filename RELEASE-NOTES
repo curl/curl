@@ -45,6 +45,9 @@ This release includes the following bugfixes:
  o library: Fix memory leaks found during static analysis [27]
  o CURLMOPT_SOCKETFUNCTION.3: fix typo [28]
  o curl_global_init: moved the "IPv6 works" check here [29]
+ o connect: disable TFO on Linux when using SSL [30]
+ o vauth: Fixed memory leak due to function returning without free [31]
+ o winbuild: fix embedded manifest option
 
 This release includes the following known bugs:
 
@@ -58,9 +61,10 @@ advice from friends like these:
   Frank Gevaerts, Gisle Vanem, Gou Lingfeng, Ivan Avdeev, Joel Depooter,
   Kamil Dudka, Luo Jinghua, Marcel Raad, Michael Kaufmann, Michael Osipov,
   Michael Wallner, Miroslav Franc, Patrick Monnerat, Ray Satiro, Reinhard Max,
-  Renaud Lehoux, Richard Gray, Romain Coltel, Sergei Nikulov, Steve Holme,
-  Timothy Polich, vanillajonathan on github, Viktor Szakáts,
-  (33 contributors)
+  Renaud Lehoux, Richard Gray, Romain Coltel, Saurav Babu, Sergei Nikulov,
+  Stefan Kanthak, Steve Holme, Timothy Polich, vanillajonathan on github,
+  Viktor Szakáts,
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -95,3 +99,5 @@ References to bug reports and discussions on issues:
  [27] = https://curl.haxx.se/bug/?i=913
  [28] = https://curl.haxx.se/bug/?i=914
  [29] = https://curl.haxx.se/bug/?i=915
+ [30] = https://curl.haxx.se/bug/?i=907
+ [31] = https://curl.haxx.se/mail/lib-2016-07/0054.html
