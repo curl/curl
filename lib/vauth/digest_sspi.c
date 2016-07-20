@@ -387,12 +387,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   /* Release the package buffer as it is not required anymore */
   s_pSecFn->FreeContextBuffer(SecurityPackage);
 
-  /* Allocate the output buffer according to the max token size as indicated
-     by the security package */
-  output_token = malloc(token_max);
-  if(!output_token)
-    return CURLE_OUT_OF_MEMORY;
-
   if(userp && *userp) {
     /* Populate our identity structure */
     if(Curl_create_sspi_identity(userp, passwdp, &identity))
@@ -418,9 +412,16 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                               &credentials, &expiry);
   if(status != SEC_E_OK) {
     Curl_sspi_free_identity(p_identity);
-    free(output_token);
 
     return CURLE_LOGIN_DENIED;
+  }
+
+  /* Allocate the output buffer according to the max token size as indicated
+     by the security package */
+  output_token = malloc(token_max);
+  if(!output_token) {
+    Curl_sspi_free_identity(p_identity);
+    return CURLE_OUT_OF_MEMORY;
   }
 
   /* Setup the challenge "input" security buffer if present */
