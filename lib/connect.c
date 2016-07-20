@@ -1084,7 +1084,10 @@ static CURLcode singleipconnect(struct connectdata *conn,
                     CONNECT_RESUME_ON_READ_WRITE | CONNECT_DATA_IDEMPOTENT,
                     NULL, 0, NULL, NULL);
 #elif defined(MSG_FASTOPEN) /* Linux */
-      rc = 0; /* Do nothing */
+      if(conn->given->flags & PROTOPT_SSL)
+        rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+      else
+        rc = 0; /* Do nothing */
 #endif
     }
     else {
