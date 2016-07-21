@@ -66,10 +66,13 @@ announcement.
   workarounds, when the release is out and make sure to credit all
   contributors properly.
 
-- Request a CVE number from distros@openwall[1] when also informing and
-  preparing them for the upcoming public security vulnerability announcement -
-  attach the advisory draft for information. Note that 'distros' won't accept
-  an embargo longer than 19 days.
+- Request a CVE number from
+  [distros@openwall](http://oss-security.openwall.org/wiki/mailing-lists/distros)
+  when also informing and preparing them for the upcoming public security
+  vulnerability announcement - attach the advisory draft for information. Note
+  that 'distros' won't accept an embargo longer than 19 days and they do not
+  care for Windows-specific flaws. For windows-specific flaws, request CVE
+  directly from MITRE.
 
 - Update the "security advisory" with the CVE number.
 
@@ -91,7 +94,7 @@ announcement.
 - The security web page on the web site should get the new vulnerability
   mentioned.
 
-[1] = http://oss-security.openwall.org/wiki/mailing-lists/distros
+
 
 CURL-SECURITY (at haxx dot se)
 ------------------------------
