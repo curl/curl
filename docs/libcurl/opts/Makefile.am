@@ -38,6 +38,7 @@ man_MANS =                                      \
  CURLINFO_HEADER_SIZE.3                         \
  CURLINFO_HTTPAUTH_AVAIL.3                      \
  CURLINFO_HTTP_CONNECTCODE.3                    \
+ CURLINFO_HTTP_VERSION.3                        \
  CURLINFO_LASTSOCKET.3                          \
  CURLINFO_LOCAL_IP.3                            \
  CURLINFO_LOCAL_PORT.3                          \
