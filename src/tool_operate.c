@@ -1448,6 +1448,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             long response;
             if((CURLE_OPERATION_TIMEDOUT == result) ||
                (CURLE_COULDNT_RESOLVE_HOST == result) ||
+               (CURLE_PARTIAL_FILE == result) ||
                (CURLE_COULDNT_RESOLVE_PROXY == result) ||
                (CURLE_FTP_ACCEPT_TIMEOUT == result))
               /* retry timeout always */
