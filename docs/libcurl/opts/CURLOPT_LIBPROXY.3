@@ -1,0 +1,46 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_LIBPROXY 3 "26 Jul 2016" "libcurl 7.51.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_LIBPROXY \- enable automatic proxy detection via libproxy
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_LIBPROXY, long enable);
+.SH DESCRIPTION
+Set \fIenable\fP to 1L to tell libcurl to use the libproxy API to determine
+which proxy, if any, to use for each request according to the system
+configuration.
+.SH DEFAULT
+0 (off)
+.SH PROTOCOLS
+All except file://. Note that some protocols don't do very well over proxy.
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.51.0
+.SH RETURN VALUE
+Returns CURLE_OK if libproxy is supported, CURLE_NOT_BUILT_IN if not.
+.SH "SEE ALSO"
+.BR CURLOPT_PROXYPORT "(3), " CURLOPT_HTTPPROXYTUNNEL "(3), "
+.BR CURLOPT_PROXYTYPE "(3), " CURLOPT_PROXY "(3)" "

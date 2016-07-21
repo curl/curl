@@ -1704,6 +1704,9 @@ typedef enum {
    * HTTP status code >= 300 */
   CINIT(KEEP_SENDING_ON_ERROR, LONG, 245),
 
+  /* Use libproxy to determine which proxy to use */
+  CINIT(LIBPROXY, LONG, 246),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

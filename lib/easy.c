@@ -266,6 +266,10 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   idna_init();
 #endif
 
+#ifdef USE_LIBPROXY
+  Curl_libproxy_global_init();
+#endif
+
   if(Curl_resolver_global_init()) {
     DEBUGF(fprintf(stderr, "Error: resolver_global_init failed\n"));
     return CURLE_FAILED_INIT;
@@ -358,6 +362,10 @@ void curl_global_cleanup(void)
 
 #if defined(USE_LIBSSH2) && defined(HAVE_LIBSSH2_EXIT)
   (void)libssh2_exit();
+#endif
+
+#ifdef USE_LIBPROXY
+  Curl_libproxy_global_cleanup();
 #endif
 
   init_flags  = 0;
