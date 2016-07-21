@@ -420,7 +420,10 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
      by the security package */
   output_token = malloc(token_max);
   if(!output_token) {
+    s_pSecFn->FreeCredentialsHandle(&credentials);
+
     Curl_sspi_free_identity(p_identity);
+
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -448,6 +451,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
   spn = Curl_convert_UTF8_to_tchar((char *) uripath);
   if(!spn) {
+    s_pSecFn->FreeCredentialsHandle(&credentials);
+
     Curl_sspi_free_identity(p_identity);
     free(output_token);
 
