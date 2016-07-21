@@ -13,6 +13,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o include the CURLINFO_HTTP_VERSION(3) man page into the release tarball
+ o include the http2-server.pl script in the release tarball
 
 This release includes the following known bugs:
 
