@@ -164,7 +164,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 void Curl_auth_gssapi_cleanup(struct kerberos5data *krb5);
 #endif /* USE_KERBEROS5 */
 
-#if (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)) && defined(USE_SPNEGO)
+#if defined(USE_SPNEGO)
 /* This is used to decode a base64 encoded SPNEGO (Negotiate) challenge
    message */
 CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
@@ -184,6 +184,6 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
 /* This is used to clean up the SPNEGO specifiec data */
 void Curl_auth_spnego_cleanup(struct negotiatedata *nego);
 
-#endif /* (HAVE_GSSAPI || USE_WINDOWS_SSPI) && USE_SPNEGO */
+#endif /* USE_SPNEGO */
 
 #endif /* HEADER_CURL_VAUTH_H */
