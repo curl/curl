@@ -182,7 +182,7 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
                                          char **outptr, size_t *outlen);
 
 /* This is used to clean up the SPNEGO specifiec data */
-void Curl_auth_spnego_cleanup(struct negotiatedata* nego);
+void Curl_auth_spnego_cleanup(struct negotiatedata *nego);
 
 #endif /* (HAVE_GSSAPI || USE_WINDOWS_SSPI) && USE_SPNEGO */
 

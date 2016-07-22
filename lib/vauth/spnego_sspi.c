@@ -265,7 +265,7 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
  * nego     [in/out] - The Negotiate data struct being cleaned up.
  *
  */
-void Curl_auth_spnego_cleanup(struct negotiatedata* nego)
+void Curl_auth_spnego_cleanup(struct negotiatedata *nego)
 {
   /* Free our security context */
   if(nego->context) {
