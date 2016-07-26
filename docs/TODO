@@ -334,7 +334,7 @@
 1.19 Timeout idle connections from the pool
 
  libcurl currently keeps connections in its connection pool for an indefinite
- period of time, until it eithe rgets reused, gets noticed that it has been
+ period of time, until it either gets reused, gets noticed that it has been
  closed by the server or gets pruned to make room for a new connection.
 
  To reduce overhead (especially for when we add monitoring of the connections
