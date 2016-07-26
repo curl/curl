@@ -335,12 +335,43 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 {
   size_t chlglen = strlen(chlg);
 
-  /* We had an input token before and we got another one now. This means we
-     provided bad credentials in the previous request. */
-  if(digest->input_token)
-    return CURLE_BAD_CONTENT_ENCODING;
+  /* We had an input token before so if there's another one now that means we
+     provided bad credentials in the previous request or it's stale. */
+  if(digest->input_token) {
+    bool stale = false;
+    const char *p = chlg;
 
-  /* Simply store the challenge for use later */
+    /* Check for the 'stale' directive */
+    for(;;) {
+      char value[DIGEST_MAX_VALUE_LENGTH];
+      char content[DIGEST_MAX_CONTENT_LENGTH];
+
+      while(*p && ISSPACE(*p))
+        p++;
+
+      if(!Curl_auth_digest_get_pair(p, value, content, &p))
+        break;
+
+      if(Curl_strcasecompare(value, "stale")
+         && Curl_strcasecompare(content, "true")) {
+        stale = true;
+        break;
+      }
+
+      while(*p && ISSPACE(*p))
+        p++;
+
+      if(',' == *p)
+        p++;
+    }
+
+    if(stale)
+      Curl_auth_digest_cleanup(digest);
+    else
+      return CURLE_LOGIN_DENIED;
+  }
+
+  /* Store the challenge for use later */
   digest->input_token = (BYTE *) Curl_memdup(chlg, chlglen + 1);
   if(!digest->input_token)
     return CURLE_OUT_OF_MEMORY;
@@ -551,8 +582,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   resp = malloc(output_token_len + 1);
   if(!resp) {
     free(output_token);
-
-    Curl_safefree(digest->http_context);
 
     return CURLE_OUT_OF_MEMORY;
   }
