@@ -2157,6 +2157,8 @@ static void close_all_connections(struct Curl_multi *multi)
     conn->data = multi->closure_handle;
 
     sigpipe_ignore(conn->data, &pipe_st);
+    conn->data->easy_conn = NULL; /* clear the easy handle's connection
+                                     pointer */
     /* This will remove the connection from the cache */
     (void)Curl_disconnect(conn, FALSE);
     sigpipe_restore(&pipe_st);
