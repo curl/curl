@@ -91,7 +91,13 @@
 extern "C" {
 #endif
 
+#if defined(BUILDING_LIBCURL) || defined(CURL_STRICTER)
 typedef struct Curl_easy CURL;
+typedef struct Curl_share CURLSH;
+#else
+typedef void CURL;
+typedef void CURLSH;
+#endif
 
 /*
  * libcurl external API function linkage decorations.
@@ -2258,7 +2264,6 @@ typedef void (*curl_unlock_function)(CURL *handle,
                                      curl_lock_data data,
                                      void *userptr);
 
-typedef struct Curl_share CURLSH;
 
 typedef enum {
   CURLSHE_OK,  /* all is fine */
