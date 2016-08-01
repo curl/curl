@@ -420,7 +420,7 @@ mbed_connect_step1(struct connectdata *conn,
 #endif
 
 #ifdef MBEDTLS_DEBUG
-  mbedtls_ssl_conf_dbg(&connssl->config, mbedtls_debug, data);
+  mbedtls_ssl_conf_dbg(&connssl->config, mbed_debug, data);
 #endif
 
   connssl->connecting_state = ssl_connect_2;
