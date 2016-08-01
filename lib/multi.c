@@ -1810,6 +1810,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     {
       char *newurl = NULL;
       bool retry = FALSE;
+      bool comeback = FALSE;
 
       /* check if over send speed */
       if((data->set.max_send_speed > 0) &&
@@ -1844,7 +1845,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       /* read/write data if it is ready to do so */
-      result = Curl_readwrite(data->easy_conn, data, &done);
+      result = Curl_readwrite(data->easy_conn, data, &done, &comeback);
 
       k = &data->req;
 
@@ -1950,6 +1951,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           rc = CURLM_CALL_MULTI_PERFORM;
         }
       }
+      else if(comeback)
+        rc = CURLM_CALL_MULTI_PERFORM;
 
       free(newurl);
       break;
