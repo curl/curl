@@ -281,8 +281,8 @@ HMODULE Curl_load_library(LPCTSTR filename)
           pLoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
           LoadLibrary(path);
 
-        free(path);
       }
+      free(path);
     }
   }
 
