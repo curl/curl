@@ -45,6 +45,7 @@
 
  3. Documentation
  3.1 Update date and version in man pages
+ 3.2 Provide cmake config-file
 
  4. FTP
  4.1 HOST
@@ -394,6 +395,12 @@
  'maketgz' or another suitable script could update the .TH sections of the man
  pages at release time to use the current date and curl/libcurl version
  number.
+
+3.2 Provide cmake config-file
+
+ A config-file package is a set of files provided by us to allow applications
+ to write cmake scripts to find and use libcurl easier. See
+ https://github.com/curl/curl/issues/885
 
 4. FTP
 
