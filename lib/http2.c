@@ -547,7 +547,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 
       /* if we receive data for another handle, wake that up */
       if(conn_s->data != data_s)
-        Curl_expire(data_s, 1);
+        Curl_expire(data_s, 0);
     }
     break;
   case NGHTTP2_PUSH_PROMISE:
@@ -621,8 +621,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
 
   /* if we receive data for another handle, wake that up */
   if(conn->data != data_s)
-    Curl_expire(data_s, 1); /* TODO: fix so that this can be set to 0 for
-                               immediately? */
+    Curl_expire(data_s, 0);
 
   DEBUGF(infof(data_s, "%zu data received for stream %u "
                "(%zu left in buffer %p, total %zu)\n",
@@ -883,7 +882,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(stream->header_recvbuf, " \r\n", 3);
     /* if we receive data for another handle, wake that up */
     if(conn->data != data_s)
-      Curl_expire(data_s, 1);
+      Curl_expire(data_s, 0);
 
     DEBUGF(infof(data_s, "h2 status: HTTP/2 %03d (easy %p)\n",
                  stream->status_code, data_s));
@@ -899,7 +898,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
   /* if we receive data for another handle, wake that up */
   if(conn->data != data_s)
-    Curl_expire(data_s, 1);
+    Curl_expire(data_s, 0);
 
   DEBUGF(infof(data_s, "h2 header: %.*s: %.*s\n", namelen, name, valuelen,
                value));

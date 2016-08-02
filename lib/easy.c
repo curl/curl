@@ -1044,7 +1044,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   if(!result &&
      ((newstate&(KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
       (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) )
-    Curl_expire(data, 1); /* get this handle going again */
+    Curl_expire(data, 0); /* get this handle going again */
 
   return result;
 }

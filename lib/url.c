@@ -405,7 +405,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   if(!data)
     return CURLE_OK;
 
-  Curl_expire(data, 0); /* shut off timers */
+  Curl_expire_clear(data); /* shut off timers */
 
   m = data->multi;
 

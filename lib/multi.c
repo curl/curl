@@ -442,7 +442,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
      sockets that time-out or have actions will be dealt with. Since this
      handle has no action yet, we make sure it times out to get things to
      happen. */
-  Curl_expire(data, 1);
+  Curl_expire(data, 0);
 
   /* increase the node-counter */
   multi->num_easy++;
@@ -695,7 +695,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   /* The timer must be shut down before data->multi is set to NULL,
      else the timenode will remain in the splay tree after
      curl_easy_cleanup is called. */
-  Curl_expire(data, 0);
+  Curl_expire_clear(data);
 
   if(data->dns.hostcachetype == HCACHE_MULTI) {
     /* stop using the multi handle's DNS cache */
@@ -1901,7 +1901,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         /* expire the new receiving pipeline head */
         if(data->easy_conn->recv_pipe->head)
-          Curl_expire_latest(data->easy_conn->recv_pipe->head->ptr, 1);
+          Curl_expire_latest(data->easy_conn->recv_pipe->head->ptr, 0);
 
         /* Check if we can move pending requests to send pipe */
         Curl_multi_process_pending_handles(multi);
@@ -2011,7 +2011,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          that could be freed anytime */
       data->easy_conn = NULL;
 
-      Curl_expire(data, 0); /* stop all timers */
+      Curl_expire_clear(data); /* stop all timers */
       break;
 
     case CURLM_STATE_MSGSENT:
@@ -2879,92 +2879,59 @@ multi_addtimeout(struct curl_llist *timeoutlist,
  * given a number of milliseconds from now to use to set the 'act before
  * this'-time for the transfer, to be extracted by curl_multi_timeout()
  *
- * Note that the timeout will be added to a queue of timeouts if it defines a
- * moment in time that is later than the current head of queue.
- *
- * Pass zero to clear all timeout values for this handle.
-*/
+ * The timeout will be added to a queue of timeouts if it defines a moment in
+ * time that is later than the current head of queue.
+ */
 void Curl_expire(struct Curl_easy *data, long milli)
 {
   struct Curl_multi *multi = data->multi;
   struct timeval *nowp = &data->state.expiretime;
   int rc;
+  struct timeval set;
 
   /* this is only interesting while there is still an associated multi struct
      remaining! */
   if(!multi)
     return;
 
-  if(!milli) {
-    /* No timeout, clear the time data. */
-    if(nowp->tv_sec || nowp->tv_usec) {
-      /* Since this is an cleared time, we must remove the previous entry from
-         the splay tree */
-      struct curl_llist *list = data->state.timeoutlist;
+  set = Curl_tvnow();
+  set.tv_sec += milli/1000;
+  set.tv_usec += (milli%1000)*1000;
 
-      rc = Curl_splayremovebyaddr(multi->timetree,
-                                  &data->state.timenode,
-                                  &multi->timetree);
-      if(rc)
-        infof(data, "Internal error clearing splay node = %d\n", rc);
-
-      /* flush the timeout list too */
-      while(list->size > 0)
-        Curl_llist_remove(list, list->tail, NULL);
-
-#ifdef DEBUGBUILD
-      infof(data, "Expire cleared\n");
-#endif
-      nowp->tv_sec = 0;
-      nowp->tv_usec = 0;
-    }
+  if(set.tv_usec >= 1000000) {
+    set.tv_sec++;
+    set.tv_usec -= 1000000;
   }
-  else {
-    struct timeval set;
 
-    set = Curl_tvnow();
-    set.tv_sec += milli/1000;
-    set.tv_usec += (milli%1000)*1000;
-
-    if(set.tv_usec >= 1000000) {
-      set.tv_sec++;
-      set.tv_usec -= 1000000;
+  if(nowp->tv_sec || nowp->tv_usec) {
+    /* This means that the struct is added as a node in the splay tree.
+       Compare if the new time is earlier, and only remove-old/add-new if it
+       is. */
+    long diff = curlx_tvdiff(set, *nowp);
+    if(diff > 0) {
+      /* the new expire time was later so just add it to the queue
+         and get out */
+      multi_addtimeout(data->state.timeoutlist, &set);
+      return;
     }
 
-    if(nowp->tv_sec || nowp->tv_usec) {
-      /* This means that the struct is added as a node in the splay tree.
-         Compare if the new time is earlier, and only remove-old/add-new if it
-         is. */
-      long diff = curlx_tvdiff(set, *nowp);
-      if(diff > 0) {
-        /* the new expire time was later so just add it to the queue
-           and get out */
-        multi_addtimeout(data->state.timeoutlist, &set);
-        return;
-      }
+    /* the new time is newer than the presently set one, so add the current
+       to the queue and update the head */
+    multi_addtimeout(data->state.timeoutlist, nowp);
 
-      /* the new time is newer than the presently set one, so add the current
-         to the queue and update the head */
-      multi_addtimeout(data->state.timeoutlist, nowp);
-
-      /* Since this is an updated time, we must remove the previous entry from
-         the splay tree first and then re-add the new value */
-      rc = Curl_splayremovebyaddr(multi->timetree,
-                                  &data->state.timenode,
-                                  &multi->timetree);
-      if(rc)
-        infof(data, "Internal error removing splay node = %d\n", rc);
-    }
-
-    *nowp = set;
-    data->state.timenode.payload = data;
-    multi->timetree = Curl_splayinsert(*nowp,
-                                       multi->timetree,
-                                       &data->state.timenode);
+    /* Since this is an updated time, we must remove the previous entry from
+       the splay tree first and then re-add the new value */
+    rc = Curl_splayremovebyaddr(multi->timetree,
+                                &data->state.timenode,
+                                &multi->timetree);
+    if(rc)
+      infof(data, "Internal error removing splay node = %d\n", rc);
   }
-#if 0
-  Curl_splayprint(multi->timetree, 0, TRUE);
-#endif
+
+  *nowp = set;
+  data->state.timenode.payload = data;
+  multi->timetree = Curl_splayinsert(*nowp, multi->timetree,
+                                     &data->state.timenode);
 }
 
 /*
@@ -3006,6 +2973,49 @@ void Curl_expire_latest(struct Curl_easy *data, long milli)
   /* Just add the timeout like normal */
   Curl_expire(data, milli);
 }
+
+
+/*
+ * Curl_expire_clear()
+ *
+ * Clear ALL timeout values for this handle.
+ */
+void Curl_expire_clear(struct Curl_easy *data)
+{
+  struct Curl_multi *multi = data->multi;
+  struct timeval *nowp = &data->state.expiretime;
+  int rc;
+
+  /* this is only interesting while there is still an associated multi struct
+     remaining! */
+  if(!multi)
+    return;
+
+  if(nowp->tv_sec || nowp->tv_usec) {
+    /* Since this is an cleared time, we must remove the previous entry from
+       the splay tree */
+    struct curl_llist *list = data->state.timeoutlist;
+
+    rc = Curl_splayremovebyaddr(multi->timetree,
+                                &data->state.timenode,
+                                &multi->timetree);
+    if(rc)
+      infof(data, "Internal error clearing splay node = %d\n", rc);
+
+    /* flush the timeout list too */
+    while(list->size > 0)
+      Curl_llist_remove(list, list->tail, NULL);
+
+#ifdef DEBUGBUILD
+    infof(data, "Expire cleared\n");
+#endif
+    nowp->tv_sec = 0;
+    nowp->tv_usec = 0;
+  }
+}
+
+
+
 
 CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,
                             void *hashp)
@@ -3067,7 +3077,7 @@ void Curl_multi_process_pending_handles(struct Curl_multi *multi)
       Curl_llist_remove(multi->pending, e, NULL);
 
       /* Make sure that the handle will be processed soonish. */
-      Curl_expire_latest(data, 1);
+      Curl_expire_latest(data, 0);
     }
 
     e = next; /* operate on next handle */
