@@ -23,6 +23,7 @@ problems may have been fixed or changed somewhat since this was written!
  1.9 HTTP/2 frames while in the connection pool kill reuse
  1.10 Strips trailing dot from host name
  1.11 transfer-encoding: chunked in HTTP/2
+ 1.12 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
  2. TLS
  2.1 Hangs with PolarSSL
@@ -201,6 +202,18 @@ problems may have been fixed or changed somewhat since this was written!
  command wrongly sends a request with both content-length and
  transfer-encoding: chunked headers being set (and the request body is not
  chunked-encoded). See https://github.com/curl/curl/issues/662
+
+1.12 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
+
+ I'm using libcurl to POST form data using a FILE* with the CURLFORM_STREAM
+ option of curl_formadd(). I've noticed that if the connection drops at just
+ the right time, the POST is reattempted without the data from the file. It
+ seems like the file stream position isn't getting reset to the beginning of
+ the file. I found the CURLOPT_SEEKFUNCTION option and set that with a
+ function that performs an fseek() on the FILE*. However, setting that didn't
+ seem to fix the issue or even get called. See
+ https://github.com/curl/curl/issues/768
+
 
 2. TLS
 
