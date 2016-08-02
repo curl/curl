@@ -6,12 +6,11 @@ Curl and libcurl 7.50.1
  Public functions in libcurl:  61
  Contributors:                 1418
 
-This release includes the following changes:
-
- o
-
 This release includes the following bugfixes:
 
+ o TLS: switch off SSL session id when client cert is used [7]
+ o TLS: only reuse connections with the same client cert [8]
+ o curl_multi_cleanup: clear connection pointer for easy handles [9]
  o include the CURLINFO_HTTP_VERSION(3) man page into the release tarball
  o include the http2-server.pl script in the release tarball
  o test558: fix test by stripping file paths from FD lines
@@ -30,10 +29,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alain Danteny, Dan Fandrich, Daniel Stenberg, Kamil Dudka, Martin Vejnár,
+  Alain Danteny, Bru Rom, Dan Fandrich, Daniel Stenberg, Eric Rescorla,
+  Fernando Muñoz, Kamil Dudka, Marcelo Echeverria, Martin Vejnár,
   Patrick Monnerat, Paul Howarth, Peter Frühberger, Ray Satiro, Sergei Nikulov,
   Steve Holme, Thomas Glanzmann, Viktor Szakáts, Yonggang Luo,
-  (14 contributors)
+  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -45,3 +45,6 @@ References to bug reports and discussions on issues:
  [4] = https://curl.haxx.se/bug/?i=938
  [5] = https://curl.haxx.se/bug/?i=939
  [6] = https://curl.haxx.se/mail/lib-2016-08/0001.html
+ [7] = https://curl.haxx.se/docs/adv_20160803A.html
+ [8] = https://curl.haxx.se/docs/adv_20160803B.html
+ [9] = https://curl.haxx.se/docs/adv_20160803C.html
