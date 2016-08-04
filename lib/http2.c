@@ -92,8 +92,9 @@ static int http2_perform_getsock(const struct connectdata *conn,
      because of renegotiation. */
   sock[0] = conn->sock[FIRSTSOCKET];
 
-  if(nghttp2_session_want_read(c->h2))
-    bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
+  /* in a HTTP/2 connection we can basically always get a frame so we should
+     always be ready for one */
+  bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
 
   if(nghttp2_session_want_write(c->h2))
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
