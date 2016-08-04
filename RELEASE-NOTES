@@ -1,4 +1,4 @@
-Curl and libcurl 7.50.1
+Curl and libcurl 7.50.2
 
  Public curl releases:         158
  Command line options:         185
@@ -8,7 +8,13 @@ Curl and libcurl 7.50.1
 
 This release includes the following bugfixes:
 
- o
+ o mbedtls: Added support for NTLM
+ o SSH: fixed SFTP/SCP transfer problems [1]
+ o multi: make Curl_expire() work with 0 ms timeouts
+ o mk-ca-bundle.pl: -m keeps ca cert meta data in output [2]
+ o TFTP: Fix upload problem with piped input [3]
+ o CURLOPT_TCP_NODELAY: now enabled by default [4]
+ o mbedtls: set verbose TLS debug when MBEDTLS_DEBUG is defined [5]
 
 This release includes the following known bugs:
 
@@ -17,9 +23,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Bill Nagel, Dan Donahue, Daniel Stenberg, Sergei Nikulov, Serj Kalichev,
+  Thomas Glanzmann, Tim Rühsen,
+  (7 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/mail/lib-2016-07/0057.html
+ [2] = https://curl.haxx.se/bug/?i=937
+ [3] = https://curl.haxx.se/bug/?i=857
+ [4] = https://curl.haxx.se/mail/lib-2016-06/0143.html
+ [5] = https://curl.haxx.se/mail/lib-2016-08/0017.html
