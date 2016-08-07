@@ -35,6 +35,10 @@
  1.17 Add support for IRIs
  1.18 try next proxy if one doesn't work
  1.19 Timeout idle connections from the pool
+ 1.20 SRV and URI DNS records
+ 1.21 QUIC
+ 1.22 Monitor connections in the connection pool
+ 1.23 Offer API to flush the connection pool
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -60,10 +64,9 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
- 5.4 SPDY
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
- 5.7 More compressions
+ 5.7 Brotli compression
 
  6. TELNET
  6.1 ditch stdin
@@ -103,6 +106,7 @@
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
  13.8 Support DANE
+ 13.9 Support TLS v1.3
 
  14. GnuTLS
  14.1 SSL engine stuff
@@ -227,11 +231,12 @@
 1.8 Allow SSL (HTTPS) to proxy
 
  To prevent local users from snooping on your traffic to the proxy. Supported
- by Chrome already:
+ by Firefox and Chrome already:
  https://www.chromium.org/developers/design-documents/secure-web-proxy
 
- ...and by Firefox soon:
- https://bugzilla.mozilla.org/show_bug.cgi?id=378637
+ See this stale work in progress branch:
+ https://github.com/curl/curl/tree/HTTPS-proxy based on this PR:
+ https://github.com/curl/curl/pull/305
 
 1.9 Cache negative name resolves
 
@@ -341,6 +346,39 @@
  To reduce overhead (especially for when we add monitoring of the connections
  in the pool), we should introduce a timeout so that connections that have
  been idle for N seconds get closed.
+
+1.20 SRV and URI DNS records
+
+ Offer support for resolving SRV and URI DNS records for libcurl to know which
+ server to connect to for various protocols (including HTTP!).
+
+1.21 QUIC
+
+ The standardization process of QUIC has been taken to the IETF and can be
+ followed on the [IETF QUIC Mailing
+ list](https://www.ietf.org/mailman/listinfo/quic). I'd like us to get on the
+ bandwagon. Ideally, this would be done with a separate library/project to
+ handle the binary/framing layer in a similar fashion to how HTTP/2 is
+ implemented. This, to allow other projects to benefit from the work and to
+ thus broaden the interest and chance of others to participate.
+
+1.22 Monitor connections in the connection pool
+
+ If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
+ curl while the connection is held in curl's connection pool, the socket will
+ be found readable when considered for reuse and that makes curl think it is
+ dead and then it will be closed and a new connection gets created instead.
+
+ This is *best* fixed by adding monitoring to connections while they are kept
+ in the pool so that pings can be responded to appropriately. It would also
+ proper allow libcurl to close connections (earlier) when they are closed by
+ the server. Also, see "1.19 Timeout idle connections from the pool"
+
+1.23 Offer API to flush the connection pool
+
+ Sometimes applications want to flush all the existing connections kept alive.
+ An API could allow a forced flush or just a forced loop that would properly
+ close all connections that have been closed by the server already.
 
 
 2. libcurl - multi interface
@@ -473,14 +511,6 @@ This is not detailed in any FTP specification.
  headers use a default value so only headers that need to be moved have to be
  specified.
 
-5.4 SPDY
-
- Chrome and Firefox already support SPDY and lots of web services do. There's
- a library for us to use for this (spdylay) that has a similar API and the
- same author as nghttp2.
-
- spdylay: https://github.com/tatsuhiro-t/spdylay
-
 5.5 auth= in URLs
 
  Add the ability to specify the preferred authentication mechanism to use by
@@ -500,7 +530,7 @@ This is not detailed in any FTP specification.
  Consider a way to tell curl to refuse to "downgrade" protocol with a redirect
  and/or possibly a bit that refuses redirect to change protocol completely.
 
-5.7 More compressions
+5.7 Brotli compression
 
  Compression algorithms that perform better than gzip are being considered for
  use and inclusion in existing browsers. For example 'brotli'. If servers
@@ -657,6 +687,18 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  approach. See Daniel's comments:
  https://curl.haxx.se/mail/lib-2013-03/0103.html . libunbound may be the
  correct library to base this development on.
+
+ Björn Stenberg wrote a separate initial take on DANE that was never
+ completed.
+
+13.9 Support TLS v1.3
+
+ TLS version 1.3 is about to ship and is getting implemented by TLS libraries
+ as we speak. We should start to support the symbol and make sure all backends
+ handle it accordingly, then gradually add support as the TLS libraries add
+ the corresponding support. There may be a need to add some additional options
+ to allow libcurl to take advantage of the new features in 1.3.
+
 
 14. GnuTLS
 
