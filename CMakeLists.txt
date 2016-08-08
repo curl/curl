@@ -666,6 +666,7 @@ if(NOT HAVE_SIZEOF_SSIZE_T)
     set(ssize_t __int64)
   endif(NOT ssize_t AND SIZEOF___INT64 EQUAL SIZEOF_SIZE_T)
 endif(NOT HAVE_SIZEOF_SSIZE_T)
+# off_t is sized later, after the HAVE_FILE_OFFSET_BITS test
 
 # Different sizeofs, etc.
 
@@ -864,9 +865,14 @@ foreach(CURL_TEST
     )
   curl_internal_test(${CURL_TEST})
 endforeach(CURL_TEST)
+
 if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
+  set(CMAKE_REQUIRED_FLAGS "-D_FILE_OFFSET_BITS=64")
 endif(HAVE_FILE_OFFSET_BITS)
+check_type_size("off_t"  SIZEOF_OFF_T)
+set(CMAKE_REQUIRED_FLAGS)
+
 foreach(CURL_TEST
     HAVE_GLIBC_STRERROR_R
     HAVE_POSIX_STRERROR_R
@@ -927,16 +933,6 @@ if(NOT CURL_SPECIAL_LIBZ)
     set(HAVE_LIBZ 0)
   endif(NOT HAVE_ZLIB_H)
 endif(NOT CURL_SPECIAL_LIBZ)
-
-if(_FILE_OFFSET_BITS)
-  set(_FILE_OFFSET_BITS 64)
-endif(_FILE_OFFSET_BITS)
-set(CMAKE_REQUIRED_FLAGS "-D_FILE_OFFSET_BITS=64")
-set(CMAKE_EXTRA_INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/curl/curl.h")
-check_type_size("curl_off_t" SIZEOF_CURL_OFF_T)
-set(CMAKE_EXTRA_INCLUDE_FILES)
-set(CMAKE_REQUIRED_FLAGS)
-
 
 # Check for nonblocking
 set(HAVE_DISABLED_NONBLOCKING 1)
@@ -1010,6 +1006,11 @@ if(WIN32)
   add_definitions(-D_WIN32_WINNT=0x0501)
 endif(WIN32)
 
+# For windows, all compilers used by cmake should support large files
+if(WIN32)
+  set(USE_WIN32_LARGE_FILES ON)
+endif(WIN32)
+
 if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
 endif(MSVC)
@@ -1063,6 +1064,8 @@ _add_if("unix-sockets"  USE_UNIX_SOCKETS)
 _add_if("libz"          HAVE_LIBZ)
 _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX)
 _add_if("IDN"           HAVE_LIBIDN)
+_add_if("Largefile"     (CURL_SIZEOF_CURL_OFF_T GREATER 4) AND
+                        ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
 # TODO SSP1 (WinSSL) check is missing
 _add_if("SSPI"          USE_WINDOWS_SSPI)
 _add_if("GSS-API"       HAVE_GSSAPI)
