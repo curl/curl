@@ -288,8 +288,6 @@ CURL_CC         = $(CC)
 CURL_RC_FLAGS = /i../include /dDEBUGBUILD=0 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 !ENDIF
 
-CURL_CC = $(CURL_CC) $(CURL_CFLAGS)
-
 !IF "$(AS_DLL)" == "true"
 
 LNK       = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
