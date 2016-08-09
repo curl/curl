@@ -123,47 +123,51 @@
  16.2 Add QOP support to GSSAPI authentication
  16.3 Support binary messages (i.e.: non-base64)
 
- 17. Command line tool
- 17.1 sync
- 17.2 glob posts
- 17.3 prevent file overwriting
- 17.4 simultaneous parallel transfers
- 17.5 provide formpost headers
- 17.6 warning when setting an option
- 17.7 warning when sending binary output to terminal
- 17.8 offer color-coded HTTP header output
- 17.9 Choose the name of file in braces for complex URLs
- 17.10 improve how curl works in a windows console window
- 17.11 -w output to stderr
- 17.12 keep running, read instructions from pipe/socket
- 17.13 support metalink in http headers
- 17.14 --fail without --location should treat 3xx as a failure
+ 17. SSH protocols
+ 17.1 Multiplexing
+ 17.2 SFTP performance
 
- 18. Build
- 18.1 roffit
+ 18. Command line tool
+ 18.1 sync
+ 18.2 glob posts
+ 18.3 prevent file overwriting
+ 18.4 simultaneous parallel transfers
+ 18.5 provide formpost headers
+ 18.6 warning when setting an option
+ 18.7 warning when sending binary output to terminal
+ 18.8 offer color-coded HTTP header output
+ 18.9 Choose the name of file in braces for complex URLs
+ 18.10 improve how curl works in a windows console window
+ 18.11 -w output to stderr
+ 18.12 keep running, read instructions from pipe/socket
+ 18.13 support metalink in http headers
+ 18.14 --fail without --location should treat 3xx as a failure
 
- 19. Test suite
- 19.1 SSL tunnel
- 19.2 nicer lacking perl message
- 19.3 more protocols supported
- 19.4 more platforms supported
- 19.5 Add support for concurrent connections
- 19.6 Use the RFC6265 test suite
+ 19. Build
+ 19.1 roffit
 
- 20. Next SONAME bump
- 20.1 http-style HEAD output for FTP
- 20.2 combine error codes
- 20.3 extend CURLOPT_SOCKOPTFUNCTION prototype
+ 20. Test suite
+ 20.1 SSL tunnel
+ 20.2 nicer lacking perl message
+ 20.3 more protocols supported
+ 20.4 more platforms supported
+ 20.5 Add support for concurrent connections
+ 20.6 Use the RFC6265 test suite
 
- 21. Next major release
- 21.1 cleanup return codes
- 21.2 remove obsolete defines
- 21.3 size_t
- 21.4 remove several functions
- 21.5 remove CURLOPT_FAILONERROR
- 21.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
- 21.7 remove progress meter from libcurl
- 21.8 remove 'curl_httppost' from public
+ 21. Next SONAME bump
+ 21.1 http-style HEAD output for FTP
+ 21.2 combine error codes
+ 21.3 extend CURLOPT_SOCKOPTFUNCTION prototype
+
+ 22. Next major release
+ 22.1 cleanup return codes
+ 22.2 remove obsolete defines
+ 22.3 size_t
+ 22.4 remove several functions
+ 22.5 remove CURLOPT_FAILONERROR
+ 22.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
+ 22.7 remove progress meter from libcurl
+ 22.8 remove 'curl_httppost' from public
 
 ==============================================================================
 
@@ -768,9 +772,28 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
   Mandatory to support LDAP SASL authentication.
 
-17. Command line tool
 
-17.1 sync
+17. SSH protocols
+
+17.1 Multiplexing
+
+ SSH is a perfectly fine multiplexed protocols which would allow libcurl to do
+ multiple parallel transfers from the same host using the same connection,
+ much in the same spirit as HTTP/2 does. libcurl however does not take
+ advantage of that ability but will instead always create a new connection for
+ new transfers even if an existing connection already exists to the host.
+
+ To fix this, libcurl would have to detect an existing connection and "attach"
+ the new transfer to the existing one.
+
+17.2 SFTP performance
+
+ libcurl's SFTP transfer performance is sub par and can be improved, mostly by
+ the approach mentioned in "1.6 Modified buffer size approach".
+
+18. Command line tool
+
+18.1 sync
 
  "curl --sync http://example.com/feed[1-100].rss" or
  "curl --sync http://example.net/{index,calendar,history}.html"
@@ -779,12 +802,12 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  remote file is newer than the local file. A Last-Modified HTTP date header
  should also be used to set the mod date on the downloaded file.
 
-17.2 glob posts
+18.2 glob posts
 
  Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
  This is easily scripted though.
 
-17.3 prevent file overwriting
+18.3 prevent file overwriting
 
  Add an option that prevents cURL from overwriting existing local files. When
  used, and there already is an existing file with the target file name
@@ -792,7 +815,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  existing). So that index.html becomes first index.html.1 and then
  index.html.2 etc.
 
-17.4 simultaneous parallel transfers
+18.4 simultaneous parallel transfers
 
  The client could be told to use maximum N simultaneous parallel transfers and
  then just make sure that happens. It should of course not make more than one
@@ -802,7 +825,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Using the multi interface would also allow properly using parallel transfers
  with HTTP/2 and supporting HTTP/2 server push from the command line.
 
-17.5 provide formpost headers
+18.5 provide formpost headers
 
  Extending the capabilities of the multipart formposting. How about leaving
  the ';type=foo' syntax as it is and adding an extra tag (headers) which
@@ -816,24 +839,24 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  which should overwrite the program reasonable defaults (plain/text,
  8bit...)
 
-17.6 warning when setting an option
+18.6 warning when setting an option
 
  Display a warning when libcurl returns an error when setting an option.
  This can be useful to tell when support for a particular feature hasn't been
  compiled into the library.
 
-17.7 warning when sending binary output to terminal
+18.7 warning when sending binary output to terminal
 
  Provide a way that prompts the user for confirmation before binary data is
  sent to the terminal, much in the style 'less' does it.
 
-17.8 offer color-coded HTTP header output
+18.8 offer color-coded HTTP header output
 
  By offering different color output on the header name and the header
  contents, they could be made more readable and thus help users working on
  HTTP services.
 
-17.9 Choose the name of file in braces for complex URLs
+18.9 Choose the name of file in braces for complex URLs
 
  When using braces to download a list of URLs and you use complicated names
  in the list of alternatives, it could be handy to allow curl to use other
@@ -845,13 +868,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  See https://github.com/curl/curl/issues/221
 
-17.10 improve how curl works in a windows console window
+18.10 improve how curl works in a windows console window
 
  If you pull the scrollbar when transferring with curl in a Windows console
  window, the transfer is interrupted and can get disconnected. This can
  probably be improved. See https://github.com/curl/curl/issues/322
 
-17.11 -w output to stderr
+18.11 -w output to stderr
 
  -w is quite useful, but not to those of us who use curl without -o or -O
  (such as for scripting through a higher level language). It would be nice to
@@ -859,7 +882,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  instead. Proposed name: --write-stderr. See
  https://github.com/curl/curl/issues/613
 
-17.12 keep running, read instructions from pipe/socket
+18.12 keep running, read instructions from pipe/socket
 
  Provide an option that makes curl not exit after the last URL (or even work
  without a given URL), and then make it read instructions passed on a pipe or
@@ -867,7 +890,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  invoke can talk to the still running instance and ask for transfers to get
  done, and thus maintain its connection pool, DNS cache and more.
 
-17.13 support metalink in http headers
+18.13 support metalink in http headers
 
  Curl has support for downloading a metalink xml file, processing it, and then
  downloading the target of the metalink. This is done via the --metalink option.
@@ -880,7 +903,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  See also https://lists.gnu.org/archive/html/bug-wget/2015-06/msg00034.html for
  an implematation of this in wget.
 
-17.14 --fail without --location should treat 3xx as a failure
+18.14 --fail without --location should treat 3xx as a failure
 
  To allow a command line like this to detect a redirect and consider it a
  failure:
@@ -892,37 +915,37 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  tool only and not in the underlying CURLOPT_FAILONERROR logic.
 
 
-18. Build
+19. Build
 
-18.1 roffit
+19.1 roffit
 
  Consider extending 'roffit' to produce decent ASCII output, and use that
  instead of (g)nroff when building src/tool_hugehelp.c
 
-19. Test suite
+20. Test suite
 
-19.1 SSL tunnel
+20.1 SSL tunnel
 
  Make our own version of stunnel for simple port forwarding to enable HTTPS
  and FTP-SSL tests without the stunnel dependency, and it could allow us to
  provide test tools built with either OpenSSL or GnuTLS
 
-19.2 nicer lacking perl message
+20.2 nicer lacking perl message
 
  If perl wasn't found by the configure script, don't attempt to run the tests
  but explain something nice why it doesn't.
 
-19.3 more protocols supported
+20.3 more protocols supported
 
  Extend the test suite to include more protocols. The telnet could just do FTP
  or http operations (for which we have test servers).
 
-19.4 more platforms supported
+20.4 more platforms supported
 
  Make the test suite work on more platforms. OpenBSD and Mac OS. Remove
  fork()s and it should become even more portable.
 
-19.5 Add support for concurrent connections
+20.5 Add support for concurrent connections
 
  Tests 836, 882 and 938 were designed to verify that separate connections aren't
  used when using different login credentials in protocols that shouldn't re-use
@@ -936,7 +959,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  and thus the wait for connections loop is never entered to receive the second
  connection.
 
-19.6 Use the RFC6265 test suite
+20.6 Use the RFC6265 test suite
 
  A test suite made for HTTP cookies (RFC 6265) by Adam Barth is available at
  https://github.com/abarth/http-state/tree/master/tests
@@ -946,14 +969,14 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  incorporated into our regular test suite.
 
 
-20. Next SONAME bump
+21. Next SONAME bump
 
-20.1 http-style HEAD output for FTP
+21.1 http-style HEAD output for FTP
 
  #undef CURL_FTP_HTTPSTYLE_HEAD in lib/ftp.c to remove the HTTP-style headers
  from being output in NOBODY requests over FTP
 
-20.2 combine error codes
+21.2 combine error codes
 
  Combine some of the error codes to remove duplicates.  The original
  numbering should not be changed, and the old identifiers would be
@@ -978,29 +1001,29 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
     CURLE_TFTP_PERM => CURLE_REMOTE_ACCESS_DENIED
 
-20.3 extend CURLOPT_SOCKOPTFUNCTION prototype
+21.3 extend CURLOPT_SOCKOPTFUNCTION prototype
 
  The current prototype only provides 'purpose' that tells what the
  connection/socket is for, but not any protocol or similar. It makes it hard
  for applications to differentiate on TCP vs UDP and even HTTP vs FTP and
  similar.
 
-21. Next major release
+22. Next major release
 
-21.1 cleanup return codes
+22.1 cleanup return codes
 
  curl_easy_cleanup() returns void, but curl_multi_cleanup() returns a
  CURLMcode. These should be changed to be the same.
 
-21.2 remove obsolete defines
+22.2 remove obsolete defines
 
  remove obsolete defines from curl/curl.h
 
-21.3 size_t
+22.3 size_t
 
  make several functions use size_t instead of int in their APIs
 
-21.4 remove several functions
+22.4 remove several functions
 
  remove the following functions from the public API:
 
@@ -1021,18 +1044,18 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  curl_multi_socket_all
 
-21.5 remove CURLOPT_FAILONERROR
+22.5 remove CURLOPT_FAILONERROR
 
  Remove support for CURLOPT_FAILONERROR, it has gotten too kludgy and weird
  internally. Let the app judge success or not for itself.
 
-21.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
+22.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
 
  Remove support for a global DNS cache. Anything global is silly, and we
  already offer the share interface for the same functionality but done
  "right".
 
-21.7 remove progress meter from libcurl
+22.7 remove progress meter from libcurl
 
  The internally provided progress meter output doesn't belong in the library.
  Basically no application wants it (apart from curl) but instead applications
@@ -1042,7 +1065,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  variable types passed to it instead of doubles so that big files work
  correctly.
 
-21.8 remove 'curl_httppost' from public
+22.8 remove 'curl_httppost' from public
 
  curl_formadd() was made to fill in a public struct, but the fact that the
  struct is public is never really used by application for their own advantage
