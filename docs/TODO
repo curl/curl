@@ -29,14 +29,13 @@
  1.11 minimize dependencies with dynamicly loaded modules
  1.12 have form functions use CURL handle argument
  1.14 Typesafe curl_easy_setopt()
- 1.15 TCP Fast Open
+ 1.15 Monitor connections in the connection pool
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
  1.18 try next proxy if one doesn't work
  1.19 Timeout idle connections from the pool
  1.20 SRV and URI DNS records
  1.21 API for URL parsing/splitting
- 1.22 Monitor connections in the connection pool
  1.23 Offer API to flush the connection pool
 
  2. libcurl - multi interface
@@ -350,18 +349,6 @@
  features to allow applications to do it. Still most or many applications
  using libcurl need that ability. In polls to users, we've learned that many
  libcurl users would like to see and use such an API.
-
-1.22 Monitor connections in the connection pool
-
- If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
- curl while the connection is held in curl's connection pool, the socket will
- be found readable when considered for reuse and that makes curl think it is
- dead and then it will be closed and a new connection gets created instead.
-
- This is *best* fixed by adding monitoring to connections while they are kept
- in the pool so that pings can be responded to appropriately. It would also
- proper allow libcurl to close connections (earlier) when they are closed by
- the server. Also, see "1.19 Timeout idle connections from the pool"
 
 1.23 Offer API to flush the connection pool
 
