@@ -30,6 +30,10 @@
  *   https://cool.haxx.se/mailman/listinfo/curl-library/
  */
 
+#ifdef CURL_NO_OLDIES
+#define CURL_STRICTER
+#endif
+
 #include "curlver.h"         /* libcurl version defines   */
 #include "curlbuild.h"       /* libcurl build definitions */
 #include "curlrules.h"       /* libcurl rules enforcement */
