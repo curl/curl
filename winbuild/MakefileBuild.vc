@@ -276,15 +276,11 @@ CFGSET = true
 
 !IF "$(DEBUG)"=="yes"
 RC_FLAGS = /dDEBUGBUILD=1 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
-CC              = $(CC_DEBUG) $(RTLIB_DEBUG)
-
-CURL_CC         = $(CC)
+CURL_CC       = $(CC_DEBUG) $(RTLIB_DEBUG)
 CURL_RC_FLAGS = /i../include /dDEBUGBUILD=1 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 !ELSE
 RC_FLAGS = /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
-CC              = $(CC_NODEBUG) $(RTLIB)
-
-CURL_CC         = $(CC)
+CURL_CC       = $(CC_NODEBUG) $(RTLIB)
 CURL_RC_FLAGS = /i../include /dDEBUGBUILD=0 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 !ENDIF
 
@@ -315,7 +311,7 @@ TARGET   = $(LIB_NAME_STATIC)
 PDB      = $(PDB_NAME_STATIC)
 !ENDIF
 LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
-CC       = $(CC) $(CFLAGS_LIBCURL_STATIC)
+CURL_CC  = $(CURL_CC) $(CFLAGS_LIBCURL_STATIC)
 
 # AS_DLL
 !ENDIF
@@ -460,13 +456,13 @@ $(CURL_DIROBJ):
 .SUFFIXES: .c .obj .res
 
 {$(LIBCURL_SRC_DIR)\}.c{$(LIB_DIROBJ)\}.obj:
-	$(CC) $(CFLAGS) /Fo"$@"  $<
+	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
 
 {$(LIBCURL_SRC_DIR)\vauth\}.c{$(LIB_DIROBJ)\vauth\}.obj:
-	$(CC) $(CFLAGS) /Fo"$@"  $<
+	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
 
 {$(LIBCURL_SRC_DIR)\vtls\}.c{$(LIB_DIROBJ)\vtls\}.obj:
-	$(CC) $(CFLAGS) /Fo"$@"  $<
+	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
 
 $(LIB_DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
 	rc $(RC_FLAGS)
@@ -501,7 +497,7 @@ $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(MANIFESTTOOL)
 
 {$(CURL_SRC_DIR)\}.c{$(CURL_DIROBJ)\}.obj:
-	$(CC) $(CURL_CFLAGS) /Fo"$@"  $<
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@"  $<
 
 $(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
 	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\tool_hugehelp.c
