@@ -36,7 +36,6 @@
  1.18 try next proxy if one doesn't work
  1.19 Timeout idle connections from the pool
  1.20 SRV and URI DNS records
- 1.21 QUIC
  1.22 Monitor connections in the connection pool
  1.23 Offer API to flush the connection pool
 
@@ -68,6 +67,7 @@
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
  5.7 Brotli compression
+ 5.8 QUIC
 
  6. TELNET
  6.1 ditch stdin
@@ -353,16 +353,6 @@
  Offer support for resolving SRV and URI DNS records for libcurl to know which
  server to connect to for various protocols (including HTTP!).
 
-1.21 QUIC
-
- The standardization process of QUIC has been taken to the IETF and can be
- followed on the [IETF QUIC Mailing
- list](https://www.ietf.org/mailman/listinfo/quic). I'd like us to get on the
- bandwagon. Ideally, this would be done with a separate library/project to
- handle the binary/framing layer in a similar fashion to how HTTP/2 is
- implemented. This, to allow other projects to benefit from the work and to
- thus broaden the interest and chance of others to participate.
-
 1.22 Monitor connections in the connection pool
 
  If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
@@ -545,6 +535,16 @@ This is not detailed in any FTP specification.
  follow along it is a good reason for us to also allow users to take advantage
  of this. The algorithm: https://github.com/google/brotli The Firefox bug:
  https://bugzilla.mozilla.org/show_bug.cgi?id=366559
+
+5.8 QUIC
+
+ The standardization process of QUIC has been taken to the IETF and can be
+ followed on the [IETF QUIC Mailing
+ list](https://www.ietf.org/mailman/listinfo/quic). I'd like us to get on the
+ bandwagon. Ideally, this would be done with a separate library/project to
+ handle the binary/framing layer in a similar fashion to how HTTP/2 is
+ implemented. This, to allow other projects to benefit from the work and to
+ thus broaden the interest and chance of others to participate.
 
 
 6. TELNET
