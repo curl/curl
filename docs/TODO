@@ -28,7 +28,6 @@
  1.10 Support IDNA2008
  1.11 minimize dependencies with dynamicly loaded modules
  1.12 have form functions use CURL handle argument
- 1.13 Add CURLOPT_MAIL_CLIENT option
  1.14 Typesafe curl_easy_setopt()
  1.15 TCP Fast Open
  1.16 Try to URL encode given URL
@@ -79,6 +78,7 @@
  7. SMTP
  7.1 Pipelining
  7.2 Enhanced capability support
+ 7.3 Add CURLOPT_MAIL_CLIENT option
 
  8. POP3
  8.1 Pipelining
@@ -270,16 +270,6 @@
  The curl_formadd() design can probably also be reconsidered to make it easier
  to use and less error-prone. Probably easiest by splitting it into several
  function calls.
-
-1.13 Add CURLOPT_MAIL_CLIENT option
-
- Rather than use the URL to specify the mail client string to present in the
- HELO and EHLO commands, libcurl should support a new CURLOPT specifically for
- specifying this data as the URL is non-standard and to be honest a bit of a
- hack ;-)
-
- Please see the following thread for more information:
- https://curl.haxx.se/mail/lib-2012-05/0178.html
 
 1.14 Typesafe curl_easy_setopt()
 
@@ -589,6 +579,17 @@ to provide the data to send.
 
  Add the ability, for an application that uses libcurl, to obtain the list of
  capabilities returned from the EHLO command.
+
+7.3 Add CURLOPT_MAIL_CLIENT option
+
+ Rather than use the URL to specify the mail client string to present in the
+ HELO and EHLO commands, libcurl should support a new CURLOPT specifically for
+ specifying this data as the URL is non-standard and to be honest a bit of a
+ hack ;-)
+
+ Please see the following thread for more information:
+ https://curl.haxx.se/mail/lib-2012-05/0178.html
+
 
 8. POP3
 
