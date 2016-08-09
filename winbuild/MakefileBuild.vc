@@ -47,13 +47,19 @@ CFGSET=FALSE
 WINBUILD_DIR=`cd`
 ZIP        = zip.exe
 
+# Allow changing C compiler via environment variable CC (default cl.exe)
+# This command macro is not set by default: https://msdn.microsoft.com/en-us/library/ms933742.aspx
+!If "$(CC)" == ""
+CC = cl.exe
+!Endif
+
 !IF "$(VC)"=="6"
-CC_NODEBUG  = cl.exe /O2 /DNDEBUG
-CC_DEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
+CC_NODEBUG  = $(CC) /O2 /DNDEBUG
+CC_DEBUG    = $(CC) /Od /Gm /Zi /D_DEBUG /GZ
 CFLAGS     = /I. /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
 !ELSE
-CC_NODEBUG  = cl.exe /O2 /DNDEBUG
-CC_DEBUG    = cl.exe /Od /D_DEBUG /RTC1 /Z7 /LDd /W3
+CC_NODEBUG  = $(CC) /O2 /DNDEBUG
+CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd /W3
 CFLAGS      = /I. /I ../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
 !ENDIF
 
