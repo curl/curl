@@ -23,13 +23,14 @@
  2.5 Document
  2.6 Test Cases
 
- 3. Pushing Out Your Changes
- 3.1 Write Access to git Repository
- 3.2 How To Make a Patch with git
- 3.3 How To Make a Patch without git
- 3.4 How to get your changes into the main sources
+ 3. Sharing Your Changes
+ 3.1 How to get your changes into the main sources
+ 3.2 About pull requests
+ 3.3 Making quality patches
  3.5 Write good commit messages
- 3.6 About pull requests
+ 3.6 Write Access to git Repository
+ 3.7 How To Make a Patch with git
+ 3.8 How To Make a Patch without git
 
 ==============================================================================
 
@@ -88,7 +89,9 @@
 
  When writing C code, follow the CODE_STYLE already established in the
  project. Consistent style makes code easier to read and mistakes less likely
- to happen.
+ to happen. Run 'make checksrc' before you submit anything, to make sure you
+ follow the basic style. That script doesn't verify everything, but if it
+ complains you know you have work to do.
 
 2.2 Non-clobbering All Over
 
@@ -144,17 +147,76 @@
  hard to write tests for, do explain exactly how you have otherwise tested and
  verified your changes.
 
-3. Pushing Out Your Changes
+3. Sharing Your Changes
 
-3.1 Write Access to git Repository
+3.1 How to get your changes into the main sources
 
- If you are a frequent contributor, or have another good reason, you can of
- course get write access to the git repository and then you'll be able to push
- your changes straight into the git repo instead of sending changes by mail as
- patches. Just ask if this is what you'd want. You will be required to have
- posted a few quality patches first, before you can be granted push access.
+ Ideally you file a pull request on github, but you can also send your plain
+ patch to the curl-library mailing list.
 
-3.2 How To Make a Patch with git
+ Either way, your change will be reviewed and discussed there and you will be
+ expected to correct flaws pointed out and update accordingly, or the change
+ risk stalling and eventually just get deleted without action. As a submitter
+ of a change, you are the owner of that change until it has been merged.
+
+ Respond on the list or on github about the change and answer questions and/or
+ fix nits/flaws. This is very important. We will take lack of replies as a
+ sign that you're not very anxious to get your patch accepted and we tend to
+ simply drop such changes.
+
+3.2 About pull requests
+
+ With github it is easy to send a pull request to the curl project to have
+ changes merged this way instead of mailing patches to the curl-library
+ mailing list. See https://github.com/curl/curl/pulls
+
+ We prefer pull requests as it makes it a proper git commit that is easy to
+ merge and they are easy to track and not that easy to loose in a flood of
+ many emails, like they sometimes do on the mailing lists.
+
+ When you ajust your pull requests after review, consider squashing the
+ commits so that we can review the full updated version more easily.
+
+3.3 Making quality patches
+
+ Make the patch against as recent sources as possible.
+
+ If you've followed the tips in this document and your patch still hasn't been
+ incorporated or responded to after some weeks, consider resubmitting it to
+ the list or better yet: change it to a pull request.
+
+3.5 Write good commit messages
+
+ A short guide to how to do fine commit messages in the curl project.
+
+      ---- start ----
+      [area]: [short line describing the main effect]
+
+      [separate the above single line from the rest with an empty line]
+
+      [full description, no wider than 72 columns that describe as much as
+      possible as to why this change is made, and possibly what things
+      it fixes and everything else that is related]
+
+      [Bug: link to source of the report or more related discussion]
+      [Reported-by: John Doe - credit the reporter]
+      [whatever-else-by: credit all helpers, finders, doers]
+      ---- stop ----
+
+ Don't forget to use commit --author="" if you commit someone else's work,
+ and make sure that you have your own user and email setup correctly in git
+ before you commit
+
+3.6 Write Access to git Repository
+
+ If you are a very frequent contributor, you may be given push access to the
+ git repository and then you'll be able to push your changes straight into the
+ git repo instead of sending changes as pull requests or by mail as patches.
+
+ Just ask if this is what you'd want. You will be required to have posted
+ several high quality patches first, before you can be granted push access.
+
+3.7 How To Make a Patch with git
 
  You need to first checkout the repository:
 
@@ -180,7 +242,7 @@
  Now send those patches off to the curl-library list. You can of course opt to
  do that with the 'git send-email' command.
 
-3.3 How To Make a Patch without git
+3.8 How To Make a Patch without git
 
  Keep a copy of the unmodified curl sources. Make your changes in a separate
  source tree. When you think you have something that you want to offer the
@@ -207,55 +269,3 @@
 
      http://gnuwin32.sourceforge.net/packages/patch.htm
      http://gnuwin32.sourceforge.net/packages/diffutils.htm
-
-3.4 How to get your changes into the main sources
-
- Submit your patch to the curl-library mailing list.
-
- Make the patch against as recent sources as possible.
-
- Make sure your patch adheres to the source indent and coding style of already
- existing source code. Failing to do so just adds more work for me.
-
- Respond to replies on the list about the patch and answer questions and/or
- fix nits/flaws. This is very important. I will take lack of replies as a sign
- that you're not very anxious to get your patch accepted and I tend to simply
- drop such patches from my TODO list.
-
- If you've followed the above paragraphs and your patch still hasn't been
- incorporated after some weeks, consider resubmitting it to the list.
-
-3.5 Write good commit messages
-
- A short guide to how to do fine commit messages in the curl project.
-
-      ---- start ----
-      [area]: [short line describing the main effect]
-
-      [separate the above single line from the rest with an empty line]
-
-      [full description, no wider than 72 columns that describe as much as
-      possible as to why this change is made, and possibly what things
-      it fixes and everything else that is related]
-
-      [Bug: link to source of the report or more related discussion]
-      [Reported-by: John Doe - credit the reporter]
-      [whatever-else-by: credit all helpers, finders, doers]
-      ---- stop ----
-
- Don't forget to use commit --author="" if you commit someone else's work,
- and make sure that you have your own user and email setup correctly in git
- before you commit
-
-3.6 About pull requests
-
- With git (and especially github) it is easy and tempting to send a pull
- request to the curl project to have changes merged this way instead of
- mailing patches to the curl-library mailing list.
-
- We used to dislike this but we're trying to change that and accept that this
- is a frictionless way for people to contribute to the project. We now welcome
- pull requests!
-
- We will continue to avoid using github's merge tools to make the history
- linear and to make sure commits follow our style guidelines.
