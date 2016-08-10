@@ -15,6 +15,15 @@ This release includes the following bugfixes:
  o TFTP: Fix upload problem with piped input [3]
  o CURLOPT_TCP_NODELAY: now enabled by default [4]
  o mbedtls: set verbose TLS debug when MBEDTLS_DEBUG is defined [5]
+ o http2: always wait for readable socket
+ o cmake: Enable win32 large file support by default
+ o cmake: Enable win32 threaded resolver by default
+ o winbuild: Avoid setting redundant CFLAGS to compile commands [6]
+ o curl.h: make CURL_NO_OLDIES define CURL_STRICTER
+ o docs: make more markdown files use .md extension
+ o docs: CONTRIBUTE and LICENSE-MIXING were converted to markdown
+ o winbuild: Allow changing C compiler via environment variable CC [7]
+ o rtsp: accept any RTSP session id [8]
 
 This release includes the following known bugs:
 
@@ -23,9 +32,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Bill Nagel, Dan Donahue, Daniel Stenberg, Sergei Nikulov, Serj Kalichev,
+  Bill Nagel, Dan Donahue, Daniel Stenberg, Erik Janssen, Ray Satiro,
+  Sergei Nikulov, Serj Kalichev, Simon Warta, Tatsuhiro Tsujikawa,
   Thomas Glanzmann, Tim Rühsen,
-  (7 contributors)
+  (11 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -36,3 +46,6 @@ References to bug reports and discussions on issues:
  [3] = https://curl.haxx.se/bug/?i=857
  [4] = https://curl.haxx.se/mail/lib-2016-06/0143.html
  [5] = https://curl.haxx.se/mail/lib-2016-08/0017.html
+ [6] = https://curl.haxx.se/bug/?i=949
+ [7] = https://curl.haxx.se/bug/?i=952
+ [8] = https://curl.haxx.se/mail/lib-2016-08/0076.html
