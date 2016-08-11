@@ -51,6 +51,7 @@
 # ----------------------------------------------
 # Verify that current subdir is libcurl's 'lib'
 # ----------------------------------------------
+!MESSAGE Use of this make system is deprecated in favour of the one in winbuild.
 
 !IF ! EXIST(.\curl_addrinfo.c)
 !  MESSAGE Can not process this makefile from outside of libcurl's 'lib' subdirectory.
