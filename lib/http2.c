@@ -185,7 +185,7 @@ const struct Curl_handler Curl_handler_http2 = {
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
+  PROTOPT_STREAM                        /* flags */
 };
 
 const struct Curl_handler Curl_handler_http2_ssl = {
@@ -205,7 +205,7 @@ const struct Curl_handler Curl_handler_http2_ssl = {
   ZERO_NULL,                            /* readwrite */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
-  PROTOPT_SSL                           /* flags */
+  PROTOPT_SSL | PROTOPT_STREAM          /* flags */
 };
 
 /*
@@ -489,8 +489,11 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   }
 
   stream = data_s->req.protop;
-  if(!stream)
+  if(!stream) {
+    DEBUGF(infof(conn->data, "No proto pointer for stream: %x\n",
+                 stream_id));
     return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
 
   DEBUGF(infof(data_s, "on_frame_recv() header %x stream %x\n",
                frame->hd.type, stream_id));
@@ -979,6 +982,43 @@ static int error_callback(nghttp2_session *session,
 }
 #endif
 
+void Curl_http2_done(struct connectdata *conn, bool premature)
+{
+  struct Curl_easy *data = conn->data;
+  struct HTTP *http = data->req.protop;
+  struct http_conn *httpc = &conn->proto.httpc;
+
+  if(http->header_recvbuf) {
+    DEBUGF(infof(data, "free header_recvbuf!!\n"));
+    Curl_add_buffer_free(http->header_recvbuf);
+    http->header_recvbuf = NULL; /* clear the pointer */
+    Curl_add_buffer_free(http->trailer_recvbuf);
+    http->trailer_recvbuf = NULL; /* clear the pointer */
+    if(http->push_headers) {
+      /* if they weren't used and then freed before */
+      for(; http->push_headers_used > 0; --http->push_headers_used) {
+        free(http->push_headers[http->push_headers_used - 1]);
+      }
+      free(http->push_headers);
+      http->push_headers = NULL;
+    }
+  }
+
+  if(premature) {
+    /* RST_STREAM */
+    nghttp2_submit_rst_stream(httpc->h2, NGHTTP2_FLAG_NONE, http->stream_id,
+                              NGHTTP2_STREAM_CLOSED);
+    if(http->stream_id == httpc->pause_stream_id) {
+      infof(data, "stopped the pause stream!\n");
+      httpc->pause_stream_id = 0;
+    }
+  }
+  if(http->stream_id) {
+    nghttp2_session_set_stream_user_data(httpc->h2, http->stream_id, 0);
+    http->stream_id = 0;
+  }
+}
+
 /*
  * Initialize nghttp2 for a Curl connection
  */
@@ -1378,6 +1418,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
        socket is not read.  But it seems that usually streams are
        notified with its drain property, and socket is read again
        quickly. */
+    DEBUGF(infof(data, "stream %x is paused, pause id: %x\n",
+                 stream->stream_id, httpc->pause_stream_id));
     *err = CURLE_AGAIN;
     return -1;
   }

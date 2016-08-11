@@ -462,7 +462,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
 #endif
 
     /* This is not NTLM or many bytes left to send: close */
-    connclose(conn, "Mid-auth HTTP and much data left to send");
+    streamclose(conn, "Mid-auth HTTP and much data left to send");
     data->req.size = 0; /* don't download any more than 0 bytes */
 
     /* There still is data left to send, but this connection is marked for
@@ -1452,9 +1452,8 @@ CURLcode Curl_http_done(struct connectdata *conn,
 {
   struct Curl_easy *data = conn->data;
   struct HTTP *http = data->req.protop;
-#ifdef USE_NGHTTP2
-  struct http_conn *httpc = &conn->proto.httpc;
-#endif
+
+  infof(data, "Curl_http_done: called premature == %d\n", premature);
 
   Curl_unencode_cleanup(conn);
 
@@ -1467,7 +1466,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
      * Do not close CONNECT_ONLY connections. */
     if((data->req.httpcode != 401) && (data->req.httpcode != 407) &&
        !data->set.connect_only)
-      connclose(conn, "Negotiate transfer completed");
+      streamclose(conn, "Negotiate transfer completed");
     Curl_cleanup_negotiate(data);
   }
 #endif
@@ -1484,27 +1483,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
     http->send_buffer = NULL; /* clear the pointer */
   }
 
-#ifdef USE_NGHTTP2
-  if(http->header_recvbuf) {
-    DEBUGF(infof(data, "free header_recvbuf!!\n"));
-    Curl_add_buffer_free(http->header_recvbuf);
-    http->header_recvbuf = NULL; /* clear the pointer */
-    Curl_add_buffer_free(http->trailer_recvbuf);
-    http->trailer_recvbuf = NULL; /* clear the pointer */
-    if(http->push_headers) {
-      /* if they weren't used and then freed before */
-      for(; http->push_headers_used > 0; --http->push_headers_used) {
-        free(http->push_headers[http->push_headers_used - 1]);
-      }
-      free(http->push_headers);
-      http->push_headers = NULL;
-    }
-  }
-  if(http->stream_id) {
-    nghttp2_session_set_stream_user_data(httpc->h2, http->stream_id, 0);
-    http->stream_id = 0;
-  }
-#endif
+  Curl_http2_done(conn, premature);
 
   if(HTTPREQ_POST_FORM == data->set.httpreq) {
     data->req.bytecount = http->readbytecount + http->writebytecount;
@@ -3118,7 +3097,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
              signal the end of the document. */
           infof(data, "no chunk, no close, no size. Assume close to "
                 "signal end\n");
-          connclose(conn, "HTTP: No end-of-message indicator");
+          streamclose(conn, "HTTP: No end-of-message indicator");
         }
       }
 
@@ -3199,7 +3178,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
              */
             if(!k->upload_done) {
               infof(data, "HTTP error before end of send, stop sending\n");
-              connclose(conn, "Stop sending data before everything sent");
+              streamclose(conn, "Stop sending data before everything sent");
               k->upload_done = TRUE;
               k->keepon &= ~KEEP_SEND; /* don't send */
               if(data->state.expect100header)
@@ -3503,7 +3482,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         /* Negative Content-Length is really odd, and we know it
            happens for example when older Apache servers send large
            files */
-        connclose(conn, "negative content-length");
+        streamclose(conn, "negative content-length");
         infof(data, "Negative content-length: %" CURL_FORMAT_CURL_OFF_T
               ", closing after transfer\n", contentlength);
       }
@@ -3576,7 +3555,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
        * the connection will close when this request has been
        * served.
        */
-      connclose(conn, "Connection: close used");
+      streamclose(conn, "Connection: close used");
     }
     else if(checkprefix("Transfer-Encoding:", k->p)) {
       /* One or more encodings. We check for chunked and/or a compression

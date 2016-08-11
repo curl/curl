@@ -569,10 +569,9 @@ static CURLcode multi_done(struct connectdata **connp,
       result = CURLE_ABORTED_BY_CALLBACK;
   }
 
-  if((!premature &&
-      conn->send_pipe->size + conn->recv_pipe->size != 0 &&
-      !data->set.reuse_forbid &&
-      !conn->bits.close)) {
+  if(conn->send_pipe->size + conn->recv_pipe->size != 0 &&
+     !data->set.reuse_forbid &&
+     !conn->bits.close) {
     /* Stop if pipeline is not empty and we do not have to close
        connection. */
     DEBUGF(infof(data, "Connection still in use, no more multi_done now!\n"));
@@ -685,7 +684,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     /* If the handle is in a pipeline and has started sending off its
        request but not received its response yet, we need to close
        connection. */
-    connclose(data->easy_conn, "Removed with partial response");
+    streamclose(data->easy_conn, "Removed with partial response");
     /* Set connection owner so that the DONE function closes it.  We can
        safely do this here since connection is killed. */
     data->easy_conn->data = easy;
@@ -1298,7 +1297,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     return CURLM_BAD_EASY_HANDLE;
 
   do {
-    bool disconnect_conn = FALSE;
+    /* A "stream" here is a logical stream if the protocol can handle that
+       (HTTP/2), or the full connection for older protocols */
+    bool stream_error = FALSE;
     rc = CURLM_OK;
 
     /* Handle the case when the pipe breaks, i.e., the connection
@@ -1376,8 +1377,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         /* Force connection closed if the connection has indeed been used */
         if(data->mstate > CURLM_STATE_DO) {
-          connclose(data->easy_conn, "Disconnected with pending data");
-          disconnect_conn = TRUE;
+          streamclose(data->easy_conn, "Disconnected with pending data");
+          stream_error = TRUE;
         }
         result = CURLE_OPERATION_TIMEDOUT;
         (void)multi_done(&data->easy_conn, result, TRUE);
@@ -1426,7 +1427,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* Add this handle to the send or pend pipeline */
         result = Curl_add_handle_to_pipeline(data, data->easy_conn);
         if(result)
-          disconnect_conn = TRUE;
+          stream_error = TRUE;
         else {
           if(async)
             /* We're now waiting for an asynchronous name lookup */
@@ -1518,7 +1519,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(result) {
         /* failure detected */
-        disconnect_conn = TRUE;
+        stream_error = TRUE;
         break;
       }
     }
@@ -1558,7 +1559,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else if(result) {
         /* failure detected */
         /* Just break, the cleaning up is handled all in one place */
-        disconnect_conn = TRUE;
+        stream_error = TRUE;
         break;
       }
       break;
@@ -1578,7 +1579,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* failure detected */
         Curl_posttransfer(data);
         multi_done(&data->easy_conn, result, TRUE);
-        disconnect_conn = TRUE;
+        stream_error = TRUE;
       }
       break;
 
@@ -1595,7 +1596,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* failure detected */
         Curl_posttransfer(data);
         multi_done(&data->easy_conn, result, TRUE);
-        disconnect_conn = TRUE;
+        stream_error = TRUE;
       }
       break;
 
@@ -1670,7 +1671,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           if(drc) {
             /* a failure here pretty much implies an out of memory */
             result = drc;
-            disconnect_conn = TRUE;
+            stream_error = TRUE;
           }
           else
             retry = (newurl)?TRUE:FALSE;
@@ -1703,7 +1704,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
           else {
             /* Have error handler disconnect conn if we can't retry */
-            disconnect_conn = TRUE;
+            stream_error = TRUE;
             free(newurl);
           }
         }
@@ -1712,7 +1713,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           Curl_posttransfer(data);
           if(data->easy_conn)
             multi_done(&data->easy_conn, result, FALSE);
-          disconnect_conn = TRUE;
+          stream_error = TRUE;
         }
       }
       break;
@@ -1734,7 +1735,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* failure detected */
         Curl_posttransfer(data);
         multi_done(&data->easy_conn, result, FALSE);
-        disconnect_conn = TRUE;
+        stream_error = TRUE;
       }
       break;
 
@@ -1763,7 +1764,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* failure detected */
         Curl_posttransfer(data);
         multi_done(&data->easy_conn, result, FALSE);
-        disconnect_conn = TRUE;
+        stream_error = TRUE;
       }
       break;
 
@@ -1885,10 +1886,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         if(!(data->easy_conn->handler->flags & PROTOPT_DUAL) &&
            result != CURLE_HTTP2_STREAM)
-          connclose(data->easy_conn, "Transfer returned error");
+          streamclose(data->easy_conn, "Transfer returned error");
 
         Curl_posttransfer(data);
-        multi_done(&data->easy_conn, result, FALSE);
+        multi_done(&data->easy_conn, result, TRUE);
       }
       else if(done) {
         followtype follow=FOLLOW_NONE;
@@ -1944,7 +1945,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             if(!result)
               newurl = NULL; /* allocation was handed over Curl_follow() */
             else
-              disconnect_conn = TRUE;
+              stream_error = TRUE;
           }
 
           multistate(data, CURLM_STATE_DONE);
@@ -2045,7 +2046,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           Curl_removeHandleFromPipeline(data, data->easy_conn->send_pipe);
           Curl_removeHandleFromPipeline(data, data->easy_conn->recv_pipe);
 
-          if(disconnect_conn) {
+          if(stream_error) {
             /* Don't attempt to send data over a connection that timed out */
             bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
             /* disconnect properly */
@@ -2069,7 +2070,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* aborted due to progress callback return code must close the
            connection */
         result = CURLE_ABORTED_BY_CALLBACK;
-        connclose(data->easy_conn, "Aborted by callback");
+        streamclose(data->easy_conn, "Aborted by callback");
 
         /* if not yet in DONE state, go there, otherwise COMPLETED */
         multistate(data, (data->mstate < CURLM_STATE_DONE)?

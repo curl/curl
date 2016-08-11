@@ -63,6 +63,7 @@ problems may have been fixed or changed somewhat since this was written!
  7.5 ASCII FTP
  7.6 FTP with NULs in URL parts
  7.7 FTP and empty path parts in the URL
+ 7.8 Premature transfer end but healthy control channel
 
  8. TELNET
  8.1 TELNET and time limtiations don't work
@@ -441,6 +442,17 @@ problems may have been fixed or changed somewhat since this was written!
  the user wants to reach the root dir (this exception SHALL remain even when
  this bug is fixed).
 
+7.8 Premature transfer end but healthy control channel
+
+ When 'multi_done' is called before the transfer has been completed the normal
+ way, it is considered a "premature" transfer end. In this situation, libcurl
+ closes the connection assuming it doesn't know the state of the connection so
+ it can't be reused for subsequent requests.
+
+ With FTP however, this isn't necessarily true but there are a bunch of
+ situations (listed in the ftp_done code) where it *could* keep the connection
+ alive even in this situation - but the current code doesn't. Fixing this would
+ allow libcurl to reuse FTP connections better.
 
 8. TELNET
 

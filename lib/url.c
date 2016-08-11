@@ -2830,6 +2830,17 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
     return CURLE_OK;
   }
 
+  /*
+   * If this connection isn't marked to force-close, leave it open if there
+   * are other users of it
+   */
+  if(!conn->bits.close &&
+     (conn->send_pipe->size + conn->recv_pipe->size)) {
+    DEBUGF(infof(data, "Curl_disconnect, usecounter: %d\n",
+                 conn->send_pipe->size + conn->recv_pipe->size));
+    return CURLE_OK;
+  }
+
   if(conn->dns_entry != NULL) {
     Curl_resolv_unlock(data, conn->dns_entry);
     conn->dns_entry = NULL;
