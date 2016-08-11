@@ -232,3 +232,10 @@ $(MODE):
 copy_from_lib:
 	echo copying .c...
 	FOR %%i IN ($(CURLX_CFILES:/=\)) DO copy %%i ..\src\
+
+clean:
+	@IF EXIST ..\include\curl\curlbuild.h ( \
+	   CALL ..\buildconf.bat -clean \
+	)
+	del CURL_OBJS.inc LIBCURL_OBJS.inc vc100.idb
+	rd/s/q ..\builds
