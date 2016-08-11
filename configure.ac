@@ -892,16 +892,26 @@ else
   fi
 
   if test -z "$OPT_ZLIB" ; then
-    dnl check for the lib first without setting any new path, since many
-    dnl people have it in the default path
+    PKG_CHECK_MODULES(ZLIB, zlib,
+        [ LIBS="${ZLIB_LIBS} $LIBS"
+          CPPFLAGS="${ZLIB_CFLAGS} $CPPFLAGS"
+          HAVE_LIBZ="1"
+        ],
+        [
+        ])
 
-    AC_CHECK_LIB(z, inflateEnd,
+    if test -z "$HAVE_LIBZ"; then
+
+      dnl Check for the lib without setting any new path, since many
+      dnl people have it in the default path
+
+      AC_CHECK_LIB(z, inflateEnd,
                    dnl libz found, set the variable
                    [HAVE_LIBZ="1"
                     LIBS="-lz $LIBS"],
                    dnl if no lib found, try /usr/local
                    [OPT_ZLIB="/usr/local"])
-
+    fi
   fi
 
   dnl Add a nonempty path to the compiler flags
