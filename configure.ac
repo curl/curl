@@ -895,6 +895,15 @@ else
     dnl check for the lib first without setting any new path, since many
     dnl people have it in the default path
 
+
+    PKG_CHECK_MODULES(ZLIB, zlib, 
+        [ LIBS="${ZLIB_LIBS} $LIBS"
+          CPPFLAGS="${ZLIB_CFLAGS} $CPPFLAGS"
+        ],
+        [
+        ])
+
+
     AC_CHECK_LIB(z, inflateEnd,
                    dnl libz found, set the variable
                    [HAVE_LIBZ="1"
