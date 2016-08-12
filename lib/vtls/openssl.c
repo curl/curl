@@ -1083,6 +1083,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
 #endif
   CURLcode result = CURLE_OK;
   bool dNSName = FALSE; /* if a dNSName field exists in the cert */
+  bool iPAddress = FALSE; /* if a iPAddress field exists in the cert */
 
 #ifdef ENABLE_IPV6
   if(conn->bits.ipv6_ip &&
@@ -1115,10 +1116,10 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
       /* get a handle to alternative name number i */
       const GENERAL_NAME *check = sk_GENERAL_NAME_value(altnames, i);
 
-      /* If a subjectAltName extension of type dNSName is present, that MUST
-         be used as the identity. / RFC2818 section 3.1 */
       if(check->type == GEN_DNS)
         dNSName = TRUE;
+      else if(check->type == GEN_IPADD)
+        iPAddress = TRUE;
 
       /* only check alternatives of the same type the target is */
       if(check->type == target) {
@@ -1164,18 +1165,14 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
     }
     GENERAL_NAMES_free(altnames);
 
-    if(dnsmatched || (!dNSName && ipmatched)) {
-      /* count as a match if the dnsname matched or if there was no dnsname
-         fields at all AND there was an IP field match */
+    if(dnsmatched || ipmatched)
       matched = TRUE;
-    }
   }
 
   if(matched)
     /* an alternative name matched */
     ;
-  else if(dNSName) {
-    /* an dNSName field existed, but didn't match and then we MUST fail */
+  else if(dNSName || iPAddress) {
     infof(data, " subjectAltName does not match %s\n", conn->host.dispname);
     failf(data, "SSL: no alternative certificate subject name matches "
           "target host name '%s'", conn->host.dispname);
