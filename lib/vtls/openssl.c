@@ -1210,7 +1210,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
           j = ASN1_STRING_length(tmp);
           if(j >= 0) {
-            peer_CN = OPENSSL_malloc(j+1);
+            peer_CN = malloc(j+1);
             if(peer_CN) {
               memcpy(peer_CN, ASN1_STRING_data(tmp), j);
               peer_CN[j] = '\0';
@@ -1236,7 +1236,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
       CURLcode rc = Curl_convert_from_utf8(data, peer_CN, strlen(peer_CN));
       /* Curl_convert_from_utf8 calls failf if unsuccessful */
       if(rc) {
-        OPENSSL_free(peer_CN);
+        free(peer_CN);
         return rc;
       }
     }
@@ -1258,7 +1258,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
       infof(data, " common name: %s (matched)\n", peer_CN);
     }
     if(peer_CN)
-      OPENSSL_free(peer_CN);
+      free(peer_CN);
   }
 
   return result;
@@ -2626,7 +2626,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
       break; /* failed */
 
     /* https://www.openssl.org/docs/crypto/buffer.html */
-    buff1 = temp = OPENSSL_malloc(len1);
+    buff1 = temp = malloc(len1);
     if(!buff1)
       break; /* failed */
 
@@ -2649,7 +2649,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
 
   /* https://www.openssl.org/docs/crypto/buffer.html */
   if(buff1)
-    OPENSSL_free(buff1);
+    free(buff1);
 
   return result;
 }
