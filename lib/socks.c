@@ -719,14 +719,16 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
             "Can't complete SOCKS5 connection to %d.%d.%d.%d:%d. (%d)",
             (unsigned char)socksreq[4], (unsigned char)socksreq[5],
             (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
+            (((unsigned char)socksreq[8] << 8) |
+             (unsigned char)socksreq[9]),
             (unsigned char)socksreq[1]);
     }
     else if(socksreq[3] == 3) {
       failf(data,
             "Can't complete SOCKS5 connection to %s:%d. (%d)",
             hostname,
-            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
+            (((unsigned char)socksreq[len - 2] << 8) |
+             (unsigned char)socksreq[len - 1]),
             (unsigned char)socksreq[1]);
     }
     else if(socksreq[3] == 4) {
@@ -741,7 +743,8 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
             (unsigned char)socksreq[14], (unsigned char)socksreq[15],
             (unsigned char)socksreq[16], (unsigned char)socksreq[17],
             (unsigned char)socksreq[18], (unsigned char)socksreq[19],
-            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
+            (((unsigned char)socksreq[20] << 8) |
+             (unsigned char)socksreq[21]),
             (unsigned char)socksreq[1]);
     }
     return CURLE_COULDNT_CONNECT;
