@@ -702,10 +702,9 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     /* decrypt_gssapi_blockread already read the whole packet */
 #endif
     if(len > 10) {
-      len -= 10;
       result = Curl_blockread_all(conn, sock, (char *)&socksreq[10],
-                                  len, &actualread);
-      if(result || (len != actualread)) {
+                                  len - 10, &actualread);
+      if(result || ((len - 10) != actualread)) {
         failf(data, "Failed to receive SOCKS5 connect request ack.");
         return CURLE_COULDNT_CONNECT;
       }
