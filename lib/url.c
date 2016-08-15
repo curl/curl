@@ -4706,7 +4706,13 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       conn->proxytype = CURLPROXY_SOCKS4A;
     else if(checkprefix("socks4", proxy) || checkprefix("socks", proxy))
       conn->proxytype = CURLPROXY_SOCKS4;
-    /* Any other xxx:// : change to http proxy */
+    else if(checkprefix("http:", proxy))
+      ; /* leave it as HTTP or HTTP/1.0 */
+    else {
+      /* Any other xxx:// reject! */
+      failf(data, "No support for proxy over the \'%s\' scheme", proxy);
+      return CURLE_COULDNT_CONNECT;
+    }
   }
   else
     proxyptr = proxy; /* No xxx:// head: It's a HTTP proxy */
