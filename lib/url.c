@@ -4710,7 +4710,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       ; /* leave it as HTTP or HTTP/1.0 */
     else {
       /* Any other xxx:// reject! */
-      failf(data, "No support for proxy over the \'%s\' scheme", proxy);
+      failf(data, "Unsupported proxy scheme for \'%s\'", proxy);
       return CURLE_COULDNT_CONNECT;
     }
   }
