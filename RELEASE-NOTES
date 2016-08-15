@@ -24,6 +24,11 @@ This release includes the following bugfixes:
  o docs: CONTRIBUTE and LICENSE-MIXING were converted to markdown
  o winbuild: Allow changing C compiler via environment variable CC [7]
  o rtsp: accept any RTSP session id [8]
+ o HTTP: retry failed HEAD requests on reused connections too
+ o configure: add zlib search with pkg-config [9]
+ o openssl: accept subjectAltName iPAddress if no dNSName match [10]
+ o MANUAL: Remove invalid link to LDAP documentation [11]
+ o socks: improved connection procedure [12]
 
 This release includes the following known bugs:
 
@@ -32,10 +37,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Bill Nagel, Dan Donahue, Daniel Stenberg, Erik Janssen, Ray Satiro,
-  Sergei Nikulov, Serj Kalichev, Simon Warta, Tatsuhiro Tsujikawa,
-  Thomas Glanzmann, Tim Rühsen,
-  (11 contributors)
+  Bill Nagel, Dambaev Alexander, Dan Donahue, Daniel Stenberg,
+  David Kalnischkies, Erik Janssen, Marc Hoersken, Mark Nottingham, Ray Satiro,
+  Ronnie Mose, Sergei Nikulov, Serj Kalichev, Simon Warta, Tatsuhiro Tsujikawa,
+  Thomas Glanzmann, Tim Rühsen, wmsch on github,
+  (17 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -49,3 +55,7 @@ References to bug reports and discussions on issues:
  [6] = https://curl.haxx.se/bug/?i=949
  [7] = https://curl.haxx.se/bug/?i=952
  [8] = https://curl.haxx.se/mail/lib-2016-08/0076.html
+ [9] = https://curl.haxx.se/bug/?i=956
+ [10] = https://curl.haxx.se/bug/?i=959
+ [11] = https://curl.haxx.se/bug/?i=962
+ [12] = https://curl.haxx.se/bug/?i=944
