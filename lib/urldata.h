@@ -1173,6 +1173,14 @@ struct Progress {
   struct timeval t_startsingle;
   struct timeval t_startop;
   struct timeval t_acceptdata;
+
+  /* upload speed limit */
+  struct timeval ul_limit_start;
+  curl_off_t ul_limit_size;
+  /* download speed limit */
+  struct timeval dl_limit_start;
+  curl_off_t dl_limit_size;
+
 #define CURR_TIME (5+1) /* 6 entries for 5 seconds */
 
   curl_off_t speeder[ CURR_TIME ];

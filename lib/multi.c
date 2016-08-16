@@ -1801,9 +1801,17 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         result = Curl_speedcheck(data, now);
 
       if(( (data->set.max_send_speed == 0) ||
-           (data->progress.ulspeed < data->set.max_send_speed))  &&
+           (Curl_pgrsLimitWaitTime(data->progress.uploaded,
+                                   data->progress.ul_limit_size,
+                                   data->set.max_send_speed,
+                                   data->progress.ul_limit_start,
+                                   now) <= 0))  &&
          ( (data->set.max_recv_speed == 0) ||
-           (data->progress.dlspeed < data->set.max_recv_speed)))
+           (Curl_pgrsLimitWaitTime(data->progress.downloaded,
+                                   data->progress.dl_limit_size,
+                                   data->set.max_recv_speed,
+                                   data->progress.dl_limit_start,
+                                   now) <= 0)))
         multistate(data, CURLM_STATE_PERFORM);
       break;
 
@@ -1814,35 +1822,31 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       bool comeback = FALSE;
 
       /* check if over send speed */
-      if((data->set.max_send_speed > 0) &&
-         (data->progress.ulspeed > data->set.max_send_speed)) {
-        int buffersize;
-
-        multistate(data, CURLM_STATE_TOOFAST);
-
-        /* calculate upload rate-limitation timeout. */
-        buffersize = (int)(data->set.buffer_size ?
-                           data->set.buffer_size : BUFSIZE);
-        timeout_ms = Curl_sleep_time(data->set.max_send_speed,
-                                     data->progress.ulspeed, buffersize);
-        Curl_expire_latest(data, timeout_ms);
-        break;
+      if(data->set.max_send_speed > 0) {
+        timeout_ms = Curl_pgrsLimitWaitTime(data->progress.uploaded,
+                                            data->progress.ul_limit_size,
+                                            data->set.max_send_speed,
+                                            data->progress.ul_limit_start,
+                                            now);
+        if(timeout_ms > 0) {
+          multistate(data, CURLM_STATE_TOOFAST);
+          Curl_expire_latest(data, timeout_ms);
+          break;
+        }
       }
 
       /* check if over recv speed */
-      if((data->set.max_recv_speed > 0) &&
-         (data->progress.dlspeed > data->set.max_recv_speed)) {
-        int buffersize;
-
-        multistate(data, CURLM_STATE_TOOFAST);
-
-        /* Calculate download rate-limitation timeout. */
-        buffersize = (int)(data->set.buffer_size ?
-                           data->set.buffer_size : BUFSIZE);
-        timeout_ms = Curl_sleep_time(data->set.max_recv_speed,
-                                     data->progress.dlspeed, buffersize);
-        Curl_expire_latest(data, timeout_ms);
-        break;
+      if(data->set.max_recv_speed > 0) {
+        timeout_ms = Curl_pgrsLimitWaitTime(data->progress.downloaded,
+                                            data->progress.dl_limit_size,
+                                            data->set.max_recv_speed,
+                                            data->progress.dl_limit_start,
+                                            now);
+        if(timeout_ms > 0) {
+          multistate(data, CURLM_STATE_TOOFAST);
+          Curl_expire_latest(data, timeout_ms);
+          break;
+        }
       }
 
       /* read/write data if it is ready to do so */
