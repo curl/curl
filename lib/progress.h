@@ -49,7 +49,11 @@ void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size);
 int Curl_pgrsUpdate(struct connectdata *);
 void Curl_pgrsResetTimesSizes(struct Curl_easy *data);
 void Curl_pgrsTime(struct Curl_easy *data, timerid timer);
-
+long Curl_pgrsLimitWaitTime(curl_off_t cursize,
+                            curl_off_t startsize,
+                            curl_off_t limit,
+                            struct timeval start,
+                            struct timeval now);
 
 /* Don't show progress for sizes smaller than: */
 #define LEAST_SIZE_PROGRESS BUFSIZE

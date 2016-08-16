@@ -31,9 +31,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAX_RECV_SPEED_LARGE,
                           curl_off_t speed);
 .SH DESCRIPTION
 Pass a curl_off_t as parameter.  If a download exceeds this \fIspeed\fP
-(counted in bytes per second) on cumulative average during the transfer, the
-transfer will pause to keep the average rate less than or equal to the
-parameter value. Defaults to unlimited speed.
+(counted in bytes per second) the transfer will pause to keep the speed less
+than or equal to the parameter value. Defaults to unlimited speed.
 
 This option doesn't affect transfer speeds done with FILE:// URLs.
 .SH DEFAULT
