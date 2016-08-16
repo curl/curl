@@ -75,11 +75,13 @@ HTTP --proxy-anyauth and 407 with cookies
 GET http://z.x.com/1331 HTTP/1.1
 Host: z.x.com
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET http://z.x.com/1331 HTTP/1.1
 Host: z.x.com
 Proxy-Authorization: Basic bXluYW1lOm15cGFzc3dvcmQ=
 Accept: */*
+Proxy-Connection: Keep-Alive
 Cookie: proxycookie=weirdo
 
 </protocol>

@@ -51,6 +51,7 @@ ftp://test-number:1059/wanted/page -p -x %HOSTIP:%HTTPPORT
 <protocol>
 CONNECT test-number:1059 HTTP/1.1
 Host: test-number:1059
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

@@ -50,11 +50,13 @@ example.fake	TRUE	/c	FALSE	2139150993	moo3	indeed
 GET http://example.fake/c/1216 HTTP/1.1
 Host: example.fake
 Accept: */*
+Proxy-Connection: Keep-Alive
 Cookie: moo2=indeed; moo3=indeed
 
 GET http://bexample.fake/c/1216 HTTP/1.1
 Host: bexample.fake
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

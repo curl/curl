@@ -50,6 +50,7 @@ ftp_proxy=http://%HOSTIP:%HTTPPORT/
 GET FTP://%HOSTIP:%FTPPORT/563;type=A HTTP/1.1
 Host: %HOSTIP:%FTPPORT
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

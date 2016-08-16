@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2305,6 +2305,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                      "%s" /* TE: */
                      "%s" /* accept-encoding */
                      "%s" /* referer */
+                     "%s" /* Proxy-Connection */
                      "%s",/* transfer-encoding */
 
                      ftp_typecode,
@@ -2327,6 +2328,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                      conn->allocptr.accept_encoding:"",
                      (data->change.referer && conn->allocptr.ref)?
                      conn->allocptr.ref:"" /* Referer: <data> */,
+                     (conn->bits.httpproxy &&
+                      !conn->bits.tunnel_proxy &&
+                      !Curl_checkProxyheaders(conn, "Proxy-Connection:"))?
+                     "Proxy-Connection: Keep-Alive\r\n":"",
                      te
       );
 

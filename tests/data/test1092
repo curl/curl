@@ -49,6 +49,7 @@ FTP with type=i over HTTP proxy
 GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/1092;type=i HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

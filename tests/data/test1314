@@ -67,10 +67,12 @@ http://firstplace.example.com/want/1314 -L -x http://%HOSTIP:%HTTPPORT
 GET http://firstplace.example.com/want/1314 HTTP/1.1
 Host: firstplace.example.com
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET http://somewhere.example.com/reply/1314 HTTP/1.1
 Host: somewhere.example.com
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

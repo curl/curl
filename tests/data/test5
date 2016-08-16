@@ -43,6 +43,7 @@ http://%HOSTIP:%HTTPPORT/we/want/that/page/5#5 -x %HOSTIP:%HTTPPORT
 GET http://%HOSTIP:%HTTPPORT/we/want/that/page/5 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

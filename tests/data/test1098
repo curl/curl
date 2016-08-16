@@ -49,10 +49,12 @@ ftp://ftp-site/moo/1098 ftp://ftp-site/moo/1098 --proxy http://%HOSTIP:%HTTPPORT
 GET ftp://ftp-site/moo/1098 HTTP/1.1
 Host: ftp-site:21
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET ftp://ftp-site/moo/1098 HTTP/1.1
 Host: ftp-site:21
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 <stdout>

@@ -57,6 +57,7 @@ http://example.com/we/want/1415 -b none -c log/jar1415.txt -x %HOSTIP:%HTTPPORT
 GET http://example.com/we/want/1415 HTTP/1.1
 Host: example.com
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 

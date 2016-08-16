@@ -43,15 +43,18 @@ http://example.fake/c/1218 http://example.fake/c/1218 http://bexample.fake/c/121
 GET http://example.fake/c/1218 HTTP/1.1
 Host: example.fake
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET http://example.fake/c/1218 HTTP/1.1
 Host: example.fake
 Accept: */*
+Proxy-Connection: Keep-Alive
 Cookie: bug=fixed
 
 GET http://bexample.fake/c/1218 HTTP/1.1
 Host: bexample.fake
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>
