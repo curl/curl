@@ -64,6 +64,7 @@ http://www.example.com.2050/2050 --connect-to ::connect.example.com.2050:%HTTPPO
 <proxy>
 CONNECT connect.example.com.2050:%HTTPPORT HTTP/1.1
 Host: connect.example.com.2050:%HTTPPORT
+Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>

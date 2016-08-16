@@ -54,6 +54,7 @@ http://%HOSTIP:%HTTPPORT/1244 -x %HOSTIP:%HTTPPORT --next http://%HOSTIP:%HTTPPO
 GET http://%HOSTIP:%HTTPPORT/1244 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

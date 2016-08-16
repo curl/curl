@@ -53,6 +53,7 @@ HTTP redirect to http://// (four slashes!)
 GET http://%HOSTIP:%HTTPPORT/want/1142 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 # 3, CURLE_URL_MALFORMAT for the four slashes
