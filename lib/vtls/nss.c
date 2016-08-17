@@ -78,13 +78,11 @@
 #define SLOTSIZE 13
 
 PRFileDesc *PR_ImportTCPSocket(PRInt32 osfd);
-
-PRLock * nss_initlock = NULL;
-PRLock * nss_crllock = NULL;
-struct curl_llist *nss_crl_list = NULL;
-NSSInitContext * nss_context = NULL;
-
-volatile int initialized = 0;
+static PRLock *nss_initlock = NULL;
+static PRLock *nss_crllock = NULL;
+static struct curl_llist *nss_crl_list = NULL;
+static NSSInitContext *nss_context = NULL;
+static volatile int initialized = 0;
 
 typedef struct {
   const char *name;
@@ -183,7 +181,7 @@ static const cipher_s cipherlist[] = {
 };
 
 static const char* pem_library = "libnsspem.so";
-SECMODModule* mod = NULL;
+static SECMODModule* mod = NULL;
 
 /* NSPR I/O layer we use to detect blocking direction during SSL handshake */
 static PRDescIdentity nspr_io_identity = PR_INVALID_IO_LAYER;
