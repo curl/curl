@@ -301,9 +301,12 @@ void parse_cert_parameter(const char *cert_parameter,
   if(param_length == 0)
     return;
 
-  /* next less trivial: cert_parameter contains no colon nor backslash; this
+  /* next less trivial: cert_parameter starts 'pkcs11:' and thus
+   * looks like a RFC7512 PKCS#11 URI which can be used as-is.
+   * Also if cert_parameter contains no colon nor backslash, this
    * means no passphrase was given and no characters escaped */
-  if(!strpbrk(cert_parameter, ":\\")) {
+  if(!strncmp(cert_parameter, "pkcs11:", 7) ||
+     !strpbrk(cert_parameter, ":\\")) {
     *certname = strdup(cert_parameter);
     return;
   }
