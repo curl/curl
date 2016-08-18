@@ -95,6 +95,7 @@
 
 #ifdef USE_MBEDTLS
 
+#include <mbedtls/platform.h>
 #include <mbedtls/ssl.h>
 #include <mbedtls/version.h>
 #include <mbedtls/entropy.h>
