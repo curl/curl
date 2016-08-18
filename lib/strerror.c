@@ -308,6 +308,10 @@ curl_easy_strerror(CURLcode error)
   case CURLE_HTTP2_STREAM:
     return "Stream error in the HTTP/2 framing layer";
 
+  case CURLE_INCORRECT_TERMINATION:
+    return "Server unexpectedly closed the connection following "
+      "a successful transfer";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:
