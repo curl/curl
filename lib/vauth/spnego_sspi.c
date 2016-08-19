@@ -265,8 +265,10 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
   if(result)
     return result;
 
-  if(!*outptr || !*outlen)
+  if(!*outptr || !*outlen) {
+    free(*outptr);
     return CURLE_REMOTE_ACCESS_DENIED;
+  }
 
   return CURLE_OK;
 }
