@@ -431,6 +431,8 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   (void)curlx_nonblock(sock, FALSE);
 
+  infof(data, "SOCKS5 communication to %s:%d\n", hostname, remote_port);
+
   code = Curl_write_plain(conn, sock, (char *)socksreq, (2 + (int)socksreq[1]),
                           &written);
   if(code || (written != (2 + (int)socksreq[1]))) {
@@ -596,32 +598,39 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     if(dns)
       hp=dns->addr;
     if(hp) {
-      struct sockaddr_in *saddr_in;
-#ifdef ENABLE_IPV6
-      struct sockaddr_in6 *saddr_in6;
-#endif
       int i;
+      char buf[64];
+      Curl_printable_address(hp, buf, sizeof(buf));
 
       if(hp->ai_family == AF_INET) {
+        struct sockaddr_in *saddr_in;
         socksreq[len++] = 1; /* ATYP: IPv4 = 1 */
 
         saddr_in = (struct sockaddr_in*)(void*)hp->ai_addr;
         for(i = 0; i < 4; i++) {
           socksreq[len++] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[i];
         }
+
+        infof(data, "SOCKS5 connect to IPv4 %s (locally resolved)\n", buf);
       }
 #ifdef ENABLE_IPV6
       else if(hp->ai_family == AF_INET6) {
+        struct sockaddr_in6 *saddr_in6;
         socksreq[len++] = 4; /* ATYP: IPv6 = 4 */
 
         saddr_in6 = (struct sockaddr_in6*)(void*)hp->ai_addr;
         for(i = 0; i < 16; i++) {
           socksreq[len++] = ((unsigned char*)&saddr_in6->sin6_addr.s6_addr)[i];
         }
+
+        infof(data, "SOCKS5 connect to IPv6 %s (locally resolved)\n", buf);
       }
 #endif
-      else
+      else {
         hp = NULL; /* fail! */
+
+        failf(data, "SOCKS5 connection to %s not supported\n", buf);
+      }
 
       Curl_resolv_unlock(data, dns); /* not used anymore from now on */
     }
@@ -629,25 +638,6 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       failf(data, "Failed to resolve \"%s\" for SOCKS5 connect.",
             hostname);
       return CURLE_COULDNT_RESOLVE_HOST;
-    }
-    else {
-      if(socksreq[3] == 1) {
-        infof(data, "SOCKS5 connect to %d.%d.%d.%d (locally resolved)\n",
-              (unsigned char)socksreq[4], (unsigned char)socksreq[5],
-              (unsigned char)socksreq[6], (unsigned char)socksreq[7]);
-      }
-      else if(socksreq[3] == 4) {
-        infof(data, "SOCKS5 connect to %02x%02x:%02x%02x:%02x%02x:%02x%02x:"
-                   "%02x%02x:%02x%02x:%02x%02x:%02x%02x (locally resolved)\n",
-              (unsigned char)socksreq[4], (unsigned char)socksreq[5],
-              (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-              (unsigned char)socksreq[8], (unsigned char)socksreq[9],
-              (unsigned char)socksreq[10], (unsigned char)socksreq[11],
-              (unsigned char)socksreq[12], (unsigned char)socksreq[13],
-              (unsigned char)socksreq[14], (unsigned char)socksreq[15],
-              (unsigned char)socksreq[16], (unsigned char)socksreq[17],
-              (unsigned char)socksreq[18], (unsigned char)socksreq[19]);
-      }
     }
   }
 
@@ -768,6 +758,9 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
             (unsigned char)socksreq[1]);
     }
     return CURLE_COULDNT_CONNECT;
+  }
+  else {
+    infof(data, "SOCKS5 request granted.\n");
   }
 
   (void)curlx_nonblock(sock, TRUE);
