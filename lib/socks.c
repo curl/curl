@@ -734,12 +734,15 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
             (unsigned char)socksreq[1]);
     }
     else if(socksreq[3] == 3) {
+      unsigned char port_upper = (unsigned char)socksreq[len - 2];
+      socksreq[len - 2] = 0;
       failf(data,
             "Can't complete SOCKS5 connection to %s:%d. (%d)",
-            hostname,
-            (((unsigned char)socksreq[len - 2] << 8) |
+            (char *)&socksreq[5],
+            ((port_upper << 8) |
              (unsigned char)socksreq[len - 1]),
             (unsigned char)socksreq[1]);
+      socksreq[len - 2] = port_upper;
     }
     else if(socksreq[3] == 4) {
       failf(data,
