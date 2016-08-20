@@ -606,7 +606,6 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
         saddr_in = (struct sockaddr_in*)(void*)hp->ai_addr;
         for(i = 0; i < 4; i++) {
           socksreq[len++] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[i];
-          infof(data, "%d\n", socksreq[len-1]);
         }
       }
 #ifdef ENABLE_IPV6
@@ -628,6 +627,25 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
       failf(data, "Failed to resolve \"%s\" for SOCKS5 connect.",
             hostname);
       return CURLE_COULDNT_RESOLVE_HOST;
+    }
+    else {
+      if(socksreq[3] == 1) {
+        infof(data, "SOCKS5 connect to %d.%d.%d.%d (locally resolved)\n",
+              (unsigned char)socksreq[4], (unsigned char)socksreq[5],
+              (unsigned char)socksreq[6], (unsigned char)socksreq[7]);
+      }
+      else if(socksreq[3] == 4) {
+        infof(data, "SOCKS5 connect to %02x%02x:%02x%02x:%02x%02x:%02x%02x:"
+                   "%02x%02x:%02x%02x:%02x%02x:%02x%02x (locally resolved)\n",
+              (unsigned char)socksreq[4], (unsigned char)socksreq[5],
+              (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+              (unsigned char)socksreq[8], (unsigned char)socksreq[9],
+              (unsigned char)socksreq[10], (unsigned char)socksreq[11],
+              (unsigned char)socksreq[12], (unsigned char)socksreq[13],
+              (unsigned char)socksreq[14], (unsigned char)socksreq[15],
+              (unsigned char)socksreq[16], (unsigned char)socksreq[17],
+              (unsigned char)socksreq[18], (unsigned char)socksreq[19]);
+      }
     }
   }
 
