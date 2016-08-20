@@ -1104,7 +1104,7 @@ struct connectdata {
  * Struct to keep statistical and informational data.
  */
 struct PureInfo {
-  int httpcode;  /* Recent HTTP, FTP, or RTSP response code */
+  int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
   int httpproxycode; /* response code from proxy when received separate */
   int httpversion; /* the http version number X.Y = X*10+Y */
   long filetime; /* If requested, this is might get set. Set to -1 if the time
