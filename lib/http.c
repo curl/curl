@@ -869,9 +869,9 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
             authp->avail |= CURLAUTH_DIGEST;
 
             /* We call this function on input Digest headers even if Digest
-              * authentication isn't activated yet, as we need to store the
-              * incoming data from this header in case we are going to use
-              * Digest */
+             * authentication isn't activated yet, as we need to store the
+             * incoming data from this header in case we are going to use
+             * Digest */
             result = Curl_input_digest(conn, proxy, auth);
             if(result) {
               infof(data, "Authentication problem. Ignoring this.\n");
