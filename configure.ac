@@ -892,7 +892,7 @@ else
   fi
 
   if test -z "$OPT_ZLIB" ; then
-    PKG_CHECK_MODULES(ZLIB, zlib,
+    PKG_CHECK_MODULES([ZLIB], [zlib],
         [ LIBS="${ZLIB_LIBS} $LIBS"
           CPPFLAGS="${ZLIB_CFLAGS} $CPPFLAGS"
           HAVE_LIBZ="1"
