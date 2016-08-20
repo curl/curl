@@ -170,24 +170,26 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
       hp=dns->addr;
     if(hp) {
       char buf[64];
-      unsigned short ip[4];
       Curl_printable_address(hp, buf, sizeof(buf));
 
-      if(4 == sscanf(buf, "%hu.%hu.%hu.%hu",
-                     &ip[0], &ip[1], &ip[2], &ip[3])) {
-        /* Set DSTIP */
-        socksreq[4] = (unsigned char)ip[0];
-        socksreq[5] = (unsigned char)ip[1];
-        socksreq[6] = (unsigned char)ip[2];
-        socksreq[7] = (unsigned char)ip[3];
+      if(hp->ai_family == AF_INET) {
+        struct sockaddr_in *saddr_in;
+
+        saddr_in = (struct sockaddr_in*)(void*)hp->ai_addr;
+        socksreq[4] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[0];
+        socksreq[5] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[1];
+        socksreq[6] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[2];
+        socksreq[7] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[3];
+
+        infof(data, "SOCKS4 connect to IPv4 %s (locally resolved)\n", buf);
       }
-      else
+      else {
         hp = NULL; /* fail! */
 
-      infof(data, "SOCKS4 connect to %s (locally resolved)\n", buf);
+        failf(data, "SOCKS4 connection to %s not supported\n", buf);
+      }
 
       Curl_resolv_unlock(data, dns); /* not used anymore from now on */
-
     }
     if(!hp) {
       failf(data, "Failed to resolve \"%s\" for SOCKS4 connect.",
