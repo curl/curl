@@ -858,11 +858,9 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
 #endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
         if(checkprefix("Digest", auth)) {
-          if((authp->avail & CURLAUTH_DIGEST) != 0) {
+          if((authp->avail & CURLAUTH_DIGEST) != 0)
             infof(data, "Ignoring duplicate digest auth header.\n");
-          }
-          else if((authp->avail & CURLAUTH_DIGEST) ||
-                  Curl_auth_is_digest_supported()) {
+          else if(Curl_auth_is_digest_supported()) {
             CURLcode result;
 
             *availp |= CURLAUTH_DIGEST;
