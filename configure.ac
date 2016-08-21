@@ -892,13 +892,16 @@ else
   fi
 
   if test -z "$OPT_ZLIB" ; then
-    PKG_CHECK_MODULES([ZLIB], [zlib],
+
+    m4_ifdef([PKG_CHECK_MODULES], [
+      PKG_CHECK_MODULES([ZLIB], [zlib],
         [ LIBS="${ZLIB_LIBS} $LIBS"
           CPPFLAGS="${ZLIB_CFLAGS} $CPPFLAGS"
           HAVE_LIBZ="1"
         ],
         [
         ])
+    ])
 
     if test -z "$HAVE_LIBZ"; then
 
