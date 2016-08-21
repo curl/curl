@@ -76,7 +76,6 @@ problems may have been fixed or changed somewhat since this was written!
  10.2 SOCKS don't support timeouts
  10.3 FTPS over SOCKS
  10.4 active FTP over a SOCKS
- 10.5 SOCKS proxy not working via IPv6
 
  11. Internals
  11.1 Curl leaks .onion hostnames in DNS
@@ -493,12 +492,6 @@ problems may have been fixed or changed somewhat since this was written!
 
  libcurl doesn't support active FTP over a SOCKS proxy
 
-10.5 SOCKS proxy not working via IPv6
-
- `curl --proxy "socks://hostname-with-AAAA-record" example.com`
-
- curl: (7) Can't complete SOCKS4 connection to 1.2.3.4:109. (91),
- request rejected or failed.
 
 11. Internals
 
