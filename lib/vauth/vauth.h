@@ -55,6 +55,9 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
                            const char *realm);
 #endif
 
+/* This is used to test if the user contains a Windows domain name */
+bool Curl_auth_user_contains_domain(const char *user);
+
 /* This is used to generate a base64 encoded PLAIN cleartext message */
 CURLcode Curl_auth_create_plain_message(struct Curl_easy *data,
                                         const char *userp,

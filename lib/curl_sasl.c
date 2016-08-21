@@ -288,7 +288,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   }
   else if(conn->bits.user_passwd) {
 #if defined(USE_KERBEROS5)
-    if((enabledmechs & SASL_MECH_GSSAPI) && Curl_auth_is_gssapi_supported()) {
+    if((enabledmechs & SASL_MECH_GSSAPI) && Curl_auth_is_gssapi_supported() &&
+       Curl_auth_user_contains_domain(conn->user)) {
       sasl->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */
       mech = SASL_MECH_STRING_GSSAPI;
       state1 = SASL_GSSAPI;
