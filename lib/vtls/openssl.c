@@ -3125,11 +3125,6 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
         *curlcode = CURLE_RECV_ERROR;
         return -1;
       }
-      else if(sslerror == 0) {
-        infof(conn->data, "server closed abruptly (missing close_notify)\n");
-        *curlcode = CURLE_INCORRECT_TERMINATION;
-        return -1;
-      }
     }
   }
   return nread;
