@@ -846,7 +846,7 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
 
   if(imapcode != 'O') {
     failf(data, "Got unexpected imap-server response");
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
+    result = CURLE_WEIRD_SERVER_REPLY;
   }
   else
     result = imap_perform_capability(conn);
@@ -1179,7 +1179,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   else {
     /* We don't know how to parse this line */
     failf(pp->conn->data, "Failed to parse FETCH response.");
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
+    result = CURLE_WEIRD_SERVER_REPLY;
   }
 
   /* End of DO phase */
@@ -1198,7 +1198,7 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
   (void)instate; /* No use for this yet */
 
   if(imapcode != 'O')
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: Fix error code */
+    result = CURLE_WEIRD_SERVER_REPLY;
   else
     /* End of DONE phase */
     state(conn, IMAP_STOP);
@@ -1275,7 +1275,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     /* Was there an error parsing the response line? */
     if(imapcode == -1)
-      return CURLE_FTP_WEIRD_SERVER_REPLY;
+      return CURLE_WEIRD_SERVER_REPLY;
 
     if(!imapcode)
       break;

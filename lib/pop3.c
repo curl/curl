@@ -663,7 +663,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
 
   if(pop3code != '+') {
     failf(data, "Got unexpected pop3-server response");
-    result = CURLE_FTP_WEIRD_SERVER_REPLY;
+    result = CURLE_WEIRD_SERVER_REPLY;
   }
   else {
     /* Does the server support APOP authentication? */

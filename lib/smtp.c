@@ -674,7 +674,7 @@ static CURLcode smtp_state_servergreet_resp(struct connectdata *conn,
 
   if(smtpcode/100 != 2) {
     failf(data, "Got unexpected smtp-server response: %d", smtpcode);
-    result = CURLE_FTP_WEIRD_SERVER_REPLY;
+    result = CURLE_WEIRD_SERVER_REPLY;
   }
   else
     result = smtp_perform_ehlo(conn);
