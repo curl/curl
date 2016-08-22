@@ -1232,6 +1232,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt_str(curl, CURLOPT_INTERFACE, config->iface);
         my_setopt_str(curl, CURLOPT_KRBLEVEL, config->krblevel);
 
+        my_setopt_str(curl, CURLOPT_LOCALADDR, config->localaddr);
+
         progressbarinit(&progressbar, config);
         if((global->progressmode == CURL_PROGRESS_BAR) &&
            !global->noprogress && !global->mute) {

@@ -1875,6 +1875,9 @@ typedef enum {
   /* Specify URL using CURL URL API. */
   CINIT(CURLU, OBJECTPOINT, 282),
 
+  /* Set the IP-Address string to use as outgoing IP Addr */
+  CINIT(LOCALADDR, STRINGPOINT, 283),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

@@ -192,6 +192,8 @@ static const struct helptxt helptext[] = {
    "Allow insecure server connections when using SSL"},
   {"    --interface <name>",
    "Use network INTERFACE (or address)"},
+  {"    --localaddr <IP-ADDR>",
+   "Specify local IP-Address to use"},
   {"-4, --ipv4",
    "Resolve names to IPv4 addresses"},
   {"-6, --ipv6",

@@ -71,6 +71,7 @@ struct OperationConfig {
   char *iface;
   long localport;
   long localportrange;
+  char *localaddr; /* local IP address */
   unsigned short porttouse;
   char *range;
   long low_speed_limit;

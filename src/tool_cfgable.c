@@ -62,6 +62,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->headerfile);
   Curl_safefree(config->ftpport);
   Curl_safefree(config->iface);
+  Curl_safefree(config->localaddr);
 
   Curl_safefree(config->range);
 
