@@ -1002,10 +1002,10 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)arg;
   struct Curl_easy *data = connssl->data;
   const char *nickname = connssl->client_nickname;
+  static const char pem_slotname[] = "PEM Token #1";
 
   if(connssl->obj_clicert) {
     /* use the cert/key provided by PEM reader */
-    static const char pem_slotname[] = "PEM Token #1";
     SECItem cert_der = { 0, NULL, 0 };
     void *proto_win = SSL_RevealPinArg(sock);
     struct CERTCertificateStr *cert;
@@ -1066,6 +1066,12 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
   nickname = (*pRetCert)->nickname;
   if(NULL == nickname)
     nickname = "[unknown]";
+
+  if(!strncmp(nickname, pem_slotname, sizeof(pem_slotname) - 1U)) {
+    failf(data, "NSS: refusing previously loaded certificate from file: %s",
+          nickname);
+    return SECFailure;
+  }
 
   if(NULL == *pRetKey) {
     failf(data, "NSS: private key not found for certificate: %s", nickname);

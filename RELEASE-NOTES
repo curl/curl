@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o SOCKS: display the hostname returned by the SOCKS5 proxy server
  o sasl: Don't use GSSAPI authentication when domain name not specified [16]
  o win: Basic support for Universal Windows Platform apps [17]
+ o nss: fix incorrect use of a previously loaded certificate from file
 
 This release includes the following known bugs:
 
