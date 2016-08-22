@@ -60,9 +60,8 @@ Couldn't resolve host. The given remote host was not resolved.
 .IP "CURLE_COULDNT_CONNECT (7)"
 Failed to connect() to host or proxy.
 .IP "CURLE_FTP_WEIRD_SERVER_REPLY (8)"
-After connecting to a FTP server, libcurl expects to get a certain reply
-back. This error code implies that it got a strange or bad reply. The given
-remote server is probably not an OK FTP server.
+The server sent data libcurl couldn't parse. This error code is used for more
+than just FTP and is aliased as \fICURLE_WEIRD_SERVER_REPLY\fP since 7.51.0.
 .IP "CURLE_REMOTE_ACCESS_DENIED (9)"
 We were denied access to the resource given in the URL.  For FTP, this occurs
 while trying to change to the remote directory.
