@@ -29,6 +29,14 @@ This release includes the following bugfixes:
  o openssl: accept subjectAltName iPAddress if no dNSName match [10]
  o MANUAL: Remove invalid link to LDAP documentation [11]
  o socks: improved connection procedure [12]
+ o proxy: reject attempts to use unsupported proxy schemes
+ o proxy: bring back use of "Proxy-Connection:" [13]
+ o curl: allow "pkcs11:" prefix for client certificates [14]
+ o spnego_sspi: fix memory leak in case *outlen is zero [15]
+ o SOCKS: improve verbose output of SOCKS5 connection sequence
+ o SOCKS: display the hostname returned by the SOCKS5 proxy server
+ o sasl: Don't use GSSAPI authentication when domain name not specified [16]
+ o win: Basic support for Universal Windows Platform apps [17]
 
 This release includes the following known bugs:
 
@@ -38,10 +46,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Bill Nagel, Dambaev Alexander, Dan Donahue, Daniel Stenberg,
-  David Kalnischkies, Erik Janssen, Marc Hoersken, Mark Nottingham, Ray Satiro,
-  Ronnie Mose, Sergei Nikulov, Serj Kalichev, Simon Warta, Tatsuhiro Tsujikawa,
-  Thomas Glanzmann, Tim Rühsen, wmsch on github,
-  (17 contributors)
+  David Kalnischkies, David Woodhouse, Erik Janssen, János Fekete,
+  Marc Hoersken, Marc Hörsken, Marco Deckel, Mark Nottingham, Miroslav Franc,
+  Ray Satiro, Ronnie Mose, Sergei Nikulov, Serj Kalichev, Simon Warta,
+  Steve Holme, Tatsuhiro Tsujikawa, Thomas Glanzmann, Tim Rühsen,
+  wmsch on github,
+  (23 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -59,3 +69,8 @@ References to bug reports and discussions on issues:
  [10] = https://curl.haxx.se/bug/?i=959
  [11] = https://curl.haxx.se/bug/?i=962
  [12] = https://curl.haxx.se/bug/?i=944
+ [13] = https://curl.haxx.se/bug/?i=954
+ [14] = https://curl.haxx.se/mail/lib-2016-08/0122.html
+ [15] = https://curl.haxx.se/bug/?i=970
+ [16] = https://curl.haxx.se/bug/?i=718
+ [17] = https://curl.haxx.se/bug/?i=820
