@@ -1177,7 +1177,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
           result = res_setopt_str(curl, CURLOPT_SSLENGINE, config->engine);
           if(result)
             goto show_error;
-          my_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L);
         }
 
         /* new in curl 7.10.7, extended in 7.19.4. Modified to use
