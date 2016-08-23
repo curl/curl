@@ -911,7 +911,7 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
     }
     else {
       socks[1] = conn->sock[SECONDARYSOCKET];
-      bits |= GETSOCK_WRITESOCK(1);
+      bits |= GETSOCK_WRITESOCK(1) | GETSOCK_READSOCK(1);
     }
 
     return bits;
