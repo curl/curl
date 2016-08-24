@@ -891,17 +891,17 @@ else
     OPT_ZLIB=""
   fi
 
-  if test -z "$OPT_ZLIB" ; then
+  CURL_CHECK_PKGCONFIG(zlib)
 
-    m4_ifdef([PKG_CHECK_MODULES], [
-      PKG_CHECK_MODULES([ZLIB], [zlib],
-        [ LIBS="${ZLIB_LIBS} $LIBS"
-          CPPFLAGS="${ZLIB_CFLAGS} $CPPFLAGS"
-          HAVE_LIBZ="1"
-        ],
-        [
-        ])
-    ])
+  if test "$PKGCONFIG" != "no" ; then
+    LIBS="`$PKGCONFIG --libs-only-l zlib` $LIBS"
+    LDFLAGS="`$PKGCONFIG --libs-only-L zlib` $LDFLAGS"
+    CPPFLAGS="`$PKGCONFIG --cflags-only-I zlib` $CPPFLAGS"
+    OPT_ZLIB=""
+    HAVE_LIBZ="1"
+  fi
+
+  if test -z "$OPT_ZLIB" ; then
 
     if test -z "$HAVE_LIBZ"; then
 
