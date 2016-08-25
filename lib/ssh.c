@@ -3109,7 +3109,6 @@ static CURLcode scp_done(struct connectdata *conn, CURLcode status,
 
 }
 
-/* return number of received (decrypted) bytes */
 static ssize_t scp_send(struct connectdata *conn, int sockindex,
                         const void *mem, size_t len, CURLcode *err)
 {
@@ -3134,10 +3133,6 @@ static ssize_t scp_send(struct connectdata *conn, int sockindex,
   return nwrite;
 }
 
-/*
- * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
- * a regular CURLcode value.
- */
 static ssize_t scp_recv(struct connectdata *conn, int sockindex,
                         char *mem, size_t len, CURLcode *err)
 {

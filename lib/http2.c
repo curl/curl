@@ -1268,10 +1268,6 @@ static int h2_session_send(struct Curl_easy *data,
   return nghttp2_session_send(h2);
 }
 
-/*
- * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
- * a regular CURLcode value.
- */
 static ssize_t http2_recv(struct connectdata *conn, int sockindex,
                           char *mem, size_t len, CURLcode *err)
 {
@@ -1497,7 +1493,6 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 #define HEADER_OVERFLOW(x) \
   (x.namelen > (uint16_t)-1 || x.valuelen > (uint16_t)-1 - x.namelen)
 
-/* return number of received (decrypted) bytes */
 static ssize_t http2_send(struct connectdata *conn, int sockindex,
                           const void *mem, size_t len, CURLcode *err)
 {
