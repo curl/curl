@@ -330,6 +330,7 @@ struct ssl_connect_data {
   CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
   bool recv_sspi_close_notify; /* true if connection closed by close_notify */
   bool recv_connection_closed; /* true if connection closed, regardless how */
+  bool use_alpn; /* true if ALPN is used for this connection */
 #elif defined(USE_DARWINSSL)
   SSLContextRef ssl_ctx;
   curl_socket_t ssl_sockfd;
