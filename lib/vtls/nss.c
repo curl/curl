@@ -360,7 +360,12 @@ static CURLcode nss_create_object(struct ssl_connect_data *ssl,
   if(!slot_name)
     return CURLE_OUT_OF_MEMORY;
 
+  /* Work around race condition in nssSlot_IsTokenPresent() causing spurious
+   * SEC_ERROR_NO_TOKEN. For more details, go to
+   * <https://bugzilla.mozilla.org/show_bug.cgi?id=1297397>. */
+  PR_Lock(nss_initlock);
   slot = PK11_FindSlotByName(slot_name);
+  PR_Unlock(nss_initlock);
   free(slot_name);
   if(!slot)
     return result;
