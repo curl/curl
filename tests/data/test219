@@ -16,6 +16,9 @@ proxy
 <server>
 none
 </server>
+<features>
+http
+</features>
  <name>
 try using proxy with unsupported scheme
  </name>
