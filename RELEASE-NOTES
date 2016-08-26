@@ -38,6 +38,7 @@ This release includes the following bugfixes:
  o sasl: Don't use GSSAPI authentication when domain name not specified [16]
  o win: Basic support for Universal Windows Platform apps [17]
  o nss: fix incorrect use of a previously loaded certificate from file
+ o nss: work around race condition in PK11_FindSlotByName() [18]
 
 This release includes the following known bugs:
 
@@ -75,3 +76,4 @@ References to bug reports and discussions on issues:
  [15] = https://curl.haxx.se/bug/?i=970
  [16] = https://curl.haxx.se/bug/?i=718
  [17] = https://curl.haxx.se/bug/?i=820
+ [18] = https://bugzilla.mozilla.org/1297397
