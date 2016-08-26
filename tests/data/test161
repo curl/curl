@@ -44,6 +44,7 @@ SIZE 161
 RETR 161
 QUIT
 </protocol>
+# CURLE_PARTIAL_FILE = 18
 <errorcode>
 18
 </errorcode>
