@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o spnego_sspi: fix memory leak in case *outlen is zero [15]
  o SOCKS: improve verbose output of SOCKS5 connection sequence
  o SOCKS: display the hostname returned by the SOCKS5 proxy server
+ o http/sasl: Query authentication mechanism supported by SSPI before using
  o sasl: Don't use GSSAPI authentication when domain name not specified [16]
  o win: Basic support for Universal Windows Platform apps [17]
  o nss: fix incorrect use of a previously loaded certificate from file
