@@ -128,7 +128,7 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
     }
 
     /* Verify the platform identifier (if necessary) */
-    if(matched && platform != PLATFORM_DONT_CARE) {
+    if(matched) {
       switch(platform) {
       case PLATFORM_WINDOWS:
         if(osver.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
@@ -138,6 +138,9 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
       case PLATFORM_WINNT:
         if(osver.dwPlatformId != VER_PLATFORM_WIN32_NT)
           matched = FALSE;
+
+      default: /* like platform == PLATFORM_DONT_CARE */
+        break;
       }
     }
   }
