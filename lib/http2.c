@@ -151,6 +151,7 @@ void Curl_http2_setup_req(struct Curl_easy *data)
   http->pauselen = 0;
   http->error_code = NGHTTP2_NO_ERROR;
   http->closed = FALSE;
+  http->close_handled = FALSE;
   http->mem = data->state.buffer;
   http->len = BUFSIZE;
   http->memlen = 0;
@@ -1256,6 +1257,8 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
     }
   }
 
+  stream->close_handled = TRUE;
+
   DEBUGF(infof(data, "http2_recv returns 0, http2_handle_stream_close\n"));
   return 0;
 }
@@ -1562,6 +1565,14 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   DEBUGF(infof(conn->data, "http2_send len=%zu\n", len));
 
   if(stream->stream_id != -1) {
+    if(stream->close_handled) {
+      infof(conn->data, "stream %d closed\n", stream->stream_id);
+      *err = CURLE_HTTP2;
+      return -1;
+    }
+    else if(stream->closed) {
+      return http2_handle_stream_close(conn, conn->data, stream, err);
+    }
     /* If stream_id != -1, we have dispatched request HEADERS, and now
        are going to send or sending request body in DATA frame */
     stream->upload_mem = mem;
