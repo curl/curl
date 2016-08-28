@@ -520,7 +520,7 @@ nickname contains ":", it needs to be preceded by "\\" so that it is not
 recognized as password delimiter.  If the nickname contains "\\", it needs to
 be escaped as "\\\\" so that it is not recognized as an escape character.
 
-(iOS and Mac OS X only) If curl is built against Secure Transport, then the
+(iOS and macOS only) If curl is built against Secure Transport, then the
 certificate string can either be the name of a certificate/private key in the
 system or user keychain, or the path to a PKCS#12-encoded certificate and
 private key. If you want to use a file from the current directory, please
@@ -568,6 +568,12 @@ Current Working Directory, or in any folder along your PATH.
 
 If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
 (libnsspem.so) needs to be available for this option to work properly.
+
+(iOS and macOS only) If curl is built against Secure Transport, then this
+option is supported for backward compatibility with other SSL engines, but it
+should not be set. If the option is not set, then curl will use the
+certificates in the system and user Keychain to verify the peer, which is the
+preferred method of verifying the peer's certificate chain.
 
 If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
