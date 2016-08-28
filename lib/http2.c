@@ -1219,8 +1219,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
 
   DEBUGASSERT(data->state.drain == 0);
 
-  /* Reset to FALSE to prevent infinite loop in readwrite_data
-   function. */
+  /* Reset to FALSE to prevent infinite loop in readwrite_data function. */
   stream->closed = FALSE;
   if(stream->error_code != NGHTTP2_NO_ERROR) {
     failf(data, "HTTP/2 stream %u was not closed cleanly: %s (err %d)",
@@ -1567,7 +1566,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   if(stream->stream_id != -1) {
     if(stream->close_handled) {
       infof(conn->data, "stream %d closed\n", stream->stream_id);
-      *err = CURLE_HTTP2;
+      *err = CURLE_HTTP2_STREAM;
       return -1;
     }
     else if(stream->closed) {
