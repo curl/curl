@@ -48,6 +48,7 @@ problems may have been fixed or changed somewhat since this was written!
  5.3 libidn and old iconv
  5.4 AIX shared build with c-ares fails
  5.5 can't handle Unicode arguments in Windows
+ 5.6 cmake support gaps
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -340,6 +341,17 @@ problems may have been fixed or changed somewhat since this was written!
 
   https://curl.haxx.se/bug/?i=345
   https://curl.haxx.se/bug/?i=731
+
+5.6 cmake support gaps
+
+ The cmake build setup lacks several features that the autoconf build
+ offers. This includes:
+
+  - symbol hiding when the shared library is built
+  - use of correct soname for the shared library build
+  - support for several TLS backends are missing
+  - the unit tests cause link failures in regular non-static builds
+  - no nghttp2 check
 
 
 6. Authentication
