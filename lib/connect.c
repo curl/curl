@@ -1376,7 +1376,7 @@ CURLcode Curl_socket(struct connectdata *conn,
  */
 void Curl_conncontrol(struct connectdata *conn,
                       int ctrl /* see defines in header */
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
                       , const char *reason
 #endif
   )

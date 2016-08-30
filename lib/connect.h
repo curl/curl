@@ -122,12 +122,12 @@ void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd);
 
 void Curl_conncontrol(struct connectdata *conn,
                       int closeit
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
                       , const char *reason
 #endif
   );
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
 #define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
 #define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
 #define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
