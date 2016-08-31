@@ -54,7 +54,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.1 NTLM authentication and unicode
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
- 6.4 Negotiate needs a fake user name
+ 6.4 Negotiate and Kerberos V5 need a fake user name
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -379,13 +379,17 @@ problems may have been fixed or changed somewhat since this was written!
  "system context" will make it use wrong(?) user name - at least when compared
  to what winhttp does. See https://curl.haxx.se/bug/view.cgi?id=535
 
-6.4 Negotiate needs a fake user name
+6.4 Negotiate and Kerberos V5 need a fake user name
 
- To get HTTP Negotiate (SPNEGO) authentication to work fine, you need to
- provide a (fake) user name (this concerns both curl and the lib) because the
- code wrongly only considers authentication if there's a user name provided.
- https://curl.haxx.se/bug/view.cgi?id=440 How?
- https://curl.haxx.se/mail/lib-2004-08/0182.html
+ In order to get Negotiate (SPNEGO) authentication to work in HTTP or Kerberos
+ V5 in the e-mail protocols, you need to  provide a (fake) user name (this
+ concerns both curl and the lib) because the code wrongly only considers
+ authentication if there's a user name provided by setting
+ conn->bits.user_passwd in url.c  https://curl.haxx.se/bug/view.cgi?id=440 How?
+ https://curl.haxx.se/mail/lib-2004-08/0182.html A possible solution is to
+ either modify this variable to be set or introduce a variable such as
+ new conn->bits.want_authentication which is set when any of the authentication
+ options are set.
 
 
 7. FTP
