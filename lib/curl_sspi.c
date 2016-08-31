@@ -64,6 +64,12 @@ PSecurityFunctionTable s_pSecFn = NULL;
  *
  * Once this function has been executed, Windows SSPI functions can be
  * called through the Security Service Provider Interface dispatch table.
+ *
+ * Parameters:
+ *
+ * None.
+ *
+ * Returns CURLE_OK on success.
  */
 CURLcode Curl_sspi_global_init(void)
 {
@@ -102,8 +108,11 @@ CURLcode Curl_sspi_global_init(void)
  * Curl_sspi_global_cleanup()
  *
  * This deinitializes the Security Service Provider Interface from libcurl.
+ *
+ * Parameters:
+ *
+ * None.
  */
-
 void Curl_sspi_global_cleanup(void)
 {
   if(s_hSecDll) {
@@ -205,6 +214,15 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   return CURLE_OK;
 }
 
+/*
+ * Curl_sspi_free_identity()
+ *
+ * This is used to free the contents of a SSPI identifier structure.
+ *
+ * Parameters:
+ *
+ * identity [in/out] - The identity structure.
+ */
 void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity)
 {
   if(identity) {
