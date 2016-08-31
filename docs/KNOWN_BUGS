@@ -49,6 +49,7 @@ problems may have been fixed or changed somewhat since this was written!
  5.4 AIX shared build with c-ares fails
  5.5 can't handle Unicode arguments in Windows
  5.6 cmake support gaps
+ 5.7 Visual Studio project gaps
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -353,6 +354,19 @@ problems may have been fixed or changed somewhat since this was written!
   - the unit tests cause link failures in regular non-static builds
   - no nghttp2 check
 
+5.7 Visual Studio project gaps
+
+ The Visual Studio projects lack some features that the autoconf and nmake
+ builds offer, such as the following:
+
+  - support for zlib and nghttp2
+  - use of static runtime libraries
+  - add the test suite components
+
+ In addition to this the following could be implemented:
+
+  - support for other development IDEs
+  - add PATH environment variables for third-party DLLs
 
 6. Authentication
 
