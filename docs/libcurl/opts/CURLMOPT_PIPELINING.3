@@ -40,7 +40,7 @@ connection rather than being executed in parallel.
 
 For multiplexing, this means that follow-up requests can re-use an existing
 connection and send the new request multiplexed over that at the same time as
-other transfers are already done of that single connection.
+other transfers are already using that single connection.
 
 There are several other related options that are interesting to tweak and
 adjust to alter how libcurl spreads out requests on different connections or
