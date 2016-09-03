@@ -178,6 +178,8 @@ August: Curl and libcurl 7.12.1
 April. GnuTLS can now optionally be used for the secure layer when curl is
 built.
 
+April: Added the multi_socket() API
+
 September: TFTP support was added.
 
 More than 100,000 unique visitors of the curl web site. 25 mirrors.
@@ -192,8 +194,6 @@ that turned out having been introduced years ago, so with the conclusion that
 nobody had found out in all this time we removed it instead of fixing it.
 
 March: security vulnerability: libcurl TFTP Packet Buffer Overflow
-
-April: Added the multi_socket() API
 
 September: The major SONAME number for libcurl was bumped to 4 due to the
 removal of ftp third party transfer support.
