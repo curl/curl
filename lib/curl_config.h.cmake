@@ -67,7 +67,7 @@
 #cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1
 
 /* to make a symbol visible */
-#cmakedefine CURL_EXTERN_SYMBOL 1
+#cmakedefine CURL_EXTERN_SYMBOL ${CURL_EXTERN_SYMBOL}
 /* Ensure using CURL_EXTERN_SYMBOL is possible */
 #ifndef CURL_EXTERN_SYMBOL
 #define CURL_EXTERN_SYMBOL
