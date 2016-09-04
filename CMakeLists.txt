@@ -119,8 +119,7 @@ if(MSVC)
   mark_as_advanced(BUILD_RELEASE_DEBUG_DIRS)
 endif()
 
-option(CURL_HIDDEN_SYMBOLS "Set to ON to hide libcurl internal symbols (=hide all symbols that aren't officially external)." ON)
-mark_as_advanced(CURL_HIDDEN_SYMBOLS)
+include(CurlSymbolHiding)
 
 option(HTTP_ONLY "disables all protocols except HTTP (This overrides all CURL_DISABLE_* options)" OFF)
 mark_as_advanced(HTTP_ONLY)
