@@ -31,6 +31,7 @@
 
 #ifdef USE_MBEDTLS
 
+#include <mbedtls/platform.h>
 #include <mbedtls/net.h>
 #include <mbedtls/ssl.h>
 #include <mbedtls/certs.h>
