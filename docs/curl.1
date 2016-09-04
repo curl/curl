@@ -153,6 +153,10 @@ version. (Added in 7.33.0)
 .IP "--http2"
 (HTTP) Tells curl to issue its requests using HTTP 2. This requires that the
 underlying libcurl was built to support it. (Added in 7.33.0)
+.IP "--custom-http-version <version number>"
+(HTTP) Tells curl to send a custom HTTP protocol version. This modifies only
+the sent out request string, the version specific client behavior is unchanged.
+(Added in 7.49.0)
 .IP "--http2-prior-knowledge"
 (HTTP) Tells curl to issue its non-TLS HTTP requests using HTTP/2 without
 HTTP/1.1 Upgrade. It requires prior knowledge that the server supports HTTP/2

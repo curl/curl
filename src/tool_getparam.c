@@ -186,6 +186,7 @@ static const struct LongShort aliases[]= {
   {"01",  "http1.1",                 FALSE},
   {"02",  "http2",                   FALSE},
   {"03",  "http2-prior-knowledge",   FALSE},
+  {"0X",  "custom-http-version",     TRUE},
   {"1",  "tlsv1",                    FALSE},
   {"10",  "tlsv1.0",                 FALSE},
   {"11",  "tlsv1.1",                 FALSE},
@@ -1040,6 +1041,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case '3':
         /* HTTP version 2.0 over clean TCP*/
         config->httpversion = CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE;
+        break;
+      case 'X':
+        /* custom HTTP version string */
+        GetStr(&config->customhttpversion, nextarg);
         break;
       }
       break;

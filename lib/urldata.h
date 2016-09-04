@@ -1464,6 +1464,7 @@ enum dupstring {
 #ifdef USE_UNIX_SOCKETS
   STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
 #endif
+  STRING_CUSTOMHTTPVERSION,   /* String to use in the HTTP version field */
 
   /* -- end of zero-terminated strings -- */
 
