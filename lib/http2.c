@@ -1735,28 +1735,6 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
         failf(conn->data, "Failed sending HTTP request: Header overflow");
         goto fail;
       }
-      /* Inspect Content-Length header field and retrieve the request
-         entity length so that we can set END_STREAM to the last DATA
-         frame. */
-      if(nva[i].namelen == 14 &&
-         Curl_raw_nequal("content-length", (char*)nva[i].name, 14)) {
-        size_t j;
-        stream->upload_left = 0;
-        if(!nva[i].valuelen)
-          goto fail;
-        for(j = 0; j < nva[i].valuelen; ++j) {
-          if(nva[i].value[j] < '0' || nva[i].value[j] > '9')
-            goto fail;
-          if(stream->upload_left >= CURL_OFF_T_MAX / 10)
-            goto fail;
-          stream->upload_left *= 10;
-          stream->upload_left += nva[i].value[j] - '0';
-        }
-        DEBUGF(infof(conn->data,
-                     "request content-length=%"
-                     CURL_FORMAT_CURL_OFF_T
-                     "\n", stream->upload_left));
-      }
       ++i;
     }
   }
@@ -1799,6 +1777,12 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
   case HTTPREQ_PUT:
+    if(conn->data->state.infilesize != -1)
+      stream->upload_left = conn->data->state.infilesize;
+    else
+      /* data sending without specifying the data amount up front */
+      stream->upload_left = -1; /* unknown, but not zero */
+
     data_prd.read_callback = data_source_read_callback;
     data_prd.source.ptr = NULL;
     stream_id = nghttp2_submit_request(h2, &pri_spec, nva, nheader,
