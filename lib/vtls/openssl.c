@@ -95,11 +95,6 @@
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10000000L)
 #define HAVE_ERR_REMOVE_THREAD_STATE 1
-#if (OPENSSL_VERSION_NUMBER >= 0x10100004L) && \
-  !defined(LIBRESSL_VERSION_NUMBER)
-/* OpenSSL 1.1.0 deprecates the function */
-#define HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED 1
-#endif
 #endif
 
 #if !defined(HAVE_SSLV2_CLIENT_METHOD) || \
@@ -110,7 +105,6 @@
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && /* OpenSSL 1.1.0+ */ \
   !defined(LIBRESSL_VERSION_NUMBER)
-#define SSLeay_add_ssl_algorithms() SSL_library_init()
 #define SSLEAY_VERSION_NUMBER OPENSSL_VERSION_NUMBER
 #define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
 #define HAVE_OPAQUE_EVP_PKEY 1 /* since 1.1.0 -pre3 */
@@ -120,8 +114,11 @@
 #else
 /* For OpenSSL before 1.1.0 */
 #define ASN1_STRING_get0_data(x) ASN1_STRING_data(x)
+#define X509_get0_notBefore(x) X509_get_notBefore(x)
+#define X509_get0_notAfter(x) X509_get_notAfter(x)
 #define CONST_EXTS /* nope */
 #define CONST_ASN1_BIT_STRING /* nope */
+#define OpenSSL_version_num() SSLeay()
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* 1.0.2 or later */ \
@@ -718,6 +715,10 @@ int Curl_ossl_init(void)
                          CONF_MFLAGS_DEFAULT_SECTION|
                          CONF_MFLAGS_IGNORE_MISSING_FILE);
 
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
+    !defined(LIBRESSL_VERSION_NUMBER)
+  /* OpenSSL 1.1.0+ takes care of initialization itself */
+#else
   /* Lets get nice error messages */
   SSL_load_error_strings();
 
@@ -726,6 +727,7 @@ int Curl_ossl_init(void)
     return 0;
 
   OpenSSL_add_all_algorithms();
+#endif
 
   return 1;
 }
@@ -733,6 +735,11 @@ int Curl_ossl_init(void)
 /* Global cleanup */
 void Curl_ossl_cleanup(void)
 {
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
+    !defined(LIBRESSL_VERSION_NUMBER)
+  /* OpenSSL 1.1 deprecates all these cleanup functions and
+     turns them into no-ops in OpenSSL 1.0 compatibility mode */
+#else
   /* Free ciphers and digests lists */
   EVP_cleanup();
 
@@ -750,9 +757,7 @@ void Curl_ossl_cleanup(void)
   ERR_free_strings();
 
   /* Free thread local error state, destroying hash upon zero refcount */
-#ifdef HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED
-
-#elif defined(HAVE_ERR_REMOVE_THREAD_STATE)
+#ifdef HAVE_ERR_REMOVE_THREAD_STATE
   ERR_remove_thread_state(NULL);
 #else
   ERR_remove_state(0);
@@ -763,6 +768,7 @@ void Curl_ossl_cleanup(void)
 
 #ifdef HAVE_SSL_COMP_FREE_COMPRESSION_METHODS
   SSL_COMP_free_compression_methods();
+#endif
 #endif
 }
 
@@ -2446,10 +2452,10 @@ static CURLcode get_cert_chain(struct connectdata *conn,
     }
 #endif
 
-    ASN1_TIME_print(mem, X509_get_notBefore(x));
+    ASN1_TIME_print(mem, X509_get0_notBefore(x));
     push_certinfo("Start date", i);
 
-    ASN1_TIME_print(mem, X509_get_notAfter(x));
+    ASN1_TIME_print(mem, X509_get0_notAfter(x));
     push_certinfo("Expire date", i);
 
     pubkey = X509_get_pubkey(x);
@@ -2702,12 +2708,12 @@ static CURLcode servercert(struct connectdata *conn,
                          buffer, BUFSIZE);
   infof(data, " subject: %s\n", rc?"[NONE]":buffer);
 
-  ASN1_TIME_print(mem, X509_get_notBefore(connssl->server_cert));
+  ASN1_TIME_print(mem, X509_get0_notBefore(connssl->server_cert));
   len = BIO_get_mem_data(mem, (char **) &ptr);
   infof(data, " start date: %.*s\n", len, ptr);
   rc = BIO_reset(mem);
 
-  ASN1_TIME_print(mem, X509_get_notAfter(connssl->server_cert));
+  ASN1_TIME_print(mem, X509_get0_notAfter(connssl->server_cert));
   len = BIO_get_mem_data(mem, (char **) &ptr);
   infof(data, " expire date: %.*s\n", len, ptr);
   rc = BIO_reset(mem);
@@ -3146,7 +3152,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   unsigned long ssleay_value;
   sub[2]='\0';
   sub[1]='\0';
-  ssleay_value=SSLeay();
+  ssleay_value=OpenSSL_version_num();
   if(ssleay_value < 0x906000) {
     ssleay_value=SSLEAY_VERSION_NUMBER;
     sub[0]='\0';
