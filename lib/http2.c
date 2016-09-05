@@ -949,7 +949,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   }
 
   if(stream->upload_left == 0)
-    *data_flags = 1;
+    *data_flags = NGHTTP2_DATA_FLAG_EOF;
   else if(nread == 0)
     return NGHTTP2_ERR_DEFERRED;
 
