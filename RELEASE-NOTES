@@ -40,6 +40,20 @@ This release includes the following bugfixes:
  o win: Basic support for Universal Windows Platform apps [17]
  o nss: fix incorrect use of a previously loaded certificate from file
  o nss: work around race condition in PK11_FindSlotByName() [18]
+ o ftp: fix wrong poll on the secondary socket [19]
+ o openssl: build warning-free with 1.1.0 (again)
+ o HTTP: stop parsing headers when switching to unknown protocols [20]
+ o test219: Add http as a required feature
+ o TLS: random file/egd doesn't have to match for conn reuse
+ o schannel: Disable ALPN for Wine since it is causing problems [21]
+ o http2: make sure stream errors don't needlessly close the connection [22]
+ o http2: return CURLE_HTTP2_STREAM for unexpected stream close [23]
+ o darwinssl: --cainfo is intended for backward compatibility only
+ o speed caps: not based on average speeds anymore [24]
+ o configure: make the cpp -P detection not clobber CPPFLAGS [25]
+ o http2: use named define instead of magic constant in read callback
+ o http2: skip the content-length parsing, detect unknown size
+ o http2: return EOF when done uploading without known size [26]
 
 This release includes the following known bugs:
 
@@ -48,13 +62,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Bill Nagel, Dambaev Alexander, Dan Donahue, Daniel Stenberg,
-  David Kalnischkies, David Woodhouse, Erik Janssen, János Fekete,
-  Marc Hoersken, Marc Hörsken, Marco Deckel, Mark Nottingham, Miroslav Franc,
-  Ray Satiro, Ronnie Mose, Sergei Nikulov, Serj Kalichev, Simon Warta,
-  Steve Holme, Tatsuhiro Tsujikawa, Thomas Glanzmann, Tim Rühsen,
-  wmsch on github,
-  (23 contributors)
+  Ales Novak, Bill Nagel, Christian Fillion, Craig Davison, Dambaev Alexander,
+  Dan Donahue, Dan Fandrich, Daniel Stenberg, David Kalnischkies,
+  David Woodhouse, Erik Janssen, János Fekete, Kamil Dudka, Marc Hoersken,
+  Marc Hörsken, Marco Deckel, Mark Hamilton, Mark Nottingham, Michael Kaufmann,
+  Miroslav Franc, Nick Zitzmann, Olivier Brunel, Peter Wang, Ray Satiro,
+  Ronnie Mose, Sergei Nikulov, Serj Kalichev, Simon Warta, Steve Holme,
+  Tatsuhiro Tsujikawa, Thomas Glanzmann, Tim Rühsen, wmsch on github,
+  (33 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -78,3 +93,11 @@ References to bug reports and discussions on issues:
  [16] = https://curl.haxx.se/bug/?i=718
  [17] = https://curl.haxx.se/bug/?i=820
  [18] = https://bugzilla.mozilla.org/1297397
+ [19] = https://curl.haxx.se/bug/?i=978
+ [20] = https://curl.haxx.se/bug/?i=899
+ [21] = https://curl.haxx.se/bug/?i=983
+ [22] = https://curl.haxx.se/bug/?i=941
+ [23] = https://curl.haxx.se/bug/?i=986
+ [24] = https://curl.haxx.se/bug/?i=971
+ [25] = https://curl.haxx.se/bug/?i=958
+ [26] = https://curl.haxx.se/bug/?i=982
