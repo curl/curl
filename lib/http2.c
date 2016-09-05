@@ -1132,9 +1132,10 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
 /*
  * Returns nonzero if current HTTP/2 session should be closed.
  */
-static int should_close_session(struct http_conn *httpc) {
+static int should_close_session(struct http_conn *httpc)
+{
   return httpc->drain_total == 0 && !nghttp2_session_want_read(httpc->h2) &&
-         !nghttp2_session_want_write(httpc->h2);
+    !nghttp2_session_want_write(httpc->h2);
 }
 
 static int h2_session_send(struct Curl_easy *data,
