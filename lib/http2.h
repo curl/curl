@@ -52,6 +52,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
 void Curl_http2_setup_conn(struct connectdata *conn);
 void Curl_http2_setup_req(struct Curl_easy *data);
 void Curl_http2_done(struct connectdata *conn, bool premature);
+CURLcode Curl_http2_done_sending(struct connectdata *conn);
 #else /* USE_NGHTTP2 */
 #define Curl_http2_init(x) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_send_request(x) CURLE_UNSUPPORTED_PROTOCOL
@@ -63,6 +64,7 @@ void Curl_http2_done(struct connectdata *conn, bool premature);
 #define Curl_http2_init_state(x)
 #define Curl_http2_init_userset(x)
 #define Curl_http2_done(x,y)
+#define Curl_http2_done_sending(x)
 #endif
 
 #endif /* HEADER_CURL_HTTP2_H */

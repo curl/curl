@@ -75,6 +75,7 @@
 #include "multiif.h"
 #include "connect.h"
 #include "non-ascii.h"
+#include "http2.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -831,6 +832,8 @@ static CURLcode done_sending(struct connectdata *conn,
                              struct SingleRequest *k)
 {
   k->keepon &= ~KEEP_SEND; /* we're done writing */
+
+  Curl_http2_done_sending(conn);
 
   if(conn->bits.rewindaftersend) {
     CURLcode result = Curl_readrewind(conn);
