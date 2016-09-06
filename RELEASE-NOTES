@@ -4,7 +4,7 @@ Curl and libcurl 7.50.2
  Command line options:         185
  curl_easy_setopt() options:   224
  Public functions in libcurl:  61
- Contributors:                 1425
+ Contributors:                 1441
 
 This release includes the following bugfixes:
 
@@ -54,6 +54,8 @@ This release includes the following bugfixes:
  o http2: use named define instead of magic constant in read callback
  o http2: skip the content-length parsing, detect unknown size
  o http2: return EOF when done uploading without known size [26]
+ o darwinssl: test for errSecSuccess in PKCS12 import rather than noErr [27]
+ o openssl: fix CURLINFO_SSL_VERIFYRESULT [28]
 
 This release includes the following known bugs:
 
@@ -63,13 +65,14 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Ales Novak, Bill Nagel, Christian Fillion, Craig Davison, Dambaev Alexander,
-  Dan Donahue, Dan Fandrich, Daniel Stenberg, David Kalnischkies,
-  David Woodhouse, Erik Janssen, János Fekete, Kamil Dudka, Marc Hoersken,
-  Marc Hörsken, Marco Deckel, Mark Hamilton, Mark Nottingham, Michael Kaufmann,
-  Miroslav Franc, Nick Zitzmann, Olivier Brunel, Peter Wang, Ray Satiro,
-  Ronnie Mose, Sergei Nikulov, Serj Kalichev, Simon Warta, Steve Holme,
-  Tatsuhiro Tsujikawa, Thomas Glanzmann, Tim Rühsen, wmsch on github,
-  (33 contributors)
+  Dan Donahue, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  David Kalnischkies, David Woodhouse, Erik Janssen, Gaurav Malhotra,
+  János Fekete, Kamil Dudka, Marcel Raad, Marc Hörsken, Marco Deckel,
+  Mark Hamilton, Mark Nottingham, Michael Kaufmann, Miroslav Franc,
+  Nick Zitzmann, Olivier Brunel, Peter Wang, Ray Satiro, Ronnie Mose,
+  Sergei Nikulov, Serj Kalichev, Simon Warta, Steve Holme, Tatsuhiro Tsujikawa,
+  Thomas Glanzmann, Tim Rühsen, wmsch on github,
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -101,3 +104,5 @@ References to bug reports and discussions on issues:
  [24] = https://curl.haxx.se/bug/?i=971
  [25] = https://curl.haxx.se/bug/?i=958
  [26] = https://curl.haxx.se/bug/?i=982
+ [27] = https://curl.haxx.se/bug/?i=993
+ [28] = https://curl.haxx.se/bug/?i=995
