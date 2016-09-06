@@ -945,7 +945,8 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
     memcpy(buf, stream->upload_mem, nread);
     stream->upload_mem += nread;
     stream->upload_len -= nread;
-    stream->upload_left -= nread;
+    if(data_s->state.infilesize != -1)
+      stream->upload_left -= nread;
   }
 
   if(stream->upload_left == 0)
