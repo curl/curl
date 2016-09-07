@@ -1541,8 +1541,16 @@ static CURLcode smtp_parse_url_path(struct connectdata *conn)
 
   /* Calculate the path if necessary */
   if(!*path) {
-    if(!Curl_gethostname(localhost, sizeof(localhost)))
+    if(!Curl_gethostname(localhost, sizeof(localhost))) {
+      /* Replace non printable US-ASCII excl. "[", "\", "]" chars with '?'.
+         See rfc5321#section-4.1.1.1 and rfc5321#section-4.1.3 */
+      char *p;
+      for(p = localhost; *p; p++)
+        if(*p < 33 || *p > 126 || (*p > 90 && *p < 94))
+          *p = '?';
+
       path = localhost;
+    }
     else
       path = "localhost";
   }
