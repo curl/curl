@@ -225,33 +225,33 @@ sub parse_csv_param($$@) {
   return @values;
 }
 
-sub sha1 {
+sub sha256 {
   my $result;
   if ($Digest::SHA::VERSION || $Digest::SHA::PurePerl::VERSION) {
     open(FILE, $_[0]) or die "Can't open '$_[0]': $!";
     binmode(FILE);
-    $result = $MOD_SHA->new(1)->addfile(*FILE)->hexdigest;
+    $result = $MOD_SHA->new(256)->addfile(*FILE)->hexdigest;
     close(FILE);
   } else {
     # Use OpenSSL command if Perl Digest::SHA modules not available
-    $result = (split(/ |\r|\n/,`$openssl dgst -sha1 $_[0]`))[1];
+    $result = (split(/ |\r|\n/,`$openssl dgst -sha256 $_[0]`))[1];
   }
   return $result;
 }
 
 
-sub oldsha1 {
-  my $sha1 = "";
+sub oldhash {
+  my $hash = "";
   open(C, "<$_[0]") || return 0;
   while(<C>) {
     chomp;
-    if($_ =~ /^\#\# SHA1: (.*)/) {
-      $sha1 = $1;
+    if($_ =~ /^\#\# SHA256: (.*)/) {
+      $hash = $1;
       last;
     }
   }
   close(C);
-  return $sha1;
+  return $hash;
 }
 
 if ( $opt_p !~ m/:/ ) {
@@ -283,9 +283,9 @@ my $stdout = $crt eq '-';
 my $resp;
 my $fetched;
 
-my $oldsha1 = oldsha1($crt);
+my $oldhash = oldhash($crt);
 
-report "SHA1 of old file: $oldsha1";
+report "SHA256 of old file: $oldhash";
 
 report "Downloading '$txt' ...";
 
@@ -328,14 +328,14 @@ if(!$filedate) {
 }
 
 # get the hash from the download file
-my $newsha1= sha1($txt);
+my $newhash= sha256($txt);
 
-if(!$opt_f && $oldsha1 eq $newsha1) {
+if(!$opt_f && $oldhash eq $newhash) {
     report "Downloaded file identical to previous run\'s source file. Exiting";
     exit;
 }
 
-report "SHA1 of new file: $newsha1";
+report "SHA256 of new file: $newhash";
 
 my $currentdate = scalar gmtime($filedate);
 
@@ -362,7 +362,7 @@ print CRT <<EOT;
 ## Just configure this file as the SSLCACertificateFile.
 ##
 ## Conversion done with mk-ca-bundle.pl version $version.
-## SHA1: $newsha1
+## SHA256: $newhash
 ##
 
 EOT
