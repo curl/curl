@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,6 +112,8 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
   }
   dirbuildup[0] = '\0';
 
+  /* Allow strtok() here since this isn't used threaded */
+  /* !checksrc! disable BANNEDFUNC 2 */
   tempdir = strtok(outdup, DIR_CHAR);
 
   while(tempdir != NULL) {

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -284,6 +284,8 @@ long proto2num(struct OperationConfig *config, long *val, const char *str)
   if(!buffer)
     return 1;
 
+  /* Allow strtok() here since this isn't used threaded */
+  /* !checksrc! disable BANNEDFUNC 2 */
   for(token = strtok(buffer, sep);
       token;
       token = strtok(NULL, sep)) {
