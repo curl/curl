@@ -1,61 +1,18 @@
-Curl and libcurl 7.50.2
+Curl and libcurl 7.51.0
 
- Public curl releases:         158
+ Public curl releases:         159
  Command line options:         185
  curl_easy_setopt() options:   224
  Public functions in libcurl:  61
  Contributors:                 1441
 
+This release includes the following changes:
+
+ o
+
 This release includes the following bugfixes:
 
- o mbedtls: Added support for NTLM
- o SSH: fixed SFTP/SCP transfer problems [1]
- o multi: make Curl_expire() work with 0 ms timeouts
- o mk-ca-bundle.pl: -m keeps ca cert meta data in output [2]
- o TFTP: Fix upload problem with piped input [3]
- o CURLOPT_TCP_NODELAY: now enabled by default [4]
- o mbedtls: set verbose TLS debug when MBEDTLS_DEBUG is defined [5]
- o http2: always wait for readable socket
- o cmake: Enable win32 large file support by default
- o cmake: Enable win32 threaded resolver by default
- o winbuild: Avoid setting redundant CFLAGS to compile commands [6]
- o curl.h: make CURL_NO_OLDIES define CURL_STRICTER
- o docs: make more markdown files use .md extension
- o docs: CONTRIBUTE and LICENSE-MIXING were converted to markdown
- o winbuild: Allow changing C compiler via environment variable CC [7]
- o rtsp: accept any RTSP session id [8]
- o HTTP: retry failed HEAD requests on reused connections too
- o configure: add zlib search with pkg-config [9]
- o openssl: accept subjectAltName iPAddress if no dNSName match [10]
- o MANUAL: Remove invalid link to LDAP documentation [11]
- o socks: improved connection procedure [12]
- o proxy: reject attempts to use unsupported proxy schemes
- o proxy: bring back use of "Proxy-Connection:" [13]
- o curl: allow "pkcs11:" prefix for client certificates [14]
- o spnego_sspi: fix memory leak in case *outlen is zero [15]
- o SOCKS: improve verbose output of SOCKS5 connection sequence
- o SOCKS: display the hostname returned by the SOCKS5 proxy server
- o http/sasl: Query authentication mechanism supported by SSPI before using
- o sasl: Don't use GSSAPI authentication when domain name not specified [16]
- o win: Basic support for Universal Windows Platform apps [17]
- o nss: fix incorrect use of a previously loaded certificate from file
- o nss: work around race condition in PK11_FindSlotByName() [18]
- o ftp: fix wrong poll on the secondary socket [19]
- o openssl: build warning-free with 1.1.0 (again)
- o HTTP: stop parsing headers when switching to unknown protocols [20]
- o test219: Add http as a required feature
- o TLS: random file/egd doesn't have to match for conn reuse
- o schannel: Disable ALPN for Wine since it is causing problems [21]
- o http2: make sure stream errors don't needlessly close the connection [22]
- o http2: return CURLE_HTTP2_STREAM for unexpected stream close [23]
- o darwinssl: --cainfo is intended for backward compatibility only
- o speed caps: not based on average speeds anymore [24]
- o configure: make the cpp -P detection not clobber CPPFLAGS [25]
- o http2: use named define instead of magic constant in read callback
- o http2: skip the content-length parsing, detect unknown size
- o http2: return EOF when done uploading without known size [26]
- o darwinssl: test for errSecSuccess in PKCS12 import rather than noErr [27]
- o openssl: fix CURLINFO_SSL_VERIFYRESULT [28]
+ o
 
 This release includes the following known bugs:
 
@@ -64,45 +21,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Ales Novak, Bill Nagel, Christian Fillion, Craig Davison, Dambaev Alexander,
-  Dan Donahue, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  David Kalnischkies, David Woodhouse, Erik Janssen, Gaurav Malhotra,
-  János Fekete, Kamil Dudka, Marcel Raad, Marc Hörsken, Marco Deckel,
-  Mark Hamilton, Mark Nottingham, Michael Kaufmann, Miroslav Franc,
-  Nick Zitzmann, Olivier Brunel, Peter Wang, Ray Satiro, Ronnie Mose,
-  Sergei Nikulov, Serj Kalichev, Simon Warta, Steve Holme, Tatsuhiro Tsujikawa,
-  Thomas Glanzmann, Tim Rühsen, wmsch on github,
-  (35 contributors)
+  
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/mail/lib-2016-07/0057.html
- [2] = https://curl.haxx.se/bug/?i=937
- [3] = https://curl.haxx.se/bug/?i=857
- [4] = https://curl.haxx.se/mail/lib-2016-06/0143.html
- [5] = https://curl.haxx.se/mail/lib-2016-08/0017.html
- [6] = https://curl.haxx.se/bug/?i=949
- [7] = https://curl.haxx.se/bug/?i=952
- [8] = https://curl.haxx.se/mail/lib-2016-08/0076.html
- [9] = https://curl.haxx.se/bug/?i=956
- [10] = https://curl.haxx.se/bug/?i=959
- [11] = https://curl.haxx.se/bug/?i=962
- [12] = https://curl.haxx.se/bug/?i=944
- [13] = https://curl.haxx.se/bug/?i=954
- [14] = https://curl.haxx.se/mail/lib-2016-08/0122.html
- [15] = https://curl.haxx.se/bug/?i=970
- [16] = https://curl.haxx.se/bug/?i=718
- [17] = https://curl.haxx.se/bug/?i=820
- [18] = https://bugzilla.mozilla.org/1297397
- [19] = https://curl.haxx.se/bug/?i=978
- [20] = https://curl.haxx.se/bug/?i=899
- [21] = https://curl.haxx.se/bug/?i=983
- [22] = https://curl.haxx.se/bug/?i=941
- [23] = https://curl.haxx.se/bug/?i=986
- [24] = https://curl.haxx.se/bug/?i=971
- [25] = https://curl.haxx.se/bug/?i=958
- [26] = https://curl.haxx.se/bug/?i=982
- [27] = https://curl.haxx.se/bug/?i=993
- [28] = https://curl.haxx.se/bug/?i=995
+ [1] = https://curl.haxx.se/bug/?i=
