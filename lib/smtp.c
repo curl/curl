@@ -1545,8 +1545,8 @@ static CURLcode smtp_parse_url_path(struct connectdata *conn)
       /* Sanitize the name, replace invalid chars with '_' */
       char *p;
       for(p = localhost; *p; p++)
-        if( !(*p >= 'a' && *p <= 'z') && !(*p >= 'A' && *p <= 'Z') &&
-            !(*p >= '0' && *p <= '9') && *p != '-' && *p != '_')
+        if(!(*p >= 'a' && *p <= 'z') && !(*p >= 'A' && *p <= 'Z') &&
+           !(*p >= '0' && *p <= '9') && *p != '-' && *p != '_')
           *p = '_';
 
       path = localhost;
