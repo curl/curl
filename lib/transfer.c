@@ -535,6 +535,13 @@ static CURLcode readwrite_data(struct Curl_easy *data,
        is non-headers. */
     if(k->str && !k->header && (nread > 0 || is_empty_data)) {
 
+      if(data->set.opt_no_body) {
+        /* data arrives although we want none, bail out */
+        streamclose(conn, "ignoring body");
+        *done = TRUE;
+        return CURLE_WEIRD_SERVER_REPLY;
+      }
+
 #ifndef CURL_DISABLE_HTTP
       if(0 == k->bodywrites && !is_empty_data) {
         /* These checks are only made the first time we are about to

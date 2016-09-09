@@ -30,6 +30,10 @@ data to
 
 verify
 </data>
+# make sure no data is written
+<datacheck nonewline="yes">
+
+</datacheck>
 </reply>
 
 #
@@ -58,5 +62,8 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+<errorcode>
+8
+</errorcode>
 </verify>
 </testcase>
