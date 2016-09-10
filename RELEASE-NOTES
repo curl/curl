@@ -12,7 +12,12 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o
+ o mk-ca-bundle.pl: use SHA256 instead of SHA1
+ o checksrc: detect strtok() use
+ o errors: new alias CURLE_WEIRD_SERVER_REPLY [1]
+ o http2: support > 64bit sized uploads [2]
+ o openssl: fix bad memory free (regression) [3]
+ o CMake: hide private library symbols [4]
 
 This release includes the following known bugs:
 
@@ -21,10 +26,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Daniel Stenberg, Harold Stuart, Jakub Zakrzewski, Randy Armstrong,
+  Ray Satiro, Viktor Szakáts,
+  (6 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/bug/?i=975
+ [2] = https://curl.haxx.se/bug/?i=996
+ [3] = https://curl.haxx.se/bug/?i=1005
+ [4] = https://curl.haxx.se/bug/?i=981
