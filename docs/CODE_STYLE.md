@@ -50,7 +50,7 @@ introduced in the C standard until C99. We use only `/*` and `*/` comments:
 
 ## Long lines
 
-Source code in curl may never be wider than 80 columns and there are two
+Source code in curl may never be wider than 79 columns and there are two
 reasons for maintaining this even in the modern era of very large and high
 resolution screens:
 
