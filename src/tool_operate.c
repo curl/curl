@@ -842,12 +842,17 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->no_body) {
           my_setopt(curl, CURLOPT_NOBODY, 1L);
           my_setopt(curl, CURLOPT_HEADER, 1L);
+          my_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS,
+                    config->suppress_connect_headers?1L:0L);
         }
         /* If --metalink is used, we ignore --include (headers in
            output) option because mixing headers to the body will
            confuse XML parser and/or hash check will fail. */
-        else if(!config->use_metalink)
+        else if(!config->use_metalink) {
           my_setopt(curl, CURLOPT_HEADER, config->include_headers?1L:0L);
+          my_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS,
+                    config->suppress_connect_headers?1L:0L);
+        }
 
         if(config->oauth_bearer)
           my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);

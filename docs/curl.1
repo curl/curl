@@ -838,6 +838,24 @@ downloading a file.
 .IP "-i, --include"
 (HTTP) Include the HTTP-header in the output. The HTTP-header includes things
 like server-name, date of the document, HTTP-version and more...
+
+Note, when connecting to an HTTPS URL through a proxy, 'curl --include' would
+display the following response:
+
+.nf
+HTTP/1.1 200 Connection established
+{headers}...
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{headers}...
+
+{body}...
+.fi
+
+This makes the parse script difficult to detect the header part in the
+response.  To suppress the \&"Connection established" part of the response, use
+this option with \fI--suppress-connect-headers\fP together.
 .IP "-I, --head"
 (HTTP/FTP/FILE)
 Fetch the HTTP-header only! HTTP-servers feature the command HEAD
@@ -1733,6 +1751,49 @@ Redirect all writes to stderr to the specified file instead. If the file name
 is a plain '-', it is instead written to stdout.
 
 If this option is used several times, the last one will be used.
+.IP "--suppress-connect-headers"
+When connecting to an HTTPS URL through a proxy, 'curl --include' would display
+the following response:
+
+.nf
+HTTP/1.1 200 Connection established
+{headers}...
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{headers}...
+
+{body}...
+.fi
+
+This makes the parse script difficult to detect the header part in the
+response. To suppress the \&"Connection established" part of the response, use
+this option with \fI-i, --include\fP together.
+
+Note 1: this option only takes effect when \fI-i, --include\fP is used.
+
+Note 2: this option doesn't restore any header fields overridden by the
+proxy. For example, the original response is:
+
+.nf
+HTTP/1.1 200 OK
+X-Header-1: foo
+
+{body}...
+.fi
+
+Then the proxy overrides the response to:
+
+.nf
+HTTP/1.1 200 OK
+X-Header-1: bar
+X-Header-2: baz
+
+{body}...
+.fi
+
+This option will not restore the value of \&"X-Header-1" to \&"foo" and not
+remove \&"X-Header-2".
 .IP "-t, --telnet-option <OPT=val>"
 Pass options to the telnet protocol. Supported options are:
 

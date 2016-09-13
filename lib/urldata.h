@@ -1688,6 +1688,8 @@ struct UserDefined {
   bool pipewait;        /* wait for pipe/multiplex status before starting a
                            new connection */
   long expect_100_timeout; /* in milliseconds */
+  bool suppress_connect_headers;  /* suppress HTTP response inserted by proxy
+                                     in data output */
 
   struct Curl_easy *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
