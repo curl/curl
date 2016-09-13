@@ -18,6 +18,9 @@ This release includes the following bugfixes:
  o http2: support > 64bit sized uploads [2]
  o openssl: fix bad memory free (regression) [3]
  o CMake: hide private library symbols [4]
+ o http: refuse to pass on response body with NO_NODY was set [5]
+ o cmake: fix curl-config --static-libs [6]
+ o mbedtls: switch off NTLM in build if md4 isn't available [7]
 
 This release includes the following known bugs:
 
@@ -26,9 +29,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Harold Stuart, Jakub Zakrzewski, Randy Armstrong,
-  Ray Satiro, Viktor Szakáts,
-  (6 contributors)
+  Daniel Stenberg, Harold Stuart, Jakub Zakrzewski, Peter Wu, Randy Armstrong,
+  Ray Satiro, Tony Kelman, Viktor Szakáts,
+  (8 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -38,3 +41,6 @@ References to bug reports and discussions on issues:
  [2] = https://curl.haxx.se/bug/?i=996
  [3] = https://curl.haxx.se/bug/?i=1005
  [4] = https://curl.haxx.se/bug/?i=981
+ [5] = https://curl.haxx.se/bug/?i=973
+ [6] = https://curl.haxx.se/bug/?i=841
+ [7] = https://curl.haxx.se/bug/?i=1004
