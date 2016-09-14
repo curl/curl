@@ -46,15 +46,15 @@ if ($@) {
 
 my %urls = (
   'nss' =>
-    'http://hg.mozilla.org/projects/nss/raw-file/tip/lib/ckfw/builtins/certdata.txt',
+    'https://hg.mozilla.org/projects/nss/raw-file/tip/lib/ckfw/builtins/certdata.txt',
   'central' =>
-    'http://hg.mozilla.org/mozilla-central/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
+    'https://hg.mozilla.org/mozilla-central/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'aurora' =>
-    'http://hg.mozilla.org/releases/mozilla-aurora/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
+    'https://hg.mozilla.org/releases/mozilla-aurora/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'beta' =>
-    'http://hg.mozilla.org/releases/mozilla-beta/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
+    'https://hg.mozilla.org/releases/mozilla-beta/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'release' =>
-    'http://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
+    'https://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
 );
 
 $opt_d = 'release';
