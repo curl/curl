@@ -1,17 +1,14 @@
-Curl and libcurl 7.51.0
+Curl and libcurl 7.50.3
 
  Public curl releases:         159
  Command line options:         185
  curl_easy_setopt() options:   224
  Public functions in libcurl:  61
- Contributors:                 1441
-
-This release includes the following changes:
-
- o
+ Contributors:                 1445
 
 This release includes the following bugfixes:
 
+ o CVE-2016-7167: escape and unescape integer overflows [8]
  o mk-ca-bundle.pl: use SHA256 instead of SHA1
  o checksrc: detect strtok() use
  o errors: new alias CURLE_WEIRD_SERVER_REPLY [1]
@@ -21,6 +18,7 @@ This release includes the following bugfixes:
  o http: refuse to pass on response body with NO_NODY was set [5]
  o cmake: fix curl-config --static-libs [6]
  o mbedtls: switch off NTLM in build if md4 isn't available [7]
+ o curl: --create-dirs on windows groks both forward and backward slashes [9]
 
 This release includes the following known bugs:
 
@@ -30,8 +28,8 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Daniel Stenberg, Harold Stuart, Jakub Zakrzewski, Peter Wu, Randy Armstrong,
-  Ray Satiro, Tony Kelman, Viktor Szakáts,
-  (8 contributors)
+  Ray Satiro, Ryan Scott, Tony Kelman, Viktor Szakáts,
+  (9 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -44,3 +42,5 @@ References to bug reports and discussions on issues:
  [5] = https://curl.haxx.se/bug/?i=973
  [6] = https://curl.haxx.se/bug/?i=841
  [7] = https://curl.haxx.se/bug/?i=1004
+ [8] = https://curl.haxx.se/docs/adv_20160914.html
+ [9] = https://curl.haxx.se/bug/?i=1007
