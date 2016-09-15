@@ -1796,6 +1796,10 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       if(nva[i].valuelen > max_acc - acc)
         break;
       acc += nva[i].valuelen;
+
+      DEBUGF(infof(conn->data, "h2 header: %.*s:%.*s\n",
+                   nva[i].namelen, nva[i].name,
+                   nva[i].valuelen, nva[i].value));
     }
 
     if(i != nheader) {
