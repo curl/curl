@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1648,6 +1648,10 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                      Connection: */
                   checkprefix("Connection", headers->data))
             ;
+          else if((conn->httpversion == 20) &&
+                  checkprefix("Transfer-Encoding:", headers->data))
+            /* HTTP/2 doesn't support chunked requests */
+            ;
           else {
             CURLcode result = Curl_add_bufferf(req_buffer, "%s\r\n",
                                                headers->data);
@@ -1934,40 +1938,35 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 #endif
 
-  if(conn->httpversion == 20)
-    /* In HTTP2 forbids Transfer-Encoding: chunked */
-    ptr = NULL;
+  ptr = Curl_checkheaders(conn, "Transfer-Encoding:");
+  if(ptr) {
+    /* Some kind of TE is requested, check if 'chunked' is chosen */
+    data->req.upload_chunky =
+      Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
+  }
   else {
-    ptr = Curl_checkheaders(conn, "Transfer-Encoding:");
-    if(ptr) {
-      /* Some kind of TE is requested, check if 'chunked' is chosen */
-      data->req.upload_chunky =
-        Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
-    }
-    else {
-      if((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
-         data->set.upload &&
-         (data->state.infilesize == -1)) {
-        if(conn->bits.authneg)
-          /* don't enable chunked during auth neg */
-          ;
-        else if(use_http_1_1plus(data, conn)) {
-          /* HTTP, upload, unknown file size and not HTTP 1.0 */
-          data->req.upload_chunky = TRUE;
-        }
-        else {
-          failf(data, "Chunky upload is not supported by HTTP 1.0");
-          return CURLE_UPLOAD_FAILED;
-        }
+    if((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
+       data->set.upload &&
+       (data->state.infilesize == -1)) {
+      if(conn->bits.authneg)
+        /* don't enable chunked during auth neg */
+        ;
+      else if(use_http_1_1plus(data, conn)) {
+        /* HTTP, upload, unknown file size and not HTTP 1.0 */
+        data->req.upload_chunky = TRUE;
       }
       else {
-        /* else, no chunky upload */
-        data->req.upload_chunky = FALSE;
+        failf(data, "Chunky upload is not supported by HTTP 1.0");
+        return CURLE_UPLOAD_FAILED;
       }
-
-      if(data->req.upload_chunky)
-        te = "Transfer-Encoding: chunked\r\n";
     }
+    else {
+      /* else, no chunky upload */
+      data->req.upload_chunky = FALSE;
+    }
+
+    if(data->req.upload_chunky)
+      te = "Transfer-Encoding: chunked\r\n";
   }
 
   Curl_safefree(conn->allocptr.host);
@@ -2761,6 +2760,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
   }
 
+  if((conn->httpversion == 20) && data->req.upload_chunky)
+    /* upload_chunky was set above to set up the request in a chunky fashion,
+       but is disabled here again to avoid that the chunked encoded version is
+       actually used when sending the request body over h2 */
+    data->req.upload_chunky = FALSE;
   return result;
 }
 
