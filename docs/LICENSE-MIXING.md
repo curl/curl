@@ -63,8 +63,11 @@ not have the announcement clause that collides with GPL.
 
 ## mbedTLS
 
- (May be used for SSL/TLS support) Uses the GPL license or a propietary
- license. If this is a problem for you, consider using another TLS library.
+ (May be used for SSL/TLS support) Uses the [Apache 2.0
+ license](https://opensource.org/licenses/Apache-2.0) or the GPL license.
+ You may choose to license the code under Apache 2.0 terms or GPL terms.
+ These licenses grant you different permissions and impose different
+ obligations. You should select the license that best meets your needs.
 
 ## BoringSSL
 
