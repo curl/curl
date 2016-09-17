@@ -36,8 +36,8 @@
 #include "memdebug.h"
 
 /*
- * This is supposed to be called in the beginning of a perform() session
- * and should reset all session-info variables
+ * This is supposed to be called in the beginning of a perform() session and
+ * in curl_easy_reset() and should reset all session-info variables.
  */
 CURLcode Curl_initinfo(struct Curl_easy *data)
 {
@@ -58,17 +58,26 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   info->filetime = -1; /* -1 is an illegal time and thus means unknown */
   info->timecond = FALSE;
 
+  info->header_size = 0;
+  info->request_size = 0;
+  info->proxyauthavail = 0;
+  info->httpauthavail = 0;
+  info->numconnects = 0;
+
   free(info->contenttype);
   info->contenttype = NULL;
 
-  info->header_size = 0;
-  info->request_size = 0;
-  info->numconnects = 0;
+  free(info->wouldredirect);
+  info->wouldredirect = NULL;
 
   info->conn_primary_ip[0] = '\0';
   info->conn_local_ip[0] = '\0';
   info->conn_primary_port = 0;
   info->conn_local_port = 0;
+
+#ifdef USE_SSL
+  Curl_ssl_free_certinfo(data);
+#endif
 
   return CURLE_OK;
 }

@@ -995,6 +995,9 @@ void curl_easy_reset(struct Curl_easy *data)
   /* zero out Progress data: */
   memset(&data->progress, 0, sizeof(struct Progress));
 
+  /* zero out PureInfo data: */
+  Curl_initinfo(data);
+
   data->progress.flags |= PGRS_HIDE;
   data->state.current_speed = -1; /* init to negative == impossible */
 }
