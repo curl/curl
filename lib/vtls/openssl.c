@@ -153,6 +153,111 @@
  */
 #define RAND_LOAD_LENGTH 1024
 
+
+/**
+ **
+ ** BEGIN: SSLKEYLOGFILE implementation
+ **
+ ** This is code that will dump CLIENT_RANDOMs so that SSL can be decrypted.
+ ** For this to work set environment variable SSLKEYLOGFILE to a filename.
+ ** And in Wireshark: Edit > Preferences > Protocols > SSL > Master-Secret log
+ **
+ ** Origin https://git.lekensteyn.nl/peter/wireshark-notes/tree/src/sslkeylog.c
+ ** Also see http://security.stackexchange.com/q/80158
+ **
+ * Dumps master keys for OpenSSL clients to file. The format is documented at
+ * https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS/Key_Log_Format
+ *
+ * Copyright (C) 2014 Peter Wu <peter@lekensteyn.nl>
+ * Licensed under the terms of GPLv3 (or any later version) at your choice.
+ **
+ **/
+
+#define PREFIX      "CLIENT_RANDOM "
+#define PREFIX_LEN  (sizeof(PREFIX) - 1)
+
+static int keylog_file_fd = -1;
+
+static void put_hex(char *buffer, int pos, char c)
+{
+  unsigned char c1 = ((unsigned char) c) >> 4;
+  unsigned char c2 = c & 0xF;
+  buffer[pos] = c1 < 10 ? '0' + c1 : 'A' + c1 - 10;
+  buffer[pos+1] = c2 < 10 ? '0' + c2 : 'A' + c2 - 10;
+}
+
+static void dump_to_fd(int fd, unsigned char *client_random,
+                       unsigned char *master_key, int master_key_length)
+{
+  int pos, i;
+  char line[PREFIX_LEN + 2 * SSL3_RANDOM_SIZE + 1 +
+            2 * SSL_MAX_MASTER_KEY_LENGTH + 1];
+
+  memcpy(line, PREFIX, PREFIX_LEN);
+  pos = PREFIX_LEN;
+  /* Client Random for SSLv3/TLS */
+  for(i = 0; i < SSL3_RANDOM_SIZE; i++) {
+    put_hex(line, pos, client_random[i]);
+    pos += 2;
+  }
+  line[pos++] = ' ';
+  /* Master Secret (size is at most SSL_MAX_MASTER_KEY_LENGTH) */
+  for(i = 0; i < master_key_length; i++) {
+    put_hex(line, pos, master_key[i]);
+    pos += 2;
+  }
+  line[pos++] = '\n';
+  /* Write at once rather than using buffered I/O. Perhaps there is concurrent
+   * write access so do not write hex values one by one. */
+  write(fd, line, pos);
+}
+
+static void tap_ssl_key(const SSL *ssl, ssl_tap_state_t *state)
+{
+  const SSL_SESSION *session = SSL_get_session(ssl);
+  unsigned char client_random[SSL3_RANDOM_SIZE];
+  unsigned char master_key[SSL_MAX_MASTER_KEY_LENGTH];
+  int master_key_length = 0;
+
+  if(session && keylog_file_fd >= 0) {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+    /* ssl->s3 is not checked in openssl 1.1.0-pre6, but let's assume that
+     * we have a valid SSL context if we have a non-NULL session. */
+    SSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE);
+    master_key_length = SSL_SESSION_get_master_key(session, master_key,
+      SSL_MAX_MASTER_KEY_LENGTH);
+#else
+    if(ssl->s3 && session->master_key_length > 0) {
+      memcpy(client_random, ssl->s3->client_random, SSL3_RANDOM_SIZE);
+
+      master_key_length = session->master_key_length;
+      memcpy(master_key, session->master_key, master_key_length);
+    }
+#endif
+  }
+
+  /* Write the logfile when the master key is available for SSLv3/TLSv1. */
+  if(master_key_length > 0) {
+    /* Skip writing keys if it did not change. */
+    if(state->master_key_length == master_key_length &&
+       memcmp(state->master_key, master_key, master_key_length) == 0) {
+      return;
+    }
+
+    memcpy(state->master_key, master_key, master_key_length);
+    state->master_key_length = master_key_length;
+
+    dump_to_fd(keylog_file_fd, client_random, master_key, master_key_length);
+  }
+}
+
+/**
+ **
+ ** END: SSLKEYLOGFILE implementation
+ **
+ **/
+
+
 static int passwd_callback(char *buf, int num, int encrypting,
                            void *global_passwd)
 {
@@ -693,6 +798,8 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
  */
 int Curl_ossl_init(void)
 {
+  const char *keylog_file_name;
+
   OPENSSL_load_builtin_modules();
 
 #ifdef HAVE_ENGINE_LOAD_BUILTIN_ENGINES
@@ -728,6 +835,12 @@ int Curl_ossl_init(void)
 
   OpenSSL_add_all_algorithms();
 #endif
+
+  keylog_file_name = getenv("SSLKEYLOGFILE");
+  if(keylog_file_name && keylog_file_fd < 0) {
+    keylog_file_fd = open(keylog_file_name,
+                          O_WRONLY | O_APPEND | O_CREAT, 0600);
+  }
 
   return 1;
 }
@@ -770,6 +883,11 @@ void Curl_ossl_cleanup(void)
   SSL_COMP_free_compression_methods();
 #endif
 #endif
+
+  if(keylog_file_fd >= 0) {
+    close(keylog_file_fd);
+    keylog_file_fd = -1;
+  }
 }
 
 /*
@@ -2154,6 +2272,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
   ERR_clear_error();
 
   err = SSL_connect(connssl->handle);
+  tap_ssl_key(connssl->handle, &connssl->tap_state);
 
   /* 1  is fine
      0  is "not successful but was shut down controlled"

@@ -249,6 +249,13 @@ struct curl_schannel_ctxt {
 };
 #endif
 
+#ifdef USE_OPENSSL
+typedef struct ssl_tap_state {
+  int master_key_length;
+  unsigned char master_key[SSL_MAX_MASTER_KEY_LENGTH];
+} ssl_tap_state_t;
+#endif
+
 /* enum for the nonblocking SSL connection state machine */
 typedef enum {
   ssl_connect_1,
@@ -278,6 +285,8 @@ struct ssl_connect_data {
   SSL_CTX* ctx;
   SSL*     handle;
   X509*    server_cert;
+  /* tap_state holds the last seen master key if we're logging them */
+  ssl_tap_state_t tap_state;
 #elif defined(USE_GNUTLS)
   gnutls_session_t session;
   gnutls_certificate_credentials_t cred;
