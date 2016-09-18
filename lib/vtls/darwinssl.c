@@ -1438,6 +1438,16 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         /* Disable IDEA: */
         case SSL_RSA_WITH_IDEA_CBC_SHA:
         case SSL_RSA_WITH_IDEA_CBC_MD5:
+        /* Disable RC4: */
+        case SSL_RSA_WITH_RC4_128_MD5:
+        case SSL_RSA_WITH_RC4_128_SHA:
+        case 0xC002: /* TLS_ECDH_ECDSA_WITH_RC4_128_SHA */
+        case 0xC007: /* TLS_ECDHE_ECDSA_WITH_RC4_128_SHA*/
+        case 0xC00C: /* TLS_ECDH_RSA_WITH_RC4_128_SHA */
+        case 0xC011: /* TLS_ECDHE_RSA_WITH_RC4_128_SHA */
+        case 0x008A: /* TLS_PSK_WITH_RC4_128_SHA */
+        case 0x008E: /* TLS_DHE_PSK_WITH_RC4_128_SHA */
+        case 0x0092: /* TLS_RSA_PSK_WITH_RC4_128_SHA */
           break;
         default: /* enable everything else */
           allowed_ciphers[allowed_ciphers_count++] = all_ciphers[i];
