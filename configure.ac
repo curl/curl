@@ -1371,18 +1371,18 @@ fi
 
 OPT_DARWINSSL=no
 AC_ARG_WITH(darwinssl,dnl
-AC_HELP_STRING([--with-darwinssl],[enable iOS/Mac OS X native SSL/TLS])
-AC_HELP_STRING([--without-darwinssl], [disable iOS/Mac OS X native SSL/TLS]),
+AC_HELP_STRING([--with-darwinssl],[enable Apple OS native SSL/TLS])
+AC_HELP_STRING([--without-darwinssl], [disable Apple OS native SSL/TLS]),
   OPT_DARWINSSL=$withval)
 
-AC_MSG_CHECKING([whether to enable iOS/Mac OS X native SSL/TLS])
+AC_MSG_CHECKING([whether to enable Apple OS native SSL/TLS])
 if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   if test "x$OPT_DARWINSSL" != "xno" &&
      test -d "/System/Library/Frameworks/Security.framework"; then
     AC_MSG_RESULT(yes)
-    AC_DEFINE(USE_DARWINSSL, 1, [to enable iOS/Mac OS X native SSL/TLS support])
+    AC_DEFINE(USE_DARWINSSL, 1, [to enable Apple OS native SSL/TLS support])
     AC_SUBST(USE_DARWINSSL, [1])
-    curl_ssl_msg="enabled (iOS/Mac OS X-native)"
+    curl_ssl_msg="enabled (Apple OS-native)"
     DARWINSSL_ENABLED=1
     LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
   else
