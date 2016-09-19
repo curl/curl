@@ -111,6 +111,7 @@
 #define HAVE_OPAQUE_RSA_DSA_DH 1 /* since 1.1.0 -pre5 */
 #define CONST_EXTS const
 #define CONST_ASN1_BIT_STRING const
+#define HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED 1
 #else
 /* For OpenSSL before 1.1.0 */
 #define ASN1_STRING_get0_data(x) ASN1_STRING_data(x)
