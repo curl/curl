@@ -8,7 +8,7 @@ Curl and libcurl 7.51.0
 
 This release includes the following changes:
 
- o
+ o nss: additional cipher suites are now accepted by CURLOPT_SSL_CIPHER_LIST
 
 This release includes the following bugfixes:
 
