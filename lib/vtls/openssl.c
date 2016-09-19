@@ -119,7 +119,14 @@
 #define X509_get0_notAfter(x) X509_get_notAfter(x)
 #define CONST_EXTS /* nope */
 #define CONST_ASN1_BIT_STRING /* nope */
+#ifdef LIBRESSL_VERSION_NUMBER
+static unsigned long OpenSSL_version_num(void)
+{
+  return LIBRESSL_VERSION_NUMBER;
+}
+#else
 #define OpenSSL_version_num() SSLeay()
+#endif
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* 1.0.2 or later */ \
