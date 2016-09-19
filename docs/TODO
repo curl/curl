@@ -108,6 +108,7 @@
  13.7 improve configure --with-ssl
  13.8 Support DANE
  13.9 Support TLS v1.3
+ 13.10 Support SSLKEYLOGFILE
 
  14. GnuTLS
  14.1 SSL engine stuff
@@ -707,6 +708,15 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  the corresponding support. There may be a need to add some additional options
  to allow libcurl to take advantage of the new features in 1.3.
 
+13.10 Support SSLKEYLOGFILE
+
+ When used, Firefox and Chrome dumps their master TLS keys to the file name
+ this environment variable specifies. This allows tools like for example
+ Wireshark to capture and decipher TLS traffic to/from those clients. libcurl
+ could be made to support this more widely (presumably this already works when
+ built with NSS). Peter Wu made a OpenSSL preload to make possible that can be
+ used as inspiration and guidance
+ https://git.lekensteyn.nl/peter/wireshark-notes/tree/src/sslkeylog.c
 
 14. GnuTLS
 
