@@ -109,6 +109,9 @@
  13.8 Support DANE
  13.9 Support TLS v1.3
  13.10 Support SSLKEYLOGFILE
+ 13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
+ 13.12 Support HSTS
+ 13.13 Support HPKP
 
  14. GnuTLS
  14.1 SSL engine stuff
@@ -717,6 +720,42 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  built with NSS). Peter Wu made a OpenSSL preload to make possible that can be
  used as inspiration and guidance
  https://git.lekensteyn.nl/peter/wireshark-notes/tree/src/sslkeylog.c
+
+13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
+
+ CURLOPT_PINNEDPUBLICKEY does not consider the hashes of intermediate & root
+ certificates when comparing the pinned keys. Therefore it is not compatible
+ with "HTTP Public Key Pinning" as there also intermediate and root certificates
+ can be pinned. This is very useful as it prevents webadmins from "locking
+ themself out of their servers".
+
+ Adding this feature would make curls pinning 100% compatible to HPKP and allow
+ more flexible pinning.
+
+13.12 Support HSTS
+
+ "HTTP Strict Transport Security" is TOFU (trust on first use), time-based
+ features indicated by a HTTP header send by the webserver. It is widely used
+ in browsers and it's purpose is to prevent insecure HTTP connections after
+ a previous HTTPS connection. It protects against SSLStripping attacks.
+
+ Doc: https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security
+ RFC 6797: https://tools.ietf.org/html/rfc6797
+
+13.13 Support HPKP
+
+ "HTTP Public Key Pinning" is TOFU (trust on first use), time-based
+ features indicated by a HTTP header send by the webserver. It's purpose is
+ to prevent Man-in-the-middle attacks by trusted CAs by allowing webadmins
+ to specify which CAs/certificates/public keys to trust when connection to
+ their websites.
+
+ It can be build based on PINNEDPUBLICKEY.
+
+ Wikipedia: https://en.wikipedia.org/wiki/HTTP_Public_Key_Pinning
+ OWASP: https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning
+ Doc: https://developer.mozilla.org/de/docs/Web/Security/Public_Key_Pinning
+ RFC: https://tools.ietf.org/html/draft-ietf-websec-key-pinning-21
 
 14. GnuTLS
 
