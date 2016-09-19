@@ -748,11 +748,6 @@ void Curl_ossl_cleanup(void)
   ENGINE_cleanup();
 #endif
 
-#ifdef HAVE_CRYPTO_CLEANUP_ALL_EX_DATA
-  /* Free OpenSSL ex_data table */
-  CRYPTO_cleanup_all_ex_data();
-#endif
-
   /* Free OpenSSL error strings */
   ERR_free_strings();
 
