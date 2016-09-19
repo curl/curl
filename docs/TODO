@@ -742,7 +742,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Doc: https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security
  RFC 6797: https://tools.ietf.org/html/rfc6797
  
-13.12 Support HPKP
+13.13 Support HPKP
 
  "HTTP Public Key Pinning" is TOFU (trust on first use), time-based
  features indicated by a HTTP header send by the webserver. It's purpose is
