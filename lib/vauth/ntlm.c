@@ -164,7 +164,7 @@ static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
  *
  * Returns CURLE_OK on success.
  */
-static CURLcode ntlm_decode_type2_target(struct SessionHandle *data,
+static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
                                          unsigned char *buffer,
                                          size_t size,
                                          struct ntlmdata *ntlm)
@@ -217,6 +217,20 @@ static CURLcode ntlm_decode_type2_target(struct SessionHandle *data,
 */
 
 /*
+ * Curl_auth_is_ntlm_supported()
+ *
+ * This is used to evaluate if NTLM is supported.
+ *
+ * Parameters: None
+ *
+ * Returns TRUE as NTLM as handled by libcurl.
+ */
+bool Curl_auth_is_ntlm_supported(void)
+{
+  return TRUE;
+}
+
+/*
  * Curl_auth_decode_ntlm_type2_message()
  *
  * This is used to decode an already encoded NTLM type-2 message. The message
@@ -232,7 +246,7 @@ static CURLcode ntlm_decode_type2_target(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_decode_ntlm_type2_message(struct SessionHandle *data,
+CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
                                              const char *type2msg,
                                              struct ntlmdata *ntlm)
 {
@@ -465,7 +479,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_ntlm_type3_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,

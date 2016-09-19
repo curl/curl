@@ -610,7 +610,7 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
   CURLcode ret;
   unsigned int ccsid;
   char * * cpp;
-  struct SessionHandle * data;
+  struct Curl_easy * data;
   struct curl_slist * * slp;
   struct curl_certinfo * cipf;
   struct curl_certinfo * cipt;
@@ -618,7 +618,7 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
   /* WARNING: unlike curl_easy_get_info(), the strings returned by this
      procedure have to be free'ed. */
 
-  data = (struct SessionHandle *) curl;
+  data = (struct Curl_easy *) curl;
   va_start(arg, info);
   paramp = va_arg(arg, void *);
   ret = Curl_getinfo(data, info, paramp);
@@ -1108,7 +1108,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
 {
   CURLcode result;
   va_list arg;
-  struct SessionHandle * data;
+  struct Curl_easy * data;
   char * s;
   char * cp;
   unsigned int ccsid;
@@ -1130,7 +1130,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
     }
 
-  data = (struct SessionHandle *) curl;
+  data = (struct Curl_easy *) curl;
   va_start(arg, tag);
 
   switch (tag) {

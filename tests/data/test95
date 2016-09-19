@@ -64,6 +64,7 @@ http://test.95:%HTTPPORT/we/want/that/page/95 -p -x %HOSTIP:%PROXYPORT -d "datat
 CONNECT test.95:%HTTPPORT HTTP/1.1
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 Host: test.95:%HTTPPORT
+Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol nonewline="yes">

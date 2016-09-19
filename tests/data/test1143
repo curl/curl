@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+followlocation
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 hello
+Connection: close
+Content-Length: 4
+
+hej
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP URL with http:/ (one slash!)
+ </name>
+ <command>
+http:/%HOSTIP:%HTTPPORT/want/1143
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /want/1143 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

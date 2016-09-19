@@ -91,7 +91,7 @@ const struct Curl_handler Curl_handler_dict = {
   PROTOPT_NONE | PROTOPT_NOURLQUERY      /* flags */
 };
 
-static char *unescape_word(struct SessionHandle *data, const char *inputbuff)
+static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
 {
   char *newp;
   char *dictp;
@@ -133,7 +133,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
   CURLcode result=CURLE_OK;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   char *path = data->state.path;

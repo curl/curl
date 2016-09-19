@@ -64,12 +64,12 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results);
 
-CURLcode Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
+CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
                                    const char *password,
                                    unsigned char *lmbuffer /* 21 bytes */);
 
 #if USE_NTRESPONSES
-CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
+CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
                                    const char *password,
                                    unsigned char *ntbuffer /* 21 bytes */);
 

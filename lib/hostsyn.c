@@ -59,7 +59,7 @@
 /*
  * Function provided by the resolver backend to set DNS servers to use.
  */
-CURLcode Curl_set_dns_servers(struct SessionHandle *data,
+CURLcode Curl_set_dns_servers(struct Curl_easy *data,
                               char *servers)
 {
   (void)data;
@@ -72,7 +72,7 @@ CURLcode Curl_set_dns_servers(struct SessionHandle *data,
  * Function provided by the resolver backend to set
  * outgoing interface to use for DNS requests
  */
-CURLcode Curl_set_dns_interface(struct SessionHandle *data,
+CURLcode Curl_set_dns_interface(struct Curl_easy *data,
                                 const char *interf)
 {
   (void)data;
@@ -84,7 +84,7 @@ CURLcode Curl_set_dns_interface(struct SessionHandle *data,
  * Function provided by the resolver backend to set
  * local IPv4 address to use as source address for DNS requests
  */
-CURLcode Curl_set_dns_local_ip4(struct SessionHandle *data,
+CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
                                 const char *local_ip4)
 {
   (void)data;
@@ -96,7 +96,7 @@ CURLcode Curl_set_dns_local_ip4(struct SessionHandle *data,
  * Function provided by the resolver backend to set
  * local IPv6 address to use as source address for DNS requests
  */
-CURLcode Curl_set_dns_local_ip6(struct SessionHandle *data,
+CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
                                 const char *local_ip6)
 {
   (void)data;

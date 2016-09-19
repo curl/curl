@@ -68,7 +68,8 @@ be used!
 SSL session IDs will be shared across the easy handles using this shared
 object. This will reduce the time spent in the SSL handshake when reconnecting
 to the same server. Note SSL session IDs are reused within the same easy handle
-by default.
+by default. Note this symbol was added in 7.10.3 but was not implemented until
+7.23.0.
 .RE
 .IP CURLSHOPT_UNSHARE
 This option does the opposite of \fICURLSHOPT_SHARE\fP. It specifies that

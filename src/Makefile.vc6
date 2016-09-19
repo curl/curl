@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -191,7 +191,7 @@ DEBUG_OBJS= \
 	rawstrd.obj \
 	strtoofftd.obj \
 	warnlessd.obj \
-	slist_wc.obj \
+	slist_wcd.obj \
 	tool_binmoded.obj \
 	tool_bnamed.obj \
 	tool_cb_dbgd.obj \
@@ -459,7 +459,7 @@ strtoofftd.obj: ../lib/strtoofft.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 warnlessd.obj: ../lib/warnless.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/warnless.c
-slist_wc.obj: slist_wc.c
+slist_wcd.obj: slist_wc.c
 	$(CCD) $(CFLAGS) /Fo"$@" slist_wc.c
 tool_binmoded.obj: tool_binmode.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_binmode.c

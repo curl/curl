@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2008 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2008 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -53,6 +53,11 @@ force rebuild even if certdata.txt is current (Added in version 1.17)
 print version info about used modules
 .IP -l
 print license info about certdata.txt
+.IP -m
+(Added in 1.26) Include meta data comments in the output. The meta data is
+specific information about each certificate that is stored in the original
+file as comments and using this option will make those comments get passed on
+to the output file. The meta data is not parsed in any way by mk-ca-bundle.
 .IP -n
 no download of certdata.txt (to use existing)
 .IP "-p [purposes]:[levels]"

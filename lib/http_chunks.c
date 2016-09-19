@@ -37,7 +37,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* !checksrc! disable SPACEBEFORECLOSE 1 */
 /*
  * Chunk format (simplified):
  *
@@ -109,7 +108,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
                               ssize_t *wrotep)
 {
   CURLcode result=CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct Curl_chunker *ch = &conn->chunk;
   struct SingleRequest *k = &data->req;
   size_t piece;

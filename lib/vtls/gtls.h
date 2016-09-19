@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,7 +41,7 @@ void Curl_gtls_close(struct connectdata *conn, int sockindex);
 void Curl_gtls_session_free(void *ptr);
 size_t Curl_gtls_version(char *buffer, size_t size);
 int Curl_gtls_shutdown(struct connectdata *conn, int sockindex);
-int Curl_gtls_random(struct SessionHandle *data,
+int Curl_gtls_random(struct Curl_easy *data,
                      unsigned char *entropy,
                      size_t length);
 void Curl_gtls_md5sum(unsigned char *tmp, /* input */
@@ -63,6 +63,9 @@ bool Curl_gtls_cert_status_request(void);
 
 /* this backend supports CURLOPT_CERTINFO */
 #define have_curlssl_certinfo 1
+
+/* this backend supports CURLOPT_PINNEDPUBLICKEY */
+#define have_curlssl_pinnedpubkey 1
 
 /* API setup for GnuTLS */
 #define curlssl_init Curl_gtls_init

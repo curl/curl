@@ -85,6 +85,8 @@ int main(void)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
+  const char **p;
+  long infilesize;
   struct upload_status upload_ctx;
 
   upload_ctx.lines_read = 0;
@@ -106,6 +108,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+    infilesize = 0;
+    for(p = payload_text; *p; ++p) {
+      infilesize += (long)strlen(*p);
+    }
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);
 
     /* Perform the append */
     res = curl_easy_perform(curl);

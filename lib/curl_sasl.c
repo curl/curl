@@ -46,9 +46,8 @@
 #include "rawstr.h"
 #include "sendf.h"
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-
-/* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -258,7 +257,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
                          bool force_ir, saslprogress *progress)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   unsigned int enabledmechs;
   const char *mech = NULL;
   char *resp = NULL;
@@ -289,7 +288,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   }
   else if(conn->bits.user_passwd) {
 #if defined(USE_KERBEROS5)
-    if(enabledmechs & SASL_MECH_GSSAPI) {
+    if((enabledmechs & SASL_MECH_GSSAPI) && Curl_auth_is_gssapi_supported() &&
+       Curl_auth_user_contains_domain(conn->user)) {
       sasl->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */
       mech = SASL_MECH_STRING_GSSAPI;
       state1 = SASL_GSSAPI;
@@ -309,7 +309,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     else
 #endif
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-    if(enabledmechs & SASL_MECH_DIGEST_MD5) {
+    if((enabledmechs & SASL_MECH_DIGEST_MD5) &&
+       Curl_auth_is_digest_supported()) {
       mech = SASL_MECH_STRING_DIGEST_MD5;
       state1 = SASL_DIGESTMD5;
       sasl->authused = SASL_MECH_DIGEST_MD5;
@@ -322,7 +323,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     else
 #endif
 #ifdef USE_NTLM
-    if(enabledmechs & SASL_MECH_NTLM) {
+    if((enabledmechs & SASL_MECH_NTLM) && Curl_auth_is_ntlm_supported()) {
       mech = SASL_MECH_STRING_NTLM;
       state1 = SASL_NTLM;
       state2 = SASL_NTLM_TYPE2MSG;
@@ -406,7 +407,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
                             int code, saslprogress *progress)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   saslstate newstate = SASL_FINAL;
   char *resp = NULL;
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)

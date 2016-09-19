@@ -26,10 +26,12 @@
 
 #include <curl/curl.h>
 
-#include "curl_printf.h"
 #include "urldata.h"
 
 #define MEMDEBUG_NODEFINES /* don't redefine the standard functions */
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -117,7 +119,7 @@ void curl_memdebug(const char *logname)
       logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
     /* Flush the log file after every line so the log isn't lost in a crash */
-    setvbuf(logfile, (char *)NULL, _IOLBF, 0);
+    setbuf(logfile, (char *)NULL);
 #endif
   }
 }

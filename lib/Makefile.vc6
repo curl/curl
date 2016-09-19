@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -115,6 +115,7 @@ LNKDLL       = link.exe /DLL
 LNKLIB       = link.exe /lib
 LFLAGS       = /nologo /machine:$(MACHINE)
 SSLLIBS      = libeay32.lib ssleay32.lib
+WINSSLLIBS   = crypt32.lib
 ZLIBLIBSDLL  = zdll.lib
 ZLIBLIBS     = zlib.lib
 WINLIBS      = ws2_32.lib wldap32.lib advapi32.lib
@@ -176,7 +177,7 @@ CFGSET   = TRUE
 TARGET   = $(LIBCURL_STA_LIB_REL)
 DIROBJ   = $(CFG)
 LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LNK      = $(LNKLIB) /out:$(DIROBJ)\$(TARGET)
+LNK      = $(LNKLIB) $(WINSSLLIBS) /out:$(DIROBJ)\$(TARGET)
 CC       = $(CCNODBG) $(RTLIB) $(CFLAGSWINSSL) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
@@ -213,7 +214,7 @@ CFGSET   = TRUE
 TARGET   = $(LIBCURL_STA_LIB_REL)
 DIROBJ   = $(CFG)
 LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-LNK      = $(LNKLIB) $(LFLAGSZLIB) /out:$(DIROBJ)\$(TARGET)
+LNK      = $(LNKLIB) $(LFLAGSZLIB) $(WINSSLLIBS) /out:$(DIROBJ)\$(TARGET)
 CC       = $(CCNODBG) $(RTLIB) $(CFLAGSWINSSL) $(CFLAGSZLIB) $(CFLAGSLIB)
 CFGSET   = TRUE
 !ENDIF
@@ -616,6 +617,7 @@ X_OBJS= \
 	$(DIROBJ)\speedcheck.obj \
 	$(DIROBJ)\splay.obj \
 	$(DIROBJ)\ssh.obj \
+	$(DIROBJ)\system_win32.obj \
 	$(DIROBJ)\vauth.obj \
 	$(DIROBJ)\cleartext.obj \
 	$(DIROBJ)\cram.obj \
@@ -643,6 +645,7 @@ X_OBJS= \
 	$(DIROBJ)\version.obj \
 	$(DIROBJ)\warnless.obj \
 	$(DIROBJ)\wildcard.obj \
+        $(DIROBJ)\x509asn1.obj \
 	$(RESOURCE)
 
 all : $(TARGET)

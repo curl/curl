@@ -41,7 +41,7 @@ CURLcode Curl_mbedtls_connect_nonblocking(struct connectdata *conn,
 
 /* tell mbedTLS to close down all open information regarding connections (and
    thus session ID caching etc) */
-void Curl_mbedtls_close_all(struct SessionHandle *data);
+void Curl_mbedtls_close_all(struct Curl_easy *data);
 
  /* close a SSL connection */
 void Curl_mbedtls_close(struct connectdata *conn, int sockindex);
@@ -49,6 +49,9 @@ void Curl_mbedtls_close(struct connectdata *conn, int sockindex);
 void Curl_mbedtls_session_free(void *ptr);
 size_t Curl_mbedtls_version(char *buffer, size_t size);
 int Curl_mbedtls_shutdown(struct connectdata *conn, int sockindex);
+
+/* this backends supports CURLOPT_PINNEDPUBLICKEY */
+#define have_curlssl_pinnedpubkey 1
 
 /* API setup for mbedTLS */
 #define curlssl_init() Curl_mbedtls_init()

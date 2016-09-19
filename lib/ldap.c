@@ -76,9 +76,8 @@
 #include "curl_base64.h"
 #include "rawstr.h"
 #include "connect.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-
-/* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -193,7 +192,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   LDAPMessage *ldapmsg = NULL;
   LDAPMessage *entryIterator;
   int num = 0;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   int ldap_proto = LDAP_VERSION3;
   int ldap_ssl = 0;
   char *val_b64 = NULL;

@@ -48,7 +48,7 @@ Enforce HTTP 1.1 requests.
 Attempt HTTP 2 requests. libcurl will fall back to HTTP 1.1 if HTTP 2 can't be
 negotiated with the server. (Added in 7.33.0)
 
-The alias \fICURL_HTTP_VERSION_2\fI was added in 7.43.0 to better reflect the
+The alias \fICURL_HTTP_VERSION_2\fP was added in 7.43.0 to better reflect the
 actual protocol name.
 .IP CURL_HTTP_VERSION_2TLS
 Attempt HTTP 2 over TLS (HTTPS) only. libcurl will fall back to HTTP 1.1 if
@@ -58,7 +58,7 @@ libcurl will use 1.1. (Added in 7.47.0)
 Issue non-TLS HTTP requests using HTTP/2 without HTTP/1.1 Upgrade. It requires
 prior knowledge that the server supports HTTP/2 straight away. HTTPS requests
 will still do HTTP/2 the standard way with negotiated protocol version in the
-TLS handshake.
+TLS handshake. (Added in 7.49.0)
 .SH DEFAULT
 CURL_HTTP_VERSION_NONE
 .SH PROTOCOLS

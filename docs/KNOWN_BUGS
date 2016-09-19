@@ -21,16 +21,20 @@ problems may have been fixed or changed somewhat since this was written!
  1.7 CONNECT response larger than 16KB
  1.8 DNS timing is wrong for HTTP redirects
  1.9 HTTP/2 frames while in the connection pool kill reuse
+ 1.10 Strips trailing dot from host name
+ 1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
  2. TLS
  2.1 Hangs with PolarSSL
  2.2 CURLINFO_SSL_VERIFYRESULT has limited support
  2.3 DER in keychain
+ 2.4 GnuTLS backend skips really long certificate fields
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
  3.2 No disconnect command
  3.3 SMTP to multiple recipients
+ 3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
 
  4. Command line
  4.1 -J with %-encoded file nameas
@@ -43,13 +47,14 @@ problems may have been fixed or changed somewhat since this was written!
  5.3 libidn and old iconv
  5.4 AIX shared build with c-ares fails
  5.5 can't handle Unicode arguments in Windows
- 5.6 Improper use of Autoconf cache variables
+ 5.6 cmake support gaps
+ 5.7 Visual Studio project gaps
 
  6. Authentication
  6.1 NTLM authentication and unicode
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
- 6.4 Negotiate needs a fake user name
+ 6.4 Negotiate and Kerberos V5 need a fake user name
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -59,6 +64,7 @@ problems may have been fixed or changed somewhat since this was written!
  7.5 ASCII FTP
  7.6 FTP with NULs in URL parts
  7.7 FTP and empty path parts in the URL
+ 7.8 Premature transfer end but healthy control channel
 
  8. TELNET
  8.1 TELNET and time limtiations don't work
@@ -79,6 +85,10 @@ problems may have been fixed or changed somewhat since this was written!
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
+
+ 13 TCP/IP
+ 13.1 --interface for ipv6 binds to unusable IP address
+
 
 ==============================================================================
 
@@ -152,6 +162,52 @@ problems may have been fixed or changed somewhat since this was written!
  This is *best* fixed by adding monitoring to connections while they are kept
  in the pool so that pings can be responded to appropriately.
 
+1.10 Strips trailing dot from host name
+
+ When given a URL wit a trailing dot for the host name part:
+ "https://example.com./", libcurl will strip off the dot and use the name
+ without a dot internally and send it dot-less in HTTP Host: headers and in
+ the TLS SNI field.
+
+ The HTTP part violates RFC 7230 section 5.4 but the SNI part is accordance
+ with RFC 6066 section 3.
+
+ URLs using these trailing dots are very rare in the wild and we have not seen
+ or gotten any real-world problems with such URLs reported. The popular
+ browsers seem to have stayed with not stripping the dot for both uses (thus
+ they violate RFC 6066 instead of RFC 7230).
+
+ Daniel took the discussion to the HTTPbis mailing list in March 2016:
+ https://lists.w3.org/Archives/Public/ietf-http-wg/2016JanMar/0430.html but
+ there was not major rush or interest to fix this. The impression I get is
+ that most HTTP people rather not rock the boat now and instead prioritize web
+ compatibility rather than to strictly adhere to these RFCs.
+
+ Our current approach allows a knowing client to send a custom HTTP header
+ with the dot added.
+
+ It can also be noted that while adding a trailing dot to the host name in
+ most (all?) cases will make the name resolve to the same set of IP addresses,
+ many HTTP servers will not happily accept the trailing dot there unless that
+ has been specificly configured to be a fine virtual host.
+
+ If URLs with trailing dots for host names become more popular or even just
+ used more than for just plain fun experiments, I'm sure we will have reason
+ to go back and reconsider.
+
+ See https://github.com/curl/curl/issues/716 for the discussion.
+
+1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
+
+ I'm using libcurl to POST form data using a FILE* with the CURLFORM_STREAM
+ option of curl_formadd(). I've noticed that if the connection drops at just
+ the right time, the POST is reattempted without the data from the file. It
+ seems like the file stream position isn't getting reset to the beginning of
+ the file. I found the CURLOPT_SEEKFUNCTION option and set that with a
+ function that performs an fseek() on the FILE*. However, setting that didn't
+ seem to fix the issue or even get called. See
+ https://github.com/curl/curl/issues/768
+
 
 2. TLS
 
@@ -174,6 +230,13 @@ problems may have been fixed or changed somewhat since this was written!
  Curl doesn't recognize certificates in DER format in keychain, but it works
  with PEM.  https://curl.haxx.se/bug/view.cgi?id=1065
 
+2.4 GnuTLS backend skips really long certificate fields
+
+ libcurl calls gnutls_x509_crt_get_dn() with a fixed buffer size and if the
+ field is too long in the cert, it'll just return an error and the field will
+ be displayed blank.
+
+
 3. Email protocols
 
 3.1 IMAP SEARCH ALL truncated response
@@ -195,6 +258,12 @@ problems may have been fixed or changed somewhat since this was written!
  command). Ordinary mail programs would proceed and still send to the ones
  that can receive data. This is subject for change in the future.
  https://curl.haxx.se/bug/view.cgi?id=1116
+
+3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
+
+ You have to tell libcurl not to expect a body, when dealing with one line
+ response commands. Please see the POP3 examples and test cases which show
+ this for the NOOP and DELE commands. https://curl.haxx.se/bug/?i=740
 
 
 4. Command line
@@ -265,13 +334,30 @@ problems may have been fixed or changed somewhat since this was written!
   https://curl.haxx.se/bug/?i=345
   https://curl.haxx.se/bug/?i=731
 
-5.6 Improper use of Autoconf cache variables
+5.6 cmake support gaps
 
- A number of macros used in curl's configure modify the Autoconf cache
- variables which breaks configure variable caching.
+ The cmake build setup lacks several features that the autoconf build
+ offers. This includes:
 
- Issue: https://github.com/curl/curl/issues/603
+  - symbol hiding when the shared library is built
+  - use of correct soname for the shared library build
+  - support for several TLS backends are missing
+  - the unit tests cause link failures in regular non-static builds
+  - no nghttp2 check
 
+5.7 Visual Studio project gaps
+
+ The Visual Studio projects lack some features that the autoconf and nmake
+ builds offer, such as the following:
+
+  - support for zlib and nghttp2
+  - use of static runtime libraries
+  - add the test suite components
+
+ In addition to this the following could be implemented:
+
+  - support for other development IDEs
+  - add PATH environment variables for third-party DLLs
 
 6. Authentication
 
@@ -298,13 +384,17 @@ problems may have been fixed or changed somewhat since this was written!
  "system context" will make it use wrong(?) user name - at least when compared
  to what winhttp does. See https://curl.haxx.se/bug/view.cgi?id=535
 
-6.4 Negotiate needs a fake user name
+6.4 Negotiate and Kerberos V5 need a fake user name
 
- To get HTTP Negotiate (SPNEGO) authentication to work fine, you need to
- provide a (fake) user name (this concerns both curl and the lib) because the
- code wrongly only considers authentication if there's a user name provided.
- https://curl.haxx.se/bug/view.cgi?id=440 How?
- https://curl.haxx.se/mail/lib-2004-08/0182.html
+ In order to get Negotiate (SPNEGO) authentication to work in HTTP or Kerberos
+ V5 in the e-mail protocols, you need to  provide a (fake) user name (this
+ concerns both curl and the lib) because the code wrongly only considers
+ authentication if there's a user name provided by setting
+ conn->bits.user_passwd in url.c  https://curl.haxx.se/bug/view.cgi?id=440 How?
+ https://curl.haxx.se/mail/lib-2004-08/0182.html A possible solution is to
+ either modify this variable to be set or introduce a variable such as
+ new conn->bits.want_authentication which is set when any of the authentication
+ options are set.
 
 
 7. FTP
@@ -373,6 +463,17 @@ problems may have been fixed or changed somewhat since this was written!
  the user wants to reach the root dir (this exception SHALL remain even when
  this bug is fixed).
 
+7.8 Premature transfer end but healthy control channel
+
+ When 'multi_done' is called before the transfer has been completed the normal
+ way, it is considered a "premature" transfer end. In this situation, libcurl
+ closes the connection assuming it doesn't know the state of the connection so
+ it can't be reused for subsequent requests.
+
+ With FTP however, this isn't necessarily true but there are a bunch of
+ situations (listed in the ftp_done code) where it *could* keep the connection
+ alive even in this situation - but the current code doesn't. Fixing this would
+ allow libcurl to reuse FTP connections better.
 
 8. TELNET
 
@@ -463,3 +564,14 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/622 and
      https://curl.haxx.se/mail/lib-2016-01/0101.html
+
+
+13 TCP/IP
+
+13.1 --interface for ipv6 binds to unusable IP address
+
+ Since IPv6 provides a lot of addresses with different scope, binding to an
+ IPv6 address needs to take the proper care so that it doesn't bind to a
+ locally scoped address as that is bound to fail.
+
+ https://github.com/curl/curl/issues/686

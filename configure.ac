@@ -339,7 +339,7 @@ dnl **********************************************************************
 
 CURL_CHECK_HEADER_WINDOWS
 CURL_CHECK_NATIVE_WINDOWS
-case X-"$ac_cv_native_windows" in
+case X-"$curl_cv_native_windows" in
   X-yes)
     CURL_CHECK_HEADER_WINSOCK
     CURL_CHECK_HEADER_WINSOCK2
@@ -348,11 +348,11 @@ case X-"$ac_cv_native_windows" in
     CURL_CHECK_HEADER_WINBER
     ;;
   *)
-    ac_cv_header_winsock_h="no"
-    ac_cv_header_winsock2_h="no"
-    ac_cv_header_ws2tcpip_h="no"
-    ac_cv_header_winldap_h="no"
-    ac_cv_header_winber_h="no"
+    curl_cv_header_winsock_h="no"
+    curl_cv_header_winsock2_h="no"
+    curl_cv_header_ws2tcpip_h="no"
+    curl_cv_header_winldap_h="no"
+    curl_cv_header_winber_h="no"
     ;;
 esac
 CURL_CHECK_WIN32_LARGEFILE
@@ -742,8 +742,8 @@ fi
 if test "$HAVE_GETHOSTBYNAME" != "1"
 then
   dnl This is for winsock systems
-  if test "$ac_cv_header_windows_h" = "yes"; then
-    if test "$ac_cv_header_winsock_h" = "yes"; then
+  if test "$curl_cv_header_windows_h" = "yes"; then
+    if test "$curl_cv_header_winsock_h" = "yes"; then
       case $host in
         *-*-mingw32ce*)
           winsock_LIB="-lwinsock"
@@ -753,7 +753,7 @@ then
           ;;
       esac
     fi
-    if test "$ac_cv_header_winsock2_h" = "yes"; then
+    if test "$curl_cv_header_winsock2_h" = "yes"; then
       winsock_LIB="-lws2_32"
     fi
     if test ! -z "$winsock_LIB"; then
@@ -851,17 +851,6 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   AC_MSG_ERROR([couldn't find libraries for gethostbyname()])
 fi
 
-dnl resolve lib?
-AC_CHECK_FUNC(strcasecmp, , [ AC_CHECK_LIB(resolve, strcasecmp) ])
-
-if test "$ac_cv_lib_resolve_strcasecmp" = "$ac_cv_func_strcasecmp"; then
-  AC_CHECK_LIB(resolve, strcasecmp,
-              [LIBS="-lresolve $LIBS"],
-               ,
-               -lnsl)
-fi
-ac_cv_func_strcasecmp="no"
-
 CURL_CHECK_LIBS_CONNECT
 
 CURL_NETWORK_LIBS=$LIBS
@@ -902,17 +891,30 @@ else
     OPT_ZLIB=""
   fi
 
-  if test -z "$OPT_ZLIB" ; then
-    dnl check for the lib first without setting any new path, since many
-    dnl people have it in the default path
+  CURL_CHECK_PKGCONFIG(zlib)
 
-    AC_CHECK_LIB(z, inflateEnd,
+  if test "$PKGCONFIG" != "no" ; then
+    LIBS="`$PKGCONFIG --libs-only-l zlib` $LIBS"
+    LDFLAGS="`$PKGCONFIG --libs-only-L zlib` $LDFLAGS"
+    CPPFLAGS="`$PKGCONFIG --cflags-only-I zlib` $CPPFLAGS"
+    OPT_ZLIB=""
+    HAVE_LIBZ="1"
+  fi
+
+  if test -z "$OPT_ZLIB" ; then
+
+    if test -z "$HAVE_LIBZ"; then
+
+      dnl Check for the lib without setting any new path, since many
+      dnl people have it in the default path
+
+      AC_CHECK_LIB(z, inflateEnd,
                    dnl libz found, set the variable
                    [HAVE_LIBZ="1"
                     LIBS="-lz $LIBS"],
                    dnl if no lib found, try /usr/local
                    [OPT_ZLIB="/usr/local"])
-
+    fi
   fi
 
   dnl Add a nonempty path to the compiler flags
@@ -999,7 +1001,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
   CURL_CHECK_HEADER_LDAP_SSL
 
   if test -z "$LDAPLIBNAME" ; then
-    if test "$ac_cv_native_windows" = "yes"; then
+    if test "$curl_cv_native_windows" = "yes"; then
       dnl Windows uses a single and unique LDAP library name
       LDAPLIBNAME="wldap32"
       LBERLIBNAME="no"
@@ -1349,7 +1351,7 @@ AC_HELP_STRING([--without-winssl], [disable Windows native SSL/TLS]),
 AC_MSG_CHECKING([whether to enable Windows native SSL/TLS (Windows native builds only)])
 if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   if test "x$OPT_WINSSL" != "xno"  &&
-     test "x$ac_cv_native_windows" = "xyes"; then
+     test "x$curl_cv_native_windows" = "xyes"; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
     AC_SUBST(USE_SCHANNEL, [1])
@@ -1359,6 +1361,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
     AC_SUBST(USE_WINDOWS_SSPI, [1])
     curl_sspi_msg="enabled"
+    LIBS="-lcrypt32 $LIBS"
   else
     AC_MSG_RESULT(no)
   fi
@@ -1368,18 +1371,18 @@ fi
 
 OPT_DARWINSSL=no
 AC_ARG_WITH(darwinssl,dnl
-AC_HELP_STRING([--with-darwinssl],[enable iOS/Mac OS X native SSL/TLS])
-AC_HELP_STRING([--without-darwinssl], [disable iOS/Mac OS X native SSL/TLS]),
+AC_HELP_STRING([--with-darwinssl],[enable Apple OS native SSL/TLS])
+AC_HELP_STRING([--without-darwinssl], [disable Apple OS native SSL/TLS]),
   OPT_DARWINSSL=$withval)
 
-AC_MSG_CHECKING([whether to enable iOS/Mac OS X native SSL/TLS])
+AC_MSG_CHECKING([whether to enable Apple OS native SSL/TLS])
 if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   if test "x$OPT_DARWINSSL" != "xno" &&
      test -d "/System/Library/Frameworks/Security.framework"; then
     AC_MSG_RESULT(yes)
-    AC_DEFINE(USE_DARWINSSL, 1, [to enable iOS/Mac OS X native SSL/TLS support])
+    AC_DEFINE(USE_DARWINSSL, 1, [to enable Apple OS native SSL/TLS support])
     AC_SUBST(USE_DARWINSSL, [1])
-    curl_ssl_msg="enabled (iOS/Mac OS X-native)"
+    curl_ssl_msg="enabled (Apple OS-native)"
     DARWINSSL_ENABLED=1
     LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
   else
@@ -1636,7 +1639,6 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
                     RAND_screen \
                     RAND_egd \
                     ENGINE_cleanup \
-                    CRYPTO_cleanup_all_ex_data \
                     SSL_get_shutdown \
                     SSLv2_client_method )
 
@@ -3173,7 +3175,7 @@ AC_CHECK_SIZEOF(time_t)
 AC_CHECK_SIZEOF(off_t)
 
 soname_bump=no
-if test x"$ac_cv_native_windows" != "xyes" &&
+if test x"$curl_cv_native_windows" != "xyes" &&
    test $ac_cv_sizeof_off_t -ne $curl_sizeof_curl_off_t; then
   AC_MSG_WARN([This libcurl built is probably not ABI compatible with previous])
   AC_MSG_WARN([builds! You MUST read lib/README.curl_off_t to figure it out.])
@@ -3341,7 +3343,7 @@ dnl and get the types of five of its arguments.
 CURL_CHECK_FUNC_GETNAMEINFO
 
 if test "$ipv6" = "yes"; then
-  if test "$ac_cv_func_getaddrinfo" = "yes"; then
+  if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_DEFINE(ENABLE_IPV6, 1, [Define if you want to enable IPv6 support])
     IPV6_ENABLED=1
     AC_SUBST(IPV6_ENABLED)
@@ -3408,7 +3410,7 @@ AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 CURL_CHECK_LIB_ARES
 AM_CONDITIONAL(USE_EMBEDDED_ARES, test x$embedded_ares = xyes)
 
-if test "x$ac_cv_native_windows" != "xyes" &&
+if test "x$curl_cv_native_windows" != "xyes" &&
    test "x$enable_shared" = "xyes"; then
   build_libhostname=yes
 else
@@ -3478,7 +3480,7 @@ AC_HELP_STRING([--enable-sspi],[Enable SSPI])
 AC_HELP_STRING([--disable-sspi],[Disable SSPI]),
 [ case "$enableval" in
   yes)
-       if test "$ac_cv_native_windows" = "yes"; then
+       if test "$curl_cv_native_windows" = "yes"; then
          AC_MSG_RESULT(yes)
          AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
          AC_SUBST(USE_WINDOWS_SSPI, [1])
@@ -3707,8 +3709,8 @@ fi
 
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
-      -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
-      -o "x$DARWINSSL_ENABLED" = "x1"; then
+      -o "x$GNUTLS_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
+      -o "x$NSS_ENABLED" = "x1" -o "x$DARWINSSL_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
 
     if test "x$CURL_DISABLE_HTTP" != "x1" -a \
@@ -3780,8 +3782,8 @@ fi
 if test "x$CURL_DISABLE_SMB" != "x1" \
     -a "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" \
     -a \( "x$OPENSSL_ENABLED" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
-      -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
-      -o "x$DARWINSSL_ENABLED" = "x1" \); then
+      -o "x$GNUTLS_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
+      -o "x$NSS_ENABLED" = "x1" -o "x$DARWINSSL_ENABLED" = "x1" \); then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMB"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMBS"

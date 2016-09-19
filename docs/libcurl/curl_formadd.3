@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -32,7 +32,7 @@ curl_formadd - add a section to a multipart/formdata HTTP POST
 curl_formadd() is used to append sections when building a multipart/formdata
 HTTP POST (sometimes referred to as RFC2388-style posts). Append one section
 at a time until you've added all the sections you want included and then you
-pass the \fIfirstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST(3)\fP.
+pass the \fIfirstitem\fP pointer as parameter to \fICURLOPT_HTTPPOST(3)\fP.
 \fIlastitem\fP is set after each \fIcurl_formadd(3)\fP call and on repeated
 invokes it should be left as set to allow repeated invokes to find the end of
 the list faster.

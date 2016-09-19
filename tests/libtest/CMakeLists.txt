@@ -43,6 +43,10 @@ if(NOT WIN32)
   # library at (tests)/libtest/.libs/libhostname.so
   set_target_properties(hostname PROPERTIES
       LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/.libs)
+  if(HIDES_CURL_PRIVATE_SYMBOLS)
+    set_property(TARGET hostname APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
+    set_property(TARGET hostname APPEND PROPERTY COMPILE_FLAGS ${CURL_CFLAG_SYMBOLS_HIDE})
+  endif()
 endif()
 
 # # files used only in some libcurl test programs

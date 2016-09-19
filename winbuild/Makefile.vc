@@ -24,6 +24,7 @@ CFGSET=true
 !MESSAGE   WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
+!MESSAGE   WITH_MBEDTLS=<dll or static> - Enable mbedTLS support, DLL or static
 !MESSAGE   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
 !MESSAGE                                  Requires Windows Vista or later, or installation from:
 !MESSAGE                                  https://www.microsoft.com/en-us/download/details.aspx?id=734
@@ -87,7 +88,7 @@ USE_SSPI = false
 !ENDIF
 
 !IFNDEF ENABLE_WINSSL
-!IFDEF WITH_SSL
+!IF DEFINED(WITH_SSL) || DEFINED(WITH_MBEDTLS)
 USE_WINSSL = false
 !ELSE
 USE_WINSSL = $(USE_SSPI)
@@ -106,6 +107,17 @@ SSL     = dll
 !ELSEIF "$(WITH_SSL)"=="static"
 USE_SSL = true
 SSL     = static
+!ENDIF
+
+!IF "$(WITH_MBEDTLS)"=="dll" || "$(WITH_MBEDTLS)"=="static"
+USE_MBEDTLS = true
+MBEDTLS     = $(WITH_MBEDTLS)
+!ENDIF
+
+!IF ( "$(USE_SSL)"=="true" && "$(USE_WINSSL)"=="true" ) \
+ || ( "$(USE_SSL)"=="true" && "$(USE_MBEDTLS)"=="true" ) \
+ || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WINSSL)"=="true" )
+!ERROR SSL, MBEDTLS and WINSSL are mutual exclusive options.
 !ENDIF
 
 !IF "$(WITH_CARES)"=="dll"
@@ -148,6 +160,10 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-static
 
 !IF "$(USE_SSL)"=="true"
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssl-$(SSL)
+!ENDIF
+
+!IF "$(USE_MBEDTLS)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-mbedtls-$(MBEDTLS)
 !ENDIF
 
 !IF "$(USE_CARES)"=="true"

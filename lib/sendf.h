@@ -26,8 +26,8 @@
 
 CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *,
                     const char *fmt, ...);
-void Curl_infof(struct SessionHandle *, const char *fmt, ...);
-void Curl_failf(struct SessionHandle *, const char *fmt, ...);
+void Curl_infof(struct Curl_easy *, const char *fmt, ...);
+void Curl_failf(struct Curl_easy *, const char *fmt, ...);
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
 
@@ -84,7 +84,7 @@ CURLcode Curl_write_plain(struct connectdata *conn,
                           ssize_t *written);
 
 /* the function used to output verbose information */
-int Curl_debug(struct SessionHandle *handle, curl_infotype type,
+int Curl_debug(struct Curl_easy *handle, curl_infotype type,
                char *data, size_t size,
                struct connectdata *conn);
 

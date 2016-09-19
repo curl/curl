@@ -6,7 +6,7 @@
  *                 \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
- * Copyright (C) 2011 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,9 +46,8 @@
 #include "curl_ldap.h"
 #include "curl_base64.h"
 #include "connect.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-
-/* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -151,7 +150,7 @@ static CURLcode ldap_setup_connection(struct connectdata *conn)
 {
   ldapconninfo *li;
   LDAPURLDesc *lud;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   int rc, proto;
   CURLcode status;
 
@@ -189,7 +188,7 @@ static Sockbuf_IO ldapsb_tls;
 static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 {
   ldapconninfo *li = conn->proto.generic;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   int rc, proto = LDAP_VERSION3;
   char hosturl[1024];
   char *ptr;
@@ -227,7 +226,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
 {
   ldapconninfo *li = conn->proto.generic;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   LDAPMessage *msg = NULL;
   struct timeval tv = {0, 1}, *tvp;
   int rc, err;
@@ -353,7 +352,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
   int rc = 0;
   LDAPURLDesc *ludp = NULL;
   int msgid;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
 
   connkeep(conn, "OpenLDAP do");
 
@@ -416,7 +415,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
                          size_t len, CURLcode *err)
 {
   ldapconninfo *li = conn->proto.generic;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   ldapreqinfo *lr = data->req.protop;
   int rc, ret;
   LDAPMessage *msg = NULL;

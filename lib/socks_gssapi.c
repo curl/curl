@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,9 +32,10 @@
 #include "timeval.h"
 #include "socks.h"
 #include "warnless.h"
+
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 static gss_ctx_id_t gss_context = GSS_C_NO_CONTEXT;
@@ -42,7 +43,7 @@ static gss_ctx_id_t gss_context = GSS_C_NO_CONTEXT;
 /*
  * Helper GSS-API error functions.
  */
-static int check_gss_err(struct SessionHandle *data,
+static int check_gss_err(struct Curl_easy *data,
                          OM_uint32 major_status,
                          OM_uint32 minor_status,
                          const char* function)
@@ -101,7 +102,7 @@ static int check_gss_err(struct SessionHandle *data,
 CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                       struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   curl_socket_t sock = conn->sock[sockindex];
   CURLcode code;
   ssize_t actualread;

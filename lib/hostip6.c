@@ -49,10 +49,9 @@
 #include "url.h"
 #include "inet_pton.h"
 #include "connect.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
-
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /***********************************************************************
@@ -168,10 +167,12 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   int error;
   char sbuf[12];
   char *sbufptr = NULL;
+#ifndef USE_RESOLVE_ON_IPS
   char addrbuf[128];
+#endif
   int pf;
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 #endif
 
   *waitp = 0; /* synchronous response only */
@@ -197,11 +198,17 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   hints.ai_family = pf;
   hints.ai_socktype = conn->socktype;
 
+#ifndef USE_RESOLVE_ON_IPS
+  /*
+   * The AI_NUMERICHOST must not be set to get synthesized IPv6 address from
+   * an IPv4 address on iOS and Mac OS X.
+   */
   if((1 == Curl_inet_pton(AF_INET, hostname, addrbuf)) ||
      (1 == Curl_inet_pton(AF_INET6, hostname, addrbuf))) {
     /* the given address is numerical only, prevent a reverse lookup */
     hints.ai_flags = AI_NUMERICHOST;
   }
+#endif
 
   if(port) {
     snprintf(sbuf, sizeof(sbuf), "%d", port);
@@ -212,6 +219,10 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   if(error) {
     infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);
     return NULL;
+  }
+
+  if(port) {
+    Curl_addrinfo_set_port(res, port);
   }
 
   dump_addrinfo(conn, res);

@@ -47,9 +47,9 @@
 #include "sendf.h"
 #include "curl_sec.h"
 #include "warnless.h"
-#include "curl_printf.h"
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -150,7 +150,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
   const char *host = conn->host.name;
   ssize_t nread;
   curl_socklen_t l = sizeof(conn->local_addr);
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   CURLcode result;
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :

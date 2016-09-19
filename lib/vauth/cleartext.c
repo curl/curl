@@ -59,7 +59,7 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_plain_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_plain_message(struct Curl_easy *data,
                                         const char *userp,
                                         const char *passwdp,
                                         char **outptr, size_t *outlen)
@@ -110,7 +110,7 @@ CURLcode Curl_auth_create_plain_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_login_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_login_message(struct Curl_easy *data,
                                         const char *valuep, char **outptr,
                                         size_t *outlen)
 {
@@ -148,7 +148,7 @@ CURLcode Curl_auth_create_login_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_external_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_external_message(struct Curl_easy *data,
                                            const char *user, char **outptr,
                                            size_t *outlen)
 {

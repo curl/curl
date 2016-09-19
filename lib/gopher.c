@@ -75,7 +75,7 @@ const struct Curl_handler Curl_handler_gopher = {
 static CURLcode gopher_do(struct connectdata *conn, bool *done)
 {
   CURLcode result=CURLE_OK;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   curl_off_t *bytecount = &data->req.bytecount;

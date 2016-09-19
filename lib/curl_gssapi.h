@@ -44,7 +44,7 @@ extern gss_OID_desc Curl_krb5_mech_oid;
 
 /* Common method for using GSS-API */
 OM_uint32 Curl_gss_init_sec_context(
-    struct SessionHandle *data,
+    struct Curl_easy *data,
     OM_uint32 *minor_status,
     gss_ctx_id_t *context,
     gss_name_t target_name,
@@ -56,7 +56,7 @@ OM_uint32 Curl_gss_init_sec_context(
     OM_uint32 *ret_flags);
 
 /* Helper to log a GSS-API error status */
-void Curl_gss_log_error(struct SessionHandle *data, const char *prefix,
+void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
                         OM_uint32 major, OM_uint32 minor);
 
 /* Provide some definitions missing in old headers */

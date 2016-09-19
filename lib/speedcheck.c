@@ -28,12 +28,12 @@
 #include "multiif.h"
 #include "speedcheck.h"
 
-void Curl_speedinit(struct SessionHandle *data)
+void Curl_speedinit(struct Curl_easy *data)
 {
   memset(&data->state.keeps_speed, 0, sizeof(struct timeval));
 }
 
-CURLcode Curl_speedcheck(struct SessionHandle *data,
+CURLcode Curl_speedcheck(struct Curl_easy *data,
                          struct timeval now)
 {
   if((data->progress.current_speed >= 0) &&

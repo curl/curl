@@ -74,6 +74,7 @@ use serverhelp qw(
     server_logfilename
     );
 
+use pathhelp;
 
 #***************************************************************************
 
@@ -384,7 +385,7 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
 
 
 #***************************************************************************
-# Convert paths for curl's tests running on Windows using Cygwin OpenSSH
+# Convert paths for curl's tests running on Windows with Cygwin/Msys OpenSSH
 #
 my $clipubkeyf_config = abs_path("$path/$clipubkeyf");
 my $hstprvkeyf_config = abs_path("$path/$hstprvkeyf");
@@ -392,10 +393,10 @@ my $pidfile_config = $pidfile;
 my $sftpsrv_config = $sftpsrv;
 
 if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
-    # convert MinGW drive paths to Cygwin drive paths
-    $clipubkeyf_config =~ s/^\/(\w)\//\/cygdrive\/$1\//;
-    $hstprvkeyf_config =~ s/^\/(\w)\//\/cygdrive\/$1\//;
-    $pidfile_config =~ s/^\/(\w)\//\/cygdrive\/$1\//;
+    # Ensure to use MinGW/Cygwin paths
+    $clipubkeyf_config = pathhelp::build_sys_abs_path($clipubkeyf_config);
+    $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf_config);
+    $pidfile_config = pathhelp::build_sys_abs_path($pidfile_config);
     $sftpsrv_config = "internal-sftp";
 }
 
@@ -763,9 +764,9 @@ my $identity_config = abs_path("$path/$identity");
 my $knownhosts_config = abs_path("$path/$knownhosts");
 
 if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
-    # convert MinGW drive paths to Cygwin drive paths
-    $identity_config =~ s/^\/(\w)\//\/cygdrive\/$1\//;
-    $knownhosts_config =~ s/^\/(\w)\//\/cygdrive\/$1\//;
+    # Ensure to use MinGW/Cygwin paths
+    $identity_config = pathhelp::build_sys_abs_path($identity_config);
+    $knownhosts_config = pathhelp::build_sys_abs_path($knownhosts_config);
 }
 
 

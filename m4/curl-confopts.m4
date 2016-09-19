@@ -433,15 +433,15 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
   tst_method="unknown"
 
   AC_MSG_CHECKING([how to set a socket into non-blocking mode])
-  if test "x$ac_cv_func_fcntl_o_nonblock" = "xyes"; then
+  if test "x$curl_cv_func_fcntl_o_nonblock" = "xyes"; then
     tst_method="fcntl O_NONBLOCK"
-  elif test "x$ac_cv_func_ioctl_fionbio" = "xyes"; then
+  elif test "x$curl_cv_func_ioctl_fionbio" = "xyes"; then
     tst_method="ioctl FIONBIO"
-  elif test "x$ac_cv_func_ioctlsocket_fionbio" = "xyes"; then
+  elif test "x$curl_cv_func_ioctlsocket_fionbio" = "xyes"; then
     tst_method="ioctlsocket FIONBIO"
-  elif test "x$ac_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
+  elif test "x$curl_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
     tst_method="IoctlSocket FIONBIO"
-  elif test "x$ac_cv_func_setsockopt_so_nonblock" = "xyes"; then
+  elif test "x$curl_cv_func_setsockopt_so_nonblock" = "xyes"; then
     tst_method="setsockopt SO_NONBLOCK"
   fi
   AC_MSG_RESULT([$tst_method])
@@ -464,7 +464,7 @@ AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
   AC_MSG_CHECKING([whether hiding of library internal symbols will actually happen])
   CFLAG_CURL_SYMBOL_HIDING=""
   doing_symbol_hiding="no"
-  if test x"$ac_cv_native_windows" != "xyes" &&
+  if test x"$curl_cv_native_windows" != "xyes" &&
     test "$want_symbol_hiding" = "yes" &&
     test "$supports_symbol_hiding" = "yes"; then
     doing_symbol_hiding="yes"
@@ -611,7 +611,7 @@ AC_DEFUN([CURL_CHECK_NTLM_WB], [
   AC_REQUIRE([CURL_CHECK_OPTION_NTLM_WB])dnl
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_MSG_CHECKING([whether to enable NTLM delegation to winbind's helper])
-  if test "$ac_cv_native_windows" = "yes" ||
+  if test "$curl_cv_native_windows" = "yes" ||
     test "x$SSL_ENABLED" = "x"; then
     want_ntlm_wb_file=""
     want_ntlm_wb="no"

@@ -401,7 +401,7 @@ static CURLcode glob_parse(URLGlob *glob, char *pattern,
       }
     }
 
-    if(++glob->size > GLOB_PATTERN_NUM)
+    if(++glob->size >= GLOB_PATTERN_NUM)
       return GLOBERROR("too many globs", pos, CURLE_URL_MALFORMAT);
   }
   return res;

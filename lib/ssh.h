@@ -98,7 +98,7 @@ typedef enum {
 } sshstate;
 
 /* this struct is used in the HandleData struct which is part of the
-   SessionHandle, which means this is used on a per-easy handle basis.
+   Curl_easy, which means this is used on a per-easy handle basis.
    Everything that is strictly related to a connection is banned from this
    struct. */
 struct SSHPROTO {

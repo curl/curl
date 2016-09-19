@@ -46,6 +46,7 @@ GET ftp://michal:aybabtu@host.com/we/want/299 HTTP/1.1
 Host: host.com:21
 Authorization: Basic bWljaGFsOmF5YmFidHU=
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

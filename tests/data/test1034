@@ -55,6 +55,7 @@ http://invalid-utf8-‚ê.local/page/1034 -x %HOSTIP:%HTTPPORT
 GET http://invalid-utf8-‚ê.local/page/1034 HTTP/1.1
 Host: invalid-utf8-‚ê.local
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

@@ -151,6 +151,7 @@ struct OperationConfig {
   struct curl_httppost *last_post;
   struct curl_slist *telnet_options;
   struct curl_slist *resolve;
+  struct curl_slist *connect_to;
   HttpReq httpreq;
 
   /* for bandwidth limiting features: */
@@ -173,6 +174,7 @@ struct OperationConfig {
                                Kerberos 5 and SPNEGO */
 
   bool tcp_nodelay;
+  bool tcp_fastopen;
   long req_retry;           /* number of retries */
   long retry_delay;         /* delay between retries (in seconds) */
   long retry_maxtime;       /* maximum time to keep retrying */

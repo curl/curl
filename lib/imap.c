@@ -80,10 +80,10 @@
 #include "rawstr.h"
 #include "curl_sasl.h"
 #include "warnless.h"
-#include "curl_printf.h"
 
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /* Local API functions */
@@ -648,7 +648,7 @@ static CURLcode imap_perform_authentication(struct connectdata *conn)
 static CURLcode imap_perform_list(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct IMAP *imap = data->req.protop;
   char *mailbox;
 
@@ -683,7 +683,7 @@ static CURLcode imap_perform_list(struct connectdata *conn)
 static CURLcode imap_perform_select(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct IMAP *imap = data->req.protop;
   struct imap_conn *imapc = &conn->proto.imapc;
   char *mailbox;
@@ -840,13 +840,13 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
                                             imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   (void)instate; /* no use for this yet */
 
   if(imapcode != 'O') {
     failf(data, "Got unexpected imap-server response");
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
+    result = CURLE_WEIRD_SERVER_REPLY;
   }
   else
     result = imap_perform_capability(conn);
@@ -860,7 +860,7 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
                                            imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct imap_conn *imapc = &conn->proto.imapc;
   const char *line = data->state.buffer;
   size_t wordlen;
@@ -947,7 +947,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
                                          imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   (void)instate; /* no use for this yet */
 
@@ -971,7 +971,7 @@ static CURLcode imap_state_auth_resp(struct connectdata *conn,
                                      imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct imap_conn *imapc = &conn->proto.imapc;
   saslprogress progress;
 
@@ -1005,7 +1005,7 @@ static CURLcode imap_state_login_resp(struct connectdata *conn,
                                       imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   (void)instate; /* no use for this yet */
 
@@ -1051,7 +1051,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
                                        imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct IMAP *imap = conn->data->req.protop;
   struct imap_conn *imapc = &conn->proto.imapc;
   const char *line = data->state.buffer;
@@ -1098,7 +1098,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
                                       imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct imap_conn *imapc = &conn->proto.imapc;
   struct pingpong *pp = &imapc->pp;
   const char *ptr = data->state.buffer;
@@ -1179,7 +1179,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   else {
     /* We don't know how to parse this line */
     failf(pp->conn->data, "Failed to parse FETCH response.");
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: fix this code */
+    result = CURLE_WEIRD_SERVER_REPLY;
   }
 
   /* End of DO phase */
@@ -1198,7 +1198,7 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
   (void)instate; /* No use for this yet */
 
   if(imapcode != 'O')
-    result = CURLE_FTP_WEIRD_SERVER_REPLY; /* TODO: Fix error code */
+    result = CURLE_WEIRD_SERVER_REPLY;
   else
     /* End of DONE phase */
     state(conn, IMAP_STOP);
@@ -1211,7 +1211,7 @@ static CURLcode imap_state_append_resp(struct connectdata *conn, int imapcode,
                                        imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   (void)instate; /* No use for this yet */
 
@@ -1275,7 +1275,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     /* Was there an error parsing the response line? */
     if(imapcode == -1)
-      return CURLE_FTP_WEIRD_SERVER_REPLY;
+      return CURLE_WEIRD_SERVER_REPLY;
 
     if(!imapcode)
       break;
@@ -1371,12 +1371,12 @@ static CURLcode imap_block_statemach(struct connectdata *conn)
   return result;
 }
 
-/* Allocate and initialize the struct IMAP for the current SessionHandle if
+/* Allocate and initialize the struct IMAP for the current Curl_easy if
    required */
 static CURLcode imap_init(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct IMAP *imap;
 
   imap = data->req.protop = calloc(sizeof(struct IMAP), 1);
@@ -1456,7 +1456,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
                           bool premature)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct IMAP *imap = data->req.protop;
 
   (void)premature;
@@ -1518,7 +1518,7 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
 {
   /* This is IMAP and no proxy */
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct IMAP *imap = data->req.protop;
   struct imap_conn *imapc = &conn->proto.imapc;
   bool selected = FALSE;
@@ -1683,7 +1683,7 @@ static CURLcode imap_regular_transfer(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   bool connected = FALSE;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   /* Make sure size is unknown at this point */
   data->req.size = -1;
@@ -1706,7 +1706,7 @@ static CURLcode imap_regular_transfer(struct connectdata *conn,
 
 static CURLcode imap_setup_connection(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   /* Initialise the IMAP layer */
   CURLcode result = imap_init(conn);
@@ -1796,6 +1796,7 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
  */
 static char *imap_atom(const char *str, bool escape_only)
 {
+  /* !checksrc! disable PARENBRACE 1 */
   const char atom_specials[] = "(){ %*]";
   const char *p1;
   char *p2;
@@ -1970,7 +1971,7 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
 {
   /* The imap struct is already initialised in imap_connect() */
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct IMAP *imap = data->req.protop;
   const char *begin = data->state.path;
   const char *ptr = begin;
@@ -2100,7 +2101,7 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
 static CURLcode imap_parse_custom_request(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct IMAP *imap = data->req.protop;
   const char *custom = data->set.str[STRING_CUSTOMREQUEST];
 

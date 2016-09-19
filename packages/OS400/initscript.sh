@@ -50,7 +50,7 @@ setenv TGTCCSID         '500'                   # Target CCSID of objects.
 setenv DEBUG            '*ALL'                  # Debug level.
 setenv OPTIMIZE         '10'                    # Optimisation level
 setenv OUTPUT           '*NONE'                 # Compilation output option.
-setenv TGTRLS           'V5R3M0'                # Target OS release.
+setenv TGTRLS           'V6R1M0'                # Target OS release.
 setenv IFSDIR           '/curl'                 # Installation IFS directory.
 
 #       Define ZLIB availability and locations.
@@ -188,7 +188,7 @@ make_module()
         CMD="CRTCMOD MODULE(${TARGETLIB}/${1}) SRCSTMF('__tmpsrcf.c')"
 #       CMD="${CMD} SYSIFCOPT(*IFS64IO) OPTION(*INCDIRFIRST *SHOWINC *SHOWSYS)"
         CMD="${CMD} SYSIFCOPT(*IFS64IO) OPTION(*INCDIRFIRST)"
-        CMD="${CMD} LOCALETYPE(*LOCALE)"
+        CMD="${CMD} LOCALETYPE(*LOCALE) FLAG(10)"
         CMD="${CMD} INCDIR('/qibm/proddata/qadrt/include'"
         CMD="${CMD} '${TOPDIR}/include/curl' '${TOPDIR}/include' '${SRCDIR}'"
         CMD="${CMD} '${TOPDIR}/packages/OS400'"
@@ -207,7 +207,7 @@ make_module()
         CMD="${CMD} OPTIMIZE(${OPTIMIZE})"
         CMD="${CMD} DBGVIEW(${DEBUG})"
 
-        DEFINES="${3}"
+        DEFINES="${3} BUILDING_LIBCURL"
 
         if [ "${WITH_ZLIB}" != "0" ]
         then    DEFINES="${DEFINES} HAVE_LIBZ HAVE_ZLIB_H"

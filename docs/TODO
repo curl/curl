@@ -28,10 +28,15 @@
  1.10 Support IDNA2008
  1.11 minimize dependencies with dynamicly loaded modules
  1.12 have form functions use CURL handle argument
- 1.13 Add CURLOPT_MAIL_CLIENT option
  1.14 Typesafe curl_easy_setopt()
- 1.15 TCP Fast Open
+ 1.15 Monitor connections in the connection pool
  1.16 Try to URL encode given URL
+ 1.17 Add support for IRIs
+ 1.18 try next proxy if one doesn't work
+ 1.19 Timeout idle connections from the pool
+ 1.20 SRV and URI DNS records
+ 1.21 API for URL parsing/splitting
+ 1.23 Offer API to flush the connection pool
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -42,6 +47,7 @@
 
  3. Documentation
  3.1 Update date and version in man pages
+ 3.2 Provide cmake config-file
 
  4. FTP
  4.1 HOST
@@ -56,10 +62,11 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
- 5.4 SPDY
+ 5.4 Use huge HTTP/2 windows
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
- 5.7 More compressions
+ 5.7 Brotli compression
+ 5.8 QUIC
 
  6. TELNET
  6.1 ditch stdin
@@ -70,6 +77,7 @@
  7. SMTP
  7.1 Pipelining
  7.2 Enhanced capability support
+ 7.3 Add CURLOPT_MAIL_CLIENT option
 
  8. POP3
  8.1 Pipelining
@@ -99,6 +107,11 @@
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
  13.8 Support DANE
+ 13.9 Support TLS v1.3
+ 13.10 Support SSLKEYLOGFILE
+ 13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
+ 13.12 Support HSTS
+ 13.13 Support HPKP
 
  14. GnuTLS
  14.1 SSL engine stuff
@@ -114,46 +127,51 @@
  16.2 Add QOP support to GSSAPI authentication
  16.3 Support binary messages (i.e.: non-base64)
 
- 17. Command line tool
- 17.1 sync
- 17.2 glob posts
- 17.3 prevent file overwriting
- 17.4 simultaneous parallel transfers
- 17.5 provide formpost headers
- 17.6 warning when setting an option
- 17.7 warning when sending binary output to terminal
- 17.8 offer color-coded HTTP header output
- 17.9 Choose the name of file in braces for complex URLs
- 17.10 improve how curl works in a windows console window
- 17.11 -w output to stderr
- 17.12 keep running, read instructions from pipe/socket
- 17.13 support metalink in http headers
+ 17. SSH protocols
+ 17.1 Multiplexing
+ 17.2 SFTP performance
 
- 18. Build
- 18.1 roffit
+ 18. Command line tool
+ 18.1 sync
+ 18.2 glob posts
+ 18.3 prevent file overwriting
+ 18.4 simultaneous parallel transfers
+ 18.5 provide formpost headers
+ 18.6 warning when setting an option
+ 18.7 warning when sending binary output to terminal
+ 18.8 offer color-coded HTTP header output
+ 18.9 Choose the name of file in braces for complex URLs
+ 18.10 improve how curl works in a windows console window
+ 18.11 -w output to stderr
+ 18.12 keep running, read instructions from pipe/socket
+ 18.13 support metalink in http headers
+ 18.14 --fail without --location should treat 3xx as a failure
 
- 19. Test suite
- 19.1 SSL tunnel
- 19.2 nicer lacking perl message
- 19.3 more protocols supported
- 19.4 more platforms supported
- 19.5 Add support for concurrent connections
- 19.6 Use the RFC6265 test suite
+ 19. Build
+ 19.1 roffit
 
- 20. Next SONAME bump
- 20.1 http-style HEAD output for FTP
- 20.2 combine error codes
- 20.3 extend CURLOPT_SOCKOPTFUNCTION prototype
+ 20. Test suite
+ 20.1 SSL tunnel
+ 20.2 nicer lacking perl message
+ 20.3 more protocols supported
+ 20.4 more platforms supported
+ 20.5 Add support for concurrent connections
+ 20.6 Use the RFC6265 test suite
 
- 21. Next major release
- 21.1 cleanup return codes
- 21.2 remove obsolete defines
- 21.3 size_t
- 21.4 remove several functions
- 21.5 remove CURLOPT_FAILONERROR
- 21.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
- 21.7 remove progress meter from libcurl
- 21.8 remove 'curl_httppost' from public
+ 21. Next SONAME bump
+ 21.1 http-style HEAD output for FTP
+ 21.2 combine error codes
+ 21.3 extend CURLOPT_SOCKOPTFUNCTION prototype
+
+ 22. Next major release
+ 22.1 cleanup return codes
+ 22.2 remove obsolete defines
+ 22.3 size_t
+ 22.4 remove several functions
+ 22.5 remove CURLOPT_FAILONERROR
+ 22.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
+ 22.7 remove progress meter from libcurl
+ 22.8 remove 'curl_httppost' from public
 
 ==============================================================================
 
@@ -222,11 +240,12 @@
 1.8 Allow SSL (HTTPS) to proxy
 
  To prevent local users from snooping on your traffic to the proxy. Supported
- by Chrome already:
+ by Firefox and Chrome already:
  https://www.chromium.org/developers/design-documents/secure-web-proxy
 
- ...and by Firefox soon:
- https://bugzilla.mozilla.org/show_bug.cgi?id=378637
+ See this stale work in progress branch:
+ https://github.com/curl/curl/tree/HTTPS-proxy based on this PR:
+ https://github.com/curl/curl/pull/305
 
 1.9 Cache negative name resolves
 
@@ -259,16 +278,6 @@
  to use and less error-prone. Probably easiest by splitting it into several
  function calls.
 
-1.13 Add CURLOPT_MAIL_CLIENT option
-
- Rather than use the URL to specify the mail client string to present in the
- HELO and EHLO commands, libcurl should support a new CURLOPT specifically for
- specifying this data as the URL is non-standard and to be honest a bit of a
- hack ;-)
-
- Please see the following thread for more information:
- https://curl.haxx.se/mail/lib-2012-05/0178.html
-
 1.14 Typesafe curl_easy_setopt()
 
  One of the most common problems in libcurl using applications is the lack of
@@ -286,10 +295,19 @@
 
   curl_easy_set_cb() - sets a callback PLUS its callback data
 
-1.15 TCP Fast Open
+1.15 Monitor connections in the connection pool
 
- RFC 7413 defines how to include data already in the TCP SYN handshake to
- reduce latency.
+ libcurl's connection cache or pool holds a number of open connections for the
+ purpose of possible subsequent connection reuse. It may contain a few up to a
+ significant amount of connections. Currently, libcurl leaves all connections
+ as they are and first when a connection is iterated over for matching or
+ reuse purpose it is verified that it is still alive.
+
+ Those connections may get closed by the server side for idleness or they may
+ get a HTTP/2 ping from the peer to verify that they're still alive. By adding
+ monitoring of the connections while in the pool, libcurl can detect dead
+ connections (and close them) better and earlier, and it can handle HTTP/2
+ pings to keep such ones alive even when not actively doing transfers on them.
 
 1.16 Try to URL encode given URL
 
@@ -299,6 +317,53 @@
  following code already does).
 
  https://github.com/curl/curl/issues/514
+
+1.17 Add support for IRIs
+
+ IRIs (RFC 3987) allow localized, non-ascii, names in the URL. To properly
+ support this, curl/libcurl would need to translate/encode the given input
+ from the input string encoding into percent encoded output "over the wire".
+
+ To make that work smoothly for curl users even on Windows, curl would
+ probably need to be able to convert from several input encodings.
+
+1.18 try next proxy if one doesn't work
+
+ Allow an application to specify a list of proxies to try, and failing to
+ connect to the first go on and try the next instead until the list is
+ exhausted. Browsers support this feature at least when they specify proxies
+ using PACs.
+
+ https://github.com/curl/curl/issues/896
+
+1.19 Timeout idle connections from the pool
+
+ libcurl currently keeps connections in its connection pool for an indefinite
+ period of time, until it either gets reused, gets noticed that it has been
+ closed by the server or gets pruned to make room for a new connection.
+
+ To reduce overhead (especially for when we add monitoring of the connections
+ in the pool), we should introduce a timeout so that connections that have
+ been idle for N seconds get closed.
+
+1.20 SRV and URI DNS records
+
+ Offer support for resolving SRV and URI DNS records for libcurl to know which
+ server to connect to for various protocols (including HTTP!).
+
+1.21 API for URL parsing/splitting
+
+ libcurl has always parsed URLs internally and never exposed any API or
+ features to allow applications to do it. Still most or many applications
+ using libcurl need that ability. In polls to users, we've learned that many
+ libcurl users would like to see and use such an API.
+
+1.23 Offer API to flush the connection pool
+
+ Sometimes applications want to flush all the existing connections kept alive.
+ An API could allow a forced flush or just a forced loop that would properly
+ close all connections that have been closed by the server already.
+
 
 2. libcurl - multi interface
 
@@ -352,6 +417,12 @@
  'maketgz' or another suitable script could update the .TH sections of the man
  pages at release time to use the current date and curl/libcurl version
  number.
+
+3.2 Provide cmake config-file
+
+ A config-file package is a set of files provided by us to allow applications
+ to write cmake scripts to find and use libcurl easier. See
+ https://github.com/curl/curl/issues/885
 
 4. FTP
 
@@ -424,13 +495,12 @@ This is not detailed in any FTP specification.
  headers use a default value so only headers that need to be moved have to be
  specified.
 
-5.4 SPDY
+5.4 Use huge HTTP/2 windows
 
- Chrome and Firefox already support SPDY and lots of web services do. There's
- a library for us to use for this (spdylay) that has a similar API and the
- same author as nghttp2.
-
- spdylay: https://github.com/tatsuhiro-t/spdylay
+ We're currently using nghttp2's default window size which is terribly small
+ (64K). This becomes a bottle neck over high bandwidth networks. We should
+ instead make the window size to be very big (512MB?) as we really don't do
+ much flow control anyway.
 
 5.5 auth= in URLs
 
@@ -451,13 +521,23 @@ This is not detailed in any FTP specification.
  Consider a way to tell curl to refuse to "downgrade" protocol with a redirect
  and/or possibly a bit that refuses redirect to change protocol completely.
 
-5.7 More compressions
+5.7 Brotli compression
 
  Compression algorithms that perform better than gzip are being considered for
  use and inclusion in existing browsers. For example 'brotli'. If servers
  follow along it is a good reason for us to also allow users to take advantage
  of this. The algorithm: https://github.com/google/brotli The Firefox bug:
  https://bugzilla.mozilla.org/show_bug.cgi?id=366559
+
+5.8 QUIC
+
+ The standardization process of QUIC has been taken to the IETF and can be
+ followed on the [IETF QUIC Mailing
+ list](https://www.ietf.org/mailman/listinfo/quic). I'd like us to get on the
+ bandwagon. Ideally, this would be done with a separate library/project to
+ handle the binary/framing layer in a similar fashion to how HTTP/2 is
+ implemented. This, to allow other projects to benefit from the work and to
+ thus broaden the interest and chance of others to participate.
 
 
 6. TELNET
@@ -494,6 +574,17 @@ to provide the data to send.
 
  Add the ability, for an application that uses libcurl, to obtain the list of
  capabilities returned from the EHLO command.
+
+7.3 Add CURLOPT_MAIL_CLIENT option
+
+ Rather than use the URL to specify the mail client string to present in the
+ HELO and EHLO commands, libcurl should support a new CURLOPT specifically for
+ specifying this data as the URL is non-standard and to be honest a bit of a
+ hack ;-)
+
+ Please see the following thread for more information:
+ https://curl.haxx.se/mail/lib-2012-05/0178.html
+
 
 8. POP3
 
@@ -609,6 +700,63 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  https://curl.haxx.se/mail/lib-2013-03/0103.html . libunbound may be the
  correct library to base this development on.
 
+ Björn Stenberg wrote a separate initial take on DANE that was never
+ completed.
+
+13.9 Support TLS v1.3
+
+ TLS version 1.3 is about to ship and is getting implemented by TLS libraries
+ as we speak. We should start to support the symbol and make sure all backends
+ handle it accordingly, then gradually add support as the TLS libraries add
+ the corresponding support. There may be a need to add some additional options
+ to allow libcurl to take advantage of the new features in 1.3.
+
+13.10 Support SSLKEYLOGFILE
+
+ When used, Firefox and Chrome dumps their master TLS keys to the file name
+ this environment variable specifies. This allows tools like for example
+ Wireshark to capture and decipher TLS traffic to/from those clients. libcurl
+ could be made to support this more widely (presumably this already works when
+ built with NSS). Peter Wu made a OpenSSL preload to make possible that can be
+ used as inspiration and guidance
+ https://git.lekensteyn.nl/peter/wireshark-notes/tree/src/sslkeylog.c
+
+13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
+
+ CURLOPT_PINNEDPUBLICKEY does not consider the hashes of intermediate & root
+ certificates when comparing the pinned keys. Therefore it is not compatible
+ with "HTTP Public Key Pinning" as there also intermediate and root certificates
+ can be pinned. This is very useful as it prevents webadmins from "locking
+ themself out of their servers".
+
+ Adding this feature would make curls pinning 100% compatible to HPKP and allow
+ more flexible pinning.
+
+13.12 Support HSTS
+
+ "HTTP Strict Transport Security" is TOFU (trust on first use), time-based
+ features indicated by a HTTP header send by the webserver. It is widely used
+ in browsers and it's purpose is to prevent insecure HTTP connections after
+ a previous HTTPS connection. It protects against SSLStripping attacks.
+
+ Doc: https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security
+ RFC 6797: https://tools.ietf.org/html/rfc6797
+
+13.13 Support HPKP
+
+ "HTTP Public Key Pinning" is TOFU (trust on first use), time-based
+ features indicated by a HTTP header send by the webserver. It's purpose is
+ to prevent Man-in-the-middle attacks by trusted CAs by allowing webadmins
+ to specify which CAs/certificates/public keys to trust when connection to
+ their websites.
+
+ It can be build based on PINNEDPUBLICKEY.
+
+ Wikipedia: https://en.wikipedia.org/wiki/HTTP_Public_Key_Pinning
+ OWASP: https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning
+ Doc: https://developer.mozilla.org/de/docs/Web/Security/Public_Key_Pinning
+ RFC: https://tools.ietf.org/html/draft-ietf-websec-key-pinning-21
+
 14. GnuTLS
 
 14.1 SSL engine stuff
@@ -673,9 +821,28 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
   Mandatory to support LDAP SASL authentication.
 
-17. Command line tool
 
-17.1 sync
+17. SSH protocols
+
+17.1 Multiplexing
+
+ SSH is a perfectly fine multiplexed protocols which would allow libcurl to do
+ multiple parallel transfers from the same host using the same connection,
+ much in the same spirit as HTTP/2 does. libcurl however does not take
+ advantage of that ability but will instead always create a new connection for
+ new transfers even if an existing connection already exists to the host.
+
+ To fix this, libcurl would have to detect an existing connection and "attach"
+ the new transfer to the existing one.
+
+17.2 SFTP performance
+
+ libcurl's SFTP transfer performance is sub par and can be improved, mostly by
+ the approach mentioned in "1.6 Modified buffer size approach".
+
+18. Command line tool
+
+18.1 sync
 
  "curl --sync http://example.com/feed[1-100].rss" or
  "curl --sync http://example.net/{index,calendar,history}.html"
@@ -684,12 +851,12 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  remote file is newer than the local file. A Last-Modified HTTP date header
  should also be used to set the mod date on the downloaded file.
 
-17.2 glob posts
+18.2 glob posts
 
  Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
  This is easily scripted though.
 
-17.3 prevent file overwriting
+18.3 prevent file overwriting
 
  Add an option that prevents cURL from overwriting existing local files. When
  used, and there already is an existing file with the target file name
@@ -697,14 +864,17 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  existing). So that index.html becomes first index.html.1 and then
  index.html.2 etc.
 
-17.4 simultaneous parallel transfers
+18.4 simultaneous parallel transfers
 
  The client could be told to use maximum N simultaneous parallel transfers and
  then just make sure that happens. It should of course not make more than one
  connection to the same remote host. This would require the client to use the
  multi interface. https://curl.haxx.se/bug/feature.cgi?id=1558595
 
-17.5 provide formpost headers
+ Using the multi interface would also allow properly using parallel transfers
+ with HTTP/2 and supporting HTTP/2 server push from the command line.
+
+18.5 provide formpost headers
 
  Extending the capabilities of the multipart formposting. How about leaving
  the ';type=foo' syntax as it is and adding an extra tag (headers) which
@@ -718,24 +888,24 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  which should overwrite the program reasonable defaults (plain/text,
  8bit...)
 
-17.6 warning when setting an option
+18.6 warning when setting an option
 
  Display a warning when libcurl returns an error when setting an option.
  This can be useful to tell when support for a particular feature hasn't been
  compiled into the library.
 
-17.7 warning when sending binary output to terminal
+18.7 warning when sending binary output to terminal
 
  Provide a way that prompts the user for confirmation before binary data is
  sent to the terminal, much in the style 'less' does it.
 
-17.8 offer color-coded HTTP header output
+18.8 offer color-coded HTTP header output
 
  By offering different color output on the header name and the header
  contents, they could be made more readable and thus help users working on
  HTTP services.
 
-17.9 Choose the name of file in braces for complex URLs
+18.9 Choose the name of file in braces for complex URLs
 
  When using braces to download a list of URLs and you use complicated names
  in the list of alternatives, it could be handy to allow curl to use other
@@ -747,13 +917,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  See https://github.com/curl/curl/issues/221
 
-17.10 improve how curl works in a windows console window
+18.10 improve how curl works in a windows console window
 
  If you pull the scrollbar when transferring with curl in a Windows console
  window, the transfer is interrupted and can get disconnected. This can
  probably be improved. See https://github.com/curl/curl/issues/322
 
-17.11 -w output to stderr
+18.11 -w output to stderr
 
  -w is quite useful, but not to those of us who use curl without -o or -O
  (such as for scripting through a higher level language). It would be nice to
@@ -761,7 +931,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  instead. Proposed name: --write-stderr. See
  https://github.com/curl/curl/issues/613
 
-17.12 keep running, read instructions from pipe/socket
+18.12 keep running, read instructions from pipe/socket
 
  Provide an option that makes curl not exit after the last URL (or even work
  without a given URL), and then make it read instructions passed on a pipe or
@@ -769,7 +939,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  invoke can talk to the still running instance and ask for transfers to get
  done, and thus maintain its connection pool, DNS cache and more.
 
-17.13 support metalink in http headers
+18.13 support metalink in http headers
 
  Curl has support for downloading a metalink xml file, processing it, and then
  downloading the target of the metalink. This is done via the --metalink option.
@@ -782,37 +952,49 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  See also https://lists.gnu.org/archive/html/bug-wget/2015-06/msg00034.html for
  an implematation of this in wget.
 
-18. Build
+18.14 --fail without --location should treat 3xx as a failure
 
-18.1 roffit
+ To allow a command line like this to detect a redirect and consider it a
+ failure:
+
+    curl -v --fail -O https://example.com/curl-7.48.0.tar.gz
+
+ ... --fail must treat 3xx responses as failures too. The least problematic
+ way to implement this is probably to add that new logic in the command line
+ tool only and not in the underlying CURLOPT_FAILONERROR logic.
+
+
+19. Build
+
+19.1 roffit
 
  Consider extending 'roffit' to produce decent ASCII output, and use that
  instead of (g)nroff when building src/tool_hugehelp.c
 
-19. Test suite
+20. Test suite
 
-19.1 SSL tunnel
+20.1 SSL tunnel
 
  Make our own version of stunnel for simple port forwarding to enable HTTPS
  and FTP-SSL tests without the stunnel dependency, and it could allow us to
  provide test tools built with either OpenSSL or GnuTLS
 
-19.2 nicer lacking perl message
+20.2 nicer lacking perl message
 
  If perl wasn't found by the configure script, don't attempt to run the tests
  but explain something nice why it doesn't.
 
-19.3 more protocols supported
+20.3 more protocols supported
 
  Extend the test suite to include more protocols. The telnet could just do FTP
  or http operations (for which we have test servers).
 
-19.4 more platforms supported
+20.4 more platforms supported
 
  Make the test suite work on more platforms. OpenBSD and Mac OS. Remove
  fork()s and it should become even more portable.
 
-19.5 Add support for concurrent connections
+20.5 Add support for concurrent connections
 
  Tests 836, 882 and 938 were designed to verify that separate connections aren't
  used when using different login credentials in protocols that shouldn't re-use
@@ -826,7 +1008,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  and thus the wait for connections loop is never entered to receive the second
  connection.
 
-19.6 Use the RFC6265 test suite
+20.6 Use the RFC6265 test suite
 
  A test suite made for HTTP cookies (RFC 6265) by Adam Barth is available at
  https://github.com/abarth/http-state/tree/master/tests
@@ -836,14 +1018,14 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  incorporated into our regular test suite.
 
 
-20. Next SONAME bump
+21. Next SONAME bump
 
-20.1 http-style HEAD output for FTP
+21.1 http-style HEAD output for FTP
 
  #undef CURL_FTP_HTTPSTYLE_HEAD in lib/ftp.c to remove the HTTP-style headers
  from being output in NOBODY requests over FTP
 
-20.2 combine error codes
+21.2 combine error codes
 
  Combine some of the error codes to remove duplicates.  The original
  numbering should not be changed, and the old identifiers would be
@@ -868,29 +1050,29 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
     CURLE_TFTP_PERM => CURLE_REMOTE_ACCESS_DENIED
 
-20.3 extend CURLOPT_SOCKOPTFUNCTION prototype
+21.3 extend CURLOPT_SOCKOPTFUNCTION prototype
 
  The current prototype only provides 'purpose' that tells what the
  connection/socket is for, but not any protocol or similar. It makes it hard
  for applications to differentiate on TCP vs UDP and even HTTP vs FTP and
  similar.
 
-21. Next major release
+22. Next major release
 
-21.1 cleanup return codes
+22.1 cleanup return codes
 
  curl_easy_cleanup() returns void, but curl_multi_cleanup() returns a
  CURLMcode. These should be changed to be the same.
 
-21.2 remove obsolete defines
+22.2 remove obsolete defines
 
  remove obsolete defines from curl/curl.h
 
-21.3 size_t
+22.3 size_t
 
  make several functions use size_t instead of int in their APIs
 
-21.4 remove several functions
+22.4 remove several functions
 
  remove the following functions from the public API:
 
@@ -911,18 +1093,18 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  curl_multi_socket_all
 
-21.5 remove CURLOPT_FAILONERROR
+22.5 remove CURLOPT_FAILONERROR
 
  Remove support for CURLOPT_FAILONERROR, it has gotten too kludgy and weird
  internally. Let the app judge success or not for itself.
 
-21.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
+22.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
 
  Remove support for a global DNS cache. Anything global is silly, and we
  already offer the share interface for the same functionality but done
  "right".
 
-21.7 remove progress meter from libcurl
+22.7 remove progress meter from libcurl
 
  The internally provided progress meter output doesn't belong in the library.
  Basically no application wants it (apart from curl) but instead applications
@@ -932,7 +1114,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  variable types passed to it instead of doubles so that big files work
  correctly.
 
-21.8 remove 'curl_httppost' from public
+22.8 remove 'curl_httppost' from public
 
  curl_formadd() was made to fill in a public struct, but the fact that the
  struct is public is never really used by application for their own advantage

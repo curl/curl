@@ -55,6 +55,7 @@ ftp://www.example.com/moo/550 http://%HOSTIP:%HTTPPORT ascii
 GET ftp://www.example.com/moo/550;type=a HTTP/1.1
 Host: www.example.com:21
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 <stdout>

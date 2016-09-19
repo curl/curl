@@ -151,6 +151,7 @@ static curl_off_t vms_realfilesize(const char * name,
   int ret_stat;
   FILE * file;
 
+  /* !checksrc! disable FOPENMODE 1 */
   file = fopen(name, "r"); /* VMS */
   if(file == NULL) {
     return 0;
@@ -791,8 +792,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
           set_binmode(stdout);
         }
 
-        if(config->tcp_nodelay)
-          my_setopt(curl, CURLOPT_TCP_NODELAY, 1L);
+        if(!config->tcp_nodelay)
+          my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
+
+        if(config->tcp_fastopen)
+          my_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
 
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
@@ -1176,9 +1180,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L);
         }
 
-        /* new in curl 7.10.7, extended in 7.19.4 but this only sets 0 or 1 */
+        /* new in curl 7.10.7, extended in 7.19.4. Modified to use
+           CREATE_DIR_RETRY in 7.49.0 */
         my_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                  config->ftp_create_dirs?1L:0L);
+                  (long)(config->ftp_create_dirs?
+                         CURLFTP_CREATE_DIR_RETRY:
+                         CURLFTP_CREATE_DIR_NONE));
 
         /* new in curl 7.10.8 */
         if(config->max_filesize)
@@ -1288,9 +1295,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_flags(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
 
         if(config->content_disposition
-           && (urlnode->flags & GETOUT_USEREMOTE)
-           && (checkprefix("http://", this_url) ||
-               checkprefix("https://", this_url)))
+           && (urlnode->flags & GETOUT_USEREMOTE))
           hdrcbdata.honor_cd_filename = TRUE;
         else
           hdrcbdata.honor_cd_filename = FALSE;
@@ -1304,6 +1309,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->resolve)
           /* new in 7.21.3 */
           my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
+
+        if(config->connect_to)
+          /* new in 7.49.0 */
+          my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
 
         /* new in 7.21.4 */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
@@ -1832,7 +1841,9 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 #endif
 
   /* Parse .curlrc if necessary */
-  if((argc == 1) || (!curlx_strequal(argv[1], "-q"))) {
+  if((argc == 1) ||
+     (!curlx_strequal(argv[1], "-q") &&
+      !curlx_strequal(argv[1], "--disable"))) {
     parseconfig(NULL, config); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .curlrc */

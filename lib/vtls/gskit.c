@@ -163,7 +163,7 @@ static bool is_separator(char c)
 }
 
 
-static CURLcode gskit_status(struct SessionHandle *data, int rc,
+static CURLcode gskit_status(struct Curl_easy *data, int rc,
                              const char *procname, CURLcode defcode)
 {
   /* Process GSKit status and map it to a CURLcode. */
@@ -206,7 +206,7 @@ static CURLcode gskit_status(struct SessionHandle *data, int rc,
 }
 
 
-static CURLcode set_enum(struct SessionHandle *data, gsk_handle h,
+static CURLcode set_enum(struct Curl_easy *data, gsk_handle h,
                 GSK_ENUM_ID id, GSK_ENUM_VALUE value, bool unsupported_ok)
 {
   int rc = gsk_attribute_set_enum(h, id, value);
@@ -228,7 +228,7 @@ static CURLcode set_enum(struct SessionHandle *data, gsk_handle h,
 }
 
 
-static CURLcode set_buffer(struct SessionHandle *data, gsk_handle h,
+static CURLcode set_buffer(struct Curl_easy *data, gsk_handle h,
                         GSK_BUF_ID id, const char *buffer, bool unsupported_ok)
 {
   int rc = gsk_attribute_set_buffer(h, id, buffer, 0);
@@ -250,7 +250,7 @@ static CURLcode set_buffer(struct SessionHandle *data, gsk_handle h,
 }
 
 
-static CURLcode set_numeric(struct SessionHandle *data,
+static CURLcode set_numeric(struct Curl_easy *data,
                             gsk_handle h, GSK_NUM_ID id, int value)
 {
   int rc = gsk_attribute_set_numeric_value(h, id, value);
@@ -270,7 +270,7 @@ static CURLcode set_numeric(struct SessionHandle *data,
 }
 
 
-static CURLcode set_callback(struct SessionHandle *data,
+static CURLcode set_callback(struct Curl_easy *data,
                              gsk_handle h, GSK_CALLBACK_ID id, void *info)
 {
   int rc = gsk_attribute_set_callback(h, id, info);
@@ -289,7 +289,7 @@ static CURLcode set_callback(struct SessionHandle *data,
 }
 
 
-static CURLcode set_ciphers(struct SessionHandle *data,
+static CURLcode set_ciphers(struct Curl_easy *data,
                                         gsk_handle h, unsigned int *protoflags)
 {
   const char *cipherlist = data->set.str[STRING_SSL_CIPHER_LIST];
@@ -436,7 +436,7 @@ void Curl_gskit_cleanup(void)
 }
 
 
-static CURLcode init_environment(struct SessionHandle *data,
+static CURLcode init_environment(struct Curl_easy *data,
                                  gsk_handle *envir, const char *appid,
                                  const char *file, const char *label,
                                  const char *password)
@@ -502,7 +502,7 @@ static void close_async_handshake(struct ssl_connect_data *connssl)
 
 
 static void close_one(struct ssl_connect_data *conn,
-                      struct SessionHandle *data)
+                      struct Curl_easy *data)
 {
   if(conn->handle) {
     gskit_status(data, gsk_secure_soc_close(&conn->handle),
@@ -517,7 +517,7 @@ static void close_one(struct ssl_connect_data *conn,
 static ssize_t gskit_send(struct connectdata *conn, int sockindex,
                            const void *mem, size_t len, CURLcode *curlcode)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   CURLcode cc;
   int written;
 
@@ -536,7 +536,7 @@ static ssize_t gskit_send(struct connectdata *conn, int sockindex,
 static ssize_t gskit_recv(struct connectdata *conn, int num, char *buf,
                            size_t buffersize, CURLcode *curlcode)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   int buffsize;
   int nread;
   CURLcode cc;
@@ -555,7 +555,7 @@ static ssize_t gskit_recv(struct connectdata *conn, int num, char *buf,
 
 static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   gsk_handle envir;
   CURLcode result;
@@ -750,7 +750,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
 static CURLcode gskit_connect_step2(struct connectdata *conn, int sockindex,
                                     bool nonblocking)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   Qso_OverlappedIO_t cstat;
   long timeout_ms;
@@ -801,7 +801,7 @@ static CURLcode gskit_connect_step2(struct connectdata *conn, int sockindex,
 
 static CURLcode gskit_connect_step3(struct connectdata *conn, int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   const gsk_cert_data_elem *cdev;
   int cdec;
@@ -889,7 +889,7 @@ static CURLcode gskit_connect_step3(struct connectdata *conn, int sockindex)
 static CURLcode gskit_connect_common(struct connectdata *conn, int sockindex,
                                      bool nonblocking, bool *done)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   long timeout_ms;
   Qso_OverlappedIO_t cstat;
@@ -976,7 +976,7 @@ CURLcode Curl_gskit_connect(struct connectdata *conn, int sockindex)
 
 void Curl_gskit_close(struct connectdata *conn, int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   if(connssl->use)
@@ -987,7 +987,7 @@ void Curl_gskit_close(struct connectdata *conn, int sockindex)
 int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   ssize_t nread;
   int what;
   int rc;

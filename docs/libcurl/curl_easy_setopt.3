@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -165,6 +165,8 @@ Proxy type. See \fICURLOPT_PROXYTYPE(3)\fP
 Filter out hosts from proxy use. \fICURLOPT_NOPROXY(3)\fP
 .IP CURLOPT_HTTPPROXYTUNNEL
 Tunnel through the HTTP proxy. \fICURLOPT_HTTPPROXYTUNNEL(3)\fP
+.IP CURLOPT_CONNECT_TO
+Connect to a specific host and port. See \fICURLOPT_CONNECT_TO(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_SERVICE
 Socks5 GSSAPI service name. \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_NEC
@@ -187,6 +189,8 @@ OBSOLETE Enable global DNS cache. See \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP
 Ask for smaller buffer size. See \fICURLOPT_BUFFERSIZE(3)\fP
 .IP CURLOPT_PORT
 Port number to connect to. See \fICURLOPT_PORT(3)\fP
+.IP CURLOPT_TCP_FASTOPEN
+Enable TFO, TCP Fast Open. See \fICURLOPT_TCP_FASTOPEN(3)\fP
 .IP CURLOPT_TCP_NODELAY
 Disable the Nagle algorithm. See \fICURLOPT_TCP_NODELAY(3)\fP
 .IP CURLOPT_ADDRESS_SCOPE

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -55,7 +55,7 @@ While the \fBeasy_handle\fP is added to a multi handle, it cannot be used by
 .SH RETURN VALUE
 CURLE_OK (0) means everything was ok, non-zero means an error occurred as
 .I <curl/curl.h>
-defines - see \fIlibcurl-errors(3)\fP. If the \fBCURLOPT_ERRORBUFFER(3)\fP was
+defines - see \fIlibcurl-errors(3)\fP. If the \fICURLOPT_ERRORBUFFER(3)\fP was
 set with \fIcurl_easy_setopt(3)\fP there will be a readable error message in
 the error buffer when non-zero is returned.
 .SH EXAMPLE

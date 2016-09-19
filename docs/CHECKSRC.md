@@ -18,11 +18,11 @@ when, for example, one of the files is generated.
 
 ## What does checksrc warn for?
 
-checksrc does check and verify the entire style guide, but the script is an
-effort to detect the most common mistakes and syntax mistakes that
-contributers make before they get accustomed to our code style. Heck, many of
-us regulars do the mistakes too and this script helps us keep the code in
-shape.
+checksrc does not check and verify the code against the entire style guide,
+but the script is instead an effort to detect the most common mistakes and
+syntax mistakes that contributers make before they get accustomed to our code
+style. Heck, many of us regulars do the mistakes too and this script helps us
+keep the code in shape.
 
     checksrc.pl -h
 
@@ -117,6 +117,8 @@ instances are ignored and nothing extra.
 
 ### Directory wide ignore patterns
 
-`checksrc.whitelist` describe!
+This is a method we've transitioned away from. Use inline ignores as far as
+possible.
 
-
+Make a `checksrc.whitelist` file in the directory of the source code with the
+false positive, and include the full offending line into this file.

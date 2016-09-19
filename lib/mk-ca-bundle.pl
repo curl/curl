@@ -6,7 +6,7 @@
 # *                            | (__| |_| |  _ <| |___
 # *                             \___|\___/|_| \_\_____|
 # *
-# * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
@@ -34,7 +34,7 @@ use Getopt::Std;
 use MIME::Base64;
 use LWP::UserAgent;
 use strict;
-use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_l $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
+use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
 use List::Util;
 use Text::Wrap;
 my $MOD_SHA = "Digest::SHA";
@@ -62,7 +62,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.25';
+my $version = '1.26';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -109,7 +109,7 @@ my @valid_signature_algorithms = (
 
 $0 =~ s@.*(/|\\)@@;
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
-getopts('bd:fhilnp:qs:tuvw:');
+getopts('bd:fhilmnp:qs:tuvw:');
 
 if(!defined($opt_d)) {
     # to make plain "-d" use not cause warnings, and actually still work
@@ -161,6 +161,7 @@ sub HELP_MESSAGE() {
   print "\t-f\tforce rebuild even if certdata.txt is current\n";
   print "\t-i\tprint version info about used modules\n";
   print "\t-l\tprint license info about certdata.txt\n";
+  print "\t-m\tinclude meta data in output\n";
   print "\t-n\tno download of certdata.txt (to use existing)\n";
   print wrap("\t","\t\t", "-p\tlist of Mozilla trust purposes and levels for certificates to include in output. Takes the form of a comma separated list of purposes, a colon, and a comma separated list of levels. (default: $default_mozilla_trust_purposes:$default_mozilla_trust_levels)"), "\n";
   print "\t\t  Valid purposes are:\n";
@@ -224,33 +225,33 @@ sub parse_csv_param($$@) {
   return @values;
 }
 
-sub sha1 {
+sub sha256 {
   my $result;
   if ($Digest::SHA::VERSION || $Digest::SHA::PurePerl::VERSION) {
     open(FILE, $_[0]) or die "Can't open '$_[0]': $!";
     binmode(FILE);
-    $result = $MOD_SHA->new(1)->addfile(*FILE)->hexdigest;
+    $result = $MOD_SHA->new(256)->addfile(*FILE)->hexdigest;
     close(FILE);
   } else {
     # Use OpenSSL command if Perl Digest::SHA modules not available
-    $result = (split(/ |\r|\n/,`$openssl dgst -sha1 $_[0]`))[1];
+    $result = (split(/ |\r|\n/,`$openssl dgst -sha256 $_[0]`))[1];
   }
   return $result;
 }
 
 
-sub oldsha1 {
-  my $sha1 = "";
+sub oldhash {
+  my $hash = "";
   open(C, "<$_[0]") || return 0;
   while(<C>) {
     chomp;
-    if($_ =~ /^\#\# SHA1: (.*)/) {
-      $sha1 = $1;
+    if($_ =~ /^\#\# SHA256: (.*)/) {
+      $hash = $1;
       last;
     }
   }
   close(C);
-  return $sha1;
+  return $hash;
 }
 
 if ( $opt_p !~ m/:/ ) {
@@ -282,9 +283,9 @@ my $stdout = $crt eq '-';
 my $resp;
 my $fetched;
 
-my $oldsha1 = oldsha1($crt);
+my $oldhash = oldhash($crt);
 
-report "SHA1 of old file: $oldsha1";
+report "SHA256 of old file: $oldhash";
 
 report "Downloading '$txt' ...";
 
@@ -327,14 +328,14 @@ if(!$filedate) {
 }
 
 # get the hash from the download file
-my $newsha1= sha1($txt);
+my $newhash= sha256($txt);
 
-if(!$opt_f && $oldsha1 eq $newsha1) {
+if(!$opt_f && $oldhash eq $newhash) {
     report "Downloaded file identical to previous run\'s source file. Exiting";
     exit;
 }
 
-report "SHA1 of new file: $newsha1";
+report "SHA256 of new file: $newhash";
 
 my $currentdate = scalar gmtime($filedate);
 
@@ -361,7 +362,7 @@ print CRT <<EOT;
 ## Just configure this file as the SSLCACertificateFile.
 ##
 ## Conversion done with mk-ca-bundle.pl version $version.
-## SHA1: $newsha1
+## SHA256: $newhash
 ##
 
 EOT
@@ -371,6 +372,7 @@ my $caname;
 my $certnum = 0;
 my $skipnum = 0;
 my $start_of_cert = 0;
+my @precert;
 
 open(TXT,"$txt") or die "Couldn't open $txt: $!\n";
 while (<TXT>) {
@@ -383,11 +385,15 @@ while (<TXT>) {
       last if (/\*\*\*\*\* END LICENSE BLOCK \*\*\*\*\*/);
     }
   }
-  next if /^#|^\s*$/;
-  chomp;
-  if (/^CVS_ID\s+\"(.*)\"/) {
-    print CRT "# $1\n";
+  elsif(/^# (Issuer|Serial Number|Subject|Not Valid Before|Not Valid After |Fingerprint \(MD5\)|Fingerprint \(SHA1\)):/) {
+      push @precert, $_;
+      next;
   }
+  elsif(/^#|^\s*$/) {
+      undef @precert;
+      next;
+  }
+  chomp;
 
   # this is a match for the start of a certificate
   if (/^CKA_CLASS CK_OBJECT_CLASS CKO_CERTIFICATE/) {
@@ -436,7 +442,7 @@ while (<TXT>) {
               . $encoded
               . "-----END CERTIFICATE-----\n";
       print CRT "\n$caname\n";
-
+      print CRT @precert if($opt_m);
       my $maxStringLength = length($caname);
       if ($opt_t) {
         foreach my $key (keys %trust_purposes_by_level) {
@@ -479,7 +485,9 @@ while (<TXT>) {
       $certnum ++;
       $start_of_cert = 0;
     }
+    undef @precert;
   }
+
 }
 close(TXT) or die "Couldn't close $txt: $!\n";
 close(CRT) or die "Couldn't close $crt.~: $!\n";

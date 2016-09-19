@@ -38,6 +38,27 @@
 #include "memdebug.h"
 
 /*
+ * Curl_auth_is_ntlm_supported()
+ *
+ * This is used to evaluate if NTLM is supported.
+ *
+ * Parameters: None
+ *
+ * Returns TRUE if NTLM is supported by Windows SSPI.
+ */
+bool Curl_auth_is_ntlm_supported(void)
+{
+  PSecPkgInfo SecurityPackage;
+  SECURITY_STATUS status;
+
+  /* Query the security package for NTLM */
+  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
+                                              &SecurityPackage);
+
+  return (status == SEC_E_OK ? TRUE : FALSE);
+}
+
+/*
  * Curl_auth_create_ntlm_type1_message()
  *
  * This is used to generate an already encoded NTLM type-1 message ready for
@@ -162,7 +183,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_decode_ntlm_type2_message(struct SessionHandle *data,
+CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
                                              const char *type2msg,
                                              struct ntlmdata *ntlm)
 {
@@ -214,7 +235,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_ntlm_type3_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,

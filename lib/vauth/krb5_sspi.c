@@ -40,6 +40,28 @@
 #include "memdebug.h"
 
 /*
+ * Curl_auth_is_gssapi_supported()
+ *
+ * This is used to evaluate if GSSAPI (Kerberos V5) is supported.
+ *
+ * Parameters: None
+ *
+ * Returns TRUE if Kerberos V5 is supported by Windows SSPI.
+ */
+bool Curl_auth_is_gssapi_supported(void)
+{
+  PSecPkgInfo SecurityPackage;
+  SECURITY_STATUS status;
+
+  /* Query the security package for Kerberos */
+  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *)
+                                              TEXT(SP_NAME_KERBEROS),
+                                              &SecurityPackage);
+
+  return (status == SEC_E_OK ? TRUE : FALSE);
+}
+
+/*
  * Curl_auth_create_gssapi_user_message()
  *
  * This is used to generate an already encoded GSSAPI (Kerberos V5) user token
@@ -62,7 +84,7 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const char *service,
@@ -240,7 +262,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct SessionHandle *data,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_gssapi_security_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
                                                   const char *chlg64,
                                                   struct kerberos5data *krb5,
                                                   char **outptr,

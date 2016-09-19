@@ -222,6 +222,15 @@
 #endif
 
 /*
+ * Use getaddrinfo to resolve the IPv4 address literal. If the current network
+ * interface doesn’t support IPv4, but supports IPv6, NAT64, and DNS64,
+ * performing this task will result in a synthesized IPv6 address.
+ */
+#ifdef  __APPLE__
+#define USE_RESOLVE_ON_IPS 1
+#endif
+
+/*
  * Include header files for windows builds before redefining anything.
  * Use this preprocessor block only to include or exclude windows.h,
  * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
@@ -629,6 +638,13 @@ int netware_init(void);
     defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
 
 #define USE_NTLM
+
+#elif defined(USE_MBEDTLS)
+#  include <mbedtls/md4.h>
+#  if defined(MBEDTLS_MD4_C)
+#define USE_NTLM
+#  endif
+
 #endif
 #endif
 
@@ -721,5 +737,30 @@ endings either CRLF or LF so 't' is appropriate.
 #define FOPEN_READTEXT "r"
 #define FOPEN_WRITETEXT "w"
 #endif
+
+/* WinSock destroys recv() buffer when send() failed.
+ * Enabled automatically for Windows and for Cygwin as Cygwin sockets are
+ * wrappers for WinSock sockets. https://github.com/curl/curl/issues/657
+ * Define DONT_USE_RECV_BEFORE_SEND_WORKAROUND to force disable workaround.
+ */
+#if !defined(DONT_USE_RECV_BEFORE_SEND_WORKAROUND)
+#  if defined(WIN32) || defined(__CYGWIN__)
+#    define USE_RECV_BEFORE_SEND_WORKAROUND
+#  endif
+#else  /* DONT_USE_RECV_BEFORE_SEND_WORKAROUNDS */
+#  ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+#    undef USE_RECV_BEFORE_SEND_WORKAROUND
+#  endif
+#endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUNDS */
+
+/* Detect Windows App environment which has a restricted access
+ * to the Win32 APIs. */
+# if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#  include <winapifamily.h>
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) && \
+     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#    define CURL_WINDOWS_APP
+#  endif
+# endif
 
 #endif /* HEADER_CURL_SETUP_H */

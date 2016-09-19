@@ -24,7 +24,7 @@
 /* Escape and unescape URL encoding in strings. The functions return a new
  * allocated string or NULL if an error occurred.  */
 
-CURLcode Curl_urldecode(struct SessionHandle *data,
+CURLcode Curl_urldecode(struct Curl_easy *data,
                         const char *string, size_t length,
                         char **ostring, size_t *olen,
                         bool reject_crlf);

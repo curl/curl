@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 66
+# serial 67
 
 
 dnl CURL_CHECK_COMPILER
@@ -1374,7 +1374,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
     GNU_C)
       dnl Only gcc 3.4 or later
       if test "$compiler_num" -ge "304"; then
-        if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
+        if $CC --help --verbose 2>/dev/null | grep fvisibility= >/dev/null ; then
           tmp_EXTERN="__attribute__ ((__visibility__ (\"default\")))"
           tmp_CFLAGS="-fvisibility=hidden"
           supports_symbol_hiding="yes"

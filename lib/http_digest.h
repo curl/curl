@@ -34,7 +34,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                             const unsigned char *uripath);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
-void Curl_digest_cleanup(struct SessionHandle *data);
+void Curl_digest_cleanup(struct Curl_easy *data);
 #else
 #define Curl_digest_cleanup(x) Curl_nop_stmt
 #endif

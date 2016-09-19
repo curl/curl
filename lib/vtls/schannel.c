@@ -56,14 +56,20 @@
 #include "inet_pton.h" /* for IP addr SNI check */
 #include "curl_multibyte.h"
 #include "warnless.h"
+#include "x509asn1.h"
 #include "curl_printf.h"
+#include "system_win32.h"
+
+ /* The last #include file should be: */
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
-/* ALPN requires version 8.1 of the  Windows SDK, which was
-   shipped with Visual Studio 2013, aka _MSC_VER 1800*/
-#if defined(_MSC_VER) && (_MSC_VER >= 1800)
+/* ALPN requires version 8.1 of the Windows SDK, which was
+   shipped with Visual Studio 2013, aka _MSC_VER 1800:
+
+   https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
+*/
+#if defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_)
 #  define HAS_ALPN 1
 #endif
 
@@ -99,7 +105,7 @@ static CURLcode
 schannel_connect_step1(struct connectdata *conn, int sockindex)
 {
   ssize_t written = -1;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SecBuffer outbuf;
   SecBufferDesc outbuf_desc;
@@ -121,12 +127,36 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
         conn->host.name, conn->remote_port);
 
+#ifdef HAS_ALPN
+  /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
+     Also it doesn't seem to be supported for Wine, see curl bug #983. */
+  connssl->use_alpn = conn->bits.tls_enable_alpn &&
+                      !GetProcAddress(GetModuleHandleA("ntdll"),
+                                      "wine_get_version") &&
+                      Curl_verify_windows_version(6, 3, PLATFORM_WINNT,
+                                                  VERSION_GREATER_THAN_EQUAL);
+#else
+  connssl->use_alpn = false;
+#endif
+
+  connssl->cred = NULL;
+
   /* check for an existing re-usable credential handle */
-  if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL)) {
-    connssl->cred = old_cred;
-    infof(data, "schannel: re-using existing credential handle\n");
+  if(conn->ssl_config.sessionid) {
+    Curl_ssl_sessionid_lock(conn);
+    if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL)) {
+      connssl->cred = old_cred;
+      infof(data, "schannel: re-using existing credential handle\n");
+
+      /* increment the reference counter of the credential/session handle */
+      connssl->cred->refcount++;
+      infof(data, "schannel: incremented credential handle refcount = %d\n",
+            connssl->cred->refcount);
+    }
+    Curl_ssl_sessionid_unlock(conn);
   }
-  else {
+
+  if(!connssl->cred) {
     /* setup Schannel API options */
     memset(&schannel_cred, 0, sizeof(schannel_cred));
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
@@ -199,6 +229,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       return CURLE_OUT_OF_MEMORY;
     }
     memset(connssl->cred, 0, sizeof(struct curl_schannel_cred));
+    connssl->cred->refcount = 1;
 
     /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx
        */
@@ -231,7 +262,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
 
 #ifdef HAS_ALPN
-  if(data->set.ssl_enable_alpn) {
+  if(connssl->use_alpn) {
     int cur = 0;
     int list_start_index = 0;
     unsigned int* extension_len = NULL;
@@ -306,11 +337,17 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   if(!host_name)
     return CURLE_OUT_OF_MEMORY;
 
-  /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
+  /* Schannel InitializeSecurityContext:
+     https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
 
+     At the moment we don't pass inbuf unless we're using ALPN since we only
+     use it for that, and Wine (for which we currently disable ALPN) is giving
+     us problems with inbuf regardless. https://github.com/curl/curl/issues/983
+  */
   sspi_status = s_pSecFn->InitializeSecurityContext(
-    &connssl->cred->cred_handle, NULL, host_name,
-    connssl->req_flags, 0, 0, &inbuf_desc, 0, &connssl->ctxt->ctxt_handle,
+    &connssl->cred->cred_handle, NULL, host_name, connssl->req_flags, 0, 0,
+    (connssl->use_alpn ? &inbuf_desc : NULL),
+    0, &connssl->ctxt->ctxt_handle,
     &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
 
   Curl_unicodefree(host_name);
@@ -357,7 +394,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 {
   int i;
   ssize_t nread = -1, written = -1;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   unsigned char *reallocated_buffer;
   size_t reallocated_length;
@@ -597,14 +634,13 @@ static CURLcode
 schannel_connect_step3(struct connectdata *conn, int sockindex)
 {
   CURLcode result = CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  struct curl_schannel_cred *old_cred = NULL;
-#ifdef HAS_ALPN
   SECURITY_STATUS sspi_status = SEC_E_OK;
+  CERT_CONTEXT *ccert_context = NULL;
+#ifdef HAS_ALPN
   SecPkgContext_ApplicationProtocol alpn_result;
 #endif
-  bool incache;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
@@ -630,7 +666,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   }
 
 #ifdef HAS_ALPN
-  if(data->set.ssl_enable_alpn) {
+  if(connssl->use_alpn) {
     sspi_status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
       SECPKG_ATTR_APPLICATION_PROTOCOL, &alpn_result);
 
@@ -664,34 +700,60 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   }
 #endif
 
-  /* increment the reference counter of the credential/session handle */
-  if(connssl->cred && connssl->ctxt) {
-    connssl->cred->refcount++;
-    infof(data, "schannel: incremented credential handle refcount = %d\n",
-          connssl->cred->refcount);
-  }
-
   /* save the current session data for possible re-use */
-  incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL));
-  if(incache) {
-    if(old_cred != connssl->cred) {
-      infof(data, "schannel: old credential handle is stale, removing\n");
-      Curl_ssl_delsessionid(conn, (void *)old_cred);
-      incache = FALSE;
+  if(conn->ssl_config.sessionid) {
+    bool incache;
+    struct curl_schannel_cred *old_cred = NULL;
+
+    Curl_ssl_sessionid_lock(conn);
+    incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL));
+    if(incache) {
+      if(old_cred != connssl->cred) {
+        infof(data, "schannel: old credential handle is stale, removing\n");
+        /* we're not taking old_cred ownership here, no refcount++ is needed */
+        Curl_ssl_delsessionid(conn, (void *)old_cred);
+        incache = FALSE;
+      }
     }
+    if(!incache) {
+      result = Curl_ssl_addsessionid(conn, (void *)connssl->cred,
+                                     sizeof(struct curl_schannel_cred));
+      if(result) {
+        Curl_ssl_sessionid_unlock(conn);
+        failf(data, "schannel: failed to store credential handle");
+        return result;
+      }
+      else {
+        /* this cred session is now also referenced by sessionid cache */
+        connssl->cred->refcount++;
+        infof(data, "schannel: stored credential handle in session cache\n");
+      }
+    }
+    Curl_ssl_sessionid_unlock(conn);
   }
 
-  if(!incache) {
-    result = Curl_ssl_addsessionid(conn, (void *)connssl->cred,
-                                   sizeof(struct curl_schannel_cred));
-    if(result) {
-      failf(data, "schannel: failed to store credential handle");
+  if(data->set.ssl.certinfo) {
+    sspi_status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
+      SECPKG_ATTR_REMOTE_CERT_CONTEXT, &ccert_context);
+
+    if((sspi_status != SEC_E_OK) || (ccert_context == NULL)) {
+      failf(data, "schannel: failed to retrieve remote cert context");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+
+    result = Curl_ssl_init_certinfo(data, 1);
+    if(!result) {
+      if(((ccert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
+         (ccert_context->cbCertEncoded > 0)) {
+
+        const char *beg = (const char *) ccert_context->pbCertEncoded;
+        const char *end = beg + ccert_context->cbCertEncoded;
+        result = Curl_extract_certinfo(conn, 0, beg, end);
+      }
+    }
+    CertFreeCertificateContext(ccert_context);
+    if(result)
       return result;
-    }
-    else {
-      connssl->cred->cached = TRUE;
-      infof(data, "schannel: stored credential handle in session cache\n");
-    }
   }
 
   connssl->connecting_state = ssl_connect_done;
@@ -704,7 +766,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
                         bool nonblocking, bool *done)
 {
   CURLcode result;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
   long timeout_ms;
@@ -963,7 +1025,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
 {
   size_t size = 0;
   ssize_t nread = -1;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   unsigned char *reallocated_buffer;
   size_t reallocated_length;
@@ -1226,39 +1288,8 @@ cleanup:
   */
   if(len && !connssl->decdata_offset && connssl->recv_connection_closed &&
      !connssl->recv_sspi_close_notify) {
-    bool isWin2k = FALSE;
-
-#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \
-    (_WIN32_WINNT < _WIN32_WINNT_WIN2K)
-    OSVERSIONINFO osver;
-
-    memset(&osver, 0, sizeof(osver));
-    osver.dwOSVersionInfoSize = sizeof(osver);
-
-    /* Find out the Windows version */
-    if(GetVersionEx(&osver)) {
-      /* Verify the version number is 5.0 */
-      if(osver.dwMajorVersion == 5 && osver.dwMinorVersion == 0)
-        isWin2k = TRUE;
-    }
-#else
-    ULONGLONG cm;
-    OSVERSIONINFOEX osver;
-
-    memset(&osver, 0, sizeof(osver));
-    osver.dwOSVersionInfoSize = sizeof(osver);
-    osver.dwMajorVersion = 5;
-
-    cm = VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL);
-    cm = VerSetConditionMask(cm, VER_MINORVERSION, VER_EQUAL);
-    cm = VerSetConditionMask(cm, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
-    cm = VerSetConditionMask(cm, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
-
-    if(VerifyVersionInfo(&osver, (VER_MAJORVERSION | VER_MINORVERSION |
-                                  VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR),
-                         cm))
-      isWin2k = TRUE;
-#endif
+    bool isWin2k = Curl_verify_windows_version(5, 0, PLATFORM_WINNT,
+                                               VERSION_EQUAL);
 
     if(isWin2k && sspi_status == SEC_E_OK)
       connssl->recv_sspi_close_notify = true;
@@ -1343,7 +1374,7 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
   /* See https://msdn.microsoft.com/en-us/library/windows/desktop/aa380138.aspx
    * Shutting Down an Schannel Connection
    */
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
@@ -1416,19 +1447,10 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 
   /* free SSPI Schannel API credential handle */
   if(connssl->cred) {
-    /* decrement the reference counter of the credential/session handle */
-    if(connssl->cred->refcount > 0) {
-      connssl->cred->refcount--;
-      infof(data, "schannel: decremented credential handle refcount = %d\n",
-            connssl->cred->refcount);
-    }
-
-    /* if the handle was not cached and the refcount is zero */
-    if(!connssl->cred->cached && connssl->cred->refcount == 0) {
-      infof(data, "schannel: clear credential handle\n");
-      s_pSecFn->FreeCredentialsHandle(&connssl->cred->cred_handle);
-      Curl_safefree(connssl->cred);
-    }
+    Curl_ssl_sessionid_lock(conn);
+    Curl_schannel_session_free(connssl->cred);
+    Curl_ssl_sessionid_unlock(conn);
+    connssl->cred = NULL;
   }
 
   /* free internal buffer for received encrypted data */
@@ -1450,16 +1472,13 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 
 void Curl_schannel_session_free(void *ptr)
 {
+  /* this is expected to be called under sessionid lock */
   struct curl_schannel_cred *cred = ptr;
 
-  if(cred && cred->cached) {
-    if(cred->refcount == 0) {
-      s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
-      Curl_safefree(cred);
-    }
-    else {
-      cred->cached = FALSE;
-    }
+  cred->refcount--;
+  if(cred->refcount == 0) {
+    s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
+    Curl_safefree(cred);
   }
 }
 
@@ -1501,7 +1520,7 @@ int Curl_schannel_random(unsigned char *entropy, size_t length)
 static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 {
   SECURITY_STATUS status;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode result = CURLE_OK;
   CERT_CONTEXT *pCertContextServer = NULL;

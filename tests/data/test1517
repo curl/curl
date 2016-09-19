@@ -1,0 +1,69 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+POST
+POST callback
+slow callback
+early response
+</keywords>
+</info>
+#
+# This reproduces issue #657, fixed with PR #668 - on Windows
+#
+# Server-side
+<reply>
+# Force server reply right after request headers, not waiting for request body
+<servercmd>
+skip: 45
+</servercmd>
+<data>
+HTTP/1.1 500 Internal Server Error
+Date: Thu, 17 Mar 2016 14:41:00 GMT
+Server: test-server/fake
+Content-Type: text/plain; charset=US-ASCII
+X-Special: swsclose
+Content-Length: 55
+Connection: close
+
+This is a virtual description of server virtual error.
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib1517
+</tool>
+
+ <name>
+HTTP POST, server responds before completed send
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1517
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^(this is what we post to the silly web server)(\r)?\n//
+</strippart>
+<protocol>
+POST /1517 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 45
+Content-Type: application/x-www-form-urlencoded
+
+</protocol>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

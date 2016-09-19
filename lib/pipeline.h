@@ -23,34 +23,34 @@
  *
  ***************************************************************************/
 
-CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
+CURLcode Curl_add_handle_to_pipeline(struct Curl_easy *handle,
                                      struct connectdata *conn);
-void Curl_move_handle_from_send_to_recv_pipe(struct SessionHandle *handle,
+void Curl_move_handle_from_send_to_recv_pipe(struct Curl_easy *handle,
                                              struct connectdata *conn);
-bool Curl_pipeline_penalized(struct SessionHandle *data,
+bool Curl_pipeline_penalized(struct Curl_easy *data,
                              struct connectdata *conn);
 
-bool Curl_pipeline_site_blacklisted(struct SessionHandle *handle,
+bool Curl_pipeline_site_blacklisted(struct Curl_easy *handle,
                                     struct connectdata *conn);
 
 CURLMcode Curl_pipeline_set_site_blacklist(char **sites,
                                            struct curl_llist **list_ptr);
 
-bool Curl_pipeline_server_blacklisted(struct SessionHandle *handle,
+bool Curl_pipeline_server_blacklisted(struct Curl_easy *handle,
                                       char *server_name);
 
 CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
                                              struct curl_llist **list_ptr);
 
-bool Curl_pipeline_checkget_write(struct SessionHandle *data,
+bool Curl_pipeline_checkget_write(struct Curl_easy *data,
                                   struct connectdata *conn);
-bool Curl_pipeline_checkget_read(struct SessionHandle *data,
+bool Curl_pipeline_checkget_read(struct Curl_easy *data,
                                  struct connectdata *conn);
 void Curl_pipeline_leave_write(struct connectdata *conn);
 void Curl_pipeline_leave_read(struct connectdata *conn);
-bool Curl_recvpipe_head(struct SessionHandle *data,
+bool Curl_recvpipe_head(struct Curl_easy *data,
                         struct connectdata *conn);
-bool Curl_sendpipe_head(struct SessionHandle *data,
+bool Curl_sendpipe_head(struct Curl_easy *data,
                         struct connectdata *conn);
 
 #endif /* HEADER_CURL_PIPELINE_H */

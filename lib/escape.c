@@ -31,9 +31,8 @@
 #include "warnless.h"
 #include "non-ascii.h"
 #include "escape.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-
-/* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -76,16 +75,23 @@ char *curl_unescape(const char *string, int length)
   return curl_easy_unescape(NULL, string, length, NULL);
 }
 
-char *curl_easy_escape(CURL *handle, const char *string, int inlength)
+char *curl_easy_escape(struct Curl_easy *data, const char *string,
+                       int inlength)
 {
-  size_t alloc = (inlength?(size_t)inlength:strlen(string))+1;
+  size_t alloc;
   char *ns;
   char *testing_ptr = NULL;
   unsigned char in; /* we need to treat the characters unsigned */
-  size_t newlen = alloc;
+  size_t newlen;
   size_t strindex=0;
   size_t length;
   CURLcode result;
+
+  if(inlength < 0)
+    return NULL;
+
+  alloc = (inlength?(size_t)inlength:strlen(string))+1;
+  newlen = alloc;
 
   ns = malloc(alloc);
   if(!ns)
@@ -113,7 +119,7 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
         }
       }
 
-      result = Curl_convert_to_network(handle, &in, 1);
+      result = Curl_convert_to_network(data, &in, 1);
       if(result) {
         /* Curl_convert_to_network calls failf if unsuccessful */
         free(ns);
@@ -140,7 +146,7 @@ char *curl_easy_escape(CURL *handle, const char *string, int inlength)
  * *olen. If length == 0, the length is assumed to be strlen(string).
  *
  */
-CURLcode Curl_urldecode(struct SessionHandle *data,
+CURLcode Curl_urldecode(struct Curl_easy *data,
                         const char *string, size_t length,
                         char **ostring, size_t *olen,
                         bool reject_ctrl)
@@ -207,18 +213,20 @@ CURLcode Curl_urldecode(struct SessionHandle *data,
  * If length == 0, the length is assumed to be strlen(string).
  * If olen == NULL, no output length is stored.
  */
-char *curl_easy_unescape(CURL *handle, const char *string, int length,
-                         int *olen)
+char *curl_easy_unescape(struct Curl_easy *data, const char *string,
+                         int length, int *olen)
 {
   char *str = NULL;
-  size_t inputlen = length;
-  size_t outputlen;
-  CURLcode res = Curl_urldecode(handle, string, inputlen, &str, &outputlen,
-                                FALSE);
-  if(res)
-    return NULL;
-  if(olen)
-    *olen = curlx_uztosi(outputlen);
+  if(length >= 0) {
+    size_t inputlen = length;
+    size_t outputlen;
+    CURLcode res = Curl_urldecode(data, string, inputlen, &str, &outputlen,
+                                  FALSE);
+    if(res)
+      return NULL;
+    if(olen)
+      *olen = curlx_uztosi(outputlen);
+  }
   return str;
 }
 

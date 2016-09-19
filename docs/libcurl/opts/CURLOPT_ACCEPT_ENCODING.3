@@ -32,12 +32,15 @@ Pass a char * argument specifying what encoding you'd like.
 
 Sets the contents of the Accept-Encoding: header sent in a HTTP request, and
 enables decoding of a response when a Content-Encoding: header is received.
-Three encodings are supported: \fIidentity\fP, which does nothing,
+Three encodings are supported: \fIidentity\fP, meaning non-compressed,
 \fIdeflate\fP which requests the server to compress its response using the
 zlib algorithm, and \fIgzip\fP which requests the gzip algorithm.
 
 If a zero-length string is set like "", then an Accept-Encoding: header
 containing all built-in supported encodings is sent.
+
+Set this option to NULL to explicitly disable it, which makes libcurl not send
+an Accept-Encoding: header and not decompress contents automatically.
 
 You can also opt to just include the Accept-Encoding: header in your request
 with \fICURLOPT_HTTPHEADER(3)\fP but then there will be no automatic
@@ -45,8 +48,16 @@ decompressing when receiving data.
 
 This is a request, not an order; the server may or may not do it.  This option
 must be set (to any non-NULL value) or else any unsolicited encoding done by
-the server is ignored. See the special file lib/README.encoding for further
-details.
+the server is ignored.
+
+Servers might respond with Content-Encoding even without getting a
+Accept-Encoding: in the request. Servers might respond with a different
+Content-Encoding than what was asked for in the request.
+
+The Content-Length: servers send for a compressed response is supposed to
+indicate the length of the compressed content so when auto decoding is enabled
+it may not match the sum of bytes reported by the write callbacks (although,
+sending the length of the non-compressed content is a common server mistake).
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

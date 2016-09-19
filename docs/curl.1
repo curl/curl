@@ -98,7 +98,10 @@ specified on a single command line and cannot be used between separate curl
 invokes.
 .SH "PROGRESS METER"
 curl normally displays a progress meter during operations, indicating the
-amount of transferred data, transfer speeds and estimated time left, etc.
+amount of transferred data, transfer speeds and estimated time left, etc. The
+progress meter displays number of bytes and the speeds are in bytes per
+second. The suffixes (k, M, G, T, P) are 1024 based. For example 1k is 1024
+bytes. 1M is 1048576 bytes.
 
 curl displays this data to the terminal by default, so if you invoke curl to
 do an operation and it is about to write data to the terminal, it
@@ -517,7 +520,7 @@ nickname contains ":", it needs to be preceded by "\\" so that it is not
 recognized as password delimiter.  If the nickname contains "\\", it needs to
 be escaped as "\\\\" so that it is not recognized as an escape character.
 
-(iOS and Mac OS X only) If curl is built against Secure Transport, then the
+(iOS and macOS only) If curl is built against Secure Transport, then the
 certificate string can either be the name of a certificate/private key in the
 system or user keychain, or the path to a PKCS#12-encoded certificate and
 private key. If you want to use a file from the current directory, please
@@ -566,6 +569,12 @@ Current Working Directory, or in any folder along your PATH.
 If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
 (libnsspem.so) needs to be available for this option to work properly.
 
+(iOS and macOS only) If curl is built against Secure Transport, then this
+option is supported for backward compatibility with other SSL engines, but it
+should not be set. If the option is not set, then curl will use the
+certificates in the system and user Keychain to verify the peer, which is the
+preferred method of verifying the peer's certificate chain.
+
 If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
 (SSL) Tells curl to use the specified certificate directory to verify the
@@ -589,9 +598,16 @@ indicating its identity. A public key is extracted from this certificate and
 if it does not exactly match the public key provided to this option, curl will
 abort the connection before sending or receiving any data.
 
-Added in 7.39.0 for OpenSSL, GnuTLS and GSKit. Added in 7.43.0 for NSS and
-wolfSSL/CyaSSL. sha256 support added in 7.44.0 for OpenSSL,
-GnuTLS, NSS and wolfSSL/CyaSSL. Other SSL backends not supported.
+PEM/DER support:
+  7.39.0: OpenSSL, GnuTLS and GSKit
+  7.43.0: NSS and wolfSSL/CyaSSL
+  7.47.0: mbedtls
+  7.49.0: PolarSSL
+sha256 support:
+  7.44.0: OpenSSL, GnuTLS, NSS and wolfSSL/CyaSSL.
+  7.47.0: mbedtls
+  7.49.0: PolarSSL
+Other SSL backends not supported.
 
 If this option is used several times, the last one will be used.
 .IP "--cert-status"
@@ -748,6 +764,10 @@ waits for a reply from the server.
 authentication, but non-encrypted data transfers for efficiency.  Fails the
 transfer if the server doesn't support SSL/TLS.  (Added in 7.16.0)
 that can still be used but will be removed in a future version.
+.IP "--ftp-ssl"
+(FTP) This deprecated option is now known as \fI--ssl\fP.
+.IP "--ftp-ssl-reqd"
+(FTP) This deprecated option is now known as \fI--ssl-reqd\fP.
 .IP "--form-string <name=string>"
 (HTTP) Similar to \fI--form\fP except that the value string for the named
 parameter is used literally. Leading \&'@' and \&'<' characters, and the
@@ -947,6 +967,8 @@ This option requires a library built with kerberos4 support. This is not
 very common. Use \fI-V, --version\fP to see if your curl supports it.
 
 If this option is used several times, the last one will be used.
+.IP "--krb4 <level>"
+(FTP) This is the former name for \fI--krb\fP. Do not use.
 .IP "-l, --list-only"
 (FTP)
 When listing an FTP directory, this switch forces a name-only view. This is
@@ -1002,10 +1024,6 @@ The given speed is measured in bytes/second, unless a suffix is appended.
 Appending 'k' or 'K' will count the number as kilobytes, 'm' or M' makes it
 megabytes, while 'g' or 'G' makes it gigabytes. Examples: 200K, 3m and 1G.
 
-The given rate is the average speed counted during the entire transfer. It
-means that curl might use higher transfer speeds in short bursts, but over
-time it uses no more than the given rate.
-
 If you also use the \fI-Y, --speed-limit\fP option, that option will take
 precedence and might cripple the rate-limiting slightly, to help keeping the
 speed-limit logic working.
@@ -1060,7 +1078,8 @@ return with exit code 63.
 files this option has no effect even if the file transfer ends up being larger
 than this given limit. This concerns both FTP and HTTP transfers.
 .IP "--mail-rcpt <address>"
-(SMTP) Specify a single address, user name or mailing list name.
+(SMTP) Specify a single address, user name or mailing list name. Repeat this
+option several times to send to multiple recipients.
 
 When performing a mail transfer, the recipient should specify a valid email
 address to send the mail to. (Added in 7.20.0)
@@ -1176,6 +1195,19 @@ effectively disables the proxy. Each name in this list is matched as either
 a domain which contains the hostname, or the hostname itself. For example,
 local.com would match local.com, local.com:80, and www.local.com, but not
 www.notlocal.com.  (Added in 7.19.4).
+.IP "--connect-to <host:port:connect-to-host:connect-to-port>"
+For a request to the given "host:port" pair, connect to
+"connect-to-host:connect-to-port" instead.
+This is suitable to direct the request at a specific server, e.g. at a specific
+cluster node in a cluster of servers.
+This option is only used to establish the network connection. It does NOT
+affect the hostname/port that is used for TLS/SSL (e.g. SNI, certificate
+verification) or for the application protocols.
+"host" and "port" may be the empty string, meaning "any host/port".
+"connect-to-host" and "connect-to-port" may also be the empty string,
+meaning "use the request's original host/port".
+This option can be used many times to add many connect rules.
+(Added in 7.49.0).
 .IP "--ntlm"
 (HTTP) Enables NTLM authentication. The NTLM authentication method was
 designed by Microsoft and is used by IIS web servers. It is a proprietary
@@ -1191,6 +1223,10 @@ This option requires a library built with SSL support. Use
 \fI-V, --version\fP to see if your curl supports NTLM.
 
 If this option is used several times, only the first one is used.
+.IP "--ntlm-wb"
+(HTTP) Enables NTLM much in the style \fI--ntlm\fP does, but hand over the
+authentication to the separate binary ntlmauth application that is executed
+when needed.
 .IP "-o, --output <file>"
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
 multiple documents, you can use '#' followed by a number in the <file>
@@ -1434,7 +1470,7 @@ If this option is used several times, the last one will be used.
 private key file, so passing this option is generally not required. Note that
 this public key extraction requires libcurl to be linked against a copy of
 libssh2 1.2.8 or higher that is itself linked against OpenSSL.)
-.IP "-q"
+.IP "-q, --disable"
 If used as the first parameter on the command line, the \fIcurlrc\fP config
 file will not be read and used. See the \fI-K, --config\fP for details on the
 default config file search path.
@@ -1554,6 +1590,9 @@ the number used for the specific protocol the host will be used for. It means
 you need several entries if you want to provide address for the same host but
 different ports.
 
+The provided address set by this option will be used even if \fI-4, --ipv4\fP
+or \fI-6, --ipv6\fP is set to make curl use another IP version.
+
 This option can be used many times to add many host names to resolve.
 
 (Added in 7.21.3)
@@ -1614,8 +1653,7 @@ option name can still be used but will be removed in a future version.
 (FTP, POP3, IMAP, SMTP) Require SSL/TLS for the connection.  Terminates the
 connection if the server doesn't support SSL/TLS. (Added in 7.20.0)
 
-This option was formerly known as \fI--ftp-ssl-reqd\fP (added in 7.15.5). That
-option name can still be used but will be removed in a future version.
+This option was formerly known as \fI--ftp-ssl-reqd\fP.
 .IP "--ssl-allow-beast"
 (SSL) This option tells curl to not work around a security flaw in the SSL3
 and TLS1.0 protocols known as BEAST.  If this option isn't used, the SSL layer
@@ -1729,6 +1767,8 @@ curl -T "img[1-1000].png" ftp://ftp.example.com/upload/
 .IP "--tcp-nodelay"
 Turn on the TCP_NODELAY option. See the \fIcurl_easy_setopt(3)\fP man page for
 details about this option. (Added in 7.11.2)
+.IP "--tcp-fastopen"
+Enable use of TCP Fast Open (RFC7413). (Added in 7.49.0)
 .IP "--tftp-blksize <value>"
 (TFTP) Set TFTP BLKSIZE option (must be >512). This is the block size that
 curl will try to use when transferring data to or from a TFTP server. By
@@ -1908,6 +1948,9 @@ same info.
 .B http_connect
 The numerical code that was found in the last response (from a proxy) to a
 curl CONNECT request. (Added in 7.12.4)
+.TP
+.B http_version
+The http version that was effectively used. (Added in 7.50.0)
 .TP
 .B local_ip
 The IP address of the local end of the most recently done connection - can be
@@ -2211,7 +2254,7 @@ Couldn't resolve host. The given remote host was not resolved.
 .IP 7
 Failed to connect to host.
 .IP 8
-FTP weird server reply. The server sent data curl couldn't parse.
+Weird server reply. The server sent data curl couldn't parse.
 .IP 9
 FTP access denied. The server denied login or denied access to the particular
 resource or directory you wanted to reach. Most often you tried to change to a

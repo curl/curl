@@ -54,8 +54,8 @@ struct Curl_share {
   long sessionage;
 };
 
-CURLSHcode Curl_share_lock (struct SessionHandle *, curl_lock_data,
+CURLSHcode Curl_share_lock (struct Curl_easy *, curl_lock_data,
                             curl_lock_access);
-CURLSHcode Curl_share_unlock (struct SessionHandle *, curl_lock_data);
+CURLSHcode Curl_share_unlock (struct Curl_easy *, curl_lock_data);
 
 #endif /* HEADER_CURL_SHARE_H */

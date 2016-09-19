@@ -80,9 +80,9 @@ as well:
 .IP axTLS
 SSL *
 .IP mbedTLS
-mbedtls_ssl_session *
+mbedtls_ssl_context *
 .IP PolarSSL
-ssl_session *
+ssl_context *
 .IP "Secure Channel (WinSSL)"
 CtxtHandle *
 .IP "Secure Transport (DarwinSSL)"
@@ -92,7 +92,8 @@ SSL *
 .RE
 
 If the \fIinternals\fP pointer is NULL then either the SSL backend is not
-supported or an SSL session has not yet been established.
+supported, an SSL session has not yet been established or the connection is no
+longer associated with the easy handle (eg curl_easy_perform has returned).
 .SH LIMITATIONS
 \fBThis option has some limitations that could make it unsafe when it comes to
 the manual verification of certificates.\fP

@@ -46,6 +46,7 @@ HTTP with proxy and URL with ? and no slash separator
 GET http://we.want.that.site.com.1214/?moo=foo HTTP/1.1
 Host: we.want.that.site.com.1214
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

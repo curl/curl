@@ -24,7 +24,7 @@
 
 #include <curl/curl.h>
 
-struct SessionHandle;
+struct Curl_easy;
 struct connectdata;
 
 /* Authentication mechanism flags */

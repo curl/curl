@@ -28,9 +28,8 @@
 #include "rawstr.h"
 #include "vauth/vauth.h"
 #include "http_digest.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-
-/* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -46,7 +45,7 @@ CURLcode Curl_input_digest(struct connectdata *conn,
                            const char *header) /* rest of the *-authenticate:
                                                   header */
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   /* Point to the correct struct with this */
   struct digestdata *digest;
@@ -74,7 +73,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                             const unsigned char *uripath)
 {
   CURLcode result;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   unsigned char *path;
   char *tmp;
   char *response;
@@ -170,7 +169,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   return CURLE_OK;
 }
 
-void Curl_digest_cleanup(struct SessionHandle *data)
+void Curl_digest_cleanup(struct Curl_easy *data)
 {
   Curl_auth_digest_cleanup(&data->state.digest);
   Curl_auth_digest_cleanup(&data->state.proxydigest);

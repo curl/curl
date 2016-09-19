@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -52,7 +52,11 @@
 extern "C" {
 #endif
 
+#if defined(BUILDING_LIBCURL) || defined(CURL_STRICTER)
+typedef struct Curl_multi CURLM;
+#else
 typedef void CURLM;
+#endif
 
 typedef enum {
   CURLM_CALL_MULTI_PERFORM = -1, /* please call curl_multi_perform() or

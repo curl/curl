@@ -8,15 +8,31 @@ possible participation.
 HTTP/2
 ------
 
-- test suite
+Improve performance. Measurements and tests have shown that in several cases
+doing transfers over HTTP/2 can be notably slower than the same transfer done
+over HTTP/1. Some of that difference can be attributed the inefficient window
+size handling currently in use but there are probably more to be learned and
+worked on to optimize this.
 
-   Base this on existing nghttp2 server to start with to make functional
-   tests. Later on we can adopt that code or work with nghttp2 to provide ways
-   to have the http2 server respond with broken responses to make sure we deal
-   with that nicely as well.
+QUIC
+----
 
-   To decide: if we need to bundle parts of the nghttp2 stuff that probably
-   won't be shipped by many distros.
+The standardization process of QUIC has been taken to the IETF and can be
+followed on the [IETF QUIC Mailing
+list](https://www.ietf.org/mailman/listinfo/quic). I'd like us to get on the
+bandwagon. Ideally, this would be done with a separate library/project to
+handle the binary/framing layer in a similar fashion to how HTTP/2 is
+implemented. This, to allow other projects to benefit from the work and to
+thus broaden the interest and chance of others to participate.
+
+TLS 1.3
+-------
+
+The new version of the TLS protocol is in the pipeline and will soon start to
+get used out in the wild. It offers some new interesting features and will
+need the TLS libraries to adapt and quite likely provide additional or
+modified APIs. libcurl needs to adapt accordingly.
+
 
 HTTP cookies
 ------------

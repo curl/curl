@@ -50,7 +50,7 @@ introduced in the C standard until C99. We use only `/*` and `*/` comments:
 
 ## Long lines
 
-Source code in curl may never be wider than 80 columns and there are two
+Source code in curl may never be wider than 79 columns and there are two
 reasons for maintaining this even in the modern era of very large and high
 resolution screens:
 
@@ -72,8 +72,12 @@ the initial keyword. Like this:
       /* clearly a youngster */
     }
 
-When we write functions however, the opening brace should be in the first
-column of the first line:
+You may omit the braces if they would contain only a one-line statement:
+
+    if(!x)
+      continue;
+
+For functions the opening brace should be on a separate line:
 
     int main(int argc, char **argv)
     {
@@ -161,6 +165,53 @@ Examples:
     contents = *pointer;
     complement = ~bits;
     empty = (!*string) ? TRUE : FALSE;
+
+## Column alignment
+
+Some statements cannot be completed on a single line because the line would
+be too long, the statement too hard to read, or due to other style guidelines
+above. In such a case the statement will span multiple lines.
+
+If a continuation line is part of an expression or sub-expression then you
+should align on the appropriate column so that it's easy to tell what part of
+the statement it is. Operators should not start continuation lines. In other
+cases follow the 2-space indent guideline. Here are some examples from libcurl:
+
+~~~c
+    if(Curl_pipeline_wanted(handle->multi, CURLPIPE_HTTP1) &&
+       (handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
+       (handle->set.httpreq == HTTPREQ_GET ||
+        handle->set.httpreq == HTTPREQ_HEAD))
+      /* didn't ask for HTTP/1.0 and a GET or HEAD */
+      return TRUE;
+~~~
+
+~~~c
+  case CURLOPT_KEEP_SENDING_ON_ERROR:
+    data->set.http_keep_sending_on_error = (0 != va_arg(param, long)) ?
+                                           TRUE : FALSE;
+    break;
+~~~
+
+~~~c
+    data->set.http_disable_hostname_check_before_authentication =
+      (0 != va_arg(param, long)) ? TRUE : FALSE;
+~~~
+
+~~~c
+  if(option) {
+    result = parse_login_details(option, strlen(option),
+                                 (userp ? &user : NULL),
+                                 (passwdp ? &passwd : NULL),
+                                 NULL);
+  }
+~~~
+
+~~~c
+        DEBUGF(infof(data, "Curl_pp_readresp_ %d bytes of trailing "
+                     "server response left\n",
+                     (int)clipamount));
+~~~
 
 ## Platform dependent code
 

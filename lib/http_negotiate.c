@@ -29,16 +29,16 @@
 #include "rawstr.h"
 #include "http_negotiate.h"
 #include "vauth/vauth.h"
-#include "curl_printf.h"
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
 CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
                               const char *header)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   size_t len;
 
   /* Point to the username, password, service and host */
@@ -124,7 +124,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   return (userp == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }
 
-void Curl_cleanup_negotiate(struct SessionHandle *data)
+void Curl_cleanup_negotiate(struct Curl_easy *data)
 {
   Curl_auth_spnego_cleanup(&data->state.negotiate);
   Curl_auth_spnego_cleanup(&data->state.proxyneg);

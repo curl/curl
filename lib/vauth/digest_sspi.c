@@ -44,6 +44,27 @@
 #include "memdebug.h"
 
 /*
+* Curl_auth_is_digest_supported()
+*
+* This is used to evaluate if DIGEST is supported.
+*
+* Parameters: None
+*
+* Returns TRUE if DIGEST is supported by Windows SSPI.
+*/
+bool Curl_auth_is_digest_supported(void)
+{
+  PSecPkgInfo SecurityPackage;
+  SECURITY_STATUS status;
+
+  /* Query the security package for Digest */
+  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_DIGEST),
+                                              &SecurityPackage);
+
+  return (status == SEC_E_OK ? TRUE : FALSE);
+}
+
+/*
  * Curl_auth_create_digest_md5_message()
  *
  * This is used to generate an already encoded DIGEST-MD5 response message
@@ -62,7 +83,7 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_digest_md5_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const char *chlg64,
                                              const char *userp,
                                              const char *passwdp,
@@ -349,7 +370,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_digest_http_message(struct SessionHandle *data,
+CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                               const char *userp,
                                               const char *passwdp,
                                               const unsigned char *request,
@@ -387,12 +408,6 @@ CURLcode Curl_auth_create_digest_http_message(struct SessionHandle *data,
   /* Release the package buffer as it is not required anymore */
   s_pSecFn->FreeContextBuffer(SecurityPackage);
 
-  /* Allocate the output buffer according to the max token size as indicated
-     by the security package */
-  output_token = malloc(token_max);
-  if(!output_token)
-    return CURLE_OUT_OF_MEMORY;
-
   if(userp && *userp) {
     /* Populate our identity structure */
     if(Curl_create_sspi_identity(userp, passwdp, &identity))
@@ -418,9 +433,19 @@ CURLcode Curl_auth_create_digest_http_message(struct SessionHandle *data,
                                               &credentials, &expiry);
   if(status != SEC_E_OK) {
     Curl_sspi_free_identity(p_identity);
-    free(output_token);
 
     return CURLE_LOGIN_DENIED;
+  }
+
+  /* Allocate the output buffer according to the max token size as indicated
+     by the security package */
+  output_token = malloc(token_max);
+  if(!output_token) {
+    s_pSecFn->FreeCredentialsHandle(&credentials);
+
+    Curl_sspi_free_identity(p_identity);
+
+    return CURLE_OUT_OF_MEMORY;
   }
 
   /* Setup the challenge "input" security buffer if present */
@@ -447,6 +472,8 @@ CURLcode Curl_auth_create_digest_http_message(struct SessionHandle *data,
 
   spn = Curl_convert_UTF8_to_tchar((char *) uripath);
   if(!spn) {
+    s_pSecFn->FreeCredentialsHandle(&credentials);
+
     Curl_sspi_free_identity(p_identity);
     free(output_token);
 

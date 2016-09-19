@@ -30,6 +30,10 @@
  *   https://cool.haxx.se/mailman/listinfo/curl-library/
  */
 
+#ifdef CURL_NO_OLDIES
+#define CURL_STRICTER
+#endif
+
 #include "curlver.h"         /* libcurl version defines   */
 #include "curlbuild.h"       /* libcurl build definitions */
 #include "curlrules.h"       /* libcurl rules enforcement */
@@ -91,7 +95,13 @@
 extern "C" {
 #endif
 
+#if defined(BUILDING_LIBCURL) || defined(CURL_STRICTER)
+typedef struct Curl_easy CURL;
+typedef struct Curl_share CURLSH;
+#else
 typedef void CURL;
+typedef void CURLSH;
+#endif
 
 /*
  * libcurl external API function linkage decorations.
@@ -373,6 +383,7 @@ typedef curlioerr (*curl_ioctl_callback)(CURL *handle,
                                          int cmd,
                                          void *clientp);
 
+#ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS
 /*
  * The following typedef's are signatures of malloc, free, realloc, strdup and
  * calloc respectively.  Function pointers of these types can be passed to the
@@ -386,6 +397,7 @@ typedef char *(*curl_strdup_callback)(const char *str);
 typedef void *(*curl_calloc_callback)(size_t nmemb, size_t size);
 
 #define CURL_DID_MEMORY_FUNC_TYPEDEFS
+#endif
 
 /* the kind of data that is passed to information_callback*/
 typedef enum {
@@ -423,7 +435,7 @@ typedef enum {
   CURLE_COULDNT_RESOLVE_PROXY,   /* 5 */
   CURLE_COULDNT_RESOLVE_HOST,    /* 6 */
   CURLE_COULDNT_CONNECT,         /* 7 */
-  CURLE_FTP_WEIRD_SERVER_REPLY,  /* 8 */
+  CURLE_WEIRD_SERVER_REPLY,      /* 8 */
   CURLE_REMOTE_ACCESS_DENIED,    /* 9 a service was denied by the server
                                     due to lack of access - when login fails
                                     this is not returned. */
@@ -554,6 +566,7 @@ typedef enum {
 
 /*  compatibility with older names */
 #define CURLOPT_ENCODING CURLOPT_ACCEPT_ENCODING
+#define CURLE_FTP_WEIRD_SERVER_REPLY CURLE_WEIRD_SERVER_REPLY
 
 /* The following were added in 7.21.5, April 2011 */
 #define CURLE_UNKNOWN_TELNET_OPTION CURLE_UNKNOWN_OPTION
@@ -1680,6 +1693,13 @@ typedef enum {
   /* Do not send any tftp option requests to the server */
   CINIT(TFTP_NO_OPTIONS, LONG, 242),
 
+  /* Linked-list of host:port:connect-to-host:connect-to-port,
+     overrides the URL's host:port (only for the network layer) */
+  CINIT(CONNECT_TO, OBJECTPOINT, 243),
+
+  /* Set TCP Fast Open */
+  CINIT(TCP_FASTOPEN, LONG, 244),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2116,6 +2136,11 @@ typedef enum {
   CURLSSLBACKEND_MBEDTLS = 11
 } curl_sslbackend;
 
+/* aliases for library clones and renames */
+#define CURLSSLBACKEND_LIBRESSL 1
+#define CURLSSLBACKEND_BORINGSSL 1
+#define CURLSSLBACKEND_WOLFSSL 6
+
 /* Information about the SSL library used and the respective internal SSL
    handle, which can be used to obtain further information regarding the
    connection. Asked for with CURLINFO_TLS_SSL_PTR or CURLINFO_TLS_SESSION. */
@@ -2179,9 +2204,10 @@ typedef enum {
   CURLINFO_TLS_SESSION      = CURLINFO_SLIST  + 43,
   CURLINFO_ACTIVESOCKET     = CURLINFO_SOCKET + 44,
   CURLINFO_TLS_SSL_PTR      = CURLINFO_SLIST  + 45,
+  CURLINFO_HTTP_VERSION     = CURLINFO_LONG   + 46,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 45
+  CURLINFO_LASTONE          = 46
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
@@ -2243,7 +2269,6 @@ typedef void (*curl_unlock_function)(CURL *handle,
                                      curl_lock_data data,
                                      void *userptr);
 
-typedef void CURLSH;
 
 typedef enum {
   CURLSHE_OK,  /* all is fine */

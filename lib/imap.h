@@ -49,9 +49,9 @@ typedef enum {
   IMAP_LAST          /* never used */
 } imapstate;
 
-/* This IMAP struct is used in the SessionHandle. All IMAP data that is
+/* This IMAP struct is used in the Curl_easy. All IMAP data that is
    connection-oriented must be in imap_conn to properly deal with the fact that
-   perhaps the SessionHandle is changed between the times the connection is
+   perhaps the Curl_easy is changed between the times the connection is
    used. */
 struct IMAP {
   curl_pp_transfer transfer;

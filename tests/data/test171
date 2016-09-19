@@ -44,6 +44,7 @@ HTTP, get cookie with dot prefixed full domain
 GET http://z.x.com/171 HTTP/1.1
 Host: z.x.com
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 <file name="log/jar171" mode="text">
