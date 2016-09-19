@@ -920,7 +920,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
 #if CURL_SUPPORT_MAC_10_6
     /* On Leopard and Snow Leopard, fall back to SecKeychainSearch. */
     status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
-#endif /* CURL_SUPPORT_MAC_10_7 */
+#endif /* CURL_SUPPORT_MAC_10_6 */
   }
 #elif CURL_SUPPORT_MAC_10_6
   /* For developers building on older cats, we have no choice but to fall back
