@@ -1354,10 +1354,9 @@ consistency. However, a server may require a POST to remain a POST after such
 a redirection. This option is meaningful only when using \fI-L, --location\fP
 (Added in 7.26.0)
 .IP "--proto <protocols>"
-Tells curl to use the listed protocols for its initial retrieval. Protocols
-are evaluated left to right, are comma separated, and are each a protocol
-name or 'all', optionally prefixed by zero or more modifiers. Available
-modifiers are:
+Tells curl to limit what protocols it may use in the transfer. Protocols are
+evaluated left to right, are comma separated, and are each a protocol name or
+'all', optionally prefixed by zero or more modifiers. Available modifiers are:
 .RS
 .TP 3
 .B +
@@ -1414,8 +1413,9 @@ for details.
 
 (Added in 7.45.0)
 .IP "--proto-redir <protocols>"
-Tells curl to use the listed protocols on redirect. See --proto for how
-protocols are represented.
+Tells curl to limit what protocols it may use on redirect. Protocols denied by
+--proto are not overridden by this option. See \fI--proto\fP for how protocols
+are represented.
 
 Example:
 

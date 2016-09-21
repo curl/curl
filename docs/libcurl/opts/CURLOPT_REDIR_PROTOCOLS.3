@@ -34,6 +34,9 @@ redirect when \fICURLOPT_FOLLOWLOCATION(3)\fP is enabled. This allows you to
 limit specific transfers to only be allowed to use a subset of protocols in
 redirections.
 
+Protocols denied by \fICURLOPT_PROTOCOLS(3)\fP are not overridden by this
+option.
+
 By default libcurl will allow all protocols on redirect except several disabled
 for security reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0
 SMB and SMBS are also disabled. \fICURLPROTO_ALL\fP enables all protocols on
