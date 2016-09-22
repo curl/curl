@@ -1700,6 +1700,12 @@ typedef enum {
   /* Set TCP Fast Open */
   CINIT(TCP_FASTOPEN, LONG, 244),
 
+  /* Set Kerberos credential-cache to use for this transfer */
+  CINIT(KRB5_CCNAME, STRINGPOINT, 245),
+
+  /* Set Kerberos client keytab to use for this transfer */
+  CINIT(KRB5_CLIENT_KTNAME, STRINGPOINT, 246),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

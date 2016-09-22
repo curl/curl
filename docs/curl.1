@@ -620,6 +620,11 @@ or no response at all is received, the verification fails.
 
 This is currently only implemented in the OpenSSL, GnuTLS and NSS backends.
 (Added in 7.41.0)
+.IP "--ccache"
+(KRB5) The Kerberos credential cache to use for GSS-API authentication.
+
+Only available when built with gssapi library supporting credential-store.
+(Added in 7.50.0)
 .IP "--false-start"
 
 (SSL) Tells curl to use false start during the TLS handshake. False start is a
@@ -958,6 +963,11 @@ private key is. DER, PEM, and ENG are supported. If not specified, PEM is
 assumed.
 
 If this option is used several times, the last one will be used.
+.IP "--keytab"
+(KRB5) The Kerberos client keytab to use for GSS-API authentication.
+
+Only available when built with gssapi library supporting credential-store.
+(Added in 7.50.0)
 .IP "--krb <level>"
 (FTP) Enable Kerberos authentication and use. The level must be entered and
 should be one of 'clear', 'safe', 'confidential', or 'private'. Should you use

@@ -44,7 +44,43 @@ OM_uint32 Curl_gss_init_sec_context(
     const bool mutual_auth,
     OM_uint32 *ret_flags)
 {
-  OM_uint32 req_flags = GSS_C_REPLAY_FLAG;
+  gss_cred_id_t creds = GSS_C_NO_CREDENTIAL;
+  OM_uint32 major, discard, req_flags = GSS_C_REPLAY_FLAG;
+
+#ifdef HAVE_GSS_CRED_STORE
+#define MAX_CRED_STORE_ELEMENTS 2
+  gss_key_value_element_desc store_elms[MAX_CRED_STORE_ELEMENTS];
+  gss_key_value_set_desc cred_store;
+
+  const char *ccache = data->set.str[STRING_KRB5_CCNAME];
+  const char *client_kt = data->set.str[STRING_KRB5_CLIENT_KTNAME];
+
+  if(ccache || client_kt) {
+    cred_store.count = 0;
+    cred_store.elements = store_elms;
+
+    if(ccache) {
+      cred_store.elements[cred_store.count].key = "ccache";
+      cred_store.elements[cred_store.count].value = ccache;
+      cred_store.count++;
+    }
+
+    if(client_kt) {
+      cred_store.elements[cred_store.count].key = "client_keytab";
+      cred_store.elements[cred_store.count].value = client_kt;
+      cred_store.count++;
+    }
+
+    major = gss_acquire_cred_from(minor_status, GSS_C_NO_NAME,
+                                  GSS_C_INDEFINITE, GSS_C_NO_OID_SET,
+                                  GSS_C_INITIATE, &cred_store,
+                                  &creds, NULL, NULL);
+    if(GSS_ERROR(major)) {
+      infof(data, "Warning: gss_acquire_cred_from() failed\n");
+      return major;
+    }
+  }
+#endif
 
   if(mutual_auth)
     req_flags |= GSS_C_MUTUAL_FLAG;
@@ -61,8 +97,8 @@ OM_uint32 Curl_gss_init_sec_context(
   if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_FLAG)
     req_flags |= GSS_C_DELEG_FLAG;
 
-  return gss_init_sec_context(minor_status,
-                              GSS_C_NO_CREDENTIAL, /* cred_handle */
+  major = gss_init_sec_context(minor_status,
+                              creds, /* cred_handle */
                               context,
                               target_name,
                               mech_type,
@@ -74,6 +110,10 @@ OM_uint32 Curl_gss_init_sec_context(
                               output_token,
                               ret_flags,
                               NULL /* time_rec */);
+  /* It is valid to pass GSS_C_NO_CREDENTIAL */
+  gss_release_cred(&discard, &creds);
+
+  return major;
 }
 
 #define GSS_LOG_BUFFER_LEN 1024

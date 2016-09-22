@@ -239,6 +239,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_INTERFACE ||                                           \
    (option) == CURLOPT_ISSUERCERT ||                                          \
    (option) == CURLOPT_KEYPASSWD ||                                           \
+   (option) == CURLOPT_KRB5_CCNAME ||                                         \
+   (option) == CURLOPT_KRB5_CLIENT_KTNAME ||                                  \
    (option) == CURLOPT_KRBLEVEL ||                                            \
    (option) == CURLOPT_LOGIN_OPTIONS ||                                       \
    (option) == CURLOPT_MAIL_AUTH ||                                           \

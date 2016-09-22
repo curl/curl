@@ -34,6 +34,10 @@
 #  include <gssapi/gssapi.h>
 #  include <gssapi/gssapi_generic.h>
 #  include <gssapi/gssapi_krb5.h>
+   /* Credential Store */
+#ifdef HAVE_GSS_CRED_STORE
+#  include <gssapi/gssapi_ext.h>
+#endif
 #else
    /* Heimdal-style */
 #  include <gssapi.h>

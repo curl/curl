@@ -1453,6 +1453,10 @@ enum dupstring {
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
     defined(USE_SPNEGO)
   STRING_SERVICE_NAME,    /* Service name */
+#ifdef HAVE_GSS_CRED_STORE
+  STRING_KRB5_CCNAME,      /* Kerberos credential cache */
+  STRING_KRB5_CLIENT_KTNAME, /* Kerberos client keytab */
+#endif
 #endif
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,
