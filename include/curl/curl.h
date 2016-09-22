@@ -1700,6 +1700,10 @@ typedef enum {
   /* Set TCP Fast Open */
   CINIT(TCP_FASTOPEN, LONG, 244),
 
+  /* Continue to send data if the server responds early with an
+   * HTTP status code >= 300 */
+  CINIT(KEEP_SENDING_ON_ERROR, LONG, 245),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

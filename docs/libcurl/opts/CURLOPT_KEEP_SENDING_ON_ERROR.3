@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -20,37 +20,33 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_FAILONERROR 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_KEEP_SENDING_ON_ERROR 3 "22 Sep 2016" "libcurl 7.51.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_FAILONERROR \- request failure on HTTP response >= 400
+CURLOPT_KEEP_SENDING_ON_ERROR \- keep sending on early HTTP response >= 300
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FAILONERROR, long fail);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_KEEP_SENDING_ON_ERROR, long keep_sending);
 .SH DESCRIPTION
-A long parameter set to 1 tells the library to fail the request if the HTTP
-code returned is equal to or larger than 400. The default action would be to
-return the page normally, ignoring that code.
+A long parameter set to 1 tells the library to keep sending the request body
+if the HTTP code returned is equal to or larger than 300. The default action
+would be to stop sending and close the stream or connection.
 
-This method is not fail-safe and there are occasions where non-successful
-response codes will slip through, especially when authentication is involved
-(response codes 401 and 407).
+This option is suitable for manual NTLM authentication, i.e. if an application
+does not use \fICURLOPT_HTTPAUTH(3)\fP, but instead sets "Authorization: NTLM ..."
+headers manually using \fICURLOPT_HTTPHEADER(3)\fP.
 
-You might get some amounts of headers transferred before this situation is
-detected, like when a "100-continue" is received as a response to a POST/PUT
-and a 401 or 407 is received immediately afterwards.
+Most applications do not need this option.
 
-When this option is used and an error is detected, it will cause the
-connection to get closed.
 .SH DEFAULT
-0, do not fail on error
+0, stop sending on error
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-Along with HTTP 
+Along with HTTP
 .SH RETURN VALUE
 Returns CURLE_OK if HTTP is enabled, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR CURLOPT_HTTP200ALIASES "(3), " CURLOPT_KEEP_SENDING_ON_ERROR "(3), "
+.BR CURLOPT_FAILONERROR "(3), " CURLOPT_HTTPHEADER "(3), "

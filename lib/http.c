@@ -3181,12 +3181,21 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
              * connection for closure after we've read the entire response.
              */
             if(!k->upload_done) {
-              infof(data, "HTTP error before end of send, stop sending\n");
-              streamclose(conn, "Stop sending data before everything sent");
-              k->upload_done = TRUE;
-              k->keepon &= ~KEEP_SEND; /* don't send */
-              if(data->state.expect100header)
-                k->exp100 = EXP100_FAILED;
+              if(data->set.http_keep_sending_on_error) {
+                infof(data, "HTTP error before end of send, keep sending\n");
+                if(k->exp100 > EXP100_SEND_DATA) {
+                  k->exp100 = EXP100_SEND_DATA;
+                  k->keepon |= KEEP_SEND;
+                }
+              }
+              else {
+                infof(data, "HTTP error before end of send, stop sending\n");
+                streamclose(conn, "Stop sending data before everything sent");
+                k->upload_done = TRUE;
+                k->keepon &= ~KEEP_SEND; /* don't send */
+                if(data->state.expect100header)
+                  k->exp100 = EXP100_FAILED;
+              }
             }
             break;
 
