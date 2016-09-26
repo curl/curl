@@ -49,6 +49,7 @@ problems may have been fixed or changed somewhat since this was written!
  5.5 can't handle Unicode arguments in Windows
  5.6 cmake support gaps
  5.7 Visual Studio project gaps
+ 5.8 configure finding libs in wrong directory
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -358,6 +359,24 @@ problems may have been fixed or changed somewhat since this was written!
 
   - support for other development IDEs
   - add PATH environment variables for third-party DLLs
+
+5.8 configure finding libs in wrong directory
+
+ When the configure script checks for third-party libraries, it adds those
+ directories to the LDFLAGS variable and then tries linking to see if it
+ works. When successful, the found directory is kept in the LDFLAGS variable
+ when the scripts continues to execute and do more tests and possibly check
+ for more libraries.
+
+ This can make subsequent checks for libraries wrongly detect another
+ installtion in a directory that was previously added to LDFLAGS by another
+ library check!
+
+ A possibly better way to do these checks would be keep the pristine LDFLAGS
+ even after successful checks and instead add those verified paths to a
+ separate variable that only after all library checks have been performed get
+ appended to LDFLAGS.
+
 
 6. Authentication
 
