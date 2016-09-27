@@ -902,6 +902,35 @@ Curl_cookie_add(struct Curl_easy *data,
   return co;
 }
 
+/*
+ * get_line() makes sure to only return complete whole lines that fit in 'len'
+ * bytes and end with a newline.
+ */
+static char *get_line(char *buf, int len, FILE *input)
+{
+  bool partial = FALSE;
+  while(1) {
+    char *b = fgets(buf, len, input);
+    if(b) {
+      size_t rlen = strlen(b);
+      if(rlen && (b[rlen-1] == '\n')) {
+        if(partial) {
+          partial = FALSE;
+          continue;
+        }
+        return b;
+      }
+      else
+        /* read a partial, discard the next piece that ends with newline */
+        partial = TRUE;
+    }
+    else
+      break;
+  }
+  return NULL;
+}
+
+
 /*****************************************************************************
  *
  * Curl_cookie_init()
@@ -958,7 +987,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     line = malloc(MAX_COOKIE_LINE);
     if(!line)
       goto fail;
-    while(fgets(line, MAX_COOKIE_LINE, fp)) {
+    while(get_line(line, MAX_COOKIE_LINE, fp)) {
       if(checkprefix("Set-Cookie:", line)) {
         /* This is a cookie line, get it! */
         lineptr=&line[11];
