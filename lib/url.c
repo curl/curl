@@ -3394,8 +3394,8 @@ ConnectionExists(struct Curl_easy *data,
       if(!(needle->handler->flags & PROTOPT_CREDSPERREQUEST)) {
         /* This protocol requires credentials per connection,
            so verify that we're using the same name and password as well */
-        if(!strequal(needle->user, check->user) ||
-           !strequal(needle->passwd, check->passwd)) {
+        if(strcmp(needle->user, check->user) ||
+           strcmp(needle->passwd, check->passwd)) {
           /* one of them was different */
           continue;
         }
@@ -3455,8 +3455,8 @@ ConnectionExists(struct Curl_easy *data,
            possible. (Especially we must not reuse the same connection if
            partway through a handshake!) */
         if(wantNTLMhttp) {
-          if(!strequal(needle->user, check->user) ||
-             !strequal(needle->passwd, check->passwd))
+          if(strcmp(needle->user, check->user) ||
+             strcmp(needle->passwd, check->passwd))
             continue;
         }
         else if(check->ntlm.state != NTLMSTATE_NONE) {
@@ -3470,8 +3470,8 @@ ConnectionExists(struct Curl_easy *data,
           if(!check->proxyuser || !check->proxypasswd)
             continue;
 
-          if(!strequal(needle->proxyuser, check->proxyuser) ||
-             !strequal(needle->proxypasswd, check->proxypasswd))
+          if(strcmp(needle->proxyuser, check->proxyuser) ||
+             strcmp(needle->proxypasswd, check->proxypasswd))
             continue;
         }
         else if(check->proxyntlm.state != NTLMSTATE_NONE) {
