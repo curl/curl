@@ -365,16 +365,16 @@ problems may have been fixed or changed somewhat since this was written!
  When the configure script checks for third-party libraries, it adds those
  directories to the LDFLAGS variable and then tries linking to see if it
  works. When successful, the found directory is kept in the LDFLAGS variable
- when the scripts continues to execute and do more tests and possibly check
- for more libraries.
+ when the script continues to execute and do more tests and possibly check for
+ more libraries.
 
  This can make subsequent checks for libraries wrongly detect another
- installtion in a directory that was previously added to LDFLAGS by another
+ installation in a directory that was previously added to LDFLAGS by another
  library check!
 
- A possibly better way to do these checks would be keep the pristine LDFLAGS
+ A possibly better way to do these checks would be to keep the pristine LDFLAGS
  even after successful checks and instead add those verified paths to a
- separate variable that only after all library checks have been performed get
+ separate variable that only after all library checks have been performed gets
  appended to LDFLAGS.
 
 
