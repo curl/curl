@@ -25,7 +25,7 @@
  */
 
 #include "test.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "memdebug.h"
 
 static CURLcode send_request(CURL *curl, const char *url, int seq,
@@ -72,11 +72,11 @@ static long parse_auth_name(const char *arg)
 {
   if(!arg)
     return CURLAUTH_NONE;
-  if(strequal(arg, "basic"))
+  if(strcasecompare(arg, "basic"))
     return CURLAUTH_BASIC;
-  if(strequal(arg, "digest"))
+  if(strcasecompare(arg, "digest"))
     return CURLAUTH_DIGEST;
-  if(strequal(arg, "ntlm"))
+  if(strcasecompare(arg, "ntlm"))
     return CURLAUTH_NTLM;
   return CURLAUTH_NONE;
 }

@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "strequal.h"
+#include "strcase.h"
 
 static CURLcode unit_setup(void) {return CURLE_OK;}
 static void unit_stop(void) {}
@@ -30,25 +30,25 @@ UNITTEST_START
 
 int rc;
 
-rc = curl_strequal("iii", "III");
+rc = curl_strcasecompare("iii", "III");
 fail_unless(rc != 0, "return code should be zero");
 
-rc = curl_strequal("iiia", "III");
+rc = curl_strcasecompare("iiia", "III");
 fail_unless(rc == 0, "return code should be zero");
 
-rc = curl_strequal("iii", "IIIa");
+rc = curl_strcasecompare("iii", "IIIa");
 fail_unless(rc == 0, "return code should be zero");
 
-rc = curl_strequal("iiiA", "IIIa");
+rc = curl_strcasecompare("iiiA", "IIIa");
 fail_unless(rc != 0, "return code should be non-zero");
 
-rc = curl_strnequal("iii", "III", 3);
+rc = curl_strncasecompare("iii", "III", 3);
 fail_unless(rc != 0, "return code should be non-zero");
 
-rc = curl_strnequal("iiiABC", "IIIcba", 3);
+rc = curl_strncasecompare("iiiABC", "IIIcba", 3);
 fail_unless(rc != 0, "return code should be non-zero");
 
-rc = curl_strnequal("ii", "II", 3);
+rc = curl_strncasecompare("ii", "II", 3);
 fail_unless(rc != 0, "return code should be non-zero");
 
 UNITTEST_STOP

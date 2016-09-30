@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,12 +26,12 @@
 #include <strings.h>
 #endif
 
-#include "strequal.h"
+#include "strcase.h"
 
 /*
  * @unittest: 1301
  */
-int curl_strequal(const char *first, const char *second)
+int curl_strcasecompare(const char *first, const char *second)
 {
 #if defined(HAVE_STRCASECMP)
   return !(strcasecmp)(first, second);
@@ -54,7 +54,7 @@ int curl_strequal(const char *first, const char *second)
 /*
  * @unittest: 1301
  */
-int curl_strnequal(const char *first, const char *second, size_t max)
+int curl_strncasecompare(const char *first, const char *second, size_t max)
 {
 #if defined(HAVE_STRNCASECMP)
   return !strncasecmp(first, second, max);

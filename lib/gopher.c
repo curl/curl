@@ -30,7 +30,6 @@
 #include "sendf.h"
 
 #include "progress.h"
-#include "strequal.h"
 #include "gopher.h"
 #include "rawstr.h"
 #include "select.h"

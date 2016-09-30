@@ -90,7 +90,6 @@ Example set of cookies:
 
 #include "urldata.h"
 #include "cookie.h"
-#include "strequal.h"
 #include "strtok.h"
 #include "sendf.h"
 #include "slist.h"
@@ -939,7 +938,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
   }
   c->running = FALSE; /* this is not running, this is init */
 
-  if(file && strequal(file, "-")) {
+  if(file && !strcmp(file, "-")) {
     fp = stdin;
     fromfile=FALSE;
   }
@@ -1310,7 +1309,7 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
   /* at first, remove expired cookies */
   remove_expired(c);
 
-  if(strequal("-", dumphere)) {
+  if(!strcmp("-", dumphere)) {
     /* use stdout */
     out = stdout;
     use_stdout=TRUE;

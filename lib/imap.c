@@ -68,9 +68,8 @@
 #include "http.h" /* for HTTP proxy tunnel stuff */
 #include "socks.h"
 #include "imap.h"
-
 #include "strtoofft.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "vtls/vtls.h"
 #include "connect.h"
 #include "strerror.h"
@@ -1935,7 +1934,7 @@ static CURLcode imap_parse_url_options(struct connectdata *conn)
     while(*ptr && *ptr != ';')
       ptr++;
 
-    if(strnequal(key, "AUTH=", 5))
+    if(strncasecompare(key, "AUTH=", 5))
       result = Curl_sasl_parse_url_auth_option(&imapc->sasl,
                                                value, ptr - value);
     else

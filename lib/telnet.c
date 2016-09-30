@@ -58,7 +58,6 @@
 
 #include "arpa_telnet.h"
 #include "select.h"
-#include "strequal.h"
 #include "rawstr.h"
 #include "warnless.h"
 

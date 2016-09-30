@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,8 +34,8 @@
    functions while they still are offered publicly. They will be made library-
    private one day */
 
-#include "strequal.h"
-/* "strequal.h" provides the strequal protos */
+#include "strcase.h"
+/* "strcase.h" provides the strcasecompare protos */
 
 #include "strtoofft.h"
 /* "strtoofft.h" provides this function: curlx_strtoofft(), returns a
@@ -73,8 +73,8 @@
 */
 
 #define curlx_getenv curl_getenv
-#define curlx_strequal curl_strequal
-#define curlx_strnequal curl_strnequal
+#define curlx_strcasecompare curl_strcasecompare
+#define curlx_strncasecompare curl_strncasecompare
 #define curlx_raw_equal Curl_raw_equal
 #define curlx_mvsnprintf curl_mvsnprintf
 #define curlx_msnprintf curl_msnprintf

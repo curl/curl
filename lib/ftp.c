@@ -61,7 +61,7 @@
 #include "ftplistparser.h"
 #include "curl_sec.h"
 #include "strtoofft.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "vtls/vtls.h"
 #include "connect.h"
 #include "strerror.h"
@@ -2999,7 +2999,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
 
         /* Check for special servers here. */
 
-        if(strequal(os, "OS/400")) {
+        if(strcasecompare(os, "OS/400")) {
           /* Force OS400 name format 1. */
           result = Curl_pp_sendf(&ftpc->pp, "%s", "SITE NAMEFMT 1");
           if(result) {
@@ -4320,7 +4320,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       return CURLE_OUT_OF_MEMORY;
 
     /* we have a special case for listing the root dir only */
-    if(strequal(path_to_use, "/")) {
+    if(!strcmp(path_to_use, "/")) {
       cur_pos++; /* make it point to the zero byte */
       ftpc->dirs[0] = strdup("/");
       ftpc->dirdepth++;

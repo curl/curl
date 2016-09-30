@@ -50,7 +50,6 @@
 #include <sys/param.h>
 #endif
 
-#include "strequal.h"
 #include "urldata.h"
 #include <curl/curl.h>
 #include "transfer.h"

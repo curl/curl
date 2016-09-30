@@ -40,7 +40,7 @@ LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
 LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c       \
   ldap.c version.c getenv.c escape.c mprintf.c telnet.c netrc.c         \
-  getinfo.c transfer.c strequal.c easy.c security.c curl_fnmatch.c      \
+  getinfo.c transfer.c strcase.c easy.c security.c curl_fnmatch.c       \
   fileinfo.c ftplistparser.c wildcard.c krb5.c memdebug.c http_chunks.c \
   strtok.c connect.c llist.c hash.c multi.c content_encoding.c share.c  \
   http_digest.c md4.c md5.c http_negotiate.c inet_pton.c strtoofft.c    \
@@ -58,7 +58,7 @@ LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
 LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h if2ip.h         \
   speedcheck.h urldata.h curl_ldap.h escape.h telnet.h getinfo.h        \
-  strequal.h curl_sec.h memdebug.h http_chunks.h curl_fnmatch.h         \
+  strcase.h curl_sec.h memdebug.h http_chunks.h curl_fnmatch.h          \
   wildcard.h fileinfo.h ftplistparser.h strtok.h connect.h llist.h      \
   hash.h content_encoding.h share.h curl_md4.h curl_md5.h http_digest.h \
   http_negotiate.h inet_pton.h amigaos.h strtoofft.h strerror.h         \

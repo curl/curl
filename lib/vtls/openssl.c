@@ -46,7 +46,6 @@
 #include "openssl.h"
 #include "connect.h"
 #include "slist.h"
-#include "strequal.h"
 #include "select.h"
 #include "vtls.h"
 #include "rawstr.h"

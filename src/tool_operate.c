@@ -321,7 +321,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
   /* Single header file for all URLs */
   if(config->headerfile) {
     /* open file for output: */
-    if(!curlx_strequal(config->headerfile, "-")) {
+    if(strcmp(config->headerfile, "-")) {
       FILE *newfile = fopen(config->headerfile, "wb");
       if(!newfile) {
         warnf(config->global, "Failed to open %s\n", config->headerfile);
@@ -464,7 +464,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         urlnum = 1; /* without globbing, this is a single URL */
 
       /* if multiple files extracted to stdout, insert separators! */
-      separator= ((!outfiles || curlx_strequal(outfiles, "-")) && urlnum > 1);
+      separator= ((!outfiles || !strcmp(outfiles, "-")) && urlnum > 1);
 
       /* Here's looping around each globbed URL */
       for(li = 0 ; li < urlnum; li++) {
@@ -534,7 +534,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
 
         if(((urlnode->flags&GETOUT_USEREMOTE) ||
-            (outfile && !curlx_strequal("-", outfile))) &&
+            (outfile && strcmp("-", outfile))) &&
            (metalink || !config->use_metalink)) {
 
           /*
@@ -715,7 +715,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           DEBUGASSERT(infd == STDIN_FILENO);
 
           set_binmode(stdin);
-          if(curlx_strequal(uploadfile, ".")) {
+          if(!strcmp(uploadfile, ".")) {
             if(curlx_nonblock((curl_socket_t)infd, TRUE) < 0)
               warnf(config->global,
                     "fcntl failed on fd=%d: %s\n", infd, strerror(errno));
@@ -1559,7 +1559,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
               char *effective_url = NULL;
               curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
               if(effective_url &&
-                 curlx_strnequal(effective_url, "http", 4)) {
+                 curlx_strncasecompare(effective_url, "http", 4)) {
                 /* This was HTTP(S) */
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
                 if(response != 200 && response != 206) {
@@ -1842,8 +1842,8 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 
   /* Parse .curlrc if necessary */
   if((argc == 1) ||
-     (!curlx_strequal(argv[1], "-q") &&
-      !curlx_strequal(argv[1], "--disable"))) {
+     (!curlx_strcasecompare(argv[1], "-q") &&
+      !curlx_strcasecompare(argv[1], "--disable"))) {
     parseconfig(NULL, config); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .curlrc */

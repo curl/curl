@@ -79,7 +79,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "sendf.h"
 #include "progress.h"
 #include "cookie.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "strerror.h"
 #include "escape.h"
 #include "strtok.h"
@@ -2610,7 +2610,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
       data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
   case CURLOPT_TLSAUTH_TYPE:
-    if(strnequal((char *)va_arg(param, char *), "SRP", strlen("SRP")))
+    if(strncasecompare((char *)va_arg(param, char *), "SRP", strlen("SRP")))
       data->set.ssl.authtype = CURL_TLSAUTH_SRP;
     else
       data->set.ssl.authtype = CURL_TLSAUTH_NONE;
@@ -5422,7 +5422,8 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
     if(!hostname_to_match)
       return CURLE_OUT_OF_MEMORY;
     hostname_to_match_len = strlen(hostname_to_match);
-    host_match = curl_strnequal(ptr, hostname_to_match, hostname_to_match_len);
+    host_match = strncasecompare(ptr, hostname_to_match,
+                                 hostname_to_match_len);
     free(hostname_to_match);
     ptr += hostname_to_match_len;
 

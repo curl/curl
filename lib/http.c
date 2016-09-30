@@ -53,7 +53,6 @@
 #include "progress.h"
 #include "curl_base64.h"
 #include "cookie.h"
-#include "strequal.h"
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"
 #include "http_digest.h"

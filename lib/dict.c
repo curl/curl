@@ -54,7 +54,6 @@
 #include "sendf.h"
 #include "escape.h"
 #include "progress.h"
-#include "strequal.h"
 #include "dict.h"
 #include "rawstr.h"
 #include "curl_memory.h"
