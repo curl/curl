@@ -78,7 +78,6 @@
 #include "select.h"
 #include "multiif.h"
 #include "url.h"
-#include "rawstr.h"
 #include "curl_sasl.h"
 #include "curl_md5.h"
 #include "warnless.h"

@@ -21,34 +21,100 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-
 #include "strcase.h"
 
+/* Portable, consistent toupper (remember EBCDIC). Do not use toupper() because
+   its behavior is altered by the current locale. */
+char Curl_raw_toupper(char in)
+{
+#if !defined(CURL_DOES_CONVERSIONS)
+  if(in >= 'a' && in <= 'z')
+    return (char)('A' + in - 'a');
+#else
+  switch (in) {
+  case 'a':
+    return 'A';
+  case 'b':
+    return 'B';
+  case 'c':
+    return 'C';
+  case 'd':
+    return 'D';
+  case 'e':
+    return 'E';
+  case 'f':
+    return 'F';
+  case 'g':
+    return 'G';
+  case 'h':
+    return 'H';
+  case 'i':
+    return 'I';
+  case 'j':
+    return 'J';
+  case 'k':
+    return 'K';
+  case 'l':
+    return 'L';
+  case 'm':
+    return 'M';
+  case 'n':
+    return 'N';
+  case 'o':
+    return 'O';
+  case 'p':
+    return 'P';
+  case 'q':
+    return 'Q';
+  case 'r':
+    return 'R';
+  case 's':
+    return 'S';
+  case 't':
+    return 'T';
+  case 'u':
+    return 'U';
+  case 'v':
+    return 'V';
+  case 'w':
+    return 'W';
+  case 'x':
+    return 'X';
+  case 'y':
+    return 'Y';
+  case 'z':
+    return 'Z';
+  }
+#endif
+
+  return in;
+}
+
 /*
+ * Curl_raw_equal() is for doing "raw" case insensitive strings. This is meant
+ * to be locale independent and only compare strings we know are safe for
+ * this.  See https://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for
+ * some further explanation to why this function is necessary.
+ *
+ * The function is capable of comparing a-z case insensitively even for
+ * non-ascii.
+ *
  * @unittest: 1301
  */
+
 int curl_strcasecompare(const char *first, const char *second)
 {
-#if defined(HAVE_STRCASECMP)
-  return !(strcasecmp)(first, second);
-#elif defined(HAVE_STRCMPI)
-  return !(strcmpi)(first, second);
-#elif defined(HAVE_STRICMP)
-  return !(stricmp)(first, second);
-#else
   while(*first && *second) {
-    if(toupper(*first) != toupper(*second)) {
+    if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
+      /* get out of the loop as soon as they don't match */
       break;
-    }
     first++;
     second++;
   }
-  return toupper(*first) == toupper(*second);
-#endif
+  /* we do the comparison here (possibly again), just to make sure that if the
+     loop above is skipped because one of the strings reached zero, we must not
+     return this as a successful match */
+  return (Curl_raw_toupper(*first) == Curl_raw_toupper(*second));
 }
 
 /*
@@ -56,15 +122,8 @@ int curl_strcasecompare(const char *first, const char *second)
  */
 int curl_strncasecompare(const char *first, const char *second, size_t max)
 {
-#if defined(HAVE_STRNCASECMP)
-  return !strncasecmp(first, second, max);
-#elif defined(HAVE_STRNCMPI)
-  return !strncmpi(first, second, max);
-#elif defined(HAVE_STRNICMP)
-  return !strnicmp(first, second, max);
-#else
   while(*first && *second && max) {
-    if(toupper(*first) != toupper(*second)) {
+    if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second)) {
       break;
     }
     max--;
@@ -74,6 +133,20 @@ int curl_strncasecompare(const char *first, const char *second, size_t max)
   if(0 == max)
     return 1; /* they are equal this far */
 
-  return toupper(*first) == toupper(*second);
-#endif
+  return Curl_raw_toupper(*first) == Curl_raw_toupper(*second);
+}
+
+/* Copy an upper case version of the string from src to dest.  The
+ * strings may overlap.  No more than n characters of the string are copied
+ * (including any NUL) and the destination string will NOT be
+ * NUL-terminated if that limit is reached.
+ */
+void Curl_strntoupper(char *dest, const char *src, size_t n)
+{
+  if(n < 1)
+    return;
+
+  do {
+    *dest++ = Curl_raw_toupper(*src);
+  } while(*src++ && --n);
 }

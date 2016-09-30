@@ -42,7 +42,6 @@
 #include "curl_sasl.h"
 #include "warnless.h"
 #include "strtok.h"
-#include "rawstr.h"
 #include "sendf.h"
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
 /* The last 3 #include files should be in this order */

@@ -28,10 +28,8 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
-
 #include "progress.h"
 #include "gopher.h"
-#include "rawstr.h"
 #include "select.h"
 #include "url.h"
 #include "escape.h"

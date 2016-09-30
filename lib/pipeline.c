@@ -31,7 +31,7 @@
 #include "multiif.h"
 #include "pipeline.h"
 #include "sendf.h"
-#include "rawstr.h"
+#include "strcase.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -177,7 +177,7 @@ bool Curl_pipeline_site_blacklisted(struct Curl_easy *handle,
         struct site_blacklist_entry *site;
 
         site = curr->ptr;
-        if(Curl_raw_equal(site->hostname, conn->host.name) &&
+        if(strcasecompare(site->hostname, conn->host.name) &&
            site->port == conn->remote_port) {
           infof(handle, "Site %s:%d is pipeline blacklisted\n",
                 conn->host.name, conn->remote_port);
@@ -269,7 +269,7 @@ bool Curl_pipeline_server_blacklisted(struct Curl_easy *handle,
         char *bl_server_name;
 
         bl_server_name = curr->ptr;
-        if(Curl_raw_nequal(bl_server_name, server_name,
+        if(strncasecompare(bl_server_name, server_name,
                            strlen(bl_server_name))) {
           infof(handle, "Server %s is blacklisted\n", server_name);
           return TRUE;

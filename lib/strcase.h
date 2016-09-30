@@ -24,11 +24,27 @@
 
 #include <curl/curl.h>
 
+/*
+ * Only "raw" case insensitive strings. This is meant to be locale independent
+ * and only compare strings we know are safe for this.
+ *
+ * The function is capable of comparing a-z case insensitively even for
+ * non-ascii.
+ */
+
 #define strcasecompare(a,b) curl_strcasecompare(a,b)
 #define strncasecompare(a,b,c) curl_strncasecompare(a,b,c)
 
 int curl_strcasecompare(const char *first, const char *second);
 int curl_strncasecompare(const char *first, const char *second, size_t max);
 
+char Curl_raw_toupper(char in);
+
+/* checkprefix() is a shorter version of the above, used when the first
+   argument is zero-byte terminated */
+#define checkprefix(a,b)    strncasecompare(a,b,strlen(a))
+
+void Curl_strntoupper(char *dest, const char *src, size_t n);
+char Curl_raw_toupper(char in);
 
 #endif /* HEADER_CURL_STRCASE_H */

@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -89,7 +89,7 @@ CURLcode get_libcurl_info(void)
   if(curlinfo->protocols) {
     for(proto = curlinfo->protocols; *proto; proto++) {
       for(p = possibly_built_in; p->proto_name; p++) {
-        if(curlx_raw_equal(*proto, p->proto_name)) {
+        if(curlx_strcasecompare(*proto, p->proto_name)) {
           built_in_protos |= p->proto_pattern;
           break;
         }

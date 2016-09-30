@@ -25,7 +25,7 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 
 #include "urldata.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "vauth/vauth.h"
 #include "http_digest.h"
 /* The last 3 #include files should be in this order */

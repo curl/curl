@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -92,7 +92,7 @@ struct win32_crypto_hash {
 #  error "Can't compile METALINK support without a crypto library."
 #endif
 
-#include "rawstr.h"
+#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -747,7 +747,7 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
         ++digest_alias) {
       metalink_checksum_t **p;
       for(p = fileinfo->checksums; *p; ++p) {
-        if(Curl_raw_equal(digest_alias->alias_name, (*p)->type) &&
+        if(strcasecompare(digest_alias->alias_name, (*p)->type) &&
            check_hex_digest((*p)->hash, digest_alias->digest_def)) {
           f->checksum =
             new_metalink_checksum_from_hex_digest(digest_alias->digest_def,
@@ -777,10 +777,10 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
          metainfo file URL may be appeared in fileinfo->metaurls.
       */
       if((*p)->type == NULL ||
-         Curl_raw_equal((*p)->type, "http") ||
-         Curl_raw_equal((*p)->type, "https") ||
-         Curl_raw_equal((*p)->type, "ftp") ||
-         Curl_raw_equal((*p)->type, "ftps")) {
+         strcasecompare((*p)->type, "http") ||
+         strcasecompare((*p)->type, "https") ||
+         strcasecompare((*p)->type, "ftp") ||
+         strcasecompare((*p)->type, "ftps")) {
         res = new_metalink_resource((*p)->url);
         tail->next = res;
         tail = res;
@@ -906,7 +906,7 @@ static int check_content_type(const char *content_type, const char *media_type)
   if(!*ptr) {
     return 0;
   }
-  return Curl_raw_nequal(ptr, media_type, media_type_len) &&
+  return strncasecompare(ptr, media_type, media_type_len) &&
     (*(ptr+media_type_len) == '\0' || *(ptr+media_type_len) == ' ' ||
      *(ptr+media_type_len) == '\t' || *(ptr+media_type_len) == ';');
 }

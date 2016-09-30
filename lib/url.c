@@ -91,7 +91,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "multiif.h"
 #include "easyif.h"
 #include "speedcheck.h"
-#include "rawstr.h"
 #include "warnless.h"
 #include "non-ascii.h"
 #include "inet_pton.h"
@@ -1221,23 +1220,23 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     if(argptr == NULL)
       break;
 
-    if(Curl_raw_equal(argptr, "ALL")) {
+    if(strcasecompare(argptr, "ALL")) {
       /* clear all cookies */
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       Curl_cookie_clearall(data->cookies);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
-    else if(Curl_raw_equal(argptr, "SESS")) {
+    else if(strcasecompare(argptr, "SESS")) {
       /* clear session cookies */
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       Curl_cookie_clearsess(data->cookies);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
-    else if(Curl_raw_equal(argptr, "FLUSH")) {
+    else if(strcasecompare(argptr, "FLUSH")) {
       /* flush cookies to file, takes care of the locking */
       Curl_flush_cookies(data, 0);
     }
-    else if(Curl_raw_equal(argptr, "RELOAD")) {
+    else if(strcasecompare(argptr, "RELOAD")) {
       /* reload cookies from file */
       Curl_cookie_loadfiles(data);
       break;
@@ -3351,7 +3350,7 @@ ConnectionExists(struct Curl_easy *data,
          (needle->proxytype != check->proxytype ||
           needle->bits.httpproxy != check->bits.httpproxy ||
           needle->bits.tunnel_proxy != check->bits.tunnel_proxy ||
-          !Curl_raw_equal(needle->proxy.name, check->proxy.name) ||
+          !strcasecompare(needle->proxy.name, check->proxy.name) ||
           needle->port != check->port))
         /* don't mix connections that use different proxies */
         continue;
@@ -3406,14 +3405,14 @@ ConnectionExists(struct Curl_easy *data,
         /* The requested connection does not use a HTTP proxy or it uses SSL or
            it is a non-SSL protocol tunneled over the same HTTP proxy name and
            port number */
-        if((Curl_raw_equal(needle->handler->scheme, check->handler->scheme) ||
+        if((strcasecompare(needle->handler->scheme, check->handler->scheme) ||
             (get_protocol_family(check->handler->protocol) ==
              needle->handler->protocol && check->tls_upgraded)) &&
-           (!needle->bits.conn_to_host || Curl_raw_equal(
+           (!needle->bits.conn_to_host || strcasecompare(
             needle->conn_to_host.name, check->conn_to_host.name)) &&
            (!needle->bits.conn_to_port ||
              needle->conn_to_port == check->conn_to_port) &&
-           Curl_raw_equal(needle->host.name, check->host.name) &&
+           strcasecompare(needle->host.name, check->host.name) &&
            needle->remote_port == check->remote_port) {
           /* The schemes match or the the protocol family is the same and the
              previous connection was TLS upgraded, and the hostname and host
@@ -3982,7 +3981,7 @@ static CURLcode findprotocol(struct Curl_easy *data,
      variables based on the URL. Now that the handler may be changed later
      when the protocol specific setup function is called. */
   for(pp = protocols; (p = *pp) != NULL; pp++) {
-    if(Curl_raw_equal(p->scheme, protostr)) {
+    if(strcasecompare(p->scheme, protostr)) {
       /* Protocol found in table. Check if allowed */
       if(!(data->set.allowed_protocols & p->protocol))
         /* nope, get out */
@@ -4051,7 +4050,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
    ************************************************************/
   if((2 == sscanf(data->change.url, "%15[^:]:%[^\n]",
                   protobuf, path)) &&
-     Curl_raw_equal(protobuf, "file")) {
+     strcasecompare(protobuf, "file")) {
     if(path[0] == '/' && path[1] == '/') {
       /* Allow omitted hostname (e.g. file:/<path>).  This is not strictly
        * speaking a valid file: URL by RFC 1738, but treating file:/<path> as
@@ -4491,7 +4490,7 @@ static bool check_noproxy(const char* name, const char* no_proxy)
   char *endptr;
 
   if(no_proxy && no_proxy[0]) {
-    if(Curl_raw_equal("*", no_proxy)) {
+    if(strcasecompare("*", no_proxy)) {
       return TRUE;
     }
 
@@ -4529,7 +4528,7 @@ static bool check_noproxy(const char* name, const char* no_proxy)
       if((tok_end - tok_start) <= namelen) {
         /* Match the last part of the name to the domain we are checking. */
         const char *checkn = name + namelen - (tok_end - tok_start);
-        if(Curl_raw_nequal(no_proxy + tok_start, checkn,
+        if(strncasecompare(no_proxy + tok_start, checkn,
                            tok_end - tok_start)) {
           if((tok_end - tok_start) == namelen || *(checkn - 1) == '.') {
             /* We either have an exact match, or the previous character is a .
@@ -4608,7 +4607,7 @@ static char *detect_proxy(struct connectdata *conn)
      * This can cause 'internal' http/ftp requests to be
      * arbitrarily redirected by any external attacker.
      */
-    if(!prox && !Curl_raw_equal("http_proxy", proxy_env)) {
+    if(!prox && !strcasecompare("http_proxy", proxy_env)) {
       /* There was no lowercase variable, try the uppercase version: */
       Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
       prox=curl_getenv(proxy_env);
@@ -5998,7 +5997,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Do this after the hostnames have been IDN-fixed .
    *************************************************************/
   if(conn->bits.conn_to_host &&
-      Curl_raw_equal(conn->conn_to_host.name, conn->host.name)) {
+     strcasecompare(conn->conn_to_host.name, conn->host.name)) {
     conn->bits.conn_to_host = FALSE;
   }
 

@@ -55,7 +55,7 @@
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
 #include "url.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "speedcheck.h"
 #include "select.h"
 #include "escape.h"

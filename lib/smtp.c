@@ -77,7 +77,6 @@
 #include "select.h"
 #include "multiif.h"
 #include "url.h"
-#include "rawstr.h"
 #include "curl_gethostname.h"
 #include "curl_sasl.h"
 #include "warnless.h"

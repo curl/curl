@@ -60,7 +60,7 @@
 #include "curl_sec.h"
 #include "ftp.h"
 #include "sendf.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "warnless.h"
 
 /* The last #include file should be: */

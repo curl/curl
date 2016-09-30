@@ -55,7 +55,7 @@
 #include "escape.h"
 #include "progress.h"
 #include "dict.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -144,9 +144,9 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
     /* AUTH is missing */
   }
 
-  if(Curl_raw_nequal(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
-      Curl_raw_nequal(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
-      Curl_raw_nequal(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
+  if(strncasecompare(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
+     strncasecompare(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
+     strncasecompare(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
 
     word = strchr(path, ':');
     if(word) {
@@ -202,9 +202,9 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
     Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                         -1, NULL); /* no upload */
   }
-  else if(Curl_raw_nequal(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
-           Curl_raw_nequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
-           Curl_raw_nequal(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
+  else if(strncasecompare(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
+          strncasecompare(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
+          strncasecompare(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
 
     word = strchr(path, ':');
     if(word) {

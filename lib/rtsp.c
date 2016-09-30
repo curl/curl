@@ -33,7 +33,7 @@
 #include "url.h"
 #include "progress.h"
 #include "rtsp.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "select.h"
 #include "connect.h"
 /* The last 3 #include files should be in this order */

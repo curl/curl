@@ -61,7 +61,7 @@
 #include "vtls.h" /* generic SSL protos etc */
 #include "slist.h"
 #include "sendf.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "url.h"
 #include "progress.h"
 #include "share.h"
@@ -84,7 +84,7 @@ static bool safe_strequal(char* str1, char* str2)
 {
   if(str1 && str2)
     /* both pointers point to something then compare them */
-    return (0 != Curl_raw_equal(str1, str2)) ? TRUE : FALSE;
+    return (0 != strcasecompare(str1, str2)) ? TRUE : FALSE;
   else
     /* if both pointers are NULL then treat them as equal */
     return (!str1 && !str2) ? TRUE : FALSE;
@@ -390,15 +390,15 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
     if(!check->sessionid)
       /* not session ID means blank entry */
       continue;
-    if(Curl_raw_equal(conn->host.name, check->name) &&
+    if(strcasecompare(conn->host.name, check->name) &&
        ((!conn->bits.conn_to_host && !check->conn_to_host) ||
-         (conn->bits.conn_to_host && check->conn_to_host &&
-           Curl_raw_equal(conn->conn_to_host.name, check->conn_to_host))) &&
+        (conn->bits.conn_to_host && check->conn_to_host &&
+         strcasecompare(conn->conn_to_host.name, check->conn_to_host))) &&
        ((!conn->bits.conn_to_port && check->conn_to_port == -1) ||
-         (conn->bits.conn_to_port && check->conn_to_port != -1 &&
-           conn->conn_to_port == check->conn_to_port)) &&
+        (conn->bits.conn_to_port && check->conn_to_port != -1 &&
+         conn->conn_to_port == check->conn_to_port)) &&
        (conn->remote_port == check->remote_port) &&
-       Curl_raw_equal(conn->handler->scheme, check->scheme) &&
+       strcasecompare(conn->handler->scheme, check->scheme) &&
        Curl_ssl_config_matches(&conn->ssl_config, &check->ssl_config)) {
       /* yes, we have a session ID! */
       (*general_age)++;          /* increase general age */

@@ -80,7 +80,7 @@
 #endif
 
 #include <curl/curl.h>
-#include "rawstr.h"
+#include "strcase.h"
 #include "warnless.h"
 #include "parsedate.h"
 
@@ -211,7 +211,7 @@ static int checkday(const char *check, size_t len)
   else
     what = &Curl_wkday[0];
   for(i=0; i<7; i++) {
-    if(Curl_raw_equal(check, what[0])) {
+    if(strcasecompare(check, what[0])) {
       found=TRUE;
       break;
     }
@@ -228,7 +228,7 @@ static int checkmonth(const char *check)
 
   what = &Curl_month[0];
   for(i=0; i<12; i++) {
-    if(Curl_raw_equal(check, what[0])) {
+    if(strcasecompare(check, what[0])) {
       found=TRUE;
       break;
     }
@@ -248,7 +248,7 @@ static int checktz(const char *check)
 
   what = tz;
   for(i=0; i< sizeof(tz)/sizeof(tz[0]); i++) {
-    if(Curl_raw_equal(check, what->name)) {
+    if(strcasecompare(check, what->name)) {
       found=TRUE;
       break;
     }

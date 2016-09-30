@@ -43,7 +43,7 @@
 #  include <fabdef.h>
 #endif
 
-#include "rawstr.h"
+#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */

@@ -46,7 +46,7 @@ LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   http_digest.c md4.c md5.c http_negotiate.c inet_pton.c strtoofft.c    \
   strerror.c amigaos.c hostasyn.c hostip4.c hostip6.c hostsyn.c         \
   inet_ntop.c parsedate.c select.c tftp.c splay.c strdup.c socks.c      \
-  ssh.c rawstr.c curl_addrinfo.c socks_gssapi.c socks_sspi.c            \
+  ssh.c curl_addrinfo.c socks_gssapi.c socks_sspi.c            \
   curl_sspi.c slist.c nonblock.c curl_memrchr.c imap.c pop3.c smtp.c    \
   pingpong.c rtsp.c curl_threads.c warnless.c hmac.c curl_rtmp.c        \
   openldap.c curl_gethostname.c gopher.c idn_win32.c                    \
@@ -64,7 +64,7 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   http_negotiate.h inet_pton.h amigaos.h strtoofft.h strerror.h         \
   inet_ntop.h curlx.h curl_memory.h curl_setup.h transfer.h select.h    \
   easyif.h multiif.h parsedate.h tftp.h sockaddr.h splay.h strdup.h     \
-  socks.h ssh.h curl_base64.h rawstr.h curl_addrinfo.h curl_sspi.h      \
+  socks.h ssh.h curl_base64.h curl_addrinfo.h curl_sspi.h      \
   slist.h nonblock.h curl_memrchr.h imap.h pop3.h smtp.h pingpong.h     \
   rtsp.h curl_threads.h warnless.h curl_hmac.h curl_rtmp.h              \
   curl_gethostname.h gopher.h http_proxy.h non-ascii.h asyn.h           \

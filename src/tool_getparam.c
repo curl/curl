@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -419,7 +419,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       if(curlx_strncasecompare(aliases[j].lname, word, fnam)) {
         longopt = TRUE;
         numhits++;
-        if(curlx_raw_equal(aliases[j].lname, word)) {
+        if(curlx_strcasecompare(aliases[j].lname, word)) {
           parse = aliases[j].letter;
           hit = j;
           numhits = 1; /* a single unique hit */
@@ -1343,7 +1343,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
-        if(config->engine && curlx_raw_equal(config->engine, "list"))
+        if(config->engine && curlx_strcasecompare(config->engine, "list"))
           return PARAM_ENGINES_REQUESTED;
         break;
       case 'g': /* CA info PEM file */
