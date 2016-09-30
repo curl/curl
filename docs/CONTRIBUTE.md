@@ -153,7 +153,7 @@ We prefer pull requests to mailed patches, as it makes it a proper git commit
 that is easy to merge and they are easy to track and not that easy to loose
 in a flood of many emails, like they sometimes do on the mailing lists.
 
-When you ajust your pull requests after review, consider squashing the
+When you adjust your pull requests after review, consider squashing the
 commits so that we can review the full updated version more easily.
 
 ### Making quality patches
