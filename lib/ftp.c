@@ -4415,7 +4415,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 
     dlen -= ftpc->file?strlen(ftpc->file):0;
     if((dlen == strlen(ftpc->prevpath)) &&
-       strnequal(path, ftpc->prevpath, dlen)) {
+       !strncmp(path, ftpc->prevpath, dlen)) {
       infof(data, "Request has same path as previous transfer\n");
       ftpc->cwddone = TRUE;
     }
