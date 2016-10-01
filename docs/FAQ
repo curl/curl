@@ -1385,14 +1385,14 @@ FAQ
   member function that is passed a pointer to the class:
 
      // f is the pointer to your object.
-     static YourClass::func(void *buffer, size_t sz, size_t n, void *f)
+     static size_t YourClass::func(void *buffer, size_t sz, size_t n, void *f)
      {
        // Call non-static member function.
        static_cast<YourClass*>(f)->nonStaticFunction();
      }
 
      // This is how you pass pointer to the static function:
-     curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass:func);
+     curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass::func);
      curl_easy_setopt(hcurl, CURLOPT_WRITEDATA, this);
 
   5.15 How do I get an FTP directory listing?
