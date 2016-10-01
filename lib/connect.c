@@ -130,9 +130,6 @@ tcpkeepalive(struct Curl_easy *data,
       infof(data, "Failed to set SIO_KEEPALIVE_VALS on fd %d: %d\n",
             (int)sockfd, WSAGetLastError());
     }
-#elif defined(CURL_WINDOWS_APP)
-    (void)majorVersion;
-    detectOsState = DETECT_OS_VISTA_OR_LATER;
 #else
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
