@@ -431,6 +431,7 @@ CURLcode glob_url(URLGlob** glob, char* url, unsigned long *urlnum,
   glob_buffer = malloc(strlen(url) + 1);
   if(!glob_buffer)
     return CURLE_OUT_OF_MEMORY;
+  glob_buffer[0]=0;
 
   glob_expand = calloc(1, sizeof(URLGlob));
   if(!glob_expand) {
@@ -548,20 +549,25 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
     switch(pat->type) {
     case UPTSet:
       if(pat->content.Set.elements) {
-        len = strlen(pat->content.Set.elements[pat->content.Set.ptr_s]);
         snprintf(buf, buflen, "%s",
                  pat->content.Set.elements[pat->content.Set.ptr_s]);
+        len = strlen(buf);
         buf += len;
         buflen -= len;
       }
       break;
     case UPTCharRange:
-      *buf++ = pat->content.CharRange.ptr_c;
+      if(buflen) {
+        *buf++ = pat->content.CharRange.ptr_c;
+        *buf = '\0';
+        buflen--;
+      }
       break;
     case UPTNumRange:
-      len = snprintf(buf, buflen, "%0*ld",
-                     pat->content.NumRange.padlength,
-                     pat->content.NumRange.ptr_n);
+      snprintf(buf, buflen, "%0*ld",
+               pat->content.NumRange.padlength,
+               pat->content.NumRange.ptr_n);
+      len = strlen(buf);
       buf += len;
       buflen -= len;
       break;
@@ -570,7 +576,6 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
       return CURLE_FAILED_INIT;
     }
   }
-  *buf = '\0';
 
   *globbed = strdup(glob->glob_buffer);
   if(!*globbed)
