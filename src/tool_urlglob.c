@@ -257,6 +257,12 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
         endp = NULL;
       else {
         pattern = endp+1;
+        while(*pattern && ISBLANK(*pattern))
+          pattern++;
+        if(!ISDIGIT(*pattern)) {
+          endp = NULL;
+          goto fail;
+        }
         errno = 0;
         max_n = strtoul(pattern, &endp, 10);
         if(errno || (*endp == ':')) {
@@ -277,6 +283,7 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
       }
     }
 
+    fail:
     *posp += (pattern - *patternp);
 
     if(!endp || (min_n > max_n) || (step_n > (max_n - min_n)) || !step_n)
