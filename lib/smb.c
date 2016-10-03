@@ -673,7 +673,7 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
 
   switch(smbc->state) {
   case SMB_NEGOTIATE:
-    if(h->status) {
+    if(h->status || smbc->got < sizeof(*nrsp) + sizeof(smbc->challenge) - 1) {
       connclose(conn, "SMB: negotiation failed");
       return CURLE_COULDNT_CONNECT;
     }
@@ -712,6 +712,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
 {
   struct smb_request *req = conn->data->req.protop;
   struct smb_header *h;
+  struct smb_conn *smbc = &conn->proto.smbc;
   enum smb_req_state next_state = SMB_DONE;
   unsigned short len;
   unsigned short off;
@@ -754,7 +755,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
     break;
 
   case SMB_OPEN:
-    if(h->status) {
+    if(h->status || smbc->got < sizeof(struct smb_nt_create_response)) {
       req->result = CURLE_REMOTE_FILE_NOT_FOUND;
       next_state = SMB_TREE_DISCONNECT;
       break;
@@ -775,7 +776,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
     break;
 
   case SMB_DOWNLOAD:
-    if(h->status) {
+    if(h->status || smbc->got < sizeof(struct smb_header) + 14) {
       req->result = CURLE_RECV_ERROR;
       next_state = SMB_CLOSE;
       break;
@@ -785,7 +786,6 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
     off = Curl_read16_le(((unsigned char *) msg) +
                          sizeof(struct smb_header) + 13);
     if(len > 0) {
-      struct smb_conn *smbc = &conn->proto.smbc;
       if(off + sizeof(unsigned int) + len > smbc->got) {
         failf(conn->data, "Invalid input packet");
         result = CURLE_RECV_ERROR;
@@ -807,7 +807,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
     break;
 
   case SMB_UPLOAD:
-    if(h->status) {
+    if(h->status || smbc->got < sizeof(struct smb_header) + 6) {
       req->result = CURLE_UPLOAD_FAILED;
       next_state = SMB_CLOSE;
       break;
