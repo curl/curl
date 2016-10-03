@@ -817,7 +817,8 @@ Curl_cookie_add(struct Curl_easy *data,
       /* the names are identical */
 
       if(clist->domain && co->domain) {
-        if(Curl_raw_equal(clist->domain, co->domain))
+        if(Curl_raw_equal(clist->domain, co->domain) &&
+          (clist->tailmatch == co->tailmatch))
           /* The domains are identical */
           replace_old=TRUE;
       }
