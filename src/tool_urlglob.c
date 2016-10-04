@@ -188,32 +188,36 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
     /* character range detected */
     char min_c;
     char max_c;
+    char end_c;
     int step=1;
 
     pat->type = UPTCharRange;
 
-    rc = sscanf(pattern, "%c-%c", &min_c, &max_c);
+    rc = sscanf(pattern, "%c-%c%c", &min_c, &max_c, &end_c);
 
-    if((rc == 2) && (pattern[3] == ':')) {
-      char *endp;
-      unsigned long lstep;
-      errno = 0;
-      lstep = strtoul(&pattern[4], &endp, 10);
-      if(errno || (*endp != ']'))
-        step = -1;
-      else {
-        pattern = endp+1;
-        step = (int)lstep;
-        if(step > (max_c - min_c))
+    if(rc == 3) {
+      if(end_c == ':') {
+        char *endp;
+        unsigned long lstep;
+        errno = 0;
+        lstep = strtoul(&pattern[4], &endp, 10);
+        if(errno || (*endp != ']'))
           step = -1;
+        else {
+          pattern = endp+1;
+          step = (int)lstep;
+          if(step > (max_c - min_c))
+            step = -1;
+        }
       }
+      else if(end_c != ']')
+        /* then this is wrong */
+        rc = 0;
     }
-    else
-      pattern += 4;
 
     *posp += (pattern - *patternp);
 
-    if((rc != 2) || (min_c >= max_c) || ((max_c - min_c) > ('z' - 'a')) ||
+    if((rc != 3) || (min_c >= max_c) || ((max_c - min_c) > ('z' - 'a')) ||
        (step <= 0) )
       /* the pattern is not well-formed */
       return GLOBERROR("bad range", *posp, CURLE_URL_MALFORMAT);
