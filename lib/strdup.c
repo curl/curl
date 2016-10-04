@@ -65,9 +65,9 @@ char *curlx_strdup(const char *str)
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-char *Curl_memdup(const char *src, size_t length)
+void *Curl_memdup(const void *src, size_t length)
 {
-  char *buffer = malloc(length);
+  void *buffer = malloc(length);
   if(!buffer)
     return NULL; /* fail */
 
