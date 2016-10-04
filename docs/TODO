@@ -67,6 +67,7 @@
  5.6 Refuse "downgrade" redirects
  5.7 Brotli compression
  5.8 QUIC
+ 5.9 Add easy argument to formpost functions
 
  6. TELNET
  6.1 ditch stdin
@@ -539,6 +540,12 @@ This is not detailed in any FTP specification.
  implemented. This, to allow other projects to benefit from the work and to
  thus broaden the interest and chance of others to participate.
 
+5.9 Add easy argument to formpost functions
+
+ Make sure there's an easy handle passed in to `curl_formadd()`,
+ `curl_formget()` and `curl_formfree()` by adding replacement functions and
+ deprecating the old ones. Allows better error messages and is generally good
+ API hygiene.
 
 6. TELNET
 
