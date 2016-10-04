@@ -26,7 +26,8 @@ CURLOPT_KEEP_SENDING_ON_ERROR \- keep sending on early HTTP response >= 300
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_KEEP_SENDING_ON_ERROR, long keep_sending);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_KEEP_SENDING_ON_ERROR,
+                          long keep_sending);
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to keep sending the request body
 if the HTTP code returned is equal to or larger than 300. The default action
@@ -37,7 +38,6 @@ does not use \fICURLOPT_HTTPAUTH(3)\fP, but instead sets "Authorization: NTLM ..
 headers manually using \fICURLOPT_HTTPHEADER(3)\fP.
 
 Most applications do not need this option.
-
 .SH DEFAULT
 0, stop sending on error
 .SH PROTOCOLS
@@ -45,7 +45,7 @@ HTTP
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-Along with HTTP
+Along with HTTP. Added in 7.51.0.
 .SH RETURN VALUE
 Returns CURLE_OK if HTTP is enabled, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
