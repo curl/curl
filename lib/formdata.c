@@ -863,13 +863,6 @@ static CURLcode AddFormData(struct FormData **formp,
 
   newform->type = type;
 
-  if(*formp) {
-    (*formp)->next = newform;
-    *formp = newform;
-  }
-  else
-    *formp = newform;
-
   if(size) {
     if(type != FORM_FILE)
       /* for static content as well as callback data we add the size given
@@ -889,6 +882,14 @@ static CURLcode AddFormData(struct FormData **formp,
       }
     }
   }
+
+  if(*formp) {
+    (*formp)->next = newform;
+    *formp = newform;
+  }
+  else
+    *formp = newform;
+
   return CURLE_OK;
   error:
   if(newform)
