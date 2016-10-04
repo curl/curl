@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -40,7 +40,10 @@ will use strlen() on the input \fIurl\fP string to find out the size.
 
 If \fBoutlength\fP is non-NULL, the function will write the length of the
 returned string in the integer it points to. This allows an escaped string
-containing %00 to still get used properly after unescaping.
+containing %00 to still get used properly after unescaping. Since this is a
+pointer to an \fIint\fP type, it can only return a value up to INT_MAX so no
+longer string can be unescaped if the string length is returned in this
+parameter.
 
 You must \fIcurl_free(3)\fP the returned string when you're done with it.
 .SH AVAILABILITY

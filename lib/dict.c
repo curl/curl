@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -52,7 +52,7 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
-
+#include "escape.h"
 #include "progress.h"
 #include "strequal.h"
 #include "dict.h"
@@ -96,12 +96,12 @@ static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
   char *newp;
   char *dictp;
   char *ptr;
-  int len;
+  size_t len;
   char ch;
   int olen=0;
 
-  newp = curl_easy_unescape(data, inputbuff, 0, &len);
-  if(!newp)
+  CURLcode result = Curl_urldecode(data, inputbuff, 0, &newp, &len, FALSE);
+  if(!newp || result)
     return NULL;
 
   dictp = malloc(((size_t)len)*2 + 1); /* add one for terminating zero */
