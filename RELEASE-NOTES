@@ -9,6 +9,7 @@ Curl and libcurl 7.51.0
 This release includes the following changes:
 
  o nss: additional cipher suites are now accepted by CURLOPT_SSL_CIPHER_LIST
+ o New option: CURLOPT_KEEP_SENDING_ON_ERROR [10]
 
 This release includes the following bugfixes:
 
@@ -21,6 +22,14 @@ This release includes the following bugfixes:
  o CURLOPT_PINNEDPUBLICKEY.3: fix the AVAILABILITY formatting
  o openssl: don’t call CRYTPO_cleanup_all_ex_data [5]
  o libressl: fix version output [6]
+ o easy: Reset all statistical session info in curl_easy_reset [7]
+ o curl_global_cleanup.3: don't unload the lib with sub threads running [8]
+ o dist: add CurlSymbolHiding.cmake to the tarball
+ o docs: Remove that --proto is just used for initial retrieval [9]
+ o configure: Fixed builds with libssh2 in a custom location
+ o curl.1: --trace supports % for sending to stderr!
+ o cookies: same domain handling changed to match browser behavior [11]
+ o formpost: trying to attach a directory no longer crashes [12]
 
 This release includes the following known bugs:
 
@@ -29,9 +38,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Akshay Vernekar, Bernard Spil, Daniel Gustafsson, Daniel Stenberg,
-  lukaszgn on github, Nick Zitzmann, Ray Satiro, Todd Short, Tony Kelman,
-  (9 contributors)
+  Akshay Vernekar, Alexander Sinditskiy, Bernard Spil, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, Jeroen Ooms, Kamil Dudka,
+  lukaszgn on github, Michael Kaufmann, Nick Zitzmann, Ray Satiro,
+  Sebastian Mundry, Sergei Kuzmin, Stephen Brokenshire, Toby Peterson,
+  Todd Short, Tony Kelman,
+  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -43,3 +55,9 @@ References to bug reports and discussions on issues:
  [4] = https://curl.haxx.se/bug/?i=1011
  [5] = https://curl.haxx.se/mail/lib-2016-09/0045.html
  [6] = https://curl.haxx.se/bug/?i=1029
+ [7] = https://curl.haxx.se/bug/?i=1017
+ [8] = https://curl.haxx.se/bug/?i=997
+ [9] = https://curl.haxx.se/bug/?i=1031
+ [10] = https://curl.haxx.se/libcurl/c/CURLOPT_KEEP_SENDING_ON_ERROR.html
+ [11] = https://curl.haxx.se/bug/?i=1050
+ [12] = https://curl.haxx.se/bug/?i=1053
