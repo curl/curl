@@ -1024,6 +1024,40 @@ static int cookie_sort(const void *p1, const void *p2)
   return 0;
 }
 
+#define CLONE(field)                     \
+  do {                                   \
+    if(src->field) {                     \
+      dup->field = strdup(src->field);   \
+      if(!dup->field)                    \
+        goto fail;                       \
+    }                                    \
+  } while(0)
+
+static struct Cookie *dup_cookie(struct Cookie *src)
+{
+  struct Cookie *dup = calloc(sizeof(struct Cookie), 1);
+  if(dup) {
+    CLONE(expirestr);
+    CLONE(domain);
+    CLONE(path);
+    CLONE(spath);
+    CLONE(name);
+    CLONE(value);
+    CLONE(maxage);
+    CLONE(version);
+    dup->expires = src->expires;
+    dup->tailmatch = src->tailmatch;
+    dup->secure = src->secure;
+    dup->livecookie = src->livecookie;
+    dup->httponly = src->httponly;
+  }
+  return dup;
+
+  fail:
+  freecookie(dup);
+  return NULL;
+}
+
 /*****************************************************************************
  *
  * Curl_cookie_getlist()
@@ -1079,11 +1113,8 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
           /* and now, we know this is a match and we should create an
              entry for the return-linked-list */
 
-          newco = malloc(sizeof(struct Cookie));
+          newco = dup_cookie(co);
           if(newco) {
-            /* first, copy the whole source cookie: */
-            memcpy(newco, co, sizeof(struct Cookie));
-
             /* then modify our next */
             newco->next = mainco;
 
@@ -1095,12 +1126,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
           else {
             fail:
             /* failure, clear up the allocated chain and return NULL */
-            while(mainco) {
-              co = mainco->next;
-              free(mainco);
-              mainco = co;
-            }
-
+            Curl_cookie_freelist(mainco);
             return NULL;
           }
         }
@@ -1152,7 +1178,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 void Curl_cookie_clearall(struct CookieInfo *cookies)
 {
   if(cookies) {
-    Curl_cookie_freelist(cookies->cookies, TRUE);
+    Curl_cookie_freelist(cookies->cookies);
     cookies->cookies = NULL;
     cookies->numcookies = 0;
   }
@@ -1164,21 +1190,14 @@ void Curl_cookie_clearall(struct CookieInfo *cookies)
  *
  * Free a list of cookies previously returned by Curl_cookie_getlist();
  *
- * The 'cookiestoo' argument tells this function whether to just free the
- * list or actually also free all cookies within the list as well.
- *
  ****************************************************************************/
 
-void Curl_cookie_freelist(struct Cookie *co, bool cookiestoo)
+void Curl_cookie_freelist(struct Cookie *co)
 {
   struct Cookie *next;
   while(co) {
     next = co->next;
-    if(cookiestoo)
-      freecookie(co);
-    else
-      free(co); /* we only free the struct since the "members" are all just
-                   pointed out in the main cookie list! */
+    freecookie(co);
     co = next;
   }
 }
@@ -1233,7 +1252,7 @@ void Curl_cookie_cleanup(struct CookieInfo *c)
 {
   if(c) {
     free(c->filename);
-    Curl_cookie_freelist(c->cookies, TRUE);
+    Curl_cookie_freelist(c->cookies);
     free(c); /* free the base struct as well */
   }
 }

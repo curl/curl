@@ -2384,7 +2384,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         }
         co = co->next; /* next cookie please */
       }
-      Curl_cookie_freelist(store, FALSE); /* free the cookie list */
+      Curl_cookie_freelist(store);
     }
     if(addcookies && !result) {
       if(!count)
