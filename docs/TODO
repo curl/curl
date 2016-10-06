@@ -149,6 +149,7 @@
  18.12 keep running, read instructions from pipe/socket
  18.13 support metalink in http headers
  18.14 --fail without --location should treat 3xx as a failure
+ 18.15 Introduce --fail-fast to exit on first transfer fail
 
  19. Build
  19.1 roffit
@@ -985,6 +986,14 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  ... --fail must treat 3xx responses as failures too. The least problematic
  way to implement this is probably to add that new logic in the command line
  tool only and not in the underlying CURLOPT_FAILONERROR logic.
+
+18.15 Introduce --fail-fast to exit on first transfer fail
+
+ curl will transfer all URLs given on the command line one by one but only
+ returns the error code for the last transfer. Transfer failures on the first
+ ones will not be returned as error code etc to the shell. A --fail-fast
+ option would make curl exit and return an error for the first transfer that
+ fails.
 
 
 19. Build
