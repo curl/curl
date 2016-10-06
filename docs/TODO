@@ -69,6 +69,7 @@
  5.7 Brotli compression
  5.8 QUIC
  5.9 Add easy argument to formpost functions
+ 5.10 Leave secure cookies alone
 
  6. TELNET
  6.1 ditch stdin
@@ -553,6 +554,14 @@ This is not detailed in any FTP specification.
  `curl_formget()` and `curl_formfree()` by adding replacement functions and
  deprecating the old ones. Allows better error messages and is generally good
  API hygiene.
+
+5.10 Leave secure cookies alone
+
+ Non-secure origins (HTTP sites) should not be allowed to set or modify
+ cookies with the 'secure' property:
+
+ https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01
+
 
 6. TELNET
 
