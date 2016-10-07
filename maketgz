@@ -133,6 +133,14 @@ fi
 
 ############################################################################
 #
+# Modify the man pages to display the version number and date.
+#
+
+echo "update man pages"
+./scripts/updatemanpages.pl $version
+
+############################################################################
+#
 # Update the IDE files
 echo "make vc-ide"
 make -s vc-ide
