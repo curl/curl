@@ -154,6 +154,7 @@
 
  19. Build
  19.1 roffit
+ 19.2 Enable PIE and RELRO by default
 
  20. Test suite
  20.1 SSL tunnel
@@ -1013,6 +1014,19 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  Consider extending 'roffit' to produce decent ASCII output, and use that
  instead of (g)nroff when building src/tool_hugehelp.c
+
+19.2 Enable PIE and RELRO by default
+
+ Especially when having programs that execute cURL via the command line, PIE
+ renders the exploitation of memory corruption vulnerabilities a lot more
+ difficult. This can be attributed to the additional information leaks being
+ required to conduct a successful attack. RELRO, on the other hand, masks
+ different binary sections like the GOT as read-only and thus kills a handful
+ of techniques that come in handy when attackers are able to arbitrarily
+ overwrite memory. A few tests showed that enabling these features had close
+ to no impact, neither on the performance nor on the general functionality of
+ cURL.
+
 
 20. Test suite
 
