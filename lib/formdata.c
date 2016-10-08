@@ -845,16 +845,23 @@ static CURLcode AddFormData(struct FormData **formp,
       goto error;
     }
 #endif
+    if(type != FORM_DATAMEM) {
+      newform->line = malloc((size_t)length+1);
+      if(!newform->line) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto error;
+      }
+      alloc2 = newform->line;
+      memcpy(newform->line, line, (size_t)length);
 
-    newform->line = malloc((size_t)length+1);
-    if(!newform->line) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto error;
+      /* zero terminate for easier debugging */
+      newform->line[(size_t)length]=0;
     }
-    alloc2 = newform->line;
-    memcpy(newform->line, line, (size_t)length);
+    else {
+      newform->line = (char *)line;
+      type = FORM_DATA; /* in all other aspects this is just FORM_DATA */
+    }
     newform->length = (size_t)length;
-    newform->line[(size_t)length]=0; /* zero terminate for easier debugging */
   }
   else
     /* For callbacks and files we don't have any actual data so we just keep a
@@ -907,13 +914,21 @@ static CURLcode AddFormDataf(struct FormData **formp,
                              curl_off_t *size,
                              const char *fmt, ...)
 {
-  char s[4096];
+  char *s;
+  CURLcode result;
   va_list ap;
   va_start(ap, fmt);
-  vsnprintf(s, sizeof(s), fmt, ap);
+  s = curl_mvaprintf(fmt, ap);
   va_end(ap);
 
-  return AddFormData(formp, FORM_DATA, s, 0, size);
+  if(!s)
+    return CURLE_OUT_OF_MEMORY;
+
+  result = AddFormData(formp, FORM_DATAMEM, s, 0, size);
+  if(result)
+    free(s);
+
+  return result;
 }
 
 /*
