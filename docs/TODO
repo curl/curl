@@ -133,6 +133,7 @@
  17. SSH protocols
  17.1 Multiplexing
  17.2 SFTP performance
+ 17.3 Support better than MD5 hostkey hash
 
  18. Command line tool
  18.1 sync
@@ -863,6 +864,16 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  libcurl's SFTP transfer performance is sub par and can be improved, mostly by
  the approach mentioned in "1.6 Modified buffer size approach".
+
+17.3 Support better than MD5 hostkey hash
+
+ libcurl offers the CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 option for verifying the
+ server's key. MD5 is generally being deprecated so we should implement
+ support for stronger hashing algorithms. libssh2 itself is what provides this
+ underlying functionality and it supports at least SHA-1 as an alternative.
+ SHA-1 is also being deprecated these days so we should consider workign with
+ libssh2 to instead offer support for SHA-256 or similar.
+
 
 18. Command line tool
 
