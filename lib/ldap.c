@@ -767,7 +767,7 @@ static bool split_str(char *str, char ***out, size_t *count)
  *
  * Defined in RFC4516 section 2.
  */
-static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
+static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
 {
   int rc = LDAP_SUCCESS;
   char *path;
@@ -798,12 +798,13 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   if(*p) {
     char *dn = p;
     char *unescaped;
+    CURLcode result;
 
     LDAP_TRACE (("DN '%s'\n", dn));
 
     /* Unescape the DN */
-    unescaped = curl_easy_unescape(conn->data, dn, 0, NULL);
-    if(!unescaped) {
+    result = Curl_urldecode(conn->data, dn, 0, &unescaped, NULL, FALSE);
+    if(result) {
       rc = LDAP_NO_MEMORY;
 
       goto quit;
@@ -862,12 +863,14 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
     for(i = 0; i < count; i++) {
       char *unescaped;
+      CURLcode result;
 
       LDAP_TRACE (("attr[%d] '%s'\n", i, attributes[i]));
 
       /* Unescape the attribute */
-      unescaped = curl_easy_unescape(conn->data, attributes[i], 0, NULL);
-      if(!unescaped) {
+      result = Curl_urldecode(conn->data, attributes[i], 0, &unescaped, NULL,
+                              FALSE);
+      if(result) {
         free(attributes);
 
         rc = LDAP_NO_MEMORY;
@@ -930,12 +933,13 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   if(*p) {
     char *filter = p;
     char *unescaped;
+    CURLcode result;
 
     LDAP_TRACE (("filter '%s'\n", filter));
 
     /* Unescape the filter */
-    unescaped = curl_easy_unescape(conn->data, filter, 0, NULL);
-    if(!unescaped) {
+    result = Curl_urldecode(conn->data, filter, 0, &unescaped, NULL, FALSE);
+    if(result) {
       rc = LDAP_NO_MEMORY;
 
       goto quit;
@@ -971,8 +975,8 @@ quit:
   return rc;
 }
 
-static int _ldap_url_parse (const struct connectdata *conn,
-                            LDAPURLDesc **ludpp)
+static int _ldap_url_parse(const struct connectdata *conn,
+                           LDAPURLDesc **ludpp)
 {
   LDAPURLDesc *ludp = calloc(1, sizeof(*ludp));
   int rc;
@@ -981,7 +985,7 @@ static int _ldap_url_parse (const struct connectdata *conn,
   if(!ludp)
      return LDAP_NO_MEMORY;
 
-  rc = _ldap_url_parse2 (conn, ludp);
+  rc = _ldap_url_parse2(conn, ludp);
   if(rc != LDAP_SUCCESS) {
     _ldap_free_urldesc(ludp);
     ludp = NULL;
@@ -990,7 +994,7 @@ static int _ldap_url_parse (const struct connectdata *conn,
   return (rc);
 }
 
-static void _ldap_free_urldesc (LDAPURLDesc *ludp)
+static void _ldap_free_urldesc(LDAPURLDesc *ludp)
 {
   size_t i;
 

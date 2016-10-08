@@ -416,12 +416,12 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   char *real_path = NULL;
   char *working_path;
-  int working_path_len;
-
-  working_path = curl_easy_unescape(data, data->state.path, 0,
-                                    &working_path_len);
-  if(!working_path)
-    return CURLE_OUT_OF_MEMORY;
+  size_t working_path_len;
+  CURLcode result =
+    Curl_urldecode(data, data->state.path, 0, &working_path,
+                   &working_path_len, FALSE);
+  if(result)
+    return result;
 
   /* Check for /~/, indicating relative to the user's home directory */
   if(conn->handler->protocol & CURLPROTO_SCP) {

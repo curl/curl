@@ -4691,21 +4691,24 @@ static CURLcode parse_proxy(struct Curl_easy *data,
          them. */
       Curl_safefree(conn->proxyuser);
       if(proxyuser && strlen(proxyuser) < MAX_CURL_USER_LENGTH)
-        conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
-      else
-        conn->proxyuser = strdup("");
-
-      if(!conn->proxyuser)
-        result = CURLE_OUT_OF_MEMORY;
+        result = Curl_urldecode(data, proxyuser, 0, &conn->proxyuser, NULL,
+                                FALSE);
       else {
+        conn->proxyuser = strdup("");
+        if(!conn->proxyuser)
+          result = CURLE_OUT_OF_MEMORY;
+      }
+
+      if(!result) {
         Curl_safefree(conn->proxypasswd);
         if(proxypasswd && strlen(proxypasswd) < MAX_CURL_PASSWORD_LENGTH)
-          conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
-        else
+          result = Curl_urldecode(data, proxypasswd, 0,
+                                  &conn->proxypasswd, NULL, FALSE);
+        else {
           conn->proxypasswd = strdup("");
-
-        if(!conn->proxypasswd)
-          result = CURLE_OUT_OF_MEMORY;
+          if(!conn->proxypasswd)
+            result = CURLE_OUT_OF_MEMORY;
+        }
       }
 
       if(!result) {
@@ -4812,6 +4815,7 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
 {
   char proxyuser[MAX_CURL_USER_LENGTH]="";
   char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";
+  CURLcode result;
 
   if(data->set.str[STRING_PROXYUSERNAME] != NULL) {
     strncpy(proxyuser, data->set.str[STRING_PROXYUSERNAME],
@@ -4824,15 +4828,11 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
     proxypasswd[MAX_CURL_PASSWORD_LENGTH-1] = '\0'; /*To be on safe side*/
   }
 
-  conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
-  if(!conn->proxyuser)
-    return CURLE_OUT_OF_MEMORY;
-
-  conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
-  if(!conn->proxypasswd)
-    return CURLE_OUT_OF_MEMORY;
-
-  return CURLE_OK;
+  result = Curl_urldecode(data, proxyuser, 0, &conn->proxyuser, NULL, FALSE);
+  if(!result)
+    result = Curl_urldecode(data, proxypasswd, 0, &conn->proxypasswd, NULL,
+                            FALSE);
+  return result;
 }
 #endif /* CURL_DISABLE_PROXY */
 
@@ -4906,9 +4906,8 @@ static CURLcode parse_url_login(struct Curl_easy *data,
     conn->bits.user_passwd = TRUE; /* enable user+password */
 
     /* Decode the user */
-    newname = curl_easy_unescape(data, userp, 0, NULL);
-    if(!newname) {
-      result = CURLE_OUT_OF_MEMORY;
+    result = Curl_urldecode(data, userp, 0, &newname, NULL, FALSE);
+    if(result) {
       goto out;
     }
 
@@ -4918,9 +4917,9 @@ static CURLcode parse_url_login(struct Curl_easy *data,
 
   if(passwdp) {
     /* We have a password in the URL so decode it */
-    char *newpasswd = curl_easy_unescape(data, passwdp, 0, NULL);
-    if(!newpasswd) {
-      result = CURLE_OUT_OF_MEMORY;
+    char *newpasswd;
+    result = Curl_urldecode(data, passwdp, 0, &newpasswd, NULL, FALSE);
+    if(result) {
       goto out;
     }
 
@@ -4930,9 +4929,9 @@ static CURLcode parse_url_login(struct Curl_easy *data,
 
   if(optionsp) {
     /* We have an options list in the URL so decode it */
-    char *newoptions = curl_easy_unescape(data, optionsp, 0, NULL);
-    if(!newoptions) {
-      result = CURLE_OUT_OF_MEMORY;
+    char *newoptions;
+    result = Curl_urldecode(data, optionsp, 0, &newoptions, NULL, FALSE);
+    if(result) {
       goto out;
     }
 
