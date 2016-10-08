@@ -4091,8 +4091,7 @@ static CURLcode ftp_do(struct connectdata *conn, bool *done)
 }
 
 
-CURLcode Curl_ftpsendf(struct connectdata *conn,
-                       const char *fmt, ...)
+CURLcode Curl_ftpsend(struct connectdata *conn, const char *cmd)
 {
   ssize_t bytes_written;
 #define SBUF_SIZE 1024
@@ -4104,10 +4103,9 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   enum protection_level data_sec = conn->data_prot;
 #endif
 
-  va_list ap;
-  va_start(ap, fmt);
-  write_len = vsnprintf(s, SBUF_SIZE-3, fmt, ap);
-  va_end(ap);
+  write_len = strlen(cmd);
+  if(write_len > (sizeof(s) -3))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   strcpy(&s[write_len], "\r\n"); /* append a trailing CRLF */
   write_len +=2;

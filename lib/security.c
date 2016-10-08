@@ -122,7 +122,7 @@ static int ftp_send_command(struct connectdata *conn, const char *message, ...)
   vsnprintf(print_buffer, sizeof(print_buffer), message, args);
   va_end(args);
 
-  if(Curl_ftpsendf(conn, print_buffer)) {
+  if(Curl_ftpsend(conn, print_buffer)) {
     ftp_code = -1;
   }
   else {
