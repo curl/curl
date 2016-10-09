@@ -349,7 +349,6 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   int checkindex;
   int countindex; /* amount of seconds stored in the speeder array */
   char time_left[10];
-  char time_total[10];
   char time_spent[10];
   curl_off_t ulestimate=0;
   curl_off_t dlestimate=0;
@@ -481,9 +480,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
       }
       fprintf(data->set.err,
               "  %% Total    %% Received %% Xferd  Average Speed   "
-              "Time    Time     Time  Current\n"
+              " Time  Time  Current\n"
               "                                 Dload  Upload   "
-              "Total   Spent    Left  Speed\n");
+              "Spent  Left    Speed\n");
       data->progress.flags |= PGRS_HEADERS_OUT; /* headers are shown */
     }
 
@@ -519,7 +518,6 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
     /* create the three time strings */
     time2str(time_left, total_estimate > 0?(total_estimate - timespent):0);
-    time2str(time_total, total_estimate);
     time2str(time_spent, timespent);
 
     /* Get the total amount of data expected to get transferred */
@@ -543,7 +541,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
             "\r"
             "%3" CURL_FORMAT_CURL_OFF_T " %s  "
             "%3" CURL_FORMAT_CURL_OFF_T " %s  "
-            "%3" CURL_FORMAT_CURL_OFF_T " %s  %s  %s %s %s %s %s",
+            "%3" CURL_FORMAT_CURL_OFF_T " %s  %s  %s %s %s %s",
             total_percen,  /* 3 letters */                /* total % */
             max5data(total_expected_transfer, max5[2]),   /* total size */
             dlpercen,      /* 3 letters */                /* rcvd % */
@@ -552,7 +550,6 @@ int Curl_pgrsUpdate(struct connectdata *conn)
             max5data(data->progress.uploaded, max5[1]),   /* xfer size */
             max5data(data->progress.dlspeed, max5[3]),    /* avrg dl speed */
             max5data(data->progress.ulspeed, max5[4]),    /* avrg ul speed */
-            time_total,    /* 8 letters */                /* total time */
             time_spent,    /* 8 letters */                /* time spent */
             time_left,     /* 8 letters */                /* time left */
             max5data(data->progress.current_speed, max5[5]) /* current speed */

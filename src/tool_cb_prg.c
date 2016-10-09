@@ -130,11 +130,11 @@ void progressbarinit(struct ProgressData *bar,
     if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 0))
       bar->width = (int)num;
     else
-      bar->width = 79;
+      bar->width = 69;
     curl_free(colp);
   }
   else
-    bar->width = 79;
+    bar->width = 69;
 #else
   /* 20000318 mgs
    * We use this emx library call to get the screen width, and subtract
