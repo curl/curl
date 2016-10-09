@@ -1441,6 +1441,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             enum {
               RETRY_NO,
               RETRY_TIMEOUT,
+              RETRY_CONNREFUSED,
               RETRY_HTTP,
               RETRY_FTP,
               RETRY_LAST /* not used */
@@ -1452,6 +1453,13 @@ static CURLcode operate_do(struct GlobalConfig *global,
                (CURLE_FTP_ACCEPT_TIMEOUT == result))
               /* retry timeout always */
               retry = RETRY_TIMEOUT;
+            else if(config->retry_connrefused &&
+                    (CURLE_COULDNT_CONNECT == result)) {
+              long oserrno;
+              curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &oserrno);
+              if(ECONNREFUSED == oserrno)
+                retry = RETRY_CONNREFUSED;
+            }
             else if((CURLE_OK == result) ||
                     (config->failonerror &&
                      (CURLE_HTTP_RETURNED_ERROR == result))) {
@@ -1499,7 +1507,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
             if(retry) {
               static const char * const m[]={
-                NULL, "timeout", "HTTP error", "FTP error"
+                NULL,
+                "timeout",
+                "connection refused",
+                "HTTP error",
+                "FTP error"
               };
 
               warnf(config->global, "Transient problem: %s "

@@ -1620,6 +1620,10 @@ also \fI--retry-max-time\fP to limit the total time allowed for
 retries. (Added in 7.12.3)
 
 If this option is used several times, the last one will be used.
+.IP "--retry-connrefused"
+In addition to the other conditions, consider ECONNREFUSED as a transient
+error too for \fI--retry\fP. This option is used together with
+\fI--retry\fP. (Added in 7.52.0)
 .IP "--retry-delay <seconds>"
 Make curl sleep this amount of time before each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
