@@ -198,6 +198,8 @@ static const char *const helptext[] = {
   "     --resolve HOST:PORT:ADDRESS  Force resolve of HOST:PORT to ADDRESS",
   "     --retry NUM   "
   "Retry request NUM times if transient problems occur",
+  "     --retry-connrefused  "
+  "Consider \"connection refused\" a transient error",
   "     --retry-delay SECONDS  Wait SECONDS between retries",
   "     --retry-max-time SECONDS  Retry only within this period",
   "     --sasl-ir       Enable initial response in SASL authentication",
