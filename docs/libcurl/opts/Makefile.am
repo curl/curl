@@ -889,7 +889,7 @@ PDFPAGES =                                      \
 
 CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
 
-EXTRA_DIST = $(man_MANS) $(HTMLPAGES) $(PDFPAGES)
+EXTRA_DIST = $(man_MANS)
 MAN2HTML= roffit --mandir=. $< >$@
 
 SUFFIXES = .3 .html

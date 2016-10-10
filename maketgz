@@ -115,16 +115,7 @@ fi
 
 ############################################################################
 #
-# Make sure we have updated HTML versions of all man pages:
-#
-echo "make html"
-make -s html
-
-# And the PDF versions
-echo "make pdf"
-make -s pdf
-
-# And the IDE files
+# Update the IDE files
 echo "make vc-ide"
 make -s vc-ide
 
