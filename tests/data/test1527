@@ -57,6 +57,7 @@ Check same headers are generated with CURLOPT_HEADEROPT == CURLHEADER_UNIFIED
 <proxy>
 CONNECT the.old.moo.1527:%HTTPPORT HTTP/1.1
 Host: the.old.moo.1527:%HTTPPORT
+Proxy-Connection: Keep-Alive
 User-Agent: Http Agent
 Expect: 100-continue
 

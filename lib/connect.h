@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -104,21 +104,37 @@ CURLcode Curl_socket(struct connectdata *conn,
 
 void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd);
 
-#ifdef CURLDEBUG
 /*
- * Curl_connclose() sets the bit.close bit to TRUE with an explanation.
- * Nothing else.
+ * Curl_conncontrol() marks the end of a connection/stream. The 'closeit'
+ * argument specifies if it is the end of a connection or a stream.
+ *
+ * For stream-based protocols (such as HTTP/2), a stream close will not cause
+ * a connection close. Other protocols will close the connection for both
+ * cases.
+ *
+ * It sets the bit.close bit to TRUE (with an explanation for debug builds),
+ * when the connection will close.
  */
+
+#define CONNCTRL_KEEP 0 /* undo a marked closure */
+#define CONNCTRL_CONNECTION 1
+#define CONNCTRL_STREAM 2
+
 void Curl_conncontrol(struct connectdata *conn,
-                      bool closeit,
-                      const char *reason);
-#define connclose(x,y) Curl_conncontrol(x,TRUE, y)
-#define connkeep(x,y) Curl_conncontrol(x, FALSE, y)
+                      int closeit
+#ifdef DEBUGBUILD
+                      , const char *reason
+#endif
+  );
+
+#ifdef DEBUGBUILD
+#define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
+#define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
+#define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
 #else /* if !CURLDEBUG */
-
-#define connclose(x,y) (x)->bits.close = TRUE
-#define connkeep(x,y) (x)->bits.close = FALSE
-
+#define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM)
+#define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
+#define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP)
 #endif
 
 #endif /* HEADER_CURL_CONNECT_H */

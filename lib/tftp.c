@@ -705,6 +705,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
   int rblock;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
+  int cb; /* Bytes currently read */
 
   switch(event) {
 
@@ -762,9 +763,20 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
       return CURLE_OK;
     }
 
-    result = Curl_fillreadbuffer(state->conn, state->blksize, &state->sbytes);
-    if(result)
-      return result;
+    /* TFTP considers data block size < 512 bytes as an end of session. So
+     * in some cases we must wait for additional data to build full (512 bytes)
+     * data block.
+     * */
+    state->sbytes = 0;
+    state->conn->data->req.upload_fromhere = (char *)state->spacket.data+4;
+    do {
+      result = Curl_fillreadbuffer(state->conn, state->blksize - state->sbytes,
+                                   &cb);
+      if(result)
+        return result;
+      state->sbytes += cb;
+      state->conn->data->req.upload_fromhere += cb;
+    } while(state->sbytes < state->blksize && cb != 0);
 
     sbytes = sendto(state->sockfd, (void *) state->spacket.data,
                     4 + state->sbytes, SEND_4TH_ARG,

@@ -119,6 +119,7 @@ int my_trace(CURL *handle, curl_infotype type,
 {
   const char *text;
   (void)handle; /* prevent compiler warning */
+  (void)userp;
 
   switch (type) {
   case CURLINFO_TEXT:

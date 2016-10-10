@@ -920,7 +920,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
 #if CURL_SUPPORT_MAC_10_6
     /* On Leopard and Snow Leopard, fall back to SecKeychainSearch. */
     status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
-#endif /* CURL_SUPPORT_MAC_10_7 */
+#endif /* CURL_SUPPORT_MAC_10_6 */
   }
 #elif CURL_SUPPORT_MAC_10_6
   /* For developers building on older cats, we have no choice but to fall back
@@ -955,7 +955,7 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
 
     /* Here we go: */
     status = SecPKCS12Import(pkcs_data, options, &items);
-    if(status == noErr && items && CFArrayGetCount(items)) {
+    if(status == errSecSuccess && items && CFArrayGetCount(items)) {
       CFDictionaryRef identity_and_trust = CFArrayGetValueAtIndex(items, 0L);
       const void *temp_identity = CFDictionaryGetValue(identity_and_trust,
         kSecImportItemIdentity);
@@ -1438,6 +1438,16 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         /* Disable IDEA: */
         case SSL_RSA_WITH_IDEA_CBC_SHA:
         case SSL_RSA_WITH_IDEA_CBC_MD5:
+        /* Disable RC4: */
+        case SSL_RSA_WITH_RC4_128_MD5:
+        case SSL_RSA_WITH_RC4_128_SHA:
+        case 0xC002: /* TLS_ECDH_ECDSA_WITH_RC4_128_SHA */
+        case 0xC007: /* TLS_ECDHE_ECDSA_WITH_RC4_128_SHA*/
+        case 0xC00C: /* TLS_ECDH_RSA_WITH_RC4_128_SHA */
+        case 0xC011: /* TLS_ECDHE_RSA_WITH_RC4_128_SHA */
+        case 0x008A: /* TLS_PSK_WITH_RC4_128_SHA */
+        case 0x008E: /* TLS_DHE_PSK_WITH_RC4_128_SHA */
+        case 0x0092: /* TLS_RSA_PSK_WITH_RC4_128_SHA */
           break;
         default: /* enable everything else */
           allowed_ciphers[allowed_ciphers_count++] = all_ciphers[i];

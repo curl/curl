@@ -130,6 +130,9 @@ tcpkeepalive(struct Curl_easy *data,
       infof(data, "Failed to set SIO_KEEPALIVE_VALS on fd %d: %d\n",
             (int)sockfd, WSAGetLastError());
     }
+#elif defined(CURL_WINDOWS_APP)
+    (void)majorVersion;
+    detectOsState = DETECT_OS_VISTA_OR_LATER;
 #else
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
@@ -1368,25 +1371,26 @@ CURLcode Curl_socket(struct connectdata *conn,
 
 }
 
-#ifdef CURLDEBUG
 /*
- * Curl_conncontrol() is used to set the conn->bits.close bit on or off. It
- * MUST be called with the connclose() or connkeep() macros with a stated
- * reason. The reason is only shown in debug builds but helps to figure out
- * decision paths when connections are or aren't re-used as expected.
+ * Curl_conncontrol() marks streams or connection for closure.
  */
-void Curl_conncontrol(struct connectdata *conn, bool closeit,
-                      const char *reason)
-{
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) reason;
+void Curl_conncontrol(struct connectdata *conn,
+                      int ctrl /* see defines in header */
+#ifdef DEBUGBUILD
+                      , const char *reason
 #endif
-  if(closeit != conn->bits.close) {
-    infof(conn->data, "Marked for [%s]: %s\n", closeit?"closure":"keep alive",
-          reason);
-
+  )
+{
+  /* close if a connection, or a stream that isn't multiplexed */
+  bool closeit = (ctrl == CONNCTRL_CONNECTION) ||
+    ((ctrl == CONNCTRL_STREAM) && !(conn->handler->flags & PROTOPT_STREAM));
+  if((ctrl == CONNCTRL_STREAM) &&
+     (conn->handler->flags & PROTOPT_STREAM))
+    DEBUGF(infof(conn->data, "Kill stream: %s\n", reason));
+  else if(closeit != conn->bits.close) {
+    DEBUGF(infof(conn->data, "Marked for [%s]: %s\n",
+                 closeit?"closure":"keep alive", reason));
     conn->bits.close = closeit; /* the only place in the source code that
                                    should assign this bit */
   }
 }
-#endif

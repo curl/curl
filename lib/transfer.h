@@ -40,10 +40,9 @@ typedef enum {
 
 CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
                      followtype type);
-
-
 CURLcode Curl_readwrite(struct connectdata *conn,
-                        struct Curl_easy *data, bool *done);
+                        struct Curl_easy *data, bool *done,
+                        bool *comeback);
 int Curl_single_getsock(const struct connectdata *conn,
                         curl_socket_t *socks,
                         int numsocks);
@@ -64,9 +63,6 @@ Curl_setup_transfer (struct connectdata *data,
                                            -1 disables */
                curl_off_t *writecountp /* return number of bytes written */
 );
-
-long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
-                     int pkt_size);
 
 #endif /* HEADER_CURL_TRANSFER_H */
 

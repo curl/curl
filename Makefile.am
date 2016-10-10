@@ -24,10 +24,12 @@ AUTOMAKE_OPTIONS = foreign
 
 ACLOCAL_AMFLAGS = -I m4
 
-CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in	\
- CMake/CurlTests.c CMake/FindGSS.cmake CMake/OtherTests.cmake	\
- CMake/Platforms/WindowsCache.cmake CMake/Utilities.cmake	\
- include/curl/curlbuild.h.cmake CMake/Macros.cmake
+CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in      \
+ CMake/CurlTests.c CMake/FindGSS.cmake CMake/OtherTests.cmake   \
+ CMake/Platforms/WindowsCache.cmake CMake/Utilities.cmake       \
+ include/curl/curlbuild.h.cmake CMake/Macros.cmake              \
+ CMake/CurlSymbolHiding.cmake
+
 
 VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
 VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp.dist

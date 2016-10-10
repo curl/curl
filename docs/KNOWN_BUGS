@@ -22,6 +22,7 @@ problems may have been fixed or changed somewhat since this was written!
  1.8 DNS timing is wrong for HTTP redirects
  1.9 HTTP/2 frames while in the connection pool kill reuse
  1.10 Strips trailing dot from host name
+ 1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
  2. TLS
  2.1 Hangs with PolarSSL
@@ -46,12 +47,15 @@ problems may have been fixed or changed somewhat since this was written!
  5.3 libidn and old iconv
  5.4 AIX shared build with c-ares fails
  5.5 can't handle Unicode arguments in Windows
+ 5.6 cmake support gaps
+ 5.7 Visual Studio project gaps
+ 5.8 configure finding libs in wrong directory
 
  6. Authentication
  6.1 NTLM authentication and unicode
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
- 6.4 Negotiate needs a fake user name
+ 6.4 Negotiate and Kerberos V5 need a fake user name
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -61,6 +65,7 @@ problems may have been fixed or changed somewhat since this was written!
  7.5 ASCII FTP
  7.6 FTP with NULs in URL parts
  7.7 FTP and empty path parts in the URL
+ 7.8 Premature transfer end but healthy control channel
 
  8. TELNET
  8.1 TELNET and time limtiations don't work
@@ -193,6 +198,17 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/716 for the discussion.
 
+1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
+
+ I'm using libcurl to POST form data using a FILE* with the CURLFORM_STREAM
+ option of curl_formadd(). I've noticed that if the connection drops at just
+ the right time, the POST is reattempted without the data from the file. It
+ seems like the file stream position isn't getting reset to the beginning of
+ the file. I found the CURLOPT_SEEKFUNCTION option and set that with a
+ function that performs an fseek() on the FILE*. However, setting that didn't
+ seem to fix the issue or even get called. See
+ https://github.com/curl/curl/issues/768
+
 
 2. TLS
 
@@ -319,6 +335,48 @@ problems may have been fixed or changed somewhat since this was written!
   https://curl.haxx.se/bug/?i=345
   https://curl.haxx.se/bug/?i=731
 
+5.6 cmake support gaps
+
+ The cmake build setup lacks several features that the autoconf build
+ offers. This includes:
+
+  - symbol hiding when the shared library is built
+  - use of correct soname for the shared library build
+  - support for several TLS backends are missing
+  - the unit tests cause link failures in regular non-static builds
+  - no nghttp2 check
+
+5.7 Visual Studio project gaps
+
+ The Visual Studio projects lack some features that the autoconf and nmake
+ builds offer, such as the following:
+
+  - support for zlib and nghttp2
+  - use of static runtime libraries
+  - add the test suite components
+
+ In addition to this the following could be implemented:
+
+  - support for other development IDEs
+  - add PATH environment variables for third-party DLLs
+
+5.8 configure finding libs in wrong directory
+
+ When the configure script checks for third-party libraries, it adds those
+ directories to the LDFLAGS variable and then tries linking to see if it
+ works. When successful, the found directory is kept in the LDFLAGS variable
+ when the script continues to execute and do more tests and possibly check for
+ more libraries.
+
+ This can make subsequent checks for libraries wrongly detect another
+ installation in a directory that was previously added to LDFLAGS by another
+ library check!
+
+ A possibly better way to do these checks would be to keep the pristine LDFLAGS
+ even after successful checks and instead add those verified paths to a
+ separate variable that only after all library checks have been performed gets
+ appended to LDFLAGS.
+
 
 6. Authentication
 
@@ -345,13 +403,17 @@ problems may have been fixed or changed somewhat since this was written!
  "system context" will make it use wrong(?) user name - at least when compared
  to what winhttp does. See https://curl.haxx.se/bug/view.cgi?id=535
 
-6.4 Negotiate needs a fake user name
+6.4 Negotiate and Kerberos V5 need a fake user name
 
- To get HTTP Negotiate (SPNEGO) authentication to work fine, you need to
- provide a (fake) user name (this concerns both curl and the lib) because the
- code wrongly only considers authentication if there's a user name provided.
- https://curl.haxx.se/bug/view.cgi?id=440 How?
- https://curl.haxx.se/mail/lib-2004-08/0182.html
+ In order to get Negotiate (SPNEGO) authentication to work in HTTP or Kerberos
+ V5 in the e-mail protocols, you need to  provide a (fake) user name (this
+ concerns both curl and the lib) because the code wrongly only considers
+ authentication if there's a user name provided by setting
+ conn->bits.user_passwd in url.c  https://curl.haxx.se/bug/view.cgi?id=440 How?
+ https://curl.haxx.se/mail/lib-2004-08/0182.html A possible solution is to
+ either modify this variable to be set or introduce a variable such as
+ new conn->bits.want_authentication which is set when any of the authentication
+ options are set.
 
 
 7. FTP
@@ -420,6 +482,17 @@ problems may have been fixed or changed somewhat since this was written!
  the user wants to reach the root dir (this exception SHALL remain even when
  this bug is fixed).
 
+7.8 Premature transfer end but healthy control channel
+
+ When 'multi_done' is called before the transfer has been completed the normal
+ way, it is considered a "premature" transfer end. In this situation, libcurl
+ closes the connection assuming it doesn't know the state of the connection so
+ it can't be reused for subsequent requests.
+
+ With FTP however, this isn't necessarily true but there are a bunch of
+ situations (listed in the ftp_done code) where it *could* keep the connection
+ alive even in this situation - but the current code doesn't. Fixing this would
+ allow libcurl to reuse FTP connections better.
 
 8. TELNET
 

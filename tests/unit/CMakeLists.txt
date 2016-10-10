@@ -40,7 +40,15 @@ foreach(_testfile ${UT_SRC})
   set_target_properties(${_testname}
       PROPERTIES COMPILE_DEFINITIONS "UNITTESTS")
 
-  add_test(NAME ${_testname}
-           COMMAND ${_testname} "http://www.google.com"
-           )
+  if(HIDES_CURL_PRIVATE_SYMBOLS)
+    set_target_properties(${_testname}
+	  PROPERTIES
+		EXCLUDE_FROM_ALL TRUE
+		EXCLUDE_FROM_DEFAULT_BUILD TRUE
+	)
+  else()
+    add_test(NAME ${_testname}
+             COMMAND ${_testname} "http://www.google.com"
+    )
+  endif()
 endforeach()

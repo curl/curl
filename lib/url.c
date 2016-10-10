@@ -405,7 +405,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   if(!data)
     return CURLE_OK;
 
-  Curl_expire(data, 0); /* shut off timers */
+  Curl_expire_clear(data); /* shut off timers */
 
   m = data->multi;
 
@@ -602,6 +602,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->tcp_keepintvl = 60;
   set->tcp_keepidle = 60;
   set->tcp_fastopen = FALSE;
+  set->tcp_nodelay = TRUE;
 
   set->ssl_enable_npn = TRUE;
   set->ssl_enable_alpn = TRUE;
@@ -780,6 +781,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * return error.
      */
     data->set.http_fail_on_error = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+  case CURLOPT_KEEP_SENDING_ON_ERROR:
+    data->set.http_keep_sending_on_error = (0 != va_arg(param, long)) ?
+                                           TRUE : FALSE;
     break;
   case CURLOPT_UPLOAD:
   case CURLOPT_PUT:
@@ -2829,6 +2834,17 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
     return CURLE_OK;
   }
 
+  /*
+   * If this connection isn't marked to force-close, leave it open if there
+   * are other users of it
+   */
+  if(!conn->bits.close &&
+     (conn->send_pipe->size + conn->recv_pipe->size)) {
+    DEBUGF(infof(data, "Curl_disconnect, usecounter: %d\n",
+                 conn->send_pipe->size + conn->recv_pipe->size));
+    return CURLE_OK;
+  }
+
   if(conn->dns_entry != NULL) {
     Curl_resolv_unlock(data, conn->dns_entry);
     conn->dns_entry = NULL;
@@ -4705,7 +4721,13 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       conn->proxytype = CURLPROXY_SOCKS4A;
     else if(checkprefix("socks4", proxy) || checkprefix("socks", proxy))
       conn->proxytype = CURLPROXY_SOCKS4;
-    /* Any other xxx:// : change to http proxy */
+    else if(checkprefix("http:", proxy))
+      ; /* leave it as HTTP or HTTP/1.0 */
+    else {
+      /* Any other xxx:// reject! */
+      failf(data, "Unsupported proxy scheme for \'%s\'", proxy);
+      return CURLE_COULDNT_CONNECT;
+    }
   }
   else
     proxyptr = proxy; /* No xxx:// head: It's a HTTP proxy */
@@ -6123,6 +6145,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   data->set.ssl.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
   data->set.ssl.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
   data->set.ssl.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST];
+  data->set.ssl.clientcert = data->set.str[STRING_CERT];
 #ifdef USE_TLS_SRP
   data->set.ssl.username = data->set.str[STRING_TLSAUTH_USERNAME];
   data->set.ssl.password = data->set.str[STRING_TLSAUTH_PASSWORD];

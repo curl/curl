@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2013, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2013-2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013-2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -114,7 +114,7 @@ CURLcode Curl_add_handle_to_pipeline(struct Curl_easy *handle,
   if(pipeline == conn->send_pipe && sendhead != conn->send_pipe->head) {
     /* this is a new one as head, expire it */
     Curl_pipeline_leave_write(conn); /* not in use yet */
-    Curl_expire(conn->send_pipe->head->ptr, 1);
+    Curl_expire(conn->send_pipe->head->ptr, 0);
   }
 
 #if 0 /* enable for pipeline debugging */
@@ -149,7 +149,7 @@ void Curl_move_handle_from_send_to_recv_pipe(struct Curl_easy *handle,
         infof(conn->data, "%p is at send pipe head B!\n",
               (void *)conn->send_pipe->head->ptr);
 #endif
-        Curl_expire(conn->send_pipe->head->ptr, 1);
+        Curl_expire(conn->send_pipe->head->ptr, 0);
       }
 
       /* The receiver's list is not really interesting here since either this

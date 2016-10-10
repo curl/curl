@@ -127,6 +127,18 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
         conn->host.name, conn->remote_port);
 
+#ifdef HAS_ALPN
+  /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
+     Also it doesn't seem to be supported for Wine, see curl bug #983. */
+  connssl->use_alpn = conn->bits.tls_enable_alpn &&
+                      !GetProcAddress(GetModuleHandleA("ntdll"),
+                                      "wine_get_version") &&
+                      Curl_verify_windows_version(6, 3, PLATFORM_WINNT,
+                                                  VERSION_GREATER_THAN_EQUAL);
+#else
+  connssl->use_alpn = false;
+#endif
+
   connssl->cred = NULL;
 
   /* check for an existing re-usable credential handle */
@@ -250,10 +262,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
 
 #ifdef HAS_ALPN
-  /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above */
-  if(conn->bits.tls_enable_alpn &&
-     Curl_verify_windows_version(6, 3, PLATFORM_WINNT,
-                                 VERSION_GREATER_THAN_EQUAL)) {
+  if(connssl->use_alpn) {
     int cur = 0;
     int list_start_index = 0;
     unsigned int* extension_len = NULL;
@@ -328,11 +337,17 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   if(!host_name)
     return CURLE_OUT_OF_MEMORY;
 
-  /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx */
+  /* Schannel InitializeSecurityContext:
+     https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
 
+     At the moment we don't pass inbuf unless we're using ALPN since we only
+     use it for that, and Wine (for which we currently disable ALPN) is giving
+     us problems with inbuf regardless. https://github.com/curl/curl/issues/983
+  */
   sspi_status = s_pSecFn->InitializeSecurityContext(
-    &connssl->cred->cred_handle, NULL, host_name,
-    connssl->req_flags, 0, 0, &inbuf_desc, 0, &connssl->ctxt->ctxt_handle,
+    &connssl->cred->cred_handle, NULL, host_name, connssl->req_flags, 0, 0,
+    (connssl->use_alpn ? &inbuf_desc : NULL),
+    0, &connssl->ctxt->ctxt_handle,
     &outbuf_desc, &connssl->ret_flags, &connssl->ctxt->time_stamp);
 
   Curl_unicodefree(host_name);
@@ -651,10 +666,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   }
 
 #ifdef HAS_ALPN
-  /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above */
-  if(conn->bits.tls_enable_alpn &&
-     Curl_verify_windows_version(6, 3, PLATFORM_WINNT,
-                                 VERSION_GREATER_THAN_EQUAL)) {
+  if(connssl->use_alpn) {
     sspi_status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
       SECPKG_ATTR_APPLICATION_PROTOCOL, &alpn_result);
 

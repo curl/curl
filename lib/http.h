@@ -168,6 +168,7 @@ struct HTTP {
   const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
   size_t pauselen; /* the number of bytes left in data */
   bool closed; /* TRUE on HTTP2 stream close */
+  bool close_handled; /* TRUE if stream closure is handled by libcurl */
   uint32_t error_code; /* HTTP/2 error code */
 
   char *mem;     /* points to a buffer in memory to store received data */

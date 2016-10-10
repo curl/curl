@@ -79,8 +79,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_COULDNT_CONNECT:
     return "Couldn't connect to server";
 
-  case CURLE_FTP_WEIRD_SERVER_REPLY:
-    return "FTP: weird server reply";
+  case CURLE_WEIRD_SERVER_REPLY:
+    return "Weird server reply";
 
   case CURLE_REMOTE_ACCESS_DENIED:
     return "Access denied to remote resource";

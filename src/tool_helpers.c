@@ -35,7 +35,7 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 /*
-** Helper functions that are used from more tha one source file.
+** Helper functions that are used from more than one source file.
 */
 
 const char *param2text(int res)

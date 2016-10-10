@@ -42,10 +42,12 @@ http://example.fake/hoge/1228 http://example.fake/hogege/ -b nonexisting -x %HOS
 GET http://example.fake/hoge/1228 HTTP/1.1
 Host: example.fake
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET http://example.fake/hogege/ HTTP/1.1
 Host: example.fake
 Accept: */*
+Proxy-Connection: Keep-Alive
 Cookie: path1=root
 
 </protocol>

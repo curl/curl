@@ -42,8 +42,14 @@ these other libraries.
 
 See the description in \fIlibcurl(3)\fP of global environment requirements for
 details of how to use this function.
-
+.SH CAUTION
+\fIcurl_global_cleanup(3)\fP does not block waiting for any libcurl-created
+threads to terminate (such as threads used for name resolving). If a module
+containing libcurl is dynamically unloaded while libcurl-created threads are
+still running then your program may crash or other corruption may occur. We
+recommend you do not run libcurl from any module that may be unloaded
+dynamically. This behavior may be addressed in the future.
 .SH "SEE ALSO"
 .BR curl_global_init "(3), "
 .BR libcurl "(3), "
-
+.BR libcurl-thread "(3), "

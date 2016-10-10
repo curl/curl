@@ -995,6 +995,9 @@ void curl_easy_reset(struct Curl_easy *data)
   /* zero out Progress data: */
   memset(&data->progress, 0, sizeof(struct Progress));
 
+  /* zero out PureInfo data: */
+  Curl_initinfo(data);
+
   data->progress.flags |= PGRS_HIDE;
   data->state.current_speed = -1; /* init to negative == impossible */
 }
@@ -1044,7 +1047,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   if(!result &&
      ((newstate&(KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
       (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) )
-    Curl_expire(data, 1); /* get this handle going again */
+    Curl_expire(data, 0); /* get this handle going again */
 
   return result;
 }

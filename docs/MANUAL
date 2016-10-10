@@ -817,12 +817,8 @@ LDAP
   and offer ldap:// support.
 
   LDAP is a complex thing and writing an LDAP query is not an easy task. I do
-  advise you to dig up the syntax description for that elsewhere. Two places
-  that might suit you are:
-
-  Netscape's "Netscape Directory SDK 3.0 for C Programmer's Guide Chapter 10:
-  Working with LDAP URLs":
-  http://developer.netscape.com/docs/manuals/dirsdk/csdk30/url.htm
+  advise you to dig up the syntax description for that elsewhere. One such
+  place might be:
 
   RFC 2255, "The LDAP URL Format" https://curl.haxx.se/rfc/rfc2255.txt
 

@@ -1,5 +1,5 @@
-Table of Contents
-=================
+curl internals
+==============
 
  - [Intro](#intro)
  - [git](#git)
@@ -40,8 +40,8 @@ Table of Contents
  - [Structs in libcurl](#structs)
 
 <a name="intro"></a>
-curl internals
-==============
+Intro
+=====
 
  This project is split in two. The library and the client. The client part
  uses the library, but the library is designed to allow other applications to

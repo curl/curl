@@ -420,7 +420,15 @@ mbed_connect_step1(struct connectdata *conn,
 #endif
 
 #ifdef MBEDTLS_DEBUG
-  mbedtls_ssl_conf_dbg(&connssl->config, mbedtls_debug, data);
+  /* In order to make that work in mbedtls MBEDTLS_DEBUG_C must be defined. */
+  mbedtls_ssl_conf_dbg(&connssl->config, mbed_debug, data);
+  /* - 0 No debug
+   * - 1 Error
+   * - 2 State change
+   * - 3 Informational
+   * - 4 Verbose
+   */
+  mbedtls_debug_set_threshold(4);
 #endif
 
   connssl->connecting_state = ssl_connect_2;

@@ -475,7 +475,7 @@ static CURLcode ReceivedServerConnect(struct connectdata *conn, bool *received)
       if(ftpcode/100 > 3)
         return CURLE_FTP_ACCEPT_FAILED;
 
-      return CURLE_FTP_WEIRD_SERVER_REPLY;
+      return CURLE_WEIRD_SERVER_REPLY;
     }
 
     break;
@@ -911,7 +911,7 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
     }
     else {
       socks[1] = conn->sock[SECONDARYSOCKET];
-      bits |= GETSOCK_WRITESOCK(1);
+      bits |= GETSOCK_WRITESOCK(1) | GETSOCK_READSOCK(1);
     }
 
     return bits;
@@ -1835,7 +1835,7 @@ static CURLcode ftp_epsv_disable(struct connectdata *conn)
   if(conn->bits.ipv6) {
     /* We can't disable EPSV when doing IPv6, so this is instead a fail */
     failf(conn->data, "Failed EPSV attempt, exiting\n");
-    return CURLE_FTP_WEIRD_SERVER_REPLY;
+    return CURLE_WEIRD_SERVER_REPLY;
   }
 
   infof(conn->data, "Failed EPSV attempt. Disabling EPSV\n");
@@ -2742,7 +2742,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       else if(ftpcode != 220) {
         failf(data, "Got a %03d ftp-server response when 220 was expected",
               ftpcode);
-        return CURLE_FTP_WEIRD_SERVER_REPLY;
+        return CURLE_WEIRD_SERVER_REPLY;
       }
 
       /* We have received a 220 response fine, now we proceed. */
@@ -3250,7 +3250,6 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   ssize_t nread;
   int ftpcode;
   CURLcode result = CURLE_OK;
-  bool was_ctl_valid = ftpc->ctl_valid;
   char *path;
   const char *path_to_use = data->state.path;
 
@@ -3274,10 +3273,9 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     /* the connection stays alive fine even though this happened */
     /* fall-through */
   case CURLE_OK: /* doesn't affect the control connection's status */
-    if(!premature) {
-      ftpc->ctl_valid = was_ctl_valid;
+    if(!premature)
       break;
-    }
+
     /* until we cope better with prematurely ended requests, let them
      * fallback as if in complete failure */
   default:       /* by default, an error means the control connection is
@@ -4093,8 +4091,7 @@ static CURLcode ftp_do(struct connectdata *conn, bool *done)
 }
 
 
-CURLcode Curl_ftpsendf(struct connectdata *conn,
-                       const char *fmt, ...)
+CURLcode Curl_ftpsend(struct connectdata *conn, const char *cmd)
 {
   ssize_t bytes_written;
 #define SBUF_SIZE 1024
@@ -4106,10 +4103,9 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   enum protection_level data_sec = conn->data_prot;
 #endif
 
-  va_list ap;
-  va_start(ap, fmt);
-  write_len = vsnprintf(s, SBUF_SIZE-3, fmt, ap);
-  va_end(ap);
+  write_len = strlen(cmd);
+  if(write_len > (sizeof(s) -3))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   strcpy(&s[write_len], "\r\n"); /* append a trailing CRLF */
   write_len +=2;

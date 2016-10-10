@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,6 +51,8 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
 /* called from Curl_http_setup_conn */
 void Curl_http2_setup_conn(struct connectdata *conn);
 void Curl_http2_setup_req(struct Curl_easy *data);
+void Curl_http2_done(struct connectdata *conn, bool premature);
+CURLcode Curl_http2_done_sending(struct connectdata *conn);
 #else /* USE_NGHTTP2 */
 #define Curl_http2_init(x) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_send_request(x) CURLE_UNSUPPORTED_PROTOCOL
@@ -61,6 +63,8 @@ void Curl_http2_setup_req(struct Curl_easy *data);
 #define Curl_http2_setup_req(x)
 #define Curl_http2_init_state(x)
 #define Curl_http2_init_userset(x)
+#define Curl_http2_done(x,y)
+#define Curl_http2_done_sending(x)
 #endif
 
 #endif /* HEADER_CURL_HTTP2_H */

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -41,8 +41,7 @@ The proxy string may be prefixed with [scheme]:// to specify which kind of
 proxy is used. Use socks4://, socks4a://, socks5:// or socks5h:// (the last
 one to enable socks5 and asking the proxy to do the resolving, also known as
 \fICURLPROXY_SOCKS5_HOSTNAME\fP type) to request the specific SOCKS version to
-be used. No protocol specified, http:// and all others will be treated as HTTP
-proxies.
+be used. No scheme specified or http://, will be treated as HTTP proxies.
 
 Without a scheme prefix, \fICURLOPT_PROXYTYPE(3)\fP can be used to specify
 which kind of proxy the string identifies.
@@ -77,6 +76,9 @@ Since 7.14.1 the proxy environment variable names can include the protocol
 scheme.
 
 Since 7.21.7 the proxy string supports the socks protocols as "schemes".
+
+Since 7.50.2, unsupported schemes in proxy strings cause libcurl to return
+error.
 .SH RETURN VALUE
 Returns CURLE_OK if proxies are supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.

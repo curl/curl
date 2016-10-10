@@ -216,18 +216,93 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
 {
   data->progress.speeder_c = 0; /* reset the progress meter display */
   data->progress.start = Curl_tvnow();
+  data->progress.ul_limit_start.tv_sec = 0;
+  data->progress.ul_limit_start.tv_usec = 0;
+  data->progress.dl_limit_start.tv_sec = 0;
+  data->progress.dl_limit_start.tv_usec = 0;
   /* clear all bits except HIDE and HEADERS_OUT */
   data->progress.flags &= PGRS_HIDE|PGRS_HEADERS_OUT;
 }
 
+/*
+ * This is used to handle speed limits, calculating how much milliseconds we
+ * need to wait until we're back under the speed limit, if needed.
+ *
+ * The way it works is by having a "starting point" (time & amount of data
+ * transfered by then) used in the speed computation, to be used instead of the
+ * start of the transfer.
+ * This starting point is regularly moved as transfer goes on, to keep getting
+ * accurate values (instead of average over the entire tranfer).
+ *
+ * This function takes the current amount of data transfered, the amount at the
+ * starting point, the limit (in bytes/s), the time of the starting point and
+ * the current time.
+ *
+ * Returns -1 if no waiting is needed (not enough data transfered since
+ * starting point yet), 0 when no waiting is needed but the starting point
+ * should be reset (to current), or the number of milliseconds to wait to get
+ * back under the speed limit.
+ */
+long Curl_pgrsLimitWaitTime(curl_off_t cursize,
+                            curl_off_t startsize,
+                            curl_off_t limit,
+                            struct timeval start,
+                            struct timeval now)
+{
+    curl_off_t size = cursize - startsize;
+    long minimum, actual;
+
+    /* we don't have a starting point yet -- return 0 so it gets (re)set */
+    if(start.tv_sec == 0 && start.tv_usec == 0)
+        return 0;
+
+    /* not enough data yet */
+    if(size < limit)
+      return -1;
+
+    minimum = (long) (CURL_OFF_T_C(1000) * size / limit);
+    actual = Curl_tvdiff(now, start);
+
+    if(actual < minimum)
+      return minimum - actual;
+    else
+      return 0;
+}
+
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
+  struct timeval now = Curl_tvnow();
+
   data->progress.downloaded = size;
+
+  /* download speed limit */
+  if((data->set.max_recv_speed > 0) &&
+     (Curl_pgrsLimitWaitTime(data->progress.downloaded,
+                             data->progress.dl_limit_size,
+                             data->set.max_recv_speed,
+                             data->progress.dl_limit_start,
+                             now) == 0)) {
+    data->progress.dl_limit_start = now;
+    data->progress.dl_limit_size = size;
+  }
 }
 
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size)
 {
+  struct timeval now = Curl_tvnow();
+
   data->progress.uploaded = size;
+
+  /* upload speed limit */
+  if((data->set.max_send_speed > 0) &&
+     (Curl_pgrsLimitWaitTime(data->progress.uploaded,
+                             data->progress.ul_limit_size,
+                             data->set.max_send_speed,
+                             data->progress.ul_limit_start,
+                             now) == 0)) {
+    data->progress.ul_limit_start = now;
+    data->progress.ul_limit_size = size;
+  }
 }
 
 void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size)

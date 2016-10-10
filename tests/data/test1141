@@ -58,10 +58,12 @@ HTTP redirect to http:/// (three slashes!)
 GET http://%HOSTIP:%HTTPPORT/want/1141 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET http://foo.example.com/want/11410001 HTTP/1.1
 Host: foo.example.com
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

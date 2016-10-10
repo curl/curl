@@ -30,6 +30,10 @@
  *   https://cool.haxx.se/mailman/listinfo/curl-library/
  */
 
+#ifdef CURL_NO_OLDIES
+#define CURL_STRICTER
+#endif
+
 #include "curlver.h"         /* libcurl version defines   */
 #include "curlbuild.h"       /* libcurl build definitions */
 #include "curlrules.h"       /* libcurl rules enforcement */
@@ -91,7 +95,13 @@
 extern "C" {
 #endif
 
+#if defined(BUILDING_LIBCURL) || defined(CURL_STRICTER)
 typedef struct Curl_easy CURL;
+typedef struct Curl_share CURLSH;
+#else
+typedef void CURL;
+typedef void CURLSH;
+#endif
 
 /*
  * libcurl external API function linkage decorations.
@@ -425,7 +435,7 @@ typedef enum {
   CURLE_COULDNT_RESOLVE_PROXY,   /* 5 */
   CURLE_COULDNT_RESOLVE_HOST,    /* 6 */
   CURLE_COULDNT_CONNECT,         /* 7 */
-  CURLE_FTP_WEIRD_SERVER_REPLY,  /* 8 */
+  CURLE_WEIRD_SERVER_REPLY,      /* 8 */
   CURLE_REMOTE_ACCESS_DENIED,    /* 9 a service was denied by the server
                                     due to lack of access - when login fails
                                     this is not returned. */
@@ -556,6 +566,7 @@ typedef enum {
 
 /*  compatibility with older names */
 #define CURLOPT_ENCODING CURLOPT_ACCEPT_ENCODING
+#define CURLE_FTP_WEIRD_SERVER_REPLY CURLE_WEIRD_SERVER_REPLY
 
 /* The following were added in 7.21.5, April 2011 */
 #define CURLE_UNKNOWN_TELNET_OPTION CURLE_UNKNOWN_OPTION
@@ -1689,6 +1700,10 @@ typedef enum {
   /* Set TCP Fast Open */
   CINIT(TCP_FASTOPEN, LONG, 244),
 
+  /* Continue to send data if the server responds early with an
+   * HTTP status code >= 300 */
+  CINIT(KEEP_SENDING_ON_ERROR, LONG, 245),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2258,7 +2273,6 @@ typedef void (*curl_unlock_function)(CURL *handle,
                                      curl_lock_data data,
                                      void *userptr);
 
-typedef struct Curl_share CURLSH;
 
 typedef enum {
   CURLSHE_OK,  /* all is fine */

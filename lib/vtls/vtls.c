@@ -99,8 +99,7 @@ Curl_ssl_config_matches(struct ssl_config_data* data,
      (data->verifyhost == needle->verifyhost) &&
      safe_strequal(data->CApath, needle->CApath) &&
      safe_strequal(data->CAfile, needle->CAfile) &&
-     safe_strequal(data->random_file, needle->random_file) &&
-     safe_strequal(data->egdsocket, needle->egdsocket) &&
+     safe_strequal(data->clientcert, needle->clientcert) &&
      safe_strequal(data->cipher_list, needle->cipher_list))
     return TRUE;
 
@@ -156,6 +155,15 @@ Curl_clone_ssl_config(struct ssl_config_data *source,
   else
     dest->random_file = NULL;
 
+  if(source->clientcert) {
+    dest->clientcert = strdup(source->clientcert);
+    if(!dest->clientcert)
+      return FALSE;
+    dest->sessionid = FALSE;
+  }
+  else
+    dest->clientcert = NULL;
+
   return TRUE;
 }
 
@@ -166,6 +174,7 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc)
   Curl_safefree(sslc->cipher_list);
   Curl_safefree(sslc->egdsocket);
   Curl_safefree(sslc->random_file);
+  Curl_safefree(sslc->clientcert);
 }
 
 

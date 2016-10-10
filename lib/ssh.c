@@ -1895,7 +1895,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         /* since we don't really wait for anything at this point, we want the
            state machine to move on as soon as possible so we set a very short
            timeout here */
-        Curl_expire(data, 1);
+        Curl_expire(data, 0);
 
         state(conn, SSH_STOP);
       }
@@ -3109,7 +3109,6 @@ static CURLcode scp_done(struct connectdata *conn, CURLcode status,
 
 }
 
-/* return number of received (decrypted) bytes */
 static ssize_t scp_send(struct connectdata *conn, int sockindex,
                         const void *mem, size_t len, CURLcode *err)
 {
@@ -3134,10 +3133,6 @@ static ssize_t scp_send(struct connectdata *conn, int sockindex,
   return nwrite;
 }
 
-/*
- * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
- * a regular CURLcode value.
- */
 static ssize_t scp_recv(struct connectdata *conn, int sockindex,
                         char *mem, size_t len, CURLcode *err)
 {

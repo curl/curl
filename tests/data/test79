@@ -48,6 +48,7 @@ ftp://%HOSTIP:%HTTPPORT/we/want/that/page/79 -x %HOSTIP:%HTTPPORT
 GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/79 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>

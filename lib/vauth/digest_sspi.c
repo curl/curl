@@ -44,6 +44,27 @@
 #include "memdebug.h"
 
 /*
+* Curl_auth_is_digest_supported()
+*
+* This is used to evaluate if DIGEST is supported.
+*
+* Parameters: None
+*
+* Returns TRUE if DIGEST is supported by Windows SSPI.
+*/
+bool Curl_auth_is_digest_supported(void)
+{
+  PSecPkgInfo SecurityPackage;
+  SECURITY_STATUS status;
+
+  /* Query the security package for Digest */
+  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_DIGEST),
+                                              &SecurityPackage);
+
+  return (status == SEC_E_OK ? TRUE : FALSE);
+}
+
+/*
  * Curl_auth_create_digest_md5_message()
  *
  * This is used to generate an already encoded DIGEST-MD5 response message

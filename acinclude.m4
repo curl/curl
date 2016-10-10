@@ -32,8 +32,8 @@ dnl actually be a single double-quoted string concatenating all them.
 AC_DEFUN([CURL_CHECK_DEF], [
   AC_REQUIRE([CURL_CPP_P])dnl
   OLDCPPFLAGS=$CPPFLAGS
-  # CPPPFLAGS comes from CURL_CPP_P
-  CPPFLAGS="$CPPPFLAGS"
+  # CPPPFLAG comes from CURL_CPP_P
+  CPPFLAGS="$CPPFLAGS $CPPPFLAG"
   AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
   AS_VAR_PUSHDEF([ac_Def], [curl_cv_def_$1])dnl
   if test -z "$SED"; then
@@ -3187,12 +3187,15 @@ TEST EINVAL TEST
     if test "x$cpp_p" = "xno"; then
       AC_MSG_WARN([failed to figure out cpp -P alternative])
       # without -P
-      CPPPFLAGS=$OLDCPPFLAGS
+      CPPPFLAG=""
     else
       # with -P
-      CPPPFLAGS=$CPPFLAGS
+      CPPPFLAG="-P"
     fi
     dnl restore CPPFLAGS
     CPPFLAGS=$OLDCPPFLAGS
+  else
+    # without -P
+    CPPPFLAG=""
   fi
 ])

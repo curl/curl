@@ -306,6 +306,20 @@ static CURLcode auth_decode_digest_md5_message(const char *chlg64,
 }
 
 /*
+ * Curl_auth_is_digest_supported()
+ *
+ * This is used to evaluate if DIGEST is supported.
+ *
+ * Parameters: None
+ *
+ * Returns TRUE as DIGEST as handled by libcurl.
+ */
+bool Curl_auth_is_digest_supported(void)
+{
+  return TRUE;
+}
+
+/*
  * Curl_auth_create_digest_md5_message()
  *
  * This is used to generate an already encoded DIGEST-MD5 response message

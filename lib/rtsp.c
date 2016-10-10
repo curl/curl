@@ -796,19 +796,15 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
       }
     }
     else {
-      /* If the Session ID is not set, and we find it in a response, then
-         set it */
-
-      /* The session ID can be an alphanumeric or a 'safe' character
+      /* If the Session ID is not set, and we find it in a response, then set
+       * it.
        *
-       * RFC 2326 15.1 Base Syntax:
-       * safe =  "\$" | "-" | "_" | "." | "+"
-       * */
+       * Allow any non whitespace content, up to the field seperator or end of
+       * line. RFC 2326 isn't 100% clear on the session ID and for example
+       * gstreamer does url-encoded session ID's not covered by the standard.
+       */
       char *end = start;
-      while(*end &&
-            (ISALNUM(*end) || *end == '-' || *end == '_' || *end == '.' ||
-             *end == '+' ||
-             (*end == '\\' && *(end + 1) && *(end + 1) == '$' && (++end, 1))))
+      while(*end && *end != ';' && !ISSPACE(*end))
         end++;
 
       /* Copy the id substring into a new buffer */

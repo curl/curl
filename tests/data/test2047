@@ -63,10 +63,12 @@ http://åäö.se/2047 -x %HOSTIP:%HTTPPORT -w "%{num_connects}\n%{num_redirects}
 GET http://xn--4cab6c.se/2047 HTTP/1.1
 Host: xn--4cab6c.se
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 GET http://xn--4cab6c.se/20470001 HTTP/1.1
 Host: xn--4cab6c.se
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 

@@ -58,6 +58,7 @@ CURLOPT_PROXYHEADER is ignored CURLHEADER_UNIFIED
 <proxy>
 CONNECT the.old.moo.1525:%HTTPPORT HTTP/1.1
 Host: the.old.moo.1525:%HTTPPORT
+Proxy-Connection: Keep-Alive
 User-Agent: Http Agent
 
 </proxy>

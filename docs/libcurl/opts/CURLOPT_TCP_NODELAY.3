@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_TCP_NODELAY 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_TCP_NODELAY 3 "30 Jun 2016" "libcurl 7.50.0" "curl_easy_setopt options"
 .SH NAME
 CURLOPT_TCP_NODELAY \- set the TCP_NODELAY option
 .SH SYNOPSIS
@@ -29,8 +29,8 @@ CURLOPT_TCP_NODELAY \- set the TCP_NODELAY option
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TCP_NODELAY, long nodelay);
 .SH DESCRIPTION
 Pass a long specifying whether the TCP_NODELAY option is to be set or cleared
-(1 = set, 0 = clear). The option is cleared by default. This will have no
-effect after the connection has been established.
+(1 = set, 0 = clear). The option is set by default. This will have no effect
+after the connection has been established.
 
 Setting this option will disable TCP's Nagle algorithm. The purpose of this
 algorithm is to try to minimize the number of small packets on the network
@@ -43,13 +43,13 @@ need to be sent without delay. This is less efficient than sending larger
 amounts of data at a time, and can contribute to congestion on the network if
 overdone.
 .SH DEFAULT
-0
+1
 .SH PROTOCOLS
 All
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-Always
+Always. The default was changed to 1 from 0 in 7.50.2.
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"

@@ -887,10 +887,12 @@ http://test.remote.haxx.se.1060:8990/path/10600002 --proxy http://%HOSTIP:%HTTPP
 <protocol>
 CONNECT test.remote.haxx.se.1060:8990 HTTP/1.1
 Host: test.remote.haxx.se.1060:8990
+Proxy-Connection: Keep-Alive
 
 CONNECT test.remote.haxx.se.1060:8990 HTTP/1.1
 Host: test.remote.haxx.se.1060:8990
 Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.haxx.se.1060:8990", response="e1fbed39c26f4efe284adc0e576ff638"
+Proxy-Connection: Keep-Alive
 
 GET /path/10600002 HTTP/1.1
 Host: test.remote.haxx.se.1060:8990

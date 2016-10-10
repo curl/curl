@@ -47,13 +47,19 @@ CFGSET=FALSE
 WINBUILD_DIR=`cd`
 ZIP        = zip.exe
 
+# Allow changing C compiler via environment variable CC (default cl.exe)
+# This command macro is not set by default: https://msdn.microsoft.com/en-us/library/ms933742.aspx
+!If "$(CC)" == ""
+CC = cl.exe
+!Endif
+
 !IF "$(VC)"=="6"
-CC_NODEBUG  = cl.exe /O2 /DNDEBUG
-CC_DEBUG    = cl.exe /Od /Gm /Zi /D_DEBUG /GZ
+CC_NODEBUG  = $(CC) /O2 /DNDEBUG
+CC_DEBUG    = $(CC) /Od /Gm /Zi /D_DEBUG /GZ
 CFLAGS     = /I. /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
 !ELSE
-CC_NODEBUG  = cl.exe /O2 /DNDEBUG
-CC_DEBUG    = cl.exe /Od /D_DEBUG /RTC1 /Z7 /LDd /W3
+CC_NODEBUG  = $(CC) /O2 /DNDEBUG
+CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd /W3
 CFLAGS      = /I. /I ../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
 !ENDIF
 
@@ -276,19 +282,13 @@ CFGSET = true
 
 !IF "$(DEBUG)"=="yes"
 RC_FLAGS = /dDEBUGBUILD=1 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
-CC              = $(CC_DEBUG) $(RTLIB_DEBUG)
-
-CURL_CC         = $(CC)
+CURL_CC       = $(CC_DEBUG) $(RTLIB_DEBUG)
 CURL_RC_FLAGS = /i../include /dDEBUGBUILD=1 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 !ELSE
 RC_FLAGS = /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
-CC              = $(CC_NODEBUG) $(RTLIB)
-
-CURL_CC         = $(CC)
+CURL_CC       = $(CC_NODEBUG) $(RTLIB)
 CURL_RC_FLAGS = /i../include /dDEBUGBUILD=0 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 !ENDIF
-
-CURL_CC = $(CURL_CC) $(CURL_CFLAGS)
 
 !IF "$(AS_DLL)" == "true"
 
@@ -317,7 +317,7 @@ TARGET   = $(LIB_NAME_STATIC)
 PDB      = $(PDB_NAME_STATIC)
 !ENDIF
 LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
-CC       = $(CC) $(CFLAGS_LIBCURL_STATIC)
+CURL_CC  = $(CURL_CC) $(CFLAGS_LIBCURL_STATIC)
 
 # AS_DLL
 !ENDIF
@@ -462,13 +462,13 @@ $(CURL_DIROBJ):
 .SUFFIXES: .c .obj .res
 
 {$(LIBCURL_SRC_DIR)\}.c{$(LIB_DIROBJ)\}.obj:
-	$(CC) $(CFLAGS) /Fo"$@"  $<
+	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
 
 {$(LIBCURL_SRC_DIR)\vauth\}.c{$(LIB_DIROBJ)\vauth\}.obj:
-	$(CC) $(CFLAGS) /Fo"$@"  $<
+	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
 
 {$(LIBCURL_SRC_DIR)\vtls\}.c{$(LIB_DIROBJ)\vtls\}.obj:
-	$(CC) $(CFLAGS) /Fo"$@"  $<
+	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
 
 $(LIB_DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
 	rc $(RC_FLAGS)
@@ -503,7 +503,7 @@ $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(MANIFESTTOOL)
 
 {$(CURL_SRC_DIR)\}.c{$(CURL_DIROBJ)\}.obj:
-	$(CC) $(CURL_CFLAGS) /Fo"$@"  $<
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@"  $<
 
 $(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
 	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\tool_hugehelp.c

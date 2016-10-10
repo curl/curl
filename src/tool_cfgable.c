@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,6 +41,7 @@ void config_init(struct OperationConfig* config)
                           CURLPROTO_SMBS);
   config->proto_redir_present = FALSE;
   config->proto_default = NULL;
+  config->tcp_nodelay = TRUE; /* enabled by default */
 }
 
 static void free_config_fields(struct OperationConfig *config)

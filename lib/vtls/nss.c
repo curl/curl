@@ -78,13 +78,12 @@
 #define SLOTSIZE 13
 
 PRFileDesc *PR_ImportTCPSocket(PRInt32 osfd);
-
-PRLock * nss_initlock = NULL;
-PRLock * nss_crllock = NULL;
-struct curl_llist *nss_crl_list = NULL;
-NSSInitContext * nss_context = NULL;
-
-volatile int initialized = 0;
+static PRLock *nss_initlock = NULL;
+static PRLock *nss_crllock = NULL;
+static PRLock *nss_findslot_lock = NULL;
+static struct curl_llist *nss_crl_list = NULL;
+static NSSInitContext *nss_context = NULL;
+static volatile int initialized = 0;
 
 typedef struct {
   const char *name;
@@ -150,7 +149,7 @@ static const cipher_s cipherlist[] = {
   {"ecdh_rsa_3des_sha",          TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA},
   {"ecdh_rsa_aes_128_sha",       TLS_ECDH_RSA_WITH_AES_128_CBC_SHA},
   {"ecdh_rsa_aes_256_sha",       TLS_ECDH_RSA_WITH_AES_256_CBC_SHA},
-  {"echde_rsa_null",             TLS_ECDHE_RSA_WITH_NULL_SHA},
+  {"ecdhe_rsa_null",             TLS_ECDHE_RSA_WITH_NULL_SHA},
   {"ecdhe_rsa_rc4_128_sha",      TLS_ECDHE_RSA_WITH_RC4_128_SHA},
   {"ecdhe_rsa_3des_sha",         TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA},
   {"ecdhe_rsa_aes_128_sha",      TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA},
@@ -180,10 +179,29 @@ static const cipher_s cipherlist[] = {
   {"ecdhe_rsa_aes_128_gcm_sha_256",   TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256},
   {"ecdh_rsa_aes_128_gcm_sha_256",    TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256},
 #endif
+#ifdef TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+  /* cipher suites using SHA384 */
+  {"rsa_aes_256_gcm_sha_384",         TLS_RSA_WITH_AES_256_GCM_SHA384},
+  {"dhe_rsa_aes_256_gcm_sha_384",     TLS_DHE_RSA_WITH_AES_256_GCM_SHA384},
+  {"dhe_dss_aes_256_gcm_sha_384",     TLS_DHE_DSS_WITH_AES_256_GCM_SHA384},
+  {"ecdhe_ecdsa_aes_256_sha_384",     TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384},
+  {"ecdhe_rsa_aes_256_sha_384",       TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384},
+  {"ecdhe_ecdsa_aes_256_gcm_sha_384", TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384},
+  {"ecdhe_rsa_aes_256_gcm_sha_384",   TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384},
+#endif
+#ifdef TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+  /* chacha20-poly1305 cipher suites */
+ {"ecdhe_rsa_chacha20_poly1305_sha_256",
+     TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256},
+ {"ecdhe_ecdsa_chacha20_poly1305_sha_256",
+     TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256},
+ {"dhe_rsa_chacha20_poly1305_sha_256",
+     TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256},
+#endif
 };
 
 static const char* pem_library = "libnsspem.so";
-SECMODModule* mod = NULL;
+static SECMODModule* mod = NULL;
 
 /* NSPR I/O layer we use to detect blocking direction during SSL handshake */
 static PRDescIdentity nspr_io_identity = PR_INVALID_IO_LAYER;
@@ -340,6 +358,19 @@ static char* dup_nickname(struct Curl_easy *data, enum dupstring cert_kind)
   return NULL;
 }
 
+/* Lock/unlock wrapper for PK11_FindSlotByName() to work around race condition
+ * in nssSlot_IsTokenPresent() causing spurious SEC_ERROR_NO_TOKEN.  For more
+ * details, go to <https://bugzilla.mozilla.org/1297397>.
+ */
+static PK11SlotInfo* nss_find_slot_by_name(const char *slot_name)
+{
+  PK11SlotInfo *slot;
+  PR_Lock(nss_initlock);
+  slot = PK11_FindSlotByName(slot_name);
+  PR_Unlock(nss_initlock);
+  return slot;
+}
+
 /* Call PK11_CreateGenericObject() with the given obj_class and filename.  If
  * the call succeeds, append the object handle to the list of objects so that
  * the object can be destroyed in Curl_nss_close(). */
@@ -362,7 +393,7 @@ static CURLcode nss_create_object(struct ssl_connect_data *ssl,
   if(!slot_name)
     return CURLE_OUT_OF_MEMORY;
 
-  slot = PK11_FindSlotByName(slot_name);
+  slot = nss_find_slot_by_name(slot_name);
   free(slot_name);
   if(!slot)
     return result;
@@ -563,7 +594,7 @@ static CURLcode nss_load_key(struct connectdata *conn, int sockindex,
     return result;
   }
 
-  slot = PK11_FindSlotByName("PEM Token #1");
+  slot = nss_find_slot_by_name("PEM Token #1");
   if(!slot)
     return CURLE_SSL_CERTPROBLEM;
 
@@ -1004,16 +1035,16 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)arg;
   struct Curl_easy *data = connssl->data;
   const char *nickname = connssl->client_nickname;
+  static const char pem_slotname[] = "PEM Token #1";
 
   if(connssl->obj_clicert) {
     /* use the cert/key provided by PEM reader */
-    static const char pem_slotname[] = "PEM Token #1";
     SECItem cert_der = { 0, NULL, 0 };
     void *proto_win = SSL_RevealPinArg(sock);
     struct CERTCertificateStr *cert;
     struct SECKEYPrivateKeyStr *key;
 
-    PK11SlotInfo *slot = PK11_FindSlotByName(pem_slotname);
+    PK11SlotInfo *slot = nss_find_slot_by_name(pem_slotname);
     if(NULL == slot) {
       failf(data, "NSS: PK11 slot not found: %s", pem_slotname);
       return SECFailure;
@@ -1068,6 +1099,12 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
   nickname = (*pRetCert)->nickname;
   if(NULL == nickname)
     nickname = "[unknown]";
+
+  if(!strncmp(nickname, pem_slotname, sizeof(pem_slotname) - 1U)) {
+    failf(data, "NSS: refusing previously loaded certificate from file: %s",
+          nickname);
+    return SECFailure;
+  }
 
   if(NULL == *pRetKey) {
     failf(data, "NSS: private key not found for certificate: %s", nickname);
@@ -1243,6 +1280,7 @@ int Curl_nss_init(void)
     PR_Init(PR_USER_THREAD, PR_PRIORITY_NORMAL, 256);
     nss_initlock = PR_NewLock();
     nss_crllock = PR_NewLock();
+    nss_findslot_lock = PR_NewLock();
   }
 
   /* We will actually initialize NSS later */
@@ -1297,6 +1335,7 @@ void Curl_nss_cleanup(void)
 
   PR_DestroyLock(nss_initlock);
   PR_DestroyLock(nss_crllock);
+  PR_DestroyLock(nss_findslot_lock);
   nss_initlock = NULL;
 
   initialized = 0;

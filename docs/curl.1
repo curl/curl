@@ -520,7 +520,7 @@ nickname contains ":", it needs to be preceded by "\\" so that it is not
 recognized as password delimiter.  If the nickname contains "\\", it needs to
 be escaped as "\\\\" so that it is not recognized as an escape character.
 
-(iOS and Mac OS X only) If curl is built against Secure Transport, then the
+(iOS and macOS only) If curl is built against Secure Transport, then the
 certificate string can either be the name of a certificate/private key in the
 system or user keychain, or the path to a PKCS#12-encoded certificate and
 private key. If you want to use a file from the current directory, please
@@ -568,6 +568,12 @@ Current Working Directory, or in any folder along your PATH.
 
 If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
 (libnsspem.so) needs to be available for this option to work properly.
+
+(iOS and macOS only) If curl is built against Secure Transport, then this
+option is supported for backward compatibility with other SSL engines, but it
+should not be set. If the option is not set, then curl will use the
+certificates in the system and user Keychain to verify the peer, which is the
+preferred method of verifying the peer's certificate chain.
 
 If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
@@ -1018,10 +1024,6 @@ The given speed is measured in bytes/second, unless a suffix is appended.
 Appending 'k' or 'K' will count the number as kilobytes, 'm' or M' makes it
 megabytes, while 'g' or 'G' makes it gigabytes. Examples: 200K, 3m and 1G.
 
-The given rate is the average speed counted during the entire transfer. It
-means that curl might use higher transfer speeds in short bursts, but over
-time it uses no more than the given rate.
-
 If you also use the \fI-Y, --speed-limit\fP option, that option will take
 precedence and might cripple the rate-limiting slightly, to help keeping the
 speed-limit logic working.
@@ -1352,10 +1354,9 @@ consistency. However, a server may require a POST to remain a POST after such
 a redirection. This option is meaningful only when using \fI-L, --location\fP
 (Added in 7.26.0)
 .IP "--proto <protocols>"
-Tells curl to use the listed protocols for its initial retrieval. Protocols
-are evaluated left to right, are comma separated, and are each a protocol
-name or 'all', optionally prefixed by zero or more modifiers. Available
-modifiers are:
+Tells curl to limit what protocols it may use in the transfer. Protocols are
+evaluated left to right, are comma separated, and are each a protocol name or
+'all', optionally prefixed by zero or more modifiers. Available modifiers are:
 .RS
 .TP 3
 .B +
@@ -1412,8 +1413,9 @@ for details.
 
 (Added in 7.45.0)
 .IP "--proto-redir <protocols>"
-Tells curl to use the listed protocols on redirect. See --proto for how
-protocols are represented.
+Tells curl to limit what protocols it may use on redirect. Protocols denied by
+--proto are not overridden by this option. See \fI--proto\fP for how protocols
+are represented.
 
 Example:
 
@@ -1816,7 +1818,8 @@ algorithms curl supports, and uncompress the data while receiving it.
 .IP "--trace <file>"
 Enables a full trace dump of all incoming and outgoing data, including
 descriptive information, to the given output file. Use "-" as filename to have
-the output sent to stdout.
+the output sent to stdout. Use "%" as filename to have the output sent to
+stderr.
 
 This option overrides previous uses of \fI-v, --verbose\fP or
 \fI--trace-ascii\fP.
@@ -2252,7 +2255,7 @@ Couldn't resolve host. The given remote host was not resolved.
 .IP 7
 Failed to connect to host.
 .IP 8
-FTP weird server reply. The server sent data curl couldn't parse.
+Weird server reply. The server sent data curl couldn't parse.
 .IP 9
 FTP access denied. The server denied login or denied access to the particular
 resource or directory you wanted to reach. Most often you tried to change to a
