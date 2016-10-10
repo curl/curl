@@ -4164,7 +4164,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     path[0]=0;
 
     rc = sscanf(data->change.url,
-                "%15[^\n:]:%3[/]%[^\n/?]%[^\n]",
+                "%15[^\n:]:%3[/]%[^\n/?#]%[^\n]",
                 protobuf, slashbuf, conn->host.name, path);
     if(2 == rc) {
       failf(data, "Bad URL");
@@ -4176,7 +4176,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
        */
-      rc = sscanf(data->change.url, "%[^\n/?]%[^\n]", conn->host.name, path);
+      rc = sscanf(data->change.url, "%[^\n/?#]%[^\n]", conn->host.name, path);
       if(1 > rc) {
         /*
          * We couldn't even get this format.
@@ -4281,10 +4281,10 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   }
 
   /* If the URL is malformatted (missing a '/' after hostname before path) we
-   * insert a slash here. The only letter except '/' we accept to start a path
-   * is '?'.
+   * insert a slash here. The only letters except '/' that can start a path is
+   * '?' and '#' - as controlled by the two sscanf() patterns above.
    */
-  if(path[0] == '?') {
+  if(path[0] != '/') {
     /* We need this function to deal with overlapping memory areas. We know
        that the memory area 'path' points to is 'urllen' bytes big and that
        is bigger than the path. Use +1 to move the zero byte too. */
