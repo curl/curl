@@ -13,7 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o openssl: fix per-thread memory leak usiong 1.0.1 or 1.0.2 [1]
+ o openssl: fix per-thread memory leak using 1.0.1 or 1.0.2 [1]
  o http: accept "Transfer-Encoding: chunked" for HTTP/2 as well [2]
  o LICENSE-MIXING.md: update with mbedTLS dual licensing [3]
  o examples/imap-append: Set size of data to be uploaded [4]
