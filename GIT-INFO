@@ -58,7 +58,7 @@ MAC OS X
  of the build tools are adequate.  For Mac OS X 10.1 users, Guido Neitzer
  wrote the following step-by-step guide:
 
- 1. Install fink (http://fink.sourceforge.net)
+ 1. Install fink (http://www.finkproject.org)
  2. Update fink to the newest version (with the installed fink)
  3. Install the latest version of autoconf, automake and m4 with fink
  4. Install version 1.4.1 of libtool - you find it in the "unstable" section
