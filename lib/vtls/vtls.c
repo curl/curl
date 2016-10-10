@@ -398,6 +398,7 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
          (conn->bits.conn_to_port && check->conn_to_port != -1 &&
            conn->conn_to_port == check->conn_to_port)) &&
        (conn->remote_port == check->remote_port) &&
+       Curl_raw_equal(conn->handler->scheme, check->scheme) &&
        Curl_ssl_config_matches(&conn->ssl_config, &check->ssl_config)) {
       /* yes, we have a session ID! */
       (*general_age)++;          /* increase general age */
@@ -528,6 +529,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   store->conn_to_host = clone_conn_to_host; /* clone connect to host name */
   store->conn_to_port = conn_to_port; /* connect to port number */
   store->remote_port = conn->remote_port; /* port number */
+  store->scheme = conn->handler->scheme;
 
   if(!Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config)) {
     store->sessionid = NULL; /* let caller free sessionid */
