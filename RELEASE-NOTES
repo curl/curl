@@ -30,6 +30,11 @@ This release includes the following bugfixes:
  o curl.1: --trace supports % for sending to stderr!
  o cookies: same domain handling changed to match browser behavior [11]
  o formpost: trying to attach a directory no longer crashes [12]
+ o CURLOPT_DEBUGFUNCTION.3: fixed unused argument warning [13]
+ o formpost: avoid silent snprintf() truncation
+ o ftp: fix Curl_ftpsendf
+ o mprintf: return error on too many arguments
+ o smb: properly check incoming packet boundaries [14]
 
 This release includes the following known bugs:
 
@@ -40,10 +45,10 @@ advice from friends like these:
 
   Akshay Vernekar, Alexander Sinditskiy, Bernard Spil, Dan Fandrich,
   Daniel Gustafsson, Daniel Stenberg, Jeroen Ooms, Kamil Dudka,
-  lukaszgn on github, Michael Kaufmann, Nick Zitzmann, Ray Satiro,
-  Sebastian Mundry, Sergei Kuzmin, Stephen Brokenshire, Toby Peterson,
-  Todd Short, Tony Kelman,
-  (18 contributors)
+  lukaszgn on github, Michael Kaufmann, Nick Zitzmann, Rainer Müller,
+  Ray Satiro, Sebastian Mundry, Sergei Kuzmin, Stephen Brokenshire,
+  Tobias Stoeckmann, Toby Peterson, Todd Short, Tony Kelman,
+  (20 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -61,3 +66,5 @@ References to bug reports and discussions on issues:
  [10] = https://curl.haxx.se/libcurl/c/CURLOPT_KEEP_SENDING_ON_ERROR.html
  [11] = https://curl.haxx.se/bug/?i=1050
  [12] = https://curl.haxx.se/bug/?i=1053
+ [13] = https://curl.haxx.se/bug/?i=1056
+ [14] = https://curl.haxx.se/bug/?i=1052
