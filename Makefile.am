@@ -28,7 +28,8 @@ CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in      \
  CMake/CurlTests.c CMake/FindGSS.cmake CMake/OtherTests.cmake   \
  CMake/Platforms/WindowsCache.cmake CMake/Utilities.cmake       \
  include/curl/curlbuild.h.cmake CMake/Macros.cmake              \
- CMake/CurlSymbolHiding.cmake
+ CMake/CurlSymbolHiding.cmake CMake/FindCARES.cmake             \
+ CMake/FindLibSSH2.cmake CMake/FindNGHTTP2.cmake
 
 
 VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
