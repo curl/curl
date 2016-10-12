@@ -599,10 +599,9 @@ int netware_init(void);
 #endif
 #endif
 
-#if defined(HAVE_LIBIDN) && defined(HAVE_TLD_H)
-/* The lib was present and the tld.h header (which is missing in libidn 0.3.X
-   but we only work with libidn 0.4.1 or later) */
-#define USE_LIBIDN
+#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H)
+/* The lib and header are present */
+#define USE_LIBIDN2
 #endif
 
 #ifndef SIZEOF_TIME_T

@@ -59,24 +59,15 @@
 #include <limits.h>
 #endif
 
-#ifdef USE_LIBIDN
-#include <idna.h>
-#include <tld.h>
-#include <stringprep.h>
-#ifdef HAVE_IDN_FREE_H
-#include <idn-free.h>
-#else
-/* prototype from idn-free.h, not provided by libidn 0.4.5's make install! */
-void idn_free (void *ptr);
-#endif
-#ifndef HAVE_IDN_FREE
-/* if idn_free() was not found in this version of libidn use free() instead */
-#define idn_free(x) (free)(x)
-#endif
+#ifdef USE_LIBIDN2
+#include <idn2.h>
+
 #elif defined(USE_WIN32_IDN)
 /* prototype for curl_win32_idn_to_ascii() */
 bool curl_win32_idn_to_ascii(const char *in, char **out);
-#endif  /* USE_LIBIDN */
+#endif  /* USE_LIBIDN2 */
+
+#include <idn2.h>
 
 #include "urldata.h"
 #include "netrc.h"
@@ -3771,58 +3762,15 @@ static bool is_ASCII_name(const char *hostname)
   return TRUE;
 }
 
-#ifdef USE_LIBIDN
-/*
- * Check if characters in hostname is allowed in Top Level Domain.
- */
-static bool tld_check_name(struct Curl_easy *data,
-                           const char *ace_hostname)
-{
-  size_t err_pos;
-  char *uc_name = NULL;
-  int rc;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  const char *tld_errmsg = "<no msg>";
-#else
-  (void)data;
-#endif
-
-  /* Convert (and downcase) ACE-name back into locale's character set */
-  rc = idna_to_unicode_lzlz(ace_hostname, &uc_name, 0);
-  if(rc != IDNA_SUCCESS)
-    return FALSE;
-
-  /* Warning: err_pos receives "the decoded character offset rather than the
-     byte position in the string." And as of libidn 1.32 that character offset
-     is for UTF-8, even if the passed in string is another locale. */
-  rc = tld_check_lz(uc_name, &err_pos, NULL);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-#ifdef HAVE_TLD_STRERROR
-  if(rc != TLD_SUCCESS)
-    tld_errmsg = tld_strerror((Tld_rc)rc);
-#endif
-  if(rc != TLD_SUCCESS)
-    infof(data, "WARNING: TLD check for %s failed; %s\n",
-          uc_name, tld_errmsg);
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
-  if(uc_name)
-     idn_free(uc_name);
-  if(rc != TLD_SUCCESS)
-    return FALSE;
-
-  return TRUE;
-}
-#endif
-
 /*
  * Perform any necessary IDN conversion of hostname
  */
-static void fix_hostname(struct Curl_easy *data,
-                         struct connectdata *conn, struct hostname *host)
+static void fix_hostname(struct connectdata *conn, struct hostname *host)
 {
   size_t len;
+  struct Curl_easy *data = conn->data;
 
-#ifndef USE_LIBIDN
+#ifndef USE_LIBIDN2
   (void)data;
   (void)conn;
 #elif defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -3840,25 +3788,18 @@ static void fix_hostname(struct Curl_easy *data,
 
   /* Check name for non-ASCII and convert hostname to ACE form if we can */
   if(!is_ASCII_name(host->name)) {
-#ifdef USE_LIBIDN
-    if(stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
+#ifdef USE_LIBIDN2
+    if(idn2_check_version(IDN2_VERSION)) {
       char *ace_hostname = NULL;
-
-      int rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);
-      infof(data, "Input domain encoded as `%s'\n",
-            stringprep_locale_charset());
-      if(rc == IDNA_SUCCESS) {
-        /* tld_check_name() displays a warning if the host name contains
-           "illegal" characters for this TLD */
-        (void)tld_check_name(data, ace_hostname);
-
-        host->encalloc = ace_hostname;
+      int rc = idn2_lookup_ul((const char *)host->name, &ace_hostname, 0);
+      if(rc == IDN2_OK) {
+        host->encalloc = (char *)ace_hostname;
         /* change the name pointer to point to the encoded hostname */
         host->name = host->encalloc;
       }
       else
         infof(data, "Failed to convert %s to ACE; %s\n", host->name,
-              Curl_idn_strerror(conn, rc));
+              idn2_strerror(rc));
     }
 #elif defined(USE_WIN32_IDN)
     char *ace_hostname = NULL;
@@ -3881,9 +3822,9 @@ static void fix_hostname(struct Curl_easy *data,
  */
 static void free_fixed_hostname(struct hostname *host)
 {
-#if defined(USE_LIBIDN)
+#if defined(USE_LIBIDN2)
   if(host->encalloc) {
-    idn_free(host->encalloc); /* must be freed with idn_free() since this was
+    idn2_free(host->encalloc); /* must be freed with idn2_free() since this was
                                  allocated by libidn */
     host->encalloc = NULL;
   }
@@ -6046,11 +5987,11 @@ static CURLcode create_conn(struct Curl_easy *data,
   /*************************************************************
    * IDN-fix the hostnames
    *************************************************************/
-  fix_hostname(data, conn, &conn->host);
+  fix_hostname(conn, &conn->host);
   if(conn->bits.conn_to_host)
-    fix_hostname(data, conn, &conn->conn_to_host);
+    fix_hostname(conn, &conn->conn_to_host);
   if(conn->proxy.name && *conn->proxy.name)
-    fix_hostname(data, conn, &conn->proxy);
+    fix_hostname(conn, &conn->proxy);
 
   /*************************************************************
    * Check whether the host and the "connect to host" are equal.
