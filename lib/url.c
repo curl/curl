@@ -2908,8 +2908,7 @@ static bool IsPipeliningPossible(const struct Curl_easy *handle,
                                  const struct connectdata *conn)
 {
   /* If a HTTP protocol and pipelining is enabled */
-  if(!conn->bits.close &&
-      (conn->handler->protocol & PROTO_FAMILY_HTTP)) {
+  if((conn->handler->protocol & PROTO_FAMILY_HTTP) && !conn->bits.close) {
 
     if(Curl_pipeline_wanted(handle->multi, CURLPIPE_HTTP1) &&
        (handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
@@ -3284,10 +3283,6 @@ ConnectionExists(struct Curl_easy *data,
       pipeLen = check->send_pipe->size + check->recv_pipe->size;
 
       if(canPipeline) {
-        /*
-         * We can not use this connection if the connection is marked for
-         * closure due to an error (ie. a timeout)
-         */
         if(check->bits.close)
             continue;
 
