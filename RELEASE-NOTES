@@ -35,6 +35,15 @@ This release includes the following bugfixes:
  o ftp: fix Curl_ftpsendf
  o mprintf: return error on too many arguments
  o smb: properly check incoming packet boundaries [14]
+ o GIT-INFO: remove the Mac 10.1-specific details [15]
+ o resolve: add error message when resolving using SIGALRM [16]
+ o cmake: add nghttp2 support [17]
+ o dist: remove PDF and HTML converted docs from the releases [18]
+ o configure: detect the broken poll() in macOS 10.12 [19]
+ o vtls: only re-use session-ids using the same scheme
+ o pipelining: skip to-be-closed connections when pipelining [20]
+ o win: fix Universal Windows Platform build [21]
+ o curl: do not set CURLOPT_SSLENGINE to DEFAULT automatically [22]
 
 This release includes the following known bugs:
 
@@ -43,12 +52,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Akshay Vernekar, Alexander Sinditskiy, Bernard Spil, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Jeroen Ooms, Kamil Dudka,
-  lukaszgn on github, Michael Kaufmann, Nick Zitzmann, Rainer Müller,
-  Ray Satiro, Sebastian Mundry, Sergei Kuzmin, Stephen Brokenshire,
-  Tobias Stoeckmann, Toby Peterson, Todd Short, Tony Kelman,
-  (20 contributors)
+  Akshay Vernekar, Alexander Sinditskiy, Andreas Streichardt, Bernard Spil,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Darío Hereñú,
+  David Woodhouse, Jeroen Ooms, Kamil Dudka, lukaszgn on github, Marcel Raad,
+  Michael Kaufmann, Nick Zitzmann, nopjmp on github, Paul Joyce, Rainer Müller,
+  Ray Satiro, Remo E, Rider Linden, Sebastian Mundry, Sergei Kuzmin,
+  Stephen Brokenshire, Tobias Stoeckmann, Toby Peterson, Todd Short,
+  Tony Kelman, Torben Dannhauer,
+  (29 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -68,3 +79,11 @@ References to bug reports and discussions on issues:
  [12] = https://curl.haxx.se/bug/?i=1053
  [13] = https://curl.haxx.se/bug/?i=1056
  [14] = https://curl.haxx.se/bug/?i=1052
+ [15] = https://curl.haxx.se/bug/?i=1049
+ [16] = https://curl.haxx.se/bug/?i=1066
+ [17] = https://curl.haxx.se/bug/?i=922
+ [18] = https://curl.haxx.se/mail/lib-2016-10/0040.html
+ [19] = https://curl.haxx.se/bug/?i=1057
+ [20] = https://curl.haxx.se/bug/?i=1075
+ [21] = https://curl.haxx.se/bug/?i=1048
+ [22] = https://curl.haxx.se/bug/?i=1042
