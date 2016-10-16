@@ -87,7 +87,7 @@ problems may have been fixed or changed somewhat since this was written!
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
 
- 13 TCP/IP
+ 13. TCP/IP
  13.1 --interface for ipv6 binds to unusable IP address
 
 
@@ -585,7 +585,7 @@ problems may have been fixed or changed somewhat since this was written!
      https://curl.haxx.se/mail/lib-2016-01/0101.html
 
 
-13 TCP/IP
+13. TCP/IP
 
 13.1 --interface for ipv6 binds to unusable IP address
 
