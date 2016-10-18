@@ -4739,12 +4739,15 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   tst_allow_poll="unknown"
   #
   case $host_os in
-    darwin[[123456789]].*|darwin10.*|darwin11.*|darwin12.*|interix*)
+    darwin*|interix*)
       dnl poll() does not work on these platforms
       dnl Interix: "does provide poll(), but the implementing developer must
       dnl have been in a bad mood, because poll() only works on the /proc
       dnl filesystem here"
+      dnl macOS: poll() first didn't exist, then was broken until fixed in 10.9
+      dnl only to break again in 10.12.
       curl_disallow_poll="yes"
+      tst_compi_poll="no"
       ;;
   esac
   #
