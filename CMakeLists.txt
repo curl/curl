@@ -19,7 +19,7 @@
 # KIND, either express or implied.
 #
 ###########################################################################
-# cURL/libcurl CMake script
+# curl/libcurl CMake script
 # by Tetetest and Sukender (Benoit Neil)
 
 # TODO:
@@ -72,7 +72,7 @@ set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 include_directories(${PROJECT_BINARY_DIR}/include/curl)
 include_directories( ${CURL_SOURCE_DIR}/include )
 
-option(BUILD_CURL_EXE "Set to ON to build cURL executable." ON)
+option(BUILD_CURL_EXE "Set to ON to build curl executable." ON)
 option(CURL_STATICLIB "Set to ON to build libcurl with static linking." OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 if(WIN32)
@@ -454,7 +454,7 @@ check_library_exists_concat("idn" idna_to_ascii_lz HAVE_LIBIDN)
 # Check for symbol dlopen (same as HAVE_LIBDL)
 check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
 
-option(CURL_ZLIB "Set to ON to enable building cURL with zlib support." ON)
+option(CURL_ZLIB "Set to ON to enable building curl with zlib support." ON)
 set(HAVE_LIBZ OFF)
 set(HAVE_ZLIB_H OFF)
 set(HAVE_ZLIB OFF)

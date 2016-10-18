@@ -894,7 +894,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
 18.3 prevent file overwriting
 
- Add an option that prevents cURL from overwriting existing local files. When
+ Add an option that prevents curl from overwriting existing local files. When
  used, and there already is an existing file with the target file name
  (either -O or -o), a number should be appended (and increased if already
  existing). So that index.html becomes first index.html.1 and then
@@ -1017,7 +1017,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
 19.2 Enable PIE and RELRO by default
 
- Especially when having programs that execute cURL via the command line, PIE
+ Especially when having programs that execute curl via the command line, PIE
  renders the exploitation of memory corruption vulnerabilities a lot more
  difficult. This can be attributed to the additional information leaks being
  required to conduct a successful attack. RELRO, on the other hand, masks
@@ -1025,7 +1025,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  of techniques that come in handy when attackers are able to arbitrarily
  overwrite memory. A few tests showed that enabling these features had close
  to no impact, neither on the performance nor on the general functionality of
- cURL.
+ curl.
 
 
 20. Test suite

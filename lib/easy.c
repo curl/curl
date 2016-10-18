@@ -217,7 +217,7 @@ curl_calloc_callback Curl_ccalloc;
 #endif
 
 /**
- * curl_global_init() globally initializes cURL given a bitwise set of the
+ * curl_global_init() globally initializes curl given a bitwise set of the
  * different features of what to initialize.
  */
 static CURLcode global_init(long flags, bool memoryfuncs)
@@ -292,7 +292,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
 
 /**
- * curl_global_init() globally initializes cURL given a bitwise set of the
+ * curl_global_init() globally initializes curl given a bitwise set of the
  * different features of what to initialize.
  */
 CURLcode curl_global_init(long flags)
@@ -301,7 +301,7 @@ CURLcode curl_global_init(long flags)
 }
 
 /*
- * curl_global_init_mem() globally initializes cURL and also registers the
+ * curl_global_init_mem() globally initializes curl and also registers the
  * user provided callback routines.
  */
 CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
@@ -333,7 +333,7 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
 }
 
 /**
- * curl_global_cleanup() globally cleanups cURL, uses the value of
+ * curl_global_cleanup() globally cleanups curl, uses the value of
  * "init_flags" to determine what needs to be cleaned up and what doesn't.
  */
 void curl_global_cleanup(void)

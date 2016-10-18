@@ -648,7 +648,7 @@ AmigaOS
 
    (This section was graciously brought to us by Diego Casorran)
 
-   To build cURL/libcurl on AmigaOS just type 'make amiga' ...
+   To build curl/libcurl on AmigaOS just type 'make amiga' ...
 
    What you need is:    (not tested with others versions)
 
@@ -900,7 +900,7 @@ CROSS COMPILE
    (This section was graciously brought to us by Jim Duey, with additions by
    Dan Fandrich)
 
-   Download and unpack the cURL package.
+   Download and unpack the curl package.
 
    'cd' to the new directory. (e.g. cd curl-7.12.3)
 
@@ -934,7 +934,7 @@ CROSS COMPILE
    You may also need to provide a parameter like '--with-random=/dev/urandom'
    to configure as it cannot detect the presence of a random number
    generating device for a target system.  The '--prefix' parameter
-   specifies where cURL will be installed.  If 'configure' completes
+   specifies where curl will be installed.  If 'configure' completes
    successfully, do 'make' and 'make install' as usual.
 
    In some cases, you may be able to simplify the above commands to as

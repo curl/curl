@@ -4,7 +4,7 @@ This document is intended to offer guidelines on how to best contribute to the
 curl project. This concerns new features as well as corrections to existing
 flaws or bugs.
 
-## Learning cURL
+## Learning curl
 
 ### Join the Community
 

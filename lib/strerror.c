@@ -427,7 +427,7 @@ curl_share_strerror(CURLSHcode error)
 
 #ifdef USE_WINSOCK
 
-/* This function handles most / all (?) Winsock errors cURL is able to produce.
+/* This function handles most / all (?) Winsock errors curl is able to produce.
  */
 static const char *
 get_winsock_error (int err, char *buf, size_t len)

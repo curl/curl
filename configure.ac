@@ -141,7 +141,7 @@ AC_SUBST(VERSIONNUM)
 
 dnl Solaris pkgadd support definitions
 PKGADD_PKG="HAXXcurl"
-PKGADD_NAME="cURL - a client that groks URLs"
+PKGADD_NAME="curl - a client that groks URLs"
 PKGADD_VENDOR="curl.haxx.se"
 AC_SUBST(PKGADD_PKG)
 AC_SUBST(PKGADD_NAME)
