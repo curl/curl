@@ -58,7 +58,7 @@ int Curl_ack_eintr = 0;
 
 /*
  * Internal function used for waiting a specific amount of ms
- * in Curl_socket_ready() and Curl_poll() when no file descriptor
+ * in Curl_socket_check() and Curl_poll() when no file descriptor
  * is provided to wait on, just being used to delay execution.
  * WinSock select() and poll() timeout mechanisms need a valid
  * socket descriptor in a not null file descriptor set to work.

@@ -741,7 +741,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
        */
     }
     else {
-      switch (Curl_socket_ready(sockfd, CURL_SOCKET_BAD, interval_ms)) {
+      switch (SOCKET_READABLE(sockfd, interval_ms)) {
       case -1: /* select() error, stop reading */
         failf(data, "FTP response aborted due to select/poll error: %d",
               SOCKERRNO);
@@ -3165,7 +3165,7 @@ static CURLcode ftp_multi_statemach(struct connectdata *conn,
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result = Curl_pp_statemach(&ftpc->pp, FALSE);
 
-  /* Check for the state outside of the Curl_socket_ready() return code checks
+  /* Check for the state outside of the Curl_socket_check() return code checks
      since at times we are in fact already in this state when this function
      gets called. */
   *done = (ftpc->state == FTP_STOP) ? TRUE : FALSE;

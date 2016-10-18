@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -144,7 +144,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
        Wait a while for the socket to be writable. Note that this doesn't
        acknowledge the timeout.
     */
-    Curl_socket_ready(CURL_SOCKET_BAD, sockfd, 100);
+    SOCKET_WRITABLE(sockfd, 100);
   }
 
   free(sel_org);

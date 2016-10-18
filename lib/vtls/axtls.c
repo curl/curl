@@ -579,8 +579,7 @@ int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
   */
 
   if(connssl->ssl) {
-    int what = Curl_socket_ready(conn->sock[sockindex],
-                                 CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
+    int what = SOCKET_READABLE(conn->sock[sockindex], SSL_SHUTDOWN_TIMEOUT);
     if(what > 0) {
       /* Something to read, let's do it and hope that it is the close
          notify alert from the server.  buf is managed internally by

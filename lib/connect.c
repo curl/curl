@@ -762,7 +762,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 #endif
 
     /* check socket for connect */
-    rc = Curl_socket_ready(CURL_SOCKET_BAD, conn->tempsock[i], 0);
+    rc = SOCKET_WRITABLE(conn->tempsock[i], 0);
 
     if(rc == 0) { /* no connection yet */
       error = 0;

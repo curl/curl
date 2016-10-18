@@ -1233,7 +1233,7 @@ static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done)
   }
   else {
     /* no timeouts to handle, check our socket */
-    rc = Curl_socket_ready(state->sockfd, CURL_SOCKET_BAD, 0);
+    rc = SOCKET_READABLE(state->sockfd, 0);
 
     if(rc == -1) {
       /* bail out */

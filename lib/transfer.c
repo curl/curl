@@ -1089,7 +1089,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   if(!select_res) /* Call for select()/poll() only, if read/write/error
                      status is not known. */
-    select_res = Curl_socket_ready(fd_read, fd_write, 0);
+    select_res = Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write, 0);
 
   if(select_res == CURL_CSELECT_ERR) {
     failf(data, "select/poll returned error");

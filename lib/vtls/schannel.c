@@ -815,7 +815,8 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
       curl_socket_t readfd = ssl_connect_2_reading ==
         connssl->connecting_state ? sockfd : CURL_SOCKET_BAD;
 
-      what = Curl_socket_ready(readfd, writefd, nonblocking ? 0 : timeout_ms);
+      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
+                               nonblocking ? 0 : timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL/TLS socket, errno: %d", SOCKERRNO);
@@ -971,8 +972,7 @@ schannel_send(struct connectdata *conn, int sockindex,
         break;
       }
 
-      what = Curl_socket_ready(CURL_SOCKET_BAD, conn->sock[sockindex],
-                               timeleft);
+      what = SOCKET_WRITABLE(conn->sock[sockindex], timeleft);
       if(what < 0) {
         /* fatal error */
         failf(conn->data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
