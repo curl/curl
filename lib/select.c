@@ -165,6 +165,12 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   int r;
   int ret;
 
+#if SIZEOF_LONG != SIZEOF_INT
+  /* wrap-around precaution */
+  if(timeout_ms >= INT_MAX)
+    timeout_ms = INT_MAX;
+#endif
+
   if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&
      (writefd == CURL_SOCKET_BAD)) {
     /* no sockets, just wait */
