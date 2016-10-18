@@ -462,6 +462,14 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
      handle is added */
   memset(&multi->timer_lastcall, 0, sizeof(multi->timer_lastcall));
 
+  /* The closure handle only ever has default timeouts set. To improve the
+     state somewhat we clone the timeouts from each added handle so that the
+     closure handle always has the same timeouts as the most recently added
+     easy handle. */
+  multi->closure_handle->set.timeout = data->set.timeout;
+  multi->closure_handle->set.server_response_timeout =
+    data->set.server_response_timeout;
+
   update_timer(multi);
   return CURLM_OK;
 }
