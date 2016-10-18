@@ -44,6 +44,13 @@ This release includes the following bugfixes:
  o pipelining: skip to-be-closed connections when pipelining [20]
  o win: fix Universal Windows Platform build [21]
  o curl: do not set CURLOPT_SSLENGINE to DEFAULT automatically [22]
+ o maketgz: make it support "only" generating version info
+ o Curl_socket_check: add extra check to avoid integer overflow
+ o gopher: properly return error for poll failures
+ o curl: set INTERLEAVEDATA too
+ o polarssl: clear thread array at init
+ o polarssl: fix unaligned SSL session-id lock
+ o polarssl: reduce #ifdef madness with a macro
 
 This release includes the following known bugs:
 
