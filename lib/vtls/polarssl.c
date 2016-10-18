@@ -101,13 +101,13 @@ static void entropy_init_mutex(entropy_context *ctx)
 /* start of entropy_func_mutex() */
 static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 {
-    int ret;
-    /* lock 1 = entropy_func_mutex() */
-    Curl_polarsslthreadlock_lock_function(1);
-    ret = entropy_func(data, output, len);
-    Curl_polarsslthreadlock_unlock_function(1);
+  int ret;
+  /* lock 1 = entropy_func_mutex() */
+  Curl_polarsslthreadlock_lock_function(1);
+  ret = entropy_func(data, output, len);
+  Curl_polarsslthreadlock_unlock_function(1);
 
-    return ret;
+  return ret;
 }
 /* end of entropy_func_mutex() */
 
@@ -143,18 +143,11 @@ static Curl_send polarssl_send;
 
 static CURLcode
 polarssl_connect_step1(struct connectdata *conn,
-                     int sockindex)
+                       int sockindex)
 {
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
-
-  bool sni = TRUE; /* default is SNI enabled */
   int ret = -1;
-#ifdef ENABLE_IPV6
-  struct in6_addr addr;
-#else
-  struct in_addr addr;
-#endif
   char errorbuf[128];
   errorbuf[0]=0;
 
@@ -163,26 +156,24 @@ polarssl_connect_step1(struct connectdata *conn,
     failf(data, "PolarSSL does not support SSLv2");
     return CURLE_SSL_CONNECT_ERROR;
   }
-  else if(data->set.ssl.version == CURL_SSLVERSION_SSLv3)
-    sni = FALSE; /* SSLv3 has no SNI */
 
 #ifdef THREADING_SUPPORT
   entropy_init_mutex(&entropy);
 
   if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func_mutex, &entropy,
                           NULL, 0)) != 0) {
-     error_strerror(ret, errorbuf, sizeof(errorbuf));
-     failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
-           -ret, errorbuf);
+    error_strerror(ret, errorbuf, sizeof(errorbuf));
+    failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
+          -ret, errorbuf);
   }
 #else
   entropy_init(&connssl->entropy);
 
   if((ret = ctr_drbg_init(&connssl->ctr_drbg, entropy_func, &connssl->entropy,
                           NULL, 0)) != 0) {
-     error_strerror(ret, errorbuf, sizeof(errorbuf));
-     failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
-                                                            -ret, errorbuf);
+    error_strerror(ret, errorbuf, sizeof(errorbuf));
+    failf(data, "Failed - PolarSSL: ctr_drbg_init returned (-0x%04X) %s\n",
+          -ret, errorbuf);
   }
 #endif /* THREADING_SUPPORT */
 
@@ -393,7 +384,7 @@ polarssl_connect_step1(struct connectdata *conn,
 
 static CURLcode
 polarssl_connect_step2(struct connectdata *conn,
-                     int sockindex)
+                       int sockindex)
 {
   int ret;
   struct Curl_easy *data = conn->data;
@@ -528,9 +519,9 @@ polarssl_connect_step2(struct connectdata *conn,
       }
       else
 #endif
-      if(!strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH)) {
-        conn->negnpn = CURL_HTTP_VERSION_1_1;
-      }
+        if(!strncmp(next_protocol, ALPN_HTTP_1_1, ALPN_HTTP_1_1_LENGTH)) {
+          conn->negnpn = CURL_HTTP_VERSION_1_1;
+        }
     }
     else
       infof(data, "ALPN, server did not agree to a protocol\n");
@@ -545,7 +536,7 @@ polarssl_connect_step2(struct connectdata *conn,
 
 static CURLcode
 polarssl_connect_step3(struct connectdata *conn,
-                     int sockindex)
+                       int sockindex)
 {
   CURLcode retcode = CURLE_OK;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -777,8 +768,8 @@ polarssl_connect_common(struct connectdata *conn,
 
 CURLcode
 Curl_polarssl_connect_nonblocking(struct connectdata *conn,
-                                int sockindex,
-                                bool *done)
+                                  int sockindex,
+                                  bool *done)
 {
   return polarssl_connect_common(conn, sockindex, TRUE, done);
 }
@@ -786,7 +777,7 @@ Curl_polarssl_connect_nonblocking(struct connectdata *conn,
 
 CURLcode
 Curl_polarssl_connect(struct connectdata *conn,
-                    int sockindex)
+                      int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
