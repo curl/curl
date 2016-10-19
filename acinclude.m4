@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -3198,4 +3198,41 @@ TEST EINVAL TEST
     # without -P
     CPPPFLAG=""
   fi
+])
+
+
+dnl CURL_MAC_CFLAGS
+dnl
+dnl Check if -mmacosx-version-min or -miphoneos-version-min are set manually,
+dnl otherwise do. And set -Werror=partial-availability.
+dnl
+
+AC_DEFUN([CURL_MAC_CFLAGS], [
+
+  tst_cflags="no"
+  case $host_os in
+    darwin*)
+      tst_cflags="yes"
+      ;;
+  esac
+
+  AC_MSG_CHECKING([for good-to-use Mac CFLAGS])
+  AC_MSG_RESULT([$tst_cflags]);
+
+  if test "$tst_cflags" = "yes"; then
+    AC_MSG_CHECKING([for *version-min in CFLAGS])
+    min=""
+    if test -z "$(echo $CFLAGS | grep mmacosx-version-min)" -a
+       test -z "$(echo $CFLAGS | grep miphoneos-version-min)"; then
+      min="-mmacosx-version-min=10.5"
+      CFLAGS="$CFLAGS $min"
+    fi
+    if test -z "$min"; then
+      AC_MSG_RESULT([set by user])
+    else
+      AC_MSG_RESULT([$min set])
+    fi
+    CFLAGS="$CFLAGS -Werror=partial-availability"
+  fi
+
 ])

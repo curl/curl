@@ -357,6 +357,8 @@ case X-"$curl_cv_native_windows" in
 esac
 CURL_CHECK_WIN32_LARGEFILE
 
+CURL_MAC_CFLAGS
+
 dnl ************************************************************
 dnl switch off particular protocols
 dnl
