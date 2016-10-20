@@ -582,6 +582,7 @@ static CURLcode multi_done(struct connectdata **connp,
      !conn->bits.close) {
     /* Stop if pipeline is not empty and we do not have to close
        connection. */
+    data->easy_conn = NULL;
     DEBUGF(infof(data, "Connection still in use, no more multi_done now!\n"));
     return CURLE_OK;
   }
