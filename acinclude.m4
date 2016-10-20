@@ -3203,8 +3203,9 @@ TEST EINVAL TEST
 
 dnl CURL_MAC_CFLAGS
 dnl
-dnl Check if -mmacosx-version-min or -miphoneos-version-min are set manually,
-dnl otherwise do. And set -Werror=partial-availability.
+dnl Check if -mmacosx-version-min, -miphoneos-version-min or any
+dnl similar are set manually, otherwise do. And set
+dnl -Werror=partial-availability.
 dnl
 
 AC_DEFUN([CURL_MAC_CFLAGS], [
@@ -3222,8 +3223,7 @@ AC_DEFUN([CURL_MAC_CFLAGS], [
   if test "$tst_cflags" = "yes"; then
     AC_MSG_CHECKING([for *version-min in CFLAGS])
     min=""
-    if test -z "$(echo $CFLAGS | grep mmacosx-version-min)" -a
-       test -z "$(echo $CFLAGS | grep miphoneos-version-min)"; then
+    if test -z "$(echo $CFLAGS | grep m.*os.*-version-min)"; then
       min="-mmacosx-version-min=10.5"
       CFLAGS="$CFLAGS $min"
     fi
