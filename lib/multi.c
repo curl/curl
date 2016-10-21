@@ -42,6 +42,7 @@
 #include "multihandle.h"
 #include "pipeline.h"
 #include "sigpipe.h"
+#include "connect.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -2177,6 +2178,7 @@ static void close_all_connections(struct Curl_multi *multi)
     conn->data->easy_conn = NULL; /* clear the easy handle's connection
                                      pointer */
     /* This will remove the connection from the cache */
+    connclose(conn, "kill all");
     (void)Curl_disconnect(conn, FALSE);
     sigpipe_restore(&pipe_st);
 
