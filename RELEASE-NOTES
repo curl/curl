@@ -56,6 +56,7 @@ This release includes the following bugfixes:
  o INSTALL: converted to markdown => INSTALL.md
  o curl_multi_remove_handle: fix a double-free [25]
  o multi: fix inifinte loop in curl_multi_cleanup() [26]
+ o nss: fix tight loop in non-blocking TLS handhsake over proxy [27]
 
 This release includes the following known bugs:
 
@@ -104,3 +105,4 @@ References to bug reports and discussions on issues:
  [24] = https://curl.haxx.se/bug/?i=1069
  [25] = https://curl.haxx.se/bug/?i=1083
  [26] = https://curl.haxx.se/mail/lib-2016-10/0011.html
+ [27] = https://bugzilla.redhat.com/1388162
