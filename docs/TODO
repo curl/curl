@@ -394,11 +394,11 @@
  Your curl/curl.h alternative could then look like (replace with suitable CPP
  variable to check):
 
- #ifdef ARCH_32bit
- #include <curl32/curl.h>
- #else /* ARCH_64bit  */
- #include <curl64/curl.h>
- #endif
+     #ifdef ARCH_32bit
+     #include <curl32/curl.h>
+     #else /* ARCH_64bit  */
+     #include <curl64/curl.h>
+     #endif
 
  A fix would either (A) fix the 32/64 setup automatically or even better (B)
  work away the architecture specific defines from the headers so that they can
