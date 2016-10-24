@@ -39,7 +39,7 @@ This release includes the following bugfixes:
  o resolve: add error message when resolving using SIGALRM [16]
  o cmake: add nghttp2 support [17]
  o dist: remove PDF and HTML converted docs from the releases [18]
- o configure: detect the broken poll() in macOS 10.12 [19]
+ o configure: disable poll() in macOS builds [19]
  o vtls: only re-use session-ids using the same scheme
  o pipelining: skip to-be-closed connections when pipelining [20]
  o win: fix Universal Windows Platform build [21]
@@ -51,6 +51,11 @@ This release includes the following bugfixes:
  o polarssl: clear thread array at init
  o polarssl: fix unaligned SSL session-id lock
  o polarssl: reduce #ifdef madness with a macro
+ o curl_multi_add_handle: set timeouts in closure handles [23]
+ o configure: set min version flags for builds on mac [24]
+ o INSTALL: converted to markdown => INSTALL.md
+ o curl_multi_remove_handle: fix a double-free [25]
+ o multi: fix inifinte loop in curl_multi_cleanup() [26]
 
 This release includes the following known bugs:
 
@@ -59,14 +64,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Akshay Vernekar, Alexander Sinditskiy, Andreas Streichardt, Bernard Spil,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Darío Hereñú,
+  Akshay Vernekar, Alexander Sinditskiy, Anders Bakken, Andreas Streichardt,
+  Bernard Spil, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Darío Hereñú,
   David Woodhouse, Jeroen Ooms, Kamil Dudka, lukaszgn on github, Marcel Raad,
-  Michael Kaufmann, Nick Zitzmann, nopjmp on github, Paul Joyce, Rainer Müller,
-  Ray Satiro, Remo E, Rider Linden, Sebastian Mundry, Sergei Kuzmin,
-  Stephen Brokenshire, Tobias Stoeckmann, Toby Peterson, Todd Short,
-  Tony Kelman, Torben Dannhauer,
-  (29 contributors)
+  Martin Storsjo, Martin Storsjö, Michael Kaufmann, Miloš Ljumović,
+  Nick Zitzmann, nopjmp on github, Paul Joyce, Rainer Müller, Ray Satiro,
+  Remo E, Rider Linden, Sebastian Mundry, Sergei Kuzmin, Stephen Brokenshire,
+  Tobias Stoeckmann, Toby Peterson, Todd Short, Tony Kelman, Torben Dannhauer,
+  Valentin David,
+  (34 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -94,3 +100,7 @@ References to bug reports and discussions on issues:
  [20] = https://curl.haxx.se/bug/?i=1075
  [21] = https://curl.haxx.se/bug/?i=1048
  [22] = https://curl.haxx.se/bug/?i=1042
+ [23] = https://curl.haxx.se/bug/?i=739
+ [24] = https://curl.haxx.se/bug/?i=1069
+ [25] = https://curl.haxx.se/bug/?i=1083
+ [26] = https://curl.haxx.se/mail/lib-2016-10/0011.html
