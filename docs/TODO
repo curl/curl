@@ -151,6 +151,7 @@
  18.13 support metalink in http headers
  18.14 --fail without --location should treat 3xx as a failure
  18.15 Introduce --fail-fast to exit on first transfer fail
+ 18.16 --retry should resume
 
  19. Build
  19.1 roffit
@@ -1006,6 +1007,15 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  ones will not be returned as error code etc to the shell. A --fail-fast
  option would make curl exit and return an error for the first transfer that
  fails.
+
+18.16 --retry should resume
+
+ When --retry is used and curl actually retries transfer, it should use the
+ already transfered data and do a resumed transfer for the rest (when
+ possible) so that it doesn't have to transfer the same data again that was
+ already tranfered before the retry.
+
+ See https://github.com/curl/curl/issues/1084
 
 
 19. Build
