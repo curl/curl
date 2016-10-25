@@ -244,7 +244,8 @@ sub sha256 {
     close(FILE);
   } else {
     # Use OpenSSL command if Perl Digest::SHA modules not available
-    $result = (split(/ |\r|\n/,`$openssl dgst -sha256 $_[0]`))[1];
+    $result = `"$openssl" dgst -r -sha256 "$_[0]"`;
+    $result =~ s/^([0-9a-f]{64}) .+/$1/is;
   }
   return $result;
 }
@@ -392,7 +393,7 @@ print CRT <<EOT;
 ##
 ## Bundle of CA Root Certificates
 ##
-## Certificate data from Mozilla ${datesrc}: ${currentdate}
+## Certificate data from Mozilla ${datesrc}: ${currentdate} GMT
 ##
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates

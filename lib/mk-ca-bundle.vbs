@@ -26,16 +26,19 @@
 '* Hacked by Guenter Knauf
 '***************************************************************************
 Option Explicit
-Const myVersion = "0.3.9"
+Const myVersion = "0.4.0"
 
-Const myUrl = "http://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt"
+Const myUrl = "https://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt"
 Const myOpenssl = "openssl.exe"
 
-Const myCdSavF = FALSE       ' Flag: save downloaded data to file certdata.txt
+Const myUseOpenSSL = TRUE    ' Flag: set FALSE if openssl is not present
+Const myCdSavF = TRUE        ' Flag: save downloaded data to file certdata.txt
 Const myCaBakF = TRUE        ' Flag: backup existing ca-bundle certificate
 Const myAskLiF = TRUE        ' Flag: display certdata.txt license agreement
-Const myAskTiF = TRUE        ' Flag: ask to include certificate text info
 Const myWrapLe = 76          ' Default length of base64 output lines
+
+' cert info code doesn't work properly with any recent openssl, leave disabled.
+Const myAskTiF = FALSE       ' Flag: ask to include certificate text info
 
 '******************* Nothing to configure below! *******************
 Dim objShell, objNetwork, objFSO, objHttp
@@ -53,8 +56,12 @@ myTmpName = InputBox("Enter output filename:", mySelf, myCaFile)
 If Not (myTmpName = "") Then
   myCaFile = myTmpName
 End If
-' Lets ignore SSL invalid cert errors
-objHttp.Option(4) = 256 + 512 + 4096 + 8192
+If (myCdFile = "") Then
+  MsgBox("URL does not contain filename!"), vbCritical, mySelf
+  WScript.Quit 1
+End If
+' Uncomment the line below to ignore SSL invalid cert errors
+' objHttp.Option(4) = 256 + 512 + 4096 + 8192
 objHttp.SetTimeouts 0, 5000, 10000, 10000
 objHttp.Open "GET", myUrl, FALSE
 objHttp.setRequestHeader "User-Agent", WScript.ScriptName & "/" & myVersion
@@ -63,15 +70,13 @@ If Not (objHttp.Status = 200) Then
   MsgBox("Failed to download '" & myCdFile & "': " & objHttp.Status & " - " & objHttp.StatusText), vbCritical, mySelf
   WScript.Quit 1
 End If
+' Write received data to file if enabled
+If (myCdSavF = TRUE) Then
+  Call SaveBinaryData(myCdFile, objHttp.ResponseBody)
+End If
 ' Convert data from ResponseBody instead of using ResponseText because of UTF-8
 myCdData = ConvertBinaryData(objHttp.ResponseBody)
 Set objHttp = Nothing
-' Write received data to file if enabled
-If (myCdSavF = TRUE) Then
-  Set myFh = objFSO.OpenTextFile(myCdFile, 2, TRUE)
-  myFh.Write myCdData
-  myFh.Close
-End If
 ' Backup exitsing ca-bundle certificate file
 If (myCaBakF = TRUE) Then
   If objFSO.FileExists(myCaFile) Then
@@ -104,20 +109,27 @@ myData = ""
 myLines = Split(myCdData, vbLf, -1)
 Set myFh = objFSO.OpenTextFile(myCaFile, 2, TRUE)
 myFh.Write "##" & vbLf
-myFh.Write "## " & myCaFile & " -- Bundle of CA Root Certificates" & vbLf
+myFh.Write "## Bundle of CA Root Certificates" & vbLf
 myFh.Write "##" & vbLf
-myFh.Write "## Converted at: " & Now & vbLf
+myFh.Write "## Certificate data from Mozilla as of: " & _
+  ConvertDateToString(LocalDateToUTC(Now)) & " GMT" & vbLf
 myFh.Write "##" & vbLf
 myFh.Write "## This is a bundle of X.509 certificates of public Certificate Authorities" & vbLf
 myFh.Write "## (CA). These were automatically extracted from Mozilla's root certificates" & vbLf
 myFh.Write "## file (certdata.txt).  This file can be found in the mozilla source tree:" & vbLf
-myFh.Write "## '/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt'" & vbLf
+myFh.Write "## " & myUrl & vbLf
 myFh.Write "##" & vbLf
 myFh.Write "## It contains the certificates in PEM format and therefore" & vbLf
 myFh.Write "## can be directly used with curl / libcurl / php_curl, or with" & vbLf
 myFh.Write "## an Apache+mod_ssl webserver for SSL client authentication." & vbLf
 myFh.Write "## Just configure this file as the SSLCACertificateFile." & vbLf
 myFh.Write "##" & vbLf
+myFh.Write "## Conversion done with mk-ca-bundle.vbs version " & myVersion & "." & vbLf
+If (myCdSavF = TRUE) And (myUseOpenSSL = TRUE) Then
+  myFh.Write "## SHA256: " & FileSHA256(myCdFile) & vbLf
+End If
+myFh.Write "##" & vbLf & vbLf
+
 myFh.Write vbLf
 For i = 0 To UBound(myLines)
   If InstrRev(myLines(i), "CKA_LABEL ") Then
@@ -216,8 +228,21 @@ Function ConvertBinaryData(arrBytes)
   objStream.Write arrBytes
   objStream.Position = 0
   objStream.Type = 2
-  objStream.Charset = "ascii"
+  objStream.Charset = "utf-8"
   ConvertBinaryData = objStream.ReadText
+  Set objStream = Nothing
+End Function
+
+Function SaveBinaryData(filename, data)
+  Const adTypeBinary = 1
+  Const adSaveCreateOverWrite = 2
+  Dim objStream
+  Set objStream = CreateObject("ADODB.Stream")
+  objStream.Type = adTypeBinary
+  objStream.Open
+  objStream.Write data
+  objStream.SaveToFile filename, adSaveCreateOverWrite
+  objStream.Close
   Set objStream = Nothing
 End Function
 
@@ -283,4 +308,61 @@ Function MyASC(OneChar)
   If OneChar = "" Then MyASC = 0 Else MyASC = Asc(OneChar)
 End Function
 
+' Return the date in the same format as perl to match mk-ca-bundle.pl output:
+' Wed Sep  7 03:12:05 2016
+Function ConvertDateToString(input)
+  Dim output
+  output = WeekDayName(WeekDay(input), TRUE) & " " & _
+           MonthName(Month(input), TRUE) & " "
+  If (Len(Day(input)) = 1) Then
+    output = output & " "
+  End If
+  output = output & _
+           Day(input) & " " & _
+           FormatDateTime(input, vbShortTime) & ":"
+  If (Len(Second(input)) = 1) Then
+    output = output & "0"
+  End If
+  output = output & _
+           Second(input) & " " & _
+           Year(input)
+  ConvertDateToString = output
+End Function
 
+' Convert local Date to UTC. Microsoft says:
+' Use Win32_ComputerSystem CurrentTimeZone property, because it automatically
+' adjusts the Time Zone bias for daylight saving time; Win32_Time Zone Bias
+' property does not.
+' https://msdn.microsoft.com/en-us/library/windows/desktop/ms696015.aspx
+Function LocalDateToUTC(localdate)
+  Dim item, offset
+  For Each item In GetObject("winmgmts:").InstancesOf("Win32_ComputerSystem")
+    offset = item.CurrentTimeZone ' the offset in minutes
+  Next
+  If (offset < 0) Then
+    LocalDateToUTC = DateAdd("n",  ABS(offset), localdate)
+  Else
+    LocalDateToUTC = DateAdd("n", -ABS(offset), localdate)
+  End If
+  'objShell.PopUp LocalDateToUTC
+End Function
+
+Function FileSHA256(filename)
+  Dim cmd, rval, tmpOut, tmpFh
+  if (myUseOpenSSL = TRUE) Then
+    tmpOut = objFSO.GetSpecialFolder(2).Path & "\" & objFSO.GetTempName
+    cmd = """" & myOpenssl & """ dgst -r -sha256 -out """ & tmpOut & """ """ & filename & """"
+    rval = objShell.Run(cmd, 0, TRUE)
+    If Not (rval = 0) Then
+      MsgBox("Failed to get sha256 of """ & filename & """ with OpenSSL commandline!"), vbCritical, mySelf
+      objFSO.DeleteFile tmpOut, TRUE
+      WScript.Quit 3
+    End If
+    Set tmpFh = objFSO.OpenTextFile(tmpOut, 1)
+    FileSHA256 = RegExprFirst("^([0-9a-f]{64}) .+", tmpFh.ReadAll)
+    tmpFh.Close
+    objFSO.DeleteFile tmpOut, TRUE
+  Else
+    FileSHA256 = ""
+  End If
+End Function
