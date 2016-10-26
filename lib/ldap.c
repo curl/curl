@@ -181,44 +181,79 @@ const struct Curl_handler Curl_handler_ldaps = {
 };
 #endif
 
-#ifdef USE_WIN32_LDAP
+#if defined(USE_WIN32_LDAP)
+
+#if defined(USE_WINDOWS_SSPI)
+static int ldap_win_bind_auth(LDAP *server, const char *user,
+                              const char *passwd, unsigned long authflags)
+{
+  ULONG method = 0;
+  SEC_WINNT_AUTH_IDENTITY cred = { 0, };
+  int rc = 0;
+
+#if defined(USE_SPNEGO)
+  if(authflags & CURLAUTH_NEGOTIATE) {
+    method = LDAP_AUTH_NEGOTIATE;
+  }
+  else
+#endif
+#if defined(USE_NTLM)
+  if(authflags & CURLAUTH_NTLM) {
+    method = LDAP_AUTH_NTLM;
+  }
+  else
+#endif
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+  if(authflags & CURLAUTH_DIGEST) {
+    method = LDAP_AUTH_DIGEST;
+  }
+  else
+#endif
+  {
+    /* required anyway if one of upper preprocessor definitions enabled */
+    rc = LDAP_AUTH_METHOD_NOT_SUPPORTED;
+  }
+
+  if(method) {
+    rc = Curl_create_sspi_identity(user, passwd, &cred);
+    if(!rc) {
+      rc = ldap_bind_s(server, NULL, (TCHAR *)&cred, method);
+      Curl_sspi_free_identity(&cred);
+    }
+  }
+  return rc;
+}
+#endif /* #if defined(USE_WINDOWS_SSPI) */
+
 static int ldap_win_bind(struct connectdata *conn, LDAP *server,
                          const char *user, const char *passwd)
 {
-  int rc = 0;
-  ULONG method = LDAP_AUTH_NEGOTIATE;
-  SEC_WINNT_AUTH_IDENTITY cred = { 0, };
+  int rc = LDAP_INVALID_CREDENTIALS;
+  ULONG method = LDAP_AUTH_SIMPLE;
+
   PTCHAR inuser = NULL;
   PTCHAR inpass = NULL;
 
-  if(user && passwd && !Curl_create_sspi_identity(user, passwd, &cred)) {
-
+  if(user && passwd) {
     if(conn->data->set.httpauth & CURLAUTH_BASIC) {
-      method = LDAP_AUTH_SIMPLE;
       inuser = Curl_convert_UTF8_to_tchar((char*)user);
-      inpass = cred.Password;
+      inpass = Curl_convert_UTF8_to_tchar((char*)passwd);
+
+      rc = ldap_bind_s(server, inuser, inpass, method);
+
+      Curl_unicodefree(inuser);
+      Curl_unicodefree(inpass);
     }
-    else if(conn->data->set.httpauth & CURLAUTH_DIGEST) {
-      method = LDAP_AUTH_DIGEST;
-      inpass = (TCHAR*)(&cred);
-    }
-    else if(conn->data->set.httpauth & CURLAUTH_NTLM) {
-      method = LDAP_AUTH_NTLM;
-      inpass = (TCHAR*)(&cred);
-    }
+#if defined(USE_WINDOWS_SSPI)
     else {
-      inpass = (TCHAR*)(&cred);
+      rc = ldap_win_bind_auth(server, user, passwd, conn->data->set.httpauth);
     }
+#endif
   }
-
-  rc = ldap_bind_s(server, inuser, inpass, method);
-
-  Curl_sspi_free_identity(&cred);
-  Curl_unicodefree(inuser);
 
   return rc;
 }
-#endif
+#endif /* #if defined(USE_WIN32_LDAP) */
 
 static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 {
