@@ -190,6 +190,7 @@ static const struct LongShort aliases[]= {
   {"10",  "tlsv1.0",                 FALSE},
   {"11",  "tlsv1.1",                 FALSE},
   {"12",  "tlsv1.2",                 FALSE},
+  {"13",  "tlsv1.3",                 FALSE},
   {"2",  "sslv2",                    FALSE},
   {"3",  "sslv3",                    FALSE},
   {"4",  "ipv4",                     FALSE},
@@ -1060,6 +1061,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case '2':
         /* TLS version 1.2 */
         config->ssl_version = CURL_SSLVERSION_TLSv1_2;
+        break;
+      case '3':
+        /* TLS version 1.3 */
+        config->ssl_version = CURL_SSLVERSION_TLSv1_3;
         break;
       }
       break;
