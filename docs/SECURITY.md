@@ -75,9 +75,11 @@ announcement.
   to the 'distros' mailing list to allow them to use the fix prior to the
   public announcement.
 
-- At the day of the next release, the private branch is merged into the master
-  branch and pushed. Once pushed, the information is accessible to the public
-  and the actual release should follow suit immediately afterwards.
+- No more than 48 hours before the release, the private branch is merged into
+  the master branch and pushed. Once pushed, the information is accessible to
+  the public and the actual release should follow suit immediately afterwards.
+  The time between the push and the release is used for final tests and
+  reviews.
 
 - The project team creates a release that includes the fix.
 
@@ -88,9 +90,19 @@ announcement.
 - The security web page on the web site should get the new vulnerability
   mentioned.
 
+Pre-notification
+----------------
 
+If you think you are or should be eligible for a pre-notifcation about
+upcoming security announcements for curl, we urge OS distros and similar
+vendors to primarily join the distros@openwall list as that is one of the
+purposes of that list - and not just for curl of course.
 
-CURL-SECURITY (at haxx dot se)
+If you are not a distro or otherwise not suitable for distros@openwall and yet
+want pre-notifications from us, contact the curl security team with a detailed
+and clear explanation why this is the case.
+
+curl-security (at haxx dot se)
 ------------------------------
 
 Who is on this list? There are a couple of criteria you must meet, and then we
