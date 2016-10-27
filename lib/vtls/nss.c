@@ -1489,10 +1489,18 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
                                 struct Curl_easy *data)
 {
   switch(data->set.ssl.version) {
-  default:
   case CURL_SSLVERSION_DEFAULT:
+    /* map CURL_SSLVERSION_DEFAULT to NSS default */
+    if(SSL_VersionRangeGetDefault(ssl_variant_stream, sslver) != SECSuccess)
+      return CURLE_SSL_CONNECT_ERROR;
+    /* ... but make sure we use at least TLSv1.0 according to libcurl API */
+    if(sslver->min < SSL_LIBRARY_VERSION_TLS_1_0)
+      sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
+    return CURLE_OK;
+
   case CURL_SSLVERSION_TLSv1:
     sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
+    /* TODO: set sslver->max to SSL_LIBRARY_VERSION_TLS_1_3 once stable */
 #ifdef SSL_LIBRARY_VERSION_TLS_1_2
     sslver->max = SSL_LIBRARY_VERSION_TLS_1_2;
 #elif defined SSL_LIBRARY_VERSION_TLS_1_1
@@ -1531,6 +1539,10 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
     sslver->max = SSL_LIBRARY_VERSION_TLS_1_2;
     return CURLE_OK;
 #endif
+    break;
+
+  default:
+    /* unsupported SSL/TLS version */
     break;
   }
 

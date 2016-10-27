@@ -8,6 +8,7 @@ Curl and libcurl 7.51.1
 
 This release includes the following changes:
 
+ o nss: map CURL_SSLVERSION_DEFAULT to NSS default
  o
 
 This release includes the following bugfixes:
