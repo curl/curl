@@ -146,7 +146,7 @@ void curl_perform(uv_poll_t *req, int status, int events)
   if(events & UV_WRITABLE)
     flags |= CURL_CSELECT_OUT;
 
-  context = (curl_context_t *) req;
+  context = (curl_context_t *) req->data;
 
   curl_multi_socket_action(curl_handle, context->sockfd, flags,
                            &running_handles);
