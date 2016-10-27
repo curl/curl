@@ -306,6 +306,9 @@ polarssl_connect_step1(struct connectdata *conn,
                         SSL_MINOR_VERSION_3);
     infof(data, "PolarSSL: Forced min. SSL Version to be TLS 1.2\n");
     break;
+  case CURL_SSLVERSION_TLSv1_3:
+    failf(data, "PolarSSL: TLS 1.3 is not yet supported");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   ssl_set_endpoint(&connssl->ssl, SSL_IS_CLIENT);

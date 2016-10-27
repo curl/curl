@@ -9,6 +9,7 @@ Curl and libcurl 7.51.1
 This release includes the following changes:
 
  o nss: map CURL_SSLVERSION_DEFAULT to NSS default
+ o vtls: support TLS 1.3 via CURL_SSLVERSION_TLSv1_3
  o
 
 This release includes the following bugfixes:

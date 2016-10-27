@@ -639,6 +639,9 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   case CURL_SSLVERSION_TLSv1_2:
     protoflags = CURL_GSKPROTO_TLSV12_MASK;
     break;
+  case CURL_SSLVERSION_TLSv1_3:
+    failf(data, "TLS 1.3 not yet supported");
+    return CURLE_SSL_CIPHER;
   }
 
   /* Process SNI. Ignore if not supported (on OS400 < V7R1). */

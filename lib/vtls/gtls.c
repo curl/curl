@@ -569,6 +569,9 @@ gtls_connect_step1(struct connectdata *conn,
       break;
     case CURL_SSLVERSION_TLSv1_2:
       protocol_priority[0] = GNUTLS_TLS1_2;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "GnuTLS does not support TLSv1.3");
+      return CURLE_SSL_CONNECT_ERROR;
     break;
       case CURL_SSLVERSION_SSLv2:
     default:
@@ -607,6 +610,9 @@ gtls_connect_step1(struct connectdata *conn,
       prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                      "+VERS-TLS1.2:" GNUTLS_SRP;
       break;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "GnuTLS does not support TLSv1.3");
+      return CURLE_SSL_CONNECT_ERROR;
     case CURL_SSLVERSION_SSLv2:
     default:
       failf(data, "GnuTLS does not support SSLv2");

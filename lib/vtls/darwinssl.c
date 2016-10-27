@@ -1071,6 +1071,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol12);
         (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
         break;
+      case CURL_SSLVERSION_TLSv1_3:
+        failf(data, "TLSv1.3 is not yet supported with this TLS backend");
+        return CURLE_SSL_CONNECT_ERROR;
       case CURL_SSLVERSION_SSLv3:
         err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol3);
         if(err != noErr) {
@@ -1122,6 +1125,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                            kTLSProtocol12,
                                            true);
         break;
+      case CURL_SSLVERSION_TLSv1_3:
+        failf(data, "TLSv1.3 is not yet supported with this TLS backend");
+        return CURLE_SSL_CONNECT_ERROR;
       case CURL_SSLVERSION_SSLv3:
         err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                            kSSLProtocol3,
@@ -1159,6 +1165,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       return CURLE_SSL_CONNECT_ERROR;
     case CURL_SSLVERSION_TLSv1_2:
       failf(data, "Your version of the OS does not support TLSv1.2");
+      return CURLE_SSL_CONNECT_ERROR;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "Your version of the OS does not support TLSv1.3");
       return CURLE_SSL_CONNECT_ERROR;
     case CURL_SSLVERSION_SSLv2:
       err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
