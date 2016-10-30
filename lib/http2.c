@@ -1572,6 +1572,28 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 #define HEADER_OVERFLOW(x) \
   (x.namelen > (uint16_t)-1 || x.valuelen > (uint16_t)-1 - x.namelen)
 
+/* Returns TRUE if header field is prohibited by HTTP/2
+   specification. */
+static bool should_ignore_header(const char *name, size_t namelen,
+                                 const char *value, size_t valuelen) {
+  switch(namelen) {
+  case 2:
+    return Curl_raw_nequal("te", name, namelen) &&
+           !Curl_raw_nequal("trailers", value, valuelen);
+  case 7:
+    return Curl_raw_nequal("upgrade", name, namelen);
+  case 10:
+    return Curl_raw_nequal("connection", name, namelen) ||
+           Curl_raw_nequal("keep-alive", name, namelen);
+  case 16:
+    return Curl_raw_nequal("proxy-connection", name, namelen);
+  case 17:
+    return Curl_raw_nequal("transfer-encoding", name, namelen);
+  default:
+    return FALSE;
+  }
+}
+
 static ssize_t http2_send(struct connectdata *conn, int sockindex,
                           const void *mem, size_t len, CURLcode *err)
 {
@@ -1725,7 +1747,6 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   i = 3;
   while(i < nheader) {
     size_t hlen;
-    int skip = 0;
 
     hdbuf = line_end + 2;
 
@@ -1743,12 +1764,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       goto fail;
     hlen = end - hdbuf;
 
-    if(hlen == 10 && Curl_raw_nequal("connection", hdbuf, 10)) {
-      /* skip Connection: headers! */
-      skip = 1;
-      --nheader;
-    }
-    else if(hlen == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
+    if(hlen == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
       authority_idx = i;
       nva[i].name = (unsigned char *)":authority";
       nva[i].namelen = strlen((char *)nva[i].name);
@@ -1761,16 +1777,22 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     while(*hdbuf == ' ' || *hdbuf == '\t')
       ++hdbuf;
     end = line_end;
-    if(!skip) {
-      nva[i].value = (unsigned char *)hdbuf;
-      nva[i].valuelen = (size_t)(end - hdbuf);
-      nva[i].flags = NGHTTP2_NV_FLAG_NONE;
-      if(HEADER_OVERFLOW(nva[i])) {
-        failf(conn->data, "Failed sending HTTP request: Header overflow");
-        goto fail;
-      }
-      ++i;
+
+    if(should_ignore_header((const char *)nva[i].name, nva[i].namelen, hdbuf,
+                            end - hdbuf)) {
+      /* skip header fields prohibited by HTTP/2 specification. */
+      --nheader;
+      continue;
     }
+
+    nva[i].value = (unsigned char *)hdbuf;
+    nva[i].valuelen = (size_t)(end - hdbuf);
+    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
+    if(HEADER_OVERFLOW(nva[i])) {
+      failf(conn->data, "Failed sending HTTP request: Header overflow");
+      goto fail;
+    }
+    ++i;
   }
 
   /* :authority must come before non-pseudo header fields */
