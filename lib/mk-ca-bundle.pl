@@ -30,6 +30,7 @@
 # dependency is the OpenSSL commandline tool for optional text listing.
 # Hacked by Guenter Knauf.
 #
+use Encode;
 use Getopt::Std;
 use MIME::Base64;
 use strict;
@@ -487,7 +488,7 @@ while (<TXT>) {
               . "-----END CERTIFICATE-----\n";
       print CRT "\n$caname\n";
       print CRT @precert if($opt_m);
-      my $maxStringLength = length($caname);
+      my $maxStringLength = length(decode('UTF-8', $caname, Encode::FB_CROAK));
       if ($opt_t) {
         foreach my $key (keys %trust_purposes_by_level) {
            my $string = $key . ": " . join(", ", @{$trust_purposes_by_level{$key}});
