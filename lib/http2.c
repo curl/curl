@@ -1572,6 +1572,71 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 #define HEADER_OVERFLOW(x) \
   (x.namelen > (uint16_t)-1 || x.valuelen > (uint16_t)-1 - x.namelen)
 
+/*
+ * Check header memory for the token "trailers".
+ * Parse the tokens as separated by comma and surrounded by whitespace.
+ * Returns TRUE if found or FALSE if not.
+ */
+static bool contains_trailers(const char *p, size_t len) {
+  const char *end = p + len;
+  for(;;) {
+    for(; p != end && (*p == ' ' || *p == '\t'); ++p)
+      ;
+    if(p == end || (size_t)(end - p) < sizeof("trailers") - 1)
+      return FALSE;
+    if(strncasecompare("trailers", p, sizeof("trailers") - 1)) {
+      p += sizeof("trailers") - 1;
+      for(; p != end && (*p == ' ' || *p == '\t'); ++p)
+        ;
+      if(p == end || *p == ',')
+        return TRUE;
+    }
+    /* skip to next token */
+    for(; p != end && *p != ','; ++p)
+      ;
+    if(p == end)
+      return FALSE;
+    ++p;
+  }
+}
+
+typedef enum {
+  /* Send header to server */
+  HEADERINST_FORWARD,
+  /* Don't send header to server */
+  HEADERINST_IGNORE,
+  /* Discard header, and replace it with "te: trailers" */
+  HEADERINST_TE_TRAILERS
+} header_instruction;
+
+/* Decides how to treat given header field. */
+static header_instruction inspect_header(const char *name, size_t namelen,
+                                         const char *value, size_t valuelen) {
+  switch(namelen) {
+  case 2:
+    if(!strncasecompare("te", name, namelen))
+      return HEADERINST_FORWARD;
+
+    return contains_trailers(value, valuelen) ?
+           HEADERINST_TE_TRAILERS : HEADERINST_IGNORE;
+  case 7:
+    return strncasecompare("upgrade", name, namelen) ?
+           HEADERINST_IGNORE : HEADERINST_FORWARD;
+  case 10:
+    return (strncasecompare("connection", name, namelen) ||
+            strncasecompare("keep-alive", name, namelen)) ?
+           HEADERINST_IGNORE : HEADERINST_FORWARD;
+  case 16:
+    return strncasecompare("proxy-connection", name, namelen) ?
+           HEADERINST_IGNORE : HEADERINST_FORWARD;
+  case 17:
+    return strncasecompare("transfer-encoding", name, namelen) ?
+           HEADERINST_IGNORE : HEADERINST_FORWARD;
+  default:
+    return HEADERINST_FORWARD;
+  }
+}
+
 static ssize_t http2_send(struct connectdata *conn, int sockindex,
                           const void *mem, size_t len, CURLcode *err)
 {
@@ -1725,7 +1790,6 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   i = 3;
   while(i < nheader) {
     size_t hlen;
-    int skip = 0;
 
     hdbuf = line_end + 2;
 
@@ -1743,12 +1807,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       goto fail;
     hlen = end - hdbuf;
 
-    if(hlen == 10 && strncasecompare("connection", hdbuf, 10)) {
-      /* skip Connection: headers! */
-      skip = 1;
-      --nheader;
-    }
-    else if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
+    if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
       authority_idx = i;
       nva[i].name = (unsigned char *)":authority";
       nva[i].namelen = strlen((char *)nva[i].name);
@@ -1761,16 +1820,28 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     while(*hdbuf == ' ' || *hdbuf == '\t')
       ++hdbuf;
     end = line_end;
-    if(!skip) {
+
+    switch(inspect_header((const char *)nva[i].name, nva[i].namelen, hdbuf,
+                          end - hdbuf)) {
+    case HEADERINST_IGNORE:
+      /* skip header fields prohibited by HTTP/2 specification. */
+      --nheader;
+      continue;
+    case HEADERINST_TE_TRAILERS:
+      nva[i].value = (uint8_t*)"trailers";
+      nva[i].valuelen = sizeof("trailers") - 1;
+      break;
+    default:
       nva[i].value = (unsigned char *)hdbuf;
       nva[i].valuelen = (size_t)(end - hdbuf);
-      nva[i].flags = NGHTTP2_NV_FLAG_NONE;
-      if(HEADER_OVERFLOW(nva[i])) {
-        failf(conn->data, "Failed sending HTTP request: Header overflow");
-        goto fail;
-      }
-      ++i;
     }
+
+    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
+    if(HEADER_OVERFLOW(nva[i])) {
+      failf(conn->data, "Failed sending HTTP request: Header overflow");
+      goto fail;
+    }
+    ++i;
   }
 
   /* :authority must come before non-pseudo header fields */
