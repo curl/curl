@@ -37,7 +37,7 @@
 #include "curl_multibyte.h"
 #include "sendf.h"
 #include "strdup.h"
-#include "rawstr.h"
+#include "strcase.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
