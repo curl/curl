@@ -312,7 +312,7 @@ long proto2num(struct OperationConfig *config, long *val, const char *str)
     }
 
     for(pp=protos; pp->name; pp++) {
-      if(curlx_strcasecompare(token, pp->name)) {
+      if(curl_strequal(token, pp->name)) {
         switch (action) {
         case deny:
           *val &= ~(pp->bit);
@@ -355,7 +355,7 @@ int check_protocol(const char *str)
   if(!str)
     return PARAM_REQUIRES_PARAMETER;
   for(pp = curlinfo->protocols; *pp; pp++) {
-    if(curlx_strcasecompare(*pp, str))
+    if(curl_strequal(*pp, str))
       return PARAM_OK;
   }
   return PARAM_LIBCURL_UNSUPPORTED_PROTOCOL;
@@ -466,11 +466,11 @@ ParameterError add2list(struct curl_slist **list, const char *ptr)
 
 int ftpfilemethod(struct OperationConfig *config, const char *str)
 {
-  if(curlx_strcasecompare("singlecwd", str))
+  if(curl_strequal("singlecwd", str))
     return CURLFTPMETHOD_SINGLECWD;
-  if(curlx_strcasecompare("nocwd", str))
+  if(curl_strequal("nocwd", str))
     return CURLFTPMETHOD_NOCWD;
-  if(curlx_strcasecompare("multicwd", str))
+  if(curl_strequal("multicwd", str))
     return CURLFTPMETHOD_MULTICWD;
 
   warnf(config->global, "unrecognized ftp file method '%s', using default\n",
@@ -481,9 +481,9 @@ int ftpfilemethod(struct OperationConfig *config, const char *str)
 
 int ftpcccmethod(struct OperationConfig *config, const char *str)
 {
-  if(curlx_strcasecompare("passive", str))
+  if(curl_strequal("passive", str))
     return CURLFTPSSL_CCC_PASSIVE;
-  if(curlx_strcasecompare("active", str))
+  if(curl_strequal("active", str))
     return CURLFTPSSL_CCC_ACTIVE;
 
   warnf(config->global, "unrecognized ftp CCC method '%s', using default\n",
@@ -494,11 +494,11 @@ int ftpcccmethod(struct OperationConfig *config, const char *str)
 
 long delegation(struct OperationConfig *config, char *str)
 {
-  if(curlx_strcasecompare("none", str))
+  if(curl_strequal("none", str))
     return CURLGSSAPI_DELEGATION_NONE;
-  if(curlx_strcasecompare("policy", str))
+  if(curl_strequal("policy", str))
     return CURLGSSAPI_DELEGATION_POLICY_FLAG;
-  if(curlx_strcasecompare("always", str))
+  if(curl_strequal("always", str))
     return CURLGSSAPI_DELEGATION_FLAG;
 
   warnf(config->global, "unrecognized delegation method '%s', using none\n",

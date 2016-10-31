@@ -747,7 +747,7 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
         ++digest_alias) {
       metalink_checksum_t **p;
       for(p = fileinfo->checksums; *p; ++p) {
-        if(strcasecompare(digest_alias->alias_name, (*p)->type) &&
+        if(curl_strequal(digest_alias->alias_name, (*p)->type) &&
            check_hex_digest((*p)->hash, digest_alias->digest_def)) {
           f->checksum =
             new_metalink_checksum_from_hex_digest(digest_alias->digest_def,
@@ -777,10 +777,10 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
          metainfo file URL may be appeared in fileinfo->metaurls.
       */
       if((*p)->type == NULL ||
-         strcasecompare((*p)->type, "http") ||
-         strcasecompare((*p)->type, "https") ||
-         strcasecompare((*p)->type, "ftp") ||
-         strcasecompare((*p)->type, "ftps")) {
+         curl_strequal((*p)->type, "http") ||
+         curl_strequal((*p)->type, "https") ||
+         curl_strequal((*p)->type, "ftp") ||
+         curl_strequal((*p)->type, "ftps")) {
         res = new_metalink_resource((*p)->url);
         tail->next = res;
         tail = res;
@@ -906,7 +906,7 @@ static int check_content_type(const char *content_type, const char *media_type)
   if(!*ptr) {
     return 0;
   }
-  return strncasecompare(ptr, media_type, media_type_len) &&
+  return curl_strnequal(ptr, media_type, media_type_len) &&
     (*(ptr+media_type_len) == '\0' || *(ptr+media_type_len) == ' ' ||
      *(ptr+media_type_len) == '\t' || *(ptr+media_type_len) == ';');
 }

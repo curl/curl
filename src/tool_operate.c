@@ -1559,7 +1559,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
               char *effective_url = NULL;
               curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
               if(effective_url &&
-                 curlx_strncasecompare(effective_url, "http", 4)) {
+                 curl_strnequal(effective_url, "http", 4)) {
                 /* This was HTTP(S) */
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
                 if(response != 200 && response != 206) {
@@ -1842,8 +1842,8 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 
   /* Parse .curlrc if necessary */
   if((argc == 1) ||
-     (!curlx_strcasecompare(argv[1], "-q") &&
-      !curlx_strcasecompare(argv[1], "--disable"))) {
+     (!curl_strequal(argv[1], "-q") &&
+      !curl_strequal(argv[1], "--disable"))) {
     parseconfig(NULL, config); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .curlrc */

@@ -416,10 +416,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     }
 
     for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
-      if(curlx_strncasecompare(aliases[j].lname, word, fnam)) {
+      if(curl_strnequal(aliases[j].lname, word, fnam)) {
         longopt = TRUE;
         numhits++;
-        if(curlx_strcasecompare(aliases[j].lname, word)) {
+        if(curl_strequal(aliases[j].lname, word)) {
           parse = aliases[j].letter;
           hit = j;
           numhits = 1; /* a single unique hit */
@@ -1343,7 +1343,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
-        if(config->engine && curlx_strcasecompare(config->engine, "list"))
+        if(config->engine && curl_strequal(config->engine, "list"))
           return PARAM_ENGINES_REQUESTED;
         break;
       case 'g': /* CA info PEM file */
@@ -1377,7 +1377,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'm': /* TLS authentication type */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
           GetStr(&config->tls_authtype, nextarg);
-          if(!strcasecompare(config->tls_authtype, "SRP"))
+          if(!curl_strequal(config->tls_authtype, "SRP"))
             return PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
         }
         else
