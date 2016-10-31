@@ -494,7 +494,7 @@ CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
 
 CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
- $(CURL_DIROBJ)\rawstr.obj \
+ $(CURL_DIROBJ)\strcase.obj \
  $(CURL_DIROBJ)\strtoofft.obj \
  $(CURL_DIROBJ)\warnless.obj
  
@@ -509,8 +509,8 @@ $(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
 	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\tool_hugehelp.c
 $(CURL_DIROBJ)\nonblock.obj: ../lib/nonblock.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/nonblock.c
-$(CURL_DIROBJ)\rawstr.obj: ../lib/rawstr.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/rawstr.c
+$(CURL_DIROBJ)\strcase.obj: ../lib/strcase.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strcase.c
 $(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strtoofft.c
 $(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
