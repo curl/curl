@@ -13,6 +13,17 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2016-8615: cookie injection for other servers [28]
+ o CVE-2016-8616: case insensitive password comparison [29]
+ o CVE-2016-8617: OOB write via unchecked multiplication [30]
+ o CVE-2016-8618: double-free in curl_maprintf [31]
+ o CVE-2016-8619: double-free in krb5 code [32]
+ o CVE-2016-8620: glob parser write/read out of bounds [33]
+ o CVE-2016-8621: curl_getdate read out of bounds [34]
+ o CVE-2016-8622: URL unescape heap overflow via integer truncation [35]
+ o CVE-2016-8623: Use-after-free via shared cookies [36]
+ o CVE-2016-8624: invalid URL parsing with '#' [37]
+ o CVE-2016-8625: IDNA 2003 makes curl use wrong host [38]
  o openssl: fix per-thread memory leak using 1.0.1 or 1.0.2 [1]
  o http: accept "Transfer-Encoding: chunked" for HTTP/2 as well [2]
  o LICENSE-MIXING.md: update with mbedTLS dual licensing [3]
@@ -57,6 +68,11 @@ This release includes the following bugfixes:
  o curl_multi_remove_handle: fix a double-free [25]
  o multi: fix inifinte loop in curl_multi_cleanup() [26]
  o nss: fix tight loop in non-blocking TLS handhsake over proxy [27]
+ o mk-ca-bundle: Change URL retrieval to HTTPS-only by default [39]
+ o mbedtls: stop using deprecated include file [40]
+ o docs: fix req->data in multi-uv example [41]
+ o configure: Fix test syntax for monotonic clock_gettime
+ o CURLMOPT_MAX_PIPELINE_LENGTH.3: Clarify it's not for HTTP/2 [42]
 
 This release includes the following known bugs:
 
@@ -66,14 +82,16 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Akshay Vernekar, Alexander Sinditskiy, Anders Bakken, Andreas Streichardt,
-  Bernard Spil, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Darío Hereñú,
-  David Woodhouse, Jeroen Ooms, Kamil Dudka, lukaszgn on github, Marcel Raad,
-  Martin Storsjo, Martin Storsjö, Michael Kaufmann, Miloš Ljumović,
+  Andrei Sedoi, Bernard Spil, Christian Heimes, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, Darío Hereñú, David Woodhouse,
+  Fernando Muñoz, Gregory Szorc, Jeroen Ooms, Kamil Dudka, Luật Nguyễn,
+  lukaszgn on github, Marcel Raad, Martin Frodl, Martin Storsjo,
+  Martin Storsjö, Michael Kaufmann, Michael Osipov, Miloš Ljumović,
   Nick Zitzmann, nopjmp on github, Paul Joyce, Rainer Müller, Ray Satiro,
   Remo E, Rider Linden, Sebastian Mundry, Sergei Kuzmin, Stephen Brokenshire,
   Tobias Stoeckmann, Toby Peterson, Todd Short, Tony Kelman, Torben Dannhauer,
   Valentin David,
-  (34 contributors)
+  (41 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -106,3 +124,18 @@ References to bug reports and discussions on issues:
  [25] = https://curl.haxx.se/bug/?i=1083
  [26] = https://curl.haxx.se/mail/lib-2016-10/0011.html
  [27] = https://bugzilla.redhat.com/1388162
+ [28] = https://curl.haxx.se/docs/adv_20161102A.html
+ [29] = https://curl.haxx.se/docs/adv_20161102B.html
+ [30] = https://curl.haxx.se/docs/adv_20161102C.html
+ [31] = https://curl.haxx.se/docs/adv_20161102D.html
+ [32] = https://curl.haxx.se/docs/adv_20161102E.html
+ [33] = https://curl.haxx.se/docs/adv_20161102F.html
+ [34] = https://curl.haxx.se/docs/adv_20161102G.html
+ [35] = https://curl.haxx.se/docs/adv_20161102H.html
+ [36] = https://curl.haxx.se/docs/adv_20161102I.html
+ [37] = https://curl.haxx.se/docs/adv_20161102J.html
+ [38] = https://curl.haxx.se/docs/adv_20161102K.html
+ [39] = https://curl.haxx.se/bug/?i=1012
+ [40] = https://curl.haxx.se/bug/?i=1087
+ [41] = https://curl.haxx.se/bug/?i=1088
+ [42] = https://curl.haxx.se/bug/?i=1059
