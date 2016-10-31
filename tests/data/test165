@@ -31,13 +31,14 @@ http
 idn
 </features>
 <setenv>
-CHARSET=ISO8859-1
+CHARSET=UTF-8
+LANG=en_US.UTF-8
 </setenv>
  <name>
 HTTP over proxy with IDN host name
  </name>
  <command>
-http://www.Â‰ˆ.se/page/165 -x %HOSTIP:%HTTPPORT
+http://www.√•√§√∂.se/page/165 -x %HOSTIP:%HTTPPORT http://www.gro√üe.de/page/165
 </command>
 </client>
 
@@ -50,6 +51,11 @@ http://www.Â‰ˆ.se/page/165 -x %HOSTIP:%HTTPPORT
 <protocol>
 GET http://www.xn--4cab6c.se/page/165 HTTP/1.1
 Host: www.xn--4cab6c.se
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://www.xn--groe-xna.de/page/165 HTTP/1.1
+Host: www.xn--groe-xna.de
 Accept: */*
 Proxy-Connection: Keep-Alive
 
