@@ -708,16 +708,16 @@ static void _ldap_trace (const char *fmt, ...)
  */
 static int str2scope (const char *p)
 {
-  if(strequal(p, "one"))
-     return LDAP_SCOPE_ONELEVEL;
-  if(strequal(p, "onetree"))
-     return LDAP_SCOPE_ONELEVEL;
-  if(strequal(p, "base"))
-     return LDAP_SCOPE_BASE;
-  if(strequal(p, "sub"))
-     return LDAP_SCOPE_SUBTREE;
-  if(strequal(p, "subtree"))
-     return LDAP_SCOPE_SUBTREE;
+  if(strcasecompare(p, "one"))
+    return LDAP_SCOPE_ONELEVEL;
+  if(strcasecompare(p, "onetree"))
+    return LDAP_SCOPE_ONELEVEL;
+  if(strcasecompare(p, "base"))
+    return LDAP_SCOPE_BASE;
+  if(strcasecompare(p, "sub"))
+    return LDAP_SCOPE_SUBTREE;
+  if(strcasecompare(p, "subtree"))
+    return LDAP_SCOPE_SUBTREE;
   return (-1);
 }
 
@@ -776,9 +776,9 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   size_t i;
 
   if(!conn->data ||
-      !conn->data->state.path ||
-      conn->data->state.path[0] != '/' ||
-      !checkprefix("LDAP", conn->data->change.url))
+     !conn->data->state.path ||
+     conn->data->state.path[0] != '/' ||
+     !checkprefix("LDAP", conn->data->change.url))
     return LDAP_INVALID_SYNTAX;
 
   ludp->lud_scope = LDAP_SCOPE_BASE;

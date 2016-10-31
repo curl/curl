@@ -27,7 +27,7 @@
 
 #include <curl/curl.h>
 #include "urldata.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "hostcheck.h"
 #include "vtls/vtls.h"
 #include "sendf.h"
