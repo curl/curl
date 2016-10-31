@@ -173,6 +173,7 @@ man_MANS =                                      \
  CURLOPT_KEEP_SENDING_ON_ERROR.3                \
  CURLOPT_KEYPASSWD.3                            \
  CURLOPT_KRBLEVEL.3                             \
+ CURLOPT_LIBPROXY.3                             \
  CURLOPT_LOCALPORT.3                            \
  CURLOPT_LOCALPORTRANGE.3                       \
  CURLOPT_LOGIN_OPTIONS.3                        \
@@ -461,6 +462,7 @@ HTMLPAGES =                                     \
  CURLOPT_KEEP_SENDING_ON_ERROR.html             \
  CURLOPT_KEYPASSWD.html                         \
  CURLOPT_KRBLEVEL.html                          \
+ CURLOPT_LIBPROXY.html                          \
  CURLOPT_LOCALPORT.html                         \
  CURLOPT_LOCALPORTRANGE.html                    \
  CURLOPT_LOGIN_OPTIONS.html                     \
@@ -749,6 +751,7 @@ PDFPAGES =                                      \
  CURLOPT_KEEP_SENDING_ON_ERROR.pdf              \
  CURLOPT_KEYPASSWD.pdf                          \
  CURLOPT_KRBLEVEL.pdf                           \
+ CURLOPT_LIBPROXY.pdf                           \
  CURLOPT_LOCALPORT.pdf                          \
  CURLOPT_LOCALPORTRANGE.pdf                     \
  CURLOPT_LOGIN_OPTIONS.pdf                      \

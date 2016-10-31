@@ -2700,6 +2700,13 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_CONNECT_TO:
     data->set.connect_to = va_arg(param, struct curl_slist *);
     break;
+  case CURLOPT_LIBPROXY:
+#ifdef USE_LIBPROXY
+    data->set.libproxy = (0 != va_arg(param, long))?TRUE:FALSE;
+#else
+    result = CURLE_NOT_BUILT_IN;
+#endif
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;
@@ -5950,6 +5957,10 @@ static CURLcode create_conn(struct Curl_easy *data,
     free(proxy);  /* proxy is in exception list */
     proxy = NULL;
   }
+#ifdef USE_LIBPROXY
+  else if(data->set.libproxy)
+    proxy = Curl_libproxy_detect_proxy(data->change.url);
+#endif
   else if(!proxy)
     proxy = detect_proxy(conn);
 

@@ -198,6 +198,10 @@
 #include <libssh2_sftp.h>
 #endif /* HAVE_LIBSSH2_H */
 
+#ifdef USE_LIBPROXY
+#include "curl_libproxy.h"
+#endif
+
 /* Download buffer size, keep it fairly big for speed reasons */
 #undef BUFSIZE
 #define BUFSIZE CURL_MAX_WRITE_SIZE
@@ -1690,6 +1694,7 @@ struct UserDefined {
   bool path_as_is;      /* allow dotdots? */
   bool pipewait;        /* wait for pipe/multiplex status before starting a
                            new connection */
+  bool libproxy;        /* use libproxy to discover proxies */
   long expect_100_timeout; /* in milliseconds */
 
   struct Curl_easy *stream_depends_on;
