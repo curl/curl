@@ -72,7 +72,7 @@
 #include "vtls.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
 
