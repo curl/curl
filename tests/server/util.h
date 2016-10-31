@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,5 +62,7 @@ int write_pidfile(const char *filename);
 void set_advisor_read_lock(const char *filename);
 
 void clear_advisor_read_lock(const char *filename);
+
+int strncasecompare(const char *first, const char *second, size_t max);
 
 #endif  /* HEADER_CURL_SERVER_UTIL_H */
