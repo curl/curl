@@ -69,7 +69,7 @@
 #include "escape.h"
 #include "progress.h"
 #include "transfer.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "strtok.h"
 #include "curl_ldap.h"
 #include "curl_multibyte.h"
