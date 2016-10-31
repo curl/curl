@@ -64,7 +64,7 @@
 #include <ocsp.h>
 #endif
 
-#include "rawstr.h"
+#include "strcase.h"
 #include "warnless.h"
 #include "x509asn1.h"
 

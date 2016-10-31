@@ -50,7 +50,6 @@
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
-#include "rawstr.h"
 #include "polarssl_threadlock.h"
 
 /* The last 3 #include files should be in this order */
