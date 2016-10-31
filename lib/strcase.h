@@ -32,11 +32,11 @@
  * non-ascii.
  */
 
-#define strcasecompare(a,b) curl_strcasecompare(a,b)
-#define strncasecompare(a,b,c) curl_strncasecompare(a,b,c)
+#define strcasecompare(a,b) Curl_strcasecompare(a,b)
+#define strncasecompare(a,b,c) Curl_strncasecompare(a,b,c)
 
-int curl_strcasecompare(const char *first, const char *second);
-int curl_strncasecompare(const char *first, const char *second, size_t max);
+int Curl_strcasecompare(const char *first, const char *second);
+int Curl_strncasecompare(const char *first, const char *second, size_t max);
 
 char Curl_raw_toupper(char in);
 

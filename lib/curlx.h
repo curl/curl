@@ -73,8 +73,8 @@
 */
 
 #define curlx_getenv curl_getenv
-#define curlx_strcasecompare curl_strcasecompare
-#define curlx_strncasecompare curl_strncasecompare
+#define curlx_strcasecompare curl_strequal
+#define curlx_strncasecompare curl_strnequal
 #define curlx_mvsnprintf curl_mvsnprintf
 #define curlx_msnprintf curl_msnprintf
 #define curlx_maprintf curl_maprintf

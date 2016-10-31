@@ -126,7 +126,7 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
           keepit = *end;
           *end = 0; /* zero terminate */
           for(i = 0; replacements[i].name; i++) {
-            if(curl_strcasecompare(ptr, replacements[i].name)) {
+            if(curl_strequal(ptr, replacements[i].name)) {
               match = TRUE;
               switch(replacements[i].id) {
               case VAR_EFFECTIVE_URL:

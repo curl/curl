@@ -102,7 +102,7 @@ char Curl_raw_toupper(char in)
  * @unittest: 1301
  */
 
-int curl_strcasecompare(const char *first, const char *second)
+int Curl_strcasecompare(const char *first, const char *second)
 {
   while(*first && *second) {
     if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
@@ -120,7 +120,7 @@ int curl_strcasecompare(const char *first, const char *second)
 /*
  * @unittest: 1301
  */
-int curl_strncasecompare(const char *first, const char *second, size_t max)
+int Curl_strncasecompare(const char *first, const char *second, size_t max)
 {
   while(*first && *second && max) {
     if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second)) {
@@ -149,4 +149,15 @@ void Curl_strntoupper(char *dest, const char *src, size_t n)
   do {
     *dest++ = Curl_raw_toupper(*src);
   } while(*src++ && --n);
+}
+
+/* --- public functions --- */
+
+int curl_strequal(const char *first, const char *second)
+{
+  return Curl_strcasecompare(first, second);
+}
+int curl_strnequal(const char *first, const char *second, size_t max)
+{
+  return Curl_strncasecompare(first, second, max);
 }
