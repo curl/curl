@@ -21,6 +21,9 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
+#include <curl/curl.h>
+
 #include "strcase.h"
 
 /* Portable, consistent toupper (remember EBCDIC). Do not use toupper() because
