@@ -416,7 +416,7 @@ $       link'ldebug'/exe=[.src]curl.exe/dsf=[.src]curl.dsf -
            [.src]curl-tool_urlglob.o, [.src]curl-tool_util.o, -
            [.src]curl-tool_vms.o, [.src]curl-tool_writeenv.o, -
            [.src]curl-tool_writeout.o, [.src]curl-tool_xattr.o, -
-           [.src]curl-strtoofft.o, [.src]curl-strdup.o, [.src]curl-rawstr.o, -
+           [.src]curl-strtoofft.o, [.src]curl-strdup.o, [.src]curl-strcase.o, -
            [.src]curl-nonblock.o, gnv_packages_vms:curlmsg.obj,-
            sys$input:/opt
 gnv$libcurl/share
@@ -428,7 +428,7 @@ $   curl_dsf = "[.src]curl.dsf"
 $   curl_main = "[.packages.vms.''arch_name']tool_main.obj"
 $   curl_src = "[.packages.vms.''arch_name']curlsrc.olb"
 $   curl_lib = "[.packages.vms.''arch_name']curllib.olb"
-$   rawstr = "rawstr"
+$   strcase = "strcase"
 $   nonblock = "nonblock"
 $   warnless = "warnless"
 $!
@@ -436,7 +436,7 @@ $!  Extended parse style requires special quoting
 $!
 $   if (arch_name .nes. "VAX") .and. (parse_style .eqs. "EXTENDED")
 $   then
-$       rawstr = """rawstr"""
+$       strcase = """strcase"""
 $       nonblock = """nonblock"""
 $       warnless = """warnless"""
 $   endif
@@ -446,7 +446,7 @@ $       define/user gnv$libcurl 'gnv_libcurl_share'
 $       link'ldebug'/exe='curl_exe'/dsf='curl_dsf' -
            'curl_main','curl_src'/lib, -
            'curl_lib'/library/include=-
-           ('rawstr','nonblock','warnless'),-
+           ('strcase','nonblock','warnless'),-
            gnv_packages_vms:curlmsg.obj,-
            sys$input:/opt
 gnv$libcurl/share
