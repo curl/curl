@@ -24,6 +24,7 @@
 #ifdef USE_METALINK
 
 #include <sys/stat.h>
+#include <stdlib.h>
 
 #ifdef HAVE_FCNTL_H
 #  include <fcntl.h>
@@ -91,8 +92,6 @@ struct win32_crypto_hash {
 #else
 #  error "Can't compile METALINK support without a crypto library."
 #endif
-
-#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -563,18 +562,13 @@ int Curl_digest_final(digest_context *context, unsigned char *result)
 
 static unsigned char hex_to_uint(const char *s)
 {
-  int v[2];
-  int i;
-  for(i = 0; i < 2; ++i) {
-    v[i] = Curl_raw_toupper(s[i]);
-    if('0' <= v[i] && v[i] <= '9') {
-      v[i] -= '0';
-    }
-    else if('A' <= v[i] && v[i] <= 'Z') {
-      v[i] -= 'A'-10;
-    }
-  }
-  return (unsigned char)((v[0] << 4) | v[1]);
+  char buf[3];
+  unsigned long val;
+  buf[0] = s[0];
+  buf[1] = s[1];
+  buf[2] = 0;
+  val = strtoul(buf, NULL, 16);
+  return (unsigned char)(val&0xff);
 }
 
 /*
