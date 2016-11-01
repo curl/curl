@@ -2,9 +2,9 @@ Curl and libcurl 7.51.0
 
  Public curl releases:         160
  Command line options:         185
- curl_easy_setopt() options:   224
+ curl_easy_setopt() options:   225
  Public functions in libcurl:  61
- Contributors:                 1445
+ Contributors:                 1467
 
 This release includes the following changes:
 
@@ -85,13 +85,13 @@ advice from friends like these:
   Andrei Sedoi, Bernard Spil, Christian Heimes, Dan Fandrich,
   Daniel Gustafsson, Daniel Stenberg, Darío Hereñú, David Woodhouse,
   Fernando Muñoz, Gregory Szorc, Jeroen Ooms, Kamil Dudka, Luật Nguyễn,
-  lukaszgn on github, Marcel Raad, Martin Frodl, Martin Storsjo,
-  Martin Storsjö, Michael Kaufmann, Michael Osipov, Miloš Ljumović,
-  Nick Zitzmann, nopjmp on github, Paul Joyce, Rainer Müller, Ray Satiro,
-  Remo E, Rider Linden, Sebastian Mundry, Sergei Kuzmin, Stephen Brokenshire,
+  lukaszgn on github, Marcel Raad, Martin Frodl, Martin Storsjö,
+  Michael Kaufmann, Michael Osipov, Miloš Ljumović, Nick Zitzmann,
+  nopjmp on github, Paul Joyce, Rainer Müller, Ray Satiro, Remo E,
+  Rider Linden, Sebastian Mundry, Sergei Kuzmin, Stephen Brokenshire,
   Tobias Stoeckmann, Toby Peterson, Todd Short, Tony Kelman, Torben Dannhauer,
   Valentin David,
-  (41 contributors)
+  (40 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
