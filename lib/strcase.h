@@ -42,7 +42,7 @@ char Curl_raw_toupper(char in);
 
 /* checkprefix() is a shorter version of the above, used when the first
    argument is zero-byte terminated */
-#define checkprefix(a,b)    strncasecompare(a,b,strlen(a))
+#define checkprefix(a,b)    curl_strnequal(a,b,strlen(a))
 
 void Curl_strntoupper(char *dest, const char *src, size_t n);
 char Curl_raw_toupper(char in);
