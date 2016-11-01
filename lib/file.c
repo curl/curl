@@ -190,7 +190,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   struct FILEPROTO *file = data->req.protop;
   int fd;
 #ifdef DOS_FILESYSTEM
-  int i;
+  size_t i;
   char *actual_path;
 #endif
   size_t real_path_len;
