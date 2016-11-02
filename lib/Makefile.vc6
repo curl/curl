@@ -633,7 +633,6 @@ X_OBJS= \
 	$(DIROBJ)\vtls.obj \
 	$(DIROBJ)\openssl.obj \
 	$(DIROBJ)\strdup.obj \
-	$(DIROBJ)\strequal.obj \
 	$(DIROBJ)\strerror.obj \
 	$(DIROBJ)\strtok.obj \
 	$(DIROBJ)\strtoofft.obj \
