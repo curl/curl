@@ -3298,11 +3298,12 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     ftpc->known_filesize = -1;
   }
 
-  /* get the "raw" path */
-  result = Curl_urldecode(data, path_to_use, 0, &path, NULL, FALSE);
+  if(!result)
+    /* get the "raw" path */
+    result = Curl_urldecode(data, path_to_use, 0, &path, NULL, FALSE);
   if(result) {
-    /* out of memory, but we can limp along anyway (and should try to
-     * since we may already be in the out of memory cleanup path) */
+    /* We can limp along anyway (and should try to since we may already be in
+     * the error path) */
     ftpc->ctl_valid = FALSE; /* mark control connection as bad */
     connclose(conn, "FTP: out of memory!"); /* mark for connection closure */
     ftpc->prevpath = NULL; /* no path remembering */
