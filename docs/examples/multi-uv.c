@@ -77,7 +77,6 @@ void destroy_curl_context(curl_context_t *context)
   uv_close((uv_handle_t *) &context->poll_handle, curl_close_cb);
 }
 
-
 void add_download(const char *url, int num)
 {
   char filename[50];
@@ -102,7 +101,6 @@ void add_download(const char *url, int num)
 
 static void check_multi_info(void)
 {
-  int running_handles;
   char *done_url;
   CURLMsg *message;
   int pending;
@@ -135,9 +133,6 @@ void curl_perform(uv_poll_t *req, int status, int events)
   int running_handles;
   int flags = 0;
   curl_context_t *context;
-  char *done_url;
-  CURLMsg *message;
-  int pending;
 
   uv_timer_stop(&timeout);
 
