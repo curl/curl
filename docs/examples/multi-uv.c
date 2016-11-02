@@ -176,22 +176,23 @@ int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
                   void *socketp)
 {
   curl_context_t *curl_context;
-  if(action == CURL_POLL_IN || action == CURL_POLL_OUT) {
-    if(socketp) {
-      curl_context = (curl_context_t *) socketp;
-    }
-    else {
-      curl_context = create_curl_context(s);
-    }
-    curl_multi_assign(curl_handle, s, (void *) curl_context);
-  }
+  int events = 0;
 
   switch(action) {
   case CURL_POLL_IN:
-    uv_poll_start(&curl_context->poll_handle, UV_READABLE, curl_perform);
-    break;
   case CURL_POLL_OUT:
-    uv_poll_start(&curl_context->poll_handle, UV_WRITABLE, curl_perform);
+  case CURL_POLL_INOUT:
+    curl_context = socketp ?
+      (curl_context_t *) socketp : create_curl_context(s);
+
+    curl_multi_assign(curl_handle, s, (void *) curl_context);
+
+    if(action != CURL_POLL_IN)
+      events |= UV_WRITABLE;
+    if(action != CURL_POLL_OUT)
+      events |= UV_READABLE;
+
+    uv_poll_start(&curl_context->poll_handle, events, curl_perform);
     break;
   case CURL_POLL_REMOVE:
     if(socketp) {
