@@ -3303,8 +3303,6 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   if(result) {
     /* out of memory, but we can limp along anyway (and should try to
      * since we may already be in the out of memory cleanup path) */
-    if(!result)
-      result = CURLE_OUT_OF_MEMORY;
     ftpc->ctl_valid = FALSE; /* mark control connection as bad */
     connclose(conn, "FTP: out of memory!"); /* mark for connection closure */
     ftpc->prevpath = NULL; /* no path remembering */
