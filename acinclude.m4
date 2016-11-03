@@ -3232,7 +3232,14 @@ AC_DEFUN([CURL_MAC_CFLAGS], [
     else
       AC_MSG_RESULT([$min set])
     fi
+
+    old_CFLAGS=$CFLAGS
     CFLAGS="$CFLAGS -Werror=partial-availability"
+    AC_MSG_CHECKING([whether $CC accepts -Werror=partial-availability])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+      [AC_MSG_RESULT([yes])],
+      [AC_MSG_RESULT([no])
+      CFLAGS=$old_CFLAGS])
   fi
 
 ])
