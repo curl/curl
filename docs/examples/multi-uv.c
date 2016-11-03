@@ -24,18 +24,12 @@
  * multi_socket API using libuv
  * </DESC>
  */
-/* Example application code using the multi socket interface to download
-   multiple files at once, but instead of using curl_multi_perform and
-   curl_multi_wait, which uses select(), we use libuv.
-   It supports epoll, kqueue, etc. on unixes and fast IO completion ports on
-   Windows, which means, it should be very fast on all platforms..
-
-   Written by Clemens Gruber, based on an outdated example from uvbook and
-   some tests from libuv.
+/* Example application using the multi socket interface to download multiple
+   files in parallel, powered by libuv.
 
    Requires libuv and (of course) libcurl.
 
-   See http://nikhilm.github.com/uvbook/ for more information on libuv.
+   See https://nikhilm.github.com/uvbook/ for more information on libuv.
 */
 
 #include <stdio.h>
