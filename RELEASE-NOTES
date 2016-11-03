@@ -1,6 +1,6 @@
-Curl and libcurl 7.51.0
+Curl and libcurl 7.51.1
 
- Public curl releases:         160
+ Public curl releases:         161
  Command line options:         185
  curl_easy_setopt() options:   225
  Public functions in libcurl:  61
@@ -8,72 +8,12 @@ Curl and libcurl 7.51.0
 
 This release includes the following changes:
 
- o nss: additional cipher suites are now accepted by CURLOPT_SSL_CIPHER_LIST
- o New option: CURLOPT_KEEP_SENDING_ON_ERROR [10]
+ o
 
 This release includes the following bugfixes:
 
- o CVE-2016-8615: cookie injection for other servers [28]
- o CVE-2016-8616: case insensitive password comparison [29]
- o CVE-2016-8617: OOB write via unchecked multiplication [30]
- o CVE-2016-8618: double-free in curl_maprintf [31]
- o CVE-2016-8619: double-free in krb5 code [32]
- o CVE-2016-8620: glob parser write/read out of bounds [33]
- o CVE-2016-8621: curl_getdate read out of bounds [34]
- o CVE-2016-8622: URL unescape heap overflow via integer truncation [35]
- o CVE-2016-8623: Use-after-free via shared cookies [36]
- o CVE-2016-8624: invalid URL parsing with '#' [37]
- o CVE-2016-8625: IDNA 2003 makes curl use wrong host [38]
- o openssl: fix per-thread memory leak using 1.0.1 or 1.0.2 [1]
- o http: accept "Transfer-Encoding: chunked" for HTTP/2 as well [2]
- o LICENSE-MIXING.md: update with mbedTLS dual licensing [3]
- o examples/imap-append: Set size of data to be uploaded [4]
- o test2048: fix url
- o darwinssl: disable RC4 cipher-suite support
- o CURLOPT_PINNEDPUBLICKEY.3: fix the AVAILABILITY formatting
- o openssl: don’t call CRYTPO_cleanup_all_ex_data [5]
- o libressl: fix version output [6]
- o easy: Reset all statistical session info in curl_easy_reset [7]
- o curl_global_cleanup.3: don't unload the lib with sub threads running [8]
- o dist: add CurlSymbolHiding.cmake to the tarball
- o docs: Remove that --proto is just used for initial retrieval [9]
- o configure: Fixed builds with libssh2 in a custom location
- o curl.1: --trace supports % for sending to stderr!
- o cookies: same domain handling changed to match browser behavior [11]
- o formpost: trying to attach a directory no longer crashes [12]
- o CURLOPT_DEBUGFUNCTION.3: fixed unused argument warning [13]
- o formpost: avoid silent snprintf() truncation
- o ftp: fix Curl_ftpsendf
- o mprintf: return error on too many arguments
- o smb: properly check incoming packet boundaries [14]
- o GIT-INFO: remove the Mac 10.1-specific details [15]
- o resolve: add error message when resolving using SIGALRM [16]
- o cmake: add nghttp2 support [17]
- o dist: remove PDF and HTML converted docs from the releases [18]
- o configure: disable poll() in macOS builds [19]
- o vtls: only re-use session-ids using the same scheme
- o pipelining: skip to-be-closed connections when pipelining [20]
- o win: fix Universal Windows Platform build [21]
- o curl: do not set CURLOPT_SSLENGINE to DEFAULT automatically [22]
- o maketgz: make it support "only" generating version info
- o Curl_socket_check: add extra check to avoid integer overflow
- o gopher: properly return error for poll failures
- o curl: set INTERLEAVEDATA too
- o polarssl: clear thread array at init
- o polarssl: fix unaligned SSL session-id lock
- o polarssl: reduce #ifdef madness with a macro
- o curl_multi_add_handle: set timeouts in closure handles [23]
- o configure: set min version flags for builds on mac [24]
- o INSTALL: converted to markdown => INSTALL.md
- o curl_multi_remove_handle: fix a double-free [25]
- o multi: fix inifinte loop in curl_multi_cleanup() [26]
- o nss: fix tight loop in non-blocking TLS handhsake over proxy [27]
- o mk-ca-bundle: Change URL retrieval to HTTPS-only by default [39]
- o mbedtls: stop using deprecated include file [40]
- o docs: fix req->data in multi-uv example [41]
- o configure: Fix test syntax for monotonic clock_gettime
- o CURLMOPT_MAX_PIPELINE_LENGTH.3: Clarify it's not for HTTP/2 [42]
-
+ o
+ 
 This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
@@ -81,61 +21,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Akshay Vernekar, Alexander Sinditskiy, Anders Bakken, Andreas Streichardt,
-  Andrei Sedoi, Bernard Spil, Christian Heimes, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Darío Hereñú, David Woodhouse,
-  Fernando Muñoz, Gregory Szorc, Jeroen Ooms, Kamil Dudka, Luật Nguyễn,
-  lukaszgn on github, Marcel Raad, Martin Frodl, Martin Storsjö,
-  Michael Kaufmann, Michael Osipov, Miloš Ljumović, Nick Zitzmann,
-  nopjmp on github, Paul Joyce, Rainer Müller, Ray Satiro, Remo E,
-  Rider Linden, Sebastian Mundry, Sergei Kuzmin, Stephen Brokenshire,
-  Tobias Stoeckmann, Toby Peterson, Todd Short, Tony Kelman, Torben Dannhauer,
-  Valentin David,
-  (40 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=964
- [2] = https://curl.haxx.se/bug/?i=1013
- [3] = https://curl.haxx.se/bug/?i=1019
- [4] = https://curl.haxx.se/bug/?i=1011
- [5] = https://curl.haxx.se/mail/lib-2016-09/0045.html
- [6] = https://curl.haxx.se/bug/?i=1029
- [7] = https://curl.haxx.se/bug/?i=1017
- [8] = https://curl.haxx.se/bug/?i=997
- [9] = https://curl.haxx.se/bug/?i=1031
- [10] = https://curl.haxx.se/libcurl/c/CURLOPT_KEEP_SENDING_ON_ERROR.html
- [11] = https://curl.haxx.se/bug/?i=1050
- [12] = https://curl.haxx.se/bug/?i=1053
- [13] = https://curl.haxx.se/bug/?i=1056
- [14] = https://curl.haxx.se/bug/?i=1052
- [15] = https://curl.haxx.se/bug/?i=1049
- [16] = https://curl.haxx.se/bug/?i=1066
- [17] = https://curl.haxx.se/bug/?i=922
- [18] = https://curl.haxx.se/mail/lib-2016-10/0040.html
- [19] = https://curl.haxx.se/bug/?i=1057
- [20] = https://curl.haxx.se/bug/?i=1075
- [21] = https://curl.haxx.se/bug/?i=1048
- [22] = https://curl.haxx.se/bug/?i=1042
- [23] = https://curl.haxx.se/bug/?i=739
- [24] = https://curl.haxx.se/bug/?i=1069
- [25] = https://curl.haxx.se/bug/?i=1083
- [26] = https://curl.haxx.se/mail/lib-2016-10/0011.html
- [27] = https://bugzilla.redhat.com/1388162
- [28] = https://curl.haxx.se/docs/adv_20161102A.html
- [29] = https://curl.haxx.se/docs/adv_20161102B.html
- [30] = https://curl.haxx.se/docs/adv_20161102C.html
- [31] = https://curl.haxx.se/docs/adv_20161102D.html
- [32] = https://curl.haxx.se/docs/adv_20161102E.html
- [33] = https://curl.haxx.se/docs/adv_20161102F.html
- [34] = https://curl.haxx.se/docs/adv_20161102G.html
- [35] = https://curl.haxx.se/docs/adv_20161102H.html
- [36] = https://curl.haxx.se/docs/adv_20161102I.html
- [37] = https://curl.haxx.se/docs/adv_20161102J.html
- [38] = https://curl.haxx.se/docs/adv_20161102K.html
- [39] = https://curl.haxx.se/bug/?i=1012
- [40] = https://curl.haxx.se/bug/?i=1087
- [41] = https://curl.haxx.se/bug/?i=1088
- [42] = https://curl.haxx.se/bug/?i=1059
+ [1] = https://curl.haxx.se/bug/?i=
