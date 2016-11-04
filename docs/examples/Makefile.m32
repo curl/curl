@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -50,7 +50,7 @@ LIBRTMP_PATH = ../../../librtmp-2.4
 endif
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
-LIBIDN_PATH = ../../../libidn-1.30
+LIBIDN_PATH = ../../../libidn-1.32
 endif
 # Edit the path below to point to the base of your MS IDN package.
 # Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1

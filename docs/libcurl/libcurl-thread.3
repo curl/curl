@@ -1,0 +1,105 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 2015 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH libcurl-thread 3 "13 Jul 2015" "libcurl" "libcurl thread safety"
+.SH NAME
+libcurl-thread \- libcurl thread safety
+.SH "Multi-threading with libcurl"
+libcurl is thread safe but has no internal thread synchronization. You may have
+to provide your own locking should you meet any of the thread safety exceptions
+below.
+
+\fBHandles.\fP You must \fBnever\fP share the same handle in multiple threads.
+You can pass the handles around among threads, but you must never use a single
+handle from more than one thread at any given time.
+
+\fBShared objects.\fP You can share certain data between multiple handles by
+using the share interface but you must provide your own locking and set
+\fIcurl_share_setopt(3)\fP CURLSHOPT_LOCKFUNC and CURLSHOPT_UNLOCKFUNC.
+.SH TLS
+If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
+then of course using the underlying SSL library multi-threaded and those libs
+might have their own requirements on this issue.  You may need to provide one
+or two functions to allow it to function properly:
+.IP OpenSSL
+OpenSSL 1.1.0 "can be safely used in multi-threaded applications provided that
+support for the underlying OS threading API is built-in."
+
+https://www.openssl.org/docs/manmaster/crypto/threads.html#DESCRIPTION
+
+OpenSSL <= 1.0.2 the user must set callbacks.
+
+https://www.openssl.org/docs/man1.0.2/crypto/threads.html#DESCRIPTION
+
+https://curl.haxx.se/libcurl/c/opensslthreadlock.html
+
+.IP GnuTLS
+http://gnutls.org/manual/html_node/Thread-safety.html
+.IP NSS
+thread-safe already without anything required.
+.IP PolarSSL
+Required actions unknown.
+.IP yassl
+Required actions unknown.
+.IP axTLS
+Required actions unknown.
+.IP Secure-Transport
+The engine is used by libcurl in a way that is fully thread-safe.
+.IP WinSSL
+The engine is used by libcurl in a way that is fully thread-safe.
+.IP wolfSSL
+The engine is used by libcurl in a way that is fully thread-safe.
+.IP BoringSSL
+The engine is used by libcurl in a way that is fully thread-safe.
+.SH "Other areas of caution"
+.IP Signals
+Signals are used for timing out name resolves (during DNS lookup) - when built
+without using either the c-ares or threaded resolver backends. When using
+multiple threads you should set the \fICURLOPT_NOSIGNAL(3)\fP option to 1L for
+all handles. Everything will or might work fine except that timeouts are not
+honored during the DNS lookup - which you can work around by building libcurl
+with c-ares support. c-ares is a library that provides asynchronous name
+resolves. On some platforms, libcurl simply will not function properly
+multi-threaded unless this option is set.
+.IP "Name resolving"
+\fBgethostby* functions and other system calls.\fP These functions, provided
+by your operating system, must be thread safe. It is very important that
+libcurl can find and use thread safe versions of these and other system calls,
+as otherwise it can't function fully thread safe. Some operating systems are
+known to have faulty thread implementations. We have previously received
+problem reports on *BSD (at least in the past, they may be working fine these
+days).  Some operating systems that are known to have solid and working thread
+support are Linux, Solaris and Windows.
+.IP "curl_global_* functions"
+These functions are not thread safe. If you are using libcurl with multiple
+threads it is especially important that before use you call
+\fIcurl_global_init(3)\fP or \fIcurl_global_init_mem(3)\fP to explicitly
+initialize the library and its dependents, rather than rely on the "lazy"
+fail-safe initialization that takes place the first time
+\fIcurl_easy_init(3)\fP is called. For an in-depth explanation refer to
+\fIlibcurl(3)\fP section \fBGLOBAL CONSTANTS\fP.
+.IP "Memory functions"
+These functions, provided either by your operating system or your own
+replacements, must be thread safe. You can use \fIcurl_global_init_mem(3)\fP
+to set your own replacement memory functions.
+.IP "Non-safe functions"
+\fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP is not thread-safe.

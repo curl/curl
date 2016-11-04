@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,7 +49,7 @@
  *
  * If you think that something actually needs to be changed, adjusted
  * or fixed in this file, then, report it on the libcurl development
- * mailing list: http://cool.haxx.se/mailman/listinfo/curl-library/
+ * mailing list: https://cool.haxx.se/mailman/listinfo/curl-library/
  *
  * Try to keep one section per platform, compiler and architecture,
  * otherwise, if an existing section is reused for a different one and
@@ -527,8 +527,9 @@
 /* ===================================== */
 
 #elif defined(__GNUC__)
-#  if defined(__ILP32__) || \
-      defined(__i386__) || defined(__ppc__) || defined(__arm__) || defined(__sparc__)
+#  if !defined(__LP64__) && (defined(__ILP32__) || \
+      defined(__i386__) || defined(__ppc__) || defined(__arm__) || \
+      defined(__sparc__) || defined(__mips__) || defined(__sh__))
 #    define CURL_SIZEOF_LONG           4
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,13 +28,11 @@
 
 #include <curl/curl.h>
 #include "netrc.h"
-
-#include "strequal.h"
 #include "strtok.h"
-#include "rawstr.h"
-#include "curl_printf.h"
+#include "strcase.h"
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -130,20 +128,20 @@ int Curl_parsenetrc(const char *host,
 
         switch(state) {
         case NOTHING:
-          if(Curl_raw_equal("machine", tok)) {
+          if(strcasecompare("machine", tok)) {
             /* the next tok is the machine name, this is in itself the
                delimiter that starts the stuff entered for this machine,
                after this we need to search for 'login' and
                'password'. */
             state=HOSTFOUND;
           }
-          else if(Curl_raw_equal("default", tok)) {
+          else if(strcasecompare("default", tok)) {
             state=HOSTVALID;
             retcode=0; /* we did find our host */
           }
           break;
         case HOSTFOUND:
-          if(Curl_raw_equal(host, tok)) {
+          if(strcasecompare(host, tok)) {
             /* and yes, this is our host! */
             state=HOSTVALID;
             retcode=0; /* we did find our host */
@@ -156,7 +154,7 @@ int Curl_parsenetrc(const char *host,
           /* we are now parsing sub-keywords concerning "our" host */
           if(state_login) {
             if(specific_login) {
-              state_our_login = Curl_raw_equal(*loginp, tok);
+              state_our_login = strcasecompare(*loginp, tok);
             }
             else {
               free(*loginp);
@@ -179,11 +177,11 @@ int Curl_parsenetrc(const char *host,
             }
             state_password=0;
           }
-          else if(Curl_raw_equal("login", tok))
+          else if(strcasecompare("login", tok))
             state_login=1;
-          else if(Curl_raw_equal("password", tok))
+          else if(strcasecompare("password", tok))
             state_password=1;
-          else if(Curl_raw_equal("machine", tok)) {
+          else if(strcasecompare("machine", tok)) {
             /* ok, there's machine here go => */
             state = HOSTFOUND;
             state_our_login = FALSE;

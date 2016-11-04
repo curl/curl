@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -75,9 +75,10 @@ int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
                       curl_socket_t writefd,
                       long timeout_ms);
 
-/* provide the former API internally */
-#define Curl_socket_ready(x,y,z) \
-  Curl_socket_check(x, CURL_SOCKET_BAD, y, z)
+#define SOCKET_READABLE(x,z) \
+  Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, z)
+#define SOCKET_WRITABLE(x,z) \
+  Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, z)
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms);
 

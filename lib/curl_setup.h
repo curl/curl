@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -181,9 +181,6 @@
 #  ifndef CURL_DISABLE_SMTP
 #    define CURL_DISABLE_SMTP
 #  endif
-#  ifndef CURL_DISABLE_RTSP
-#    define CURL_DISABLE_RTSP
-#  endif
 #  ifndef CURL_DISABLE_RTMP
 #    define CURL_DISABLE_RTMP
 #  endif
@@ -225,6 +222,15 @@
 #endif
 
 /*
+ * Use getaddrinfo to resolve the IPv4 address literal. If the current network
+ * interface doesn’t support IPv4, but supports IPv6, NAT64, and DNS64,
+ * performing this task will result in a synthesized IPv6 address.
+ */
+#ifdef  __APPLE__
+#define USE_RESOLVE_ON_IPS 1
+#endif
+
+/*
  * Include header files for windows builds before redefining anything.
  * Use this preprocessor block only to include or exclude windows.h,
  * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
@@ -249,7 +255,7 @@
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
 #    ifdef HAVE_WS2TCPIP_H
-#       include <ws2tcpip.h>
+#      include <ws2tcpip.h>
 #    endif
 #  else
 #    ifdef HAVE_WINSOCK_H
@@ -476,7 +482,7 @@
 #  endif
 
 #  ifndef fileno /* sunos 4 have this as a macro! */
-     int fileno( FILE *stream);
+     int fileno(FILE *stream);
 #  endif
 
 #endif /* WIN32 */
@@ -484,9 +490,10 @@
 /*
  * msvc 6.0 requires PSDK in order to have INET6_ADDRSTRLEN
  * defined in ws2tcpip.h as well as to provide IPv6 support.
+ * Does not apply if lwIP is used.
  */
 
-#if defined(_MSC_VER) && !defined(__POCC__)
+#if defined(_MSC_VER) && !defined(__POCC__) && !defined(USE_LWIPSOCK)
 #  if !defined(HAVE_WS2TCPIP_H) || \
      ((_MSC_VER < 1300) && !defined(INET6_ADDRSTRLEN))
 #    undef HAVE_GETADDRINFO_THREADSAFE
@@ -530,6 +537,7 @@
 #  define CURLRES_ARES
 /* now undef the stock libc functions just to avoid them being used */
 #  undef HAVE_GETADDRINFO
+#  undef HAVE_FREEADDRINFO
 #  undef HAVE_GETHOSTBYNAME
 #elif defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 #  define CURLRES_ASYNCH
@@ -591,10 +599,9 @@ int netware_init(void);
 #endif
 #endif
 
-#if defined(HAVE_LIBIDN) && defined(HAVE_TLD_H)
-/* The lib was present and the tld.h header (which is missing in libidn 0.3.X
-   but we only work with libidn 0.4.1 or later) */
-#define USE_LIBIDN
+#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H)
+/* The lib and header are present */
+#define USE_LIBIDN2
 #endif
 
 #ifndef SIZEOF_TIME_T
@@ -605,7 +612,7 @@ int netware_init(void);
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
 
 #if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_NSS) || \
-    defined(USE_POLARSSL) || defined(USE_AXTLS) || \
+    defined(USE_POLARSSL) || defined(USE_AXTLS) || defined(USE_MBEDTLS) || \
     defined(USE_CYASSL) || defined(USE_SCHANNEL) || \
     defined(USE_DARWINSSL) || defined(USE_GSKIT)
 #define USE_SSL    /* SSL support has been enabled */
@@ -629,11 +636,14 @@ int netware_init(void);
     defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_DARWINSSL) || \
     defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
 
-#ifdef HAVE_BORINGSSL /* BoringSSL is not NTLM capable */
-#undef USE_NTLM
-#else
 #define USE_NTLM
-#endif
+
+#elif defined(USE_MBEDTLS)
+#  include <mbedtls/md4.h>
+#  if defined(MBEDTLS_MD4_C)
+#define USE_NTLM
+#  endif
+
 #endif
 #endif
 
@@ -677,7 +687,7 @@ int netware_init(void);
  * Ensure that Winsock and lwIP TCP/IP stacks are not mixed.
  */
 
-#if defined(__LWIP_OPT_H__)
+#if defined(__LWIP_OPT_H__) || defined(LWIP_HDR_OPT_H)
 #  if defined(SOCKET) || \
      defined(USE_WINSOCK) || \
      defined(HAVE_WINSOCK_H) || \
@@ -708,7 +718,7 @@ int netware_init(void);
 #endif
 
 /* In Windows the default file mode is text but an application can override it.
-Therefore we specify it explicitly. https://github.com/bagder/curl/pull/258
+Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 */
 #if defined(WIN32) || defined(MSDOS)
 #define FOPEN_READTEXT "rt"
@@ -726,5 +736,30 @@ endings either CRLF or LF so 't' is appropriate.
 #define FOPEN_READTEXT "r"
 #define FOPEN_WRITETEXT "w"
 #endif
+
+/* WinSock destroys recv() buffer when send() failed.
+ * Enabled automatically for Windows and for Cygwin as Cygwin sockets are
+ * wrappers for WinSock sockets. https://github.com/curl/curl/issues/657
+ * Define DONT_USE_RECV_BEFORE_SEND_WORKAROUND to force disable workaround.
+ */
+#if !defined(DONT_USE_RECV_BEFORE_SEND_WORKAROUND)
+#  if defined(WIN32) || defined(__CYGWIN__)
+#    define USE_RECV_BEFORE_SEND_WORKAROUND
+#  endif
+#else  /* DONT_USE_RECV_BEFORE_SEND_WORKAROUNDS */
+#  ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+#    undef USE_RECV_BEFORE_SEND_WORKAROUND
+#  endif
+#endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUNDS */
+
+/* Detect Windows App environment which has a restricted access
+ * to the Win32 APIs. */
+# if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#  include <winapifamily.h>
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) && \
+     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#    define CURL_WINDOWS_APP
+#  endif
+# endif
 
 #endif /* HEADER_CURL_SETUP_H */

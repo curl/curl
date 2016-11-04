@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,7 +29,7 @@
  * NTLM details:
  *
  * http://davenport.sourceforge.net/ntlm.html
- * http://www.innovation.ch/java/ntlm.html
+ * https://www.innovation.ch/java/ntlm.html
  */
 
 #define DEBUG_ME 0
@@ -47,13 +47,12 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "select.h"
-#include "curl_ntlm_msgs.h"
+#include "vauth/ntlm.h"
 #include "curl_ntlm_wb.h"
 #include "url.h"
 #include "strerror.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-
-/* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -373,8 +372,8 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
      * by delegating the NTLM challenge/response protocal to a helper
      * in ntlm_auth.
      * http://devel.squid-cache.org/ntlm/squid_helper_protocol.html
-     * http://www.samba.org/samba/docs/man/manpages-3/winbindd.8.html
-     * http://www.samba.org/samba/docs/man/manpages-3/ntlm_auth.1.html
+     * https://www.samba.org/samba/docs/man/manpages-3/winbindd.8.html
+     * https://www.samba.org/samba/docs/man/manpages-3/ntlm_auth.1.html
      * Preprocessor symbol 'NTLM_WB_ENABLED' is defined when this
      * feature is enabled and 'NTLM_WB_FILE' symbol holds absolute
      * filename of ntlm_auth helper.

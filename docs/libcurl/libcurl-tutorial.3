@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -256,58 +256,8 @@ complication for you. Given simply the URL to a file, libcurl will take care
 of all the details needed to get the file moved from one machine to another.
 
 .SH "Multi-threading Issues"
-The first basic rule is that you must \fBnever\fP simultaneously share a
-libcurl handle (be it easy or multi or whatever) between multiple
-threads. Only use one handle in one thread at any time. You can pass the
-handles around among threads, but you must never use a single handle from more
-than one thread at any given time.
-
-libcurl is completely thread safe, except for two issues: signals and SSL/TLS
-handlers. Signals are used for timing out name resolves (during DNS lookup) -
-when built without using either the c-ares or threaded resolver backends.
-
-If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
-then of course using the underlying SSL library multi-threaded and those libs
-might have their own requirements on this issue. Basically, you need to
-provide one or two functions to allow it to function properly. For all
-details, see this:
-
-OpenSSL
-
- http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
-
-GnuTLS
-
- http://gnutls.org/manual/html_node/Thread-safety.html
-
-NSS
-
- is claimed to be thread-safe already without anything required.
-
-PolarSSL
-
- Required actions unknown.
-
-yassl
-
- Required actions unknown.
-
-axTLS
-
- Required actions unknown.
-
-Secure Transport
-
- The engine is fully thread-safe, and no additional steps are required.
-
-When using multiple threads you should set the \fICURLOPT_NOSIGNAL(3)\fP
-option to 1 for all handles. Everything will or might work fine except that
-timeouts are not honored during the DNS lookup - which you can work around by
-building libcurl with c-ares support. c-ares is a library that provides
-asynchronous name resolves. On some platforms, libcurl simply will not
-function properly multi-threaded unless this option is set.
-
-Also, note that \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP is not thread-safe.
+libcurl is thread safe but there are a few exceptions. Refer to
+\fIlibcurl-thread(3)\fP for more information.
 
 .SH "When It Doesn't Work"
 There will always be times when the transfer fails for some reason. You might
@@ -1005,7 +955,7 @@ or understand incoming cookies and they will just be ignored. However, when
 the parser is enabled the cookies will be understood and the cookies will be
 kept in memory and used properly in subsequent requests when the same handle
 is used. Many times this is enough, and you may not have to save the cookies
-to disk at all. Note that the file you specify to \ICURLOPT_COOKIEFILE(3)\fP
+to disk at all. Note that the file you specify to \fICURLOPT_COOKIEFILE(3)\fP
 doesn't have to exist to enable the parser, so a common way to just enable the
 parser and not read any cookies is to use the name of a file you know doesn't
 exist.
@@ -1096,7 +1046,7 @@ input from potentially untrusted users.  Following is a discussion about
 some risks in the ways in which applications commonly use libcurl and
 potential mitigations of those risks. It is by no means comprehensive, but
 shows classes of attacks that robust applications should consider. The
-Common Weakness Enumeration project at http://cwe.mitre.org/ is a good
+Common Weakness Enumeration project at https://cwe.mitre.org/ is a good
 reference for many of these and similar types of weaknesses of which
 application writers should be aware.
 
@@ -1136,11 +1086,15 @@ NTLM authentication, HTTPS, FTPS, SCP and SFTP are a few examples.
 .IP "Redirects"
 The \fICURLOPT_FOLLOWLOCATION(3)\fP option automatically follows HTTP
 redirects sent by a remote server.  These redirects can refer to any kind of
-URL, not just HTTP.  A redirect to a file: URL would cause the libcurl to read
-(or write) arbitrary files from the local filesystem.  If the application
-returns the data back to the user (as would happen in some kinds of CGI
-scripts), an attacker could leverage this to read otherwise forbidden data
-(e.g.  file://localhost/etc/passwd).
+URL, not just HTTP. By default libcurl will allow all protocols on redirect
+except several disabled for security reasons: Since 7.19.4 FILE and SCP are
+disabled, and since 7.40.0 SMB and SMBS are also disabled.
+
+A redirect to a file: URL would cause the libcurl to read (or write) arbitrary
+files from the local filesystem.  If the application returns the data back to
+the user (as would happen in some kinds of CGI scripts), an attacker could
+leverage this to read otherwise forbidden data (e.g.
+file://localhost/etc/passwd).
 
 If authentication credentials are stored in the ~/.netrc file, or Kerberos
 is in use, any other URL type (not just file:) that requires

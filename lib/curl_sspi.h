@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -325,6 +325,10 @@ extern PSecurityFunctionTable s_pSecFn;
 #endif
 #ifndef SEC_I_SIGNATURE_NEEDED
 # define SEC_I_SIGNATURE_NEEDED               ((HRESULT)0x0009035CL)
+#endif
+
+#ifndef CRYPT_E_REVOKED
+# define CRYPT_E_REVOKED                      ((HRESULT)0x80092010L)
 #endif
 
 #ifdef UNICODE

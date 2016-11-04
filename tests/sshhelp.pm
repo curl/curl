@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -120,8 +120,8 @@ $sshlog          = undef;                    # ssh client log file
 $sftplog         = undef;                    # sftp client log file
 $sftpcmds        = 'curl_sftp_cmds';         # sftp client commands batch file
 $knownhosts      = 'curl_client_knownhosts'; # ssh knownhosts file
-$hstprvkeyf      = 'curl_host_dsa_key';      # host private key file
-$hstpubkeyf      = 'curl_host_dsa_key.pub';  # host public key file
+$hstprvkeyf      = 'curl_host_rsa_key';      # host private key file
+$hstpubkeyf      = 'curl_host_rsa_key.pub';  # host public key file
 $cliprvkeyf      = 'curl_client_key';        # client private key file
 $clipubkeyf      = 'curl_client_key.pub';    # client public key file
 

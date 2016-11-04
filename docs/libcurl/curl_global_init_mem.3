@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -36,11 +36,13 @@ This function works exactly as \fIcurl_global_init(3)\fP with one addition: it
 allows the application to set callbacks to replace the otherwise used internal
 memory functions.
 
-This man page only adds documentation for the callbacks, see the
-\fIcurl_global_init(3)\fP man page for all the rest. When you use this
-function, all callback arguments must be set to valid function pointers.
+If you are using libcurl from multiple threads or libcurl was built with the
+threaded resolver option then the callback functions must be thread safe. The
+threaded resolver is a common build option to enable (and in some cases the
+default) so we strongly urge you to make your callback functions thread safe.
 
-The prototypes for the given callbacks should match these:
+All callback arguments must be set to valid function pointers. The
+prototypes for the given callbacks must match these:
 .IP "void *malloc_callback(size_t size);"
 To replace malloc()
 .IP "void free_callback(void *ptr);"
@@ -51,6 +53,9 @@ To replace realloc()
 To replace strdup()
 .IP "void *calloc_callback(size_t nmemb, size_t size);"
 To replace calloc()
+.RE
+This function is otherwise the same as \fIcurl_global_init(3)\fP, please refer
+to that man page for documentation.
 .SH "CAUTION"
 Manipulating these gives considerable powers to the application to severely
 screw things up for libcurl. Take care!

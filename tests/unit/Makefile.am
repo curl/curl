@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -70,6 +70,9 @@ AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 
 # Makefile.inc provides neat definitions
 include Makefile.inc
+
+checksrc:
+	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
 
 if BUILD_UNITTESTS
 noinst_PROGRAMS = $(UNITPROGS)

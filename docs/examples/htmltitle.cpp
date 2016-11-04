@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,7 +42,7 @@
 //
 
 #ifdef _MSC_VER
-#define COMPARE(a, b) (!stricmp((a), (b)))
+#define COMPARE(a, b) (!_stricmp((a), (b)))
 #else
 #define COMPARE(a, b) (!strcasecmp((a), (b)))
 #endif

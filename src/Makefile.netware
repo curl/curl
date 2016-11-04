@@ -1,9 +1,31 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2004 - 2014, Guenter Knauf, <http://www.gknw.net/phpbb>.
+# Copyright (C) 2001 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
 #################################################################
 #
 ## Makefile for building curl.nlm (NetWare version - gnu make)
-## Use: make -f Makefile.netware
 ##
-## Comments to: Guenter Knauf http://www.gknw.net/phpbb
+## Use: make -f Makefile.netware
 #
 #################################################################
 
@@ -80,7 +102,7 @@ endif
 TARGET  = curl
 VERSION	= $(LIBCURL_VERSION)
 COPYR	= Copyright (C) $(LIBCURL_COPYRIGHT_STR)
-DESCR	= cURL $(LIBCURL_VERSION_STR) ($(LIBARCH)) - http://curl.haxx.se
+DESCR	= cURL $(LIBCURL_VERSION_STR) ($(LIBARCH)) - https://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
 SCREEN	= $(TARGET) commandline utility

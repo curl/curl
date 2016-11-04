@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,7 +19,11 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
 #include "curl_setup.h"
+
+#include <curl/curl.h>
+
 #include "strdup.h"
 #include "curl_memory.h"
 
@@ -61,9 +65,9 @@ char *curlx_strdup(const char *str)
  * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-char *Curl_memdup(const char *src, size_t length)
+void *Curl_memdup(const void *src, size_t length)
 {
-  char *buffer = malloc(length);
+  void *buffer = malloc(length);
   if(!buffer)
     return NULL; /* fail */
 

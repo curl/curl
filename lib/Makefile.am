@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -30,7 +30,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 config-win32.h	\
  config-os400.h setup-os400.h config-symbian.h Makefile.Watcom		\
  config-tpf.h mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)	\
  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl	\
- objnames-test08.sh objnames-test10.sh objnames.inc checksrc.whitelist
+ objnames-test08.sh objnames-test10.sh objnames.inc
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -80,9 +80,9 @@ if SONAME_BUMP
 #
 # This conditional soname bump SHOULD be removed at next "proper" bump.
 #
-VERSIONINFO=-version-info 8:0:3
+VERSIONINFO=-version-info 9:0:4
 else
-VERSIONINFO=-version-info 7:0:3
+VERSIONINFO=-version-info 8:0:4
 endif
 
 # This flag accepts an argument of the form current[:revision[:age]]. So,
@@ -146,7 +146,8 @@ libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
 libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
 
 checksrc:
-	@@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(top_srcdir)/lib $(CSOURCES) $(HHEADERS)
+	@PERL@ $(srcdir)/checksrc.pl -D$(srcdir) -W$(srcdir)/curl_config.h      \
+	$(srcdir)/*.[ch] $(srcdir)/vauth/*.[ch] $(srcdir)/vtls/*.[ch]
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes

@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -481,8 +481,9 @@
 #endif
 
 /* Define if the compiler supports the 'long long' data type. */
-#if defined(__MINGW32__) || defined(__WATCOMC__) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 1310))
+#if defined(__MINGW32__) || defined(__WATCOMC__)      || \
+    (defined(_MSC_VER)     && (_MSC_VER     >= 1310)) || \
+    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x561))
 #define HAVE_LONGLONG 1
 #endif
 
@@ -620,7 +621,8 @@ Vista
 /* Define if struct sockaddr_in6 has the sin6_scope_id member. */
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 
-#if HAVE_WINSOCK2_H && defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
+#if defined(HAVE_WINSOCK2_H) && defined(_WIN32_WINNT) && \
+    (_WIN32_WINNT >= 0x0600)
 #define HAVE_STRUCT_POLLFD 1
 #endif
 
@@ -727,7 +729,7 @@ Vista
 /* If you want to build curl with the built-in manual */
 #define USE_MANUAL 1
 
-#if defined(__POCC__) || (USE_IPV6)
+#if defined(__POCC__) || defined(USE_IPV6)
 #  define ENABLE_IPV6 1
 #endif
 

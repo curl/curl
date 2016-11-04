@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -67,7 +67,7 @@ zfree_cb(voidpf opaque, voidpf ptr)
 static CURLcode
 process_zlib_error(struct connectdata *conn, z_stream *z)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   if(z->msg)
     failf (data, "Error while processing content unencoding: %s",
            z->msg);
@@ -425,7 +425,7 @@ Curl_unencode_gzip_write(struct connectdata *conn,
 
 void Curl_unencode_cleanup(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct SingleRequest *k = &data->req;
   z_stream *z = &k->z;
   if(k->zlib_init != ZLIB_UNINIT)

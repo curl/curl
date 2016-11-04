@@ -43,8 +43,11 @@ TFTP retrieve with mode=netascii
 <verify>
 <protocol>
 opcode: 1
-filename: /1094
 mode: netascii
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /1094
 </protocol>
 </verify>
 </testcase>

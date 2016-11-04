@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,7 +39,8 @@ static void unit_stop(void)
 
 UNITTEST_START
 
-#if defined(USE_NTLM) && (!defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO))
+#if defined(USE_NTLM) && (!defined(USE_WINDOWS_SSPI) || \
+                          defined(USE_WIN32_CRYPTO))
   unsigned char output[21];
   unsigned char *testp = output;
   Curl_ntlm_core_mk_nt_hash(easy, "1", output);
@@ -54,6 +55,7 @@ UNITTEST_START
               "\x39\xaf\x87\xa6\x75\x0a\x7a\x00\xba\xa0"
               "\xd3\x4f\x04\x9e\xc1\xd0\x00\x00\x00\x00\x00", 21);
 
+/* !checksrc! disable LONGLINE 2 */
   Curl_ntlm_core_mk_nt_hash(easy, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", output);
 
   verify_memory(testp,

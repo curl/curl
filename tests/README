@@ -43,6 +43,7 @@ The cURL Test Suite
   diff (when a test fails, a diff is shown)
   stunnel (for HTTPS and FTPS tests)
   OpenSSH or SunSSH (for SCP, SFTP and SOCKS4/5 tests)
+  nghttpx (for HTTP/2 tests)
 
  1.2 Port numbers used by test servers
 
@@ -163,7 +164,7 @@ The cURL Test Suite
 
  1.8 Logs
 
-  All logs are generated in the logs/ subdirectory (it is emptied first in the
+  All logs are generated in the log/ subdirectory (it is emptied first in the
   runtests.pl script). Use runtests.pl -k to force it to keep the temporary
   files after the test run since successful runs will clean it up otherwise.
 

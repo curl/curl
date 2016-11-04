@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,16 +39,16 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static struct SessionHandle *data;
+static struct Curl_easy *data;
 static struct curl_hash hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
 
-static CURLcode unit_setup( void )
+static CURLcode unit_setup(void)
 {
   int rc;
   data = curl_easy_init();
-  if (!data)
+  if(!data)
     return CURLE_OUT_OF_MEMORY;
 
   rc = Curl_mk_dnscache(&hp);
@@ -60,9 +60,9 @@ static CURLcode unit_setup( void )
   return CURLE_OK;
 }
 
-static void unit_stop( void )
+static void unit_stop(void)
 {
-  if (data_node) {
+  if(data_node) {
     Curl_freeaddrinfo(data_node->addr);
     free(data_node);
   }
@@ -103,15 +103,15 @@ static Curl_addrinfo *fake_ai(void)
 static CURLcode create_node(void)
 {
   data_key = aprintf("%s:%d", "dummy", 0);
-  if (!data_key)
+  if(!data_key)
     return CURLE_OUT_OF_MEMORY;
 
   data_node = calloc(1, sizeof(struct Curl_dns_entry));
-  if (!data_node)
+  if(!data_node)
     return CURLE_OUT_OF_MEMORY;
 
   data_node->addr = fake_ai();
-  if (!data_node->addr)
+  if(!data_node->addr)
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
@@ -124,7 +124,7 @@ UNITTEST_START
   size_t key_len;
 
   /* Test 1305 exits without adding anything to the hash */
-  if (strcmp(arg, "1305") != 0) {
+  if(strcmp(arg, "1305") != 0) {
     CURLcode rc = create_node();
     abort_unless(rc == CURLE_OK, "data node creation failed");
     key_len = strlen(data_key);
@@ -134,8 +134,6 @@ UNITTEST_START
     abort_unless(nodep, "insertion into hash failed");
     /* Freeing will now be done by Curl_hash_destroy */
     data_node = NULL;
-
-    /* To do: test retrieval, deletion, edge conditions */
   }
 
 UNITTEST_STOP

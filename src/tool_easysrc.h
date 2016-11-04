@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,18 +26,19 @@
 
 /* global variable declarations, for easy-interface source code generation */
 
-extern struct curl_slist *easysrc_decl; /* Variable declarations */
-extern struct curl_slist *easysrc_data; /* Build slists, forms etc. */
-extern struct curl_slist *easysrc_code; /* Setopt calls etc. */
-extern struct curl_slist *easysrc_toohard; /* Unconvertible setopt */
-extern struct curl_slist *easysrc_clean;  /* Clean up (reverse order) */
+extern struct slist_wc *easysrc_decl; /* Variable declarations */
+extern struct slist_wc *easysrc_data; /* Build slists, forms etc. */
+extern struct slist_wc *easysrc_code; /* Setopt calls etc. */
+extern struct slist_wc *easysrc_toohard; /* Unconvertible setopt */
+extern struct slist_wc *easysrc_clean;  /* Clean up (reverse order) */
 
 extern int easysrc_form_count;  /* Number of curl_httppost variables */
 extern int easysrc_slist_count; /* Number of curl_slist variables */
 
 extern CURLcode easysrc_init(void);
-extern CURLcode easysrc_add(struct curl_slist **plist, const char *bupf);
-extern CURLcode easysrc_addf(struct curl_slist **plist, const char *fmt, ...);
+extern CURLcode easysrc_add(struct slist_wc **plist, const char *bupf);
+extern CURLcode easysrc_addf(struct slist_wc **plist,
+                             const char *fmt, ...);
 extern CURLcode easysrc_perform(void);
 extern CURLcode easysrc_cleanup(void);
 

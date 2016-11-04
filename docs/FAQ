@@ -30,6 +30,7 @@ FAQ
   2.2 Does curl work/build with other SSL libraries?
   2.3 Where can I find a copy of LIBEAY32.DLL?
   2.4 Does curl support SOCKS (RFC 1928) ?
+  2.5 Install libcurl for both 32bit and 64bit?
 
  3. Usage Problems
   3.1 curl: (1) SSL is disabled, https: not supported
@@ -80,7 +81,7 @@ FAQ
   4.16 My HTTP POST or PUT requests are slow!
   4.17 Non-functional connect timeouts on Windows
   4.18 file:// URLs containing drive letters (Windows, NetWare)
-  4.19 Why doesn't cURL return an error when the network cable is unplugged?
+  4.19 Why doesn't curl return an error when the network cable is unplugged?
   4.20 curl doesn't return error for HTTP non-200 responses!
   4.21 Why is there a HTTP/1.1 in my HTTP/2 request?
 
@@ -225,7 +226,9 @@ FAQ
   implement it for you, that is not a very friendly attitude. We spend a
   considerable time already on maintaining and developing curl. In order to
   get more out of us, you should consider trading in some of your time and
-  efforts in return.
+  efforts in return. Simply go to the GitHub repo which resides at
+  https://github.com/curl/curl, fork the project, and create pull requests
+  with your proposed changes.
 
   If you write the code, chances are bigger that it will get into curl faster.
 
@@ -251,9 +254,10 @@ FAQ
 
   We still get help from companies. Haxx provides web site, bandwidth, mailing
   lists etc, sourceforge.net hosts project services we take advantage from,
-  like the bug tracker and github hosts the primary git repository. Also
-  again, some companies have sponsored certain parts of the development in the
-  past and I hope some will continue to do so in the future.
+  like the bug tracker, and GitHub hosts the primary git repository at
+  https://github.com/curl/curl. Also again, some companies have sponsored
+  certain parts of the development in the past and I hope some will continue to
+  do so in the future.
 
   If you want to support our project, consider a donation or a banner-program
   or even better: by helping us coding, documenting, testing etc.
@@ -278,7 +282,7 @@ FAQ
   Please do not mail any single individual unless you really need to. Keep
   curl-related questions on a suitable mailing list. All available mailing
   lists are listed in the MANUAL document and online at
-  http://curl.haxx.se/mail/
+  https://curl.haxx.se/mail/
 
   Keeping curl-related questions and discussions on mailing lists allows
   others to join in and help, to share their ideas, contribute their
@@ -299,7 +303,7 @@ FAQ
   your curl-related problems.
 
   We list available alternatives on the curl web site:
-  http://curl.haxx.se/support.html
+  https://curl.haxx.se/support.html
 
   1.10 How many are using curl?
 
@@ -316,7 +320,7 @@ FAQ
   In May 2012 Daniel did a counting game and came up with a number that may
   be completely wrong or somewhat accurate. Over 500 million!
 
-  See http://daniel.haxx.se/blog/2012/05/16/300m-users/
+  See https://daniel.haxx.se/blog/2012/05/16/300m-users/
 
   1.11 Why don't you update ca-bundle.crt
 
@@ -338,7 +342,7 @@ FAQ
   If you want the most recent collection of ca certs that Mozilla Firefox
   uses, we recommend that you extract the collection yourself from Mozilla
   Firefox (by running 'make ca-bundle), or by using our online service setup
-  for this purpose: http://curl.haxx.se/docs/caextract.html
+  for this purpose: https://curl.haxx.se/docs/caextract.html
 
   1.12 I have a problem who can I chat with?
 
@@ -352,13 +356,15 @@ FAQ
   cryptography. When doing so, the Export Control Classification Number (ECCN)
   is used to identify the level of export control etc.
 
-  ASF gives a good explanation at https://www.apache.org/dev/crypto.html
+  Apache Software Foundation gives a good explanation of ECCNs at
+  https://www.apache.org/dev/crypto.html
 
   We believe curl's number might be ECCN 5D002, another possibility is
-  5D992. It seems necessary to write them, asking to confirm.
+  5D992. It seems necessary to write them (the authority that administers ECCN
+  numbers), asking to confirm.
 
-  Comprehensible explanations of the meaning of such numbers and how to
-  obtain them (resp.) are here
+  Comprehensible explanations of the meaning of such numbers and how to obtain
+  them (resp.) are here
 
   http://www.bis.doc.gov/licensing/exportingbasics.htm
   http://www.bis.doc.gov/licensing/do_i_needaneccn.html
@@ -444,7 +450,7 @@ FAQ
   GnuTLS, yassl, NSS, PolarSSL, axTLS, Secure Transport (native iOS/OS X),
   WinSSL (native Windows) or GSKit (native IBM i). They all have their pros
   and cons, and we try to maintain a comparison of them here:
-  http://curl.haxx.se/docs/ssl-compared.html
+  https://curl.haxx.se/docs/ssl-compared.html
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
@@ -458,6 +464,32 @@ FAQ
   2.4 Does curl support SOCKS (RFC 1928) ?
 
   Yes, SOCKS 4 and 5 are supported.
+
+  2.5 Install libcurl for both 32bit and 64bit?
+
+  In curl's configure procedure one of the regular include files get created
+  with platform specific information. The file 'curl/curlbuild.h' in the
+  installed libcurl file tree is therefore somewhat tied to that particular
+  platform.
+
+  To allow applications to get built for either 32bit or 64bit you need to
+  install libcurl headers for both setups and unfortunately curl doesn't do
+  this automatically.
+
+  A commonly used procedure is this:
+
+     $ ./configure [32bit platform]
+     $ mv curl/curlbuild.h curl/curlbuild-32bit.h
+     $ ./configure [64bit platform]
+     $ mv curl/curlbuild.h curl/curlbuild-64bit.h
+
+  Then you make a toplevel curl/curlbuild.h replacement that only does this:
+
+     #ifdef IS_32BIT
+     #include "curlbuild-32bit.h"
+     else
+     #include "curlbuild-64bit.h"
+     #endif
 
 
 3. Usage problems
@@ -556,7 +588,7 @@ FAQ
 
   Find out more about which languages that support curl directly, and how to
   install and use them, in the libcurl section of the curl web site:
-  http://curl.haxx.se/libcurl/
+  https://curl.haxx.se/libcurl/
 
   All the various bindings to libcurl are made by other projects and people,
   outside of the cURL project. The cURL project itself only produces libcurl
@@ -689,7 +721,7 @@ FAQ
   certificate. Server certificate verification is enabled by default in curl
   and libcurl and is often the reason for problems as explained in FAQ entry
   4.12 and the SSLCERTS document
-  (http://curl.haxx.se/docs/sslcerts.html). Server certificates that are
+  (https://curl.haxx.se/docs/sslcerts.html). Server certificates that are
   "self-signed" or otherwise signed by a CA that you do not have a CA cert
   for, cannot be verified. If the verification during a connect fails, you are
   refused access. You then need to explicitly disable the verification to
@@ -936,8 +968,8 @@ FAQ
 
   4.9 Curl can't authenticate to the server that requires NTLM?
 
-  NTLM support requires OpenSSL, GnuTLS, NSS, Secure Transport, or Microsoft
-  Windows libraries at build-time to provide this functionality.
+  NTLM support requires OpenSSL, GnuTLS, mbedTLS, NSS, Secure Transport, or
+  Microsoft Windows libraries at build-time to provide this functionality.
 
   NTLM is a Microsoft proprietary protocol. Proprietary formats are evil. You
   should not use such ones.
@@ -980,7 +1012,7 @@ FAQ
   this check.
 
   Details are also in the SSLCERTS file in the release archives, found online
-  here: http://curl.haxx.se/docs/sslcerts.html
+  here: https://curl.haxx.se/docs/sslcerts.html
 
   4.13 Why is curl -R on Windows one hour off?
 
@@ -1051,18 +1083,18 @@ FAQ
 
   4.18 file:// URLs containing drive letters (Windows, NetWare)
 
-  When using cURL to try to download a local file, one might use a URL
+  When using curl to try to download a local file, one might use a URL
   in this format:
 
   file://D:/blah.txt
 
-  You'll find that even if D:\blah.txt does exist, cURL returns a 'file
+  You'll find that even if D:\blah.txt does exist, curl returns a 'file
   not found' error.
 
   According to RFC 1738 (https://www.ietf.org/rfc/rfc1738.txt),
   file:// URLs must contain a host component, but it is ignored by
   most implementations. In the above example, 'D:' is treated as the
-  host component, and is taken away. Thus, cURL tries to open '/blah.txt'.
+  host component, and is taken away. Thus, curl tries to open '/blah.txt'.
   If your system is installed to drive C:, that will resolve to 'C:\blah.txt',
   and if that doesn't exist you will get the not found error.
 
@@ -1075,9 +1107,9 @@ FAQ
 
   file://localhost/D:/blah.txt
 
-  In either case, cURL should now be looking for the correct file.
+  In either case, curl should now be looking for the correct file.
 
-  4.19 Why doesn't cURL return an error when the network cable is unplugged?
+  4.19 Why doesn't curl return an error when the network cable is unplugged?
 
   Unplugging a cable is not an error situation. The TCP/IP protocol stack
   was designed to be fault tolerant, so even though there may be a physical
@@ -1087,7 +1119,7 @@ FAQ
 
   In such cases, the TCP/IP stack is responsible for detecting when the
   network connection is irrevocably lost. Since with some protocols it is
-  perfectly legal for the client wait indefinitely for data, the stack may
+  perfectly legal for the client to wait indefinitely for data, the stack may
   never report a problem, and even when it does, it can take up to 20 minutes
   for it to detect an issue.  The curl option --keepalive-time enables
   keep-alive support in the TCP/IP stack which makes it periodically probe the
@@ -1153,25 +1185,9 @@ FAQ
   your system has such.  Note that you must never share the same handle in
   multiple threads.
 
-  libcurl's implementation of timeouts might use signals (depending on what it
-  was built to use for name resolving), and signal handling is generally not
-  thread-safe.  Multi-threaded Applicationss that call libcurl from different
-  threads (on different handles) might want to use CURLOPT_NOSIGNAL, e.g.:
-
-    curl_easy_setopt(handle, CURLOPT_NOSIGNAL, true);
-
-  If you use a OpenSSL-powered libcurl in a multi-threaded environment, you
-  need to provide one or two locking functions:
-
-    https://www.openssl.org/docs/crypto/threads.html
-
-  If you use a GnuTLS-powered libcurl in a multi-threaded environment, you
-  need to provide locking function(s) for libgcrypt (which is used by GnuTLS
-  for the crypto functions).
-
-    https://web.archive.org/web/20111103083330/http://www.gnu.org/software/gnutls/manual/html_node/Multi_002dthreaded-applications.html
-
-  No special locking is needed with a NSS-powered libcurl. NSS is thread-safe.
+  There may be some exceptions to thread safety depending on how libcurl was
+  built. Please review the guidelines for thread safety to learn more:
+  https://curl.haxx.se/libcurl/c/threadsafe.html
 
   5.2 How can I receive all data into a large memory chunk?
 
@@ -1369,14 +1385,14 @@ FAQ
   member function that is passed a pointer to the class:
 
      // f is the pointer to your object.
-     static YourClass::func(void *buffer, size_t sz, size_t n, void *f)
+     static size_t YourClass::func(void *buffer, size_t sz, size_t n, void *f)
      {
        // Call non-static member function.
        static_cast<YourClass*>(f)->nonStaticFunction();
      }
 
      // This is how you pass pointer to the static function:
-     curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass:func);
+     curl_easy_setopt(hcurl, CURLOPT_WRITEFUNCTION, YourClass::func);
      curl_easy_setopt(hcurl, CURLOPT_WRITEDATA, this);
 
   5.15 How do I get an FTP directory listing?
@@ -1386,18 +1402,28 @@ FAQ
   CURLOPT_CUSTOMREQUEST to alter what exact listing command libcurl would use
   to list the files.
 
-  The follow-up question that tend to follow the previous one, is how a
-  program is supposed to parse the directory listing. How does it know what's
-  a file and what's a dir and what's a symlink etc. The harsh reality is that
-  FTP provides no such fine and easy-to-parse output. The output format FTP
-  servers respond to LIST commands are entirely at the server's own liking and
-  the NLST output doesn't reveal any types and in many cases don't even
-  include all the directory entries. Also, both LIST and NLST tend to hide
-  unix-style hidden files (those that start with a dot) by default so you need
-  to do "LIST -a" or similar to see them.
+  The follow-up question tends to be how is a program supposed to parse the
+  directory listing. How does it know what's a file and what's a dir and what's
+  a symlink etc. If the FTP server supports the MLSD command then it will
+  return data in a machine-readable format that can be parsed for type. The
+  types are specified by RFC3659 section 7.5.1. If MLSD is not supported then
+  you have to work with what you're given. The LIST output format is entirely
+  at the server's own liking and the NLST output doesn't reveal any types and
+  in many cases doesn't even include all the directory entries. Also, both LIST
+  and NLST tend to hide unix-style hidden files (those that start with a dot)
+  by default so you need to do "LIST -a" or similar to see them.
 
-  The application thus needs to parse the LIST output. One such existing
-  list parser is available at http://cr.yp.to/ftpparse.html  Versions of
+  Example - List only directories.
+  ftp.funet.fi supports MLSD and ftp.kernel.org does not:
+
+     curl -s ftp.funet.fi/pub/ -X MLSD | \
+       perl -lne 'print if s/(?:^|;)type=dir;[^ ]+ (.+)$/$1/'
+
+     curl -s ftp.kernel.org/pub/linux/kernel/ | \
+       perl -lne 'print if s/^d[-rwx]{9}(?: +[^ ]+){7} (.+)$/$1/'
+
+  If you need to parse LIST output in libcurl one such existing
+  list parser is available at https://cr.yp.to/ftpparse.html  Versions of
   libcurl since 7.21.0 also provide the ability to specify a wildcard to
   download multiple files from one FTP directory.
 
@@ -1516,7 +1542,7 @@ FAQ
   notice" somewhere. Most probably like in the documentation or in the section
   where other third party dependencies already are mentioned and acknowledged.
 
-  As can be seen here: http://curl.haxx.se/docs/companies.html and elsewhere,
+  As can be seen here: https://curl.haxx.se/docs/companies.html and elsewhere,
   more and more companies are discovering the power of libcurl and take
   advantage of it even in commercial environments.
 
@@ -1536,9 +1562,7 @@ FAQ
 
   7.2 Who wrote PHP/CURL?
 
-  PHP/CURL is a module that comes with the regular PHP package. It depends and
-  uses libcurl, so you need to have libcurl installed properly first before
-  PHP/CURL can be used. PHP/CURL was initially written by Sterling Hughes.
+  PHP/CURL was initially written by Sterling Hughes.
 
   7.3 Can I perform multiple requests using the same handle?
 
@@ -1547,4 +1571,10 @@ FAQ
   unknown to me).
 
   After a transfer, you just set new options in the handle and make another
-  transfer. This will make libcurl to re-use the same connection if it can.
+  transfer. This will make libcurl re-use the same connection if it can.
+
+  7.4 Does PHP/CURL have dependencies?
+
+  PHP/CURL is a module that comes with the regular PHP package. It depends on
+  and uses libcurl, so you need to have libcurl installed properly before
+  PHP/CURL can be used.

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -30,12 +30,12 @@ int test(char *URL)
    char *newURL = NULL;
    struct curl_slist *slist = NULL;
 
-   if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
      fprintf(stderr, "curl_global_init() failed\n");
      return TEST_ERR_MAJOR_BAD;
    }
 
-   if ((curl = curl_easy_init()) == NULL) {
+   if((curl = curl_easy_init()) == NULL) {
      fprintf(stderr, "curl_easy_init() failed\n");
      curl_global_cleanup();
      return TEST_ERR_MAJOR_BAD;
@@ -58,16 +58,15 @@ int test(char *URL)
     * even though no directories are stored in the ftpconn->dirs array (after a
     * call to freedirs).
     */
-   newURL = malloc(strlen(URL) + 3);
-   if (newURL == NULL) {
+   newURL = aprintf("%s./", URL);
+   if(newURL == NULL) {
      curl_easy_cleanup(curl);
      curl_global_cleanup();
      return TEST_ERR_MAJOR_BAD;
    }
-   newURL = strcat(strcpy(newURL, URL), "./");
 
    slist = curl_slist_append (NULL, "SYST");
-   if (slist == NULL) {
+   if(slist == NULL) {
      free(newURL);
      curl_easy_cleanup(curl);
      curl_global_cleanup();

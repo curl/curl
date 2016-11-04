@@ -43,11 +43,17 @@ for several protocols
 <verify>
 <protocol>
 opcode: 1
-filename: /2004
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /2004
 opcode: 1
-filename: /2004
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /2004
 </protocol>
 <stdout>
 Test data file

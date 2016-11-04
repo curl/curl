@@ -1,0 +1,101 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP/2
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+<data1>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-maa-
+</data1>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+http/2
+</server>
+ <name>
+HTTP/2 GET with Upgrade:
+ </name>
+ <command>
+http://%HOSTIP:%HTTP2PORT/1700 --http2 http://%HOSTIP:%HTTP2PORT/17000001
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+^X-Forwarded-Proto:.*
+^Via:.*
+</strip>
+<protocol>
+GET /1700 HTTP/1.1
+Host: %HOSTIP:%HTTP2PORT
+Accept: */*
+
+GET /17000001 HTTP/1.1
+Host: %HOSTIP:%HTTP2PORT
+Accept: */*
+
+</protocol>
+<stdout>
+HTTP/1.1 101 Switching Protocols
+Connection: Upgrade
+Upgrade: h2c
+
+HTTP/2 200 
+date: Thu, 09 Nov 2010 14:49:00 GMT
+last-modified: Tue, 13 Jun 2000 12:10:00 GMT
+etag: "21025-dc7-39462498"
+accept-ranges: bytes
+content-length: 6
+content-type: text/html
+funny-head: yesyes
+server: cut-out
+via: 1.1 nghttpx
+
+-foo-
+HTTP/2 200 
+date: Thu, 09 Nov 2010 14:49:00 GMT
+content-length: 6
+content-type: text/html
+server: cut-out
+via: 1.1 nghttpx
+
+-maa-
+</stdout>
+<stripfile>
+s/^server:.*/server: cut-out/
+</stripfile>
+</verify>
+</testcase>

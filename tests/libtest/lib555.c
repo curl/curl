@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -96,7 +96,8 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_IOCTLDATA, &counter);
   easy_setopt(curl, CURLOPT_READFUNCTION, readcallback);
   easy_setopt(curl, CURLOPT_READDATA, &counter);
-  /* We CANNOT do the POST fine without setting the size (or choose chunked)! */
+  /* We CANNOT do the POST fine without setting the size (or choose
+     chunked)! */
   easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(UPLOADTHIS));
 
   easy_setopt(curl, CURLOPT_POST, 1L);
@@ -113,7 +114,7 @@ int test(char *URL)
 
   multi_add_handle(m, curl);
 
-  while (running) {
+  while(running) {
     struct timeval timeout;
     fd_set fdread, fdwrite, fdexcep;
     int maxfd = -99;

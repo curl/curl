@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -49,16 +49,15 @@
 #include "url.h"
 #include "inet_pton.h"
 #include "connect.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /***********************************************************************
  * Only for IPv6-enabled builds
  **********************************************************************/
 #ifdef CURLRES_IPV6
-
 
 #if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
 /* These are strictly for memory tracing and are using the same style as the
@@ -124,6 +123,7 @@ bool Curl_ipvalid(struct connectdata *conn)
 {
   if(conn->ip_version == CURL_IPRESOLVE_V6)
     return Curl_ipv6works();
+
   return TRUE;
 }
 
@@ -167,15 +167,17 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   int error;
   char sbuf[12];
   char *sbufptr = NULL;
+#ifndef USE_RESOLVE_ON_IPS
   char addrbuf[128];
+#endif
   int pf;
-  struct SessionHandle *data = conn->data;
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  struct Curl_easy *data = conn->data;
+#endif
 
   *waitp = 0; /* synchronous response only */
 
-  /*
-   * Check if a limited name resolve has been requested.
-   */
+  /* Check if a limited name resolve has been requested */
   switch(conn->ip_version) {
   case CURL_IPRESOLVE_V4:
     pf = PF_INET;
@@ -196,20 +198,31 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   hints.ai_family = pf;
   hints.ai_socktype = conn->socktype;
 
+#ifndef USE_RESOLVE_ON_IPS
+  /*
+   * The AI_NUMERICHOST must not be set to get synthesized IPv6 address from
+   * an IPv4 address on iOS and Mac OS X.
+   */
   if((1 == Curl_inet_pton(AF_INET, hostname, addrbuf)) ||
      (1 == Curl_inet_pton(AF_INET6, hostname, addrbuf))) {
     /* the given address is numerical only, prevent a reverse lookup */
     hints.ai_flags = AI_NUMERICHOST;
   }
+#endif
 
   if(port) {
     snprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr=sbuf;
   }
+
   error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &res);
   if(error) {
     infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);
     return NULL;
+  }
+
+  if(port) {
+    Curl_addrinfo_set_port(res, port);
   }
 
   dump_addrinfo(conn, res);
@@ -217,5 +230,5 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   return res;
 }
 #endif /* CURLRES_SYNCH */
-#endif /* CURLRES_IPV6 */
 
+#endif /* CURLRES_IPV6 */

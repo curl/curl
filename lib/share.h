@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -54,8 +54,8 @@ struct Curl_share {
   long sessionage;
 };
 
-CURLSHcode Curl_share_lock (struct SessionHandle *, curl_lock_data,
+CURLSHcode Curl_share_lock (struct Curl_easy *, curl_lock_data,
                             curl_lock_access);
-CURLSHcode Curl_share_unlock (struct SessionHandle *, curl_lock_data);
+CURLSHcode Curl_share_unlock (struct Curl_easy *, curl_lock_data);
 
 #endif /* HEADER_CURL_SHARE_H */

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,22 +33,22 @@
  *
  * If no conversion was needed *outbuf may be NULL.
  */
-CURLcode Curl_convert_clone(struct SessionHandle *data,
+CURLcode Curl_convert_clone(struct Curl_easy *data,
                             const char *indata,
                             size_t insize,
                             char **outbuf);
 
-void Curl_convert_init(struct SessionHandle *data);
-void Curl_convert_setup(struct SessionHandle *data);
-void Curl_convert_close(struct SessionHandle *data);
+void Curl_convert_init(struct Curl_easy *data);
+void Curl_convert_setup(struct Curl_easy *data);
+void Curl_convert_close(struct Curl_easy *data);
 
-CURLcode Curl_convert_to_network(struct SessionHandle *data,
+CURLcode Curl_convert_to_network(struct Curl_easy *data,
                                  char *buffer, size_t length);
-CURLcode Curl_convert_from_network(struct SessionHandle *data,
+CURLcode Curl_convert_from_network(struct Curl_easy *data,
                                  char *buffer, size_t length);
-CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
+CURLcode Curl_convert_from_utf8(struct Curl_easy *data,
                                  char *buffer, size_t length);
-CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form);
+CURLcode Curl_convert_form(struct Curl_easy *data, struct FormData *form);
 #else
 #define Curl_convert_clone(a,b,c,d) ((void)a, CURLE_OK)
 #define Curl_convert_init(x) Curl_nop_stmt

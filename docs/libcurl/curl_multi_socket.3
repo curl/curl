@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -43,7 +43,7 @@ decreases by one, it DOES NOT necessarily mean that this exact socket/transfer
 is the one that completed. Use \fIcurl_multi_info_read(3)\fP to figure out
 which easy handle that completed.
 
-The \fBcurl_multi_socket_action(3)\fP functions inform the application about
+The \fIcurl_multi_socket_action(3)\fP functions inform the application about
 updates in the socket (file descriptor) status by doing none, one, or multiple
 calls to the socket callback function set with the CURLMOPT_SOCKETFUNCTION
 option to \fIcurl_multi_setopt(3)\fP. They update the status with changes
@@ -52,7 +52,7 @@ since the previous time the callback was called.
 Get the timeout time by setting the \fICURLMOPT_TIMERFUNCTION\fP option with
 \fIcurl_multi_setopt(3)\fP. Your application will then get called with
 information on how long to wait for socket actions at most before doing the
-timeout action: call the \fBcurl_multi_socket_action(3)\fP function with the
+timeout action: call the \fIcurl_multi_socket_action(3)\fP function with the
 \fBsockfd\fP argument set to CURL_SOCKET_TIMEOUT. You can also use the
 \fIcurl_multi_timeout(3)\fP function to poll the value at any given time, but
 for an event-based system using the callback is far better than relying on
@@ -63,7 +63,7 @@ equivalent to \fIcurl_multi_socket_action(3)\fP with \fBev_bitmask\fP set to
 0.
 
 Force libcurl to (re-)check all its internal sockets and transfers instead of
-just a single one by calling \fBcurl_multi_socket_all(3)\fP. Note that there
+just a single one by calling \fIcurl_multi_socket_all(3)\fP. Note that there
 should not be any reason to use this function!
 .SH "CALLBACK DETAILS"
 

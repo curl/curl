@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -28,12 +28,12 @@ CURLOPT_PATH_AS_IS \- do not handle dot dot sequences
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PATH_AS_IS, long leaveit);
 .SH DESCRIPTION
-By setting the long \fIleavit\fP to 1, to explicitly tell libcurl to not alter
-the given path before passing it on to the server.
+Set the long \fIleaveit\fP to 1, to explicitly tell libcurl to not alter the
+given path before passing it on to the server.
 
-This tells libcurl to NOT squash sequences of "/../" or "/./" that may exist
-in the URL's path part and that is supposed to be removed according to RFC
-3986 section 5.2.4.
+This instructs libcurl to NOT squash sequences of "/../" or "/./" that may
+exist in the URL's path part and that is supposed to be removed according to
+RFC 3986 section 5.2.4.
 
 Some server implementations are known to (erroneously) require the dot dot
 sequences to remain in the path and some clients want to pass these on in
@@ -43,7 +43,7 @@ By default libcurl will merge such sequences before using the path.
 .SH DEFAULT
 0
 .SH PROTOCOLS
-All 
+All
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -61,3 +61,5 @@ Aded in 7.42.0
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLOPT_STDERR "(3), " CURLOPT_DEBUGFUNCTION "(3), "
+.BR CURLOPT_URL "(3), "
+

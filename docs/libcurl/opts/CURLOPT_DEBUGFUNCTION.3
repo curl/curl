@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -88,7 +88,7 @@ void dump(const char *text,
   size_t c;
   unsigned int width=0x10;
 
-  fprintf(stream, "%s, %10.10ld bytes (0x%8.8lx)\n",
+  fprintf(stream, "%s, %10.10ld bytes (0x%8.8lx)\\n",
           text, (long)size, (long)size);
 
   for(i=0; i<size; i+= width) {
@@ -103,10 +103,12 @@ void dump(const char *text,
     }
 
     /* show data on the right */
-    for(c = 0; (c < width) && (i+c < size); c++)
-      fputc(ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:'.', stream);
+    for(c = 0; (c < width) && (i+c < size); c++) {
+      char x = (ptr[i+c] >= 0x20 && ptr[i+c] < 0x80) ? ptr[i+c] : '.';
+      fputc(x, stream);
+    }
 
-    fputc('\n', stream); /* newline */
+    fputc('\\n', stream); /* newline */
   }
 }
 
@@ -117,6 +119,7 @@ int my_trace(CURL *handle, curl_infotype type,
 {
   const char *text;
   (void)handle; /* prevent compiler warning */
+  (void)userp;
 
   switch (type) {
   case CURLINFO_TEXT:
@@ -167,7 +170,7 @@ int main(void)
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+      fprintf(stderr, "curl_easy_perform() failed: %s\\n",
               curl_easy_strerror(res));
 
     /* always cleanup */

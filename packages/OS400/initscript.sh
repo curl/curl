@@ -50,7 +50,7 @@ setenv TGTCCSID         '500'                   # Target CCSID of objects.
 setenv DEBUG            '*ALL'                  # Debug level.
 setenv OPTIMIZE         '10'                    # Optimisation level
 setenv OUTPUT           '*NONE'                 # Compilation output option.
-setenv TGTRLS           'V5R3M0'                # Target OS release.
+setenv TGTRLS           'V6R1M0'                # Target OS release.
 setenv IFSDIR           '/curl'                 # Installation IFS directory.
 
 #       Define ZLIB availability and locations.
@@ -59,6 +59,13 @@ setenv WITH_ZLIB        0                       # Define to 1 to enable.
 setenv ZLIB_INCLUDE     '/zlib/include'         # ZLIB include IFS directory.
 setenv ZLIB_LIB         'ZLIB'                  # ZLIB library.
 setenv ZLIB_BNDDIR      'ZLIB_A'                # ZLIB binding directory.
+
+#       Define LIBSSH2 availability and locations.
+
+setenv WITH_LIBSSH2     0                       # Define to 1 to enable.
+setenv LIBSSH2_INCLUDE  '/libssh2/include'      # LIBSSH2 include IFS directory.
+setenv LIBSSH2_LIB      'LIBSSH2'               # LIBSSH2 library.
+setenv LIBSSH2_BNDDIR   'LIBSSH2_A'             # LIBSSH2 binding directory.
 
 
 ################################################################################
@@ -181,7 +188,7 @@ make_module()
         CMD="CRTCMOD MODULE(${TARGETLIB}/${1}) SRCSTMF('__tmpsrcf.c')"
 #       CMD="${CMD} SYSIFCOPT(*IFS64IO) OPTION(*INCDIRFIRST *SHOWINC *SHOWSYS)"
         CMD="${CMD} SYSIFCOPT(*IFS64IO) OPTION(*INCDIRFIRST)"
-        CMD="${CMD} LOCALETYPE(*LOCALE)"
+        CMD="${CMD} LOCALETYPE(*LOCALE) FLAG(10)"
         CMD="${CMD} INCDIR('/qibm/proddata/qadrt/include'"
         CMD="${CMD} '${TOPDIR}/include/curl' '${TOPDIR}/include' '${SRCDIR}'"
         CMD="${CMD} '${TOPDIR}/packages/OS400'"
@@ -190,16 +197,24 @@ make_module()
         then    CMD="${CMD} '${ZLIB_INCLUDE}'"
         fi
 
+        if [ "${WITH_LIBSSH2}" != "0" ]
+        then    CMD="${CMD} '${LIBSSH2_INCLUDE}'"
+        fi
+
         CMD="${CMD} ${INCLUDES})"
         CMD="${CMD} TGTCCSID(${TGTCCSID}) TGTRLS(${TGTRLS})"
         CMD="${CMD} OUTPUT(${OUTPUT})"
         CMD="${CMD} OPTIMIZE(${OPTIMIZE})"
         CMD="${CMD} DBGVIEW(${DEBUG})"
 
-        DEFINES="${3}"
+        DEFINES="${3} BUILDING_LIBCURL"
 
         if [ "${WITH_ZLIB}" != "0" ]
         then    DEFINES="${DEFINES} HAVE_LIBZ HAVE_ZLIB_H"
+        fi
+
+        if [ "${WITH_LIBSSH2}" != "0" ]
+        then    DEFINES="${DEFINES} USE_LIBSSH2 HAVE_LIBSSH2_H"
         fi
 
         if [ "${DEFINES}" ]

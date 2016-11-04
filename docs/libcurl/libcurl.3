@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -97,8 +97,8 @@ Unix-like operating system that ship libcurl as part of their distributions
 often don't provide the curl-config tool, but simply install the library and
 headers in the common path for this purpose.
 
-Many Linux and similar sytems use pkg-config to provide build and link options
-about libraries and libcurl supports that as well.
+Many Linux and similar systems use pkg-config to provide build and link
+options about libraries and libcurl supports that as well.
 .SH "LIBCURL SYMBOL NAMES"
 All public functions in the libcurl interface are prefixed with 'curl_' (with
 a lowercase c). You can find other functions in the library source code, but
@@ -111,13 +111,8 @@ libcurl works
 .B exactly
 the same, on any of the platforms it compiles and builds on.
 .SH "THREADS"
-Never ever call curl-functions simultaneously using the same handle from
-several threads. libcurl is thread-safe and can be used in any number of
-threads, but you must use separate curl handles if you want to use libcurl in
-more than one thread simultaneously.
-
-The global environment functions are not thread-safe.  See \fBGLOBAL
-CONSTANTS\fP below for details.
+libcurl is thread safe but there are a few exceptions. Refer to
+\fIlibcurl-thread(3)\fP for more information.
 
 .SH "PERSISTENT CONNECTIONS"
 Persistent connections means that libcurl can re-use the same connection for
@@ -199,6 +194,9 @@ object as the program starts up and the destructor as it terminates.  As the
 author of this libcurl-using module, you can make the constructor call
 \fIcurl_global_init(3)\fP and the destructor call \fIcurl_global_cleanup(3)\fP
 and satisfy libcurl's requirements without your user having to think about it.
+(Caveat: If you are initializing libcurl from a Windows DLL you should not
+initialize it from DllMain or a static initializer because Windows holds the
+loader lock during that time and it could cause a deadlock.)
 
 \fIcurl_global_init(3)\fP has an argument that tells what particular parts of
 the global constant environment to set up.  In order to successfully use any

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -77,7 +77,7 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
 
   if(CURL_ASYNC_SUCCESS == status) {
     if(ai) {
-      struct SessionHandle *data = conn->data;
+      struct Curl_easy *data = conn->data;
 
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);

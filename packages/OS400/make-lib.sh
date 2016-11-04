@@ -20,7 +20,7 @@ fi
 echo '#pragma comment(user, "libcurl version '"${LIBCURL_VERSION}"'")' > os400.c
 echo '#pragma comment(user, __DATE__)' >> os400.c
 echo '#pragma comment(user, __TIME__)' >> os400.c
-echo '#pragma comment(copyright, "Copyright (C) 1998-2014 Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
+echo '#pragma comment(copyright, "Copyright (C) 1998-2016 Daniel Stenberg et al. OS/400 version by P. Monnerat")' >> os400.c
 make_module     OS400           os400.c
 LINK=                           # No need to rebuild service program yet.
 MODULES=
@@ -128,6 +128,11 @@ then    CMD="CRTSRVPGM SRVPGM(${TARGETLIB}/${SRVPGM})"
         CMD="${CMD} BNDDIR(${TARGETLIB}/${STATBNDDIR}"
         if [ "${WITH_ZLIB}" != 0 ]
         then    CMD="${CMD} ${ZLIB_LIB}/${ZLIB_BNDDIR}"
+                liblist -a "${ZLIB_LIB}"
+        fi
+        if [ "${WITH_LIBSSH2}" != 0 ]
+        then    CMD="${CMD} ${LIBSSH2_LIB}/${LIBSSH2_BNDDIR}"
+                liblist -a "${LIBSSH2_LIB}"
         fi
         CMD="${CMD})"
         CMD="${CMD} BNDSRVPGM(QADRTTS QGLDCLNT QGLDBRDR)"

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,12 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
+/* <DESC>
+ * IMAP example using SSL
+ * </DESC>
+ */
+
 #include <stdio.h>
 #include <curl/curl.h>
 
@@ -42,7 +48,8 @@ int main(void)
 
     /* This will fetch message 1 from the user's inbox. Note the use of
     * imaps:// rather than imap:// to request a SSL based connection. */
-    curl_easy_setopt(curl, CURLOPT_URL, "imaps://imap.example.com/INBOX/;UID=1");
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     "imaps://imap.example.com/INBOX/;UID=1");
 
     /* If you want to connect to a site who isn't using a certificate that is
      * signed by one of the certs in the CA bundle you have, you can skip the

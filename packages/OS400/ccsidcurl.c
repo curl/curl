@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -610,7 +610,7 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
   CURLcode ret;
   unsigned int ccsid;
   char * * cpp;
-  struct SessionHandle * data;
+  struct Curl_easy * data;
   struct curl_slist * * slp;
   struct curl_certinfo * cipf;
   struct curl_certinfo * cipt;
@@ -618,7 +618,7 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
   /* WARNING: unlike curl_easy_get_info(), the strings returned by this
      procedure have to be free'ed. */
 
-  data = (struct SessionHandle *) curl;
+  data = (struct Curl_easy *) curl;
   va_start(arg, info);
   paramp = va_arg(arg, void *);
   ret = Curl_getinfo(data, info, paramp);
@@ -679,6 +679,8 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
         break;
 
       case CURLINFO_TLS_SESSION:
+      case CURLINFO_TLS_SSL_PTR:
+      case CURLINFO_SOCKET:
         break;
 
       default:
@@ -932,6 +934,14 @@ curl_formadd_ccsid(struct curl_httppost * * httppost,
 
       break;
 
+    case CURLFORM_CONTENTLEN:
+      lengthx = nargs;
+
+      if(!forms)
+        value = (char *) va_arg(arg, curl_off_t);
+
+      break;
+
     case CURLFORM_NAMELENGTH:
       namelengthx = nargs;
 
@@ -1098,7 +1108,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
 {
   CURLcode result;
   va_list arg;
-  struct SessionHandle * data;
+  struct Curl_easy * data;
   char * s;
   char * cp;
   unsigned int ccsid;
@@ -1120,7 +1130,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
     }
 
-  data = (struct SessionHandle *) curl;
+  data = (struct Curl_easy *) curl;
   va_start(arg, tag);
 
   switch (tag) {
@@ -1133,6 +1143,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_COOKIELIST:
   case CURLOPT_CRLFILE:
   case CURLOPT_CUSTOMREQUEST:
+  case CURLOPT_DEFAULT_PROTOCOL:
   case CURLOPT_DNS_SERVERS:
   case CURLOPT_EGDSOCKET:
   case CURLOPT_ENCODING:
@@ -1277,4 +1288,43 @@ curl_form_long_value(long value)
   /* ILE/RPG cannot cast an integer to a pointer. This procedure does it. */
 
   return (char *) value;
+}
+
+
+char *
+curl_pushheader_bynum_cssid(struct curl_pushheaders *h,
+                            size_t num, unsigned int ccsid)
+
+{
+  char *d = (char *) NULL;
+  char *s = curl_pushheader_bynum(h, num);
+
+  if(s)
+    d = dynconvert(ccsid, s, -1, ASCII_CCSID);
+
+  return d;
+}
+
+
+char *
+curl_pushheader_byname_ccsid(struct curl_pushheaders *h, const char *header,
+                             unsigned int ccsidin, unsigned int ccsidout)
+
+{
+  char *d = (char *) NULL;
+  char *s;
+
+  if(header) {
+    header = dynconvert(ASCII_CCSID, header, -1, ccsidin);
+
+    if(header) {
+      s = curl_pushheader_byname(h, header);
+      free((char *) header);
+
+      if(s)
+        d = dynconvert(ccsidout, s, -1, ASCII_CCSID);
+    }
+  }
+
+  return d;
 }

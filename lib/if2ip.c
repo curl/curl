@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -51,12 +51,11 @@
 #endif
 
 #include "inet_ntop.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "if2ip.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /* ------------------------------------------------------------------ */
@@ -68,7 +67,7 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
   (void) sa;
 #else
   if(sa->sa_family == AF_INET6) {
-    const struct sockaddr_in6 * sa6 = (const struct sockaddr_in6 *) sa;
+    const struct sockaddr_in6 * sa6 = (const struct sockaddr_in6 *)(void *) sa;
     const unsigned char * b = sa6->sin6_addr.s6_addr;
     unsigned short w = (unsigned short) ((b[0] << 8) | b[1]);
 
@@ -103,7 +102,7 @@ bool Curl_if_is_interface_name(const char *interf)
 
   if(getifaddrs(&head) >= 0) {
     for(iface=head; iface != NULL; iface=iface->ifa_next) {
-      if(curl_strequal(iface->ifa_name, interf)) {
+      if(strcasecompare(iface->ifa_name, interf)) {
         result = TRUE;
         break;
       }
@@ -133,7 +132,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
     for(iface = head; iface != NULL; iface=iface->ifa_next) {
       if(iface->ifa_addr != NULL) {
         if(iface->ifa_addr->sa_family == af) {
-          if(curl_strequal(iface->ifa_name, interf)) {
+          if(strcasecompare(iface->ifa_name, interf)) {
             void *addr;
             char *ip;
             char scope[12] = "";
@@ -152,11 +151,12 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
                 continue;
               }
 
-              addr = &((struct sockaddr_in6 *)iface->ifa_addr)->sin6_addr;
+              addr =
+                &((struct sockaddr_in6 *)(void *)iface->ifa_addr)->sin6_addr;
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
               /* Include the scope of this interface as part of the address */
-              scopeid =
-                ((struct sockaddr_in6 *)iface->ifa_addr)->sin6_scope_id;
+              scopeid = ((struct sockaddr_in6 *)(void *)iface->ifa_addr)
+                            ->sin6_scope_id;
 
               /* If given, scope id should match. */
               if(remote_scope_id && scopeid != remote_scope_id) {
@@ -171,7 +171,8 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
             }
             else
 #endif
-              addr = &((struct sockaddr_in *)iface->ifa_addr)->sin_addr;
+              addr =
+                  &((struct sockaddr_in *)(void *)iface->ifa_addr)->sin_addr;
             res = IF2IP_FOUND;
             ip = (char *) Curl_inet_ntop(af, addr, ipstr, sizeof(ipstr));
             snprintf(buf, buf_size, "%s%s", ip, scope);
@@ -179,7 +180,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
           }
         }
         else if((res == IF2IP_NOT_FOUND) &&
-                curl_strequal(iface->ifa_name, interf)) {
+                strcasecompare(iface->ifa_name, interf)) {
           res = IF2IP_AF_NOT_SUPPORTED;
         }
       }

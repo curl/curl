@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -139,7 +139,7 @@ int main(void)
   rc = gethostbyname_r(address, &h, &hdata);
 #elif defined(HAVE_GETHOSTBYNAME_R_5) || \
       defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT)
-  rc = gethostbyname_r(address, &h, buffer, 8192, 0, &h_errnop);
+  rc = gethostbyname_r(address, &h, buffer, 8192, &h_errnop);
   (void)hp; /* not used for test */
 #elif defined(HAVE_GETHOSTBYNAME_R_6) || \
       defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)

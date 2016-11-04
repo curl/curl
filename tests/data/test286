@@ -85,8 +85,11 @@ condition in the TFTP transmit code.
 </upload>
 <protocol>
 opcode: 2
-filename: /test286.txt
 mode: octet
+tsize: 512
+blksize: 512
+timeout: 6
+filename: /test286.txt
 </protocol>
 </verify>
 </testcase>

@@ -1,13 +1,33 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2000, Jaepil Kim, <pit@paradise.net.nz>.
+# Copyright (C) 2001 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
 ############################################################
 #
 #  Makefile.b32 - Borland's C++ Compiler 5.X
 #
-#  'lib' directory
-#
 #  'BCCDIR' has to be set up to point to the base directory
 #  of the compiler, i.e. SET BCCDIR = c:\Borland\BCC55
 #
-#  Initially written by Jaepil Kim, pit@paradise.net.nz
 ############################################################
 
 !if "$(__MAKE__)" == ""
@@ -49,7 +69,7 @@ CC_FLAGS = -5 -O2 -tWM -w -w-aus -w-ccc -w-dup -w-prc -w-pro -w-rch -w-sig -w-sp
 LIBFLAGS = /C /P32
 LDFLAGS  = -q -lq -laa -tWD
 
-SRCDIR   = .;.\vtls
+SRCDIR   = .;.\vauth;.\vtls
 OBJDIR   = .\BCC_objs
 INCDIRS  = -I.;.\lib;..\include
 LINKLIB  = $(BCCDIR)\lib\cw32mt.lib $(BCCDIR)\lib\ws2_32.lib
@@ -95,10 +115,11 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\l
 # using explicit compilation build rules instead of implicit ones.
 
 NOHYPHEN1 = $(CSOURCES:-=_)
-NOHYPHEN2 = $(NOHYPHEN1:vtls/=)
+NOHYPHEN2 = $(NOHYPHEN1:vauth/=)
+NOHYPHEN3 = $(NOHYPHEN2:vtls/=)
 
-OBJECTS = $(NOHYPHEN2:.c=.obj)
-PREPROCESSED = $(NOHYPHEN2:.c=.int)
+OBJECTS = $(NOHYPHEN3:.c=.obj)
+PREPROCESSED = $(NOHYPHEN3:.c=.int)
 
 # Borland's command line compiler (BCC32) version 5.5.1 integrated
 # preprocessor has a bug which results in silently generating wrong

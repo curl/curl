@@ -43,7 +43,7 @@ HTTP with proxy and host-only URL
 ^User-Agent:.*
 </strip>
 <protocol>
-GET HTTP://we.want.that.site.com.1213/ HTTP/1.1
+GET http://we.want.that.site.com.1213/ HTTP/1.1
 Host: we.want.that.site.com.1213
 Accept: */*
 Proxy-Connection: Keep-Alive

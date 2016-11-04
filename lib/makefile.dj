@@ -1,15 +1,39 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
 #
-#  Adapted for djgpp2 / Watt-32 / DOS by
-#  Gisle Vanem <gvanem@broadpark.no>
+# Copyright (C) 2003 - 2008, Gisle Vanem <gvanem@yahoo.no>.
+# Copyright (C) 2003 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
+#
+#  Adapted for djgpp2 / Watt-32 / DOS
 #
 
 DEPEND_PREREQ = curl_config.h
+VPATH  = vtls
 TOPDIR = ..
 
 include ../packages/DOS/common.dj
 include Makefile.inc
 
-OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CSOURCES)))
+SOURCES = $(sort $(CSOURCES))
+OBJECTS = $(addprefix $(OBJ_DIR)/, $(notdir $(SOURCES:.c=.o)))
 
 CURL_LIB = libcurl.a
 

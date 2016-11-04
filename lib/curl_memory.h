@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -83,7 +83,20 @@
 
 #ifndef CURLX_NO_MEMORY_CALLBACKS
 
-#include <curl/curl.h> /* for the callback typedefs */
+#ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
+/*
+ * The following memory function replacement typedef's are COPIED from
+ * curl/curl.h and MUST match the originals. We copy them to avoid having to
+ * include curl/curl.h here. We avoid that include since it includes stdio.h
+ * and other headers that may get messed up with defines done here.
+ */
+typedef void *(*curl_malloc_callback)(size_t size);
+typedef void (*curl_free_callback)(void *ptr);
+typedef void *(*curl_realloc_callback)(void *ptr, size_t size);
+typedef char *(*curl_strdup_callback)(const char *str);
+typedef void *(*curl_calloc_callback)(size_t nmemb, size_t size);
+#define CURL_DID_MEMORY_FUNC_TYPEDEFS
+#endif
 
 extern curl_malloc_callback Curl_cmalloc;
 extern curl_free_callback Curl_cfree;

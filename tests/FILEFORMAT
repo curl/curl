@@ -181,6 +181,7 @@ http-unix
 https
 httptls+srp
 httptls+srp-ipv6
+http/2
 imap
 none
 pop3
@@ -222,6 +223,7 @@ Metalink
 NSS
 NTLM
 OpenSSL
+PSL
 socks
 SPNEGO
 SSL
@@ -425,8 +427,9 @@ have a text/binary difference.
 Variables are substituted as in the <command> section.
 </file>
 <stripfile>
-One perl op per line that operates on the file before being compared. This is
-pretty advanced. Example: "s/^EPRT .*/EPRT stripped/"
+One perl op per line that operates on the output file or stdout before being
+compared with what is stored in the test file. This is pretty
+advanced. Example: "s/^EPRT .*/EPRT stripped/"
 </stripfile>
 <upload>
 the contents of the upload data curl should have sent

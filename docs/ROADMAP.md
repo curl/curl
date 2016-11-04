@@ -8,41 +8,44 @@ possible participation.
 HTTP/2
 ------
 
-- test suite
+Improve performance. Measurements and tests have shown that in several cases
+doing transfers over HTTP/2 can be notably slower than the same transfer done
+over HTTP/1. Some of that difference can be attributed the inefficient window
+size handling currently in use but there are probably more to be learned and
+worked on to optimize this.
 
-   Base this on existing nghttp2 server to start with to make functional
-   tests. Later on we can adopt that code or work with nghttp2 to provide ways
-   to have the http2 server respond with broken responses to make sure we deal
-   with that nicely as well.
+QUIC
+----
 
-   To decide: if we need to bundle parts of the nghttp2 stuff that probably
-   won't be shipped by many distros.
+The standardization process of QUIC has been taken to the IETF and can be
+followed on the [IETF QUIC Mailing
+list](https://www.ietf.org/mailman/listinfo/quic). I'd like us to get on the
+bandwagon. Ideally, this would be done with a separate library/project to
+handle the binary/framing layer in a similar fashion to how HTTP/2 is
+implemented. This, to allow other projects to benefit from the work and to
+thus broaden the interest and chance of others to participate.
 
-- stream properties API
+TLS 1.3
+-------
 
-   Provide options for setting priorities and dependencies among the streams
-   (easy handles). They are mostly information set for the stream and sent to
-   the server so we don't have to add much logic for this.
+The new version of the TLS protocol is in the pipeline and will soon start to
+get used out in the wild. It offers some new interesting features and will
+need the TLS libraries to adapt and quite likely provide additional or
+modified APIs. libcurl needs to adapt accordingly.
 
-- server push
 
-   Not exactly clear exactly how to support this API-wise, but by adding
-   handles without asking for a resource it could be a way to be prepared to
-   receive pushes in case such are sent. We probably need it to still specify
-   a URL with host name, port etc but we probably need a special option to
-   tell libcurl it is for server push purposes.
+HTTP cookies
+------------
 
-- provide option for HTTP/2 "prior knowledge" over clear text
+Two cookie drafts have been adopted by the httpwg in IETF and we should
+support them as the popular browsers will as well:
 
-   As it would avoid the roundtrip-heavy Upgrade: procedures when you _know_
-   it speaks HTTP/2.
+[Deprecate modification of 'secure' cookies from non-secure
+origins](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-00)
 
-- provide option to allow curl to default to HTTP/2 only when using HTTPS
+[Cookie Prefixes](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-prefixes-00)
 
-   We could switch on HTTP/2 by-default for HTTPS quite easily and it
-   shouldn't hurt anyone, while HTTP/2 for HTTP by default could introduce
-   lots of Upgrade: roundtrips that users won't like. So a separated option
-   alternative makes sense.
+[Firefox bug report about secure cookies](https://bugzilla.mozilla.org/show_bug.cgi?id=976073)
 
 SRV records
 -----------
@@ -52,7 +55,9 @@ How to find services for specific domains/hosts.
 HTTPS to proxy
 --------------
 
-To avoid network traffic to/from the proxy getting snooped on.
+To avoid network traffic to/from the proxy getting snooped on. There's a git
+branch in the public git repository for this that we need to make sure works
+for all TLS backends and then merge!
 
 curl_formadd()
 --------------
@@ -61,12 +66,10 @@ make sure there's an easy handle passed in to `curl_formadd()`,
 `curl_formget()` and `curl_formfree()` by adding replacement functions and
 deprecating the old ones to allow custom mallocs and more
 
-third-party SASL
+Third-party SASL
 ----------------
 
-add support for third-party SASL libraries such as Cyrus SASL - may need to
-move existing native and SSPI based authentication into vsasl folder after
-reworking HTTP and SASL code
+Add support for third-party SASL libraries such as Cyrus SASL.
 
 SASL authentication in LDAP
 ---------------------------
@@ -117,7 +120,7 @@ Improve
 
 2. curl -h output (considered overwhelming to users)
 
-3. we have > 160 command line options, is there a way to redo things to
+3. we have > 170 command line options, is there a way to redo things to
    simplify or improve the situation as we are likely to keep adding
    features/options in the future too
 

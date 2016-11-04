@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -36,15 +36,14 @@ Such a cookie can be either a single line in Netscape / Mozilla format or just
 regular HTTP-style header (Set-Cookie: ...) format. This will also enable the
 cookie engine. This adds that single cookie to the internal cookie store.
 
-If you use the Set-Cookie format and don't specify a domain then the cookie
-is sent for any domain and will not be modified. If a server sets a cookie of
-the same name (or maybe you've imported one) then both will be sent on a future
-transfer to that server, likely not what you intended. Either set a domain in
-Set-Cookie (doing that will include sub domains) or use the Netscape format as
+Exercise caution if you are using this option and multiple transfers may occur.
+If you use the Set-Cookie format and don't specify a domain then the cookie is
+sent for any domain (even after redirects are followed) and cannot be modified
+by a server-set cookie. If a server sets a cookie of the same name (or maybe
+you've imported one) then both will be sent on a future transfer to that
+server, likely not what you intended. To address these issues set a domain in
+Set-Cookie (doing that will include sub-domains) or use the Netscape format as
 shown in EXAMPLE.
-
-Starting in 7.43.0 the aforementioned any-domain cookies will not appear in the
-lists exported by \fICURLINFO_COOKIELIST(3)\fP and \fICURLOPT_COOKIEJAR(3)\fP.
 
 Additionally, there are commands available that perform actions if you pass in
 these exact strings:
@@ -101,7 +100,7 @@ were skipped on import are not exported.
 */
 curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");  /* export */
 
-res = curl_easy_perform(curl);  /* cookies imported from cookies.txt */
+curl_easy_perform(curl);  /* cookies imported from cookies.txt */
 
 curl_easy_cleanup(curl);  /* cookies exported to cookies.txt */
 .fi
@@ -117,4 +116,5 @@ RELOAD was added in 7.39.0
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
-.BR CURLOPT_COOKIEFILE "(3), " CURLOPT_COOKIEJAR "(3), "  CURLOPT_COOKIE "(3), "
+.BR CURLOPT_COOKIEFILE "(3), " CURLOPT_COOKIEJAR "(3), " CURLOPT_COOKIE "(3), "
+.BR CURLINFO_COOKIELIST "(3), "
