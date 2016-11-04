@@ -908,7 +908,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
     values[4] = label_cf;
     keys[4] = kSecMatchSubjectContains;
     query_dict = CFDictionaryCreate(NULL, (const void **)keys,
-                                   (const void **)values, 4L,
+                                   (const void **)values, 5L,
                                    &kCFCopyStringDictionaryKeyCallBacks,
                                    &kCFTypeDictionaryValueCallBacks);
     CFRelease(values[3]);
