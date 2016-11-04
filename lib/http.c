@@ -3035,7 +3035,16 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 #endif /* CURL_DOES_CONVERSIONS */
 
       if(100 <= k->httpcode && 199 >= k->httpcode) {
-        int expect_header=1;
+        /*
+         * We have made a HTTP PUT or POST and this is 1.1-lingo
+         * that tells us that the server is OK with this and ready
+         * to receive the data.
+         * However, we'll get more headers now so we must get
+         * back into the header-parsing state!
+         */
+        k->header = TRUE;
+        k->headerline = 0; /* restart the header line counter */
+
         /* "A user agent MAY ignore unexpected 1xx status responses." */
         switch(k->httpcode) {
         case 100:
@@ -3053,40 +3062,15 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 
             /* switch to http2 now. The bytes after response headers
                are also processed here, otherwise they are lost. */
-            if (k->proto101 == HTTP2_101)
-            {
-              result = Curl_http2_switched(conn, k->str, *nread);
-              if (result)
-                return result;
-              *nread = 0;
-            }
-            else if (k->proto101 == WEBSOCKETS_101)
-            {
-              expect_header = 0;
-            }
+            result = Curl_http2_switched(conn, k->str, *nread);
+            if(result)
+              return result;
+            *nread = 0;
           }
           break;
         default:
           break;
         }
-
-        if (expect_header)
-        {
-          /*
-         * We have made a HTTP PUT or POST and this is 1.1-lingo
-         * that tells us that the server is OK with this and ready
-         * to receive the data.
-         * However, we'll get more headers now so we must get
-         * back into the header-parsing state!
-         */
-          k->header = TRUE;
-          k->headerline = 0; /* restart the header line counter */
-        }
-        else
-        {
-                  k->header = FALSE; /* no more header to parse! */
-        }
-
       }
       else {
         k->header = FALSE; /* no more header to parse! */
@@ -3737,11 +3721,6 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
             return result;
         }
       }
-    }
-      else if (Curl_compareheader(k->p, "Upgrade:", "WebSocket"))
-    {
-      k->upgr101 = UPGR101_REQUESTED;
-      k->proto101 = WEBSOCKETS_101;
     }
     else if(conn->handler->protocol & CURLPROTO_RTSP) {
       result = Curl_rtsp_parseheader(conn, k->p);
