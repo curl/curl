@@ -92,6 +92,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "warnless.h"
 #include "non-ascii.h"
 #include "inet_pton.h"
+#include "getinfo.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -645,6 +646,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
     data->state.headersize=HEADERSIZE;
 
     Curl_convert_init(data);
+
+    Curl_initinfo(data);
 
     /* most recent connection is not yet defined */
     data->state.lastconnect = NULL;

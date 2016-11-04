@@ -927,6 +927,8 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
 
   Curl_convert_setup(outcurl);
 
+  Curl_initinfo(outcurl);
+
   outcurl->magic = CURLEASY_MAGIC_NUMBER;
 
   /* we reach this point and thus we are OK */
