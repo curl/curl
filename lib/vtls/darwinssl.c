@@ -889,8 +889,8 @@ static OSStatus CopyIdentityWithLabel(char *label,
      kSecClassIdentity was introduced in Lion. If both exist, let's use them
      to find the certificate. */
   if(SecItemCopyMatching != NULL && kSecClassIdentity != NULL) {
-    CFTypeRef keys[4];
-    CFTypeRef values[4];
+    CFTypeRef keys[5];
+    CFTypeRef values[5];
     CFDictionaryRef query_dict;
     CFStringRef label_cf = CFStringCreateWithCString(NULL, label,
       kCFStringEncodingUTF8);
@@ -903,8 +903,10 @@ static OSStatus CopyIdentityWithLabel(char *label,
     values[2] = kSecMatchLimitOne; /* one is enough, thanks */
     keys[2] = kSecMatchLimit;
     /* identity searches need a SecPolicyRef in order to work */
-    values[3] = SecPolicyCreateSSL(false, label_cf);
+    values[3] = SecPolicyCreateSSL(false, NULL);
     keys[3] = kSecMatchPolicy;
+    values[4] = label_cf;
+    keys[4] = kSecMatchSubjectContains;
     query_dict = CFDictionaryCreate(NULL, (const void **)keys,
                                    (const void **)values, 4L,
                                    &kCFCopyStringDictionaryKeyCallBacks,
