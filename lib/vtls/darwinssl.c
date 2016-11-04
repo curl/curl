@@ -882,6 +882,9 @@ static OSStatus CopyIdentityWithLabelOldSchool(char *label,
 static OSStatus CopyIdentityWithLabel(char *label,
                                       SecIdentityRef *out_cert_and_key)
 {
+  CFArrayRef keys_list;
+  CFIndex keys_list_count;
+  CFIndex i;
   OSStatus status = errSecItemNotFound;
 
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
@@ -900,23 +903,43 @@ static OSStatus CopyIdentityWithLabel(char *label,
     keys[0] = kSecClass;
     values[1] = kCFBooleanTrue;    /* we want a reference */
     keys[1] = kSecReturnRef;
-    values[2] = kSecMatchLimitOne; /* one is enough, thanks */
+    values[2] = kSecMatchLimitAll; /* one is enough, thanks */
     keys[2] = kSecMatchLimit;
     /* identity searches need a SecPolicyRef in order to work */
     values[3] = SecPolicyCreateSSL(false, NULL);
     keys[3] = kSecMatchPolicy;
+    /* match the name of the certificate (this doesn't seem to work :( ) */
     values[4] = label_cf;
-    keys[4] = kSecMatchSubjectContains;
+    keys[4] = kSecAttrLabel;
     query_dict = CFDictionaryCreate(NULL, (const void **)keys,
-                                   (const void **)values, 5L,
+                                   (const void **)values, 4L,
                                    &kCFCopyStringDictionaryKeyCallBacks,
                                    &kCFTypeDictionaryValueCallBacks);
-    CFRelease(values[3]);
-    CFRelease(label_cf);
 
     /* Do we have a match? */
-    status = SecItemCopyMatching(query_dict, (CFTypeRef *)out_cert_and_key);
+    status = SecItemCopyMatching(query_dict, (CFTypeRef *) &keys_list);
+
+    /* Because kSecAttrLabel matching doesn't work with kSecClassIdentity,
+     * we need to find the correct identity ourselves */
+    keys_list_count = CFArrayGetCount( keys_list );
+    *out_cert_and_key = NULL;
+    for(i=0; i<keys_list_count; i++) {
+        OSStatus err = noErr;
+        SecCertificateRef cert = NULL;
+        *out_cert_and_key = (SecIdentityRef) CFArrayGetValueAtIndex(keys_list, i);
+        err = SecIdentityCopyCertificate(*out_cert_and_key, &cert);
+        if(err == noErr) {
+            CFStringRef cert_summary = CopyCertSubject(cert);
+            if(CFStringCompare(cert_summary, label_cf, NULL) == kCFCompareEqualTo) {
+                break;
+            }
+        }
+        *out_cert_and_key = NULL;
+        status = 1;
+    }
+
     CFRelease(query_dict);
+    CFRelease(label_cf);
   }
   else {
 #if CURL_SUPPORT_MAC_10_6
@@ -1212,6 +1235,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       err = CopyIdentityWithLabel(data->set.str[STRING_CERT], &cert_and_key);
 
     if(err == noErr) {
+
       SecCertificateRef cert = NULL;
       CFTypeRef certs_c[1];
       CFArrayRef certs;
