@@ -54,7 +54,7 @@ AM_CPPFLAGS = -I$(top_builddir)/include/curl \
               -I$(top_srcdir)/tests/libtest
 endif
 
-EXTRA_DIST = Makefile.inc
+EXTRA_DIST = Makefile.inc CMakeLists.txt
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
