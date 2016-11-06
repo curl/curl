@@ -33,7 +33,6 @@
 
 #include "urldata.h"
 #include "sendf.h"
-#include "strequal.h"
 #include "select.h"
 #include "connect.h"
 #include "timeval.h"
@@ -67,7 +66,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
       result = CURLE_OPERATION_TIMEDOUT;
       break;
     }
-    if(Curl_socket_ready(sockfd, CURL_SOCKET_BAD, timeleft) <= 0) {
+    if(SOCKET_READABLE(sockfd, timeleft) <= 0) {
       result = ~CURLE_OK;
       break;
     }
@@ -401,7 +400,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   (void)curlx_nonblock(sock, TRUE);
 
   /* wait until socket gets connected */
-  result = Curl_socket_ready(CURL_SOCKET_BAD, sock, timeout);
+  result = SOCKET_WRITABLE(sock, timeout);
 
   if(-1 == result) {
     failf(conn->data, "SOCKS5: no connection here");
@@ -442,7 +441,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   (void)curlx_nonblock(sock, TRUE);
 
-  result = Curl_socket_ready(sock, CURL_SOCKET_BAD, timeout);
+  result = SOCKET_READABLE(sock, timeout);
 
   if(-1 == result) {
     failf(conn->data, "SOCKS5 nothing to read");

@@ -1036,16 +1036,19 @@ static int alloc_addbyter(int output, FILE *data)
     infop->len =0;
   }
   else if(infop->len+1 >= infop->alloc) {
-    char *newptr;
+    char *newptr = NULL;
+    size_t newsize = infop->alloc*2;
 
-    newptr = realloc(infop->buffer, infop->alloc*2);
+    /* detect wrap-around or other overflow problems */
+    if(newsize > infop->alloc)
+      newptr = realloc(infop->buffer, newsize);
 
     if(!newptr) {
       infop->fail = 1;
       return -1; /* fail */
     }
     infop->buffer = newptr;
-    infop->alloc *= 2;
+    infop->alloc = newsize;
   }
 
   infop->buffer[ infop->len ] = outc;

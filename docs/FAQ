@@ -81,7 +81,7 @@ FAQ
   4.16 My HTTP POST or PUT requests are slow!
   4.17 Non-functional connect timeouts on Windows
   4.18 file:// URLs containing drive letters (Windows, NetWare)
-  4.19 Why doesn't cURL return an error when the network cable is unplugged?
+  4.19 Why doesn't curl return an error when the network cable is unplugged?
   4.20 curl doesn't return error for HTTP non-200 responses!
   4.21 Why is there a HTTP/1.1 in my HTTP/2 request?
 
@@ -1083,18 +1083,18 @@ FAQ
 
   4.18 file:// URLs containing drive letters (Windows, NetWare)
 
-  When using cURL to try to download a local file, one might use a URL
+  When using curl to try to download a local file, one might use a URL
   in this format:
 
   file://D:/blah.txt
 
-  You'll find that even if D:\blah.txt does exist, cURL returns a 'file
+  You'll find that even if D:\blah.txt does exist, curl returns a 'file
   not found' error.
 
   According to RFC 1738 (https://www.ietf.org/rfc/rfc1738.txt),
   file:// URLs must contain a host component, but it is ignored by
   most implementations. In the above example, 'D:' is treated as the
-  host component, and is taken away. Thus, cURL tries to open '/blah.txt'.
+  host component, and is taken away. Thus, curl tries to open '/blah.txt'.
   If your system is installed to drive C:, that will resolve to 'C:\blah.txt',
   and if that doesn't exist you will get the not found error.
 
@@ -1107,9 +1107,9 @@ FAQ
 
   file://localhost/D:/blah.txt
 
-  In either case, cURL should now be looking for the correct file.
+  In either case, curl should now be looking for the correct file.
 
-  4.19 Why doesn't cURL return an error when the network cable is unplugged?
+  4.19 Why doesn't curl return an error when the network cable is unplugged?
 
   Unplugging a cable is not an error situation. The TCP/IP protocol stack
   was designed to be fault tolerant, so even though there may be a physical

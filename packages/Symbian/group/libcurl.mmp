@@ -31,7 +31,7 @@ SOURCE \
   http_negotiate.c inet_pton.c strtoofft.c strerror.c amigaos.c        \
   hostasyn.c hostip4.c hostip6.c hostsyn.c inet_ntop.c parsedate.c     \
   select.c vtls/gtls.c vtls/vtls.c tftp.c splay.c strdup.c socks.c     \
-  ssh.c vtls/nss.c rawstr.c curl_addrinfo.c socks_gssapi.c             \
+  ssh.c vtls/nss.c strcase.c curl_addrinfo.c socks_gssapi.c             \
   socks_sspi.c curl_sspi.c slist.c nonblock.c curl_memrchr.c imap.c    \
   pop3.c smtp.c pingpong.c rtsp.c curl_threads.c warnless.c hmac.c     \
   vtls/polarssl.c curl_rtmp.c openldap.c curl_gethostname.c gopher.c   \

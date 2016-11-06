@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -1856,7 +1856,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
   #
-  if test "x$dontwant_rt" == "xno" ; then
+  if test "x$dontwant_rt" = "xno" ; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
@@ -3198,4 +3198,48 @@ TEST EINVAL TEST
     # without -P
     CPPPFLAG=""
   fi
+])
+
+
+dnl CURL_MAC_CFLAGS
+dnl
+dnl Check if -mmacosx-version-min, -miphoneos-version-min or any
+dnl similar are set manually, otherwise do. And set
+dnl -Werror=partial-availability.
+dnl
+
+AC_DEFUN([CURL_MAC_CFLAGS], [
+
+  tst_cflags="no"
+  case $host_os in
+    darwin*)
+      tst_cflags="yes"
+      ;;
+  esac
+
+  AC_MSG_CHECKING([for good-to-use Mac CFLAGS])
+  AC_MSG_RESULT([$tst_cflags]);
+
+  if test "$tst_cflags" = "yes"; then
+    AC_MSG_CHECKING([for *version-min in CFLAGS])
+    min=""
+    if test -z "$(echo $CFLAGS | grep m.*os.*-version-min)"; then
+      min="-mmacosx-version-min=10.8"
+      CFLAGS="$CFLAGS $min"
+    fi
+    if test -z "$min"; then
+      AC_MSG_RESULT([set by user])
+    else
+      AC_MSG_RESULT([$min set])
+    fi
+
+    old_CFLAGS=$CFLAGS
+    CFLAGS="$CFLAGS -Werror=partial-availability"
+    AC_MSG_CHECKING([whether $CC accepts -Werror=partial-availability])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+      [AC_MSG_RESULT([yes])],
+      [AC_MSG_RESULT([no])
+      CFLAGS=$old_CFLAGS])
+  fi
+
 ])

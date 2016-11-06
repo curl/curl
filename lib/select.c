@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,15 +51,14 @@
 #include "warnless.h"
 
 /* Convenience local macros */
-
-#define elapsed_ms  (int)curlx_tvdiff(curlx_tvnow(), initial_tv)
+#define ELAPSED_MS()  (int)curlx_tvdiff(curlx_tvnow(), initial_tv)
 
 int Curl_ack_eintr = 0;
-#define error_not_EINTR (Curl_ack_eintr || error != EINTR)
+#define ERROR_NOT_EINTR(error) (Curl_ack_eintr || error != EINTR)
 
 /*
  * Internal function used for waiting a specific amount of ms
- * in Curl_socket_ready() and Curl_poll() when no file descriptor
+ * in Curl_socket_check() and Curl_poll() when no file descriptor
  * is provided to wait on, just being used to delay execution.
  * WinSock select() and poll() timeout mechanisms need a valid
  * socket descriptor in a not null file descriptor set to work.
@@ -109,9 +108,9 @@ int Curl_wait_ms(int timeout_ms)
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if(error && error_not_EINTR)
+    if(error && ERROR_NOT_EINTR(error))
       break;
-    pending_ms = timeout_ms - elapsed_ms;
+    pending_ms = timeout_ms - ELAPSED_MS();
     if(pending_ms <= 0) {
       r = 0;  /* Simulate a "call timed out" case */
       break;
@@ -165,6 +164,12 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   int r;
   int ret;
 
+#if SIZEOF_LONG != SIZEOF_INT
+  /* wrap-around precaution */
+  if(timeout_ms >= INT_MAX)
+    timeout_ms = INT_MAX;
+#endif
+
   if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&
      (writefd == CURL_SOCKET_BAD)) {
     /* no sockets, just wait */
@@ -213,10 +218,10 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if(error && error_not_EINTR)
+    if(error && ERROR_NOT_EINTR(error))
       break;
     if(timeout_ms > 0) {
-      pending_ms = (int)(timeout_ms - elapsed_ms);
+      pending_ms = (int)(timeout_ms - ELAPSED_MS());
       if(pending_ms <= 0) {
         r = 0;  /* Simulate a "call timed out" case */
         break;
@@ -328,10 +333,10 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if(error && error_not_EINTR)
+    if(error && ERROR_NOT_EINTR(error))
       break;
     if(timeout_ms > 0) {
-      pending_ms = timeout_ms - elapsed_ms;
+      pending_ms = (int)(timeout_ms - ELAPSED_MS());
       if(pending_ms <= 0) {
         r = 0;  /* Simulate a "call timed out" case */
         break;
@@ -434,10 +439,10 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if(error && error_not_EINTR)
+    if(error && ERROR_NOT_EINTR(error))
       break;
     if(timeout_ms > 0) {
-      pending_ms = timeout_ms - elapsed_ms;
+      pending_ms = (int)(timeout_ms - ELAPSED_MS());
       if(pending_ms <= 0) {
         r = 0;  /* Simulate a "call timed out" case */
         break;
@@ -521,10 +526,10 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if(r != -1)
       break;
     error = SOCKERRNO;
-    if(error && error_not_EINTR)
+    if(error && ERROR_NOT_EINTR(error))
       break;
     if(timeout_ms > 0) {
-      pending_ms = timeout_ms - elapsed_ms;
+      pending_ms = timeout_ms - ELAPSED_MS();
       if(pending_ms <= 0) {
         r = 0;  /* Simulate a "call timed out" case */
         break;

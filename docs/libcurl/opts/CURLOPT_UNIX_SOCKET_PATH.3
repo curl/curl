@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -33,9 +33,9 @@ to \fIpath\fP. If \fIpath\fP is NULL, then Unix domain sockets are disabled. An
 empty string will result in an error at some point, it will not disable use of
 Unix domain sockets.
 
-When enabled, cURL will connect to the Unix domain socket instead of
+When enabled, curl will connect to the Unix domain socket instead of
 establishing a TCP connection to a host. Since no TCP connection is created,
-cURL does not need to resolve the DNS hostname in the URL.
+curl does not need to resolve the DNS hostname in the URL.
 
 The maximum path length on Cygwin, Linux and Solaris is 107. On other platforms
 it might be even less.

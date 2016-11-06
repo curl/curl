@@ -69,12 +69,11 @@
 #include "escape.h"
 #include "progress.h"
 #include "transfer.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "strtok.h"
 #include "curl_ldap.h"
 #include "curl_multibyte.h"
 #include "curl_base64.h"
-#include "rawstr.h"
 #include "connect.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -284,7 +283,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       /* Novell SDK supports DER or BASE64 files. */
       int cert_type = LDAPSSL_CERT_FILETYPE_B64;
       if((data->set.str[STRING_CERT_TYPE]) &&
-         (Curl_raw_equal(data->set.str[STRING_CERT_TYPE], "DER")))
+         (strcasecompare(data->set.str[STRING_CERT_TYPE], "DER")))
         cert_type = LDAPSSL_CERT_FILETYPE_DER;
       if(!ldap_ca) {
         failf(data, "LDAP local: ERROR %s CA cert not set!",
@@ -325,7 +324,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     if(data->set.ssl.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
       if((data->set.str[STRING_CERT_TYPE]) &&
-         (!Curl_raw_equal(data->set.str[STRING_CERT_TYPE], "PEM"))) {
+         (!strcasecompare(data->set.str[STRING_CERT_TYPE], "PEM"))) {
         failf(data, "LDAP local: ERROR OpenLDAP only supports PEM cert-type!");
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
@@ -708,16 +707,16 @@ static void _ldap_trace (const char *fmt, ...)
  */
 static int str2scope (const char *p)
 {
-  if(strequal(p, "one"))
-     return LDAP_SCOPE_ONELEVEL;
-  if(strequal(p, "onetree"))
-     return LDAP_SCOPE_ONELEVEL;
-  if(strequal(p, "base"))
-     return LDAP_SCOPE_BASE;
-  if(strequal(p, "sub"))
-     return LDAP_SCOPE_SUBTREE;
-  if(strequal(p, "subtree"))
-     return LDAP_SCOPE_SUBTREE;
+  if(strcasecompare(p, "one"))
+    return LDAP_SCOPE_ONELEVEL;
+  if(strcasecompare(p, "onetree"))
+    return LDAP_SCOPE_ONELEVEL;
+  if(strcasecompare(p, "base"))
+    return LDAP_SCOPE_BASE;
+  if(strcasecompare(p, "sub"))
+    return LDAP_SCOPE_SUBTREE;
+  if(strcasecompare(p, "subtree"))
+    return LDAP_SCOPE_SUBTREE;
   return (-1);
 }
 
@@ -767,7 +766,7 @@ static bool split_str(char *str, char ***out, size_t *count)
  *
  * Defined in RFC4516 section 2.
  */
-static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
+static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
 {
   int rc = LDAP_SUCCESS;
   char *path;
@@ -776,9 +775,9 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   size_t i;
 
   if(!conn->data ||
-      !conn->data->state.path ||
-      conn->data->state.path[0] != '/' ||
-      !checkprefix("LDAP", conn->data->change.url))
+     !conn->data->state.path ||
+     conn->data->state.path[0] != '/' ||
+     !checkprefix("LDAP", conn->data->change.url))
     return LDAP_INVALID_SYNTAX;
 
   ludp->lud_scope = LDAP_SCOPE_BASE;
@@ -798,12 +797,13 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   if(*p) {
     char *dn = p;
     char *unescaped;
+    CURLcode result;
 
     LDAP_TRACE (("DN '%s'\n", dn));
 
     /* Unescape the DN */
-    unescaped = curl_easy_unescape(conn->data, dn, 0, NULL);
-    if(!unescaped) {
+    result = Curl_urldecode(conn->data, dn, 0, &unescaped, NULL, FALSE);
+    if(result) {
       rc = LDAP_NO_MEMORY;
 
       goto quit;
@@ -862,12 +862,14 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
 
     for(i = 0; i < count; i++) {
       char *unescaped;
+      CURLcode result;
 
       LDAP_TRACE (("attr[%d] '%s'\n", i, attributes[i]));
 
       /* Unescape the attribute */
-      unescaped = curl_easy_unescape(conn->data, attributes[i], 0, NULL);
-      if(!unescaped) {
+      result = Curl_urldecode(conn->data, attributes[i], 0, &unescaped, NULL,
+                              FALSE);
+      if(result) {
         free(attributes);
 
         rc = LDAP_NO_MEMORY;
@@ -930,12 +932,13 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   if(*p) {
     char *filter = p;
     char *unescaped;
+    CURLcode result;
 
     LDAP_TRACE (("filter '%s'\n", filter));
 
     /* Unescape the filter */
-    unescaped = curl_easy_unescape(conn->data, filter, 0, NULL);
-    if(!unescaped) {
+    result = Curl_urldecode(conn->data, filter, 0, &unescaped, NULL, FALSE);
+    if(result) {
       rc = LDAP_NO_MEMORY;
 
       goto quit;
@@ -971,8 +974,8 @@ quit:
   return rc;
 }
 
-static int _ldap_url_parse (const struct connectdata *conn,
-                            LDAPURLDesc **ludpp)
+static int _ldap_url_parse(const struct connectdata *conn,
+                           LDAPURLDesc **ludpp)
 {
   LDAPURLDesc *ludp = calloc(1, sizeof(*ludp));
   int rc;
@@ -981,7 +984,7 @@ static int _ldap_url_parse (const struct connectdata *conn,
   if(!ludp)
      return LDAP_NO_MEMORY;
 
-  rc = _ldap_url_parse2 (conn, ludp);
+  rc = _ldap_url_parse2(conn, ludp);
   if(rc != LDAP_SUCCESS) {
     _ldap_free_urldesc(ludp);
     ludp = NULL;
@@ -990,7 +993,7 @@ static int _ldap_url_parse (const struct connectdata *conn,
   return (rc);
 }
 
-static void _ldap_free_urldesc (LDAPURLDesc *ludp)
+static void _ldap_free_urldesc(LDAPURLDesc *ludp)
 {
   size_t i;
 

@@ -53,7 +53,6 @@
 #include "progress.h"
 #include "curl_base64.h"
 #include "cookie.h"
-#include "strequal.h"
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"
 #include "http_digest.h"
@@ -68,7 +67,7 @@
 #include "parsedate.h" /* for the week day and month names */
 #include "strtoofft.h"
 #include "multiif.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "content_encoding.h"
 #include "http_proxy.h"
 #include "warnless.h"
@@ -182,7 +181,7 @@ char *Curl_checkheaders(const struct connectdata *conn,
   struct Curl_easy *data = conn->data;
 
   for(head = data->set.headers;head; head=head->next) {
-    if(Curl_raw_nequal(head->data, thisheader, thislen))
+    if(strncasecompare(head->data, thisheader, thislen))
       return head->data;
   }
 
@@ -208,7 +207,7 @@ char *Curl_checkProxyheaders(const struct connectdata *conn,
   for(head = (conn->bits.proxy && data->set.sep_headers) ?
         data->set.proxyheaders : data->set.headers;
       head; head=head->next) {
-    if(Curl_raw_nequal(head->data, thisheader, thislen))
+    if(strncasecompare(head->data, thisheader, thislen))
       return head->data;
   }
 
@@ -726,7 +725,7 @@ Curl_http_output_auth(struct connectdata *conn,
      conn->bits.netrc ||
      !data->state.first_host ||
      data->set.http_disable_hostname_check_before_authentication ||
-     Curl_raw_equal(data->state.first_host, conn->host.name)) {
+     strcasecompare(data->state.first_host, conn->host.name)) {
     result = output_auth_headers(conn, authhost, request, path, FALSE);
   }
   else
@@ -1305,7 +1304,7 @@ Curl_compareheader(const char *headerline, /* line to check */
   const char *start;
   const char *end;
 
-  if(!Curl_raw_nequal(headerline, header, hlen))
+  if(!strncasecompare(headerline, header, hlen))
     return FALSE; /* doesn't start with header */
 
   /* pass the header */
@@ -1331,7 +1330,7 @@ Curl_compareheader(const char *headerline, /* line to check */
 
   /* find the content string in the rest of the line */
   for(;len>=clen;len--, start++) {
-    if(Curl_raw_nequal(start, content, clen))
+    if(strncasecompare(start, content, clen))
       return TRUE; /* match! */
   }
 
@@ -1973,7 +1972,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   ptr = Curl_checkheaders(conn, "Host:");
   if(ptr && (!data->state.this_is_a_follow ||
-             Curl_raw_equal(data->state.first_host, conn->host.name))) {
+             strcasecompare(data->state.first_host, conn->host.name))) {
 #if !defined(CURL_DISABLE_COOKIES)
     /* If we have a given custom Host: header, we extract the host name in
        order to possibly use it for cookie reasons later on. We only allow the
@@ -2384,7 +2383,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         }
         co = co->next; /* next cookie please */
       }
-      Curl_cookie_freelist(store, FALSE); /* free the cookie list */
+      Curl_cookie_freelist(store);
     }
     if(addcookies && !result) {
       if(!count)

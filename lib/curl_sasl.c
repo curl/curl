@@ -42,8 +42,6 @@
 #include "curl_sasl.h"
 #include "warnless.h"
 #include "strtok.h"
-#include "strequal.h"
-#include "rawstr.h"
 #include "sendf.h"
 #include "non-ascii.h" /* included for Curl_convert_... prototypes */
 /* The last 3 #include files should be in this order */
@@ -159,7 +157,7 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
     sasl->prefmech = SASL_AUTH_NONE;
   }
 
-  if(strnequal(value, "*", len))
+  if(!strncmp(value, "*", len))
     sasl->prefmech = SASL_AUTH_DEFAULT;
   else {
     mechbit = Curl_sasl_decode_mech(value, len, &mechlen);

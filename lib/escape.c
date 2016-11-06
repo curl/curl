@@ -224,8 +224,14 @@ char *curl_easy_unescape(struct Curl_easy *data, const char *string,
                                   FALSE);
     if(res)
       return NULL;
-    if(olen)
-      *olen = curlx_uztosi(outputlen);
+
+    if(olen) {
+      if(outputlen <= (size_t) INT_MAX)
+        *olen = curlx_uztosi(outputlen);
+      else
+        /* too large to return in an int, fail! */
+        Curl_safefree(str);
+    }
   }
   return str;
 }

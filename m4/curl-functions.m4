@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -4739,12 +4739,15 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   tst_allow_poll="unknown"
   #
   case $host_os in
-    darwin[[123456789]].*|darwin10.*|darwin11.*|darwin12.*|interix*)
+    darwin*|interix*)
       dnl poll() does not work on these platforms
       dnl Interix: "does provide poll(), but the implementing developer must
       dnl have been in a bad mood, because poll() only works on the /proc
       dnl filesystem here"
+      dnl macOS: poll() first didn't exist, then was broken until fixed in 10.9
+      dnl only to break again in 10.12.
       curl_disallow_poll="yes"
+      tst_compi_poll="no"
       ;;
   esac
   #
@@ -4803,11 +4806,27 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_poll
+        $curl_includes_time
       ]],[[
+        /* detect the original poll() breakage */
         if(0 != poll(0, 0, 10))
           exit(1); /* fail */
-        else
-          exit(0);
+        else {
+          /* detect the 10.12 poll() breakage */
+          struct timeval before, after;
+          int rc;
+          size_t us;
+
+          gettimeofday(&before, NULL);
+          rc = poll(NULL, 0, 500);
+          gettimeofday(&after, NULL);
+
+          us = (after.tv_sec - before.tv_sec) * 1000000 +
+            (after.tv_usec - before.tv_usec);
+
+          if(us < 400000)
+            exit(1);
+        }
       ]])
     ],[
       AC_MSG_RESULT([yes])

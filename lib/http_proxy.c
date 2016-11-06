@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,7 +31,6 @@
 #include "http.h"
 #include "url.h"
 #include "select.h"
-#include "rawstr.h"
 #include "progress.h"
 #include "non-ascii.h"
 #include "connect.h"
@@ -245,7 +244,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
     }
 
     if(!blocking) {
-      if(0 == Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD, 0))
+      if(0 == SOCKET_READABLE(tunnelsocket, 0))
         /* return so we'll be called again polling-style */
         return CURLE_OK;
       else {
@@ -280,8 +279,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         }
 
         /* loop every second at least, less if the timeout is near */
-        switch (Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD,
-                                  check<1000L?check:1000)) {
+        switch (SOCKET_READABLE(tunnelsocket, check<1000L?check:1000)) {
         case -1: /* select() error, stop reading */
           error = SELECT_ERROR;
           failf(data, "Proxy CONNECT aborted due to select/poll error");

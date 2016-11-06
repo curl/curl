@@ -20,18 +20,18 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH mk-ca-bundle 1 "5 Jan 2013" "version 1.20" "mk-ca-bundle manual"
+.TH mk-ca-bundle 1 "24 Oct 2016" "version 1.27" "mk-ca-bundle manual"
 .SH NAME
 mk-ca-bundle \- convert mozilla's certdata.txt to PEM format
 .SH SYNOPSIS
-mk-ca-bundle [bilnpqstuv]
+mk-ca-bundle [options]
 .I [outputfile]
 .SH DESCRIPTION
 The mk-ca-bundle tool downloads the certdata.txt file from Mozilla's source
-tree over HTTP, then parses certdata.txt and extracts certificates
-into PEM format.  By default, only CA root certificates trusted to issue SSL
-server authentication certificates are extracted. These are then processed with
-the OpenSSL commandline tool to produce the final ca-bundle file.
+tree over HTTPS, then parses certdata.txt and extracts certificates into PEM
+format. By default, only CA root certificates trusted to issue SSL server
+authentication certificates are extracted. These are then processed with the
+OpenSSL commandline tool to produce the final ca-bundle file.
 
 The default \fIoutputfile\fP name is \fBca-bundle.crt\fP. By setting it to '-'
 (a single dash) you will get the output sent to STDOUT instead of a file.
@@ -51,6 +51,10 @@ shortcuts for which source tree to get the cert data from.
 force rebuild even if certdata.txt is current (Added in version 1.17)
 .IP -i
 print version info about used modules
+.IP -k
+Allow insecure data transfer. By default (since 1.27) this command will fail
+if the HTTPS transfer fails. This overrides that decision (and opens for
+man-in-the-middle attacks).
 .IP -l
 print license info about certdata.txt
 .IP -m

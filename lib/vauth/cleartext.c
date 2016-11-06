@@ -33,8 +33,6 @@
 #include "curl_md5.h"
 #include "warnless.h"
 #include "strtok.h"
-#include "strequal.h"
-#include "rawstr.h"
 #include "sendf.h"
 #include "curl_printf.h"
 

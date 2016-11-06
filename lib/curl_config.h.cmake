@@ -936,6 +936,9 @@
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
+/* to enable NGHTTP2  */
+#cmakedefine USE_NGHTTP2 1
+
 /* if Unix domain sockets are enabled  */
 #cmakedefine USE_UNIX_SOCKETS
 

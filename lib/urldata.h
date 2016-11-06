@@ -374,6 +374,7 @@ struct ssl_config_data {
 struct curl_ssl_session {
   char *name;       /* host name for which this ID was used */
   char *conn_to_host; /* host name for the connection (may be NULL) */
+  const char *scheme; /* protocol scheme used */
   void *sessionid;  /* as returned from the SSL layer */
   size_t idsize;    /* if known, otherwise 0 */
   long age;         /* just a number, the higher the more recent */
@@ -1104,7 +1105,7 @@ struct connectdata {
 
 /*
  * Struct to keep statistical and informational data.
- * All variables in this struct must be reset in Curl_initinfo().
+ * All variables in this struct must be initialized/reset in Curl_initinfo().
  */
 struct PureInfo {
   int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */

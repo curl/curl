@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -80,7 +80,7 @@
 #endif
 
 #include <curl/curl.h>
-#include "rawstr.h"
+#include "strcase.h"
 #include "warnless.h"
 #include "parsedate.h"
 
@@ -211,7 +211,7 @@ static int checkday(const char *check, size_t len)
   else
     what = &Curl_wkday[0];
   for(i=0; i<7; i++) {
-    if(Curl_raw_equal(check, what[0])) {
+    if(strcasecompare(check, what[0])) {
       found=TRUE;
       break;
     }
@@ -228,7 +228,7 @@ static int checkmonth(const char *check)
 
   what = &Curl_month[0];
   for(i=0; i<12; i++) {
-    if(Curl_raw_equal(check, what[0])) {
+    if(strcasecompare(check, what[0])) {
       found=TRUE;
       break;
     }
@@ -248,7 +248,7 @@ static int checktz(const char *check)
 
   what = tz;
   for(i=0; i< sizeof(tz)/sizeof(tz[0]); i++) {
-    if(Curl_raw_equal(check, what->name)) {
+    if(strcasecompare(check, what->name)) {
       found=TRUE;
       break;
     }
@@ -386,15 +386,17 @@ static int parsedate(const char *date, time_t *output)
       /* a digit */
       int val;
       char *end;
+      int len=0;
       if((secnum == -1) &&
-         (3 == sscanf(date, "%02d:%02d:%02d", &hournum, &minnum, &secnum))) {
+         (3 == sscanf(date, "%02d:%02d:%02d%n",
+                      &hournum, &minnum, &secnum, &len))) {
         /* time stamp! */
-        date += 8;
+        date += len;
       }
       else if((secnum == -1) &&
-              (2 == sscanf(date, "%02d:%02d", &hournum, &minnum))) {
+              (2 == sscanf(date, "%02d:%02d%n", &hournum, &minnum, &len))) {
         /* time stamp without seconds */
-        date += 5;
+        date += len;
         secnum = 0;
       }
       else {

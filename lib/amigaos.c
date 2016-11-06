@@ -57,7 +57,7 @@ bool Curl_amiga_init()
   }
 
   if(SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG) &errno,
-                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG) "cURL",
+                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG) "curl",
                     TAG_DONE)) {
     __request("SocketBaseTags ERROR");
     return FALSE;

@@ -29,7 +29,7 @@
 #include "http.h"
 #include "sendf.h"
 #include "curl_base64.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "multiif.h"
 #include "conncache.h"
 #include "url.h"
@@ -319,7 +319,7 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
      the middle of header, it could be matched in middle of the value,
      this is because we do prefix match.*/
   if(!h || !GOOD_EASY_HANDLE(h->data) || !header || !header[0] ||
-     Curl_raw_equal(header, ":") || strchr(header + 1, ':'))
+     !strcmp(header, ":") || strchr(header + 1, ':'))
     return NULL;
   else {
     struct HTTP *stream = h->data->req.protop;
@@ -1743,12 +1743,12 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       goto fail;
     hlen = end - hdbuf;
 
-    if(hlen == 10 && Curl_raw_nequal("connection", hdbuf, 10)) {
+    if(hlen == 10 && strncasecompare("connection", hdbuf, 10)) {
       /* skip Connection: headers! */
       skip = 1;
       --nheader;
     }
-    else if(hlen == 4 && Curl_raw_nequal("host", hdbuf, 4)) {
+    else if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
       authority_idx = i;
       nva[i].name = (unsigned char *)":authority";
       nva[i].namelen = strlen((char *)nva[i].name);

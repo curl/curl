@@ -33,7 +33,7 @@
 #include "url.h"
 #include "progress.h"
 #include "rtsp.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "select.h"
 #include "connect.h"
 /* The last 3 #include files should be in this order */
@@ -147,7 +147,7 @@ bool Curl_rtsp_connisdead(struct connectdata *check)
   int sval;
   bool ret_val = TRUE;
 
-  sval = Curl_socket_ready(check->sock[FIRSTSOCKET], CURL_SOCKET_BAD, 0);
+  sval = SOCKET_READABLE(check->sock[FIRSTSOCKET], 0);
   if(sval == 0) {
     /* timeout */
     ret_val = FALSE;

@@ -34,7 +34,7 @@
 #include "formdata.h" /* for the boundary function */
 #include "url.h" /* for the ssl config check function */
 #include "connect.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "select.h"
 #include "vtls.h"
 #include "llist.h"
@@ -64,7 +64,7 @@
 #include <ocsp.h>
 #endif
 
-#include "rawstr.h"
+#include "strcase.h"
 #include "warnless.h"
 #include "x509asn1.h"
 
@@ -261,7 +261,7 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc * model,
     found = PR_FALSE;
 
     for(i=0; i<NUM_OF_CIPHERS; i++) {
-      if(Curl_raw_equal(cipher, cipherlist[i].name)) {
+      if(strcasecompare(cipher, cipherlist[i].name)) {
         cipher_state[i] = PR_TRUE;
         found = PR_TRUE;
         break;
@@ -1921,8 +1921,11 @@ static CURLcode nss_connect_common(struct connectdata *conn, int sockindex,
   const bool blocking = (done == NULL);
   CURLcode result;
 
-  if(connssl->state == ssl_connection_complete)
+  if(connssl->state == ssl_connection_complete) {
+    if(!blocking)
+      *done = TRUE;
     return CURLE_OK;
+  }
 
   if(connssl->connecting_state == ssl_connect_1) {
     result = nss_setup_connect(conn, sockindex);

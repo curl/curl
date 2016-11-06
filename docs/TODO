@@ -25,7 +25,6 @@
  1.7 Detect when called from within callbacks
  1.8 Allow SSL (HTTPS) to proxy
  1.9 Cache negative name resolves
- 1.10 Support IDNA2008
  1.11 minimize dependencies with dynamicly loaded modules
  1.12 have form functions use CURL handle argument
  1.14 Typesafe curl_easy_setopt()
@@ -38,6 +37,7 @@
  1.21 API for URL parsing/splitting
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
+ 1.25 Remove the generated include file
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -151,6 +151,7 @@
  18.13 support metalink in http headers
  18.14 --fail without --location should treat 3xx as a failure
  18.15 Introduce --fail-fast to exit on first transfer fail
+ 18.16 --retry should resume
 
  19. Build
  19.1 roffit
@@ -257,12 +258,6 @@
 
  A name resolve that has failed is likely to fail when made again within a
  short period of time. Currently we only cache positive responses.
-
-1.10 Support IDNA2008
-
- International Domain Names are supported in libcurl since years back, powered
- by libidn. libidn implements IDNA2003 which has been superseded by IDNA2008.
- libidn2 is an existing library offering support for IDNA2008.
 
 1.11 minimize dependencies with dynamicly loaded modules
 
@@ -375,6 +370,32 @@
  libcurl supports the CURLOPT_TCP_FASTOPEN option since 7.49.0 for Linux and
  Mac OS. Windows supports TCP Fast Open starting with Windows 10, version 1607
  and we should add support for it.
+
+1.25 Remove the generated include file
+
+ When curl and libcurl are built, one of the public include files are
+ generated and is populated with a set of defines that are derevid from sizes
+ and constants for the particular target architecture that build is made. For
+ platforms that can select between 32 bit and 64 bit at build time, this
+ approach makes the libcurl build only create a set of public headers suitable
+ for one of the architectures and not both. If you build libcurl for such a
+ platform and you want to allow applications to get built using either 32/64
+ version, you must generate the libcurl headers once for each setup and you
+ must then add a replacement curl header that would itself select the correct
+ 32 or 64 bit specific header as necessary.
+
+ Your curl/curl.h alternative could then look like (replace with suitable CPP
+ variable to check):
+
+     #ifdef ARCH_32bit
+     #include <curl32/curl.h>
+     #else /* ARCH_64bit  */
+     #include <curl64/curl.h>
+     #endif
+
+ A fix would either (A) fix the 32/64 setup automatically or even better (B)
+ work away the architecture specific defines from the headers so that they can
+ be used for all architectures independently of what libcurl was built for.
 
 
 2. libcurl - multi interface
@@ -894,7 +915,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
 18.3 prevent file overwriting
 
- Add an option that prevents cURL from overwriting existing local files. When
+ Add an option that prevents curl from overwriting existing local files. When
  used, and there already is an existing file with the target file name
  (either -O or -o), a number should be appended (and increased if already
  existing). So that index.html becomes first index.html.1 and then
@@ -1007,6 +1028,15 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  option would make curl exit and return an error for the first transfer that
  fails.
 
+18.16 --retry should resume
+
+ When --retry is used and curl actually retries transfer, it should use the
+ already transfered data and do a resumed transfer for the rest (when
+ possible) so that it doesn't have to transfer the same data again that was
+ already tranfered before the retry.
+
+ See https://github.com/curl/curl/issues/1084
+
 
 19. Build
 
@@ -1017,7 +1047,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
 19.2 Enable PIE and RELRO by default
 
- Especially when having programs that execute cURL via the command line, PIE
+ Especially when having programs that execute curl via the command line, PIE
  renders the exploitation of memory corruption vulnerabilities a lot more
  difficult. This can be attributed to the additional information leaks being
  required to conduct a successful attack. RELRO, on the other hand, masks
@@ -1025,7 +1055,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  of techniques that come in handy when attackers are able to arbitrarily
  overwrite memory. A few tests showed that enabling these features had close
  to no impact, neither on the performance nor on the general functionality of
- cURL.
+ curl.
 
 
 20. Test suite

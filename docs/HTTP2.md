@@ -96,18 +96,31 @@ curl tool
 
 curl offers the `--http2` command line option to enable use of HTTP/2.
 
-curl offers the `--http2-prior-knowledge` command line option to enable use of 
+curl offers the `--http2-prior-knowledge` command line option to enable use of
 HTTP/2 without HTTP/1.1 Upgrade.
 
 Since 7.47.0, the curl tool enables HTTP/2 by default for HTTPS connections.
 
+curl tool limitations
+---------------------
+
+The command line tool won't do any HTTP/2 multiplexing even though libcurl
+supports it, simply because the curl tool is not written to take advantage of
+the libcurl API that's necessary for this (the multi interface). We have an
+outstanding TODO item for this and **you** can help us make it happen.
+
+The command line tool also doesn't support HTTP/2 server push for the same
+reason it doesn't do multiplexing: it needs to use the multi interface for
+that so that multiplexing is supported.
+
 HTTP Alternative Services
 -------------------------
 
-Alt-Svc is a suggested extension with a corresponding frame (ALTSVC) in HTTP/2
-that tells the client about an alternative "route" to the same content for the
-same origin server that you get the response from. A browser or long-living
-client can use that hint to create a new connection asynchronously.  For
-libcurl, we may introduce a way to bring such clues to the applicaton and/or
-let a subsequent request use the alternate route
-automatically. [Spec](https://tools.ietf.org/html/draft-ietf-httpbis-alt-svc-14)
+Alt-Svc is an extension with a corresponding frame (ALTSVC) in HTTP/2 that
+tells the client about an alternative "route" to the same content for the same
+origin server that you get the response from. A browser or long-living client
+can use that hint to create a new connection asynchronously.  For libcurl, we
+may introduce a way to bring such clues to the applicaton and/or let a
+subsequent request use the alternate route automatically.
+
+[Detailed in RFC 7838](https://tools.ietf.org/html/rfc7838)

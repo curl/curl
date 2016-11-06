@@ -26,7 +26,6 @@
 
 #include "urldata.h"
 #include "sendf.h"
-#include "rawstr.h"
 #include "http_negotiate.h"
 #include "vauth/vauth.h"
 

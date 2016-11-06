@@ -30,7 +30,6 @@
 #include "progress.h"
 #include "multiif.h"
 #include "sendf.h"
-#include "rawstr.h"
 #include "conncache.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

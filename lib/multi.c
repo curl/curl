@@ -42,6 +42,7 @@
 #include "multihandle.h"
 #include "pipeline.h"
 #include "sigpipe.h"
+#include "connect.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -462,6 +463,14 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
      handle is added */
   memset(&multi->timer_lastcall, 0, sizeof(multi->timer_lastcall));
 
+  /* The closure handle only ever has default timeouts set. To improve the
+     state somewhat we clone the timeouts from each added handle so that the
+     closure handle always has the same timeouts as the most recently added
+     easy handle. */
+  multi->closure_handle->set.timeout = data->set.timeout;
+  multi->closure_handle->set.server_response_timeout =
+    data->set.server_response_timeout;
+
   update_timer(multi);
   return CURLM_OK;
 }
@@ -574,6 +583,7 @@ static CURLcode multi_done(struct connectdata **connp,
      !conn->bits.close) {
     /* Stop if pipeline is not empty and we do not have to close
        connection. */
+    data->easy_conn = NULL;
     DEBUGF(infof(data, "Connection still in use, no more multi_done now!\n"));
     return CURLE_OK;
   }
@@ -2168,6 +2178,7 @@ static void close_all_connections(struct Curl_multi *multi)
     conn->data->easy_conn = NULL; /* clear the easy handle's connection
                                      pointer */
     /* This will remove the connection from the cache */
+    connclose(conn, "kill all");
     (void)Curl_disconnect(conn, FALSE);
     sigpipe_restore(&pipe_st);
 

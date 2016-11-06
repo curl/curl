@@ -1,36 +1,19 @@
-Curl and libcurl 7.51.0
+Curl and libcurl 7.51.1
 
- Public curl releases:         160
+ Public curl releases:         161
  Command line options:         185
- curl_easy_setopt() options:   224
+ curl_easy_setopt() options:   225
  Public functions in libcurl:  61
- Contributors:                 1445
+ Contributors:                 1467
 
 This release includes the following changes:
 
- o nss: additional cipher suites are now accepted by CURLOPT_SSL_CIPHER_LIST
- o New option: CURLOPT_KEEP_SENDING_ON_ERROR [10]
+ o
 
 This release includes the following bugfixes:
 
- o openssl: fix per-thread memory leak usiong 1.0.1 or 1.0.2 [1]
- o http: accept "Transfer-Encoding: chunked" for HTTP/2 as well [2]
- o LICENSE-MIXING.md: update with mbedTLS dual licensing [3]
- o examples/imap-append: Set size of data to be uploaded [4]
- o test2048: fix url
- o darwinssl: disable RC4 cipher-suite support
- o CURLOPT_PINNEDPUBLICKEY.3: fix the AVAILABILITY formatting
- o openssl: don’t call CRYTPO_cleanup_all_ex_data [5]
- o libressl: fix version output [6]
- o easy: Reset all statistical session info in curl_easy_reset [7]
- o curl_global_cleanup.3: don't unload the lib with sub threads running [8]
- o dist: add CurlSymbolHiding.cmake to the tarball
- o docs: Remove that --proto is just used for initial retrieval [9]
- o configure: Fixed builds with libssh2 in a custom location
- o curl.1: --trace supports % for sending to stderr!
- o cookies: same domain handling changed to match browser behavior [11]
- o formpost: trying to attach a directory no longer crashes [12]
-
+ o
+ 
 This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
@@ -38,26 +21,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Akshay Vernekar, Alexander Sinditskiy, Bernard Spil, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Jeroen Ooms, Kamil Dudka,
-  lukaszgn on github, Michael Kaufmann, Nick Zitzmann, Ray Satiro,
-  Sebastian Mundry, Sergei Kuzmin, Stephen Brokenshire, Toby Peterson,
-  Todd Short, Tony Kelman,
-  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=964
- [2] = https://curl.haxx.se/bug/?i=1013
- [3] = https://curl.haxx.se/bug/?i=1019
- [4] = https://curl.haxx.se/bug/?i=1011
- [5] = https://curl.haxx.se/mail/lib-2016-09/0045.html
- [6] = https://curl.haxx.se/bug/?i=1029
- [7] = https://curl.haxx.se/bug/?i=1017
- [8] = https://curl.haxx.se/bug/?i=997
- [9] = https://curl.haxx.se/bug/?i=1031
- [10] = https://curl.haxx.se/libcurl/c/CURLOPT_KEEP_SENDING_ON_ERROR.html
- [11] = https://curl.haxx.se/bug/?i=1050
- [12] = https://curl.haxx.se/bug/?i=1053
+ [1] = https://curl.haxx.se/bug/?i=

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,7 +72,7 @@
 #include "vtls.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
 
@@ -1001,8 +1001,8 @@ int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
 
   close_one(connssl, data);
   rc = 0;
-  what = Curl_socket_ready(conn->sock[sockindex],
-                           CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
+  what = SOCKET_READABLE(conn->sock[sockindex],
+                         SSL_SHUTDOWN_TIMEOUT);
 
   for(;;) {
     if(what < 0) {
@@ -1031,7 +1031,7 @@ int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
     if(nread <= 0)
       break;
 
-    what = Curl_socket_ready(conn->sock[sockindex], CURL_SOCKET_BAD, 0);
+    what = SOCKET_READABLE(conn->sock[sockindex], 0);
   }
 
   return rc;

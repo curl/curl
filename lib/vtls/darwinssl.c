@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2014, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2150,7 +2150,8 @@ darwinssl_connect_common(struct connectdata *conn,
       curl_socket_t readfd = ssl_connect_2_reading ==
       connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
-      what = Curl_socket_ready(readfd, writefd, nonblocking?0:timeout_ms);
+      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
+                               nonblocking?0:timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
@@ -2272,8 +2273,7 @@ int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex)
 
   rc = 0;
 
-  what = Curl_socket_ready(conn->sock[sockindex],
-                           CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
+  what = SOCKET_READABLE(conn->sock[sockindex], SSL_SHUTDOWN_TIMEOUT);
 
   for(;;) {
     if(what < 0) {
@@ -2301,7 +2301,7 @@ int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex)
     if(nread <= 0)
       break;
 
-    what = Curl_socket_ready(conn->sock[sockindex], CURL_SOCKET_BAD, 0);
+    what = SOCKET_READABLE(conn->sock[sockindex], 0);
   }
 
   return rc;

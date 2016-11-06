@@ -1,4 +1,4 @@
-# cURL C code style
+# curl C code style
 
 Source code that has a common style is easier to read than code that uses
 different styles in different places. It helps making the code feel like one
