@@ -903,18 +903,19 @@ static OSStatus CopyIdentityWithLabel(char *label,
     keys[0] = kSecClass;
     values[1] = kCFBooleanTrue;    /* we want a reference */
     keys[1] = kSecReturnRef;
-    values[2] = kSecMatchLimitAll; /* one is enough, thanks */
+    values[2] = kSecMatchLimitAll; /* kSecMatchLimitOne would be better, if the label matching below would work correctly */
     keys[2] = kSecMatchLimit;
     /* identity searches need a SecPolicyRef in order to work */
     values[3] = SecPolicyCreateSSL(false, NULL);
     keys[3] = kSecMatchPolicy;
-    /* match the name of the certificate (this doesn't seem to work :( ) */
+    /* match the name of the certificate (this doesn't seem to work in Macos Sierra :( ) */
     values[4] = label_cf;
     keys[4] = kSecAttrLabel;
     query_dict = CFDictionaryCreate(NULL, (const void **)keys,
                                    (const void **)values, 4L,
                                    &kCFCopyStringDictionaryKeyCallBacks,
                                    &kCFTypeDictionaryValueCallBacks);
+    CFRelease(values[3]);
 
     /* Do we have a match? */
     status = SecItemCopyMatching(query_dict, (CFTypeRef *) &keys_list);
