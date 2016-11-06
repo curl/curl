@@ -1584,7 +1584,7 @@ static bool contains_trailers(const char *p, size_t len) {
       return FALSE;
     }
     /* trailers does not bear parameter. */
-    if(!Curl_raw_nequal("trailers", p, sizeof("trailers") - 1)) {
+    if(!strncasecompare("trailers", p, sizeof("trailers") - 1)) {
       goto next;
     }
     p += sizeof("trailers") - 1;
@@ -1621,22 +1621,22 @@ static header_instruction inspect_header(const char *name, size_t namelen,
                                          const char *value, size_t valuelen) {
   switch(namelen) {
   case 2:
-    if(!Curl_raw_nequal("te", name, namelen)) {
+    if(!strncasecompare("te", name, namelen)) {
       return FORWARD;
     }
     return contains_trailers(value, valuelen) ? TE_TRAILERS : IGNORE;
   case 7:
-    return Curl_raw_nequal("upgrade", name, namelen) ? IGNORE : FORWARD;
+    return strncasecompare("upgrade", name, namelen) ? IGNORE : FORWARD;
   case 10:
-    return Curl_raw_nequal("connection", name, namelen) ||
-                   Curl_raw_nequal("keep-alive", name, namelen)
+    return strncasecompare("connection", name, namelen) ||
+                   strncasecompare("keep-alive", name, namelen)
                ? IGNORE
                : FORWARD;
   case 16:
-    return Curl_raw_nequal("proxy-connection", name, namelen) ? IGNORE
+    return strncasecompare("proxy-connection", name, namelen) ? IGNORE
                                                               : FORWARD;
   case 17:
-    return Curl_raw_nequal("transfer-encoding", name, namelen) ? IGNORE
+    return strncasecompare("transfer-encoding", name, namelen) ? IGNORE
                                                                : FORWARD;
   default:
     return FORWARD;
