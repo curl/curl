@@ -1774,6 +1774,11 @@ curl -T "{file1,file2}" http://www.example.com
 or even
 
 curl -T "img[1-1000].png" ftp://ftp.example.com/upload/
+
+When uploading to an SMTP server: the uploaded data is assumed to be RFC 5322
+formatted. It has to feature the necessary set of headers and mail body
+formatted correctly by the user as curl will not transcode nor encode it
+further in any way.
 .IP "--tcp-nodelay"
 Turn on the TCP_NODELAY option. See the \fIcurl_easy_setopt(3)\fP man page for
 details about this option. (Added in 7.11.2)
