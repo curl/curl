@@ -886,6 +886,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
   CFIndex keys_list_count;
   CFIndex i;
   OSStatus status = errSecItemNotFound;
+  CFStringRef common_name;
 
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
   /* SecItemCopyMatching() was introduced in iOS and Snow Leopard.
@@ -922,21 +923,28 @@ static OSStatus CopyIdentityWithLabel(char *label,
 
     /* Because kSecAttrLabel matching doesn't work with kSecClassIdentity,
      * we need to find the correct identity ourselves */
-    keys_list_count = CFArrayGetCount( keys_list );
-    *out_cert_and_key = NULL;
-    for(i=0; i<keys_list_count; i++) {
-        OSStatus err = noErr;
-        SecCertificateRef cert = NULL;
-        *out_cert_and_key = (SecIdentityRef) CFArrayGetValueAtIndex(keys_list, i);
-        err = SecIdentityCopyCertificate(*out_cert_and_key, &cert);
-        if(err == noErr) {
-            CFStringRef cert_summary = CopyCertSubject(cert);
-            if(CFStringCompare(cert_summary, label_cf, NULL) == kCFCompareEqualTo) {
-                break;
-            }
-        }
+    if(status == noErr) {
+        keys_list_count = CFArrayGetCount( keys_list );
         *out_cert_and_key = NULL;
-        status = 1;
+        for(i=0; i<keys_list_count; i++) {
+            OSStatus err = noErr;
+            SecCertificateRef cert = NULL;
+            *out_cert_and_key = (SecIdentityRef) CFArrayGetValueAtIndex(keys_list, i);
+            err = SecIdentityCopyCertificate(*out_cert_and_key, &cert);
+            if(err == noErr) {
+                SecCertificateCopyCommonName(cert, &common_name);
+                if(CFStringCompare(common_name, label_cf, NULL) == kCFCompareEqualTo) {
+                    CFRelease(cert);
+                    CFRelease(common_name);
+                    status = noErr;
+                    break;
+                }
+                CFRelease(common_name);
+            }
+            *out_cert_and_key = NULL;
+            status = 1;
+            CFRelease(cert);
+        }
     }
 
     CFRelease(query_dict);
