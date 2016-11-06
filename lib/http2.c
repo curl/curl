@@ -1572,25 +1572,74 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 #define HEADER_OVERFLOW(x) \
   (x.namelen > (uint16_t)-1 || x.valuelen > (uint16_t)-1 - x.namelen)
 
-/* Returns TRUE if header field is prohibited by HTTP/2
-   specification. */
-static bool should_ignore_header(const char *name, size_t namelen,
-                                 const char *value, size_t valuelen) {
+/* Returns TRUE iff p of length len contains "trailers".  p is
+   expected to point to the header field value of "te" header
+   field. */
+static bool contains_trailers(const char *p, size_t len) {
+  const char *end = p + len;
+  for(;;) {
+    for(; p != end && (*p == ' ' || *p == '\t'); ++p)
+      ;
+    if(p == end || (size_t)(end - p) < sizeof("trailers") - 1) {
+      return FALSE;
+    }
+    /* trailers does not bear parameter. */
+    if(!Curl_raw_nequal("trailers", p, sizeof("trailers") - 1)) {
+      goto next;
+    }
+    p += sizeof("trailers") - 1;
+    /* We have found t-codings has "trailers" in its prefix.  Make
+       sure that remaining bytes are OWS. */
+    for(; p != end && (*p == ' ' || *p == 't'); ++p)
+      ;
+    if(p == end || *p == ',') {
+      return TRUE;
+    }
+  next:
+    /* skip to next "," */
+    for(; p != end && *p != ','; ++p)
+      ;
+    if(p == end) {
+      return FALSE;
+    }
+    ++p;
+  }
+  return FALSE;
+}
+
+typedef enum {
+  /* Send header to server */
+  FORWARD,
+  /* Don't send header to server */
+  IGNORE,
+  /* Discard header, and replace it with "te: trailers" */
+  TE_TRAILERS
+} header_instruction;
+
+/* Decides how to treat given header field. */
+static header_instruction inspect_header(const char *name, size_t namelen,
+                                         const char *value, size_t valuelen) {
   switch(namelen) {
   case 2:
-    return Curl_raw_nequal("te", name, namelen) &&
-           !Curl_raw_nequal("trailers", value, valuelen);
+    if(!Curl_raw_nequal("te", name, namelen)) {
+      return FORWARD;
+    }
+    return contains_trailers(value, valuelen) ? TE_TRAILERS : IGNORE;
   case 7:
-    return Curl_raw_nequal("upgrade", name, namelen);
+    return Curl_raw_nequal("upgrade", name, namelen) ? IGNORE : FORWARD;
   case 10:
     return Curl_raw_nequal("connection", name, namelen) ||
-           Curl_raw_nequal("keep-alive", name, namelen);
+                   Curl_raw_nequal("keep-alive", name, namelen)
+               ? IGNORE
+               : FORWARD;
   case 16:
-    return Curl_raw_nequal("proxy-connection", name, namelen);
+    return Curl_raw_nequal("proxy-connection", name, namelen) ? IGNORE
+                                                              : FORWARD;
   case 17:
-    return Curl_raw_nequal("transfer-encoding", name, namelen);
+    return Curl_raw_nequal("transfer-encoding", name, namelen) ? IGNORE
+                                                               : FORWARD;
   default:
-    return FALSE;
+    return FORWARD;
   }
 }
 
@@ -1778,15 +1827,21 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
       ++hdbuf;
     end = line_end;
 
-    if(should_ignore_header((const char *)nva[i].name, nva[i].namelen, hdbuf,
-                            end - hdbuf)) {
+    switch(inspect_header((const char *)nva[i].name, nva[i].namelen, hdbuf,
+                          end - hdbuf)) {
+    case IGNORE:
       /* skip header fields prohibited by HTTP/2 specification. */
       --nheader;
       continue;
+    case TE_TRAILERS:
+      nva[i].value = (uint8_t*)"trailers";
+      nva[i].valuelen = sizeof("trailers")-1;
+      break;
+    default:
+      nva[i].value = (unsigned char *)hdbuf;
+      nva[i].valuelen = (size_t)(end - hdbuf);
     }
 
-    nva[i].value = (unsigned char *)hdbuf;
-    nva[i].valuelen = (size_t)(end - hdbuf);
     nva[i].flags = NGHTTP2_NV_FLAG_NONE;
     if(HEADER_OVERFLOW(nva[i])) {
       failf(conn->data, "Failed sending HTTP request: Header overflow");
