@@ -28,13 +28,11 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
-
 #include "progress.h"
-#include "strequal.h"
 #include "gopher.h"
-#include "rawstr.h"
 #include "select.h"
 #include "url.h"
+#include "escape.h"
 #include "warnless.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -83,7 +81,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   char *sel;
   char *sel_org = NULL;
   ssize_t amount, k;
-  int len;
+  size_t len;
 
   *done = TRUE; /* unconditionally */
 
@@ -107,7 +105,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
         newp[i] = '\x09';
 
     /* ... and finally unescape */
-    sel = curl_easy_unescape(data, newp, 0, &len);
+    result = Curl_urldecode(data, newp, 0, &sel, &len, FALSE);
     if(!sel)
       return CURLE_OUT_OF_MEMORY;
     sel_org = sel;

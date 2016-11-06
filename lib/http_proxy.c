@@ -31,7 +31,6 @@
 #include "http.h"
 #include "url.h"
 #include "select.h"
-#include "rawstr.h"
 #include "progress.h"
 #include "non-ascii.h"
 #include "connect.h"

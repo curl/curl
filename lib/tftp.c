@@ -55,9 +55,10 @@
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
 #include "url.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "speedcheck.h"
 #include "select.h"
+#include "escape.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -484,10 +485,10 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     /* As RFC3617 describes the separator slash is not actually part of the
        file name so we skip the always-present first letter of the path
        string. */
-    filename = curl_easy_unescape(data, &state->conn->data->state.path[1], 0,
-                                  NULL);
-    if(!filename)
-      return CURLE_OUT_OF_MEMORY;
+    result = Curl_urldecode(data, &state->conn->data->state.path[1], 0,
+                            &filename, NULL, FALSE);
+    if(result)
+      return result;
 
     snprintf((char *)state->spacket.data+2,
              state->blksize,

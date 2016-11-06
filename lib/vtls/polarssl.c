@@ -54,7 +54,7 @@
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "polarssl_threadlock.h"
 #include "curl_printf.h"
 #include "curl_memory.h"

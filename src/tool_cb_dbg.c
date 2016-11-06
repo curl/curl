@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,9 +73,9 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
 
   if(!config->trace_stream) {
     /* open for append */
-    if(curlx_strequal("-", config->trace_dump))
+    if(!strcmp("-", config->trace_dump))
       config->trace_stream = stdout;
-    else if(curlx_strequal("%", config->trace_dump))
+    else if(!strcmp("%", config->trace_dump))
       /* Ok, this is somewhat hackish but we do it undocumented for now */
       config->trace_stream = config->errors;  /* aka stderr */
     else {

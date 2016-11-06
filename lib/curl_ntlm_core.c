@@ -105,7 +105,7 @@
 
 #include "urldata.h"
 #include "non-ascii.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "curl_ntlm_core.h"
 #include "curl_md5.h"
 #include "curl_hmac.h"

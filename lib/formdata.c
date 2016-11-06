@@ -33,7 +33,7 @@
 #include "urldata.h" /* for struct Curl_easy */
 #include "formdata.h"
 #include "vtls/vtls.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "sendf.h"
 #include "strdup.h"
 /* The last 3 #include files should be in this order */
@@ -201,9 +201,9 @@ static const char *ContentTypeForFilename(const char *filename,
   if(filename) { /* in case a NULL was passed in */
     for(i=0; i<sizeof(ctts)/sizeof(ctts[0]); i++) {
       if(strlen(filename) >= strlen(ctts[i].extension)) {
-        if(strequal(filename +
-                    strlen(filename) - strlen(ctts[i].extension),
-                    ctts[i].extension)) {
+        if(strcasecompare(filename +
+                          strlen(filename) - strlen(ctts[i].extension),
+                          ctts[i].extension)) {
           contenttype = ctts[i].type;
           break;
         }
@@ -878,7 +878,7 @@ static CURLcode AddFormData(struct FormData **formp,
     else {
       /* Since this is a file to be uploaded here, add the size of the actual
          file */
-      if(!strequal("-", newform->line)) {
+      if(strcmp("-", newform->line)) {
         struct_stat file;
         if(!stat(newform->line, &file) && !S_ISDIR(file.st_mode))
           *size += filesize(newform->line, file);
@@ -1305,7 +1305,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
         /* we should include the contents from the specified file */
         FILE *fileread;
 
-        fileread = strequal("-", file->contents)?
+        fileread = !strcmp("-", file->contents)?
           stdin:fopen(file->contents, "rb"); /* binary read for win32  */
 
         /*

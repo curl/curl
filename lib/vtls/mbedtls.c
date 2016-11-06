@@ -31,11 +31,15 @@
 
 #ifdef USE_MBEDTLS
 
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER >= 0x02040000
 #include <mbedtls/net_sockets.h>
+#else
+#include <mbedtls/net.h>
+#endif
 #include <mbedtls/ssl.h>
 #include <mbedtls/certs.h>
 #include <mbedtls/x509.h>
-#include <mbedtls/version.h>
 
 #include <mbedtls/error.h>
 #include <mbedtls/entropy.h>
@@ -50,7 +54,6 @@
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
-#include "rawstr.h"
 #include "polarssl_threadlock.h"
 
 /* The last 3 #include files should be in this order */

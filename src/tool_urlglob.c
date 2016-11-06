@@ -188,32 +188,36 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
     /* character range detected */
     char min_c;
     char max_c;
+    char end_c;
     int step=1;
 
     pat->type = UPTCharRange;
 
-    rc = sscanf(pattern, "%c-%c", &min_c, &max_c);
+    rc = sscanf(pattern, "%c-%c%c", &min_c, &max_c, &end_c);
 
-    if((rc == 2) && (pattern[3] == ':')) {
-      char *endp;
-      unsigned long lstep;
-      errno = 0;
-      lstep = strtoul(&pattern[4], &endp, 10);
-      if(errno || (*endp != ']'))
-        step = -1;
-      else {
-        pattern = endp+1;
-        step = (int)lstep;
-        if(step > (max_c - min_c))
+    if(rc == 3) {
+      if(end_c == ':') {
+        char *endp;
+        unsigned long lstep;
+        errno = 0;
+        lstep = strtoul(&pattern[4], &endp, 10);
+        if(errno || (*endp != ']'))
           step = -1;
+        else {
+          pattern = endp+1;
+          step = (int)lstep;
+          if(step > (max_c - min_c))
+            step = -1;
+        }
       }
+      else if(end_c != ']')
+        /* then this is wrong */
+        rc = 0;
     }
-    else
-      pattern += 4;
 
     *posp += (pattern - *patternp);
 
-    if((rc != 2) || (min_c >= max_c) || ((max_c - min_c) > ('z' - 'a')) ||
+    if((rc != 3) || (min_c >= max_c) || ((max_c - min_c) > ('z' - 'a')) ||
        (step <= 0) )
       /* the pattern is not well-formed */
       return GLOBERROR("bad range", *posp, CURLE_URL_MALFORMAT);
@@ -257,6 +261,12 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
         endp = NULL;
       else {
         pattern = endp+1;
+        while(*pattern && ISBLANK(*pattern))
+          pattern++;
+        if(!ISDIGIT(*pattern)) {
+          endp = NULL;
+          goto fail;
+        }
         errno = 0;
         max_n = strtoul(pattern, &endp, 10);
         if(errno || (*endp == ':')) {
@@ -277,6 +287,7 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
       }
     }
 
+    fail:
     *posp += (pattern - *patternp);
 
     if(!endp || (min_n > max_n) || (step_n > (max_n - min_n)) || !step_n)
@@ -424,6 +435,7 @@ CURLcode glob_url(URLGlob** glob, char* url, unsigned long *urlnum,
   glob_buffer = malloc(strlen(url) + 1);
   if(!glob_buffer)
     return CURLE_OUT_OF_MEMORY;
+  glob_buffer[0]=0;
 
   glob_expand = calloc(1, sizeof(URLGlob));
   if(!glob_expand) {
@@ -541,20 +553,25 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
     switch(pat->type) {
     case UPTSet:
       if(pat->content.Set.elements) {
-        len = strlen(pat->content.Set.elements[pat->content.Set.ptr_s]);
         snprintf(buf, buflen, "%s",
                  pat->content.Set.elements[pat->content.Set.ptr_s]);
+        len = strlen(buf);
         buf += len;
         buflen -= len;
       }
       break;
     case UPTCharRange:
-      *buf++ = pat->content.CharRange.ptr_c;
+      if(buflen) {
+        *buf++ = pat->content.CharRange.ptr_c;
+        *buf = '\0';
+        buflen--;
+      }
       break;
     case UPTNumRange:
-      len = snprintf(buf, buflen, "%0*ld",
-                     pat->content.NumRange.padlength,
-                     pat->content.NumRange.ptr_n);
+      snprintf(buf, buflen, "%0*ld",
+               pat->content.NumRange.padlength,
+               pat->content.NumRange.ptr_n);
+      len = strlen(buf);
       buf += len;
       buflen -= len;
       break;
@@ -563,7 +580,6 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
       return CURLE_FAILED_INIT;
     }
   }
-  *buf = '\0';
 
   *globbed = strdup(glob->glob_buffer);
   if(!*globbed)

@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -416,10 +416,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     }
 
     for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
-      if(curlx_strnequal(aliases[j].lname, word, fnam)) {
+      if(curl_strnequal(aliases[j].lname, word, fnam)) {
         longopt = TRUE;
         numhits++;
-        if(curlx_raw_equal(aliases[j].lname, word)) {
+        if(curl_strequal(aliases[j].lname, word)) {
           parse = aliases[j].letter;
           hit = j;
           numhits = 1; /* a single unique hit */
@@ -1109,7 +1109,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       break;
     case 'C':
       /* This makes us continue an ftp transfer at given position */
-      if(!curlx_strequal(nextarg, "-")) {
+      if(strcmp(nextarg, "-")) {
         err = str2offset(&config->resume_from, nextarg);
         if(err)
           return err;
@@ -1153,7 +1153,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         }
         if('@' == is_file) {
           /* a '@' letter, it means that a file name or - (stdin) follows */
-          if(curlx_strequal("-", p)) {
+          if(!strcmp("-", p)) {
             file = stdin;
             set_binmode(stdin);
           }
@@ -1218,7 +1218,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
            or - (stdin) follows */
         nextarg++; /* pass the @ */
 
-        if(curlx_strequal("-", nextarg)) {
+        if(!strcmp("-", nextarg)) {
           file = stdin;
           if(subletter == 'b') /* forced data-binary */
             set_binmode(stdin);
@@ -1343,7 +1343,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
-        if(config->engine && curlx_raw_equal(config->engine, "list"))
+        if(config->engine && curl_strequal(config->engine, "list"))
           return PARAM_ENGINES_REQUESTED;
         break;
       case 'g': /* CA info PEM file */
@@ -1377,7 +1377,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'm': /* TLS authentication type */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
           GetStr(&config->tls_authtype, nextarg);
-          if(!strequal(config->tls_authtype, "SRP"))
+          if(!curl_strequal(config->tls_authtype, "SRP"))
             return PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
         }
         else
@@ -1770,7 +1770,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         FILE *file;
         const char *fname;
         nextarg++; /* pass the @ */
-        if(curlx_strequal("-", nextarg)) {
+        if(!strcmp("-", nextarg)) {
           fname = "<stdin>";
           file = stdin;
         }
@@ -1880,7 +1880,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
       bool passarg;
       char *flag = argv[i];
 
-      if(curlx_strequal("--", argv[i]))
+      if(!strcmp("--", argv[i]))
         /* This indicates the end of the flags and thus enables the
            following (URL) argument to start with -. */
         stillflags = FALSE;
@@ -1936,7 +1936,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
      result != PARAM_ENGINES_REQUESTED) {
     const char *reason = param2text(result);
 
-    if(orig_opt && !curlx_strequal(":", orig_opt))
+    if(orig_opt && strcmp(":", orig_opt))
       helpf(config->errors, "option %s: %s\n", orig_opt, reason);
     else
       helpf(config->errors, "%s\n", reason);

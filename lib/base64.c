@@ -190,6 +190,11 @@ static CURLcode base64_encode(const char *table64,
   if(!insize)
     insize = strlen(indata);
 
+#if SIZEOF_SIZE_T == 4
+  if(insize > UINT_MAX/4)
+    return CURLE_OUT_OF_MEMORY;
+#endif
+
   base64data = output = malloc(insize * 4 / 3 + 4);
   if(!output)
     return CURLE_OUT_OF_MEMORY;

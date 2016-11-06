@@ -25,7 +25,6 @@
  1.7 Detect when called from within callbacks
  1.8 Allow SSL (HTTPS) to proxy
  1.9 Cache negative name resolves
- 1.10 Support IDNA2008
  1.11 minimize dependencies with dynamicly loaded modules
  1.12 have form functions use CURL handle argument
  1.14 Typesafe curl_easy_setopt()
@@ -259,12 +258,6 @@
 
  A name resolve that has failed is likely to fail when made again within a
  short period of time. Currently we only cache positive responses.
-
-1.10 Support IDNA2008
-
- International Domain Names are supported in libcurl since years back, powered
- by libidn. libidn implements IDNA2003 which has been superseded by IDNA2008.
- libidn2 is an existing library offering support for IDNA2008.
 
 1.11 minimize dependencies with dynamicly loaded modules
 

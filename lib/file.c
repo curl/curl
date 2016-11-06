@@ -190,14 +190,15 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   struct FILEPROTO *file = data->req.protop;
   int fd;
 #ifdef DOS_FILESYSTEM
-  int i;
+  size_t i;
   char *actual_path;
 #endif
-  int real_path_len;
+  size_t real_path_len;
 
-  real_path = curl_easy_unescape(data, data->state.path, 0, &real_path_len);
-  if(!real_path)
-    return CURLE_OUT_OF_MEMORY;
+  CURLcode result = Curl_urldecode(data, data->state.path, 0, &real_path,
+                                   &real_path_len, FALSE);
+  if(result)
+    return result;
 
 #ifdef DOS_FILESYSTEM
   /* If the first character is a slash, and there's

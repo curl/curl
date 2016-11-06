@@ -1239,7 +1239,17 @@ or use several variables like:
 
   curl http://{site,host}.host[1-5].com -o "#1_#2"
 
-You may use this option as many times as the number of URLs you have.
+You may use this option as many times as the number of URLs you have. For
+example, if you specify two URLs on the same command line, you can use it like
+this:
+
+  curl -o aa example.com -o bb example.net
+
+and the order of the -o options and the URLs doesn't matter, just that the
+first -o is for the first URL and so on, so the above command line can also be
+written as
+
+  curl example.com example.net -o aa -o bb
 
 See also the \fI--create-dirs\fP option to create the local directories
 dynamically. Specifying the output as '-' (a single dash) will force the

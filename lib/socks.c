@@ -33,7 +33,6 @@
 
 #include "urldata.h"
 #include "sendf.h"
-#include "strequal.h"
 #include "select.h"
 #include "connect.h"
 #include "timeval.h"

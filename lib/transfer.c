@@ -21,10 +21,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-
 #include "strtoofft.h"
-#include "strequal.h"
-#include "rawstr.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>

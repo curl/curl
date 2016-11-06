@@ -305,3 +305,87 @@ void clear_advisor_read_lock(const char *filename)
     logmsg("Error removing lock file %s error: %d %s",
            filename, error, strerror(error));
 }
+
+
+/* Portable, consistent toupper (remember EBCDIC). Do not use toupper() because
+   its behavior is altered by the current locale. */
+static char raw_toupper(char in)
+{
+#if !defined(CURL_DOES_CONVERSIONS)
+  if(in >= 'a' && in <= 'z')
+    return (char)('A' + in - 'a');
+#else
+  switch (in) {
+  case 'a':
+    return 'A';
+  case 'b':
+    return 'B';
+  case 'c':
+    return 'C';
+  case 'd':
+    return 'D';
+  case 'e':
+    return 'E';
+  case 'f':
+    return 'F';
+  case 'g':
+    return 'G';
+  case 'h':
+    return 'H';
+  case 'i':
+    return 'I';
+  case 'j':
+    return 'J';
+  case 'k':
+    return 'K';
+  case 'l':
+    return 'L';
+  case 'm':
+    return 'M';
+  case 'n':
+    return 'N';
+  case 'o':
+    return 'O';
+  case 'p':
+    return 'P';
+  case 'q':
+    return 'Q';
+  case 'r':
+    return 'R';
+  case 's':
+    return 'S';
+  case 't':
+    return 'T';
+  case 'u':
+    return 'U';
+  case 'v':
+    return 'V';
+  case 'w':
+    return 'W';
+  case 'x':
+    return 'X';
+  case 'y':
+    return 'Y';
+  case 'z':
+    return 'Z';
+  }
+#endif
+
+  return in;
+}
+
+int strncasecompare(const char *first, const char *second, size_t max)
+{
+  while(*first && *second && max) {
+    if(raw_toupper(*first) != raw_toupper(*second)) {
+      break;
+    }
+    max--;
+    first++;
+    second++;
+  }
+  if(0 == max)
+    return 1; /* they are equal this far */
+
+  return raw_toupper(*first) == raw_toupper(*second);
+}

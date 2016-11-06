@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,9 @@
 
 #include "curl_setup.h"
 
-#include "rawstr.h"
+#include <curl/curl.h>
+
+#include "strcase.h"
 
 /* Portable, consistent toupper (remember EBCDIC). Do not use toupper() because
    its behavior is altered by the current locale. */
@@ -99,9 +101,11 @@ char Curl_raw_toupper(char in)
  *
  * The function is capable of comparing a-z case insensitively even for
  * non-ascii.
+ *
+ * @unittest: 1301
  */
 
-int Curl_raw_equal(const char *first, const char *second)
+int Curl_strcasecompare(const char *first, const char *second)
 {
   while(*first && *second) {
     if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
@@ -116,7 +120,10 @@ int Curl_raw_equal(const char *first, const char *second)
   return (Curl_raw_toupper(*first) == Curl_raw_toupper(*second));
 }
 
-int Curl_raw_nequal(const char *first, const char *second, size_t max)
+/*
+ * @unittest: 1301
+ */
+int Curl_strncasecompare(const char *first, const char *second, size_t max)
 {
   while(*first && *second && max) {
     if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second)) {
@@ -145,4 +152,15 @@ void Curl_strntoupper(char *dest, const char *src, size_t n)
   do {
     *dest++ = Curl_raw_toupper(*src);
   } while(*src++ && --n);
+}
+
+/* --- public functions --- */
+
+int curl_strequal(const char *first, const char *second)
+{
+  return Curl_strcasecompare(first, second);
+}
+int curl_strnequal(const char *first, const char *second, size_t max)
+{
+  return Curl_strncasecompare(first, second, max);
 }

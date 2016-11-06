@@ -50,7 +50,6 @@
 #include <sys/param.h>
 #endif
 
-#include "strequal.h"
 #include "urldata.h"
 #include <curl/curl.h>
 #include "transfer.h"
@@ -143,28 +142,6 @@ static CURLcode win32_init(void)
 
   return CURLE_OK;
 }
-
-#ifdef USE_LIBIDN
-/*
- * Initialise use of IDNA library.
- * It falls back to ASCII if $CHARSET isn't defined. This doesn't work for
- * idna_to_ascii_lz().
- */
-static void idna_init (void)
-{
-#ifdef WIN32
-  char buf[60];
-  UINT cp = GetACP();
-
-  if(!getenv("CHARSET") && cp > 0) {
-    snprintf(buf, sizeof(buf), "CHARSET=cp%u", cp);
-    putenv(buf);
-  }
-#else
-  /* to do? */
-#endif
-}
-#endif  /* USE_LIBIDN */
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized;
@@ -260,10 +237,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   if(netware_init()) {
     DEBUGF(fprintf(stderr, "Warning: LONG namespace not available\n"));
   }
-#endif
-
-#ifdef USE_LIBIDN
-  idna_init();
 #endif
 
   if(Curl_resolver_global_init()) {
@@ -953,6 +926,8 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     goto fail;
 
   Curl_convert_setup(outcurl);
+
+  Curl_initinfo(outcurl);
 
   outcurl->magic = CURLEASY_MAGIC_NUMBER;
 
