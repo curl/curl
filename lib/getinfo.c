@@ -36,8 +36,11 @@
 #include "memdebug.h"
 
 /*
- * This is supposed to be called in the beginning of a perform() session and
- * in curl_easy_reset() and should reset all session-info variables.
+ * Initialize statistical and informational data.
+ *
+ * This function is called in curl_easy_reset, curl_easy_duphandle and at the
+ * beginning of a perform session. It must reset the session-info variables,
+ * in particular all variables in struct PureInfo.
  */
 CURLcode Curl_initinfo(struct Curl_easy *data)
 {

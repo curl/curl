@@ -1105,7 +1105,7 @@ struct connectdata {
 
 /*
  * Struct to keep statistical and informational data.
- * All variables in this struct must be reset in Curl_initinfo().
+ * All variables in this struct must be initialized/reset in Curl_initinfo().
  */
 struct PureInfo {
   int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
