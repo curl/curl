@@ -1549,6 +1549,11 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
     verstr = "TLSv1.2";
     break;
 #endif
+#ifdef TLS1_3_VERSION
+  case TLS1_3_VERSION:
+    verstr = "TLSv1.3";
+    break;
+#endif
   case 0:
     break;
   default:
@@ -1677,6 +1682,10 @@ get_ssl_version_txt(SSL *ssl)
     return "";
 
   switch(SSL_version(ssl)) {
+#ifdef TLS1_3_VERSION
+  case TLS1_3_VERSION:
+    return "TLSv1.3";
+#endif
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
   case TLS1_2_VERSION:
     return "TLSv1.2";
@@ -1728,6 +1737,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
   case CURL_SSLVERSION_TLSv1_2:
+  case CURL_SSLVERSION_TLSv1_3:
     /* it will be handled later with the context options */
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
     !defined(LIBRESSL_VERSION_NUMBER)
@@ -1888,6 +1898,16 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     ctx_options |= SSL_OP_NO_SSLv3;
     ctx_options |= SSL_OP_NO_TLSv1;
     ctx_options |= SSL_OP_NO_TLSv1_1;
+    break;
+#endif
+
+#ifdef TLS1_3_VERSION
+  case CURL_SSLVERSION_TLSv1_3:
+    ctx_options |= SSL_OP_NO_SSLv2;
+    ctx_options |= SSL_OP_NO_SSLv3;
+    ctx_options |= SSL_OP_NO_TLSv1;
+    ctx_options |= SSL_OP_NO_TLSv1_1;
+    ctx_options |= SSL_OP_NO_TLSv1_2;
     break;
 #endif
 
