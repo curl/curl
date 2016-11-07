@@ -35,7 +35,7 @@
 #include "url.h"
 #include "connect.h"
 #include "strtoofft.h"
-
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -841,10 +841,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
             stream->push_headers_alloc) {
       char **headp;
       stream->push_headers_alloc *= 2;
-      headp = realloc(stream->push_headers,
-                      stream->push_headers_alloc * sizeof(char *));
+      headp = Curl_saferealloc(stream->push_headers,
+                               stream->push_headers_alloc * sizeof(char *));
       if(!headp) {
-        free(stream->push_headers);
         stream->push_headers = NULL;
         return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
       }

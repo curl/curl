@@ -76,6 +76,7 @@
 #include "pipeline.h"
 #include "http2.h"
 #include "connect.h"
+#include "strdup.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1255,14 +1256,13 @@ CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size)
 
     if(in->buffer)
       /* we have a buffer, enlarge the existing one */
-      new_rb = realloc(in->buffer, new_size);
+      new_rb = Curl_saferealloc(in->buffer, new_size);
     else
       /* create a new buffer */
       new_rb = malloc(new_size);
 
     if(!new_rb) {
       /* If we failed, we cleanup the whole buffer and return error */
-      Curl_safefree(in->buffer);
       free(in);
       return CURLE_OUT_OF_MEMORY;
     }

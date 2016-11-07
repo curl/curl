@@ -31,6 +31,7 @@
 #include "warnless.h"
 #include "non-ascii.h"
 #include "escape.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -109,11 +110,9 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
       newlen += 2; /* the size grows with two, since this'll become a %XX */
       if(newlen > alloc) {
         alloc *= 2;
-        testing_ptr = realloc(ns, alloc);
-        if(!testing_ptr) {
-          free(ns);
+        testing_ptr = Curl_saferealloc(ns, alloc);
+        if(!testing_ptr)
           return NULL;
-        }
         else {
           ns = testing_ptr;
         }
