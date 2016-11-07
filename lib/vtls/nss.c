@@ -734,6 +734,11 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
   if(SSL_GetNextProto(sock, &state, buf, &buflen, buflenmax) == SECSuccess) {
 
     switch(state) {
+#if NSSVERNUM >= 0x031a00 /* 3.26.0 */
+    /* used by NSS internally to implement 0-RTT */
+    case SSL_NEXT_PROTO_EARLY_VALUE:
+      /* fall through! */
+#endif
     case SSL_NEXT_PROTO_NO_SUPPORT:
     case SSL_NEXT_PROTO_NO_OVERLAP:
       infof(conn->data, "ALPN/NPN, server did not agree to a protocol\n");
