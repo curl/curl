@@ -210,7 +210,7 @@ int main(int argc, char **argv)
     return 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL)) {
-    fprintf(stderr, "Could not init cURL\n");
+    fprintf(stderr, "Could not init curl\n");
     return 1;
   }
 

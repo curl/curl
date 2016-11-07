@@ -102,7 +102,7 @@ endif
 TARGET  = curl
 VERSION	= $(LIBCURL_VERSION)
 COPYR	= Copyright (C) $(LIBCURL_COPYRIGHT_STR)
-DESCR	= cURL $(LIBCURL_VERSION_STR) ($(LIBARCH)) - https://curl.haxx.se
+DESCR	= curl $(LIBCURL_VERSION_STR) ($(LIBARCH)) - https://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
 SCREEN	= $(TARGET) commandline utility

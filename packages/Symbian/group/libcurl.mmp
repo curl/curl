@@ -1,5 +1,5 @@
 //
-// libcurl.dll cURL network retrieval client library
+// libcurl.dll curl network retrieval client library
 //
 
 // Build-time options (uncomment these to enable)

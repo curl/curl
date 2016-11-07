@@ -49,9 +49,9 @@ add_executable(
   ${CURL_FILES}
   )
 
-source_group("cURLX source files" FILES ${CURLX_CFILES})
-source_group("cURL source files" FILES ${CURL_CFILES})
-source_group("cURL header files" FILES ${CURL_HFILES})
+source_group("curlX source files" FILES ${CURLX_CFILES})
+source_group("curl source files" FILES ${CURL_CFILES})
+source_group("curl header files" FILES ${CURL_HFILES})
 
 include_directories(
   ${CURL_SOURCE_DIR}/lib        # To be able to reach "curl_setup_once.h"
@@ -61,7 +61,7 @@ include_directories(
   ${CURL_SOURCE_DIR}/src        # To be able to reach "tool_hugehelp.h"
   )
 
-#Build cURL executable
+#Build curl executable
 target_link_libraries( ${EXE_NAME} libcurl ${CURL_LIBS})
 
 ################################################################################

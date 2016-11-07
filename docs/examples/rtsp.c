@@ -188,7 +188,7 @@ int main(int argc, char * const argv[])
 
   printf("\nRTSP request %s\n", VERSION_STR);
   printf("    Project web site: http://code.google.com/p/rtsprequest/\n");
-  printf("    Requires cURL V7.20 or greater\n\n");
+  printf("    Requires curl V7.20 or greater\n\n");
 
   /* check command line */
   if((argc != 2) && (argc != 3)) {
@@ -226,7 +226,7 @@ int main(int argc, char * const argv[])
     if(res == CURLE_OK) {
       curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
       CURL *curl;
-      fprintf(stderr, "    cURL V%s loaded\n", data->version);
+      fprintf(stderr, "    curl V%s loaded\n", data->version);
 
       /* initialize this curl session */
       curl = curl_easy_init();

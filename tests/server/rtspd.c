@@ -129,7 +129,7 @@ static void storerequest(char *reqbuf, size_t totalsize);
 
 const char *serverlogfile = DEFAULT_LOGFILE;
 
-#define RTSPDVERSION "cURL test suite RTSP server/0.1"
+#define RTSPDVERSION "curl test suite RTSP server/0.1"
 
 #define REQUEST_DUMP  "log/server.input"
 #define RESPONSE_DUMP "log/server.response"

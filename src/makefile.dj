@@ -59,7 +59,7 @@ PROGRAM  = curl.exe
 OBJECTS += $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
 
 all: $(OBJ_DIR) $(PROGRAM)
-	@echo Welcome to cURL
+	@echo Welcome to curl
 
 $(PROGRAM): $(OBJECTS) ../lib/libcurl.a
 	$(CC) -o $@ $^ $(LDFLAGS) $(EX_LIBS)
