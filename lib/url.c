@@ -2800,6 +2800,10 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->localdev);
   Curl_free_ssl_config(&conn->ssl_config);
 
+#ifdef USE_UNIX_SOCKETS
+  Curl_safefree(conn->unix_domain_socket);
+#endif
+
   free(conn); /* free all the connection oriented data */
 }
 
@@ -3328,6 +3332,17 @@ ConnectionExists(struct Curl_easy *data,
           continue;
         }
       }
+
+#ifdef USE_UNIX_SOCKETS
+      if(needle->unix_domain_socket) {
+        if(!check->unix_domain_socket)
+          continue;
+        if(strcmp(needle->unix_domain_socket, check->unix_domain_socket))
+          continue;
+      }
+      else if(check->unix_domain_socket)
+        continue;
+#endif
 
       if((needle->handler->flags&PROTOPT_SSL) !=
          (check->handler->flags&PROTOPT_SSL))
@@ -5539,11 +5554,11 @@ static CURLcode resolve_server(struct Curl_easy *data,
     struct Curl_dns_entry *hostaddr;
 
 #ifdef USE_UNIX_SOCKETS
-    if(data->set.str[STRING_UNIX_SOCKET_PATH]) {
+    if(conn->unix_domain_socket) {
       /* Unix domain sockets are local. The host gets ignored, just use the
        * specified domain socket address. Do not cache "DNS entries". There is
        * no DNS involved and we already have the filesystem path available */
-      const char *path = data->set.str[STRING_UNIX_SOCKET_PATH];
+      const char *path = conn->unix_domain_socket;
 
       hostaddr = calloc(1, sizeof(struct Curl_dns_entry));
       if(!hostaddr)
@@ -5694,6 +5709,10 @@ static void reuse_conn(struct connectdata *old_conn,
   old_conn->recv_pipe = NULL;
 
   Curl_safefree(old_conn->master_buffer);
+
+#ifdef USE_UNIX_SOCKETS
+  Curl_safefree(old_conn->unix_domain_socket);
+#endif
 }
 
 /**
@@ -5900,9 +5919,16 @@ static CURLcode create_conn(struct Curl_easy *data,
     proxy = detect_proxy(conn);
 
 #ifdef USE_UNIX_SOCKETS
-  if(proxy && data->set.str[STRING_UNIX_SOCKET_PATH]) {
-    free(proxy);  /* Unix domain sockets cannot be proxied, so disable it */
-    proxy = NULL;
+  if(data->set.str[STRING_UNIX_SOCKET_PATH]) {
+    if(proxy) {
+      free(proxy); /* Unix domain sockets cannot be proxied, so disable it */
+      proxy = NULL;
+    }
+    conn->unix_domain_socket = strdup(data->set.str[STRING_UNIX_SOCKET_PATH]);
+    if(conn->unix_domain_socket == NULL) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
   }
 #endif
 

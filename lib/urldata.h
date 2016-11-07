@@ -1099,6 +1099,10 @@ struct connectdata {
   struct connectbundle *bundle; /* The bundle we are member of */
 
   int negnpn; /* APLN or NPN TLS negotiated protocol, CURL_HTTP_VERSION* */
+
+#ifdef USE_UNIX_SOCKETS
+  char *unix_domain_socket;
+#endif
 };
 
 /* The end of connectdata. */
