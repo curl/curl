@@ -272,7 +272,6 @@ polarssl_connect_step1(struct connectdata *conn,
   }
 
   switch(data->set.ssl.version) {
-  default:
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
     ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
@@ -308,6 +307,9 @@ polarssl_connect_step1(struct connectdata *conn,
     break;
   case CURL_SSLVERSION_TLSv1_3:
     failf(data, "PolarSSL: TLS 1.3 is not yet supported");
+    return CURLE_SSL_CONNECT_ERROR;
+  default:
+    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;
   }
 

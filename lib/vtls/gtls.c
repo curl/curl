@@ -409,7 +409,6 @@ gtls_connect_step1(struct connectdata *conn,
   if(!gtls_inited)
     Curl_gtls_init();
 
-  /* GnuTLS only supports SSLv3 and TLSv1 */
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
     failf(data, "GnuTLS does not support SSLv2");
     return CURLE_SSL_CONNECT_ERROR;
@@ -569,15 +568,16 @@ gtls_connect_step1(struct connectdata *conn,
       break;
     case CURL_SSLVERSION_TLSv1_2:
       protocol_priority[0] = GNUTLS_TLS1_2;
+      break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "GnuTLS does not support TLSv1.3");
+      failf(data, "GnuTLS: TLS 1.3 is not yet supported");
       return CURLE_SSL_CONNECT_ERROR;
-    break;
-      case CURL_SSLVERSION_SSLv2:
-    default:
+    case CURL_SSLVERSION_SSLv2:
       failf(data, "GnuTLS does not support SSLv2");
       return CURLE_SSL_CONNECT_ERROR;
-      break;
+    default:
+      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      return CURLE_SSL_CONNECT_ERROR;
   }
   rc = gnutls_protocol_set_priority(session, protocol_priority);
   if(rc != GNUTLS_E_SUCCESS) {
@@ -611,13 +611,14 @@ gtls_connect_step1(struct connectdata *conn,
                      "+VERS-TLS1.2:" GNUTLS_SRP;
       break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "GnuTLS does not support TLSv1.3");
+      failf(data, "GnuTLS: TLS 1.3 is not yet supported");
       return CURLE_SSL_CONNECT_ERROR;
     case CURL_SSLVERSION_SSLv2:
-    default:
       failf(data, "GnuTLS does not support SSLv2");
       return CURLE_SSL_CONNECT_ERROR;
-      break;
+    default:
+      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      return CURLE_SSL_CONNECT_ERROR;
   }
   rc = gnutls_priority_set_direct(session, prioritylist, &err);
   if((rc == GNUTLS_E_INVALID_REQUEST) && err) {

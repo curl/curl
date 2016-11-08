@@ -351,8 +351,11 @@ mbed_connect_step1(struct connectdata *conn,
                                  MBEDTLS_SSL_MINOR_VERSION_3);
     infof(data, "mbedTLS: Set SSL version to TLS 1.2\n");
     break;
+  case CURL_SSLVERSION_TLSv1_3:
+    failf(data, "mbedTLS: TLS 1.3 is not yet supported");
+    return CURLE_SSL_CONNECT_ERROR;
   default:
-    failf(data, "mbedTLS: Unsupported SSL protocol version");
+    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;
   }
 

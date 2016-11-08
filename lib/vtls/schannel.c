@@ -197,7 +197,6 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     }
 
     switch(data->set.ssl.version) {
-    default:
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_0_CLIENT |
@@ -214,7 +213,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_2_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "schannel: TLS 1.3 is not yet supported");
+      failf(data, "Schannel: TLS 1.3 is not yet supported");
       return CURLE_SSL_CONNECT_ERROR;
     case CURL_SSLVERSION_SSLv3:
       schannel_cred.grbitEnabledProtocols = SP_PROT_SSL3_CLIENT;
@@ -222,6 +221,9 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     case CURL_SSLVERSION_SSLv2:
       schannel_cred.grbitEnabledProtocols = SP_PROT_SSL2_CLIENT;
       break;
+    default:
+      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      return CURLE_SSL_CONNECT_ERROR;
     }
 
     /* allocate memory for the re-usable credential handle */
