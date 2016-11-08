@@ -105,6 +105,8 @@ content then you must make sure strlen() on the data pointer returns zero.
 followed by a filename, causes that file to be read and its contents used
 as data in this part. This part does \fInot\fP automatically become a file
 upload part simply because its data was read from a file.
+
+The specified file needs to kept around until the associated transfer is done.
 .IP CURLFORM_FILE
 followed by a filename, makes this part a file upload part. It sets the
 \fIfilename\fP field to the basename of the provided filename, it reads the
@@ -117,6 +119,8 @@ providing multiple \fBCURLFORM_FILE\fP arguments each followed by the filename
 
 The given upload file has to exist in its full in the file system already when
 the upload starts, as libcurl needs to read the correct file size beforehand.
+
+The specified file needs to kept around until the associated transfer is done.
 .IP CURLFORM_CONTENTTYPE
 is used in combination with \fICURLFORM_FILE\fP. Followed by a pointer to a
 string which provides the content-type for this part, possibly instead of an
