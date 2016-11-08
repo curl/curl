@@ -303,7 +303,6 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           flags |= FLAGS_ALT;
           break;
         case '.':
-          flags |= FLAGS_PREC;
           if('*' == *fmt) {
             /* The precision is picked from a specified parameter */
 
