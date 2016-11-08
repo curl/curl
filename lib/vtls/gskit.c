@@ -614,8 +614,6 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
     return result;
 
   /* Determine which SSL/TLS version should be enabled. */
-  protoflags = CURL_GSKPROTO_TLSV10_MASK | CURL_GSKPROTO_TLSV11_MASK |
-               CURL_GSKPROTO_TLSV12_MASK;
   sni = conn->host.name;
   switch (data->set.ssl.version) {
   case CURL_SSLVERSION_SSLv2:
@@ -626,6 +624,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
     protoflags = CURL_GSKPROTO_SSLV3_MASK;
     sni = (char *) NULL;
     break;
+  case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
     protoflags = CURL_GSKPROTO_TLSV10_MASK |
                  CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK;
@@ -640,8 +639,11 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
     protoflags = CURL_GSKPROTO_TLSV12_MASK;
     break;
   case CURL_SSLVERSION_TLSv1_3:
-    failf(data, "TLS 1.3 not yet supported");
-    return CURLE_SSL_CIPHER;
+    failf(data, "GSKit: TLS 1.3 is not yet supported");
+    return CURLE_SSL_CONNECT_ERROR;
+  default:
+    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   /* Process SNI. Ignore if not supported (on OS400 < V7R1). */

@@ -1053,7 +1053,6 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLSetProtocolVersionMax != NULL) {
     switch(data->set.ssl.version) {
-      default:
       case CURL_SSLVERSION_DEFAULT:
       case CURL_SSLVERSION_TLSv1:
         (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol1);
@@ -1072,7 +1071,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
         break;
       case CURL_SSLVERSION_TLSv1_3:
-        failf(data, "TLSv1.3 is not yet supported with this TLS backend");
+        failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
         return CURLE_SSL_CONNECT_ERROR;
       case CURL_SSLVERSION_SSLv3:
         err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol3);
@@ -1089,6 +1088,10 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
           return CURLE_SSL_CONNECT_ERROR;
         }
         (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kSSLProtocol2);
+        break;
+      default:
+        failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+        return CURLE_SSL_CONNECT_ERROR;
     }
   }
   else {
@@ -1097,7 +1100,6 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                        kSSLProtocolAll,
                                        false);
     switch (data->set.ssl.version) {
-      default:
       case CURL_SSLVERSION_DEFAULT:
       case CURL_SSLVERSION_TLSv1:
         (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
@@ -1126,7 +1128,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                            true);
         break;
       case CURL_SSLVERSION_TLSv1_3:
-        failf(data, "TLSv1.3 is not yet supported with this TLS backend");
+        failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
         return CURLE_SSL_CONNECT_ERROR;
       case CURL_SSLVERSION_SSLv3:
         err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
@@ -1146,13 +1148,15 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
           return CURLE_SSL_CONNECT_ERROR;
         }
         break;
+      default:
+        failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+        return CURLE_SSL_CONNECT_ERROR;
     }
 #endif  /* CURL_SUPPORT_MAC_10_8 */
   }
 #else
   (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx, kSSLProtocolAll, false);
   switch(data->set.ssl.version) {
-    default:
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
     case CURL_SSLVERSION_TLSv1_0:
@@ -1187,6 +1191,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         return CURLE_SSL_CONNECT_ERROR;
       }
       break;
+    default:
+      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      return CURLE_SSL_CONNECT_ERROR;
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 

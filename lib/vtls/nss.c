@@ -1555,8 +1555,8 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
     break;
 
   default:
-    /* unsupported SSL/TLS version */
-    break;
+    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   failf(data, "TLS minor version cannot be set");
