@@ -9,8 +9,8 @@ style is more important than individual contributors having their own personal
 tastes satisfied.
 
 Our C code has a few style rules. Most of them are verified and upheld by the
-lib/checksrc.pl script. Invoked with `make checksrc` or even by default by the
-build system when built after `./configure --enable-debug` has been used.
+`lib/checksrc.pl` script. Invoked with `make checksrc` or even by default by
+the build system when built after `./configure --enable-debug` has been used.
 
 It is normally not a problem for anyone to follow the guidelines, as you just
 need to copy the style already used in the source code and there are no
@@ -28,7 +28,8 @@ other places of the code, just that the names should be logical,
 understandable and be named according to what they're used for. File-local
 functions should be made static. We like lower case names.
 
-See the INTERNALS document on how we name non-exported library-global symbols.
+See the [INTERNALS](INTERNALS.md) document on how we name non-exported
+library-global symbols.
 
 ## Indenting
 
