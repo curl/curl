@@ -1,7 +1,7 @@
-Curl and libcurl 7.51.1
+Curl and libcurl 7.52.0
 
  Public curl releases:         161
- Command line options:         185
+ Command line options:         186
  curl_easy_setopt() options:   225
  Public functions in libcurl:  61
  Contributors:                 1467
@@ -11,12 +11,25 @@ This release includes the following changes:
  o nss: map CURL_SSLVERSION_DEFAULT to NSS default
  o vtls: support TLS 1.3 via CURL_SSLVERSION_TLSv1_3
  o curl: introduce the --tlsv1.3 option to force TLS 1.3
- o
 
 This release includes the following bugfixes:
 
- o
- 
+ o msvc: removed a straggling reference to strequal.c
+ o winbuild: remove strcase.obj from curl build [1]
+ o examples: bugfixed multi-uv.c
+ o configure: verify that compiler groks -Werror=partial-availability [2]
+ o mbedtls: fix build with mbedtls versions < 2.4.0 [3]
+ o dist: add unit test CMakeLists.txt to the tarball
+ o curl -w: added more decimal digits to timing counters [4]
+ o easy: Initialize info variables on easy init and duphandle [5]
+ o cmake: disable poll for macOS [6]
+ o http2: Don't send header fields prohibited by HTTP/2 spec [7]
+ o ssh: check md5 fingerprints case insensitively (regression) [8]
+ o openssl: initial TLS 1.3 adaptions
+ o curl_formadd.3: *_FILECONTENT and *_FILE need the file to be kept
+ o printf: fix ".*f" handling [9]
+ o examples/fileupload.c: fclose the file as well
+
 This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
@@ -24,9 +37,21 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Adam Piggott, Andrei Sedoi, Bruce Stephens, Dan Fandrich, Daniel Stenberg,
+  Frank Gevaerts, Jakub Zakrzewski, Kamil Dudka, Mauro Rappa, Neal Poole,
+  Peter Wu, Ray Satiro, Ricki Hirner, Tatsuhiro Tsujikawa, Tony Kelman,
+  (15 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/bug/?i=1098
+ [2] = https://curl.haxx.se/bug/?i=1104
+ [3] = https://curl.haxx.se/bug/?i=1087
+ [4] = https://curl.haxx.se/bug/?i=1106
+ [5] = https://curl.haxx.se/bug/?i=1103
+ [6] = https://curl.haxx.se/bug/?i=1089
+ [7] = https://curl.haxx.se/bug/?i=1092
+ [8] = https://github.com/curl/curl/commit/ce8d09483eea2fcb1b50e323e1a8ed1f3613b2e3#commitcomment-19666146
+ [9] = https://curl.haxx.se/bug/?i=1113
