@@ -37,6 +37,7 @@
 CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
                               const char *header)
 {
+  CURLcode result;
   struct Curl_easy *data = conn->data;
   size_t len;
 
@@ -89,8 +90,13 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   }
 
   /* Initilise the security context and decode our challenge */
-  return Curl_auth_decode_spnego_message(data, userp, passwdp, service, host,
-                                         header, neg_ctx);
+  result = Curl_auth_decode_spnego_message(data, userp, passwdp, service,
+                                           host, header, neg_ctx);
+
+  if(result)
+    Curl_auth_spnego_cleanup(neg_ctx);
+
+  return result;
 }
 
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
