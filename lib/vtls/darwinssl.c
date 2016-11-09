@@ -913,10 +913,9 @@ static OSStatus CopyIdentityWithLabel(char *label,
   values[4] = label_cf;
   keys[4] = kSecAttrLabel;
   query_dict = CFDictionaryCreate(NULL, (const void **)keys,
-                                 (const void **)values, 5L,
-                                 &kCFCopyStringDictionaryKeyCallBacks,
-                                 &kCFTypeDictionaryValueCallBacks);
-  CFRelease(values[3]);
+                                  (const void **)values, 5L,
+                                  &kCFCopyStringDictionaryKeyCallBacks,
+                                  &kCFTypeDictionaryValueCallBacks);
 
   /* Do we have a match? */
   status = SecItemCopyMatching(query_dict, (CFTypeRef *) &keys_list);
@@ -948,6 +947,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
     }
   }
 
+  CFRelease(values[3]);
   CFRelease(query_dict);
   CFRelease(label_cf);
 #else
