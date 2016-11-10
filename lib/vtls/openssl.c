@@ -1925,6 +1925,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
   case CURL_SSLVERSION_TLSv1_3:
 #ifdef TLS1_3_VERSION
+    SSL_CTX_set_max_proto_version(connssl->ctx, TLS1_3_VERSION);
     ctx_options |= SSL_OP_NO_SSLv2;
     ctx_options |= SSL_OP_NO_SSLv3;
     ctx_options |= SSL_OP_NO_TLSv1;
