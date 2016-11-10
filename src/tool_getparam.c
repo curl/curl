@@ -125,6 +125,7 @@ static const struct LongShort aliases[]= {
   {"$e", "proxy-digest",             FALSE},
   {"$f", "proxy-basic",              FALSE},
   {"$g", "retry",                    TRUE},
+  {"$V", "retry-connrefused",        FALSE},
   {"$h", "retry-delay",              TRUE},
   {"$i", "retry-max-time",           TRUE},
   {"$k", "proxy-negotiate",          FALSE},
@@ -792,6 +793,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         err = str2unum(&config->req_retry, nextarg);
         if(err)
           return err;
+        break;
+      case 'V': /* --retry-connrefused */
+        config->retry_connrefused = toggle;
         break;
       case 'h': /* --retry-delay */
         err = str2unum(&config->retry_delay, nextarg);
