@@ -188,8 +188,8 @@ static int ossl_seed(struct Curl_easy *data)
   char *buf = data->state.buffer; /* point to the big buffer */
   int nread=0;
 
-  /* Q: should we add support for a random file name as a libcurl option?
-     A: Yes, it is here */
+  if(rand_enough())
+    return 1;
 
 #ifndef RANDOM_FILE
   /* if RANDOM_FILE isn't defined, we only perform this if an option tells
