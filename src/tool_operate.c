@@ -1677,20 +1677,38 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
 #endif
 
-#ifdef HAVE_UTIME
+#if defined(WIN32) || defined(HAVE_UTIME)
         /* File time can only be set _after_ the file has been closed */
         if(!result && config->remote_time && outs.s_isreg && outs.filename) {
           /* Ask libcurl if we got a remote file time */
           long filetime = -1;
           curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
           if(filetime >= 0) {
+#if defined(WIN32)
+            /* 910670515199 is the maximum unix filetime that can be used as a
+               Windows FILETIME: 30827-12-31T23:59:59. */
+            if(filetime <= 910670515199i64) {
+              __int64 converted = (filetime * 10000000i64) +
+                                  116444736000000000i64;
+              HANDLE hfile = CreateFileA(outs.filename, FILE_WRITE_ATTRIBUTES,
+                                         (FILE_SHARE_READ | FILE_SHARE_WRITE |
+                                          FILE_SHARE_DELETE),
+                                         NULL, OPEN_EXISTING, 0, NULL);
+              if(hfile != INVALID_HANDLE_VALUE) {
+                SetFileTime(hfile, NULL, (FILETIME *)&converted,
+                            (FILETIME *)&converted);
+                CloseHandle(hfile);
+              }
+            }
+#elif defined(HAVE_UTIME)
             struct utimbuf times;
             times.actime = (time_t)filetime;
             times.modtime = (time_t)filetime;
             utime(outs.filename, &times); /* set the time we got */
+#endif
           }
         }
-#endif
+#endif /* defined(WIN32) || defined(HAVE_UTIME) */
 
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink && result == CURLE_OK) {
