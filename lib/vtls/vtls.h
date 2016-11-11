@@ -56,8 +56,6 @@ bool Curl_clone_ssl_config(struct ssl_config_data* source,
                            struct ssl_config_data* dest);
 void Curl_free_ssl_config(struct ssl_config_data* sslc);
 
-unsigned int Curl_rand(struct Curl_easy *);
-
 int Curl_ssl_backend(void);
 
 #ifdef USE_SSL
@@ -140,10 +138,9 @@ void Curl_ssl_kill_session(struct curl_ssl_session *session);
  */
 void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid);
 
-/* get N random bytes into the buffer, return 0 if a find random is filled
-   in */
-int Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
-                    size_t length);
+/* get N random bytes into the buffer */
+CURLcode Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
+                         size_t length);
 CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
                          size_t tmplen,
                          unsigned char *md5sum, /* output */
