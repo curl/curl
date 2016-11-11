@@ -331,6 +331,8 @@ struct ssl_connect_data {
   gsk_handle handle;
   int iocport;
   ssl_connect_state connecting_state;
+  int localfd;
+  int remotefd;
 #endif
 #ifdef USE_AXTLS
   SSL_CTX* ssl_ctx;
