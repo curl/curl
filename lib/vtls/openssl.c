@@ -176,26 +176,12 @@ static int passwd_callback(char *buf, int num, int encrypting,
 }
 
 /*
- * rand_enough() is a function that returns TRUE if we have seeded the random
- * engine properly. We use some preprocessor magic to provide a seed_enough()
- * macro to use, just to prevent a compiler warning on this function if we
- * pass in an argument that is never used.
+ * rand_enough() returns TRUE if we have seeded the random engine properly.
  */
-
-#ifdef HAVE_RAND_STATUS
-#define seed_enough(x) rand_enough()
 static bool rand_enough(void)
 {
   return (0 != RAND_status()) ? TRUE : FALSE;
 }
-#else
-#define seed_enough(x) rand_enough(x)
-static bool rand_enough(int nread)
-{
-  /* this is a very silly decision to make */
-  return (nread > 500) ? TRUE : FALSE;
-}
-#endif
 
 static int ossl_seed(struct Curl_easy *data)
 {
@@ -217,7 +203,7 @@ static int ossl_seed(struct Curl_easy *data)
                              data->set.str[STRING_SSL_RANDOM_FILE]:
                              RANDOM_FILE),
                             RAND_LOAD_LENGTH);
-    if(seed_enough(nread))
+    if(rand_enough())
       return nread;
   }
 
@@ -237,7 +223,7 @@ static int ossl_seed(struct Curl_easy *data)
                        data->set.str[STRING_SSL_EGDSOCKET]:EGD_SOCKET);
     if(-1 != ret) {
       nread += ret;
-      if(seed_enough(nread))
+      if(rand_enough())
         return nread;
     }
   }
@@ -258,7 +244,7 @@ static int ossl_seed(struct Curl_easy *data)
   if(buf[0]) {
     /* we got a file name to try */
     nread += RAND_load_file(buf, RAND_LOAD_LENGTH);
-    if(seed_enough(nread))
+    if(rand_enough())
       return nread;
   }
 

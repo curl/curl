@@ -1637,9 +1637,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
     dnl SSL_get_shutdown (but this check won't actually detect it there
     dnl as it's a macro that needs the header files be included)
 
-    AC_CHECK_FUNCS( RAND_status \
-                    RAND_screen \
-                    RAND_egd \
+    AC_CHECK_FUNCS( RAND_egd \
                     ENGINE_cleanup \
                     SSL_get_shutdown \
                     SSLv2_client_method )
