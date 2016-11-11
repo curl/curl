@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -359,9 +359,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   now = Curl_tvnow(); /* what time is it */
 
   /* The time spent so far (from the start) */
-  data->progress.timespent =
-    (double)(now.tv_sec - data->progress.start.tv_sec) +
-    (double)(now.tv_usec - data->progress.start.tv_usec)/1000000.0;
+  data->progress.timespent = curlx_tvdiff_secs(now, data->progress.start);
   timespent = (curl_off_t)data->progress.timespent;
 
   /* The average download speed this far */
