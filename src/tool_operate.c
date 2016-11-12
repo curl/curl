@@ -1805,9 +1805,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
     urlnode->flags = 0;
 
     /*
-    ** Bail out upon critical errors
+    ** Bail out upon critical errors or --fail-early
     */
-    if(is_fatal_error(result))
+    if(is_fatal_error(result) || (result && global->fail_early))
       goto quit_curl;
 
   } /* for-loop through all URLs */

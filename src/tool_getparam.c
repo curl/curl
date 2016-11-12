@@ -231,6 +231,7 @@ static const struct LongShort aliases[]= {
   {"Es", "ssl-no-revoke",            FALSE},
   {"Et", "tcp-fastopen",             FALSE},
   {"f",  "fail",                     FALSE},
+  {"fa", "fail-early",               FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
   {"g",  "globoff",                  FALSE},
@@ -1438,8 +1439,14 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       }
       break;
     case 'f':
-      /* fail hard on errors  */
-      config->failonerror = toggle;
+      switch(subletter) {
+      case 'a': /* --fail-early */
+        global->fail_early = toggle;
+        break;
+      default:
+        /* fail hard on errors  */
+        config->failonerror = toggle;
+      }
       break;
     case 'F':
       /* "form data" simulation, this is a little advanced so lets do our best

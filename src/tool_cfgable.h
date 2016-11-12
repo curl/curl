@@ -239,7 +239,7 @@ struct GlobalConfig {
   bool tracetime;                 /* include timestamp? */
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
   char *libcurl;                  /* Output libcurl code to this file name */
-
+  bool fail_early;                /* exit on first transfer error */
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */
