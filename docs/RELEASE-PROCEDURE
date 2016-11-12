@@ -11,8 +11,8 @@ in the source code repo
 - make sure all relevant changes are committed on the master branch
 
 - tag the git repo in this style: `git tag -a curl-7_34_0`. -a annotates the
-  tag and we use underscores instead of dots in the version number. 
-   
+  tag and we use underscores instead of dots in the version number.
+
 - run "./maketgz 7.34.0" to build the release tarballs. It is important that
   you run this on a machine with the correct set of autotools etc installed
   as this is what then will be shipped and used by most users on *nix like
@@ -23,8 +23,6 @@ in the source code repo
 - gpg sign the 4 tarballs as maketgz suggests
 
 - upload the 8 resulting files to the primary download directory
-
-- upload the 4 tarballs to github for the HTTPS download
 
 in the curl-www repo
 --------------------
@@ -42,6 +40,11 @@ in the curl-www repo
 - make sure all relevant changes are committed and pushed on the master branch
 
   (the web site then updates its contents automatically)
+
+on github
+---------
+
+- edit the newly made release tag so that it is listed as the latest release
 
 inform
 ------
@@ -80,10 +83,10 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- October 7, 2015 (version 7.45.0)
-- December 2, 2015
-- January 27, 2016
-- March 23, 2016
-- May 18, 2016
-- July 13, 2016
-- September 7, 2016
+- September 7, 2016 (version 7.50.2)
+- November 2, 2016
+- December 28, 2016
+- February 22, 2017
+- April 19, 2017
+- June 14, 2017
+- August 9, 2017

@@ -11,7 +11,7 @@ cookies
 <data>
 HTTP/1.1 200 Mooo swsclose
 Connection: close
-Set-Cookie: path=/; thewinneris=nowayyouwin;
+Set-Cookie: thewinneris=nowayyouwin; path=/;
 Content-Length: 8
 
 *flopp*

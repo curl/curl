@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+TFTP
+TFTP WRQ
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+tftp
+</server>
+ <name>
+TFTP send without TFTP options requests
+ </name>
+ <command>
+-T log/test1243.txt tftp://%HOSTIP:%TFTPPORT// --tftp-no-options --trace-ascii log/traceit
+</command>
+<file name="log/test1243.txt">
+a chunk of
+data
+sent
+ to server
+</file>
+</client>
+
+#
+# Verify pseudo protocol after the test has been "shot"
+<verify>
+<upload>
+a chunk of
+data
+sent
+ to server
+</upload>
+<protocol>
+opcode: 2
+mode: octet
+filename: /test1243.txt
+</protocol>
+</verify>
+</testcase>

@@ -2,7 +2,7 @@
 <info>
 <keywords>
 HTTP
-http2
+HTTP/2
 </keywords>
 </info>
 
@@ -27,7 +27,7 @@ Content-Type: text/html
 http
 </server>
 <features>
-http2
+http/2
 </features>
  <name>
 HTTP/2 upgrade refused

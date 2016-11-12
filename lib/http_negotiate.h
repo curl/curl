@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,11 +31,7 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
 /* this is for creating Negotiate header output */
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy);
 
-void Curl_cleanup_negotiate(struct SessionHandle *data);
-
-#ifdef USE_WINDOWS_SSPI
-#define GSS_ERROR(status) (status & 0x80000000)
-#endif
+void Curl_cleanup_negotiate(struct Curl_easy *data);
 
 #endif /* USE_SPNEGO */
 

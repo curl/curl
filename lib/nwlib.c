@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -58,26 +58,26 @@ rtag_t      gAllocTag   = (rtag_t) NULL;
 NXMutex_t   *gLibLock   = (NXMutex_t *) NULL;
 
 /* internal library function prototypes... */
-int  DisposeLibraryData( void * );
-void DisposeThreadData( void * );
-int  GetOrSetUpData( int id, libdata_t **data, libthreaddata_t **threaddata );
+int  DisposeLibraryData(void *);
+void DisposeThreadData(void *);
+int  GetOrSetUpData(int id, libdata_t **data, libthreaddata_t **threaddata);
 
 
-int _NonAppStart( void        *NLMHandle,
-                  void        *errorScreen,
-                  const char  *cmdLine,
-                  const char  *loadDirPath,
-                  size_t      uninitializedDataLength,
-                  void        *NLMFileHandle,
-                  int         (*readRoutineP)( int conn,
-                                               void *fileHandle, size_t offset,
-                                               size_t nbytes,
-                                               size_t *bytesRead,
-                                               void *buffer ),
+int _NonAppStart(void        *NLMHandle,
+                 void        *errorScreen,
+                 const char  *cmdLine,
+                 const char  *loadDirPath,
+                 size_t      uninitializedDataLength,
+                 void        *NLMFileHandle,
+                 int         (*readRoutineP)(int conn,
+                                             void *fileHandle, size_t offset,
+                                             size_t nbytes,
+                                             size_t *bytesRead,
+                                             void *buffer),
                   size_t      customDataOffset,
                   size_t      customDataSize,
                   int         messageCount,
-                  const char  **messages )
+                  const char  **messages)
 {
   NX_LOCK_INFO_ALLOC(liblock, "Per-Application Data Lock", 0);
 
@@ -132,7 +132,7 @@ int _NonAppStart( void        *NLMHandle,
  * Here we clean up any resources we allocated. Resource tags is a big part
  * of what we created, but NetWare doesn't ask us to free those.
  */
-void _NonAppStop( void )
+void _NonAppStop(void)
 {
   (void) unregister_library(gLibId);
   NXMutexFree(gLibLock);
@@ -149,13 +149,13 @@ void _NonAppStop( void )
  * we return a non-zero value. Right now, there isn't any reason not to allow
  * it.
  */
-int _NonAppCheckUnload( void )
+int _NonAppCheckUnload(void)
 {
     return 0;
 }
 
 int GetOrSetUpData(int id, libdata_t **appData,
-                   libthreaddata_t **threadData )
+                   libthreaddata_t **threadData)
 {
   int                 err;
   libdata_t           *app_data;
@@ -277,7 +277,7 @@ int GetOrSetUpData(int id, libdata_t **appData,
   return err;
 }
 
-int DisposeLibraryData( void *data )
+int DisposeLibraryData(void *data)
 {
   if(data) {
     void *tenbytes = ((libdata_t *) data)->tenbytes;
@@ -289,7 +289,7 @@ int DisposeLibraryData( void *data )
   return 0;
 }
 
-void DisposeThreadData( void *data )
+void DisposeThreadData(void *data)
 {
   if(data) {
     void *twentybytes = ((libthreaddata_t *) data)->twentybytes;
@@ -303,7 +303,7 @@ void DisposeThreadData( void *data )
 /* For native CLib-based NLM seems we can do a bit more simple. */
 #include <nwthread.h>
 
-int main ( void )
+int main (void)
 {
   /* initialize any globals here... */
 

@@ -16,7 +16,7 @@ License: MIT/X derivate
 Vendor: Daniel Stenberg <Daniel.Stenberg@haxx.se>
 Group: Applications/Internet
 Source: %{name}-%{version}.tar.bz2
-URL: http://curl.haxx.se/
+URL: https://curl.haxx.se/
 Provides: curl
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}

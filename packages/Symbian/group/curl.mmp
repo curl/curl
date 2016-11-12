@@ -1,5 +1,5 @@
 //
-// cURL network retrieval client
+// curl network retrieval client
 //
 
 TARGET        curl.exe
@@ -49,7 +49,7 @@ SOURCE \
 
 SOURCEPATH  ../../../lib
 SOURCE \
-    rawstr.c nonblock.c
+    strcase.c nonblock.c
 
 USERINCLUDE ../../../src ../../../lib ../../../include/curl
 

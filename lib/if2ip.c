@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -51,12 +51,11 @@
 #endif
 
 #include "inet_ntop.h"
-#include "strequal.h"
+#include "strcase.h"
 #include "if2ip.h"
+/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /* ------------------------------------------------------------------ */
@@ -103,7 +102,7 @@ bool Curl_if_is_interface_name(const char *interf)
 
   if(getifaddrs(&head) >= 0) {
     for(iface=head; iface != NULL; iface=iface->ifa_next) {
-      if(curl_strequal(iface->ifa_name, interf)) {
+      if(strcasecompare(iface->ifa_name, interf)) {
         result = TRUE;
         break;
       }
@@ -133,7 +132,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
     for(iface = head; iface != NULL; iface=iface->ifa_next) {
       if(iface->ifa_addr != NULL) {
         if(iface->ifa_addr->sa_family == af) {
-          if(curl_strequal(iface->ifa_name, interf)) {
+          if(strcasecompare(iface->ifa_name, interf)) {
             void *addr;
             char *ip;
             char scope[12] = "";
@@ -181,7 +180,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
           }
         }
         else if((res == IF2IP_NOT_FOUND) &&
-                curl_strequal(iface->ifa_name, interf)) {
+                strcasecompare(iface->ifa_name, interf)) {
           res = IF2IP_AF_NOT_SUPPORTED;
         }
       }

@@ -17,6 +17,7 @@ none
 </server>
 <features>
 TrackMemory
+ipv6
 </features>
 # tool is what to use instead of 'curl'
 <tool>
@@ -35,6 +36,8 @@ nothing
 # Verify data after the test has been "shot"
 <verify>
 <file name="log/memdump">
+FD hostip6.c: socket()
+FD connect.c: sclose()
 MEM lib558.c: malloc()
 MEM lib558.c: free()
 MEM escape.c: malloc()
@@ -46,7 +49,7 @@ MEM escape.c: free()
 s/ =.*//
 s/\(.*\)/()/
 s/:\d+/:/
-s:^(MEM )(.*/)(.*):$1$3:
+s:^(MEM |FD )(.*/)(.*):$1$3:
 </stripfile>
 </verify>
 

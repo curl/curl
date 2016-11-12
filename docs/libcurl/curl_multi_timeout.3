@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -29,12 +29,12 @@ CURLMcode curl_multi_timeout(CURLM *multi_handle, long *timeout);
 .SH DESCRIPTION
 
 An application using the libcurl multi interface should call
-\fBcurl_multi_timeout(3)\fP to figure out how long it should wait for socket
+\fIcurl_multi_timeout(3)\fP to figure out how long it should wait for socket
 actions \- at most \- before proceeding.
 
 Proceeding means either doing the socket-style timeout action: call the
-\fBcurl_multi_socket_action(3)\fP function with the \fBsockfd\fP argument set
-to CURL_SOCKET_TIMEOUT, or call \fBcurl_multi_perform(3)\fP if you're using
+\fIcurl_multi_socket_action(3)\fP function with the \fBsockfd\fP argument set
+to CURL_SOCKET_TIMEOUT, or call \fIcurl_multi_perform(3)\fP if you're using
 the simpler and older multi interface approach.
 
 The timeout value returned in the long \fBtimeout\fP points to, is in number
@@ -68,9 +68,9 @@ select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 .SH "RETURN VALUE"
 The standard CURLMcode for multi interface error codes.
 .SH "TYPICAL USAGE"
-Call \fBcurl_multi_timeout(3)\fP, then wait for action on the sockets. You
-figure out which sockets to wait for by calling \fBcurl_multi_fdset(3)\fP or
-by a previous call to \fBcurl_multi_socket(3)\fP.
+Call \fIcurl_multi_timeout(3)\fP, then wait for action on the sockets. You
+figure out which sockets to wait for by calling \fIcurl_multi_fdset(3)\fP or
+by a previous call to \fIcurl_multi_socket(3)\fP.
 .SH AVAILABILITY
 This function was added in libcurl 7.15.4.
 .SH "SEE ALSO"

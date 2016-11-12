@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2015 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -41,9 +41,17 @@ then of course using the underlying SSL library multi-threaded and those libs
 might have their own requirements on this issue.  You may need to provide one
 or two functions to allow it to function properly:
 .IP OpenSSL
-http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+OpenSSL 1.1.0 "can be safely used in multi-threaded applications provided that
+support for the underlying OS threading API is built-in."
 
-http://curl.haxx.se/libcurl/c/opensslthreadlock.html
+https://www.openssl.org/docs/manmaster/crypto/threads.html#DESCRIPTION
+
+OpenSSL <= 1.0.2 the user must set callbacks.
+
+https://www.openssl.org/docs/man1.0.2/crypto/threads.html#DESCRIPTION
+
+https://curl.haxx.se/libcurl/c/opensslthreadlock.html
+
 .IP GnuTLS
 http://gnutls.org/manual/html_node/Thread-safety.html
 .IP NSS
@@ -59,6 +67,8 @@ The engine is used by libcurl in a way that is fully thread-safe.
 .IP WinSSL
 The engine is used by libcurl in a way that is fully thread-safe.
 .IP wolfSSL
+The engine is used by libcurl in a way that is fully thread-safe.
+.IP BoringSSL
 The engine is used by libcurl in a way that is fully thread-safe.
 .SH "Other areas of caution"
 .IP Signals
@@ -91,5 +101,5 @@ fail-safe initialization that takes place the first time
 These functions, provided either by your operating system or your own
 replacements, must be thread safe. You can use \fIcurl_global_init_mem(3)\fP
 to set your own replacement memory functions.
-.IP Non-safe functions
+.IP "Non-safe functions"
 \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP is not thread-safe.

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -64,12 +64,12 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results);
 
-CURLcode Curl_ntlm_core_mk_lm_hash(struct SessionHandle *data,
+CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
                                    const char *password,
                                    unsigned char *lmbuffer /* 21 bytes */);
 
 #if USE_NTRESPONSES
-CURLcode Curl_ntlm_core_mk_nt_hash(struct SessionHandle *data,
+CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
                                    const char *password,
                                    unsigned char *ntbuffer /* 21 bytes */);
 

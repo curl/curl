@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -45,8 +45,20 @@ Enforce HTTP 1.0 requests.
 .IP CURL_HTTP_VERSION_1_1
 Enforce HTTP 1.1 requests.
 .IP CURL_HTTP_VERSION_2_0
-Attempt HTTP 2 requests. libcurl will fall back to HTTP 1.x if HTTP 2 can't be
+Attempt HTTP 2 requests. libcurl will fall back to HTTP 1.1 if HTTP 2 can't be
 negotiated with the server. (Added in 7.33.0)
+
+The alias \fICURL_HTTP_VERSION_2\fP was added in 7.43.0 to better reflect the
+actual protocol name.
+.IP CURL_HTTP_VERSION_2TLS
+Attempt HTTP 2 over TLS (HTTPS) only. libcurl will fall back to HTTP 1.1 if
+HTTP 2 can't be negotiated with the HTTPS server. For clear text HTTP servers,
+libcurl will use 1.1. (Added in 7.47.0)
+.IP CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE
+Issue non-TLS HTTP requests using HTTP/2 without HTTP/1.1 Upgrade. It requires
+prior knowledge that the server supports HTTP/2 straight away. HTTPS requests
+will still do HTTP/2 the standard way with negotiated protocol version in the
+TLS handshake. (Added in 7.49.0)
 .SH DEFAULT
 CURL_HTTP_VERSION_NONE
 .SH PROTOCOLS

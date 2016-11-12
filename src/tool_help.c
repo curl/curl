@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -58,6 +58,7 @@ static const char *const helptext[] = {
   "     --compressed    Request compressed response (using deflate or gzip)",
   " -K, --config FILE   Read config from FILE",
   "     --connect-timeout SECONDS  Maximum time allowed for connection",
+  "     --connect-to HOST1:PORT1:HOST2:PORT2 Connect to host (network level)",
   " -C, --continue-at OFFSET  Resumed transfer OFFSET",
   " -b, --cookie STRING/FILE  Read cookies from STRING/FILE (H)",
   " -c, --cookie-jar FILE  Write cookies to FILE after operation (H)",
@@ -83,6 +84,7 @@ static const char *const helptext[] = {
 #ifdef USE_ENVIRONMENT
   "     --environment   Write results to environment variables (RISC OS)",
 #endif
+  "     --expect100-timeout SECONDS How long to wait for 100-continue (H)",
   " -f, --fail          Fail silently (no output at all) on HTTP errors (H)",
   "     --false-start   Enable TLS False Start.",
   " -F, --form CONTENT  Specify HTTP multipart POST data (H)",
@@ -110,6 +112,7 @@ static const char *const helptext[] = {
   " -0, --http1.0       Use HTTP 1.0 (H)",
   "     --http1.1       Use HTTP 1.1 (H)",
   "     --http2         Use HTTP 2 (H)",
+  "     --http2-prior-knowledge  Use HTTP 2 without HTTP/1.1 Upgrade (H)",
   "     --ignore-content-length  Ignore the HTTP Content-Length header",
   " -i, --include       Include protocol headers in the output (H/F)",
   " -k, --insecure      Allow connections to SSL sites without certs (H)",
@@ -152,6 +155,7 @@ static const char *const helptext[] = {
   "     --no-sessionid  Disable SSL session-ID reusing (SSL)",
   "     --noproxy       List of hosts which do not use proxy",
   "     --ntlm          Use HTTP NTLM authentication (H)",
+  "     --ntlm-wb       Use HTTP NTLM authentication with winbind (H)",
   "     --oauth2-bearer TOKEN  OAuth 2 Bearer Token (IMAP, POP3, SMTP)",
   " -o, --output FILE   Write to FILE instead of stdout",
   "     --pass PASS     Pass phrase for the private key (SSL/SSH)",
@@ -190,6 +194,7 @@ static const char *const helptext[] = {
   "     --proxy-negotiate  "
   "Use HTTP Negotiate (SPNEGO) authentication on the proxy (H)",
   "     --proxy-ntlm    Use NTLM authentication on the proxy (H)",
+  "     --proxy-header LINE Pass custom header LINE to proxy (H)",
   "     --proxy-pass PASS Pass phrase for the private key for proxy (SSL)",
   "     --proxy-ssl-allow-beast "
   "Allow security flaw to improve interop for proxy (SSL)",
@@ -244,13 +249,16 @@ static const char *const helptext[] = {
   "     --ssl-no-revoke    Disable cert revocation checks (WinSSL)",
   "     --stderr FILE   Where to redirect stderr (use \"-\" for stdout)",
   "     --tcp-nodelay   Use the TCP_NODELAY option",
+  "     --tcp-fastopen  Use TCP Fast Open",
   " -t, --telnet-option OPT=VAL  Set telnet option",
   "     --tftp-blksize VALUE  Set TFTP BLKSIZE option (must be >512)",
-  " -z, --time-cond TIME  Transfer based on a time condition",
+  "     --tftp-no-options  Do not send TFTP options requests",
+  " -z, --time-cond TIME   Transfer based on a time condition",
   " -1, --tlsv1         Use >= TLSv1 (SSL)",
   "     --tlsv1.0       Use TLSv1.0 (SSL)",
   "     --tlsv1.1       Use TLSv1.1 (SSL)",
   "     --tlsv1.2       Use TLSv1.2 (SSL)",
+  "     --tlsv1.3       Use TLSv1.3 (SSL)",
   "     --trace FILE    Write a debug trace to FILE",
   "     --trace-ascii FILE  Like --trace, but without hex output",
   "     --trace-time    Add time stamps to trace/verbose output",
@@ -271,7 +279,7 @@ static const char *const helptext[] = {
 #endif
   " -w, --write-out FORMAT  Use output FORMAT after completion",
   "     --xattr         Store metadata in extended file attributes",
-  " -q                  Disable .curlrc (must be first parameter)",
+  " -q, --disable       Disable .curlrc (must be first parameter)",
   NULL
 };
 

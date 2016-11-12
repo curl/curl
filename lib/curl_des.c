@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NTLM) && !defined(HAVE_DES_SET_ODD_PARITY)
+#if defined(USE_NTLM) && !defined(USE_OPENSSL)
 
 #include "curl_des.h"
 
@@ -60,4 +60,4 @@ void Curl_des_set_odd_parity(unsigned char *bytes, size_t len)
   }
 }
 
-#endif /* USE_NTLM && !HAVE_DES_SET_ODD_PARITY */
+#endif /* USE_NTLM && !USE_OPENSSL */

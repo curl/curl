@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,16 +31,15 @@
 #include "http.h"
 #include "url.h"
 #include "select.h"
-#include "rawstr.h"
 #include "progress.h"
 #include "non-ascii.h"
 #include "connect.h"
-#include "curl_printf.h"
 #include "curlx.h"
 #include "vtls/vtls.h"
 
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /*
@@ -83,11 +82,9 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
     /* for [protocol] tunneled through HTTP proxy */
     struct HTTP http_proxy;
     void *prot_save;
+    const char *hostname;
+    int remote_port;
     CURLcode result;
-    const char * const host = sockindex == SECONDARYSOCKET ?
-      conn->secondaryhostname : conn->host.name;
-    const int port = sockindex == SECONDARYSOCKET ? conn->secondary_port :
-      conn->remote_port;
 
     /* BLOCKING */
     /* We want "seamless" operations through HTTP proxy tunnel */
@@ -105,7 +102,21 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
     memset(&http_proxy, 0, sizeof(http_proxy));
     conn->data->req.protop = &http_proxy;
     connkeep(conn, "HTTP proxy CONNECT");
-    result = Curl_proxyCONNECT(conn, sockindex, host, port, FALSE);
+    if(sockindex == SECONDARYSOCKET)
+      hostname = conn->secondaryhostname;
+    else if(conn->bits.conn_to_host)
+      hostname = conn->conn_to_host.name;
+    else
+      hostname = conn->host.name;
+
+    if(sockindex == SECONDARYSOCKET)
+      remote_port = conn->secondary_port;
+    else if(conn->bits.conn_to_port)
+      remote_port = conn->conn_to_port;
+    else
+      remote_port = conn->remote_port;
+    result = Curl_proxyCONNECT(conn, sockindex, hostname,
+                               remote_port, FALSE);
     conn->data->req.protop = prot_save;
     if(CURLE_OK != result)
       return result;
@@ -134,7 +145,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            bool blocking)
 {
   int subversion=0;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   struct SingleRequest *k = &data->req;
   CURLcode result;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
@@ -191,9 +202,14 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         const char *useragent="";
         const char *http = (conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ?
           "1.0" : "1.1";
-        char *hostheader= /* host:port with IPv6 support */
-          aprintf("%s%s%s:%hu", conn->bits.ipv6_ip?"[":"",
-                  hostname, conn->bits.ipv6_ip?"]":"",
+        bool ipv6_ip = conn->bits.ipv6_ip;
+        char *hostheader;
+
+        /* the hostname may be different */
+        if(hostname != conn->host.name)
+          ipv6_ip = (strchr(hostname, ':') != NULL);
+        hostheader= /* host:port with IPv6 support */
+          aprintf("%s%s%s:%hu", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
                   remote_port);
         if(!hostheader) {
           Curl_add_buffer_free(req_buffer);
@@ -267,7 +283,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
     }
 
     if(!blocking) {
-      if(0 == Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD, 0))
+      if(0 == SOCKET_READABLE(tunnelsocket, 0))
         /* return so we'll be called again polling-style */
         return CURLE_OK;
       else {
@@ -302,8 +318,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         }
 
         /* loop every second at least, less if the timeout is near */
-        switch (Curl_socket_ready(tunnelsocket, CURL_SOCKET_BAD,
-                                  check<1000L?check:1000)) {
+        switch (SOCKET_READABLE(tunnelsocket, check<1000L?check:1000)) {
         case -1: /* select() error, stop reading */
           error = SELECT_ERROR;
           failf(data, "Proxy CONNECT aborted due to select/poll error");
@@ -596,7 +611,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       free(data->req.newurl);
       data->req.newurl = NULL;
       /* failure, close this connection to avoid re-use */
-      connclose(conn, "proxy CONNECT failure");
+      streamclose(conn, "proxy CONNECT failure");
       Curl_closesocket(conn, conn->sock[sockindex]);
       conn->sock[sockindex] = CURL_SOCKET_BAD;
     }

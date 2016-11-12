@@ -14,7 +14,7 @@ Vendor: Daniel Stenberg <Daniel.Stenberg@haxx.se>
 Packager: Loic Dachary <loic@senga.org>
 Group: Utilities/Console
 Source: %{name}-%{version}.tar.gz
-URL: http://curl.haxx.se/
+URL: https://curl.haxx.se/
 BuildRoot: /tmp/%{name}-%{version}-root
 
 %description

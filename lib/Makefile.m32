@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -80,7 +80,7 @@ CC	= $(CROSSPREFIX)gcc
 CFLAGS	= $(CURL_CFLAG_EXTRAS) -g -O2 -Wall
 CFLAGS	+= -fno-strict-aliasing
 # comment LDFLAGS below to keep debug info
-LDFLAGS	= $(CURL_LDFLAG_EXTRAS) -s
+LDFLAGS	= $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL) -s
 AR	= $(CROSSPREFIX)ar
 RANLIB	= $(CROSSPREFIX)ranlib
 RC	= $(CROSSPREFIX)windres
@@ -153,7 +153,9 @@ ZLIB = 1
 endif
 ifeq ($(findstring -ssh2,$(CFG)),-ssh2)
 SSH2 = 1
+ifneq ($(findstring -winssl,$(CFG)),-winssl)
 SSL = 1
+endif
 ZLIB = 1
 endif
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
@@ -215,6 +217,11 @@ ifdef SSH2
   INCLUDES += -I"$(LIBSSH2_PATH)/include" -I"$(LIBSSH2_PATH)/win32"
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   DLL_LIBS += -L"$(LIBSSH2_PATH)/win32" -lssh2
+  ifdef WINSSL
+    ifndef DYN
+      DLL_LIBS += -lbcrypt -lcrypt32
+    endif
+  endif
 endif
 ifdef SSL
   ifndef OPENSSL_INCLUDE
@@ -251,6 +258,10 @@ ifdef SSL
       CFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
     endif
   endif
+else
+ifdef WINSSL
+  DLL_LIBS += -lcrypt32
+endif
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"

@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -144,6 +144,8 @@ Error message buffer. See \fICURLOPT_ERRORBUFFER(3)\fP
 stderr replacement stream. See \fICURLOPT_STDERR(3)\fP
 .IP CURLOPT_FAILONERROR
 Fail on HTTP 4xx errors. \fICURLOPT_FAILONERROR(3)\fP
+.IP CURLOPT_KEEP_SENDING_ON_ERROR
+Keep sending on HTTP >= 300 errors. \fICURLOPT_KEEP_SENDING_ON_ERROR(3)\fP
 .SH NETWORK OPTIONS
 .IP CURLOPT_URL
 URL to work on. See \fICURLOPT_URL(3)\fP
@@ -165,14 +167,16 @@ Proxy type. See \fICURLOPT_PROXYTYPE(3)\fP
 Filter out hosts from proxy use. \fICURLOPT_NOPROXY(3)\fP
 .IP CURLOPT_HTTPPROXYTUNNEL
 Tunnel through the HTTP proxy. \fICURLOPT_HTTPPROXYTUNNEL(3)\fP
+.IP CURLOPT_CONNECT_TO
+Connect to a specific host and port. See \fICURLOPT_CONNECT_TO(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_SERVICE
 Socks5 GSSAPI service name. \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
 .IP CURLOPT_SOCKS5_GSSAPI_NEC
 Socks5 GSSAPI NEC mode. See \fICURLOPT_SOCKS5_GSSAPI_NEC(3)\fP
 .IP CURLOPT_PROXY_SERVICE_NAME
-Proxy service name. \fICURLOPT_PROXY_SERVICE_NAME(3)\fP
+Proxy authentication service name. \fICURLOPT_PROXY_SERVICE_NAME(3)\fP
 .IP CURLOPT_SERVICE_NAME
-SPNEGO service name. \fICURLOPT_SERVICE_NAME(3)\fP
+Authentication service name. \fICURLOPT_SERVICE_NAME(3)\fP
 .IP CURLOPT_INTERFACE
 Bind connection locally to this. See \fICURLOPT_INTERFACE(3)\fP
 .IP CURLOPT_LOCALPORT
@@ -187,6 +191,8 @@ OBSOLETE Enable global DNS cache. See \fICURLOPT_DNS_USE_GLOBAL_CACHE(3)\fP
 Ask for smaller buffer size. See \fICURLOPT_BUFFERSIZE(3)\fP
 .IP CURLOPT_PORT
 Port number to connect to. See \fICURLOPT_PORT(3)\fP
+.IP CURLOPT_TCP_FASTOPEN
+Enable TFO, TCP Fast Open. See \fICURLOPT_TCP_FASTOPEN(3)\fP
 .IP CURLOPT_TCP_NODELAY
 Disable the Nagle algorithm. See \fICURLOPT_TCP_NODELAY(3)\fP
 .IP CURLOPT_ADDRESS_SCOPE
@@ -314,6 +320,8 @@ Authentication address. See \fICURLOPT_MAIL_AUTH(3)\fP
 .SH TFTP OPTIONS
 .IP CURLOPT_TFTP_BLKSIZE
 TFTP block size. See \fICURLOPT_TFTP_BLKSIZE(3)\fP
+.IP CURLOPT_TFTP_NO_OPTIONS
+Do not send TFTP options requests. See \fICURLOPT_TFTP_NO_OPTIONS(3)\fP
 .SH FTP OPTIONS
 .IP CURLOPT_FTPPORT
 Use active FTP. See \fICURLOPT_FTPPORT(3)\fP

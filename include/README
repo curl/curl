@@ -37,7 +37,7 @@ The following notes apply to libcurl version 7.19.0 and later.
   also distribute along with it the generated curl/curlbuild.h which has been
   used to compile it. Otherwise the library will be of no use for the users of
   the library that you have built. It is _your_ responsibility to provide this
-  file. No one at the cURL project can know how you have built the library.
+  file. No one at the curl project can know how you have built the library.
 
 * File curl/curlbuild.h includes platform and configuration dependent info,
   and must not be modified by anyone. Configure script generates it for you.

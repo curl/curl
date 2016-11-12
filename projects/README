@@ -4,7 +4,7 @@ Building via IDE Project Files
    This document describes how to compile, build and install curl and libcurl
    from sources using an IDE based development tool such as Visual Studio.
 
-   Project files are currently available for Visual C++ v6.0 to v12.0. The
+   Project files are currently available for Visual C++ v6.0 to v14.0. The
    following directory structure has been used to cater for this:
 
    somedirectory\
@@ -27,8 +27,8 @@ Dependencies
 ============
 
    The projects files also support build configurations that require third
-   party dependencies such as OpenSSL and SSH2. If you wish to support these,
-   you will also need to download and compile those libraries as well.
+   party dependencies such as OpenSSL, wolfSSL and SSH2. If you wish to support
+   these, you will also need to download and compile those libraries as well.
 
    To support compilation of these libraries using different versions of
    compilers, the following directory structure has been used for both the
@@ -55,9 +55,10 @@ Dependencies
            |_VC <version>
              |_<configuration>
 
-   As OpenSSL doesn't support side-by-side compilation when using different
-   versions of Visual Studio a build helper batch file has been provided to
-   assist with this. Please run "build-openssl -help" for usage details.
+   As OpenSSL and wolfSSL don't support side-by-side compilation when using
+   different versions of Visual Studio, build helper batch files have been
+   provided to assist with this. Please run "build-openssl -help" and/or
+   "build-wolfssl -help" for usage details.
 
 Building with Visual C++
 ========================
@@ -68,16 +69,16 @@ Building with Visual C++
    If you are building with VC6 then you will also need the February 2003
    Edition of the Windows Platform SDK which can be downloaded from:
 
-    http://www.microsoft.com/en-us/download/details.aspx?id=12261
+    https://www.microsoft.com/en-us/download/details.aspx?id=12261
 
    If you require support for Internationalized Domain Names via Windows IDN
    then you will need either:
 
     * Microsoft Internationalized Domain Name (IDN) Mitigation APIs:
-      http://www.microsoft.com/en-us/download/details.aspx?id=734
+      https://www.microsoft.com/en-us/download/details.aspx?id=734
 
     * Microsoft Windows SDK Update for Windows Vista:
-      http://www.microsoft.com/en-us/download/details.aspx?id=23719
+      https://www.microsoft.com/en-us/download/details.aspx?id=23719
 
     * Microsoft Visual Studio 2010 or above
 
@@ -159,18 +160,3 @@ Legacy Windows and SSL
    support the legacy handshakes and algorithms used by those versions. If
    you will be using curl in one of those earlier versions of Windows you
    should choose another SSL backend such as OpenSSL.
-
-TODO
-====
-
-   These project files are a recent addition to the curl source code and as such
-   are not 100% complete. This is a list of things that are still todo:
-
-   * Support zlib
-   * Use of static runtime libraries
-   * Generate *.vcxproj.filters files for VC10, VC11 and VC12
-   * Add the Test Suite components
-   * Support for other development IDEs
-   * Add PATH environment variables for third-party DLLs
-
-   Any additional help would be appreciated ;-)

@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -69,7 +69,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
                               size_t included_body_bytes,
                               int socketindex);
 
-CURLcode Curl_add_timecondition(struct SessionHandle *data,
+CURLcode Curl_add_timecondition(struct Curl_easy *data,
                                 Curl_send_buffer *buf);
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                  bool is_connect,
@@ -87,7 +87,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
                               ssize_t length, ssize_t *wrote);
 
 /* These functions are in http.c */
-void Curl_http_auth_stage(struct SessionHandle *data, int stage);
+void Curl_http_auth_stage(struct Curl_easy *data, int stage);
 CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
                               const char *auth);
 CURLcode Curl_http_auth_act(struct connectdata *conn);
@@ -163,10 +163,12 @@ struct HTTP {
   Curl_send_buffer *header_recvbuf;
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
                                   upper layer */
+  Curl_send_buffer *trailer_recvbuf;
   int status_code; /* HTTP status code */
   const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
   size_t pauselen; /* the number of bytes left in data */
   bool closed; /* TRUE on HTTP2 stream close */
+  bool close_handled; /* TRUE if stream closure is handled by libcurl */
   uint32_t error_code; /* HTTP/2 error code */
 
   char *mem;     /* points to a buffer in memory to store received data */
@@ -213,15 +215,16 @@ struct http_conn {
      them for both cases. */
   int32_t pause_stream_id; /* stream ID which paused
                               nghttp2_session_mem_recv */
+  size_t drain_total; /* sum of all stream's UrlState.drain */
 
-  /* this is a hash of all individual streams (SessionHandle structs) */
+  /* this is a hash of all individual streams (Curl_easy structs) */
   struct h2settings settings;
 #else
   int unused; /* prevent a compiler warning */
 #endif
 };
 
-CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
+CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                                      struct connectdata *conn,
                                      ssize_t *nread,
                                      bool *stop_reading);

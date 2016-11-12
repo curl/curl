@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -29,6 +29,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_convert.h"
+#include "tool_doswin.h"
 #include "tool_operhlp.h"
 #include "tool_metalink.h"
 
@@ -62,8 +63,8 @@ bool output_expected(const char *url, const char *uploadfile)
 
 bool stdin_upload(const char *uploadfile)
 {
-  return (curlx_strequal(uploadfile, "-") ||
-          curlx_strequal(uploadfile, ".")) ? TRUE : FALSE;
+  return (!strcmp(uploadfile, "-") ||
+          !strcmp(uploadfile, ".")) ? TRUE : FALSE;
 }
 
 /*
@@ -128,7 +129,7 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
  */
 CURLcode get_url_file_name(char **filename, const char *url)
 {
-  const char *pc;
+  const char *pc, *pc2;
 
   *filename = NULL;
 
@@ -138,7 +139,11 @@ CURLcode get_url_file_name(char **filename, const char *url)
     pc += 3;
   else
     pc = url;
+
+  pc2 = strrchr(pc, '\\');
   pc = strrchr(pc, '/');
+  if(pc2 && (!pc || pc < pc2))
+    pc = pc2;
 
   if(pc)
     /* duplicate the string beyond the slash */
@@ -150,6 +155,17 @@ CURLcode get_url_file_name(char **filename, const char *url)
   *filename = strdup(pc);
   if(!*filename)
     return CURLE_OUT_OF_MEMORY;
+
+#if defined(MSDOS) || defined(WIN32)
+  {
+    char *sanitized;
+    SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
+    Curl_safefree(*filename);
+    if(sc)
+      return CURLE_URL_MALFORMAT;
+    *filename = sanitized;
+  }
+#endif /* MSDOS || WIN32 */
 
   /* in case we built debug enabled, we allow an environment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a

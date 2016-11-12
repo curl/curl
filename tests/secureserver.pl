@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -39,6 +39,8 @@ use serverhelp qw(
     server_pidfilename
     server_logfilename
     );
+
+use pathhelp;
 
 my $stunnel = "stunnel";
 
@@ -229,9 +231,9 @@ if($stunnel_version < 310) {
 if($stunnel =~ /tstunnel(\.exe)?"?$/) {
     $tstunnel_windows = 1;
 
-    # replace Cygwin and MinGW drives within paths
-    $capath =~ s/^(\/cygdrive)?\/(\w)\//$2\:\//;
-    $certfile =~ s/^(\/cygdrive)?\/(\w)\//$2\:\//;
+    # convert Cygwin/MinGW paths to Win32 format
+    $capath = pathhelp::sys_native_abs_path($capath);
+    $certfile = pathhelp::sys_native_abs_path($certfile);
 }
 
 #***************************************************************************

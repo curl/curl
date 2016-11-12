@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -78,7 +78,8 @@
 /* ioctl callback function */
 static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)
 {
-  intptr_t fd = (intptr_t)userp;
+  int *fdp = (int *)userp;
+  int fd = *fdp;
 
   (void)handle; /* not used in here */
 
@@ -100,10 +101,11 @@ static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)
 /* read callback function, fread() look alike */
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-  size_t retcode;
+  ssize_t retcode;
   curl_off_t nread;
 
-  intptr_t fd = (intptr_t)stream;
+  int *fdp = (int *)stream;
+  int fd = *fdp;
 
   retcode = read(fd, ptr, size * nmemb);
 
@@ -119,7 +121,7 @@ int main(int argc, char **argv)
 {
   CURL *curl;
   CURLcode res;
-  intptr_t hd ;
+  int hd;
   struct stat file_info;
 
   char *file;
@@ -132,7 +134,7 @@ int main(int argc, char **argv)
   url = argv[2];
 
   /* get the file size of the local file */
-  hd = open(file, O_RDONLY) ;
+  hd = open(file, O_RDONLY);
   fstat(hd, &file_info);
 
   /* In windows, this will init the winsock stuff */
@@ -145,20 +147,20 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
     /* which file to upload */
-    curl_easy_setopt(curl, CURLOPT_READDATA, (void*)hd);
+    curl_easy_setopt(curl, CURLOPT_READDATA, (void*)&hd);
 
     /* set the ioctl function */
     curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, my_ioctl);
 
     /* pass the file descriptor to the ioctl callback as well */
-    curl_easy_setopt(curl, CURLOPT_IOCTLDATA, (void*)hd);
+    curl_easy_setopt(curl, CURLOPT_IOCTLDATA, (void*)&hd);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
-    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L) ;
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     /* specify target URL, and note that this URL should also include a file
        name, not only a directory (as you can do with GTP uploads) */
-    curl_easy_setopt(curl,CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
 
     /* and give the size of the upload, this supports large file sizes
        on systems that have general support for it */

@@ -49,3 +49,4 @@ missing
 mkinstalldirs
 tags
 test-driver
+scripts/_curl

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,7 +45,6 @@
 #include "fileinfo.h"
 #include "llist.h"
 #include "strtoofft.h"
-#include "rawstr.h"
 #include "ftp.h"
 #include "ftplistparser.h"
 #include "curl_fnmatch.h"
@@ -728,7 +727,6 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         case PL_UNIX_FILENAME_NAME:
           parser->item_length++;
           if(c == '\r') {
-            parser->item_length--;
             parser->state.UNIX.sub.filename = PL_UNIX_FILENAME_WINDOWSEOL;
           }
           else if(c == '\n') {
@@ -744,7 +742,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           break;
         case PL_UNIX_FILENAME_WINDOWSEOL:
           if(c == '\n') {
-            finfo->b_data[parser->item_offset + parser->item_length] = 0;
+            finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
             parser->offsets.filename = parser->item_offset;
             parser->state.UNIX.main = PL_UNIX_FILETYPE;
             result = ftp_pl_insert_finfo(conn, finfo);
@@ -835,9 +833,8 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           }
           break;
         case PL_UNIX_SYMLINK_TARGET:
-          parser->item_length ++;
+          parser->item_length++;
           if(c == '\r') {
-            parser->item_length --;
             parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_WINDOWSEOL;
           }
           else if(c == '\n') {

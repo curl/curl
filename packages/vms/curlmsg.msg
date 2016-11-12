@@ -30,7 +30,7 @@ OBSOLETE4		<obsolete error code>
 COULDNT_RESOLVE_PROXY	<could not resolve proxy>
 COULDNT_RESOLVE_HOST	<could not resolve host>
 COULDNT_CONNECT		<could not connect>
-FTP_WEIRD_SERVER_REPLY	<FTP weird server reply>
+WEIRD_SERVER_REPLY	<weird server reply>
 FTP_ACCESS_DENIED	<FTP access denied>
 OBSOLETE10		<obsolete error code>
 FTP_WEIRD_PASS_REPLY	<FTP weird PASS reply>

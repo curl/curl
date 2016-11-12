@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,11 +52,10 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
-
+#include "escape.h"
 #include "progress.h"
-#include "strequal.h"
 #include "dict.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -91,17 +90,17 @@ const struct Curl_handler Curl_handler_dict = {
   PROTOPT_NONE | PROTOPT_NOURLQUERY      /* flags */
 };
 
-static char *unescape_word(struct SessionHandle *data, const char *inputbuff)
+static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
 {
   char *newp;
   char *dictp;
   char *ptr;
-  int len;
+  size_t len;
   char ch;
   int olen=0;
 
-  newp = curl_easy_unescape(data, inputbuff, 0, &len);
-  if(!newp)
+  CURLcode result = Curl_urldecode(data, inputbuff, 0, &newp, &len, FALSE);
+  if(!newp || result)
     return NULL;
 
   dictp = malloc(((size_t)len)*2 + 1); /* add one for terminating zero */
@@ -133,7 +132,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
   CURLcode result=CURLE_OK;
-  struct SessionHandle *data=conn->data;
+  struct Curl_easy *data=conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   char *path = data->state.path;
@@ -145,9 +144,9 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
     /* AUTH is missing */
   }
 
-  if(Curl_raw_nequal(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
-      Curl_raw_nequal(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
-      Curl_raw_nequal(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
+  if(strncasecompare(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
+     strncasecompare(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
+     strncasecompare(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
 
     word = strchr(path, ':');
     if(word) {
@@ -203,9 +202,9 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
     Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                         -1, NULL); /* no upload */
   }
-  else if(Curl_raw_nequal(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
-           Curl_raw_nequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
-           Curl_raw_nequal(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
+  else if(strncasecompare(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
+          strncasecompare(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
+          strncasecompare(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
 
     word = strchr(path, ':');
     if(word) {

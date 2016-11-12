@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -96,6 +96,9 @@ int Curl_schannel_random(unsigned char *entropy, size_t length);
 
 /* Set the API backend definition to Schannel */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_SCHANNEL
+
+/* this backend supports CURLOPT_CERTINFO */
+#define have_curlssl_certinfo 1
 
 /* API setup for Schannel */
 #define curlssl_init Curl_schannel_init

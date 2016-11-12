@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,12 +28,12 @@
 #include "multiif.h"
 #include "speedcheck.h"
 
-void Curl_speedinit(struct SessionHandle *data)
+void Curl_speedinit(struct Curl_easy *data)
 {
   memset(&data->state.keeps_speed, 0, sizeof(struct timeval));
 }
 
-CURLcode Curl_speedcheck(struct SessionHandle *data,
+CURLcode Curl_speedcheck(struct Curl_easy *data,
                          struct timeval now)
 {
   if((data->progress.current_speed >= 0) &&

@@ -24,7 +24,7 @@ README
 CONTACT
 
   If you have problems, questions, ideas or suggestions, please contact us
-  by posting to a suitable mailing list. See http://curl.haxx.se/mail/
+  by posting to a suitable mailing list. See https://curl.haxx.se/mail/
 
   All contributors to the project are listed in the THANKS document.
 
@@ -32,13 +32,13 @@ WEB SITE
 
   Visit the curl web site for the latest news and downloads:
 
-        http://curl.haxx.se/
+        https://curl.haxx.se/
 
 GIT
 
   To download the very latest source off the GIT server do this:
 
-    git clone https://github.com/bagder/curl.git
+    git clone https://github.com/curl/curl.git
 
   (you'll get a directory named curl created, filled with the source code)
 

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -79,6 +79,8 @@ const NameValue setopt_nv_CURL_HTTP_VERSION[] = {
   NV(CURL_HTTP_VERSION_NONE),
   NV(CURL_HTTP_VERSION_1_0),
   NV(CURL_HTTP_VERSION_1_1),
+  NV(CURL_HTTP_VERSION_2_0),
+  NV(CURL_HTTP_VERSION_2TLS),
   NVEND,
 };
 
@@ -90,6 +92,7 @@ const NameValue setopt_nv_CURL_SSLVERSION[] = {
   NV(CURL_SSLVERSION_TLSv1_0),
   NV(CURL_SSLVERSION_TLSv1_1),
   NV(CURL_SSLVERSION_TLSv1_2),
+  NV(CURL_SSLVERSION_TLSv1_3),
   NVEND,
 };
 
@@ -164,6 +167,7 @@ static const NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
   NV1(CURLOPT_SSL_VERIFYHOST, 1),
   NV1(CURLOPT_SSL_ENABLE_NPN, 1),
   NV1(CURLOPT_SSL_ENABLE_ALPN, 1),
+  NV1(CURLOPT_TCP_NODELAY, 1),
   NV1(CURLOPT_PROXY_SSL_VERIFYPEER, 1),
   NV1(CURLOPT_PROXY_SSL_VERIFYHOST, 1),
   NVEND

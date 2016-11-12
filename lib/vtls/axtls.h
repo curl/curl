@@ -12,7 +12,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,7 +42,7 @@ void Curl_axtls_session_free(void *ptr);
 size_t Curl_axtls_version(char *buffer, size_t size);
 int Curl_axtls_shutdown(struct connectdata *conn, int sockindex);
 int Curl_axtls_check_cxn(struct connectdata *conn);
-int Curl_axtls_random(struct SessionHandle *data,
+int Curl_axtls_random(struct Curl_easy *data,
                       unsigned char *entropy,
                       size_t length);
 

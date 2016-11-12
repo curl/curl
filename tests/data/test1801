@@ -2,7 +2,7 @@
 <info>
 <keywords>
 HTTP
-http2
+HTTP/2
 </keywords>
 </info>
 
@@ -37,7 +37,7 @@ upgrade
 http
 </server>
 <features>
-http2
+http/2
 </features>
  <name>
 HTTP/2 upgrade with lying server

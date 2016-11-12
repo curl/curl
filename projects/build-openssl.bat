@@ -6,11 +6,11 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2012 - 2015, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) 2012 - 2016, Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
-rem * are also available at http://curl.haxx.se/docs/copyright.html.
+rem * are also available at https://curl.haxx.se/docs/copyright.html.
 rem *
 rem * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 rem * copies of the Software, and permit persons to whom the Software is
@@ -120,11 +120,18 @@ rem ***************************************************************************
   rem Check we have Visual Studio installed
   if not exist "%PF%\%VC_PATH%" goto novc
 
-  rem Check we have Perl installed
+  rem Check we have Perl in our path
   echo %PATH% | findstr /I /C:"\Perl" 1>nul
   if errorlevel 1 (
-    if not exist "%SystemDrive%\Perl" (
-      if not exist "%SystemDrive%\Perl64" goto noperl
+    rem It isn't so check we have it installed and set the path if it is
+    if exist "%SystemDrive%\Perl" (
+      set "PATH=%SystemDrive%\Perl\bin;%PATH%"
+    ) else (
+      if exist "%SystemDrive%\Perl64" (
+        set "PATH=%SystemDrive%\Perl64\bin;%PATH%"
+      ) else (
+        goto noperl
+      )
     )
   )
 

@@ -10,7 +10,7 @@ rem * Copyright (C) 2014 - 2015, Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
-rem * are also available at http://curl.haxx.se/docs/copyright.html.
+rem * are also available at https://curl.haxx.se/docs/copyright.html.
 rem *
 rem * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 rem * copies of the Software, and permit persons to whom the Software is
@@ -20,13 +20,6 @@ rem * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 rem * KIND, either express or implied.
 rem *
 rem ***************************************************************************
-
-rem NOTES
-rem
-rem Do not set %ERRORLEVEL% to anything. %ERRORLEVEL% is a special variable
-rem that only contains errorlevel when %ERRORLEVEL% is not set. Same for %CD%.
-rem http://blogs.msdn.com/b/oldnewthing/archive/2008/09/26/8965755.aspx
-rem If you need to set the errorlevel do this instead: CALL :seterr [#]
 
 :begin
   rem Check we are running on a Windows NT derived OS
@@ -271,19 +264,18 @@ rem
       for /f "delims=" %%r in ('dir /b ..\src\*.rc') do call :element %1 src "%%r" %3
     ) else if "!var!" == "CURL_SRC_X_C_FILES" (
       call :element %1 lib "strtoofft.c" %3
-      call :element %1 lib "rawstr.c" %3
       call :element %1 lib "nonblock.c" %3
       call :element %1 lib "warnless.c" %3
     ) else if "!var!" == "CURL_SRC_X_H_FILES" (
       call :element %1 lib "config-win32.h" %3
       call :element %1 lib "curl_setup.h" %3
       call :element %1 lib "strtoofft.h" %3
-      call :element %1 lib "rawstr.h" %3
       call :element %1 lib "nonblock.h" %3
       call :element %1 lib "warnless.h" %3
     ) else if "!var!" == "CURL_LIB_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\*.c') do call :element %1 lib "%%c" %3
     ) else if "!var!" == "CURL_LIB_H_FILES" (
+      for /f "delims=" %%h in ('dir /b ..\include\curl\*.h') do call :element %1 include\curl "%%h" %3
       for /f "delims=" %%h in ('dir /b ..\lib\*.h') do call :element %1 lib "%%h" %3
     ) else if "!var!" == "CURL_LIB_RC_FILES" (
       for /f "delims=" %%r in ('dir /b ..\lib\*.rc') do call :element %1 lib "%%r" %3
