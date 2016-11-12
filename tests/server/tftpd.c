@@ -1232,19 +1232,17 @@ static void sendtftp(struct testcase *test, struct formats *pf)
 {
   int size;
   ssize_t n;
-  /* This is volatile to live through a siglongjmp */
+  /* These are volatile to live through a siglongjmp */
   volatile unsigned short sendblock; /* block count */
-  struct tftphdr *sdp;      /* data buffer */
-  struct tftphdr *sap;      /* ack buffer */
+  struct tftphdr * volatile sdp = r_init(); /* data buffer */
+  struct tftphdr * const sap = &ackbuf.hdr; /* ack buffer */
 
   sendblock = 1;
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, timer);
 #endif
-  sdp = r_init();
-  sap = &ackbuf.hdr;
   do {
-    size = readit(test, &sdp, pf->f_convert);
+    size = readit(test, (struct tftphdr **)&sdp, pf->f_convert);
     if(size < 0) {
       nak(errno + 100);
       return;
