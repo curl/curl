@@ -4258,11 +4258,13 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   char *fragment;
   char *path = data->state.path;
   char *query;
+  int i;
   int rc;
   char protobuf[16] = "";
   const char *protop = "";
   CURLcode result;
   bool rebuild_url = FALSE;
+  bool url_has_scheme = FALSE;
 
   *prot_missing = FALSE;
 
@@ -4281,9 +4283,32 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
    * proxy -- and we don't know if we will need to use SSL until we parse the
    * url ...
    ************************************************************/
-  if((2 == sscanf(data->change.url, "%15[^:]:%[^\n]",
-                  protobuf, path)) &&
-     strcasecompare(protobuf, "file")) {
+  if(data->change.url[0] == ':') {
+    failf(data, "Bad URL, colon is first character");
+    return CURLE_URL_MALFORMAT;
+  }
+  for(i = 0; i < 16 && data->change.url[i]; ++i) {
+    if(data->change.url[i] == '/')
+      break;
+    if(data->change.url[i] == ':') {
+      url_has_scheme = TRUE;
+      break;
+    }
+  }
+  /* handle the file: scheme */
+  if((url_has_scheme && strncasecompare(data->change.url, "file:", 5)) ||
+     (!url_has_scheme && data->set.str[STRING_DEFAULT_PROTOCOL] &&
+      strcasecompare(data->set.str[STRING_DEFAULT_PROTOCOL], "file"))) {
+    if(url_has_scheme)
+      rc = sscanf(data->change.url, "%*15[^\n/:]:%[^\n]", path);
+    else
+      rc = sscanf(data->change.url, "%[^\n]", path);
+
+    if(rc != 1) {
+      failf(data, "Bad URL");
+      return CURLE_URL_MALFORMAT;
+    }
+
     if(path[0] == '/' && path[1] == '/') {
       /* Allow omitted hostname (e.g. file:/<path>).  This is not strictly
        * speaking a valid file: URL by RFC 1738, but treating file:/<path> as
@@ -4294,6 +4319,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
          memory areas overlap! */
       memmove(path, path + 2, strlen(path + 2)+1);
     }
+
     /*
      * we deal with file://<host>/<path> differently since it supports no
      * hostname other than "localhost" and "127.0.0.1", which is unique among
@@ -4305,7 +4331,8 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       char *ptr;
       if(!checkprefix("localhost/", path) &&
          !checkprefix("127.0.0.1/", path)) {
-        failf(data, "Valid host name with slash missing in URL");
+        failf(data, "Invalid file://hostname/, "
+                    "expected localhost or 127.0.0.1 or none");
         return CURLE_URL_MALFORMAT;
       }
       ptr = &path[9]; /* now points to the slash after the host */
@@ -4342,7 +4369,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     path[0]=0;
 
     rc = sscanf(data->change.url,
-                "%15[^\n:]:%3[/]%[^\n/?#]%[^\n]",
+                "%15[^\n/:]:%3[/]%[^\n/?#]%[^\n]",
                 protobuf, slashbuf, conn->host.name, path);
     if(2 == rc) {
       failf(data, "Bad URL");
