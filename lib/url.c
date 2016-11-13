@@ -4258,11 +4258,12 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   char *fragment;
   char *path = data->state.path;
   char *query;
+  int i;
   int rc;
-  char protobuf[16] = "";
   const char *protop = "";
   CURLcode result;
   bool rebuild_url = FALSE;
+  bool url_has_scheme = FALSE;
 
   *prot_missing = FALSE;
 
@@ -4281,10 +4282,47 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
    * proxy -- and we don't know if we will need to use SSL until we parse the
    * url ...
    ************************************************************/
-  if((2 == sscanf(data->change.url, "%15[^:]:%[^\n]",
-                  protobuf, path)) &&
-     strcasecompare(protobuf, "file")) {
-    if(path[0] == '/' && path[1] == '/') {
+  if(data->change.url[0] == ':') {
+    failf(data, "Bad URL, colon is first character");
+    return CURLE_URL_MALFORMAT;
+  }
+
+  /* Make sure we don't mistake a drive letter for a scheme, for example:
+     curld --proto-default file c:/foo/bar.txt */
+  if((('a' <= data->change.url[0] && data->change.url[0] <= 'z') ||
+      ('A' <= data->change.url[0] && data->change.url[0] <= 'Z')) &&
+     data->change.url[1] == ':' && data->set.str[STRING_DEFAULT_PROTOCOL] &&
+     strcasecompare(data->set.str[STRING_DEFAULT_PROTOCOL], "file")) {
+    ; /* do nothing */
+  }
+  else { /* check for a scheme */
+    for(i = 0; i < 16 && data->change.url[i]; ++i) {
+      if(data->change.url[i] == '/')
+        break;
+      if(data->change.url[i] == ':') {
+        url_has_scheme = TRUE;
+        break;
+      }
+    }
+  }
+
+  /* handle the file: scheme */
+  if((url_has_scheme && strncasecompare(data->change.url, "file:", 5)) ||
+     (!url_has_scheme && data->set.str[STRING_DEFAULT_PROTOCOL] &&
+      strcasecompare(data->set.str[STRING_DEFAULT_PROTOCOL], "file"))) {
+    bool path_has_drive = FALSE;
+
+    if(url_has_scheme)
+      rc = sscanf(data->change.url, "%*15[^\n/:]:%[^\n]", path);
+    else
+      rc = sscanf(data->change.url, "%[^\n]", path);
+
+    if(rc != 1) {
+      failf(data, "Bad URL");
+      return CURLE_URL_MALFORMAT;
+    }
+
+    if(url_has_scheme && path[0] == '/' && path[1] == '/') {
       /* Allow omitted hostname (e.g. file:/<path>).  This is not strictly
        * speaking a valid file: URL by RFC 1738, but treating file:/<path> as
        * file://localhost/<path> is similar to how other schemes treat missing
@@ -4294,18 +4332,25 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
          memory areas overlap! */
       memmove(path, path + 2, strlen(path + 2)+1);
     }
+
+    /* the path may start with a drive letter. for backwards compatibility
+       we skip some processing on those paths. */
+    path_has_drive = (('a' <= path[0] && path[0] <= 'z') ||
+                      ('A' <= path[0] && path[0] <= 'Z')) && path[1] == ':';
+
     /*
      * we deal with file://<host>/<path> differently since it supports no
      * hostname other than "localhost" and "127.0.0.1", which is unique among
      * the URL protocols specified in RFC 1738
      */
-    if(path[0] != '/') {
+    if(path[0] != '/' && !path_has_drive) {
       /* the URL includes a host name, it must match "localhost" or
          "127.0.0.1" to be valid */
       char *ptr;
       if(!checkprefix("localhost/", path) &&
          !checkprefix("127.0.0.1/", path)) {
-        failf(data, "Valid host name with slash missing in URL");
+        failf(data, "Invalid file://hostname/, "
+                    "expected localhost or 127.0.0.1 or none");
         return CURLE_URL_MALFORMAT;
       }
       ptr = &path[9]; /* now points to the slash after the host */
@@ -4332,17 +4377,28 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
       /* This cannot be made with strcpy, as the memory chunks overlap! */
       memmove(path, ptr, strlen(ptr)+1);
+
+      path_has_drive = (('a' <= path[0] && path[0] <= 'z') ||
+                        ('A' <= path[0] && path[0] <= 'Z')) && path[1] == ':';
     }
+
+#if !defined(MSDOS) && !defined(WIN32) && !defined(__CYGWIN__)
+    if(path_has_drive) {
+      failf(data, "File drive letters are only accepted in MSDOS/Windows.");
+      return CURLE_URL_MALFORMAT;
+    }
+#endif
 
     protop = "file"; /* protocol string */
   }
   else {
     /* clear path */
+    char protobuf[16];
     char slashbuf[4];
     path[0]=0;
 
     rc = sscanf(data->change.url,
-                "%15[^\n:]:%3[/]%[^\n/?#]%[^\n]",
+                "%15[^\n/:]:%3[/]%[^\n/?#]%[^\n]",
                 protobuf, slashbuf, conn->host.name, path);
     if(2 == rc) {
       failf(data, "Bad URL");
