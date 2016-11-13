@@ -250,8 +250,8 @@ long Curl_pgrsLimitWaitTime(curl_off_t cursize,
                             struct timeval now)
 {
   curl_off_t size = cursize - startsize;
-  size_t minimum;
-  size_t actual;
+  time_t minimum;
+  time_t actual;
 
   /* we don't have a starting point yet -- return 0 so it gets (re)set */
   if(start.tv_sec == 0 && start.tv_usec == 0)
