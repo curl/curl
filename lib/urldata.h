@@ -1280,6 +1280,11 @@ struct auth {
                    be RFC compliant */
 };
 
+struct Curl_http2_dep {
+  struct Curl_http2_dep *next;
+  struct Curl_easy *data;
+};
+
 struct UrlState {
 
   /* Points to the connection cache */
@@ -1747,6 +1752,8 @@ struct UserDefined {
   struct Curl_easy *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
+
+  struct Curl_http2_dep *stream_dependents;
 };
 
 struct Names {

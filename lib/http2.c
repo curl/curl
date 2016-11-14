@@ -2108,6 +2108,82 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   return CURLE_OK;
 }
 
+void Curl_http2_add_child(struct Curl_easy *parent, struct Curl_easy *child,
+                          bool exclusive)
+{
+  struct Curl_http2_dep **tail;
+  struct Curl_http2_dep *dep = calloc(1, sizeof(struct Curl_http2_dep));
+  dep->data = child;
+
+  if(parent->set.stream_dependents && exclusive) {
+    struct Curl_http2_dep *node = parent->set.stream_dependents;
+    while(node) {
+      node->data->set.stream_depends_on = child;
+      node = node->next;
+    }
+
+    tail = &child->set.stream_dependents;
+    while(*tail)
+      tail = &(*tail)->next;
+
+    DEBUGASSERT(!*tail);
+    *tail = parent->set.stream_dependents;
+    parent->set.stream_dependents = 0;
+  }
+
+  tail = &parent->set.stream_dependents;
+  while(*tail) {
+    (*tail)->data->set.stream_depends_e = FALSE;
+    tail = &(*tail)->next;
+  }
+
+  DEBUGASSERT(!*tail);
+  *tail = dep;
+
+  child->set.stream_depends_on = parent;
+  child->set.stream_depends_e = exclusive;
+}
+
+void Curl_http2_remove_child(struct Curl_easy *parent, struct Curl_easy *child)
+{
+  struct Curl_http2_dep *last = 0;
+  struct Curl_http2_dep *data = parent->set.stream_dependents;
+  DEBUGASSERT(child->set.stream_depends_on == parent);
+
+  while(data && data->data != child) {
+    last = data;
+    data = data->next;
+  }
+
+  DEBUGASSERT(data);
+
+  if(data) {
+    if(last) {
+      last->next = data->next;
+    }
+    else {
+      parent->set.stream_dependents = data->next;
+    }
+    free(data);
+  }
+
+  child->set.stream_depends_on = 0;
+  child->set.stream_depends_e = FALSE;
+}
+
+void Curl_http2_cleanup_dependencies(struct Curl_easy *data)
+{
+  while(data->set.stream_dependents) {
+    struct Curl_easy *tmp = data->set.stream_dependents->data;
+    Curl_http2_remove_child(data, tmp);
+    if(data->set.stream_depends_on)
+      Curl_http2_add_child(data->set.stream_depends_on, tmp, FALSE);
+  }
+
+  if(data->set.stream_depends_on)
+    Curl_http2_remove_child(data->set.stream_depends_on, data);
+}
+
 #else /* !USE_NGHTTP2 */
 
 /* Satisfy external references even if http2 is not compiled in. */
