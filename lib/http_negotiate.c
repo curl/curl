@@ -55,7 +55,7 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
     passwdp = conn->http_proxy.passwd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
               data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
-    host = conn->proxy.name;
+    host = conn->http_proxy.name;
     neg_ctx = &data->state.proxyneg;
   }
   else {

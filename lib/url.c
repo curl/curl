@@ -3017,6 +3017,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 
   free_fixed_hostname(&conn->host);
   free_fixed_hostname(&conn->conn_to_host);
+  free_fixed_hostname(&conn->proxy);
   free_fixed_hostname(&conn->http_proxy.host);
   free_fixed_hostname(&conn->socks_proxy.host);
 
@@ -3221,9 +3222,9 @@ proxy_info_matches(const struct proxy_info* data,
 {
   if((data->proxytype == needle->proxytype) &&
      (data->port == needle->port) &&
-     strcasecompare(data->host.name, needle->host.name) &&
-     strcasecompare(data->user, needle->user) &&
-     strcasecompare(data->passwd, needle->passwd))
+     Curl_safe_strcasecompare(data->host.name, needle->host.name) &&
+     Curl_safe_strcasecompare(data->user, needle->user) &&
+     Curl_safe_strcasecompare(data->passwd, needle->passwd))
     return TRUE;
 
   return FALSE;
@@ -5850,6 +5851,10 @@ static void reuse_conn(struct connectdata *old_conn,
 {
   free_fixed_hostname(&old_conn->http_proxy.host);
   free_fixed_hostname(&old_conn->socks_proxy.host);
+  free_fixed_hostname(&old_conn->proxy);
+
+  free(old_conn->http_proxy.host.rawalloc);
+  free(old_conn->socks_proxy.host.rawalloc);
   free(old_conn->proxy.rawalloc);
 
   /* free the SSL config struct from this connection struct as this was
