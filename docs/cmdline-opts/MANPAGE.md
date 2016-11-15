@@ -24,7 +24,7 @@ Each file has a set of meta-data and a body of text.
     Protocols: (space separated list for which protocols this option works)
     Added: (version number in which this was added)
     Mutexed: (space separated list of options this overrides)
-    Requires: (space separated list of features this option requres)
+    Requires: (space separated list of features this option requires)
     See-also: (space separated list of related options)
     Help: (short text for the --help output for this option)
     --- (end of meta-data)
