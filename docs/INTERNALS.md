@@ -973,7 +973,7 @@ for older and later versions as things don't change drastically that often.
   to work with.
 
   `->scheme` is the URL scheme name, usually spelled out in uppercase. That's
-  "HTTP" or "FTP" etc. SSL versions of the protcol need its own `Curl_handler`
+  "HTTP" or "FTP" etc. SSL versions of the protocol need its own `Curl_handler`
   setup so HTTPS separate from HTTP.
 
   `->setup_connection` is called to allow the protocol code to allocate
