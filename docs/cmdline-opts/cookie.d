@@ -1,7 +1,8 @@
 Short: b
 Long: cookie
-Arg: <name=data>
+Arg: <data>
 Protocols: HTTP
+Help: Send cookies from string/file
 ---
 Pass the data to the HTTP server in the Cookie header. It is supposedly
 the data previously received from the server in a "Set-Cookie:" line.  The

@@ -26,6 +26,7 @@ Each file has a set of meta-data and a body of text.
     Mutexed: (space separated list of options this overrides)
     Requires: (space separated list of features this option requres)
     See-also: (space separated list of related options)
+    Help: (short text for the --help output for this option)
     --- (end of meta-data)
 
 ### Body
@@ -37,11 +38,15 @@ correct markup that shows both short and long version.
 ## Header
 
 `page-header` is the nroff formatted file that will be output before the
-generated options output.
+generated options output for the master man page.
 
 ## Generate
 
-`perl gen.pl`
+`./gen.pl mainpage`
 
-This command outputs an nroff file, meant to become `curl.1`. The full curl
-man page.
+This command outputs a single huge nroff file, meant to become `curl.1`. The
+full curl man page.
+
+`./gen.pl listhelp`
+
+Generates a full `curl --help` output for all known command line options.

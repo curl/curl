@@ -8,6 +8,8 @@ closedir $dh;
 
 my %optshort;
 my %optlong;
+my %helplong;
+my %arglong;
 
 # get the long name version, return the man page string
 sub manpageify {
@@ -165,13 +167,20 @@ sub getshortlong {
     open(F, "<$f");
     my $short;
     my $long;
-
+    my $help;
+    my $arg;
     while(<F>) {
         if(/^Short: (.)/i) {
             $short=$1;
         }
         elsif(/^Long: (.*)/i) {
             $long=$1;
+        }
+        elsif(/^Help: (.*)/i) {
+            $help=$1;
+        }
+        elsif(/^Arg: (.*)/i) {
+            $arg=$1;
         }
         elsif(/^---/) {
             last;
@@ -183,6 +192,8 @@ sub getshortlong {
     }
     if($long) {
         $optlong{$long}=$short;
+        $helplong{$long}=$help;
+        $arglong{$long}=$arg;
     }
 }
 
@@ -202,15 +213,59 @@ sub header {
     printdesc(@d);
 }
 
+sub listhelp {
+    foreach my $f (sort keys %helplong) {
+        my $long = $f;
+        my $short = $optlong{$long};
+        my $opt;
+
+        if(defined($short) && $long) {
+            $opt = "-$short, --$long";
+        }
+        elsif($long && !$short) {
+            $opt = "    --$long";
+        }
+
+        my $arg = $arglong{$long};
+        if($arg) {
+            $opt .= " $arg";
+        }
+
+        printf " %-19s %s\n", $opt, $helplong{$f};
+    }
+}
+
+sub mainpage {
+    # show the page header
+    header();
+
+    # output docs for all options
+    foreach my $f (sort @s) {
+        single($f);
+    }
+}
+
+sub getargs {
+    my $f;
+    do {
+        $f = shift @ARGV;
+        if($f eq "mainpage") {
+            mainpage();
+            return;
+        }
+        elsif($f eq "listhelp") {
+            listhelp();
+            return;
+        }
+    } while($f);
+
+    print "Usage: gen.pl <mainpage/listhelp>\n";
+}
+
 #------------------------------------------------------------------------
 
 # learn all existing options
 indexoptions();
 
-# show the page header
-header();
+getargs();
 
-# output docs for all options
-foreach my $f (sort @s) {
-    single($f);
-}
