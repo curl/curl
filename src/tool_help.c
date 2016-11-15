@@ -86,6 +86,7 @@ static const char *const helptext[] = {
 #endif
   "     --expect100-timeout SECONDS How long to wait for 100-continue (H)",
   " -f, --fail          Fail silently (no output at all) on HTTP errors (H)",
+  "     --fail-early    Fail on first transfer error, do not continue",
   "     --false-start   Enable TLS False Start.",
   " -F, --form CONTENT  Specify HTTP multipart POST data (H)",
   "     --form-string STRING  Specify HTTP multipart POST data (H)",
