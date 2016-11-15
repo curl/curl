@@ -33,7 +33,7 @@ sub printdesc {
         if($d =~ /^[^ ]/) {
             for my $k (keys %optlong) {
                 my $l = manpageify($k);
-                $d =~ s/--$k(\s)/$l$1/;
+                $d =~ s/--$k([^a-z0-9_-])/$l$1/;
             }
         }
         print $d;
