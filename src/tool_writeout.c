@@ -52,6 +52,7 @@ typedef enum {
   VAR_FTP_ENTRY_PATH,
   VAR_REDIRECT_URL,
   VAR_SSL_VERIFY_RESULT,
+  VAR_PROXY_SSL_VERIFY_RESULT,
   VAR_EFFECTIVE_FILENAME,
   VAR_PRIMARY_IP,
   VAR_PRIMARY_PORT,
@@ -91,6 +92,7 @@ static const struct variable replacements[]={
   {"ftp_entry_path", VAR_FTP_ENTRY_PATH},
   {"redirect_url", VAR_REDIRECT_URL},
   {"ssl_verify_result", VAR_SSL_VERIFY_RESULT},
+  {"proxy_ssl_verify_result", VAR_PROXY_SSL_VERIFY_RESULT},
   {"filename_effective", VAR_EFFECTIVE_FILENAME},
   {"remote_ip", VAR_PRIMARY_IP},
   {"remote_port", VAR_PRIMARY_PORT},
@@ -249,6 +251,12 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
               case VAR_SSL_VERIFY_RESULT:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_SSL_VERIFYRESULT,
+                                     &longinfo))
+                  fprintf(stream, "%ld", longinfo);
+                break;
+              case VAR_PROXY_SSL_VERIFY_RESULT:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_PROXY_SSL_VERIFYRESULT,
                                      &longinfo))
                   fprintf(stream, "%ld", longinfo);
                 break;

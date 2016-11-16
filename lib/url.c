@@ -526,7 +526,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
 
   /* Set the default size of the SSL session ID cache */
-  set->ssl.max_ssl_sessions = 5;
+  set->general_ssl.max_ssl_sessions = 5;
 
   set->proxyport = CURL_DEFAULT_PROXY_PORT; /* from url.h */
   set->proxytype = CURLPROXY_HTTP; /* defaults to HTTP proxy */
@@ -540,14 +540,16 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
    * libcurl 7.10 introduced SSL verification *by default*! This needs to be
    * switched off unless wanted.
    */
-  set->ssl.verifypeer = TRUE;
-  set->ssl.verifyhost = TRUE;
+  set->ssl.primary.verifypeer = TRUE;
+  set->ssl.primary.verifyhost = TRUE;
 #ifdef USE_TLS_SRP
   set->ssl.authtype = CURL_TLSAUTH_NONE;
 #endif
   set->ssh_auth_types = CURLSSH_AUTH_DEFAULT; /* defaults to any auth
                                                       type */
-  set->ssl.sessionid = TRUE; /* session ID caching enabled by default */
+  set->general_ssl.sessionid = TRUE; /* session ID caching enabled by
+                                        default */
+  set->proxy_ssl = set->ssl;
 
   set->new_file_perms = 0644;    /* Default permissions */
   set->new_directory_perms = 0755; /* Default permissions */
@@ -570,14 +572,17 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 
   /* This is our preferred CA cert bundle/path since install time */
 #if defined(CURL_CA_BUNDLE)
-  result = setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
+  result = setstropt(&set->str[STRING_SSL_CAFILE_ORIG], CURL_CA_BUNDLE);
   if(result)
     return result;
 #endif
 #if defined(CURL_CA_PATH)
-  result = setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
+  result = setstropt(&set->str[STRING_SSL_CAPATH_ORIG], CURL_CA_PATH);
   if(result)
     return result;
+
+  result = setstropt(&set->str[STRING_SSL_CAPATH_PROXY],
+                     (char *) CURL_CA_PATH);
 #endif
 
   set->wildcardmatch  = FALSE;
@@ -697,7 +702,12 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection */
-    result = setstropt(&data->set.str[STRING_SSL_CIPHER_LIST],
+    result = setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_ORIG],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_SSL_CIPHER_LIST:
+    /* set a list of cipher we want to use in the SSL connection for proxy */
+    result = setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_PROXY],
                        va_arg(param, char *));
     break;
 
@@ -903,7 +913,18 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * implementations are lame.
      */
 #ifdef USE_SSL
-    data->set.ssl.version = va_arg(param, long);
+    data->set.ssl.primary.version = va_arg(param, long);
+#else
+    result = CURLE_UNKNOWN_OPTION;
+#endif
+    break;
+  case CURLOPT_PROXY_SSLVERSION:
+    /*
+     * Set explicit SSL version to try to connect with for proxy, as some SSL
+     * implementations are lame.
+     */
+#ifdef USE_SSL
+    data->set.proxy_ssl.primary.version = va_arg(param, long);
 #else
     result = CURLE_UNKNOWN_OPTION;
 #endif
@@ -1437,15 +1458,27 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
 
   case CURLOPT_PROXY:
     /*
-     * Set proxy server:port to use as HTTP proxy.
+     * Set proxy server:port to use as proxy.
      *
-     * If the proxy is set to "" we explicitly say that we don't want to use a
-     * proxy (even though there might be environment variables saying so).
+     * If the proxy is set to "" (and CURLOPT_SOCKS_PROXY is set to "" or NULL)
+     * we explicitly say that we don't want to use a proxy
+     * (even though there might be environment variables saying so).
      *
      * Setting it to NULL, means no proxy but allows the environment variables
-     * to decide for us.
+     * to decide for us (if CURLOPT_SOCKS_PROXY setting it to NULL).
      */
     result = setstropt(&data->set.str[STRING_PROXY],
+                       va_arg(param, char *));
+    break;
+
+  case CURLOPT_SOCKS_PROXY:
+    /*
+     * Set proxy server:port to use as SOCKS proxy.
+     *
+     * If the proxy is set to "" or NULL we explicitly say that we don't want
+     * to use the socks proxy.
+     */
+    result = setstropt(&data->set.str[STRING_SOCKS_PROXY],
                        va_arg(param, char *));
     break;
 
@@ -1454,6 +1487,13 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Set proxy type. HTTP/HTTP_1_0/SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
      */
     data->set.proxytype = (curl_proxytype)va_arg(param, long);
+    break;
+
+  case CURLOPT_SOCKS_PROXYTYPE:
+    /*
+     * Set proxy type. SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
+     */
+    data->set.socks_proxytype = (curl_proxytype)va_arg(param, long);
     break;
 
   case CURLOPT_PROXY_TRANSFER_MODE:
@@ -1913,35 +1953,70 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * String that holds file name of the SSL certificate to use
      */
-    result = setstropt(&data->set.str[STRING_CERT],
+    result = setstropt(&data->set.str[STRING_CERT_ORIG],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_SSLCERT:
+    /*
+     * String that holds file name of the SSL certificate to use for proxy
+     */
+    result = setstropt(&data->set.str[STRING_CERT_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_SSLCERTTYPE:
     /*
      * String that holds file type of the SSL certificate to use
      */
-    result = setstropt(&data->set.str[STRING_CERT_TYPE],
+    result = setstropt(&data->set.str[STRING_CERT_TYPE_ORIG],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_SSLCERTTYPE:
+    /*
+     * String that holds file type of the SSL certificate to use for proxy
+     */
+    result = setstropt(&data->set.str[STRING_CERT_TYPE_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_SSLKEY:
     /*
      * String that holds file name of the SSL key to use
      */
-    result = setstropt(&data->set.str[STRING_KEY],
+    result = setstropt(&data->set.str[STRING_KEY_ORIG],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_SSLKEY:
+    /*
+     * String that holds file name of the SSL key to use for proxy
+     */
+    result = setstropt(&data->set.str[STRING_KEY_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_SSLKEYTYPE:
     /*
      * String that holds file type of the SSL key to use
      */
-    result = setstropt(&data->set.str[STRING_KEY_TYPE],
+    result = setstropt(&data->set.str[STRING_KEY_TYPE_ORIG],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_SSLKEYTYPE:
+    /*
+     * String that holds file type of the SSL key to use for proxy
+     */
+    result = setstropt(&data->set.str[STRING_KEY_TYPE_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_KEYPASSWD:
     /*
      * String that holds the SSL or SSH private key password.
      */
-    result = setstropt(&data->set.str[STRING_KEY_PASSWD],
+    result = setstropt(&data->set.str[STRING_KEY_PASSWD_ORIG],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_KEYPASSWD:
+    /*
+     * String that holds the SSL private key password for proxy.
+     */
+    result = setstropt(&data->set.str[STRING_KEY_PASSWD_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_SSLENGINE:
@@ -2004,7 +2079,15 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Enable peer SSL verifying.
      */
-    data->set.ssl.verifypeer = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    data->set.ssl.primary.verifypeer = (0 != va_arg(param, long)) ?
+                                       TRUE : FALSE;
+    break;
+  case CURLOPT_PROXY_SSL_VERIFYPEER:
+    /*
+     * Enable peer SSL verifying for proxy.
+     */
+    data->set.proxy_ssl.primary.verifypeer =
+      (0 != va_arg(param, long))?TRUE:FALSE;
     break;
   case CURLOPT_SSL_VERIFYHOST:
     /*
@@ -2022,7 +2105,25 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
-    data->set.ssl.verifyhost = (0 != arg) ? TRUE : FALSE;
+    data->set.ssl.primary.verifyhost = (0 != arg) ? TRUE : FALSE;
+    break;
+  case CURLOPT_PROXY_SSL_VERIFYHOST:
+    /*
+     * Enable verification of the host name in the peer certificate for proxy
+     */
+    arg = va_arg(param, long);
+
+    /* Obviously people are not reading documentation and too many thought
+       this argument took a boolean when it wasn't and misused it. We thus ban
+       1 as a sensible input and we warn about its use. Then we only have the
+       2 action internally stored as TRUE. */
+
+    if(1 == arg) {
+      failf(data, "CURLOPT_SSL_VERIFYHOST no longer supports 1 as value!");
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+
+    data->set.proxy_ssl.primary.verifyhost = (0 != arg)?TRUE:FALSE;
     break;
   case CURLOPT_SSL_VERIFYSTATUS:
     /*
@@ -2033,7 +2134,8 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
       break;
     }
 
-    data->set.ssl.verifystatus = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    data->set.ssl.primary.verifystatus = (0 != va_arg(param, long)) ?
+                                         TRUE : FALSE;
     break;
   case CURLOPT_SSL_CTX_FUNCTION:
 #ifdef have_curlssl_ssl_ctx
@@ -2089,7 +2191,15 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Set CA info for SSL connection. Specify file name of the CA certificate
      */
-    result = setstropt(&data->set.str[STRING_SSL_CAFILE],
+    result = setstropt(&data->set.str[STRING_SSL_CAFILE_ORIG],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_CAINFO:
+    /*
+     * Set CA info SSL connection for proxy. Specify file name of the
+     * CA certificate
+     */
+    result = setstropt(&data->set.str[STRING_SSL_CAFILE_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_CAPATH:
@@ -2099,7 +2209,16 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * certificates which have been prepared using openssl c_rehash utility.
      */
     /* This does not work on windows. */
-    result = setstropt(&data->set.str[STRING_SSL_CAPATH],
+    result = setstropt(&data->set.str[STRING_SSL_CAPATH_ORIG],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_CAPATH:
+    /*
+     * Set CA path info for SSL connection proxy. Specify directory name of the
+     * CA certificates which have been prepared using openssl c_rehash utility.
+     */
+    /* This does not work on windows. */
+    result = setstropt(&data->set.str[STRING_SSL_CAPATH_PROXY],
                        va_arg(param, char *));
 #else
     result = CURLE_NOT_BUILT_IN;
@@ -2110,7 +2229,15 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Set CRL file info for SSL connection. Specify file name of the CRL
      * to check certificates revocation
      */
-    result = setstropt(&data->set.str[STRING_SSL_CRLFILE],
+    result = setstropt(&data->set.str[STRING_SSL_CRLFILE_ORIG],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_CRLFILE:
+    /*
+     * Set CRL file info for SSL connection for proxy. Specify file name of the
+     * CRL to check certificates revocation
+     */
+    result = setstropt(&data->set.str[STRING_SSL_CRLFILE_PROXY],
                        va_arg(param, char *));
     break;
   case CURLOPT_ISSUERCERT:
@@ -2118,7 +2245,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Set Issuer certificate file
      * to check certificates issuer
      */
-    result = setstropt(&data->set.str[STRING_SSL_ISSUERCERT],
+    result = setstropt(&data->set.str[STRING_SSL_ISSUERCERT_ORIG],
                        va_arg(param, char *));
     break;
   case CURLOPT_TELNETOPTIONS:
@@ -2199,7 +2326,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
       }
 #endif   /* CURL_DISABLE_HTTP */
       if(data->share->sslsession) {
-        data->set.ssl.max_ssl_sessions = data->share->max_ssl_sessions;
+        data->set.general_ssl.max_ssl_sessions = data->share->max_ssl_sessions;
         data->state.session = data->share->sslsession;
       }
       Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
@@ -2234,8 +2361,14 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
 
   case CURLOPT_SSL_OPTIONS:
     arg = va_arg(param, long);
-    data->set.ssl_enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
-    data->set.ssl_no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
+    data->set.ssl.enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
+    break;
+
+  case CURLOPT_PROXY_SSL_OPTIONS:
+    arg = va_arg(param, long);
+    data->set.proxy_ssl.enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.proxy_ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     break;
 
 #endif
@@ -2331,7 +2464,8 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_SSL_SESSIONID_CACHE:
-    data->set.ssl.sessionid = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    data->set.general_ssl.sessionid = (0 != va_arg(param, long)) ?
+                                      TRUE : FALSE;
     break;
 
 #ifdef USE_LIBSSH2
@@ -2598,22 +2732,42 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
 #ifdef USE_TLS_SRP
   case CURLOPT_TLSAUTH_USERNAME:
-    result = setstropt(&data->set.str[STRING_TLSAUTH_USERNAME],
+    result = setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_ORIG],
                        va_arg(param, char *));
-    if(data->set.str[STRING_TLSAUTH_USERNAME] && !data->set.ssl.authtype)
+    if(data->set.str[STRING_TLSAUTH_USERNAME_ORIG] && !data->set.ssl.authtype)
       data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
-  case CURLOPT_TLSAUTH_PASSWORD:
-    result = setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD],
+  case CURLOPT_PROXY_TLSAUTH_USERNAME:
+    result = setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_PROXY],
                        va_arg(param, char *));
-    if(data->set.str[STRING_TLSAUTH_USERNAME] && !data->set.ssl.authtype)
+    if(data->set.str[STRING_TLSAUTH_USERNAME_PROXY] &&
+       !data->set.proxy_ssl.authtype)
+      data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
+    break;
+  case CURLOPT_TLSAUTH_PASSWORD:
+    result = setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_ORIG],
+                       va_arg(param, char *));
+    if(data->set.str[STRING_TLSAUTH_USERNAME_ORIG] && !data->set.ssl.authtype)
       data->set.ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
+    break;
+  case CURLOPT_PROXY_TLSAUTH_PASSWORD:
+    result = setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_PROXY],
+                       va_arg(param, char *));
+    if(data->set.str[STRING_TLSAUTH_USERNAME_PROXY] &&
+       !data->set.proxy_ssl.authtype)
+      data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
   case CURLOPT_TLSAUTH_TYPE:
     if(strncasecompare((char *)va_arg(param, char *), "SRP", strlen("SRP")))
       data->set.ssl.authtype = CURL_TLSAUTH_SRP;
     else
       data->set.ssl.authtype = CURL_TLSAUTH_NONE;
+    break;
+  case CURLOPT_PROXY_TLSAUTH_TYPE:
+    if(strncasecompare((char *)va_arg(param, char *), "SRP", strlen("SRP")))
+      data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP;
+    else
+      data->set.proxy_ssl.authtype = CURL_TLSAUTH_NONE;
     break;
 #endif
   case CURLOPT_DNS_SERVERS:
@@ -2771,8 +2925,10 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->passwd);
   Curl_safefree(conn->oauth_bearer);
   Curl_safefree(conn->options);
-  Curl_safefree(conn->proxyuser);
-  Curl_safefree(conn->proxypasswd);
+  Curl_safefree(conn->http_proxy.user);
+  Curl_safefree(conn->socks_proxy.user);
+  Curl_safefree(conn->http_proxy.passwd);
+  Curl_safefree(conn->socks_proxy.passwd);
   Curl_safefree(conn->allocptr.proxyuserpwd);
   Curl_safefree(conn->allocptr.uagent);
   Curl_safefree(conn->allocptr.userpwd);
@@ -2786,7 +2942,9 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->trailer);
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->conn_to_host.rawalloc); /* host name buffer */
-  Curl_safefree(conn->proxy.rawalloc); /* proxy name buffer */
+  Curl_safefree(conn->secondaryhostname);
+  Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
+  Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
   Curl_safefree(conn->master_buffer);
 
   conn_reset_all_postponed_data(conn);
@@ -2798,7 +2956,8 @@ static void conn_free(struct connectdata *conn)
   conn->recv_pipe = NULL;
 
   Curl_safefree(conn->localdev);
-  Curl_free_ssl_config(&conn->ssl_config);
+  Curl_free_primary_ssl_config(&conn->ssl_config);
+  Curl_free_primary_ssl_config(&conn->proxy_ssl_config);
 
 #ifdef USE_UNIX_SOCKETS
   Curl_safefree(conn->unix_domain_socket);
@@ -2863,6 +3022,8 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
   free_fixed_hostname(&conn->host);
   free_fixed_hostname(&conn->conn_to_host);
   free_fixed_hostname(&conn->proxy);
+  free_fixed_hostname(&conn->http_proxy.host);
+  free_fixed_hostname(&conn->socks_proxy.host);
 
   Curl_ssl_close(conn, FIRSTSOCKET);
 
@@ -3058,6 +3219,21 @@ Curl_oldest_idle_connection(struct Curl_easy *data)
 
   return conn_candidate;
 }
+
+static bool
+proxy_info_matches(const struct proxy_info* data,
+                   const struct proxy_info* needle)
+{
+  if((data->proxytype == needle->proxytype) &&
+     (data->port == needle->port) &&
+     Curl_safe_strcasecompare(data->host.name, needle->host.name) &&
+     Curl_safe_strcasecompare(data->user, needle->user) &&
+     Curl_safe_strcasecompare(data->passwd, needle->passwd))
+    return TRUE;
+
+  return FALSE;
+}
+
 
 /*
  * This function finds the connection in the connection
@@ -3352,23 +3528,12 @@ ConnectionExists(struct Curl_easy *data,
           /* except protocols that have been upgraded via TLS */
           continue;
 
-      if(needle->handler->flags&PROTOPT_SSL) {
-        if((data->set.ssl.verifypeer != check->verifypeer) ||
-           (data->set.ssl.verifyhost != check->verifyhost))
-          continue;
-      }
-
-      if(needle->bits.proxy != check->bits.proxy)
-        /* don't do mixed proxy and non-proxy connections */
+      if(needle->bits.httpproxy != check->bits.httpproxy ||
+         needle->bits.socksproxy != check->bits.socksproxy)
         continue;
 
-      if(needle->bits.proxy &&
-         (needle->proxytype != check->proxytype ||
-          needle->bits.httpproxy != check->bits.httpproxy ||
-          needle->bits.tunnel_proxy != check->bits.tunnel_proxy ||
-          !strcasecompare(needle->proxy.name, check->proxy.name) ||
-          needle->port != check->port))
-        /* don't mix connections that use different proxies */
+      if(needle->bits.socksproxy && !proxy_info_matches(&needle->socks_proxy,
+                                                        &check->socks_proxy))
         continue;
 
       if(needle->bits.conn_to_host != check->bits.conn_to_host)
@@ -3380,6 +3545,33 @@ ConnectionExists(struct Curl_easy *data,
         /* don't mix connections that use the "connect to port" feature and
          * connections that don't use this feature */
         continue;
+
+      if(needle->bits.httpproxy) {
+        if(!proxy_info_matches(&needle->http_proxy, &check->http_proxy))
+          continue;
+
+        if(needle->bits.tunnel_proxy != check->bits.tunnel_proxy)
+          continue;
+
+        if(needle->http_proxy.proxytype == CURLPROXY_HTTPS) {
+          /* use https proxy */
+          if(needle->handler->flags&PROTOPT_SSL) {
+            /* use double layer ssl */
+            if(!Curl_ssl_config_matches(&needle->proxy_ssl_config,
+                                        &check->proxy_ssl_config))
+              continue;
+            if(check->proxy_ssl[FIRSTSOCKET].state != ssl_connection_complete)
+              continue;
+          }
+          else {
+            if(!Curl_ssl_config_matches(&needle->ssl_config,
+                                        &check->ssl_config))
+              continue;
+            if(check->ssl[FIRSTSOCKET].state != ssl_connection_complete)
+              continue;
+          }
+        }
+      }
 
       if(!canPipeline && check->inuse)
         /* this request can't be pipelined but the checked connection is
@@ -3417,10 +3609,11 @@ ConnectionExists(struct Curl_easy *data,
       }
 
       if(!needle->bits.httpproxy || (needle->handler->flags&PROTOPT_SSL) ||
-         (needle->bits.httpproxy && needle->bits.tunnel_proxy)) {
+         needle->bits.tunnel_proxy) {
         /* The requested connection does not use a HTTP proxy or it uses SSL or
-           it is a non-SSL protocol tunneled over the same HTTP proxy name and
-           port number */
+           it is a non-SSL protocol tunneled or it is a non-SSL protocol which
+           is allowed to be upgraded via TLS */
+
         if((strcasecompare(needle->handler->scheme, check->handler->scheme) ||
             (get_protocol_family(check->handler->protocol) ==
              needle->handler->protocol && check->tls_upgraded)) &&
@@ -3481,12 +3674,13 @@ ConnectionExists(struct Curl_easy *data,
 
         /* Same for Proxy NTLM authentication */
         if(wantProxyNTLMhttp) {
-          /* Both check->proxyuser and check->proxypasswd can be NULL */
-          if(!check->proxyuser || !check->proxypasswd)
+          /* Both check->http_proxy.user and check->http_proxy.passwd can be
+           * NULL */
+          if(!check->http_proxy.user || !check->http_proxy.passwd)
             continue;
 
-          if(strcmp(needle->proxyuser, check->proxyuser) ||
-             strcmp(needle->proxypasswd, check->proxypasswd))
+          if(strcmp(needle->http_proxy.user, check->http_proxy.user) ||
+             strcmp(needle->http_proxy.passwd, check->http_proxy.passwd))
             continue;
         }
         else if(check->proxyntlm.state != NTLMSTATE_NONE) {
@@ -3590,51 +3784,50 @@ ConnectionExists(struct Curl_easy *data,
    Note: this function's sub-functions call failf()
 
 */
-CURLcode Curl_connected_proxy(struct connectdata *conn,
-                              int sockindex)
+CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex)
 {
-  if(!conn->bits.proxy || sockindex)
+  CURLcode result = CURLE_OK;
+  /* if(!conn->bits.proxy || sockindex) */
     /* this magic only works for the primary socket as the secondary is used
        for FTP only and it has FTP specific magic in ftp.c */
-    return CURLE_OK;
+    /* return CURLE_OK; */
 
-  switch(conn->proxytype) {
+  if(conn->bits.socksproxy) {
 #ifndef CURL_DISABLE_PROXY
-  case CURLPROXY_SOCKS5:
-  case CURLPROXY_SOCKS5_HOSTNAME:
-    return Curl_SOCKS5(conn->proxyuser, conn->proxypasswd,
-                       conn->bits.conn_to_host ? conn->conn_to_host.name :
-                       conn->host.name,
-                       conn->bits.conn_to_port ? conn->conn_to_port :
-                       conn->remote_port,
-                       FIRSTSOCKET, conn);
+    const char * const host = conn->bits.conn_to_host ?
+                              conn->conn_to_host.name :
+                              conn->bits.httpproxy ?
+                              conn->http_proxy.host.name :
+                              sockindex == SECONDARYSOCKET ?
+                              conn->secondaryhostname : conn->host.name;
+    const int port = conn->bits.conn_to_port ? conn->conn_to_port :
+                     conn->bits.httpproxy ?
+                     (int)conn->http_proxy.port :
+                     sockindex == SECONDARYSOCKET ?
+                      conn->secondary_port : conn->remote_port;
+    conn->bits.socksproxy_connecting = TRUE;
+    switch(conn->socks_proxy.proxytype) {
+    case CURLPROXY_SOCKS5:
+    case CURLPROXY_SOCKS5_HOSTNAME:
+      result = Curl_SOCKS5(conn->socks_proxy.user, conn->socks_proxy.passwd,
+                         host, port, sockindex, conn);
+      break;
 
-  case CURLPROXY_SOCKS4:
-    return Curl_SOCKS4(conn->proxyuser,
-                       conn->bits.conn_to_host ? conn->conn_to_host.name :
-                       conn->host.name,
-                       conn->bits.conn_to_port ? conn->conn_to_port :
-                       conn->remote_port,
-                       FIRSTSOCKET, conn, FALSE);
+    case CURLPROXY_SOCKS4:
+    case CURLPROXY_SOCKS4A:
+      result = Curl_SOCKS4(conn->socks_proxy.user, host, port, sockindex,
+                           conn);
+      break;
 
-  case CURLPROXY_SOCKS4A:
-    return Curl_SOCKS4(conn->proxyuser,
-                       conn->bits.conn_to_host ? conn->conn_to_host.name :
-                       conn->host.name,
-                       conn->bits.conn_to_port ? conn->conn_to_port :
-                       conn->remote_port,
-                       FIRSTSOCKET, conn, TRUE);
-
+    default:
+      failf(conn->data, "unknown proxytype option given");
+      result = CURLE_COULDNT_CONNECT;
+    } /* switch proxytype */
+    conn->bits.socksproxy_connecting = FALSE;
 #endif /* CURL_DISABLE_PROXY */
-  case CURLPROXY_HTTP:
-  case CURLPROXY_HTTP_1_0:
-    /* do nothing here. handled later. */
-    break;
-  default:
-    break;
-  } /* switch proxytype */
+  }
 
-  return CURLE_OK;
+  return result;
 }
 
 /*
@@ -3645,7 +3838,9 @@ void Curl_verboseconnect(struct connectdata *conn)
 {
   if(conn->data->set.verbose)
     infof(conn->data, "Connected to %s (%s) port %ld (#%ld)\n",
-          conn->bits.proxy ? conn->proxy.dispname : conn->host.dispname,
+          conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
+          conn->bits.httpproxy ? conn->http_proxy.host.dispname :
+                             conn->host.dispname,
           conn->ip_addr_str, conn->port, conn->connection_id);
 }
 #endif
@@ -3735,9 +3930,13 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
 
   if(!conn->bits.protoconnstart) {
 
-    result = Curl_proxy_connect(conn);
+    result = Curl_proxy_connect(conn, FIRSTSOCKET);
     if(result)
       return result;
+
+    if(CONNECT_FIRSTSOCKET_PROXY_SSL())
+      /* wait for HTTPS proxy SSL initialization to complete */
+      return CURLE_OK;
 
     if(conn->bits.tunnel_proxy && conn->bits.httpproxy &&
        (conn->tunnel_state[FIRSTSOCKET] != TUNNEL_COMPLETE))
@@ -3897,12 +4096,14 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->data = data; /* Setup the association between this connection
                         and the Curl_easy */
 
-  conn->proxytype = data->set.proxytype; /* type */
+  conn->http_proxy.proxytype = data->set.proxytype;
+  conn->socks_proxy.proxytype = data->set.socks_proxytype;
 
 #ifdef CURL_DISABLE_PROXY
 
   conn->bits.proxy = FALSE;
   conn->bits.httpproxy = FALSE;
+  conn->bits.socksproxy = FALSE;
   conn->bits.proxy_user_passwd = FALSE;
   conn->bits.tunnel_proxy = FALSE;
 
@@ -3913,11 +4114,20 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->bits.proxy = (data->set.str[STRING_PROXY] &&
                       *data->set.str[STRING_PROXY]) ? TRUE : FALSE;
   conn->bits.httpproxy = (conn->bits.proxy &&
-                          (conn->proxytype == CURLPROXY_HTTP ||
-                           conn->proxytype == CURLPROXY_HTTP_1_0)) ?
-                          TRUE : FALSE;
-  conn->bits.proxy_user_passwd = (data->set.str[STRING_PROXYUSERNAME]) ?
-                                 TRUE : FALSE;
+                          (conn->http_proxy.proxytype == CURLPROXY_HTTP ||
+                           conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0 ||
+                           conn->http_proxy.proxytype == CURLPROXY_HTTPS)) ?
+                           TRUE : FALSE;
+  conn->bits.socksproxy = (conn->bits.proxy &&
+                           !conn->bits.httpproxy) ? TRUE : FALSE;
+
+  if(data->set.str[STRING_SOCKS_PROXY] && *data->set.str[STRING_SOCKS_PROXY]) {
+    conn->bits.proxy = TRUE;
+    conn->bits.socksproxy = TRUE;
+  }
+
+  conn->bits.proxy_user_passwd =
+    (data->set.str[STRING_PROXYUSERNAME]) ? TRUE : FALSE;
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
 
 #endif /* CURL_DISABLE_PROXY */
@@ -3926,8 +4136,10 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
 
-  conn->verifypeer = data->set.ssl.verifypeer;
-  conn->verifyhost = data->set.ssl.verifyhost;
+  conn->ssl_config.verifypeer = data->set.ssl.primary.verifypeer;
+  conn->ssl_config.verifyhost = data->set.ssl.primary.verifyhost;
+  conn->proxy_ssl_config.verifypeer = data->set.proxy_ssl.primary.verifypeer;
+  conn->proxy_ssl_config.verifyhost = data->set.proxy_ssl.primary.verifyhost;
 
   conn->ip_version = data->set.ipver;
 
@@ -4659,7 +4871,8 @@ static char *detect_proxy(struct connectdata *conn)
  * that may exist registered to the same proxy host.
  */
 static CURLcode parse_proxy(struct Curl_easy *data,
-                            struct connectdata *conn, char *proxy)
+                            struct connectdata *conn, char *proxy,
+                            curl_proxytype proxytype)
 {
   char *prox_portno;
   char *endofprot;
@@ -4668,6 +4881,10 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   char *proxyptr;
   char *portptr;
   char *atsign;
+  long port = -1;
+  char *proxyuser = NULL;
+  char *proxypasswd = NULL;
+  bool sockstype;
 
   /* We do the proxy host string parsing here. We want the host name and the
    * port name. Accept a protocol:// prefix
@@ -4677,14 +4894,16 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   endofprot = strstr(proxy, "://");
   if(endofprot) {
     proxyptr = endofprot+3;
-    if(checkprefix("socks5h", proxy))
-      conn->proxytype = CURLPROXY_SOCKS5_HOSTNAME;
+    if(checkprefix("https", proxy))
+      proxytype = CURLPROXY_HTTPS;
+    else if(checkprefix("socks5h", proxy))
+      proxytype = CURLPROXY_SOCKS5_HOSTNAME;
     else if(checkprefix("socks5", proxy))
-      conn->proxytype = CURLPROXY_SOCKS5;
+      proxytype = CURLPROXY_SOCKS5;
     else if(checkprefix("socks4a", proxy))
-      conn->proxytype = CURLPROXY_SOCKS4A;
+      proxytype = CURLPROXY_SOCKS4A;
     else if(checkprefix("socks4", proxy) || checkprefix("socks", proxy))
-      conn->proxytype = CURLPROXY_SOCKS4;
+      proxytype = CURLPROXY_SOCKS4;
     else if(checkprefix("http:", proxy))
       ; /* leave it as HTTP or HTTP/1.0 */
     else {
@@ -4696,54 +4915,20 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   else
     proxyptr = proxy; /* No xxx:// head: It's a HTTP proxy */
 
+  sockstype = proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
+              proxytype == CURLPROXY_SOCKS5 ||
+              proxytype == CURLPROXY_SOCKS4A ||
+              proxytype == CURLPROXY_SOCKS4;
+
   /* Is there a username and password given in this proxy url? */
   atsign = strchr(proxyptr, '@');
   if(atsign) {
-    char *proxyuser = NULL;
-    char *proxypasswd = NULL;
     CURLcode result =
       parse_login_details(proxyptr, atsign - proxyptr,
-                          &proxyuser, &proxypasswd, NULL);
-    if(!result) {
-      /* found user and password, rip them out.  note that we are
-         unescaping them, as there is otherwise no way to have a
-         username or password with reserved characters like ':' in
-         them. */
-      Curl_safefree(conn->proxyuser);
-      if(proxyuser && strlen(proxyuser) < MAX_CURL_USER_LENGTH)
-        result = Curl_urldecode(data, proxyuser, 0, &conn->proxyuser, NULL,
-                                FALSE);
-      else {
-        conn->proxyuser = strdup("");
-        if(!conn->proxyuser)
-          result = CURLE_OUT_OF_MEMORY;
-      }
-
-      if(!result) {
-        Curl_safefree(conn->proxypasswd);
-        if(proxypasswd && strlen(proxypasswd) < MAX_CURL_PASSWORD_LENGTH)
-          result = Curl_urldecode(data, proxypasswd, 0,
-                                  &conn->proxypasswd, NULL, FALSE);
-        else {
-          conn->proxypasswd = strdup("");
-          if(!conn->proxypasswd)
-            result = CURLE_OUT_OF_MEMORY;
-        }
-      }
-
-      if(!result) {
-        conn->bits.proxy_user_passwd = TRUE; /* enable it */
-        atsign++; /* the right side of the @-letter */
-
-        proxyptr = atsign; /* now use this instead */
-      }
-    }
-
-    free(proxyuser);
-    free(proxypasswd);
-
+                              &proxyuser, &proxypasswd, NULL);
     if(result)
       return result;
+    proxyptr = atsign + 1;
   }
 
   /* start scanning for port number at this point */
@@ -4780,7 +4965,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   prox_portno = strchr(portptr, ':');
   if(prox_portno) {
     char *endp = NULL;
-    long port = 0;
+
     *prox_portno = 0x0; /* cut off number from host name */
     prox_portno ++;
     /* now set the local port number */
@@ -4814,15 +4999,53 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     if(data->set.proxyport)
       /* None given in the proxy string, then get the default one if it is
          given */
-      conn->port = data->set.proxyport;
+      port = data->set.proxyport;
   }
 
-  /* now, clone the cleaned proxy host name */
-  conn->proxy.rawalloc = strdup(proxyptr);
-  conn->proxy.name = conn->proxy.rawalloc;
+  if(*proxyptr) {
+    struct proxy_info *proxyinfo =
+      sockstype ? &conn->socks_proxy : &conn->http_proxy;
+    proxyinfo->proxytype = proxytype;
 
-  if(!conn->proxy.rawalloc)
-    return CURLE_OUT_OF_MEMORY;
+    if(proxyuser) {
+      /* found user and password, rip them out.  note that we are unescaping
+         them, as there is otherwise no way to have a username or password
+         with reserved characters like ':' in them. */
+      Curl_safefree(proxyinfo->user);
+      proxyinfo->user = curl_easy_unescape(data, proxyuser, 0, NULL);
+
+      if(!proxyinfo->user)
+        return CURLE_OUT_OF_MEMORY;
+
+      Curl_safefree(proxyinfo->passwd);
+      if(proxypasswd && strlen(proxypasswd) < MAX_CURL_PASSWORD_LENGTH)
+        proxyinfo->passwd = curl_easy_unescape(data, proxypasswd, 0, NULL);
+      else
+        proxyinfo->passwd = strdup("");
+
+      if(!proxyinfo->passwd)
+        return CURLE_OUT_OF_MEMORY;
+
+      conn->bits.proxy_user_passwd = TRUE; /* enable it */
+    }
+
+    if(port >= 0) {
+      proxyinfo->port = port;
+      if(conn->port < 0 || sockstype || !conn->socks_proxy.host.rawalloc)
+        conn->port = port;
+    }
+
+    /* now, clone the cleaned proxy host name */
+    Curl_safefree(proxyinfo->host.rawalloc);
+    proxyinfo->host.rawalloc = strdup(proxyptr);
+    proxyinfo->host.name = proxyinfo->host.rawalloc;
+
+    if(!proxyinfo->host.rawalloc)
+      return CURLE_OUT_OF_MEMORY;
+  }
+
+  Curl_safefree(proxyuser);
+  Curl_safefree(proxypasswd);
 
   return CURLE_OK;
 }
@@ -4848,10 +5071,11 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
     proxypasswd[MAX_CURL_PASSWORD_LENGTH-1] = '\0'; /*To be on safe side*/
   }
 
-  result = Curl_urldecode(data, proxyuser, 0, &conn->proxyuser, NULL, FALSE);
+  result = Curl_urldecode(data, proxyuser, 0, &conn->http_proxy.user, NULL,
+                          FALSE);
   if(!result)
-    result = Curl_urldecode(data, proxypasswd, 0, &conn->proxypasswd, NULL,
-                            FALSE);
+    result = Curl_urldecode(data, proxypasswd, 0, &conn->http_proxy.passwd,
+                            NULL, FALSE);
   return result;
 }
 #endif /* CURL_DISABLE_PROXY */
@@ -5579,7 +5803,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
     }
     else
 #endif
-    if(!conn->proxy.name || !*conn->proxy.name) {
+    if(!conn->bits.proxy) {
       struct hostname *connhost;
       if(conn->bits.conn_to_host)
         connhost = &conn->conn_to_host;
@@ -5611,8 +5835,11 @@ static CURLcode resolve_server(struct Curl_easy *data,
     else {
       /* This is a proxy that hasn't been resolved yet. */
 
+      struct hostname * const host = conn->bits.socksproxy ?
+        &conn->socks_proxy.host : &conn->http_proxy.host;
+
       /* resolve proxy */
-      rc = Curl_resolv_timeout(conn, conn->proxy.name, (int)conn->port,
+      rc = Curl_resolv_timeout(conn, host->name, (int)conn->port,
                                &hostaddr, timeout_ms);
 
       if(rc == CURLRESOLV_PENDING)
@@ -5622,7 +5849,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
         result = CURLE_OPERATION_TIMEDOUT;
 
       else if(!hostaddr) {
-        failf(data, "Couldn't resolve proxy '%s'", conn->proxy.dispname);
+        failf(data, "Couldn't resolve proxy '%s'", host->dispname);
         result = CURLE_COULDNT_RESOLVE_PROXY;
         /* don't return yet, we need to clean up the timeout first */
       }
@@ -5642,12 +5869,18 @@ static CURLcode resolve_server(struct Curl_easy *data,
 static void reuse_conn(struct connectdata *old_conn,
                        struct connectdata *conn)
 {
+  free_fixed_hostname(&old_conn->http_proxy.host);
+  free_fixed_hostname(&old_conn->socks_proxy.host);
   free_fixed_hostname(&old_conn->proxy);
+
+  free(old_conn->http_proxy.host.rawalloc);
+  free(old_conn->socks_proxy.host.rawalloc);
   free(old_conn->proxy.rawalloc);
 
   /* free the SSL config struct from this connection struct as this was
      allocated in vain and is targeted for destruction */
-  Curl_free_ssl_config(&old_conn->ssl_config);
+  Curl_free_primary_ssl_config(&old_conn->ssl_config);
+  Curl_free_primary_ssl_config(&old_conn->proxy_ssl_config);
 
   conn->data = old_conn->data;
 
@@ -5667,12 +5900,18 @@ static void reuse_conn(struct connectdata *old_conn,
   conn->bits.proxy_user_passwd = old_conn->bits.proxy_user_passwd;
   if(conn->bits.proxy_user_passwd) {
     /* use the new proxy user name and proxy password though */
-    Curl_safefree(conn->proxyuser);
-    Curl_safefree(conn->proxypasswd);
-    conn->proxyuser = old_conn->proxyuser;
-    conn->proxypasswd = old_conn->proxypasswd;
-    old_conn->proxyuser = NULL;
-    old_conn->proxypasswd = NULL;
+    Curl_safefree(conn->http_proxy.user);
+    Curl_safefree(conn->socks_proxy.user);
+    Curl_safefree(conn->http_proxy.passwd);
+    Curl_safefree(conn->socks_proxy.passwd);
+    conn->http_proxy.user = old_conn->http_proxy.user;
+    conn->socks_proxy.user = old_conn->socks_proxy.user;
+    conn->http_proxy.passwd = old_conn->http_proxy.passwd;
+    conn->socks_proxy.passwd = old_conn->socks_proxy.passwd;
+    old_conn->http_proxy.user = NULL;
+    old_conn->socks_proxy.user = NULL;
+    old_conn->http_proxy.passwd = NULL;
+    old_conn->socks_proxy.passwd = NULL;
   }
 
   /* host can change, when doing keepalive with a proxy or if the case is
@@ -5698,8 +5937,10 @@ static void reuse_conn(struct connectdata *old_conn,
 
   Curl_safefree(old_conn->user);
   Curl_safefree(old_conn->passwd);
-  Curl_safefree(old_conn->proxyuser);
-  Curl_safefree(old_conn->proxypasswd);
+  Curl_safefree(old_conn->http_proxy.user);
+  Curl_safefree(old_conn->socks_proxy.user);
+  Curl_safefree(old_conn->http_proxy.passwd);
+  Curl_safefree(old_conn->socks_proxy.passwd);
   Curl_safefree(old_conn->localdev);
 
   Curl_llist_destroy(old_conn->send_pipe, NULL);
@@ -5744,6 +5985,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   char *options = NULL;
   bool reuse;
   char *proxy = NULL;
+  char *socksproxy = NULL;
   bool prot_missing = FALSE;
   bool connections_available = TRUE;
   bool force_reuse = FALSE;
@@ -5910,12 +6152,22 @@ static CURLcode create_conn(struct Curl_easy *data,
     }
   }
 
+  if(data->set.str[STRING_SOCKS_PROXY]) {
+    socksproxy = strdup(data->set.str[STRING_SOCKS_PROXY]);
+    /* if global socks proxy is set, this is it */
+    if(NULL == socksproxy) {
+      failf(data, "memory shortage");
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+  }
+
   if(data->set.str[STRING_NOPROXY] &&
      check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY])) {
-    free(proxy);  /* proxy is in exception list */
-    proxy = NULL;
+    Curl_safefree(proxy);
+    Curl_safefree(socksproxy);
   }
-  else if(!proxy)
+  else if(!proxy && !socksproxy)
     proxy = detect_proxy(conn);
 
 #ifdef USE_UNIX_SOCKETS
@@ -5937,23 +6189,36 @@ static CURLcode create_conn(struct Curl_easy *data,
                      protocol doesn't work with network */
     proxy = NULL;
   }
+  if(socksproxy && (!*socksproxy ||
+                    (conn->handler->flags & PROTOPT_NONETWORK))) {
+    free(socksproxy);  /* Don't bother with an empty socks proxy string or if
+                          the protocol doesn't work with network */
+    socksproxy = NULL;
+  }
 
   /***********************************************************************
    * If this is supposed to use a proxy, we need to figure out the proxy host
    * name, proxy type and port number, so that we can re-use an existing
    * connection that may exist registered to the same proxy host.
    ***********************************************************************/
-  if(proxy) {
-    result = parse_proxy(data, conn, proxy);
+  if(proxy || socksproxy) {
+    if(proxy) {
+      result = parse_proxy(data, conn, proxy, conn->http_proxy.proxytype);
+      Curl_safefree(proxy); /* parse_proxy copies the proxy string */
+      if(result)
+        goto out;
+    }
 
-    free(proxy); /* parse_proxy copies the proxy string */
-    proxy = NULL;
+    if(socksproxy) {
+      result = parse_proxy(data, conn, socksproxy,
+                           conn->socks_proxy.proxytype);
+      /* parse_proxy copies the socks proxy string */
+      Curl_safefree(socksproxy);
+      if(result)
+        goto out;
+    }
 
-    if(result)
-      goto out;
-
-    if((conn->proxytype == CURLPROXY_HTTP) ||
-       (conn->proxytype == CURLPROXY_HTTP_1_0)) {
+    if(conn->http_proxy.host.rawalloc) {
 #ifdef CURL_DISABLE_HTTP
       /* asking for a HTTP proxy is a bit funny when HTTP is disabled... */
       result = CURLE_UNSUPPORTED_PROTOCOL;
@@ -5972,12 +6237,34 @@ static CURLcode create_conn(struct Curl_easy *data,
       conn->bits.httpproxy = FALSE; /* not a HTTP proxy */
       conn->bits.tunnel_proxy = FALSE; /* no tunneling if not HTTP */
     }
-    conn->bits.proxy = TRUE;
+
+    if(conn->socks_proxy.host.rawalloc) {
+      if(!conn->http_proxy.host.rawalloc) {
+        /* once a socks proxy */
+        if(!conn->socks_proxy.user) {
+          conn->socks_proxy.user = conn->http_proxy.user;
+          conn->http_proxy.user = NULL;
+          Curl_safefree(conn->socks_proxy.passwd);
+          conn->socks_proxy.passwd = conn->http_proxy.passwd;
+          conn->http_proxy.passwd = NULL;
+        }
+      }
+      conn->bits.socksproxy = TRUE;
+    }
+    else
+      conn->bits.socksproxy = FALSE; /* not a socks proxy */
   }
   else {
+    conn->bits.socksproxy = FALSE;
+    conn->bits.httpproxy = FALSE;
+  }
+  conn->bits.proxy = conn->bits.httpproxy || conn->bits.socksproxy;
+
+  if(!conn->bits.proxy) {
     /* we aren't using the proxy after all... */
     conn->bits.proxy = FALSE;
     conn->bits.httpproxy = FALSE;
+    conn->bits.socksproxy = FALSE;
     conn->bits.proxy_user_passwd = FALSE;
     conn->bits.tunnel_proxy = FALSE;
   }
@@ -6113,20 +6400,51 @@ static CURLcode create_conn(struct Curl_easy *data,
      that will be freed as part of the Curl_easy struct, but all cloned
      copies will be separately allocated.
   */
-  data->set.ssl.CApath = data->set.str[STRING_SSL_CAPATH];
-  data->set.ssl.CAfile = data->set.str[STRING_SSL_CAFILE];
-  data->set.ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE];
-  data->set.ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
-  data->set.ssl.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
-  data->set.ssl.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
-  data->set.ssl.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST];
-  data->set.ssl.clientcert = data->set.str[STRING_CERT];
+  data->set.ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_ORIG];
+  data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
+  data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_ORIG];
+  data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
+  data->set.ssl.primary.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
+  data->set.proxy_ssl.primary.random_file =
+    data->set.str[STRING_SSL_RANDOM_FILE];
+  data->set.ssl.primary.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
+  data->set.proxy_ssl.primary.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
+  data->set.ssl.primary.cipher_list =
+    data->set.str[STRING_SSL_CIPHER_LIST_ORIG];
+  data->set.proxy_ssl.primary.cipher_list =
+    data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
+
+  data->set.ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_ORIG];
+  data->set.proxy_ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_PROXY];
+  data->set.ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_ORIG];
+  data->set.proxy_ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_PROXY];
+  data->set.ssl.cert = data->set.str[STRING_CERT_ORIG];
+  data->set.proxy_ssl.cert = data->set.str[STRING_CERT_PROXY];
+  data->set.ssl.cert_type = data->set.str[STRING_CERT_TYPE_ORIG];
+  data->set.proxy_ssl.cert_type = data->set.str[STRING_CERT_TYPE_PROXY];
+  data->set.ssl.key = data->set.str[STRING_KEY_ORIG];
+  data->set.proxy_ssl.key = data->set.str[STRING_KEY_PROXY];
+  data->set.ssl.key_type = data->set.str[STRING_KEY_TYPE_ORIG];
+  data->set.proxy_ssl.key_type = data->set.str[STRING_KEY_TYPE_PROXY];
+  data->set.ssl.key_passwd = data->set.str[STRING_KEY_PASSWD_ORIG];
+  data->set.proxy_ssl.key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
+  data->set.ssl.primary.clientcert = data->set.str[STRING_CERT_ORIG];
+  data->set.proxy_ssl.primary.clientcert = data->set.str[STRING_CERT_PROXY];
 #ifdef USE_TLS_SRP
-  data->set.ssl.username = data->set.str[STRING_TLSAUTH_USERNAME];
-  data->set.ssl.password = data->set.str[STRING_TLSAUTH_PASSWORD];
+  data->set.ssl.username = data->set.str[STRING_TLSAUTH_USERNAME_ORIG];
+  data->set.proxy_ssl.username = data->set.str[STRING_TLSAUTH_USERNAME_PROXY];
+  data->set.ssl.password = data->set.str[STRING_TLSAUTH_PASSWORD_ORIG];
+  data->set.proxy_ssl.password = data->set.str[STRING_TLSAUTH_PASSWORD_PROXY];
 #endif
 
-  if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config)) {
+  if(!Curl_clone_primary_ssl_config(&data->set.ssl.primary,
+     &conn->ssl_config)) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  if(!Curl_clone_primary_ssl_config(&data->set.proxy_ssl.primary,
+                                    &conn->proxy_ssl_config)) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
@@ -6183,7 +6501,9 @@ static CURLcode create_conn(struct Curl_easy *data,
     infof(data, "Re-using existing connection! (#%ld) with %s %s\n",
           conn->connection_id,
           conn->bits.proxy?"proxy":"host",
-          conn->proxy.name?conn->proxy.dispname:conn->host.dispname);
+          conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
+          conn->http_proxy.host.name ? conn->http_proxy.host.dispname :
+                                       conn->host.dispname);
   }
   else {
     /* We have decided that we want a new connection. However, we may not
@@ -6314,6 +6634,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   free(options);
   free(passwd);
   free(user);
+  free(socksproxy);
   free(proxy);
   return result;
 }

@@ -51,11 +51,11 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   struct negotiatedata *neg_ctx;
 
   if(proxy) {
-    userp = conn->proxyuser;
-    passwdp = conn->proxypasswd;
+    userp = conn->http_proxy.user;
+    passwdp = conn->http_proxy.passwd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
               data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
-    host = conn->proxy.name;
+    host = conn->http_proxy.host.name;
     neg_ctx = &data->state.proxyneg;
   }
   else {
