@@ -372,11 +372,11 @@ mbed_connect_step1(struct connectdata *conn,
                                 mbedtls_ssl_list_ciphersuites());
 
   /* Check if there's a cached ID we can/should use here! */
-  if(conn->ssl_config.sessionid) {
+  if(data->set.general_ssl.sessionid) {
     void *old_session = NULL;
 
     Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, &old_session, NULL)) {
+    if(!Curl_ssl_getsessionid(conn, &old_session, NULL, sockindex)) {
       ret = mbedtls_ssl_set_session(&connssl->ssl, old_session);
       if(ret) {
         Curl_ssl_sessionid_unlock(conn);
@@ -613,7 +613,7 @@ mbed_connect_step3(struct connectdata *conn,
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-  if(conn->ssl_config.sessionid) {
+  if(data->set.general_ssl.sessionid) {
     int ret;
     mbedtls_ssl_session *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
@@ -632,10 +632,10 @@ mbed_connect_step3(struct connectdata *conn,
 
     /* If there's already a matching session in the cache, delete it */
     Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL))
+    if(!Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL, sockindex))
       Curl_ssl_delsessionid(conn, old_ssl_sessionid);
 
-    retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0);
+    retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0, sockindex);
     Curl_ssl_sessionid_unlock(conn);
     if(retcode) {
       free(our_ssl_sessionid);

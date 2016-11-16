@@ -142,9 +142,9 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   connssl->cred = NULL;
 
   /* check for an existing re-usable credential handle */
-  if(conn->ssl_config.sessionid) {
+  if(data->set.general_ssl.sessionid) {
     Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL)) {
+    if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL, sockindex)) {
       connssl->cred = old_cred;
       infof(data, "schannel: re-using existing credential handle\n");
 
@@ -161,7 +161,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     memset(&schannel_cred, 0, sizeof(schannel_cred));
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
 
-    if(data->set.ssl.verifypeer) {
+    if(conn->ssl_config.verifypeer) {
 #ifdef _WIN32_WCE
       /* certificate validation on CE doesn't seem to work right; we'll
          do it following a more manual process. */
@@ -170,13 +170,14 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         SCH_CRED_IGNORE_REVOCATION_OFFLINE;
 #else
       schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
-      if(data->set.ssl_no_revoke)
+      /* TODO s/data->set.ssl.no_revoke/SSL_SET_OPTION(no_revoke)/g */
+      if(data->set.ssl.no_revoke)
         schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
                                  SCH_CRED_IGNORE_REVOCATION_OFFLINE;
       else
         schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
 #endif
-      if(data->set.ssl_no_revoke)
+      if(data->set.ssl.no_revoke)
         infof(data, "schannel: disabled server certificate revocation "
                     "checks\n");
       else
@@ -189,14 +190,14 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       infof(data, "schannel: disabled server certificate revocation checks\n");
     }
 
-    if(!data->set.ssl.verifyhost) {
+    if(!conn->ssl_config.verifyhost) {
       schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
       infof(data, "schannel: verifyhost setting prevents Schannel from "
             "comparing the supplied target name with the subject "
             "names in server certificates. Also disables SNI.\n");
     }
 
-    switch(data->set.ssl.version) {
+    switch(conn->ssl_config.version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_0_CLIENT |
@@ -628,7 +629,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 #ifdef _WIN32_WCE
   /* Windows CE doesn't do any server certificate validation.
      We have to do it manually. */
-  if(data->set.ssl.verifypeer)
+  if(conn->ssl_config.verifypeer)
     return verify_certificate(conn, sockindex);
 #endif
 
@@ -706,12 +707,13 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
 #endif
 
   /* save the current session data for possible re-use */
-  if(conn->ssl_config.sessionid) {
+  if(data->set.general_ssl.sessionid) {
     bool incache;
     struct curl_schannel_cred *old_cred = NULL;
 
     Curl_ssl_sessionid_lock(conn);
-    incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL));
+    incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL,
+                                      sockindex));
     if(incache) {
       if(old_cred != connssl->cred) {
         infof(data, "schannel: old credential handle is stale, removing\n");
@@ -722,7 +724,8 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     }
     if(!incache) {
       result = Curl_ssl_addsessionid(conn, (void *)connssl->cred,
-                                     sizeof(struct curl_schannel_cred));
+                                     sizeof(struct curl_schannel_cred),
+                                     sockindex);
       if(result) {
         Curl_ssl_sessionid_unlock(conn);
         failf(data, "schannel: failed to store credential handle");
@@ -1551,7 +1554,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
                                 NULL,
                                 pCertContextServer->hCertStore,
                                 &ChainPara,
-                                (data->set.ssl_no_revoke ? 0 :
+                                (data->set.ssl.no_revoke ? 0 :
                                  CERT_CHAIN_REVOCATION_CHECK_CHAIN),
                                 NULL,
                                 &pChainContext)) {
@@ -1587,7 +1590,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
   }
 
   if(result == CURLE_OK) {
-    if(data->set.ssl.verifyhost) {
+    if(conn->ssl_config.verifyhost) {
       TCHAR cert_hostname_buff[128];
       xcharp_u hostname;
       xcharp_u cert_hostname;

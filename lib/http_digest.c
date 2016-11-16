@@ -95,8 +95,8 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   if(proxy) {
     digest = &data->state.proxydigest;
     allocuserpwd = &conn->allocptr.proxyuserpwd;
-    userp = conn->proxyuser;
-    passwdp = conn->proxypasswd;
+    userp = conn->http_proxy.user;
+    passwdp = conn->http_proxy.passwd;
     authp = &data->state.authproxy;
   }
   else {
