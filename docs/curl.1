@@ -1468,6 +1468,33 @@ the default authentication method curl uses with proxies.
 .IP "--proxy-digest"
 Tells curl to use HTTP Digest authentication when communicating with the given
 proxy. Use \fI--digest\fP for enabling HTTP Digest with a remote host.
+.IP "--proxy-cacert <CA certificate>"
+(SSL) Same as --cacert but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-capath <CA certificate directory>"
+(SSL) Same as --capath but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-cert <certificate[:password]>"
+(SSL) Same as \fI--cert\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-cert-type <type>"
+(SSL) Same as \fI--cert-type\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-ciphers <list of ciphers>"
+(SSL) Same as \fI--ciphers\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-crlfile <file>"
+(HTTPS) Same as \fI--crlfile\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-insecure"
+(SSL) Same as \fI--insecure\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-key <key>"
+(SSL) Same as \fI--key\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-key-type <type>"
+(SSL) Same as \fI--key-type\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
 .IP "--proxy-negotiate"
 Tells curl to use HTTP Negotiate (SPNEGO) authentication when communicating
 with the given proxy. Use \fI--negotiate\fP for enabling HTTP Negotiate (SPNEGO)
@@ -1475,11 +1502,35 @@ with a remote host. (Added in 7.17.1)
 .IP "--proxy-ntlm"
 Tells curl to use HTTP NTLM authentication when communicating with the given
 proxy. Use \fI--ntlm\fP for enabling NTLM with a remote host.
+.IP "--proxy-pass <phrase>"
+(SSL) Same as \fI--pass\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
 .IP "--proxy-service-name <servicename>"
 This option allows you to change the service name for proxy negotiation.
 
 Examples: --proxy-negotiate proxy-name \fI--proxy-service-name\fP sockd would use
 sockd/proxy-name.  (Added in 7.43.0).
+.IP "--proxy-ssl-allow-beast"
+(SSL) Same as \fI--ssl-allow-beast\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-sslv2"
+(SSL) Same as \fI--sslv2\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-sslv3"
+(SSL) Same as \fI--sslv3\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-tlsauthtype <authtype>"
+Same as \fI--tlsauthtype\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-tlspassword <password>"
+Same as \fI--tlspassword\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-tlsuser <user>"
+Same as \fI--tlsuser\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
+.IP "--proxy-tlsv1"
+(SSL) Same as \fI--tlsv1\fP but used in HTTPS proxy context.
+(Added in 7.XXX)
 .IP "--proxy1.0 <proxyhost[:port]>"
 Use the specified HTTP 1.0 proxy. If the port number is not specified, it is
 assumed at port 1080.

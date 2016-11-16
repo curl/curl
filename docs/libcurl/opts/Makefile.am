@@ -49,6 +49,7 @@ man_MANS =                                      \
  CURLINFO_PRIMARY_IP.3                          \
  CURLINFO_PRIMARY_PORT.3                        \
  CURLINFO_PRIVATE.3                             \
+ CURLINFO_PROXY_SSL_VERIFYRESULT.3              \
  CURLINFO_PROXYAUTH_AVAIL.3                     \
  CURLINFO_REDIRECT_COUNT.3                      \
  CURLINFO_REDIRECT_TIME.3                       \
@@ -223,6 +224,24 @@ man_MANS =                                      \
  CURLOPT_PROXYUSERPWD.3                         \
  CURLOPT_PROXY_SERVICE_NAME.3                   \
  CURLOPT_PROXY_TRANSFER_MODE.3                  \
+ CURLOPT_PROXY_CAINFO.3                         \
+ CURLOPT_PROXY_CAPATH.3                         \
+ CURLOPT_PROXY_CRLFILE.3                        \
+ CURLOPT_PROXY_KEYPASSWD.3                      \
+ CURLOPT_PROXY_SSLCERT.3                        \
+ CURLOPT_PROXY_SSLCERTTYPE.3                    \
+ CURLOPT_PROXY_SSLKEY.3                         \
+ CURLOPT_PROXY_SSLKEYTYPE.3                     \
+ CURLOPT_PROXY_SSLVERSION.3                     \
+ CURLOPT_PROXY_SSL_CIPHER_LIST.3                \
+ CURLOPT_PROXY_SSL_OPTIONS.3                    \
+ CURLOPT_PROXY_SSL_VERIFYHOST.3                 \
+ CURLOPT_PROXY_SSL_VERIFYPEER.3                 \
+ CURLOPT_PROXY_TLSAUTH_PASSWORD.3               \
+ CURLOPT_PROXY_TLSAUTH_TYPE.3                   \
+ CURLOPT_PROXY_TLSAUTH_USERNAME.3               \
+ CURLOPT_SOCKS_PROXY.3                          \
+ CURLOPT_SOCKS_PROXYTYPE.3                      \
  CURLOPT_PUT.3                                  \
  CURLOPT_QUOTE.3                                \
  CURLOPT_RANDOM_FILE.3                          \

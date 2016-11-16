@@ -176,10 +176,36 @@ static const char *const helptext[] = {
   "     --proxy-anyauth  Pick \"any\" proxy authentication method (H)",
   "     --proxy-basic   Use Basic authentication on the proxy (H)",
   "     --proxy-digest  Use Digest authentication on the proxy (H)",
+  "     --proxy-cacert FILE "
+  "CA certificate to verify peer against for proxy (SSL)",
+  "     --proxy-capath DIR "
+  "CA directory to verify peer against for proxy (SSL)",
+  "     --proxy-cert CERT[:PASSWD] "
+  "Client certificate file and password for proxy (SSL)",
+  "     --proxy-cert-type TYPE "
+  "Certificate file type (DER/PEM/ENG) for proxy (SSL)",
+  "     --proxy-ciphers LIST SSL ciphers to use for proxy (SSL)",
+  "     --proxy-crlfile FILE "
+  "Get a CRL list in PEM format from the given file for proxy",
+  "     --proxy-insecure "
+  "Allow connections to SSL sites without certs for proxy (H)",
+  "     --proxy-key KEY Private key file name for proxy (SSL)",
+  "     --proxy-key-type TYPE "
+  "Private key file type for proxy (DER/PEM/ENG) (SSL)",
   "     --proxy-negotiate  "
   "Use HTTP Negotiate (SPNEGO) authentication on the proxy (H)",
   "     --proxy-ntlm    Use NTLM authentication on the proxy (H)",
   "     --proxy-header LINE Pass custom header LINE to proxy (H)",
+  "     --proxy-pass PASS Pass phrase for the private key for proxy (SSL)",
+  "     --proxy-ssl-allow-beast "
+  "Allow security flaw to improve interop for proxy (SSL)",
+  "     --proxy-sslv2   Use SSLv2 for proxy (SSL)",
+  "     --proxy-sslv3   Use SSLv3 for proxy (SSL)",
+  "     --proxy-tlsv1   Use TLSv1 for proxy (SSL)",
+  "     --proxy-tlsuser USER TLS username for proxy",
+  "     --proxy-tlspassword STRING TLS password for proxy",
+  "     --proxy-tlsauthtype STRING "
+  "TLS authentication type for proxy (default SRP)",
   "     --proxy-service-name NAME  SPNEGO proxy service name",
   "     --service-name NAME  SPNEGO service name",
   " -U, --proxy-user USER[:PASSWORD]  Proxy user and password",

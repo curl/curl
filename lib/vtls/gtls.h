@@ -34,6 +34,8 @@ CURLcode Curl_gtls_connect(struct connectdata *conn, int sockindex);
 CURLcode Curl_gtls_connect_nonblocking(struct connectdata *conn,
                                        int sockindex,
                                        bool *done);
+bool Curl_gtls_data_pending(const struct connectdata *conn,
+                            int connindex);
 
  /* close a SSL connection */
 void Curl_gtls_close(struct connectdata *conn, int sockindex);
@@ -81,7 +83,7 @@ bool Curl_gtls_cert_status_request(void);
 #define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
 #define curlssl_version Curl_gtls_version
 #define curlssl_check_cxn(x) ((void)x, -1)
-#define curlssl_data_pending(x,y) ((void)x, (void)y, 0)
+#define curlssl_data_pending(x,y) Curl_gtls_data_pending(x,y)
 #define curlssl_random(x,y,z) Curl_gtls_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_gtls_md5sum(a,b,c,d)
 #define curlssl_sha256sum(a,b,c,d) Curl_gtls_sha256sum(a,b,c,d)

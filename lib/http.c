@@ -288,8 +288,8 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
 
   if(proxy) {
     userp = &conn->allocptr.proxyuserpwd;
-    user = conn->proxyuser;
-    pwd = conn->proxypasswd;
+    user = conn->http_proxy.user;
+    pwd = conn->http_proxy.passwd;
   }
   else {
     userp = &conn->allocptr.userpwd;
@@ -642,7 +642,7 @@ output_auth_headers(struct connectdata *conn,
   if(auth) {
     infof(data, "%s auth using %s with user '%s'\n",
           proxy ? "Proxy" : "Server", auth,
-          proxy ? (conn->proxyuser ? conn->proxyuser : "") :
+          proxy ? (conn->http_proxy.user ? conn->http_proxy.user : "") :
                   (conn->user ? conn->user : ""));
     authstatus->multi = (!authstatus->done) ? TRUE : FALSE;
   }
@@ -1099,7 +1099,9 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
     return result;
   }
 
-  if((conn->handler->flags & PROTOPT_SSL) && conn->httpversion != 20) {
+  if((conn->handler->flags & PROTOPT_SSL ||
+     conn->http_proxy.proxytype == CURLPROXY_HTTPS)
+     && conn->httpversion != 20) {
     /* We never send more than CURL_MAX_WRITE_SIZE bytes in one single chunk
        when we speak HTTPS, as if only a fraction of it is sent now, this data
        needs to fit into the normal read-callback buffer later on and that
@@ -1350,9 +1352,12 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   connkeep(conn, "HTTP default");
 
   /* the CONNECT procedure might not have been completed */
-  result = Curl_proxy_connect(conn);
+  result = Curl_proxy_connect(conn, FIRSTSOCKET);
   if(result)
     return result;
+
+  if(CONNECT_FIRSTSOCKET_PROXY_SSL())
+    return CURLE_OK; /* wait for HTTPS proxy SSL initialization to complete */
 
   if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
     /* nothing else to do except wait right now - we're not done here. */
@@ -1396,50 +1401,16 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
 
   return result;
 }
-#endif
 
-#if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
-    defined(USE_DARWINSSL) || defined(USE_POLARSSL) || defined(USE_NSS) || \
-    defined(USE_MBEDTLS)
-/* This function is for OpenSSL, GnuTLS, darwinssl, schannel and polarssl only.
-   It should be made to query the generic SSL layer instead. */
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
                          int numsocks)
 {
-  if(conn->handler->flags & PROTOPT_SSL) {
-    struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
-
-    if(!numsocks)
-      return GETSOCK_BLANK;
-
-    if(connssl->connecting_state == ssl_connect_2_writing) {
-      /* write mode */
-      socks[0] = conn->sock[FIRSTSOCKET];
-      return GETSOCK_WRITESOCK(0);
-    }
-    else if(connssl->connecting_state == ssl_connect_2_reading) {
-      /* read mode */
-      socks[0] = conn->sock[FIRSTSOCKET];
-      return GETSOCK_READSOCK(0);
-    }
-  }
-
-  return CURLE_OK;
-}
-#else
-#ifdef USE_SSL
-static int https_getsock(struct connectdata *conn,
-                         curl_socket_t *socks,
-                         int numsocks)
-{
-  (void)conn;
-  (void)socks;
-  (void)numsocks;
+  if(conn->handler->flags & PROTOPT_SSL)
+    return Curl_ssl_getsock(conn, socks, numsocks);
   return GETSOCK_BLANK;
 }
 #endif /* USE_SSL */
-#endif /* USE_OPENSSL || USE_GNUTLS || USE_SCHANNEL */
 
 /*
  * Curl_http_done() gets called after a single HTTP request has been
