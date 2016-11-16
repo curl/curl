@@ -2054,7 +2054,8 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
                     " after upgrade: len=%zu\n",
         nread);
 
-  memcpy(httpc->inbuf, mem, nread);
+  if(nread)
+    memcpy(httpc->inbuf, mem, nread);
   httpc->inbuflen = nread;
 
   nproc = nghttp2_session_mem_recv(httpc->h2, (const uint8_t *)httpc->inbuf,
