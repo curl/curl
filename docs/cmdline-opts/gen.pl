@@ -11,6 +11,7 @@ my %optlong;
 my %helplong;
 my %arglong;
 my %redirlong;
+my %protolong;
 
 # get the long name version, return the man page string
 sub manpageify {
@@ -98,41 +99,51 @@ sub single {
     my $seealso;
     my $magic; # cmdline special option
     while(<F>) {
-        if(/^Short: (.)/i) {
+        if(/^Short: *(.)/i) {
             $short=$1;
         }
-        elsif(/^Long: (.*)/i) {
+        elsif(/^Long: *(.*)/i) {
             $long=$1;
         }
-        elsif(/^Added: (.*)/i) {
+        elsif(/^Added: *(.*)/i) {
             $added=$1;
         }
-        elsif(/^Tags: (.*)/i) {
+        elsif(/^Tags: *(.*)/i) {
             $tags=$1;
         }
-        elsif(/^Arg: (.*)/i) {
+        elsif(/^Arg: *(.*)/i) {
             $arg=$1;
         }
-        elsif(/^Magic: (.*)/i) {
+        elsif(/^Magic: *(.*)/i) {
             $magic=$1;
         }
-        elsif(/^Mutexed: (.*)/i) {
+        elsif(/^Mutexed: *(.*)/i) {
             $mutexed=$1;
         }
-        elsif(/^Protocols: (.*)/i) {
+        elsif(/^Protocols: *(.*)/i) {
             $protocols=$1;
         }
-        elsif(/^See-also: (.*)/i) {
+        elsif(/^See-also: *(.*)/i) {
             $seealso=$1;
         }
-        elsif(/^Requires: (.*)/i) {
+        elsif(/^Requires: *(.*)/i) {
             $requires=$1;
         }
-        elsif(/^Redirect: (.*)/i) {
+        elsif(/^Redirect: *(.*)/i) {
             $redirect=$1;
         }
+        elsif(/^Help: *(.*)/i) {
+            ;
+        }
         elsif(/^---/) {
+            if(!$long) {
+                print STDERR "WARN: no 'Long:' in $f\n";
+            }
             last;
+        }
+        else {
+            chomp;
+            print STDERR "WARN: unrecognized line in $f, ignoring:\n:'$_';"
         }
     }
     my @dest;
@@ -222,6 +233,7 @@ sub getshortlong {
     my $long;
     my $help;
     my $arg;
+    my $protocols;
     while(<F>) {
         if(/^Short: (.)/i) {
             $short=$1;
@@ -235,6 +247,9 @@ sub getshortlong {
         elsif(/^Arg: (.*)/i) {
             $arg=$1;
         }
+        elsif(/^Protocols: (.*)/i) {
+            $protocols=$1;
+        }
         elsif(/^---/) {
             last;
         }
@@ -247,6 +262,7 @@ sub getshortlong {
         $optlong{$long}=$short;
         $helplong{$long}=$help;
         $arglong{$long}=$arg;
+        $protolong{$long}=$protocols;
     }
 }
 
@@ -311,6 +327,19 @@ sub showonly {
     }
 }
 
+sub showprotocols {
+    my %prots;
+    foreach my $f (keys %optlong) {
+        my @p = split(/ /, $protolong{$f});
+        for my $p (@p) {
+            $prots{$p}++;
+        }
+    }
+    for(sort keys %prots) {
+        printf "$_ (%d options)\n", $prots{$_};
+    }
+}
+
 sub getargs {
     my $f;
     do {
@@ -327,9 +356,13 @@ sub getargs {
             showonly(shift @ARGV);
             return;
         }
+        elsif($f eq "protos") {
+            showprotocols();
+            return;
+        }
     } while($f);
 
-    print "Usage: gen.pl <mainpage/listhelp/single FILE>\n";
+    print "Usage: gen.pl <mainpage/listhelp/single FILE/protos>\n";
 }
 
 #------------------------------------------------------------------------
