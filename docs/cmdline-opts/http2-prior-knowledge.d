@@ -1,4 +1,3 @@
-Short:
 Long: http2-prior-knowledge
 Tags: Versions
 Protocols: HTTP

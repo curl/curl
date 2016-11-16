@@ -1,4 +1,3 @@
-Short:
 Long: http2
 Tags: Versions
 Protocols: HTTP

@@ -1,6 +1,5 @@
-Short:
 Long: no-npn
-Tags: Versions
+Tags: Versions HTTP/2
 Protocols: HTTPS
 Added: 7.36.0
 Mutexed:

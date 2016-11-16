@@ -1,4 +1,3 @@
-Short:
 Long: http1.1
 Tags: Versions
 Protocols: HTTP

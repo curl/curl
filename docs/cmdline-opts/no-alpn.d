@@ -1,9 +1,7 @@
-Short:
 Long: no-alpn
-Tags:
+Tags: HTTP/2
 Protocols: HTTPS
 Added: 7.36.0
-Mutexed:
 See-also: no-npn http2
 Requires: TLS
 Help: Disable the ALPN TLS extension
