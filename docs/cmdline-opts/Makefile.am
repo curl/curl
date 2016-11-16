@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,8 +22,9 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
-DPAGES = abstract-unix-socket.d anyauth.d 				\
-  append.d basic.d cacert.d capath.d cert.d				\
+MANPAGE = $(top_builddir)/docs/curl.1
+
+DPAGES = abstract-unix-socket.d anyauth.d append.d basic.d cacert.d capath.d cert.d \
   cert-status.d cert-type.d ciphers.d compressed.d config.d		\
   connect-timeout.d connect-to.d continue-at.d cookie.d cookie-jar.d	\
   create-dirs.d crlf.d crlfile.d data-ascii.d data-binary.d data.d	\
@@ -65,4 +66,11 @@ DPAGES = abstract-unix-socket.d anyauth.d 				\
   unix-socket.d upload-file.d url.d use-ascii.d user-agent.d user.d	\
   verbose.d version.d write-out.d xattr.d
 
-EXTRA_DIST = $(DPAGES) MANPAGE.md gen.pl page-footer page-header
+OTHERPAGES = page-footer page-header
+
+EXTRA_DIST = $(DPAGES) MANPAGE.md gen.pl $(OTHERPAGES)
+
+all: $(MANPAGE)
+
+$(MANPAGE): $(DPAGES) $(OTHERPAGES)
+	@PERL@ gen.pl mainpage > $(MANPAGE)
