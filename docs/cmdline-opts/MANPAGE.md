@@ -26,6 +26,7 @@ Each file has a set of meta-data and a body of text.
     Mutexed: (space separated list of options this overrides)
     Requires: (space separated list of features this option requires)
     See-also: (space separated list of related options)
+    Redirect: (option name to use instead)
     Help: (short text for the --help output for this option)
     --- (end of meta-data)
 

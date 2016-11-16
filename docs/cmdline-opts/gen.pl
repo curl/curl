@@ -10,6 +10,7 @@ my %optshort;
 my %optlong;
 my %helplong;
 my %arglong;
+my %redirlong;
 
 # get the long name version, return the man page string
 sub manpageify {
@@ -51,6 +52,7 @@ sub single {
     my $arg;
     my $mutexed;
     my $requires;
+    my $redirect;
     my $seealso;
     my $magic; # cmdline special option
     while(<F>) {
@@ -84,6 +86,9 @@ sub single {
         elsif(/^Requires: (.*)/i) {
             $requires=$1;
         }
+        elsif(/^Redirect: (.*)/i) {
+            $redirect=$1;
+        }
         elsif(/^---/) {
             last;
         }
@@ -109,21 +114,26 @@ sub single {
     }
 
     print ".IP \"$opt\"\n";
-    my $o;
-    if($protocols) {
-        $o++;
-        print "($protocols) ";
+    if($redirect) {
+        my $l = manpageify($redirect);
+        print "Use $l instead!\n";
     }
-    if(!$arg && !$mutexed && !$magic) {
-        $o++;
-        print "[Boolean] ";
+    else {
+        my $o;
+        if($protocols) {
+            $o++;
+            print "($protocols) ";
+        }
+        if(!$arg && !$mutexed && !$magic) {
+            $o++;
+            print "[Boolean] ";
+        }
+        if($magic) {
+            $o++;
+            print "[cmdline control] ";
+        }
+        print "\n" if($o);
     }
-    if($magic) {
-        $o++;
-        print "[cmdline control] ";
-    }
-
-    print "\n" if($o);
 
     printdesc(@desc);
     undef @desc;
@@ -231,7 +241,12 @@ sub listhelp {
             $opt .= " $arg";
         }
 
-        printf " %-19s %s\n", $opt, $helplong{$f};
+        my $line = sprintf " %-19s %s\n", $opt, $helplong{$f};
+
+        if(length($line) > 79) {
+            print STDERR "WARN: the --$long line is too long\n";
+        }
+        print $line;
     }
 }
 
