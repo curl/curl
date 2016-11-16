@@ -59,6 +59,8 @@
 #define nghttp2_session_callbacks_set_error_callback(x,y)
 #endif
 
+#define HTTP2_HUGE_WINDOW_SIZE (1 << 30)
+
 /*
  * Curl_http2_init_state() is called when the easy handle is created and
  * allows for HTTP/2 specific init of state.
@@ -965,7 +967,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
  */
 static nghttp2_settings_entry settings[] = {
   { NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS, 100 },
-  { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, NGHTTP2_INITIAL_WINDOW_SIZE },
+  { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, HTTP2_HUGE_WINDOW_SIZE },
 };
 
 #define H2_BUFSIZE 32768
@@ -2031,12 +2033,21 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   else {
     /* stream ID is unknown at this point */
     stream->stream_id = -1;
-    rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, NULL, 0);
+    rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, settings,
+                                 sizeof(settings) / sizeof(settings[0]));
     if(rv != 0) {
       failf(data, "nghttp2_submit_settings() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
       return CURLE_HTTP2;
     }
+  }
+
+  rv = nghttp2_session_set_local_window_size(httpc->h2, NGHTTP2_FLAG_NONE, 0,
+                                             HTTP2_HUGE_WINDOW_SIZE);
+  if(rv != 0) {
+    failf(data, "nghttp2_session_set_local_window_size() failed: %s(%d)",
+          nghttp2_strerror(rv), rv);
+    return CURLE_HTTP2;
   }
 
   /* we are going to copy mem to httpc->inbuf.  This is required since
