@@ -1451,6 +1451,126 @@ the default authentication method curl uses with proxies.
 .IP "--proxy-digest"
 Tells curl to use HTTP Digest authentication when communicating with the given
 proxy. Use \fI--digest\fP for enabling HTTP Digest with a remote host.
+.IP "--proxy-cacert <CA certificate>"
+// TODO to correct this text
+(SSL) Tells curl to use the specified certificate file to verify the peer. The
+file may contain multiple CA certificates. The certificate(s) must be in PEM
+format. Normally curl is built to use a default file for this, so this option
+is typically used to alter that default file.
+
+curl recognizes the environment variable named 'CURL_CA_BUNDLE' if it is
+set, and uses the given path as a path to a CA cert bundle. This option
+overrides that variable.
+
+The windows version of curl will automatically look for a CA certs file named
+\'curl-ca-bundle.crt\', either in the same directory as curl.exe, or in the
+Current Working Directory, or in any folder along your PATH.
+
+If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
+(libnsspem.so) needs to be available for this option to work properly.
+
+(iOS and macOS only) If curl is built against Secure Transport, then this
+option is supported for backward compatibility with other SSL engines, but it
+should not be set. If the option is not set, then curl will use the
+certificates in the system and user Keychain to verify the peer, which is the
+preferred method of verifying the peer's certificate chain.
+
+If this option is used several times, the last one will be used.
+(Added in 7.51.1)
+.IP "--proxy-capath <CA certificate directory>"
+// TODO to correct this text
+(SSL) Tells curl to use the specified certificate directory to verify the
+peer. Multiple paths can be provided by separating them with ":" (e.g.
+\&"path1:path2:path3"). The certificates must be in PEM format, and if curl is
+built against OpenSSL, the directory must have been processed using the
+c_rehash utility supplied with OpenSSL. Using \fI--capath\fP can allow
+OpenSSL-powered curl to make SSL-connections much more efficiently than using
+\fI--cacert\fP if the \fI--cacert\fP file contains many CA certificates.
+
+If this option is set, the default capath value will be ignored, and if it is
+used several times, the last one will be used.
+(Added in 7.51.1)
+.IP "--proxy-cert <certificate[:password]>"
+// TODO to correct this text
+(SSL) Tells curl to use the specified client certificate file when getting a
+file with HTTPS, FTPS or another SSL-based protocol. The certificate must be
+in PKCS#12 format if using Secure Transport, or PEM format if using any other
+engine.  If the optional password isn't specified, it will be queried for on
+the terminal. Note that this option assumes a \&"certificate" file that is the
+private key and the client certificate concatenated! See \fI--cert\fP and
+\fI--key\fP to specify them independently.
+
+If curl is built against the NSS SSL library then this option can tell
+curl the nickname of the certificate to use within the NSS database defined
+by the environment variable SSL_DIR (or by default /etc/pki/nssdb). If the
+NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files may be
+loaded. If you want to use a file from the current directory, please precede
+it with "./" prefix, in order to avoid confusion with a nickname.  If the
+nickname contains ":", it needs to be preceded by "\\" so that it is not
+recognized as password delimiter.  If the nickname contains "\\", it needs to
+be escaped as "\\\\" so that it is not recognized as an escape character.
+
+(iOS and macOS only) If curl is built against Secure Transport, then the
+certificate string can either be the name of a certificate/private key in the
+system or user keychain, or the path to a PKCS#12-encoded certificate and
+private key. If you want to use a file from the current directory, please
+precede it with "./" prefix, in order to avoid confusion with a nickname.
+
+If this option is used several times, the last one will be used.
+(Added in 7.51.1)
+.IP "--proxy-cert-type <type>"
+// TODO to correct this text
+(SSL) Tells curl what certificate type the provided certificate is in. PEM,
+DER and ENG are recognized types.  If not specified, PEM is assumed.
+
+If this option is used several times, the last one will be used.
+(Added in 7.51.1)
+.IP "--proxy-ciphers <list of ciphers>"
+// TODO to correct this text
+(SSL) Specifies which ciphers to use in the connection. The list of ciphers
+must specify valid ciphers. Read up on SSL cipher list details on this URL:
+\fIhttps://www.openssl.org/docs/apps/ciphers.html\fP
+
+NSS ciphers are done differently than OpenSSL and GnuTLS. The full list of NSS
+ciphers is in the NSSCipherSuite entry at this URL:
+\fIhttps://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html#Directives\fP
+
+If this option is used several times, the last one will be used.
+(Added in 7.51.1)
+.IP "--proxy-crlfile <file>"
+// TODO to correct this text
+(HTTPS/FTPS) Provide a file using PEM format with a Certificate Revocation
+List that may specify peer certificates that are to be considered revoked.
+
+If this option is used several times, the last one will be used.
+
+(Added in 7.51.1)
+.IP "--proxy-insecure"
+// TODO to correct this text
+(SSL) This option explicitly allows curl to perform "insecure" SSL connections
+and transfers. All SSL connections are attempted to be made secure by using
+the CA certificate bundle installed by default. This makes all connections
+considered "insecure" fail unless \fI-k, --insecure\fP is used.
+
+See this online resource for further details:
+\fBhttps://curl.haxx.se/docs/sslcerts.html\fP
+(Added in 7.51.1)
+.IP "--proxy-key <key>"
+// TODO to correct this text
+(SSL/SSH) Private key file name. Allows you to provide your private key in this
+separate file. For SSH, if not specified, curl tries the following candidates
+in order: '~/.ssh/id_rsa', '~/.ssh/id_dsa', './id_rsa', './id_dsa'.
+
+If this option is used several times, the last one will be used.
+(Added in 7.51.1)
+.IP "--proxy-key-type <type>"
+// TODO to correct this text
+(SSL) Private key file type. Specify which type your \fI--key\fP provided
+private key is. DER, PEM, and ENG are supported. If not specified, PEM is
+assumed.
+
+If this option is used several times, the last one will be used.
+(Added in 7.51.1)
 .IP "--proxy-negotiate"
 Tells curl to use HTTP Negotiate (SPNEGO) authentication when communicating
 with the given proxy. Use \fI--negotiate\fP for enabling HTTP Negotiate (SPNEGO)
@@ -1458,11 +1578,57 @@ with a remote host. (Added in 7.17.1)
 .IP "--proxy-ntlm"
 Tells curl to use HTTP NTLM authentication when communicating with the given
 proxy. Use \fI--ntlm\fP for enabling NTLM with a remote host.
+.IP "--proxy-pass <phrase>"
+// TODO to correct this text
+(SSL/SSH) Passphrase for the private key
+
+If this option is used several times, the last one will be used.
+(Added in 7.51.1)
 .IP "--proxy-service-name <servicename>"
 This option allows you to change the service name for proxy negotiation.
 
 Examples: --proxy-negotiate proxy-name \fI--proxy-service-name\fP sockd would use
 sockd/proxy-name.  (Added in 7.43.0).
+.IP "--proxy-ssl-allow-beast"
+// TODO to correct this text
+(SSL) This option tells curl to not work around a security flaw in the SSL3
+and TLS1.0 protocols known as BEAST.  If this option isn't used, the SSL layer
+may use workarounds known to cause interoperability problems with some older
+SSL implementations. WARNING: this option loosens the SSL security, and by
+using this flag you ask for exactly that.  (Added in 7.51.1)
+.IP "--proxy-sslv2"
+// TODO to correct this text
+(SSL) Forces curl to use SSL version 2 when negotiating with a remote SSL
+server. Sometimes curl is built without SSLv2 support. SSLv2 is widely
+considered insecure (see RFC 6176).
+(Added in 7.51.1)
+.IP "--proxy-sslv3"
+// TODO to correct this text
+(SSL) Forces curl to use SSL version 3 when negotiating with a remote SSL
+server. Sometimes curl is built without SSLv3 support. SSLv3 is widely
+considered insecure (see RFC 7568).
+(Added in 7.51.1)
+.IP "--proxy-tlsauthtype <authtype>"
+// TODO to correct this text
+Set TLS authentication type. Currently, the only supported option is "SRP",
+for TLS-SRP (RFC 5054). If \fI--tlsuser\fP and \fI--tlspassword\fP are
+specified but \fI--tlsauthtype\fP is not, then this option defaults to "SRP".
+(Added in 7.51.1)
+.IP "--proxy-tlspassword <password>"
+// TODO to correct this text
+Set password for use with the TLS authentication method specified with
+\fI--tlsauthtype\fP. Requires that \fI--tlsuser\fP also be set.  (Added in
+7.51.1)
+.IP "--proxy-tlsuser <user>"
+// TODO to correct this text
+Set username for use with the TLS authentication method specified with
+\fI--tlsauthtype\fP. Requires that \fI--tlspassword\fP also be set.  (Added in
+7.51.1)
+.IP "--proxy-tlsv1"
+// TODO to correct this text
+(SSL)
+Forces curl to use TLS version 1.0 when negotiating with a remote TLS server.
+(Added in 7.51.1)
 .IP "--proxy1.0 <proxyhost[:port]>"
 Use the specified HTTP 1.0 proxy. If the port number is not specified, it is
 assumed at port 1080.
