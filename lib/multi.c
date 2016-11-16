@@ -42,6 +42,7 @@
 #include "multihandle.h"
 #include "pipeline.h"
 #include "sigpipe.h"
+#include "vtls/vtls.h"
 #include "connect.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -812,6 +813,9 @@ static int waitconnect_getsock(struct connectdata *conn,
   if(!numsocks)
     return GETSOCK_BLANK;
 
+  if(CONNECT_FIRSTSOCKET_PROXY_SSL())
+    return Curl_ssl_getsock(conn, sock, numsocks);
+
   for(i=0; i<2; i++) {
     if(conn->tempsock[i] != CURL_SOCKET_BAD) {
       sock[s] = conn->tempsock[i];
@@ -1548,7 +1552,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(data, CURLM_STATE_CONNECT);
       }
       else if(!result) {
-        if(data->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_COMPLETE) {
+        if((data->easy_conn->http_proxy.proxytype != CURLPROXY_HTTPS ||
+           data->easy_conn->bits.proxy_ssl_connected[FIRSTSOCKET]) &&
+           (data->easy_conn->tunnel_state[FIRSTSOCKET] != TUNNEL_CONNECT)) {
           rc = CURLM_CALL_MULTI_PERFORM;
           /* initiate protocol connect phase */
           multistate(data, CURLM_STATE_SENDPROTOCONNECT);
@@ -1561,6 +1567,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* awaiting a completion of an asynch TCP connect */
       result = Curl_is_connected(data->easy_conn, FIRSTSOCKET, &connected);
       if(connected && !result) {
+#ifndef CURL_DISABLE_HTTP
+        if((data->easy_conn->http_proxy.proxytype == CURLPROXY_HTTPS &&
+            !data->easy_conn->bits.proxy_ssl_connected[FIRSTSOCKET]) ||
+            (data->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)) {
+          multistate(data, CURLM_STATE_WAITPROXYCONNECT);
+          break;
+        }
+#endif
         rc = CURLM_CALL_MULTI_PERFORM;
         multistate(data, data->easy_conn->bits.tunnel_proxy?
                    CURLM_STATE_WAITPROXYCONNECT:

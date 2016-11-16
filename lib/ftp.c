@@ -499,7 +499,7 @@ static CURLcode InitiateTransfer(struct connectdata *conn)
   struct FTP *ftp = data->req.protop;
   CURLcode result = CURLE_OK;
 
-  if(conn->ssl[SECONDARYSOCKET].use) {
+  if(conn->bits.ftp_use_data_ssl) {
     /* since we only have a plaintext TCP connection here, we must now
      * do the TLS stuff */
     infof(data, "Doing the SSL/TLS handshake on the data stream\n");
@@ -740,7 +740,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
        * wait for more data anyway.
        */
     }
-    else {
+    else if(!Curl_ssl_data_pending(conn, FIRSTSOCKET)) {
       switch (SOCKET_READABLE(sockfd, interval_ms)) {
       case -1: /* select() error, stop reading */
         failf(data, "FTP response aborted due to select/poll error: %d",
@@ -1850,84 +1850,6 @@ static CURLcode ftp_epsv_disable(struct connectdata *conn)
   return result;
 }
 
-/*
- * Perform the necessary magic that needs to be done once the TCP connection
- * to the proxy has completed.
- */
-static CURLcode proxy_magic(struct connectdata *conn,
-                            char *newhost, unsigned short newport,
-                            bool *magicdone)
-{
-  CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
-
-#if defined(CURL_DISABLE_PROXY)
-  (void) newhost;
-  (void) newport;
-#endif
-
-  *magicdone = FALSE;
-
-  switch(conn->proxytype) {
-  case CURLPROXY_SOCKS5:
-  case CURLPROXY_SOCKS5_HOSTNAME:
-    result = Curl_SOCKS5(conn->proxyuser, conn->proxypasswd, newhost,
-                         newport, SECONDARYSOCKET, conn);
-    *magicdone = TRUE;
-    break;
-  case CURLPROXY_SOCKS4:
-    result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
-                         SECONDARYSOCKET, conn, FALSE);
-    *magicdone = TRUE;
-    break;
-  case CURLPROXY_SOCKS4A:
-    result = Curl_SOCKS4(conn->proxyuser, newhost, newport,
-                         SECONDARYSOCKET, conn, TRUE);
-    *magicdone = TRUE;
-    break;
-  case CURLPROXY_HTTP:
-  case CURLPROXY_HTTP_1_0:
-    /* do nothing here. handled later. */
-    break;
-  default:
-    failf(data, "unknown proxytype option given");
-    result = CURLE_COULDNT_CONNECT;
-    break;
-  }
-
-  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
-    /* BLOCKING */
-    /* We want "seamless" FTP operations through HTTP proxy tunnel */
-
-    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the
-     * member conn->proto.http; we want FTP through HTTP and we have to
-     * change the member temporarily for connecting to the HTTP proxy. After
-     * Curl_proxyCONNECT we have to set back the member to the original
-     * struct FTP pointer
-     */
-    struct HTTP http_proxy;
-    struct FTP *ftp_save = data->req.protop;
-    memset(&http_proxy, 0, sizeof(http_proxy));
-    data->req.protop = &http_proxy;
-
-    result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, newhost, newport, TRUE);
-
-    data->req.protop = ftp_save;
-
-    if(result)
-      return result;
-
-    if(conn->tunnel_state[SECONDARYSOCKET] != TUNNEL_COMPLETE) {
-      /* the CONNECT procedure is not complete, the tunnel is not yet up */
-      state(conn, FTP_STOP); /* this phase is completed */
-      return result;
-    }
-    else
-      *magicdone = TRUE;
-  }
-
-  return result;
-}
 
 static char *control_address(struct connectdata *conn)
 {
@@ -1935,11 +1857,7 @@ static char *control_address(struct connectdata *conn)
      If a proxy tunnel is used, returns the original host name instead, because
      the effective control connection address is the proxy address,
      not the ftp host. */
-  if(conn->bits.tunnel_proxy ||
-     conn->proxytype == CURLPROXY_SOCKS5 ||
-     conn->proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
-     conn->proxytype == CURLPROXY_SOCKS4 ||
-     conn->proxytype == CURLPROXY_SOCKS4A)
+  if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
     return conn->host.name;
 
   return conn->ip_addr_str;
@@ -2063,7 +1981,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
      * here. We don't want to rely on a former host lookup that might've
      * expired now, instead we remake the lookup here and now!
      */
-    rc = Curl_resolv(conn, conn->proxy.name, (int)conn->port, &addr);
+    const char * const host_name = conn->bits.socksproxy ?
+      conn->socks_proxy.host.name : conn->http_proxy.host.name;
+    rc = Curl_resolv(conn, host_name, (int)conn->port, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING, ignores the return code but 'addr' will be NULL in
          case of failure */
@@ -2073,8 +1993,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
       (unsigned short)conn->port; /* we connect to the proxy's port */
 
     if(!addr) {
-      failf(data, "Can't resolve proxy host %s:%hu",
-            conn->proxy.name, connectport);
+      failf(data, "Can't resolve proxy host %s:%hu", host_name, connectport);
       return CURLE_FTP_CANT_GET_HOST;
     }
   }
@@ -2114,6 +2033,10 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   if(data->set.verbose)
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(conn, addr->addr, ftpc->newhost, connectport);
+
+  Curl_safefree(conn->secondaryhostname);
+  conn->secondaryhostname = strdup(ftpc->newhost);
+  conn->secondary_port = ftpc->newport;
 
   Curl_resolv_unlock(data, addr); /* we're done using this address */
   conn->bits.do_more = TRUE;
@@ -2763,7 +2686,10 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       }
 #endif
 
-      if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
+      if(data->set.use_ssl &&
+         (!conn->ssl[FIRSTSOCKET].use ||
+          (conn->bits.proxy_ssl_connected[FIRSTSOCKET] &&
+           !conn->proxy_ssl[FIRSTSOCKET].use))) {
         /* We don't have a SSL/TLS connection yet, but FTPS is
            requested. Try a FTPS connection now */
 
@@ -2808,7 +2734,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         /* Curl_ssl_connect is BLOCKING */
         result = Curl_ssl_connect(conn, FIRSTSOCKET);
         if(!result) {
-          conn->ssl[SECONDARYSOCKET].use = FALSE; /* clear-text data */
+          conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
           result = ftp_state_user(conn);
         }
       }
@@ -2850,7 +2776,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     case FTP_PROT:
       if(ftpcode/100 == 2)
         /* We have enabled SSL for the data connection! */
-        conn->ssl[SECONDARYSOCKET].use =
+        conn->bits.ftp_use_data_ssl =
           (data->set.use_ssl != CURLUSESSL_CONTROL) ? TRUE : FALSE;
       /* FTP servers typically responds with 500 if they decide to reject
          our 'P' request */
@@ -3666,10 +3592,6 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
     /* Ready to do more? */
     if(connected) {
       DEBUGF(infof(data, "DO-MORE connected phase starts\n"));
-      if(conn->bits.proxy) {
-        infof(data, "Connection to proxy confirmed\n");
-        result = proxy_magic(conn, ftpc->newhost, ftpc->newport, &connected);
-      }
     }
     else {
       if(result && (ftpc->count1 == 0)) {
@@ -3680,6 +3602,18 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
       return result;
     }
   }
+
+  result = Curl_proxy_connect(conn, SECONDARYSOCKET);
+  if(result)
+    return result;
+
+  if(CONNECT_SECONDARYSOCKET_PROXY_SSL())
+    return result;
+
+  if(conn->bits.tunnel_proxy && conn->bits.httpproxy &&
+     conn->tunnel_state[SECONDARYSOCKET] != TUNNEL_COMPLETE)
+    return result;
+
 
   if(ftpc->state) {
     /* already in a state so skip the intial commands.
@@ -4246,8 +4180,8 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   const char *cur_pos;
   const char *filename = NULL;
 
-  cur_pos = path_to_use; /* current position in path. point at the begin
-                            of next path component */
+  cur_pos = path_to_use; /* current position in path. point at the begin of
+                            next path component */
 
   ftpc->ctl_valid = FALSE;
   ftpc->cwdfail = FALSE;

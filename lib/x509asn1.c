@@ -1068,6 +1068,11 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
   int matched = -1;
   size_t addrlen = (size_t) -1;
   ssize_t len;
+  const char * const hostname = SSL_IS_PROXY()? conn->http_proxy.host.name:
+                                                conn->host.name;
+  const char * const dispname = SSL_IS_PROXY()?
+                                  conn->http_proxy.host.dispname:
+                                  conn->host.dispname;
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -1077,7 +1082,7 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
   /* Verify that connection server matches info in X509 certificate at
      `beg'..`end'. */
 
-  if(!data->set.ssl.verifyhost)
+  if(!SSL_CONN_CONFIG(verifyhost))
     return CURLE_OK;
 
   if(!beg)
@@ -1086,11 +1091,11 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
 
   /* Get the server IP address. */
 #ifdef ENABLE_IPV6
-  if(conn->bits.ipv6_ip && Curl_inet_pton(AF_INET6, conn->host.name, &addr))
+  if(conn->bits.ipv6_ip && Curl_inet_pton(AF_INET6, hostname, &addr))
     addrlen = sizeof(struct in6_addr);
   else
 #endif
-  if(Curl_inet_pton(AF_INET, conn->host.name, &addr))
+  if(Curl_inet_pton(AF_INET, hostname, &addr))
     addrlen = sizeof(struct in_addr);
 
   /* Process extensions. */
@@ -1113,7 +1118,7 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
           len = utf8asn1str(&dnsname, CURL_ASN1_IA5_STRING,
                             name.beg, name.end);
           if(len > 0 && (size_t)len == strlen(dnsname))
-            matched = Curl_cert_hostcheck(dnsname, conn->host.name);
+            matched = Curl_cert_hostcheck(dnsname, hostname);
           else
             matched = 0;
           free(dnsname);
@@ -1131,12 +1136,12 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
   switch (matched) {
   case 1:
     /* an alternative name matched the server hostname */
-    infof(data, "\t subjectAltName: %s matched\n", conn->host.dispname);
+    infof(data, "\t subjectAltName: %s matched\n", dispname);
     return CURLE_OK;
   case 0:
     /* an alternative name field existed, but didn't match and then
        we MUST fail */
-    infof(data, "\t subjectAltName does not match %s\n", conn->host.dispname);
+    infof(data, "\t subjectAltName does not match %s\n", dispname);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
@@ -1168,14 +1173,14 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
     }
     if(strlen(dnsname) != (size_t) len)         /* Nul byte in string ? */
       failf(data, "SSL: illegal cert name field");
-    else if(Curl_cert_hostcheck((const char *) dnsname, conn->host.name)) {
+    else if(Curl_cert_hostcheck((const char *) dnsname, hostname)) {
       infof(data, "\t common name: %s (matched)\n", dnsname);
       free(dnsname);
       return CURLE_OK;
     }
     else
       failf(data, "SSL: certificate subject name '%s' does not match "
-            "target host name '%s'", dnsname, conn->host.dispname);
+            "target host name '%s'", dnsname, dispname);
     free(dnsname);
   }
 

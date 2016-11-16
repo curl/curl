@@ -86,6 +86,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   unsigned char socksreq[4]; /* room for GSS-API exchange header only */
   const char *service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
                         data->set.str[STRING_PROXY_SERVICE_NAME]  : "rcmd";
+  const size_t service_length = strlen(service);
 
   /*   GSS-API request looks like
    * +----+------+-----+----------------+
@@ -102,11 +103,13 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       return CURLE_OUT_OF_MEMORY;
   }
   else {
-    service_name = malloc(strlen(service) + strlen(conn->proxy.name) + 2);
+    service_name = malloc(service_length +
+                          strlen(conn->socks_proxy.host.name) + 2);
     if(!service_name)
       return CURLE_OUT_OF_MEMORY;
-    snprintf(service_name, strlen(service) +strlen(conn->proxy.name)+2,
-             "%s/%s", service, conn->proxy.name);
+    snprintf(service_name, service_length +
+             strlen(conn->socks_proxy.host.name)+2, "%s/%s",
+             service, conn->socks_proxy.host.name);
   }
 
   input_desc.cBuffers = 1;

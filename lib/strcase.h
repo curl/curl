@@ -36,6 +36,7 @@
 #define strncasecompare(a,b,c) Curl_strncasecompare(a,b,c)
 
 int Curl_strcasecompare(const char *first, const char *second);
+int Curl_safe_strcasecompare(const char *first, const char *second);
 int Curl_strncasecompare(const char *first, const char *second, size_t max);
 
 char Curl_raw_toupper(char in);

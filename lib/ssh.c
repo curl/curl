@@ -874,7 +874,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
 
-        sshc->passphrase = data->set.str[STRING_KEY_PASSWD];
+        sshc->passphrase = data->set.ssl.key_passwd;
         if(!sshc->passphrase)
           sshc->passphrase = "";
 
