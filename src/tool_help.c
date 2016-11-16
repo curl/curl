@@ -78,7 +78,7 @@ static const char *const helptext[] = {
   "     --dns-interface  Interface to use for DNS requests",
   "     --dns-ipv4-addr  IPv4 address to use for DNS requests, dot notation",
   "     --dns-ipv6-addr  IPv6 address to use for DNS requests, dot notation",
-  " -D, --dump-header FILE  Write the headers to FILE",
+  " -D, --dump-header FILE  Write the received headers to FILE",
   "     --egd-file FILE  EGD socket path for random data (SSL)",
   "     --engine ENGINE  Crypto engine (use \"--engine list\" for list) (SSL)",
 #ifdef USE_ENVIRONMENT
