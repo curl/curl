@@ -208,6 +208,43 @@ int Curl_ssl_backend(void)
   return (int)CURL_SSL_BACKEND;
 }
 
+#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
+    defined(USE_DARWINSSL) || defined(USE_NSS)
+/* This function is for OpenSSL, GnuTLS, darwinssl, and schannel only. */
+int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
+                     int numsocks)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
+
+  if(!numsocks)
+    return GETSOCK_BLANK;
+
+  if(connssl->connecting_state == ssl_connect_2_writing) {
+    /* write mode */
+    socks[0] = conn->sock[FIRSTSOCKET];
+    return GETSOCK_WRITESOCK(0);
+  }
+  else if(connssl->connecting_state == ssl_connect_2_reading) {
+    /* read mode */
+    socks[0] = conn->sock[FIRSTSOCKET];
+    return GETSOCK_READSOCK(0);
+  }
+
+  return GETSOCK_BLANK;
+}
+#else
+int Curl_ssl_getsock(struct connectdata *conn,
+                          curl_socket_t *socks,
+                          int numsocks)
+{
+  (void)conn;
+  (void)socks;
+  (void)numsocks;
+  return GETSOCK_BLANK;
+}
+/* USE_SSLEAY || USE_GNUTLS || USE_SCHANNEL || USE_DARWINSSL || USE_NSS */
+#endif
+
 #ifdef USE_SSL
 
 /* "global" init done? */
@@ -553,43 +590,6 @@ void Curl_ssl_close_all(struct Curl_easy *data)
 
   curlssl_close_all(data);
 }
-
-#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
-    defined(USE_DARWINSSL) || defined(USE_NSS)
-/* This function is for OpenSSL, GnuTLS, darwinssl, and schannel only. */
-int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
-                     int numsocks)
-{
-  struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
-
-  if(!numsocks)
-    return GETSOCK_BLANK;
-
-  if(connssl->connecting_state == ssl_connect_2_writing) {
-    /* write mode */
-    socks[0] = conn->sock[FIRSTSOCKET];
-    return GETSOCK_WRITESOCK(0);
-  }
-  else if(connssl->connecting_state == ssl_connect_2_reading) {
-    /* read mode */
-    socks[0] = conn->sock[FIRSTSOCKET];
-    return GETSOCK_READSOCK(0);
-  }
-
-  return GETSOCK_BLANK;
-}
-#else
-int Curl_ssl_getsock(struct connectdata *conn,
-                          curl_socket_t *socks,
-                          int numsocks)
-{
-  (void)conn;
-  (void)socks;
-  (void)numsocks;
-  return GETSOCK_BLANK;
-}
-/* USE_SSLEAY || USE_GNUTLS || USE_SCHANNEL || USE_DARWINSSL || USE_NSS */
-#endif
 
 void Curl_ssl_close(struct connectdata *conn, int sockindex)
 {
