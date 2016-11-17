@@ -169,7 +169,7 @@ mbed_connect_step1(struct connectdata *conn,
   errorbuf[0]=0;
 
   /* mbedTLS only supports SSLv3 and TLSv1 */
-  if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
+  if(data->set.ssl.primary.version == CURL_SSLVERSION_SSLv2) {
     failf(data, "mbedTLS does not support SSLv2");
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -205,34 +205,34 @@ mbed_connect_step1(struct connectdata *conn,
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&connssl->cacert);
 
-  if(data->set.str[STRING_SSL_CAFILE]) {
+  if(data->set.str[STRING_SSL_CAFILE_ORIG]) {
     ret = mbedtls_x509_crt_parse_file(&connssl->cacert,
-                                      data->set.str[STRING_SSL_CAFILE]);
+                                      data->set.str[STRING_SSL_CAFILE_ORIG]);
 
     if(ret<0) {
 #ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
       failf(data, "Error reading ca cert file %s - mbedTLS: (-0x%04X) %s",
-            data->set.str[STRING_SSL_CAFILE], -ret, errorbuf);
+            data->set.str[STRING_SSL_CAFILE_ORIG], -ret, errorbuf);
 
-      if(data->set.ssl.verifypeer)
+      if(data->set.ssl.primary.verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
     }
   }
 
-  if(data->set.str[STRING_SSL_CAPATH]) {
+  if(data->set.str[STRING_SSL_CAPATH_ORIG]) {
     ret = mbedtls_x509_crt_parse_path(&connssl->cacert,
-                                      data->set.str[STRING_SSL_CAPATH]);
+                                      data->set.str[STRING_SSL_CAPATH_ORIG]);
 
     if(ret<0) {
 #ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
       failf(data, "Error reading ca cert path %s - mbedTLS: (-0x%04X) %s",
-            data->set.str[STRING_SSL_CAPATH], -ret, errorbuf);
+            data->set.str[STRING_SSL_CAPATH_ORIG], -ret, errorbuf);
 
-      if(data->set.ssl.verifypeer)
+      if(data->set.ssl.primary.verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
     }
   }
@@ -240,16 +240,16 @@ mbed_connect_step1(struct connectdata *conn,
   /* Load the client certificate */
   mbedtls_x509_crt_init(&connssl->clicert);
 
-  if(data->set.str[STRING_CERT]) {
+  if(data->set.str[STRING_CERT_ORIG]) {
     ret = mbedtls_x509_crt_parse_file(&connssl->clicert,
-                                      data->set.str[STRING_CERT]);
+                                      data->set.str[STRING_CERT_ORIG]);
 
     if(ret) {
 #ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
       failf(data, "Error reading client cert file %s - mbedTLS: (-0x%04X) %s",
-            data->set.str[STRING_CERT], -ret, errorbuf);
+            data->set.str[STRING_CERT_ORIG], -ret, errorbuf);
 
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -258,9 +258,10 @@ mbed_connect_step1(struct connectdata *conn,
   /* Load the client private key */
   mbedtls_pk_init(&connssl->pk);
 
-  if(data->set.str[STRING_KEY]) {
-    ret = mbedtls_pk_parse_keyfile(&connssl->pk, data->set.str[STRING_KEY],
-                                   data->set.str[STRING_KEY_PASSWD]);
+  if(data->set.str[STRING_KEY_ORIG]) {
+    ret = mbedtls_pk_parse_keyfile(&connssl->pk,
+                                   data->set.str[STRING_KEY_ORIG],
+                                   data->set.str[STRING_KEY_ORIG]);
     if(ret == 0 && !mbedtls_pk_can_do(&connssl->pk, MBEDTLS_PK_RSA))
       ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 
@@ -269,7 +270,7 @@ mbed_connect_step1(struct connectdata *conn,
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
       failf(data, "Error reading private key %s - mbedTLS: (-0x%04X) %s",
-            data->set.str[STRING_KEY], -ret, errorbuf);
+            data->set.str[STRING_KEY_ORIG], -ret, errorbuf);
 
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -278,16 +279,16 @@ mbed_connect_step1(struct connectdata *conn,
   /* Load the CRL */
   mbedtls_x509_crl_init(&connssl->crl);
 
-  if(data->set.str[STRING_SSL_CRLFILE]) {
+  if(data->set.str[STRING_SSL_CRLFILE_ORIG]) {
     ret = mbedtls_x509_crl_parse_file(&connssl->crl,
-                                      data->set.str[STRING_SSL_CRLFILE]);
+                                      data->set.str[STRING_SSL_CRLFILE_ORIG]);
 
     if(ret) {
 #ifdef MBEDTLS_ERROR_C
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
       failf(data, "Error reading CRL file %s - mbedTLS: (-0x%04X) %s",
-            data->set.str[STRING_SSL_CRLFILE], -ret, errorbuf);
+            data->set.str[STRING_SSL_CRLFILE_ORIG], -ret, errorbuf);
 
       return CURLE_SSL_CRL_BADFILE;
     }
@@ -316,7 +317,7 @@ mbed_connect_step1(struct connectdata *conn,
   mbedtls_ssl_conf_cert_profile(&connssl->config,
                                 &mbedtls_x509_crt_profile_fr);
 
-  switch(data->set.ssl.version) {
+  switch(data->set.ssl.primary.version) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
     mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
@@ -392,7 +393,7 @@ mbed_connect_step1(struct connectdata *conn,
                             &connssl->cacert,
                             &connssl->crl);
 
-  if(data->set.str[STRING_KEY]) {
+  if(data->set.str[STRING_KEY_ORIG]) {
     mbedtls_ssl_conf_own_cert(&connssl->config,
                               &connssl->clicert, &connssl->pk);
   }
@@ -486,7 +487,7 @@ mbed_connect_step2(struct connectdata *conn,
 
   ret = mbedtls_ssl_get_verify_result(&conn->ssl[sockindex].ssl);
 
-  if(ret && data->set.ssl.verifypeer) {
+  if(ret && data->set.ssl.primary.verifypeer) {
     if(ret & MBEDTLS_X509_BADCERT_EXPIRED)
       failf(data, "Cert verify failed: BADCERT_EXPIRED");
 
