@@ -63,6 +63,8 @@ static CURLcode https_proxy_connect(struct connectdata *conn, int sockindex)
   }
   return result;
 #else
+  (void) conn;
+  (void) sockindex;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
