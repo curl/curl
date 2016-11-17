@@ -15,6 +15,16 @@ BUGS
   1.6 How to get a stack trace
   1.7 Bugs in libcurl bindings
 
+ 2. Bug fixing procedure
+ 2.1 What happens on first filing
+ 2.2 First response
+ 2.3 Not reproducible
+ 2.4 Unresponsive
+ 2.5 Lack of time/interest
+ 2.6 KNOWN_BUGS
+ 2.7 TODO
+ 2.8 Closing off stalled bugs
+
 ==============================================================================
 
 1.1 There are still bugs
@@ -75,8 +85,6 @@ BUGS
   MANUAL file.
 
 1.4 libcurl problems
-
-  First, post all libcurl problems on the curl-library mailing list.
 
   When you've written your own application with libcurl to perform transfers,
   it is even more important to be specific and detailed when reporting bugs.
@@ -144,3 +152,96 @@ BUGS
   If you suspect that the problem exists in the underlying libcurl, then
   please convert your program over to plain C and follow the steps outlined
   above.
+
+2. Bug fixing procedure
+
+2.1 What happens on first filing
+
+  When a new issue is posted in the issue tracker or on the mailing list, the
+  team of developers first need to see the report. Maybe they took the day
+  off, maybe they're off in the woods hunting. Have patience. Allow at least a
+  few days before expecting someone to have responded.
+
+  In the issue tracker you can expect that some labels will be set on the
+  issue to help categorize it.
+
+2.2 First response
+
+  If your issue/bug report wasn't perfect at once (and few are), chances are
+  that someone will ask follow-up questions. Which version did you use? Which
+  options did you use? How often does the problem occur? How can we reproduce
+  this problem? Which protocols does it involve? Or perhaps much more specific
+  and deep diving questions. It all depends on your specific issue.
+
+  You should then respond to these follow-up questions and provide more info
+  about the problem, so that we can help you figure it out. Or maybe you can
+  help us figure it out. An active back-and-forth communication is important
+  and the key for finding a cure and landing a fix.
+
+2.3 Not reproducible
+
+  For problems that we can't reproduce and can't understand even after having
+  gotten all the info we need and having studied the source code over again,
+  are really hard to solve so then we may require further work from you who
+  actually see or experience the problem.
+
+2.4 Unresponsive
+
+  If the problem haven't been understood or reproduced, and there's nobody
+  responding to follow-up questions or questions asking for clarifications or
+  for discussing possible ways to move forward with the task, we take that as
+  a strong suggestion that the bug is not important.
+
+  Unimportant issues will be closed as inactive sooner or later as they can't
+  be fixed. The inactivity period (waiting for responses) should not be
+  shorter than two weeks but may extend months.
+
+2.5 Lack of time/interest
+
+  Bugs that are filed and are understood can unfortunately end up in the
+  "nobody cares enough about it to work on it" category. Such bugs are
+  perfectly valid problems that *should* get fixed but apparently aren't. We
+  try to mark such bugs as "KNOWN_BUGS material" after a time of inactivity
+  and if no activity is noticed after yet some time those bugs are added to
+  KNOWN_BUGS and are closed in the issue tracker.
+
+2.6 KNOWN_BUGS
+
+  This is a list of known bugs. Bugs we know exist and that have been pointed
+  out but that haven't yet been fixed. The reasons for why they haven't been
+  fixed can involve anything really, but the primary reason is that nobody has
+  considered these problems to be important enough to spend the necesary time
+  and effort to have them fixed.
+
+  The KNOWN_BUGS are always up for grabs and we will always love the ones who
+  bring one of them back to live and offers solutions to them.
+
+  The KNOWN_BUGS document has a sibling document known as TODO.
+
+2.7 TODO
+
+  Issues that are filed or reported that aren't really bugs but more missing
+  features or ideas for future improvements and so on are marked as
+  'enhancement' or 'feature-request' and will be added to the TODO document
+  instead and the issue is closed. We don't keep TODO items in the issue
+  tracker.
+
+  The TODO document is full of ideas and suggestions of what we can add or fix
+  one day. You're always encouraged and free to grab one of those items and
+  take up a discussion with the curl development team on how that could be
+  implemented or provided in the project so that you can work on ticking it
+  odd that document.
+
+  If the issue is rather a bug and not a missing feature or functionality, it
+  is listed in KNOWN_BUGS instead.
+
+2.8 Closing off stalled bugs
+
+  The issue and pull request trackers on https://github.com/curl/curl will
+  only hold "active" entries (using a non-precise defintion of what active
+  actually is, but they're at least not completely dead). Those that are
+  abandonded or in other ways dormant will be closed and sometimes added to
+  TODO and KNOWN_BUGS instead.
+
+  This way, we only have "active" issues open on github. Irrelevant issues and
+  pull requests will not distract developes or casual visitors.
