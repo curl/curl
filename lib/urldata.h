@@ -962,8 +962,8 @@ struct connectdata {
   struct timeval connecttime;
   /* The two fields below get set in Curl_connecthost */
   int num_addr; /* number of addresses to try to connect to */
-  long timeoutms_per_addr; /* how long time in milliseconds to spend on
-                              trying to connect to each IP address */
+  time_t timeoutms_per_addr; /* how long time in milliseconds to spend on
+                                trying to connect to each IP address */
 
   const struct Curl_handler *handler; /* Connection's protocol handler */
   const struct Curl_handler *given;   /* The protocol first given */

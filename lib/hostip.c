@@ -568,7 +568,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
                         const char *hostname,
                         int port,
                         struct Curl_dns_entry **entry,
-                        long timeoutms)
+                        time_t timeoutms)
 {
 #ifdef USE_ALARM_TIMEOUT
 #ifdef HAVE_SIGACTION

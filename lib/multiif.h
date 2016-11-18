@@ -25,9 +25,9 @@
 /*
  * Prototypes for library-wide functions provided by multi.c
  */
-void Curl_expire(struct Curl_easy *data, long milli);
+void Curl_expire(struct Curl_easy *data, time_t milli);
 void Curl_expire_clear(struct Curl_easy *data);
-void Curl_expire_latest(struct Curl_easy *data, long milli);
+void Curl_expire_latest(struct Curl_easy *data, time_t milli);
 bool Curl_pipeline_wanted(const struct Curl_multi* multi, int bits);
 void Curl_multi_handlePipeBreak(struct Curl_easy *data);
 

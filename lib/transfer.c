@@ -1137,7 +1137,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
       */
 
-      long ms = Curl_tvdiff(k->now, k->start100);
+      time_t ms = Curl_tvdiff(k->now, k->start100);
       if(ms >= data->set.expect_100_timeout) {
         /* we've waited long enough, continue anyway */
         k->exp100 = EXP100_SEND_DATA;

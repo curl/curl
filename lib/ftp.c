@@ -384,10 +384,10 @@ static CURLcode AcceptServerConnect(struct connectdata *conn)
  * Curl_pgrsTime(..., TIMER_STARTACCEPT);
  *
  */
-static long ftp_timeleft_accept(struct Curl_easy *data)
+static time_t ftp_timeleft_accept(struct Curl_easy *data)
 {
-  long timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
-  long other;
+  time_t timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
+  time_t other;
   struct timeval now;
 
   if(data->set.accepttimeout > 0)
@@ -430,7 +430,7 @@ static CURLcode ReceivedServerConnect(struct connectdata *conn, bool *received)
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
   int result;
-  long timeout_ms;
+  time_t timeout_ms;
   ssize_t nread;
   int ftpcode;
 
@@ -547,7 +547,7 @@ static CURLcode InitiateTransfer(struct connectdata *conn)
 static CURLcode AllowServerConnect(struct connectdata *conn, bool *connected)
 {
   struct Curl_easy *data = conn->data;
-  long timeout_ms;
+  time_t timeout_ms;
   CURLcode result = CURLE_OK;
 
   *connected = FALSE;
@@ -687,8 +687,8 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
    * line in a response or continue reading.  */
 
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
-  long timeout;              /* timeout in milliseconds */
-  long interval_ms;
+  time_t timeout;              /* timeout in milliseconds */
+  time_t interval_ms;
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
@@ -3250,7 +3250,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   ssize_t nread;
   int ftpcode;
   CURLcode result = CURLE_OK;
-  char *path;
+  char *path = NULL;
   const char *path_to_use = data->state.path;
 
   if(!ftp)
