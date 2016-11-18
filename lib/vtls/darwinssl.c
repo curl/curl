@@ -1089,45 +1089,45 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLSetProtocolVersionMax != NULL) {
     switch(conn->ssl_config.version) {
-      case CURL_SSLVERSION_DEFAULT:
-      case CURL_SSLVERSION_TLSv1:
-        (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol1);
-        (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
-        break;
-      case CURL_SSLVERSION_TLSv1_0:
-        (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol1);
-        (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol1);
-        break;
-      case CURL_SSLVERSION_TLSv1_1:
-        (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol11);
-        (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol11);
-        break;
-      case CURL_SSLVERSION_TLSv1_2:
-        (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol12);
-        (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
-        break;
-      case CURL_SSLVERSION_TLSv1_3:
-        failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
+    case CURL_SSLVERSION_DEFAULT:
+    case CURL_SSLVERSION_TLSv1:
+      (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol1);
+      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
+      break;
+    case CURL_SSLVERSION_TLSv1_0:
+      (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol1);
+      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol1);
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+      (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol11);
+      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol11);
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol12);
+      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
+    case CURL_SSLVERSION_SSLv3:
+      err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol3);
+      if(err != noErr) {
+        failf(data, "Your version of the OS does not support SSLv3");
         return CURLE_SSL_CONNECT_ERROR;
-      case CURL_SSLVERSION_SSLv3:
-        err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol3);
-        if(err != noErr) {
-          failf(data, "Your version of the OS does not support SSLv3");
-          return CURLE_SSL_CONNECT_ERROR;
-        }
-        (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kSSLProtocol3);
-        break;
-      case CURL_SSLVERSION_SSLv2:
-        err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol2);
-        if(err != noErr) {
-          failf(data, "Your version of the OS does not support SSLv2");
-          return CURLE_SSL_CONNECT_ERROR;
-        }
-        (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kSSLProtocol2);
-        break;
-      default:
-        failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      }
+      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kSSLProtocol3);
+      break;
+    case CURL_SSLVERSION_SSLv2:
+      err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol2);
+      if(err != noErr) {
+        failf(data, "Your version of the OS does not support SSLv2");
         return CURLE_SSL_CONNECT_ERROR;
+      }
+      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kSSLProtocol2);
+      break;
+    default:
+      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      return CURLE_SSL_CONNECT_ERROR;
     }
   }
   else {
@@ -1136,88 +1136,36 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                        kSSLProtocolAll,
                                        false);
     switch (conn->ssl_config.version) {
-      case CURL_SSLVERSION_DEFAULT:
-      case CURL_SSLVERSION_TLSv1:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol1,
-                                           true);
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol11,
-                                           true);
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol12,
-                                           true);
-        break;
-      case CURL_SSLVERSION_TLSv1_0:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol1,
-                                           true);
-        break;
-      case CURL_SSLVERSION_TLSv1_1:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol11,
-                                           true);
-        break;
-      case CURL_SSLVERSION_TLSv1_2:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol12,
-                                           true);
-        break;
-      case CURL_SSLVERSION_TLSv1_3:
-        failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
-        return CURLE_SSL_CONNECT_ERROR;
-      case CURL_SSLVERSION_SSLv3:
-        err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kSSLProtocol3,
-                                           true);
-        if(err != noErr) {
-          failf(data, "Your version of the OS does not support SSLv3");
-          return CURLE_SSL_CONNECT_ERROR;
-        }
-        break;
-      case CURL_SSLVERSION_SSLv2:
-        err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kSSLProtocol2,
-                                           true);
-        if(err != noErr) {
-          failf(data, "Your version of the OS does not support SSLv2");
-          return CURLE_SSL_CONNECT_ERROR;
-        }
-        break;
-      default:
-        failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
-        return CURLE_SSL_CONNECT_ERROR;
-    }
-#endif  /* CURL_SUPPORT_MAC_10_8 */
-  }
-#else
-  (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx, kSSLProtocolAll, false);
-  switch(conn->ssl_config.version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
+      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kTLSProtocol1,
+                                         true);
+      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kTLSProtocol11,
+                                         true);
+      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kTLSProtocol12,
+                                         true);
+      break;
     case CURL_SSLVERSION_TLSv1_0:
       (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                          kTLSProtocol1,
                                          true);
       break;
     case CURL_SSLVERSION_TLSv1_1:
-      failf(data, "Your version of the OS does not support TLSv1.1");
-      return CURLE_SSL_CONNECT_ERROR;
-    case CURL_SSLVERSION_TLSv1_2:
-      failf(data, "Your version of the OS does not support TLSv1.2");
-      return CURLE_SSL_CONNECT_ERROR;
-    case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "Your version of the OS does not support TLSv1.3");
-      return CURLE_SSL_CONNECT_ERROR;
-    case CURL_SSLVERSION_SSLv2:
-      err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                         kSSLProtocol2,
+      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kTLSProtocol11,
                                          true);
-      if(err != noErr) {
-        failf(data, "Your version of the OS does not support SSLv2");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
       break;
+    case CURL_SSLVERSION_TLSv1_2:
+      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kTLSProtocol12,
+                                         true);
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
     case CURL_SSLVERSION_SSLv3:
       err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                          kSSLProtocol3,
@@ -1227,39 +1175,92 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         return CURLE_SSL_CONNECT_ERROR;
       }
       break;
+    case CURL_SSLVERSION_SSLv2:
+      err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                         kSSLProtocol2,
+                                         true);
+      if(err != noErr) {
+        failf(data, "Your version of the OS does not support SSLv2");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+      break;
     default:
       failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
       return CURLE_SSL_CONNECT_ERROR;
+    }
+#endif  /* CURL_SUPPORT_MAC_10_8 */
+  }
+#else
+  (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx, kSSLProtocolAll, false);
+  switch(conn->ssl_config.version) {
+  case CURL_SSLVERSION_DEFAULT:
+  case CURL_SSLVERSION_TLSv1:
+  case CURL_SSLVERSION_TLSv1_0:
+    (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                       kTLSProtocol1,
+                                       true);
+    break;
+  case CURL_SSLVERSION_TLSv1_1:
+    failf(data, "Your version of the OS does not support TLSv1.1");
+    return CURLE_SSL_CONNECT_ERROR;
+  case CURL_SSLVERSION_TLSv1_2:
+    failf(data, "Your version of the OS does not support TLSv1.2");
+    return CURLE_SSL_CONNECT_ERROR;
+  case CURL_SSLVERSION_TLSv1_3:
+    failf(data, "Your version of the OS does not support TLSv1.3");
+    return CURLE_SSL_CONNECT_ERROR;
+  case CURL_SSLVERSION_SSLv2:
+    err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                       kSSLProtocol2,
+                                       true);
+    if(err != noErr) {
+      failf(data, "Your version of the OS does not support SSLv2");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    break;
+  case CURL_SSLVERSION_SSLv3:
+    err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                       kSSLProtocol3,
+                                       true);
+    if(err != noErr) {
+      failf(data, "Your version of the OS does not support SSLv3");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    break;
+  default:
+    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 
-  if(data->set.str[STRING_KEY]) {
+  if(data->set.str[STRING_KEY_ORIG]) {
     infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
-                "Transport. The private key must be in the Keychain.\n");
+          "Transport. The private key must be in the Keychain.\n");
   }
 
-  if(data->set.str[STRING_CERT]) {
+  if(data->set.str[STRING_CERT_ORIG]) {
     SecIdentityRef cert_and_key = NULL;
-    bool is_cert_file = is_file(data->set.str[STRING_CERT]);
+    bool is_cert_file = is_file(data->set.str[STRING_CERT_ORIG]);
 
     /* User wants to authenticate with a client cert. Look for it:
        If we detect that this is a file on disk, then let's load it.
        Otherwise, assume that the user wants to use an identity loaded
        from the Keychain. */
     if(is_cert_file) {
-      if(!data->set.str[STRING_CERT_TYPE])
+      if(!data->set.ssl.cert_type)
         infof(data, "WARNING: SSL: Certificate type not set, assuming "
-                    "PKCS#12 format.\n");
-      else if(strncmp(data->set.str[STRING_CERT_TYPE], "P12",
-        strlen(data->set.str[STRING_CERT_TYPE])) != 0)
+              "PKCS#12 format.\n");
+      else if(strncmp(data->set.ssl.cert_type, "P12",
+                      strlen(data->set.ssl.cert_type)))
         infof(data, "WARNING: SSL: The Security framework only supports "
-                    "loading identities that are in PKCS#12 format.\n");
-
-      err = CopyIdentityFromPKCS12File(data->set.str[STRING_CERT],
-        data->set.str[STRING_KEY_PASSWD], &cert_and_key);
+              "loading identities that are in PKCS#12 format.\n");
+      err = CopyIdentityFromPKCS12File(data->set.str[STRING_CERT_ORIG],
+                                       data->set.ssl.key_passwd,
+                                       &cert_and_key);
     }
     else
-      err = CopyIdentityWithLabel(data->set.str[STRING_CERT], &cert_and_key);
+      err = CopyIdentityWithLabel(data->set.str[STRING_CERT_ORIG],
+                                  &cert_and_key);
 
     if(err == noErr) {
       SecCertificateRef cert = NULL;
@@ -1298,27 +1299,27 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
     else {
       switch(err) {
-        case errSecAuthFailed: case -25264: /* errSecPkcs12VerifyFailure */
-          failf(data, "SSL: Incorrect password for the certificate \"%s\" "
-                      "and its private key.", data->set.str[STRING_CERT]);
-          break;
-        case -26275: /* errSecDecode */ case -25257: /* errSecUnknownFormat */
-          failf(data, "SSL: Couldn't make sense of the data in the "
-                      "certificate \"%s\" and its private key.",
-                      data->set.str[STRING_CERT]);
-          break;
-        case -25260: /* errSecPassphraseRequired */
-          failf(data, "SSL The certificate \"%s\" requires a password.",
-                      data->set.str[STRING_CERT]);
-          break;
-        case errSecItemNotFound:
-          failf(data, "SSL: Can't find the certificate \"%s\" and its private "
-                      "key in the Keychain.", data->set.str[STRING_CERT]);
-          break;
-        default:
-          failf(data, "SSL: Can't load the certificate \"%s\" and its private "
-                      "key: OSStatus %d", data->set.str[STRING_CERT], err);
-          break;
+      case errSecAuthFailed: case -25264: /* errSecPkcs12VerifyFailure */
+        failf(data, "SSL: Incorrect password for the certificate \"%s\" "
+              "and its private key.", data->set.str[STRING_CERT_ORIG]);
+        break;
+      case -26275: /* errSecDecode */ case -25257: /* errSecUnknownFormat */
+        failf(data, "SSL: Couldn't make sense of the data in the "
+              "certificate \"%s\" and its private key.",
+              data->set.str[STRING_CERT_ORIG]);
+        break;
+      case -25260: /* errSecPassphraseRequired */
+        failf(data, "SSL The certificate \"%s\" requires a password.",
+              data->set.str[STRING_CERT_ORIG]);
+        break;
+      case errSecItemNotFound:
+        failf(data, "SSL: Can't find the certificate \"%s\" and its private "
+              "key in the Keychain.", data->set.str[STRING_CERT_ORIG]);
+        break;
+      default:
+        failf(data, "SSL: Can't load the certificate \"%s\" and its private "
+              "key: OSStatus %d", data->set.str[STRING_CERT_ORIG], err);
+        break;
       }
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -1350,7 +1351,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   if(SSLSetSessionOption != NULL) {
 #endif /* CURL_BUILD_MAC */
     bool break_on_auth = !conn->ssl_config.verifypeer ||
-      data->set.str[STRING_SSL_CAFILE];
+      data->set.str[STRING_SSL_CAFILE_ORIG];
     err = SSLSetSessionOption(connssl->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
                               break_on_auth);
@@ -1378,15 +1379,15 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
 
-  if(data->set.str[STRING_SSL_CAFILE]) {
-    bool is_cert_file = is_file(data->set.str[STRING_SSL_CAFILE]);
+  if(data->set.str[STRING_SSL_CAFILE_ORIG]) {
+    bool is_cert_file = is_file(data->set.str[STRING_SSL_CAFILE_ORIG]);
 
     if(!is_cert_file) {
       failf(data, "SSL: can't load CA certificate file %s",
-            data->set.str[STRING_SSL_CAFILE]);
+            data->set.str[STRING_SSL_CAFILE_ORIG]);
       return CURLE_SSL_CACERT_BADFILE;
     }
-    if(!data->set.ssl.verifypeer) {
+    if(!data->set.ssl.primary.verifypeer) {
       failf(data, "SSL: CA certificate set, but certificate verification "
             "is disabled");
       return CURLE_SSL_CONNECT_ERROR;
@@ -1410,8 +1411,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     || (Curl_inet_pton(AF_INET6, conn->host.name, &addr))
   #endif
        ) {
-         infof(data, "WARNING: using IP address, SNI is being disabled by "
-         "the OS.\n");
+      infof(data, "WARNING: using IP address, SNI is being disabled by "
+            "the OS.\n");
     }
   }
 
@@ -1434,7 +1435,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         running in an affected version of OS X. */
       if(darwinver_maj == 12 && darwinver_min <= 3 &&
          all_ciphers[i] >= 0xC001 && all_ciphers[i] <= 0xC032) {
-           continue;
+        continue;
       }
 #endif /* CURL_BUILD_MAC */
       switch(all_ciphers[i]) {
@@ -1557,8 +1558,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     else {
       CURLcode result;
       ssl_sessionid =
-        aprintf("%s:%d:%d:%s:%hu", data->set.str[STRING_SSL_CAFILE],
-                data->set.ssl.verifypeer, data->set.ssl.verifyhost,
+        aprintf("%s:%d:%d:%s:%hu", data->set.str[STRING_SSL_CAFILE_ORIG],
+                data->set.ssl.primary.verifypeer,
+                data->set.ssl.primary.verifyhost,
                 conn->host.name, conn->remote_port);
       ssl_sessionid_len = strlen(ssl_sessionid);
 
@@ -1914,8 +1916,8 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       /* The below is errSSLServerAuthCompleted; it's not defined in
         Leopard's headers */
       case -9841:
-        if(data->set.str[STRING_SSL_CAFILE]) {
-          int res = verify_cert(data->set.str[STRING_SSL_CAFILE], data,
+        if(data->set.str[STRING_SSL_CAFILE_ORIG]) {
+          int res = verify_cert(data->set.str[STRING_SSL_CAFILE_ORIG], data,
                                 connssl->ssl_ctx);
           if(res != CURLE_OK)
             return res;
