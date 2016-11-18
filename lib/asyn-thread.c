@@ -169,7 +169,7 @@ struct thread_sync_data {
 struct thread_data {
   curl_thread_t thread_hnd;
   unsigned int poll_interval;
-  long interval_end;
+  time_t interval_end;
   struct thread_sync_data tsd;
 };
 
@@ -525,7 +525,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   }
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
-    long elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
+    time_t elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
 

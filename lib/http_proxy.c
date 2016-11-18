@@ -113,7 +113,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
   curl_off_t cl=0;
   bool closeConnection = FALSE;
   bool chunked_encoding = FALSE;
-  long check;
+  time_t check;
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1

@@ -44,12 +44,12 @@
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
-long Curl_pp_state_timeout(struct pingpong *pp)
+time_t Curl_pp_state_timeout(struct pingpong *pp)
 {
   struct connectdata *conn = pp->conn;
   struct Curl_easy *data=conn->data;
-  long timeout_ms; /* in milliseconds */
-  long timeout2_ms; /* in milliseconds */
+  time_t timeout_ms; /* in milliseconds */
+  time_t timeout2_ms; /* in milliseconds */
   long response_time= (data->set.server_response_timeout)?
     data->set.server_response_timeout: pp->response_time;
 
@@ -83,8 +83,8 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block)
   struct connectdata *conn = pp->conn;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
-  long interval_ms;
-  long timeout_ms = Curl_pp_state_timeout(pp);
+  time_t interval_ms;
+  time_t timeout_ms = Curl_pp_state_timeout(pp);
   struct Curl_easy *data=conn->data;
   CURLcode result = CURLE_OK;
 

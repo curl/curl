@@ -3021,8 +3021,8 @@ Curl_oldest_idle_connection(struct Curl_easy *data)
   struct curl_hash_iterator iter;
   struct curl_llist_element *curr;
   struct curl_hash_element *he;
-  long highscore=-1;
-  long score;
+  time_t highscore=-1;
+  time_t score;
   struct timeval now;
   struct connectdata *conn_candidate = NULL;
   struct connectbundle *bundle;
@@ -3071,8 +3071,8 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
                                       struct connectbundle *bundle)
 {
   struct curl_llist_element *curr;
-  long highscore=-1;
-  long score;
+  time_t highscore=-1;
+  time_t score;
   struct timeval now;
   struct connectdata *conn_candidate = NULL;
   struct connectdata *conn;
@@ -3154,7 +3154,7 @@ static int call_disconnect_if_dead(struct connectdata *conn,
 static void prune_dead_connections(struct Curl_easy *data)
 {
   struct timeval now = Curl_tvnow();
-  long elapsed = Curl_tvdiff(now, data->state.conn_cache->last_cleanup);
+  time_t elapsed = Curl_tvdiff(now, data->state.conn_cache->last_cleanup);
 
   if(elapsed >= 1000L) {
     Curl_conncache_foreach(data->state.conn_cache, data,
@@ -5537,7 +5537,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
                                bool *async)
 {
   CURLcode result=CURLE_OK;
-  long timeout_ms = Curl_timeleft(data, NULL, TRUE);
+  time_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
   /*************************************************************
    * Resolve the name of the server or proxy

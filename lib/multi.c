@@ -1300,7 +1300,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   CURLMcode rc;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k;
-  long timeout_ms;
+  time_t timeout_ms;
   int control;
 
   if(!GOOD_EASY_HANDLE(data))
@@ -2486,7 +2486,7 @@ static CURLMcode add_next_timeout(struct timeval now,
      timeout in *tv */
   for(e = list->head; e;) {
     struct curl_llist_element *n = e->next;
-    long diff = curlx_tvdiff(*(struct timeval *)e->ptr, now);
+    time_t diff = curlx_tvdiff(*(struct timeval *)e->ptr, now);
     if(diff <= 0)
       /* remove outdated entry */
       Curl_llist_remove(list, e, NULL);
@@ -2764,7 +2764,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 
     if(Curl_splaycomparekeys(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
-      *timeout_ms = curlx_tvdiff(multi->timetree->key, now);
+      *timeout_ms = (long)curlx_tvdiff(multi->timetree->key, now);
       if(!*timeout_ms)
         /*
          * Since we only provide millisecond resolution on the returned value
@@ -2871,7 +2871,7 @@ multi_addtimeout(struct curl_llist *timeoutlist,
     /* find the correct spot in the list */
     for(e = timeoutlist->head; e; e = e->next) {
       struct timeval *checktime = e->ptr;
-      long diff = curlx_tvdiff(*checktime, *timedup);
+      time_t diff = curlx_tvdiff(*checktime, *timedup);
       if(diff > 0)
         break;
       prev = e;
@@ -2898,7 +2898,7 @@ multi_addtimeout(struct curl_llist *timeoutlist,
  * The timeout will be added to a queue of timeouts if it defines a moment in
  * time that is later than the current head of queue.
  */
-void Curl_expire(struct Curl_easy *data, long milli)
+void Curl_expire(struct Curl_easy *data, time_t milli)
 {
   struct Curl_multi *multi = data->multi;
   struct timeval *nowp = &data->state.expiretime;
@@ -2911,7 +2911,7 @@ void Curl_expire(struct Curl_easy *data, long milli)
     return;
 
   set = Curl_tvnow();
-  set.tv_sec += milli/1000;
+  set.tv_sec += (long)(milli/1000);
   set.tv_usec += (milli%1000)*1000;
 
   if(set.tv_usec >= 1000000) {
@@ -2923,7 +2923,7 @@ void Curl_expire(struct Curl_easy *data, long milli)
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
        is. */
-    long diff = curlx_tvdiff(set, *nowp);
+    time_t diff = curlx_tvdiff(set, *nowp);
     if(diff > 0) {
       /* the new expire time was later so just add it to the queue
          and get out */
@@ -2961,14 +2961,14 @@ void Curl_expire(struct Curl_easy *data, long milli)
  * time-out period to expire.
  *
  */
-void Curl_expire_latest(struct Curl_easy *data, long milli)
+void Curl_expire_latest(struct Curl_easy *data, time_t milli)
 {
   struct timeval *expire = &data->state.expiretime;
 
   struct timeval set;
 
   set = Curl_tvnow();
-  set.tv_sec += milli / 1000;
+  set.tv_sec += (long)(milli / 1000);
   set.tv_usec += (milli % 1000) * 1000;
 
   if(set.tv_usec >= 1000000) {
@@ -2980,7 +2980,7 @@ void Curl_expire_latest(struct Curl_easy *data, long milli)
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
          is. */
-    long diff = curlx_tvdiff(set, *expire);
+    time_t diff = curlx_tvdiff(set, *expire);
     if(diff > 0)
       /* the new expire time was later than the top time, so just skip this */
       return;

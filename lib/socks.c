@@ -57,7 +57,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
   ssize_t nread;
   ssize_t allread = 0;
   int result;
-  long timeleft;
+  time_t timeleft;
   *n = 0;
   for(;;) {
     timeleft = Curl_timeleft(conn->data, NULL, TRUE);
@@ -376,7 +376,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   CURLcode code;
   curl_socket_t sock = conn->sock[sockindex];
   struct Curl_easy *data = conn->data;
-  long timeout;
+  time_t timeout;
   bool socks5_resolve_local = (conn->proxytype == CURLPROXY_SOCKS5)?TRUE:FALSE;
   const size_t hostname_len = strlen(hostname);
   ssize_t len = 0;

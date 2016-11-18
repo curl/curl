@@ -87,7 +87,7 @@ int Curl_resolv(struct connectdata *conn, const char *hostname,
                 int port, struct Curl_dns_entry **dnsentry);
 int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
                         int port, struct Curl_dns_entry **dnsentry,
-                        long timeoutms);
+                        time_t timeoutms);
 
 #ifdef CURLRES_IPV6
 /*
