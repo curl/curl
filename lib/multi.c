@@ -813,8 +813,10 @@ static int waitconnect_getsock(struct connectdata *conn,
   if(!numsocks)
     return GETSOCK_BLANK;
 
+#ifdef USE_SSL
   if(CONNECT_FIRSTSOCKET_PROXY_SSL())
     return Curl_ssl_getsock(conn, sock, numsocks);
+#endif
 
   for(i=0; i<2; i++) {
     if(conn->tempsock[i] != CURL_SOCKET_BAD) {

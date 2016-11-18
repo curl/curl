@@ -123,9 +123,11 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
   TCHAR *host_name;
   CURLcode result;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
-        conn->host.name, conn->remote_port);
+        hostname, conn->remote_port);
 
 #ifdef HAS_ALPN
   /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
@@ -259,9 +261,9 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
 
   /* Warn if SNI is disabled due to use of an IP address */
-  if(Curl_inet_pton(AF_INET, conn->host.name, &addr)
+  if(Curl_inet_pton(AF_INET, hostname, &addr)
 #ifdef ENABLE_IPV6
-     || Curl_inet_pton(AF_INET6, conn->host.name, &addr6)
+     || Curl_inet_pton(AF_INET6, hostname, &addr6)
 #endif
     ) {
     infof(data, "schannel: using IP address, SNI is not supported by OS.\n");
@@ -339,7 +341,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
   memset(connssl->ctxt, 0, sizeof(struct curl_schannel_ctxt));
 
-  host_name = Curl_convert_UTF8_to_tchar(conn->host.name);
+  host_name = Curl_convert_UTF8_to_tchar(hostname);
   if(!host_name)
     return CURLE_OUT_OF_MEMORY;
 
@@ -412,11 +414,13 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   TCHAR *host_name;
   CURLcode result;
   bool doread;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 2/3)\n",
-        conn->host.name, conn->remote_port);
+        hostname, conn->remote_port);
 
   if(!connssl->cred || !connssl->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
@@ -512,7 +516,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     memcpy(inbuf[0].pvBuffer, connssl->encdata_buffer,
            connssl->encdata_offset);
 
-    host_name = Curl_convert_UTF8_to_tchar(conn->host.name);
+    host_name = Curl_convert_UTF8_to_tchar(hostname);
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
@@ -644,6 +648,8 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 #ifdef HAS_ALPN
   SecPkgContext_ApplicationProtocol alpn_result;
 #endif
@@ -651,7 +657,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 3/3)\n",
-        conn->host.name, conn->remote_port);
+        hostname, conn->remote_port);
 
   if(!connssl->cred)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1384,9 +1390,11 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
    */
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 
   infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
-        conn->host.name, conn->remote_port);
+        hostname, conn->remote_port);
 
   if(connssl->cred && connssl->ctxt) {
     SecBufferDesc BuffDesc;
@@ -1408,7 +1416,7 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
       failf(data, "schannel: ApplyControlToken failure: %s",
             Curl_sspi_strerror(conn, sspi_status));
 
-    host_name = Curl_convert_UTF8_to_tchar(conn->host.name);
+    host_name = Curl_convert_UTF8_to_tchar(hostname);
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
@@ -1533,6 +1541,9 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
   CURLcode result = CURLE_OK;
   CERT_CONTEXT *pCertContextServer = NULL;
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
+  const char * const conn_hostname = SSL_IS_PROXY() ?
+    conn->http_proxy.host.name :
+    conn->host.name;
 
   status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
                                             SECPKG_ATTR_REMOTE_CERT_CONTEXT,
@@ -1597,7 +1608,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
       DWORD len;
 
       cert_hostname.const_tchar_ptr = cert_hostname_buff;
-      hostname.tchar_ptr = Curl_convert_UTF8_to_tchar(conn->host.name);
+      hostname.tchar_ptr = Curl_convert_UTF8_to_tchar(conn_hostname);
 
       /* TODO: Fix this for certificates with multiple alternative names.
       Right now we're only asking for the first preferred alternative name.
@@ -1615,7 +1626,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
                               128);
       if(len > 0 && *cert_hostname.tchar_ptr == '*') {
         /* this is a wildcard cert.  try matching the last len - 1 chars */
-        int hostname_len = strlen(conn->host.name);
+        int hostname_len = strlen(conn_hostname);
         cert_hostname.tchar_ptr++;
         if(_tcsicmp(cert_hostname.const_tchar_ptr,
                     hostname.const_tchar_ptr + hostname_len - len + 2) != 0)
@@ -1630,7 +1641,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
         _cert_hostname = Curl_convert_tchar_to_UTF8(cert_hostname.tchar_ptr);
         failf(data, "schannel: CertGetNameString() certificate hostname "
               "(%s) did not match connection (%s)",
-              _cert_hostname, conn->host.name);
+              _cert_hostname, conn_hostname);
         Curl_unicodefree(_cert_hostname);
       }
       Curl_unicodefree(hostname.tchar_ptr);

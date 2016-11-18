@@ -262,6 +262,9 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   size_t len = 0;
   saslstate state1 = SASL_STOP;
   saslstate state2 = SASL_FINAL;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
+  const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
 #if defined(USE_KERBEROS5)
   const char* service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :
@@ -341,8 +344,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
 
       if(force_ir || data->set.sasl_ir)
         result = Curl_auth_create_oauth_bearer_message(data, conn->user,
-                                                       conn->host.name,
-                                                       conn->port,
+                                                       hostname,
+                                                       port,
                                                        conn->oauth_bearer,
                                                        &resp, &len);
     }
@@ -408,6 +411,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   saslstate newstate = SASL_FINAL;
   char *resp = NULL;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
+  const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)
   char *serverdata;
   char *chlg = NULL;
@@ -542,8 +548,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     /* Create the authorisation message */
     if(sasl->authused == SASL_MECH_OAUTHBEARER) {
       result = Curl_auth_create_oauth_bearer_message(data, conn->user,
-                                                     conn->host.name,
-                                                     conn->port,
+                                                     hostname,
+                                                     port,
                                                      conn->oauth_bearer,
                                                      &resp, &len);
 
