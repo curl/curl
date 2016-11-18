@@ -602,6 +602,7 @@ X_OBJS= \
 	$(DIROBJ)\pop3.obj \
 	$(DIROBJ)\progress.obj \
 	$(DIROBJ)\strcase.obj \
+	$(DIROBJ)\rand.obj \
 	$(DIROBJ)\rtsp.obj \
 	$(DIROBJ)\schannel.obj \
 	$(DIROBJ)\security.obj \

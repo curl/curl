@@ -191,6 +191,7 @@ struct OperationConfig {
   bool tcp_nodelay;
   bool tcp_fastopen;
   long req_retry;           /* number of retries */
+  bool retry_connrefused;   /* set connection refused as a transient error */
   long retry_delay;         /* delay between retries (in seconds) */
   long retry_maxtime;       /* maximum time to keep retrying */
 
@@ -256,7 +257,7 @@ struct GlobalConfig {
   bool tracetime;                 /* include timestamp? */
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
   char *libcurl;                  /* Output libcurl code to this file name */
-
+  bool fail_early;                /* exit on first transfer error */
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */

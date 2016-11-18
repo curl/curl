@@ -356,7 +356,7 @@ told to read from a file like that, carriage returns and newlines will be
 stripped out. If you don't want the @ character to have a special
 interpretation use \fI--data-raw\fP instead.
 .IP "-D, --dump-header <file>"
-Write the protocol headers to the specified file.
+Write the received protocol headers to the specified file.
 
 This option is handy to use when you want to store the headers that an HTTP
 site sends to you. Cookies from the headers could then be read in a second
@@ -620,6 +620,23 @@ or no response at all is received, the verification fails.
 
 This is currently only implemented in the OpenSSL, GnuTLS and NSS backends.
 (Added in 7.41.0)
+.IP "--fail-early"
+Fail and exit on first detected error.
+
+When curl is used to do multiple transfers on the command line, it will
+attempt to operate on each given URL, one by one. By default, it will ignore
+errors if there are more URLs given and the last URL's success will determine
+the error code curl returns. So early failures will be "hidden" by subsequent
+successful transfers.
+
+Using this option, curl will instead return an error on the first transfers
+that fails, independent on the amount of more URLs that are given on the
+command line. This way, no transfer failures go undetected by scripts and
+similar.
+
+This option will apply for all given URLs even if you use \fI--next\fP.
+
+(Added in 7.52.0)
 .IP "--false-start"
 
 (SSL) Tells curl to use false start during the TLS handshake. False start is a
@@ -1671,6 +1688,10 @@ also \fI--retry-max-time\fP to limit the total time allowed for
 retries. (Added in 7.12.3)
 
 If this option is used several times, the last one will be used.
+.IP "--retry-connrefused"
+In addition to the other conditions, consider ECONNREFUSED as a transient
+error too for \fI--retry\fP. This option is used together with
+\fI--retry\fP. (Added in 7.52.0)
 .IP "--retry-delay <seconds>"
 Make curl sleep this amount of time before each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
@@ -1879,7 +1900,7 @@ Forces curl to use TLS version 1.2 when negotiating with a remote TLS server.
 .IP "--tlsv1.3"
 (SSL)
 Forces curl to use TLS version 1.3 when negotiating with a remote TLS server.
-(Added in 7.51.1)
+(Added in 7.52.0)
 .IP "--tr-encoding"
 (HTTP) Request a compressed Transfer-Encoding response using one of the
 algorithms curl supports, and uncompress the data while receiving it.

@@ -1130,6 +1130,10 @@ struct connectdata {
   struct connectbundle *bundle; /* The bundle we are member of */
 
   int negnpn; /* APLN or NPN TLS negotiated protocol, CURL_HTTP_VERSION* */
+
+#ifdef USE_UNIX_SOCKETS
+  char *unix_domain_socket;
+#endif
 };
 
 /* The end of connectdata. */
@@ -1177,8 +1181,8 @@ struct PureInfo {
 
 
 struct Progress {
-  long lastshow; /* time() of the last displayed progress meter or NULL to
-                    force redraw at next call */
+  time_t lastshow; /* time() of the last displayed progress meter or NULL to
+                      force redraw at next call */
   curl_off_t size_dl; /* total expected size */
   curl_off_t size_ul; /* total expected size */
   curl_off_t downloaded; /* transferred so far */

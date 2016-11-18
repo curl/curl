@@ -176,34 +176,29 @@ static int passwd_callback(char *buf, int num, int encrypting,
 }
 
 /*
- * rand_enough() is a function that returns TRUE if we have seeded the random
- * engine properly. We use some preprocessor magic to provide a seed_enough()
- * macro to use, just to prevent a compiler warning on this function if we
- * pass in an argument that is never used.
+ * rand_enough() returns TRUE if we have seeded the random engine properly.
  */
-
-#ifdef HAVE_RAND_STATUS
-#define seed_enough(x) rand_enough()
 static bool rand_enough(void)
 {
   return (0 != RAND_status()) ? TRUE : FALSE;
 }
-#else
-#define seed_enough(x) rand_enough(x)
-static bool rand_enough(int nread)
-{
-  /* this is a very silly decision to make */
-  return (nread > 500) ? TRUE : FALSE;
-}
-#endif
 
-static int ossl_seed(struct Curl_easy *data)
+static CURLcode Curl_ossl_seed(struct Curl_easy *data)
 {
+  /* we have the "SSL is seeded" boolean static to prevent multiple
+     time-consuming seedings in vain */
+  static bool ssl_seeded = FALSE;
   char *buf = data->state.buffer; /* point to the big buffer */
   int nread=0;
 
-  /* Q: should we add support for a random file name as a libcurl option?
-     A: Yes, it is here */
+  if(ssl_seeded)
+    return CURLE_OK;
+
+  if(rand_enough()) {
+    /* OpenSSL 1.1.0+ will return here */
+    ssl_seeded = TRUE;
+    return CURLE_OK;
+  }
 
 #ifndef RANDOM_FILE
   /* if RANDOM_FILE isn't defined, we only perform this if an option tells
@@ -217,7 +212,7 @@ static int ossl_seed(struct Curl_easy *data)
                              data->set.str[STRING_SSL_RANDOM_FILE]:
                              RANDOM_FILE),
                             RAND_LOAD_LENGTH);
-    if(seed_enough(nread))
+    if(rand_enough())
       return nread;
   }
 
@@ -237,7 +232,7 @@ static int ossl_seed(struct Curl_easy *data)
                        data->set.str[STRING_SSL_EGDSOCKET]:EGD_SOCKET);
     if(-1 != ret) {
       nread += ret;
-      if(seed_enough(nread))
+      if(rand_enough())
         return nread;
     }
   }
@@ -248,9 +243,10 @@ static int ossl_seed(struct Curl_easy *data)
   do {
     unsigned char randb[64];
     int len = sizeof(randb);
-    RAND_bytes(randb, len);
+    if(!RAND_bytes(randb, len))
+      break;
     RAND_add(randb, len, (len >> 1));
-  } while(!RAND_status());
+  } while(!rand_enough());
 
   /* generates a default path for the random seed file */
   buf[0]=0; /* blank it first */
@@ -258,25 +254,12 @@ static int ossl_seed(struct Curl_easy *data)
   if(buf[0]) {
     /* we got a file name to try */
     nread += RAND_load_file(buf, RAND_LOAD_LENGTH);
-    if(seed_enough(nread))
+    if(rand_enough())
       return nread;
   }
 
   infof(data, "libcurl is now using a weak random seed!\n");
-  return nread;
-}
-
-static void Curl_ossl_seed(struct Curl_easy *data)
-{
-  /* we have the "SSL is seeded" boolean static to prevent multiple
-     time-consuming seedings in vain */
-  static bool ssl_seeded = FALSE;
-
-  if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
-     data->set.str[STRING_SSL_EGDSOCKET]) {
-    ossl_seed(data);
-    ssl_seeded = TRUE;
-  }
+  return CURLE_SSL_CONNECT_ERROR; /* confusing error code */
 }
 
 #ifndef SSL_FILETYPE_ENGINE
@@ -1746,7 +1729,9 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
 
   /* Make funny stuff to get random input */
-  Curl_ossl_seed(data);
+  result = Curl_ossl_seed(data);
+  if(result)
+    return result;
 
   *certverifyresult = !X509_V_OK;
 
@@ -3289,7 +3274,12 @@ int Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
                      size_t length)
 {
   if(data) {
-    Curl_ossl_seed(data); /* Initiate the seed if not already done */
+    if(Curl_ossl_seed(data)) /* Initiate the seed if not already done */
+      return 1; /* couldn't seed for some reason */
+  }
+  else {
+    if(!rand_enough())
+      return 1;
   }
   RAND_bytes(entropy, curlx_uztosi(length));
   return 0; /* 0 as in no problem */

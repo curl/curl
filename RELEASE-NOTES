@@ -1,7 +1,7 @@
 Curl and libcurl 7.52.0
 
  Public curl releases:         161
- Command line options:         186
+ Command line options:         187
  curl_easy_setopt() options:   225
  Public functions in libcurl:  61
  Contributors:                 1467
@@ -11,6 +11,7 @@ This release includes the following changes:
  o nss: map CURL_SSLVERSION_DEFAULT to NSS default
  o vtls: support TLS 1.3 via CURL_SSLVERSION_TLSv1_3
  o curl: introduce the --tlsv1.3 option to force TLS 1.3
+ o curl: Add --retry-connrefused [11]
 
 This release includes the following bugfixes:
 
@@ -29,6 +30,10 @@ This release includes the following bugfixes:
  o curl_formadd.3: *_FILECONTENT and *_FILE need the file to be kept
  o printf: fix ".*f" handling [9]
  o examples/fileupload.c: fclose the file as well
+ o SPNEGO: Fix memory leak when authentication fails [10]
+ o realloc: use Curl_saferealloc to avoid common mistakes [12]
+ o openssl: make sure to fail in the unlikely event that PRNG seeding fails
+ o URL-parser: for file://[host]/ URLs, the [host] must be localhost [13]
 
 This release includes the following known bugs:
 
@@ -37,10 +42,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Piggott, Andrei Sedoi, Bruce Stephens, Dan Fandrich, Daniel Stenberg,
-  Frank Gevaerts, Jakub Zakrzewski, Kamil Dudka, Mauro Rappa, Neal Poole,
-  Peter Wu, Ray Satiro, Ricki Hirner, Tatsuhiro Tsujikawa, Tony Kelman,
-  (15 contributors)
+  Adam Piggott, Andrei Sedoi, Bruce Stephens, Dan Fandrich, Daniel Hwang,
+  Daniel Stenberg, Frank Gevaerts, Isaac Boukris, Jakub Zakrzewski,
+  Kamil Dudka, Mauro Rappa, Mike Crowe, Neal Poole, Peter Wu, Ray Satiro,
+  Ricki Hirner, Tatsuhiro Tsujikawa, Tony Kelman,
+  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -55,3 +61,7 @@ References to bug reports and discussions on issues:
  [7] = https://curl.haxx.se/bug/?i=1092
  [8] = https://github.com/curl/curl/commit/ce8d09483eea2fcb1b50e323e1a8ed1f3613b2e3#commitcomment-19666146
  [9] = https://curl.haxx.se/bug/?i=1113
+ [10] = https://curl.haxx.se/bug/?i=1115
+ [11] = https://curl.haxx.se/bug/?i=1064
+ [12] = https://curl.haxx.se/mail/lib-2016-11/0087.html
+ [13] = https://curl.haxx.se/mail/lib-2016-11/0104.html

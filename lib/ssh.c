@@ -71,7 +71,7 @@
 #include "url.h"
 #include "speedcheck.h"
 #include "getinfo.h"
-
+#include "strdup.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "connect.h"
@@ -2112,9 +2112,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       /* get room for the filename and extra output */
       sshc->readdir_totalLen += 4 + sshc->readdir_len;
-      new_readdir_line = realloc(sshc->readdir_line, sshc->readdir_totalLen);
+      new_readdir_line = Curl_saferealloc(sshc->readdir_line,
+                                          sshc->readdir_totalLen);
       if(!new_readdir_line) {
-        Curl_safefree(sshc->readdir_line);
+        sshc->readdir_line = NULL;
         Curl_safefree(sshc->readdir_filename);
         Curl_safefree(sshc->readdir_longentry);
         state(conn, SSH_SFTP_CLOSE);

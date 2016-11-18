@@ -1430,7 +1430,7 @@ bool Curl_gtls_data_pending(const struct connectdata *conn, int connindex)
      0 != gnutls_record_check_pending(conn->proxy_ssl[connindex].session))
     res = TRUE;
 
-    return res;
+  return res;
 }
 
 static ssize_t gtls_send(struct connectdata *conn,

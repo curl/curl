@@ -62,7 +62,7 @@
 #include "sendf.h"
 #include "strcase.h"
 #include "warnless.h"
-
+#include "strdup.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -202,7 +202,7 @@ static CURLcode read_data(struct connectdata *conn,
   if(len) {
     /* only realloc if there was a length */
     len = ntohl(len);
-    tmp = realloc(buf->data, len);
+    tmp = Curl_saferealloc(buf->data, len);
   }
   if(tmp == NULL)
     return CURLE_OUT_OF_MEMORY;

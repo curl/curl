@@ -78,7 +78,7 @@ static const char *const helptext[] = {
   "     --dns-interface  Interface to use for DNS requests",
   "     --dns-ipv4-addr  IPv4 address to use for DNS requests, dot notation",
   "     --dns-ipv6-addr  IPv6 address to use for DNS requests, dot notation",
-  " -D, --dump-header FILE  Write the headers to FILE",
+  " -D, --dump-header FILE  Write the received headers to FILE",
   "     --egd-file FILE  EGD socket path for random data (SSL)",
   "     --engine ENGINE  Crypto engine (use \"--engine list\" for list) (SSL)",
 #ifdef USE_ENVIRONMENT
@@ -86,6 +86,7 @@ static const char *const helptext[] = {
 #endif
   "     --expect100-timeout SECONDS How long to wait for 100-continue (H)",
   " -f, --fail          Fail silently (no output at all) on HTTP errors (H)",
+  "     --fail-early    Fail on first transfer error, do not continue",
   "     --false-start   Enable TLS False Start.",
   " -F, --form CONTENT  Specify HTTP multipart POST data (H)",
   "     --form-string STRING  Specify HTTP multipart POST data (H)",
@@ -224,6 +225,8 @@ static const char *const helptext[] = {
   "     --resolve HOST:PORT:ADDRESS  Force resolve of HOST:PORT to ADDRESS",
   "     --retry NUM   "
   "Retry request NUM times if transient problems occur",
+  "     --retry-connrefused  "
+  "Consider \"connection refused\" a transient error",
   "     --retry-delay SECONDS  Wait SECONDS between retries",
   "     --retry-max-time SECONDS  Retry only within this period",
   "     --sasl-ir       Enable initial response in SASL authentication",

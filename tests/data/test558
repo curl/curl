@@ -41,8 +41,8 @@ FD connect.c: sclose()
 MEM lib558.c: malloc()
 MEM lib558.c: free()
 MEM escape.c: malloc()
-MEM escape.c: realloc()
-MEM escape.c: realloc()
+MEM strdup.c: realloc()
+MEM strdup.c: realloc()
 MEM escape.c: free()
 </file>
 <stripfile>

@@ -35,7 +35,7 @@
 #include "url.h"
 #include "connect.h"
 #include "strtoofft.h"
-
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -58,6 +58,8 @@
 #else
 #define nghttp2_session_callbacks_set_error_callback(x,y)
 #endif
+
+#define HTTP2_HUGE_WINDOW_SIZE (1 << 30)
 
 /*
  * Curl_http2_init_state() is called when the easy handle is created and
@@ -841,10 +843,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
             stream->push_headers_alloc) {
       char **headp;
       stream->push_headers_alloc *= 2;
-      headp = realloc(stream->push_headers,
-                      stream->push_headers_alloc * sizeof(char *));
+      headp = Curl_saferealloc(stream->push_headers,
+                               stream->push_headers_alloc * sizeof(char *));
       if(!headp) {
-        free(stream->push_headers);
         stream->push_headers = NULL;
         return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
       }
@@ -966,7 +967,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
  */
 static nghttp2_settings_entry settings[] = {
   { NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS, 100 },
-  { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, NGHTTP2_INITIAL_WINDOW_SIZE },
+  { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, HTTP2_HUGE_WINDOW_SIZE },
 };
 
 #define H2_BUFSIZE 32768
@@ -2032,12 +2033,21 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   else {
     /* stream ID is unknown at this point */
     stream->stream_id = -1;
-    rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, NULL, 0);
+    rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, settings,
+                                 sizeof(settings) / sizeof(settings[0]));
     if(rv != 0) {
       failf(data, "nghttp2_submit_settings() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
       return CURLE_HTTP2;
     }
+  }
+
+  rv = nghttp2_session_set_local_window_size(httpc->h2, NGHTTP2_FLAG_NONE, 0,
+                                             HTTP2_HUGE_WINDOW_SIZE);
+  if(rv != 0) {
+    failf(data, "nghttp2_session_set_local_window_size() failed: %s(%d)",
+          nghttp2_strerror(rv), rv);
+    return CURLE_HTTP2;
   }
 
   /* we are going to copy mem to httpc->inbuf.  This is required since
@@ -2055,7 +2065,8 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
                     " after upgrade: len=%zu\n",
         nread);
 
-  memcpy(httpc->inbuf, mem, nread);
+  if(nread)
+    memcpy(httpc->inbuf, mem, nread);
   httpc->inbuflen = nread;
 
   nproc = nghttp2_session_mem_recv(httpc->h2, (const uint8_t *)httpc->inbuf,

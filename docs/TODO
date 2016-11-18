@@ -63,7 +63,6 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
- 5.4 Use huge HTTP/2 windows
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
  5.7 Brotli compression
@@ -527,13 +526,6 @@ This is not detailed in any FTP specification.
  sorts the headers based on that number. We could then have internally created
  headers use a default value so only headers that need to be moved have to be
  specified.
-
-5.4 Use huge HTTP/2 windows
-
- We're currently using nghttp2's default window size which is terribly small
- (64K). This becomes a bottle neck over high bandwidth networks. We should
- instead make the window size to be very big (512MB?) as we really don't do
- much flow control anyway.
 
 5.5 auth= in URLs
 

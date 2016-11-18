@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -249,24 +249,26 @@ long Curl_pgrsLimitWaitTime(curl_off_t cursize,
                             struct timeval start,
                             struct timeval now)
 {
-    curl_off_t size = cursize - startsize;
-    long minimum, actual;
+  curl_off_t size = cursize - startsize;
+  time_t minimum;
+  time_t actual;
 
-    /* we don't have a starting point yet -- return 0 so it gets (re)set */
-    if(start.tv_sec == 0 && start.tv_usec == 0)
-        return 0;
+  /* we don't have a starting point yet -- return 0 so it gets (re)set */
+  if(start.tv_sec == 0 && start.tv_usec == 0)
+    return 0;
 
-    /* not enough data yet */
-    if(size < limit)
-      return -1;
+  /* not enough data yet */
+  if(size < limit)
+    return -1;
 
-    minimum = (long) (CURL_OFF_T_C(1000) * size / limit);
-    actual = Curl_tvdiff(now, start);
+  minimum = (time_t) (CURL_OFF_T_C(1000) * size / limit);
+  actual = Curl_tvdiff(now, start);
 
-    if(actual < minimum)
-      return minimum - actual;
-    else
-      return 0;
+  if(actual < minimum)
+    /* this is a conversion on some systems (64bit time_t => 32bit long) */
+    return (long)(minimum - actual);
+  else
+    return 0;
 }
 
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
@@ -359,9 +361,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   now = Curl_tvnow(); /* what time is it */
 
   /* The time spent so far (from the start) */
-  data->progress.timespent =
-    (double)(now.tv_sec - data->progress.start.tv_sec) +
-    (double)(now.tv_usec - data->progress.start.tv_usec)/1000000.0;
+  data->progress.timespent = curlx_tvdiff_secs(now, data->progress.start);
   timespent = (curl_off_t)data->progress.timespent;
 
   /* The average download speed this far */
@@ -375,7 +375,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
      (data->progress.timespent>0?data->progress.timespent:1));
 
   /* Calculations done at most once a second, unless end is reached */
-  if(data->progress.lastshow != (long)now.tv_sec) {
+  if(data->progress.lastshow != now.tv_sec) {
     shownow = TRUE;
 
     data->progress.lastshow = now.tv_sec;
@@ -402,7 +402,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
     /* first of all, we don't do this if there's no counted seconds yet */
     if(countindex) {
-      long span_ms;
+      time_t span_ms;
 
       /* Get the index position to compare with the 'nowindex' position.
          Get the oldest entry possible. While we have less than CURR_TIME
