@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,8 +28,8 @@
 #include <curl/curl.h>
 #include "sendf.h"
 #include "content_encoding.h"
+#include "strdup.h"
 #include "curl_memory.h"
-
 #include "memdebug.h"
 
 /* Comment this out if zlib is always going to be at least ver. 1.2.0.4
@@ -371,12 +371,9 @@ Curl_unencode_gzip_write(struct connectdata *conn,
   {
     /* Need more gzip header data state */
     ssize_t hlen;
-    unsigned char *oldblock = z->next_in;
-
     z->avail_in += (uInt)nread;
-    z->next_in = realloc(z->next_in, z->avail_in);
+    z->next_in = Curl_saferealloc(z->next_in, z->avail_in);
     if(z->next_in == NULL) {
-      free(oldblock);
       return exit_zlib(z, &k->zlib_init, CURLE_OUT_OF_MEMORY);
     }
     /* Append the new block of data to the previous one */

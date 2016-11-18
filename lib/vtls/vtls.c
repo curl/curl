@@ -132,118 +132,10 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc)
   Curl_safefree(sslc->clientcert);
 }
 
-
-/*
- * Curl_rand() returns a random unsigned integer, 32bit.
- *
- * This non-SSL function is put here only because this file is the only one
- * with knowledge of what the underlying SSL libraries provide in terms of
- * randomizers.
- *
- * NOTE: 'data' may be passed in as NULL when coming from external API without
- * easy handle!
- *
- */
-
-unsigned int Curl_rand(struct Curl_easy *data)
-{
-  unsigned int r = 0;
-  static unsigned int randseed;
-  static bool seeded = FALSE;
-
-#ifdef CURLDEBUG
-  char *force_entropy = getenv("CURL_ENTROPY");
-  if(force_entropy) {
-    if(!seeded) {
-      size_t elen = strlen(force_entropy);
-      size_t clen = sizeof(randseed);
-      size_t min = elen < clen ? elen : clen;
-      memcpy((char *)&randseed, force_entropy, min);
-      seeded = TRUE;
-    }
-    else
-      randseed++;
-    return randseed;
-  }
-#endif
-
-  /* data may be NULL! */
-  if(!Curl_ssl_random(data, (unsigned char *)&r, sizeof(r)))
-    return r;
-
-  /* If Curl_ssl_random() returns non-zero it couldn't offer randomness and we
-     instead perform a "best effort" */
-
-#ifdef RANDOM_FILE
-  if(!seeded) {
-    /* if there's a random file to read a seed from, use it */
-    int fd = open(RANDOM_FILE, O_RDONLY);
-    if(fd > -1) {
-      /* read random data into the randseed variable */
-      ssize_t nread = read(fd, &randseed, sizeof(randseed));
-      if(nread == sizeof(randseed))
-        seeded = TRUE;
-      close(fd);
-    }
-  }
-#endif
-
-  if(!seeded) {
-    struct timeval now = curlx_tvnow();
-    infof(data, "WARNING: Using weak random seed\n");
-    randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
-    randseed = randseed * 1103515245 + 12345;
-    randseed = randseed * 1103515245 + 12345;
-    randseed = randseed * 1103515245 + 12345;
-    seeded = TRUE;
-  }
-
-  /* Return an unsigned 32-bit pseudo-random number. */
-  r = randseed = randseed * 1103515245 + 12345;
-  return (r << 16) | ((r >> 16) & 0xFFFF);
-}
-
 int Curl_ssl_backend(void)
 {
   return (int)CURL_SSL_BACKEND;
 }
-
-#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
-    defined(USE_DARWINSSL) || defined(USE_NSS)
-/* This function is for OpenSSL, GnuTLS, darwinssl, and schannel only. */
-int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
-                     int numsocks)
-{
-  struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
-
-  if(!numsocks)
-    return GETSOCK_BLANK;
-
-  if(connssl->connecting_state == ssl_connect_2_writing) {
-    /* write mode */
-    socks[0] = conn->sock[FIRSTSOCKET];
-    return GETSOCK_WRITESOCK(0);
-  }
-  else if(connssl->connecting_state == ssl_connect_2_reading) {
-    /* read mode */
-    socks[0] = conn->sock[FIRSTSOCKET];
-    return GETSOCK_READSOCK(0);
-  }
-
-  return GETSOCK_BLANK;
-}
-#else
-int Curl_ssl_getsock(struct connectdata *conn,
-                          curl_socket_t *socks,
-                          int numsocks)
-{
-  (void)conn;
-  (void)socks;
-  (void)numsocks;
-  return GETSOCK_BLANK;
-}
-/* USE_SSLEAY || USE_GNUTLS || USE_SCHANNEL || USE_DARWINSSL || USE_NSS */
-#endif
 
 #ifdef USE_SSL
 
@@ -806,11 +698,16 @@ CURLcode Curl_ssl_push_certinfo(struct Curl_easy *data,
   return Curl_ssl_push_certinfo_len(data, certnum, label, value, valuelen);
 }
 
-int Curl_ssl_random(struct Curl_easy *data,
-                     unsigned char *entropy,
-                     size_t length)
+CURLcode Curl_ssl_random(struct Curl_easy *data,
+                         unsigned char *entropy,
+                         size_t length)
 {
-  return curlssl_random(data, entropy, length);
+  int rc = curlssl_random(data, entropy, length);
+  if(rc) {
+    failf(data, "PRNG seeding failed");
+    return CURLE_FAILED_INIT; /* possibly weird return code */
+  }
+  return CURLE_OK;
 }
 
 /*

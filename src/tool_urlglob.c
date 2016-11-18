@@ -213,6 +213,9 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
       else if(end_c != ']')
         /* then this is wrong */
         rc = 0;
+      else
+        /* end_c == ']' */
+        pattern += 4;
     }
 
     *posp += (pattern - *patternp);

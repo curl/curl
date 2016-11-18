@@ -145,7 +145,7 @@ int Curl_wait_ms(int timeout_ms)
 int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
                       curl_socket_t readfd1,
                       curl_socket_t writefd, /* socket to write to */
-                      long timeout_ms)       /* milliseconds to wait */
+                      time_t timeout_ms)     /* milliseconds to wait */
 {
 #ifdef HAVE_POLL_FINE
   struct pollfd pfd[3];

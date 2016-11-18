@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,8 +40,8 @@ CURLcode Curl_speedcheck(struct Curl_easy *data,
      data->set.low_speed_time &&
      (Curl_tvlong(data->state.keeps_speed) != 0) &&
      (data->progress.current_speed < data->set.low_speed_limit)) {
-    long howlong = Curl_tvdiff(now, data->state.keeps_speed);
-    long nextcheck = (data->set.low_speed_time * 1000) - howlong;
+    time_t howlong = Curl_tvdiff(now, data->state.keeps_speed);
+    time_t nextcheck = (data->set.low_speed_time * 1000) - howlong;
 
     /* We are now below the "low speed limit". If we are below it
        for "low speed time" seconds we consider that enough reason

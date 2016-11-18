@@ -833,7 +833,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   }
 
   /* Determine which SSL/TLS version should be enabled. */
-  sni = conn->host.name;
+  sni = hostname;
   switch (ssl_version) {
   case CURL_SSLVERSION_SSLv2:
     protoflags = CURL_GSKPROTO_SSLV2_MASK;

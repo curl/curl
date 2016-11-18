@@ -2959,6 +2959,10 @@ static void conn_free(struct connectdata *conn)
   Curl_free_primary_ssl_config(&conn->ssl_config);
   Curl_free_primary_ssl_config(&conn->proxy_ssl_config);
 
+#ifdef USE_UNIX_SOCKETS
+  Curl_safefree(conn->unix_domain_socket);
+#endif
+
   free(conn); /* free all the connection oriented data */
 }
 
@@ -3178,8 +3182,8 @@ Curl_oldest_idle_connection(struct Curl_easy *data)
   struct curl_hash_iterator iter;
   struct curl_llist_element *curr;
   struct curl_hash_element *he;
-  long highscore=-1;
-  long score;
+  time_t highscore=-1;
+  time_t score;
   struct timeval now;
   struct connectdata *conn_candidate = NULL;
   struct connectbundle *bundle;
@@ -3243,8 +3247,8 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
                                       struct connectbundle *bundle)
 {
   struct curl_llist_element *curr;
-  long highscore=-1;
-  long score;
+  time_t highscore=-1;
+  time_t score;
   struct timeval now;
   struct connectdata *conn_candidate = NULL;
   struct connectdata *conn;
@@ -3326,7 +3330,7 @@ static int call_disconnect_if_dead(struct connectdata *conn,
 static void prune_dead_connections(struct Curl_easy *data)
 {
   struct timeval now = Curl_tvnow();
-  long elapsed = Curl_tvdiff(now, data->state.conn_cache->last_cleanup);
+  time_t elapsed = Curl_tvdiff(now, data->state.conn_cache->last_cleanup);
 
   if(elapsed >= 1000L) {
     Curl_conncache_foreach(data->state.conn_cache, data,
@@ -3504,6 +3508,17 @@ ConnectionExists(struct Curl_easy *data,
           continue;
         }
       }
+
+#ifdef USE_UNIX_SOCKETS
+      if(needle->unix_domain_socket) {
+        if(!check->unix_domain_socket)
+          continue;
+        if(strcmp(needle->unix_domain_socket, check->unix_domain_socket))
+          continue;
+      }
+      else if(check->unix_domain_socket)
+        continue;
+#endif
 
       if((needle->handler->flags&PROTOPT_SSL) !=
          (check->handler->flags&PROTOPT_SSL))
@@ -3772,10 +3787,6 @@ ConnectionExists(struct Curl_easy *data,
 CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex)
 {
   CURLcode result = CURLE_OK;
-  /* if(!conn->bits.proxy || sockindex) */
-    /* this magic only works for the primary socket as the secondary is used
-       for FTP only and it has FTP specific magic in ftp.c */
-    /* return CURLE_OK; */
 
   if(conn->bits.socksproxy) {
 #ifndef CURL_DISABLE_PROXY
@@ -3809,6 +3820,8 @@ CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex)
       result = CURLE_COULDNT_CONNECT;
     } /* switch proxytype */
     conn->bits.socksproxy_connecting = FALSE;
+#else
+  (void)sockindex;
 #endif /* CURL_DISABLE_PROXY */
   }
 
@@ -4280,33 +4293,38 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
      * the URL protocols specified in RFC 1738
      */
     if(path[0] != '/') {
-      /* the URL included a host name, we ignore host names in file:// URLs
-         as the standards don't define what to do with them */
-      char *ptr=strchr(path, '/');
-      if(ptr) {
-        /* there was a slash present
-
-           RFC1738 (section 3.1, page 5) says:
-
-           The rest of the locator consists of data specific to the scheme,
-           and is known as the "url-path". It supplies the details of how the
-           specified resource can be accessed. Note that the "/" between the
-           host (or port) and the url-path is NOT part of the url-path.
-
-           As most agents use file://localhost/foo to get '/foo' although the
-           slash preceding foo is a separator and not a slash for the path,
-           a URL as file://localhost//foo must be valid as well, to refer to
-           the same file with an absolute path.
-        */
-
-        if(ptr[1] && ('/' == ptr[1]))
-          /* if there was two slashes, we skip the first one as that is then
-             used truly as a separator */
-          ptr++;
-
-        /* This cannot be made with strcpy, as the memory chunks overlap! */
-        memmove(path, ptr, strlen(ptr)+1);
+      /* the URL includes a host name, it must match "localhost" or
+         "127.0.0.1" to be valid */
+      char *ptr;
+      if(!checkprefix("localhost/", path) &&
+         !checkprefix("127.0.0.1/", path)) {
+        failf(data, "Valid host name with slash missing in URL");
+        return CURLE_URL_MALFORMAT;
       }
+      ptr = &path[9]; /* now points to the slash after the host */
+
+      /* there was a host name and slash present
+
+         RFC1738 (section 3.1, page 5) says:
+
+         The rest of the locator consists of data specific to the scheme,
+         and is known as the "url-path". It supplies the details of how the
+         specified resource can be accessed. Note that the "/" between the
+         host (or port) and the url-path is NOT part of the url-path.
+
+         As most agents use file://localhost/foo to get '/foo' although the
+         slash preceding foo is a separator and not a slash for the path,
+         a URL as file://localhost//foo must be valid as well, to refer to
+         the same file with an absolute path.
+      */
+
+      if('/' == ptr[1])
+        /* if there was two slashes, we skip the first one as that is then
+           used truly as a separator */
+        ptr++;
+
+      /* This cannot be made with strcpy, as the memory chunks overlap! */
+      memmove(path, ptr, strlen(ptr)+1);
     }
 
     protop = "file"; /* protocol string */
@@ -5741,7 +5759,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
                                bool *async)
 {
   CURLcode result=CURLE_OK;
-  long timeout_ms = Curl_timeleft(data, NULL, TRUE);
+  time_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
   /*************************************************************
    * Resolve the name of the server or proxy
@@ -5758,11 +5776,11 @@ static CURLcode resolve_server(struct Curl_easy *data,
     struct Curl_dns_entry *hostaddr;
 
 #ifdef USE_UNIX_SOCKETS
-    if(data->set.str[STRING_UNIX_SOCKET_PATH]) {
+    if(conn->unix_domain_socket) {
       /* Unix domain sockets are local. The host gets ignored, just use the
        * specified domain socket address. Do not cache "DNS entries". There is
        * no DNS involved and we already have the filesystem path available */
-      const char *path = data->set.str[STRING_UNIX_SOCKET_PATH];
+      const char *path = conn->unix_domain_socket;
 
       hostaddr = calloc(1, sizeof(struct Curl_dns_entry));
       if(!hostaddr)
@@ -5930,6 +5948,10 @@ static void reuse_conn(struct connectdata *old_conn,
   old_conn->recv_pipe = NULL;
 
   Curl_safefree(old_conn->master_buffer);
+
+#ifdef USE_UNIX_SOCKETS
+  Curl_safefree(old_conn->unix_domain_socket);
+#endif
 }
 
 /**
@@ -6147,9 +6169,16 @@ static CURLcode create_conn(struct Curl_easy *data,
     proxy = detect_proxy(conn);
 
 #ifdef USE_UNIX_SOCKETS
-  if(proxy && data->set.str[STRING_UNIX_SOCKET_PATH]) {
-    free(proxy);  /* Unix domain sockets cannot be proxied, so disable it */
-    proxy = NULL;
+  if(data->set.str[STRING_UNIX_SOCKET_PATH]) {
+    if(proxy) {
+      free(proxy); /* Unix domain sockets cannot be proxied, so disable it */
+      proxy = NULL;
+    }
+    conn->unix_domain_socket = strdup(data->set.str[STRING_UNIX_SOCKET_PATH]);
+    if(conn->unix_domain_socket == NULL) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
   }
 #endif
 

@@ -88,7 +88,7 @@ void Curl_pp_init(struct pingpong *pp);
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
-long Curl_pp_state_timeout(struct pingpong *pp);
+time_t Curl_pp_state_timeout(struct pingpong *pp);
 
 
 /***********************************************************************

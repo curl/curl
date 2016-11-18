@@ -125,6 +125,7 @@ static const struct LongShort aliases[]= {
   {"$e", "proxy-digest",             FALSE},
   {"$f", "proxy-basic",              FALSE},
   {"$g", "retry",                    TRUE},
+  {"$V", "retry-connrefused",        FALSE},
   {"$h", "retry-delay",              TRUE},
   {"$i", "retry-max-time",           TRUE},
   {"$k", "proxy-negotiate",          FALSE},
@@ -248,6 +249,7 @@ static const struct LongShort aliases[]= {
   {"EA", "proxy-sslv2",              FALSE},
   {"EB", "proxy-sslv3",              FALSE},
   {"f",  "fail",                     FALSE},
+  {"fa", "fail-early",               FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
   {"g",  "globoff",                  FALSE},
@@ -824,6 +826,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         err = str2unum(&config->req_retry, nextarg);
         if(err)
           return err;
+        break;
+      case 'V': /* --retry-connrefused */
+        config->retry_connrefused = toggle;
         break;
       case 'h': /* --retry-delay */
         err = str2unum(&config->retry_delay, nextarg);
@@ -1552,8 +1557,14 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       }
       break;
     case 'f':
-      /* fail hard on errors  */
-      config->failonerror = toggle;
+      switch(subletter) {
+      case 'a': /* --fail-early */
+        global->fail_early = toggle;
+        break;
+      default:
+        /* fail hard on errors  */
+        config->failonerror = toggle;
+      }
       break;
     case 'F':
       /* "form data" simulation, this is a little advanced so lets do our best

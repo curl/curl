@@ -45,7 +45,7 @@ not have the announcement clause that collides with GPL.
 
 ## WolfSSL
 
- (May be used for SSL/TLS support) Uses the GPL license or a propietary
+ (May be used for SSL/TLS support) Uses the GPL license or a proprietary
  license. If this is a problem for you, consider using another TLS library.
 
 ## NSS

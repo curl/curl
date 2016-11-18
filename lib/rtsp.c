@@ -36,6 +36,7 @@
 #include "strcase.h"
 #include "select.h"
 #include "connect.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -614,9 +615,9 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
 
   if(rtspc->rtp_buf) {
     /* There was some leftover data the last time. Merge buffers */
-    char *newptr = realloc(rtspc->rtp_buf, rtspc->rtp_bufsize + *nread);
+    char *newptr = Curl_saferealloc(rtspc->rtp_buf,
+                                    rtspc->rtp_bufsize + *nread);
     if(!newptr) {
-      Curl_safefree(rtspc->rtp_buf);
       rtspc->rtp_buf = NULL;
       rtspc->rtp_bufsize = 0;
       return CURLE_OUT_OF_MEMORY;

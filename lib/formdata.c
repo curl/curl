@@ -36,6 +36,7 @@
 #include "strcase.h"
 #include "sendf.h"
 #include "strdup.h"
+#include "rand.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -1569,8 +1570,12 @@ static char *formboundary(struct Curl_easy *data)
 {
   /* 24 dashes and 16 hexadecimal digits makes 64 bit (18446744073709551615)
      combinations */
-  return aprintf("------------------------%08x%08x",
-                 Curl_rand(data), Curl_rand(data));
+  unsigned int rnd[2];
+  CURLcode result = Curl_rand(data, &rnd[0], 2);
+  if(result)
+    return NULL;
+
+  return aprintf("------------------------%08x%08x", rnd[0], rnd[1]);
 }
 
 #else  /* CURL_DISABLE_HTTP */

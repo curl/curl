@@ -502,8 +502,8 @@ gtls_connect_step1(struct connectdata *conn,
 
 #ifdef CURL_CA_FALLBACK
   /* use system ca certificate store as fallback */
-  if(data->set.ssl.verifypeer &&
-     !(data->set.ssl.CAfile || data->set.ssl.CApath)) {
+  if(SSL_CONN_CONFIG(verifypeer) &&
+     !(SSL_CONN_CONFIG(CAfile) || SSL_CONN_CONFIG(CApath))) {
     gnutls_certificate_set_x509_system_trust(conn->ssl[sockindex].cred);
   }
 #endif
@@ -1430,7 +1430,7 @@ bool Curl_gtls_data_pending(const struct connectdata *conn, int connindex)
      0 != gnutls_record_check_pending(conn->proxy_ssl[connindex].session))
     res = TRUE;
 
-    return res;
+  return res;
 }
 
 static ssize_t gtls_send(struct connectdata *conn,
