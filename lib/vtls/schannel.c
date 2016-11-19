@@ -774,7 +774,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
-  long timeout_ms;
+  time_t timeout_ms;
   int what;
 
   /* check if the connection has already been established */
@@ -962,7 +962,7 @@ schannel_send(struct connectdata *conn, int sockindex,
     /* send entire message or fail */
     while(len > (size_t)written) {
       ssize_t this_write;
-      long timeleft;
+      time_t timeleft;
       int what;
 
       this_write = 0;
