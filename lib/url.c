@@ -3786,10 +3786,6 @@ ConnectionExists(struct Curl_easy *data,
 CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex)
 {
   CURLcode result = CURLE_OK;
-  /* if(!conn->bits.proxy || sockindex) */
-    /* this magic only works for the primary socket as the secondary is used
-       for FTP only and it has FTP specific magic in ftp.c */
-    /* return CURLE_OK; */
 
   if(conn->bits.socksproxy) {
 #ifndef CURL_DISABLE_PROXY
@@ -3823,6 +3819,8 @@ CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex)
       result = CURLE_COULDNT_CONNECT;
     } /* switch proxytype */
     conn->bits.socksproxy_connecting = FALSE;
+#else
+  (void)sockindex;
 #endif /* CURL_DISABLE_PROXY */
   }
 

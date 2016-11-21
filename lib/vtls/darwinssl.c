@@ -1038,6 +1038,12 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
+  const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
+  char * const ssl_cert = SSL_SET_OPTION(cert);
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
+  const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -1233,34 +1239,33 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 
-  if(data->set.str[STRING_KEY_ORIG]) {
+  if(SSL_SET_OPTION(key)) {
     infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
           "Transport. The private key must be in the Keychain.\n");
   }
 
-  if(data->set.str[STRING_CERT_ORIG]) {
+  if(ssl_cert) {
     SecIdentityRef cert_and_key = NULL;
-    bool is_cert_file = is_file(data->set.str[STRING_CERT_ORIG]);
+    bool is_cert_file = is_file(ssl_cert);
 
     /* User wants to authenticate with a client cert. Look for it:
        If we detect that this is a file on disk, then let's load it.
        Otherwise, assume that the user wants to use an identity loaded
        from the Keychain. */
     if(is_cert_file) {
-      if(!data->set.ssl.cert_type)
+      if(!SSL_SET_OPTION(cert_type))
         infof(data, "WARNING: SSL: Certificate type not set, assuming "
-              "PKCS#12 format.\n");
-      else if(strncmp(data->set.ssl.cert_type, "P12",
-                      strlen(data->set.ssl.cert_type)))
+                    "PKCS#12 format.\n");
+      else if(strncmp(SSL_SET_OPTION(cert_type), "P12",
+        strlen(SSL_SET_OPTION(cert_type))) != 0)
         infof(data, "WARNING: SSL: The Security framework only supports "
-              "loading identities that are in PKCS#12 format.\n");
-      err = CopyIdentityFromPKCS12File(data->set.str[STRING_CERT_ORIG],
-                                       data->set.ssl.key_passwd,
-                                       &cert_and_key);
+                    "loading identities that are in PKCS#12 format.\n");
+
+      err = CopyIdentityFromPKCS12File(ssl_cert,
+        SSL_SET_OPTION(key_passwd), &cert_and_key);
     }
     else
-      err = CopyIdentityWithLabel(data->set.str[STRING_CERT_ORIG],
-                                  &cert_and_key);
+      err = CopyIdentityWithLabel(ssl_cert, &cert_and_key);
 
     if(err == noErr) {
       SecCertificateRef cert = NULL;
@@ -1301,24 +1306,24 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       switch(err) {
       case errSecAuthFailed: case -25264: /* errSecPkcs12VerifyFailure */
         failf(data, "SSL: Incorrect password for the certificate \"%s\" "
-              "and its private key.", data->set.str[STRING_CERT_ORIG]);
+                    "and its private key.", ssl_cert);
         break;
       case -26275: /* errSecDecode */ case -25257: /* errSecUnknownFormat */
         failf(data, "SSL: Couldn't make sense of the data in the "
-              "certificate \"%s\" and its private key.",
-              data->set.str[STRING_CERT_ORIG]);
+                    "certificate \"%s\" and its private key.",
+                    ssl_cert);
         break;
       case -25260: /* errSecPassphraseRequired */
         failf(data, "SSL The certificate \"%s\" requires a password.",
-              data->set.str[STRING_CERT_ORIG]);
+                    ssl_cert);
         break;
       case errSecItemNotFound:
         failf(data, "SSL: Can't find the certificate \"%s\" and its private "
-              "key in the Keychain.", data->set.str[STRING_CERT_ORIG]);
+                    "key in the Keychain.", ssl_cert);
         break;
       default:
         failf(data, "SSL: Can't load the certificate \"%s\" and its private "
-              "key: OSStatus %d", data->set.str[STRING_CERT_ORIG], err);
+                    "key: OSStatus %d", ssl_cert, err);
         break;
       }
       return CURLE_SSL_CERTPROBLEM;
@@ -1350,8 +1355,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #else
   if(SSLSetSessionOption != NULL) {
 #endif /* CURL_BUILD_MAC */
-    bool break_on_auth = !conn->ssl_config.verifypeer ||
-      data->set.str[STRING_SSL_CAFILE_ORIG];
+    bool break_on_auth = !conn->ssl_config.verifypeer || ssl_cafile;
     err = SSLSetSessionOption(connssl->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
                               break_on_auth);
@@ -1379,15 +1383,14 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
 
-  if(data->set.str[STRING_SSL_CAFILE_ORIG]) {
-    bool is_cert_file = is_file(data->set.str[STRING_SSL_CAFILE_ORIG]);
+  if(ssl_cafile) {
+    bool is_cert_file = is_file(ssl_cafile);
 
     if(!is_cert_file) {
-      failf(data, "SSL: can't load CA certificate file %s",
-            data->set.str[STRING_SSL_CAFILE_ORIG]);
+      failf(data, "SSL: can't load CA certificate file %s", ssl_cafile);
       return CURLE_SSL_CACERT_BADFILE;
     }
-    if(!data->set.ssl.primary.verifypeer) {
+    if(!verifypeer) {
       failf(data, "SSL: CA certificate set, but certificate verification "
             "is disabled");
       return CURLE_SSL_CONNECT_ERROR;
@@ -1398,17 +1401,17 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
    * Both hostname check and SNI require SSLSetPeerDomainName().
    * Also: the verifyhost setting influences SNI usage */
   if(conn->ssl_config.verifyhost) {
-    err = SSLSetPeerDomainName(connssl->ssl_ctx, conn->host.name,
-    strlen(conn->host.name));
+    err = SSLSetPeerDomainName(connssl->ssl_ctx, hostname,
+    strlen(hostname));
 
     if(err != noErr) {
       infof(data, "WARNING: SSL: SSLSetPeerDomainName() failed: OSStatus %d\n",
             err);
     }
 
-    if((Curl_inet_pton(AF_INET, conn->host.name, &addr))
+    if((Curl_inet_pton(AF_INET, hostname, &addr))
   #ifdef ENABLE_IPV6
-    || (Curl_inet_pton(AF_INET6, conn->host.name, &addr))
+    || (Curl_inet_pton(AF_INET6, hostname, &addr))
   #endif
        ) {
       infof(data, "WARNING: using IP address, SNI is being disabled by "
@@ -1558,10 +1561,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     else {
       CURLcode result;
       ssl_sessionid =
-        aprintf("%s:%d:%d:%s:%hu", data->set.str[STRING_SSL_CAFILE_ORIG],
-                data->set.ssl.primary.verifypeer,
-                data->set.ssl.primary.verifyhost,
-                conn->host.name, conn->remote_port);
+        aprintf("%s:%d:%d:%s:%hu", ssl_cafile,
+                verifypeer, SSL_CONN_CONFIG(verifyhost), hostname, port);
       ssl_sessionid_len = strlen(ssl_sessionid);
 
       err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
@@ -1898,6 +1899,8 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
   OSStatus err;
   SSLCipherSuite cipher;
   SSLProtocol protocol = 0;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
               || ssl_connect_2_reading == connssl->connecting_state
@@ -1916,8 +1919,8 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       /* The below is errSSLServerAuthCompleted; it's not defined in
         Leopard's headers */
       case -9841:
-        if(data->set.str[STRING_SSL_CAFILE_ORIG]) {
-          int res = verify_cert(data->set.str[STRING_SSL_CAFILE_ORIG], data,
+        if(SSL_CONN_CONFIG(CAfile)) {
+          int res = verify_cert(SSL_CONN_CONFIG(CAfile), data,
                                 connssl->ssl_ctx);
           if(res != CURLE_OK)
             return res;
@@ -1986,7 +1989,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         return CURLE_SSL_CONNECT_ERROR;
       default:
         failf(data, "Unknown SSL protocol error in connection to %s:%d",
-              conn->host.name, err);
+              hostname, err);
         return CURLE_SSL_CONNECT_ERROR;
     }
   }

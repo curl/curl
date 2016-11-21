@@ -2074,7 +2074,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
           ssl_capath ? ssl_capath : "none");
   }
 #ifdef CURL_CA_FALLBACK
-  else if(data->set.ssl.verifypeer) {
+  else if(verifypeer) {
     /* verfying the peer without any CA certificates won't
        work so use openssl's built in default as fallback */
     SSL_CTX_set_default_verify_paths(connssl->ctx);
@@ -2108,7 +2108,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   https://rt.openssl.org/Ticket/Display.html?id=3621&user=guest&pass=guest
   */
 #if defined(X509_V_FLAG_TRUSTED_FIRST) && !defined(X509_V_FLAG_NO_ALT_CHAINS)
-  if(data->set.ssl.verifypeer) {
+  if(verifypeer) {
     X509_STORE_set_flags(SSL_CTX_get_cert_store(connssl->ctx),
                          X509_V_FLAG_TRUSTED_FIRST);
   }
@@ -2204,6 +2204,8 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
   struct Curl_easy *data = conn->data;
   int err;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  long * const certverifyresult = SSL_IS_PROXY() ?
+    &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
               || ssl_connect_2_reading == connssl->connecting_state
               || ssl_connect_2_writing == connssl->connecting_state);
@@ -2253,7 +2255,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
 
         lerr = SSL_get_verify_result(connssl->handle);
         if(lerr != X509_V_OK) {
-          data->set.ssl.certverifyresult = lerr;
+          *certverifyresult = lerr;
           snprintf(error_buffer, sizeof(error_buffer),
                    "SSL certificate problem: %s",
                    X509_verify_cert_error_string(lerr));
