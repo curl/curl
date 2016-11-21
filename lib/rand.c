@@ -115,7 +115,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 
 CURLcode Curl_rand(struct Curl_easy *data, unsigned int *rndptr, int num)
 {
-  CURLcode result;
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
   int i;
 
   assert(num > 0);
