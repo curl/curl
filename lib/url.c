@@ -3400,9 +3400,8 @@ ConnectionExists(struct Curl_easy *data,
         */
         if((check->localport != needle->localport) ||
            (check->localportrange != needle->localportrange) ||
-           !check->localdev ||
-           !needle->localdev ||
-           strcmp(check->localdev, needle->localdev))
+           (needle->localdev &&
+            (!check->localdev || strcmp(check->localdev, needle->localdev))))
           continue;
       }
 
