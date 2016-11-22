@@ -174,7 +174,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
                                  SCH_CRED_IGNORE_REVOCATION_OFFLINE;
       else
-        schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
+        schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN | SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+                                 SCH_CRED_IGNORE_REVOCATION_OFFLINE;
 #endif
       if(data->set.ssl_no_revoke)
         infof(data, "schannel: disabled server certificate revocation "
