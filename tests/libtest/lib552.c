@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -63,14 +63,14 @@ void dump(const char *text,
 
     for(c = 0; (c < width) && (i+c < size); c++) {
       /* check for 0D0A; if found, skip past and start a new line of output */
-      if (nohex && (i+c+1 < size) && ptr[i+c]==0x0D && ptr[i+c+1]==0x0A) {
+      if(nohex && (i+c+1 < size) && ptr[i+c]==0x0D && ptr[i+c+1]==0x0A) {
         i+=(c+2-width);
         break;
       }
       fprintf(stream, "%c",
               (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:'.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if (nohex && (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
+      if(nohex && (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
         i+=(c+3-width);
         break;
       }
@@ -121,12 +121,14 @@ int my_trace(CURL *handle, curl_infotype type,
 
 
 static size_t current_offset = 0;
-static char databuf[70000]; /* MUST be more than 64k OR MAX_INITIAL_POST_SIZE */
+static char databuf[70000]; /* MUST be more than 64k OR
+                               MAX_INITIAL_POST_SIZE */
 
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t  amount = nmemb * size; /* Total bytes curl wants */
-  size_t  available = sizeof(databuf) - current_offset; /* What we have to give */
+  size_t  available = sizeof(databuf) - current_offset; /* What we have to
+                                                           give */
   size_t  given = amount < available ? amount : available; /* What is given */
   (void)stream;
   memcpy(ptr, databuf + current_offset, given);
@@ -135,7 +137,8 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 
-static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_callback(void *ptr, size_t size, size_t nmemb,
+                             void *stream)
 {
   int amount = curlx_uztosi(size * nmemb);
   printf("%.*s", amount, (char *)ptr);
@@ -147,7 +150,7 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 static curlioerr ioctl_callback(CURL * handle, int cmd, void *clientp)
 {
   (void)clientp;
-  if (cmd == CURLIOCMD_RESTARTREAD ) {
+  if(cmd == CURLIOCMD_RESTARTREAD) {
     printf("APPLICATION: recieved a CURLIOCMD_RESTARTREAD request\n");
     printf("APPLICATION: ** REWINDING! **\n");
     current_offset = 0;
@@ -181,7 +184,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* setup repeated data string */
-  for (i=0; i < sizeof(databuf); ++i)
+  for(i=0; i < sizeof(databuf); ++i)
       databuf[i] = fill[i % sizeof fill];
 
   /* Post */
@@ -206,7 +209,8 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
 
-  /* Accept any auth. But for this bug configure proxy with DIGEST, basic might work too, not NTLM */
+  /* Accept any auth. But for this bug configure proxy with DIGEST, basic
+     might work too, not NTLM */
   test_setopt(curl, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
 
   res = curl_easy_perform(curl);

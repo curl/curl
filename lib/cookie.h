@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -70,19 +70,19 @@ struct CookieInfo {
 #define MAX_NAME 1024
 #define MAX_NAME_TXT "1023"
 
-struct SessionHandle;
+struct Curl_easy;
 /*
  * Add a cookie to the internal list of cookies. The domain and path arguments
  * are only used if the header boolean is TRUE.
  */
 
-struct Cookie *Curl_cookie_add(struct SessionHandle *data,
+struct Cookie *Curl_cookie_add(struct Curl_easy *data,
                                struct CookieInfo *, bool header, char *lineptr,
                                const char *domain, const char *path);
 
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *, const char *,
                                    const char *, bool);
-void Curl_cookie_freelist(struct Cookie *cookies, bool cookiestoo);
+void Curl_cookie_freelist(struct Cookie *cookies);
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);
 
@@ -93,12 +93,12 @@ void Curl_cookie_clearsess(struct CookieInfo *cookies);
 #define Curl_cookie_cleanup(x) Curl_nop_stmt
 #define Curl_flush_cookies(x,y) Curl_nop_stmt
 #else
-void Curl_flush_cookies(struct SessionHandle *data, int cleanup);
+void Curl_flush_cookies(struct Curl_easy *data, int cleanup);
 void Curl_cookie_cleanup(struct CookieInfo *);
-struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
+struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
                                     const char *, struct CookieInfo *, bool);
-struct curl_slist *Curl_cookie_list(struct SessionHandle *data);
-void Curl_cookie_loadfiles(struct SessionHandle *data);
+struct curl_slist *Curl_cookie_list(struct Curl_easy *data);
+void Curl_cookie_loadfiles(struct Curl_easy *data);
 #endif
 
 #endif /* HEADER_CURL_COOKIE_H */

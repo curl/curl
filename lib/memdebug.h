@@ -8,11 +8,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -27,10 +27,6 @@
  * CAUTION: this header is designed to work when included by the app-side
  * as well as the library. Do not mix with library internals!
  */
-
-#include "curl_setup.h"
-
-#include <curl/curl.h>
 
 #define CURL_MT_LOGFNAME_BUFSIZE 512
 
@@ -57,17 +53,17 @@ CURL_EXTERN void curl_memlog(const char *format, ...);
 
 /* file descriptor manipulators */
 CURL_EXTERN curl_socket_t curl_socket(int domain, int type, int protocol,
-                                      int line , const char *source);
+                                      int line, const char *source);
 CURL_EXTERN void curl_mark_sclose(curl_socket_t sockfd,
-                                  int line , const char *source);
+                                  int line, const char *source);
 CURL_EXTERN int curl_sclose(curl_socket_t sockfd,
-                            int line , const char *source);
+                            int line, const char *source);
 CURL_EXTERN curl_socket_t curl_accept(curl_socket_t s, void *a, void *alen,
                                       int line, const char *source);
 #ifdef HAVE_SOCKETPAIR
 CURL_EXTERN int curl_socketpair(int domain, int type, int protocol,
                                 curl_socket_t socket_vector[2],
-                                int line , const char *source);
+                                int line, const char *source);
 #endif
 
 /* FILE functions */
@@ -103,6 +99,7 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #  endif
 #endif
 
+#undef socket
 #define socket(domain,type,protocol)\
  curl_socket(domain, type, protocol, __LINE__, __FILE__)
 #undef accept /* for those with accept as a macro */

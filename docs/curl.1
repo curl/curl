@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -51,16 +51,16 @@ braces as in:
 
 or you can get sequences of alphanumeric series by using [] as in:
 
-  ftp://ftp.numericals.com/file[1-100].txt
+  ftp://ftp.example.com/file[1-100].txt
 
-  ftp://ftp.numericals.com/file[001-100].txt    (with leading zeros)
+  ftp://ftp.example.com/file[001-100].txt    (with leading zeros)
 
-  ftp://ftp.letters.com/file[a-z].txt
+  ftp://ftp.example.com/file[a-z].txt
 
 Nested sequences are not supported, but you can use several ones next to each
 other:
 
-  http://any.org/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
+  http://example.com/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
 
 You can specify any amount of URLs on the command line. They will be fetched
 in a sequential manner in the specified order.
@@ -68,9 +68,9 @@ in a sequential manner in the specified order.
 You can specify a step counter for the ranges to get every Nth number or
 letter:
 
-  http://www.numericals.com/file[1-100:10].txt
+  http://example.com/file[1-100:10].txt
 
-  http://www.letters.com/file[a-z:2].txt
+  http://example.com/file[a-z:2].txt
 
 When using [] or {} sequences when invoked from a command line prompt, you
 probably have to put the full URL within double quotes to avoid the shell from
@@ -98,7 +98,10 @@ specified on a single command line and cannot be used between separate curl
 invokes.
 .SH "PROGRESS METER"
 curl normally displays a progress meter during operations, indicating the
-amount of transferred data, transfer speeds and estimated time left, etc.
+amount of transferred data, transfer speeds and estimated time left, etc. The
+progress meter displays number of bytes and the speeds are in bytes per
+second. The suffixes (k, M, G, T, P) are 1024 based. For example 1k is 1024
+bytes. 1M is 1048576 bytes.
 
 curl displays this data to the terminal by default, so if you invoke curl to
 do an operation and it is about to write data to the terminal, it
@@ -150,6 +153,14 @@ version. (Added in 7.33.0)
 .IP "--http2"
 (HTTP) Tells curl to issue its requests using HTTP 2. This requires that the
 underlying libcurl was built to support it. (Added in 7.33.0)
+.IP "--http2-prior-knowledge"
+(HTTP) Tells curl to issue its non-TLS HTTP requests using HTTP/2 without
+HTTP/1.1 Upgrade. It requires prior knowledge that the server supports HTTP/2
+straight away. HTTPS requests will still do HTTP/2 the standard way with
+negotiated protocol version in the TLS handshake.
+
+HTTP/2 support in general also requires that the underlying libcurl was built
+to support it. (Added in 7.49.0)
 .IP "--no-npn"
 Disable the NPN TLS extension. NPN is enabled by default if libcurl was built
 with an SSL library that supports NPN. NPN is used by a libcurl that supports
@@ -165,9 +176,9 @@ HTTP 2 to negotiate HTTP 2 support with the server during https sessions.
 .IP "-1, --tlsv1"
 (SSL)
 Forces curl to use TLS version 1.x when negotiating with a remote TLS server.
-You can use options \fI--tlsv1.0\fP, \fI--tlsv1.1\fP, and \fI--tlsv1.2\fP to
-control the TLS version more precisely (if the SSL backend in use supports such
-a level of control).
+You can use options \fI--tlsv1.0\fP, \fI--tlsv1.1\fP, \fI--tlsv1.2\fP, and
+\fI--tlsv1.3\fP to control the TLS version more precisely (if the SSL backend
+in use supports such a level of control).
 .IP "-2, --sslv2"
 (SSL) Forces curl to use SSL version 2 when negotiating with a remote SSL
 server. Sometimes curl is built without SSLv2 support. SSLv2 is widely
@@ -216,8 +227,8 @@ read previously stored cookie lines from, which should be used in this session
 if they match. Using this method also activates the cookie engine which will
 make curl record incoming cookies too, which may be handy if you're using this
 in combination with the \fI-L, --location\fP option. The file format of the
-file to read cookies from should be plain HTTP headers or the Netscape/Mozilla
-cookie file format.
+file to read cookies from should be plain HTTP headers (Set-Cookie style) or
+the Netscape/Mozilla cookie file format.
 
 The file specified with \fI-b, --cookie\fP is only used as input. No cookies
 will be written to the file. To store cookies, use the \fI-c, --cookie-jar\fP
@@ -345,7 +356,7 @@ told to read from a file like that, carriage returns and newlines will be
 stripped out. If you don't want the @ character to have a special
 interpretation use \fI--data-raw\fP instead.
 .IP "-D, --dump-header <file>"
-Write the protocol headers to the specified file.
+Write the received protocol headers to the specified file.
 
 This option is handy to use when you want to store the headers that an HTTP
 site sends to you. Cookies from the headers could then be read in a second
@@ -430,6 +441,9 @@ the traditional PORT command.
 \fB--eprt\fP can be used to explicitly enable EPRT again and \fB--no-eprt\fP
 is an alias for \fB--disable-eprt\fP.
 
+If the server is an IPv6 host, this option will have no effect as EPRT is
+necessary then.
+
 Disabling EPRT only changes the active behavior. If you want to switch to
 passive mode you need to not use \fI-P, --ftp-port\fP or force it with
 \fI--ftp-pasv\fP.
@@ -440,6 +454,9 @@ but with this option, it will not try using EPSV.
 
 \fB--epsv\fP can be used to explicitly enable EPSV again and \fB--no-epsv\fP
 is an alias for \fB--disable-epsv\fP.
+
+If the server is an IPv6 host, this option will have no effect as EPSV is
+necessary then.
 
 Disabling EPSV only changes the passive behavior. If you want to switch to
 active mode you need to use \fI-P, --ftp-port\fP.
@@ -503,7 +520,7 @@ nickname contains ":", it needs to be preceded by "\\" so that it is not
 recognized as password delimiter.  If the nickname contains "\\", it needs to
 be escaped as "\\\\" so that it is not recognized as an escape character.
 
-(iOS and Mac OS X only) If curl is built against Secure Transport, then the
+(iOS and macOS only) If curl is built against Secure Transport, then the
 certificate string can either be the name of a certificate/private key in the
 system or user keychain, or the path to a PKCS#12-encoded certificate and
 private key. If you want to use a file from the current directory, please
@@ -523,6 +540,13 @@ after having run curl.
 (SSL) Specify the path name to the Entropy Gathering Daemon socket. The socket
 is used to seed the random engine for SSL connections. See also the
 \fI--random-file\fP option.
+.IP "--expect100-timeout <seconds>"
+(HTTP) Maximum time in seconds that you allow curl to wait for a 100-continue
+response when curl emits an Expects: 100-continue header in its request. By
+default curl will wait one second. This option accepts decimal values! When
+curl stops waiting, it will continue as if the response has been received.
+
+(Added in 7.47.0)
 .IP "--cert-type <type>"
 (SSL) Tells curl what certificate type the provided certificate is in. PEM,
 DER and ENG are recognized types.  If not specified, PEM is assumed.
@@ -544,6 +568,12 @@ Current Working Directory, or in any folder along your PATH.
 
 If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
 (libnsspem.so) needs to be available for this option to work properly.
+
+(iOS and macOS only) If curl is built against Secure Transport, then this
+option is supported for backward compatibility with other SSL engines, but it
+should not be set. If the option is not set, then curl will use the
+certificates in the system and user Keychain to verify the peer, which is the
+preferred method of verifying the peer's certificate chain.
 
 If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
@@ -568,9 +598,16 @@ indicating its identity. A public key is extracted from this certificate and
 if it does not exactly match the public key provided to this option, curl will
 abort the connection before sending or receiving any data.
 
-Added in 7.39.0 for OpenSSL, GnuTLS and GSKit. Added in 7.43.0 for NSS and
-wolfSSL/CyaSSL. sha256 support added in 7.44.0 for OpenSSL,
-GnuTLS, NSS and wolfSSL/CyaSSL. Other SSL backends not supported.
+PEM/DER support:
+  7.39.0: OpenSSL, GnuTLS and GSKit
+  7.43.0: NSS and wolfSSL/CyaSSL
+  7.47.0: mbedtls
+  7.49.0: PolarSSL
+sha256 support:
+  7.44.0: OpenSSL, GnuTLS, NSS and wolfSSL/CyaSSL.
+  7.47.0: mbedtls
+  7.49.0: PolarSSL
+Other SSL backends not supported.
 
 If this option is used several times, the last one will be used.
 .IP "--cert-status"
@@ -583,6 +620,23 @@ or no response at all is received, the verification fails.
 
 This is currently only implemented in the OpenSSL, GnuTLS and NSS backends.
 (Added in 7.41.0)
+.IP "--fail-early"
+Fail and exit on first detected error.
+
+When curl is used to do multiple transfers on the command line, it will
+attempt to operate on each given URL, one by one. By default, it will ignore
+errors if there are more URLs given and the last URL's success will determine
+the error code curl returns. So early failures will be "hidden" by subsequent
+successful transfers.
+
+Using this option, curl will instead return an error on the first transfers
+that fails, independent on the amount of more URLs that are given on the
+command line. This way, no transfer failures go undetected by scripts and
+similar.
+
+This option will apply for all given URLs even if you use \fI--next\fP.
+
+(Added in 7.52.0)
 .IP "--false-start"
 
 (SSL) Tells curl to use false start during the TLS handshake. False start is a
@@ -613,11 +667,10 @@ the symbol <. The difference between @ and < is then that @ makes a file get
 attached in the post as a file upload, while the < makes a text field and just
 get the contents for that text field from a file.
 
-Example, to send your password file to the server, where
-\&'password' is the name of the form-field to which /etc/passwd will be the
-input:
+Example: to send an image to a server, where \&'profile' is the name of the
+form-field to which portrait.jpg will be the input:
 
-\fBcurl\fP -F password=@/etc/passwd www.mypasswords.com
+\fBcurl\fP -F profile=@portrait.jpg https://example.com/upload.cgi
 
 To read content from stdin instead of a file, use - as the filename. This goes
 for both @ and < constructs. Unfortunately it does not support reading the
@@ -627,24 +680,24 @@ transfer starts.
 You can also tell curl what Content-Type to use by using 'type=', in a manner
 similar to:
 
-\fBcurl\fP -F "web=@index.html;type=text/html" url.com
+\fBcurl\fP -F "web=@index.html;type=text/html" example.com
 
 or
 
-\fBcurl\fP -F "name=daniel;type=text/foo" url.com
+\fBcurl\fP -F "name=daniel;type=text/foo" example.com
 
 You can also explicitly change the name field of a file upload part by setting
 filename=, like this:
 
-\fBcurl\fP -F "file=@localfile;filename=nameinpost" url.com
+\fBcurl\fP -F "file=@localfile;filename=nameinpost" example.com
 
 If filename/path contains ',' or ';', it must be quoted by double-quotes like:
 
-\fBcurl\fP -F "file=@\\"localfile\\";filename=\\"nameinpost\\"" url.com
+\fBcurl\fP -F "file=@\\"localfile\\";filename=\\"nameinpost\\"" example.com
 
 or
 
-\fBcurl\fP -F 'file=@"localfile";filename="nameinpost"' url.com
+\fBcurl\fP -F 'file=@"localfile";filename="nameinpost"' example.com
 
 Note that if a filename/path is quoted by double-quotes, any double-quote
 or backslash within the filename must be escaped by backslash.
@@ -728,6 +781,10 @@ waits for a reply from the server.
 authentication, but non-encrypted data transfers for efficiency.  Fails the
 transfer if the server doesn't support SSL/TLS.  (Added in 7.16.0)
 that can still be used but will be removed in a future version.
+.IP "--ftp-ssl"
+(FTP) This deprecated option is now known as \fI--ssl\fP.
+.IP "--ftp-ssl-reqd"
+(FTP) This deprecated option is now known as \fI--ssl-reqd\fP.
 .IP "--form-string <name=string>"
 (HTTP) Similar to \fI--form\fP except that the value string for the named
 parameter is used literally. Leading \&'@' and \&'<' characters, and the
@@ -775,7 +832,7 @@ intended for a proxy.
 
 Example:
 
-\&# curl -H "X-First-Name: Joe" http://192.168.0.1/
+\&# curl -H "X-First-Name: Joe" http://example.com/
 
 \fBWARNING\fP: headers set with this option will be set in all requests - even
 after redirects are followed, like when told with \fB-L, --location\fP. This
@@ -808,7 +865,7 @@ time only.
 Perform an operation using a specified interface. You can enter interface
 name, IP address or host name. An example could look like:
 
- curl --interface eth0:1 http://www.netscape.com/
+ curl --interface eth0:1 https://www.example.com/
 
 If this option is used several times, the last one will be used.
 .IP "-j, --junk-session-cookies"
@@ -821,8 +878,17 @@ cookies when they're closed down.
 server-specified Content-Disposition filename instead of extracting a filename
 from the URL.
 
+If the server specifies a file name and a file with that name already exists
+in the current working directory it will not be overwritten and an error will
+occur. If the server doesn't specify a file name then this option has no
+effect.
+
 There's no attempt to decode %-sequences (yet) in the provided file name, so
 this option may provide you with rather unexpected file names.
+
+\fBWARNING\fP: Exercise judicious use of this option, especially on Windows. A
+rogue server could send you the name of a DLL or other file that could possibly
+be loaded automatically by Windows or some third party software.
 .IP "-k, --insecure"
 (SSL) This option explicitly allows curl to perform "insecure" SSL connections
 and transfers. All SSL connections are attempted to be made secure by using
@@ -830,7 +896,7 @@ the CA certificate bundle installed by default. This makes all connections
 considered "insecure" fail unless \fI-k, --insecure\fP is used.
 
 See this online resource for further details:
-\fBhttp://curl.haxx.se/docs/sslcerts.html\fP
+\fBhttps://curl.haxx.se/docs/sslcerts.html\fP
 .IP "-K, --config <config file>"
 Specify which config file to read curl arguments from. The config file is a
 text file in which command line arguments can be written which then will be
@@ -857,7 +923,7 @@ Note that to be able to specify a URL in the config file, you need to specify
 it using the \fI--url\fP option, and not by simply writing the URL on its own
 line. So, it could look similar to this:
 
-url = "http://curl.haxx.se/docs/"
+url = "https://curl.haxx.se/docs/"
 
 When curl is invoked, it always (unless \fI-q\fP is used) checks for a default
 config file and uses it if found. The default config file is checked for in
@@ -876,14 +942,14 @@ simply try to load .curlrc from the determined home dir.
 .nf
 # --- Example file ---
 # this is a comment
-url = "curl.haxx.se"
+url = "example.com"
 output = "curlhere.html"
 user-agent = "superagent/1.0"
 
 # and fetch another URL too
-url = "curl.haxx.se/docs/manpage.html"
+url = "example.com/docs/manpage.html"
 -O
-referer = "http://nowhereatall.com/"
+referer = "http://nowhereatall.example.com/"
 # --- End of example file ---
 .fi
 
@@ -918,6 +984,8 @@ This option requires a library built with kerberos4 support. This is not
 very common. Use \fI-V, --version\fP to see if your curl supports it.
 
 If this option is used several times, the last one will be used.
+.IP "--krb4 <level>"
+(FTP) This is the former name for \fI--krb\fP. Do not use.
 .IP "-l, --list-only"
 (FTP)
 When listing an FTP directory, this switch forces a name-only view. This is
@@ -955,7 +1023,7 @@ re-send the following request using the same unmodified method.
 
 You can tell curl to not change the non-GET request method to GET after a 30x
 response by using the dedicated options for that: \fI--post301\fP,
-\fI--post302\fP and \fI-post303\fP.
+\fI--post302\fP and \fI--post303\fP.
 .IP "--libcurl <file>"
 Append this option to any ordinary curl command line, and you will get a
 libcurl-using C source code written to the file that does the equivalent
@@ -972,10 +1040,6 @@ otherwise would be.
 The given speed is measured in bytes/second, unless a suffix is appended.
 Appending 'k' or 'K' will count the number as kilobytes, 'm' or M' makes it
 megabytes, while 'g' or 'G' makes it gigabytes. Examples: 200K, 3m and 1G.
-
-The given rate is the average speed counted during the entire transfer. It
-means that curl might use higher transfer speeds in short bursts, but over
-time it uses no more than the given rate.
 
 If you also use the \fI-Y, --speed-limit\fP option, that option will take
 precedence and might cripple the rate-limiting slightly, to help keeping the
@@ -1031,7 +1095,8 @@ return with exit code 63.
 files this option has no effect even if the file transfer ends up being larger
 than this given limit. This concerns both FTP and HTTP transfers.
 .IP "--mail-rcpt <address>"
-(SMTP) Specify a single address, user name or mailing list name.
+(SMTP) Specify a single address, user name or mailing list name. Repeat this
+option several times to send to multiple recipients.
 
 When performing a mail transfer, the recipient should specify a valid email
 address to send the mail to. (Added in 7.20.0)
@@ -1147,6 +1212,19 @@ effectively disables the proxy. Each name in this list is matched as either
 a domain which contains the hostname, or the hostname itself. For example,
 local.com would match local.com, local.com:80, and www.local.com, but not
 www.notlocal.com.  (Added in 7.19.4).
+.IP "--connect-to <host:port:connect-to-host:connect-to-port>"
+For a request to the given "host:port" pair, connect to
+"connect-to-host:connect-to-port" instead.
+This is suitable to direct the request at a specific server, e.g. at a specific
+cluster node in a cluster of servers.
+This option is only used to establish the network connection. It does NOT
+affect the hostname/port that is used for TLS/SSL (e.g. SNI, certificate
+verification) or for the application protocols.
+"host" and "port" may be the empty string, meaning "any host/port".
+"connect-to-host" and "connect-to-port" may also be the empty string,
+meaning "use the request's original host/port".
+This option can be used many times to add many connect rules.
+(Added in 7.49.0).
 .IP "--ntlm"
 (HTTP) Enables NTLM authentication. The NTLM authentication method was
 designed by Microsoft and is used by IIS web servers. It is a proprietary
@@ -1162,19 +1240,33 @@ This option requires a library built with SSL support. Use
 \fI-V, --version\fP to see if your curl supports NTLM.
 
 If this option is used several times, only the first one is used.
+.IP "--ntlm-wb"
+(HTTP) Enables NTLM much in the style \fI--ntlm\fP does, but hand over the
+authentication to the separate binary ntlmauth application that is executed
+when needed.
 .IP "-o, --output <file>"
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
 multiple documents, you can use '#' followed by a number in the <file>
 specifier. That variable will be replaced with the current string for the URL
 being fetched. Like in:
 
-  curl http://{one,two}.site.com -o "file_#1.txt"
+  curl http://{one,two}.example.com -o "file_#1.txt"
 
 or use several variables like:
 
   curl http://{site,host}.host[1-5].com -o "#1_#2"
 
-You may use this option as many times as the number of URLs you have.
+You may use this option as many times as the number of URLs you have. For
+example, if you specify two URLs on the same command line, you can use it like
+this:
+
+  curl -o aa example.com -o bb example.net
+
+and the order of the -o options and the URLs doesn't matter, just that the
+first -o is for the first URL and so on, so the above command line can also be
+written as
+
+  curl example.com example.net -o aa -o bb
 
 See also the \fI--create-dirs\fP option to create the local directories
 dynamically. Specifying the output as '-' (a single dash) will force the
@@ -1183,12 +1275,15 @@ output to be done to stdout.
 Write output to a local file named like the remote file we get. (Only the file
 part of the remote file is used, the path is cut off.)
 
-The remote file name to use for saving is extracted from the given URL,
-nothing else.
+The file will be saved in the current working directory. If you want the file
+saved in a different directory, make sure you change the current working
+directory before invoking curl with this option.
 
-Consequentially, the file will be saved in the current working directory. If
-you want the file saved in a different directory, make sure you change current
-working directory before you invoke curl with the \fB-O, --remote-name\fP flag!
+The remote file name to use for saving is extracted from the given URL, nothing
+else, and if it already exists it will be overwritten. If you want the server
+to be able to choose the file name refer to \fI-J, --remote-header-name\fP
+which can be used in addition to this option. If the server chooses a file name
+and that name already exists it will not be overwritten.
 
 There is no URL decoding done on the file name. If it has %20 or other URL
 encoded parts of the name, they will end up as-is as file name.
@@ -1286,10 +1381,9 @@ consistency. However, a server may require a POST to remain a POST after such
 a redirection. This option is meaningful only when using \fI-L, --location\fP
 (Added in 7.26.0)
 .IP "--proto <protocols>"
-Tells curl to use the listed protocols for its initial retrieval. Protocols
-are evaluated left to right, are comma separated, and are each a protocol
-name or 'all', optionally prefixed by zero or more modifiers. Available
-modifiers are:
+Tells curl to limit what protocols it may use in the transfer. Protocols are
+evaluated left to right, are comma separated, and are each a protocol name or
+'all', optionally prefixed by zero or more modifiers. Available modifiers are:
 .RS
 .TP 3
 .B +
@@ -1346,8 +1440,9 @@ for details.
 
 (Added in 7.45.0)
 .IP "--proto-redir <protocols>"
-Tells curl to use the listed protocols on redirect. See --proto for how
-protocols are represented.
+Tells curl to limit what protocols it may use on redirect. Protocols denied by
+--proto are not overridden by this option. See \fI--proto\fP for how protocols
+are represented.
 
 Example:
 
@@ -1402,7 +1497,7 @@ If this option is used several times, the last one will be used.
 private key file, so passing this option is generally not required. Note that
 this public key extraction requires libcurl to be linked against a copy of
 libssh2 1.2.8 or higher that is itself linked against OpenSSL.)
-.IP "-q"
+.IP "-q, --disable"
 If used as the first parameter on the command line, the \fIcurlrc\fP config
 file will not be read and used. See the \fI-K, --config\fP for details on the
 default config file search path.
@@ -1522,6 +1617,9 @@ the number used for the specific protocol the host will be used for. It means
 you need several entries if you want to provide address for the same host but
 different ports.
 
+The provided address set by this option will be used even if \fI-4, --ipv4\fP
+or \fI-6, --ipv6\fP is set to make curl use another IP version.
+
 This option can be used many times to add many host names to resolve.
 
 (Added in 7.21.3)
@@ -1539,6 +1637,10 @@ also \fI--retry-max-time\fP to limit the total time allowed for
 retries. (Added in 7.12.3)
 
 If this option is used several times, the last one will be used.
+.IP "--retry-connrefused"
+In addition to the other conditions, consider ECONNREFUSED as a transient
+error too for \fI--retry\fP. This option is used together with
+\fI--retry\fP. (Added in 7.52.0)
 .IP "--retry-delay <seconds>"
 Make curl sleep this amount of time before each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
@@ -1582,8 +1684,7 @@ option name can still be used but will be removed in a future version.
 (FTP, POP3, IMAP, SMTP) Require SSL/TLS for the connection.  Terminates the
 connection if the server doesn't support SSL/TLS. (Added in 7.20.0)
 
-This option was formerly known as \fI--ftp-ssl-reqd\fP (added in 7.15.5). That
-option name can still be used but will be removed in a future version.
+This option was formerly known as \fI--ftp-ssl-reqd\fP.
 .IP "--ssl-allow-beast"
 (SSL) This option tells curl to not work around a security flaw in the SSL3
 and TLS1.0 protocols known as BEAST.  If this option isn't used, the SSL layer
@@ -1689,14 +1790,21 @@ specifies what to upload and to where. curl also supports "globbing" of the -T
 argument, meaning that you can upload multiple files to a single URL by using
 the same URL globbing style supported in the URL, like this:
 
-curl -T "{file1,file2}" http://www.uploadtothissite.com
+curl -T "{file1,file2}" http://www.example.com
 
 or even
 
-curl -T "img[1-1000].png" ftp://ftp.picturemania.com/upload/
+curl -T "img[1-1000].png" ftp://ftp.example.com/upload/
+
+When uploading to an SMTP server: the uploaded data is assumed to be RFC 5322
+formatted. It has to feature the necessary set of headers and mail body
+formatted correctly by the user as curl will not transcode nor encode it
+further in any way.
 .IP "--tcp-nodelay"
 Turn on the TCP_NODELAY option. See the \fIcurl_easy_setopt(3)\fP man page for
 details about this option. (Added in 7.11.2)
+.IP "--tcp-fastopen"
+Enable use of TCP Fast Open (RFC7413). (Added in 7.49.0)
 .IP "--tftp-blksize <value>"
 (TFTP) Set TFTP BLKSIZE option (must be >512). This is the block size that
 curl will try to use when transferring data to or from a TFTP server. By
@@ -1705,6 +1813,14 @@ default 512 bytes will be used.
 If this option is used several times, the last one will be used.
 
 (Added in 7.20.0)
+.IP "--tftp-no-options"
+(TFTP) Tells curl not to send TFTP options requests.
+
+This option improves interop with some legacy servers that do not acknowledge
+or properly implement TFTP options. When this option is used
+\fI--tftp-blksize\fP is ignored.
+
+(Added in 7.48.0)
 .IP "--tlsauthtype <authtype>"
 Set TLS authentication type. Currently, the only supported option is "SRP",
 for TLS-SRP (RFC 5054). If \fI--tlsuser\fP and \fI--tlspassword\fP are
@@ -1730,6 +1846,10 @@ Forces curl to use TLS version 1.1 when negotiating with a remote TLS server.
 (SSL)
 Forces curl to use TLS version 1.2 when negotiating with a remote TLS server.
 (Added in 7.34.0)
+.IP "--tlsv1.3"
+(SSL)
+Forces curl to use TLS version 1.3 when negotiating with a remote TLS server.
+(Added in 7.52.0)
 .IP "--tr-encoding"
 (HTTP) Request a compressed Transfer-Encoding response using one of the
 algorithms curl supports, and uncompress the data while receiving it.
@@ -1738,7 +1858,8 @@ algorithms curl supports, and uncompress the data while receiving it.
 .IP "--trace <file>"
 Enables a full trace dump of all incoming and outgoing data, including
 descriptive information, to the given output file. Use "-" as filename to have
-the output sent to stdout.
+the output sent to stdout. Use "%" as filename to have the output sent to
+stderr.
 
 This option overrides previous uses of \fI-v, --verbose\fP or
 \fI--trace-ascii\fP.
@@ -1854,7 +1975,7 @@ The Content-Type of the requested document, if there was any.
 The ultimate filename that curl writes out to. This is only meaningful if curl
 is told to write to a file with the \fI--remote-name\fP or \fI--output\fP
 option. It's most useful in combination with the \fI--remote-header-name\fP
-option. (Added in 7.25.1)
+option. (Added in 7.26.0)
 .TP
 .B ftp_entry_path
 The initial path curl ended up in when logging on to the remote FTP
@@ -1868,6 +1989,9 @@ same info.
 .B http_connect
 The numerical code that was found in the last response (from a proxy) to a
 curl CONNECT request. (Added in 7.12.4)
+.TP
+.B http_version
+The http version that was effectively used. (Added in 7.50.0)
 .TP
 .B local_ip
 The IP address of the local end of the most recently done connection - can be
@@ -2171,7 +2295,7 @@ Couldn't resolve host. The given remote host was not resolved.
 .IP 7
 Failed to connect to host.
 .IP 8
-FTP weird server reply. The server sent data curl couldn't parse.
+Weird server reply. The server sent data curl couldn't parse.
 .IP 9
 FTP access denied. The server denied login or denied access to the particular
 resource or directory you wanted to reach. Most often you tried to change to a
@@ -2328,7 +2452,7 @@ are meant to never change.
 Daniel Stenberg is the main author, but the whole list of contributors is
 found in the separate THANKS file.
 .SH WWW
-http://curl.haxx.se
+https://curl.haxx.se
 .SH FTP
 ftp://ftp.sunet.se/pub/www/utilities/curl/
 .SH "SEE ALSO"

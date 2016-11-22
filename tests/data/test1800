@@ -2,7 +2,7 @@
 <info>
 <keywords>
 HTTP
-http2
+HTTP/2
 </keywords>
 </info>
 
@@ -27,7 +27,7 @@ Content-Type: text/html
 http
 </server>
 <features>
-http2
+http/2
 </features>
  <name>
 HTTP/2 upgrade refused
@@ -48,7 +48,7 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Connection: Upgrade, HTTP2-Settings
 Upgrade: %H2CVER
-HTTP2-Settings: AAMAAABkAAQAAP__
+HTTP2-Settings: AAMAAABkAARAAAAA
 
 </protocol>
 </verify>

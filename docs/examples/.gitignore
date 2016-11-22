@@ -73,3 +73,7 @@ smtp-vrfy
 url2file
 usercertinmem
 xmlstream
+http2-download
+http2-serverpush
+http2-upload
+imap-lsub

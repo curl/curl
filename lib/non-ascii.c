@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -51,7 +51,7 @@
  * Curl_convert_clone() returns a malloced copy of the source string (if
  * returning CURLE_OK), with the data converted to network format.
  */
-CURLcode Curl_convert_clone(struct SessionHandle *data,
+CURLcode Curl_convert_clone(struct Curl_easy *data,
                            const char *indata,
                            size_t insize,
                            char **outbuf)
@@ -79,7 +79,7 @@ CURLcode Curl_convert_clone(struct SessionHandle *data,
  * Curl_convert_to_network() is an internal function for performing ASCII
  * conversions on non-ASCII platforms. It convers the buffer _in place_.
  */
-CURLcode Curl_convert_to_network(struct SessionHandle *data,
+CURLcode Curl_convert_to_network(struct Curl_easy *data,
                                  char *buffer, size_t length)
 {
   if(data->set.convtonetwork) {
@@ -139,7 +139,7 @@ CURLcode Curl_convert_to_network(struct SessionHandle *data,
  * Curl_convert_from_network() is an internal function for performing ASCII
  * conversions on non-ASCII platforms. It convers the buffer _in place_.
  */
-CURLcode Curl_convert_from_network(struct SessionHandle *data,
+CURLcode Curl_convert_from_network(struct Curl_easy *data,
                                    char *buffer, size_t length)
 {
   if(data->set.convfromnetwork) {
@@ -199,7 +199,7 @@ CURLcode Curl_convert_from_network(struct SessionHandle *data,
  * Curl_convert_from_utf8() is an internal function for performing UTF-8
  * conversions on non-ASCII platforms.
  */
-CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
+CURLcode Curl_convert_from_utf8(struct Curl_easy *data,
                                 char *buffer, size_t length)
 {
   if(data->set.convfromutf8) {
@@ -261,9 +261,9 @@ CURLcode Curl_convert_from_utf8(struct SessionHandle *data,
 }
 
 /*
- * Init conversion stuff for a SessionHandle
+ * Init conversion stuff for a Curl_easy
  */
-void Curl_convert_init(struct SessionHandle *data)
+void Curl_convert_init(struct Curl_easy *data)
 {
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
   /* conversion descriptors for iconv calls */
@@ -276,9 +276,9 @@ void Curl_convert_init(struct SessionHandle *data)
 }
 
 /*
- * Setup conversion stuff for a SessionHandle
+ * Setup conversion stuff for a Curl_easy
  */
-void Curl_convert_setup(struct SessionHandle *data)
+void Curl_convert_setup(struct Curl_easy *data)
 {
   data->inbound_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
                                 CURL_ICONV_CODESET_OF_NETWORK);
@@ -289,10 +289,10 @@ void Curl_convert_setup(struct SessionHandle *data)
 }
 
 /*
- * Close conversion stuff for a SessionHandle
+ * Close conversion stuff for a Curl_easy
  */
 
-void Curl_convert_close(struct SessionHandle *data)
+void Curl_convert_close(struct Curl_easy *data)
 {
 #ifdef HAVE_ICONV
   /* close iconv conversion descriptors */
@@ -314,7 +314,7 @@ void Curl_convert_close(struct SessionHandle *data)
  * Curl_convert_form() is used from http.c, this converts any form items that
    need to be sent in the network encoding.  Returns CURLE_OK on success.
  */
-CURLcode Curl_convert_form(struct SessionHandle *data, struct FormData *form)
+CURLcode Curl_convert_form(struct Curl_easy *data, struct FormData *form)
 {
   CURLcode result;
 

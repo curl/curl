@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,7 +31,7 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-CURLSH *
+struct Curl_share *
 curl_share_init(void)
 {
   struct Curl_share *share = calloc(1, sizeof(struct Curl_share));
@@ -49,9 +49,8 @@ curl_share_init(void)
 
 #undef curl_share_setopt
 CURLSHcode
-curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
+curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
 {
-  struct Curl_share *share = (struct Curl_share *)sh;
   va_list param;
   int type;
   curl_lock_function lockfunc;
@@ -71,14 +70,14 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     /* this is a type this share will share */
     type = va_arg(param, int);
     share->specifier |= (1<<type);
-    switch( type ) {
+    switch(type) {
     case CURL_LOCK_DATA_DNS:
       break;
 
     case CURL_LOCK_DATA_COOKIE:
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
       if(!share->cookies) {
-        share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE );
+        share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE);
         if(!share->cookies)
           res = CURLSHE_NOMEM;
       }
@@ -114,7 +113,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     /* this is a type this share will no longer share */
     type = va_arg(param, int);
     share->specifier &= ~(1<<type);
-    switch( type ) {
+    switch(type) {
     case CURL_LOCK_DATA_DNS:
       break;
 
@@ -172,10 +171,8 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 }
 
 CURLSHcode
-curl_share_cleanup(CURLSH *sh)
+curl_share_cleanup(struct Curl_share *share)
 {
-  struct Curl_share *share = (struct Curl_share *)sh;
-
   if(share == NULL)
     return CURLSHE_INVALID;
 
@@ -213,7 +210,7 @@ curl_share_cleanup(CURLSH *sh)
 
 
 CURLSHcode
-Curl_share_lock(struct SessionHandle *data, curl_lock_data type,
+Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
                 curl_lock_access accesstype)
 {
   struct Curl_share *share = data->share;
@@ -231,7 +228,7 @@ Curl_share_lock(struct SessionHandle *data, curl_lock_data type,
 }
 
 CURLSHcode
-Curl_share_unlock(struct SessionHandle *data, curl_lock_data type)
+Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
 {
   struct Curl_share *share = data->share;
 

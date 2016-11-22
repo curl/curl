@@ -1,0 +1,69 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP HEAD
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+No headers at all, just data swsclose
+
+Let's get
+
+a little
+
+so that
+
+we
+
+have
+
+some
+
+test
+
+data to
+
+verify
+</data>
+# make sure no data is written
+<datacheck nonewline="yes">
+
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP HEAD, receive no headers only body
+ </name>
+ <command>
+-I http://%HOSTIP:%HTTPPORT/1144
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+HEAD /1144 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<errorcode>
+8
+</errorcode>
+</verify>
+</testcase>

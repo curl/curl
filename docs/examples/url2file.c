@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+/* <DESC>
+ * Download a given URL into a local file named page.out.
+ * </DESC>
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -37,7 +41,7 @@ int main(int argc, char *argv[])
   static const char *pagefilename = "page.out";
   FILE *pagefile;
 
-  if(argc < 2 ) {
+  if(argc < 2) {
     printf("Usage: %s <URL>\n", argv[0]);
     return 1;
   }
@@ -61,7 +65,7 @@ int main(int argc, char *argv[])
 
   /* open the file */
   pagefile = fopen(pagefilename, "wb");
-  if (pagefile) {
+  if(pagefile) {
 
     /* write the page body to this file handle */
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);

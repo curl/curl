@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -83,7 +83,8 @@ Curl_addrinfo *Curl_str2addr(char *dotted, int port);
 Curl_addrinfo *Curl_unix2addr(const char *path);
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO)
+#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) && \
+    defined(HAVE_FREEADDRINFO)
 void
 curl_dofreeaddrinfo(struct addrinfo *freethis,
                     int line, const char *source);
@@ -96,6 +97,14 @@ curl_dogetaddrinfo(const char *hostname,
                    const struct addrinfo *hints,
                    struct addrinfo **result,
                    int line, const char *source);
+#endif
+
+#ifdef HAVE_GETADDRINFO
+#ifdef USE_RESOLVE_ON_IPS
+void Curl_addrinfo_set_port(Curl_addrinfo *addrinfo, int port);
+#else
+#define Curl_addrinfo_set_port(x,y)
+#endif
 #endif
 
 #endif /* HEADER_CURL_ADDRINFO_H */

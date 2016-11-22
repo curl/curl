@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -19,7 +19,6 @@
 # KIND, either express or implied.
 #
 #***************************************************************************
-
 
 dnl CURL_CHECK_DEF (SYMBOL, [INCLUDES], [SILENT])
 dnl -------------------------------------------------
@@ -31,6 +30,10 @@ dnl result in a set of double-quoted strings the returned expansion will
 dnl actually be a single double-quoted string concatenating all them.
 
 AC_DEFUN([CURL_CHECK_DEF], [
+  AC_REQUIRE([CURL_CPP_P])dnl
+  OLDCPPFLAGS=$CPPFLAGS
+  # CPPPFLAG comes from CURL_CPP_P
+  CPPFLAGS="$CPPFLAGS $CPPPFLAG"
   AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])dnl
   AS_VAR_PUSHDEF([ac_Def], [curl_cv_def_$1])dnl
   if test -z "$SED"; then
@@ -67,6 +70,7 @@ CURL_DEF_TOKEN $1
   fi
   AS_VAR_POPDEF([ac_Def])dnl
   AS_VAR_POPDEF([ac_HaveDef])dnl
+  CPPFLAGS=$OLDCPPFLAGS
 ])
 
 
@@ -170,7 +174,7 @@ dnl -------------------------------------------------
 dnl Check for compilable and valid windows.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
-  AC_CACHE_CHECK([for windows.h], [ac_cv_header_windows_h], [
+  AC_CACHE_CHECK([for windows.h], [curl_cv_header_windows_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -186,12 +190,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
 #endif
       ]])
     ],[
-      ac_cv_header_windows_h="yes"
+      curl_cv_header_windows_h="yes"
     ],[
-      ac_cv_header_windows_h="no"
+      curl_cv_header_windows_h="no"
     ])
   ])
-  case "$ac_cv_header_windows_h" in
+  case "$curl_cv_header_windows_h" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, 1,
         [Define to 1 if you have the windows.h header file.])
@@ -208,9 +212,9 @@ dnl Check if building a native Windows target
 
 AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
-  AC_CACHE_CHECK([whether build target is a native Windows one], [ac_cv_native_windows], [
-    if test "$ac_cv_header_windows_h" = "no"; then
-      ac_cv_native_windows="no"
+  AC_CACHE_CHECK([whether build target is a native Windows one], [curl_cv_native_windows], [
+    if test "$curl_cv_header_windows_h" = "no"; then
+      curl_cv_native_windows="no"
     else
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
@@ -223,13 +227,13 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
 #endif
         ]])
       ],[
-        ac_cv_native_windows="yes"
+        curl_cv_native_windows="yes"
       ],[
-        ac_cv_native_windows="no"
+        curl_cv_native_windows="no"
       ])
     fi
   ])
-  AM_CONDITIONAL(DOING_NATIVE_WINDOWS, test "x$ac_cv_native_windows" = xyes)
+  AM_CONDITIONAL(DOING_NATIVE_WINDOWS, test "x$curl_cv_native_windows" = xyes)
 ])
 
 
@@ -239,7 +243,7 @@ dnl Check for compilable and valid winsock.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
-  AC_CACHE_CHECK([for winsock.h], [ac_cv_header_winsock_h], [
+  AC_CACHE_CHECK([for winsock.h], [curl_cv_header_winsock_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -256,12 +260,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK], [
 #endif
       ]])
     ],[
-      ac_cv_header_winsock_h="yes"
+      curl_cv_header_winsock_h="yes"
     ],[
-      ac_cv_header_winsock_h="no"
+      curl_cv_header_winsock_h="no"
     ])
   ])
-  case "$ac_cv_header_winsock_h" in
+  case "$curl_cv_header_winsock_h" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_WINSOCK_H, 1,
         [Define to 1 if you have the winsock.h header file.])
@@ -276,7 +280,7 @@ dnl Check for compilable and valid winsock2.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
-  AC_CACHE_CHECK([for winsock2.h], [ac_cv_header_winsock2_h], [
+  AC_CACHE_CHECK([for winsock2.h], [curl_cv_header_winsock2_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -293,12 +297,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WINSOCK2], [
 #endif
       ]])
     ],[
-      ac_cv_header_winsock2_h="yes"
+      curl_cv_header_winsock2_h="yes"
     ],[
-      ac_cv_header_winsock2_h="no"
+      curl_cv_header_winsock2_h="no"
     ])
   ])
-  case "$ac_cv_header_winsock2_h" in
+  case "$curl_cv_header_winsock2_h" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_WINSOCK2_H, 1,
         [Define to 1 if you have the winsock2.h header file.])
@@ -313,7 +317,7 @@ dnl Check for compilable and valid ws2tcpip.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
-  AC_CACHE_CHECK([for ws2tcpip.h], [ac_cv_header_ws2tcpip_h], [
+  AC_CACHE_CHECK([for ws2tcpip.h], [curl_cv_header_ws2tcpip_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -331,12 +335,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WS2TCPIP], [
 #endif
       ]])
     ],[
-      ac_cv_header_ws2tcpip_h="yes"
+      curl_cv_header_ws2tcpip_h="yes"
     ],[
-      ac_cv_header_ws2tcpip_h="no"
+      curl_cv_header_ws2tcpip_h="no"
     ])
   ])
-  case "$ac_cv_header_ws2tcpip_h" in
+  case "$curl_cv_header_ws2tcpip_h" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_WS2TCPIP_H, 1,
         [Define to 1 if you have the ws2tcpip.h header file.])
@@ -351,7 +355,7 @@ dnl Check for compilable and valid winldap.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_WINLDAP], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
-  AC_CACHE_CHECK([for winldap.h], [ac_cv_header_winldap_h], [
+  AC_CACHE_CHECK([for winldap.h], [curl_cv_header_winldap_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -371,12 +375,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WINLDAP], [
 #endif
       ]])
     ],[
-      ac_cv_header_winldap_h="yes"
+      curl_cv_header_winldap_h="yes"
     ],[
-      ac_cv_header_winldap_h="no"
+      curl_cv_header_winldap_h="no"
     ])
   ])
-  case "$ac_cv_header_winldap_h" in
+  case "$curl_cv_header_winldap_h" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_WINLDAP_H, 1,
         [Define to 1 if you have the winldap.h header file.])
@@ -391,7 +395,7 @@ dnl Check for compilable and valid winber.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_WINBER], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINLDAP])dnl
-  AC_CACHE_CHECK([for winber.h], [ac_cv_header_winber_h], [
+  AC_CACHE_CHECK([for winber.h], [curl_cv_header_winber_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -413,12 +417,12 @@ AC_DEFUN([CURL_CHECK_HEADER_WINBER], [
 #endif
       ]])
     ],[
-      ac_cv_header_winber_h="yes"
+      curl_cv_header_winber_h="yes"
     ],[
-      ac_cv_header_winber_h="no"
+      curl_cv_header_winber_h="no"
     ])
   ])
-  case "$ac_cv_header_winber_h" in
+  case "$curl_cv_header_winber_h" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_WINBER_H, 1,
         [Define to 1 if you have the winber.h header file.])
@@ -434,7 +438,7 @@ dnl and check if it is needed even with ldap.h
 
 AC_DEFUN([CURL_CHECK_HEADER_LBER], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
-  AC_CACHE_CHECK([for lber.h], [ac_cv_header_lber_h], [
+  AC_CACHE_CHECK([for lber.h], [curl_cv_header_lber_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -458,12 +462,12 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
         ber_free(bep, 1);
       ]])
     ],[
-      ac_cv_header_lber_h="yes"
+      curl_cv_header_lber_h="yes"
     ],[
-      ac_cv_header_lber_h="no"
+      curl_cv_header_lber_h="no"
     ])
   ])
-  if test "$ac_cv_header_lber_h" = "yes"; then
+  if test "$curl_cv_header_lber_h" = "yes"; then
     AC_DEFINE_UNQUOTED(HAVE_LBER_H, 1,
       [Define to 1 if you have the lber.h header file.])
     #
@@ -514,7 +518,7 @@ dnl Check for compilable and valid ldap.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
   AC_REQUIRE([CURL_CHECK_HEADER_LBER])dnl
-  AC_CACHE_CHECK([for ldap.h], [ac_cv_header_ldap_h], [
+  AC_CACHE_CHECK([for ldap.h], [curl_cv_header_ldap_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -540,12 +544,12 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
         int res = ldap_unbind(ldp);
       ]])
     ],[
-      ac_cv_header_ldap_h="yes"
+      curl_cv_header_ldap_h="yes"
     ],[
-      ac_cv_header_ldap_h="no"
+      curl_cv_header_ldap_h="no"
     ])
   ])
-  case "$ac_cv_header_ldap_h" in
+  case "$curl_cv_header_ldap_h" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_LDAP_H, 1,
         [Define to 1 if you have the ldap.h header file.])
@@ -560,7 +564,7 @@ dnl Check for compilable and valid ldap_ssl.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
   AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
-  AC_CACHE_CHECK([for ldap_ssl.h], [ac_cv_header_ldap_ssl_h], [
+  AC_CACHE_CHECK([for ldap_ssl.h], [curl_cv_header_ldap_ssl_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -588,12 +592,12 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
         LDAP *ldp = ldapssl_init("dummy", LDAPS_PORT, 1);
       ]])
     ],[
-      ac_cv_header_ldap_ssl_h="yes"
+      curl_cv_header_ldap_ssl_h="yes"
     ],[
-      ac_cv_header_ldap_ssl_h="no"
+      curl_cv_header_ldap_ssl_h="no"
     ])
   ])
-  case "$ac_cv_header_ldap_ssl_h" in
+  case "$curl_cv_header_ldap_ssl_h" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_LDAP_SSL_H, 1,
         [Define to 1 if you have the ldap_ssl.h header file.])
@@ -608,7 +612,7 @@ dnl Check for compilable and valid ldapssl.h header
 
 AC_DEFUN([CURL_CHECK_HEADER_LDAPSSL], [
   AC_REQUIRE([CURL_CHECK_HEADER_LDAP])dnl
-  AC_CACHE_CHECK([for ldapssl.h], [ac_cv_header_ldapssl_h], [
+  AC_CACHE_CHECK([for ldapssl.h], [curl_cv_header_ldapssl_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -640,12 +644,12 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAPSSL], [
         LDAP *ldp = ldap_ssl_init("dummy", LDAPS_PORT, cert_label);
       ]])
     ],[
-      ac_cv_header_ldapssl_h="yes"
+      curl_cv_header_ldapssl_h="yes"
     ],[
-      ac_cv_header_ldapssl_h="no"
+      curl_cv_header_ldapssl_h="no"
     ])
   ])
-  case "$ac_cv_header_ldapssl_h" in
+  case "$curl_cv_header_ldapssl_h" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_LDAPSSL_H, 1,
         [Define to 1 if you have the ldapssl.h header file.])
@@ -862,7 +866,7 @@ dnl Check for compilable and valid malloc.h header,
 dnl and check if it is needed even with stdlib.h
 
 AC_DEFUN([CURL_CHECK_HEADER_MALLOC], [
-  AC_CACHE_CHECK([for malloc.h], [ac_cv_header_malloc_h], [
+  AC_CACHE_CHECK([for malloc.h], [curl_cv_header_malloc_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #include <malloc.h>
@@ -873,12 +877,12 @@ AC_DEFUN([CURL_CHECK_HEADER_MALLOC], [
         free(q);
       ]])
     ],[
-      ac_cv_header_malloc_h="yes"
+      curl_cv_header_malloc_h="yes"
     ],[
-      ac_cv_header_malloc_h="no"
+      curl_cv_header_malloc_h="no"
     ])
   ])
-  if test "$ac_cv_header_malloc_h" = "yes"; then
+  if test "$curl_cv_header_malloc_h" = "yes"; then
     AC_DEFINE_UNQUOTED(HAVE_MALLOC_H, 1,
       [Define to 1 if you have the malloc.h header file.])
     #
@@ -914,7 +918,7 @@ dnl and check if it is needed even with stdlib.h for
 dnl memory related functions.
 
 AC_DEFUN([CURL_CHECK_HEADER_MEMORY], [
-  AC_CACHE_CHECK([for memory.h], [ac_cv_header_memory_h], [
+  AC_CACHE_CHECK([for memory.h], [curl_cv_header_memory_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #include <memory.h>
@@ -925,12 +929,12 @@ AC_DEFUN([CURL_CHECK_HEADER_MEMORY], [
         free(q);
       ]])
     ],[
-      ac_cv_header_memory_h="yes"
+      curl_cv_header_memory_h="yes"
     ],[
-      ac_cv_header_memory_h="no"
+      curl_cv_header_memory_h="no"
     ])
   ])
-  if test "$ac_cv_header_memory_h" = "yes"; then
+  if test "$curl_cv_header_memory_h" = "yes"; then
     AC_DEFINE_UNQUOTED(HAVE_MEMORY_H, 1,
       [Define to 1 if you have the memory.h header file.])
     #
@@ -1154,7 +1158,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
       #
       AC_DEFINE_UNQUOTED(HAVE_GETNAMEINFO, 1,
         [Define to 1 if you have the getnameinfo function.])
-      ac_cv_func_getnameinfo="yes"
+      curl_cv_func_getnameinfo="yes"
     fi
   fi
 ])
@@ -1209,7 +1213,7 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
                    netdb.h netinet/in.h arpa/inet.h)
   #
   AC_CACHE_CHECK([for working NI_WITHSCOPEID],
-    [ac_cv_working_ni_withscopeid], [
+    [curl_cv_working_ni_withscopeid], [
     AC_RUN_IFELSE([
       AC_LANG_PROGRAM([[
 #ifdef HAVE_STDLIB_H
@@ -1267,10 +1271,10 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
       ]]) # AC-LANG-PROGRAM
     ],[
       # Exit code == 0. Program worked.
-      ac_cv_working_ni_withscopeid="yes"
+      curl_cv_working_ni_withscopeid="yes"
     ],[
       # Exit code != 0. Program failed.
-      ac_cv_working_ni_withscopeid="no"
+      curl_cv_working_ni_withscopeid="no"
     ],[
       # Program is not run when cross-compiling. So we assume
       # NI_WITHSCOPEID will work if we are able to compile it.
@@ -1283,13 +1287,13 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID], [
           unsigned int dummy= NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
         ]])
       ],[
-        ac_cv_working_ni_withscopeid="yes"
+        curl_cv_working_ni_withscopeid="yes"
       ],[
-        ac_cv_working_ni_withscopeid="no"
+        curl_cv_working_ni_withscopeid="no"
       ]) # AC-COMPILE-IFELSE
     ]) # AC-RUN-IFELSE
   ]) # AC-CACHE-CHECK
-  case "$ac_cv_working_ni_withscopeid" in
+  case "$curl_cv_working_ni_withscopeid" in
     yes)
       AC_DEFINE(HAVE_NI_WITHSCOPEID, 1,
         [Define to 1 if NI_WITHSCOPEID exists and works.])
@@ -1423,7 +1427,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
       #
       AC_DEFINE_UNQUOTED(HAVE_RECV, 1,
         [Define to 1 if you have the recv function.])
-      ac_cv_func_recv="yes"
+      curl_cv_func_recv="yes"
     fi
   else
     AC_MSG_ERROR([Unable to link function recv])
@@ -1590,7 +1594,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       #
       AC_DEFINE_UNQUOTED(HAVE_SEND, 1,
         [Define to 1 if you have the send function.])
-      ac_cv_func_send="yes"
+      curl_cv_func_send="yes"
     fi
   else
     AC_MSG_ERROR([Unable to link function send])
@@ -1603,7 +1607,7 @@ dnl Check for MSG_NOSIGNAL
 
 AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
   AC_CHECK_HEADERS(sys/types.h sys/socket.h)
-  AC_CACHE_CHECK([for MSG_NOSIGNAL], [ac_cv_msg_nosignal], [
+  AC_CACHE_CHECK([for MSG_NOSIGNAL], [curl_cv_msg_nosignal], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -1631,12 +1635,12 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
         int flag=MSG_NOSIGNAL;
       ]])
     ],[
-      ac_cv_msg_nosignal="yes"
+      curl_cv_msg_nosignal="yes"
     ],[
-      ac_cv_msg_nosignal="no"
+      curl_cv_msg_nosignal="no"
     ])
   ])
-  case "$ac_cv_msg_nosignal" in
+  case "$curl_cv_msg_nosignal" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_MSG_NOSIGNAL, 1,
         [Define to 1 if you have the MSG_NOSIGNAL flag.])
@@ -1654,7 +1658,7 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK])dnl
   AC_REQUIRE([CURL_CHECK_HEADER_WINSOCK2])dnl
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h sys/socket.h)
-  AC_CACHE_CHECK([for struct timeval], [ac_cv_struct_timeval], [
+  AC_CACHE_CHECK([for struct timeval], [curl_cv_struct_timeval], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #undef inline
@@ -1693,12 +1697,12 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
         ts.tv_usec = 0;
       ]])
     ],[
-      ac_cv_struct_timeval="yes"
+      curl_cv_struct_timeval="yes"
     ],[
-      ac_cv_struct_timeval="no"
+      curl_cv_struct_timeval="no"
     ])
   ])
-  case "$ac_cv_struct_timeval" in
+  case "$curl_cv_struct_timeval" in
     yes)
       AC_DEFINE_UNQUOTED(HAVE_STRUCT_TIMEVAL, 1,
         [Define to 1 if you have the timeval struct.])
@@ -1736,13 +1740,13 @@ AC_DEFUN([TYPE_SIG_ATOMIC_T], [
         ]])
       ],[
         AC_MSG_RESULT([no])
-        ac_cv_sig_atomic_t_volatile="no"
+        curl_cv_sig_atomic_t_volatile="no"
       ],[
         AC_MSG_RESULT([yes])
-        ac_cv_sig_atomic_t_volatile="yes"
+        curl_cv_sig_atomic_t_volatile="yes"
       ])
       #
-      if test "$ac_cv_sig_atomic_t_volatile" = "yes"; then
+      if test "$curl_cv_sig_atomic_t_volatile" = "yes"; then
         AC_DEFINE(HAVE_SIG_ATOMIC_T_VOLATILE, 1,
           [Define to 1 if sig_atomic_t is already defined as volatile.])
       fi
@@ -1852,7 +1856,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   AC_CHECK_HEADERS(sys/types.h sys/time.h time.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
   #
-  if test "x$dontwant_rt" == "xno" ; then
+  if test "x$dontwant_rt" = "xno" ; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
@@ -1874,10 +1878,10 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
       ]])
     ],[
       AC_MSG_RESULT([yes])
-      ac_cv_func_clock_gettime="yes"
+      curl_func_clock_gettime="yes"
     ],[
       AC_MSG_RESULT([no])
-      ac_cv_func_clock_gettime="no"
+      curl_func_clock_gettime="no"
     ])
   fi
   dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally postponed
@@ -1893,7 +1897,7 @@ dnl check and prepended to LIBS any needed libraries.
 AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
   AC_REQUIRE([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC])dnl
   #
-  if test "$ac_cv_func_clock_gettime" = "yes"; then
+  if test "$curl_func_clock_gettime" = "yes"; then
     #
     AC_MSG_CHECKING([for clock_gettime in libraries])
     #
@@ -1938,11 +1942,11 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
       X-unknown)
         AC_MSG_RESULT([cannot find clock_gettime])
         AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
-        ac_cv_func_clock_gettime="no"
+        curl_func_clock_gettime="no"
         ;;
       X-)
         AC_MSG_RESULT([no additional lib required])
-        ac_cv_func_clock_gettime="yes"
+        curl_func_clock_gettime="yes"
         ;;
       *)
         if test -z "$curl_cv_save_LIBS"; then
@@ -1951,13 +1955,13 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
         fi
         AC_MSG_RESULT([$curl_cv_gclk_LIBS])
-        ac_cv_func_clock_gettime="yes"
+        curl_func_clock_gettime="yes"
         ;;
     esac
     #
     dnl only do runtime verification when not cross-compiling
     if test "x$cross_compiling" != "xyes" &&
-      test "$ac_cv_func_clock_gettime" = "yes"; then
+      test "$curl_func_clock_gettime" = "yes"; then
       AC_MSG_CHECKING([if monotonic clock_gettime works])
       AC_RUN_IFELSE([
         AC_LANG_PROGRAM([[
@@ -1989,12 +1993,12 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
       ],[
         AC_MSG_RESULT([no])
         AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
-        ac_cv_func_clock_gettime="no"
+        curl_func_clock_gettime="no"
         LIBS="$curl_cv_save_LIBS"
       ])
     fi
     #
-    case "$ac_cv_func_clock_gettime" in
+    case "$curl_func_clock_gettime" in
       yes)
         AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME_MONOTONIC, 1,
           [Define to 1 if you have the clock_gettime function and monotonic timer.])
@@ -2155,7 +2159,7 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
   AC_MSG_CHECKING([size of curl_socklen_t])
   curl_sizeof_curl_socklen_t="unknown"
   curl_pull_headers_socklen_t="unknown"
-  if test "$ac_cv_header_ws2tcpip_h" = "yes"; then
+  if test "$curl_cv_header_ws2tcpip_h" = "yes"; then
     tst_pull_header_checks='none ws2tcpip'
     tst_size_checks='4'
   else
@@ -2449,7 +2453,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
       #
       AC_DEFINE_UNQUOTED(HAVE_SELECT, 1,
         [Define to 1 if you have the select function.])
-      ac_cv_func_select="yes"
+      curl_cv_func_select="yes"
     fi
   fi
 ])
@@ -2561,8 +2565,8 @@ dnl regarding the paths this will scan:
 dnl /etc/ssl/certs/ca-certificates.crt Debian systems
 dnl /etc/pki/tls/certs/ca-bundle.crt Redhat and Mandriva
 dnl /usr/share/ssl/certs/ca-bundle.crt old(er) Redhat
-dnl /usr/local/share/certs/ca-root.crt FreeBSD
-dnl /etc/ssl/cert.pem OpenBSD
+dnl /usr/local/share/certs/ca-root-nss.crt FreeBSD
+dnl /etc/ssl/cert.pem OpenBSD, FreeBSD (symlink)
 dnl /etc/ssl/certs/ (ca path) SUSE
 
 AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
@@ -2570,7 +2574,8 @@ AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
   AC_MSG_CHECKING([default CA cert bundle/path])
 
   AC_ARG_WITH(ca-bundle,
-AC_HELP_STRING([--with-ca-bundle=FILE], [File name to use as CA bundle])
+AC_HELP_STRING([--with-ca-bundle=FILE],
+[Path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
 AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   [
     want_ca="$withval"
@@ -2580,7 +2585,11 @@ AC_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   ],
   [ want_ca="unset" ])
   AC_ARG_WITH(ca-path,
-AC_HELP_STRING([--with-ca-path=DIRECTORY], [Directory to use as CA path])
+AC_HELP_STRING([--with-ca-path=DIRECTORY],
+[Path to a directory containing CA certificates stored individually, with \
+their filenames in a hash format. This option can be used with OpenSSL, \
+GnuTLS and PolarSSL backends. Refer to OpenSSL c_rehash for details. \
+(example: /etc/certificates)])
 AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   [
     want_capath="$withval"
@@ -2589,6 +2598,10 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     fi
   ],
   [ want_capath="unset"])
+
+  ca_warning="   (warning: certs not found)"
+  capath_warning="   (warning: certs not found)"
+  check_capath=""
 
   if test "x$want_ca" != "xno" -a "x$want_ca" != "xunset" -a \
           "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
@@ -2627,7 +2640,7 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
         for a in /etc/ssl/certs/ca-certificates.crt \
                  /etc/pki/tls/certs/ca-bundle.crt \
                  /usr/share/ssl/certs/ca-bundle.crt \
-                 /usr/local/share/certs/ca-root.crt \
+                 /usr/local/share/certs/ca-root-nss.crt \
                  /etc/ssl/cert.pem \
                  "$cac"; do
           if test -f "$a"; then
@@ -2638,17 +2651,36 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
       fi
       if test "x$want_capath" = "xunset" -a "x$ca" = "xno" -a \
               "x$OPENSSL_ENABLED" = "x1"; then
-        for a in /etc/ssl/certs/; do
-          if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
-            capath="$a"
-            break
-          fi
-        done
+        check_capath="/etc/ssl/certs/"
       fi
     else
       dnl no option given and cross-compiling
       AC_MSG_WARN([skipped the ca-cert path detection when cross-compiling])
     fi
+  fi
+
+  if test "x$ca" = "xno" || test -f "$ca"; then
+    ca_warning=""
+  fi
+
+  if test "x$capath" != "xno"; then
+    check_capath="$capath"
+  fi
+
+  if test ! -z "$check_capath"; then
+    for a in "$check_capath"; do
+      if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
+        if test "x$capath" = "xno"; then
+          capath="$a"
+        fi
+        capath_warning=""
+        break
+      fi
+    done
+  fi
+
+  if test "x$capath" = "xno"; then
+    capath_warning=""
   fi
 
   if test "x$ca" != "xno"; then
@@ -2664,6 +2696,24 @@ AC_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   fi
   if test "x$ca" = "xno" && test "x$capath" = "xno"; then
     AC_MSG_RESULT([no])
+  fi
+
+  AC_MSG_CHECKING([whether to use builtin CA store of SSL library])
+  AC_ARG_WITH(ca-fallback,
+AC_HELP_STRING([--with-ca-fallback], [Use the built in CA store of the SSL library])
+AC_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the SSL library]),
+  [
+    if test "x$with_ca_fallback" != "xyes" -a "x$with_ca_fallback" != "xno"; then
+      AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
+    fi
+  ],
+  [ with_ca_fallback="no"])
+  AC_MSG_RESULT([$with_ca_fallback])
+  if test "x$with_ca_fallback" = "xyes"; then
+    if test "x$OPENSSL_ENABLED" != "x1" -a "x$GNUTLS_ENABLED" != "x1"; then
+      AC_MSG_ERROR([--with-ca-fallback only works with OpenSSL or GnuTLS])
+    fi
+    AC_DEFINE_UNQUOTED(CURL_CA_FALLBACK, 1, [define "1" to use built in CA store of SSL library ])
   fi
 ])
 
@@ -2961,7 +3011,7 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
   AC_REQUIRE([CURL_CHECK_HEADER_WINDOWS])dnl
   AC_MSG_CHECKING([whether build target supports WIN32 file API])
   curl_win32_file_api="no"
-  if test "$ac_cv_header_windows_h" = "yes"; then
+  if test "$curl_cv_header_windows_h" = "yes"; then
     if test x"$enable_largefile" != "xno"; then
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
@@ -3100,4 +3150,96 @@ use vars qw(
 
 1;
 _EOF
+])
+
+dnl CURL_CPP_P
+dnl
+dnl Check if $cpp -P should be used for extract define values due to gcc 5
+dnl splitting up strings and defines between line outputs. gcc by default
+dnl (without -P) will show TEST EINVAL TEST as
+dnl
+dnl # 13 "conftest.c"
+dnl TEST
+dnl # 13 "conftest.c" 3 4
+dnl     22
+dnl # 13 "conftest.c"
+dnl            TEST
+
+AC_DEFUN([CURL_CPP_P], [
+  AC_MSG_CHECKING([if cpp -P is needed])
+  AC_EGREP_CPP([TEST.*TEST], [
+ #include <errno.h>
+TEST EINVAL TEST
+  ], [cpp=no], [cpp=yes])
+  AC_MSG_RESULT([$cpp])
+
+  dnl we need cpp -P so check if it works then
+  if test "x$cpp" = "xyes"; then
+    AC_MSG_CHECKING([if cpp -P works])
+    OLDCPPFLAGS=$CPPFLAGS
+    CPPFLAGS="$CPPFLAGS -P"
+    AC_EGREP_CPP([TEST.*TEST], [
+ #include <errno.h>
+TEST EINVAL TEST
+    ], [cpp_p=yes], [cpp_p=no])
+    AC_MSG_RESULT([$cpp_p])
+
+    if test "x$cpp_p" = "xno"; then
+      AC_MSG_WARN([failed to figure out cpp -P alternative])
+      # without -P
+      CPPPFLAG=""
+    else
+      # with -P
+      CPPPFLAG="-P"
+    fi
+    dnl restore CPPFLAGS
+    CPPFLAGS=$OLDCPPFLAGS
+  else
+    # without -P
+    CPPPFLAG=""
+  fi
+])
+
+
+dnl CURL_MAC_CFLAGS
+dnl
+dnl Check if -mmacosx-version-min, -miphoneos-version-min or any
+dnl similar are set manually, otherwise do. And set
+dnl -Werror=partial-availability.
+dnl
+
+AC_DEFUN([CURL_MAC_CFLAGS], [
+
+  tst_cflags="no"
+  case $host_os in
+    darwin*)
+      tst_cflags="yes"
+      ;;
+  esac
+
+  AC_MSG_CHECKING([for good-to-use Mac CFLAGS])
+  AC_MSG_RESULT([$tst_cflags]);
+
+  if test "$tst_cflags" = "yes"; then
+    AC_MSG_CHECKING([for *version-min in CFLAGS])
+    min=""
+    if test -z "$(echo $CFLAGS | grep m.*os.*-version-min)"; then
+      min="-mmacosx-version-min=10.8"
+      CFLAGS="$CFLAGS $min"
+    fi
+    if test -z "$min"; then
+      AC_MSG_RESULT([set by user])
+    else
+      AC_MSG_RESULT([$min set])
+    fi
+
+    old_CFLAGS=$CFLAGS
+    CFLAGS="$CFLAGS -Werror=partial-availability"
+    AC_MSG_CHECKING([whether $CC accepts -Werror=partial-availability])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+      [AC_MSG_RESULT([yes])],
+      [AC_MSG_RESULT([no])
+      CFLAGS=$old_CFLAGS])
+  fi
+
 ])

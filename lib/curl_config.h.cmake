@@ -67,7 +67,7 @@
 #cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1
 
 /* to make a symbol visible */
-#cmakedefine CURL_EXTERN_SYMBOL 1
+#cmakedefine CURL_EXTERN_SYMBOL ${CURL_EXTERN_SYMBOL}
 /* Ensure using CURL_EXTERN_SYMBOL is possible */
 #ifndef CURL_EXTERN_SYMBOL
 #define CURL_EXTERN_SYMBOL
@@ -906,6 +906,9 @@
 /* Define if you want to enable POSIX threaded DNS lookup */
 #cmakedefine USE_THREADS_POSIX 1
 
+/* Define if you want to enable WIN32 threaded DNS lookup */
+#cmakedefine USE_THREADS_WIN32 1
+
 /* Define to disable non-blocking sockets. */
 #cmakedefine USE_BLOCKING_SOCKETS 1
 
@@ -914,6 +917,9 @@
 
 /* if PolarSSL is enabled */
 #cmakedefine USE_POLARSSL 1
+
+/* if mbedTLS is enabled */
+#cmakedefine USE_MBEDTLS 1
 
 /* if libSSH2 is in use */
 #cmakedefine USE_LIBSSH2 1
@@ -930,11 +936,13 @@
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
+/* to enable NGHTTP2  */
+#cmakedefine USE_NGHTTP2 1
+
 /* if Unix domain sockets are enabled  */
 #cmakedefine USE_UNIX_SOCKETS
 
-/* Define to 1 if you are building a Windows target without large file
-   support. */
+/* Define to 1 if you are building a Windows target with large file support. */
 #cmakedefine USE_WIN32_LARGE_FILES 1
 
 /* to enable SSPI support */

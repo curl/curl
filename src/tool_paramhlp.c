@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -284,6 +284,8 @@ long proto2num(struct OperationConfig *config, long *val, const char *str)
   if(!buffer)
     return 1;
 
+  /* Allow strtok() here since this isn't used threaded */
+  /* !checksrc! disable BANNEDFUNC 2 */
   for(token = strtok(buffer, sep);
       token;
       token = strtok(NULL, sep)) {
@@ -310,7 +312,7 @@ long proto2num(struct OperationConfig *config, long *val, const char *str)
     }
 
     for(pp=protos; pp->name; pp++) {
-      if(curlx_raw_equal(token, pp->name)) {
+      if(curl_strequal(token, pp->name)) {
         switch (action) {
         case deny:
           *val &= ~(pp->bit);
@@ -353,7 +355,7 @@ int check_protocol(const char *str)
   if(!str)
     return PARAM_REQUIRES_PARAMETER;
   for(pp = curlinfo->protocols; *pp; pp++) {
-    if(curlx_raw_equal(*pp, str))
+    if(curl_strequal(*pp, str))
       return PARAM_OK;
   }
   return PARAM_LIBCURL_UNSUPPORTED_PROTOCOL;
@@ -426,7 +428,7 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
       curlx_msnprintf(prompt, sizeof(prompt),
                       "Enter %s password for user '%s' on URL #%"
                       CURL_FORMAT_CURL_OFF_TU ":",
-                      kind, *userpwd, i + 1);
+                      kind, *userpwd, (curl_off_t) (i + 1));
 
     /* get password */
     getpass_r(prompt, passwd, sizeof(passwd));
@@ -464,11 +466,11 @@ ParameterError add2list(struct curl_slist **list, const char *ptr)
 
 int ftpfilemethod(struct OperationConfig *config, const char *str)
 {
-  if(curlx_raw_equal("singlecwd", str))
+  if(curl_strequal("singlecwd", str))
     return CURLFTPMETHOD_SINGLECWD;
-  if(curlx_raw_equal("nocwd", str))
+  if(curl_strequal("nocwd", str))
     return CURLFTPMETHOD_NOCWD;
-  if(curlx_raw_equal("multicwd", str))
+  if(curl_strequal("multicwd", str))
     return CURLFTPMETHOD_MULTICWD;
 
   warnf(config->global, "unrecognized ftp file method '%s', using default\n",
@@ -479,9 +481,9 @@ int ftpfilemethod(struct OperationConfig *config, const char *str)
 
 int ftpcccmethod(struct OperationConfig *config, const char *str)
 {
-  if(curlx_raw_equal("passive", str))
+  if(curl_strequal("passive", str))
     return CURLFTPSSL_CCC_PASSIVE;
-  if(curlx_raw_equal("active", str))
+  if(curl_strequal("active", str))
     return CURLFTPSSL_CCC_ACTIVE;
 
   warnf(config->global, "unrecognized ftp CCC method '%s', using default\n",
@@ -492,11 +494,11 @@ int ftpcccmethod(struct OperationConfig *config, const char *str)
 
 long delegation(struct OperationConfig *config, char *str)
 {
-  if(curlx_raw_equal("none", str))
+  if(curl_strequal("none", str))
     return CURLGSSAPI_DELEGATION_NONE;
-  if(curlx_raw_equal("policy", str))
+  if(curl_strequal("policy", str))
     return CURLGSSAPI_DELEGATION_POLICY_FLAG;
-  if(curlx_raw_equal("always", str))
+  if(curl_strequal("always", str))
     return CURLGSSAPI_DELEGATION_FLAG;
 
   warnf(config->global, "unrecognized delegation method '%s', using none\n",

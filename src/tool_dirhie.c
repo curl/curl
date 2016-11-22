@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -91,6 +91,14 @@ static void show_dir_errno(FILE *errors, const char *name)
  *  should create all the dir* automagically
  */
 
+#ifdef WIN32
+/* systems that may use either or when specifying a path */
+#define PATH_DELIMITERS "\\/"
+#else
+#define PATH_DELIMITERS DIR_CHAR
+#endif
+
+
 CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
 {
   char *tempdir;
@@ -112,10 +120,12 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
   }
   dirbuildup[0] = '\0';
 
-  tempdir = strtok(outdup, DIR_CHAR);
+  /* Allow strtok() here since this isn't used threaded */
+  /* !checksrc! disable BANNEDFUNC 2 */
+  tempdir = strtok(outdup, PATH_DELIMITERS);
 
   while(tempdir != NULL) {
-    tempdir2 = strtok(NULL, DIR_CHAR);
+    tempdir2 = strtok(NULL, PATH_DELIMITERS);
     /* since strtok returns a token for the last word even
        if not ending with DIR_CHAR, we need to prune it */
     if(tempdir2 != NULL) {
@@ -123,7 +133,8 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
       if(dlen)
         snprintf(&dirbuildup[dlen], outlen - dlen, "%s%s", DIR_CHAR, tempdir);
       else {
-        if(0 != strncmp(outdup, DIR_CHAR, 1))
+        if(outdup == tempdir)
+          /* the output string doesn't start with a separator */
           strcpy(dirbuildup, tempdir);
         else
           snprintf(dirbuildup, outlen, "%s%s", DIR_CHAR, tempdir);

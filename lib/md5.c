@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,6 +23,8 @@
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
+
+#include <curl/curl.h>
 
 #include "curl_md5.h"
 #include "curl_hmac.h"
@@ -122,7 +124,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
   CC_MD5_Final(digest, ctx);
 }
 
-#elif defined(_WIN32)
+#elif defined(_WIN32) && !defined(CURL_WINDOWS_APP)
 
 #include <wincrypt.h>
 #include "curl_memory.h"

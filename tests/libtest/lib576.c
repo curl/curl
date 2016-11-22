@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -74,7 +74,8 @@ long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains)
   }
   if(finfo->filetype == CURLFILETYPE_FILE) {
     ch_d->print_content = 1;
-    printf("Content:\n-------------------------------------------------------------\n");
+    printf("Content:\n-----------------------"
+           "--------------------------------------\n");
   }
   if(strcmp(finfo->filename, "someothertext.txt") == 0) {
     printf("# THIS CONTENT WAS SKIPPED IN CHUNK_BGN CALLBACK #\n");
@@ -100,7 +101,7 @@ int test(char *URL)
 {
   CURL *handle = NULL;
   CURLcode res = CURLE_OK;
-  chunk_data_t chunk_data = {0,0};
+  chunk_data_t chunk_data = {0, 0};
   curl_global_init(CURL_GLOBAL_ALL);
   handle = curl_easy_init();
   if(!handle) {

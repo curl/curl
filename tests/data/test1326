@@ -33,7 +33,7 @@ GET /we/want/1326 HTTP/1.0
 
 </stdin>
  <command>
-telnet://%HOSTIP:%HTTPPORT
+telnet://%HOSTIP:%HTTPPORT --upload-file -
 </command>
 </client>
 

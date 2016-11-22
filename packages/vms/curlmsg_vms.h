@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -59,7 +59,7 @@ static const long vms_cond[] =
 	CURL_COULDNT_RESOLVE_PROXY,
 	CURL_COULDNT_RESOLVE_HOST,
 	CURL_COULDNT_CONNECT,
-	CURL_FTP_WEIRD_SERVER_REPLY,
+	CURL_WEIRD_SERVER_REPLY,
 	CURL_FTP_ACCESS_DENIED,
 	CURL_OBSOLETE10,
 	CURL_FTP_WEIRD_PASS_REPLY,

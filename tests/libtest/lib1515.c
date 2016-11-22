@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -39,7 +39,8 @@
 #define sleep(s) Sleep(s * 1000)
 #endif
 
-static int debug_callback(CURL *curl, curl_infotype info, char *msg, size_t len, void *ptr)
+static int debug_callback(CURL *curl, curl_infotype info, char *msg,
+                          size_t len, void *ptr)
 {
   (void)curl;
   (void)ptr;
@@ -121,7 +122,8 @@ int test(char *URL)
   int i;
   int count = 2;
 
-  snprintf(dns_entry, sizeof(dns_entry), "testserver.example.com:%s:%s", port, address);
+  snprintf(dns_entry, sizeof(dns_entry), "testserver.example.com:%s:%s",
+           port, address);
 
   start_test_timing();
 
@@ -130,7 +132,8 @@ int test(char *URL)
 
   for(i = 1; i <= count; i++) {
     char target_url[256];
-    snprintf(target_url, sizeof(target_url), "http://testserver.example.com:%s%s%04d", port, path, i);
+    snprintf(target_url, sizeof(target_url),
+             "http://testserver.example.com:%s/%s%04d", port, path, i);
 
     /* second request must succeed like the first one */
     if((res = do_one_request(multi, target_url, dns_entry)))

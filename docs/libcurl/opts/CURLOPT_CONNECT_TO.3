@@ -1,0 +1,111 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_CONNECT_TO 3 "10 April 2016" "libcurl 7.49.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_CONNECT_TO \- Connect to a specific host and port instead of the URL's host and port
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECT_TO,
+                          struct curl_slist *connect_to);
+.fi
+.SH DESCRIPTION
+Pass a pointer to a linked list of strings with "connect to" information to
+use for establishing network connections with this handle. The linked list
+should be a fully valid list of \fBstruct curl_slist\fP structs properly
+filled in. Use \fIcurl_slist_append(3)\fP to create the list and
+\fIcurl_slist_free_all(3)\fP to clean up an entire list.
+
+Each single string should be written using the format
+HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT where HOST is the host of the
+request, PORT is the port of the request, CONNECT-TO-HOST is the host name to
+connect to, and CONNECT-TO-PORT is the port to connect to.
+
+The first string that matches the request's host and port is used.
+
+Dotted numerical IP addresses are supported for HOST and CONNECT-TO-HOST.
+A numerical IPv6 address must be written within [brackets].
+
+Any of the four values may be empty. When the HOST or PORT is empty, the host
+or port will always match (the request's host or port is ignored).
+When CONNECT-TO-HOST or CONNECT-TO-PORT is empty, the "connect to" feature
+will be disabled for the host or port, and the request's host or port will be
+used to establish the network connection.
+
+This option is suitable to direct the request at a specific server, e.g. at a
+specific cluster node in a cluster of servers.
+
+The "connect to" host and port are only used to establish the network
+connection. They do NOT affect the host and port that are used for TLS/SSL
+(e.g. SNI, certificate verification) or for the application protocols.
+
+In contrast to \fICURLOPT_RESOLVE(3)\fP, the option
+\fICURLOPT_CONNECT_TO(3)\fP does not pre-populate the DNS cache and therefore
+it does not affect future transfers of other easy handles that have been added
+to the same multi handle.
+
+The "connect to" host and port are ignored if they are equal to the host and
+the port in the request URL, because connecting to the host and the port in
+the request URL is the default behavior.
+
+If an HTTP proxy is used for a request having a special "connect to" host or
+port, and the "connect to" host or port differs from the requests's host and
+port, the HTTP proxy is automatically switched to tunnel mode for this
+specific request. This is necessary because it is not possible to connect to a
+specific host or port in normal (non-tunnel) mode.
+
+When this option is passed to \fIcurl_easy_setopt(3)\fP, libcurl will not copy
+the entire list so you \fBmust\fP keep it around until you no longer use this
+\fIhandle\fP for a transfer before you call \fIcurl_slist_free_all(3)\fP on
+the list.
+
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl;
+struct curl_slist *connect_to = NULL;
+connect_to = curl_slist_append(NULL, "example.com::server1.example.com:");
+
+curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  curl_easy_perform(curl);
+
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+}
+
+curl_slist_free_all(connect_to);
+.fi
+.SH AVAILABILITY
+Added in 7.49.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_URL "(3), " CURLOPT_RESOLVE "(3), " CURLOPT_FOLLOWLOCATION "(3), " CURLOPT_HTTPPROXYTUNNEL  "(3), "

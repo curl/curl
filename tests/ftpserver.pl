@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -609,7 +609,7 @@ sub protocolsetup {
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ {| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '+OK cURL POP3 server ready to serve '."\r\n")
+            '+OK curl POP3 server ready to serve '."\r\n")
         );
     }
     elsif($proto eq 'imap') {
@@ -643,7 +643,7 @@ sub protocolsetup {
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ {| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '* OK cURL IMAP server ready to serve'."\r\n")
+            '* OK curl IMAP server ready to serve'."\r\n")
         );
     }
     elsif($proto eq 'smtp') {
@@ -1057,7 +1057,7 @@ sub EXPN_smtp {
 }
 
 sub QUIT_smtp {
-    sendcontrol "221 cURL $smtp_type server signing off\r\n";
+    sendcontrol "221 curl $smtp_type server signing off\r\n";
 
     return 0;
 }
@@ -1605,7 +1605,7 @@ sub NOOP_imap {
 }
 
 sub LOGOUT_imap {
-    sendcontrol "* BYE cURL IMAP server signing off\r\n";
+    sendcontrol "* BYE curl IMAP server signing off\r\n";
     sendcontrol "$cmdid OK LOGOUT completed\r\n";
 
     return 0;
@@ -1941,7 +1941,7 @@ sub QUIT_pop3 {
         @deleted = ();
     }
 
-    sendcontrol "+OK cURL POP3 server signing off\r\n";
+    sendcontrol "+OK curl POP3 server signing off\r\n";
 
     return 0;
 }

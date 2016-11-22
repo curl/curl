@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,7 +33,6 @@
 
 #include "urldata.h"
 #include "sendf.h"
-#include "strequal.h"
 #include "select.h"
 #include "connect.h"
 #include "timeval.h"
@@ -58,7 +57,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
   ssize_t nread;
   ssize_t allread = 0;
   int result;
-  long timeleft;
+  time_t timeleft;
   *n = 0;
   for(;;) {
     timeleft = Curl_timeleft(conn->data, NULL, TRUE);
@@ -67,7 +66,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
       result = CURLE_OPERATION_TIMEDOUT;
       break;
     }
-    if(Curl_socket_ready(sockfd, CURL_SOCKET_BAD, timeleft) <= 0) {
+    if(SOCKET_READABLE(sockfd, timeleft) <= 0) {
       result = ~CURLE_OK;
       break;
     }
@@ -119,7 +118,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
   int result;
   CURLcode code;
   curl_socket_t sock = conn->sock[sockindex];
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   if(Curl_timeleft(data, NULL, TRUE) < 0) {
     /* time-out, bail out, go home */
@@ -170,24 +169,26 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
       hp=dns->addr;
     if(hp) {
       char buf[64];
-      unsigned short ip[4];
       Curl_printable_address(hp, buf, sizeof(buf));
 
-      if(4 == sscanf( buf, "%hu.%hu.%hu.%hu",
-                      &ip[0], &ip[1], &ip[2], &ip[3])) {
-        /* Set DSTIP */
-        socksreq[4] = (unsigned char)ip[0];
-        socksreq[5] = (unsigned char)ip[1];
-        socksreq[6] = (unsigned char)ip[2];
-        socksreq[7] = (unsigned char)ip[3];
+      if(hp->ai_family == AF_INET) {
+        struct sockaddr_in *saddr_in;
+
+        saddr_in = (struct sockaddr_in*)(void*)hp->ai_addr;
+        socksreq[4] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[0];
+        socksreq[5] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[1];
+        socksreq[6] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[2];
+        socksreq[7] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[3];
+
+        infof(data, "SOCKS4 connect to IPv4 %s (locally resolved)\n", buf);
       }
-      else
+      else {
         hp = NULL; /* fail! */
 
-      infof(data, "SOCKS4 connect to %s (locally resolved)\n", buf);
+        failf(data, "SOCKS4 connection to %s not supported\n", buf);
+      }
 
       Curl_resolv_unlock(data, dns); /* not used anymore from now on */
-
     }
     if(!hp) {
       failf(data, "Failed to resolve \"%s\" for SOCKS4 connect.",
@@ -374,8 +375,8 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   int result;
   CURLcode code;
   curl_socket_t sock = conn->sock[sockindex];
-  struct SessionHandle *data = conn->data;
-  long timeout;
+  struct Curl_easy *data = conn->data;
+  time_t timeout;
   bool socks5_resolve_local = (conn->proxytype == CURLPROXY_SOCKS5)?TRUE:FALSE;
   const size_t hostname_len = strlen(hostname);
   ssize_t len = 0;
@@ -399,7 +400,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   (void)curlx_nonblock(sock, TRUE);
 
   /* wait until socket gets connected */
-  result = Curl_socket_ready(CURL_SOCKET_BAD, sock, timeout);
+  result = SOCKET_WRITABLE(sock, timeout);
 
   if(-1 == result) {
     failf(conn->data, "SOCKS5: no connection here");
@@ -429,6 +430,8 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   (void)curlx_nonblock(sock, FALSE);
 
+  infof(data, "SOCKS5 communication to %s:%d\n", hostname, remote_port);
+
   code = Curl_write_plain(conn, sock, (char *)socksreq, (2 + (int)socksreq[1]),
                           &written);
   if(code || (written != (2 + (int)socksreq[1]))) {
@@ -438,7 +441,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   (void)curlx_nonblock(sock, TRUE);
 
-  result = Curl_socket_ready(sock, CURL_SOCKET_BAD, timeout);
+  result = SOCKET_READABLE(sock, timeout);
 
   if(-1 == result) {
     failf(conn->data, "SOCKS5 nothing to read");
@@ -594,33 +597,39 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     if(dns)
       hp=dns->addr;
     if(hp) {
-      struct sockaddr_in *saddr_in;
-#ifdef ENABLE_IPV6
-      struct sockaddr_in6 *saddr_in6;
-#endif
       int i;
+      char buf[64];
+      Curl_printable_address(hp, buf, sizeof(buf));
 
       if(hp->ai_family == AF_INET) {
+        struct sockaddr_in *saddr_in;
         socksreq[len++] = 1; /* ATYP: IPv4 = 1 */
 
         saddr_in = (struct sockaddr_in*)(void*)hp->ai_addr;
         for(i = 0; i < 4; i++) {
           socksreq[len++] = ((unsigned char*)&saddr_in->sin_addr.s_addr)[i];
-          infof(data, "%d\n", socksreq[len-1]);
         }
+
+        infof(data, "SOCKS5 connect to IPv4 %s (locally resolved)\n", buf);
       }
 #ifdef ENABLE_IPV6
       else if(hp->ai_family == AF_INET6) {
+        struct sockaddr_in6 *saddr_in6;
         socksreq[len++] = 4; /* ATYP: IPv6 = 4 */
 
         saddr_in6 = (struct sockaddr_in6*)(void*)hp->ai_addr;
         for(i = 0; i < 16; i++) {
           socksreq[len++] = ((unsigned char*)&saddr_in6->sin6_addr.s6_addr)[i];
         }
+
+        infof(data, "SOCKS5 connect to IPv6 %s (locally resolved)\n", buf);
       }
 #endif
-      else
+      else {
         hp = NULL; /* fail! */
+
+        failf(data, "SOCKS5 connection to %s not supported\n", buf);
+      }
 
       Curl_resolv_unlock(data, dns); /* not used anymore from now on */
     }
@@ -668,39 +677,6 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
           "SOCKS5 reply has wrong version, version should be 5.");
     return CURLE_COULDNT_CONNECT;
   }
-  if(socksreq[1] != 0) { /* Anything besides 0 is an error */
-    if(socksreq[3] == 1) {
-      failf(data,
-            "Can't complete SOCKS5 connection to %d.%d.%d.%d:%d. (%d)",
-            (unsigned char)socksreq[4], (unsigned char)socksreq[5],
-            (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
-            (unsigned char)socksreq[1]);
-    }
-    else if(socksreq[3] == 3) {
-      failf(data,
-            "Can't complete SOCKS5 connection to %s:%d. (%d)",
-            hostname,
-            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
-            (unsigned char)socksreq[1]);
-    }
-    else if(socksreq[3] == 4) {
-      failf(data,
-            "Can't complete SOCKS5 connection to %02x%02x:%02x%02x:"
-            "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%d. (%d)",
-            (unsigned char)socksreq[4], (unsigned char)socksreq[5],
-            (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-            (unsigned char)socksreq[8], (unsigned char)socksreq[9],
-            (unsigned char)socksreq[10], (unsigned char)socksreq[11],
-            (unsigned char)socksreq[12], (unsigned char)socksreq[13],
-            (unsigned char)socksreq[14], (unsigned char)socksreq[15],
-            (unsigned char)socksreq[16], (unsigned char)socksreq[17],
-            (unsigned char)socksreq[18], (unsigned char)socksreq[19],
-            (((unsigned char)socksreq[8] << 8) | (unsigned char)socksreq[9]),
-            (unsigned char)socksreq[1]);
-    }
-    return CURLE_COULDNT_CONNECT;
-  }
 
   /* Fix: in general, returned BND.ADDR is variable length parameter by RFC
      1928, so the reply packet should be read until the end to avoid errors at
@@ -735,10 +711,9 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     /* decrypt_gssapi_blockread already read the whole packet */
 #endif
     if(len > 10) {
-      len -= 10;
       result = Curl_blockread_all(conn, sock, (char *)&socksreq[10],
-                                  len, &actualread);
-      if(result || (len != actualread)) {
+                                  len - 10, &actualread);
+      if(result || ((len - 10) != actualread)) {
         failf(data, "Failed to receive SOCKS5 connect request ack.");
         return CURLE_COULDNT_CONNECT;
       }
@@ -746,6 +721,49 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   }
 #endif
+
+  if(socksreq[1] != 0) { /* Anything besides 0 is an error */
+    if(socksreq[3] == 1) {
+      failf(data,
+            "Can't complete SOCKS5 connection to %d.%d.%d.%d:%d. (%d)",
+            (unsigned char)socksreq[4], (unsigned char)socksreq[5],
+            (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+            (((unsigned char)socksreq[8] << 8) |
+             (unsigned char)socksreq[9]),
+            (unsigned char)socksreq[1]);
+    }
+    else if(socksreq[3] == 3) {
+      unsigned char port_upper = (unsigned char)socksreq[len - 2];
+      socksreq[len - 2] = 0;
+      failf(data,
+            "Can't complete SOCKS5 connection to %s:%d. (%d)",
+            (char *)&socksreq[5],
+            ((port_upper << 8) |
+             (unsigned char)socksreq[len - 1]),
+            (unsigned char)socksreq[1]);
+      socksreq[len - 2] = port_upper;
+    }
+    else if(socksreq[3] == 4) {
+      failf(data,
+            "Can't complete SOCKS5 connection to %02x%02x:%02x%02x:"
+            "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%d. (%d)",
+            (unsigned char)socksreq[4], (unsigned char)socksreq[5],
+            (unsigned char)socksreq[6], (unsigned char)socksreq[7],
+            (unsigned char)socksreq[8], (unsigned char)socksreq[9],
+            (unsigned char)socksreq[10], (unsigned char)socksreq[11],
+            (unsigned char)socksreq[12], (unsigned char)socksreq[13],
+            (unsigned char)socksreq[14], (unsigned char)socksreq[15],
+            (unsigned char)socksreq[16], (unsigned char)socksreq[17],
+            (unsigned char)socksreq[18], (unsigned char)socksreq[19],
+            (((unsigned char)socksreq[20] << 8) |
+             (unsigned char)socksreq[21]),
+            (unsigned char)socksreq[1]);
+    }
+    return CURLE_COULDNT_CONNECT;
+  }
+  else {
+    infof(data, "SOCKS5 request granted.\n");
+  }
 
   (void)curlx_nonblock(sock, TRUE);
   return CURLE_OK; /* Proxy was successful! */

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,7 +52,7 @@
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
-#include "rawstr.h"
+#include "strcase.h"
 #include "warnless.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
@@ -62,7 +62,7 @@
 
 /*
  Some hackish cast macros based on:
- http://library.gnome.org/devel/glib/unstable/glib-Type-Conversion-Macros.html
+ https://developer.gnome.org/glib/unstable/glib-Type-Conversion-Macros.html
 */
 #ifndef GNUTLS_POINTER_TO_INT_CAST
 #define GNUTLS_POINTER_TO_INT_CAST(p) ((int) (long) (p))
@@ -201,7 +201,7 @@ int Curl_gtls_cleanup(void)
   return 1;
 }
 
-static void showtime(struct SessionHandle *data,
+static void showtime(struct Curl_easy *data,
                      const char *text,
                      time_t stamp)
 {
@@ -262,7 +262,7 @@ static CURLcode handshake(struct connectdata *conn,
                           bool duringconnect,
                           bool nonblocking)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   gnutls_session_t session = conn->ssl[sockindex].session;
   curl_socket_t sockfd = conn->sock[sockindex];
@@ -289,7 +289,7 @@ static CURLcode handshake(struct connectdata *conn,
       curl_socket_t readfd = ssl_connect_2_reading==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
-      what = Curl_socket_ready(readfd, writefd,
+      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                nonblocking?0:
                                timeout_ms?timeout_ms:1000);
       if(what < 0) {
@@ -356,9 +356,9 @@ static gnutls_x509_crt_fmt_t do_file_type(const char *type)
 {
   if(!type || !type[0])
     return GNUTLS_X509_FMT_PEM;
-  if(Curl_raw_equal(type, "PEM"))
+  if(strcasecompare(type, "PEM"))
     return GNUTLS_X509_FMT_PEM;
-  if(Curl_raw_equal(type, "DER"))
+  if(strcasecompare(type, "DER"))
     return GNUTLS_X509_FMT_DER;
   return -1;
 }
@@ -367,11 +367,9 @@ static CURLcode
 gtls_connect_step1(struct connectdata *conn,
                    int sockindex)
 {
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   gnutls_session_t session;
   int rc;
-  void *ssl_sessionid;
-  size_t ssl_idsize;
   bool sni = TRUE; /* default is SNI enabled */
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
@@ -411,7 +409,6 @@ gtls_connect_step1(struct connectdata *conn,
   if(!gtls_inited)
     Curl_gtls_init();
 
-  /* GnuTLS only supports SSLv3 and TLSv1 */
   if(data->set.ssl.version == CURL_SSLVERSION_SSLv2) {
     failf(data, "GnuTLS does not support SSLv2");
     return CURLE_SSL_CONNECT_ERROR;
@@ -484,6 +481,14 @@ gtls_connect_step1(struct connectdata *conn,
     else
       infof(data, "found %d certificates in %s\n",
             rc, data->set.ssl.CApath);
+  }
+#endif
+
+#ifdef CURL_CA_FALLBACK
+  /* use system ca certificate store as fallback */
+  if(data->set.ssl.verifypeer &&
+     !(data->set.ssl.CAfile || data->set.ssl.CApath)) {
+    gnutls_certificate_set_x509_system_trust(conn->ssl[sockindex].cred);
   }
 #endif
 
@@ -563,12 +568,16 @@ gtls_connect_step1(struct connectdata *conn,
       break;
     case CURL_SSLVERSION_TLSv1_2:
       protocol_priority[0] = GNUTLS_TLS1_2;
-    break;
-      case CURL_SSLVERSION_SSLv2:
-    default:
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "GnuTLS: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
+    case CURL_SSLVERSION_SSLv2:
       failf(data, "GnuTLS does not support SSLv2");
       return CURLE_SSL_CONNECT_ERROR;
-      break;
+    default:
+      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      return CURLE_SSL_CONNECT_ERROR;
   }
   rc = gnutls_protocol_set_priority(session, protocol_priority);
   if(rc != GNUTLS_E_SUCCESS) {
@@ -601,11 +610,15 @@ gtls_connect_step1(struct connectdata *conn,
       prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                      "+VERS-TLS1.2:" GNUTLS_SRP;
       break;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "GnuTLS: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
     case CURL_SSLVERSION_SSLv2:
-    default:
       failf(data, "GnuTLS does not support SSLv2");
       return CURLE_SSL_CONNECT_ERROR;
-      break;
+    default:
+      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      return CURLE_SSL_CONNECT_ERROR;
   }
   rc = gnutls_priority_set_direct(session, prioritylist, &err);
   if((rc == GNUTLS_E_INVALID_REQUEST) && err) {
@@ -633,12 +646,12 @@ gtls_connect_step1(struct connectdata *conn,
 #endif
 
 #ifdef HAS_ALPN
-  if(data->set.ssl_enable_alpn) {
+  if(conn->bits.tls_enable_alpn) {
     int cur = 0;
     gnutls_datum_t protocols[2];
 
 #ifdef USE_NGHTTP2
-    if(data->set.httpversion == CURL_HTTP_VERSION_2_0) {
+    if(data->set.httpversion >= CURL_HTTP_VERSION_2) {
       protocols[cur].data = (unsigned char *)NGHTTP2_PROTO_VERSION_ID;
       protocols[cur].size = NGHTTP2_PROTO_VERSION_ID_LEN;
       cur++;
@@ -676,11 +689,11 @@ gtls_connect_step1(struct connectdata *conn,
               "error reading X.509 potentially-encrypted key file: %s",
               gnutls_strerror(rc));
         return CURLE_SSL_CONNECT_ERROR;
-#else
-        failf(data, "gnutls lacks support for encrypted key files");
-        return CURLE_SSL_CONNECT_ERROR;
-#endif
       }
+#else
+      failf(data, "gnutls lacks support for encrypted key files");
+      return CURLE_SSL_CONNECT_ERROR;
+#endif
     }
     else {
       rc = gnutls_certificate_set_x509_key_file(
@@ -741,19 +754,25 @@ gtls_connect_step1(struct connectdata *conn,
 
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things */
+  if(conn->ssl_config.sessionid) {
+    void *ssl_sessionid;
+    size_t ssl_idsize;
 
-  if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, &ssl_idsize)) {
-    /* we got a session id, use it! */
-    gnutls_session_set_data(session, ssl_sessionid, ssl_idsize);
+    Curl_ssl_sessionid_lock(conn);
+    if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, &ssl_idsize)) {
+      /* we got a session id, use it! */
+      gnutls_session_set_data(session, ssl_sessionid, ssl_idsize);
 
-    /* Informational message */
-    infof (data, "SSL re-using session ID\n");
+      /* Informational message */
+      infof (data, "SSL re-using session ID\n");
+    }
+    Curl_ssl_sessionid_unlock(conn);
   }
 
   return CURLE_OK;
 }
 
-static CURLcode pkp_pin_peer_pubkey(struct SessionHandle *data,
+static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                     gnutls_x509_crt_t cert,
                                     const char *pinnedpubkey)
 {
@@ -828,11 +847,9 @@ gtls_connect_step3(struct connectdata *conn,
   unsigned int bits;
   time_t certclock;
   const char *ptr;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   gnutls_session_t session = conn->ssl[sockindex].session;
   int rc;
-  bool incache;
-  void *ssl_sessionid;
 #ifdef HAS_ALPN
   gnutls_datum_t proto;
 #endif
@@ -1232,7 +1249,7 @@ gtls_connect_step3(struct connectdata *conn,
   infof(data, "\t compression: %s\n", ptr);
 
 #ifdef HAS_ALPN
-  if(data->set.ssl_enable_alpn) {
+  if(conn->bits.tls_enable_alpn) {
     rc = gnutls_alpn_get_selected_protocol(session, &proto);
     if(rc == 0) {
       infof(data, "ALPN, server accepted to use %.*s\n", proto.size,
@@ -1242,7 +1259,7 @@ gtls_connect_step3(struct connectdata *conn,
       if(proto.size == NGHTTP2_PROTO_VERSION_ID_LEN &&
          !memcmp(NGHTTP2_PROTO_VERSION_ID, proto.data,
                  NGHTTP2_PROTO_VERSION_ID_LEN)) {
-        conn->negnpn = CURL_HTTP_VERSION_2_0;
+        conn->negnpn = CURL_HTTP_VERSION_2;
       }
       else
 #endif
@@ -1260,11 +1277,13 @@ gtls_connect_step3(struct connectdata *conn,
   conn->recv[sockindex] = gtls_recv;
   conn->send[sockindex] = gtls_send;
 
-  {
+  if(conn->ssl_config.sessionid) {
     /* we always unconditionally get the session id here, as even if we
        already got it from the cache and asked to use it in the connection, it
        might've been rejected and then a new one is in use now and we need to
        detect that. */
+    bool incache;
+    void *ssl_sessionid;
     void *connect_sessionid;
     size_t connect_idsize = 0;
 
@@ -1276,6 +1295,7 @@ gtls_connect_step3(struct connectdata *conn,
       /* extract session ID to the allocated buffer */
       gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
 
+      Curl_ssl_sessionid_lock(conn);
       incache = !(Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL));
       if(incache) {
         /* there was one before in the cache, so instead of risking that the
@@ -1285,6 +1305,7 @@ gtls_connect_step3(struct connectdata *conn,
 
       /* store this session id */
       result = Curl_ssl_addsessionid(conn, connect_sessionid, connect_idsize);
+      Curl_ssl_sessionid_unlock(conn);
       if(result) {
         free(connect_sessionid);
         result = CURLE_OUT_OF_MEMORY;
@@ -1373,7 +1394,7 @@ static ssize_t gtls_send(struct connectdata *conn,
 {
   ssize_t rc = gnutls_record_send(conn->ssl[sockindex].session, mem, len);
 
-  if(rc < 0 ) {
+  if(rc < 0) {
     *curlcode = (rc == GNUTLS_E_AGAIN)
       ? CURLE_AGAIN
       : CURLE_SEND_ERROR;
@@ -1417,7 +1438,7 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
 {
   ssize_t result;
   int retval = 0;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   int done = 0;
   char buf[120];
 
@@ -1431,8 +1452,8 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
 
   if(conn->ssl[sockindex].session) {
     while(!done) {
-      int what = Curl_socket_ready(conn->sock[sockindex],
-                                   CURL_SOCKET_BAD, SSL_SHUTDOWN_TIMEOUT);
+      int what = SOCKET_READABLE(conn->sock[sockindex],
+                                 SSL_SHUTDOWN_TIMEOUT);
       if(what > 0) {
         /* Something to read, let's do it and hope that it is the close
            notify alert from the server */
@@ -1530,7 +1551,7 @@ size_t Curl_gtls_version(char *buffer, size_t size)
 }
 
 #ifndef USE_GNUTLS_NETTLE
-static int Curl_gtls_seed(struct SessionHandle *data)
+static int Curl_gtls_seed(struct Curl_easy *data)
 {
   /* we have the "SSL is seeded" boolean static to prevent multiple
      time-consuming seedings in vain */
@@ -1541,6 +1562,12 @@ static int Curl_gtls_seed(struct SessionHandle *data)
 
   if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
      data->set.str[STRING_SSL_EGDSOCKET]) {
+
+    /* TODO: to a good job seeding the RNG
+       This may involve the gcry_control function and these options:
+       GCRYCTL_SET_RANDOM_SEED_FILE
+       GCRYCTL_SET_RNDEGD_SOCKET
+    */
     ssl_seeded = TRUE;
   }
   return 0;
@@ -1548,7 +1575,7 @@ static int Curl_gtls_seed(struct SessionHandle *data)
 #endif
 
 /* data might be NULL! */
-int Curl_gtls_random(struct SessionHandle *data,
+int Curl_gtls_random(struct Curl_easy *data,
                      unsigned char *entropy,
                      size_t length)
 {

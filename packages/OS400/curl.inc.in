@@ -5,11 +5,11 @@
       *                            | (__| |_| |  _ <| |___
       *                             \___|\___/|_| \_\_____|
       *
-      * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+      * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
-      * are also available at http://curl.haxx.se/docs/copyright.html.
+      * are also available at https://curl.haxx.se/docs/copyright.html.
       *
       * You may opt to use, copy, modify, merge, publish, distribute and/or sell
       * copies of the Software, and permit persons to whom the Software is
@@ -125,6 +125,8 @@
      d                 c                   X'00040000'
      d CURL_VERSION_UNIX_SOCKETS...
      d                 c                   X'00080000'
+     d CURL_VERSION_PSL...
+     d                 c                   X'00100000'
       *
      d CURL_HTTPPOST_FILENAME...
      d                 c                   X'00000001'
@@ -230,6 +232,10 @@
      d                 c                   3
      d CURL_HTTP_VERSION_2...
      d                 c                   3
+     d CURL_HTTP_VERSION_2TLS...
+     d                 c                   4
+     d CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE...
+     d                 c                   5
       *
      d CURL_NETRC_IGNORED...
      d                 c                   0
@@ -252,6 +258,8 @@
      d                 c                   5
      d CURL_SSLVERSION_TLSv1_2...
      d                 c                   6
+     d CURL_SSLVERSION_TLSv1_3...
+     d                 c                   7
       *
      d CURL_TLSAUTH_NONE...
      d                 c                   0
@@ -363,6 +371,8 @@
      d                 c                   6
      d  CURLE_COULDNT_CONNECT...
      d                 c                   7
+     d  CURLE_WEIRD_SERVER_REPLY...
+     d                 c                   8
      d  CURLE_FTP_WEIRD_SERVER_REPLY...
      d                 c                   8
      d  CURLE_REMOTE_ACCESS_DENIED...
@@ -530,6 +540,8 @@
      d                 c                   90
      d  CURLE_SSL_INVALIDCERTSTATUS...
      d                 c                   91
+     d  CURLE_HTTP2_STREAM...
+     d                 c                   92
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLE_URL_MALFORMAT_USER...
@@ -1238,6 +1250,14 @@
      d                 c                   10240
      d  CURLOPT_STREAM_DEPENDS_E...
      d                 c                   10241
+     d  CURLOPT_TFTP_NO_OPTIONS...
+     d                 c                   00242
+     d  CURLOPT_CONNECT_TO...
+     d                 c                   10243
+     d  CURLOPT_TCP_FASTOPEN...
+     d                 c                   00244
+     d  CURLOPT_KEEP_SENDING_ON_ERROR...
+     d                 c                   00245
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1420,6 +1440,10 @@
      d                 c                   X'0040002B'
      d  CURLINFO_ACTIVESOCKET...                                                CURLINFO_SOCKET + 44
      d                 c                   X'0050002C'
+     d  CURLINFO_TLS_SSL_PTR...                                                 CURLINFO_SLIST + 45
+     d                 c                   X'0040002D'
+     d  CURLINFO_HTTP_VERSION...                                                CURLINFO_LONG + 46
+     d                 c                   X'0020002E'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
@@ -1450,6 +1474,13 @@
      d                 c                   10
      d  CURLSSLBACKEND_MBEDTLS...
      d                 c                   11
+      * Aliases for clones.
+     d  CURLSSLBACKEND_LIBRESSL...
+     d                 c                   1
+     d  CURLSSLBACKEND_BORINGSSL...
+     d                 c                   1
+     d  CURLSSLBACKEND_WOLFSSL...
+     d                 c                   6
       *
      d curl_closepolicy...
      d                 s             10i 0 based(######ptr######)               Enum

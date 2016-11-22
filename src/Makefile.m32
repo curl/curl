@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -26,7 +26,7 @@
 ## and optionally OpenSSL (1.0.2a), libssh2 (1.5), zlib (1.2.8), librtmp (2.4)
 ##
 ## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
-## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-spi-winidn
+## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
 ## set ZLIB_PATH=c:/zlib-1.2.8
@@ -89,14 +89,14 @@ LIBCARES_PATH = $(PROOT)/ares
 endif
 
 CC	= $(CROSSPREFIX)gcc
-CFLAGS	= -g -O2 -Wall
+CFLAGS	= $(CURL_CFLAG_EXTRAS) -g -O2 -Wall
 CFLAGS	+= -fno-strict-aliasing
 # comment LDFLAGS below to keep debug info
-LDFLAGS	= -s
+LDFLAGS	= $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE) -s
 AR	= $(CROSSPREFIX)ar
 RC	= $(CROSSPREFIX)windres
 RCFLAGS	= --include-dir=$(PROOT)/include -O COFF
-STRIP   = $(CROSSPREFIX)strip -g
+STRIP	= $(CROSSPREFIX)strip -g
 
 # We may need these someday
 # PERL = perl
@@ -105,18 +105,18 @@ STRIP   = $(CROSSPREFIX)strip -g
 # Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
 ifeq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),x86_64)
-ARCH    = w64
+ARCH	= w64
 else
-ARCH    = w32
+ARCH	= w32
 endif
 endif
 
 ifeq ($(ARCH),w64)
-CFLAGS	+= -m64 -D_AMD64_
+CFLAGS  += -m64 -D_AMD64_
 LDFLAGS += -m64
 RCFLAGS += -F pe-x86-64
 else
-CFLAGS	+= -m32
+CFLAGS  += -m32
 LDFLAGS += -m32
 RCFLAGS += -F pe-i386
 endif
@@ -168,7 +168,9 @@ ZLIB = 1
 endif
 ifeq ($(findstring -ssh2,$(CFG)),-ssh2)
 SSH2 = 1
+ifneq ($(findstring -winssl,$(CFG)),-winssl)
 SSL = 1
+endif
 ZLIB = 1
 endif
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
@@ -236,6 +238,11 @@ endif
 ifdef SSH2
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
+  ifdef WINSSL
+    ifndef DYN
+      curl_LDADD += -lbcrypt -lcrypt32
+    endif
+  endif
 endif
 ifdef SSL
   ifndef OPENSSL_INCLUDE
@@ -267,6 +274,10 @@ ifdef SSL
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_OPENSSL
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
+else
+ifdef WINSSL
+  curl_LDADD += -lcrypt32
+endif
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"

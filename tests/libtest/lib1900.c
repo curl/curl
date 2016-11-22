@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) 2013 - 2016, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -113,7 +113,7 @@ static void setup_handle(char *base_url, CURLM *m, int handlenum)
 {
   char urlbuf[256];
 
-  sprintf(urlbuf, "%s%s", base_url, urlstring[handlenum]);
+  snprintf(urlbuf, sizeof(urlbuf), "%s%s", base_url, urlstring[handlenum]);
   curl_easy_setopt(handles[handlenum], CURLOPT_URL, urlbuf);
   curl_easy_setopt(handles[handlenum], CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(handles[handlenum], CURLOPT_FAILONERROR, 1L);
@@ -192,12 +192,12 @@ int test(char *URL)
     abort_on_test_timeout();
 
     /* See how the transfers went */
-    while ((msg = curl_multi_info_read(m, &msgs_left))) {
-      if (msg->msg == CURLMSG_DONE) {
+    while((msg = curl_multi_info_read(m, &msgs_left))) {
+      if(msg->msg == CURLMSG_DONE) {
         int i, found = 0;
 
         /* Find out which handle this message is about */
-        for (i = 0; i < num_handles; i++) {
+        for(i = 0; i < num_handles; i++) {
           found = (msg->easy_handle == handles[i]);
           if(found)
             break;

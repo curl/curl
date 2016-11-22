@@ -1,0 +1,37 @@
+<testcase>
+<info>
+<keywords>
+proxy
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+http
+</features>
+ <name>
+try using proxy with unsupported scheme
+ </name>
+ <command>
+-x foo://%HOSTIP:%HTTPPORT/219 http://%HOSTIP:%HTTPPORT/219
+</command>
+</client>
+
+#
+# Verify after the test has been "shot"
+<verify>
+<errorcode>
+7
+</errorcode>
+</verify>
+</testcase>

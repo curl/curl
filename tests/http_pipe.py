@@ -6,7 +6,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#    https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,11 +34,11 @@ This is a test server to test the libcurl pipelining functionality.
 It is a modified version if Google's HTTP pipelining test server. More
 information can be found here:
 
-http://dev.chromium.org/developers/design-documents/network-stack/http-pipelining
+https://dev.chromium.org/developers/design-documents/network-stack/http-pipelining
 
 Source code can be found here:
 
-http://code.google.com/p/http-pipelining-test/
+https://code.google.com/archive/p/http-pipelining-test/
 '''
 MAX_REQUEST_SIZE = 1024  # bytes
 MIN_POLL_TIME = 0.01  # seconds. Minimum time to poll, in order to prevent

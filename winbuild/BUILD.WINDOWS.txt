@@ -12,12 +12,12 @@ Building with Visual C++, prerequisites
 
    The latest Platform SDK can be downloaded freely from:
 
-    http://msdn.microsoft.com/en-us/windows/bb980924
+    https://msdn.microsoft.com/en-us/windows/bb980924
 
    If you are building with VC6 then you will also need the February 2003
    Edition of the Platform SDK which can be downloaded from:
 
-    http://www.microsoft.com/en-us/download/details.aspx?id=12261
+    https://www.microsoft.com/en-us/download/details.aspx?id=12261
 
    If you wish to support zlib, openssl, c-ares, ssh2, you will have to download
    them separately and copy them to the deps directory as shown below:
@@ -64,6 +64,7 @@ where <options> is one or many of:
                                  Libraries can be fetched at http://windows.php.net/downloads/php-sdk/deps/
                                  Uncompress them into the deps folder.
   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
+  WITH_MBEDTLS=<dll or static> - Enable mbedTLS support, DLL or static
   WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
@@ -71,7 +72,7 @@ where <options> is one or many of:
   ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
                                  Requires Windows Vista or later, or installation from:
-                                 http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
+                                 https://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
   DEBUG=<yes or no>            - Debug builds
