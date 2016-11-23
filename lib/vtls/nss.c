@@ -539,7 +539,7 @@ static CURLcode nss_load_crl(const char *crlfilename)
     goto fail;
 
   /* place a trailing zero right after the visible data */
-  body = (char*)filedata.data;
+  body = (char *)filedata.data;
   body[--filedata.len] = '\0';
 
   body = strstr(body, "-----BEGIN");

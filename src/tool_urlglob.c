@@ -44,7 +44,7 @@ static CURLcode glob_fixed(URLGlob *glob, char *fixed, size_t len)
   pat->content.Set.ptr_s = 0;
   pat->globindex = -1;
 
-  pat->content.Set.elements = malloc(sizeof(char*));
+  pat->content.Set.elements = malloc(sizeof(char *));
 
   if(!pat->content.Set.elements)
     return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
@@ -118,14 +118,14 @@ static CURLcode glob_set(URLGlob *glob, char **patternp,
       *buf = '\0';
       if(pat->content.Set.elements) {
         char **new_arr = realloc(pat->content.Set.elements,
-                                 (pat->content.Set.size + 1) * sizeof(char*));
+                                 (pat->content.Set.size + 1) * sizeof(char *));
         if(!new_arr)
           return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
 
         pat->content.Set.elements = new_arr;
       }
       else
-        pat->content.Set.elements = malloc(sizeof(char*));
+        pat->content.Set.elements = malloc(sizeof(char *));
 
       if(!pat->content.Set.elements)
         return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);

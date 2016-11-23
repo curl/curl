@@ -291,7 +291,7 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
      * gethostbyname() is the preferred one.
      */
   else {
-    h = gethostbyname((void*)hostname);
+    h = gethostbyname((void *)hostname);
 #endif /* HAVE_GETADDRINFO_THREADSAFE || HAVE_GETHOSTBYNAME_R */
   }
 

@@ -86,7 +86,7 @@ typedef struct _GlobalInfo
   struct ev_timer timer_event;
   CURLM *multi;
   int still_running;
-  FILE* input;
+  FILE *input;
 } GlobalInfo;
 
 
@@ -243,7 +243,8 @@ static void remsock(SockInfo *f, GlobalInfo *g)
 
 
 /* Assign information to a SockInfo structure */
-static void setsock(SockInfo*f, curl_socket_t s, CURL*e, int act, GlobalInfo*g)
+static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
+                    GlobalInfo *g)
 {
   printf("%s  \n", __PRETTY_FUNCTION__);
 

@@ -278,12 +278,12 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
     /* The first four bytes will be an unsigned int indicating number
        of bytes of data in the rest of the the buffer. */
-    extension_len = (unsigned int*)(&alpn_buffer[cur]);
+    extension_len = (unsigned int *)(&alpn_buffer[cur]);
     cur += sizeof(unsigned int);
 
     /* The next four bytes are an indicator that this buffer will contain
        ALPN data, as opposed to NPN, for example. */
-    *(unsigned int*)&alpn_buffer[cur] =
+    *(unsigned int *)&alpn_buffer[cur] =
       SecApplicationProtocolNegotiationExt_ALPN;
     cur += sizeof(unsigned int);
 

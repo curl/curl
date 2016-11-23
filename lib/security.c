@@ -222,7 +222,7 @@ buffer_read(struct krb5buffer *buf, void *data, size_t len)
 {
   if(buf->size - buf->index < len)
     len = buf->size - buf->index;
-  memcpy(data, (char*)buf->data + buf->index, len);
+  memcpy(data, (char *)buf->data + buf->index, len);
   buf->index += len;
   return len;
 }
@@ -291,7 +291,7 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
       prot_level = conn->command_prot;
   }
   bytes = conn->mech->encode(conn->app_data, from, length, prot_level,
-                             (void**)&buffer);
+                             (void **)&buffer);
   if(!buffer || bytes <= 0)
     return; /* error */
 

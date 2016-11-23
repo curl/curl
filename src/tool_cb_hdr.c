@@ -47,7 +47,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
   struct OutStruct *heads = hdrcbdata->heads;
   const char *str = ptr;
   const size_t cb = size * nmemb;
-  const char *end = (char*)ptr + cb;
+  const char *end = (char *)ptr + cb;
   char *url = NULL;
 
   /*

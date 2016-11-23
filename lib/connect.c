@@ -610,17 +610,17 @@ static bool getaddressinfo(struct sockaddr *sa, char *addr,
                            long *port)
 {
   unsigned short us_port;
-  struct sockaddr_in* si = NULL;
+  struct sockaddr_in *si = NULL;
 #ifdef ENABLE_IPV6
-  struct sockaddr_in6* si6 = NULL;
+  struct sockaddr_in6 *si6 = NULL;
 #endif
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
-  struct sockaddr_un* su = NULL;
+  struct sockaddr_un *su = NULL;
 #endif
 
   switch (sa->sa_family) {
     case AF_INET:
-      si = (struct sockaddr_in*)(void*) sa;
+      si = (struct sockaddr_in *)(void *) sa;
       if(Curl_inet_ntop(sa->sa_family, &si->sin_addr,
                         addr, MAX_IPADR_LEN)) {
         us_port = ntohs(si->sin_port);
@@ -630,7 +630,7 @@ static bool getaddressinfo(struct sockaddr *sa, char *addr,
       break;
 #ifdef ENABLE_IPV6
     case AF_INET6:
-      si6 = (struct sockaddr_in6*)(void*) sa;
+      si6 = (struct sockaddr_in6 *)(void *) sa;
       if(Curl_inet_ntop(sa->sa_family, &si6->sin6_addr,
                         addr, MAX_IPADR_LEN)) {
         us_port = ntohs(si6->sin6_port);

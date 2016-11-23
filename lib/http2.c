@@ -1653,7 +1653,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   size_t nheader;
   size_t i;
   size_t authority_idx;
-  char *hdbuf = (char*)mem;
+  char *hdbuf = (char *)mem;
   char *end, *line_end;
   nghttp2_data_provider data_prd;
   int32_t stream_id;

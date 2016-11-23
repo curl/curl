@@ -104,7 +104,7 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn);
 static CURLcode pop3_perform_auth(struct connectdata *conn, const char *mech,
                                   const char *initresp);
 static CURLcode pop3_continue_auth(struct connectdata *conn, const char *resp);
-static void pop3_get_message(char *buffer, char** outptr);
+static void pop3_get_message(char *buffer, char **outptr);
 
 /*
  * POP3 protocol handler.
@@ -1572,7 +1572,7 @@ CURLcode Curl_pop3_write(struct connectdata *conn, char *str, size_t nread)
       if(prev) {
         /* If the partial match was the CRLF and dot then only write the CRLF
            as the server would have inserted the dot */
-        result = Curl_client_write(conn, CLIENTWRITE_BODY, (char*)POP3_EOB,
+        result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)POP3_EOB,
                                    strip_dot ? prev - 1 : prev);
 
         if(result)

@@ -182,7 +182,7 @@ _CURL_WARNING(_curl_easy_setopt_err_error_buffer,
               "curl_easy_setopt expects a "
               "char buffer of CURL_ERROR_SIZE as argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_FILE,
-  "curl_easy_setopt expects a FILE* argument for this option")
+  "curl_easy_setopt expects a 'FILE *' argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_postfields,
   "curl_easy_setopt expects a 'void *' or 'char *' argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_curl_httpost,
@@ -364,7 +364,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
 
 /* XXX: should evaluate to true iff expr is a pointer */
 #define _curl_is_any_ptr(expr)                                                \
-  (sizeof(expr) == sizeof(void*))
+  (sizeof(expr) == sizeof(void *))
 
 /* evaluates to true if expr is NULL */
 /* XXX: must not evaluate expr, so this check is not accurate */
@@ -456,12 +456,12 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    _curl_callback_compatible((expr), _curl_read_callback4) ||                 \
    _curl_callback_compatible((expr), _curl_read_callback5) ||                 \
    _curl_callback_compatible((expr), _curl_read_callback6))
-typedef size_t (_curl_read_callback1)(char *, size_t, size_t, void*);
-typedef size_t (_curl_read_callback2)(char *, size_t, size_t, const void*);
-typedef size_t (_curl_read_callback3)(char *, size_t, size_t, FILE*);
-typedef size_t (_curl_read_callback4)(void *, size_t, size_t, void*);
-typedef size_t (_curl_read_callback5)(void *, size_t, size_t, const void*);
-typedef size_t (_curl_read_callback6)(void *, size_t, size_t, FILE*);
+typedef size_t (_curl_read_callback1)(char *, size_t, size_t, void *);
+typedef size_t (_curl_read_callback2)(char *, size_t, size_t, const void *);
+typedef size_t (_curl_read_callback3)(char *, size_t, size_t, FILE *);
+typedef size_t (_curl_read_callback4)(void *, size_t, size_t, void *);
+typedef size_t (_curl_read_callback5)(void *, size_t, size_t, const void *);
+typedef size_t (_curl_read_callback6)(void *, size_t, size_t, FILE *);
 
 /* evaluates to true if expr is of type curl_write_callback or "similar" */
 #define _curl_is_write_cb(expr)                                               \
@@ -474,14 +474,14 @@ typedef size_t (_curl_read_callback6)(void *, size_t, size_t, FILE*);
    _curl_callback_compatible((expr), _curl_write_callback4) ||                \
    _curl_callback_compatible((expr), _curl_write_callback5) ||                \
    _curl_callback_compatible((expr), _curl_write_callback6))
-typedef size_t (_curl_write_callback1)(const char *, size_t, size_t, void*);
+typedef size_t (_curl_write_callback1)(const char *, size_t, size_t, void *);
 typedef size_t (_curl_write_callback2)(const char *, size_t, size_t,
-                                       const void*);
-typedef size_t (_curl_write_callback3)(const char *, size_t, size_t, FILE*);
-typedef size_t (_curl_write_callback4)(const void *, size_t, size_t, void*);
+                                       const void *);
+typedef size_t (_curl_write_callback3)(const char *, size_t, size_t, FILE *);
+typedef size_t (_curl_write_callback4)(const void *, size_t, size_t, void *);
 typedef size_t (_curl_write_callback5)(const void *, size_t, size_t,
-                                       const void*);
-typedef size_t (_curl_write_callback6)(const void *, size_t, size_t, FILE*);
+                                       const void *);
+typedef size_t (_curl_write_callback6)(const void *, size_t, size_t, FILE *);
 
 /* evaluates to true if expr is of type curl_ioctl_callback or "similar" */
 #define _curl_is_ioctl_cb(expr)                                         \
@@ -491,10 +491,10 @@ typedef size_t (_curl_write_callback6)(const void *, size_t, size_t, FILE*);
    _curl_callback_compatible((expr), _curl_ioctl_callback2) ||                \
    _curl_callback_compatible((expr), _curl_ioctl_callback3) ||                \
    _curl_callback_compatible((expr), _curl_ioctl_callback4))
-typedef curlioerr (_curl_ioctl_callback1)(CURL *, int, void*);
-typedef curlioerr (_curl_ioctl_callback2)(CURL *, int, const void*);
-typedef curlioerr (_curl_ioctl_callback3)(CURL *, curliocmd, void*);
-typedef curlioerr (_curl_ioctl_callback4)(CURL *, curliocmd, const void*);
+typedef curlioerr (_curl_ioctl_callback1)(CURL *, int, void *);
+typedef curlioerr (_curl_ioctl_callback2)(CURL *, int, const void *);
+typedef curlioerr (_curl_ioctl_callback3)(CURL *, curliocmd, void *);
+typedef curlioerr (_curl_ioctl_callback4)(CURL *, curliocmd, const void *);
 
 /* evaluates to true if expr is of type curl_sockopt_callback or "similar" */
 #define _curl_is_sockopt_cb(expr)                                       \

@@ -32,7 +32,7 @@ static struct curl_hash hash_static;
 
 static void mydtor(void *p)
 {
-  int *ptr = (int*)p;
+  int *ptr = (int *)p;
   free(ptr);
 }
 

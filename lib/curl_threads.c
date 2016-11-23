@@ -59,7 +59,7 @@ static void *curl_thread_create_thunk(void *arg)
   return 0;
 }
 
-curl_thread_t Curl_thread_create(unsigned int (*func) (void*), void *arg)
+curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
 {
   curl_thread_t t = malloc(sizeof(pthread_t));
   struct curl_actual_call *ac = malloc(sizeof(struct curl_actual_call));
@@ -100,7 +100,7 @@ int Curl_thread_join(curl_thread_t *hnd)
 
 #elif defined(USE_THREADS_WIN32)
 
-curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void*),
+curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void *),
                                  void *arg)
 {
 #ifdef _WIN32_WCE

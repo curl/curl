@@ -86,7 +86,7 @@ static const char *urls[] = {
 };
 
 #define MAX 10 /* number of simultaneous transfers */
-#define CNT sizeof(urls)/sizeof(char*) /* total number of transfers to do */
+#define CNT sizeof(urls)/sizeof(char *) /* total number of transfers to do */
 
 static size_t cb(char *d, size_t n, size_t l, void *p)
 {

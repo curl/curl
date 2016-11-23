@@ -1004,7 +1004,7 @@ static void sendsuboption(struct connectdata *conn, int option)
   ssize_t bytes_written;
   int err;
   unsigned short x, y;
-  unsigned char*uc1, *uc2;
+  unsigned char *uc1, *uc2;
 
   struct Curl_easy *data = conn->data;
   struct TELNET *tn = (struct TELNET *)data->req.protop;
@@ -1020,8 +1020,8 @@ static void sendsuboption(struct connectdata *conn, int option)
     /* Window size must be sent according to the 'network order' */
     x=htons(tn->subopt_wsx);
     y=htons(tn->subopt_wsy);
-    uc1 = (unsigned char*)&x;
-    uc2 = (unsigned char*)&y;
+    uc1 = (unsigned char *)&x;
+    uc2 = (unsigned char *)&y;
     CURL_SB_ACCUM(tn, uc1[0]);
     CURL_SB_ACCUM(tn, uc1[1]);
     CURL_SB_ACCUM(tn, uc2[0]);

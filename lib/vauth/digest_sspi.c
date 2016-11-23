@@ -414,7 +414,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
 
     /* Populate our identity domain */
-    if(Curl_override_sspi_http_realm((const char*) digest->input_token,
+    if(Curl_override_sspi_http_realm((const char *) digest->input_token,
                                      &identity))
       return CURLE_OUT_OF_MEMORY;
 

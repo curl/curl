@@ -68,7 +68,7 @@
 #define GNUTLS_POINTER_TO_INT_CAST(p) ((int) (long) (p))
 #endif
 #ifndef GNUTLS_INT_TO_POINTER_CAST
-#define GNUTLS_INT_TO_POINTER_CAST(i) ((void*) (long) (i))
+#define GNUTLS_INT_TO_POINTER_CAST(i) ((void *) (long) (i))
 #endif
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */

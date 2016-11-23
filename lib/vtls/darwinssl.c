@@ -197,7 +197,7 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
 
   do {
     length = write(sock,
-                   (char*)dataPtr + bytesSent,
+                   (char *)dataPtr + bytesSent,
                    dataLen - bytesSent);
   } while((length > 0) &&
            ( (bytesSent += length) < dataLen) );

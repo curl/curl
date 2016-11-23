@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -117,7 +117,7 @@ CURLcode Curl_convert_to_network(struct Curl_easy *data,
     /* call iconv */
     input_ptr = output_ptr = buffer;
     in_bytes = out_bytes = length;
-    rc = iconv(data->outbound_cd, (const char**)&input_ptr, &in_bytes,
+    rc = iconv(data->outbound_cd, (const char **)&input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
     if((rc == ICONV_ERROR) || (in_bytes != 0)) {
       error = ERRNO;

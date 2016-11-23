@@ -60,7 +60,7 @@
    what ultimately goes over the network.
 */
 #define CURL_OUTPUT_DIGEST_CONV(a, b) \
-  result = Curl_convert_to_network(a, (char *)b, strlen((const char*)b)); \
+  result = Curl_convert_to_network(a, (char *)b, strlen((const char *)b)); \
   if(result) { \
     free(b); \
     return result; \

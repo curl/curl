@@ -147,13 +147,13 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
     /* which file to upload */
-    curl_easy_setopt(curl, CURLOPT_READDATA, (void*)&hd);
+    curl_easy_setopt(curl, CURLOPT_READDATA, (void *)&hd);
 
     /* set the ioctl function */
     curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, my_ioctl);
 
     /* pass the file descriptor to the ioctl callback as well */
-    curl_easy_setopt(curl, CURLOPT_IOCTLDATA, (void*)&hd);
+    curl_easy_setopt(curl, CURLOPT_IOCTLDATA, (void *)&hd);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);

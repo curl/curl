@@ -107,7 +107,7 @@ static CURLcode imap_perform_authenticate(struct connectdata *conn,
                                           const char *initresp);
 static CURLcode imap_continue_authenticate(struct connectdata *conn,
                                            const char *resp);
-static void imap_get_message(char *buffer, char** outptr);
+static void imap_get_message(char *buffer, char **outptr);
 
 /*
  * IMAP protocol handler.
@@ -390,7 +390,7 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
  *
  * Gets the authentication message from the response buffer.
  */
-static void imap_get_message(char *buffer, char** outptr)
+static void imap_get_message(char *buffer, char **outptr)
 {
   size_t len = 0;
   char *message = NULL;

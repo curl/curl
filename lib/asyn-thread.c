@@ -382,7 +382,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   struct thread_data *td = calloc(1, sizeof(struct thread_data));
   int err = RESOLVER_ENOMEM;
 
-  conn->async.os_specific = (void*) td;
+  conn->async.os_specific = (void *)td;
   if(!td)
     goto err_exit;
 

@@ -295,7 +295,7 @@ static int ssl_ui_reader(UI *ui, UI_STRING *uis)
   switch(UI_get_string_type(uis)) {
   case UIT_PROMPT:
   case UIT_VERIFY:
-    password = (const char*)UI_get0_user_data(ui);
+    password = (const char *)UI_get0_user_data(ui);
     if(password && (UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD)) {
       UI_set_result(ui, uis, password);
       return 1;
@@ -1567,7 +1567,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
     else
       tls_rt_name = "";
 
-    msg_type = *(char*)buf;
+    msg_type = *(char *)buf;
     msg_name = ssl_msg_type(ssl_ver, msg_type);
 
     txt_len = snprintf(ssl_buf, sizeof(ssl_buf), "%s (%s), %s, %s (%d):\n",

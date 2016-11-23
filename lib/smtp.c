@@ -103,7 +103,7 @@ static CURLcode smtp_parse_custom_request(struct connectdata *conn);
 static CURLcode smtp_perform_auth(struct connectdata *conn, const char *mech,
                                   const char *initresp);
 static CURLcode smtp_continue_auth(struct connectdata *conn, const char *resp);
-static void smtp_get_message(char *buffer, char** outptr);
+static void smtp_get_message(char *buffer, char **outptr);
 
 /*
  * SMTP protocol handler.
