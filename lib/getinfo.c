@@ -86,7 +86,7 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
 }
 
 static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
-                             char **param_charp)
+                             const char **param_charp)
 {
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
@@ -122,6 +122,9 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_RTSP_SESSION_ID:
     *param_charp = data->set.str[STRING_RTSP_SESSION_ID];
+    break;
+  case CURLINFO_SCHEME:
+    *param_charp = data->info.conn_scheme;
     break;
 
   default:
@@ -228,6 +231,9 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
       *param_longp = CURL_HTTP_VERSION_NONE;
       break;
     }
+    break;
+  case CURLINFO_PROTOCOL:
+    *param_longp = data->info.conn_protocol;
     break;
 
   default:
@@ -385,7 +391,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   va_list arg;
   long *param_longp = NULL;
   double *param_doublep = NULL;
-  char **param_charp = NULL;
+  const char **param_charp = NULL;
   struct curl_slist **param_slistp = NULL;
   curl_socket_t *param_socketp = NULL;
   int type;
@@ -399,7 +405,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   type = CURLINFO_TYPEMASK & (int)info;
   switch(type) {
   case CURLINFO_STRING:
-    param_charp = va_arg(arg, char **);
+    param_charp = va_arg(arg, const char **);
     if(param_charp)
       result = getinfo_char(data, info, param_charp);
     break;
