@@ -266,9 +266,9 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
 #if defined(USE_KERBEROS5)
-  const char* service = data->set.str[STRING_SERVICE_NAME] ?
-                        data->set.str[STRING_SERVICE_NAME] :
-                        sasl->params->service;
+  const char *service = data->set.str[STRING_SERVICE_NAME] ?
+    data->set.str[STRING_SERVICE_NAME] :
+    sasl->params->service;
 #endif
 
   sasl->force_ir = force_ir;    /* Latch for future use */

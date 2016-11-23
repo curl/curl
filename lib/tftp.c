@@ -1356,7 +1356,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
 static CURLcode tftp_setup_connection(struct connectdata * conn)
 {
   struct Curl_easy *data = conn->data;
-  char * type;
+  char *type;
   char command;
 
   conn->socktype = SOCK_DGRAM;   /* UDP datagram based */

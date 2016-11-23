@@ -488,7 +488,7 @@ static CURLcode pausewrite(struct Curl_easy *data,
  */
 CURLcode Curl_client_chop_write(struct connectdata *conn,
                                 int type,
-                                char * ptr,
+                                char *ptr,
                                 size_t len)
 {
   struct Curl_easy *data = conn->data;

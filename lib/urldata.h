@@ -468,7 +468,7 @@ struct ntlmdata {
 #else
   unsigned int flags;
   unsigned char nonce[8];
-  void* target_info; /* TargetInfo received in the ntlm type-2 message */
+  void *target_info; /* TargetInfo received in the ntlm type-2 message */
   unsigned int target_info_len;
 #endif
 };
@@ -754,7 +754,7 @@ struct SingleRequest {
  */
 
 struct Curl_handler {
-  const char * scheme;        /* URL scheme name. */
+  const char *scheme;        /* URL scheme name. */
 
   /* Complement to setup_connection_internals(). */
   CURLcode (*setup_connection)(struct connectdata *);
@@ -1054,7 +1054,7 @@ struct connectdata {
                                    send on this pipeline */
   struct curl_llist *recv_pipe; /* List of handles waiting to read
                                    their responses on this pipeline */
-  char* master_buffer; /* The master buffer allocated on-demand;
+  char *master_buffer; /* The master buffer allocated on-demand;
                           used for pipelining. */
   size_t read_pos; /* Current read position in the master buffer */
   size_t buf_len; /* Length of the buffer?? */
@@ -1075,8 +1075,8 @@ struct connectdata {
   /* used for communication with Samba's winbind daemon helper ntlm_auth */
   curl_socket_t ntlm_auth_hlpr_socket;
   pid_t ntlm_auth_hlpr_pid;
-  char* challenge_header;
-  char* response_header;
+  char *challenge_header;
+  char *response_header;
 #endif
 #endif
 
@@ -1572,10 +1572,10 @@ struct UserDefined {
   curl_opensocket_callback fopensocket; /* function for checking/translating
                                            the address and opening the
                                            socket */
-  void* opensocket_client;
+  void *opensocket_client;
   curl_closesocket_callback fclosesocket; /* function for closing the
                                              socket */
-  void* closesocket_client;
+  void *closesocket_client;
 
   void *seek_client;    /* pointer to pass to the seek callback */
   /* the 3 curl_conv_callback functions below are used on non-ASCII hosts */

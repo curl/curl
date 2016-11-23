@@ -46,7 +46,7 @@ static gss_ctx_id_t gss_context = GSS_C_NO_CONTEXT;
 static int check_gss_err(struct Curl_easy *data,
                          OM_uint32 major_status,
                          OM_uint32 minor_status,
-                         const char* function)
+                         const char *function)
 {
   if(GSS_ERROR(major_status)) {
     OM_uint32 maj_stat, min_stat;

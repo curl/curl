@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,8 +42,8 @@ static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
 
 UNITTEST_START
   int rc;
-  struct curl_httppost* post = NULL;
-  struct curl_httppost* last = NULL;
+  struct curl_httppost *post = NULL;
+  struct curl_httppost *last = NULL;
   size_t total_size = 0;
   char buffer[] = "test buffer";
 

@@ -108,8 +108,8 @@ static const curl_OID   OIDtable[] = {
  */
 
 
-const char * Curl_getASN1Element(curl_asn1Element * elem,
-                                 const char * beg, const char * end)
+const char *Curl_getASN1Element(curl_asn1Element *elem,
+                                const char *beg, const char *end)
 {
   unsigned char b;
   unsigned long len;
@@ -173,9 +173,9 @@ const char * Curl_getASN1Element(curl_asn1Element * elem,
   return elem->end;
 }
 
-static const curl_OID * searchOID(const char * oid)
+static const curl_OID * searchOID(const char *oid)
 {
-  const curl_OID * op;
+  const curl_OID *op;
 
   /* Search the null terminated OID or OID identifier in local table.
      Return the table entry pointer or NULL if not found. */
@@ -187,7 +187,7 @@ static const curl_OID * searchOID(const char * oid)
   return (const curl_OID *) NULL;
 }
 
-static const char * bool2str(const char * beg, const char * end)
+static const char *bool2str(const char *beg, const char *end)
 {
   /* Convert an ASN.1 Boolean value into its string representation.
      Return the dynamically allocated string, or NULL if source is not an
@@ -198,10 +198,10 @@ static const char * bool2str(const char * beg, const char * end)
   return strdup(*beg? "TRUE": "FALSE");
 }
 
-static const char * octet2str(const char * beg, const char * end)
+static const char *octet2str(const char *beg, const char *end)
 {
   size_t n = end - beg;
-  char * buf = NULL;
+  char *buf = NULL;
 
   /* Convert an ASN.1 octet string to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
@@ -215,7 +215,7 @@ static const char * octet2str(const char * beg, const char * end)
   return buf;
 }
 
-static const char * bit2str(const char * beg, const char * end)
+static const char *bit2str(const char *beg, const char *end)
 {
   /* Convert an ASN.1 bit string to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
@@ -225,7 +225,7 @@ static const char * bit2str(const char * beg, const char * end)
   return octet2str(beg, end);
 }
 
-static const char * int2str(const char * beg, const char * end)
+static const char *int2str(const char *beg, const char *end)
 {
   long val = 0;
   size_t n = end - beg;
@@ -251,14 +251,14 @@ static const char * int2str(const char * beg, const char * end)
 }
 
 static ssize_t
-utf8asn1str(char * * to, int type, const char * from, const char * end)
+utf8asn1str(char **to, int type, const char *from, const char *end)
 {
   size_t inlength = end - from;
   int size = 1;
   size_t outlength;
   int charsize;
   unsigned int wc;
-  char * buf;
+  char *buf;
 
   /* Perform a lazy conversion from an ASN.1 typed string to UTF8. Allocate the
      destination buffer dynamically. The allocation size will normally be too
@@ -342,9 +342,9 @@ utf8asn1str(char * * to, int type, const char * from, const char * end)
   return outlength;
 }
 
-static const char * string2str(int type, const char * beg, const char * end)
+static const char *string2str(int type, const char *beg, const char *end)
 {
-  char * buf;
+  char *buf;
 
   /* Convert an ASN.1 String into its UTF-8 string representation.
      Return the dynamically allocated string, or NULL if an error occurs. */
@@ -354,7 +354,7 @@ static const char * string2str(int type, const char * beg, const char * end)
   return buf;
 }
 
-static int encodeUint(char * buf, int n, unsigned int x)
+static int encodeUint(char *buf, int n, unsigned int x)
 {
   int i = 0;
   unsigned int y = x / 10;
@@ -374,7 +374,7 @@ static int encodeUint(char * buf, int n, unsigned int x)
   return i;
 }
 
-static int encodeOID(char * buf, int n, const char * beg, const char * end)
+static int encodeOID(char *buf, int n, const char *beg, const char *end)
 {
   int i = 0;
   unsigned int x;
@@ -413,9 +413,9 @@ static int encodeOID(char * buf, int n, const char * beg, const char * end)
   return i;
 }
 
-static const char * OID2str(const char * beg, const char * end, bool symbolic)
+static const char *OID2str(const char *beg, const char *end, bool symbolic)
 {
-  char * buf = (char *) NULL;
+  char *buf = (char *) NULL;
   const curl_OID * op;
   int n;
 
@@ -443,14 +443,14 @@ static const char * OID2str(const char * beg, const char * end, bool symbolic)
   return buf;
 }
 
-static const char * GTime2str(const char * beg, const char * end)
+static const char *GTime2str(const char *beg, const char *end)
 {
-  const char * tzp;
-  const char * fracp;
+  const char *tzp;
+  const char *fracp;
   char sec1, sec2;
   size_t fracl;
   size_t tzl;
-  const char * sep = "";
+  const char *sep = "";
 
   /* Convert an ASN.1 Generalized time to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
@@ -506,11 +506,11 @@ static const char * GTime2str(const char * beg, const char * end)
                        sep, tzl, tzp);
 }
 
-static const char * UTime2str(const char * beg, const char * end)
+static const char *UTime2str(const char *beg, const char *end)
 {
-  const char * tzp;
+  const char *tzp;
   size_t tzl;
-  const char * sec;
+  const char *sec;
 
   /* Convert an ASN.1 UTC time to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
@@ -545,7 +545,7 @@ static const char * UTime2str(const char * beg, const char * end)
                        tzl, tzp);
 }
 
-const char * Curl_ASN1tostr(curl_asn1Element * elem, int type)
+const char *Curl_ASN1tostr(curl_asn1Element *elem, int type)
 {
   /* Convert an ASN.1 element to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
@@ -588,17 +588,17 @@ const char * Curl_ASN1tostr(curl_asn1Element * elem, int type)
   return (const char *) NULL;   /* Unsupported. */
 }
 
-static ssize_t encodeDN(char * buf, size_t n, curl_asn1Element * dn)
+static ssize_t encodeDN(char *buf, size_t n, curl_asn1Element *dn)
 {
   curl_asn1Element rdn;
   curl_asn1Element atv;
   curl_asn1Element oid;
   curl_asn1Element value;
   size_t l = 0;
-  const char * p1;
-  const char * p2;
-  const char * p3;
-  const char * str;
+  const char *p1;
+  const char *p2;
+  const char *p3;
+  const char *str;
 
   /* ASCII encode distinguished name at `dn' into the `n'-byte buffer at `buf'.
      Return the total string length, even if larger than `n'. */
@@ -654,9 +654,9 @@ static ssize_t encodeDN(char * buf, size_t n, curl_asn1Element * dn)
   return l;
 }
 
-const char * Curl_DNtostr(curl_asn1Element * dn)
+const char *Curl_DNtostr(curl_asn1Element *dn)
 {
-  char * buf = (char *) NULL;
+  char *buf = (char *) NULL;
   ssize_t n = encodeDN(buf, 0, dn);
 
   /* Convert an ASN.1 distinguished name into a printable string.
@@ -676,12 +676,12 @@ const char * Curl_DNtostr(curl_asn1Element * dn)
  * X509 parser.
  */
 
-int Curl_parseX509(curl_X509certificate * cert,
-                   const char * beg, const char * end)
+int Curl_parseX509(curl_X509certificate *cert,
+                   const char *beg, const char *end)
 {
   curl_asn1Element elem;
   curl_asn1Element tbsCertificate;
-  const char * ccp;
+  const char *ccp;
   static const char defaultVersion = 0;  /* v1. */
 
   /* ASN.1 parse an X509 certificate into structure subfields.
@@ -760,7 +760,7 @@ int Curl_parseX509(curl_X509certificate * cert,
   return 0;
 }
 
-static size_t copySubstring(char * to, const char * from)
+static size_t copySubstring(char *to, const char *from)
 {
   size_t i;
 
@@ -777,8 +777,8 @@ static size_t copySubstring(char * to, const char * from)
   return i;
 }
 
-static const char * dumpAlgo(curl_asn1Element * param,
-                             const char * beg, const char * end)
+static const char *dumpAlgo(curl_asn1Element *param,
+                            const char *beg, const char *end)
 {
   curl_asn1Element oid;
 
@@ -793,10 +793,10 @@ static const char * dumpAlgo(curl_asn1Element * param,
   return OID2str(oid.beg, oid.end, TRUE);
 }
 
-static void do_pubkey_field(struct Curl_easy * data, int certnum,
-                            const char * label, curl_asn1Element * elem)
+static void do_pubkey_field(struct Curl_easy *data, int certnum,
+                            const char *label, curl_asn1Element *elem)
 {
-  const char * output;
+  const char *output;
 
   /* Generate a certificate information record for the public key. */
 
@@ -810,14 +810,14 @@ static void do_pubkey_field(struct Curl_easy * data, int certnum,
   }
 }
 
-static void do_pubkey(struct Curl_easy * data, int certnum,
-                      const char * algo, curl_asn1Element * param,
-                      curl_asn1Element * pubkey)
+static void do_pubkey(struct Curl_easy *data, int certnum,
+                      const char *algo, curl_asn1Element *param,
+                      curl_asn1Element *pubkey)
 {
   curl_asn1Element elem;
   curl_asn1Element pk;
-  const char * p;
-  const char * q;
+  const char *p;
+  const char *q;
   unsigned long len;
   unsigned int i;
 
@@ -874,18 +874,18 @@ static void do_pubkey(struct Curl_easy * data, int certnum,
 #endif
 }
 
-CURLcode Curl_extract_certinfo(struct connectdata * conn,
+CURLcode Curl_extract_certinfo(struct connectdata *conn,
                                int certnum,
-                               const char * beg,
-                               const char * end)
+                               const char *beg,
+                               const char *end)
 {
   curl_X509certificate cert;
-  struct Curl_easy * data = conn->data;
+  struct Curl_easy *data = conn->data;
   curl_asn1Element param;
-  const char * ccp;
-  char * cp1;
+  const char *ccp;
+  char *cp1;
   size_t cl1;
-  char * cp2;
+  char *cp2;
   CURLcode result;
   unsigned long version;
   size_t i;
@@ -1039,12 +1039,12 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
 
 #if defined(USE_GSKIT)
 
-static const char * checkOID(const char * beg, const char * end,
-                             const char * oid)
+static const char *checkOID(const char *beg, const char *end,
+                            const char *oid)
 {
   curl_asn1Element e;
-  const char * ccp;
-  const char * p;
+  const char *ccp;
+  const char *p;
   bool matched;
 
   /* Check if first ASN.1 element at `beg' is the given OID.
@@ -1063,18 +1063,18 @@ static const char * checkOID(const char * beg, const char * end,
   return matched? ccp: (const char *) NULL;
 }
 
-CURLcode Curl_verifyhost(struct connectdata * conn,
-                         const char * beg, const char * end)
+CURLcode Curl_verifyhost(struct connectdata *conn,
+                         const char *beg, const char *end)
 {
-  struct Curl_easy * data = conn->data;
+  struct Curl_easy *data = conn->data;
   curl_X509certificate cert;
   curl_asn1Element dn;
   curl_asn1Element elem;
   curl_asn1Element ext;
   curl_asn1Element name;
-  const char * p;
-  const char * q;
-  char * dnsname;
+  const char *p;
+  const char *q;
+  char *dnsname;
   int matched = -1;
   size_t addrlen = (size_t) -1;
   ssize_t len;

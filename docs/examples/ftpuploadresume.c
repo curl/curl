@@ -36,8 +36,8 @@
 /* The MinGW headers are missing a few Win32 function definitions,
    you shouldn't need this if you use VC++ */
 #if defined(__MINGW32__) && !defined(__MINGW64__)
-int __cdecl _snscanf(const char * input, size_t length,
-                     const char * format, ...);
+int __cdecl _snscanf(const char *input, size_t length,
+                     const char *format, ...);
 #endif
 
 
@@ -77,7 +77,7 @@ size_t readfunc(void *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 
-int upload(CURL *curlhandle, const char * remotepath, const char * localpath,
+int upload(CURL *curlhandle, const char *remotepath, const char *localpath,
            long timeout, long tries)
 {
   FILE *f;

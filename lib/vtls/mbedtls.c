@@ -455,7 +455,7 @@ mbed_connect_step2(struct connectdata *conn,
   const mbedtls_x509_crt *peercert;
 
 #ifdef HAS_ALPN
-  const char* next_protocol;
+  const char *next_protocol;
 #endif
 
   char errorbuf[128];

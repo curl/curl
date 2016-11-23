@@ -2305,7 +2305,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
      * negotiated
      */
     if(conn->bits.tls_enable_alpn) {
-      const unsigned char* neg_protocol;
+      const unsigned char *neg_protocol;
       unsigned int len;
       SSL_get0_alpn_selected(connssl->handle, &neg_protocol, &len);
       if(len != 0) {

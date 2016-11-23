@@ -81,7 +81,7 @@ AddHttpPost(char *name, size_t namelength,
             char *buffer, size_t bufferlength,
             char *contenttype,
             long flags,
-            struct curl_slist* contentHeader,
+            struct curl_slist *contentHeader,
             char *showfilename, char *userp,
             struct curl_httppost *parent_post,
             struct curl_httppost **httppost,
@@ -548,9 +548,9 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       {
         /* this "cast increases required alignment of target type" but
            we consider it OK anyway */
-        struct curl_slist* list = array_state?
-          (struct curl_slist*)(void*)array_value:
-          va_arg(params, struct curl_slist*);
+        struct curl_slist *list = array_state?
+          (struct curl_slist *)(void *)array_value:
+          va_arg(params, struct curl_slist *);
 
         if(current_form->contentheader)
           return_value = CURL_FORMADD_OPTION_TWICE;
@@ -762,8 +762,8 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
  * and CD/DVD images should be either a STREAM_LF format or a fixed format.
  *
  */
-curl_off_t VmsRealFileSize(const char * name,
-                           const struct_stat * stat_buf)
+curl_off_t VmsRealFileSize(const char *name,
+                           const struct_stat *stat_buf)
 {
   char buffer[8192];
   curl_off_t count;
@@ -792,8 +792,8 @@ curl_off_t VmsRealFileSize(const char * name,
  *  if not to call a routine to get the correct size.
  *
  */
-static curl_off_t VmsSpecialSize(const char * name,
-                                 const struct_stat * stat_buf)
+static curl_off_t VmsSpecialSize(const char *name,
+                                 const struct_stat *stat_buf)
 {
   switch(stat_buf->st_fab_rfm) {
   case FAB$C_VAR:
@@ -1167,7 +1167,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
   curl_off_t size = 0; /* support potentially ENORMOUS formposts */
   char *boundary;
   char *fileboundary = NULL;
-  struct curl_slist* curList;
+  struct curl_slist *curList;
 
   *finalform = NULL; /* default form is empty */
 

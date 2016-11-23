@@ -606,8 +606,8 @@ void Curl_persistconninfo(struct connectdata *conn)
 }
 
 /* retrieves ip address and port from a sockaddr structure */
-static bool getaddressinfo(struct sockaddr* sa, char* addr,
-                           long* port)
+static bool getaddressinfo(struct sockaddr *sa, char *addr,
+                           long *port)
 {
   unsigned short us_port;
   struct sockaddr_in* si = NULL;
@@ -843,7 +843,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   if(result) {
     /* no more addresses to try */
 
-    const char* hostname;
+    const char *hostname;
 
     /* if the first address family runs out of addresses to try before
        the happy eyeball timeout, go ahead and try the next family now */

@@ -145,10 +145,10 @@ static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 /**
  * Check for curl completion.
  */
-static int checkForCompletion(CURLM* curl, int* success)
+static int checkForCompletion(CURLM *curl, int *success)
 {
   int numMessages;
-  CURLMsg* message;
+  CURLMsg *message;
   int result = 0;
   *success = 0;
   while((message = curl_multi_info_read(curl, &numMessages)) != NULL) {

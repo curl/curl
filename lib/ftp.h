@@ -143,7 +143,7 @@ struct ftp_conn {
   ftpstate state_saved; /* transfer type saved to be reloaded after
                            data connection is established */
   curl_off_t retr_size_saved; /* Size of retrieved file saved */
-  char * server_os;     /* The target server operating system. */
+  char *server_os;     /* The target server operating system. */
   curl_off_t known_filesize; /* file size is different from -1, if wildcard
                                 LIST parsing was done and wc_statemach set
                                 it */

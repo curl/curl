@@ -98,12 +98,12 @@ int Curl_ssl_check_cxn(struct connectdata *conn);
 /* Certificate information list handling. */
 
 void Curl_ssl_free_certinfo(struct Curl_easy *data);
-CURLcode Curl_ssl_init_certinfo(struct Curl_easy * data, int num);
-CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy * data, int certnum,
-                                    const char * label, const char * value,
+CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num);
+CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data, int certnum,
+                                    const char *label, const char *value,
                                     size_t valuelen);
-CURLcode Curl_ssl_push_certinfo(struct Curl_easy * data, int certnum,
-                                const char * label, const char * value);
+CURLcode Curl_ssl_push_certinfo(struct Curl_easy *data, int certnum,
+                                const char *label, const char *value);
 
 /* Functions to be used by SSL library adaptation functions */
 

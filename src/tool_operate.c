@@ -143,8 +143,8 @@ static bool is_fatal_error(CURLcode code)
  * and CD/DVD images should be either a STREAM_LF format or a fixed format.
  *
  */
-static curl_off_t vms_realfilesize(const char * name,
-                                   const struct_stat * stat_buf)
+static curl_off_t vms_realfilesize(const char *name,
+                                   const struct_stat *stat_buf)
 {
   char buffer[8192];
   curl_off_t count;
@@ -174,8 +174,8 @@ static curl_off_t vms_realfilesize(const char * name,
  *  if not to call a routine to get the correct size.
  *
  */
-static curl_off_t VmsSpecialSize(const char * name,
-                                 const struct_stat * stat_buf)
+static curl_off_t VmsSpecialSize(const char *name,
+                                 const struct_stat *stat_buf)
 {
   switch(stat_buf->st_fab_rfm) {
   case FAB$C_VAR:

@@ -421,7 +421,7 @@ static CURLcode glob_parse(URLGlob *glob, char *pattern,
   return res;
 }
 
-CURLcode glob_url(URLGlob** glob, char* url, unsigned long *urlnum,
+CURLcode glob_url(URLGlob **glob, char *url, unsigned long *urlnum,
                   FILE *error)
 {
   /*

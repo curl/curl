@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,7 +41,7 @@
 #   endif
 #endif
 #include <stdlib.h>
-    char * decc$getenv(const char * __name);
+char *decc$getenv(const char *__name);
 #include <pwd.h>
 
 #include <string.h>
@@ -79,23 +79,24 @@
 #   if __INITIAL_POINTER_SIZE == 32
 /* Translate the path, but only if the path is a VMS file specification */
 /* The translation is usually only needed for older versions of VMS */
-static char * vms_translate_path(const char * path) {
-char * unix_path;
-char * test_str;
+static char *vms_translate_path(const char *path)
+{
+  char *unix_path;
+  char *test_str;
 
-    /* See if the result is in VMS format, if not, we are done */
-    /* Assume that this is a PATH, not just some data */
-    test_str = strpbrk(path, ":[<^");
-    if(test_str == NULL) {
-      return (char *)path;
-    }
+  /* See if the result is in VMS format, if not, we are done */
+  /* Assume that this is a PATH, not just some data */
+  test_str = strpbrk(path, ":[<^");
+  if(test_str == NULL) {
+    return (char *)path;
+  }
 
-    unix_path = decc$translate_vms(path);
+  unix_path = decc$translate_vms(path);
 
-    if((int)unix_path <= 0) {
-      /* We can not translate it, so return the original string */
-      return (char *)path;
-    }
+  if((int)unix_path <= 0) {
+    /* We can not translate it, so return the original string */
+    return (char *)path;
+  }
 }
 #   else
     /* VMS translate path is actually not needed on the current 64 bit */
@@ -111,27 +112,27 @@ char * test_str;
 #   endif
 #endif
 
-static char * vms_getenv(const char * envvar) {
+static char *vms_getenv(const char *envvar)
+{
+  char *result;
+  char *vms_path;
 
-char * result;
-char * vms_path;
-
-    /* first use the DECC getenv() function */
-    result = decc$getenv(envvar);
-    if(result == NULL) {
-      return result;
-    }
-
-    vms_path = result;
-    result = vms_translate_path(vms_path);
-
-    /* note that if you backport this to use VAX C RTL, that the VAX C RTL */
-    /* may do a malloc(2048) for each call to getenv(), so you will need   */
-    /* to add a free(vms_path) */
-    /* Do not do a free() for DEC C RTL builds, which should be used for */
-    /* VMS 5.5-2 and later, even if using GCC */
-
+  /* first use the DECC getenv() function */
+  result = decc$getenv(envvar);
+  if(result == NULL) {
     return result;
+  }
+
+  vms_path = result;
+  result = vms_translate_path(vms_path);
+
+  /* note that if you backport this to use VAX C RTL, that the VAX C RTL */
+  /* may do a malloc(2048) for each call to getenv(), so you will need   */
+  /* to add a free(vms_path) */
+  /* Do not do a free() for DEC C RTL builds, which should be used for */
+  /* VMS 5.5-2 and later, even if using GCC */
+
+  return result;
 }
 
 
@@ -146,10 +147,10 @@ struct passwd * my_passwd;
 #   if __INITIAL_POINTER_SIZE
 __char_ptr32 unix_path;
 #   else
-char * unix_path;
+char *unix_path;
 #   endif
 #else
-char * unix_path;
+char *unix_path;
 #endif
 
     my_passwd = decc_getpwuid(uid);

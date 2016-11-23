@@ -34,12 +34,12 @@ size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
   return (nmemb*size);
 }
 
-static CURLcode sslctx_function(CURL * curl, void * sslctx, void * parm)
+static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 {
-  X509_STORE * store;
-  X509 * cert=NULL;
-  BIO * bio;
-  char * mypem = /* www.cacert.org */
+  X509_STORE *store;
+  X509 *cert=NULL;
+  BIO *bio;
+  char *mypem = /* www.cacert.org */
     "-----BEGIN CERTIFICATE-----\n"\
     "MIIHPTCCBSWgAwIBAgIBADANBgkqhkiG9w0BAQQFADB5MRAwDgYDVQQKEwdSb290\n"\
     "IENBMR4wHAYDVQQLExVodHRwOi8vd3d3LmNhY2VydC5vcmcxIjAgBgNVBAMTGUNB\n"\
@@ -107,7 +107,7 @@ static CURLcode sslctx_function(CURL * curl, void * sslctx, void * parm)
 
 int main(void)
 {
-  CURL * ch;
+  CURL *ch;
   CURLcode rv;
 
   rv=curl_global_init(CURL_GLOBAL_ALL);

@@ -271,7 +271,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
 #else
     int ldap_option;
-    char* ldap_ca = conn->ssl_config.CAfile;
+    char *ldap_ca = conn->ssl_config.CAfile;
 #if defined(CURL_HAS_NOVELL_LDAPSDK)
     rc = ldapssl_client_init(NULL, NULL);
     if(rc != LDAP_SUCCESS) {

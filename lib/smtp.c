@@ -278,10 +278,10 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
  *
  * Gets the authentication message from the response buffer.
  */
-static void smtp_get_message(char *buffer, char** outptr)
+static void smtp_get_message(char *buffer, char **outptr)
 {
   size_t len = 0;
-  char* message = NULL;
+  char *message = NULL;
 
   /* Find the start of the message */
   for(message = buffer + 4; *message == ' ' || *message == '\t'; message++)

@@ -410,7 +410,7 @@ gtls_connect_step1(struct connectdata *conn,
    requested in the priority string, so treat it specially
  */
 #define GNUTLS_SRP "+SRP"
-  const char* prioritylist;
+  const char *prioritylist;
   const char *err = NULL;
 #endif
 

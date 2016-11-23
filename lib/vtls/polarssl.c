@@ -361,7 +361,7 @@ polarssl_connect_step1(struct connectdata *conn,
 
 #ifdef HAS_ALPN
   if(conn->bits.tls_enable_alpn) {
-    static const char* protocols[3];
+    static const char *protocols[3];
     int cur = 0;
 
 #ifdef USE_NGHTTP2

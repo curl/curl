@@ -146,12 +146,12 @@ static bool tailmatch(const char *cooke_domain, const char *hostname)
  * matching cookie path and url path
  * RFC6265 5.1.4 Paths and Path-Match
  */
-static bool pathmatch(const char* cookie_path, const char* request_uri)
+static bool pathmatch(const char *cookie_path, const char *request_uri)
 {
   size_t cookie_path_len;
   size_t uri_path_len;
-  char* uri_path = NULL;
-  char* pos;
+  char *uri_path = NULL;
+  char *pos;
   bool ret = FALSE;
 
   /* cookie_path must not have last '/' separator. ex: /sample */

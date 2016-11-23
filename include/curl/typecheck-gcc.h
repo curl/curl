@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -151,7 +151,7 @@ _CURL_WARNING(_curl_easy_setopt_err_curl_off_t,
   "curl_easy_setopt expects a curl_off_t argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_string,
               "curl_easy_setopt expects a "
-              "string (char* or char[]) argument for this option"
+              "string ('char *' or char[]) argument for this option"
   )
 _CURL_WARNING(_curl_easy_setopt_err_write_callback,
   "curl_easy_setopt expects a curl_write_callback argument for this option")
@@ -184,22 +184,23 @@ _CURL_WARNING(_curl_easy_setopt_err_error_buffer,
 _CURL_WARNING(_curl_easy_setopt_err_FILE,
   "curl_easy_setopt expects a FILE* argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_postfields,
-  "curl_easy_setopt expects a void* or char* argument for this option")
+  "curl_easy_setopt expects a 'void *' or 'char *' argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_curl_httpost,
-  "curl_easy_setopt expects a struct curl_httppost* argument for this option")
+              "curl_easy_setopt expects a 'struct curl_httppost *' "
+              "argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_curl_slist,
-  "curl_easy_setopt expects a struct curl_slist* argument for this option")
+  "curl_easy_setopt expects a 'struct curl_slist *' argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_CURLSH,
   "curl_easy_setopt expects a CURLSH* argument for this option")
 
 _CURL_WARNING(_curl_easy_getinfo_err_string,
-  "curl_easy_getinfo expects a pointer to char * for this info")
+  "curl_easy_getinfo expects a pointer to 'char *' for this info")
 _CURL_WARNING(_curl_easy_getinfo_err_long,
   "curl_easy_getinfo expects a pointer to long for this info")
 _CURL_WARNING(_curl_easy_getinfo_err_double,
   "curl_easy_getinfo expects a pointer to double for this info")
 _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
-  "curl_easy_getinfo expects a pointer to struct curl_slist * for this info")
+  "curl_easy_getinfo expects a pointer to 'struct curl_slist *' for this info")
 
 /* groups of curl_easy_setops options that take the same type of argument */
 

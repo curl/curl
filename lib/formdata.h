@@ -65,7 +65,7 @@ typedef struct FormInfo {
                          file name will be used */
   bool showfilename_alloc;
   char *userp;        /* pointer for the read callback */
-  struct curl_slist* contentheader;
+  struct curl_slist *contentheader;
   struct FormInfo *more;
 } FormInfo;
 

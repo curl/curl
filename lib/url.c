@@ -1031,7 +1031,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
           (data->set.postfieldsize > (curl_off_t)((size_t)-1))))
         result = CURLE_OUT_OF_MEMORY;
       else {
-        char * p;
+        char *p;
 
         (void) setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
 
@@ -4705,7 +4705,7 @@ void Curl_free_request_state(struct Curl_easy *data)
 * Checks if the host is in the noproxy list. returns true if it matches
 * and therefore the proxy should NOT be used.
 ****************************************************************/
-static bool check_noproxy(const char* name, const char* no_proxy)
+static bool check_noproxy(const char *name, const char *no_proxy)
 {
   /* no_proxy=domain1.dom,host.domain2.dom
    *   (a comma-separated list of hosts which should
@@ -4714,7 +4714,7 @@ static bool check_noproxy(const char* name, const char* no_proxy)
    */
   size_t tok_start;
   size_t tok_end;
-  const char* separator = ", ";
+  const char *separator = ", ";
   size_t no_proxy_len;
   size_t namelen;
   char *endptr;

@@ -273,7 +273,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   if(connssl->use_alpn) {
     int cur = 0;
     int list_start_index = 0;
-    unsigned int* extension_len = NULL;
+    unsigned int *extension_len = NULL;
     unsigned short* list_len = NULL;
 
     /* The first four bytes will be an unsigned int indicating number

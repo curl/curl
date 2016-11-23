@@ -200,14 +200,14 @@ static const cipher_s cipherlist[] = {
 #endif
 };
 
-static const char* pem_library = "libnsspem.so";
-static SECMODModule* mod = NULL;
+static const char *pem_library = "libnsspem.so";
+static SECMODModule *mod = NULL;
 
 /* NSPR I/O layer we use to detect blocking direction during SSL handshake */
 static PRDescIdentity nspr_io_identity = PR_INVALID_IO_LAYER;
 static PRIOMethods nspr_io_methods;
 
-static const char* nss_error_to_name(PRErrorCode code)
+static const char *nss_error_to_name(PRErrorCode code)
 {
   const char *name = PR_ErrorToName(code);
   if(name)
@@ -337,7 +337,7 @@ static int is_file(const char *filename)
  * should be later deallocated using free().  If the OOM failure occurs, we
  * return NULL, too.
  */
-static char* dup_nickname(struct Curl_easy *data, const char *str)
+static char *dup_nickname(struct Curl_easy *data, const char *str)
 {
   const char *n;
 
@@ -513,7 +513,7 @@ static CURLcode nss_cache_crl(SECItem *crl_der)
   return CURLE_OK;
 }
 
-static CURLcode nss_load_crl(const char* crlfilename)
+static CURLcode nss_load_crl(const char *crlfilename)
 {
   PRFileDesc *infile;
   PRFileInfo  info;
@@ -663,7 +663,7 @@ static CURLcode cert_stuff(struct connectdata *conn, int sockindex,
   return CURLE_OK;
 }
 
-static char * nss_get_password(PK11SlotInfo * slot, PRBool retry, void *arg)
+static char *nss_get_password(PK11SlotInfo *slot, PRBool retry, void *arg)
 {
   (void)slot; /* unused */
 

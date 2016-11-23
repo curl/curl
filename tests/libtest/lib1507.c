@@ -68,7 +68,7 @@ int test(char *URL)
    CURLM *mcurl = NULL;
    int still_running = 1;
    struct timeval mp_start;
-   struct curl_slist* rcpt_list = NULL;
+   struct curl_slist *rcpt_list = NULL;
 
    curl_global_init(CURL_GLOBAL_DEFAULT);
 

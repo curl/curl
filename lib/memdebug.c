@@ -90,7 +90,7 @@ struct memdebug {
   union {
     curl_off_t o;
     double d;
-    void * p;
+    void *p;
   } mem[1];
   /* I'm hoping this is the thing with the strictest alignment
    * requirements.  That also means we waste some space :-( */

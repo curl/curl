@@ -45,7 +45,7 @@ static void MD5_Init(MD5_CTX * ctx)
 }
 
 static void MD5_Update(MD5_CTX * ctx,
-                       const unsigned char * input,
+                       const unsigned char *input,
                        unsigned int inputLen)
 {
   md5_update(ctx, inputLen, input);
@@ -71,7 +71,7 @@ static void MD5_Init(MD5_CTX * ctx)
 }
 
 static void MD5_Update(MD5_CTX * ctx,
-                       const unsigned char * input,
+                       const unsigned char *input,
                        unsigned int inputLen)
 {
   gcry_md_write(*ctx, input, inputLen);

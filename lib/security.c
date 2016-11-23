@@ -411,7 +411,7 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
 static int sec_set_protection_level(struct connectdata *conn)
 {
   int code;
-  char* pbsz;
+  char *pbsz;
   static unsigned int buffer_size = 1 << 20; /* 1048576 */
   enum protection_level level = conn->request_data_prot;
 

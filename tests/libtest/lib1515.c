@@ -113,7 +113,7 @@ test_cleanup:
 
 int test(char *URL)
 {
-  CURLM* multi = NULL;
+  CURLM *multi = NULL;
   int res = 0;
   char *address = libtest_arg2;
   char *port = libtest_arg3;

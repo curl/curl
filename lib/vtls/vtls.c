@@ -81,13 +81,14 @@
                                  (data->share->specifier &             \
                                   (1<<CURL_LOCK_DATA_SSL_SESSION)))
 
-#define CLONE_STRING(var) if(source->var) { \
-                            dest->var = strdup(source->var); \
-                            if(!dest->var) \
-                               return FALSE; \
-                          } \
-                          else \
-                            dest->var = NULL;
+#define CLONE_STRING(var)                    \
+  if(source->var) {                          \
+    dest->var = strdup(source->var);         \
+    if(!dest->var)                           \
+      return FALSE;                          \
+  }                                          \
+  else                                       \
+    dest->var = NULL;
 
 bool
 Curl_ssl_config_matches(struct ssl_primary_config* data,
@@ -653,9 +654,9 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
                                     const char *value,
                                     size_t valuelen)
 {
-  struct curl_certinfo * ci = &data->info.certs;
-  char * output;
-  struct curl_slist * nl;
+  struct curl_certinfo *ci = &data->info.certs;
+  char *output;
+  struct curl_slist *nl;
   CURLcode result = CURLE_OK;
   size_t labellen = strlen(label);
   size_t outlen = labellen + 1 + valuelen + 1; /* label:value\0 */

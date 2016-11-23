@@ -37,7 +37,7 @@ static CURL *easy[MAX_EASY_HANDLES];
 static curl_socket_t sockets[MAX_EASY_HANDLES];
 static int res = 0;
 
-static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
+static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 {
   ssize_t idx = ((CURL **) data) - easy;
   curl_socket_t sock;
@@ -104,7 +104,7 @@ int test(char *url)
   int num_handles = 0;
   enum HandleState state = ReadyForNewHandle;
   size_t urllen = strlen(url) + 4 + 1;
-  char* full_url = malloc(urllen);
+  char *full_url = malloc(urllen);
 
   start_test_timing();
 
