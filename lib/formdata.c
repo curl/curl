@@ -1427,7 +1427,8 @@ int Curl_FormInit(struct Form *form, struct FormData *formdata)
    *
    */
 # define fopen_read vmsfopenread
-static FILE * vmsfopenread(const char *file, const char *mode) {
+static FILE * vmsfopenread(const char *file, const char *mode)
+{
   struct_stat statbuf;
   int result;
 

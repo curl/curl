@@ -219,7 +219,8 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
   return ortn;
 }
 
-CF_INLINE const char *SSLCipherNameForNumber(SSLCipherSuite cipher) {
+CF_INLINE const char *SSLCipherNameForNumber(SSLCipherSuite cipher)
+{
   switch (cipher) {
     /* SSL version 3.0 */
     case SSL_RSA_WITH_NULL_MD5:
@@ -364,7 +365,8 @@ CF_INLINE const char *SSLCipherNameForNumber(SSLCipherSuite cipher) {
   return "SSL_NULL_WITH_NULL_NULL";
 }
 
-CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
+CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
+{
   switch(cipher) {
     /* TLS 1.0 with AES (RFC 3268) */
     case TLS_RSA_WITH_AES_128_CBC_SHA:
@@ -2449,7 +2451,8 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
   (void)CC_MD5(tmp, (CC_LONG)tmplen, md5sum);
 }
 
-bool Curl_darwinssl_false_start(void) {
+bool Curl_darwinssl_false_start(void)
+{
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   if(SSLSetSessionOption != NULL)
     return TRUE;

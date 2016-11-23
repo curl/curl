@@ -48,8 +48,8 @@
  * For libcurl static library release builds no overriding takes place.
  */
 
-int Curl_gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen) {
-
+int Curl_gethostname(char *name, GETHOSTNAME_TYPE_ARG2 namelen)
+{
 #ifndef HAVE_GETHOSTNAME
 
   /* Allow compilation and return failure when unavailable */

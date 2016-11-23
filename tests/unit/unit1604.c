@@ -42,7 +42,8 @@ static void unit_stop(void)
 
 #if defined(MSDOS) || defined(WIN32)
 
-static char *getflagstr(int flags) {
+static char *getflagstr(int flags)
+{
   char *buf = malloc(256);
   fail_unless(buf, "out of memory");
   snprintf(buf, 256, "%s,%s,%s,%s",
@@ -53,7 +54,8 @@ static char *getflagstr(int flags) {
   return buf;
 }
 
-static char *getcurlcodestr(int cc) {
+static char *getcurlcodestr(int cc)
+{
   char *buf = malloc(256);
   fail_unless(buf, "out of memory");
   snprintf(buf, 256, "%s (%d)",

@@ -2181,7 +2181,8 @@ bool Curl_nss_cert_status_request(void)
 #endif
 }
 
-bool Curl_nss_false_start(void) {
+bool Curl_nss_false_start(void)
+{
 #if NSSVERNUM >= 0x030f04 /* 3.15.4 */
   return TRUE;
 #else

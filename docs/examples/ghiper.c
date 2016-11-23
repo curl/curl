@@ -94,7 +94,8 @@ typedef struct _SockInfo {
 } SockInfo;
 
 /* Die if we get a bad CURLMcode somewhere */
-static void mcode_or_die(const char *where, CURLMcode code) {
+static void mcode_or_die(const char *where, CURLMcode code)
+{
   if(CURLM_OK != code) {
     const char *s;
     switch (code) {

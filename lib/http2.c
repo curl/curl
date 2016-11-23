@@ -225,7 +225,8 @@ int Curl_http2_ver(char *p, size_t len)
 https://tools.ietf.org/html/rfc7540#page-77
 nghttp2_error_code enums are identical.
 */
-const char *Curl_http2_strerror(uint32_t err) {
+const char *Curl_http2_strerror(uint32_t err)
+{
 #ifndef NGHTTP2_HAS_HTTP2_STRERROR
   const char *str[] = {
     "NO_ERROR",             /* 0x0 */
@@ -1578,7 +1579,8 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
  * Parse the tokens as separated by comma and surrounded by whitespace.
  * Returns TRUE if found or FALSE if not.
  */
-static bool contains_trailers(const char *p, size_t len) {
+static bool contains_trailers(const char *p, size_t len)
+{
   const char *end = p + len;
   for(;;) {
     for(; p != end && (*p == ' ' || *p == '\t'); ++p)

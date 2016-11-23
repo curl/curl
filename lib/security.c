@@ -88,7 +88,8 @@ name_to_level(const char *name)
 
 /* Convert a protocol |level| to its char representation.
    We take an int to catch programming mistakes. */
-static char level_to_char(int level) {
+static char level_to_char(int level)
+{
   switch(level) {
   case PROT_CLEAR:
     return 'C';
