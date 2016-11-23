@@ -55,7 +55,8 @@ my %warnings = (
     'COPYRIGHT'        => 'file missing a copyright statement',
     'BADCOMMAND'       => 'bad !checksrc! instruction',
     'UNUSEDIGNORE'     => 'a warning ignore was not used',
-    'OPENCOMMENT'      => 'file ended with a /* comment still "open"'
+    'OPENCOMMENT'      => 'file ended with a /* comment still "open"',
+    'ASTERISKSPACE'    => 'pointer declared with space after asterisk'
     );
 
 sub readwhitelist {
@@ -471,6 +472,12 @@ sub scanfile {
             }
         }
 
+        # check for 'char * name'
+        if(($l =~ /(^.*(char|int|long|void|curl_slist|CURL|CURLM|CURLMsg|curl_httppost) *\*) (\w+)/) && ($3 ne "const")) {
+            checkwarn("ASTERISKSPACE",
+                      $line, length($1), $file, $ol,
+                      "no space after declarative asterisk");
+        }
         $line++;
         $prevl = $ol;
     }
