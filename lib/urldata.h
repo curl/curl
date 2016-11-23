@@ -1174,6 +1174,9 @@ struct PureInfo {
   char conn_local_ip[MAX_IPADR_LEN];
   long conn_local_port;
 
+  const char *conn_scheme;
+  unsigned int conn_protocol;
+
   struct curl_certinfo certs; /* info about the certs, only populated in
                                  OpenSSL builds. Asked for with
                                  CURLOPT_CERTINFO / CURLINFO_CERTINFO */
