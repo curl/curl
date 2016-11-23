@@ -485,6 +485,19 @@ sub scanfile {
                       $line, length($1)-1, $file, $ol,
                       "no space before asterisk");
         }
+
+        # check for 'void func() {', but avoid false positives by requiring
+        # both an open and closed parentheses before the open brace
+        if($l =~ /^((\w).*){\z/) {
+            my $k = $1;
+            $k =~ s/const *//;
+            $k =~ s/static *//;
+            if($k =~ /\(.*\)/) {
+                checkwarn("BRACEPOS",
+                          $line, length($l)-1, $file, $ol,
+                          "wrongly placed open brace");
+            }
+        }
         $line++;
         $prevl = $ol;
     }
