@@ -2097,7 +2097,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
       X509_STORE_set_flags(SSL_CTX_get_cert_store(connssl->ctx),
                            X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
     }
-    infof(data, "  CRLfile: %s\n", ssl_crlfile ? ssl_crlfile: "none");
+    infof(data, "  CRLfile: %s\n", ssl_crlfile);
   }
 
   /* Try building a chain using issuers in the trusted store first to avoid
