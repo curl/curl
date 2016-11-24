@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,7 +37,7 @@
  *
  * Returns the integer.
  */
-unsigned short Curl_read16_le(unsigned char *buf)
+unsigned short Curl_read16_le(const unsigned char *buf)
 {
   return (unsigned short)(((unsigned short)buf[0]) |
                           ((unsigned short)buf[1] << 8));
@@ -56,7 +56,7 @@ unsigned short Curl_read16_le(unsigned char *buf)
  *
  * Returns the integer.
  */
-unsigned int Curl_read32_le(unsigned char *buf)
+unsigned int Curl_read32_le(const unsigned char *buf)
 {
   return ((unsigned int)buf[0]) | ((unsigned int)buf[1] << 8) |
          ((unsigned int)buf[2] << 16) | ((unsigned int)buf[3] << 24);
@@ -77,7 +77,7 @@ unsigned int Curl_read32_le(unsigned char *buf)
  * Returns the integer.
  */
 #if defined(HAVE_LONGLONG)
-unsigned long long Curl_read64_le(unsigned char *buf)
+unsigned long long Curl_read64_le(const unsigned char *buf)
 {
   return ((unsigned long long)buf[0]) |
          ((unsigned long long)buf[1] << 8) |
@@ -89,7 +89,7 @@ unsigned long long Curl_read64_le(unsigned char *buf)
          ((unsigned long long)buf[7] << 56);
 }
 #else
-unsigned __int64 Curl_read64_le(unsigned char *buf)
+unsigned __int64 Curl_read64_le(const unsigned char *buf)
 {
   return ((unsigned __int64)buf[0]) | ((unsigned __int64)buf[1] << 8) |
          ((unsigned __int64)buf[2] << 16) | ((unsigned __int64)buf[3] << 24) |
@@ -113,7 +113,7 @@ unsigned __int64 Curl_read64_le(unsigned char *buf)
  *
  * Returns the integer.
  */
-unsigned short Curl_read16_be(unsigned char *buf)
+unsigned short Curl_read16_be(const unsigned char *buf)
 {
   return (unsigned short)(((unsigned short)buf[0] << 8) |
                           ((unsigned short)buf[1]));
@@ -132,7 +132,7 @@ unsigned short Curl_read16_be(unsigned char *buf)
  *
  * Returns the integer.
  */
-unsigned int Curl_read32_be(unsigned char *buf)
+unsigned int Curl_read32_be(const unsigned char *buf)
 {
   return ((unsigned int)buf[0] << 24) | ((unsigned int)buf[1] << 16) |
          ((unsigned int)buf[2] << 8) | ((unsigned int)buf[3]);
@@ -153,7 +153,7 @@ unsigned int Curl_read32_be(unsigned char *buf)
  * Returns the integer.
  */
 #if defined(HAVE_LONGLONG)
-unsigned long long Curl_read64_be(unsigned char *buf)
+unsigned long long Curl_read64_be(const unsigned char *buf)
 {
   return ((unsigned long long)buf[0] << 56) |
          ((unsigned long long)buf[1] << 48) |
@@ -165,7 +165,7 @@ unsigned long long Curl_read64_be(unsigned char *buf)
          ((unsigned long long)buf[7]);
 }
 #else
-unsigned __int64 Curl_read64_be(unsigned char *buf)
+unsigned __int64 Curl_read64_be(const unsigned char *buf)
 {
   return ((unsigned __int64)buf[0] << 56) | ((unsigned __int64)buf[1] << 48) |
          ((unsigned __int64)buf[2] << 40) | ((unsigned __int64)buf[3] << 32) |

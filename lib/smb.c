@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
- * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -308,8 +308,8 @@ static CURLcode smb_recv_message(struct connectdata *conn, void **msg)
   if(smbc->got < sizeof(unsigned int))
     return CURLE_OK;
 
-  nbt_size = Curl_read16_be((unsigned char *)(buf + sizeof(unsigned short))) +
-             sizeof(unsigned int);
+  nbt_size = Curl_read16_be((const unsigned char *)(buf +
+             sizeof(unsigned short))) + sizeof(unsigned int);
   if(smbc->got < nbt_size)
     return CURLE_OK;
 
@@ -320,7 +320,7 @@ static CURLcode smb_recv_message(struct connectdata *conn, void **msg)
     if(nbt_size >= msg_size + sizeof(unsigned short)) {
       /* Add the byte count */
       msg_size += sizeof(unsigned short) +
-                  Curl_read16_le((unsigned char *)&buf[msg_size]);
+                  Curl_read16_le((const unsigned char *)&buf[msg_size]);
       if(nbt_size < msg_size)
         return CURLE_READ_ERROR;
     }
@@ -781,9 +781,9 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_CLOSE;
       break;
     }
-    len = Curl_read16_le(((unsigned char *) msg) +
+    len = Curl_read16_le(((const unsigned char *) msg) +
                          sizeof(struct smb_header) + 11);
-    off = Curl_read16_le(((unsigned char *) msg) +
+    off = Curl_read16_le(((const unsigned char *) msg) +
                          sizeof(struct smb_header) + 13);
     if(len > 0) {
       if(off + sizeof(unsigned int) + len > smbc->got) {
@@ -812,7 +812,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_CLOSE;
       break;
     }
-    len = Curl_read16_le(((unsigned char *) msg) +
+    len = Curl_read16_le(((const unsigned char *) msg) +
                          sizeof(struct smb_header) + 5);
     conn->data->req.bytecount += len;
     conn->data->req.offset += len;
