@@ -528,7 +528,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   /* Set the default size of the SSL session ID cache */
   set->general_ssl.max_ssl_sessions = 5;
 
-  set->proxyport = CURL_DEFAULT_PROXY_PORT; /* from url.h */
+  set->proxyport = 0;
   set->proxytype = CURLPROXY_HTTP; /* defaults to HTTP proxy */
   set->httpauth = CURLAUTH_BASIC;  /* defaults to basic */
   set->proxyauth = CURLAUTH_BASIC; /* defaults to basic */
@@ -4997,6 +4997,12 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       /* None given in the proxy string, then get the default one if it is
          given */
       port = data->set.proxyport;
+    else {
+      if(proxytype == CURLPROXY_HTTPS)
+        port = CURL_DEFAULT_HTTPS_PROXY_PORT;
+      else
+        port = CURL_DEFAULT_PROXY_PORT;
+    }
   }
 
   if(*proxyptr) {
