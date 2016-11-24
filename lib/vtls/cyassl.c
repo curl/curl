@@ -101,6 +101,18 @@ and that's a problem since options.h hasn't been included yet. */
 #endif
 #endif
 
+/* KEEP_PEER_CERT is a product of the presence of build time symbol
+   OPENSSL_EXTRA without NO_CERTS, depending on the version. KEEP_PEER_CERT is
+   in wolfSSL's settings.h, and the latter two are build time symbols in
+   options.h. */
+#ifndef KEEP_PEER_CERT
+#if defined(HAVE_CYASSL_GET_PEER_CERTIFICATE) || \
+    defined(HAVE_WOLFSSL_GET_PEER_CERTIFICATE) || \
+    (defined(OPENSSL_EXTRA) && !defined(NO_CERTS))
+#define KEEP_PEER_CERT
+#endif
+#endif
+
 /* HAVE_SUPPORTED_CURVES is wolfSSL's build time symbol for enabling the ECC
    supported curve extension in options.h. Note ECC is enabled separately. */
 #ifndef HAVE_SUPPORTED_CURVES
@@ -923,6 +935,15 @@ void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
   InitSha256(&SHA256pw);
   Sha256Update(&SHA256pw, tmp, (word32)tmplen);
   Sha256Final(&SHA256pw, sha256sum);
+}
+
+bool Curl_cyassl_supports_pinnedpubkey(void)
+{
+#ifdef KEEP_PEER_CERT
+  return TRUE;
+#else
+  return FALSE;
+#endif
 }
 
 #endif

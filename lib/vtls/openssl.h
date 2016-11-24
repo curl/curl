@@ -77,7 +77,7 @@ void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
                       unsigned char *sha256sum /* output */,
                       size_t unused);
 
-bool Curl_ossl_cert_status_request(void);
+bool Curl_ossl_supports_cert_status_request(void);
 
 /* Set the API backend definition to OpenSSL */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_OPENSSL
@@ -91,8 +91,12 @@ bool Curl_ossl_cert_status_request(void);
 /* this backend supports CURLOPT_SSL_CTX_* */
 #define have_curlssl_ssl_ctx 1
 
+/* this backend may support CURLOPT_SSL_VERIFYSTATUS */
+#define curlssl_supports_cert_status_request() \
+  Curl_ossl_supports_cert_status_request()
+
 /* this backend supports CURLOPT_PINNEDPUBLICKEY */
-#define have_curlssl_pinnedpubkey 1
+#define curlssl_supports_pinnedpubkey() (1)
 
 /* API setup for OpenSSL */
 #define curlssl_init Curl_ossl_init
@@ -114,7 +118,6 @@ bool Curl_ossl_cert_status_request(void);
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
 #define curlssl_sha256sum(a,b,c,d) Curl_ossl_sha256sum(a,b,c,d)
 #endif
-#define curlssl_cert_status_request() Curl_ossl_cert_status_request()
 
 #define DEFAULT_CIPHER_SELECTION \
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"
