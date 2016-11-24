@@ -123,9 +123,11 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
   TCHAR *host_name;
   CURLcode result;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
-        conn->host.name, conn->remote_port);
+        hostname, conn->remote_port);
 
 #ifdef HAS_ALPN
   /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
@@ -142,9 +144,9 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   connssl->cred = NULL;
 
   /* check for an existing re-usable credential handle */
-  if(conn->ssl_config.sessionid) {
+  if(data->set.general_ssl.sessionid) {
     Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL)) {
+    if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL, sockindex)) {
       connssl->cred = old_cred;
       infof(data, "schannel: re-using existing credential handle\n");
 
@@ -161,7 +163,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     memset(&schannel_cred, 0, sizeof(schannel_cred));
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
 
-    if(data->set.ssl.verifypeer) {
+    if(conn->ssl_config.verifypeer) {
 #ifdef _WIN32_WCE
       /* certificate validation on CE doesn't seem to work right; we'll
          do it following a more manual process. */
@@ -170,13 +172,14 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         SCH_CRED_IGNORE_REVOCATION_OFFLINE;
 #else
       schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
-      if(data->set.ssl_no_revoke)
+      /* TODO s/data->set.ssl.no_revoke/SSL_SET_OPTION(no_revoke)/g */
+      if(data->set.ssl.no_revoke)
         schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
                                  SCH_CRED_IGNORE_REVOCATION_OFFLINE;
       else
         schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
 #endif
-      if(data->set.ssl_no_revoke)
+      if(data->set.ssl.no_revoke)
         infof(data, "schannel: disabled server certificate revocation "
                     "checks\n");
       else
@@ -189,14 +192,14 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       infof(data, "schannel: disabled server certificate revocation checks\n");
     }
 
-    if(!data->set.ssl.verifyhost) {
+    if(!conn->ssl_config.verifyhost) {
       schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
       infof(data, "schannel: verifyhost setting prevents Schannel from "
             "comparing the supplied target name with the subject "
             "names in server certificates. Also disables SNI.\n");
     }
 
-    switch(data->set.ssl.version) {
+    switch(conn->ssl_config.version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_0_CLIENT |
@@ -258,9 +261,9 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
 
   /* Warn if SNI is disabled due to use of an IP address */
-  if(Curl_inet_pton(AF_INET, conn->host.name, &addr)
+  if(Curl_inet_pton(AF_INET, hostname, &addr)
 #ifdef ENABLE_IPV6
-     || Curl_inet_pton(AF_INET6, conn->host.name, &addr6)
+     || Curl_inet_pton(AF_INET6, hostname, &addr6)
 #endif
     ) {
     infof(data, "schannel: using IP address, SNI is not supported by OS.\n");
@@ -338,7 +341,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   }
   memset(connssl->ctxt, 0, sizeof(struct curl_schannel_ctxt));
 
-  host_name = Curl_convert_UTF8_to_tchar(conn->host.name);
+  host_name = Curl_convert_UTF8_to_tchar(hostname);
   if(!host_name)
     return CURLE_OUT_OF_MEMORY;
 
@@ -411,11 +414,13 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   TCHAR *host_name;
   CURLcode result;
   bool doread;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 2/3)\n",
-        conn->host.name, conn->remote_port);
+        hostname, conn->remote_port);
 
   if(!connssl->cred || !connssl->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
@@ -511,7 +516,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     memcpy(inbuf[0].pvBuffer, connssl->encdata_buffer,
            connssl->encdata_offset);
 
-    host_name = Curl_convert_UTF8_to_tchar(conn->host.name);
+    host_name = Curl_convert_UTF8_to_tchar(hostname);
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
@@ -628,7 +633,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 #ifdef _WIN32_WCE
   /* Windows CE doesn't do any server certificate validation.
      We have to do it manually. */
-  if(data->set.ssl.verifypeer)
+  if(conn->ssl_config.verifypeer)
     return verify_certificate(conn, sockindex);
 #endif
 
@@ -643,6 +648,8 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 #ifdef HAS_ALPN
   SecPkgContext_ApplicationProtocol alpn_result;
 #endif
@@ -650,7 +657,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 3/3)\n",
-        conn->host.name, conn->remote_port);
+        hostname, conn->remote_port);
 
   if(!connssl->cred)
     return CURLE_SSL_CONNECT_ERROR;
@@ -706,12 +713,13 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
 #endif
 
   /* save the current session data for possible re-use */
-  if(conn->ssl_config.sessionid) {
+  if(data->set.general_ssl.sessionid) {
     bool incache;
     struct curl_schannel_cred *old_cred = NULL;
 
     Curl_ssl_sessionid_lock(conn);
-    incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL));
+    incache = !(Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL,
+                                      sockindex));
     if(incache) {
       if(old_cred != connssl->cred) {
         infof(data, "schannel: old credential handle is stale, removing\n");
@@ -722,7 +730,8 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     }
     if(!incache) {
       result = Curl_ssl_addsessionid(conn, (void *)connssl->cred,
-                                     sizeof(struct curl_schannel_cred));
+                                     sizeof(struct curl_schannel_cred),
+                                     sockindex);
       if(result) {
         Curl_ssl_sessionid_unlock(conn);
         failf(data, "schannel: failed to store credential handle");
@@ -1381,9 +1390,11 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
    */
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 
   infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
-        conn->host.name, conn->remote_port);
+        hostname, conn->remote_port);
 
   if(connssl->cred && connssl->ctxt) {
     SecBufferDesc BuffDesc;
@@ -1405,7 +1416,7 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
       failf(data, "schannel: ApplyControlToken failure: %s",
             Curl_sspi_strerror(conn, sspi_status));
 
-    host_name = Curl_convert_UTF8_to_tchar(conn->host.name);
+    host_name = Curl_convert_UTF8_to_tchar(hostname);
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
@@ -1530,6 +1541,9 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
   CURLcode result = CURLE_OK;
   CERT_CONTEXT *pCertContextServer = NULL;
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
+  const char * const conn_hostname = SSL_IS_PROXY() ?
+    conn->http_proxy.host.name :
+    conn->host.name;
 
   status = s_pSecFn->QueryContextAttributes(&connssl->ctxt->ctxt_handle,
                                             SECPKG_ATTR_REMOTE_CERT_CONTEXT,
@@ -1551,7 +1565,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
                                 NULL,
                                 pCertContextServer->hCertStore,
                                 &ChainPara,
-                                (data->set.ssl_no_revoke ? 0 :
+                                (data->set.ssl.no_revoke ? 0 :
                                  CERT_CHAIN_REVOCATION_CHECK_CHAIN),
                                 NULL,
                                 &pChainContext)) {
@@ -1587,14 +1601,14 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
   }
 
   if(result == CURLE_OK) {
-    if(data->set.ssl.verifyhost) {
+    if(conn->ssl_config.verifyhost) {
       TCHAR cert_hostname_buff[128];
       xcharp_u hostname;
       xcharp_u cert_hostname;
       DWORD len;
 
       cert_hostname.const_tchar_ptr = cert_hostname_buff;
-      hostname.tchar_ptr = Curl_convert_UTF8_to_tchar(conn->host.name);
+      hostname.tchar_ptr = Curl_convert_UTF8_to_tchar(conn_hostname);
 
       /* TODO: Fix this for certificates with multiple alternative names.
       Right now we're only asking for the first preferred alternative name.
@@ -1612,7 +1626,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
                               128);
       if(len > 0 && *cert_hostname.tchar_ptr == '*') {
         /* this is a wildcard cert.  try matching the last len - 1 chars */
-        int hostname_len = strlen(conn->host.name);
+        int hostname_len = strlen(conn_hostname);
         cert_hostname.tchar_ptr++;
         if(_tcsicmp(cert_hostname.const_tchar_ptr,
                     hostname.const_tchar_ptr + hostname_len - len + 2) != 0)
@@ -1627,7 +1641,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
         _cert_hostname = Curl_convert_tchar_to_UTF8(cert_hostname.tchar_ptr);
         failf(data, "schannel: CertGetNameString() certificate hostname "
               "(%s) did not match connection (%s)",
-              _cert_hostname, conn->host.name);
+              _cert_hostname, conn_hostname);
         Curl_unicodefree(_cert_hostname);
       }
       Curl_unicodefree(hostname.tchar_ptr);

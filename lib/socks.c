@@ -109,9 +109,10 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
                      const char *hostname,
                      int remote_port,
                      int sockindex,
-                     struct connectdata *conn,
-                     bool protocol4a)
+                     struct connectdata *conn)
 {
+  const bool protocol4a =
+    (conn->socks_proxy.proxytype == CURLPROXY_SOCKS4A) ? TRUE : FALSE;
 #define SOCKS4REQLEN 262
   unsigned char socksreq[SOCKS4REQLEN]; /* room for SOCKS4 request incl. user
                                            id */
@@ -125,6 +126,10 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;
   }
+
+  if(conn->bits.httpproxy)
+    infof(conn->data, "SOCKS4%s: connecting to HTTP proxy %s port %d\n",
+          protocol4a ? "a" : "", hostname, remote_port);
 
   (void)curlx_nonblock(sock, FALSE);
 
@@ -377,9 +382,14 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
   curl_socket_t sock = conn->sock[sockindex];
   struct Curl_easy *data = conn->data;
   time_t timeout;
-  bool socks5_resolve_local = (conn->proxytype == CURLPROXY_SOCKS5)?TRUE:FALSE;
+  bool socks5_resolve_local =
+    (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ? TRUE : FALSE;
   const size_t hostname_len = strlen(hostname);
   ssize_t len = 0;
+
+  if(conn->bits.httpproxy)
+    infof(conn->data, "SOCKS5: connecting to HTTP proxy %s port %d\n",
+          hostname, remote_port);
 
   /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
   if(!socks5_resolve_local && hostname_len > 255) {

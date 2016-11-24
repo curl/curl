@@ -76,5 +76,16 @@ CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex);
 void Curl_verboseconnect(struct connectdata *conn);
 #endif
 
+#define CONNECT_PROXY_SSL()\
+  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
+  !conn->bits.proxy_ssl_connected[sockindex])
+
+#define CONNECT_FIRSTSOCKET_PROXY_SSL()\
+  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
+  !conn->bits.proxy_ssl_connected[FIRSTSOCKET])
+
+#define CONNECT_SECONDARYSOCKET_PROXY_SSL()\
+  (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
+  !conn->bits.proxy_ssl_connected[SECONDARYSOCKET])
 
 #endif /* HEADER_CURL_URL_H */

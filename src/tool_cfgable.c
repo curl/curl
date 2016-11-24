@@ -68,6 +68,9 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->tls_username);
   Curl_safefree(config->tls_password);
   Curl_safefree(config->tls_authtype);
+  Curl_safefree(config->proxy_tls_username);
+  Curl_safefree(config->proxy_tls_password);
+  Curl_safefree(config->proxy_tls_authtype);
   Curl_safefree(config->proxyuserpwd);
   Curl_safefree(config->proxy);
 
@@ -99,15 +102,24 @@ static void free_config_fields(struct OperationConfig *config)
   config->url_out = NULL;
 
   Curl_safefree(config->cipher_list);
+  Curl_safefree(config->proxy_cipher_list);
   Curl_safefree(config->cert);
+  Curl_safefree(config->proxy_cert);
   Curl_safefree(config->cert_type);
+  Curl_safefree(config->proxy_cert_type);
   Curl_safefree(config->cacert);
+  Curl_safefree(config->proxy_cacert);
   Curl_safefree(config->capath);
+  Curl_safefree(config->proxy_capath);
   Curl_safefree(config->crlfile);
   Curl_safefree(config->pinnedpubkey);
+  Curl_safefree(config->proxy_crlfile);
   Curl_safefree(config->key);
+  Curl_safefree(config->proxy_key);
   Curl_safefree(config->key_type);
+  Curl_safefree(config->proxy_key_type);
   Curl_safefree(config->key_passwd);
+  Curl_safefree(config->proxy_key_passwd);
   Curl_safefree(config->pubkey);
   Curl_safefree(config->hostpubmd5);
   Curl_safefree(config->engine);

@@ -123,6 +123,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   unsigned char socksreq[4]; /* room for GSS-API exchange header only */
   const char *serviceptr = data->set.str[STRING_PROXY_SERVICE_NAME] ?
                            data->set.str[STRING_PROXY_SERVICE_NAME] : "rcmd";
+  const size_t serviceptr_length = strlen(serviceptr);
 
   /*   GSS-API request looks like
    * +----+------+-----+----------------+
@@ -134,22 +135,23 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   /* prepare service name */
   if(strchr(serviceptr, '/')) {
-    service.value = malloc(strlen(serviceptr));
+    service.length = serviceptr_length;
+    service.value = malloc(service.length);
     if(!service.value)
       return CURLE_OUT_OF_MEMORY;
-    service.length = strlen(serviceptr);
     memcpy(service.value, serviceptr, service.length);
 
     gss_major_status = gss_import_name(&gss_minor_status, &service,
                                        (gss_OID) GSS_C_NULL_OID, &server);
   }
   else {
-    service.value = malloc(strlen(serviceptr) +strlen(conn->proxy.name)+2);
+    service.value = malloc(serviceptr_length +
+                           strlen(conn->socks_proxy.host.name)+2);
     if(!service.value)
       return CURLE_OUT_OF_MEMORY;
-    service.length = strlen(serviceptr) +strlen(conn->proxy.name)+1;
+    service.length = serviceptr_length + strlen(conn->socks_proxy.host.name)+1;
     snprintf(service.value, service.length+1, "%s@%s",
-             serviceptr, conn->proxy.name);
+             serviceptr, conn->socks_proxy.host.name);
 
     gss_major_status = gss_import_name(&gss_minor_status, &service,
                                        GSS_C_NT_HOSTBASED_SERVICE, &server);
