@@ -40,6 +40,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+/* For overflow checks. */
+#define CURL_SIZE_T_MAX         ((size_t) ~0)
+
 
 /* ASN.1 OIDs. */
 static const char       cnOID[] = "2.5.4.3";    /* Common name. */
@@ -117,7 +120,7 @@ const char * Curl_getASN1Element(curl_asn1Element * elem,
      Returns a pointer in source string after the parsed element, or NULL
      if an error occurs. */
 
-  if(beg >= end || !*beg)
+  if(!beg || !end || (size_t) (end - beg) > CURL_ASN1_MAX)
     return (const char *) NULL;
 
   /* Process header byte. */
@@ -198,15 +201,17 @@ static const char * bool2str(const char * beg, const char * end)
 static const char * octet2str(const char * beg, const char * end)
 {
   size_t n = end - beg;
-  char * buf;
+  char * buf = NULL;
 
   /* Convert an ASN.1 octet string to a printable string.
      Return the dynamically allocated string, or NULL if an error occurs. */
 
-  buf = malloc(3 * n + 1);
-  if(buf)
-    for(n = 0; beg < end; n += 3)
-      snprintf(buf + n, 4, "%02x:", *(const unsigned char *) beg++);
+  if(n <= (CURL_SIZE_T_MAX - 1) / 3) {
+    buf = malloc(3 * n + 1);
+    if(buf)
+      for(n = 0; beg < end; n += 3)
+        snprintf(buf + n, 4, "%02x:", *(const unsigned char *) beg++);
+  }
   return buf;
 }
 
@@ -282,6 +287,8 @@ utf8asn1str(char * * to, int type, const char * from, const char * end)
 
   if(inlength % size)
     return -1;  /* Length inconsistent with character size. */
+  if(inlength / size > (CURL_SIZE_T_MAX - 1) / 4)
+    return -1;  /* Too big. */
   buf = malloc(4 * (inlength / size) + 1);
   if(!buf)
     return -1;  /* Not enough memory. */
@@ -669,8 +676,8 @@ const char * Curl_DNtostr(curl_asn1Element * dn)
  * X509 parser.
  */
 
-void Curl_parseX509(curl_X509certificate * cert,
-                    const char * beg, const char * end)
+int Curl_parseX509(curl_X509certificate * cert,
+                   const char * beg, const char * end)
 {
   curl_asn1Element elem;
   curl_asn1Element tbsCertificate;
@@ -686,7 +693,8 @@ void Curl_parseX509(curl_X509certificate * cert,
   cert->certificate.end = end;
 
   /* Get the sequence content. */
-  Curl_getASN1Element(&elem, beg, end);
+  if(!Curl_getASN1Element(&elem, beg, end))
+    return -1;  /* Invalid bounds/size. */
   beg = elem.beg;
   end = elem.end;
 
@@ -749,6 +757,7 @@ void Curl_parseX509(curl_X509certificate * cert,
   }
   if(elem.tag == 3)
     Curl_getASN1Element(&cert->extensions, elem.beg, elem.end);
+  return 0;
 }
 
 static size_t copySubstring(char * to, const char * from)
@@ -889,7 +898,8 @@ CURLcode Curl_extract_certinfo(struct connectdata * conn,
   /* Prepare the certificate information for curl_easy_getinfo(). */
 
   /* Extract the certificate ASN.1 elements. */
-  Curl_parseX509(&cert, beg, end);
+  if(Curl_parseX509(&cert, beg, end))
+    return CURLE_OUT_OF_MEMORY;
 
   /* Subject. */
   ccp = Curl_DNtostr(&cert.subject);
@@ -1080,9 +1090,8 @@ CURLcode Curl_verifyhost(struct connectdata * conn,
   if(!data->set.ssl.verifyhost)
     return CURLE_OK;
 
-  if(!beg)
+  if(Curl_parseX509(&cert, beg, end))
     return CURLE_PEER_FAILED_VERIFICATION;
-  Curl_parseX509(&cert, beg, end);
 
   /* Get the server IP address. */
 #ifdef ENABLE_IPV6

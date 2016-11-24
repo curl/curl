@@ -875,9 +875,8 @@ static CURLcode gskit_connect_step3(struct connectdata *conn, int sockindex)
     curl_X509certificate x509;
     curl_asn1Element *p;
 
-    if(!cert)
+    if(Curl_parseX509(&x509, cert, certend))
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-    Curl_parseX509(&x509, cert, certend);
     p = &x509.subjectPublicKeyInfo;
     result = Curl_pin_peer_pubkey(data, ptr, p->header, p->end - p->header);
     if(result) {
