@@ -41,6 +41,9 @@ int Curl_gskit_shutdown(struct connectdata *conn, int sockindex);
 size_t Curl_gskit_version(char *buffer, size_t size);
 int Curl_gskit_check_cxn(struct connectdata *cxn);
 
+/* Support HTTPS-proxy */
+/* TODO: add '#define HTTPS_PROXY_SUPPORT 1' and fix test #1014 (if need) */
+
 /* Set the API backend definition to GSKit */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_GSKIT
 

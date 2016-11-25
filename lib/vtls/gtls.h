@@ -57,6 +57,9 @@ void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
 
 bool Curl_gtls_cert_status_request(void);
 
+/* Support HTTPS-proxy */
+#define HTTPS_PROXY_SUPPORT 1
+
 /* Set the API backend definition to GnuTLS */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_GNUTLS
 

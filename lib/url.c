@@ -4924,6 +4924,14 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   else
     proxyptr = proxy; /* No xxx:// head: It's a HTTP proxy */
 
+#ifndef HTTPS_PROXY_SUPPORT
+  if(proxytype == CURLPROXY_HTTPS) {
+    failf(data, "Unsupported proxy \'%s\'"
+                ", libcurl is built without the HTTPS-proxy support.", proxy);
+    return CURLE_NOT_BUILT_IN;
+  }
+#endif
+
   sockstype = proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
               proxytype == CURLPROXY_SOCKS5 ||
               proxytype == CURLPROXY_SOCKS4A ||

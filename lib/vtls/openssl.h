@@ -79,6 +79,9 @@ void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
 
 bool Curl_ossl_cert_status_request(void);
 
+/* Support HTTPS-proxy */
+#define HTTPS_PROXY_SUPPORT 1
+
 /* Set the API backend definition to OpenSSL */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_OPENSSL
 
