@@ -23,7 +23,6 @@
  1.5 get rid of PATH_MAX
  1.6 Modified buffer size approach
  1.7 Detect when called from within callbacks
- 1.8 Allow SSL (HTTPS) to proxy
  1.9 Cache negative name resolves
  1.11 minimize dependencies with dynamicly loaded modules
  1.12 have form functions use CURL handle argument
@@ -242,16 +241,6 @@
  We should set a state variable before calling callbacks, so that we
  subsequently can add code within libcurl that returns error if called within
  callbacks for when that's not supported.
-
-1.8 Allow SSL (HTTPS) to proxy
-
- To prevent local users from snooping on your traffic to the proxy. Supported
- by Firefox and Chrome already:
- https://www.chromium.org/developers/design-documents/secure-web-proxy
-
- See this stale work in progress branch:
- https://github.com/curl/curl/tree/HTTPS-proxy based on this PR:
- https://github.com/curl/curl/pull/305
 
 1.9 Cache negative name resolves
 
