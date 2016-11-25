@@ -171,7 +171,6 @@ mbed_connect_step1(struct connectdata *conn,
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
-
   int ret = -1;
   char errorbuf[128];
   errorbuf[0]=0;
@@ -453,6 +452,9 @@ mbed_connect_step2(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   const mbedtls_x509_crt *peercert;
+  const char * const pinnedpubkey = SSL_IS_PROXY() ?
+        data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+        data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
 
 #ifdef HAS_ALPN
   const char *next_protocol;
@@ -524,7 +526,7 @@ mbed_connect_step2(struct connectdata *conn,
     free(buffer);
   }
 
-  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+  if(pinnedpubkey) {
     int size;
     CURLcode result;
     mbedtls_x509_crt *p;
@@ -563,7 +565,7 @@ mbed_connect_step2(struct connectdata *conn,
 
     /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer. */
     result = Curl_pin_peer_pubkey(data,
-                                  data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+                                  pinnedpubkey,
                                   &pubkey[PUB_DER_MAX_BYTES - size], size);
     if(result) {
       mbedtls_x509_crt_free(p);

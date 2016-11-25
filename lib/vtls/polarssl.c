@@ -397,6 +397,10 @@ polarssl_connect_step2(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   char buffer[1024];
+  const char * const pinnedpubkey = SSL_IS_PROXY() ?
+            data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+            data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+
 
   char errorbuf[128];
   errorbuf[0] = 0;
@@ -458,7 +462,7 @@ polarssl_connect_step2(struct connectdata *conn,
   }
 
   /* adapted from mbedtls.c */
-  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+  if(pinnedpubkey) {
     int size;
     CURLcode result;
     x509_crt *p;
@@ -500,7 +504,7 @@ polarssl_connect_step2(struct connectdata *conn,
 
     /* pk_write_pubkey_der writes data at the end of the buffer. */
     result = Curl_pin_peer_pubkey(data,
-                                  data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+                                  pinnedpubkey,
                                   &pubkey[PUB_DER_MAX_BYTES - size], size);
     if(result) {
       x509_crt_free(p);

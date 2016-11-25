@@ -2181,7 +2181,19 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Set pinned public key for SSL connection.
      * Specify file name of the public key in DER format.
      */
-    result = setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+    result = setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG],
+                       va_arg(param, char *));
+#else
+    result = CURLE_NOT_BUILT_IN;
+#endif
+    break;
+  case CURLOPT_PROXY_PINNEDPUBLICKEY:
+#ifdef have_curlssl_pinnedpubkey /* only by supported backends */
+    /*
+     * Set pinned public key for SSL connection.
+     * Specify file name of the public key in DER format.
+     */
+    result = setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY],
                        va_arg(param, char *));
 #else
     result = CURLE_NOT_BUILT_IN;

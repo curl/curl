@@ -1229,7 +1229,8 @@ gtls_connect_step3(struct connectdata *conn,
       infof(data, "\t server certificate activation date OK\n");
   }
 
-  ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  ptr = SSL_IS_PROXY() ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+        data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
   if(ptr) {
     result = pkp_pin_peer_pubkey(data, x509_cert, ptr);
     if(result != CURLE_OK) {

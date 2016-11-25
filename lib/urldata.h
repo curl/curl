@@ -1471,7 +1471,8 @@ enum dupstring {
   STRING_SSL_CAPATH_PROXY, /* CA directory name (doesn't work on windows) */
   STRING_SSL_CAFILE_ORIG, /* certificate file to verify peer against */
   STRING_SSL_CAFILE_PROXY, /* certificate file to verify peer against */
-  STRING_SSL_PINNEDPUBLICKEY, /* public key file to verify peer against */
+  STRING_SSL_PINNEDPUBLICKEY_ORIG, /* public key file to verify peer against */
+  STRING_SSL_PINNEDPUBLICKEY_PROXY, /* public key file to verify proxy */
   STRING_SSL_CIPHER_LIST_ORIG, /* list of ciphers to use */
   STRING_SSL_CIPHER_LIST_PROXY, /* list of ciphers to use */
   STRING_SSL_EGDSOCKET,   /* path to file containing the EGD daemon socket */

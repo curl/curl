@@ -2891,7 +2891,8 @@ static CURLcode servercert(struct connectdata *conn,
     /* when not strict, we don't bother about the verify cert problems */
     result = CURLE_OK;
 
-  ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  ptr = SSL_IS_PROXY() ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+                         data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
   if(!result && ptr) {
     result = pkp_pin_peer_pubkey(data, connssl->server_cert, ptr);
     if(result)

@@ -1926,6 +1926,10 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
   PRUint32 timeout;
   long * const certverifyresult = SSL_IS_PROXY() ?
     &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
+  const char * const pinnedpubkey = SSL_IS_PROXY() ?
+              data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+              data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+
 
   /* check timeout situation */
   const long time_left = Curl_timeleft(data, NULL, TRUE);
@@ -1971,7 +1975,7 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
     }
   }
 
-  result = cmp_peer_pubkey(connssl, data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
+  result = cmp_peer_pubkey(connssl, pinnedpubkey);
   if(result)
     /* status already printed */
     goto error;

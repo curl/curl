@@ -424,6 +424,10 @@ cyassl_connect_step2(struct connectdata *conn,
     conn->host.name;
   const char * const dispname = SSL_IS_PROXY() ?
     conn->http_proxy.host.dispname : conn->host.dispname;
+  const char * const pinnedpubkey = SSL_IS_PROXY() ?
+                        data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+                        data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+    conn->http_proxy.host.dispname : conn->host.dispname;
 
   conn->recv[sockindex] = cyassl_recv;
   conn->send[sockindex] = cyassl_send;
@@ -497,7 +501,7 @@ cyassl_connect_step2(struct connectdata *conn,
     }
   }
 
-  if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
+  if(pinnedpubkey) {
 #ifdef KEEP_PEER_CERT
     X509 *x509;
     const char *x509_der;
@@ -529,7 +533,7 @@ cyassl_connect_step2(struct connectdata *conn,
     }
 
     result = Curl_pin_peer_pubkey(data,
-                                  data->set.str[STRING_SSL_PINNEDPUBLICKEY],
+                                  pinnedpubkey,
                                   (const unsigned char *)pubkey->header,
                                   (size_t)(pubkey->end - pubkey->header));
     if(result) {
