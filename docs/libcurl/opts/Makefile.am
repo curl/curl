@@ -49,8 +49,9 @@ man_MANS =                                      \
  CURLINFO_PRIMARY_IP.3                          \
  CURLINFO_PRIMARY_PORT.3                        \
  CURLINFO_PRIVATE.3                             \
- CURLINFO_PROXY_SSL_VERIFYRESULT.3              \
+ CURLINFO_PROTOCOL.3                            \
  CURLINFO_PROXYAUTH_AVAIL.3                     \
+ CURLINFO_PROXY_SSL_VERIFYRESULT.3              \
  CURLINFO_REDIRECT_COUNT.3                      \
  CURLINFO_REDIRECT_TIME.3                       \
  CURLINFO_REDIRECT_URL.3                        \
@@ -60,6 +61,7 @@ man_MANS =                                      \
  CURLINFO_RTSP_CSEQ_RECV.3                      \
  CURLINFO_RTSP_SERVER_CSEQ.3                    \
  CURLINFO_RTSP_SESSION_ID.3                     \
+ CURLINFO_SCHEME.3                              \
  CURLINFO_SIZE_DOWNLOAD.3                       \
  CURLINFO_SIZE_UPLOAD.3                         \
  CURLINFO_SPEED_DOWNLOAD.3                      \
@@ -222,12 +224,12 @@ man_MANS =                                      \
  CURLOPT_PROXYTYPE.3                            \
  CURLOPT_PROXYUSERNAME.3                        \
  CURLOPT_PROXYUSERPWD.3                         \
- CURLOPT_PROXY_SERVICE_NAME.3                   \
- CURLOPT_PROXY_TRANSFER_MODE.3                  \
  CURLOPT_PROXY_CAINFO.3                         \
  CURLOPT_PROXY_CAPATH.3                         \
  CURLOPT_PROXY_CRLFILE.3                        \
  CURLOPT_PROXY_KEYPASSWD.3                      \
+ CURLOPT_PROXY_PINNEDPUBLICKEY.3                \
+ CURLOPT_PROXY_SERVICE_NAME.3                   \
  CURLOPT_PROXY_SSLCERT.3                        \
  CURLOPT_PROXY_SSLCERTTYPE.3                    \
  CURLOPT_PROXY_SSLKEY.3                         \
@@ -240,8 +242,7 @@ man_MANS =                                      \
  CURLOPT_PROXY_TLSAUTH_PASSWORD.3               \
  CURLOPT_PROXY_TLSAUTH_TYPE.3                   \
  CURLOPT_PROXY_TLSAUTH_USERNAME.3               \
- CURLOPT_SOCKS_PROXY.3                          \
- CURLOPT_SOCKS_PROXYTYPE.3                      \
+ CURLOPT_PROXY_TRANSFER_MODE.3                  \
  CURLOPT_PUT.3                                  \
  CURLOPT_QUOTE.3                                \
  CURLOPT_RANDOM_FILE.3                          \
@@ -268,6 +269,8 @@ man_MANS =                                      \
  CURLOPT_SOCKOPTFUNCTION.3                      \
  CURLOPT_SOCKS5_GSSAPI_NEC.3                    \
  CURLOPT_SOCKS5_GSSAPI_SERVICE.3                \
+ CURLOPT_SOCKS_PROXY.3                          \
+ CURLOPT_SOCKS_PROXYTYPE.3                      \
  CURLOPT_SSH_AUTH_TYPES.3                       \
  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.3              \
  CURLOPT_SSH_KEYDATA.3                          \
@@ -346,6 +349,7 @@ HTMLPAGES =                                     \
  CURLINFO_HEADER_SIZE.html                      \
  CURLINFO_HTTPAUTH_AVAIL.html                   \
  CURLINFO_HTTP_CONNECTCODE.html                 \
+ CURLINFO_HTTP_VERSION.html                     \
  CURLINFO_LASTSOCKET.html                       \
  CURLINFO_LOCAL_IP.html                         \
  CURLINFO_LOCAL_PORT.html                       \
@@ -356,7 +360,9 @@ HTMLPAGES =                                     \
  CURLINFO_PRIMARY_IP.html                       \
  CURLINFO_PRIMARY_PORT.html                     \
  CURLINFO_PRIVATE.html                          \
+ CURLINFO_PROTOCOL.html                         \
  CURLINFO_PROXYAUTH_AVAIL.html                  \
+ CURLINFO_PROXY_SSL_VERIFYRESULT.html           \
  CURLINFO_REDIRECT_COUNT.html                   \
  CURLINFO_REDIRECT_TIME.html                    \
  CURLINFO_REDIRECT_URL.html                     \
@@ -366,6 +372,7 @@ HTMLPAGES =                                     \
  CURLINFO_RTSP_CSEQ_RECV.html                   \
  CURLINFO_RTSP_SERVER_CSEQ.html                 \
  CURLINFO_RTSP_SESSION_ID.html                  \
+ CURLINFO_SCHEME.html                           \
  CURLINFO_SIZE_DOWNLOAD.html                    \
  CURLINFO_SIZE_UPLOAD.html                      \
  CURLINFO_SPEED_DOWNLOAD.html                   \
@@ -528,7 +535,24 @@ HTMLPAGES =                                     \
  CURLOPT_PROXYTYPE.html                         \
  CURLOPT_PROXYUSERNAME.html                     \
  CURLOPT_PROXYUSERPWD.html                      \
+ CURLOPT_PROXY_CAINFO.html                      \
+ CURLOPT_PROXY_CAPATH.html                      \
+ CURLOPT_PROXY_CRLFILE.html                     \
+ CURLOPT_PROXY_KEYPASSWD.html                   \
+ CURLOPT_PROXY_PINNEDPUBLICKEY.html             \
  CURLOPT_PROXY_SERVICE_NAME.html                \
+ CURLOPT_PROXY_SSLCERT.html                     \
+ CURLOPT_PROXY_SSLCERTTYPE.html                 \
+ CURLOPT_PROXY_SSLKEY.html                      \
+ CURLOPT_PROXY_SSLKEYTYPE.html                  \
+ CURLOPT_PROXY_SSLVERSION.html                  \
+ CURLOPT_PROXY_SSL_CIPHER_LIST.html             \
+ CURLOPT_PROXY_SSL_OPTIONS.html                 \
+ CURLOPT_PROXY_SSL_VERIFYHOST.html              \
+ CURLOPT_PROXY_SSL_VERIFYPEER.html              \
+ CURLOPT_PROXY_TLSAUTH_PASSWORD.html            \
+ CURLOPT_PROXY_TLSAUTH_TYPE.html                \
+ CURLOPT_PROXY_TLSAUTH_USERNAME.html            \
  CURLOPT_PROXY_TRANSFER_MODE.html               \
  CURLOPT_PUT.html                               \
  CURLOPT_QUOTE.html                             \
@@ -556,6 +580,8 @@ HTMLPAGES =                                     \
  CURLOPT_SOCKOPTFUNCTION.html                   \
  CURLOPT_SOCKS5_GSSAPI_NEC.html                 \
  CURLOPT_SOCKS5_GSSAPI_SERVICE.html             \
+ CURLOPT_SOCKS_PROXY.html                       \
+ CURLOPT_SOCKS_PROXYTYPE.html                   \
  CURLOPT_SSH_AUTH_TYPES.html                    \
  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.html           \
  CURLOPT_SSH_KEYDATA.html                       \
@@ -634,6 +660,7 @@ PDFPAGES =                                      \
  CURLINFO_HEADER_SIZE.pdf                       \
  CURLINFO_HTTPAUTH_AVAIL.pdf                    \
  CURLINFO_HTTP_CONNECTCODE.pdf                  \
+ CURLINFO_HTTP_VERSION.pdf                      \
  CURLINFO_LASTSOCKET.pdf                        \
  CURLINFO_LOCAL_IP.pdf                          \
  CURLINFO_LOCAL_PORT.pdf                        \
@@ -644,7 +671,9 @@ PDFPAGES =                                      \
  CURLINFO_PRIMARY_IP.pdf                        \
  CURLINFO_PRIMARY_PORT.pdf                      \
  CURLINFO_PRIVATE.pdf                           \
+ CURLINFO_PROTOCOL.pdf                          \
  CURLINFO_PROXYAUTH_AVAIL.pdf                   \
+ CURLINFO_PROXY_SSL_VERIFYRESULT.pdf            \
  CURLINFO_REDIRECT_COUNT.pdf                    \
  CURLINFO_REDIRECT_TIME.pdf                     \
  CURLINFO_REDIRECT_URL.pdf                      \
@@ -654,6 +683,7 @@ PDFPAGES =                                      \
  CURLINFO_RTSP_CSEQ_RECV.pdf                    \
  CURLINFO_RTSP_SERVER_CSEQ.pdf                  \
  CURLINFO_RTSP_SESSION_ID.pdf                   \
+ CURLINFO_SCHEME.pdf                            \
  CURLINFO_SIZE_DOWNLOAD.pdf                     \
  CURLINFO_SIZE_UPLOAD.pdf                       \
  CURLINFO_SPEED_DOWNLOAD.pdf                    \
@@ -816,7 +846,24 @@ PDFPAGES =                                      \
  CURLOPT_PROXYTYPE.pdf                          \
  CURLOPT_PROXYUSERNAME.pdf                      \
  CURLOPT_PROXYUSERPWD.pdf                       \
+ CURLOPT_PROXY_CAINFO.pdf                       \
+ CURLOPT_PROXY_CAPATH.pdf                       \
+ CURLOPT_PROXY_CRLFILE.pdf                      \
+ CURLOPT_PROXY_KEYPASSWD.pdf                    \
+ CURLOPT_PROXY_PINNEDPUBLICKEY.pdf              \
  CURLOPT_PROXY_SERVICE_NAME.pdf                 \
+ CURLOPT_PROXY_SSLCERT.pdf                      \
+ CURLOPT_PROXY_SSLCERTTYPE.pdf                  \
+ CURLOPT_PROXY_SSLKEY.pdf                       \
+ CURLOPT_PROXY_SSLKEYTYPE.pdf                   \
+ CURLOPT_PROXY_SSLVERSION.pdf                   \
+ CURLOPT_PROXY_SSL_CIPHER_LIST.pdf              \
+ CURLOPT_PROXY_SSL_OPTIONS.pdf                  \
+ CURLOPT_PROXY_SSL_VERIFYHOST.pdf               \
+ CURLOPT_PROXY_SSL_VERIFYPEER.pdf               \
+ CURLOPT_PROXY_TLSAUTH_PASSWORD.pdf             \
+ CURLOPT_PROXY_TLSAUTH_TYPE.pdf                 \
+ CURLOPT_PROXY_TLSAUTH_USERNAME.pdf             \
  CURLOPT_PROXY_TRANSFER_MODE.pdf                \
  CURLOPT_PUT.pdf                                \
  CURLOPT_QUOTE.pdf                              \
@@ -844,6 +891,8 @@ PDFPAGES =                                      \
  CURLOPT_SOCKOPTFUNCTION.pdf                    \
  CURLOPT_SOCKS5_GSSAPI_NEC.pdf                  \
  CURLOPT_SOCKS5_GSSAPI_SERVICE.pdf              \
+ CURLOPT_SOCKS_PROXY.pdf                        \
+ CURLOPT_SOCKS_PROXYTYPE.pdf                    \
  CURLOPT_SSH_AUTH_TYPES.pdf                     \
  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.pdf            \
  CURLOPT_SSH_KEYDATA.pdf                        \
@@ -929,3 +978,9 @@ pdf: $(PDFPAGES)
 
 mancheck:
 	@cd $(top_srcdir)/docs/libcurl/opts && ls `awk -F, '!/OBSOLETE/ && /^  CINIT/ { a=substr($$1, 9); print "CURLOPT_" a ".3"}' $(top_srcdir)/include/curl/curl.h`
+	rm -f in_temp
+	@(for a in $(man_MANS); do echo $$a >>in_temp; done)
+	sort in_temp > in_makefile
+	ls CURL*.3 > in_directory
+	-diff -u in_makefile in_directory
+	rm in_temp in_directory in_makefile
