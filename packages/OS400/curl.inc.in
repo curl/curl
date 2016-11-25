@@ -1482,8 +1482,12 @@
      d                 c                   X'0040002D'
      d  CURLINFO_HTTP_VERSION...                                                CURLINFO_LONG + 46
      d                 c                   X'0020002E'
-     d  CURLINFO_PROXY_SSL_VERIFYRESULT...                                      CURLINFO_LONG + 45
+     d  CURLINFO_PROXY_SSL_VERIFYRESULT...                                      CURLINFO_LONG + 47
      d                 c                   X'0020002F'
+     d  CURLINFO_PROTOCOL...                                                    CURLINFO_LONG + 48
+     d                 c                   X'00200030'
+     d  CURLINFO_SCHEME...                                                      CURLINFO_STRING + 49
+     d                 c                   X'00100031'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
