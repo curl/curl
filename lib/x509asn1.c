@@ -41,7 +41,7 @@
 #include "memdebug.h"
 
 /* For overflow checks. */
-#define CURL_SIZE_T_MAX         ((size_t) ~0)
+#define CURL_SIZE_T_MAX         ((size_t)-1)
 
 
 /* ASN.1 OIDs. */
@@ -119,8 +119,8 @@ const char *Curl_getASN1Element(curl_asn1Element *elem,
      ending at `end'.
      Returns a pointer in source string after the parsed element, or NULL
      if an error occurs. */
-
-  if(!beg || !end || (size_t) (end - beg) > CURL_ASN1_MAX)
+  if(!beg || !end || beg >= end || !*beg ||
+     (size_t)(end - beg) > CURL_ASN1_MAX)
     return (const char *) NULL;
 
   /* Process header byte. */
@@ -155,7 +155,7 @@ const char *Curl_getASN1Element(curl_asn1Element *elem,
     elem->end = beg;
     return beg + 1;
   }
-  else if(beg + b > end)
+  else if((unsigned)b > (size_t)(end - beg))
     return (const char *) NULL; /* Does not fit in source. */
   else {
     /* Get long length. */
@@ -166,7 +166,7 @@ const char *Curl_getASN1Element(curl_asn1Element *elem,
       len = (len << 8) | (unsigned char) *beg++;
     } while(--b);
   }
-  if((unsigned long) (end - beg) < len)
+  if(len > (size_t)(end - beg))
     return (const char *) NULL;  /* Element data does not fit in source. */
   elem->beg = beg;
   elem->end = beg + len;
