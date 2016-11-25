@@ -324,6 +324,9 @@ static curl_version_info_data version_info = {
 #if defined(USE_LIBPSL)
   | CURL_VERSION_PSL
 #endif
+#if defined(HTTPS_PROXY_SUPPORT)
+  | CURL_VERSION_HTTPS_PROXY
+#endif
   ,
   NULL, /* ssl_version */
   0,    /* ssl_version_num, this is kept at zero */
