@@ -28,12 +28,13 @@ CURLOPT_PROXY_CAINFO \- path to proxy Certificate Authority (CA) bundle
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CAINFO, char *path);
 .SH DESCRIPTION
-TODO: Make this text specific to HTTPS proxy. (Added in 7.XXX)
-Pass a char * to a zero terminated string naming a file holding one or more
-certificates to verify the peer with.
+This option is for connecting to a HTTPS proxy, not a HTTPS server.
 
-If \fICURLOPT_SSL_VERIFYPEER(3)\fP is zero and you avoid verifying the
-server's certificate, \fICURLOPT_CAINFO(3)\fP need not even indicate an
+Pass a char * to a zero terminated string naming a file holding one or more
+certificates to verify the HTTPS proxy with.
+
+If \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP is zero and you avoid verifying the
+server's certificate, \fICURLOPT_PROXY_CAINFO(3)\fP need not even indicate an
 accessible file.
 
 This option is by default set to the system path where libcurl's cacert bundle
@@ -50,15 +51,20 @@ preferred method of verifying the peer's certificate chain.
 .SH DEFAULT
 Built-in system specific
 .SH PROTOCOLS
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+Used with HTTPS proxy
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-For SSL engines that don't support certificate files the CURLOPT_PROXY_CAINFO option
-is ignored. Refer to https://curl.haxx.se/docs/ssl-compared.html
+Added in 7.52.0
+
+For TLS backends that don't support certificate files, the
+\fICURLOPT_PROXY_CAINFO(3)\fP option is ignored. Refer to
+https://curl.haxx.se/docs/ssl-compared.html
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
+.BR CURLOPT_PROXY_CAPATH "(3), "
+.BR CURLOPT_PROXY_SSL_VERIFYPEER "(3), " CURLOPT_PROXY_SSL_VERIFYHOST "(3), "
 .BR CURLOPT_CAPATH "(3), "
 .BR CURLOPT_SSL_VERIFYPEER "(3), " CURLOPT_SSL_VERIFYHOST "(3), "
