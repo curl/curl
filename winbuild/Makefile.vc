@@ -21,6 +21,8 @@ CFGSET=true
 !MESSAGE                                  Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
 !MESSAGE                                  Uncompress them into the deps folder.
 !MESSAGE   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
+!MESSAGE   ENABLE_NGHTTP2=<yes or no>   - Enable HTTP/2 support, defaults to no
+!MESSAGE                                  Requires OpenSSL
 !MESSAGE   WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
@@ -107,6 +109,16 @@ SSL     = dll
 !ELSEIF "$(WITH_SSL)"=="static"
 USE_SSL = true
 SSL     = static
+!ENDIF
+
+!IF "$(USE_SSL)"=="true"
+!IF "$(ENABLE_NGHTTP2)"=="yes"
+USE_NGHTTP2 = true
+!ENDIF
+!ENDIF
+
+!IFNDEF USE_NGHTTP2
+USE_NGHTTP2 = false
 !ENDIF
 
 !IF "$(WITH_MBEDTLS)"=="dll" || "$(WITH_MBEDTLS)"=="static"
@@ -213,6 +225,7 @@ $(MODE):
 
 	@SET CONFIG_NAME_LIB=$(CONFIG_NAME_LIB)
 	@SET MACHINE=$(MACHINE)
+	@SET USE_NGHTTP2=$(USE_NGHTTP2)
 	@SET USE_IDN=$(USE_IDN)
 	@SET USE_IPV6=$(USE_IPV6)
 	@SET USE_SSPI=$(USE_SSPI)
