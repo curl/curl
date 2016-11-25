@@ -78,6 +78,9 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   info->conn_primary_port = 0;
   info->conn_local_port = 0;
 
+  info->conn_scheme = 0;
+  info->conn_protocol = 0;
+
 #ifdef USE_SSL
   Curl_ssl_free_certinfo(data);
 #endif
