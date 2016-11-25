@@ -6079,6 +6079,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   bool reuse;
   char *proxy = NULL;
   char *socksproxy = NULL;
+  char *no_proxy = NULL;
   bool prot_missing = FALSE;
   bool connections_available = TRUE;
   bool force_reuse = FALSE;
@@ -6255,13 +6256,20 @@ static CURLcode create_conn(struct Curl_easy *data,
     }
   }
 
-  if(data->set.str[STRING_NOPROXY] &&
-     check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY])) {
+  no_proxy = curl_getenv("no_proxy");
+  if(!no_proxy)
+    no_proxy = curl_getenv("NO_PROXY");
+
+  if(check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY]) ||
+     (!data->set.str[STRING_NOPROXY] &&
+      check_noproxy(conn->host.name, no_proxy))) {
     Curl_safefree(proxy);
     Curl_safefree(socksproxy);
   }
   else if(!proxy && !socksproxy)
     proxy = detect_proxy(conn);
+
+  Curl_safefree(no_proxy);
 
 #ifdef USE_UNIX_SOCKETS
   if(data->set.str[STRING_UNIX_SOCKET_PATH]) {

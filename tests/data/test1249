@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+NO_PROXY
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Content-Type: text/html
+
+foo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Access a non-proxied host with using the combination of --proxy option and NO_PROXY env var
+</name>
+<setenv>
+NO_PROXY=%HOSTIP
+</setenv>
+<command>
+http://user:secret@%HOSTIP:%HTTPPORT/1249 --proxy http://dummy:%PROXYPORT/ --max-time 5
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1249 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjpzZWNyZXQ=
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
