@@ -28,24 +28,19 @@ CURLOPT_PROXY_SSLKEYTYPE \- set type of the proxy private key file
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLKEYTYPE, char *type);
 .SH DESCRIPTION
-TODO: Make this text specific to HTTPS proxy. (Added in 7.XXX)
+This option is for connecting to a HTTPS proxy, not a HTTPS server.
+
 Pass a pointer to a zero terminated string as parameter. The string should be
 the format of your private key. Supported formats are "PEM", "DER" and "ENG".
-
-The format "ENG" enables you to load the private key from a crypto engine. In
-this case \fICURLOPT_SSLKEY(3)\fP is used as an identifier passed to the
-engine. You have to set the crypto engine with \fICURLOPT_SSLENGINE(3)\fP.
-\&"DER" format key file currently does not work because of a bug in OpenSSL.
-.SH DEFAULT
-"PEM"
 .SH PROTOCOLS
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+Used with HTTPS proxy
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-If built TLS enabled.
+Added in 7.52.0
 .SH RETURN VALUE
 Returns CURLE_OK if TLS is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
-.BR CURLOPT_SSLKEY "(3), " CURLOPT_SSLCERT "(3), "
+.BR CURLOPT_PROXY_SSLKEY "(3), " CURLOPT_PROXY_SSLCERT "(3), "
+.BR CURLOPT_SSLKEYTYPE "(3), "

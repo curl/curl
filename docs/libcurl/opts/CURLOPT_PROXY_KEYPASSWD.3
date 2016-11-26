@@ -28,19 +28,23 @@ CURLOPT_PROXY_KEYPASSWD \- set passphrase to proxy private key
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_KEYPASSWD, char *pwd);
 .SH DESCRIPTION
-TODO: Make this text specific to HTTPS proxy. (Added in 7.XXX)
+This option is for connecting to a HTTPS proxy, not a HTTPS server.
+
 Pass a pointer to a zero terminated string as parameter. It will be used as
-the password required to use the \fICURLOPT_SSLKEY(3)\fP or
-\fICURLOPT_SSH_PRIVATE_KEYFILE(3)\fP private key.  You never needed a pass
-phrase to load a certificate but you need one to load your private key.
+the password required to use the \fICURLOPT_PROXY_SSLKEY(3)\fP private key.
+You never needed a pass phrase to load a certificate but you need one to load
+your private key.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+Used with HTTPS proxy
 .SH EXAMPLE
 TODO
+.SH AVAILABILITY
+Added in 7.52.0
 .SH RETURN VALUE
 Returns CURLE_OK if TLS enabled, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
-.BR CURLOPT_SSLKEY "(3), " CURLOPT_SSH_PRIVATE_KEYFILE "(3), "
+.BR CURLOPT_PROXY_SSLKEY "(3), " CURLOPT_SSH_PRIVATE_KEYFILE "(3), "
+.BR CURLOPT_SSLKEY "(3), "
