@@ -127,6 +127,8 @@
      d                 c                   X'00080000'
      d CURL_VERSION_PSL...
      d                 c                   X'00100000'
+     d CURL_VERSION_HTTPS_PROXY...
+     d                 c                   X'00200000'
       *
      d CURL_HTTPPOST_FILENAME...
      d                 c                   X'00000001'
@@ -1296,6 +1298,8 @@
      d                 c                   10262
      d  CURLOPT_SOCKS_PROXYTYPE...
      d                 c                   00263
+     d  CURLOPT_PROXY_PINNEDPUBLICKEY...
+     d                 c                   10264
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
