@@ -246,8 +246,6 @@ static const struct LongShort aliases[]= {
   {"E7", "proxy-capath",             TRUE},
   {"E8", "proxy-insecure",           FALSE},
   {"E9", "proxy-tlsv1",              FALSE},
-  {"EA", "proxy-sslv2",              FALSE},
-  {"EB", "proxy-sslv3",              FALSE},
   {"f",  "fail",                     FALSE},
   {"fa", "fail-early",               FALSE},
   {"F",  "form",                     TRUE},
@@ -1540,16 +1538,6 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case '9':
         /* TLS version 1 for proxy */
         config->proxy_ssl_version = CURL_SSLVERSION_TLSv1;
-        break;
-
-      case 'A':
-        /* SSL version 2 for proxy */
-        config->proxy_ssl_version = CURL_SSLVERSION_SSLv2;
-        break;
-
-      case 'B':
-        /* SSL version 3 for proxy */
-        config->proxy_ssl_version = CURL_SSLVERSION_SSLv3;
         break;
 
       default: /* unknown flag */

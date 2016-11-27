@@ -199,8 +199,6 @@ static const char *const helptext[] = {
   "     --proxy-pass PASS Pass phrase for the private key for proxy (SSL)",
   "     --proxy-ssl-allow-beast "
   "Allow security flaw to improve interop for proxy (SSL)",
-  "     --proxy-sslv2   Use SSLv2 for proxy (SSL)",
-  "     --proxy-sslv3   Use SSLv3 for proxy (SSL)",
   "     --proxy-tlsv1   Use TLSv1 for proxy (SSL)",
   "     --proxy-tlsuser USER TLS username for proxy",
   "     --proxy-tlspassword STRING TLS password for proxy",
