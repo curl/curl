@@ -79,7 +79,7 @@ sub added {
         return ".SH \"ADDED\"\nAdded in curl version $data\n";
     }
     else {
-        return "Added in $added. ";
+        return "Added in $data. ";
     }
 }
 
@@ -318,6 +318,8 @@ sub mainpage {
     foreach my $f (sort @s) {
         single($f, 0);
     }
+
+    header("page-footer");
 }
 
 sub showonly {
