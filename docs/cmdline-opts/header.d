@@ -31,9 +31,8 @@ Example:
  curl -H "X-First-Name: Joe" http://example.com/
 
 \fBWARNING\fP: headers set with this option will be set in all requests - even
-after redirects are followed, like when told with \fB-L, --location\fP. This
-can lead to the header being sent to other hosts than the original host, so
-sensitive headers should be used with caution combined with following
-redirects.
+after redirects are followed, like when told with --location. This can lead to
+the header being sent to other hosts than the original host, so sensitive
+headers should be used with caution combined with following redirects.
 
 This option can be used multiple times to add/replace/remove multiple headers.

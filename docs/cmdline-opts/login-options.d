@@ -1,6 +1,7 @@
 Long: login-options
 Arg: <options>
 Protocols: IMAP POP3 SMTP
+Help: Server login options
 Added: 7.34.0
 ---
 Specify the login options to use during server authentication.

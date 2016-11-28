@@ -95,7 +95,6 @@ sub single {
     my $arg;
     my $mutexed;
     my $requires;
-    my $redirect;
     my $seealso;
     my $magic; # cmdline special option
     while(<F>) {
@@ -128,9 +127,6 @@ sub single {
         }
         elsif(/^Requires: *(.*)/i) {
             $requires=$1;
-        }
-        elsif(/^Redirect: *(.*)/i) {
-            $redirect=$1;
         }
         elsif(/^Help: *(.*)/i) {
             ;
@@ -174,14 +170,8 @@ sub single {
     else {
         print ".IP \"$opt\"\n";
     }
-    if($redirect) {
-        my $l = manpageify($redirect);
-        print "Use $l instead!\n";
-    }
-    else {
-        if($protocols) {
-            print protocols($standalone, $protocols);
-        }
+    if($protocols) {
+        print protocols($standalone, $protocols);
     }
 
     if($standalone) {

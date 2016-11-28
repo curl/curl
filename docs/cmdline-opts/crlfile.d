@@ -1,4 +1,4 @@
-Long: crfile
+Long: crlfile
 Arg: <file>
 Protocols: TLS
 Help: Get a CRL list in PEM format from the given file

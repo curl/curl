@@ -1,4 +1,5 @@
 Long: proxytunnel
+Short: p
 Help: Operate through a HTTP proxy tunnel (using CONNECT)
 See-also: proxy
 ---

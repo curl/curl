@@ -1,4 +1,5 @@
 Long: referer
+Short: e
 Protocols: HTTP
 Help: Referer URL
 See-also: user-agent header

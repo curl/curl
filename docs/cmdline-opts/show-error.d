@@ -1,5 +1,5 @@
 long: show-error
 Short: S
-Help: Show error. With -s, make curl show errors when they occur
+Help: Show error even when -s is used
 ---
 When used with --silent, it makes curl show an error message if it fails.

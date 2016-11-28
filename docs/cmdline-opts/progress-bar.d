@@ -1,6 +1,6 @@
 Short: #
 Long: progress-bar
-Help: Disable the ALPN TLS extension
+Help: Display transfer progress as a bar
 ---
 Make curl display transfer progress as a simple progress bar instead of the
 standard, more informational, meter.
