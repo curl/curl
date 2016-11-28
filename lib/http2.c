@@ -59,6 +59,10 @@
 #define nghttp2_session_callbacks_set_error_callback(x,y)
 #endif
 
+#if (NGHTTP2_VERSION_NUM >= 0x010c00)
+#define NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE 1
+#endif
+
 #define HTTP2_HUGE_WINDOW_SIZE (1 << 30)
 
 /*
@@ -2044,6 +2048,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
     }
   }
 
+#ifdef NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
   rv = nghttp2_session_set_local_window_size(httpc->h2, NGHTTP2_FLAG_NONE, 0,
                                              HTTP2_HUGE_WINDOW_SIZE);
   if(rv != 0) {
@@ -2051,6 +2056,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
           nghttp2_strerror(rv), rv);
     return CURLE_HTTP2;
   }
+#endif
 
   /* we are going to copy mem to httpc->inbuf.  This is required since
      mem is part of buffer pointed by stream->mem, and callbacks
