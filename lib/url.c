@@ -464,6 +464,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   /* this destroys the channel and we cannot use it anymore after this */
   Curl_resolver_cleanup(data->state.resolver);
 
+  Curl_http2_cleanup_dependencies(data);
   Curl_convert_close(data);
 
   /* No longer a dirty share, if it exists */
@@ -2847,9 +2848,11 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     return CURLE_NOT_BUILT_IN;
 #else
     struct Curl_easy *dep = va_arg(param, struct Curl_easy *);
-    if(dep && GOOD_EASY_HANDLE(dep)) {
-      data->set.stream_depends_on = dep;
-      data->set.stream_depends_e = (option == CURLOPT_STREAM_DEPENDS_E);
+    if(!dep || GOOD_EASY_HANDLE(dep)) {
+      if(data->set.stream_depends_on) {
+        Curl_http2_remove_child(data->set.stream_depends_on, data);
+      }
+      Curl_http2_add_child(dep, data, (option == CURLOPT_STREAM_DEPENDS_E));
     }
     break;
 #endif
