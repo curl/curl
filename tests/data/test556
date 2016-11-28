@@ -8,7 +8,7 @@ HTTP GET
 
 <reply>
 <data>
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK swsclose
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 Content-Length: 6

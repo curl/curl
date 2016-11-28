@@ -187,7 +187,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     *param_longp = data->info.numconnects;
     break;
   case CURLINFO_LASTSOCKET:
-    sockfd = Curl_getconnectinfo(data, NULL);
+    sockfd = Curl_getconnectinfo(data, NULL, NULL);
 
     /* note: this is not a good conversion for systems with 64 bit sockets and
        32 bit longs */
@@ -380,7 +380,7 @@ static CURLcode getinfo_socket(struct Curl_easy *data, CURLINFO info,
 {
   switch(info) {
   case CURLINFO_ACTIVESOCKET:
-    *param_socketp = Curl_getconnectinfo(data, NULL);
+    *param_socketp = Curl_getconnectinfo(data, NULL, NULL);
     break;
   default:
     return CURLE_UNKNOWN_OPTION;

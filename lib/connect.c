@@ -1214,14 +1214,19 @@ static int conn_is_conn(struct connectdata *conn, void *param)
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given Curl_easy.
  *
- * The returned socket will be CURL_SOCKET_BAD in case of failure!
+ * The returned socket will be CURL_SOCKET_BAD if an EOS has been received
+ * or in case of failure.
  */
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
-                                  struct connectdata **connp)
+                                  struct connectdata **connp,
+                                  bool *eos_received)
 {
   curl_socket_t sockfd;
 
   DEBUGASSERT(data);
+
+  if(eos_received)
+    *eos_received = false;
 
   /* this works for an easy handle:
    * - that has been used for curl_easy_perform()
@@ -1251,8 +1256,12 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
     /* determine if ssl */
     if(c->ssl[FIRSTSOCKET].use) {
       /* use the SSL context */
-      if(!Curl_ssl_check_cxn(c))
-        return CURL_SOCKET_BAD;   /* FIN received */
+      if(!Curl_ssl_check_cxn(c)) {
+        /* EOS received */
+        if(eos_received)
+          *eos_received = true;
+        return CURL_SOCKET_BAD;
+      }
     }
 /* Minix 3.1 doesn't support any flags on recv; just assume socket is OK */
 #ifdef MSG_PEEK
@@ -1261,7 +1270,10 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
       char buf;
       if(recv((RECV_TYPE_ARG1)sockfd, (RECV_TYPE_ARG2)&buf,
               (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK) == 0) {
-        return CURL_SOCKET_BAD;   /* FIN received */
+        /* EOS received */
+        if(eos_received)
+          *eos_received = true;
+        return CURL_SOCKET_BAD;
       }
     }
 #endif

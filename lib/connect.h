@@ -47,10 +47,12 @@ time_t Curl_timeleft(struct Curl_easy *data,
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given Curl_easy.
  *
- * The returned socket will be CURL_SOCKET_BAD in case of failure!
+ * The returned socket will be CURL_SOCKET_BAD if an EOS has been received
+ * or in case of failure.
  */
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
-                                  struct connectdata **connp);
+                                  struct connectdata **connp,
+                                  bool *eos_received);
 
 #ifdef USE_WINSOCK
 /* When you run a program that uses the Windows Sockets API, you may
