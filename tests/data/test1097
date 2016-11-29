@@ -19,18 +19,16 @@ Content-Length: 27
 This is all fine and dandy
 </data>
 
+# This is the CONNECT response
 <connect1001>
 HTTP/1.1 200 We are fine and cool
 Server: Apache/1.3.27 (Dorw1n) PHP/44.1.2
-Content-Length: 27
 
-This is all fine and dandy
 </connect1001>
 
 <datacheck>
 HTTP/1.1 200 We are fine and cool
 Server: Apache/1.3.27 (Dorw1n) PHP/44.1.2
-Content-Length: 27
 
 HTTP/1.1 200 We are fine and cool
 Server: Apache/1.3.27 (Dorw1n) PHP/44.1.2

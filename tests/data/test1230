@@ -23,14 +23,12 @@ mooooooo
 <connect>
 HTTP/1.1 200 welcome dear
 Date: Thu, 09 Nov 2010 14:49:00 GMT
-Content-Length: 0
 
 </connect>
 
 <datacheck>
 HTTP/1.1 200 welcome dear
 Date: Thu, 09 Nov 2010 14:49:00 GMT
-Content-Length: 0
 
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT

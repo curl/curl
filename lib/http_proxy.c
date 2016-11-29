@@ -529,6 +529,15 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                       return result;
                   }
                   else if(checkprefix("Content-Length:", line_start)) {
+                    if(k->httpcode/100 == 2) {
+                      /* A server MUST NOT send any Transfer-Encoding or
+                         Content-Length header fields in a 2xx (Successful)
+                         response to CONNECT. (RFC 7231 section 4.3.6) */
+                      failf(data, "Content-Length: in %03d response",
+                            k->httpcode);
+                      return CURLE_RECV_ERROR;
+                    }
+
                     cl = curlx_strtoofft(line_start +
                                          strlen("Content-Length:"), NULL, 10);
                   }
@@ -538,6 +547,14 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                   else if(Curl_compareheader(line_start,
                                              "Transfer-Encoding:",
                                              "chunked")) {
+                    if(k->httpcode/100 == 2) {
+                      /* A server MUST NOT send any Transfer-Encoding or
+                         Content-Length header fields in a 2xx (Successful)
+                         response to CONNECT. (RFC 7231 section 4.3.6) */
+                      failf(data, "Transfer-Encoding: in %03d response",
+                            k->httpcode);
+                      return CURLE_RECV_ERROR;
+                    }
                     infof(data, "CONNECT responded chunked\n");
                     chunked_encoding = TRUE;
                     /* init our chunky engine */
