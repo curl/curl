@@ -940,7 +940,7 @@ void Curl_sndbufset(curl_socket_t sockfd)
       if(osver.dwMajorVersion >= majorVersion)
         detectOsState = DETECT_OS_VISTA_OR_LATER;
     }
-#elif !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_PC_APP)
+#else
     ULONGLONG majorVersionMask;
     OSVERSIONINFOEX osver;
 
@@ -954,8 +954,6 @@ void Curl_sndbufset(curl_socket_t sockfd)
       detectOsState = DETECT_OS_VISTA_OR_LATER;
     else
       detectOsState = DETECT_OS_PREVISTA;
-#else
-    detectOsState = DETECT_OS_VISTA_OR_LATER;
 #endif
   }
 
