@@ -328,9 +328,11 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         case 0: /* timeout */
           break;
         default:
-          DEBUGASSERT(ptr+BUFSIZE-nread <= data->state.buffer+BUFSIZE+1);
-          result = Curl_read(conn, tunnelsocket, ptr, BUFSIZE-nread,
-                             &gotbytes);
+          if(ptr >= &data->state.buffer[BUFSIZE]) {
+            failf(data, "CONNECT response too large!");
+            return CURLE_RECV_ERROR;
+          }
+          result = Curl_read(conn, tunnelsocket, ptr, 1, &gotbytes);
           if(result==CURLE_AGAIN)
             continue; /* go loop yourself */
           else if(result)
@@ -445,15 +447,6 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                       if(cl) {
                         infof(data, "Ignore %" CURL_FORMAT_CURL_OFF_T
                               " bytes of response-body\n", cl);
-
-                        /* remove the remaining chunk of what we already
-                           read */
-                        cl -= (gotbytes - i);
-
-                        if(cl<=0)
-                          /* if the whole thing was already read, we are done!
-                           */
-                          keepon=FALSE;
                       }
                       else if(chunked_encoding) {
                         CHUNKcode r;
@@ -473,8 +466,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
                         /* now parse the chunked piece of data so that we can
                            properly tell when the stream ends */
-                        r = Curl_httpchunk_read(conn, line_start+1,
-                                                  gotbytes -i, &gotbytes);
+                        r = Curl_httpchunk_read(conn, line_start+1, 1,
+                                                &gotbytes);
                         if(r == CHUNKE_STOP) {
                           /* we're done reading chunks! */
                           infof(data, "chunk reading DONE\n");
