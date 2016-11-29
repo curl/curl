@@ -590,6 +590,8 @@ if(NOT UNIX)
         set(CURL_LIBS ${CURL_LIBS} "crypt32")
       endif()
     endif()
+  elseif(USE_OPENSSL)
+    set(CURL_LIBS ${CURL_LIBS} "crypt32")
   endif()
 endif(NOT UNIX)
 
