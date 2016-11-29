@@ -53,7 +53,7 @@ BOOL WINAPI PeekNamedPipe(
   _Out_opt_  LPDWORD lpBytesLeftThisMessage
 )
 {
-  return FALSE;
+  return 0;
 }
 
 void WINAPI InitializeCriticalSection(
