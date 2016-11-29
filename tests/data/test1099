@@ -32,11 +32,17 @@ tftp://%HOSTIP:%TFTPPORT/an/invalid-file tftp://%HOSTIP:%TFTPPORT//1099 --trace-
 <verify>
 <protocol>
 opcode: 1
+mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
 filename: an/invalid-file
-mode: octet
 opcode: 1
-filename: /1099
 mode: octet
+tsize: 0
+blksize: 512
+timeout: 6
+filename: /1099
 </protocol>
 <stdout>
 data for 1099

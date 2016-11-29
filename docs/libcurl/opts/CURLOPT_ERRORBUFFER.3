@@ -9,7 +9,7 @@
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -51,15 +51,33 @@ All
 .nf
 curl = curl_easy_init();
 if(curl) {
-  char error[CURL_ERROR_SIZE]
+  CURLcode res;
+  char errbuf[CURL_ERROR_SIZE];
 
   curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
 
   /* provide a buffer to store errors in */
-  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
+  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
-  /* Perform the request */
-  curl_easy_perform(curl);
+  /* set the error buffer as empty before performing a request */
+  errbuf[0] = 0;
+
+  /* perform the request */
+  res = curl_easy_perform(curl);
+
+  /* if the request did not complete correctly, show the error
+  information. if no detailed error information was written to errbuf
+  show the more generic information from curl_easy_strerror instead.
+  */
+  if(res != CURLE_OK) {
+    size_t len = strlen(errbuf);
+    fprintf(stderr, "\\nlibcurl: (%d) ", res);
+    if(len)
+      fprintf(stderr, "%s%s", errbuf,
+              ((errbuf[len - 1] != '\\n') ? "\\n" : ""));
+    else
+      fprintf(stderr, "%s\\n", curl_easy_strerror(res));
+  }
 }
 .fi
 .SH AVAILABILITY

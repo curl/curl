@@ -41,6 +41,8 @@ Set-Cookie: partmatch=present; domain=.0.0.1; path=/w;
 Set-Cookie: duplicate=test; domain=.0.0.1; domain=.0.0.1; path=/donkey;
 Set-Cookie: cookie=yes; path=/we;
 Set-Cookie: cookie=perhaps; path=/we/want;
+Set-Cookie: name with space=is weird but; path=/we/want;
+Set-Cookie: trailingspace    = removed; path=/we/want;
 Set-Cookie: nocookie=yes; path=/WE;
 Set-Cookie: blexp=yesyes; domain=%HOSTIP; domain=%HOSTIP; expiry=totally bad;
 Set-Cookie: partialip=nono; domain=.0.0.1;
@@ -60,7 +62,7 @@ perl -e 'if ("%HOSTIP" !~ /\.0\.0\.1$/) {print "Test only works for HOSTIPs endi
 GET /we/want/8 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Cookie: cookie=perhaps; cookie=yes; foobar=name; blexp=yesyes
+Cookie: cookie=perhaps; name with space=is weird but; trailingspace=removed; cookie=yes; foobar=name; blexp=yesyes
 
 </protocol>
 </verify>

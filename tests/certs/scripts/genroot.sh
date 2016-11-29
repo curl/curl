@@ -50,15 +50,15 @@ echo "openssl x509 -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -
 
 $OPENSSL x509  -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-$SERIAL-ca.cacert -sha1
 
-echo "openssl x509 -text -hash -out $PREFIX-ca.cacert -in $PREFIX-$SERIAL-ca.cacert -nameopt multiline"
-$OPENSSL x509 -text -hash -out $PREFIX-ca.cacert -in $PREFIX-$SERIAL-ca.cacert -nameopt multiline
+echo "openssl x509 -text -in $PREFIX-$SERIAL-ca.cacert -nameopt multiline > $PREFIX-ca.cacert "
+$OPENSSL x509 -text -in $PREFIX-$SERIAL-ca.cacert -nameopt multiline > $PREFIX-ca.cacert
 
 echo "openssl x509 -in $PREFIX-ca.cacert -outform der -out $PREFIX-ca.der "
 $OPENSSL x509 -in $PREFIX-ca.cacert -outform der -out $PREFIX-ca.der
 
-echo "openssl x509 -in $PREFIX-ca.cacert -text -out $PREFIX-ca.crt -nameopt multiline"
+echo "openssl x509 -in $PREFIX-ca.cacert -text -nameopt multiline > $PREFIX-ca.crt "
 
-$OPENSSL x509 -in $PREFIX-ca.cacert -text -out $PREFIX-ca.crt -nameopt multiline
+$OPENSSL x509 -in $PREFIX-ca.cacert -text -nameopt multiline > $PREFIX-ca.crt
 
 echo "openssl x509 -noout -text -in $PREFIX-ca.cacert -nameopt multiline"
 $OPENSSL x509 -noout -text -in $PREFIX-ca.cacert -nameopt multiline

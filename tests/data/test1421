@@ -1,0 +1,72 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Uknown-header: blrub
+Content-Length: 6
+
+-foo-
+</data>
+
+<servercmd>
+connection-monitor
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Re-using HTTP proxy connection for two different host names
+ </name>
+ <command>
+--proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.1421:8990/ http://different.remote.haxx.se.1421:8990
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+HTTP/1.1 200 OK
+Uknown-header: blrub
+Content-Length: 6
+
+-foo-
+HTTP/1.1 200 OK
+Uknown-header: blrub
+Content-Length: 6
+
+-foo-
+</stdout>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET http://test.remote.haxx.se.1421:8990/ HTTP/1.1
+Host: test.remote.haxx.se.1421:8990
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://different.remote.haxx.se.1421:8990/ HTTP/1.1
+Host: different.remote.haxx.se.1421:8990
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+[DISCONNECT]
+</protocol>
+</verify>
+</testcase>

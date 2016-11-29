@@ -72,7 +72,7 @@ fi
 if test "x$xc_lt_want_enable_shared" = 'xyes' &&
   test "x$xc_lt_want_enable_static" = 'xyes'; then
   case $host_os in @%:@ (
-    mingw* | pw32* | cegcc* | os2* | aix*)
+    pw32* | cegcc* | os2* | aix*)
       xc_lt_want_enable_static='no'
       ;;
   esac

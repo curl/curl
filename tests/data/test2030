@@ -253,43 +253,43 @@ chkhostname curlhost
 </strip>
 <protocol>
 GET /20300100 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 Accept: */*
 
 GET /20300100 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoIBANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyY3VybGhvc3Q=
 Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoIBANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyY3VybGhvc3Q=
 Accept: */*
 
 GET /20300200 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/20300200", response="2f2d784ba53a0a307758a90e98d25c27"
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /20300300 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /20300300 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAABoIBANgKEcT5xUUBHw5+0m4FjWTGNzg6PeHJHbaPwNwCt/tXcnIeTQCTMAg12SPDyNXMf3Rlc3R1c2VyY3VybGhvc3Q=
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /20300400 HTTP/1.1
-Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20300400", response="d6262e9147db08c62ff2f53b515861e8"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20300400", response="d6262e9147db08c62ff2f53b515861e8"
 Accept: */*
 
 GET /20300400 HTTP/1.1
-Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20300400", response="d6262e9147db08c62ff2f53b515861e8"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="5", uri="/20300400", response="d6262e9147db08c62ff2f53b515861e8"
 Accept: */*
 
 GET /20300500 HTTP/1.1
-Authorization: Digest username="testuser", realm="testrealm", nonce="7", uri="/20300500", response="198757e61163a779cf24ed4c49c1ad7d"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="7", uri="/20300500", response="198757e61163a779cf24ed4c49c1ad7d"
 Accept: */*
 
 </protocol>

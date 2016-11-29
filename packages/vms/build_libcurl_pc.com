@@ -76,7 +76,7 @@ $ endif
 $!
 $!
 $ curl_version = "0.0.0"
-$ open/read vf [--.src]version.h
+$ open/read vf [--.src]tool_version.h
 $version_loop:
 $   read vf/end=version_loop_end line_in
 $   if line_in .eqs. "" then goto version_loop

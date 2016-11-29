@@ -42,6 +42,7 @@ Content-Length: 26
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>
@@ -66,8 +67,8 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /1079 HTTP/1.1
-Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/1079", response="e340c7cdca0950462070f46ee139e9f7"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/1079", response="e340c7cdca0950462070f46ee139e9f7"
 Accept: */*
 
 </protocol>

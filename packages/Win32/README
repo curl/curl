@@ -3,7 +3,7 @@ Author: Jörn Hartroth
 DESCRIPTION
 
 (If you're only looking for precompiled win32 binaries, go visit
-http://curl.haxx.se/download.html)
+https://curl.haxx.se/download.html)
 
 Packaging of the curl binaries for Win32 should at this point in time be based
 on the InfoZip (zip/unzip) archiver family as the de-facto standard for

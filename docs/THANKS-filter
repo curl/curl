@@ -1,0 +1,72 @@
+# This is a list of names we have recorded that already are thanked
+# appropriately in THANKS. This list contains variations of their names and
+# their "canonical" name. This file is used for scripting purposes to avoid
+# duplicate entries and will not be included in release tarballs.
+# When removing dupes that aren't identical names from THANKS, add a line
+# here!
+#
+# Used-by: contributor.sh
+s/Andres Garcia/Andrés García/
+s/Chris Conroy/Christopher Conroy/
+s/Francois Charlier/François Charlier/
+s/Gokhan Sengun/Gökhan Şengün/
+s/John Malmberg/John E. Malmberg/
+s/Luca Alteas/Luca Altea/
+s/Michal Gorny/Michał Górny/
+s/Michal Górny/Michał Górny/
+s/Moonesamy/S. Moonesamy/
+s/Pete Su$/Peter Su/
+s/Sam Listopad/Samuel Listopad/
+s/Sebastien Willemijns/Sébastien Willemijns/
+s/YAMADA Yasuharu/Yasuharu Yamada/
+s/Karl M$/Karl Moerder/
+s/Bjorn Stenberg/Björn Stenberg/
+s/upstream tests 305 and 404//
+s/Gaël PORTAY/Gaël Portay/
+s/Romulo Ceccon/Romulo A. Ceccon/
+s/Nach M. S$/Nach M. S./
+s/Jay Satiro/Ray Satiro/
+s/Richard J. Moore/Richard Moore/
+s/Sergey Nikulov/Sergei Nikulov/
+s/Petr Písař/Petr Pisar/
+s/Nick Zitzmann (originally)/Nick Zitzmann/
+s/product-security at Apple//
+s/IT DOES NOT WORK//
+s/Albert Chin/Albert Chin-A-Young/
+s/Paras S\z/Paras Sethia/
+s/Paras Sethiaethia/Paras Sethia/
+s/Дмитрий Фалько/Dmitry Falko/
+s/byte_bucket in the #curl IRC channel//
+s/Michal Górny and Anthony G. Basile//
+s/Alejandro Alvarez$/Alejandro Alvarez Ayllon/
+s/Ant Bryan/Anthony Bryan/
+s/Cédric Deltheil/Cédric Deltheil/
+s/Christian Hagele/Christian Hägele/
+s/douglas steinwand/Douglas Steinwand/
+s/Frank Van Uffelen and Fabian Hiernaux//
+s/Rodrigo Silva (MestreLion)/Rodrigo Silva/
+s/tetetest tetetest//
+s/Jiří Hruška/Jiri Hruska/
+s/Viktor Szakats/Viktor Szakáts/
+s/Jonathan Cardoso$/Jonathan Cardoso Machado/
+s/Linus Nielsen$/Linus Nielsen Feltzing/
+s/Todd Ouska$/Todd A Ouska/
+s/Tim Ruehsen/Tim Rühsen/
+s/Michael Koenig/Michael König/
+s/moparisthebest/Travis Burtrum/
+s/Jan-E/Jan Ehrhardt/
+s/Paras S$/Paras Sethia/
+s/Cristian Rodr\xEDguez$/Cristian Rodríguez/
+s/Sidney San Mart\xEDn$/Sidney San Martín/
+s/Sidney San Martin$/Sidney San Martín/
+s/Taneli V\xE4h\xE4kangas$/Taneli Vähäkangas/
+s/Taneli Vahakangas$/Taneli Vähäkangas/
+s/Никита Дорохин./Никита Дорохин/
+s/upstream tests 305//
+s/ (edited)//
+s/Jean-Philippe Barette-LaPierre$/Jean-Philippe Barrette-LaPierre/
+s/Joern Hartroth$/Jörn Hartroth/
+s/Hongli Lai (Phusion)$/Hongli Lai/
+s/github user 'kreshano'$/kreshano on github/
+s/Marc Hoersken$/Marc Hörsken/
+s/Martin Storsjo$/Martin Storsjö/

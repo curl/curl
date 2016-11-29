@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -56,18 +56,19 @@ static char msgbuff[256];
 
 static void store_errmsg(const char *msg, int err)
 {
-  if (!err)
-    sprintf(msgbuff, "%s", msg);
+  if(!err)
+    snprintf(msgbuff, sizeof(msgbuff), "%s", msg);
   else
-    sprintf(msgbuff, "%s, errno %d, %s", msg, err, strerror(err));
+    snprintf(msgbuff, sizeof(msgbuff), "%s, errno %d, %s", msg,
+             err, strerror(err));
 }
 
 static void close_file_descriptors(void)
 {
-  for (num_open.rlim_cur = 0;
-       num_open.rlim_cur < num_open.rlim_max;
-       num_open.rlim_cur++)
-    if (fd[num_open.rlim_cur] > 0)
+  for(num_open.rlim_cur = 0;
+      num_open.rlim_cur < num_open.rlim_max;
+      num_open.rlim_cur++)
+    if(fd[num_open.rlim_cur] > 0)
       close(fd[num_open.rlim_cur]);
   free(fd);
   fd = NULL;
@@ -79,20 +80,20 @@ static int fopen_works(void)
   int i;
   int ret = 1;
 
-  for (i = 0; i < 3; i++) {
+  for(i = 0; i < 3; i++) {
     fpa[i] = NULL;
   }
-  for (i = 0; i < 3; i++) {
-    fpa[i] = fopen(DEV_NULL, "r");
-    if (fpa[i] == NULL) {
-      store_errmsg("fopen() failed", ERRNO);
+  for(i = 0; i < 3; i++) {
+    fpa[i] = fopen(DEV_NULL, FOPEN_READTEXT);
+    if(fpa[i] == NULL) {
+      store_errmsg("fopen failed", ERRNO);
       fprintf(stderr, "%s\n", msgbuff);
       ret = 0;
       break;
     }
   }
-  for (i = 0; i < 3; i++) {
-    if (fpa[i] != NULL)
+  for(i = 0; i < 3; i++) {
+    if(fpa[i] != NULL)
       fclose(fpa[i]);
   }
   return ret;
@@ -112,7 +113,7 @@ static int rlimit(int keep_open)
 #ifdef HAVE_LONGLONG
   char fmt_llu[] = "%llu";
 
-  if (sizeof(rl.rlim_max) > sizeof(long))
+  if(sizeof(rl.rlim_max) > sizeof(long))
     fmt = fmt_llu;
   else
 #endif
@@ -120,7 +121,7 @@ static int rlimit(int keep_open)
 
   /* get initial open file limits */
 
-  if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
+  if(getrlimit(RLIMIT_NOFILE, &rl) != 0) {
     store_errmsg("getrlimit() failed", ERRNO);
     fprintf(stderr, "%s\n", msgbuff);
     return -1;
@@ -129,19 +130,19 @@ static int rlimit(int keep_open)
   /* show initial open file limits */
 
 #ifdef RLIM_INFINITY
-  if (rl.rlim_cur == RLIM_INFINITY)
+  if(rl.rlim_cur == RLIM_INFINITY)
     strcpy(strbuff, "INFINITY");
   else
 #endif
-    sprintf(strbuff, fmt, rl.rlim_cur);
+    snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_cur);
   fprintf(stderr, "initial soft limit: %s\n", strbuff);
 
 #ifdef RLIM_INFINITY
-  if (rl.rlim_max == RLIM_INFINITY)
+  if(rl.rlim_max == RLIM_INFINITY)
     strcpy(strbuff, "INFINITY");
   else
 #endif
-    sprintf(strbuff, fmt, rl.rlim_max);
+    snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_max);
   fprintf(stderr, "initial hard limit: %s\n", strbuff);
 
   /* show our constants */
@@ -159,14 +160,14 @@ static int rlimit(int keep_open)
    * open more than soft limit file descriptors will fail.
    */
 
-  if (rl.rlim_cur != rl.rlim_max) {
+  if(rl.rlim_cur != rl.rlim_max) {
 
 #ifdef OPEN_MAX
-    if ((rl.rlim_cur > 0) &&
-        (rl.rlim_cur < OPEN_MAX)) {
+    if((rl.rlim_cur > 0) &&
+       (rl.rlim_cur < OPEN_MAX)) {
       fprintf(stderr, "raising soft limit up to OPEN_MAX\n");
       rl.rlim_cur = OPEN_MAX;
-      if (setrlimit(RLIMIT_NOFILE, &rl) != 0) {
+      if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
         /* on failure don't abort just issue a warning */
         store_errmsg("setrlimit() failed", ERRNO);
         fprintf(stderr, "%s\n", msgbuff);
@@ -177,7 +178,7 @@ static int rlimit(int keep_open)
 
     fprintf(stderr, "raising soft limit up to hard limit\n");
     rl.rlim_cur = rl.rlim_max;
-    if (setrlimit(RLIMIT_NOFILE, &rl) != 0) {
+    if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
       /* on failure don't abort just issue a warning */
       store_errmsg("setrlimit() failed", ERRNO);
       fprintf(stderr, "%s\n", msgbuff);
@@ -186,7 +187,7 @@ static int rlimit(int keep_open)
 
     /* get current open file limits */
 
-    if (getrlimit(RLIMIT_NOFILE, &rl) != 0) {
+    if(getrlimit(RLIMIT_NOFILE, &rl) != 0) {
       store_errmsg("getrlimit() failed", ERRNO);
       fprintf(stderr, "%s\n", msgbuff);
       return -3;
@@ -195,19 +196,19 @@ static int rlimit(int keep_open)
     /* show current open file limits */
 
 #ifdef RLIM_INFINITY
-    if (rl.rlim_cur == RLIM_INFINITY)
+    if(rl.rlim_cur == RLIM_INFINITY)
       strcpy(strbuff, "INFINITY");
     else
 #endif
-      sprintf(strbuff, fmt, rl.rlim_cur);
+      snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_cur);
     fprintf(stderr, "current soft limit: %s\n", strbuff);
 
 #ifdef RLIM_INFINITY
-    if (rl.rlim_max == RLIM_INFINITY)
+    if(rl.rlim_max == RLIM_INFINITY)
       strcpy(strbuff, "INFINITY");
     else
 #endif
-      sprintf(strbuff, fmt, rl.rlim_max);
+      snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_max);
     fprintf(stderr, "current hard limit: %s\n", strbuff);
 
   } /* (rl.rlim_cur != rl.rlim_max) */
@@ -229,15 +230,15 @@ static int rlimit(int keep_open)
 
   num_open.rlim_cur = NUM_NEEDED;
 
-  if ((rl.rlim_cur > 0) &&
+  if((rl.rlim_cur > 0) &&
 #ifdef RLIM_INFINITY
      (rl.rlim_cur != RLIM_INFINITY) &&
 #endif
      (rl.rlim_cur <= num_open.rlim_cur)) {
-    sprintf(strbuff2, fmt, rl.rlim_cur);
-    sprintf(strbuff1, fmt, num_open.rlim_cur);
-    sprintf(strbuff, "fds needed %s > system limit %s",
-            strbuff1, strbuff2);
+    snprintf(strbuff2, sizeof(strbuff2), fmt, rl.rlim_cur);
+    snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
+    snprintf(strbuff, sizeof(strbuff), "fds needed %s > system limit %s",
+             strbuff1, strbuff2);
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
     return -4;
@@ -252,21 +253,21 @@ static int rlimit(int keep_open)
    * that it becomes available to the test.
    */
 
-  for (nitems = i = 1; nitems <= i; i *= 2)
+  for(nitems = i = 1; nitems <= i; i *= 2)
     nitems = i;
-  if (nitems > 0x7fff)
+  if(nitems > 0x7fff)
     nitems = 0x40000;
   do {
     num_open.rlim_max = sizeof(*memchunk) * (size_t)nitems;
-    sprintf(strbuff, fmt, num_open.rlim_max);
+    snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
     fprintf(stderr, "allocating memchunk %s byte array\n", strbuff);
     memchunk = malloc(sizeof(*memchunk) * (size_t)nitems);
-    if (!memchunk) {
+    if(!memchunk) {
       fprintf(stderr, "memchunk, malloc() failed\n");
       nitems /= 2;
     }
-  } while (nitems && !memchunk);
-  if (!memchunk) {
+  } while(nitems && !memchunk);
+  if(!memchunk) {
     store_errmsg("memchunk, malloc() failed", ERRNO);
     fprintf(stderr, "%s\n", msgbuff);
     return -5;
@@ -276,7 +277,7 @@ static int rlimit(int keep_open)
 
   fprintf(stderr, "initializing memchunk array\n");
 
-  for (i = 0; i < nitems; i++)
+  for(i = 0; i < nitems; i++)
     memchunk[i] = -1;
 
   /* set the number of file descriptors we will try to open */
@@ -285,10 +286,10 @@ static int rlimit(int keep_open)
 
   /* verify that we won't overflow size_t in malloc() */
 
-  if ((size_t)(num_open.rlim_max) > ((size_t)-1) / sizeof(*fd)) {
-    sprintf(strbuff1, fmt, num_open.rlim_max);
-    sprintf(strbuff, "unable to allocate an array for %s "
-            "file descriptors, would overflow size_t", strbuff1);
+  if((size_t)(num_open.rlim_max) > ((size_t)-1) / sizeof(*fd)) {
+    snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_max);
+    snprintf(strbuff, sizeof(strbuff), "unable to allocate an array for %s "
+             "file descriptors, would overflow size_t", strbuff1);
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
     free(memchunk);
@@ -297,11 +298,11 @@ static int rlimit(int keep_open)
 
   /* allocate array for file descriptors */
 
-  sprintf(strbuff, fmt, num_open.rlim_max);
+  snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
   fprintf(stderr, "allocating array for %s file descriptors\n", strbuff);
 
   fd = malloc(sizeof(*fd) * (size_t)(num_open.rlim_max));
-  if (!fd) {
+  if(!fd) {
     store_errmsg("fd, malloc() failed", ERRNO);
     fprintf(stderr, "%s\n", msgbuff);
     free(memchunk);
@@ -312,19 +313,19 @@ static int rlimit(int keep_open)
 
   fprintf(stderr, "initializing fd array\n");
 
-  for (num_open.rlim_cur = 0;
-       num_open.rlim_cur < num_open.rlim_max;
-       num_open.rlim_cur++)
+  for(num_open.rlim_cur = 0;
+      num_open.rlim_cur < num_open.rlim_max;
+      num_open.rlim_cur++)
     fd[num_open.rlim_cur] = -1;
 
-  sprintf(strbuff, fmt, num_open.rlim_max);
+  snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
   fprintf(stderr, "trying to open %s file descriptors\n", strbuff);
 
   /* open a dummy descriptor */
 
   fd[0] = open(DEV_NULL, O_RDONLY);
-  if (fd[0] < 0) {
-    sprintf(strbuff, "opening of %s failed", DEV_NULL);
+  if(fd[0] < 0) {
+    snprintf(strbuff, sizeof(strbuff), "opening of %s failed", DEV_NULL);
     store_errmsg(strbuff, ERRNO);
     fprintf(stderr, "%s\n", msgbuff);
     free(fd);
@@ -335,36 +336,37 @@ static int rlimit(int keep_open)
 
   /* create a bunch of file descriptors */
 
-  for (num_open.rlim_cur = 1;
-       num_open.rlim_cur < num_open.rlim_max;
-       num_open.rlim_cur++) {
+  for(num_open.rlim_cur = 1;
+      num_open.rlim_cur < num_open.rlim_max;
+      num_open.rlim_cur++) {
 
     fd[num_open.rlim_cur] = dup(fd[0]);
 
-    if (fd[num_open.rlim_cur] < 0) {
+    if(fd[num_open.rlim_cur] < 0) {
 
       fd[num_open.rlim_cur] = -1;
 
-      sprintf(strbuff1, fmt, num_open.rlim_cur);
-      sprintf(strbuff, "dup() attempt %s failed", strbuff1);
+      snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
+      snprintf(strbuff, sizeof(strbuff), "dup() attempt %s failed", strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
-      sprintf(strbuff1, fmt, num_open.rlim_cur);
-      sprintf(strbuff, "fds system limit seems close to %s", strbuff1);
+      snprintf(strbuff1, sizeof(strbuff), fmt, num_open.rlim_cur);
+      snprintf(strbuff, sizeof(strbuff), "fds system limit seems close to %s",
+               strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
       num_open.rlim_max = NUM_NEEDED;
 
-      sprintf(strbuff2, fmt, num_open.rlim_max);
-      sprintf(strbuff1, fmt, num_open.rlim_cur);
-      sprintf(strbuff, "fds needed %s > system limit %s",
-              strbuff2, strbuff1);
+      snprintf(strbuff2, sizeof(strbuff2), fmt, num_open.rlim_max);
+      snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
+      snprintf(strbuff, sizeof(strbuff), "fds needed %s > system limit %s",
+               strbuff2, strbuff1);
       store_errmsg(strbuff, 0);
       fprintf(stderr, "%s\n", msgbuff);
 
-      for (num_open.rlim_cur = 0;
-           fd[num_open.rlim_cur] >= 0;
-           num_open.rlim_cur++)
+      for(num_open.rlim_cur = 0;
+          fd[num_open.rlim_cur] >= 0;
+          num_open.rlim_cur++)
         close(fd[num_open.rlim_cur]);
       free(fd);
       fd = NULL;
@@ -375,7 +377,7 @@ static int rlimit(int keep_open)
 
   }
 
-  sprintf(strbuff, fmt, num_open.rlim_max);
+  snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
   fprintf(stderr, "%s file descriptors open\n", strbuff);
 
 #if !defined(HAVE_POLL_FINE)    && \
@@ -394,8 +396,9 @@ static int rlimit(int keep_open)
    */
 
   num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
-  if (num_open.rlim_max > num_open.rlim_cur) {
-    sprintf(strbuff, "select limit is FD_SETSIZE %d", FD_SETSIZE);
+  if(num_open.rlim_max > num_open.rlim_cur) {
+    snprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
+             FD_SETSIZE);
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
     close_file_descriptors();
@@ -404,12 +407,13 @@ static int rlimit(int keep_open)
   }
 
   num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
-  for (rl.rlim_cur = 0;
-       rl.rlim_cur < num_open.rlim_max;
-       rl.rlim_cur++) {
-    if ((fd[rl.rlim_cur] > 0) &&
+  for(rl.rlim_cur = 0;
+      rl.rlim_cur < num_open.rlim_max;
+      rl.rlim_cur++) {
+    if((fd[rl.rlim_cur] > 0) &&
        ((unsigned int)fd[rl.rlim_cur] > num_open.rlim_cur)) {
-      sprintf(strbuff, "select limit is FD_SETSIZE %d", FD_SETSIZE);
+      snprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
+               FD_SETSIZE);
       store_errmsg(strbuff, 0);
       fprintf(stderr, "%s\n", msgbuff);
       close_file_descriptors();
@@ -429,12 +433,14 @@ static int rlimit(int keep_open)
    * if it is capable of fopen()ing some additional files.
    */
 
-  if (!fopen_works()) {
-    sprintf(strbuff1, fmt, num_open.rlim_max);
-    sprintf(strbuff, "stdio fopen() fails with %s fds open()",
-            strbuff1);
+  if(!fopen_works()) {
+    snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_max);
+    snprintf(strbuff, sizeof(strbuff),
+             "fopen fails with %s fds open()",
+             strbuff1);
     fprintf(stderr, "%s\n", msgbuff);
-    sprintf(strbuff, "stdio fopen() fails with lots of fds open()");
+    snprintf(strbuff, sizeof(strbuff),
+             "fopen fails with lots of fds open()");
     store_errmsg(strbuff, 0);
     close_file_descriptors();
     free(memchunk);
@@ -448,7 +454,7 @@ static int rlimit(int keep_open)
 
   /* close file descriptors unless instructed to keep them */
 
-  if (!keep_open) {
+  if(!keep_open) {
     close_file_descriptors();
   }
 
@@ -469,7 +475,7 @@ int test(char *URL)
     return 0; /* sure, run this! */
   }
 
-  if (rlimit(TRUE)) {
+  if(rlimit(TRUE)) {
     /* failure */
     return TEST_ERR_MAJOR_BAD;
   }
@@ -477,13 +483,13 @@ int test(char *URL)
   /* run the test with the bunch of open file descriptors
      and close them all once the test is over */
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
     close_file_descriptors();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if ((curl = curl_easy_init()) == NULL) {
+  if((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
     close_file_descriptors();
     curl_global_cleanup();

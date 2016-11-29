@@ -122,7 +122,7 @@ DELAY [command] [secs]
  - Delay responding to this command for the given time
 RETRWEIRDO
  - Enable the "weirdo" RETR case when multiple response lines appear at once
-   when a file is transfered
+   when a file is transferred
 RETRNOSIZE
  - Make sure the RETR response doesn't contain the size of the file
 NOSAVE
@@ -156,7 +156,8 @@ rtp: part [num] channel [num] size [num]
 
 connection-monitor When used, this will log [DISCONNECT] to the server.input
                log when the connection is disconnected.
-
+upgrade        when an HTTP upgrade header is found, the server will upgrade
+               to http2
 
 For TFTP:
 writedelay: [secs] delay this amount between reply packets (each packet being
@@ -176,9 +177,11 @@ ftps
 http
 http-ipv6
 http-proxy
+http-unix
 https
 httptls+srp
 httptls+srp-ipv6
+http/2
 imap
 none
 pop3
@@ -195,27 +198,42 @@ Give only one per line.  This subsection is mandatory.
 
 <features>
 A list of features that MUST be present in the client/library for this test to
-be able to run (if these features are not present, the test will be
-SKIPPED). Features testable here are:
+be able to run. If a required feature is not present then the test will be
+SKIPPED.
+
+Alternatively a feature can be prefixed with an exclamation mark to indicate a
+feature is NOT required. If the feature is present then the test will be
+SKIPPED.
+
+Features testable here are:
 
 axTLS
 crypto
 debug
 getrlimit
 GnuTLS
+GSS-API
+http2
 idn
 ipv6
+Kerberos
 large_file
 libz
 Metalink
 NSS
 NTLM
 OpenSSL
+PSL
 socks
+SPNEGO
 SSL
+SSLpinning
+SSPI
 TLS-SRP
 TrackMemory
 unittest
+unix-sockets
+WinSSL
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
@@ -274,8 +292,8 @@ data that is defined within the <reply><data></data></reply> section.
 If there's no test number found above, the HTTP test server will use the
 number following the last dot in the given hostname (made so that a CONNECT
 can still pass on test number) so that "foo.bar.123" gets treated as test case
-123. Alternatively, if an ipv6-address is provided to CONNECT, the last
-hexadecimal group in the address will be used as the test numer! For example
+123. Alternatively, if an IPv6 address is provided to CONNECT, the last
+hexadecimal group in the address will be used as the test number! For example
 the address "[1234::ff]" would be treated as test case 255.
 
 Set type="perl" to write the test case as a perl script. It implies that
@@ -318,13 +336,14 @@ Available substitute variables include:
 %HOSTIP       - IPv4 address of the host running this test
 %HTTP6PORT    - IPv6 port number of the HTTP server
 %HTTPPIPEPORT - Port number of the HTTP pipelining server
+%HTTPUNIXPATH - Path to the Unix socket of the HTTP server
 %HTTPPORT     - Port number of the HTTP server
 %HTTPSPORT    - Port number of the HTTPS server
 %HTTPTLS6PORT - IPv6 port number of the HTTP TLS server
 %HTTPTLSPORT  - Port number of the HTTP TLS server
 %IMAP6PORT - IPv6 port number of the IMAP server
 %IMAPPORT  - Port number of the IMAP server
-%POP36PORT - IPv6 ort number of the POP3 server
+%POP36PORT - IPv6 port number of the POP3 server
 %POP3PORT  - Port number of the POP3 server
 %PROXYPORT - Port number of the HTTP proxy
 %PWD       - Current directory
@@ -408,8 +427,9 @@ have a text/binary difference.
 Variables are substituted as in the <command> section.
 </file>
 <stripfile>
-One perl op per line that operates on the file before being compared. This is
-pretty advanced. Example: "s/^EPRT .*/EPRT stripped/"
+One perl op per line that operates on the output file or stdout before being
+compared with what is stored in the test file. This is pretty
+advanced. Example: "s/^EPRT .*/EPRT stripped/"
 </stripfile>
 <upload>
 the contents of the upload data curl should have sent

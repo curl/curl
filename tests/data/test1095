@@ -52,6 +52,7 @@ This IS the real page!
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>
@@ -73,9 +74,9 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /1095 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="test \"this\" realm!!", nonce="1053604145", uri="/1095", response="a1c7931ece9e8617bae2715045e4f49f"
 User-Agent: curl/7.10.5 (i686-pc-linux-gnu) libcurl/7.10.5 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

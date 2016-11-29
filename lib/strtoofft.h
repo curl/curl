@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,7 +45,14 @@
 #    define curlx_strtoofft strtoll
 #  else
 #    if defined(_MSC_VER) && (_MSC_VER >= 1300) && (_INTEGRAL_MAX_BITS >= 64)
-       _CRTIMP __int64 __cdecl _strtoi64(const char *, char **, int);
+#      if defined(_SAL_VERSION)
+         _Check_return_ _CRTIMP __int64 __cdecl _strtoi64(
+             _In_z_ const char *_String,
+             _Out_opt_ _Deref_post_z_ char **_EndPtr, _In_ int _Radix);
+#      else
+         _CRTIMP __int64 __cdecl _strtoi64(const char *_String,
+                                           char **_EndPtr, int _Radix);
+#      endif
 #      define curlx_strtoofft _strtoi64
 #    else
        curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);

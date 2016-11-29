@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -29,15 +29,12 @@
 
 #include "content_encoding.h"
 #include "http.h"
-#include "curl_memory.h"
 #include "non-ascii.h" /* for Curl_convert_to_network prototype */
 #include "strtoofft.h"
 #include "warnless.h"
 
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /*
@@ -83,7 +80,7 @@ static bool Curl_isxdigit(char digit)
 {
   return ( (digit >= 0x30 && digit <= 0x39) /* 0-9 */
         || (digit >= 0x41 && digit <= 0x46) /* A-F */
-        || (digit >= 0x61 && digit <= 0x66) /* a-f */ ) ? TRUE : FALSE;
+        || (digit >= 0x61 && digit <= 0x66) /* a-f */) ? TRUE : FALSE;
 }
 
 void Curl_httpchunk_init(struct connectdata *conn)
@@ -111,7 +108,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
                               ssize_t *wrotep)
 {
   CURLcode result=CURLE_OK;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   struct Curl_chunker *ch = &conn->chunk;
   struct SingleRequest *k = &data->req;
   size_t piece;
@@ -158,7 +155,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         if(result) {
           /* Curl_convert_from_network calls failf if unsuccessful */
           /* Treat it as a bad hex character */
-          return CHUNKE_ILLEGAL_HEX ;
+          return CHUNKE_ILLEGAL_HEX;
         }
 
         ch->datasize=curlx_strtoofft(ch->hexbuffer, &endptr, 16);
@@ -221,7 +218,6 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
                                           (ssize_t)piece);
         break;
 
-      case COMPRESS:
       default:
         failf (conn->data,
                "Unrecognized content encoding type. "

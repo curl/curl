@@ -33,8 +33,8 @@ BUILD_TYPE := debug
 USER_CFLAGS:=
 
 # directories where to seek for includes and libraries
-OPENSSL_INC := D:/libraries/openssl/openssl-0.9.8y-vxWorks6.3/include
-OPENSSL_LIB := D:/libraries/openssl/openssl-0.9.8y-vxWorks6.3
+OPENSSL_INC := D:/libraries/openssl/openssl-0.9.8zc-vxWorks6.3/include
+OPENSSL_LIB := D:/libraries/openssl/openssl-0.9.8zc-vxWorks6.3
 ZLIB_INC    := D:/libraries/zlib/zlib-1.2.8-VxWorks6.3/zlib-1.2.8
 ZLIB_LIB    := D:/libraries/zlib/zlib-1.2.8-VxWorks6.3/binaries/vxworks_3.1_gnu/Debug/lib
 ARES_INC    :=

@@ -5,11 +5,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -56,7 +56,7 @@ PROGRAM_NAME = curl.exe
 
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8y
+OPENSSL_PATH = ../../openssl-1.0.2a
 !ENDIF
 
 !IFNDEF ZLIB_PATH
@@ -77,7 +77,7 @@ MACHINE  = X86
 # If, for some reason the Windows SDK is installed but not installed
 # in the default location, you can specify WINDOWS_SDK_PATH.
 # It can be downloaded from:
-# http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
+# https://msdn.microsoft.com/windows/bb980924.aspx
 
 # WINDOWS_SSPI = 1
 
@@ -90,18 +90,23 @@ WINDOWS_SDK_PATH = "$(PROGRAMFILES)\Microsoft SDK"
 ########################################################
 ## Nothing more to do below this line!
 
-ZLIB_CFLAGS   = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
-ZLIB_LFLAGS   = "/LIBPATH:$(ZLIB_PATH)"
-ZLIB_LIBS     = zlib.lib
-ZLIB_IMP_LIBS = zdll.lib
+ZLIB_CFLAGS    = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
+ZLIB_LFLAGS    = "/LIBPATH:$(ZLIB_PATH)"
+ZLIB_LIBS      = zlib.lib
+ZLIB_IMP_LIBS  = zdll.lib
 
-SSL_CFLAGS     = /DUSE_SSLEAY
+SSL_CFLAGS     = /DUSE_OPENSSL
 SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
 SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib user32.lib
+WINLIBS        = ws2_32.lib wldap32.lib advapi32.lib
 
 WINSSL_CFLAGS  = /DUSE_SCHANNEL
 #WINSSL_LIBS    = gdi32.lib user32.lib
+
+!IFDEF USE_IDN
+WINLIBS        = $(WINLIBS) normaliz.lib
+!ENDIF
 
 # Runtime library configuration
 RTLIB   = /MD
@@ -137,9 +142,10 @@ CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
 
 RELEASE_OBJS= \
 	nonblockr.obj \
-	rawstrr.obj \
+	strcaser.obj \
 	strtoofftr.obj \
 	warnless.obj \
+	slist_wc.obj \
 	tool_binmoder.obj \
 	tool_bnamer.obj \
 	tool_cb_dbgr.obj \
@@ -182,9 +188,10 @@ RELEASE_OBJS= \
 
 DEBUG_OBJS= \
 	nonblockd.obj \
-	rawstrd.obj \
+	strcased.obj \
 	strtoofftd.obj \
 	warnlessd.obj \
+	slist_wcd.obj \
 	tool_binmoded.obj \
 	tool_bnamed.obj \
 	tool_cb_dbgd.obj \
@@ -340,9 +347,8 @@ LINKLIBS_DEBUG = $(LIBCURL_IMP_LIB_DBG) $(SSL_LIBS) $(ZLIB_IMP_LIBS)
 LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
-
-LINKLIBS       = $(LINKLIBS) ws2_32.lib wldap32.lib advapi32.lib
-LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) ws2_32.lib wldap32.lib advapi32.lib
+LINKLIBS       = $(LINKLIBS) $(WINLIBS)
+LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) $(WINLIBS)
 
 all : release
 
@@ -357,12 +363,14 @@ debug: $(DEBUG_OBJS)
 ## Release
 nonblockr.obj: ../lib/nonblock.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
-rawstrr.obj: ../lib/rawstr.c
-	$(CCR) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
+strcaser.obj: ../lib/strcase.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strcase.c
 strtoofftr.obj: ../lib/strtoofft.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 warnless.obj: ../lib/warnless.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/warnless.c
+slist_wc.obj: slist_wc.c
+	$(CCR) $(CFLAGS) /Fo"$@" slist_wc.c
 tool_binmoder.obj: tool_binmode.c
 	$(CCR) $(CFLAGS) /Fo"$@" tool_binmode.c
 tool_bnamer.obj: tool_bname.c
@@ -445,12 +453,14 @@ curlr.res : curl.rc
 ## Debug
 nonblockd.obj: ../lib/nonblock.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/nonblock.c
-rawstrd.obj: ../lib/rawstr.c
-	$(CCD) $(CFLAGS) /Fo"$@" ../lib/rawstr.c
+strcased.obj: ../lib/strcase.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strcase.c
 strtoofftd.obj: ../lib/strtoofft.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 warnlessd.obj: ../lib/warnless.c
 	$(CCD) $(CFLAGS) /Fo"$@" ../lib/warnless.c
+slist_wcd.obj: slist_wc.c
+	$(CCD) $(CFLAGS) /Fo"$@" slist_wc.c
 tool_binmoded.obj: tool_binmode.c
 	$(CCD) $(CFLAGS) /Fo"$@" tool_binmode.c
 tool_bnamed.obj: tool_bname.c

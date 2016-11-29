@@ -6,18 +6,18 @@ if(USE_MANUAL)
   # embedded text. NROFF and MANOPT are set in the parent CMakeLists.txt
   add_custom_command(
     OUTPUT tool_hugehelp.c
-    COMMAND echo "#include \"tool_setup.h\"" > tool_hugehelp.c
-    COMMAND echo "#ifndef HAVE_LIBZ" >> tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "#ifndef HAVE_LIBZ" >> tool_hugehelp.c
     COMMAND env LC_ALL=C "${NROFF}" ${NROFF_MANOPT}
             "${CURL_SOURCE_DIR}/docs/curl.1" |
             "${PERL}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"
             "${CURL_SOURCE_DIR}/docs/MANUAL" >> tool_hugehelp.c
-    COMMAND echo "#else" >> tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "#else" >> tool_hugehelp.c
     COMMAND env LC_ALL=C "${NROFF}" ${NROFF_MANOPT}
             "${CURL_SOURCE_DIR}/docs/curl.1" |
             "${PERL}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl" -c
             "${CURL_SOURCE_DIR}/docs/MANUAL" >> tool_hugehelp.c
-    COMMAND echo "#endif /* HAVE_LIBZ */" >> tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "#endif /* HAVE_LIBZ */" >> tool_hugehelp.c
     DEPENDS
       "${CURL_SOURCE_DIR}/docs/MANUAL"
       "${CURL_SOURCE_DIR}/docs/curl.1"
@@ -27,12 +27,13 @@ if(USE_MANUAL)
 else()
   add_custom_command(
     OUTPUT tool_hugehelp.c
-    COMMAND echo "/* built-in manual is disabled, blank function */" > tool_hugehelp.c
-    COMMAND echo "#include \"tool_hugehelp.h\"" >> tool_hugehelp.c
-    COMMAND echo "void hugehelp(void) {}" >> tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "/* built-in manual is disabled, blank function */" > tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_hugehelp.h\"" >> tool_hugehelp.c
+    COMMAND ${CMAKE_COMMAND} -E echo "void hugehelp(void) {}" >> tool_hugehelp.c
     DEPENDS
       "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
     VERBATIM)
+
 endif()
 
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
@@ -42,14 +43,15 @@ if(MSVC)
   list(APPEND CURL_SOURCE curl.rc)
 endif()
 
+# CURL_FILES comes from Makefile.inc
 add_executable(
   ${EXE_NAME}
-  ${curl_SOURCES}
+  ${CURL_FILES}
   )
 
-source_group("cURLX source files" FILES ${CURLX_CFILES})
-source_group("cURL source files" FILES ${CURL_CFILES})
-source_group("cURL header files" FILES ${CURL_HFILES})
+source_group("curlX source files" FILES ${CURLX_CFILES})
+source_group("curl source files" FILES ${CURL_CFILES})
+source_group("curl header files" FILES ${CURL_HFILES})
 
 include_directories(
   ${CURL_SOURCE_DIR}/lib        # To be able to reach "curl_setup_once.h"
@@ -59,7 +61,7 @@ include_directories(
   ${CURL_SOURCE_DIR}/src        # To be able to reach "tool_hugehelp.h"
   )
 
-#Build cURL executable
+#Build curl executable
 target_link_libraries( ${EXE_NAME} libcurl ${CURL_LIBS})
 
 ################################################################################

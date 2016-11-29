@@ -64,13 +64,13 @@ http://%HOSTIP:%HTTPPORT/519
 <verify>
 <protocol>
 GET /519 HTTP/1.1
-Authorization: Basic bW9uc3Rlcjp1bmRlcmJlZA==
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic bW9uc3Rlcjp1bmRlcmJlZA==
 Accept: */*
 
 GET /519 HTTP/1.1
-Authorization: Basic YW5vdGhlcm1vbnN0ZXI6aW53YXJkcm9iZQ==
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic YW5vdGhlcm1vbnN0ZXI6aW53YXJkcm9iZQ==
 Accept: */*
 
 </protocol>

@@ -35,7 +35,7 @@ file
 Metalink
 </features>
  <name>
-Metalink local XML file, attempt UNIX questionable file name III
+Metalink local XML file, attempt Unix questionable file name III
  </name>
 <command option="no-output,no-include">
 --metalink file://%PWD/log/test2020.metalink

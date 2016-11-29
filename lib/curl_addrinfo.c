@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,6 +33,9 @@
 #ifdef HAVE_ARPA_INET_H
 #  include <arpa/inet.h>
 #endif
+#ifdef HAVE_SYS_UN_H
+#  include <sys/un.h>
+#endif
 
 #ifdef __VMS
 #  include <in.h>
@@ -47,14 +50,10 @@
 #include "curl_addrinfo.h"
 #include "inet_pton.h"
 #include "warnless.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
-
 
 /*
  * Curl_freeaddrinfo()
@@ -80,13 +79,8 @@ Curl_freeaddrinfo(Curl_addrinfo *cahead)
   Curl_addrinfo *ca;
 
   for(ca = cahead; ca != NULL; ca = canext) {
-
-    if(ca->ai_addr)
-      free(ca->ai_addr);
-
-    if(ca->ai_canonname)
-      free(ca->ai_canonname);
-
+    free(ca->ai_addr);
+    free(ca->ai_canonname);
     canext = ca->ai_next;
 
     free(ca);
@@ -477,6 +471,42 @@ Curl_addrinfo *Curl_str2addr(char *address, int port)
   return NULL; /* bad input format */
 }
 
+#ifdef USE_UNIX_SOCKETS
+/**
+ * Given a path to a Unix domain socket, return a newly allocated Curl_addrinfo
+ * struct initialized with this path.
+ */
+Curl_addrinfo *Curl_unix2addr(const char *path)
+{
+  Curl_addrinfo *ai;
+  struct sockaddr_un *sa_un;
+  size_t path_len;
+
+  ai = calloc(1, sizeof(Curl_addrinfo));
+  if(!ai)
+    return NULL;
+  if((ai->ai_addr = calloc(1, sizeof(struct sockaddr_un))) == NULL) {
+    free(ai);
+    return NULL;
+  }
+  /* sun_path must be able to store the NUL-terminated path */
+  path_len = strlen(path);
+  if(path_len >= sizeof(sa_un->sun_path)) {
+    free(ai->ai_addr);
+    free(ai);
+    return NULL;
+  }
+
+  ai->ai_family = AF_UNIX;
+  ai->ai_socktype = SOCK_STREAM; /* assume reliable transport for HTTP */
+  ai->ai_addrlen = (curl_socklen_t) sizeof(struct sockaddr_un);
+  sa_un = (void *) ai->ai_addr;
+  sa_un->sun_family = AF_UNIX;
+  memcpy(sa_un->sun_path, path, path_len + 1); /* copy NUL byte */
+  return ai;
+}
+#endif
+
 #if defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO)
 /*
  * curl_dofreeaddrinfo()
@@ -490,7 +520,11 @@ void
 curl_dofreeaddrinfo(struct addrinfo *freethis,
                     int line, const char *source)
 {
+#ifdef USE_LWIPSOCK
+  lwip_freeaddrinfo(freethis);
+#else
   (freeaddrinfo)(freethis);
+#endif
   curl_memlog("ADDR %s:%d freeaddrinfo(%p)\n",
               source, line, (void *)freethis);
 }
@@ -513,7 +547,11 @@ curl_dogetaddrinfo(const char *hostname,
                    struct addrinfo **result,
                    int line, const char *source)
 {
+#ifdef USE_LWIPSOCK
+  int res=lwip_getaddrinfo(hostname, service, hints, result);
+#else
   int res=(getaddrinfo)(hostname, service, hints, result);
+#endif
   if(0 == res)
     /* success */
     curl_memlog("ADDR %s:%d getaddrinfo() = %p\n",
@@ -525,3 +563,32 @@ curl_dogetaddrinfo(const char *hostname,
 }
 #endif /* defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) */
 
+#if defined(HAVE_GETADDRINFO) && defined(USE_RESOLVE_ON_IPS)
+/*
+ * Work-arounds the sin6_port is always zero bug on iOS 9.3.2 and Mac OS X
+ * 10.11.5.
+ */
+void Curl_addrinfo_set_port(Curl_addrinfo *addrinfo, int port)
+{
+  Curl_addrinfo *ca;
+  struct sockaddr_in *addr;
+#ifdef ENABLE_IPV6
+  struct sockaddr_in6 *addr6;
+#endif
+  for(ca = addrinfo; ca != NULL; ca = ca->ai_next) {
+    switch (ca->ai_family) {
+    case AF_INET:
+      addr = (void *)ca->ai_addr; /* storage area for this info */
+      addr->sin_port = htons((unsigned short)port);
+      break;
+
+#ifdef ENABLE_IPV6
+    case AF_INET6:
+      addr6 = (void *)ca->ai_addr; /* storage area for this info */
+      addr6->sin6_port = htons((unsigned short)port);
+      break;
+#endif
+    }
+  }
+}
+#endif

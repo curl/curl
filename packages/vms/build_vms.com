@@ -148,6 +148,9 @@ $!                      * 3 spaces after $ for second level.  Line start + 4.
 $!                      * 7 spaces after $ for third level.  Line start + 8.
 $!                      * Each level after that indents 4 characters.
 $!                      * then/else/endif same indentation as if statement.
+$! 17-Nov-2014, Michael Steve
+$!                   Modified build to handle new location of the VTLS lib
+$!                   source within zip archive. Not a pretty fix.
 $!
 $!===========================================================================
 $!
@@ -546,7 +549,7 @@ $ if (.not. nossl)
 $ then
 $   if (f$trnlnm("OPENSSL") .nes. "")
 $   then
-$!        cc_defs = cc_defs + ", USE_SSLEAY=1"
+$!        cc_defs = cc_defs + ", USE_OPENSSL=1"
 $        if ((f$trnlnm("SSL$INCLUDE") .nes. "") .and. (.not. nohpssl))
 $        then
 $!          Use HP SSL.
@@ -677,8 +680,6 @@ $! Form CC qualifiers.
 $!
 $ cc_defs = "/define = (''cc_defs')"
 $ cc_qual2 = cc_qual2 + " /object = ''objdir'"
-$ cc_qual2 = cc_qual2 + " /include = ([-.lib], [-.src],"
-$ cc_qual2 = cc_qual2 + " [-.packages.vms], [-.packages.vms.''arch_name'])"
 $ cc_qual2 = cc_qual2 + "/nested_include_directory=none"
 $!
 $ 'vo_c' "CC opts:", -
@@ -806,7 +807,6 @@ $!   set nover
 $ endif
 $!
 $!
-$!
 $ on control_y then goto Common_Exit
 $!
 $ set default 'proc_dev_dir'
@@ -819,10 +819,21 @@ $ if curl_sys_zlibinc .nes. ""
 $ then
 $   sys_inc = sys_inc + ",''curl_sys_zlibinc'"
 $ endif
+$! Build LIB
+$ cc_include = "/include=([-.lib],[-.lib.vtls],[-.packages.vms]"
+$ cc_include = cc_include + ",[-.packages.vms.''arch_name'])"
 $ call build "[--.lib]" "*.c" "''objdir'CURLLIB.OLB" "amigaos, nwlib, nwos"
 $ if ($status .eq. ctrl_y) then goto Common_Exit
+$! Build VTLS
+$ cc_include = "/include=([--.lib.vtls],[--.lib],[--.src]"
+$ cc_include = cc_include + ",[--.packages.vms],[--.packages.vms.''arch_name'])"
+$ call build "[--.lib.vtls]" "*.c" "''objdir'CURLLIB.OLB" "amigaos, nwlib, nwos"
+$! Build SRC
+$ cc_include = "/include=([-.src],[-.lib],[-.lib.vtls]"
+$ cc_include = cc_include + ",[-.packages.vms],[-.packages.vms.''arch_name'])"
 $ call build "[--.src]" "*.c" "''objdir'CURLSRC.OLB"
 $ if ($status .eq. ctrl_y) then goto Common_Exit
+$! Build MSG
 $ call build "[]" "*.msg" "''objdir'CURLSRC.OLB"
 $ if ($status .eq. ctrl_y) then goto Common_Exit
 $!
@@ -920,7 +931,7 @@ $   on control_y then goto EndLoop ! SS$_CONTROLY
 $   sts = 1 ! SS$_NORMAL.
 $!   set noon
 $   set default 'p1'
-$   search = p2
+$   search = "sys$disk:" + p2
 $   reset = f$search("reset")
 $   if f$search( p3) .eqs. ""
 $   then
@@ -994,6 +1005,7 @@ $       define/user decc$system_include 'sys_inc'
 $       CC 'cc_defs' -
          'cc_qual1' -
          'cc_qual2' -
+         'cc_include' -
          'file'
 $   else
 $       cmd_msg = "MESSAGE " + msg_qual

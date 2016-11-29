@@ -1,0 +1,60 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLINFO_TLS_SESSION 3 "12 Sep 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
+.SH NAME
+CURLINFO_TLS_SESSION \- get TLS session info
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SESSION,
+                           struct curl_tlssessioninfo **session);
+.SH DESCRIPTION
+\fBThis option has been superseded\fP by \fICURLINFO_TLS_SSL_PTR(3)\fP which
+was added in 7.48.0. The only reason you would use this option instead is if
+you could be using a version of libcurl earlier than 7.48.0.
+
+This option is exactly the same as \fICURLINFO_TLS_SSL_PTR(3)\fP except in the
+case of OpenSSL. If the session \fIbackend\fP is CURLSSLBACKEND_OPENSSL the
+session \fIinternals\fP pointer varies depending on the option:
+
+CURLINFO_TLS_SESSION OpenSSL session \fIinternals\fP is SSL_CTX *.
+
+CURLINFO_TLS_SSL_PTR OpenSSL session \fIinternals\fP is SSL *.
+
+You can obtain an SSL_CTX pointer from an SSL pointer using OpenSSL function
+SSL_get_SSL_CTX. Therefore unless you need compatibility with older versions of
+libcurl use \fICURLINFO_TLS_SSL_PTR(3)\fP. Refer to that document for more
+information.
+.SH PROTOCOLS
+All TLS-based
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.34.0, and supported OpenSSL, GnuTLS, NSS and gskit only up until
+7.48.0 was released.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
+.BR CURLINFO_TLS_SSL_PTR "(3), "

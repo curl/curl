@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -44,12 +44,15 @@ ADDRESS can of course be either IPv4 or IPv6 style addressing.
 
 This option effectively pre-populates the DNS cache with entries for the
 host+port pair so redirects and everything that operations against the
-HOST+PORT will instead use your provided ADDRESS. Addresses to set with
-\fICURL_RESOLVE\fP will not time-out from the DNS cache like ordinary
+HOST+PORT will instead use your provided ADDRESS. Addresses set with
+\fICURLOPT_RESOLVE(3)\fP will not time-out from the DNS cache like ordinary
 entries.
 
-You can remove names from the DNS cache again, to stop providing these fake
-resolves, by including a string in the linked list that uses the format
+The provided ADDRESS set by this option will be used even if
+\fICURLOPT_IPRESOLVE(3)\fP is set to make libcurl use another IP version.
+
+Remove names from the DNS cache again, to stop providing these fake resolves,
+by including a string in the linked list that uses the format
 \&"-HOST:PORT". The host name must be prefixed with a dash, and the host name
 and port number must exactly match what was already added previously.
 .SH DEFAULT
@@ -66,7 +69,8 @@ curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
   curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
-  res = curl_easy_perform(curl);
+
+  curl_easy_perform(curl);
 
   /* always cleanup */
   curl_easy_cleanup(curl);
@@ -75,8 +79,8 @@ if(curl) {
 curl_slist_free_all(host);
 .fi
 .SH AVAILABILITY
-Added in 7.21.3
+Added in 7.21.3. Removal support added in 7.42.0.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR CURLOPT_IPRESOLVE "(3), " CURLOPT_DNS_CACHE_TIMEOUT "(3), "
+.BR CURLOPT_IPRESOLVE "(3), " CURLOPT_DNS_CACHE_TIMEOUT "(3), " CURLOPT_CONNECT_TO "(3), "

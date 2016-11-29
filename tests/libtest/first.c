@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -33,6 +33,10 @@
 #  include <fcntl.h> /* for setmode() */
 #endif
 
+#ifdef USE_NSS
+#include <nspr.h>
+#endif
+
 #ifdef CURLDEBUG
 #  define MEMDEBUG_NODEFINES
 #  include "memdebug.h"
@@ -52,7 +56,7 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
    * select() can not be used to sleep without a single fd_set.
    */
   if(!nfds) {
-    Sleep(1000*tv->tv_sec + tv->tv_usec/1000);
+    Sleep((1000*tv->tv_sec) + (DWORD)(((double)tv->tv_usec)/1000.0));
     return 0;
   }
 #endif
@@ -65,7 +69,7 @@ void wait_ms(int ms)
   t.tv_sec = ms/1000;
   ms -= (int)t.tv_sec * 1000;
   t.tv_usec = ms * 1000;
-  select_wrapper(0, NULL, NULL , NULL, &t);
+  select_wrapper(0, NULL, NULL, NULL, &t);
 }
 
 char *libtest_arg2=NULL;
@@ -111,9 +115,24 @@ static void memory_tracking_init(void)
 #  define memory_tracking_init() Curl_nop_stmt
 #endif
 
+/* returns a hexdump in a static memory area */
+char *hexdump(unsigned char *buffer, size_t len)
+{
+  static char dump[200*3+1];
+  char *p = dump;
+  size_t i;
+  if(len > 200)
+    return NULL;
+  for(i=0; i<len; i++, p += 3)
+    snprintf(p, 4, "%02x ", buffer[i]);
+  return dump;
+}
+
+
 int main(int argc, char **argv)
 {
   char *URL;
+  int result;
 
 #ifdef O_BINARY
 #  ifdef __HIGHC__
@@ -134,7 +153,7 @@ int main(int argc, char **argv)
   setlocale(LC_ALL, "");
 #endif
 
-  if(argc< 2 ) {
+  if(argc< 2) {
     fprintf(stderr, "Pass URL as argument please\n");
     return 1;
   }
@@ -152,5 +171,13 @@ int main(int argc, char **argv)
 
   fprintf(stderr, "URL: %s\n", URL);
 
-  return test(URL);
+  result = test(URL);
+
+#ifdef USE_NSS
+  if(PR_Initialized())
+    /* prevent valgrind from reporting possibly lost memory (fd cache, ...) */
+    PR_Cleanup();
+#endif
+
+  return result;
 }

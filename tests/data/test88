@@ -56,6 +56,7 @@ This IS the real page!
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>
@@ -84,9 +85,9 @@ Accept: */*
 Content-Length: 0
 
 PUT /88 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/88", response="78a49fa53d0c228778297687d4168e71"
 User-Agent: curl/7.10.5 (i686-pc-linux-gnu) libcurl/7.10.5 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 85
 Expect: 100-continue

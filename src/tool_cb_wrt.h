@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,6 +28,9 @@
 */
 
 size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata);
+
+/* create a local file for writing, return TRUE on success */
+bool tool_create_output_file(struct OutStruct *outs);
 
 #endif /* HEADER_CURL_TOOL_CB_WRT_H */
 

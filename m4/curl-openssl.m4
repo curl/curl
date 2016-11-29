@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -67,6 +67,7 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_HEADERS], [
     esac
     case $tst_api in
       0x110) tst_show="1.1.0" ;;
+      0x102) tst_show="1.0.2" ;;
       0x101) tst_show="1.0.1" ;;
       0x100) tst_show="1.0.0" ;;
       0x099) tst_show="0.9.9" ;;
@@ -140,6 +141,13 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_LIBRARY], [
   fi
   if test "$tst_api" = "unknown"; then
     AC_LINK_IFELSE([
+      AC_LANG_FUNC_LINK_TRY([SSL_CONF_CTX_new])
+    ],[
+      tst_api="0x102"
+    ])
+  fi
+  if test "$tst_api" = "unknown"; then
+    AC_LINK_IFELSE([
       AC_LANG_FUNC_LINK_TRY([SSL_renegotiate_abbreviated])
     ],[
       tst_api="0x101"
@@ -210,6 +218,7 @@ AC_DEFUN([CURL_CHECK_OPENSSL_API_LIBRARY], [
   fi
   case $tst_api in
     0x110) tst_show="1.1.0" ;;
+    0x102) tst_show="1.0.2" ;;
     0x101) tst_show="1.0.1" ;;
     0x100) tst_show="1.0.0" ;;
     0x099) tst_show="0.9.9" ;;

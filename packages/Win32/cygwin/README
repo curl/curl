@@ -12,12 +12,12 @@ Dependencies:
   - Cygwin
   - OpenSSL 0.9.6b-2+ (*)
 
-  (*) cURL can be built without SSL support, see below for details
+  (*) curl can be built without SSL support, see below for details
 
 
 Canonical Homepage and Downloads:
-  http://curl.haxx.se/
-  http://curl.haxx.se/download.html
+  https://curl.haxx.se/
+  https://curl.haxx.se/download.html
 
 
 Cygwin specific source files (a .README template and a Makefile
@@ -41,7 +41,7 @@ Build Instructions (to recompile from the cygwin source tarball):
   (**) LibTool 1.4.2 had a bug related to cygwin's use of ".exe" extensions,
       such that "make install" blew up at curl.exe. See this URL for details:
          http://mail.gnu.org/pipermail/libtool/2001-September/005549.html
-      The copy of ltmain.sh that is distributed with cURL includes this patch.
+      The copy of ltmain.sh that is distributed with curl includes this patch.
 
   As of curl 7.9.1, the official source compiles (under Cygwin) and tests
     100% cleanly OOTB (Out Of The Box)
@@ -100,9 +100,9 @@ Packaging Instructions:
   requires: cygwin openssl
 
   @ curl-devel
-  sdesc: "(lib)cURL headers, static libraries, developer docs and samples"
+  sdesc: "(lib)curl headers, static libraries, developer docs and samples"
   ldesc: "curl-devel is the developer-oriented (non-run-time) parts
-  of the cURL package. It includes header files, static libraries,
+  of the curl package. It includes header files, static libraries,
   example source code snippets, and the libcurl man pages."
   category: Web Libs Devel
   requires: cygwin openssl curl
@@ -110,5 +110,5 @@ Packaging Instructions:
 
 Cygwin port maintained by:
   Kevin Roth <kproth @ users . sourceforge . net>
-  Questions about cURL should be directed to curl-users@cool.haxx.se.
+  Questions about curl should be directed to curl-users@cool.haxx.se.
   Questions about this cygwin package go to cygwin@cygwin.com.

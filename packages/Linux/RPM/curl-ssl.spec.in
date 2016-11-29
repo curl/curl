@@ -14,7 +14,7 @@ Vendor: Daniel Stenberg <Daniel.Stenberg@haxx.se>
 Packager: Troy Engel <tengel@sonic.net>
 Group: Utilities/Console
 Source: %{tarball}-%{version}.tar.gz
-URL: http://curl.haxx.se/
+URL: https://curl.haxx.se/
 Provides: curl
 Obsoletes: curl
 BuildRoot: %{_tmppath}/%{tarball}-%{version}-root

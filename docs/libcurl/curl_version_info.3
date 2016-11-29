@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH curl_version_info 3 "2 Aug 2014" "libcurl 7.38.0" "libcurl Manual"
+.TH curl_version_info 3 "2 Nov 2014" "libcurl 7.40.0" "libcurl Manual"
 .SH NAME
 curl_version_info - returns run-time libcurl version info
 .SH SYNOPSIS
@@ -57,7 +57,7 @@ typedef struct {
   char *ssl_version;        /* human readable string */
   long ssl_version_num;     /* not used, always zero */
   const char *libz_version; /* human readable string */
-  const char **protocols;   /* list of protocols */
+  const char * const *protocols; /* protocols */
 
   /* when 'age' is 1 or higher, the members below also exist: */
   const char *ares;         /* human readable string */
@@ -76,9 +76,9 @@ typedef struct {
 .fi
 
 \fIage\fP describes what the age of this struct is. The number depends on how
-new the libcurl you're using is. You are however guaranteed to get a struct that you
-have a matching struct for in the header, as you tell libcurl your "age" with
-the input argument.
+new the libcurl you're using is. You are however guaranteed to get a struct
+that you have a matching struct for in the header, as you tell libcurl your
+"age" with the input argument.
 
 \fIversion\fP is just an ascii string for the libcurl version.
 
@@ -96,7 +96,10 @@ bits are:
 .IP CURL_VERSION_IPV6
 supports IPv6
 .IP CURL_VERSION_KERBEROS4
-supports kerberos4 (when using FTP)
+supports Kerberos V4 (when using FTP)
+.IP CURL_VERSION_KERBEROS5
+supports Kerberos V5 authentication for FTP, IMAP, POP3, SMTP and SOCKSv5 proxy
+(Added in 7.40.0)
 .IP CURL_VERSION_SSL
 supports SSL (HTTPS/FTPS) (Added in 7.10)
 .IP CURL_VERSION_LIBZ
@@ -124,9 +127,9 @@ libcurl was built with support for IDNA, domain names with international
 letters. (Added in 7.12.0)
 .IP CURL_VERSION_SSPI
 libcurl was built with support for SSPI. This is only available on Windows and
-makes libcurl use Windows-provided functions for NTLM, SPNEGO and SASL DIGEST-MD5
-authentication. It also allows libcurl to use the current user credentials without
-the app having to pass them on. (Added in 7.13.2)
+makes libcurl use Windows-provided functions for Kerberos, NTLM, SPNEGO and
+Digest authentication. It also allows libcurl to use the current user
+credentials without the app having to pass them on. (Added in 7.13.2)
 .IP CURL_VERSION_GSSAPI
 libcurl was built with support for GSS-API. This makes libcurl use provided
 functions for Kerberos and SPNEGO authentication. It also allows libcurl
@@ -143,6 +146,16 @@ libcurl was built with support for NTLM delegation to a winbind helper.
 .IP CURL_VERSION_HTTP2
 libcurl was built with support for HTTP2.
 (Added in 7.33.0)
+.IP CURL_VERSION_UNIX_SOCKETS
+libcurl was built with support for Unix domain sockets.
+(Added in 7.40.0)
+.IP CURL_VERSION_PSL
+libcurl was built with support for Mozilla's Public Suffix List. This makes
+libcurl ignore cookies with a domain that's on the list.
+(Added in 7.47.0)
+.IP CURL_VERSION_HTTPS_PROXY
+libcurl was built with support for HTTPS-proxy.
+(Added in 7.52.0)
 .RE
 \fIssl_version\fP is an ASCII string for the OpenSSL version used. If libcurl
 has no SSL support, this is NULL.

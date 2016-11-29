@@ -64,6 +64,7 @@ ok
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>
@@ -84,17 +85,17 @@ test
 </strip>
 <protocol>
 GET http://%HOSTIP:%HTTPPORT/1001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 2-4/5
 User-Agent: curl/7.12.1-CVS (i686-pc-linux-gnu) libcurl/7.12.1-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.6
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
 
 GET http://%HOSTIP:%HTTPPORT/1001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/1001", response="6af4d89c952f4dd4cc215a6878dc499d"
 Content-Range: bytes 2-4/5
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 3

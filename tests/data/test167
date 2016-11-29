@@ -43,6 +43,7 @@ Nice auth sir!
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>
@@ -60,17 +61,17 @@ http://data.from.server.requiring.digest.hohoho.com/167 --proxy http://%HOSTIP:%
 </strip>
 <protocol>
 GET http://data.from.server.requiring.digest.hohoho.com/167 HTTP/1.1
+Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Basic Zm9vOmJhcg==
 User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
-Host: data.from.server.requiring.digest.hohoho.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://data.from.server.requiring.digest.hohoho.com/167 HTTP/1.1
+Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Basic Zm9vOmJhcg==
 Authorization: Digest username="digest", realm="weirdorealm", nonce="12345", uri="/167", response="13c7c02a252cbe1c46d8669898a3be26"
 User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
-Host: data.from.server.requiring.digest.hohoho.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -610,15 +610,15 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
   CURLcode ret;
   unsigned int ccsid;
   char * * cpp;
-  struct SessionHandle * data;
+  struct Curl_easy * data;
   struct curl_slist * * slp;
   struct curl_certinfo * cipf;
   struct curl_certinfo * cipt;
 
-  /* WARNING: unlike curl_easy_get_info(), the strings returned by this
+  /* WARNING: unlike curl_easy_getinfo(), the strings returned by this
      procedure have to be free'ed. */
 
-  data = (struct SessionHandle *) curl;
+  data = (struct Curl_easy *) curl;
   va_start(arg, info);
   paramp = va_arg(arg, void *);
   ret = Curl_getinfo(data, info, paramp);
@@ -679,6 +679,8 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
         break;
 
       case CURLINFO_TLS_SESSION:
+      case CURLINFO_TLS_SSL_PTR:
+      case CURLINFO_SOCKET:
         break;
 
       default:
@@ -932,6 +934,14 @@ curl_formadd_ccsid(struct curl_httppost * * httppost,
 
       break;
 
+    case CURLFORM_CONTENTLEN:
+      lengthx = nargs;
+
+      if(!forms)
+        value = (char *) va_arg(arg, curl_off_t);
+
+      break;
+
     case CURLFORM_NAMELENGTH:
       namelengthx = nargs;
 
@@ -1098,7 +1108,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
 {
   CURLcode result;
   va_list arg;
-  struct SessionHandle * data;
+  struct Curl_easy * data;
   char * s;
   char * cp;
   unsigned int ccsid;
@@ -1114,12 +1124,13 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if(testwarn) {
     testwarn = 0;
 
-    if((int) STRING_LAST != (int) STRING_BEARER + 1)
+    if((int) STRING_LASTZEROTERMINATED != (int) STRING_UNIX_SOCKET_PATH + 1 ||
+       (int) STRING_LAST != (int) STRING_COPYPOSTFIELDS + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
     }
 
-  data = (struct SessionHandle *) curl;
+  data = (struct Curl_easy *) curl;
   va_start(arg, tag);
 
   switch (tag) {
@@ -1132,19 +1143,20 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_COOKIELIST:
   case CURLOPT_CRLFILE:
   case CURLOPT_CUSTOMREQUEST:
+  case CURLOPT_DEFAULT_PROTOCOL:
   case CURLOPT_DNS_SERVERS:
   case CURLOPT_EGDSOCKET:
   case CURLOPT_ENCODING:
+  case CURLOPT_FTPPORT:
   case CURLOPT_FTP_ACCOUNT:
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:
-  case CURLOPT_FTPPORT:
   case CURLOPT_INTERFACE:
   case CURLOPT_ISSUERCERT:
   case CURLOPT_KEYPASSWD:
   case CURLOPT_KRBLEVEL:
   case CURLOPT_LOGIN_OPTIONS:
-  case CURLOPT_MAIL_FROM:
   case CURLOPT_MAIL_AUTH:
+  case CURLOPT_MAIL_FROM:
   case CURLOPT_NETRC_FILE:
   case CURLOPT_NOPROXY:
   case CURLOPT_PASSWORD:
@@ -1153,26 +1165,43 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_PROXYPASSWORD:
   case CURLOPT_PROXYUSERNAME:
   case CURLOPT_PROXYUSERPWD:
+  case CURLOPT_PROXY_CAINFO:
+  case CURLOPT_PROXY_CAPATH:
+  case CURLOPT_PROXY_CRLFILE:
+  case CURLOPT_PROXY_KEYPASSWD:
+  case CURLOPT_PROXY_PINNEDPUBLICKEY:
+  case CURLOPT_PROXY_SERVICE_NAME:
+  case CURLOPT_PROXY_SSLCERT:
+  case CURLOPT_PROXY_SSLCERTTYPE:
+  case CURLOPT_PROXY_SSLKEY:
+  case CURLOPT_PROXY_SSLKEYTYPE:
+  case CURLOPT_PROXY_SSL_CIPHER_LIST:
+  case CURLOPT_PROXY_TLSAUTH_PASSWORD:
+  case CURLOPT_PROXY_TLSAUTH_TYPE:
+  case CURLOPT_PROXY_TLSAUTH_USERNAME:
   case CURLOPT_RANDOM_FILE:
   case CURLOPT_RANGE:
   case CURLOPT_REFERER:
   case CURLOPT_RTSP_SESSION_ID:
   case CURLOPT_RTSP_STREAM_URI:
   case CURLOPT_RTSP_TRANSPORT:
+  case CURLOPT_SERVICE_NAME:
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
+  case CURLOPT_SOCKS_PROXY:
   case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
   case CURLOPT_SSH_KNOWNHOSTS:
   case CURLOPT_SSH_PRIVATE_KEYFILE:
   case CURLOPT_SSH_PUBLIC_KEYFILE:
   case CURLOPT_SSLCERT:
   case CURLOPT_SSLCERTTYPE:
-  case CURLOPT_SSL_CIPHER_LIST:
   case CURLOPT_SSLENGINE:
   case CURLOPT_SSLKEY:
   case CURLOPT_SSLKEYTYPE:
+  case CURLOPT_SSL_CIPHER_LIST:
   case CURLOPT_TLSAUTH_PASSWORD:
   case CURLOPT_TLSAUTH_TYPE:
   case CURLOPT_TLSAUTH_USERNAME:
+  case CURLOPT_UNIX_SOCKET_PATH:
   case CURLOPT_URL:
   case CURLOPT_USERAGENT:
   case CURLOPT_USERNAME:
@@ -1191,10 +1220,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
       }
 
     result = curl_easy_setopt(curl, tag, s);
-
-    if(s)
-      free(s);
-
+    free(s);
     break;
 
   case CURLOPT_COPYPOSTFIELDS:
@@ -1276,4 +1302,43 @@ curl_form_long_value(long value)
   /* ILE/RPG cannot cast an integer to a pointer. This procedure does it. */
 
   return (char *) value;
+}
+
+
+char *
+curl_pushheader_bynum_cssid(struct curl_pushheaders *h,
+                            size_t num, unsigned int ccsid)
+
+{
+  char *d = (char *) NULL;
+  char *s = curl_pushheader_bynum(h, num);
+
+  if(s)
+    d = dynconvert(ccsid, s, -1, ASCII_CCSID);
+
+  return d;
+}
+
+
+char *
+curl_pushheader_byname_ccsid(struct curl_pushheaders *h, const char *header,
+                             unsigned int ccsidin, unsigned int ccsidout)
+
+{
+  char *d = (char *) NULL;
+  char *s;
+
+  if(header) {
+    header = dynconvert(ASCII_CCSID, header, -1, ccsidin);
+
+    if(header) {
+      s = curl_pushheader_byname(h, header);
+      free((char *) header);
+
+      if(s)
+        d = dynconvert(ccsidout, s, -1, ASCII_CCSID);
+    }
+  }
+
+  return d;
 }

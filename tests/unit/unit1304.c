@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,10 +31,10 @@ static CURLcode unit_setup(void)
 {
   password = strdup("");
   login = strdup("");
-  if (!password || !login) {
-	  Curl_safefree(password);
-	  Curl_safefree(login);
-	  return CURLE_OUT_OF_MEMORY;
+  if(!password || !login) {
+    Curl_safefree(password);
+    Curl_safefree(login);
+    return CURLE_OUT_OF_MEMORY;
   }
   return CURLE_OK;
 }
@@ -48,7 +48,7 @@ static void unit_stop(void)
 UNITTEST_START
   int result;
 
-  static const char* const filename1 = "log/netrc1304";
+  static const char * const filename1 = "log/netrc1304";
   memcpy(filename, filename1, strlen(filename1));
 
   /*
@@ -72,7 +72,8 @@ UNITTEST_START
   abort_unless(password != NULL, "returned NULL!");
   fail_unless(password[0] == 0, "password should not have been changed");
   abort_unless(login != NULL, "returned NULL!");
-  fail_unless(strncmp(login, "me", 2) == 0, "login should not have been changed");
+  fail_unless(strncmp(login, "me", 2) == 0,
+              "login should not have been changed");
 
   /*
    * Test a non existent login and host in our netrc file.
@@ -85,7 +86,8 @@ UNITTEST_START
   abort_unless(password != NULL, "returned NULL!");
   fail_unless(password[0] == 0, "password should not have been changed");
   abort_unless(login != NULL, "returned NULL!");
-  fail_unless(strncmp(login, "me", 2) == 0, "login should not have been changed");
+  fail_unless(strncmp(login, "me", 2) == 0,
+              "login should not have been changed");
 
   /*
    * Test a non existent login (substring of an existing one) in our
@@ -99,7 +101,8 @@ UNITTEST_START
   abort_unless(password != NULL, "returned NULL!");
   fail_unless(password[0] == 0, "password should not have been changed");
   abort_unless(login != NULL, "returned NULL!");
-  fail_unless(strncmp(login, "admi", 4) == 0, "login should not have been changed");
+  fail_unless(strncmp(login, "admi", 4) == 0,
+              "login should not have been changed");
 
   /*
    * Test a non existent login (superstring of an existing one)
@@ -113,7 +116,8 @@ UNITTEST_START
   abort_unless(password != NULL, "returned NULL!");
   fail_unless(password[0] == 0, "password should not have been changed");
   abort_unless(login != NULL, "returned NULL!");
-  fail_unless(strncmp(login, "adminn", 6) == 0, "login should not have been changed");
+  fail_unless(strncmp(login, "adminn", 6) == 0,
+              "login should not have been changed");
 
   /*
    * Test for the first existing host in our netrc file

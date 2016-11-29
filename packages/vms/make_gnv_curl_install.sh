@@ -33,7 +33,7 @@ export GNV_CXX_QUALIFIERS=/DEBUG/OPTIMIZE/float=ieee/ieee_mode=denorm_results
 export GNV_CC_NO_INC_PRIMARY=1
 #
 #
-# POSIX exit mode is needed for UNIX shells.
+# POSIX exit mode is needed for Unix shells.
 export GNV_CC_MAIN_POSIX_EXIT=1
 make
 cd ../..

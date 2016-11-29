@@ -6,11 +6,11 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -27,6 +27,7 @@
 use strict;
 use warnings;
 use Cwd;
+use Cwd 'abs_path';
 
 #***************************************************************************
 # Variables and subs imported from sshhelp module
@@ -73,6 +74,7 @@ use serverhelp qw(
     server_logfilename
     );
 
+use pathhelp;
 
 #***************************************************************************
 
@@ -88,6 +90,7 @@ my $path = getcwd();          # current working directory
 my $logdir = $path .'/log';   # directory for log files
 my $username = $ENV{USER};    # default user
 my $pidfile;                  # ssh daemon pid file
+my $identity = 'curl_client_key'; # default identity file
 
 my $error;
 my @cfgarr;
@@ -369,17 +372,33 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
     # Make sure all files are gone so ssh-keygen doesn't complain
     unlink($hstprvkeyf, $hstpubkeyf, $cliprvkeyf, $clipubkeyf);
     logmsg 'generating host keys...' if($verbose);
-    if(system "$sshkeygen -q -t dsa -f $hstprvkeyf -C 'curl test server' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -f $hstprvkeyf -C 'curl test server' -N ''") {
         logmsg 'Could not generate host key';
         exit 1;
     }
     logmsg 'generating client keys...' if($verbose);
-    if(system "$sshkeygen -q -t dsa -f $cliprvkeyf -C 'curl test client' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -f $cliprvkeyf -C 'curl test client' -N ''") {
         logmsg 'Could not generate client key';
         exit 1;
     }
 }
 
+
+#***************************************************************************
+# Convert paths for curl's tests running on Windows with Cygwin/Msys OpenSSH
+#
+my $clipubkeyf_config = abs_path("$path/$clipubkeyf");
+my $hstprvkeyf_config = abs_path("$path/$hstprvkeyf");
+my $pidfile_config = $pidfile;
+my $sftpsrv_config = $sftpsrv;
+
+if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+    # Ensure to use MinGW/Cygwin paths
+    $clipubkeyf_config = pathhelp::build_sys_abs_path($clipubkeyf_config);
+    $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf_config);
+    $pidfile_config = pathhelp::build_sys_abs_path($pidfile_config);
+    $sftpsrv_config = "internal-sftp";
+}
 
 #***************************************************************************
 #  ssh daemon configuration file options we might use and version support
@@ -479,10 +498,10 @@ push @cfgarr, "AllowUsers $username";
 push @cfgarr, 'DenyGroups';
 push @cfgarr, 'AllowGroups';
 push @cfgarr, '#';
-push @cfgarr, "AuthorizedKeysFile $path/$clipubkeyf";
-push @cfgarr, "AuthorizedKeysFile2 $path/$clipubkeyf";
-push @cfgarr, "HostKey $path/$hstprvkeyf";
-push @cfgarr, "PidFile $pidfile";
+push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
+push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
+push @cfgarr, "HostKey $hstprvkeyf_config";
+push @cfgarr, "PidFile $pidfile_config";
 push @cfgarr, '#';
 push @cfgarr, "Port $port";
 push @cfgarr, "ListenAddress $listenaddr";
@@ -512,7 +531,7 @@ push @cfgarr, 'RhostsRSAAuthentication no';
 push @cfgarr, 'RSAAuthentication no';
 push @cfgarr, 'ServerKeyBits 768';
 push @cfgarr, 'StrictModes no';
-push @cfgarr, "Subsystem sftp $sftpsrv";
+push @cfgarr, "Subsystem sftp \"$sftpsrv_config\"";
 push @cfgarr, 'SyslogFacility AUTH';
 push @cfgarr, 'UseLogin no';
 push @cfgarr, 'X11Forwarding no';
@@ -540,7 +559,7 @@ sub sshd_supports_opt {
         ($sshdid =~ /SunSSH/)) {
         # ssh daemon supports command line options -t -f and -o
         $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
-                    qx($sshd -t -f $sshdconfig -o $option=$value 2>&1);
+                    qx("$sshd" -t -f $sshdconfig -o "$option=$value" 2>&1);
         return !$err;
     }
     if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 299)) {
@@ -551,7 +570,7 @@ sub sshd_supports_opt {
             return 0;
         }
         $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
-                    qx($sshd -t -f $sshdconfig 2>&1);
+                    qx("$sshd" -t -f $sshdconfig 2>&1);
         unlink $sshdconfig;
         return !$err;
     }
@@ -697,7 +716,7 @@ if($error) {
 #***************************************************************************
 # Verify that sshd actually supports our generated configuration file
 #
-if(system "$sshd -t -f $sshdconfig > $sshdlog 2>&1") {
+if(system "\"$sshd\" -t -f $sshdconfig > $sshdlog 2>&1") {
     logmsg "sshd configuration file $sshdconfig failed verification";
     display_sshdlog();
     display_sshdconfig();
@@ -711,11 +730,11 @@ if(system "$sshd -t -f $sshdconfig > $sshdlog 2>&1") {
 if((! -e $knownhosts) || (! -s $knownhosts)) {
     logmsg 'generating ssh client known hosts file...' if($verbose);
     unlink($knownhosts);
-    if(open(DSAKEYFILE, "<$hstpubkeyf")) {
-        my @dsahostkey = do { local $/ = ' '; <DSAKEYFILE> };
-        if(close(DSAKEYFILE)) {
+    if(open(RSAKEYFILE, "<$hstpubkeyf")) {
+        my @rsahostkey = do { local $/ = ' '; <RSAKEYFILE> };
+        if(close(RSAKEYFILE)) {
             if(open(KNOWNHOSTS, ">$knownhosts")) {
-                print KNOWNHOSTS "$listenaddr ssh-dss $dsahostkey[1]\n";
+                print KNOWNHOSTS "$listenaddr ssh-rsa $rsahostkey[1]\n";
                 if(!close(KNOWNHOSTS)) {
                     $error = "Error: cannot close file $knownhosts";
                 }
@@ -735,6 +754,19 @@ if((! -e $knownhosts) || (! -s $knownhosts)) {
         logmsg $error;
         exit 1;
     }
+}
+
+
+#***************************************************************************
+# Convert paths for curl's tests running on Windows using Cygwin OpenSSH
+#
+my $identity_config = abs_path("$path/$identity");
+my $knownhosts_config = abs_path("$path/$knownhosts");
+
+if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+    # Ensure to use MinGW/Cygwin paths
+    $identity_config = pathhelp::build_sys_abs_path($identity_config);
+    $knownhosts_config = pathhelp::build_sys_abs_path($knownhosts_config);
 }
 
 
@@ -834,8 +866,8 @@ push @cfgarr, '#';
 push @cfgarr, "BindAddress $listenaddr";
 push @cfgarr, "DynamicForward $socksport";
 push @cfgarr, '#';
-push @cfgarr, "IdentityFile $path/curl_client_key";
-push @cfgarr, "UserKnownHostsFile $path/$knownhosts";
+push @cfgarr, "IdentityFile $identity_config";
+push @cfgarr, "UserKnownHostsFile $knownhosts_config";
 push @cfgarr, '#';
 push @cfgarr, 'BatchMode yes';
 push @cfgarr, 'ChallengeResponseAuthentication no';
@@ -1025,16 +1057,16 @@ if($error) {
 # Start the ssh server daemon without forking it
 #
 logmsg "SCP/SFTP server listening on port $port" if($verbose);
-my $rc = system "$sshd -e -D -f $sshdconfig > $sshdlog 2>&1";
+my $rc = system "\"$sshd\" -e -D -f $sshdconfig > $sshdlog 2>&1";
 if($rc == -1) {
-    logmsg "$sshd failed with: $!";
+    logmsg "\"$sshd\" failed with: $!";
 }
 elsif($rc & 127) {
-    logmsg sprintf("$sshd died with signal %d, and %s coredump",
+    logmsg sprintf("\"$sshd\" died with signal %d, and %s coredump",
                    ($rc & 127), ($rc & 128)?'a':'no');
 }
 elsif($verbose && ($rc >> 8)) {
-    logmsg sprintf("$sshd exited with %d", $rc >> 8);
+    logmsg sprintf("\"$sshd\" exited with %d", $rc >> 8);
 }
 
 

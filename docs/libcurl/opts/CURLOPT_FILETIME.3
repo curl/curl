@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -31,8 +31,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FILETIME, long gettime);
 Pass a long. If it is 1, libcurl will attempt to get the modification time of
 the remote document in this operation. This requires that the remote server
 sends the time or replies to a time querying command. The
-\fIcurl_easy_getinfo(3)\fP function with the \fICURLINFO_FILETIME\fP argument
-can be used after a transfer to extract the received time (if any).
+\fIcurl_easy_getinfo(3)\fP function with the \fICURLINFO_FILETIME(3)\fP
+argument can be used after a transfer to extract the received time (if any).
 .SH DEFAULT
 0
 .SH PROTOCOLS
@@ -40,7 +40,7 @@ HTTP, FTP, SFTP, FILE
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-Always
+Always, for SFTP since 7.49.0
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"

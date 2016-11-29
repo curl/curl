@@ -1,18 +1,24 @@
 #File defines convenience macros for available feature testing
 
 # This macro checks if the symbol exists in the library and if it
-# does, it appends library to the list.
+# does, it prepends library to the list.  It is intended to be called
+# multiple times with a sequence of possibly dependent libraries in
+# order of least-to-most-dependent.  Some libraries depend on others
+# to link correctly.
 macro(CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
-  check_library_exists("${CURL_LIBS};${LIBRARY}" ${SYMBOL} "${CMAKE_LIBRARY_PATH}"
+  check_library_exists("${LIBRARY};${CURL_LIBS}" ${SYMBOL} "${CMAKE_LIBRARY_PATH}"
     ${VARIABLE})
   if(${VARIABLE})
-    list(APPEND CURL_LIBS ${LIBRARY})
+    set(CURL_LIBS ${LIBRARY} ${CURL_LIBS})
   endif(${VARIABLE})
 endmacro(CHECK_LIBRARY_EXISTS_CONCAT)
 
 # Check if header file exists and add it to the list.
+# This macro is intended to be called multiple times with a sequence of
+# possibly dependent header files.  Some headers depend on others to be
+# compiled correctly.
 macro(CHECK_INCLUDE_FILE_CONCAT FILE VARIABLE)
-  check_include_file("${FILE}" ${VARIABLE})
+  check_include_files("${CURL_INCLUDES};${FILE}" ${VARIABLE})
   if(${VARIABLE})
     set(CURL_INCLUDES ${CURL_INCLUDES} ${FILE})
     set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D${VARIABLE}")
@@ -21,7 +27,7 @@ endmacro(CHECK_INCLUDE_FILE_CONCAT)
 
 # For other curl specific tests, use this macro.
 macro(CURL_INTERNAL_TEST CURL_TEST)
-  if("${CURL_TEST}" MATCHES "^${CURL_TEST}$")
+  if(NOT DEFINED "${CURL_TEST}")
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${CURL_TEST} ${CURL_TEST_DEFINES} ${CMAKE_REQUIRED_FLAGS}")
     if(CMAKE_REQUIRED_LIBRARIES)
@@ -49,11 +55,11 @@ macro(CURL_INTERNAL_TEST CURL_TEST)
         "Performing Curl Test ${CURL_TEST} failed with the following output:\n"
         "${OUTPUT}\n")
     endif(${CURL_TEST})
-  endif("${CURL_TEST}" MATCHES "^${CURL_TEST}$")
+  endif()
 endmacro(CURL_INTERNAL_TEST)
 
 macro(CURL_INTERNAL_TEST_RUN CURL_TEST)
-  if("${CURL_TEST}_COMPILE" MATCHES "^${CURL_TEST}_COMPILE$")
+  if(NOT DEFINED "${CURL_TEST}_COMPILE")
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${CURL_TEST} ${CMAKE_REQUIRED_FLAGS}")
     if(CMAKE_REQUIRED_LIBRARIES)
@@ -85,5 +91,5 @@ macro(CURL_INTERNAL_TEST_RUN CURL_TEST)
       file(APPEND "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log"
         "\n\n")
     endif(${CURL_TEST}_COMPILE AND NOT ${CURL_TEST})
-  endif("${CURL_TEST}_COMPILE" MATCHES "^${CURL_TEST}_COMPILE$")
+  endif()
 endmacro(CURL_INTERNAL_TEST_RUN)

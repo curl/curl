@@ -23,7 +23,7 @@
 # 28-Dec-2012	J. Malmberg	Update for Bash 4.2.39
 #==========================================================================
 #
-# POSIX exit mode is needed for UNIX shells.
+# POSIX exit mode is needed for Unix shells.
 export GNV_CC_MAIN_POSIX_EXIT=1
 #
 # Where to look for the helper files.

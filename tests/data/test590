@@ -101,22 +101,22 @@ chkhostname curlhost
 </strip>
 <protocol>
 GET http://test.remote.example.com/path/590 HTTP/1.1
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Host: test.remote.example.com
+User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://test.remote.example.com/path/590 HTTP/1.1
+Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://test.remote.example.com/path/590 HTTP/1.1
+Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAACeAJ4AWAAAAAAAAAD2AAAAAgACAPYAAAAIAAgA+AAAAAAAAAAAAAAABoKBAB3Hr6SDn3NDNkgebbaP88ExMjM0MjIzNFIW4N7aYT44bAIg1jt2blUBAQAAAAAAAACAPtXesZ0BMTIzNDIyMzQAAAAAAgAEAEMAQwABABIARQBMAEkAUwBBAEIARQBUAEgABAAYAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAMALABlAGwAaQBzAGEAYgBlAHQAaAAuAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAAAAAAAAAAAbWVjdXJsaG9zdA==
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 

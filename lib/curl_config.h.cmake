@@ -24,6 +24,12 @@
 /* to disable FTP */
 #cmakedefine CURL_DISABLE_FTP 1
 
+/* to disable GOPHER */
+#cmakedefine CURL_DISABLE_GOPHER 1
+
+/* to disable IMAP */
+#cmakedefine CURL_DISABLE_IMAP 1
+
 /* to disable HTTP */
 #cmakedefine CURL_DISABLE_HTTP 1
 
@@ -33,8 +39,23 @@
 /* to disable LDAPS */
 #cmakedefine CURL_DISABLE_LDAPS 1
 
+/* to disable POP3 */
+#cmakedefine CURL_DISABLE_POP3 1
+
 /* to disable proxies */
 #cmakedefine CURL_DISABLE_PROXY 1
+
+/* to disable RTSP */
+#cmakedefine CURL_DISABLE_RTSP 1
+
+/* to disable RTMP */
+#cmakedefine CURL_DISABLE_RTMP 1
+
+/* to disable SMB */
+#cmakedefine CURL_DISABLE_SMB 1
+
+/* to disable SMTP */
+#cmakedefine CURL_DISABLE_SMTP 1
 
 /* to disable TELNET */
 #cmakedefine CURL_DISABLE_TELNET 1
@@ -46,14 +67,14 @@
 #cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1
 
 /* to make a symbol visible */
-#cmakedefine CURL_EXTERN_SYMBOL 1
+#cmakedefine CURL_EXTERN_SYMBOL ${CURL_EXTERN_SYMBOL}
 /* Ensure using CURL_EXTERN_SYMBOL is possible */
 #ifndef CURL_EXTERN_SYMBOL
 #define CURL_EXTERN_SYMBOL
 #endif
 
 /* Use Windows LDAP implementation */
-#cmakedefine CURL_LDAP_WIN 1
+#cmakedefine USE_WIN32_LDAP 1
 
 /* when not building a shared library */
 #cmakedefine CURL_STATICLIB 1
@@ -467,6 +488,9 @@
 /* Define to 1 if you have a working POSIX-style strerror_r function. */
 #cmakedefine HAVE_POSIX_STRERROR_R 1
 
+/* Define to 1 if you have the <pthread.h> header file */
+#cmakedefine HAVE_PTHREAD_H 1
+
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine HAVE_PWD_H 1
 
@@ -879,6 +903,12 @@
 /* Define if you want to enable c-ares support */
 #cmakedefine USE_ARES 1
 
+/* Define if you want to enable POSIX threaded DNS lookup */
+#cmakedefine USE_THREADS_POSIX 1
+
+/* Define if you want to enable WIN32 threaded DNS lookup */
+#cmakedefine USE_THREADS_WIN32 1
+
 /* Define to disable non-blocking sockets. */
 #cmakedefine USE_BLOCKING_SOCKETS 1
 
@@ -887,6 +917,9 @@
 
 /* if PolarSSL is enabled */
 #cmakedefine USE_POLARSSL 1
+
+/* if mbedTLS is enabled */
+#cmakedefine USE_MBEDTLS 1
 
 /* if libSSH2 is in use */
 #cmakedefine USE_LIBSSH2 1
@@ -903,15 +936,20 @@
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
-/* if SSL is enabled */
-#cmakedefine USE_SSLEAY 1
+/* to enable NGHTTP2  */
+#cmakedefine USE_NGHTTP2 1
 
-/* Define to 1 if you are building a Windows target without large file
-   support. */
+/* if Unix domain sockets are enabled  */
+#cmakedefine USE_UNIX_SOCKETS
+
+/* Define to 1 if you are building a Windows target with large file support. */
 #cmakedefine USE_WIN32_LARGE_FILES 1
 
 /* to enable SSPI support */
 #cmakedefine USE_WINDOWS_SSPI 1
+
+/* to enable Windows SSL  */
+#cmakedefine USE_SCHANNEL 1
 
 /* Define to 1 if using yaSSL in OpenSSL compatibility mode. */
 #cmakedefine USE_YASSLEMUL 1

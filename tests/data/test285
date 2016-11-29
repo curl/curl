@@ -37,8 +37,11 @@ sent
 </upload>
 <protocol>
 opcode: 2
-filename: /test285.txt
 mode: octet
+tsize: 32
+blksize: 512
+timeout: 6
+filename: /test285.txt
 </protocol>
 </verify>
 </testcase>

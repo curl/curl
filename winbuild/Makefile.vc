@@ -15,17 +15,21 @@ CFGSET=true
 
 !MESSAGE Usage: nmake /f Makefile.vc mode=<static or dll> <options>
 !MESSAGE where <options> is one or many of:
-!MESSAGE   VC=<6,7,8,9,10,11,12>        - VC versions
+!MESSAGE   VC=<6,7,8,9,10,11,12,14>     - VC versions
 !MESSAGE   WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
 !MESSAGE                                  Defaults to sibbling directory deps: ../deps
 !MESSAGE                                  Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
 !MESSAGE                                  Uncompress them into the deps folder.
 !MESSAGE   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
+!MESSAGE   ENABLE_NGHTTP2=<yes or no>   - Enable HTTP/2 support, defaults to no
+!MESSAGE                                  Requires OpenSSL
+!MESSAGE   WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
+!MESSAGE   WITH_MBEDTLS=<dll or static> - Enable mbedTLS support, DLL or static
 !MESSAGE   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
 !MESSAGE                                  Requires Windows Vista or later, or installation from:
-!MESSAGE                                  http://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
+!MESSAGE                                  https://www.microsoft.com/en-us/download/details.aspx?id=734
 !MESSAGE   ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
 !MESSAGE   ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes
 !MESSAGE   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
@@ -86,7 +90,7 @@ USE_SSPI = false
 !ENDIF
 
 !IFNDEF ENABLE_WINSSL
-!IFDEF WITH_SSL
+!IF DEFINED(WITH_SSL) || DEFINED(WITH_MBEDTLS)
 USE_WINSSL = false
 !ELSE
 USE_WINSSL = $(USE_SSPI)
@@ -105,6 +109,35 @@ SSL     = dll
 !ELSEIF "$(WITH_SSL)"=="static"
 USE_SSL = true
 SSL     = static
+!ENDIF
+
+!IF "$(USE_SSL)"=="true"
+!IF "$(ENABLE_NGHTTP2)"=="yes"
+USE_NGHTTP2 = true
+!ENDIF
+!ENDIF
+
+!IFNDEF USE_NGHTTP2
+USE_NGHTTP2 = false
+!ENDIF
+
+!IF "$(WITH_MBEDTLS)"=="dll" || "$(WITH_MBEDTLS)"=="static"
+USE_MBEDTLS = true
+MBEDTLS     = $(WITH_MBEDTLS)
+!ENDIF
+
+!IF ( "$(USE_SSL)"=="true" && "$(USE_WINSSL)"=="true" ) \
+ || ( "$(USE_SSL)"=="true" && "$(USE_MBEDTLS)"=="true" ) \
+ || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WINSSL)"=="true" )
+!ERROR SSL, MBEDTLS and WINSSL are mutual exclusive options.
+!ENDIF
+
+!IF "$(WITH_CARES)"=="dll"
+USE_CARES = true
+CARES     = dll
+!ELSEIF "$(WITH_CARES)"=="static"
+USE_CARES = true
+CARES     = static
 !ENDIF
 
 !IF "$(WITH_ZLIB)"=="dll"
@@ -141,6 +174,14 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-static
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-ssl-$(SSL)
 !ENDIF
 
+!IF "$(USE_MBEDTLS)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-mbedtls-$(MBEDTLS)
+!ENDIF
+
+!IF "$(USE_CARES)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-cares-$(CARES)
+!ENDIF
+
 !IF "$(USE_ZLIB)"=="true"
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-zlib-$(ZLIB)
 !ENDIF
@@ -169,6 +210,9 @@ CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 
 $(MODE):
+	@IF NOT EXIST ..\include\curl\curlbuild.h ( \
+	   CALL ..\buildconf.bat \
+	)
 	@SET DIROBJ=$(LIBCURL_DIROBJ)
 	@SET MACRO_NAME=LIBCURL_OBJS
 	@SET OUTFILE=LIBCURL_OBJS.inc
@@ -181,6 +225,7 @@ $(MODE):
 
 	@SET CONFIG_NAME_LIB=$(CONFIG_NAME_LIB)
 	@SET MACHINE=$(MACHINE)
+	@SET USE_NGHTTP2=$(USE_NGHTTP2)
 	@SET USE_IDN=$(USE_IDN)
 	@SET USE_IPV6=$(USE_IPV6)
 	@SET USE_SSPI=$(USE_SSPI)

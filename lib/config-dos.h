@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -132,12 +132,11 @@
   #define HAVE_LIBZ              1
 #endif
 
-/* USE_SSLEAY on cmd-line */
-#ifdef USE_SSLEAY
+/* USE_OPENSSL on cmd-line */
+#ifdef USE_OPENSSL
   #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
   #define HAVE_OPENSSL_ENGINE_H  1
   #define OPENSSL_NO_KRB5        1
-  #define USE_OPENSSL            1
 #endif
 
 /* to disable LDAP */
@@ -162,11 +161,6 @@
   #define HAVE_SYS_TIME_H 1
   #define HAVE_TERMIOS_H  1
   #define HAVE_VARIADIC_MACROS_GCC 1
-
-  /* Because djgpp <= 2.03 doesn't have snprintf() etc. */
-  #if (DJGPP_MINOR < 4)
-    #define _MPRINTF_REPLACE
-  #endif
 
 #elif defined(__WATCOMC__)
   #define HAVE_STRCASECMP 1

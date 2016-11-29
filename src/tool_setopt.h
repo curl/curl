@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -28,8 +28,8 @@
  */
 
 #define SETOPT_CHECK(v) do { \
-  res = (v); \
-  if(res) \
+  result = (v); \
+  if(result) \
     goto show_error; \
 } WHILE_FALSE
 
@@ -47,11 +47,13 @@ typedef struct {
 } NameValueUnsigned;
 
 extern const NameValue setopt_nv_CURLPROXY[];
+extern const NameValue setopt_nv_CURL_SOCKS_PROXY[];
 extern const NameValue setopt_nv_CURL_HTTP_VERSION[];
 extern const NameValue setopt_nv_CURL_SSLVERSION[];
 extern const NameValue setopt_nv_CURL_TIMECOND[];
 extern const NameValue setopt_nv_CURLFTPSSL_CCC[];
 extern const NameValue setopt_nv_CURLUSESSL[];
+extern const NameValueUnsigned setopt_nv_CURLSSLOPT[];
 extern const NameValue setopt_nv_CURL_NETRC[];
 extern const NameValue setopt_nv_CURLPROTO[];
 extern const NameValueUnsigned setopt_nv_CURLAUTH[];
@@ -60,13 +62,16 @@ extern const NameValueUnsigned setopt_nv_CURLAUTH[];
 #define setopt_nv_CURLOPT_HTTP_VERSION setopt_nv_CURL_HTTP_VERSION
 #define setopt_nv_CURLOPT_HTTPAUTH setopt_nv_CURLAUTH
 #define setopt_nv_CURLOPT_SSLVERSION setopt_nv_CURL_SSLVERSION
+#define setopt_nv_CURLOPT_PROXY_SSLVERSION setopt_nv_CURL_SSLVERSION
 #define setopt_nv_CURLOPT_TIMECONDITION setopt_nv_CURL_TIMECOND
 #define setopt_nv_CURLOPT_FTP_SSL_CCC setopt_nv_CURLFTPSSL_CCC
 #define setopt_nv_CURLOPT_USE_SSL setopt_nv_CURLUSESSL
+#define setopt_nv_CURLOPT_SSL_OPTIONS setopt_nv_CURLSSLOPT
 #define setopt_nv_CURLOPT_NETRC setopt_nv_CURL_NETRC
 #define setopt_nv_CURLOPT_PROTOCOLS setopt_nv_CURLPROTO
 #define setopt_nv_CURLOPT_REDIR_PROTOCOLS setopt_nv_CURLPROTO
 #define setopt_nv_CURLOPT_PROXYTYPE setopt_nv_CURLPROXY
+#define setopt_nv_CURLOPT_SOCKS_PROXYTYPE setopt_nv_CURL_SOCKS_PROXY
 #define setopt_nv_CURLOPT_PROXYAUTH setopt_nv_CURLAUTH
 
 /* Intercept setopt calls for --libcurl */

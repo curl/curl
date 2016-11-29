@@ -40,8 +40,8 @@ http://we.want.that.site.com/279 -x http://f%61ke@%HOSTIP:%HTTPPORT
 </strip>
 <protocol>
 GET http://we.want.that.site.com/279 HTTP/1.1
-Proxy-Authorization: Basic ZmFrZTo=
 Host: we.want.that.site.com
+Proxy-Authorization: Basic ZmFrZTo=
 Accept: */*
 Proxy-Connection: Keep-Alive
 

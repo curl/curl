@@ -1,9 +1,31 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2004 - 2014, Guenter Knauf, <http://www.gknw.net/phpbb>.
+# Copyright (C) 2001 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
 #################################################################
 #
 ## Makefile for building curl.nlm (NetWare version - gnu make)
-## Use: make -f Makefile.netware
 ##
-## Comments to: Guenter Knauf http://www.gknw.net/phpbb
+## Use: make -f Makefile.netware
 #
 #################################################################
 
@@ -19,12 +41,12 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8y
+OPENSSL_PATH = ../../openssl-1.0.2a
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.4.3
+LIBSSH2_PATH = ../../libssh2-1.5.0
 endif
 
 # Edit the path below to point to the base of your axTLS package.
@@ -40,6 +62,11 @@ endif
 # Edit the path below to point to the base of your librtmp package.
 ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp-2.3
+endif
+
+# Edit the path below to point to the base of your nghttp2 package.
+ifndef NGHTTP2_PATH
+NGHTTP2_PATH = ../../nghttp2-0.6.7
 endif
 
 # Edit the path below to point to the base of your fbopenssl package.
@@ -75,7 +102,7 @@ endif
 TARGET  = curl
 VERSION	= $(LIBCURL_VERSION)
 COPYR	= Copyright (C) $(LIBCURL_COPYRIGHT_STR)
-DESCR	= cURL $(LIBCURL_VERSION_STR) ($(LIBARCH)) - http://curl.haxx.se
+DESCR	= curl $(LIBCURL_VERSION_STR) ($(LIBARCH)) - https://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
 SCREEN	= $(TARGET) commandline utility
@@ -230,6 +257,9 @@ ifeq ($(findstring -metalink,$(CFG)),-metalink)
 WITH_METALINK = 1
 WITH_SSL = 1
 endif
+ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
+WITH_NGHTTP2 = 1
+endif
 ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 ENABLE_IPV6 = 1
 endif
@@ -286,6 +316,10 @@ endif
 ifdef WITH_IDN
 	# INCLUDES += -I$(LIBIDN_PATH)/include
 	LDLIBS += $(LIBIDN_PATH)/lib/libidn.$(LIBEXT)
+endif
+ifdef WITH_NGHTTP2
+	INCLUDES += -I$(NGHTTP2_PATH)/include
+	LDLIBS += $(NGHTTP2_PATH)/lib/libnghttp2.$(LIBEXT)
 endif
 ifdef WITH_METALINK
 	CFLAGS += -DUSE_METALINK

@@ -57,6 +57,7 @@ Nice auth sir!
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>
@@ -74,23 +75,23 @@ http://data.from.server.requiring.digest.hohoho.com/168 --proxy http://%HOSTIP:%
 </strip>
 <protocol>
 GET http://data.from.server.requiring.digest.hohoho.com/168 HTTP/1.1
-User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
 Host: data.from.server.requiring.digest.hohoho.com
+User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://data.from.server.requiring.digest.hohoho.com/168 HTTP/1.1
+Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/168", response="fb8608e00ad9239a3dedb14bc8575976"
 User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
-Host: data.from.server.requiring.digest.hohoho.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://data.from.server.requiring.digest.hohoho.com/168 HTTP/1.1
+Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/168", response="fb8608e00ad9239a3dedb14bc8575976"
 Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/168", response="ca87f2d768a231e2d637a55698d5c416"
 User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
-Host: data.from.server.requiring.digest.hohoho.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 

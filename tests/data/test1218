@@ -14,7 +14,7 @@ cookies
 <data>
 HTTP/1.1 200 OK
 Date: Tue, 25 Sep 2001 19:37:44 GMT
-Set-Cookie: domain=.example.fake; bug=fixed;
+Set-Cookie: bug=fixed; domain=.example.fake;
 Content-Length: 21
 
 This server says moo

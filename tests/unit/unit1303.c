@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,17 +25,17 @@
 #include "connect.h"
 #include "memdebug.h" /* LAST include file */
 
-static struct SessionHandle *data;
+static struct Curl_easy *data;
 
-static CURLcode unit_setup( void )
+static CURLcode unit_setup(void)
 {
   data = curl_easy_init();
-  if (!data)
+  if(!data)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
 
-static void unit_stop( void )
+static void unit_stop(void)
 {
   curl_easy_cleanup(data);
 }
@@ -69,12 +69,12 @@ struct timetest {
 };
 
 UNITTEST_START
+{
+  struct timeval now;
+  long timeout;
+  unsigned int i;
 
-struct timeval now;
-long timeout;
-unsigned int i;
-
-const struct timetest run[] = {
+  const struct timetest run[] = {
   /* both timeouts set, not connecting */
   {BASE + 4, 0,      10000, 8000, FALSE, 6000, "6 seconds should be left"},
   {BASE + 4, 990000, 10000, 8000, FALSE, 5010, "5010 ms should be left"},
@@ -126,21 +126,20 @@ const struct timetest run[] = {
   /* both timeouts set, connecting, connect timeout the longer one */
   {BASE + 4, 0,      10000, 12000, TRUE, 6000, "6 seconds should be left"},
 
-};
+  };
 
-/* this is the pretended start time of the transfer */
-data->progress.t_startsingle.tv_sec = BASE;
-data->progress.t_startsingle.tv_usec = 0;
-data->progress.t_startop.tv_sec = BASE;
-data->progress.t_startop.tv_usec = 0;
+  /* this is the pretended start time of the transfer */
+  data->progress.t_startsingle.tv_sec = BASE;
+  data->progress.t_startsingle.tv_usec = 0;
+  data->progress.t_startop.tv_sec = BASE;
+  data->progress.t_startop.tv_usec = 0;
 
-for(i=0; i < sizeof(run)/sizeof(run[0]); i++) {
-  NOW(run[i].now_s, run[i].now_us);
-  TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
-  timeout =  Curl_timeleft(data, &now, run[i].connecting);
-  if(timeout != run[i].result)
-    fail(run[i].comment);
+  for(i=0; i < sizeof(run)/sizeof(run[0]); i++) {
+    NOW(run[i].now_s, run[i].now_us);
+    TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
+    timeout =  Curl_timeleft(data, &now, run[i].connecting);
+    if(timeout != run[i].result)
+      fail(run[i].comment);
+  }
 }
-
-
 UNITTEST_STOP

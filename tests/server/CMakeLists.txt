@@ -9,7 +9,7 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
     ${CURL_BINARY_DIR}/lib      # To be able to reach "curl_config.h"
     ${CURL_BINARY_DIR}/include  # To be able to reach "curl/curlbuild.h"
     )
-  if(CURL_USE_ARES)
+  if(USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 

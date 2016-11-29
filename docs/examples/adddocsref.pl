@@ -2,7 +2,7 @@
 
 # pass files as argument(s)
 
-my $docroot="http://curl.haxx.se/libcurl/c";
+my $docroot="https://curl.haxx.se/libcurl/c";
 
 for $f (@ARGV) {
     open(NEW, ">$f.new");

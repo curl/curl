@@ -151,6 +151,10 @@ Finally, this is the real page!
 <server>
 http
 </server>
+<features>
+!SSPI
+crypto
+</features>
 <tool>
 libauthretry
 </tool>
@@ -183,13 +187,13 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /20260100 HTTP/1.1
-Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/20260100", response="5f992a2e761ab926256419f7c685f85b"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/20260100", response="5f992a2e761ab926256419f7c685f85b"
 Accept: */*
 
 GET /20260200 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /20260300 HTTP/1.1
@@ -197,18 +201,18 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /20260300 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="3", uri="/20260300", response="132242e602882251929be93228c830ae"
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /20260400 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Accept: */*
 
 GET /20260500 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*
 
 </protocol>

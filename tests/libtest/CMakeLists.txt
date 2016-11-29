@@ -9,7 +9,7 @@ function(SETUP_TEST TEST_NAME)          # ARGN are the files in the test
     ${CURL_BINARY_DIR}/lib          # To be able to reach "curl_config.h"
     ${CURL_BINARY_DIR}/include      # To be able to reach "curl/curlbuild.h"
     )
-  if(CURL_USE_ARES)
+  if(USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 
@@ -35,6 +35,19 @@ foreach(TEST_NAME ${noinst_PROGRAMS})
   setup_test(${TEST_NAME} ${${TEST_NAME}_SOURCES})
 endforeach()
 
+# Allows for hostname override to make tests machine independent.
+# TODO this cmake build assumes a shared build, detect static linking here!
+if(NOT WIN32)
+  add_library(hostname MODULE sethostname.c sethostname.h)
+  # Output to .libs for compatibility with autotools, the test data expects a
+  # library at (tests)/libtest/.libs/libhostname.so
+  set_target_properties(hostname PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/.libs)
+  if(HIDES_CURL_PRIVATE_SYMBOLS)
+    set_property(TARGET hostname APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
+    set_property(TARGET hostname APPEND PROPERTY COMPILE_FLAGS ${CURL_CFLAG_SYMBOLS_HIDE})
+  endif()
+endif()
 
 # # files used only in some libcurl test programs
 # SET(TESTUTIL testutil.c testutil.h)

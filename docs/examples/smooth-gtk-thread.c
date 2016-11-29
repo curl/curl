@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,9 +19,12 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* This is a multi threaded application that uses a progress bar to show
+/* <DESC>
+ * A multi threaded application that uses a progress bar to show
  * status.  It uses Gtk+ to make a smooth pulse.
- *
+ * </DESC>
+ */
+/*
  * Written by Jud Bishop after studying the other examples provided with
  * libcurl.
  *
@@ -71,22 +74,19 @@ void *pull_one_url(void *NaN)
 
   /* Stop threads from entering unless j is incremented */
   pthread_mutex_lock(&lock);
-  while ( j < num_urls )
-  {
+  while(j < num_urls) {
     printf("j = %d\n", j);
 
     http =
       g_strdup_printf("xoap.weather.com/weather/local/%s?cc=*&dayf=5&unit=i\n",
                       urls[j]);
 
-    printf( "http %s", http );
+    printf("http %s", http);
 
     curl = curl_easy_init();
-    if(curl)
-    {
+    if(curl) {
 
-      outfile = fopen(urls[j], "w");
-      /* printf("fopen\n"); */
+      outfile = fopen(urls[j], "wb");
 
       /* Set the URL and transfer type */
       curl_easy_setopt(curl, CURLOPT_URL, http);
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
   g_signal_connect(G_OBJECT (top_window), "delete-event",
                    G_CALLBACK(cb_delete), NULL);
 
-  if (!g_thread_create(&create_thread, progress_bar, FALSE, NULL) != 0)
+  if(!g_thread_create(&create_thread, progress_bar, FALSE, NULL) != 0)
     g_warning("can't create the thread");
 
   gtk_main();
@@ -225,4 +225,3 @@ int main(int argc, char **argv)
 
   return 0;
 }
-

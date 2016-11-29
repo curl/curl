@@ -79,8 +79,8 @@ a second line
 line three
 four is the number of lines
 PUT /1075 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 Accept: */*
 Content-Length: 85
 Expect: 100-continue

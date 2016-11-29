@@ -5,9 +5,12 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
+ *  Copyright (c) 2000 David Odin (aka DindinX) for MandrakeSoft
  */
-/* Copyright (c) 2000 David Odin (aka DindinX) for MandrakeSoft */
-/* an attempt to use the curl library in concert with a gtk-threaded application */
+/* <DESC>
+ * use the libcurl in a gtk-threaded application
+ * </DESC>
+ */
 
 #include <stdio.h>
 #include <gtk/gtk.h>
@@ -47,9 +50,9 @@ void *my_thread(void *ptr)
   gchar *url = ptr;
 
   curl = curl_easy_init();
-  if(curl)
-  {
-    outfile = fopen("test.curl", "w");
+  if(curl) {
+    const char *filename = "test.curl";
+    outfile = fopen(filename, "wb");
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
@@ -94,7 +97,7 @@ int main(int argc, char **argv)
   gtk_container_add(GTK_CONTAINER(Frame2), Bar);
   gtk_widget_show_all(Window);
 
-  if (!g_thread_create(&my_thread, argv[1], FALSE, NULL) != 0)
+  if(!g_thread_create(&my_thread, argv[1], FALSE, NULL) != 0)
     g_warning("can't create the thread");
 
 

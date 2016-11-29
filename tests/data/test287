@@ -28,7 +28,7 @@ http
 HTTP proxy CONNECT with custom User-Agent header
  </name>
  <command>
-http://test.remote.example.com.287:%HTTPPORT/path/287 -H "User-Agent: looser/2007" --proxy http://%HOSTIP:%HTTPPORT --proxytunnel
+http://test.remote.example.com.287:%HTTPPORT/path/287 -H "User-Agent: looser/2015" --proxy http://%HOSTIP:%HTTPPORT --proxytunnel --proxy-header "User-Agent: looser/2007"
 </command>
 </client>
 

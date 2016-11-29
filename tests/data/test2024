@@ -115,6 +115,10 @@ Finally, this is the real page!
 <server>
 http
 </server>
+<features>
+!SSPI
+crypto
+</features>
 <tool>
 libauthretry
 </tool>
@@ -143,28 +147,28 @@ chkhostname curlhost
 </strip>
 <protocol>
 GET /20240100 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Accept: */*
 
 GET /20240200 HTTP/1.1
-Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/20240200", response="ed646c565f79e2dd9fa37cb5a621213c"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/20240200", response="ed646c565f79e2dd9fa37cb5a621213c"
 Accept: */*
 
 GET /20240300 HTTP/1.1
-Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
 Accept: */*
 
 GET /20240400 HTTP/1.1
-Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/20240400", response="9741ced8caacc6124770187b36f007c5"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="2", uri="/20240400", response="9741ced8caacc6124770187b36f007c5"
 Accept: */*
 
 GET /20240500 HTTP/1.1
-Authorization: Digest username="testuser", realm="testrealm", nonce="3", uri="/20240500", response="5bc77ec8c2d443b27a1b55f1fd8fbb13"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="testrealm", nonce="3", uri="/20240500", response="5bc77ec8c2d443b27a1b55f1fd8fbb13"
 Accept: */*
 
 </protocol>

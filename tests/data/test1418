@@ -71,6 +71,7 @@ moo
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>
@@ -92,13 +93,13 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /1418 HTTP/1.1
-Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/1418", response="986238b7e0077754944c966f56d9bc77"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/1418", response="986238b7e0077754944c966f56d9bc77"
 Accept: */*
 
 GET /14180003 HTTP/1.1
-Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/14180003", response="1c6390a67bac3283a9b023402f3b3540"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/14180003", response="1c6390a67bac3283a9b023402f3b3540"
 Accept: */*
 
 [DISCONNECT]

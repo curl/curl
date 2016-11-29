@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -120,13 +120,13 @@ int main(int argc, char *argv[])
     /* Check that the system has IPv6 enabled before checking the resolver */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)
-      /* an ipv6 address was requested and we can't get/use one */
+      /* an IPv6 address was requested and we can't get/use one */
       rc = -1;
     else {
       sclose(s);
     }
 
-    if (rc == 0) {
+    if(rc == 0) {
       /* getaddrinfo() resolve */
       struct addrinfo *ai;
       struct addrinfo hints;
@@ -135,9 +135,11 @@ int main(int argc, char *argv[])
       hints.ai_family = PF_INET6;
       hints.ai_socktype = SOCK_STREAM;
       hints.ai_flags = AI_CANONNAME;
-      /* Use parenthesis around function to stop it from being replaced by
-      the macro in memdebug.h */
+      /* Use parenthesis around functions to stop them from being replaced by
+         the macro in memdebug.h */
       rc = (getaddrinfo)(host, "80", &hints, &ai);
+      if(rc == 0)
+        (freeaddrinfo)(ai);
     }
 
 #else

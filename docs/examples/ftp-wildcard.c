@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+/* <DESC>
+ * FTP wildcard pattern matching
+ * </DESC>
+ */
 #include <curl/curl.h>
 #include <stdio.h>
 
@@ -115,7 +119,7 @@ static long file_is_coming(struct curl_fileinfo *finfo,
       return CURL_CHUNK_BGN_FUNC_SKIP;
     }
 
-    data->output = fopen(finfo->filename, "w");
+    data->output = fopen(finfo->filename, "wb");
     if(!data->output) {
       return CURL_CHUNK_BGN_FUNC_FAIL;
     }

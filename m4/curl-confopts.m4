@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -316,6 +316,42 @@ dnl     AC_MSG_ERROR([options --enable-ares and --enable-threads are mutually ex
 dnl   fi
 dnl ])
 
+dnl CURL_CHECK_OPTION_RT
+dnl -------------------------------------------------
+dnl Verify if configure has been involed with option
+dnl --disable-rt and set shell variable dontwant_rt
+dnl as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_RT], [
+  AC_BEFORE([$0], [CURL_CHECK_LIB_THREADS])dnl
+  AC_MSG_CHECKING([whether to disable dependency on -lrt])
+  OPT_RT="default"
+  AC_ARG_ENABLE(rt,
+ AC_HELP_STRING([--disable-rt],[disable dependency on -lrt]),
+  OPT_RT=$enableval)
+  case "$OPT_RT" in
+    no)
+      dnl --disable-rt used (reverse logic)
+      dontwant_rt="yes"
+      AC_MSG_RESULT([yes])
+      ;;
+    default)
+      dnl configure option not specified (so not disabled)
+      dontwant_rt="no"
+      AC_MSG_RESULT([(assumed no)])
+      ;;
+    *)
+      dnl --enable-rt option used (reverse logic)
+      dontwant_rt="no"
+      AC_MSG_RESULT([no])
+      ;;
+  esac
+  dnl TODO: may require mutual exclusion
+  if test "$dontwant_rt" = "yes" && test "$want_thres" = "yes" ; then
+    AC_MSG_ERROR([options --disable-rt and --enable-thread-resolver are mutually exclusive, at most one can be selected.])
+  fi
+])
+ 
 
 dnl CURL_CHECK_OPTION_WARNINGS
 dnl -------------------------------------------------
@@ -397,15 +433,15 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
   tst_method="unknown"
 
   AC_MSG_CHECKING([how to set a socket into non-blocking mode])
-  if test "x$ac_cv_func_fcntl_o_nonblock" = "xyes"; then
+  if test "x$curl_cv_func_fcntl_o_nonblock" = "xyes"; then
     tst_method="fcntl O_NONBLOCK"
-  elif test "x$ac_cv_func_ioctl_fionbio" = "xyes"; then
+  elif test "x$curl_cv_func_ioctl_fionbio" = "xyes"; then
     tst_method="ioctl FIONBIO"
-  elif test "x$ac_cv_func_ioctlsocket_fionbio" = "xyes"; then
+  elif test "x$curl_cv_func_ioctlsocket_fionbio" = "xyes"; then
     tst_method="ioctlsocket FIONBIO"
-  elif test "x$ac_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
+  elif test "x$curl_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
     tst_method="IoctlSocket FIONBIO"
-  elif test "x$ac_cv_func_setsockopt_so_nonblock" = "xyes"; then
+  elif test "x$curl_cv_func_setsockopt_so_nonblock" = "xyes"; then
     tst_method="setsockopt SO_NONBLOCK"
   fi
   AC_MSG_RESULT([$tst_method])
@@ -428,7 +464,7 @@ AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
   AC_MSG_CHECKING([whether hiding of library internal symbols will actually happen])
   CFLAG_CURL_SYMBOL_HIDING=""
   doing_symbol_hiding="no"
-  if test x"$ac_cv_native_windows" != "xyes" &&
+  if test x"$curl_cv_native_windows" != "xyes" &&
     test "$want_symbol_hiding" = "yes" &&
     test "$supports_symbol_hiding" = "yes"; then
     doing_symbol_hiding="yes"
@@ -575,7 +611,7 @@ AC_DEFUN([CURL_CHECK_NTLM_WB], [
   AC_REQUIRE([CURL_CHECK_OPTION_NTLM_WB])dnl
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_MSG_CHECKING([whether to enable NTLM delegation to winbind's helper])
-  if test "$ac_cv_native_windows" = "yes" ||
+  if test "$curl_cv_native_windows" = "yes" ||
     test "x$SSL_ENABLED" = "x"; then
     want_ntlm_wb_file=""
     want_ntlm_wb="no"

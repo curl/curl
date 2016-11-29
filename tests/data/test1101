@@ -45,8 +45,8 @@ http://user:secret@%HOSTIP:%HTTPPORT/gimme/1101
 </strip>
 <protocol>
 GET /gimme/1101 HTTP/1.1
-Authorization: Basic dXNlcjpzZWNyZXQ=
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjpzZWNyZXQ=
 Accept: */*
 
 </protocol>

@@ -43,8 +43,8 @@ FTP over HTTP proxy with user:pass not in url
 </strip>
 <protocol>
 GET ftp://michal:aybabtu@host.com/we/want/299 HTTP/1.1
-Authorization: Basic bWljaGFsOmF5YmFidHU=
 Host: host.com:21
+Authorization: Basic bWljaGFsOmF5YmFidHU=
 Accept: */*
 Proxy-Connection: Keep-Alive
 

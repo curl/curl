@@ -66,6 +66,7 @@ This IS the real page!
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>
@@ -99,8 +100,8 @@ a second line
 line three
 four is the number of lines
 PUT /1071 HTTP/1.0
-Authorization: Digest username="testuser", realm="gimme all yer s3cr3ts", nonce="11223344", uri="/1071", response="df4cef6b52a30e65d472dd848d2055a1"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="testuser", realm="gimme all yer s3cr3ts", nonce="11223344", uri="/1071", response="df4cef6b52a30e65d472dd848d2055a1"
 Accept: */*
 Content-Length: 85
 

@@ -1,0 +1,30 @@
+<testcase>
+<info>
+<keywords>
+CURLOPT_OPENSOCKETFUNCTION
+</keywords>
+</info>
+
+<client>
+<server>
+none
+</server>
+<features>
+http
+</features>
+<tool>
+lib1530
+</tool>
+ <name>
+CURLOPT_OPENSOCKETFUNCTION returns bad socket
+ </name>
+</client>
+
+# it should be detected and an error should be reported
+<verify>
+# 7 == CURLE_COULDNT_CONNECT
+<errorcode>
+7
+</errorcode>
+</verify>
+</testcase>

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -372,6 +372,63 @@ int curlx_sztosi(ssize_t sznum)
   DEBUGASSERT((size_t) sznum <= (size_t) CURL_MASK_SINT);
 #endif
   return (int)(sznum & (ssize_t) CURL_MASK_SINT);
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
+}
+
+/*
+** unsigned int to unsigned short
+*/
+
+unsigned short curlx_uitous(unsigned int uinum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#endif
+
+  DEBUGASSERT(uinum <= (unsigned int) CURL_MASK_USHORT);
+  return (unsigned short) (uinum & (unsigned int) CURL_MASK_USHORT);
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
+}
+
+/*
+** unsigned int to unsigned char
+*/
+
+unsigned char curlx_uitouc(unsigned int uinum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#endif
+
+  DEBUGASSERT(uinum <= (unsigned int) CURL_MASK_UCHAR);
+  return (unsigned char) (uinum & (unsigned int) CURL_MASK_UCHAR);
+
+#ifdef __INTEL_COMPILER
+#  pragma warning(pop)
+#endif
+}
+
+/*
+** unsigned int to signed int
+*/
+
+int curlx_uitosi(unsigned int uinum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#endif
+
+  DEBUGASSERT(uinum <= (unsigned int) CURL_MASK_SINT);
+  return (int) (uinum & (unsigned int) CURL_MASK_SINT);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(pop)

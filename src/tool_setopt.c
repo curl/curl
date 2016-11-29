@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -45,6 +45,15 @@
 const NameValue setopt_nv_CURLPROXY[] = {
   NV(CURLPROXY_HTTP),
   NV(CURLPROXY_HTTP_1_0),
+  NV(CURLPROXY_HTTPS),
+  NV(CURLPROXY_SOCKS4),
+  NV(CURLPROXY_SOCKS5),
+  NV(CURLPROXY_SOCKS4A),
+  NV(CURLPROXY_SOCKS5_HOSTNAME),
+  NVEND,
+};
+
+const NameValue setopt_nv_CURL_SOCKS_PROXY[] = {
   NV(CURLPROXY_SOCKS4),
   NV(CURLPROXY_SOCKS5),
   NV(CURLPROXY_SOCKS4A),
@@ -70,6 +79,8 @@ const NameValue setopt_nv_CURL_HTTP_VERSION[] = {
   NV(CURL_HTTP_VERSION_NONE),
   NV(CURL_HTTP_VERSION_1_0),
   NV(CURL_HTTP_VERSION_1_1),
+  NV(CURL_HTTP_VERSION_2_0),
+  NV(CURL_HTTP_VERSION_2TLS),
   NVEND,
 };
 
@@ -81,6 +92,7 @@ const NameValue setopt_nv_CURL_SSLVERSION[] = {
   NV(CURL_SSLVERSION_TLSv1_0),
   NV(CURL_SSLVERSION_TLSv1_1),
   NV(CURL_SSLVERSION_TLSv1_2),
+  NV(CURL_SSLVERSION_TLSv1_3),
   NVEND,
 };
 
@@ -104,6 +116,12 @@ const NameValue setopt_nv_CURLUSESSL[] = {
   NV(CURLUSESSL_TRY),
   NV(CURLUSESSL_CONTROL),
   NV(CURLUSESSL_ALL),
+  NVEND,
+};
+
+const NameValueUnsigned setopt_nv_CURLSSLOPT[] = {
+  NV(CURLSSLOPT_ALLOW_BEAST),
+  NV(CURLSSLOPT_NO_REVOKE),
   NVEND,
 };
 
@@ -134,6 +152,8 @@ const NameValue setopt_nv_CURLPROTO[] = {
   NV(CURLPROTO_RTSP),
   NV(CURLPROTO_SCP),
   NV(CURLPROTO_SFTP),
+  NV(CURLPROTO_SMB),
+  NV(CURLPROTO_SMBS),
   NV(CURLPROTO_SMTP),
   NV(CURLPROTO_SMTPS),
   NV(CURLPROTO_TELNET),
@@ -147,6 +167,9 @@ static const NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
   NV1(CURLOPT_SSL_VERIFYHOST, 1),
   NV1(CURLOPT_SSL_ENABLE_NPN, 1),
   NV1(CURLOPT_SSL_ENABLE_ALPN, 1),
+  NV1(CURLOPT_TCP_NODELAY, 1),
+  NV1(CURLOPT_PROXY_SSL_VERIFYPEER, 1),
+  NV1(CURLOPT_PROXY_SSL_VERIFYHOST, 1),
   NVEND
 };
 
@@ -219,7 +242,7 @@ static char *c_escape(const char *str)
       e += 2;
     }
     else if(! isprint(c)) {
-      snprintf(e, 4, "\\%03o", c);
+      snprintf(e, 5, "\\%03o", (unsigned)c);
       e += 4;
     }
     else
@@ -384,11 +407,11 @@ CURLcode tool_setopt_httppost(CURL *curl, struct GlobalConfig *config,
           ret = CURLE_OUT_OF_MEMORY;
           goto nomem;
         }
-        if(pp->flags & HTTPPOST_FILENAME) {
+        if(pp->flags & CURL_HTTPPOST_FILENAME) {
           /* file upload as for -F @filename */
           DATA1("             CURLFORM_FILE, \"%s\",", escaped);
         }
-        else if(pp->flags & HTTPPOST_READFILE) {
+        else if(pp->flags & CURL_HTTPPOST_READFILE) {
           /* content from file as for -F <filename */
           DATA1("             CURLFORM_FILECONTENT, \"%s\",", escaped);
         }

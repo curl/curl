@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -69,7 +69,7 @@
 /* #undef CURL_EXTERN_SYMBOL */
 
 /* Use Windows LDAP implementation */
-/* #undef CURL_LDAP_WIN */
+/* #undef USE_WIN32_LDAP */
 
 /* your Entropy Gathering Daemon socket pathname */
 /* #undef EGD_SOCKET */
@@ -658,7 +658,7 @@
 
 /* Define to the address where bug reports for this package should be sent. */
 /*#define PACKAGE_BUGREPORT \
-  "a suitable curl mailing list => http://curl.haxx.se/mail/"*/
+  "a suitable curl mailing list => https://curl.haxx.se/mail/"*/
 
 /* Define to the full name of this package. */
 /*#define PACKAGE_NAME "curl"*/
@@ -676,7 +676,7 @@
 /*#define RANDOM_FILE "/dev/urandom"*/
 
 #define RECV_TYPE_ARG1 int
-#define RECV_TYPE_ARG2 void*
+#define RECV_TYPE_ARG2 void *
 #define RECV_TYPE_ARG3 size_t
 #define RECV_TYPE_ARG4 int
 #define RECV_TYPE_RETV ssize_t
@@ -692,7 +692,7 @@
 
 #define SEND_TYPE_ARG1 int
 #define SEND_QUAL_ARG2 const
-#define SEND_TYPE_ARG2 void*
+#define SEND_TYPE_ARG2 void *
 #define SEND_TYPE_ARG3 size_t
 #define SEND_TYPE_ARG4 int
 #define SEND_TYPE_RETV ssize_t
@@ -806,12 +806,6 @@
 /* Enable appropriate header only when zlib support is enabled */
 #ifdef HAVE_LIBZ
 #define HAVE_ZLIB_H 1
-#endif
-
-/* Enable appropriate definitions only when OpenSSL support is enabled */
-#ifdef USE_SSLEAY
-/* if OpenSSL is in use */
-#define USE_OPENSSL
 #endif
 
 #endif /* HEADER_CURL_CONFIG_SYMBIAN_H */

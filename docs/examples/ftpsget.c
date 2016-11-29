@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -24,11 +24,9 @@
 
 #include <curl/curl.h>
 
-/*
- * This is an example showing how to get a single file from an FTPS server.
- * It delays the actual destination file creation until the first write
- * callback so that it won't create an empty file in case the remote file
- * doesn't exist or something else fails.
+/* <DESC>
+ * Get a single file from an FTPS server.
+ * </DESC>
  */
 
 struct FtpFile {
@@ -55,7 +53,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
   struct FtpFile ftpfile={
-    "yourfile.bin", /* name to store the file as if succesful */
+    "yourfile.bin", /* name to store the file as if successful */
     NULL
   };
 

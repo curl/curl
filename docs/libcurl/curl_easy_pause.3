@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -62,7 +62,7 @@ function is called again without this bit set. Thus, the read callback
 .IP CURLPAUSE_ALL
 Convenience define that pauses both directions.
 .IP CURLPAUSE_CONT
-Convenience define that unpauses both directions
+Convenience define that unpauses both directions.
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, and a non-zero return
 code means something wrong occurred after the new state was set.  See the
@@ -79,7 +79,7 @@ Before libcurl 7.32.0, when a specific handle was unpaused with this function,
 there was no particular forced rechecking or similar of the socket's state,
 which made the continuation of the transfer get delayed until next
 multi-socket call invoke or even longer. Alternatively, the user could
-forcibly call for example curl_multi_socket_all(3) - with a rather hefty
+forcibly call for example \fIcurl_multi_socket_all(3)\fP - with a rather hefty
 performance penalty.
 
 Starting in libcurl 7.32.0, unpausing a transfer will schedule a timeout

@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -409,7 +409,7 @@
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-#define CURL_LDAP_WIN 1
+#define USE_WIN32_LDAP 1
 #undef HAVE_LDAP_URL_PARSE
 
 /* ---------------------------------------------------------------- */
@@ -443,6 +443,6 @@
 #define ENOMEM 2
 #define EAGAIN 3
 
-extern int stat(const char *path,struct stat *buffer );
+extern int stat(const char *path, struct stat *buffer);
 
 #endif /* HEADER_CURL_CONFIG_WIN32CE_H */

@@ -1,0 +1,99 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_PROXY_PINNEDPUBLICKEY 3 "24 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_PROXY_PINNEDPUBLICKEY \- set pinned public key for https proxy
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_PINNEDPUBLICKEY, char *pinnedpubkey);
+.SH DESCRIPTION
+Pass a pointer to a zero terminated string as parameter. The string can be the
+file name of your pinned public key. The file format expected is "PEM" or "DER".
+The string can also be any number of base64 encoded sha256 hashes preceded by
+"sha256//" and separated by ";"
+
+When negotiating a TLS or SSL connection, the https proxy sends a certificate
+indicating its identity. A public key is extracted from this certificate and
+if it does not exactly match the public key provided to this option, curl will
+abort the connection before sending or receiving any data.
+
+On mismatch, \fICURLE_SSL_PINNEDPUBKEYNOTMATCH\fP is returned.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+.SH EXAMPLE
+.nf
+TODO
+.fi
+.SH PUBLIC KEY EXTRACTION
+If you do not have the https proxy server's public key file you can extract it
+from the https proxy server's certificate.
+.nf
+# retrieve the server's certificate if you don't already have it
+#
+# be sure to examine the certificate to see if it is what you expected
+#
+# Windows-specific:
+# - Use NUL instead of /dev/null.
+# - OpenSSL may wait for input instead of disconnecting. Hit enter.
+# - If you don't have sed, then just copy the certificate into a file:
+#   Lines from -----BEGIN CERTIFICATE----- to -----END CERTIFICATE-----.
+#
+openssl s_client -servername www.example.com -connect www.example.com:443 < /dev/null | sed -n "/-----BEGIN/,/-----END/p" > www.example.com.pem
+
+# extract public key in pem format from certificate
+openssl x509 -in www.example.com.pem -pubkey -noout > www.example.com.pubkey.pem
+
+# convert public key from pem to der
+openssl asn1parse -noout -inform pem -in www.example.com.pubkey.pem -out www.example.com.pubkey.der
+
+# sha256 hash and base64 encode der to string for use
+openssl dgst -sha256 -binary www.example.com.pubkey.der | openssl base64
+.fi
+The public key in PEM format contains a header, base64 data and a
+footer:
+.nf
+-----BEGIN PUBLIC KEY-----
+[BASE 64 DATA]
+-----END PUBLIC KEY-----
+.fi
+.SH AVAILABILITY
+PEM/DER support:
+
+  7.52.0: GSKit, GnuTLS, NSS, OpenSSL, PolarSSL, mbedtls, wolfSSL/CyaSSL
+
+sha256 support:
+
+  7.52.0: GnuTLS, NSS, OpenSSL, PolarSSL, mbedtls, wolfSSL/CyaSSL
+
+Other SSL backends not supported.
+.SH RETURN VALUE
+Returns CURLE_OK if TLS enabled, CURLE_UNKNOWN_OPTION if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+.SH "SEE ALSO"
+.BR CURLOPT_PROXY_SSL_VERIFYPEER "(3), "
+.BR CURLOPT_PROXY_SSL_VERIFYHOST "(3), "
+.BR CURLOPT_PROXY_CAINFO "(3), "
+.BR CURLOPT_PROXY_CAPATH "(3), "

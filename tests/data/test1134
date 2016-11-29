@@ -50,13 +50,13 @@ http://%HOSTIP:%HTTPPORT/1134 -u user1:password1 --next http://%HOSTIP:%HTTPPORT
 </strip>
 <protocol>
 GET /1134 HTTP/1.1
-Authorization: Basic dXNlcjE6cGFzc3dvcmQx
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic dXNlcjE6cGFzc3dvcmQx
 Accept: */*
 
 GET /11340001 HTTP/1.1
-Authorization: Basic MnVzZXI6cGFzc3dvcmQy
 Host: %HOSTIP:%HTTPPORT
+Authorization: Basic MnVzZXI6cGFzc3dvcmQy
 Accept: */*
 
 [DISCONNECT]

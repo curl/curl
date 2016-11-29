@@ -1,9 +1,31 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2004 - 2015, Guenter Knauf, <http://www.gknw.net/phpbb>.
+# Copyright (C) 2001 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
 #################################################################
 #
 ## Makefile for building libcurl.nlm (NetWare version - gnu make)
-## Use: make -f Makefile.netware
 ##
-## Comments to: Guenter Knauf http://www.gknw.net/phpbb
+## Use: make -f Makefile.netware
 #
 #################################################################
 
@@ -19,12 +41,12 @@ endif
 
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.8y
+OPENSSL_PATH = ../../openssl-1.0.2a
 endif
 
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
-LIBSSH2_PATH = ../../libssh2-1.4.3
+LIBSSH2_PATH = ../../libssh2-1.5.0
 endif
 
 # Edit the path below to point to the base of your axTLS package.
@@ -40,6 +62,11 @@ endif
 # Edit the path below to point to the base of your librtmp package.
 ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../librtmp-2.3
+endif
+
+# Edit the path below to point to the base of your nghttp2 package.
+ifndef NGHTTP2_PATH
+NGHTTP2_PATH = ../../nghttp2-0.6.7
 endif
 
 # Edit the path below to point to the base of your fbopenssl package.
@@ -60,7 +87,7 @@ endif
 TARGET  = libcurl
 VERSION	= $(LIBCURL_VERSION)
 COPYR	= Copyright (C) $(LIBCURL_COPYRIGHT_STR)
-DESCR	= cURL libcurl $(LIBCURL_VERSION_STR) ($(LIBARCH)) - http://curl.haxx.se
+DESCR	= curl libcurl $(LIBCURL_VERSION_STR) ($(LIBARCH)) - https://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
 SCREEN	= none
@@ -209,6 +236,11 @@ WITH_SSL =
 else
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
 WITH_SSL = 1
+ifeq ($(findstring -srp,$(CFG)),-srp)
+ifeq "$(wildcard $(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)/openssl/srp.h)" "$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)/openssl/srp.h"
+WITH_SRP = 1
+endif
+endif
 endif
 endif
 ifeq ($(findstring -zlib,$(CFG)),-zlib)
@@ -216,6 +248,9 @@ WITH_ZLIB = 1
 endif
 ifeq ($(findstring -idn,$(CFG)),-idn)
 WITH_IDN = 1
+endif
+ifeq ($(findstring -nghttp2,$(CFG)),-nghttp2)
+WITH_NGHTTP2 = 1
 endif
 ifeq ($(findstring -ipv6,$(CFG)),-ipv6)
 ENABLE_IPV6 = 1
@@ -269,6 +304,10 @@ ifdef WITH_IDN
 	INCLUDES += -I$(LIBIDN_PATH)/include
 	LDLIBS += $(LIBIDN_PATH)/lib/libidn.$(LIBEXT)
 endif
+ifdef WITH_NGHTTP2
+	INCLUDES += -I$(NGHTTP2_PATH)/include
+	LDLIBS += $(NGHTTP2_PATH)/lib/libnghttp2.$(LIBEXT)
+endif
 
 ifeq ($(LIBARCH),LIBC)
 	INCLUDES += -I$(NDK_LIBC)/include
@@ -312,7 +351,7 @@ OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(notdir $(CSOURCES)))) $(OBJDIR)/n
 
 OBJL	= $(OBJS) $(OBJDIR)/nwlib.o $(LDLIBS)
 
-vpath %.c . vtls
+vpath %.c . vauth vtls
 
 all: lib nlm
 
@@ -462,7 +501,7 @@ curl_config.h: Makefile.netware
 	@echo $(DL)#error This $(notdir $@) is created for NetWare platform!$(DL) >> $@
 	@echo $(DL)#endif$(DL) >> $@
 	@echo $(DL)#define VERSION "$(LIBCURL_VERSION_STR)"$(DL) >> $@
-	@echo $(DL)#define PACKAGE_BUGREPORT "a suitable curl mailing list => http://curl.haxx.se/mail/"$(DL) >> $@
+	@echo $(DL)#define PACKAGE_BUGREPORT "a suitable curl mailing list => https://curl.haxx.se/mail/"$(DL) >> $@
 ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)#define OS "i586-pc-clib-NetWare"$(DL) >> $@
 	@echo $(DL)#define NETDB_USE_INTERNET 1$(DL) >> $@
@@ -626,6 +665,10 @@ ifdef WITH_SSL
 	@echo $(DL)#define HAVE_LIBSSL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_LIBCRYPTO 1$(DL) >> $@
 	@echo $(DL)#define OPENSSL_NO_KRB5 1$(DL) >> $@
+ifdef WITH_SRP
+	@echo $(DL)#define HAVE_SSLEAY_SRP 1$(DL) >> $@
+	@echo $(DL)#define USE_TLS_SRP 1$(DL) >> $@
+endif
 ifdef WITH_SPNEGO
 	@echo $(DL)#define HAVE_SPNEGO 1$(DL) >> $@
 endif
@@ -644,6 +687,9 @@ ifdef WITH_IDN
 endif
 ifdef WITH_RTMP
 	@echo $(DL)#define USE_LIBRTMP 1$(DL) >> $@
+endif
+ifdef WITH_NGHTTP2
+	@echo $(DL)#define USE_NGHTTP2 1$(DL) >> $@
 endif
 	@echo $(DL)#ifdef __GNUC__$(DL) >> $@
 	@echo $(DL)#define HAVE_VARIADIC_MACROS_GCC 1$(DL) >> $@
@@ -675,6 +721,11 @@ ifdef WITH_SSL
 else
 	@echo SSL support:     no
 endif
+ifdef WITH_SRP
+	@echo SRP support:     enabled
+else
+	@echo SRP support:     no
+endif
 ifdef WITH_SSH2
 	@echo SSH2 support:    enabled (libssh2)
 else
@@ -685,15 +736,20 @@ ifdef WITH_ZLIB
 else
 	@echo zlib support:    no
 endif
+ifdef WITH_NGHTTP2
+	@echo http2 support:   enabled
+else
+	@echo http2 support:   no
+endif
 ifdef WITH_ARES
 	@echo c-ares support:  enabled
 else
 	@echo c-ares support:  no
 endif
 ifdef ENABLE_IPV6
-	@echo ipv6 support:    enabled
+	@echo IPv6 support:    enabled
 else
-	@echo ipv6 support:    no
+	@echo IPv6 support:    no
 endif
 
 $(CURL_INC)/curl/curlbuild.h: Makefile.netware FORCE

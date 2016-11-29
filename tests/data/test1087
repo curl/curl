@@ -95,8 +95,8 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://first.host.it.is/we/want/that/page/10871000 HTTP/1.1
-Authorization: Basic aWFtOm15c2VsZg==
 Host: first.host.it.is
+Authorization: Basic aWFtOm15c2VsZg==
 Accept: */*
 Proxy-Connection: Keep-Alive
 

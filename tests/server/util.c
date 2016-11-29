@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -77,11 +77,11 @@ char *data_to_hex(char *data, size_t len)
     if((data[i] >= 0x20) && (data[i] < 0x7f))
       *optr++ = *iptr++;
     else {
-      sprintf(optr, "%%%02x", *iptr++);
+      snprintf(optr, 4, "%%%02x", *iptr++);
       optr+=3;
     }
   }
-  *optr=0; /* in case no sprintf() was used */
+  *optr=0; /* in case no sprintf was used */
 
   return buf;
 }
@@ -99,7 +99,7 @@ void logmsg(const char *msg, ...)
   static time_t epoch_offset;
   static int    known_offset;
 
-  if (!serverlogfile) {
+  if(!serverlogfile) {
     fprintf(stderr, "Error: serverlogfile not set\n");
     return;
   }
@@ -140,11 +140,11 @@ void win32_perror (const char *msg)
   char buf[512];
   DWORD err = SOCKERRNO;
 
-  if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
-                     LANG_NEUTRAL, buf, sizeof(buf), NULL))
+  if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+                    LANG_NEUTRAL, buf, sizeof(buf), NULL))
      snprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
-  if (msg)
-     fprintf(stderr, "%s: ", msg);
+  if(msg)
+    fprintf(stderr, "%s: ", msg);
   fprintf(stderr, "%s\n", buf);
 }
 #endif  /* WIN32 */
@@ -159,15 +159,14 @@ void win32_init(void)
 
   err = WSAStartup(wVersionRequested, &wsaData);
 
-  if (err != 0) {
+  if(err != 0) {
     perror("Winsock init failed");
     logmsg("Error initialising winsock -- aborting");
     exit(1);
   }
 
-  if ( LOBYTE( wsaData.wVersion ) != USE_WINSOCK ||
-       HIBYTE( wsaData.wVersion ) != USE_WINSOCK ) {
-
+  if(LOBYTE(wsaData.wVersion) != USE_WINSOCK ||
+     HIBYTE(wsaData.wVersion) != USE_WINSOCK) {
     WSACleanup();
     perror("Winsock init failed");
     logmsg("No suitable winsock.dll found -- aborting");
@@ -305,4 +304,88 @@ void clear_advisor_read_lock(const char *filename)
   if(res)
     logmsg("Error removing lock file %s error: %d %s",
            filename, error, strerror(error));
+}
+
+
+/* Portable, consistent toupper (remember EBCDIC). Do not use toupper() because
+   its behavior is altered by the current locale. */
+static char raw_toupper(char in)
+{
+#if !defined(CURL_DOES_CONVERSIONS)
+  if(in >= 'a' && in <= 'z')
+    return (char)('A' + in - 'a');
+#else
+  switch (in) {
+  case 'a':
+    return 'A';
+  case 'b':
+    return 'B';
+  case 'c':
+    return 'C';
+  case 'd':
+    return 'D';
+  case 'e':
+    return 'E';
+  case 'f':
+    return 'F';
+  case 'g':
+    return 'G';
+  case 'h':
+    return 'H';
+  case 'i':
+    return 'I';
+  case 'j':
+    return 'J';
+  case 'k':
+    return 'K';
+  case 'l':
+    return 'L';
+  case 'm':
+    return 'M';
+  case 'n':
+    return 'N';
+  case 'o':
+    return 'O';
+  case 'p':
+    return 'P';
+  case 'q':
+    return 'Q';
+  case 'r':
+    return 'R';
+  case 's':
+    return 'S';
+  case 't':
+    return 'T';
+  case 'u':
+    return 'U';
+  case 'v':
+    return 'V';
+  case 'w':
+    return 'W';
+  case 'x':
+    return 'X';
+  case 'y':
+    return 'Y';
+  case 'z':
+    return 'Z';
+  }
+#endif
+
+  return in;
+}
+
+int strncasecompare(const char *first, const char *second, size_t max)
+{
+  while(*first && *second && max) {
+    if(raw_toupper(*first) != raw_toupper(*second)) {
+      break;
+    }
+    max--;
+    first++;
+    second++;
+  }
+  if(0 == max)
+    return 1; /* they are equal this far */
+
+  return raw_toupper(*first) == raw_toupper(*second);
 }

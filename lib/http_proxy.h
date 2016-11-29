@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -26,16 +26,17 @@
 /* ftp can use this as well */
 CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                            int tunnelsocket,
-                           const char *hostname, int remote_port);
+                           const char *hostname, int remote_port,
+                           bool blocking);
 
 /* Default proxy timeout in milliseconds */
 #define PROXY_TIMEOUT (3600*1000)
 
-CURLcode Curl_proxy_connect(struct connectdata *conn);
+CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex);
 
 #else
-#define Curl_proxyCONNECT(x,y,z,w) CURLE_NOT_BUILT_IN
-#define Curl_proxy_connect(x) CURLE_OK
+#define Curl_proxyCONNECT(x,y,z,w,v) CURLE_NOT_BUILT_IN
+#define Curl_proxy_connect(x,y) CURLE_OK
 #endif
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */

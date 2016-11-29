@@ -5,11 +5,11 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
-.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
 .\" *
 .\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
 .\" * copies of the Software, and permit persons to whom the Software is
@@ -39,14 +39,14 @@ shown above.
 This function gets called by libcurl as soon as it has received header
 data. The header callback will be called once for each header and only
 complete header lines are passed on to the callback. Parsing headers is very
-easy using this. The size of the data pointed to by \fIptr\fP is \fIsize\fP
+easy using this. The size of the data pointed to by \fIbuffer\fP is \fIsize\fP
 multiplied with \fInmemb\fP. Do not assume that the header line is zero
 terminated! The pointer named \fIuserdata\fP is the one you set with the
 \fICURLOPT_HEADERDATA(3)\fP option. This callback function must return the
 number of bytes actually taken care of. If that amount differs from the amount
 passed in to your function, it'll signal an error to the library. This will
 cause the transfer to get aborted and the libcurl function in progress will
-return \fICURL_WRITE_ERROR\fP.
+return \fICURLE_WRITE_ERROR\fP.
 
 A complete HTTP header that is passed to this function can be up to
 \fICURL_MAX_HTTP_HEADER\fP (100K) bytes.
@@ -80,7 +80,24 @@ Nothing.
 Used for all protocols with headers or meta-data concept: HTTP, FTP, POP3,
 IMAP, SMTP and more.
 .SH EXAMPLE
-TODO
+.nf
+static size_t header_callback(char *buffer, size_t size,
+                              size_t nitems, void *userdata)
+{
+  /* received header is nitems * size long in 'buffer' NOT ZERO TERMINATED */
+  /* 'userdata' is set with CURLOPT_HEADERDATA */
+  return nitems * size;
+}
+
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+
+  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE

@@ -3,7 +3,7 @@ LATEST VERSION
   You always find news about what's going on as well as the latest versions
   from the curl web pages, located at:
 
-        http://curl.haxx.se
+        https://curl.haxx.se
 
 SIMPLE USAGE
 
@@ -58,6 +58,10 @@ SIMPLE USAGE
   Get the main page from an IPv6 web server:
 
         curl "http://[2001:1890:1112:1::20]/"
+
+  Get a file from an SMB server:
+
+        curl -u "domain\username:passwd" smb://server.example.com/share/file.txt
 
 DOWNLOAD TO A FILE
 
@@ -227,6 +231,11 @@ UPLOADING
   a fashion similar to:
 
         curl --proxytunnel -x proxy:port -T localfile ftp.upload.com
+
+SMB / SMBS
+
+        curl -T file.txt -u "domain\username:passwd" 
+         smb://server.example.com/share/
 
  HTTP
 
@@ -461,8 +470,8 @@ COOKIES
   stored cookies which match the request as it follows the location.  The
   file "empty.txt" may be a nonexistent file.
 
-  Alas, to both read and write cookies from a netscape cookie file, you can
-  set both -b and -c to use the same file:
+  To read and write cookies from a netscape cookie file, you can set both -b
+  and -c to use the same file:
 
         curl -b cookies.txt -c cookies.txt www.example.com
 
@@ -808,14 +817,10 @@ LDAP
   and offer ldap:// support.
 
   LDAP is a complex thing and writing an LDAP query is not an easy task. I do
-  advise you to dig up the syntax description for that elsewhere. Two places
-  that might suit you are:
+  advise you to dig up the syntax description for that elsewhere. One such
+  place might be:
 
-  Netscape's "Netscape Directory SDK 3.0 for C Programmer's Guide Chapter 10:
-  Working with LDAP URLs":
-  http://developer.netscape.com/docs/manuals/dirsdk/csdk30/url.htm
-
-  RFC 2255, "The LDAP URL Format" http://curl.haxx.se/rfc/rfc2255.txt
+  RFC 2255, "The LDAP URL Format" https://curl.haxx.se/rfc/rfc2255.txt
 
   To show you an example, this is how I can get all people from my local LDAP
   server that has a certain sub-domain in their email address:
@@ -1002,7 +1007,7 @@ MAILING LISTS
 
   For your convenience, we have several open mailing lists to discuss curl,
   its development and things relevant to this. Get all info at
-  http://curl.haxx.se/mail/. Some of the lists available are:
+  https://curl.haxx.se/mail/. Some of the lists available are:
 
   curl-users
 

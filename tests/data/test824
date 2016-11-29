@@ -34,7 +34,7 @@ body
 imap
 </server>
  <name>
-IMAP OAuth 2.0 authentication
+IMAP OAuth 2.0 (XOAUTH2) authentication
  </name>
  <command>
 'imap://%HOSTIP:%IMAPPORT/824/;UID=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM

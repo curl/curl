@@ -5,12 +5,12 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
+ * Copyright (C) 2013-2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010, 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_POLARSSL) && \
+#if (defined(USE_POLARSSL) || defined(USE_MBEDTLS)) && \
     (defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32))
 
 #if defined(USE_THREADS_POSIX)
@@ -36,10 +36,7 @@
 #endif
 
 #include "polarssl_threadlock.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
+#include "curl_printf.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -50,12 +47,12 @@
 /* This array will store all of the mutexes available to PolarSSL. */
 static POLARSSL_MUTEX_T *mutex_buf = NULL;
 
-int polarsslthreadlock_thread_setup(void)
+int Curl_polarsslthreadlock_thread_setup(void)
 {
   int i;
   int ret;
 
-  mutex_buf = malloc(NUMT * sizeof(POLARSSL_MUTEX_T));
+  mutex_buf = calloc(NUMT * sizeof(POLARSSL_MUTEX_T), 1);
   if(!mutex_buf)
     return 0;     /* error, no number of threads defined */
 
@@ -76,7 +73,7 @@ int polarsslthreadlock_thread_setup(void)
   return 1; /* OK */
 }
 
-int polarsslthreadlock_thread_cleanup(void)
+int Curl_polarsslthreadlock_thread_cleanup(void)
 {
   int i;
   int ret;
@@ -103,7 +100,7 @@ int polarsslthreadlock_thread_cleanup(void)
   return 1; /* OK */
 }
 
-int polarsslthreadlock_lock_function(int n)
+int Curl_polarsslthreadlock_lock_function(int n)
 {
   int ret;
 #ifdef HAVE_PTHREAD_H
@@ -128,7 +125,7 @@ int polarsslthreadlock_lock_function(int n)
   return 1; /* OK */
 }
 
-int polarsslthreadlock_unlock_function(int n)
+int Curl_polarsslthreadlock_unlock_function(int n)
 {
   int ret;
 #ifdef HAVE_PTHREAD_H
@@ -153,4 +150,4 @@ int polarsslthreadlock_unlock_function(int n)
   return 1; /* OK */
 }
 
-#endif /* USE_POLARSSL */
+#endif /* USE_POLARSSL || USE_MBEDTLS */

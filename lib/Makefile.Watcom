@@ -1,6 +1,28 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2005 - 2009, Gisle Vanem <gvanem@yahoo.no>.
+# Copyright (C) 2005 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
 #
 #  Watcom / OpenWatcom / Win32 makefile for libcurl.
-#  G. Vanem <gvanem@broadpark.no>
 #
 
 .ERASE
@@ -77,6 +99,11 @@ CFLAGS += -d_WIN32_WINNT=0x0501 -dENABLE_IPV6
 CFLAGS += -dUSE_WINDOWS_SSPI
 !endif
 
+!ifdef %use_winssl
+CFLAGS += -dUSE_WINDOWS_SSPI
+CFLAGS += -DUSE_SCHANNEL
+!endif
+
 !ifdef %use_winidn
 CFLAGS += -dWINVER=0x0600 -dUSE_WIN32_IDN
 !  if $(__VERSION__) <= 1290
@@ -96,7 +123,7 @@ ZLIB_ROOT = ../../zlib-1.2.8
 !ifdef %libssh2_root
 LIBSSH2_ROOT = $(%libssh2_root)
 !else
-LIBSSH2_ROOT = ../../libssh2-1.4.3
+LIBSSH2_ROOT = ../../libssh2-1.5.0
 !endif
 
 !ifdef %librtmp_root
@@ -108,7 +135,7 @@ LIBRTMP_ROOT = ../../rtmpdump-2.3
 !ifdef %openssl_root
 OPENSSL_ROOT = $(%openssl_root)
 !else
-OPENSSL_ROOT = ../../openssl-0.9.8y
+OPENSSL_ROOT = ../../openssl-1.0.2a
 !endif
 
 !ifdef %ares_root
@@ -160,16 +187,17 @@ LIB_ARG  = $(OBJ_STAT)/wlib.arg
 
 OBJS1 = ./$(CSOURCES:.c=.obj)
 OBJS2 = $(OBJS1:vtls/=)
-OBJS3 = $(OBJS2: = ./)
-OBJS_STAT = $(OBJS3:./=$(OBJ_STAT)/)
-OBJS_DYN  = $(OBJS3:./=$(OBJ_DYN)/)
+OBJS3 = $(OBJS2:vauth/=)
+OBJS4 = $(OBJS3: = ./)
+OBJS_STAT = $(OBJS4:./=$(OBJ_STAT)/)
+OBJS_DYN  = $(OBJS4:./=$(OBJ_DYN)/)
 
 CURLBUILDH = ../include/curl/curlbuild.h
 RESOURCE   = $(OBJ_DYN)/libcurl.res
 
 DIRS = $(OBJ_BASE) $(OBJ_BASE)/stat $(OBJ_BASE)/dyn
 
-.c : vtls
+.c : vauth vtls
 
 all: $(CURLBUILDH) $(DIRS) $(TARGETS) .SYMBOLIC
 	@echo Welcome to libcurl

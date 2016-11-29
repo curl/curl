@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -57,7 +57,8 @@
 #define CURL_COULDNT_RESOLVE_PROXY 251756594
 #define CURL_COULDNT_RESOLVE_HOST 251756602
 #define CURL_COULDNT_CONNECT 251756610
-#define CURL_FTP_WEIRD_SERVER_REPLY 251756618
+#define CURL_WEIRD_SERVER_REPLY 251756618
+#define CURL_FTP_WEIRD_SERVER_REPLY CURL_WEIRD_SERVER_REPLY
 #define CURL_FTP_ACCESS_DENIED 251756626
 #define CURL_OBSOLETE10 251756634
 #define CURL_FTP_WEIRD_PASS_REPLY 251756642

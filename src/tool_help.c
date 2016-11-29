@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -52,11 +52,13 @@ static const char *const helptext[] = {
   "     --cacert FILE   CA certificate to verify peer against (SSL)",
   "     --capath DIR    CA directory to verify peer against (SSL)",
   " -E, --cert CERT[:PASSWD]  Client certificate file and password (SSL)",
+  "     --cert-status   Verify the status of the server certificate (SSL)",
   "     --cert-type TYPE  Certificate file type (DER/PEM/ENG) (SSL)",
   "     --ciphers LIST  SSL ciphers to use (SSL)",
   "     --compressed    Request compressed response (using deflate or gzip)",
   " -K, --config FILE   Read config from FILE",
   "     --connect-timeout SECONDS  Maximum time allowed for connection",
+  "     --connect-to HOST1:PORT1:HOST2:PORT2 Connect to host (network level)",
   " -C, --continue-at OFFSET  Resumed transfer OFFSET",
   " -b, --cookie STRING/FILE  Read cookies from STRING/FILE (H)",
   " -c, --cookie-jar FILE  Write cookies to FILE after operation (H)",
@@ -64,6 +66,7 @@ static const char *const helptext[] = {
   "     --crlf          Convert LF to CRLF in upload",
   "     --crlfile FILE  Get a CRL list in PEM format from the given file",
   " -d, --data DATA     HTTP POST data (H)",
+  "     --data-raw DATA  HTTP POST data, '@' allowed (H)",
   "     --data-ascii DATA  HTTP POST ASCII data (H)",
   "     --data-binary DATA  HTTP POST binary data (H)",
   "     --data-urlencode DATA  HTTP POST data url encoded (H)",
@@ -75,13 +78,16 @@ static const char *const helptext[] = {
   "     --dns-interface  Interface to use for DNS requests",
   "     --dns-ipv4-addr  IPv4 address to use for DNS requests, dot notation",
   "     --dns-ipv6-addr  IPv6 address to use for DNS requests, dot notation",
-  " -D, --dump-header FILE  Write the headers to FILE",
+  " -D, --dump-header FILE  Write the received headers to FILE",
   "     --egd-file FILE  EGD socket path for random data (SSL)",
   "     --engine ENGINE  Crypto engine (use \"--engine list\" for list) (SSL)",
 #ifdef USE_ENVIRONMENT
   "     --environment   Write results to environment variables (RISC OS)",
 #endif
+  "     --expect100-timeout SECONDS How long to wait for 100-continue (H)",
   " -f, --fail          Fail silently (no output at all) on HTTP errors (H)",
+  "     --fail-early    Fail on first transfer error, do not continue",
+  "     --false-start   Enable TLS False Start.",
   " -F, --form CONTENT  Specify HTTP multipart POST data (H)",
   "     --form-string STRING  Specify HTTP multipart POST data (H)",
   "     --ftp-account DATA  Account data string (F)",
@@ -107,6 +113,7 @@ static const char *const helptext[] = {
   " -0, --http1.0       Use HTTP 1.0 (H)",
   "     --http1.1       Use HTTP 1.1 (H)",
   "     --http2         Use HTTP 2 (H)",
+  "     --http2-prior-knowledge  Use HTTP 2 without HTTP/1.1 Upgrade (H)",
   "     --ignore-content-length  Ignore the HTTP Content-Length header",
   " -i, --include       Include protocol headers in the output (H/F)",
   " -k, --insecure      Allow connections to SSL sites without certs (H)",
@@ -140,7 +147,7 @@ static const char *const helptext[] = {
   " -n, --netrc         Must read .netrc for user name and password",
   "     --netrc-optional  Use either .netrc or URL; overrides -n",
   "     --netrc-file FILE  Specify FILE for netrc",
-  " -:  --next          "
+  " -:, --next          "
   "Allows the following URL to use a separate set of options",
   "     --no-alpn       Disable the ALPN TLS extension (H)",
   " -N, --no-buffer     Disable buffering of the output stream",
@@ -149,10 +156,12 @@ static const char *const helptext[] = {
   "     --no-sessionid  Disable SSL session-ID reusing (SSL)",
   "     --noproxy       List of hosts which do not use proxy",
   "     --ntlm          Use HTTP NTLM authentication (H)",
+  "     --ntlm-wb       Use HTTP NTLM authentication with winbind (H)",
   "     --oauth2-bearer TOKEN  OAuth 2 Bearer Token (IMAP, POP3, SMTP)",
   " -o, --output FILE   Write to FILE instead of stdout",
   "     --pass PASS     Pass phrase for the private key (SSL/SSH)",
-  "     --pinnedpubkey FILE Public key (DER) to verify peer against (OpenSSL)",
+  "     --path-as-is    Do not squash .. sequences in URL path",
+  "     --pinnedpubkey FILE/HASHES Public key to verify peer against (SSL)",
   "     --post301       "
   "Do not switch to GET after following a 301 redirect (H)",
   "     --post302       "
@@ -161,14 +170,42 @@ static const char *const helptext[] = {
   "Do not switch to GET after following a 303 redirect (H)",
   " -#, --progress-bar  Display transfer progress as a progress bar",
   "     --proto PROTOCOLS  Enable/disable PROTOCOLS",
-  "     --proto-redir PROTOCOLS  Enable/disable PROTOCOLS on redirect",
+  "     --proto-default PROTOCOL  Use PROTOCOL for any URL missing a scheme",
+  "     --proto-redir PROTOCOLS   Enable/disable PROTOCOLS on redirect",
   " -x, --proxy [PROTOCOL://]HOST[:PORT]  Use proxy on given port",
   "     --proxy-anyauth  Pick \"any\" proxy authentication method (H)",
   "     --proxy-basic   Use Basic authentication on the proxy (H)",
   "     --proxy-digest  Use Digest authentication on the proxy (H)",
+  "     --proxy-cacert FILE "
+  "CA certificate to verify peer against for proxy (SSL)",
+  "     --proxy-capath DIR "
+  "CA directory to verify peer against for proxy (SSL)",
+  "     --proxy-cert CERT[:PASSWD] "
+  "Client certificate file and password for proxy (SSL)",
+  "     --proxy-cert-type TYPE "
+  "Certificate file type (DER/PEM/ENG) for proxy (SSL)",
+  "     --proxy-ciphers LIST SSL ciphers to use for proxy (SSL)",
+  "     --proxy-crlfile FILE "
+  "Get a CRL list in PEM format from the given file for proxy",
+  "     --proxy-insecure "
+  "Allow connections to SSL sites without certs for proxy (H)",
+  "     --proxy-key KEY Private key file name for proxy (SSL)",
+  "     --proxy-key-type TYPE "
+  "Private key file type for proxy (DER/PEM/ENG) (SSL)",
   "     --proxy-negotiate  "
   "Use HTTP Negotiate (SPNEGO) authentication on the proxy (H)",
   "     --proxy-ntlm    Use NTLM authentication on the proxy (H)",
+  "     --proxy-header LINE Pass custom header LINE to proxy (H)",
+  "     --proxy-pass PASS Pass phrase for the private key for proxy (SSL)",
+  "     --proxy-ssl-allow-beast "
+  "Allow security flaw to improve interop for proxy (SSL)",
+  "     --proxy-tlsv1   Use TLSv1 for proxy (SSL)",
+  "     --proxy-tlsuser USER TLS username for proxy",
+  "     --proxy-tlspassword STRING TLS password for proxy",
+  "     --proxy-tlsauthtype STRING "
+  "TLS authentication type for proxy (default SRP)",
+  "     --proxy-service-name NAME  SPNEGO proxy service name",
+  "     --service-name NAME  SPNEGO service name",
   " -U, --proxy-user USER[:PASSWORD]  Proxy user and password",
   "     --proxy1.0 HOST[:PORT]  Use HTTP/1.0 proxy on given port",
   " -p, --proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
@@ -186,6 +223,7 @@ static const char *const helptext[] = {
   "     --resolve HOST:PORT:ADDRESS  Force resolve of HOST:PORT to ADDRESS",
   "     --retry NUM   "
   "Retry request NUM times if transient problems occur",
+  "     --retry-connrefused  Retry on connection refused (use with --retry)",
   "     --retry-delay SECONDS  Wait SECONDS between retries",
   "     --retry-max-time SECONDS  Retry only within this period",
   "     --sasl-ir       Enable initial response in SASL authentication",
@@ -197,10 +235,8 @@ static const char *const helptext[] = {
   "     --socks5 HOST[:PORT]  SOCKS5 proxy on given host + port",
   "     --socks5-hostname HOST[:PORT]  "
   "SOCKS5 proxy, pass host name to proxy",
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   "     --socks5-gssapi-service NAME  SOCKS5 proxy service name for GSS-API",
   "     --socks5-gssapi-nec  Compatibility with NEC SOCKS5 server",
-#endif
   " -Y, --speed-limit RATE  "
   "Stop transfers below RATE for 'speed-time' secs",
   " -y, --speed-time SECONDS  "
@@ -210,15 +246,19 @@ static const char *const helptext[] = {
   " -2, --sslv2         Use SSLv2 (SSL)",
   " -3, --sslv3         Use SSLv3 (SSL)",
   "     --ssl-allow-beast  Allow security flaw to improve interop (SSL)",
+  "     --ssl-no-revoke    Disable cert revocation checks (WinSSL)",
   "     --stderr FILE   Where to redirect stderr (use \"-\" for stdout)",
   "     --tcp-nodelay   Use the TCP_NODELAY option",
+  "     --tcp-fastopen  Use TCP Fast Open",
   " -t, --telnet-option OPT=VAL  Set telnet option",
   "     --tftp-blksize VALUE  Set TFTP BLKSIZE option (must be >512)",
-  " -z, --time-cond TIME  Transfer based on a time condition",
-  " -1, --tlsv1         Use => TLSv1 (SSL)",
+  "     --tftp-no-options  Do not send TFTP options requests",
+  " -z, --time-cond TIME   Transfer based on a time condition",
+  " -1, --tlsv1         Use >= TLSv1 (SSL)",
   "     --tlsv1.0       Use TLSv1.0 (SSL)",
   "     --tlsv1.1       Use TLSv1.1 (SSL)",
   "     --tlsv1.2       Use TLSv1.2 (SSL)",
+  "     --tlsv1.3       Use TLSv1.3 (SSL)",
   "     --trace FILE    Write a debug trace to FILE",
   "     --trace-ascii FILE  Like --trace, but without hex output",
   "     --trace-time    Add time stamps to trace/verbose output",
@@ -230,6 +270,7 @@ static const char *const helptext[] = {
   "     --tlsuser USER  TLS username",
   "     --tlspassword STRING  TLS password",
   "     --tlsauthtype STRING  TLS authentication type (default: SRP)",
+  "     --unix-socket FILE    Connect through this Unix domain socket",
   " -A, --user-agent STRING  Send User-Agent STRING to server (H)",
   " -v, --verbose       Make the operation more talkative",
   " -V, --version       Show version number and quit",
@@ -238,7 +279,7 @@ static const char *const helptext[] = {
 #endif
   " -w, --write-out FORMAT  Use output FORMAT after completion",
   "     --xattr         Store metadata in extended file attributes",
-  " -q                  Disable .curlrc (must be first parameter)",
+  " -q, --disable       Disable .curlrc (must be first parameter)",
   NULL
 };
 
@@ -264,15 +305,17 @@ static const struct feat feats[] = {
   {"Largefile",      CURL_VERSION_LARGEFILE},
   {"SSPI",           CURL_VERSION_SSPI},
   {"GSS-API",        CURL_VERSION_GSSAPI},
+  {"Kerberos",       CURL_VERSION_KERBEROS5},
   {"SPNEGO",         CURL_VERSION_SPNEGO},
   {"NTLM",           CURL_VERSION_NTLM},
   {"NTLM_WB",        CURL_VERSION_NTLM_WB},
   {"SSL",            CURL_VERSION_SSL},
-  {"krb4",           CURL_VERSION_KERBEROS4},
   {"libz",           CURL_VERSION_LIBZ},
   {"CharConv",       CURL_VERSION_CONV},
   {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
-  {"HTTP2",          CURL_VERSION_HTTP2}
+  {"HTTP2",          CURL_VERSION_HTTP2},
+  {"UnixSockets",    CURL_VERSION_UNIX_SOCKETS},
+  {"HTTPS-proxy",    CURL_VERSION_HTTPS_PROXY}
 };
 
 void tool_help(void)
@@ -308,6 +351,9 @@ void tool_version_info(void)
     }
 #ifdef USE_METALINK
     printf("Metalink ");
+#endif
+#ifdef USE_LIBPSL
+    printf("PSL ");
 #endif
     puts(""); /* newline */
   }

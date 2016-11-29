@@ -47,9 +47,9 @@ download on.
 </strip>
 <protocol>
 GET http://%HOSTIP:%HTTPPORT/want/256 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: Basic ZGFuaWVsOnN0ZW5iZXJn
 Range: bytes=78-
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Proxy-Connection: Keep-Alive
 

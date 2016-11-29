@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -19,6 +19,10 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+/* <DESC>
+ * Use getinfo to get content-type after completed transfer.
+ * </DESC>
+ */
 #include <stdio.h>
 #include <curl/curl.h>
 
@@ -27,18 +31,14 @@ int main(void)
   CURL *curl;
   CURLcode res;
 
-  /* http://curl.haxx.se/libcurl/c/curl_easy_init.html */
   curl = curl_easy_init();
   if(curl) {
-    /* http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL */
     curl_easy_setopt(curl, CURLOPT_URL, "http://www.example.com/");
-    /* http://curl.haxx.se/libcurl/c/curl_easy_perform.html */
     res = curl_easy_perform(curl);
 
     if(CURLE_OK == res) {
       char *ct;
       /* ask for the content-type */
-      /* http://curl.haxx.se/libcurl/c/curl_easy_getinfo.html */
       res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
 
       if((CURLE_OK == res) && ct)
@@ -46,7 +46,6 @@ int main(void)
     }
 
     /* always cleanup */
-    /* http://curl.haxx.se/libcurl/c/curl_easy_cleanup.html */
     curl_easy_cleanup(curl);
   }
   return 0;

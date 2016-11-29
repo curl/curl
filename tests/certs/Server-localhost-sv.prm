@@ -1,11 +1,11 @@
 extensions = x509v3
 [ x509v3 ]
 subjectAltName = DNS:localhost
-keyUsage	= keyEncipherment
+keyUsage	= keyEncipherment,digitalSignature,keyAgreement
 extendedKeyUsage = serverAuth
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid
-basicConstraints = critical,CA:false
+basicConstraints = CA:false
 [ req ]
 default_bits                    = 1024
 distinguished_name              = req_DN

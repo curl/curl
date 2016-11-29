@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,13 +21,14 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "rawstr.h"
+#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_cfgable.h"
+#include "tool_doswin.h"
 #include "tool_msgs.h"
 #include "tool_cb_hdr.h"
 
@@ -46,7 +47,8 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
   struct OutStruct *heads = hdrcbdata->heads;
   const char *str = ptr;
   const size_t cb = size * nmemb;
-  const char *end = (char*)ptr + cb;
+  const char *end = (char *)ptr + cb;
+  char *url = NULL;
 
   /*
    * Once that libcurl has called back tool_header_cb() the returned value
@@ -61,7 +63,8 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
 
 #ifdef DEBUGBUILD
   if(size * nmemb > (size_t)CURL_MAX_HTTP_HEADER) {
-    warnf(heads->config, "Header data exceeds single call write limit!\n");
+    warnf(heads->config->global, "Header data exceeds single call write "
+          "limit!\n");
     return failure;
   }
 #endif
@@ -74,6 +77,8 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
     size_t rc = fwrite(ptr, size, nmemb, heads->stream);
     if(rc != cb)
       return rc;
+    /* flush the stream to send off what we got earlier */
+    (void)fflush(heads->stream);
   }
 
   /*
@@ -84,7 +89,9 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
    */
 
   if(hdrcbdata->honor_cd_filename &&
-     (cb > 20) && checkprefix("Content-disposition:", str)) {
+     (cb > 20) && checkprefix("Content-disposition:", str) &&
+     !curl_easy_getinfo(outs->config->easy, CURLINFO_EFFECTIVE_URL, &url) &&
+     url && (checkprefix("http://", url) || checkprefix("https://", url))) {
     const char *p = str + 20;
 
     /* look for the 'filename=' parameter
@@ -178,15 +185,12 @@ static char *parse_filename(const char *ptr, size_t len)
   }
 
   /* scan for the end letter and stop there */
-  q = p;
-  while(*q) {
-    if(q[1] && (q[0] == '\\'))
-      q++;
-    else if(q[0] == stop)
+  for(q = p; *q; ++q) {
+    if(*q == stop) {
+      *q = '\0';
       break;
-    q++;
+    }
   }
-  *q = '\0';
 
   /* make sure the file name doesn't end in \r or \n */
   q = strchr(p, '\r');
@@ -199,6 +203,17 @@ static char *parse_filename(const char *ptr, size_t len)
 
   if(copy != p)
     memmove(copy, p, strlen(p) + 1);
+
+#if defined(MSDOS) || defined(WIN32)
+  {
+    char *sanitized;
+    SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
+    Curl_safefree(copy);
+    if(sc)
+      return NULL;
+    copy = sanitized;
+  }
+#endif /* MSDOS || WIN32 */
 
   /* in case we built debug enabled, we allow an evironment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a

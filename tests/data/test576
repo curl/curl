@@ -22,7 +22,7 @@ ftp
 lib576
 </tool>
  <name>
-FTP wildcard download - skip/parser_correctness/CURLOPT_FNMATCH_FUNCTION (UNIX)
+FTP wildcard download - skip/parser_correctness/CURLOPT_FNMATCH_FUNCTION (Unix)
  </name>
  <command>
 ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*

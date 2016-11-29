@@ -1,0 +1,63 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_PIPEWAIT 3 "12 May 2015" "libcurl 7.43.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_PIPEWAIT \- wait for pipelining/multiplexing
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PIPEWAIT, long wait);
+.SH DESCRIPTION
+Set \fIwait\fP to 1L to tell libcurl to prefer to wait for a connection to
+confirm or deny that it can do pipelining or multiplexing before continuing.
+
+When about to perform a new transfer that allows pipelining or multiplexing,
+libcurl will check for existing connections to re-use and pipeline on. If no
+such connection exists it will immediately continue and create a fresh new
+connection to use.
+
+By setting this option to 1 - and having \fICURLMOPT_PIPELINING(3)\fP enabled
+for the multi handle this transfer is associated with - libcurl will instead
+wait for the connection to reveal if it is possible to pipeline/multiplex on
+before it continues. This enables libcurl to much better keep the number of
+connections to a minimum when using pipelining or multiplexing protocols.
+
+The effect thus becomes that with this option set, libcurl prefers to wait and
+re-use an existing connection for pipelining rather than the opposite: prefer
+to open a new connection rather than waiting.
+
+The waiting time is as long as it takes for the connection to get up and for
+libcurl to get the necessary response back that informs it about its protocol
+and support level.
+.SH DEFAULT
+0 (off)
+.SH PROTOCOLS
+HTTP(S)
+.SH EXAMPLE
+.SH AVAILABILITY
+Added in 7.43.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_FORBID_REUSE "(3), " CURLOPT_FRESH_CONNECT "(3), "
+.BR CURLMOPT_PIPELINING "(3), " CURLMOPT_MAX_HOST_CONNECTIONS "(3), "

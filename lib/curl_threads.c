@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -22,6 +22,8 @@
 
 #include "curl_setup.h"
 
+#include <curl/curl.h>
+
 #if defined(USE_THREADS_POSIX)
 #  ifdef HAVE_PTHREAD_H
 #    include <pthread.h>
@@ -33,10 +35,6 @@
 #endif
 
 #include "curl_threads.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -61,7 +59,7 @@ static void *curl_thread_create_thunk(void *arg)
   return 0;
 }
 
-curl_thread_t Curl_thread_create(unsigned int (*func) (void*), void *arg)
+curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
 {
   curl_thread_t t = malloc(sizeof(pthread_t));
   struct curl_actual_call *ac = malloc(sizeof(struct curl_actual_call));
@@ -77,8 +75,8 @@ curl_thread_t Curl_thread_create(unsigned int (*func) (void*), void *arg)
   return t;
 
 err:
-  Curl_safefree(t);
-  Curl_safefree(ac);
+  free(t);
+  free(ac);
   return curl_thread_t_null;
 }
 
@@ -102,7 +100,7 @@ int Curl_thread_join(curl_thread_t *hnd)
 
 #elif defined(USE_THREADS_WIN32)
 
-curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void*),
+curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void *),
                                  void *arg)
 {
 #ifdef _WIN32_WCE
@@ -123,7 +121,12 @@ void Curl_thread_destroy(curl_thread_t hnd)
 
 int Curl_thread_join(curl_thread_t *hnd)
 {
+#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
+    (_WIN32_WINNT < _WIN32_WINNT_VISTA)
   int ret = (WaitForSingleObject(*hnd, INFINITE) == WAIT_OBJECT_0);
+#else
+  int ret = (WaitForSingleObjectEx(*hnd, INFINITE, FALSE) == WAIT_OBJECT_0);
+#endif
 
   Curl_thread_destroy(*hnd);
 

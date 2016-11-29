@@ -57,8 +57,8 @@ http://%HOSTIP:%HTTPPORT/1041 -Tlog/test1041.txt -C -
 # it can skip part of the file or not.  Instead, it sends the entire file.
 <protocol>
 PUT /1041 HTTP/1.1
-Content-Range: bytes 0-99/100
 Host: %HOSTIP:%HTTPPORT
+Content-Range: bytes 0-99/100
 Accept: */*
 Content-Length: 100
 Expect: 100-continue

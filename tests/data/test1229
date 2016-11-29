@@ -52,6 +52,7 @@ This IS the real page!
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>
@@ -73,8 +74,8 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /1229 HTTP/1.1
-Authorization: Digest username="\\user\"", realm="testrealm", nonce="1053604145", uri="/1229", response="f2694d426040712584c156d3de72b8d6"
 Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="\\user\"", realm="testrealm", nonce="1053604145", uri="/1229", response="f2694d426040712584c156d3de72b8d6"
 Accept: */*
 
 </protocol>

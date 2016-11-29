@@ -21,20 +21,10 @@ Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 34
 WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+Connection: close
 
 This is not the real page either!
 </data1001>
-
-# This is supposed to be returned when the server gets the second
-# Authorization: NTLM line passed-in from the client
-<data1002>
-HTTP/1.1 200 Things are fine in server land swsclose
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 32
-
-Finally, this is the real page!
-</data1002>
 
 <datacheck>
 HTTP/1.1 401 Now gimme that second request of crap
@@ -42,13 +32,9 @@ Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 34
 WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+Connection: close
 
-HTTP/1.1 200 Things are fine in server land swsclose
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-Content-Length: 32
-
-Finally, this is the real page!
+This is not the real page either!
 </datacheck>
 
 </reply>
@@ -64,7 +50,7 @@ debug
 http
 </server>
  <name>
-HTTP with NTLM authorization when talking HTTP/1.0
+HTTP with NTLM authorization when talking HTTP/1.0 (known to fail)
  </name>
  <setenv>
 # we force our own host name, in order to make the test machine independent
@@ -87,15 +73,9 @@ chkhostname curlhost
 </strip>
 <protocol>
 GET /159 HTTP/1.0
+Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-
-GET /159 HTTP/1.0
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAACeAJ4AWAAAAAAAAAD2AAAACAAIAPYAAAAIAAgA/gAAAAAAAAAAAAAABoKBAL9LNW5+nkyHZRmyFaL/LJ4xMjM0MjIzNGUCyhgQ9hw6eWAT13EbDa0BAQAAAAAAAACAPtXesZ0BMTIzNDIyMzQAAAAAAgAEAEMAQwABABIARQBMAEkAUwBBAEIARQBUAEgABAAYAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAMALABlAGwAaQBzAGEAYgBlAHQAaAAuAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAAAAAAAAAAAdGVzdHVzZXJjdXJsaG9zdA==
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

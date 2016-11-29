@@ -1,0 +1,51 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLMOPT_MAX_PIPELINE_LENGTH 3 "4 Nov 2014" "libcurl 7.39.0" "curl_multi_setopt options"
+.SH NAME
+CURLMOPT_MAX_PIPELINE_LENGTH \- maximum number of requests in a pipeline
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_PIPELINE_LENGTH, long max);
+.SH DESCRIPTION
+Pass a long. The set \fBmax\fP number will be used as the maximum amount of
+outstanding requests in an HTTP/1.1 pipelined connection. This option is only
+used for HTTP/1.1 pipelining, not for HTTP/2 multiplexing.
+
+When this limit is reached, libcurl will use another connection to the same
+host (see \fICURLMOPT_MAX_HOST_CONNECTIONS(3)\fP), or queue the request until
+one of the pipelines to the host is ready to accept a request.  Thus, the
+total number of requests in-flight is \fICURLMOPT_MAX_HOST_CONNECTIONS(3)\fP *
+\fICURLMOPT_MAX_PIPELINE_LENGTH(3)\fP.
+.SH DEFAULT
+5
+.SH PROTOCOLS
+HTTP(S)
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.30.0
+.SH RETURN VALUE
+Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLMOPT_PIPELINING "(3), " CURLMOPT_MAX_HOST_CONNECTIONS "(3), "

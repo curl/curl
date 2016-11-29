@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -56,12 +56,9 @@
 #include "url.h"
 #include "inet_ntop.h"
 #include "warnless.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 #if defined(CURLRES_SYNCH) && \
@@ -98,8 +95,8 @@
  * hostip.c   - method-independent resolver functions and utility functions
  * hostasyn.c - functions for asynchronous name resolves
  * hostsyn.c  - functions for synchronous name resolves
- * hostip4.c  - ipv4-specific functions
- * hostip6.c  - ipv6-specific functions
+ * hostip4.c  - IPv4 specific functions
+ * hostip6.c  - IPv6 specific functions
  *
  * The two asynchronous name resolver backends are implemented in:
  * asyn-ares.c   - functions for ares-using name resolves
@@ -140,11 +137,7 @@ struct curl_hash *Curl_global_host_cache_init(void)
 void Curl_global_host_cache_dtor(void)
 {
   if(host_cache_initialized) {
-    /* first make sure that any custom "CURLOPT_RESOLVE" names are
-       cleared off */
-    Curl_hostcache_clean(NULL, &hostname_cache);
-    /* then free the remaining hash completely */
-    Curl_hash_clean(&hostname_cache);
+    Curl_hash_destroy(&hostname_cache);
     host_cache_initialized = 0;
   }
 }
@@ -237,7 +230,8 @@ hostcache_timestamp_remove(void *datap, void *hc)
     (struct hostcache_prune_data *) datap;
   struct Curl_dns_entry *c = (struct Curl_dns_entry *) hc;
 
-  return !c->inuse && (data->now - c->timestamp >= data->cache_timeout);
+  return (0 != c->timestamp)
+    && (data->now - c->timestamp >= data->cache_timeout);
 }
 
 /*
@@ -260,7 +254,7 @@ hostcache_prune(struct curl_hash *hostcache, long cache_timeout, time_t now)
  * Library-wide function for pruning the DNS cache. This function takes and
  * returns the appropriate locks.
  */
-void Curl_hostcache_prune(struct SessionHandle *data)
+void Curl_hostcache_prune(struct Curl_easy *data)
 {
   time_t now;
 
@@ -283,34 +277,6 @@ void Curl_hostcache_prune(struct SessionHandle *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 }
 
-/*
- * Check if the entry should be pruned. Assumes a locked cache.
- */
-static int
-remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
-{
-  struct hostcache_prune_data user;
-
-  if(!dns || (data->set.dns_cache_timeout == -1) || !data->dns.hostcache ||
-     dns->inuse)
-    /* cache forever means never prune, and NULL hostcache means we can't do
-       it, if it still is in use then we leave it */
-    return 0;
-
-  time(&user.now);
-  user.cache_timeout = data->set.dns_cache_timeout;
-
-  if(!hostcache_timestamp_remove(&user,dns) )
-    return 0;
-
-  Curl_hash_clean_with_criterium(data->dns.hostcache,
-                                 (void *) &user,
-                                 hostcache_timestamp_remove);
-
-  return 1;
-}
-
-
 #ifdef HAVE_SIGSETJMP
 /* Beware this is a global and unique instance. This is used to store the
    return address that we can jump back to from inside a signal handler. This
@@ -318,26 +284,16 @@ remove_entry_if_stale(struct SessionHandle *data, struct Curl_dns_entry *dns)
 sigjmp_buf curl_jmpenv;
 #endif
 
-/*
- * Curl_fetch_addr() fetches a 'Curl_dns_entry' already in the DNS cache.
- *
- * Curl_resolv() checks initially and multi_runsingle() checks each time
- * it discovers the handle in the state WAITRESOLVE whether the hostname
- * has already been resolved and the address has already been stored in
- * the DNS cache. This short circuits waiting for a lot of pending
- * lookups for the same hostname requested by different handles.
- *
- * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
- */
-struct Curl_dns_entry *
-Curl_fetch_addr(struct connectdata *conn,
+/* lookup address, returns entry if found and not stale */
+static struct Curl_dns_entry *
+fetch_addr(struct connectdata *conn,
                 const char *hostname,
-                int port, int *stale)
+                int port)
 {
   char *entry_id = NULL;
   struct Curl_dns_entry *dns = NULL;
   size_t entry_len;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
@@ -350,13 +306,58 @@ Curl_fetch_addr(struct connectdata *conn,
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
 
+  if(dns && (data->set.dns_cache_timeout != -1))  {
+    /* See whether the returned entry is stale. Done before we release lock */
+    struct hostcache_prune_data user;
+
+    time(&user.now);
+    user.cache_timeout = data->set.dns_cache_timeout;
+
+    if(hostcache_timestamp_remove(&user, dns)) {
+      infof(data, "Hostname in DNS cache was stale, zapped\n");
+      dns = NULL; /* the memory deallocation is being handled by the hash */
+      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len+1);
+    }
+  }
+
   /* free the allocated entry_id again */
   free(entry_id);
 
-  /* See whether the returned entry is stale. Done before we release lock */
-  *stale = remove_entry_if_stale(data, dns);
-  if(*stale)
-    dns = NULL; /* the memory deallocation is being handled by the hash */
+  return dns;
+}
+
+/*
+ * Curl_fetch_addr() fetches a 'Curl_dns_entry' already in the DNS cache.
+ *
+ * Curl_resolv() checks initially and multi_runsingle() checks each time
+ * it discovers the handle in the state WAITRESOLVE whether the hostname
+ * has already been resolved and the address has already been stored in
+ * the DNS cache. This short circuits waiting for a lot of pending
+ * lookups for the same hostname requested by different handles.
+ *
+ * Returns the Curl_dns_entry entry pointer or NULL if not in the cache.
+ *
+ * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
+ * use, or we'll leak memory!
+ */
+struct Curl_dns_entry *
+Curl_fetch_addr(struct connectdata *conn,
+                const char *hostname,
+                int port)
+{
+  struct Curl_easy *data = conn->data;
+  struct Curl_dns_entry *dns = NULL;
+
+  if(data->share)
+    Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
+  dns = fetch_addr(conn, hostname, port);
+
+  if(dns)
+    dns->inuse++; /* we use it! */
+
+  if(data->share)
+    Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
   return dns;
 }
@@ -371,7 +372,7 @@ Curl_fetch_addr(struct connectdata *conn,
  * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
  */
 struct Curl_dns_entry *
-Curl_cache_addr(struct SessionHandle *data,
+Curl_cache_addr(struct Curl_easy *data,
                 Curl_addrinfo *addr,
                 const char *hostname,
                 int port)
@@ -395,11 +396,11 @@ Curl_cache_addr(struct SessionHandle *data,
     return NULL;
   }
 
-  dns->inuse = 0;   /* init to not used */
+  dns->inuse = 1;   /* the cache has the first reference */
   dns->addr = addr; /* this is the address(es) */
   time(&dns->timestamp);
   if(dns->timestamp == 0)
-    dns->timestamp = 1;   /* zero indicates that entry isn't in hash table */
+    dns->timestamp = 1;   /* zero indicates CURLOPT_RESOLVE entry */
 
   /* Store the resolved data in our DNS cache. */
   dns2 = Curl_hash_add(data->dns.hostcache, entry_id, entry_len+1,
@@ -446,23 +447,19 @@ int Curl_resolv(struct connectdata *conn,
                 struct Curl_dns_entry **entry)
 {
   struct Curl_dns_entry *dns = NULL;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
   CURLcode result;
-  int stale, rc = CURLRESOLV_ERROR; /* default to failure */
+  int rc = CURLRESOLV_ERROR; /* default to failure */
 
   *entry = NULL;
 
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  dns = Curl_fetch_addr(conn, hostname, port, &stale);
-
-  infof(data, "Hostname was %sfound in DNS cache\n", dns||stale?"":"NOT ");
-  if(stale)
-    infof(data, "Hostname in DNS cache was stale, zapped\n");
-
+  dns = fetch_addr(conn, hostname, port);
 
   if(dns) {
+    infof(data, "Hostname %s was found in DNS cache\n", hostname);
     dns->inuse++; /* we use it! */
     rc = CURLRESOLV_RESOLVED;
   }
@@ -571,7 +568,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
                         const char *hostname,
                         int port,
                         struct Curl_dns_entry **entry,
-                        long timeoutms)
+                        time_t timeoutms)
 {
 #ifdef USE_ALARM_TIMEOUT
 #ifdef HAVE_SIGACTION
@@ -585,7 +582,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #endif /* HAVE_SIGACTION */
   volatile long timeout;
   volatile unsigned int prev_alarm = 0;
-  struct SessionHandle *data = conn->data;
+  struct Curl_easy *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
   int rc;
 
@@ -606,37 +603,14 @@ int Curl_resolv_timeout(struct connectdata *conn,
     /* USE_ALARM_TIMEOUT defined, but no timeout actually requested */
     return Curl_resolv(conn, hostname, port, entry);
 
-  if(timeout < 1000)
+  if(timeout < 1000) {
     /* The alarm() function only provides integer second resolution, so if
        we want to wait less than one second we must bail out already now. */
+    failf(data,
+        "remaining timeout of %ld too small to resolve via SIGALRM method",
+        timeout);
     return CURLRESOLV_TIMEDOUT;
-
-  /*************************************************************
-   * Set signal handler to catch SIGALRM
-   * Store the old value to be able to set it back later!
-   *************************************************************/
-#ifdef HAVE_SIGACTION
-  sigaction(SIGALRM, NULL, &sigact);
-  keep_sigact = sigact;
-  keep_copysig = TRUE; /* yes, we have a copy */
-  sigact.sa_handler = alarmfunc;
-#ifdef SA_RESTART
-  /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
-  sigact.sa_flags &= ~SA_RESTART;
-#endif
-  /* now set the new struct */
-  sigaction(SIGALRM, &sigact, NULL);
-#else /* HAVE_SIGACTION */
-  /* no sigaction(), revert to the much lamer signal() */
-#ifdef HAVE_SIGNAL
-  keep_sigact = signal(SIGALRM, alarmfunc);
-#endif
-#endif /* HAVE_SIGACTION */
-
-  /* alarm() makes a signal get sent when the timeout fires off, and that
-     will abort system calls */
-  prev_alarm = alarm(curlx_sltoui(timeout/1000L));
-
+  }
   /* This allows us to time-out from the name resolver, as the timeout
      will generate a signal and we will siglongjmp() from that here.
      This technique has problems (see alarmfunc).
@@ -648,6 +622,33 @@ int Curl_resolv_timeout(struct connectdata *conn,
     failf(data, "name lookup timed out");
     rc = CURLRESOLV_ERROR;
     goto clean_up;
+  }
+  else {
+    /*************************************************************
+     * Set signal handler to catch SIGALRM
+     * Store the old value to be able to set it back later!
+     *************************************************************/
+#ifdef HAVE_SIGACTION
+    sigaction(SIGALRM, NULL, &sigact);
+    keep_sigact = sigact;
+    keep_copysig = TRUE; /* yes, we have a copy */
+    sigact.sa_handler = alarmfunc;
+#ifdef SA_RESTART
+    /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
+    sigact.sa_flags &= ~SA_RESTART;
+#endif
+    /* now set the new struct */
+    sigaction(SIGALRM, &sigact, NULL);
+#else /* HAVE_SIGACTION */
+    /* no sigaction(), revert to the much lamer signal() */
+#ifdef HAVE_SIGNAL
+    keep_sigact = signal(SIGALRM, alarmfunc);
+#endif
+#endif /* HAVE_SIGACTION */
+
+    /* alarm() makes a signal get sent when the timeout fires off, and that
+       will abort system calls */
+    prev_alarm = alarm(curlx_sltoui(timeout/1000L));
   }
 
 #else
@@ -718,56 +719,39 @@ clean_up:
  *
  * May be called with 'data' == NULL for global cache.
  */
-void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
+void Curl_resolv_unlock(struct Curl_easy *data, struct Curl_dns_entry *dns)
 {
-  DEBUGASSERT(dns && (dns->inuse>0));
-
   if(data && data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-  dns->inuse--;
-  /* only free if nobody is using AND it is not in hostcache (timestamp ==
-     0) */
-  if(dns->inuse == 0 && dns->timestamp == 0) {
-    Curl_freeaddrinfo(dns->addr);
-    free(dns);
-  }
+  freednsentry(dns);
 
   if(data && data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 }
 
 /*
- * File-internal: free a cache dns entry.
+ * File-internal: release cache dns entry reference, free if inuse drops to 0
  */
 static void freednsentry(void *freethis)
 {
-  struct Curl_dns_entry *p = (struct Curl_dns_entry *) freethis;
+  struct Curl_dns_entry *dns = (struct Curl_dns_entry *) freethis;
+  DEBUGASSERT(dns && (dns->inuse>0));
 
-  /* mark the entry as not in hostcache */
-  p->timestamp = 0;
-  if(p->inuse == 0) {
-    Curl_freeaddrinfo(p->addr);
-    free(p);
+  dns->inuse--;
+  if(dns->inuse == 0) {
+    Curl_freeaddrinfo(dns->addr);
+    free(dns);
   }
 }
 
 /*
- * Curl_mk_dnscache() creates a new DNS cache and returns the handle for it.
+ * Curl_mk_dnscache() inits a new DNS cache and returns success/failure.
  */
-struct curl_hash *Curl_mk_dnscache(void)
+int Curl_mk_dnscache(struct curl_hash *hash)
 {
-  return Curl_hash_alloc(7, Curl_hash_str, Curl_str_key_compare, freednsentry);
-}
-
-static int hostcache_inuse(void *data, void *hc)
-{
-  struct Curl_dns_entry *c = (struct Curl_dns_entry *) hc;
-
-  if(c->inuse == 1)
-    Curl_resolv_unlock(data, c);
-
-  return 1; /* free all entries */
+  return Curl_hash_init(hash, 7, Curl_hash_str, Curl_str_key_compare,
+                        freednsentry);
 }
 
 /*
@@ -777,40 +761,76 @@ static int hostcache_inuse(void *data, void *hc)
  * can be done!
  */
 
-void Curl_hostcache_clean(struct SessionHandle *data,
+void Curl_hostcache_clean(struct Curl_easy *data,
                           struct curl_hash *hash)
 {
-  /* Entries added to the hostcache with the CURLOPT_RESOLVE function are
-   * still present in the cache with the inuse counter set to 1. Detect them
-   * and cleanup!
-   */
-  Curl_hash_clean_with_criterium(hash, data, hostcache_inuse);
+  if(data && data->share)
+    Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
+  Curl_hash_clean(hash);
+
+  if(data && data->share)
+    Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 }
 
 
-CURLcode Curl_loadhostpairs(struct SessionHandle *data)
+CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 {
   struct curl_slist *hostp;
   char hostname[256];
   char address[256];
   int port;
 
-  for(hostp = data->change.resolve; hostp; hostp = hostp->next ) {
+  for(hostp = data->change.resolve; hostp; hostp = hostp->next) {
     if(!hostp->data)
       continue;
     if(hostp->data[0] == '-') {
-      /* TODO: mark an entry for removal */
+      char *entry_id;
+      size_t entry_len;
+
+      if(2 != sscanf(hostp->data + 1, "%255[^:]:%d", hostname, &port)) {
+        infof(data, "Couldn't parse CURLOPT_RESOLVE removal entry '%s'!\n",
+              hostp->data);
+        continue;
+      }
+
+      /* Create an entry id, based upon the hostname and port */
+      entry_id = create_hostcache_id(hostname, port);
+      /* If we can't create the entry id, fail */
+      if(!entry_id) {
+        return CURLE_OUT_OF_MEMORY;
+      }
+
+      entry_len = strlen(entry_id);
+
+      if(data->share)
+        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
+      /* delete entry, ignore if it didn't exist */
+      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len+1);
+
+      if(data->share)
+        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+
+      /* free the allocated entry_id again */
+      free(entry_id);
     }
-    else if(3 == sscanf(hostp->data, "%255[^:]:%d:%255s", hostname, &port,
-                        address)) {
+    else {
       struct Curl_dns_entry *dns;
       Curl_addrinfo *addr;
       char *entry_id;
       size_t entry_len;
 
+      if(3 != sscanf(hostp->data, "%255[^:]:%d:%255s", hostname, &port,
+                     address)) {
+        infof(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'!\n",
+              hostp->data);
+        continue;
+      }
+
       addr = Curl_str2addr(address, port);
       if(!addr) {
-        infof(data, "Resolve %s found illegal!\n", hostp->data);
+        infof(data, "Address in '%s' found illegal!\n", hostp->data);
         continue;
       }
 
@@ -833,9 +853,16 @@ CURLcode Curl_loadhostpairs(struct SessionHandle *data)
       /* free the allocated entry_id again */
       free(entry_id);
 
-      if(!dns)
+      if(!dns) {
         /* if not in the cache already, put this host in the cache */
         dns = Curl_cache_addr(data, addr, hostname, port);
+        if(dns) {
+          dns->timestamp = 0; /* mark as added by CURLOPT_RESOLVE */
+          /* release the returned reference; the cache itself will keep the
+           * entry alive: */
+          dns->inuse--;
+        }
+      }
       else
         /* this is a duplicate, free it again */
         Curl_freeaddrinfo(addr);

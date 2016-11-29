@@ -78,8 +78,8 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://z.x.com/1331 HTTP/1.1
-Proxy-Authorization: Basic bXluYW1lOm15cGFzc3dvcmQ=
 Host: z.x.com
+Proxy-Authorization: Basic bXluYW1lOm15cGFzc3dvcmQ=
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: proxycookie=weirdo

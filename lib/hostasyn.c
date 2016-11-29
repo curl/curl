@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -47,10 +47,6 @@
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -75,13 +71,13 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
                                 struct Curl_addrinfo *ai)
 {
   struct Curl_dns_entry *dns = NULL;
-  CURLcode rc = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   conn->async.status = status;
 
   if(CURL_ASYNC_SUCCESS == status) {
     if(ai) {
-      struct SessionHandle *data = conn->data;
+      struct Curl_easy *data = conn->data;
 
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
@@ -92,14 +88,14 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
       if(!dns) {
         /* failed to store, cleanup and return error */
         Curl_freeaddrinfo(ai);
-        rc = CURLE_OUT_OF_MEMORY;
+        result = CURLE_OUT_OF_MEMORY;
       }
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
     }
     else {
-      rc = CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
     }
   }
 
@@ -110,9 +106,9 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
     async struct */
   conn->async.done = TRUE;
 
-  /* ipv4: The input hostent struct will be freed by ares when we return from
+  /* IPv4: The input hostent struct will be freed by ares when we return from
      this function */
-  return rc;
+  return result;
 }
 
 /* Call this function after Curl_connect() has returned async=TRUE and
@@ -123,21 +119,21 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
 CURLcode Curl_async_resolved(struct connectdata *conn,
                              bool *protocol_done)
 {
-  CURLcode code;
+  CURLcode result;
 
   if(conn->async.dns) {
     conn->dns_entry = conn->async.dns;
     conn->async.dns = NULL;
   }
 
-  code = Curl_setup_conn(conn, protocol_done);
+  result = Curl_setup_conn(conn, protocol_done);
 
-  if(code)
+  if(result)
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
     Curl_disconnect(conn, FALSE); /* close the connection */
 
-  return code;
+  return result;
 }
 
 /*

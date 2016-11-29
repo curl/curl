@@ -1,9 +1,3 @@
-                                  _   _ ____  _
-                              ___| | | |  _ \| |
-                             / __| | | | |_) | |
-                            | (__| |_| |  _ <| |___
-                             \___|\___/|_| \_\_____|
-
 curl release procedure - how to do a release
 ============================================
 
@@ -17,8 +11,8 @@ in the source code repo
 - make sure all relevant changes are committed on the master branch
 
 - tag the git repo in this style: `git tag -a curl-7_34_0`. -a annotates the
-  tag and we use underscores instead of dots in the version number. 
-   
+  tag and we use underscores instead of dots in the version number.
+
 - run "./maketgz 7.34.0" to build the release tarballs. It is important that
   you run this on a machine with the correct set of autotools etc installed
   as this is what then will be shipped and used by most users on *nix like
@@ -46,6 +40,11 @@ in the curl-www repo
 - make sure all relevant changes are committed and pushed on the master branch
 
   (the web site then updates its contents automatically)
+
+on github
+---------
+
+- edit the newly made release tag so that it is listed as the latest release
 
 inform
 ------
@@ -84,11 +83,10 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- November 5, 2014 (version 7.39.0)
-- December 31, 2014
-- February 25, 2015
-- April 22, 2015
-- June 17, 2015
-- August 12, 2015
-- October 7, 2015
-- December 2, 2015
+- September 7, 2016 (version 7.50.2)
+- November 2, 2016
+- December 28, 2016
+- February 22, 2017
+- April 19, 2017
+- June 14, 2017
+- August 9, 2017

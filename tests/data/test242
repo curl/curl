@@ -45,8 +45,8 @@ HTTP-IPv6 GET with username+password in URL
 </strip>
 <protocol>
 GET /242 HTTP/1.1
-Authorization: Basic Zm9vYmFyOmJhcmZvbw==
 Host: %HOST6IP:%HTTP6PORT
+Authorization: Basic Zm9vYmFyOmJhcmZvbw==
 Accept: */*
 
 </protocol>

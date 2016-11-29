@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -23,17 +23,14 @@
 /* Base64 encoding/decoding */
 
 #include "curl_setup.h"
-
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
-#include "urldata.h" /* for the SessionHandle definition */
+#include "urldata.h" /* for the Curl_easy definition */
 #include "warnless.h"
 #include "curl_base64.h"
-#include "curl_memory.h"
 #include "non-ascii.h"
 
-/* include memdebug.h last */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
@@ -152,7 +149,7 @@ CURLcode Curl_base64_decode(const char *src,
   for(i = 0; i < numQuantums; i++) {
     size_t result = decodeQuantum(pos, src);
     if(!result) {
-      Curl_safefree(newstr);
+      free(newstr);
 
       return CURLE_BAD_CONTENT_ENCODING;
     }
@@ -172,11 +169,11 @@ CURLcode Curl_base64_decode(const char *src,
 }
 
 static CURLcode base64_encode(const char *table64,
-                              struct SessionHandle *data,
+                              struct Curl_easy *data,
                               const char *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
-  CURLcode error;
+  CURLcode result;
   unsigned char ibuf[3];
   unsigned char obuf[4];
   int i;
@@ -190,11 +187,16 @@ static CURLcode base64_encode(const char *table64,
   *outptr = NULL;
   *outlen = 0;
 
-  if(0 == insize)
+  if(!insize)
     insize = strlen(indata);
 
-  base64data = output = malloc(insize*4/3+4);
-  if(NULL == output)
+#if SIZEOF_SIZE_T == 4
+  if(insize > UINT_MAX/4)
+    return CURLE_OUT_OF_MEMORY;
+#endif
+
+  base64data = output = malloc(insize * 4 / 3 + 4);
+  if(!output)
     return CURLE_OUT_OF_MEMORY;
 
   /*
@@ -202,10 +204,10 @@ static CURLcode base64_encode(const char *table64,
    * not the host encoding.  And we can't change the actual input
    * so we copy it to a buffer, translate it, and use that instead.
    */
-  error = Curl_convert_clone(data, indata, insize, &convbuf);
-  if(error) {
+  result = Curl_convert_clone(data, indata, insize, &convbuf);
+  if(result) {
     free(output);
-    return error;
+    return result;
   }
 
   if(convbuf)
@@ -236,29 +238,35 @@ static CURLcode base64_encode(const char *table64,
                table64[obuf[0]],
                table64[obuf[1]]);
       break;
+
     case 2: /* two bytes read */
       snprintf(output, 5, "%c%c%c=",
                table64[obuf[0]],
                table64[obuf[1]],
                table64[obuf[2]]);
       break;
+
     default:
       snprintf(output, 5, "%c%c%c%c",
                table64[obuf[0]],
                table64[obuf[1]],
                table64[obuf[2]],
-               table64[obuf[3]] );
+               table64[obuf[3]]);
       break;
     }
     output += 4;
   }
+
+  /* Zero terminate */
   *output = '\0';
-  *outptr = base64data; /* return pointer to new data, allocated memory */
 
-  if(convbuf)
-    free(convbuf);
+  /* Return the pointer to the new data (allocated memory) */
+  *outptr = base64data;
 
-  *outlen = strlen(base64data); /* return the length of the new data */
+  free(convbuf);
+
+  /* Return the length of the new data */
+  *outlen = strlen(base64data);
 
   return CURLE_OK;
 }
@@ -280,7 +288,7 @@ static CURLcode base64_encode(const char *table64,
  *
  * @unittest: 1302
  */
-CURLcode Curl_base64_encode(struct SessionHandle *data,
+CURLcode Curl_base64_encode(struct Curl_easy *data,
                             const char *inputbuff, size_t insize,
                             char **outptr, size_t *outlen)
 {
@@ -304,10 +312,9 @@ CURLcode Curl_base64_encode(struct SessionHandle *data,
  *
  * @unittest: 1302
  */
-CURLcode Curl_base64url_encode(struct SessionHandle *data,
+CURLcode Curl_base64url_encode(struct Curl_easy *data,
                                const char *inputbuff, size_t insize,
                                char **outptr, size_t *outlen)
 {
   return base64_encode(base64url, data, inputbuff, insize, outptr, outlen);
 }
-/* ---- End of Base64 Encoding ---- */

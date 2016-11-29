@@ -1,0 +1,141 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLINFO_TLS_SSL_PTR 3 "23 Feb 2016" "libcurl 7.48.0" "curl_easy_getinfo options"
+.SH NAME
+CURLINFO_TLS_SESSION, CURLINFO_TLS_SSL_PTR \- get TLS session info
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SSL_PTR,
+                           struct curl_tlssessioninfo **session);
+
+/* if you need compatibility with libcurl < 7.48.0 use
+   CURLINFO_TLS_SESSION instead: */
+
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SESSION,
+                           struct curl_tlssessioninfo **session);
+.SH DESCRIPTION
+Pass a pointer to a 'struct curl_tlssessioninfo *'.  The pointer will be
+initialized to refer to a 'struct curl_tlssessioninfo *' that will contain an
+enum indicating the SSL library used for the handshake and a pointer to the
+respective internal TLS session structure of this underlying SSL library.
+
+This option may be useful for example to extract certificate information in a
+format convenient for further processing, such as manual validation. Refer to
+the \fBLIMITATIONS\fP section.
+
+.nf
+struct curl_tlssessioninfo {
+  curl_sslbackend backend;
+  void *internals;
+};
+.fi
+
+The \fIbackend\fP struct member is one of the defines in the CURLSSLBACKEND_*
+series: CURLSSLBACKEND_NONE (when built without TLS support),
+CURLSSLBACKEND_AXTLS, CURLSSLBACKEND_CYASSL, CURLSSLBACKEND_DARWINSSL,
+CURLSSLBACKEND_GNUTLS, CURLSSLBACKEND_GSKIT, CURLSSLBACKEND_MBEDTLS,
+CURLSSLBACKEND_NSS, CURLSSLBACKEND_OPENSSL, CURLSSLBACKEND_POLARSSL or
+CURLSSLBACKEND_SCHANNEL. (Note that the OpenSSL forks are all reported as just
+OpenSSL here.)
+
+The \fIinternals\fP struct member will point to a TLS library specific pointer
+for the active ("in use") SSL connection, with the following underlying types:
+.RS
+.IP GnuTLS
+gnutls_session_t
+.IP gskit
+gsk_handle
+.IP NSS
+PRFileDesc *
+.IP OpenSSL
+CURLINFO_TLS_SESSION: SSL_CTX *
+
+CURLINFO_TLS_SSL_PTR: SSL *
+.RE
+Since 7.48.0 the \fIinternals\fP member can point to these other SSL backends
+as well:
+.RS
+.IP axTLS
+SSL *
+.IP mbedTLS
+mbedtls_ssl_context *
+.IP PolarSSL
+ssl_context *
+.IP "Secure Channel (WinSSL)"
+CtxtHandle *
+.IP "Secure Transport (DarwinSSL)"
+SSLContext *
+.IP "WolfSSL (formerly CyaSSL)"
+SSL *
+.RE
+
+If the \fIinternals\fP pointer is NULL then either the SSL backend is not
+supported, an SSL session has not yet been established or the connection is no
+longer associated with the easy handle (eg curl_easy_perform has returned).
+.SH LIMITATIONS
+\fBThis option has some limitations that could make it unsafe when it comes to
+the manual verification of certificates.\fP
+
+This option only retrieves the first in-use SSL session pointer for your easy
+handle, however your easy handle may have more than one in-use SSL session if
+using FTP over SSL. That is because the FTP protocol has a control channel and
+a data channel and one or both may be over SSL. \fBCurrently there is no way to
+retrieve a second in-use SSL session associated with an easy handle.\fP
+
+This option has not been thoroughly tested with plaintext protocols that can be
+upgraded/downgraded to/from SSL: FTP, SMTP, POP3, IMAP when used with
+\fICURLOPT_USE_SSL(3)\fP. Though you will be able to retrieve the SSL pointer,
+it's possible that before you can do that \fBdata (including auth) may have
+already been sent over a connection after it was upgraded.\fP
+
+Renegotiation. If unsafe renegotiation or renegotiation in a way that the
+certificate is allowed to change is allowed by your SSL library this may occur
+and the certificate may change, and \fBdata may continue to be sent or received
+after renegotiation but before you are able to get the (possibly) changed SSL
+pointer,\fP with the (possibly) changed certificate information.
+
+If you are using OpenSSL or wolfSSL then \fICURLOPT_SSL_CTX_FUNCTION(3)\fP can
+be used to set a certificate verification callback in the CTX. That is safer
+than using this option to poll for certificate changes and doesn't suffer from
+any of the problems above. There is currently no way in libcurl to set a
+verification callback for the other SSL backends.
+
+How are you using this option? Are you affected by any of these limitations?
+Please let us know by making a comment at
+https://github.com/curl/curl/issues/685
+.SH PROTOCOLS
+All TLS-based
+.SH EXAMPLE
+TODO
+.SH AVAILABILITY
+Added in 7.48.0.
+
+This option supersedes \fICURLINFO_TLS_SESSION(3)\fP which was added in 7.34.0.
+This option is exactly the same as that option except in the case of OpenSSL.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
+.BR CURLINFO_TLS_SESSION "(3), "

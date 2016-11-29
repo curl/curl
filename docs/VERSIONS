@@ -1,22 +1,18 @@
-                                  _   _ ____  _
-                              ___| | | |  _ \| |
-                             / __| | | | |_) | |
-                            | (__| |_| |  _ <| |___
-                             \___|\___/|_| \_\_____|
-
 Version Numbers and Releases
+============================
 
  Curl is not only curl. Curl is also libcurl. They're actually individually
  versioned, but they mostly follow each other rather closely.
 
  The version numbering is always built up using the same system:
 
-        X.Y[.Z]
+        X.Y.Z
 
- Where
-   X is main version number
-   Y is release number
-   Z is patch number
+  - X is main version number
+  - Y is release number
+  - Z is patch number
+
+## Bumping numbers
 
  One of these numbers will get bumped in each new release. The numbers to the
  right of a bumped number will be reset to zero. If Z is zero, it may not be
@@ -57,4 +53,4 @@ Version Numbers and Releases
  release. It makes comparisons with greater than and less than work.
 
  This number is also available as three separate defines:
- LIBCURL_VERSION_MAJOR, LIBCURL_VERSION_MINOR and LIBCURL_VERSION_PATCH.
+ `LIBCURL_VERSION_MAJOR`, `LIBCURL_VERSION_MINOR` and `LIBCURL_VERSION_PATCH`.

@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -53,7 +53,7 @@ int test(char *URL)
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
-    sprintf(target_url, "%s%04i", URL, i + 1);
+    snprintf(target_url, sizeof(target_url), "%s%04i", URL, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */
@@ -83,13 +83,15 @@ int test(char *URL)
 
     abort_on_test_timeout();
 
-    if(!running && handles_added >= NUM_HANDLES)
-      break; /* done */
+    if(!running) {
+      if(handles_added >= NUM_HANDLES)
+        break; /* done */
 
-    /* Add the rest of the handles now that the first handle has sent the
-       request. */
-    while(handles_added < NUM_HANDLES)
-      multi_add_handle(m, curl[handles_added++]);
+      /* Add the rest of the handles now that the first handle has completed
+         its request. */
+      while(handles_added < NUM_HANDLES)
+        multi_add_handle(m, curl[handles_added++]);
+    }
 
     FD_ZERO(&rd);
     FD_ZERO(&wr);

@@ -39,10 +39,8 @@ HTTP multiple provided Host: headers
 </strip>
 <protocol>
 GET /1121 HTTP/1.1
-Accept: */*
 Host: host1
-Host: host2
-Host: host3
+Accept: */*
 
 </protocol>
 </verify>

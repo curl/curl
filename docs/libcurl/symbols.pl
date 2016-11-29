@@ -10,7 +10,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at http://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.haxx.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -24,7 +24,7 @@
 # Experience has shown that the symbols-in-versions file is very useful to
 # applications that want to build with a wide range of libcurl versions.
 # It is however easy to get it wrong and the source gets a bit messy with all
-# the fixed numerical comparisions.
+# the fixed numerical comparisons.
 #
 # The point of this script is to provide an easy-to-use macro for libcurl-
 # using applications to do preprocessor checks for specific libcurl defines,
@@ -71,7 +71,7 @@ while(<F>) {
         my $dep;
 
         # is there removed info?
-        if($vers =~ /([\d.]+)[ \t-]+([\d.]+)[ \t]+([\d.]+)/) {
+        if($vers =~ /([\d.]+)[ \t-]+([\d.-]+)[ \t]+([\d.]+)/) {
             ($intr, $dep, $rm)=($1, $2, $3);
         }
         # is it a dep-only line?

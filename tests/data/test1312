@@ -40,7 +40,7 @@ HTTP GET with -J, Content-Disposition and ; in filename
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1312 -J -O
+%HOSTIP:%HTTPPORT/1312 -J -O
 </command>
 </client>
 

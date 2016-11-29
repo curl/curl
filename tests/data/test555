@@ -112,8 +112,8 @@ s/^(this is the blurb we want to upload)\r\n/$1\n/ if($has_charconv)
 </strippart>
 <protocol>
 POST http://test.remote.example.com/path/555 HTTP/1.1
-User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Host: test.remote.example.com
+User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36
@@ -121,18 +121,18 @@ Content-Type: application/x-www-form-urlencoded
 
 this is the blurb we want to upload
 POST http://test.remote.example.com/path/555 HTTP/1.1
+Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
 
 POST http://test.remote.example.com/path/555 HTTP/1.1
+Host: test.remote.example.com
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAACeAJ4AWAAAAAAAAAD2AAAACAAIAPYAAAAIAAgA/gAAAAAAAAAAAAAABoKBAL9LNW5+nkyHZRmyFaL/LJ4xMjM0MjIzNGUCyhgQ9hw6eWAT13EbDa0BAQAAAAAAAACAPtXesZ0BMTIzNDIyMzQAAAAAAgAEAEMAQwABABIARQBMAEkAUwBBAEIARQBUAEgABAAYAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAMALABlAGwAaQBzAGEAYgBlAHQAaAAuAGMAYwAuAGkAYwBlAGQAZQB2AC4AbgB1AAAAAAAAAAAAdGVzdHVzZXJjdXJsaG9zdA==
 User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
-Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 36

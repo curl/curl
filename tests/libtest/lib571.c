@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -37,8 +37,6 @@
 #  include <fcntl.h>
 #endif
 
-#include <curl/mprintf.h>
-
 #include "warnless.h"
 #include "memdebug.h"
 
@@ -52,7 +50,8 @@ static const char *RTP_DATA = "$_1234\n\0asdf";
 
 static int rtp_packet_count = 0;
 
-static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream) {
+static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream)
+{
   char *data = (char *)ptr;
   int channel = RTP_PKT_CHANNEL(data);
   int message_size;
@@ -77,8 +76,9 @@ static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream) {
         printf("RTP PAYLOAD CORRUPTED [%s]\n", data + i);
         return failure;
       }
-    } else {
-      if (memcmp(RTP_DATA, data + i, message_size - i) != 0) {
+    }
+    else {
+      if(memcmp(RTP_DATA, data + i, message_size - i) != 0) {
         printf("RTP PAYLOAD END CORRUPTED (%d), [%s]\n",
                message_size - i, data + i);
         return failure;
@@ -112,13 +112,13 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
     fclose(protofile);
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if ((curl = curl_easy_init()) == NULL) {
+  if((curl = curl_easy_init()) == NULL) {
     fprintf(stderr, "curl_easy_init() failed\n");
     fclose(protofile);
     curl_global_cleanup();
@@ -197,9 +197,7 @@ int test(char *URL)
   }
 
 test_cleanup:
-
-  if(stream_uri)
-    free(stream_uri);
+  free(stream_uri);
 
   if(protofile)
     fclose(protofile);

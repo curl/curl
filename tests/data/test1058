@@ -44,8 +44,8 @@ http://%HOSTIP:%HTTPPORT/want/1058 -r -101
 </strip>
 <protocol>
 GET /want/1058 HTTP/1.1
-Range: bytes=-101
 Host: %HOSTIP:%HTTPPORT
+Range: bytes=-101
 Accept: */*
 
 </protocol>

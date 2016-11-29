@@ -52,6 +52,7 @@ ok
 http
 </server>
 <features>
+!SSPI
 crypto
 </features>
  <name>
@@ -75,8 +76,8 @@ bar
 </strip>
 <protocol>
 POST http://remotehost:54321/we/want/259 HTTP/1.1
-User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: remotehost:54321
+User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 409
@@ -101,9 +102,9 @@ bar
 
 ------------------------------7c633d5c27ce--
 POST http://remotehost:54321/we/want/259 HTTP/1.1
+Host: remotehost:54321
 User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Proxy-Authorization: Digest username="uuuser", realm="many secrets", nonce="911", uri="/we/want/259", response="b479994d13e60f3aa192a67c5892ddc5"
-Host: remotehost:54321
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 409
