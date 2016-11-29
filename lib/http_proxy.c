@@ -351,14 +351,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
             }
           }
           else {
-            /*
-             * We got a whole chunk of data, which can be anything from one
-             * byte to a set of lines and possibly just a piece of the last
-             * line.
-             */
-            int i;
-
-            nread += gotbytes;
+            /* We got a byte of data */
+            nread++;
 
             if(keepon > TRUE) {
               /* This means we are currently ignoring a response-body */
@@ -368,7 +362,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
               if(cl) {
                 /* A Content-Length based body: simply count down the counter
                    and make sure to break out of the loop when we're done! */
-                cl -= gotbytes;
+                cl--;
                 if(cl<=0) {
                   keepon = FALSE;
                   break;
@@ -382,7 +376,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
                 /* now parse the chunked piece of data so that we can
                    properly tell when the stream ends */
-                r = Curl_httpchunk_read(conn, ptr, gotbytes, &tookcareof);
+                r = Curl_httpchunk_read(conn, ptr, 1, &tookcareof);
                 if(r == CHUNKE_STOP) {
                   /* we're done reading chunks! */
                   infof(data, "chunk reading DONE\n");
@@ -395,180 +389,167 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
                         tookcareof);
               }
             }
-            else
-              for(i = 0; i < gotbytes; ptr++, i++) {
-                perline++; /* amount of bytes in this line so far */
-                if(*ptr == 0x0a) {
-                  char letter;
-                  int writetype;
+            else {
+              perline++; /* amount of bytes in this line so far */
+              if(*ptr == 0x0a) {
+                int writetype;
 
-                  /* convert from the network encoding */
-                  result = Curl_convert_from_network(data, line_start,
-                                                     perline);
-                  /* Curl_convert_from_network calls failf if unsuccessful */
-                  if(result)
-                    return result;
+                /* convert from the network encoding */
+                result = Curl_convert_from_network(data, line_start, perline);
+                /* Curl_convert_from_network calls failf if unsuccessful */
+                if(result)
+                  return result;
 
-                  /* output debug if that is requested */
-                  if(data->set.verbose)
-                    Curl_debug(data, CURLINFO_HEADER_IN,
-                               line_start, (size_t)perline, conn);
+                /* output debug if that is requested */
+                if(data->set.verbose)
+                  Curl_debug(data, CURLINFO_HEADER_IN,
+                             line_start, (size_t)perline, conn);
 
-                  /* send the header to the callback */
-                  writetype = CLIENTWRITE_HEADER;
-                  if(data->set.include_header)
-                    writetype |= CLIENTWRITE_BODY;
+                /* send the header to the callback */
+                writetype = CLIENTWRITE_HEADER;
+                if(data->set.include_header)
+                  writetype |= CLIENTWRITE_BODY;
 
-                  result = Curl_client_write(conn, writetype, line_start,
-                                             perline);
+                result = Curl_client_write(conn, writetype, line_start,
+                                           perline);
 
-                  data->info.header_size += (long)perline;
-                  data->req.headerbytecount += (long)perline;
+                data->info.header_size += (long)perline;
+                data->req.headerbytecount += (long)perline;
 
-                  if(result)
-                    return result;
+                if(result)
+                  return result;
 
-                  /* Newlines are CRLF, so the CR is ignored as the line isn't
-                     really terminated until the LF comes. Treat a following CR
-                     as end-of-headers as well.*/
+                /* Newlines are CRLF, so the CR is ignored as the line isn't
+                   really terminated until the LF comes. Treat a following CR
+                   as end-of-headers as well.*/
 
-                  if(('\r' == line_start[0]) ||
-                     ('\n' == line_start[0])) {
-                    /* end of response-headers from the proxy */
-                    nread = 0; /* make next read start over in the read
-                                  buffer */
-                    ptr=data->state.buffer;
-                    if((407 == k->httpcode) && !data->state.authproblem) {
-                      /* If we get a 407 response code with content length
-                         when we have no auth problem, we must ignore the
-                         whole response-body */
-                      keepon = 2;
+                if(('\r' == line_start[0]) ||
+                   ('\n' == line_start[0])) {
+                  /* end of response-headers from the proxy */
+                  nread = 0; /* make next read start over in the read
+                                buffer */
+                  ptr=data->state.buffer;
+                  if((407 == k->httpcode) && !data->state.authproblem) {
+                    /* If we get a 407 response code with content length
+                       when we have no auth problem, we must ignore the
+                       whole response-body */
+                    keepon = 2;
 
-                      if(cl) {
-                        infof(data, "Ignore %" CURL_FORMAT_CURL_OFF_T
-                              " bytes of response-body\n", cl);
+                    if(cl) {
+                      infof(data, "Ignore %" CURL_FORMAT_CURL_OFF_T
+                            " bytes of response-body\n", cl);
+                    }
+                    else if(chunked_encoding) {
+                      CHUNKcode r;
+                      /* We set ignorebody true here since the chunked
+                         decoder function will acknowledge that. Pay
+                         attention so that this is cleared again when this
+                         function returns! */
+                      k->ignorebody = TRUE;
+
+                      if(line_start[1] == '\n') {
+                        /* this can only be a LF if the letter at index 0
+                           was a CR */
+                        line_start++;
                       }
-                      else if(chunked_encoding) {
-                        CHUNKcode r;
-                        /* We set ignorebody true here since the chunked
-                           decoder function will acknowledge that. Pay
-                           attention so that this is cleared again when this
-                           function returns! */
-                        k->ignorebody = TRUE;
-                        infof(data, "%zd bytes of chunk left\n", gotbytes-i);
 
-                        if(line_start[1] == '\n') {
-                          /* this can only be a LF if the letter at index 0
-                             was a CR */
-                          line_start++;
-                          i++;
-                        }
-
-                        /* now parse the chunked piece of data so that we can
-                           properly tell when the stream ends */
-                        r = Curl_httpchunk_read(conn, line_start+1, 1,
-                                                &gotbytes);
-                        if(r == CHUNKE_STOP) {
-                          /* we're done reading chunks! */
-                          infof(data, "chunk reading DONE\n");
-                          keepon = FALSE;
-                          /* we did the full CONNECT treatment, go to
-                             COMPLETE */
-                          conn->tunnel_state[sockindex] = TUNNEL_COMPLETE;
-                        }
-                        else
-                          infof(data, "Read %zd bytes of chunk, continue\n",
-                                gotbytes);
+                      /* now parse the chunked piece of data so that we can
+                         properly tell when the stream ends */
+                      r = Curl_httpchunk_read(conn, line_start+1, 1,
+                                              &gotbytes);
+                      if(r == CHUNKE_STOP) {
+                        /* we're done reading chunks! */
+                        infof(data, "chunk reading DONE\n");
+                        keepon = FALSE;
+                        /* we did the full CONNECT treatment, go to
+                           COMPLETE */
+                        conn->tunnel_state[sockindex] = TUNNEL_COMPLETE;
                       }
-                      else {
-                        /* without content-length or chunked encoding, we
-                           can't keep the connection alive since the close is
-                           the end signal so we bail out at once instead */
-                        keepon=FALSE;
-                      }
+                      else
+                        infof(data, "Read %zd bytes of chunk, continue\n",
+                              gotbytes);
                     }
                     else {
-                      keepon = FALSE;
-                      if(200 == data->info.httpproxycode) {
-                        if(gotbytes - (i+1))
-                          failf(data, "Proxy CONNECT followed by %zd bytes "
-                                "of opaque data. Data ignored (known bug #39)",
-                                gotbytes - (i+1));
-                      }
+                      /* without content-length or chunked encoding, we
+                         can't keep the connection alive since the close is
+                         the end signal so we bail out at once instead */
+                      keepon=FALSE;
                     }
-                    /* we did the full CONNECT treatment, go to COMPLETE */
-                    conn->tunnel_state[sockindex] = TUNNEL_COMPLETE;
-                    break; /* breaks out of for-loop, not switch() */
                   }
-
-                  /* keep a backup of the position we are about to blank */
-                  letter = line_start[perline];
-                  line_start[perline]=0; /* zero terminate the buffer */
-                  if((checkprefix("WWW-Authenticate:", line_start) &&
-                      (401 == k->httpcode)) ||
-                     (checkprefix("Proxy-authenticate:", line_start) &&
-                      (407 == k->httpcode))) {
-
-                    bool proxy = (k->httpcode == 407) ? TRUE : FALSE;
-                    char *auth = Curl_copy_header_value(line_start);
-                    if(!auth)
-                      return CURLE_OUT_OF_MEMORY;
-
-                    result = Curl_http_input_auth(conn, proxy, auth);
-
-                    free(auth);
-
-                    if(result)
-                      return result;
-                  }
-                  else if(checkprefix("Content-Length:", line_start)) {
-                    if(k->httpcode/100 == 2) {
-                      /* A server MUST NOT send any Transfer-Encoding or
-                         Content-Length header fields in a 2xx (Successful)
-                         response to CONNECT. (RFC 7231 section 4.3.6) */
-                      failf(data, "Content-Length: in %03d response",
-                            k->httpcode);
-                      return CURLE_RECV_ERROR;
-                    }
-
-                    cl = curlx_strtoofft(line_start +
-                                         strlen("Content-Length:"), NULL, 10);
-                  }
-                  else if(Curl_compareheader(line_start,
-                                             "Connection:", "close"))
-                    closeConnection = TRUE;
-                  else if(Curl_compareheader(line_start,
-                                             "Transfer-Encoding:",
-                                             "chunked")) {
-                    if(k->httpcode/100 == 2) {
-                      /* A server MUST NOT send any Transfer-Encoding or
-                         Content-Length header fields in a 2xx (Successful)
-                         response to CONNECT. (RFC 7231 section 4.3.6) */
-                      failf(data, "Transfer-Encoding: in %03d response",
-                            k->httpcode);
-                      return CURLE_RECV_ERROR;
-                    }
-                    infof(data, "CONNECT responded chunked\n");
-                    chunked_encoding = TRUE;
-                    /* init our chunky engine */
-                    Curl_httpchunk_init(conn);
-                  }
-                  else if(Curl_compareheader(line_start,
-                                             "Proxy-Connection:", "close"))
-                    closeConnection = TRUE;
-                  else if(2 == sscanf(line_start, "HTTP/1.%d %d",
-                                      &subversion,
-                                      &k->httpcode)) {
-                    /* store the HTTP code from the proxy */
-                    data->info.httpproxycode = k->httpcode;
-                  }
-                  /* put back the letter we blanked out before */
-                  line_start[perline]= letter;
-
-                  perline=0; /* line starts over here */
-                  line_start = ptr+1; /* this skips the zero byte we wrote */
+                  else
+                    keepon = FALSE;
+                  /* we did the full CONNECT treatment, go to COMPLETE */
+                  conn->tunnel_state[sockindex] = TUNNEL_COMPLETE;
+                  break; /* breaks out of for-loop, not switch() */
                 }
+
+                line_start[perline]=0; /* zero terminate the buffer */
+                if((checkprefix("WWW-Authenticate:", line_start) &&
+                    (401 == k->httpcode)) ||
+                   (checkprefix("Proxy-authenticate:", line_start) &&
+                    (407 == k->httpcode))) {
+
+                  bool proxy = (k->httpcode == 407) ? TRUE : FALSE;
+                  char *auth = Curl_copy_header_value(line_start);
+                  if(!auth)
+                    return CURLE_OUT_OF_MEMORY;
+
+                  result = Curl_http_input_auth(conn, proxy, auth);
+
+                  free(auth);
+
+                  if(result)
+                    return result;
+                }
+                else if(checkprefix("Content-Length:", line_start)) {
+                  if(k->httpcode/100 == 2) {
+                    /* A server MUST NOT send any Transfer-Encoding or
+                       Content-Length header fields in a 2xx (Successful)
+                       response to CONNECT. (RFC 7231 section 4.3.6) */
+                    failf(data, "Content-Length: in %03d response",
+                          k->httpcode);
+                    return CURLE_RECV_ERROR;
+                  }
+
+                  cl = curlx_strtoofft(line_start +
+                                       strlen("Content-Length:"), NULL, 10);
+                }
+                else if(Curl_compareheader(line_start,
+                                           "Connection:", "close"))
+                  closeConnection = TRUE;
+                else if(Curl_compareheader(line_start,
+                                           "Transfer-Encoding:",
+                                           "chunked")) {
+                  if(k->httpcode/100 == 2) {
+                    /* A server MUST NOT send any Transfer-Encoding or
+                       Content-Length header fields in a 2xx (Successful)
+                       response to CONNECT. (RFC 7231 section 4.3.6) */
+                    failf(data, "Transfer-Encoding: in %03d response",
+                          k->httpcode);
+                    return CURLE_RECV_ERROR;
+                  }
+                  infof(data, "CONNECT responded chunked\n");
+                  chunked_encoding = TRUE;
+                  /* init our chunky engine */
+                  Curl_httpchunk_init(conn);
+                }
+                else if(Curl_compareheader(line_start,
+                                           "Proxy-Connection:", "close"))
+                  closeConnection = TRUE;
+                else if(2 == sscanf(line_start, "HTTP/1.%d %d",
+                                    &subversion,
+                                    &k->httpcode)) {
+                  /* store the HTTP code from the proxy */
+                  data->info.httpproxycode = k->httpcode;
+                }
+
+                perline=0; /* line starts over here */
+                ptr = data->state.buffer;
+                line_start = ptr;
               }
+              else /* not end of header line */
+                ptr++;
+            }
           }
           break;
         } /* switch */
