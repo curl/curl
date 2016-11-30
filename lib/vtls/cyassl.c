@@ -427,7 +427,6 @@ cyassl_connect_step2(struct connectdata *conn,
   const char * const pinnedpubkey = SSL_IS_PROXY() ?
                         data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
                         data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
-    conn->http_proxy.host.dispname : conn->host.dispname;
 
   conn->recv[sockindex] = cyassl_recv;
   conn->send[sockindex] = cyassl_send;
