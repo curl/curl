@@ -2653,7 +2653,7 @@ sub checksystem {
     logmsg sprintf("* Servers: %s", $stunnel?"SSL ":"");
     logmsg sprintf("%s", $http_ipv6?"HTTP-IPv6 ":"");
     logmsg sprintf("%s", $http_unix?"HTTP-unix ":"");
-    logmsg sprintf("%s\n", $ftp_ipv6?"FTP-IPv6 ":"OFF");
+    logmsg sprintf("%s\n", $ftp_ipv6?"FTP-IPv6 ":"");
 
     logmsg sprintf("* Env: %s%s", $valgrind?"Valgrind ":"",
                    $run_event_based?"event-based ":"");
