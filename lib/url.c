@@ -5677,6 +5677,9 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
   int host_match = FALSE;
   int port_match = FALSE;
 
+  *host_result = NULL;
+  *port_result = -1;
+
   if(*ptr == ':') {
     /* an empty hostname always matches */
     host_match = TRUE;
@@ -5739,9 +5742,9 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   char *host = NULL;
-  int port = 0;
+  int port = -1;
 
-  while(conn_to_host && !host) {
+  while(conn_to_host && !host && port == -1) {
     result = parse_connect_to_string(data, conn, conn_to_host->data,
                                      &host, &port);
     if(result)
@@ -5760,7 +5763,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     else {
       /* no "connect to host" */
       conn->bits.conn_to_host = FALSE;
-      free(host);
+      Curl_safefree(host);
     }
 
     if(port >= 0) {
@@ -5771,6 +5774,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     else {
       /* no "connect to port" */
       conn->bits.conn_to_port = FALSE;
+      port = -1;
     }
 
     conn_to_host = conn_to_host->next;
