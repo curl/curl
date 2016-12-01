@@ -105,6 +105,7 @@ static const char *const helptext[] = {
   "clear for transfer (F)",
   " -G, --get           Send the -d data with a HTTP GET (H)",
   " -g, --globoff       Disable URL sequences and ranges using {} and []",
+  "     --haproxy-protocol  Send HAProxy PROXY protocol header (H)",
   " -H, --header LINE   Pass custom header LINE to server (H)",
   " -I, --head          Show document info only",
   " -h, --help          This help text",

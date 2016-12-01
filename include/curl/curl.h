@@ -1774,6 +1774,9 @@ typedef enum {
      this option is used only if PROXY_SSL_VERIFYPEER is true */
   CINIT(PROXY_PINNEDPUBLICKEY, STRINGPOINT, 264),
 
+  /* send HAProxy PROXY protocol header? */
+  CINIT(HAPROXYPROTOCOL, LONG, 265),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

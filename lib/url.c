@@ -2056,6 +2056,12 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      */
     data->set.localport = curlx_sltous(va_arg(param, long));
     break;
+  case CURLOPT_HAPROXYPROTOCOL:
+    /*
+     * Sends the HAProxy PROXY protcol header.
+     */
+    data->set.haproxyprotocol = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
   case CURLOPT_LOCALPORTRANGE:
     /*
      * Set number of local ports to try, starting with CURLOPT_LOCALPORT.
