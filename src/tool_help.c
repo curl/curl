@@ -164,6 +164,8 @@ static const struct helptxt helptext[] = {
    "How long to wait in milliseconds for IPv6 before trying IPv4"},
   {"-I, --head",
    "Show document info only"},
+  {"    --haproxy-protocol",
+   "Send HAProxy PROXY protocol header"},
   {"-H, --header <header/@file>",
    "Pass custom header(s) to server"},
   {"-h, --help",
