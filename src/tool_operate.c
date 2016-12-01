@@ -1297,6 +1297,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
                         (long)config->localportrange);
         }
 
+        my_setopt(curl, CURLOPT_HAPROXYPROTOCOL,
+                  config->haproxy_protocol?1L:0L);
+
         /* curl 7.15.5 */
         my_setopt_str(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER,
                       config->ftp_alternative_to_user);

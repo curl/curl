@@ -1841,6 +1841,9 @@ typedef enum {
   /* User data to pass to the resolver start callback. */
   CINIT(RESOLVER_START_DATA, OBJECTPOINT, 273),
 
+  /* send HAProxy PROXY protocol header? */
+  CINIT(HAPROXYPROTOCOL, LONG, 274),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

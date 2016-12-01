@@ -92,6 +92,8 @@ static int http_getsock_do(struct connectdata *conn,
                            int numsocks);
 static int http_should_fail(struct connectdata *conn);
 
+static void add_haproxy_protocol_header(struct connectdata *conn, bool *done);
+
 #ifdef USE_SSL
 static CURLcode https_connecting(struct connectdata *conn, bool *done);
 static int https_getsock(struct connectdata *conn,
@@ -1357,6 +1359,11 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
     /* nothing else to do except wait right now - we're not done here. */
     return CURLE_OK;
 
+  if(conn->data->set.haproxyprotocol) {
+    /* add HAProxy PROXY protocol header */
+    add_haproxy_protocol_header(conn, done);
+  }
+
   if(conn->given->protocol & CURLPROTO_HTTPS) {
     /* perform SSL initialization */
     result = https_connecting(conn, done);
@@ -1380,6 +1387,37 @@ static int http_getsock_do(struct connectdata *conn,
   (void)numsocks; /* unused, we trust it to be at least 1 */
   socks[0] = conn->sock[FIRSTSOCKET];
   return GETSOCK_WRITESOCK(0);
+}
+
+static void add_haproxy_protocol_header(struct connectdata *conn, bool *done)
+{
+  char proxy_header[128];
+  Curl_send_buffer *req_buffer;
+  CURLcode result;
+  char tcp_version[5];
+
+  /* Emit the correct prefix for IPv6 */
+  if (conn->bits.ipv6) {
+    strcpy(tcp_version, "TCP6");
+  } else {
+    strcpy(tcp_version, "TCP4");
+  }
+
+  snprintf(proxy_header,
+           sizeof proxy_header,
+           "PROXY %s %s %s %i %i\r\n",
+           tcp_version,
+           conn->data->info.conn_local_ip,
+           conn->data->info.conn_primary_ip,
+           conn->data->info.conn_local_port,
+           conn->data->info.conn_primary_port);
+  req_buffer = Curl_add_buffer_init();
+  Curl_add_bufferf(req_buffer, proxy_header);
+  result = Curl_add_buffer_send(req_buffer,
+                                conn,
+                                &conn->data->info.request_size,
+                                0,
+                                FIRSTSOCKET);
 }
 
 #ifdef USE_SSL
