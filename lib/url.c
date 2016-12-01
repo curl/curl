@@ -5453,11 +5453,16 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
       *portptr = '\0'; /* cut off the name there */
       conn->remote_port = curlx_ultous(port);
     }
-    else
+    else {
+      if(rest[0]) {
+        failf(data, "Illegal port number");
+        return CURLE_URL_MALFORMAT;
+      }
       /* Browser behavior adaptation. If there's a colon with no digits after,
          just cut off the name there which makes us ignore the colon and just
          use the default port. Firefox and Chrome both do that. */
       *portptr = '\0';
+    }
   }
 
   /* only if remote_port was not already parsed off the URL we use the
