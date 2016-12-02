@@ -17,6 +17,9 @@ URL
 <server>
 none
 </server>
+<features>
+http
+</features>
  <name>
 reject non-numerical port number in URL
  </name>
