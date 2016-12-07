@@ -3159,8 +3159,8 @@ static ssize_t ossl_send(struct connectdata *conn,
       /*  A failure in the SSL library occurred, usually a protocol error.
           The OpenSSL error queue contains more information on the error. */
       sslerror = ERR_get_error();
-      if(sslerror ==
-         ERR_PACK(ERR_LIB_SSL, SSL_F_SSL3_WRITE_PENDING, SSL_R_BIO_NOT_SET) &&
+      if(ERR_GET_LIB(sslerror) == ERR_LIB_SSL &&
+         ERR_GET_REASON(sslerror) == SSL_R_BIO_NOT_SET &&
          conn->ssl[sockindex].state == ssl_connection_complete &&
          conn->proxy_ssl[sockindex].state == ssl_connection_complete) {
         char ver[120];
