@@ -51,6 +51,12 @@ This release includes the following bugfixes:
  o winbuild: add config option ENABLE_NGHTTP2 [21]
  o http2: check nghttp2_session_set_local_window_size exists [22]
  o http2: Fix crashes when parent stream gets aborted [23]
+ o CURLOPT_CONNECT_TO: Skip non-matching "connect-to" entries [25]
+ o URL parser: reject non-numerical port numbers
+ o CONNECT: reject TE or CL in 2xx responses
+ o CONNECT: read responses one byte at a time [26]
+ o curl: support zero-length argument strings in config files [27]
+ o openssl: don't use OpenSSL's ERR_PACK [28]
 
 This release includes the following known bugs:
 
@@ -59,14 +65,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Piggott, afrind on github, Alex Chan, Alex Rousskov, Anders Bakken,
-  Andrei Sedoi, Bruce Stephens, Dan Fandrich, Daniel Hwang, Daniel Stenberg,
-  Dave Reisner, David Schweikert, Dmitry Kurochkin, Frank Gevaerts,
-  Isaac Boukris, Jakub Zakrzewski, Jan Ehrhardt, Kamil Dudka, Marcel Raad,
-  Mauro Rappa, Michael Kaufmann, Mike Crowe, Neal Poole, Nick Zitzmann,
-  Okhin Vasilij, Patrick Monnerat, Peter Wu, Ray Satiro, Ricki Hirner,
-  Tatsuhiro Tsujikawa, Thomas Glanzmann, Tony Kelman, Vasy Okhin,
-  (33 contributors)
+  Adam Langley, Adam Piggott, afrind on github, Alex Chan, Alex Rousskov,
+  Anders Bakken, Andrei Sedoi, Bruce Stephens, Dan Fandrich, Daniel Hwang,
+  Daniel Stenberg, Dave Reisner, David Schweikert, Dmitry Kurochkin,
+  Frank Gevaerts, Isaac Boukris, Jakub Zakrzewski, Jan Ehrhardt,
+  Jeremy Pearson, Kamil Dudka, Marcel Raad, Mauro Rappa, Michael Kaufmann,
+  Mike Crowe, Neal Poole, Nick Zitzmann, Okhin Vasilij, Patrick Monnerat,
+  Peter Wu, Ray Satiro, Ricki Hirner, Tatsuhiro Tsujikawa, Thomas Glanzmann,
+  Tony Kelman, Vasy Okhin,
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -96,3 +103,7 @@ References to bug reports and discussions on issues:
  [22] = https://github.com/curl/curl/commit/a4d8888#commitcomment-19985676
  [23] = https://curl.haxx.se/bug/?i=1125
  [24] = https://curl.haxx.se/bug/?i=1127
+ [25] = https://curl.haxx.se/bug/?i=1148
+ [26] = https://curl.haxx.se/bug/?i=1132
+ [27] = https://curl.haxx.se/bug/?i=1152
+ [28] = https://curl.haxx.se/bug/?i=1157
