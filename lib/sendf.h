@@ -56,6 +56,8 @@ CURLcode Curl_client_chop_write(struct connectdata *conn, int type, char *ptr,
 CURLcode Curl_client_write(struct connectdata *conn, int type, char *ptr,
                            size_t len) WARN_UNUSED_RESULT;
 
+bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex);
+
 /* internal read-function, does plain socket only */
 CURLcode Curl_read_plain(curl_socket_t sockfd,
                          char *buf,

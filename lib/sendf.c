@@ -122,6 +122,13 @@ static size_t convert_lineends(struct Curl_easy *data,
 #endif /* CURL_DO_LINEEND_CONV */
 
 #ifdef USE_RECV_BEFORE_SEND_WORKAROUND
+bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
+{
+  struct postponed_data * const psnd = &(conn->postponed[sockindex]);
+  return psnd->buffer && psnd->allocated_size &&
+         psnd->recv_size > psnd->recv_processed;
+}
+
 static void pre_receive_plain(struct connectdata *conn, int num)
 {
   const curl_socket_t sockfd = conn->sock[num];
@@ -201,6 +208,10 @@ static ssize_t get_pre_recved(struct connectdata *conn, int num, char *buf,
 }
 #else  /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 /* Use "do-nothing" macros instead of functions when workaround not used */
+bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
+{
+  return false;
+}
 #define pre_receive_plain(c,n) do {} WHILE_FALSE
 #define get_pre_recved(c,n,b,l) 0
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
