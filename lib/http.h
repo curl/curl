@@ -219,6 +219,10 @@ struct http_conn {
 
   /* this is a hash of all individual streams (Curl_easy structs) */
   struct h2settings settings;
+
+  /* list of settings that will be sent */
+  nghttp2_settings_entry local_settings[3];
+  size_t local_settings_num;
 #else
   int unused; /* prevent a compiler warning */
 #endif

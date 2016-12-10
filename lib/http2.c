@@ -967,14 +967,6 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   return nread;
 }
 
-/*
- * The HTTP2 settings we send in the Upgrade request
- */
-static nghttp2_settings_entry settings[] = {
-  { NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS, 100 },
-  { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, HTTP2_HUGE_WINDOW_SIZE },
-};
-
 #define H2_BUFSIZE 32768
 
 #ifdef NGHTTP2_HAS_ERROR_CALLBACK
@@ -989,6 +981,23 @@ static int error_callback(nghttp2_session *session,
   return 0;
 }
 #endif
+
+static void populate_settings(struct connectdata *conn,
+                              struct http_conn *httpc)
+{
+  nghttp2_settings_entry *iv = httpc->local_settings;
+
+  iv[0].settings_id = NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS;
+  iv[0].value = 100;
+
+  iv[1].settings_id = NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE;
+  iv[1].value = HTTP2_HUGE_WINDOW_SIZE;
+
+  iv[2].settings_id = NGHTTP2_SETTINGS_ENABLE_PUSH;
+  iv[2].value = conn->data->multi->push_cb != NULL;
+
+  httpc->local_settings_num = 3;
+}
 
 void Curl_http2_done(struct connectdata *conn, bool premature)
 {
@@ -1103,16 +1112,14 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
   size_t blen;
   struct SingleRequest *k = &conn->data->req;
   uint8_t *binsettings = conn->proto.httpc.binsettings;
+  struct http_conn *httpc = &conn->proto.httpc;
 
-  /* As long as we have a fixed set of settings, we don't have to dynamically
-   * figure out the base64 strings since it'll always be the same. However,
-   * the settings will likely not be fixed every time in the future.
-   */
+  populate_settings(conn, httpc);
 
   /* this returns number of bytes it wrote */
   binlen = nghttp2_pack_settings_payload(binsettings, H2_BINSETTINGS_LEN,
-                                         settings,
-                                         sizeof(settings)/sizeof(settings[0]));
+                                         httpc->local_settings,
+                                         httpc->local_settings_num);
   if(!binlen) {
     failf(conn->data, "nghttp2 unexpectedly failed on pack_settings_payload");
     return CURLE_FAILED_INIT;
@@ -2031,10 +2038,13 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
                                          conn->data);
   }
   else {
+    populate_settings(conn, httpc);
+
     /* stream ID is unknown at this point */
     stream->stream_id = -1;
-    rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE, settings,
-                                 sizeof(settings) / sizeof(settings[0]));
+    rv = nghttp2_submit_settings(httpc->h2, NGHTTP2_FLAG_NONE,
+                                 httpc->local_settings,
+                                 httpc->local_settings_num);
     if(rv != 0) {
       failf(data, "nghttp2_submit_settings() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
