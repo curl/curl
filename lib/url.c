@@ -695,6 +695,9 @@ CURLcode Curl_open(struct Curl_easy **curl)
   return result;
 }
 
+#define C_SSLVERSION_VALUE(x) (x & 0xffff)
+#define C_SSLVERSION_MAX_VALUE(x) (x & 0xffff0000)
+
 CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
                      va_list param)
 {
@@ -927,7 +930,9 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * implementations are lame.
      */
 #ifdef USE_SSL
-    data->set.ssl.primary.version = va_arg(param, long);
+    arg = va_arg(param, long);
+    data->set.ssl.primary.version = C_SSLVERSION_VALUE(arg);
+    data->set.ssl.primary.version_max = C_SSLVERSION_MAX_VALUE(arg);
 #else
     result = CURLE_UNKNOWN_OPTION;
 #endif
@@ -938,7 +943,9 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * implementations are lame.
      */
 #ifdef USE_SSL
-    data->set.proxy_ssl.primary.version = va_arg(param, long);
+    arg = va_arg(param, long);
+    data->set.proxy_ssl.primary.version = C_SSLVERSION_VALUE(arg);
+    data->set.proxy_ssl.primary.version_max = C_SSLVERSION_MAX_VALUE(arg);
 #else
     result = CURLE_UNKNOWN_OPTION;
 #endif

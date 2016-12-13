@@ -350,6 +350,7 @@ struct ssl_connect_data {
 
 struct ssl_primary_config {
   long version;          /* what version the client wants to use */
+  long version_max;      /* max supported version the client wants to use*/
   bool verifypeer;       /* set TRUE if this is desired */
   bool verifyhost;       /* set TRUE if CN/SAN must match hostname */
   bool verifystatus;     /* set TRUE if certificate status must be checked */
