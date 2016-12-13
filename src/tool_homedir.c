@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,7 +46,7 @@ static char *GetEnv(const char *variable, char do_expand)
   }
   if(do_expand && strchr(variable, '%')) {
     /* buf2 == variable if not expanded */
-    rc = ExpandEnvironmentStrings (variable, buf2, sizeof(buf2));
+    rc = ExpandEnvironmentStrings(variable, buf2, sizeof(buf2));
     if(rc > 0 && rc < sizeof(buf2) &&
        !strchr(buf2, '%'))    /* no vars still unexpanded */
       env = buf2;

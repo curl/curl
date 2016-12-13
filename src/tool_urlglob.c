@@ -516,7 +516,7 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
     for(i = 0; carry && (i < glob->size); i++) {
       carry = FALSE;
       pat = &glob->pattern[glob->size - 1 - i];
-      switch (pat->type) {
+      switch(pat->type) {
       case UPTSet:
         if((pat->content.Set.elements) &&
            (++pat->content.Set.ptr_s == pat->content.Set.size)) {
@@ -631,7 +631,7 @@ CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
       }
 
       if(pat) {
-        switch (pat->type) {
+        switch(pat->type) {
         case UPTSet:
           if(pat->content.Set.elements) {
             appendthis = pat->content.Set.elements[pat->content.Set.ptr_s];

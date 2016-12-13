@@ -127,7 +127,7 @@ int main(void)
               curl_easy_strerror(res));
 
     /* clean up the FTP commands list */
-    curl_slist_free_all (headerlist);
+    curl_slist_free_all(headerlist);
 
     /* always cleanup */
     curl_easy_cleanup(curl);

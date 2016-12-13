@@ -545,8 +545,8 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
     }
   }
   if(http_should_fail(conn)) {
-    failf (data, "The requested URL returned error: %d",
-           data->req.httpcode);
+    failf(data, "The requested URL returned error: %d",
+          data->req.httpcode);
     result = CURLE_HTTP_RETURNED_ERROR;
   }
 
@@ -2063,7 +2063,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* when doing ftp, append ;type=<a|i> if not present */
         char *type = strstr(ppath, ";type=");
         if(type && type[6] && type[7] == 0) {
-          switch (Curl_raw_toupper(type[6])) {
+          switch(Curl_raw_toupper(type[6])) {
           case 'A':
           case 'D':
           case 'I':
@@ -2299,7 +2299,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
    * Free proxyuserpwd for Negotiate/NTLM. Cannot reuse as it is associated
    * with the connection and shouldn't be repeated over it either.
    */
-  switch (data->state.authproxy.picked) {
+  switch(data->state.authproxy.picked) {
   case CURLAUTH_NEGOTIATE:
   case CURLAUTH_NTLM:
   case CURLAUTH_NTLM_WB:
@@ -2753,7 +2753,7 @@ checkhttpprefix(struct Curl_easy *data,
   /* convert from the network encoding using a scratch area */
   char *scratch = strdup(s);
   if(NULL == scratch) {
-    failf (data, "Failed to allocate memory for conversion!");
+    failf(data, "Failed to allocate memory for conversion!");
     return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
   }
   if(CURLE_OK != Curl_convert_from_network(data, scratch, strlen(s)+1)) {
@@ -2791,7 +2791,7 @@ checkrtspprefix(struct Curl_easy *data,
   /* convert from the network encoding using a scratch area */
   char *scratch = strdup(s);
   if(NULL == scratch) {
-    failf (data, "Failed to allocate memory for conversion!");
+    failf(data, "Failed to allocate memory for conversion!");
     return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
   }
   if(CURLE_OK != Curl_convert_from_network(data, scratch, strlen(s)+1)) {
@@ -2843,8 +2843,8 @@ static CURLcode header_append(struct Curl_easy *data,
       /* The reason to have a max limit for this is to avoid the risk of a bad
          server feeding libcurl with a never-ending header that will cause
          reallocs infinitely */
-      failf (data, "Avoided giant realloc for header (max is %d)!",
-             CURL_MAX_HTTP_HEADER);
+      failf(data, "Avoided giant realloc for header (max is %d)!",
+            CURL_MAX_HTTP_HEADER);
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -2852,7 +2852,7 @@ static CURLcode header_append(struct Curl_easy *data,
     hbufp_index = k->hbufp - data->state.headerbuff;
     newbuff = realloc(data->state.headerbuff, newsize);
     if(!newbuff) {
-      failf (data, "Failed to alloc memory for big header!");
+      failf(data, "Failed to alloc memory for big header!");
       return CURLE_OUT_OF_MEMORY;
     }
     data->state.headersize=newsize;
@@ -3093,8 +3093,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
        * up and return an error.
        */
       if(http_should_fail(conn)) {
-        failf (data, "The requested URL returned error: %d",
-               k->httpcode);
+        failf(data, "The requested URL returned error: %d",
+              k->httpcode);
         return CURLE_HTTP_RETURNED_ERROR;
       }
 

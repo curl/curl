@@ -105,7 +105,7 @@ void *pull_one_url(void *NaN)
 
       curl_easy_cleanup(curl);
     }
-    g_free (http);
+    g_free(http);
 
     /* Adds more latency, testing the mutex.*/
     sleep(1);
@@ -118,7 +118,7 @@ void *pull_one_url(void *NaN)
 gboolean pulse_bar(gpointer data)
 {
   gdk_threads_enter();
-  gtk_progress_bar_pulse (GTK_PROGRESS_BAR (data));
+  gtk_progress_bar_pulse(GTK_PROGRESS_BAR (data));
   gdk_threads_leave();
 
   /* Return true so the function will be called again;
@@ -182,8 +182,8 @@ int main(int argc, char **argv)
 
   /* Init thread */
   g_thread_init(NULL);
-  gdk_threads_init ();
-  gdk_threads_enter ();
+  gdk_threads_init();
+  gdk_threads_enter();
 
   gtk_init(&argc, &argv);
 
@@ -203,9 +203,9 @@ int main(int argc, char **argv)
 
   /* Progress bar */
   progress_bar = gtk_progress_bar_new();
-  gtk_progress_bar_pulse (GTK_PROGRESS_BAR (progress_bar));
+  gtk_progress_bar_pulse(GTK_PROGRESS_BAR (progress_bar));
   /* Make uniform pulsing */
-  gint pulse_ref = g_timeout_add (300, pulse_bar, progress_bar);
+  gint pulse_ref = g_timeout_add(300, pulse_bar, progress_bar);
   g_object_set_data(G_OBJECT(progress_bar), "pulse_id",
                     GINT_TO_POINTER(pulse_ref));
   gtk_container_add(GTK_CONTAINER(inside_frame), progress_bar);

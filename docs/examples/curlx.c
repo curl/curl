@@ -293,7 +293,7 @@ int main(int argc, char **argv)
   binaryptr = malloc(tabLength);
 
   p.verbose = 0;
-  p.errorbio = BIO_new_fp (stderr, BIO_NOCLOSE);
+  p.errorbio = BIO_new_fp(stderr, BIO_NOCLOSE);
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
@@ -408,7 +408,7 @@ int main(int argc, char **argv)
   }
 
 
-  p.errorbio = BIO_new_fp (stderr, BIO_NOCLOSE);
+  p.errorbio = BIO_new_fp(stderr, BIO_NOCLOSE);
 
   if(!(p.curl = curl_easy_init())) {
     BIO_printf(p.errorbio, "Cannot init curl lib\n");
@@ -419,7 +419,7 @@ int main(int argc, char **argv)
     BIO_printf(p.errorbio, "Error opening P12 file %s\n", p.p12file);
     goto err;
   }
-  if(!(p.p12 = d2i_PKCS12_bio (p12bio, NULL))) {
+  if(!(p.p12 = d2i_PKCS12_bio(p12bio, NULL))) {
     BIO_printf(p.errorbio, "Cannot decode P12 structure %s\n", p.p12file);
     goto err;
   }
@@ -505,7 +505,7 @@ int main(int argc, char **argv)
 
   {
     int lu; int i=0;
-    while((lu = BIO_read (in, &binaryptr[i], tabLength-i)) >0) {
+    while((lu = BIO_read(in, &binaryptr[i], tabLength-i)) >0) {
       i+=lu;
       if(i== tabLength) {
         tabLength+=100;

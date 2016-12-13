@@ -653,7 +653,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           infd = -1;
           if(stat(uploadfile, &fileinfo) == 0) {
             fileinfo.st_size = VmsSpecialSize(uploadfile, &fileinfo);
-            switch (fileinfo.st_fab_rfm) {
+            switch(fileinfo.st_fab_rfm) {
             case FAB$C_VAR:
             case FAB$C_VFC:
             case FAB$C_STMCR:

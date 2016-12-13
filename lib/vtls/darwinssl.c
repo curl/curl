@@ -221,7 +221,7 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
 
 CF_INLINE const char *SSLCipherNameForNumber(SSLCipherSuite cipher)
 {
-  switch (cipher) {
+  switch(cipher) {
     /* SSL version 3.0 */
     case SSL_RSA_WITH_NULL_MD5:
       return "SSL_RSA_WITH_NULL_MD5";
@@ -1143,7 +1143,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                        kSSLProtocolAll,
                                        false);
-    switch (conn->ssl_config.version) {
+    switch(conn->ssl_config.version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
@@ -1879,7 +1879,7 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
     return sslerr_to_curlerr(data, ret);
   }
 
-  switch (trust_eval) {
+  switch(trust_eval) {
     case kSecTrustResultUnspecified:
     case kSecTrustResultProceed:
       return CURLE_OK;
@@ -1912,7 +1912,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
   err = SSLHandshake(connssl->ssl_ctx);
 
   if(err != noErr) {
-    switch (err) {
+    switch(err) {
       case errSSLWouldBlock:  /* they're not done with us yet */
         connssl->connecting_state = connssl->ssl_direction ?
             ssl_connect_2_writing : ssl_connect_2_reading;
@@ -2002,7 +2002,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
     /* Informational message */
     (void)SSLGetNegotiatedCipher(connssl->ssl_ctx, &cipher);
     (void)SSLGetNegotiatedProtocolVersion(connssl->ssl_ctx, &protocol);
-    switch (protocol) {
+    switch(protocol) {
       case kSSLProtocol2:
         infof(data, "SSL 2.0 connection using %s\n",
               SSLCipherNameForNumber(cipher));
@@ -2489,7 +2489,7 @@ static ssize_t darwinssl_send(struct connectdata *conn,
   if(connssl->ssl_write_buffered_length) {
     /* Write the buffered data: */
     err = SSLWrite(connssl->ssl_ctx, NULL, 0UL, &processed);
-    switch (err) {
+    switch(err) {
       case noErr:
         /* processed is always going to be 0 because we didn't write to
            the buffer, so return how much was written to the socket */
@@ -2509,7 +2509,7 @@ static ssize_t darwinssl_send(struct connectdata *conn,
     /* We've got new data to write: */
     err = SSLWrite(connssl->ssl_ctx, mem, len, &processed);
     if(err != noErr) {
-      switch (err) {
+      switch(err) {
         case errSSLWouldBlock:
           /* Data was buffered but not sent, we have to tell the caller
              to try sending again, and remember how much was buffered */
@@ -2538,7 +2538,7 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
   OSStatus err = SSLRead(connssl->ssl_ctx, buf, buffersize, &processed);
 
   if(err != noErr) {
-    switch (err) {
+    switch(err) {
       case errSSLWouldBlock:  /* return how much we read (if anything) */
         if(processed)
           return (ssize_t)processed;

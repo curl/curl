@@ -320,7 +320,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         }
 
         /* loop every second at least, less if the timeout is near */
-        switch (SOCKET_READABLE(tunnelsocket, check<1000L?check:1000)) {
+        switch(SOCKET_READABLE(tunnelsocket, check<1000L?check:1000)) {
         case -1: /* select() error, stop reading */
           error = SELECT_ERROR;
           failf(data, "Proxy CONNECT aborted due to select/poll error");
@@ -632,7 +632,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 
   data->state.authproxy.done = TRUE;
 
-  infof (data, "Proxy replied OK to CONNECT request\n");
+  infof(data, "Proxy replied OK to CONNECT request\n");
   data->req.ignorebody = FALSE; /* put it (back) to non-ignore state */
   conn->bits.rewindaftersend = FALSE; /* make sure this isn't set for the
                                          document request  */

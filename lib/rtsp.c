@@ -489,7 +489,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
    * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
    * with basic and digest, it will be freed anyway by the next request
    */
-  Curl_safefree (conn->allocptr.userpwd);
+  Curl_safefree(conn->allocptr.userpwd);
   conn->allocptr.userpwd = NULL;
 
   if(result)
@@ -737,7 +737,7 @@ CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
   curl_write_callback writeit;
 
   if(len == 0) {
-    failf (data, "Cannot write a 0 size RTP packet.");
+    failf(data, "Cannot write a 0 size RTP packet.");
     return CURLE_WRITE_ERROR;
   }
 
@@ -745,12 +745,12 @@ CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
   wrote = writeit(ptr, 1, len, data->set.rtp_out);
 
   if(CURL_WRITEFUNC_PAUSE == wrote) {
-    failf (data, "Cannot pause RTP");
+    failf(data, "Cannot pause RTP");
     return CURLE_WRITE_ERROR;
   }
 
   if(wrote != len) {
-    failf (data, "Failed writing RTP data");
+    failf(data, "Failed writing RTP data");
     return CURLE_WRITE_ERROR;
   }
 

@@ -1501,7 +1501,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * set transfer mode (;type=<a|i>) when doing FTP via an HTTP proxy
      */
-    switch (va_arg(param, long)) {
+    switch(va_arg(param, long)) {
     case 0:
       data->set.proxy_transfer_mode = FALSE;
       break;
@@ -2890,10 +2890,10 @@ static void conn_reset_postponed_data(struct connectdata *conn, int num)
 #endif /* DEBUGBUILD */
   }
   else {
-    DEBUGASSERT (psnd->allocated_size == 0);
-    DEBUGASSERT (psnd->recv_size == 0);
-    DEBUGASSERT (psnd->recv_processed == 0);
-    DEBUGASSERT (psnd->bindsock == CURL_SOCKET_BAD);
+    DEBUGASSERT(psnd->allocated_size == 0);
+    DEBUGASSERT(psnd->recv_size == 0);
+    DEBUGASSERT(psnd->recv_processed == 0);
+    DEBUGASSERT(psnd->bindsock == CURL_SOCKET_BAD);
   }
 }
 
@@ -4166,7 +4166,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   if(Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1) &&
      !conn->master_buffer) {
     /* Allocate master_buffer to be used for HTTP/1 pipelining */
-    conn->master_buffer = calloc(BUFSIZE, sizeof (char));
+    conn->master_buffer = calloc(BUFSIZE, sizeof(char));
     if(!conn->master_buffer)
       goto error;
   }

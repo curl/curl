@@ -155,7 +155,7 @@ static const gskit_cipher  ciphertable[] = {
 static bool is_separator(char c)
 {
   /* Return whether character is a cipher list separator. */
-  switch (c) {
+  switch(c) {
   case ' ':
   case '\t':
   case ':':
@@ -171,7 +171,7 @@ static CURLcode gskit_status(struct Curl_easy *data, int rc,
                              const char *procname, CURLcode defcode)
 {
   /* Process GSKit status and map it to a CURLcode. */
-  switch (rc) {
+  switch(rc) {
   case GSK_OK:
   case GSK_OS400_ASYNCHRONOUS_SOC_INIT:
     return CURLE_OK;
@@ -194,7 +194,7 @@ static CURLcode gskit_status(struct Curl_easy *data, int rc,
   case GSK_OS400_ERROR_NOT_REGISTERED:
     break;
   case GSK_ERROR_IO:
-    switch (errno) {
+    switch(errno) {
     case ENOMEM:
       return CURLE_OUT_OF_MEMORY;
     default:
@@ -215,7 +215,7 @@ static CURLcode set_enum(struct Curl_easy *data, gsk_handle h,
 {
   int rc = gsk_attribute_set_enum(h, id, value);
 
-  switch (rc) {
+  switch(rc) {
   case GSK_OK:
     return CURLE_OK;
   case GSK_ERROR_IO:
@@ -237,7 +237,7 @@ static CURLcode set_buffer(struct Curl_easy *data, gsk_handle h,
 {
   int rc = gsk_attribute_set_buffer(h, id, buffer, 0);
 
-  switch (rc) {
+  switch(rc) {
   case GSK_OK:
     return CURLE_OK;
   case GSK_ERROR_IO:
@@ -259,7 +259,7 @@ static CURLcode set_numeric(struct Curl_easy *data,
 {
   int rc = gsk_attribute_set_numeric_value(h, id, value);
 
-  switch (rc) {
+  switch(rc) {
   case GSK_OK:
     return CURLE_OK;
   case GSK_ERROR_IO:
@@ -279,7 +279,7 @@ static CURLcode set_callback(struct Curl_easy *data,
 {
   int rc = gsk_attribute_set_callback(h, id, info);
 
-  switch (rc) {
+  switch(rc) {
   case GSK_OK:
     return CURLE_OK;
   case GSK_ERROR_IO:
@@ -453,7 +453,7 @@ static CURLcode init_environment(struct Curl_easy *data,
   /* Creates the GSKit environment. */
 
   rc = gsk_environment_open(&h);
-  switch (rc) {
+  switch(rc) {
   case GSK_OK:
     break;
   case GSK_INSUFFICIENT_STORAGE:
@@ -834,7 +834,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
 
   /* Determine which SSL/TLS version should be enabled. */
   sni = hostname;
-  switch (ssl_version) {
+  switch(ssl_version) {
   case CURL_SSLVERSION_SSLv2:
     protoflags = CURL_GSKPROTO_SSLV2_MASK;
     sni = NULL;
@@ -996,7 +996,7 @@ static CURLcode gskit_connect_step2(struct connectdata *conn, int sockindex,
       timeout_ms = 0;
     stmv.tv_sec = timeout_ms / 1000;
     stmv.tv_usec = (timeout_ms - stmv.tv_sec * 1000) * 1000;
-    switch (QsoWaitForIOCompletion(connssl->iocport, &cstat, &stmv)) {
+    switch(QsoWaitForIOCompletion(connssl->iocport, &cstat, &stmv)) {
     case 1:             /* Operation complete. */
       break;
     case -1:            /* An error occurred: handshake still in progress. */
@@ -1053,7 +1053,7 @@ static CURLcode gskit_connect_step3(struct connectdata *conn, int sockindex)
     infof(data, "Server certificate:\n");
     p = cdev;
     for(i = 0; i++ < cdec; p++)
-      switch (p->cert_data_id) {
+      switch(p->cert_data_id) {
       case CERT_BODY_DER:
         cert = p->cert_data_p;
         certend = cert + cdev->cert_data_l;

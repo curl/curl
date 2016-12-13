@@ -114,7 +114,7 @@ int my_trace(CURL *handle, curl_infotype type,
   int num = hnd2num(handle);
   (void)handle; /* prevent compiler warning */
   (void)userp;
-  switch (type) {
+  switch(type) {
   case CURLINFO_TEXT:
     fprintf(stderr, "== %d Info: %s", num, data);
   default: /* in case a new one is introduced to shock us */

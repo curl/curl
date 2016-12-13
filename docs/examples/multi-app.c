@@ -156,7 +156,7 @@ int main(void)
           break;
       }
 
-      switch (idx) {
+      switch(idx) {
       case HTTP_HANDLE:
         printf("HTTP transfer completed with status %d\n", msg->data.result);
         break;

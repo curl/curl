@@ -295,7 +295,7 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                    curl_easy_getinfo(curl, CURLINFO_HTTP_VERSION,
                                      &longinfo)) {
                   const char *version = "0";
-                  switch (longinfo) {
+                  switch(longinfo) {
                   case CURL_HTTP_VERSION_1_0:
                     version = "1.0";
                     break;

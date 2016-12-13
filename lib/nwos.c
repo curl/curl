@@ -26,7 +26,7 @@
 
 #ifdef __NOVELL_LIBC__
 /* For native LibC-based NLM we need to do nothing. */
-int netware_init (void)
+int netware_init(void)
 {
   return 0;
 }
@@ -45,7 +45,7 @@ NETDB_DEFINE_CONTEXT
 #include <arpa/inet.h>
 NETINET_DEFINE_CONTEXT
 
-int netware_init (void)
+int netware_init(void)
 {
   int rc = 0;
   unsigned int myHandle = GetNLMHandle();
@@ -72,13 +72,13 @@ int netware_init (void)
 }
 
 /* dummy function to satisfy newer prelude */
-int __init_environment (void)
+int __init_environment(void)
 {
   return 0;
 }
 
 /* dummy function to satisfy newer prelude */
-int __deinit_environment (void)
+int __deinit_environment(void)
 {
   return 0;
 }

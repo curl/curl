@@ -396,9 +396,9 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
       }
     }
 
-    switch (parser->os_type) {
+    switch(parser->os_type) {
     case OS_TYPE_UNIX:
-      switch (parser->state.UNIX.main) {
+      switch(parser->state.UNIX.main) {
       case PL_UNIX_TOTALSIZE:
         switch(parser->state.UNIX.sub.total_dirsize) {
         case PL_UNIX_TOTALSIZE_INIT:
@@ -447,7 +447,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         }
         break;
       case PL_UNIX_FILETYPE:
-        switch (c) {
+        switch(c) {
         case '-':
           finfo->filetype = CURLFILETYPE_FILE;
           break;
@@ -967,7 +967,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         }
         break;
       case PL_WINNT_FILENAME:
-        switch (parser->state.NT.sub.filename) {
+        switch(parser->state.NT.sub.filename) {
         case PL_WINNT_FILENAME_PRESPACE:
           if(c != ' ') {
             parser->item_offset = finfo->b_used -1;

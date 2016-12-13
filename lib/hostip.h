@@ -131,7 +131,7 @@ int Curl_mk_dnscache(struct curl_hash *hash);
 void Curl_hostcache_prune(struct Curl_easy *data);
 
 /* Return # of adresses in a Curl_addrinfo struct */
-int Curl_num_addresses (const Curl_addrinfo *addr);
+int Curl_num_addresses(const Curl_addrinfo *addr);
 
 #if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
 int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,

@@ -133,7 +133,7 @@ int my_trace(CURL *handle, curl_infotype type,
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
            now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
 
-  switch (type) {
+  switch(type) {
   case CURLINFO_TEXT:
     fprintf(stderr, "%s [%d] Info: %s", timebuf, num, data);
   default: /* in case a new one is introduced to shock us */

@@ -78,7 +78,7 @@ static Curl_addrinfo *fake_ai(void)
   static Curl_addrinfo *ai;
   int ss_size;
 
-  ss_size = sizeof (struct sockaddr_in);
+  ss_size = sizeof(struct sockaddr_in);
 
   if((ai = calloc(1, sizeof(Curl_addrinfo))) == NULL)
     return NULL;

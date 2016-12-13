@@ -571,7 +571,7 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
         return pausewrite(data, CLIENTWRITE_HEADER, ptr, len);
 
       if(wrote != chunklen) {
-        failf (data, "Failed writing header");
+        failf(data, "Failed writing header");
         return CURLE_WRITE_ERROR;
       }
     }
@@ -692,7 +692,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
     }
     /* If we come here, it means that there is no data to read from the buffer,
      * so we read from the socket */
-    bytesfromsocket = CURLMIN(sizerequested, BUFSIZE * sizeof (char));
+    bytesfromsocket = CURLMIN(sizerequested, BUFSIZE * sizeof(char));
     buffertofill = conn->master_buffer;
   }
   else {
@@ -796,7 +796,7 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
     char buffer[160];
     const char *t=NULL;
     const char *w="Data";
-    switch (type) {
+    switch(type) {
     case CURLINFO_HEADER_IN:
       w = "Header";
       /* FALLTHROUGH */

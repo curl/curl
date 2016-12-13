@@ -455,7 +455,7 @@ static CURLcode ReceivedServerConnect(struct connectdata *conn, bool *received)
   result = Curl_socket_check(ctrl_sock, data_sock, CURL_SOCKET_BAD, 0);
 
   /* see if the connection request is already here */
-  switch (result) {
+  switch(result) {
   case -1: /* error */
     /* let's die here */
     failf(data, "Error while waiting for server connect");
@@ -741,7 +741,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
        */
     }
     else if(!Curl_ssl_data_pending(conn, FIRSTSOCKET)) {
-      switch (SOCKET_READABLE(sockfd, interval_ms)) {
+      switch(SOCKET_READABLE(sockfd, interval_ms)) {
       case -1: /* select() error, stop reading */
         failf(data, "FTP response aborted due to select/poll error: %d",
               SOCKERRNO);
@@ -3873,7 +3873,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
   struct WildcardData * const wildcard = &(conn->data->wildcard);
   CURLcode result = CURLE_OK;
 
-  switch (wildcard->state) {
+  switch(wildcard->state) {
   case CURLWC_INIT:
     result = init_wc_data(conn);
     if(wildcard->state == CURLWC_CLEAN)
@@ -4501,7 +4501,7 @@ static CURLcode ftp_setup_connection(struct connectdata *conn)
     command = Curl_raw_toupper(type[6]);
     conn->bits.type_set = TRUE;
 
-    switch (command) {
+    switch(command) {
     case 'A': /* ASCII mode */
       data->set.prefer_ascii = TRUE;
       break;

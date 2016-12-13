@@ -135,7 +135,7 @@ Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
 {
   struct curl_hash_element  *he;
   struct curl_llist_element *le;
-  struct curl_llist *l = FETCH_LIST (h, key, key_len);
+  struct curl_llist *l = FETCH_LIST(h, key, key_len);
 
   for(le = l->head; le; le = le->next) {
     he = (struct curl_hash_element *) le->ptr;

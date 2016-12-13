@@ -235,7 +235,7 @@ static void showtime(struct Curl_easy *data,
   infof(data, "%s\n", data->state.buffer);
 }
 
-static gnutls_datum_t load_file (const char *file)
+static gnutls_datum_t load_file(const char *file)
 {
   FILE *f;
   gnutls_datum_t loaded_file = { NULL, 0 };
@@ -567,7 +567,7 @@ gtls_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  switch (SSL_CONN_CONFIG(version) {
+  switch(SSL_CONN_CONFIG(version) {
     case CURL_SSLVERSION_SSLv3:
       protocol_priority[0] = GNUTLS_SSL3;
       break;
@@ -606,7 +606,7 @@ gtls_connect_step1(struct connectdata *conn,
   /* Ensure +SRP comes at the *end* of all relevant strings so that it can be
    * removed if a run-time error indicates that SRP is not supported by this
    * GnuTLS version */
-  switch (SSL_CONN_CONFIG(version)) {
+  switch(SSL_CONN_CONFIG(version)) {
     case CURL_SSLVERSION_SSLv3:
       prioritylist = GNUTLS_CIPHERS ":-VERS-TLS-ALL:+VERS-SSL3.0";
       sni = false;
@@ -791,7 +791,7 @@ gtls_connect_step1(struct connectdata *conn,
       gnutls_session_set_data(session, ssl_sessionid, ssl_idsize);
 
       /* Informational message */
-      infof (data, "SSL re-using session ID\n");
+      infof(data, "SSL re-using session ID\n");
     }
     Curl_ssl_sessionid_unlock(conn);
   }
@@ -1374,7 +1374,7 @@ gtls_connect_common(struct connectdata *conn,
 
   /* Initiate the connection, if not already done */
   if(ssl_connect_1==connssl->connecting_state) {
-    rc = gtls_connect_step1 (conn, sockindex);
+    rc = gtls_connect_step1(conn, sockindex);
     if(rc)
       return rc;
   }
@@ -1653,7 +1653,7 @@ void Curl_gtls_md5sum(unsigned char *tmp, /* input */
   gcry_md_hd_t MD5pw;
   gcry_md_open(&MD5pw, GCRY_MD_MD5, 0);
   gcry_md_write(MD5pw, tmp, tmplen);
-  memcpy(md5sum, gcry_md_read (MD5pw, 0), md5len);
+  memcpy(md5sum, gcry_md_read(MD5pw, 0), md5len);
   gcry_md_close(MD5pw);
 #endif
 }
@@ -1672,7 +1672,7 @@ void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
   gcry_md_hd_t SHA256pw;
   gcry_md_open(&SHA256pw, GCRY_MD_SHA256, 0);
   gcry_md_write(SHA256pw, tmp, tmplen);
-  memcpy(sha256sum, gcry_md_read (SHA256pw, 0), sha256len);
+  memcpy(sha256sum, gcry_md_read(SHA256pw, 0), sha256len);
   gcry_md_close(SHA256pw);
 #endif
 }

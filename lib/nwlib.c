@@ -303,14 +303,14 @@ void DisposeThreadData(void *data)
 /* For native CLib-based NLM seems we can do a bit more simple. */
 #include <nwthread.h>
 
-int main (void)
+int main(void)
 {
   /* initialize any globals here... */
 
   /* do this if any global initializing was done
   SynchronizeStart();
   */
-  ExitThread (TSR_THREAD, 0);
+  ExitThread(TSR_THREAD, 0);
   return 0;
 }
 

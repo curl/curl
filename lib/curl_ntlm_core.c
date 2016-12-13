@@ -566,7 +566,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
     gcry_md_hd_t MD4pw;
     gcry_md_open(&MD4pw, GCRY_MD_MD4, 0);
     gcry_md_write(MD4pw, pw, 2 * len);
-    memcpy (ntbuffer, gcry_md_read (MD4pw, 0), MD4_DIGEST_LENGTH);
+    memcpy(ntbuffer, gcry_md_read(MD4pw, 0), MD4_DIGEST_LENGTH);
     gcry_md_close(MD4pw);
 #elif defined(USE_MBEDTLS)
     mbedtls_md4(pw, 2 * len, ntbuffer);

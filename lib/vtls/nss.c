@@ -1515,7 +1515,7 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
                                 struct Curl_easy *data,
                                 struct connectdata *conn)
 {
-  switch (SSL_CONN_CONFIG(version)) {
+  switch(SSL_CONN_CONFIG(version)) {
   case CURL_SSLVERSION_DEFAULT:
     /* map CURL_SSLVERSION_DEFAULT to NSS default */
     if(SSL_VersionRangeGetDefault(ssl_variant_stream, sslver) != SECSuccess)

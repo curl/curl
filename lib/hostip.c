@@ -172,7 +172,7 @@ Curl_printable_address(const Curl_addrinfo *ai, char *buf, size_t bufsize)
   const struct in6_addr *ipaddr6;
 #endif
 
-  switch (ai->ai_family) {
+  switch(ai->ai_family) {
     case AF_INET:
       sa4 = (const void *)ai->ai_addr;
       ipaddr4 = &sa4->sin_addr;

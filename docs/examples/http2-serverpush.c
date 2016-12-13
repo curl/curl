@@ -93,7 +93,7 @@ int my_trace(CURL *handle, curl_infotype type,
   const char *text;
   (void)handle; /* prevent compiler warning */
   (void)userp;
-  switch (type) {
+  switch(type) {
   case CURLINFO_TEXT:
     fprintf(stderr, "== Info: %s", data);
   default: /* in case a new one is introduced to shock us */

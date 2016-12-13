@@ -431,7 +431,7 @@ SANITIZEcode msdosify(char **const sanitized, const char *file_name,
             *d   = 'x';
           }
           else {
-            memcpy (d, "plus", 4);
+            memcpy(d, "plus", 4);
             d += 3;
           }
         }

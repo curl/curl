@@ -40,7 +40,7 @@
  */
 #define curl_easy_setopt(handle, option, value)                               \
 __extension__ ({                                                              \
-  __typeof__ (option) _curl_opt = option;                                     \
+  __typeof__(option) _curl_opt = option;                                     \
   if(__builtin_constant_p(_curl_opt)) {                                       \
     if(_curl_is_long_option(_curl_opt))                                       \
       if(!_curl_is_long(value))                                               \
@@ -110,7 +110,7 @@ __extension__ ({                                                              \
 /* FIXME: don't allow const pointers */
 #define curl_easy_getinfo(handle, info, arg)                                  \
 __extension__ ({                                                              \
-  __typeof__ (info) _curl_info = info;                                        \
+  __typeof__(info) _curl_info = info;                                        \
   if(__builtin_constant_p(_curl_info)) {                                      \
     if(_curl_is_string_info(_curl_info))                                      \
       if(!_curl_is_arr((arg), char *))                                        \

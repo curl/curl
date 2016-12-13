@@ -292,9 +292,9 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   gss_release_name(&gss_status, &server);
 
   /* Everything is good so far, user was authenticated! */
-  gss_major_status = gss_inquire_context (&gss_minor_status, gss_context,
-                                          &gss_client_name, NULL, NULL, NULL,
-                                          NULL, NULL, NULL);
+  gss_major_status = gss_inquire_context(&gss_minor_status, gss_context,
+                                         &gss_client_name, NULL, NULL, NULL,
+                                         NULL, NULL, NULL);
   if(check_gss_err(data, gss_major_status,
                    gss_minor_status, "gss_inquire_context")) {
     gss_delete_sec_context(&gss_status, &gss_context, NULL);

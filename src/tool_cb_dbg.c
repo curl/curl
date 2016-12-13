@@ -182,7 +182,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   }
 #endif /* CURL_DOES_CONVERSIONS */
 
-  switch (type) {
+  switch(type) {
   case CURLINFO_TEXT:
     fprintf(output, "%s== Info: %s", timebuf, data);
   default: /* in case a new one is introduced to shock us */

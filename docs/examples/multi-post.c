@@ -165,7 +165,7 @@ int main(void)
     curl_formfree(formpost);
 
     /* free slist */
-    curl_slist_free_all (headerlist);
+    curl_slist_free_all(headerlist);
   }
   return 0;
 }

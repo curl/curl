@@ -78,7 +78,7 @@ void ourWriteEnv(CURL *curl)
   double doubleinfo;
 
   for(i=0; variables[i].name; i++) {
-    switch (variables[i].type) {
+    switch(variables[i].type) {
     case writeenv_STRING:
       if(curl_easy_getinfo(curl, variables[i].id, &string) == CURLE_OK)
         internalSetEnv(variables[i].name, string);

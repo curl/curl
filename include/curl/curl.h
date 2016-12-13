@@ -1910,7 +1910,10 @@ typedef enum {
 
 
 /* curl_strequal() and curl_strnequal() are subject for removal in a future
-   libcurl, see lib/README.curlx for details */
+   libcurl, see lib/README.curlx for details
+
+   !checksrc! disable SPACEBEFOREPAREN 2
+*/
 CURL_EXTERN int (curl_strequal)(const char *s1, const char *s2);
 CURL_EXTERN int (curl_strnequal)(const char *s1, const char *s2, size_t n);
 

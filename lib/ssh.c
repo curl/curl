@@ -239,7 +239,7 @@ kbd_callback(const char *name, int name_len, const char *instruction,
 
 static CURLcode sftp_libssh2_error_to_CURLE(int err)
 {
-  switch (err) {
+  switch(err) {
     case LIBSSH2_FX_OK:
       return CURLE_OK;
 
@@ -271,7 +271,7 @@ static CURLcode sftp_libssh2_error_to_CURLE(int err)
 
 static CURLcode libssh2_session_error_to_CURLE(int err)
 {
-  switch (err) {
+  switch(err) {
     /* Ordered by order of appearance in libssh2.h */
     case LIBSSH2_ERROR_NONE:
       return CURLE_OK;
@@ -2652,7 +2652,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         else if(rc < 0) {
           infof(data, "Failed to disconnect from libssh2 agent\n");
         }
-        libssh2_agent_free (sshc->ssh_agent);
+        libssh2_agent_free(sshc->ssh_agent);
         sshc->ssh_agent = NULL;
 
         /* NB: there is no need to free identities, they are part of internal
@@ -3384,7 +3384,7 @@ get_pathname(const char **cpp, char **path)
 
 static const char *sftp_libssh2_strerror(int err)
 {
-  switch (err) {
+  switch(err) {
     case LIBSSH2_FX_NO_SUCH_FILE:
       return "No such file or directory";
 

@@ -65,7 +65,7 @@ int Curl_axtls_cleanup(void)
 
 static CURLcode map_error_to_curl(int axtls_err)
 {
-  switch (axtls_err) {
+  switch(axtls_err) {
   case SSL_ERROR_NOT_SUPPORTED:
   case SSL_ERROR_INVALID_VERSION:
   case -70:                       /* protocol version alert from server */
@@ -121,7 +121,7 @@ static Curl_send axtls_send;
 static void free_ssl_structs(struct ssl_connect_data *connssl)
 {
   if(connssl->ssl) {
-    ssl_free (connssl->ssl);
+    ssl_free(connssl->ssl);
     connssl->ssl = NULL;
   }
   if(connssl->ssl_ctx) {
@@ -265,7 +265,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     if(!Curl_ssl_getsessionid(conn, (void **) &ssl_sessionid, &ssl_idsize,
                               sockindex)) {
       /* we got a session id, use it! */
-      infof (data, "SSL re-using session ID\n");
+      infof(data, "SSL re-using session ID\n");
       ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex],
                            ssl_sessionid, (uint8_t)ssl_idsize);
     }
@@ -392,7 +392,7 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
     Curl_ssl_sessionid_lock(conn);
     if(Curl_ssl_addsessionid(conn, (void *) ssl_sessionid, ssl_idsize,
                              sockindex) != CURLE_OK)
-      infof (data, "failed to add session to cache\n");
+      infof(data, "failed to add session to cache\n");
     Curl_ssl_sessionid_unlock(conn);
   }
 
@@ -440,7 +440,7 @@ CURLcode Curl_axtls_connect_nonblocking(
         return CURLE_OK;
       }
     }
-    infof (conn->data, "handshake completed successfully\n");
+    infof(conn->data, "handshake completed successfully\n");
     conn->ssl[sockindex].connecting_state = ssl_connect_3;
   }
 
@@ -506,7 +506,7 @@ Curl_axtls_connect(struct connectdata *conn,
     /* TODO: avoid polling */
     Curl_wait_ms(10);
   }
-  infof (conn->data, "handshake completed successfully\n");
+  infof(conn->data, "handshake completed successfully\n");
 
   conn_step = connect_finish(conn, sockindex);
   if(conn_step != CURLE_OK) {

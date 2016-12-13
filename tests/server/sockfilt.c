@@ -1283,7 +1283,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
       sclose(sock);
       return CURL_SOCKET_BAD;
     }
-    switch (localaddr.sa.sa_family) {
+    switch(localaddr.sa.sa_family) {
     case AF_INET:
       *listenport = ntohs(localaddr.sa4.sin_port);
       break;

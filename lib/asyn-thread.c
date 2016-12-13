@@ -263,7 +263,7 @@ static int getaddrinfo_complete(struct connectdata *conn)
  * For builds without ARES, but with ENABLE_IPV6, create a resolver thread
  * and wait on it.
  */
-static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
+static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
 {
   struct thread_sync_data *tsd = (struct thread_sync_data*)arg;
   struct thread_data *td = tsd->td;
@@ -303,7 +303,7 @@ static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
 /*
  * gethostbyname_thread() resolves a name and then exits.
  */
-static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
+static unsigned int CURL_STDCALL gethostbyname_thread(void *arg)
 {
   struct thread_sync_data *tsd = (struct thread_sync_data *)arg;
   struct thread_data *td = tsd->td;
@@ -336,7 +336,7 @@ static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
 /*
  * destroy_async_data() cleans up async resolver data and thread handle.
  */
-static void destroy_async_data (struct Curl_async *async)
+static void destroy_async_data(struct Curl_async *async)
 {
   if(async->os_specific) {
     struct thread_data *td = (struct thread_data*) async->os_specific;
@@ -375,9 +375,9 @@ static void destroy_async_data (struct Curl_async *async)
  *
  * Returns FALSE in case of failure, otherwise TRUE.
  */
-static bool init_resolve_thread (struct connectdata *conn,
-                                 const char *hostname, int port,
-                                 const struct addrinfo *hints)
+static bool init_resolve_thread(struct connectdata *conn,
+                                const char *hostname, int port,
+                                const struct addrinfo *hints)
 {
   struct thread_data *td = calloc(1, sizeof(struct thread_data));
   int err = RESOLVER_ENOMEM;

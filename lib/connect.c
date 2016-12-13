@@ -194,7 +194,7 @@ time_t Curl_timeleft(struct Curl_easy *data,
   if(duringconnect && (data->set.connecttimeout > 0))
     timeout_set |= 2;
 
-  switch (timeout_set) {
+  switch(timeout_set) {
   case 1:
     timeout_ms = data->set.timeout;
     break;
@@ -620,7 +620,7 @@ static bool getaddressinfo(struct sockaddr *sa, char *addr,
   struct sockaddr_un *su = NULL;
 #endif
 
-  switch (sa->sa_family) {
+  switch(sa->sa_family) {
     case AF_INET:
       si = (struct sockaddr_in *)(void *) sa;
       if(Curl_inet_ntop(sa->sa_family, &si->sin_addr,

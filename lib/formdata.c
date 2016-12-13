@@ -316,7 +316,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         break;
     }
 
-    switch (option) {
+    switch(option) {
     case CURLFORM_ARRAY:
       if(array_state)
         /* we don't support an array from within an array */
@@ -1434,7 +1434,7 @@ static FILE * vmsfopenread(const char *file, const char *mode)
 
   result = stat(file, &statbuf);
 
-  switch (statbuf.st_fab_rfm) {
+  switch(statbuf.st_fab_rfm) {
   case FAB$C_VAR:
   case FAB$C_VFC:
   case FAB$C_STMCR:

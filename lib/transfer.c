@@ -741,8 +741,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
              Make sure that ALL_CONTENT_ENCODINGS contains all the
              encodings handled here. */
 #ifdef HAVE_LIBZ
-          switch (conn->data->set.http_ce_skip ?
-                  IDENTITY : k->auto_decoding) {
+          switch(conn->data->set.http_ce_skip ?
+                 IDENTITY : k->auto_decoding) {
           case IDENTITY:
 #endif
             /* This is the default when the server sends no
@@ -775,9 +775,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
             break;
 
           default:
-            failf (data, "Unrecognized content encoding type. "
-                   "libcurl understands `identity', `deflate' and `gzip' "
-                   "content encodings.");
+            failf(data, "Unrecognized content encoding type. "
+                  "libcurl understands `identity', `deflate' and `gzip' "
+                  "content encodings.");
             result = CURLE_BAD_CONTENT_ENCODING;
             break;
           }

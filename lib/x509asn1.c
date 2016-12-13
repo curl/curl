@@ -267,7 +267,7 @@ utf8asn1str(char **to, int type, const char *from, const char *end)
      string length. */
 
   *to = (char *) NULL;
-  switch (type) {
+  switch(type) {
   case CURL_ASN1_BMP_STRING:
     size = 2;
     break;
@@ -302,7 +302,7 @@ utf8asn1str(char **to, int type, const char *from, const char *end)
   else {
     for(outlength = 0; from < end;) {
       wc = 0;
-      switch (size) {
+      switch(size) {
       case 4:
         wc = (wc << 8) | *(const unsigned char *) from++;
         wc = (wc << 8) | *(const unsigned char *) from++;
@@ -460,7 +460,7 @@ static const char *GTime2str(const char *beg, const char *end)
 
   /* Get seconds digits. */
   sec1 = '0';
-  switch (fracp - beg - 12) {
+  switch(fracp - beg - 12) {
   case 0:
     sec2 = '0';
     break;
@@ -519,7 +519,7 @@ static const char *UTime2str(const char *beg, const char *end)
     ;
   /* Get the seconds. */
   sec = beg + 10;
-  switch (tzp - sec) {
+  switch(tzp - sec) {
   case 0:
     sec = "00";
   case 2:
@@ -556,7 +556,7 @@ const char *Curl_ASN1tostr(curl_asn1Element *elem, int type)
   if(!type)
     type = elem->tag;   /* Type not forced: use element tag as type. */
 
-  switch (type) {
+  switch(type) {
   case CURL_ASN1_BOOLEAN:
     return bool2str(elem->beg, elem->end);
   case CURL_ASN1_INTEGER:
@@ -1122,7 +1122,7 @@ CURLcode Curl_verifyhost(struct connectdata *conn,
       /* Check all GeneralNames. */
       for(q = elem.beg; matched != 1 && q < elem.end;) {
         q = Curl_getASN1Element(&name, q, elem.end);
-        switch (name.tag) {
+        switch(name.tag) {
         case 2: /* DNS name. */
           len = utf8asn1str(&dnsname, CURL_ASN1_IA5_STRING,
                             name.beg, name.end);
@@ -1142,7 +1142,7 @@ CURLcode Curl_verifyhost(struct connectdata *conn,
     }
   }
 
-  switch (matched) {
+  switch(matched) {
   case 1:
     /* an alternative name matched the server hostname */
     infof(data, "\t subjectAltName: %s matched\n", dispname);

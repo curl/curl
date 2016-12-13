@@ -1628,7 +1628,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       break;
     case 'L':
       config->followlocation = toggle; /* Follow Location: HTTP headers */
-      switch (subletter) {
+      switch(subletter) {
       case 't':
         /* Continue to send authentication (user+password) when following
          * locations, even when hostname changed */

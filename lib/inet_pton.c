@@ -65,7 +65,7 @@ static int      inet_pton6(const char *src, unsigned char *dst);
 int
 Curl_inet_pton(int af, const char *src, void *dst)
 {
-  switch (af) {
+  switch(af) {
   case AF_INET:
     return (inet_pton4(src, (unsigned char *)dst));
 #ifdef ENABLE_IPV6

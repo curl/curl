@@ -501,7 +501,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
         (mp_intmax_t)va_arg(arglist, int);
     }
 
-    switch (vto[i].type) {
+    switch(vto[i].type) {
     case FORMAT_STRING:
       vto[i].data.str = va_arg(arglist, char *);
       break;
@@ -691,7 +691,7 @@ static int dprintf_formatf(
 
     is_alt = (p->flags & FLAGS_ALT) ? 1 : 0;
 
-    switch (p->type) {
+    switch(p->type) {
     case FORMAT_INT:
       num = p->data.num.as_unsigned;
       if(p->flags & FLAGS_CHAR) {

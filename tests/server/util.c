@@ -135,7 +135,7 @@ void logmsg(const char *msg, ...)
 
 #ifdef WIN32
 /* use instead of perror() on generic windows */
-void win32_perror (const char *msg)
+void win32_perror(const char *msg)
 {
   char buf[512];
   DWORD err = SOCKERRNO;
@@ -315,7 +315,7 @@ static char raw_toupper(char in)
   if(in >= 'a' && in <= 'z')
     return (char)('A' + in - 'a');
 #else
-  switch (in) {
+  switch(in) {
   case 'a':
     return 'A';
   case 'b':

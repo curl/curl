@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     /* then cleanup the formpost chain */
     curl_formfree(formpost);
     /* free slist */
-    curl_slist_free_all (headerlist);
+    curl_slist_free_all(headerlist);
   }
   return 0;
 }

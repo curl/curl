@@ -45,7 +45,7 @@ static void my_lock(CURL *handle, curl_lock_data data,
   (void)handle;
   (void)laccess;
 
-  switch (data) {
+  switch(data) {
     case CURL_LOCK_DATA_SHARE:
       what = "share";
       break;
@@ -72,7 +72,7 @@ static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
   (void)handle;
-  switch ( data) {
+  switch(data) {
     case CURL_LOCK_DATA_SHARE:
       what = "share";
       break;

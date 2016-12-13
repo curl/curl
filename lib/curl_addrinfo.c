@@ -286,10 +286,10 @@ Curl_he2ai(const struct hostent *he, int port)
     size_t ss_size;
 #ifdef ENABLE_IPV6
     if(he->h_addrtype == AF_INET6)
-      ss_size = sizeof (struct sockaddr_in6);
+      ss_size = sizeof(struct sockaddr_in6);
     else
 #endif
-      ss_size = sizeof (struct sockaddr_in);
+      ss_size = sizeof(struct sockaddr_in);
 
     if((ai = calloc(1, sizeof(Curl_addrinfo))) == NULL) {
       result = CURLE_OUT_OF_MEMORY;
@@ -325,7 +325,7 @@ Curl_he2ai(const struct hostent *he, int port)
 
     /* leave the rest of the struct filled with zero */
 
-    switch (ai->ai_family) {
+    switch(ai->ai_family) {
     case AF_INET:
       addr = (void *)ai->ai_addr; /* storage area for this info */
 
@@ -576,7 +576,7 @@ void Curl_addrinfo_set_port(Curl_addrinfo *addrinfo, int port)
   struct sockaddr_in6 *addr6;
 #endif
   for(ca = addrinfo; ca != NULL; ca = ca->ai_next) {
-    switch (ca->ai_family) {
+    switch(ca->ai_family) {
     case AF_INET:
       addr = (void *)ca->ai_addr; /* storage area for this info */
       addr->sin_port = htons((unsigned short)port);

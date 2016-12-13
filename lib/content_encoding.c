@@ -69,11 +69,11 @@ process_zlib_error(struct connectdata *conn, z_stream *z)
 {
   struct Curl_easy *data = conn->data;
   if(z->msg)
-    failf (data, "Error while processing content unencoding: %s",
-           z->msg);
+    failf(data, "Error while processing content unencoding: %s",
+          z->msg);
   else
-    failf (data, "Error while processing content unencoding: "
-           "Unknown failure within decompression software.");
+    failf(data, "Error while processing content unencoding: "
+          "Unknown failure within decompression software.");
 
   return CURLE_BAD_CONTENT_ENCODING;
 }
@@ -327,14 +327,14 @@ Curl_unencode_gzip_write(struct connectdata *conn,
    * can handle the gzip header themselves.
    */
 
-  switch (k->zlib_init) {
+  switch(k->zlib_init) {
   /* Skip over gzip header? */
   case ZLIB_INIT:
   {
     /* Initial call state */
     ssize_t hlen;
 
-    switch (check_gzip_header((unsigned char *)k->str, nread, &hlen)) {
+    switch(check_gzip_header((unsigned char *)k->str, nread, &hlen)) {
     case GZIP_OK:
       z->next_in = (Bytef *)k->str + hlen;
       z->avail_in = (uInt)(nread - hlen);
@@ -379,7 +379,7 @@ Curl_unencode_gzip_write(struct connectdata *conn,
     /* Append the new block of data to the previous one */
     memcpy(z->next_in + z->avail_in - nread, k->str, nread);
 
-    switch (check_gzip_header(z->next_in, z->avail_in, &hlen)) {
+    switch(check_gzip_header(z->next_in, z->avail_in, &hlen)) {
     case GZIP_OK:
       /* This is the zlib stream data */
       free(z->next_in);

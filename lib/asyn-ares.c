@@ -169,7 +169,7 @@ int Curl_resolver_duphandle(void **to, void *from)
   return CURLE_OK;
 }
 
-static void destroy_async_data (struct Curl_async *async);
+static void destroy_async_data(struct Curl_async *async);
 
 /*
  * Cancel all possibly still on-going resolves for this connection.
@@ -184,7 +184,7 @@ void Curl_resolver_cancel(struct connectdata *conn)
 /*
  * destroy_async_data() cleans up async resolver data.
  */
-static void destroy_async_data (struct Curl_async *async)
+static void destroy_async_data(struct Curl_async *async)
 {
   free(async->hostname);
 

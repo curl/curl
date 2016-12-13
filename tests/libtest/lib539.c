@@ -65,7 +65,7 @@ int test(char *URL)
      return TEST_ERR_MAJOR_BAD;
    }
 
-   slist = curl_slist_append (NULL, "SYST");
+   slist = curl_slist_append(NULL, "SYST");
    if(slist == NULL) {
      free(newURL);
      curl_easy_cleanup(curl);

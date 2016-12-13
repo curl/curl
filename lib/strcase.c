@@ -34,7 +34,7 @@ char Curl_raw_toupper(char in)
   if(in >= 'a' && in <= 'z')
     return (char)('A' + in - 'a');
 #else
-  switch (in) {
+  switch(in) {
   case 'a':
     return 'A';
   case 'b':
