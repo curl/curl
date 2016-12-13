@@ -748,6 +748,69 @@ static ssize_t gskit_recv(struct connectdata *conn, int num, char *buf,
   return (ssize_t) nread;
 }
 
+static CURLcode
+set_ssl_version_up_to(unsigned int *protoflags, struct connectdata *conn,
+                      long ssl_version, long ssl_version_up_to)
+{
+  struct Curl_easy *data = conn->data;
+
+  switch(ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_NONE:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          return set_ssl_version_up_to(protoflags, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+        case CURL_SSLVERSION_TLSv1_1:
+          return set_ssl_version_up_to(protoflags, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+        case CURL_SSLVERSION_TLSv1_2:
+          return set_ssl_version_up_to(protoflags, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+        case CURL_SSLVERSION_TLSv1_3:
+          return set_ssl_version_up_to(protoflags, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+      }
+      break;
+  }
+
+  switch(ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+      switch(ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+           *protoflags |= CURL_GSKPROTO_TLSV10_MASK;
+        case CURL_SSLVERSION_TLSv1_1:
+           *protoflags |= CURL_GSKPROTO_TLSV11_MASK;
+        case CURL_SSLVERSION_TLSv1_2:
+           *protoflags |= CURL_GSKPROTO_TLSV12_MASK;
+           break;
+        case CURL_SSLVERSION_TLSv1_3:
+          failf(data, "GSKit: TLS 1.3 is not yet supported");
+          return CURLE_SSL_CONNECT_ERROR;
+      } break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+      switch(ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+           *protoflags |= CURL_GSKPROTO_TLSV10_MASK;
+        case CURL_SSLVERSION_TLSv1_1:
+           *protoflags |= CURL_GSKPROTO_TLSV11_MASK;
+        case CURL_SSLVERSION_TLSv1_2:
+           *protoflags |= CURL_GSKPROTO_TLSV12_MASK;
+      } break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+      switch(ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+           *protoflags |= CURL_GSKPROTO_TLSV10_MASK;
+        case CURL_SSLVERSION_TLSv1_1:
+           *protoflags |= CURL_GSKPROTO_TLSV11_MASK;
+      } break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
+      switch(ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+           *protoflags |= CURL_GSKPROTO_TLSV10_MASK;
+      } break;
+  }
+  return CURLE_OK;
+}
 
 static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
 {
@@ -764,7 +827,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   const char * const hostname = SSL_IS_PROXY()? conn->http_proxy.host.name:
     conn->host.name;
   const char *sni;
-  unsigned int protoflags;
+  unsigned int protoflags = 0;
   long timeout;
   Qso_OverlappedIO_t commarea;
   int sockpair[2];
@@ -849,17 +912,14 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
                  CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK;
     break;
   case CURL_SSLVERSION_TLSv1_0:
-    protoflags = CURL_GSKPROTO_TLSV10_MASK;
-    break;
   case CURL_SSLVERSION_TLSv1_1:
-    protoflags = CURL_GSKPROTO_TLSV11_MASK;
-    break;
   case CURL_SSLVERSION_TLSv1_2:
-    protoflags = CURL_GSKPROTO_TLSV12_MASK;
-    break;
   case CURL_SSLVERSION_TLSv1_3:
-    failf(data, "GSKit: TLS 1.3 is not yet supported");
-    return CURLE_SSL_CONNECT_ERROR;
+    result = set_ssl_version_up_to(&protoflags, conn, ssl_version,
+                                   SSL_CONN_CONFIG(version_up_to));
+    if(result != CURLE_OK)
+      return result;
+    break;
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;

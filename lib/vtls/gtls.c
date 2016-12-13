@@ -375,6 +375,144 @@ static gnutls_x509_crt_fmt_t do_file_type(const char *type)
   return -1;
 }
 
+#ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
+static CURLcode
+set_ssl_version_up_to(int *protocol_priority, struct connectdata *conn,
+                      long ssl_version, long ssl_version_up_to)
+{
+  struct Curl_easy *data = conn->data;
+
+  switch(ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_NONE:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          return set_ssl_version_up_to(protocol_priority, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+        case CURL_SSLVERSION_TLSv1_1:
+          return set_ssl_version_up_to(protocol_priority, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+        case CURL_SSLVERSION_TLSv1_2:
+          return set_ssl_version_up_to(protocol_priority, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+        case CURL_SSLVERSION_TLSv1_3:
+          return set_ssl_version_up_to(protocol_priority, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+      }
+      break;
+  }
+
+  switch(ssl_version) {
+    case CURL_SSLVERSION_TLSv1_0:
+      protocol_priority[0] = GNUTLS_TLS1_0;
+      switch (ssl_version_up_to) {
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+          protocol_priority[1] = GNUTLS_TLS1_1;
+          break;
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+          protocol_priority[1] = GNUTLS_TLS1_1;
+          protocol_priority[2] = GNUTLS_TLS1_2;
+          break;
+      }
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+      protocol_priority[0] = GNUTLS_TLS1_1;
+      switch (ssl_version_up_to) {
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+          protocol_priority[1] = GNUTLS_TLS1_2;
+          break;
+      }
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      protocol_priority[0] = GNUTLS_TLS1_2;
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "GnuTLS: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  return CURLE_OK;
+}
+#else
+#define GNUTLS_CIPHERS "NORMAL:-ARCFOUR-128:-CTYPE-ALL:+CTYPE-X509"
+/* If GnuTLS was compiled without support for SRP it will error out if SRP is
+   requested in the priority string, so treat it specially
+ */
+#define GNUTLS_SRP "+SRP"
+
+static CURLcode
+set_ssl_version_up_to(const char **prioritylist, struct connectdata *conn,
+                      long ssl_version, long ssl_version_up_to)
+{
+  struct Curl_easy *data = conn->data;
+
+  switch(ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_NONE:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          return set_ssl_version_up_to(prioritylist, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+        case CURL_SSLVERSION_TLSv1_1:
+          return set_ssl_version_up_to(prioritylist, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+        case CURL_SSLVERSION_TLSv1_2:
+          return set_ssl_version_up_to(prioritylist, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+        case CURL_SSLVERSION_TLSv1_3:
+          return set_ssl_version_up_to(prioritylist, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+      }
+      break;
+  }
+
+  switch(ssl_version) {
+    case CURL_SSLVERSION_TLSv1_0:
+      switch (ssl_version_up_to) {
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
+          *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
+                         "+VERS-TLS1.0:" GNUTLS_SRP;
+          break;
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+          *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
+                         "+VERS-TLS1.0:+VERS-TLS1.1:" GNUTLS_SRP;
+          break;
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+          *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
+                         "+VERS-TLS1.0:+VERS-TLS1.1:+VERS-TLS1.2:" GNUTLS_SRP;
+          break;
+      }
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+      switch (ssl_version_up_to) {
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+          *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
+                         "+VERS-TLS1.1:" GNUTLS_SRP;
+          break;
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+          *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
+                         "+VERS-TLS1.1:+VERS-TLS1.2:" GNUTLS_SRP;
+          break;
+      }
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      switch (ssl_version_up_to) {
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+        case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+          *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
+                         "+VERS-TLS1.2:" GNUTLS_SRP;
+          break;
+      }
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "GnuTLS: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  return CURLE_OK;
+}
+#endif
+
 static CURLcode
 gtls_connect_step1(struct connectdata *conn,
                    int sockindex)
@@ -405,13 +543,8 @@ gtls_connect_step1(struct connectdata *conn,
     GNUTLS_CIPHER_3DES_CBC,
   };
   static const int cert_type_priority[] = { GNUTLS_CRT_X509, 0 };
-  static int protocol_priority[] = { 0, 0, 0, 0 };
+  int protocol_priority[] = { 0, 0, 0, 0 };
 #else
-#define GNUTLS_CIPHERS "NORMAL:-ARCFOUR-128:-CTYPE-ALL:+CTYPE-X509"
-/* If GnuTLS was compiled without support for SRP it will error out if SRP is
-   requested in the priority string, so treat it specially
- */
-#define GNUTLS_SRP "+SRP"
   const char *prioritylist;
   const char *err = NULL;
 #endif
@@ -568,7 +701,7 @@ gtls_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  switch(SSL_CONN_CONFIG(version) {
+  switch (SSL_CONN_CONFIG(version)) {
     case CURL_SSLVERSION_SSLv3:
       protocol_priority[0] = GNUTLS_SSL3;
       break;
@@ -579,17 +712,16 @@ gtls_connect_step1(struct connectdata *conn,
       protocol_priority[2] = GNUTLS_TLS1_2;
       break;
     case CURL_SSLVERSION_TLSv1_0:
-      protocol_priority[0] = GNUTLS_TLS1_0;
-      break;
     case CURL_SSLVERSION_TLSv1_1:
-      protocol_priority[0] = GNUTLS_TLS1_1;
-      break;
     case CURL_SSLVERSION_TLSv1_2:
-      protocol_priority[0] = GNUTLS_TLS1_2;
-      break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "GnuTLS: TLS 1.3 is not yet supported");
-      return CURLE_SSL_CONNECT_ERROR;
+      {
+        CURLcode result = set_ssl_version_up_to(protocol_priority, conn,
+                                               SSL_CONN_CONFIG(version),
+                                               SSL_CONN_CONFIG(version_up_to));
+        if(result != CURLE_OK)
+          return result;
+      } break;
     case CURL_SSLVERSION_SSLv2:
       failf(data, "GnuTLS does not support SSLv2");
       return CURLE_SSL_CONNECT_ERROR;
@@ -617,20 +749,16 @@ gtls_connect_step1(struct connectdata *conn,
       prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:" GNUTLS_SRP;
       break;
     case CURL_SSLVERSION_TLSv1_0:
-      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                     "+VERS-TLS1.0:" GNUTLS_SRP;
-      break;
     case CURL_SSLVERSION_TLSv1_1:
-      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                     "+VERS-TLS1.1:" GNUTLS_SRP;
-      break;
     case CURL_SSLVERSION_TLSv1_2:
-      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                     "+VERS-TLS1.2:" GNUTLS_SRP;
-      break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "GnuTLS: TLS 1.3 is not yet supported");
-      return CURLE_SSL_CONNECT_ERROR;
+      {
+        CURLcode result = set_ssl_version_up_to(&prioritylist, conn,
+                                               SSL_CONN_CONFIG(version),
+                                               SSL_CONN_CONFIG(version_up_to));
+        if(result != CURLE_OK)
+          return result;
+      } break;
     case CURL_SSLVERSION_SSLv2:
       failf(data, "GnuTLS does not support SSLv2");
       return CURLE_SSL_CONNECT_ERROR;

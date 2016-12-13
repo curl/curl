@@ -95,6 +95,7 @@ Curl_ssl_config_matches(struct ssl_primary_config* data,
                         struct ssl_primary_config* needle)
 {
   if((data->version == needle->version) &&
+     (data->version_up_to == needle->version_up_to) &&
      (data->verifypeer == needle->verifypeer) &&
      (data->verifyhost == needle->verifyhost) &&
      Curl_safe_strcasecompare(data->CApath, needle->CApath) &&
@@ -113,6 +114,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   dest->verifyhost = source->verifyhost;
   dest->verifypeer = source->verifypeer;
   dest->version = source->version;
+  dest->version_up_to = source->version_up_to;
 
   CLONE_STRING(CAfile);
   CLONE_STRING(CApath);
@@ -176,6 +178,41 @@ static bool ssl_prefs_check(struct Curl_easy *data)
   if((data->set.ssl.primary.version < 0)
      || (data->set.ssl.primary.version >= CURL_SSLVERSION_LAST)) {
     failf(data, "Unrecognized parameter value passed via CURLOPT_SSLVERSION");
+    return FALSE;
+  }
+  if(data->set.ssl.primary.version_up_to != CURL_SSLVERSION_OR_UP_TO_NONE) {
+    if(data->set.ssl.primary.version_up_to >= CURL_SSLVERSION_OR_UP_TO_FIRST
+      && data->set.ssl.primary.version_up_to < CURL_SSLVERSION_OR_UP_TO_LAST) {
+        switch(data->set.ssl.primary.version) {
+          case CURL_SSLVERSION_DEFAULT:
+          case CURL_SSLVERSION_TLSv1:
+          case CURL_SSLVERSION_SSLv2:
+          case CURL_SSLVERSION_SSLv3:
+            break;
+          case CURL_SSLVERSION_TLSv1_0:
+            if(data->set.ssl.primary.version_up_to >=
+               CURL_SSLVERSION_OR_UP_TO_TLSv1_0)
+              return TRUE;
+            break;
+          case CURL_SSLVERSION_TLSv1_1:
+            if(data->set.ssl.primary.version_up_to >=
+               CURL_SSLVERSION_OR_UP_TO_TLSv1_1)
+              return TRUE;
+            break;
+          case CURL_SSLVERSION_TLSv1_2:
+            if(data->set.ssl.primary.version_up_to >=
+               CURL_SSLVERSION_OR_UP_TO_TLSv1_2)
+              return TRUE;
+            break;
+          case CURL_SSLVERSION_TLSv1_3:
+            if(data->set.ssl.primary.version_up_to >=
+               CURL_SSLVERSION_OR_UP_TO_TLSv1_3)
+              return TRUE;
+            break;
+        }
+      }
+    failf(data, "CURL_SSLVERSION_OR_UP_TO doesn't supports setuped "
+                "CURL_SSLVERSION");
     return FALSE;
   }
   return TRUE;

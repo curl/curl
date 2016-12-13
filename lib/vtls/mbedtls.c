@@ -158,6 +158,72 @@ static Curl_recv mbed_recv;
 static Curl_send mbed_send;
 
 static CURLcode
+set_ssl_version_up_to(struct connectdata *conn, int sockindex,
+                      long ssl_version, long ssl_version_up_to)
+{
+  struct Curl_easy *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  int mbedtls_version_minor = MBEDTLS_SSL_MINOR_VERSION_1;
+  int mbedtls_version_up_to_minor = MBEDTLS_SSL_MINOR_VERSION_1;
+
+  switch(ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_NONE:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          return set_ssl_version_up_to(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+        case CURL_SSLVERSION_TLSv1_1:
+          return set_ssl_version_up_to(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+        case CURL_SSLVERSION_TLSv1_2:
+          return set_ssl_version_up_to(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+        case CURL_SSLVERSION_TLSv1_3:
+          return set_ssl_version_up_to(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+      }
+      break;
+  }
+
+  switch (ssl_version) {
+    case CURL_SSLVERSION_TLSv1_0:
+      mbedtls_version_minor = MBEDTLS_SSL_MINOR_VERSION_1;
+      infof(data, "mbedTLS: Set SSL min version to TLS 1.0\n");
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+      mbedtls_version_minor = MBEDTLS_SSL_MINOR_VERSION_2;
+      infof(data, "mbedTLS: Set SSL min version to TLS 1.1\n");
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      mbedtls_version_minor = MBEDTLS_SSL_MINOR_VERSION_3;
+      infof(data, "mbedTLS: Set SSL min version to TLS 1.2\n");
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "mbedTLS: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  switch(ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
+      mbedtls_version_up_to_minor = MBEDTLS_SSL_MINOR_VERSION_1;
+      break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+      mbedtls_version_up_to_minor = MBEDTLS_SSL_MINOR_VERSION_2;
+      break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+      mbedtls_version_up_to_minor = MBEDTLS_SSL_MINOR_VERSION_3;
+      break;
+  }
+
+  mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
+                               mbedtls_version_minor);
+  mbedtls_ssl_conf_max_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
+                               mbedtls_version_up_to_minor);
+  return CURLE_OK;
+}
+
+static CURLcode
 mbed_connect_step1(struct connectdata *conn,
                    int sockindex)
 {
@@ -333,29 +399,16 @@ mbed_connect_step1(struct connectdata *conn,
     infof(data, "mbedTLS: Set SSL version to SSLv3\n");
     break;
   case CURL_SSLVERSION_TLSv1_0:
-    mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                                 MBEDTLS_SSL_MINOR_VERSION_1);
-    mbedtls_ssl_conf_max_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                                 MBEDTLS_SSL_MINOR_VERSION_1);
-    infof(data, "mbedTLS: Set SSL version to TLS 1.0\n");
-    break;
   case CURL_SSLVERSION_TLSv1_1:
-    mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                                 MBEDTLS_SSL_MINOR_VERSION_2);
-    mbedtls_ssl_conf_max_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                                 MBEDTLS_SSL_MINOR_VERSION_2);
-    infof(data, "mbedTLS: Set SSL version to TLS 1.1\n");
-    break;
   case CURL_SSLVERSION_TLSv1_2:
-    mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                                 MBEDTLS_SSL_MINOR_VERSION_3);
-    mbedtls_ssl_conf_max_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                                 MBEDTLS_SSL_MINOR_VERSION_3);
-    infof(data, "mbedTLS: Set SSL version to TLS 1.2\n");
-    break;
   case CURL_SSLVERSION_TLSv1_3:
-    failf(data, "mbedTLS: TLS 1.3 is not yet supported");
-    return CURLE_SSL_CONNECT_ERROR;
+    {
+      CURLcode result = set_ssl_version_up_to(conn, sockindex,
+                                              SSL_CONN_CONFIG(version),
+                                              SSL_CONN_CONFIG(version_up_to));
+      if(result != CURLE_OK)
+        return result;
+    } break;
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;

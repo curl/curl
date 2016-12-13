@@ -922,7 +922,9 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * implementations are lame.
      */
 #ifdef USE_SSL
-    data->set.ssl.primary.version = va_arg(param, long);
+    arg = va_arg(param, long);
+    data->set.ssl.primary.version = GET_CURL_SSLVERSION(arg);
+    data->set.ssl.primary.version_up_to = GET_CURL_SSLVERSION_OR_UP_TO(arg);
 #else
     result = CURLE_UNKNOWN_OPTION;
 #endif

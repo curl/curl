@@ -140,6 +140,71 @@ static void polarssl_debug(void *context, int level, const char *line)
 static Curl_recv polarssl_recv;
 static Curl_send polarssl_send;
 
+static CURLcode
+set_ssl_version_up_to(struct connectdata *conn, int sockindex,
+                      long ssl_version, long ssl_version_up_to)
+{
+  struct Curl_easy *data = conn->data;
+  struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+
+  switch(ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_NONE:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          return set_ssl_version_up_to(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+        case CURL_SSLVERSION_TLSv1_1:
+          return set_ssl_version_up_to(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+        case CURL_SSLVERSION_TLSv1_2:
+          return set_ssl_version_up_to(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+        case CURL_SSLVERSION_TLSv1_3:
+          return set_ssl_version_up_to(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+      }
+      break;
+  }
+
+  switch (ssl_version) {
+    case CURL_SSLVERSION_TLSv1_0:
+      ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
+                          SSL_MINOR_VERSION_1);
+      infof(data, "PolarSSL: Forced min. SSL Version to be TLS 1.0\n");
+      break;
+   case CURL_SSLVERSION_TLSv1_1:
+      ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
+                          SSL_MINOR_VERSION_2);
+      infof(data, "PolarSSL: Forced min. SSL Version to be TLS 1.1\n");
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
+                          SSL_MINOR_VERSION_3);
+      infof(data, "PolarSSL: Forced min. SSL Version to be TLS 1.2\n");
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "PolarSSL: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  switch(ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
+      ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
+                          SSL_MINOR_VERSION_1);
+      break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+      ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
+                          SSL_MINOR_VERSION_2);
+      break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+      ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
+                          SSL_MINOR_VERSION_3);
+      break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+      break;
+  }
+  return CURLE_OK;
+}
 
 static CURLcode
 polarssl_connect_step1(struct connectdata *conn,
@@ -287,29 +352,16 @@ polarssl_connect_step1(struct connectdata *conn,
     infof(data, "PolarSSL: Forced min. SSL Version to be SSLv3\n");
     break;
   case CURL_SSLVERSION_TLSv1_0:
-    ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_1);
-    ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_1);
-    infof(data, "PolarSSL: Forced min. SSL Version to be TLS 1.0\n");
-    break;
   case CURL_SSLVERSION_TLSv1_1:
-    ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_2);
-    ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_2);
-    infof(data, "PolarSSL: Forced min. SSL Version to be TLS 1.1\n");
-    break;
   case CURL_SSLVERSION_TLSv1_2:
-    ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_3);
-    ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
-                        SSL_MINOR_VERSION_3);
-    infof(data, "PolarSSL: Forced min. SSL Version to be TLS 1.2\n");
-    break;
   case CURL_SSLVERSION_TLSv1_3:
-    failf(data, "PolarSSL: TLS 1.3 is not yet supported");
-    return CURLE_SSL_CONNECT_ERROR;
+    {
+      CURLcode result = set_ssl_version_up_to(conn, sockindex,
+                                              SSL_CONN_CONFIG(version),
+                                              SSL_CONN_CONFIG(version_up_to));
+      if(result != CURLE_OK)
+        return result;
+    } break;
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;

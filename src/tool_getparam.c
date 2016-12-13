@@ -193,6 +193,10 @@ static const struct LongShort aliases[]= {
   {"11",  "tlsv1.1",                 FALSE},
   {"12",  "tlsv1.2",                 FALSE},
   {"13",  "tlsv1.3",                 FALSE},
+  {"1a", "up-to-tls-default",        FALSE},
+  {"1b", "up-to-tlsv1.1",            FALSE},
+  {"1c", "up-to-tlsv1.2",            FALSE},
+  {"1d", "up-to-tlsv1.3",            FALSE},
   {"2",  "sslv2",                    FALSE},
   {"3",  "sslv3",                    FALSE},
   {"4",  "ipv4",                     FALSE},
@@ -1098,19 +1102,39 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case '0':
         /* TLS version 1.0 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_0;
+        config->ssl_version = CURL_SSLVERSION_TLSv1_0 |
+                            GET_CURL_SSLVERSION_OR_UP_TO(config->ssl_version);
         break;
       case '1':
         /* TLS version 1.1 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_1;
+        config->ssl_version = CURL_SSLVERSION_TLSv1_1 |
+                            GET_CURL_SSLVERSION_OR_UP_TO(config->ssl_version);
         break;
       case '2':
         /* TLS version 1.2 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_2;
+        config->ssl_version = CURL_SSLVERSION_TLSv1_2 |
+                            GET_CURL_SSLVERSION_OR_UP_TO(config->ssl_version);
         break;
       case '3':
         /* TLS version 1.3 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_3;
+        config->ssl_version = CURL_SSLVERSION_TLSv1_3 |
+                            GET_CURL_SSLVERSION_OR_UP_TO(config->ssl_version);
+        break;
+      case 'a':
+        config->ssl_version = GET_CURL_SSLVERSION(config->ssl_version) |
+                              CURL_SSLVERSION_OR_UP_TO_DEFAULT;
+        break;
+      case 'b':
+        config->ssl_version = GET_CURL_SSLVERSION(config->ssl_version) |
+                              CURL_SSLVERSION_OR_UP_TO_TLSv1_1;
+        break;
+      case 'c':
+        config->ssl_version = GET_CURL_SSLVERSION(config->ssl_version) |
+                              CURL_SSLVERSION_OR_UP_TO_TLSv1_2;
+        break;
+      case 'd':
+        config->ssl_version = GET_CURL_SSLVERSION(config->ssl_version) |
+                              CURL_SSLVERSION_OR_UP_TO_TLSv1_3;
         break;
       }
       break;

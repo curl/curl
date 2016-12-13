@@ -103,6 +103,66 @@ static void InitSecBufferDesc(SecBufferDesc *desc, SecBuffer *BufArr,
 }
 
 static CURLcode
+set_ssl_version_up_to(SCHANNEL_CRED *schannel_cred, struct connectdata *conn,
+                      long ssl_version, long ssl_version_up_to)
+{
+  struct Curl_easy *data = conn->data;
+  switch(ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_NONE:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          return set_ssl_version_up_to(schannel_cred, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+        case CURL_SSLVERSION_TLSv1_1:
+          return set_ssl_version_up_to(schannel_cred, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+        case CURL_SSLVERSION_TLSv1_2:
+          return set_ssl_version_up_to(schannel_cred, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+        case CURL_SSLVERSION_TLSv1_3:
+          return set_ssl_version_up_to(schannel_cred, conn, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+      }
+      break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
+      } break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
+        case CURL_SSLVERSION_TLSv1_1:
+          schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_1_CLIENT;
+      } break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
+        case CURL_SSLVERSION_TLSv1_1:
+          schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_1_CLIENT;
+        case CURL_SSLVERSION_TLSv1_2:
+          schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_2_CLIENT;
+      } break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
+        case CURL_SSLVERSION_TLSv1_1:
+          schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_1_CLIENT;
+        case CURL_SSLVERSION_TLSv1_2:
+          schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_2_CLIENT;
+          break;
+        case CURL_SSLVERSION_TLSv1_3:
+          failf(data, "Schannel: TLS 1.3 is not yet supported");
+          return CURLE_SSL_CONNECT_ERROR;
+     } break;
+  }
+  return CURLE_OK;
+}
+
+static CURLcode
 schannel_connect_step1(struct connectdata *conn, int sockindex)
 {
   ssize_t written = -1;
@@ -208,17 +268,16 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         SP_PROT_TLS1_2_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_0:
-      schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_0_CLIENT;
-      break;
     case CURL_SSLVERSION_TLSv1_1:
-      schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_1_CLIENT;
-      break;
     case CURL_SSLVERSION_TLSv1_2:
-      schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_2_CLIENT;
-      break;
     case CURL_SSLVERSION_TLSv1_3:
-      failf(data, "Schannel: TLS 1.3 is not yet supported");
-      return CURLE_SSL_CONNECT_ERROR;
+      {
+        CURLcode result = set_ssl_version_up_to(&schannel_cred, conn,
+                                               conn->ssl_config.version,
+                                               conn->ssl_config.version_up_to);
+        if(result != CURLE_OK)
+          return result;
+      } break;
     case CURL_SSLVERSION_SSLv3:
       schannel_cred.grbitEnabledProtocols = SP_PROT_SSL3_CLIENT;
       break;

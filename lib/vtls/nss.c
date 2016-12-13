@@ -1512,6 +1512,94 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
   return CURLE_OK;
 }
 
+static CURLcode
+set_ssl_version_up_to(SSLVersionRange *sslver, struct Curl_easy *data,
+                      long ssl_version, long ssl_version_up_to)
+{
+  switch(ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_NONE:
+      switch (ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          return set_ssl_version_up_to(sslver, data, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+        case CURL_SSLVERSION_TLSv1_1:
+          return set_ssl_version_up_to(sslver, data, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+        case CURL_SSLVERSION_TLSv1_2:
+          return set_ssl_version_up_to(sslver, data, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+        case CURL_SSLVERSION_TLSv1_3:
+          return set_ssl_version_up_to(sslver, data, ssl_version,
+                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+      }
+      break;
+  }
+
+  switch(ssl_version) {
+    case CURL_SSLVERSION_TLSv1_0:
+      sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+#ifdef SSL_LIBRARY_VERSION_TLS_1_1
+      sslver->min = SSL_LIBRARY_VERSION_TLS_1_1;
+      break;
+#else
+      failf(data, "TLS1.1 minor version cannot be set");
+      return CURLE_SSL_CONNECT_ERROR;
+#endif
+    case CURL_SSLVERSION_TLSv1_2:
+#ifdef SSL_LIBRARY_VERSION_TLS_1_2
+      sslver->min = SSL_LIBRARY_VERSION_TLS_1_2;
+      break;
+#else
+      failf(data, "TLS1.2 minor version cannot be set");
+      return CURLE_SSL_CONNECT_ERROR;
+#endif
+    case CURL_SSLVERSION_TLSv1_3:
+#ifdef SSL_LIBRARY_VERSION_TLS_1_3
+      sslver->min = SSL_LIBRARY_VERSION_TLS_1_3;
+      break;
+#else
+      failf(data, "TLS1.3 minor version cannot be set");
+      return CURLE_SSL_CONNECT_ERROR;
+#endif
+  }
+
+  switch (ssl_version_up_to) {
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
+      break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+#ifdef SSL_LIBRARY_VERSION_TLS_1_1
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_1;
+#else
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
+#endif
+      break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+#ifdef SSL_LIBRARY_VERSION_TLS_1_2
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_2;
+#elif defined(SSL_LIBRARY_VERSION_TLS_1_1)
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_1;
+#else
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
+#endif
+      break;
+    case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+#ifdef SSL_LIBRARY_VERSION_TLS_1_3
+        sslver->max = SSL_LIBRARY_VERSION_TLS_1_3;
+#elif defined(SSL_LIBRARY_VERSION_TLS_1_2)
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_2;
+#elif defined(SSL_LIBRARY_VERSION_TLS_1_1)
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_1;
+#else
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
+#endif
+      break;
+  }
+  return CURLE_OK;
+}
+
 static CURLcode nss_init_sslver(SSLVersionRange *sslver,
                                 struct Curl_easy *data,
                                 struct connectdata *conn)
@@ -1549,34 +1637,11 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
     return CURLE_OK;
 
   case CURL_SSLVERSION_TLSv1_0:
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
-    return CURLE_OK;
-
   case CURL_SSLVERSION_TLSv1_1:
-#ifdef SSL_LIBRARY_VERSION_TLS_1_1
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_1;
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_1;
-    return CURLE_OK;
-#endif
-    break;
-
   case CURL_SSLVERSION_TLSv1_2:
-#ifdef SSL_LIBRARY_VERSION_TLS_1_2
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_2;
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_2;
-    return CURLE_OK;
-#endif
-    break;
-
   case CURL_SSLVERSION_TLSv1_3:
-#ifdef SSL_LIBRARY_VERSION_TLS_1_3
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_3;
-    sslver->max = SSL_LIBRARY_VERSION_TLS_1_3;
-    return CURLE_OK;
-#endif
-    break;
-
+    return set_ssl_version_up_to(sslver, data, SSL_CONN_CONFIG(version),
+                                 SSL_CONN_CONFIG(version_up_to));
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;
