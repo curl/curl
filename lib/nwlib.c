@@ -184,7 +184,8 @@ int GetOrSetUpData(int id, libdata_t **appData,
      */
     NXLock(gLibLock);
 
-    if(!(app_data = (libdata_t *) get_app_data(id))) {
+    app_data = (libdata_t *) get_app_data(id);
+    if(!app_data) {
       app_data = malloc(sizeof(libdata_t));
 
       if(app_data) {
@@ -259,7 +260,8 @@ int GetOrSetUpData(int id, libdata_t **appData,
           err         = ENOMEM;
         }
 
-        if((err = NXKeySetValue(key, thread_data))) {
+        err = NXKeySetValue(key, thread_data);
+        if(err) {
           free(thread_data->twentybytes);
           free(thread_data);
           thread_data = (libthreaddata_t *) NULL;

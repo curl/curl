@@ -79,7 +79,8 @@ int test(char *URL)
   }
 
   /* get a curl handle */
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     fclose(hd_src);

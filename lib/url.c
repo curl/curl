@@ -5822,18 +5822,22 @@ static CURLcode resolve_server(struct Curl_easy *data,
       hostaddr = calloc(1, sizeof(struct Curl_dns_entry));
       if(!hostaddr)
         result = CURLE_OUT_OF_MEMORY;
-      else if((hostaddr->addr = Curl_unix2addr(path)) != NULL)
-        hostaddr->inuse++;
       else {
-        /* Long paths are not supported for now */
-        if(strlen(path) >= sizeof(((struct sockaddr_un *)0)->sun_path)) {
-          failf(data, "Unix socket path too long: '%s'", path);
-          result = CURLE_COULDNT_RESOLVE_HOST;
+        int longpath=0;
+        hostaddr->addr = Curl_unix2addr(path, &longpath);
+        if(hostaddr->addr)
+          hostaddr->inuse++;
+        else {
+          /* Long paths are not supported for now */
+          if(longpath) {
+            failf(data, "Unix socket path too long: '%s'", path);
+            result = CURLE_COULDNT_RESOLVE_HOST;
+          }
+          else
+            result = CURLE_OUT_OF_MEMORY;
+          free(hostaddr);
+          hostaddr = NULL;
         }
-        else
-          result = CURLE_OUT_OF_MEMORY;
-        free(hostaddr);
-        hostaddr = NULL;
       }
     }
     else

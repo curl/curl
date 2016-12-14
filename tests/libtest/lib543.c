@@ -36,7 +36,8 @@ int test(char *URL)
   char *s;
   (void)URL;
 
-  if((easy = curl_easy_init()) == NULL) {
+  easy = curl_easy_init();
+  if(!easy) {
     fprintf(stderr, "curl_easy_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }

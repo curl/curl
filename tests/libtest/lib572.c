@@ -55,7 +55,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -69,7 +70,8 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
 
   /* SETUP */
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -83,7 +85,8 @@ int test(char *URL)
   if(res)
     goto test_cleanup;
 
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -117,7 +120,8 @@ int test(char *URL)
   paramsf = NULL;
 
   /* Heartbeat GET_PARAMETERS */
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -131,7 +135,8 @@ int test(char *URL)
 
   /* POST GET_PARAMETERS */
 
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -149,7 +154,8 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDS, NULL);
 
   /* Make sure we can do a normal request now */
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }

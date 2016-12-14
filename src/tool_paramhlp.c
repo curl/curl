@@ -66,12 +66,15 @@ ParameterError file2string(char **bufp, FILE *file)
 
   if(file) {
     while(fgets(buffer, sizeof(buffer), file)) {
-      if((ptr = strchr(buffer, '\r')) != NULL)
+      ptr = strchr(buffer, '\r');
+      if(ptr)
         *ptr = '\0';
-      if((ptr = strchr(buffer, '\n')) != NULL)
+      ptr = strchr(buffer, '\n');
+      if(ptr)
         *ptr = '\0';
       buflen = strlen(buffer);
-      if((ptr = realloc(string, stringlen+buflen+1)) == NULL) {
+      ptr = realloc(string, stringlen+buflen+1);
+      if(!ptr) {
         Curl_safefree(string);
         return PARAM_NO_MEM;
       }
@@ -102,7 +105,8 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
         }
         alloc *= 2;
         /* allocate an extra char, reserved space, for null termination */
-        if((newbuf = realloc(buffer, alloc+1)) == NULL) {
+        newbuf = realloc(buffer, alloc+1);
+        if(!newbuf) {
           Curl_safefree(buffer);
           return PARAM_NO_MEM;
         }
@@ -115,7 +119,8 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
     buffer[nused] = '\0';
     /* free trailing slack space, if possible */
     if(alloc != nused) {
-      if((newbuf = realloc(buffer, nused+1)) == NULL) {
+      newbuf = realloc(buffer, nused+1);
+      if(!newbuf) {
         Curl_safefree(buffer);
         return PARAM_NO_MEM;
       }

@@ -61,13 +61,15 @@ static int _getch(void)
 #define VERSION_STR  "V1.0"
 
 /* error handling macros */
-#define my_curl_easy_setopt(A, B, C) \
-  if((res = curl_easy_setopt((A), (B), (C))) != CURLE_OK) \
+#define my_curl_easy_setopt(A, B, C)                             \
+  res = curl_easy_setopt((A), (B), (C));                         \
+  if(!res)                                                       \
     fprintf(stderr, "curl_easy_setopt(%s, %s, %s) failed: %d\n", \
             #A, #B, #C, res);
 
-#define my_curl_easy_perform(A) \
-  if((res = curl_easy_perform((A))) != CURLE_OK) \
+#define my_curl_easy_perform(A)                                     \
+  res = curl_easy_perform(A);                                       \
+  if(!res)                                                          \
     fprintf(stderr, "curl_easy_perform(%s) failed: %d\n", #A, res);
 
 

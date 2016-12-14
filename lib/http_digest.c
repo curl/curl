@@ -75,7 +75,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   CURLcode result;
   struct Curl_easy *data = conn->data;
   unsigned char *path;
-  char *tmp;
+  char *tmp = NULL;
   char *response;
   size_t len;
   bool have_chlg;
@@ -140,12 +140,14 @@ CURLcode Curl_output_digest(struct connectdata *conn,
      http://www.fngtps.com/2006/09/http-authentication
   */
 
-  if(authp->iestyle && ((tmp = strchr((char *)uripath, '?')) != NULL)) {
-    size_t urilen = tmp - (char *)uripath;
-
-    path = (unsigned char *) aprintf("%.*s", urilen, uripath);
+  if(authp->iestyle) {
+    tmp = strchr((char *)uripath, '?');
+    if(tmp) {
+      size_t urilen = tmp - (char *)uripath;
+      path = (unsigned char *) aprintf("%.*s", urilen, uripath);
+    }
   }
-  else
+  if(!tmp)
     path = (unsigned char *) strdup((char *) uripath);
 
   if(!path)

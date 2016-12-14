@@ -195,7 +195,8 @@ int test(char *URL)
 
   /* prepare share */
   printf("SHARE_INIT\n");
-  if((share = curl_share_init()) == NULL) {
+  share = curl_share_init();
+  if(!share) {
     fprintf(stderr, "curl_share_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -230,7 +231,8 @@ int test(char *URL)
   }
 
   /* initial cookie manipulation */
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_share_cleanup(share);
     curl_global_cleanup();
@@ -275,7 +277,8 @@ int test(char *URL)
 
   /* fetch a another one and save cookies */
   printf("*** run %d\n", i);
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_share_cleanup(share);
     curl_global_cleanup();
@@ -302,7 +305,8 @@ int test(char *URL)
   curl_slist_free_all(headers);
 
   /* load cookies */
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_share_cleanup(share);
     curl_global_cleanup();

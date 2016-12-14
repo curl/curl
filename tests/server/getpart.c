@@ -309,7 +309,8 @@ int getpart(char **outbuf, size_t *outlen,
       ptr++;
       end = ptr;
       EAT_WORD(end);
-      if((len.sig = end - ptr) > MAX_TAG_LEN) {
+      len.sig = end - ptr;
+      if(len.sig > MAX_TAG_LEN) {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
@@ -370,7 +371,8 @@ int getpart(char **outbuf, size_t *outlen,
       /* get potential tag */
       end = ptr;
       EAT_WORD(end);
-      if((len.sig = end - ptr) > MAX_TAG_LEN) {
+      len.sig = end - ptr;
+      if(len.sig > MAX_TAG_LEN) {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }
@@ -389,7 +391,8 @@ int getpart(char **outbuf, size_t *outlen,
       end = ptr;
       while(*end && ('>' != *end))
         end++;
-      if((len.sig = end - ptr) > MAX_TAG_LEN) {
+      len.sig = end - ptr;
+      if(len.sig > MAX_TAG_LEN) {
         error = GPE_NO_BUFFER_SPACE;
         break;
       }

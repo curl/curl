@@ -254,7 +254,8 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc * model,
     while((*cipher) && (ISSPACE(*cipher)))
       ++cipher;
 
-    if((cipher_list = strchr(cipher, ','))) {
+    cipher_list = strchr(cipher, ',');
+    if(cipher_list) {
       *cipher_list++ = '\0';
     }
 

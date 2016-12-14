@@ -101,7 +101,8 @@ int test(char *url)
 
   /* Send wrong password, then right password */
 
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -120,8 +121,8 @@ int test(char *url)
   curl_easy_cleanup(curl);
 
   /* Send wrong password twice, then right password */
-
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;

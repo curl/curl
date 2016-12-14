@@ -356,6 +356,14 @@ sub scanfile {
             }
         }
 
+        if($nostr =~ /^((.*)(if) *\()(.*)\)/) {
+            my $pos = length($1);
+            if($4 =~ / = /) {
+                checkwarn("ASSIGNWITHINCONDITION",
+                          $line, $pos+1, $file, $l,
+                          "assignment within conditional expression");
+            }
+        }
         # check spaces after open parentheses
         if($l =~ /^(.*[a-z])\( /i) {
             checkwarn("SPACEAFTERPAREN",

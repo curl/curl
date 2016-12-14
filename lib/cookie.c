@@ -798,8 +798,8 @@ Curl_cookie_add(struct Curl_easy *data,
   /* Check if the domain is a Public Suffix and if yes, ignore the cookie.
      This needs a libpsl compiled with builtin data. */
   if(domain && co->domain && !isip(co->domain)) {
-    if(((psl = psl_builtin()) != NULL)
-        && !psl_is_cookie_domain_acceptable(psl, domain, co->domain)) {
+    psl = psl_builtin();
+    if(psl && !psl_is_cookie_domain_acceptable(psl, domain, co->domain)) {
       infof(data,
             "cookie '%s' dropped, domain '%s' must not set cookies for '%s'\n",
             co->name, domain, co->domain);

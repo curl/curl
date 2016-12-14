@@ -157,7 +157,8 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
   }
   slash = strpbrk(username, "\\/");
   if(slash) {
-    if((domain = strdup(username)) == NULL)
+    domain = strdup(username);
+    if(!domain)
       return CURLE_OUT_OF_MEMORY;
     slash = domain + (slash - username);
     *slash = '\0';

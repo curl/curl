@@ -103,7 +103,8 @@ inet_pton4(const char *src, unsigned char *dst)
   while((ch = *src++) != '\0') {
     const char *pch;
 
-    if((pch = strchr(digits, ch)) != NULL) {
+    pch = strchr(digits, ch);
+    if(pch) {
       unsigned int val = *tp * 10 + (unsigned int)(pch - digits);
 
       if(saw_digit && *tp == 0)
@@ -169,7 +170,8 @@ inet_pton6(const char *src, unsigned char *dst)
   while((ch = *src++) != '\0') {
     const char *pch;
 
-    if((pch = strchr((xdigits = xdigits_l), ch)) == NULL)
+    pch = strchr((xdigits = xdigits_l), ch);
+    if(!pch)
       pch = strchr((xdigits = xdigits_u), ch);
     if(pch != NULL) {
       val <<= 4;

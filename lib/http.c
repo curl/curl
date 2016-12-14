@@ -840,9 +840,11 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
                   auth += strlen("NTLM");
                   while(*auth && ISSPACE(*auth))
                     auth++;
-                  if(*auth)
-                    if((conn->challenge_header = strdup(auth)) == NULL)
+                  if(*auth) {
+                    conn->challenge_header = strdup(auth);
+                    if(!conn->challenge_header)
                       return CURLE_OUT_OF_MEMORY;
+                  }
                 }
               }
 #endif

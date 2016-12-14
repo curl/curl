@@ -53,7 +53,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     fclose(idfile);
@@ -77,7 +78,8 @@ int test(char *URL)
 
   /* Go through the various Session IDs */
   for(i = 0; i < 3; i++) {
-    if((stream_uri = suburl(URL, request++)) == NULL) {
+    stream_uri = suburl(URL, request++);
+    if(!stream_uri) {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
@@ -96,7 +98,8 @@ int test(char *URL)
     fprintf(idfile, "Got Session ID: [%s]\n", rtsp_session_id);
     rtsp_session_id = NULL;
 
-    if((stream_uri = suburl(URL, request++)) == NULL) {
+    stream_uri = suburl(URL, request++);
+    if(!stream_uri) {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
