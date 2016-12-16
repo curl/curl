@@ -180,7 +180,7 @@ struct OperationConfig {
   int ftp_ssl_ccc_mode;
 
   char *socksproxy;         /* set to server string */
-  int socksver;             /* set to CURLPROXY_SOCKS* define */
+
   int socks5_gssapi_nec;    /* The NEC reference server does not protect the
                                encryption type exchange */
   char *proxy_service_name; /* set authentication service name for HTTP and

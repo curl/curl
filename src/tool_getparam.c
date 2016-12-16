@@ -799,21 +799,21 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'c': /* --socks5 specifies a socks5 proxy to use, and resolves
                    the name locally and passes on the resolved address */
-        GetStr(&config->socksproxy, nextarg);
-        config->socksver = CURLPROXY_SOCKS5;
+        GetStr(&config->proxy, nextarg);
+        config->proxyver = CURLPROXY_SOCKS5;
         break;
       case 't': /* --socks4 specifies a socks4 proxy to use */
-        GetStr(&config->socksproxy, nextarg);
-        config->socksver = CURLPROXY_SOCKS4;
+        GetStr(&config->proxy, nextarg);
+        config->proxyver = CURLPROXY_SOCKS4;
         break;
       case 'T': /* --socks4a specifies a socks4a proxy to use */
-        GetStr(&config->socksproxy, nextarg);
-        config->socksver = CURLPROXY_SOCKS4A;
+        GetStr(&config->proxy, nextarg);
+        config->proxyver = CURLPROXY_SOCKS4A;
         break;
       case '2': /* --socks5-hostname specifies a socks5 proxy and enables name
                    resolving with the proxy */
-        GetStr(&config->socksproxy, nextarg);
-        config->socksver = CURLPROXY_SOCKS5_HOSTNAME;
+        GetStr(&config->proxy, nextarg);
+        config->proxyver = CURLPROXY_SOCKS5_HOSTNAME;
         break;
       case 'd': /* --tcp-nodelay option */
         config->tcp_nodelay = toggle;
