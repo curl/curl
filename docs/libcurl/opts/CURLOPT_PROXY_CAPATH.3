@@ -28,22 +28,20 @@ CURLOPT_PROXY_CAPATH \- specify directory holding proxy CA certificates
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_CAPATH, char *capath);
 .SH DESCRIPTION
-TODO: Make this text specific to HTTPS proxy. (Added in 7.XXX)
 Pass a char * to a zero terminated string naming a directory holding multiple
-CA certificates to verify the peer with. If libcurl is built against OpenSSL,
-the certificate directory must be prepared using the openssl c_rehash utility.
-This makes sense only when used in combination with the
-\fICURLOPT_SSL_VERIFYPEER(3)\fP option.
-
-The \fICURLOPT_CAPATH(3)\fP function apparently does not work in Windows due
-to some limitation in openssl.
+CA certificates to verify the HTTPS proxy with. If libcurl is built against
+OpenSSL, the certificate directory must be prepared using the openssl c_rehash
+utility. This makes sense only when \fICURLOPT_SSL_VERIFYPEER(3)\fP is enabled
+(which it is by default).
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+Everything used over an HTTPS proxy
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
+Added in 7.52.0
+
 This option is supported by the OpenSSL, GnuTLS and PolarSSL backends. The NSS
 backend provides the option only for backward compatibility.
 .SH RETURN VALUE

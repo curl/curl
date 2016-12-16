@@ -28,12 +28,11 @@ CURLOPT_PROXY_SSL_CIPHER_LIST \- specify ciphers to use for proxy TLS
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSL_CIPHER_LIST, char *list);
 .SH DESCRIPTION
-TODO: Make this text specific to HTTPS proxy. (Added in 7.XXX)
 Pass a char *, pointing to a zero terminated string holding the list of
-ciphers to use for the SSL connection. The list must be syntactically correct,
-it consists of one or more cipher strings separated by colons. Commas or
-spaces are also acceptable separators but colons are normally used, \&!, \&-
-and \&+ can be used as operators.
+ciphers to use for the connection to the HTTPS proxy. The list must be
+syntactically correct, it consists of one or more cipher strings separated by
+colons. Commas or spaces are also acceptable separators but colons are
+normally used, \&!, \&- and \&+ can be used as operators.
 
 For OpenSSL and GnuTLS valid examples of cipher lists include 'RC4-SHA',
 \'SHA1+DES\', 'TLSv1' and 'DEFAULT'. The default list is normally set when you
@@ -54,13 +53,16 @@ You'll find more details about the NSS cipher lists on this URL:
 .SH DEFAULT
 NULL, use internal default
 .SH PROTOCOLS
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+All
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
+Added in 7.52.0
+
 If built TLS enabled.
 .SH RETURN VALUE
 Returns CURLE_OK if TLS is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
-.BR CURLOPT_SSLVERSION "(3), " CURLOPT_USE_SSL "(3), "
+.BR CURLOPT_PROXY_SSLVERSION "(3), " CURLOPT_USE_SSL "(3), "
+.BR CURLOPT_SSLVERSION "(3), "

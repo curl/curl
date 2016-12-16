@@ -22,23 +22,22 @@
 .\"
 .TH CURLINFO_PROXY_SSL_VERIFYRESULT 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_getinfo options"
 .SH NAME
-CURLINFO_PROXY_SSL_VERIFYRESULT \- get the result of the proxy certification verification
+CURLINFO_PROXY_SSL_VERIFYRESULT \- get the result of the proxy certificate verification
 .SH SYNOPSIS
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PROXY_SSL_VERIFYRESULT, long *result);
 .SH DESCRIPTION
-TODO: Make this text specific to HTTPS proxy. (Added in 7.XXX)
-Pass a pointer to a long to receive the result of the certification
-verification that was requested (using the \fICURLOPT_SSL_VERIFYPEER(3)\fP
-option.
+Pass a pointer to a long to receive the result of the certificate verification
+that was requested (using the \fICURLOPT_PROXY_SSL_VERIFYPEER(3)\fP option.
 .SH PROTOCOLS
-All using TLS
+All
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
-Added in 7.5
+Added in 7.52.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
+.BR CURLINFO_SSL_VERIFYRESULT "(3), "

@@ -28,10 +28,10 @@ CURLOPT_PROXY_SSLKEY \- specify private keyfile for TLS and SSL proxy client cer
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLKEY, char *keyfile);
 .SH DESCRIPTION
-TODO: Make this text specific to HTTPS proxy. (Added in 7.XXX)
 Pass a pointer to a zero terminated string as parameter. The string should be
-the file name of your private key. The default format is "PEM" and can be
-changed with \fICURLOPT_SSLKEYTYPE(3)\fP.
+the file name of your private key used for connecting to the HTTPS proxy. The
+default format is "PEM" and can be changed with
+\fICURLOPT_PROXY_SSLKEYTYPE(3)\fP.
 
 (iOS and Mac OS X only) This option is ignored if curl was built against
 Secure Transport. Secure Transport expects the private key to be already
@@ -39,13 +39,16 @@ present in the keychain or PKCS#12 file containing the certificate.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
-All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+All
 .SH EXAMPLE
 TODO
 .SH AVAILABILITY
+Added in 7.52.0
+
 If built TLS enabled.
 .SH RETURN VALUE
 Returns CURLE_OK if TLS is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.
 .SH "SEE ALSO"
+.BR CURLOPT_PROXY_SSLKEYTYPE "(3), " CURLOPT_PROXY_SSLCERT "(3), "
 .BR CURLOPT_SSLKEYTYPE "(3), " CURLOPT_SSLCERT "(3), "
