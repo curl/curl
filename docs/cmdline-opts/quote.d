@@ -1,4 +1,5 @@
 Long: quote
+Short: Q
 Help: Send command(s) to server before transfer
 Protocols: FTP SFTP
 ---

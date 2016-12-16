@@ -1,4 +1,5 @@
 Long: egd-file
+Arg: <file>
 Help: EGD socket path for random data
 Protocols: TLS
 See-also: random-file

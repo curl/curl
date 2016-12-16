@@ -1,6 +1,7 @@
 Long: form-string
 Help: Specify HTTP multipart POST data
 Protocols: HTTP
+Arg: <name=string>
 See-also: form
 ---
 Similar to --form except that the value string for the named parameter is used
