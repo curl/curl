@@ -168,6 +168,7 @@ static const char *const helptext[] = {
   "Do not switch to GET after following a 302 redirect (H)",
   "     --post303       "
   "Do not switch to GET after following a 303 redirect (H)",
+  "     --preproxy [PROTOCOL://]HOST[:PORT] Proxy before HTTP(S) proxy",
   " -#, --progress-bar  Display transfer progress as a progress bar",
   "     --proto PROTOCOLS  Enable/disable PROTOCOLS",
   "     --proto-default PROTOCOL  Use PROTOCOL for any URL missing a scheme",

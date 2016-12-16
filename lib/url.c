@@ -1472,14 +1472,14 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
                        va_arg(param, char *));
     break;
 
-  case CURLOPT_SOCKS_PROXY:
+  case CURLOPT_PRE_PROXY:
     /*
      * Set proxy server:port to use as SOCKS proxy.
      *
      * If the proxy is set to "" or NULL we explicitly say that we don't want
      * to use the socks proxy.
      */
-    result = setstropt(&data->set.str[STRING_SOCKS_PROXY],
+    result = setstropt(&data->set.str[STRING_PRE_PROXY],
                        va_arg(param, char *));
     break;
 
@@ -4126,7 +4126,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->bits.socksproxy = (conn->bits.proxy &&
                            !conn->bits.httpproxy) ? TRUE : FALSE;
 
-  if(data->set.str[STRING_SOCKS_PROXY] && *data->set.str[STRING_SOCKS_PROXY]) {
+  if(data->set.str[STRING_PRE_PROXY] && *data->set.str[STRING_PRE_PROXY]) {
     conn->bits.proxy = TRUE;
     conn->bits.socksproxy = TRUE;
   }
@@ -6184,8 +6184,8 @@ static CURLcode create_conn(struct Curl_easy *data,
     }
   }
 
-  if(data->set.str[STRING_SOCKS_PROXY]) {
-    socksproxy = strdup(data->set.str[STRING_SOCKS_PROXY]);
+  if(data->set.str[STRING_PRE_PROXY]) {
+    socksproxy = strdup(data->set.str[STRING_PRE_PROXY]);
     /* if global socks proxy is set, this is it */
     if(NULL == socksproxy) {
       failf(data, "memory shortage");

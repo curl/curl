@@ -290,6 +290,7 @@ static const struct LongShort aliases[]= {
   {"V",  "version",                  FALSE},
   {"w",  "write-out",                TRUE},
   {"x",  "proxy",                    TRUE},
+  {"xa", "preproxy",                 TRUE},
   {"X",  "request",                  TRUE},
   {"Y",  "speed-limit",              TRUE},
   {"y",  "speed-time",               TRUE},
@@ -1920,9 +1921,16 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         GetStr(&config->writeout, nextarg);
       break;
     case 'x':
-      /* proxy */
-      GetStr(&config->proxy, nextarg);
-      config->proxyver = CURLPROXY_HTTP;
+      switch(subletter) {
+      case 'a': /* --preproxy */
+        GetStr(&config->preproxy, nextarg);
+        break;
+      default:
+        /* --proxy */
+        GetStr(&config->proxy, nextarg);
+        config->proxyver = CURLPROXY_HTTP;
+        break;
+      }
       break;
     case 'X':
       /* set custom request */

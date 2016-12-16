@@ -1763,8 +1763,8 @@ typedef enum {
      CURLSSLOPT_* */
   CINIT(PROXY_SSL_OPTIONS, LONG, 261),
 
-  /* Name of socks proxy to use. */
-  CINIT(SOCKS_PROXY, STRINGPOINT, 262),
+  /* Name of pre proxy to use. */
+  CINIT(PRE_PROXY, STRINGPOINT, 262),
 
   /* The public key in DER form used to validate the proxy public key
      this option is used only if PROXY_SSL_VERIFYPEER is true */

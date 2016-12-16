@@ -212,6 +212,7 @@ man_MANS =                                      \
  CURLOPT_POSTQUOTE.3                            \
  CURLOPT_POSTREDIR.3                            \
  CURLOPT_PREQUOTE.3                             \
+ CURLOPT_PRE_PROXY.3                            \
  CURLOPT_PRIVATE.3                              \
  CURLOPT_PROGRESSDATA.3                         \
  CURLOPT_PROGRESSFUNCTION.3                     \
@@ -269,7 +270,6 @@ man_MANS =                                      \
  CURLOPT_SOCKOPTFUNCTION.3                      \
  CURLOPT_SOCKS5_GSSAPI_NEC.3                    \
  CURLOPT_SOCKS5_GSSAPI_SERVICE.3                \
- CURLOPT_SOCKS_PROXY.3                          \
  CURLOPT_SSH_AUTH_TYPES.3                       \
  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.3              \
  CURLOPT_SSH_KEYDATA.3                          \
@@ -522,6 +522,7 @@ HTMLPAGES =                                     \
  CURLOPT_POSTQUOTE.html                         \
  CURLOPT_POSTREDIR.html                         \
  CURLOPT_PREQUOTE.html                          \
+ CURLOPT_PRE_PROXY.html                         \
  CURLOPT_PRIVATE.html                           \
  CURLOPT_PROGRESSDATA.html                      \
  CURLOPT_PROGRESSFUNCTION.html                  \
@@ -579,7 +580,6 @@ HTMLPAGES =                                     \
  CURLOPT_SOCKOPTFUNCTION.html                   \
  CURLOPT_SOCKS5_GSSAPI_NEC.html                 \
  CURLOPT_SOCKS5_GSSAPI_SERVICE.html             \
- CURLOPT_SOCKS_PROXY.html                       \
  CURLOPT_SSH_AUTH_TYPES.html                    \
  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.html           \
  CURLOPT_SSH_KEYDATA.html                       \
@@ -832,6 +832,7 @@ PDFPAGES =                                      \
  CURLOPT_POSTQUOTE.pdf                          \
  CURLOPT_POSTREDIR.pdf                          \
  CURLOPT_PREQUOTE.pdf                           \
+ CURLOPT_PRE_PROXY.pdf                          \
  CURLOPT_PRIVATE.pdf                            \
  CURLOPT_PROGRESSDATA.pdf                       \
  CURLOPT_PROGRESSFUNCTION.pdf                   \
@@ -889,7 +890,6 @@ PDFPAGES =                                      \
  CURLOPT_SOCKOPTFUNCTION.pdf                    \
  CURLOPT_SOCKS5_GSSAPI_NEC.pdf                  \
  CURLOPT_SOCKS5_GSSAPI_SERVICE.pdf              \
- CURLOPT_SOCKS_PROXY.pdf                        \
  CURLOPT_SSH_AUTH_TYPES.pdf                     \
  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.pdf            \
  CURLOPT_SSH_KEYDATA.pdf                        \

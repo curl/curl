@@ -150,7 +150,7 @@ static void free_config_fields(struct OperationConfig *config)
   curl_slist_free_all(config->resolve);
   curl_slist_free_all(config->connect_to);
 
-  Curl_safefree(config->socksproxy);
+  Curl_safefree(config->preproxy);
   Curl_safefree(config->proxy_service_name);
   Curl_safefree(config->service_name);
 

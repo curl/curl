@@ -868,8 +868,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel?1L:0L);
 
           /* new in libcurl 7.52.0 */
-          if(config->socksproxy)
-            my_setopt_str(curl, CURLOPT_SOCKS_PROXY, config->socksproxy);
+          if(config->preproxy)
+            my_setopt_str(curl, CURLOPT_PRE_PROXY, config->preproxy);
 
           /* new in libcurl 7.10.6 */
           if(config->proxyanyauth)

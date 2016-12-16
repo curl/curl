@@ -1468,7 +1468,7 @@ enum dupstring {
   STRING_NETRC_FILE,      /* if not NULL, use this instead of trying to find
                              $HOME/.netrc */
   STRING_PROXY,           /* proxy to use */
-  STRING_SOCKS_PROXY,     /* socks proxy to use */
+  STRING_PRE_PROXY,       /* pre socks proxy to use */
   STRING_SET_RANGE,       /* range, if used */
   STRING_SET_REFERER,     /* custom string for the HTTP referer field */
   STRING_SET_URL,         /* what original URL to work on */
