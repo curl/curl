@@ -4792,7 +4792,6 @@ static char *detect_proxy(struct connectdata *conn)
 {
   char *proxy = NULL;
 
-#ifndef CURL_DISABLE_HTTP
   /* If proxy was not specified, we check for default proxy environment
    * variables, to enable i.e Lynx compliance:
    *
@@ -4810,62 +4809,46 @@ static char *detect_proxy(struct connectdata *conn)
    * For compatibility, the all-uppercase versions of these variables are
    * checked if the lowercase versions don't exist.
    */
-  char *no_proxy=NULL;
   char proxy_env[128];
+  const char *protop = conn->handler->scheme;
+  char *envp = proxy_env;
+  char *prox;
 
-  no_proxy=curl_getenv("no_proxy");
-  if(!no_proxy)
-    no_proxy=curl_getenv("NO_PROXY");
+  /* Now, build <protocol>_proxy and check for such a one to use */
+  while(*protop)
+    *envp++ = (char)tolower((int)*protop++);
 
-  if(!check_noproxy(conn->host.name, no_proxy)) {
-    /* It was not listed as without proxy */
-    const char *protop = conn->handler->scheme;
-    char *envp = proxy_env;
-    char *prox;
+  /* append _proxy */
+  strcpy(envp, "_proxy");
 
-    /* Now, build <protocol>_proxy and check for such a one to use */
-    while(*protop)
-      *envp++ = (char)tolower((int)*protop++);
+  /* read the protocol proxy: */
+  prox=curl_getenv(proxy_env);
 
-    /* append _proxy */
-    strcpy(envp, "_proxy");
-
-    /* read the protocol proxy: */
+  /*
+   * We don't try the uppercase version of HTTP_PROXY because of
+   * security reasons:
+   *
+   * When curl is used in a webserver application
+   * environment (cgi or php), this environment variable can
+   * be controlled by the web server user by setting the
+   * http header 'Proxy:' to some value.
+   *
+   * This can cause 'internal' http/ftp requests to be
+   * arbitrarily redirected by any external attacker.
+   */
+  if(!prox && !strcasecompare("http_proxy", proxy_env)) {
+    /* There was no lowercase variable, try the uppercase version: */
+    Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
     prox=curl_getenv(proxy_env);
+  }
 
-    /*
-     * We don't try the uppercase version of HTTP_PROXY because of
-     * security reasons:
-     *
-     * When curl is used in a webserver application
-     * environment (cgi or php), this environment variable can
-     * be controlled by the web server user by setting the
-     * http header 'Proxy:' to some value.
-     *
-     * This can cause 'internal' http/ftp requests to be
-     * arbitrarily redirected by any external attacker.
-     */
-    if(!prox && !strcasecompare("http_proxy", proxy_env)) {
-      /* There was no lowercase variable, try the uppercase version: */
-      Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
-      prox=curl_getenv(proxy_env);
-    }
-
-    if(prox)
-      proxy = prox; /* use this */
-    else {
-      proxy = curl_getenv("all_proxy"); /* default proxy to use */
-      if(!proxy)
-        proxy=curl_getenv("ALL_PROXY");
-    }
-  } /* if(!check_noproxy(conn->host.name, no_proxy)) - it wasn't specified
-       non-proxy */
-  free(no_proxy);
-
-#else /* !CURL_DISABLE_HTTP */
-
-  (void)conn;
-#endif /* CURL_DISABLE_HTTP */
+  if(prox)
+    proxy = prox; /* use this */
+  else {
+    proxy = curl_getenv("all_proxy"); /* default proxy to use */
+    if(!proxy)
+      proxy=curl_getenv("ALL_PROXY");
+  }
 
   return proxy;
 }
@@ -6206,7 +6189,13 @@ static CURLcode create_conn(struct Curl_easy *data,
     Curl_safefree(socksproxy);
   }
   else if(!proxy && !socksproxy)
-    proxy = detect_proxy(conn);
+#ifndef CURL_DISABLE_HTTP
+    /* if the host is not in the noproxy list, detect proxy. */
+    if(!check_noproxy(conn->host.name, no_proxy))
+      proxy = detect_proxy(conn);
+#else  /* !CURL_DISABLE_HTTP */
+    proxy = NULL;
+#endif /* CURL_DISABLE_HTTP */
 
   Curl_safefree(no_proxy);
 
