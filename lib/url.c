@@ -1490,13 +1490,6 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     data->set.proxytype = (curl_proxytype)va_arg(param, long);
     break;
 
-  case CURLOPT_SOCKS_PROXYTYPE:
-    /*
-     * Set proxy type. SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
-     */
-    data->set.socks_proxytype = (curl_proxytype)va_arg(param, long);
-    break;
-
   case CURLOPT_PROXY_TRANSFER_MODE:
     /*
      * set transfer mode (;type=<a|i>) when doing FTP via an HTTP proxy
@@ -4109,7 +4102,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
                         and the Curl_easy */
 
   conn->http_proxy.proxytype = data->set.proxytype;
-  conn->socks_proxy.proxytype = data->set.socks_proxytype;
+  conn->socks_proxy.proxytype = CURLPROXY_SOCKS4;
 
 #ifdef CURL_DISABLE_PROXY
 

@@ -867,11 +867,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
           if(config->proxy)
             my_setopt_enum(curl, CURLOPT_PROXYTYPE, (long)config->proxyver);
 
-          /* new in libcurl 7.10 */
+          /* new in libcurl 7.52.0 */
           if(config->socksproxy) {
             my_setopt_str(curl, CURLOPT_SOCKS_PROXY, config->socksproxy);
-            my_setopt_enum(curl, CURLOPT_SOCKS_PROXYTYPE,
-                           (long)config->socksver);
           }
 
           /* new in libcurl 7.10.6 */

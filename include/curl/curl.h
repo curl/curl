@@ -1766,13 +1766,9 @@ typedef enum {
   /* Name of socks proxy to use. */
   CINIT(SOCKS_PROXY, STRINGPOINT, 262),
 
-  /* indicates type of proxy. accepted values are CURLPROXY_SOCKS4,
-     CURLPROXY_SOCKS4A and CURLPROXY_SOCKS5. */
-  CINIT(SOCKS_PROXYTYPE, LONG, 263),
-
   /* The public key in DER form used to validate the proxy public key
      this option is used only if PROXY_SSL_VERIFYPEER is true */
-  CINIT(PROXY_PINNEDPUBLICKEY, STRINGPOINT, 264),
+  CINIT(PROXY_PINNEDPUBLICKEY, STRINGPOINT, 263),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

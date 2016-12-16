@@ -270,7 +270,6 @@ man_MANS =                                      \
  CURLOPT_SOCKS5_GSSAPI_NEC.3                    \
  CURLOPT_SOCKS5_GSSAPI_SERVICE.3                \
  CURLOPT_SOCKS_PROXY.3                          \
- CURLOPT_SOCKS_PROXYTYPE.3                      \
  CURLOPT_SSH_AUTH_TYPES.3                       \
  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.3              \
  CURLOPT_SSH_KEYDATA.3                          \
@@ -581,7 +580,6 @@ HTMLPAGES =                                     \
  CURLOPT_SOCKS5_GSSAPI_NEC.html                 \
  CURLOPT_SOCKS5_GSSAPI_SERVICE.html             \
  CURLOPT_SOCKS_PROXY.html                       \
- CURLOPT_SOCKS_PROXYTYPE.html                   \
  CURLOPT_SSH_AUTH_TYPES.html                    \
  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.html           \
  CURLOPT_SSH_KEYDATA.html                       \
@@ -892,7 +890,6 @@ PDFPAGES =                                      \
  CURLOPT_SOCKS5_GSSAPI_NEC.pdf                  \
  CURLOPT_SOCKS5_GSSAPI_SERVICE.pdf              \
  CURLOPT_SOCKS_PROXY.pdf                        \
- CURLOPT_SOCKS_PROXYTYPE.pdf                    \
  CURLOPT_SSH_AUTH_TYPES.pdf                     \
  CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.pdf            \
  CURLOPT_SSH_KEYDATA.pdf                        \
