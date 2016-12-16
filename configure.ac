@@ -3827,6 +3827,7 @@ AC_CONFIG_FILES([Makefile \
            docs/examples/Makefile \
            docs/libcurl/Makefile \
            docs/libcurl/opts/Makefile \
+           docs/cmdline-opts/Makefile \
            include/Makefile \
            include/curl/Makefile \
            src/Makefile \
