@@ -384,7 +384,7 @@ set_ssl_version_up_to(int *protocol_priority, struct connectdata *conn,
 
   switch(ssl_version_up_to) {
     case CURL_SSLVERSION_OR_UP_TO_NONE:
-      switch (ssl_version) {
+      switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           return set_ssl_version_up_to(protocol_priority, conn, ssl_version,
                                        CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
@@ -404,7 +404,7 @@ set_ssl_version_up_to(int *protocol_priority, struct connectdata *conn,
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
       protocol_priority[0] = GNUTLS_TLS1_0;
-      switch (ssl_version_up_to) {
+      switch(ssl_version_up_to) {
         case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
           protocol_priority[1] = GNUTLS_TLS1_1;
           break;
@@ -416,7 +416,7 @@ set_ssl_version_up_to(int *protocol_priority, struct connectdata *conn,
       break;
     case CURL_SSLVERSION_TLSv1_1:
       protocol_priority[0] = GNUTLS_TLS1_1;
-      switch (ssl_version_up_to) {
+      switch(ssl_version_up_to) {
         case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
           protocol_priority[1] = GNUTLS_TLS1_2;
           break;
@@ -447,7 +447,7 @@ set_ssl_version_up_to(const char **prioritylist, struct connectdata *conn,
 
   switch(ssl_version_up_to) {
     case CURL_SSLVERSION_OR_UP_TO_NONE:
-      switch (ssl_version) {
+      switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           return set_ssl_version_up_to(prioritylist, conn, ssl_version,
                                        CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
@@ -466,7 +466,7 @@ set_ssl_version_up_to(const char **prioritylist, struct connectdata *conn,
 
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
-      switch (ssl_version_up_to) {
+      switch(ssl_version_up_to) {
         case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
           *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                          "+VERS-TLS1.0:" GNUTLS_SRP;
@@ -483,7 +483,7 @@ set_ssl_version_up_to(const char **prioritylist, struct connectdata *conn,
       }
       break;
     case CURL_SSLVERSION_TLSv1_1:
-      switch (ssl_version_up_to) {
+      switch(ssl_version_up_to) {
         case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
           *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                          "+VERS-TLS1.1:" GNUTLS_SRP;
@@ -496,7 +496,7 @@ set_ssl_version_up_to(const char **prioritylist, struct connectdata *conn,
       }
       break;
     case CURL_SSLVERSION_TLSv1_2:
-      switch (ssl_version_up_to) {
+      switch(ssl_version_up_to) {
         case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
         case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
           *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
@@ -701,7 +701,7 @@ gtls_connect_step1(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  switch (SSL_CONN_CONFIG(version)) {
+  switch(SSL_CONN_CONFIG(version)) {
     case CURL_SSLVERSION_SSLv3:
       protocol_priority[0] = GNUTLS_SSL3;
       break;

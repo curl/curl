@@ -149,7 +149,7 @@ set_ssl_version_up_to(struct connectdata *conn, int sockindex,
 
   switch(ssl_version_up_to) {
     case CURL_SSLVERSION_OR_UP_TO_NONE:
-      switch (ssl_version) {
+      switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           return set_ssl_version_up_to(conn, sockindex, ssl_version,
                                        CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
@@ -166,7 +166,7 @@ set_ssl_version_up_to(struct connectdata *conn, int sockindex,
       break;
   }
 
-  switch (ssl_version) {
+  switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
       ssl_set_min_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
                           SSL_MINOR_VERSION_1);

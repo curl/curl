@@ -1518,7 +1518,7 @@ set_ssl_version_up_to(SSLVersionRange *sslver, struct Curl_easy *data,
 {
   switch(ssl_version_up_to) {
     case CURL_SSLVERSION_OR_UP_TO_NONE:
-      switch (ssl_version) {
+      switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           return set_ssl_version_up_to(sslver, data, ssl_version,
                                        CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
@@ -1565,7 +1565,7 @@ set_ssl_version_up_to(SSLVersionRange *sslver, struct Curl_easy *data,
 #endif
   }
 
-  switch (ssl_version_up_to) {
+  switch(ssl_version_up_to) {
     case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
       sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
       break;

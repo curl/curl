@@ -756,7 +756,7 @@ set_ssl_version_up_to(unsigned int *protoflags, struct connectdata *conn,
 
   switch(ssl_version_up_to) {
     case CURL_SSLVERSION_OR_UP_TO_NONE:
-      switch (ssl_version) {
+      switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           return set_ssl_version_up_to(protoflags, conn, ssl_version,
                                        CURL_SSLVERSION_OR_UP_TO_TLSv1_0);

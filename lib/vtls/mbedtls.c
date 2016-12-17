@@ -168,7 +168,7 @@ set_ssl_version_up_to(struct connectdata *conn, int sockindex,
 
   switch(ssl_version_up_to) {
     case CURL_SSLVERSION_OR_UP_TO_NONE:
-      switch (ssl_version) {
+      switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           return set_ssl_version_up_to(conn, sockindex, ssl_version,
                                        CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
@@ -185,7 +185,7 @@ set_ssl_version_up_to(struct connectdata *conn, int sockindex,
       break;
   }
 
-  switch (ssl_version) {
+  switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
       mbedtls_version_minor = MBEDTLS_SSL_MINOR_VERSION_1;
       infof(data, "mbedTLS: Set SSL min version to TLS 1.0\n");
