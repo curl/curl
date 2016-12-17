@@ -147,10 +147,10 @@ my %opts = (
     '-N, --buffer' => 6,
     '--sessionid' => 6,
 
-    # deprecated options do not need to be in curl -h output
-    '--krb4' => 4,
-    '--ftp-ssl' => 4,
-    '--ftp-ssl-reqd' => 4,
+    # deprecated options do not need to be in tool_help.c nor curl.1
+    '--krb4' => 6,
+    '--ftp-ssl' => 6,
+    '--ftp-ssl-reqd' => 6,
 
     # for tests and debug only, can remain hidden
     '--test-event' => 6,
