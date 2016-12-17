@@ -152,7 +152,7 @@ fail.
 
 Used together with \fI-u, --user\fP.
 
-See also \fI--proxy-anyauth\fP and \fI--basic\fP and \fI--digest\fP. 
+See also \fI--proxy-anyauth\fP and \fI--basic\fP and \fI--digest\fP.
 .IP "-a, --append"
 (FTP SFTP) When used in an upload, this makes curl append to the target file instead of
 overwriting it. If the remote file doesn't exist, it will be created.  Note
@@ -165,7 +165,7 @@ previously set option that sets a different authentication method (such as
 
 Used together with \fI-u, --user\fP.
 
-See also \fI--proxy-basic\fP. 
+See also \fI--proxy-basic\fP.
 .IP "--cacert <CA certificate>"
 (TLS) Tells curl to use the specified certificate file to verify the peer. The file
 may contain multiple CA certificates. The certificate(s) must be in PEM
@@ -211,14 +211,14 @@ or no response at all is received, the verification fails.
 
 This is currently only implemented in the OpenSSL, GnuTLS and NSS backends.
 
-Added in 7.41.0. 
+Added in 7.41.0.
 .IP "--cert-type <type>"
 (TLS) Tells curl what certificate type the provided certificate is in. PEM, DER and
 ENG are recognized types.  If not specified, PEM is assumed.
 
 If this option is used several times, the last one will be used.
 
-See also \fI-E, --cert\fP and \fI--key\fP and \fI--key-type\fP. 
+See also \fI-E, --cert\fP and \fI--key\fP and \fI--key-type\fP.
 .IP "-E, --cert <certificate[:password]>"
 (TLS) Tells curl to use the specified client certificate file when getting a file
 with HTTPS, FTPS or another SSL-based protocol. The certificate must be in
@@ -246,7 +246,7 @@ precede it with "./" prefix, in order to avoid confusion with a nickname.
 
 If this option is used several times, the last one will be used.
 
-See also \fI--cert-type\fP and \fI--key\fP and \fI--key-type\fP. 
+See also \fI--cert-type\fP and \fI--key\fP and \fI--key-type\fP.
 .IP "--ciphers <list of ciphers>"
 (TLS) Specifies which ciphers to use in the connection. The list of ciphers must
 specify valid ciphers. Read up on SSL cipher list details on this URL:
@@ -327,7 +327,7 @@ accepts decimal values.
 
 If this option is used several times, the last one will be used.
 
-See also \fI-m, --max-time\fP. 
+See also \fI-m, --max-time\fP.
 .IP "--connect-to <HOST1:PORT1:HOST2:PORT2>"
 
 For a request to the given HOST:PORT pair, connect to
@@ -342,7 +342,7 @@ original host/port".
 
 This option can be used many times to add many connect rules.
 
-See also \fI--resolve\fP and \fI-H, --header\fP. Added in 7.49.0. 
+See also \fI--resolve\fP and \fI-H, --header\fP. Added in 7.49.0.
 .IP "-C, --continue-at <offset>"
 Continue/Resume a previous file transfer at the given offset. The given offset
 is the exact number of bytes that will be skipped, counting from the beginning
@@ -354,7 +354,7 @@ transfer. It then uses the given output/input files to figure that out.
 
 If this option is used several times, the last one will be used.
 
-See also \fI-r, --range\fP. 
+See also \fI-r, --range\fP.
 .IP "-c, --cookie-jar <filename>"
 (HTTP) Specify to which file you want curl to write all cookies after a completed
 operation. Curl writes all cookies from its in-memory cookie storage to the
@@ -422,7 +422,7 @@ specify peer certificates that are to be considered revoked.
 
 If this option is used several times, the last one will be used.
 
-Added in 7.19.7. 
+Added in 7.19.7.
 .IP "--data-ascii <data>"
 (HTTP) This is just an alias for \fI-d, --data\fP.
 .IP "--data-binary <data>"
@@ -438,7 +438,7 @@ data as described in \fI-d, --data\fP.
 (HTTP) This posts data similarly to \fI-d, --data\fP but without the special
 interpretation of the @ character.
 
-See also \fI-d, --data\fP. Added in 7.43.0. 
+See also \fI-d, --data\fP. Added in 7.43.0.
 .IP "--data-urlencode <data>"
 (HTTP) This posts data, similar to the other \fI-d, --data\fP options with the exception
 that this performs URL-encoding.
@@ -467,7 +467,7 @@ sign appended, resulting in \fIname=urlencoded-file-content\fP. Note that the
 name is expected to be URL-encoded already.
 .RE
 
-See also \fI-d, --data\fP and \fI--data-raw\fP. Added in 7.18.0. 
+See also \fI-d, --data\fP and \fI--data-raw\fP. Added in 7.18.0.
 .IP "-d, --data <data>"
 (HTTP) Sends the specified data in a POST request to the HTTP server, in the same way
 that a browser does when a user has filled in an HTML form and presses the
@@ -487,12 +487,12 @@ chunk that looks like \&'name=daniel&skill=lousy'.
 If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from
 stdin. Multiple files can also be specified. Posting data from a file named
-'foobar' would thus be done with \fI\fI-d, --data\fP\fP @foobar. When --data is told to
-read from a file like that, carriage returns and newlines will be stripped
-out. If you don't want the @ character to have a special interpretation use
-\fI--data-raw\fP instead.
+'foobar' would thus be done with \fI-d, --data\fP @foobar. When --data is told to read
+from a file like that, carriage returns and newlines will be stripped out. If
+you don't want the @ character to have a special interpretation use \fI--data-raw\fP
+instead.
 
-See also \fI--data-binary\fP and \fI--data-urlencode\fP and \fI--data-raw\fP. This option overrides \fI-F, --form\fP and \fI-I, --head\fP and \fI--upload\fP. 
+See also \fI--data-binary\fP and \fI--data-urlencode\fP and \fI--data-raw\fP. This option overrides \fI-F, --form\fP and \fI-I, --head\fP and \fI--upload\fP.
 .IP "--delegation <LEVEL>"
 (GSS/kerberos) Set LEVEL to tell the server what it is allowed to delegate when it
 comes to user credentials.
@@ -512,7 +512,7 @@ combination with the normal \fI-u, --user\fP option to set user name and passwor
 
 If this option is used several times, only the first one is used.
 
-See also \fI-u, --user\fP and \fI--proxy-digest\fP and \fI--anyauth\fP. This option overrides \fI--basic\fP and \fI--ntlm\fP and \fI--negotiate\fP. 
+See also \fI-u, --user\fP and \fI--proxy-digest\fP and \fI--anyauth\fP. This option overrides \fI--basic\fP and \fI--ntlm\fP and \fI--negotiate\fP.
 .IP "--disable-eprt"
 (FTP) Tell curl to disable the use of the EPRT and LPRT commands when doing active
 FTP transfers. Curl will normally always first attempt to use EPRT, then LPRT
@@ -551,26 +551,26 @@ config file search path.
 counterpart to \fI--interface\fP (which does not affect DNS). The supplied string
 must be an interface name (not an address).
 
-See also \fI--dns-ipv4-addr\fP and \fI--dns-ipv6-addr\fP. \fI--dns-interface\fP requires that the underlying libcurl was built to support c-ares. Added in 7.33.0. 
+See also \fI--dns-ipv4-addr\fP and \fI--dns-ipv6-addr\fP. \fI--dns-interface\fP requires that the underlying libcurl was built to support c-ares. Added in 7.33.0.
 .IP "--dns-ipv4-addr <address>"
 (DNS) Tell curl to bind to <ip-address> when making IPv4 DNS requests, so that
 the DNS requests originate from this address. The argument should be a
 single IPv4 address.
 
-See also \fI--dns-interface\fP and \fI--dns-ipv6-addr\fP. \fI--dns-ipv4-addr\fP requires that the underlying libcurl was built to support c-ares. Added in 7.33.0. 
+See also \fI--dns-interface\fP and \fI--dns-ipv6-addr\fP. \fI--dns-ipv4-addr\fP requires that the underlying libcurl was built to support c-ares. Added in 7.33.0.
 .IP "--dns-ipv6-addr <address>"
 (DNS) Tell curl to bind to <ip-address> when making IPv6 DNS requests, so that
 the DNS requests originate from this address. The argument should be a
 single IPv6 address.
 
-See also \fI--dns-interface\fP and \fI--dns-ipv4-addr\fP. \fI--dns-ipv6-addr\fP requires that the underlying libcurl was built to support c-ares. Added in 7.33.0. 
+See also \fI--dns-interface\fP and \fI--dns-ipv4-addr\fP. \fI--dns-ipv6-addr\fP requires that the underlying libcurl was built to support c-ares. Added in 7.33.0.
 .IP "--dns-servers <addresses>"
 Set the list of DNS servers to be used instead of the system default.
 The list of IP addresses should be separated with commas. Port numbers
 may also optionally be given as \fI:<port-number>\fP after each IP
 address.
 
-\fI--dns-servers\fP requires that the underlying libcurl was built to support c-ares. Added in 7.33.0. 
+\fI--dns-servers\fP requires that the underlying libcurl was built to support c-ares. Added in 7.33.0.
 .IP "-D, --dump-header <filename>"
 (HTTP FTP) Write the received protocol headers to the specified file.
 
@@ -584,29 +584,29 @@ and thus are saved there.
 
 If this option is used several times, the last one will be used.
 
-See also \fI-o, --output\fP. 
+See also \fI-o, --output\fP.
 .IP "--egd-file <file>"
 (TLS) Specify the path name to the Entropy Gathering Daemon socket. The socket is
 used to seed the random engine for SSL connections.
 
-See also \fI--random-file\fP. 
+See also \fI--random-file\fP.
 .IP "--engine <name>"
-(TLS) Select the OpenSSL crypto engine to use for cipher operations. Use \fI\fI--engine\fP
-list\fP to print a list of build-time supported engines. Note that not all (or
+(TLS) Select the OpenSSL crypto engine to use for cipher operations. Use \fI--engine\fP
+list to print a list of build-time supported engines. Note that not all (or
 none) of the engines may be available at run-time.
 .IP "--environment"
 Sets a range of environment variables, using the names the \fI-w, --write-out\fP option
 supports, to allow easier extraction of useful information after having run
 curl.
 
-\fI--environment\fP requires that the underlying libcurl was built to support RISC OS. 
+\fI--environment\fP requires that the underlying libcurl was built to support RISC OS.
 .IP "--expect100-timeout <seconds>"
 (HTTP) Maximum time in seconds that you allow curl to wait for a 100-continue
 response when curl emits an Expects: 100-continue header in its request. By
 default curl will wait one second. This option accepts decimal values! When
 curl stops waiting, it will continue as if the response has been received.
 
-See also \fI--connect-timeout\fP. Added in 7.47.0. 
+See also \fI--connect-timeout\fP. Added in 7.47.0.
 .IP "--fail-early"
 Fail and exit on first detected error.
 
@@ -623,7 +623,7 @@ similar.
 
 This option will apply for all given URLs even if you use \fI-:, --next\fP.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "-f, --fail"
 (HTTP) Fail silently (no output at all) on server errors. This is mostly done to
 better enable scripts etc to better deal with failed attempts. In normal cases
@@ -643,7 +643,7 @@ handshake.
 This is currently only implemented in the NSS and Secure Transport (on iOS 7.0
 or later, or OS X 10.9 or later) backends.
 
-Added in 7.42.0. 
+Added in 7.42.0.
 .IP "--form-string <name=string>"
 (HTTP) Similar to \fI-F, --form\fP except that the value string for the named parameter is used
 literally. Leading \&'@' and \&'<' characters, and the \&';type=' string in
@@ -651,7 +651,7 @@ the value have no special meaning. Use this in preference to \fI-F, --form\fP\fP
 there's any possibility that the string value may accidentally trigger the
 \&'@' or \&'<' features of \fI-F, --form\fP.
 
-See also \fI-F, --form\fP. 
+See also \fI-F, --form\fP.
 .IP "-F, --form <name=content>"
 (HTTP) This lets curl emulate a filled-in form in which a user has pressed the submit
 button. This causes curl to POST data using the Content-Type
@@ -701,27 +701,27 @@ See further examples and details in the MANUAL.
 
 This option can be used multiple times.
 
-This option overrides \fI-d, --data\fP and \fI-I, --head\fP and \fI--upload\fP. 
+This option overrides \fI-d, --data\fP and \fI-I, --head\fP and \fI--upload\fP.
 .IP "--ftp-account <data>"
 (FTP) When an FTP server asks for "account data" after user name and password has
 been provided, this data is sent off using the ACCT command.
 
 If this option is used several times, the last one will be used.
 
-Added in 7.13.0. 
+Added in 7.13.0.
 .IP "--ftp-alternative-to-user <command>"
 (FTP) If authenticating with the USER and PASS commands fails, send this command.
 When connecting to Tumbleweed's Secure Transport server over FTPS using a
 client certificate, using "SITE AUTH" will tell the server to retrieve the
 username from the certificate.
 
-Added in 7.15.5. 
+Added in 7.15.5.
 .IP "--ftp-create-dirs"
 (FTP SFTP) When an FTP or SFTP URL/operation uses a path that doesn't currently exist on
 the server, the standard behavior of curl is to fail. Using this option, curl
 will instead attempt to create missing directories.
 
-See also \fI--create-dirs\fP. 
+See also \fI--create-dirs\fP.
 .IP "--ftp-method <method>"
 (FTP) Control what method curl should use to reach a file on an FTP(S)
 server. The method argument should be one of the following alternatives:
@@ -739,7 +739,7 @@ curl does one CWD with the full target directory and then operates on the file
 compliant than 'nocwd' but without the full penalty of 'multicwd'.
 .RE
 
-Added in 7.15.1. 
+Added in 7.15.1.
 .IP "--ftp-pasv"
 (FTP) Use passive mode for the data connection. Passive is the internal default
 behavior, but using this option can be used to override a previous \fI-P, --ftp-port\fP
@@ -752,7 +752,7 @@ correct \fI-P, --ftp-port\fP again.
 Passive mode means that curl will try the EPSV command first and then PASV,
 unless \fI--disable-epsv\fP is used.
 
-See also \fI--disable-epsv\fP. Added in 7.11.0. 
+See also \fI--disable-epsv\fP. Added in 7.11.0.
 .IP "-P, --ftp-port <address>"
 (FTP) Reverses the default initiator/listener roles when connecting with FTP. This
 option makes curl use active mode. curl then tells the server to connect back
@@ -780,13 +780,13 @@ to tell curl what TCP port range to use. That means you specify a port range,
 from a lower to a higher number. A single number works as well, but do note
 that it increases the risk of failure since the port may not be available.
 
-See also \fI--ftp-pasv\fP and \fI--disable-eprt\fP. 
+See also \fI--ftp-pasv\fP and \fI--disable-eprt\fP.
 .IP "--ftp-pret"
 (FTP) Tell curl to send a PRET command before PASV (and EPSV). Certain FTP servers,
 mainly drftpd, require this non-standard command for directory listings as
 well as up and downloads in PASV mode.
 
-Added in 7.20.0. 
+Added in 7.20.0.
 .IP "--ftp-skip-pasv-ip"
 (FTP) Tell curl to not use the IP address the server suggests in its response
 to curl's PASV command when curl connects the data connection. Instead curl
@@ -795,27 +795,27 @@ connection.
 
 This option has no effect if PORT, EPRT or EPSV is used instead of PASV.
 
-See also \fI--ftp-pasv\fP. Added in 7.14.2. 
+See also \fI--ftp-pasv\fP. Added in 7.14.2.
 .IP "--ftp-ssl-ccc-mode <active/passive>"
 (FTP) Sets the CCC mode. The passive mode will not initiate the shutdown, but
 instead wait for the server to do it, and will not reply to the shutdown from
 the server. The active mode initiates the shutdown and waits for a reply from
 the server.
 
-See also \fI--ftp-ssl-ccc\fP. Added in 7.16.2. 
+See also \fI--ftp-ssl-ccc\fP. Added in 7.16.2.
 .IP "--ftp-ssl-ccc"
 (FTP) Use CCC (Clear Command Channel) Shuts down the SSL/TLS layer after
 authenticating. The rest of the control channel communication will be
 unencrypted. This allows NAT routers to follow the FTP transaction. The
 default mode is passive.
 
-See also \fI--ssl\fP and \fI--ftp-ssl-ccc-mode\fP. Added in 7.16.1. 
+See also \fI--ssl\fP and \fI--ftp-ssl-ccc-mode\fP. Added in 7.16.1.
 .IP "--ftp-ssl-control"
 (FTP) Require SSL/TLS for the FTP login, clear for transfer.  Allows secure
 authentication, but non-encrypted data transfers for efficiency.  Fails the
 transfer if the server doesn't support SSL/TLS.
 
-Added in 7.16.0. 
+Added in 7.16.0.
 .IP "-G, --get"
 When used, this option will make all data specified with \fI-d, --data\fP, \fI--data-binary\fP
 or \fI--data-urlencode\fP to be used in an HTTP GET request instead of the POST
@@ -878,27 +878,27 @@ description.
 be the 128 bit MD5 checksum of the remote host's public key, curl will refuse
 the connection with the host unless the md5sums match.
 
-Added in 7.17.1. 
+Added in 7.17.1.
 .IP "-0, --http1.0"
 (HTTP) Tells curl to use HTTP version 1.0 instead of using its internally preferred
 HTTP version.
 
-This option overrides \fI--http1.1\fP and \fI--http2\fP. 
+This option overrides \fI--http1.1\fP and \fI--http2\fP.
 .IP "--http1.1"
 (HTTP) Tells curl to use HTTP version 1.1.
 
-This option overrides \fI-0, --http1.0\fP and \fI--http2\fP. Added in 7.33.0. 
+This option overrides \fI-0, --http1.0\fP and \fI--http2\fP. Added in 7.33.0.
 .IP "--http2-prior-knowledge"
 (HTTP) Tells curl to issue its non-TLS HTTP requests using HTTP/2 without HTTP/1.1
 Upgrade. It requires prior knowledge that the server supports HTTP/2 straight
 away. HTTPS requests will still do HTTP/2 the standard way with negotiated
 protocol version in the TLS handshake.
 
-\fI--http2-prior-knowledge\fP requires that the underlying libcurl was built to support HTTP/2. This option overrides \fI--http1.1\fP and \fI-0, --http1.0\fP and \fI--http2\fP. Added in 7.49.0. 
+\fI--http2-prior-knowledge\fP requires that the underlying libcurl was built to support HTTP/2. This option overrides \fI--http1.1\fP and \fI-0, --http1.0\fP and \fI--http2\fP. Added in 7.49.0.
 .IP "--http2"
 (HTTP) Tells curl to use HTTP version 2.
 
-See also \fI--no-alpn\fP. \fI--http2\fP requires that the underlying libcurl was built to support HTTP/2. This option overrides \fI--http1.1\fP and \fI-0, --http1.0\fP and \fI--http2-prior-knowledge\fP. Added in 7.33.0. 
+See also \fI--no-alpn\fP. \fI--http2\fP requires that the underlying libcurl was built to support HTTP/2. This option overrides \fI--http1.1\fP and \fI-0, --http1.0\fP and \fI--http2-prior-knowledge\fP. Added in 7.33.0.
 .IP "--ignore-content-length"
 (FTP HTTP) For HTTP, Ignore the Content-Length header. This is particularly useful for
 servers running Apache 1.x, which will report incorrect Content-Length for
@@ -910,7 +910,7 @@ downloading a file.
 Include the HTTP-header in the output. The HTTP-header includes things like
 server-name, date of the document, HTTP-version and more...
 
-See also \fI-v, --verbose\fP. 
+See also \fI-v, --verbose\fP.
 .IP "-k, --insecure"
 (TLS) This option explicitly allows curl to perform "insecure" SSL connections and
 transfers. All SSL connections are attempted to be made secure by using the CA
@@ -928,24 +928,24 @@ name, IP address or host name. An example could look like:
 
 If this option is used several times, the last one will be used.
 
-See also \fI--dns-interface\fP. 
+See also \fI--dns-interface\fP.
 .IP "-4, --ipv4"
 This option tells curl to resolve names to IPv4 addresses only, and not for
 example try IPv6.
 
-See also \fI--http1.1\fP and \fI--http2\fP. This option overrides \fI-6, --ipv6\fP. 
+See also \fI--http1.1\fP and \fI--http2\fP. This option overrides \fI-6, --ipv6\fP.
 .IP "-6, --ipv6"
 This option tells curl to resolve names to IPv6 addresses only, and not for
 example try IPv4.
 
-See also \fI--http1.1\fP and \fI--http2\fP. This option overrides \fI-6, --ipv6\fP. 
+See also \fI--http1.1\fP and \fI--http2\fP. This option overrides \fI-6, --ipv6\fP.
 .IP "-j, --junk-session-cookies"
 (HTTP) When curl is told to read cookies from a given file, this option will make it
 discard all "session cookies". This will basically have the same effect as if
 a new session is started. Typical browsers always discard session cookies when
 they're closed down.
 
-See also \fI-b, --cookie\fP and \fI-c, --cookie-jar\fP. 
+See also \fI-b, --cookie\fP and \fI-c, --cookie-jar\fP.
 .IP "--keepalive-time <seconds>"
 This option sets the time a connection needs to remain idle before sending
 keepalive probes and the time between individual keepalive probes. It is
@@ -956,7 +956,7 @@ option has no effect if \fI--no-keepalive\fP is used.
 If this option is used several times, the last one will be used. If
 unspecified, the option defaults to 60 seconds.
 
-Added in 7.18.0. 
+Added in 7.18.0.
 .IP "--key-type <type>"
 (TLS) Private key file type. Specify which type your \fI--key\fP provided private key
 is. DER, PEM, and ENG are supported. If not specified, PEM is assumed.
@@ -975,7 +975,7 @@ level that is not one of these, 'private' will instead be used.
 
 If this option is used several times, the last one will be used.
 
-\fI--krb\fP requires that the underlying libcurl was built to support Kerberos. 
+\fI--krb\fP requires that the underlying libcurl was built to support Kerberos.
 .IP "--libcurl <file>"
 Append this option to any ordinary curl command line, and you will get a
 libcurl-using C source code written to the file that does the equivalent
@@ -984,7 +984,7 @@ of what your command-line operation does!
 If this option is used several times, the last given file name will be
 used.
 
-Added in 7.16.1. 
+Added in 7.16.1.
 .IP "--limit-rate <speed>"
 Specify the maximum transfer rate you want curl to use - for both downloads
 and uploads. This feature is useful if you have a limited pipe and you'd like
@@ -1020,21 +1020,21 @@ Note: When combined with \fI-X, --request\fP, this option can be used to send an
 command instead, so the user may use the email's unique identifier rather than
 it's message id to make the request.
 
-Added in 7.21.5. 
+Added in 7.21.5.
 .IP "--local-port <num/range>"
 Set a preferred single number or range (FROM-TO) of local port numbers to use
 for the connection(s).  Note that port numbers by nature are a scarce resource
 that will be busy at times so setting this range to something too narrow might
 cause unnecessary connection setup failures.
 
-Added in 7.15.2. 
+Added in 7.15.2.
 .IP "--location-trusted"
 (HTTP) Like \fI-L, --location\fP, but will allow sending the name + password to all hosts that
 the site may redirect to. This may or may not introduce a security breach if
 the site redirects you to a site to which you'll send your authentication info
 (which is plaintext in the case of HTTP Basic authentication).
 
-See also \fI-u, --user\fP. 
+See also \fI-u, --user\fP.
 .IP "-L, --location"
 (HTTP) If the server reports that the requested page has moved to a different
 location (indicated with a Location: header and a 3XX response code), this
@@ -1064,17 +1064,17 @@ RFC 2384, RFC 5092 and IETF draft draft-earhart-url-smtp-00.txt
 
 If this option is used several times, the last one will be used.
 
-Added in 7.34.0. 
+Added in 7.34.0.
 .IP "--mail-auth <address>"
 (SMTP) Specify a single address. This will be used to specify the authentication
 address (identity) of a submitted message that is being relayed to another
 server.
 
-See also \fI--mail-rcpt\fP and \fI--mail-from\fP. Added in 7.25.0. 
+See also \fI--mail-rcpt\fP and \fI--mail-from\fP. Added in 7.25.0.
 .IP "--mail-from <address>"
 (SMTP) Specify a single address that the given mail should get sent from.
 
-See also \fI--mail-rcpt\fP and \fI--mail-auth\fP. Added in 7.20.0. 
+See also \fI--mail-rcpt\fP and \fI--mail-auth\fP. Added in 7.20.0.
 .IP "--mail-rcpt <address>"
 (SMTP) Specify a single address, user name or mailing list name. Repeat this
 option several times to send to multiple recipients.
@@ -1090,7 +1090,7 @@ When performing a mailing list expand (EXPN command), the recipient should be
 specified using the mailing list name, such as "Friends" or "London-Office".
 (Added in 7.34.0)
 
-Added in 7.20.0. 
+Added in 7.20.0.
 .IP "-M, --manual"
 Manual. Display the huge help text.
 .IP "--max-filesize <bytes>"
@@ -1102,7 +1102,7 @@ return with exit code 63.
 files this option has no effect even if the file transfer ends up being larger
 than this given limit. This concerns both FTP and HTTP transfers.
 
-See also \fI--limit-rate\fP. 
+See also \fI--limit-rate\fP.
 .IP "--max-redirs <num>"
 (HTTP) Set maximum number of redirection-followings allowed. When \fI-L, --location\fP is used,
 is used to prevent curl from following redirections \&"in absurdum". By
@@ -1119,7 +1119,7 @@ timeout increases in decimal precision.
 
 If this option is used several times, the last one will be used.
 
-See also \fI--connect-timeout\fP. 
+See also \fI--connect-timeout\fP.
 .IP "--metalink"
 This option can tell curl to parse and process a given URI as Metalink file
 (both version 3 and 4 (RFC 5854) are supported) and make use of the mirrors
@@ -1144,7 +1144,7 @@ headers are included in the file described in Metalink file, hash check will
 fail.
 
 
-\fI--metalink\fP requires that the underlying libcurl was built to support metalink. Added in 7.27.0. 
+\fI--metalink\fP requires that the underlying libcurl was built to support metalink. Added in 7.27.0.
 .IP "--negotiate"
 (HTTP) Enables Negotiate (SPNEGO) authentication.
 
@@ -1157,7 +1157,7 @@ and password from the \fI-u, --user\fP option aren't actually used.
 
 If this option is used several times, only the first one is used.
 
-See also \fI--basic\fP and \fI--ntlm\fP and \fI--anyauth\fP and \fI--proxy-negotiate\fP. 
+See also \fI--basic\fP and \fI--ntlm\fP and \fI--anyauth\fP and \fI--proxy-negotiate\fP.
 .IP "--netrc-file <filemame>"
 This option is similar to \fI-n, --netrc\fP, except that you provide the path (absolute
 or relative) to the netrc file that Curl should use.  You can only specify one
@@ -1166,12 +1166,12 @@ the last one will be used.
 
 It will abide by \fI--netrc-optional\fP if specified.
 
-This option overrides \fI-n, --netrc\fP. Added in 7.21.5. 
+This option overrides \fI-n, --netrc\fP. Added in 7.21.5.
 .IP "--netrc-optional"
 Very similar to \fI-n, --netrc\fP, but this option makes the .netrc usage \fBoptional\fP
 and not mandatory as the \fI-n, --netrc\fP option does.
 
-See also \fI--netrc-file\fP. This option overrides \fI-n, --netrc\fP. 
+See also \fI--netrc-file\fP. This option overrides \fI-n, --netrc\fP.
 .IP "-n, --netrc"
 Makes curl scan the \fI.netrc\fP (\fI_netrc\fP on Windows) file in the user's
 home directory for login name and password. This is typically used for FTP on
@@ -1200,13 +1200,13 @@ For example, you can do both a GET and a POST in a single command line:
 
  curl www1.example.com --next -d postthis www2.example.com
 
-Added in 7.36.0. 
+Added in 7.36.0.
 .IP "--no-alpn"
 (HTTPS) Disable the ALPN TLS extension. ALPN is enabled by default if libcurl was built
 with an SSL library that supports ALPN. ALPN is used by a libcurl that supports
 HTTP/2 to negotiate HTTP/2 support with the server during https sessions.
 
-See also \fI--no-npn\fP and \fI--http2\fP. \fI--no-alpn\fP requires that the underlying libcurl was built to support TLS. Added in 7.36.0. 
+See also \fI--no-npn\fP and \fI--http2\fP. \fI--no-alpn\fP requires that the underlying libcurl was built to support TLS. Added in 7.36.0.
 .IP "-N, --no-buffer"
 Disables the buffering of the output stream. In normal work situations, curl
 will use a standard buffered output stream that will have the effect that it
@@ -1226,7 +1226,7 @@ Note that this is the negated option name documented. You can thus use
 with an SSL library that supports NPN. NPN is used by a libcurl that supports
 HTTP/2 to negotiate HTTP/2 support with the server during https sessions.
 
-See also \fI--no-alpn\fP and \fI--http2\fP. \fI--no-npn\fP requires that the underlying libcurl was built to support TLS. Added in 7.36.0. 
+See also \fI--no-alpn\fP and \fI--http2\fP. \fI--no-npn\fP requires that the underlying libcurl was built to support TLS. Added in 7.36.0.
 .IP "--no-sessionid"
 (TLS) Disable curl's use of SSL session-ID caching.  By default all transfers are
 done using the cache. Note that while nothing should ever get hurt by
@@ -1237,7 +1237,7 @@ you to succeed.
 Note that this is the negated option name documented. You can thus use
 --sessionid to enforce session-ID caching.
 
-Added in 7.16.0. 
+Added in 7.16.0.
 .IP "--noproxy <no-proxy-list>"
 Comma-separated list of hosts which do not use a proxy, if one is specified.
 The only wildcard is a single * character, which matches all hosts, and
@@ -1246,12 +1246,12 @@ a domain which contains the hostname, or the hostname itself. For example,
 local.com would match local.com, local.com:80, and www.local.com, but not
 www.notlocal.com.
 
-Added in 7.19.4. 
+Added in 7.19.4.
 .IP "--ntlm-wb"
 (HTTP) Enables NTLM much in the style \fI--ntlm\fP does, but hand over the authentication
 to the separate binary ntlmauth application that is executed when needed.
 
-See also \fI--ntlm\fP and \fI--proxy-ntlm\fP. 
+See also \fI--ntlm\fP and \fI--proxy-ntlm\fP.
 .IP "--ntlm"
 (HTTP) Enables NTLM authentication. The NTLM authentication method was designed by
 Microsoft and is used by IIS web servers. It is a proprietary protocol,
@@ -1265,7 +1265,7 @@ If you want to enable NTLM for your proxy authentication, then use
 
 If this option is used several times, only the first one is used.
 
-See also \fI--proxy-ntlm\fP. \fI--ntlm\fP requires that the underlying libcurl was built to support TLS. This option overrides \fI--basic\fP and \fI--negotiated\fP and \fI--digest\fP and \fI--anyauth\fP. 
+See also \fI--proxy-ntlm\fP. \fI--ntlm\fP requires that the underlying libcurl was built to support TLS. This option overrides \fI--basic\fP and \fI--negotiated\fP and \fI--digest\fP and \fI--anyauth\fP.
 .IP "--oauth2-bearer"
 (IMAP POP3 SMTP) Specify the Bearer Token for OAUTH 2.0 server authentication. The Bearer Token
 is used in conjunction with the user name which can be specified as part of
@@ -1302,7 +1302,7 @@ See also the \fI--create-dirs\fP option to create the local directories
 dynamically. Specifying the output as '-' (a single dash) will force the
 output to be done to stdout.
 
-See also \fI-O, --remote-name\fP and \fI--remote-name-all\fP and \fI-J, --remote-header-name\fP. 
+See also \fI-O, --remote-name\fP and \fI--remote-name-all\fP and \fI-J, --remote-header-name\fP.
 .IP "--pass <phrase>"
 (SSH TLS) Passphrase for the private key
 
@@ -1312,7 +1312,7 @@ Tell curl to not handle sequences of /../ or /./ in the given URL
 path. Normally curl will squash or merge them according to standards but with
 this option set you tell it not to do that.
 
-Added in 7.42.0. 
+Added in 7.42.0.
 .IP "--pinnedpubkey <hashes>"
 (TLS) Tells curl to use the specified public key file (or hashes) to verify the
 peer. This can be a path to a file which contains a single public key in PEM
@@ -1343,7 +1343,7 @@ in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
 a redirection. This option is meaningful only when using \fI-L, --location\fP.
 
-See also \fI--post302\fP and \fI--post303\fP and \fI-L, --location\fP. Added in 7.17.1. 
+See also \fI--post302\fP and \fI--post303\fP and \fI-L, --location\fP. Added in 7.17.1.
 .IP "--post302"
 (HTTP) Tells curl to respect RFC 7230/6.4.2 and not convert POST requests into GET
 requests when following a 302 redirection. The non-RFC behaviour is ubiquitous
@@ -1351,7 +1351,7 @@ in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
 a redirection. This option is meaningful only when using \fI-L, --location\fP.
 
-See also \fI--post301\fP and \fI--post303\fP and \fI-L, --location\fP. Added in 7.19.1. 
+See also \fI--post301\fP and \fI--post303\fP and \fI-L, --location\fP. Added in 7.19.1.
 .IP "--post303"
 (HTTP) Tells curl to respect RFC 7230/6.4.2 and not convert POST requests into GET
 requests when following a 303 redirection. The non-RFC behaviour is ubiquitous
@@ -1359,7 +1359,7 @@ in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
 a redirection. This option is meaningful only when using \fI-L, --location\fP.
 
-See also \fI--post302\fP and \fI--post301\fP and \fI-L, --location\fP. Added in 7.26.0. 
+See also \fI--post302\fP and \fI--post301\fP and \fI-L, --location\fP. Added in 7.26.0.
 .IP "--preproxy [protocol://]host[:port]"
 Use the specified proxy before connecting to the ordinary proxy. Hence pre
 proxy. A pre proxy must be a SOCKS speaking proxy.
@@ -1378,7 +1378,7 @@ or pass in a colon with %3a.
 
 If this option is used several times, the last one will be used.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "-#, --progress-bar"
 Make curl display transfer progress as a simple progress bar instead of the
 standard, more informational, meter.
@@ -1402,7 +1402,7 @@ This option does not change the default proxy protocol (http).
 Without this option curl would make a guess based on the host, see \fI--url\fP for
 details.
 
-Added in 7.45.0. 
+Added in 7.45.0.
 .IP "--proto-redir <protocols>"
 Tells curl to limit what protocols it may use on redirect. Protocols denied by
 \fI--proto\fP are not overridden by this option. See --proto for how protocols are
@@ -1417,7 +1417,7 @@ for security reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0
 SMB and SMBS are also disabled. Specifying \fIall\fP or \fI+all\fP enables all
 protocols on redirect, including those disabled for security.
 
-Added in 7.20.2. 
+Added in 7.20.2.
 .IP "--proto <protocols>"
 Tells curl to limit what protocols it may use in the transfer. Protocols are
 evaluated left to right, are comma separated, and are each a protocol name or
@@ -1457,47 +1457,47 @@ support for that protocol being built into curl to avoid an error.
 This option can be used multiple times, in which case the effect is the same
 as concatenating the protocols into one instance of the option.
 
-See also \fI--proto-redir\fP and \fI--proto-default\fP. Added in 7.20.2. 
+See also \fI--proto-redir\fP and \fI--proto-default\fP. Added in 7.20.2.
 .IP "--proxy-anyauth"
 Tells curl to pick a suitable authentication method when communicating with
 the given HTTP proxy. This might cause an extra request/response round-trip.
 
-See also \fI-x, --proxy\fP and \fI--proxy-basic\fP and \fI--proxy-digest\fP. Added in 7.13.2. 
+See also \fI-x, --proxy\fP and \fI--proxy-basic\fP and \fI--proxy-digest\fP. Added in 7.13.2.
 .IP "--proxy-basic"
 Tells curl to use HTTP Basic authentication when communicating with the given
 proxy. Use \fI--basic\fP for enabling HTTP Basic with a remote host. Basic is the
 default authentication method curl uses with proxies.
 
-See also \fI-x, --proxy\fP and \fI--proxy-anyauth\fP and \fI--proxy-digest\fP. 
+See also \fI-x, --proxy\fP and \fI--proxy-anyauth\fP and \fI--proxy-digest\fP.
 .IP "--proxy-cacert <file>"
 Same as \fI--cacert\fP but used in HTTPS proxy context.
 
-See also \fI--proxy-capath\fP and \fI--cacert\fP and \fI--capath\fP and \fI-x, --proxy\fP. Added in 7.52.0. 
+See also \fI--proxy-capath\fP and \fI--cacert\fP and \fI--capath\fP and \fI-x, --proxy\fP. Added in 7.52.0.
 .IP "--proxy-capath <dir>"
 Same as \fI--capath\fP but used in HTTPS proxy context.
 
-See also \fI--proxy-cacert\fP and \fI-x, --proxy\fP and \fI--capath\fP. Added in 7.52.0. 
+See also \fI--proxy-cacert\fP and \fI-x, --proxy\fP and \fI--capath\fP. Added in 7.52.0.
 .IP "--proxy-cert-type <type>"
 Same as \fI--cert-type\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--proxy-cert <cert[:passwd]>"
 Same as \fI-E, --cert\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--proxy-ciphers <list>"
 Same as \fI--ciphers\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--proxy-crlfile <file>"
 Same as \fI--crlfile\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--proxy-digest"
 Tells curl to use HTTP Digest authentication when communicating with the given
 proxy. Use \fI--digest\fP for enabling HTTP Digest with a remote host.
 
-See also \fI-x, --proxy\fP and \fI--proxy-anyauth\fP and \fI--proxy-basic\fP. 
+See also \fI-x, --proxy\fP and \fI--proxy-anyauth\fP and \fI--proxy-basic\fP.
 .IP "--proxy-header <header>"
 (HTTP) Extra header to include in the request when sending HTTP to a proxy. You may
 specify any number of extra headers. This is the equivalent option to \fI-H, --header\fP
@@ -1514,15 +1514,15 @@ knows will not be sent to a proxy.
 
 This option can be used multiple times to add/replace/remove multiple headers.
 
-Added in 7.37.0. 
+Added in 7.37.0.
 .IP "--proxy-insecure"
 Same as \fI-k, --insecure\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--proxy-key-type <type>"
 Same as \fI--key-type\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--proxy-key <key>"
 Same as \fI--key\fP but used in HTTPS proxy context.
 .IP "--proxy-negotiate"
@@ -1530,40 +1530,40 @@ Tells curl to use HTTP Negotiate (SPNEGO) authentication when communicating
 with the given proxy. Use \fI--negotiate\fP for enabling HTTP Negotiate (SPNEGO)
 with a remote host.
 
-See also \fI--proxy-anyauth\fP and \fI--proxy-basic\fP. Added in 7.17.1. 
+See also \fI--proxy-anyauth\fP and \fI--proxy-basic\fP. Added in 7.17.1.
 .IP "--proxy-ntlm"
 Tells curl to use HTTP NTLM authentication when communicating with the given
 proxy. Use \fI--ntlm\fP for enabling NTLM with a remote host.
 
-See also \fI--proxy-negotiate\fP and \fI--proxy-anyauth\fP. 
+See also \fI--proxy-negotiate\fP and \fI--proxy-anyauth\fP.
 .IP "--proxy-pass <phrase>"
-Same as \fI\fI--pass\fP\fP but used in HTTPS proxy context.
+Same as \fI--pass\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--proxy-service-name <name>"
 This option allows you to change the service name for proxy negotiation.
 
-Added in 7.43.0. 
+Added in 7.43.0.
 .IP "--proxy-ssl-allow-beast"
 Same as \fI--ssl-allow-beast\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--proxy-tlsauthtype <type>"
 Same as \fI--tlsauthtype\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--proxy-tlspassword <string>"
 Same as \fI--tlspassword\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
-.IP "--proxy-tlsuser.d <name>"
+Added in 7.52.0.
+.IP "--proxy-tlsuser <name>"
 Same as \fI--tlsuser\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--proxy-tlsv1"
 Same as \fI-1, --tlsv1\fP but used in HTTPS proxy context.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "-U, --proxy-user <user:password>"
 Specify the user name and password to use for proxy authentication.
 
@@ -1616,7 +1616,7 @@ HTTP-like operations. The tunnel approach is made with the HTTP proxy CONNECT
 request and requires that the proxy allows direct connect to the remote port
 number curl wants to tunnel through to.
 
-See also \fI-x, --proxy\fP. 
+See also \fI-x, --proxy\fP.
 .IP "--pubkey <key>"
 (SFTP SCP) Public key file name. Allows you to provide your public key in this separate
 file.
@@ -1728,7 +1728,7 @@ If this option is used several times, the last one will be used.
 (HTTP) When used, it disables all internal HTTP decoding of content or transfer
 encodings and instead makes them passed on unaltered, raw.
 
-Added in 7.16.2. 
+Added in 7.16.2.
 .IP "-e, --referer <URL>"
 (HTTP) Sends the "Referrer Page" information to the HTTP server. This can also be set
 with the \fI-H, --header\fP flag of course.  When used with \fI-L, --location\fP you can append
@@ -1738,7 +1738,7 @@ even if you don't set an initial \fI-e, --referer\fP.
 
 If this option is used several times, the last one will be used.
 
-See also \fI-A, --user-agent\fP and \fI-H, --header\fP. 
+See also \fI-A, --user-agent\fP and \fI-H, --header\fP.
 .IP "-J, --remote-header-name"
 (HTTP) This option tells the \fI-O, --remote-name\fP option to use the server-specified
 Content-Disposition filename instead of extracting a filename from the URL.
@@ -1760,7 +1760,7 @@ if \fI-O, --remote-name\fP were used for each one. So if you want to disable tha
 specific URL after \fI--remote-name-all\fP has been used, you must use "-o -" or
 --no-remote-name.
 
-Added in 7.19.0. 
+Added in 7.19.0.
 .IP "-O, --remote-name"
 Write output to a local file named like the remote file we get. (Only the file
 part of the remote file is used, the path is cut off.)
@@ -1832,12 +1832,12 @@ is set to make curl use another IP version.
 
 This option can be used many times to add many host names to resolve.
 
-Added in 7.21.3. 
+Added in 7.21.3.
 .IP "--retry-connrefused"
 In addition to the other conditions, consider ECONNREFUSED as a transient
 error too for \fI--retry\fP. This option is used together with --retry.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "--retry-delay <seconds>"
 Make curl sleep this amount of time before each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
@@ -1846,7 +1846,7 @@ used. Setting this delay to zero will make curl use the default backoff time.
 
 If this option is used several times, the last one will be used.
 
-Added in 7.12.3. 
+Added in 7.12.3.
 .IP "--retry-max-time <seconds>"
 The retry timer is reset before the first transfer attempt. Retries will be
 done as usual (see \fI--retry\fP) as long as the timer hasn't reached this given
@@ -1857,7 +1857,7 @@ zero to not timeout retries.
 
 If this option is used several times, the last one will be used.
 
-Added in 7.12.3. 
+Added in 7.12.3.
 .IP "--retry <num>"
 If a transient error is returned when curl tries to perform a transfer, it
 will retry this number of times before giving up. Setting the number to 0
@@ -1872,17 +1872,17 @@ using \fI--retry-delay\fP you disable this exponential backoff algorithm. See al
 
 If this option is used several times, the last one will be used.
 
-Added in 7.12.3. 
+Added in 7.12.3.
 .IP "--sasl-ir"
 Enable initial response in SASL authentication.
 
-Added in 7.31.0. 
+Added in 7.31.0.
 .IP "--service-name <name>"
 This option allows you to change the service name for SPNEGO.
 
 Examples: \fI--negotiate\fP \fI--service-name\fP sockd would use sockd/server-name.
 
-Added in 7.43.0. 
+Added in 7.43.0.
 .IP "-S, --show-error"
 When used with \fI-s, --silent\fP, it makes curl show an error message if it fails.
 .IP "-s, --silent"
@@ -1890,7 +1890,7 @@ Silent or quiet mode. Don't show progress meter or error messages.  Makes Curl
 mute. It will still output the data you ask for, potentially even to the
 terminal/stdout unless you redirect it.
 
-See also \fI-v, --verbose\fP and \fI--stderr\fP. 
+See also \fI-v, --verbose\fP and \fI--stderr\fP.
 .IP "--socks4 <host[:port]>"
 Use the specified SOCKS4 proxy. If the port number is not specified, it is
 assumed at port 1080.
@@ -1903,7 +1903,7 @@ with \fI-x, --proxy\fP using a socks4:// protocol prefix.
 
 If this option is used several times, the last one will be used.
 
-Added in 7.15.2. 
+Added in 7.15.2.
 .IP "--socks4a <host[:port]>"
 Use the specified SOCKS4a proxy. If the port number is not specified, it is
 assumed at port 1080.
@@ -1916,14 +1916,14 @@ with \fI-x, --proxy\fP using a socks4a:// protocol prefix.
 
 If this option is used several times, the last one will be used.
 
-Added in 7.18.0. 
+Added in 7.18.0.
 .IP "--socks5-gssapi-nec"
 As part of the GSS-API negotiation a protection mode is negotiated. RFC 1961
 says in section 4.3/4.4 it should be protected, but the NEC reference
 implementation does not.  The option \fI--socks5-gssapi-nec\fP allows the
 unprotected exchange of the protection mode negotiation.
 
-Added in 7.19.4. 
+Added in 7.19.4.
 .IP "--socks5-gssapi-service <name>"
 The default service name for a socks server is rcmd/server-fqdn. This option
 allows you to change it.
@@ -1933,7 +1933,7 @@ sockd/proxy-name \fI--socks5\fP proxy-name \fI--socks5-gssapi-service\fP sockd/r
 would use sockd/real-name for cases where the proxy-name does not match the
 principal name.
 
-Added in 7.19.4. 
+Added in 7.19.4.
 .IP "--socks5-hostname <host[:port]>"
 Use the specified SOCKS5 proxy (and let the proxy resolve the host name). If
 the port number is not specified, it is assumed at port 1080.
@@ -1946,7 +1946,7 @@ hostname proxy with \fI-x, --proxy\fP using a socks5h:// protocol prefix.
 
 If this option is used several times, the last one will be used.
 
-Added in 7.18.0. 
+Added in 7.18.0.
 .IP "--socks5 <host[:port]>"
 Use the specified SOCKS5 proxy - but resolve the host name locally. If the
 port number is not specified, it is assumed at port 1080.
@@ -1961,7 +1961,7 @@ If this option is used several times, the last one will be used.
 
 This option (as well as \fI--socks4\fP) does not work with IPV6, FTPS or LDAP.
 
-Added in 7.18.0. 
+Added in 7.18.0.
 .IP "-Y, --speed-limit <speed>"
 If a download is slower than this given speed (in bytes per second) for
 speed-time seconds it gets aborted. speed-time is set with \fI-y, --speed-time\fP and is
@@ -1984,20 +1984,20 @@ use workarounds known to cause interoperability problems with some older SSL
 implementations. WARNING: this option loosens the SSL security, and by using
 this flag you ask for exactly that.
 
-Added in 7.25.0. 
+Added in 7.25.0.
 .IP "--ssl-no-revoke"
 (WinSSL) This option tells curl to disable certificate revocation checks.
 WARNING: this option loosens the SSL security, and by using this flag you ask
 for exactly that.
 
-Added in 7.44.0. 
+Added in 7.44.0.
 .IP "--ssl-reqd"
 (FTP IMAP POP3 SMTP) Require SSL/TLS for the connection.  Terminates the connection if the server
 doesn't support SSL/TLS.
 
 This option was formerly known as --ftp-ssl-reqd.
 
-Added in 7.20.0. 
+Added in 7.20.0.
 .IP "--ssl"
 (FTP IMAP POP3 SMTP) 
 Try to use SSL/TLS for the connection.  Reverts to a non-secure connection if
@@ -2007,30 +2007,30 @@ for different levels of encryption required.
 This option was formerly known as --ftp-ssl (Added in 7.11.0). That option
 name can still be used but will be removed in a future version.
 
-Added in 7.20.0. 
+Added in 7.20.0.
 .IP "-2, --sslv2"
 (SSL) Forces curl to use SSL version 2 when negotiating with a remote SSL
 server. Sometimes curl is built without SSLv2 support. SSLv2 is widely
 considered insecure (see RFC 6176).
 
-See also \fI--http1.1\fP and \fI--http2\fP. \fI-2, --sslv2\fP requires that the underlying libcurl was built to support TLS. This option overrides \fI-3, --sslv3\fP and \fI-1, --tlsv1\fP and \fI--tlsv1.1\fP and \fI--tlsv1.2\fP. 
+See also \fI--http1.1\fP and \fI--http2\fP. \fI-2, --sslv2\fP requires that the underlying libcurl was built to support TLS. This option overrides \fI-3, --sslv3\fP and \fI-1, --tlsv1\fP and \fI--tlsv1.1\fP and \fI--tlsv1.2\fP.
 .IP "-3, --sslv3"
 (SSL) Forces curl to use SSL version 3 when negotiating with a remote SSL
 server. Sometimes curl is built without SSLv3 support. SSLv3 is widely
 considered insecure (see RFC 7568).
 
-See also \fI--http1.1\fP and \fI--http2\fP. \fI-3, --sslv3\fP requires that the underlying libcurl was built to support TLS. This option overrides \fI-2, --sslv2\fP and \fI-1, --tlsv1\fP and \fI--tlsv1.1\fP and \fI--tlsv1.2\fP. 
+See also \fI--http1.1\fP and \fI--http2\fP. \fI-3, --sslv3\fP requires that the underlying libcurl was built to support TLS. This option overrides \fI-2, --sslv2\fP and \fI-1, --tlsv1\fP and \fI--tlsv1.1\fP and \fI--tlsv1.2\fP.
 .IP "--stderr"
 Redirect all writes to stderr to the specified file instead. If the file name
 is a plain '-', it is instead written to stdout.
 
 If this option is used several times, the last one will be used.
 
-See also \fI-v, --verbose\fP and \fI-s, --silent\fP. 
+See also \fI-v, --verbose\fP and \fI-s, --silent\fP.
 .IP "--tcp-fastopen"
 Enable use of TCP Fast Open (RFC7413).
 
-Added in 7.49.0. 
+Added in 7.49.0.
 .IP "--tcp-nodelay"
 Turn on the TCP_NODELAY option. See the \fIcurl_easy_setopt(3)\fP man page for
 details about this option.
@@ -2038,7 +2038,7 @@ details about this option.
 Since 7.50.2, curl sets this option by default and you need to explictitly
 switch it off if you don't want it on.
 
-Added in 7.11.2. 
+Added in 7.11.2.
 .IP "-t, --telnet-option <opt=val>"
 Pass options to the telnet protocol. Supported options are:
 
@@ -2054,7 +2054,7 @@ bytes will be used.
 
 If this option is used several times, the last one will be used.
 
-Added in 7.20.0. 
+Added in 7.20.0.
 .IP "--tftp-no-options"
 (TFTP) Tells curl not to send TFTP options requests.
 
@@ -2062,7 +2062,7 @@ This option improves interop with some legacy servers that do not acknowledge
 or properly implement TFTP options. When this option is used \fI--tftp-blksize\fP is
 ignored.
 
-Added in 7.48.0. 
+Added in 7.48.0.
 .IP "-z, --time-cond <time>"
 (HTTP FTP) Request a file that has been modified later than the given time and date, or
 one that has been modified before that time. The <date expression> can be all
@@ -2080,48 +2080,48 @@ Set TLS authentication type. Currently, the only supported option is "SRP",
 for TLS-SRP (RFC 5054). If \fI--tlsuser\fP and \fI--tlspassword\fP are specified but
 \fI--tlsauthtype\fP is not, then this option defaults to "SRP".
 
-Added in 7.21.4. 
+Added in 7.21.4.
 .IP "--tlspassword"
 Set password for use with the TLS authentication method specified with
 \fI--tlsauthtype\fP. Requires that \fI--tlsuser\fP also be set.
 
-Added in 7.21.4. 
+Added in 7.21.4.
 .IP "--tlsuser <name>"
 Set username for use with the TLS authentication method specified with
 \fI--tlsauthtype\fP. Requires that \fI--tlspassword\fP also is set.
 
-Added in 7.21.4. 
+Added in 7.21.4.
 .IP "--tlsv1.0"
 (TLS) Forces curl to use TLS version 1.0 when connecting to a remote TLS server.
 
-Added in 7.34.0. 
+Added in 7.34.0.
 .IP "--tlsv1.1"
 (TLS) Forces curl to use TLS version 1.1 when connecting to a remote TLS server.
 
-Added in 7.34.0. 
+Added in 7.34.0.
 .IP "--tlsv1.2"
 (TLS) Forces curl to use TLS version 1.2 when connecting to a remote TLS server.
 
-Added in 7.34.0. 
+Added in 7.34.0.
 .IP "--tlsv1.3"
 (TLS) Forces curl to use TLS version 1.3 when connecting to a remote TLS server.
 
 Note that TLS 1.3 is only supported by a subset of TLS backends. At the time
 of writing this, those are BoringSSL and NSS only.
 
-Added in 7.52.0. 
+Added in 7.52.0.
 .IP "-1, --tlsv1"
 (SSL) Forces curl to use TLS version 1.x when negotiating with a remote TLS server.
-You can use options \fI\fI-1, --tlsv1\fP.0\fP, \fI--tlsv1.1\fP, \fI--tlsv1.2\fP, and \fI--tlsv1.3\fP to control
+You can use options \fI-1, --tlsv1\fP.0, \fI--tlsv1.1\fP, \fI--tlsv1.2\fP, and \fI--tlsv1.3\fP to control
 the TLS version more precisely (if the SSL backend in use supports such a
 level of control).
 
-See also \fI--http1.1\fP and \fI--http2\fP. \fI-1, --tlsv1\fP requires that the underlying libcurl was built to support TLS. This option overrides \fI--tlsv1.1\fP and \fI--tlsv1.2\fP. 
+See also \fI--http1.1\fP and \fI--http2\fP. \fI-1, --tlsv1\fP requires that the underlying libcurl was built to support TLS. This option overrides \fI--tlsv1.1\fP and \fI--tlsv1.2\fP.
 .IP "--tr-encoding"
 (HTTP) Request a compressed Transfer-Encoding response using one of the algorithms
 curl supports, and uncompress the data while receiving it.
 
-Added in 7.21.6. 
+Added in 7.21.6.
 .IP "--trace-ascii <file>"
 Enables a full trace dump of all incoming and outgoing data, including
 descriptive information, to the given output file. Use "-" as filename to have
@@ -2133,11 +2133,11 @@ read for untrained humans.
 
 If this option is used several times, the last one will be used.
 
-This option overrides \fI--trace\fP and \fI-v, --verbose\fP. 
+This option overrides \fI--trace\fP and \fI-v, --verbose\fP.
 .IP "--trace-time"
 Prepends a time stamp to each trace or verbose line that curl displays.
 
-Added in 7.14.0. 
+Added in 7.14.0.
 .IP "--trace <file>"
 Enables a full trace dump of all incoming and outgoing data, including
 descriptive information, to the given output file. Use "-" as filename to have
@@ -2146,11 +2146,11 @@ stderr.
 
 If this option is used several times, the last one will be used.
 
-This option overrides \fI-v, --verbose\fP and \fI--trace-ascii\fP. 
+This option overrides \fI-v, --verbose\fP and \fI--trace-ascii\fP.
 .IP "--unix-socket <path>"
 (HTTP) Connect through this Unix domain socket, instead of using the network.
 
-Added in 7.40.0. 
+Added in 7.40.0.
 .IP "-T, --upload-file <file>"
 This transfers the specified local file to the remote URL. If there is no file
 part in the specified URL, curl will append the local file name. NOTE that you
@@ -2247,7 +2247,7 @@ If you think this option still doesn't give you enough details, consider using
 
 Use \fI-s, --silent\fP to make curl really quiet.
 
-See also \fI-i, --include\fP. This option overrides \fI--trace\fP and \fI--trace-ascii\fP. 
+See also \fI-i, --include\fP. This option overrides \fI--trace\fP and \fI--trace-ascii\fP.
 .IP "-V, --version"
 Displays information about curl and the libcurl version it uses.
 
@@ -2328,8 +2328,8 @@ The Content-Type of the requested document, if there was any.
 .TP
 .B filename_effective
 The ultimate filename that curl writes out to. This is only meaningful if curl
-is told to write to a file with the \fI\fI-O, --remote-name\fP\fP or \fI\fI-o, --output\fP\fP
-option. It's most useful in combination with the \fI\fI-J, --remote-header-name\fP\fP
+is told to write to a file with the \fI-O, --remote-name\fP or \fI-o, --output\fP
+option. It's most useful in combination with the \fI-J, --remote-header-name\fP
 option. (Added in 7.26.0)
 .TP
 .B ftp_entry_path
@@ -2446,14 +2446,14 @@ attributes, a warning is issued.
 .SH FILES
 .I ~/.curlrc
 .RS
-Default config file, see \fI-K, \fI-K, --config\fP\fP for details.
+Default config file, see \fI-K, --config\fP for details.
 .SH ENVIRONMENT
 The environment variables can be specified in lower case or upper case. The
 lower case version has precedence. http_proxy is an exception as it is only
 available in lower case.
 
 Using an environment variable to set the proxy has the same effect as using
-the \fI\fI-x, --proxy\fP\fP option.
+the \fI-x, --proxy\fP option.
 
 .IP "http_proxy [protocol://]<host>[:port]"
 Sets the proxy server to use for HTTP.
@@ -2477,13 +2477,13 @@ a supported one, the proxy will be treated as an HTTP proxy.
 
 The supported proxy protocol prefixes are as follows:
 .IP "socks4://"
-Makes it the equivalent of \fI\fI--socks4\fP\fP
+Makes it the equivalent of \fI--socks4\fP
 .IP "socks4a://"
-Makes it the equivalent of \fI\fI--socks4a\fP\fP
+Makes it the equivalent of \fI--socks4a\fP
 .IP "socks5://"
-Makes it the equivalent of \fI\fI--socks5\fP\fP
+Makes it the equivalent of \fI--socks5\fP
 .IP "socks5h://"
-Makes it the equivalent of \fI\fI--socks5-hostname\fP\fP
+Makes it the equivalent of \fI--socks5-hostname\fP
 .SH EXIT CODES
 There are a bunch of different error codes and their corresponding error
 messages that may appear during bad conditions. At the time of this writing,
@@ -2530,7 +2530,7 @@ FTP quote error. A quote command returned error from the server.
 .IP 22
 HTTP page not retrieved. The requested url was not found or returned another
 error with the HTTP error code being 400 or above. This return code only
-appears if \fI-f, \fI-f, --fail\fP\fP is used.
+appears if \fI-f, --fail\fP is used.
 .IP 23
 Write error. Curl couldn't write data to a local filesystem or similar.
 .IP 25
