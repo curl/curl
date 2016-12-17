@@ -210,8 +210,9 @@ sub single {
     }
     if($foot[0]) {
         print "\n";
-        print @foot;
-        print "\n";
+        my $f = join("", @foot);
+        $f =~ s/ +\z//; # remove trailing space
+        print "$f\n";
     }
     return 0;
 }
