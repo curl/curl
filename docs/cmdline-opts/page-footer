@@ -1,14 +1,14 @@
 .SH FILES
 .I ~/.curlrc
 .RS
-Default config file, see \fI-K, --config\fP for details.
+Default config file, see --config for details.
 .SH ENVIRONMENT
 The environment variables can be specified in lower case or upper case. The
 lower case version has precedence. http_proxy is an exception as it is only
 available in lower case.
 
 Using an environment variable to set the proxy has the same effect as using
-the \fI--proxy\fP option.
+the --proxy option.
 
 .IP "http_proxy [protocol://]<host>[:port]"
 Sets the proxy server to use for HTTP.
@@ -32,13 +32,13 @@ a supported one, the proxy will be treated as an HTTP proxy.
 
 The supported proxy protocol prefixes are as follows:
 .IP "socks4://"
-Makes it the equivalent of \fI--socks4\fP
+Makes it the equivalent of --socks4
 .IP "socks4a://"
-Makes it the equivalent of \fI--socks4a\fP
+Makes it the equivalent of --socks4a
 .IP "socks5://"
-Makes it the equivalent of \fI--socks5\fP
+Makes it the equivalent of --socks5
 .IP "socks5h://"
-Makes it the equivalent of \fI--socks5-hostname\fP
+Makes it the equivalent of --socks5-hostname
 .SH EXIT CODES
 There are a bunch of different error codes and their corresponding error
 messages that may appear during bad conditions. At the time of this writing,
@@ -85,7 +85,7 @@ FTP quote error. A quote command returned error from the server.
 .IP 22
 HTTP page not retrieved. The requested url was not found or returned another
 error with the HTTP error code being 400 or above. This return code only
-appears if \fI-f, --fail\fP is used.
+appears if --fail is used.
 .IP 23
 Write error. Curl couldn't write data to a local filesystem or similar.
 .IP 25

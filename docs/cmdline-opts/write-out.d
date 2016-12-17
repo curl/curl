@@ -27,8 +27,8 @@ The Content-Type of the requested document, if there was any.
 .TP
 .B filename_effective
 The ultimate filename that curl writes out to. This is only meaningful if curl
-is told to write to a file with the \fI--remote-name\fP or \fI--output\fP
-option. It's most useful in combination with the \fI--remote-header-name\fP
+is told to write to a file with the --remote-name or --output
+option. It's most useful in combination with the --remote-header-name
 option. (Added in 7.26.0)
 .TP
 .B ftp_entry_path
