@@ -790,7 +790,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       break;
     case '$': /* more options without a short option */
       switch(subletter) {
-      case 'a': /* --ftp-ssl */
+      case 'a': /* --ssl */
         if(toggle && !(curlinfo->features & CURL_VERSION_SSL))
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->ftp_ssl = toggle;
@@ -888,7 +888,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'u': /* --ftp-alternative-to-user */
         GetStr(&config->ftp_alternative_to_user, nextarg);
         break;
-      case 'v': /* --ftp-ssl-reqd */
+      case 'v': /* --ssl-reqd */
         if(toggle && !(curlinfo->features & CURL_VERSION_SSL))
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->ftp_ssl_reqd = toggle;
