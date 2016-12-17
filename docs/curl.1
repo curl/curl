@@ -1337,7 +1337,7 @@ Other SSL backends not supported.
 
 If this option is used several times, the last one will be used.
 .IP "--post301"
-(HTTP) Tells curl to respect RFC 7230/6.4.2 and not convert POST requests into GET
+(HTTP) Tells curl to respect RFC 7231/6.4.2 and not convert POST requests into GET
 requests when following a 301 redirection. The non-RFC behaviour is ubiquitous
 in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
@@ -1345,7 +1345,7 @@ a redirection. This option is meaningful only when using \fI-L, --location\fP.
 
 See also \fI--post302\fP and \fI--post303\fP and \fI-L, --location\fP. Added in 7.17.1.
 .IP "--post302"
-(HTTP) Tells curl to respect RFC 7230/6.4.2 and not convert POST requests into GET
+(HTTP) Tells curl to respect RFC 7231/6.4.3 and not convert POST requests into GET
 requests when following a 302 redirection. The non-RFC behaviour is ubiquitous
 in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
@@ -1353,7 +1353,7 @@ a redirection. This option is meaningful only when using \fI-L, --location\fP.
 
 See also \fI--post301\fP and \fI--post303\fP and \fI-L, --location\fP. Added in 7.19.1.
 .IP "--post303"
-(HTTP) Tells curl to respect RFC 7230/6.4.2 and not convert POST requests into GET
+(HTTP) Tells curl to respect RFC 7231/6.4.4 and not convert POST requests into GET
 requests when following a 303 redirection. The non-RFC behaviour is ubiquitous
 in web browsers, so curl does the conversion by default to maintain
 consistency. However, a server may require a POST to remain a POST after such
@@ -2112,7 +2112,7 @@ of writing this, those are BoringSSL and NSS only.
 Added in 7.52.0.
 .IP "-1, --tlsv1"
 (SSL) Forces curl to use TLS version 1.x when negotiating with a remote TLS server.
-You can use options \fI-1, --tlsv1\fP.0, \fI--tlsv1.1\fP, \fI--tlsv1.2\fP, and \fI--tlsv1.3\fP to control
+You can use options \fI\fI-1, --tlsv1\fP.0\fP, \fI--tlsv1.1\fP, \fI--tlsv1.2\fP, and \fI--tlsv1.3\fP to control
 the TLS version more precisely (if the SSL backend in use supports such a
 level of control).
 
