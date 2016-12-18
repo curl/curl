@@ -77,11 +77,10 @@ int test(char *URL)
 
     if(!res) {
       /* we assume that sending always work */
-      size_t total=0;
 
       do {
         /* busy-read like crazy */
-        res = curl_easy_recv(curl, buf, 1024, &iolen);
+        res = curl_easy_recv(curl, buf, sizeof(buf), &iolen);
 
 #ifdef TPF
         sleep(1); /* avoid ctl-10 dump */
@@ -92,10 +91,12 @@ int test(char *URL)
           if(!write(STDOUT_FILENO, buf, iolen))
             break;
         }
-        total += iolen;
 
-      } while(((res == CURLE_OK) || (res == CURLE_AGAIN)) && (total < 129));
+      } while((res == CURLE_OK && iolen != 0) || (res == CURLE_AGAIN));
     }
+
+    if(res != CURLE_OK || iolen != 0)
+      return TEST_ERR_FAILURE;
   }
 
 test_cleanup:
