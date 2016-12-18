@@ -3255,7 +3255,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
         sub[0] = 'z';
       }
       else {
-        sub[0]=(char)(((ssleay_value>>4)&0xff) + 'a' -1);
+        sub[0] = (char) (minor_ver + 'a' - 1);
       }
     }
     else
