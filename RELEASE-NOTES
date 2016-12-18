@@ -57,6 +57,10 @@ This release includes the following bugfixes:
  o CONNECT: read responses one byte at a time [26]
  o curl: support zero-length argument strings in config files [27]
  o openssl: don't use OpenSSL's ERR_PACK [28]
+ o curl.1: generated with the new man page system [29]
+ o curl_easy_recv: Improve documentation and example program [30]
+ o Curl_getconnectinfo: avoid checking if the connection is closed [31]
+ o CIPHERS.md: attempt to document TLS cipher names [32]
 
 This release includes the following known bugs:
 
@@ -68,12 +72,12 @@ advice from friends like these:
   Adam Langley, Adam Piggott, afrind on github, Alex Chan, Alex Rousskov,
   Anders Bakken, Andrei Sedoi, Bruce Stephens, Dan Fandrich, Daniel Hwang,
   Daniel Stenberg, Dave Reisner, David Schweikert, Dmitry Kurochkin,
-  Frank Gevaerts, Isaac Boukris, Jakub Zakrzewski, Jan Ehrhardt,
-  Jeremy Pearson, Kamil Dudka, Marcel Raad, Mauro Rappa, Michael Kaufmann,
-  Mike Crowe, Neal Poole, Nick Zitzmann, Okhin Vasilij, Patrick Monnerat,
-  Peter Wu, Ray Satiro, Ricki Hirner, Tatsuhiro Tsujikawa, Thomas Glanzmann,
-  Tony Kelman, Vasy Okhin,
-  (35 contributors)
+  Frank Gevaerts, Frank Meier, Gisle Vanem, Isaac Boukris, Jakub Zakrzewski,
+  Jan Ehrhardt, Jeremy Pearson, Kamil Dudka, Marcel Raad, Mauro Rappa,
+  Michael Kaufmann, Mike Crowe, Neal Poole, Nick Zitzmann, Okhin Vasilij,
+  Patrick Monnerat, Peter Wu, Ray Satiro, Ricki Hirner, Tatsuhiro Tsujikawa,
+  Thomas Glanzmann, Tony Kelman, Vasy Okhin,
+  (37 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -107,3 +111,7 @@ References to bug reports and discussions on issues:
  [26] = https://curl.haxx.se/bug/?i=1132
  [27] = https://curl.haxx.se/bug/?i=1152
  [28] = https://curl.haxx.se/bug/?i=1157
+ [29] = https://github.com/curl/curl/blob/master/docs/cmdline-opts/MANPAGE.md
+ [30] = https://curl.haxx.se/bug/?i=1134
+ [31] = https://curl.haxx.se/bug/?i=1134
+ [32] = https://curl.haxx.se/docs/ssl-ciphers.html
