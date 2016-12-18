@@ -1030,7 +1030,8 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 
 static CURLcode easy_connection(struct Curl_easy *data,
                                 curl_socket_t *sfd,
-                                struct connectdata **connp)
+                                struct connectdata **connp,
+                                bool *eos_received)
 {
   if(data == NULL)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1041,9 +1042,9 @@ static CURLcode easy_connection(struct Curl_easy *data,
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
-  *sfd = Curl_getconnectinfo(data, connp);
+  *sfd = Curl_getconnectinfo(data, connp, eos_received);
 
-  if(*sfd == CURL_SOCKET_BAD) {
+  if(*sfd == CURL_SOCKET_BAD && !(eos_received && *eos_received)) {
     failf(data, "Failed to get recent socket");
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
@@ -1063,12 +1064,16 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
   CURLcode result;
   ssize_t n1;
   struct connectdata *c;
+  bool eos_received;
 
-  result = easy_connection(data, &sfd, &c);
+  result = easy_connection(data, &sfd, &c, &eos_received);
   if(result)
     return result;
 
   *n = 0;
+  if(eos_received)
+    return CURLE_OK;
+
   result = Curl_read(c, sfd, buffer, buflen, &n1);
 
   if(result)
@@ -1089,9 +1094,9 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
   curl_socket_t sfd;
   CURLcode result;
   ssize_t n1;
-  struct connectdata *c = NULL;
+  struct connectdata *c;
 
-  result = easy_connection(data, &sfd, &c);
+  result = easy_connection(data, &sfd, &c, NULL);
   if(result)
     return result;
 
