@@ -98,7 +98,7 @@
 #define OS "AmigaOS"
 
 #define PACKAGE "curl"
-#define PACKAGE_BUGREPORT "a suitable curl mailing list: https://curl.haxx.se/mail/"
+#define PACKAGE_BUGREPORT "a suitable mailing list: https://curl.haxx.se/mail/"
 #define PACKAGE_NAME "curl"
 #define PACKAGE_STRING "curl -"
 #define PACKAGE_TARNAME "curl"
