@@ -57,7 +57,8 @@ my %warnings = (
     'UNUSEDIGNORE'     => 'a warning ignore was not used',
     'OPENCOMMENT'      => 'file ended with a /* comment still "open"',
     'ASTERISKSPACE'    => 'pointer declared with space after asterisk',
-    'ASTERISKNOSPACE'  => 'pointer declared without space before asterisk'
+    'ASTERISKNOSPACE'  => 'pointer declared without space before asterisk',
+    'ASSIGNWITHINCONDITION'  => 'assignment within conditional expression'
     );
 
 sub readwhitelist {
