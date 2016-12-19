@@ -210,6 +210,8 @@ static ssize_t get_pre_recved(struct connectdata *conn, int num, char *buf,
 /* Use "do-nothing" macros instead of functions when workaround not used */
 bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
 {
+  (void)conn;
+  (void)sockindex;
   return false;
 }
 #define pre_receive_plain(c,n) do {} WHILE_FALSE
