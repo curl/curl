@@ -59,6 +59,7 @@
 #include "x509asn1.h"
 #include "curl_printf.h"
 #include "system_win32.h"
+#include "hostcheck.h"
 
  /* The last #include file should be: */
 #include "curl_memory.h"
@@ -1602,13 +1603,8 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 
   if(result == CURLE_OK) {
     if(conn->ssl_config.verifyhost) {
-      TCHAR cert_hostname_buff[128];
-      xcharp_u hostname;
-      xcharp_u cert_hostname;
+      TCHAR cert_hostname_buff[256];
       DWORD len;
-
-      cert_hostname.const_tchar_ptr = cert_hostname_buff;
-      hostname.tchar_ptr = Curl_convert_UTF8_to_tchar(conn_hostname);
 
       /* TODO: Fix this for certificates with multiple alternative names.
       Right now we're only asking for the first preferred alternative name.
@@ -1620,31 +1616,50 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
       */
       len = CertGetNameString(pCertContextServer,
                               CERT_NAME_DNS_TYPE,
-                              0,
+                              CERT_NAME_DISABLE_IE4_UTF8_FLAG,
                               NULL,
-                              cert_hostname.tchar_ptr,
-                              128);
-      if(len > 0 && *cert_hostname.tchar_ptr == '*') {
-        /* this is a wildcard cert.  try matching the last len - 1 chars */
-        int hostname_len = strlen(conn_hostname);
-        cert_hostname.tchar_ptr++;
-        if(_tcsicmp(cert_hostname.const_tchar_ptr,
-                    hostname.const_tchar_ptr + hostname_len - len + 2) != 0)
-          result = CURLE_PEER_FAILED_VERIFICATION;
+                              cert_hostname_buff,
+                              256);
+      if(len > 0) {
+        const char *cert_hostname;
+
+        /* Comparing the cert name and the connection hostname encoded as UTF-8
+         * is acceptable since both values are assumed to use ASCII
+         * (or some equivalent) encoding
+         */
+        cert_hostname = Curl_convert_tchar_to_UTF8(cert_hostname_buff);
+        if(!cert_hostname) {
+          result = CURLE_OUT_OF_MEMORY;
+        }
+        else{
+          int match_result;
+
+          match_result = Curl_cert_hostcheck(cert_hostname, conn->host.name);
+          if(match_result == CURL_HOST_MATCH) {
+            infof(data,
+                  "schannel: connection hostname (%s) validated "
+                  "against certificate name (%s)\n",
+                  conn->host.name,
+                  cert_hostname);
+            result = CURLE_OK;
+          }
+          else{
+            failf(data,
+                  "schannel: connection hostname (%s) "
+                  "does not match certificate name (%s)",
+                  conn->host.name,
+                  cert_hostname);
+            result = CURLE_PEER_FAILED_VERIFICATION;
+          }
+          Curl_unicodefree(cert_hostname);
+        }
       }
-      else if(len == 0 || _tcsicmp(hostname.const_tchar_ptr,
-                                   cert_hostname.const_tchar_ptr) != 0) {
+      else {
+        failf(data,
+              "schannel: CertGetNameString did not provide any "
+              "certificate name information");
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
-      if(result == CURLE_PEER_FAILED_VERIFICATION) {
-        char *_cert_hostname;
-        _cert_hostname = Curl_convert_tchar_to_UTF8(cert_hostname.tchar_ptr);
-        failf(data, "schannel: CertGetNameString() certificate hostname "
-              "(%s) did not match connection (%s)",
-              _cert_hostname, conn_hostname);
-        Curl_unicodefree(_cert_hostname);
-      }
-      Curl_unicodefree(hostname.tchar_ptr);
     }
   }
 

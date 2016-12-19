@@ -44,7 +44,7 @@ extern const char *serverlogfile;
 
 #undef perror
 #define perror(m) win32_perror(m)
-void win32_perror (const char *msg);
+void win32_perror(const char *msg);
 #endif  /* WIN32 */
 
 #ifdef USE_WINSOCK
