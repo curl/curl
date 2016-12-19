@@ -1,10 +1,10 @@
 Curl and libcurl 7.52.0
 
  Public curl releases:         161
- Command line options:         203
+ Command line options:         204
  curl_easy_setopt() options:   243
  Public functions in libcurl:  61
- Contributors:                 1467
+ Contributors:                 1480
 
 This release includes the following changes:
 
@@ -14,9 +14,13 @@ This release includes the following changes:
  o curl: Add --retry-connrefused [11]
  o proxy: Support HTTPS proxy and SOCKS+HTTP(s) [24]
  o add CURLINFO_SCHEME, CURLINFO_PROTOCOL, and %{scheme} [20]
+ o curl: add --fail-early [15]
 
 This release includes the following bugfixes:
 
+ o CVE-2016-9586: printf floating point buffer overflow [33]
+ o CVE-2016-9952: Win CE schannel cert wildcard matches too much [34]
+ o CVE-2016-9953: Win CE schannel cert name out of buffer read [35]
  o msvc: removed a straggling reference to strequal.c
  o winbuild: remove strcase.obj from curl build [1]
  o examples: bugfixed multi-uv.c
@@ -38,7 +42,6 @@ This release includes the following bugfixes:
  o URL-parser: for file://[host]/ URLs, the [host] must be localhost [13]
  o timeval: prefer time_t to hold seconds instead of long
  o Curl_rand: fixed and moved to rand.c [14]
- o curl: add --fail-early [15]
  o glob: fix [a-c] globbing regression [16]
  o darwinssl: fix SSL client certificate not found on MacOS Sierra [17]
  o curl.1: Clarify --dump-header only writes received headers
@@ -71,13 +74,13 @@ advice from friends like these:
 
   Adam Langley, Adam Piggott, afrind on github, Alex Chan, Alex Rousskov,
   Anders Bakken, Andrei Sedoi, Bruce Stephens, Dan Fandrich, Daniel Hwang,
-  Daniel Stenberg, Dave Reisner, David Schweikert, Dmitry Kurochkin,
-  Frank Gevaerts, Frank Meier, Gisle Vanem, Isaac Boukris, Jakub Zakrzewski,
-  Jan Ehrhardt, Jeremy Pearson, Kamil Dudka, Marcel Raad, Mauro Rappa,
-  Michael Kaufmann, Mike Crowe, Neal Poole, Nick Zitzmann, Okhin Vasilij,
-  Patrick Monnerat, Peter Wu, Ray Satiro, Ricki Hirner, Tatsuhiro Tsujikawa,
-  Thomas Glanzmann, Tony Kelman, Vasy Okhin,
-  (37 contributors)
+  Daniel Stenberg, Dan McNulty, Dave Reisner, David Schweikert,
+  Dmitry Kurochkin, Frank Gevaerts, Frank Meier, Gisle Vanem, Isaac Boukris,
+  Jakub Zakrzewski, Jan Ehrhardt, Jeremy Pearson, Kamil Dudka, Marcel Raad,
+  Mauro Rappa, Michael Kaufmann, Mike Crowe, Neal Poole, Nick Zitzmann,
+  Okhin Vasilij, Patrick Monnerat, Peter Wu, Ray Satiro, Ricki Hirner,
+  Tatsuhiro Tsujikawa, Thomas Glanzmann, Tony Kelman, Vasy Okhin,
+  (38 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -115,3 +118,6 @@ References to bug reports and discussions on issues:
  [30] = https://curl.haxx.se/bug/?i=1134
  [31] = https://curl.haxx.se/bug/?i=1134
  [32] = https://curl.haxx.se/docs/ssl-ciphers.html
+ [33] = https://curl.haxx.se/docs/adv_20161221A.html
+ [34] = https://curl.haxx.se/docs/adv_20161221B.html
+ [35] = https://curl.haxx.se/docs/adv_20161221C.html
