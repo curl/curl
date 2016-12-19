@@ -2111,12 +2111,10 @@ of writing this, those are BoringSSL and NSS only.
 
 Added in 7.52.0.
 .IP "-1, --tlsv1"
-(SSL) Forces curl to use TLS version 1.x when negotiating with a remote TLS server.
-You can use options \fI\fI-1, --tlsv1\fP.0\fP, \fI--tlsv1.1\fP, \fI--tlsv1.2\fP, and \fI--tlsv1.3\fP to control
-the TLS version more precisely (if the SSL backend in use supports such a
-level of control).
+(SSL) Tells curl to use TLS version 1.x when negotiating with a remote TLS
+server. That means TLS version 1.0, 1.1 or 1.2.
 
-See also \fI--http1.1\fP and \fI--http2\fP. \fI-1, --tlsv1\fP requires that the underlying libcurl was built to support TLS. This option overrides \fI--tlsv1.1\fP and \fI--tlsv1.2\fP.
+See also \fI--http1.1\fP and \fI--http2\fP. \fI-1, --tlsv1\fP requires that the underlying libcurl was built to support TLS. This option overrides \fI--tlsv1.1\fP and \fI--tlsv1.2\fP and \fI--tlsv1.3\fP.
 .IP "--tr-encoding"
 (HTTP) Request a compressed Transfer-Encoding response using one of the algorithms
 curl supports, and uncompress the data while receiving it.
