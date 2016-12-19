@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+NO_PROXY
+noproxy
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Content-Type: text/html
+
+foo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Under condition using --proxy, override NO_PROXY by --nproxy and access target URL directly
+</name>
+<setenv>
+NO_PROXY=example.com
+</setenv>
+<command>
+http://%HOSTIP:%HTTPPORT/1252 --proxy http://%HOSTIP:%HTTPPORT --noproxy %HOSTIP
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1252 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
