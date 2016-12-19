@@ -9,3 +9,7 @@ effectively disables the proxy. Each name in this list is matched as either
 a domain which contains the hostname, or the hostname itself. For example,
 local.com would match local.com, local.com:80, and www.local.com, but not
 www.notlocal.com.
+
+Since 7.52.2, This option overrides the environment variables that disable
+the proxy. If there's an environment variable disabling a proxy, you can set
+noproxy list to \&"" to override it.

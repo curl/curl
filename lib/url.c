@@ -6191,8 +6191,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   else if(!proxy && !socksproxy)
 #ifndef CURL_DISABLE_HTTP
     /* if the host is not in the noproxy list, detect proxy. */
-    if(!check_noproxy(conn->host.name, no_proxy))
-      proxy = detect_proxy(conn);
+    proxy = detect_proxy(conn);
 #else  /* !CURL_DISABLE_HTTP */
     proxy = NULL;
 #endif /* CURL_DISABLE_HTTP */

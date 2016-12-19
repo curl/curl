@@ -23,6 +23,16 @@ Sets the proxy server to use if no protocol-specific proxy is set.
 .IP "NO_PROXY <comma-separated list of hosts>"
 list of host names that shouldn't go through any proxy. If set to a asterisk
 \&'*' only, it matches all hosts.
+
+Since 7.52.2, this environment variable disable the proxy even if specify
+--proxy option. That is
+.B NO_PROXY=direct.example.com curl -x http://proxy.example.com
+.B http://direct.example.com
+accesses the target URL directly, and
+.B NO_PROXY=direct.example.com curl -x http://proxy.example.com
+.B http://somewhere.example.com
+accesses the target URL through proxy.
+
 .SH "PROXY PROTOCOL PREFIXES"
 Since curl version 7.21.7, the proxy string may be specified with a
 protocol:// prefix to specify alternative proxy protocols.
