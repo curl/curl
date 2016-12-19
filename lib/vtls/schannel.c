@@ -103,40 +103,40 @@ static void InitSecBufferDesc(SecBufferDesc *desc, SecBuffer *BufArr,
 }
 
 static CURLcode
-set_ssl_version_up_to(SCHANNEL_CRED *schannel_cred, struct connectdata *conn,
-                      long ssl_version, long ssl_version_up_to)
+set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn,
+                      long ssl_version, long ssl_version_max)
 {
   struct Curl_easy *data = conn->data;
-  switch(ssl_version_up_to) {
-    case CURL_SSLVERSION_OR_UP_TO_NONE:
+  switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_NONE:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_up_to(schannel_cred, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+          return set_ssl_version_min_max(schannel_cred, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_0);
         case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_up_to(schannel_cred, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+          return set_ssl_version_min_max(schannel_cred, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_1);
         case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_up_to(schannel_cred, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+          return set_ssl_version_min_max(schannel_cred, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_2);
         case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_up_to(schannel_cred, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+          return set_ssl_version_min_max(schannel_cred, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_3);
       }
       break;
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
+    case CURL_SSLVERSION_MAX_TLSv1_0:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
       } break;
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+    case CURL_SSLVERSION_MAX_TLSv1_1:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
         case CURL_SSLVERSION_TLSv1_1:
           schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_1_CLIENT;
       } break;
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+    case CURL_SSLVERSION_MAX_TLSv1_2:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
@@ -145,7 +145,7 @@ set_ssl_version_up_to(SCHANNEL_CRED *schannel_cred, struct connectdata *conn,
         case CURL_SSLVERSION_TLSv1_2:
           schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_2_CLIENT;
       } break;
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+    case CURL_SSLVERSION_MAX_TLSv1_3:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
@@ -272,9 +272,9 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_up_to(&schannel_cred, conn,
+        CURLcode result = set_ssl_version_min_max(&schannel_cred, conn,
                                                conn->ssl_config.version,
-                                               conn->ssl_config.version_up_to);
+                                               conn->ssl_config.version_max);
         if(result != CURLE_OK)
           return result;
       } break;

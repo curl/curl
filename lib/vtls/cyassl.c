@@ -149,7 +149,7 @@ cyassl_connect_step1(struct connectdata *conn,
   if(conssl->state == ssl_connection_complete)
     return CURLE_OK;
 
-  if(SSL_CONN_CONFIG(version_up_to) != CURL_SSLVERSION_OR_UP_TO_NONE) {
+  if(SSL_CONN_CONFIG(version_max) != CURL_SSLVERSION_MAX_NONE) {
     failf(data, "CyaSSL does not support to set maximum SSL/TLS version");
     return CURLE_SSL_CONNECT_ERROR;
   }

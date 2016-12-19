@@ -377,26 +377,26 @@ static gnutls_x509_crt_fmt_t do_file_type(const char *type)
 
 #ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
 static CURLcode
-set_ssl_version_up_to(int *protocol_priority, struct connectdata *conn,
-                      long ssl_version, long ssl_version_up_to)
+set_ssl_version_min_max(int *protocol_priority, struct connectdata *conn,
+                      long ssl_version, long ssl_version_max)
 {
   struct Curl_easy *data = conn->data;
 
-  switch(ssl_version_up_to) {
-    case CURL_SSLVERSION_OR_UP_TO_NONE:
+  switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_NONE:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_up_to(protocol_priority, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+          return set_ssl_version_min_max(protocol_priority, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_0);
         case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_up_to(protocol_priority, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+          return set_ssl_version_min_max(protocol_priority, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_1);
         case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_up_to(protocol_priority, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+          return set_ssl_version_min_max(protocol_priority, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_2);
         case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_up_to(protocol_priority, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+          return set_ssl_version_min_max(protocol_priority, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_3);
       }
       break;
   }
@@ -404,11 +404,11 @@ set_ssl_version_up_to(int *protocol_priority, struct connectdata *conn,
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
       protocol_priority[0] = GNUTLS_TLS1_0;
-      switch(ssl_version_up_to) {
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+      switch(ssl_version_max) {
+        case CURL_SSLVERSION_MAX_TLSv1_1:
           protocol_priority[1] = GNUTLS_TLS1_1;
           break;
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+        case CURL_SSLVERSION_MAX_TLSv1_2:
           protocol_priority[1] = GNUTLS_TLS1_1;
           protocol_priority[2] = GNUTLS_TLS1_2;
           break;
@@ -416,8 +416,8 @@ set_ssl_version_up_to(int *protocol_priority, struct connectdata *conn,
       break;
     case CURL_SSLVERSION_TLSv1_1:
       protocol_priority[0] = GNUTLS_TLS1_1;
-      switch(ssl_version_up_to) {
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+      switch(ssl_version_max) {
+        case CURL_SSLVERSION_MAX_TLSv1_2:
           protocol_priority[1] = GNUTLS_TLS1_2;
           break;
       }
@@ -440,65 +440,65 @@ set_ssl_version_up_to(int *protocol_priority, struct connectdata *conn,
 #define GNUTLS_SRP "+SRP"
 
 static CURLcode
-set_ssl_version_up_to(const char **prioritylist, struct connectdata *conn,
-                      long ssl_version, long ssl_version_up_to)
+set_ssl_version_min_max(const char **prioritylist, struct connectdata *conn,
+                      long ssl_version, long ssl_version_max)
 {
   struct Curl_easy *data = conn->data;
 
-  switch(ssl_version_up_to) {
-    case CURL_SSLVERSION_OR_UP_TO_NONE:
+  switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_NONE:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_up_to(prioritylist, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+          return set_ssl_version_min_max(prioritylist, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_0);
         case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_up_to(prioritylist, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+          return set_ssl_version_min_max(prioritylist, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_1);
         case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_up_to(prioritylist, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+          return set_ssl_version_min_max(prioritylist, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_2);
         case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_up_to(prioritylist, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+          return set_ssl_version_min_max(prioritylist, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_3);
       }
       break;
   }
 
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
-      switch(ssl_version_up_to) {
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
+      switch(ssl_version_max) {
+        case CURL_SSLVERSION_MAX_TLSv1_0:
           *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                          "+VERS-TLS1.0:" GNUTLS_SRP;
           break;
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+        case CURL_SSLVERSION_MAX_TLSv1_1:
           *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                          "+VERS-TLS1.0:+VERS-TLS1.1:" GNUTLS_SRP;
           break;
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+        case CURL_SSLVERSION_MAX_TLSv1_2:
+        case CURL_SSLVERSION_MAX_TLSv1_3:
           *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                          "+VERS-TLS1.0:+VERS-TLS1.1:+VERS-TLS1.2:" GNUTLS_SRP;
           break;
       }
       break;
     case CURL_SSLVERSION_TLSv1_1:
-      switch(ssl_version_up_to) {
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+      switch(ssl_version_max) {
+        case CURL_SSLVERSION_MAX_TLSv1_1:
           *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                          "+VERS-TLS1.1:" GNUTLS_SRP;
           break;
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+        case CURL_SSLVERSION_MAX_TLSv1_2:
+        case CURL_SSLVERSION_MAX_TLSv1_3:
           *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                          "+VERS-TLS1.1:+VERS-TLS1.2:" GNUTLS_SRP;
           break;
       }
       break;
     case CURL_SSLVERSION_TLSv1_2:
-      switch(ssl_version_up_to) {
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
-        case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+      switch(ssl_version_max) {
+        case CURL_SSLVERSION_MAX_TLSv1_2:
+        case CURL_SSLVERSION_MAX_TLSv1_3:
           *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                          "+VERS-TLS1.2:" GNUTLS_SRP;
           break;
@@ -716,9 +716,9 @@ gtls_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_up_to(protocol_priority, conn,
+        CURLcode result = set_ssl_version_min_max(protocol_priority, conn,
                                                SSL_CONN_CONFIG(version),
-                                               SSL_CONN_CONFIG(version_up_to));
+                                               SSL_CONN_CONFIG(version_max));
         if(result != CURLE_OK)
           return result;
       } break;
@@ -753,9 +753,9 @@ gtls_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_up_to(&prioritylist, conn,
+        CURLcode result = set_ssl_version_min_max(&prioritylist, conn,
                                                SSL_CONN_CONFIG(version),
-                                               SSL_CONN_CONFIG(version_up_to));
+                                               SSL_CONN_CONFIG(version_max));
         if(result != CURLE_OK)
           return result;
       } break;

@@ -158,29 +158,29 @@ static Curl_recv mbed_recv;
 static Curl_send mbed_send;
 
 static CURLcode
-set_ssl_version_up_to(struct connectdata *conn, int sockindex,
-                      long ssl_version, long ssl_version_up_to)
+set_ssl_version_min_max(struct connectdata *conn, int sockindex,
+                      long ssl_version, long ssl_version_max)
 {
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   int mbedtls_version_minor = MBEDTLS_SSL_MINOR_VERSION_1;
-  int mbedtls_version_up_to_minor = MBEDTLS_SSL_MINOR_VERSION_1;
+  int mbedtls_version_max_minor = MBEDTLS_SSL_MINOR_VERSION_1;
 
-  switch(ssl_version_up_to) {
-    case CURL_SSLVERSION_OR_UP_TO_NONE:
+  switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_NONE:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_up_to(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+          return set_ssl_version_min_max(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_0);
         case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_up_to(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+          return set_ssl_version_min_max(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_1);
         case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_up_to(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+          return set_ssl_version_min_max(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_2);
         case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_up_to(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+          return set_ssl_version_min_max(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_3);
       }
       break;
   }
@@ -203,23 +203,23 @@ set_ssl_version_up_to(struct connectdata *conn, int sockindex,
       return CURLE_SSL_CONNECT_ERROR;
   }
 
-  switch(ssl_version_up_to) {
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
-      mbedtls_version_up_to_minor = MBEDTLS_SSL_MINOR_VERSION_1;
+  switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_TLSv1_0:
+      mbedtls_version_max_minor = MBEDTLS_SSL_MINOR_VERSION_1;
       break;
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
-      mbedtls_version_up_to_minor = MBEDTLS_SSL_MINOR_VERSION_2;
+    case CURL_SSLVERSION_MAX_TLSv1_1:
+      mbedtls_version_max_minor = MBEDTLS_SSL_MINOR_VERSION_2;
       break;
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
-      mbedtls_version_up_to_minor = MBEDTLS_SSL_MINOR_VERSION_3;
+    case CURL_SSLVERSION_MAX_TLSv1_2:
+    case CURL_SSLVERSION_MAX_TLSv1_3:
+      mbedtls_version_max_minor = MBEDTLS_SSL_MINOR_VERSION_3;
       break;
   }
 
   mbedtls_ssl_conf_min_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                mbedtls_version_minor);
   mbedtls_ssl_conf_max_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                               mbedtls_version_up_to_minor);
+                               mbedtls_version_max_minor);
   return CURLE_OK;
 }
 
@@ -403,9 +403,9 @@ mbed_connect_step1(struct connectdata *conn,
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
     {
-      CURLcode result = set_ssl_version_up_to(conn, sockindex,
+      CURLcode result = set_ssl_version_min_max(conn, sockindex,
                                               SSL_CONN_CONFIG(version),
-                                              SSL_CONN_CONFIG(version_up_to));
+                                              SSL_CONN_CONFIG(version_max));
       if(result != CURLE_OK)
         return result;
     } break;

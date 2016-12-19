@@ -50,16 +50,16 @@ TLSv1.1 (Added in 7.34.0)
 TLSv1.2 (Added in 7.34.0)
 .IP CURL_SSLVERSION_TLSv1_3
 TLSv1.3 (Added in 7.52.0)
-.IP CURL_SSLVERSION_OR_UP_TO_DEFAULT
+.IP CURL_SSLVERSION_MAX_DEFAULT
 Use as flag with CURL_SSLVERSION_TLSv1_x and behavior is same as
-CURL_SSLVERSION_OR_UP_TO_TLSv1_2.
-.IP CURL_SSLVERSION_OR_UP_TO_TLSv1_1
+CURL_SSLVERSION_MAX_TLSv1_2.
+.IP CURL_SSLVERSION_MAX_TLSv1_1
 Use this flag with CURL_SSLVERSION_TLSv1_0 and it means
 TLSv1.0-TLSv1.1 (Added in 7.53.0)
-.IP CURL_SSLVERSION_OR_UP_TO_TLSv1_2
+.IP CURL_SSLVERSION_MAX_TLSv1_2
 Use this flag with CURL_SSLVERSION_TLSv1_0/CURL_SSLVERSION_TLSv1_1
  and it is means TLSv1.x-TLSv1.2 (Added in 7.53.0)
-.IP CURL_SSLVERSION_OR_UP_TO_TLSv1_3
+.IP CURL_SSLVERSION_MAX_TLSv1_3
 Use this flag with CURL_SSLVERSION_TLSv1_0/CURL_SSLVERSION_TLSv1_1/
 CURL_SSLVERSION_TLSv1_2 and it is means TLSv1.x-TLSv1.3 (Added in 7.53.0)
 .RE
@@ -75,7 +75,7 @@ if(curl) {
 
   /* ask libcurl to use TLS version 1.1 or later */
   curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1.1 |
-                   CURL_SSLVERSION_OR_UP_TO_DEFAULT);
+                   CURL_SSLVERSION_MAX_DEFAULT);
 
   /* Perform the request */
   curl_easy_perform(curl);

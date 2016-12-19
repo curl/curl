@@ -1105,22 +1105,22 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case '0':
         /* TLS version 1.0 */
         config->ssl_version = CURL_SSLVERSION_TLSv1_0 |
-                            GET_CURL_SSLVERSION_OR_UP_TO(config->ssl_version);
+                            GET_CURL_SSLVERSION_MAX(config->ssl_version);
         break;
       case '1':
         /* TLS version 1.1 */
         config->ssl_version = CURL_SSLVERSION_TLSv1_1 |
-                            GET_CURL_SSLVERSION_OR_UP_TO(config->ssl_version);
+                            GET_CURL_SSLVERSION_MAX(config->ssl_version);
         break;
       case '2':
         /* TLS version 1.2 */
         config->ssl_version = CURL_SSLVERSION_TLSv1_2 |
-                            GET_CURL_SSLVERSION_OR_UP_TO(config->ssl_version);
+                            GET_CURL_SSLVERSION_MAX(config->ssl_version);
         break;
       case '3':
         /* TLS version 1.3 */
         config->ssl_version = CURL_SSLVERSION_TLSv1_3 |
-                            GET_CURL_SSLVERSION_OR_UP_TO(config->ssl_version);
+                            GET_CURL_SSLVERSION_MAX(config->ssl_version);
         break;
       }
       break;

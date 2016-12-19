@@ -924,7 +924,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
 #ifdef USE_SSL
     arg = va_arg(param, long);
     data->set.ssl.primary.version = GET_CURL_SSLVERSION(arg);
-    data->set.ssl.primary.version_up_to = GET_CURL_SSLVERSION_OR_UP_TO(arg);
+    data->set.ssl.primary.version_max = GET_CURL_SSLVERSION_MAX(arg);
 #else
     result = CURLE_UNKNOWN_OPTION;
 #endif

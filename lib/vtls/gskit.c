@@ -749,32 +749,32 @@ static ssize_t gskit_recv(struct connectdata *conn, int num, char *buf,
 }
 
 static CURLcode
-set_ssl_version_up_to(unsigned int *protoflags, struct connectdata *conn,
-                      long ssl_version, long ssl_version_up_to)
+set_ssl_version_min_max(unsigned int *protoflags, struct connectdata *conn,
+                      long ssl_version, long ssl_version_max)
 {
   struct Curl_easy *data = conn->data;
 
-  switch(ssl_version_up_to) {
-    case CURL_SSLVERSION_OR_UP_TO_NONE:
+  switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_NONE:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_up_to(protoflags, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+          return set_ssl_version_min_max(protoflags, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_0);
         case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_up_to(protoflags, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+          return set_ssl_version_min_max(protoflags, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_1);
         case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_up_to(protoflags, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+          return set_ssl_version_min_max(protoflags, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_2);
         case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_up_to(protoflags, conn, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+          return set_ssl_version_min_max(protoflags, conn, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_3);
       }
       break;
   }
 
-  switch(ssl_version_up_to) {
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+  switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_TLSv1_3:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
            *protoflags |= CURL_GSKPROTO_TLSV10_MASK;
@@ -787,7 +787,7 @@ set_ssl_version_up_to(unsigned int *protoflags, struct connectdata *conn,
           failf(data, "GSKit: TLS 1.3 is not yet supported");
           return CURLE_SSL_CONNECT_ERROR;
       } break;
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+    case CURL_SSLVERSION_MAX_TLSv1_2:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
            *protoflags |= CURL_GSKPROTO_TLSV10_MASK;
@@ -796,14 +796,14 @@ set_ssl_version_up_to(unsigned int *protoflags, struct connectdata *conn,
         case CURL_SSLVERSION_TLSv1_2:
            *protoflags |= CURL_GSKPROTO_TLSV12_MASK;
       } break;
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+    case CURL_SSLVERSION_MAX_TLSv1_1:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
            *protoflags |= CURL_GSKPROTO_TLSV10_MASK;
         case CURL_SSLVERSION_TLSv1_1:
            *protoflags |= CURL_GSKPROTO_TLSV11_MASK;
       } break;
-    case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
+    case CURL_SSLVERSION_MAX_TLSv1_0:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
            *protoflags |= CURL_GSKPROTO_TLSV10_MASK;
@@ -915,8 +915,8 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   case CURL_SSLVERSION_TLSv1_1:
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
-    result = set_ssl_version_up_to(&protoflags, conn, ssl_version,
-                                   SSL_CONN_CONFIG(version_up_to));
+    result = set_ssl_version_min_max(&protoflags, conn, ssl_version,
+                                   SSL_CONN_CONFIG(version_max));
     if(result != CURLE_OK)
       return result;
     break;

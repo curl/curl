@@ -566,10 +566,10 @@ ParameterError str2tls_max(long *val, const char *str)
     const char *tls_max_str;
     long tls_max;
   } const tls_max_array[] = {
-    { "default", CURL_SSLVERSION_OR_UP_TO_DEFAULT },
-    { "1.1",     CURL_SSLVERSION_OR_UP_TO_TLSv1_1 },
-    { "1.2",     CURL_SSLVERSION_OR_UP_TO_TLSv1_2 },
-    { "1.3",     CURL_SSLVERSION_OR_UP_TO_TLSv1_3 }
+    { "default", CURL_SSLVERSION_MAX_DEFAULT },
+    { "1.1",     CURL_SSLVERSION_MAX_TLSv1_1 },
+    { "1.2",     CURL_SSLVERSION_MAX_TLSv1_2 },
+    { "1.3",     CURL_SSLVERSION_MAX_TLSv1_3 }
   };
   size_t i = 0;
   if(!str)

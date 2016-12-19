@@ -156,8 +156,8 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
        same connection */
     return CURLE_OK;
 
-  if(SSL_CONN_CONFIG(version_up_to) != CURL_SSLVERSION_OR_UP_TO_NONE) {
-    failf(data, "axtls does not support CURL_SSLVERSION_OR_UP_TO");
+  if(SSL_CONN_CONFIG(version_max) != CURL_SSLVERSION_MAX_NONE) {
+    failf(data, "axtls does not support CURL_SSLVERSION_MAX");
     return CURLE_SSL_CONNECT_ERROR;
   }
 

@@ -1043,27 +1043,29 @@ CF_INLINE bool is_file(const char *filename)
 }
 
 static CURLcode
-set_ssl_version_up_to(struct connectdata *conn, int sockindex,
-                      long ssl_version, long ssl_version_up_to)
+set_ssl_version_min_max(struct connectdata *conn, int sockindex)
 {
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-
-  switch(ssl_version_up_to) {
-    case CURL_SSLVERSION_OR_UP_TO_NONE:
+  long ssl_version = conn->ssl_config.version;
+  long ssl_version_max = conn->ssl_config.version_max
+  switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_NONE:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_up_to(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_0);
+          ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_0;
+          break;
+          return set_ssl_version_min_max(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_0);
         case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_up_to(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_1);
+          return set_ssl_version_min_max(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_1);
         case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_up_to(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_2);
+          return set_ssl_version_min_max(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_2);
         case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_up_to(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_OR_UP_TO_TLSv1_3);
+          return set_ssl_version_min_max(conn, sockindex, ssl_version,
+                                       CURL_SSLVERSION_MAX_TLSv1_3);
       }
       break;
   }
@@ -1087,15 +1089,15 @@ set_ssl_version_up_to(struct connectdata *conn, int sockindex,
         return CURLE_SSL_CONNECT_ERROR;
     }
 
-    switch(ssl_version_up_to) {
-      case CURL_SSLVERSION_OR_UP_TO_TLSv1_0:
+    switch(ssl_version_max) {
+      case CURL_SSLVERSION_MAX_TLSv1_0:
          max_ssl_protocol = kTLSProtocol1;
          break;
-      case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+      case CURL_SSLVERSION_MAX_TLSv1_1:
          max_ssl_protocol = kTLSProtocol11;
          break;
-      case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
-      case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
+      case CURL_SSLVERSION_MAX_TLSv1_2:
+      case CURL_SSLVERSION_MAX_TLSv1_3:
          max_ssl_protocol = kTLSProtocol12;
          break;
      }
@@ -1125,13 +1127,13 @@ set_ssl_version_up_to(struct connectdata *conn, int sockindex,
         (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                            kTLSProtocol1,
                                            true);
-        switch(conn->ssl_config.version_up_to) {
-          case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
-          case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+        switch(conn->ssl_config.version_max) {
+          case CURL_SSLVERSION_MAX_TLSv1_3:
+          case CURL_SSLVERSION_MAX_TLSv1_2:
             (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                                kTLSProtocol12,
                                                true);
-          case CURL_SSLVERSION_OR_UP_TO_TLSv1_1:
+          case CURL_SSLVERSION_MAX_TLSv1_1:
             (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                                kTLSProtocol11,
                                                true);
@@ -1141,9 +1143,9 @@ set_ssl_version_up_to(struct connectdata *conn, int sockindex,
         (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                            kTLSProtocol11,
                                            true);
-        switch(conn->ssl_config.version_up_to) {
-          case CURL_SSLVERSION_OR_UP_TO_TLSv1_3:
-          case CURL_SSLVERSION_OR_UP_TO_TLSv1_2:
+        switch(conn->ssl_config.version_max) {
+          case CURL_SSLVERSION_MAX_TLSv1_3:
+          case CURL_SSLVERSION_MAX_TLSv1_2:
             (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                                kTLSProtocol12,
                                                true);
@@ -1238,9 +1240,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_up_to(conn, sockindex,
+        CURLcode result = set_ssl_version_min_max(conn, sockindex,
                                                conn->ssl_config.version,
-                                               conn->ssl_config.version_up_to);
+                                               conn->ssl_config.version_max);
         if(result != CURLE_OK)
           return result;
       } break;
@@ -1288,9 +1290,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_up_to(conn, sockindex,
+        CURLcode result = set_ssl_version_min_max(conn, sockindex,
                                                conn->ssl_config.version,
-                                               conn->ssl_config.version_up_to);
+                                               conn->ssl_config.version_max);
         if(result != CURLE_OK)
           return result;
       } break;
@@ -1319,7 +1321,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif  /* CURL_SUPPORT_MAC_10_8 */
   }
 #else
-  if(conn->ssl_config.version_up_to != CURL_SSLVERSION_OR_UP_TO_NONE) {
+  if(conn->ssl_config.version_max != CURL_SSLVERSION_MAX_NONE) {
     failf(data, "Your version of the OS does not support to set maximum"
                 " SSL/TLS version");
     return CURLE_SSL_CONNECT_ERROR;
