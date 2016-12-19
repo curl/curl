@@ -1590,7 +1590,7 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
   if(!scratch || data->set.crlf) {
     oldscratch = scratch;
 
-    scratch = newscratch = malloc(2 * BUFSIZE);
+    scratch = newscratch = malloc(2 * DEFAULT_BUFSIZE);
     if(!newscratch) {
       failf(data, "Failed to alloc scratch buffer!");
 

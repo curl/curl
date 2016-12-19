@@ -1682,9 +1682,10 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
       else {
         curl_off_t passed=0;
         do {
+	  const long buf_size = data->set.buffer_size;
           size_t readthisamountnow =
-            (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
-            BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
+            (data->state.resume_from - passed > buf_size) ?
+            buf_size : curlx_sotouz(data->state.resume_from - passed);
 
           size_t actuallyread =
             data->state.fread_func(data->state.buffer, 1, readthisamountnow,
@@ -2131,7 +2132,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
           return result;
 
         /* format: "Tue, 15 Nov 1994 12:45:26" */
-        snprintf(buf, BUFSIZE-1,
+        snprintf(buf, data->set.buffer_size-1,
                  "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
                  Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
                  tm->tm_mday,
@@ -2311,6 +2312,7 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
   struct Curl_easy *data=conn->data;
   curl_off_t filesize;
   char *buf = data->state.buffer;
+  const long buf_size = data->set.buffer_size;
 
   /* get the size from the ascii string: */
   filesize = (ftpcode == 213)?curlx_strtoofft(buf+4, NULL, 0):-1;
@@ -2318,7 +2320,7 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
   if(instate == FTP_SIZE) {
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(-1 != filesize) {
-      snprintf(buf, sizeof(data->state.buffer),
+      snprintf(buf, buf_size,
                "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
       result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
       if(result)

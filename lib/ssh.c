@@ -1838,11 +1838,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           }
           /* seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
           else {
+	    const long buf_size = data->set.buffer_size;
             curl_off_t passed=0;
             do {
               size_t readthisamountnow =
-                (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
-                BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
+                (data->state.resume_from - passed > buf_size) ?
+                buf_size : curlx_sotouz(data->state.resume_from - passed);
 
               size_t actuallyread =
                 data->state.fread_func(data->state.buffer, 1,

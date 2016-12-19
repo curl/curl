@@ -141,7 +141,7 @@ static void pre_receive_plain(struct connectdata *conn, int num)
       /* Have some incoming data */
       if(!psnd->buffer) {
         /* Use buffer double default size for intermediate buffer */
-        psnd->allocated_size = 2 * BUFSIZE;
+        psnd->allocated_size = 2 * conn->data->set.buffer_size;
         psnd->buffer = malloc(psnd->allocated_size);
         psnd->recv_size = 0;
         psnd->recv_processed = 0;
@@ -229,9 +229,10 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 {
   va_list ap;
   size_t len;
+  const long buf_size = data->set.buffer_size;
   va_start(ap, fmt);
 
-  vsnprintf(data->state.buffer, BUFSIZE, fmt, ap);
+  vsnprintf(data->state.buffer, buf_size, fmt, ap);
 
   if(data->set.errorbuffer && !data->state.errorbuf) {
     snprintf(data->set.errorbuffer, CURL_ERROR_SIZE, "%s", data->state.buffer);
@@ -239,7 +240,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   }
   if(data->set.verbose) {
     len = strlen(data->state.buffer);
-    if(len < BUFSIZE - 1) {
+    if(len < buf_size - 1) {
       data->state.buffer[len] = '\n';
       data->state.buffer[++len] = '\0';
     }
@@ -678,6 +679,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
 
   /* If session can pipeline, check connection buffer  */
   if(pipelining) {
+
     size_t bytestocopy = CURLMIN(conn->buf_len - conn->read_pos,
                                  sizerequested);
 
@@ -692,13 +694,11 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
     }
     /* If we come here, it means that there is no data to read from the buffer,
      * so we read from the socket */
-    bytesfromsocket = CURLMIN(sizerequested, BUFSIZE * sizeof(char));
+    bytesfromsocket = CURLMIN(sizerequested, DEFAULT_BUFSIZE * sizeof (char));
     buffertofill = conn->master_buffer;
   }
   else {
-    bytesfromsocket = CURLMIN((long)sizerequested,
-                              conn->data->set.buffer_size ?
-                              conn->data->set.buffer_size : BUFSIZE);
+    bytesfromsocket = CURLMIN((long)sizerequested, conn->data->set.buffer_size);
     buffertofill = buf;
   }
 
@@ -725,16 +725,17 @@ static int showit(struct Curl_easy *data, curl_infotype type,
     "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
 
 #ifdef CURL_DOES_CONVERSIONS
-  char buf[BUFSIZE+1];
+  const long buf_size = data->set.buffer_size;
+  char buf[buf_size+1];
   size_t conv_size = 0;
 
   switch(type) {
   case CURLINFO_HEADER_OUT:
     /* assume output headers are ASCII */
     /* copy the data into my buffer so the original is unchanged */
-    if(size > BUFSIZE) {
-      size = BUFSIZE; /* truncate if necessary */
-      buf[BUFSIZE] = '\0';
+    if(size > buf_size) {
+      size = buf_size; /* truncate if necessary */
+      buf[buf_size] = '\0';
     }
     conv_size = size;
     memcpy(buf, ptr, size);
