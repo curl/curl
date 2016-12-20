@@ -1309,6 +1309,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   struct timeval now;
   bool keepon = TRUE;
   char *buf = data->state.buffer;
+  const size_t buf_size = CURL_BUFSIZE(data->set.buffer_size);
   struct TELNET *tn;
 
   *done = TRUE; /* unconditionally */
@@ -1451,7 +1452,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
           if(!readfile_read)
             break;
 
-          if(!ReadFile(stdin_handle, buf, sizeof(data->state.buffer),
+          if(!ReadFile(stdin_handle, buf, buf_size,
                        &readfile_read, NULL)) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
@@ -1470,7 +1471,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 
     case WAIT_OBJECT_0 + 1:
     {
-      if(!ReadFile(stdin_handle, buf, sizeof(data->state.buffer),
+      if(!ReadFile(stdin_handle, buf, buf_size,
                    &readfile_read, NULL)) {
         keepon = FALSE;
         result = CURLE_READ_ERROR;
