@@ -48,6 +48,7 @@
 #include "slist.h"
 #include "select.h"
 #include "vtls.h"
+#include "ssl_hlp.h"
 #include "strcase.h"
 #include "hostcheck.h"
 #include "curl_printf.h"
@@ -1694,29 +1695,12 @@ get_ssl_version_txt(SSL *ssl)
 }
 
 static CURLcode
-set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
-                      long ssl_version, long ssl_version_max)
+set_ssl_version_min_max(long *ctx_options, struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
-
-  switch(ssl_version_max) {
-    case CURL_SSLVERSION_MAX_NONE:
-      switch(ssl_version) {
-        case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_min_max(ctx_options, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_0);
-        case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_min_max(ctx_options, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_1);
-        case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_min_max(ctx_options, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_2);
-        case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_min_max(ctx_options, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_3);
-      }
-      break;
-  }
+  long ssl_version = SSL_CONN_CONFIG(version);
+  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+                                                 SSL_CONN_CONFIG(version_max));
 
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
@@ -1981,9 +1965,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   case CURL_SSLVERSION_TLSv1_1:
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
-    result = set_ssl_version_min_max(&ctx_options, conn,
-                                   SSL_CONN_CONFIG(version),
-                                   SSL_CONN_CONFIG(version_max));
+    result = set_ssl_version_min_max(&ctx_options, conn);
     if(result != CURLE_OK)
        return result;
     break;

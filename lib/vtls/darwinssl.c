@@ -31,6 +31,7 @@
 #include "urldata.h" /* for the Curl_easy definition */
 #include "curl_base64.h"
 #include "strtok.h"
+#include "ssl_hlp.h"
 
 #ifdef USE_DARWINSSL
 
@@ -1047,28 +1048,9 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
 {
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  long ssl_version = conn->ssl_config.version;
-  long ssl_version_max = conn->ssl_config.version_max
-  switch(ssl_version_max) {
-    case CURL_SSLVERSION_MAX_NONE:
-      switch(ssl_version) {
-        case CURL_SSLVERSION_TLSv1_0:
-          ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_0;
-          break;
-          return set_ssl_version_min_max(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_0);
-        case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_min_max(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_1);
-        case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_min_max(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_2);
-        case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_min_max(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_3);
-      }
-      break;
-  }
+  long ssl_version = SSL_CONN_CONFIG(version);
+  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+                                                 SSL_CONN_CONFIG(version_max));
 
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLSetProtocolVersionMax != NULL) {
@@ -1240,9 +1222,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_min_max(conn, sockindex,
-                                               conn->ssl_config.version,
-                                               conn->ssl_config.version_max);
+        CURLcode result = set_ssl_version_min_max(conn, sockindex);
         if(result != CURLE_OK)
           return result;
       } break;
@@ -1290,9 +1270,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_min_max(conn, sockindex,
-                                               conn->ssl_config.version,
-                                               conn->ssl_config.version_max);
+        CURLcode result = set_ssl_version_min_max(conn, sockindex);
         if(result != CURLE_OK)
           return result;
       } break;

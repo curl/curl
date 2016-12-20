@@ -51,6 +51,7 @@
 #include "inet_pton.h"
 #include "mbedtls.h"
 #include "vtls.h"
+#include "ssl_hlp.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
@@ -158,32 +159,15 @@ static Curl_recv mbed_recv;
 static Curl_send mbed_send;
 
 static CURLcode
-set_ssl_version_min_max(struct connectdata *conn, int sockindex,
-                      long ssl_version, long ssl_version_max)
+set_ssl_version_min_max(struct connectdata *conn, int sockindex)
 {
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   int mbedtls_version_minor = MBEDTLS_SSL_MINOR_VERSION_1;
   int mbedtls_version_max_minor = MBEDTLS_SSL_MINOR_VERSION_1;
-
-  switch(ssl_version_max) {
-    case CURL_SSLVERSION_MAX_NONE:
-      switch(ssl_version) {
-        case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_min_max(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_0);
-        case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_min_max(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_1);
-        case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_min_max(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_2);
-        case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_min_max(conn, sockindex, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_3);
-      }
-      break;
-  }
+  long ssl_version = SSL_CONN_CONFIG(version);
+  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+                                                 SSL_CONN_CONFIG(version_max));
 
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
@@ -403,9 +387,7 @@ mbed_connect_step1(struct connectdata *conn,
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
     {
-      CURLcode result = set_ssl_version_min_max(conn, sockindex,
-                                              SSL_CONN_CONFIG(version),
-                                              SSL_CONN_CONFIG(version_max));
+      CURLcode result = set_ssl_version_min_max(conn, sockindex);
       if(result != CURLE_OK)
         return result;
     } break;

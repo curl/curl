@@ -49,6 +49,7 @@
 #include "inet_pton.h"
 #include "gtls.h"
 #include "vtls.h"
+#include "ssl_hlp.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
@@ -377,29 +378,12 @@ static gnutls_x509_crt_fmt_t do_file_type(const char *type)
 
 #ifndef USE_GNUTLS_PRIORITY_SET_DIRECT
 static CURLcode
-set_ssl_version_min_max(int *protocol_priority, struct connectdata *conn,
-                      long ssl_version, long ssl_version_max)
+set_ssl_version_min_max(int *protocol_priority, struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
-
-  switch(ssl_version_max) {
-    case CURL_SSLVERSION_MAX_NONE:
-      switch(ssl_version) {
-        case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_min_max(protocol_priority, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_0);
-        case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_min_max(protocol_priority, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_1);
-        case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_min_max(protocol_priority, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_2);
-        case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_min_max(protocol_priority, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_3);
-      }
-      break;
-  }
+  long ssl_version = SSL_CONN_CONFIG(version);
+  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+                                                 SSL_CONN_CONFIG(version_max));
 
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
@@ -440,29 +424,12 @@ set_ssl_version_min_max(int *protocol_priority, struct connectdata *conn,
 #define GNUTLS_SRP "+SRP"
 
 static CURLcode
-set_ssl_version_min_max(const char **prioritylist, struct connectdata *conn,
-                      long ssl_version, long ssl_version_max)
+set_ssl_version_min_max(const char **prioritylist, struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
-
-  switch(ssl_version_max) {
-    case CURL_SSLVERSION_MAX_NONE:
-      switch(ssl_version) {
-        case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_min_max(prioritylist, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_0);
-        case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_min_max(prioritylist, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_1);
-        case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_min_max(prioritylist, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_2);
-        case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_min_max(prioritylist, conn, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_3);
-      }
-      break;
-  }
+  long ssl_version = SSL_CONN_CONFIG(version);
+  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+                                                 SSL_CONN_CONFIG(version_max));
 
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
@@ -716,9 +683,7 @@ gtls_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_min_max(protocol_priority, conn,
-                                               SSL_CONN_CONFIG(version),
-                                               SSL_CONN_CONFIG(version_max));
+        CURLcode result = set_ssl_version_min_max(protocol_priority, conn);
         if(result != CURLE_OK)
           return result;
       } break;
@@ -753,9 +718,7 @@ gtls_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_min_max(&prioritylist, conn,
-                                               SSL_CONN_CONFIG(version),
-                                               SSL_CONN_CONFIG(version_max));
+        CURLcode result = set_ssl_version_min_max(&prioritylist, conn);
         if(result != CURLE_OK)
           return result;
       } break;

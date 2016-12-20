@@ -37,6 +37,7 @@
 #include "strcase.h"
 #include "select.h"
 #include "vtls.h"
+#include "ssl_hlp.h"
 #include "llist.h"
 #include "curl_printf.h"
 #include "nssg.h"
@@ -1514,26 +1515,12 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
 
 static CURLcode
 set_ssl_version_min_max(SSLVersionRange *sslver, struct Curl_easy *data,
-                      long ssl_version, long ssl_version_max)
+                        struct connectdata *conn)
 {
-  switch(ssl_version_max) {
-    case CURL_SSLVERSION_MAX_NONE:
-      switch(ssl_version) {
-        case CURL_SSLVERSION_TLSv1_0:
-          return set_ssl_version_min_max(sslver, data, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_0);
-        case CURL_SSLVERSION_TLSv1_1:
-          return set_ssl_version_min_max(sslver, data, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_1);
-        case CURL_SSLVERSION_TLSv1_2:
-          return set_ssl_version_min_max(sslver, data, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_2);
-        case CURL_SSLVERSION_TLSv1_3:
-          return set_ssl_version_min_max(sslver, data, ssl_version,
-                                       CURL_SSLVERSION_MAX_TLSv1_3);
-      }
-      break;
-  }
+  long ssl_version = SSL_CONN_CONFIG(version);
+  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+                                                 SSL_CONN_CONFIG(version_max));
+  (void) data;
 
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
@@ -1640,8 +1627,7 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
   case CURL_SSLVERSION_TLSv1_1:
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
-    return set_ssl_version_min_max(sslver, data, SSL_CONN_CONFIG(version),
-                                 SSL_CONN_CONFIG(version_max));
+    return set_ssl_version_min_max(sslver, data, conn);
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
     return CURLE_SSL_CONNECT_ERROR;
