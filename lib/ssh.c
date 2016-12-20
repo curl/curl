@@ -2866,8 +2866,8 @@ static CURLcode ssh_block_statemach(struct connectdata *conn,
       if(LIBSSH2_SESSION_BLOCK_OUTBOUND & dir)
         fd_write = sock;
       /* wait for the socket to become ready */
-      Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write,
-                        left>1000?1000:left); /* ignore result */
+      (void)Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write,
+                              left>1000?1000:left); /* ignore result */
     }
 #endif
 
