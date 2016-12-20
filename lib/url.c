@@ -452,6 +452,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   }
   data->change.url = NULL;
 
+  Curl_safefree(data->state.buffer);
   Curl_safefree(data->state.headerbuff);
 
   Curl_flush_cookies(data, 1);
@@ -641,6 +642,12 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   /* We do some initial setup here, all those fields that can't be just 0 */
 
+  data->state.buffer = malloc(BUFSIZE + 1);
+  if(!data->state.buffer) {
+    DEBUGF(fprintf(stderr, "Error: malloc of buffer failed\n"));
+    result = CURLE_OUT_OF_MEMORY;
+  }
+
   data->state.headerbuff = malloc(HEADERSIZE);
   if(!data->state.headerbuff) {
     DEBUGF(fprintf(stderr, "Error: malloc of headerbuff failed\n"));
@@ -671,6 +678,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   if(result) {
     Curl_resolver_cleanup(data->state.resolver);
+    free(data->state.buffer);
     free(data->state.headerbuff);
     Curl_freeset(data);
     free(data);
@@ -2268,9 +2276,20 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      */
     data->set.buffer_size = va_arg(param, long);
 
-    if((data->set.buffer_size> (BUFSIZE -1)) ||
-       (data->set.buffer_size < 1))
-      data->set.buffer_size = 0; /* huge internal default */
+    if(data->set.buffer_size > MAX_BUFSIZE)
+      data->set.buffer_size = MAX_BUFSIZE; /* huge internal default */
+    else if(data->set.buffer_size < 1)
+      data->set.buffer_size = BUFSIZE;
+
+    /* Resize only if larger than default buffer size. */
+    if(data->set.buffer_size > BUFSIZE) {
+      data->state.buffer = realloc(data->state.buffer,
+                                   data->set.buffer_size + 1);
+      if(!data->state.buffer) {
+        DEBUGF(fprintf(stderr, "Error: realloc of buffer failed\n"));
+        result = CURLE_OUT_OF_MEMORY;
+      }
+    }
 
     break;
 
