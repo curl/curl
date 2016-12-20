@@ -2107,7 +2107,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
         /* we have a time, reformat it */
         time_t secs=time(NULL);
         /* using the good old yacc/bison yuck */
-        snprintf(buf, sizeof(conn->data->state.buffer),
+        snprintf(buf, CURL_BUFSIZE(conn->data->set.buffer_size),
                  "%04d%02d%02d %02d:%02d:%02d GMT",
                  year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
@@ -2318,7 +2318,7 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
   if(instate == FTP_SIZE) {
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(-1 != filesize) {
-      snprintf(buf, sizeof(data->state.buffer),
+      snprintf(buf, CURL_BUFSIZE(data->set.buffer_size),
                "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
       result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
       if(result)
@@ -2823,6 +2823,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     case FTP_PWD:
       if(ftpcode == 257) {
         char *ptr=&data->state.buffer[4];  /* start on the first letter */
+        const size_t buf_size = CURL_BUFSIZE(data->set.buffer_size);
         char *dir;
         char *store;
 
@@ -2840,7 +2841,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
         */
 
         /* scan for the first double-quote for non-standard responses */
-        while(ptr < &data->state.buffer[sizeof(data->state.buffer)]
+        while(ptr < &data->state.buffer[buf_size]
               && *ptr != '\n' && *ptr != '\0' && *ptr != '"')
           ptr++;
 

@@ -297,7 +297,8 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
     pwd = conn->passwd;
   }
 
-  snprintf(data->state.buffer, sizeof(data->state.buffer), "%s:%s", user, pwd);
+  snprintf(data->state.buffer, CURL_BUFSIZE(data->set.buffer_size),
+           "%s:%s", user, pwd);
 
   result = Curl_base64_encode(data,
                               data->state.buffer, strlen(data->state.buffer),
