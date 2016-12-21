@@ -74,7 +74,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 {
   CURLcode result;
   struct Curl_easy *data = conn->data;
-  unsigned char *path;
+  unsigned char *path = NULL;
   char *tmp = NULL;
   char *response;
   size_t len;
