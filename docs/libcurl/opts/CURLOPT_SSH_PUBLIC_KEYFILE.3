@@ -38,6 +38,9 @@ set.
 If NULL (or an empty string) is passed, libcurl will pass no public key to
 libssh2, which then tries to compute it from the private key.  This is known
 to work with libssh2 1.4.0+ linked against OpenSSL.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

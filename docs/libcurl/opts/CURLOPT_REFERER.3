@@ -32,6 +32,9 @@ Pass a pointer to a zero terminated string as parameter. It will be used to
 set the Referer: header in the http request sent to the remote server. This
 can be used to fool servers or scripts. You can also set any custom header
 with \fICURLOPT_HTTPHEADER(3)\fP.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

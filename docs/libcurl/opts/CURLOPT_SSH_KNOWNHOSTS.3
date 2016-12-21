@@ -34,6 +34,9 @@ format as supported by libssh2. If this file is specified, libcurl will only
 accept connections with hosts that are known and present in that file, with a
 matching public key. Use \fICURLOPT_SSH_KEYFUNCTION(3)\fP to alter the default
 behavior on host and key (mis)matching.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

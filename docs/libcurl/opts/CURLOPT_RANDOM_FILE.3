@@ -30,6 +30,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RANDOM_FILE, char *path);
 .SH DESCRIPTION
 Pass a char * to a zero terminated file name. The file will be used to read
 from to seed the random engine for SSL and more.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL, not used
 .SH PROTOCOLS

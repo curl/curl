@@ -30,6 +30,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_EGDSOCKET, char *path);
 .SH DESCRIPTION
 Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
 socket. It will be used to seed the random engine for SSL.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

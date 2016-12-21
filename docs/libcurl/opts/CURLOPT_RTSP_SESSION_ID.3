@@ -34,6 +34,9 @@ set to any non-NULL value, libcurl will return \fICURLE_RTSP_SESSION_ERROR\fP
 if ID received from the server does not match. If unset (or set to NULL),
 libcurl will automatically set the ID the first time the server sets it in a
 response.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

@@ -37,6 +37,9 @@ defined in RFC5054 and provides mutual authentication if both sides have a
 shared secret. To use TLS-SRP, you must also set the
 \fICURLOPT_TLSAUTH_USERNAME(3)\fP and \fICURLOPT_TLSAUTH_PASSWORD(3)\fP
 options.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 blank
 .SH PROTOCOLS

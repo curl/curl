@@ -61,6 +61,9 @@ SMTP options.
 The user and password strings are not URL decoded, so there's no way to send
 in a user name containing a colon using this option. Use
 \fICURLOPT_USERNAME(3)\fP for that, or include it in the URL.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

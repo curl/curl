@@ -80,6 +80,9 @@ Normally a multiline response is returned which can be used, in conjunction
 with \fICURLOPT_MAIL_RCPT(3)\fP, to specify an EXPN request. If the
 \fICURLOPT_NOBODY(3)\fP option is specified then the request can be used to
 issue NOOP and RSET commands.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
