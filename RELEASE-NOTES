@@ -1,6 +1,6 @@
-Curl and libcurl 7.52.0
+Curl and libcurl 7.52.1
 
- Public curl releases:         161
+ Public curl releases:         162
  Command line options:         204
  curl_easy_setopt() options:   243
  Public functions in libcurl:  61
@@ -8,62 +8,11 @@ Curl and libcurl 7.52.0
 
 This release includes the following changes:
 
- o nss: map CURL_SSLVERSION_DEFAULT to NSS default
- o vtls: support TLS 1.3 via CURL_SSLVERSION_TLSv1_3
- o curl: introduce the --tlsv1.3 option to force TLS 1.3
- o curl: Add --retry-connrefused [11]
- o proxy: Support HTTPS proxy and SOCKS+HTTP(s) [24]
- o add CURLINFO_SCHEME, CURLINFO_PROTOCOL, and %{scheme} [20]
- o curl: add --fail-early [15]
+ o
 
 This release includes the following bugfixes:
 
- o CVE-2016-9586: printf floating point buffer overflow [33]
- o CVE-2016-9952: Win CE schannel cert wildcard matches too much [34]
- o CVE-2016-9953: Win CE schannel cert name out of buffer read [35]
- o msvc: removed a straggling reference to strequal.c
- o winbuild: remove strcase.obj from curl build [1]
- o examples: bugfixed multi-uv.c
- o configure: verify that compiler groks -Werror=partial-availability [2]
- o mbedtls: fix build with mbedtls versions < 2.4.0 [3]
- o dist: add unit test CMakeLists.txt to the tarball
- o curl -w: added more decimal digits to timing counters [4]
- o easy: Initialize info variables on easy init and duphandle [5]
- o cmake: disable poll for macOS [6]
- o http2: Don't send header fields prohibited by HTTP/2 spec [7]
- o ssh: check md5 fingerprints case insensitively (regression) [8]
- o openssl: initial TLS 1.3 adaptions
- o curl_formadd.3: *_FILECONTENT and *_FILE need the file to be kept
- o printf: fix ".*f" handling [9]
- o examples/fileupload.c: fclose the file as well
- o SPNEGO: Fix memory leak when authentication fails [10]
- o realloc: use Curl_saferealloc to avoid common mistakes [12]
- o openssl: make sure to fail in the unlikely event that PRNG seeding fails
- o URL-parser: for file://[host]/ URLs, the [host] must be localhost [13]
- o timeval: prefer time_t to hold seconds instead of long
- o Curl_rand: fixed and moved to rand.c [14]
- o glob: fix [a-c] globbing regression [16]
- o darwinssl: fix SSL client certificate not found on MacOS Sierra [17]
- o curl.1: Clarify --dump-header only writes received headers
- o http2: Fix address sanitizer memcpy warning
- o http2: Use huge HTTP/2 windows [18]
- o connects: Don't mix unix domain sockets with regular ones
- o url: Fix conn reuse for local ports and interfaces [19]
- o x509: Limit ASN.1 structure sizes to 256K
- o checksrc: add more checks
- o winbuild: add config option ENABLE_NGHTTP2 [21]
- o http2: check nghttp2_session_set_local_window_size exists [22]
- o http2: Fix crashes when parent stream gets aborted [23]
- o CURLOPT_CONNECT_TO: Skip non-matching "connect-to" entries [25]
- o URL parser: reject non-numerical port numbers
- o CONNECT: reject TE or CL in 2xx responses
- o CONNECT: read responses one byte at a time [26]
- o curl: support zero-length argument strings in config files [27]
- o openssl: don't use OpenSSL's ERR_PACK [28]
- o curl.1: generated with the new man page system [29]
- o curl_easy_recv: Improve documentation and example program [30]
- o Curl_getconnectinfo: avoid checking if the connection is closed [31]
- o CIPHERS.md: attempt to document TLS cipher names [32]
+ o lib: fix MSVC compiler warnings
 
 This release includes the following known bugs:
 
@@ -72,52 +21,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Langley, Adam Piggott, afrind on github, Alex Chan, Alex Rousskov,
-  Anders Bakken, Andrei Sedoi, Bruce Stephens, Dan Fandrich, Daniel Hwang,
-  Daniel Stenberg, Dan McNulty, Dave Reisner, David Schweikert,
-  Dmitry Kurochkin, Frank Gevaerts, Frank Meier, Gisle Vanem, Isaac Boukris,
-  Jakub Zakrzewski, Jan Ehrhardt, Jeremy Pearson, Kamil Dudka, Marcel Raad,
-  Mauro Rappa, Michael Kaufmann, Mike Crowe, Neal Poole, Nick Zitzmann,
-  Okhin Vasilij, Patrick Monnerat, Peter Wu, Ray Satiro, Ricki Hirner,
-  Tatsuhiro Tsujikawa, Thomas Glanzmann, Tony Kelman, Vasy Okhin,
-  (38 contributors)
+  Marcel Raad
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=1098
- [2] = https://curl.haxx.se/bug/?i=1104
- [3] = https://curl.haxx.se/bug/?i=1087
- [4] = https://curl.haxx.se/bug/?i=1106
- [5] = https://curl.haxx.se/bug/?i=1103
- [6] = https://curl.haxx.se/bug/?i=1089
- [7] = https://curl.haxx.se/bug/?i=1092
- [8] = https://github.com/curl/curl/commit/ce8d09483eea2fcb1b50e323e1a8ed1f3613b2e3#commitcomment-19666146
- [9] = https://curl.haxx.se/bug/?i=1113
- [10] = https://curl.haxx.se/bug/?i=1115
- [11] = https://curl.haxx.se/bug/?i=1064
- [12] = https://curl.haxx.se/mail/lib-2016-11/0087.html
- [13] = https://curl.haxx.se/mail/lib-2016-11/0104.html
- [14] = https://curl.haxx.se/mail/lib-2016-11/0119.html
- [15] = https://curl.haxx.se/mail/archive-2016-11/0038.html
- [16] = https://github.com/curl/curl/commit/ee4f76606cfa4ee068bf28edd37c8dae7e8db317#commitcomment-19823146
- [17] = https://curl.haxx.se/bug/?i=1105
- [18] = https://curl.haxx.se/bug/?i=1102
- [19] = https://curl.haxx.se/mail/lib-2016-11/0137.html
- [20] = https://curl.haxx.se/bug/?i=1137
- [21] = https://curl.haxx.se/bug/?i=1141
- [22] = https://github.com/curl/curl/commit/a4d8888#commitcomment-19985676
- [23] = https://curl.haxx.se/bug/?i=1125
- [24] = https://curl.haxx.se/bug/?i=1127
- [25] = https://curl.haxx.se/bug/?i=1148
- [26] = https://curl.haxx.se/bug/?i=1132
- [27] = https://curl.haxx.se/bug/?i=1152
- [28] = https://curl.haxx.se/bug/?i=1157
- [29] = https://github.com/curl/curl/blob/master/docs/cmdline-opts/MANPAGE.md
- [30] = https://curl.haxx.se/bug/?i=1134
- [31] = https://curl.haxx.se/bug/?i=1134
- [32] = https://curl.haxx.se/docs/ssl-ciphers.html
- [33] = https://curl.haxx.se/docs/adv_20161221A.html
- [34] = https://curl.haxx.se/docs/adv_20161221B.html
- [35] = https://curl.haxx.se/docs/adv_20161221C.html
+ [1] = https://curl.haxx.se/bug/?i=
