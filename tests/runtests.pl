@@ -3594,7 +3594,7 @@ sub singletest {
             $usevalgrind = 1;
             my $valgrindcmd = "$valgrind ";
             $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
-            $valgrindcmd .= "--leak-check=yes ";
+            $valgrindcmd .= "--quiet --leak-check=yes ";
             $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
            # $valgrindcmd .= "--gen-suppressions=all ";
             $valgrindcmd .= "--num-callers=16 ";
