@@ -39,6 +39,9 @@ if it does not exactly match the public key provided to this option, curl will
 abort the connection before sending or receiving any data.
 
 On mismatch, \fICURLE_SSL_PINNEDPUBKEYNOTMATCH\fP is returned.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

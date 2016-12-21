@@ -33,6 +33,9 @@ enables kerberos awareness.  This is a string that should match one of the
 following: \&'clear', \&'safe', \&'confidential' or \&'private'.  If the
 string is set but doesn't match one of these, 'private' will be used. Set the
 string to NULL to disable kerberos support for FTP.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

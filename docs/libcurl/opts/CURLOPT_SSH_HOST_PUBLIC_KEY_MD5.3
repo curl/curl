@@ -33,6 +33,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5,
 Pass a char * pointing to a string containing 32 hexadecimal digits. The
 string should be the 128 bit MD5 checksum of the remote host's public key, and
 libcurl will reject the connection to the host unless the md5sums match.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

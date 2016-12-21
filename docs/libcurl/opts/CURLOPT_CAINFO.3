@@ -46,6 +46,9 @@ option is supported for backward compatibility with other SSL engines, but it
 should not be set. If the option is not set, then curl will use the
 certificates in the system and user Keychain to verify the peer, which is the
 preferred method of verifying the peer's certificate chain.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 Built-in system specific
 .SH PROTOCOLS
