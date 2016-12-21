@@ -1345,7 +1345,6 @@ static int test_curl_off_t_formatting(void)
   num_cofft_tests = i;
 
 #endif
-  /* !checksrc! enable LONGLINE */
 
   for(i=1; i<=num_cofft_tests; i++) {
 
@@ -1650,7 +1649,7 @@ static int test_float_formatting(void)
 
   return errors;
 }
-
+/* !checksrc! enable LONGLINE */
 
 int test(char *URL)
 {
