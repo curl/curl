@@ -367,6 +367,10 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
   size_t decoded_sz = 0;
   CURLcode error;
 
+  if(!conn->mech)
+    /* not inititalized, return error */
+    return -1;
+
   DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
 
   error = Curl_base64_decode(buffer + 4, (unsigned char **)&buf, &decoded_sz);
