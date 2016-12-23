@@ -3275,6 +3275,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 int Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
                      size_t length)
 {
+  int rc;
   if(data) {
     if(Curl_ossl_seed(data)) /* Initiate the seed if not already done */
       return 1; /* couldn't seed for some reason */
@@ -3283,8 +3284,9 @@ int Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
     if(!rand_enough())
       return 1;
   }
-  RAND_bytes(entropy, curlx_uztosi(length));
-  return 0; /* 0 as in no problem */
+  /* RAND_bytes() returns 1 on success, 0 otherwise.  */
+  rc = RAND_bytes(entropy, curlx_uztosi(length));
+  return rc^1;
 }
 
 void Curl_ossl_md5sum(unsigned char *tmp, /* input */
