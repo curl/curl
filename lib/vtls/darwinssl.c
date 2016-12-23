@@ -885,12 +885,13 @@ static OSStatus CopyIdentityWithLabel(char *label,
                                       SecIdentityRef *out_cert_and_key)
 {
   OSStatus status = errSecItemNotFound;
+
+#if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
   CFArrayRef keys_list;
   CFIndex keys_list_count;
   CFIndex i;
   CFStringRef common_name;
 
-#if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
   /* SecItemCopyMatching() was introduced in iOS and Snow Leopard.
      kSecClassIdentity was introduced in Lion. If both exist, let's use them
      to find the certificate. */
@@ -929,12 +930,13 @@ static OSStatus CopyIdentityWithLabel(char *label,
     if(status == noErr) {
       keys_list_count = CFArrayGetCount(keys_list);
       *out_cert_and_key = NULL;
+      status = 1;
       for(i=0; i<keys_list_count; i++) {
         OSStatus err = noErr;
         SecCertificateRef cert = NULL;
-        *out_cert_and_key =
+        SecIdentityRef identity =
           (SecIdentityRef) CFArrayGetValueAtIndex(keys_list, i);
-        err = SecIdentityCopyCertificate(*out_cert_and_key, &cert);
+        err = SecIdentityCopyCertificate(identity, &cert);
         if(err == noErr) {
 #if CURL_BUILD_IOS
           common_name = SecCertificateCopySubjectSummary(cert);
@@ -944,17 +946,19 @@ static OSStatus CopyIdentityWithLabel(char *label,
           if(CFStringCompare(common_name, label_cf, 0) == kCFCompareEqualTo) {
             CFRelease(cert);
             CFRelease(common_name);
+            CFRetain(identity);
+            *out_cert_and_key = identity;
             status = noErr;
             break;
           }
           CFRelease(common_name);
         }
-        *out_cert_and_key = NULL;
-        status = 1;
         CFRelease(cert);
       }
     }
 
+    if (keys_list)
+      CFRelease(keys_list);
     CFRelease(query_dict);
     CFRelease(label_cf);
   }
