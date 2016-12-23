@@ -1425,8 +1425,6 @@ CURLcode Curl_http_done(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct HTTP *http = data->req.protop;
 
-  infof(data, "Curl_http_done: called premature == %d\n", premature);
-
   Curl_unencode_cleanup(conn);
 
 #ifdef USE_SPNEGO
