@@ -1,6 +1,6 @@
-Curl and libcurl 7.52.1
+Curl and libcurl 7.52.2
 
- Public curl releases:         162
+ Public curl releases:         163
  Command line options:         204
  curl_easy_setopt() options:   243
  Public functions in libcurl:  61
@@ -8,11 +8,7 @@ Curl and libcurl 7.52.1
 
 This release includes the following bugfixes:
 
- o CVE-2016-9594: unititialized random [1]
- o lib557: fix checksrc warnings
- o lib: fix MSVC compiler warnings
- o lib557.c: use a shorter MAXIMIZE representation [2]
- o tests: run checksrc on debug builds
+ o
 
 This release includes the following known bugs:
 
@@ -21,12 +17,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Kamil Dudka, Marcel Raad, Ray Satiro,
-  (4 contributors)
+
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/docs/adv_20161223.html
- [2] = https://curl.haxx.se/mail/lib-2016-12/0098.html
+ [1] = https://curl.haxx.se/bug/?i=
