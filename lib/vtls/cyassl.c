@@ -772,7 +772,7 @@ cyassl_connect_common(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
-  long timeout_ms;
+  time_t timeout_ms;
   int what;
 
   /* check if the connection has already been established */
