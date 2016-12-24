@@ -5,8 +5,8 @@ To remedy this issue for libcurl I've generated this options file that
 build-wolfssl will copy to the wolfSSL include directories and will result in
 maximum compatibility.
 
-These are the configure options that were used to build wolfSSL v3.9.0 in mingw
-and generate the options in this file:
+These are the configure options that were used to build wolfSSL v3.10.0 in
+mingw and generate the options in this file:
 
 C_EXTRA_FLAGS="\
   -Wno-attributes \
@@ -17,12 +17,15 @@ C_EXTRA_FLAGS="\
   -DWOLFSSL_STATIC_RSA \
   " \
 ./configure --prefix=/usr/local \
+  --disable-jobserver \
   --enable-aesgcm \
   --enable-alpn \
   --enable-certgen \
+  --enable-des3 \
   --enable-dh \
   --enable-dsa \
   --enable-ecc \
+  --enable-eccshamir \
   --enable-fastmath \
   --enable-opensslextra \
   --enable-ripemd \
@@ -93,6 +96,15 @@ extern "C" {
 #undef  OPENSSL_EXTRA
 #define OPENSSL_EXTRA
 
+#undef  TFM_TIMING_RESISTANT
+#define TFM_TIMING_RESISTANT
+
+#undef  ECC_TIMING_RESISTANT
+#define ECC_TIMING_RESISTANT
+
+#undef  WC_RSA_BLINDING
+#define WC_RSA_BLINDING
+
 #undef  HAVE_AESGCM
 #define HAVE_AESGCM
 
@@ -161,6 +173,9 @@ extern "C" {
 
 #undef  HAVE_SUPPORTED_CURVES
 #define HAVE_SUPPORTED_CURVES
+
+#undef  HAVE_EXTENDED_MASTER
+#define HAVE_EXTENDED_MASTER
 
 #undef  WOLFSSL_TEST_CERT
 #define WOLFSSL_TEST_CERT
