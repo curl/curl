@@ -65,14 +65,25 @@ Weird server reply. The server sent data curl couldn't parse.
 FTP access denied. The server denied login or denied access to the particular
 resource or directory you wanted to reach. Most often you tried to change to a
 directory that doesn't exist on the server.
+.IP 10
+FTP accept failed. While waiting for the server to connect back when an active
+FTP session is used, an error code was sent over the control connection or
+similar.
 .IP 11
 FTP weird PASS reply. Curl couldn't parse the reply sent to the PASS request.
+.IP 12
+During an active FTP session while waiting for the server to connect back to
+curl, the timeout expired.
 .IP 13
 FTP weird PASV reply, Curl couldn't parse the reply sent to the PASV request.
 .IP 14
 FTP weird 227 format. Curl couldn't parse the 227-line the server sent.
 .IP 15
 FTP can't get host. Couldn't resolve the host IP we got in the 227-line.
+.IP 16
+HTTP/2 error. A problem was detected in the HTTP2 framing layer. This is
+somewhat generic and can be one out of several problems, see the error message
+for details.
 .IP 17
 FTP couldn't set binary. Couldn't change transfer method to binary.
 .IP 18
