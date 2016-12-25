@@ -2830,7 +2830,7 @@ dnl **********************************************************************
 
 AC_MSG_CHECKING([whether to build with libidn2])
 OPT_IDN="default"
-AC_ARG_WITH(libidn,
+AC_ARG_WITH(libidn2,
 AC_HELP_STRING([--with-libidn2=PATH],[Enable libidn2 usage])
 AC_HELP_STRING([--without-libidn2],[Disable libidn2 usage]),
   [OPT_IDN=$withval])
