@@ -1553,7 +1553,7 @@ char *Curl_formpostheader(void *formp, size_t *len)
   struct Form *form=(struct Form *)formp;
 
   if(!form->data)
-    return 0; /* nothing, ERROR! */
+    return NULL; /* nothing, ERROR! */
 
   header = form->data->line;
   *len = form->data->length;
