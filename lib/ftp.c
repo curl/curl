@@ -2000,7 +2000,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
 
     if(!addr) {
       failf(data, "Can't resolve proxy host %s:%hu", host_name, connectport);
-      return CURLE_FTP_CANT_GET_HOST;
+      return CURLE_COULDNT_RESOLVE_PROXY;
     }
   }
   else {
