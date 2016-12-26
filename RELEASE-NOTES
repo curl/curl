@@ -8,7 +8,17 @@ Curl and libcurl 7.52.2
 
 This release includes the following bugfixes:
 
- o
+ o gnutls-random: check return code for failed random
+ o openssl-random: check return code when asking for random
+ o http: remove "Curl_http_done: called premature" message
+ o cyassl: use time_t instead of long for timeout
+ o build-wolfssl: Sync config with wolfSSL 3.10
+ o ftp-gss: check for init before use
+ o configure: accept --with-libidn2 instead [1]
+ o ftp: failure to resolve proxy should return that error code
+ o curl.1: add three more exit codes
+ o docs/ciphers: link to our own new page about ciphers
+ o vtls: s/SSLEAY/OPENSSL - fixes multi_socket timeouts with openssl [2]
 
 This release includes the following known bugs:
 
@@ -17,10 +27,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-
+  Christian Weisgerber, Daniel Romero, Daniel Stenberg, Ray Satiro,
+  (4 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/mail/lib-2016-12/0110.html
+ [2] = https://curl.haxx.se/bug/?i=1174
