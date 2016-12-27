@@ -35,10 +35,6 @@
 #  include <locale.h>
 #endif
 
-#ifdef HAVE_NETINET_TCP_H
-#  include <netinet/tcp.h>
-#endif
-
 #ifdef __VMS
 #  include <fabdef.h>
 #endif
