@@ -148,8 +148,8 @@ data. The parameter you pass to \fICURLFORM_STREAM\fP is the pointer passed on
 to the read callback's fourth argument. If you want the part to look like a
 file upload one, set the \fICURLFORM_FILENAME\fP parameter as well. Note that
 when using \fICURLFORM_STREAM\fP, \fICURLFORM_CONTENTSLENGTH\fP must also be
-set with the total expected length of the part. (Option added in libcurl
-7.18.2)
+set with the total expected length of the part unless the formpost is sent
+chunked encoded. (Option added in libcurl 7.18.2)
 .IP CURLFORM_ARRAY
 Another possibility to send options to curl_formadd() is the
 \fBCURLFORM_ARRAY\fP option, that passes a struct curl_forms array pointer as
