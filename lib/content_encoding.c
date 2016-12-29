@@ -314,7 +314,7 @@ Curl_unencode_gzip_write(struct connectdata *conn,
 #ifndef OLD_ZLIB_SUPPORT
   /* Support for old zlib versions is compiled away and we are running with
      an old version, so return an error. */
-  return exit_zlib(z, &k->zlib_init, CURLE_FUNCTION_NOT_FOUND);
+  return exit_zlib(z, &k->zlib_init, CURLE_WRITE_ERROR);
 
 #else
   /* This next mess is to get around the potential case where there isn't
