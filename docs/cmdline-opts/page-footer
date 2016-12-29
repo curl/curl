@@ -122,7 +122,7 @@ HTTP post error. Internal post-request generation error.
 .IP 35
 SSL connect error. The SSL handshaking failed.
 .IP 36
-FTP bad download resume. Couldn't continue an earlier aborted download.
+Bad download resume. Couldn't continue an earlier aborted download.
 .IP 37
 FILE couldn't read file. Failed to open the file. Permissions?
 .IP 38
