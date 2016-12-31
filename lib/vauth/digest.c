@@ -46,7 +46,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if !defined(USE_WINDOWS_SSPI)
+#if !defined(xUSE_WINDOWS_SSPI)
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
 #define DIGEST_QOP_VALUE_AUTH_CONF        (1 << 2)
@@ -134,7 +134,7 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
   return TRUE;
 }
 
-#if !defined(USE_WINDOWS_SSPI)
+#if !defined(xUSE_WINDOWS_SSPI)
 /* Convert md5 chunk to RFC2617 (section 3.1.3) -suitable ascii string*/
 static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
                                      unsigned char *dest) /* 33 bytes */
