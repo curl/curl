@@ -32,7 +32,9 @@ Pass a long. Sets the interval, in seconds, that the operating system will
 wait between sending keepalive probes. Not all operating systems support this
 option. (Added in 7.25.0)
 .SH DEFAULT
+60
 .SH PROTOCOLS
+All
 .SH EXAMPLE
 .nf
 CURL *curl = curl_easy_init();
@@ -42,7 +44,7 @@ if(curl) {
   /* enable TCP keep-alive for this transfer */
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
-  /* keep-alive idle time to 120 seconds */
+  /* set keep-alive idle time to 120 seconds */
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 120L);
 
   /* interval time between keep-alive probes: 60 seconds */
