@@ -1393,17 +1393,12 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
 
-  if(ssl_cafile) {
+  if(ssl_cafile && verifypeer) {
     bool is_cert_file = is_file(ssl_cafile);
 
     if(!is_cert_file) {
       failf(data, "SSL: can't load CA certificate file %s", ssl_cafile);
       return CURLE_SSL_CACERT_BADFILE;
-    }
-    if(!verifypeer) {
-      failf(data, "SSL: CA certificate set, but certificate verification "
-            "is disabled");
-      return CURLE_SSL_CONNECT_ERROR;
     }
   }
 
@@ -1929,7 +1924,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       /* The below is errSSLServerAuthCompleted; it's not defined in
         Leopard's headers */
       case -9841:
-        if(SSL_CONN_CONFIG(CAfile)) {
+        if(SSL_CONN_CONFIG(CAfile) && SSL_CONN_CONFIG(verifypeer)) {
           int res = verify_cert(SSL_CONN_CONFIG(CAfile), data,
                                 connssl->ssl_ctx);
           if(res != CURLE_OK)
