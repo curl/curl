@@ -247,3 +247,67 @@ libcurl was built to use. This is an attempt to list known cipher names.
 `ecdhe_rsa_chacha20_poly1305_sha_256`
 `ecdhe_ecdsa_chacha20_poly1305_sha_256`
 `dhe_rsa_chacha20_poly1305_sha_256`
+
+## GSKit
+
+Ciphers are internally defined as numeric codes (http://www.ibm.com/support/knowledgecenter/ssw_ibm_i_73/apis/gsk_attribute_set_buffer.htm),
+but libcurl maps them to the following case-insensitive names.
+
+### SSL2 cipher suites (insecure: disabled by default)
+
+`rc2-md5`
+`rc4-md5`
+`exp-rc2-md5`
+`exp-rc4-md5`
+`des-cbc-md5`
+`des-cbc3-md5`
+
+### SSL3 cipher suites
+
+`null-md5`
+`null-sha`
+`rc4-md5`
+`rc4-sha`
+`exp-rc2-cbc-md5`
+`exp-rc4-md5`
+`exp-des-cbc-sha`
+`des-cbc3-sha`
+
+### TLS v1.0 cipher suites
+
+`null-md5`
+`null-sha`
+`rc4-md5`
+`rc4-sha`
+`exp-rc2-cbc-md5`
+`exp-rc4-md5`
+`exp-des-cbc-sha`
+`des-cbc3-sha`
+`aes128-sha`
+`aes256-sha`
+
+### TLS v1.1 cipher suites
+
+`null-md5`
+`null-sha`
+`rc4-md5`
+`rc4-sha`
+`exp-des-cbc-sha`
+`des-cbc3-sha`
+`aes128-sha`
+`aes256-sha`
+
+### TLS v1.2 cipher suites
+
+`null-md5`
+`null-sha`
+`null-sha256`
+`rc4-md5`
+`rc4-sha`
+`des-cbc3-sha`
+`aes128-sha`
+`aes256-sha`
+`aes128-sha256`
+`aes256-sha256`
+`aes128-gcm-sha256`
+`aes256-gcm-sha384`
