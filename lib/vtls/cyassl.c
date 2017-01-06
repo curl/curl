@@ -134,6 +134,7 @@ cyassl_connect_step1(struct connectdata *conn,
                      int sockindex)
 {
   char error_buffer[CYASSL_MAX_ERROR_SZ];
+  char *ciphers;
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data* conssl = &conn->ssl[sockindex];
   SSL_METHOD* req_method = NULL;
@@ -227,6 +228,15 @@ cyassl_connect_step1(struct connectdata *conn,
     }
 #endif
     break;
+  }
+
+  ciphers = SSL_CONN_CONFIG(cipher_list);
+  if(ciphers) {
+    if(!SSL_CTX_set_cipher_list(conssl->ctx, ciphers)) {
+      failf(data, "failed setting cipher list: %s", ciphers);
+      return CURLE_SSL_CIPHER;
+    }
+    infof(data, "Cipher selection: %s\n", ciphers);
   }
 
 #ifndef NO_FILESYSTEM
