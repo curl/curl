@@ -591,7 +591,13 @@ cyassl_connect_step2(struct connectdata *conn,
 #endif /* HAVE_ALPN */
 
   conssl->connecting_state = ssl_connect_3;
+#if (LIBCYASSL_VERSION_HEX >= 0x03009010)
+  infof(data, "SSL connection using %s / %s\n",
+        wolfSSL_get_version(conssl->handle),
+        wolfSSL_get_cipher_name(conssl->handle));
+#else
   infof(data, "SSL connected\n");
+#endif
 
   return CURLE_OK;
 }
