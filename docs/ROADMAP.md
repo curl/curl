@@ -5,15 +5,6 @@ Roadmap of things Daniel Stenberg and Steve Holme want to work on next. It is
 intended to serve as a guideline for others for information, feedback and
 possible participation.
 
-HTTP/2
-------
-
-Improve performance. Measurements and tests have shown that in several cases
-doing transfers over HTTP/2 can be notably slower than the same transfer done
-over HTTP/1. Some of that difference can be attributed the inefficient window
-size handling currently in use but there are probably more to be learned and
-worked on to optimize this.
-
 QUIC
 ----
 
@@ -24,15 +15,6 @@ bandwagon. Ideally, this would be done with a separate library/project to
 handle the binary/framing layer in a similar fashion to how HTTP/2 is
 implemented. This, to allow other projects to benefit from the work and to
 thus broaden the interest and chance of others to participate.
-
-TLS 1.3
--------
-
-The new version of the TLS protocol is in the pipeline and will soon start to
-get used out in the wild. It offers some new interesting features and will
-need the TLS libraries to adapt and quite likely provide additional or
-modified APIs. libcurl needs to adapt accordingly.
-
 
 HTTP cookies
 ------------
@@ -52,19 +34,17 @@ SRV records
 
 How to find services for specific domains/hosts.
 
-HTTPS to proxy
---------------
-
-To avoid network traffic to/from the proxy getting snooped on. There's a git
-branch in the public git repository for this that we need to make sure works
-for all TLS backends and then merge!
-
 curl_formadd()
 --------------
 
 make sure there's an easy handle passed in to `curl_formadd()`,
 `curl_formget()` and `curl_formfree()` by adding replacement functions and
-deprecating the old ones to allow custom mallocs and more
+deprecating the old ones to allow custom mallocs and more.
+
+Or perhaps even better: revamp the formpost API completely while we're at it
+and making something that is easier to use and understand:
+
+ https://github.com/curl/curl/wiki/formpost-API-redesigned
 
 Third-party SASL
 ----------------
@@ -120,18 +100,14 @@ Improve
 
 2. curl -h output (considered overwhelming to users)
 
-3. we have > 170 command line options, is there a way to redo things to
+3. we have > 200 command line options, is there a way to redo things to
    simplify or improve the situation as we are likely to keep adding
    features/options in the future too
 
-4. docs (considered "bad" by users but how do we make it better?)
-
-  - split up curl.1
-
-5. authentication framework (consider merging HTTP and SASL authentication to
+4. authentication framework (consider merging HTTP and SASL authentication to
    give one API for protocols to call)
 
-6. Perform some of the clean up from the TODO document, removing old
+5. Perform some of the clean up from the TODO document, removing old
    definitions and such like that are currently earmarked to be removed years
    ago
 
