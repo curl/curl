@@ -22,7 +22,8 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
-DPAGES = anyauth.d append.d basic.d cacert.d capath.d cert.d		\
+DPAGES = abstract-unix-socket.d anyauth.d 				\
+  append.d basic.d cacert.d capath.d cert.d				\
   cert-status.d cert-type.d ciphers.d compressed.d config.d		\
   connect-timeout.d connect-to.d continue-at.d cookie.d cookie-jar.d	\
   create-dirs.d crlf.d crlfile.d data-ascii.d data-binary.d data.d	\
