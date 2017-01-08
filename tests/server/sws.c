@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1200,14 +1200,21 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     size_t num = count;
     if(num > 200)
       num = 200;
+
+    retry:
     written = swrite(sock, buffer, num);
     if(written < 0) {
+      if((EWOULDBLOCK == errno) || (EAGAIN == errno)) {
+        wait_ms(10);
+        goto retry;
+      }
       sendfailure = TRUE;
       break;
     }
     else {
       logmsg("Sent off %zd bytes", written);
     }
+
     /* write to file as well */
     fwrite(buffer, 1, (size_t)written, dump);
 
