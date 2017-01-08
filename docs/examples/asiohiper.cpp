@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -177,21 +177,45 @@ static void check_multi_info(GlobalInfo *g)
 
 /* Called by asio when there is an action on a socket */
 static void event_cb(GlobalInfo *g, boost::asio::ip::tcp::socket *tcp_socket,
-                     int action)
+                     int action, const boost::system::error_code & error, int *fdp)
 {
   fprintf(MSG_OUT, "\nevent_cb: action=%d", action);
 
-  CURLMcode rc;
-  rc = curl_multi_socket_action(g->multi, tcp_socket->native_handle(), action,
-                                &g->still_running);
-
-  mcode_or_die("event_cb: curl_multi_socket_action", rc);
-  check_multi_info(g);
-
-  if(g->still_running <= 0)
+  /* make sure the event matches what are wanted */
+  if(*fdp == action || *fdp == CURL_POLL_INOUT)
   {
-    fprintf(MSG_OUT, "\nlast transfer done, kill timeout");
-    timer.cancel();
+    curl_socket_t s = tcp_socket->native_handle();
+    CURLMcode rc;
+    if(error)
+      action = CURL_CSELECT_ERR;
+    rc = curl_multi_socket_action(g->multi, s, action, &g->still_running);
+  
+    mcode_or_die("event_cb: curl_multi_socket_action", rc);
+    check_multi_info(g);
+  
+    if(g->still_running <= 0)
+    {
+      fprintf(MSG_OUT, "\nlast transfer done, kill timeout");
+      timer.cancel();
+    }
+  
+    /* keep on watching.
+     * the socket may have been closed and/or fdp may have been changed
+     * in curl_multi_socket_action(), so check them both */
+    if(!error && socket_map.find(s) != socket_map.end() &&
+        (*fdp == action || *fdp == CURL_POLL_INOUT))
+    {
+      if(action == CURL_POLL_IN)
+      {
+        tcp_socket->async_read_some(boost::asio::null_buffers(),
+                boost::bind(&event_cb, g, tcp_socket, action, _1, fdp));
+      }
+      if(action == CURL_POLL_OUT)
+      {
+        tcp_socket->async_write_some(boost::asio::null_buffers(),
+                boost::bind(&event_cb, g, tcp_socket, action, _1, fdp));
+      }
+    }
   }
 }
 
@@ -221,7 +245,7 @@ static void remsock(int *f, GlobalInfo *g)
   }
 }
 
-static void setsock(int *fdp, curl_socket_t s, CURL*e, int act, GlobalInfo*g)
+static void setsock(int *fdp, curl_socket_t s, CURL*e, int act, int oldact, GlobalInfo*g)
 {
   fprintf(MSG_OUT, "\nsetsock: socket=%d, act=%d, fdp=%p", s, act, fdp);
 
@@ -241,26 +265,34 @@ static void setsock(int *fdp, curl_socket_t s, CURL*e, int act, GlobalInfo*g)
   if(act == CURL_POLL_IN)
   {
     fprintf(MSG_OUT, "\nwatching for socket to become readable");
-
-    tcp_socket->async_read_some(boost::asio::null_buffers(),
-                                boost::bind(&event_cb, g, tcp_socket, act));
+    if(oldact != CURL_POLL_IN && oldact != CURL_POLL_INOUT)
+    {
+      tcp_socket->async_read_some(boost::asio::null_buffers(),
+              boost::bind(&event_cb, g, tcp_socket, CURL_POLL_IN, _1, fdp));
+    }
   }
   else if (act == CURL_POLL_OUT)
   {
     fprintf(MSG_OUT, "\nwatching for socket to become writable");
-
-    tcp_socket->async_write_some(boost::asio::null_buffers(),
-                                 boost::bind(&event_cb, g, tcp_socket, act));
+    if(oldact != CURL_POLL_OUT && oldact != CURL_POLL_INOUT)
+    {
+      tcp_socket->async_write_some(boost::asio::null_buffers(),
+              boost::bind(&event_cb, g, tcp_socket, CURL_POLL_OUT, _1, fdp));
+    }
   }
   else if(act == CURL_POLL_INOUT)
   {
     fprintf(MSG_OUT, "\nwatching for socket to become readable & writable");
-
-    tcp_socket->async_read_some(boost::asio::null_buffers(),
-                                boost::bind(&event_cb, g, tcp_socket, act));
-
-    tcp_socket->async_write_some(boost::asio::null_buffers(),
-                                 boost::bind(&event_cb, g, tcp_socket, act));
+    if(oldact != CURL_POLL_IN && oldact != CURL_POLL_INOUT)
+    {
+      tcp_socket->async_read_some(boost::asio::null_buffers(),
+              boost::bind(&event_cb, g, tcp_socket, CURL_POLL_IN, _1, fdp));
+    }
+    if(oldact != CURL_POLL_OUT && oldact != CURL_POLL_INOUT)
+    {
+      tcp_socket->async_write_some(boost::asio::null_buffers(),
+              boost::bind(&event_cb, g, tcp_socket, CURL_POLL_OUT, _1, fdp));
+    }
   }
 }
 
@@ -269,7 +301,7 @@ static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g)
   /* fdp is used to store current action */
   int *fdp = (int *) calloc(sizeof(int), 1);
 
-  setsock(fdp, s, easy, action, g);
+  setsock(fdp, s, easy, action, 0, g);
   curl_multi_assign(g->multi, s, fdp);
 }
 
@@ -302,7 +334,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
       fprintf(MSG_OUT,
               "\nChanging action from %s to %s",
               whatstr[*actionp], whatstr[what]);
-      setsock(actionp, s, e, what, g);
+      setsock(actionp, s, e, what, *actionp, g);
     }
   }
 
