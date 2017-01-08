@@ -37,7 +37,7 @@ struct userdata {
   int counter;
 };
 
-int lock[3];
+int locks[3];
 
 /* lock callback */
 static void my_lock(CURL *handle, curl_lock_data data,
@@ -69,11 +69,11 @@ static void my_lock(CURL *handle, curl_lock_data data,
   }
 
   /* detect locking of locked locks */
-  if(lock[locknum]) {
+  if(locks[locknum]) {
     printf("lock: double locked %s\n", what);
     return;
   }
-  lock[locknum]++;
+  locks[locknum]++;
 
   printf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
@@ -105,11 +105,11 @@ static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
   }
 
   /* detect unlocking of unlocked locks */
-  if(!lock[locknum]) {
+  if(!locks[locknum]) {
     printf("unlock: double unlocked %s\n", what);
     return;
   }
-  lock[locknum]--;
+  locks[locknum]--;
 
   printf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
