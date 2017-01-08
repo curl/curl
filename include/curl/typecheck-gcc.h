@@ -219,7 +219,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
 
 /* evaluates to true if option takes a char* argument */
 #define _curl_is_string_option(option)                                        \
-  ((option) == CURLOPT_ACCEPT_ENCODING ||                                     \
+  ((option) == CURLOPT_ABSTRACT_UNIX_SOCKET ||                                \
+   (option) == CURLOPT_ACCEPT_ENCODING ||                                     \
    (option) == CURLOPT_CAINFO ||                                              \
    (option) == CURLOPT_CAPATH ||                                              \
    (option) == CURLOPT_COOKIE ||                                              \

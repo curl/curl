@@ -1133,6 +1133,7 @@ struct connectdata {
 
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
+  bool abstract_unix_socket;
 #endif
 };
 
@@ -1754,6 +1755,8 @@ struct UserDefined {
   int stream_weight;
 
   struct Curl_http2_dep *stream_dependents;
+
+  bool abstract_unix_socket;
 };
 
 struct Names {

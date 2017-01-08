@@ -2814,6 +2814,12 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
 
 #ifdef USE_UNIX_SOCKETS
   case CURLOPT_UNIX_SOCKET_PATH:
+    data->set.abstract_unix_socket = FALSE;
+    result = setstropt(&data->set.str[STRING_UNIX_SOCKET_PATH],
+                       va_arg(param, char *));
+    break;
+  case CURLOPT_ABSTRACT_UNIX_SOCKET:
+    data->set.abstract_unix_socket = TRUE;
     result = setstropt(&data->set.str[STRING_UNIX_SOCKET_PATH],
                        va_arg(param, char *));
     break;
@@ -3522,6 +3528,8 @@ ConnectionExists(struct Curl_easy *data,
         if(!check->unix_domain_socket)
           continue;
         if(strcmp(needle->unix_domain_socket, check->unix_domain_socket))
+          continue;
+        if(needle->abstract_unix_socket != check->abstract_unix_socket)
           continue;
       }
       else if(check->unix_domain_socket)
@@ -5863,8 +5871,9 @@ static CURLcode resolve_server(struct Curl_easy *data,
       if(!hostaddr)
         result = CURLE_OUT_OF_MEMORY;
       else {
-        int longpath=0;
-        hostaddr->addr = Curl_unix2addr(path, &longpath);
+        bool longpath = FALSE;
+        hostaddr->addr = Curl_unix2addr(path, &longpath,
+                                        conn->abstract_unix_socket);
         if(hostaddr->addr)
           hostaddr->inuse++;
         else {
@@ -6273,6 +6282,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
+    conn->abstract_unix_socket = data->set.abstract_unix_socket;
   }
 #endif
 

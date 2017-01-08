@@ -139,6 +139,10 @@ but prefix it with "no-". However, in this list we mostly only list and show
 the --option version of them. (This concept with --no options was added in
 7.19.0. Previously most options were toggled on/off on repeated use of the
 same command line option.)
+.IP "--abstract-unix-socket <path>"
+(HTTP) Connect through an abstract Unix domain socket, instead of using the network.
+
+Added in 7.53.0.
 .IP "--anyauth"
 (HTTP) Tells curl to figure out authentication method by itself, and use the most
 secure one the remote site claims to support. This is done by first doing a

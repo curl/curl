@@ -87,6 +87,7 @@ man_MANS =                                      \
  CURLMOPT_SOCKETFUNCTION.3                      \
  CURLMOPT_TIMERDATA.3                           \
  CURLMOPT_TIMERFUNCTION.3                       \
+ CURLOPT_ABSTRACT_UNIX_SOCKET.3                 \
  CURLOPT_ACCEPTTIMEOUT_MS.3                     \
  CURLOPT_ACCEPT_ENCODING.3                      \
  CURLOPT_ADDRESS_SCOPE.3                        \
@@ -397,6 +398,7 @@ HTMLPAGES =                                     \
  CURLMOPT_SOCKETFUNCTION.html                   \
  CURLMOPT_TIMERDATA.html                        \
  CURLMOPT_TIMERFUNCTION.html                    \
+ CURLOPT_ABSTRACT_UNIX_SOCKET.html              \
  CURLOPT_ACCEPTTIMEOUT_MS.html                  \
  CURLOPT_ACCEPT_ENCODING.html                   \
  CURLOPT_ADDRESS_SCOPE.html                     \
@@ -707,6 +709,7 @@ PDFPAGES =                                      \
  CURLMOPT_SOCKETFUNCTION.pdf                    \
  CURLMOPT_TIMERDATA.pdf                         \
  CURLMOPT_TIMERFUNCTION.pdf                     \
+ CURLOPT_ABSTRACT_UNIX_SOCKET.pdf               \
  CURLOPT_ACCEPTTIMEOUT_MS.pdf                   \
  CURLOPT_ACCEPT_ENCODING.pdf                    \
  CURLOPT_ADDRESS_SCOPE.pdf                      \

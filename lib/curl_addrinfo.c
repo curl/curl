@@ -47,6 +47,8 @@
 #  define in_addr_t unsigned long
 #endif
 
+#include <stddef.h>
+
 #include "curl_addrinfo.h"
 #include "inet_pton.h"
 #include "warnless.h"
@@ -483,11 +485,13 @@ Curl_addrinfo *Curl_str2addr(char *address, int port)
  * struct initialized with this path.
  * Set '*longpath' to TRUE if the error is a too long path.
  */
-Curl_addrinfo *Curl_unix2addr(const char *path, int *longpath)
+Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract)
 {
   Curl_addrinfo *ai;
   struct sockaddr_un *sa_un;
   size_t path_len;
+
+  *longpath = FALSE;
 
   ai = calloc(1, sizeof(Curl_addrinfo));
   if(!ai)
@@ -495,12 +499,15 @@ Curl_addrinfo *Curl_unix2addr(const char *path, int *longpath)
   ai->ai_addr = calloc(1, sizeof(struct sockaddr_un));
   if(!ai->ai_addr) {
     free(ai);
-    *longpath = FALSE;
     return NULL;
   }
+
+  sa_un = (void *) ai->ai_addr;
+  sa_un->sun_family = AF_UNIX;
+
   /* sun_path must be able to store the NUL-terminated path */
-  path_len = strlen(path);
-  if(path_len >= sizeof(sa_un->sun_path)) {
+  path_len = strlen(path) + 1;
+  if(path_len > sizeof(sa_un->sun_path)) {
     free(ai->ai_addr);
     free(ai);
     *longpath = TRUE;
@@ -509,10 +516,14 @@ Curl_addrinfo *Curl_unix2addr(const char *path, int *longpath)
 
   ai->ai_family = AF_UNIX;
   ai->ai_socktype = SOCK_STREAM; /* assume reliable transport for HTTP */
-  ai->ai_addrlen = (curl_socklen_t) sizeof(struct sockaddr_un);
-  sa_un = (void *) ai->ai_addr;
-  sa_un->sun_family = AF_UNIX;
-  memcpy(sa_un->sun_path, path, path_len + 1); /* copy NUL byte */
+  ai->ai_addrlen = offsetof(struct sockaddr_un, sun_path) + path_len;
+
+  /* Abstract Unix domain socket have NULL prefix instead of suffix */
+  if(abstract)
+    memcpy(sa_un->sun_path + 1, path, path_len - 1);
+  else
+    memcpy(sa_un->sun_path, path, path_len); /* copy NUL byte */
+
   return ai;
 }
 #endif

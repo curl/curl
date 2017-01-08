@@ -183,6 +183,7 @@ static const struct LongShort aliases[]= {
   {"$R", "expect100-timeout",        TRUE},
   {"$S", "tftp-no-options",          FALSE},
   {"$U", "connect-to",               TRUE},
+  {"$W", "abstract-unix-socket",     TRUE},
   {"0",   "http1.0",                 FALSE},
   {"01",  "http1.1",                 FALSE},
   {"02",  "http2",                   FALSE},
@@ -1024,6 +1025,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 #endif
         break;
       case 'M': /* --unix-socket */
+        config->abstract_unix_socket = FALSE;
         GetStr(&config->unix_socket_path, nextarg);
         break;
       case 'N': /* --path-as-is */
@@ -1053,6 +1055,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         err = add2list(&config->connect_to, nextarg);
         if(err)
           return err;
+        break;
+      case 'W': /* --abstract-unix-socket */
+        config->abstract_unix_socket = TRUE;
+        GetStr(&config->unix_socket_path, nextarg);
         break;
       }
       break;

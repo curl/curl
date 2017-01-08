@@ -1770,6 +1770,9 @@ typedef enum {
      this option is used only if PROXY_SSL_VERIFYPEER is true */
   CINIT(PROXY_PINNEDPUBLICKEY, STRINGPOINT, 263),
 
+  /* Path to an abstract Unix domain socket */
+  CINIT(ABSTRACT_UNIX_SOCKET, STRINGPOINT, 264),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

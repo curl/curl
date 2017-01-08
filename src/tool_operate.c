@@ -1393,11 +1393,17 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_SSL_ENABLE_ALPN, 0L);
         }
 
-        /* new in 7.40.0 */
-        if(config->unix_socket_path)
-          my_setopt_str(curl, CURLOPT_UNIX_SOCKET_PATH,
-                        config->unix_socket_path);
-
+        /* new in 7.40.0, abstract support added in 7.53.0 */
+        if(config->unix_socket_path) {
+          if(config->abstract_unix_socket) {
+            my_setopt_str(curl, CURLOPT_ABSTRACT_UNIX_SOCKET,
+                          config->unix_socket_path);
+          }
+          else {
+            my_setopt_str(curl, CURLOPT_UNIX_SOCKET_PATH,
+                          config->unix_socket_path);
+          }
+        }
         /* new in 7.45.0 */
         if(config->proto_default)
           my_setopt_str(curl, CURLOPT_DEFAULT_PROTOCOL, config->proto_default);
