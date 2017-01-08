@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,7 +37,7 @@ struct userdata {
   int counter;
 };
 
-int lock[3];
+static int locks[3];
 
 /* lock callback */
 static void my_lock(CURL *handle, curl_lock_data data,
@@ -69,11 +69,11 @@ static void my_lock(CURL *handle, curl_lock_data data,
   }
 
   /* detect locking of locked locks */
-  if(lock[locknum]) {
+  if(locks[locknum]) {
     printf("lock: double locked %s\n", what);
     return;
   }
-  lock[locknum]++;
+  locks[locknum]++;
 
   printf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
@@ -105,11 +105,11 @@ static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
   }
 
   /* detect unlocking of unlocked locks */
-  if(!lock[locknum]) {
+  if(!locks[locknum]) {
     printf("unlock: double unlocked %s\n", what);
     return;
   }
-  lock[locknum]--;
+  locks[locknum]--;
 
   printf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
