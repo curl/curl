@@ -9,7 +9,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -89,14 +89,6 @@ if test -n "$only"; then
     # done!
     exit;
 fi
-
-# Generate VC7, VC8, VC9, VC10, VC11, VC12 and VC14 versions from the VC6
-# Makefile versions
-for ver in vc7 vc8 vc9 vc10 vc11 vc12 vc14; do
-  make -f Makefile.dist $ver
-  mv src/Makefile.$ver src/Makefile.$ver.dist
-  mv lib/Makefile.$ver lib/Makefile.$ver.dist
-done
 
 echo "curl version $curlversion"
 echo "libcurl version $libversion"

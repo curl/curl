@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -136,8 +136,7 @@ VC_DIST = projects/README                           \
  projects/Windows/VC14/src/curl.vcxproj.filters
 
 WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
- winbuild/MakefileBuild.vc winbuild/Makefile.vc				\
- winbuild/Makefile.msvc.names
+ winbuild/MakefileBuild.vc winbuild/Makefile.vc
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
  RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework scripts/zsh.pl	\

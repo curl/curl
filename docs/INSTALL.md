@@ -247,7 +247,7 @@ If you want to set any of these defines you have the following options:
 
  - Modify lib/config-win32.h
  - Modify lib/curl_setup.h
- - Modify lib/Makefile.vc6
+ - Modify winbuild/Makefile.vc
  - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
@@ -263,7 +263,7 @@ libcurl and curl compilation processes. To set this definition you have the
 following alternatives:
 
  - Modify lib/config-win32.h and src/config-win32.h
- - Modify lib/Makefile.vc6
+ - Modify winbuild/Makefile.vc
  - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
