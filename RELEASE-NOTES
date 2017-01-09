@@ -19,6 +19,24 @@ This release includes the following bugfixes:
  o curl.1: add three more exit codes
  o docs/ciphers: link to our own new page about ciphers
  o vtls: s/SSLEAY/OPENSSL - fixes multi_socket timeouts with openssl [2]
+ o darwinssl: fix iOS build [3]
+ o darwinssl: fix CFArrayRef leak [4]
+ o cmake: use crypt32.lib when building with OpenSSL on windows [5]
+ o curl_formadd.3: CURLFORM_CONTENTSLENGTH not needed when chunked [6]
+ o digest_sspi: copy terminating NUL as well [7]
+ o curl: fix --remote-time incorrect times on Windows [8]
+ o curl.1: several updates and corrections [11]
+ o content_encoding: change return code on a failure
+ o curl.h: CURLE_FUNCTION_NOT_FOUND is no longer in use
+ o docs: TCP_KEEPALIVE start and interval default to 60 [9]
+ o darwinssl: --insecure overrides --cacert if both settings are in use [10]
+ o TheArtOfHttpScripting: grammar
+ o CIPHERS.md: document GSKit ciphers
+ o wolfssl: support setting cipher list
+ o wolfssl: display negotiated SSL version and cipher
+ o lib506: fix build for Open Watcom [12]
+ o asiohiper: improved socket handling [13]
+ o examples: make the C++ examples follow our code style too
 
 This release includes the following known bugs:
 
@@ -27,8 +45,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Christian Weisgerber, Daniel Romero, Daniel Stenberg, Ray Satiro,
-  (4 contributors)
+  Chris Araman, Christian Weisgerber, Dan Fandrich, Daniel Romero,
+  Daniel Stenberg, Dan Jacobson, Jiří Malák, Kim Minjoong, Kyselgov E.N,
+  Max Khon, Mingliang Zhu, Nick Zitzmann, Patrick Monnerat, Peter Wu,
+  Praveen Pvs, Ray Satiro,
+  (16 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -36,3 +57,14 @@ References to bug reports and discussions on issues:
 
  [1] = https://curl.haxx.se/mail/lib-2016-12/0110.html
  [2] = https://curl.haxx.se/bug/?i=1174
+ [3] = https://curl.haxx.se/bug/?i=1172
+ [4] = https://curl.haxx.se/bug/?i=1173
+ [5] = https://curl.haxx.se/bug/?i=1147
+ [6] = https://curl.haxx.se/bug/?i=1013
+ [7] = https://curl.haxx.se/bug/?i=1180
+ [8] = https://curl.haxx.se/bug/?i=1121
+ [9] = https://curl.haxx.se/mail/lib-2017-01/0000.html
+ [10] = https://curl.haxx.se/bug/?i=1184
+ [11] = https://curl.haxx.se/bug/?i=1190
+ [12] = https://curl.haxx.se/bug/?i=1196
+ [13] = https://curl.haxx.se/bug/?i=1191
