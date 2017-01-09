@@ -4287,18 +4287,32 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     failf(data, "Bad URL, colon is first character");
     return CURLE_URL_MALFORMAT;
   }
-  for(i = 0; i < 16 && data->change.url[i]; ++i) {
-    if(data->change.url[i] == '/')
-      break;
-    if(data->change.url[i] == ':') {
-      url_has_scheme = TRUE;
-      break;
+
+  /* Make sure we don't mistake a drive letter for a scheme, for example:
+     curld --proto-default file c:/foo/bar.txt */
+  if((('a' <= data->change.url[0] && data->change.url[0] <= 'z') ||
+      ('A' <= data->change.url[0] && data->change.url[0] <= 'Z')) &&
+     data->change.url[1] == ':' && data->set.str[STRING_DEFAULT_PROTOCOL] &&
+     strcasecompare(data->set.str[STRING_DEFAULT_PROTOCOL], "file")) {
+    ; /* do nothing */
+  }
+  else { /* check for a scheme */
+    for(i = 0; i < 16 && data->change.url[i]; ++i) {
+      if(data->change.url[i] == '/')
+        break;
+      if(data->change.url[i] == ':') {
+        url_has_scheme = TRUE;
+        break;
+      }
     }
   }
+
   /* handle the file: scheme */
   if((url_has_scheme && strncasecompare(data->change.url, "file:", 5)) ||
      (!url_has_scheme && data->set.str[STRING_DEFAULT_PROTOCOL] &&
       strcasecompare(data->set.str[STRING_DEFAULT_PROTOCOL], "file"))) {
+    bool path_has_drive = false;
+
     if(url_has_scheme)
       rc = sscanf(data->change.url, "%*15[^\n/:]:%[^\n]", path);
     else
@@ -4320,12 +4334,17 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       memmove(path, path + 2, strlen(path + 2)+1);
     }
 
+    /* the path may start with a drive letter. for backwards compatibility
+       we skip some processing on those paths. */
+    path_has_drive = (('a' <= path[0] && path[0] <= 'z') ||
+                      ('A' <= path[0] && path[0] <= 'Z')) && path[1] == ':';
+
     /*
      * we deal with file://<host>/<path> differently since it supports no
      * hostname other than "localhost" and "127.0.0.1", which is unique among
      * the URL protocols specified in RFC 1738
      */
-    if(path[0] != '/') {
+    if(path[0] != '/' && !path_has_drive) {
       /* the URL includes a host name, it must match "localhost" or
          "127.0.0.1" to be valid */
       char *ptr;
@@ -4359,6 +4378,9 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
       /* This cannot be made with strcpy, as the memory chunks overlap! */
       memmove(path, ptr, strlen(ptr)+1);
+
+      path_has_drive = (('a' <= path[0] && path[0] <= 'z') ||
+                        ('A' <= path[0] && path[0] <= 'Z')) && path[1] == ':';
     }
 
     protop = "file"; /* protocol string */
