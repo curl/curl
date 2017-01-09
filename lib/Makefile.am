@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -23,7 +23,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
-EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 config-win32.h	\
+EXTRA_DIST = Makefile.b32 Makefile.m32 config-win32.h	\
  config-win32ce.h config-riscos.h config-mac.h curl_config.h.in		\
  makefile.dj config-dos.h libcurl.plist libcurl.rc config-amigaos.h	\
  makefile.amiga Makefile.netware nwlib.c nwos.c config-win32ce.h	\
