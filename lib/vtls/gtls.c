@@ -92,11 +92,11 @@ static bool gtls_inited = FALSE;
 #    define GNUTLS_MAPS_WINSOCK_ERRORS 1
 #  endif
 
-#  if (GNUTLS_VERSION_NUMBER >= 0x030200)
+#  if HAVE_GNUTLS_ALPN_SET_PROTOCOLS
 #    define HAS_ALPN
 #  endif
 
-#  if (GNUTLS_VERSION_NUMBER >= 0x03020d)
+#  if HAVE_GNUTLS_OCSP_REQ_INIT
 #    define HAS_OCSP
 #  endif
 
