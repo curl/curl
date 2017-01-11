@@ -4383,6 +4383,13 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
                         ('A' <= path[0] && path[0] <= 'Z')) && path[1] == ':';
     }
 
+#if !defined(MSDOS) && !defined(WIN32) && !defined(__CYGWIN__)
+    if(path_has_drive) {
+      failf(data, "File drive letters are only accepted in MSDOS/Windows.");
+      return CURLE_URL_MALFORMAT;
+    }
+#endif
+
     protop = "file"; /* protocol string */
   }
   else {
