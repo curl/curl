@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1862,28 +1862,22 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
 
   /* Warn stream may be rejected if cumulative length of headers is too large.
      It appears nghttp2 will not send a header frame larger than 64KB. */
+#define MAX_ACC 60000  /* <64KB to account for some overhead */
   {
     size_t acc = 0;
-    const size_t max_acc = 60000;  /* <64KB to account for some overhead */
 
     for(i = 0; i < nheader; ++i) {
-      if(nva[i].namelen > max_acc - acc)
-        break;
-      acc += nva[i].namelen;
-
-      if(nva[i].valuelen > max_acc - acc)
-        break;
-      acc += nva[i].valuelen;
+      acc += nva[i].namelen + nva[i].valuelen;
 
       DEBUGF(infof(conn->data, "h2 header: %.*s:%.*s\n",
                    nva[i].namelen, nva[i].name,
                    nva[i].valuelen, nva[i].value));
     }
 
-    if(i != nheader) {
+    if(acc > MAX_ACC) {
       infof(conn->data, "http2_send: Warning: The cumulative length of all "
-                        "headers exceeds %zu bytes and that could cause the "
-                        "stream to be rejected.\n", max_acc);
+            "headers exceeds %zu bytes and that could cause the "
+            "stream to be rejected.\n", MAX_ACC);
     }
   }
 
