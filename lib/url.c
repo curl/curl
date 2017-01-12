@@ -2971,6 +2971,10 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->unix_domain_socket);
 #endif
 
+#ifdef USE_UNIX_SOCKETS
+  Curl_safefree(conn->unix_domain_socket);
+#endif
+
   free(conn); /* free all the connection oriented data */
 }
 
