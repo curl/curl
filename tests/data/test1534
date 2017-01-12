@@ -27,7 +27,7 @@ http
 lib1534
 </tool>
 <name>
-Test CURLINFO_RESPONSE_CODE
+CURLINFO_FILETIME init and reset
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/1534
