@@ -518,6 +518,15 @@
 /* Define to 1 if you have the send function. */
 #cmakedefine HAVE_SEND 1
 
+/* Define to 1 if you have the 'fsetxattr' function. */
+#cmakedefine HAVE_FSETXATTR 1
+
+/* fsetxattr() takes 5 args */
+#cmakedefine HAVE_FSETXATTR_5 1
+
+/* fsetxattr() takes 6 args */
+#cmakedefine HAVE_FSETXATTR_6 1
+
 /* Define to 1 if you have the <setjmp.h> header file. */
 #cmakedefine HAVE_SETJMP_H 1
 
