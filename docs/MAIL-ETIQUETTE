@@ -38,17 +38,17 @@ MAIL ETIQUETTE
   Each mailing list is targeted to a specific set of users and subjects,
   please use the one or the ones that suit you the most.
 
-  Each mailing list have hundreds up to thousands of readers, meaning that
-  each mail sent will be received and read by a very large amount of people.
+  Each mailing list has hundreds up to thousands of readers, meaning that
+  each mail sent will be received and read by a very large number of people.
   People from various cultures, regions, religions and continents.
 
   1.2 Netiquette
 
-  Netiquette is a common name for how to behave on the internet. Of course, in
+  Netiquette is a common term for how to behave on the internet. Of course, in
   each particular group and subculture there will be differences in what is
   acceptable and what is considered good manners.
 
-  This document outlines what we in the curl project considers to be good
+  This document outlines what we in the curl project consider to be good
   etiquette, and primarily this focus on how to behave on and how to use our
   mailing lists.
 
@@ -56,7 +56,7 @@ MAIL ETIQUETTE
 
   Many people send one question to one person. One person gets many mails, and
   there is only one person who can give you a reply. The question may be
-  something that other people are also wanting to ask. These other people have
+  something that other people would also like to ask. These other people have
   no way to read the reply, but to ask the one person the question. The one
   person consequently gets overloaded with mail.
 
@@ -79,8 +79,8 @@ MAIL ETIQUETTE
   1.5 Moderation of new posters
 
   Several of the curl mailing lists automatically make all posts from new
-  subscribers require moderation. This means that after you've subscribed and
-  send your first mail to a list, that mail will not be let through to the
+  subscribers be moderated. This means that after you've subscribed and
+  sent your first mail to a list, that mail will not be let through to the
   list until a mailing list administrator has verified that it is OK and
   permits it to get posted.
 
@@ -104,9 +104,9 @@ MAIL ETIQUETTE
   messages"
 
   No matter what, we NEVER EVER respond to trolls or spammers on the list. If
-  you believe the list admin should do something particular, contact him/her
-  off-list. The subject will be taken care of as good as possible to prevent
-  repeated offenses, but responding on the list to such messages never lead to
+  you believe the list admin should do something in particular, contact him/her
+  off-list. The subject will be taken care of as much as possible to prevent
+  repeated offenses, but responding on the list to such messages never leads to
   anything good and only puts the light even more on the offender: which was
   the entire purpose of it getting sent to the list in the first place.
 
@@ -114,16 +114,16 @@ MAIL ETIQUETTE
 
   1.7 How to unsubscribe
 
-  You unsubscribe the same way you subscribed in the first place. You go to
-  the page for the particular mailing list you're subscribed to and you enter
+  You can unsubscribe the same way you subscribed in the first place. You go
+  to the page for the particular mailing list you're subscribed to and you enter
   your email address and password and press the unsubscribe button.
 
-  Also, this information is included in the headers of every mail that is sent
-  out to all curl related mailing lists and there's a footer in each mail that
-  links to the "admin" page on which you can unsubscribe and change other
-  options.
+  Also, the instructions to unsubscribe are included in the headers of every 
+  mail that is sent out to all curl related mailing lists and there's a footer 
+  in each mail that links to the "admin" page on which you can unsubscribe and 
+  change other options.
 
-  You NEVER EVER email the mailing list requesting someone else to get you off
+  You NEVER EVER email the mailing list requesting someone else to take you off
   the list.
 
   1.8 I posted, now what?
@@ -132,35 +132,35 @@ MAIL ETIQUETTE
   send the email, your post will just be silently discarded.
 
   If you posted for the first time to the mailing list, you first need to wait
-  for an administrator to allow your email to go through. This normally
+  for an administrator to allow your email to go through (moderated). This normally
   happens very quickly but in case we're asleep, you may have to wait a few
   hours.
 
   Once your email goes through it is sent out to several hundred or even
-  thousand recipients.  Your email may cover an area that not that many people
+  thousands of recipients.  Your email may cover an area that not that many people
   know about or are interested in. Or possibly the person who knows about it
-  is on vacation or under a very heavy work load right now. You have to wait
-  for a response and you must not expect to get a response at all, but
+  is on vacation or under a very heavy work load right now. You may have to wait
+  for a response and you should not expect to get a response at all, but
   hopefully you get an answer within a couple of days.
 
   You do yourself and all of us a service when you include as many details as
   possible already in your first email. Mention your operating system and
   environment. Tell us which curl version you're using and tell us what you
   did, what happened and what you expected would happen. Preferably, show us
-  what you did in details enough to allow others to help point out the problem
-  or repeat the same steps in their places.
+  what you did with details enough to allow others to help point out the problem
+  or repeat the same steps in their locations.
 
   Failing to include details will only delay responses and make people respond
-  and ask for the details and you have to send a follow-up email that includes
-  them.
+  and ask for more details and you will have to send a follow-up email that 
+  includes them.
 
-  Expect the responses to primarily help YOU debug the issue, or ask you
+  Expect the responses to primarily help YOU debug the issue, or ask YOU
   questions that can lead you or others towards a solution or explanation to
   whatever you experience.
 
   If you are a repeat offender to the guidelines outlined in this document,
   chances are that people will ignore you at will and your chances to get
-  responses will greatly diminish.
+  responses in the future will greatly diminish.
 
 
 2. Sending mail
@@ -183,7 +183,7 @@ MAIL ETIQUETTE
 
   We're actively discouraging replying back to the single person by setting
   the Reply-To: field in outgoing mails back to the mailing list address,
-  making it harder for people to mail the author only by mistake.
+  making it harder for people to mail the author directly, if only by mistake.
 
   2.3 Use a Sensible Subject
 
@@ -198,7 +198,7 @@ MAIL ETIQUETTE
   mail conversation below. It forces users to read the mail in a backwards
   order to properly understand it.
 
-  This is why top posting is so bad:
+  This is why top posting is so bad (in top posting order):
 
       A: Because it messes up the order in which people normally read text.
       Q: Why is top-posting such a bad thing?
@@ -254,7 +254,7 @@ MAIL ETIQUETTE
   If you are the one who asks, please consider responding once more in case
   one of the hints was what solved your problems. The guys who write answers
   feel good to know that they provided a good answer and that you fixed the
-  problem. Far too often, the person who asked the question is never heard of
+  problem. Far too often, the person who asked the question is never heard from
   again, and we never get to know if he/she is gone because the problem was
   solved or perhaps because the problem was unsolvable!
 
