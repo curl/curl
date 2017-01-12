@@ -680,9 +680,9 @@ size_t Curl_axtls_version(char *buffer, size_t size)
   return snprintf(buffer, size, "axTLS/%s", ssl_version());
 }
 
-int Curl_axtls_random(struct Curl_easy *data,
-                      unsigned char *entropy,
-                      size_t length)
+CURLcode Curl_axtls_random(struct Curl_easy *data,
+                           unsigned char *entropy,
+                           size_t length)
 {
   static bool ssl_seeded = FALSE;
   (void)data;
@@ -694,7 +694,7 @@ int Curl_axtls_random(struct Curl_easy *data,
     RNG_initialize();
   }
   get_random((int)length, entropy);
-  return 0;
+  return CURLE_OK;
 }
 
 #endif /* USE_AXTLS */

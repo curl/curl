@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2138,17 +2138,17 @@ int Curl_nss_seed(struct Curl_easy *data)
 }
 
 /* data might be NULL */
-int Curl_nss_random(struct Curl_easy *data,
-                    unsigned char *entropy,
-                    size_t length)
+CURLcode Curl_nss_random(struct Curl_easy *data,
+                         unsigned char *entropy,
+                         size_t length)
 {
   Curl_nss_seed(data);  /* Initiate the seed if not already done */
 
   if(SECSuccess != PK11_GenerateRandom(entropy, curlx_uztosi(length)))
     /* signal a failure */
-    return -1;
+    return CURLE_FAILED_INIT;
 
-  return 0;
+  return CURLE_OK;
 }
 
 void Curl_nss_md5sum(unsigned char *tmp, /* input */

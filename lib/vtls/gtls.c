@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1625,21 +1625,21 @@ static int Curl_gtls_seed(struct Curl_easy *data)
 #endif
 
 /* data might be NULL! */
-int Curl_gtls_random(struct Curl_easy *data,
-                     unsigned char *entropy,
-                     size_t length)
+CURLcode Curl_gtls_random(struct Curl_easy *data,
+                          unsigned char *entropy,
+                          size_t length)
 {
 #if defined(USE_GNUTLS_NETTLE)
   int rc;
   (void)data;
   rc = gnutls_rnd(GNUTLS_RND_RANDOM, entropy, length);
-  return rc;
+  return rc?CURLE_FAILED_INIT:CURLE_OK;
 #elif defined(USE_GNUTLS)
   if(data)
     Curl_gtls_seed(data); /* Initiate the seed if not already done */
   gcry_randomize(entropy, length, GCRY_STRONG_RANDOM);
 #endif
-  return 0;
+  return CURLE_OK;
 }
 
 void Curl_gtls_md5sum(unsigned char *tmp, /* input */

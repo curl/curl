@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1516,21 +1516,21 @@ size_t Curl_schannel_version(char *buffer, size_t size)
   return size;
 }
 
-int Curl_schannel_random(unsigned char *entropy, size_t length)
+CURLcode Curl_schannel_random(unsigned char *entropy, size_t length)
 {
   HCRYPTPROV hCryptProv = 0;
 
   if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
-    return 1;
+    return CURLE_FAILED_INIT;
 
   if(!CryptGenRandom(hCryptProv, (DWORD)length, entropy)) {
     CryptReleaseContext(hCryptProv, 0UL);
-    return 1;
+    return CURLE_FAILED_INIT;
   }
 
   CryptReleaseContext(hCryptProv, 0UL);
-  return 0;
+  return CURLE_OK;
 }
 
 #ifdef _WIN32_WCE

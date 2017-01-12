@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -917,19 +917,19 @@ Curl_cyassl_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-int Curl_cyassl_random(struct Curl_easy *data,
-                       unsigned char *entropy,
-                       size_t length)
+CURLcode Curl_cyassl_random(struct Curl_easy *data,
+                            unsigned char *entropy,
+                            size_t length)
 {
   RNG rng;
   (void)data;
   if(InitRng(&rng))
-    return 1;
+    return CURLE_FAILED_INIT;
   if(length > UINT_MAX)
-    return 1;
+    return CURLE_FAILED_INIT;
   if(RNG_GenerateBlock(&rng, entropy, (unsigned)length))
-    return 1;
-  return 0;
+    return CURLE_FAILED_INIT;
+  return CURLE_OK;
 }
 
 void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */

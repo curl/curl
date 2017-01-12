@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -3272,21 +3272,21 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 }
 
 /* can be called with data == NULL */
-int Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
-                     size_t length)
+CURLcode Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
+                          size_t length)
 {
   int rc;
   if(data) {
     if(Curl_ossl_seed(data)) /* Initiate the seed if not already done */
-      return 1; /* couldn't seed for some reason */
+      return CURLE_FAILED_INIT; /* couldn't seed for some reason */
   }
   else {
     if(!rand_enough())
-      return 1;
+      return CURLE_FAILED_INIT;
   }
   /* RAND_bytes() returns 1 on success, 0 otherwise.  */
   rc = RAND_bytes(entropy, curlx_uztosi(length));
-  return rc^1;
+  return rc?CURLE_FAILED_INIT:CURLE_OK;
 }
 
 void Curl_ossl_md5sum(unsigned char *tmp, /* input */
