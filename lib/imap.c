@@ -952,7 +952,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
 
   if(imapcode != 'O') {
     if(data->set.use_ssl != CURLUSESSL_TRY) {
-      failf(data, "STARTTLS denied. %c", imapcode);
+      failf(data, "STARTTLS denied");
       result = CURLE_USE_SSL_FAILED;
     }
     else
