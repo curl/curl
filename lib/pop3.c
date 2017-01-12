@@ -799,7 +799,7 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
 
   if(pop3code != '+') {
     if(data->set.use_ssl != CURLUSESSL_TRY) {
-      failf(data, "STARTTLS denied. %c", pop3code);
+      failf(data, "STARTTLS denied");
       result = CURLE_USE_SSL_FAILED;
     }
     else
