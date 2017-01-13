@@ -1509,6 +1509,20 @@ static bool use_http_1_1plus(const struct Curl_easy *data,
           (data->set.httpversion >= CURL_HTTP_VERSION_1_1));
 }
 
+static const char *get_http_string(const struct Curl_easy *data,
+                                   const struct connectdata *conn)
+{
+#ifdef USE_NGHTTP2
+  if(conn->proto.httpc.h2)
+    return "2";
+#endif
+
+  if(use_http_1_1plus(data, conn))
+    return "1.1";
+
+  return "1.0";
+}
+
 /* check and possibly add an Expect: header */
 static CURLcode expect100(struct Curl_easy *data,
                           struct connectdata *conn,
@@ -2223,9 +2237,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
   }
 
-  /* Use 1.1 unless the user specifically asked for 1.0 or the server only
-     supports 1.0 */
-  httpstring= use_http_1_1plus(data, conn)?"1.1":"1.0";
+  httpstring = get_http_string(data, conn);
 
   /* initialize a dynamic send-buffer */
   req_buffer = Curl_add_buffer_init();
