@@ -37,6 +37,21 @@ This release includes the following bugfixes:
  o lib506: fix build for Open Watcom [12]
  o asiohiper: improved socket handling [13]
  o examples: make the C++ examples follow our code style too
+ o tests/sws: retry send() on EWOULDBLOCK [14]
+ o cmake: Fix passing _WINSOCKAPI_ macro to compiler [15]
+ o smtp: Fix STARTTLS denied error message
+ o imap/pop3: don't print response character in STARTTLS denied messages [16]
+ o rand: make it work without TLS backing [17]
+ o url: fix parsing for when 'file' is the default protocol [18]
+ o url: allow file://X:/path URLs on windows again [19]
+ o gnutls: check for alpn and ocsp in configure [20]
+ o IDN: Use TR46 'non-transitional' for toASCII translations [21]
+ o url: Fix NO_PROXY env var to work properly with --proxy option [22]
+ o CURLOPT_PREQUOTE.3: takes a struct curl_slist*, not a char* [23]
+ o docs: Add note about libcurl copying strings to CURLOPT_* manpages [24]
+ o curl: reset the easy handle at --next
+ o --next docs: --trace and --trace-ascii are also global
+ o --write-out docs: 'time_total' is not always shown with ms precision
 
 This release includes the following known bugs:
 
@@ -45,11 +60,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Chris Araman, Christian Weisgerber, Dan Fandrich, Daniel Romero,
-  Daniel Stenberg, Dan Jacobson, Jiří Malák, Kim Minjoong, Kyselgov E.N,
-  Max Khon, Mingliang Zhu, Nick Zitzmann, Patrick Monnerat, Peter Wu,
-  Praveen Pvs, Ray Satiro,
-  (16 contributors)
+  Anatol Belski, Chris Araman, Christian Weisgerber, Dan Fandrich,
+  Daniel Romero, Daniel Stenberg, Dan Jacobson, Eramoto Masaya, Frank Gevaerts,
+  Isaac Boukris, Jiří Malák, John Kohl, Kim Minjoong, Kyselgov E.N,
+  Marcus Hoffmann, Max Khon, Mingliang Zhu, Nick Zitzmann, Patrick Monnerat,
+  Peter Wu, Praveen Pvs, Ray Satiro, Tim Rühsen,
+  (23 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -68,3 +84,14 @@ References to bug reports and discussions on issues:
  [11] = https://curl.haxx.se/bug/?i=1190
  [12] = https://curl.haxx.se/bug/?i=1196
  [13] = https://curl.haxx.se/bug/?i=1191
+ [14] = https://curl.haxx.se/mail/lib-2017-01/0009.html
+ [15] = https://curl.haxx.se/bug/?i=1195
+ [16] = https://curl.haxx.se/bug/?i=1203
+ [17] = https://curl.haxx.se/mail/lib-2017-01/0055.html
+ [18] = https://curl.haxx.se/bug/?i=1124
+ [19] = https://curl.haxx.se/bug/?i=1187
+ [20] = https://curl.haxx.se/bug/?i=1204
+ [21] = https://curl.haxx.se/bug/?i=1207
+ [22] = https://curl.haxx.se/bug/?i=1140
+ [23] = https://curl.haxx.se/bug/?i=1169
+ [24] = https://curl.haxx.se/bug/?i=1169
