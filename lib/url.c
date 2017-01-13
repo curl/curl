@@ -4010,7 +4010,7 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
 #ifdef USE_LIBIDN2
     if(idn2_check_version(IDN2_VERSION)) {
       char *ace_hostname = NULL;
-#ifdef IDN2_TRANSITIONAL
+#if IDN2_VERSION_NUMBER >= 0x00140000
       int flags = IDN2_NFC_INPUT | IDN2_TRANSITIONAL;
 #else
       int flags = IDN2_NFC_INPUT;
