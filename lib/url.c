@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -4010,8 +4010,15 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
 #ifdef USE_LIBIDN2
     if(idn2_check_version(IDN2_VERSION)) {
       char *ace_hostname = NULL;
-      int rc = idn2_lookup_ul((const char *)host->name, &ace_hostname,
-                              IDN2_NFC_INPUT);
+#if IDN2_VERSION_NUMBER >= 0x00140000
+      /* IDN2_NFC_INPUT: Normalize input string using normalization form C.
+         IDN2_NONTRANSITIONAL: Perform Unicode TR46 non-transitional
+         processing. */
+      int flags = IDN2_NFC_INPUT | IDN2_NONTRANSITIONAL;
+#else
+      int flags = IDN2_NFC_INPUT;
+#endif
+      int rc = idn2_lookup_ul((const char *)host->name, &ace_hostname, flags);
       if(rc == IDN2_OK) {
         host->encalloc = (char *)ace_hostname;
         /* change the name pointer to point to the encoded hostname */
