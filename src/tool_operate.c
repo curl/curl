@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1999,6 +1999,9 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
           result = operate_do(config, config->current);
 
           config->current = config->current->next;
+
+          if(config->current && config->current->easy)
+            curl_easy_reset(config->current->easy);
         }
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
