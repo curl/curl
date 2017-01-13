@@ -127,8 +127,7 @@ about to be transferred. This includes time_pretransfer and also the time the
 server needed to calculate the result.
 .TP
 .B time_total
-The total time, in seconds, that the full operation lasted. The time will be
-displayed with millisecond resolution.
+The total time, in seconds, that the full operation lasted.
 .TP
 .B url_effective
 The URL that was fetched last. This is most meaningful if you've told curl
