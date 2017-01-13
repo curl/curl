@@ -4010,12 +4010,8 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
 #ifdef USE_LIBIDN2
     if(idn2_check_version(IDN2_VERSION)) {
       char *ace_hostname = NULL;
-#if IDN2_VERSION_NUMBER >= 0x00140000
-      int flags = IDN2_NFC_INPUT | IDN2_TRANSITIONAL;
-#else
-      int flags = IDN2_NFC_INPUT;
-#endif
-      int rc = idn2_lookup_ul((const char *)host->name, &ace_hostname, flags);
+      int rc = idn2_lookup_ul((const char *)host->name, &ace_hostname,
+                              IDN2_NFC_INPUT);
       if(rc == IDN2_OK) {
         host->encalloc = (char *)ace_hostname;
         /* change the name pointer to point to the encoded hostname */
