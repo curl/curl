@@ -4026,7 +4026,8 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
 #else
       int flags = IDN2_NFC_INPUT;
 #endif
-      int rc = idn2_lookup_ul((const char *)host->name, &ace_hostname, flags);
+      int rc = idn2_lookup_u8((const uint8_t *)host->name,
+                              (uint8_t **)&ace_hostname, flags);
       if(rc == IDN2_OK) {
         host->encalloc = (char *)ace_hostname;
         /* change the name pointer to point to the encoded hostname */
