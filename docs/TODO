@@ -151,6 +151,7 @@
  18.13 support metalink in http headers
  18.14 --fail without --location should treat 3xx as a failure
  18.15 --retry should resume
+ 18.16 send only part of --data
 
  19. Build
  19.1 roffit
@@ -1020,6 +1021,14 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  See https://github.com/curl/curl/issues/1084
 
+18.16 send only part of --data
+
+ When the user only wants to send a small piece of the data provided with
+ --data or --data-binary, like when that data is a huge file, consider a way
+ to specify that curl should only send a piece of that. One suggested syntax
+ would be: "--data-binary @largefile.zip!1073741823-2147483647".
+
+ See https://github.com/curl/curl/issues/1200
 
 19. Build
 
