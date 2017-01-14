@@ -68,6 +68,8 @@
  5.8 QUIC
  5.9 Improve formpost API
  5.10 Leave secure cookies alone
+ 5.11 Chunked transfer multipart formpost
+
 
  6. TELNET
  6.1 ditch stdin
@@ -566,6 +568,15 @@ This is not detailed in any FTP specification.
  cookies with the 'secure' property:
 
  https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01
+
+5.11 Chunked transfer multipart formpost
+
+ For a case where the file is being made during the upload is progressing
+ (like passed on stdin to the curl tool), we cannot know the size before-hand
+ and we rather not read the entire thing into memory before it can start the
+ upload.
+
+ https://github.com/curl/curl/issues/1139
 
 
 6. TELNET
