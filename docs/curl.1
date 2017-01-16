@@ -141,6 +141,8 @@ the --option version of them. (This concept with --no options was added in
 same command line option.)
 .IP "--abstract-unix-socket <path>"
 (HTTP) Connect through an abstract Unix domain socket, instead of using the network.
+Note: netstat shows the path of an abstract socket prefixed with '@', however
+the <path> argument should not have this leading character.
 
 Added in 7.53.0.
 .IP "--anyauth"
@@ -1194,7 +1196,7 @@ for each.
 
 \fI-:, --next\fP will reset all local options and only global ones will have their
 values survive over to the operation following the \fI-:, --next\fP instruction. Global
-options include \fI-v, --verbose\fP and \fI--fail-early\fP.
+options include \fI-v, --verbose\fP, \fI--trace\fP, \fI--trace-ascii\fP and \fI--fail-early\fP.
 
 For example, you can do both a GET and a POST in a single command line:
 
@@ -1245,6 +1247,10 @@ effectively disables the proxy. Each name in this list is matched as either
 a domain which contains the hostname, or the hostname itself. For example,
 local.com would match local.com, local.com:80, and www.local.com, but not
 www.notlocal.com.
+
+Since 7.53.0, This option overrides the environment variables that disable the
+proxy. If there's an environment variable disabling a proxy, you can set
+noproxy list to \&"" to override it.
 
 Added in 7.19.4.
 .IP "--ntlm-wb"
@@ -2429,8 +2435,7 @@ about to be transferred. This includes time_pretransfer and also the time the
 server needed to calculate the result.
 .TP
 .B time_total
-The total time, in seconds, that the full operation lasted. The time will be
-displayed with millisecond resolution.
+The total time, in seconds, that the full operation lasted.
 .TP
 .B url_effective
 The URL that was fetched last. This is most meaningful if you've told curl
@@ -2469,6 +2474,16 @@ Sets the proxy server to use if no protocol-specific proxy is set.
 .IP "NO_PROXY <comma-separated list of hosts>"
 list of host names that shouldn't go through any proxy. If set to a asterisk
 \&'*' only, it matches all hosts.
+
+Since 7.53.0, this environment variable disable the proxy even if specify
+\fI-x, --proxy\fP option. That is
+.B NO_PROXY=direct.example.com curl -x http://proxy.example.com
+.B http://direct.example.com
+accesses the target URL directly, and
+.B NO_PROXY=direct.example.com curl -x http://proxy.example.com
+.B http://somewhere.example.com
+accesses the target URL through proxy.
+
 .SH "PROXY PROTOCOL PREFIXES"
 Since curl version 7.21.7, the proxy string may be specified with a
 protocol:// prefix to specify alternative proxy protocols.
