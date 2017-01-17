@@ -4280,6 +4280,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   CURLcode result;
   bool rebuild_url = FALSE;
   bool url_has_scheme = FALSE;
+  char protobuf[16];
 
   *prot_missing = FALSE;
 
@@ -4409,7 +4410,6 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   }
   else {
     /* clear path */
-    char protobuf[16];
     char slashbuf[4];
     path[0]=0;
 
