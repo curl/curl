@@ -105,7 +105,7 @@
  13.1 Disable specific versions
  13.2 Provide mutex locking API
  13.3 Evaluate SSL patches
- 13.4 Cache OpenSSL contexts
+ 13.4 Cache/share OpenSSL contexts
  13.5 Export session ids
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
@@ -698,7 +698,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Evaluate/apply Gertjan van Wingerde's SSL patches:
  https://curl.haxx.se/mail/lib-2004-03/0087.html
 
-13.4 Cache OpenSSL contexts
+13.4 Cache/share OpenSSL contexts
 
  "Look at SSL cafile - quick traces look to me like these are done on every
  request as well, when they should only be necessary once per SSL context (or
@@ -707,6 +707,12 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  instead make one for every connection and re-use that SSL context in the same
  style connections are re-used. It will make us use slightly more memory but
  it will libcurl do less creations and deletions of SSL contexts.
+
+ Technically, the "caching" is probably best implemented by getting added to
+ the share interface so that easy handles who want to and can reuse the
+ context specify that by sharing with the right properties set.
+
+ https://github.com/curl/curl/issues/1110
 
 13.5 Export session ids
 
