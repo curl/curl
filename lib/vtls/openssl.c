@@ -3286,7 +3286,7 @@ CURLcode Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
   }
   /* RAND_bytes() returns 1 on success, 0 otherwise.  */
   rc = RAND_bytes(entropy, curlx_uztosi(length));
-  return rc?CURLE_FAILED_INIT:CURLE_OK;
+  return (rc == 1 ? CURLE_OK : CURLE_FAILED_INIT);
 }
 
 void Curl_ossl_md5sum(unsigned char *tmp, /* input */
