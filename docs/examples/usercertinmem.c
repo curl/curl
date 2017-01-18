@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,8 +20,7 @@
  *
  ***************************************************************************/
 /* <DESC>
-/* Example using an in memory PEM user certificate and RSA key to retrieve an
- * https page.
+ * Use an in-memory user certificate and RSA key and retrieve an https page.
  * </DESC>
  */
 /* Written by Ishan SinghLevett, based on Theo Borm's cacertinmem.c.
