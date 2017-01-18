@@ -3412,19 +3412,14 @@ ConnectionExists(struct Curl_easy *data,
       max_pipeline_length(data->multi):0;
     size_t best_pipe_len = max_pipe_len;
     struct curl_llist_element *curr;
-    const char *hostname;
-
-    if(needle->bits.conn_to_host)
-      hostname = needle->conn_to_host.name;
-    else
-      hostname = needle->host.name;
 
     infof(data, "Found bundle for host %s: %p [%s]\n",
-          hostname, (void *)bundle,
-          (bundle->multiuse== BUNDLE_PIPELINING?
-           "can pipeline":
-           (bundle->multiuse== BUNDLE_MULTIPLEX?
-            "can multiplex":"serially")));
+          (needle->bits.conn_to_host ? needle->conn_to_host.name :
+           needle->host.name), (void *)bundle,
+          (bundle->multiuse == BUNDLE_PIPELINING ?
+           "can pipeline" :
+           (bundle->multiuse == BUNDLE_MULTIPLEX ?
+            "can multiplex" : "serially")));
 
     /* We can't pipe if we don't know anything about the server */
     if(canPipeline) {
@@ -5639,6 +5634,10 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
   char *portptr;
   int port = -1;
 
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void) data;
+#endif
+
   *hostname_result = NULL;
   *port_result = -1;
 
@@ -5804,14 +5803,11 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       return result;
 
     if(host && *host) {
-      bool ipv6host;
       conn->conn_to_host.rawalloc = host;
       conn->conn_to_host.name = host;
       conn->bits.conn_to_host = TRUE;
 
-      ipv6host = strchr(host, ':') != NULL;
-      infof(data, "Connecting to hostname: %s%s%s\n",
-            ipv6host ? "[" : "", host, ipv6host ? "]" : "");
+      infof(data, "Connecting to hostname: %s\n", host);
     }
     else {
       /* no "connect to host" */
