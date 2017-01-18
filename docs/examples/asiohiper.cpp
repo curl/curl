@@ -72,10 +72,19 @@ typedef struct _ConnInfo
   CURL *easy;
   char *url;
   GlobalInfo *global;
+  int fdp;   /* fdp is used to store current action */
   char error[CURL_ERROR_SIZE];
 } ConnInfo;
 
 static void timer_cb(const boost::system::error_code & error, GlobalInfo *g);
+
+static ConnInfo* get_conninfo(CURL *e)
+{
+  ConnInfo* conn = NULL;
+  if(e)
+    curl_easy_getinfo(e, CURLINFO_PRIVATE, &conn);
+  return conn;
+}
 
 /* Update the event timer after curl_multi library calls */
 static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
@@ -172,12 +181,12 @@ static void check_multi_info(GlobalInfo *g)
 /* Called by asio when there is an action on a socket */
 static void event_cb(GlobalInfo *g, boost::asio::ip::tcp::socket *tcp_socket,
                      int action, const boost::system::error_code & error,
-                     int *fdp)
+                     ConnInfo *conn)
 {
   fprintf(MSG_OUT, "\nevent_cb: action=%d", action);
 
   /* make sure the event matches what are wanted */
-  if(*fdp == action || *fdp == CURL_POLL_INOUT) {
+  if(conn->fdp == action || conn->fdp == CURL_POLL_INOUT) {
     curl_socket_t s = tcp_socket->native_handle();
     CURLMcode rc;
     if(error)
@@ -196,16 +205,16 @@ static void event_cb(GlobalInfo *g, boost::asio::ip::tcp::socket *tcp_socket,
      * the socket may have been closed and/or fdp may have been changed
      * in curl_multi_socket_action(), so check them both */
     if(!error && socket_map.find(s) != socket_map.end() &&
-       (*fdp == action || *fdp == CURL_POLL_INOUT)) {
+       (conn->fdp == action || conn->fdp == CURL_POLL_INOUT)) {
       if(action == CURL_POLL_IN) {
         tcp_socket->async_read_some(boost::asio::null_buffers(),
                                     boost::bind(&event_cb, g, tcp_socket,
-                                                action, _1, fdp));
+                                                action, _1, conn));
       }
       if(action == CURL_POLL_OUT) {
         tcp_socket->async_write_some(boost::asio::null_buffers(),
                                      boost::bind(&event_cb, g, tcp_socket,
-                                                 action, _1, fdp));
+                                                 action, _1, conn));
       }
     }
   }
@@ -227,19 +236,19 @@ static void timer_cb(const boost::system::error_code & error, GlobalInfo *g)
 }
 
 /* Clean up any data */
-static void remsock(int *f, GlobalInfo *g)
+static void remsock(ConnInfo *conn)
 {
   fprintf(MSG_OUT, "\nremsock: ");
 
-  if(f) {
-    free(f);
+  if(conn) {
+    conn->fdp = -1;
   }
 }
 
-static void setsock(int *fdp, curl_socket_t s, CURL *e, int act, int oldact,
-                    GlobalInfo *g)
+static void setsock(curl_socket_t s, CURL *e, int act, int oldact,
+                    GlobalInfo *g, ConnInfo *conn)
 {
-  fprintf(MSG_OUT, "\nsetsock: socket=%d, act=%d, fdp=%p", s, act, fdp);
+  fprintf(MSG_OUT, "\nsetsock: socket=%d, act=%d, fdp=%p", s, act, conn->fdp);
 
   std::map<curl_socket_t, boost::asio::ip::tcp::socket *>::iterator it =
     socket_map.find(s);
@@ -251,14 +260,14 @@ static void setsock(int *fdp, curl_socket_t s, CURL *e, int act, int oldact,
 
   boost::asio::ip::tcp::socket * tcp_socket = it->second;
 
-  *fdp = act;
+  conn->fdp = act;
 
   if(act == CURL_POLL_IN) {
     fprintf(MSG_OUT, "\nwatching for socket to become readable");
     if(oldact != CURL_POLL_IN && oldact != CURL_POLL_INOUT) {
       tcp_socket->async_read_some(boost::asio::null_buffers(),
                                   boost::bind(&event_cb, g, tcp_socket,
-                                              CURL_POLL_IN, _1, fdp));
+                                              CURL_POLL_IN, _1, conn));
     }
   }
   else if(act == CURL_POLL_OUT) {
@@ -266,7 +275,7 @@ static void setsock(int *fdp, curl_socket_t s, CURL *e, int act, int oldact,
     if(oldact != CURL_POLL_OUT && oldact != CURL_POLL_INOUT) {
       tcp_socket->async_write_some(boost::asio::null_buffers(),
                                    boost::bind(&event_cb, g, tcp_socket,
-                                               CURL_POLL_OUT, _1, fdp));
+                                               CURL_POLL_OUT, _1, conn));
     }
   }
   else if(act == CURL_POLL_INOUT) {
@@ -274,23 +283,20 @@ static void setsock(int *fdp, curl_socket_t s, CURL *e, int act, int oldact,
     if(oldact != CURL_POLL_IN && oldact != CURL_POLL_INOUT) {
       tcp_socket->async_read_some(boost::asio::null_buffers(),
                                   boost::bind(&event_cb, g, tcp_socket,
-                                              CURL_POLL_IN, _1, fdp));
+                                              CURL_POLL_IN, _1, conn));
     }
     if(oldact != CURL_POLL_OUT && oldact != CURL_POLL_INOUT) {
       tcp_socket->async_write_some(boost::asio::null_buffers(),
                                    boost::bind(&event_cb, g, tcp_socket,
-                                               CURL_POLL_OUT, _1, fdp));
+                                               CURL_POLL_OUT, _1, conn));
     }
   }
 }
 
-static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g)
+static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g, ConnInfo* conn)
 {
-  /* fdp is used to store current action */
-  int *fdp = (int *) calloc(sizeof(int), 1);
-
-  setsock(fdp, s, easy, action, 0, g);
-  curl_multi_assign(g->multi, s, fdp);
+  setsock(s, easy, action, 0, g, conn);
+  curl_multi_assign(g->multi, s, conn);
 }
 
 /* CURLMOPT_SOCKETFUNCTION */
@@ -299,26 +305,28 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
   fprintf(MSG_OUT, "\nsock_cb: socket=%d, what=%d, sockp=%p", s, what, sockp);
 
   GlobalInfo *g = (GlobalInfo*) cbp;
-  int *actionp = (int *) sockp;
   const char *whatstr[] = { "none", "IN", "OUT", "INOUT", "REMOVE"};
+  ConnInfo* conn = get_conninfo(e);
+  if (!conn)
+    return -1;
 
   fprintf(MSG_OUT,
           "\nsocket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
 
   if(what == CURL_POLL_REMOVE) {
     fprintf(MSG_OUT, "\n");
-    remsock(actionp, g);
+    remsock(conn);
   }
   else {
-    if(!actionp) {
+    if(!sockp) {
       fprintf(MSG_OUT, "\nAdding data: %s", whatstr[what]);
-      addsock(s, e, what, g);
+      addsock(s, e, what, g, conn);
     }
     else {
       fprintf(MSG_OUT,
               "\nChanging action from %s to %s",
-              whatstr[*actionp], whatstr[what]);
-      setsock(actionp, s, e, what, *actionp, g);
+              whatstr[conn->fdp], whatstr[what]);
+      setsock(s, e, what, conn->fdp, g, conn);
     }
   }
 
