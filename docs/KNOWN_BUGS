@@ -22,7 +22,6 @@ problems may have been fixed or changed somewhat since this was written!
  1.9 HTTP/2 frames while in the connection pool kill reuse
  1.10 Strips trailing dot from host name
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
- 1.12 HTTP/2 server push enabled when no pushes can be accepted
 
  2. TLS
  2.1 Hangs with PolarSSL
@@ -205,13 +204,6 @@ problems may have been fixed or changed somewhat since this was written!
  seem to fix the issue or even get called. See
  https://github.com/curl/curl/issues/768
 
-1.12 HTTP/2 server push enabled when no pushes can be accepted
-
- If the easy interface is used, we can't accept any server pushes so we should
- switch off them already in the h2 settings as otherwise we risk wasting
- bandwidth when the server tries to send pushes libcurl will never accept.
-
- See https://github.com/curl/curl/issues/927
 
 2. TLS
 
