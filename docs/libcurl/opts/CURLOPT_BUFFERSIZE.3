@@ -31,11 +31,14 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_BUFFERSIZE, long size);
 Pass a long specifying your preferred \fIsize\fP (in bytes) for the receive
 buffer in libcurl.  The main point of this would be that the write callback
 gets called more often and with smaller chunks. Secondly, for some protocols,
-there's a benefit of having a larger buffer for performance. This is just
-treated as a request, not an order. You cannot be guaranteed to actually get
-the given size.
+there's a benefit of having a larger buffer for performance. Growing the
+buffer was added in 7.53.0.
 
-This size is by default is (\fICURL_MAX_WRITE_SIZE\fP).
+This is just treated as a request, not an order. You cannot be guaranteed to
+actually get the given size.
+
+This size by default is (\fICURL_MAX_WRITE_SIZE\fP). The maximum size is
+(\fICURL_MAX_READ_SIZE\fP).
 .SH DEFAULT
 CURL_MAX_WRITE_SIZE
 .SH PROTOCOLS

@@ -201,7 +201,8 @@
 /* Download buffer size, keep it fairly big for speed reasons */
 #undef BUFSIZE
 #define BUFSIZE CURL_MAX_WRITE_SIZE
-#define MAX_BUFSIZE 524288
+#undef MAX_BUFSIZE
+#define MAX_BUFSIZE CURL_MAX_READ_SIZE
 #define CURL_BUFSIZE(x) ((x)?(x):(BUFSIZE))
 
 /* Initial size of the buffer to store headers in, it'll be enlarged in case

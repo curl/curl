@@ -1309,7 +1309,6 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   struct timeval now;
   bool keepon = TRUE;
   char *buf = data->state.buffer;
-  const size_t buf_size = CURL_BUFSIZE(data->set.buffer_size);
   struct TELNET *tn;
 
   *done = TRUE; /* unconditionally */
@@ -1417,6 +1416,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 
   /* Keep on listening and act on events */
   while(keepon) {
+    const size_t buf_size = CURL_BUFSIZE(data->set.buffer_size);
     waitret = WaitForMultipleObjects(obj_count, objs, FALSE, wait_timeout);
     switch(waitret) {
     case WAIT_TIMEOUT:
