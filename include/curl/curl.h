@@ -193,6 +193,11 @@ typedef int (*curl_xferinfo_callback)(void *clientp,
                                       curl_off_t ultotal,
                                       curl_off_t ulnow);
 
+#ifndef CURL_MAX_READ_SIZE
+  /* The maximum receive buffer size configurable via CURLOPT_BUFFERSIZE. */
+#define CURL_MAX_READ_SIZE 524288
+#endif
+
 #ifndef CURL_MAX_WRITE_SIZE
   /* Tests have proven that 20K is a very bad buffer size for uploads on
      Windows, while 16K for some odd reason performed a lot better.

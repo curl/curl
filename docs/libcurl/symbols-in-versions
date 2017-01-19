@@ -748,6 +748,7 @@ CURL_LOCK_TYPE_DNS              7.10          -           7.10.2
 CURL_LOCK_TYPE_NONE             7.10          -           7.10.2
 CURL_LOCK_TYPE_SSL_SESSION      7.10          -           7.10.2
 CURL_MAX_HTTP_HEADER            7.19.7
+CURL_MAX_READ_SIZE              7.53.0
 CURL_MAX_WRITE_SIZE             7.9.7
 CURL_NETRC_IGNORED              7.9.8
 CURL_NETRC_OPTIONAL             7.9.8
