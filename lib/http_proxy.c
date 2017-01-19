@@ -303,6 +303,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       ssize_t gotbytes;
       char *ptr;
       char *line_start;
+      const long buf_size = data->set.buffer_size;
 
       ptr = data->state.buffer;
       line_start = ptr;
@@ -310,13 +311,13 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       nread = 0;
       perline = 0;
 
-      while(nread < BUFSIZE && keepon && !error) {
+      while((nread<buf_size) && (keepon && !error)) {
         int writetype;
 
         if(Curl_pgrsUpdate(conn))
           return CURLE_ABORTED_BY_CALLBACK;
 
-        if(ptr >= &data->state.buffer[BUFSIZE]) {
+        if(ptr >= &data->state.buffer[buf_size]) {
           failf(data, "CONNECT response too large!");
           return CURLE_RECV_ERROR;
         }

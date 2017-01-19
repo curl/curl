@@ -405,9 +405,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   /* This is where we loop until we have read everything there is to
      read or we get a CURLE_AGAIN */
   do {
-    size_t buffersize = data->set.buffer_size?
-      data->set.buffer_size : BUFSIZE;
-    size_t bytestoread = buffersize;
+    size_t bytestoread = data->set.buffer_size;
 
     if(
 #if defined(USE_NGHTTP2)
@@ -861,6 +859,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
   CURLcode result;
   ssize_t nread; /* number of bytes read */
   bool sending_http_headers = FALSE;
+  const long buf_size = data->set.buffer_size;
 
   if((k->bytecount == 0) && (k->writebytecount == 0))
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
@@ -905,7 +904,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
             sending_http_headers = FALSE;
         }
 
-        result = Curl_fillreadbuffer(conn, BUFSIZE, &fillcount);
+        result = Curl_fillreadbuffer(conn, buf_size, &fillcount);
         if(result)
           return result;
 
@@ -937,7 +936,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
          (data->set.crlf))) {
         /* Do we need to allocate a scratch buffer? */
         if(!data->state.scratch) {
-          data->state.scratch = malloc(2 * BUFSIZE);
+          data->state.scratch = malloc(2 * buf_size);
           if(!data->state.scratch) {
             failf(data, "Failed to alloc scratch buffer!");
 

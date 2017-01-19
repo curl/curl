@@ -308,6 +308,7 @@ static CURLcode file_upload(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;
+  const long buf_size = data->set.buffer_size;
   size_t nread;
   size_t nwrite;
   curl_off_t bytecount = 0;
@@ -361,7 +362,7 @@ static CURLcode file_upload(struct connectdata *conn)
 
   while(!result) {
     int readcount;
-    result = Curl_fillreadbuffer(conn, BUFSIZE, &readcount);
+    result = Curl_fillreadbuffer(conn, buf_size, &readcount);
     if(result)
       break;
 
@@ -435,6 +436,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   ssize_t nread;
   struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;
+  const long buf_size = data->set.buffer_size;
   curl_off_t bytecount = 0;
   int fd;
   struct timeval now = Curl_tvnow();
@@ -476,7 +478,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     time_t filetime;
     struct tm buffer;
     const struct tm *tm = &buffer;
-    snprintf(buf, sizeof(data->state.buffer),
+    snprintf(buf, buf_size,
              "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", expected_size);
     result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
     if(result)
@@ -493,7 +495,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
       return result;
 
     /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-    snprintf(buf, BUFSIZE-1,
+    snprintf(buf, buf_size-1,
              "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
              Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
              tm->tm_mday,
@@ -560,11 +562,11 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
 
     if(size_known) {
       bytestoread =
-        (expected_size < CURL_OFF_T_C(BUFSIZE) - CURL_OFF_T_C(1)) ?
-        curlx_sotouz(expected_size) : BUFSIZE - 1;
+        (expected_size < buf_size - CURL_OFF_T_C(1)) ?
+        curlx_sotouz(expected_size) : buf_size - 1;
     }
     else
-      bytestoread = BUFSIZE-1;
+      bytestoread = buf_size-1;
 
     nread = read(fd, buf, bytestoread);
 

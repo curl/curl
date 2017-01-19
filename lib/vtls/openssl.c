@@ -189,6 +189,7 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
      time-consuming seedings in vain */
   static bool ssl_seeded = FALSE;
   char *buf = data->state.buffer; /* point to the big buffer */
+  const long buf_size = data->set.buffer_size;
   int nread=0;
 
   if(ssl_seeded)
@@ -250,7 +251,7 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
 
   /* generates a default path for the random seed file */
   buf[0]=0; /* blank it first */
-  RAND_file_name(buf, BUFSIZE);
+  RAND_file_name(buf, buf_size);
   if(buf[0]) {
     /* we got a file name to try */
     nread += RAND_load_file(buf, RAND_LOAD_LENGTH);
@@ -2758,6 +2759,7 @@ static CURLcode servercert(struct connectdata *conn,
   X509 *issuer;
   FILE *fp;
   char *buffer = data->state.buffer;
+  const long buffer_size = data->set.buffer_size;
   const char *ptr;
   long * const certverifyresult = SSL_IS_PROXY() ?
     &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
@@ -2779,7 +2781,7 @@ static CURLcode servercert(struct connectdata *conn,
   infof(data, "%s certificate:\n", SSL_IS_PROXY() ? "Proxy" : "Server");
 
   rc = x509_name_oneline(X509_get_subject_name(connssl->server_cert),
-                         buffer, BUFSIZE);
+                         buffer, buffer_size);
   infof(data, " subject: %s\n", rc?"[NONE]":buffer);
 
   ASN1_TIME_print(mem, X509_get0_notBefore(connssl->server_cert));
@@ -2804,7 +2806,7 @@ static CURLcode servercert(struct connectdata *conn,
   }
 
   rc = x509_name_oneline(X509_get_issuer_name(connssl->server_cert),
-                         buffer, BUFSIZE);
+                         buffer, buffer_size);
   if(rc) {
     if(strict)
       failf(data, "SSL: couldn't get X509-issuer name!");

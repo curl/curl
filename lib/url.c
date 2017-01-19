@@ -452,6 +452,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   }
   data->change.url = NULL;
 
+  Curl_safefree(data->state.buffer);
   Curl_safefree(data->state.headerbuff);
 
   Curl_flush_cookies(data, 1);
@@ -641,6 +642,14 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   /* We do some initial setup here, all those fields that can't be just 0 */
 
+  data->set.buffer_size = DEFAULT_BUFSIZE;
+
+  data->state.buffer = malloc(data->set.buffer_size + 1);
+  if(!data->state.buffer) {
+    DEBUGF(fprintf(stderr, "Error: malloc of buffer failed\n"));
+    result = CURLE_OUT_OF_MEMORY;
+  }
+
   data->state.headerbuff = malloc(HEADERSIZE);
   if(!data->state.headerbuff) {
     DEBUGF(fprintf(stderr, "Error: malloc of headerbuff failed\n"));
@@ -671,6 +680,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   if(result) {
     Curl_resolver_cleanup(data->state.resolver);
+    free(data->state.buffer);
     free(data->state.headerbuff);
     Curl_freeset(data);
     free(data);
@@ -2262,17 +2272,30 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_BUFFERSIZE:
+  {
     /*
      * The application kindly asks for a differently sized receive buffer.
      * If it seems reasonable, we'll use it.
      */
+    const long original_buffer_size = data->set.buffer_size;
     data->set.buffer_size = va_arg(param, long);
 
-    if((data->set.buffer_size> (BUFSIZE -1)) ||
+    DEBUGASSERT(DEFAULT_BUFSIZE <= MAX_BUFSIZE);
+
+    if((data->set.buffer_size> (MAX_BUFSIZE -1)) ||
        (data->set.buffer_size < 1))
-      data->set.buffer_size = 0; /* huge internal default */
+      data->set.buffer_size= MAX_BUFSIZE; /* huge internal default */
+
+    if (original_buffer_size < data->set.buffer_size) {
+      data->state.buffer = realloc(data->state.buffer, data->set.buffer_size + 1);
+      if(!data->state.buffer) {
+        DEBUGF(fprintf(stderr, "Error: realloc of buffer failed\n"));
+        result = CURLE_OUT_OF_MEMORY;
+      }
+    }
 
     break;
+  }
 
   case CURLOPT_NOSIGNAL:
     /*
@@ -4169,8 +4192,9 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   if(Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1) &&
      !conn->master_buffer) {
+	  fprintf(stderr, "master buffer?!!\n");
     /* Allocate master_buffer to be used for HTTP/1 pipelining */
-    conn->master_buffer = calloc(BUFSIZE, sizeof(char));
+    conn->master_buffer = calloc(DEFAULT_BUFSIZE, sizeof (char));
     if(!conn->master_buffer)
       goto error;
   }

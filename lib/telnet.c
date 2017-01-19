@@ -1309,6 +1309,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   struct timeval now;
   bool keepon = TRUE;
   char *buf = data->state.buffer;
+  const long buf_size = data->set.buffer_size;
   struct TELNET *tn;
 
   *done = TRUE; /* unconditionally */
@@ -1423,7 +1424,8 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       for(;;) {
         if(data->set.is_fread_set) {
           /* read from user-supplied method */
-          result = (int)data->state.fread_func(buf, 1, BUFSIZE - 1,
+
+          result = (int)data->state.fread_func(buf, 1, buf_size - 1,
                                                data->state.in);
           if(result == CURL_READFUNC_ABORT) {
             keepon = FALSE;
@@ -1499,7 +1501,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       }
       if(events.lNetworkEvents & FD_READ) {
         /* read data from network */
-        result = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        result = Curl_read(conn, sockfd, buf, buf_size - 1, &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1588,7 +1590,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */
-        result = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        result = Curl_read(conn, sockfd, buf, buf_size - 1, &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1624,12 +1626,12 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       nread = 0;
       if(poll_cnt == 2) {
         if(pfd[1].revents & POLLIN) { /* read from in file */
-          nread = read(pfd[1].fd, buf, BUFSIZE - 1);
+          nread = read(pfd[1].fd, buf, buf_size - 1);
         }
       }
       else {
         /* read from user-supplied method */
-        nread = (int)data->state.fread_func(buf, 1, BUFSIZE - 1,
+        nread = (int)data->state.fread_func(buf, 1, buf_size - 1,
                                             data->state.in);
         if(nread == CURL_READFUNC_ABORT) {
           keepon = FALSE;

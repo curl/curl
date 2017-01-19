@@ -1681,6 +1681,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
 {
   const struct tm *tm;
   char *buf = data->state.buffer;
+  const long buf_size = data->set.buffer_size;
   struct tm keeptime;
   CURLcode result;
 
@@ -1703,7 +1704,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
    */
 
   /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-  snprintf(buf, BUFSIZE-1,
+  snprintf(buf, buf_size-1,
            "%s, %02d %s %4d %02d:%02d:%02d GMT",
            Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
            tm->tm_mday,
@@ -2154,9 +2155,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         else {
           curl_off_t passed=0;
           do {
+            const long buf_size = data->set.buffer_size;
             size_t readthisamountnow =
-              (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
-              BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
+              (data->state.resume_from - passed > buf_size) ?
+              buf_size : curlx_sotouz(data->state.resume_from - passed);
 
             size_t actuallyread =
               data->state.fread_func(data->state.buffer, 1, readthisamountnow,
