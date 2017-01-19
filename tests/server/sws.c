@@ -1204,7 +1204,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     retry:
     written = swrite(sock, buffer, num);
     if(written < 0) {
-      if((EWOULDBLOCK == errno) || (EAGAIN == errno)) {
+      if((EWOULDBLOCK == SOCKERRNO) || (EAGAIN == SOCKERRNO)) {
         wait_ms(10);
         goto retry;
       }
