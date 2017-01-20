@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, DirecTV, Contact: Eric Hu, <ehu@directv.com>.
- * Copyright (C) 2010 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -267,13 +267,13 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
       /* we got a session id, use it! */
       infof(data, "SSL re-using session ID\n");
       ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex],
-                           ssl_sessionid, (uint8_t)ssl_idsize);
+                           ssl_sessionid, (uint8_t)ssl_idsize, NULL);
     }
     Curl_ssl_sessionid_unlock(conn);
   }
 
   if(!ssl)
-    ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex], NULL, 0);
+    ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex], NULL, 0, NULL);
 
   conn->ssl[sockindex].ssl = ssl;
   return CURLE_OK;
@@ -387,8 +387,8 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
 
   /* Put our freshly minted SSL session in cache */
   if(data->set.general_ssl.sessionid) {
-    const uint8_t *ssl_sessionid = ssl_get_session_id_size(ssl);
-    size_t ssl_idsize = ssl_get_session_id(ssl);
+    const uint8_t *ssl_sessionid = ssl_get_session_id(ssl);
+    size_t ssl_idsize = ssl_get_session_id_size(ssl);
     Curl_ssl_sessionid_lock(conn);
     if(Curl_ssl_addsessionid(conn, (void *) ssl_sessionid, ssl_idsize,
                              sockindex) != CURLE_OK)
