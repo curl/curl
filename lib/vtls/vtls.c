@@ -485,9 +485,8 @@ void Curl_ssl_close_all(struct Curl_easy *data)
 }
 
 #if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
-    defined(USE_DARWINSSL) || defined(USE_NSS) || defined(USE_MBEDTLS)
-/* This function is for OpenSSL, GnuTLS, darwinssl, mbedtls, and schannel
-   only. */
+  defined(USE_DARWINSSL) || defined(USE_POLARSSL) || defined(USE_NSS) || \
+  defined(USE_MBEDTLS)
 int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
                      int numsocks)
 {
