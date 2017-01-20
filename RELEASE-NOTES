@@ -1,10 +1,15 @@
 Curl and libcurl 7.53.0
 
  Public curl releases:         163
- Command line options:         204
- curl_easy_setopt() options:   243
+ Command line options:         205
+ curl_easy_setopt() options:   244
  Public functions in libcurl:  61
- Contributors:                 1480
+ Contributors:                 1496
+
+This release includes the following changes:
+
+ o unix_socket: added --abstract-unix-socket and CURLOPT_ABSTRACT_UNIX_SOCKET [25]
+ o CURLOPT_BUFFERSIZE: support enlarging receive buffer [29]
 
 This release includes the following bugfixes:
 
@@ -52,6 +57,16 @@ This release includes the following bugfixes:
  o curl: reset the easy handle at --next
  o --next docs: --trace and --trace-ascii are also global
  o --write-out docs: 'time_total' is not always shown with ms precision
+ o http: print correct HTTP string in verbose output when using HTTP/2
+ o docs: improved language in README.md HISTORY.md CONTRIBUTE.md [26]
+ o http2: disable server push if not requested [27]
+ o nss: use the correct lock in nss_find_slot_by_name()
+ o usercertinmem.c: improve the short description
+ o CURLOPT_CONNECT_TO: Fix compile warnings
+ o docs: non-blocking SSL handshake is now supported with NSS
+ o *.rc: escape non-ASCII/non-UTF-8 character for clarity [28]
+ o mbedTLS: fix multi interface non-blocking handshake [30]
+ o PolarSSL: fix multi interface non-blocking handshake [31]
 
 This release includes the following known bugs:
 
@@ -60,12 +75,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anatol Belski, Chris Araman, Christian Weisgerber, Dan Fandrich,
-  Daniel Romero, Daniel Stenberg, Dan Jacobson, Eramoto Masaya, Frank Gevaerts,
-  Isaac Boukris, Jiří Malák, John Kohl, Kim Minjoong, Kyselgov E.N,
-  Marcus Hoffmann, Max Khon, Mingliang Zhu, Nick Zitzmann, Patrick Monnerat,
-  Peter Wu, Praveen Pvs, Ray Satiro, Tim Rühsen,
-  (23 contributors)
+  Alessandro Ghedini, Anatol Belski, Antoine Aubert, Chris Araman,
+  Christian Weisgerber, Chungtsun Li, Dan Fandrich, Daniel Romero,
+  Daniel Stenberg, Dan Jacobson, ERAMOTO Masaya, Fahim Chandurwala,
+  Frank Gevaerts, Gisle Vanem, Isaac Boukris, Jiří Malák, John Kohl,
+  Kamil Dudka, Kim Minjoong, Kyselgov E.N, Marcus Hoffmann, Max Khon,
+  Michael Kaufmann, Mingliang Zhu, Nick Zitzmann, Patrick Monnerat, Peter Wu,
+  Praveen Pvs, Ray Satiro, Richy Kim, Tim Rühsen, Viktor Szakáts,
+  (32 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -95,3 +112,10 @@ References to bug reports and discussions on issues:
  [22] = https://curl.haxx.se/bug/?i=1140
  [23] = https://curl.haxx.se/bug/?i=1169
  [24] = https://curl.haxx.se/bug/?i=1169
+ [25] = https://curl.haxx.se/bug/?i=1197
+ [26] = https://curl.haxx.se/bug/?i=1211
+ [27] = https://curl.haxx.se/bug/?i=1160
+ [28] = https://curl.haxx.se/bug/?i=1217
+ [29] = https://curl.haxx.se/bug/?i=1222
+ [30] = https://curl.haxx.se/bug/?i=1223
+ [31] = https://github.com/curl/curl/issues/1174#issuecomment-274018791
