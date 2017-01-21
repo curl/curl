@@ -57,7 +57,6 @@
  */
 boost::asio::io_service io_service;
 boost::asio::deadline_timer timer(io_service);
-std::map<curl_socket_t, boost::asio::ip::tcp::socket *> socket_map;
 
 /* Global information, common to all connections */
 typedef struct _GlobalInfo
@@ -73,8 +72,11 @@ typedef struct _ConnInfo
   char *url;
   GlobalInfo *global;
   int fdp;   /* fdp is used to store current action */
+  boost::asio::ip::tcp::socket *sock;
   char error[CURL_ERROR_SIZE];
 } ConnInfo;
+
+std::map<curl_socket_t, ConnInfo *> socket_map;
 
 static void timer_cb(const boost::system::error_code & error, GlobalInfo *g);
 
@@ -173,7 +175,6 @@ static void check_multi_info(GlobalInfo *g)
       curl_multi_remove_handle(g->multi, easy);
       free(conn->url);
       curl_easy_cleanup(easy);
-      free(conn);
     }
   }
 }
@@ -250,7 +251,7 @@ static void setsock(curl_socket_t s, CURL *e, int act, int oldact,
 {
   fprintf(MSG_OUT, "\nsetsock: socket=%d, act=%d, fdp=%p", s, act, conn->fdp);
 
-  std::map<curl_socket_t, boost::asio::ip::tcp::socket *>::iterator it =
+  std::map<curl_socket_t, ConnInfo *>::iterator it =
     socket_map.find(s);
 
   if(it == socket_map.end()) {
@@ -258,7 +259,7 @@ static void setsock(curl_socket_t s, CURL *e, int act, int oldact,
     return;
   }
 
-  boost::asio::ip::tcp::socket * tcp_socket = it->second;
+  boost::asio::ip::tcp::socket * tcp_socket = it->second->sock;
 
   conn->fdp = act;
 
@@ -369,7 +370,7 @@ static curl_socket_t opensocket(void *clientp, curlsocktype purpose,
                                 struct curl_sockaddr *address)
 {
   fprintf(MSG_OUT, "\nopensocket :");
-
+  ConnInfo *conn = (ConnInfo *)clientp;
   curl_socket_t sockfd = CURL_SOCKET_BAD;
 
   /* restrict to IPv4 */
@@ -377,6 +378,7 @@ static curl_socket_t opensocket(void *clientp, curlsocktype purpose,
     /* create a tcp socket object */
     boost::asio::ip::tcp::socket *tcp_socket =
       new boost::asio::ip::tcp::socket(io_service);
+    conn->sock = tcp_socket;
 
     /* open it and get the native handle*/
     boost::system::error_code ec;
@@ -394,7 +396,7 @@ static curl_socket_t opensocket(void *clientp, curlsocktype purpose,
 
       /* save it for monitoring */
       socket_map.insert(std::pair<curl_socket_t,
-                        boost::asio::ip::tcp::socket *>(sockfd, tcp_socket));
+                        ConnInfo *>(sockfd, conn));
     }
   }
 
@@ -406,11 +408,12 @@ static int close_socket(void *clientp, curl_socket_t item)
 {
   fprintf(MSG_OUT, "\nclose_socket : %d", item);
 
-  std::map<curl_socket_t, boost::asio::ip::tcp::socket *>::iterator it =
+  std::map<curl_socket_t, ConnInfo *>::iterator it =
     socket_map.find(item);
 
   if(it != socket_map.end()) {
-    delete it->second;
+    delete it->second->sock;
+    free(it->second);
     socket_map.erase(it);
   }
 
@@ -447,9 +450,11 @@ static void new_conn(char *url, GlobalInfo *g)
 
   /* call this function to get a socket */
   curl_easy_setopt(conn->easy, CURLOPT_OPENSOCKETFUNCTION, opensocket);
+  curl_easy_setopt(conn->easy, CURLOPT_OPENSOCKETDATA, conn);
 
   /* call this function to close a socket */
   curl_easy_setopt(conn->easy, CURLOPT_CLOSESOCKETFUNCTION, close_socket);
+  curl_easy_setopt(conn->easy, CURLOPT_CLOSESOCKETDATA, conn);
 
   fprintf(MSG_OUT,
           "\nAdding easy %p to multi %p (%s)", conn->easy, g->multi, url);
