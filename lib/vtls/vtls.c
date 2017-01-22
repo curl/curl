@@ -286,10 +286,10 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
 
   const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
-                                                 &conn->proxy_ssl_config :
-                                                 &conn->ssl_config;
+    &conn->proxy_ssl_config :
+    &conn->ssl_config;
   const char * const name = isProxy ? conn->http_proxy.host.name :
-                                      conn->host.name;
+    conn->host.name;
   int port = isProxy ? (int)conn->port : conn->remote_port;
   *ssl_sessionid = NULL;
 
@@ -394,8 +394,8 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   long *general_age;
   const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
-                                           &conn->proxy_ssl_config :
-                                           &conn->ssl_config;
+    &conn->proxy_ssl_config :
+    &conn->ssl_config;
 
   DEBUGASSERT(data->set.general_ssl.sessionid);
 
@@ -447,7 +447,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   store->sessionid = ssl_sessionid;
   store->idsize = idsize;
   store->age = *general_age;    /* set current age */
-    /* free it if there's one already present */
+  /* free it if there's one already present */
   free(store->name);
   free(store->conn_to_host);
   store->name = clone_host;               /* clone host name */
@@ -510,8 +510,8 @@ int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
 }
 #else
 int Curl_ssl_getsock(struct connectdata *conn,
-                          curl_socket_t *socks,
-                          int numsocks)
+                     curl_socket_t *socks,
+                     int numsocks)
 {
   (void)conn;
   (void)socks;
