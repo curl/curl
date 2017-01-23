@@ -51,7 +51,6 @@
 #include "inet_pton.h"
 #include "mbedtls.h"
 #include "vtls.h"
-#include "ssl_hlp.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
@@ -166,7 +165,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
   int mbedtls_version_minor = MBEDTLS_SSL_MINOR_VERSION_1;
   int mbedtls_version_max_minor = MBEDTLS_SSL_MINOR_VERSION_1;
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+  long ssl_version_max = Curl_ssl_retrieve_version_max(ssl_version,
                                                  SSL_CONN_CONFIG(version_max));
 
   switch(ssl_version) {
@@ -195,6 +194,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
       mbedtls_version_max_minor = MBEDTLS_SSL_MINOR_VERSION_2;
       break;
     case CURL_SSLVERSION_MAX_TLSv1_2:
+    case CURL_SSLVERSION_MAX_DEFAULT:
     case CURL_SSLVERSION_MAX_TLSv1_3:
       mbedtls_version_max_minor = MBEDTLS_SSL_MINOR_VERSION_3;
       break;
@@ -204,6 +204,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
                                mbedtls_version_minor);
   mbedtls_ssl_conf_max_version(&connssl->config, MBEDTLS_SSL_MAJOR_VERSION_3,
                                mbedtls_version_max_minor);
+  }
   return CURLE_OK;
 }
 

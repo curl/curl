@@ -169,6 +169,10 @@ bool Curl_ssl_cert_status_request(void);
 
 bool Curl_ssl_false_start(void);
 
+/* returns fixed ssl_max_version for ssl_version */
+long Curl_ssl_retrieve_version_max(long ssl_version,
+                                   long ssl_version_max_default);
+
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 #else

@@ -12,7 +12,9 @@ by arguments tlsv1.0 or tlsv1.1 or tlsv1.2.
 
 .RS
 .IP "default"
-Use up to recommended version.
+Use up to recommended TLS version.
+.IP "1.0"
+Use up to TLSv1.0.
 .IP "1.1"
 Use up to TLSv1.1.
 .IP "1.2"

@@ -51,7 +51,6 @@
 #include "inet_pton.h"
 #include "polarssl.h"
 #include "vtls.h"
-#include "ssl_hlp.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
@@ -147,7 +146,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex);
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+  long ssl_version_max = Curl_ssl_retrieve_version_max(ssl_version,
                                                  SSL_CONN_CONFIG(version_max));
 
   switch(ssl_version) {
@@ -172,6 +171,8 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex);
   }
 
   switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_DEFAULT:
+      break;
     case CURL_SSLVERSION_MAX_TLSv1_0:
       ssl_set_max_version(&connssl->ssl, SSL_MAJOR_VERSION_3,
                           SSL_MINOR_VERSION_1);

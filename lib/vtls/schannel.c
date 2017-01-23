@@ -49,7 +49,6 @@
 #include "curl_sspi.h"
 #include "schannel.h"
 #include "vtls.h"
-#include "ssl_hlp.h"
 #include "sendf.h"
 #include "connect.h" /* for the connect timeout */
 #include "strerror.h"
@@ -108,7 +107,7 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+  long ssl_version_max = Curl_ssl_retrieve_version_max(ssl_version,
                                                  SSL_CONN_CONFIG(version_max));
   switch(ssl_version_max) {
     case CURL_SSLVERSION_MAX_TLSv1_0:
@@ -124,6 +123,7 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
           schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_1_CLIENT;
       } break;
     case CURL_SSLVERSION_MAX_TLSv1_2:
+    case CURL_SSLVERSION_MAX_DEFAULT:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
           schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;

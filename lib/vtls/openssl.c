@@ -48,7 +48,6 @@
 #include "slist.h"
 #include "select.h"
 #include "vtls.h"
-#include "ssl_hlp.h"
 #include "strcase.h"
 #include "hostcheck.h"
 #include "curl_printf.h"
@@ -1699,7 +1698,7 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+  long ssl_version_max = Curl_ssl_retrieve_version_max(ssl_version,
                                                  SSL_CONN_CONFIG(version_max));
 
   switch(ssl_version) {
@@ -1756,6 +1755,7 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn)
       *ctx_options |= SSL_OP_NO_TLSv1_2;
 #endif
     case CURL_SSLVERSION_MAX_TLSv1_2:
+    case CURL_SSLVERSION_MAX_DEFAULT:
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
 #ifdef TLS1_3_VERSION
       *ctx_options |= SSL_OP_NO_TLSv1_3;

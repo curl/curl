@@ -70,7 +70,6 @@
 #include "sendf.h"
 #include "gskit.h"
 #include "vtls.h"
-#include "ssl_hlp.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "strcase.h"
@@ -754,12 +753,12 @@ set_ssl_version_min_max(unsigned int *protoflags, struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+  long ssl_version_max = Curl_ssl_retrieve_version_max(ssl_version,
                                                  SSL_CONN_CONFIG(version_max));
 
   switch(ssl_version_max) {
     case CURL_SSLVERSION_MAX_TLSv1_3:
-      switch(ssl_version) {
+     switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
            *protoflags |= CURL_GSKPROTO_TLSV10_MASK;
         case CURL_SSLVERSION_TLSv1_1:
@@ -772,6 +771,7 @@ set_ssl_version_min_max(unsigned int *protoflags, struct connectdata *conn)
           return CURLE_SSL_CONNECT_ERROR;
       } break;
     case CURL_SSLVERSION_MAX_TLSv1_2:
+    case CURL_SSLVERSION_MAX_DEFAULT:
       switch(ssl_version) {
         case CURL_SSLVERSION_TLSv1_0:
            *protoflags |= CURL_GSKPROTO_TLSV10_MASK;

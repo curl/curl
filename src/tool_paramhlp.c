@@ -567,6 +567,7 @@ ParameterError str2tls_max(long *val, const char *str)
     long tls_max;
   } const tls_max_array[] = {
     { "default", CURL_SSLVERSION_MAX_DEFAULT },
+    { "1.0",     CURL_SSLVERSION_MAX_TLSv1_0 },
     { "1.1",     CURL_SSLVERSION_MAX_TLSv1_1 },
     { "1.2",     CURL_SSLVERSION_MAX_TLSv1_2 },
     { "1.3",     CURL_SSLVERSION_MAX_TLSv1_3 }

@@ -37,7 +37,6 @@
 #include "strcase.h"
 #include "select.h"
 #include "vtls.h"
-#include "ssl_hlp.h"
 #include "llist.h"
 #include "curl_printf.h"
 #include "nssg.h"
@@ -1518,9 +1517,18 @@ set_ssl_version_min_max(SSLVersionRange *sslver, struct Curl_easy *data,
                         struct connectdata *conn)
 {
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+  long ssl_version_max = Curl_ssl_retrieve_version_max(ssl_version,
                                                  SSL_CONN_CONFIG(version_max));
+  SSLVersionRange ssl_version_default = {
+    SSL_LIBRARY_VERSION_TLS_1_0,  /* min */
+    SSL_LIBRARY_VERSION_TLS_1_0   /* max */
+  };
   (void) data;
+
+  if(SSL_VersionRangeGetDefault(ssl_variant_stream, &ssl_version_default) !=
+     SECSuccess) {
+     return CURLE_SSL_CONNECT_ERROR;
+  }
 
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
@@ -1553,6 +1561,9 @@ set_ssl_version_min_max(SSLVersionRange *sslver, struct Curl_easy *data,
   }
 
   switch(ssl_version_max) {
+    case CURL_SSLVERSION_MAX_DEFAULT:
+      sslver->max = ssl_version_default.max;
+      break;
     case CURL_SSLVERSION_MAX_TLSv1_0:
       sslver->max = SSL_LIBRARY_VERSION_TLS_1_0;
       break;
@@ -1574,7 +1585,7 @@ set_ssl_version_min_max(SSLVersionRange *sslver, struct Curl_easy *data,
       break;
     case CURL_SSLVERSION_MAX_TLSv1_3:
 #ifdef SSL_LIBRARY_VERSION_TLS_1_3
-        sslver->max = SSL_LIBRARY_VERSION_TLS_1_3;
+      sslver->max = SSL_LIBRARY_VERSION_TLS_1_3;
 #elif defined(SSL_LIBRARY_VERSION_TLS_1_2)
       sslver->max = SSL_LIBRARY_VERSION_TLS_1_2;
 #elif defined(SSL_LIBRARY_VERSION_TLS_1_1)

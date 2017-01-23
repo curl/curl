@@ -31,7 +31,6 @@
 #include "urldata.h" /* for the Curl_easy definition */
 #include "curl_base64.h"
 #include "strtok.h"
-#include "ssl_hlp.h"
 
 #ifdef USE_DARWINSSL
 
@@ -1049,7 +1048,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = retrieve_ssl_version_max(ssl_version,
+  long ssl_version_max = Curl_ssl_retrieve_version_max(ssl_version,
                                                  SSL_CONN_CONFIG(version_max));
 
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
@@ -1063,7 +1062,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
       case CURL_SSLVERSION_TLSv1_1:
         min_ssl_protocol = kTLSProtocol11;
         break;
-      case CURL_SSLVERSION_TLSv1_1:
+      case CURL_SSLVERSION_TLSv1_2:
         min_ssl_protocol = kTLSProtocol12;
         break;
       case CURL_SSLVERSION_TLSv1_3:
@@ -1078,6 +1077,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
       case CURL_SSLVERSION_MAX_TLSv1_1:
          max_ssl_protocol = kTLSProtocol11;
          break;
+      case CURL_SSLVERSION_MAX_DEFAULT:
       case CURL_SSLVERSION_MAX_TLSv1_2:
       case CURL_SSLVERSION_MAX_TLSv1_3:
          max_ssl_protocol = kTLSProtocol12;
@@ -1112,6 +1112,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
         switch(conn->ssl_config.version_max) {
           case CURL_SSLVERSION_MAX_TLSv1_3:
           case CURL_SSLVERSION_MAX_TLSv1_2:
+          case CURL_SSLVERSION_MAX_DEFAULT:
             (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                                kTLSProtocol12,
                                                true);
@@ -1128,6 +1129,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
         switch(conn->ssl_config.version_max) {
           case CURL_SSLVERSION_MAX_TLSv1_3:
           case CURL_SSLVERSION_MAX_TLSv1_2:
+          case CURL_SSLVERSION_MAX_DEFAULT:
             (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                                kTLSProtocol12,
                                                true);

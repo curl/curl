@@ -183,6 +183,9 @@ static bool ssl_prefs_check(struct Curl_easy *data)
   if(data->set.ssl.primary.version_max != CURL_SSLVERSION_MAX_NONE) {
     if(data->set.ssl.primary.version_max >= CURL_SSLVERSION_MAX_FIRST
       && data->set.ssl.primary.version_max < CURL_SSLVERSION_MAX_LAST) {
+        if(data->set.ssl.primary.version_max == CURL_SSLVERSION_MAX_DEFAULT) {
+          return TRUE;
+        }
         switch(data->set.ssl.primary.version) {
           case CURL_SSLVERSION_DEFAULT:
           case CURL_SSLVERSION_TLSv1:
@@ -1001,6 +1004,28 @@ bool Curl_ssl_false_start(void)
 #else
   return FALSE;
 #endif
+}
+
+/*
+ * returns fixed ssl_max_version for ssl_version
+ */
+long Curl_ssl_retrieve_version_max(long ssl_version,
+                                   long ssl_version_max_default)
+{
+  switch(ssl_version_max_default) {
+    case CURL_SSLVERSION_MAX_NONE:
+      switch(ssl_version) {
+        case CURL_SSLVERSION_TLSv1_0:
+          return CURL_SSLVERSION_MAX_TLSv1_0;
+        case CURL_SSLVERSION_TLSv1_1:
+          return CURL_SSLVERSION_MAX_TLSv1_1;
+        case CURL_SSLVERSION_TLSv1_2:
+          return CURL_SSLVERSION_MAX_TLSv1_2;
+        case CURL_SSLVERSION_TLSv1_3:
+          return CURL_SSLVERSION_MAX_TLSv1_3;
+      }
+  }
+  return ssl_version_max_default;
 }
 
 #endif /* USE_SSL */
