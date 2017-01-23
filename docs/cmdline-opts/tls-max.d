@@ -14,9 +14,9 @@ by arguments tlsv1.0 or tlsv1.1 or tlsv1.2.
 .IP "default"
 Use up to recommended version.
 .IP "1.1"
-Use up to TLSv1.1 . The supported minimum is tlsv1.0.
+Use up to TLSv1.1.
 .IP "1.2"
-Use up to TLSv1.2 . The supported minimum is tlsv1.0 or tlsv1.1.
+Use up to TLSv1.2.
 .IP "1.3"
-Use up to TLSv1.3 . The supported minimum is tlsv1.0 or tlsv1.1 or tlsv1.2.
+Use up to TLSv1.3.
 .RE
