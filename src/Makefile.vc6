@@ -35,6 +35,7 @@
 ##
 #
 #############################################################
+!MESSAGE Use of this make system is deprecated in favour of the one in winbuild.
 
 PROGRAM_NAME = curl.exe
 

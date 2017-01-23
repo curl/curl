@@ -109,6 +109,8 @@ SSL     = dll
 !ELSEIF "$(WITH_SSL)"=="static"
 USE_SSL = true
 SSL     = static
+!ELSEIF "$(WITH_SSL)"!=""
+!ERROR WITH_SSL=dll or WITH_SSL=static
 !ENDIF
 
 !IF "$(USE_SSL)"=="true"
@@ -124,6 +126,8 @@ USE_NGHTTP2 = false
 !IF "$(WITH_MBEDTLS)"=="dll" || "$(WITH_MBEDTLS)"=="static"
 USE_MBEDTLS = true
 MBEDTLS     = $(WITH_MBEDTLS)
+!ELSEIF "$(WITH_MBEDTLS)"!=""
+!ERROR WITH_MBEDTLS=dll or WITH_MBEDTLS=static
 !ENDIF
 
 !IF ( "$(USE_SSL)"=="true" && "$(USE_WINSSL)"=="true" ) \
@@ -138,6 +142,8 @@ CARES     = dll
 !ELSEIF "$(WITH_CARES)"=="static"
 USE_CARES = true
 CARES     = static
+!ELSEIF "$(WITH_CARES)"!=""
+!ERROR WITH_CARES=dll or WITH_CARES=static
 !ENDIF
 
 !IF "$(WITH_ZLIB)"=="dll"
@@ -146,6 +152,8 @@ ZLIB     = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
 USE_ZLIB = true
 ZLIB     = static
+!ELSEIF "$(WITH_ZLIB)"!=""
+!ERROR WITH_ZLIB=dll or WITH_ZLIB=static
 !ENDIF
 
 !IF "$(WITH_SSH2)"=="dll"
@@ -154,6 +162,8 @@ SSH2     = dll
 !ELSEIF "$(WITH_SSH2)"=="static"
 USE_SSH2 = true
 SSH2     = static
+!ELSEIF "$(WITH_SSH2)"!=""
+!ERROR WITH_SSH2=dll or WITH_SSH2=static
 !ENDIF
 
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-vc$(VC)-$(MACHINE)
@@ -235,3 +245,10 @@ $(MODE):
 copy_from_lib:
 	echo copying .c...
 	FOR %%i IN ($(CURLX_CFILES:/=\)) DO copy %%i ..\src\
+
+clean:
+	@IF EXIST ..\include\curl\curlbuild.h ( \
+	   CALL ..\buildconf.bat -clean \
+	)
+	del CURL_OBJS.inc LIBCURL_OBJS.inc vc100.idb
+	rd/s/q ..\builds
