@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1416,7 +1416,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 
   /* Keep on listening and act on events */
   while(keepon) {
-    const size_t buf_size = CURL_BUFSIZE(data->set.buffer_size);
+    const DWORD buf_size = (DWORD)CURL_BUFSIZE(data->set.buffer_size);
     waitret = WaitForMultipleObjects(obj_count, objs, FALSE, wait_timeout);
     switch(waitret) {
     case WAIT_TIMEOUT:
