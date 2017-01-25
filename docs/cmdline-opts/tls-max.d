@@ -7,7 +7,7 @@ Requires: TLS
 See-also: tlsv1.0 tlsv1.1 tlsv1.2
 Help: Use TLSv1.0 or greater
 ---
-Defines a range of supported TLS versions up to VERSION. A minimum is defined
+VERSION defines maximum supported TLS version. A minimum is defined
 by arguments tlsv1.0 or tlsv1.1 or tlsv1.2.
 
 .RS

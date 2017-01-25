@@ -2085,7 +2085,7 @@ than the specified date/time.
 
 If this option is used several times, the last one will be used.
 .IP "--tls-max <VERSION>"
-(SSL) Defines a range of supported TLS versions up to VERSION. A minimum is defined
+(SSL) VERSION defines maximum supported TLS version. A minimum is defined
 by arguments tlsv1.0 or tlsv1.1 or tlsv1.2.
 
 .RS
@@ -2218,7 +2218,7 @@ setting a default protocol, see \fI--proto-default\fP for details.
 This option may be used any number of times. To control where this URL is
 written, use the \fI-o, --output\fP or the \fI-O, --remote-name\fP options.
 .IP "-B, --use-ascii"
-(FTP LDAP) Enable ASCII transfer. For FTP, this can also be enforced by using an URL that
+(FTP LDAP) Enable ASCII transfer. For FTP, this can also be enforced by using a URL that
 ends with ";type=A". This option causes data sent to stdout to be in text mode
 for win32 systems.
 .IP "-A, --user-agent <name>"
