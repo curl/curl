@@ -305,6 +305,7 @@ if(WIN32)
   cmake_dependent_option(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON
     CMAKE_USE_WINSSL OFF)
 endif()
+option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
 
 set(openssl_default ON)
 if(WIN32)
@@ -360,6 +361,14 @@ if(CMAKE_USE_OPENSSL AND NOT SSL_ENABLED)
   check_symbol_exists(RAND_status "${CURL_INCLUDES}" HAVE_RAND_STATUS)
   check_symbol_exists(RAND_screen "${CURL_INCLUDES}" HAVE_RAND_SCREEN)
   check_symbol_exists(RAND_egd    "${CURL_INCLUDES}" HAVE_RAND_EGD)
+endif()
+
+if(CMAKE_USE_MBEDTLS AND NOT SSL_ENABLED)
+  find_package(MbedTLS REQUIRED)
+  set(SSL_ENABLED ON)
+  set(USE_MBEDTLS ON)
+  list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
+  include_directories(${MBEDTLS_INCLUDE_DIR})
 endif()
 
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
@@ -1087,6 +1096,7 @@ set(_items)
 _add_if("WinSSL"        SSL_ENABLED AND USE_WINDOWS_SSPI)
 _add_if("OpenSSL"       SSL_ENABLED AND USE_OPENSSL)
 _add_if("DarwinSSL"     SSL_ENABLED AND USE_DARWINSSL)
+_add_if("mbedTLS"       SSL_ENABLED AND USE_MBEDTLS)
 _add_if("IPv6"          ENABLE_IPV6)
 _add_if("unix-sockets"  USE_UNIX_SOCKETS)
 _add_if("libz"          HAVE_LIBZ)
@@ -1105,7 +1115,7 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
 if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR
-   USE_WINDOWS_SSPI OR GNUTLS_ENABLED OR NSS_ENABLED OR USE_DARWINSSL))
+   USE_WINDOWS_SSPI OR GNUTLS_ENABLED OR NSS_ENABLED OR USE_DARWINSSL OR USE_MBEDTLS))
   _add_if("NTLM"        1)
   # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"     NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
