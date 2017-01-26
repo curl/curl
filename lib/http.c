@@ -645,10 +645,10 @@ output_auth_headers(struct connectdata *conn,
           proxy ? "Proxy" : "Server", auth,
           proxy ? (conn->http_proxy.user ? conn->http_proxy.user : "") :
                   (conn->user ? conn->user : ""));
-    authstatus->multi = (!authstatus->done) ? TRUE : FALSE;
+    authstatus->multipass = (!authstatus->done) ? TRUE : FALSE;
   }
   else
-    authstatus->multi = FALSE;
+    authstatus->multipass = FALSE;
 
   return CURLE_OK;
 }
@@ -1426,6 +1426,11 @@ CURLcode Curl_http_done(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct HTTP *http = data->req.protop;
 
+  /* Clear multipass flag. If authentication isn't done yet, then it will get
+   * a chance to be set back to true when we output the next auth header */
+  data->state.authhost.multipass = FALSE;
+  data->state.authproxy.multipass = FALSE;
+
   Curl_unencode_cleanup(conn);
 
 #ifdef USE_SPNEGO
@@ -1862,7 +1867,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  if((data->state.authhost.multi || data->state.authproxy.multi) &&
+  if((data->state.authhost.multipass || data->state.authproxy.multipass) &&
      (httpreq != HTTPREQ_GET) &&
      (httpreq != HTTPREQ_HEAD)) {
     /* Auth is required and we are not authenticated yet. Make a PUT or POST

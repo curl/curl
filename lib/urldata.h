@@ -1283,8 +1283,8 @@ struct auth {
                           this resource */
   bool done;  /* TRUE when the auth phase is done and ready to do the *actual*
                  request */
-  bool multi; /* TRUE if this is not yet authenticated but within the auth
-                 multipass negotiation */
+  bool multipass; /* TRUE if this is not yet authenticated but within the
+                     auth multipass negotiation */
   bool iestyle; /* TRUE if digest should be done IE-style or FALSE if it should
                    be RFC compliant */
 };
