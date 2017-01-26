@@ -295,8 +295,11 @@ if(WIN32)
 endif()
 
 # check SSL libraries
-# TODO support GNUTLS, NSS, POLARSSL, AXTLS, CYASSL, DARWINSSL
+# TODO support GNUTLS, NSS, POLARSSL, AXTLS, CYASSL
 
+if(APPLE)
+  option(CMAKE_USE_DARWINSSL "enable Apple OS native SSL/TLS" OFF)
+endif()
 if(WIN32)
   option(CMAKE_USE_WINSSL "enable Windows native SSL/TLS" OFF)
   cmake_dependent_option(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON
@@ -320,7 +323,7 @@ if(CURL_WINDOWS_SSPI)
   set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DSECURITY_WIN32")
 endif()
 
-if(CMAKE_USE_DARWINSSL)
+if(CMAKE_USE_DARWINSSL AND NOT SSL_ENABLED)
   find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
   if(NOT COREFOUNDATION_FRAMEWORK)
       message(FATAL_ERROR "CoreFoundation framework not found")
@@ -1083,6 +1086,7 @@ endfunction()
 set(_items)
 _add_if("WinSSL"        SSL_ENABLED AND USE_WINDOWS_SSPI)
 _add_if("OpenSSL"       SSL_ENABLED AND USE_OPENSSL)
+_add_if("DarwinSSL"     SSL_ENABLED AND USE_DARWINSSL)
 _add_if("IPv6"          ENABLE_IPV6)
 _add_if("unix-sockets"  USE_UNIX_SOCKETS)
 _add_if("libz"          HAVE_LIBZ)
@@ -1099,9 +1103,9 @@ _add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
 _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
-# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS, DARWINSSL
+# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
 if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR
-   USE_WINDOWS_SSPI OR GNUTLS_ENABLED OR NSS_ENABLED OR DARWINSSL_ENABLED))
+   USE_WINDOWS_SSPI OR GNUTLS_ENABLED OR NSS_ENABLED OR USE_DARWINSSL))
   _add_if("NTLM"        1)
   # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"     NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
