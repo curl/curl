@@ -1062,7 +1062,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         GetStr(&config->unix_socket_path, nextarg);
         break;
       case 'X': /* --tls-max */
-        err = str2tls_max(&config->ssl_version, nextarg);
+        err = str2tls_max(&config->ssl_version_max, nextarg);
         if(err)
           return err;
         break;
@@ -1104,23 +1104,19 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case '0':
         /* TLS version 1.0 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_0 |
-                            CURL_GET_SSLVERSION_MAX(config->ssl_version);
+        config->ssl_version = CURL_SSLVERSION_TLSv1_0;
         break;
       case '1':
         /* TLS version 1.1 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_1 |
-                            CURL_GET_SSLVERSION_MAX(config->ssl_version);
+        config->ssl_version = CURL_SSLVERSION_TLSv1_1;
         break;
       case '2':
         /* TLS version 1.2 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_2 |
-                            CURL_GET_SSLVERSION_MAX(config->ssl_version);
+        config->ssl_version = CURL_SSLVERSION_TLSv1_2;
         break;
       case '3':
         /* TLS version 1.3 */
-        config->ssl_version = CURL_SSLVERSION_TLSv1_3 |
-                            CURL_GET_SSLVERSION_MAX(config->ssl_version);
+        config->ssl_version = CURL_SSLVERSION_TLSv1_3;
         break;
       }
       break;

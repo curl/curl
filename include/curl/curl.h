@@ -1871,8 +1871,6 @@ enum CURL_NETRC_OPTION {
   CURL_NETRC_LAST
 };
 
-#define CURL_GET_SSLVERSION(x) (x & 0xffff)
-#define CURL_GET_SSLVERSION_MAX(x) (x & 0xffff0000)
 enum {
   CURL_SSLVERSION_MAX_NONE =     0,
   CURL_SSLVERSION_MAX_FIRST =    (1 << 16),

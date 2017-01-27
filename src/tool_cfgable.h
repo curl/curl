@@ -156,6 +156,7 @@ struct OperationConfig {
   struct curl_slist *postquote;
   struct curl_slist *prequote;
   long ssl_version;
+  long ssl_version_max;
   long proxy_ssl_version;
   long ip_version;
   curl_TimeCond timecond;

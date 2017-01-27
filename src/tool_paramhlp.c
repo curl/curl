@@ -577,7 +577,7 @@ ParameterError str2tls_max(long *val, const char *str)
     return PARAM_REQUIRES_PARAMETER;
   for(i = 0; i < sizeof(tls_max_array)/sizeof(tls_max_array[i]); i++) {
     if(!strcmp(str, tls_max_array[i].tls_max_str)) {
-      *val = CURL_GET_SSLVERSION(*val) | tls_max_array[i].tls_max;
+      *val = tls_max_array[i].tls_max;
       return PARAM_OK;
     }
   }
