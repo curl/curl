@@ -110,7 +110,6 @@
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
  13.8 Support DANE
- 13.9 Support TLS v1.3
  13.10 Support SSLKEYLOGFILE
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
@@ -746,14 +745,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  Björn Stenberg wrote a separate initial take on DANE that was never
  completed.
-
-13.9 Support TLS v1.3
-
- TLS version 1.3 is about to ship and is getting implemented by TLS libraries
- as we speak. We should start to support the symbol and make sure all backends
- handle it accordingly, then gradually add support as the TLS libraries add
- the corresponding support. There may be a need to add some additional options
- to allow libcurl to take advantage of the new features in 1.3.
 
 13.10 Support SSLKEYLOGFILE
 
