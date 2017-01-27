@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -492,7 +492,6 @@ Curl_cookie_add(struct Curl_easy *data,
         }
         else if(strcasecompare("domain", name)) {
           bool is_ip;
-          const char *dotp;
 
           /* Now, we make sure that our host is within the given domain,
              or the given domain is not valid and thus cannot be set. */
@@ -500,12 +499,22 @@ Curl_cookie_add(struct Curl_easy *data,
           if('.' == whatptr[0])
             whatptr++; /* ignore preceding dot */
 
-          is_ip = isip(domain ? domain : whatptr);
+#ifndef USE_LIBPSL
+          /*
+           * Without PSL we don't know when the incoming cookie is set on a
+           * TLD or otherwise "protected" suffix. To reduce risk, we require a
+           * dot OR the exact host name being "localhost".
+           */
+          {
+            const char *dotp;
+            /* check for more dots */
+            dotp = strchr(whatptr, '.');
+            if(!dotp && !strcasecompare("localhost", whatptr))
+              domain=":";
+          }
+#endif
 
-          /* check for more dots */
-          dotp = strchr(whatptr, '.');
-          if(!dotp)
-            domain=":";
+          is_ip = isip(domain ? domain : whatptr);
 
           if(!domain
              || (is_ip && !strcmp(whatptr, domain))
