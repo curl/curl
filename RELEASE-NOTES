@@ -67,6 +67,12 @@ This release includes the following bugfixes:
  o *.rc: escape non-ASCII/non-UTF-8 character for clarity [28]
  o mbedTLS: fix multi interface non-blocking handshake [30]
  o PolarSSL: fix multi interface non-blocking handshake [31]
+ o VC: remove the makefile.vc6 build infra [32]
+ o telnet: fix windows compiler warnings [33]
+ o cookies: do not assume a valid domain has a dot
+ o polarssl: fix hangs
+ o gnutls: disable TLS session tickets [34]
+ o mbedtls: disable TLS session tickets [35]
 
 This release includes the following known bugs:
 
@@ -119,3 +125,7 @@ References to bug reports and discussions on issues:
  [29] = https://curl.haxx.se/bug/?i=1222
  [30] = https://curl.haxx.se/bug/?i=1223
  [31] = https://github.com/curl/curl/issues/1174#issuecomment-274018791
+ [32] = https://curl.haxx.se/bug/?i=1215
+ [33] = https://curl.haxx.se/bug/?i=1225
+ [34] = https://curl.haxx.se/bug/?i=1109
+ [35] = https://curl.haxx.se/bug/?i=1109
