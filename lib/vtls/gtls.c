@@ -380,6 +380,7 @@ gtls_connect_step1(struct connectdata *conn,
                    int sockindex)
 {
   struct Curl_easy *data = conn->data;
+  unsigned int init_flags;
   gnutls_session_t session;
   int rc;
   bool sni = TRUE; /* default is SNI enabled */
@@ -526,7 +527,14 @@ gtls_connect_step1(struct connectdata *conn,
   }
 
   /* Initialize TLS session as a client */
-  rc = gnutls_init(&conn->ssl[sockindex].session, GNUTLS_CLIENT);
+  init_flags = GNUTLS_CLIENT;
+
+#if defined(GNUTLS_NO_TICKETS)
+  /* Disable TLS session tickets */
+  init_flags |= GNUTLS_NO_TICKETS;
+#endif
+
+  rc = gnutls_init(&conn->ssl[sockindex].session, init_flags);
   if(rc != GNUTLS_E_SUCCESS) {
     failf(data, "gnutls_init() failed: %d", rc);
     return CURLE_SSL_CONNECT_ERROR;
