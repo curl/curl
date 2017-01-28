@@ -373,6 +373,11 @@ mbed_connect_step1(struct connectdata *conn,
   mbedtls_ssl_conf_ciphersuites(&connssl->config,
                                 mbedtls_ssl_list_ciphersuites());
 
+#if defined(MBEDTLS_SSL_SESSION_TICKETS)
+  mbedtls_ssl_conf_session_tickets(&connssl->config,
+                                   MBEDTLS_SSL_SESSION_TICKETS_DISABLED);
+#endif
+
   /* Check if there's a cached ID we can/should use here! */
   if(data->set.general_ssl.sessionid) {
     void *old_session = NULL;
