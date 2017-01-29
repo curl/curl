@@ -14,8 +14,7 @@ README.netware
   curl users are NetWare-based, especially also consuming the lib from PHP.
 
   The unix-style man pages are tricky to read on windows, so therefore all
-  those pages have been converted to HTML as well as pdf, and included in the 
-  release archives.
+  those pages are also provided as web pages on the curl web site.
 
   The main curl.1 man page is also "built-in" in the command line tool. Use a
   command line similar to this in order to extract a separate text file:
