@@ -50,6 +50,9 @@ void Curl_mbedtls_session_free(void *ptr);
 size_t Curl_mbedtls_version(char *buffer, size_t size);
 int Curl_mbedtls_shutdown(struct connectdata *conn, int sockindex);
 
+CURLcode Curl_mbedtls_random(struct Curl_easy *data, unsigned char *entropy,
+                     size_t length);
+
 /* this backends supports CURLOPT_PINNEDPUBLICKEY */
 #define have_curlssl_pinnedpubkey 1
 
@@ -70,11 +73,7 @@ int Curl_mbedtls_shutdown(struct connectdata *conn, int sockindex);
 #define curlssl_data_pending(x,y) Curl_mbedtls_data_pending(x, y)
 #define CURL_SSL_BACKEND CURLSSLBACKEND_MBEDTLS
 #define curlssl_sha256sum(a,b,c,d) mbedtls_sha256(a,b,c,0)
-
-/* This might cause libcurl to use a weeker random!
-   TODO: implement proper use of Polarssl's CTR-DRBG or HMAC-DRBG and use that
-*/
-#define curlssl_random(x,y,z) (x=x, y=y, z=z, CURLE_NOT_BUILT_IN)
+#define curlssl_random(x,y,z) Curl_mbedtls_random(x, y, z)
 
 #endif /* USE_MBEDTLS */
 #endif /* HEADER_CURL_MBEDTLS_H */
