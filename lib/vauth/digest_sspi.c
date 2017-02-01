@@ -335,9 +335,10 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 {
   size_t chlglen = strlen(chlg);
 
-  /* We had an input token before and we got another one now. This means we
-     provided bad credentials in the previous request. */
-  if(digest->input_token)
+  /* We had an input token before and we got another one now without
+     'stale=true'. This means we provided bad credentials in the previous
+     request. */
+  if(digest->input_token && !strstr(chlg, "stale=true"))
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Simply store the challenge for use later */
