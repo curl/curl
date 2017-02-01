@@ -498,16 +498,14 @@ int cert_stuff(struct connectdata *conn,
            * sk_X509_pop_free() call.
            */
           X509 *x = sk_X509_pop(ca);
+          if(!SSL_CTX_add_client_CA(ctx, x)) {
+            X509_free(x);
+            failf(data, "cannot add certificate to client CA list");
+            goto fail;
+          }
           if(!SSL_CTX_add_extra_chain_cert(ctx, x)) {
             X509_free(x);
             failf(data, "cannot add certificate to certificate chain");
-            goto fail;
-          }
-          /* SSL_CTX_add_client_CA() seems to work with either sk_* function,
-           * presumably because it duplicates what we pass to it.
-           */
-          if(!SSL_CTX_add_client_CA(ctx, x)) {
-            failf(data, "cannot add certificate to client CA list");
             goto fail;
           }
         }
