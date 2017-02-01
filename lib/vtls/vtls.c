@@ -175,49 +175,24 @@ void Curl_ssl_cleanup(void)
 static bool ssl_prefs_check(struct Curl_easy *data)
 {
   /* check for CURLOPT_SSLVERSION invalid parameter value */
-  if((data->set.ssl.primary.version < 0)
-     || (data->set.ssl.primary.version >= CURL_SSLVERSION_LAST)) {
+  const long sslver = data->set.ssl.primary.version;
+  if((sslver < 0) || (sslver >= CURL_SSLVERSION_LAST)) {
     failf(data, "Unrecognized parameter value passed via CURLOPT_SSLVERSION");
     return FALSE;
   }
-  if(data->set.ssl.primary.version_max != CURL_SSLVERSION_MAX_NONE) {
-    if(data->set.ssl.primary.version_max >= CURL_SSLVERSION_MAX_FIRST
-      && data->set.ssl.primary.version_max < CURL_SSLVERSION_MAX_LAST) {
-        if(data->set.ssl.primary.version_max == CURL_SSLVERSION_MAX_DEFAULT) {
-          return TRUE;
-        }
-        switch(data->set.ssl.primary.version) {
-          case CURL_SSLVERSION_DEFAULT:
-          case CURL_SSLVERSION_TLSv1:
-          case CURL_SSLVERSION_SSLv2:
-          case CURL_SSLVERSION_SSLv3:
-            break;
-          case CURL_SSLVERSION_TLSv1_0:
-            if(data->set.ssl.primary.version_max >=
-               CURL_SSLVERSION_MAX_TLSv1_0)
-              return TRUE;
-            break;
-          case CURL_SSLVERSION_TLSv1_1:
-            if(data->set.ssl.primary.version_max >=
-               CURL_SSLVERSION_MAX_TLSv1_1)
-              return TRUE;
-            break;
-          case CURL_SSLVERSION_TLSv1_2:
-            if(data->set.ssl.primary.version_max >=
-               CURL_SSLVERSION_MAX_TLSv1_2)
-              return TRUE;
-            break;
-          case CURL_SSLVERSION_TLSv1_3:
-            if(data->set.ssl.primary.version_max >=
-               CURL_SSLVERSION_MAX_TLSv1_3)
-              return TRUE;
-            break;
-        }
-      }
-    failf(data, "CURL_SSLVERSION_MAX doesn't supports setuped "
-                "CURL_SSLVERSION");
-    return FALSE;
+
+  switch(data->set.ssl.primary.version_max) {
+  case CURL_SSLVERSION_MAX_NONE:
+  case CURL_SSLVERSION_MAX_DEFAULT:
+    break;
+
+  default:
+    if((data->set.ssl.primary.version_max >> 16) < sslver) {
+      failf(data, "CURL_SSLVERSION_MAX incompatible with CURL_SSLVERSION");
+      return FALSE;
+    }
   }
+
   return TRUE;
 }
 
