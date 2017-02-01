@@ -1135,6 +1135,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
 
   switch (tag) {
 
+  case CURLOPT_ABSTRACT_UNIX_SOCKET:
   case CURLOPT_CAINFO:
   case CURLOPT_CAPATH:
   case CURLOPT_COOKIE:
@@ -1161,6 +1162,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_NOPROXY:
   case CURLOPT_PASSWORD:
   case CURLOPT_PINNEDPUBLICKEY:
+  case CURLOPT_PRE_PROXY:
   case CURLOPT_PROXY:
   case CURLOPT_PROXYPASSWORD:
   case CURLOPT_PROXYUSERNAME:
@@ -1187,7 +1189,6 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_RTSP_TRANSPORT:
   case CURLOPT_SERVICE_NAME:
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
-  case CURLOPT_SOCKS_PROXY:
   case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
   case CURLOPT_SSH_KNOWNHOSTS:
   case CURLOPT_SSH_PRIVATE_KEYFILE:

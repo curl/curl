@@ -63,6 +63,7 @@ designer. CCSID 0 can be used to select the current job's CCSID.
 _ curl_easy_setopt_ccsid()
   Variable arguments are a string pointer and a CCSID (unsigned int) for
 options:
+        CURLOPT_ABSTRACT_UNIX_SOCKET
         CURLOPT_CAINFO
         CURLOPT_CAPATH
         CURLOPT_COOKIE
@@ -90,6 +91,7 @@ options:
         CURLOPT_NOPROXY
         CURLOPT_PASSWORD
         CURLOPT_PINNEDPUBLICKEY
+        CURLOPT_PRE_PROXY
         CURLOPT_PROXY
         CURLOPT_PROXYPASSWORD
         CURLOPT_PROXYUSERNAME
@@ -116,7 +118,6 @@ options:
         CURLOPT_RTSP_TRANSPORT
         CURLOPT_SERVICE_NAME
         CURLOPT_SOCKS5_GSSAPI_SERVICE
-        CURLOPT_SOCKS_PROXY
         CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
         CURLOPT_SSH_KNOWNHOSTS
         CURLOPT_SSH_PRIVATE_KEYFILE
