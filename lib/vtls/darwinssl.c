@@ -1425,6 +1425,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
             "the OS.\n");
     }
   }
+  else {
+    infof(data, "WARNING: disabling hostname validation also disables SNI.\n");
+  }
 
   /* Disable cipher suites that ST supports but are not safe. These ciphers
      are unlikely to be used in any case since ST gives other ciphers a much

@@ -58,9 +58,16 @@ The default value for this option is 2.
 
 This option controls checking the server's certificate's claimed identity.
 The server could be lying.  To control lying, see
-\fICURLOPT_SSL_VERIFYPEER(3)\fP.  If libcurl is built against NSS and
-\fICURLOPT_SSL_VERIFYPEER(3)\fP is zero, \fICURLOPT_SSL_VERIFYHOST(3)\fP is
-also set to zero and cannot be overridden.
+\fICURLOPT_SSL_VERIFYPEER(3)\fP.
+.SH LIMITATIONS
+DarwinSSL: If \fIverify\fP value is 0, then SNI is also disabled. SNI is a TLS
+extension that sends the hostname to the server. The server may use that
+information to do such things as sending back a specific certificate for the
+hostname, or forwarding the request to a specific origin server. Some hostnames
+may be inaccessible if SNI is not sent.
+
+NSS: If \fICURLOPT_SSL_VERIFYPEER(3)\fP is zero,
+\fICURLOPT_SSL_VERIFYHOST(3)\fP is also set to zero and cannot be overridden.
 .SH DEFAULT
 2
 .SH PROTOCOLS
