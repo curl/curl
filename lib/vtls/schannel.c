@@ -107,18 +107,18 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = SSL_CONN_CONFIG(version_max) >> 16;
+  long ssl_version_max = SSL_CONN_CONFIG(version_max)
   long i = ssl_version;
 
   switch(ssl_version_max) {
-    case CURL_SSLVERSION_DEFAULT:
-      ssl_version_max = ssl_version;
+    case CURL_SSLVERSION_MAX_NONE:
+      ssl_version_max = ssl_version << 16;
       break;
-    case CURL_SSLVERSION_TLSv1:
-      ssl_version_max = CURL_SSLVERSION_TLSv1_2;
+    case CURL_SSLVERSION_MAX_DEFAULT:
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
       break;
   }
-  for(;i<=ssl_version_max;++i) {
+  for(;i<= (ssl_version_max >> 16);++i) {
     switch(i) {
       case CURL_SSLVERSION_TLSv1_0:
         schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
