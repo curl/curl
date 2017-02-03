@@ -1843,12 +1843,17 @@ CURLcode Curl_retry_request(struct connectdata *conn,
     return CURLE_OK;
 
   if((data->req.bytecount + data->req.headerbytecount == 0) &&
-     conn->bits.reuse &&
-     (data->set.rtspreq != RTSPREQ_RECEIVE)) {
-    /* We didn't get a single byte when we attempted to re-use a
-       connection. This might happen if the connection was left alive when we
-       were done using it before, but that was closed when we wanted to use it
-       again. Bad luck. Retry the same request on a fresh connect! */
+      conn->bits.reuse &&
+      (!data->set.opt_no_body
+        || (conn->handler->protocol & PROTO_FAMILY_HTTP)) &&
+      (data->set.rtspreq != RTSPREQ_RECEIVE)) {
+    /* We got no data, we attempted to re-use a connection. For HTTP this
+       can be a retry so we try again regardless if we expected a body.
+       For other protocols we only try again only if we expected a body.
+
+       This might happen if the connection was left alive when we were
+       done using it before, but that was closed when we wanted to read from
+       it again. Bad luck. Retry the same request on a fresh connect! */
     infof(conn->data, "Connection died, retrying a fresh connect\n");
     *url = strdup(conn->data->change.url);
     if(!*url)
