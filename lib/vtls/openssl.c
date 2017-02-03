@@ -1698,51 +1698,38 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = Curl_ssl_retrieve_version_max(ssl_version,
-                                                 SSL_CONN_CONFIG(version_max));
+  long ssl_version_max = SSL_CONN_CONFIG(version_max);
+  if(ssl_version_max == CURL_SSLVERSION_MAX_NONE) {
+    ssl_version_max = ssl_version << 16;
+  }
 
   switch(ssl_version) {
-    case CURL_SSLVERSION_TLSv1_0:
-      *ctx_options |= SSL_OP_NO_SSLv2;
-      *ctx_options |= SSL_OP_NO_SSLv3;
-      break;
-
-    case CURL_SSLVERSION_TLSv1_1:
-#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
-      *ctx_options |= SSL_OP_NO_SSLv2;
-      *ctx_options |= SSL_OP_NO_SSLv3;
-      *ctx_options |= SSL_OP_NO_TLSv1;
-      break;
-#else
-      failf(data, OSSL_PACKAGE " was built without TLS 1.1 support");
-      return CURLE_NOT_BUILT_IN;
-#endif
-
-    case CURL_SSLVERSION_TLSv1_2:
-#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
-      *ctx_options |= SSL_OP_NO_SSLv2;
-      *ctx_options |= SSL_OP_NO_SSLv3;
-      *ctx_options |= SSL_OP_NO_TLSv1;
-      *ctx_options |= SSL_OP_NO_TLSv1_1;
-      break;
-#else
-      failf(data, OSSL_PACKAGE " was built without TLS 1.2 support");
-      return CURLE_NOT_BUILT_IN;
-#endif
-
     case CURL_SSLVERSION_TLSv1_3:
 #ifdef TLS1_3_VERSION
       SSL_CTX_set_max_proto_version(connssl->ctx, TLS1_3_VERSION);
-      *ctx_options |= SSL_OP_NO_SSLv2;
-      *ctx_options |= SSL_OP_NO_SSLv3;
-      *ctx_options |= SSL_OP_NO_TLSv1;
-      *ctx_options |= SSL_OP_NO_TLSv1_1;
       *ctx_options |= SSL_OP_NO_TLSv1_2;
-      break;
 #else
       failf(data, OSSL_PACKAGE " was built without TLS 1.3 support");
       return CURLE_NOT_BUILT_IN;
 #endif
+    case CURL_SSLVERSION_TLSv1_2:
+#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
+      *ctx_options |= SSL_OP_NO_TLSv1_1;
+#else
+      failf(data, OSSL_PACKAGE " was built without TLS 1.2 support");
+      return CURLE_NOT_BUILT_IN;
+#endif
+    case CURL_SSLVERSION_TLSv1_1:
+#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
+      *ctx_options |= SSL_OP_NO_TLSv1;
+#else
+      failf(data, OSSL_PACKAGE " was built without TLS 1.1 support");
+      return CURLE_NOT_BUILT_IN;
+#endif
+    case CURL_SSLVERSION_TLSv1_0:
+      *ctx_options |= SSL_OP_NO_SSLv2;
+      *ctx_options |= SSL_OP_NO_SSLv3;
+      break;
   }
 
   switch(ssl_version_max) {
@@ -1756,12 +1743,17 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn)
 #endif
     case CURL_SSLVERSION_MAX_TLSv1_2:
     case CURL_SSLVERSION_MAX_DEFAULT:
-#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
 #ifdef TLS1_3_VERSION
       *ctx_options |= SSL_OP_NO_TLSv1_3;
 #endif
-#endif
       break;
+    case CURL_SSLVERSION_MAX_TLSv1_3:
+#ifdef TLS1_3_VERSION
+      break;
+#else
+      failf(data, OSSL_PACKAGE " was built without TLS 1.3 support");
+      return CURLE_NOT_BUILT_IN;
+#endif
   }
   return CURLE_OK;
 }

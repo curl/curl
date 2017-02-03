@@ -1042,112 +1042,98 @@ CF_INLINE bool is_file(const char *filename)
   return false;
 }
 
+#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
+static CURLcode darwinssl_version_from_curl(long *darwinver, long version)
+{
+  switch(ssl_version) {
+    case CURL_SSLVERSION_TLSv1_0:
+      *darwinver = kTLSProtocol1;
+      return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_1:
+      *darwinver = kTLSProtocol11;
+      return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_2:
+      *darwinver = kTLSProtocol12;
+      return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_3:
+      break;
+  }
+  return CURLE_SSL_CONNECT_ERROR;
+}
+#endif
+
 static CURLcode
 set_ssl_version_min_max(struct connectdata *conn, int sockindex)
 {
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = Curl_ssl_retrieve_version_max(ssl_version,
-                                                 SSL_CONN_CONFIG(version_max));
+  long ssl_version_max = SSL_CONN_CONFIG(version_max) >> 16;
+  switch(ssl_version) {
+    case CURL_SSLVERSION_DEFAULT:
+    case CURL_SSLVERSION_TLSv1:
+      ssl_version = CURL_SSLVERSION_TLSv1_0;
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+      break;
+  }
+  if(ssl_version_max == CURL_SSLVERSION_MAX_NONE) {
+    ssl_version_max = ssl_version;
+  }
 
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLSetProtocolVersionMax != NULL) {
-    SSLProtocol min_ssl_protocol = kTLSProtocol1;
-    SSLProtocol max_ssl_protocol = kTLSProtocol1;
-    switch(ssl_version) {
-      case CURL_SSLVERSION_TLSv1_0:
-        min_ssl_protocol = kTLSProtocol1;
-        break;
-      case CURL_SSLVERSION_TLSv1_1:
-        min_ssl_protocol = kTLSProtocol11;
-        break;
-      case CURL_SSLVERSION_TLSv1_2:
-        min_ssl_protocol = kTLSProtocol12;
-        break;
-      case CURL_SSLVERSION_TLSv1_3:
-        failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
-        return CURLE_SSL_CONNECT_ERROR;
+    SSLProtocol darwin_ver_min = kTLSProtocol1;
+    SSLProtocol darwin_ver_max = kTLSProtocol1;
+    CURLcode result = darwinssl_version_from_curl(&darwin_ver_min,
+                                                  ssl_version);
+    if(result) {
+      failf(data, "unsupported min version passed via CURLOPT_SSLVERSION");
+      return result;
+    }
+    result = darwinssl_version_from_curl(&darwin_ver_max, ssl_version_max);
+    if(result) {
+      failf(data, "unsupported max version passed via CURLOPT_SSLVERSION");
+      return result;
     }
 
-    switch(ssl_version_max) {
-      case CURL_SSLVERSION_MAX_TLSv1_0:
-         max_ssl_protocol = kTLSProtocol1;
-         break;
-      case CURL_SSLVERSION_MAX_TLSv1_1:
-         max_ssl_protocol = kTLSProtocol11;
-         break;
-      case CURL_SSLVERSION_MAX_DEFAULT:
-      case CURL_SSLVERSION_MAX_TLSv1_2:
-      case CURL_SSLVERSION_MAX_TLSv1_3:
-         max_ssl_protocol = kTLSProtocol12;
-         break;
-     }
-
-     (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, min_ssl_protocol);
-     (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, max_ssl_protocol);
+    (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, darwin_ver_min);
+    (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, darwin_ver_max);
+    return result;
   }
   else {
 #if CURL_SUPPORT_MAC_10_8
+    long i = ssl_version;
     (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                        kSSLProtocolAll,
                                        false);
-    switch(conn->ssl_config.version) {
-      case CURL_SSLVERSION_DEFAULT:
-      case CURL_SSLVERSION_TLSv1:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol1,
-                                           true);
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol11,
-                                           true);
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol12,
-                                           true);
-        break;
-      case CURL_SSLVERSION_TLSv1_0:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol1,
-                                           true);
-        switch(conn->ssl_config.version_max) {
-          case CURL_SSLVERSION_MAX_TLSv1_3:
-          case CURL_SSLVERSION_MAX_TLSv1_2:
-          case CURL_SSLVERSION_MAX_DEFAULT:
-            (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                               kTLSProtocol12,
-                                               true);
-          case CURL_SSLVERSION_MAX_TLSv1_1:
-            (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                               kTLSProtocol11,
-                                               true);
-        }
-        break;
-      case CURL_SSLVERSION_TLSv1_1:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol11,
-                                           true);
-        switch(conn->ssl_config.version_max) {
-          case CURL_SSLVERSION_MAX_TLSv1_3:
-          case CURL_SSLVERSION_MAX_TLSv1_2:
-          case CURL_SSLVERSION_MAX_DEFAULT:
-            (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                               kTLSProtocol12,
-                                               true);
-        }
-        break;
-      case CURL_SSLVERSION_TLSv1_2:
-        (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
-                                           kTLSProtocol12,
-                                           true);
-        break;
-      case CURL_SSLVERSION_TLSv1_3:
-        failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
-        return CURLE_SSL_CONNECT_ERROR;
+    for(;i <= (ssl_version_max >> 16);i++) {
+      switch(i) {
+        case CURL_SSLVERSION_TLSv1_0:
+          (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                            kTLSProtocol1,
+                                            true);
+          break;
+        case CURL_SSLVERSION_TLSv1_1:
+          (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                            kTLSProtocol11,
+                                            true);
+          break;
+        case CURL_SSLVERSION_TLSv1_2:
+          (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+                                            kTLSProtocol12,
+                                            true);
+          break;
+        case CURL_SSLVERSION_TLSv1_3:
+          failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
+          return CURLE_SSL_CONNECT_ERROR;
+      }
     }
-  }
+    return CURLE_OK;
 #endif  /* CURL_SUPPORT_MAC_10_8 */
+  }
 #endif  /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
-  return CURLE_OK;
+  failf(data, "DarwinSSL: cannot set SSL protocol");
+  return CURLE_SSL_CONNECT_ERROR;
 }
 
 
