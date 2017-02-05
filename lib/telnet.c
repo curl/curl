@@ -1186,7 +1186,7 @@ CURLcode telrcv(struct connectdata *conn,
              * IAC SE was left off, or another option got inserted into the
              * suboption are all possibilities.  If we assume that the IAC was
              * not doubled, and really the IAC SE was left off, we could get
-             * into an infinate loop here.  So, instead, we terminate the
+             * into an infinite loop here.  So, instead, we terminate the
              * suboption, and process the partial suboption if we can.
              */
             CURL_SB_ACCUM(tn, CURL_IAC);
@@ -1326,7 +1326,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 #ifdef USE_WINSOCK
   /*
   ** This functionality only works with WinSock >= 2.0.  So,
-  ** make sure have it.
+  ** make sure we have it.
   */
   result = check_wsock2(data);
   if(result)
