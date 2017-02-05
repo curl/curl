@@ -365,9 +365,7 @@ CF_INLINE const char *SSLCipherNameForNumber(SSLCipherSuite cipher)
   }
   return "SSL_NULL_WITH_NULL_NULL";
 }
-#endif /*  CURL_DISABLE_VERBOSE_STRINGS */
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
 CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
 {
   switch(cipher) {
