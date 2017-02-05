@@ -2041,8 +2041,9 @@ static CURLcode
 darwinssl_connect_step3(struct connectdata *conn,
                         int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  struct Curl_easy *data = conn->data;
   CFStringRef server_cert_summary;
   char server_cert_summary_c[128];
   CFArrayRef server_certs = NULL;
@@ -2150,6 +2151,8 @@ darwinssl_connect_step3(struct connectdata *conn,
     CFRelease(server_certs);
   }
 #endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
+
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
 
   connssl->connecting_state = ssl_connect_done;
   return CURLE_OK;
