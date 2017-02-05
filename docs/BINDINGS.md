@@ -16,14 +16,14 @@ libcurl bindings
 
 [C++](http://curlpp.org/) Written by Jean-Philippe Barrette-LaPierre
 
-[Ch](http://chcurl.sourceforge.net/) Written by Stephen Nestinger and Jonathan Rogado
+[Ch](https://chcurl.sourceforge.io/) Written by Stephen Nestinger and Jonathan Rogado
 
 Cocoa: [BBHTTP](https://github.com/brunodecarvalho/BBHTTP) written by Bruno de Carvalho
-[curlhandle](http://curlhandle.sourceforge.net/) Written by Dan Wood
+[curlhandle](https://github.com/karelia/curlhandle) Written by Dan Wood
 
-[D](http://dlang.org/library/std/net/curl.html) Written by Kenneth Bogert
+[D](https://dlang.org/library/std/net/curl.html) Written by Kenneth Bogert
 
-[Dylan](http://dylanlibs.sourceforge.net/) Written by Chris Double
+[Dylan](https://dylanlibs.sourceforge.io/) Written by Chris Double
 
 [Eiffel](https://room.eiffel.com/library/curl) Written by Eiffel Software
 
@@ -33,7 +33,7 @@ Cocoa: [BBHTTP](https://github.com/brunodecarvalho/BBHTTP) written by Bruno de C
 
 [Ferite](http://www.ferite.org/) Written by Paul Querna
 
-[Gambas](http://gambas.sourceforge.net/)
+[Gambas](https://gambas.sourceforge.io/)
 
 [glib/GTK+](http://atterer.net/glibcurl/) Written by Richard Atterer
 
@@ -41,17 +41,17 @@ Cocoa: [BBHTTP](https://github.com/brunodecarvalho/BBHTTP) written by Bruno de C
 
 [Harbour](https://github.com/vszakats/harbour-core/tree/master/contrib/hbcurl) Written by Viktor Szakáts
 
-[Haskell](http://hackage.haskell.org/cgi-bin/hackage-scripts/package/curl) Written by Galois, Inc
+[Haskell](https://hackage.haskell.org/cgi-bin/hackage-scripts/package/curl) Written by Galois, Inc
 
 [Java](https://github.com/pjlegato/curl-java)
 
 [Julia](https://github.com/forio/Curl.jl) Written by Paul Howe
 
-[Lisp](http://common-lisp.net/project/cl-curl/) Written by Liam Healy
+[Lisp](https://common-lisp.net/project/cl-curl/) Written by Liam Healy
 
 Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](http://luaforge.net/projects/lua-curl/) by Jürgen Hötzel
 
-[Mono](http://forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
+[Mono](https://forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
 
 [.NET](https://sourceforge.net/projects/libcurl-net/) libcurl-net by Jeffrey Phillips
 
@@ -69,11 +69,11 @@ Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](ht
 
 [PostgreSQL](http://gborg.postgresql.org/project/pgcurl/projdisplay.php) Written by Gian Paolo Ciceri
 
-[Python](http://pycurl.sourceforge.net/) PycURL by Kjetil Jacobsen
+[Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
 
-[R](http://cran.r-project.org/package=curl)
+[R](https://cran.r-project.org/package=curl)
 
-[Rexx](http://rexxcurl.sourceforge.net/) Written Mark Hessling
+[Rexx](https://rexxcurl.sourceforge.io/) Written Mark Hessling
 
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 
@@ -81,7 +81,7 @@ Ruby: [curb](http://curb.rubyforge.org/) written by Ross Bamford, [ruby-curl-mul
 
 [Rust](https://github.com/carllerche/curl-rust) curl-rust - by Carl Lerche
 
-[Scheme](http://www.metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
+[Scheme](https://www.metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
 
 [S-Lang](http://www.jedsoft.org/slang/modules/curl.html) by John E Davis
 
@@ -97,9 +97,9 @@ Ruby: [curb](http://curb.rubyforge.org/) written by Ross Bamford, [ruby-curl-mul
 
 [Visual Foxpro](http://www.ctl32.com.ar/libcurl.asp) by Carlos Alloatti
 
-[Q](http://q-lang.sourceforge.net/) The libcurl module is part of the default install
+[Q](https://q-lang.sourceforge.io/) The libcurl module is part of the default install
 
-[wxWidgets](http://wxcode.sourceforge.net/components/wxcurl/) Written by Casey O'Donnell
+[wxWidgets](https://wxcode.sourceforge.io/components/wxcurl/) Written by Casey O'Donnell
 
 [XBLite](http://perso.wanadoo.fr/xblite/libraries.html) Written by David Szafranski
 
