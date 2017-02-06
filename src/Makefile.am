@@ -93,7 +93,7 @@ EXTRA_DIST = mkhelp.pl makefile.dj Makefile.b32		\
  macos/src/curl_GUSIConfig.cpp macos/src/macos_main.cpp makefile.amiga	\
  curl.rc Makefile.netware Makefile.inc Makefile.Watcom CMakeLists.txt
 
-MANPAGE=$(top_srcdir)/docs/curl.1
+MANPAGE=$(top_builddir)/docs/curl.1
 README=$(top_srcdir)/docs/MANUAL
 MKHELP=$(top_srcdir)/src/mkhelp.pl
 HUGE=tool_hugehelp.c

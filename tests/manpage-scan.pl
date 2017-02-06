@@ -39,8 +39,9 @@
 use strict;
 use warnings;
 
-# we may get the dir root pointed out
+# we may get the dir roots pointed out
 my $root=$ARGV[0] || ".";
+my $buildroot=$ARGV[1] || ".";
 my $syms = "$root/docs/libcurl/symbols-in-versions";
 my $curlh = "$root/include/curl/curl.h";
 my $errors=0;
@@ -196,7 +197,7 @@ close(R);
 
 #########################################################################
 # parse the curl.1 man page, extract all documented command line options
-open(R, "<$root/docs/curl.1") ||
+open(R, "<$buildroot/docs/curl.1") ||
     die "no input file";
 my @manpage; # store all parsed parameters
 while(<R>) {

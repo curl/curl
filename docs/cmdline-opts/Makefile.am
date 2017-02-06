@@ -73,4 +73,4 @@ EXTRA_DIST = $(DPAGES) MANPAGE.md gen.pl $(OTHERPAGES)
 all: $(MANPAGE)
 
 $(MANPAGE): $(DPAGES) $(OTHERPAGES)
-	@PERL@ gen.pl mainpage > $(MANPAGE)
+	@PERL@ $(srcdir)/gen.pl mainpage $(srcdir) > $(MANPAGE)
