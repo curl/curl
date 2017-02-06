@@ -408,6 +408,7 @@ struct digestdata {
 #if defined(USE_WINDOWS_SSPI)
   BYTE *input_token;
   size_t input_token_len;
+  CtxtHandle *http_context;
 #else
   char *nonce;
   char *cnonce;
