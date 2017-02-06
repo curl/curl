@@ -2039,12 +2039,13 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
   }
 }
 
-static CURLcode
-darwinssl_connect_step3(struct connectdata *conn,
-                        int sockindex)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+/* This should be called during step3 of the connection at the earliest */
+static void
+show_verbose_server_cert(struct connectdata *conn,
+                         int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
   struct Curl_easy *data = conn->data;
   CFStringRef server_cert_summary;
   char server_cert_summary_c[128];
@@ -2054,9 +2055,9 @@ darwinssl_connect_step3(struct connectdata *conn,
   CFIndex i, count;
   SecTrustRef trust = NULL;
 
-  /* There is no step 3!
-   * Well, okay, if verbose mode is on, let's print the details of the
-   * server certificates. */
+  if(!connssl->ssl_ctx)
+    return;
+
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
 #if CURL_BUILD_IOS
 #pragma unused(server_certs)
@@ -2153,8 +2154,21 @@ darwinssl_connect_step3(struct connectdata *conn,
     CFRelease(server_certs);
   }
 #endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
+}
+#endif /*  CURL_DISABLE_VERBOSE_STRINGS */
 
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+static CURLcode
+darwinssl_connect_step3(struct connectdata *conn,
+                        int sockindex)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+
+  /* There is no step 3!
+   * Well, okay, if verbose mode is on, let's print the details of the
+   * server certificates. */
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  show_verbose_server_cert(conn, sockindex);
+#endif
 
   connssl->connecting_state = ssl_connect_done;
   return CURLE_OK;
