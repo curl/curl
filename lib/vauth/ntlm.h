@@ -32,7 +32,7 @@
 /* Stuff only required for curl_ntlm_msgs.c */
 #ifdef BUILDING_CURL_NTLM_MSGS_C
 
-/* Flag bits definitions based on http://davenport.sourceforge.net/ntlm.html */
+/* Flag bits definitions based on https://davenport.sourceforge.io/ntlm.html */
 
 #define NTLMFLAG_NEGOTIATE_UNICODE               (1<<0)
 /* Indicates that Unicode strings are supported for use in security buffer

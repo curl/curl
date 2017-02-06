@@ -243,5 +243,5 @@ For unix-like operating systems:
 
 For Windows:
 
- - [http://gnuwin32.sourceforge.net/packages/patch.htm](http://gnuwin32.sourceforge.net/packages/patch.htm)
- - [http://gnuwin32.sourceforge.net/packages/diffutils.htm](http://gnuwin32.sourceforge.net/packages/diffutils.htm)
+ - [https://gnuwin32.sourceforge.io/packages/patch.htm](https://gnuwin32.sourceforge.io/packages/patch.htm)
+ - [https://gnuwin32.sourceforge.io/packages/diffutils.htm](https://gnuwin32.sourceforge.io/packages/diffutils.htm)

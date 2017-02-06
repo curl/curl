@@ -10807,7 +10807,7 @@ Daniel (23 June)
 - Eric Glass provided us with a better doc on NTLM details, and I added more
   comments and clarified the current code more. Using the new knowledge, we
   should be able to make the NTLM stuff work even better.
-  Eric's original URL: http://davenport.sourceforge.net/ntlm.html
+  Eric's original URL: https://davenport.sourceforge.io/ntlm.html
   Version stored and provided at curl site: https://curl.haxx.se/rfc/ntlm.html
 
 - Fixed the minor compile problems pre3 had if built without GSSAPI and/or
@@ -14064,7 +14064,7 @@ Daniel (30 May 2001)
   we discussed and added a few CURL_GLOBAL_* flags in include/curl.h
 
 - Kjetil Jacobsen privately announced his python interface to libcurl,
-  available at http://pycurl.sourceforge.net/
+  available at http://pycurl.io/
 
 Daniel (29 May 2001)
 - Sterling Hughes fixed a strtok() problem in libcurl. It is not a thread-

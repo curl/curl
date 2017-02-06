@@ -34,7 +34,7 @@
  *
  * The function is a port of the Java based oddParity() function over at:
  *
- * http://davenport.sourceforge.net/ntlm.html
+ * https://davenport.sourceforge.io/ntlm.html
  *
  * Parameters:
  *
