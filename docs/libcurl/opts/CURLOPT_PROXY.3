@@ -38,10 +38,22 @@ option \fICURLOPT_PROXYPORT(3)\fP. If not specified, libcurl will default to
 using port 1080 for proxies.
 
 The proxy string may be prefixed with [scheme]:// to specify which kind of
-proxy is used. Use socks4://, socks4a://, socks5:// or socks5h:// (the last
-one to enable socks5 and asking the proxy to do the resolving, also known as
-\fICURLPROXY_SOCKS5_HOSTNAME\fP type) to request the specific SOCKS version to
-be used. No scheme specified or http://, will be treated as HTTP proxies.
+proxy is used.
+
+.RS
+.IP http://
+HTTP Proxy. Default when no scheme or proxy type is specified.
+.IP https://
+HTTPS Proxy. (Added in 7.52.0 for OpenSSL, GnuTLS and NSS)
+.IP socks4://
+SOCKS4 Proxy.
+.IP socks4a://
+SOCKS4a Proxy. Proxy resolves URL hostname.
+.IP socks5://
+SOCKS5 Proxy.
+.IP socks5h://
+SOCKS5 Proxy. Proxy resolves URL hostname.
+.RE
 
 Without a scheme prefix, \fICURLOPT_PROXYTYPE(3)\fP can be used to specify
 which kind of proxy the string identifies.

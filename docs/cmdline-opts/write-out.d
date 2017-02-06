@@ -60,6 +60,10 @@ Number of new connects made in the recent transfer. (Added in 7.12.3)
 .B num_redirects
 Number of redirects that were followed in the request. (Added in 7.12.3)
 .TP
+.B proxy_ssl_verify_result
+The result of the HTTPS proxy's SSL peer certificate verification that was
+requested. 0 means the verification was successful. (Added in 7.52.0)
+.TP
 .B redirect_url
 When an HTTP request was made without -L to follow redirects, this variable
 will show the actual URL a redirect \fIwould\fP take you to. (Added in 7.18.2)
