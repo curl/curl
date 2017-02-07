@@ -73,6 +73,20 @@ This release includes the following bugfixes:
  o polarssl: fix hangs
  o gnutls: disable TLS session tickets [34]
  o mbedtls: disable TLS session tickets [35]
+ o mbedtls: implement CTR-DRBG and HAVEGE random generators [36]
+ o openssl: Don't use certificate after transferring ownership [37]
+ o cmake: Support curl --xattr when built with cmake [38]
+ o OS400: Fix symbols [39]
+ o docs: Add more HTTPS proxy documentation [40]
+ o docs: use more HTTPS links [41]
+ o cmdline-opts: Fixed build and test in out of source tree builds
+ o CHANGES.0: removed
+ o schannel: Remove incorrect SNI disabled message [42]
+ o darwinssl: Avoid parsing certificates when not in verbose mode [43]
+ o test552: Fix typos [44]
+ o telnet: Fix typos [45]
+ o transfer: only retry nobody-requests for HTTP [46]
+ o http2: reset push header counter fixes crash [47]
 
 This release includes the following known bugs:
 
@@ -81,14 +95,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Anatol Belski, Antoine Aubert, Chris Araman,
-  Christian Weisgerber, Chungtsun Li, Dan Fandrich, Daniel Romero,
-  Daniel Stenberg, Dan Jacobson, ERAMOTO Masaya, Fahim Chandurwala,
-  Frank Gevaerts, Gisle Vanem, Isaac Boukris, Jiří Malák, John Kohl,
-  Kamil Dudka, Kim Minjoong, Kyselgov E.N, Marcus Hoffmann, Max Khon,
-  Michael Kaufmann, Mingliang Zhu, Nick Zitzmann, Patrick Monnerat, Peter Wu,
-  Praveen Pvs, Ray Satiro, Richy Kim, Tim Rühsen, Viktor Szakáts,
-  (32 contributors)
+  Adam Langley, Alessandro Ghedini, Anatol Belski, Antoine Aubert,
+  Chris Araman, Christian Weisgerber, Chungtsun Li, Dan Fandrich,
+  Daniel Gustafsson, Daniel Romero, Daniel Stenberg, Dan Jacobson,
+  Eramoto Masaya, Fahim Chandurwala, Frank Gevaerts, Gisle Vanem,
+  Isaac Boukris, Jiří Malák, Joel Depooter, John Kohl, jonrumsey on github,
+  Kamil Dudka, Kim Minjoong, Kyselgov E.N, Marcus Hoffmann, Markus Westerlind,
+  Max Khon, Michael Kaufmann, Mingliang Zhu, Nick Zitzmann, Patrick Monnerat,
+  Peter Wu, Praveen Pvs, Ray Satiro, Richy Kim, Sean Burford, Tim Rühsen,
+  Viktor Szakáts, zelinchen on github,
+  (39 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -129,3 +145,15 @@ References to bug reports and discussions on issues:
  [33] = https://curl.haxx.se/bug/?i=1225
  [34] = https://curl.haxx.se/bug/?i=1109
  [35] = https://curl.haxx.se/bug/?i=1109
+ [36] = https://curl.haxx.se/bug/?i=1227
+ [37] = https://curl.haxx.se/bug/?i=1236
+ [38] = https://curl.haxx.se/bug/?i=1176
+ [39] = https://curl.haxx.se/bug/?i=1237
+ [40] = https://github.com/curl/curl/commit/cb4e2be
+ [41] = https://curl.haxx.se/bug/?i=1247
+ [42] = https://curl.haxx.se/bug/?i=1240
+ [43] = https://curl.haxx.se/bug/?i=1246
+ [44] = https://curl.haxx.se/bug/?i=1245
+ [45] = https://curl.haxx.se/bug/?i=1245
+ [46] = https://curl.haxx.se/bug/?i=1243
+ [47] = https://curl.haxx.se/bug/?i=1249
