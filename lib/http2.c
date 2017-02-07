@@ -415,6 +415,7 @@ static int push_promise(struct Curl_easy *data,
       free(stream->push_headers[i]);
     free(stream->push_headers);
     stream->push_headers = NULL;
+    stream->push_headers_used = 0;
 
     if(rv) {
       /* denied, kill off the new handle again */
