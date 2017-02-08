@@ -819,9 +819,7 @@ void Curl_polarssl_cleanup(void)
 
 int Curl_polarssl_data_pending(const struct connectdata *conn, int sockindex)
 {
-  ssl_context *ssl =
-    (ssl_context *)&conn->ssl[sockindex].ssl;
-  return ssl->in_msglen != 0;
+  return ssl_get_bytes_avail(&conn->ssl[sockindex].ssl) != 0;
 }
 
 #endif /* USE_POLARSSL */
