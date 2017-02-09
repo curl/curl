@@ -87,6 +87,7 @@ This release includes the following bugfixes:
  o telnet: Fix typos [45]
  o transfer: only retry nobody-requests for HTTP [46]
  o http2: reset push header counter fixes crash [47]
+ o nss: make FTPS work with --proxytunnel [48]
 
 This release includes the following known bugs:
 
@@ -157,3 +158,4 @@ References to bug reports and discussions on issues:
  [45] = https://curl.haxx.se/bug/?i=1245
  [46] = https://curl.haxx.se/bug/?i=1243
  [47] = https://curl.haxx.se/bug/?i=1249
+ [48] = https://bugzilla.redhat.com/1420327
