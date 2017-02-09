@@ -3,8 +3,9 @@ Arg: [protocol://]host[:port]
 Help: Use this proxy first
 Added: 7.52.0
 ---
-Use the specified proxy before connecting to the ordinary proxy. Hence pre
-proxy. A pre proxy must be a SOCKS speaking proxy.
+Use the specified SOCKS proxy before connecting to an HTTP or HTTPS --proxy. In
+such a case curl first connects to the SOCKS proxy and then connects (through
+SOCKS) to the HTTP or HTTPS proxy. Hence pre proxy.
 
 The pre proxy string should be specified with a protocol:// prefix to specify
 alternative proxy protocols. Use socks4://, socks4a://, socks5:// or
