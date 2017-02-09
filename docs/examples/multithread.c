@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,10 +33,10 @@
 /*
   List of URLs to fetch.
 
-  If you intend to use a SSL-based protocol here you MUST setup the OpenSSL
-  callback functions as described here:
+  If you intend to use a SSL-based protocol here you might need to setup TLS
+  library mutex callbacks as described here:
 
-  https://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+  https://curl.haxx.se/libcurl/c/threadsafe.html
 
 */
 const char * const urls[NUMT]= {
