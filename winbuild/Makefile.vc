@@ -30,6 +30,11 @@ CFGSET=true
 !MESSAGE                                  Requires OpenSSL
 !MESSAGE   WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
+!MESSAGE      ZLIB_LIBS=<LibFile>       - zlib lib filename to use (default: zlib_lib) (requires WITH_ZLIB)
+!MESSAGE      ZLIB_HEADER_PATH=<path>   - Path to zlib include files. (requires WITH_ZLIB)
+!MESSAGE      ZLIB_CFLAGS=...           - Extra flags to supply when compiling zlib modules (requires WITH_ZLIB)
+!MESSAGE      ZLIB_LIB_PATH=<path>      - Path to zlib lib files  (requires WITH_ZLIB)
+!MESSAGE      ZLIB_LFLAGS=...           - Extra flags to supply when linking zlib modules (requires WITH_ZLIB)
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
 !MESSAGE   WITH_MBEDTLS=<dll or static> - Enable mbedTLS support, DLL or static
 !MESSAGE   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
