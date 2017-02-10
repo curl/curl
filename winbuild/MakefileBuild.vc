@@ -114,18 +114,24 @@ LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
 
 
 !IF "$(WITH_SSL)"=="dll"
+!IFNDEF SSL_LIBS
 !IF EXISTS("$(DEVEL_LIB)\libssl.lib")
 SSL_LIBS     = libssl.lib libcrypto.lib
 !ELSE
 SSL_LIBS     = libeay32.lib ssleay32.lib
 !ENDIF
+!ENDIF
 USE_SSL      = true
 SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
+!IFNDEF SSL_LIBS
 !IF EXISTS("$(DEVEL_LIB)\libssl.lib")
 SSL_LIBS     = libssl.lib libcrypto.lib gdi32.lib user32.lib crypt32.lib
 !ELSE
 SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib crypt32.lib
+!ENDIF
+!ELSE
+SSL_LIBS     = $(SSL_LIBS) gdi32.lib user32.lib crypt32.lib
 !ENDIF
 USE_SSL      = true
 SSL          = static
@@ -136,7 +142,13 @@ USE_NGHTTP2  = false
 !ENDIF
 
 !IFDEF USE_SSL
-SSL_CFLAGS   = /DUSE_OPENSSL /I"$(DEVEL_INCLUDE)/openssl"
+SSL_CFLAGS   = $(SSL_CFLAGS) /DUSE_OPENSSL /I"$(DEVEL_INCLUDE)/openssl"
+!IFDEF SSL_HEADER_PATH
+SSL_CFLAGS   = $(SSL_CFLAGS) /I"$(SSL_HEADER_PATH)"
+!ENDIF
+!IFDEF SSL_LIB_PATH
+SSL_LFLAGS   = $(SSL_LFLAGS) /libpath:$(SSL_LIB_PATH)
+!ENDIF
 
 !IF "$(USE_NGHTTP2)"=="yes"
 USE_NGHTTP2  = true
