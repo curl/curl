@@ -6,6 +6,7 @@ CFGSET=true
 TARGET = $(LIB_NAME_DLL)
 AS_DLL = true
 CFGSET=true
+!ELSEIF "$(MODE)"=="clean"
 !ELSE
 !MESSAGE Invalid mode: $(MODE)
 
@@ -215,6 +216,7 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-winssl
 !ENDIF
 
+!IF  "$(CFGSET)"=="true"
 !MESSAGE configuration name: $(CONFIG_NAME_LIB)
 
 BUILD_DIR=../builds/$(CONFIG_NAME_LIB)
@@ -248,3 +250,7 @@ $(MODE):
 copy_from_lib:
 	echo copying .c...
 	FOR %%i IN ($(CURLX_CFILES:/=\)) DO copy %%i ..\src\
+!ELSE
+clean:
+	@$(MAKE) /NOLOGO /F MakefileBuild.vc clean mode=clean
+!ENDIF

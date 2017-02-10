@@ -315,9 +315,8 @@ TARGET = $(LIB_NAME_DLL)
 CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
 AS_DLL = true
 CFGSET = true
-!ENDIF
-
-!IF "$(CFGSET)" == "FALSE"
+!ELSEIF "$(MODE)"=="clean"
+!ELSE
 !ERROR please choose a valid mode
 !ENDIF
 
@@ -430,6 +429,7 @@ CURL_LINK = link.exe /incremental:no /libpath:"$(DIRDIST)\lib"
 #
 !IF "$(CFGSET)" == "FALSE"
 clean:
+    cd ..
 	@-erase /s *.dll 2> NUL
 	@-erase /s *.exp 2> NUL
 	@-erase /s *.idb 2> NUL
@@ -438,6 +438,7 @@ clean:
 	@-erase /s *.pch 2> NUL
 	@-erase /s *.pdb 2> NUL
 	@-erase /s *.res 2> NUL
+    cd winbuild
 !ELSE
 # A mode was provided, so the library can be built.
 #
