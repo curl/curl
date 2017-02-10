@@ -4613,6 +4613,10 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     data->change.url_alloc = TRUE; /* free this later */
   }
 
+  result = findprotocol(data, conn, protop);
+  if(result)
+    return result;
+
   /*
    * Parse the login details from the URL and strip them out of
    * the host name
@@ -4699,8 +4703,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
    *   conn->host.name is B
    *   data->state.path is /C
    */
-
-  return findprotocol(data, conn, protop);
+  return CURLE_OK;
 }
 
 /*
@@ -5206,6 +5209,7 @@ static CURLcode parse_url_login(struct Curl_easy *data,
   DEBUGASSERT(!**user);
   DEBUGASSERT(!**passwd);
   DEBUGASSERT(!**options);
+  DEBUGASSERT(conn->handler);
 
   if(!ptr)
     goto out;
@@ -5224,9 +5228,12 @@ static CURLcode parse_url_login(struct Curl_easy *data,
   if(data->set.use_netrc == CURL_NETRC_REQUIRED)
     goto out;
 
-  /* We could use the login information in the URL so extract it */
+  /* We could use the login information in the URL so extract it. Only parse
+     options if the handler says we should. */
   result = parse_login_details(login, ptr - login - 1,
-                               &userp, &passwdp, &optionsp);
+                               &userp, &passwdp,
+                               (conn->handler->flags & PROTOPT_URLOPTIONS)?
+                               &optionsp:NULL);
   if(result)
     goto out;
 

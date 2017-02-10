@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -845,6 +845,8 @@ struct Curl_handler {
                                           request instead of per connection */
 #define PROTOPT_ALPN_NPN (1<<8) /* set ALPN and/or NPN for this */
 #define PROTOPT_STREAM (1<<9) /* a protocol with individual logical streams */
+#define PROTOPT_URLOPTIONS (1<<10) /* allow options part in the userinfo field
+                                      of the URL */
 
 /* return the count of bytes sent, or -1 on error */
 typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
