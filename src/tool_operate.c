@@ -1678,8 +1678,13 @@ static CURLcode operate_do(struct GlobalConfig *global,
           fprintf(global->errors, "curl: (%d) %s\n", result, (errorbuffer[0]) ?
                   errorbuffer : curl_easy_strerror(result));
           if(result == CURLE_SSL_CACERT)
-            fprintf(global->errors, "%s%s",
-                    CURL_CA_CERT_ERRORMSG1, CURL_CA_CERT_ERRORMSG2);
+            fprintf(global->errors, "%s%s%s",
+                    CURL_CA_CERT_ERRORMSG1, CURL_CA_CERT_ERRORMSG2,
+                    ((config->proxy &&
+                      curl_strnequal(config->proxy, "https://", 8)) ?
+                     "HTTPS proxy has similar options --proxy-cacert "
+                     "and --proxy-insecure.\n" :
+                     ""));
         }
 
         /* Fall through comment to 'quit_urls' label */
