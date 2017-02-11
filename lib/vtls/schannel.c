@@ -107,7 +107,7 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
   long ssl_version = SSL_CONN_CONFIG(version);
-  long ssl_version_max = SSL_CONN_CONFIG(version_max)
+  long ssl_version_max = SSL_CONN_CONFIG(version_max);
   long i = ssl_version;
 
   switch(ssl_version_max) {
