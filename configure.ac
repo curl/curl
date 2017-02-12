@@ -3407,7 +3407,28 @@ if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
 [Options --enable-threaded-resolver and --enable-ares are mutually exclusive])
 fi
 
-if test "$want_thres" = "yes" && test "$dontwant_rt" = "no"; then
+dnl ************************************************************
+dnl disable POSIX threads
+dnl
+AC_MSG_CHECKING([whether to use POSIX threads for threaded resolver])
+AC_ARG_ENABLE(pthreads,
+AC_HELP_STRING([--enable-pthreads],
+               [Enable POSIX threads (default for threaded resolver)])
+AC_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
+[ case "$enableval" in
+  no)  AC_MSG_RESULT(no)
+       want_pthreads=no
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       want_pthreads=yes
+       ;;
+  esac ], [
+       AC_MSG_RESULT(auto)
+       want_pthreads=auto
+       ]
+)
+if test "$want_thres" = "yes" && test "$dontwant_rt" = "no" && \
+   test "$want_pthreads" != "no"; then
   AC_CHECK_HEADER(pthread.h,
     [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
       save_CFLAGS="$CFLAGS"
@@ -3429,10 +3450,24 @@ if test "$want_thres" = "yes" && test "$dontwant_rt" = "no"; then
         AC_DEFINE(USE_THREADS_POSIX, 1, [if you want POSIX threaded DNS lookup])
         curl_res_msg="POSIX threaded"
       fi
-
-
   ])
 fi
+if test "x$USE_THREADS_POSIX" != "x1"; then
+  if test "$want_pthreads" = "yes"; then
+    AC_MSG_ERROR([--enable-pthreads but pthreads was not found])
+  fi
+  if test "$want_thres" = "yes"; then
+    dnl If native Windows fallback on Win32 threads since no POSIX threads
+    if test "$curl_cv_native_windows" = "yes"; then
+      USE_THREADS_WIN32=1
+      AC_DEFINE(USE_THREADS_WIN32, 1, [if you want Win32 threaded DNS lookup])
+      curl_res_msg="Win32 threaded"
+    else
+      AC_MSG_ERROR([Threaded resolver enabled but no thread library found])
+    fi
+  fi
+fi
+
 
 dnl ************************************************************
 dnl disable verbose text strings
@@ -3661,7 +3696,8 @@ fi
 if test "x$HAVE_LIBZ" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES libz"
 fi
-if test "x$USE_ARES" = "x1" -o "x$USE_THREADS_POSIX" = "x1"; then
+if test "x$USE_ARES" = "x1" -o "x$USE_THREADS_POSIX" = "x1" \
+                            -o "x$USE_THREADS_WIN32" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
 if test "x$IDN_ENABLED" = "x1"; then
