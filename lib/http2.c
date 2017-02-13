@@ -116,18 +116,11 @@ static int http2_getsock(struct connectdata *conn,
   return http2_perform_getsock(conn, sock, numsocks);
 }
 
-static CURLcode http2_disconnect(struct connectdata *conn,
-                                 bool dead_connection)
+/*
+ * http2_stream_free() free HTTP2 stream related data
+ */
+static void http2_stream_free(struct HTTP *http)
 {
-  struct HTTP *http = conn->data->req.protop;
-  struct http_conn *c = &conn->proto.httpc;
-  (void)dead_connection;
-
-  DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT starts now\n"));
-
-  nghttp2_session_del(c->h2);
-  Curl_safefree(c->inbuf);
-
   if(http) {
     Curl_add_buffer_free(http->header_recvbuf);
     http->header_recvbuf = NULL; /* clear the pointer */
@@ -139,6 +132,19 @@ static CURLcode http2_disconnect(struct connectdata *conn,
     free(http->push_headers);
     http->push_headers = NULL;
   }
+}
+
+static CURLcode http2_disconnect(struct connectdata *conn,
+                                 bool dead_connection)
+{
+  struct http_conn *c = &conn->proto.httpc;
+  (void)dead_connection;
+
+  DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT starts now\n"));
+
+  nghttp2_session_del(c->h2);
+  Curl_safefree(c->inbuf);
+  http2_stream_free(conn->data->req.protop);
 
   DEBUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
 
@@ -419,6 +425,7 @@ static int push_promise(struct Curl_easy *data,
 
     if(rv) {
       /* denied, kill off the new handle again */
+      http2_stream_free(newhandle->req.protop);
       (void)Curl_close(newhandle);
       goto fail;
     }
@@ -433,6 +440,7 @@ static int push_promise(struct Curl_easy *data,
     rc = Curl_multi_add_perform(data->multi, newhandle, conn);
     if(rc) {
       infof(data, "failed to add handle to multi\n");
+      http2_stream_free(newhandle->req.protop);
       Curl_close(newhandle);
       rv = 1;
       goto fail;
