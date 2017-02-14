@@ -1987,7 +1987,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           /* failed, remove time condition */
           config->timecond = CURL_TIMECOND_NONE;
           warnf(global,
-                "Illegal date format for -z, --timecond (and not "
+                "Illegal date format for -z, --time-cond (and not "
                 "a file name). Disabling time condition. "
                 "See curl_getdate(3) for valid date syntax.\n");
         }
