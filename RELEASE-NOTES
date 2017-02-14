@@ -88,6 +88,15 @@ This release includes the following bugfixes:
  o transfer: only retry nobody-requests for HTTP [46]
  o http2: reset push header counter fixes crash [47]
  o nss: make FTPS work with --proxytunnel [48]
+ o test1139: Added the --manual keyword since the manual is required
+ o polarssl, mbedtls: Fix detection of pending data [49]
+ o http_proxy: Fix tiny memory leak upon edge case connecting to proxy [50]
+ o URL: only accept ";options" in SMTP/POP3/IMAP URL schemes [51]
+ o curl.1: ftp.sunet.se is no longer an FTP mirror
+ o tool_operate: Show HTTPS-Proxy options on CURLE_SSL_CACERT [52]
+ o http2: fix memory-leak when denying push streams [53]
+ o configure: Allow disabling pthreads, fall back on Win32 threads [54]
+ o curl: fix typo in time condition warning message [55]
 
 This release includes the following known bugs:
 
@@ -97,15 +106,15 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Adam Langley, Alessandro Ghedini, Anatol Belski, Antoine Aubert,
-  Chris Araman, Christian Weisgerber, Chungtsun Li, Dan Fandrich,
-  Daniel Gustafsson, Daniel Romero, Daniel Stenberg, Dan Jacobson,
-  Eramoto Masaya, Fahim Chandurwala, Frank Gevaerts, Gisle Vanem,
+  Cameron MacMinn, Chris Araman, Christian Weisgerber, Chungtsun Li,
+  Dan Fandrich, Daniel Gustafsson, Daniel Romero, Daniel Stenberg,
+  Dan Jacobson, Eramoto Masaya, Fahim Chandurwala, Frank Gevaerts, Gisle Vanem,
   Isaac Boukris, Jiří Malák, Joel Depooter, John Kohl, jonrumsey on github,
   Kamil Dudka, Kim Minjoong, Kyselgov E.N, Marcus Hoffmann, Markus Westerlind,
-  Max Khon, Michael Kaufmann, Mingliang Zhu, Nick Zitzmann, Patrick Monnerat,
-  Peter Wu, Praveen Pvs, Ray Satiro, Richy Kim, Sean Burford, Tim Rühsen,
-  Viktor Szakáts, zelinchen on github,
-  (39 contributors)
+  Max Khon, Michael Kaufmann, Mingliang Zhu, Nick Draffen, Nick Zitzmann,
+  Patrick Monnerat, Peter Wu, Praveen Pvs, Ray Satiro, Richy Kim, Sean Burford,
+  Tim Rühsen, Viktor Szakáts, zelinchen on github,
+  (41 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -159,3 +168,10 @@ References to bug reports and discussions on issues:
  [46] = https://curl.haxx.se/bug/?i=1243
  [47] = https://curl.haxx.se/bug/?i=1249
  [48] = https://bugzilla.redhat.com/1420327
+ [49] = https://curl.haxx.se/mail/lib-2017-02/0032.html
+ [50] = https://curl.haxx.se/bug/?i=1255
+ [51] = https://curl.haxx.se/bug/?i=1252
+ [52] = https://curl.haxx.se/bug/?i=1258
+ [53] = https://curl.haxx.se/bug/?i=1229
+ [54] = https://curl.haxx.se/bug/?i=1260
+ [55] = https://curl.haxx.se/bug/?i=1263
