@@ -23,8 +23,8 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) && \
-    (CURL_SIZEOF_CURL_OFF_T > 4)
+#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) &&  \
+  (CURL_SIZEOF_CURL_OFF_T > 4)
 
 #if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
@@ -117,18 +117,18 @@ const struct Curl_handler Curl_handler_smbs = {
 #define SERVICENAME       "?????"
 
 /* Append a string to an SMB message */
-#define MSGCAT(str) \
-  strcpy(p, (str)); \
+#define MSGCAT(str)                             \
+  strcpy(p, (str));                             \
   p += strlen(str);
 
 /* Append a null-terminated string to an SMB message */
-#define MSGCATNULL(str) \
-  strcpy(p, (str)); \
+#define MSGCATNULL(str)                         \
+  strcpy(p, (str));                             \
   p += strlen(str) + 1;
 
 /* SMB is mostly little endian */
 #if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || \
-   defined(__OS400__)
+  defined(__OS400__)
 static unsigned short smb_swap16(unsigned short x)
 {
   return (unsigned short) ((x << 8) | ((x >> 8) & 0xff));
@@ -137,20 +137,20 @@ static unsigned short smb_swap16(unsigned short x)
 static unsigned int smb_swap32(unsigned int x)
 {
   return (x << 24) | ((x << 8) & 0xff0000) | ((x >> 8) & 0xff00) |
-         ((x >> 24) & 0xff);
+    ((x >> 24) & 0xff);
 }
 
 #ifdef HAVE_LONGLONG
 static unsigned long long smb_swap64(unsigned long long x)
 {
   return ((unsigned long long) smb_swap32((unsigned int) x) << 32) |
-          smb_swap32((unsigned int) (x >> 32));
+    smb_swap32((unsigned int) (x >> 32));
 }
 #else
 static unsigned __int64 smb_swap64(unsigned __int64 x)
 {
   return ((unsigned __int64) smb_swap32((unsigned int) x) << 32) |
-          smb_swap32((unsigned int) (x >> 32));
+    smb_swap32((unsigned int) (x >> 32));
 }
 #endif
 #else
@@ -197,7 +197,7 @@ static void conn_state(struct connectdata *conn, enum smb_conn_state newstate)
 
   if(smb->state != newstate)
     infof(conn->data, "SMB conn %p state change from %s to %s\n",
-    (void *)smb, names[smb->state], names[newstate]);
+          (void *)smb, names[smb->state], names[newstate]);
 #endif
 
   smb->state = newstate;
@@ -223,7 +223,7 @@ static void request_state(struct connectdata *conn,
 
   if(req->state != newstate)
     infof(conn->data, "SMB request %p state change from %s to %s\n",
-    (void *)req, names[req->state], names[newstate]);
+          (void *)req, names[req->state], names[newstate]);
 #endif
 
   req->state = newstate;
@@ -308,8 +308,9 @@ static CURLcode smb_recv_message(struct connectdata *conn, void **msg)
   if(smbc->got < sizeof(unsigned int))
     return CURLE_OK;
 
-  nbt_size = Curl_read16_be((const unsigned char *)(buf +
-             sizeof(unsigned short))) + sizeof(unsigned int);
+  nbt_size = Curl_read16_be((const unsigned char *)
+                            (buf + sizeof(unsigned short))) +
+    sizeof(unsigned int);
   if(smbc->got < nbt_size)
     return CURLE_OK;
 
@@ -320,7 +321,7 @@ static CURLcode smb_recv_message(struct connectdata *conn, void **msg)
     if(nbt_size >= msg_size + sizeof(unsigned short)) {
       /* Add the byte count */
       msg_size += sizeof(unsigned short) +
-                  Curl_read16_le((const unsigned char *)&buf[msg_size]);
+        Curl_read16_le((const unsigned char *)&buf[msg_size]);
       if(nbt_size < msg_size)
         return CURLE_READ_ERROR;
     }
@@ -603,7 +604,7 @@ static CURLcode smb_send_and_recv(struct connectdata *conn, void **msg)
   /* Check if there is data in the transfer buffer */
   if(!smbc->send_size && smbc->upload_size) {
     int nread = smbc->upload_size > BUFSIZE ? BUFSIZE :
-                                              (int) smbc->upload_size;
+      (int) smbc->upload_size;
     conn->data->req.upload_fromhere = conn->data->state.uploadbuffer;
     result = Curl_fillreadbuffer(conn, nread, &nread);
     if(result && result != CURLE_AGAIN)
