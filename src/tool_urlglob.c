@@ -189,7 +189,7 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
     char min_c;
     char max_c;
     char end_c;
-    int step=1;
+    unsigned long step = 1;
 
     pat->type = UPTCharRange;
 
@@ -198,17 +198,12 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
     if(rc == 3) {
       if(end_c == ':') {
         char *endp;
-        unsigned long lstep;
         errno = 0;
-        lstep = strtoul(&pattern[4], &endp, 10);
+        step = strtoul(&pattern[4], &endp, 10);
         if(errno || &pattern[4] == endp || *endp != ']')
-          step = -1;
-        else {
+          step = 0;
+        else
           pattern = endp+1;
-          step = (int)lstep;
-          if(step > (max_c - min_c))
-            step = -1;
-        }
       }
       else if(end_c != ']')
         /* then this is wrong */
@@ -220,19 +215,21 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
 
     *posp += (pattern - *patternp);
 
-    if((rc != 3) || (min_c >= max_c) || ((max_c - min_c) > ('z' - 'a')) ||
-       (step <= 0) )
+    if(rc != 3 || !step || step > (unsigned)INT_MAX ||
+       (min_c == max_c && step != 1) ||
+       (min_c != max_c && (min_c > max_c || step > (unsigned)(max_c - min_c) ||
+                           (max_c - min_c) > ('z' - 'a'))))
       /* the pattern is not well-formed */
       return GLOBERROR("bad range", *posp, CURLE_URL_MALFORMAT);
 
     /* if there was a ":[num]" thing, use that as step or else use 1 */
-    pat->content.CharRange.step = step;
+    pat->content.CharRange.step = (int)step;
     pat->content.CharRange.ptr_c = pat->content.CharRange.min_c = min_c;
     pat->content.CharRange.max_c = max_c;
 
-    if(multiply(amount, (pat->content.CharRange.max_c -
+    if(multiply(amount, ((pat->content.CharRange.max_c -
                           pat->content.CharRange.min_c) /
-                         pat->content.CharRange.step + 1) )
+                         pat->content.CharRange.step + 1)))
       return GLOBERROR("range overflow", *posp, CURLE_URL_MALFORMAT);
   }
   else if(ISDIGIT(*pattern)) {
@@ -293,7 +290,9 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
     fail:
     *posp += (pattern - *patternp);
 
-    if(!endp || (min_n > max_n) || (step_n > (max_n - min_n)) || !step_n)
+    if(!endp || !step_n ||
+       (min_n == max_n && step_n != 1) ||
+       (min_n != max_n && (min_n > max_n || step_n > (max_n - min_n))))
       /* the pattern is not well-formed */
       return GLOBERROR("bad range", *posp, CURLE_URL_MALFORMAT);
 
@@ -303,9 +302,9 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
     pat->content.NumRange.max_n = max_n;
     pat->content.NumRange.step = step_n;
 
-    if(multiply(amount, (pat->content.NumRange.max_n -
-                         pat->content.NumRange.min_n) /
-                        pat->content.NumRange.step + 1) )
+    if(multiply(amount, ((pat->content.NumRange.max_n -
+                          pat->content.NumRange.min_n) /
+                         pat->content.NumRange.step + 1)))
       return GLOBERROR("range overflow", *posp, CURLE_URL_MALFORMAT);
   }
   else
