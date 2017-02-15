@@ -151,6 +151,7 @@
  18.14 --fail without --location should treat 3xx as a failure
  18.15 --retry should resume
  18.16 send only part of --data
+ 18.17 consider file name from the redirected URL with -O ?
 
  19. Build
  19.1 roffit
@@ -1025,6 +1026,25 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  would be: "--data-binary @largefile.zip!1073741823-2147483647".
 
  See https://github.com/curl/curl/issues/1200
+
+18.17 consider file name from the redirected URL with -O ?
+
+ When a user gives a URL and uses -O, and curl follows a redirect to a new
+ URL, the file name is not extracted and used from the newly redirected-to URL
+ even if the new URL may have a much more sensible file name.
+
+ This is clearly documented and helps for security since there's no surprise
+ to users which file name that might get overwritten. But maybe a new option
+ could allow for this or maybe -J should imply such a treatment as well as -J
+ already allows for the server to decide what file name to use so it already
+ provides the "may overwrite any file" risk.
+
+ This is extra tricky if the original URL has no file name part at all since
+ then the current code path will error out with an error message, and we can't
+ *know* already at that point if curl will be redirected to a URL that has a
+ file name...
+
+ See https://github.com/curl/curl/issues/1241
 
 19. Build
 
