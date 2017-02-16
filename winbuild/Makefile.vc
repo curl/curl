@@ -57,7 +57,10 @@ ENABLE_SSPI = $(USE_SSPI)
 !ENDIF
 
 # default options
+
 !IFNDEF MACHINE
+# Note: nmake magically changes the value of PROCESSOR_ARCHITECTURE from "AMD64"
+# to "x86" when building in a 32 bit build environment on a 64 bit machine.
 !IF "$(PROCESSOR_ARCHITECTURE)"=="AMD64"
 MACHINE = x64
 !ELSE
