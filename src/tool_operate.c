@@ -1012,16 +1012,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         if(config->cacert)
           my_setopt_str(curl, CURLOPT_CAINFO, config->cacert);
-
         if(config->proxy_cacert)
           my_setopt_str(curl, CURLOPT_PROXY_CAINFO, config->proxy_cacert);
-        else if(config->cacert) { /* --proxy-cacert defaults to --cacert */
-          result = res_setopt_str(curl, CURLOPT_PROXY_CAINFO, config->cacert);
-          if(result != CURLE_OK &&
-             result != CURLE_NOT_BUILT_IN &&
-             result != CURLE_UNKNOWN_OPTION)
-            goto show_error;
-        }
 
         if(config->capath) {
           result = res_setopt_str(curl, CURLOPT_CAPATH, config->capath);
@@ -1033,7 +1025,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
           else if(result)
             goto show_error;
         }
-
         if(config->proxy_capath) {
           result = res_setopt_str(curl, CURLOPT_PROXY_CAPATH,
                                   config->proxy_capath);
@@ -1044,27 +1035,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
           else if(result)
             goto show_error;
         }
-        else if(config->capath) { /* --proxy-capath defaults to --capath */
-          result = res_setopt_str(curl, CURLOPT_PROXY_CAPATH, config->capath);
-          if(result != CURLE_OK &&
-             result != CURLE_NOT_BUILT_IN &&
-             result != CURLE_UNKNOWN_OPTION)
-            goto show_error;
-        }
 
         if(config->crlfile)
           my_setopt_str(curl, CURLOPT_CRLFILE, config->crlfile);
-
         if(config->proxy_crlfile)
           my_setopt_str(curl, CURLOPT_PROXY_CRLFILE, config->proxy_crlfile);
-        else if(config->crlfile) { /* --proxy-crlfile defaults to --crlfile */
-          result = res_setopt_str(curl, CURLOPT_PROXY_CRLFILE,
-                                  config->crlfile);
-          if(result != CURLE_OK &&
-             result != CURLE_NOT_BUILT_IN &&
-             result != CURLE_UNKNOWN_OPTION)
-            goto show_error;
-        }
 
         if(config->pinnedpubkey)
           my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
