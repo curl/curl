@@ -577,14 +577,19 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   result = setstropt(&set->str[STRING_SSL_CAFILE_ORIG], CURL_CA_BUNDLE);
   if(result)
     return result;
+
+  result = setstropt(&set->str[STRING_SSL_CAFILE_PROXY], CURL_CA_BUNDLE);
+  if(result)
+    return result;
 #endif
 #if defined(CURL_CA_PATH)
   result = setstropt(&set->str[STRING_SSL_CAPATH_ORIG], CURL_CA_PATH);
   if(result)
     return result;
 
-  result = setstropt(&set->str[STRING_SSL_CAPATH_PROXY],
-                     (char *) CURL_CA_PATH);
+  result = setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
+  if(result)
+    return result;
 #endif
 
   set->wildcardmatch  = FALSE;
@@ -2225,8 +2230,12 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /* This does not work on windows. */
     result = setstropt(&data->set.str[STRING_SSL_CAPATH_ORIG],
                        va_arg(param, char *));
+#else
+    result = CURLE_NOT_BUILT_IN;
+#endif
     break;
   case CURLOPT_PROXY_CAPATH:
+#ifdef have_curlssl_ca_path /* not supported by all backends */
     /*
      * Set CA path info for SSL connection proxy. Specify directory name of the
      * CA certificates which have been prepared using openssl c_rehash utility.
