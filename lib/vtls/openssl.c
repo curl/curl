@@ -436,18 +436,17 @@ int cert_stuff(struct connectdata *conn,
     case SSL_FILETYPE_PKCS12:
     {
 #ifdef HAVE_OPENSSL_PKCS12_H
-      FILE *f;
-      PKCS12 *p12;
+      BIO *f = BIO_new(BIO_s_file());
+      PKCS12 *p12 = NULL;
       EVP_PKEY *pri;
       STACK_OF(X509) *ca = NULL;
 
-      f = fopen(cert_file, "rb");
-      if(!f) {
+      if(BIO_read_filename(f, cert_file) <= 0) {
         failf(data, "could not open PKCS12 file '%s'", cert_file);
         return 0;
       }
-      p12 = d2i_PKCS12_fp(f, NULL);
-      fclose(f);
+      p12 = d2i_PKCS12_bio(f, NULL);
+      BIO_free(f);
 
       if(!p12) {
         failf(data, "error reading PKCS12 file '%s'", cert_file);
