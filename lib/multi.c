@@ -638,7 +638,10 @@ static CURLcode multi_done(struct connectdata **connp,
 
       infof(data, "Connection #%ld to host %s left intact\n",
             conn->connection_id,
-            conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
+            conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
+            conn->bits.httpproxy ? conn->http_proxy.host.dispname :
+            conn->bits.conn_to_host ? conn->conn_to_host.dispname :
+            conn->host.dispname);
     }
     else
       data->state.lastconnect = NULL;
@@ -1477,8 +1480,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       struct connectdata *conn = data->easy_conn;
       const char *hostname;
 
-      if(conn->bits.proxy)
-        hostname = conn->proxy.name;
+      if(conn->bits.httpproxy)
+        hostname = conn->http_proxy.host.name;
       else if(conn->bits.conn_to_host)
         hostname = conn->conn_to_host.name;
       else

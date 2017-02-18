@@ -3054,7 +3054,6 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 
   free_fixed_hostname(&conn->host);
   free_fixed_hostname(&conn->conn_to_host);
-  free_fixed_hostname(&conn->proxy);
   free_fixed_hostname(&conn->http_proxy.host);
   free_fixed_hostname(&conn->socks_proxy.host);
 
@@ -3819,17 +3818,19 @@ CURLcode Curl_connected_proxy(struct connectdata *conn, int sockindex)
 
   if(conn->bits.socksproxy) {
 #ifndef CURL_DISABLE_PROXY
-    const char * const host = conn->bits.conn_to_host ?
-                              conn->conn_to_host.name :
-                              conn->bits.httpproxy ?
+    /* for the secondary socket (FTP), use the "connect to host"
+     * but ignore the "connect to port" (use the secondary port)
+     */
+    const char * const host = conn->bits.httpproxy ?
                               conn->http_proxy.host.name :
+                              conn->bits.conn_to_host ?
+                              conn->conn_to_host.name :
                               sockindex == SECONDARYSOCKET ?
                               conn->secondaryhostname : conn->host.name;
-    const int port = conn->bits.conn_to_port ? conn->conn_to_port :
-                     conn->bits.httpproxy ?
-                     (int)conn->http_proxy.port :
-                     sockindex == SECONDARYSOCKET ?
-                      conn->secondary_port : conn->remote_port;
+    const int port = conn->bits.httpproxy ? (int)conn->http_proxy.port :
+                     sockindex == SECONDARYSOCKET ? conn->secondary_port :
+                     conn->bits.conn_to_port ? conn->conn_to_port :
+                     conn->remote_port;
     conn->bits.socksproxy_connecting = TRUE;
     switch(conn->socks_proxy.proxytype) {
     case CURLPROXY_SOCKS5:
@@ -3867,7 +3868,8 @@ void Curl_verboseconnect(struct connectdata *conn)
     infof(conn->data, "Connected to %s (%s) port %ld (#%ld)\n",
           conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
           conn->bits.httpproxy ? conn->http_proxy.host.dispname :
-                             conn->host.dispname,
+          conn->bits.conn_to_host ? conn->conn_to_host.dispname :
+          conn->host.dispname,
           conn->ip_addr_str, conn->port, conn->connection_id);
 }
 #endif
@@ -4114,7 +4116,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->tempsock[1] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->connection_id = -1;    /* no ID */
   conn->port = -1; /* unknown at this point */
-  conn->remote_port = -1; /* unknown */
+  conn->remote_port = -1; /* unknown at this point */
 #if defined(USE_RECV_BEFORE_SEND_WORKAROUND) && defined(DEBUGBUILD)
   conn->postponed[0].bindsock = CURL_SOCKET_BAD; /* no file descriptor */
   conn->postponed[1].bindsock = CURL_SOCKET_BAD; /* no file descriptor */
@@ -5925,7 +5927,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
       if(conn->bits.conn_to_port)
         conn->port = conn->conn_to_port;
       else
-        conn->port = conn->remote_port; /* it is the same port */
+        conn->port = conn->remote_port;
 
       /* Resolve target host right on */
       rc = Curl_resolv_timeout(conn, connhost->name, (int)conn->port,
@@ -5981,11 +5983,9 @@ static void reuse_conn(struct connectdata *old_conn,
 {
   free_fixed_hostname(&old_conn->http_proxy.host);
   free_fixed_hostname(&old_conn->socks_proxy.host);
-  free_fixed_hostname(&old_conn->proxy);
 
   free(old_conn->http_proxy.host.rawalloc);
   free(old_conn->socks_proxy.host.rawalloc);
-  free(old_conn->proxy.rawalloc);
 
   /* free the SSL config struct from this connection struct as this was
      allocated in vain and is targeted for destruction */
@@ -6432,12 +6432,14 @@ static CURLcode create_conn(struct Curl_easy *data,
   fix_hostname(conn, &conn->host);
   if(conn->bits.conn_to_host)
     fix_hostname(conn, &conn->conn_to_host);
-  if(conn->proxy.name && *conn->proxy.name)
-    fix_hostname(conn, &conn->proxy);
+  if(conn->bits.httpproxy)
+    fix_hostname(conn, &conn->http_proxy.host);
+  if(conn->bits.socksproxy)
+    fix_hostname(conn, &conn->socks_proxy.host);
 
   /*************************************************************
    * Check whether the host and the "connect to host" are equal.
-   * Do this after the hostnames have been IDN-fixed .
+   * Do this after the hostnames have been IDN-fixed.
    *************************************************************/
   if(conn->bits.conn_to_host &&
      strcasecompare(conn->conn_to_host.name, conn->host.name)) {

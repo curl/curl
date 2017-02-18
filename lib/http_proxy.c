@@ -98,16 +98,21 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
      * original pointer
      *
      * This function might be called several times in the multi interface case
-     * if the proxy's CONNTECT response is not instant.
+     * if the proxy's CONNECT response is not instant.
      */
     prot_save = conn->data->req.protop;
     memset(&http_proxy, 0, sizeof(http_proxy));
     conn->data->req.protop = &http_proxy;
     connkeep(conn, "HTTP proxy CONNECT");
-    if(sockindex == SECONDARYSOCKET)
-      hostname = conn->secondaryhostname;
-    else if(conn->bits.conn_to_host)
+
+    /* for the secondary socket (FTP), use the "connect to host"
+     * but ignore the "connect to port" (use the secondary port)
+     */
+
+    if(conn->bits.conn_to_host)
       hostname = conn->conn_to_host.name;
+    else if(sockindex == SECONDARYSOCKET)
+      hostname = conn->secondaryhostname;
     else
       hostname = conn->host.name;
 

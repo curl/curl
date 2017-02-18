@@ -936,7 +936,6 @@ struct connectdata {
   char *secondaryhostname; /* secondary socket host name (ftp) */
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
-  struct hostname proxy;
 
   struct proxy_info socks_proxy;
   struct proxy_info http_proxy;
@@ -1644,7 +1643,6 @@ struct UserDefined {
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
-  curl_proxytype socks_proxytype; /* what kind of socks proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
   void *private_data; /* application-private data */

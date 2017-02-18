@@ -1,11 +1,12 @@
 <testcase>
-#based off test 707 after bug report #1218
+#based off test 712
 <info>
 <keywords>
 FTP
 PASV
 RETR
 SOCKS5
+CURLOPT_CONNECT_TO
 </keywords>
 </info>
 #
@@ -24,10 +25,10 @@ ftp
 socks5
 </server>
  <name>
-FTP fetch with --proxy set to socks5://
+FTP fetch with --proxy set to socks5:// and with --connect-to
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/712 --proxy socks5://%HOSTIP:%SOCKSPORT 
+ftp://ftp.example.com/713 --connect-to ::%HOSTIP:%FTPPORT --proxy socks5://%HOSTIP:%SOCKSPORT 
 </command>
 </client>
 
@@ -40,8 +41,8 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 712
-RETR 712
+SIZE 713
+RETR 713
 QUIT
 </protocol>
 </verify>
