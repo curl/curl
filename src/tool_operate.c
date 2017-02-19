@@ -1622,7 +1622,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                   metalink_next_res = 1;
                   fprintf(global->errors,
                           "Metalink: fetching (%s) from (%s) FAILED "
-                          "(HTTP status code %d)\n",
+                          "(HTTP status code %ld)\n",
                           mlfile->filename, this_url, response);
                 }
               }

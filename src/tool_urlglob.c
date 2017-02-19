@@ -645,7 +645,7 @@ CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
           appendlen = 1;
           break;
         case UPTNumRange:
-          snprintf(numbuf, sizeof(numbuf), "%0*d",
+          snprintf(numbuf, sizeof(numbuf), "%0*lu",
                    pat->content.NumRange.padlength,
                    pat->content.NumRange.ptr_n);
           appendthis = numbuf;
