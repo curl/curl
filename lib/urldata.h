@@ -408,6 +408,8 @@ struct digestdata {
 #if defined(USE_WINDOWS_SSPI)
   BYTE *input_token;
   size_t input_token_len;
+  bool have_context;
+  CtxtHandle context;
 #else
   char *nonce;
   char *cnonce;
