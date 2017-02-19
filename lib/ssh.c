@@ -918,6 +918,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                                          &err_msg, NULL, 0);
         infof(data, "SSH public key authentication failed: %s\n", err_msg);
         state(conn, SSH_AUTH_PASS_INIT);
+        rc = 0; /* clear rc and continue */
       }
       break;
 
@@ -928,6 +929,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       else {
         state(conn, SSH_AUTH_HOST_INIT);
+        rc = 0; /* clear rc and continue */
       }
       break;
 
@@ -989,6 +991,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         if(rc < 0) {
           infof(data, "Failure connecting to agent\n");
           state(conn, SSH_AUTH_KEY_INIT);
+          rc = 0; /* clear rc and continue */
         }
         else {
           state(conn, SSH_AUTH_AGENT_LIST);
@@ -1008,6 +1011,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       if(rc < 0) {
         infof(data, "Failure requesting identities to agent\n");
         state(conn, SSH_AUTH_KEY_INIT);
+        rc = 0; /* clear rc and continue */
       }
       else {
         state(conn, SSH_AUTH_AGENT);
