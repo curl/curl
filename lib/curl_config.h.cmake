@@ -927,6 +927,9 @@
 /* if PolarSSL is enabled */
 #cmakedefine USE_POLARSSL 1
 
+/* if DarwinSSL is enabled */
+#cmakedefine USE_DARWINSSL 1
+
 /* if mbedTLS is enabled */
 #cmakedefine USE_MBEDTLS 1
 
