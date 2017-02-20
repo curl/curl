@@ -1389,7 +1389,8 @@ static int http_getsock_do(struct connectdata *conn,
   return GETSOCK_WRITESOCK(0);
 }
 
-static void add_haproxy_protocol_header(struct connectdata *conn, bool *done)
+static CURLcode add_haproxy_protocol_header(struct connectdata *conn,
+                                            bool *done)
 {
   char proxy_header[128];
   Curl_send_buffer *req_buffer;
@@ -1397,9 +1398,10 @@ static void add_haproxy_protocol_header(struct connectdata *conn, bool *done)
   char tcp_version[5];
 
   /* Emit the correct prefix for IPv6 */
-  if (conn->bits.ipv6) {
+  if(conn->bits.ipv6) {
     strcpy(tcp_version, "TCP6");
-  } else {
+  }
+  else {
     strcpy(tcp_version, "TCP4");
   }
 
@@ -1418,6 +1420,8 @@ static void add_haproxy_protocol_header(struct connectdata *conn, bool *done)
                                 &conn->data->info.request_size,
                                 0,
                                 FIRSTSOCKET);
+
+  return result;
 }
 
 #ifdef USE_SSL
