@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
- * Copyright (C) 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2016-2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,7 +32,11 @@
 
 #ifdef HAVE_PROCESS_H
 #include <process.h>
+#ifdef CURL_WINDOWS_APP
+#define getpid GetCurrentProcessId
+#else
 #define getpid _getpid
+#endif
 #endif
 
 #include "smb.h"
