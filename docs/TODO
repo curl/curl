@@ -23,6 +23,7 @@
  1.5 get rid of PATH_MAX
  1.6 Modified buffer size approach
  1.7 Detect when called from within callbacks
+ 1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
  1.11 minimize dependencies with dynamicly loaded modules
  1.12 have form functions use CURL handle argument
@@ -244,6 +245,14 @@
  subsequently can add code within libcurl that returns error if called within
  callbacks for when that's not supported.
 
+1.8 CURLOPT_RESOLVE for any port number
+
+ This option allows applications to set a replacement IP address for a given
+ host + port pair. Consider making support for providing a replacement address
+ for the host name on all port numbers.
+
+ See https://github.com/curl/curl/issues/1264
+
 1.9 Cache negative name resolves
 
  A name resolve that has failed is likely to fail when made again within a
@@ -395,7 +404,7 @@
  Make sure we don't ever loop because of non-blocking sockets returning
  EWOULDBLOCK or similar. Blocking cases include:
 
- - Name resolves on non-windows unless c-ares is used
+ - Name resolves on non-windows unless c-ares or the threaded resolver is used
  - HTTP proxy CONNECT operations
  - SOCKS proxy handshakes
  - file:// transfers
