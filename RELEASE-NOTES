@@ -97,6 +97,14 @@ This release includes the following bugfixes:
  o http2: fix memory-leak when denying push streams [53]
  o configure: Allow disabling pthreads, fall back on Win32 threads [54]
  o curl: fix typo in time condition warning message [55]
+ o axtls: adapt to API changes [56]
+ o tool_urlglob: Allow a glob range with the same start and stop [57]
+ o winbuild: add note on auto-detection of MACHINE in Makefile.vc [58]
+ o http: fix missing 'Content-Length: 0' while negotiating auth [59]
+ o proxy: fix hostname resolution and IDN conversion [60]
+ o docs: fix timeout handling in multi-uv example
+ o digest_sspi: Fix nonce-count generation in HTTP digest [61]
+ o sftp: improved checks for create dir failures [62]
 
 This release includes the following known bugs:
 
@@ -105,16 +113,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Langley, Alessandro Ghedini, Anatol Belski, Antoine Aubert,
-  Cameron MacMinn, Chris Araman, Christian Weisgerber, Chungtsun Li,
-  Dan Fandrich, Daniel Gustafsson, Daniel Romero, Daniel Stenberg,
-  Dan Jacobson, Eramoto Masaya, Fahim Chandurwala, Frank Gevaerts, Gisle Vanem,
-  Isaac Boukris, Jiří Malák, Joel Depooter, John Kohl, jonrumsey on github,
+  Adam Langley, Alessandro Ghedini, Anatol Belski, Andreas Roth,
+  Antoine Aubert, Cameron MacMinn, Chris Araman, Christian Weisgerber,
+  Chungtsun Li, Dan Fandrich, Daniel Gustafsson, Daniel Romero,
+  Daniel Stenberg, Dan Jacobson, Dominik Hölzl, Eramoto Masaya,
+  Fahim Chandurwala, Frank Gevaerts, Gisle Vanem, Isaac Boukris,
+  Jean Gressmann, Jiří Malák, Joel Depooter, John Kohl, jonrumsey on github,
   Kamil Dudka, Kim Minjoong, Kyselgov E.N, Marcus Hoffmann, Markus Westerlind,
   Max Khon, Michael Kaufmann, Mingliang Zhu, Nick Draffen, Nick Zitzmann,
-  Patrick Monnerat, Peter Wu, Praveen Pvs, Ray Satiro, Richy Kim, Sean Burford,
-  Tim Rühsen, Viktor Szakáts, zelinchen on github,
-  (41 contributors)
+  Patrick Monnerat, Peter Wu, Praveen Pvs, Ray Satiro, R. Dennis Steed,
+  Richy Kim, Sean Burford, Simon Warta, Tim Rühsen, Viktor Szakáts,
+  zelinchen on github,
+  (46 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -175,3 +185,10 @@ References to bug reports and discussions on issues:
  [53] = https://curl.haxx.se/bug/?i=1229
  [54] = https://curl.haxx.se/bug/?i=1260
  [55] = https://curl.haxx.se/bug/?i=1263
+ [56] = https://curl.haxx.se/bug/?i=1220
+ [57] = https://curl.haxx.se/bug/?i=1238
+ [58] = https://curl.haxx.se/bug/?i=1265
+ [59] = https://curl.haxx.se/bug/?i=1242
+ [60] = https://curl.haxx.se/bug/?i=1248
+ [61] = https://curl.haxx.se/bug/?i=1251
+ [62] = https://curl.haxx.se/bug/?i=1269
