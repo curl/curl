@@ -449,8 +449,8 @@ mbed_connect_step1(struct connectdata *conn,
     ret = (*data->set.ssl.fsslctx)(data, &connssl->config,
                                    data->set.ssl.fsslctxp);
     if(ret) {
-      failf(data, "error signaled by mbedTLS ctx callback");
-      return CURLE_SSL_CERTPROBLEM;
+      failf(data, "error signaled by ssl ctx callback");
+      return ret;
     }
   }
 
