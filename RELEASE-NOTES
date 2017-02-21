@@ -4,7 +4,7 @@ Curl and libcurl 7.53.0
  Command line options:         205
  curl_easy_setopt() options:   244
  Public functions in libcurl:  61
- Contributors:                 1496
+ Contributors:                 1506
 
 This release includes the following changes:
 
@@ -13,6 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2017-2629: make SSL_VERIFYSTATUS work again [64]
  o gnutls-random: check return code for failed random
  o openssl-random: check return code when asking for random
  o http: remove "Curl_http_done: called premature" message
@@ -105,6 +106,8 @@ This release includes the following bugfixes:
  o docs: fix timeout handling in multi-uv example
  o digest_sspi: Fix nonce-count generation in HTTP digest [61]
  o sftp: improved checks for create dir failures [62]
+ o smb: use getpid replacement for windows UWP builds [63]
+ o digest_sspi: Handle 'stale=TRUE' directive in HTTP digest [65]
 
 This release includes the following known bugs:
 
@@ -122,9 +125,9 @@ advice from friends like these:
   Kamil Dudka, Kim Minjoong, Kyselgov E.N, Marcus Hoffmann, Markus Westerlind,
   Max Khon, Michael Kaufmann, Mingliang Zhu, Nick Draffen, Nick Zitzmann,
   Patrick Monnerat, Peter Wu, Praveen Pvs, Ray Satiro, R. Dennis Steed,
-  Richy Kim, Sean Burford, Simon Warta, Tim Rühsen, Viktor Szakáts,
-  zelinchen on github,
-  (46 contributors)
+  Richy Kim, Sean Burford, Simon Warta, tarek112 on github, Tim Rühsen,
+  Viktor Szakáts, zelinchen on github,
+  (47 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -192,3 +195,6 @@ References to bug reports and discussions on issues:
  [60] = https://curl.haxx.se/bug/?i=1248
  [61] = https://curl.haxx.se/bug/?i=1251
  [62] = https://curl.haxx.se/bug/?i=1269
+ [63] = https://github.com/Microsoft/vcpkg/blob/7676b8780db1e1e591c4fc7eba4f96f73c428cb4/ports/curl/0002_fix_uwp.patch
+ [64] = https://curl.haxx.se/docs/adv_20170222.html
+ [65] = https://github.com/curl/curl/issues/928
