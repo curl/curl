@@ -24,7 +24,8 @@ Current flaws in the curl CMake build
    Missing features in the cmake build:
 
    - Builds libcurl without large file support
-   - Can't select which SSL library to build with, only OpenSSL
+   - Does not support all SSL libraries (only OpenSSL, WinSSL, DarwinSSL, and
+     mbed TLS)
    - Doesn't build with SCP and SFTP support (libssh2)
    - Doesn't allow different resolver backends (no c-ares build support)
    - No RTMP support built
