@@ -1064,16 +1064,16 @@ static int cookie_sort(const void *p1, const void *p2)
 #define CLONE(field)                     \
   do {                                   \
     if(src->field) {                     \
-      dup->field = strdup(src->field);   \
-      if(!dup->field)                    \
+      d->field = strdup(src->field);     \
+      if(!d->field)                      \
         goto fail;                       \
     }                                    \
   } while(0)
 
 static struct Cookie *dup_cookie(struct Cookie *src)
 {
-  struct Cookie *dup = calloc(sizeof(struct Cookie), 1);
-  if(dup) {
+  struct Cookie *d = calloc(sizeof(struct Cookie), 1);
+  if(d) {
     CLONE(expirestr);
     CLONE(domain);
     CLONE(path);
@@ -1082,16 +1082,16 @@ static struct Cookie *dup_cookie(struct Cookie *src)
     CLONE(value);
     CLONE(maxage);
     CLONE(version);
-    dup->expires = src->expires;
-    dup->tailmatch = src->tailmatch;
-    dup->secure = src->secure;
-    dup->livecookie = src->livecookie;
-    dup->httponly = src->httponly;
+    d->expires = src->expires;
+    d->tailmatch = src->tailmatch;
+    d->secure = src->secure;
+    d->livecookie = src->livecookie;
+    d->httponly = src->httponly;
   }
-  return dup;
+  return d;
 
   fail:
-  freecookie(dup);
+  freecookie(d);
   return NULL;
 }
 
