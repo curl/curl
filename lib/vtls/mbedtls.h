@@ -56,6 +56,9 @@ CURLcode Curl_mbedtls_random(struct Curl_easy *data, unsigned char *entropy,
 /* this backends supports CURLOPT_PINNEDPUBLICKEY */
 #define have_curlssl_pinnedpubkey 1
 
+/* this backend supports CURLOPT_SSL_CTX_* */
+#define have_curlssl_ssl_ctx 1
+
 /* API setup for mbedTLS */
 #define curlssl_init() Curl_mbedtls_init()
 #define curlssl_cleanup() Curl_mbedtls_cleanup()
