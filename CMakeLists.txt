@@ -308,12 +308,22 @@ endif()
 option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
 
 set(openssl_default ON)
-if(WIN32)
-    set(openssl_default OFF)
+if(WIN32 OR CMAKE_USE_DARWINSSL OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
+  set(openssl_default OFF)
 endif()
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
 
-if(CMAKE_USE_WINSSL AND NOT SSL_ENABLED)
+collect_true(enabled_ssl_options enabled_ssl_options_count
+  CMAKE_USE_WINSSL
+  CMAKE_USE_DARWINSSL
+  CMAKE_USE_OPENSSL
+  CMAKE_USE_MBEDTLS
+)
+if(enabled_ssl_options_count GREATER 1)
+  message(FATAL_ERROR "Multiple SSL options specified: ${enabled_ssl_options}. Please pick at most one and disable the rest.")
+endif()
+
+if(CMAKE_USE_WINSSL)
   set(SSL_ENABLED ON)
   set(USE_SCHANNEL ON) # Windows native SSL/TLS support
   set(USE_WINDOWS_SSPI ON) # CMAKE_USE_WINSSL implies CURL_WINDOWS_SSPI
@@ -324,7 +334,7 @@ if(CURL_WINDOWS_SSPI)
   set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DSECURITY_WIN32")
 endif()
 
-if(CMAKE_USE_DARWINSSL AND NOT SSL_ENABLED)
+if(CMAKE_USE_DARWINSSL)
   find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
   if(NOT COREFOUNDATION_FRAMEWORK)
       message(FATAL_ERROR "CoreFoundation framework not found")
@@ -340,7 +350,7 @@ if(CMAKE_USE_DARWINSSL AND NOT SSL_ENABLED)
   list(APPEND CURL_LIBS "${COREFOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}")
 endif()
 
-if(CMAKE_USE_OPENSSL AND NOT SSL_ENABLED)
+if(CMAKE_USE_OPENSSL)
   find_package(OpenSSL REQUIRED)
   set(SSL_ENABLED ON)
   set(USE_OPENSSL ON)
@@ -363,7 +373,7 @@ if(CMAKE_USE_OPENSSL AND NOT SSL_ENABLED)
   check_symbol_exists(RAND_egd    "${CURL_INCLUDES}" HAVE_RAND_EGD)
 endif()
 
-if(CMAKE_USE_MBEDTLS AND NOT SSL_ENABLED)
+if(CMAKE_USE_MBEDTLS)
   find_package(MbedTLS REQUIRED)
   set(SSL_ENABLED ON)
   set(USE_MBEDTLS ON)
