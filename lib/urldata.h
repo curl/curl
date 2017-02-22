@@ -136,8 +136,10 @@
 #undef realloc
 #endif /* USE_AXTLS */
 
-#ifdef USE_SCHANNEL
+#if defined(USE_SCHANNEL) || defined(USE_WINDOWS_SSPI)
 #include "curl_sspi.h"
+#endif
+#ifdef USE_SCHANNEL
 #include <schnlsp.h>
 #include <schannel.h>
 #endif
