@@ -547,11 +547,9 @@ This is not detailed in any FTP specification.
 
 5.7 Brotli compression
 
- Compression algorithms that perform better than gzip are being considered for
- use and inclusion in existing browsers. For example 'brotli'. If servers
- follow along it is a good reason for us to also allow users to take advantage
- of this. The algorithm: https://github.com/google/brotli The Firefox bug:
- https://bugzilla.mozilla.org/show_bug.cgi?id=366559
+ Brotli compression performs better than gzip and is being implemented by
+ browsers and servers widely. The algorithm: https://github.com/google/brotli
+ The Firefox bug: https://bugzilla.mozilla.org/show_bug.cgi?id=366559
 
 5.8 QUIC
 
