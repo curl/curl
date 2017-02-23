@@ -32,7 +32,8 @@ http
 idn
 </features>
 <setenv>
-CHARSET=ISO8859-1
+CHARSET=UTF-8
+LANG=en_US.UTF-8
 </setenv>
  <name>
 HTTP over proxy with too long IDN host name

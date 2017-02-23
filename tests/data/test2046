@@ -42,6 +42,7 @@ idn
 </features>
 <setenv>
 CHARSET=UTF-8
+LANG=en_US.UTF-8
 </setenv>
  <name>
 Connection re-use with IDN host name
