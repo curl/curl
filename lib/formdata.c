@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1332,7 +1332,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
             char buffer[512];
             while((nread = fread(buffer, 1, sizeof(buffer), fileread)) != 0) {
               result = AddFormData(&form, FORM_CONTENT, buffer, nread, &size);
-              if(result)
+              if(result || feof(fileread) || ferror(fileread))
                 break;
             }
           }
