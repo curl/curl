@@ -12,6 +12,7 @@ This release includes the following bugfixes:
  o url: Improve CURLOPT_PROXY_CAPATH error handling [1]
  o urldata: include curl_sspi.h when Windows SSPI is enabled [2]
  o formdata: check for EOF when reading from stdin [3]
+ o tests: Set CHARSET & LANG to UTF-8 in 1035, 2046 and 2047 [4]
 
 This release includes the following known bugs:
 
@@ -20,9 +21,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, jveazey on github, Ray Satiro, shachaf on github,
-  Viktor Szakáts,
-  (5 contributors)
+  Daniel Stenberg, İsmail Dönmez, jveazey on github, Ray Satiro,
+  Shachaf Ben-Kiki, Viktor Szakáts,
+  (6 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -31,3 +32,4 @@ References to bug reports and discussions on issues:
  [1] = https://curl.haxx.se/bug/?i=1257
  [2] = https://curl.haxx.se/bug/?i=1276
  [3] = https://curl.haxx.se/bug/?i=1281
+ [4] = https://curl.haxx.se/bug/?i=1277
