@@ -1,113 +1,17 @@
-Curl and libcurl 7.53.0
+Curl and libcurl 7.53.1
 
- Public curl releases:         163
+ Public curl releases:         164
  Command line options:         205
  curl_easy_setopt() options:   244
  Public functions in libcurl:  61
  Contributors:                 1506
 
-This release includes the following changes:
-
- o unix_socket: added --abstract-unix-socket and CURLOPT_ABSTRACT_UNIX_SOCKET [25]
- o CURLOPT_BUFFERSIZE: support enlarging receive buffer [29]
-
 This release includes the following bugfixes:
 
- o CVE-2017-2629: make SSL_VERIFYSTATUS work again [64]
- o gnutls-random: check return code for failed random
- o openssl-random: check return code when asking for random
- o http: remove "Curl_http_done: called premature" message
- o cyassl: use time_t instead of long for timeout
- o build-wolfssl: Sync config with wolfSSL 3.10
- o ftp-gss: check for init before use
- o configure: accept --with-libidn2 instead [1]
- o ftp: failure to resolve proxy should return that error code
- o curl.1: add three more exit codes
- o docs/ciphers: link to our own new page about ciphers
- o vtls: s/SSLEAY/OPENSSL - fixes multi_socket timeouts with openssl [2]
- o darwinssl: fix iOS build [3]
- o darwinssl: fix CFArrayRef leak [4]
- o cmake: use crypt32.lib when building with OpenSSL on windows [5]
- o curl_formadd.3: CURLFORM_CONTENTSLENGTH not needed when chunked [6]
- o digest_sspi: copy terminating NUL as well [7]
- o curl: fix --remote-time incorrect times on Windows [8]
- o curl.1: several updates and corrections [11]
- o content_encoding: change return code on a failure
- o curl.h: CURLE_FUNCTION_NOT_FOUND is no longer in use
- o docs: TCP_KEEPALIVE start and interval default to 60 [9]
- o darwinssl: --insecure overrides --cacert if both settings are in use [10]
- o TheArtOfHttpScripting: grammar
- o CIPHERS.md: document GSKit ciphers
- o wolfssl: support setting cipher list
- o wolfssl: display negotiated SSL version and cipher
- o lib506: fix build for Open Watcom [12]
- o asiohiper: improved socket handling [13]
- o examples: make the C++ examples follow our code style too
- o tests/sws: retry send() on EWOULDBLOCK [14]
- o cmake: Fix passing _WINSOCKAPI_ macro to compiler [15]
- o smtp: Fix STARTTLS denied error message
- o imap/pop3: don't print response character in STARTTLS denied messages [16]
- o rand: make it work without TLS backing [17]
- o url: fix parsing for when 'file' is the default protocol [18]
- o url: allow file://X:/path URLs on windows again [19]
- o gnutls: check for alpn and ocsp in configure [20]
- o IDN: Use TR46 'non-transitional' for toASCII translations [21]
- o url: Fix NO_PROXY env var to work properly with --proxy option [22]
- o CURLOPT_PREQUOTE.3: takes a struct curl_slist*, not a char* [23]
- o docs: Add note about libcurl copying strings to CURLOPT_* manpages [24]
- o curl: reset the easy handle at --next
- o --next docs: --trace and --trace-ascii are also global
- o --write-out docs: 'time_total' is not always shown with ms precision
- o http: print correct HTTP string in verbose output when using HTTP/2
- o docs: improved language in README.md HISTORY.md CONTRIBUTE.md [26]
- o http2: disable server push if not requested [27]
- o nss: use the correct lock in nss_find_slot_by_name()
- o usercertinmem.c: improve the short description
- o CURLOPT_CONNECT_TO: Fix compile warnings
- o docs: non-blocking SSL handshake is now supported with NSS
- o *.rc: escape non-ASCII/non-UTF-8 character for clarity [28]
- o mbedTLS: fix multi interface non-blocking handshake [30]
- o PolarSSL: fix multi interface non-blocking handshake [31]
- o VC: remove the makefile.vc6 build infra [32]
- o telnet: fix windows compiler warnings [33]
- o cookies: do not assume a valid domain has a dot
- o polarssl: fix hangs
- o gnutls: disable TLS session tickets [34]
- o mbedtls: disable TLS session tickets [35]
- o mbedtls: implement CTR-DRBG and HAVEGE random generators [36]
- o openssl: Don't use certificate after transferring ownership [37]
- o cmake: Support curl --xattr when built with cmake [38]
- o OS400: Fix symbols [39]
- o docs: Add more HTTPS proxy documentation [40]
- o docs: use more HTTPS links [41]
- o cmdline-opts: Fixed build and test in out of source tree builds
- o CHANGES.0: removed
- o schannel: Remove incorrect SNI disabled message [42]
- o darwinssl: Avoid parsing certificates when not in verbose mode [43]
- o test552: Fix typos [44]
- o telnet: Fix typos [45]
- o transfer: only retry nobody-requests for HTTP [46]
- o http2: reset push header counter fixes crash [47]
- o nss: make FTPS work with --proxytunnel [48]
- o test1139: Added the --manual keyword since the manual is required
- o polarssl, mbedtls: Fix detection of pending data [49]
- o http_proxy: Fix tiny memory leak upon edge case connecting to proxy [50]
- o URL: only accept ";options" in SMTP/POP3/IMAP URL schemes [51]
- o curl.1: ftp.sunet.se is no longer an FTP mirror
- o tool_operate: Show HTTPS-Proxy options on CURLE_SSL_CACERT [52]
- o http2: fix memory-leak when denying push streams [53]
- o configure: Allow disabling pthreads, fall back on Win32 threads [54]
- o curl: fix typo in time condition warning message [55]
- o axtls: adapt to API changes [56]
- o tool_urlglob: Allow a glob range with the same start and stop [57]
- o winbuild: add note on auto-detection of MACHINE in Makefile.vc [58]
- o http: fix missing 'Content-Length: 0' while negotiating auth [59]
- o proxy: fix hostname resolution and IDN conversion [60]
- o docs: fix timeout handling in multi-uv example
- o digest_sspi: Fix nonce-count generation in HTTP digest [61]
- o sftp: improved checks for create dir failures [62]
- o smb: use getpid replacement for windows UWP builds [63]
- o digest_sspi: Handle 'stale=TRUE' directive in HTTP digest [65]
+ o cyassl: fix typo
+ o url: Improve CURLOPT_PROXY_CAPATH error handling [1]
+ o urldata: include curl_sspi.h when Windows SSPI is enabled [2]
+ o formdata: check for EOF when reading from stdin [3]
 
 This release includes the following known bugs:
 
@@ -116,85 +20,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Langley, Alessandro Ghedini, Anatol Belski, Andreas Roth,
-  Antoine Aubert, Cameron MacMinn, Chris Araman, Christian Weisgerber,
-  Chungtsun Li, Dan Fandrich, Daniel Gustafsson, Daniel Romero,
-  Daniel Stenberg, Dan Jacobson, Dominik Hölzl, Eramoto Masaya,
-  Fahim Chandurwala, Frank Gevaerts, Gisle Vanem, Isaac Boukris,
-  Jean Gressmann, Jiří Malák, Joel Depooter, John Kohl, jonrumsey on github,
-  Kamil Dudka, Kim Minjoong, Kyselgov E.N, Marcus Hoffmann, Markus Westerlind,
-  Max Khon, Michael Kaufmann, Mingliang Zhu, Nick Draffen, Nick Zitzmann,
-  Patrick Monnerat, Peter Wu, Praveen Pvs, Ray Satiro, R. Dennis Steed,
-  Richy Kim, Sean Burford, Simon Warta, tarek112 on github, Tim Rühsen,
-  Viktor Szakáts, zelinchen on github,
-  (47 contributors)
+  Daniel Stenberg, jveazey on github, Ray Satiro, shachaf on github,
+  Viktor Szakáts,
+  (5 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/mail/lib-2016-12/0110.html
- [2] = https://curl.haxx.se/bug/?i=1174
- [3] = https://curl.haxx.se/bug/?i=1172
- [4] = https://curl.haxx.se/bug/?i=1173
- [5] = https://curl.haxx.se/bug/?i=1147
- [6] = https://curl.haxx.se/bug/?i=1013
- [7] = https://curl.haxx.se/bug/?i=1180
- [8] = https://curl.haxx.se/bug/?i=1121
- [9] = https://curl.haxx.se/mail/lib-2017-01/0000.html
- [10] = https://curl.haxx.se/bug/?i=1184
- [11] = https://curl.haxx.se/bug/?i=1190
- [12] = https://curl.haxx.se/bug/?i=1196
- [13] = https://curl.haxx.se/bug/?i=1191
- [14] = https://curl.haxx.se/mail/lib-2017-01/0009.html
- [15] = https://curl.haxx.se/bug/?i=1195
- [16] = https://curl.haxx.se/bug/?i=1203
- [17] = https://curl.haxx.se/mail/lib-2017-01/0055.html
- [18] = https://curl.haxx.se/bug/?i=1124
- [19] = https://curl.haxx.se/bug/?i=1187
- [20] = https://curl.haxx.se/bug/?i=1204
- [21] = https://curl.haxx.se/bug/?i=1207
- [22] = https://curl.haxx.se/bug/?i=1140
- [23] = https://curl.haxx.se/bug/?i=1169
- [24] = https://curl.haxx.se/bug/?i=1169
- [25] = https://curl.haxx.se/bug/?i=1197
- [26] = https://curl.haxx.se/bug/?i=1211
- [27] = https://curl.haxx.se/bug/?i=1160
- [28] = https://curl.haxx.se/bug/?i=1217
- [29] = https://curl.haxx.se/bug/?i=1222
- [30] = https://curl.haxx.se/bug/?i=1223
- [31] = https://github.com/curl/curl/issues/1174#issuecomment-274018791
- [32] = https://curl.haxx.se/bug/?i=1215
- [33] = https://curl.haxx.se/bug/?i=1225
- [34] = https://curl.haxx.se/bug/?i=1109
- [35] = https://curl.haxx.se/bug/?i=1109
- [36] = https://curl.haxx.se/bug/?i=1227
- [37] = https://curl.haxx.se/bug/?i=1236
- [38] = https://curl.haxx.se/bug/?i=1176
- [39] = https://curl.haxx.se/bug/?i=1237
- [40] = https://github.com/curl/curl/commit/cb4e2be
- [41] = https://curl.haxx.se/bug/?i=1247
- [42] = https://curl.haxx.se/bug/?i=1240
- [43] = https://curl.haxx.se/bug/?i=1246
- [44] = https://curl.haxx.se/bug/?i=1245
- [45] = https://curl.haxx.se/bug/?i=1245
- [46] = https://curl.haxx.se/bug/?i=1243
- [47] = https://curl.haxx.se/bug/?i=1249
- [48] = https://bugzilla.redhat.com/1420327
- [49] = https://curl.haxx.se/mail/lib-2017-02/0032.html
- [50] = https://curl.haxx.se/bug/?i=1255
- [51] = https://curl.haxx.se/bug/?i=1252
- [52] = https://curl.haxx.se/bug/?i=1258
- [53] = https://curl.haxx.se/bug/?i=1229
- [54] = https://curl.haxx.se/bug/?i=1260
- [55] = https://curl.haxx.se/bug/?i=1263
- [56] = https://curl.haxx.se/bug/?i=1220
- [57] = https://curl.haxx.se/bug/?i=1238
- [58] = https://curl.haxx.se/bug/?i=1265
- [59] = https://curl.haxx.se/bug/?i=1242
- [60] = https://curl.haxx.se/bug/?i=1248
- [61] = https://curl.haxx.se/bug/?i=1251
- [62] = https://curl.haxx.se/bug/?i=1269
- [63] = https://github.com/Microsoft/vcpkg/blob/7676b8780db1e1e591c4fc7eba4f96f73c428cb4/ports/curl/0002_fix_uwp.patch
- [64] = https://curl.haxx.se/docs/adv_20170222.html
- [65] = https://github.com/curl/curl/issues/928
+ [1] = https://curl.haxx.se/bug/?i=1257
+ [2] = https://curl.haxx.se/bug/?i=1276
+ [3] = https://curl.haxx.se/bug/?i=1281
