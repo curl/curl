@@ -111,9 +111,6 @@ require "getpart.pm"; # array functions
 require "valgrind.pm"; # valgrind report parser
 require "ftp.pm";
 
-# Make sure we run a UTF-8 locale for idn tests
-$ENV{'LANG'} = 'en_US.UTF-8';
-
 my $HOSTIP="127.0.0.1";   # address on which the test server listens
 my $HOST6IP="[::1]";      # address on which the test server listens
 my $CLIENTIP="127.0.0.1"; # address which curl uses for incoming connections
