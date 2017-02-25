@@ -106,8 +106,8 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
     /* ... and finally unescape */
     result = Curl_urldecode(data, newp, 0, &sel, &len, FALSE);
-    if(!sel)
-      return CURLE_OUT_OF_MEMORY;
+    if(result)
+      return result;
     sel_org = sel;
   }
 
