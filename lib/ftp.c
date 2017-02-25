@@ -2040,11 +2040,14 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(conn, addr->addr, ftpc->newhost, connectport);
 
-  Curl_safefree(conn->secondaryhostname);
-  conn->secondaryhostname = strdup(ftpc->newhost);
-  conn->secondary_port = ftpc->newport;
-
   Curl_resolv_unlock(data, addr); /* we're done using this address */
+
+  Curl_safefree(conn->secondaryhostname);
+  conn->secondary_port = ftpc->newport;
+  conn->secondaryhostname = strdup(ftpc->newhost);
+  if(!conn->secondaryhostname)
+    return CURLE_OUT_OF_MEMORY;
+
   conn->bits.do_more = TRUE;
   state(conn, FTP_STOP); /* this phase is completed */
 
