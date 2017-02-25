@@ -15,6 +15,10 @@ unittest
 <server>
 none
 </server>
+<setenv>
+LC_ALL=
+LC_NUMERIC=C
+</setenv>
 # tool is what to use instead of 'curl'
 <tool>
 lib557
