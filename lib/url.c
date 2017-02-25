@@ -5118,15 +5118,19 @@ static CURLcode parse_proxy(struct Curl_easy *data,
          with reserved characters like ':' in them. */
       Curl_safefree(proxyinfo->user);
       proxyinfo->user = curl_easy_unescape(data, proxyuser, 0, NULL);
+      Curl_safefree(proxyuser);
 
-      if(!proxyinfo->user)
+      if(!proxyinfo->user) {
+        Curl_safefree(proxypasswd);
         return CURLE_OUT_OF_MEMORY;
+      }
 
       Curl_safefree(proxyinfo->passwd);
       if(proxypasswd && strlen(proxypasswd) < MAX_CURL_PASSWORD_LENGTH)
         proxyinfo->passwd = curl_easy_unescape(data, proxypasswd, 0, NULL);
       else
         proxyinfo->passwd = strdup("");
+      Curl_safefree(proxypasswd);
 
       if(!proxyinfo->passwd)
         return CURLE_OUT_OF_MEMORY;
