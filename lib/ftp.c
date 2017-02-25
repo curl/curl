@@ -4283,7 +4283,6 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
                            &ftpc->dirs[ftpc->dirdepth], NULL,
                            TRUE);
           if(result) {
-            free(ftpc->dirs[ftpc->dirdepth]);
             freedirs(ftpc);
             return result;
           }
