@@ -43,14 +43,17 @@ man_MANS = curl_easy_cleanup.3 curl_easy_getinfo.3 curl_easy_init.3	 \
  curl_multi_socket_action.3 curl_multi_wait.3 libcurl-symbols.3 	 \
  libcurl-thread.3 curl_multi_socket_all.3
 
+man_DISTMANS = $(man_MANS:.3=.3.dist)
+
 HTMLPAGES = $(man_MANS:.3=.html)
 
 PDFPAGES = $(man_MANS:.3=.pdf)
-
+ 
 m4macrodir = $(datadir)/aclocal
 dist_m4macro_DATA = libcurl.m4
 
-CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(TESTS) libcurl-symbols.3
+CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(TESTS) $(man_DISTMANS) \
+  libcurl-symbols.3
 
 EXTRA_DIST = $(man_MANS) index.html ABI symbols-in-versions symbols.pl  \
   mksymbolsmanpage.pl

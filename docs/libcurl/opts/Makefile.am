@@ -333,11 +333,13 @@ man_MANS =                                      \
  CURLOPT_XFERINFOFUNCTION.3                     \
  CURLOPT_XOAUTH2_BEARER.3
 
+man_DISTMANS = $(man_MANS:.3=.3.dist)
+
 HTMLPAGES = $(man_MANS:.3=.html)
 
 PDFPAGES = $(man_MANS:.3=.pdf)
 
-CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
+CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(man_DISTMANS)
 
 EXTRA_DIST = $(man_MANS)
 MAN2HTML= roffit --mandir=. $< >$@
