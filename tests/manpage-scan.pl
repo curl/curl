@@ -197,7 +197,8 @@ close(R);
 
 #########################################################################
 # parse the curl.1 man page, extract all documented command line options
-open(R, "<$buildroot/docs/curl.1") ||
+# The man page may or may not be rebuilt, so check both possible locations
+open(R, "<$buildroot/docs/curl.1") || open(R, "<$root/docs/curl.1") ||
     die "no input file";
 my @manpage; # store all parsed parameters
 while(<R>) {
