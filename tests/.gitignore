@@ -1,4 +1,5 @@
 *pid
+*.1.dist
 configurehelp.pm
 curl_client_key
 curl_client_key.pub
