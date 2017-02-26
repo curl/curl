@@ -25,11 +25,8 @@ set(UT_SRC
 
 set(UT_COMMON_FILES ../libtest/first.c ../libtest/test.h curlcheck.h)
 include_directories(
-  ${CURL_SOURCE_DIR}/lib          # To be able to reach "curl_setup_once.h"
-  ${CURL_SOURCE_DIR}/tests/libtest
   ${CURL_SOURCE_DIR}/src
-  ${CURL_BINARY_DIR}/lib          # To be able to reach "curl_config.h"
-  ${CURL_BINARY_DIR}/include      # To be able to reach "curl/curlbuild.h"
+  ${CURL_SOURCE_DIR}/tests/libtest
 )
 
 foreach(_testfile ${UT_SRC})

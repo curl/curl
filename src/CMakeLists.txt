@@ -54,12 +54,14 @@ source_group("curl source files" FILES ${CURL_CFILES})
 source_group("curl header files" FILES ${CURL_HFILES})
 
 include_directories(
-  ${CURL_SOURCE_DIR}/lib        # To be able to reach "curl_setup_once.h"
-  ${CURL_BINARY_DIR}/lib        # To be able to reach "curl_config.h"
-  ${CURL_BINARY_DIR}/include    # To be able to reach "curl/curlbuild.h"
-  # This is needed as tool_hugehelp.c is generated in the binary dir
-  ${CURL_SOURCE_DIR}/src        # To be able to reach "tool_hugehelp.h"
-  )
+  ${CURL_BINARY_DIR}/include/curl # for generated curlbuild.h from curl.h
+  ${CURL_BINARY_DIR}/include      # for generated curlbuild.h from lib/curl_setup.h
+  ${CURL_SOURCE_DIR}/include      # for libcurl's external include files
+  ${CURL_BINARY_DIR}/lib          # for libcurl's generated lib/curl_config.h
+  #${CURL_BINARY_DIR}/src          # for curl's generated src/curl_config.h
+  ${CURL_SOURCE_DIR}/lib          # for libcurl's lib/curl_setup.h and other "borrowed" files
+  ${CURL_SOURCE_DIR}/src          # for curl's src/tool_setup.h and "curl-private" files
+)
 
 #Build curl executable
 target_link_libraries( ${EXE_NAME} libcurl ${CURL_LIBS})
