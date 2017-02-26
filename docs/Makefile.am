@@ -26,12 +26,13 @@ man_MANS = curl.1 curl-config.1
 noinst_man_MANS = mk-ca-bundle.1
 GENHTMLPAGES = curl.html curl-config.html mk-ca-bundle.html
 PDFPAGES = curl.pdf curl-config.pdf mk-ca-bundle.pdf
+MANDISTPAGES = curl.1.dist curl-config.1.dist
 
 HTMLPAGES = $(GENHTMLPAGES) index.html
 
 SUBDIRS = examples libcurl cmdline-opts
 
-CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) curl.1
+CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
 
 EXTRA_DIST = MANUAL BUGS CONTRIBUTE.md FAQ FEATURES INTERNALS.md SSLCERTS.md  \
  README.win32 RESOURCES TODO TheArtOfHttpScripting THANKS VERSIONS KNOWN_BUGS \
