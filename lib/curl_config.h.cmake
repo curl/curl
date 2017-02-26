@@ -6,6 +6,9 @@
 /* Location of default ca bundle */
 #cmakedefine CURL_CA_BUNDLE ${CURL_CA_BUNDLE}
 
+/* define "1" to use built-in ca store of TLS backend */
+#cmakedefine CURL_CA_FALLBACK 1
+
 /* Location of default ca path */
 #cmakedefine CURL_CA_PATH ${CURL_CA_PATH}
 
