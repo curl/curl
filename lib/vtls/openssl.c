@@ -1783,9 +1783,14 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(connssl->ctx)
+  if(connssl->ctx) {
+    /* CURLOPT_SSL_CTX_FUNCTION says "pointer will be a new one every time" */
+    SSL_CTX *tmp = SSL_CTX_new(req_method);
     SSL_CTX_free(connssl->ctx);
-  connssl->ctx = SSL_CTX_new(req_method);
+    connssl->ctx = tmp;
+  }
+  else
+    connssl->ctx = SSL_CTX_new(req_method);
 
   if(!connssl->ctx) {
     failf(data, "SSL: couldn't create a context: %s",
