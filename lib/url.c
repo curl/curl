@@ -6112,7 +6112,9 @@ static CURLcode create_conn(struct Curl_easy *data,
   bool reuse;
   char *proxy = NULL;
   char *socksproxy = NULL;
+#ifndef CURL_DISABLE_PROXY
   char *no_proxy = NULL;
+#endif
   bool prot_missing = FALSE;
   bool connections_available = TRUE;
   bool force_reuse = FALSE;
