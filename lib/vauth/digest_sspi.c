@@ -412,7 +412,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   size_t token_max;
   char *resp;
   BYTE *output_token;
-  size_t output_token_len;
+  size_t output_token_len = 0;
   PSecPkgInfo SecurityPackage;
   SecBuffer chlg_buf[5];
   SecBufferDesc chlg_desc;
