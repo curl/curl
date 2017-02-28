@@ -3427,7 +3427,7 @@ AC_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
        want_pthreads=auto
        ]
 )
-if test "$want_thres" = "yes" && test "$dontwant_rt" = "no" && \
+if ( test "$want_thres" = "yes" && test "$dontwant_rt" = "no" ) || \
    test "$want_pthreads" != "no"; then
   AC_CHECK_HEADER(pthread.h,
     [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
