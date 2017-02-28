@@ -539,6 +539,7 @@ int cert_stuff(struct connectdata *conn,
       if(!key_file)
         /* cert & key can only be in PEM case in the same file */
         key_file=cert_file;
+      /* FALLTHROUGH */
     case SSL_FILETYPE_ASN1:
       if(SSL_CTX_use_PrivateKey_file(ctx, key_file, file_type) != 1) {
         failf(data, "unable to set private key file: '%s' type %s",
