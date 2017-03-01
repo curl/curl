@@ -346,10 +346,6 @@ AC_DEFUN([CURL_CHECK_OPTION_RT], [
       AC_MSG_RESULT([no])
       ;;
   esac
-  dnl TODO: may require mutual exclusion
-  if test "$dontwant_rt" = "yes" && test "$want_thres" = "yes" ; then
-    AC_MSG_ERROR([options --disable-rt and --enable-thread-resolver are mutually exclusive, at most one can be selected.])
-  fi
 ])
  
 
