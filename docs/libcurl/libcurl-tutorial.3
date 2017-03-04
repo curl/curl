@@ -1147,7 +1147,7 @@ behind a firewall.  Apps can mitigate against this by using the
 .IP "IPv6 Addresses"
 libcurl will normally handle IPv6 addresses transparently and just as easily
 as IPv4 addresses. That means that a sanitizing function that filters out
-addressses like 127.0.0.1 isn't sufficient--the equivalent IPv6 addresses ::1,
+addresses like 127.0.0.1 isn't sufficient--the equivalent IPv6 addresses ::1,
 ::, 0:00::0:1, ::127.0.0.1 and ::ffff:7f00:1 supplied somehow by an attacker
 would all bypass a naive filter and could allow access to undesired local
 resources.  IPv6 also has special address blocks like link-local and site-local

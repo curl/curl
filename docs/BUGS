@@ -210,7 +210,7 @@ BUGS
   This is a list of known bugs. Bugs we know exist and that have been pointed
   out but that haven't yet been fixed. The reasons for why they haven't been
   fixed can involve anything really, but the primary reason is that nobody has
-  considered these problems to be important enough to spend the necesary time
+  considered these problems to be important enough to spend the necessary time
   and effort to have them fixed.
 
   The KNOWN_BUGS are always up for grabs and we will always love the ones who
@@ -238,7 +238,7 @@ BUGS
 2.8 Closing off stalled bugs
 
   The issue and pull request trackers on https://github.com/curl/curl will
-  only hold "active" entries (using a non-precise defintion of what active
+  only hold "active" entries (using a non-precise definition of what active
   actually is, but they're at least not completely dead). Those that are
   abandonded or in other ways dormant will be closed and sometimes added to
   TODO and KNOWN_BUGS instead.

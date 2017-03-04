@@ -184,7 +184,7 @@ problems may have been fixed or changed somewhat since this was written!
  It can also be noted that while adding a trailing dot to the host name in
  most (all?) cases will make the name resolve to the same set of IP addresses,
  many HTTP servers will not happily accept the trailing dot there unless that
- has been specificly configured to be a fine virtual host.
+ has been specifically configured to be a fine virtual host.
 
  If URLs with trailing dots for host names become more popular or even just
  used more than for just plain fun experiments, I'm sure we will have reason
