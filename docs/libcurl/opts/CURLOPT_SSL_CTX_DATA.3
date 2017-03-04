@@ -41,6 +41,10 @@ TODO
 Added in 7.11.0 for OpenSSL. Added in 7.42.0 for wolfSSL/CyaSSL. Other SSL
 backends not supported.
 .SH RETURN VALUE
-Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+CURLE_OK if supported; or an error such as:
+
+CURLE_NOT_BUILT_IN - Not supported by the SSL backend
+
+CURLE_UNKNOWN_OPTION
 .SH "SEE ALSO"
 .BR CURLOPT_SSL_CTX_FUNCTION "(3), " CURLOPT_SSLVERSION "(3), "

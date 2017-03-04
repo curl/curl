@@ -72,30 +72,30 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   X509 *cert=NULL;
   BIO *bio;
   char *mypem = /* example CA cert PEM - shortened */
-    "-----BEGIN CERTIFICATE-----\n"
-    "MIIHPTCCBSWgAwIBAgIBADANBgkqhkiG9w0BAQQFADB5MRAwDgYDVQQKEwdSb290\n"
-    "IENBMR4wHAYDVQQLExVodHRwOi8vd3d3LmNhY2VydC5vcmcxIjAgBgNVBAMTGUNB\n"
-    "IENlcnQgU2lnbmluZyBBdXRob3JpdHkxITAfBgkqhkiG9w0BCQEWEnN1cHBvcnRA\n"
-    "Y2FjZXJ0Lm9yZzAeFw0wMzAzMzAxMjI5NDlaFw0zMzAzMjkxMjI5NDlaMHkxEDAO\n"
-    "GCSNe9FINSkYQKyTYOGWhlC0elnYjyELn8+CkcY7v2vcB5G5l1YjqrZslMZIBjzk\n"
-    "zk6q5PYvCdxTby78dOs6Y5nCpqyJvKeyRKANihDjbPIky/qbn3BHLt4Ui9SyIAmW\n"
-    "omTxJBzcoTWcFbLUvFUufQb1nA5V9FrWk9p2rSVzTMVD\n"\
-    "-----END CERTIFICATE-----\n";
+    "-----BEGIN CERTIFICATE-----\\n"
+    "MIIHPTCCBSWgAwIBAgIBADANBgkqhkiG9w0BAQQFADB5MRAwDgYDVQQKEwdSb290\\n"
+    "IENBMR4wHAYDVQQLExVodHRwOi8vd3d3LmNhY2VydC5vcmcxIjAgBgNVBAMTGUNB\\n"
+    "IENlcnQgU2lnbmluZyBBdXRob3JpdHkxITAfBgkqhkiG9w0BCQEWEnN1cHBvcnRA\\n"
+    "Y2FjZXJ0Lm9yZzAeFw0wMzAzMzAxMjI5NDlaFw0zMzAzMjkxMjI5NDlaMHkxEDAO\\n"
+    "GCSNe9FINSkYQKyTYOGWhlC0elnYjyELn8+CkcY7v2vcB5G5l1YjqrZslMZIBjzk\\n"
+    "zk6q5PYvCdxTby78dOs6Y5nCpqyJvKeyRKANihDjbPIky/qbn3BHLt4Ui9SyIAmW\\n"
+    "omTxJBzcoTWcFbLUvFUufQb1nA5V9FrWk9p2rSVzTMVD\\n"
+    "-----END CERTIFICATE-----\\n";
   /* get a BIO */
   bio=BIO_new_mem_buf(mypem, -1);
-  /* use it to read the PEM formatted certificate from memory into an X509
-   * structure that SSL can use
+  /* use it to read the PEM formatted certificate from memory into an
+   * X509 structure that SSL can use
    */
   PEM_read_bio_X509(bio, &cert, 0, NULL);
   if(cert == NULL)
-    printf("PEM_read_bio_X509 failed...\n");
+    printf("PEM_read_bio_X509 failed...\\n");
 
-  /* get a pointer to the X509 certificate store (which may be empty!) */
+  /* get a pointer to the X509 certificate store (which may be empty) */
   store=SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
 
   /* add our certificate to this store */
   if(X509_STORE_add_cert(store, cert)==0)
-    printf("error adding certificate\n");
+    printf("error adding certificate\\n");
 
   /* decrease reference counts */
   X509_free(cert);
@@ -123,9 +123,9 @@ int main(void)
   rv=curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
   rv=curl_easy_perform(ch);
   if(rv==CURLE_OK)
-    printf("*** transfer succeeded ***\n");
+    printf("*** transfer succeeded ***\\n");
   else
-    printf("*** transfer failed ***\n");
+    printf("*** transfer failed ***\\n");
 
   curl_easy_cleanup(ch);
   curl_global_cleanup();
@@ -136,6 +136,10 @@ int main(void)
 Added in 7.11.0 for OpenSSL. Added in 7.42.0 for wolfSSL/CyaSSL. Other SSL
 backends not supported.
 .SH RETURN VALUE
-Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+CURLE_OK if supported; or an error such as:
+
+CURLE_NOT_BUILT_IN - Not supported by the SSL backend
+
+CURLE_UNKNOWN_OPTION
 .SH "SEE ALSO"
 .BR CURLOPT_SSL_CTX_DATA "(3), " CURLOPT_SSL_VERIFYPEER "(3), "
