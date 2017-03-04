@@ -25,7 +25,7 @@
  1.7 Detect when called from within callbacks
  1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
- 1.11 minimize dependencies with dynamicly loaded modules
+ 1.11 minimize dependencies with dynamically loaded modules
  1.12 have form functions use CURL handle argument
  1.14 Typesafe curl_easy_setopt()
  1.15 Monitor connections in the connection pool
@@ -259,7 +259,7 @@
  A name resolve that has failed is likely to fail when made again within a
  short period of time. Currently we only cache positive responses.
 
-1.11 minimize dependencies with dynamicly loaded modules
+1.11 minimize dependencies with dynamically loaded modules
 
  We can create a system with loadable modules/plug-ins, where these modules
  would be the ones that link to 3rd party libs. That would allow us to avoid
@@ -531,7 +531,7 @@ This is not detailed in any FTP specification.
 
  RFC 7616 introduces an update to the HTTP Digest authentication
  specification, which amongst other thing defines how new digest algorithms
- can be used instead of MD5 which is considered old and not recommanded.
+ can be used instead of MD5 which is considered old and not recommended.
 
  See https://tools.ietf.org/html/rfc7616 and
  https://github.com/curl/curl/issues/1018
@@ -1046,9 +1046,9 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 18.15 --retry should resume
 
  When --retry is used and curl actually retries transfer, it should use the
- already transfered data and do a resumed transfer for the rest (when
+ already transferred data and do a resumed transfer for the rest (when
  possible) so that it doesn't have to transfer the same data again that was
- already tranfered before the retry.
+ already transferred before the retry.
 
  See https://github.com/curl/curl/issues/1084
 

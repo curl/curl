@@ -602,7 +602,7 @@ FAQ
   In October 2009, there were interfaces available for the following
   languages: Ada95, Basic, C, C++, Ch, Cocoa, D, Dylan, Eiffel, Euphoria,
   Ferite, Gambas, glib/GTK+, Haskell, ILE/RPG, Java, Lisp, Lua, Mono, .NET,
-  Object-Pascal, O'Caml, Pascal, Perl, PHP, PostgreSQL, Python, R, Rexx, Ruby,
+  Object-Pascal, OCaml, Pascal, Perl, PHP, PostgreSQL, Python, R, Rexx, Ruby,
   Scheme, S-Lang, Smalltalk, SP-Forth, SPL, Tcl, Visual Basic, Visual FoxPro,
   Q, wxwidgets and XBLite. By the time you read this, additional ones may have
   appeared!
