@@ -40,7 +40,7 @@ WWW-Authenticate: NTLM
 This is a bad password page!
 </data1102>
 
-<!-- Second request has NTML auth, right password -->
+<!-- Second request has NTLM auth, right password -->
 <data200>
 HTTP/1.1 401 Need NTLM auth (2)
 Server: Microsoft-IIS/5.0

@@ -23,7 +23,7 @@ WWW-Authenticate: Basic realm="testrealm"
 This is a bad password page!
 </data100>
 
-<!-- NTML auth -->
+<!-- NTLM auth -->
 <data200>
 HTTP/1.1 401 Need Basic or NTLM auth (2)
 Server: Microsoft-IIS/5.0
