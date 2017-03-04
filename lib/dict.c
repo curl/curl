@@ -92,7 +92,7 @@ const struct Curl_handler Curl_handler_dict = {
 
 static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
 {
-  char *newp;
+  char *newp = NULL;
   char *dictp;
   char *ptr;
   size_t len;
