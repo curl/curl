@@ -368,7 +368,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
     timeout = CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve timeout */
 
   /* Wait for the name resolve query to complete. */
-  for(;;) {
+  while(!result) {
     struct timeval *tvp, tv, store;
     long timediff;
     int itimeout;
@@ -390,28 +390,25 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       timeout_ms = 1000;
 
     waitperform(conn, timeout_ms);
-    Curl_resolver_is_resolved(conn, &temp_entry);
+    result = Curl_resolver_is_resolved(conn, &temp_entry);
 
-    if(conn->async.done)
+    if(result || conn->async.done)
       break;
 
-    if(Curl_pgrsUpdate(conn)) {
+    if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
-      timeout = -1; /* trigger the cancel below */
-    }
     else {
       struct timeval now2 = Curl_tvnow();
       timediff = Curl_tvdiff(now2, now); /* spent time */
       timeout -= timediff?timediff:1; /* always deduct at least 1 */
       now = now2; /* for next loop */
     }
-
-    if(timeout < 0) {
-      /* our timeout, so we cancel the ares operation */
-      ares_cancel((ares_channel)data->state.resolver);
-      break;
-    }
+    if(timeout < 0)
+      result = CURLE_OPERATION_TIMEDOUT;
   }
+  if(result)
+    /* failure, so we cancel the ares operation */
+    ares_cancel((ares_channel)data->state.resolver);
 
   /* Operation complete, if the lookup was successful we now have the entry
      in the cache. */
