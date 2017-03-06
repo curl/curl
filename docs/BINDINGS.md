@@ -14,7 +14,9 @@ libcurl bindings
 
 [Basic](http://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
 
-[C++](http://curlpp.org/) Written by Jean-Philippe Barrette-LaPierre
+C++: [curlpp](http://curlpp.org/) Written by Jean-Philippe Barrette-LaPierre,
+[curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
+Requests](https://github.com/whoshuu/cpr) by Huu Nguyen
 
 [Ch](https://chcurl.sourceforge.io/) Written by Stephen Nestinger and Jonathan Rogado
 
