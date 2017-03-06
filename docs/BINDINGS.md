@@ -39,6 +39,8 @@ Cocoa: [BBHTTP](https://github.com/brunodecarvalho/BBHTTP) written by Bruno de C
 
 [glib/GTK+](http://atterer.net/glibcurl/) Written by Richard Atterer
 
+Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
+
 [Guile](http://www.lonelycactus.com/guile-curl.html) Written by Michael L. Gran
 
 [Harbour](https://github.com/vszakats/harbour-core/tree/master/contrib/hbcurl) Written by Viktor Szakáts
@@ -65,7 +67,9 @@ Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](ht
 
 [Pascal](http://houston.quik.com/jkp/curlpas/) Free Pascal, Delphi and Kylix binding written by Jeffrey Pohlmeyer.
 
-[Perl](https://github.com/szbalint/WWW--Curl) Maintained by Cris Bailiff and Bálint Szilakszi
+Perl: [WWW--Curl](https://github.com/szbalint/WWW--Curl) Maintained by Cris
+Bailiff and Bálint Szilakszi,
+[perl6-net-curl](https://github.com/azawawi/perl6-net-curl) by Ahmad M. Zawawi
 
 [PHP](https://php.net/curl) Originally written by Sterling Hughes
 
