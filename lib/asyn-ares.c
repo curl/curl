@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -359,6 +359,11 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   struct Curl_dns_entry *temp_entry;
 
   timeout = Curl_timeleft(data, &now, TRUE);
+  if(timeout < 0) {
+    /* already expired! */
+    connclose(conn, "Timed out before name resolve started");
+    return CURLE_OPERATION_TIMEDOUT;
+  }
   if(!timeout)
     timeout = CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve timeout */
 
