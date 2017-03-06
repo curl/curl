@@ -5643,7 +5643,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
     }
 #endif
 
-    portptr = strrchr(conn->host.name, ':');
+    portptr = strchr(conn->host.name, ':');
   }
 
   if(data->set.use_port && data->state.allow_port) {
@@ -5698,15 +5698,16 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
       return CURLE_URL_MALFORMAT;
     }
 
-    else if(rest != &portptr[1]) {
+    if(rest[0]) {
+      failf(data, "Port number ended with '%c'", rest[0]);
+      return CURLE_URL_MALFORMAT;
+    }
+
+    if(rest != &portptr[1]) {
       *portptr = '\0'; /* cut off the name there */
       conn->remote_port = curlx_ultous(port);
     }
     else {
-      if(rest[0]) {
-        failf(data, "Illegal port number");
-        return CURLE_URL_MALFORMAT;
-      }
       /* Browser behavior adaptation. If there's a colon with no digits after,
          just cut off the name there which makes us ignore the colon and just
          use the default port. Firefox and Chrome both do that. */
