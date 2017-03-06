@@ -1770,9 +1770,12 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   if(SSL_HandshakeCallback(model, HandshakeCallback, conn) != SECSuccess)
     goto error;
 
-  if(SSL_CONN_CONFIG(verifypeer)) {
+  {
     const CURLcode rv = nss_load_ca_certificates(conn, sockindex);
-    if(rv) {
+    if((rv == CURLE_SSL_CACERT_BADFILE) && !SSL_CONN_CONFIG(verifypeer))
+      /* not a fatal error because we are not going to verify the peer */
+      infof(data, "warning: CA certificates failed to load\n");
+    else if(rv) {
       result = rv;
       goto error;
     }
