@@ -29,6 +29,5 @@ HTTP URL with rubbish after port number
 <errorcode>
 3
 </errorcode>
-</protocol>
 </verify>
 </testcase>
