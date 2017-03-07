@@ -95,4 +95,6 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s);
 CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct connectdata *conn);
+
+CURLcode Curl_multi_easy_state(struct Curl_easy *data, long *valuep);
 #endif /* HEADER_CURL_MULTIIF_H */
