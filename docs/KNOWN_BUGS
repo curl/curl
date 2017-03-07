@@ -27,6 +27,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.1 CURLINFO_SSL_VERIFYRESULT has limited support
  2.2 DER in keychain
  2.3 GnuTLS backend skips really long certificate fields
+ 2.4 DarwinSSL won't import PKCS#12 client certificates without a password
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -221,6 +222,12 @@ problems may have been fixed or changed somewhat since this was written!
  libcurl calls gnutls_x509_crt_get_dn() with a fixed buffer size and if the
  field is too long in the cert, it'll just return an error and the field will
  be displayed blank.
+
+2.4 DarwinSSL won't import PKCS#12 client certificates without a password
+
+ libcurl calls SecPKCS12Import with the PKCS#12 client certificate, but that
+ function rejects certificates that do not have a password.
+ https://github.com/curl/curl/issues/1308
 
 
 3. Email protocols
