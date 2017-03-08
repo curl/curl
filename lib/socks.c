@@ -375,6 +375,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
   */
 
   unsigned char socksreq[600]; /* room for large user/pw (255 max each) */
+  int idx;
   ssize_t actualread;
   ssize_t written;
   int result;
@@ -426,17 +427,17 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
     return CURLE_COULDNT_CONNECT;
   }
 
-  socksreq[0] = 5; /* version */
+  idx = 0;
+  socksreq[idx++] = 5;   /* version */
+  idx++;                 /* reserve for the number of authentication methods */
+  socksreq[idx++] = 0;   /* no authentication */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  socksreq[1] = (char)(proxy_user ? 3 : 2); /* number of methods (below) */
-  socksreq[2] = 0; /* no authentication */
-  socksreq[3] = 1; /* GSS-API */
-  socksreq[4] = 2; /* username/password */
-#else
-  socksreq[1] = (char)(proxy_user ? 2 : 1); /* number of methods (below) */
-  socksreq[2] = 0; /* no authentication */
-  socksreq[3] = 2; /* username/password */
+  socksreq[idx++] = 1;   /* GSS-API */
 #endif
+  if(proxy_user)
+    socksreq[idx++] = 2; /* username/password */
+  /* write the number of authentication methods */
+  socksreq[1] = (unsigned char) (idx - 2);
 
   (void)curlx_nonblock(sock, FALSE);
 
