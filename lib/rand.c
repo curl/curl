@@ -47,10 +47,16 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
   char *force_entropy = getenv("CURL_ENTROPY");
   if(force_entropy) {
     if(!seeded) {
+      size_t i;
       size_t elen = strlen(force_entropy);
       size_t clen = sizeof(randseed);
       size_t min = elen < clen ? elen : clen;
-      memcpy((char *)&randseed, force_entropy, min);
+
+      randseed = 0;
+      for(i = 0; i < min; ++i) {
+        randseed |=
+          ((unsigned int)(*((unsigned char *)force_entropy + i)) << (i * 8));
+      }
       seeded = TRUE;
     }
     else
