@@ -1,12 +1,16 @@
 Long: insecure
 Short: k
-Help: Allow insecure connections when using SSL
+Help: Allow insecure server connections when using SSL
 Protocols: TLS
+See-also: proxy-insecure cacert
 ---
-This option explicitly allows curl to perform "insecure" SSL connections and
-transfers. All SSL connections are attempted to be made secure by using the CA
-certificate bundle installed by default. This makes all connections considered
-\&"insecure" fail unless --insecure is used.
+
+By default, every SSL connection curl makes is verified to be secure. This
+option allows curl to proceed and operate even for server connections
+otherwise considered insecure.
+
+The server connection is verified by making sure the server's certificate
+contains the right name and verifies successfully using the cert store.
 
 See this online resource for further details:
  https://curl.haxx.se/docs/sslcerts.html
