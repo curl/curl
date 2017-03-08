@@ -8,7 +8,37 @@ Curl and libcurl 7.53.2
 
 This release includes the following bugfixes:
 
- o
+ o cmake: Replace invalid UTF-8 byte sequence [1]
+ o tests: use consistent environment variables for setting charset
+ o proxy: fixed a memory leak on OOM
+ o ftp: removed an erroneous free in an OOM path
+ o docs: de-duplicate file lists in the Makefiles [2]
+ o ftp: fixed a NULL pointer dereference on OOM
+ o gopher: fixed detection of an error condition from Curl_urldecode
+ o url: fix unix-socket support for proxy-disabled builds [3]
+ o test1139: allow for the possibility that the man page is not rebuilt
+ o cyassl: get library version string at runtime
+ o digest_sspi: fix compilation warning
+ o tests: enable HTTP/2 tests to run with non-default port numbers
+ o warnless: suppress compiler warning
+ o darwinssl: Warn that disabling host verify also disables SNI [4]
+ o configure: fix for --enable-pthreads [5]
+ o checksrc.bat: Ignore curl_config.h.in, curl_config.h
+ o no-keepalive.d: fix typo [6]
+ o configure: fix --with-zlib when a path is specified [7]
+ o build: fix gcc7 implicit fallthrough warnings [8]
+ o fix potential use of uninitialized variables [9]
+ o CURLOPT_SSL_CTX_FUNCTION.3: Fix EXAMPLE formatting errors [10]
+ o CMake: Reorganize SSL support, separate WinSSL and SSPI [11]
+ o CMake: Add DarwinSSL support [12]
+ o CMake: Add mbedTLS support [13]
+ o ares: return error at once if timed out before name resolve starts [14]
+ o BINDINGS: added C++, perl, go and Scilab bindings
+ o URL: return error on malformed URLs with junk after port number
+ o KNOWN_BUGS: Add DarwinSSL won't import PKCS#12 without a password [15]
+ o http2: Fix assertion error on redirect with CL=0 [16]
+ o updatemanpages.pl: Update man pages to use current date and versions [17]
+ o --insecure: clarify that this option is for server connections [18]
 
 This release includes the following known bugs:
 
@@ -17,9 +47,32 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Alexis La Goutte, Andrew Krieger, Dan Fandrich, Daniel Stenberg,
+  Giuseppe Persico, Greg Rowe, Isaac Boukris, Joel Depooter, Justin Clift,
+  Marc-Antoine Perennou, Marcel Raad, mccormickt12 on github, Michael Maltese,
+  Orange Tsai, Peter Pentchev, Peter Wu, Ray Satiro, Simon Warta,
+  Steve Brokenshire, Sylvestre Ledru, Tatsuhiro Tsujikawa,
+  (21 contributors)
+
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/bug/?i=1275
+ [2] = https://curl.haxx.se/bug/?i=1287
+ [3] = https://curl.haxx.se/bug/?i=1289
+ [4] = https://curl.haxx.se/bug/?i=1240
+ [5] = https://curl.haxx.se/bug/?i=1295
+ [6] = https://curl.haxx.se/bug/?i=1301
+ [7] = https://curl.haxx.se/bug/?i=1292
+ [8] = https://curl.haxx.se/bug/?i=1297
+ [9] = https://curl.haxx.se/bug/?i=1304
+ [10] = https://curl.haxx.se/bug/?i=1290
+ [11] = https://curl.haxx.se/bug/?i=1228
+ [12] = https://curl.haxx.se/bug/?i=1228
+ [13] = https://curl.haxx.se/bug/?i=1228
+ [14] = https://curl.haxx.se/mail/lib-2017-03/0004.html
+ [15] = https://curl.haxx.se/bug/?i=1308
+ [16] = https://curl.haxx.se/bug/?i=1286
+ [17] = https://curl.haxx.se/bug/?i=1058
+ [18] = https://curl.haxx.se/mail/lib-2017-03/0002.html
