@@ -184,6 +184,7 @@ static const struct LongShort aliases[]= {
   {"$S", "tftp-no-options",          FALSE},
   {"$U", "connect-to",               TRUE},
   {"$W", "abstract-unix-socket",     TRUE},
+  {"$X", "tls-max",                  TRUE},
   {"0",   "http1.0",                 FALSE},
   {"01",  "http1.1",                 FALSE},
   {"02",  "http2",                   FALSE},
@@ -1059,6 +1060,11 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'W': /* --abstract-unix-socket */
         config->abstract_unix_socket = TRUE;
         GetStr(&config->unix_socket_path, nextarg);
+        break;
+      case 'X': /* --tls-max */
+        err = str2tls_max(&config->ssl_version_max, nextarg);
+        if(err)
+          return err;
         break;
       }
       break;

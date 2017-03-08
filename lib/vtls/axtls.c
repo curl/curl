@@ -156,6 +156,12 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
        same connection */
     return CURLE_OK;
 
+  if(SSL_CONN_CONFIG(version_max) != CURL_SSLVERSION_MAX_NONE) {
+    failf(data, "axtls does not support CURL_SSLVERSION_MAX");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+
   /* axTLS only supports TLSv1 */
   /* check to see if we've been told to use an explicit SSL/TLS version */
   switch(SSL_CONN_CONFIG(version)) {
