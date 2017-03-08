@@ -105,7 +105,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
 *   Set protocol4a=true for  "SOCKS 4A (Simple Extension to SOCKS 4 Protocol)"
 *   Nonsupport "Identification Protocol (RFC1413)"
 */
-CURLcode Curl_SOCKS4(const char *proxy_name,
+CURLcode Curl_SOCKS4(const char *proxy_user,
                      const char *hostname,
                      int remote_port,
                      int sockindex,
@@ -206,14 +206,14 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
    * This is currently not supporting "Identification Protocol (RFC1413)".
    */
   socksreq[8] = 0; /* ensure empty userid is NUL-terminated */
-  if(proxy_name) {
-    size_t plen = strlen(proxy_name);
+  if(proxy_user) {
+    size_t plen = strlen(proxy_user);
     if(plen >= sizeof(socksreq) - 8) {
       failf(data, "Too long SOCKS proxy name, can't use!\n");
       return CURLE_COULDNT_CONNECT;
     }
     /* copy the proxy name WITH trailing zero */
-    memcpy(socksreq + 8, proxy_name, plen+1);
+    memcpy(socksreq + 8, proxy_user, plen+1);
   }
 
   /*
@@ -350,7 +350,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
  * This function logs in to a SOCKS5 proxy and sends the specifics to the final
  * destination server.
  */
-CURLcode Curl_SOCKS5(const char *proxy_name,
+CURLcode Curl_SOCKS5(const char *proxy_user,
                      const char *proxy_password,
                      const char *hostname,
                      int remote_port,
@@ -428,12 +428,12 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 
   socksreq[0] = 5; /* version */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  socksreq[1] = (char)(proxy_name ? 3 : 2); /* number of methods (below) */
+  socksreq[1] = (char)(proxy_user ? 3 : 2); /* number of methods (below) */
   socksreq[2] = 0; /* no authentication */
   socksreq[3] = 1; /* GSS-API */
   socksreq[4] = 2; /* username/password */
 #else
-  socksreq[1] = (char)(proxy_name ? 2 : 1); /* number of methods (below) */
+  socksreq[1] = (char)(proxy_user ? 2 : 1); /* number of methods (below) */
   socksreq[2] = 0; /* no authentication */
   socksreq[3] = 2; /* username/password */
 #endif
@@ -494,13 +494,13 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
 #endif
   else if(socksreq[1] == 2) {
     /* Needs user name and password */
-    size_t proxy_name_len, proxy_password_len;
-    if(proxy_name && proxy_password) {
-      proxy_name_len = strlen(proxy_name);
+    size_t proxy_user_len, proxy_password_len;
+    if(proxy_user && proxy_password) {
+      proxy_user_len = strlen(proxy_user);
       proxy_password_len = strlen(proxy_password);
     }
     else {
-      proxy_name_len = 0;
+      proxy_user_len = 0;
       proxy_password_len = 0;
     }
 
@@ -513,10 +513,10 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
      */
     len = 0;
     socksreq[len++] = 1;    /* username/pw subnegotiation version */
-    socksreq[len++] = (unsigned char) proxy_name_len;
-    if(proxy_name && proxy_name_len)
-      memcpy(socksreq + len, proxy_name, proxy_name_len);
-    len += proxy_name_len;
+    socksreq[len++] = (unsigned char) proxy_user_len;
+    if(proxy_user && proxy_user_len)
+      memcpy(socksreq + len, proxy_user, proxy_user_len);
+    len += proxy_user_len;
     socksreq[len++] = (unsigned char) proxy_password_len;
     if(proxy_password && proxy_password_len)
       memcpy(socksreq + len, proxy_password, proxy_password_len);
@@ -555,7 +555,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     }
     if(socksreq[1] == 255) {
 #endif
-      if(!proxy_name || !*proxy_name) {
+      if(!proxy_user || !*proxy_user) {
         failf(data,
               "No authentication method was acceptable. (It is quite likely"
               " that the SOCKS5 server wanted a username/password, since none"
