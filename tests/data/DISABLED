@@ -16,3 +16,5 @@
 # test 1510 casues problems on the CI on github
 # example: https://travis-ci.org/curl/curl/builds/81633600
 1510
+# Pipelining test that is causing false positives a little too often
+1903
