@@ -140,7 +140,7 @@ static void polarssl_debug(void *context, int level, const char *line)
 static Curl_recv polarssl_recv;
 static Curl_send polarssl_send;
 
-static CURLcode polarssl_version_from_curl(int *polarver, long version)
+static CURLcode polarssl_version_from_curl(int *polarver, long ssl_version)
 {
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
@@ -159,7 +159,7 @@ static CURLcode polarssl_version_from_curl(int *polarver, long version)
 }
 
 static CURLcode
-set_ssl_version_min_max(struct connectdata *conn, int sockindex);
+set_ssl_version_min_max(struct connectdata *conn, int sockindex)
 {
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
