@@ -106,19 +106,21 @@ $(MANPAGE):
 
 if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and
-# compressed formats
-$(HUGE): $(README) $(MANPAGE)  mkhelp.pl
+# compressed formats. $(MANPAGE) must be the first dependency so it
+# can be referenced with $< which points to the correct location in
+# the VPATH.
+$(HUGE): $(MANPAGE) $(README) $(MKHELP)
 	echo '#include "tool_setup.h"' > $(HUGE)
 	echo '#ifndef HAVE_LIBZ' >> $(HUGE)
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
+	$(NROFF) $< | $(PERL) $(MKHELP) $(README) >> $(HUGE)
 	echo '#else' >> $(HUGE)
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) -c $(README) >> $(HUGE)
+	$(NROFF) $< | $(PERL) $(MKHELP) -c $(README) >> $(HUGE)
 	echo '#endif /* HAVE_LIBZ */' >> $(HUGE)
 else # HAVE_LIBZ
 # This generates the tool_hugehelp.c file uncompressed only
-$(HUGE): $(README) $(MANPAGE)  mkhelp.pl
+$(HUGE): $(MANPAGE) $(README) mkhelp.pl
 	echo '#include "tool_setup.h"' > $(HUGE)
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
+	$(NROFF) $< | $(PERL) $(MKHELP) $(README) >> $(HUGE)
 endif
 
 else # USE_MANUAL
