@@ -102,39 +102,6 @@ while(<READ>) {
 }
 close(READ);
 
-# if compressed
-if($c) {
-    my @test = `gzip --version 2>&1`;
-    if($test[0] =~ /gzip/) {
-        open(GZIP, ">dumpit") ||
-            die "can't create the dumpit file, try without -c";
-        binmode GZIP;
-        for(@out) {
-            print GZIP $_;
-            $gzip += length($_);
-        }
-        close(GZIP);
-
-        system("gzip --best --no-name dumpit");
-
-        open(GZIP, "<dumpit.gz") ||
-             die "can't read the dumpit.gz file, try without -c";
-        binmode GZIP;
-        while(<GZIP>) {
-            push @gzip, $_;
-            $gzipped += length($_);
-        }
-        close(GZIP);
-
-        unlink("dumpit.gz");
-    }
-    else {
-        # no gzip, no compression!
-        undef $c;
-        print STDERR "MEEEP: Couldn't find gzip, disable compression\n";
-    }
-}
-
 $now = localtime;
 print <<HEAD
 /*
@@ -146,27 +113,33 @@ print <<HEAD
 HEAD
     ;
 if($c) {
+    # if compressed
+    use IO::Compress::Gzip;
+    my $content = join("", @out);
+    my $gzippedContent;
+    IO::Compress::Gzip::gzip(
+        \$content, \$gzippedContent, Level => 9, TextFlag => 1) or die "gzip failed:";
+    $gzip = length($content);
+    $gzipped = length($gzippedContent);
+
     print <<HEAD
 #include <zlib.h>
 #include "memdebug.h" /* keep this as LAST include */
 static const unsigned char hugehelpgz[] = {
   /* This mumbo-jumbo is the huge help text compressed with gzip.
-     Thanks to this operation, the size of this data shrunk from $gzip
+     Thanks to this operation, the size of this data shrank from $gzip
      to $gzipped bytes. You can disable the use of compressed help
      texts by NOT passing -c to the mkhelp.pl tool. */
 HEAD
 ;
+
     my $c=0;
     print " ";
-    for(@gzip) {
-        my @all=split(//, $_);
-        for(@all) {
-            my $num=ord($_);
-            printf(" 0x%02x,", 0+$num);
-            if(++$c>11) {
-                print "\n ";
-                $c=0;
-            }
+    for(split(//, $gzippedContent)) {
+        my $num=ord($_);
+        printf(" 0x%02x,", 0+$num);
+        if(!(++$c % 12)) {
+            print "\n ";
         }
     }
     print "\n};\n";
