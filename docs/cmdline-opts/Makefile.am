@@ -61,6 +61,7 @@ DPAGES = abstract-unix-socket.d anyauth.d append.d basic.d cacert.d capath.d cer
   speed-limit.d speed-time.d ssl-allow-beast.d ssl.d ssl-no-revoke.d	\
   ssl-reqd.d sslv2.d sslv3.d stderr.d tcp-fastopen.d tcp-nodelay.d	\
   telnet-option.d tftp-blksize.d tftp-no-options.d time-cond.d		\
+  tls-max.d \
   tlsauthtype.d tlspassword.d tlsuser.d tlsv1.0.d tlsv1.1.d tlsv1.2.d	\
   tlsv1.3.d tlsv1.d trace-ascii.d trace.d trace-time.d tr-encoding.d	\
   unix-socket.d upload-file.d url.d use-ascii.d user-agent.d user.d	\
