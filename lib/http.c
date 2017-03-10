@@ -1359,6 +1359,10 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
+  if(conn->bits.proxy_connect_closed)
+    /* this is not an error, just part of the connection negotiation */
+    return CURLE_OK;
+
   if(CONNECT_FIRSTSOCKET_PROXY_SSL())
     return CURLE_OK; /* wait for HTTPS proxy SSL initialization to complete */
 
