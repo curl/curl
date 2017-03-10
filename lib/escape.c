@@ -113,9 +113,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
         testing_ptr = Curl_saferealloc(ns, alloc);
         if(!testing_ptr)
           return NULL;
-        else {
-          ns = testing_ptr;
-        }
+        ns = testing_ptr;
       }
 
       result = Curl_convert_to_network(data, &in, 1);

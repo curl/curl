@@ -773,8 +773,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     curl_multi_cleanup(multi);
     if(mcode == CURLM_OUT_OF_MEMORY)
       return CURLE_OUT_OF_MEMORY;
-    else
-      return CURLE_FAILED_INIT;
+    return CURLE_FAILED_INIT;
   }
 
   sigpipe_ignore(data, &pipe_st);

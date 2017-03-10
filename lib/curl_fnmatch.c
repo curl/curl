@@ -145,8 +145,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
       else if(c == ']') {
         if(something_found)
           return SETCHARSET_OK;
-        else
-          something_found = TRUE;
+        something_found = TRUE;
         state = CURLFNM_SCHS_RIGHTBR;
         charset[c] = 1;
         (*p)++;
@@ -244,7 +243,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
       if(c == ']') {
         return SETCHARSET_OK;
       }
-      else if(c == '\\') {
+      if(c == '\\') {
         c = *(++(*p));
         if(ISPRINT(c)) {
           charset[c] = 1;
@@ -345,8 +344,7 @@ static int loop(const unsigned char *pattern, const unsigned char *string)
       else if(*p == '\0') {
         if(*s == '\0')
           return CURL_FNMATCH_MATCH;
-        else
-          return CURL_FNMATCH_NOMATCH;
+        return CURL_FNMATCH_NOMATCH;
       }
       else if(*p == '\\') {
         state = CURLFNM_LOOP_BACKSLASH;

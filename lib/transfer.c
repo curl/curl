@@ -117,7 +117,8 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     *nreadp = 0;
     return CURLE_ABORTED_BY_CALLBACK;
   }
-  else if(nread == CURL_READFUNC_PAUSE) {
+  if(nread == CURL_READFUNC_PAUSE) {
+    struct SingleRequest *k = &data->req;
 
     if(conn->handler->flags & PROTOPT_NONETWORK) {
       /* protocols that work without network cannot be paused. This is
@@ -126,16 +127,15 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
       failf(data, "Read callback asked for PAUSE when not supported!");
       return CURLE_READ_ERROR;
     }
-    else {
-      struct SingleRequest *k = &data->req;
-      /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
-      k->keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
-      if(data->req.upload_chunky) {
+
+    /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
+    k->keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
+    if(data->req.upload_chunky) {
         /* Back out the preallocation done above */
-        data->req.upload_fromhere -= (8 + 2);
-      }
-      *nreadp = 0;
+      data->req.upload_fromhere -= (8 + 2);
     }
+    *nreadp = 0;
+
     return CURLE_OK; /* nothing was read */
   }
   else if((size_t)nread > buffersize) {
@@ -642,7 +642,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
           failf(data, "%s in chunked-encoding", Curl_chunked_strerror(res));
           return CURLE_RECV_ERROR;
         }
-        else if(CHUNKE_STOP == res) {
+        if(CHUNKE_STOP == res) {
           size_t dataleft;
           /* we're done reading chunks! */
           k->keepon &= ~KEEP_RECV; /* read no more */
@@ -918,7 +918,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
         /* this is a paused transfer */
         break;
       }
-      else if(nread<=0) {
+      if(nread<=0) {
         result = done_sending(conn, k);
         if(result)
           return result;
@@ -1192,7 +1192,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             k->size - k->bytecount);
       return CURLE_PARTIAL_FILE;
     }
-    else if(!(data->set.opt_no_body) &&
+    if(!(data->set.opt_no_body) &&
             k->chunk &&
             (conn->chunk.state != CHUNK_STOP)) {
       /*

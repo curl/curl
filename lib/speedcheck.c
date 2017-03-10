@@ -55,10 +55,8 @@ CURLcode Curl_speedcheck(struct Curl_easy *data,
             data->set.low_speed_time);
       return CURLE_OPERATION_TIMEDOUT;
     }
-    else {
-      /* wait complete low_speed_time */
-      Curl_expire_latest(data, nextcheck);
-    }
+    /* wait complete low_speed_time */
+    Curl_expire_latest(data, nextcheck);
   }
   else {
     /* we keep up the required speed all right */
