@@ -123,7 +123,7 @@ USE_SSL      = true
 SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
 !IF EXISTS("$(DEVEL_LIB)\libssl.lib")
-SSL_LIBS     = libssl.lib libcrypto.lib ws2_32.lib crypt32.lib gdi32.lib user32.lib crypt32.lib
+SSL_LIBS     = libssl.lib libcrypto.lib gdi32.lib user32.lib crypt32.lib
 !ELSE
 SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib crypt32.lib
 !ENDIF
