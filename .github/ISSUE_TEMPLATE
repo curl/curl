@@ -1,5 +1,9 @@
-[ There are collections of known issues to be aware of:
-  https://curl.haxx.se/docs/knownbugs.html https://curl.haxx.se/docs/todo.html ]
+<!-- Only file bugs here! Questions should be taken on the mailing list,
+     see https://curl.haxx.se/mail/
+
+     There are collections of known issues to be aware of:
+     https://curl.haxx.se/docs/knownbugs.html
+     https://curl.haxx.se/docs/todo.html       -->
 
 ### I did this
 
@@ -7,6 +11,6 @@
 
 ### curl/libcurl version
 
-[curl -V output perhaps?]
+[curl -V output]
 
 ### operating system
