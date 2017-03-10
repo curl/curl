@@ -244,6 +244,9 @@ $(MODE):
 	@SET USE_IPV6=$(USE_IPV6)
 	@SET USE_SSPI=$(USE_SSPI)
 	@SET USE_WINSSL=$(USE_WINSSL)
+# compatibility bit
+	@SET WITH_NGHTTP2=$(WITH_NGHTTP2)
+
 	@$(MAKE) /NOLOGO /F MakefileBuild.vc
 
 copy_from_lib:

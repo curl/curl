@@ -125,6 +125,7 @@ SSL          = static
 
 !IFDEF USE_SSL
 SSL_CFLAGS   = /DUSE_OPENSSL /I"$(DEVEL_INCLUDE)/openssl"
+!ENDIF
 
 !IF "$(WITH_NGHTTP2)"=="dll"
 NGHTTP2_CFLAGS   = /DUSE_NGHTTP2
@@ -132,8 +133,6 @@ NGHTTP2_LIBS     = nghttp2.lib
 !ELSEIF "$(WITH_NGHTTP2)"=="static"
 NGHTTP2_CFLAGS   = /DUSE_NGHTTP2 /DNGHTTP2_STATICLIB
 NGHTTP2_LIBS     = nghttp2_static.lib
-!ENDIF
-
 !ENDIF
 
 !IF "$(WITH_MBEDTLS)"=="dll" || "$(WITH_MBEDTLS)"=="static"
