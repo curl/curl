@@ -82,7 +82,7 @@ LFLAGS_PDB = /incremental:no /opt:ref,icf /DEBUG
 
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
-WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
+WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib crypt32.lib
 
 BASE_NAME              = libcurl
 BASE_NAME_DEBUG        = $(BASE_NAME)_debug

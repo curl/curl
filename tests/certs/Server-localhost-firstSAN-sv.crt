@@ -1,0 +1,80 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 14725819352362 (0xd649f3b452a)
+    Signature Algorithm: sha1WithRSAEncryption
+        Issuer:
+            countryName               = NN
+            organizationName          = Edel Curl Arctic Illudium Research Cloud
+            commonName                = Northern Nowhere Trust Anchor
+        Validity
+            Not Before: Aug 30 18:32:15 2016 GMT
+            Not After : Nov 16 18:32:15 2024 GMT
+        Subject:
+            countryName               = NN
+            organizationName          = Edel Curl Arctic Illudium Research Cloud
+            commonName                = localhost.nn
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (1024 bit)
+                Modulus:
+                    00:c5:87:2e:fb:f5:88:8a:39:4c:62:88:9f:fb:4a:
+                    02:1c:27:92:9d:0b:65:a2:70:1f:d1:b7:de:c8:1d:
+                    87:28:4b:9c:4b:cc:f6:f6:7c:83:1f:2d:76:be:41:
+                    29:5e:31:fa:23:0c:2d:7d:cb:38:c2:8b:54:8f:fc:
+                    6a:50:6d:c7:d7:af:72:fb:3b:a1:a7:4d:c4:1b:d2:
+                    0d:75:7c:92:62:97:48:c4:e8:12:c0:00:33:66:0e:
+                    28:17:0f:5c:36:d6:50:70:ec:c8:9f:a2:ae:b9:eb:
+                    eb:19:05:f0:53:83:42:2a:ae:40:1f:fa:fb:7a:b7:
+                    86:4c:ab:6b:28:0b:2f:7f:81
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Subject Alternative Name: 
+                DNS:localhost, DNS:localhost1, DNS:localhost2
+            X509v3 Key Usage: 
+                Digital Signature, Key Encipherment, Key Agreement
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication
+            X509v3 Subject Key Identifier: 
+                2C:4D:DD:54:88:59:3F:A4:34:9C:E3:56:FF:95:0F:E2:CE:51:20:95
+            X509v3 Authority Key Identifier: 
+                keyid:12:CA:BA:4B:46:04:A7:75:8A:2C:E8:0E:54:94:BC:12:65:A6:7B:CE
+
+            X509v3 Basic Constraints: 
+                CA:FALSE
+    Signature Algorithm: sha1WithRSAEncryption
+         77:cd:d2:17:91:a6:4b:70:de:79:6a:20:82:a3:56:a3:d0:6a:
+         ba:f7:7d:6f:00:69:d2:06:06:0b:da:cd:49:9d:36:fd:d0:cc:
+         bd:8a:dc:e1:d6:89:c9:23:02:8a:19:2d:14:ca:c6:06:87:66:
+         c7:f4:32:37:95:0d:f1:a7:1c:a1:fe:43:4f:3b:03:03:e2:1a:
+         c6:fc:91:d5:0d:a0:7e:82:60:14:31:2f:6d:b8:f4:57:98:8d:
+         04:74:a3:82:28:6d:1c:b4:de:1a:70:bd:fe:73:ac:b7:96:ec:
+         7c:9b:6d:64:c6:f8:67:39:c7:ea:f4:aa:48:26:b8:14:85:f0:
+         00:ab:8f:bd:1a:95:e2:a7:63:92:35:1e:37:04:c2:70:2c:1c:
+         56:95:b1:83:70:8c:99:88:1c:8a:6f:7a:a2:0d:84:dd:4f:0e:
+         3e:8b:fb:31:cf:ae:ee:b0:e4:f6:c1:8d:d1:98:a9:8d:17:1f:
+         5d:5a:79:e8:7c:97:ab:40:bc:aa:7e:c4:0b:19:30:ad:18:aa:
+         9c:9b:eb:3f:35:d3:86:9c:3a:cc:e6:9a:2c:47:d1:bb:36:6e:
+         f2:c5:d4:e3:0c:5b:c6:eb:30:e6:0d:3a:4b:3a:a3:6b:62:93:
+         8b:6a:59:1f:48:66:2e:d9:70:14:b6:aa:4f:d1:3b:38:5e:e6:
+         79:7f:b7:00
+-----BEGIN CERTIFICATE-----
+MIIDWjCCAkKgAwIBAgIGDWSfO0UqMA0GCSqGSIb3DQEBBQUAMGgxCzAJBgNVBAYT
+Ak5OMTEwLwYDVQQKDChFZGVsIEN1cmwgQXJjdGljIElsbHVkaXVtIFJlc2VhcmNo
+IENsb3VkMSYwJAYDVQQDDB1Ob3J0aGVybiBOb3doZXJlIFRydXN0IEFuY2hvcjAe
+Fw0xNjA4MzAxODMyMTVaFw0yNDExMTYxODMyMTVaMFcxCzAJBgNVBAYTAk5OMTEw
+LwYDVQQKDChFZGVsIEN1cmwgQXJjdGljIElsbHVkaXVtIFJlc2VhcmNoIENsb3Vk
+MRUwEwYDVQQDDAxsb2NhbGhvc3Qubm4wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJ
+AoGBAMWHLvv1iIo5TGKIn/tKAhwnkp0LZaJwH9G33sgdhyhLnEvM9vZ8gx8tdr5B
+KV4x+iMMLX3LOMKLVI/8alBtx9evcvs7oadNxBvSDXV8kmKXSMToEsAAM2YOKBcP
+XDbWUHDsyJ+irrnr6xkF8FODQiquQB/6+3q3hkyraygLL3+BAgMBAAGjgZ4wgZsw
+LAYDVR0RBCUwI4IJbG9jYWxob3N0ggpsb2NhbGhvc3Qxggpsb2NhbGhvc3QyMAsG
+A1UdDwQEAwIDqDATBgNVHSUEDDAKBggrBgEFBQcDATAdBgNVHQ4EFgQULE3dVIhZ
+P6Q0nONW/5UP4s5RIJUwHwYDVR0jBBgwFoAUEsq6S0YEp3WKLOgOVJS8EmWme84w
+CQYDVR0TBAIwADANBgkqhkiG9w0BAQUFAAOCAQEAd83SF5GmS3DeeWoggqNWo9Bq
+uvd9bwBp0gYGC9rNSZ02/dDMvYrc4daJySMCihktFMrGBodmx/QyN5UN8accof5D
+TzsDA+IaxvyR1Q2gfoJgFDEvbbj0V5iNBHSjgihtHLTeGnC9/nOst5bsfJttZMb4
+ZznH6vSqSCa4FIXwAKuPvRqV4qdjkjUeNwTCcCwcVpWxg3CMmYgcim96og2E3U8O
+Pov7Mc+u7rDk9sGN0ZipjRcfXVp56HyXq0C8qn7ECxkwrRiqnJvrPzXThpw6zOaa
+LEfRuzZu8sXU4wxbxusw5g06Szqja2KTi2pZH0hmLtlwFLaqT9E7OF7meX+3AA==
+-----END CERTIFICATE-----

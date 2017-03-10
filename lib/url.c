@@ -488,25 +488,33 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->socks5_gssapi_nec = FALSE;
 #endif
 
-  /* This is our preferred CA cert bundle/path since install time */
+  /* Set the default CA cert bundle/path detected/specified at build time.
+   *
+   * If Schannel (WinSSL) is the selected SSL backend then these locations
+   * are ignored. We allow setting CA location for schannel only when
+   * explicitly specified by the user via CURLOPT_CAINFO / --cacert.
+   */
+  if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #if defined(CURL_CA_BUNDLE)
-  result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_ORIG], CURL_CA_BUNDLE);
-  if(result)
-    return result;
+    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_ORIG], CURL_CA_BUNDLE);
+    if(result)
+      return result;
 
-  result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY], CURL_CA_BUNDLE);
-  if(result)
-    return result;
+    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
+                            CURL_CA_BUNDLE);
+    if(result)
+      return result;
 #endif
 #if defined(CURL_CA_PATH)
-  result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_ORIG], CURL_CA_PATH);
-  if(result)
-    return result;
+    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_ORIG], CURL_CA_PATH);
+    if(result)
+      return result;
 
-  result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
-  if(result)
-    return result;
+    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
+    if(result)
+      return result;
 #endif
+  }
 
   set->wildcard_enabled = FALSE;
   set->chunk_bgn      = ZERO_NULL;

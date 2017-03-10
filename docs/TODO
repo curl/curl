@@ -121,7 +121,6 @@
 
  15. WinSSL/SChannel
  15.1 Add support for client certificate authentication
- 15.2 Add support for custom server certificate validation
  15.3 Add support for the --ciphers option
 
  16. SASL
@@ -819,17 +818,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  or the user to supply a custom client certificate using curl or libcurl.
 
  Therefore support for the existing -E/--cert and --key options should be
- implemented by supplying a custom certificate to the SChannel APIs, see:
- - Getting a Certificate for Schannel
-   https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
-
-15.2 Add support for custom server certificate validation
-
- WinSSL/SChannel currently makes use of the OS-level system and user
- certificate trust store. This does not allow the application or user to
- customize the server certificate validation process using curl or libcurl.
-
- Therefore support for the existing --cacert or --capath options should be
  implemented by supplying a custom certificate to the SChannel APIs, see:
  - Getting a Certificate for Schannel
    https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
