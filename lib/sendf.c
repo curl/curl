@@ -565,10 +565,9 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
           failf(data, "Write callback asked for PAUSE when not supported!");
           return CURLE_WRITE_ERROR;
         }
-        else
-          return pausewrite(data, type, ptr, len);
+        return pausewrite(data, type, ptr, len);
       }
-      else if(wrote != chunklen) {
+      if(wrote != chunklen) {
         failf(data, "Failed writing body (%zu != %zu)", wrote, chunklen);
         return CURLE_WRITE_ERROR;
       }
@@ -652,8 +651,7 @@ CURLcode Curl_read_plain(curl_socket_t sockfd,
 #endif
     if(return_error)
       return CURLE_AGAIN;
-    else
-      return CURLE_RECV_ERROR;
+    return CURLE_RECV_ERROR;
   }
 
   /* we only return number of bytes read when we return OK */

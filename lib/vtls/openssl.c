@@ -775,7 +775,7 @@ int Curl_ossl_check_cxn(struct connectdata *conn)
                (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK);
   if(nread == 0)
     return 0; /* connection has been closed */
-  else if(nread == 1)
+  if(nread == 1)
     return 1; /* connection still in place */
   else if(nread == -1) {
       int err = SOCKERRNO;
@@ -2085,12 +2085,10 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
               ssl_capath ? ssl_capath : "none");
         return CURLE_SSL_CACERT_BADFILE;
       }
-      else {
-        /* Just continue with a warning if no strict  certificate verification
-           is required. */
-        infof(data, "error setting certificate verify locations,"
-              " continuing anyway:\n");
-      }
+      /* Just continue with a warning if no strict  certificate verification
+         is required. */
+      infof(data, "error setting certificate verify locations,"
+            " continuing anyway:\n");
     }
     else {
       /* Everything is fine. */
@@ -2120,12 +2118,11 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
       failf(data, "error loading CRL file: %s", ssl_crlfile);
       return CURLE_SSL_CRL_BADFILE;
     }
-    else {
-      /* Everything is fine. */
-      infof(data, "successfully load CRL file:\n");
-      X509_STORE_set_flags(SSL_CTX_get_cert_store(connssl->ctx),
-                           X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
-    }
+    /* Everything is fine. */
+    infof(data, "successfully load CRL file:\n");
+    X509_STORE_set_flags(SSL_CTX_get_cert_store(connssl->ctx),
+                         X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
+
     infof(data, "  CRLfile: %s\n", ssl_crlfile);
   }
 
@@ -2253,7 +2250,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
       connssl->connecting_state = ssl_connect_2_reading;
       return CURLE_OK;
     }
-    else if(SSL_ERROR_WANT_WRITE == detail) {
+    if(SSL_ERROR_WANT_WRITE == detail) {
       connssl->connecting_state = ssl_connect_2_writing;
       return CURLE_OK;
     }
@@ -3066,16 +3063,14 @@ static CURLcode ossl_connect_common(struct connectdata *conn,
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
         return CURLE_SSL_CONNECT_ERROR;
       }
-      else if(0 == what) {
+      if(0 == what) {
         if(nonblocking) {
           *done = FALSE;
           return CURLE_OK;
         }
-        else {
-          /* timeout */
-          failf(data, "SSL connection timeout");
-          return CURLE_OPERATION_TIMEDOUT;
-        }
+        /* timeout */
+        failf(data, "SSL connection timeout");
+        return CURLE_OPERATION_TIMEDOUT;
       }
       /* socket is readable or writable */
     }
@@ -3145,8 +3140,7 @@ bool Curl_ossl_data_pending(const struct connectdata *conn, int connindex)
            (conn->proxy_ssl[connindex].handle &&
             0 != SSL_pending(conn->proxy_ssl[connindex].handle))) ?
            TRUE : FALSE;
-  else
-    return FALSE;
+  return FALSE;
 }
 
 static ssize_t ossl_send(struct connectdata *conn,

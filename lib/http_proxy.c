@@ -293,10 +293,8 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
       if(!Curl_conn_data_pending(conn, sockindex))
         /* return so we'll be called again polling-style */
         return CURLE_OK;
-      else {
-        DEBUGF(infof(data,
-               "Read response immediately from proxy CONNECT\n"));
-      }
+      DEBUGF(infof(data,
+             "Read response immediately from proxy CONNECT\n"));
     }
 
     /* at this point, the tunnel_connecting phase is over. */
@@ -342,7 +340,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
           }
           continue;
         }
-        else if(result) {
+        if(result) {
           keepon = FALSE;
           break;
         }
@@ -617,11 +615,9 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
     if(conn->bits.proxy_connect_closed)
       /* this is not an error, just part of the connection negotiation */
       return CURLE_OK;
-    else {
-      failf(data, "Received HTTP code %d from proxy after CONNECT",
-            data->req.httpcode);
-      return CURLE_RECV_ERROR;
-    }
+    failf(data, "Received HTTP code %d from proxy after CONNECT",
+          data->req.httpcode);
+    return CURLE_RECV_ERROR;
   }
 
   conn->tunnel_state[sockindex] = TUNNEL_COMPLETE;

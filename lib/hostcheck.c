@@ -87,7 +87,7 @@ static int hostmatch(char *hostname, char *pattern)
   if(Curl_inet_pton(AF_INET, hostname, &ignored) > 0)
     return CURL_HOST_NOMATCH;
 #ifdef ENABLE_IPV6
-  else if(Curl_inet_pton(AF_INET6, hostname, &si6.sin6_addr) > 0)
+  if(Curl_inet_pton(AF_INET6, hostname, &si6.sin6_addr) > 0)
     return CURL_HOST_NOMATCH;
 #endif
 

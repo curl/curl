@@ -216,7 +216,7 @@ static CURLcode rtsp_done(struct connectdata *conn,
             CSeq_sent, CSeq_recv);
       return CURLE_RTSP_CSEQ_ERROR;
     }
-    else if(data->set.rtspreq == RTSPREQ_RECEIVE &&
+    if(data->set.rtspreq == RTSPREQ_RECEIVE &&
             (conn->proto.rtspc.rtp_channel == -1)) {
       infof(data, "Got an RTP Receive with a CSeq of %ld\n", CSeq_recv);
       /* TODO CPC: Server -> Client logic here */
@@ -648,31 +648,29 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
         *readmore = TRUE;
         break;
       }
-      else {
-        /* We have the full RTP interleaved packet
-         * Write out the header including the leading '$' */
-        DEBUGF(infof(data, "RTP write channel %d rtp_length %d\n",
-              rtspc->rtp_channel, rtp_length));
-        result = rtp_client_write(conn, &rtp[0], rtp_length + 4);
-        if(result) {
-          failf(data, "Got an error writing an RTP packet");
-          *readmore = FALSE;
-          Curl_safefree(rtspc->rtp_buf);
-          rtspc->rtp_buf = NULL;
-          rtspc->rtp_bufsize = 0;
-          return result;
-        }
+      /* We have the full RTP interleaved packet
+       * Write out the header including the leading '$' */
+      DEBUGF(infof(data, "RTP write channel %d rtp_length %d\n",
+             rtspc->rtp_channel, rtp_length));
+      result = rtp_client_write(conn, &rtp[0], rtp_length + 4);
+      if(result) {
+        failf(data, "Got an error writing an RTP packet");
+        *readmore = FALSE;
+        Curl_safefree(rtspc->rtp_buf);
+        rtspc->rtp_buf = NULL;
+        rtspc->rtp_bufsize = 0;
+        return result;
+      }
 
-        /* Move forward in the buffer */
-        rtp_dataleft -= rtp_length + 4;
-        rtp += rtp_length + 4;
+      /* Move forward in the buffer */
+      rtp_dataleft -= rtp_length + 4;
+      rtp += rtp_length + 4;
 
-        if(data->set.rtspreq == RTSPREQ_RECEIVE) {
-          /* If we are in a passive receive, give control back
-           * to the app as often as we can.
-           */
-          k->keepon &= ~KEEP_RECV;
-        }
+      if(data->set.rtspreq == RTSPREQ_RECEIVE) {
+        /* If we are in a passive receive, give control back
+         * to the app as often as we can.
+         */
+        k->keepon &= ~KEEP_RECV;
       }
     }
     else {
@@ -703,20 +701,18 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
     *nread = 0;
     return CURLE_OK;
   }
-  else {
-    /* Fix up k->str to point just after the last RTP packet */
-    k->str += *nread - rtp_dataleft;
+  /* Fix up k->str to point just after the last RTP packet */
+  k->str += *nread - rtp_dataleft;
 
-    /* either all of the data has been read or...
-     * rtp now points at the next byte to parse
-     */
-    if(rtp_dataleft > 0)
-      DEBUGASSERT(k->str[0] == rtp[0]);
+  /* either all of the data has been read or...
+   * rtp now points at the next byte to parse
+   */
+  if(rtp_dataleft > 0)
+    DEBUGASSERT(k->str[0] == rtp[0]);
 
-    DEBUGASSERT(rtp_dataleft <= *nread); /* sanity check */
+  DEBUGASSERT(rtp_dataleft <= *nread); /* sanity check */
 
-    *nread = rtp_dataleft;
-  }
+  *nread = rtp_dataleft;
 
   /* If we get here, we have finished with the leftover/merge buffer */
   Curl_safefree(rtspc->rtp_buf);

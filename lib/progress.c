@@ -267,8 +267,8 @@ long Curl_pgrsLimitWaitTime(curl_off_t cursize,
   if(actual < minimum)
     /* this is a conversion on some systems (64bit time_t => 32bit long) */
     return (long)(minimum - actual);
-  else
-    return 0;
+
+  return 0;
 }
 
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
@@ -454,7 +454,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
         failf(data, "Callback aborted");
       return result;
     }
-    else if(data->set.fprogress) {
+    if(data->set.fprogress) {
       /* The older deprecated callback is set, call that */
       result= data->set.fprogress(data->set.progress_client,
                                   (double)data->progress.size_dl,

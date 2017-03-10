@@ -515,7 +515,7 @@ int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
     socks[0] = conn->sock[FIRSTSOCKET];
     return GETSOCK_WRITESOCK(0);
   }
-  else if(connssl->connecting_state == ssl_connect_2_reading) {
+  if(connssl->connecting_state == ssl_connect_2_reading) {
     /* read mode */
     socks[0] = conn->sock[FIRSTSOCKET];
     return GETSOCK_READSOCK(0);

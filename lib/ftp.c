@@ -916,8 +916,7 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
 
     return bits;
   }
-  else
-    return Curl_pp_getsock(&conn->proto.ftpc.pp, socks, numsocks);
+  return Curl_pp_getsock(&conn->proto.ftpc.pp, socks, numsocks);
 }
 
 /* This is called after the FTP_QUOTE state is passed.
@@ -1209,7 +1208,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         possibly_non_local = FALSE; /* don't try this again */
         continue;
       }
-      else if(error != EADDRINUSE && error != EACCES) {
+      if(error != EADDRINUSE && error != EACCES) {
         failf(data, "bind(port=%hu) failed: %s", port,
               Curl_strerror(conn, error) );
         Curl_closesocket(conn, portsock);
@@ -1307,7 +1306,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       }
       break;
     }
-    else if(PORT == fcmd) {
+    if(PORT == fcmd) {
       char *source = myhost;
       char *dest = tmp;
 
@@ -1674,31 +1673,29 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
     }
 
     if(seekerr != CURL_SEEKFUNC_OK) {
+      curl_off_t passed=0;
       if(seekerr != CURL_SEEKFUNC_CANTSEEK) {
         failf(data, "Could not seek stream");
         return CURLE_FTP_COULDNT_USE_REST;
       }
       /* seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
-      else {
-        curl_off_t passed=0;
-        do {
-          size_t readthisamountnow =
-            (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
-            BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
+      do {
+        size_t readthisamountnow =
+          (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
+          BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
 
-          size_t actuallyread =
-            data->state.fread_func(data->state.buffer, 1, readthisamountnow,
-                                   data->state.in);
+        size_t actuallyread =
+          data->state.fread_func(data->state.buffer, 1, readthisamountnow,
+                                 data->state.in);
 
-          passed += actuallyread;
-          if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
-            /* this checks for greater-than only to make sure that the
-               CURL_READFUNC_ABORT return code still aborts */
-            failf(data, "Failed to read data");
-            return CURLE_FTP_COULDNT_USE_REST;
-          }
-        } while(passed < data->state.resume_from);
-      }
+        passed += actuallyread;
+        if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
+          /* this checks for greater-than only to make sure that the
+             CURL_READFUNC_ABORT return code still aborts */
+          failf(data, "Failed to read data");
+          return CURLE_FTP_COULDNT_USE_REST;
+        }
+      } while(passed < data->state.resume_from);
     }
     /* now, decrease the size of the read */
     if(data->state.infilesize>0) {
@@ -2412,8 +2409,7 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
 
     return CURLE_OK;
   }
-  else
-    return InitiateTransfer(conn);
+  return InitiateTransfer(conn);
 }
 
 /* for LIST and RETR responses */
@@ -2948,12 +2944,10 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
           state(conn, FTP_NAMEFMT);
           break;
         }
-        else {
-          /* Nothing special for the target server. */
-          /* remember target server OS */
-          Curl_safefree(ftpc->server_os);
-          ftpc->server_os = os;
-        }
+        /* Nothing special for the target server. */
+        /* remember target server OS */
+        Curl_safefree(ftpc->server_os);
+        ftpc->server_os = os;
       }
       else {
         /* Cannot identify server OS. Continue anyway and cross fingers. */
@@ -3800,12 +3794,10 @@ static CURLcode init_wc_data(struct connectdata *conn)
       result = ftp_parse_url_path(conn);
       return result;
     }
-    else {
-      wildcard->pattern = strdup(last_slash);
-      if(!wildcard->pattern)
-        return CURLE_OUT_OF_MEMORY;
-      last_slash[0] = '\0'; /* cut file from path */
-    }
+    wildcard->pattern = strdup(last_slash);
+    if(!wildcard->pattern)
+      return CURLE_OUT_OF_MEMORY;
+    last_slash[0] = '\0'; /* cut file from path */
   }
   else { /* there is only 'wildcard pattern' or nothing */
     if(path[0]) {
@@ -3890,8 +3882,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
     if(wildcard->state == CURLWC_CLEAN)
       /* only listing! */
       break;
-    else
-      wildcard->state = result ? CURLWC_ERROR : CURLWC_MATCHING;
+    wildcard->state = result ? CURLWC_ERROR : CURLWC_MATCHING;
     break;
 
   case CURLWC_MATCHING: {
@@ -3909,7 +3900,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
       wildcard->state = CURLWC_CLEAN;
       return wc_statemach(conn);
     }
-    else if(wildcard->filelist->size == 0) {
+    if(wildcard->filelist->size == 0) {
       /* no corresponding file */
       wildcard->state = CURLWC_CLEAN;
       return CURLE_REMOTE_FILE_NOT_FOUND;

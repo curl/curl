@@ -469,7 +469,7 @@ Curl_addrinfo *Curl_str2addr(char *address, int port)
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(AF_INET, &in, address, port);
 #ifdef ENABLE_IPV6
-  else {
+  {
     struct in6_addr in6;
     if(Curl_inet_pton(AF_INET6, address, &in6) > 0)
       /* This is a dotted IPv6 address ::1-style */

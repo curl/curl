@@ -959,10 +959,8 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
       if(s == CURL_SOCKET_BAD)
         /* this socket is unused, break out of loop */
         break;
-      else {
-        if((int)s > this_max_fd)
-          this_max_fd = (int)s;
-      }
+      if((int)s > this_max_fd)
+        this_max_fd = (int)s;
     }
 
     data = data->next; /* check next handle */
@@ -2277,8 +2275,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 
     return CURLM_OK;
   }
-  else
-    return CURLM_BAD_HANDLE;
+  return CURLM_BAD_HANDLE;
 }
 
 /*
@@ -2313,8 +2310,7 @@ CURLMsg *curl_multi_info_read(struct Curl_multi *multi, int *msgs_in_queue)
 
     return &msg->extmsg;
   }
-  else
-    return NULL;
+  return NULL;
 }
 
 /*
@@ -2575,7 +2571,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     /* or should we fall-through and do the timer-based stuff? */
     return result;
   }
-  else if(s != CURL_SOCKET_TIMEOUT) {
+  if(s != CURL_SOCKET_TIMEOUT) {
 
     struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
 

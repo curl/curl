@@ -899,11 +899,9 @@ static CURLcode check_telnet_options(struct connectdata *conn)
       result = CURLE_UNKNOWN_TELNET_OPTION;
       break;
     }
-    else {
-      failf(data, "Syntax error in telnet option: %s", head->data);
-      result = CURLE_TELNET_OPTION_SYNTAX;
-      break;
-    }
+    failf(data, "Syntax error in telnet option: %s", head->data);
+    result = CURLE_TELNET_OPTION_SYNTAX;
+    break;
   }
 
   if(result) {
@@ -1594,7 +1592,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
         if(result == CURLE_AGAIN)
           break;
         /* returned not-zero, this an error */
-        else if(result) {
+        if(result) {
           keepon = FALSE;
           break;
         }

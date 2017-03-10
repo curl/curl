@@ -91,10 +91,8 @@ Curl_hash_init(struct curl_hash *h,
     }
     return 0; /* fine */
   }
-  else {
-    h->slots = 0;
-    return 1; /* failure */
-  }
+  h->slots = 0;
+  return 1; /* failure */
 }
 
 static struct curl_hash_element *
@@ -347,10 +345,8 @@ Curl_hash_next_element(struct curl_hash_iterator *iter)
     struct curl_hash_element *he = iter->current_element->ptr;
     return he;
   }
-  else {
-    iter->current_element = NULL;
-    return NULL;
-  }
+  iter->current_element = NULL;
+  return NULL;
 }
 
 #if 0 /* useful function for debugging hashes and their contents */

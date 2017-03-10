@@ -359,7 +359,7 @@ static CURLcode tftp_parse_option_ack(tftp_state_data_t *state,
         failf(data, "invalid blocksize value in OACK packet");
         return CURLE_TFTP_ILLEGAL;
       }
-      else if(blksize > TFTP_BLKSIZE_MAX) {
+      if(blksize > TFTP_BLKSIZE_MAX) {
         failf(data, "%s (%d)", "blksize is larger than max supported",
               TFTP_BLKSIZE_MAX);
         return CURLE_TFTP_ILLEGAL;
@@ -1189,7 +1189,7 @@ static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
     state->state = TFTP_STATE_FIN;
     return 0;
   }
-  else if(current > state->rx_time+state->retry_time) {
+  if(current > state->rx_time+state->retry_time) {
     if(event)
       *event = TFTP_EVENT_TIMEOUT;
     time(&state->rx_time); /* update even though we received nothing */
@@ -1223,7 +1223,7 @@ static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done)
     failf(data, "TFTP response timeout");
     return CURLE_OPERATION_TIMEDOUT;
   }
-  else if(event != TFTP_EVENT_NONE) {
+  if(event != TFTP_EVENT_NONE) {
     result = tftp_state_machine(state, event);
     if(result)
       return result;

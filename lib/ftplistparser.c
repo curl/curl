@@ -433,10 +433,8 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                 PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
                 return bufflen;
               }
-              else {
-                parser->state.UNIX.main = PL_UNIX_FILETYPE;
-                finfo->b_used = 0;
-              }
+              parser->state.UNIX.main = PL_UNIX_FILETYPE;
+              finfo->b_used = 0;
             }
             else {
               PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
