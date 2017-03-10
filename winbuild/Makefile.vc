@@ -116,9 +116,9 @@ SSL     = static
 
 !IF "$(ENABLE_NGHTTP2)"=="yes"
 # compatibility bit, WITH_NGHTTP2 is the correct flag
-WITH_NGHTTP2=dll
-USE_NGHTTP2 = true
-NGHTTP2     = dll
+WITH_NGHTTP2 = dll
+USE_NGHTTP2  = true
+NGHTTP2      = dll
 !ELSEIF "$(WITH_NGHTTP2)"=="dll"
 USE_NGHTTP2 = true
 NGHTTP2     = dll
