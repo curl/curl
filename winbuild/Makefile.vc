@@ -21,8 +21,7 @@ CFGSET=true
 !MESSAGE                                  Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
 !MESSAGE                                  Uncompress them into the deps folder.
 !MESSAGE   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
-!MESSAGE   ENABLE_NGHTTP2=<yes or no>   - Enable HTTP/2 support, defaults to no
-!MESSAGE                                  Requires OpenSSL
+!MESSAGE   WITH_NGHTTP2=<dll or static> - Enable HTTP/2 support, DLL or static
 !MESSAGE   WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
@@ -114,10 +113,17 @@ USE_SSL = true
 SSL     = static
 !ENDIF
 
-!IF "$(USE_SSL)"=="true"
 !IF "$(ENABLE_NGHTTP2)"=="yes"
+# compatibility bit, WITH_NGHTTP2 is the correct flag
+WITH_NGHTTP2 = dll
+USE_NGHTTP2  = true
+NGHTTP2      = dll
+!ELSEIF "$(WITH_NGHTTP2)"=="dll"
 USE_NGHTTP2 = true
-!ENDIF
+NGHTTP2     = dll
+!ELSEIF "$(WITH_NGHTTP2)"=="static"
+USE_NGHTTP2 = true
+NGHTTP2     = static
 !ENDIF
 
 !IFNDEF USE_NGHTTP2
@@ -205,6 +211,10 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-winssl
 !ENDIF
 
+!IF "$(USE_NGHTTP2)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-nghttp2-$(NGHTTP2)
+!ENDIF
+
 !MESSAGE configuration name: $(CONFIG_NAME_LIB)
 
 BUILD_DIR=../builds/$(CONFIG_NAME_LIB)
@@ -233,6 +243,9 @@ $(MODE):
 	@SET USE_IPV6=$(USE_IPV6)
 	@SET USE_SSPI=$(USE_SSPI)
 	@SET USE_WINSSL=$(USE_WINSSL)
+# compatibility bit
+	@SET WITH_NGHTTP2=$(WITH_NGHTTP2)
+
 	@$(MAKE) /NOLOGO /F MakefileBuild.vc
 
 copy_from_lib:
