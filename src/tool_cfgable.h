@@ -235,6 +235,7 @@ struct OperationConfig {
   bool falsestart;
   bool path_as_is;
   double expect100timeout;
+  bool haproxy_protocol;          /* whether to send HAProxy PROXY protocol */
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */

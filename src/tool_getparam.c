@@ -109,6 +109,7 @@ static const struct LongShort aliases[]= {
   {"*x", "krb",                      TRUE},
   {"*x", "krb4",                     TRUE},
          /* 'krb4' is the previous name */
+  {"*X", "haproxy-protocol",         FALSE},
   {"*y", "max-filesize",             TRUE},
   {"*z", "disable-eprt",             FALSE},
   {"*Z", "eprt",                     FALSE},
@@ -742,6 +743,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           GetStr(&config->krblevel, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      case 'X': /* --haproxy-protocol */
+        config->haproxy_protocol = toggle;
         break;
       case 'y': /* --max-filesize */
         err = str2offset(&config->max_filesize, nextarg);
