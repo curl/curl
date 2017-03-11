@@ -515,33 +515,34 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
         }
         else if(checkprefix("Content-Length:", line_start)) {
           if(k->httpcode/100 == 2) {
-            /* A server MUST NOT send any Transfer-Encoding or
-               Content-Length header fields in a 2xx (Successful)
-               response to CONNECT. (RFC 7231 section 4.3.6) */
-            failf(data, "Content-Length: in %03d response",
+            /* A client MUST ignore any Content-Length or Transfer-Encoding
+               header fields received in a successful response to CONNECT.
+               "Successful" described as: 2xx (Successful). RFC 7231 4.3.6 */
+            infof(data, "Ignoring Content-Length in CONNECT %03d response\n",
                   k->httpcode);
-            return CURLE_RECV_ERROR;
           }
-
-          cl = curlx_strtoofft(line_start +
-                               strlen("Content-Length:"), NULL, 10);
+          else {
+            cl = curlx_strtoofft(line_start +
+                                 strlen("Content-Length:"), NULL, 10);
+          }
         }
         else if(Curl_compareheader(line_start, "Connection:", "close"))
           closeConnection = TRUE;
-        else if(Curl_compareheader(line_start,
-                                   "Transfer-Encoding:",
-                                   "chunked")) {
+        else if(checkprefix("Transfer-Encoding:", line_start)) {
           if(k->httpcode/100 == 2) {
-            /* A server MUST NOT send any Transfer-Encoding or
-               Content-Length header fields in a 2xx (Successful)
-               response to CONNECT. (RFC 7231 section 4.3.6) */
-            failf(data, "Transfer-Encoding: in %03d response", k->httpcode);
-            return CURLE_RECV_ERROR;
+            /* A client MUST ignore any Content-Length or Transfer-Encoding
+               header fields received in a successful response to CONNECT.
+               "Successful" described as: 2xx (Successful). RFC 7231 4.3.6 */
+            infof(data, "Ignoring Transfer-Encoding in "
+                  "CONNECT %03d response\n", k->httpcode);
           }
-          infof(data, "CONNECT responded chunked\n");
-          chunked_encoding = TRUE;
-          /* init our chunky engine */
-          Curl_httpchunk_init(conn);
+          else if(Curl_compareheader(line_start,
+                                     "Transfer-Encoding:", "chunked")) {
+            infof(data, "CONNECT responded chunked\n");
+            chunked_encoding = TRUE;
+            /* init our chunky engine */
+            Curl_httpchunk_init(conn);
+          }
         }
         else if(Curl_compareheader(line_start, "Proxy-Connection:", "close"))
           closeConnection = TRUE;
