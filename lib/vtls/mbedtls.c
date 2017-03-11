@@ -159,7 +159,7 @@ static Curl_send mbed_send;
 
 static CURLcode mbedtls_version_from_curl(int *mbedver, long version)
 {
-  switch(ssl_version) {
+  switch(version) {
     case CURL_SSLVERSION_TLSv1_0:
       *mbedver = MBEDTLS_SSL_MINOR_VERSION_1;
       return CURLE_OK;
