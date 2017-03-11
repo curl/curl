@@ -111,12 +111,10 @@ int test(char *url)
   res = send_wrong_password(curl, url, 100, main_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
-  curl_easy_reset(curl);
 
   res = send_right_password(curl, url, 200, fallback_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
-  curl_easy_reset(curl);
 
   curl_easy_cleanup(curl);
 
@@ -131,17 +129,14 @@ int test(char *url)
   res = send_wrong_password(curl, url, 300, main_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
-  curl_easy_reset(curl);
 
   res = send_wrong_password(curl, url, 400, fallback_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
-  curl_easy_reset(curl);
 
   res = send_right_password(curl, url, 500, fallback_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
-  curl_easy_reset(curl);
 
 test_cleanup:
 
