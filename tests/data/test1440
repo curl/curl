@@ -1,0 +1,31 @@
+<testcase>
+<info>
+<keywords>
+--write-out
+</keywords>
+</info>
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+file
+</server>
+
+<name>
+Check --write-out with trailing %{
+</name>
+<command>
+file://localhost/%PWD/log/ --write-out '%{'
+</command>
+</client>
+
+# Verify data
+<verify>
+<stdout nonewline="yes">
+%{
+</stdout>
+</verify>
+</testcase>
