@@ -27,6 +27,9 @@ http
  <name>
 --libcurl for simple HTTP GET
  </name>
+<setenv>
+SSL_CERT_FILE=
+</setenv>
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/1400 --libcurl log/test1400.c
 </command>

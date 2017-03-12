@@ -25,6 +25,9 @@ smtp
  <name>
 --libcurl for SMTP
  </name>
+<setenv>
+SSL_CERT_FILE=
+</setenv>
 <file name="log/test1406.eml">
 From: different
 To: another

@@ -32,7 +32,10 @@ imap
  <name>
 --libcurl for IMAP FETCH message
  </name>
- <command>
+<setenv>
+SSL_CERT_FILE=
+</setenv>
+<command>
 'imap://%HOSTIP:%IMAPPORT/1420/;UID=1' -u user:secret --libcurl log/test1420.c
 </command>
 </client>

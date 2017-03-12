@@ -31,6 +31,9 @@ http
  <name>
 --libcurl for GET with various options
  </name>
+<setenv>
+SSL_CERT_FILE=
+</setenv>
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/1401 --libcurl log/test1401.c --basic -u fake:user -H "X-Files: Mulder" -H "X-Men: cyclops, iceman" -A MyUA -b chocolate=chip --proto "=http,ftp,file"
 </command>

@@ -26,7 +26,10 @@ pop3
  <name>
 --libcurl for POP3 LIST one message
  </name>
- <command>
+<setenv>
+SSL_CERT_FILE=
+</setenv>
+<command>
 pop3://%HOSTIP:%POP3PORT/1407 -l -u user:secret --libcurl log/test1407.c
 </command>
 </client>

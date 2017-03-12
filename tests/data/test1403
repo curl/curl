@@ -28,6 +28,9 @@ http
  <name>
 --libcurl for GET with query
  </name>
+<setenv>
+SSL_CERT_FILE=
+</setenv>
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/1403 --libcurl log/test1403.c -G -d "foo=bar" -d "baz=quux"
 </command>

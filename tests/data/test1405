@@ -32,6 +32,9 @@ ftp
  <name>
 --libcurl for FTP with quote ops
  </name>
+<setenv>
+SSL_CERT_FILE=
+</setenv>
  <command>
 ftp://%HOSTIP:%FTPPORT/1405 -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3" -Q "*FAIL" -Q "+*FAIL HARD" --libcurl log/test1405.c
 </command>

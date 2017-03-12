@@ -28,6 +28,9 @@ http
  <name>
 --libcurl for simple POST
  </name>
+<setenv>
+SSL_CERT_FILE=
+</setenv>
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/1402 --libcurl log/test1402.c -d "foo=bar" -d "baz=quux"
 </command>
