@@ -2,6 +2,7 @@
 <info>
 <keywords>
 --write-out
+FILE
 </keywords>
 </info>
 # Server-side
@@ -18,12 +19,15 @@ file
 Check --write-out with trailing %
 </name>
 <command>
-file://localhost/%PWD/log/ --write-out '%'
+file://localhost/%PWD/log/non-existent-file.txt --write-out '%'
 </command>
 </client>
 
 # Verify data
 <verify>
+<errorcode>
+37
+</errorcode>
 <stdout nonewline="yes">
 %
 </stdout>
