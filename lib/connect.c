@@ -810,8 +810,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
         return CURLE_OK;
       }
-      else
-        infof(data, "Connection failed\n");
+      infof(data, "Connection failed\n");
     }
     else if(rc & CURL_CSELECT_ERR)
       (void)verifyconnect(conn->tempsock[i], &error);

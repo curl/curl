@@ -1197,8 +1197,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
            This needs FIXing.
         */
         return CURLE_SEND_ERROR;
-      else
-        Curl_pipeline_leave_write(conn);
+      Curl_pipeline_leave_write(conn);
     }
   }
   Curl_add_buffer_free(in);
@@ -2156,32 +2155,31 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       }
 
       if(seekerr != CURL_SEEKFUNC_OK) {
+        curl_off_t passed=0;
+
         if(seekerr != CURL_SEEKFUNC_CANTSEEK) {
           failf(data, "Could not seek stream");
           return CURLE_READ_ERROR;
         }
         /* when seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
-        else {
-          curl_off_t passed=0;
-          do {
-            size_t readthisamountnow =
-              (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
-              BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
+        do {
+          size_t readthisamountnow =
+            (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
+            BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
 
-            size_t actuallyread =
-              data->state.fread_func(data->state.buffer, 1, readthisamountnow,
-                                     data->state.in);
+          size_t actuallyread =
+            data->state.fread_func(data->state.buffer, 1, readthisamountnow,
+                                   data->state.in);
 
-            passed += actuallyread;
-            if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
-              /* this checks for greater-than only to make sure that the
-                 CURL_READFUNC_ABORT return code still aborts */
-              failf(data, "Could only read %" CURL_FORMAT_CURL_OFF_T
-                    " bytes from the input", passed);
-              return CURLE_READ_ERROR;
-            }
-          } while(passed < data->state.resume_from);
-        }
+          passed += actuallyread;
+          if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
+            /* this checks for greater-than only to make sure that the
+               CURL_READFUNC_ABORT return code still aborts */
+            failf(data, "Could only read %" CURL_FORMAT_CURL_OFF_T
+                  " bytes from the input", passed);
+            return CURLE_READ_ERROR;
+          }
+        } while(passed < data->state.resume_from);
       }
 
       /* now, decrease the size of the read */
@@ -2827,8 +2825,7 @@ checkrtspprefix(struct Curl_easy *data,
 #endif /* CURL_DOES_CONVERSIONS */
   if(checkprefix("RTSP/", s))
     return TRUE;
-  else
-    return FALSE;
+  return FALSE;
 }
 #endif /* CURL_DISABLE_RTSP */
 

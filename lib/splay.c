@@ -201,10 +201,8 @@ struct Curl_tree *Curl_splaygetbest(struct timeval i,
 
     return x;
   }
-  else {
-    *removed = NULL; /* no match */
-    return t;        /* It wasn't there */
-  }
+  *removed = NULL; /* no match */
+  return t;        /* It wasn't there */
 }
 
 

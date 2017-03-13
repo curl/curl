@@ -3684,7 +3684,7 @@ ConnectionExists(struct Curl_easy *data,
                            check->connection_id));
               continue;
             }
-            else if(check->ssl[FIRSTSOCKET].state != ssl_connection_complete) {
+            if(check->ssl[FIRSTSOCKET].state != ssl_connection_complete) {
               foundPendingCandidate = TRUE;
               DEBUGF(infof(data,
                            "Connection #%ld has not started SSL connect, "

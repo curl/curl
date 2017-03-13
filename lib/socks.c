@@ -73,7 +73,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
     result = Curl_read_plain(sockfd, buf, buffersize, &nread);
     if(CURLE_AGAIN == result)
       continue;
-    else if(result)
+    if(result)
       break;
 
     if(buffersize == nread) {
@@ -416,7 +416,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     failf(conn->data, "SOCKS5: no connection here");
     return CURLE_COULDNT_CONNECT;
   }
-  else if(0 == result) {
+  if(0 == result) {
     failf(conn->data, "SOCKS5: connection timeout");
     return CURLE_OPERATION_TIMEDOUT;
   }
@@ -457,7 +457,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     failf(conn->data, "SOCKS5 nothing to read");
     return CURLE_COULDNT_CONNECT;
   }
-  else if(0 == result) {
+  if(0 == result) {
     failf(conn->data, "SOCKS5 read timeout");
     return CURLE_OPERATION_TIMEDOUT;
   }
@@ -553,7 +553,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
             "SOCKS5 GSSAPI per-message authentication is not supported.");
       return CURLE_COULDNT_CONNECT;
     }
-    else if(socksreq[1] == 255) {
+    if(socksreq[1] == 255) {
 #endif
       if(!proxy_name || !*proxy_name) {
         failf(data,
@@ -772,9 +772,7 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
     }
     return CURLE_COULDNT_CONNECT;
   }
-  else {
-    infof(data, "SOCKS5 request granted.\n");
-  }
+  infof(data, "SOCKS5 request granted.\n");
 
   (void)curlx_nonblock(sock, TRUE);
   return CURLE_OK; /* Proxy was successful! */

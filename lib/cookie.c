@@ -929,9 +929,8 @@ static char *get_line(char *buf, int len, FILE *input)
         }
         return b;
       }
-      else
-        /* read a partial, discard the next piece that ends with newline */
-        partial = TRUE;
+      /* read a partial, discard the next piece that ends with newline */
+      partial = TRUE;
     }
     else
       break;

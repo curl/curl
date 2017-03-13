@@ -128,8 +128,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
         hdrcbdata->honor_cd_filename = FALSE;
         break;
       }
-      else
-        return failure;
+      return failure;
     }
   }
 
