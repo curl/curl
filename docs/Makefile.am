@@ -30,7 +30,8 @@ MANDISTPAGES = curl.1.dist curl-config.1.dist
 
 HTMLPAGES = $(GENHTMLPAGES) index.html
 
-SUBDIRS = examples libcurl cmdline-opts
+SUBDIRS = libcurl cmdline-opts
+DIST_SUBDIRS = $(SUBDIRS) examples
 
 CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
 
