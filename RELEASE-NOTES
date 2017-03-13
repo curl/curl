@@ -1,10 +1,16 @@
 Curl and libcurl 7.54.0
 
  Public curl releases:         165
- Command line options:         205
- curl_easy_setopt() options:   244
+ Command line options:         207
+ curl_easy_setopt() options:   245
  Public functions in libcurl:  61
  Contributors:                 1507
+
+This release includes the following changes:
+ o Add CURL_SSLVERSION_MAX_* constants to CURLOPT_SSLVERSION [19]
+ o Add --max-tls [19]
+ o Add CURLOPT_SUPPRESS_CONNECT_HEADERS [24]
+ o Add --suppress-connect-headers [24]
 
 This release includes the following bugfixes:
 
@@ -39,6 +45,17 @@ This release includes the following bugfixes:
  o http2: Fix assertion error on redirect with CL=0 [16]
  o updatemanpages.pl: Update man pages to use current date and versions [17]
  o --insecure: clarify that this option is for server connections [18]
+ o mkhelp: simplified the gzip code
+ o build: fixed making man page in out-of-tree tarball builds
+ o tests: disabled 1903 due to flakiness
+ o openssl: add two /* FALLTHROUGH */ to satisfy coverity
+ o cmdline-opts: fixed a few typos
+ o authneg: clear auth.multi flag at http_done [20]
+ o curl_easy_reset: Also reset the authentication state [21]
+ o proxy: skip SSL initialization for closed connections [22]
+ o http_proxy: ignore TE and CL in CONNECT 2xx responses [23]
+ o tool_writeout: fixed a buffer read overrun on --write-out
+ o make: regenerate docs/curl.1 by runinng make in docs [25]
 
 This release includes the following known bugs:
 
@@ -47,12 +64,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexis La Goutte, Andrew Krieger, Dan Fandrich, Daniel Stenberg,
-  Giuseppe Persico, Greg Rowe, Isaac Boukris, Joel Depooter, Justin Clift,
-  Marc-Antoine Perennou, Marcel Raad, mccormickt12 on github, Michael Maltese,
-  Orange Tsai, Peter Pentchev, Peter Wu, Ray Satiro, Simon Warta,
-  Steve Brokenshire, Sylvestre Ledru, Tatsuhiro Tsujikawa,
-  (21 contributors)
+  Alexis La Goutte, Andrew Krieger, Antony74 on github, Brian Carpenter,
+  Carlo Cannas, Carlo Teubner, Dan Fandrich, Daniel Stenberg, Desmond O. Chang,
+  Giuseppe Persico, Greg Rowe, Isaac Boukris, Joel Depooter, Jozef Kralik,
+  Justin Clift, Marc-Antoine Perennou, Marcel Raad, mccormickt12 on github,
+  Michael Kaufmann, Michael Maltese, mkzero on github, Orange Tsai,
+  Peter Pentchev, Peter Wu, Ray Satiro, Simon Warta, Steve Brokenshire,
+  Sylvestre Ledru, Tatsuhiro Tsujikawa, Thomas Glanzmann,
+  (30 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -76,3 +95,10 @@ References to bug reports and discussions on issues:
  [16] = https://curl.haxx.se/bug/?i=1286
  [17] = https://curl.haxx.se/bug/?i=1058
  [18] = https://curl.haxx.se/mail/lib-2017-03/0002.html
+ [19] = https://curl.haxx.se/bug/?i=1166
+ [20] = https://curl.haxx.se/bug/?i=1095
+ [21] = https://curl.haxx.se/bug/?i=1095
+ [22] = https://curl.haxx.se/bug/?i=1239
+ [23] = https://curl.haxx.se/bug/?i=1317
+ [24] = https://curl.haxx.se/bug/?i=783
+ [25] = https://curl.haxx.se/mail/lib-2017-03/0017.html
