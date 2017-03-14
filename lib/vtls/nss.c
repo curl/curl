@@ -1992,7 +1992,8 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     unsigned char protocols[128];
 
 #ifdef USE_NGHTTP2
-    if(data->set.httpversion >= CURL_HTTP_VERSION_2) {
+    if(data->set.httpversion >= CURL_HTTP_VERSION_2 &&
+       (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)) {
       protocols[cur++] = NGHTTP2_PROTO_VERSION_ID_LEN;
       memcpy(&protocols[cur], NGHTTP2_PROTO_VERSION_ID,
           NGHTTP2_PROTO_VERSION_ID_LEN);
