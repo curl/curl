@@ -63,9 +63,6 @@ LDADD = $(top_builddir)/src/libcurltool.la   \
         $(top_builddir)/lib/libcurlu.la      \
         @LDFLAGS@ @LIBCURL_LIBS@
 
-DEPENDENCIES = $(top_builddir)/src/libcurltool.la \
-               $(top_builddir)/lib/libcurlu.la
-
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 
 # Makefile.inc provides neat definitions

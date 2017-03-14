@@ -68,7 +68,6 @@ endif
 
 # Dependencies (may need to be overriden)
 LDADD = $(SUPPORTFILES_LIBS)
-DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
 # noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)

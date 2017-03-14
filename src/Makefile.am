@@ -70,7 +70,6 @@ endif
 
 curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
 curl_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
-curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 
 # if unit tests are enabled, build a static library to link them with
 if BUILD_UNITTESTS
