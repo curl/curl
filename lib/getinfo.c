@@ -240,7 +240,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_XFER_STATE:
     return Curl_multi_easy_state(data, param_longp);
-	
+
   default:
     return CURLE_UNKNOWN_OPTION;
   }
