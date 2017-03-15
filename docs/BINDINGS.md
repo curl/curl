@@ -25,6 +25,8 @@ Cocoa: [BBHTTP](https://github.com/brunodecarvalho/BBHTTP) written by Bruno de C
 
 [D](https://dlang.org/library/std/net/curl.html) Written by Kenneth Bogert
 
+[Delphi](https://github.com/Mercury13/curl4delphi) Written by Mikhail Merkuryev
+
 [Dylan](https://dylanlibs.sourceforge.io/) Written by Chris Double
 
 [Eiffel](https://room.eiffel.com/library/curl) Written by Eiffel Software
