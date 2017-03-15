@@ -269,6 +269,7 @@ CURLINFO_TLS_SESSION            7.34.0        7.48.0
 CURLINFO_TLS_SSL_PTR            7.48.0
 CURLINFO_TOTAL_TIME             7.4.1
 CURLINFO_TYPEMASK               7.4.1
+CURLINFO_XFER_STATE             7.55.0
 CURLIOCMD_NOP                   7.12.3
 CURLIOCMD_RESTARTREAD           7.12.3
 CURLIOE_FAILRESTART             7.12.3
@@ -830,3 +831,13 @@ CURL_WAIT_POLLIN                7.28.0
 CURL_WAIT_POLLOUT               7.28.0
 CURL_WAIT_POLLPRI               7.28.0
 CURL_WRITEFUNC_PAUSE            7.18.0
+CURLXFER_CONNECT                7.55.0
+CURLXFER_DO                     7.55.0
+CURLXFER_DONE                   7.55.0
+CURLXFER_INIT                   7.55.0
+CURLXFER_NAMERES                7.55.0
+CURLXFER_PROTOCONNECT           7.55.0
+CURLXFER_PROXYCONNECT           7.55.0
+CURLXFER_TOOFAST                7.55.0
+CURLXFER_TRANSFER               7.55.0
+CURLXFER_WAITDO                 7.55.0
