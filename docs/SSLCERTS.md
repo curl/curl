@@ -161,3 +161,13 @@ disabled. Secure Transport on iOS will run OCSP checks on certificates unless
 peer verification is disabled. Secure Transport on OS X will run either OCSP
 or CRL checks on certificates if those features are enabled, and this behavior
 can be adjusted in the preferences of Keychain Access.
+
+HTTPS proxy
+-----------
+
+Since version 7.52.0, curl can do HTTPS to the proxy separately from the
+connection to the server. This TLS connection is handled separately from the
+server connection so instead of `--insecure` and `--cacert` to control the
+certificate verification, you use `--proxy-insecure` and `--proxy-cacert`.
+With these options, you make sure that the TLS connection and the trust of the
+proxy can be kept totally separate from the TLS connection to the server.
