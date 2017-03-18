@@ -127,6 +127,9 @@
 /* Define to 1 if bool is an available type. */
 #cmakedefine HAVE_BOOL_T 1
 
+/* Define to 1 if you have the connectx function. */
+#cmakedefine HAVE_CONNECTX 1
+
 /* Define to 1 if you have the clock_gettime function and monotonic timer. */
 #cmakedefine HAVE_CLOCK_GETTIME_MONOTONIC 1
 
@@ -715,6 +718,9 @@
 
 /* Define to 1 if you have the <utime.h> header file. */
 #cmakedefine HAVE_UTIME_H 1
+
+/* Define to 1 if you have valid connectx function. */
+#cmakedefine HAVE_VALID_CONNECTX 1
 
 /* Define to 1 if compiler supports C99 variadic macro style. */
 #cmakedefine HAVE_VARIADIC_MACROS_C99 1

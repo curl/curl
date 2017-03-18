@@ -1058,26 +1058,17 @@ static CURLcode singleipconnect(struct connectdata *conn,
   /* Connect TCP sockets, bind UDP */
   if(!isconnected && (conn->socktype == SOCK_STREAM)) {
     if(conn->bits.tcp_fastopen) {
-#if defined(CONNECT_DATA_IDEMPOTENT) /* OS X */
-#ifdef HAVE_BUILTIN_AVAILABLE
-      if(__builtin_available(macOS 10.11, iOS 9.0, tvOS 9.0, watchOS 2.0, *)) {
-#endif /* HAVE_BUILTIN_AVAILABLE */
-        sa_endpoints_t endpoints;
-        endpoints.sae_srcif = 0;
-        endpoints.sae_srcaddr = NULL;
-        endpoints.sae_srcaddrlen = 0;
-        endpoints.sae_dstaddr = &addr.sa_addr;
-        endpoints.sae_dstaddrlen = addr.addrlen;
+#if defined(HAVE_VALID_CONNECTX) /* Darwin */
+      sa_endpoints_t endpoints;
+      endpoints.sae_srcif = 0;
+      endpoints.sae_srcaddr = NULL;
+      endpoints.sae_srcaddrlen = 0;
+      endpoints.sae_dstaddr = &addr.sa_addr;
+      endpoints.sae_dstaddrlen = addr.addrlen;
 
-        rc = connectx(sockfd, &endpoints, SAE_ASSOCID_ANY,
-                      CONNECT_RESUME_ON_READ_WRITE | CONNECT_DATA_IDEMPOTENT,
-                      NULL, 0, NULL, NULL);
-#ifdef HAVE_BUILTIN_AVAILABLE
-      }
-      else {
-        rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
-      }
-#endif /* HAVE_BUILTIN_AVAILABLE */
+      rc = connectx(sockfd, &endpoints, SAE_ASSOCID_ANY,
+                    CONNECT_RESUME_ON_READ_WRITE | CONNECT_DATA_IDEMPOTENT,
+                    NULL, 0, NULL, NULL);
 #elif defined(MSG_FASTOPEN) /* Linux */
       if(conn->given->flags & PROTOPT_SSL)
         rc = connect(sockfd, &addr.sa_addr, addr.addrlen);

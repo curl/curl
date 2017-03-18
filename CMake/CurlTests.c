@@ -549,3 +549,21 @@ main() {
   return 0;
 }
 #endif
+#ifdef HAVE_VALID_CONNECTX
+#  include <Availability.h>
+#  include <sys/socket.h>
+#  if defined(__MAC_OS_X_VERSION_MIN_REQUIRED)
+#    if (__MAC_OS_X_VERSION_MIN_REQUIRED < 101100)
+#      error Function requires deployment target OS X 10.11 or later
+#    endif
+#  elif defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
+#    if (__IPHONE_OS_VERSION_MIN_REQUIRED < 90000)
+#      error Function requires deployment target iOS 9.0 or later
+#    endif
+#  endif
+
+main() {
+  connectx(0, 0, 0, 0, 0, 0, 0, 0);
+  return 0;
+}
+#endif

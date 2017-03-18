@@ -2970,3 +2970,43 @@ AC_DEFUN([CURL_SUPPORTS_BUILTIN_AVAILABLE], [
     AC_MSG_RESULT([no])
   ])
 ])
+
+
+dnl CURL_CHECK_FUNC_CONNECTX
+dnl
+dnl Check if connectx() function is present.
+dnl The connectx() function call appeared in Darwin 15.0.0
+dnl but it's not declared using availability attribute.
+dnl Additionally _connectx symbol is part of OS X 10.9/10.10
+dnl system lib but does not have specified functionality.
+dnl
+
+AC_DEFUN([CURL_CHECK_FUNC_CONNECTX], [
+  AC_REQUIRE([CURL_MAC_CFLAGS])dnl
+  AC_CHECK_FUNCS([connectx])
+  AC_MSG_CHECKING([if connectx is available in deployment target])
+  AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([[
+#if defined(HAVE_CONNECTX)
+#  include <Availability.h>
+#  if defined(__MAC_OS_X_VERSION_MIN_REQUIRED)
+#    if (__MAC_OS_X_VERSION_MIN_REQUIRED < 101100)
+#      error Function requires deployment target OS X 10.11 or later
+#    endif
+#  elif defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
+#    if (__IPHONE_OS_VERSION_MIN_REQUIRED < 90000)
+#      error Function requires deployment target iOS 9.0 or later
+#    endif
+#  endif
+#else
+#  error Function not present in the headers
+#endif
+    ]])],
+    [
+      AC_DEFINE(HAVE_VALID_CONNECTX, 1,
+        [Set to 1 if connectx() function have specified functionality.])
+      AC_MSG_RESULT([yes])
+    ],
+    [AC_MSG_RESULT([no])]
+  )
+])

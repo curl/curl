@@ -880,6 +880,15 @@ check_symbol_exists(fcntl          "${CURL_INCLUDES}" HAVE_FCNTL)
 check_symbol_exists(ioctl          "${CURL_INCLUDES}" HAVE_IOCTL)
 check_symbol_exists(setsockopt     "${CURL_INCLUDES}" HAVE_SETSOCKOPT)
 
+# The connectx() function call appeared in Darwin 15.0.0
+# but it's not declared using availability attribute.
+# Additionally _connectx symbol is part of OS X 10.9/10.10
+# system lib but does not have specified functionality.
+check_symbol_exists(connectx       "${CURL_INCLUDES}" HAVE_CONNECTX)
+if(HAVE_CONNECTX)
+  curl_internal_test_run(HAVE_VALID_CONNECTX)
+endif(HAVE_CONNECTX)
+
 # symbol exists in win32, but function does not.
 if(WIN32)
   if(ENABLE_INET_PTON)
