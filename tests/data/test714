@@ -39,6 +39,9 @@ silly content
 ftp
 http-proxy
 </server>
+<features>
+http
+</features>
  <name>
 FTP fetch with --proxy set to http:// and with --connect-to
  </name>
