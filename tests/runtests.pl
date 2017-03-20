@@ -2684,7 +2684,7 @@ sub checksystem {
         }
         logmsg sprintf("\n*   GOPHER/%d ", $GOPHERPORT);
         if($gopher_ipv6) {
-            logmsg sprintf("GOPHER-IPv6/%d", $GOPHERPORT);
+            logmsg sprintf("GOPHER-IPv6/%d", $GOPHER6PORT);
         }
         logmsg sprintf("\n*   SSH/%d ", $SSHPORT);
         logmsg sprintf("SOCKS/%d ", $SOCKSPORT);
