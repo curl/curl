@@ -768,7 +768,7 @@ endings either CRLF or LF so 't' is appropriate.
  */
 
 #if defined(CONNECT_DATA_IDEMPOTENT)
-/* multiple function declarations with attributes is allowed in GNU extension */
+/* multiple function attributes declarations are allowed in GNU extension */
 extern int connectx(int socket, const sa_endpoints_t *endpoints,
                     sae_associd_t associd, unsigned int flags,
                     const struct iovec *iov, unsigned int iovcnt,
