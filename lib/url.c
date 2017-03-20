@@ -2834,12 +2834,22 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     data->set.tcp_keepintvl = va_arg(param, long);
     break;
   case CURLOPT_TCP_FASTOPEN:
-#if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN)
-    data->set.tcp_fastopen = (0 != va_arg(param, long))?TRUE:FALSE;
-#else
-    result = CURLE_NOT_BUILT_IN;
+  {
+    bool supports_fastopen = false;
+#if defined(CONNECT_DATA_IDEMPOTENT)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpartial-availability"
+    supports_fastopen = (connectx != NULL);
+#  pragma GCC diagnostic pop
+#elif defined(MSG_FASTOPEN)
+    supports_fastopen = true;
 #endif
+    if(supports_fastopen)
+      data->set.tcp_fastopen = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    else
+      result = CURLE_NOT_BUILT_IN;
     break;
+  }
   case CURLOPT_SSL_ENABLE_NPN:
     data->set.ssl_enable_npn = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;

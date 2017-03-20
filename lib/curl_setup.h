@@ -762,4 +762,18 @@ endings either CRLF or LF so 't' is appropriate.
 #  endif
 # endif
 
+/* Detect Darwin connectx() function availability.
+ * The connectx() function call appeared in Darwin 15.0.0
+ * but it's not declared using availability attribute.
+ */
+
+#if defined(CONNECT_DATA_IDEMPOTENT)
+/* multiple function declarations with attributes is allowed in GNU extension */
+extern int connectx(int socket, const sa_endpoints_t *endpoints,
+                    sae_associd_t associd, unsigned int flags,
+                    const struct iovec *iov, unsigned int iovcnt,
+                    size_t *len, sae_connid_t *connid)
+                    __OSX_AVAILABLE_STARTING(__MAC_10_11, __IPHONE_9_0);
+#endif
+
 #endif /* HEADER_CURL_SETUP_H */
