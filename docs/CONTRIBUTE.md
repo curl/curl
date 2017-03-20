@@ -175,14 +175,15 @@ A short guide to how to write commit messages in the curl project.
     possible as to why this change is made, and possibly what things
     it fixes and everything else that is related]
            -- empty line --
+    [Closes/Fixes #1234 - if this closes or fixes a github issue]
     [Bug: URL to source of the report or more related discussion]
     [Reported-by: John Doe - credit the reporter]
     [whatever-else-by: credit all helpers, finders, doers]
     ---- stop ----
 
-Don't forget to use commit --author="" if you commit someone else's work,
-and make sure that you have your own user and email setup correctly in git
-before you commit
+Don't forget to use commit --author="" if you commit someone else's work, and
+make sure that you have your own user and email setup correctly in git before
+you commit
 
 ### Write Access to git Repository
 
