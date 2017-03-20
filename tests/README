@@ -59,14 +59,20 @@ The curl Test Suite
   - TCP/8999 for SCP/SFTP
   - TCP/9000 for SOCKS
   - TCP/9001 for POP3
-  - TCP/9002 for IMAP
-  - TCP/9003 for SMTP
-  - TCP/9004 for SMTP IPv6
-  - TCP/9005 for RTSP
-  - TCP/9006 for RTSP IPv6
-  - TCP/9007 for GOPHER
-  - TCP/9008 for GOPHER IPv6
-  - TCP/9008 for HTTPS server with TLS-SRP support
+  - TCP/9002 for POP3 IPv6
+  - TCP/9003 for IMAP
+  - TCP/9004 for IMAP IPv6
+  - TCP/9005 for SMTP
+  - TCP/9006 for SMTP IPv6
+  - TCP/9007 for RTSP
+  - TCP/9008 for RTSP IPv6
+  - TCP/9009 for GOPHER
+  - TCP/9010 for GOPHER IPv6
+  - TCP/9011 for HTTPS server with TLS-SRP support
+  - TCP/9012 for HTTPS IPv6 server with TLS-SRP support
+  - TCP/9013 for HTTP proxy server for CONNECT
+  - TCP/9014 for HTTP pipelining server
+  - TCP/9015 for HTTP/2 server
 
  1.3 Test servers
 
