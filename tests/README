@@ -44,6 +44,7 @@ The curl Test Suite
   stunnel (for HTTPS and FTPS tests)
   OpenSSH or SunSSH (for SCP, SFTP and SOCKS4/5 tests)
   nghttpx (for HTTP/2 tests)
+  nroff (for --manual tests)
 
  1.2 Port numbers used by test servers
 
