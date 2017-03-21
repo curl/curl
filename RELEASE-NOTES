@@ -55,7 +55,7 @@ This release includes the following bugfixes:
  o proxy: skip SSL initialization for closed connections [22]
  o http_proxy: ignore TE and CL in CONNECT 2xx responses [23]
  o tool_writeout: fixed a buffer read overrun on --write-out
- o make: regenerate docs/curl.1 by runinng make in docs [25]
+ o make: regenerate docs/curl.1 by running make in docs [25]
  o winbuild: add basic support for OpenSSL 1.1.x [26]
  o build: removed redundant DEPENDENCIES from makefiles
  o CURLINFO_LOCAL_PORT.3: added example
