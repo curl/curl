@@ -56,6 +56,14 @@ This release includes the following bugfixes:
  o http_proxy: ignore TE and CL in CONNECT 2xx responses [23]
  o tool_writeout: fixed a buffer read overrun on --write-out
  o make: regenerate docs/curl.1 by runinng make in docs [25]
+ o winbuild: add basic support for OpenSSL 1.1.x [26]
+ o build: removed redundant DEPENDENCIES from makefiles
+ o CURLINFO_LOCAL_PORT.3: added example
+ o curl: show HTTPS-Proxy options on CURLE_SSL_CACERT [27]
+ o tests: strip more options from non-HTTP --libcurl tests
+ o tests: fixed the documented test server port numbers
+ o runtests.pl: fixed display of the Gopher IPv6 port number
+ o multi: fix streamclose() crash in debug mode [28]
 
 This release includes the following known bugs:
 
@@ -64,14 +72,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexis La Goutte, Andrew Krieger, Antony74 on github, Brian Carpenter,
-  Carlo Cannas, Carlo Teubner, Dan Fandrich, Daniel Stenberg, Desmond O. Chang,
-  Giuseppe Persico, Greg Rowe, Isaac Boukris, Joel Depooter, Jozef Kralik,
-  Justin Clift, Marc-Antoine Perennou, Marcel Raad, mccormickt12 on github,
-  Michael Kaufmann, Michael Maltese, mkzero on github, Orange Tsai,
-  Peter Pentchev, Peter Wu, Ray Satiro, Simon Warta, Steve Brokenshire,
-  Sylvestre Ledru, Tatsuhiro Tsujikawa, Thomas Glanzmann,
-  (30 contributors)
+  Alexis La Goutte, Anatol Belski, Andrew Krieger, Antony74 on github,
+  Brian Carpenter, Carlo Cannas, Carlo Teubner, Dan Fandrich, Daniel Stenberg,
+  Desmond O. Chang, Giuseppe Persico, Greg Rowe, Isaac Boukris, Joel Depooter,
+  Jozef Kralik, Justin Clift, Marc-Antoine Perennou, Marcel Raad,
+  mccormickt12 on github, Michael Kaufmann, Michael Maltese, mkzero on github,
+  Nehal J Wani, Orange Tsai, Palo Markovic, Peter Pentchev, Peter Wu,
+  Ray Satiro, Simon Warta, Steve Brokenshire, Sylvestre Ledru,
+  Tatsuhiro Tsujikawa, Thomas Glanzmann, zelinchen on github,
+  (34 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -102,3 +111,6 @@ References to bug reports and discussions on issues:
  [23] = https://curl.haxx.se/bug/?i=1317
  [24] = https://curl.haxx.se/bug/?i=783
  [25] = https://curl.haxx.se/mail/lib-2017-03/0017.html
+ [26] = https://curl.haxx.se/bug/?i=1322
+ [27] = https://curl.haxx.se/bug/?i=1331
+ [28] = https://curl.haxx.se/bug/?i=1329
