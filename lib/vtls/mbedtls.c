@@ -495,6 +495,16 @@ mbed_connect_step1(struct connectdata *conn,
   mbedtls_debug_set_threshold(4);
 #endif
 
+  /* give application a chance to interfere with mbedTLS set up. */
+  if(data->set.ssl.fsslctx) {
+    ret = (*data->set.ssl.fsslctx)(data, &connssl->config,
+                                   data->set.ssl.fsslctxp);
+    if(ret) {
+      failf(data, "error signaled by ssl ctx callback");
+      return ret;
+    }
+  }
+
   connssl->connecting_state = ssl_connect_2;
 
   return CURLE_OK;
