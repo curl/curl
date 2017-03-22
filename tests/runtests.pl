@@ -202,6 +202,7 @@ my $valgrind_tool;
 my $gdb = checktestcmd("gdb");
 my $httptlssrv = find_httptlssrv();
 
+my $has_builtinman; # set if curl is built with --manual support
 my $has_ssl;        # set if libcurl is built with SSL support
 my $has_largefile;  # set if libcurl is built with large file support
 my $has_idn;        # set if libcurl is built with IDN support
@@ -2348,16 +2349,27 @@ sub checksystem {
     my $versretval;
     my $versnoexec;
     my @version=();
+    my $builtinmanretval;
 
     my $curlverout="$LOGDIR/curlverout.log";
     my $curlvererr="$LOGDIR/curlvererr.log";
     my $versioncmd="$CURL --version 1>$curlverout 2>$curlvererr";
+    my $builtinman="$CURL --manual >/dev/null 2>&1";
 
     unlink($curlverout);
     unlink($curlvererr);
 
     $versretval = runclient($versioncmd);
     $versnoexec = $!;
+
+    $builtinmanretval = runclient($builtinman);
+
+    if($builtinmanretval ne "0") {
+        system("echo 1026 >> $TESTDIR/DISABLED.local");
+    }
+    else {
+        $has_builtinman=1;
+    }
 
     open(VERSOUT, "<$curlverout");
     @version = <VERSOUT>;
@@ -5365,6 +5377,10 @@ else {
 if($all) {
     logmsg "TESTDONE: $all tests were considered during ".
         sprintf("%.0f", $sofar) ." seconds.\n";
+}
+
+if(not defined $has_builtinman) {
+    logmsg "TESTINFO: builtin man tests were skipped due to it isn't built.\n";
 }
 
 if($skipped && !$short) {
