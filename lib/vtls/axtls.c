@@ -262,7 +262,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
    * 2) setting up callbacks.  these seem gnutls specific
    */
 
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     const uint8_t *ssl_sessionid;
     size_t ssl_idsize;
 
@@ -392,7 +392,7 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
   conn->send[sockindex] = axtls_send;
 
   /* Put our freshly minted SSL session in cache */
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     const uint8_t *ssl_sessionid = ssl_get_session_id(ssl);
     size_t ssl_idsize = ssl_get_session_id_size(ssl);
     Curl_ssl_sessionid_lock(conn);

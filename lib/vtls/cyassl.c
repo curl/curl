@@ -398,7 +398,7 @@ cyassl_connect_step1(struct connectdata *conn,
 #endif /* HAVE_ALPN */
 
   /* Check if there's a cached ID we can/should use here! */
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     void *ssl_sessionid = NULL;
 
     Curl_ssl_sessionid_lock(conn);
@@ -618,7 +618,7 @@ cyassl_connect_step3(struct connectdata *conn,
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     bool incache;
     SSL_SESSION *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;

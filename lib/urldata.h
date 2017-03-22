@@ -360,6 +360,7 @@ struct ssl_primary_config {
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
+  bool sessionid;        /* cache session IDs or not */
 };
 
 struct ssl_config_data {
@@ -389,7 +390,6 @@ struct ssl_config_data {
 };
 
 struct ssl_general_config {
-  bool sessionid; /* cache session IDs or not */
   size_t max_ssl_sessions; /* SSL session id cache size */
 };
 

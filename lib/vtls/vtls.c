@@ -122,6 +122,9 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   CLONE_STRING(egdsocket);
   CLONE_STRING(random_file);
   CLONE_STRING(clientcert);
+
+  /* Disable dest sessionid cache if a client cert is used, CVE-2016-5419. */
+  dest->sessionid = (dest->clientcert ? false : source->sessionid);
   return TRUE;
 }
 
@@ -308,9 +311,9 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
   int port = isProxy ? (int)conn->port : conn->remote_port;
   *ssl_sessionid = NULL;
 
-  DEBUGASSERT(data->set.general_ssl.sessionid);
+  DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
-  if(!data->set.general_ssl.sessionid)
+  if(!SSL_SET_OPTION(primary.sessionid))
     /* session ID re-use is disabled */
     return TRUE;
 
@@ -412,7 +415,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
     &conn->proxy_ssl_config :
     &conn->ssl_config;
 
-  DEBUGASSERT(data->set.general_ssl.sessionid);
+  DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
   clone_host = strdup(isProxy ? conn->http_proxy.host.name : conn->host.name);
   if(!clone_host)

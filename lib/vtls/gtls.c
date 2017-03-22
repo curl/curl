@@ -873,7 +873,7 @@ gtls_connect_step1(struct connectdata *conn,
 
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things */
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     void *ssl_sessionid;
     size_t ssl_idsize;
 
@@ -1404,7 +1404,7 @@ gtls_connect_step3(struct connectdata *conn,
   conn->recv[sockindex] = gtls_recv;
   conn->send[sockindex] = gtls_send;
 
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     /* we always unconditionally get the session id here, as even if we
        already got it from the cache and asked to use it in the connection, it
        might've been rejected and then a new one is in use now and we need to

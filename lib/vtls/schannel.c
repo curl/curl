@@ -188,7 +188,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   connssl->cred = NULL;
 
   /* check for an existing re-usable credential handle */
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     Curl_ssl_sessionid_lock(conn);
     if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL, sockindex)) {
       connssl->cred = old_cred;
@@ -757,7 +757,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
 #endif
 
   /* save the current session data for possible re-use */
-  if(data->set.general_ssl.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     bool incache;
     struct curl_schannel_cred *old_cred = NULL;
 

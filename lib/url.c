@@ -546,7 +546,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 #endif
   set->ssh_auth_types = CURLSSH_AUTH_DEFAULT; /* defaults to any auth
                                                       type */
-  set->general_ssl.sessionid = TRUE; /* session ID caching enabled by
+  set->ssl.primary.sessionid = TRUE; /* session ID caching enabled by
                                         default */
   set->proxy_ssl = set->ssl;
 
@@ -2499,8 +2499,9 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_SSL_SESSIONID_CACHE:
-    data->set.general_ssl.sessionid = (0 != va_arg(param, long)) ?
+    data->set.ssl.primary.sessionid = (0 != va_arg(param, long)) ?
                                       TRUE : FALSE;
+    data->set.proxy_ssl.primary.sessionid = data->set.ssl.primary.sessionid;
     break;
 
 #ifdef USE_LIBSSH2

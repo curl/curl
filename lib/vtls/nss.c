@@ -1720,7 +1720,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     goto error;
 
   /* do not use SSL cache if disabled or we are not going to verify peer */
-  ssl_no_cache = (data->set.general_ssl.sessionid
+  ssl_no_cache = (SSL_SET_OPTION(primary.sessionid)
                   && SSL_CONN_CONFIG(verifypeer)) ? PR_FALSE : PR_TRUE;
   if(SSL_OptionSet(model, SSL_NO_CACHE, ssl_no_cache) != SECSuccess)
     goto error;
