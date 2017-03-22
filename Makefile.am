@@ -193,6 +193,9 @@ test:
 test-full:
 	@(cd tests; $(MAKE) all full-test)
 
+test-nonflaky:
+	@(cd tests; $(MAKE) all nonflaky-test)
+
 test-torture:
 	@(cd tests; $(MAKE) all torture-test)
 
