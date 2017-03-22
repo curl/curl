@@ -110,8 +110,6 @@ endif()
 if(ENABLE_ARES)
   set(USE_ARES 1)
   find_package(CARES REQUIRED)
-  list(APPEND CURL_LIBS ${CARES_LIBRARY} )
-  set(CURL_LIBS ${CURL_LIBS} ${CARES_LIBRARY})
 endif()
 
 if(MSVC)
@@ -1015,6 +1013,10 @@ else()
 endif()
 set(CURL_PULL_STDINT_H ${HAVE_STDINT_H})
 set(CURL_PULL_INTTYPES_H ${HAVE_INTTYPES_H})
+
+if(USE_ARES)
+  list(APPEND CURL_LIBS ${CARES_LIBRARY} )
+endif()
 
 include(CMake/OtherTests.cmake)
 
