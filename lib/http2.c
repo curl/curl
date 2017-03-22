@@ -469,6 +469,14 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   int rv;
   size_t left, ncopy;
   int32_t stream_id = frame->hd.stream_id;
+  const char *name[] = {
+    "DATA", "HEADERS", "PRIORITY", "RST_STREAM", "SETTINGS", "PUSH_PROMISE",
+    "PING", "GOAWAY", "WINDOW_UPDATE", "CONTINUATION", "ALTSVC"
+  };
+
+  DEBUGF(infof(conn->data, "on_frame_recv: %s\n",
+               ((frame->hd.type < sizeof name / sizeof name[0]) ?
+                name[frame->hd.type] : "unknown frame")));
 
   if(!stream_id) {
     /* stream ID zero is for connection-oriented stuff */
