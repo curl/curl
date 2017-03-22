@@ -14,7 +14,7 @@ install:
 before_script:
   - ./buildconf
 
-script: ./configure --enable-debug && make && make test-full
+script: ./configure --enable-debug && make && make test-nonflaky
 
 compiler:
   - clang
