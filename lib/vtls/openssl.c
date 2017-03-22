@@ -156,9 +156,29 @@ static unsigned long OpenSSL_version_num(void)
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have
  * an infinite length), but must be large enough to provide enough
- * entopy to properly seed OpenSSL's PRNG.
+ * entropy to properly seed OpenSSL's PRNG.
  */
 #define RAND_LOAD_LENGTH 1024
+
+static const char *SSL_ERROR_to_str(int err)
+{
+  const char *str[] = {
+    "SSL_ERROR_NONE",               /* 0 */
+    "SSL_ERROR_SSL",                /* 1 */
+    "SSL_ERROR_WANT_READ",          /* 2 */
+    "SSL_ERROR_WANT_WRITE",         /* 3 */
+    "SSL_ERROR_WANT_X509_LOOKUP",   /* 4 */
+    "SSL_ERROR_SYSCALL",            /* 5 */
+    "SSL_ERROR_ZERO_RETURN",        /* 6 */
+    "SSL_ERROR_WANT_CONNECT",       /* 7 */
+    "SSL_ERROR_WANT_ACCEPT",        /* 8 */
+    "SSL_ERROR_WANT_ASYNC",         /* 9 */
+    "SSL_ERROR_WANT_ASYNC_JOB",     /* 10 */
+    "SSL_ERROR_WANT_EARLY",         /* 11 */
+  };
+  return ((err >= 0 && err < sizeof str / sizeof str[0]) ?
+          str[err] : "SSL_ERROR unknown");
+}
 
 static int passwd_callback(char *buf, int num, int encrypting,
                            void *global_passwd)
@@ -980,8 +1000,10 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
         default:
           /* openssl/ssl.h says "look at error stack/return value/errno" */
           sslerror = ERR_get_error();
-          failf(conn->data, OSSL_PACKAGE " SSL read: %s, errno %d",
-                ossl_strerror(sslerror, buf, sizeof(buf)),
+          failf(conn->data, OSSL_PACKAGE " SSL_read on shutdown: %s, errno %d",
+                (sslerror ?
+                 ossl_strerror(sslerror, buf, sizeof(buf)) :
+                 SSL_ERROR_to_str(err)),
                 SOCKERRNO);
           done = 1;
           break;
@@ -2306,8 +2328,8 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
         const char * const hostname = SSL_IS_PROXY() ?
           conn->http_proxy.host.name : conn->host.name;
         const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
-        failf(data, "Unknown SSL protocol error in connection to %s:%ld ",
-              hostname, port);
+        failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%ld ",
+              SSL_ERROR_to_str(detail), hostname, port);
         return result;
       }
 
@@ -3199,7 +3221,8 @@ static ssize_t ossl_send(struct connectdata *conn,
       return -1;
     }
     /* a true error */
-    failf(conn->data, "SSL_write() return error %d", err);
+    failf(conn->data, OSSL_PACKAGE " SSL_write: %s, errno %d",
+          SSL_ERROR_to_str(err), SOCKERRNO);
     *curlcode = CURLE_SEND_ERROR;
     return -1;
   }
@@ -3244,8 +3267,10 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
       if((nread < 0) || sslerror) {
         /* If the return code was negative or there actually is an error in the
            queue */
-        failf(conn->data, "SSL read: %s, errno %d",
-              ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)),
+        failf(conn->data, OSSL_PACKAGE " SSL_read: %s, errno %d",
+              (sslerror ?
+               ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)) :
+               SSL_ERROR_to_str(err)),
               SOCKERRNO);
         *curlcode = CURLE_RECV_ERROR;
         return -1;
