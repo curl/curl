@@ -3277,9 +3277,7 @@ proxy_info_matches(const struct proxy_info* data,
 {
   if((data->proxytype == needle->proxytype) &&
      (data->port == needle->port) &&
-     Curl_safe_strcasecompare(data->host.name, needle->host.name) &&
-     Curl_safe_strcasecompare(data->user, needle->user) &&
-     Curl_safe_strcasecompare(data->passwd, needle->passwd))
+     Curl_safe_strcasecompare(data->host.name, needle->host.name))
     return TRUE;
 
   return FALSE;
