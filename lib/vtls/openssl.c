@@ -162,7 +162,7 @@ static unsigned long OpenSSL_version_num(void)
 
 static const char *SSL_ERROR_to_str(int err)
 {
-  const char *str[] = {
+  static const char * const str[] = {
     "SSL_ERROR_NONE",               /* 0 */
     "SSL_ERROR_SSL",                /* 1 */
     "SSL_ERROR_WANT_READ",          /* 2 */
