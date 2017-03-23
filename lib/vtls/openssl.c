@@ -176,7 +176,7 @@ static const char *SSL_ERROR_to_str(int err)
     "SSL_ERROR_WANT_ASYNC_JOB",     /* 10 */
     "SSL_ERROR_WANT_EARLY",         /* 11 */
   };
-  return ((err >= 0 && err < sizeof str / sizeof str[0]) ?
+  return ((err >= 0 && err < (int)(sizeof str / sizeof str[0])) ?
           str[err] : "SSL_ERROR unknown");
 }
 
