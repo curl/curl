@@ -113,8 +113,19 @@ print <<HEAD
 HEAD
     ;
 if($c) {
-    # if compressed
-    use IO::Compress::Gzip;
+    # If compression requested, check that the Gzip module is available
+    # or else disable compression
+    $c = eval
+    {
+      require IO::Compress::Gzip;
+      IO::Compress::Gzip->import();
+      1;
+    };
+    print STDERR "Warning: compression requested but Gzip is not available\n" if (!$c)
+}
+
+if($c)
+{
     my $content = join("", @out);
     my $gzippedContent;
     IO::Compress::Gzip::gzip(
