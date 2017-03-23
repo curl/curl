@@ -2312,20 +2312,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                      te
       );
 
-  /* clear userpwd to avoid re-using credentials from re-used connections */
+  /* clear userpwd and proxyuserpwd to avoid re-using old credentials
+   * from re-used connections */
   Curl_safefree(conn->allocptr.userpwd);
-
-  /*
-   * Free proxyuserpwd for Negotiate/NTLM. Cannot reuse as it is associated
-   * with the connection and shouldn't be repeated over it either.
-   */
-  switch(data->state.authproxy.picked) {
-  case CURLAUTH_NEGOTIATE:
-  case CURLAUTH_NTLM:
-  case CURLAUTH_NTLM_WB:
-    Curl_safefree(conn->allocptr.proxyuserpwd);
-    break;
-  }
+  Curl_safefree(conn->allocptr.proxyuserpwd);
 
   if(result)
     return result;
