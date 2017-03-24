@@ -52,7 +52,7 @@ static void splayprint(struct Curl_tree * t, int d, char output)
            (long)t->key.tv_usec, i);
   }
 
-  for(count=0, node = t->same; node; node = node->same, count++)
+  for(count=0, node = t->samen; node != t; node = node->samen, count++)
     ;
 
   if(output) {
