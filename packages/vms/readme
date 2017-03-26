@@ -218,7 +218,7 @@ allow interrupted downloads to be continued.
 
 
 The libcurl file module still does not understand VMS file types and requires
-the input files to be in STREAM_LF to work propery.
+the input files to be in STREAM_LF to work property.
 
 The test suites are not supported as of 7.11.0.
 

@@ -37,7 +37,7 @@ use serverhelp qw(
 my $verbose = 0;     # set to 1 for debugging
 my $port = 8997;     # just a default
 my $ipvnum = 4;      # default IP version of tftp server
-my $idnum = 1;       # dafault tftp server instance number
+my $idnum = 1;       # default tftp server instance number
 my $proto = 'tftp';  # protocol the tftp server speaks
 my $pidfile;         # tftp server pid file
 my $logfile;         # tftp server log file

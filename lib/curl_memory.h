@@ -70,7 +70,7 @@
  *
  * Programs and libraries in 'tests' subdirectories have specific
  * purposes and needs, and as such each one will use whatever fits
- * best, depending additionally wether it links with libcurl or not.
+ * best, depending additionally whether it links with libcurl or not.
  *
  * Caveat emptor. Proper curlx_* separation is a work in progress
  * the same as CURLX_NO_MEMORY_CALLBACKS usage, some adjustments may

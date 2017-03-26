@@ -1314,7 +1314,7 @@ struct UrlState {
 
   char *buffer; /* download buffer */
   char uploadbuffer[BUFSIZE+1]; /* upload buffer */
-  curl_off_t current_speed;  /* the ProgressShow() funcion sets this,
+  curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */
 

@@ -37,7 +37,7 @@ use serverhelp qw(
 my $verbose = 0;     # set to 1 for debugging
 my $port = 8990;     # just a default
 my $ipvnum = 4;      # default IP version of rtsp server
-my $idnum = 1;       # dafault rtsp server instance number
+my $idnum = 1;       # default rtsp server instance number
 my $proto = 'rtsp';  # protocol the rtsp server speaks
 my $pidfile;         # rtsp server pid file
 my $logfile;         # rtsp server log file

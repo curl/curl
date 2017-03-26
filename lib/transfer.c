@@ -1795,7 +1795,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
     break;
 
   case 303: /* See Other */
-    /* Disable both types of POSTs, unless the user explicitely
+    /* Disable both types of POSTs, unless the user explicitly
        asks for POST after POST */
     if(data->set.httpreq != HTTPREQ_GET
       && !(data->set.keep_post & CURL_REDIR_POST_303)) {

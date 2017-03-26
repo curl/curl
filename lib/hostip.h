@@ -130,7 +130,7 @@ int Curl_mk_dnscache(struct curl_hash *hash);
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct Curl_easy *data);
 
-/* Return # of adresses in a Curl_addrinfo struct */
+/* Return # of addresses in a Curl_addrinfo struct */
 int Curl_num_addresses(const Curl_addrinfo *addr);
 
 #if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)

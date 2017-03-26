@@ -48,7 +48,7 @@ int main(void)
     /* This is mailbox folder to select */
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/INBOX");
 
-    /* Set the SEARCH command specifing what we want to search for. Note that
+    /* Set the SEARCH command specifying what we want to search for. Note that
      * this can contain a message sequence set and a number of search criteria
      * keywords including flags such as ANSWERED, DELETED, DRAFT, FLAGGED, NEW,
      * RECENT and SEEN. For more information about the search criteria please

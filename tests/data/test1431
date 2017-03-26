@@ -30,7 +30,7 @@ Funny-head: yesyes
 http
 </server>
  <name>
-HTTP GET with single-digit reponse code
+HTTP GET with single-digit response code
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/1431

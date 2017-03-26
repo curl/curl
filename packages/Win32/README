@@ -20,7 +20,7 @@ marker, you'll want to rejoin the pieces to be all on one line in the batch
 file). Call any of these batch files - after compiling the curl binaries -
 with a single parameter specifying the name of the archive file to be created.
 
-It is implicitely assumed that all of the binary files (curl.exe, libcurl.a,
+It is implicitly assumed that all of the binary files (curl.exe, libcurl.a,
 etc) have previously been copied to the main directory of the curl source
 package (the directory where the main README resides), because that is where
 they should end up in the zip archive. The archive should *not* be built with

@@ -4011,7 +4011,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
 }
 
 /*
- * Helpers for IDNA convertions.
+ * Helpers for IDNA conversions.
  */
 static bool is_ASCII_name(const char *hostname)
 {

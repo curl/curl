@@ -214,7 +214,7 @@ static char *parse_filename(const char *ptr, size_t len)
   }
 #endif /* MSDOS || WIN32 */
 
-  /* in case we built debug enabled, we allow an evironment variable
+  /* in case we built debug enabled, we allow an environment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a
    * specific directory
    */

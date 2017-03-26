@@ -129,7 +129,7 @@ int Curl_wait_ms(int timeout_ms)
  * and a file descriptor is too large for FD_SETSIZE.
  *
  * A negative timeout value makes this function wait indefinitely,
- * unles no valid file descriptor is given, when this happens the
+ * unless no valid file descriptor is given, when this happens the
  * negative timeout is ignored and the function times out immediately.
  *
  * Return values:
@@ -380,7 +380,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
  * select() is used instead.  An error is returned if select() is
  * being used and a file descriptor is too large for FD_SETSIZE.
  * A negative timeout value makes this function wait indefinitely,
- * unles no valid file descriptor is given, when this happens the
+ * unless no valid file descriptor is given, when this happens the
  * negative timeout is ignored and the function times out immediately.
  *
  * Return values:

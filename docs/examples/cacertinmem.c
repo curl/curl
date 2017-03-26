@@ -133,7 +133,7 @@ int main(void)
     printf("*** transfer failed ***\n");
 
   /* second try: retrieve page using cacerts' certificate -> will succeed
-   * load the certificate by installing a function doing the nescessary
+   * load the certificate by installing a function doing the necessary
    * "modifications" to the SSL CONTEXT just before link init
    */
   rv=curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);

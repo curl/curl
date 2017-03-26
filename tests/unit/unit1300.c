@@ -242,7 +242,7 @@ UNITTEST_START
 
   /**
    * @case 1:
-   * moving head from an llist containg one element to an empty llist
+   * moving head from an llist containing one element to an empty llist
    * @assumptions:
    * 1: llist size will be 0
    * 2: llist_destination size will be 1

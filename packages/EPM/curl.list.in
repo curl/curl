@@ -16,7 +16,7 @@ $datarootdir=@datarootdir@
 %vendor Daniel Stenberg, <daniel@haxx.se>
 %license ${srcdir}/MITX.txt
 %readme ${srcdir}/README
-%description Curl is a command line tool for transfering data specified
+%description Curl is a command line tool for transferring data specified
 %description with URL syntax
 %version @VERSION@
 %packager Giuseppe "Cowo" Corbelli <cowo@lugbs.linux.it>

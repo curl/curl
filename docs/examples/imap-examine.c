@@ -48,7 +48,7 @@ int main(void)
     /* This is just the server URL */
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com");
 
-    /* Set the EXAMINE command specifing the mailbox folder */
+    /* Set the EXAMINE command specifying the mailbox folder */
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "EXAMINE OUTBOX");
 
     /* Perform the custom request */

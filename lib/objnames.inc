@@ -36,7 +36,7 @@
 # file name that may be longer than 10 characters, or not, into a string
 # with at most 10 characters which may be used as an OS/400 object name.
 #
-# This function might not be universally usefull, nor we care about it.
+# This function might not be universally useful, nor we care about it.
 #
 # It is intended to be used with libcurl's (*.c) source file names, so
 # dependency on libcurl's source file naming scheme is acceptable and

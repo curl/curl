@@ -320,7 +320,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
 /*
  * Curl_auth_decode_digest_http_message()
  *
- * This is used to decode a HTTP DIGEST challenge message into the seperate
+ * This is used to decode a HTTP DIGEST challenge message into the separate
  * attributes.
  *
  * Parameters:
@@ -550,7 +550,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     if(!digest->http_context)
       return CURLE_OUT_OF_MEMORY;
 
-    /* Generate our reponse message */
+    /* Generate our response message */
     status = s_pSecFn->InitializeSecurityContext(&credentials, NULL,
                                                  spn,
                                                  ISC_REQ_USE_HTTP_STYLE, 0, 0,
@@ -586,7 +586,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  /* Copy the generated reponse */
+  /* Copy the generated response */
   memcpy(resp, output_token, output_token_len);
   resp[output_token_len] = 0;
 

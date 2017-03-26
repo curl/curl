@@ -61,7 +61,7 @@ http://%HOSTIP:%HTTPPORT/554
 s/^--------------------------[a-z0-9]*/------------------------------/
 s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
 </strippart>
-# Note that the stripping above removes 12 bytes from every occurance of the
+# Note that the stripping above removes 12 bytes from every occurrence of the
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>

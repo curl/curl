@@ -23,7 +23,7 @@
 
 /*
  * This test uses these funny custom memory callbacks for the only purpose
- * of verifying that curl_global_init_mem() functionallity is present in
+ * of verifying that curl_global_init_mem() functionality is present in
  * libcurl and that it works unconditionally no matter how libcurl is built,
  * nothing more.
  *

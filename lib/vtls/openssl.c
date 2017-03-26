@@ -1630,7 +1630,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 #ifdef HAS_NPN
 
 /*
- * in is a list of lenght prefixed strings. this function has to select
+ * in is a list of length prefixed strings. this function has to select
  * the protocol we want to use from the list and write its string into out.
  */
 

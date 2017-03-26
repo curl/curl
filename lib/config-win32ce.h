@@ -379,7 +379,7 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #endif
 
-/* VS2005 and later dafault size for time_t is 64-bit, unless */
+/* VS2005 and later default size for time_t is 64-bit, unless */
 /* _USE_32BIT_TIME_T has been defined to get a 32-bit time_t. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 #  ifndef _USE_32BIT_TIME_T

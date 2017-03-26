@@ -276,7 +276,7 @@ _ CURL.INC member in file H. This defines everything needed by an ILE/RPG
   program using libcurl.
 _ LIBxxx modules and programs. Although the test environment is not supported
   on OS/400, the libcurl test programs are compiled for manual tests.
-_ IFS directory /curl/include/curl containg the C header files for IFS source
+_ IFS directory /curl/include/curl containing the C header files for IFS source
   C/C++ compilation and curl.inc.rpgle for IFS source ILE/RPG compilation.
 
 

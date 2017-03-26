@@ -143,7 +143,7 @@ void Curl_global_host_cache_dtor(void)
 }
 
 /*
- * Return # of adresses in a Curl_addrinfo struct
+ * Return # of addresses in a Curl_addrinfo struct
  */
 int Curl_num_addresses(const Curl_addrinfo *addr)
 {
@@ -573,7 +573,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #ifdef USE_ALARM_TIMEOUT
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
-  volatile bool keep_copysig = FALSE; /* wether old sigact has been saved */
+  volatile bool keep_copysig = FALSE; /* whether old sigact has been saved */
   struct sigaction sigact;
 #else
 #ifdef HAVE_SIGNAL

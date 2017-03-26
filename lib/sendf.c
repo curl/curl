@@ -262,7 +262,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   va_end(ap);
 }
 
-/* Curl_sendf() sends formated data to the server */
+/* Curl_sendf() sends formatted data to the server */
 CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
                     const char *fmt, ...)
 {

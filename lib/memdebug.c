@@ -458,7 +458,7 @@ int curl_fclose(FILE *file, int line, const char *source)
 
 #define LOGLINE_BUFSIZE  1024
 
-/* this does the writting to the memory tracking log file */
+/* this does the writing to the memory tracking log file */
 void curl_memlog(const char *format, ...)
 {
   char *buf;

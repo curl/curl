@@ -1754,7 +1754,7 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
   /*
    * This state uses:
    * 'count1' to iterate over the commands to send
-   * 'count2' to store wether to allow commands to fail
+   * 'count2' to store whether to allow commands to fail
    */
 
   if(init)
@@ -2870,7 +2870,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
              does not start with a '/'), we probably need some server-dependent
              adjustments. For example, this is the case when connecting to
              an OS400 FTP server: this server supports two name syntaxes,
-             the default one being incompatible with standard pathes. In
+             the default one being incompatible with standard paths. In
              addition, this server switches automatically to the regular path
              syntax when one is encountered in a command: this results in
              having an entrypath in the wrong syntax when later used in CWD.
@@ -3552,7 +3552,7 @@ static CURLcode ftp_range(struct connectdata *conn)
                  " to %" CURL_FORMAT_CURL_OFF_T ", totally %"
                  CURL_FORMAT_CURL_OFF_T " bytes\n",
                  from, to, data->req.maxdownload));
-    ftpc->dont_check = TRUE; /* dont check for successful transfer */
+    ftpc->dont_check = TRUE; /* don't check for successful transfer */
   }
   else
     data->req.maxdownload = -1;
@@ -3621,7 +3621,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
 
 
   if(ftpc->state) {
-    /* already in a state so skip the intial commands.
+    /* already in a state so skip the initial commands.
        They are only done to kickstart the do_more state */
     result = ftp_multi_statemach(conn, &complete);
 

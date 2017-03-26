@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 /* <DESC>
- * POP3 example showing how to retreive only the headers of an e-mail
+ * POP3 example showing how to retrieve only the headers of an e-mail
  * </DESC>
  */
 

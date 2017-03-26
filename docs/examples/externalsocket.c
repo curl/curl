@@ -38,7 +38,7 @@
 #include <sys/types.h>        /*  socket types              */
 #include <sys/socket.h>       /*  socket definitions        */
 #include <netinet/in.h>
-#include <arpa/inet.h>        /*  inet (3) funtions         */
+#include <arpa/inet.h>        /*  inet (3) functions         */
 #include <unistd.h>           /*  misc. Unix functions      */
 #endif
 

@@ -10,7 +10,7 @@
  * instead of (only) local files. Local files (ie those that can be directly
  * fopened) will drop back to using the underlying clib implementations
  *
- * See the main() function at the bottom that shows an app that retrives from a
+ * See the main() function at the bottom that shows an app that retrieves from a
  * specified url using fgets() and fread() and saves as two output files.
  *
  * Copyright (c) 2003 Simtec Electronics
@@ -345,7 +345,7 @@ size_t url_fread(void *ptr, size_t size, size_t nmemb, URL_FILE *file)
 
     fill_buffer(file, want);
 
-    /* check if theres data in the buffer - if not fill_buffer()
+    /* check if there's data in the buffer - if not fill_buffer()
      * either errored or EOF */
     if(!file->buffer_pos)
       return 0;
@@ -384,7 +384,7 @@ char *url_fgets(char *ptr, size_t size, URL_FILE *file)
   case CFTYPE_CURL:
     fill_buffer(file, want);
 
-    /* check if theres data in the buffer - if not fill either errored or
+    /* check if there's data in the buffer - if not fill either errored or
      * EOF */
     if(!file->buffer_pos)
       return NULL;
@@ -404,7 +404,7 @@ char *url_fgets(char *ptr, size_t size, URL_FILE *file)
 
     /* xfer data to caller */
     memcpy(ptr, file->buffer, want);
-    ptr[want]=0;/* allways null terminate */
+    ptr[want]=0;/* always null terminate */
 
     use_buffer(file, want);
 
@@ -450,7 +450,7 @@ void url_rewind(URL_FILE *file)
 #define FREADFILE "fread.test"
 #define REWINDFILE "rewind.test"
 
-/* Small main program to retrive from a url using fgets and fread saving the
+/* Small main program to retrieve from a url using fgets and fread saving the
  * output to two test files (note the fgets method will corrupt binary files if
  * they contain 0 chars */
 int main(int argc, char *argv[])

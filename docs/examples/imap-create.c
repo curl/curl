@@ -48,7 +48,7 @@ int main(void)
     /* This is just the server URL */
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com");
 
-    /* Set the CREATE command specifing the new folder name */
+    /* Set the CREATE command specifying the new folder name */
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "CREATE FOLDER");
 
     /* Perform the custom request */

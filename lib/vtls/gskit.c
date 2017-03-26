@@ -320,7 +320,7 @@ static CURLcode set_ciphers(struct connectdata *conn,
 
   /* We allocate GSKit buffers of the same size as the input string: since
      GSKit tokens are always shorter than their cipher names, allocated buffers
-     will always be large enough to accomodate the result. */
+     will always be large enough to accommodate the result. */
   l = strlen(cipherlist) + 1;
   memset((char *) ciphers, 0, sizeof ciphers);
   for(i = 0; i < CURL_GSKPROTO_LAST; i++) {
