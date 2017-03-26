@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -793,7 +793,7 @@ CURLcode Curl_rtsp_parseheader(struct connectdata *conn,
       /* If the Session ID is not set, and we find it in a response, then set
        * it.
        *
-       * Allow any non whitespace content, up to the field seperator or end of
+       * Allow any non whitespace content, up to the field separator or end of
        * line. RFC 2326 isn't 100% clear on the session ID and for example
        * gstreamer does url-encoded session ID's not covered by the standard.
        */

@@ -235,7 +235,7 @@ branding the PCSI kit based on who is making the kit.
       Since at this time curl does not need this alias procedure, the steps
       to automatically build it are not included here.
 
-      While newer versions of PCSI can support ODS-5 filenames, not all verions
+      While newer versions of PCSI can support ODS-5 filenames, not all versions
       of PCSI on systems that have ODS-5 filenames do.  So as a post install
       step, the PCSI kit built by these steps does a rename to the correct
       case as a post install step.

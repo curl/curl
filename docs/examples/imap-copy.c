@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,7 +48,7 @@ int main(void)
     /* This is source mailbox folder to select */
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/INBOX");
 
-    /* Set the COPY command specifing the message ID and destination folder */
+    /* Set the COPY command specifying the message ID and destination folder */
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "COPY 1 FOLDER");
 
     /* Note that to perform a move operation you will need to perform the copy,

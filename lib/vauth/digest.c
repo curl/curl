@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -237,7 +237,7 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
  * auth_decode_digest_md5_message()
  *
  * This is used internally to decode an already encoded DIGEST-MD5 challenge
- * message into the seperate attributes.
+ * message into the separate attributes.
  *
  * Parameters:
  *
@@ -366,7 +366,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   char qop[]        = DIGEST_QOP_VALUE_STRING_AUTH;
   char *spn         = NULL;
 
-  /* Decode the challange message */
+  /* Decode the challenge message */
   result = auth_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
                                           realm, sizeof(realm),
                                           algorithm, sizeof(algorithm),
@@ -502,7 +502,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 /*
  * Curl_auth_decode_digest_http_message()
  *
- * This is used to decode a HTTP DIGEST challenge message into the seperate
+ * This is used to decode a HTTP DIGEST challenge message into the separate
  * attributes.
  *
  * Parameters:

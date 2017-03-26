@@ -12,7 +12,7 @@
 #  GSS_LINKER_FLAGS - Additional linker flags
 #  GSS_COMPILER_FLAGS - Additional compiler flags
 #  GSS_VERSION - This is set to version advertised by pkg-config or read from manifest.
-#                In case the library is found but no version info availabe it'll be set to "unknown"
+#                In case the library is found but no version info available it'll be set to "unknown"
 
 set(_MIT_MODNAME mit-krb5-gssapi)
 set(_HEIMDAL_MODNAME heimdal-gssapi)

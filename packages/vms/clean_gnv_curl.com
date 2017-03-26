@@ -11,7 +11,7 @@ $!
 $! This should be run with no parameters after the gnv_curl_configure.sh
 $! script is run.
 $!
-$! Paramter P1: REALCLEAN
+$! Parameter P1: REALCLEAN
 $!   This removes all build products and brings the environment back to
 $!   the point where the gnv_curl_configure.sh procedure needs to be run again.
 $!

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -229,16 +229,16 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
  * need to wait until we're back under the speed limit, if needed.
  *
  * The way it works is by having a "starting point" (time & amount of data
- * transfered by then) used in the speed computation, to be used instead of the
- * start of the transfer.
- * This starting point is regularly moved as transfer goes on, to keep getting
- * accurate values (instead of average over the entire tranfer).
+ * transferred by then) used in the speed computation, to be used instead of
+ * the start of the transfer.  This starting point is regularly moved as
+ * transfer goes on, to keep getting accurate values (instead of average over
+ * the entire transfer).
  *
- * This function takes the current amount of data transfered, the amount at the
- * starting point, the limit (in bytes/s), the time of the starting point and
- * the current time.
+ * This function takes the current amount of data transferred, the amount at
+ * the starting point, the limit (in bytes/s), the time of the starting point
+ * and the current time.
  *
- * Returns -1 if no waiting is needed (not enough data transfered since
+ * Returns -1 if no waiting is needed (not enough data transferred since
  * starting point yet), 0 when no waiting is needed but the starting point
  * should be reset (to current), or the number of milliseconds to wait to get
  * back under the speed limit.

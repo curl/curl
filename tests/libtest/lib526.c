@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,7 +29,7 @@
  * controlling the small differences.
  *
  * - lib526 closes all easy handles after
- *   they all have transfered the file over the single connection
+ *   they all have transferred the file over the single connection
  * - lib527 closes each easy handle after each single transfer.
  * - lib532 uses only a single easy handle that is removed, reset and then
  *   re-added for each transfer

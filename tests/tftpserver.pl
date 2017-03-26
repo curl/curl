@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -37,7 +37,7 @@ use serverhelp qw(
 my $verbose = 0;     # set to 1 for debugging
 my $port = 8997;     # just a default
 my $ipvnum = 4;      # default IP version of tftp server
-my $idnum = 1;       # dafault tftp server instance number
+my $idnum = 1;       # default tftp server instance number
 my $proto = 'tftp';  # protocol the tftp server speaks
 my $pidfile;         # tftp server pid file
 my $logfile;         # tftp server log file

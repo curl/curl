@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -379,7 +379,7 @@
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #endif
 
-/* VS2005 and later dafault size for time_t is 64-bit, unless */
+/* VS2005 and later default size for time_t is 64-bit, unless */
 /* _USE_32BIT_TIME_T has been defined to get a 32-bit time_t. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 #  ifndef _USE_32BIT_TIME_T

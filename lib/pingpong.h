@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -95,7 +95,7 @@ time_t Curl_pp_state_timeout(struct pingpong *pp);
  *
  * Curl_pp_sendf()
  *
- * Send the formated string as a command to a pingpong server. Note that
+ * Send the formatted string as a command to a pingpong server. Note that
  * the string should not have any CRLF appended, as this function will
  * append the necessary things itself.
  *
@@ -108,7 +108,7 @@ CURLcode Curl_pp_sendf(struct pingpong *pp,
  *
  * Curl_pp_vsendf()
  *
- * Send the formated string as a command to a pingpong server. Note that
+ * Send the formatted string as a command to a pingpong server. Note that
  * the string should not have any CRLF appended, as this function will
  * append the necessary things itself.
  *

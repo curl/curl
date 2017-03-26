@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -458,7 +458,7 @@ int curl_fclose(FILE *file, int line, const char *source)
 
 #define LOGLINE_BUFSIZE  1024
 
-/* this does the writting to the memory tracking log file */
+/* this does the writing to the memory tracking log file */
 void curl_memlog(const char *format, ...)
 {
   char *buf;

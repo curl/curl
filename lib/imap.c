@@ -1749,7 +1749,7 @@ static CURLcode imap_setup_connection(struct connectdata *conn)
  *
  * imap_sendf()
  *
- * Sends the formated string as an IMAP command to the server.
+ * Sends the formatted string as an IMAP command to the server.
  *
  * Designed to never block.
  */

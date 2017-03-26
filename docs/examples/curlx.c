@@ -101,7 +101,7 @@
 static const char *curlx_usage[]={
   "usage: curlx args\n",
   " -p12 arg         - tia  file ",
-  " -envpass arg     - environement variable which content the tia private"
+  " -envpass arg     - environment variable which content the tia private"
   " key password",
   " -out arg         - output file (response)- default stdout",
   " -in arg          - input file (request)- default stdin",

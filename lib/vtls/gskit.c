@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -320,7 +320,7 @@ static CURLcode set_ciphers(struct connectdata *conn,
 
   /* We allocate GSKit buffers of the same size as the input string: since
      GSKit tokens are always shorter than their cipher names, allocated buffers
-     will always be large enough to accomodate the result. */
+     will always be large enough to accommodate the result. */
   l = strlen(cipherlist) + 1;
   memset((char *) ciphers, 0, sizeof ciphers);
   for(i = 0; i < CURL_GSKPROTO_LAST; i++) {

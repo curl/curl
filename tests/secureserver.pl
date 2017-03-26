@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -63,7 +63,7 @@ my $pidfile;          # stunnel pid file
 my $logfile;          # stunnel log file
 my $loglevel = 5;     # stunnel log level
 my $ipvnum = 4;       # default IP version of stunneled server
-my $idnum = 1;        # dafault stunneled server instance number
+my $idnum = 1;        # default stunneled server instance number
 my $proto = 'https';  # default secure server protocol
 my $conffile;         # stunnel configuration file
 my $capath;           # certificate chain PEM folder
@@ -172,7 +172,7 @@ while(@ARGV) {
 }
 
 #***************************************************************************
-# Initialize command line option dependant variables
+# Initialize command line option dependent variables
 #
 if(!$pidfile) {
     $pidfile = "$path/". server_pidfilename($proto, $ipvnum, $idnum);

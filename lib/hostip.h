@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -130,7 +130,7 @@ int Curl_mk_dnscache(struct curl_hash *hash);
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct Curl_easy *data);
 
-/* Return # of adresses in a Curl_addrinfo struct */
+/* Return # of addresses in a Curl_addrinfo struct */
 int Curl_num_addresses(const Curl_addrinfo *addr);
 
 #if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)

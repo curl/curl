@@ -797,7 +797,7 @@ curl_formadd_ccsid(struct curl_httppost * * httppost,
   unsigned int contentccsid;
   unsigned int nameccsid;
 
-  /* A single curl_formadd() call cannot be splitted in several calls to deal
+  /* A single curl_formadd() call cannot be split in several calls to deal
      with all parameters: the original parameters are thus copied to a local
      curl_forms array and converted to ASCII when needed.
      CURLFORM_PTRNAME is processed as if it were CURLFORM_COPYNAME.

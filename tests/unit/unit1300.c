@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -242,7 +242,7 @@ UNITTEST_START
 
   /**
    * @case 1:
-   * moving head from an llist containg one element to an empty llist
+   * moving head from an llist containing one element to an empty llist
    * @assumptions:
    * 1: llist size will be 0
    * 2: llist_destination size will be 1

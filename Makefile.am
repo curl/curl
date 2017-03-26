@@ -253,7 +253,7 @@ rpm:
 # pkgadd -d ./HAXXcurl-*
 #
 
-# gak - libtool requires an absoulte directory, hence the pwd below...
+# gak - libtool requires an absolute directory, hence the pwd below...
 pkgadd:
 	umask 022 ; \
 	make install DESTDIR=`/bin/pwd`/packages/Solaris/root ; \

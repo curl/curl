@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -129,7 +129,7 @@ int Curl_wait_ms(int timeout_ms)
  * and a file descriptor is too large for FD_SETSIZE.
  *
  * A negative timeout value makes this function wait indefinitely,
- * unles no valid file descriptor is given, when this happens the
+ * unless no valid file descriptor is given, when this happens the
  * negative timeout is ignored and the function times out immediately.
  *
  * Return values:
@@ -380,7 +380,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
  * select() is used instead.  An error is returned if select() is
  * being used and a file descriptor is too large for FD_SETSIZE.
  * A negative timeout value makes this function wait indefinitely,
- * unles no valid file descriptor is given, when this happens the
+ * unless no valid file descriptor is given, when this happens the
  * negative timeout is ignored and the function times out immediately.
  *
  * Return values:
