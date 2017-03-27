@@ -164,7 +164,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   int r;
   int ret;
 
-#if SIZEOF_LONG != SIZEOF_INT
+#if SIZEOF_TIME_T != SIZEOF_INT
   /* wrap-around precaution */
   if(timeout_ms >= INT_MAX)
     timeout_ms = INT_MAX;
