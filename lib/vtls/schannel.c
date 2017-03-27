@@ -255,7 +255,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       {
-        CURLcode result = set_ssl_version_min_max(&schannel_cred, conn);
+        result = set_ssl_version_min_max(&schannel_cred, conn);
         if(result != CURLE_OK)
           return result;
         break;
