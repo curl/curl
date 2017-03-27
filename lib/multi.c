@@ -2939,7 +2939,7 @@ void Curl_expire(struct Curl_easy *data, time_t milli)
 
   set = Curl_tvnow();
   set.tv_sec += (long)(milli/1000);
-  set.tv_usec += (milli%1000)*1000;
+  set.tv_usec += (long)(milli%1000)*1000;
 
   if(set.tv_usec >= 1000000) {
     set.tv_sec++;
@@ -2996,7 +2996,7 @@ void Curl_expire_latest(struct Curl_easy *data, time_t milli)
 
   set = Curl_tvnow();
   set.tv_sec += (long)(milli / 1000);
-  set.tv_usec += (milli % 1000) * 1000;
+  set.tv_usec += (long)(milli % 1000) * 1000;
 
   if(set.tv_usec >= 1000000) {
     set.tv_sec++;
