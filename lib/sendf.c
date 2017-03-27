@@ -33,6 +33,7 @@
 #include "non-ascii.h"
 #include "strerror.h"
 #include "select.h"
+#include "strdup.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -474,21 +475,58 @@ static CURLcode pausewrite(struct Curl_easy *data,
      we want to send we need to dup it to save a copy for when the sending
      is again enabled */
   struct SingleRequest *k = &data->req;
-  char *dupl = malloc(len);
-  if(!dupl)
-    return CURLE_OUT_OF_MEMORY;
+  struct UrlState *s = &data->state;
+  char *dupl;
+  unsigned int i;
+  bool newtype = TRUE;
 
-  memcpy(dupl, ptr, len);
+  if(s->tempcount) {
+    for(i=0; i< s->tempcount; i++) {
+      if(s->tempwrite[i].type == type) {
+        /* data for this type exists */
+        newtype = FALSE;
+        break;
+      }
+    }
+    DEBUGASSERT(i < 3);
+  }
+  else
+    i = 0;
 
-  /* store this information in the state struct for later use */
-  data->state.tempwrite = dupl;
-  data->state.tempwritesize = len;
-  data->state.tempwritetype = type;
+  if(!newtype) {
+    /* append new data to old data */
+
+    /* figure out the new size of the data to save */
+    size_t newlen = len + s->tempwrite[i].len;
+    /* allocate the new memory area */
+    char *newptr = realloc(s->tempwrite[i].buf, newlen);
+    if(!newptr)
+      return CURLE_OUT_OF_MEMORY;
+    /* copy the new data to the end of the new area */
+    memcpy(newptr + s->tempwrite[i].len, ptr, len);
+
+    /* update the pointer and the size */
+    s->tempwrite[i].buf = newptr;
+    s->tempwrite[i].len = newlen;
+  }
+  else {
+    dupl = Curl_memdup(ptr, len);
+    if(!dupl)
+      return CURLE_OUT_OF_MEMORY;
+
+    /* store this information in the state struct for later use */
+    s->tempwrite[i].buf = dupl;
+    s->tempwrite[i].len = len;
+    s->tempwrite[i].type = type;
+
+    if(newtype)
+      s->tempcount++;
+  }
 
   /* mark the connection as RECV paused */
   k->keepon |= KEEP_RECV_PAUSE;
 
-  DEBUGF(infof(data, "Pausing with %zu bytes in buffer for type %02x\n",
+  DEBUGF(infof(data, "Paused %zu bytes in buffer for type %02x\n",
                len, type));
 
   return CURLE_OK;
@@ -511,31 +549,10 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
   if(!len)
     return CURLE_OK;
 
-  /* If reading is actually paused, we're forced to append this chunk of data
-     to the already held data, but only if it is the same type as otherwise it
-     can't work and it'll return error instead. */
-  if(data->req.keepon & KEEP_RECV_PAUSE) {
-    size_t newlen;
-    char *newptr;
-    if(type != data->state.tempwritetype)
-      /* major internal confusion */
-      return CURLE_RECV_ERROR;
-
-    DEBUGASSERT(data->state.tempwrite);
-
-    /* figure out the new size of the data to save */
-    newlen = len + data->state.tempwritesize;
-    /* allocate the new memory area */
-    newptr = realloc(data->state.tempwrite, newlen);
-    if(!newptr)
-      return CURLE_OUT_OF_MEMORY;
-    /* copy the new data to the end of the new area */
-    memcpy(newptr + data->state.tempwritesize, ptr, len);
-    /* update the pointer and the size */
-    data->state.tempwrite = newptr;
-    data->state.tempwritesize = newlen;
-    return CURLE_OK;
-  }
+  /* If reading is paused, append this data to the already held data for this
+     type. */
+  if(data->req.keepon & KEEP_RECV_PAUSE)
+    return pausewrite(data, type, ptr, len);
 
   /* Determine the callback(s) to use. */
   if(type & CLIENTWRITE_BODY)
@@ -614,6 +631,8 @@ CURLcode Curl_client_write(struct connectdata *conn,
 
   if(0 == len)
     len = strlen(ptr);
+
+  DEBUGASSERT(type <= 3);
 
   /* FTP data may need conversion. */
   if((type & CLIENTWRITE_BODY) &&

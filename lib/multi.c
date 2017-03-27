@@ -532,6 +532,7 @@ static CURLcode multi_done(struct connectdata **connp,
   CURLcode result;
   struct connectdata *conn;
   struct Curl_easy *data;
+  unsigned int i;
 
   DEBUGASSERT(*connp);
 
@@ -598,9 +599,11 @@ static CURLcode multi_done(struct connectdata **connp,
   }
 
   /* if the transfer was completed in a paused state there can be buffered
-     data left to write and then kill */
-  free(data->state.tempwrite);
-  data->state.tempwrite = NULL;
+     data left to free */
+  for(i=0; i < data->state.tempcount; i++) {
+    free(data->state.tempwrite[i].buf);
+  }
+  data->state.tempcount = 0;
 
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
      forced us to close this connection. This is ignored for requests taking
