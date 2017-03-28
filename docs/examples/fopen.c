@@ -10,8 +10,8 @@
  * instead of (only) local files. Local files (ie those that can be directly
  * fopened) will drop back to using the underlying clib implementations
  *
- * See the main() function at the bottom that shows an app that retrieves from a
- * specified url using fgets() and fread() and saves as two output files.
+ * See the main() function at the bottom that shows an app that retrieves from
+ * a specified url using fgets() and fread() and saves as two output files.
  *
  * Copyright (c) 2003 Simtec Electronics
  *
