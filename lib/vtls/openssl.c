@@ -55,7 +55,9 @@
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
+#ifndef OPENSSL_NO_DSA
 #include <openssl/dsa.h>
+#endif
 #include <openssl/dh.h>
 #include <openssl/err.h>
 #include <openssl/md5.h>
@@ -2640,6 +2642,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       }
       case EVP_PKEY_DSA:
       {
+#ifndef OPENSSL_NO_DSA
         DSA *dsa;
 #ifdef HAVE_OPAQUE_EVP_PKEY
         dsa = EVP_PKEY_get0_DSA(pubkey);
@@ -2670,6 +2673,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
         print_pubkey_BN(dsa, priv_key, i);
         print_pubkey_BN(dsa, pub_key, i);
 #endif
+#endif /* !OPENSSL_NO_DSA */
         break;
       }
       case EVP_PKEY_DH:
