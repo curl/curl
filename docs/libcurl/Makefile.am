@@ -48,13 +48,13 @@ libcurl-symbols.3: $(srcdir)/symbols-in-versions $(srcdir)/mksymbolsmanpage.pl
 	perl $(srcdir)/mksymbolsmanpage.pl < $(srcdir)/symbols-in-versions > $@
 
 html: $(HTMLPAGES)
-	cd opts && make html
+	cd opts && $(MAKE) html
 
 .3.html:
 	$(MAN2HTML)
 
 pdf: $(PDFPAGES)
-	cd opts && make pdf
+	cd opts && $(MAKE) pdf
 
 .3.pdf:
 	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
