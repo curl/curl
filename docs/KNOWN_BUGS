@@ -159,7 +159,7 @@ problems may have been fixed or changed somewhat since this was written!
 
 1.10 Strips trailing dot from host name
 
- When given a URL wit a trailing dot for the host name part:
+ When given a URL with a trailing dot for the host name part:
  "https://example.com./", libcurl will strip off the dot and use the name
  without a dot internally and send it dot-less in HTTP Host: headers and in
  the TLS SNI field.
