@@ -171,10 +171,10 @@ dist-hook:
 	done)
 
 html:
-	cd docs && make html
+	cd docs && $(MAKE) html
 
 pdf:
-	cd docs && make pdf
+	cd docs && $(MAKE) pdf
 
 check: test examples check-docs
 
@@ -256,7 +256,7 @@ rpm:
 # gak - libtool requires an absolute directory, hence the pwd below...
 pkgadd:
 	umask 022 ; \
-	make install DESTDIR=`/bin/pwd`/packages/Solaris/root ; \
+	$(MAKE) install DESTDIR=`/bin/pwd`/packages/Solaris/root ; \
 	cat COPYING > $(srcdir)/packages/Solaris/copyright ; \
 	cd $(srcdir)/packages/Solaris && $(MAKE) package
 

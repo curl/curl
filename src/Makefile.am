@@ -101,7 +101,7 @@ if USE_MANUAL
 # Here are the stuff to create a built-in manual
 
 $(MANPAGE):
-	cd $(top_builddir)/docs && make curl.1
+	cd $(top_builddir)/docs && $(MAKE) curl.1
 
 if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and

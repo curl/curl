@@ -47,13 +47,13 @@ MAN2HTML= roffit $< >$@
 SUFFIXES = .1 .html .pdf
 
 curl.1:
-	cd cmdline-opts && make
+	cd cmdline-opts && $(MAKE)
 
 html: $(HTMLPAGES)
-	cd libcurl && make html
+	cd libcurl && $(MAKE) html
 
 pdf: $(PDFPAGES)
-	cd libcurl && make pdf
+	cd libcurl && $(MAKE) pdf
 
 .1.html:
 	$(MAN2HTML)
