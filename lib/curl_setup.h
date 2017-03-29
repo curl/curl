@@ -124,18 +124,7 @@
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
 
-/*
- * libcurl's external interface definitions are also used internally,
- * and might also include required system header files to define them.
- */
-
-#include <curl/curlbuild.h>
-
-/*
- * Compile time sanity checks must also be done when building the library.
- */
-
-#include <curl/curlrules.h>
+#include <curl/curl.h>
 
 /*
  * Ensure that no one is using the old SIZEOF_CURL_OFF_T macro
