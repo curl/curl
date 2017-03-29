@@ -839,7 +839,7 @@ static CURLcode AddFormData(struct FormData **formp,
     /* we make it easier for plain strings: */
     if(!length)
       length = strlen((char *)line);
-#if (SIZEOF_SIZE_T < CURL_SIZEOF_CURL_OFF_T)
+#if (SIZEOF_SIZE_T < SIZEOF_CURL_OFF_T)
     else if(length >= (curl_off_t)(size_t)-1) {
       result = CURLE_BAD_FUNCTION_ARGUMENT;
       goto error;

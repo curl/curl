@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,19 +57,9 @@
 /*  DEFINITION OF THESE SYMBOLS SHALL NOT TAKE PLACE ANYWHERE ELSE  */
 /* ================================================================ */
 
-#ifdef CURL_SIZEOF_LONG
-#error "CURL_SIZEOF_LONG shall not be defined except in curlbuild.h"
-   Error Compilation_aborted_CURL_SIZEOF_LONG_already_defined
-#endif
-
 #ifdef CURL_TYPEOF_CURL_SOCKLEN_T
 #error "CURL_TYPEOF_CURL_SOCKLEN_T shall not be defined except in curlbuild.h"
    Error Compilation_aborted_CURL_TYPEOF_CURL_SOCKLEN_T_already_defined
-#endif
-
-#ifdef CURL_SIZEOF_CURL_SOCKLEN_T
-#error "CURL_SIZEOF_CURL_SOCKLEN_T shall not be defined except in curlbuild.h"
-   Error Compilation_aborted_CURL_SIZEOF_CURL_SOCKLEN_T_already_defined
 #endif
 
 #ifdef CURL_TYPEOF_CURL_OFF_T
@@ -90,11 +80,6 @@
 #ifdef CURL_FORMAT_OFF_T
 #error "CURL_FORMAT_OFF_T shall not be defined except in curlbuild.h"
    Error Compilation_aborted_CURL_FORMAT_OFF_T_already_defined
-#endif
-
-#ifdef CURL_SIZEOF_CURL_OFF_T
-#error "CURL_SIZEOF_CURL_OFF_T shall not be defined except in curlbuild.h"
-   Error Compilation_aborted_CURL_SIZEOF_CURL_OFF_T_already_defined
 #endif
 
 #ifdef CURL_SUFFIX_CURL_OFF_T
@@ -158,14 +143,8 @@
 #  include <sys/poll.h>
 #endif
 
-/* The size of `long', as computed by sizeof. */
-#define CURL_SIZEOF_LONG ${CURL_SIZEOF_LONG}
-
 /* Integral data type used for curl_socklen_t. */
 #define CURL_TYPEOF_CURL_SOCKLEN_T ${CURL_TYPEOF_CURL_SOCKLEN_T}
-
-/* The size of `curl_socklen_t', as computed by sizeof. */
-#define CURL_SIZEOF_CURL_SOCKLEN_T ${CURL_SIZEOF_CURL_SOCKLEN_T}
 
 /* Data type definition of curl_socklen_t. */
 typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
@@ -184,9 +163,6 @@ typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
 
 /* curl_off_t formatting string directive with "%" conversion specifier. */
 #define CURL_FORMAT_OFF_T "${CURL_FORMAT_OFF_T}"
-
-/* The size of `curl_off_t', as computed by sizeof. */
-#define CURL_SIZEOF_CURL_OFF_T ${CURL_SIZEOF_CURL_OFF_T}
 
 /* curl_off_t constant suffix. */
 #define CURL_SUFFIX_CURL_OFF_T ${CURL_SUFFIX_CURL_OFF_T}

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -75,19 +75,9 @@
  * Verify that some macros are actually defined.
  */
 
-#ifndef CURL_SIZEOF_LONG
-#  error "CURL_SIZEOF_LONG definition is missing!"
-   Error Compilation_aborted_CURL_SIZEOF_LONG_is_missing
-#endif
-
 #ifndef CURL_TYPEOF_CURL_SOCKLEN_T
 #  error "CURL_TYPEOF_CURL_SOCKLEN_T definition is missing!"
    Error Compilation_aborted_CURL_TYPEOF_CURL_SOCKLEN_T_is_missing
-#endif
-
-#ifndef CURL_SIZEOF_CURL_SOCKLEN_T
-#  error "CURL_SIZEOF_CURL_SOCKLEN_T definition is missing!"
-   Error Compilation_aborted_CURL_SIZEOF_CURL_SOCKLEN_T_is_missing
 #endif
 
 #ifndef CURL_TYPEOF_CURL_OFF_T
@@ -110,11 +100,6 @@
    Error Compilation_aborted_CURL_FORMAT_OFF_T_is_missing
 #endif
 
-#ifndef CURL_SIZEOF_CURL_OFF_T
-#  error "CURL_SIZEOF_CURL_OFF_T definition is missing!"
-   Error Compilation_aborted_CURL_SIZEOF_CURL_OFF_T_is_missing
-#endif
-
 #ifndef CURL_SUFFIX_CURL_OFF_T
 #  error "CURL_SUFFIX_CURL_OFF_T definition is missing!"
    Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_T_is_missing
@@ -124,63 +109,6 @@
 #  error "CURL_SUFFIX_CURL_OFF_TU definition is missing!"
    Error Compilation_aborted_CURL_SUFFIX_CURL_OFF_TU_is_missing
 #endif
-
-/*
- * Macros private to this header file.
- */
-
-#define CurlchkszEQ(t, s) sizeof(t) == s ? 1 : -1
-
-#define CurlchkszGE(t1, t2) sizeof(t1) >= sizeof(t2) ? 1 : -1
-
-/*
- * Verify that the size previously defined and expected for long
- * is the same as the one reported by sizeof() at compile time.
- */
-
-typedef char
-  __curl_rule_01__
-    [CurlchkszEQ(long, CURL_SIZEOF_LONG)];
-
-/*
- * Verify that the size previously defined and expected for
- * curl_off_t is actually the the same as the one reported
- * by sizeof() at compile time.
- */
-
-typedef char
-  __curl_rule_02__
-    [CurlchkszEQ(curl_off_t, CURL_SIZEOF_CURL_OFF_T)];
-
-/*
- * Verify at compile time that the size of curl_off_t as reported
- * by sizeof() is greater or equal than the one reported for long
- * for the current compilation.
- */
-
-typedef char
-  __curl_rule_03__
-    [CurlchkszGE(curl_off_t, long)];
-
-/*
- * Verify that the size previously defined and expected for
- * curl_socklen_t is actually the the same as the one reported
- * by sizeof() at compile time.
- */
-
-typedef char
-  __curl_rule_04__
-    [CurlchkszEQ(curl_socklen_t, CURL_SIZEOF_CURL_SOCKLEN_T)];
-
-/*
- * Verify at compile time that the size of curl_socklen_t as reported
- * by sizeof() is greater or equal than the one reported for int for
- * the current compilation.
- */
-
-typedef char
-  __curl_rule_05__
-    [CurlchkszGE(curl_socklen_t, int)];
 
 /* ================================================================ */
 /*          EXTERNALLY AND INTERNALLY VISIBLE DEFINITIONS           */
@@ -233,13 +161,6 @@ typedef char
 #  define CURL_OFF_T_C(Val)  __CURL_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_T)
 #  define CURL_OFF_TU_C(Val) __CURL_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_TU)
 #endif
-
-/*
- * Get rid of macros private to this header file.
- */
-
-#undef CurlchkszEQ
-#undef CurlchkszGE
 
 /*
  * Get rid of macros not intended to exist beyond this point.

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -2076,22 +2076,6 @@ _EOF
 ])
 
 
-dnl CURL_CONFIGURE_LONG
-dnl -------------------------------------------------
-dnl Find out the size of long as reported by sizeof() and define
-dnl CURL_SIZEOF_LONG as appropriate to be used in template file
-dnl include/curl/curlbuild.h.in to properly configure the library.
-dnl The size of long is a build time characteristic and as such
-dnl must be recorded in curlbuild.h
-
-AC_DEFUN([CURL_CONFIGURE_LONG], [
-  if test -z "$ac_cv_sizeof_long" ||
-    test "$ac_cv_sizeof_long" -eq "0"; then
-    AC_MSG_ERROR([cannot find out size of long.])
-  fi
-  CURL_DEFINE_UNQUOTED([CURL_SIZEOF_LONG], [$ac_cv_sizeof_long])
-])
-
 
 dnl CURL_CONFIGURE_CURL_SOCKLEN_T
 dnl -------------------------------------------------
@@ -2216,7 +2200,6 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
       ;;
   esac
   CURL_DEFINE_UNQUOTED([CURL_TYPEOF_CURL_SOCKLEN_T], [$curl_typeof_curl_socklen_t])
-  CURL_DEFINE_UNQUOTED([CURL_SIZEOF_CURL_SOCKLEN_T], [$curl_sizeof_curl_socklen_t])
 ])
 
 
@@ -2996,7 +2979,7 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
   CURL_DEFINE_UNQUOTED([CURL_FORMAT_CURL_OFF_T], ["$curl_format_curl_off_t"])
   CURL_DEFINE_UNQUOTED([CURL_FORMAT_CURL_OFF_TU], ["$curl_format_curl_off_tu"])
   CURL_DEFINE_UNQUOTED([CURL_FORMAT_OFF_T], ["%$curl_format_curl_off_t"])
-  CURL_DEFINE_UNQUOTED([CURL_SIZEOF_CURL_OFF_T], [$curl_sizeof_curl_off_t])
+  CURL_DEFINE_UNQUOTED([SIZEOF_CURL_OFF_T], [$curl_sizeof_curl_off_t])
   CURL_DEFINE_UNQUOTED([CURL_SUFFIX_CURL_OFF_T], [$curl_suffix_curl_off_t])
   CURL_DEFINE_UNQUOTED([CURL_SUFFIX_CURL_OFF_TU], [$curl_suffix_curl_off_tu])
   #

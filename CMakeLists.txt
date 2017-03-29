@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -725,20 +725,20 @@ endif(NOT HAVE_SIZEOF_SSIZE_T)
 
 # Different sizeofs, etc.
 
-#    define CURL_SIZEOF_LONG        4
+#    define SIZEOF_LONG        4
 #    define CURL_TYPEOF_CURL_OFF_T  long long
 #    define CURL_FORMAT_CURL_OFF_T  "lld"
 #    define CURL_FORMAT_CURL_OFF_TU "llu"
 #    define CURL_FORMAT_OFF_T       "%lld"
-#    define CURL_SIZEOF_CURL_OFF_T  8
+#    define SIZEOF_CURL_OFF_T  8
 #    define CURL_SUFFIX_CURL_OFF_T  LL
 #    define CURL_SUFFIX_CURL_OFF_TU ULL
 
-set(CURL_SIZEOF_LONG ${SIZEOF_LONG})
+set(SIZEOF_LONG ${SIZEOF_LONG})
 
 if(SIZEOF_LONG EQUAL 8)
   set(CURL_TYPEOF_CURL_OFF_T long)
-  set(CURL_SIZEOF_CURL_OFF_T 8)
+  set(SIZEOF_CURL_OFF_T 8)
   set(CURL_FORMAT_CURL_OFF_T "ld")
   set(CURL_FORMAT_CURL_OFF_TU "lu")
   set(CURL_FORMAT_OFF_T "%ld")
@@ -748,7 +748,7 @@ endif(SIZEOF_LONG EQUAL 8)
 
 if(SIZEOF_LONG_LONG EQUAL 8)
   set(CURL_TYPEOF_CURL_OFF_T "long long")
-  set(CURL_SIZEOF_CURL_OFF_T 8)
+  set(SIZEOF_CURL_OFF_T 8)
   set(CURL_FORMAT_CURL_OFF_T "lld")
   set(CURL_FORMAT_CURL_OFF_TU "llu")
   set(CURL_FORMAT_OFF_T "%lld")
@@ -758,7 +758,7 @@ endif(SIZEOF_LONG_LONG EQUAL 8)
 
 if(NOT CURL_TYPEOF_CURL_OFF_T)
   set(CURL_TYPEOF_CURL_OFF_T ${ssize_t})
-  set(CURL_SIZEOF_CURL_OFF_T ${SIZEOF_SSIZE_T})
+  set(SIZEOF_CURL_OFF_T ${SIZEOF_SSIZE_T})
   # TODO: need adjustment here.
   set(CURL_FORMAT_CURL_OFF_T "ld")
   set(CURL_FORMAT_CURL_OFF_TU "lu")
@@ -1028,15 +1028,15 @@ if(HAVE_SOCKLEN_T)
   elseif(HAVE_SYS_SOCKET_H)
     set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
   endif()
-  check_type_size("socklen_t" CURL_SIZEOF_CURL_SOCKLEN_T)
+  check_type_size("socklen_t" SIZEOF_CURL_SOCKLEN_T)
   set(CMAKE_EXTRA_INCLUDE_FILES)
-  if(NOT HAVE_CURL_SIZEOF_CURL_SOCKLEN_T)
+  if(NOT HAVE_SIZEOF_CURL_SOCKLEN_T)
     message(FATAL_ERROR
      "Check for sizeof socklen_t failed, see CMakeFiles/CMakerror.log")
   endif()
 else()
   set(CURL_TYPEOF_CURL_SOCKLEN_T int)
-  set(CURL_SIZEOF_CURL_SOCKLEN_T ${SIZEOF_INT})
+  set(SIZEOF_CURL_SOCKLEN_T ${SIZEOF_INT})
 endif()
 
 # TODO test which of these headers are required for the typedefs used in curlbuild.h
@@ -1115,7 +1115,7 @@ _add_if("unix-sockets"  USE_UNIX_SOCKETS)
 _add_if("libz"          HAVE_LIBZ)
 _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
 _add_if("IDN"           HAVE_LIBIDN2)
-_add_if("Largefile"     (CURL_SIZEOF_CURL_OFF_T GREATER 4) AND
+_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
                         ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
 # TODO SSP1 (WinSSL) check is missing
 _add_if("SSPI"          USE_WINDOWS_SSPI)

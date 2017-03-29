@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -381,7 +381,7 @@ ParameterError str2offset(curl_off_t *val, const char *str)
     /* offsets aren't negative, this indicates weird input */
     return PARAM_NEGATIVE_NUMERIC;
 
-#if(CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
+#if(SIZEOF_CURL_OFF_T > SIZEOF_LONG)
   *val = curlx_strtoofft(str, &endptr, 0);
   if((*val == CURL_OFF_T_MAX || *val == CURL_OFF_T_MIN) && (ERRNO == ERANGE))
     return PARAM_BAD_NUMERIC;
