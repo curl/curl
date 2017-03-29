@@ -446,7 +446,7 @@ static CURLcode smb_send_setup(struct connectdata *conn)
 
   Curl_ntlm_core_mk_lm_hash(conn->data, conn->passwd, lm_hash);
   Curl_ntlm_core_lm_resp(lm_hash, smbc->challenge, lm);
-#if USE_NTRESPONSES
+#ifdef USE_NTRESPONSES
   Curl_ntlm_core_mk_nt_hash(conn->data, conn->passwd, nt_hash);
   Curl_ntlm_core_lm_resp(nt_hash, smbc->challenge, nt);
 #else
