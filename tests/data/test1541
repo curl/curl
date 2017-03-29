@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+typecheck
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+verify curl/system.h detection
+ </name>
+<tool>
+lib1541
+</tool>
+</client>
+
+</testcase>

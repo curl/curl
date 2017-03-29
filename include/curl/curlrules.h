@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -103,11 +103,6 @@
 #ifndef CURL_FORMAT_CURL_OFF_TU
 #  error "CURL_FORMAT_CURL_OFF_TU definition is missing!"
    Error Compilation_aborted_CURL_FORMAT_CURL_OFF_TU_is_missing
-#endif
-
-#ifndef CURL_FORMAT_OFF_T
-#  error "CURL_FORMAT_OFF_T definition is missing!"
-   Error Compilation_aborted_CURL_FORMAT_OFF_T_is_missing
 #endif
 
 #ifndef CURL_SIZEOF_CURL_OFF_T
@@ -240,23 +235,5 @@ typedef char
 
 #undef CurlchkszEQ
 #undef CurlchkszGE
-
-/*
- * Get rid of macros not intended to exist beyond this point.
- */
-
-#undef CURL_PULL_WS2TCPIP_H
-#undef CURL_PULL_SYS_TYPES_H
-#undef CURL_PULL_SYS_SOCKET_H
-#undef CURL_PULL_SYS_POLL_H
-#undef CURL_PULL_STDINT_H
-#undef CURL_PULL_INTTYPES_H
-
-#undef CURL_TYPEOF_CURL_SOCKLEN_T
-#undef CURL_TYPEOF_CURL_OFF_T
-
-#ifdef CURL_NO_OLDIES
-#undef CURL_FORMAT_OFF_T /* not required since 7.19.0 - obsoleted in 7.20.0 */
-#endif
 
 #endif /* __CURL_CURLRULES_H */
