@@ -35,7 +35,11 @@
 #endif
 
 #include "curlver.h"         /* libcurl version defines   */
+#ifndef CURL_BUILDTIME
+#include "system.h"          /* determine things run-time */
+#else
 #include "curlbuild.h"       /* libcurl build definitions */
+#endif
 #include "curlrules.h"       /* libcurl rules enforcement */
 
 /*
