@@ -40,7 +40,7 @@ static char *parse_filename(const char *ptr, size_t len);
 ** callback for CURLOPT_HEADERFUNCTION
 */
 
-size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
+size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   struct HdrCbData *hdrcbdata = userdata;
   struct OutStruct *outs = hdrcbdata->outs;
