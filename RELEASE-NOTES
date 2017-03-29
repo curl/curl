@@ -64,6 +64,26 @@ This release includes the following bugfixes:
  o tests: fixed the documented test server port numbers
  o runtests.pl: fixed display of the Gopher IPv6 port number
  o multi: fix streamclose() crash in debug mode [28]
+ o cmake: build manual pages [29]
+ o cmake: add support for building HTML and PDF docs [30]
+ o mbedtls: add support for CURLOPT_SSL_CTX_FUNCTION [31]
+ o make: introduce 'test-nonflaky' target
+ o CURLINFO_PRIMARY_IP.3: add example
+ o tests/README: mention nroff for --manual tests [32]
+ o mkhelp: disable compression if the perl gzip module is unavailable
+ o openssl: fall back on SSL_ERROR_* string when no error detail [33]
+ o asiohiper: make sure socket is open in event_cb [34]
+ o tests/README: make "Run" section foolproof [35]
+ o curl: check for end of input in writeout backslash handling
+ o .gitattributes: turn off CRLF for *.am [36]
+ o multi: fix MinGW-w64 compiler warnings
+ o schannel: fix variable shadowing warning
+ o openssl: exclude DSA code when OPENSSL_NO_DSA is defined [37]
+ o http: Fix proxy connection reuse with basic-auth [38]
+ o pause: handle mixed types of data when paused [39]
+ o http: do not treat FTPS over CONNECT as HTTPS
+ o conncache: make hashkey avoid malloc [40]
+ o make: use the variable MAKE for recursive calls [41]
 
 This release includes the following known bugs:
 
@@ -72,15 +92,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexis La Goutte, Anatol Belski, Andrew Krieger, Antony74 on github,
-  Brian Carpenter, Carlo Cannas, Carlo Teubner, Dan Fandrich, Daniel Stenberg,
-  Desmond O. Chang, Giuseppe Persico, Greg Rowe, Isaac Boukris, Joel Depooter,
-  Jozef Kralik, Justin Clift, Marc-Antoine Perennou, Marcel Raad,
+  Ales Mlakar, Alexis La Goutte, Anatol Belski, Anders Roxell, Andrew Krieger,
+  Antony74 on github, Brian Carpenter, Carlo Cannas, Carlo Teubner,
+  Dan Fandrich, Daniel Stenberg, Desmond O. Chang, Edward Kimmel,
+  Giuseppe Persico, Greg Rowe, Isaac Boukris, Joel Depooter, Jozef Kralik,
+  Justin Clift, ka7 on github, Kamil Dudka, madblobfish on github,
+  Maksim Stsepanenka, Marc-Antoine Perennou, Marcel Raad,
   mccormickt12 on github, Michael Kaufmann, Michael Maltese, mkzero on github,
-  Nehal J Wani, Orange Tsai, Palo Markovic, Peter Pentchev, Peter Wu,
-  Ray Satiro, Simon Warta, Steve Brokenshire, Sylvestre Ledru,
-  Tatsuhiro Tsujikawa, Thomas Glanzmann, zelinchen on github,
-  (34 contributors)
+  Nehal J Wani, neheb on github, Orange Tsai, Palo Markovic, Peter Pentchev,
+  Peter Wu, Ray Satiro, Simon Warta, Stephen Toub, Steve Brokenshire,
+  Sylvestre Ledru, Tatsuhiro Tsujikawa, Thomas Glanzmann, zelinchen on github,
+  (43 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -114,3 +136,16 @@ References to bug reports and discussions on issues:
  [26] = https://curl.haxx.se/bug/?i=1322
  [27] = https://curl.haxx.se/bug/?i=1331
  [28] = https://curl.haxx.se/bug/?i=1329
+ [29] = https://curl.haxx.se/bug/?i=1288
+ [30] = https://curl.haxx.se/bug/?i=1288
+ [31] = https://curl.haxx.se/bug/?i=1272
+ [32] = https://curl.haxx.se/bug/?i=1342
+ [33] = https://curl.haxx.se/bug/?i=1348
+ [34] = https://curl.haxx.se/bug/?i=1318
+ [35] = https://curl.haxx.se/bug/?i=1352
+ [36] = https://curl.haxx.se/bug/?i=1344
+ [37] = https://curl.haxx.se/bug/?i=1361
+ [38] = https://curl.haxx.se/bug/?i=1350
+ [39] = https://curl.haxx.se/bug/?i=1354
+ [40] = https://curl.haxx.se/bug/?i=1365
+ [41] = https://curl.haxx.se/bug/?i=1366
