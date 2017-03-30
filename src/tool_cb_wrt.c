@@ -84,7 +84,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
    * it does not match then it fails with CURLE_WRITE_ERROR. So at this
    * point returning a value different from sz*nmemb indicates failure.
    */
-  const size_t failure = (sz * nmemb) ? 0 : 1;
+  const size_t failure = (sz && nmemb) ? 0 : 1;
 
   if(!config)
     return failure;
