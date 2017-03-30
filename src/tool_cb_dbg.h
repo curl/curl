@@ -28,7 +28,7 @@
 */
 
 int tool_debug_cb(CURL *handle, curl_infotype type,
-                  unsigned char *data, size_t size,
+                  char *data, size_t size,
                   void *userdata);
 
 #endif /* HEADER_CURL_TOOL_CB_DBG_H */
