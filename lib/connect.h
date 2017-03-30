@@ -127,16 +127,16 @@ void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd);
 
 void Curl_conncontrol(struct connectdata *conn,
                       int closeit
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
                       , const char *reason
 #endif
   );
 
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
 #define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
 #define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
-#else /* if !CURLDEBUG */
+#else /* if !DEBUGBUILD || CURL_DISABLE_VERBOSE_STRINGS */
 #define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM)
 #define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
 #define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP)
