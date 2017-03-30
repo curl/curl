@@ -596,6 +596,9 @@ static int on_invalid_frame_recv(nghttp2_session *session,
 {
   struct Curl_easy *data_s = NULL;
   (void)userp;
+#if !defined(DEBUGBUILD) || defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void)lib_error_code;
+#endif
 
   data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
   if(data_s) {
@@ -706,6 +709,9 @@ static int on_frame_not_send(nghttp2_session *session,
 {
   struct Curl_easy *data_s;
   (void)userp;
+#if !defined(DEBUGBUILD) || defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void)lib_error_code;
+#endif
 
   data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
   if(data_s) {
