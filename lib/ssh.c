@@ -2822,7 +2822,7 @@ static CURLcode ssh_block_statemach(struct connectdata *conn,
 
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
-    long left;
+    time_t left;
     struct timeval now = Curl_tvnow();
 
     result = ssh_statemach_act(conn, &block);
