@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -31,7 +31,7 @@ man_DISTMANS = $(man_MANS:.3=.3.dist)
 HTMLPAGES = $(man_MANS:.3=.html)
 
 PDFPAGES = $(man_MANS:.3=.pdf)
- 
+
 m4macrodir = $(datadir)/aclocal
 dist_m4macro_DATA = libcurl.m4
 
@@ -39,7 +39,7 @@ CLEANFILES = $(HTMLPAGES) $(PDFPAGES) $(TESTS) $(man_DISTMANS) \
   libcurl-symbols.3
 
 EXTRA_DIST = $(man_MANS) index.html ABI symbols-in-versions symbols.pl  \
-  mksymbolsmanpage.pl
+  mksymbolsmanpage.pl CMakeLists.txt
 MAN2HTML= roffit --mandir=. $< >$@
 
 SUFFIXES = .3 .html

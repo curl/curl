@@ -26,7 +26,7 @@ MANPAGE = $(top_builddir)/docs/curl.1
 
 include Makefile.inc
 
-EXTRA_DIST = $(DPAGES) MANPAGE.md gen.pl $(OTHERPAGES)
+EXTRA_DIST = $(DPAGES) MANPAGE.md gen.pl $(OTHERPAGES) CMakeLists.txt
 
 all: $(MANPAGE)
 
