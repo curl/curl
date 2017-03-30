@@ -56,7 +56,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
    * it does not match then it fails with CURLE_WRITE_ERROR. So at this
    * point returning a value different from sz*nmemb indicates failure.
    */
-  size_t failure = (size * nmemb) ? 0 : 1;
+  size_t failure = (size && nmemb) ? 0 : 1;
 
   if(!heads->config)
     return failure;
