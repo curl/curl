@@ -147,7 +147,7 @@ static unsigned long OpenSSL_version_num(void)
 /*
  * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
  * BoringSSL: supported since d28f59c27bac (committed 2015-11-19), the
- *            BORINGSSL_201512 macro for 2016-01-21 should be close enough.
+ *            BORINGSSL_201512 macro from 2016-01-21 should be close enough.
  * LibreSSL: unsupported in at least 2.5.1 (explicitly check for it since it
  *            lies and pretends to be OpenSSL 2.0.0).
  */
