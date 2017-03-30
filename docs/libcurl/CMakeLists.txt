@@ -49,7 +49,7 @@ add_manual_pages(man_MANS)
 
 string(REPLACE ".3" ".html" HTMLPAGES "${man_MANS}")
 string(REPLACE ".3" ".pdf" PDFPAGES "${man_MANS}")
-add_custom_target(html DEPENDS "${HTMLPAGES}")
-add_custom_target(pdf DEPENDS "${PDFPAGES}")
+add_custom_target(html DEPENDS ${HTMLPAGES})
+add_custom_target(pdf DEPENDS ${PDFPAGES})
 
 add_subdirectory(opts)
