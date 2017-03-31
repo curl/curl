@@ -58,8 +58,8 @@ struct curl_hash {
 
 struct curl_hash_element {
   void   *ptr;
-  char   *key;
   size_t key_len;
+  char   key[1]; /* allocated memory following the struct */
 };
 
 struct curl_hash_iterator {
