@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,8 +36,6 @@ hash_element_dtor(void *user, void *element)
 {
   struct curl_hash *h = (struct curl_hash *) user;
   struct curl_hash_element *e = (struct curl_hash_element *) element;
-
-  Curl_safefree(e->key);
 
   if(e->ptr) {
     h->dtor(e->ptr);
@@ -98,23 +96,14 @@ Curl_hash_init(struct curl_hash *h,
 static struct curl_hash_element *
 mk_hash_element(const void *key, size_t key_len, const void *p)
 {
-  struct curl_hash_element *he = malloc(sizeof(struct curl_hash_element));
-
+  /* allocate the struct plus memory after it to store the key */
+  struct curl_hash_element *he = malloc(sizeof(struct curl_hash_element) +
+                                        key_len);
   if(he) {
-    void *dupkey = malloc(key_len);
-    if(dupkey) {
-      /* copy the key */
-      memcpy(dupkey, key, key_len);
-
-      he->key = dupkey;
-      he->key_len = key_len;
-      he->ptr = (void *) p;
-    }
-    else {
-      /* failed to duplicate the key, free memory and fail */
-      free(he);
-      he = NULL;
-    }
+    /* copy the key */
+    memcpy(he->key, key, key_len);
+    he->key_len = key_len;
+    he->ptr = (void *) p;
   }
   return he;
 }
@@ -156,7 +145,6 @@ Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
      * "destructor" for the actual data 'p'. When we fail, we shall not touch
      * that data.
      */
-    free(he->key);
     free(he);
   }
 

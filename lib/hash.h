@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -58,8 +58,8 @@ struct curl_hash {
 
 struct curl_hash_element {
   void   *ptr;
-  char   *key;
   size_t key_len;
+  char   key[1]; /* allocated memory following the struct */
 };
 
 struct curl_hash_iterator {
