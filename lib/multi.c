@@ -974,6 +974,8 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
+#define NUM_POLLS_ON_STACK 10
+
 CURLMcode curl_multi_wait(struct Curl_multi *multi,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
@@ -987,8 +989,10 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
   unsigned int nfds = 0;
   unsigned int curlfds;
   struct pollfd *ufds = NULL;
+  bool ufds_malloc = FALSE;
   long timeout_internal;
   int retcode = 0;
+  struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1028,9 +1032,14 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
   nfds += extra_nfds; /* add the externally provided ones */
 
   if(nfds || extra_nfds) {
-    ufds = malloc(nfds * sizeof(struct pollfd));
-    if(!ufds)
-      return CURLM_OUT_OF_MEMORY;
+    if(nfds > NUM_POLLS_ON_STACK) {
+      ufds = malloc(nfds * sizeof(struct pollfd));
+      if(!ufds)
+        return CURLM_OUT_OF_MEMORY;
+      ufds_malloc = TRUE;
+    }
+    else
+      ufds = &a_few_on_stack[0];
   }
   nfds = 0;
 
@@ -1108,7 +1117,8 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
     }
   }
 
-  free(ufds);
+  if(ufds_malloc)
+    free(ufds);
   if(ret)
     *ret = retcode;
   return CURLM_OK;
