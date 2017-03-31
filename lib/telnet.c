@@ -1421,22 +1421,22 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     {
       for(;;) {
         if(data->set.is_fread_set) {
+          size_t n;
           /* read from user-supplied method */
-          result = (int)data->state.fread_func(buf, 1, BUFSIZE - 1,
-                                               data->state.in);
-          if(result == CURL_READFUNC_ABORT) {
+          n = data->state.fread_func(buf, 1, BUFSIZE - 1, data->state.in);
+          if(n == CURL_READFUNC_ABORT) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
             break;
           }
 
-          if(result == CURL_READFUNC_PAUSE)
+          if(n == CURL_READFUNC_PAUSE)
             break;
 
-          if(result == 0)                        /* no bytes */
+          if(n == 0)                        /* no bytes */
             break;
 
-          readfile_read = result; /* fall thru with number of bytes read */
+          readfile_read = (DWORD)n; /* fall thru with number of bytes read */
         }
         else {
           /* read from stdin */
