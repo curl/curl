@@ -10,10 +10,9 @@ errors if there are more URLs given and the last URL's success will determine
 the error code curl returns. So early failures will be "hidden" by subsequent
 successful transfers.
 
-Using this option, curl will instead return an error on the first transfers
-that fails, independent on the amount of more URLs that are given on the
-command line. This way, no transfer failures go undetected by scripts and
-similar.
+Using this option, curl will instead return an error on the first transfer
+that fails, independent of the amount of URLs that are given on the command
+line. This way, no transfer failures go undetected by scripts and similar.
 
 This option is global and does not need to be specified for each use of --next.
 
