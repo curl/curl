@@ -39,6 +39,9 @@
 #elif defined(HAVE_POLL_H)
 #include <poll.h>
 #endif
+#ifdef __MINGW32__
+#include <w32api.h>
+#endif
 
 #define ENABLE_CURLX_PRINTF
 /* make the curlx header define all printf() functions to use the curlx_*
@@ -55,9 +58,14 @@
 #define EINVAL  22 /* errno.h value */
 #endif
 
+/* MinGW with w32api version < 3.6 declared in6addr_any as extern,
+   but lacked the definition */
 #if defined(ENABLE_IPV6) && defined(__MINGW32__)
+#if (__W32API_MAJOR_VERSION < 3) || \
+    ((__W32API_MAJOR_VERSION == 3) && (__W32API_MINOR_VERSION < 6))
 const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
-#endif
+#endif /* w32api < 3.6 */
+#endif /* ENABLE_IPV6 && __MINGW32__*/
 
 /* This function returns a pointer to STATIC memory. It converts the given
  * binary lump to a hex formatted string usable for output in logs or
