@@ -1755,7 +1755,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 #endif
 
 #if defined(HAVE_UTIME) || \
-    (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8))
+    (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8))
         /* File time can only be set _after_ the file has been closed */
         if(!result && config->remote_time && outs.s_isreg && outs.filename) {
           /* Ask libcurl if we got a remote file time */
@@ -1765,7 +1765,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 /* Windows utime() may attempt to adjust our unix gmt 'filetime' by a daylight
    saving time offset and since it's GMT that is bad behavior. When we have
    access to a 64-bit type we can bypass utime and set the times directly. */
-#if defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8)
+#if defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)
             /* 910670515199 is the maximum unix filetime that can be used as a
                Windows FILETIME without overflow: 30827-12-31T23:59:59. */
             if(filetime <= CURL_OFF_T_C(910670515199)) {
@@ -1812,7 +1812,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           }
         }
 #endif /* defined(HAVE_UTIME) || \
-          (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8)) */
+          (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)) */
 
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink && result == CURLE_OK) {

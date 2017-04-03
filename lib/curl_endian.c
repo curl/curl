@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,7 +62,7 @@ unsigned int Curl_read32_le(const unsigned char *buf)
          ((unsigned int)buf[2] << 16) | ((unsigned int)buf[3] << 24);
 }
 
-#if (CURL_SIZEOF_CURL_OFF_T > 4)
+#if (SIZEOF_CURL_OFF_T > 4)
 /*
  * Curl_read64_le()
  *
@@ -98,7 +98,7 @@ unsigned __int64 Curl_read64_le(const unsigned char *buf)
 }
 #endif
 
-#endif /* CURL_SIZEOF_CURL_OFF_T > 4 */
+#endif /* SIZEOF_CURL_OFF_T > 4 */
 
 /*
  * Curl_read16_be()
@@ -138,7 +138,7 @@ unsigned int Curl_read32_be(const unsigned char *buf)
          ((unsigned int)buf[2] << 8) | ((unsigned int)buf[3]);
 }
 
-#if (CURL_SIZEOF_CURL_OFF_T > 4)
+#if (SIZEOF_CURL_OFF_T > 4)
 /*
  * Curl_read64_be()
  *
@@ -174,7 +174,7 @@ unsigned __int64 Curl_read64_be(const unsigned char *buf)
 }
 #endif
 
-#endif /* CURL_SIZEOF_CURL_OFF_T > 4 */
+#endif /* SIZEOF_CURL_OFF_T > 4 */
 
 /*
  * Curl_write16_le()
@@ -212,7 +212,7 @@ void Curl_write32_le(const int value, unsigned char *buffer)
   buffer[3] = (char)((value & 0xFF000000) >> 24);
 }
 
-#if (CURL_SIZEOF_CURL_OFF_T > 4)
+#if (SIZEOF_CURL_OFF_T > 4)
 /*
  * Curl_write64_le()
  *
@@ -233,4 +233,4 @@ void Curl_write64_le(const __int64 value, unsigned char *buffer)
   Curl_write32_le((int)value, buffer);
   Curl_write32_le((int)(value >> 32), buffer + 4);
 }
-#endif /* CURL_SIZEOF_CURL_OFF_T > 4 */
+#endif /* SIZEOF_CURL_OFF_T > 4 */
