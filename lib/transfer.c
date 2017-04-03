@@ -1356,13 +1356,12 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
     if(data->set.wildcardmatch) {
       struct WildcardData *wc = &data->wildcard;
-      if(!wc->filelist) {
+      if(wc->state < CURLWC_INIT) {
         result = Curl_wildcard_init(wc); /* init wildcard structures */
         if(result)
           return CURLE_OUT_OF_MEMORY;
       }
     }
-
   }
 
   return result;

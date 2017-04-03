@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -80,10 +80,10 @@ struct Curl_multi {
   int num_alive; /* amount of easy handles that are added but have not yet
                     reached COMPLETE state */
 
-  struct curl_llist *msglist; /* a list of messages from completed transfers */
+  struct curl_llist msglist; /* a list of messages from completed transfers */
 
-  struct curl_llist *pending; /* Curl_easys that are in the
-                                 CURLM_STATE_CONNECT_PEND state */
+  struct curl_llist pending; /* Curl_easys that are in the
+                                CURLM_STATE_CONNECT_PEND state */
 
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;
@@ -138,11 +138,11 @@ struct Curl_multi {
                                      bigger than this is not
                                      considered for pipelining */
 
-  struct curl_llist *pipelining_site_bl; /* List of sites that are blacklisted
-                                            from pipelining */
+  struct curl_llist pipelining_site_bl; /* List of sites that are blacklisted
+                                           from pipelining */
 
-  struct curl_llist *pipelining_server_bl; /* List of server types that are
-                                              blacklisted from pipelining */
+  struct curl_llist pipelining_server_bl; /* List of server types that are
+                                             blacklisted from pipelining */
 
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;

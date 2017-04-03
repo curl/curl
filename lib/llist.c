@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,27 +33,13 @@
 /*
  * @unittest: 1300
  */
-static void
-llist_init(struct curl_llist *l, curl_llist_dtor dtor)
+void
+Curl_llist_init(struct curl_llist *l, curl_llist_dtor dtor)
 {
   l->size = 0;
   l->dtor = dtor;
   l->head = NULL;
   l->tail = NULL;
-}
-
-struct curl_llist *
-Curl_llist_alloc(curl_llist_dtor dtor)
-{
-  struct curl_llist *list;
-
-  list = malloc(sizeof(struct curl_llist));
-  if(!list)
-    return NULL;
-
-  llist_init(list, dtor);
-
-  return list;
 }
 
 /*
@@ -149,8 +135,6 @@ Curl_llist_destroy(struct curl_llist *list, void *user)
   if(list) {
     while(list->size > 0)
       Curl_llist_remove(list, list->tail, user);
-
-    free(list);
   }
 }
 

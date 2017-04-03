@@ -1058,10 +1058,10 @@ struct connectdata {
                               handle */
   bool writechannel_inuse; /* whether the write channel is in use by an easy
                               handle */
-  struct curl_llist *send_pipe; /* List of handles waiting to
-                                   send on this pipeline */
-  struct curl_llist *recv_pipe; /* List of handles waiting to read
-                                   their responses on this pipeline */
+  struct curl_llist send_pipe; /* List of handles waiting to send on this
+                                  pipeline */
+  struct curl_llist recv_pipe; /* List of handles waiting to read their
+                                  responses on this pipeline */
   char *master_buffer; /* The master buffer allocated on-demand;
                           used for pipelining. */
   size_t read_pos; /* Current read position in the master buffer */
@@ -1374,7 +1374,7 @@ struct UrlState {
 #endif /* USE_OPENSSL */
   struct timeval expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
-  struct curl_llist *timeoutlist; /* list of pending timeouts */
+  struct curl_llist timeoutlist; /* list of pending timeouts */
 
   /* a place to store the most recently set FTP entrypath */
   char *most_recent_ftp_entrypath;

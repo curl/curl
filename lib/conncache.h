@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2015 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
@@ -38,7 +38,7 @@ struct conncache {
 struct connectbundle {
   int multiuse;                 /* supports multi-use */
   size_t num_connections;       /* Number of connections in the bundle */
-  struct curl_llist *conn_list; /* The connectdata members of the bundle */
+  struct curl_llist conn_list;  /* The connectdata members of the bundle */
 };
 
 int Curl_conncache_init(struct conncache *, int size);
