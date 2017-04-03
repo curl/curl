@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2013, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2013-2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -69,8 +69,8 @@ bool Curl_pipeline_penalized(struct Curl_easy *data,
     curl_off_t recv_size = -2; /* Make it easy to spot in the log */
 
     /* Find the head of the recv pipe, if any */
-    if(conn->recv_pipe && conn->recv_pipe->head) {
-      struct Curl_easy *recv_handle = conn->recv_pipe->head->ptr;
+    if(conn->recv_pipe.head) {
+      struct Curl_easy *recv_handle = conn->recv_pipe.head->ptr;
 
       recv_size = recv_handle->req.size;
 
@@ -103,18 +103,18 @@ static CURLcode addHandleToPipeline(struct Curl_easy *data,
 CURLcode Curl_add_handle_to_pipeline(struct Curl_easy *handle,
                                      struct connectdata *conn)
 {
-  struct curl_llist_element *sendhead = conn->send_pipe->head;
+  struct curl_llist_element *sendhead = conn->send_pipe.head;
   struct curl_llist *pipeline;
   CURLcode result;
 
-  pipeline = conn->send_pipe;
+  pipeline = &conn->send_pipe;
 
   result = addHandleToPipeline(handle, pipeline);
 
-  if(pipeline == conn->send_pipe && sendhead != conn->send_pipe->head) {
+  if(pipeline == &conn->send_pipe && sendhead != conn->send_pipe.head) {
     /* this is a new one as head, expire it */
     Curl_pipeline_leave_write(conn); /* not in use yet */
-    Curl_expire(conn->send_pipe->head->ptr, 0);
+    Curl_expire(conn->send_pipe.head->ptr, 0);
   }
 
 #if 0 /* enable for pipeline debugging */
@@ -135,21 +135,21 @@ void Curl_move_handle_from_send_to_recv_pipe(struct Curl_easy *handle,
 {
   struct curl_llist_element *curr;
 
-  curr = conn->send_pipe->head;
+  curr = conn->send_pipe.head;
   while(curr) {
     if(curr->ptr == handle) {
-      Curl_llist_move(conn->send_pipe, curr,
-                      conn->recv_pipe, conn->recv_pipe->tail);
+      Curl_llist_move(&conn->send_pipe, curr,
+                      &conn->recv_pipe, conn->recv_pipe.tail);
 
-      if(conn->send_pipe->head) {
+      if(conn->send_pipe.head) {
         /* Since there's a new easy handle at the start of the send pipeline,
            set its timeout value to 1ms to make it trigger instantly */
         Curl_pipeline_leave_write(conn); /* not used now */
 #ifdef DEBUGBUILD
         infof(conn->data, "%p is at send pipe head B!\n",
-              (void *)conn->send_pipe->head->ptr);
+              (void *)conn->send_pipe.head->ptr);
 #endif
-        Curl_expire(conn->send_pipe->head->ptr, 0);
+        Curl_expire(conn->send_pipe.head->ptr, 0);
       }
 
       /* The receiver's list is not really interesting here since either this
@@ -191,15 +191,14 @@ bool Curl_pipeline_site_blacklisted(struct Curl_easy *handle,
 }
 
 CURLMcode Curl_pipeline_set_site_blacklist(char **sites,
-                                           struct curl_llist **list_ptr)
+                                           struct curl_llist *list)
 {
-  struct curl_llist *old_list = *list_ptr;
-  struct curl_llist *new_list = NULL;
+  /* Free the old list */
+  if(list->size)
+    Curl_llist_destroy(list, NULL);
 
   if(sites) {
-    new_list = Curl_llist_alloc((curl_llist_dtor) site_blacklist_llist_dtor);
-    if(!new_list)
-      return CURLM_OUT_OF_MEMORY;
+    Curl_llist_init(list, (curl_llist_dtor) site_blacklist_llist_dtor);
 
     /* Parse the URLs and populate the list */
     while(*sites) {
@@ -209,14 +208,14 @@ CURLMcode Curl_pipeline_set_site_blacklist(char **sites,
 
       hostname = strdup(*sites);
       if(!hostname) {
-        Curl_llist_destroy(new_list, NULL);
+        Curl_llist_destroy(list, NULL);
         return CURLM_OUT_OF_MEMORY;
       }
 
       entry = malloc(sizeof(struct site_blacklist_entry));
       if(!entry) {
         free(hostname);
-        Curl_llist_destroy(new_list, NULL);
+        Curl_llist_destroy(list, NULL);
         return CURLM_OUT_OF_MEMORY;
       }
 
@@ -233,23 +232,15 @@ CURLMcode Curl_pipeline_set_site_blacklist(char **sites,
 
       entry->hostname = hostname;
 
-      if(!Curl_llist_insert_next(new_list, new_list->tail, entry)) {
+      if(!Curl_llist_insert_next(list, list->tail, entry)) {
         site_blacklist_llist_dtor(NULL, entry);
-        Curl_llist_destroy(new_list, NULL);
+        Curl_llist_destroy(list, NULL);
         return CURLM_OUT_OF_MEMORY;
       }
 
       sites++;
     }
   }
-
-  /* Free the old list */
-  if(old_list) {
-    Curl_llist_destroy(old_list, NULL);
-  }
-
-  /* This might be NULL if sites == NULL, i.e the blacklist is cleared */
-  *list_ptr = new_list;
 
   return CURLM_OK;
 }
@@ -284,15 +275,14 @@ bool Curl_pipeline_server_blacklisted(struct Curl_easy *handle,
 }
 
 CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
-                                             struct curl_llist **list_ptr)
+                                             struct curl_llist *list)
 {
-  struct curl_llist *old_list = *list_ptr;
-  struct curl_llist *new_list = NULL;
+  /* Free the old list */
+  if(list->size)
+    Curl_llist_destroy(list, NULL);
 
   if(servers) {
-    new_list = Curl_llist_alloc((curl_llist_dtor) server_blacklist_llist_dtor);
-    if(!new_list)
-      return CURLM_OUT_OF_MEMORY;
+    Curl_llist_init(list, (curl_llist_dtor) server_blacklist_llist_dtor);
 
     /* Parse the URLs and populate the list */
     while(*servers) {
@@ -300,12 +290,12 @@ CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
 
       server_name = strdup(*servers);
       if(!server_name) {
-        Curl_llist_destroy(new_list, NULL);
+        Curl_llist_destroy(list, NULL);
         return CURLM_OUT_OF_MEMORY;
       }
 
-      if(!Curl_llist_insert_next(new_list, new_list->tail, server_name)) {
-        Curl_llist_destroy(new_list, NULL);
+      if(!Curl_llist_insert_next(list, list->tail, server_name)) {
+        Curl_llist_destroy(list, NULL);
         Curl_safefree(server_name);
         return CURLM_OUT_OF_MEMORY;
       }
@@ -314,13 +304,6 @@ CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
     }
   }
 
-  /* Free the old list */
-  if(old_list) {
-    Curl_llist_destroy(old_list, NULL);
-  }
-
-  /* This might be NULL if sites == NULL, i.e the blacklist is cleared */
-  *list_ptr = new_list;
 
   return CURLM_OK;
 }
@@ -340,14 +323,14 @@ static bool pipe_head(struct Curl_easy *data,
 bool Curl_recvpipe_head(struct Curl_easy *data,
                         struct connectdata *conn)
 {
-  return pipe_head(data, conn->recv_pipe);
+  return pipe_head(data, &conn->recv_pipe);
 }
 
 /* returns TRUE if the given handle is head of the send pipe */
 bool Curl_sendpipe_head(struct Curl_easy *data,
                         struct connectdata *conn)
 {
-  return pipe_head(data, conn->send_pipe);
+  return pipe_head(data, &conn->send_pipe);
 }
 
 

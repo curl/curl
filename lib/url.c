@@ -411,10 +411,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   /* Destroy the timeout list that is held in the easy handle. It is
      /normally/ done by curl_multi_remove_handle() but this is "just in
      case" */
-  if(data->state.timeoutlist) {
-    Curl_llist_destroy(data->state.timeoutlist, NULL);
-    data->state.timeoutlist = NULL;
-  }
+  Curl_llist_destroy(&data->state.timeoutlist, NULL);
 
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from
                       the multi handle, since that function uses the magic
@@ -672,9 +669,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
     data->progress.flags |= PGRS_HIDE;
     data->state.current_speed = -1; /* init to negative == impossible */
-
-    data->wildcard.state = CURLWC_INIT;
-    data->wildcard.filelist = NULL;
     data->set.fnmatch = ZERO_NULL;
     data->set.maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
 
@@ -3001,11 +2995,8 @@ static void conn_free(struct connectdata *conn)
 
   conn_reset_all_postponed_data(conn);
 
-  Curl_llist_destroy(conn->send_pipe, NULL);
-  Curl_llist_destroy(conn->recv_pipe, NULL);
-
-  conn->send_pipe = NULL;
-  conn->recv_pipe = NULL;
+  Curl_llist_destroy(&conn->send_pipe, NULL);
+  Curl_llist_destroy(&conn->recv_pipe, NULL);
 
   Curl_safefree(conn->localdev);
   Curl_free_primary_ssl_config(&conn->ssl_config);
@@ -3045,9 +3036,9 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
    * are other users of it
    */
   if(!conn->bits.close &&
-     (conn->send_pipe->size + conn->recv_pipe->size)) {
+     (conn->send_pipe.size + conn->recv_pipe.size)) {
     DEBUGF(infof(data, "Curl_disconnect, usecounter: %d\n",
-                 conn->send_pipe->size + conn->recv_pipe->size));
+                 conn->send_pipe.size + conn->recv_pipe.size));
     return CURLE_OK;
   }
 
@@ -3080,8 +3071,8 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 
   /* Indicate to all handles on the pipe that we're dead */
   if(Curl_pipeline_wanted(data->multi, CURLPIPE_ANY)) {
-    signalPipeClose(conn->send_pipe, TRUE);
-    signalPipeClose(conn->recv_pipe, TRUE);
+    signalPipeClose(&conn->send_pipe, TRUE);
+    signalPipeClose(&conn->recv_pipe, TRUE);
   }
 
   conn_free(conn);
@@ -3186,9 +3177,9 @@ void Curl_getoff_all_pipelines(struct Curl_easy *data,
   bool send_head = (conn->writechannel_inuse &&
                     Curl_sendpipe_head(data, conn));
 
-  if(Curl_removeHandleFromPipeline(data, conn->recv_pipe) && recv_head)
+  if(Curl_removeHandleFromPipeline(data, &conn->recv_pipe) && recv_head)
     Curl_pipeline_leave_read(conn);
-  if(Curl_removeHandleFromPipeline(data, conn->send_pipe) && send_head)
+  if(Curl_removeHandleFromPipeline(data, &conn->send_pipe) && send_head)
     Curl_pipeline_leave_write(conn);
 }
 
@@ -3249,7 +3240,7 @@ Curl_oldest_idle_connection(struct Curl_easy *data)
 
     bundle = he->ptr;
 
-    curr = bundle->conn_list->head;
+    curr = bundle->conn_list.head;
     while(curr) {
       conn = curr->ptr;
 
@@ -3306,7 +3297,7 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
 
   now = Curl_tvnow();
 
-  curr = bundle->conn_list->head;
+  curr = bundle->conn_list.head;
   while(curr) {
     conn = curr->ptr;
 
@@ -3334,7 +3325,7 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
 static bool disconnect_if_dead(struct connectdata *conn,
                                struct Curl_easy *data)
 {
-  size_t pipeLen = conn->send_pipe->size + conn->recv_pipe->size;
+  size_t pipeLen = conn->send_pipe.size + conn->recv_pipe.size;
   if(!pipeLen && !conn->inuse) {
     /* The check for a dead socket makes sense only if there are no
        handles in pipeline and the connection isn't already marked in
@@ -3481,7 +3472,7 @@ ConnectionExists(struct Curl_easy *data,
       }
     }
 
-    curr = bundle->conn_list->head;
+    curr = bundle->conn_list.head;
     while(curr) {
       bool match = FALSE;
       size_t pipeLen;
@@ -3496,7 +3487,7 @@ ConnectionExists(struct Curl_easy *data,
       if(disconnect_if_dead(check, data))
         continue;
 
-      pipeLen = check->send_pipe->size + check->recv_pipe->size;
+      pipeLen = check->send_pipe.size + check->recv_pipe.size;
 
       if(canPipeline) {
         if(check->bits.protoconnstart && check->bits.close)
@@ -3504,8 +3495,8 @@ ConnectionExists(struct Curl_easy *data,
 
         if(!check->bits.multiplex) {
           /* If not multiplexing, make sure the pipe has only GET requests */
-          struct Curl_easy* sh = gethandleathead(check->send_pipe);
-          struct Curl_easy* rh = gethandleathead(check->recv_pipe);
+          struct Curl_easy* sh = gethandleathead(&check->send_pipe);
+          struct Curl_easy* rh = gethandleathead(&check->recv_pipe);
           if(sh) {
             if(!IsPipeliningPossible(sh, check))
               continue;
@@ -3543,7 +3534,7 @@ ConnectionExists(struct Curl_easy *data,
           infof(data, "Connection #%ld isn't open enough, can't reuse\n",
                 check->connection_id);
 #ifdef DEBUGBUILD
-          if(check->recv_pipe->size > 0) {
+          if(check->recv_pipe.size > 0) {
             infof(data,
                   "BAD! Unconnected #%ld has a non-empty recv pipeline!\n",
                   check->connection_id);
@@ -4217,10 +4208,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   }
 
   /* Initialize the pipeline lists */
-  conn->send_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
-  conn->recv_pipe = Curl_llist_alloc((curl_llist_dtor) llist_dtor);
-  if(!conn->send_pipe || !conn->recv_pipe)
-    goto error;
+  Curl_llist_init(&conn->send_pipe, (curl_llist_dtor) llist_dtor);
+  Curl_llist_init(&conn->recv_pipe, (curl_llist_dtor) llist_dtor);
 
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CLEAR;
@@ -4243,11 +4232,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   return conn;
   error:
 
-  Curl_llist_destroy(conn->send_pipe, NULL);
-  Curl_llist_destroy(conn->recv_pipe, NULL);
-
-  conn->send_pipe = NULL;
-  conn->recv_pipe = NULL;
+  Curl_llist_destroy(&conn->send_pipe, NULL);
+  Curl_llist_destroy(&conn->recv_pipe, NULL);
 
   free(conn->master_buffer);
   free(conn->localdev);
@@ -6242,11 +6228,8 @@ static void reuse_conn(struct connectdata *old_conn,
   Curl_safefree(old_conn->socks_proxy.passwd);
   Curl_safefree(old_conn->localdev);
 
-  Curl_llist_destroy(old_conn->send_pipe, NULL);
-  Curl_llist_destroy(old_conn->recv_pipe, NULL);
-
-  old_conn->send_pipe = NULL;
-  old_conn->recv_pipe = NULL;
+  Curl_llist_destroy(&old_conn->send_pipe, NULL);
+  Curl_llist_destroy(&old_conn->recv_pipe, NULL);
 
   Curl_safefree(old_conn->master_buffer);
 
@@ -6645,7 +6628,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   /* If we found a reusable connection, we may still want to
      open a new connection if we are pipelining. */
   if(reuse && !force_reuse && IsPipeliningPossible(data, conn_temp)) {
-    size_t pipelen = conn_temp->send_pipe->size + conn_temp->recv_pipe->size;
+    size_t pipelen = conn_temp->send_pipe.size + conn_temp->recv_pipe.size;
     if(pipelen > 0) {
       infof(data, "Found connection %ld, with requests in the pipe (%zu)\n",
             conn_temp->connection_id, pipelen);
@@ -6913,7 +6896,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   if(!result) {
     /* no error */
-    if((*in_connect)->send_pipe->size || (*in_connect)->recv_pipe->size)
+    if((*in_connect)->send_pipe.size || (*in_connect)->recv_pipe.size)
       /* pipelining */
       *protocol_done = TRUE;
     else if(!*asyncp) {

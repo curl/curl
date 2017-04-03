@@ -3900,7 +3900,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
       wildcard->state = CURLWC_CLEAN;
       return wc_statemach(conn);
     }
-    if(wildcard->filelist->size == 0) {
+    if(wildcard->filelist.size == 0) {
       /* no corresponding file */
       wildcard->state = CURLWC_CLEAN;
       return CURLE_REMOTE_FILE_NOT_FOUND;
@@ -3911,7 +3911,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
   case CURLWC_DOWNLOADING: {
     /* filelist has at least one file, lets get first one */
     struct ftp_conn *ftpc = &conn->proto.ftpc;
-    struct curl_fileinfo *finfo = wildcard->filelist->head->ptr;
+    struct curl_fileinfo *finfo = wildcard->filelist.head->ptr;
 
     char *tmp_path = aprintf("%s%s", wildcard->path, finfo->filename);
     if(!tmp_path)
@@ -3926,7 +3926,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
     infof(conn->data, "Wildcard - START of \"%s\"\n", finfo->filename);
     if(conn->data->set.chunk_bgn) {
       long userresponse = conn->data->set.chunk_bgn(
-          finfo, wildcard->customptr, (int)wildcard->filelist->size);
+        finfo, wildcard->customptr, (int)wildcard->filelist.size);
       switch(userresponse) {
       case CURL_CHUNK_BGN_FUNC_SKIP:
         infof(conn->data, "Wildcard - \"%s\" skipped by user\n",
@@ -3951,9 +3951,9 @@ static CURLcode wc_statemach(struct connectdata *conn)
       return result;
 
     /* we don't need the Curl_fileinfo of first file anymore */
-    Curl_llist_remove(wildcard->filelist, wildcard->filelist->head, NULL);
+    Curl_llist_remove(&wildcard->filelist, wildcard->filelist.head, NULL);
 
-    if(wildcard->filelist->size == 0) { /* remains only one file to down. */
+    if(wildcard->filelist.size == 0) { /* remains only one file to down. */
       wildcard->state = CURLWC_CLEAN;
       /* after that will be ftp_do called once again and no transfer
          will be done because of CURLWC_CLEAN state */
@@ -3964,8 +3964,8 @@ static CURLcode wc_statemach(struct connectdata *conn)
   case CURLWC_SKIP: {
     if(conn->data->set.chunk_end)
       conn->data->set.chunk_end(conn->data->wildcard.customptr);
-    Curl_llist_remove(wildcard->filelist, wildcard->filelist->head, NULL);
-    wildcard->state = (wildcard->filelist->size == 0) ?
+    Curl_llist_remove(&wildcard->filelist, wildcard->filelist.head, NULL);
+    wildcard->state = (wildcard->filelist.size == 0) ?
                       CURLWC_CLEAN : CURLWC_DOWNLOADING;
     return wc_statemach(conn);
   }
@@ -3981,6 +3981,7 @@ static CURLcode wc_statemach(struct connectdata *conn)
 
   case CURLWC_DONE:
   case CURLWC_ERROR:
+  case CURLWC_CLEAR:
     break;
   }
 

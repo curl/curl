@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -74,21 +74,10 @@ Curl_hash_init(struct curl_hash *h,
   h->size = 0;
   h->slots = slots;
 
-  h->table = malloc(slots * sizeof(struct curl_llist *));
+  h->table = malloc(slots * sizeof(struct curl_llist));
   if(h->table) {
-    for(i = 0; i < slots; ++i) {
-      h->table[i] = Curl_llist_alloc((curl_llist_dtor) hash_element_dtor);
-      if(!h->table[i]) {
-        while(i--) {
-          Curl_llist_destroy(h->table[i], NULL);
-          h->table[i] = NULL;
-        }
-        free(h->table);
-        h->table = NULL;
-        h->slots = 0;
-        return 1; /* failure */
-      }
-    }
+    for(i = 0; i < slots; ++i)
+      Curl_llist_init(&h->table[i], (curl_llist_dtor) hash_element_dtor);
     return 0; /* fine */
   }
   h->slots = 0;
@@ -119,7 +108,7 @@ mk_hash_element(const void *key, size_t key_len, const void *p)
   return he;
 }
 
-#define FETCH_LIST(x,y,z) x->table[x->hash_func(y, z, x->slots)]
+#define FETCH_LIST(x,y,z) &x->table[x->hash_func(y, z, x->slots)]
 
 /* Insert the data in the hash. If there already was a match in the hash,
  * that data is replaced.
@@ -241,8 +230,7 @@ Curl_hash_destroy(struct curl_hash *h)
   int i;
 
   for(i = 0; i < h->slots; ++i) {
-    Curl_llist_destroy(h->table[i], (void *) h);
-    h->table[i] = NULL;
+    Curl_llist_destroy(&h->table[i], (void *) h);
   }
 
   Curl_safefree(h->table);
@@ -274,7 +262,7 @@ Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
     return;
 
   for(i = 0; i < h->slots; ++i) {
-    list = h->table[i];
+    list = &h->table[i];
     le = list->head; /* get first list entry */
     while(le) {
       struct curl_hash_element *he = le->ptr;
@@ -333,8 +321,8 @@ Curl_hash_next_element(struct curl_hash_iterator *iter)
   /* If we have reached the end of the list, find the next one */
   if(!iter->current_element) {
     for(i = iter->slot_index;i < h->slots;i++) {
-      if(h->table[i]->head) {
-        iter->current_element = h->table[i]->head;
+      if(h->table[i].head) {
+        iter->current_element = h->table[i].head;
         iter->slot_index = i+1;
         break;
       }

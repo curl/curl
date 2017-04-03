@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -280,7 +280,7 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
   curl_fnmatch_callback compare;
   struct WildcardData *wc = &conn->data->wildcard;
   struct ftp_wc_tmpdata *tmpdata = wc->tmp;
-  struct curl_llist *llist = wc->filelist;
+  struct curl_llist *llist = &wc->filelist;
   struct ftp_parselist_data *parser = tmpdata->parser;
   bool add = TRUE;
 
