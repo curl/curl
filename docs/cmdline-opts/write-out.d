@@ -120,7 +120,7 @@ about to begin. This includes all pre-transfer commands and negotiations that
 are specific to the particular protocol(s) involved.
 .TP
 .B time_redirect
-The time, in seconds, it took for all redirection steps include name lookup,
+The time, in seconds, it took for all redirection steps including name lookup,
 connect, pretransfer and transfer before the final transaction was
 started. time_redirect shows the complete execution time for multiple
 redirections. (Added in 7.12.3)
