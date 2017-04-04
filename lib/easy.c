@@ -619,7 +619,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         /* If nothing updated the timeout, we decrease it by the spent time.
          * If it was updated, it has the new timeout time stored already.
          */
-        ev->ms += curlx_tvdiff(after, before);
+        ev->ms += (long)curlx_tvdiff(after, before);
 
     }
     else
