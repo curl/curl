@@ -50,7 +50,7 @@
 #include "memdebug.h"
 
 /* Supported mechanisms */
-const struct {
+static const struct {
   const char   *name;  /* Name */
   size_t        len;   /* Name length */
   unsigned int  bit;   /* Flag bit */
