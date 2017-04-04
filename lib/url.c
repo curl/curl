@@ -6215,7 +6215,6 @@ static void reuse_conn(struct connectdata *old_conn,
   Curl_persistconninfo(conn);
 
   conn_reset_all_postponed_data(old_conn); /* free buffers */
-  conn_reset_all_postponed_data(conn);     /* reset unprocessed data */
 
   /* re-use init */
   conn->bits.reuse = TRUE; /* yes, we're re-using here */
