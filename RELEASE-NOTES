@@ -84,6 +84,24 @@ This release includes the following bugfixes:
  o http: do not treat FTPS over CONNECT as HTTPS
  o conncache: make hashkey avoid malloc [40]
  o make: use the variable MAKE for recursive calls [41]
+ o curl: fix callback argument inconsistency [42]
+ o NTLM: check for features with #ifdef instead of #if [43]
+ o cmake: add several missing files to the dist
+ o select: use correct SIZEOF_ constant [44]
+ o connect: fix unreferenced parameter warning
+ o schannel: fix unused variable warning
+ o gcc7: fix ‘*’ in boolean context [45]
+ o http2: silence unused parameter warnings
+ o ssh: fix narrowing conversion warning
+ o telnet: (win32) fix read callback return variable [46]
+ o docs: Explain --fail-early does not imply --fail [47]
+ o docs: added examples for CURLINFO_FILETIME.3 and CURLOPT_FILETIME.3
+ o tests/server/util: remove in6addr_any for recent MinGW [48]
+ o multi: make curl_multi_wait avoid malloc in the typical case [49]
+ o include: curl/system.h is a run-time version of curlbuild.h [50]
+ o easy: silence compiler warning
+ o llist: replace Curl_llist_alloc with Curl_llist_init [51]
+ o hash: move key into hash struct to reduce mallocs [52]
 
 This release includes the following known bugs:
 
@@ -94,15 +112,16 @@ advice from friends like these:
 
   Ales Mlakar, Alexis La Goutte, Anatol Belski, Anders Roxell, Andrew Krieger,
   Antony74 on github, Brian Carpenter, Carlo Cannas, Carlo Teubner,
-  Dan Fandrich, Daniel Stenberg, Desmond O. Chang, Edward Kimmel,
-  Giuseppe Persico, Greg Rowe, Isaac Boukris, Joel Depooter, Jozef Kralik,
-  Justin Clift, ka7 on github, Kamil Dudka, madblobfish on github,
-  Maksim Stsepanenka, Marc-Antoine Perennou, Marcel Raad,
-  mccormickt12 on github, Michael Kaufmann, Michael Maltese, mkzero on github,
-  Nehal J Wani, neheb on github, Orange Tsai, Palo Markovic, Peter Pentchev,
-  Peter Wu, Ray Satiro, Simon Warta, Stephen Toub, Steve Brokenshire,
-  Sylvestre Ledru, Tatsuhiro Tsujikawa, Thomas Glanzmann, zelinchen on github,
-  (43 contributors)
+  Dan Fandrich, Daniel Stenberg, Desmond O. Chang, Edward Kimmel, Gisle Vanem,
+  Giuseppe Persico, Greg Rowe, Hanno Böck, Isaac Boukris, Joel Depooter,
+  Jozef Kralik, Justin Clift, ka7 on github, Kamil Dudka,
+  madblobfish on github, Maksim Stsepanenka, Marc-Antoine Perennou,
+  Marcel Raad, mccormickt12 on github, Michael Kaufmann, Michael Maltese,
+  mkzero on github, Nehal J Wani, neheb on github, Orange Tsai, Palo Markovic,
+  Peter Pentchev, Peter Wu, Ray Satiro, Simon Warta, Stephen Toub,
+  Steve Brokenshire, Sylvestre Ledru, Tatsuhiro Tsujikawa, Thomas Glanzmann,
+  zelinchen on github,
+  (45 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -149,3 +168,14 @@ References to bug reports and discussions on issues:
  [39] = https://curl.haxx.se/bug/?i=1354
  [40] = https://curl.haxx.se/bug/?i=1365
  [41] = https://curl.haxx.se/bug/?i=1366
+ [42] = https://curl.haxx.se/mail/lib-2017-03/0116.html
+ [43] = https://github.com/curl/curl/pull/1367
+ [44] = https://curl.haxx.se/bug/?i=1362
+ [45] = https://curl.haxx.se/bug/?i=1371
+ [46] = https://github.com/curl/curl/issues/1225#issuecomment-290340890
+ [47] = https://curl.haxx.se/bug/?i=1375
+ [48] = https://curl.haxx.se/bug/?i=1379
+ [49] = https://curl.haxx.se/bug/?i=1377
+ [50] = https://curl.haxx.se/bug/?i=1373
+ [51] = https://curl.haxx.se/bug/?i=1381
+ [52] = https://curl.haxx.se/bug/?i=1376
