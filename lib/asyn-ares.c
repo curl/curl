@@ -535,16 +535,16 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   }
 
   /* File Lookup, if successful we do not need make a DNS request */
-  if (family == PF_UNSPEC && Curl_ipv6works()) {
+  if(family == PF_UNSPEC && Curl_ipv6works()) {
     struct hostent* host;
     Curl_addrinfo* ai = NULL;
-    if (ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
-      PF_INET, &host))
+    if(ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
+                               PF_INET, &host) == ARES_SUCCESS)
       ai = Curl_he2ai(host, port);
-    if (ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
-      PF_INET6, &host))
+    if(ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
+                               PF_INET6, &host) == ARES_SUCCESS)
       compound_results(&ai, Curl_he2ai(host, port));
-    if (ai)
+    if(ai)
       return ai;
   }
 #endif /* CURLRES_IPV6 */
