@@ -47,7 +47,9 @@ int test(char *URL)
   socket_h = "Yes";
 #endif
   snprintf(detect, sizeof(detect),
+#ifdef CHECK_CURL_OFF_T
            "CURL_TYPEOF_CURL_OFF_T:     %s\n"
+#endif
            "CURL_FORMAT_CURL_OFF_T:     %s\n"
            "CURL_FORMAT_CURL_OFF_TU:    %s\n"
            "CURL_SUFFIX_CURL_OFF_T:     %s\n"
@@ -58,7 +60,9 @@ int test(char *URL)
            "CURL_PULL_SYS_TYPES_H:      %s\n"
            "CURL_PULL_SYS_SOCKET_H:     %s\n"
 
+#ifdef CHECK_CURL_OFF_T
            , STRING(CURL_TYPEOF_CURL_OFF_T)
+#endif
            , CURL_FORMAT_CURL_OFF_T
            , CURL_FORMAT_CURL_OFF_TU
            , STRING(CURL_SUFFIX_CURL_OFF_T)
@@ -76,7 +80,9 @@ int test(char *URL)
   ssocket_h = "Yes";
 #endif
   snprintf(syst, sizeof(syst),
+#ifdef CHECK_CURL_OFF_T
            "CURL_TYPEOF_CURL_OFF_T:     %s\n"
+#endif
            "CURL_FORMAT_CURL_OFF_T:     %s\n"
            "CURL_FORMAT_CURL_OFF_TU:    %s\n"
            "CURL_SUFFIX_CURL_OFF_T:     %s\n"
@@ -87,7 +93,9 @@ int test(char *URL)
            "CURL_PULL_SYS_TYPES_H:      %s\n"
            "CURL_PULL_SYS_SOCKET_H:     %s\n"
 
+#ifdef CHECK_CURL_OFF_T
            , STRING(CURLSYS_TYPEOF_CURL_OFF_T)
+#endif
            , CURLSYS_FORMAT_CURL_OFF_T
            , CURLSYS_FORMAT_CURL_OFF_TU
            , STRING(CURLSYS_SUFFIX_CURL_OFF_T)
