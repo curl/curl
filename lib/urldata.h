@@ -316,7 +316,7 @@ struct ssl_connect_data {
   PRFileDesc *handle;
   char *client_nickname;
   struct Curl_easy *data;
-  struct curl_llist *obj_list;
+  struct curl_llist obj_list;
   PK11GenericObject *obj_clicert;
 #elif defined(USE_GSKIT)
   gsk_handle handle;
