@@ -81,7 +81,7 @@ PRFileDesc *PR_ImportTCPSocket(PRInt32 osfd);
 static PRLock *nss_initlock = NULL;
 static PRLock *nss_crllock = NULL;
 static PRLock *nss_findslot_lock = NULL;
-static struct curl_llist *nss_crl_list = NULL;
+static struct curl_llist nss_crl_list;
 static NSSInitContext *nss_context = NULL;
 static volatile int initialized = 0;
 
@@ -413,7 +413,7 @@ static CURLcode nss_create_object(struct ssl_connect_data *ssl,
   if(!obj)
     return result;
 
-  if(!Curl_llist_insert_next(ssl->obj_list, ssl->obj_list->tail, obj)) {
+  if(!Curl_llist_insert_next(&ssl->obj_list, ssl->obj_list.tail, obj)) {
     PK11_DestroyGenericObject(obj);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -496,7 +496,7 @@ static CURLcode nss_cache_crl(SECItem *crl_der)
   PR_Lock(nss_crllock);
 
   /* store the CRL item so that we can free it in Curl_nss_cleanup() */
-  if(!Curl_llist_insert_next(nss_crl_list, nss_crl_list->tail, crl_der)) {
+  if(!Curl_llist_insert_next(&nss_crl_list, nss_crl_list.tail, crl_der)) {
     SECITEM_FreeItem(crl_der, PR_TRUE);
     PR_Unlock(nss_crllock);
     return CURLE_OUT_OF_MEMORY;
@@ -1227,9 +1227,7 @@ static CURLcode nss_init(struct Curl_easy *data)
     return CURLE_OK;
 
   /* list of all CRL items we need to destroy in Curl_nss_cleanup() */
-  nss_crl_list = Curl_llist_alloc(nss_destroy_crl_item);
-  if(!nss_crl_list)
-    return CURLE_OUT_OF_MEMORY;
+  Curl_llist_init(&nss_crl_list, nss_destroy_crl_item);
 
   /* First we check if $SSL_DIR points to a valid dir */
   cert_dir = getenv("SSL_DIR");
@@ -1336,8 +1334,7 @@ void Curl_nss_cleanup(void)
   }
 
   /* destroy all CRL items */
-  Curl_llist_destroy(nss_crl_list, NULL);
-  nss_crl_list = NULL;
+  Curl_llist_destroy(&nss_crl_list, NULL);
 
   PR_Unlock(nss_initlock);
 
@@ -1385,8 +1382,7 @@ static void nss_close(struct ssl_connect_data *connssl)
   connssl->client_nickname = NULL;
 
   /* destroy all NSS objects in order to avoid failure of NSS shutdown */
-  Curl_llist_destroy(connssl->obj_list, NULL);
-  connssl->obj_list = NULL;
+  Curl_llist_destroy(&connssl->obj_list, NULL);
   connssl->obj_clicert = NULL;
 
   if(connssl->handle) {
@@ -1636,8 +1632,7 @@ static CURLcode nss_fail_connect(struct ssl_connect_data *connssl,
   }
 
   /* cleanup on connection failure */
-  Curl_llist_destroy(connssl->obj_list, NULL);
-  connssl->obj_list = NULL;
+  Curl_llist_destroy(&connssl->obj_list, NULL);
 
   return curlerr;
 }
@@ -1678,9 +1673,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   connssl->data = data;
 
   /* list of all NSS objects we need to destroy in Curl_nss_close() */
-  connssl->obj_list = Curl_llist_alloc(nss_destroy_object);
-  if(!connssl->obj_list)
-    return CURLE_OUT_OF_MEMORY;
+  Curl_llist_init(&connssl->obj_list, nss_destroy_object);
 
   /* FIXME. NSS doesn't support multiple databases open at the same time. */
   PR_Lock(nss_initlock);
