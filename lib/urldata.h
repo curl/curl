@@ -333,6 +333,11 @@ struct ssl_connect_data {
   size_t encdata_length, decdata_length;
   size_t encdata_offset, decdata_offset;
   unsigned char *encdata_buffer, *decdata_buffer;
+  /* encdata_is_incomplete: if encdata contains only a partial record that
+     can't be decrypted without another Curl_read_plain (that is, status is
+     SEC_E_INCOMPLETE_MESSAGE) then set this true. after Curl_read_plain writes
+     more bytes into encdata then set this back to false. */
+  bool encdata_is_incomplete;
   unsigned long req_flags, ret_flags;
   CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
   bool recv_sspi_close_notify; /* true if connection closed by close_notify */
