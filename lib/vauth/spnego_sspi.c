@@ -34,6 +34,7 @@
 #include "warnless.h"
 #include "curl_multibyte.h"
 #include "sendf.h"
+#include "strerror.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -224,6 +225,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   free(chlg);
 
   if(GSS_ERROR(nego->status)) {
+    failf(data, "InitializeSecurityContext failed: %s",
+          Curl_sspi_strerror(data->easy_conn, nego->status));
     return CURLE_OUT_OF_MEMORY;
   }
 
