@@ -278,7 +278,7 @@ static CURLcode handshake(struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   gnutls_session_t session = conn->ssl[sockindex].session;
   curl_socket_t sockfd = conn->sock[sockindex];
-  long timeout_ms;
+  time_t timeout_ms;
   int rc;
   int what;
 
@@ -314,7 +314,7 @@ static CURLcode handshake(struct connectdata *conn,
           return CURLE_OK;
         else if(timeout_ms) {
           /* timeout */
-          failf(data, "SSL connection timeout at %ld", timeout_ms);
+          failf(data, "SSL connection timeout at %ld", (long)timeout_ms);
           return CURLE_OPERATION_TIMEDOUT;
         }
       }
