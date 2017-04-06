@@ -420,6 +420,7 @@
 
 #else
 /* generic "safe guess" on old 32 bit style */
+# define CURLSYS_SIZEOF_LONG 4
 # define CURLSYS_SIZEOF_CURL_SOCKLEN_T 4
 # define CURLSYS_SIZEOF_CURL_OFF_T 4
 # define CURLSYS_TYPEOF_CURL_OFF_T     long
