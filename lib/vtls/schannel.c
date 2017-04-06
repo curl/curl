@@ -159,7 +159,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
   TCHAR *host_name;
   CURLcode result;
-  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+  char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
 
   infof(data, "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
@@ -456,7 +456,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   TCHAR *host_name;
   CURLcode result;
   bool doread;
-  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+  char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
@@ -1434,7 +1434,7 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
    */
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+  char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
 
   infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
