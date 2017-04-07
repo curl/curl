@@ -363,6 +363,19 @@
 #  define CURLSYS_TYPEOF_CURL_SOCKLEN_T int
 #  define CURLSYS_SIZEOF_CURL_SOCKLEN_T 4
 
+#elif defined(__TINYC__) /* also known as tcc */
+
+#  define CURLSYS_SIZEOF_LONG           4
+#  define CURLSYS_TYPEOF_CURL_OFF_T     long long
+#  define CURLSYS_FORMAT_CURL_OFF_T     "lld"
+#  define CURLSYS_FORMAT_CURL_OFF_TU    "llu"
+#  define CURLSYS_SIZEOF_CURL_OFF_T     8
+#  define CURLSYS_SUFFIX_CURL_OFF_T     LL
+#  define CURLSYS_SUFFIX_CURL_OFF_TU    ULL
+#  define CURLSYS_TYPEOF_CURL_SOCKLEN_T socklen_t
+#  define CURLSYS_PULL_SYS_TYPES_H      1
+#  define CURLSYS_PULL_SYS_SOCKET_H     1
+
 /* ===================================== */
 /*    KEEP MSVC THE PENULTIMATE ENTRY    */
 /* ===================================== */
