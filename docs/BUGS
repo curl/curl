@@ -14,6 +14,7 @@ BUGS
   1.5 Who will fix the problems
   1.6 How to get a stack trace
   1.7 Bugs in libcurl bindings
+  1.8 Bugs in old versions
 
  2. Bug fixing procedure
  2.1 What happens on first filing
@@ -152,6 +153,38 @@ BUGS
   If you suspect that the problem exists in the underlying libcurl, then
   please convert your program over to plain C and follow the steps outlined
   above.
+
+1.8 Bugs in old versions
+
+  The curl project typically releases new versions every other month, and we
+  fix several hundred bugs per year. For a huge table of releases, number of
+  bug fixes and more, see: https://curl.haxx.se/docs/releases.html
+
+  The developers in the curl project do not have bandwidth or energy enough to
+  maintain several branches or to spend much time on hunting down problems in
+  old versions when chances are we already fixed them or at least that they've
+  changed nature and appearance in later versions.
+
+  When you experience a problem and want to report it, you really SHOULD
+  include the version number of the curl you're using when you experience the
+  issue. If that version number shows us that you're using an out-of-date
+  curl, you should also try out a modern curl version to see if the problem
+  persists or how/if it has changed in apperance.
+
+  Even if you cannot immediately upgrade your application/system to run the
+  latest curl version, you can most often at least run a test version or
+  experimental build or similar, to get this confirmed or not.
+
+  At times people insist that they cannot upgrade to a modern curl version,
+  but instead they "just want the bug fixed". That's fine, just don't count on
+  us spending many cycles on trying to identify which single commit, if that's
+  even possible, that at some point in the past fixed the problem you're now
+  experiencing.
+
+  Security wise, it is almost always a bad idea to lag behind the current curl
+  versions by a lot. We keeping discovering and reporting security problems
+  over time see you can see in this table:
+  https://curl.haxx.se/docs/vulnerabilities.html
 
 2. Bug fixing procedure
 
