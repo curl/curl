@@ -1805,6 +1805,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   long ctx_options = 0;
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   bool sni;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -1823,8 +1825,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
-  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
-    conn->host.name;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
 

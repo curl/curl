@@ -973,7 +973,9 @@ gtls_connect_step3(struct connectdata *conn,
   gnutls_datum_t proto;
 #endif
   CURLcode result = CURLE_OK;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   gnutls_protocol_t version = gnutls_protocol_get_version(session);
+#endif
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
 
