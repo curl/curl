@@ -108,7 +108,7 @@ libressl.
  - mbedTLS: `--without-ssl --with-mbedtls`
  - axTLS: `--without-ssl --with-axtls`
  - schannel: `--without-ssl --with-winssl`
- - secure transport: `--with-winssl --with-darwinssl`
+ - secure transport: `--without-ssl --with-darwinssl`
 
 # Windows
 
