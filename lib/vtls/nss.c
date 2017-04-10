@@ -81,6 +81,7 @@
 static PRLock *nss_initlock = NULL;
 static PRLock *nss_crllock = NULL;
 static PRLock *nss_findslot_lock = NULL;
+static PRLock *nss_trustload_lock = NULL;
 static struct curl_llist nss_crl_list;
 static NSSInitContext *nss_context = NULL;
 static volatile int initialized = 0;
@@ -208,6 +209,9 @@ static const cipher_s cipherlist[] = {
 
 static const char *pem_library = "libnsspem.so";
 static SECMODModule *pem_module = NULL;
+
+static const char *trust_library = "libnssckbi.so";
+static SECMODModule *trust_module = NULL;
 
 /* NSPR I/O layer we use to detect blocking direction during SSL handshake */
 static PRDescIdentity nspr_io_identity = PR_INVALID_IO_LAYER;
@@ -1355,6 +1359,7 @@ int Curl_nss_init(void)
     nss_initlock = PR_NewLock();
     nss_crllock = PR_NewLock();
     nss_findslot_lock = PR_NewLock();
+    nss_trustload_lock = PR_NewLock();
   }
 
   /* We will actually initialize NSS later */
@@ -1394,6 +1399,7 @@ void Curl_nss_cleanup(void)
     SSL_ClearSessionCache();
 
     nss_unload_module(&pem_module);
+    nss_unload_module(&trust_module);
     NSS_ShutdownContext(nss_context);
     nss_context = NULL;
   }
@@ -1406,6 +1412,7 @@ void Curl_nss_cleanup(void)
   PR_DestroyLock(nss_initlock);
   PR_DestroyLock(nss_crllock);
   PR_DestroyLock(nss_findslot_lock);
+  PR_DestroyLock(nss_trustload_lock);
   nss_initlock = NULL;
 
   initialized = 0;
@@ -1527,12 +1534,44 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   const char *cafile = SSL_CONN_CONFIG(CAfile);
   const char *capath = SSL_CONN_CONFIG(CApath);
+  bool use_trust_module;
+  CURLcode result = CURLE_OK;
 
-  if(cafile) {
-    CURLcode result = nss_load_cert(&conn->ssl[sockindex], cafile, PR_TRUE);
-    if(result)
-      return result;
+  /* treat empty string as unset */
+  if(cafile && !cafile[0])
+    cafile = NULL;
+  if(capath && !capath[0])
+    capath = NULL;
+
+  infof(data, "  CAfile: %s\n  CApath: %s\n",
+      cafile ? cafile : "none",
+      capath ? capath : "none");
+
+  /* load libnssckbi.so if no other trust roots were specified */
+  use_trust_module = !cafile && !capath;
+
+  PR_Lock(nss_trustload_lock);
+  if(use_trust_module && !trust_module) {
+    /* libnssckbi.so needed but not yet loaded --> load it! */
+    result = nss_load_module(&trust_module, trust_library, "trust");
+    infof(data, "%s %s\n", (result) ? "failed to load" : "loaded",
+          trust_library);
+    if(result == CURLE_FAILED_INIT)
+      /* make the error non-fatal if we are not going to verify peer */
+      result = CURLE_SSL_CACERT_BADFILE;
   }
+  else if(!use_trust_module && trust_module) {
+    /* libnssckbi.so not needed but already loaded --> unload it! */
+    infof(data, "unloading %s\n", trust_library);
+    nss_unload_module(&trust_module);
+  }
+  PR_Unlock(nss_trustload_lock);
+
+  if(cafile)
+    result = nss_load_cert(&conn->ssl[sockindex], cafile, PR_TRUE);
+
+  if(result)
+    return result;
 
   if(capath) {
     struct_stat st;
@@ -1565,10 +1604,6 @@ static CURLcode nss_load_ca_certificates(struct connectdata *conn,
     else
       infof(data, "warning: CURLOPT_CAPATH not a directory (%s)\n", capath);
   }
-
-  infof(data, "  CAfile: %s\n  CApath: %s\n",
-      cafile ? cafile : "none",
-      capath ? capath : "none");
 
   return CURLE_OK;
 }
