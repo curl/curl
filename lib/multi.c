@@ -3001,11 +3001,14 @@ void Curl_expire_latest(struct Curl_easy *data, time_t milli)
   if(expire->tv_sec || expire->tv_usec) {
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
-         is. */
+       is. */
     time_t diff = curlx_tvdiff(set, *expire);
-    if(diff > 0)
-      /* the new expire time was later than the top time, so just skip this */
+    if((diff > 0) && (diff < milli)) {
+      /* if the new expire time is later than the top time, skip it, but not
+         if the diff is larger than the new offset since then the previous
+         time is already expired! */
       return;
+    }
   }
 
   /* Just add the timeout like normal */
