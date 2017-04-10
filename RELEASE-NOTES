@@ -102,6 +102,19 @@ This release includes the following bugfixes:
  o easy: silence compiler warning
  o llist: replace Curl_llist_alloc with Curl_llist_init [51]
  o hash: move key into hash struct to reduce mallocs [52]
+ o url: don't free postponed data on connection reuse [53]
+ o curl_sasl: declare mechtable static
+ o curl: fix Windows Unicode build
+ o multi: fix queueing of pending easy handles [54]
+ o tool_operate: fix MinGW compiler warning [55]
+ o low_speed_limit: improved function for longer time periods [56]
+ o gtls: fix compiler warning
+ o sspi: print out InitializeSecurityContext() error message [57]
+ o schannel: fix compiler warnings [58]
+ o vtls: fix unreferenced variable warnings
+ o INSTALL.md: fix secure transport configure arguments
+ o CURLINFO_SCHEME.3: fix variable type
+ o libcurl-thread.3: also mention threaded-resolver [59]
 
 This release includes the following known bugs:
 
@@ -110,18 +123,19 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Ales Mlakar, Alexis La Goutte, Anatol Belski, Anders Roxell, Andrew Krieger,
-  Antony74 on github, Brian Carpenter, Carlo Cannas, Carlo Teubner,
-  Dan Fandrich, Daniel Stenberg, Desmond O. Chang, Edward Kimmel, Gisle Vanem,
-  Giuseppe Persico, Greg Rowe, Hanno Böck, Isaac Boukris, Joel Depooter,
-  Jozef Kralik, Justin Clift, ka7 on github, Kamil Dudka,
-  madblobfish on github, Maksim Stsepanenka, Marc-Antoine Perennou,
-  Marcel Raad, mccormickt12 on github, Michael Kaufmann, Michael Maltese,
-  mkzero on github, Nehal J Wani, neheb on github, Orange Tsai, Palo Markovic,
+  Ales Mlakar, Alex Bligh, Alexis La Goutte, Anatol Belski, Anders Roxell,
+  Andrew Krieger, Antony74 on github, Antti Hätälä, Brian Carpenter,
+  Carlo Cannas, Carlo Teubner, Dan Fandrich, Dániel Bakai, Daniel Stenberg,
+  Desmond O. Chang, Edward Kimmel, Gisle Vanem, Giuseppe Persico, Greg Rowe,
+  Hanno Böck, Isaac Boukris, Joel Depooter, Jozef Kralik, Justin Clift,
+  ka7 on github, Kamil Dudka, madblobfish on github, Maksim Stsepanenka,
+  Marc-Antoine Perennou, Marcel Raad, Martin Kepplinger,
+  mccormickt12 on github, Michael Kaufmann, Michael Maltese, mkzero on github,
+  Nehal J Wani, neheb on github, Orange Tsai, Palo Markovic, Paul Harris,
   Peter Pentchev, Peter Wu, Ray Satiro, Simon Warta, Stephen Toub,
   Steve Brokenshire, Sylvestre Ledru, Tatsuhiro Tsujikawa, Thomas Glanzmann,
   zelinchen on github,
-  (45 contributors)
+  (50 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -179,3 +193,10 @@ References to bug reports and discussions on issues:
  [50] = https://curl.haxx.se/bug/?i=1373
  [51] = https://curl.haxx.se/bug/?i=1381
  [52] = https://curl.haxx.se/bug/?i=1376
+ [53] = https://curl.haxx.se/bug/?i=1380
+ [54] = https://curl.haxx.se/bug/?i=1358
+ [55] = https://curl.haxx.se/bug/?i=1378
+ [56] = https://curl.haxx.se/bug/?i=1390
+ [57] = https://curl.haxx.se/bug/?i=1395
+ [58] = https://curl.haxx.se/bug/?i=1394
+ [59] = https://curl.haxx.se/mail/lib-2017-04/0044.html
