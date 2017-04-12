@@ -35,8 +35,10 @@ int test(char *URL)
 
   const char *types_h = "No";
   const char *socket_h = "No";
+  const char *ws2tcpip_h = "No";
   const char *stypes_h = "No";
   const char *ssocket_h = "No";
+  const char *sws2tcpip_h = "No";
 
   (void)(URL);
 
@@ -45,6 +47,9 @@ int test(char *URL)
 #endif
 #ifdef CURL_PULL_SYS_SOCKET_H
   socket_h = "Yes";
+#endif
+#ifdef CURL_PULL_WS2TCPIP_H
+  ws2tcpip_h = "Yes";
 #endif
   snprintf(detect, sizeof(detect),
 #ifdef CHECK_CURL_OFF_T
@@ -59,6 +64,7 @@ int test(char *URL)
            "CURL_TYPEOF_CURL_SOCKLEN_T: %s\n"
            "CURL_PULL_SYS_TYPES_H:      %s\n"
            "CURL_PULL_SYS_SOCKET_H:     %s\n"
+           "CURL_PULL_WS2TCPIP_H:       %s\n"
 
 #ifdef CHECK_CURL_OFF_T
            , STRING(CURL_TYPEOF_CURL_OFF_T)
@@ -71,13 +77,17 @@ int test(char *URL)
            , CURL_SIZEOF_LONG
            , STRING(CURL_TYPEOF_CURL_SOCKLEN_T)
            , types_h
-           , socket_h);
+           , socket_h
+           , ws2tcpip_h);
 
 #ifdef CURLSYS_PULL_SYS_TYPES_H
   stypes_h = "Yes";
 #endif
 #ifdef CURLSYS_PULL_SYS_SOCKET_H
   ssocket_h = "Yes";
+#endif
+#ifdef CURLSYS_PULL_WS2TCPIP_H
+  sws2tcpip_h = "Yes";
 #endif
   snprintf(syst, sizeof(syst),
 #ifdef CHECK_CURL_OFF_T
@@ -92,6 +102,7 @@ int test(char *URL)
            "CURL_TYPEOF_CURL_SOCKLEN_T: %s\n"
            "CURL_PULL_SYS_TYPES_H:      %s\n"
            "CURL_PULL_SYS_SOCKET_H:     %s\n"
+           "CURL_PULL_WS2TCPIP_H:       %s\n"
 
 #ifdef CHECK_CURL_OFF_T
            , STRING(CURLSYS_TYPEOF_CURL_OFF_T)
@@ -104,7 +115,8 @@ int test(char *URL)
            , CURLSYS_SIZEOF_LONG
            , STRING(CURLSYS_TYPEOF_CURL_SOCKLEN_T)
            , stypes_h
-           , ssocket_h);
+           , ssocket_h
+           , sws2tcpip_h);
 
   if(strcmp(detect, syst)) {
     printf("===> Type detection failed <====\n");
