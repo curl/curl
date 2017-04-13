@@ -408,6 +408,7 @@ static int push_promise(struct Curl_easy *data,
     stream = data->req.protop;
     if(!stream) {
       failf(data, "Internal NULL stream!\n");
+      (void)Curl_close(newhandle);
       rv = 1;
       goto fail;
     }
