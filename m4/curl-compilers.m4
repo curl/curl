@@ -577,8 +577,11 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         #
       GNU_C)
         #
-        dnl Placeholder
-        tmp_CFLAGS="$tmp_CFLAGS"
+        dnl turn implicit-function-declaration warning into error,
+        dnl at least gcc 2.95 and later support this
+        if test "$compiler_num" -ge "295"; then
+          tmp_CFLAGS="$tmp_CFLAGS -Werror-implicit-function-declaration"
+        fi
         ;;
         #
       HP_UX_C)
