@@ -126,7 +126,7 @@ if test -f ${srcdir}/include/curl/curlbuild.h; then
 fi
 
 dnl figure out the libcurl version
-CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curlver.h`
+CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)".*/\1/p' ${srcdir}/include/curl/curlver.h`
 XC_CHECK_PROG_CC
 XC_AUTOMAKE
 AC_MSG_CHECKING([curl version])
@@ -136,7 +136,7 @@ AC_SUBST(CURLVERSION)
 
 dnl
 dnl we extract the numerical version for curl-config only
-VERSIONNUM=`$SED -ne 's/^#define LIBCURL_VERSION_NUM 0x\(.*\)/\1/p' ${srcdir}/include/curl/curlver.h`
+VERSIONNUM=`$SED -ne 's/^#define LIBCURL_VERSION_NUM 0x\([0-9A-Fa-f]*\).*/\1/p' ${srcdir}/include/curl/curlver.h`
 AC_SUBST(VERSIONNUM)
 
 dnl Solaris pkgadd support definitions
