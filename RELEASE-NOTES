@@ -115,6 +115,14 @@ This release includes the following bugfixes:
  o INSTALL.md: fix secure transport configure arguments
  o CURLINFO_SCHEME.3: fix variable type
  o libcurl-thread.3: also mention threaded-resolver [59]
+ o nss: load CA certificates even with --insecure [60]
+ o openssl: fix this statement may fall through [61]
+ o poll: prefer <poll.h> over <sys/poll.h> [62]
+ o polarssl: unbreak build with versions < 1.3.8 [63]
+ o Curl_expire_latest: ignore already expired timers [64]
+ o configure: turn implicit function declarations into errors [65]
+ o mbedtls: fix memory leak in error path [66]
+ o http2: fix handle leak in error path [67]
 
 This release includes the following known bugs:
 
@@ -128,14 +136,14 @@ advice from friends like these:
   Carlo Cannas, Carlo Teubner, Dan Fandrich, Dániel Bakai, Daniel Stenberg,
   Desmond O. Chang, Edward Kimmel, Gisle Vanem, Giuseppe Persico, Greg Rowe,
   Hanno Böck, Isaac Boukris, Joel Depooter, Jozef Kralik, Justin Clift,
-  ka7 on github, Kamil Dudka, madblobfish on github, Maksim Stsepanenka,
-  Marc-Antoine Perennou, Marcel Raad, Martin Kepplinger,
+  ka7 on github, Kamil Dudka, Larry Stefani, madblobfish on github,
+  Maksim Stsepanenka, Marc-Antoine Perennou, Marcel Raad, Martin Kepplinger,
   mccormickt12 on github, Michael Kaufmann, Michael Maltese, mkzero on github,
   Nehal J Wani, neheb on github, Orange Tsai, Palo Markovic, Paul Harris,
-  Peter Pentchev, Peter Wu, Ray Satiro, Simon Warta, Stephen Toub,
-  Steve Brokenshire, Sylvestre Ledru, Tatsuhiro Tsujikawa, Thomas Glanzmann,
-  zelinchen on github,
-  (50 contributors)
+  Peter Pentchev, Peter Wu, Rainer Canavan, Ray Satiro, Simon Warta,
+  Stephen Toub, Steve Brokenshire, Sylvestre Ledru, Tatsuhiro Tsujikawa,
+  Thomas Glanzmann, zelinchen on github,
+  (52 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -200,3 +208,11 @@ References to bug reports and discussions on issues:
  [57] = https://curl.haxx.se/bug/?i=1395
  [58] = https://curl.haxx.se/bug/?i=1394
  [59] = https://curl.haxx.se/mail/lib-2017-04/0044.html
+ [60] = https://curl.haxx.se/bug/?i=851
+ [61] = https://curl.haxx.se/bug/?i=1402
+ [62] = https://curl.haxx.se/bug/?i=1406
+ [63] = https://curl.haxx.se/bug/?i=1401
+ [64] = https://curl.haxx.se/mail/lib-2017-04/0030.html
+ [65] = https://curl.haxx.se/bug/?i=1409
+ [66] = https://curl.haxx.se/bug/?i=1417
+ [67] = https://curl.haxx.se/bug/?i=1416
