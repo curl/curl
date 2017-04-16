@@ -64,14 +64,14 @@ struct timetest {
   int timeout_ms;
   int connecttimeout_ms;
   bool connecting;
-  long result;
+  time_t result;
   const char *comment;
 };
 
 UNITTEST_START
 {
   struct timeval now;
-  long timeout;
+  time_t timeout;
   unsigned int i;
 
   const struct timetest run[] = {
