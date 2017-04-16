@@ -85,6 +85,7 @@ else()
 endif()
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
+option(ENABLE_DOCS "Set to ON to enable docs" ON)
 
 if (ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
@@ -225,7 +226,9 @@ if(ENABLE_MANUAL)
   endif()
 endif()
 # Required for building manual, docs, tests
-find_package(Perl REQUIRED)
+if (BUILD_TESTING OR ENABLE_DOCS OR ENABLE_MANUAL)
+  find_package(Perl REQUIRED)
+endif()
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
@@ -1084,7 +1087,9 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-add_subdirectory(docs)
+if(ENABLE_DOCS)
+  add_subdirectory(docs)
+endif()
 add_subdirectory(lib)
 if(BUILD_CURL_EXE)
   add_subdirectory(src)
