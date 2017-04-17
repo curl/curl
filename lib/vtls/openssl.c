@@ -200,6 +200,14 @@ static const char *SSL_ERROR_to_str(int err)
   }
 }
 
+/* Return error string for last OpenSSL error
+ */
+static char *ossl_strerror(unsigned long error, char *buf, size_t size)
+{
+  ERR_error_string_n(error, buf, size);
+  return buf;
+}
+
 static int passwd_callback(char *buf, int num, int encrypting,
                            void *global_passwd)
 {
@@ -375,6 +383,7 @@ int cert_stuff(struct connectdata *conn,
                char *key_passwd)
 {
   struct Curl_easy *data = conn->data;
+  char error_buffer[256];
 
   int file_type = do_file_type(cert_type);
 
@@ -400,7 +409,8 @@ int cert_stuff(struct connectdata *conn,
               "could not load PEM client certificate, " OSSL_PACKAGE
               " error %s, "
               "(no key found, wrong pass phrase, or wrong file format?)",
-              ERR_error_string(ERR_get_error(), NULL) );
+              ossl_strerror(ERR_get_error(), error_buffer,
+                            sizeof(error_buffer)) );
         return 0;
       }
       break;
@@ -416,7 +426,8 @@ int cert_stuff(struct connectdata *conn,
               "could not load ASN1 client certificate, " OSSL_PACKAGE
               " error %s, "
               "(no key found, wrong pass phrase, or wrong file format?)",
-              ERR_error_string(ERR_get_error(), NULL) );
+              ossl_strerror(ERR_get_error(), error_buffer,
+                            sizeof(error_buffer)) );
         return 0;
       }
       break;
@@ -445,7 +456,8 @@ int cert_stuff(struct connectdata *conn,
                               0, &params, NULL, 1)) {
             failf(data, "ssl engine cannot load client cert with id"
                   " '%s' [%s]", cert_file,
-                  ERR_error_string(ERR_get_error(), NULL));
+                  ossl_strerror(ERR_get_error(), error_buffer,
+                                sizeof(error_buffer)));
             return 0;
           }
 
@@ -501,7 +513,8 @@ int cert_stuff(struct connectdata *conn,
         failf(data,
               "could not parse PKCS12 file, check password, " OSSL_PACKAGE
               " error %s",
-              ERR_error_string(ERR_get_error(), NULL) );
+              ossl_strerror(ERR_get_error(), error_buffer,
+                            sizeof(error_buffer)) );
         PKCS12_free(p12);
         return 0;
       }
@@ -512,7 +525,8 @@ int cert_stuff(struct connectdata *conn,
         failf(data,
               "could not load PKCS12 client certificate, " OSSL_PACKAGE
               " error %s",
-              ERR_error_string(ERR_get_error(), NULL) );
+              ossl_strerror(ERR_get_error(), error_buffer,
+                            sizeof(error_buffer)) );
         goto fail;
       }
 
@@ -701,17 +715,6 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
 
   return !rc;
 #endif
-}
-
-/* Return error string for last OpenSSL error
- */
-static char *ossl_strerror(unsigned long error, char *buf, size_t size)
-{
-  /* OpenSSL 0.9.6 and later has a function named
-     ERR_error_string_n() that takes the size of the buffer as a
-     third argument */
-  ERR_error_string_n(error, buf, size);
-  return buf;
 }
 
 /**
@@ -1845,6 +1848,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
+  char error_buffer[256];
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
 
@@ -1910,7 +1914,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
   if(!connssl->ctx) {
     failf(data, "SSL: couldn't create a context: %s",
-          ERR_error_string(ERR_peek_error(), NULL));
+          ossl_strerror(ERR_peek_error(), error_buffer, sizeof(error_buffer)));
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -2240,7 +2244,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
       if(!SSL_set_session(connssl->handle, ssl_sessionid)) {
         Curl_ssl_sessionid_unlock(conn);
         failf(data, "SSL: SSL_set_session failed: %s",
-              ERR_error_string(ERR_get_error(), NULL));
+              ossl_strerror(ERR_get_error(), error_buffer,
+                            sizeof(error_buffer)));
         return CURLE_SSL_CONNECT_ERROR;
       }
       /* Informational message */
@@ -2260,7 +2265,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   else if(!SSL_set_fd(connssl->handle, (int)sockfd)) {
     /* pass the raw socket into the SSL layers */
     failf(data, "SSL: SSL_set_fd failed: %s",
-          ERR_error_string(ERR_get_error(), NULL));
+          ossl_strerror(ERR_get_error(), error_buffer, sizeof(error_buffer)));
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -2301,8 +2306,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
     else {
       /* untreated error */
       unsigned long errdetail;
-      char error_buffer[256]=""; /* OpenSSL documents that this must be at
-                                    least 256 bytes long. */
+      char error_buffer[256]="";
       CURLcode result;
       long lerr;
       int lib;
@@ -3198,8 +3202,7 @@ static ssize_t ossl_send(struct connectdata *conn,
   /* SSL_write() is said to return 'int' while write() and send() returns
      'size_t' */
   int err;
-  char error_buffer[256]; /* OpenSSL documents that this must be at least 256
-                             bytes long. */
+  char error_buffer[256];
   unsigned long sslerror;
   int memlen;
   int rc;
@@ -3260,8 +3263,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
                          size_t buffersize,        /* max amount to read */
                          CURLcode *curlcode)
 {
-  char error_buffer[256]; /* OpenSSL documents that this must be at
-                             least 256 bytes long. */
+  char error_buffer[256];
   unsigned long sslerror;
   ssize_t nread;
   int buffsize;
