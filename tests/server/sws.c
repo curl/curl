@@ -1894,7 +1894,7 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
   while(!req->done_processing) {
     int rc = get_request(msgsock, req);
     if(rc <= 0) {
-      /* Nothing further to read now (possibly because the socket was closed) */
+      /* Nothing further to read now, possibly because the socket was closed */
       return rc;
     }
   }
