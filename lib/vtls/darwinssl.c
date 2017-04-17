@@ -113,6 +113,36 @@
 #define ioErr -36
 #define paramErr -50
 
+#ifdef DARWIN_SSL_PINNEDPUBKEY
+/* both new and old APIs return rsa keys missing the spki header (not DER) */
+static const unsigned char rsa4096SpkiHeader[] = {
+                                       0x30, 0x82, 0x02, 0x22, 0x30, 0x0d,
+                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
+                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
+                                       0x00, 0x03, 0x82, 0x02, 0x0f, 0x00};
+
+static const unsigned char rsa2048SpkiHeader[] = {
+                                       0x30, 0x82, 0x01, 0x22, 0x30, 0x0d,
+                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
+                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
+                                       0x00, 0x03, 0x82, 0x01, 0x0f, 0x00};
+#ifdef DARWIN_SSL_PINNEDPUBKEY_V1
+/* the *new* version doesn't return DER encoded ecdsa certs like the old... */
+static const unsigned char ecDsaSecp256r1SpkiHeader[] = {
+                                       0x30, 0x59, 0x30, 0x13, 0x06, 0x07,
+                                       0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
+                                       0x01, 0x06, 0x08, 0x2a, 0x86, 0x48,
+                                       0xce, 0x3d, 0x03, 0x01, 0x07, 0x03,
+                                       0x42, 0x00};
+
+static const unsigned char ecDsaSecp384r1SpkiHeader[] = {
+                                       0x30, 0x76, 0x30, 0x10, 0x06, 0x07,
+                                       0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
+                                       0x01, 0x06, 0x05, 0x2b, 0x81, 0x04,
+                                       0x00, 0x22, 0x03, 0x62, 0x00};
+#endif /* DARWIN_SSL_PINNEDPUBKEY_V1 */
+#endif /* DARWIN_SSL_PINNEDPUBKEY */
+
 /* The following two functions were ripped from Apple sample code,
  * with some modifications: */
 static OSStatus SocketRead(SSLConnectionRef connection,
@@ -1996,6 +2026,112 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
   }
 }
 
+#ifdef DARWIN_SSL_PINNEDPUBKEY
+static CURLcode pkp_pin_peer_pubkey(struct SessionHandle *data,
+                                    SSLContextRef ctx,
+                                    const char *pinnedpubkey)
+{  /* Scratch */
+  size_t pubkeylen, realpubkeylen, spkiHeaderLength = 24;
+  unsigned char *pubkey = NULL, *realpubkey = NULL, *spkiHeader = NULL;
+  CFDataRef publicKeyBits = NULL;
+
+  /* Result is returned to caller */
+  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+
+  /* if a path wasn't specified, don't pin */
+  if(!pinnedpubkey)
+    return CURLE_OK;
+
+
+  if(!ctx)
+    return result;
+
+  do {
+    SecTrustRef trust;
+    OSStatus ret = SSLCopyPeerTrust(ctx, &trust);
+    if(ret != noErr || trust == NULL)
+      break;
+
+    SecKeyRef keyRef = SecTrustCopyPublicKey(trust);
+    CFRelease(trust);
+    if(keyRef == NULL)
+      break;
+
+#ifdef DARWIN_SSL_PINNEDPUBKEY_V1
+
+    publicKeyBits = SecKeyCopyExternalRepresentation(keyRef, NULL);
+    CFRelease(keyRef);
+    if(publicKeyBits == NULL)
+      break;
+
+#elif DARWIN_SSL_PINNEDPUBKEY_V2
+
+    OSStatus success = SecItemExport(keyRef, kSecFormatOpenSSL, 0, NULL,
+                                     &publicKeyBits);
+    CFRelease(keyRef);
+    if(success != errSecSuccess || publicKeyBits == NULL)
+      break;
+
+#endif /* DARWIN_SSL_PINNEDPUBKEY_V2 */
+
+    pubkeylen = CFDataGetLength(publicKeyBits);
+    pubkey = CFDataGetBytePtr(publicKeyBits);
+
+    switch(pubkeylen) {
+      case 526:
+        /* 4096 bit RSA pubkeylen == 526 */
+        spkiHeader = rsa4096SpkiHeader;
+        break;
+      case 270:
+        /* 2048 bit RSA pubkeylen == 270 */
+        spkiHeader = rsa2048SpkiHeader;
+        break;
+#ifdef DARWIN_SSL_PINNEDPUBKEY_V1
+      case 65:
+        /* ecDSA secp256r1 pubkeylen == 65 */
+        spkiHeader = ecDsaSecp256r1SpkiHeader;
+        spkiHeaderLength = 26;
+        break;
+      case 97:
+        /* ecDSA secp384r1 pubkeylen == 97 */
+        spkiHeader = ecDsaSecp384r1SpkiHeader;
+        spkiHeaderLength = 23;
+        break;
+      default:
+        infof(data, "SSL: unhandled public key length: %d\n", pubkeylen);
+#elif DARWIN_SSL_PINNEDPUBKEY_V2
+      default:
+        /* ecDSA secp256r1 pubkeylen == 91 header already included?
+         * ecDSA secp384r1 header already included too
+         * we assume rest of algorithms do same, so do nothing
+         */
+        result = Curl_pin_peer_pubkey(data, pinnedpubkey, pubkey,
+                                    pubkeylen);
+#endif /* DARWIN_SSL_PINNEDPUBKEY_V2 */
+        continue; /* break from loop */
+    }
+
+    realpubkeylen = pubkeylen + spkiHeaderLength;
+    realpubkey = malloc(realpubkeylen);
+    if(!realpubkey)
+      break;
+
+    memcpy(realpubkey, spkiHeader, spkiHeaderLength);
+    memcpy(realpubkey + spkiHeaderLength, pubkey, pubkeylen);
+
+    result = Curl_pin_peer_pubkey(data, pinnedpubkey, realpubkey,
+                                  realpubkeylen);
+
+  } while(0);
+
+  Curl_safefree(realpubkey);
+  if(publicKeyBits != NULL)
+    CFRelease(publicKeyBits);
+
+  return result;
+}
+#endif /* DARWIN_SSL_PINNEDPUBKEY */
+
 static CURLcode
 darwinssl_connect_step2(struct connectdata *conn, int sockindex)
 {
@@ -2101,6 +2237,17 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
   else {
     /* we have been connected fine, we're not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
+
+#ifdef DARWIN_SSL_PINNEDPUBKEY
+    if(data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG]) {
+      CURLcode result = pkp_pin_peer_pubkey(data, connssl->ssl_ctx,
+                            data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG]);
+      if(result) {
+        failf(data, "SSL: public key does not match pinned public key!");
+        return result;
+      }
+    }
+#endif /* DARWIN_SSL_PINNEDPUBKEY */
 
     /* Informational message */
     (void)SSLGetNegotiatedCipher(connssl->ssl_ctx, &cipher);
@@ -2571,6 +2718,15 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
 {
   (void)md5len;
   (void)CC_MD5(tmp, (CC_LONG)tmplen, md5sum);
+}
+
+void Curl_darwinssl_sha256sum(unsigned char *tmp, /* input */
+                           size_t tmplen,
+                           unsigned char *sha256sum, /* output */
+                           size_t sha256len)
+{
+  assert(sha256len >= SHA256_DIGEST_LENGTH);
+  (void)CC_SHA256(tmp, (CC_LONG)tmplen, sha256sum);
 }
 
 bool Curl_darwinssl_false_start(void)
