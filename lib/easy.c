@@ -179,7 +179,7 @@ curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #endif
 #else
 /*
- * Symbian OS doesn't support initialization to code in writeable static data.
+ * Symbian OS doesn't support initialization to code in writable static data.
  * Initialization will occur in the curl_global_init() call.
  */
 curl_malloc_callback Curl_cmalloc;

@@ -872,7 +872,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
         continue;
       }
 
-          /* Window Size */
+      /* Window Size */
       if(strcasecompare(option_keyword, "WS")) {
         if(sscanf(option_arg, "%hu%*[xX]%hu",
                   &tn->subopt_wsx, &tn->subopt_wsy) == 2)
@@ -1014,7 +1014,7 @@ static void sendsuboption(struct connectdata *conn, int option)
     CURL_SB_ACCUM(tn, CURL_IAC);
     CURL_SB_ACCUM(tn, CURL_SB);
     CURL_SB_ACCUM(tn, CURL_TELOPT_NAWS);
-    /* We must deal either with litte or big endien processors */
+    /* We must deal either with litte or big endian processors */
     /* Window size must be sent according to the 'network order' */
     x=htons(tn->subopt_wsx);
     y=htons(tn->subopt_wsy);
