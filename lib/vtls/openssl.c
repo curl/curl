@@ -2606,38 +2606,18 @@ static CURLcode get_cert_chain(struct connectdata *conn,
         {
           const BIGNUM *n;
           const BIGNUM *e;
-          const BIGNUM *d;
-          const BIGNUM *p;
-          const BIGNUM *q;
-          const BIGNUM *dmp1;
-          const BIGNUM *dmq1;
-          const BIGNUM *iqmp;
 
-          RSA_get0_key(rsa, &n, &e, &d);
-          RSA_get0_factors(rsa, &p, &q);
-          RSA_get0_crt_params(rsa, &dmp1, &dmq1, &iqmp);
+          RSA_get0_key(rsa, &n, &e, NULL);
           BN_print(mem, n);
           push_certinfo("RSA Public Key", i);
           print_pubkey_BN(rsa, n, i);
           print_pubkey_BN(rsa, e, i);
-          print_pubkey_BN(rsa, d, i);
-          print_pubkey_BN(rsa, p, i);
-          print_pubkey_BN(rsa, q, i);
-          print_pubkey_BN(rsa, dmp1, i);
-          print_pubkey_BN(rsa, dmq1, i);
-          print_pubkey_BN(rsa, iqmp, i);
         }
 #else
         BIO_printf(mem, "%d", BN_num_bits(rsa->n));
         push_certinfo("RSA Public Key", i);
         print_pubkey_BN(rsa, n, i);
         print_pubkey_BN(rsa, e, i);
-        print_pubkey_BN(rsa, d, i);
-        print_pubkey_BN(rsa, p, i);
-        print_pubkey_BN(rsa, q, i);
-        print_pubkey_BN(rsa, dmp1, i);
-        print_pubkey_BN(rsa, dmq1, i);
-        print_pubkey_BN(rsa, iqmp, i);
 #endif
 
         break;
@@ -2656,23 +2636,20 @@ static CURLcode get_cert_chain(struct connectdata *conn,
           const BIGNUM *p;
           const BIGNUM *q;
           const BIGNUM *g;
-          const BIGNUM *priv_key;
           const BIGNUM *pub_key;
 
           DSA_get0_pqg(dsa, &p, &q, &g);
-          DSA_get0_key(dsa, &pub_key, &priv_key);
+          DSA_get0_key(dsa, &pub_key, NULL);
 
           print_pubkey_BN(dsa, p, i);
           print_pubkey_BN(dsa, q, i);
           print_pubkey_BN(dsa, g, i);
-          print_pubkey_BN(dsa, priv_key, i);
           print_pubkey_BN(dsa, pub_key, i);
         }
 #else
         print_pubkey_BN(dsa, p, i);
         print_pubkey_BN(dsa, q, i);
         print_pubkey_BN(dsa, g, i);
-        print_pubkey_BN(dsa, priv_key, i);
         print_pubkey_BN(dsa, pub_key, i);
 #endif
 #endif /* !OPENSSL_NO_DSA */
@@ -2691,20 +2668,17 @@ static CURLcode get_cert_chain(struct connectdata *conn,
           const BIGNUM *p;
           const BIGNUM *q;
           const BIGNUM *g;
-          const BIGNUM *priv_key;
           const BIGNUM *pub_key;
           DH_get0_pqg(dh, &p, &q, &g);
-          DH_get0_key(dh, &pub_key, &priv_key);
+          DH_get0_key(dh, &pub_key, NULL);
           print_pubkey_BN(dh, p, i);
           print_pubkey_BN(dh, q, i);
           print_pubkey_BN(dh, g, i);
-          print_pubkey_BN(dh, priv_key, i);
           print_pubkey_BN(dh, pub_key, i);
        }
 #else
         print_pubkey_BN(dh, p, i);
         print_pubkey_BN(dh, g, i);
-        print_pubkey_BN(dh, priv_key, i);
         print_pubkey_BN(dh, pub_key, i);
 #endif
         break;
