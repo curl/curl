@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -1517,52 +1517,50 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
      AC_CHECK_LIB(crypto, HMAC_Init_ex,[
        HAVECRYPTO="yes"
        LIBS="-lcrypto $LIBS"], [
-       LDFLAGS="$CLEANLDFLAGS"
-       CPPFLAGS="$CLEANCPPFLAGS"
-       LIBS="$CLEANLIBS"
+
+       dnl still no, but what about with -ldl?
+       AC_MSG_CHECKING([OpenSSL linking with -ldl])
+       LIBS="-ldl $LIBS"
+       AC_TRY_LINK(
+       [
+         #include <openssl/err.h>
+       ],
+       [
+         ERR_clear_error();
+       ],
+       [
+         AC_MSG_RESULT(yes)
+         HAVECRYPTO="yes"
+       ],
+       [
+         AC_MSG_RESULT(no)
+         dnl ok, so what about bouth -ldl and -lpthread?
+
+         AC_MSG_CHECKING([OpenSSL linking with -ldl and -lpthread])
+         LIBS="-lpthread $LIBS"
+         AC_TRY_LINK(
+         [
+           #include <openssl/err.h>
+         ],
+         [
+           ERR_clear_error();
+         ],
+         [
+           AC_MSG_RESULT(yes)
+           HAVECRYPTO="yes"
+         ],
+         [
+           AC_MSG_RESULT(no)
+           LDFLAGS="$CLEANLDFLAGS"
+           CPPFLAGS="$CLEANCPPFLAGS"
+           LIBS="$CLEANLIBS"
+
+         ])
+
        ])
-    ])
 
-
-  if test X"$HAVECRYPTO" = X"yes"; then
-     AC_MSG_CHECKING([OpenSSL linking without -ldl])
-     saved_libs=$LIBS
-     AC_TRY_LINK(
-        [
-          #include <openssl/evp.h>
-        ],
-        [
-          SSLeay_add_all_algorithms();
-        ],
-        [
-          AC_MSG_RESULT(yes)
-          LIBS="$saved_libs"
-        ],
-        [
-          AC_MSG_RESULT(no)
-          AC_MSG_CHECKING([OpenSSL linking with -ldl])
-          LIBS="-ldl $LIBS"
-          AC_TRY_LINK(
-          [
-            #include <openssl/evp.h>
-          ],
-          [
-            SSLeay_add_all_algorithms();
-          ],
-          [
-            AC_MSG_RESULT(yes)
-            LIBS="$saved_libs -ldl"
-          ],
-          [
-            AC_MSG_RESULT(no)
-            LIBS="$saved_libs"
-          ]
-          )
-
-        ]
-     )
-
-  fi
+     ])
+  ])
 
   if test X"$HAVECRYPTO" = X"yes"; then
     dnl This is only reasonable to do if crypto actually is there: check for
