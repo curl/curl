@@ -4,7 +4,7 @@ Curl and libcurl 7.54.0
  Command line options:         207
  curl_easy_setopt() options:   245
  Public functions in libcurl:  61
- Contributors:                 1507
+ Contributors:                 1538
 
 This release includes the following changes:
  o Add CURL_SSLVERSION_MAX_* constants to CURLOPT_SSLVERSION [19]
@@ -14,6 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2017-7468: switch off SSL session id when client cert is used [68]
  o cmake: Replace invalid UTF-8 byte sequence [1]
  o tests: use consistent environment variables for setting charset
  o proxy: fixed a memory leak on OOM
@@ -123,6 +124,13 @@ This release includes the following bugfixes:
  o configure: turn implicit function declarations into errors [65]
  o mbedtls: fix memory leak in error path [66]
  o http2: fix handle leak in error path [67]
+ o .gitattributes: force shell scripts to LF [69]
+ o configure.ac: ignore CR after version numbers [70]
+ o extern-scan.pl: strip trailing CR [71]
+ o openssl: make SSL_ERROR_to_str more future-proof [72]
+ o openssl: fix thread-safety bugs in error-handling [73]
+ o openssl: don't try to print nonexistant peer private keys [74]
+ o nss: fix MinGW compiler warnings [75]
 
 This release includes the following known bugs:
 
@@ -133,17 +141,18 @@ advice from friends like these:
 
   Ales Mlakar, Alex Bligh, Alexis La Goutte, Anatol Belski, Anders Roxell,
   Andrew Krieger, Antony74 on github, Antti Hätälä, Brian Carpenter,
-  Carlo Cannas, Carlo Teubner, Dan Fandrich, Dániel Bakai, Daniel Stenberg,
-  Desmond O. Chang, Edward Kimmel, Gisle Vanem, Giuseppe Persico, Greg Rowe,
-  Hanno Böck, Isaac Boukris, Joel Depooter, Jozef Kralik, Justin Clift,
-  ka7 on github, Kamil Dudka, Larry Stefani, madblobfish on github,
+  Carlo Cannas, Carlo Teubner, Dan Fandrich, Dániel Bakai, Daniel Gustafsson,
+  Daniel Stenberg, David Benjamin, Desmond O. Chang, Edward Kimmel,
+  Gisle Vanem, Giuseppe Persico, Greg Rowe, Hanno Böck, Isaac Boukris,
+  Joel Depooter, Jozef Kralik, Justin Clift, ka7 on github, Kamil Dudka,
+  Larry Stefani, lijian996 on github, madblobfish on github,
   Maksim Stsepanenka, Marc-Antoine Perennou, Marcel Raad, Martin Kepplinger,
   mccormickt12 on github, Michael Kaufmann, Michael Maltese, mkzero on github,
   Nehal J Wani, neheb on github, Orange Tsai, Palo Markovic, Paul Harris,
   Peter Pentchev, Peter Wu, Rainer Canavan, Ray Satiro, Simon Warta,
   Stephen Toub, Steve Brokenshire, Sylvestre Ledru, Tatsuhiro Tsujikawa,
   Thomas Glanzmann, zelinchen on github,
-  (52 contributors)
+  (55 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -216,3 +225,11 @@ References to bug reports and discussions on issues:
  [65] = https://curl.haxx.se/bug/?i=1409
  [66] = https://curl.haxx.se/bug/?i=1417
  [67] = https://curl.haxx.se/bug/?i=1416
+ [68] = https://curl.haxx.se/docs/adv_20170419.html
+ [69] = https://curl.haxx.se/bug/?i=1422
+ [70] = https://curl.haxx.se/bug/?i=1422
+ [71] = https://curl.haxx.se/bug/?i=1422
+ [72] = https://curl.haxx.se/bug/?i=1424
+ [73] = https://curl.haxx.se/bug/?i=1424
+ [74] = https://curl.haxx.se/bug/?i=1425
+ [75] = https://curl.haxx.se/bug/?i=1393
