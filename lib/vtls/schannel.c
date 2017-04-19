@@ -129,6 +129,26 @@
  * #define failf(x, y, ...) printf(y, __VA_ARGS__)
  */
 
+/* APIs return rsa keys missing the spki header (not DER) */
+static const size_t spkiHeaderLength = 24;
+
+static const unsigned char rsa4096SpkiHeader[] = {
+                                       0x30, 0x82, 0x02, 0x22, 0x30, 0x0d,
+                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
+                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
+                                       0x00, 0x03, 0x82, 0x02, 0x0f, 0x00};
+
+static const unsigned char rsa2048SpkiHeader[] = {
+                                       0x30, 0x82, 0x01, 0x22, 0x30, 0x0d,
+                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
+                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
+                                       0x00, 0x03, 0x82, 0x01, 0x0f, 0x00};
+
+/* define these here if they aren't already */
+#ifndef CALG_SHA_256
+#define CALG_SHA_256 0x0000800c
+#endif
+
 /* Structs to store Schannel handles */
 struct curl_schannel_cred {
   CredHandle cred_handle;
@@ -164,6 +184,9 @@ struct ssl_backend_data {
 
 static Curl_recv schannel_recv;
 static Curl_send schannel_send;
+
+static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
+                                    const char *pinnedpubkey);
 
 #ifdef _WIN32_WCE
 static CURLcode verify_certificate(struct connectdata *conn, int sockindex);
@@ -542,6 +565,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   bool doread;
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+  const char *pubkey_ptr;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
 
@@ -759,6 +783,16 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   if(sspi_status == SEC_E_OK) {
     connssl->connecting_state = ssl_connect_3;
     infof(data, "schannel: SSL/TLS handshake complete\n");
+  }
+
+  pubkey_ptr = SSL_IS_PROXY() ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+                         data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+  if(pubkey_ptr) {
+    result = pkp_pin_peer_pubkey(conn, sockindex, pubkey_ptr);
+    if(result) {
+      failf(data, "SSL: public key does not match pinned public key!");
+      return result;
+    }
   }
 
 #ifdef _WIN32_WCE
@@ -1669,6 +1703,159 @@ static CURLcode Curl_schannel_random(struct Curl_easy *data UNUSED_PARAM,
   return CURLE_OK;
 }
 
+static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
+                                    const char *pinnedpubkey)
+{
+  SECURITY_STATUS status;
+  struct Curl_easy *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  CERT_CONTEXT *pCertContextServer = NULL;
+  const CERT_CHAIN_CONTEXT *pChainContext = NULL;
+  HCRYPTPROV hCryptProv = 0;
+  HCRYPTKEY hCertPubKey = NULL;
+  size_t bloblen, pubkeylen, realpubkeylen;
+  unsigned char *blob = NULL, *pubkey = NULL, *realpubkey = NULL,
+                *spkiHeader = NULL;
+
+  /* Result is returned to caller */
+  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+
+  /* if a path wasn't specified, don't pin */
+  if(!pinnedpubkey)
+    return CURLE_OK;
+
+  do {
+    status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+                                              SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                              &pCertContextServer);
+
+    if((status != SEC_E_OK) || (pCertContextServer == NULL)) {
+      failf(data, "schannel: Failed to read remote certificate context: %s",
+            Curl_sspi_strerror(conn, status));
+      break; /* failed */
+    }
+
+
+    if(!CryptAcquireContext(&hCryptProv, NULL, NULL,
+                            /*PROV_RSA_FULL,*/
+                            PROV_RSA_AES,
+                            CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
+      failf(data, "schannel: Failed to acquire crypto context: %s",
+            Curl_sspi_strerror(conn, GetLastError()));
+      break; /* failed */
+    }
+
+    /* Get the public key information for the certificate.
+     This works for RSA keys, but secp256r1 and secp384r1 gives
+     this error:
+     Unknown error (0x8009310B) - ASN1 bad tag value met.
+     */
+    if(!CryptImportPublicKeyInfo(
+        hCryptProv,
+        X509_ASN_ENCODING,
+        &pCertContextServer->pCertInfo->SubjectPublicKeyInfo,
+        &hCertPubKey)) {
+      failf(data, "schannel: Failed to import public key info: %s",
+            Curl_sspi_strerror(conn, GetLastError()));
+      break; /* failed */
+    }
+
+    /* export to blob */
+    if(!CryptExportKey(hCertPubKey, 0, PUBLICKEYBLOB, 0, 0, &bloblen)) {
+      failf(data, "schannel: Failed to get public key blob length: %s",
+            Curl_sspi_strerror(conn, GetLastError()));
+      break; /* failed */
+    }
+
+    blob = malloc(bloblen);
+    if(!blob)
+      break; /* failed */
+
+    if(!CryptExportKey(hCertPubKey, 0, PUBLICKEYBLOB, 0, blob, &bloblen)) {
+      failf(data, "schannel: Failed to export public key to blob: %s",
+            Curl_sspi_strerror(conn, GetLastError()));
+      break; /* failed */
+    }
+
+    /* export to der 
+     not sure what second arg should be,
+     X509_PUBLIC_KEY_INFO -- fails
+     RSA_CSP_PUBLICKEYBLOB -- not quite der, missing spki header bytes
+     CNG_RSA_PUBLIC_KEY_BLOB -- fails
+     PKCS_CONTENT_INFO -- fails
+     X509_SEQUENCE_OF_ANY - fails
+     CRYPT_STRING_BASE64HEADER - fails
+     */
+    if(!CryptEncodeObjectEx(X509_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, blob, 0,
+                            NULL, NULL, &pubkeylen)) {
+      failf(data, "schannel: Failed to get public key der length: %s",
+            Curl_sspi_strerror(conn, GetLastError()));
+      break;
+    }
+
+    pubkey = malloc(pubkeylen);
+    if(!pubkey)
+      break;
+
+    if(!CryptEncodeObjectEx(X509_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, blob, 0,
+                            NULL, pubkey, &pubkeylen)) {
+      failf(data, "schannel: Failed to export public key to der: %s",
+            Curl_sspi_strerror(conn, GetLastError()));
+      break;
+    }
+
+    FILE *fp;
+    fp=fopen("windows.key", "wb");
+    fwrite(pubkey, sizeof(pubkey[0]), pubkeylen, fp);
+    fclose(fp);
+
+    switch(pubkeylen) {
+      case 526:
+        /* 4096 bit RSA pubkeylen == 526 */
+        spkiHeader = rsa4096SpkiHeader;
+        break;
+      case 270:
+        /* 2048 bit RSA pubkeylen == 270 */
+        spkiHeader = rsa2048SpkiHeader;
+        break;
+      default:
+        infof(data, "SSL: unhandled public key length: %d\n", pubkeylen);
+        continue; /* break from loop */
+    }
+
+    realpubkeylen = pubkeylen + spkiHeaderLength;
+    realpubkey = malloc(realpubkeylen);
+    if(!realpubkey)
+      break;
+
+    memcpy(realpubkey, spkiHeader, spkiHeaderLength);
+    memcpy(realpubkey + spkiHeaderLength, pubkey, pubkeylen);
+
+    fp=fopen("windows.real.key", "wb");
+    fwrite(realpubkey, sizeof(realpubkey[0]), realpubkeylen, fp);
+    fclose(fp);
+
+    /* The one good exit point */
+    result = Curl_pin_peer_pubkey(data, pinnedpubkey, realpubkey,
+                                  realpubkeylen);
+  } while(0);
+
+  if(pChainContext)
+    CertFreeCertificateChain(pChainContext);
+
+  if(pCertContextServer)
+    CertFreeCertificateContext(pCertContextServer);
+
+  if(hCryptProv != 0)
+    CryptReleaseContext(hCryptProv, 0UL);
+
+  Curl_safefree(blob);
+  Curl_safefree(pubkey);
+  Curl_safefree(realpubkey);
+
+  return result;
+}
+
 #ifdef _WIN32_WCE
 static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 {
@@ -1809,6 +1996,62 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 }
 #endif /* _WIN32_WCE */
 
+static void Curl_schannel_checksum(const unsigned char *input,
+                      size_t inputlen,
+                      unsigned char *checksum,
+                      size_t checksumlen,
+                      const unsigned char *pszProvider,
+                      const unsigned int algId)
+{
+  HCRYPTPROV hProv = 0;
+  HCRYPTHASH hHash = 0;
+  size_t cbHashSize = 0, dwCount = sizeof(size_t);
+
+  /* since this can fail in multiple ways, zero memory first so we never
+   * return old data
+   */
+  memset(checksum, 0, checksumlen);
+
+  if(!CryptAcquireContext(&hProv, NULL, NULL, pszProvider,
+                          CRYPT_VERIFYCONTEXT))
+    return; /* failed */
+
+  do {
+    if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
+      break; /* failed */
+
+    if(!CryptHashData(hHash, (const BYTE*) input, inputlen, 0))
+      break; /* failed */
+
+    /* get hash size */
+    if(!CryptGetHashParam(hHash, HP_HASHSIZE, (BYTE *)&cbHashSize,
+                          &dwCount, 0))
+      break; /* failed */
+
+    /* check hash size */
+    if(checksumlen < cbHashSize)
+      break; /* failed */
+
+    if (CryptGetHashParam(hHash, HP_HASHVAL, checksum, &checksumlen, 0))
+      break; /* failed */
+  } while(0);
+
+  if(hHash)
+    CryptDestroyHash(hHash);
+
+  if(hProv)
+    CryptReleaseContext(hProv, 0);
+}
+
+void Curl_schannel_sha256sum(unsigned char *input,
+                           size_t inputlen,
+                           unsigned char *sha256sum,
+                           size_t sha256len)
+{
+    Curl_schannel_checksum(input, inputlen, sha256sum, sha256len,
+                           PROV_RSA_AES, CALG_SHA_256);
+}
+
 static void *Curl_schannel_get_internals(struct ssl_connect_data *connssl,
                                          CURLINFO info UNUSED_PARAM)
 {
@@ -1821,7 +2064,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
 
   0, /* have_ca_path */
   1, /* have_certinfo */
-  0, /* have_pinnedpubkey */
+  1, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
 
@@ -1846,7 +2089,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
   Curl_none_md5sum,                  /* md5sum */
-  NULL                               /* sha256sum */
+  Curl_schannel_sha256sum            /* sha256sum */
 };
 
 #endif /* USE_SCHANNEL */

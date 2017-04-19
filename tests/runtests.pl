@@ -2771,6 +2771,7 @@ sub checksystem {
             }
            if ($libcurl =~ /winssl/i) {
                $has_winssl=1;
+               $has_sslpinning=1;
                $ssllib="WinSSL";
            }
            elsif ($libcurl =~ /openssl/i) {
