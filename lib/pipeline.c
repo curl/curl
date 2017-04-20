@@ -38,16 +38,15 @@
 #include "memdebug.h"
 
 struct site_blacklist_entry {
-  char *hostname;
+  struct curl_llist_element list;
   unsigned short port;
+  char hostname[1];
 };
 
 static void site_blacklist_llist_dtor(void *user, void *element)
 {
   struct site_blacklist_entry *entry = element;
   (void)user;
-
-  Curl_safefree(entry->hostname);
   free(entry);
 }
 
@@ -94,8 +93,8 @@ bool Curl_pipeline_penalized(struct Curl_easy *data,
 static CURLcode addHandleToPipeline(struct Curl_easy *data,
                                     struct curl_llist *pipeline)
 {
-  if(!Curl_llist_insert_next(pipeline, pipeline->tail, data))
-    return CURLE_OUT_OF_MEMORY;
+  Curl_llist_insert_next(pipeline, pipeline->tail, data,
+                         &data->pipeline_queue);
   return CURLE_OK;
 }
 
@@ -202,24 +201,17 @@ CURLMcode Curl_pipeline_set_site_blacklist(char **sites,
 
     /* Parse the URLs and populate the list */
     while(*sites) {
-      char *hostname;
       char *port;
       struct site_blacklist_entry *entry;
 
-      hostname = strdup(*sites);
-      if(!hostname) {
-        Curl_llist_destroy(list, NULL);
-        return CURLM_OUT_OF_MEMORY;
-      }
-
-      entry = malloc(sizeof(struct site_blacklist_entry));
+      entry = malloc(sizeof(struct site_blacklist_entry) + strlen(*sites));
       if(!entry) {
-        free(hostname);
         Curl_llist_destroy(list, NULL);
         return CURLM_OUT_OF_MEMORY;
       }
+      strcpy(entry->hostname, *sites);
 
-      port = strchr(hostname, ':');
+      port = strchr(entry->hostname, ':');
       if(port) {
         *port = '\0';
         port++;
@@ -230,14 +222,7 @@ CURLMcode Curl_pipeline_set_site_blacklist(char **sites,
         entry->port = 80;
       }
 
-      entry->hostname = hostname;
-
-      if(!Curl_llist_insert_next(list, list->tail, entry)) {
-        site_blacklist_llist_dtor(NULL, entry);
-        Curl_llist_destroy(list, NULL);
-        return CURLM_OUT_OF_MEMORY;
-      }
-
+      Curl_llist_insert_next(list, list->tail, entry, &entry->list);
       sites++;
     }
   }
@@ -274,6 +259,11 @@ bool Curl_pipeline_server_blacklisted(struct Curl_easy *handle,
   return FALSE;
 }
 
+struct blacklist_node {
+  struct curl_llist_element list;
+  char server_name[1];
+};
+
 CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
                                              struct curl_llist *list)
 {
@@ -286,20 +276,18 @@ CURLMcode Curl_pipeline_set_server_blacklist(char **servers,
 
     /* Parse the URLs and populate the list */
     while(*servers) {
-      char *server_name;
+      struct blacklist_node *n;
+      size_t len = strlen(*servers);
 
-      server_name = strdup(*servers);
-      if(!server_name) {
+      n = malloc(sizeof(struct blacklist_node) + len);
+      if(!n) {
         Curl_llist_destroy(list, NULL);
         return CURLM_OUT_OF_MEMORY;
       }
+      strcpy(n->server_name, *servers);
 
-      if(!Curl_llist_insert_next(list, list->tail, server_name)) {
-        Curl_llist_destroy(list, NULL);
-        Curl_safefree(server_name);
-        return CURLM_OUT_OF_MEMORY;
-      }
-
+      Curl_llist_insert_next(list, list->tail, n->server_name,
+                             &n->list);
       servers++;
     }
   }

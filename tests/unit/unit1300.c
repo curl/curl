@@ -48,15 +48,20 @@ static void unit_stop(void)
 }
 
 UNITTEST_START
+{
   int unusedData_case1 = 1;
   int unusedData_case2 = 2;
   int unusedData_case3 = 3;
+  struct curl_llist_element case1_list;
+  struct curl_llist_element case2_list;
+  struct curl_llist_element case3_list;
+  struct curl_llist_element case4_list;
+  struct curl_llist_element case5_list;
   struct curl_llist_element *head;
   struct curl_llist_element *element_next;
   struct curl_llist_element *element_prev;
   struct curl_llist_element *to_remove;
   size_t llist_size = Curl_llist_count(&llist);
-  int curlErrCode = 0;
 
   /**
    * testing llist_init
@@ -85,67 +90,49 @@ UNITTEST_START
    * 3: list tail will be the same as list head
    */
 
-  curlErrCode = Curl_llist_insert_next(&llist, llist.head, &unusedData_case1);
-  if(curlErrCode == 1) {
-    fail_unless(Curl_llist_count(&llist) == 1,
-                 "List size should be 1 after adding a new element");
-    /*test that the list head data holds my unusedData */
-    fail_unless(llist.head->ptr == &unusedData_case1,
-                 "List size should be 1 after adding a new element");
-    /*same goes for the list tail */
-    fail_unless(llist.tail == llist.head,
-                 "List size should be 1 after adding a new element");
+  Curl_llist_insert_next(&llist, llist.head, &unusedData_case1, &case1_list);
 
-    /**
-     * testing Curl_llist_insert_next
-     * case 2:
-     * list has 1 element, adding one element after the head
-     * @assumptions:
-     * 1: the element next to head should be our newly created element
-     * 2: the list tail should be our newly created element
-     */
+  fail_unless(Curl_llist_count(&llist) == 1,
+              "List size should be 1 after adding a new element");
+  /*test that the list head data holds my unusedData */
+  fail_unless(llist.head->ptr == &unusedData_case1,
+              "head ptr should be first entry");
+  /*same goes for the list tail */
+  fail_unless(llist.tail == llist.head,
+              "tail and head should be the same");
 
-    curlErrCode = Curl_llist_insert_next(&llist, llist.head,
-                                         &unusedData_case3);
-    if(curlErrCode == 1) {
-      fail_unless(llist.head->next->ptr == &unusedData_case3,
-                  "the node next to head is not getting set correctly");
-      fail_unless(llist.tail->ptr == &unusedData_case3,
-                  "the list tail is not getting set correctly");
-    }
-    else {
-      printf("skipping Curl_llist_insert_next as a non "
-             "success error code was returned\n");
-    }
+  /**
+   * testing Curl_llist_insert_next
+   * case 2:
+   * list has 1 element, adding one element after the head
+   * @assumptions:
+   * 1: the element next to head should be our newly created element
+   * 2: the list tail should be our newly created element
+   */
 
-    /**
-     * testing Curl_llist_insert_next
-     * case 3:
-     * list has >1 element, adding one element after "NULL"
-     * @assumptions:
-     * 1: the element next to head should be our newly created element
-     * 2: the list tail should different from newly created element
-     */
+  Curl_llist_insert_next(&llist, llist.head,
+                         &unusedData_case3, &case3_list);
+  fail_unless(llist.head->next->ptr == &unusedData_case3,
+              "the node next to head is not getting set correctly");
+  fail_unless(llist.tail->ptr == &unusedData_case3,
+              "the list tail is not getting set correctly");
 
-    curlErrCode = Curl_llist_insert_next(&llist, llist.head,
-                                         &unusedData_case2);
-    if(curlErrCode == 1) {
-      fail_unless(llist.head->next->ptr == &unusedData_case2,
-                  "the node next to head is not getting set correctly");
-      /* better safe than sorry, check that the tail isn't corrupted */
-      fail_unless(llist.tail->ptr != &unusedData_case2,
-                  "the list tail is not getting set correctly");
-    }
-    else {
-      printf("skipping Curl_llist_insert_next as a non "
-             "success error code was returned\n");
-    }
+  /**
+   * testing Curl_llist_insert_next
+   * case 3:
+   * list has >1 element, adding one element after "NULL"
+   * @assumptions:
+   * 1: the element next to head should be our newly created element
+   * 2: the list tail should different from newly created element
+   */
 
-  }
-  else {
-    printf("skipping Curl_llist_insert_next as a non "
-           "success error code was returned\n");
-  }
+  Curl_llist_insert_next(&llist, llist.head,
+                         &unusedData_case2, &case2_list);
+  fail_unless(llist.head->next->ptr == &unusedData_case2,
+              "the node next to head is not getting set correctly");
+  /* better safe than sorry, check that the tail isn't corrupted */
+  fail_unless(llist.tail->ptr != &unusedData_case2,
+              "the list tail is not getting set correctly");
 
   /* unit tests for Curl_llist_remove */
 
@@ -183,8 +170,11 @@ UNITTEST_START
    * 2: element->previous->next will be element->next
    * 3: element->next->previous will be element->previous
    */
-  Curl_llist_insert_next(&llist, llist.head, &unusedData_case3);
+  Curl_llist_insert_next(&llist, llist.head, &unusedData_case3,
+                         &case4_list);
   llist_size = Curl_llist_count(&llist);
+  fail_unless(llist_size == 3, "should be 3 list members");
+
   to_remove = llist.head->next;
   abort_unless(to_remove, "to_remove is NULL");
   element_next = to_remove->next;
@@ -248,20 +238,17 @@ UNITTEST_START
   * add one element to the list
   */
 
-  curlErrCode = Curl_llist_insert_next(&llist, llist.head, &unusedData_case1);
+  Curl_llist_insert_next(&llist, llist.head, &unusedData_case1,
+                         &case5_list);
   /* necessary assertions */
 
-  abort_unless(curlErrCode == 1,
-  "Curl_llist_insert_next returned an error, Can't move on with test");
   abort_unless(Curl_llist_count(&llist) == 1,
   "Number of list elements is not as expected, Aborting");
   abort_unless(Curl_llist_count(&llist_destination) == 0,
   "Number of list elements is not as expected, Aborting");
 
   /*actual testing code*/
-  curlErrCode = Curl_llist_move(&llist, llist.head, &llist_destination, NULL);
-  abort_unless(curlErrCode == 1,
-  "Curl_llist_move returned an error, Can't move on with test");
+  Curl_llist_move(&llist, llist.head, &llist_destination, NULL);
   fail_unless(Curl_llist_count(&llist) == 0,
       "moving element from llist didn't decrement the size");
 
@@ -279,7 +266,5 @@ UNITTEST_START
 
   fail_unless(llist_destination.tail == llist_destination.tail,
             "llist_destination tail doesn't equal llist_destination head");
-
-
-
+}
 UNITTEST_STOP

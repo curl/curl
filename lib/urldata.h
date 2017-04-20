@@ -898,6 +898,8 @@ struct connectdata {
      connection is used! */
   struct Curl_easy *data;
 
+  struct curl_llist_element bundle_node; /* conncache */
+
   /* chunk is for HTTP chunked encoding, but is in the general connectdata
      struct only because we can do just about any protocol through a HTTP proxy
      and a HTTP proxy may in fact respond using chunked encoding */
@@ -1804,6 +1806,8 @@ struct Curl_easy {
   struct Curl_easy *prev;
 
   struct connectdata *easy_conn;     /* the "unit's" connection */
+  struct curl_llist_element connect_queue;
+  struct curl_llist_element pipeline_queue;
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */

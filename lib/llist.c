@@ -49,18 +49,17 @@ Curl_llist_init(struct curl_llist *l, curl_llist_dtor dtor)
  * entry is NULL and the list already has elements, the new one will be
  * inserted first in the list.
  *
+ * The 'ne' argument should be a pointer into the object to store.
+ *
  * Returns: 1 on success and 0 on failure.
  *
  * @unittest: 1300
  */
-int
+void
 Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
-                       const void *p)
+                       const void *p,
+                       struct curl_llist_element *ne)
 {
-  struct curl_llist_element *ne = malloc(sizeof(struct curl_llist_element));
-  if(!ne)
-    return 0;
-
   ne->ptr = (void *) p;
   if(list->size == 0) {
     list->head = ne;
@@ -87,19 +86,18 @@ Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
   }
 
   ++list->size;
-
-  return 1;
 }
 
 /*
  * @unittest: 1300
  */
-int
+void
 Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
                   void *user)
 {
+  void *ptr;
   if(e == NULL || list->size == 0)
-    return 1;
+    return;
 
   if(e == list->head) {
     list->head = e->next;
@@ -117,16 +115,16 @@ Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
       e->next->prev = e->prev;
   }
 
-  list->dtor(user, e->ptr);
+  ptr = e->ptr;
 
   e->ptr  = NULL;
   e->prev = NULL;
   e->next = NULL;
 
-  free(e);
   --list->size;
 
-  return 1;
+  /* call the dtor() last for when it actually frees the 'e' memory itself */
+  list->dtor(user, ptr);
 }
 
 void
@@ -147,13 +145,13 @@ Curl_llist_count(struct curl_llist *list)
 /*
  * @unittest: 1300
  */
-int Curl_llist_move(struct curl_llist *list, struct curl_llist_element *e,
-                    struct curl_llist *to_list,
-                    struct curl_llist_element *to_e)
+void Curl_llist_move(struct curl_llist *list, struct curl_llist_element *e,
+                     struct curl_llist *to_list,
+                     struct curl_llist_element *to_e)
 {
   /* Remove element from list */
   if(e == NULL || list->size == 0)
-    return 0;
+    return;
 
   if(e == list->head) {
     list->head = e->next;
@@ -193,6 +191,4 @@ int Curl_llist_move(struct curl_llist *list, struct curl_llist_element *e,
   }
 
   ++to_list->size;
-
-  return 1;
 }
