@@ -280,9 +280,8 @@ static int sh_init(struct curl_hash *hash, int hashsize)
 static CURLMcode multi_addmsg(struct Curl_multi *multi,
                               struct Curl_message *msg)
 {
-  if(!Curl_llist_insert_next(&multi->msglist, multi->msglist.tail, msg))
-    return CURLM_OUT_OF_MEMORY;
-
+  Curl_llist_insert_next(&multi->msglist, multi->msglist.tail, msg,
+                         &msg->list);
   return CURLM_OK;
 }
 
@@ -1432,10 +1431,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(data, CURLM_STATE_CONNECT_PEND);
 
         /* add this handle to the list of connect-pending handles */
-        if(!Curl_llist_insert_next(&multi->pending, multi->pending.tail, data))
-          result = CURLE_OUT_OF_MEMORY;
-        else
-          result = CURLE_OK;
+        Curl_llist_insert_next(&multi->pending, multi->pending.tail, data,
+                               &data->connect_queue);
+        result = CURLE_OK;
         break;
       }
 
@@ -2483,7 +2481,10 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
   }
 }
 
-
+struct time_node {
+  struct curl_llist_element list;
+  struct timeval time;
+};
 
 /*
  * add_next_timeout()
@@ -2504,13 +2505,16 @@ static CURLMcode add_next_timeout(struct timeval now,
   struct timeval *tv = &d->state.expiretime;
   struct curl_llist *list = &d->state.timeoutlist;
   struct curl_llist_element *e;
+  struct time_node *node = NULL;
 
   /* move over the timeout list for this specific handle and remove all
      timeouts that are now passed tense and store the next pending
      timeout in *tv */
   for(e = list->head; e;) {
     struct curl_llist_element *n = e->next;
-    time_t diff = curlx_tvdiff(*(struct timeval *)e->ptr, now);
+    time_t diff;
+    node = (struct time_node *)e->ptr;
+    diff = curlx_tvdiff(node->time, now);
     if(diff <= 0)
       /* remove outdated entry */
       Curl_llist_remove(list, e, NULL);
@@ -2528,7 +2532,7 @@ static CURLMcode add_next_timeout(struct timeval now,
   }
   else {
     /* copy the first entry to 'tv' */
-    memcpy(tv, e->ptr, sizeof(*tv));
+    memcpy(tv, &node->time, sizeof(*tv));
 
     /* remove first entry from list */
     Curl_llist_remove(list, e, NULL);
@@ -2879,21 +2883,21 @@ multi_addtimeout(struct curl_llist *timeoutlist,
                  struct timeval *stamp)
 {
   struct curl_llist_element *e;
-  struct timeval *timedup;
+  struct time_node *node;
   struct curl_llist_element *prev = NULL;
 
-  timedup = malloc(sizeof(*timedup));
-  if(!timedup)
+  node = malloc(sizeof(struct time_node));
+  if(!node)
     return CURLM_OUT_OF_MEMORY;
 
   /* copy the timestamp */
-  memcpy(timedup, stamp, sizeof(*timedup));
+  memcpy(&node->time, stamp, sizeof(*stamp));
 
   if(Curl_llist_count(timeoutlist)) {
     /* find the correct spot in the list */
     for(e = timeoutlist->head; e; e = e->next) {
-      struct timeval *checktime = e->ptr;
-      time_t diff = curlx_tvdiff(*checktime, *timedup);
+      struct time_node *check = (struct time_node *)e->ptr;
+      time_t diff = curlx_tvdiff(check->time, node->time);
       if(diff > 0)
         break;
       prev = e;
@@ -2903,11 +2907,7 @@ multi_addtimeout(struct curl_llist *timeoutlist,
   /* else
      this is the first timeout on the list */
 
-  if(!Curl_llist_insert_next(timeoutlist, prev, timedup)) {
-    free(timedup);
-    return CURLM_OUT_OF_MEMORY;
-  }
-
+  Curl_llist_insert_next(timeoutlist, prev, node, &node->list);
   return CURLM_OK;
 }
 
@@ -3044,8 +3044,9 @@ void Curl_expire_clear(struct Curl_easy *data)
       infof(data, "Internal error clearing splay node = %d\n", rc);
 
     /* flush the timeout list too */
-    while(list->size > 0)
+    while(list->size > 0) {
       Curl_llist_remove(list, list->tail, NULL);
+    }
 
 #ifdef DEBUGBUILD
     infof(data, "Expire cleared\n");

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,11 +23,15 @@
  ***************************************************************************/
 
 #include <curl/curl.h>
+#include "llist.h"
 
-struct curl_fileinfo *Curl_fileinfo_alloc(void);
+struct fileinfo {
+  struct curl_fileinfo info;
+  struct curl_llist_element list;
+};
+
+struct fileinfo *Curl_fileinfo_alloc(void);
 
 void Curl_fileinfo_dtor(void *, void *);
-
-struct curl_fileinfo *Curl_fileinfo_dup(const struct curl_fileinfo *src);
 
 #endif /* HEADER_CURL_FILEINFO_H */

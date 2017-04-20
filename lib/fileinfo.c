@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,23 +28,19 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-struct curl_fileinfo *Curl_fileinfo_alloc(void)
+struct fileinfo *Curl_fileinfo_alloc(void)
 {
-  struct curl_fileinfo *tmp = malloc(sizeof(struct curl_fileinfo));
-  if(!tmp)
-    return NULL;
-  memset(tmp, 0, sizeof(struct curl_fileinfo));
-  return tmp;
+  return calloc(1, sizeof(struct fileinfo));
 }
 
 void Curl_fileinfo_dtor(void *user, void *element)
 {
-  struct curl_fileinfo *finfo = element;
+  struct fileinfo *finfo = element;
   (void) user;
   if(!finfo)
     return;
 
-  Curl_safefree(finfo->b_data);
+  Curl_safefree(finfo->info.b_data);
 
   free(finfo);
 }

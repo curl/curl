@@ -57,6 +57,7 @@ struct curl_hash {
 };
 
 struct curl_hash_element {
+  struct curl_llist_element list;
   void   *ptr;
   size_t key_len;
   char   key[1]; /* allocated memory following the struct */

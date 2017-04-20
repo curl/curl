@@ -124,17 +124,9 @@ Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
 
   he = mk_hash_element(key, key_len, p);
   if(he) {
-    if(Curl_llist_insert_next(l, l->tail, he)) {
-      ++h->size;
-      return p; /* return the new entry */
-    }
-    /*
-     * Couldn't insert it, destroy the 'he' element and the key again. We
-     * don't call hash_element_dtor() since that would also call the
-     * "destructor" for the actual data 'p'. When we fail, we shall not touch
-     * that data.
-     */
-    free(he);
+    Curl_llist_insert_next(l, l->tail, he, &he->list);
+    ++h->size;
+    return p; /* return the new entry */
   }
 
   return NULL; /* failure */

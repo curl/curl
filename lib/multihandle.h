@@ -25,6 +25,7 @@
 #include "conncache.h"
 
 struct Curl_message {
+  struct curl_llist_element list;
   /* the 'CURLMsg' is the part that is visible to the external user */
   struct CURLMsg extmsg;
 };
