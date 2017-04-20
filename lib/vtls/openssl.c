@@ -2819,6 +2819,7 @@ static CURLcode servercert(struct connectdata *conn,
 
   connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
   if(!connssl->server_cert) {
+    BIO_free(mem);
     if(!strict)
       return CURLE_OK;
 
