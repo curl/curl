@@ -101,7 +101,7 @@ if USE_MANUAL
 # Here are the stuff to create a built-in manual
 
 $(MANPAGE):
-	cd $(top_builddir)/docs && $(MAKE) curl.1
+	cd $(top_builddir)/docs && $(MAKE)
 
 if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and
@@ -111,15 +111,15 @@ if HAVE_LIBZ
 $(HUGE): $(MANPAGE) $(README) $(MKHELP)
 	echo '#include "tool_setup.h"' > $(HUGE)
 	echo '#ifndef HAVE_LIBZ' >> $(HUGE)
-	$(NROFF) $< | $(PERL) $(MKHELP) $(README) >> $(HUGE)
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
 	echo '#else' >> $(HUGE)
-	$(NROFF) $< | $(PERL) $(MKHELP) -c $(README) >> $(HUGE)
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) -c $(README) >> $(HUGE)
 	echo '#endif /* HAVE_LIBZ */' >> $(HUGE)
 else # HAVE_LIBZ
 # This generates the tool_hugehelp.c file uncompressed only
 $(HUGE): $(MANPAGE) $(README) mkhelp.pl
 	echo '#include "tool_setup.h"' > $(HUGE)
-	$(NROFF) $< | $(PERL) $(MKHELP) $(README) >> $(HUGE)
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
 endif
 
 else # USE_MANUAL

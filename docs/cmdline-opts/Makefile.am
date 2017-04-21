@@ -22,7 +22,7 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
-MANPAGE = $(top_builddir)/docs/curl.1
+MANPAGE = $(abs_top_builddir)/docs/curl.1
 
 include Makefile.inc
 
