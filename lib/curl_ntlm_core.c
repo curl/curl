@@ -80,6 +80,9 @@
 
 #  include <mbedtls/des.h>
 #  include <mbedtls/md4.h>
+#  if !defined(MBEDTLS_MD4_C)
+#    include "curl_md4.h"
+#  endif
 
 #elif defined(USE_NSS)
 
@@ -568,10 +571,11 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
     gcry_md_write(MD4pw, pw, 2 * len);
     memcpy(ntbuffer, gcry_md_read(MD4pw, 0), MD4_DIGEST_LENGTH);
     gcry_md_close(MD4pw);
+#elif defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
+    (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
+    Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_MBEDTLS)
     mbedtls_md4(pw, 2 * len, ntbuffer);
-#elif defined(USE_NSS) || defined(USE_OS400CRYPTO)
-    Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_DARWINSSL)
     (void)CC_MD4(pw, (CC_LONG)(2 * len), ntbuffer);
 #elif defined(USE_WIN32_CRYPTO)
