@@ -432,6 +432,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   connssl->recv_unrecoverable_err = CURLE_OK;
   connssl->recv_sspi_close_notify = false;
   connssl->recv_connection_closed = false;
+  connssl->encdata_is_incomplete = false;
 
   /* continue to second handshake step */
   connssl->connecting_state = ssl_connect_2;
@@ -532,6 +533,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 
       /* increase encrypted data buffer offset */
       connssl->encdata_offset += nread;
+      connssl->encdata_is_incomplete = false;
     }
 
     infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
@@ -576,6 +578,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 
     /* check if the handshake was incomplete */
     if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
+      connssl->encdata_is_incomplete = true;
       connssl->connecting_state = ssl_connect_2_reading;
       infof(data, "schannel: received incomplete message, need more data\n");
       return CURLE_OK;
@@ -1177,6 +1180,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
     }
     else if(nread > 0) {
       connssl->encdata_offset += (size_t)nread;
+      connssl->encdata_is_incomplete = false;
       infof(data, "schannel: encrypted data got %zd\n", nread);
     }
   }
@@ -1313,6 +1317,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
       }
     }
     else if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
+      connssl->encdata_is_incomplete = true;
       if(!*err)
         *err = CURLE_AGAIN;
       infof(data, "schannel: failed to decrypt data, need more data\n");
@@ -1414,8 +1419,8 @@ bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex)
   const struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   if(connssl->use) /* SSL/TLS is in use */
-    return (connssl->encdata_offset > 0 ||
-            connssl->decdata_offset > 0) ? TRUE : FALSE;
+    return (connssl->decdata_offset > 0 ||
+            (connssl->encdata_offset > 0 && !connssl->encdata_is_incomplete));
   else
     return FALSE;
 }
@@ -1518,6 +1523,7 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
     Curl_safefree(connssl->encdata_buffer);
     connssl->encdata_length = 0;
     connssl->encdata_offset = 0;
+    connssl->encdata_is_incomplete = false;
   }
 
   /* free internal buffer for received decrypted data */
