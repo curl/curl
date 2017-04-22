@@ -561,7 +561,7 @@ static void events_setup(struct Curl_multi *multi, struct events *ev)
 static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 {
   bool done = FALSE;
-  CURLMcode mcode;
+  CURLMcode mcode = CURLM_OK;
   CURLcode result = CURLE_OK;
 
   while(!done) {

@@ -205,7 +205,7 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
 {
   char *tmp;
   char *token;
-  char *tok_buf;
+  char *tok_buf = NULL;
 
   /* Initialise the output */
   *value = 0;
@@ -563,7 +563,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
           return CURLE_OUT_OF_MEMORY;
       }
       else if(strcasecompare(value, "qop")) {
-        char *tok_buf;
+        char *tok_buf = NULL;
         /* Tokenize the list and choose auth if possible, use a temporary
            clone of the buffer since strtok_r() ruins it */
         tmp = strdup(content);
