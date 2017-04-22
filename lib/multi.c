@@ -1014,7 +1014,7 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
   curlfds = nfds; /* number of internal file descriptors */
   nfds += extra_nfds; /* add the externally provided ones */
 
-  if(nfds || extra_nfds) {
+  if(nfds) {
     if(nfds > NUM_POLLS_ON_STACK) {
       ufds = malloc(nfds * sizeof(struct pollfd));
       if(!ufds)
