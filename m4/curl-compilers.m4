@@ -158,7 +158,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
     flags_dbg_all="$flags_dbg_all -gvms"
     flags_dbg_yes="-g"
     flags_dbg_off=""
-    flags_opt_all="-O -O0 -O1 -O2 -O3 -Os"
+    flags_opt_all="-O -O0 -O1 -O2 -O3 -Os -Og -Ofast"
     flags_opt_yes="-O2"
     flags_opt_off="-O0"
     CURL_CHECK_DEF([_WIN32], [], [silent])
