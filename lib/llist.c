@@ -51,8 +51,6 @@ Curl_llist_init(struct curl_llist *l, curl_llist_dtor dtor)
  *
  * The 'ne' argument should be a pointer into the object to store.
  *
- * Returns: 1 on success and 0 on failure.
- *
  * @unittest: 1300
  */
 void
