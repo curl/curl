@@ -22,7 +22,7 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
-man_MANS = curl.1 curl-config.1
+man_MANS = $(abs_builddir)/curl.1 curl-config.1
 noinst_man_MANS = mk-ca-bundle.1
 GENHTMLPAGES = curl.html curl-config.html mk-ca-bundle.html
 PDFPAGES = curl.pdf curl-config.pdf mk-ca-bundle.pdf
@@ -30,7 +30,9 @@ MANDISTPAGES = curl.1.dist curl-config.1.dist
 
 HTMLPAGES = $(GENHTMLPAGES) index.html
 
-SUBDIRS = libcurl cmdline-opts
+# Build targets in this file (.) before cmdline-opts to ensure that
+# the curl.1 rule below runs first
+SUBDIRS = libcurl . cmdline-opts
 DIST_SUBDIRS = $(SUBDIRS) examples
 
 CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
@@ -47,7 +49,17 @@ MAN2HTML= roffit $< >$@
 
 SUFFIXES = .1 .html .pdf
 
-curl.1:
+# $(abs_builddir) is to disable VPATH when searching for this file, which
+# would otherwise find the copy in $(srcdir) which breaks the $(HUGE)
+# rule in src/Makefile.am in out-of-tree builds that references the file in the
+# build directory.
+#
+# First, seed the used copy of curl.1 with the prebuilt copy (in an out-of-tree
+# build), then run make recursively to rebuild it only if its dependencies
+# have changed.
+$(abs_builddir)/curl.1:
+	if test "$(top_builddir)x" != "$(top_srcdir)x" -a -e "$(srcdir)/curl.1"; then \
+		cp -fp "$(srcdir)/curl.1" $@; fi
 	cd cmdline-opts && $(MAKE)
 
 html: $(HTMLPAGES)
