@@ -246,6 +246,8 @@ static void setfiletime(long filetime, const char *filename,
 #endif /* defined(HAVE_UTIME) || \
           (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8)) */
 
+#define BUFFER_SIZE (100*1024)
+
 static CURLcode operate_do(struct GlobalConfig *global,
                            struct OperationConfig *config)
 {
@@ -888,10 +890,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_SEEKDATA, &input);
         my_setopt(curl, CURLOPT_SEEKFUNCTION, tool_seek_cb);
 
-        if(config->recvpersecond)
-          /* tell libcurl to use a smaller sized buffer as it allows us to
-             make better sleeps! 7.9.9 stuff! */
+        if(config->recvpersecond &&
+           (config->recvpersecond < BUFFER_SIZE))
+          /* use a smaller sized buffer for better sleeps */
           my_setopt(curl, CURLOPT_BUFFERSIZE, (long)config->recvpersecond);
+        else
+          my_setopt(curl, CURLOPT_BUFFERSIZE, (long)BUFFER_SIZE);
 
         /* size of uploaded file: */
         if(uploadfilesize != -1)
