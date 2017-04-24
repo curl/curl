@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
   slist1 = curl_slist_append(slist1, "recipient.two@example.com");
 
   hnd = curl_easy_init();
+  curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t)38);
   curl_easy_setopt(hnd, CURLOPT_URL, "smtp://%HOSTIP:%SMTPPORT/1406");
   curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
