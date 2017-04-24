@@ -898,8 +898,8 @@ else
 
     if test "$PKGCONFIG" != "no" ; then
       LIBS="`$PKGCONFIG --libs-only-l zlib` $LIBS"
-      LDFLAGS="`$PKGCONFIG --libs-only-L zlib` $LDFLAGS"
-      CPPFLAGS="`$PKGCONFIG --cflags-only-I zlib` $CPPFLAGS"
+      LDFLAGS="$LDFLAGS `$PKGCONFIG --libs-only-L zlib`"
+      CPPFLAGS="$CPPFLAGS `$PKGCONFIG --cflags-only-I zlib`"
       OPT_ZLIB=""
       HAVE_LIBZ="1"
     fi
@@ -2495,8 +2495,8 @@ if test X"$OPT_LIBMETALINK" != Xno; then
     clean_CPPFLAGS="$CPPFLAGS"
     clean_LDFLAGS="$LDFLAGS"
     clean_LIBS="$LIBS"
-    CPPFLAGS="$addcflags $clean_CPPFLAGS"
-    LDFLAGS="$addld $clean_LDFLAGS"
+    CPPFLAGS="$clean_CPPFLAGS $addcflags"
+    LDFLAGS="$clean_LDFLAGS $addld"
     LIBS="$addlib $clean_LIBS"
     AC_MSG_CHECKING([if libmetalink is recent enough])
     AC_LINK_IFELSE([
@@ -2580,7 +2580,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
     DIR_SSH2=${PREFIX_SSH2}/lib$libsuff
   fi
 
-  LDFLAGS="$LD_SSH2 $LDFLAGS"
+  LDFLAGS="$LDFLAGS $LD_SSH2"
   CPPFLAGS="$CPPFLAGS $CPP_SSH2"
   LIBS="$LIB_SSH2 $LIBS"
 
@@ -2795,8 +2795,8 @@ if test "$want_winidn" = "yes"; then
     WINIDN_DIR="$want_winidn_path/lib$libsuff"
   fi
   #
-  CPPFLAGS="$WINIDN_CPPFLAGS $CPPFLAGS"
-  LDFLAGS="$WINIDN_LDFLAGS $LDFLAGS"
+  CPPFLAGS="$CPPFLAGS $WINIDN_CPPFLAGS"
+  LDFLAGS="$LDFLAGS $WINIDN_LDFLAGS"
   LIBS="$WINIDN_LIBS $LIBS"
   #
   AC_MSG_CHECKING([if IdnToUnicode can be linked])
@@ -2911,8 +2911,8 @@ if test "$want_idn" = "yes"; then
     AC_MSG_NOTICE([IDN_DIR: "$IDN_DIR"])
   fi
   #
-  CPPFLAGS="$IDN_CPPFLAGS $CPPFLAGS"
-  LDFLAGS="$IDN_LDFLAGS $LDFLAGS"
+  CPPFLAGS="$CPPFLAGS $IDN_CPPFLAGS"
+  LDFLAGS="$LDFLAGS $IDN_LDFLAGS"
   LIBS="$IDN_LIBS $LIBS"
   #
   AC_MSG_CHECKING([if idn2_lookup_ul can be linked])
