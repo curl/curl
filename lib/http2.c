@@ -165,7 +165,7 @@ void Curl_http2_setup_req(struct Curl_easy *data)
   http->closed = FALSE;
   http->close_handled = FALSE;
   http->mem = data->state.buffer;
-  http->len = BUFSIZE;
+  http->len = data->set.buffer_size;
   http->memlen = 0;
 }
 
