@@ -2997,6 +2997,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
   Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
   Curl_safefree(conn->master_buffer);
+  Curl_safefree(conn->connect_buffer);
 
   conn_reset_all_postponed_data(conn);
 

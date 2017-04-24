@@ -1144,6 +1144,7 @@ struct connectdata {
   struct connectbundle *bundle; /* The bundle we are member of */
 
   int negnpn; /* APLN or NPN TLS negotiated protocol, CURL_HTTP_VERSION* */
+  char *connect_buffer; /* for CONNECT business */
 
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
