@@ -405,8 +405,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   /* This is where we loop until we have read everything there is to
      read or we get a CURLE_AGAIN */
   do {
-    size_t buffersize = data->set.buffer_size?
-      data->set.buffer_size : BUFSIZE;
+    size_t buffersize = data->set.buffer_size;
     size_t bytestoread = buffersize;
 
     if(
