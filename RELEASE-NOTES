@@ -12,7 +12,16 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o
+ o openssl: fix memory leak in servercert
+ o tests: remove the html and PDF versions from the tarball
+ o mbedtls: enable NTLM (& SMB) even if MD4 support is unavailable
+ o typecheck-gcc: handle function pointers properly [1]
+ o llist: no longer uses malloc [2]
+ o gnutls: removed some code when --disable-verbose is configured
+ o lib: fix maybe-uninitialized warnings
+ o multi: clarify condition in curl_multi_wait [3]
+ o schannel: Don't treat encrypted partial record as pending data [4]
+ o configure: fix the -ldl check for openssl, add -lpthread check [5]
 
 This release includes the following known bugs:
 
@@ -21,9 +30,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Alan Jenkins, Dan Fandrich, Daniel Stenberg, Kevin Ji, Marcel Raad,
+  Ray Satiro, Thomas Klausner,
+  (7 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/bug/?i=1403
+ [2] = https://curl.haxx.se/bug/?i=1435
+ [3] = https://curl.haxx.se/bug/?i=1439
+ [4] = https://curl.haxx.se/bug/?i=1392
+ [5] = https://curl.haxx.se/bug/?i=1427
