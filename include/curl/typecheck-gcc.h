@@ -349,7 +349,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
 
 /* true if info expects a pointer to struct curl_slist * argument */
 #define _curl_is_slist_info(info)                                             \
-  (CURLINFO_SLIST < (info))
+  (CURLINFO_SLIST < (info) && (info) < CURLINFO_SOCKET)
 
 
 /* typecheck helpers -- check whether given expression has requested type*/
