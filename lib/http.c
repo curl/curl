@@ -285,6 +285,7 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
   const char *user;
   const char *pwd;
   CURLcode result;
+  char *out;
 
   if(proxy) {
     userp = &conn->allocptr.proxyuserpwd;
@@ -297,27 +298,32 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
     pwd = conn->passwd;
   }
 
-  snprintf(data->state.buffer, CURL_BUFSIZE(data->set.buffer_size),
-           "%s:%s", user, pwd);
+  out = aprintf("%s:%s", user, pwd);
+  if(!out)
+    return CURLE_OUT_OF_MEMORY;
 
-  result = Curl_base64_encode(data,
-                              data->state.buffer, strlen(data->state.buffer),
-                              &authorization, &size);
+  result = Curl_base64_encode(data, out, strlen(out), &authorization, &size);
   if(result)
-    return result;
+    goto fail;
 
-  if(!authorization)
-    return CURLE_REMOTE_ACCESS_DENIED;
+  if(!authorization) {
+    result = CURLE_REMOTE_ACCESS_DENIED;
+    goto fail;
+  }
 
   free(*userp);
   *userp = aprintf("%sAuthorization: Basic %s\r\n",
                    proxy ? "Proxy-" : "",
                    authorization);
   free(authorization);
-  if(!*userp)
-    return CURLE_OUT_OF_MEMORY;
+  if(!*userp) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
 
-  return CURLE_OK;
+  fail:
+  free(out);
+  return result;
 }
 
 /* pickoneauth() selects the most favourable authentication method from the
