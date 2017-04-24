@@ -85,6 +85,12 @@ static struct curl_llist nss_crl_list;
 static NSSInitContext *nss_context = NULL;
 static volatile int initialized = 0;
 
+/* type used to wrap pointers as list nodes */
+struct ptr_list_wrap {
+  void *ptr;
+  struct curl_llist_element node;
+};
+
 typedef struct {
   const char *name;
   int num;
@@ -371,6 +377,18 @@ static PK11SlotInfo* nss_find_slot_by_name(const char *slot_name)
   return slot;
 }
 
+/* wrap 'ptr' as list node and tail-insert into 'list' */
+static CURLcode insert_wrapped_ptr(struct curl_llist *list, void *ptr)
+{
+  struct ptr_list_wrap *wrap = malloc(sizeof *wrap);
+  if(!wrap)
+    return CURLE_OUT_OF_MEMORY;
+
+  wrap->ptr = ptr;
+  Curl_llist_insert_next(list, list->tail, wrap, &wrap->node);
+  return CURLE_OK;
+}
+
 /* Call PK11_CreateGenericObject() with the given obj_class and filename.  If
  * the call succeeds, append the object handle to the list of objects so that
  * the object can be destroyed in Curl_nss_close(). */
@@ -413,7 +431,7 @@ static CURLcode nss_create_object(struct ssl_connect_data *ssl,
   if(!obj)
     return result;
 
-  if(!Curl_llist_insert_next(&ssl->obj_list, ssl->obj_list.tail, obj)) {
+  if(insert_wrapped_ptr(&ssl->obj_list, obj) != CURLE_OK) {
     PK11_DestroyGenericObject(obj);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -430,17 +448,21 @@ static CURLcode nss_create_object(struct ssl_connect_data *ssl,
  * NSS objects in Curl_nss_close() */
 static void nss_destroy_object(void *user, void *ptr)
 {
-  PK11GenericObject *obj = (PK11GenericObject *)ptr;
+  struct ptr_list_wrap *wrap = (struct ptr_list_wrap *) ptr;
+  PK11GenericObject *obj = (PK11GenericObject *) wrap->ptr;
   (void) user;
   PK11_DestroyGenericObject(obj);
+  free(wrap);
 }
 
 /* same as nss_destroy_object() but for CRL items */
 static void nss_destroy_crl_item(void *user, void *ptr)
 {
-  SECItem *crl_der = (SECItem *)ptr;
+  struct ptr_list_wrap *wrap = (struct ptr_list_wrap *) ptr;
+  SECItem *crl_der = (SECItem *) wrap->ptr;
   (void) user;
   SECITEM_FreeItem(crl_der, PR_TRUE);
+  free(wrap);
 }
 
 static CURLcode nss_load_cert(struct ssl_connect_data *ssl,
@@ -496,7 +518,7 @@ static CURLcode nss_cache_crl(SECItem *crl_der)
   PR_Lock(nss_crllock);
 
   /* store the CRL item so that we can free it in Curl_nss_cleanup() */
-  if(!Curl_llist_insert_next(&nss_crl_list, nss_crl_list.tail, crl_der)) {
+  if(insert_wrapped_ptr(&nss_crl_list, crl_der) != CURLE_OK) {
     SECITEM_FreeItem(crl_der, PR_TRUE);
     PR_Unlock(nss_crllock);
     return CURLE_OUT_OF_MEMORY;
