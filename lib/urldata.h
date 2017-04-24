@@ -206,7 +206,6 @@
 #undef MAX_BUFSIZE
 #define MAX_BUFSIZE CURL_MAX_READ_SIZE
 #define MIN_BUFSIZE 1024
-#define CURL_BUFSIZE(x) ((x)?(x):(BUFSIZE))
 
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
    of need. */

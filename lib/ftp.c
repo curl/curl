@@ -2824,7 +2824,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     case FTP_PWD:
       if(ftpcode == 257) {
         char *ptr=&data->state.buffer[4];  /* start on the first letter */
-        const size_t buf_size = CURL_BUFSIZE(data->set.buffer_size);
+        const size_t buf_size = data->set.buffer_size;
         char *dir;
         char *store;
 

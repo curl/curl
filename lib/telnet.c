@@ -1416,7 +1416,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 
   /* Keep on listening and act on events */
   while(keepon) {
-    const DWORD buf_size = (DWORD)CURL_BUFSIZE(data->set.buffer_size);
+    const DWORD buf_size = (DWORD)data->set.buffer_size;
     waitret = WaitForMultipleObjects(obj_count, objs, FALSE, wait_timeout);
     switch(waitret) {
     case WAIT_TIMEOUT:

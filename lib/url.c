@@ -607,6 +607,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
   set->sep_headers = TRUE; /* separated header lists by default */
+  set->buffer_size = BUFSIZE;
 
   Curl_http2_init_userset(set);
   return result;
