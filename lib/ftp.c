@@ -2101,17 +2101,17 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
       /* we got a time. Format should be: "YYYYMMDDHHMMSS[.sss]" where the
          last .sss part is optional and means fractions of a second */
       int year, month, day, hour, minute, second;
-      char *buf = data->state.buffer;
-      if(6 == sscanf(buf+4, "%04d%02d%02d%02d%02d%02d",
+      if(6 == sscanf(&data->state.buffer[4], "%04d%02d%02d%02d%02d%02d",
                      &year, &month, &day, &hour, &minute, &second)) {
         /* we have a time, reformat it */
+        char timebuf[24];
         time_t secs=time(NULL);
-        /* using the good old yacc/bison yuck */
-        snprintf(buf, CURL_BUFSIZE(conn->data->set.buffer_size),
+
+        snprintf(timebuf, sizeof(timebuf),
                  "%04d%02d%02d %02d:%02d:%02d GMT",
                  year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
-        data->info.filetime = (long)curl_getdate(buf, &secs);
+        data->info.filetime = (long)curl_getdate(timebuf, &secs);
       }
 
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
@@ -2122,6 +2122,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
          ftpc->file &&
          data->set.get_filetime &&
          (data->info.filetime>=0) ) {
+        char headerbuf[128];
         time_t filetime = (time_t)data->info.filetime;
         struct tm buffer;
         const struct tm *tm = &buffer;
@@ -2131,7 +2132,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
           return result;
 
         /* format: "Tue, 15 Nov 1994 12:45:26" */
-        snprintf(buf, BUFSIZE-1,
+        snprintf(headerbuf, sizeof(headerbuf),
                  "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
                  Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
                  tm->tm_mday,
@@ -2140,7 +2141,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
                  tm->tm_hour,
                  tm->tm_min,
                  tm->tm_sec);
-        result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
+        result = Curl_client_write(conn, CLIENTWRITE_BOTH, headerbuf, 0);
         if(result)
           return result;
       } /* end of a ridiculous amount of conditionals */
@@ -2318,9 +2319,10 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
   if(instate == FTP_SIZE) {
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(-1 != filesize) {
-      snprintf(buf, CURL_BUFSIZE(data->set.buffer_size),
+      char clbuf[128];
+      snprintf(clbuf, sizeof(clbuf),
                "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
-      result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
+      result = Curl_client_write(conn, CLIENTWRITE_BOTH, clbuf, 0);
       if(result)
         return result;
     }
@@ -2420,7 +2422,6 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct FTP *ftp = data->req.protop;
-  char *buf = data->state.buffer;
 
   if((ftpcode == 150) || (ftpcode == 125)) {
 
@@ -2464,6 +2465,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
        *
        * Example D above makes this parsing a little tricky */
       char *bytes;
+      char *buf = data->state.buffer;
       bytes=strstr(buf, " bytes");
       if(bytes--) {
         long in=(long)(bytes-buf);
