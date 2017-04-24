@@ -2284,15 +2284,17 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * The application kindly asks for a differently sized receive buffer.
      * If it seems reasonable, we'll use it.
      */
-    data->set.buffer_size = va_arg(param, long);
+    arg = va_arg(param, long);
 
-    if(data->set.buffer_size > MAX_BUFSIZE)
-      data->set.buffer_size = MAX_BUFSIZE; /* huge internal default */
-    else if(data->set.buffer_size < 1)
-      data->set.buffer_size = BUFSIZE;
+    if(arg > MAX_BUFSIZE)
+      arg = MAX_BUFSIZE; /* huge internal default */
+    else if(arg < 1)
+      arg = BUFSIZE;
+    else if(arg < MIN_BUFSIZE)
+      arg = BUFSIZE;
 
     /* Resize only if larger than default buffer size. */
-    if(data->set.buffer_size > BUFSIZE) {
+    if(arg > BUFSIZE) {
       char *newbuff = realloc(data->state.buffer, data->set.buffer_size + 1);
       if(!newbuff) {
         DEBUGF(fprintf(stderr, "Error: realloc of buffer failed\n"));
@@ -2301,6 +2303,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
       else
         data->state.buffer = newbuff;
     }
+    data->set.buffer_size = arg;
 
     break;
 
