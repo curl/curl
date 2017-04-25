@@ -558,12 +558,11 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     size_t bytestoread;
 
     if(size_known) {
-      bytestoread =
-        (expected_size < CURL_OFF_T_C(BUFSIZE) - CURL_OFF_T_C(1)) ?
-        curlx_sotouz(expected_size) : BUFSIZE - 1;
+      bytestoread = (expected_size < data->set.buffer_size) ?
+        curlx_sotouz(expected_size) : (size_t)data->set.buffer_size;
     }
     else
-      bytestoread = BUFSIZE-1;
+      bytestoread = data->set.buffer_size-1;
 
     nread = read(fd, buf, bytestoread);
 
