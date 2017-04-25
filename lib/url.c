@@ -6984,7 +6984,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 * Returns the family as a single bit protocol identifier.
 */
 
-unsigned int get_protocol_family(unsigned int protocol)
+static unsigned int get_protocol_family(unsigned int protocol)
 {
   unsigned int family;
 
