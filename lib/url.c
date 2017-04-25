@@ -2935,8 +2935,7 @@ static void conn_reset_all_postponed_data(struct connectdata *conn)
   conn_reset_postponed_data(conn, 1);
 }
 #else  /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
-/* Use "do-nothing" macros instead of functions when workaround not used */
-#define conn_reset_postponed_data(c,n) do {} WHILE_FALSE
+/* Use "do-nothing" macro instead of function when workaround not used */
 #define conn_reset_all_postponed_data(c) do {} WHILE_FALSE
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 

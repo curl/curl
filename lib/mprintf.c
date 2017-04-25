@@ -42,10 +42,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifndef SIZEOF_LONG_DOUBLE
-#define SIZEOF_LONG_DOUBLE 0
-#endif
-
 /*
  * If SIZEOF_SIZE_T has not been defined, default to the size of long.
  */

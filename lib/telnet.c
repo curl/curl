@@ -81,8 +81,6 @@
   } WHILE_FALSE
 
 #define  CURL_SB_GET(x) ((*x->subpointer++)&0xff)
-#define  CURL_SB_PEEK(x)   ((*x->subpointer)&0xff)
-#define  CURL_SB_EOF(x) (x->subpointer >= x->subend)
 #define  CURL_SB_LEN(x) (x->subend - x->subpointer)
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS

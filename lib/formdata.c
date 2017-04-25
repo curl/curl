@@ -54,9 +54,6 @@ static char *formboundary(struct Curl_easy *data);
    extensions. */
 #define HTTPPOST_CONTENTTYPE_DEFAULT "application/octet-stream"
 
-#define FORM_FILE_SEPARATOR ','
-#define FORM_TYPE_SEPARATOR ';'
-
 #define HTTPPOST_PTRNAME CURL_HTTPPOST_PTRNAME
 #define HTTPPOST_FILENAME CURL_HTTPPOST_FILENAME
 #define HTTPPOST_PTRCONTENTS CURL_HTTPPOST_PTRCONTENTS
