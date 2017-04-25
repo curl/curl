@@ -904,7 +904,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
             sending_http_headers = FALSE;
         }
 
-        result = Curl_fillreadbuffer(conn, BUFSIZE, &fillcount);
+        result = Curl_fillreadbuffer(conn, UPLOAD_BUFSIZE, &fillcount);
         if(result)
           return result;
 
