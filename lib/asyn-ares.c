@@ -541,6 +541,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
                        ARES_OPT_LOOKUPS) == ARES_SUCCESS &&
      opt->lookups && *opt->lookups == 'f') {
     ares_delete_options(opt);
+    opt = NULL;
     struct hostent* host;
     Curl_addrinfo* ai = NULL;
     if(ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
