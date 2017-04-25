@@ -207,6 +207,10 @@
 #define MAX_BUFSIZE CURL_MAX_READ_SIZE
 #define MIN_BUFSIZE 1024
 
+/* The upload buffer size, should not be smaller than CURL_MAX_WRITE_SIZE, as
+   it needs to hold a full buffer as could be sent in a write callback */
+#define UPLOAD_BUFSIZE CURL_MAX_WRITE_SIZE
+
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
    of need. */
 #define HEADERSIZE 256
@@ -1333,7 +1337,7 @@ struct UrlState {
   size_t headersize;   /* size of the allocation */
 
   char *buffer; /* download buffer */
-  char uploadbuffer[BUFSIZE+1]; /* upload buffer */
+  char uploadbuffer[UPLOAD_BUFSIZE+1]; /* upload buffer */
   curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */
