@@ -149,7 +149,7 @@ static void pre_receive_plain(struct connectdata *conn, int num)
       /* Have some incoming data */
       if(!psnd->buffer) {
         /* Use buffer double default size for intermediate buffer */
-        psnd->allocated_size = 2 * BUFSIZE;
+        psnd->allocated_size = 2 * conn->data->set.buffer_size;
         psnd->buffer = malloc(psnd->allocated_size);
         psnd->recv_size = 0;
         psnd->recv_processed = 0;
@@ -693,9 +693,10 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
   ssize_t nread = 0;
   size_t bytesfromsocket = 0;
   char *buffertofill = NULL;
+  struct Curl_easy *data = conn->data;
 
   /* if HTTP/1 pipelining is both wanted and possible */
-  bool pipelining = Curl_pipeline_wanted(conn->data->multi, CURLPIPE_HTTP1) &&
+  bool pipelining = Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1) &&
     (conn->bundle->multiuse == BUNDLE_PIPELINING);
 
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
@@ -721,13 +722,11 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
     }
     /* If we come here, it means that there is no data to read from the buffer,
      * so we read from the socket */
-    bytesfromsocket = CURLMIN(sizerequested, BUFSIZE * sizeof(char));
+    bytesfromsocket = CURLMIN(sizerequested, (size_t)data->set.buffer_size);
     buffertofill = conn->master_buffer;
   }
   else {
-    bytesfromsocket = CURLMIN((long)sizerequested,
-                              conn->data->set.buffer_size ?
-                              conn->data->set.buffer_size : BUFSIZE);
+    bytesfromsocket = CURLMIN(sizerequested, (size_t)data->set.buffer_size);
     buffertofill = buf;
   }
 

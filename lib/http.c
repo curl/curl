@@ -1117,7 +1117,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
        buffer is using this size.
     */
 
-    sendsize = (size > CURL_MAX_WRITE_SIZE) ? CURL_MAX_WRITE_SIZE : size;
+    sendsize = CURLMIN(size, CURL_MAX_WRITE_SIZE);
 
     /* OpenSSL is very picky and we must send the SAME buffer pointer to the
        library when we attempt to re-send this buffer. Sending the same data
@@ -2172,8 +2172,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* when seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
         do {
           size_t readthisamountnow =
-            (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
-            BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
+            (data->state.resume_from - passed > data->set.buffer_size) ?
+            (size_t)data->set.buffer_size :
+            curlx_sotouz(data->state.resume_from - passed);
 
           size_t actuallyread =
             data->state.fread_func(data->state.buffer, 1, readthisamountnow,

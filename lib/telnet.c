@@ -1425,7 +1425,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
         if(data->set.is_fread_set) {
           size_t n;
           /* read from user-supplied method */
-          n = data->state.fread_func(buf, 1, BUFSIZE - 1, data->state.in);
+          n = data->state.fread_func(buf, 1, buf_size, data->state.in);
           if(n == CURL_READFUNC_ABORT) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
@@ -1500,7 +1500,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       }
       if(events.lNetworkEvents & FD_READ) {
         /* read data from network */
-        result = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        result = Curl_read(conn, sockfd, buf, data->set.buffer_size, &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1589,7 +1589,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */
-        result = Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+        result = Curl_read(conn, sockfd, buf, data->set.buffer_size, &nread);
         /* read would've blocked. Loop again */
         if(result == CURLE_AGAIN)
           break;
@@ -1625,12 +1625,12 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
       nread = 0;
       if(poll_cnt == 2) {
         if(pfd[1].revents & POLLIN) { /* read from in file */
-          nread = read(pfd[1].fd, buf, BUFSIZE - 1);
+          nread = read(pfd[1].fd, buf, data->set.buffer_size);
         }
       }
       else {
         /* read from user-supplied method */
-        nread = (int)data->state.fread_func(buf, 1, BUFSIZE - 1,
+        nread = (int)data->state.fread_func(buf, 1, data->set.buffer_size,
                                             data->state.in);
         if(nread == CURL_READFUNC_ABORT) {
           keepon = FALSE;

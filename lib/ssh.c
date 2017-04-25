@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1837,8 +1837,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
           do {
             size_t readthisamountnow =
-              (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
-              BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
+              (data->state.resume_from - passed > data->set.buffer_size) ?
+              data->set.buffer_size :
+              curlx_sotouz(data->state.resume_from - passed);
 
             size_t actuallyread =
               data->state.fread_func(data->state.buffer, 1,

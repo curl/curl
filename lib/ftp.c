@@ -1681,8 +1681,9 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
       /* seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
       do {
         size_t readthisamountnow =
-          (data->state.resume_from - passed > CURL_OFF_T_C(BUFSIZE)) ?
-          BUFSIZE : curlx_sotouz(data->state.resume_from - passed);
+          (data->state.resume_from - passed > data->set.buffer_size) ?
+          (size_t)data->set.buffer_size :
+          curlx_sotouz(data->state.resume_from - passed);
 
         size_t actuallyread =
           data->state.fread_func(data->state.buffer, 1, readthisamountnow,
