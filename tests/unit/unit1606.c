@@ -62,7 +62,6 @@ static int runawhile(struct Curl_easy *easy,
 
   finaltime = (int)(now.tv_sec - 1);
 
-  printf("%s\n", easy->state.buffer);
   return finaltime;
 }
 
