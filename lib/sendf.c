@@ -722,7 +722,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
     }
     /* If we come here, it means that there is no data to read from the buffer,
      * so we read from the socket */
-    bytesfromsocket = CURLMIN(sizerequested, (size_t)data->set.buffer_size);
+    bytesfromsocket = CURLMIN(sizerequested, MASTERBUF_SIZE);
     buffertofill = conn->master_buffer;
   }
   else {

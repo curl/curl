@@ -140,6 +140,10 @@ static CURLcode parse_login_details(const char *login, const size_t len,
                                     char **optionsptr);
 static unsigned int get_protocol_family(unsigned int protocol);
 
+#define READBUFFER_SIZE CURL_MAX_WRITE_SIZE
+#define READBUFFER_MAX  CURL_MAX_READ_SIZE
+#define READBUFFER_MIN  1024
+
 /*
  * Protocol table.
  */
@@ -607,7 +611,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
   set->sep_headers = TRUE; /* separated header lists by default */
-  set->buffer_size = BUFSIZE;
+  set->buffer_size = READBUFFER_SIZE;
 
   Curl_http2_init_userset(set);
   return result;
@@ -645,7 +649,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   /* We do some initial setup here, all those fields that can't be just 0 */
 
-  data->state.buffer = malloc(BUFSIZE + 1);
+  data->state.buffer = malloc(READBUFFER_SIZE + 1);
   if(!data->state.buffer) {
     DEBUGF(fprintf(stderr, "Error: malloc of buffer failed\n"));
     result = CURLE_OUT_OF_MEMORY;
@@ -2287,16 +2291,16 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      */
     arg = va_arg(param, long);
 
-    if(arg > MAX_BUFSIZE)
-      arg = MAX_BUFSIZE; /* huge internal default */
+    if(arg > READBUFFER_MAX)
+      arg = READBUFFER_MAX;
     else if(arg < 1)
-      arg = BUFSIZE;
-    else if(arg < MIN_BUFSIZE)
-      arg = BUFSIZE;
+      arg = READBUFFER_SIZE;
+    else if(arg < READBUFFER_MIN)
+      arg = READBUFFER_MIN;
 
     /* Resize only if larger than default buffer size. */
-    if(arg > BUFSIZE) {
-      char *newbuff = realloc(data->state.buffer, data->set.buffer_size + 1);
+    if(arg > READBUFFER_SIZE) {
+      char *newbuff = realloc(data->state.buffer, arg + 1);
       if(!newbuff) {
         DEBUGF(fprintf(stderr, "Error: realloc of buffer failed\n"));
         result = CURLE_OUT_OF_MEMORY;
@@ -4208,7 +4212,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   if(Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1) &&
      !conn->master_buffer) {
     /* Allocate master_buffer to be used for HTTP/1 pipelining */
-    conn->master_buffer = calloc(BUFSIZE, sizeof(char));
+    conn->master_buffer = calloc(MASTERBUF_SIZE, sizeof(char));
     if(!conn->master_buffer)
       goto error;
   }

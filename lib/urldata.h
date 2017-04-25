@@ -200,16 +200,12 @@
 #include <libssh2_sftp.h>
 #endif /* HAVE_LIBSSH2_H */
 
-/* Download buffer size, keep it fairly big for speed reasons */
-#undef BUFSIZE
-#define BUFSIZE CURL_MAX_WRITE_SIZE
-#undef MAX_BUFSIZE
-#define MAX_BUFSIZE CURL_MAX_READ_SIZE
-#define MIN_BUFSIZE 1024
-
 /* The upload buffer size, should not be smaller than CURL_MAX_WRITE_SIZE, as
    it needs to hold a full buffer as could be sent in a write callback */
 #define UPLOAD_BUFSIZE CURL_MAX_WRITE_SIZE
+
+/* The "master buffer" is for HTTP pipelining */
+#define MASTERBUF_SIZE 16384
 
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
    of need. */
