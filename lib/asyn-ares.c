@@ -535,7 +535,12 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   }
 
   /* File Lookup, if successful we do not need make a DNS request */
-  if(family == PF_UNSPEC && Curl_ipv6works()) {
+  struct ares_options* opt = NULL;
+  if(family == PF_UNSPEC && Curl_ipv6works() &&
+     ares_save_options((ares_channel)data->state.resolver, opt,
+                       ARES_OPT_LOOKUPS) == ARES_SUCCESS &&
+     opt->lookups && *opt->lookups == 'f') {
+    ares_delete_options(opt);
     struct hostent* host;
     Curl_addrinfo* ai = NULL;
     if(ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
@@ -547,6 +552,8 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     if(ai)
       return ai;
   }
+  if (opt)
+    ares_delete_options(opt);
 #endif /* CURLRES_IPV6 */
 
   bufp = strdup(hostname);
