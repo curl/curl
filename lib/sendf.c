@@ -751,21 +751,19 @@ static int showit(struct Curl_easy *data, curl_infotype type,
 {
   static const char s_infotype[CURLINFO_END][3] = {
     "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
+  int rc = 0;
 
 #ifdef CURL_DOES_CONVERSIONS
-  char buf[BUFSIZE+1];
+  char *buf = NULL;
   size_t conv_size = 0;
 
   switch(type) {
   case CURLINFO_HEADER_OUT:
-    /* assume output headers are ASCII */
-    /* copy the data into my buffer so the original is unchanged */
-    if(size > BUFSIZE) {
-      size = BUFSIZE; /* truncate if necessary */
-      buf[BUFSIZE] = '\0';
-    }
+    buf = Curl_memdup(ptr, size);
+    if(!buf)
+      return 1;
     conv_size = size;
-    memcpy(buf, ptr, size);
+
     /* Special processing is needed for this block if it
      * contains both headers and data (separated by CRLFCRLF).
      * We want to convert just the headers, leaving the data as-is.
@@ -793,26 +791,29 @@ static int showit(struct Curl_easy *data, curl_infotype type,
 #endif /* CURL_DOES_CONVERSIONS */
 
   if(data->set.fdebug)
-    return (*data->set.fdebug)(data, type, ptr, size,
-                               data->set.debugdata);
-
-  switch(type) {
-  case CURLINFO_TEXT:
-  case CURLINFO_HEADER_OUT:
-  case CURLINFO_HEADER_IN:
-    fwrite(s_infotype[type], 2, 1, data->set.err);
-    fwrite(ptr, size, 1, data->set.err);
+    rc = (*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+  else {
+    switch(type) {
+    case CURLINFO_TEXT:
+    case CURLINFO_HEADER_OUT:
+    case CURLINFO_HEADER_IN:
+      fwrite(s_infotype[type], 2, 1, data->set.err);
+      fwrite(ptr, size, 1, data->set.err);
 #ifdef CURL_DOES_CONVERSIONS
-    if(size != conv_size) {
-      /* we had untranslated data so we need an explicit newline */
-      fwrite("\n", 1, 1, data->set.err);
-    }
+      if(size != conv_size) {
+        /* we had untranslated data so we need an explicit newline */
+        fwrite("\n", 1, 1, data->set.err);
+      }
 #endif
-    break;
-  default: /* nada */
-    break;
+      break;
+    default: /* nada */
+      break;
+    }
   }
-  return 0;
+#ifdef CURL_DOES_CONVERSIONS
+  free(buf);
+#endif
+  return rc;
 }
 
 int Curl_debug(struct Curl_easy *data, curl_infotype type,
