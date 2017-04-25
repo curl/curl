@@ -853,7 +853,6 @@ static CURLcode done_sending(struct connectdata *conn,
  */
 static CURLcode readwrite_upload(struct Curl_easy *data,
                                  struct connectdata *conn,
-                                 struct SingleRequest *k,
                                  int *didwhat)
 {
   ssize_t i, si;
@@ -861,6 +860,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
   CURLcode result;
   ssize_t nread; /* number of bytes read */
   bool sending_http_headers = FALSE;
+  struct SingleRequest *k = &data->req;
 
   if((k->bytecount == 0) && (k->writebytecount == 0))
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
@@ -871,15 +871,15 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
 
     /* only read more data if there's no upload data already
        present in the upload buffer */
-    if(0 == data->req.upload_present) {
+    if(0 == k->upload_present) {
       /* init the "upload from here" pointer */
-      data->req.upload_fromhere = k->uploadbuf;
+      k->upload_fromhere = data->state.uploadbuffer;
 
       if(!k->upload_done) {
         /* HTTP pollution, this should be written nicer to become more
            protocol agnostic. */
         int fillcount;
-        struct HTTP *http = data->req.protop;
+        struct HTTP *http = k->protop;
 
         if((k->exp100 == EXP100_SENDING_REQUEST) &&
            (http->sending == HTTPSEND_BODY)) {
@@ -926,7 +926,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
       }
 
       /* store number of bytes available for upload */
-      data->req.upload_present = nread;
+      k->upload_present = nread;
 
       /* convert LF to CRLF if so asked */
       if((!sending_http_headers) && (
@@ -952,7 +952,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
          * must be used instead of the escape sequences \r & \n.
          */
         for(i = 0, si = 0; i < nread; i++, si++) {
-          if(data->req.upload_fromhere[i] == 0x0a) {
+          if(k->upload_fromhere[i] == 0x0a) {
             data->state.scratch[si++] = 0x0d;
             data->state.scratch[si] = 0x0a;
             if(!data->set.crlf) {
@@ -963,7 +963,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
             }
           }
           else
-            data->state.scratch[si] = data->req.upload_fromhere[i];
+            data->state.scratch[si] = k->upload_fromhere[i];
         }
 
         if(si != nread) {
@@ -972,10 +972,10 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
           nread = si;
 
           /* upload from the new (replaced) buffer instead */
-          data->req.upload_fromhere = data->state.scratch;
+          k->upload_fromhere = data->state.scratch;
 
           /* set the new amount too */
-          data->req.upload_present = nread;
+          k->upload_present = nread;
         }
       }
 
@@ -986,7 +986,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
           return result;
       }
 #endif /* CURL_DISABLE_SMTP */
-    } /* if 0 == data->req.upload_present */
+    } /* if 0 == k->upload_present */
     else {
       /* We have a partial buffer left from a previous "round". Use
          that instead of reading more data */
@@ -994,17 +994,17 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
 
     /* write to socket (send away data) */
     result = Curl_write(conn,
-                        conn->writesockfd,     /* socket to send to */
-                        data->req.upload_fromhere, /* buffer pointer */
-                        data->req.upload_present,  /* buffer size */
-                        &bytes_written);           /* actually sent */
+                        conn->writesockfd,  /* socket to send to */
+                        k->upload_fromhere, /* buffer pointer */
+                        k->upload_present,  /* buffer size */
+                        &bytes_written);    /* actually sent */
 
     if(result)
       return result;
 
     if(data->set.verbose)
       /* show the data before we change the pointer upload_fromhere */
-      Curl_debug(data, CURLINFO_DATA_OUT, data->req.upload_fromhere,
+      Curl_debug(data, CURLINFO_DATA_OUT, k->upload_fromhere,
                  (size_t)bytes_written, conn);
 
     k->writebytecount += bytes_written;
@@ -1015,20 +1015,20 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
       infof(data, "We are completely uploaded and fine\n");
     }
 
-    if(data->req.upload_present != bytes_written) {
+    if(k->upload_present != bytes_written) {
       /* we only wrote a part of the buffer (if anything), deal with it! */
 
       /* store the amount of bytes left in the buffer to write */
-      data->req.upload_present -= bytes_written;
+      k->upload_present -= bytes_written;
 
       /* advance the pointer where to find the buffer when the next send
          is to happen */
-      data->req.upload_fromhere += bytes_written;
+      k->upload_fromhere += bytes_written;
     }
     else {
       /* we've uploaded that buffer now */
-      data->req.upload_fromhere = k->uploadbuf;
-      data->req.upload_present = 0; /* no more bytes left */
+      k->upload_fromhere = data->state.uploadbuffer;
+      k->upload_present = 0; /* no more bytes left */
 
       if(k->upload_done) {
         result = done_sending(conn, k);
@@ -1108,7 +1108,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if((k->keepon & KEEP_SEND) && (select_res & CURL_CSELECT_OUT)) {
     /* write */
 
-    result = readwrite_upload(data, conn, k, &didwhat);
+    result = readwrite_upload(data, conn, &didwhat);
     if(result)
       return result;
   }
@@ -1186,15 +1186,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
        */
        (k->bytecount != (k->size + data->state.crlf_conversions)) &&
 #endif /* CURL_DO_LINEEND_CONV */
-       !data->req.newurl) {
+       !k->newurl) {
       failf(data, "transfer closed with %" CURL_FORMAT_CURL_OFF_T
-            " bytes remaining to read",
-            k->size - k->bytecount);
+            " bytes remaining to read", k->size - k->bytecount);
       return CURLE_PARTIAL_FILE;
     }
-    if(!(data->set.opt_no_body) &&
-            k->chunk &&
-            (conn->chunk.state != CHUNK_STOP)) {
+    if(!(data->set.opt_no_body) && k->chunk &&
+       (conn->chunk.state != CHUNK_STOP)) {
       /*
        * In chunked mode, return an error if the connection is closed prior to
        * the empty (terminating) chunk is read.

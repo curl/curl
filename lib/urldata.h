@@ -721,7 +721,6 @@ struct SingleRequest {
   long bodywrites;
 
   char *buf;
-  char *uploadbuf;
   curl_socket_t maxfd;
 
   int keepon;

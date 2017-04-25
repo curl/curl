@@ -6961,7 +6961,6 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   k->bytecount = 0;
 
   k->buf = data->state.buffer;
-  k->uploadbuf = data->state.uploadbuffer;
   k->hbufp = data->state.headerbuff;
   k->ignorebody=FALSE;
 
