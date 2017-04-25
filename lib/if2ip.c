@@ -239,7 +239,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
     return IF2IP_NOT_FOUND;
   }
 
-  s = (struct sockaddr_in *)&req.ifr_addr;
+  s = (struct sockaddr_in *)(void *)&req.ifr_addr;
   memcpy(&in, &s->sin_addr, sizeof(in));
   Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
 
