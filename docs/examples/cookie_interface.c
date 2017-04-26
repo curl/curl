@@ -111,7 +111,7 @@ main(void)
     */
     snprintf(nline, sizeof(nline),
       "Set-Cookie: OLD_PREF=3d141414bf4209321; "
-      "expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.google.com");
+      "expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.example.com");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if(res != CURLE_OK) {
       fprintf(stderr, "Curl curl_easy_setopt failed: %s\n",
