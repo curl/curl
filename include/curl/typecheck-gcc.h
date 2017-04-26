@@ -249,11 +249,25 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
    (option) == CURLOPT_NOPROXY ||                                             \
    (option) == CURLOPT_PASSWORD ||                                            \
    (option) == CURLOPT_PINNEDPUBLICKEY ||                                     \
+   (option) == CURLOPT_PRE_PROXY ||                                           \
    (option) == CURLOPT_PROXY ||                                               \
    (option) == CURLOPT_PROXYPASSWORD ||                                       \
    (option) == CURLOPT_PROXYUSERNAME ||                                       \
    (option) == CURLOPT_PROXYUSERPWD ||                                        \
+   (option) == CURLOPT_PROXY_CAINFO ||                                        \
+   (option) == CURLOPT_PROXY_CAPATH ||                                        \
+   (option) == CURLOPT_PROXY_CRLFILE ||                                       \
+   (option) == CURLOPT_PROXY_KEYPASSWD ||                                     \
+   (option) == CURLOPT_PROXY_PINNEDPUBLICKEY ||                               \
    (option) == CURLOPT_PROXY_SERVICE_NAME ||                                  \
+   (option) == CURLOPT_PROXY_SSLCERT ||                                       \
+   (option) == CURLOPT_PROXY_SSLCERTTYPE ||                                   \
+   (option) == CURLOPT_PROXY_SSLKEY ||                                        \
+   (option) == CURLOPT_PROXY_SSLKEYTYPE ||                                    \
+   (option) == CURLOPT_PROXY_SSL_CIPHER_LIST ||                               \
+   (option) == CURLOPT_PROXY_TLSAUTH_PASSWORD ||                              \
+   (option) == CURLOPT_PROXY_TLSAUTH_USERNAME ||                              \
+   (option) == CURLOPT_PROXY_TLSAUTH_TYPE ||                                  \
    (option) == CURLOPT_RANDOM_FILE ||                                         \
    (option) == CURLOPT_RANGE ||                                               \
    (option) == CURLOPT_REFERER ||                                             \
