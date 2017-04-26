@@ -124,6 +124,9 @@ __extension__ ({                                                              \
     if(_curl_is_slist_info(_curl_info))                                       \
       if(!_curl_is_arr((arg), struct curl_slist *))                           \
         _curl_easy_getinfo_err_curl_slist();                                  \
+   if(_curl_is_socket_info(_curl_info))                                       \
+      if(!_curl_is_arr((arg), curl_socket_t))                                 \
+        _curl_easy_getinfo_err_curl_socket();                                 \
   }                                                                           \
   curl_easy_getinfo(handle, _curl_info, arg);                                 \
 })
@@ -201,6 +204,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_double,
   "curl_easy_getinfo expects a pointer to double for this info")
 _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
   "curl_easy_getinfo expects a pointer to 'struct curl_slist *' for this info")
+_CURL_WARNING(_curl_easy_getinfo_err_curl_socket,
+  "curl_easy_getinfo expects a pointer to curl_socket_t for this info")
 
 /* groups of curl_easy_setops options that take the same type of argument */
 
@@ -364,6 +369,10 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
 /* true if info expects a pointer to struct curl_slist * argument */
 #define _curl_is_slist_info(info)                                             \
   (CURLINFO_SLIST < (info) && (info) < CURLINFO_SOCKET)
+
+/* true if info expects a pointer to struct curl_socket_t argument */
+#define _curl_is_socket_info(info)                                            \
+  (CURLINFO_SOCKET < (info))
 
 
 /* typecheck helpers -- check whether given expression has requested type*/
