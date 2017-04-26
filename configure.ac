@@ -3294,7 +3294,8 @@ AC_CHECK_FUNCS([fork \
   setmode \
   setrlimit \
   uname \
-  utime
+  utime \
+  utimes
 ],[
 ],[
   func="$ac_func"

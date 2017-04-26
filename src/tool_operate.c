@@ -231,6 +231,17 @@ static void setfiletime(long filetime, const char *filename,
               "CreateFile failed: GetLastError %u\n",
               filetime, GetLastError());
     }
+
+#elif defined(HAVE_UTIMES)
+    struct timeval times[2];
+    times[0].tv_sec = times[1].tv_sec = filetime;
+    times[0].tv_usec = times[1].tv_usec = 0;
+    if(utimes(filename, times)) {
+      fprintf(error_stream,
+              "Failed to set filetime %ld on outfile: errno %d\n",
+              filetime, errno);
+    }
+
 #elif defined(HAVE_UTIME)
     struct utimbuf times;
     times.actime = (time_t)filetime;
