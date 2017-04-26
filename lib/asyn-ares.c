@@ -553,7 +553,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     if(ai)
       return ai;
   }
-  if (opt)
+  if(opt)
     ares_delete_options(opt);
 #endif /* CURLRES_IPV6 */
 
