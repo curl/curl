@@ -545,6 +545,9 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
   set->httpauth = CURLAUTH_BASIC;  /* defaults to basic */
   set->proxyauth = CURLAUTH_BASIC; /* defaults to basic */
 
+  /* SOCKS5 proxy auth defaults to username/password + GSS-API */
+  set->socks5auth = CURLAUTH_BASIC | CURLAUTH_GSSAPI;
+
   /* make libcurl quiet by default: */
   set->hide_progress = TRUE;  /* CURLOPT_NOPROGRESS changes these */
 
@@ -1541,6 +1544,11 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
 #endif   /* CURL_DISABLE_PROXY */
 
+  case CURLOPT_SOCKS5_AUTH:
+    data->set.socks5auth = va_arg(param, unsigned long);
+    if(data->set.socks5auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
+      result = CURLE_NOT_BUILT_IN;
+    break;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CURLOPT_SOCKS5_GSSAPI_NEC:
     /*

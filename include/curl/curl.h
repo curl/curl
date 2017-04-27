@@ -677,6 +677,8 @@ typedef enum {
 #define CURLAUTH_NEGOTIATE    (((unsigned long)1)<<2)
 /* Deprecated since the advent of CURLAUTH_NEGOTIATE */
 #define CURLAUTH_GSSNEGOTIATE CURLAUTH_NEGOTIATE
+/* Used for CURLOPT_SOCKS5_AUTH to stay terminologically correct */
+#define CURLAUTH_GSSAPI CURLAUTH_NEGOTIATE
 #define CURLAUTH_NTLM         (((unsigned long)1)<<3)
 #define CURLAUTH_DIGEST_IE    (((unsigned long)1)<<4)
 #define CURLAUTH_NTLM_WB      (((unsigned long)1)<<5)
@@ -1782,6 +1784,9 @@ typedef enum {
 
   /* Strip the initial slash from the path taken from the URL */
   CINIT(STRIP_PATH_SLASH, LONG, 266),
+
+  /* bitmask of allowed auth methods for connections to SOCKS5 proxies */
+  CINIT(SOCKS5_AUTH, LONG, 267),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
