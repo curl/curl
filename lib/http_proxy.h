@@ -34,7 +34,7 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
 CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex);
 
 #else
-#define Curl_proxyCONNECT(x,y,z,w,v) CURLE_NOT_BUILT_IN
+#define Curl_proxyCONNECT(x,y,z,w) CURLE_NOT_BUILT_IN
 #define Curl_proxy_connect(x,y) CURLE_OK
 #endif
 
