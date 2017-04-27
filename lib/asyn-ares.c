@@ -535,26 +535,29 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   }
 
   /* File Lookup, if successful we do not need make a DNS request */
-  struct ares_options* opt = NULL;
+  struct ares_options opt = { 0 };
+  int optmask = ARES_OPT_LOOKUPS;
   if(family == PF_UNSPEC && Curl_ipv6works() &&
-     ares_save_options((ares_channel)data->state.resolver, opt,
-                       ARES_OPT_LOOKUPS) == ARES_SUCCESS &&
-     opt->lookups && *opt->lookups == 'f') {
-    ares_delete_options(opt);
-    opt = NULL;
-    struct hostent* host;
+     ares_save_options((ares_channel)data->state.resolver, &opt,
+                       &optmask) == ARES_SUCCESS) {
     Curl_addrinfo* ai = NULL;
-    if(ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
-                               PF_INET, &host) == ARES_SUCCESS)
-      ai = Curl_he2ai(host, port);
-    if(ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
-                               PF_INET6, &host) == ARES_SUCCESS)
-      compound_results(&ai, Curl_he2ai(host, port));
+    if(opt.lookups && *(opt.lookups) == 'f') {
+      struct hostent* host;
+      if(ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
+                                 PF_INET, &host) == ARES_SUCCESS) {
+        ai = Curl_he2ai(host, port);
+        ares_free_hostent(host);
+      }
+      if(ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
+                                 PF_INET6, &host) == ARES_SUCCESS) {
+        compound_results(&ai, Curl_he2ai(host, port));
+        ares_free_hostent(host);
+      }
+    }
+    ares_delete_options(opt);
     if(ai)
       return ai;
   }
-  if(opt)
-    ares_delete_options(opt);
 #endif /* CURLRES_IPV6 */
 
   bufp = strdup(hostname);
