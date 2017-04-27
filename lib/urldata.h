@@ -1615,6 +1615,7 @@ struct UserDefined {
   long use_port;     /* which port to use (when not using default) */
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
+  unsigned long socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
   long followlocation; /* as in HTTP Location: */
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */

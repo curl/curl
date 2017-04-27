@@ -387,6 +387,8 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
     (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ? TRUE : FALSE;
   const size_t hostname_len = strlen(hostname);
   ssize_t len = 0;
+  const unsigned long auth = data->set.socks5auth;
+  bool allow_gssapi = FALSE;
 
   if(conn->bits.httpproxy)
     infof(conn->data, "SOCKS5: connecting to HTTP proxy %s port %d\n",
@@ -427,13 +429,24 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
     return CURLE_COULDNT_CONNECT;
   }
 
+  if(auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
+    infof(conn->data,
+        "warning: unsupported value passed to CURLOPT_SOCKS5_AUTH: %lu\n",
+        auth);
+  if(!(auth & CURLAUTH_BASIC))
+    /* disable username/password auth */
+    proxy_user = NULL;
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+  if(auth & CURLAUTH_GSSAPI)
+    allow_gssapi = TRUE;
+#endif
+
   idx = 0;
   socksreq[idx++] = 5;   /* version */
   idx++;                 /* reserve for the number of authentication methods */
   socksreq[idx++] = 0;   /* no authentication */
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  socksreq[idx++] = 1;   /* GSS-API */
-#endif
+  if(allow_gssapi)
+    socksreq[idx++] = 1; /* GSS-API */
   if(proxy_user)
     socksreq[idx++] = 2; /* username/password */
   /* write the number of authentication methods */
@@ -485,7 +498,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
     ;
   }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  else if(socksreq[1] == 1) {
+  else if(allow_gssapi && (socksreq[1] == 1)) {
     code = Curl_SOCKS5_gssapi_negotiate(sockindex, conn);
     if(code) {
       failf(data, "Unable to negotiate SOCKS5 GSS-API context.");
@@ -546,16 +559,12 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
   }
   else {
     /* error */
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    if(socksreq[1] == 255) {
-#else
-    if(socksreq[1] == 1) {
+    if(!allow_gssapi && (socksreq[1] == 1)) {
       failf(data,
             "SOCKS5 GSSAPI per-message authentication is not supported.");
       return CURLE_COULDNT_CONNECT;
     }
     if(socksreq[1] == 255) {
-#endif
       if(!proxy_user || !*proxy_user) {
         failf(data,
               "No authentication method was acceptable. (It is quite likely"
