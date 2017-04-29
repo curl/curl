@@ -30,6 +30,8 @@ if ($ARGV[0] eq "prepare")
     binmode FILE;
     print FILE "Test file to support curl test suite\n";
     close(FILE);
+    # The mtime is specifically chosen to be an even number so that it can be
+    # represented exactly on a FAT filesystem.
     utime time, timegm(0,0,12,1,0,100), "plainfile.txt";
     chmod 0666, "plainfile.txt";
 
@@ -37,6 +39,8 @@ if ($ARGV[0] eq "prepare")
     binmode FILE;
     print FILE "Read-only test file to support curl test suite\n";
     close(FILE);
+    # The mtime is specifically chosen to be an even number so that it can be
+    # represented exactly on a FAT filesystem.
     utime time, timegm(0,0,12,31,11,100), "rofile.txt";
     chmod 0444, "rofile.txt";
 

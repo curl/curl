@@ -1,0 +1,35 @@
+<testcase>
+<info>
+<keywords>
+FILE
+--remote-time
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+file
+</server>
+<precheck>
+perl %SRCDIR/libtest/test613.pl prepare %PWD/log/test1445.dir
+</precheck>
+ <name>
+file:// with --remote-time
+ </name>
+ <command>
+file://localhost/%PWD/log/test1445.dir/plainfile.txt --remote-time
+</command>
+<postcheck>
+perl %SRCDIR/libtest/test613.pl postprocess %PWD/log/test1445.dir && \
+perl -e 'exit((stat("log/curl1445.out"))[9] != 946728000)'
+</postcheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>
