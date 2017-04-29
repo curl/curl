@@ -2293,12 +2293,13 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
 
     /* Resize only if larger than default buffer size. */
     if(data->set.buffer_size > BUFSIZE) {
-      data->state.buffer = realloc(data->state.buffer,
-                                   data->set.buffer_size + 1);
-      if(!data->state.buffer) {
+      char *newbuff = realloc(data->state.buffer, data->set.buffer_size + 1);
+      if(!newbuff) {
         DEBUGF(fprintf(stderr, "Error: realloc of buffer failed\n"));
         result = CURLE_OUT_OF_MEMORY;
       }
+      else
+        data->state.buffer = newbuff;
     }
 
     break;
