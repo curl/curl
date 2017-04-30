@@ -181,7 +181,7 @@ void Curl_http2_setup_conn(struct connectdata *conn)
  * but will be used at run-time when the protocol is dynamically switched from
  * HTTP to HTTP2.
  */
-const struct Curl_handler Curl_handler_http2 = {
+static const struct Curl_handler Curl_handler_http2 = {
   "HTTP",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */
@@ -201,7 +201,7 @@ const struct Curl_handler Curl_handler_http2 = {
   PROTOPT_STREAM                        /* flags */
 };
 
-const struct Curl_handler Curl_handler_http2_ssl = {
+static const struct Curl_handler Curl_handler_http2_ssl = {
   "HTTPS",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
   Curl_http,                            /* do_it */
