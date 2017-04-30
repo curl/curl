@@ -43,8 +43,8 @@
 
 #define NUM_HANDLES 1000
 
-void *curl_hnd[NUM_HANDLES];
-int num_transfers;
+static void *curl_hnd[NUM_HANDLES];
+static int num_transfers;
 
 /* a handle to number lookup, highly ineffective when we do many
    transfers... */

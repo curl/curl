@@ -27,7 +27,7 @@
 #include <string.h>
 #include <curl/curl.h>
 
-const char data[]=
+static const char data[]=
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
   "Nam rhoncus odio id venenatis volutpat. Vestibulum dapibus "
   "bibendum ullamcorper. Maecenas finibus elit augue, vel "

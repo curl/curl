@@ -45,8 +45,8 @@
 
 #define NUM_HANDLES 1000
 
-void *curl_hnd[NUM_HANDLES];
-int num_transfers;
+static void *curl_hnd[NUM_HANDLES];
+static int num_transfers;
 
 /* a handle to number lookup, highly ineffective when we do many
    transfers... */
@@ -177,7 +177,7 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
   return retcode;
 }
 
-struct input indata[NUM_HANDLES];
+static struct input indata[NUM_HANDLES];
 
 static void setup(CURL *hnd, int num, const char *upload)
 {

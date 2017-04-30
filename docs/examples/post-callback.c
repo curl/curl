@@ -28,7 +28,7 @@
 #include <string.h>
 #include <curl/curl.h>
 
-const char data[]="this is what we post to the silly web server";
+static const char data[]="this is what we post to the silly web server";
 
 struct WriteThis {
   const char *readptr;
