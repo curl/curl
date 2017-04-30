@@ -45,7 +45,7 @@ static void unit_stop(void)
 static char *getflagstr(int flags)
 {
   char *buf = malloc(256);
-  fail_unless(buf, "out of memory");
+  abort_unless(buf, "out of memory");
   snprintf(buf, 256, "%s,%s,%s,%s",
     ((flags & SANITIZE_ALLOW_COLONS) ? "SANITIZE_ALLOW_COLONS" : ""),
     ((flags & SANITIZE_ALLOW_PATH) ? "SANITIZE_ALLOW_PATH" : ""),
@@ -57,7 +57,7 @@ static char *getflagstr(int flags)
 static char *getcurlcodestr(int cc)
 {
   char *buf = malloc(256);
-  fail_unless(buf, "out of memory");
+  abort_unless(buf, "out of memory");
   snprintf(buf, 256, "%s (%d)",
     (cc == SANITIZE_ERR_OK ? "SANITIZE_ERR_OK" :
      cc == SANITIZE_ERR_BAD_ARGUMENT ? "SANITIZE_ERR_BAD_ARGUMENT" :

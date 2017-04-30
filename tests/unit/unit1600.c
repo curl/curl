@@ -29,7 +29,7 @@ CURL *easy;
 static CURLcode unit_setup(void)
 {
   easy = curl_easy_init();
-  return CURLE_OK;
+  return easy ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
 
 static void unit_stop(void)

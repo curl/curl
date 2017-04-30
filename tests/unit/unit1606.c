@@ -69,6 +69,7 @@ static int runawhile(struct Curl_easy *easy,
 UNITTEST_START
 {
   struct Curl_easy *easy = curl_easy_init();
+  abort_unless(easy, "out of memory");
 
   fail_unless(runawhile(easy, 41, 41, 40, 0) == 41,
               "wrong low speed timeout");

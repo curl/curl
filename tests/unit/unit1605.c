@@ -34,9 +34,10 @@ static void unit_stop(void)
 }
 
 UNITTEST_START
-  CURL *easy = curl_easy_init();
   int len;
   char *esc;
+  CURL *easy = curl_easy_init();
+  abort_unless(easy, "out of memory");
 
   esc = curl_easy_escape(easy, "", -1);
   fail_unless(esc == NULL, "negative string length can't work");
