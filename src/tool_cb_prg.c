@@ -83,7 +83,7 @@ int tool_progress_cb(void *clientp,
   }
   else if(point != bar->prev) {
     frac = (double)point / (double)total;
-    percent = frac * 100.0f;
+    percent = frac * 100.0;
     barwidth = bar->width - 7;
     num = (int) (((double)barwidth) * frac);
     if(num > MAX_BARLENGTH)
