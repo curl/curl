@@ -588,9 +588,13 @@ int netware_init(void);
 #endif
 #endif
 
-#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H)
+#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && !defined(USE_WIN32_IDN)
 /* The lib and header are present */
 #define USE_LIBIDN2
+#endif
+
+#if defined(USE_LIBIDN2) && defined(USE_WIN32_IDN)
+#error "Both libidn2 and WinIDN are enabled, choose one."
 #endif
 
 #ifndef SIZEOF_TIME_T
