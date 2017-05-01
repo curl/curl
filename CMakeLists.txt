@@ -688,7 +688,7 @@ elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
     endif()
 endif()
 
-if(CURL_CA_PATH_SET AND NOT (USE_OPENSSL OR GNUTLS_ENABLED))
+if(CURL_CA_PATH_SET AND NOT USE_OPENSSL)
     message(FATAL_ERROR
             "CA path only supported by OpenSSL, GnuTLS or PolarSSL. "
             "Set CURL_CA_PATH=none or enable one of those TLS backends.")
@@ -1199,8 +1199,7 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR
-   USE_WINDOWS_SSPI OR GNUTLS_ENABLED OR NSS_ENABLED OR USE_DARWINSSL OR USE_MBEDTLS))
+if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_DARWINSSL OR USE_MBEDTLS))
   _add_if("NTLM"        1)
   # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"     NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
