@@ -623,6 +623,35 @@ else()
 endif()
 
 
+#
+# CA handling
+#
+set(CURL_CA_BUNDLE "auto" CACHE STRING
+    "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+set(CURL_CA_FALLBACK OFF CACHE BOOL
+    "Set ON to use built-in CA store of TLS backend. Defaults to OFF")
+set(CURL_CA_PATH "auto" CACHE STRING
+    "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+
+if("${CURL_CA_BUNDLE}" STREQUAL "none")
+    unset(CURL_CA_BUNDLE CACHE)
+elseif("${CURL_CA_BUNDLE}" STREQUAL "auto")
+    # TODO: implement
+    message(SEND_ERROR "Auto mode not implemented for CURL_CA_BUNDLE")
+elseif("${CURL_CA_BUNDLE}" STREQUAL "")
+    message(SEND_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or path.")
+endif()
+
+if("${CURL_CA_PATH}" STREQUAL "none")
+    unset(CURL_CA_PATH CACHE)
+elseif("${CURL_CA_PATH}" STREQUAL "auto")
+    # TODO: implement
+    message(SEND_ERROR "Auto mode not implemented for CURL_CA_PATH")
+elseif("${CURL_CA_PATH}" STREQUAL "")
+    message(SEND_ERROR "Invalid value of CURL_CA_PATH. Use 'none', 'auto' or path.")
+endif()
+
+
 # Check for header files
 if(NOT UNIX)
   check_include_file_concat("windows.h"      HAVE_WINDOWS_H)
