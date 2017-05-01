@@ -28,6 +28,7 @@
 #include "curlx.h"
 
 #include "tool_cfgable.h"
+#include "tool_convert.h"
 #include "tool_mfiles.h"
 #include "tool_msgs.h"
 #include "tool_formparse.h"

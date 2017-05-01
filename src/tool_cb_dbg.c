@@ -26,6 +26,7 @@
 #include "curlx.h"
 
 #include "tool_cfgable.h"
+#include "tool_convert.h"
 #include "tool_msgs.h"
 #include "tool_cb_dbg.h"
 #include "tool_util.h"
@@ -171,7 +172,8 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
       if(memcmp(&data[i], "\r\n\r\n", 4) == 0) {
         /* dump everything through the CRLFCRLF as a sent header */
         text = "=> Send header";
-        dump(timebuf, text, output, data, i + 4, config->tracetype, type);
+        dump(timebuf, text, output, (unsigned char *)data, i + 4,
+             config->tracetype, type);
         data += i + 3;
         size -= i + 4;
         type = CURLINFO_DATA_OUT;
