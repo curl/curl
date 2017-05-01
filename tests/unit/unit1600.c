@@ -24,7 +24,7 @@
 #include "urldata.h"
 #include "curl_ntlm_core.h"
 
-CURL *easy;
+static CURL *easy;
 
 static CURLcode unit_setup(void)
 {

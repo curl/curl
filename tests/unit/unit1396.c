@@ -21,7 +21,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-CURL *hnd;
+static CURL *hnd;
 
 static CURLcode unit_setup(void)
 {

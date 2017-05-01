@@ -36,11 +36,11 @@
 #include "memdebug.h"
 */
 
-int seen_malloc = 0;
-int seen_free = 0;
-int seen_realloc = 0;
-int seen_strdup = 0;
-int seen_calloc = 0;
+static int seen_malloc = 0;
+static int seen_free = 0;
+static int seen_realloc = 0;
+static int seen_strdup = 0;
+static int seen_calloc = 0;
 
 void *custom_malloc(size_t size);
 void custom_free(void *ptr);

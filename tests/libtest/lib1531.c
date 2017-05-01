@@ -27,8 +27,8 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-char const testData[] = ".abc\0xyz";
-off_t const testDataSize = sizeof(testData) - 1;
+static char const testData[] = ".abc\0xyz";
+static off_t const testDataSize = sizeof(testData) - 1;
 
 int test(char *URL)
 {

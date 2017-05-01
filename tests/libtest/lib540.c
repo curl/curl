@@ -46,7 +46,7 @@
 
 #define NUM_HANDLES 2
 
-CURL *eh[NUM_HANDLES];
+static CURL *eh[NUM_HANDLES];
 
 static int init(int num, CURLM *cm, const char *url, const char *userpwd,
                 struct curl_slist *headers)

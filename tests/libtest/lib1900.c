@@ -29,14 +29,14 @@
 #define MAX_URLS 200
 #define MAX_BLACKLIST 20
 
-int urltime[MAX_URLS];
-char *urlstring[MAX_URLS];
-CURL *handles[MAX_URLS];
-char *site_blacklist[MAX_BLACKLIST];
-char *server_blacklist[MAX_BLACKLIST];
-int num_handles;
-int blacklist_num_servers;
-int blacklist_num_sites;
+static int urltime[MAX_URLS];
+static char *urlstring[MAX_URLS];
+static CURL *handles[MAX_URLS];
+static char *site_blacklist[MAX_BLACKLIST];
+static char *server_blacklist[MAX_BLACKLIST];
+static int num_handles;
+static int blacklist_num_servers;
+static int blacklist_num_sites;
 
 static size_t
 write_callback(void *contents, size_t size, size_t nmemb, void *userp)
