@@ -36,8 +36,7 @@ static const char data[]=
   "Vivamus nec neque ac elit blandit pretium vitae maximus ipsum. "
   "Quisque sodales magna vel erat auctor, sed pellentesque nisi "
   "rhoncus. Donec vehicula maximus pretium. Aliquam eu tincidunt "
-  "lorem. Ut placerat, sem eu pharetra mattis, ante lacus fringilla "
-  "diam, a consequat quam eros eget erat.";
+  "lorem.";
 
 struct WriteThis {
   const char *readptr;
@@ -88,7 +87,8 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     /* First set the URL, the target file */
-    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/path/to/upload/file");
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     "ftp://example.com/path/to/upload/file");
 
     /* User and password for the FTP login */
     curl_easy_setopt(curl, CURLOPT_USERPWD, "login:secret");
