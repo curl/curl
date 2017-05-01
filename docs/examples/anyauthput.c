@@ -29,39 +29,15 @@
 #ifdef WIN32
 #  include <io.h>
 #else
-#  ifdef __VMS
-     typedef int intptr_t;
-#  endif
-#  if !defined(_AIX) && !defined(__sgi) && !defined(__osf__)
-#    include <stdint.h>
-#  endif
 #  include <unistd.h>
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef _MSC_VER
-#  ifdef _WIN64
-     typedef __int64 intptr_t;
-#  else
-     typedef int intptr_t;
-#  endif
-#endif
-
 #include <curl/curl.h>
 
 #if LIBCURL_VERSION_NUM < 0x070c03
 #error "upgrade your libcurl to no less than 7.12.3"
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#if defined(_AIX) || defined(__sgi) || defined(__osf__)
-#ifndef intptr_t
-#define intptr_t long
-#endif
 #endif
 
 /*
