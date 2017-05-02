@@ -236,7 +236,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
 
   if(source)
     curl_memlog("MEM %s:%d strdup(%p) (%zu) = %p\n",
-                source, line, (void *)str, len, (void *)mem);
+                source, line, (const void *)str, len, (const void *)mem);
 
   return mem;
 }
@@ -480,7 +480,7 @@ void curl_memlog(const char *format, ...)
     nchars = LOGLINE_BUFSIZE - 1;
 
   if(nchars > 0)
-    fwrite(buf, 1, nchars, logfile);
+    fwrite(buf, 1, (size_t)nchars, logfile);
 
   (Curl_cfree)(buf);
 }

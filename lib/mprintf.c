@@ -610,7 +610,7 @@ static int dprintf_formatf(
     int is_neg;
 
     /* Base of a number to be written.  */
-    long base;
+    unsigned long base;
 
     /* Integral values to be written.  */
     mp_uintmax_t num;
