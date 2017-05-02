@@ -22,6 +22,27 @@ This release includes the following bugfixes:
  o multi: clarify condition in curl_multi_wait [3]
  o schannel: Don't treat encrypted partial record as pending data [4]
  o configure: fix the -ldl check for openssl, add -lpthread check [5]
+ o configure: accept -Og and -Ofast GCC flags [6]
+ o Makefile: avoid use of GNU-specific form of $< [7]
+ o if2ip: fix -Wcast-align warning
+ o configure: stop prepending to LDFLAGS, CPPFLAGS [8]
+ o curl: set a 100K buffer size by default [9]
+ o typecheck-gcc: fix _curl_is_slist_info [10]
+ o nss: do not leak PKCS #11 slot while loading a key [11]
+ o nss: load libnssckbi.so if no other trust is specified [12]
+ o examples: ftpuploadfrommem.c [13]
+ o url: declare get_protocol_family() static [14]
+ o examples/cookie_interface.c: changed to example.com
+ o test1443: test --remote-time
+ o curl: use utimes instead of obsolescent utime when available
+ o url: fixed a memory leak on OOM while setting CURLOPT_BUFFERSIZE
+ o curl_rtmp: fix missing-variable-declarations warnings
+ o tests: fixed OOM handling of unit tests to abort test
+ o curl_setup: Ensure no more than one IDN lib is enabled [15]
+ o tool: Fix missing prototype warnings for CURL_DOES_CONVERSIONS [16]
+ o CURLOPT_BUFFERSIZE: 1024 bytes is now the minimum size [17]
+ o curl: non-boolean command line args reject --no- prefixes [18]
+ o telnet: Write full buffer instead of byte-by-byte [19]
 
 This release includes the following known bugs:
 
@@ -30,9 +51,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alan Jenkins, Dan Fandrich, Daniel Stenberg, Kevin Ji, Marcel Raad,
-  Ray Satiro, Thomas Klausner,
-  (7 contributors)
+  Alan Jenkins, Dan Fandrich, Daniel Stenberg, Gisle Vanem,
+  Helmut K. C. Tessarek, Kai Engert, Kamil Dudka, Kevin Ji, Marcel Raad,
+  Martin Kepplinger, Ray Satiro, Richard Hsu, Thomas Klausner,
+  (13 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -43,3 +65,17 @@ References to bug reports and discussions on issues:
  [3] = https://curl.haxx.se/bug/?i=1439
  [4] = https://curl.haxx.se/bug/?i=1392
  [5] = https://curl.haxx.se/bug/?i=1427
+ [6] = https://curl.haxx.se/bug/?i=1440
+ [7] = https://curl.haxx.se/bug/?i=1432
+ [8] = https://curl.haxx.se/bug/?i=1420
+ [9] = https://curl.haxx.se/bug/?i=1446
+ [10] = https://curl.haxx.se/bug/?i=1447
+ [11] = https://bugzilla.redhat.com/1444860
+ [12] = https://curl.haxx.se/bug/?i=1414
+ [13] = https://curl.haxx.se/bug/?i=1451
+ [14] = https://curl.haxx.se/mail/lib-2017-04/0127.html
+ [15] = https://github.com/curl/curl/issues/1441#issuecomment-297689856
+ [16] = https://curl.haxx.se/bug/?i=1460
+ [17] = https://curl.haxx.se/bug/?i=1449
+ [18] = https://curl.haxx.se/bug/?i=1453
+ [19] = https://curl.haxx.se/bug/?i=1389
