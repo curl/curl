@@ -1349,7 +1349,7 @@ struct UrlState {
   long sessionage;                  /* number of the most recent session */
   unsigned int tempcount; /* number of entries in use in tempwrite, 0 - 3 */
   struct tempbuf tempwrite[3]; /* BOTH, HEADER, BODY */
-  char *scratch; /* huge buffer[BUFSIZE*2] when doing upload CRLF replacing */
+  char *scratch; /* huge buffer[set.buffer_size*2] for upload CRLF replacing */
   bool errorbuf; /* Set to TRUE if the error buffer is already filled in.
                     This must be set to FALSE every time _easy_perform() is
                     called. */
