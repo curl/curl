@@ -1838,7 +1838,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           do {
             size_t readthisamountnow =
               (data->state.resume_from - passed > data->set.buffer_size) ?
-              data->set.buffer_size :
+              (size_t)data->set.buffer_size :
               curlx_sotouz(data->state.resume_from - passed);
 
             size_t actuallyread =
