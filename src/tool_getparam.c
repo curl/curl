@@ -84,9 +84,6 @@ static const struct LongShort aliases[]= {
   {"*E", "epsv",                     ARG_BOOL},
          /* 'epsv' made like this to make --no-epsv and --epsv to work
              although --disable-epsv is the documented option */
-#ifdef USE_ENVIRONMENT
-  {"*f", "environment",              ARG_BOOL},
-#endif
   {"*F", "dns-servers",              ARG_STRING},
   {"*g", "trace",                    ARG_STRING},
   {"*G", "npn",                      ARG_BOOL},
@@ -562,11 +559,6 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
       case 'E': /* --epsv */
         config->disable_epsv = (!toggle)?TRUE:FALSE;
         break;
-#ifdef USE_ENVIRONMENT
-      case 'f':
-        config->writeenv = toggle;
-        break;
-#endif
       case 'F': /* --dns-servers */
         /* IP addrs of DNS servers */
         GetStr(&config->dns_servers, nextarg);
