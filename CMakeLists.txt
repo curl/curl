@@ -227,7 +227,7 @@ if(ENABLE_MANUAL)
 endif()
 # Required for building manual, docs, tests
 if (BUILD_TESTING OR ENABLE_DOCS OR ENABLE_MANUAL)
-  find_package(Perl REQUIRED)
+  find_package(Perl)
   if (NOT PERL_FOUND)
     message(FATAL_ERROR
       "Package perl not found. Make perl available or configure with ENABLE_DOCS=OFF, ENABLE_MANUAL=OFF and BUILD_TESTING=OFF")
