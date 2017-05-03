@@ -1,6 +1,6 @@
 Long: abstract-unix-socket
 Arg: <path>
-Help: Connect through an abstract Unix domain socket
+Help: Connect via abstract Unix domain socket
 Added: 7.53.0
 Protocols: HTTP
 ---
