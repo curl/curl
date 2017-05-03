@@ -228,6 +228,10 @@ endif()
 # Required for building manual, docs, tests
 if (BUILD_TESTING OR ENABLE_DOCS OR ENABLE_MANUAL)
   find_package(Perl REQUIRED)
+  if (NOT PERL_FOUND)
+    message(FATAL_ERROR
+      "Package perl not found. Make perl available or configure with ENABLE_DOCS=OFF, ENABLE_MANUAL=OFF and BUILD_TESTING=OFF")
+  endif()
 endif()
 
 # We need ansi c-flags, especially on HP
