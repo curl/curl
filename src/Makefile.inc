@@ -58,7 +58,6 @@ CURL_CFILES = \
 	tool_urlglob.c \
 	tool_util.c \
 	tool_vms.c \
-	tool_writeenv.c \
 	tool_writeout.c \
 	tool_xattr.c
 
@@ -103,7 +102,6 @@ CURL_HFILES = \
 	tool_util.h \
 	tool_version.h \
 	tool_vms.h \
-	tool_writeenv.h \
 	tool_writeout.h \
 	tool_xattr.h
 

@@ -71,7 +71,6 @@
 #include "tool_sleep.h"
 #include "tool_urlglob.h"
 #include "tool_util.h"
-#include "tool_writeenv.h"
 #include "tool_writeout.h"
 #include "tool_xattr.h"
 #include "tool_vms.h"
@@ -1747,9 +1746,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         if(config->writeout)
           ourWriteOut(curl, &outs, config->writeout);
-
-        if(config->writeenv)
-          ourWriteEnv(curl);
 
         /*
         ** Code within this loop may jump directly here to label 'show_error'
