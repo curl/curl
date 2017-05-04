@@ -26,8 +26,12 @@
  */
 
 #include "test.h"
-#include "memdebug.h"
 
+#ifdef HAVE_LOCALE_H
+#  include <locale.h> /* for setlocale() */
+#endif
+
+#include "memdebug.h"
 
 #if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
 #  define MPRNT_SUFFIX_CURL_OFF_T  LL
@@ -1655,6 +1659,14 @@ int test(char *URL)
 {
   int errors = 0;
   (void)URL; /* not used */
+
+#ifdef HAVE_SETLOCALE
+  /*
+   * The test makes assumptions about the numeric locale (specifically,
+   * RADIXCHAR) so set it to a known working (and portable) one.
+   */
+  setlocale(LC_NUMERIC, "C");
+#endif
 
   errors += test_weird_arguments();
 
