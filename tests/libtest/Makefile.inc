@@ -17,7 +17,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib520 lib521 lib523 lib524 lib525 lib526 lib527 lib529 lib530 lib532   \
  lib533 lib536 lib537 lib539 lib540 lib541 lib542 lib543 lib544 lib545   \
  lib547 lib548 lib549 lib552 lib553 lib554 lib555 lib556 lib557 lib558   \
-        lib560 lib562 lib564 lib565 lib566 lib567 lib568 lib569 lib570   \
+ lib559 lib560 lib562 lib564 lib565 lib566 lib567 lib568 lib569 lib570   \
  lib571 lib572 lib573 lib574 lib575 lib576        lib578 lib579 lib582   \
  lib583 lib585 lib586 lib587        lib590 lib591 lib597 lib598 lib599   \
  lib1500 lib1501 lib1502 lib1503 lib1504 lib1505 lib1506 lib1507 lib1508 \
@@ -205,6 +205,9 @@ lib557_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib558_SOURCES = lib558.c $(SUPPORTFILES)
 lib558_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib559_SOURCES = lib559.c $(SUPPORTFILES)
+lib559_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib560_SOURCES = lib560.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib560_LDADD = $(TESTUTIL_LIBS)
