@@ -194,7 +194,7 @@ my $pwd = getcwd();          # current working directory
 
 my $start;
 my $ftpchecktime=1; # time it took to verify our test FTP server
-
+my $scrambleorder;
 my $stunnel = checkcmd("stunnel4") || checkcmd("tstunnel") || checkcmd("stunnel");
 my $valgrind = checktestcmd("valgrind");
 my $valgrind_logfile="--logfile";
@@ -4870,6 +4870,10 @@ while(@ARGV) {
         # have the servers display protocol output
         $debugprotocol=1;
     }
+    elsif($ARGV[0] eq "-e") {
+        # run the tests cases event based if possible
+        $run_event_based=1;
+    }
     elsif ($ARGV[0] eq "-g") {
         # run this test with gdb
         $gdbthis=1;
@@ -4892,6 +4896,10 @@ while(@ARGV) {
         # no valgrind
         undef $valgrind;
     }
+    elsif ($ARGV[0] eq "-o") {
+        # execute in scrambled order
+        $scrambleorder=1;
+    }
     elsif($ARGV[0] =~ /^-t(.*)/) {
         # torture
         $torture=1;
@@ -4906,10 +4914,6 @@ while(@ARGV) {
     elsif($ARGV[0] eq "-a") {
         # continue anyway, even if a test fail
         $anyway=1;
-    }
-    elsif($ARGV[0] eq "-e") {
-        # run the tests cases event based if possible
-        $run_event_based=1;
     }
     elsif($ARGV[0] eq "-p") {
         $postmortem=1;
@@ -4958,12 +4962,14 @@ Usage: runtests.pl [options] [test selection(s)]
   -bN      use base port number N for test servers (default $base)
   -c path  use this curl executable
   -d       display server debug info
+  -e       event-based execution
   -g       run the test case with gdb
   -gw      run the test case with gdb as a windowed application
   -h       this help text
   -k       keep stdout and stderr files present after tests
   -l       list all test case names/descriptions
   -n       no valgrind
+  -o       scrambled order
   -p       print log file contents when a test fails
   -r       run time statistics
   -rf      full run time statistics
@@ -5186,6 +5192,19 @@ else {
         exit;
     }
     $TESTCASES = $verified;
+}
+
+if($scrambleorder) {
+    # scramble the order of the test cases
+    my @rand;
+    while($TESTCASES) {
+        my @all = split(/ /, $TESTCASES);
+        my $r = rand @all;
+        push @rand, $all[$r];
+        $all[$r]="";
+        $TESTCASES = join(" ", @all);
+    }
+    $TESTCASES = join(" ", @rand);
 }
 
 #######################################################################
