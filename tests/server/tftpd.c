@@ -208,7 +208,7 @@ static bool use_ipv6 = FALSE;
 static const char *ipv_inuse = "IPv4";
 
 const  char *serverlogfile = DEFAULT_LOGFILE;
-static char *pidname= (char *)".tftpd.pid";
+static const char *pidname = ".tftpd.pid";
 static int serverlogslocked = 0;
 static int wrotepidfile = 0;
 
@@ -960,7 +960,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 #ifdef USE_WINSOCK
   DWORD recvtimeout, recvtimeoutbak;
 #endif
-  char *option = (char *)"mode"; /* mode is implicit */
+  const char *option = "mode"; /* mode is implicit */
   int toggle = 1;
 
   /* Open request dump file. */

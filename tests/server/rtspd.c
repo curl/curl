@@ -1190,7 +1190,7 @@ int main(int argc, char *argv[])
   int wrotepidfile = 0;
   int flag;
   unsigned short port = DEFAULT_PORT;
-  char *pidname= (char *)".rtsp.pid";
+  const char *pidname = ".rtsp.pid";
   struct httprequest req;
   int rc;
   int error;

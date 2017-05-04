@@ -120,9 +120,9 @@ int main(int argc, char *argv[])
   long testnum;
   const char *env;
   int arg = 1;
-  char *helper_user = (char *)"unknown";
-  char *helper_proto = (char *)"unknown";
-  char *helper_domain = (char *)"unknown";
+  const char *helper_user = "unknown";
+  const char *helper_proto = "unknown";
+  const char *helper_domain = "unknown";
   bool use_cached_creds = FALSE;
   char *msgbuf;
 

@@ -130,7 +130,7 @@ static curl_socket_t all_sockets[MAX_SOCKETS];
 static size_t num_sockets = 0;
 
 static int ProcessRequest(struct httprequest *req);
-static void storerequest(char *reqbuf, size_t totalsize);
+static void storerequest(const char *reqbuf, size_t totalsize);
 
 #define DEFAULT_PORT 8999
 
@@ -843,7 +843,7 @@ static int ProcessRequest(struct httprequest *req)
 }
 
 /* store the entire request in a file */
-static void storerequest(char *reqbuf, size_t totalsize)
+static void storerequest(const char *reqbuf, size_t totalsize)
 {
   int res;
   int error = 0;
@@ -1965,7 +1965,7 @@ int main(int argc, char *argv[])
   const char *unix_socket = NULL;
   bool unlink_socket = false;
 #endif
-  char *pidname= (char *)".http.pid";
+  const char *pidname = ".http.pid";
   struct httprequest req;
   int rc = 0;
   int error;
@@ -2315,7 +2315,7 @@ int main(int argc, char *argv[])
 
             if(req.connmon) {
               const char *keepopen="[DISCONNECT]\n";
-              storerequest((char *)keepopen, strlen(keepopen));
+              storerequest(keepopen, strlen(keepopen));
             }
 
             if(!req.open)

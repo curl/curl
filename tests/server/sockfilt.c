@@ -405,7 +405,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
   ssize_t nwrite = 0;
 
   do {
-    wc = write(filedes, (unsigned char *)buffer + nwrite, nbytes - nwrite);
+    wc = write(filedes, (const unsigned char *)buffer + nwrite, nbytes - nwrite);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
@@ -1338,7 +1338,7 @@ int main(int argc, char *argv[])
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
-  char *pidname= (char *)".sockfilt.pid";
+  const char *pidname = ".sockfilt.pid";
   bool juggle_again;
   int rc;
   int error;
