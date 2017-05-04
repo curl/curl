@@ -405,7 +405,8 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
   ssize_t nwrite = 0;
 
   do {
-    wc = write(filedes, (const unsigned char *)buffer + nwrite, nbytes - nwrite);
+    wc = write(filedes, (const unsigned char *)buffer + nwrite,
+               nbytes - nwrite);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
