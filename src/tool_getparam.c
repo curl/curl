@@ -64,7 +64,7 @@ struct LongShort {
   enum {
     ARG_NONE,   /* stand-alone but not a boolean */
     ARG_BOOL,   /* accepts a --no-[name] prefix */
-    ARG_STRING, /* requires an argument */
+    ARG_STRING  /* requires an argument */
   } desc;
 };
 
