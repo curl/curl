@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -4896,7 +4896,7 @@ while(@ARGV) {
         # no valgrind
         undef $valgrind;
     }
-    elsif ($ARGV[0] eq "-o") {
+    elsif ($ARGV[0] eq "-R") {
         # execute in scrambled order
         $scrambleorder=1;
     }
@@ -4969,8 +4969,8 @@ Usage: runtests.pl [options] [test selection(s)]
   -k       keep stdout and stderr files present after tests
   -l       list all test case names/descriptions
   -n       no valgrind
-  -o       scrambled order
   -p       print log file contents when a test fails
+  -R       scrambled order
   -r       run time statistics
   -rf      full run time statistics
   -s       short output
