@@ -68,7 +68,7 @@ UNITTEST_START
   };
 
   for(i=0; i < sizeof(pairs)/sizeof(pairs[0]); i++) {
-    char *out = Curl_dedotdotify((char *)pairs[i].input);
+    char *out = Curl_dedotdotify(pairs[i].input);
     abort_unless(out != NULL, "returned NULL!");
 
     if(strcmp(out, pairs[i].output)) {

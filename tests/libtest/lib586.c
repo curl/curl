@@ -31,7 +31,7 @@ struct Tdata {
 };
 
 struct userdata {
-  char *text;
+  const char *text;
   int counter;
 };
 
@@ -138,7 +138,7 @@ int test(char *URL)
   int i;
   struct userdata user;
 
-  user.text = (char *)"Pigs in space";
+  user.text = "Pigs in space";
   user.counter = 0;
 
   printf("GLOBAL_INIT\n");
