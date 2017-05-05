@@ -22,7 +22,7 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
-MANPAGE = $(top_builddir)/docs/curl.1
+MANPAGE = $(abs_top_builddir)/docs/curl.1
 
 include Makefile.inc
 
@@ -31,4 +31,14 @@ EXTRA_DIST = $(DPAGES) MANPAGE.md gen.pl $(OTHERPAGES) CMakeLists.txt
 all: $(MANPAGE)
 
 $(MANPAGE): $(DPAGES) $(OTHERPAGES)
-	@PERL@ $(srcdir)/gen.pl mainpage $(srcdir) > $(MANPAGE)
+	(if ! test -x "$(PERL)"; then \
+	  if ! test -f "$(top_srcdir)/docs/curl.1"; then \
+	    echo "Creating docs/curl.1 requires perl!"; \
+	    exit 2; \
+	  fi; \
+	  if test "$(top_srcdir)x" != "$(top_builddir)x"; then \
+	    cp $(top_srcdir)/docs/curl.1 $(MANPAGE); \
+	  fi \
+	else \
+	@PERL@ $(srcdir)/gen.pl mainpage $(srcdir) > $(MANPAGE); \
+	fi)
