@@ -103,7 +103,7 @@ static int fopen_works(void)
 static int rlimit(int keep_open)
 {
   int *tmpfd;
-  int nitems, i;
+  rlim_t nitems, i;
   int *memchunk = NULL;
   char *fmt;
   struct rlimit rl;
@@ -232,7 +232,7 @@ static int rlimit(int keep_open)
   if(nitems > 0x7fff)
     nitems = 0x40000;
   do {
-    num_open.rlim_max = sizeof(*memchunk) * (size_t)nitems;
+    num_open.rlim_max = sizeof(*memchunk) * nitems;
     snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
     fprintf(stderr, "allocating memchunk %s byte array\n", strbuff);
     memchunk = malloc(sizeof(*memchunk) * (size_t)nitems);
