@@ -1825,6 +1825,7 @@ typedef enum {
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER
 
   /*parameters for the CURLOPT_FTP_SKIP_PASV_IP option */
+#define CURL_FTP_SKIP_PASV_IP_NEVER           0
 #define CURL_FTP_SKIP_PASV_IP_ALWAYS          1
 #define CURL_FTP_SKIP_PASV_IP_IF_NOT_ROUTABLE 2
 
