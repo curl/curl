@@ -1867,6 +1867,18 @@ static char *control_address(struct connectdata *conn)
   return conn->ip_addr_str;
 }
 
+static bool isRoutableIpV4(int ip[4])
+{
+	if (ip[0] == 127 || //127.0.0.0/8 (localhost)
+		ip[0] == 10  || //10.0.0.0/8 (private)
+		(ip[0] == 192 && ip[1] == 168) || //192.168.0.0/16 (private)
+		(ip[0] == 169 && ip[1] == 254) ||  //169.254.0.0/16 (link-local)
+		(ip[0] == 172 && ip[1] / 16 == 1)) //172.16.0.0/12 (private)
+		return false;
+	return true;
+}
+
+
 static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
                                     int ftpcode)
 {
@@ -1954,16 +1966,18 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     }
 
     /* we got OK from server */
-    if(data->set.ftp_skip_ip) {
-      /* told to ignore the remotely given IP but instead use the host we used
-         for the control connection */
-      infof(data, "Skip %d.%d.%d.%d for data connection, re-use %s instead\n",
-            ip[0], ip[1], ip[2], ip[3],
-            conn->host.name);
-      ftpc->newhost = strdup(control_address(conn));
-    }
-    else
-      ftpc->newhost = aprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+		if (data->set.ftp_pasvp_ip_rule == CURL_FTP_SKIP_PASV_IP_ALWAYS ||
+			(data->set.ftp_pasvp_ip_rule == CURL_FTP_SKIP_PASV_IP_IF_NOT_ROUTABLE && !isRoutableIpV4(ip)))
+		{
+            /* told to ignore the remotely given IP but instead use the host we used
+               for the control connection */
+            infof(data, "Skip %d.%d.%d.%d for data connection, re-use %s instead\n",
+                  ip[0], ip[1], ip[2], ip[3],
+                  conn->host.name);
+            ftpc->newhost = strdup(control_address(conn));
+		}
+		else
+        ftpc->newhost = aprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
 
     if(!ftpc->newhost)
       return CURLE_OUT_OF_MEMORY;
