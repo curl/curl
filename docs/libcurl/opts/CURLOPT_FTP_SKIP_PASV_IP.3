@@ -28,7 +28,7 @@ CURLOPT_FTP_SKIP_PASV_IP \- ignore the IP address in the PASV response
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_SKIP_PASV_IP, long rule);
 .SH DESCRIPTION
-URL_FTP_SKIP_PASV_IP_ALWAYS instructs libcurl to  ignore the IP address the
+URL_FTP_SKIP_PASV_IP_ALWAYS instructs libcurl to ignore the IP address the
 server suggests in its 227-response to libcurl's PASV command when libcurl connects
 the data connection. Instead libcurl will re-use the same IP address it already uses
 for the control connection. But it will use the port number from the 227-response.
