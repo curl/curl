@@ -177,7 +177,8 @@ struct OperationConfig {
   bool doh_verifystatus;
   bool create_dirs;
   bool ftp_create_dirs;
-  bool ftp_skip_ip;
+  long ftp_pasvp_ip_rule;   /* how to handle the IP address the FTP server
+                               passes on to us */
   bool proxynegotiate;
   bool proxyntlm;
   bool proxydigest;

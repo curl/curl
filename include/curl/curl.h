@@ -2202,6 +2202,12 @@ typedef enum {
   /* Convenient "aliases" */
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER
 
+  /* parameters for the CURLOPT_FTP_SKIP_PASV_IP option */
+#define CURL_FTP_SKIP_PASV_IP_NEVER           0L
+#define CURL_FTP_SKIP_PASV_IP_ALWAYS          1L
+#define CURL_FTP_SKIP_PASV_IP_IF_NOT_ROUTABLE 2L
+
+
   /* These enums are for use with the CURLOPT_HTTP_VERSION option. */
 enum {
   CURL_HTTP_VERSION_NONE, /* setting this means we don't care, and that we'd

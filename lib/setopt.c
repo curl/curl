@@ -1266,10 +1266,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_FTP_SKIP_PASV_IP:
     /*
-     * Enable or disable FTP_SKIP_PASV_IP, which will disable/enable the
-     * bypass of the IP address in PASV responses.
+     * Set up how to handle the IP that is returned by the server for PASV
      */
-    data->set.ftp_skip_ip = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    data->set.ftp_pasvp_ip_rule = va_arg(param, long);
     break;
 
   case CURLOPT_FTP_ACCOUNT:

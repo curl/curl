@@ -1198,7 +1198,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->ignorecl = toggle;
         break;
       case 'q': /* --ftp-skip-pasv-ip */
-        config->ftp_skip_ip = toggle;
+        config->ftp_pasvp_ip_rule = CURL_FTP_SKIP_PASV_IP_ALWAYS;
         break;
       case 'r': /* --ftp-method (undocumented at this point) */
         config->ftp_filemethod = ftpfilemethod(config, nextarg);

@@ -1931,7 +1931,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl?1L:0L);
 
         /* curl 7.14.2 */
-        my_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip?1L:0L);
+        my_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_pasvp_ip_rule);
 
         /* curl 7.15.1 */
         if(proto_ftp)
