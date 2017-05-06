@@ -48,9 +48,9 @@ if(curl) {
     res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_AVAIL, &auth);
     if(!res) {
       if(!auth)
-        printf("No auth available, perhaps no 401?\n");
+        printf("No auth available, perhaps no 401?\\n");
       else {
-        printf("%s%s%s%s\n",
+        printf("%s%s%s%s\\n",
                auth & CURLAUTH_BASIC ? "Basic ":"",
                auth & CURLAUTH_DIGEST ? "Digest ":"",
                auth & CURLAUTH_NEGOTIATE ? "Negotiate ":"",

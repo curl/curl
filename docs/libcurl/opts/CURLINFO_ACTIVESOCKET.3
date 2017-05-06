@@ -55,7 +55,7 @@ if(curl) {
   res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
 
   if(res != CURLE_OK) {
-    printf("Error: %s\n", curl_easy_strerror(res));
+    printf("Error: %s\\n", curl_easy_strerror(res));
     return 1;
   }
 }

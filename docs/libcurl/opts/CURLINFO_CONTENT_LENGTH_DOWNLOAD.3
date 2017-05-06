@@ -48,7 +48,7 @@ if(curl) {
     double cl;
     res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &cl);
     if(!res) {
-      printf("Size: %.0f\n", cl);
+      printf("Size: %.0f\\n", cl);
     }
   }
 }

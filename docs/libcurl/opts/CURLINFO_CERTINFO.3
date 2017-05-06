@@ -57,13 +57,13 @@ if(curl) {
     res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &ci);
 
     if (!res) {
-      printf("%d certs!\n", ci->num_of_certs);
+      printf("%d certs!\\n", ci->num_of_certs);
 
       for(i = 0; i < ci->num_of_certs; i++) {
         struct curl_slist *slist;
 
         for(slist = ci->certinfo[i]; slist; slist = slist->next)
-          printf("%s\n", slist->data);
+          printf("%s\\n", slist->data);
       }
     }
   }

@@ -43,7 +43,7 @@ if(curl) {
     long port;
     res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_PORT, &port);
     if(!res)
-      printf("Connected to remote port: %ld\n", port);
+      printf("Connected to remote port: %ld\\n", port);
   }
   curl_easy_cleanup(curl);
 }

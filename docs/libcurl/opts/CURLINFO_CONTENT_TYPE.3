@@ -51,7 +51,7 @@ if(curl) {
     char *ct = NULL;
     res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
     if(!res && ct) {
-      printf("Content-Type: %s\n", ct);
+      printf("Content-Type: %s\\n", ct);
     }
   }
   curl_easy_cleanup(curl);

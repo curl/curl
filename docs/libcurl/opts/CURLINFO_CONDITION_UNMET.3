@@ -55,7 +55,7 @@ if(curl) {
     long unmet;
     res = curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &unmet);
     if(!res) {
-      printf("The time condition was %sfulfilled\n", unmet?"NOT":"");
+      printf("The time condition was %sfulfilled\\n", unmet?"NOT":"");
     }
   }
 }

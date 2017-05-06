@@ -47,7 +47,7 @@ if(curl) {
     long code;
     res = curl_easy_getinfo(curl, CURLINFO_HTTP_CONNECTCODE, &code);
     if(!res && code)
-      printf("The CONNECT response code: %03ld\n", code);
+      printf("The CONNECT response code: %03ld\\n", code);
   }
   curl_easy_cleanup(curl);
 }

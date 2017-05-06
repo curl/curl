@@ -45,7 +45,7 @@ if(curl) {
     double ul;
     res = curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD, &ul);
     if(!res) {
-      printf("Uploaded %.0f bytes\n", ul);
+      printf("Uploaded %.0f bytes\\n", ul);
     }
   }
 }

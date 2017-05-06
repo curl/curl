@@ -46,7 +46,7 @@ if(curl) {
     long size;
     res = curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &size);
     if(!res)
-      printf("Header size: %ld bytes\n", size);
+      printf("Header size: %ld bytes\\n", size);
   }
   curl_easy_cleanup(curl);
 }
