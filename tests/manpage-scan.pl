@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2016, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -232,7 +232,7 @@ my @toolhelp; # store all parsed parameters
 while(<R>) {
     chomp;
     my $l= $_;
-    if(/^  \" *(.*)/) {
+    if(/^  \{\" *(.*)/) {
         my $str=$1;
         my $combo;
         if($str =~ /^-(.), --([a-z0-9.-]*)/) {
