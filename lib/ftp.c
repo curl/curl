@@ -1972,7 +1972,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     if(data->set.ftp_pasvp_ip_rule == CURL_FTP_SKIP_PASV_IP_IF_NOT_ROUTABLE &&
        !is_routable_ip_v4(ip)) {
          int ip_ctrl[4];
-         if(4 != sscanf(str, "%d,%d,%d,%d",
+         if(4 != sscanf(control_address(conn), "%d,%d,%d,%d",
             &ip_ctrl[0], &ip_ctrl[1], &ip_ctrl[2], &ip_ctrl[3]) ||
             is_routable_ip_v4(ip_ctrl))
             skipIp = true;
