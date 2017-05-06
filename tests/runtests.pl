@@ -3333,31 +3333,12 @@ sub singletest {
     }
     logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
 
-    # extract the reply data
-    my @reply = getpart("reply", "data");
-    my @replycheck = getpart("reply", "datacheck");
-
     my %replyattr = getpartattr("reply", "data");
-    my %replycheckattr = getpartattr("reply", "datacheck");
-
-    if (@replycheck) {
-        # we use this file instead to check the final output against
-        # get the mode attribute
-        my $filemode=$replycheckattr{'mode'};
-        if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
-            map s/\r\n/\n/g, @replycheck;
-            map s/\n/\r\n/g, @replycheck;
-        }
-        if($replycheckattr{'nonewline'}) {
-            # Yes, we must cut off the final newline from the final line
-            # of the datacheck
-            chomp($replycheck[$#replycheck]);
-        }
-
-        for my $partsuffix (('1', '2', '3', '4')) {
+    my @reply;
+    if (partexists("reply", "datacheck")) {
+        for my $partsuffix (('', '1', '2', '3', '4')) {
             my @replycheckpart = getpart("reply", "datacheck".$partsuffix);
-            if(@replycheckpart || partexists("reply", "datacheck".$partsuffix) ) {
+            if(@replycheckpart) {
                 my %replycheckpartattr = getpartattr("reply", "datacheck".$partsuffix);
                 # get the mode attribute
                 my $filemode=$replycheckpartattr{'mode'};
@@ -3371,13 +3352,13 @@ sub singletest {
                     # of the datacheck
                     chomp($replycheckpart[$#replycheckpart]);
                 }
-                push(@replycheck, @replycheckpart);
+                push(@reply, @replycheckpart);
             }
         }
-
-        @reply=@replycheck;
     }
     else {
+        # check against the data section
+        @reply = getpart("reply", "data");
         # get the mode attribute
         my $filemode=$replyattr{'mode'};
         if($filemode && ($filemode eq "text") && $has_textaware) {
