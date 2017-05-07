@@ -181,7 +181,7 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$conffile = "$path/stunnel.conf";
+$conffile = "$path/${proto}_stunnel.conf";
 
 $capath = abs_path($path);
 $certfile = "$srcdir/". ($stuncert?"certs/$stuncert":"stunnel.pem");

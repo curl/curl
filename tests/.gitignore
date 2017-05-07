@@ -10,9 +10,10 @@ curl_sftp_cmds
 curl_sftp_config
 curl_ssh_config
 curl_sshd_config
+ftps_stunnel.conf
+https_stunnel.conf
 log
 runtests.html
 runtests.pdf
-stunnel.conf
 testcurl.html
 testcurl.pdf
