@@ -52,7 +52,7 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
   }
 
   /* select() returns the number of signalled sockets or -1 */
-  res = select(sockfd + 1, &infd, &outfd, &errfd, &tv);
+  res = select((int)sockfd + 1, &infd, &outfd, &errfd, &tv);
   return res;
 }
 
