@@ -22,6 +22,11 @@
 
 #include "curl_setup.h"
 
+/***********************************************************************
+ * Only for threaded name resolves builds
+ **********************************************************************/
+#ifdef CURLRES_THREADED
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -73,11 +78,6 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-/***********************************************************************
- * Only for threaded name resolves builds
- **********************************************************************/
-#ifdef CURLRES_THREADED
 
 /*
  * Curl_resolver_global_init()
