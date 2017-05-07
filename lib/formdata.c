@@ -1564,14 +1564,20 @@ char *Curl_formpostheader(void *formp, size_t *len)
  */
 static char *formboundary(struct Curl_easy *data)
 {
+  char *b;
+  const char dashes[] = "------------------------";
+
   /* 24 dashes and 16 hexadecimal digits makes 64 bit (18446744073709551615)
      combinations */
-  unsigned int rnd[2];
-  CURLcode result = Curl_rand(data, &rnd[0], 2);
-  if(result)
+  b = malloc(sizeof dashes + 16);
+  if(!b)
     return NULL;
 
-  return aprintf("------------------------%08x%08x", rnd[0], rnd[1]);
+  strcpy(b, dashes);
+  Curl_rand_hexonly(data, (unsigned char *)b + (sizeof dashes - 1), 16);
+  b[sizeof dashes - 1 + 16] = 0;
+
+  return b;
 }
 
 #else  /* CURL_DISABLE_HTTP */

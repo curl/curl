@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /*
- * Curl_rand() stores 'num' number of random unsigned integers in the buffer
+ * Curl_rand() stores 'num' number of random unsigned characters in the buffer
  * 'rnd' points to.
  *
  * If libcurl is built without TLS support or with a TLS backend that lacks a
@@ -37,7 +37,12 @@
  * easy handle!
  *
  */
-CURLcode Curl_rand(struct Curl_easy *data, unsigned int *rnd,
+CURLcode Curl_rand(struct Curl_easy *data, unsigned char *rnd,
                    unsigned int num);
+
+/* Same as above but outputs only random lowercase hex characters.
+   Does NOT terminate.*/
+CURLcode Curl_rand_hexonly(struct Curl_easy *data, unsigned char *rnd,
+                           unsigned int num);
 
 #endif /* HEADER_CURL_RAND_H */

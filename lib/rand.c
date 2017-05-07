@@ -47,10 +47,16 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
   char *force_entropy = getenv("CURL_ENTROPY");
   if(force_entropy) {
     if(!seeded) {
+      size_t i;
       size_t elen = strlen(force_entropy);
       size_t clen = sizeof(randseed);
       size_t min = elen < clen ? elen : clen;
-      memcpy((char *)&randseed, force_entropy, min);
+
+      randseed = 0;
+      for(i = 0; i < min; ++i) {
+        randseed |=
+          ((unsigned int)(*((unsigned char *)force_entropy + i)) << (i * 8));
+      }
       seeded = TRUE;
     }
     else
@@ -115,18 +121,47 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
  *
  */
 
-CURLcode Curl_rand(struct Curl_easy *data, unsigned int *rndptr,
+CURLcode Curl_rand(struct Curl_easy *data, unsigned char *rnd,
                    unsigned int num)
 {
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
-  unsigned int i;
 
   assert(num > 0);
 
-  for(i = 0; i < num; i++) {
-    result = randit(data, rndptr++);
+  while(num) {
+    unsigned int r;
+    unsigned int left = num < sizeof(unsigned int) ?
+                        num : sizeof(unsigned int);
+
+    result = randit(data, &r);
     if(result)
       return result;
+
+    while(left) {
+      *rnd++ = (unsigned char)(r & 0xFF);
+      r >>= 8;
+      --num;
+      --left;
+    }
   }
+
+  return result;
+}
+
+CURLcode Curl_rand_hexonly(struct Curl_easy *data, unsigned char *rnd,
+                           unsigned int num)
+{
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+  const char *hex = "0123456789abcdef";
+
+  result = Curl_rand(data, rnd, num);
+  if(result)
+    return result;
+
+  while(num) {
+    *rnd++ = hex[*rnd & 0xF];
+    --num;
+  }
+
   return result;
 }
