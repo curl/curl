@@ -1119,7 +1119,8 @@ static CURLcode tftp_receive_packet(struct connectdata *conn)
   }
   else {
     /* The event is given by the TFTP packet time */
-    state->event = (tftp_event_t)getrpacketevent(&state->rpacket);
+    unsigned short event = getrpacketevent(&state->rpacket);
+    state->event = (tftp_event_t)event;
 
     switch(state->event) {
     case TFTP_EVENT_DATA:
@@ -1138,9 +1139,12 @@ static CURLcode tftp_receive_packet(struct connectdata *conn)
       }
       break;
     case TFTP_EVENT_ERROR:
-      state->error = (tftp_error_t)getrpacketblock(&state->rpacket);
+    {
+      unsigned short error = getrpacketblock(&state->rpacket);
+      state->error = (tftp_error_t)error;
       infof(data, "%s\n", (const char *)state->rpacket.data+4);
       break;
+    }
     case TFTP_EVENT_ACK:
       break;
     case TFTP_EVENT_OACK:
