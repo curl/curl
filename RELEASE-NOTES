@@ -43,6 +43,26 @@ This release includes the following bugfixes:
  o CURLOPT_BUFFERSIZE: 1024 bytes is now the minimum size [17]
  o curl: non-boolean command line args reject --no- prefixes [18]
  o telnet: Write full buffer instead of byte-by-byte [19]
+ o typecheck-gcc: add missing string options [20]
+ o typecheck-gcc: add support for CURLINFO_SOCKET [21]
+ o opt man pages: many more now have examples
+ o curl_setup_once: use SEND_QUAL_ARG2 for swrite [22]
+ o test557: set a known good numeric locale
+ o schannel: return a more specific error code for SEC_E_UNTRUSTED_ROOT
+ o tests/server: make string literals const
+ o runtests: use -R for random order [23]
+ o unit1305: fix compiler warning
+ o curl_slist_append.3: clarify a NULL input creates a new list
+ o tests/server: run checksrc by default in debug-builds
+ o tests: fix -Wcast-qual warnings
+ o runtests.pl: simplify the datacheck read section
+ o curl: remove --environment and tool_writeenv.c [24]
+ o buildconf: fix hang on IRIX [25]
+ o tftp: silence bad-function-cast warning
+ o asyn-thread: fix unused macro warnings
+ o tool_parsecfg: fix -Wcast-qual warning
+ o sendrecv: fix MinGW-w64 warning
+ o test537: use correct variable type [26]
 
 This release includes the following known bugs:
 
@@ -51,10 +71,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alan Jenkins, Dan Fandrich, Daniel Stenberg, Gisle Vanem,
+  Alan Jenkins, canavan at github, Dan Fandrich, Daniel Stenberg, Gisle Vanem,
   Helmut K. C. Tessarek, Kai Engert, Kamil Dudka, Kevin Ji, Marcel Raad,
   Martin Kepplinger, Ray Satiro, Richard Hsu, Thomas Klausner,
-  (13 contributors)
+  (14 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -79,3 +99,10 @@ References to bug reports and discussions on issues:
  [17] = https://curl.haxx.se/bug/?i=1449
  [18] = https://curl.haxx.se/bug/?i=1453
  [19] = https://curl.haxx.se/bug/?i=1389
+ [20] = https://curl.haxx.se/bug/?i=1452
+ [21] = https://curl.haxx.se/bug/?i=1452
+ [22] = https://curl.haxx.se/bug/?i=1464
+ [23] = https://curl.haxx.se/bug/?i=1466
+ [24] = https://curl.haxx.se/bug/?i=1463
+ [25] = https://curl.haxx.se/bug/?i=1471
+ [26] = https://curl.haxx.se/bug/?i=1469
