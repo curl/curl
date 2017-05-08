@@ -5179,7 +5179,11 @@ if($scrambleorder) {
     # scramble the order of the test cases
     my @rand;
     while($TESTCASES) {
-        my @all = split(/ /, $TESTCASES);
+        my @all = split(/ +/, $TESTCASES);
+        if(!$all[0]) {
+            # if the first is blank, shift away it
+            shift @all;
+        }
         my $r = rand @all;
         push @rand, $all[$r];
         $all[$r]="";
