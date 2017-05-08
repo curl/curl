@@ -113,7 +113,7 @@ CURLcode Curl_add_handle_to_pipeline(struct Curl_easy *handle,
   if(pipeline == &conn->send_pipe && sendhead != conn->send_pipe.head) {
     /* this is a new one as head, expire it */
     Curl_pipeline_leave_write(conn); /* not in use yet */
-    Curl_expire(conn->send_pipe.head->ptr, 0);
+    Curl_expire(conn->send_pipe.head->ptr, 0, EXPIRE_PIPELINE_SEND);
   }
 
 #if 0 /* enable for pipeline debugging */
@@ -148,7 +148,7 @@ void Curl_move_handle_from_send_to_recv_pipe(struct Curl_easy *handle,
         infof(conn->data, "%p is at send pipe head B!\n",
               (void *)conn->send_pipe.head->ptr);
 #endif
-        Curl_expire(conn->send_pipe.head->ptr, 0);
+        Curl_expire(conn->send_pipe.head->ptr, 0, EXPIRE_PIPELINE_READ);
       }
 
       /* The receiver's list is not really interesting here since either this

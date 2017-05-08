@@ -580,10 +580,8 @@ static CURLcode AllowServerConnect(struct connectdata *conn, bool *connected)
   else {
     /* Add timeout to multi handle and break out of the loop */
     if(!result && *connected == FALSE) {
-      if(data->set.accepttimeout > 0)
-        Curl_expire(data, data->set.accepttimeout);
-      else
-        Curl_expire(data, DEFAULT_ACCEPT_TIMEOUT);
+      Curl_expire(data, data->set.accepttimeout > 0 ?
+                  data->set.accepttimeout: DEFAULT_ACCEPT_TIMEOUT, 0);
     }
   }
 
