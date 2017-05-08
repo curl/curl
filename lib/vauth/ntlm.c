@@ -555,10 +555,10 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 #if defined(USE_NTRESPONSES) && defined(USE_NTLM_V2)
   if(ntlm->target_info_len) {
     unsigned char ntbuffer[0x18];
-    unsigned int entropy[2];
+    unsigned char entropy[8];
     unsigned char ntlmv2hash[0x18];
 
-    result = Curl_rand(data, &entropy[0], 2);
+    result = Curl_rand(data, entropy, 8);
     if(result)
       return result;
 
@@ -572,15 +572,13 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
       return result;
 
     /* LMv2 response */
-    result = Curl_ntlm_core_mk_lmv2_resp(ntlmv2hash,
-                                         (unsigned char *)&entropy[0],
+    result = Curl_ntlm_core_mk_lmv2_resp(ntlmv2hash, entropy,
                                          &ntlm->nonce[0], lmresp);
     if(result)
       return result;
 
     /* NTLMv2 response */
-    result = Curl_ntlm_core_mk_ntlmv2_resp(ntlmv2hash,
-                                           (unsigned char *)&entropy[0],
+    result = Curl_ntlm_core_mk_ntlmv2_resp(ntlmv2hash, entropy,
                                            ntlm, &ntlmv2resp, &ntresplen);
     if(result)
       return result;
@@ -596,10 +594,10 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     unsigned char ntbuffer[0x18];
     unsigned char tmp[0x18];
     unsigned char md5sum[MD5_DIGEST_LENGTH];
-    unsigned int entropy[2];
+    unsigned char entropy[8];
 
     /* Need to create 8 bytes random data */
-    result = Curl_rand(data, &entropy[0], 2);
+    result = Curl_rand(data, entropy, 8);
     if(result)
       return result;
 
