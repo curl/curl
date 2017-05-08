@@ -2746,6 +2746,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       data->req.upload_done = TRUE;
       data->req.keepon &= ~KEEP_SEND; /* we're done writing */
       data->req.exp100 = EXP100_SEND_DATA; /* already sent */
+      Curl_expire_done(data, EXPIRE_100_TIMEOUT);
     }
   }
 
@@ -3042,6 +3043,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           if(k->exp100 > EXP100_SEND_DATA) {
             k->exp100 = EXP100_SEND_DATA;
             k->keepon |= KEEP_SEND;
+            Curl_expire_done(data, EXPIRE_100_TIMEOUT);
           }
           break;
         case 101:
@@ -3168,6 +3170,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
              * request body has been sent we stop sending and mark the
              * connection for closure after we've read the entire response.
              */
+            Curl_expire_done(data, EXPIRE_100_TIMEOUT);
             if(!k->upload_done) {
               if(data->set.http_keep_sending_on_error) {
                 infof(data, "HTTP error before end of send, keep sending\n");

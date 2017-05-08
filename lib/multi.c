@@ -99,8 +99,6 @@ static const char * const statename[]={
 };
 #endif
 
-static void multi_freetimeout(void *a, void *b);
-
 /* function pointer called once when switching TO a state */
 typedef void (*init_multistate_func)(struct Curl_easy *data);
 
@@ -369,7 +367,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     return CURLM_ADDED_ALREADY;
 
   /* Initialize timeout list for this handle */
-  Curl_llist_init(&data->state.timeoutlist, multi_freetimeout);
+  Curl_llist_init(&data->state.timeoutlist, NULL);
 
   /*
    * No failure allowed in this function beyond this point. And no
@@ -430,7 +428,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
      sockets that time-out or have actions will be dealt with. Since this
      handle has no action yet, we make sure it times out to get things to
      happen. */
-  Curl_expire(data, 0, EXPIRE_ADD_HANDLE);
+  Curl_expire(data, 0, EXPIRE_RUN_NOW);
 
   /* increase the node-counter */
   multi->num_easy++;
@@ -1941,7 +1939,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* expire the new receiving pipeline head */
         if(data->easy_conn->recv_pipe.head)
           Curl_expire_latest(data->easy_conn->recv_pipe.head->ptr, 0,
-                             EXPIRE_PIPELINE_READ);
+                             EXPIRE_RUN_NOW);
 
         /* Check if we can move pending requests to send pipe */
         Curl_multi_process_pending_handles(multi);
@@ -2482,12 +2480,6 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
   }
 }
 
-struct time_node {
-  struct curl_llist_element list;
-  struct timeval time;
-  expire_id id;
-};
-
 /*
  * add_next_timeout()
  *
@@ -2860,34 +2852,19 @@ static int update_timer(struct Curl_multi *multi)
 }
 
 /*
- * multi_freetimeout()
- *
- * Callback used by the llist system when a single timeout list entry is
- * destroyed.
- */
-static void multi_freetimeout(void *user, void *entryptr)
-{
-  (void)user;
-
-  /* the entry was plain malloc()'ed */
-  free(entryptr);
-}
-
-/*
  * multi_deltimeout()
  *
  * Remove a given timestamp from the list of timeouts.
  */
 static void
-multi_deltimeout(struct Curl_easy *data, expire_id id)
+multi_deltimeout(struct Curl_easy *data, expire_id eid)
 {
   struct curl_llist_element *e;
   struct curl_llist *timeoutlist = &data->state.timeoutlist;
-
-  /* find and remove the node(s) from the list */
+  /* find and remove the specific node from the list */
   for(e = timeoutlist->head; e; e = e->next) {
-    struct time_node *node = (struct time_node *)e->ptr;
-    if(node->id == id) {
+    struct time_node *n = (struct time_node *)e->ptr;
+    if(n->eid == eid) {
       Curl_llist_remove(timeoutlist, e, NULL);
       return;
     }
@@ -2904,7 +2881,7 @@ multi_deltimeout(struct Curl_easy *data, expire_id id)
 static CURLMcode
 multi_addtimeout(struct Curl_easy *data,
                  struct timeval *stamp,
-                 int id)
+                 expire_id eid)
 {
   struct curl_llist_element *e;
   struct time_node *node;
@@ -2912,13 +2889,11 @@ multi_addtimeout(struct Curl_easy *data,
   size_t n;
   struct curl_llist *timeoutlist = &data->state.timeoutlist;
 
-  node = malloc(sizeof(struct time_node));
-  if(!node)
-    return CURLM_OUT_OF_MEMORY;
+  node = &data->state.expires[eid];
 
   /* copy the timestamp and id */
   memcpy(&node->time, stamp, sizeof(*stamp));
-  node->id = id;
+  node->eid = eid; /* also marks it as in use */
 
   n = Curl_llist_count(timeoutlist);
   infof(data, "TIMEOUTS %zd\n", n);
@@ -2949,9 +2924,7 @@ multi_addtimeout(struct Curl_easy *data,
  * The timeout will be added to a queue of timeouts if it defines a moment in
  * time that is later than the current head of queue.
  *
- * If 'id' is given (non-zero), expire will replace a former timeout using the
- * same id. id is also a good way to keep track of the purpose of each
- * timeout.
+ * Expire replaces a former timeout using the same id if already set.
  */
 void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
 {
@@ -3056,6 +3029,17 @@ void Curl_expire_latest(struct Curl_easy *data, time_t milli, expire_id id)
   Curl_expire(data, milli, id);
 }
 
+/*
+ * Curl_expire_done()
+ *
+ * Removes the expire timer. Marks it as done.
+ *
+ */
+void Curl_expire_done(struct Curl_easy *data, expire_id id)
+{
+  /* remove the timer, if there */
+  multi_deltimeout(data, id);
+}
 
 /*
  * Curl_expire_clear()
@@ -3160,7 +3144,7 @@ void Curl_multi_process_pending_handles(struct Curl_multi *multi)
       Curl_llist_remove(&multi->pending, e, NULL);
 
       /* Make sure that the handle will be processed soonish. */
-      Curl_expire_latest(data, 0, EXPIRE_MULTI_PENDING);
+      Curl_expire_latest(data, 0, EXPIRE_RUN_NOW);
     }
 
     e = next; /* operate on next handle */

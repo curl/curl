@@ -1891,7 +1891,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         /* since we don't really wait for anything at this point, we want the
            state machine to move on as soon as possible so we set a very short
            timeout here */
-        Curl_expire(data, 0);
+        Curl_expire(data, 0, EXPIRE_RUN_NOW);
 
         state(conn, SSH_STOP);
       }

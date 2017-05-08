@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -540,7 +540,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
       td->poll_interval = 250;
 
     td->interval_end = elapsed + td->poll_interval;
-    Curl_expire(conn->data, td->poll_interval);
+    Curl_expire(conn->data, td->poll_interval, EXPIRE_ASYNC_NAME);
   }
 
   return CURLE_OK;

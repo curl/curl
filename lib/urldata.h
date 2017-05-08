@@ -1314,6 +1314,30 @@ struct tempbuf {
                  Curl_client_write() */
 };
 
+/* Timers */
+typedef enum {
+  EXPIRE_100_TIMEOUT,
+  EXPIRE_ASYNC_NAME,
+  EXPIRE_CONNECTTIMEOUT,
+  EXPIRE_DNS_PER_NAME,
+  EXPIRE_HAPPY_EYEBALLS,
+  EXPIRE_MULTI_PENDING,
+  EXPIRE_RUN_NOW,
+  EXPIRE_SPEEDCHECK,
+  EXPIRE_TIMEOUT,
+  EXPIRE_TOOFAST,
+  EXPIRE_LAST /* not an actual timer, used as a marker only */
+} expire_id;
+
+/*
+ * One instance for each timeout an easy handle can set.
+ */
+struct time_node {
+  struct curl_llist_element list;
+  struct timeval time;
+  expire_id eid;
+};
+
 struct UrlState {
 
   /* Points to the connection cache */
@@ -1382,6 +1406,7 @@ struct UrlState {
   struct timeval expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
   struct curl_llist timeoutlist; /* list of pending timeouts */
+  struct time_node expires[EXPIRE_LAST]; /* nodes for each expire type */
 
   /* a place to store the most recently set FTP entrypath */
   char *most_recent_ftp_entrypath;

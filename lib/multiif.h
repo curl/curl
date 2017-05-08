@@ -26,28 +26,10 @@
  * Prototypes for library-wide functions provided by multi.c
  */
 
-/* Timers */
-typedef enum {
-  EXPIRE_SPEEDCHECK,
-  EXPIRE_H2DATA,
-  EXPIRE_PIPELINE_SEND,
-  EXPIRE_PIPELINE_READ,
-  EXPIRE_ADD_HANDLE,
-  EXPIRE_TOOFAST,
-  EXPIRE_UNPAUSE,
-  EXPIRE_ARES,
-  EXPIRE_MULTI_PENDING,
-  EXPIRE_DNS_PER_NAME,
-  EXPIRE_HAPPY_EYEBALLS,
-  EXPIRE_100_TIMEOUT,
-  EXPIRE_TIMEOUT,
-  EXPIRE_CONNECTTIMEOUT,
-  EXPIRE_LAST /* not an actual timer, used as a marker only */
-} expire_id;
-
 void Curl_expire(struct Curl_easy *data, time_t milli, expire_id);
 void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_latest(struct Curl_easy *data, time_t milli, expire_id);
+void Curl_expire_done(struct Curl_easy *data, expire_id id);
 bool Curl_pipeline_wanted(const struct Curl_multi* multi, int bits);
 void Curl_multi_handlePipeBreak(struct Curl_easy *data);
 
