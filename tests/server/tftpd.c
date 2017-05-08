@@ -199,8 +199,8 @@ static curl_socklen_t fromlen;
 
 static curl_socket_t peer = CURL_SOCKET_BAD;
 
-static int timeout;
-static int maxtimeout = 5 * TIMEOUT;
+static unsigned int timeout;
+static unsigned int maxtimeout = 5 * TIMEOUT;
 
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
@@ -217,7 +217,7 @@ static sigjmp_buf timeoutbuf;
 #endif
 
 #if defined(HAVE_ALARM) && defined(SIGALRM)
-static int rexmtval = TIMEOUT;
+static const unsigned int rexmtval = TIMEOUT;
 #endif
 
 /* do-nothing macro replacement for systems which lack siginterrupt() */
