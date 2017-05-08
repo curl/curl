@@ -38,7 +38,7 @@ static void voutf(struct GlobalConfig *config,
                   const char *fmt,
                   va_list ap)
 {
-  size_t width = (79 - (int)strlen(prefix));
+  size_t width = (79 - strlen(prefix));
   if(!config->mute) {
     size_t len;
     char *ptr;
