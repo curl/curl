@@ -320,7 +320,7 @@ int test(char *URL)
       tv.tv_usec = 100000;
     }
 
-    select_test(maxFd, &readSet, &writeSet, NULL, &tv);
+    select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
     checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN, "read");

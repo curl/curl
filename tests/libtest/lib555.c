@@ -98,7 +98,7 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose
      chunked)! */
-  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(UPLOADTHIS));
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(UPLOADTHIS));
 
   easy_setopt(curl, CURLOPT_POST, 1L);
 #ifdef CURL_DOES_CONVERSIONS

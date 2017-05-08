@@ -77,7 +77,7 @@ int test(char *URL)
 #endif
 
   /* Set the expected POST size */
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, data_size);
+  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data_size);
   test_setopt(curl, CURLOPT_POSTFIELDS, data);
 
   /* we want to use our own progress function */
