@@ -30,5 +30,5 @@ EXTRA_DIST = $(DPAGES) MANPAGE.md gen.pl $(OTHERPAGES) CMakeLists.txt
 
 all: $(MANPAGE)
 
-$(MANPAGE): $(DPAGES) $(OTHERPAGES)
+$(MANPAGE): $(DPAGES) $(OTHERPAGES) Makefile.inc
 	@PERL@ $(srcdir)/gen.pl mainpage $(srcdir) > $(MANPAGE)
