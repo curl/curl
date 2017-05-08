@@ -48,7 +48,7 @@ static char *Curl_basename(char *path);
 #endif
 
 static size_t readfromfile(struct Form *form, char *buffer, size_t size);
-static char *formboundary(struct Curl_easy *data);
+static CURLcode formboundary(struct Curl_easy *data, char *buffer, size_t len);
 
 /* What kind of Content-Type to use on un-specified files with unrecognized
    extensions. */
@@ -1159,20 +1159,19 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
   struct FormData *firstform;
   struct curl_httppost *file;
   CURLcode result = CURLE_OK;
-
   curl_off_t size = 0; /* support potentially ENORMOUS formposts */
-  char *boundary;
-  char *fileboundary = NULL;
+  char fileboundary[42];
   struct curl_slist *curList;
+  char boundary[42];
 
   *finalform = NULL; /* default form is empty */
 
   if(!post)
     return result; /* no input => no output! */
 
-  boundary = formboundary(data);
-  if(!boundary)
-    return CURLE_OUT_OF_MEMORY;
+  result = formboundary(data, boundary, sizeof(boundary));
+  if(result)
+    return result;
 
   /* Make the first line of the output */
   result = AddFormDataf(&form, NULL,
@@ -1182,7 +1181,6 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
                         boundary);
 
   if(result) {
-    free(boundary);
     return result;
   }
   /* we DO NOT include that line in the total size of the POST, since it'll be
@@ -1225,10 +1223,8 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
       /* If used, this is a link to more file names, we must then do
          the magic to include several files with the same field name */
 
-      free(fileboundary);
-      fileboundary = formboundary(data);
-      if(!fileboundary) {
-        result = CURLE_OUT_OF_MEMORY;
+      result = formboundary(data, fileboundary, sizeof(fileboundary));
+      if(result) {
         break;
       }
 
@@ -1379,16 +1375,10 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
 
   if(result) {
     Curl_formclean(&firstform);
-    free(fileboundary);
-    free(boundary);
     return result;
   }
 
   *sizep = size;
-
-  free(fileboundary);
-  free(boundary);
-
   *finalform = firstform;
 
   return result;
@@ -1562,16 +1552,17 @@ char *Curl_formpostheader(void *formp, size_t *len)
  * formboundary() creates a suitable boundary string and returns an allocated
  * one.
  */
-static char *formboundary(struct Curl_easy *data)
+static CURLcode formboundary(struct Curl_easy *data,
+                             char *buffer, size_t buflen)
 {
   /* 24 dashes and 16 hexadecimal digits makes 64 bit (18446744073709551615)
      combinations */
-  unsigned int rnd[2];
-  CURLcode result = Curl_rand(data, &rnd[0], 2);
-  if(result)
-    return NULL;
+  DEBUGASSERT(buflen >= 41);
 
-  return aprintf("------------------------%08x%08x", rnd[0], rnd[1]);
+  memset(buffer, '-', 24);
+  Curl_rand_hex(data, (unsigned char *)&buffer[24], 17);
+
+  return CURLE_OK;
 }
 
 #else  /* CURL_DISABLE_HTTP */

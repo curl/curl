@@ -47,10 +47,12 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
   char *force_entropy = getenv("CURL_ENTROPY");
   if(force_entropy) {
     if(!seeded) {
+      unsigned int seed = 0;
       size_t elen = strlen(force_entropy);
-      size_t clen = sizeof(randseed);
+      size_t clen = sizeof(seed);
       size_t min = elen < clen ? elen : clen;
-      memcpy((char *)&randseed, force_entropy, min);
+      memcpy((char *)&seed, force_entropy, min);
+      randseed = ntohl(seed);
       seeded = TRUE;
     }
     else
@@ -115,18 +117,63 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
  *
  */
 
-CURLcode Curl_rand(struct Curl_easy *data, unsigned int *rndptr,
-                   unsigned int num)
+CURLcode Curl_rand(struct Curl_easy *data, unsigned char *rnd, size_t num)
 {
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
-  unsigned int i;
 
   assert(num > 0);
 
-  for(i = 0; i < num; i++) {
-    result = randit(data, rndptr++);
+  while(num) {
+    unsigned int r;
+    size_t left = num < sizeof(unsigned int) ? num : sizeof(unsigned int);
+
+    result = randit(data, &r);
     if(result)
       return result;
+
+    while(left) {
+      *rnd++ = (unsigned char)(r & 0xFF);
+      r >>= 8;
+      --num;
+      --left;
+    }
   }
+
+  return result;
+}
+
+/*
+ * Curl_rand_hex() fills the 'rnd' buffer with a given 'num' size with random
+ * hexadecimal digits PLUS a zero terminating byte. It must be an odd number
+ * size.
+ */
+
+CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
+                       size_t num)
+{
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+  const char *hex = "0123456789abcdef";
+  unsigned char buffer[128];
+  unsigned char *bufp = buffer;
+  DEBUGASSERT(num > 1);
+
+  if((num/2 >= sizeof(buffer)) || !(num&1))
+    /* make sure it fits in the local buffer and that it is an odd number! */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  num--; /* save one for zero termination */
+
+  result = Curl_rand(data, buffer, num/2);
+  if(result)
+    return result;
+
+  while(num) {
+    *rnd++ = hex[(*bufp & 0xF0)>>4];
+    *rnd++ = hex[*bufp & 0x0F];
+    bufp++;
+    num -= 2;
+  }
+  *rnd = 0;
+
   return result;
 }
