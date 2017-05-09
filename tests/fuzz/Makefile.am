@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -19,6 +19,39 @@
 # KIND, either express or implied.
 #
 ###########################################################################
+AUTOMAKE_OPTIONS = foreign nostdinc
 
+# Specify our include paths here, and do it relative to $(top_srcdir) and
+# $(top_builddir), to ensure that these paths which belong to the library
+# being currently built and tested are searched before the library which
+# might possibly already be installed in the system.
+#
+# $(top_builddir)/include/curl for generated curlbuild.h included from curl.h
+# $(top_builddir)/include for generated curlbuild.h inc. from lib/curl_setup.h
+# $(top_srcdir)/include is for libcurl's external include files
+# $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
+# $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
 
-# FIXME, probably adapt from file in ../unit
+AM_CPPFLAGS = -I$(top_builddir)/include/curl \
+              -I$(top_builddir)/include      \
+              -I$(top_srcdir)/include        \
+              -I$(top_builddir)/lib          \
+              -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/tests/fuzz
+
+EXTRA_DIST = Makefile.inc CMakeLists.txt
+
+LIBS = -lpthread -lFuzzer -lstdc++ -lm
+LDFLAGS = -L/usr/lib/llvm-5.0/lib #-L/home/daniel/src/Fuzzer/
+
+LDADD = $(top_builddir)/lib/libcurl.la      \
+        @LDFLAGS@ @LIBCURL_LIBS@
+
+# Makefile.inc provides neat definitions
+include Makefile.inc
+
+checksrc:
+	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
+
+noinst_PROGRAMS = $(FUZZPROGS)
+

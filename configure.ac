@@ -3891,6 +3891,7 @@ AC_CONFIG_FILES([Makefile \
            tests/server/Makefile \
            tests/libtest/Makefile \
            tests/unit/Makefile \
+           tests/fuzz/Makefile \
            packages/Makefile \
            packages/Win32/Makefile \
            packages/Win32/cygwin/Makefile \
