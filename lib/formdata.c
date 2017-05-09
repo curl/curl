@@ -1557,7 +1557,8 @@ static CURLcode formboundary(struct Curl_easy *data,
 {
   /* 24 dashes and 16 hexadecimal digits makes 64 bit (18446744073709551615)
      combinations */
-  DEBUGASSERT(buflen >= 41);
+  if(buflen < 41)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   memset(buffer, '-', 24);
   Curl_rand_hex(data, (unsigned char *)&buffer[24], 17);
