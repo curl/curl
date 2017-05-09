@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,9 +25,29 @@
 /*
  * Prototypes for library-wide functions provided by multi.c
  */
-void Curl_expire(struct Curl_easy *data, time_t milli);
+
+/* Timers */
+typedef enum {
+  EXPIRE_SPEEDCHECK,
+  EXPIRE_H2DATA,
+  EXPIRE_PIPELINE_SEND,
+  EXPIRE_PIPELINE_READ,
+  EXPIRE_ADD_HANDLE,
+  EXPIRE_TOOFAST,
+  EXPIRE_UNPAUSE,
+  EXPIRE_ARES,
+  EXPIRE_MULTI_PENDING,
+  EXPIRE_DNS_PER_NAME,
+  EXPIRE_HAPPY_EYEBALLS,
+  EXPIRE_100_TIMEOUT,
+  EXPIRE_TIMEOUT,
+  EXPIRE_CONNECTTIMEOUT,
+  EXPIRE_LAST /* not an actual timer, used as a marker only */
+} expire_id;
+
+void Curl_expire(struct Curl_easy *data, time_t milli, expire_id);
 void Curl_expire_clear(struct Curl_easy *data);
-void Curl_expire_latest(struct Curl_easy *data, time_t milli);
+void Curl_expire_latest(struct Curl_easy *data, time_t milli, expire_id);
 bool Curl_pipeline_wanted(const struct Curl_multi* multi, int bits);
 void Curl_multi_handlePipeBreak(struct Curl_easy *data);
 
