@@ -1867,7 +1867,7 @@ static char *control_address(struct connectdata *conn)
   return conn->ip_addr_str;
 }
 
-static bool is_routable_ip_v4(int ip[4])
+static bool is_private_ip_v4(int ip[4])
 {
     if(ip[0] == 127 || /*127.0.0.0/8 (localhost)*/
         ip[0] == 10  || /*10.0.0.0/8 (private)*/
@@ -1970,11 +1970,11 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     skipIp = data->set.ftp_pasvp_ip_rule == CURL_FTP_SKIP_PASV_IP_ALWAYS;
 
     if(data->set.ftp_pasvp_ip_rule == CURL_FTP_SKIP_PASV_IP_IF_NOT_ROUTABLE &&
-       !is_routable_ip_v4(ip)) {
+       !is_private_ip_v4(ip)) {
          int ip_ctrl[4];
          if(4 != sscanf(control_address(conn), "%d.%d.%d.%d",
             &ip_ctrl[0], &ip_ctrl[1], &ip_ctrl[2], &ip_ctrl[3]) ||
-            is_routable_ip_v4(ip_ctrl))
+            is_private_ip_v4(ip_ctrl))
             skipIp = true;
         }
 
