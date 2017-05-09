@@ -34,7 +34,7 @@ tftp
 TFTP retrieve with mode=netascii
  </name>
  <command>
-"tftp://%HOSTIP:%TFTPPORT//1094;mode=netascii" --trace-ascii log/traceit
+"tftp://%HOSTIP:%TFTPPORT//1094;mode=netascii"
 </command>
 </client>
 

@@ -17,7 +17,7 @@ tftp
 TFTP retrieve on invalid file
  </name>
  <command>
-tftp://%HOSTIP:%TFTPPORT//invalid-file --trace-ascii log/traceit --tftp-blksize 1024
+tftp://%HOSTIP:%TFTPPORT//invalid-file --tftp-blksize 1024
 </command>
 </client>
 
