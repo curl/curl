@@ -42,9 +42,9 @@ lib1900
 HTTP GET using pipelining
  </name>
  <command>
-http://%HOSTIP:%HTTPPIPEPORT/
+http://%HOSTIP:%HTTPPIPEPORT/ log/urls1900.txt
 </command>
-<file name="log/urls.txt">
+<file name="log/urls1900.txt">
 0 1k.txt
 1000 100k.txt
 0 1k.txt

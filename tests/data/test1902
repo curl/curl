@@ -43,9 +43,9 @@ lib1900
 HTTP GET using pipelining, broken pipe
  </name>
  <command>
-http://%HOSTIP:%HTTPPIPEPORT/
+http://%HOSTIP:%HTTPPIPEPORT/ log/urls1902.txt
 </command>
-<file name="log/urls.txt">
+<file name="log/urls1902.txt">
 0 1k.txt
 1000 connection_close.txt
 1 1k.txt

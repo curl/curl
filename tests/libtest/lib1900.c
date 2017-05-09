@@ -142,7 +142,7 @@ int test(char *URL)
   int handlenum = 0;
   struct timeval last_handle_add;
 
-  if(parse_url_file("log/urls.txt") <= 0)
+  if(parse_url_file(libtest_arg2) <= 0)
     goto test_cleanup;
 
   start_test_timing();

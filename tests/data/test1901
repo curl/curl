@@ -43,9 +43,9 @@ lib1900
 HTTP GET using pipelining, blacklisted site
  </name>
  <command>
-http://%HOSTIP:%HTTPPIPEPORT/
+http://%HOSTIP:%HTTPPIPEPORT/ log/urls1901.txt
 </command>
-<file name="log/urls.txt">
+<file name="log/urls1901.txt">
 blacklist_site 127.0.0.1:%HTTPPIPEPORT
 0 1k.txt
 1000 100k.txt
