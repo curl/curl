@@ -424,6 +424,11 @@ mbed_connect_step1(struct connectdata *conn,
   mbedtls_ssl_conf_ciphersuites(&connssl->config,
                                 mbedtls_ssl_list_ciphersuites());
 
+#if defined(MBEDTLS_SSL_RENEGOTIATION)
+  mbedtls_ssl_conf_renegotiation(&connssl->config,
+                                 MBEDTLS_SSL_RENEGOTIATION_ENABLED);
+#endif
+
 #if defined(MBEDTLS_SSL_SESSION_TICKETS)
   mbedtls_ssl_conf_session_tickets(&connssl->config,
                                    MBEDTLS_SSL_SESSION_TICKETS_DISABLED);
