@@ -1,0 +1,10 @@
+Fuzz tests
+==========
+
+The goal is to add tests for *ALL* protocols supported in libcurl.
+We will need some additional patches in the future, to increase coverage.
+
+Building the fuzz target
+========================
+
+FIXME fill out once the makefiles are in order.
