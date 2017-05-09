@@ -154,7 +154,7 @@ int formparse(struct OperationConfig *config,
   char type_major[128] = "";
   char type_minor[128] = "";
   char *contp;
-  const char *type = NULL;
+  char *type = NULL;
   char *sep;
 
   if((1 == sscanf(input, "%255[^=]=", name)) &&
@@ -215,7 +215,7 @@ int formparse(struct OperationConfig *config,
             }
 
             /* now point beyond the content-type specifier */
-            sep = (char *)type + strlen(type_major)+strlen(type_minor)+1;
+            sep = type + strlen(type_major)+strlen(type_minor)+1;
 
             /* there's a semicolon following - we check if it is a filename
                specified and if not we simply assume that it is text that

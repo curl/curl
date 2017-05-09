@@ -420,10 +420,10 @@ GetFileAndPassword(char *nextarg, char **file, char **password)
   cleanarg(nextarg);
 }
 
-ParameterError getparameter(char *flag,    /* f or -long-flag */
-                            char *nextarg, /* NULL if unset */
-                            bool *usedarg, /* set to TRUE if the arg
-                                              has been used */
+ParameterError getparameter(const char *flag, /* f or -long-flag */
+                            char *nextarg,    /* NULL if unset */
+                            bool *usedarg,    /* set to TRUE if the arg
+                                                 has been used */
                             struct GlobalConfig *global,
                             struct OperationConfig *config)
 {
@@ -444,7 +444,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
   if(('-' != flag[0]) ||
      (('-' == flag[0]) && ('-' == flag[1]))) {
     /* this should be a long name */
-    char *word = ('-' == flag[0]) ? flag+2 : flag;
+    const char *word = ('-' == flag[0]) ? flag+2 : flag;
     size_t fnam = strlen(word);
     int numhits = 0;
 
