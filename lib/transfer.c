@@ -1139,6 +1139,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         /* we've waited long enough, continue anyway */
         k->exp100 = EXP100_SEND_DATA;
         k->keepon |= KEEP_SEND;
+        Curl_expire_done(data, EXPIRE_100_TIMEOUT);
         infof(data, "Done waiting for 100-continue\n");
       }
     }
