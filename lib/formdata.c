@@ -96,7 +96,7 @@ AddHttpPost(char *name, size_t namelength,
     post->contenttype = contenttype;
     post->contentheader = contentHeader;
     post->showfilename = showfilename;
-    post->userp = userp,
+    post->userp = userp;
     post->flags = flags | CURL_HTTPPOST_LARGE;
   }
   else
