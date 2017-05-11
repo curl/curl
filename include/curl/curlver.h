@@ -64,11 +64,11 @@
  * timestamp is not stored in git, as the timestamp is properly set in the
  * tarballs by the maketgz script.
  *
- * The format of the date should follow this template:
+ * The format of the date follows this template:
  *
- * "Mon Feb 12 11:35:33 UTC 2007"
+ * "2007-11-23"
  */
-#define LIBCURL_TIMESTAMP "DEV"
+#define LIBCURL_TIMESTAMP "[unreleased]"
 
 #define CURL_VERSION_BITS(x,y,z) ((x)<<16|(y)<<8|z)
 #define CURL_AT_LEAST_VERSION(x,y,z) \
