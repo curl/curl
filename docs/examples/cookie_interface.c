@@ -47,7 +47,8 @@ print_cookies(CURL *curl)
             curl_easy_strerror(res));
     exit(1);
   }
-  nc = cookies, i = 1;
+  nc = cookies;
+  i = 1;
   while(nc) {
     printf("[%d]: %s\n", i, nc->data);
     nc = nc->next;
