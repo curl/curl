@@ -2896,7 +2896,6 @@ multi_addtimeout(struct Curl_easy *data,
   node->eid = eid; /* also marks it as in use */
 
   n = Curl_llist_count(timeoutlist);
-  infof(data, "TIMEOUTS %zd\n", n);
   if(n) {
     /* find the correct spot in the list */
     for(e = timeoutlist->head; e; e = e->next) {
@@ -2939,8 +2938,6 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
     return;
 
   DEBUGASSERT(id < EXPIRE_LAST);
-
-  infof(data, "EXPIRE in %d, id %d\n", (int)milli, id);
 
   set = Curl_tvnow();
   set.tv_sec += (long)(milli/1000);
