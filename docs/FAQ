@@ -118,6 +118,7 @@ FAQ
   7.1 What is PHP/CURL?
   7.2 Who wrote PHP/CURL?
   7.3 Can I perform multiple requests using the same handle?
+  7.4 Does PHP/CURL have dependencies?
 
 ==============================================================================
 
@@ -324,7 +325,7 @@ FAQ
 
   1.11 Why don't you update ca-bundle.crt
 
-  The ca cert bundle that used to be shipped with curl was very outdated and 
+  The ca cert bundle that used to be shipped with curl was very outdated and
   must be replaced with an up-to-date version by anyone who wants to verify
   peers. It is no longer provided by curl. The last curl release that ever
   shipped a ca cert bundle was curl 7.18.0.
@@ -520,13 +521,13 @@ FAQ
 
   3.3 Why doesn't my posting using -F work?
 
-  You can't arbitrarily use -F or -d, the choice between -F or -d depends on the 
-  HTTP operation you need curl to do and what the web server that will receive 
-  your post expects. 
+  You can't arbitrarily use -F or -d, the choice between -F or -d depends on the
+  HTTP operation you need curl to do and what the web server that will receive
+  your post expects.
 
-  If the form you're trying to submit uses the type 'multipart/form-data', then 
-  and only then you must use the -F type. In all the most common cases, you 
-  should use -d which then causes a posting with the type 
+  If the form you're trying to submit uses the type 'multipart/form-data', then
+  and only then you must use the -F type. In all the most common cases, you
+  should use -d which then causes a posting with the type
   'application/x-www-form-urlencoded'.
 
   This is described in some detail in the MANUAL and TheArtOfHttpScripting
@@ -699,8 +700,8 @@ FAQ
 
   CLIENT CERTIFICATE
 
-  The server you communicate with may require that you can provide this in 
-  order to prove that you actually are who you claim to be.  If the server 
+  The server you communicate with may require that you can provide this in
+  order to prove that you actually are who you claim to be.  If the server
   doesn't require this, you don't need a client certificate.
 
   A client certificate is always used together with a private key, and the
@@ -1176,7 +1177,7 @@ FAQ
   The reason for this is that we first generate the request to send using the
   old 1.1 style and show that request in the verbose output, and then we
   convert it over to the binary header-compressed HTTP/2 style. The actual
-  "1.1" part from that request is then not actually used in the transfer. 
+  "1.1" part from that request is then not actually used in the transfer.
   The binary HTTP/2 headers are not human readable.
 
 5. libcurl Issues
@@ -1259,9 +1260,9 @@ FAQ
   libcurl will reuse connections for all transfers that are made using the
   same libcurl handle.
 
-  When you use the easy interface the connection cache is kept within the easy 
-  handle. If you instead use the multi interface, the connection cache will be 
-  kept within the multi handle and will be shared among all the easy handles 
+  When you use the easy interface the connection cache is kept within the easy
+  handle. If you instead use the multi interface, the connection cache will be
+  kept within the multi handle and will be shared among all the easy handles
   that are used within the same multi handle.
 
   5.7 Link errors when building libcurl on Windows!
@@ -1321,7 +1322,7 @@ FAQ
   you want to change name resolver function you must rebuild libcurl and tell
   it to use a different function.
 
-  - The non-IPv6 resolver that can use one of four different host name resolve 
+  - The non-IPv6 resolver that can use one of four different host name resolve
   calls (depending on what your system supports):
 
       A - gethostbyname()
