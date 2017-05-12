@@ -3109,12 +3109,16 @@ static bool SocketIsDead(curl_socket_t sock)
 }
 
 /*
- * IsPipeliningPossible() returns TRUE if the options set would allow
- * pipelining/multiplexing and the connection is using a HTTP protocol.
+ * IsPipeliningPossible()
+ *
+ * Return a bitmask with the available pipelining and multiplexing options for
+ * the given requested connection.
  */
-static bool IsPipeliningPossible(const struct Curl_easy *handle,
-                                 const struct connectdata *conn)
+static int IsPipeliningPossible(const struct Curl_easy *handle,
+                                const struct connectdata *conn)
 {
+  int avail = 0;
+
   /* If a HTTP protocol and pipelining is enabled */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
      (!conn->bits.protoconnstart || !conn->bits.close)) {
@@ -3124,14 +3128,14 @@ static bool IsPipeliningPossible(const struct Curl_easy *handle,
        (handle->set.httpreq == HTTPREQ_GET ||
         handle->set.httpreq == HTTPREQ_HEAD))
       /* didn't ask for HTTP/1.0 and a GET or HEAD */
-      return TRUE;
+      avail |= CURLPIPE_HTTP1;
 
     if(Curl_pipeline_wanted(handle->multi, CURLPIPE_MULTIPLEX) &&
        (handle->set.httpversion >= CURL_HTTP_VERSION_2))
       /* allows HTTP/2 */
-      return TRUE;
+      avail |= CURLPIPE_MULTIPLEX;
   }
-  return FALSE;
+  return avail;
 }
 
 int Curl_removeHandleFromPipeline(struct Curl_easy *handle,
@@ -3418,7 +3422,7 @@ ConnectionExists(struct Curl_easy *data,
   struct connectdata *check;
   struct connectdata *chosen = 0;
   bool foundPendingCandidate = FALSE;
-  bool canPipeline = IsPipeliningPossible(data, needle);
+  int pipe = IsPipeliningPossible(data, needle);
   struct connectbundle *bundle;
 
 #ifdef USE_NTLM
@@ -3434,10 +3438,9 @@ ConnectionExists(struct Curl_easy *data,
   *force_reuse = FALSE;
   *waitpipe = FALSE;
 
-  /* We can't pipe if the site is blacklisted */
-  if(canPipeline && Curl_pipeline_site_blacklisted(data, needle)) {
-    canPipeline = FALSE;
-  }
+  /* We can't pipeline if the site is blacklisted */
+  if((pipe & CURLPIPE_HTTP1) && Curl_pipeline_site_blacklisted(data, needle))
+    pipe &= ~ CURLPIPE_HTTP1;
 
   /* Look up the bundle with all the connections to this
      particular host */
@@ -3457,8 +3460,8 @@ ConnectionExists(struct Curl_easy *data,
            (bundle->multiuse == BUNDLE_MULTIPLEX ?
             "can multiplex" : "serially")));
 
-    /* We can't pipe if we don't know anything about the server */
-    if(canPipeline) {
+    /* We can't pipeline if we don't know anything about the server */
+    if(pipe) {
       if(bundle->multiuse <= BUNDLE_UNKNOWN) {
         if((bundle->multiuse == BUNDLE_UNKNOWN) && data->set.pipewait) {
           infof(data, "Server doesn't support multi-use yet, wait\n");
@@ -3467,18 +3470,18 @@ ConnectionExists(struct Curl_easy *data,
         }
 
         infof(data, "Server doesn't support multi-use (yet)\n");
-        canPipeline = FALSE;
+        pipe = 0;
       }
       if((bundle->multiuse == BUNDLE_PIPELINING) &&
          !Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1)) {
         /* not asked for, switch off */
         infof(data, "Could pipeline, but not asked to!\n");
-        canPipeline = FALSE;
+        pipe = 0;
       }
       else if((bundle->multiuse == BUNDLE_MULTIPLEX) &&
               !Curl_pipeline_wanted(data->multi, CURLPIPE_MULTIPLEX)) {
         infof(data, "Could multiplex, but not asked to!\n");
-        canPipeline = FALSE;
+        pipe = 0;
       }
     }
 
@@ -3499,20 +3502,21 @@ ConnectionExists(struct Curl_easy *data,
 
       pipeLen = check->send_pipe.size + check->recv_pipe.size;
 
-      if(canPipeline) {
+      if(pipe) {
         if(check->bits.protoconnstart && check->bits.close)
           continue;
 
         if(!check->bits.multiplex) {
-          /* If not multiplexing, make sure the pipe has only GET requests */
+          /* If not multiplexing, make sure the connection is fine for HTTP/1
+             pipelining */
           struct Curl_easy* sh = gethandleathead(&check->send_pipe);
           struct Curl_easy* rh = gethandleathead(&check->recv_pipe);
           if(sh) {
-            if(!IsPipeliningPossible(sh, check))
+            if(!(IsPipeliningPossible(sh, check) & CURLPIPE_HTTP1))
               continue;
           }
           else if(rh) {
-            if(!IsPipeliningPossible(rh, check))
+            if(!(IsPipeliningPossible(rh, check) & CURLPIPE_HTTP1))
               continue;
           }
         }
@@ -3620,7 +3624,7 @@ ConnectionExists(struct Curl_easy *data,
         }
       }
 
-      if(!canPipeline && check->inuse)
+      if(!pipe && check->inuse)
         /* this request can't be pipelined but the checked connection is
            already in use so we skip it */
         continue;
@@ -3751,7 +3755,7 @@ ConnectionExists(struct Curl_easy *data,
           continue;
         }
 #endif
-        if(canPipeline) {
+        if(pipe) {
           /* We can pipeline if we want to. Let's continue looking for
              the optimal connection to use, i.e the shortest pipe that is not
              blacklisted. */
