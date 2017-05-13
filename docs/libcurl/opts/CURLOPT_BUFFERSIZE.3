@@ -37,7 +37,8 @@ This is just treated as a request, not an order. You cannot be guaranteed to
 actually get the given size.
 
 This buffer size is by default \fICURL_MAX_WRITE_SIZE\fP (16kB). The maximum
-buffer size allowed to set is \fICURL_MAX_READ_SIZE\fP (512kB).
+buffer size allowed to be set is \fICURL_MAX_READ_SIZE\fP (512kB). The minimum
+buffer size allowed to be set is 1024.
 .SH DEFAULT
 CURL_MAX_WRITE_SIZE (16kB)
 .SH PROTOCOLS

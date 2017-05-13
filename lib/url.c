@@ -144,6 +144,15 @@ static unsigned int get_protocol_family(unsigned int protocol);
 #define READBUFFER_MAX  CURL_MAX_READ_SIZE
 #define READBUFFER_MIN  1024
 
+/* Some parts of the code (e.g. chunked encoding) assume this buffer has at
+ * more than just a few bytes to play with. Don't let it become too small or
+ * bad things will happen.
+ */
+#if READBUFFER_SIZE < READBUFFER_MIN
+# error READBUFFER_SIZE is too small
+#endif
+
+
 /*
  * Protocol table.
  */
