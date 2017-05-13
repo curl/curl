@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 CURLE_PARTIAL_FILE
 FAILURE
+chunked Transfer-Encoding
 </keywords>
 </info>
 #
@@ -37,7 +38,7 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 http
 </server>
  <name>
-HTTP GET with chunked Transfer-Encoding closed pre-maturely
+HTTP GET with chunked Transfer-Encoding closed prematurely
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/207

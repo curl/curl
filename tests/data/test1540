@@ -4,7 +4,7 @@
 HTTP
 HTTP GET
 CURLPAUSE_RECV
-chunked encoding
+chunked Transfer-Encoding
 Trailer:
 </keywords>
 </info>

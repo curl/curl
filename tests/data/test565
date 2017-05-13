@@ -4,6 +4,7 @@
 HTTP
 HTTP POST
 HTTP Digest auth
+chunked Transfer-Encoding
 </keywords>
 </info>
 #
