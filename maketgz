@@ -67,8 +67,8 @@ if test -z "$only"; then
     PLIST="$PLIST$ext"
 fi
 
-# requires a date command that knows -u for UTC time zone
-datestamp=`LC_TIME=C date -u`
+# requires a date command that knows + for format
+datestamp=`date +"%F"`
 
 # Replace version number in header file:
 sed -i -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g' \
