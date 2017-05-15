@@ -43,7 +43,7 @@ if(curl) {
   res = curl_easy_perform(curl);
 
   if(!res) {
-    /* extract the content-type */
+    /* extract the available authentication types */
     long auth;
     res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_AVAIL, &auth);
     if(!res) {
