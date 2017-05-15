@@ -48,10 +48,33 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
                            size_t tmplen,
                            unsigned char *md5sum, /* output */
                            size_t md5len);
+void Curl_darwinssl_sha256sum(unsigned char *tmp, /* input */
+                           size_t tmplen,
+                           unsigned char *sha256sum, /* output */
+                           size_t sha256len);
 bool Curl_darwinssl_false_start(void);
 
 /* Set the API backend definition to SecureTransport */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_DARWINSSL
+
+/* pinned public key support tests */
+
+/* version 1 supports macOS 10.12+ and iOS 10+ */
+#if ((TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000) || \
+    (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED  >= 101200))
+#define DARWIN_SSL_PINNEDPUBKEY_V1 1
+#endif
+
+/* version 2 supports MacOSX 10.7+ */
+#if (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070)
+#define DARWIN_SSL_PINNEDPUBKEY_V2 1
+#endif
+
+#if defined(DARWIN_SSL_PINNEDPUBKEY_V1) || defined(DARWIN_SSL_PINNEDPUBKEY_V2)
+/* this backend supports CURLOPT_PINNEDPUBLICKEY */
+#define DARWIN_SSL_PINNEDPUBKEY 1
+#define have_curlssl_pinnedpubkey 1
+#endif /* DARWIN_SSL_PINNEDPUBKEY */
 
 /* API setup for SecureTransport */
 #define curlssl_init() (1)
@@ -70,6 +93,7 @@ bool Curl_darwinssl_false_start(void);
 #define curlssl_data_pending(x,y) Curl_darwinssl_data_pending(x, y)
 #define curlssl_random(x,y,z) ((void)x, Curl_darwinssl_random(y,z))
 #define curlssl_md5sum(a,b,c,d) Curl_darwinssl_md5sum(a,b,c,d)
+#define curlssl_sha256sum(a,b,c,d) Curl_darwinssl_sha256sum(a,b,c,d)
 #define curlssl_false_start() Curl_darwinssl_false_start()
 
 #endif /* USE_DARWINSSL */

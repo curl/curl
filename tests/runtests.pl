@@ -2412,6 +2412,7 @@ sub checksystem {
            }
            elsif ($libcurl =~ /securetransport/i) {
                $has_darwinssl=1;
+               $has_sslpinning=1;
                $ssllib="DarwinSSL";
            }
            elsif ($libcurl =~ /BoringSSL/i) {
