@@ -113,6 +113,61 @@
 #define ioErr -36
 #define paramErr -50
 
+
+/* Several symbols are only available in newer Apple SDKs and will fire
+ * warnings about "partial availability" if you build this code with a
+ * earlier OS target. If one of these warnings arises:
+ * - Make sure you always check that symbol against NULL, which it will
+ * be when running on an OS that didn't offer the symbol. If NULL, respond
+ * appropriately: use a fallback, don't do something, report an error.
+ * - Add that symbol to the list below this comment. Clang reports that
+ * redeclaring the symbol is the appropriate way to pacify the warning,
+ * as it shows you probably meant to reference that symbol, even to check
+ * it for NULL. */
+__nullable CFStringRef SecCertificateCopyLongDescription(
+    CFAllocatorRef __nullable alloc, SecCertificateRef certificate,
+    CFErrorRef *error) __attribute__((weak_import));
+CFStringRef SecCertificateCopySubjectSummary(SecCertificateRef certificate)
+    __attribute__((weak_import));
+OSStatus SecItemCopyMatching(CFDictionaryRef query,
+    CFTypeRef * __nullable CF_RETURNS_RETAINED result)
+    __attribute__((weak_import));
+SecPolicyRef SecPolicyCreateSSL(Boolean server,
+    CFStringRef __nullable hostname) __attribute__((weak_import));
+__nullable SSLContextRef SSLCreateContext(CFAllocatorRef __nullable alloc,
+    SSLProtocolSide protocolSide, SSLConnectionType connectionType)
+    __attribute__((weak_import));
+OSStatus SSLSetProtocolVersionMax(SSLContextRef context,
+    SSLProtocol maxVersion) __attribute__((weak_import));
+OSStatus SSLSetProtocolVersionMin(SSLContextRef context,
+    SSLProtocol minVersion) __attribute__((weak_import));
+OSStatus SSLSetSessionOption(SSLContextRef context, SSLSessionOption option,
+    Boolean value) __attribute__((weak_import));
+__nullable SecCertificateRef SecCertificateCreateWithData(
+    CFAllocatorRef __nullable allocator, CFDataRef data)
+    __attribute__((weak_import));
+OSStatus SSLCopyPeerTrust(SSLContextRef context,
+    SecTrustRef * __nonnull CF_RETURNS_RETAINED trust)
+    __attribute__((weak_import));
+OSStatus SecTrustSetAnchorCertificatesOnly(SecTrustRef trust,
+    Boolean anchorCertificatesOnly) __attribute__((weak_import));
+OSStatus SecTrustEvaluateAsync(SecTrustRef trust,
+    dispatch_queue_t __nullable queue,
+    SecTrustCallback result) __attribute__((weak_import));
+CFIndex SecTrustGetCertificateCount(SecTrustRef trust)
+    __attribute__((weak_import));
+__nullable SecCertificateRef SecTrustGetCertificateAtIndex(SecTrustRef trust,
+    CFIndex ix) __attribute__((weak_import));
+extern const CFStringRef kSecClassIdentity __attribute__((weak_import));
+extern const CFStringRef kSecClass __attribute__((weak_import));
+extern const CFStringRef kSecReturnRef __attribute__((weak_import));
+extern const CFStringRef kSecMatchLimitAll __attribute__((weak_import));
+extern const CFStringRef kSecMatchLimit __attribute__((weak_import));
+extern const CFStringRef kSecMatchPolicy __attribute__((weak_import));
+extern const CFStringRef kSecAttrLabel __attribute__((weak_import));
+/* end of list of partial availability redeclarations. */
+
+
 /* The following two functions were ripped from Apple sample code,
  * with some modifications: */
 static OSStatus SocketRead(SSLConnectionRef connection,

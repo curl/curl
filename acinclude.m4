@@ -1872,6 +1872,12 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
 #include <time.h>
 #endif
 #endif
+#ifdef __APPLE__
+#ifdef __clang__
+/* avoid problems with -Werror=partial-availablity -mmacosx-version-min=10.5 */
+#pragma clang diagnostic ignored "-Wpartial-availability"
+#endif
+#endif
       ]],[[
         struct timespec ts;
         (void)clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -1924,6 +1930,12 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
 #else
 #ifdef HAVE_TIME_H
 #include <time.h>
+#endif
+#endif
+#ifdef __APPLE__
+#ifdef __clang__
+/* avoid problems with -Werror=partial-availablity -mmacosx-version-min=10.5 */
+#pragma clang diagnostic ignored "-Wpartial-availability"
 #endif
 #endif
           ]],[[
@@ -1979,6 +1991,12 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
 #else
 #ifdef HAVE_TIME_H
 #include <time.h>
+#endif
+#endif
+#ifdef __APPLE__
+#ifdef __clang__
+/* avoid problems with -Werror=partial-availablity -mmacosx-version-min=10.5 */
+#pragma clang diagnostic ignored "-Wpartial-availability"
 #endif
 #endif
         ]],[[

@@ -48,6 +48,12 @@ struct timeval curlx_tvnow(void)
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
 
+#ifdef __APPLE__
+/* redeclare without the availability flag, since we check the weak symbol. */
+int clock_gettime(clockid_t __clock_id, struct timespec *__tp)
+    __attribute__((weak_import));
+#endif
+
 struct timeval curlx_tvnow(void)
 {
   /*
@@ -59,7 +65,7 @@ struct timeval curlx_tvnow(void)
   */
   struct timeval now;
   struct timespec tsnow;
-  if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
+  if((NULL!=clock_gettime) && (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
     now.tv_sec = tsnow.tv_sec;
     now.tv_usec = tsnow.tv_nsec / 1000;
   }
