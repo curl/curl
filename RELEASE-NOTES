@@ -8,7 +8,7 @@ Curl and libcurl 7.54.1
 
 This release includes the following changes:
 
- o
+ o curl: show the libcurl release date in --version output [32]
 
 This release includes the following bugfixes:
 
@@ -63,6 +63,16 @@ This release includes the following bugfixes:
  o tool_parsecfg: fix -Wcast-qual warning
  o sendrecv: fix MinGW-w64 warning
  o test537: use correct variable type [26]
+ o rand: treat fake entropy the same regardless of endianness [27]
+ o curl: generate the --help output [28]
+ o tests: removed redundant --trace-ascii arguments
+ o multi: assign IDs to all timers and make each timer singleton
+ o multi: use a fixed array of timers instead of malloc [29]
+ o mbedtls: Support server renegotiation request [30]
+ o pipeline: fix mistakenly trying to pipeline POSTs [31]
+ o lib510: don't write past the end of the buffer if it's too small
+ o CURLOPT_HTTPPROXYTUNNEL.3: clarify, add example
+ o SecureTransport/DarwinSSL: Implement public key pinning [33]
 
 This release includes the following known bugs:
 
@@ -71,10 +81,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alan Jenkins, canavan at github, Dan Fandrich, Daniel Stenberg, Gisle Vanem,
-  Helmut K. C. Tessarek, Kai Engert, Kamil Dudka, Kevin Ji, Marcel Raad,
-  Martin Kepplinger, Ray Satiro, Richard Hsu, Thomas Klausner,
-  (14 contributors)
+  Alan Jenkins, Brian Childs, canavan at github, Dan Fandrich, Daniel Stenberg,
+  Gisle Vanem, Helmut K. C. Tessarek, Kai Engert, Kamil Dudka, Kevin Ji,
+  Marcel Raad, Martin Kepplinger, Michael Kaufmann, Ray Satiro, Richard Hsu,
+  Ron Eldor, stootill at github, Thomas Klausner, Travis Burtrum,
+  (19 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -106,3 +117,10 @@ References to bug reports and discussions on issues:
  [24] = https://curl.haxx.se/bug/?i=1463
  [25] = https://curl.haxx.se/bug/?i=1471
  [26] = https://curl.haxx.se/bug/?i=1469
+ [27] = https://curl.haxx.se/bug/?i=1315
+ [28] = https://curl.haxx.se/bug/?i=1465
+ [29] = https://curl.haxx.se/bug/?i=1472
+ [30] = https://curl.haxx.se/bug/?i=1475
+ [31] = https://curl.haxx.se/bug/?i=1481
+ [32] = https://curl.haxx.se/bug/?i=1474
+ [33] = https://curl.haxx.se/bug/?i=1400
