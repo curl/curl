@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -414,8 +414,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
   char *serverdata;
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
   char *chlg = NULL;
   size_t chlglen = 0;
 #endif
