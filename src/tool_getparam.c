@@ -1602,12 +1602,42 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case 'H':
       /* A custom header to append to a list */
-      if(subletter == 'p') /* --proxy-header */
-        err = add2list(&config->proxyheaders, nextarg);
-      else
-        err = add2list(&config->headers, nextarg);
-      if(err)
-        return err;
+      if(nextarg[0] == '@') {
+        /* read many headers from a file or stdin */
+        char *string;
+        size_t len;
+        bool use_stdin = !strcmp(&nextarg[1], "-");
+        FILE *file = use_stdin?stdin:fopen(&nextarg[1], FOPEN_READTEXT);
+        if(!file)
+          warnf(global, "Failed to open %s!\n", &nextarg[1]);
+        else {
+          if(PARAM_OK == file2memory(&string, &len, file)) {
+            /* Allow strtok() here since this isn't used threaded */
+            /* !checksrc! disable BANNEDFUNC 2 */
+            char *h = strtok(string, "\r\n");
+            while(h) {
+              if(subletter == 'p') /* --proxy-header */
+                err = add2list(&config->proxyheaders, h);
+              else
+                err = add2list(&config->headers, h);
+              if(err)
+                return err;
+              h = strtok(NULL, "\r\n");
+            }
+            free(string);
+          }
+          if(!use_stdin)
+            fclose(file);
+        }
+      }
+      else {
+        if(subletter == 'p') /* --proxy-header */
+          err = add2list(&config->proxyheaders, nextarg);
+        else
+          err = add2list(&config->headers, nextarg);
+        if(err)
+          return err;
+      }
       break;
     case 'i':
       config->include_headers = toggle; /* include the headers as well in the
