@@ -1404,7 +1404,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     else
       err = CopyIdentityWithLabel(ssl_cert, &cert_and_key);
 
-    if(err == noErr) {
+    if(err == noErr && cert_and_key) {
       SecCertificateRef cert = NULL;
       CFTypeRef certs_c[1];
       CFArrayRef certs;
