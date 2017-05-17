@@ -1,5 +1,6 @@
 Long: oauth2-bearer
 Help: OAuth 2 Bearer Token
+Arg: <token>
 Protocols: IMAP POP3 SMTP
 ---
 Specify the Bearer Token for OAUTH 2.0 server authentication. The Bearer Token
