@@ -129,7 +129,7 @@ if($c)
     my $content = join("", @out);
     my $gzippedContent;
     IO::Compress::Gzip::gzip(
-        \$content, \$gzippedContent, Level => 9, TextFlag => 1) or die "gzip failed:";
+        \$content, \$gzippedContent, Level => 9, TextFlag => 1, Time=>0) or die "gzip failed:";
     $gzip = length($content);
     $gzipped = length($gzippedContent);
 
