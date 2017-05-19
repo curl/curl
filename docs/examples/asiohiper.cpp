@@ -90,7 +90,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
     timer.expires_from_now(boost::posix_time::millisec(timeout_ms));
     timer.async_wait(boost::bind(&timer_cb, _1, g));
   }
-  else {
+  else if(timeout_ms == 0) {
     /* call timeout function immediately */
     boost::system::error_code error; /*success*/
     timer_cb(error, g);
