@@ -73,6 +73,14 @@ This release includes the following bugfixes:
  o lib510: don't write past the end of the buffer if it's too small
  o CURLOPT_HTTPPROXYTUNNEL.3: clarify, add example
  o SecureTransport/DarwinSSL: Implement public key pinning [33]
+ o curl.1: clarify --config
+ o curl_sasl: fix build error with CURL_DISABLE_CRYPTO_AUTH + USE_NTLM [34]
+ o darwinssl: Fix exception when processing a client-side certificate [35]
+ o curl.1: mention --oauth2-bearer's <token> argument
+ o mkhelp.pl: do not add current time into curl binary [36]
+ o asiohiper.cpp / evhiperfifo.c: deal with negative timerfunction input [37]
+ o ssh: fix memory leak in disconnect due to timeout [38]
+ o tests: stabilize test 1034 [39]
 
 This release includes the following known bugs:
 
@@ -81,11 +89,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alan Jenkins, Brian Childs, canavan at github, Dan Fandrich, Daniel Stenberg,
-  Gisle Vanem, Helmut K. C. Tessarek, Kai Engert, Kamil Dudka, Kevin Ji,
-  Marcel Raad, Martin Kepplinger, Michael Kaufmann, Ray Satiro, Richard Hsu,
+  Alan Jenkins, Bernhard M. Wiedemann, Brian Childs, canavan at github,
+  Dan Fandrich, Daniel Stenberg, Gisle Vanem, Helmut K. C. Tessarek,
+  Joel Depooter, Kai Engert, Kamil Dudka, Kevin Ji, Marcel Raad,
+  Martin Kepplinger, Michael Kaufmann, Nick Zitzmann, Ray Satiro, Richard Hsu,
   Ron Eldor, stootill at github, Thomas Klausner, Travis Burtrum,
-  (19 contributors)
+  wyattoday at github,
+  (23 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -124,3 +134,9 @@ References to bug reports and discussions on issues:
  [31] = https://curl.haxx.se/bug/?i=1481
  [32] = https://curl.haxx.se/bug/?i=1474
  [33] = https://curl.haxx.se/bug/?i=1400
+ [34] = https://curl.haxx.se/bug/?i=1487
+ [35] = https://curl.haxx.se/bug/?i=1450
+ [36] = https://curl.haxx.se/bug/?i=1490
+ [37] = https://curl.haxx.se/bug/?i=1253
+ [38] = https://curl.haxx.se/bug/?i=1479
+ [39] = https://curl.haxx.se/bug/?i=1488
