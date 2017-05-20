@@ -615,12 +615,18 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         }
       }
 
-      if(!ev->msbump)
+      if(!ev->msbump) {
         /* If nothing updated the timeout, we decrease it by the spent time.
          * If it was updated, it has the new timeout time stored already.
          */
-        ev->ms += (long)curlx_tvdiff(after, before);
-
+        time_t timediff = curlx_tvdiff(after, before);
+        if(timediff > 0) {
+          if(timediff > ev->ms)
+            ev->ms = 0;
+          else
+            ev->ms -= (long)timediff;
+        }
+      }
     }
     else
       return CURLE_RECV_ERROR;

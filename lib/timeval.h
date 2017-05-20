@@ -46,8 +46,6 @@ time_t curlx_tvdiff(struct timeval t1, struct timeval t2);
  */
 double curlx_tvdiff_secs(struct timeval t1, struct timeval t2);
 
-time_t Curl_tvlong(struct timeval t1);
-
 /* These two defines below exist to provide the older API for library
    internals only. */
 #define Curl_tvnow() curlx_tvnow()

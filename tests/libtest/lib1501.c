@@ -31,22 +31,7 @@
 
 /* 500 milliseconds allowed. An extreme number but lets be really conservative
    to allow old and slow machines to run this test too */
-#define MAX_BLOCKED_TIME_US 500000
-
-/* return the number of microseconds between two time stamps */
-static int elapsed(struct timeval *before,
-                   struct timeval *after)
-{
-  ssize_t result;
-
-  result = (after->tv_sec - before->tv_sec) * 1000000 +
-    after->tv_usec - before->tv_usec;
-  if(result < 0)
-    result = 0;
-
-  return curlx_sztosi(result);
-}
-
+#define MAX_BLOCKED_TIME_MS 500
 
 int test(char *URL)
 {
@@ -80,7 +65,7 @@ int test(char *URL)
     int maxfd = -99;
     struct timeval before;
     struct timeval after;
-    int e;
+    long e;
 
     timeout.tv_sec = 0;
     timeout.tv_usec = 100000L; /* 100 ms */
@@ -105,10 +90,10 @@ int test(char *URL)
     abort_on_test_timeout();
 
     after = tutil_tvnow();
-    e = elapsed(&before, &after);
-    fprintf(stderr, "pong = %d\n", e);
+    e = tutil_tvdiff(after, before);
+    fprintf(stderr, "pong = %ld\n", e);
 
-    if(e > MAX_BLOCKED_TIME_US) {
+    if(e > MAX_BLOCKED_TIME_MS) {
       res = 100;
       break;
     }

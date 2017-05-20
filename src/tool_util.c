@@ -121,8 +121,8 @@ struct timeval tool_tvnow(void)
  */
 long tool_tvdiff(struct timeval newer, struct timeval older)
 {
-  return (newer.tv_sec-older.tv_sec)*1000+
-    (newer.tv_usec-older.tv_usec)/1000;
+  return (long)(newer.tv_sec-older.tv_sec)*1000+
+    (long)(newer.tv_usec-older.tv_usec)/1000;
 }
 
 /*
@@ -137,10 +137,3 @@ double tool_tvdiff_secs(struct timeval newer, struct timeval older)
       (double)(newer.tv_usec-older.tv_usec)/1000000.0;
   return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
 }
-
-/* return the number of seconds in the given input timeval struct */
-long tool_tvlong(struct timeval t1)
-{
-  return t1.tv_sec;
-}
-
