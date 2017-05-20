@@ -28,10 +28,12 @@ include Makefile.inc
 
 man_DISTMANS = $(man_MANS:.3=.3.dist)
 
+man_DISTMANS = $(man_MANS:.3=.3.dist)
+
 HTMLPAGES = $(man_MANS:.3=.html)
 
 PDFPAGES = $(man_MANS:.3=.pdf)
-
+ 
 m4macrodir = $(datadir)/aclocal
 dist_m4macro_DATA = libcurl.m4
 

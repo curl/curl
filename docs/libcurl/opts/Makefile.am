@@ -26,6 +26,8 @@ include Makefile.inc
 
 man_DISTMANS = $(man_MANS:.3=.3.dist)
 
+man_DISTMANS = $(man_MANS:.3=.3.dist)
+
 HTMLPAGES = $(man_MANS:.3=.html)
 
 PDFPAGES = $(man_MANS:.3=.pdf)
