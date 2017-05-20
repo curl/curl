@@ -1540,8 +1540,16 @@ static CURLcode smtp_parse_url_path(struct connectdata *conn)
 
   /* Calculate the path if necessary */
   if(!*path) {
-    if(!Curl_gethostname(localhost, sizeof(localhost)))
+    if(!Curl_gethostname(localhost, sizeof(localhost))) {
+      /* Sanitize the name, replace invalid chars with '_' */
+      char *p;
+      for(p = localhost; *p; p++)
+        if(!(*p >= 'a' && *p <= 'z') && !(*p >= 'A' && *p <= 'Z') &&
+           !(*p >= '0' && *p <= '9') && *p != '-' && *p != '_')
+          *p = '_';
+
       path = localhost;
+    }
     else
       path = "localhost";
   }
