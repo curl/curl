@@ -596,7 +596,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
     /* Ignore the timeout when signals are disabled */
     timeout = 0;
   else
-    timeout = timeoutms;
+    timeout = (timeoutms > LONG_MAX) ? LONG_MAX : (long)timeoutms;
 
   if(!timeout)
     /* USE_ALARM_TIMEOUT defined, but no timeout actually requested */
@@ -688,10 +688,11 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    unsigned long elapsed_ms = Curl_tvdiff(Curl_tvnow(), conn->created);
+    unsigned long elapsed_secs = (unsigned long) (Curl_tvdiff(Curl_tvnow(),
+                                   conn->created) / 1000);
 
     /* the alarm period is counted in even number of seconds */
-    unsigned long alarm_set = prev_alarm - elapsed_ms/1000;
+    unsigned long alarm_set = prev_alarm - elapsed_secs;
 
     if(!alarm_set ||
        ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {

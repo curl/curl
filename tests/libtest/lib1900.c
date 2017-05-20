@@ -167,7 +167,6 @@ int test(char *URL)
   for(;;) {
     struct timeval interval;
     struct timeval now;
-    long int msnow, mslast;
     fd_set rd, wr, exc;
     int maxfd = -99;
     long timeout;
@@ -177,9 +176,7 @@ int test(char *URL)
 
     if(handlenum < num_handles) {
       now = tutil_tvnow();
-      msnow = now.tv_sec * 1000 + now.tv_usec / 1000;
-      mslast = last_handle_add.tv_sec * 1000 + last_handle_add.tv_usec / 1000;
-      if((msnow - mslast) >= urltime[handlenum]) {
+      if(tutil_tvdiff(now, last_handle_add) >= urltime[handlenum]) {
         fprintf(stdout, "Adding handle %d\n", handlenum);
         setup_handle(URL, m, handlenum);
         last_handle_add = now;

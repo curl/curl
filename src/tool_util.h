@@ -45,12 +45,10 @@ long tool_tvlong(struct timeval t1);
 #undef tvnow
 #undef tvdiff
 #undef tvdiff_secs
-#undef tvlong
 
 #define tvnow()           tool_tvnow()
 #define tvdiff(a,b)       tool_tvdiff((a), (b))
 #define tvdiff_secs(a,b)  tool_tvdiff_secs((a), (b))
-#define tvlong(a)         tool_tvlong((a))
 
 #endif /* HEADER_CURL_TOOL_UTIL_H */
 
