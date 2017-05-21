@@ -387,6 +387,51 @@ CURLcode curl_easy_setopt(struct Curl_easy *data, CURLoption tag, ...)
   return result;
 }
 
+CURL_EXTERN CURLcode curl_easy_setopt_bool(CURL *curl, CURLoption option, int value)
+{
+  return curl_easy_setopt(curl, option, value == 1 ? 1L : 0L);
+}
+
+CURL_EXTERN CURLcode curl_easy_setopt_headers(CURL *curl, struct curl_slist *headers)
+{
+    return curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+}
+
+CURL_EXTERN CURLcode curl_easy_setopt_int(CURL *curl, CURLoption option, long data)
+{
+    return curl_easy_setopt(curl, option, data);
+}
+
+CURL_EXTERN CURLcode curl_easy_setopt_string(CURL *curl, CURLoption option, char *data)
+{
+    return curl_easy_setopt(curl, option, data);
+}
+
+CURL_EXTERN CURLcode curl_easy_setopt_read_function(CURL *curl, void *userData,
+    size_t (*read_cb) (char *buffer, size_t size, size_t nitems,
+      void *userdata)) 
+{
+  CURLcode rc = curl_easy_setopt(curl, CURLOPT_READDATA, userData);
+  if  (rc == CURLE_OK) {
+    rc = curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
+  }
+  return rc;
+}
+
+CURL_EXTERN CURLcode curl_easy_setopt_write_function(CURL *curl, void *userData,
+    size_t (*write_cb) (char *buffer, size_t size, size_t nitems,
+      void *userdata)) 
+{
+  CURLcode rc = curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+  if  (rc == CURLE_OK)  {
+    rc = curl_easy_setopt(curl, CURLOPT_WRITEDATA, userData);
+    if  (rc == CURLE_OK) {
+      rc = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    }
+  }
+  return rc;
+}
+
 #ifdef CURLDEBUG
 
 struct socketmonitor {
@@ -851,6 +896,16 @@ CURLcode curl_easy_getinfo(struct Curl_easy *data, CURLINFO info, ...)
 
   va_end(arg);
   return result;
+}
+
+CURLcode curl_easy_getinfo_string(CURL *curl, CURLINFO info, char **data)
+{
+  return curl_easy_getinfo(curl, info, data);
+}
+
+CURLcode curl_easy_getinfo_long(CURL *curl, CURLINFO info, long *data)
+{
+  return curl_easy_getinfo(curl, info, data);    
 }
 
 /*

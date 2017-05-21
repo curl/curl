@@ -27,6 +27,17 @@ extern "C" {
 
 CURL_EXTERN CURL *curl_easy_init(void);
 CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
+CURL_EXTERN CURLcode curl_easy_setopt_bool(CURL *curl, CURLoption option, int value);
+CURL_EXTERN CURLcode curl_easy_setopt_headers(CURL *curl, struct curl_slist *headers);
+CURL_EXTERN CURLcode curl_easy_setopt_int(CURL *curl, CURLoption option, long data);
+CURL_EXTERN CURLcode curl_easy_setopt_string(CURL *curl, CURLoption option, char *data);
+CURL_EXTERN CURLcode curl_easy_setopt_read_function(CURL *curl, void *userData,
+    size_t (*read_cb) (char *buffer, size_t size, size_t nitems,
+      void *userdata));
+CURL_EXTERN CURLcode curl_easy_setopt_write_function(CURL *curl, void *userData,
+    size_t (*write_cb) (char *buffer, size_t size, size_t nitems,
+      void *userdata));
+
 CURL_EXTERN CURLcode curl_easy_perform(CURL *curl);
 CURL_EXTERN void curl_easy_cleanup(CURL *curl);
 
@@ -44,7 +55,8 @@ CURL_EXTERN void curl_easy_cleanup(CURL *curl);
  * transfer is completed.
  */
 CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
-
+CURL_EXTERN CURLcode curl_easy_getinfo_string(CURL *curl, CURLINFO info, char **data);
+CURL_EXTERN CURLcode curl_easy_getinfo_long(CURL *curl, CURLINFO info, long *data);
 
 /*
  * NAME curl_easy_duphandle()
