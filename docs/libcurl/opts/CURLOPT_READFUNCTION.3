@@ -64,6 +64,9 @@ internal read function will be used. It is doing an fread() on the FILE *
 userdata set with \fICURLOPT_READDATA(3)\fP.
 .SH DEFAULT
 The default internal read callback is fread().
+
+\fBNote\fP: fread() returns the number of items it read but not the bytes, no
+worries, because the argument \fIsize\fP is always 1.
 .SH PROTOCOLS
 This is used for all protocols when doing uploads.
 .SH EXAMPLE
