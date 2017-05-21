@@ -3247,6 +3247,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           Curl_pgrsSetDownloadSize(data, k->size);
           k->maxdownload = k->size;
         }
+        else if (data->state.this_is_a_follow)
+          /* We are redirected, clear previous content-length anyway */
+          Curl_pgrsSetDownloadSize(data, k->size);
 
         /* If max download size is *zero* (nothing) we already have
            nothing and can safely return ok now!  But for HTTP/2, we'd
