@@ -327,7 +327,7 @@ RESOURCE = libcurl.res
 all: $(libcurl_a_LIBRARY) $(libcurl_dll_LIBRARY)
 
 $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
-	@$(call DEL, $@)
+	@-$(call DEL, $@)
 	$(AR) cru $@ $(libcurl_a_OBJECTS)
 	$(RANLIB) $@
 	$(STRIP) $@
@@ -335,7 +335,7 @@ $(libcurl_a_LIBRARY): $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 # remove the last line above to keep debug info
 
 $(libcurl_dll_LIBRARY): $(libcurl_a_OBJECTS) $(RESOURCE) $(libcurl_dll_DEPENDENCIES)
-	@$(call DEL, $@)
+	@-$(call DEL, $@)
 	$(CC) $(LDFLAGS) -shared -o $@ \
 	  -Wl,--output-def,$(@:.dll=.def),--out-implib,$(libcurl_dll_a_LIBRARY) \
 	  $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS)
