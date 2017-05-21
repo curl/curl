@@ -611,6 +611,11 @@ int netware_init(void);
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS) && \
+    defined(USE_WINDOWS_SSPI)
+#include <wincrypt.h>  /* for CRYPT_E_REVOKED macro */
+#endif
+
 /* Single point where USE_SPNEGO definition might be defined */
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
