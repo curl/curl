@@ -410,7 +410,7 @@ if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
 #  AllowTcpForwarding               : OpenSSH 2.3.0 and later
 #  AllowUsers                       : OpenSSH 1.2.1 and later
 #  AuthorizedKeysFile               : OpenSSH 2.9.9 and later
-#  AuthorizedKeysFile2              : OpenSSH 2.9.9 and later
+#  AuthorizedKeysFile2              : OpenSSH 2.9.9 - 5.8.0 
 #  Banner                           : OpenSSH 2.5.0 and later
 #  ChallengeResponseAuthentication  : OpenSSH 2.5.0 and later
 #  Ciphers                          : OpenSSH 2.1.0 and later [3]
@@ -499,7 +499,6 @@ push @cfgarr, 'DenyGroups';
 push @cfgarr, 'AllowGroups';
 push @cfgarr, '#';
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
-push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
 push @cfgarr, "HostKey $hstprvkeyf_config";
 push @cfgarr, "PidFile $pidfile_config";
 push @cfgarr, '#';
@@ -643,12 +642,18 @@ push @cfgarr, '#';
 #***************************************************************************
 # Options that might be supported or not in sshd OpenSSH 2.9.9 and later
 #
+my $sshd_cfg_ListenAddress_pos = 13;
+if(sshd_supports_opt('AuthorizedKeysFile2',"$clipubkeyf_config")) {
+    # Place next to AuthorizedKeysFile
+    splice @cfgarr, 9, 0, "AuthorizedKeysFile2 $clipubkeyf_config";
+    $sshd_cfg_ListenAddress_pos++;
+}
 if(sshd_supports_opt('AcceptEnv','')) {
     push @cfgarr, 'AcceptEnv';
 }
 if(sshd_supports_opt('AddressFamily','any')) {
     # Address family must be specified before ListenAddress
-    splice @cfgarr, 14, 0, 'AddressFamily any';
+    splice @cfgarr, $sshd_cfg_ListenAddress_pos, 0, 'AddressFamily any';
 }
 if(sshd_supports_opt('Compression','no')) {
     push @cfgarr, 'Compression no';
