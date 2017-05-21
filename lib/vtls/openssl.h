@@ -120,7 +120,8 @@ bool Curl_ossl_cert_status_request(void);
 #define curlssl_cert_status_request() Curl_ossl_cert_status_request()
 
 #define DEFAULT_CIPHER_SELECTION \
-  "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"
+  "ECDHE-RSA-AES128-GCM-SHA256:" \
+  "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4"
 
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */
