@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 
-my $curl = $ARGV[0] || 'curl';
+my $curl = $ARGV[0] || '../src/curl';
 
 my $regex = '\s+(?:(-[^\s]+),\s)?(--[^\s]+)\s([^\s.]+)?\s+(.*)';
 my @opts = parse_main_opts('--help', $regex);
