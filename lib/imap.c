@@ -733,12 +733,12 @@ static CURLcode imap_perform_fetch(struct connectdata *conn)
 
   /* Send the FETCH command */
   if(imap->partial)
-    result = imap_sendf(conn, "FETCH %s BODY[%s]<%s>",
+    result = imap_sendf(conn, "UID FETCH %s BODY[%s]<%s>",
                         imap->uid,
                         imap->section ? imap->section : "",
                         imap->partial);
   else
-    result = imap_sendf(conn, "FETCH %s BODY[%s]",
+    result = imap_sendf(conn, "UID FETCH %s BODY[%s]",
                         imap->uid,
                         imap->section ? imap->section : "");
 
