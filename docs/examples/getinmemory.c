@@ -53,7 +53,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   mem->size += realsize;
   mem->memory[mem->size] = 0;
 
-  return realsize;
+  return nmemb;
 }
 
 int main(void)
