@@ -31,6 +31,7 @@
 
 #ifdef USE_POLARSSL
 
+#include <polarssl/compat-1.2.h>
 #include <polarssl/net.h>
 #include <polarssl/ssl.h>
 #include <polarssl/certs.h>
