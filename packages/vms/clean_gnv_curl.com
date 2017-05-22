@@ -105,9 +105,6 @@ $!
 $ file = "lcl_root:[...]*.lai"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.include.curl]curlbuild.h_old"
-$ if f$search(file) .nes. "" then delete 'file';*
-$!
 $ file = "lcl_root:[.packages.vms]curl-*_original_src.bck"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
@@ -164,9 +161,6 @@ $ file = "lcl_root:[]curl-config."
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $ file = "lcl_root:[]config.h"
-$ if f$search(file) .nes. "" then delete 'file';*
-$!
-$ file = "lcl_root:[.include.curl]curlbuild.h"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
 $ file = "lcl_root:[.src]config.h"

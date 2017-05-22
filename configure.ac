@@ -36,7 +36,7 @@ This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
 AC_CONFIG_SRCDIR([lib/urldata.h])
-AC_CONFIG_HEADERS(lib/curl_config.h include/curl/curlbuild.h)
+AC_CONFIG_HEADERS(lib/curl_config.h)
 AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -119,11 +119,6 @@ fi
 AC_SUBST([AR])
 
 AC_SUBST(libext)
-
-dnl Remove non-configure distributed curlbuild.h
-if test -f ${srcdir}/include/curl/curlbuild.h; then
-  rm -f ${srcdir}/include/curl/curlbuild.h
-fi
 
 dnl figure out the libcurl version
 CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)".*/\1/p' ${srcdir}/include/curl/curlver.h`

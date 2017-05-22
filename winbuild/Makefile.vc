@@ -213,9 +213,6 @@ CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 
 $(MODE):
-	@IF NOT EXIST ..\include\curl\curlbuild.h ( \
-	   CALL ..\buildconf.bat \
-	)
 	@SET DIROBJ=$(LIBCURL_DIROBJ)
 	@SET MACRO_NAME=LIBCURL_OBJS
 	@SET OUTFILE=LIBCURL_OBJS.inc

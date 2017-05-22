@@ -59,9 +59,8 @@ common_CFLAGS := -Wpointer-arith -Wwrite-strings -Wunused -Winline -Wnested-exte
 include $(CLEAR_VARS)
 include $(LOCAL_PATH)/lib/Makefile.inc
 CURL_HEADERS := \
-	curlbuild.h \
 	curl.h \
-	curlrules.h \
+	system.h \
 	curlver.h \
 	easy.h \
 	mprintf.h \

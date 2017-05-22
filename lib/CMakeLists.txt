@@ -1,7 +1,5 @@
 set(LIB_NAME libcurl)
 
-configure_file(${CURL_SOURCE_DIR}/include/curl/curlbuild.h.cmake
-  ${CURL_BINARY_DIR}/include/curl/curlbuild.h)
 configure_file(curl_config.h.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
 
@@ -10,7 +8,6 @@ include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
 list(APPEND HHEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h
-  ${CURL_BINARY_DIR}/include/curl/curlbuild.h
   )
 
 if(MSVC)
