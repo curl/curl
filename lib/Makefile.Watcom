@@ -6,7 +6,7 @@
 #                             \___|\___/|_| \_\_____|
 #
 # Copyright (C) 2005 - 2009, Gisle Vanem <gvanem@yahoo.no>.
-# Copyright (C) 2005 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2005 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -192,14 +192,13 @@ OBJS4 = $(OBJS3: = ./)
 OBJS_STAT = $(OBJS4:./=$(OBJ_STAT)/)
 OBJS_DYN  = $(OBJS4:./=$(OBJ_DYN)/)
 
-CURLBUILDH = ../include/curl/curlbuild.h
 RESOURCE   = $(OBJ_DYN)/libcurl.res
 
 DIRS = $(OBJ_BASE) $(OBJ_BASE)/stat $(OBJ_BASE)/dyn
 
 .c : vauth vtls
 
-all: $(CURLBUILDH) $(DIRS) $(TARGETS) .SYMBOLIC
+all: $(DIRS) $(TARGETS) .SYMBOLIC
 	@echo Welcome to libcurl
 
 clean: .SYMBOLIC
@@ -215,9 +214,6 @@ vclean distclean: clean .SYMBOLIC
 
 $(DIRS):
 	-$(MD) $^@
-
-$(CURLBUILDH): .EXISTSONLY
-	$(CP) $^@.dist $^@
 
 $(LIBNAME).dll: $(OBJS_DYN) $(RESOURCE) $(__MAKEFILES__)
 	%create $(LINK_ARG)

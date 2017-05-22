@@ -56,7 +56,7 @@ source_group("curl header files" FILES ${CURL_HFILES})
 include_directories(
   ${CURL_SOURCE_DIR}/lib        # To be able to reach "curl_setup_once.h"
   ${CURL_BINARY_DIR}/lib        # To be able to reach "curl_config.h"
-  ${CURL_BINARY_DIR}/include    # To be able to reach "curl/curlbuild.h"
+  ${CURL_BINARY_DIR}/include    # To be able to reach "curl/curl.h"
   # This is needed as tool_hugehelp.c is generated in the binary dir
   ${CURL_SOURCE_DIR}/src        # To be able to reach "tool_hugehelp.h"
   )

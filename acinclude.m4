@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -2079,10 +2079,7 @@ _EOF
 dnl CURL_CONFIGURE_LONG
 dnl -------------------------------------------------
 dnl Find out the size of long as reported by sizeof() and define
-dnl CURL_SIZEOF_LONG as appropriate to be used in template file
-dnl include/curl/curlbuild.h.in to properly configure the library.
-dnl The size of long is a build time characteristic and as such
-dnl must be recorded in curlbuild.h
+dnl CURL_SIZEOF_LONG.
 
 AC_DEFUN([CURL_CONFIGURE_LONG], [
   if test -z "$ac_cv_sizeof_long" ||
@@ -2095,10 +2092,6 @@ AC_DEFUN([CURL_CONFIGURE_LONG], [
 
 dnl CURL_CONFIGURE_CURL_SOCKLEN_T
 dnl -------------------------------------------------
-dnl Find out suitable curl_socklen_t data type definition and size, making
-dnl appropriate definitions for template file include/curl/curlbuild.h.in
-dnl to properly configure and use the library.
-dnl
 dnl The need for the curl_socklen_t definition arises mainly to properly
 dnl interface HP-UX systems which on one hand have a typedef'ed socklen_t
 dnl data type which is 32 or 64-Bit wide depending on the data model being
@@ -2222,10 +2215,6 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
 
 dnl CURL_CONFIGURE_PULL_SYS_POLL
 dnl -------------------------------------------------
-dnl Find out if system header file sys/poll.h must be included by the
-dnl external interface, making appropriate definitions for template file
-dnl include/curl/curlbuild.h.in to properly configure and use the library.
-dnl
 dnl The need for the sys/poll.h inclusion arises mainly to properly
 dnl interface AIX systems which define macros 'events' and 'revents'.
 
@@ -2859,8 +2848,7 @@ AC_DEFUN([DO_CURL_OFF_T_SUFFIX_CHECK], [
 dnl CURL_CONFIGURE_CURL_OFF_T
 dnl -------------------------------------------------
 dnl Find out suitable curl_off_t data type definition and associated
-dnl items, and make the appropriate definitions used in template file
-dnl include/curl/curlbuild.h.in to properly configure the library.
+dnl items
 
 AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
   AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
