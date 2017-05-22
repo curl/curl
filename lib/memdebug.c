@@ -441,7 +441,7 @@ int curl_fclose(FILE *file, int line, const char *source)
 {
   int res;
 
-  DEBUGDEBUGASSERT(file != NULL);
+  DEBUGASSERT(file != NULL);
 
   res=fclose(file);
 
