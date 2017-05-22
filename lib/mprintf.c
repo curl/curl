@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1999 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -951,9 +951,7 @@ static int dprintf_formatf(
         /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
            output characters */
         (sprintf)(work, formatbuf, p->data.dnum);
-#ifdef CURLDEBUG
-        assert(strlen(work) <= sizeof(work));
-#endif
+        DEBUGASSERT(strlen(work) <= sizeof(work));
         for(fptr=work; *fptr; fptr++)
           OUTCHAR(*fptr);
       }

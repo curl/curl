@@ -121,7 +121,7 @@ CURLcode Curl_rand(struct Curl_easy *data, unsigned char *rnd, size_t num)
 {
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
 
-  assert(num > 0);
+  DEBUGASSERT(num > 0);
 
   while(num) {
     unsigned int r;

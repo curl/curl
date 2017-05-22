@@ -784,7 +784,7 @@ static int on_begin_headers(nghttp2_session *session,
   /* This is trailer HEADERS started.  Allocate buffer for them. */
   DEBUGF(infof(data_s, "trailer field started\n"));
 
-  assert(stream->trailer_recvbuf == NULL);
+  DEBUGASSERT(stream->trailer_recvbuf == NULL);
 
   stream->trailer_recvbuf = Curl_add_buffer_init();
   if(!stream->trailer_recvbuf) {
@@ -1453,7 +1453,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     infof(data, "%zu data bytes written\n", nread);
     if(stream->pauselen == 0) {
       DEBUGF(infof(data, "Unpaused by stream %u\n", stream->stream_id));
-      assert(httpc->pause_stream_id == stream->stream_id);
+      DEBUGASSERT(httpc->pause_stream_id == stream->stream_id);
       httpc->pause_stream_id = 0;
 
       stream->pausedata = NULL;
