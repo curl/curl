@@ -4,13 +4,13 @@
 #cmakedefine BUILDING_LIBCURL 1
 
 /* Location of default ca bundle */
-#cmakedefine CURL_CA_BUNDLE ${CURL_CA_BUNDLE}
+#cmakedefine CURL_CA_BUNDLE "${CURL_CA_BUNDLE}"
 
 /* define "1" to use built-in ca store of TLS backend */
 #cmakedefine CURL_CA_FALLBACK 1
 
 /* Location of default ca path */
-#cmakedefine CURL_CA_PATH ${CURL_CA_PATH}
+#cmakedefine CURL_CA_PATH "${CURL_CA_PATH}"
 
 /* to disable cookies support */
 #cmakedefine CURL_DISABLE_COOKIES 1
