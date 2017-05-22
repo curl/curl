@@ -158,58 +158,6 @@ const struct Curl_handler Curl_handler_pop3s = {
 };
 #endif
 
-#ifndef CURL_DISABLE_HTTP
-/*
- * HTTP-proxyed POP3 protocol handler.
- */
-
-static const struct Curl_handler Curl_handler_pop3_proxy = {
-  "POP3",                               /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  PORT_POP3,                            /* defport */
-  CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
-};
-
-#ifdef USE_SSL
-/*
- * HTTP-proxyed POP3S protocol handler.
- */
-
-static const struct Curl_handler Curl_handler_pop3s_proxy = {
-  "POP3S",                              /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  PORT_POP3S,                           /* defport */
-  CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
-};
-#endif
-#endif
-
 /* SASL parameters for the pop3 protocol */
 static const struct SASLproto saslpop3 = {
   "pop",                      /* The service name */
@@ -1355,31 +1303,6 @@ static CURLcode pop3_setup_connection(struct connectdata *conn)
 
   /* Clear the TLS upgraded flag */
   conn->tls_upgraded = FALSE;
-
-  /* Set up the proxy if necessary */
-  if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
-    /* Unless we have asked to tunnel POP3 operations through the proxy, we
-       switch and use HTTP operations only */
-#ifndef CURL_DISABLE_HTTP
-    if(conn->handler == &Curl_handler_pop3)
-      conn->handler = &Curl_handler_pop3_proxy;
-    else {
-#ifdef USE_SSL
-      conn->handler = &Curl_handler_pop3s_proxy;
-#else
-      failf(data, "POP3S not supported!");
-      return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-    }
-
-    /* set it up as an HTTP connection instead */
-    return conn->handler->setup_connection(conn);
-#else
-    failf(data, "POP3 over http proxy requires HTTP support built-in!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
-
   data->state.path++;   /* don't include the initial slash */
 
   return CURLE_OK;
