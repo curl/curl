@@ -239,8 +239,8 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
   PTCHAR inpass = NULL;
 
   if(user && passwd && (conn->data->set.httpauth & CURLAUTH_BASIC)) {
-    inuser = Curl_convert_UTF8_to_tchar((char*)user);
-    inpass = Curl_convert_UTF8_to_tchar((char*)passwd);
+    inuser = Curl_convert_UTF8_to_tchar((char *) user);
+    inpass = Curl_convert_UTF8_to_tchar((char *) passwd);
 
     rc = ldap_bind_s(server, inuser, inpass, method);
 
