@@ -815,6 +815,10 @@ LDAP
 
   If you have installed the OpenLDAP library, curl can take advantage of it
   and offer ldap:// support.
+  On Windows, curl will use WinLDAP from Platform SDK by default.
+
+  Default protocol version used by curl is LDAPv3. LDAPv2 will be used as
+  fallback mechanism in case if LDAPv3 will fail to connect.
 
   LDAP is a complex thing and writing an LDAP query is not an easy task. I do
   advise you to dig up the syntax description for that elsewhere. One such
@@ -829,6 +833,20 @@ LDAP
 
   If I want the same info in HTML format, I can get it by not using the -B
   (enforce ASCII) flag.
+
+  You also can use authentication when accessing LDAP catalog:
+
+      curl -u user:passwd "ldap://ldap.frontec.se/o=frontec??sub?mail=*"
+      curl "ldap://user:passwd@ldap.frontec.se/o=frontec??sub?mail=*"
+
+  By default, if user and password provided, OpenLDAP/WinLDAP will use basic
+  authentication. On Windows you can control this behavior by providing 
+  one of --basic, --ntlm or --digest option in curl command line
+
+      curl --ntlm "ldap://user:passwd@ldap.frontec.se/o=frontec??sub?mail=*"
+
+  On Windows, if no user/password specified, auto-negotiation mechanism will
+  be used with current logon credentials (SSPI/SPNEGO).
 
 ENVIRONMENT VARIABLES
 
