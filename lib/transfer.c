@@ -1624,9 +1624,7 @@ static char *concat_url(const char *base, const char *relurl)
  * as given by the remote server and set up the new URL to request.
  */
 CURLcode Curl_follow(struct Curl_easy *data,
-                     char *newurl, /* this 'newurl' is the Location: string,
-                                      and it must be malloc()ed before passed
-                                      here */
+                     char *newurl,    /* the Location: string */
                      followtype type) /* see transfer.h */
 {
 #ifdef CURL_DISABLE_HTTP
@@ -1639,33 +1637,36 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
   /* Location: redirect */
   bool disallowport = FALSE;
+  bool reachedmax = FALSE;
 
   if(type == FOLLOW_REDIR) {
     if((data->set.maxredirs != -1) &&
-        (data->set.followlocation >= data->set.maxredirs)) {
-      failf(data, "Maximum (%ld) redirects followed", data->set.maxredirs);
-      return CURLE_TOO_MANY_REDIRECTS;
+       (data->set.followlocation >= data->set.maxredirs)) {
+      reachedmax = TRUE;
+      type = FOLLOW_FAKE; /* switch to fake to store the would-be-redirected
+                             to URL */
     }
+    else {
+      /* mark the next request as a followed location: */
+      data->state.this_is_a_follow = TRUE;
 
-    /* mark the next request as a followed location: */
-    data->state.this_is_a_follow = TRUE;
+      data->set.followlocation++; /* count location-followers */
 
-    data->set.followlocation++; /* count location-followers */
+      if(data->set.http_auto_referer) {
+        /* We are asked to automatically set the previous URL as the referer
+           when we get the next URL. We pick the ->url field, which may or may
+           not be 100% correct */
 
-    if(data->set.http_auto_referer) {
-      /* We are asked to automatically set the previous URL as the referer
-         when we get the next URL. We pick the ->url field, which may or may
-         not be 100% correct */
+        if(data->change.referer_alloc) {
+          Curl_safefree(data->change.referer);
+          data->change.referer_alloc = FALSE;
+        }
 
-      if(data->change.referer_alloc) {
-        Curl_safefree(data->change.referer);
-        data->change.referer_alloc = FALSE;
+        data->change.referer = strdup(data->change.url);
+        if(!data->change.referer)
+          return CURLE_OUT_OF_MEMORY;
+        data->change.referer_alloc = TRUE; /* yes, free this later */
       }
-
-      data->change.referer = strdup(data->change.url);
-      if(!data->change.referer)
-        return CURLE_OUT_OF_MEMORY;
-      data->change.referer_alloc = TRUE; /* yes, free this later */
     }
   }
 
@@ -1677,7 +1678,6 @@ CURLcode Curl_follow(struct Curl_easy *data,
     char *absolute = concat_url(data->change.url, newurl);
     if(!absolute)
       return CURLE_OUT_OF_MEMORY;
-    free(newurl);
     newurl = absolute;
   }
   else {
@@ -1693,8 +1693,6 @@ CURLcode Curl_follow(struct Curl_easy *data,
     if(!newest)
       return CURLE_OUT_OF_MEMORY;
     strcpy_url(newest, newurl); /* create a space-free URL */
-
-    free(newurl); /* that was no good */
     newurl = newest; /* use this instead now */
 
   }
@@ -1703,6 +1701,11 @@ CURLcode Curl_follow(struct Curl_easy *data,
     /* we're only figuring out the new url if we would've followed locations
        but now we're done so we can get out! */
     data->info.wouldredirect = newurl;
+
+    if(reachedmax) {
+      failf(data, "Maximum (%ld) redirects followed", data->set.maxredirs);
+      return CURLE_TOO_MANY_REDIRECTS;
+    }
     return CURLE_OK;
   }
 
@@ -1716,7 +1719,6 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
   data->change.url = newurl;
   data->change.url_alloc = TRUE;
-  newurl = NULL; /* don't free! */
 
   infof(data, "Issue another request to this URL: '%s'\n", data->change.url);
 
