@@ -2829,8 +2829,12 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
            closure alert notice, read() is returning 0
          Either way, inform the caller that the server disconnected. */
       case errSSLClosedGraceful:
-      case errSSLClosedNoNotify:
         *curlcode = CURLE_OK;
+        return -1L;
+        break;
+
+      case errSSLClosedNoNotify:
+        *curlcode = CURLE_INCORRECT_TERMINATION;
         return -1L;
         break;
 

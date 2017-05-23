@@ -1360,8 +1360,8 @@ cleanup:
     if(isWin2k && sspi_status == SEC_E_OK)
       connssl->recv_sspi_close_notify = true;
     else {
-      *err = CURLE_RECV_ERROR;
       infof(data, "schannel: server closed abruptly (missing close_notify)\n");
+      *err = CURLE_INCORRECT_TERMINATION;
     }
   }
 

@@ -1681,7 +1681,12 @@ static ssize_t gtls_recv(struct connectdata *conn, /* connection data */
   if(ret < 0) {
     failf(conn->data, "GnuTLS recv error (%d): %s",
           (int)ret, gnutls_strerror((int)ret));
-    *curlcode = CURLE_RECV_ERROR;
+    if(ret == GNUTLS_E_PREMATURE_TERMINATION) {
+      *curlcode = CURLE_INCORRECT_TERMINATION;
+    }
+    else {
+      *curlcode = CURLE_RECV_ERROR;
+    }
     return -1;
   }
 
