@@ -2327,7 +2327,8 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
          (reason == SSL_R_CERTIFICATE_VERIFY_FAILED)) {
         result = CURLE_SSL_CACERT;
 
-        lerr = SSL_get_verify_result(connssl->handle);
+        lerr = data->set.ssl.certverifyresult =
+          SSL_get_verify_result(connssl->handle);
         if(lerr != X509_V_OK) {
           *certverifyresult = lerr;
           snprintf(error_buffer, sizeof(error_buffer),
