@@ -3431,7 +3431,7 @@ ConnectionExists(struct Curl_easy *data,
   struct connectdata *check;
   struct connectdata *chosen = 0;
   bool foundPendingCandidate = FALSE;
-  int pipe = IsPipeliningPossible(data, needle);
+  int canpipe = IsPipeliningPossible(data, needle);
   struct connectbundle *bundle;
 
 #ifdef USE_NTLM
@@ -3448,8 +3448,9 @@ ConnectionExists(struct Curl_easy *data,
   *waitpipe = FALSE;
 
   /* We can't pipeline if the site is blacklisted */
-  if((pipe & CURLPIPE_HTTP1) && Curl_pipeline_site_blacklisted(data, needle))
-    pipe &= ~ CURLPIPE_HTTP1;
+  if((canpipe & CURLPIPE_HTTP1) &&
+     Curl_pipeline_site_blacklisted(data, needle))
+    canpipe &= ~ CURLPIPE_HTTP1;
 
   /* Look up the bundle with all the connections to this
      particular host */
@@ -3470,7 +3471,7 @@ ConnectionExists(struct Curl_easy *data,
             "can multiplex" : "serially")));
 
     /* We can't pipeline if we don't know anything about the server */
-    if(pipe) {
+    if(canpipe) {
       if(bundle->multiuse <= BUNDLE_UNKNOWN) {
         if((bundle->multiuse == BUNDLE_UNKNOWN) && data->set.pipewait) {
           infof(data, "Server doesn't support multi-use yet, wait\n");
@@ -3479,18 +3480,18 @@ ConnectionExists(struct Curl_easy *data,
         }
 
         infof(data, "Server doesn't support multi-use (yet)\n");
-        pipe = 0;
+        canpipe = 0;
       }
       if((bundle->multiuse == BUNDLE_PIPELINING) &&
          !Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1)) {
         /* not asked for, switch off */
         infof(data, "Could pipeline, but not asked to!\n");
-        pipe = 0;
+        canpipe = 0;
       }
       else if((bundle->multiuse == BUNDLE_MULTIPLEX) &&
               !Curl_pipeline_wanted(data->multi, CURLPIPE_MULTIPLEX)) {
         infof(data, "Could multiplex, but not asked to!\n");
-        pipe = 0;
+        canpipe = 0;
       }
     }
 
@@ -3511,7 +3512,7 @@ ConnectionExists(struct Curl_easy *data,
 
       pipeLen = check->send_pipe.size + check->recv_pipe.size;
 
-      if(pipe) {
+      if(canpipe) {
         if(check->bits.protoconnstart && check->bits.close)
           continue;
 
@@ -3633,7 +3634,7 @@ ConnectionExists(struct Curl_easy *data,
         }
       }
 
-      if(!pipe && check->inuse)
+      if(!canpipe && check->inuse)
         /* this request can't be pipelined but the checked connection is
            already in use so we skip it */
         continue;
@@ -3764,7 +3765,7 @@ ConnectionExists(struct Curl_easy *data,
           continue;
         }
 #endif
-        if(pipe) {
+        if(canpipe) {
           /* We can pipeline if we want to. Let's continue looking for
              the optimal connection to use, i.e the shortest pipe that is not
              blacklisted. */
