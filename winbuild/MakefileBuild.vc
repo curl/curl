@@ -74,8 +74,12 @@ CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
 WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
 
+!IFNDEF BASE_NAME
 BASE_NAME              = libcurl
+!ENDIF
+!IFNDEF BASE_NAME_DEBUG
 BASE_NAME_DEBUG        = $(BASE_NAME)_debug
+!ENDIF
 BASE_NAME_STATIC       = $(BASE_NAME)_a
 BASE_NAME_STATIC_DEBUG = $(BASE_NAME_STATIC)_debug
 
@@ -114,18 +118,24 @@ LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
 
 
 !IF "$(WITH_SSL)"=="dll"
+!IFNDEF SSL_LIBS
 !IF EXISTS("$(DEVEL_LIB)\libssl.lib")
 SSL_LIBS     = libssl.lib libcrypto.lib
 !ELSE
 SSL_LIBS     = libeay32.lib ssleay32.lib
 !ENDIF
+!ENDIF
 USE_SSL      = true
 SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
+!IFNDEF SSL_LIBS
 !IF EXISTS("$(DEVEL_LIB)\libssl.lib")
 SSL_LIBS     = libssl.lib libcrypto.lib gdi32.lib user32.lib crypt32.lib
 !ELSE
 SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib crypt32.lib
+!ENDIF
+!ELSE
+SSL_LIBS     = $(SSL_LIBS) gdi32.lib user32.lib crypt32.lib
 !ENDIF
 USE_SSL      = true
 SSL          = static
@@ -136,7 +146,13 @@ USE_NGHTTP2  = false
 !ENDIF
 
 !IFDEF USE_SSL
-SSL_CFLAGS   = /DUSE_OPENSSL /I"$(DEVEL_INCLUDE)/openssl"
+SSL_CFLAGS   = $(SSL_CFLAGS) /DUSE_OPENSSL /I"$(DEVEL_INCLUDE)/openssl"
+!IFDEF SSL_HEADER_PATH
+SSL_CFLAGS   = $(SSL_CFLAGS) /I"$(SSL_HEADER_PATH)"
+!ENDIF
+!IFDEF SSL_LIB_PATH
+SSL_LFLAGS   = $(SSL_LFLAGS) /libpath:$(SSL_LIB_PATH)
+!ENDIF
 
 !IF "$(USE_NGHTTP2)"=="yes"
 USE_NGHTTP2  = true
@@ -180,17 +196,28 @@ CARES_CFLAGS   = /DUSE_ARES /I"$(DEVEL_INCLUDE)/cares"
 !ENDIF
 
 !IF "$(WITH_ZLIB)"=="dll"
+!IFNDEF ZLIB_LIBS
 ZLIB_LIBS   = zlib.lib
+!ENDIF
 USE_ZLIB    = true
 ZLIB        = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
+!IFNDEF ZLIB_LIBS
 ZLIB_LIBS   = zlib_a.lib
+!ENDIF
 USE_ZLIB    = true
 ZLIB        = static
 !ENDIF
 
 !IFDEF USE_ZLIB
-ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+ZLIB_CFLAGS = $(ZLIB_CFLAGS) /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+!IFDEF ZLIB_HEADER_PATH
+ZLIB_CFLAGS = $(ZLIB_CFLAGS) /I"$(ZLIB_HEADER_PATH)"
+!ENDIF
+!IFDEF ZLIB_LIB_PATH
+ZLIB_LFLAGS   = $(SSL_LFLAGS) /libpath:$(ZLIB_LIB_PATH)
+!ENDIF
+
 !ENDIF
 
 
@@ -292,9 +319,8 @@ TARGET = $(LIB_NAME_DLL)
 CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
 AS_DLL = true
 CFGSET = true
-!ENDIF
-
-!IF "$(CFGSET)" == "FALSE"
+!ELSEIF "$(MODE)"=="clean"
+!ELSE
 !ERROR please choose a valid mode
 !ENDIF
 
@@ -407,6 +433,7 @@ CURL_LINK = link.exe /incremental:no /libpath:"$(DIRDIST)\lib"
 #
 !IF "$(CFGSET)" == "FALSE"
 clean:
+    cd ..
 	@-erase /s *.dll 2> NUL
 	@-erase /s *.exp 2> NUL
 	@-erase /s *.idb 2> NUL
@@ -415,6 +442,7 @@ clean:
 	@-erase /s *.pch 2> NUL
 	@-erase /s *.pdb 2> NUL
 	@-erase /s *.res 2> NUL
+    cd winbuild
 !ELSE
 # A mode was provided, so the library can be built.
 #

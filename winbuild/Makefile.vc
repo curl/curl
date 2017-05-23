@@ -6,6 +6,7 @@ CFGSET=true
 TARGET = $(LIB_NAME_DLL)
 AS_DLL = true
 CFGSET=true
+!ELSEIF "$(MODE)"=="clean"
 !ELSE
 !MESSAGE Invalid mode: $(MODE)
 
@@ -21,10 +22,20 @@ CFGSET=true
 !MESSAGE                                  Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
 !MESSAGE                                  Uncompress them into the deps folder.
 !MESSAGE   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
+!MESSAGE      SSL_LIBS=<File1 File2>    - OpenSSL libs to use (default: libeay32.lib ssleay32.lib) (requires WITH_SSL)
+!MESSAGE      SSL_HEADER_PATH=<path>    - Path to OpenSSL include files. (requires WITH_SSL)
+!MESSAGE      SSL_CFLAGS=...            - Extra flags to supply when compiling OpenSSL modules (requires WITH_SSL)
+!MESSAGE      SSL_LIB_PATH=<path>       - Path to OpenSSL lib files  (requires WITH_SSL)
+!MESSAGE      SSL_LFLAGS=...            - Extra flags to supply when linking OpenSSL modules (requires WITH_SSL)
 !MESSAGE   ENABLE_NGHTTP2=<yes or no>   - Enable HTTP/2 support, defaults to no
 !MESSAGE                                  Requires OpenSSL
 !MESSAGE   WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
+!MESSAGE      ZLIB_LIBS=<LibFile>       - zlib lib filename to use (default: zlib_lib) (requires WITH_ZLIB)
+!MESSAGE      ZLIB_HEADER_PATH=<path>   - Path to zlib include files. (requires WITH_ZLIB)
+!MESSAGE      ZLIB_CFLAGS=...           - Extra flags to supply when compiling zlib modules (requires WITH_ZLIB)
+!MESSAGE      ZLIB_LIB_PATH=<path>      - Path to zlib lib files  (requires WITH_ZLIB)
+!MESSAGE      ZLIB_LFLAGS=...           - Extra flags to supply when linking zlib modules (requires WITH_ZLIB)
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
 !MESSAGE   WITH_MBEDTLS=<dll or static> - Enable mbedTLS support, DLL or static
 !MESSAGE   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
@@ -205,6 +216,7 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-winssl
 !ENDIF
 
+!IF  "$(CFGSET)"=="true"
 !MESSAGE configuration name: $(CONFIG_NAME_LIB)
 
 BUILD_DIR=../builds/$(CONFIG_NAME_LIB)
@@ -238,3 +250,7 @@ $(MODE):
 copy_from_lib:
 	echo copying .c...
 	FOR %%i IN ($(CURLX_CFILES:/=\)) DO copy %%i ..\src\
+!ELSE
+clean:
+	@$(MAKE) /NOLOGO /F MakefileBuild.vc clean mode=clean
+!ENDIF
