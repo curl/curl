@@ -79,7 +79,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* ask libcurl to use TLS version 1.1 or later */
-  curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1.1 |
+  curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_1 |
                    CURL_SSLVERSION_MAX_DEFAULT);
 
   /* Perform the request */
