@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -65,7 +65,12 @@ existing connection if possible. This requires HTTP/2.
 .SH PROTOCOLS
 HTTP(S)
 .SH EXAMPLE
-TODO
+.nf
+CURLM *m = curl_multi_init();
+/* try HTTP/1 pipelining and HTTP/2 multiplexing */
+curl_multi_setopt(m, CURLMOPT_PIPELINING, CURLPIPE_HTTP1 |
+                                          CURLPIPE_MULTIPLEX);
+.fi
 .SH AVAILABILITY
 Added in 7.16.0. Multiplex support bit added in 7.43.0.
 .SH RETURN VALUE
