@@ -4121,7 +4121,7 @@ sub singletest {
                 $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
                 return 1;
             }
-            my @e = valgrindparse($srcdir, $feature{'SSL'}, "$LOGDIR/$vgfile");
+            my @e = valgrindparse("$LOGDIR/$vgfile");
             if(@e && $e[0]) {
                 if($automakestyle) {
                     logmsg "FAIL: $testnum - $testname - valgrind\n";
