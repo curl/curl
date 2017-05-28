@@ -3594,21 +3594,6 @@ sub singletest {
     my $dumped_core;
     my $cmdres;
 
-    # Apr 2007: precommand isn't being used and could be removed
-    my @precommand= getpart("client", "precommand");
-    if($precommand[0]) {
-        # this is pure perl to eval!
-        my $code = join("", @precommand);
-        eval $code;
-        if($@) {
-            logmsg "perl: $code\n";
-            logmsg "precommand: $@";
-            stopservers($verbose);
-            timestampskippedevents($testnum);
-            return -1;
-        }
-    }
-
     if($gdbthis) {
         my $gdbinit = "$TESTDIR/gdbinit$testnum";
         open(GDBCMD, ">$LOGDIR/gdbcmd");
