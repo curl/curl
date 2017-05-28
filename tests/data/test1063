@@ -41,7 +41,5 @@ Invalid large X- range on a file://
 <errorcode>
 36
 </errorcode>
-<stdout>
-</stdout>
 </verify>
 </testcase>

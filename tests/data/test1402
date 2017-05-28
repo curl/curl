@@ -112,7 +112,5 @@ int main(int argc, char *argv[])
 }
 /**** End of sample code ****/
 </file>
-<stdout>
-</stdout>
 </verify>
 </testcase>
