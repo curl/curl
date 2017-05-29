@@ -241,6 +241,7 @@ you build curl the manual will not be available (curl --man^). Integration of \
 the manual is not required and a summary of the options will still be available \
 (curl --help^). To integrate the manual your PATH is required to have \
 groff/nroff, perl and optionally gzip for compression. ")
+      unset(ENABLE_MANUAL CACHE)
     endif()
   endif()
 endif()
