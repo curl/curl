@@ -67,7 +67,7 @@
 #endif
 
 #if defined(THREADING_SUPPORT)
-static mbedtls_entropy_context entropy;
+static mbedtls_entropy_context ts_entropy;
 
 static int entropy_init_initialized = 0;
 
@@ -247,11 +247,11 @@ mbed_connect_step1(struct connectdata *conn,
   }
 
 #ifdef THREADING_SUPPORT
-  entropy_init_mutex(&entropy);
+  entropy_init_mutex(&ts_entropy);
   mbedtls_ctr_drbg_init(&connssl->ctr_drbg);
 
   ret = mbedtls_ctr_drbg_seed(&connssl->ctr_drbg, entropy_func_mutex,
-                              &entropy, NULL, 0);
+                              &ts_entropy, NULL, 0);
   if(ret) {
 #ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
