@@ -85,7 +85,6 @@ else()
 endif()
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
-option(ENABLE_DOCS "Set to ON to enable docs" ON)
 
 if (ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
@@ -225,12 +224,21 @@ if(ENABLE_MANUAL)
     message(WARNING "Found no *nroff program")
   endif()
 endif()
-# Required for building manual, docs, tests
-if (BUILD_TESTING OR ENABLE_DOCS OR ENABLE_MANUAL)
+# Required for building docs including manual, and tests
+if (BUILD_TESTING OR ENABLE_MANUAL)
   find_package(Perl)
   if (NOT PERL_FOUND)
-    message(FATAL_ERROR
-      "Package perl not found. Make perl available or configure with ENABLE_DOCS=OFF, ENABLE_MANUAL=OFF and BUILD_TESTING=OFF")
+    if (BUILD_TESTING)
+      message(FATAL_ERROR "Perl was not found, but building of tests was enabled with BUILD_TESTING option.\
+Make perl available or do not build tests by not turning on BUILD_TESTING option")
+    endif()
+    if (ENABLE_MANUAL)
+      message("Warning: perl was not found, which is required to build manual. This means when \
+you build curl the manual will not be available (curl --man^). Integration of \
+the manual is not required and a summary of the options will still be available \
+(curl --help^). To integrate the manual your PATH is required to have \
+groff/nroff, perl and optionally gzip for compression. ")
+    endif()
   endif()
 endif()
 
