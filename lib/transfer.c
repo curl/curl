@@ -1309,8 +1309,11 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
   if(data->set.httpreq == HTTPREQ_PUT)
     data->state.infilesize = data->set.filesize;
-  else
+  else {
     data->state.infilesize = data->set.postfieldsize;
+    if(data->set.postfields && (data->state.infilesize == -1))
+      data->state.infilesize = (curl_off_t)strlen(data->set.postfields);
+  }
 
   /* If there is a list of cookie files to read, do it now! */
   if(data->change.cookielist)

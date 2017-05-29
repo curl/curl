@@ -419,8 +419,6 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
     case HTTPREQ_POST:
       if(data->state.infilesize != -1)
         expectsend = data->state.infilesize;
-      else if(data->set.postfields)
-        expectsend = (curl_off_t)strlen(data->set.postfields);
       break;
     case HTTPREQ_PUT:
       if(data->state.infilesize != -1)
@@ -2559,12 +2557,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     if(conn->bits.authneg)
       postsize = 0;
-    else {
-      /* figure out the size of the postfields */
-      postsize = (data->state.infilesize != -1)?
-        data->state.infilesize:
-        (data->set.postfields? (curl_off_t)strlen(data->set.postfields):-1);
-    }
+    else
+      /* the size of the post body */
+      postsize = data->state.infilesize;
 
     /* We only set Content-Length and allow a custom Content-Length if
        we don't upload data chunked, as RFC2616 forbids us to set both
