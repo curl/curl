@@ -27,6 +27,10 @@
 
 #include "test.h"
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
 #ifdef HAVE_LOCALE_H
 #  include <locale.h> /* for setlocale() */
 #endif
@@ -1621,8 +1625,8 @@ static int test_float_formatting(void)
                  123456789123456789123456789.2987654);
   errors += strlen_check(buf, 325);
 
-  /* 1<<31 turns negative (-2147483648) when used signed */
-  curl_msnprintf(buf, sizeof(buf), "%*f", (1<<31), 9.1);
+  /* check negative when used signed */
+  curl_msnprintf(buf, sizeof(buf), "%*f", INT_MIN, 9.1);
   errors += string_check(buf, "9.100000");
 
   /* curl_msnprintf() limits a single float output to 325 bytes maximum
