@@ -233,6 +233,7 @@ if (BUILD_TESTING OR ENABLE_MANUAL)
     if (BUILD_TESTING)
       message("Warning: Perl was not found, but building of tests was enabled through BUILD_TESTING option. \
 Building of tests will be disables.")
+      unset(BUILD_TESTING CACHE)
     endif()
     if (ENABLE_MANUAL)
       message("Warning: perl was not found, which is required to build manual. This means when \
