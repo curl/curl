@@ -4,7 +4,7 @@ Curl and libcurl 7.54.1
  Command line options:         207
  curl_easy_setopt() options:   245
  Public functions in libcurl:  61
- Contributors:                 1538
+ Contributors:                 1548
 
 This release includes the following changes:
 
@@ -81,6 +81,13 @@ This release includes the following bugfixes:
  o asiohiper.cpp / evhiperfifo.c: deal with negative timerfunction input [37]
  o ssh: fix memory leak in disconnect due to timeout [38]
  o tests: stabilize test 1034 [39]
+ o cmake: auto detection of CURL_CA_BUNDLE/CURL_CA_PATH [40]
+ o assert: avoid, use DEBUGASSERT instead [41]
+ o LDAP: using ldap_bind_s on Windows with methods [42]
+ o redirect: store the "would redirect to" URL when max redirs is reached [43]
+ o winbuild: fix the nghttp2 build [44]
+ o examples: fix -Wimplicit-fallthrough warnings
+ o time: fix type conversions and compiler warnings [45]
 
 This release includes the following known bugs:
 
@@ -89,13 +96,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alan Jenkins, Bernhard M. Wiedemann, Brian Childs, canavan at github,
-  Dan Fandrich, Daniel Stenberg, Gisle Vanem, Helmut K. C. Tessarek,
-  Joel Depooter, Kai Engert, Kamil Dudka, Kevin Ji, Marcel Raad,
-  Martin Kepplinger, Michael Kaufmann, Nick Zitzmann, Ray Satiro, Richard Hsu,
-  Ron Eldor, stootill at github, Thomas Klausner, Travis Burtrum,
-  wyattoday at github,
-  (23 contributors)
+  Akhil Kedia, Alan Jenkins, Anatol Belski, Bernhard M. Wiedemann,
+  Brian Childs, canavan at github, Dan Fandrich, Daniel Stenberg, Gisle Vanem,
+  Helmut K. C. Tessarek, Joel Depooter, jonrumsey at github, Kai Engert,
+  Kamil Dudka, Kevin Ji, Lloyd Fournier, Marcel Raad, Martin Kepplinger,
+  Michael Kaufmann, Nick Zitzmann, Phil Crump, Ray Satiro, Richard Hsu,
+  Ron Eldor, Sergei Nikulov, Simon Warta, stootill at github, Thomas Klausner,
+  Travis Burtrum, wyattoday at github,
+  (30 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -140,3 +148,9 @@ References to bug reports and discussions on issues:
  [37] = https://curl.haxx.se/bug/?i=1253
  [38] = https://curl.haxx.se/bug/?i=1479
  [39] = https://curl.haxx.se/bug/?i=1488
+ [40] = https://curl.haxx.se/bug/?i=1461
+ [41] = https://curl.haxx.se/bug/?i=1504
+ [42] = https://curl.haxx.se/bug/?i=878
+ [43] = https://curl.haxx.se/bug/?i=1489
+ [44] = https://curl.haxx.se/bug/?i=1321
+ [45] = https://curl.haxx.se/bug/?i=1499
