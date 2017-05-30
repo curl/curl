@@ -3599,14 +3599,15 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
     if(connected) {
       DEBUGF(infof(data, "DO-MORE connected phase starts\n"));
     }
-    else {
-      if(result && (ftpc->count1 == 0)) {
-        *completep = -1; /* go back to DOING please */
-        /* this is a EPSV connect failing, try PASV instead */
-        return ftp_epsv_disable(conn);
-      }
-      return result;
+
+    if(result && (ftpc->count1 == 0)) {
+      *completep = -1; /* go back to DOING please */
+      /* this is a EPSV connect failing, try PASV instead */
+      return ftp_epsv_disable(conn);
     }
+
+    if(!connected)
+      return result;
   }
 
   result = Curl_proxy_connect(conn, SECONDARYSOCKET);
