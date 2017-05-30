@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -36,6 +36,10 @@ list is matched as either a domain which contains the hostname, or the
 hostname itself. For example, example.com would match example.com,
 example.com:80, and www.example.com, but not www.notanexample.com or
 example.com.othertld.
+
+If the name in the noproxy list has a leading period, it is a domain match
+against the provided host name. This way ".example.com" will switch off proxy
+use for both "www.example.com" as well as for "foo.example.com".
 
 The application does not have to keep the string around after setting this
 option.
