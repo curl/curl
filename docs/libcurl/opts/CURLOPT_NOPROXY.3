@@ -48,7 +48,18 @@ NULL
 .SH PROTOCOLS
 Most
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  /* accept various URLs */
+  curl_easy_setopt(curl, CURLOPT_URL, input);
+  /* use this proxy */
+  curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
+  /* ... but make sure this host name is not proxied */
+  curl_easy_setopt(curl, CURLOPT_NOPROXY, "www.example.com");
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.19.4
 .SH RETURN VALUE

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -41,7 +41,17 @@ This option doesn't affect transfer speeds done with FILE:// URLs.
 .SH PROTOCOLS
 All except file://
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  /* cap the upload speed to 1000 bytes/sec */
+  curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, (curl_off_t)1000);
+  /* (set some upload options as well!) */
+  ret = curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.15.5
 .SH RETURN VALUE
