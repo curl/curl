@@ -63,6 +63,10 @@ CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd /W3
 CFLAGS      = /I. /I ../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
 !ENDIF
 
+!IFDEF WIN32_WINNT
+CFLAGS = $(CFLAGS) /D_WIN32_WINNT=$(WIN32_WINNT)
+!ENDIF
+
 LFLAGS     = /nologo /machine:$(MACHINE)
 LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib

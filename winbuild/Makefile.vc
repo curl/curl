@@ -35,6 +35,7 @@ CFGSET=true
 !MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
 !MESSAGE   DEBUG=<yes or no>            - Debug builds
 !MESSAGE   MACHINE=<x86 or x64>         - Target architecture (default x64 on AMD64, x86 on others)
+!MESSAGE   WIN32_WINNT=<value>          - Override value of WIN32_WINNT to target an earlier version of the WIN32 API
 !ERROR please choose a valid mode
 
 !ENDIF
