@@ -58,7 +58,7 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
   return written;
 }
 
-static int closesocket(void *clientp, curl_socket_t item)
+static int closecb(void *clientp, curl_socket_t item)
 {
   (void)clientp;
   printf("libcurl wants to close %d now\n", (int)item);
@@ -145,7 +145,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &sockfd);
 
     /* call this function to close sockets */
-    curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, closesocket);
+    curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, closecb);
     curl_easy_setopt(curl, CURLOPT_CLOSESOCKETDATA, &sockfd);
 
     /* call this function to set options for the socket */
