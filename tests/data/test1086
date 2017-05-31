@@ -87,7 +87,7 @@ ftp
 FTP download with strict timeout and slow data transfer
  </name>
  <command timeout="1">
-ftp://%HOSTIP:%FTPPORT/1086 -m 7
+ftp://%HOSTIP:%FTPPORT/1086 -m 9
 </command>
 </client>
 
