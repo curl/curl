@@ -116,7 +116,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   if(!passwdp)
     passwdp = "";
 
-#if defined(USE_WINDOWS_SSPI)
+#if defined(xUSE_WINDOWS_SSPI)
   have_chlg = digest->input_token ? TRUE : FALSE;
 #else
   have_chlg = digest->nonce ? TRUE : FALSE;
