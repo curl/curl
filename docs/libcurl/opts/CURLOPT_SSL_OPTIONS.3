@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -47,14 +47,22 @@ exception in the case of Windows' Untrusted Publishers blacklist which it seems
 can't be bypassed.\fP This option may have broader support to accommodate other
 SSL backends in the future.
 https://curl.haxx.se/docs/ssl-compared.html
-
-
 .SH DEFAULT
 0
 .SH PROTOCOLS
 All TLS-based protocols
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  /* weaken TLS only for use with silly servers */
+  curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_ALLOW_BEAST |
+                   CURLSSLOPT_NO_REVOKE);
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.25.0
 .SH RETURN VALUE

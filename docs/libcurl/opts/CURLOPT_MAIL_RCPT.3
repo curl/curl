@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -51,7 +51,19 @@ NULL
 .SH PROTOCOLS
 SMTP
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  struct curl_slist *list;
+  list = curl_slist_append(NULL, "root@localhost");
+  list = curl_slist_append(list, "person@example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
+  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, list);
+  ret = curl_easy_perform(curl);
+  curl_slist_free_all(list);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.20.0. The VRFY and EXPN logic was added in 7.34.0
 .SH RETURN VALUE
