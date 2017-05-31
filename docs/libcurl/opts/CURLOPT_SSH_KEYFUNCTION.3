@@ -97,7 +97,7 @@ NULL
 SFTP and SCP
 .SH EXAMPLE
 .nf
-statoc int keycb(CURL *easy,
+static int keycb(CURL *easy,
                  const struct curl_khkey *knownkey,
                  const struct curl_khkey *foundkey,
                  enum curl_khmatch,
