@@ -50,7 +50,7 @@ static int my_fnmatch(void *clientp,
 
 {
   struct local_stuff local_data;
-  curl_easy_setopt(curl, CURLOPT_URL, "ftp://ftp.example.com/*txt");
+  curl_easy_setopt(curl, CURLOPT_URL, "ftp://ftp.example.com/file*");
   curl_easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
   curl_easy_setopt(curl, CURLOPT_FNMATCH_FUNCTION, my_fnmatch);
   curl_easy_setopt(curl, CURLOPT_FNMATCH_DATA, &local_data);
