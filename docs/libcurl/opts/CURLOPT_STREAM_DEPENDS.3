@@ -30,7 +30,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STREAM_DEPENDS, CURL *dephandle)
 .SH DESCRIPTION
 Pass a CURL * pointer in \fIdephandle\fP to identify the stream within the
 same connection that this stream is depending upon. This option clears the
-exclusive it and is mutually exclusive to the
+exclusive bit and is mutually exclusive to the
 \fICURLOPT_STREAM_DEPENDS_E(3)\fP option.
 
 The spec says "Including a dependency expresses a preference to allocate
