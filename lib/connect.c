@@ -671,6 +671,9 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     /* there's no connection! */
     return;
 
+  /* set socket blocking */
+  (void)curlx_nonblock(sockfd, FALSE);
+
   if(!conn->bits.reuse && !conn->bits.tcp_fastopen) {
     int error;
 
