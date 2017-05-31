@@ -274,6 +274,7 @@ static const struct Curl_handler Curl_handler_dummy = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   0,                                    /* defport */
   0,                                    /* protocol */
   PROTOPT_NONE                          /* flags */
@@ -3379,11 +3380,19 @@ static bool disconnect_if_dead(struct connectdata *conn,
        handles in pipeline and the connection isn't already marked in
        use */
     bool dead;
-    if(conn->handler->protocol & CURLPROTO_RTSP)
-      /* RTSP is a special case due to RTP interleaving */
-      dead = Curl_rtsp_connisdead(conn);
-    else
+
+    if(conn->handler->connection_check) {
+      /* The protocol has a special method for checking the state of the
+         connection. Use it to check if the connection is dead. */
+      unsigned int state;
+
+      state = conn->handler->connection_check(conn, CONNCHECK_ISDEAD);
+      dead = (state & CONNRESULT_DEAD);
+    }
+    else {
+      /* Use the general method for determining the death of a connection */
       dead = SocketIsDead(conn->sock[FIRSTSOCKET]);
+    }
 
     if(dead) {
       conn->data = data;

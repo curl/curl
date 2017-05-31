@@ -196,6 +196,7 @@ static const struct Curl_handler Curl_handler_http2 = {
   http2_perform_getsock,                /* perform_getsock */
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_STREAM                        /* flags */
@@ -216,6 +217,7 @@ static const struct Curl_handler Curl_handler_http2_ssl = {
   http2_perform_getsock,                /* perform_getsock */
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
   PROTOPT_SSL | PROTOPT_STREAM          /* flags */
