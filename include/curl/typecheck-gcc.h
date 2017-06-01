@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -367,8 +367,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_socket,
   (CURLINFO_DOUBLE < (info) && (info) < CURLINFO_SLIST)
 
 /* true if info expects a pointer to struct curl_slist * argument */
-#define _curl_is_slist_info(info)                                             \
-  (CURLINFO_SLIST < (info) && (info) < CURLINFO_SOCKET)
+#define _curl_is_slist_info(info)                                       \
+  (((info) == CURLINFO_SSL_ENGINES) || ((info) == CURLINFO_COOKIELIST))
 
 /* true if info expects a pointer to struct curl_socket_t argument */
 #define _curl_is_socket_info(info)                                            \
