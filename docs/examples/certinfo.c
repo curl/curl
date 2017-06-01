@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,24 +56,19 @@ int main(void)
     res = curl_easy_perform(curl);
 
     if(!res) {
-      union {
-        struct curl_slist    *to_info;
-        struct curl_certinfo *to_certinfo;
-      } ptr;
+      struct curl_certinfo *certinfo;
 
-      ptr.to_info = NULL;
+      res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &certinfo);
 
-      res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &ptr.to_info);
-
-      if(!res && ptr.to_info) {
+      if(!res && certinfo) {
         int i;
 
-        printf("%d certs!\n", ptr.to_certinfo->num_of_certs);
+        printf("%d certs!\n", certinfo->num_of_certs);
 
-        for(i = 0; i < ptr.to_certinfo->num_of_certs; i++) {
+        for(i = 0; i < certinfo->num_of_certs; i++) {
           struct curl_slist *slist;
 
-          for(slist = ptr.to_certinfo->certinfo[i]; slist; slist = slist->next)
+          for(slist = certinfo->certinfo[i]; slist; slist = slist->next)
             printf("%s\n", slist->data);
 
         }
