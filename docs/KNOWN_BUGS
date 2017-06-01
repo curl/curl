@@ -49,7 +49,6 @@ problems may have been fixed or changed somewhat since this was written!
  5.7 Visual Studio project gaps
  5.8 configure finding libs in wrong directory
  5.9 Utilize Requires.private directives in libcurl.pc
- 5.10 Fix the gcc typechecks
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -363,14 +362,6 @@ problems may have been fixed or changed somewhat since this was written!
 5.9 Utilize Requires.private directives in libcurl.pc
 
  https://github.com/curl/curl/issues/864
-
-5.10 Fix the gcc typechecks
-
- Issue #846 identifies a problem with the gcc-typechecks and how the types are
- documented and checked for CURLINFO_CERTINFO but our attempts to fix the
- issue were futile and needs more attention.
-
- https://github.com/curl/curl/issues/846
 
 6. Authentication
 
