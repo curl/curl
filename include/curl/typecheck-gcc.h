@@ -124,6 +124,9 @@ __extension__ ({                                                              \
     if(_curl_is_slist_info(_curl_info))                                       \
       if(!_curl_is_arr((arg), struct curl_slist *))                           \
         _curl_easy_getinfo_err_curl_slist();                                  \
+    if(_curl_is_tlssessioninfo_info(_curl_info))                              \
+      if(!_curl_is_arr((arg), struct curl_tlssessioninfo *))                  \
+        _curl_easy_getinfo_err_curl_tlssesssioninfo();                        \
    if(_curl_is_socket_info(_curl_info))                                       \
       if(!_curl_is_arr((arg), curl_socket_t))                                 \
         _curl_easy_getinfo_err_curl_socket();                                 \
@@ -204,6 +207,9 @@ _CURL_WARNING(_curl_easy_getinfo_err_double,
   "curl_easy_getinfo expects a pointer to double for this info")
 _CURL_WARNING(_curl_easy_getinfo_err_curl_slist,
   "curl_easy_getinfo expects a pointer to 'struct curl_slist *' for this info")
+_CURL_WARNING(_curl_easy_getinfo_err_curl_tlssesssioninfo,
+              "curl_easy_getinfo expects a pointer to "
+              "'struct curl_tlssessioninfo *' for this info")
 _CURL_WARNING(_curl_easy_getinfo_err_curl_socket,
   "curl_easy_getinfo expects a pointer to curl_socket_t for this info")
 
@@ -369,6 +375,10 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_socket,
 /* true if info expects a pointer to struct curl_slist * argument */
 #define _curl_is_slist_info(info)                                       \
   (((info) == CURLINFO_SSL_ENGINES) || ((info) == CURLINFO_COOKIELIST))
+
+/* true if info expects a pointer to struct curl_tlssessioninfo * argument */
+#define _curl_is_tlssessioninfo_info(info)                              \
+  (((info) == CURLINFO_TLS_SSL_PTR) || ((info) == CURLINFO_TLS_SESSION))
 
 /* true if info expects a pointer to struct curl_socket_t argument */
 #define _curl_is_socket_info(info)                                            \
