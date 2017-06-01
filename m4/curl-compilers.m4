@@ -84,7 +84,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
   if test "$curl_cv_have_def___clang__" = "yes"; then
     AC_MSG_RESULT([yes])
     compiler_id="CLANG"
-    clangver=`$CC -v 2>&1 | grep version | sed "s/.*version \([0-9]*\.[0-9]*\).*/\1/"`
+    clangver=`$CC -v 2>&1 | grep version | "$SED" 's/.*version \(@<:@0-9@:>@*\.@<:@0-9@:>@*\).*/\1/'`
     clangvhi=`echo $clangver | cut -d . -f1`
     clangvlo=`echo $clangver | cut -d . -f2`
     compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
