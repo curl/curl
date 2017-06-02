@@ -131,7 +131,7 @@ static void mbed_debug(void *context, int level, const char *f_name,
 /*
  *  profile
  */
-const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
+static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
 {
   /* Hashes from SHA-1 and above */
   MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_SHA1) |
