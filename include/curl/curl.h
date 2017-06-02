@@ -36,8 +36,6 @@
 
 #include "curlver.h"         /* libcurl version defines   */
 #include "system.h"          /* determine things run-time */
-#include "curlbuild.h"       /* libcurl build definitions */
-#include "curlrules.h"       /* libcurl rules enforcement */
 
 /*
  * Define WIN32 when build target is Win32 API

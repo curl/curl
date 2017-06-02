@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+rem * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -73,7 +73,6 @@ rem
     echo Generating prerequisite files
 
     call :generate
-    if errorlevel 4 goto nogencurlbuild
     if errorlevel 3 goto nogenhugehelp
     if errorlevel 2 goto nogenmakefile
     if errorlevel 1 goto warning
@@ -83,7 +82,6 @@ rem
     echo Removing prerequisite files
 
     call :clean
-    if errorlevel 3 goto nocleancurlbuild
     if errorlevel 2 goto nocleanhugehelp
     if errorlevel 1 goto nocleanmakefile
   )
@@ -98,7 +96,6 @@ rem 0 - success
 rem 1 - success with simplified tool_hugehelp.c 
 rem 2 - failed to generate Makefile
 rem 3 - failed to generate tool_hugehelp.c
-rem 4 - failed to generate curlbuild.h
 rem
 :generate
   if "%OS%" == "Windows_NT" setlocal
@@ -126,16 +123,6 @@ rem
   )
   cmd /c exit 0
 
-  rem Create curlbuild.h
-  echo * %CD%\include\curl\curlbuild.h
-  if exist include\curl\curlbuild.h.dist (
-    copy /Y include\curl\curlbuild.h.dist include\curl\curlbuild.h 1>NUL 2>&1
-    if errorlevel 1 (
-      if "%OS%" == "Windows_NT" endlocal
-      exit /B 4
-    )
-  )
-
   rem Setup c-ares git tree
   if exist ares\buildconf.bat (
     echo.
@@ -160,7 +147,6 @@ rem
 rem 0 - success
 rem 1 - failed to clean Makefile
 rem 2 - failed to clean tool_hugehelp.c
-rem 3 - failed to clean curlbuild.h
 rem
 :clean
   rem Remove Makefile
@@ -178,15 +164,6 @@ rem
     del src\tool_hugehelp.c 2>NUL
     if exist src\tool_hugehelp.c (
       exit /B 2
-    )
-  )
-
-  rem Remove curlbuild.h
-  echo * %CD%\include\curl\curlbuild.h
-  if exist include\curl\curlbuild.h (
-    del include\curl\curlbuild.h 2>NUL
-    if exist include\curl\curlbuild.h (
-      exit /B 3
     )
   )
 
@@ -304,11 +281,6 @@ rem
   echo Error: Unable to generate src\tool_hugehelp.c
   goto error
 
-:nogencurlbuild
-  echo.
-  echo Error: Unable to generate include\curl\curlbuild.h
-  goto error
-
 :nocleanmakefile
   echo.
   echo Error: Unable to clean Makefile
@@ -317,11 +289,6 @@ rem
 :nocleanhugehelp
   echo.
   echo Error: Unable to clean src\tool_hugehelp.c
-  goto error
-
-:nocleancurlbuild
-  echo.
-  echo Error: Unable to clean include\curl\curlbuild.h
   goto error
 
 :warning
