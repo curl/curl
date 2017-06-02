@@ -64,6 +64,7 @@ TEST_Q = -a -s
 TEST_AM = -a -am
 TEST_F = -a -p -r
 TEST_T = -a -t
+TEST_E = -a -e
 
 # !flaky means that it'll skip all tests using the flaky keyword
 TEST_NF = -a -p -r !flaky
@@ -90,6 +91,9 @@ nonflaky-test: perlcheck all
 
 torture-test: perlcheck all
 	$(TEST) $(TEST_T) $(TFLAGS)
+
+event-test: perlcheck all
+	$(TEST) $(TEST_E) $(TFLAGS)
 
 .1.html:
 	$(MAN2HTML)

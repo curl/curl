@@ -202,6 +202,9 @@ test-nonflaky:
 test-torture:
 	@(cd tests; $(MAKE) all torture-test)
 
+test-event:
+	@(cd tests; $(MAKE) all event-test)
+
 test-am:
 	@(cd tests; $(MAKE) all am-test)
 
