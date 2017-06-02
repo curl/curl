@@ -90,7 +90,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define SET(n) \
-        (*(MD4_u32plus *)&ptr[(n) * 4])
+        (*(MD4_u32plus *)(void *)&ptr[(n) * 4])
 #define GET(n) \
         SET(n)
 #else
