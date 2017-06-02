@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -233,6 +233,13 @@ sub processfile{
 
 if(!$curlver) {
   printargs();
+}
+
+# check to see that the git command works, it requires git 2.6 something
+my $gitcheck = `git log -1 --date="format:%B %d, %Y" $dirlist[0] 2>/dev/null`;
+if(length($gitcheck) < 1) {
+    print "git version too old or $dirlist[0] is a bad argument\n";
+    exit;
 }
 
 # Look in each directory.
