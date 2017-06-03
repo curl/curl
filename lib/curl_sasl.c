@@ -414,7 +414,6 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
-  char *serverdata;
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)
   char *chlg = NULL;
   size_t chlglen = 0;
@@ -423,6 +422,10 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :
                         sasl->params->service;
+#endif
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
+    defined(USE_NTLM)
+  char *serverdata;
 #endif
   size_t len = 0;
 
