@@ -466,6 +466,7 @@ static const char *GTime2str(const char *beg, const char *end)
     break;
   case 2:
     sec1 = fracp[-2];
+    /* FALLTHROUGH */
   case 1:
     sec2 = fracp[-1];
     break;
