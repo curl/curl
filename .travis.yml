@@ -1,24 +1,86 @@
-os:
-  - linux
-  - osx
-
-sudo: false
-
 language: c
+sudo: false
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+        packages:
+            - cmake
+            - gcc-4.8
+            - lcov
+            - clang-3.7
+            - valgrind
+
+matrix:
+    include:
+        - os: linux
+          compiler: gcc
+          env: BUILD_TYPE=normal
+        - os: linux
+          compiler: clang
+          env: BUILD_TYPE=normal
+        - os: osx
+          compiler: gcc
+          env: BUILD_TYPE=normal
+        - os: osx
+          compiler: clang
+          env: BUILD_TYPE=normal
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: BUILD_TYPE=cmake
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: BUILD_TYPE=cmake
+        - os: linux
+          compiler: gcc
+          env: BUILD_TYPE=coverage
+        - os: linux
+          compiler: gcc
+          env: BUILD_TYPE=distcheck
 
 install:
+  - pip install --user cpp-coveralls
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall libtool > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install openssl libidn rtmpdump libssh2 c-ares libmetalink libressl nghttp2; fi
 
 before_script:
-  - ./buildconf
+    - ./buildconf
 
-script: ./configure --enable-debug && make && make test-nonflaky
-
-compiler:
-  - clang
-  - gcc
+script:
+    - |
+        if [ "$BUILD_TYPE" = "coverage" ]; then
+             export CC="gcc-4.8"
+             ./configure --enable-debug --disable-shared --enable-code-coverage
+             make
+             make TFLAGS=-n test-nonflaky
+             make "TFLAGS=-n -e 1 2 3 4 5 6 7 8 9 10" test-nonflaky
+             make "TFLAGS=-n -t 1 2 3 4 5 6 7 8 9 10" test-nonflaky
+             coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' -i src -i lib -i lib/vtls -i lib/vauth -e tests -e docs
+        fi
+    - |
+        if [ "$BUILD_TYPE" = "normal" ]; then
+             ./configure --enable-debug
+             make
+             make TFLAGS=-n test-nonflaky
+        fi
+    - |
+        if [ "$BUILD_TYPE" = "cmake" ]; then
+             mkdir build
+             cd build
+             cmake ..
+             make
+        fi
+    - |
+        if [ "$BUILD_TYPE" = "distcheck" ]; then
+            ./configure
+            make
+            ./maketgz 99.98.97
+             tar xvf curl-99.98.97.tar.gz && cd curl-99.98.97 && ./configure && make && make TFLAGS=1 test
+        fi
 
 notifications:
   email: false
