@@ -56,7 +56,7 @@ static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream)
   int channel = RTP_PKT_CHANNEL(data);
   int message_size;
   int coded_size = RTP_PKT_LENGTH(data);
-  size_t failure = (size * nmemb) ? 0 : 1;
+  size_t failure = (size && nmemb) ? 0 : 1;
   int i;
   (void)stream;
 

@@ -44,7 +44,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   long longdata;
   CURLcode code;
 
-  const size_t failure = (size * nmemb) ? 0 : 1;
+  const size_t failure = (size && nmemb) ? 0 : 1;
 
   char *output = malloc(size * nmemb + 1);
   if(!output) {
