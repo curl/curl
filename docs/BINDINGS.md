@@ -83,6 +83,8 @@ Bailiff and Bálint Szilakszi,
 
 [Rexx](https://rexxcurl.sourceforge.io/) Written Mark Hessling
 
+[Ring](http://ring-lang.sourceforge.net/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
+
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 
 Ruby: [curb](http://curb.rubyforge.org/) written by Ross Bamford, [ruby-curl-multi](http://curl-multi.rubyforge.org/) written by Kristjan Petursson and Keith Rarick
