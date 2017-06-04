@@ -45,7 +45,7 @@ This release includes the following bugfixes:
  o telnet: Write full buffer instead of byte-by-byte [19]
  o typecheck-gcc: add missing string options [20]
  o typecheck-gcc: add support for CURLINFO_SOCKET [21]
- o opt man pages: many more now have examples
+ o opt man pages: they all have examples now
  o curl_setup_once: use SEND_QUAL_ARG2 for swrite [22]
  o test557: set a known good numeric locale
  o schannel: return a more specific error code for SEC_E_UNTRUSTED_ROOT
@@ -88,6 +88,32 @@ This release includes the following bugfixes:
  o winbuild: fix the nghttp2 build [44]
  o examples: fix -Wimplicit-fallthrough warnings
  o time: fix type conversions and compiler warnings [45]
+ o mbedtls: fix variable shadow warning
+ o test557: fix ubsan runtime error due to int left shift [46]
+ o transfer: init the infilesize from the postfields [47]
+ o docs: clarify NO_PROXY further [48]
+ o build-wolfssl: Sync config with wolfSSL 3.11
+ o curl-compilers.m4: enable -Wshift-sign-overflow for clang [49]
+ o example/externalsocket.c: make it use CLOSESOCKETFUNCTION too
+ o lib574.c: use correct callback proto
+ o lib583: fix compiler warning
+ o curl-compilers.m4: fix compiler_num for clang [50]
+ o typecheck-gcc.h: separate getinfo slist checks from other pointers [51]
+ o typecheck-gcc.h: check CURLINFO_TLS_SSL_PTR and CURLINFO_TLS_SESSION
+ o typecheck-gcc.h: check CURLINFO_CERTINFO [52]
+ o build: provide easy code coverage measuring [53]
+ o test1537: dedicated tests of the URL (un)escape API calls [54]
+ o curl_endian: remove unused functions [55]
+ o test1538: verify the libcurl strerror API calls
+ o MD(4|5): silence cast-align clang warning
+ o dedotdot: fixed output for ".." and "." only input [56]
+ o cyassl: define build macros before including ssl.h [57]
+ o updatemanpages.pl: error out on too old git version
+ o curl_sasl: fix unused-variable warning
+ o x509asn1: fix implicit-fallthrough warning with GCC 7
+ o libtest: fix implicit-fallthrough warnings with GCC 7
+ o BINDINGS: add Ring binding [58]
+ o curl_ntlm_core: pass unsigned char to toupper
 
 This release includes the following known bugs:
 
@@ -97,13 +123,14 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Akhil Kedia, Alan Jenkins, Anatol Belski, Bernhard M. Wiedemann,
-  Brian Childs, canavan at github, Dan Fandrich, Daniel Stenberg, Gisle Vanem,
-  Helmut K. C. Tessarek, Joel Depooter, jonrumsey at github, Kai Engert,
-  Kamil Dudka, Kevin Ji, Lloyd Fournier, Marcel Raad, Martin Kepplinger,
-  Michael Kaufmann, Nick Zitzmann, Phil Crump, Ray Satiro, Richard Hsu,
-  Ron Eldor, Sergei Nikulov, Simon Warta, stootill at github, Thomas Klausner,
-  Travis Burtrum, wyattoday at github,
-  (30 contributors)
+  Brian Childs, canavan at github, Dan Fandrich, Daniel Stenberg,
+  Edward Thomson, Gisle Vanem, Helmut K. C. Tessarek, Joel Depooter,
+  jonrumsey at github, Kai Engert, Kamil Dudka, Kevin Ji, Lloyd Fournier,
+  Mahmoud Samir Fayed, Marcel Raad, Martin Kepplinger, Max Dymond,
+  Michael Kaufmann, Nick Zitzmann, Phil Crump, Piotr Dobrogost, Ray Satiro,
+  Richard Hsu, Ron Eldor, Sergei Nikulov, Simon Warta, stootill at github,
+  Thomas Klausner, Travis Burtrum, Vincas Razma, wyattoday at github,
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -154,3 +181,16 @@ References to bug reports and discussions on issues:
  [43] = https://curl.haxx.se/bug/?i=1489
  [44] = https://curl.haxx.se/bug/?i=1321
  [45] = https://curl.haxx.se/bug/?i=1499
+ [46] = https://curl.haxx.se/bug/?i=1516
+ [47] = https://curl.haxx.se/bug/?i=1294
+ [48] = https://curl.haxx.se/bug/?i=1208
+ [49] = https://curl.haxx.se/bug/?i=1516
+ [50] = https://curl.haxx.se/bug/?i=1522
+ [51] = https://curl.haxx.se/bug/?i=1524
+ [52] = https://curl.haxx.se/bug/?i=846
+ [53] = https://curl.haxx.se/bug/?i=1528
+ [54] = https://curl.haxx.se/bug/?i=1530
+ [55] = https://curl.haxx.se/bug/?i=1529
+ [56] = https://curl.haxx.se/bug/?i=1532
+ [57] = https://curl.haxx.se/bug/?i=1536
+ [58] = https://curl.haxx.se/bug/?i=1539
