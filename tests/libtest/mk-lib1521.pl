@@ -166,7 +166,7 @@ while(<STDIN>) {
         elsif($type eq "FUNCTIONPOINT") {
             if($name =~ /([^ ]*)FUNCTION/) {
               my $l=lc($1);
-              print "${pref} ${l}cb);\n";
+              print "${pref}\n$i${l}cb);\n";
             }
             else {
               print "${pref} &func);\n";

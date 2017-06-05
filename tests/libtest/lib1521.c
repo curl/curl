@@ -97,9 +97,11 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_READDATA, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
     (void)curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
+    (void)curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                           writecb);
     (void)curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_READFUNCTION, readcb);
+    (void)curl_easy_setopt(curl, CURLOPT_READFUNCTION,
+                           readcb);
     (void)curl_easy_setopt(curl, CURLOPT_READFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_TIMEOUT, 0L);
     (void)curl_easy_setopt(curl, CURLOPT_TIMEOUT, 22L);
@@ -221,7 +223,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_PUT, 22L);
     (void)curl_easy_setopt(curl, CURLOPT_PUT, LO);
     (void)curl_easy_setopt(curl, CURLOPT_PUT, HI);
-    (void)curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progresscb);
+    (void)curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION,
+                           progresscb);
     (void)curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
@@ -285,7 +288,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 22L);
     (void)curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, LO);
     (void)curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, HI);
-    (void)curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, headercb);
+    (void)curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION,
+                           headercb);
     (void)curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_HTTPGET, 0L);
     (void)curl_easy_setopt(curl, CURLOPT_HTTPGET, 22L);
@@ -329,7 +333,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, HI);
     (void)curl_easy_setopt(curl, CURLOPT_PREQUOTE, slist);
     (void)curl_easy_setopt(curl, CURLOPT_PREQUOTE, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, debugcb);
+    (void)curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION,
+                           debugcb);
     (void)curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_DEBUGDATA, NULL);
@@ -371,7 +376,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_HTTPAUTH, 22L);
     (void)curl_easy_setopt(curl, CURLOPT_HTTPAUTH, LO);
     (void)curl_easy_setopt(curl, CURLOPT_HTTPAUTH, HI);
-    (void)curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, ssl_ctx_cb);
+    (void)curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION,
+                           ssl_ctx_cb);
     (void)curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, NULL);
@@ -421,7 +427,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_FTPSSLAUTH, 22L);
     (void)curl_easy_setopt(curl, CURLOPT_FTPSSLAUTH, LO);
     (void)curl_easy_setopt(curl, CURLOPT_FTPSSLAUTH, HI);
-    (void)curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcb);
+    (void)curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION,
+                           ioctlcb);
     (void)curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_IOCTLDATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_IOCTLDATA, NULL);
@@ -453,11 +460,14 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 22L);
     (void)curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, LO);
     (void)curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, HI);
-    (void)curl_easy_setopt(curl, CURLOPT_CONV_FROM_NETWORK_FUNCTION, conv_from_network_cb);
+    (void)curl_easy_setopt(curl, CURLOPT_CONV_FROM_NETWORK_FUNCTION,
+                           conv_from_network_cb);
     (void)curl_easy_setopt(curl, CURLOPT_CONV_FROM_NETWORK_FUNCTION, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_CONV_TO_NETWORK_FUNCTION, conv_to_network_cb);
+    (void)curl_easy_setopt(curl, CURLOPT_CONV_TO_NETWORK_FUNCTION,
+                           conv_to_network_cb);
     (void)curl_easy_setopt(curl, CURLOPT_CONV_TO_NETWORK_FUNCTION, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_CONV_FROM_UTF8_FUNCTION, conv_from_utf8_cb);
+    (void)curl_easy_setopt(curl, CURLOPT_CONV_FROM_UTF8_FUNCTION,
+                           conv_from_utf8_cb);
     (void)curl_easy_setopt(curl, CURLOPT_CONV_FROM_UTF8_FUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, OFF_NO);
     (void)curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, OFF_VAL);
@@ -467,7 +477,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, OFF_LO);
     (void)curl_easy_setopt(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER, "string");
     (void)curl_easy_setopt(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockoptcb);
+    (void)curl_easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION,
+                           sockoptcb);
     (void)curl_easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_SOCKOPTDATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_SOCKOPTDATA, NULL);
@@ -517,7 +528,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_POSTREDIR, HI);
     (void)curl_easy_setopt(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5, "string");
     (void)curl_easy_setopt(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocketcb);
+    (void)curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION,
+                           opensocketcb);
     (void)curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, NULL);
@@ -527,7 +539,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_PROXY_TRANSFER_MODE, 22L);
     (void)curl_easy_setopt(curl, CURLOPT_PROXY_TRANSFER_MODE, LO);
     (void)curl_easy_setopt(curl, CURLOPT_PROXY_TRANSFER_MODE, HI);
-    (void)curl_easy_setopt(curl, CURLOPT_SEEKFUNCTION, seekcb);
+    (void)curl_easy_setopt(curl, CURLOPT_SEEKFUNCTION,
+                           seekcb);
     (void)curl_easy_setopt(curl, CURLOPT_SEEKFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_SEEKDATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_SEEKDATA, NULL);
@@ -573,7 +586,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, HI);
     (void)curl_easy_setopt(curl, CURLOPT_SSH_KNOWNHOSTS, "string");
     (void)curl_easy_setopt(curl, CURLOPT_SSH_KNOWNHOSTS, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_SSH_KEYFUNCTION, ssh_keycb);
+    (void)curl_easy_setopt(curl, CURLOPT_SSH_KEYFUNCTION,
+                           ssh_keycb);
     (void)curl_easy_setopt(curl, CURLOPT_SSH_KEYFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_SSH_KEYDATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_SSH_KEYDATA, NULL);
@@ -605,17 +619,21 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_RTSP_SERVER_CSEQ, HI);
     (void)curl_easy_setopt(curl, CURLOPT_INTERLEAVEDATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_INTERLEAVEDATA, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_INTERLEAVEFUNCTION, interleavecb);
+    (void)curl_easy_setopt(curl, CURLOPT_INTERLEAVEFUNCTION,
+                           interleavecb);
     (void)curl_easy_setopt(curl, CURLOPT_INTERLEAVEFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_WILDCARDMATCH, 0L);
     (void)curl_easy_setopt(curl, CURLOPT_WILDCARDMATCH, 22L);
     (void)curl_easy_setopt(curl, CURLOPT_WILDCARDMATCH, LO);
     (void)curl_easy_setopt(curl, CURLOPT_WILDCARDMATCH, HI);
-    (void)curl_easy_setopt(curl, CURLOPT_CHUNK_BGN_FUNCTION, chunk_bgn_cb);
+    (void)curl_easy_setopt(curl, CURLOPT_CHUNK_BGN_FUNCTION,
+                           chunk_bgn_cb);
     (void)curl_easy_setopt(curl, CURLOPT_CHUNK_BGN_FUNCTION, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_CHUNK_END_FUNCTION, chunk_end_cb);
+    (void)curl_easy_setopt(curl, CURLOPT_CHUNK_END_FUNCTION,
+                           chunk_end_cb);
     (void)curl_easy_setopt(curl, CURLOPT_CHUNK_END_FUNCTION, NULL);
-    (void)curl_easy_setopt(curl, CURLOPT_FNMATCH_FUNCTION, fnmatch_cb);
+    (void)curl_easy_setopt(curl, CURLOPT_FNMATCH_FUNCTION,
+                           fnmatch_cb);
     (void)curl_easy_setopt(curl, CURLOPT_FNMATCH_FUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_CHUNK_DATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_CHUNK_DATA, NULL);
@@ -633,7 +651,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_TRANSFER_ENCODING, 22L);
     (void)curl_easy_setopt(curl, CURLOPT_TRANSFER_ENCODING, LO);
     (void)curl_easy_setopt(curl, CURLOPT_TRANSFER_ENCODING, HI);
-    (void)curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, closesocketcb);
+    (void)curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION,
+                           closesocketcb);
     (void)curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_CLOSESOCKETDATA, &object);
     (void)curl_easy_setopt(curl, CURLOPT_CLOSESOCKETDATA, NULL);
@@ -669,7 +688,8 @@ int test(char *URL)
     (void)curl_easy_setopt(curl, CURLOPT_SASL_IR, 22L);
     (void)curl_easy_setopt(curl, CURLOPT_SASL_IR, LO);
     (void)curl_easy_setopt(curl, CURLOPT_SASL_IR, HI);
-    (void)curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfocb);
+    (void)curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION,
+                           xferinfocb);
     (void)curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, NULL);
     (void)curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER, "string");
     (void)curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER, NULL);
