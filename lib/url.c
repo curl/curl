@@ -1023,8 +1023,8 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * CURL_REDIR_POST_ALL - POST is kept as POST after 301, 302 and 303
      * other - POST is kept as POST after 301 and 302
      */
-    int postRedir = curlx_sltosi(va_arg(param, long));
-    data->set.keep_post = postRedir & CURL_REDIR_POST_ALL;
+    arg = va_arg(param, long);
+    data->set.keep_post = arg & CURL_REDIR_POST_ALL;
   }
   break;
 
@@ -2075,13 +2075,19 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Set what local port to bind the socket to when performing an operation.
      */
-    data->set.localport = curlx_sltous(va_arg(param, long));
+    arg = va_arg(param, long);
+    if((arg < 0) || (arg > 65535))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.localport = curlx_sltous(arg);
     break;
   case CURLOPT_LOCALPORTRANGE:
     /*
      * Set number of local ports to try, starting with CURLOPT_LOCALPORT.
      */
-    data->set.localportrange = curlx_sltosi(va_arg(param, long));
+    arg = va_arg(param, long);
+    if((arg < 0) || (arg > 65535))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.localportrange = curlx_sltosi(arg);
     break;
   case CURLOPT_KRBLEVEL:
     /*
@@ -2812,13 +2818,17 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
       data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
     break;
   case CURLOPT_TLSAUTH_TYPE:
-    if(strncasecompare((char *)va_arg(param, char *), "SRP", strlen("SRP")))
+    argptr = va_arg(param, char *);
+    if(!argptr ||
+       strncasecompare(argptr, "SRP", strlen("SRP")))
       data->set.ssl.authtype = CURL_TLSAUTH_SRP;
     else
       data->set.ssl.authtype = CURL_TLSAUTH_NONE;
     break;
   case CURLOPT_PROXY_TLSAUTH_TYPE:
-    if(strncasecompare((char *)va_arg(param, char *), "SRP", strlen("SRP")))
+    argptr = va_arg(param, char *);
+    if(!argptr ||
+       strncasecompare(argptr, "SRP", strlen("SRP")))
       data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP;
     else
       data->set.proxy_ssl.authtype = CURL_TLSAUTH_NONE;
