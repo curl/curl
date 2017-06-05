@@ -470,8 +470,9 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_socket,
 #endif
 
 /* evaluates to true if expr is of type FILE* */
-#define _curl_is_FILE(expr)                                                   \
-  (__builtin_types_compatible_p(__typeof__(expr), FILE *))
+#define _curl_is_FILE(expr)                                             \
+  (_curl_is_NULL(expr) ||                                              \
+   (__builtin_types_compatible_p(__typeof__(expr), FILE *)))
 
 /* evaluates to true if expr can be passed as POST data (void* or char*) */
 #define _curl_is_postfields(expr)                                             \
