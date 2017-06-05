@@ -380,7 +380,7 @@ if(CMAKE_USE_MBEDTLS)
   set(SSL_ENABLED ON)
   set(USE_MBEDTLS ON)
   list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
-  include_directories(${MBEDTLS_INCLUDE_DIR})
+  include_directories(${MBEDTLS_INCLUDE_DIRS})
 endif()
 
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
