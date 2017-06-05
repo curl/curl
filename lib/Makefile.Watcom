@@ -6,7 +6,7 @@
 #                             \___|\___/|_| \_\_____|
 #
 # Copyright (C) 2005 - 2009, Gisle Vanem <gvanem@yahoo.no>.
-# Copyright (C) 2005 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2005 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -81,7 +81,7 @@ RD = rmdir /q /s 2>NUL
 SYS_INCL = -I"$(%watcom)/h/nt" -I"$(%watcom)/h"
 
 CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -zc -s -fr=con -w2 -fpi -oilrtfm &
-         -wcd=201 -bt=nt -d+ -dWIN32 -dCURL_WANTS_CA_BUNDLE_ENV         &
+         -wcd=201 -bt=nt -d+ -dWIN32 &
          -dBUILDING_LIBCURL -I. -I"../include" $(SYS_INCL)
 
 !ifdef %debug
