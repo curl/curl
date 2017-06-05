@@ -29,11 +29,6 @@ struct data {
     char *blaha;
 };
 
-static int func(void)
-{
-  return 0;
-}
-
 #define LO -2147483647
 #define HI 2147483648
 #define OFF_VAL (curl_off_t) 3123123123
@@ -41,37 +36,58 @@ static int func(void)
 #define OFF_HI (curl_off_t) HI
 #define OFF_NO (curl_off_t) 0
 
+static size_t writecb(char *buffer, size_t size, size_t nitems,
+                      void *outstream)
+{
+  (void)buffer;
+  (void)size;
+  (void)nitems;
+  (void)outstream;
+  return 0;
+}
+
+static size_t readcb(char *buffer,
+              size_t size,
+              size_t nitems,
+              void *instream)
+{
+  (void)buffer;
+  (void)size;
+  (void)nitems;
+  (void)instream;
+  return 0;
+}
+
+curl_progress_callback progresscb;
+curl_write_callback headercb;
+curl_debug_callback debugcb;
+curl_ssl_ctx_callback ssl_ctx_cb;
+curl_ioctl_callback ioctlcb;
+curl_sockopt_callback sockoptcb;
+curl_opensocket_callback opensocketcb;
+curl_seek_callback seekcb;
+curl_sshkeycallback ssh_keycb;
+curl_chunk_bgn_callback chunk_bgn_cb;
+curl_chunk_end_callback chunk_end_cb;
+curl_fnmatch_callback fnmatch_cb;
+curl_closesocket_callback closesocketcb;
+curl_xferinfo_callback xferinfocb;
+
 int test(char *URL)
 {
   CURL *curl;
   CURL *dep;
   CURLSH *share;
-  (void)URL; /* not used */
   char errorbuffer[CURL_ERROR_SIZE];
-  curl_write_callback writecb;
-  curl_read_callback readcb;
-  curl_progress_callback progresscb;
-  curl_write_callback headercb;
-  curl_debug_callback debugcb;
-  curl_ssl_ctx_callback ssl_ctx_cb;
-  curl_ioctl_callback ioctlcb;
-  void *conv_from_network_cb;
-  void *conv_to_network_cb;
-  void *conv_from_utf8_cb;
-  curl_sockopt_callback sockoptcb;
-  curl_opensocket_callback opensocketcb;
-  curl_seek_callback seekcb;
-  curl_sshkeycallback ssh_keycb;
-  void *interleavecb;
-  curl_chunk_bgn_callback chunk_bgn_cb;
-  curl_chunk_end_callback chunk_end_cb;
-  curl_fnmatch_callback fnmatch_cb;
-  curl_closesocket_callback closesocketcb;
-  curl_xferinfo_callback xferinfocb;
-  char *stringpointerextra="moooo";
+  void *conv_from_network_cb = NULL;
+  void *conv_to_network_cb = NULL;
+  void *conv_from_utf8_cb = NULL;
+  void *interleavecb = NULL;
+  char *stringpointerextra=(char *)"moooo";
   struct curl_slist *slist=NULL;
   struct curl_httppost *httppost=NULL;
   FILE *stream = stderr;
+  (void)URL; /* not used */
   dep = curl_easy_init();
   share = curl_share_init();
   curl = curl_easy_init();
