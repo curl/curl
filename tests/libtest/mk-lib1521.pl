@@ -78,6 +78,31 @@ int test(char *URL)
   CURL *dep;
   CURLSH *share;
   (void)URL; /* not used */
+  char errorbuffer[CURL_ERROR_SIZE];
+  curl_write_callback writecb;
+  curl_read_callback readcb;
+  curl_progress_callback progresscb;
+  curl_write_callback headercb;
+  curl_debug_callback debugcb;
+  curl_ssl_ctx_callback ssl_ctx_cb;
+  curl_ioctl_callback ioctlcb;
+  void *conv_from_network_cb;
+  void *conv_to_network_cb;
+  void *conv_from_utf8_cb;
+  curl_sockopt_callback sockoptcb;
+  curl_opensocket_callback opensocketcb;
+  curl_seek_callback seekcb;
+  curl_sshkeycallback ssh_keycb;
+  void *interleavecb;
+  curl_chunk_bgn_callback chunk_bgn_cb;
+  curl_chunk_end_callback chunk_end_cb;
+  curl_fnmatch_callback fnmatch_cb;
+  curl_closesocket_callback closesocketcb;
+  curl_xferinfo_callback xferinfocb;
+  char *stringpointerextra="moooo";
+  struct curl_slist *slist=NULL;
+  struct curl_httppost *httppost=NULL;
+  FILE *stream = stderr;
   dep = curl_easy_init();
   share = curl_share_init();
   curl = curl_easy_init();
@@ -106,8 +131,32 @@ while(<STDIN>) {
             if($name =~ /DEPENDS/) {
               print "${pref} dep);\n";
             }
-            elsif($name =~ /SHARE/) {
+            elsif($name =~ "SHARE") {
               print "${pref} share);\n";
+            }
+            elsif($name eq "ERRORBUFFER") {
+              print "${pref} errorbuffer);\n";
+            }
+            elsif(($name eq "POSTFIELDS") ||
+                  ($name eq "COPYPOSTFIELDS")) {
+              print "${pref} stringpointerextra);\n";
+            }
+            elsif(($name eq "HTTPHEADER") ||
+                  ($name eq "POSTQUOTE") ||
+                  ($name eq "PREQUOTE") ||
+                  ($name eq "HTTP200ALIASES") ||
+                  ($name eq "TELNETOPTIONS") ||
+                  ($name eq "MAIL_RCPT") ||
+                  ($name eq "RESOLVE") ||
+                  ($name eq "PROXYHEADER") ||
+                  ($name eq "QUOTE")) {
+              print "${pref} slist);\n";
+            }
+            elsif($name eq "HTTPPOST") {
+              print "${pref} httppost);\n";
+            }
+            elsif($name eq "STDERR") {
+              print "${pref} stream);\n";
             }
             else {
               print "${pref} &object);\n";
@@ -115,7 +164,13 @@ while(<STDIN>) {
             print "${pref} NULL);\n";
         }
         elsif($type eq "FUNCTIONPOINT") {
-            print "${pref} &func);\n";
+            if($name =~ /([^ ]*)FUNCTION/) {
+              my $l=lc($1);
+              print "${pref} ${l}cb);\n";
+            }
+            else {
+              print "${pref} &func);\n";
+            }
             print "${pref} NULL);\n";
         }
         elsif($type eq "OFF_T") {
