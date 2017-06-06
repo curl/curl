@@ -16,7 +16,7 @@ matrix:
     include:
         - os: linux
           compiler: gcc
-          env: BUILD_TYPE=normal
+          env: BUILD_TYPE=debug
         - os: linux
           compiler: clang
           env: BUILD_TYPE=normal
@@ -25,7 +25,7 @@ matrix:
           env: BUILD_TYPE=normal
         - os: osx
           compiler: clang
-          env: BUILD_TYPE=normal
+          env: BUILD_TYPE=debug
         - os: linux
           compiler: gcc
           dist: trusty
@@ -62,8 +62,14 @@ script:
              coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' -i src -i lib -i lib/vtls -i lib/vauth -e tests -e docs
         fi
     - |
-        if [ "$BUILD_TYPE" = "normal" ]; then
+        if [ "$BUILD_TYPE" = "debug" ]; then
              ./configure --enable-debug
+             make
+             make TFLAGS=-n test-nonflaky
+        fi
+    - |
+        if [ "$BUILD_TYPE" = "normal" ]; then
+             ./configure
              make
              make TFLAGS=-n test-nonflaky
         fi
