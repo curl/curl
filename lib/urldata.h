@@ -892,6 +892,23 @@ struct proxy_info {
   char *passwd;  /* proxy password string, allocated */
 };
 
+#define CONNECT_BUFFER_SIZE 16384
+
+/* struct for HTTP CONNECT state data */
+struct http_connect_state {
+  char connect_buffer[CONNECT_BUFFER_SIZE];
+  int perline; /* count bytes per line */
+  int keepon;
+  char *line_start;
+  char *ptr; /* where to store more data */
+  curl_off_t cl; /* size of content to read and ignore */
+  enum {
+    TUNNEL_INIT,    /* init/default/no tunnel state */
+    TUNNEL_CONNECT, /* CONNECT has been sent off */
+    TUNNEL_COMPLETE /* CONNECT response received completely */
+  } tunnel_state;
+};
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -1134,17 +1151,9 @@ struct connectdata {
   char *localdev;
   unsigned short localport;
   int localportrange;
-
-  /* tunnel as in tunnel through a HTTP proxy with CONNECT */
-  enum {
-    TUNNEL_INIT,    /* init/default/no tunnel state */
-    TUNNEL_CONNECT, /* CONNECT has been sent off */
-    TUNNEL_COMPLETE /* CONNECT response received completely */
-  } tunnel_state[2]; /* two separate ones to allow FTP */
+  struct http_connect_state *connect_state; /* for HTTP CONNECT */
   struct connectbundle *bundle; /* The bundle we are member of */
-
   int negnpn; /* APLN or NPN TLS negotiated protocol, CURL_HTTP_VERSION* */
-  char *connect_buffer; /* for CONNECT business */
 
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;

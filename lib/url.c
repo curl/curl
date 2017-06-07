@@ -3020,7 +3020,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
   Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
   Curl_safefree(conn->master_buffer);
-  Curl_safefree(conn->connect_buffer);
+  Curl_safefree(conn->connect_state);
 
   conn_reset_all_postponed_data(conn);
 
@@ -4010,7 +4010,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
       return CURLE_OK;
 
     if(conn->bits.tunnel_proxy && conn->bits.httpproxy &&
-       (conn->tunnel_state[FIRSTSOCKET] != TUNNEL_COMPLETE))
+       Curl_connect_ongoing(conn))
       /* when using an HTTP tunnel proxy, await complete tunnel establishment
          before proceeding further. Return CURLE_OK so we'll be called again */
       return CURLE_OK;
