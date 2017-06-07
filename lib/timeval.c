@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -130,14 +130,24 @@ time_t curlx_tvdiff(struct timeval newer, struct timeval older)
 }
 
 /*
- * Same as curlx_tvdiff but with full usec resolution.
+ * Make sure that the first argument is the more recent time, as otherwise
+ * we'll get a weird negative time-diff back...
  *
- * Returns: the time difference in seconds with subsecond resolution.
+ * Returns: the time difference in number of microseconds. For too large diffs
+ * it returns max value.
  */
-double curlx_tvdiff_secs(struct timeval newer, struct timeval older)
+time_t Curl_tvdiff_us(struct timeval newer, struct timeval older)
 {
-  if(newer.tv_sec != older.tv_sec)
-    return (double)(newer.tv_sec-older.tv_sec)+
-      (double)(newer.tv_usec-older.tv_usec)/1000000.0;
-  return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
+  time_t diff = newer.tv_sec-older.tv_sec;
+#if SIZEOF_TIME_T < 8
+  /* for 32bit time_t systems */
+  if(diff >= (0x7fffffff/1000000))
+    return 0x7fffffff;
+#else
+  /* for 64bit time_t systems */
+  if(diff >= (0x7fffffffffffffff/1000000))
+    return 0x7fffffffffffffff;
+#endif
+  return (newer.tv_sec-older.tv_sec)*1000000+
+    (time_t)(newer.tv_usec-older.tv_usec);
 }

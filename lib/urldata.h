@@ -1213,17 +1213,17 @@ struct Progress {
   int width; /* screen width at download start */
   int flags; /* see progress.h */
 
-  double timespent;
+  time_t timespent;
 
   curl_off_t dlspeed;
   curl_off_t ulspeed;
 
-  double t_nslookup;
-  double t_connect;
-  double t_appconnect;
-  double t_pretransfer;
-  double t_starttransfer;
-  double t_redirect;
+  time_t t_nslookup;
+  time_t t_connect;
+  time_t t_appconnect;
+  time_t t_pretransfer;
+  time_t t_starttransfer;
+  time_t t_redirect;
 
   struct timeval start;
   struct timeval t_startsingle;
