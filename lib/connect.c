@@ -132,7 +132,7 @@ tcpkeepalive(struct Curl_easy *data,
     }
 #else
 #ifdef TCP_KEEPIDLE
-    optval = curlx_sltosi(data->set.tcp_keepidle);
+    optval = Curl_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
           (void *)&optval, sizeof(optval)) < 0) {
@@ -140,7 +140,7 @@ tcpkeepalive(struct Curl_easy *data,
     }
 #endif
 #ifdef TCP_KEEPINTVL
-    optval = curlx_sltosi(data->set.tcp_keepintvl);
+    optval = Curl_sltosi(data->set.tcp_keepintvl);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
           (void *)&optval, sizeof(optval)) < 0) {
@@ -149,7 +149,7 @@ tcpkeepalive(struct Curl_easy *data,
 #endif
 #ifdef TCP_KEEPALIVE
     /* Mac OS X style */
-    optval = curlx_sltosi(data->set.tcp_keepidle);
+    optval = Curl_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
           (void *)&optval, sizeof(optval)) < 0) {

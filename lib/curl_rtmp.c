@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010, Howard Chu, <hyc@highlandsun.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -277,7 +277,7 @@ static ssize_t rtmp_recv(struct connectdata *conn, int sockindex, char *buf,
 
   (void)sockindex; /* unused */
 
-  nread = RTMP_Read(r, buf, curlx_uztosi(len));
+  nread = RTMP_Read(r, buf, Curl_uztosi(len));
   if(nread < 0) {
     if(r->m_read.status == RTMP_READ_COMPLETE ||
         r->m_read.status == RTMP_READ_EOF) {
@@ -298,7 +298,7 @@ static ssize_t rtmp_send(struct connectdata *conn, int sockindex,
 
   (void)sockindex; /* unused */
 
-  num = RTMP_Write(r, (char *)buf, curlx_uztosi(len));
+  num = RTMP_Write(r, (char *)buf, Curl_uztosi(len));
   if(num < 0)
     *err = CURLE_SEND_ERROR;
 

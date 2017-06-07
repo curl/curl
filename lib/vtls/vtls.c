@@ -889,7 +889,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
      * if the size of our certificate is bigger than the file
      * size then it can't match
      */
-    size = curlx_sotouz((curl_off_t) filesize);
+    size = Curl_sotouz((curl_off_t) filesize);
     if(pubkeylen > size)
       break;
 
@@ -953,7 +953,7 @@ CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
   MD5pw = Curl_MD5_init(Curl_DIGEST_MD5);
   if(!MD5pw)
     return CURLE_OUT_OF_MEMORY;
-  Curl_MD5_update(MD5pw, tmp, curlx_uztoui(tmplen));
+  Curl_MD5_update(MD5pw, tmp, Curl_uztoui(tmplen));
   Curl_MD5_final(MD5pw, md5sum);
 #endif
   return CURLE_OK;

@@ -476,10 +476,10 @@ static CURLcode pop3_perform_apop(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
 
   Curl_MD5_update(ctxt, (const unsigned char *) pop3c->apoptimestamp,
-                  curlx_uztoui(strlen(pop3c->apoptimestamp)));
+                  Curl_uztoui(strlen(pop3c->apoptimestamp)));
 
   Curl_MD5_update(ctxt, (const unsigned char *) conn->passwd,
-                  curlx_uztoui(strlen(conn->passwd)));
+                  Curl_uztoui(strlen(conn->passwd)));
 
   /* Finalise the digest */
   Curl_MD5_final(ctxt, digest);

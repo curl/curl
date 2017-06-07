@@ -381,7 +381,7 @@ CURLcode Curl_dupset(struct Curl_easy *dst, struct Curl_easy *src)
   if(src->set.postfieldsize && src->set.str[i]) {
     /* postfieldsize is curl_off_t, Curl_memdup() takes a size_t ... */
     dst->set.str[i] = Curl_memdup(src->set.str[i],
-                                  curlx_sotouz(src->set.postfieldsize));
+                                  Curl_sotouz(src->set.postfieldsize));
     if(!dst->set.str[i])
       return CURLE_OUT_OF_MEMORY;
     /* point to the new copy */
@@ -2078,7 +2078,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     arg = va_arg(param, long);
     if((arg < 0) || (arg > 65535))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.localport = curlx_sltous(arg);
+    data->set.localport = Curl_sltous(arg);
     break;
   case CURLOPT_LOCALPORTRANGE:
     /*
@@ -2087,7 +2087,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     arg = va_arg(param, long);
     if((arg < 0) || (arg > 65535))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.localportrange = curlx_sltosi(arg);
+    data->set.localportrange = Curl_sltosi(arg);
     break;
   case CURLOPT_KRBLEVEL:
     /*
@@ -2616,7 +2616,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * know that an unsigned int will always hold the value so we blindly
      * typecast to this type
      */
-    data->set.scope_id = curlx_sltoui(va_arg(param, long));
+    data->set.scope_id = Curl_sltoui(va_arg(param, long));
     break;
 
   case CURLOPT_PROTOCOLS:
@@ -5735,7 +5735,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
 
     if(rest != &portptr[1]) {
       *portptr = '\0'; /* cut off the name there */
-      conn->remote_port = curlx_ultous(port);
+      conn->remote_port = Curl_ultous(port);
     }
     else {
       /* Browser behavior adaptation. If there's a colon with no digits after,

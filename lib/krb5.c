@@ -93,7 +93,7 @@ krb5_decode(void *app_data, void *buf, int len,
   }
 
   memcpy(buf, dec.value, dec.length);
-  len = curlx_uztosi(dec.length);
+  len = Curl_uztosi(dec.length);
   gss_release_buffer(&min, &dec);
 
   return len;
@@ -137,7 +137,7 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to)
   if(!*to)
     return -1;
   memcpy(*to, enc.value, enc.length);
-  len = curlx_uztosi(enc.length);
+  len = Curl_uztosi(enc.length);
   gss_release_buffer(&min, &enc);
   return len;
 }

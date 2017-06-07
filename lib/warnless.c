@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -121,7 +121,7 @@
 ** unsigned long to unsigned short
 */
 
-unsigned short curlx_ultous(unsigned long ulnum)
+unsigned short Curl_ultous(unsigned long ulnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -140,7 +140,7 @@ unsigned short curlx_ultous(unsigned long ulnum)
 ** unsigned long to unsigned char
 */
 
-unsigned char curlx_ultouc(unsigned long ulnum)
+unsigned char Curl_ultouc(unsigned long ulnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -159,7 +159,7 @@ unsigned char curlx_ultouc(unsigned long ulnum)
 ** unsigned long to signed int
 */
 
-int curlx_ultosi(unsigned long ulnum)
+int Curl_ultosi(unsigned long ulnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -178,7 +178,7 @@ int curlx_ultosi(unsigned long ulnum)
 ** unsigned size_t to signed curl_off_t
 */
 
-curl_off_t curlx_uztoso(size_t uznum)
+curl_off_t Curl_uztoso(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -200,7 +200,7 @@ curl_off_t curlx_uztoso(size_t uznum)
 ** unsigned size_t to signed int
 */
 
-int curlx_uztosi(size_t uznum)
+int Curl_uztosi(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -219,7 +219,7 @@ int curlx_uztosi(size_t uznum)
 ** unsigned size_t to unsigned long
 */
 
-unsigned long curlx_uztoul(size_t uznum)
+unsigned long Curl_uztoul(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
 # pragma warning(push)
@@ -240,7 +240,7 @@ unsigned long curlx_uztoul(size_t uznum)
 ** unsigned size_t to unsigned int
 */
 
-unsigned int curlx_uztoui(size_t uznum)
+unsigned int Curl_uztoui(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
 # pragma warning(push)
@@ -261,7 +261,7 @@ unsigned int curlx_uztoui(size_t uznum)
 ** signed long to signed int
 */
 
-int curlx_sltosi(long slnum)
+int Curl_sltosi(long slnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -283,7 +283,7 @@ int curlx_sltosi(long slnum)
 ** signed long to unsigned int
 */
 
-unsigned int curlx_sltoui(long slnum)
+unsigned int Curl_sltoui(long slnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -305,7 +305,7 @@ unsigned int curlx_sltoui(long slnum)
 ** signed long to unsigned short
 */
 
-unsigned short curlx_sltous(long slnum)
+unsigned short Curl_sltous(long slnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -325,7 +325,7 @@ unsigned short curlx_sltous(long slnum)
 ** unsigned size_t to signed ssize_t
 */
 
-ssize_t curlx_uztosz(size_t uznum)
+ssize_t Curl_uztosz(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -344,7 +344,7 @@ ssize_t curlx_uztosz(size_t uznum)
 ** signed curl_off_t to unsigned size_t
 */
 
-size_t curlx_sotouz(curl_off_t sonum)
+size_t Curl_sotouz(curl_off_t sonum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -363,7 +363,7 @@ size_t curlx_sotouz(curl_off_t sonum)
 ** signed ssize_t to signed int
 */
 
-int curlx_sztosi(ssize_t sznum)
+int Curl_sztosi(ssize_t sznum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -385,7 +385,7 @@ int curlx_sztosi(ssize_t sznum)
 ** unsigned int to unsigned short
 */
 
-unsigned short curlx_uitous(unsigned int uinum)
+unsigned short Curl_uitous(unsigned int uinum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -404,7 +404,7 @@ unsigned short curlx_uitous(unsigned int uinum)
 ** unsigned int to unsigned char
 */
 
-unsigned char curlx_uitouc(unsigned int uinum)
+unsigned char Curl_uitouc(unsigned int uinum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -423,7 +423,7 @@ unsigned char curlx_uitouc(unsigned int uinum)
 ** unsigned int to signed int
 */
 
-int curlx_uitosi(unsigned int uinum)
+int Curl_uitosi(unsigned int uinum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -442,7 +442,7 @@ int curlx_uitosi(unsigned int uinum)
 ** signed int to unsigned size_t
 */
 
-size_t curlx_sitouz(int sinum)
+size_t Curl_sitouz(int sinum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -463,7 +463,7 @@ size_t curlx_sitouz(int sinum)
 ** curl_socket_t to signed int
 */
 
-int curlx_sktosi(curl_socket_t s)
+int Curl_sktosi(curl_socket_t s)
 {
   return (int)((ssize_t) s);
 }
@@ -472,7 +472,7 @@ int curlx_sktosi(curl_socket_t s)
 ** signed int to curl_socket_t
 */
 
-curl_socket_t curlx_sitosk(int i)
+curl_socket_t Curl_sitosk(int i)
 {
   return (curl_socket_t)((ssize_t) i);
 }
@@ -481,21 +481,21 @@ curl_socket_t curlx_sitosk(int i)
 
 #if defined(WIN32) || defined(_WIN32)
 
-ssize_t curlx_read(int fd, void *buf, size_t count)
+ssize_t Curl_read(int fd, void *buf, size_t count)
 {
-  return (ssize_t)read(fd, buf, curlx_uztoui(count));
+  return (ssize_t)read(fd, buf, Curl_uztoui(count));
 }
 
-ssize_t curlx_write(int fd, const void *buf, size_t count)
+ssize_t Curl_write(int fd, const void *buf, size_t count)
 {
-  return (ssize_t)write(fd, buf, curlx_uztoui(count));
+  return (ssize_t)write(fd, buf, Curl_uztoui(count));
 }
 
 #endif /* WIN32 || _WIN32 */
 
 #if defined(__INTEL_COMPILER) && defined(__unix__)
 
-int curlx_FD_ISSET(int fd, fd_set *fdset)
+int Curl_FD_ISSET(int fd, fd_set *fdset)
 {
   #pragma warning(push)
   #pragma warning(disable:1469) /* clobber ignored */
@@ -503,7 +503,7 @@ int curlx_FD_ISSET(int fd, fd_set *fdset)
   #pragma warning(pop)
 }
 
-void curlx_FD_SET(int fd, fd_set *fdset)
+void Curl_FD_SET(int fd, fd_set *fdset)
 {
   #pragma warning(push)
   #pragma warning(disable:1469) /* clobber ignored */
@@ -511,7 +511,7 @@ void curlx_FD_SET(int fd, fd_set *fdset)
   #pragma warning(pop)
 }
 
-void curlx_FD_ZERO(fd_set *fdset)
+void Curl_FD_ZERO(fd_set *fdset)
 {
   #pragma warning(push)
   #pragma warning(disable:593) /* variable was set but never used */
@@ -519,7 +519,7 @@ void curlx_FD_ZERO(fd_set *fdset)
   #pragma warning(pop)
 }
 
-unsigned short curlx_htons(unsigned short usnum)
+unsigned short Curl_htons(unsigned short usnum)
 {
 #if (__INTEL_COMPILER == 910) && defined(__i386__)
   return (unsigned short)(((usnum << 8) & 0xFF00) | ((usnum >> 8) & 0x00FF));
@@ -531,7 +531,7 @@ unsigned short curlx_htons(unsigned short usnum)
 #endif
 }
 
-unsigned short curlx_ntohs(unsigned short usnum)
+unsigned short Curl_ntohs(unsigned short usnum)
 {
 #if (__INTEL_COMPILER == 910) && defined(__i386__)
   return (unsigned short)(((usnum << 8) & 0xFF00) | ((usnum >> 8) & 0x00FF));

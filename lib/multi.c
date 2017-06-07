@@ -2293,7 +2293,7 @@ CURLMsg *curl_multi_info_read(struct Curl_multi *multi, int *msgs_in_queue)
     /* remove the extracted entry */
     Curl_llist_remove(&multi->msglist, e, NULL);
 
-    *msgs_in_queue = curlx_uztosi(Curl_llist_count(&multi->msglist));
+    *msgs_in_queue = Curl_uztosi(Curl_llist_count(&multi->msglist));
 
     return &msg->extmsg;
   }

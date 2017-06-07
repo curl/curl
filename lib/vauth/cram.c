@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -106,14 +106,14 @@ CURLcode Curl_auth_create_cram_md5_message(struct Curl_easy *data,
   /* Compute the digest using the password as the key */
   ctxt = Curl_HMAC_init(Curl_HMAC_MD5,
                         (const unsigned char *) passwdp,
-                        curlx_uztoui(strlen(passwdp)));
+                        Curl_uztoui(strlen(passwdp)));
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
   if(chlglen > 0)
     Curl_HMAC_update(ctxt, (const unsigned char *) chlg,
-                     curlx_uztoui(chlglen));
+                     Curl_uztoui(chlglen));
 
   /* Finalise the digest */
   Curl_HMAC_final(ctxt, digest);
