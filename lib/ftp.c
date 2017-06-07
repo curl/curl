@@ -602,7 +602,7 @@ static bool ftp_endofresp(struct connectdata *conn, char *line, size_t len,
   (void)conn;
 
   if((len > 3) && LASTLINE(line)) {
-    *code = curlx_sltosi(strtol(line, NULL, 10));
+    *code = Curl_sltosi(strtol(line, NULL, 10));
     return TRUE;
   }
 
@@ -1067,10 +1067,10 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     if(ip_end != NULL) {
       port_start = strchr(ip_end, ':');
       if(port_start) {
-        port_min = curlx_ultous(strtoul(port_start+1, NULL, 10));
+        port_min = Curl_ultous(strtoul(port_start+1, NULL, 10));
         port_sep = strchr(port_start, '-');
         if(port_sep) {
-          port_max = curlx_ultous(strtoul(port_sep + 1, NULL, 10));
+          port_max = Curl_ultous(strtoul(port_sep + 1, NULL, 10));
         }
         else
           port_max = port_min;
@@ -1681,7 +1681,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
         size_t readthisamountnow =
           (data->state.resume_from - passed > data->set.buffer_size) ?
           (size_t)data->set.buffer_size :
-          curlx_sotouz(data->state.resume_from - passed);
+          Curl_sotouz(data->state.resume_from - passed);
 
         size_t actuallyread =
           data->state.fread_func(data->state.buffer, 1, readthisamountnow,

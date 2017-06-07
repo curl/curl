@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,14 +71,14 @@ static size_t decodeQuantum(unsigned char *dest, const char *src)
   }
 
   if(padding < 1)
-    dest[2] = curlx_ultouc(x & 0xFFUL);
+    dest[2] = Curl_ultouc(x & 0xFFUL);
 
   x >>= 8;
   if(padding < 2)
-    dest[1] = curlx_ultouc(x & 0xFFUL);
+    dest[1] = Curl_ultouc(x & 0xFFUL);
 
   x >>= 8;
-  dest[0] = curlx_ultouc(x & 0xFFUL);
+  dest[0] = Curl_ultouc(x & 0xFFUL);
 
   return 3 - padding;
 }

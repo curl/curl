@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -171,7 +171,7 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
 
       hex = strtoul(hexstr, &ptr, 16);
 
-      in = curlx_ultouc(hex); /* this long is never bigger than 255 anyway */
+      in = Curl_ultouc(hex); /* this long is never bigger than 255 anyway */
 
       result = Curl_convert_from_network(data, &in, 1);
       if(result) {
@@ -224,7 +224,7 @@ char *curl_easy_unescape(struct Curl_easy *data, const char *string,
 
     if(olen) {
       if(outputlen <= (size_t) INT_MAX)
-        *olen = curlx_uztosi(outputlen);
+        *olen = Curl_uztosi(outputlen);
       else
         /* too large to return in an int, fail! */
         Curl_safefree(str);

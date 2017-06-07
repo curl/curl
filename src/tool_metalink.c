@@ -93,10 +93,7 @@ struct win32_crypto_hash {
 #  error "Can't compile METALINK support without a crypto library."
 #endif
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
-
 #include "tool_getparam.h"
 #include "tool_paramhlp.h"
 #include "tool_cfgable.h"

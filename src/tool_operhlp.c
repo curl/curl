@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,9 +22,6 @@
 #include "tool_setup.h"
 
 #include "strcase.h"
-
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_cfgable.h"
@@ -104,10 +101,10 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
       char *urlbuffer;
       if(ptr)
         /* there is a trailing slash on the URL */
-        urlbuffer = aprintf("%s%s", url, encfile);
+        urlbuffer = curl_maprintf("%s%s", url, encfile);
       else
         /* there is no trailing slash on the URL */
-        urlbuffer = aprintf("%s/%s", url, encfile);
+        urlbuffer = curl_maprintf("%s/%s", url, encfile);
 
       curl_free(encfile);
       Curl_safefree(url);
@@ -173,7 +170,7 @@ CURLcode get_url_file_name(char **filename, const char *url)
    */
 #ifdef DEBUGBUILD
   {
-    char *tdir = curlx_getenv("CURL_TESTDIR");
+    char *tdir = curl_getenv("CURL_TESTDIR");
     if(tdir) {
       char buffer[512]; /* suitably large */
       snprintf(buffer, sizeof(buffer), "%s/%s", tdir, *filename);

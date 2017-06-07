@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,9 +24,6 @@
 #include "slist_wc.h"
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
-
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_cfgable.h"
@@ -111,7 +108,7 @@ CURLcode easysrc_addf(struct slist_wc **plist, const char *fmt, ...)
   char *bufp;
   va_list ap;
   va_start(ap, fmt);
-  bufp = curlx_mvaprintf(fmt, ap);
+  bufp = curl_mvaprintf(fmt, ap);
   va_end(ap);
   if(! bufp) {
     ret = CURLE_OUT_OF_MEMORY;

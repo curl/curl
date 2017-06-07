@@ -2293,7 +2293,7 @@ CURLMsg *curl_multi_info_read(struct Curl_multi *multi, int *msgs_in_queue)
     /* remove the extracted entry */
     Curl_llist_remove(&multi->msglist, e, NULL);
 
-    *msgs_in_queue = curlx_uztosi(Curl_llist_count(&multi->msglist));
+    *msgs_in_queue = Curl_uztosi(Curl_llist_count(&multi->msglist));
 
     return &msg->extmsg;
   }
@@ -2501,7 +2501,7 @@ static CURLMcode add_next_timeout(struct timeval now,
     struct curl_llist_element *n = e->next;
     time_t diff;
     node = (struct time_node *)e->ptr;
-    diff = curlx_tvdiff(node->time, now);
+    diff = Curl_tvdiff(node->time, now);
     if(diff <= 0)
       /* remove outdated entry */
       Curl_llist_remove(list, e, NULL);
@@ -2777,7 +2777,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 
     if(Curl_splaycomparekeys(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
-      *timeout_ms = (long)curlx_tvdiff(multi->timetree->key, now);
+      *timeout_ms = (long)Curl_tvdiff(multi->timetree->key, now);
       if(!*timeout_ms)
         /*
          * Since we only provide millisecond resolution on the returned value
@@ -2893,7 +2893,7 @@ multi_addtimeout(struct Curl_easy *data,
     /* find the correct spot in the list */
     for(e = timeoutlist->head; e; e = e->next) {
       struct time_node *check = (struct time_node *)e->ptr;
-      time_t diff = curlx_tvdiff(check->time, node->time);
+      time_t diff = Curl_tvdiff(check->time, node->time);
       if(diff > 0)
         break;
       prev = e;
@@ -2945,7 +2945,7 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
        is. */
-    time_t diff = curlx_tvdiff(set, *nowp);
+    time_t diff = Curl_tvdiff(set, *nowp);
 
     /* remove the previous timer first, if there */
     multi_deltimeout(data, id);
@@ -3006,7 +3006,7 @@ void Curl_expire_latest(struct Curl_easy *data, time_t milli, expire_id id)
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
        is. */
-    time_t diff = curlx_tvdiff(set, *expire);
+    time_t diff = Curl_tvdiff(set, *expire);
     if((diff > 0) && (diff < milli)) {
       /* if the new expire time is later than the top time, skip it, but not
          if the diff is larger than the new offset since then the previous

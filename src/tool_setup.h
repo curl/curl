@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,6 +40,25 @@
  */
 
 #include <curl/curl.h> /* external interface */
+#include <curl/mprintf.h>
+
+# undef printf
+# undef fprintf
+# undef sprintf
+# undef snprintf
+# undef vprintf
+# undef vfprintf
+# undef vsprintf
+# undef vsnprintf
+
+# define printf curl_mprintf
+# define fprintf curl_mfprintf
+# define sprintf curl_msprintf
+# define snprintf curl_msnprintf
+# define vprintf curl_mvprintf
+# define vfprintf curl_mvfprintf
+# define vsprintf curl_mvsprintf
+# define vsnprintf curl_mvsnprintf
 
 /*
  * Platform specific stuff.

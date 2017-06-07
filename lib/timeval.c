@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,7 +48,7 @@ struct timeval curlx_tvnow(void)
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
 
-struct timeval curlx_tvnow(void)
+struct timeval Curl_tvnow(void)
 {
   /*
   ** clock_gettime() is granted to be increased monotonically when the
@@ -82,7 +82,7 @@ struct timeval curlx_tvnow(void)
 
 #elif defined(HAVE_GETTIMEOFDAY)
 
-struct timeval curlx_tvnow(void)
+struct timeval Curl_tvnow(void)
 {
   /*
   ** gettimeofday() is not granted to be increased monotonically, due to
@@ -96,7 +96,7 @@ struct timeval curlx_tvnow(void)
 
 #else
 
-struct timeval curlx_tvnow(void)
+struct timeval Curl_tvnow(void)
 {
   /*
   ** time() returns the value of time in seconds since the Epoch.
@@ -116,7 +116,7 @@ struct timeval curlx_tvnow(void)
  * Returns: the time difference in number of milliseconds. For large diffs it
  * returns 0x7fffffff on 32bit time_t systems.
  */
-time_t curlx_tvdiff(struct timeval newer, struct timeval older)
+time_t Curl_tvdiff(struct timeval newer, struct timeval older)
 {
 #if SIZEOF_TIME_T < 8
   /* for 32bit time_t systems, add a precaution to avoid overflow for really
@@ -130,11 +130,11 @@ time_t curlx_tvdiff(struct timeval newer, struct timeval older)
 }
 
 /*
- * Same as curlx_tvdiff but with full usec resolution.
+ * Same as Curl_tvdiff but with full usec resolution.
  *
  * Returns: the time difference in seconds with subsecond resolution.
  */
-double curlx_tvdiff_secs(struct timeval newer, struct timeval older)
+double Curl_tvdiff_secs(struct timeval newer, struct timeval older)
 {
   if(newer.tv_sec != older.tv_sec)
     return (double)(newer.tv_sec-older.tv_sec)+

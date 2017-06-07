@@ -7,7 +7,7 @@
  * rewrite to work around the paragraph 2 in the BSD licenses as explained
  * below.
  *
- * Copyright (c) 1998, 1999 Kungliga Tekniska Högskolan
+ * Copyright (c) 1998, 1999, 2017 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
  * Copyright (C) 2001 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -297,7 +297,7 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
     return; /* error */
 
   if(iscmd) {
-    error = Curl_base64_encode(conn->data, buffer, curlx_sitouz(bytes),
+    error = Curl_base64_encode(conn->data, buffer, Curl_sitouz(bytes),
                                &cmd_buffer, &cmd_size);
     if(error) {
       free(buffer);
@@ -321,7 +321,7 @@ static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
   else {
     htonl_bytes = htonl(bytes);
     socket_write(conn, fd, &htonl_bytes, sizeof(htonl_bytes));
-    socket_write(conn, fd, buffer, curlx_sitouz(bytes));
+    socket_write(conn, fd, buffer, Curl_sitouz(bytes));
   }
   free(buffer);
 }
@@ -332,14 +332,14 @@ static ssize_t sec_write(struct connectdata *conn, curl_socket_t fd,
   ssize_t tx = 0, len = conn->buffer_size;
 
   len -= conn->mech->overhead(conn->app_data, conn->data_prot,
-                              curlx_sztosi(len));
+                              Curl_sztosi(len));
   if(len <= 0)
     len = length;
   while(length) {
     if(length < (size_t)len)
       len = length;
 
-    do_sec_send(conn, fd, buffer, curlx_sztosi(len));
+    do_sec_send(conn, fd, buffer, Curl_sztosi(len));
     length -= len;
     buffer += len;
     tx += len;
@@ -381,7 +381,7 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
     free(buf);
     return -1;
   }
-  decoded_len = curlx_uztosi(decoded_sz);
+  decoded_len = Curl_uztosi(decoded_sz);
 
   decoded_len = conn->mech->decode(conn->app_data, buf, decoded_len,
                                    level, conn);

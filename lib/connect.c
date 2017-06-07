@@ -132,7 +132,7 @@ tcpkeepalive(struct Curl_easy *data,
     }
 #else
 #ifdef TCP_KEEPIDLE
-    optval = curlx_sltosi(data->set.tcp_keepidle);
+    optval = Curl_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
           (void *)&optval, sizeof(optval)) < 0) {
@@ -140,7 +140,7 @@ tcpkeepalive(struct Curl_easy *data,
     }
 #endif
 #ifdef TCP_KEEPINTVL
-    optval = curlx_sltosi(data->set.tcp_keepintvl);
+    optval = Curl_sltosi(data->set.tcp_keepintvl);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
           (void *)&optval, sizeof(optval)) < 0) {
@@ -149,7 +149,7 @@ tcpkeepalive(struct Curl_easy *data,
 #endif
 #ifdef TCP_KEEPALIVE
     /* Mac OS X style */
-    optval = curlx_sltosi(data->set.tcp_keepidle);
+    optval = Curl_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
           (void *)&optval, sizeof(optval)) < 0) {
@@ -768,7 +768,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
     if(rc == 0) { /* no connection yet */
       error = 0;
-      if(curlx_tvdiff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
+      if(Curl_tvdiff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
         infof(data, "After %ldms connect time, move on!\n",
               conn->timeoutms_per_addr);
         error = ETIMEDOUT;
@@ -776,7 +776,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
       /* should we try another protocol family? */
       if(i == 0 && conn->tempaddr[1] == NULL &&
-         curlx_tvdiff(now, conn->connecttime) >= HAPPY_EYEBALLS_TIMEOUT) {
+         Curl_tvdiff(now, conn->connecttime) >= HAPPY_EYEBALLS_TIMEOUT) {
         trynextip(conn, sockindex, 1);
       }
     }

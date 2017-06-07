@@ -40,9 +40,6 @@
 #endif
 
 #include "strcase.h"
-
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_binmode.h"
@@ -316,7 +313,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
      !config->capath &&
      !config->insecure_ok) {
     char *env;
-    env = curlx_getenv("CURL_CA_BUNDLE");
+    env = curl_getenv("CURL_CA_BUNDLE");
     if(env) {
       config->cacert = strdup(env);
       if(!config->cacert) {
@@ -327,7 +324,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
       }
     }
     else {
-      env = curlx_getenv("SSL_CERT_DIR");
+      env = curl_getenv("SSL_CERT_DIR");
       if(env) {
         config->capath = strdup(env);
         if(!config->capath) {
@@ -339,7 +336,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         capath_from_env = true;
       }
       else {
-        env = curlx_getenv("SSL_CERT_FILE");
+        env = curl_getenv("SSL_CERT_FILE");
         if(env) {
           config->cacert = strdup(env);
           if(!config->cacert) {
@@ -837,12 +834,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
            * Then append ? followed by the get fields to the url.
            */
           if(pc)
-            urlbuffer = aprintf("%s%c%s", this_url, sep, httpgetfields);
+            urlbuffer = curl_maprintf("%s%c%s", this_url, sep, httpgetfields);
           else
             /* Append  / before the ? to create a well-formed url
                if the url contains a hostname only
             */
-            urlbuffer = aprintf("%s/?%s", this_url, httpgetfields);
+            urlbuffer = curl_maprintf("%s/?%s", this_url, httpgetfields);
 
           if(!urlbuffer) {
             result = CURLE_OUT_OF_MEMORY;
@@ -1181,7 +1178,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             result = CURLE_OUT_OF_MEMORY;
             home = homedir();
             if(home) {
-              file = aprintf("%s/%sssh/known_hosts", home, DOT_CHAR);
+              file = curl_maprintf("%s/%sssh/known_hosts", home, DOT_CHAR);
               if(file) {
                 /* new in curl 7.19.6 */
                 result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, file);

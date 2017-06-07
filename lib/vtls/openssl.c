@@ -214,7 +214,7 @@ static int passwd_callback(char *buf, int num, int encrypting,
   DEBUGASSERT(0 == encrypting);
 
   if(!encrypting) {
-    int klen = curlx_uztosi(strlen((char *)global_passwd));
+    int klen = Curl_uztosi(strlen((char *)global_passwd));
     if(num > klen) {
       memcpy(buf, global_passwd, klen+1);
       return klen;
@@ -1278,7 +1278,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
         else /* not a UTF8 name */
           j = ASN1_STRING_to_UTF8(&peer_CN, tmp);
 
-        if(peer_CN && (curlx_uztosi(strlen((char *)peer_CN)) != j)) {
+        if(peer_CN && (Curl_uztosi(strlen((char *)peer_CN)) != j)) {
           /* there was a terminating zero before the end of string, this
              cannot match and we return failure! */
           failf(data, "SSL: illegal cert name field");
@@ -3334,7 +3334,7 @@ CURLcode Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
       return CURLE_FAILED_INIT;
   }
   /* RAND_bytes() returns 1 on success, 0 otherwise.  */
-  rc = RAND_bytes(entropy, curlx_uztosi(length));
+  rc = RAND_bytes(entropy, Curl_uztosi(length));
   return (rc == 1 ? CURLE_OK : CURLE_FAILED_INIT);
 }
 

@@ -557,7 +557,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
 
     if(size_known) {
       bytestoread = (expected_size < data->set.buffer_size) ?
-        curlx_sotouz(expected_size) : (size_t)data->set.buffer_size;
+        Curl_sotouz(expected_size) : (size_t)data->set.buffer_size;
     }
     else
       bytestoread = data->set.buffer_size-1;

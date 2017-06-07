@@ -612,43 +612,6 @@ curlx
    strtoll() (or equivalent) function exist on your platform. If `curl_off_t`
    is only a 32 bit number on your platform, this macro uses strtol().
 
-`curlx_tvnow()`
----------------
-   returns a struct timeval for the current time.
-
-`curlx_tvdiff()`
---------------
-   returns the difference between two timeval structs, in number of
-   milliseconds.
-
-`curlx_tvdiff_secs()`
----------------------
-   returns the same as `curlx_tvdiff` but with full usec resolution (as a
-   double)
-
-Future
-------
-
- Several functions will be removed from the public `curl_` name space in a
- future libcurl release. They will then only become available as `curlx_`
- functions instead. To make the transition easier, we already today provide
- these functions with the `curlx_` prefix to allow sources to be built
- properly with the new function names. The concerned functions are:
-
- - `curlx_getenv`
- - `curlx_strequal`
- - `curlx_strnequal`
- - `curlx_mvsnprintf`
- - `curlx_msnprintf`
- - `curlx_maprintf`
- - `curlx_mvaprintf`
- - `curlx_msprintf`
- - `curlx_mprintf`
- - `curlx_mfprintf`
- - `curlx_mvsprintf`
- - `curlx_mvprintf`
- - `curlx_mvfprintf`
-
 <a name="contentencoding"></a>
 Content Encoding
 ================

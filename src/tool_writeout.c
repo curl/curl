@@ -20,8 +20,6 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 #include "tool_cfgable.h"
 #include "tool_writeout.h"
