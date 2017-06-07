@@ -34,7 +34,8 @@
 #include "progress.h"
 #include "non-ascii.h"
 #include "connect.h"
-#include "curlx.h"
+#include "strcase.h"
+#include "strtoofft.h"
 #include "vtls/vtls.h"
 
 /* The last 3 #include files should be in this order */
