@@ -311,7 +311,6 @@ static CURLcode file_upload(struct connectdata *conn)
   size_t nread;
   size_t nwrite;
   curl_off_t bytecount = 0;
-  struct timeval now = Curl_tvnow();
   struct_stat file_stat;
   const char *buf2;
 
@@ -399,7 +398,7 @@ static CURLcode file_upload(struct connectdata *conn)
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(data, now);
+      result = Curl_speedcheck(data, Curl_tvnow());
   }
   if(!result && Curl_pgrsUpdate(conn))
     result = CURLE_ABORTED_BY_CALLBACK;
@@ -436,7 +435,6 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   char *buf = data->state.buffer;
   curl_off_t bytecount = 0;
   int fd;
-  struct timeval now = Curl_tvnow();
   struct FILEPROTO *file;
 
   *done = TRUE; /* unconditionally */
@@ -585,7 +583,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(data, now);
+      result = Curl_speedcheck(data, Curl_tvnow());
   }
   if(Curl_pgrsUpdate(conn))
     result = CURLE_ABORTED_BY_CALLBACK;
