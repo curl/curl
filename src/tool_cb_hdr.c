@@ -220,7 +220,7 @@ static char *parse_filename(const char *ptr, size_t len)
    */
 #ifdef DEBUGBUILD
   {
-    char *tdir = curlx_getenv("CURL_TESTDIR");
+    char *tdir = curl_getenv("CURL_TESTDIR");
     if(tdir) {
       char buffer[512]; /* suitably large */
       snprintf(buffer, sizeof(buffer), "%s/%s", tdir, copy);

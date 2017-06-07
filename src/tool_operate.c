@@ -316,7 +316,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
      !config->capath &&
      !config->insecure_ok) {
     char *env;
-    env = curlx_getenv("CURL_CA_BUNDLE");
+    env = curl_getenv("CURL_CA_BUNDLE");
     if(env) {
       config->cacert = strdup(env);
       if(!config->cacert) {
@@ -327,7 +327,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
       }
     }
     else {
-      env = curlx_getenv("SSL_CERT_DIR");
+      env = curl_getenv("SSL_CERT_DIR");
       if(env) {
         config->capath = strdup(env);
         if(!config->capath) {
@@ -339,7 +339,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         capath_from_env = true;
       }
       else {
-        env = curlx_getenv("SSL_CERT_FILE");
+        env = curl_getenv("SSL_CERT_FILE");
         if(env) {
           config->cacert = strdup(env);
           if(!config->cacert) {

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -94,7 +94,7 @@ static void memory_tracking_init(void)
 {
   char *env;
   /* if CURL_MEMDEBUG is set, this starts memory tracking message logging */
-  env = curlx_getenv("CURL_MEMDEBUG");
+  env = curl_getenv("CURL_MEMDEBUG");
   if(env) {
     /* use the value as file name */
     char fname[CURL_MT_LOGFNAME_BUFSIZE];
@@ -108,7 +108,7 @@ static void memory_tracking_init(void)
        log a free() without an alloc! */
   }
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
-  env = curlx_getenv("CURL_MEMLIMIT");
+  env = curl_getenv("CURL_MEMLIMIT");
   if(env) {
     char *endptr;
     long num = strtol(env, &endptr, 10);

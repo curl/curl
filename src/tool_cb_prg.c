@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -123,7 +123,7 @@ void progressbarinit(struct ProgressData *bar,
   /* 20000318 mgs
    * OS/2 users most likely won't have this env var set, and besides that
    * we're using our own way to determine screen width */
-  colp = curlx_getenv("COLUMNS");
+  colp = curl_getenv("COLUMNS");
   if(colp) {
     char *endptr;
     long num = strtol(colp, &endptr, 10);
