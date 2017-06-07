@@ -50,51 +50,5 @@
   curlx_uztosi()
 */
 
-/* Now setup curlx_ * names for the functions that are to become curlx_ and
-   be removed from a future libcurl official API:
-   curlx_mprintf (and its variations)
-   curlx_strcasecompare
-   curlx_strncasecompare
-
-*/
-
-#define curlx_mvsnprintf curl_mvsnprintf
-#define curlx_msnprintf curl_msnprintf
-#define curlx_maprintf curl_maprintf
-#define curlx_mvaprintf curl_mvaprintf
-#define curlx_msprintf curl_msprintf
-#define curlx_mprintf curl_mprintf
-#define curlx_mfprintf curl_mfprintf
-#define curlx_mvsprintf curl_mvsprintf
-#define curlx_mvprintf curl_mvprintf
-#define curlx_mvfprintf curl_mvfprintf
-
-#ifdef ENABLE_CURLX_PRINTF
-/* If this define is set, we define all "standard" printf() functions to use
-   the curlx_* version instead. It makes the source code transparent and
-   easier to understand/patch. Undefine them first. */
-# undef printf
-# undef fprintf
-# undef sprintf
-# undef snprintf
-# undef vprintf
-# undef vfprintf
-# undef vsprintf
-# undef vsnprintf
-# undef aprintf
-# undef vaprintf
-
-# define printf curlx_mprintf
-# define fprintf curlx_mfprintf
-# define sprintf curlx_msprintf
-# define snprintf curlx_msnprintf
-# define vprintf curlx_mvprintf
-# define vfprintf curlx_mvfprintf
-# define vsprintf curlx_mvsprintf
-# define vsnprintf curlx_mvsnprintf
-# define aprintf curlx_maprintf
-# define vaprintf curlx_mvaprintf
-#endif /* ENABLE_CURLX_PRINTF */
-
 #endif /* HEADER_CURL_CURLX_H */
 

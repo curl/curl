@@ -22,9 +22,6 @@
 #include "tool_setup.h"
 
 #include "strcase.h"
-
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_binmode.h"
@@ -419,6 +416,7 @@ GetFileAndPassword(char *nextarg, char **file, char **password)
   }
   cleanarg(nextarg);
 }
+
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */

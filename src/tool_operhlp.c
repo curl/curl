@@ -22,9 +22,6 @@
 #include "tool_setup.h"
 
 #include "strcase.h"
-
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_cfgable.h"
@@ -104,10 +101,10 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
       char *urlbuffer;
       if(ptr)
         /* there is a trailing slash on the URL */
-        urlbuffer = aprintf("%s%s", url, encfile);
+        urlbuffer = curl_maprintf("%s%s", url, encfile);
       else
         /* there is no trailing slash on the URL */
-        urlbuffer = aprintf("%s/%s", url, encfile);
+        urlbuffer = curl_maprintf("%s/%s", url, encfile);
 
       curl_free(encfile);
       Curl_safefree(url);
