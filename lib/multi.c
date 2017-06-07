@@ -44,6 +44,7 @@
 #include "sigpipe.h"
 #include "vtls/vtls.h"
 #include "connect.h"
+#include "http_proxy.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -114,6 +115,13 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     NULL,
     NULL,
     Curl_init_CONNECT, /* CONNECT */
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    Curl_connect_free /* DO */
     /* the rest is NULL too */
   };
 
@@ -826,7 +834,7 @@ static int waitproxyconnect_getsock(struct connectdata *conn,
 
   /* when we've sent a CONNECT to a proxy, we should rather wait for the
      socket to become readable to be able to get the response headers */
-  if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
+  if(conn->connect_state)
     return GETSOCK_READSOCK(0);
 
   return GETSOCK_WRITESOCK(0);
@@ -1455,7 +1463,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                          CURLM_STATE_WAITDO:CURLM_STATE_DO);
             else {
 #ifndef CURL_DISABLE_HTTP
-              if(data->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
+              if(Curl_connect_ongoing(data->easy_conn))
                 multistate(data, CURLM_STATE_WAITPROXYCONNECT);
               else
 #endif
@@ -1520,7 +1528,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                        CURLM_STATE_WAITDO:CURLM_STATE_DO);
           else {
 #ifndef CURL_DISABLE_HTTP
-            if(data->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
+            if(Curl_connect_ongoing(data->easy_conn))
               multistate(data, CURLM_STATE_WAITPROXYCONNECT);
             else
 #endif
@@ -1552,7 +1560,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else if(!result) {
         if((data->easy_conn->http_proxy.proxytype != CURLPROXY_HTTPS ||
            data->easy_conn->bits.proxy_ssl_connected[FIRSTSOCKET]) &&
-           (data->easy_conn->tunnel_state[FIRSTSOCKET] != TUNNEL_CONNECT)) {
+           Curl_connect_complete(data->easy_conn)) {
           rc = CURLM_CALL_MULTI_PERFORM;
           /* initiate protocol connect phase */
           multistate(data, CURLM_STATE_SENDPROTOCONNECT);
@@ -1568,7 +1576,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 #ifndef CURL_DISABLE_HTTP
         if((data->easy_conn->http_proxy.proxytype == CURLPROXY_HTTPS &&
             !data->easy_conn->bits.proxy_ssl_connected[FIRSTSOCKET]) ||
-            (data->easy_conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)) {
+           Curl_connect_ongoing(data->easy_conn)) {
           multistate(data, CURLM_STATE_WAITPROXYCONNECT);
           break;
         }

@@ -272,7 +272,6 @@ static void close_secondarysocket(struct connectdata *conn)
     conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
   }
   conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
-  conn->tunnel_state[SECONDARYSOCKET] = TUNNEL_INIT;
 }
 
 /*
@@ -3585,7 +3584,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
 
   /* if the second connection isn't done yet, wait for it */
   if(!conn->bits.tcpconnect[SECONDARYSOCKET]) {
-    if(conn->tunnel_state[SECONDARYSOCKET] == TUNNEL_CONNECT) {
+    if(Curl_connect_ongoing(conn)) {
       /* As we're in TUNNEL_CONNECT state now, we know the proxy name and port
          aren't used so we blank their arguments. TODO: make this nicer */
       result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, NULL, 0);
@@ -3617,7 +3616,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
     return result;
 
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy &&
-     conn->tunnel_state[SECONDARYSOCKET] != TUNNEL_COMPLETE)
+     Curl_connect_ongoing(conn))
     return result;
 
 
