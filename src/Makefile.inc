@@ -11,14 +11,12 @@
 # the official API, but we re-use the code here to avoid duplication.
 CURLX_CFILES = \
 	../lib/strtoofft.c \
-	../lib/nonblock.c \
-	../lib/warnless.c
+	../lib/nonblock.c
 
 CURLX_HFILES = \
 	../lib/curl_setup.h \
 	../lib/strtoofft.h \
-	../lib/nonblock.h \
-	../lib/warnless.h
+	../lib/nonblock.h
 
 CURL_CFILES = \
 	slist_wc.c \
