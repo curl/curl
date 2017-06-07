@@ -2658,6 +2658,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
     ;;
   *)
     dnl use the given --with-librtmp spot
+    LIB_RTMP="-lrtmp"
     PREFIX_RTMP=$OPT_LIBRTMP
     ;;
   esac
