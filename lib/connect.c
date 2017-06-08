@@ -1070,7 +1070,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
 
   conn->connecttime = Curl_tvnow();
   if(conn->num_addr > 1)
-    Curl_expire_latest(data, conn->timeoutms_per_addr, EXPIRE_DNS_PER_NAME);
+    Curl_expire(data, conn->timeoutms_per_addr, EXPIRE_DNS_PER_NAME);
 
   /* Connect TCP sockets, bind UDP */
   if(!isconnected && (conn->socktype == SOCK_STREAM)) {
