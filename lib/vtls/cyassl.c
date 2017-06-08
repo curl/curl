@@ -205,9 +205,14 @@ cyassl_connect_step1(struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(conssl->ctx)
+  if(conssl->ctx) {
+    /* CURLOPT_SSL_CTX_FUNCTION says "pointer will be a new one every time" */
+    SSL_CTX *tmp = SSL_CTX_new(req_method);
     SSL_CTX_free(conssl->ctx);
-  conssl->ctx = SSL_CTX_new(req_method);
+    conssl->ctx = tmp;
+  }
+  else
+    conssl->ctx = SSL_CTX_new(req_method);
 
   if(!conssl->ctx) {
     failf(data, "SSL: couldn't create a context!");
