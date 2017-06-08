@@ -238,6 +238,8 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_PROTOCOL:
     *param_longp = data->info.conn_protocol;
     break;
+  case CURLINFO_XFER_STATE:
+    return Curl_multi_easy_state(data, param_longp);
 
   default:
     return CURLE_UNKNOWN_OPTION;

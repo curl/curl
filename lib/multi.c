@@ -3097,6 +3097,66 @@ void Curl_multi_process_pending_handles(struct Curl_multi *multi)
   }
 }
 
+/*
+ * Return the external version of the internal state for this
+ * connection/handle.
+ *
+ * The external version is part of the fixed API and must never change even if
+ * new states MAY be introduced if absolutely necessary.
+ */
+CURLcode Curl_multi_easy_state(struct Curl_easy *data, long *valuep)
+{
+  long ext_state = CURLXFER_INIT;
+  if(data && data->multi) {
+    switch(data->mstate) {
+    case CURLM_STATE_INIT:
+      break;
+    case CURLM_STATE_CONNECT_PEND:
+    case CURLM_STATE_CONNECT:
+    case CURLM_STATE_WAITCONNECT:
+      ext_state = CURLXFER_CONNECT;
+      break;
+    case CURLM_STATE_WAITRESOLVE:
+      ext_state = CURLXFER_NAMERES;
+      break;
+    case CURLM_STATE_WAITPROXYCONNECT:
+      ext_state = CURLXFER_PROXYCONNECT;
+      break;
+    case CURLM_STATE_PROTOCONNECT:
+      ext_state = CURLXFER_PROTOCONNECT;
+      break;
+    case CURLM_STATE_WAITDO:
+      ext_state = CURLXFER_WAITDO;
+      break;
+    case CURLM_STATE_DO:
+    case CURLM_STATE_DOING:
+    case CURLM_STATE_DO_MORE:
+    case CURLM_STATE_DO_DONE:
+      ext_state = CURLXFER_DO;
+      break;
+    case CURLM_STATE_WAITPERFORM:
+    case CURLM_STATE_PERFORM:
+      ext_state = CURLXFER_TRANSFER;
+      break;
+    case CURLM_STATE_TOOFAST:
+      ext_state = CURLXFER_TOOFAST;
+      break;
+    case CURLM_STATE_DONE:
+    case CURLM_STATE_COMPLETED:
+    case CURLM_STATE_MSGSENT:
+    case CURLM_STATE_LAST:
+      ext_state = CURLXFER_DONE;
+      break;
+    }
+    if(valuep)
+      *valuep = ext_state;
+  }
+  else
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return CURLE_OK;
+}
+
+
 #ifdef DEBUGBUILD
 void Curl_multi_dump(struct Curl_multi *multi)
 {

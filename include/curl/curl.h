@@ -2218,6 +2218,23 @@ struct curl_certinfo {
                                    format "name: value" */
 };
 
+/* The XFER_STATE option returns state about the particular transfer. Not all
+ * transfers will use all states. States may not be changed to in a numerical
+ * order. In some cases a transfer can go back to a previously already visited
+ * state. We may introduce new states in the future. */
+#define CURLXFER_INIT         0 /* nothing really happened yet */
+#define CURLXFER_NAMERES      1 /* name resolving */
+#define CURLXFER_CONNECT      2 /* TCP (or similar) connect */
+#define CURLXFER_PROTOCONNECT 3 /* protocol specific connect oriented ops */
+#define CURLXFER_PROXYCONNECT 4 /* proxy CONNECT procedure */
+#define CURLXFER_WAITDO       5 /* waiting to issue request */
+#define CURLXFER_DO           6 /* issuing request */
+#define CURLXFER_TRANSFER     7 /* transfer */
+#define CURLXFER_TOOFAST      8 /* toggled transfer due to rate limiting,
+                                   basically a variation of *TRANSFER */
+#define CURLXFER_DONE         9 /* transfer complete */
+
+
 /* enum for the different supported SSL backends */
 typedef enum {
   CURLSSLBACKEND_NONE = 0,
@@ -2307,9 +2324,10 @@ typedef enum {
   CURLINFO_PROXY_SSL_VERIFYRESULT = CURLINFO_LONG + 47,
   CURLINFO_PROTOCOL         = CURLINFO_LONG   + 48,
   CURLINFO_SCHEME           = CURLINFO_STRING + 49,
+  CURLINFO_XFER_STATE       = CURLINFO_LONG   + 50,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 49
+  CURLINFO_LASTONE          = 51
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
