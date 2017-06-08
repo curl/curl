@@ -232,7 +232,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
   milli = (timeout->tv_sec * 1000) + (timeout->tv_usec/1000);
   if(milli == 0)
     milli += 10;
-  Curl_expire_latest(conn->data, milli, EXPIRE_ASYNC_NAME);
+  Curl_expire(conn->data, milli, EXPIRE_ASYNC_NAME);
 
   return max;
 }
