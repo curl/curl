@@ -1075,17 +1075,25 @@ static CURLcode singleipconnect(struct connectdata *conn,
   /* Connect TCP sockets, bind UDP */
   if(!isconnected && (conn->socktype == SOCK_STREAM)) {
     if(conn->bits.tcp_fastopen) {
-#if defined(CONNECT_DATA_IDEMPOTENT) /* OS X */
-      sa_endpoints_t endpoints;
-      endpoints.sae_srcif = 0;
-      endpoints.sae_srcaddr = NULL;
-      endpoints.sae_srcaddrlen = 0;
-      endpoints.sae_dstaddr = &addr.sa_addr;
-      endpoints.sae_dstaddrlen = addr.addrlen;
+#if defined(CONNECT_DATA_IDEMPOTENT) /* Darwin */
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpartial-availability"
+        if(connectx != NULL) {
+          sa_endpoints_t endpoints;
+          endpoints.sae_srcif = 0;
+          endpoints.sae_srcaddr = NULL;
+          endpoints.sae_srcaddrlen = 0;
+          endpoints.sae_dstaddr = &addr.sa_addr;
+          endpoints.sae_dstaddrlen = addr.addrlen;
 
-      rc = connectx(sockfd, &endpoints, SAE_ASSOCID_ANY,
-                    CONNECT_RESUME_ON_READ_WRITE | CONNECT_DATA_IDEMPOTENT,
-                    NULL, 0, NULL, NULL);
+          rc = connectx(sockfd, &endpoints, SAE_ASSOCID_ANY,
+                        CONNECT_RESUME_ON_READ_WRITE | CONNECT_DATA_IDEMPOTENT,
+                        NULL, 0, NULL, NULL);
+        }
+        else {
+          return CURLE_NOT_BUILT_IN;
+        }
+#  pragma GCC diagnostic pop
 #elif defined(MSG_FASTOPEN) /* Linux */
       if(conn->given->flags & PROTOPT_SSL)
         rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
