@@ -2616,7 +2616,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * know that an unsigned int will always hold the value so we blindly
      * typecast to this type
      */
-    data->set.scope_id = curlx_sltoui(va_arg(param, long));
+    arg = va_arg(param, long);
+    if((arg < 0) || (arg > 0xf))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.scope_id = curlx_sltoui(arg);
     break;
 
   case CURLOPT_PROTOCOLS:
