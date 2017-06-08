@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -2907,9 +2907,9 @@ AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
     AC_MSG_CHECKING([for 64-bit curl_off_t data type])
     for t8 in          \
       "$x_LP64_long"   \
+      'long long'      \
       'int64_t'        \
       '__int64'        \
-      'long long'      \
       '__longlong'     \
       '__longlong_t'   ; do
       DO_CURL_OFF_T_CHECK([$t8], [8])
