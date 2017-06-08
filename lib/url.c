@@ -720,6 +720,9 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_DNS_CACHE_TIMEOUT:
     data->set.dns_cache_timeout = va_arg(param, long);
     break;
+  case CURLOPT_DNS_RESOLVE_FIRST:
+    data->set.dns_resolve_first = va_arg(param, long);
+    break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
     /* remember we want this enabled */
     arg = va_arg(param, long);
@@ -3554,6 +3557,20 @@ ConnectionExists(struct Curl_easy *data,
           if(!check->ip_addr_str[0]) {
             infof(data,
                   "Connection #%ld is still name resolving, can't reuse\n",
+                  check->connection_id);
+            continue;
+          }
+        }
+
+        /* Unable to get ip address from needle...
+         * Is this possible?
+         */
+        if(data->set.dns_resolve_first) {
+          if(!check->ip_addr_str[0] &&
+             (strcmp(needle->ip_addr_str, check->ip_addr_str) != 0)) {
+            infof(data, "#%s #%s\n", needle->dns_entry->addr->ai_canonname,
+                  check->ip_addr_str);
+            infof(data, "Connection #%ld has stale ip, can't reuse\n",
                   check->connection_id);
             continue;
           }
@@ -6653,8 +6670,10 @@ static CURLcode create_conn(struct Curl_easy *data,
      we only acknowledge this option if this is not a re-used connection
      already (which happens due to follow-location or during a HTTP
      authentication phase). */
-  if(data->set.reuse_fresh && !data->state.this_is_a_follow)
+  if((data->set.reuse_fresh && !data->state.this_is_a_follow) ||
+          data->set.dns_resolve_first) {
     reuse = FALSE;
+  }
   else
     reuse = ConnectionExists(data, conn, &conn_temp, &force_reuse, &waitpipe);
 
@@ -6936,6 +6955,41 @@ CURLcode Curl_connect(struct Curl_easy *data,
       /* DNS resolution is done: that's either because this is a reused
          connection, in which case DNS was unnecessary, or because DNS
          really did finish already (synch resolver/fast async resolve) */
+
+      /*
+       * Since DNS is resolved, we can check what IP has been resolved
+       * in new connection against existing connections to see if one
+       * can be reused.
+       */
+      if(data->set.dns_resolve_first) {
+        bool force_reuse = FALSE;
+        bool waitpipe = FALSE;
+        struct connectdata *usethis = NULL;
+        bool reuse;
+
+        reuse = ConnectionExists(data, *in_connect, &usethis,
+                                  &force_reuse, &waitpipe);
+
+        if(reuse) {
+          // Connection found that can be used, we need to free old connection
+          struct connectdata *new_conn = NULL;
+
+          new_conn = *in_connect;
+          *in_connect = usethis;
+
+          // Remove new connection from cache
+          Curl_disconnect(new_conn, TRUE);
+
+          /* How can we reuse old connection? */
+          infof(data, "CONNECTION REUSED\n");
+//          conn_free(*in_connect);
+//          infof(data, "COPY OLD CONN TO NEW CONNECTION\n");
+//          reuse_conn(usethis, *in_connect);
+//          infof(data, "FREE OLD CONNECTION\n");
+//          conn_free(usethis);
+        }
+      }
+
       result = Curl_setup_conn(*in_connect, protocol_done);
     }
   }

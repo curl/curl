@@ -1782,6 +1782,9 @@ typedef enum {
   /* Suppress proxy CONNECT response headers from user callbacks */
   CINIT(SUPPRESS_CONNECT_HEADERS, LONG, 265),
 
+  /* Resolve dns earlier in connection creation */
+  CINIT(DNS_RESOLVE_FIRST, LONG, 239),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
