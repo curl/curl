@@ -380,11 +380,10 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
     data->progress.lastshow = now.tv_sec;
 
-    /* Let's do the "current speed" thing, which should use the fastest
-       of the dl/ul speeds. Store the faster speed at entry 'nowindex'. */
+    /* Let's do the "current speed" thing, with the dl + ul speeds
+       combined. Store the speed at entry 'nowindex'. */
     data->progress.speeder[ nowindex ] =
-      data->progress.downloaded>data->progress.uploaded?
-      data->progress.downloaded:data->progress.uploaded;
+      data->progress.downloaded + data->progress.uploaded;
 
     /* remember the exact time for this moment */
     data->progress.speeder_time [ nowindex ] = now;
@@ -433,10 +432,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
       }
     }
     else
-      /* the first second we use the main average */
+      /* the first second we use the average */
       data->progress.current_speed =
-        (data->progress.ulspeed>data->progress.dlspeed)?
-        data->progress.ulspeed:data->progress.dlspeed;
+        data->progress.ulspeed + data->progress.dlspeed;
 
   } /* Calculations end */
 
