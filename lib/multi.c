@@ -1840,9 +1840,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(send_timeout_ms <= 0 && recv_timeout_ms <= 0)
           multistate(data, CURLM_STATE_PERFORM);
         else if(send_timeout_ms >= recv_timeout_ms)
-          Curl_expire_latest(data, send_timeout_ms, EXPIRE_TOOFAST);
+          Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
         else
-          Curl_expire_latest(data, recv_timeout_ms, EXPIRE_TOOFAST);
+          Curl_expire(data, recv_timeout_ms, EXPIRE_TOOFAST);
       }
       break;
 
@@ -1873,9 +1873,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(send_timeout_ms > 0 || recv_timeout_ms > 0) {
         multistate(data, CURLM_STATE_TOOFAST);
         if(send_timeout_ms >= recv_timeout_ms)
-          Curl_expire_latest(data, send_timeout_ms, EXPIRE_TOOFAST);
+          Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
         else
-          Curl_expire_latest(data, recv_timeout_ms, EXPIRE_TOOFAST);
+          Curl_expire(data, recv_timeout_ms, EXPIRE_TOOFAST);
         break;
       }
 
@@ -1936,8 +1936,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         /* expire the new receiving pipeline head */
         if(data->easy_conn->recv_pipe.head)
-          Curl_expire_latest(data->easy_conn->recv_pipe.head->ptr, 0,
-                             EXPIRE_RUN_NOW);
+          Curl_expire(data->easy_conn->recv_pipe.head->ptr, 0, EXPIRE_RUN_NOW);
 
         /* Check if we can move pending requests to send pipe */
         Curl_multi_process_pending_handles(multi);
@@ -2977,49 +2976,6 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
 }
 
 /*
- * Curl_expire_latest()
- *
- * This is like Curl_expire() but will only add a timeout node to the list of
- * timers if there is no timeout that will expire before the given time.
- *
- * Use this function if the code logic risks calling this function many times
- * or if there's no particular conditional wait in the code for this specific
- * time-out period to expire.
- *
- */
-void Curl_expire_latest(struct Curl_easy *data, time_t milli, expire_id id)
-{
-  struct timeval *expire = &data->state.expiretime;
-
-  struct timeval set;
-
-  set = Curl_tvnow();
-  set.tv_sec += (long)(milli / 1000);
-  set.tv_usec += (long)(milli % 1000) * 1000;
-
-  if(set.tv_usec >= 1000000) {
-    set.tv_sec++;
-    set.tv_usec -= 1000000;
-  }
-
-  if(expire->tv_sec || expire->tv_usec) {
-    /* This means that the struct is added as a node in the splay tree.
-       Compare if the new time is earlier, and only remove-old/add-new if it
-       is. */
-    time_t diff = curlx_tvdiff(set, *expire);
-    if((diff > 0) && (diff < milli)) {
-      /* if the new expire time is later than the top time, skip it, but not
-         if the diff is larger than the new offset since then the previous
-         time is already expired! */
-      return;
-    }
-  }
-
-  /* Just add the timeout like normal */
-  Curl_expire(data, milli, id);
-}
-
-/*
  * Curl_expire_done()
  *
  * Removes the expire timer. Marks it as done.
@@ -3134,7 +3090,7 @@ void Curl_multi_process_pending_handles(struct Curl_multi *multi)
       Curl_llist_remove(&multi->pending, e, NULL);
 
       /* Make sure that the handle will be processed soonish. */
-      Curl_expire_latest(data, 0, EXPIRE_RUN_NOW);
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
     }
 
     e = next; /* operate on next handle */
