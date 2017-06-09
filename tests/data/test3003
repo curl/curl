@@ -58,10 +58,10 @@ writedelay: 1
 http
 </server>
  <name>
-Test low speed limit (100bps) with small upload post
+Test low speed limit (200bps) with small upload post (should fail - too slow inc conn setup time)
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/3001 --speed-limit 100 --speed-time 6 -F form1=012
+http://%HOSTIP:%HTTPPORT/3003 --speed-limit 200 --speed-time 6 -F form1=012
 </command>
 </client>
 
@@ -72,7 +72,7 @@ http://%HOSTIP:%HTTPPORT/3001 --speed-limit 100 --speed-time 6 -F form1=012
 ^User-Agent:.*
 </strip>
 <protocol>
-POST /3001 HTTP/1.1
+POST /3003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 143
