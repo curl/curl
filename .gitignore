@@ -9,7 +9,7 @@
 *.obj
 *.pdb
 *~
-.*.swp
+.*.sw?
 .cproject
 .deps
 .dirstamp
