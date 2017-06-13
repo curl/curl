@@ -170,7 +170,7 @@ dist-hook:
 	(distit=`find $(srcdir) -name "*.dist" | grep -v ./ares/`; \
 	for file in $$distit; do \
 	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \
-	  cp $$file $(distdir)$$strip; \
+	  cp -p $$file $(distdir)$$strip; \
 	done)
 
 html:

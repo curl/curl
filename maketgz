@@ -139,6 +139,9 @@ fi
 echo "update man pages"
 ./scripts/updatemanpages.pl $version
 
+# make the generated file newer than the man page
+touch src/tool_hugehelp.c
+
 ############################################################################
 #
 # Update the IDE files
