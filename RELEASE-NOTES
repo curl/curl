@@ -4,7 +4,7 @@ Curl and libcurl 7.54.1
  Command line options:         207
  curl_easy_setopt() options:   245
  Public functions in libcurl:  61
- Contributors:                 1548
+ Contributors:                 1571
 
 This release includes the following changes:
 
@@ -12,6 +12,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2017-9502: file: URL buffer overflow [65]
  o openssl: fix memory leak in servercert
  o tests: remove the html and PDF versions from the tarball
  o mbedtls: enable NTLM (& SMB) even if MD4 support is unavailable
@@ -114,6 +115,18 @@ This release includes the following bugfixes:
  o libtest: fix implicit-fallthrough warnings with GCC 7
  o BINDINGS: add Ring binding [58]
  o curl_ntlm_core: pass unsigned char to toupper
+ o test1262: verify ftp download with -z for "if older than this"
+ o test1521: test all curl_easy_setopt options [59]
+ o typecheck-gcc: allow CURLOPT_STDERR to be NULL too
+ o metalink: remove unused printf() argument
+ o file: make speedcheck use current time for checks [60]
+ o configure: fix link with librtmp when specifying path [61]
+ o examples/multi-uv.c: fix deprecated symbol [62]
+ o cmake: Fix inconsistency regarding mbed TLS include directory [63]
+ o setopt: check CURLOPT_ADDRESS_SCOPE option range
+ o gitignore: ignore all vim swap files [64]
+ o urlglob: fix division by zero
+ o libressl: OCSP and intermediate certs workaround no longer needed [66]
 
 This release includes the following known bugs:
 
@@ -123,14 +136,16 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Akhil Kedia, Alan Jenkins, Anatol Belski, Bernhard M. Wiedemann,
-  Brian Childs, canavan at github, Dan Fandrich, Daniel Stenberg,
-  Edward Thomson, Gisle Vanem, Helmut K. C. Tessarek, Joel Depooter,
-  jonrumsey at github, Kai Engert, Kamil Dudka, Kevin Ji, Lloyd Fournier,
-  Mahmoud Samir Fayed, Marcel Raad, Martin Kepplinger, Max Dymond,
-  Michael Kaufmann, Nick Zitzmann, Phil Crump, Piotr Dobrogost, Ray Satiro,
-  Richard Hsu, Ron Eldor, Sergei Nikulov, Simon Warta, stootill at github,
-  Thomas Klausner, Travis Burtrum, Vincas Razma, wyattoday at github,
-  (35 contributors)
+  Brian Childs, canavan at github, Chris Carlmar, Dan Fandrich,
+  Daniel Stenberg, Edward Thomson, Gisle Vanem, GwanYeong Kim,
+  Helmut K. C. Tessarek, Joel Depooter, jonrumsey at github, Kai Engert,
+  Kamil Dudka, Kevin Ji, Lloyd Fournier, Mahmoud Samir Fayed, Marcel Raad,
+  Martin Kepplinger, Max Dymond, Michael Kaufmann, Nick Zitzmann, Paul Harris,
+  Phil Crump, Piotr Dobrogost, Ray Satiro, Richard Hsu, Ron Eldor,
+  Ryuichi KAWAMATA, Sergei Nikulov, Simon Warta, stootill at github,
+  Stuart Henderson, TheAssassin at github, Thomas Klausner, Travis Burtrum,
+  Vincas Razma, wyattoday at github,
+  (41 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -194,3 +209,11 @@ References to bug reports and discussions on issues:
  [56] = https://curl.haxx.se/bug/?i=1532
  [57] = https://curl.haxx.se/bug/?i=1536
  [58] = https://curl.haxx.se/bug/?i=1539
+ [59] = https://curl.haxx.se/bug/?i=1543
+ [60] = https://curl.haxx.se/bug/?i=1550
+ [61] = https://curl.haxx.se/mail/lib-2017-06/0017.html
+ [62] = https://curl.haxx.se/bug/?i=1557
+ [63] = https://curl.haxx.se/bug/?i=1541
+ [64] = https://curl.haxx.se/bug/?i=1561
+ [65] = https://curl.haxx.se/docs/adv_20170614.html
+ [66] = https://curl.haxx.se/mail/lib-2017-06/0038.html
