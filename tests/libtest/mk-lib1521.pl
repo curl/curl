@@ -22,7 +22,7 @@
 ###########################################################################
 
 # Usage:
-# cat ../../include/curl/curl.h | perl mk-lib1521.pl > lib1521.c
+#   perl mk-lib1521.pl < ../../include/curl/curl.h > lib1521.c
 
 # minimum and maximum long signed values
 my $minlong = "LONG_MIN";
@@ -106,9 +106,10 @@ curl_xferinfo_callback xferinfocb;
 
 int test(char *URL)
 {
-  CURL *curl;
-  CURL *dep;
-  CURLSH *share;
+  int res = 0;
+  CURL *curl = NULL;
+  CURL *dep = NULL;
+  CURLSH *share = NULL;
   char errorbuffer[CURL_ERROR_SIZE];
   void *conv_from_network_cb = NULL;
   void *conv_to_network_cb = NULL;
@@ -118,19 +119,23 @@ int test(char *URL)
   struct curl_slist *slist=NULL;
   struct curl_httppost *httppost=NULL;
   FILE *stream = stderr;
+  struct data object;
   (void)URL; /* not used */
-  dep = curl_easy_init();
+  easy_init(dep);
+  easy_init(curl);
   share = curl_share_init();
-  curl = curl_easy_init();
-  if(curl) {
-    struct data object;
+  if(!share) {
+    res = CURLE_OUT_OF_MEMORY;
+    goto test_cleanup;
+  }
+
 HEADER
     ;
 
 while(<STDIN>) {
     if($_ =~ /^  CINIT\(([^ ]*), ([^ ]*), (\d*)\)/) {
         my ($name, $type, $val)=($1, $2, $3);
-        my $w="    ";
+        my $w="  ";
         my $pref = "$w(void)curl_easy_setopt(curl, CURLOPT_$name,";
         my $i = ' ' x (length($w) + 23);
         if($type eq "STRINGPOINT") {
@@ -203,12 +208,14 @@ while(<STDIN>) {
 
 
 print <<FOOTER
-    curl_easy_setopt(curl, 1, 0);
-    curl_easy_cleanup(curl);
-    curl_easy_cleanup(dep);
-    curl_share_cleanup(share);
-  }
-  return 0;
+  curl_easy_setopt(curl, 1, 0);
+
+test_cleanup:
+  curl_easy_cleanup(curl);
+  curl_easy_cleanup(dep);
+  curl_share_cleanup(share);
+
+  return res;
 }
 FOOTER
     ;
