@@ -1388,6 +1388,4 @@ const struct Curl_ssl Curl_ssl_gskit = {
   NULL                            /* sha256sum */
 };
 
-const struct Curl_ssl *Curl_ssl = &Curl_ssl_gskit;
-
 #endif /* USE_GSKIT */

@@ -937,6 +937,4 @@ const struct Curl_ssl Curl_ssl_polarssl = {
   Curl_polarssl_sha256sum            /* sha256sum */
 };
 
-const struct Curl_ssl *Curl_ssl = &Curl_ssl_polarssl;
-
 #endif /* USE_POLARSSL */

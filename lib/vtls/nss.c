@@ -2378,5 +2378,4 @@ const struct Curl_ssl Curl_ssl_nss = {
   Curl_nss_sha256sum            /* sha256sum */
 };
 
-const struct Curl_ssl *Curl_ssl = &Curl_ssl_nss;
 #endif /* USE_NSS */

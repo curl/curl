@@ -130,9 +130,14 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc)
   Curl_safefree(sslc->clientcert);
 }
 
+#ifdef USE_SSL
+static int multissl_init(void);
+#endif
+
 int Curl_ssl_backend(void)
 {
 #ifdef USE_SSL
+  multissl_init();
   return Curl_ssl->id;
 #else
   return (int)CURLSSLBACKEND_NONE;
@@ -1047,6 +1052,144 @@ CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
   Curl_MD5_update(MD5pw, input, curlx_uztoui(inputlen));
   Curl_MD5_final(MD5pw, md5sum);
   return CURLE_OK;
+}
+
+static int Curl_multissl_init(void)
+{
+  if(multissl_init())
+    return 1;
+  return Curl_ssl->init();
+}
+
+static size_t Curl_multissl_version(char *buffer, size_t size)
+{
+  if(multissl_init())
+    return 0;
+  return Curl_ssl->version(buffer, size);
+}
+
+static CURLcode Curl_multissl_connect(struct connectdata *conn, int sockindex)
+{
+  if(multissl_init())
+    return CURLE_FAILED_INIT;
+  return Curl_ssl->connect(conn, sockindex);
+}
+
+static CURLcode Curl_multissl_connect_nonblocking(struct connectdata *conn,
+                                                  int sockindex, bool *done)
+{
+  if(multissl_init())
+    return CURLE_FAILED_INIT;
+  return Curl_ssl->connect_nonblocking(conn, sockindex, done);
+}
+
+static void *Curl_multissl_get_internals(struct ssl_connect_data *connssl,
+                                         CURLINFO info)
+{
+  if(multissl_init())
+    return NULL;
+  return Curl_ssl->get_internals(connssl, info);
+}
+
+static void Curl_multissl_close(struct connectdata *conn, int sockindex)
+{
+  if(multissl_init())
+    return;
+  Curl_ssl->close(conn, sockindex);
+}
+
+static const struct Curl_ssl Curl_ssl_multi = {
+  "multi",                           /* name */
+  CURLSSLBACKEND_NONE,
+
+  0, /* have_ca_path */
+  0, /* have_certinfo */
+  0, /* have_pinnedpubkey */
+  0, /* have_ssl_ctx */
+  0, /* support_https_proxy */
+
+  (size_t)-1, /* something insanely large to be on the safe side */
+
+  Curl_multissl_init,                /* init */
+  Curl_none_cleanup,                 /* cleanup */
+  Curl_multissl_version,             /* version */
+  Curl_none_check_cxn,               /* check_cxn */
+  Curl_none_shutdown,                /* shutdown */
+  Curl_none_data_pending,            /* data_pending */
+  Curl_none_random,                  /* random */
+  Curl_none_cert_status_request,     /* cert_status_request */
+  Curl_multissl_connect,             /* connect */
+  Curl_multissl_connect_nonblocking, /* connect_nonblocking */
+  Curl_multissl_get_internals,       /* get_internals */
+  Curl_multissl_close,               /* close */
+  Curl_none_close_all,               /* close_all */
+  Curl_none_session_free,            /* session_free */
+  Curl_none_set_engine,              /* set_engine */
+  Curl_none_set_engine_default,      /* set_engine_default */
+  Curl_none_engines_list,            /* engines_list */
+  Curl_none_false_start,             /* false_start */
+  Curl_none_md5sum,                  /* md5sum */
+  NULL                               /* sha256sum */
+};
+
+const struct Curl_ssl *Curl_ssl = &Curl_ssl_multi;
+
+static const struct Curl_ssl *available_backends[] = {
+#if defined(USE_AXTLS)
+  &Curl_ssl_axtls,
+#endif
+#if defined(USE_CYASSL)
+  &Curl_ssl_cyassl,
+#endif
+#if defined(USE_DARWINSSL)
+  &Curl_ssl_darwinssl,
+#endif
+#if defined(USE_GNUTLS)
+  &Curl_ssl_gnutls,
+#endif
+#if defined(USE_GSKIT)
+  &Curl_ssl_gskit,
+#endif
+#if defined(USE_MBEDTLS)
+  &Curl_ssl_mbedtls,
+#endif
+#if defined(USE_NSS)
+  &Curl_ssl_nss,
+#endif
+#if defined(USE_OPENSSL)
+  &Curl_ssl_openssl,
+#endif
+#if defined(USE_POLARSSL)
+  &Curl_ssl_polarssl,
+#endif
+#if defined(USE_SCHANNEL)
+  &Curl_ssl_schannel,
+#endif
+  NULL
+};
+
+static int multissl_init(void)
+{
+  const char *env;
+  int i;
+
+  if(Curl_ssl != &Curl_ssl_multi)
+    return 1;
+
+  if(!available_backends[0])
+    return 1;
+
+  env = getenv("CURL_SSL_BACKEND");
+  if(env)
+    for(i = 0; available_backends[i]; i++)
+      if(!strcmp(env, available_backends[i]->name)) {
+        Curl_ssl = available_backends[i];
+        return 0;
+      }
+
+  /* Fall back to first available backend */
+  Curl_ssl = available_backends[0];
+  return 0;
 }
 
 #endif /* USE_SSL */

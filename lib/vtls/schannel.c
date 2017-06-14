@@ -1849,6 +1849,4 @@ const struct Curl_ssl Curl_ssl_schannel = {
   NULL                               /* sha256sum */
 };
 
-const struct Curl_ssl *Curl_ssl = &Curl_ssl_schannel;
-
 #endif /* USE_SCHANNEL */

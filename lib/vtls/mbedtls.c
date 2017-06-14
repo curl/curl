@@ -1072,6 +1072,4 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   Curl_mbedtls_sha256sum            /* sha256sum */
 };
 
-const struct Curl_ssl *Curl_ssl = &Curl_ssl_mbedtls;
-
 #endif /* USE_MBEDTLS */
