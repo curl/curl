@@ -4363,11 +4363,16 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     return CURLE_URL_MALFORMAT;
   }
 
-  /* Make sure we don't mistake a drive letter for a scheme, for example:
+  /* MSDOS/Windows style drive prefix, eg c: in c:foo */
+#define STARTS_WITH_DRIVE_PREFIX(str) \
+  ((('a' <= str[0] && str[0] <= 'z') || \
+    ('A' <= str[0] && str[0] <= 'Z')) && \
+   (str[1] == ':'))
+
+  /* Don't mistake a drive letter for a scheme if the default protocol is file.
      curld --proto-default file c:/foo/bar.txt */
-  if((('a' <= data->change.url[0] && data->change.url[0] <= 'z') ||
-      ('A' <= data->change.url[0] && data->change.url[0] <= 'Z')) &&
-     data->change.url[1] == ':' && data->set.str[STRING_DEFAULT_PROTOCOL] &&
+  if(STARTS_WITH_DRIVE_PREFIX(data->change.url) &&
+     data->set.str[STRING_DEFAULT_PROTOCOL] &&
      strcasecompare(data->set.str[STRING_DEFAULT_PROTOCOL], "file")) {
     ; /* do nothing */
   }
@@ -4386,8 +4391,6 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   if((url_has_scheme && strncasecompare(data->change.url, "file:", 5)) ||
      (!url_has_scheme && data->set.str[STRING_DEFAULT_PROTOCOL] &&
       strcasecompare(data->set.str[STRING_DEFAULT_PROTOCOL], "file"))) {
-    bool path_has_drive = FALSE;
-
     if(url_has_scheme)
       rc = sscanf(data->change.url, "%*15[^\n/:]:%[^\n]", path);
     else
@@ -4409,17 +4412,12 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       memmove(path, path + 2, strlen(path + 2)+1);
     }
 
-    /* the path may start with a drive letter. for backwards compatibility
-       we skip some processing on those paths. */
-    path_has_drive = (('a' <= path[0] && path[0] <= 'z') ||
-                      ('A' <= path[0] && path[0] <= 'Z')) && path[1] == ':';
-
     /*
      * we deal with file://<host>/<path> differently since it supports no
      * hostname other than "localhost" and "127.0.0.1", which is unique among
      * the URL protocols specified in RFC 1738
      */
-    if(path[0] != '/' && !path_has_drive) {
+    if(path[0] != '/' && !STARTS_WITH_DRIVE_PREFIX(path)) {
       /* the URL includes a host name, it must match "localhost" or
          "127.0.0.1" to be valid */
       char *ptr;
@@ -4453,13 +4451,10 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
       /* This cannot be made with strcpy, as the memory chunks overlap! */
       memmove(path, ptr, strlen(ptr)+1);
-
-      path_has_drive = (('a' <= path[0] && path[0] <= 'z') ||
-                        ('A' <= path[0] && path[0] <= 'Z')) && path[1] == ':';
     }
 
 #if !defined(MSDOS) && !defined(WIN32) && !defined(__CYGWIN__)
-    if(path_has_drive) {
+    if(STARTS_WITH_DRIVE_PREFIX(path)) {
       failf(data, "File drive letters are only accepted in MSDOS/Windows.");
       return CURLE_URL_MALFORMAT;
     }
