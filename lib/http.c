@@ -1369,7 +1369,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   if(CONNECT_FIRSTSOCKET_PROXY_SSL())
     return CURLE_OK; /* wait for HTTPS proxy SSL initialization to complete */
 
-  if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
+  if(!Curl_connect_complete(conn))
     /* nothing else to do except wait right now - we're not done here. */
     return CURLE_OK;
 
