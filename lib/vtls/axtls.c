@@ -740,6 +740,4 @@ const struct Curl_ssl Curl_ssl_axtls = {
   NULL                            /* sha256sum */
 };
 
-const struct Curl_ssl *Curl_ssl = &Curl_ssl_axtls;
-
 #endif /* USE_AXTLS */

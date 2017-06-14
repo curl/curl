@@ -2922,8 +2922,6 @@ const struct Curl_ssl Curl_ssl_darwinssl = {
   Curl_darwinssl_sha256sum            /* sha256sum */
 };
 
-const struct Curl_ssl *Curl_ssl = &Curl_ssl_darwinssl;
-
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

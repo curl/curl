@@ -1839,5 +1839,4 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_gtls_sha256sum            /* sha256sum */
 };
 
-const struct Curl_ssl *Curl_ssl = &Curl_ssl_gnutls;
 #endif /* USE_GNUTLS */

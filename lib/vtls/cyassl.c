@@ -1015,6 +1015,4 @@ const struct Curl_ssl Curl_ssl_cyassl = {
   Curl_cyassl_sha256sum            /* sha256sum */
 };
 
-const struct Curl_ssl *Curl_ssl = &Curl_ssl_cyassl;
-
 #endif
