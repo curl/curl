@@ -84,7 +84,7 @@ endif
 endif
 
 CC	= $(CROSSPREFIX)gcc
-CFLAGS	= -g -O2 -Wall
+CFLAGS	= -g -O2 -Wall -W
 CFLAGS	+= -fno-strict-aliasing
 ifeq ($(ARCH),w64)
 CFLAGS	+= -m64 -D_AMD64_
