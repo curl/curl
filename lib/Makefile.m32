@@ -77,7 +77,7 @@ LIBCARES_PATH = $(PROOT)/ares
 endif
 
 CC	= $(CROSSPREFIX)gcc
-CFLAGS	= $(CURL_CFLAG_EXTRAS) -g -O2 -Wall
+CFLAGS	= $(CURL_CFLAG_EXTRAS) -g -O2 -Wall -W
 CFLAGS	+= -fno-strict-aliasing
 # comment LDFLAGS below to keep debug info
 LDFLAGS	= $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL) -s
