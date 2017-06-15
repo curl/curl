@@ -248,6 +248,37 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
 
 #define DOUBLE_SECS(x) (double)(x)/1000000
 
+static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
+                             curl_off_t *param_offt)
+{
+  switch(info) {
+  case CURLINFO_SIZE_UPLOAD_T:
+    *param_offt = data->progress.uploaded;
+    break;
+  case CURLINFO_SIZE_DOWNLOAD_T:
+    *param_offt = data->progress.downloaded;
+    break;
+  case CURLINFO_SPEED_DOWNLOAD_T:
+    *param_offt =  data->progress.dlspeed;
+    break;
+  case CURLINFO_SPEED_UPLOAD_T:
+    *param_offt = data->progress.ulspeed;
+    break;
+  case CURLINFO_CONTENT_LENGTH_DOWNLOAD_T:
+    *param_offt = (data->progress.flags & PGRS_DL_SIZE_KNOWN)?
+      data->progress.size_dl:-1;
+    break;
+  case CURLINFO_CONTENT_LENGTH_UPLOAD_T:
+    *param_offt = (data->progress.flags & PGRS_UL_SIZE_KNOWN)?
+      data->progress.size_ul:-1;
+    break;
+  default:
+    return CURLE_UNKNOWN_OPTION;
+  }
+
+  return CURLE_OK;
+}
+
 static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
                                double *param_doublep)
 {
@@ -396,6 +427,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   va_list arg;
   long *param_longp = NULL;
   double *param_doublep = NULL;
+  curl_off_t *param_offt = NULL;
   const char **param_charp = NULL;
   struct curl_slist **param_slistp = NULL;
   curl_socket_t *param_socketp = NULL;
@@ -423,6 +455,11 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
     param_doublep = va_arg(arg, double *);
     if(param_doublep)
       result = getinfo_double(data, info, param_doublep);
+    break;
+  case CURLINFO_OFF_T:
+    param_offt = va_arg(arg, curl_off_t *);
+    if(param_offt)
+      result = getinfo_offt(data, info, param_offt);
     break;
   case CURLINFO_SLIST:
     param_slistp = va_arg(arg, struct curl_slist **);

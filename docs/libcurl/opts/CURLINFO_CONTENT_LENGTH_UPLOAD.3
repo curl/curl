@@ -31,6 +31,9 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONTENT_LENGTH_UPLOAD,
 .SH DESCRIPTION
 Pass a pointer to a double to receive the specified size of the upload.  Since
 7.19.4, this returns -1 if the size isn't known.
+
+\fICURLINFO_CONTENT_LENGTH_UPLOAD_T(3)\fP is a newer replacement that returns a
+more sensible variable type.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
@@ -45,7 +48,7 @@ if(curl) {
   if(!res) {
     /* check the size */
     double cl;
-    res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &cl);
+    res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_UPLOAD, &cl);
     if(!res) {
       printf("Size: %.0f\\n", cl);
     }
@@ -58,3 +61,4 @@ Added in 7.6.1
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
+.BR CURLINFO_CONTENT_LENGTH_DOWNLOAD_T "(3), "

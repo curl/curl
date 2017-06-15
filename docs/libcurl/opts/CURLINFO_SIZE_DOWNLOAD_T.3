@@ -20,22 +20,19 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLINFO_SIZE_DOWNLOAD 3 "28 Aug 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
+.TH CURLINFO_SIZE_DOWNLOAD_T 3 "25 May 2017" "libcurl 7.55.0" "curl_easy_getinfo options"
 .SH NAME
-CURLINFO_SIZE_DOWNLOAD \- get the number of downloaded bytes
+CURLINFO_SIZE_DOWNLOAD_T \- get the number of downloaded bytes
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SIZE_DOWNLOAD, double *dlp);
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SIZE_DOWNLOAD_T, curl_off_t *dlp);
 .SH DESCRIPTION
-Pass a pointer to a double to receive the total amount of bytes that were
-downloaded.  The amount is only for the latest transfer and will be reset
+Pass a pointer to a \fIcurl_off_t\fP to receive the total amount of bytes that
+were downloaded.  The amount is only for the latest transfer and will be reset
 again for each new transfer. This counts actual payload data, what's also
 commonly called body. All meta and header data are excluded and will not be
 counted in this number.
-
-\fICURLINFO_SIZE_DOWNLOAD_T(3)\fP is a newer replacement that returns a more
-sensible variable type.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
@@ -49,19 +46,19 @@ if(curl) {
 
   if(!res) {
     /* check the size */
-    double dl;
-    res = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, &dl);
+    curl_off_t dl;
+    res = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &dl);
     if(!res) {
-      printf("Downloaded %.0f bytes\\n", cl);
+      printf("Downloaded " CURL_FORMAT_CURL_OFF_T " bytes\\n", cl);
     }
   }
 }
 .fi
 .SH AVAILABILITY
-Added in 7.4.1
+Added in 7.55.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
-.BR CURLINFO_SIZE_DOWNLOAD_T "(3), "
+.BR CURLINFO_SIZE_DOWNLOAD "(3), "
 .BR CURLINFO_SIZE_UPLOAD_T "(3), "

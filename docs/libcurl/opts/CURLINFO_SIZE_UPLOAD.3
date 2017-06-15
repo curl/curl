@@ -30,6 +30,9 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SIZE_UPLOAD, double *uploadp);
 .SH DESCRIPTION
 Pass a pointer to a double to receive the total amount of bytes that were
 uploaded.
+
+\fICURLINFO_SIZE_UPLOAD_T(3)\fP is a newer replacement that returns a more
+sensible variable type.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
@@ -56,3 +59,4 @@ Added in 7.4.1
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
+.BR CURLINFO_SIZE_DOWNLOAD_T "(3), " CURLINFO_SIZE_UPLOAD_T "(3), "
