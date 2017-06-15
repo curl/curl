@@ -37,7 +37,6 @@
  1.21 API for URL parsing/splitting
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
- 1.25 Remove the generated include file
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -368,33 +367,6 @@
  libcurl supports the CURLOPT_TCP_FASTOPEN option since 7.49.0 for Linux and
  Mac OS. Windows supports TCP Fast Open starting with Windows 10, version 1607
  and we should add support for it.
-
-1.25 Remove the generated include file
-
- When curl and libcurl are built, one of the public include files are
- generated and is populated with a set of defines that are derevid from sizes
- and constants for the particular target architecture that build is made. For
- platforms that can select between 32 bit and 64 bit at build time, this
- approach makes the libcurl build only create a set of public headers suitable
- for one of the architectures and not both. If you build libcurl for such a
- platform and you want to allow applications to get built using either 32/64
- version, you must generate the libcurl headers once for each setup and you
- must then add a replacement curl header that would itself select the correct
- 32 or 64 bit specific header as necessary.
-
- Your curl/curl.h alternative could then look like (replace with suitable CPP
- variable to check):
-
-     #ifdef ARCH_32bit
-     #include <curl32/curl.h>
-     #else /* ARCH_64bit  */
-     #include <curl64/curl.h>
-     #endif
-
- A fix would either (A) fix the 32/64 setup automatically or even better (B)
- work away the architecture specific defines from the headers so that they can
- be used for all architectures independently of what libcurl was built for.
-
 
 2. libcurl - multi interface
 
