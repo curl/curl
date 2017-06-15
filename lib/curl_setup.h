@@ -640,6 +640,10 @@ int netware_init(void);
 #endif
 #endif
 
+#ifdef CURL_WANTS_CA_BUNDLE_ENV
+#error "No longer supported. Set CURLOPT_CAINFO at runtime instead."
+#endif
+
 /*
  * Provide a mechanism to silence picky compilers, such as gcc 4.6+.
  * Parameters should of course normally not be unused, but for example when
