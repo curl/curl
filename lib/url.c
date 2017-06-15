@@ -5348,12 +5348,15 @@ static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
       result = CURLE_UNSUPPORTED_PROTOCOL;
       goto out;
 #else
-      /* force this connection's protocol to become HTTP if not already
-         compatible - if it isn't tunneling through */
-      if(!(conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-         !conn->bits.tunnel_proxy)
-        conn->handler = &Curl_handler_http;
-
+      /* force this connection's protocol to become HTTP if compatible */
+      if(!(conn->handler->protocol & PROTO_FAMILY_HTTP)) {
+        if((conn->handler->flags & PROTOPT_PROXY_AS_HTTP) &&
+           !conn->bits.tunnel_proxy)
+          conn->handler = &Curl_handler_http;
+        else
+          /* if not converting to HTTP over the proxy, enforce tunneling */
+          conn->bits.tunnel_proxy = TRUE;
+      }
       conn->bits.httpproxy = TRUE;
 #endif
     }

@@ -855,6 +855,9 @@ struct Curl_handler {
 #define PROTOPT_STREAM (1<<9) /* a protocol with individual logical streams */
 #define PROTOPT_URLOPTIONS (1<<10) /* allow options part in the userinfo field
                                       of the URL */
+#define PROTOPT_PROXY_AS_HTTP (1<<11) /* allow this non-HTTP scheme over a
+                                         HTTP proxy as HTTP proxies may know
+                                         this protocol and act as a gateway */
 
 /* return the count of bytes sent, or -1 on error */
 typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
