@@ -34,7 +34,7 @@ use Encode;
 use Getopt::Std;
 use MIME::Base64;
 use strict;
-use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
+use vars qw($opt_b $opt_d $opt_e $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
 use List::Util;
 use Text::Wrap;
 my $MOD_SHA = "Digest::SHA";
@@ -110,7 +110,7 @@ my @valid_signature_algorithms = (
 
 $0 =~ s@.*(/|\\)@@;
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
-getopts('bd:fhiklmnp:qs:tuvw:');
+getopts('bd:efhiklmnp:qs:tuvw:');
 
 if(!defined($opt_d)) {
     # to make plain "-d" use not cause warnings, and actually still work
@@ -361,6 +361,58 @@ if(!$opt_n) {
         . ($resp? $resp->code . ' - ' . $resp->message : "LWP failed");
       exit 1 if -e $crt || ! -r $txt;
     }
+  }
+
+  # should we verify the txt download?
+  if($opt_e)
+  {
+
+    # grab local size
+    my $txt_size = (stat($txt))[7];
+	## DEBUG ONLY: uncomment this line to break this test
+	#$txt_size=1234;#Obviously fake
+    report "Grabbing local size file for '$txt':$txt_size";
+
+    # now get remote path for the url you grabbed certdata.txt from
+    (my $url_p = $url) =~ s|$txt$||;
+
+    # now grab the directory listing where the certdata.txt is located
+    chomp(my @dl=`curl -L --silent "${url_p}" --stderr -`);
+    if($?)
+    {
+      report "I had a problem contacting '${url_p}'";
+      exit 1;
+    }
+
+    my $txt_remote_size=0;
+    foreach my $l (@dl)
+    {
+      next if($l =~ m/^$/);
+      # Then I have the right file, now look up the size...
+      if($l =~ m/.* ([0-9]*) $txt/)
+      {
+        # So we have the size...
+        $txt_remote_size = $1;
+        report "remote size: $txt_remote_size";
+        last if($txt_remote_size > 0);
+      }
+    }
+
+    # Make sure...
+    if(!$txt_remote_size || $txt_remote_size !~ m/^[0-9]*$/)
+    {
+      report "I wasn't able to grab the remote size!";
+      exit 1;
+    }
+
+    # and now just compare
+    if($txt_remote_size != $txt_size)
+    {
+      report "ERROR! local file '$txt' size:$txt_size ; Remote file size:$txt_remote_size\n";
+      exit 1;
+    }
+
+    report "Local '$txt' OK";
   }
 }
 
