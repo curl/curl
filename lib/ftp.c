@@ -180,8 +180,8 @@ const struct Curl_handler Curl_handler_ftp = {
   ZERO_NULL,                       /* readwrite */
   PORT_FTP,                        /* defport */
   CURLPROTO_FTP,                   /* protocol */
-  PROTOPT_DUAL | PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD
-  | PROTOPT_NOURLQUERY /* flags */
+  PROTOPT_DUAL | PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD |
+  PROTOPT_NOURLQUERY | PROTOPT_HTTP_PROXY /* flags */
 };
 
 
@@ -210,59 +210,6 @@ const struct Curl_handler Curl_handler_ftps = {
   PROTOPT_SSL | PROTOPT_DUAL | PROTOPT_CLOSEACTION |
   PROTOPT_NEEDSPWD | PROTOPT_NOURLQUERY /* flags */
 };
-#endif
-
-#ifndef CURL_DISABLE_HTTP
-/*
- * HTTP-proxyed FTP protocol handler.
- */
-
-static const struct Curl_handler Curl_handler_ftp_proxy = {
-  "FTP",                                /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  PORT_FTP,                             /* defport */
-  CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
-};
-
-
-#ifdef USE_SSL
-/*
- * HTTP-proxyed FTPS protocol handler.
- */
-
-static const struct Curl_handler Curl_handler_ftps_proxy = {
-  "FTPS",                               /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  PORT_FTPS,                            /* defport */
-  CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
-};
-#endif
 #endif
 
 static void close_secondarysocket(struct connectdata *conn)
@@ -4461,28 +4408,6 @@ static CURLcode ftp_setup_connection(struct connectdata *conn)
   char *type;
   char command;
   struct FTP *ftp;
-
-  if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
-    /* Unless we have asked to tunnel ftp operations through the proxy, we
-       switch and use HTTP operations only */
-#ifndef CURL_DISABLE_HTTP
-    if(conn->handler == &Curl_handler_ftp)
-      conn->handler = &Curl_handler_ftp_proxy;
-    else {
-#ifdef USE_SSL
-      conn->handler = &Curl_handler_ftps_proxy;
-#else
-      failf(data, "FTPS not supported!");
-      return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-    }
-    /* set it up as a HTTP connection instead */
-    return conn->handler->setup_connection(conn);
-#else
-    failf(data, "FTP over http proxy requires HTTP support built-in!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
 
   conn->data->req.protop = ftp = malloc(sizeof(struct FTP));
   if(NULL == ftp)

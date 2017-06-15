@@ -157,58 +157,6 @@ const struct Curl_handler Curl_handler_smtps = {
 };
 #endif
 
-#ifndef CURL_DISABLE_HTTP
-/*
- * HTTP-proxyed SMTP protocol handler.
- */
-
-static const struct Curl_handler Curl_handler_smtp_proxy = {
-  "SMTP",                               /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  PORT_SMTP,                            /* defport */
-  CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
-};
-
-#ifdef USE_SSL
-/*
- * HTTP-proxyed SMTPS protocol handler.
- */
-
-static const struct Curl_handler Curl_handler_smtps_proxy = {
-  "SMTPS",                              /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  PORT_SMTPS,                           /* defport */
-  CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_NONE                          /* flags */
-};
-#endif
-#endif
-
 /* SASL parameters for the smtp protocol */
 static const struct SASLproto saslsmtp = {
   "smtp",                     /* The service name */
@@ -1450,30 +1398,6 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
 
   /* Clear the TLS upgraded flag */
   conn->tls_upgraded = FALSE;
-
-  /* Set up the proxy if necessary */
-  if(conn->bits.httpproxy && !data->set.tunnel_thru_httpproxy) {
-    /* Unless we have asked to tunnel SMTP operations through the proxy, we
-       switch and use HTTP operations only */
-#ifndef CURL_DISABLE_HTTP
-    if(conn->handler == &Curl_handler_smtp)
-      conn->handler = &Curl_handler_smtp_proxy;
-    else {
-#ifdef USE_SSL
-      conn->handler = &Curl_handler_smtps_proxy;
-#else
-      failf(data, "SMTPS not supported!");
-      return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-    }
-    /* set it up as a HTTP connection instead */
-    return conn->handler->setup_connection(conn);
-
-#else
-    failf(data, "SMTP over http proxy requires HTTP support built-in!");
-    return CURLE_UNSUPPORTED_PROTOCOL;
-#endif
-  }
 
   /* Initialise the SMTP layer */
   result = smtp_init(conn);
