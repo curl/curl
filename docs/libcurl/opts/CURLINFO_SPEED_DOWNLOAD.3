@@ -30,6 +30,9 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SPEED_DOWNLOAD, double *speed)
 .SH DESCRIPTION
 Pass a pointer to a double to receive the average download speed that curl
 measured for the complete download. Measured in bytes/second.
+
+\fICURLINFO_SPEED_DOWNLOAD_T(3)\fP is a newer replacement that returns a more
+sensible variable type.
 .SH PROTOCOLS
 .SH EXAMPLE
 .nf
@@ -56,3 +59,4 @@ Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR curl_easy_getinfo "(3), " curl_easy_setopt "(3), "
 .BR CURLINFO_SPEED_UPLOAD "(3), "
+.BR CURLINFO_SIZE_UPLOAD_T "(3), "
