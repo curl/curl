@@ -677,5 +677,10 @@ CURLcode Curl_proxyCONNECT(struct connectdata *conn,
   return result;
 }
 
+#else
+void Curl_connect_free(struct Curl_easy *data)
+{
+  (void)data;
+}
 
 #endif /* CURL_DISABLE_PROXY */

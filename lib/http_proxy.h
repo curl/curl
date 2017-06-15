@@ -35,11 +35,14 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex);
 
 bool Curl_connect_complete(struct connectdata *conn);
 bool Curl_connect_ongoing(struct connectdata *conn);
-void Curl_connect_free(struct Curl_easy *data);
 
 #else
 #define Curl_proxyCONNECT(x,y,z,w) CURLE_NOT_BUILT_IN
 #define Curl_proxy_connect(x,y) CURLE_OK
+#define Curl_connect_complete(x) CURLE_OK
+#define Curl_connect_ongoing(x) FALSE
 #endif
+
+void Curl_connect_free(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */
