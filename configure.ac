@@ -366,6 +366,7 @@ AC_HELP_STRING([--disable-http],[Disable HTTP support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_HTTP, 1, [to disable HTTP])
+       disable_http="yes"
        AC_MSG_WARN([disable HTTP disables FTP over proxy and RTSP])
        AC_SUBST(CURL_DISABLE_HTTP, [1])
        AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
@@ -2953,6 +2954,12 @@ dnl Check for nghttp2
 dnl **********************************************************************
 
 OPT_H2="yes"
+
+if test "x$disable_http" = "xyes"; then
+  # without HTTP, nghttp2 is no use
+  OPT_H2="no"
+fi
+
 AC_ARG_WITH(nghttp2,
 AC_HELP_STRING([--with-nghttp2=PATH],[Enable nghttp2 usage])
 AC_HELP_STRING([--without-nghttp2],[Disable nghttp2 usage]),
