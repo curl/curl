@@ -7,4 +7,8 @@ We will need some additional patches in the future, to increase coverage.
 Building the fuzz target
 ========================
 
-FIXME fill out once the makefiles are in order.
+CC=clang-5.0 CFLAGS="-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-coverage=trace-pc-guard,trace-cmp" ./configure --disable-shared --enable-debug --enable-maintainer-mode
+make -sj
+
+cd tests/fuzz
+make
