@@ -257,6 +257,7 @@ static const struct LongShort aliases[]= {
   {"Fs", "form-string",              ARG_STRING},
   {"g",  "globoff",                  ARG_BOOL},
   {"G",  "get",                      ARG_NONE},
+  {"Ga", "strip-path-slash",         ARG_BOOL},
   {"h",  "help",                     ARG_BOOL},
   {"H",  "header",                   ARG_STRING},
   {"Hp", "proxy-header",             ARG_STRING},
@@ -1591,7 +1592,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
 
     case 'G': /* HTTP GET */
-      config->use_httpget = TRUE;
+      if(subletter == 'a') { /* --strip-path-slash */
+        config->strip_path_slash = TRUE;
+      }
+      else
+        config->use_httpget = TRUE;
       break;
 
     case 'h': /* h for help */

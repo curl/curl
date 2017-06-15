@@ -829,6 +829,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
          then this can be changed to HEAD later on) */
       data->set.httpreq = HTTPREQ_GET;
     break;
+  case CURLOPT_STRIP_PATH_SLASH:
+    arg = va_arg(param, long);
+    data->set.strip_path_slash = (bool)arg;
+    break;
   case CURLOPT_FILETIME:
     /*
      * Try to get the file time of the remote document. The time will

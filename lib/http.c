@@ -1851,6 +1851,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       case HTTPREQ_PUT:
         request = "PUT";
         break;
+      case HTTPREQ_OPTIONS:
+        request = "OPTIONS";
+        break;
       default: /* this should never happen */
       case HTTPREQ_GET:
         request = "GET";
@@ -2265,6 +2268,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   result = Curl_add_bufferf(req_buffer, "%s ", request);
   if(result)
     return result;
+
+  if(data->set.strip_path_slash)
+    ppath++;
 
   /* url */
   if(paste_ftp_userpwd)
