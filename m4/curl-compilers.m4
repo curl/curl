@@ -892,6 +892,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wshift-sign-overflow"
           fi
           #
+          dnl Only clang 3.2 or later
+          if test "$compiler_num" -ge "302"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wmissing-variable-declarations"
+          fi
+          #
           dnl Only clang 3.6 or later
           if test "$compiler_num" -ge "306"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wdouble-promotion"
