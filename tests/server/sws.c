@@ -1194,12 +1194,12 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
   responsesize = count;
   do {
-    /* Ok, we send no more than 200 bytes at a time, just to make sure that
+    /* Ok, we send no more than N bytes at a time, just to make sure that
        larger chunks are split up so that the client will need to do multiple
        recv() calls to get it and thus we exercise that code better */
     size_t num = count;
-    if(num > 200)
-      num = 200;
+    if(num > 20)
+      num = 20;
 
     retry:
     written = swrite(sock, buffer, num);
@@ -1210,9 +1210,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       }
       sendfailure = TRUE;
       break;
-    }
-    else {
-      logmsg("Sent off %zd bytes", written);
     }
 
     /* write to file as well */

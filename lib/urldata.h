@@ -905,6 +905,7 @@ struct http_connect_state {
   char *line_start;
   char *ptr; /* where to store more data */
   curl_off_t cl; /* size of content to read and ignore */
+  bool chunked_encoding;
   enum {
     TUNNEL_INIT,    /* init/default/no tunnel state */
     TUNNEL_CONNECT, /* CONNECT has been sent off */
