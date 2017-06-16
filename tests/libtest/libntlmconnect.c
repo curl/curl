@@ -44,8 +44,8 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   curl_socket_t sock;
   long longdata;
   CURLcode code;
-
   const size_t failure = (size && nmemb) ? 0 : 1;
+  (void)ptr;
 
   counter[idx] += (int)(size * nmemb);
 
@@ -91,7 +91,7 @@ int test(char *url)
 {
   CURLM *multi = NULL;
   int running;
-  int i, j;
+  int i;
   int num_handles = 0;
   enum HandleState state = ReadyForNewHandle;
   size_t urllen = strlen(url) + 4 + 1;
