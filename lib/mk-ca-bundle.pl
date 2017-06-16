@@ -310,7 +310,7 @@ if(!$opt_n) {
         my $proto = !$opt_k ? "--proto =https" : "";
         my $quiet = $opt_q ? "-s" : "";
         my @out = `curl -w %{response_code} $proto $quiet -o "$txt" "$url"`;
-        if(@out && $out[0] == 200) {
+        if(!$? && @out && $out[0] == 200) {
           $fetched = 1;
           report "Downloaded $txt";
         }
