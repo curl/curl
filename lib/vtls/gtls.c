@@ -763,7 +763,8 @@ gtls_connect_step1(struct connectdata *conn,
     gnutls_datum_t protocols[2];
 
 #ifdef USE_NGHTTP2
-    if(data->set.httpversion >= CURL_HTTP_VERSION_2) {
+    if(data->set.httpversion >= CURL_HTTP_VERSION_2 &&
+       (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)) {
       protocols[cur].data = (unsigned char *)NGHTTP2_PROTO_VERSION_ID;
       protocols[cur].size = NGHTTP2_PROTO_VERSION_ID_LEN;
       cur++;
