@@ -901,6 +901,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "306"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wdouble-promotion"
           fi
+          #
+          dnl Only clang 3.9 or later
+          if test "$compiler_num" -ge "309"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wcomma"
+          fi
         fi
         ;;
         #
