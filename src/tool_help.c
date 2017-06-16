@@ -252,7 +252,7 @@ static const struct helptxt helptext[] = {
    "Use HTTP NTLM authentication"},
   {"    --ntlm-wb",
    "Use HTTP NTLM authentication with winbind"},
-  {"    --oauth2-bearer",
+  {"    --oauth2-bearer <token>",
    "OAuth 2 Bearer Token"},
   {"-o, --output <file>",
    "Write to file instead of stdout"},

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -85,11 +85,20 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
    * point returning a value different from sz*nmemb indicates failure.
    */
   const size_t failure = (sz && nmemb) ? 0 : 1;
+  bool isatty = config->global->isatty;
 
   if(!config)
     return failure;
 
 #ifdef DEBUGBUILD
+  {
+    char *tty = curlx_getenv("CURL_ISATTY");
+    if(tty) {
+      isatty = TRUE;
+      curl_free(tty);
+    }
+  }
+
   if(config->include_headers) {
     if(sz * nmemb > (size_t)CURL_MAX_HTTP_HEADER) {
       warnf(config->global, "Header data size exceeds single call write "
@@ -136,6 +145,18 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(!outs->stream && !tool_create_output_file(outs))
     return failure;
+
+  if(isatty && (outs->bytes < 2000) && !config->binary_ok) {
+    /* binary output to terminal? */
+    size_t bytes = sz * nmemb;
+    if(memchr(buffer, 0, bytes)) {
+      warnf(config->global, "Binary output can mess up your terminal. "
+            "Use \"--output -\" to tell curl to output it to your terminal "
+            "anyway, or consider \"--output <FILE>\" to save to a file.\n");
+      config->synthetic_error = ERR_BINARY_TERMINAL;
+      return bytes-1;
+    }
+  }
 
   rc = fwrite(buffer, sz, nmemb, outs->stream);
 
