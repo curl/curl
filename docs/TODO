@@ -140,7 +140,6 @@
  18.4 simultaneous parallel transfers
  18.5 provide formpost headers
  18.6 warning when setting an option
- 18.7 warning when sending binary output to terminal
  18.8 offer color-coded HTTP header output
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
@@ -932,11 +931,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Display a warning when libcurl returns an error when setting an option.
  This can be useful to tell when support for a particular feature hasn't been
  compiled into the library.
-
-18.7 warning when sending binary output to terminal
-
- Provide a way that prompts the user for confirmation before binary data is
- sent to the terminal, much in the style 'less' does it.
 
 18.8 offer color-coded HTTP header output
 

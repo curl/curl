@@ -1554,7 +1554,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->proxy_insecure_ok = toggle;
         break;
 
-      case '9':
+      case '9': /* --proxy-tlsv1 */
         /* TLS version 1 for proxy */
         config->proxy_ssl_version = CURL_SSLVERSION_TLSv1;
         break;
