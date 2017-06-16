@@ -27,6 +27,12 @@
 
 #include "tool_metalink.h"
 
+typedef enum {
+  ERR_NONE,
+  ERR_BINARY_TERMINAL = 1, /* binary to terminal detected */
+  ERR_LAST
+} curl_error;
+
 struct GlobalConfig;
 
 struct OperationConfig {
@@ -141,6 +147,7 @@ struct OperationConfig {
   bool insecure_ok;         /* set TRUE to allow insecure SSL connects */
   bool proxy_insecure_ok;   /* set TRUE to allow insecure SSL connects
                                for proxy */
+  bool terminal_binary_ok;
   bool verifystatus;
   bool create_dirs;
   bool ftp_create_dirs;
@@ -236,6 +243,8 @@ struct OperationConfig {
   double expect100timeout;
   bool suppress_connect_headers;  /* suppress proxy CONNECT response headers
                                      from user callbacks */
+  curl_error synthetic_error;     /* if non-zero, it overrides any libcurl
+                                     error */
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
