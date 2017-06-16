@@ -311,6 +311,7 @@ static CURLcode CONNECT(struct connectdata *conn,
         return result;
 
       s->tunnel_state = TUNNEL_CONNECT;
+      s->perline = 0;
     } /* END CONNECT PHASE */
 
     check = Curl_timeleft(data, NULL, TRUE);
@@ -327,8 +328,6 @@ static CURLcode CONNECT(struct connectdata *conn,
 
     { /* READING RESPONSE PHASE */
       int error = SELECT_OK;
-
-      s->perline = 0;
 
       while(s->keepon && !error) {
         ssize_t gotbytes;
