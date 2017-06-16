@@ -188,7 +188,6 @@ static CURLcode CONNECT(struct connectdata *conn,
   CURLcode result;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
   bool closeConnection = FALSE;
-  bool chunked_encoding = FALSE;
   time_t check;
   struct http_connect_state *s = conn->connect_state;
 
@@ -454,7 +453,7 @@ static CURLcode CONNECT(struct connectdata *conn,
               infof(data, "Ignore %" CURL_FORMAT_CURL_OFF_T
                     " bytes of response-body\n", s->cl);
             }
-            else if(chunked_encoding) {
+            else if(s->chunked_encoding) {
               CHUNKcode r;
 
               infof(data, "Ignore chunked response-body\n");
@@ -541,7 +540,7 @@ static CURLcode CONNECT(struct connectdata *conn,
           else if(Curl_compareheader(s->line_start,
                                      "Transfer-Encoding:", "chunked")) {
             infof(data, "CONNECT responded chunked\n");
-            chunked_encoding = TRUE;
+            s->chunked_encoding = TRUE;
             /* init our chunky engine */
             Curl_httpchunk_init(conn);
           }
