@@ -8,7 +8,6 @@ HTTP proxy
 chunked Transfer-Encoding
 proxytunnel
 HTTP proxy Digest auth
-flaky
 </keywords>
 </info>
 
