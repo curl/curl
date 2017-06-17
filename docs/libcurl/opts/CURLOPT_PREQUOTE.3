@@ -22,22 +22,25 @@
 .\"
 .TH CURLOPT_PREQUOTE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_PREQUOTE \- commands to run before FTP or SFTP transfer
+CURLOPT_PREQUOTE \- commands to run before an FTP transfer
 .SH SYNOPSIS
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PREQUOTE,
                           struct curl_slist *cmds);
 .SH DESCRIPTION
-Pass a pointer to a linked list of FTP or SFTP commands to pass to the server
-after the transfer type is set. The linked list should be a fully valid list
-of struct curl_slist structs properly filled in as described for
+Pass a pointer to a linked list of FTP commands to pass to the server after
+the transfer type is set. The linked list should be a fully valid list of
+struct curl_slist structs properly filled in as described for
 \fICURLOPT_QUOTE(3)\fP. Disable this operation again by setting a NULL to this
 option.
+
+While \fICURLOPT_QOUTE(3)\fP and \fICURLOPT_POSTQUOTE(3)\fP work for SFTP,
+this option does not.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
-FTP and SFTP
+FTP
 .SH EXAMPLE
 .nf
 struct curl_slist *h = NULL;

@@ -877,6 +877,10 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  SHA-1 is also being deprecated these days so we should consider workign with
  libssh2 to instead offer support for SHA-256 or similar.
 
+17.4 Support CURLOPT_PREQUOTE
+
+ The two other QUOTE options are supported for SFTP, but this was left out for
+ unknown reasons!
 
 18. Command line tool
 
