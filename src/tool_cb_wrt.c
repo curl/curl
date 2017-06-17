@@ -88,9 +88,6 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
    */
   const size_t failure = bytes ? 0 : 1;
 
-  if(!config)
-    return failure;
-
 #ifdef DEBUGBUILD
   {
     char *tty = curlx_getenv("CURL_ISATTY");
