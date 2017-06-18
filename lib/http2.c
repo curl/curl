@@ -2134,12 +2134,15 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   return CURLE_OK;
 }
 
-void Curl_http2_add_child(struct Curl_easy *parent, struct Curl_easy *child,
-                          bool exclusive)
+CURLcode Curl_http2_add_child(struct Curl_easy *parent,
+                              struct Curl_easy *child,
+                              bool exclusive)
 {
   if(parent) {
     struct Curl_http2_dep **tail;
     struct Curl_http2_dep *dep = calloc(1, sizeof(struct Curl_http2_dep));
+    if(!dep)
+      return CURLE_OUT_OF_MEMORY;
     dep->data = child;
 
     if(parent->set.stream_dependents && exclusive) {
@@ -2170,6 +2173,7 @@ void Curl_http2_add_child(struct Curl_easy *parent, struct Curl_easy *child,
 
   child->set.stream_depends_on = parent;
   child->set.stream_depends_e = exclusive;
+  return CURLE_OK;
 }
 
 void Curl_http2_remove_child(struct Curl_easy *parent, struct Curl_easy *child)
