@@ -101,8 +101,8 @@ HUGE=tool_hugehelp.c
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
 
-$(MANPAGE):
-	cd $(top_builddir)/docs && $(MAKE)
+# $(MANPAGE) exists and is up-to-date because docs is built before src
+# in SUBDIRS of root Makefile.am
 
 if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and
