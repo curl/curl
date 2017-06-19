@@ -118,6 +118,7 @@ int test(char *URL)
   struct data object;
   char *charp;
   long val;
+  curl_off_t oval;
   double dval;
   curl_socket_t sockfd;
   struct curl_certinfo *certinfo;
@@ -2335,15 +2336,27 @@ int test(char *URL)
   res = curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD, &dval);
   if(UNEX(res)) {
     geterr("SIZE_UPLOAD", res, __LINE__); goto test_cleanup; }
+  res = curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &oval);
+  if(UNEX(res)) {
+    geterr("SIZE_UPLOAD_T", res, __LINE__); goto test_cleanup; }
   res = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, &dval);
   if(UNEX(res)) {
     geterr("SIZE_DOWNLOAD", res, __LINE__); goto test_cleanup; }
+  res = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &oval);
+  if(UNEX(res)) {
+    geterr("SIZE_DOWNLOAD_T", res, __LINE__); goto test_cleanup; }
   res = curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &dval);
   if(UNEX(res)) {
     geterr("SPEED_DOWNLOAD", res, __LINE__); goto test_cleanup; }
+  res = curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T, &oval);
+  if(UNEX(res)) {
+    geterr("SPEED_DOWNLOAD_T", res, __LINE__); goto test_cleanup; }
   res = curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &dval);
   if(UNEX(res)) {
     geterr("SPEED_UPLOAD", res, __LINE__); goto test_cleanup; }
+  res = curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &oval);
+  if(UNEX(res)) {
+    geterr("SPEED_UPLOAD_T", res, __LINE__); goto test_cleanup; }
   res = curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &val);
   if(UNEX(res)) {
     geterr("HEADER_SIZE", res, __LINE__); goto test_cleanup; }
@@ -2359,9 +2372,15 @@ int test(char *URL)
   res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &dval);
   if(UNEX(res)) {
     geterr("CONTENT_LENGTH_DOWNLOAD", res, __LINE__); goto test_cleanup; }
+  res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &oval);
+  if(UNEX(res)) {
+    geterr("CONTENT_LENGTH_DOWNLOAD_T", res, __LINE__); goto test_cleanup; }
   res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_UPLOAD, &dval);
   if(UNEX(res)) {
     geterr("CONTENT_LENGTH_UPLOAD", res, __LINE__); goto test_cleanup; }
+  res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_UPLOAD_T, &oval);
+  if(UNEX(res)) {
+    geterr("CONTENT_LENGTH_UPLOAD_T", res, __LINE__); goto test_cleanup; }
   res = curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME, &dval);
   if(UNEX(res)) {
     geterr("STARTTRANSFER_TIME", res, __LINE__); goto test_cleanup; }
