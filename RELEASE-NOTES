@@ -8,7 +8,9 @@ Curl and libcurl 7.55.0
 
 This release includes the following changes:
 
- o 
+ o curl: allow --header and --proxy-header read from file [7]
+ o getinfo: provide sizes as curl_off_t [6]
+ o curl: prevent binary output spewed to terminal [16]
 
 This release includes the following bugfixes:
 
@@ -17,6 +19,22 @@ This release includes the following bugfixes:
  o timers: store internal time stamps as time_t instead of doubles [3]
  o progress: let "current speed" be UL + DL speeds combined [4]
  o http-proxy: do the HTTP CONNECT process entirely non-blocking [5]
+ o lib/curl_setup.h: remove CURL_WANTS_CA_BUNDLE_ENV [8]
+ o fuzz: bring oss-fuzz initial code converted to C89 [10]
+ o configure: disable nghttp2 too if HTTP has been disabled
+ o mk-ca-bundle.pl: Check curl's exit code after certdata download [11]
+ o test1148: verify the -# progressbar [12]
+ o tests: stabilize test 2032 and 2033 [13]
+ o HTTPS-Proxy: don't offer h2 for https proxy connections [14]
+ o http-proxy: only attempt FTP over HTTP proxy [9]
+ o curl-compilers.m4: enable vla warning for clang [15]
+ o curl-compilers.m4: enable double-promotion warning [15]
+ o curl-compilers.m4: enable missing-variable-declarations clang warning [15]
+ o curl-compilers.m4: enable comma clang warning [15]
+ o Makefile.m32: enable -W for MinGW32 build [15]
+ o CURLOPT_PREQUOTE: not supported for SFTP [17]
+ o http2: fix OOM crash
+ o PIPELINING_SERVER_BL: cleanup the internal list use [18]
 
 This release includes the following known bugs:
 
@@ -25,8 +43,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Marcel Raad, Paul Harris, Ray Satiro, Simon Warta,
-  (5 contributors)
+  Dan Fandrich, Daniel Stenberg, Frederik B, Jakub Wilk, Marcel Raad,
+  Matteo B., Michael Kaufmann, Pascal Terjan, Paul Harris, Ray Satiro,
+  Simon Warta, Timothe Litt,
+  (12 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -37,4 +57,16 @@ References to bug reports and discussions on issues:
  [3] = https://curl.haxx.se/bug/?i=1531
  [4] = https://curl.haxx.se/bug/?i=1556
  [5] = https://curl.haxx.se/bug/?i=1547
-
+ [6] = https://curl.haxx.se/bug/?i=1511
+ [7] = https://curl.haxx.se/bug/?i=1486
+ [8] = https://curl.haxx.se/bug/?i=1538
+ [9] = https://curl.haxx.se/bug/?i=1505
+ [10] = https://curl.haxx.se/bug/?i=1476
+ [11] = https://curl.haxx.se/bug/?i=1577
+ [12] = https://curl.haxx.se/bug/?i=1569
+ [13] = https://curl.haxx.se/bug/?i=1576
+ [14] = https://curl.haxx.se/bug/?i=1546
+ [15] = https://curl.haxx.se/bug/?i=1578
+ [16] = https://curl.haxx.se/bug/?i=1512
+ [17] = https://curl.haxx.se/bug/?i=1514
+ [18] = https://curl.haxx.se/bug/?i=1584
