@@ -149,6 +149,7 @@ int test(char *URL)
   struct data object;
   char *charp;
   long val;
+  curl_off_t oval;
   double dval;
   curl_socket_t sockfd;
   struct curl_certinfo *certinfo;
@@ -254,6 +255,9 @@ while(<STDIN>) {
        }
        elsif($type eq "LONG") {
          print "$c &val);\n$check";
+       }
+       elsif($type eq "OFF_T") {
+         print "$c &oval);\n$check";
        }
        elsif($type eq "DOUBLE") {
          print "$c &dval);\n$check";
