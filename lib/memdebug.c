@@ -146,7 +146,7 @@ static bool countcheck(const char *func, int line, const char *source)
                 source, line, func);
         fflush(logfile); /* because it might crash now */
       }
-      SET_ERRNO(ENOMEM);
+      errno = ENOMEM;
       return TRUE; /* RETURN ERROR! */
     }
     else
