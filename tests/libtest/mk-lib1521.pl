@@ -67,6 +67,20 @@ struct data {
 #define OFF_HI (curl_off_t) HI
 #define OFF_NO (curl_off_t) 0
 
+/* Unexpected error.
+    CURLE_NOT_BUILT_IN   - means disabled at build
+    CURLE_UNKNOWN_OPTION - means no such option (anymore?)
+    CURLE_SSL_ENGINE_NOTFOUND - set unkown ssl engine
+    CURLE_UNSUPPORTED_PROTOCOL - set bad HTTP version
+    CURLE_BAD_FUNCTION_ARGUMENT - unsupported value
+   */
+#define UNEX(x) ((x) && \\
+                 ((x) != CURLE_NOT_BUILT_IN) && \\
+                 ((x) != CURLE_UNKNOWN_OPTION) && \\
+                 ((x) != CURLE_SSL_ENGINE_NOTFOUND) && \\
+                 ((x) != CURLE_UNSUPPORTED_PROTOCOL) && \\
+                 ((x) != CURLE_BAD_FUNCTION_ARGUMENT) )
+
 static size_t writecb(char *buffer, size_t size, size_t nitems,
                       void *outstream)
 {
@@ -89,6 +103,20 @@ static size_t readcb(char *buffer,
   return 0;
 }
 
+static int err(const char *name, CURLcode val, int lineno)
+{
+  printf("CURLOPT_%s returned %d, \\"%s\\" on line %d\\n",
+         name, val, curl_easy_strerror(val), lineno);
+  return (int)val;
+}
+
+static int geterr(const char *name, CURLcode val, int lineno)
+{
+  printf("CURLINFO_%s returned %d, \\"%s\\" on line %d\\n",
+         name, val, curl_easy_strerror(val), lineno);
+  return (int)val;
+}
+
 curl_progress_callback progresscb;
 curl_write_callback headercb;
 curl_debug_callback debugcb;
@@ -106,7 +134,6 @@ curl_xferinfo_callback xferinfocb;
 
 int test(char *URL)
 {
-  int res = 0;
   CURL *curl = NULL;
   CURL *dep = NULL;
   CURLSH *share = NULL;
@@ -120,6 +147,13 @@ int test(char *URL)
   struct curl_httppost *httppost=NULL;
   FILE *stream = stderr;
   struct data object;
+  char *charp;
+  long val;
+  double dval;
+  curl_socket_t sockfd;
+  struct curl_certinfo *certinfo;
+  struct curl_tlssessioninfo *tlssession;
+  CURLcode res = CURLE_OK;
   (void)URL; /* not used */
   easy_init(dep);
   easy_init(curl);
@@ -136,31 +170,34 @@ while(<STDIN>) {
     if($_ =~ /^  CINIT\(([^ ]*), ([^ ]*), (\d*)\)/) {
         my ($name, $type, $val)=($1, $2, $3);
         my $w="  ";
-        my $pref = "$w(void)curl_easy_setopt(curl, CURLOPT_$name,";
+        my $pref = "${w}res = curl_easy_setopt(curl, CURLOPT_$name,";
         my $i = ' ' x (length($w) + 23);
+        my $check = "  if(UNEX(res)) {\n    err(\"$name\", res, __LINE__); goto test_cleanup; }\n";
         if($type eq "STRINGPOINT") {
-            print "${pref} \"string\");\n";
-            print "${pref} NULL);\n";
+            print "${pref} \"string\");\n$check";
+            print "${pref} NULL);\n$check";
         }
         elsif($type eq "LONG") {
-            print "${pref} 0L);\n";
-            print "${pref} 22L);\n";
-            print "${pref} LO);\n";
-            print "${pref} HI);\n";
+            print "${pref} 0L);\n$check";
+            print "${pref} 22L);\n$check";
+            print "${pref} LO);\n$check";
+            print "${pref} HI);\n$check";
         }
         elsif($type eq "OBJECTPOINT") {
             if($name =~ /DEPENDS/) {
-              print "${pref} dep);\n";
+              print "${pref} dep);\n$check";
             }
             elsif($name =~ "SHARE") {
-              print "${pref} share);\n";
+              print "${pref} share);\n$check";
             }
             elsif($name eq "ERRORBUFFER") {
-              print "${pref} errorbuffer);\n";
+              print "${pref} errorbuffer);\n$check";
             }
             elsif(($name eq "POSTFIELDS") ||
                   ($name eq "COPYPOSTFIELDS")) {
-              print "${pref} stringpointerextra);\n";
+              # set size to zero to avoid it being "illegal"
+              print "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);\n";
+              print "${pref} stringpointerextra);\n$check";
             }
             elsif(($name eq "HTTPHEADER") ||
                   ($name eq "POSTQUOTE") ||
@@ -171,51 +208,91 @@ while(<STDIN>) {
                   ($name eq "RESOLVE") ||
                   ($name eq "PROXYHEADER") ||
                   ($name eq "QUOTE")) {
-              print "${pref} slist);\n";
+              print "${pref} slist);\n$check";
             }
             elsif($name eq "HTTPPOST") {
-              print "${pref} httppost);\n";
+              print "${pref} httppost);\n$check";
             }
             elsif($name eq "STDERR") {
-              print "${pref} stream);\n";
+              print "${pref} stream);\n$check";
             }
             else {
-              print "${pref} &object);\n";
+              print "${pref} &object);\n$check";
             }
-            print "${pref} NULL);\n";
+            print "${pref} NULL);\n$check";
         }
         elsif($type eq "FUNCTIONPOINT") {
             if($name =~ /([^ ]*)FUNCTION/) {
               my $l=lc($1);
-              print "${pref}\n$i${l}cb);\n";
+              print "${pref}\n$i${l}cb);\n$check";
             }
             else {
-              print "${pref} &func);\n";
+              print "${pref} &func);\n$check";
             }
-            print "${pref} NULL);\n";
+            print "${pref} NULL);\n$check";
         }
         elsif($type eq "OFF_T") {
             # play conservative to work with 32bit curl_off_t
-            print "${pref} OFF_NO);\n";
-            print "${pref} OFF_VAL);\n";
-            print "${pref} OFF_LO);\n";
+            print "${pref} OFF_NO);\n$check";
+            print "${pref} OFF_VAL);\n$check";
+            print "${pref} OFF_LO);\n$check";
         }
         else {
-            print "\n---- $type\n";
+            print STDERR "\n---- $type\n";
         }
+    }
+    elsif($_ =~ /^  CURLINFO_NONE/) {
+       $infomode = 1;
+    }
+    elsif($infomode &&
+          ($_ =~ /^  CURLINFO_([^ ]*) *= *CURLINFO_([^ ]*)/)) {
+       my ($info, $type)=($1, $2);
+       my $c = "  res = curl_easy_getinfo(curl, CURLINFO_$info,";
+       my $check = "  if(UNEX(res)) {\n    geterr(\"$info\", res, __LINE__); goto test_cleanup; }\n";
+       if($type eq "STRING") {
+         print "$c &charp);\n$check";
+       }
+       elsif($type eq "LONG") {
+         print "$c &val);\n$check";
+       }
+       elsif($type eq "DOUBLE") {
+         print "$c &dval);\n$check";
+       }
+       elsif($type eq "SLIST") {
+         print "$c &slist);\n$check";
+         print "  if(slist)\n    curl_slist_free_all(slist);\n";
+       }
+       elsif($type eq "SOCKET") {
+         print "$c &sockfd);\n$check";
+       }
+       elsif($type eq "PTR") {
+         if($info eq "CERTINFO") {
+            print "$c &certinfo);\n$check";
+         }
+         elsif(($info eq "TLS_SESSION") ||
+               ($info eq "TLS_SSL_PTR")) {
+            print "$c &tlssession);\n$check";
+         }
+         else {
+            print STDERR "$info/$type is unsupported\n";
+         }
+       }
+       else {
+         print STDERR "$type is unsupported\n";
+       }
     }
 }
 
 
 print <<FOOTER
   curl_easy_setopt(curl, 1, 0);
-
+  res = CURLE_OK;
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_easy_cleanup(dep);
   curl_share_cleanup(share);
 
-  return res;
+  return (int)res;
 }
 FOOTER
     ;
