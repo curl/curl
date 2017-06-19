@@ -1780,8 +1780,8 @@ typedef enum {
   /* Suppress proxy CONNECT response headers from user callbacks */
   CINIT(SUPPRESS_CONNECT_HEADERS, LONG, 265),
 
-  /* Strip the initial slash from the path taken from the URL */
-  CINIT(STRIP_PATH_SLASH, LONG, 266),
+  /* The request target, instead of extracted from the URL */
+  CINIT(REQUEST_TARGET, STRINGPOINT, 266),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

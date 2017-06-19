@@ -2,7 +2,7 @@
 <info>
 <keywords>
 HTTP
---strip-path-slash
+--request-target
 </keywords>
 </info>
 
@@ -31,10 +31,10 @@ Funny-head: yesyes
 http
 </server>
  <name>
-Send "OPTIONS *" with --strip-path-slash
+Send "OPTIONS *" with --request-target
  </name>
  <command>
---strip-path-slash -X OPTIONS http://%HOSTIP:%HTTPPORT/* -H "Testno: 1299"
+--request-target "*" -X OPTIONS http://%HOSTIP:%HTTPPORT/ -H "Testno: 1299"
 </command>
 </client>
 

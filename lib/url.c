@@ -829,9 +829,9 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
          then this can be changed to HEAD later on) */
       data->set.httpreq = HTTPREQ_GET;
     break;
-  case CURLOPT_STRIP_PATH_SLASH:
-    arg = va_arg(param, long);
-    data->set.strip_path_slash = (bool)arg;
+  case CURLOPT_REQUEST_TARGET:
+    result = setstropt(&data->set.str[STRING_TARGET],
+                       va_arg(param, char *));
     break;
   case CURLOPT_FILETIME:
     /*

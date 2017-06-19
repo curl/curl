@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
---strip-path-slash
+--request-target
 </keywords>
 </info>
 
@@ -32,10 +32,10 @@ Funny-head: yesyes
 http
 </server>
  <name>
-HTTP GET special path with --strip-path-slash
+HTTP GET special path with --request-target
  </name>
  <command>
---strip-path-slash "http://%HOSTIP:%HTTPPORT/XXX" -H "Testno: 1298"
+--request-target "XXX" "http://%HOSTIP:%HTTPPORT/" -H "Testno: 1298"
 </command>
 </client>
 
