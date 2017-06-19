@@ -85,7 +85,9 @@ script:
             ./configure
             make
             ./maketgz 99.98.97
-             tar xvf curl-99.98.97.tar.gz && cd curl-99.98.97 && ./configure && make && make TFLAGS=1 test
+            (tar xvf curl-99.98.97.tar.gz && cd curl-99.98.97 && ./configure && make && make TFLAGS=1 test)
+            rm -rf curl-99.98.97
+            (tar xvf curl-99.98.97.tar.gz && mkdir build && cd build && ../curl-99.98.97/configure && make && make TFLAGS=1 test)
         fi
 
 notifications:
