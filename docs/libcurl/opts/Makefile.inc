@@ -278,6 +278,7 @@ man_MANS =                                      \
   CURLOPT_STREAM_DEPENDS.3                      \
   CURLOPT_STREAM_DEPENDS_E.3                    \
   CURLOPT_STREAM_WEIGHT.3                       \
+  CURLOPT_STRIP_PATH_SLASH.3                    \
   CURLOPT_SUPPRESS_CONNECT_HEADERS.3            \
   CURLOPT_TCP_FASTOPEN.3                        \
   CURLOPT_TCP_KEEPALIVE.3                       \

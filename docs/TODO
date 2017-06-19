@@ -69,7 +69,6 @@
  5.9 Improve formpost API
  5.10 Leave secure cookies alone
  5.11 Chunked transfer multipart formpost
- 5.12 OPTIONS *
 
  6. TELNET
  6.1 ditch stdin
@@ -557,23 +556,6 @@ This is not detailed in any FTP specification.
  upload.
 
  https://github.com/curl/curl/issues/1139
-
-5.12 OPTIONS *
-
- HTTP defines an OPTIONS method that can be sent with an asterisk option like
- "OPTIONS *" to ask about options from the server and not a specific URL
- resource. https://tools.ietf.org/html/rfc7230#section-5.3.4
-
- libcurl as it currently works will always sent HTTP methods with a path that
- starts with a slash so there's no way for an application to send a proper
- "OPTIONS *" using libcurl. This should be fixed.
-
- I can't think of any other non-slash paths we should support so it will
- probably make sense to add a new boolean option for issuign an "OPTIONS *"
- request. CURLOPT_OPTIONSASTERISK perhaps (and a corresponding command line
- option)?
-
- See https://github.com/curl/curl/issues/1280
 
 
 6. TELNET
