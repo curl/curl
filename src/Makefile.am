@@ -116,7 +116,7 @@ $(HUGE): $(MANPAGE) $(README) $(MKHELP)
 	echo '#endif /* HAVE_LIBZ */' >> $(HUGE)
 else # HAVE_LIBZ
 # This generates the tool_hugehelp.c file uncompressed only
-$(HUGE): $(MANPAGE) $(README) mkhelp.pl
+$(HUGE): $(MANPAGE) $(README) $(MKHELP)
 	echo '#include "tool_setup.h"' > $(HUGE)
 	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
 endif
