@@ -1264,6 +1264,7 @@ typedef enum {
   HTTPREQ_POST_FORM, /* we make a difference internally */
   HTTPREQ_PUT,
   HTTPREQ_HEAD,
+  HTTPREQ_OPTIONS,
   HTTPREQ_CUSTOM,
   HTTPREQ_LAST /* last in list */
 } Curl_HttpReq;
@@ -1698,6 +1699,7 @@ struct UserDefined {
   Curl_HttpReq httpreq;   /* what kind of HTTP request (if any) is this */
   long httpversion; /* when non-zero, a specific HTTP version requested to
                        be used in the library's request(s) */
+  bool strip_path_slash; /* strip off initial slash from path */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */

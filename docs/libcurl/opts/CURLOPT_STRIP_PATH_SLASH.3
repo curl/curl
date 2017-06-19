@@ -20,41 +20,37 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_NOBODY 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_STRIP_PATH_SLASH 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_NOBODY \- do the download request without getting the body
+CURLOPT_STRIP_PATH_SLASH \- strip the leading slash from the path
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOBODY, long opt);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STRIP_PATH_SLASH, value);
 .SH DESCRIPTION
-A long parameter set to 1 tells libcurl to not include the body-part in the
-output when doing what would otherwise be a download. For HTTP(S), this makes
-libcurl do a HEAD request. For most other protocols it means just not asking
-to transfer the body data.
-
-Enabling this option means asking for a download but without a body.
+Pass a long set to 1 to tell libcurl to strip out the leading slash from the
+path when used on the server.
 .SH DEFAULT
-0, the body is transferred
+0 - use the leading slash.
 .SH PROTOCOLS
-Most
+HTTP
 .SH EXAMPLE
 .nf
 curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/*");
+  curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "OPTIONS");
 
-  /* get us the resource without a body! */
-  curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+  /* issue an OPTIONS * request (no leading slash) */
+  curl_easy_setopt(curl, CURLOPT_STRIP_PATH_SLASH, 1L);
 
   /* Perform the request */
   curl_easy_perform(curl);
 }
 .fi
 .SH AVAILABILITY
-Always
+Added in 7.55.0
 .SH RETURN VALUE
-Returns CURLE_OK
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
-.BR CURLOPT_HTTPGET "(3), " CURLOPT_POST "(3), "
-.BR CURLOPT_STRIP_PATH_SLASH "(3), "
+.BR CURLOPT_CUSTOMREQUEST "(3), " CURLOPT_HTTPGET "(3), "

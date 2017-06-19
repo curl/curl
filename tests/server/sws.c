@@ -602,6 +602,14 @@ static int ProcessRequest(struct httprequest *req)
     }
 
     if(req->testno == DOCNUMBER_NOTHING) {
+      /* check for a Testno: header with the test case number */
+      char *testno = strstr(line, "\nTestno: ");
+      if(testno) {
+        req->testno = strtol(&testno[9], NULL, 10);
+        logmsg("Found test number %d in Testno: header!", req->testno);
+      }
+    }
+    if(req->testno == DOCNUMBER_NOTHING) {
       /* Still no test case number. Try to get the the number off the last dot
          instead, IE we consider the TLD to be the test number. Test 123 can
          then be written as "example.com.123". */

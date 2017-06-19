@@ -400,6 +400,8 @@ static const struct helptxt helptext[] = {
    "Use SSLv3"},
   {"    --stderr",
    "Where to redirect stderr"},
+  {"    --strip-path-slash",
+   "Strip off the first slash of the path"},
   {"    --suppress-connect-headers",
    "Suppress proxy CONNECT response headers"},
   {"    --tcp-fastopen",
