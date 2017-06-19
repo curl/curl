@@ -630,10 +630,14 @@ const char *Curl_strerror(struct connectdata *conn, int err)
 {
   char *buf, *p;
   size_t max;
-  int old_errno = ERRNO;
+  int old_errno;
+  DWORD old_win_err;
 
   DEBUGASSERT(conn);
   DEBUGASSERT(err >= 0);
+
+  old_errno = errno;
+  old_win_err = GetLastError();
 
   buf = conn->syserr_buf;
   max = sizeof(conn->syserr_buf)-1;
@@ -722,8 +726,11 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   if(p && (p - buf) >= 1)
     *p = '\0';
 
-  if(old_errno != ERRNO)
-    SET_ERRNO(old_errno);
+  if(old_win_err != GetLastError())
+    SetLastError(old_win_err);
+
+  if(errno != old_errno)
+    errno = old_errno;
 
   return buf;
 }
@@ -737,6 +744,7 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
   char *p, *str, *msg = NULL;
   bool msg_formatted = FALSE;
   int old_errno;
+  DWORD old_win_err;
 #endif
   const char *txt;
   char *outbuf;
@@ -750,7 +758,8 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 
-  old_errno = ERRNO;
+  old_errno = errno;
+  old_win_err = GetLastError();
 
   switch(err) {
     case SEC_E_OK:
@@ -1051,8 +1060,11 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
       strncpy(outbuf, str, outmax);
   }
 
-  if(old_errno != ERRNO)
-    SET_ERRNO(old_errno);
+  if(old_win_err != GetLastError())
+    SetLastError(old_win_err);
+
+  if(errno != old_errno)
+    errno = old_errno;
 
 #else
 

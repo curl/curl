@@ -407,9 +407,7 @@ static bool init_resolve_thread(struct connectdata *conn,
 #endif
 
   if(!td->thread_hnd) {
-#ifndef _WIN32_WCE
     err = errno;
-#endif
     goto err_exit;
   }
 
@@ -418,8 +416,7 @@ static bool init_resolve_thread(struct connectdata *conn,
  err_exit:
   destroy_async_data(&conn->async);
 
-  SET_ERRNO(err);
-
+  errno = err;
   return FALSE;
 }
 
@@ -655,7 +652,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
   /* fall-back to blocking version */
   infof(conn->data, "init_resolve_thread() failed for %s; %s\n",
-        hostname, Curl_strerror(conn, ERRNO));
+        hostname, Curl_strerror(conn, errno));
 
   error = Curl_getaddrinfo_ex(hostname, sbuf, &hints, &res);
   if(error) {

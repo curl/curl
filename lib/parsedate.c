@@ -404,12 +404,12 @@ static int parsedate(const char *date, time_t *output)
         int error;
         int old_errno;
 
-        old_errno = ERRNO;
-        SET_ERRNO(0);
+        old_errno = errno;
+        errno = 0;
         lval = strtol(date, &end, 10);
-        error = ERRNO;
-        if(error != old_errno)
-          SET_ERRNO(old_errno);
+        error = errno;
+        if(errno != old_errno)
+          errno = old_errno;
 
         if(error)
           return PARSEDATE_FAIL;

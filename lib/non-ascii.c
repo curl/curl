@@ -98,19 +98,17 @@ CURLcode Curl_convert_to_network(struct Curl_easy *data,
     /* do the translation ourselves */
     char *input_ptr, *output_ptr;
     size_t in_bytes, out_bytes, rc;
-    int error;
 
     /* open an iconv conversion descriptor if necessary */
     if(data->outbound_cd == (iconv_t)-1) {
       data->outbound_cd = iconv_open(CURL_ICONV_CODESET_OF_NETWORK,
                                      CURL_ICONV_CODESET_OF_HOST);
       if(data->outbound_cd == (iconv_t)-1) {
-        error = ERRNO;
         failf(data,
               "The iconv_open(\"%s\", \"%s\") call failed with errno %i: %s",
               CURL_ICONV_CODESET_OF_NETWORK,
               CURL_ICONV_CODESET_OF_HOST,
-              error, strerror(error));
+              errno, strerror(errno));
         return CURLE_CONV_FAILED;
       }
     }
@@ -120,10 +118,9 @@ CURLcode Curl_convert_to_network(struct Curl_easy *data,
     rc = iconv(data->outbound_cd, (const char **)&input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
     if((rc == ICONV_ERROR) || (in_bytes != 0)) {
-      error = ERRNO;
       failf(data,
             "The Curl_convert_to_network iconv call failed with errno %i: %s",
-            error, strerror(error));
+            errno, strerror(errno));
       return CURLE_CONV_FAILED;
     }
 #else
@@ -158,19 +155,17 @@ CURLcode Curl_convert_from_network(struct Curl_easy *data,
     /* do the translation ourselves */
     char *input_ptr, *output_ptr;
     size_t in_bytes, out_bytes, rc;
-    int error;
 
     /* open an iconv conversion descriptor if necessary */
     if(data->inbound_cd == (iconv_t)-1) {
       data->inbound_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
                                     CURL_ICONV_CODESET_OF_NETWORK);
       if(data->inbound_cd == (iconv_t)-1) {
-        error = ERRNO;
         failf(data,
               "The iconv_open(\"%s\", \"%s\") call failed with errno %i: %s",
               CURL_ICONV_CODESET_OF_HOST,
               CURL_ICONV_CODESET_OF_NETWORK,
-              error, strerror(error));
+              errno, strerror(errno));
         return CURLE_CONV_FAILED;
       }
     }
@@ -180,10 +175,9 @@ CURLcode Curl_convert_from_network(struct Curl_easy *data,
     rc = iconv(data->inbound_cd, (const char **)&input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
     if((rc == ICONV_ERROR) || (in_bytes != 0)) {
-      error = ERRNO;
       failf(data,
             "Curl_convert_from_network iconv call failed with errno %i: %s",
-            error, strerror(error));
+            errno, strerror(errno));
       return CURLE_CONV_FAILED;
     }
 #else
@@ -219,19 +213,17 @@ CURLcode Curl_convert_from_utf8(struct Curl_easy *data,
     const char *input_ptr;
     char *output_ptr;
     size_t in_bytes, out_bytes, rc;
-    int error;
 
     /* open an iconv conversion descriptor if necessary */
     if(data->utf8_cd == (iconv_t)-1) {
       data->utf8_cd = iconv_open(CURL_ICONV_CODESET_OF_HOST,
                                  CURL_ICONV_CODESET_FOR_UTF8);
       if(data->utf8_cd == (iconv_t)-1) {
-        error = ERRNO;
         failf(data,
               "The iconv_open(\"%s\", \"%s\") call failed with errno %i: %s",
               CURL_ICONV_CODESET_OF_HOST,
               CURL_ICONV_CODESET_FOR_UTF8,
-              error, strerror(error));
+              errno, strerror(errno));
         return CURLE_CONV_FAILED;
       }
     }
@@ -241,10 +233,9 @@ CURLcode Curl_convert_from_utf8(struct Curl_easy *data,
     rc = iconv(data->utf8_cd, &input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
     if((rc == ICONV_ERROR) || (in_bytes != 0)) {
-      error = ERRNO;
       failf(data,
             "The Curl_convert_from_utf8 iconv call failed with errno %i: %s",
-            error, strerror(error));
+            errno, strerror(errno));
       return CURLE_CONV_FAILED;
     }
     if(output_ptr < input_ptr) {
