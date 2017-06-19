@@ -54,6 +54,8 @@
 #include <limits.h>
 #endif
 
+#include <errno.h>
+
 #include "urldata.h"
 #include "curl_base64.h"
 #include "curl_memory.h"
@@ -239,8 +241,13 @@ static ssize_t sec_recv(struct connectdata *conn, int sockindex,
   *err = CURLE_OK;
 
   /* Handle clear text response. */
-  if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR)
-      return read(fd, buffer, len);
+  if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR) {
+    for(;;) {
+      ssize_t nread = read(fd, buffer, len);
+      if(nread >= 0 || errno != EINTR)
+        return nread;
+    }
+  }
 
   if(conn->in_buffer.eof_flag) {
     conn->in_buffer.eof_flag = 0;

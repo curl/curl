@@ -48,6 +48,8 @@
 #include <fcntl.h>
 #endif
 
+#include <errno.h>
+
 #include "strtoofft.h"
 #include "urldata.h"
 #include <curl/curl.h>
@@ -562,12 +564,20 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     else
       bytestoread = data->set.buffer_size-1;
 
-    nread = read(fd, buf, bytestoread);
+    for(;;) {
+      nread = read(fd, buf, bytestoread);
+      if(nread < 0) {
+        if(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
+          continue;
+        else
+          return CURLE_ABORTED_BY_CALLBACK;
+      }
+      break;
+    }
 
-    if(nread > 0)
-      buf[nread] = 0;
+    buf[nread] = 0;
 
-    if(nread <= 0 || (size_known && (expected_size == 0)))
+    if(!nread || (size_known && (expected_size == 0)))
       break;
 
     bytecount += nread;
