@@ -110,7 +110,7 @@ __extension__ ({                                                              \
 /* FIXME: don't allow const pointers */
 #define curl_easy_getinfo(handle, info, arg)                                  \
 __extension__ ({                                                              \
-  __typeof__(info) _curl_info = info;                                        \
+  __typeof__(info) _curl_info = info;                                         \
   if(__builtin_constant_p(_curl_info)) {                                      \
     if(_curl_is_string_info(_curl_info))                                      \
       if(!_curl_is_arr((arg), char *))                                        \
@@ -130,9 +130,12 @@ __extension__ ({                                                              \
     if(_curl_is_certinfo_info(_curl_info))                                    \
       if(!_curl_is_arr((arg), struct curl_certinfo *))                        \
         _curl_easy_getinfo_err_curl_certinfo();                               \
-   if(_curl_is_socket_info(_curl_info))                                       \
+    if(_curl_is_socket_info(_curl_info))                                      \
       if(!_curl_is_arr((arg), curl_socket_t))                                 \
         _curl_easy_getinfo_err_curl_socket();                                 \
+    if(_curl_is_off_t_info(_curl_info))                                       \
+      if(!_curl_is_arr((arg), curl_off_t))                                    \
+        _curl_easy_getinfo_err_curl_off_t();                                  \
   }                                                                           \
   curl_easy_getinfo(handle, _curl_info, arg);                                 \
 })
@@ -218,6 +221,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_certinfo,
               "'struct curl_certinfo *' for this info")
 _CURL_WARNING(_curl_easy_getinfo_err_curl_socket,
   "curl_easy_getinfo expects a pointer to curl_socket_t for this info")
+_CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
+  "curl_easy_getinfo expects a pointer to curl_off_t for this info")
 
 /* groups of curl_easy_setops options that take the same type of argument */
 
@@ -391,7 +396,11 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_socket,
 
 /* true if info expects a pointer to struct curl_socket_t argument */
 #define _curl_is_socket_info(info)                                            \
-  (CURLINFO_SOCKET < (info))
+  (CURLINFO_SOCKET < (info) && (info) < CURLINFO_OFF_T)
+
+/* true if info expects a pointer to curl_off_t argument */
+#define _curl_is_off_t_info(info)                                             \
+  (CURLINFO_OFF_T < (info))
 
 
 /* typecheck helpers -- check whether given expression has requested type*/
