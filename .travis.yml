@@ -90,5 +90,10 @@ script:
             (tar xf curl-99.98.97.tar.gz && mkdir build && cd build && ../curl-99.98.97/configure && make && make TFLAGS=1 test)
         fi
 
+# whitelist branches to avoid testing feature branches twice (as branch and as pull request)
+branches:
+    only:
+        - master
+
 notifications:
   email: false

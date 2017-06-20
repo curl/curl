@@ -63,3 +63,8 @@ build_script:
     - cd build.%BDIR%
     - cmake .. -G"%PRJ_GEN%" -DCMAKE_USE_OPENSSL=%OPENSSL% -DCURL_STATICLIB=%STATICLIB% -DBUILD_TESTING=%TESTING%
     - cmake --build . --config %PRJ_CFG% --clean-first
+
+# whitelist branches to avoid testing feature branches twice (as branch and as pull request)
+branches:
+    only:
+        - master
