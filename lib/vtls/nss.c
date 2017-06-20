@@ -2327,6 +2327,11 @@ bool Curl_nss_false_start(void)
 const struct Curl_ssl Curl_ssl_nss = {
   "nss",                        /* name */
 
+  1, /* have_ca_path */
+  1, /* have_certinfo */
+  1, /* have_pinnedpubkey */
+  0, /* have_ssl_ctx */
+
   Curl_nss_init,                /* init */
   Curl_nss_cleanup,             /* cleanup */
   Curl_nss_version,             /* version */

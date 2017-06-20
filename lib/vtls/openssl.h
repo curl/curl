@@ -79,18 +79,6 @@ extern const struct Curl_ssl Curl_ssl_openssl;
 /* Set the API backend definition to OpenSSL */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_OPENSSL
 
-/* this backend supports the CAPATH option */
-#define have_curlssl_ca_path 1
-
-/* this backend supports CURLOPT_CERTINFO */
-#define have_curlssl_certinfo 1
-
-/* this backend supports CURLOPT_SSL_CTX_* */
-#define have_curlssl_ssl_ctx 1
-
-/* this backend supports CURLOPT_PINNEDPUBLICKEY */
-#define have_curlssl_pinnedpubkey 1
-
 #define DEFAULT_CIPHER_SELECTION \
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"
 

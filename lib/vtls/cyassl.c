@@ -110,6 +110,18 @@ and that's a problem since options.h hasn't been included yet. */
 #define CYASSL_MAX_ERROR_SZ 80
 #endif
 
+/* KEEP_PEER_CERT is a product of the presence of build time symbol
+   OPENSSL_EXTRA without NO_CERTS, depending on the version. KEEP_PEER_CERT is
+   in wolfSSL's settings.h, and the latter two are build time symbols in
+   options.h. */
+#ifndef KEEP_PEER_CERT
+#if defined(HAVE_CYASSL_GET_PEER_CERTIFICATE) || \
+    defined(HAVE_WOLFSSL_GET_PEER_CERTIFICATE) || \
+    (defined(OPENSSL_EXTRA) && !defined(NO_CERTS))
+#define KEEP_PEER_CERT
+#endif
+#endif
+
 static Curl_recv cyassl_recv;
 static Curl_send cyassl_send;
 
@@ -953,6 +965,15 @@ static void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
 
 const struct Curl_ssl Curl_ssl_cyassl = {
   "cyassl",                        /* name */
+
+  0, /* have_ca_path */
+  0, /* have_certinfo */
+#ifdef KEEP_PEER_CERT
+  1, /* have_pinnedpubkey */
+#else
+  0, /* have_pinnedpubkey */
+#endif
+  1, /* have_ssl_ctx */
 
   Curl_cyassl_init,                /* init */
   Curl_none_cleanup,               /* cleanup */

@@ -28,6 +28,11 @@ struct connectdata;
 struct Curl_ssl {
   const char *name;
 
+  unsigned have_ca_path:1;      /* supports CAPATH */
+  unsigned have_certinfo:1;     /* supports CURLOPT_CERTINFO */
+  unsigned have_pinnedpubkey:1; /* supports CURLOPT_PINNEDPUBLICKEY */
+  unsigned have_ssl_ctx:1;      /* supports CURLOPT_SSL_CTX_* */
+
   int (*init)(void);
   void (*cleanup)(void);
 

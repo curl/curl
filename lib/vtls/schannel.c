@@ -1729,6 +1729,11 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 const struct Curl_ssl Curl_ssl_schannel = {
   "schannel",                        /* name */
 
+  0, /* have_ca_path */
+  1, /* have_certinfo */
+  0, /* have_pinnedpubkey */
+  0, /* have_ssl_ctx */
+
   Curl_schannel_init,                /* init */
   Curl_schannel_cleanup,             /* cleanup */
   Curl_schannel_version,             /* version */

@@ -100,8 +100,5 @@ extern const struct Curl_ssl Curl_ssl_schannel;
 /* Set the API backend definition to Schannel */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_SCHANNEL
 
-/* this backend supports CURLOPT_CERTINFO */
-#define have_curlssl_certinfo 1
-
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_H */
