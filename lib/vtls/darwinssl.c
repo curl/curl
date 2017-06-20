@@ -118,6 +118,24 @@
 #define ioErr -36
 #define paramErr -50
 
+/* pinned public key support tests */
+
+/* version 1 supports macOS 10.12+ and iOS 10+ */
+#if ((TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000) || \
+    (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED  >= 101200))
+#define DARWIN_SSL_PINNEDPUBKEY_V1 1
+#endif
+
+/* version 2 supports MacOSX 10.7+ */
+#if (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070)
+#define DARWIN_SSL_PINNEDPUBKEY_V2 1
+#endif
+
+#if defined(DARWIN_SSL_PINNEDPUBKEY_V1) || defined(DARWIN_SSL_PINNEDPUBKEY_V2)
+/* this backend supports CURLOPT_PINNEDPUBLICKEY */
+#define DARWIN_SSL_PINNEDPUBKEY 1
+#endif /* DARWIN_SSL_PINNEDPUBKEY */
+
 #ifdef DARWIN_SSL_PINNEDPUBKEY
 /* both new and old APIs return rsa keys missing the spki header (not DER) */
 static const unsigned char rsa4096SpkiHeader[] = {
@@ -2854,6 +2872,15 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
 
 const struct Curl_ssl Curl_ssl_darwinssl = {
   "darwinssl",                        /* name */
+
+  0, /* have_ca_path */
+  0, /* have_certinfo */
+#ifdef DARWIN_SSL_PINNEDPUBKEY
+  1, /* have_pinnedpubkey */
+#else
+  0, /* have_pinnedpubkey */
+#endif /* DARWIN_SSL_PINNEDPUBKEY */
+  0, /* have_ssl_ctx */
 
   Curl_none_init,                     /* init */
   Curl_none_cleanup,                  /* cleanup */

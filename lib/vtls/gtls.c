@@ -1789,6 +1789,11 @@ bool Curl_gtls_cert_status_request(void)
 const struct Curl_ssl Curl_ssl_gnutls = {
   "gnutls",                      /* name */
 
+  1, /* have_ca_path */
+  1, /* have_certinfo */
+  1, /* have_pinnedpubkey */
+  0, /* have_ssl_ctx */
+
   Curl_gtls_init,                /* init */
   Curl_gtls_cleanup,             /* cleanup */
   Curl_gtls_version,             /* version */

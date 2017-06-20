@@ -57,14 +57,5 @@ extern const struct Curl_ssl Curl_ssl_gnutls;
 /* Set the API backend definition to GnuTLS */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_GNUTLS
 
-/* this backend supports the CAPATH option */
-#define have_curlssl_ca_path 1
-
-/* this backend supports CURLOPT_CERTINFO */
-#define have_curlssl_certinfo 1
-
-/* this backend supports CURLOPT_PINNEDPUBLICKEY */
-#define have_curlssl_pinnedpubkey 1
-
 #endif /* USE_GNUTLS */
 #endif /* HEADER_CURL_GTLS_H */

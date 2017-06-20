@@ -51,12 +51,6 @@ int Curl_mbedtls_shutdown(struct connectdata *conn, int sockindex);
 CURLcode Curl_mbedtls_random(struct Curl_easy *data, unsigned char *entropy,
                      size_t length);
 
-/* this backends supports CURLOPT_PINNEDPUBLICKEY */
-#define have_curlssl_pinnedpubkey 1
-
-/* this backend supports CURLOPT_SSL_CTX_* */
-#define have_curlssl_ssl_ctx 1
-
 extern const struct Curl_ssl Curl_ssl_mbedtls;
 
 #define CURL_SSL_BACKEND CURLSSLBACKEND_MBEDTLS

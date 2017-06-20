@@ -2179,24 +2179,26 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
                                          TRUE : FALSE;
     break;
   case CURLOPT_SSL_CTX_FUNCTION:
-#ifdef have_curlssl_ssl_ctx
     /*
      * Set a SSL_CTX callback
      */
-    data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
-#else
-    result = CURLE_NOT_BUILT_IN;
+#ifdef USE_SSL
+    if(Curl_ssl->have_ssl_ctx)
+      data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
+    else
 #endif
+      result = CURLE_NOT_BUILT_IN;
     break;
   case CURLOPT_SSL_CTX_DATA:
-#ifdef have_curlssl_ssl_ctx
     /*
      * Set a SSL_CTX callback parameter pointer
      */
-    data->set.ssl.fsslctxp = va_arg(param, void *);
-#else
-    result = CURLE_NOT_BUILT_IN;
+#ifdef USE_SSL
+    if(Curl_ssl->have_ssl_ctx)
+      data->set.ssl.fsslctxp = va_arg(param, void *);
+    else
 #endif
+      result = CURLE_NOT_BUILT_IN;
     break;
   case CURLOPT_SSL_FALSESTART:
     /*
@@ -2210,35 +2212,38 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     data->set.ssl.falsestart = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
   case CURLOPT_CERTINFO:
-#ifdef have_curlssl_certinfo
-    data->set.ssl.certinfo = (0 != va_arg(param, long)) ? TRUE : FALSE;
-#else
-    result = CURLE_NOT_BUILT_IN;
+#ifdef USE_SSL
+    if(Curl_ssl->have_certinfo)
+      data->set.ssl.certinfo = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    else
 #endif
+      result = CURLE_NOT_BUILT_IN;
     break;
   case CURLOPT_PINNEDPUBLICKEY:
-#ifdef have_curlssl_pinnedpubkey /* only by supported backends */
     /*
      * Set pinned public key for SSL connection.
      * Specify file name of the public key in DER format.
      */
-    result = setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG],
-                       va_arg(param, char *));
-#else
-    result = CURLE_NOT_BUILT_IN;
+#ifdef USE_SSL
+    if(Curl_ssl->have_pinnedpubkey)
+      result = setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG],
+                         va_arg(param, char *));
+    else
 #endif
+      result = CURLE_NOT_BUILT_IN;
     break;
   case CURLOPT_PROXY_PINNEDPUBLICKEY:
-#ifdef have_curlssl_pinnedpubkey /* only by supported backends */
     /*
      * Set pinned public key for SSL connection.
      * Specify file name of the public key in DER format.
      */
-    result = setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY],
-                       va_arg(param, char *));
-#else
-    result = CURLE_NOT_BUILT_IN;
+#ifdef USE_SSL
+    if(Curl_ssl->have_pinnedpubkey)
+      result = setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY],
+                         va_arg(param, char *));
+    else
 #endif
+      result = CURLE_NOT_BUILT_IN;
     break;
   case CURLOPT_CAINFO:
     /*
@@ -2256,30 +2261,32 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
                        va_arg(param, char *));
     break;
   case CURLOPT_CAPATH:
-#ifdef have_curlssl_ca_path /* not supported by all backends */
     /*
      * Set CA path info for SSL connection. Specify directory name of the CA
      * certificates which have been prepared using openssl c_rehash utility.
      */
-    /* This does not work on windows. */
-    result = setstropt(&data->set.str[STRING_SSL_CAPATH_ORIG],
-                       va_arg(param, char *));
-#else
-    result = CURLE_NOT_BUILT_IN;
+#ifdef USE_SSL
+    if(Curl_ssl->have_ca_path)
+      /* This does not work on windows. */
+      result = setstropt(&data->set.str[STRING_SSL_CAPATH_ORIG],
+                         va_arg(param, char *));
+    else
 #endif
+      result = CURLE_NOT_BUILT_IN;
     break;
   case CURLOPT_PROXY_CAPATH:
-#ifdef have_curlssl_ca_path /* not supported by all backends */
     /*
      * Set CA path info for SSL connection proxy. Specify directory name of the
      * CA certificates which have been prepared using openssl c_rehash utility.
      */
-    /* This does not work on windows. */
-    result = setstropt(&data->set.str[STRING_SSL_CAPATH_PROXY],
-                       va_arg(param, char *));
-#else
-    result = CURLE_NOT_BUILT_IN;
+#ifdef USE_SSL
+    if(Curl_ssl->have_ca_path)
+      /* This does not work on windows. */
+      result = setstropt(&data->set.str[STRING_SSL_CAPATH_PROXY],
+                         va_arg(param, char *));
+    else
 #endif
+      result = CURLE_NOT_BUILT_IN;
     break;
   case CURLOPT_CRLFILE:
     /*

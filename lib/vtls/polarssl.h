@@ -50,11 +50,5 @@ extern const struct Curl_ssl Curl_ssl_polarssl;
 /* Set the API backend definition to PolarSSL */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_POLARSSL
 
-/* this backend supports the CAPATH option */
-#define have_curlssl_ca_path 1
-
-/* this backends supports CURLOPT_PINNEDPUBLICKEY */
-#define have_curlssl_pinnedpubkey 1
-
 #endif /* USE_POLARSSL */
 #endif /* HEADER_CURL_POLARSSL_H */

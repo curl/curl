@@ -1018,6 +1018,11 @@ static void Curl_mbedtls_sha256sum(const unsigned char *input,
 const struct Curl_ssl Curl_ssl_mbedtls = {
   "mbedtls",                        /* name */
 
+  0, /* have_ca_path */
+  0, /* have_certinfo */
+  1, /* have_pinnedpubkey */
+  1, /* have_ssl_ctx */
+
   Curl_mbedtls_init,                /* init */
   Curl_mbedtls_cleanup,             /* cleanup */
   Curl_mbedtls_version,             /* version */

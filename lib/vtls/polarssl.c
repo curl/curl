@@ -881,6 +881,11 @@ static void Curl_polarssl_sha256sum(const unsigned char *input,
 const struct Curl_ssl Curl_ssl_polarssl = {
   "polarssl",                        /* name */
 
+  1, /* have_ca_path */
+  0, /* have_certinfo */
+  1, /* have_pinnedpubkey */
+  0, /* have_ssl_ctx */
+
   Curl_polarssl_init,                /* init */
   Curl_polarssl_cleanup,             /* cleanup */
   Curl_polarssl_version,             /* version */

@@ -51,24 +51,5 @@ extern const struct Curl_ssl Curl_ssl_darwinssl;
 /* Set the API backend definition to SecureTransport */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_DARWINSSL
 
-/* pinned public key support tests */
-
-/* version 1 supports macOS 10.12+ and iOS 10+ */
-#if ((TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000) || \
-    (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED  >= 101200))
-#define DARWIN_SSL_PINNEDPUBKEY_V1 1
-#endif
-
-/* version 2 supports MacOSX 10.7+ */
-#if (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070)
-#define DARWIN_SSL_PINNEDPUBKEY_V2 1
-#endif
-
-#if defined(DARWIN_SSL_PINNEDPUBKEY_V1) || defined(DARWIN_SSL_PINNEDPUBKEY_V2)
-/* this backend supports CURLOPT_PINNEDPUBLICKEY */
-#define DARWIN_SSL_PINNEDPUBKEY 1
-#define have_curlssl_pinnedpubkey 1
-#endif /* DARWIN_SSL_PINNEDPUBKEY */
-
 #endif /* USE_DARWINSSL */
 #endif /* HEADER_CURL_DARWINSSL_H */

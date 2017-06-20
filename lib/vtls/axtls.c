@@ -705,6 +705,11 @@ CURLcode Curl_axtls_random(struct Curl_easy *data,
 const struct Curl_ssl Curl_ssl_axtls = {
   "axtls",                        /* name */
 
+  0, /* have_ca_path */
+  0, /* have_certinfo */
+  0, /* have_pinnedpubkey */
+  0, /* have_ssl_ctx */
+
   Curl_axtls_init,                /* init */
   Curl_axtls_cleanup,             /* cleanup */
   Curl_axtls_version,             /* version */

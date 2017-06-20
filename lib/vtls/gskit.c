@@ -1337,6 +1337,11 @@ int Curl_gskit_check_cxn(struct connectdata *cxn)
 const struct Curl_ssl Curl_ssl_gskit = {
   "gskit",                        /* name */
 
+  0, /* have_ca_path */
+  1, /* have_certinfo */
+  0, /* have_pinnedpubkey */
+  0, /* have_ssl_ctx */
+
   Curl_gskit_init,                /* init */
   Curl_gskit_cleanup,             /* cleanup */
   Curl_gskit_version,             /* version */

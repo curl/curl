@@ -3390,6 +3390,11 @@ bool Curl_ossl_cert_status_request(void)
 const struct Curl_ssl Curl_ssl_openssl = {
   "openssl",                     /* name */
 
+  1, /* have_ca_path */
+  1, /* have_certinfo */
+  1, /* have_pinnedpubkey */
+  1, /* have_ssl_ctx */
+
   Curl_ossl_init,                /* init */
   Curl_ossl_cleanup,             /* cleanup */
   Curl_ossl_version,             /* version */

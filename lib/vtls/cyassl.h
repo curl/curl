@@ -25,18 +25,6 @@
 
 #ifdef USE_CYASSL
 
-/* KEEP_PEER_CERT is a product of the presence of build time symbol
-   OPENSSL_EXTRA without NO_CERTS, depending on the version. KEEP_PEER_CERT is
-   in wolfSSL's settings.h, and the latter two are build time symbols in
-   options.h. */
-#ifndef KEEP_PEER_CERT
-#if defined(HAVE_CYASSL_GET_PEER_CERTIFICATE) || \
-    defined(HAVE_WOLFSSL_GET_PEER_CERTIFICATE) || \
-    (defined(OPENSSL_EXTRA) && !defined(NO_CERTS))
-#define KEEP_PEER_CERT
-#endif
-#endif
-
 CURLcode Curl_cyassl_connect(struct connectdata *conn, int sockindex);
 bool Curl_cyassl_data_pending(const struct connectdata* conn, int connindex);
 int Curl_cyassl_shutdown(struct connectdata* conn, int sockindex);
@@ -59,14 +47,6 @@ extern const struct Curl_ssl Curl_ssl_cyassl;
 
 /* Set the API backend definition to CyaSSL */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_CYASSL
-
-/* this backend supports CURLOPT_SSL_CTX_* */
-#define have_curlssl_ssl_ctx 1
-
-#ifdef KEEP_PEER_CERT
-/* this backend supports CURLOPT_PINNEDPUBLICKEY */
-#define have_curlssl_pinnedpubkey 1
-#endif
 
 #endif /* USE_CYASSL */
 #endif /* HEADER_CURL_CYASSL_H */
