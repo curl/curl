@@ -16,16 +16,16 @@ matrix:
     include:
         - os: linux
           compiler: gcc
-          env: BUILD_TYPE=debug
+          env: BUILD_TYPE=normal
         - os: linux
           compiler: clang
-          env: BUILD_TYPE=normal
+          env: BUILD_TYPE=debug
         - os: osx
           compiler: gcc
-          env: BUILD_TYPE=normal
+          env: BUILD_TYPE=debug
         - os: osx
           compiler: clang
-          env: BUILD_TYPE=debug
+          env: BUILD_TYPE=normal
         - os: linux
           compiler: gcc
           dist: trusty
@@ -69,7 +69,7 @@ script:
         fi
     - |
         if [ "$BUILD_TYPE" = "normal" ]; then
-             ./configure
+             ./configure --enable-werror
              make
              make TFLAGS=-n test-nonflaky
         fi
