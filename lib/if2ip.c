@@ -121,11 +121,11 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 
 #ifndef ENABLE_IPV6
   (void) remote_scope;
-
-#ifndef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
-  (void) remote_scope_id;
 #endif
 
+#if !defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID) || \
+    !defined(ENABLE_IPV6)
+  (void) remote_scope_id;
 #endif
 
   if(getifaddrs(&head) >= 0) {
