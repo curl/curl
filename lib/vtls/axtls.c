@@ -47,21 +47,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-
-/* Global axTLS init, called from Curl_ssl_init() */
-static int Curl_axtls_init(void)
-{
-/* axTLS has no global init.  Everything is done through SSL and SSL_CTX
- * structs stored in connectdata structure.  Perhaps can move to axtls.h.
- */
-  return 1;
-}
-
-static void Curl_axtls_cleanup(void)
-{
-  /* axTLS has no global cleanup.  Perhaps can move this to axtls.h. */
-}
-
 static CURLcode map_error_to_curl(int axtls_err)
 {
   switch(axtls_err) {
@@ -705,8 +690,13 @@ const struct Curl_ssl Curl_ssl_axtls = {
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
 
-  Curl_axtls_init,                /* init */
-  Curl_axtls_cleanup,             /* cleanup */
+  /*
+   * axTLS has no global init.  Everything is done through SSL and SSL_CTX
+   * structs stored in connectdata structure.
+   */
+  Curl_none_init,                 /* init */
+  /* axTLS has no global cleanup. */
+  Curl_none_cleanup,              /* cleanup */
   Curl_axtls_version,             /* version */
   Curl_axtls_check_cxn,           /* check_cxn */
   Curl_axtls_shutdown,            /* shutdown */
