@@ -18,7 +18,6 @@ problems may have been fixed or changed somewhat since this was written!
  1.4 multipart formposts file name encoding
  1.5 Expect-100 meets 417
  1.6 Unnecessary close when 401 received waiting for 100
- 1.8 DNS timing is wrong for HTTP redirects
  1.9 HTTP/2 frames while in the connection pool kill reuse
  1.10 Strips trailing dot from host name
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
@@ -139,12 +138,6 @@ problems may have been fixed or changed somewhat since this was written!
  libcurl closes the connection if an HTTP 401 reply is received while it is
  waiting for the the 100-continue response.
  https://curl.haxx.se/mail/lib-2008-08/0462.html
-
-1.8 DNS timing is wrong for HTTP redirects
-
- When extracting timing information after HTTP redirects, only the last
- transfer's results are returned and not the totals:
- https://github.com/curl/curl/issues/522
 
 1.9 HTTP/2 frames while in the connection pool kill reuse
 

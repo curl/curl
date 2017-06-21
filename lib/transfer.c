@@ -1338,7 +1338,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 #endif
 
     Curl_initinfo(data); /* reset session-specific information "variables" */
-    Curl_pgrsResetTimesSizes(data);
+    Curl_pgrsResetTransferSizes(data);
     Curl_pgrsStartNow(data);
 
     if(data->set.timeout)
@@ -1820,7 +1820,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
     break;
   }
   Curl_pgrsTime(data, TIMER_REDIRECT);
-  Curl_pgrsResetTimesSizes(data);
+  Curl_pgrsResetTransferSizes(data);
 
   return CURLE_OK;
 #endif /* CURL_DISABLE_HTTP */

@@ -149,14 +149,9 @@ int Curl_pgrsDone(struct connectdata *conn)
   return 0;
 }
 
-/* reset all times except redirect, and reset the known transfer sizes */
-void Curl_pgrsResetTimesSizes(struct Curl_easy *data)
+/* reset the known transfer sizes */
+void Curl_pgrsResetTransferSizes(struct Curl_easy *data)
 {
-  data->progress.t_nslookup = 0;
-  data->progress.t_connect = 0;
-  data->progress.t_pretransfer = 0;
-  data->progress.t_starttransfer = 0;
-
   Curl_pgrsSetDownloadSize(data, -1);
   Curl_pgrsSetUploadSize(data, -1);
 }
@@ -181,6 +176,7 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
   case TIMER_STARTSINGLE:
     /* This is set at the start of each single fetch */
     data->progress.t_startsingle = now;
+    data->progress.is_t_startransfer_set = false;
     break;
   case TIMER_STARTACCEPT:
     data->progress.t_acceptdata = now;
@@ -205,10 +201,11 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
      * This prevents repeated invocations of the function from incorrectly
      * changing the t_starttransfer time.
      */
-    if (*delta > data->progress.t_redirect) {
+    if(data->progress.is_t_startransfer_set) {
       return;
     }
     else {
+      data->progress.is_t_startransfer_set = true;
       break;
     }
   case TIMER_POSTRANSFER:
@@ -222,7 +219,7 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
     time_t us = Curl_tvdiff_us(now, data->progress.t_startsingle);
     if(!us)
       us++; /* make sure at least one microsecond passed */
-    *delta = us;
+    *delta += us;
   }
 }
 
@@ -230,6 +227,7 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
 {
   data->progress.speeder_c = 0; /* reset the progress meter display */
   data->progress.start = Curl_tvnow();
+  data->progress.is_t_startransfer_set = false;
   data->progress.ul_limit_start.tv_sec = 0;
   data->progress.ul_limit_start.tv_usec = 0;
   data->progress.dl_limit_start.tv_sec = 0;
