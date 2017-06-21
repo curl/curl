@@ -26,11 +26,13 @@
 #
 
 DEPEND_PREREQ = curl_config.h
-VPATH  = vtls
+VPATH  = vtls vauth
 TOPDIR = ..
 
 include ../packages/DOS/common.dj
 include Makefile.inc
+
+CFLAGS += -DBUILDING_LIBCURL
 
 SOURCES = $(sort $(CSOURCES))
 OBJECTS = $(addprefix $(OBJ_DIR)/, $(notdir $(SOURCES:.c=.o)))
