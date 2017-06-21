@@ -171,12 +171,12 @@ gzip -dc $targz | bzip2 --best > $bzip2
 
 ############################################################################
 #
-# Now make an lzma archive from the tar.gz original
+# Now make an xz archive from the tar.gz original
 #
 
-lzma="curl-$version.tar.lzma"
-echo "Generating $lzma"
-gzip -dc $targz | lzma --best - > $lzma
+xz="curl-$version.tar.xz"
+echo "Generating $xz"
+gzip -dc $targz | xz -9e - > $xz
 
 ############################################################################
 #
@@ -202,7 +202,7 @@ makezip
 echo "------------------"
 echo "maketgz report:"
 echo ""
-ls -l $targz $bzip2 $zip $lzma
+ls -l $targz $bzip2 $zip $xz
 
 echo "Run this:"
-echo "gpg -b -a $targz && gpg -b -a $bzip2 && gpg -b -a $zip && gpg -b -a $lzma"
+echo "gpg -b -a $targz && gpg -b -a $bzip2 && gpg -b -a $zip && gpg -b -a $xz"
