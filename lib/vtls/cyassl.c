@@ -122,6 +122,8 @@ and that's a problem since options.h hasn't been included yet. */
 #endif
 #endif
 
+#define BACKEND connssl
+
 static Curl_recv cyassl_recv;
 static Curl_send cyassl_send;
 
@@ -148,7 +150,7 @@ cyassl_connect_step1(struct connectdata *conn,
   char error_buffer[CYASSL_MAX_ERROR_SZ];
   char *ciphers;
   struct Curl_easy *data = conn->data;
-  struct ssl_connect_data* conssl = &conn->ssl[sockindex];
+  struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   SSL_METHOD* req_method = NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
 #ifdef HAVE_SNI
@@ -158,7 +160,7 @@ cyassl_connect_step1(struct connectdata *conn,
 #define use_sni(x)  Curl_nop_stmt
 #endif
 
-  if(conssl->state == ssl_connection_complete)
+  if(connssl->state == ssl_connection_complete)
     return CURLE_OK;
 
   if(SSL_CONN_CONFIG(version_max) != CURL_SSLVERSION_MAX_NONE) {
@@ -217,11 +219,11 @@ cyassl_connect_step1(struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(conssl->ctx)
-    SSL_CTX_free(conssl->ctx);
-  conssl->ctx = SSL_CTX_new(req_method);
+  if(BACKEND->ctx)
+    SSL_CTX_free(BACKEND->ctx);
+  BACKEND->ctx = SSL_CTX_new(req_method);
 
-  if(!conssl->ctx) {
+  if(!BACKEND->ctx) {
     failf(data, "SSL: couldn't create a context!");
     return CURLE_OUT_OF_MEMORY;
   }
@@ -237,9 +239,9 @@ cyassl_connect_step1(struct connectdata *conn,
     version. We use wolfSSL_CTX_SetMinVersion and not CyaSSL_SetMinVersion
     because only the former will work before the user's CTX callback is called.
     */
-    if((wolfSSL_CTX_SetMinVersion(conssl->ctx, WOLFSSL_TLSV1) != 1) &&
-       (wolfSSL_CTX_SetMinVersion(conssl->ctx, WOLFSSL_TLSV1_1) != 1) &&
-       (wolfSSL_CTX_SetMinVersion(conssl->ctx, WOLFSSL_TLSV1_2) != 1)) {
+    if((wolfSSL_CTX_SetMinVersion(BACKEND->ctx, WOLFSSL_TLSV1) != 1) &&
+       (wolfSSL_CTX_SetMinVersion(BACKEND->ctx, WOLFSSL_TLSV1_1) != 1) &&
+       (wolfSSL_CTX_SetMinVersion(BACKEND->ctx, WOLFSSL_TLSV1_2) != 1)) {
       failf(data, "SSL: couldn't set the minimum protocol version");
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -249,7 +251,7 @@ cyassl_connect_step1(struct connectdata *conn,
 
   ciphers = SSL_CONN_CONFIG(cipher_list);
   if(ciphers) {
-    if(!SSL_CTX_set_cipher_list(conssl->ctx, ciphers)) {
+    if(!SSL_CTX_set_cipher_list(BACKEND->ctx, ciphers)) {
       failf(data, "failed setting cipher list: %s", ciphers);
       return CURLE_SSL_CIPHER;
     }
@@ -259,7 +261,7 @@ cyassl_connect_step1(struct connectdata *conn,
 #ifndef NO_FILESYSTEM
   /* load trusted cacert */
   if(SSL_CONN_CONFIG(CAfile)) {
-    if(1 != SSL_CTX_load_verify_locations(conssl->ctx,
+    if(1 != SSL_CTX_load_verify_locations(BACKEND->ctx,
                                       SSL_CONN_CONFIG(CAfile),
                                       SSL_CONN_CONFIG(CApath))) {
       if(SSL_CONN_CONFIG(verifypeer)) {
@@ -296,7 +298,7 @@ cyassl_connect_step1(struct connectdata *conn,
   if(SSL_SET_OPTION(cert) && SSL_SET_OPTION(key)) {
     int file_type = do_file_type(SSL_SET_OPTION(cert_type));
 
-    if(SSL_CTX_use_certificate_file(conssl->ctx, SSL_SET_OPTION(cert),
+    if(SSL_CTX_use_certificate_file(BACKEND->ctx, SSL_SET_OPTION(cert),
                                      file_type) != 1) {
       failf(data, "unable to use client certificate (no key or wrong pass"
             " phrase?)");
@@ -304,7 +306,7 @@ cyassl_connect_step1(struct connectdata *conn,
     }
 
     file_type = do_file_type(SSL_SET_OPTION(key_type));
-    if(SSL_CTX_use_PrivateKey_file(conssl->ctx, SSL_SET_OPTION(key),
+    if(SSL_CTX_use_PrivateKey_file(BACKEND->ctx, SSL_SET_OPTION(key),
                                     file_type) != 1) {
       failf(data, "unable to set private key");
       return CURLE_SSL_CONNECT_ERROR;
@@ -316,7 +318,7 @@ cyassl_connect_step1(struct connectdata *conn,
    * fail to connect if the verification fails, or if it should continue
    * anyway. In the latter case the result of the verification is checked with
    * SSL_get_verify_result() below. */
-  SSL_CTX_set_verify(conssl->ctx,
+  SSL_CTX_set_verify(BACKEND->ctx,
                      SSL_CONN_CONFIG(verifypeer)?SSL_VERIFY_PEER:
                                                  SSL_VERIFY_NONE,
                      NULL);
@@ -335,7 +337,7 @@ cyassl_connect_step1(struct connectdata *conn,
 #ifdef ENABLE_IPV6
        (0 == Curl_inet_pton(AF_INET6, hostname, &addr6)) &&
 #endif
-       (CyaSSL_CTX_UseSNI(conssl->ctx, CYASSL_SNI_HOST_NAME, hostname,
+       (CyaSSL_CTX_UseSNI(BACKEND->ctx, CYASSL_SNI_HOST_NAME, hostname,
                           (unsigned short)hostname_len) != 1)) {
       infof(data, "WARNING: failed to configure server name indication (SNI) "
             "TLS extension\n");
@@ -348,15 +350,15 @@ cyassl_connect_step1(struct connectdata *conn,
      https://github.com/wolfSSL/wolfssl/issues/366
      The supported curves below are those also supported by OpenSSL 1.0.2 and
      in the same order. */
-  CyaSSL_CTX_UseSupportedCurve(conssl->ctx, 0x17); /* secp256r1 */
-  CyaSSL_CTX_UseSupportedCurve(conssl->ctx, 0x19); /* secp521r1 */
-  CyaSSL_CTX_UseSupportedCurve(conssl->ctx, 0x18); /* secp384r1 */
+  CyaSSL_CTX_UseSupportedCurve(BACKEND->ctx, 0x17); /* secp256r1 */
+  CyaSSL_CTX_UseSupportedCurve(BACKEND->ctx, 0x19); /* secp521r1 */
+  CyaSSL_CTX_UseSupportedCurve(BACKEND->ctx, 0x18); /* secp384r1 */
 #endif
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
     CURLcode result = CURLE_OK;
-    result = (*data->set.ssl.fsslctx)(data, conssl->ctx,
+    result = (*data->set.ssl.fsslctx)(data, BACKEND->ctx,
                                       data->set.ssl.fsslctxp);
     if(result) {
       failf(data, "error signaled by ssl ctx callback");
@@ -374,10 +376,10 @@ cyassl_connect_step1(struct connectdata *conn,
 #endif
 
   /* Let's make an SSL structure */
-  if(conssl->handle)
-    SSL_free(conssl->handle);
-  conssl->handle = SSL_new(conssl->ctx);
-  if(!conssl->handle) {
+  if(BACKEND->handle)
+    SSL_free(BACKEND->handle);
+  BACKEND->handle = SSL_new(BACKEND->ctx);
+  if(!BACKEND->handle) {
     failf(data, "SSL: couldn't create a context (handle)!");
     return CURLE_OUT_OF_MEMORY;
   }
@@ -400,7 +402,7 @@ cyassl_connect_step1(struct connectdata *conn,
     strcpy(protocols + strlen(protocols), ALPN_HTTP_1_1);
     infof(data, "ALPN, offering %s\n", ALPN_HTTP_1_1);
 
-    if(wolfSSL_UseALPN(conssl->handle, protocols,
+    if(wolfSSL_UseALPN(BACKEND->handle, protocols,
                        (unsigned)strlen(protocols),
                        WOLFSSL_ALPN_CONTINUE_ON_MISMATCH) != SSL_SUCCESS) {
       failf(data, "SSL: failed setting ALPN protocols");
@@ -416,10 +418,10 @@ cyassl_connect_step1(struct connectdata *conn,
     Curl_ssl_sessionid_lock(conn);
     if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL, sockindex)) {
       /* we got a session id, use it! */
-      if(!SSL_set_session(conssl->handle, ssl_sessionid)) {
+      if(!SSL_set_session(BACKEND->handle, ssl_sessionid)) {
         Curl_ssl_sessionid_unlock(conn);
         failf(data, "SSL: SSL_set_session failed: %s",
-              ERR_error_string(SSL_get_error(conssl->handle, 0),
+              ERR_error_string(SSL_get_error(BACKEND->handle, 0),
               error_buffer));
         return CURLE_SSL_CONNECT_ERROR;
       }
@@ -430,12 +432,12 @@ cyassl_connect_step1(struct connectdata *conn,
   }
 
   /* pass the raw socket into the SSL layer */
-  if(!SSL_set_fd(conssl->handle, (int)sockfd)) {
+  if(!SSL_set_fd(BACKEND->handle, (int)sockfd)) {
     failf(data, "SSL: SSL_set_fd failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  conssl->connecting_state = ssl_connect_2;
+  connssl->connecting_state = ssl_connect_2;
   return CURLE_OK;
 }
 
@@ -446,7 +448,7 @@ cyassl_connect_step2(struct connectdata *conn,
 {
   int ret = -1;
   struct Curl_easy *data = conn->data;
-  struct ssl_connect_data* conssl = &conn->ssl[sockindex];
+  struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const char * const dispname = SSL_IS_PROXY() ?
@@ -460,22 +462,22 @@ cyassl_connect_step2(struct connectdata *conn,
 
   /* Enable RFC2818 checks */
   if(SSL_CONN_CONFIG(verifyhost)) {
-    ret = CyaSSL_check_domain_name(conssl->handle, hostname);
+    ret = CyaSSL_check_domain_name(BACKEND->handle, hostname);
     if(ret == SSL_FAILURE)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  ret = SSL_connect(conssl->handle);
+  ret = SSL_connect(BACKEND->handle);
   if(ret != 1) {
     char error_buffer[CYASSL_MAX_ERROR_SZ];
-    int  detail = SSL_get_error(conssl->handle, ret);
+    int  detail = SSL_get_error(BACKEND->handle, ret);
 
     if(SSL_ERROR_WANT_READ == detail) {
-      conssl->connecting_state = ssl_connect_2_reading;
+      connssl->connecting_state = ssl_connect_2_reading;
       return CURLE_OK;
     }
     else if(SSL_ERROR_WANT_WRITE == detail) {
-      conssl->connecting_state = ssl_connect_2_writing;
+      connssl->connecting_state = ssl_connect_2_writing;
       return CURLE_OK;
     }
     /* There is no easy way to override only the CN matching.
@@ -536,7 +538,7 @@ cyassl_connect_step2(struct connectdata *conn,
     curl_asn1Element *pubkey;
     CURLcode result;
 
-    x509 = SSL_get_peer_certificate(conssl->handle);
+    x509 = SSL_get_peer_certificate(BACKEND->handle);
     if(!x509) {
       failf(data, "SSL: failed retrieving server certificate");
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
@@ -578,7 +580,7 @@ cyassl_connect_step2(struct connectdata *conn,
     char *protocol = NULL;
     unsigned short protocol_len = 0;
 
-    rc = wolfSSL_ALPN_GetProtocol(conssl->handle, &protocol, &protocol_len);
+    rc = wolfSSL_ALPN_GetProtocol(BACKEND->handle, &protocol, &protocol_len);
 
     if(rc == SSL_SUCCESS) {
       infof(data, "ALPN, server accepted to use %.*s\n", protocol_len,
@@ -607,11 +609,11 @@ cyassl_connect_step2(struct connectdata *conn,
   }
 #endif /* HAVE_ALPN */
 
-  conssl->connecting_state = ssl_connect_3;
+  connssl->connecting_state = ssl_connect_3;
 #if (LIBCYASSL_VERSION_HEX >= 0x03009010)
   infof(data, "SSL connection using %s / %s\n",
-        wolfSSL_get_version(conssl->handle),
-        wolfSSL_get_cipher_name(conssl->handle));
+        wolfSSL_get_version(BACKEND->handle),
+        wolfSSL_get_cipher_name(BACKEND->handle));
 #else
   infof(data, "SSL connected\n");
 #endif
@@ -635,7 +637,7 @@ cyassl_connect_step3(struct connectdata *conn,
     SSL_SESSION *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
 
-    our_ssl_sessionid = SSL_get_session(connssl->handle);
+    our_ssl_sessionid = SSL_get_session(BACKEND->handle);
 
     Curl_ssl_sessionid_lock(conn);
     incache = !(Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL,
@@ -672,12 +674,13 @@ static ssize_t cyassl_send(struct connectdata *conn,
                            size_t len,
                            CURLcode *curlcode)
 {
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   char error_buffer[CYASSL_MAX_ERROR_SZ];
   int  memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
-  int  rc     = SSL_write(conn->ssl[sockindex].handle, mem, memlen);
+  int  rc     = SSL_write(BACKEND->handle, mem, memlen);
 
   if(rc < 0) {
-    int err = SSL_get_error(conn->ssl[sockindex].handle, rc);
+    int err = SSL_get_error(BACKEND->handle, rc);
 
     switch(err) {
     case SSL_ERROR_WANT_READ:
@@ -698,16 +701,16 @@ static ssize_t cyassl_send(struct connectdata *conn,
 
 static void Curl_cyassl_close(struct connectdata *conn, int sockindex)
 {
-  struct ssl_connect_data *conssl = &conn->ssl[sockindex];
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  if(conssl->handle) {
-    (void)SSL_shutdown(conssl->handle);
-    SSL_free(conssl->handle);
-    conssl->handle = NULL;
+  if(BACKEND->handle) {
+    (void)SSL_shutdown(BACKEND->handle);
+    SSL_free(BACKEND->handle);
+    BACKEND->handle = NULL;
   }
-  if(conssl->ctx) {
-    SSL_CTX_free(conssl->ctx);
-    conssl->ctx = NULL;
+  if(BACKEND->ctx) {
+    SSL_CTX_free(BACKEND->ctx);
+    BACKEND->ctx = NULL;
   }
 }
 
@@ -717,12 +720,13 @@ static ssize_t cyassl_recv(struct connectdata *conn,
                            size_t buffersize,
                            CURLcode *curlcode)
 {
+  struct ssl_connect_data *connssl = &conn->ssl[num];
   char error_buffer[CYASSL_MAX_ERROR_SZ];
   int  buffsize = (buffersize > (size_t)INT_MAX) ? INT_MAX : (int)buffersize;
-  int  nread    = SSL_read(conn->ssl[num].handle, buf, buffsize);
+  int  nread    = SSL_read(BACKEND->handle, buf, buffsize);
 
   if(nread < 0) {
-    int err = SSL_get_error(conn->ssl[num].handle, nread);
+    int err = SSL_get_error(BACKEND->handle, nread);
 
     switch(err) {
     case SSL_ERROR_ZERO_RETURN: /* no more data */
@@ -774,8 +778,9 @@ static int Curl_cyassl_init(void)
 static bool Curl_cyassl_data_pending(const struct connectdata* conn,
                                      int connindex)
 {
-  if(conn->ssl[connindex].handle)   /* SSL is in use */
-    return (0 != SSL_pending(conn->ssl[connindex].handle)) ? TRUE : FALSE;
+  const struct ssl_connect_data *connssl = &conn->ssl[connindex];
+  if(BACKEND->handle)   /* SSL is in use */
+    return (0 != SSL_pending(BACKEND->handle)) ? TRUE : FALSE;
   else
     return FALSE;
 }
@@ -790,9 +795,9 @@ static int Curl_cyassl_shutdown(struct connectdata *conn, int sockindex)
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  if(connssl->handle) {
-    SSL_free(connssl->handle);
-    connssl->handle = NULL;
+  if(BACKEND->handle) {
+    SSL_free(BACKEND->handle);
+    BACKEND->handle = NULL;
   }
   return retval;
 }
@@ -963,7 +968,7 @@ static void *Curl_cyassl_get_internals(struct ssl_connect_data *connssl,
                                        CURLINFO info UNUSED_PARAM)
 {
   (void)info;
-  return connssl->handle;
+  return BACKEND->handle;
 }
 
 const struct Curl_ssl Curl_ssl_cyassl = {
