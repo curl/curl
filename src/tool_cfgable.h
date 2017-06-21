@@ -139,12 +139,12 @@ struct OperationConfig {
   bool crlf;
   char *customrequest;
   char *krblevel;
+  char *request_target;
   long httpversion;
   bool nobuffer;
   bool readbusy;            /* set when reading input returns EAGAIN */
   bool globoff;
   bool use_httpget;
-  bool strip_path_slash;
   bool insecure_ok;         /* set TRUE to allow insecure SSL connects */
   bool proxy_insecure_ok;   /* set TRUE to allow insecure SSL connects
                                for proxy */

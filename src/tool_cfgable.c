@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -123,7 +123,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->pubkey);
   Curl_safefree(config->hostpubmd5);
   Curl_safefree(config->engine);
-
+  Curl_safefree(config->request_target);
   Curl_safefree(config->customrequest);
   Curl_safefree(config->krblevel);
 
