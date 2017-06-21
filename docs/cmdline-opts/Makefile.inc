@@ -42,6 +42,6 @@ DPAGES = abstract-unix-socket.d anyauth.d append.d basic.d cacert.d capath.d cer
   tlsauthtype.d tlspassword.d tlsuser.d tlsv1.0.d tlsv1.1.d tlsv1.2.d   \
   tlsv1.3.d tlsv1.d trace-ascii.d trace.d trace-time.d tr-encoding.d    \
   unix-socket.d upload-file.d url.d use-ascii.d user-agent.d user.d     \
-  verbose.d version.d write-out.d xattr.d strip-path-slash.d
+  verbose.d version.d write-out.d xattr.d request-target.d
 
 OTHERPAGES = page-footer page-header

@@ -1588,7 +1588,7 @@ enum dupstring {
 #ifdef USE_UNIX_SOCKETS
   STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
 #endif
-
+  STRING_TARGET,                /* CURLOPT_REQUEST_TARGET */
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,

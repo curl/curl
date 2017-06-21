@@ -20,18 +20,18 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_STRIP_PATH_SLASH 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_REQUEST_TARGET 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_STRIP_PATH_SLASH \- strip the leading slash from the path
+CURLOPT_REQUEST_TARGET \- specify an alternative target for this request
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STRIP_PATH_SLASH, value);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REQUEST_TARGET, string);
 .SH DESCRIPTION
-Pass a long set to 1 to tell libcurl to strip out the leading slash from the
-path when used on the server.
+Pass a char * to string which libcurl uses in the upcoming request instead of
+the path as extracted from the URL.
 .SH DEFAULT
-0 - use the leading slash.
+NULL
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
@@ -42,7 +42,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "OPTIONS");
 
   /* issue an OPTIONS * request (no leading slash) */
-  curl_easy_setopt(curl, CURLOPT_STRIP_PATH_SLASH, 1L);
+  curl_easy_setopt(curl, CURLOPT_REQUEST_TARGET, "*");
 
   /* Perform the request */
   curl_easy_perform(curl);

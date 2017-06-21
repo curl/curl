@@ -2269,8 +2269,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  if(data->set.strip_path_slash)
-    ppath++;
+  if(data->set.str[STRING_TARGET])
+    ppath = data->set.str[STRING_TARGET];
 
   /* url */
   if(paste_ftp_userpwd)
