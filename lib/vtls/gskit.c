@@ -1357,4 +1357,6 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_none_false_start           /* false_start */
 };
 
+const struct Curl_ssl *Curl_ssl = &Curl_ssl_gskit;
+
 #endif /* USE_GSKIT */

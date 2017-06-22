@@ -1807,4 +1807,5 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_none_false_start          /* false_start */
 };
 
+const struct Curl_ssl *Curl_ssl = &Curl_ssl_gnutls;
 #endif /* USE_GNUTLS */

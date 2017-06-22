@@ -74,25 +74,8 @@ extern const struct Curl_ssl Curl_ssl_gnutls;
 /* this backend supports CURLOPT_PINNEDPUBLICKEY */
 #define have_curlssl_pinnedpubkey 1
 
-/* API setup for GnuTLS */
-#define curlssl_init Curl_gtls_init
-#define curlssl_cleanup Curl_gtls_cleanup
-#define curlssl_connect Curl_gtls_connect
-#define curlssl_connect_nonblocking Curl_gtls_connect_nonblocking
-#define curlssl_session_free(x)  Curl_gtls_session_free(x)
-#define curlssl_close_all(x) ((void)x)
-#define curlssl_close Curl_gtls_close
-#define curlssl_shutdown(x,y) Curl_gtls_shutdown(x,y)
-#define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) ((void)x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
-#define curlssl_version Curl_gtls_version
-#define curlssl_check_cxn(x) ((void)x, -1)
-#define curlssl_data_pending(x,y) Curl_gtls_data_pending(x,y)
-#define curlssl_random(x,y,z) Curl_gtls_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_gtls_md5sum(a,b,c,d)
 #define curlssl_sha256sum(a,b,c,d) Curl_gtls_sha256sum(a,b,c,d)
-#define curlssl_cert_status_request() Curl_gtls_cert_status_request()
 
 #endif /* USE_GNUTLS */
 #endif /* HEADER_CURL_GTLS_H */

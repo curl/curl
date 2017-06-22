@@ -103,22 +103,5 @@ extern const struct Curl_ssl Curl_ssl_schannel;
 /* this backend supports CURLOPT_CERTINFO */
 #define have_curlssl_certinfo 1
 
-/* API setup for Schannel */
-#define curlssl_init Curl_schannel_init
-#define curlssl_cleanup Curl_schannel_cleanup
-#define curlssl_connect Curl_schannel_connect
-#define curlssl_connect_nonblocking Curl_schannel_connect_nonblocking
-#define curlssl_session_free Curl_schannel_session_free
-#define curlssl_close_all(x) ((void)x)
-#define curlssl_close Curl_schannel_close
-#define curlssl_shutdown Curl_schannel_shutdown
-#define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) ((void)x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
-#define curlssl_version Curl_schannel_version
-#define curlssl_check_cxn(x) ((void)x, -1)
-#define curlssl_data_pending Curl_schannel_data_pending
-#define curlssl_random(x,y,z) Curl_schannel_random(x,y,z)
-
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_H */

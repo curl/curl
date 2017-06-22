@@ -56,6 +56,10 @@ struct Curl_ssl {
   bool (*false_start)(void);
 };
 
+#ifdef USE_SSL
+extern const struct Curl_ssl *Curl_ssl;
+#endif
+
 int Curl_none_init(void);
 void Curl_none_cleanup(void);
 int Curl_none_shutdown(struct connectdata *conn, int sockindex);

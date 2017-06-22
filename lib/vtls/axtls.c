@@ -724,4 +724,6 @@ const struct Curl_ssl Curl_ssl_axtls = {
   Curl_none_false_start           /* false_start */
 };
 
+const struct Curl_ssl *Curl_ssl = &Curl_ssl_axtls;
+
 #endif /* USE_AXTLS */

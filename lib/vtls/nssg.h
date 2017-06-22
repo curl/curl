@@ -82,29 +82,8 @@ extern const struct Curl_ssl Curl_ssl_nss;
 /* this backends supports CURLOPT_PINNEDPUBLICKEY */
 #define have_curlssl_pinnedpubkey 1
 
-/* API setup for NSS */
-#define curlssl_init Curl_nss_init
-#define curlssl_cleanup Curl_nss_cleanup
-#define curlssl_connect Curl_nss_connect
-#define curlssl_connect_nonblocking Curl_nss_connect_nonblocking
-
-/* NSS has its own session ID cache */
-#define curlssl_session_free(x) Curl_nop_stmt
-#define curlssl_close_all(x) ((void)x)
-#define curlssl_close Curl_nss_close
-/* NSS has no shutdown function provided and thus always fail */
-#define curlssl_shutdown(x,y) ((void)x, (void)y, 1)
-#define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) ((void)x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
-#define curlssl_version Curl_nss_version
-#define curlssl_check_cxn(x) Curl_nss_check_cxn(x)
-#define curlssl_data_pending(x,y) ((void)x, (void)y, 0)
-#define curlssl_random(x,y,z) Curl_nss_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_nss_md5sum(a,b,c,d)
 #define curlssl_sha256sum(a,b,c,d) Curl_nss_sha256sum(a,b,c,d)
-#define curlssl_cert_status_request() Curl_nss_cert_status_request()
-#define curlssl_false_start() Curl_nss_false_start()
 
 #endif /* USE_NSS */
 #endif /* HEADER_CURL_NSSG_H */
