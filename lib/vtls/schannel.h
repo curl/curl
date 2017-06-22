@@ -95,6 +95,8 @@ size_t Curl_schannel_version(char *buffer, size_t size);
 CURLcode Curl_schannel_random(struct Curl_easy *data, unsigned char *entropy,
                               size_t length);
 
+extern const struct Curl_ssl Curl_ssl_schannel;
+
 /* Set the API backend definition to Schannel */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_SCHANNEL
 

@@ -2322,4 +2322,28 @@ bool Curl_nss_false_start(void)
 #endif
 }
 
+const struct Curl_ssl Curl_ssl_nss = {
+  "nss",                        /* name */
+
+  Curl_nss_init,                /* init */
+  Curl_nss_cleanup,             /* cleanup */
+  Curl_nss_version,             /* version */
+  Curl_nss_check_cxn,           /* check_cxn */
+  /* NSS has no shutdown function provided and thus always fail */
+  Curl_none_shutdown,           /* shutdown */
+  Curl_none_data_pending,       /* data_pending */
+  Curl_nss_random,              /* random */
+  Curl_nss_cert_status_request, /* cert_status_request */
+  Curl_nss_connect,             /* connect */
+  Curl_nss_connect_nonblocking, /* connect_nonblocking */
+  Curl_nss_close,               /* close */
+  Curl_none_close_all,          /* close_all */
+  /* NSS has its own session ID cache */
+  Curl_none_session_free,       /* session_free */
+  Curl_none_set_engine,         /* set_engine */
+  Curl_none_set_engine_default, /* set_engine_default */
+  Curl_none_engines_list,       /* engines_list */
+  Curl_nss_false_start          /* false_start */
+};
+
 #endif /* USE_NSS */

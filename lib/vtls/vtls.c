@@ -984,4 +984,88 @@ bool Curl_ssl_false_start(void)
 #endif
 }
 
+/*
+ * Default implementations for unsupported functions.
+ */
+
+int Curl_none_init(void)
+{
+  return 1;
+}
+
+void Curl_none_cleanup(void)
+{ }
+
+int Curl_none_shutdown(struct connectdata *conn UNUSED_PARAM,
+                       int sockindex UNUSED_PARAM)
+{
+  (void)conn;
+  (void)sockindex;
+  return 0;
+}
+
+int Curl_none_check_cxn(struct connectdata *conn UNUSED_PARAM)
+{
+  (void)conn;
+  return -1;
+}
+
+CURLcode Curl_none_random(struct Curl_easy *data UNUSED_PARAM,
+                          unsigned char *entropy UNUSED_PARAM,
+                          size_t length UNUSED_PARAM)
+{
+  (void)data;
+  (void)entropy;
+  (void)length;
+  return CURLE_NOT_BUILT_IN;
+}
+
+void Curl_none_close_all(struct Curl_easy *data UNUSED_PARAM)
+{
+  (void)data;
+}
+
+void Curl_none_session_free(void *ptr UNUSED_PARAM)
+{
+  (void)ptr;
+}
+
+bool Curl_none_data_pending(const struct connectdata *conn UNUSED_PARAM,
+                            int connindex UNUSED_PARAM)
+{
+  (void)conn;
+  (void)connindex;
+  return 0;
+}
+
+bool Curl_none_cert_status_request(void)
+{
+  return FALSE;
+}
+
+CURLcode Curl_none_set_engine(struct Curl_easy *data UNUSED_PARAM,
+                              const char *engine UNUSED_PARAM)
+{
+  (void)data;
+  (void)engine;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode Curl_none_set_engine_default(struct Curl_easy *data UNUSED_PARAM)
+{
+  (void)data;
+  return CURLE_NOT_BUILT_IN;
+}
+
+struct curl_slist *Curl_none_engines_list(struct Curl_easy *data UNUSED_PARAM)
+{
+  (void)data;
+  return (struct curl_slist *)NULL;
+}
+
+bool Curl_none_false_start(void)
+{
+  return FALSE;
+}
+
 #endif /* USE_SSL */

@@ -870,4 +870,29 @@ bool Curl_polarssl_data_pending(const struct connectdata *conn, int sockindex)
   return ssl_get_bytes_avail(&conn->ssl[sockindex].ssl) != 0;
 }
 
+const struct Curl_ssl Curl_ssl_polarssl = {
+  "polarssl",                        /* name */
+
+  Curl_polarssl_init,                /* init */
+  Curl_polarssl_cleanup,             /* cleanup */
+  Curl_polarssl_version,             /* version */
+  Curl_none_check_cxn,               /* check_cxn */
+  Curl_none_shutdown,                /* shutdown */
+  Curl_polarssl_data_pending,        /* data_pending */
+  /* This might cause libcurl to use a weeker random!
+   * TODO: use Polarssl's CTR-DRBG or HMAC-DRBG
+  */
+  Curl_none_random,                  /* random */
+  Curl_none_cert_status_request,     /* cert_status_request */
+  Curl_polarssl_connect,             /* connect */
+  Curl_polarssl_connect_nonblocking, /* connect_nonblocking */
+  Curl_polarssl_close,               /* close */
+  Curl_none_close_all,               /* close_all */
+  Curl_polarssl_session_free,        /* session_free */
+  Curl_none_set_engine,              /* set_engine */
+  Curl_none_set_engine_default,      /* set_engine_default */
+  Curl_none_engines_list,            /* engines_list */
+  Curl_none_false_start              /* false_start */
+};
+
 #endif /* USE_POLARSSL */

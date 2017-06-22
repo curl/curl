@@ -702,4 +702,26 @@ CURLcode Curl_axtls_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+const struct Curl_ssl Curl_ssl_axtls = {
+  "axtls",                        /* name */
+
+  Curl_axtls_init,                /* init */
+  Curl_axtls_cleanup,             /* cleanup */
+  Curl_axtls_version,             /* version */
+  Curl_axtls_check_cxn,           /* check_cxn */
+  Curl_axtls_shutdown,            /* shutdown */
+  Curl_none_data_pending,         /* data_pending */
+  Curl_axtls_random,              /* random */
+  Curl_none_cert_status_request,  /* cert_status_request */
+  Curl_axtls_connect,             /* connect */
+  Curl_axtls_connect_nonblocking, /* connect_nonblocking */
+  Curl_axtls_close,               /* close */
+  Curl_none_close_all,            /* close_all */
+  Curl_axtls_session_free,        /* session_free */
+  Curl_none_set_engine,           /* set_engine */
+  Curl_none_set_engine_default,   /* set_engine_default */
+  Curl_none_engines_list,         /* engines_list */
+  Curl_none_false_start           /* false_start */
+};
+
 #endif /* USE_AXTLS */

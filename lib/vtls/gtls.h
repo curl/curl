@@ -60,6 +60,8 @@ bool Curl_gtls_cert_status_request(void);
 /* Support HTTPS-proxy */
 #define HTTPS_PROXY_SUPPORT 1
 
+extern const struct Curl_ssl Curl_ssl_gnutls;
+
 /* Set the API backend definition to GnuTLS */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_GNUTLS
 

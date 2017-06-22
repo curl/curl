@@ -56,6 +56,21 @@ struct Curl_ssl {
   bool (*false_start)(void);
 };
 
+int Curl_none_init(void);
+void Curl_none_cleanup(void);
+int Curl_none_shutdown(struct connectdata *conn, int sockindex);
+int Curl_none_check_cxn(struct connectdata *conn);
+CURLcode Curl_none_random(struct Curl_easy *data, unsigned char *entropy,
+                          size_t length);
+void Curl_none_close_all(struct Curl_easy *data);
+void Curl_none_session_free(void *ptr);
+bool Curl_none_data_pending(const struct connectdata *conn, int connindex);
+bool Curl_none_cert_status_request(void);
+CURLcode Curl_none_set_engine(struct Curl_easy *data, const char *engine);
+CURLcode Curl_none_set_engine_default(struct Curl_easy *data);
+struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
+bool Curl_none_false_start(void);
+
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */
 #include "nssg.h"           /* NSS versions */

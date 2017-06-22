@@ -1007,4 +1007,26 @@ bool Curl_mbedtls_data_pending(const struct connectdata *conn, int sockindex)
   return mbedtls_ssl_get_bytes_avail(&conn->ssl[sockindex].ssl) != 0;
 }
 
+const struct Curl_ssl Curl_ssl_mbedtls = {
+  "mbedtls",                        /* name */
+
+  Curl_mbedtls_init,                /* init */
+  Curl_mbedtls_cleanup,             /* cleanup */
+  Curl_mbedtls_version,             /* version */
+  Curl_none_check_cxn,              /* check_cxn */
+  Curl_none_shutdown,               /* shutdown */
+  Curl_mbedtls_data_pending,        /* data_pending */
+  Curl_mbedtls_random,              /* random */
+  Curl_none_cert_status_request,    /* cert_status_request */
+  Curl_mbedtls_connect,             /* connect */
+  Curl_mbedtls_connect_nonblocking, /* connect_nonblocking */
+  Curl_mbedtls_close,               /* close */
+  Curl_mbedtls_close_all,           /* close_all */
+  Curl_mbedtls_session_free,        /* session_free */
+  Curl_none_set_engine,             /* set_engine */
+  Curl_none_set_engine_default,     /* set_engine_default */
+  Curl_none_engines_list,           /* engines_list */
+  Curl_none_false_start             /* false_start */
+};
+
 #endif /* USE_MBEDTLS */

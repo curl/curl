@@ -1726,4 +1726,26 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 }
 #endif /* _WIN32_WCE */
 
+const struct Curl_ssl Curl_ssl_schannel = {
+  "schannel",                        /* name */
+
+  Curl_schannel_init,                /* init */
+  Curl_schannel_cleanup,             /* cleanup */
+  Curl_schannel_version,             /* version */
+  Curl_none_check_cxn,               /* check_cxn */
+  Curl_schannel_shutdown,            /* shutdown */
+  Curl_schannel_data_pending,        /* data_pending */
+  Curl_schannel_random,              /* random */
+  Curl_none_cert_status_request,     /* cert_status_request */
+  Curl_schannel_connect,             /* connect */
+  Curl_schannel_connect_nonblocking, /* connect_nonblocking */
+  Curl_schannel_close,               /* close */
+  Curl_none_close_all,               /* close_all */
+  Curl_schannel_session_free,        /* session_free */
+  Curl_none_set_engine,              /* set_engine */
+  Curl_none_set_engine_default,      /* set_engine_default */
+  Curl_none_engines_list,            /* engines_list */
+  Curl_none_false_start              /* false_start */
+};
+
 #endif /* USE_SCHANNEL */

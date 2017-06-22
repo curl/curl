@@ -59,6 +59,8 @@ void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
                      unsigned char *sha256sum, /* output */
                      size_t unused);
 
+extern const struct Curl_ssl Curl_ssl_cyassl;
+
 /* Set the API backend definition to CyaSSL */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_CYASSL
 
