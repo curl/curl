@@ -46,10 +46,6 @@ int Curl_gtls_shutdown(struct connectdata *conn, int sockindex);
 CURLcode Curl_gtls_random(struct Curl_easy *data,
                           unsigned char *entropy,
                           size_t length);
-void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
-                      size_t tmplen,
-                      unsigned char *sha256sum, /* output */
-                      size_t sha256len);
 
 bool Curl_gtls_cert_status_request(void);
 
@@ -69,8 +65,6 @@ extern const struct Curl_ssl Curl_ssl_gnutls;
 
 /* this backend supports CURLOPT_PINNEDPUBLICKEY */
 #define have_curlssl_pinnedpubkey 1
-
-#define curlssl_sha256sum(a,b,c,d) Curl_gtls_sha256sum(a,b,c,d)
 
 #endif /* USE_GNUTLS */
 #endif /* HEADER_CURL_GTLS_H */

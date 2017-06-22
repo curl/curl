@@ -54,10 +54,6 @@ CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
 CURLcode Curl_cyassl_random(struct Curl_easy *data,
                             unsigned char *entropy,
                             size_t length);
-void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
-                     size_t tmplen,
-                     unsigned char *sha256sum, /* output */
-                     size_t unused);
 
 extern const struct Curl_ssl Curl_ssl_cyassl;
 
@@ -71,8 +67,6 @@ extern const struct Curl_ssl Curl_ssl_cyassl;
 /* this backend supports CURLOPT_PINNEDPUBLICKEY */
 #define have_curlssl_pinnedpubkey 1
 #endif
-
-#define curlssl_sha256sum(a,b,c,d) Curl_cyassl_sha256sum(a,b,c,d)
 
 #endif /* USE_CYASSL */
 #endif /* HEADER_CURL_CYASSL_H */

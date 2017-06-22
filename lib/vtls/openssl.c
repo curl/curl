@@ -3364,10 +3364,10 @@ static CURLcode Curl_ossl_md5sum(unsigned char *tmp, /* input */
 }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
-void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
-                      size_t tmplen,
-                      unsigned char *sha256sum /* output */,
-                      size_t unused)
+static void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
+                                size_t tmplen,
+                                unsigned char *sha256sum /* output */,
+                                size_t unused)
 {
   SHA256_CTX SHA256pw;
   (void)unused;
@@ -3407,7 +3407,12 @@ const struct Curl_ssl Curl_ssl_openssl = {
   Curl_ossl_set_engine_default,  /* set_engine_default */
   Curl_ossl_engines_list,        /* engines_list */
   Curl_none_false_start,         /* false_start */
-  Curl_ossl_md5sum               /* md5sum */
+  Curl_ossl_md5sum,              /* md5sum */
+#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
+  Curl_ossl_sha256sum            /* sha256sum */
+#else
+  NULL                           /* sha256sum */
+#endif
 };
 
 const struct Curl_ssl *Curl_ssl = &Curl_ssl_openssl;

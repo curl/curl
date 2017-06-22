@@ -791,12 +791,10 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
   size_t size, pem_len;
   CURLcode pem_read;
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-#ifdef curlssl_sha256sum
   CURLcode encode;
   size_t encodedlen, pinkeylen;
   char *encoded, *pinkeycopy, *begin_pos, *end_pos;
   unsigned char *sha256sumdigest = NULL;
-#endif
 
   /* if a path wasn't specified, don't pin */
   if(!pinnedpubkey)
@@ -806,13 +804,17 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 
   /* only do this if pinnedpubkey starts with "sha256//", length 8 */
   if(strncmp(pinnedpubkey, "sha256//", 8) == 0) {
-#ifdef curlssl_sha256sum
+    if(!Curl_ssl->sha256sum) {
+      /* without sha256 support, this cannot match */
+      return result;
+    }
+
     /* compute sha256sum of public key */
     sha256sumdigest = malloc(SHA256_DIGEST_LENGTH);
     if(!sha256sumdigest)
       return CURLE_OUT_OF_MEMORY;
-    curlssl_sha256sum(pubkey, pubkeylen,
-                      sha256sumdigest, SHA256_DIGEST_LENGTH);
+    Curl_ssl->sha256sum(pubkey, pubkeylen,
+                        sha256sumdigest, SHA256_DIGEST_LENGTH);
     encode = Curl_base64_encode(data, (char *)sha256sumdigest,
                                 SHA256_DIGEST_LENGTH, &encoded, &encodedlen);
     Curl_safefree(sha256sumdigest);
@@ -859,10 +861,6 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     } while(end_pos && begin_pos);
     Curl_safefree(encoded);
     Curl_safefree(pinkeycopy);
-#else
-    /* without sha256 support, this cannot match */
-    (void)data;
-#endif
     return result;
   }
 
