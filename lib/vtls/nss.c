@@ -2293,10 +2293,10 @@ static CURLcode Curl_nss_md5sum(unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
-void Curl_nss_sha256sum(const unsigned char *tmp, /* input */
-                     size_t tmplen,
-                     unsigned char *sha256sum, /* output */
-                     size_t sha256len)
+static void Curl_nss_sha256sum(const unsigned char *tmp, /* input */
+                               size_t tmplen,
+                               unsigned char *sha256sum, /* output */
+                               size_t sha256len)
 {
   PK11Context *SHA256pw = PK11_CreateDigestContext(SEC_OID_SHA256);
   unsigned int SHA256out;
@@ -2346,7 +2346,8 @@ const struct Curl_ssl Curl_ssl_nss = {
   Curl_none_set_engine_default, /* set_engine_default */
   Curl_none_engines_list,       /* engines_list */
   Curl_nss_false_start,         /* false_start */
-  Curl_nss_md5sum               /* md5sum */
+  Curl_nss_md5sum,              /* md5sum */
+  Curl_nss_sha256sum            /* sha256sum */
 };
 
 const struct Curl_ssl *Curl_ssl = &Curl_ssl_nss;

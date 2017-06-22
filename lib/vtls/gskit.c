@@ -1355,7 +1355,8 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_none_set_engine_default,   /* set_engine_default */
   Curl_none_engines_list,         /* engines_list */
   Curl_none_false_start,          /* false_start */
-  Curl_none_md5sum                /* md5sum */
+  Curl_none_md5sum,               /* md5sum */
+  NULL                            /* sha256sum */
 };
 
 const struct Curl_ssl *Curl_ssl = &Curl_ssl_gskit;

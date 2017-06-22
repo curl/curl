@@ -939,10 +939,10 @@ CURLcode Curl_cyassl_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
-                      size_t tmplen,
-                      unsigned char *sha256sum /* output */,
-                      size_t unused)
+static void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
+                                  size_t tmplen,
+                                  unsigned char *sha256sum /* output */,
+                                  size_t unused)
 {
   Sha256 SHA256pw;
   (void)unused;
@@ -971,7 +971,8 @@ const struct Curl_ssl Curl_ssl_cyassl = {
   Curl_none_set_engine_default,    /* set_engine_default */
   Curl_none_engines_list,          /* engines_list */
   Curl_none_false_start,           /* false_start */
-  Curl_none_md5sum                 /* md5sum */
+  Curl_none_md5sum,                /* md5sum */
+  Curl_cyassl_sha256sum            /* sha256sum */
 };
 
 const struct Curl_ssl *Curl_ssl = &Curl_ssl_cyassl;

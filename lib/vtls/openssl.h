@@ -68,10 +68,6 @@ bool Curl_ossl_data_pending(const struct connectdata *conn,
 /* return 0 if a find random is filled in */
 CURLcode Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
                           size_t length);
-void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
-                      size_t tmplen,
-                      unsigned char *sha256sum /* output */,
-                      size_t unused);
 
 bool Curl_ossl_cert_status_request(void);
 
@@ -94,10 +90,6 @@ extern const struct Curl_ssl Curl_ssl_openssl;
 
 /* this backend supports CURLOPT_PINNEDPUBLICKEY */
 #define have_curlssl_pinnedpubkey 1
-
-#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
-#define curlssl_sha256sum(a,b,c,d) Curl_ossl_sha256sum(a,b,c,d)
-#endif
 
 #define DEFAULT_CIPHER_SELECTION \
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"

@@ -44,10 +44,6 @@ bool Curl_darwinssl_data_pending(const struct connectdata *conn,
 
 CURLcode Curl_darwinssl_random(struct Curl_easy *data, unsigned char *entropy,
                                size_t length);
-void Curl_darwinssl_sha256sum(const unsigned char *tmp, /* input */
-                              size_t tmplen,
-                              unsigned char *sha256sum, /* output */
-                              size_t sha256len);
 bool Curl_darwinssl_false_start(void);
 
 extern const struct Curl_ssl Curl_ssl_darwinssl;
@@ -73,8 +69,6 @@ extern const struct Curl_ssl Curl_ssl_darwinssl;
 #define DARWIN_SSL_PINNEDPUBKEY 1
 #define have_curlssl_pinnedpubkey 1
 #endif /* DARWIN_SSL_PINNEDPUBKEY */
-
-#define curlssl_sha256sum(a,b,c,d) Curl_darwinssl_sha256sum(a, b, c, d)
 
 #endif /* USE_DARWINSSL */
 #endif /* HEADER_CURL_DARWINSSL_H */

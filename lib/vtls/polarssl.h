@@ -26,8 +26,6 @@
 
 #ifdef USE_POLARSSL
 
-#include <polarssl/sha256.h>
-
 /* Called on first use PolarSSL, setup threading if supported */
 int  Curl_polarssl_init(void);
 void Curl_polarssl_cleanup(void);
@@ -57,8 +55,6 @@ extern const struct Curl_ssl Curl_ssl_polarssl;
 
 /* this backends supports CURLOPT_PINNEDPUBLICKEY */
 #define have_curlssl_pinnedpubkey 1
-
-#define curlssl_sha256sum(a,b,c,d) sha256(a,b,c,0)
 
 #endif /* USE_POLARSSL */
 #endif /* HEADER_CURL_POLARSSL_H */

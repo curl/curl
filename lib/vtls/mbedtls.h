@@ -26,8 +26,6 @@
 
 #ifdef USE_MBEDTLS
 
-#include <mbedtls/sha256.h>
-
 /* Called on first use mbedTLS, setup threading if supported */
 int  Curl_mbedtls_init(void);
 void Curl_mbedtls_cleanup(void);
@@ -62,7 +60,6 @@ CURLcode Curl_mbedtls_random(struct Curl_easy *data, unsigned char *entropy,
 extern const struct Curl_ssl Curl_ssl_mbedtls;
 
 #define CURL_SSL_BACKEND CURLSSLBACKEND_MBEDTLS
-#define curlssl_sha256sum(a,b,c,d) mbedtls_sha256(a,b,c,0)
 
 #endif /* USE_MBEDTLS */
 #endif /* HEADER_CURL_MBEDTLS_H */

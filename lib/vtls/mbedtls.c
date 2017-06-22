@@ -1007,6 +1007,14 @@ bool Curl_mbedtls_data_pending(const struct connectdata *conn, int sockindex)
   return mbedtls_ssl_get_bytes_avail(&conn->ssl[sockindex].ssl) != 0;
 }
 
+static void Curl_mbedtls_sha256sum(const unsigned char *input,
+                                    size_t inputlen,
+                                    unsigned char *sha256sum,
+                                    size_t sha256len UNUSED_PARAM)
+{
+  mbedtls_sha256(input, inputlen, sha256sum, 0);
+}
+
 const struct Curl_ssl Curl_ssl_mbedtls = {
   "mbedtls",                        /* name */
 
@@ -1027,7 +1035,8 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   Curl_none_set_engine_default,     /* set_engine_default */
   Curl_none_engines_list,           /* engines_list */
   Curl_none_false_start,            /* false_start */
-  Curl_none_md5sum                  /* md5sum */
+  Curl_none_md5sum,                 /* md5sum */
+  Curl_mbedtls_sha256sum            /* sha256sum */
 };
 
 const struct Curl_ssl *Curl_ssl = &Curl_ssl_mbedtls;
