@@ -47,6 +47,8 @@ void Curl_polarssl_session_free(void *ptr);
 size_t Curl_polarssl_version(char *buffer, size_t size);
 int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 
+extern const struct Curl_ssl Curl_ssl_polarssl;
+
 /* Set the API backend definition to PolarSSL */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_POLARSSL
 

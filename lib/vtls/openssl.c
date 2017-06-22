@@ -3385,4 +3385,27 @@ bool Curl_ossl_cert_status_request(void)
   return FALSE;
 #endif
 }
+
+const struct Curl_ssl Curl_ssl_openssl = {
+  "openssl",                     /* name */
+
+  Curl_ossl_init,                /* init */
+  Curl_ossl_cleanup,             /* cleanup */
+  Curl_ossl_version,             /* version */
+  Curl_ossl_check_cxn,           /* check_cxn */
+  Curl_ossl_shutdown,            /* shutdown */
+  Curl_ossl_data_pending,        /* data_pending */
+  Curl_ossl_random,              /* random */
+  Curl_ossl_cert_status_request, /* cert_status_request */
+  Curl_ossl_connect,             /* connect */
+  Curl_ossl_connect_nonblocking, /* connect_nonblocking */
+  Curl_ossl_close,               /* close */
+  Curl_ossl_close_all,           /* close_all */
+  Curl_ossl_session_free,        /* session_free */
+  Curl_ossl_set_engine,          /* set_engine */
+  Curl_ossl_set_engine_default,  /* set_engine_default */
+  Curl_ossl_engines_list,        /* engines_list */
+  Curl_none_false_start          /* false_start */
+};
+
 #endif /* USE_OPENSSL */

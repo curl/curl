@@ -1785,4 +1785,26 @@ bool Curl_gtls_cert_status_request(void)
 #endif
 }
 
+const struct Curl_ssl Curl_ssl_gnutls = {
+  "gnutls",                      /* name */
+
+  Curl_gtls_init,                /* init */
+  Curl_gtls_cleanup,             /* cleanup */
+  Curl_gtls_version,             /* version */
+  Curl_none_check_cxn,           /* check_cxn */
+  Curl_gtls_shutdown,            /* shutdown */
+  Curl_gtls_data_pending,        /* data_pending */
+  Curl_gtls_random,              /* random */
+  Curl_gtls_cert_status_request, /* cert_status_request */
+  Curl_gtls_connect,             /* connect */
+  Curl_gtls_connect_nonblocking, /* connect_nonblocking */
+  Curl_gtls_close,               /* close */
+  Curl_none_close_all,           /* close_all */
+  Curl_glts_session_free,        /* session_free */
+  Curl_none_set_engine,          /* set_engine */
+  Curl_none_set_engine_default,  /* set_engine_default */
+  Curl_none_engines_list,        /* engines_list */
+  Curl_none_false_start          /* false_start */
+};
+
 #endif /* USE_GNUTLS */

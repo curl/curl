@@ -46,6 +46,8 @@ CURLcode Curl_axtls_random(struct Curl_easy *data,
                            unsigned char *entropy,
                            size_t length);
 
+extern const struct Curl_ssl Curl_ssl_axtls;
+
 /* Set the API backend definition to axTLS */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_AXTLS
 

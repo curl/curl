@@ -951,4 +951,26 @@ void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
   Sha256Final(&SHA256pw, sha256sum);
 }
 
+const struct Curl_ssl Curl_ssl_cyassl = {
+  "cyassl",                        /* name */
+
+  Curl_cyassl_init,                /* init */
+  Curl_none_cleanup,               /* cleanup */
+  Curl_cyassl_version,             /* version */
+  Curl_none_check_cxn,             /* check_cxn */
+  Curl_cyassl_shutdown,            /* shutdown */
+  Curl_cyassl_data_pending,        /* data_pending */
+  Curl_cyassl_random,              /* random */
+  Curl_none_cert_status_request,   /* cert_status_request */
+  Curl_cyassl_connect,             /* connect */
+  Curl_cyassl_connect_nonblocking, /* connect_nonblocking */
+  Curl_cyassl_close,               /* close */
+  Curl_none_close_all,             /* close_all */
+  Curl_cyassl_session_free,        /* session_free */
+  Curl_none_set_engine,            /* set_engine */
+  Curl_none_set_engine_default,    /* set_engine_default */
+  Curl_none_engines_list,          /* engines_list */
+  Curl_none_false_start            /* false_start */
+};
+
 #endif

@@ -2851,6 +2851,28 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
   return (ssize_t)processed;
 }
 
+const struct Curl_ssl Curl_ssl_darwinssl = {
+  "darwinssl",                        /* name */
+
+  Curl_none_init,                     /* init */
+  Curl_none_cleanup,                  /* cleanup */
+  Curl_darwinssl_version,             /* version */
+  Curl_darwinssl_check_cxn,           /* check_cxn */
+  Curl_darwinssl_shutdown,            /* shutdown */
+  Curl_darwinssl_data_pending,        /* data_pending */
+  Curl_darwinssl_random,              /* random */
+  Curl_none_cert_status_request,      /* cert_status_request */
+  Curl_darwinssl_connect,             /* connect */
+  Curl_darwinssl_connect_nonblocking, /* connect_nonblocking */
+  Curl_darwinssl_close,               /* close */
+  Curl_none_close_all,                /* close_all */
+  Curl_darwinssl_session_free,        /* session_free */
+  Curl_none_set_engine,               /* set_engine */
+  Curl_none_set_engine_default,       /* set_engine_default */
+  Curl_none_engines_list,             /* engines_list */
+  Curl_darwinssl_false_start          /* false_start */
+};
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
