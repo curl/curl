@@ -2718,13 +2718,14 @@ CURLcode Curl_darwinssl_random(struct Curl_easy *data UNUSED_PARAM,
   return CURLE_OK;
 }
 
-void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
-                           size_t tmplen,
-                           unsigned char *md5sum, /* output */
-                           size_t md5len)
+static CURLcode Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
+                                      size_t tmplen,
+                                      unsigned char *md5sum, /* output */
+                                      size_t md5len)
 {
   (void)md5len;
   (void)CC_MD5(tmp, (CC_LONG)tmplen, md5sum);
+  return CURLE_OK;
 }
 
 void Curl_darwinssl_sha256sum(const unsigned char *tmp, /* input */
@@ -2870,7 +2871,8 @@ const struct Curl_ssl Curl_ssl_darwinssl = {
   Curl_none_set_engine,               /* set_engine */
   Curl_none_set_engine_default,       /* set_engine_default */
   Curl_none_engines_list,             /* engines_list */
-  Curl_darwinssl_false_start          /* false_start */
+  Curl_darwinssl_false_start,         /* false_start */
+  Curl_darwinssl_md5sum               /* md5sum */
 };
 
 const struct Curl_ssl *Curl_ssl = &Curl_ssl_darwinssl;
