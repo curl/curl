@@ -157,14 +157,15 @@ lists.
 Every pull request submitted will automatically be tested in several different
 ways. Every pull request is verfied that:
 
- - ... the code still builds, warning-free, on Linux and macOS, with both
+ - ... it still builds, warning-free, on Linux and macOS, with both
    clang and gcc
- - ... the code still builds fine on Windows with several MSVC versions
- - ... the code still builds with cmake on Linux, with gcc and clang
- - ... the code follows rudimentary code style rules
+ - ... it still builds fine on Windows with several MSVC versions
+ - ... it still builds with cmake on Linux, with gcc and clang
+ - ... it follows rudimentary code style rules
  - ... the test suite still runs 100% fine
  - ... the release tarball (the "dist") still works
- - ... the code coverage doesn't shrink drastically
+ - ... it builds fine in-tree as well as out-of-tree
+ - ... code coverage doesn't shrink drastically
 
 If the pull-request fails one of these tests, it will show up as a red X and
 you are expected to fix the problem. If you don't understand whan the issue is
