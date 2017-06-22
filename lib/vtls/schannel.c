@@ -1568,7 +1568,8 @@ size_t Curl_schannel_version(char *buffer, size_t size)
   return size;
 }
 
-CURLcode Curl_schannel_random(unsigned char *entropy, size_t length)
+CURLcode Curl_schannel_random(struct Curl_easy *data UNUSED_PARAM,
+                              unsigned char *entropy, size_t length)
 {
   HCRYPTPROV hCryptProv = 0;
 

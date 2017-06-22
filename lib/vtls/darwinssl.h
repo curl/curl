@@ -42,7 +42,7 @@ int Curl_darwinssl_check_cxn(struct connectdata *conn);
 bool Curl_darwinssl_data_pending(const struct connectdata *conn,
                                  int connindex);
 
-CURLcode Curl_darwinssl_random(unsigned char *entropy,
+CURLcode Curl_darwinssl_random(struct Curl_easy *data, unsigned char *entropy,
                                size_t length);
 void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
                            size_t tmplen,
@@ -91,7 +91,7 @@ bool Curl_darwinssl_false_start(void);
 #define curlssl_version Curl_darwinssl_version
 #define curlssl_check_cxn Curl_darwinssl_check_cxn
 #define curlssl_data_pending(x,y) Curl_darwinssl_data_pending(x, y)
-#define curlssl_random(x,y,z) ((void)x, Curl_darwinssl_random(y,z))
+#define curlssl_random(x,y,z) Curl_darwinssl_random(x, y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_darwinssl_md5sum(a,b,c,d)
 #define curlssl_sha256sum(a,b,c,d) \
   Curl_darwinssl_sha256sum((unsigned char *)a, b, c, d)
