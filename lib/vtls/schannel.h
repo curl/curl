@@ -92,7 +92,8 @@ int Curl_schannel_init(void);
 void Curl_schannel_cleanup(void);
 size_t Curl_schannel_version(char *buffer, size_t size);
 
-CURLcode Curl_schannel_random(unsigned char *entropy, size_t length);
+CURLcode Curl_schannel_random(struct Curl_easy *data, unsigned char *entropy,
+                              size_t length);
 
 /* Set the API backend definition to Schannel */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_SCHANNEL
@@ -115,7 +116,7 @@ CURLcode Curl_schannel_random(unsigned char *entropy, size_t length);
 #define curlssl_version Curl_schannel_version
 #define curlssl_check_cxn(x) ((void)x, -1)
 #define curlssl_data_pending Curl_schannel_data_pending
-#define curlssl_random(x,y,z) ((void)x, Curl_schannel_random(y,z))
+#define curlssl_random(x,y,z) Curl_schannel_random(x,y,z)
 
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_H */
