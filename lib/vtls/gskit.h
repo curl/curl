@@ -52,25 +52,6 @@ extern const struct Curl_ssl Curl_ssl_gskit;
 /* this backend supports CURLOPT_CERTINFO */
 #define have_curlssl_certinfo 1
 
-/* API setup for GSKit */
-#define curlssl_init Curl_gskit_init
-#define curlssl_cleanup Curl_gskit_cleanup
-#define curlssl_connect Curl_gskit_connect
-#define curlssl_connect_nonblocking Curl_gskit_connect_nonblocking
-
-/*  No session handling for GSKit */
-#define curlssl_session_free(x) Curl_nop_stmt
-#define curlssl_close_all(x) ((void)x)
-#define curlssl_close Curl_gskit_close
-#define curlssl_shutdown(x,y) Curl_gskit_shutdown(x,y)
-#define curlssl_set_engine(x,y) CURLE_NOT_BUILT_IN
-#define curlssl_set_engine_default(x) CURLE_NOT_BUILT_IN
-#define curlssl_engines_list(x) NULL
-#define curlssl_version Curl_gskit_version
-#define curlssl_check_cxn(x) Curl_gskit_check_cxn(x)
-#define curlssl_data_pending(x,y) 0
-#define curlssl_random(x,y,z) (x=x, y=y, z=z, CURLE_NOT_BUILT_IN)
-
 #endif /* USE_GSKIT */
 
 #endif /* HEADER_CURL_GSKIT_H */

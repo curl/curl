@@ -51,23 +51,6 @@ extern const struct Curl_ssl Curl_ssl_axtls;
 /* Set the API backend definition to axTLS */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_AXTLS
 
-/* API setup for axTLS */
-#define curlssl_init Curl_axtls_init
-#define curlssl_cleanup Curl_axtls_cleanup
-#define curlssl_connect Curl_axtls_connect
-#define curlssl_connect_nonblocking Curl_axtls_connect_nonblocking
-#define curlssl_session_free(x)  Curl_axtls_session_free(x)
-#define curlssl_close_all(x) ((void)x)
-#define curlssl_close Curl_axtls_close
-#define curlssl_shutdown(x,y) Curl_axtls_shutdown(x,y)
-#define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) ((void)x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
-#define curlssl_version Curl_axtls_version
-#define curlssl_check_cxn(x) Curl_axtls_check_cxn(x)
-#define curlssl_data_pending(x,y) ((void)x, (void)y, 0)
-#define curlssl_random(x,y,z) Curl_axtls_random(x,y,z)
-
 #endif /* USE_AXTLS */
 #endif /* HEADER_CURL_AXTLS_H */
 

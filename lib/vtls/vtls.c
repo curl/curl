@@ -37,8 +37,8 @@
    Curl_schannel_ - prefix for Schannel SSPI ones
    Curl_darwinssl_ - prefix for SecureTransport (Darwin) ones
 
-   Note that this source code uses curlssl_* functions, and they are all
-   defines/macros #defined by the lib-specific header files.
+   Note that this source code uses the functions of the configured SSL
+   backend via the global Curl_ssl instance.
 
    "SSL/TLS Strong Encryption: An Introduction"
    https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
@@ -161,7 +161,7 @@ int Curl_ssl_init(void)
     return 1;
   init_ssl = TRUE; /* never again */
 
-  return curlssl_init();
+  return Curl_ssl->init();
 }
 
 
@@ -170,7 +170,7 @@ void Curl_ssl_cleanup(void)
 {
   if(init_ssl) {
     /* only cleanup if we did a previous init */
-    curlssl_cleanup();
+    Curl_ssl->cleanup();
     init_ssl = FALSE;
   }
 }
@@ -233,7 +233,7 @@ Curl_ssl_connect(struct connectdata *conn, int sockindex)
   conn->ssl[sockindex].use = TRUE;
   conn->ssl[sockindex].state = ssl_connection_negotiating;
 
-  result = curlssl_connect(conn, sockindex);
+  result = Curl_ssl->connect(conn, sockindex);
 
   if(!result)
     Curl_pgrsTime(conn->data, TIMER_APPCONNECT); /* SSL is connected */
@@ -257,12 +257,7 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
 
   /* mark this is being ssl requested from here on. */
   conn->ssl[sockindex].use = TRUE;
-#ifdef curlssl_connect_nonblocking
-  result = curlssl_connect_nonblocking(conn, sockindex, done);
-#else
-  *done = TRUE; /* fallback to BLOCKING */
-  result = curlssl_connect(conn, sockindex);
-#endif /* non-blocking connect support */
+  result = Curl_ssl->connect_nonblocking(conn, sockindex, done);
   if(!result && *done)
     Curl_pgrsTime(conn->data, TIMER_APPCONNECT); /* SSL is connected */
   return result;
@@ -361,7 +356,7 @@ void Curl_ssl_kill_session(struct curl_ssl_session *session)
     /* defensive check */
 
     /* free the ID the SSL-layer specific way */
-    curlssl_session_free(session->sessionid);
+    Curl_ssl->session_free(session->sessionid);
 
     session->sessionid = NULL;
     session->age = 0; /* fresh */
@@ -499,7 +494,7 @@ void Curl_ssl_close_all(struct Curl_easy *data)
     Curl_safefree(data->state.session);
   }
 
-  curlssl_close_all(data);
+  Curl_ssl->close_all(data);
 }
 
 #if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
@@ -542,12 +537,12 @@ int Curl_ssl_getsock(struct connectdata *conn,
 void Curl_ssl_close(struct connectdata *conn, int sockindex)
 {
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
-  curlssl_close(conn, sockindex);
+  Curl_ssl->close(conn, sockindex);
 }
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
 {
-  if(curlssl_shutdown(conn, sockindex))
+  if(Curl_ssl->shutdown(conn, sockindex))
     return CURLE_SSL_SHUTDOWN_FAILED;
 
   conn->ssl[sockindex].use = FALSE; /* get back to ordinary socket usage */
@@ -563,20 +558,20 @@ CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
  */
 CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine)
 {
-  return curlssl_set_engine(data, engine);
+  return Curl_ssl->set_engine(data, engine);
 }
 
 /* Selects the default SSL crypto engine
  */
 CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data)
 {
-  return curlssl_set_engine_default(data);
+  return Curl_ssl->set_engine_default(data);
 }
 
 /* Return list of OpenSSL crypto engine names. */
 struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data)
 {
-  return curlssl_engines_list(data);
+  return Curl_ssl->engines_list(data);
 }
 
 /*
@@ -604,7 +599,7 @@ CURLcode Curl_ssl_initsessions(struct Curl_easy *data, size_t amount)
 
 size_t Curl_ssl_version(char *buffer, size_t size)
 {
-  return curlssl_version(buffer, size);
+  return Curl_ssl->version(buffer, size);
 }
 
 /*
@@ -617,13 +612,13 @@ size_t Curl_ssl_version(char *buffer, size_t size)
  */
 int Curl_ssl_check_cxn(struct connectdata *conn)
 {
-  return curlssl_check_cxn(conn);
+  return Curl_ssl->check_cxn(conn);
 }
 
 bool Curl_ssl_data_pending(const struct connectdata *conn,
                            int connindex)
 {
-  return curlssl_data_pending(conn, connindex);
+  return Curl_ssl->data_pending(conn, connindex);
 }
 
 void Curl_ssl_free_certinfo(struct Curl_easy *data)
@@ -721,7 +716,7 @@ CURLcode Curl_ssl_random(struct Curl_easy *data,
                          unsigned char *entropy,
                          size_t length)
 {
-  return curlssl_random(data, entropy, length);
+  return Curl_ssl->random(data, entropy, length);
 }
 
 /*
@@ -965,11 +960,7 @@ CURLcode Curl_ssl_md5sum(unsigned char *tmp, /* input */
  */
 bool Curl_ssl_cert_status_request(void)
 {
-#ifdef curlssl_cert_status_request
-  return curlssl_cert_status_request();
-#else
-  return FALSE;
-#endif
+  return Curl_ssl->cert_status_request();
 }
 
 /*
@@ -977,11 +968,7 @@ bool Curl_ssl_cert_status_request(void)
  */
 bool Curl_ssl_false_start(void)
 {
-#ifdef curlssl_false_start
-  return curlssl_false_start();
-#else
-  return FALSE;
-#endif
+  return Curl_ssl->false_start();
 }
 
 /*

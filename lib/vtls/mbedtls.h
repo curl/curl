@@ -61,24 +61,8 @@ CURLcode Curl_mbedtls_random(struct Curl_easy *data, unsigned char *entropy,
 
 extern const struct Curl_ssl Curl_ssl_mbedtls;
 
-/* API setup for mbedTLS */
-#define curlssl_init() Curl_mbedtls_init()
-#define curlssl_cleanup() Curl_mbedtls_cleanup()
-#define curlssl_connect Curl_mbedtls_connect
-#define curlssl_connect_nonblocking Curl_mbedtls_connect_nonblocking
-#define curlssl_session_free(x)  Curl_mbedtls_session_free(x)
-#define curlssl_close_all Curl_mbedtls_close_all
-#define curlssl_close Curl_mbedtls_close
-#define curlssl_shutdown(x,y) 0
-#define curlssl_set_engine(x,y) (x=x, y=y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) (x=x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) (x=x, (struct curl_slist *)NULL)
-#define curlssl_version Curl_mbedtls_version
-#define curlssl_check_cxn(x) (x=x, -1)
-#define curlssl_data_pending(x,y) Curl_mbedtls_data_pending(x, y)
 #define CURL_SSL_BACKEND CURLSSLBACKEND_MBEDTLS
 #define curlssl_sha256sum(a,b,c,d) mbedtls_sha256(a,b,c,0)
-#define curlssl_random(x,y,z) Curl_mbedtls_random(x, y, z)
 
 #endif /* USE_MBEDTLS */
 #endif /* HEADER_CURL_MBEDTLS_H */

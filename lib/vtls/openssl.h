@@ -99,27 +99,10 @@ extern const struct Curl_ssl Curl_ssl_openssl;
 /* this backend supports CURLOPT_PINNEDPUBLICKEY */
 #define have_curlssl_pinnedpubkey 1
 
-/* API setup for OpenSSL */
-#define curlssl_init Curl_ossl_init
-#define curlssl_cleanup Curl_ossl_cleanup
-#define curlssl_connect Curl_ossl_connect
-#define curlssl_connect_nonblocking Curl_ossl_connect_nonblocking
-#define curlssl_session_free(x) Curl_ossl_session_free(x)
-#define curlssl_close_all Curl_ossl_close_all
-#define curlssl_close Curl_ossl_close
-#define curlssl_shutdown(x,y) Curl_ossl_shutdown(x,y)
-#define curlssl_set_engine(x,y) Curl_ossl_set_engine(x,y)
-#define curlssl_set_engine_default(x) Curl_ossl_set_engine_default(x)
-#define curlssl_engines_list(x) Curl_ossl_engines_list(x)
-#define curlssl_version Curl_ossl_version
-#define curlssl_check_cxn Curl_ossl_check_cxn
-#define curlssl_data_pending(x,y) Curl_ossl_data_pending(x,y)
-#define curlssl_random(x,y,z) Curl_ossl_random(x,y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_ossl_md5sum(a,b,c,d)
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
 #define curlssl_sha256sum(a,b,c,d) Curl_ossl_sha256sum(a,b,c,d)
 #endif
-#define curlssl_cert_status_request() Curl_ossl_cert_status_request()
 
 #define DEFAULT_CIPHER_SELECTION \
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"

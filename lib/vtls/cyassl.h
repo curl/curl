@@ -72,22 +72,6 @@ extern const struct Curl_ssl Curl_ssl_cyassl;
 #define have_curlssl_pinnedpubkey 1
 #endif
 
-/* API setup for CyaSSL */
-#define curlssl_init Curl_cyassl_init
-#define curlssl_cleanup() Curl_nop_stmt
-#define curlssl_connect Curl_cyassl_connect
-#define curlssl_connect_nonblocking Curl_cyassl_connect_nonblocking
-#define curlssl_session_free(x)  Curl_cyassl_session_free(x)
-#define curlssl_close_all(x) ((void)x)
-#define curlssl_close Curl_cyassl_close
-#define curlssl_shutdown(x,y) Curl_cyassl_shutdown(x,y)
-#define curlssl_set_engine(x,y) ((void)x, (void)y, CURLE_NOT_BUILT_IN)
-#define curlssl_set_engine_default(x) ((void)x, CURLE_NOT_BUILT_IN)
-#define curlssl_engines_list(x) ((void)x, (struct curl_slist *)NULL)
-#define curlssl_version Curl_cyassl_version
-#define curlssl_check_cxn(x) ((void)x, -1)
-#define curlssl_data_pending(x,y) Curl_cyassl_data_pending(x,y)
-#define curlssl_random(x,y,z) Curl_cyassl_random(x,y,z)
 #define curlssl_sha256sum(a,b,c,d) Curl_cyassl_sha256sum(a,b,c,d)
 
 #endif /* USE_CYASSL */

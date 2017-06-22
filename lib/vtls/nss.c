@@ -2346,4 +2346,5 @@ const struct Curl_ssl Curl_ssl_nss = {
   Curl_nss_false_start          /* false_start */
 };
 
+const struct Curl_ssl *Curl_ssl = &Curl_ssl_nss;
 #endif /* USE_NSS */
