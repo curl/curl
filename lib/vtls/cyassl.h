@@ -27,8 +27,5 @@
 
 extern const struct Curl_ssl Curl_ssl_cyassl;
 
-/* Set the API backend definition to CyaSSL */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_CYASSL
-
 #endif /* USE_CYASSL */
 #endif /* HEADER_CURL_CYASSL_H */

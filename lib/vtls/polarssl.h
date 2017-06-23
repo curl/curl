@@ -28,8 +28,5 @@
 
 extern const struct Curl_ssl Curl_ssl_polarssl;
 
-/* Set the API backend definition to PolarSSL */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_POLARSSL
-
 #endif /* USE_POLARSSL */
 #endif /* HEADER_CURL_POLARSSL_H */

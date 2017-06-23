@@ -1354,6 +1354,7 @@ static void *Curl_gskit_get_internals(struct ssl_connect_data *connssl,
 
 const struct Curl_ssl Curl_ssl_gskit = {
   "gskit",                        /* name */
+  CURLSSLBACKEND_GSKIT,
 
   0, /* have_ca_path */
   1, /* have_certinfo */

@@ -132,7 +132,11 @@ void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc)
 
 int Curl_ssl_backend(void)
 {
-  return (int)CURL_SSL_BACKEND;
+#ifdef USE_SSL
+  return Curl_ssl->id;
+#else
+  return (int)CURLSSLBACKEND_NONE;
+#endif
 }
 
 #ifdef USE_SSL

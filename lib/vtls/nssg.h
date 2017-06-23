@@ -35,8 +35,5 @@ CURLcode Curl_nss_force_init(struct Curl_easy *data);
 
 extern const struct Curl_ssl Curl_ssl_nss;
 
-/* Set the API backend definition to NSS */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_NSS
-
 #endif /* USE_NSS */
 #endif /* HEADER_CURL_NSSG_H */

@@ -28,6 +28,7 @@ struct ssl_connect_data;
 
 struct Curl_ssl {
   const char *name;
+  int id; /* one of the CURLSSLBACKEND_* constants */
 
   unsigned have_ca_path:1;      /* supports CAPATH */
   unsigned have_certinfo:1;     /* supports CURLOPT_CERTINFO */
@@ -242,8 +243,6 @@ bool Curl_ssl_false_start(void);
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 #else
-/* Set the API backend definition to none */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_NONE
 
 /* When SSL support is not present, just define away these function calls */
 #define Curl_ssl_init() 1

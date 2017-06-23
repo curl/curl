@@ -33,9 +33,6 @@
 
 extern const struct Curl_ssl Curl_ssl_gskit;
 
-/* Set the API backend definition to GSKit */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_GSKIT
-
 #endif /* USE_GSKIT */
 
 #endif /* HEADER_CURL_GSKIT_H */
