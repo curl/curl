@@ -2323,6 +2323,13 @@ static bool Curl_nss_false_start(void)
 #endif
 }
 
+static void *Curl_nss_get_internals(struct ssl_connect_data *connssl,
+                                    CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return connssl->handle;
+}
+
 const struct Curl_ssl Curl_ssl_nss = {
   "nss",                        /* name */
 
@@ -2343,6 +2350,7 @@ const struct Curl_ssl Curl_ssl_nss = {
   Curl_nss_cert_status_request, /* cert_status_request */
   Curl_nss_connect,             /* connect */
   Curl_nss_connect_nonblocking, /* connect_nonblocking */
+  Curl_nss_get_internals,       /* get_internals */
   Curl_nss_close,               /* close */
   Curl_none_close_all,          /* close_all */
   /* NSS has its own session ID cache */

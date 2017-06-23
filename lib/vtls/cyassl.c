@@ -959,6 +959,13 @@ static void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
   Sha256Final(&SHA256pw, sha256sum);
 }
 
+static void *Curl_cyassl_get_internals(struct ssl_connect_data *connssl,
+                                       CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return connssl->handle;
+}
+
 const struct Curl_ssl Curl_ssl_cyassl = {
   "cyassl",                        /* name */
 
@@ -982,6 +989,7 @@ const struct Curl_ssl Curl_ssl_cyassl = {
   Curl_none_cert_status_request,   /* cert_status_request */
   Curl_cyassl_connect,             /* connect */
   Curl_cyassl_connect_nonblocking, /* connect_nonblocking */
+  Curl_cyassl_get_internals,       /* get_internals */
   Curl_cyassl_close,               /* close */
   Curl_none_close_all,             /* close_all */
   Curl_cyassl_session_free,        /* session_free */

@@ -1333,6 +1333,13 @@ static int Curl_gskit_check_cxn(struct connectdata *cxn)
   return -1;  /* connection status unknown */
 }
 
+static void *Curl_gskit_get_internals(struct ssl_connect_data *connssl,
+                                      CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return connssl->handle;
+}
+
 const struct Curl_ssl Curl_ssl_gskit = {
   "gskit",                        /* name */
 
@@ -1354,6 +1361,7 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_none_cert_status_request,  /* cert_status_request */
   Curl_gskit_connect,             /* connect */
   Curl_gskit_connect_nonblocking, /* connect_nonblocking */
+  Curl_gskit_get_internals,       /* get_internals */
   Curl_gskit_close,               /* close */
   Curl_none_close_all,            /* close_all */
   /* No session handling for GSKit */

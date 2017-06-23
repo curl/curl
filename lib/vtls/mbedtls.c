@@ -1012,6 +1012,13 @@ static void Curl_mbedtls_sha256sum(const unsigned char *input,
   mbedtls_sha256(input, inputlen, sha256sum, 0);
 }
 
+static void *Curl_mbedtls_get_internals(struct ssl_connect_data *connssl,
+                                        CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return &connssl->ssl;
+}
+
 const struct Curl_ssl Curl_ssl_mbedtls = {
   "mbedtls",                        /* name */
 
@@ -1031,6 +1038,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   Curl_none_cert_status_request,    /* cert_status_request */
   Curl_mbedtls_connect,             /* connect */
   Curl_mbedtls_connect_nonblocking, /* connect_nonblocking */
+  Curl_mbedtls_get_internals,       /* get_internals */
   Curl_mbedtls_close,               /* close */
   Curl_mbedtls_close_all,           /* close_all */
   Curl_mbedtls_session_free,        /* session_free */
