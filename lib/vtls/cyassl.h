@@ -25,24 +25,6 @@
 
 #ifdef USE_CYASSL
 
-CURLcode Curl_cyassl_connect(struct connectdata *conn, int sockindex);
-bool Curl_cyassl_data_pending(const struct connectdata* conn, int connindex);
-int Curl_cyassl_shutdown(struct connectdata* conn, int sockindex);
-
- /* close a SSL connection */
-void Curl_cyassl_close(struct connectdata *conn, int sockindex);
-
-void Curl_cyassl_session_free(void *ptr);
-size_t Curl_cyassl_version(char *buffer, size_t size);
-int Curl_cyassl_shutdown(struct connectdata *conn, int sockindex);
-int Curl_cyassl_init(void);
-CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
-                                         int sockindex,
-                                         bool *done);
-CURLcode Curl_cyassl_random(struct Curl_easy *data,
-                            unsigned char *entropy,
-                            size_t length);
-
 extern const struct Curl_ssl Curl_ssl_cyassl;
 
 /* Set the API backend definition to CyaSSL */

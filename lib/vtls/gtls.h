@@ -28,27 +28,6 @@
 
 #include "urldata.h"
 
-int Curl_gtls_init(void);
-void Curl_gtls_cleanup(void);
-CURLcode Curl_gtls_connect(struct connectdata *conn, int sockindex);
-CURLcode Curl_gtls_connect_nonblocking(struct connectdata *conn,
-                                       int sockindex,
-                                       bool *done);
-bool Curl_gtls_data_pending(const struct connectdata *conn,
-                            int connindex);
-
- /* close a SSL connection */
-void Curl_gtls_close(struct connectdata *conn, int sockindex);
-
-void Curl_gtls_session_free(void *ptr);
-size_t Curl_gtls_version(char *buffer, size_t size);
-int Curl_gtls_shutdown(struct connectdata *conn, int sockindex);
-CURLcode Curl_gtls_random(struct Curl_easy *data,
-                          unsigned char *entropy,
-                          size_t length);
-
-bool Curl_gtls_cert_status_request(void);
-
 extern const struct Curl_ssl Curl_ssl_gnutls;
 
 /* Set the API backend definition to GnuTLS */

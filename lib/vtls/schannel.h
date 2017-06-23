@@ -76,25 +76,6 @@
 #define CURL_SCHANNEL_BUFFER_INIT_SIZE   4096
 #define CURL_SCHANNEL_BUFFER_FREE_SIZE   1024
 
-
-CURLcode Curl_schannel_connect(struct connectdata *conn, int sockindex);
-
-CURLcode Curl_schannel_connect_nonblocking(struct connectdata *conn,
-                                           int sockindex,
-                                           bool *done);
-
-bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex);
-void Curl_schannel_close(struct connectdata *conn, int sockindex);
-int Curl_schannel_shutdown(struct connectdata *conn, int sockindex);
-void Curl_schannel_session_free(void *ptr);
-
-int Curl_schannel_init(void);
-void Curl_schannel_cleanup(void);
-size_t Curl_schannel_version(char *buffer, size_t size);
-
-CURLcode Curl_schannel_random(struct Curl_easy *data, unsigned char *entropy,
-                              size_t length);
-
 extern const struct Curl_ssl Curl_ssl_schannel;
 
 /* Set the API backend definition to Schannel */

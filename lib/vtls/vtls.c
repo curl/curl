@@ -28,14 +28,6 @@
    to any specific SSL-layer.
 
    Curl_ssl_ - prefix for generic ones
-   Curl_ossl_ - prefix for OpenSSL ones
-   Curl_gtls_ - prefix for GnuTLS ones
-   Curl_nss_ - prefix for NSS ones
-   Curl_gskit_ - prefix for GSKit ones
-   Curl_polarssl_ - prefix for PolarSSL ones
-   Curl_cyassl_ - prefix for CyaSSL ones
-   Curl_schannel_ - prefix for Schannel SSPI ones
-   Curl_darwinssl_ - prefix for SecureTransport (Darwin) ones
 
    Note that this source code uses the functions of the configured SSL
    backend via the global Curl_ssl instance.

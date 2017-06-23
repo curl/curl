@@ -732,7 +732,7 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
  * @retval 0 error initializing SSL
  * @retval 1 SSL initialized successfully
  */
-int Curl_ossl_init(void)
+static int Curl_ossl_init(void)
 {
   OPENSSL_load_builtin_modules();
 
@@ -774,7 +774,7 @@ int Curl_ossl_init(void)
 }
 
 /* Global cleanup */
-void Curl_ossl_cleanup(void)
+static void Curl_ossl_cleanup(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
     !defined(LIBRESSL_VERSION_NUMBER)
@@ -816,7 +816,7 @@ void Curl_ossl_cleanup(void)
  *     0 means the connection has been closed
  *    -1 means the connection status is unknown
  */
-int Curl_ossl_check_cxn(struct connectdata *conn)
+static int Curl_ossl_check_cxn(struct connectdata *conn)
 {
   /* SSL_peek takes data out of the raw recv buffer without peeking so we use
      recv MSG_PEEK instead. Bug #795 */
@@ -862,7 +862,8 @@ int Curl_ossl_check_cxn(struct connectdata *conn)
 
 /* Selects an OpenSSL crypto engine
  */
-CURLcode Curl_ossl_set_engine(struct Curl_easy *data, const char *engine)
+static CURLcode Curl_ossl_set_engine(struct Curl_easy *data,
+                                     const char *engine)
 {
 #if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *e;
@@ -907,7 +908,7 @@ CURLcode Curl_ossl_set_engine(struct Curl_easy *data, const char *engine)
 
 /* Sets engine as default for all SSL operations
  */
-CURLcode Curl_ossl_set_engine_default(struct Curl_easy *data)
+static CURLcode Curl_ossl_set_engine_default(struct Curl_easy *data)
 {
 #ifdef HAVE_OPENSSL_ENGINE_H
   if(data->state.engine) {
@@ -929,7 +930,7 @@ CURLcode Curl_ossl_set_engine_default(struct Curl_easy *data)
 
 /* Return list of OpenSSL crypto engine names.
  */
-struct curl_slist *Curl_ossl_engines_list(struct Curl_easy *data)
+static struct curl_slist *Curl_ossl_engines_list(struct Curl_easy *data)
 {
   struct curl_slist *list = NULL;
 #if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_ENGINE_H)
@@ -968,7 +969,7 @@ static void ossl_close(struct ssl_connect_data *connssl)
 /*
  * This function is called when an SSL connection is closed.
  */
-void Curl_ossl_close(struct connectdata *conn, int sockindex)
+static void Curl_ossl_close(struct connectdata *conn, int sockindex)
 {
   ossl_close(&conn->ssl[sockindex]);
   ossl_close(&conn->proxy_ssl[sockindex]);
@@ -978,7 +979,7 @@ void Curl_ossl_close(struct connectdata *conn, int sockindex)
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
+static int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
 {
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -1077,7 +1078,7 @@ int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
   return retval;
 }
 
-void Curl_ossl_session_free(void *ptr)
+static void Curl_ossl_session_free(void *ptr)
 {
   /* free the ID */
   SSL_SESSION_free(ptr);
@@ -1087,7 +1088,7 @@ void Curl_ossl_session_free(void *ptr)
  * This function is called when the 'data' struct is going away. Close
  * down everything and free all resources!
  */
-void Curl_ossl_close_all(struct Curl_easy *data)
+static void Curl_ossl_close_all(struct Curl_easy *data)
 {
 #ifdef HAVE_OPENSSL_ENGINE_H
   if(data->state.engine) {
@@ -3148,14 +3149,14 @@ static CURLcode ossl_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode Curl_ossl_connect_nonblocking(struct connectdata *conn,
-                                       int sockindex,
-                                       bool *done)
+static CURLcode Curl_ossl_connect_nonblocking(struct connectdata *conn,
+                                              int sockindex,
+                                              bool *done)
 {
   return ossl_connect_common(conn, sockindex, TRUE, done);
 }
 
-CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex)
+static CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
@@ -3169,7 +3170,8 @@ CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-bool Curl_ossl_data_pending(const struct connectdata *conn, int connindex)
+static bool Curl_ossl_data_pending(const struct connectdata *conn,
+                                   int connindex)
 {
   if(conn->ssl[connindex].handle)
     /* SSL is in use */
@@ -3179,6 +3181,8 @@ bool Curl_ossl_data_pending(const struct connectdata *conn, int connindex)
            TRUE : FALSE;
   return FALSE;
 }
+
+static size_t Curl_ossl_version(char *buffer, size_t size);
 
 static ssize_t ossl_send(struct connectdata *conn,
                          int sockindex,
@@ -3293,7 +3297,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
   return nread;
 }
 
-size_t Curl_ossl_version(char *buffer, size_t size)
+static size_t Curl_ossl_version(char *buffer, size_t size)
 {
 #ifdef OPENSSL_IS_BORINGSSL
   return snprintf(buffer, size, OSSL_PACKAGE);
@@ -3333,8 +3337,8 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 }
 
 /* can be called with data == NULL */
-CURLcode Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
-                          size_t length)
+static CURLcode Curl_ossl_random(struct Curl_easy *data,
+                                 unsigned char *entropy, size_t length)
 {
   int rc;
   if(data) {
@@ -3377,7 +3381,7 @@ static void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
 }
 #endif
 
-bool Curl_ossl_cert_status_request(void)
+static bool Curl_ossl_cert_status_request(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
     !defined(OPENSSL_NO_OCSP)

@@ -26,25 +26,6 @@
 
 #ifdef USE_POLARSSL
 
-/* Called on first use PolarSSL, setup threading if supported */
-int  Curl_polarssl_init(void);
-void Curl_polarssl_cleanup(void);
-bool Curl_polarssl_data_pending(const struct connectdata *conn, int sockindex);
-
-
-CURLcode Curl_polarssl_connect(struct connectdata *conn, int sockindex);
-
-CURLcode Curl_polarssl_connect_nonblocking(struct connectdata *conn,
-                                           int sockindex,
-                                           bool *done);
-
- /* close a SSL connection */
-void Curl_polarssl_close(struct connectdata *conn, int sockindex);
-
-void Curl_polarssl_session_free(void *ptr);
-size_t Curl_polarssl_version(char *buffer, size_t size);
-int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
-
 extern const struct Curl_ssl Curl_ssl_polarssl;
 
 /* Set the API backend definition to PolarSSL */

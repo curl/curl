@@ -1351,7 +1351,7 @@ static CURLcode nss_init(struct Curl_easy *data)
  * @retval 0 error initializing SSL
  * @retval 1 SSL initialized successfully
  */
-int Curl_nss_init(void)
+static int Curl_nss_init(void)
 {
   /* curl_global_init() is not thread-safe so this test is ok */
   if(nss_initlock == NULL) {
@@ -1386,7 +1386,7 @@ CURLcode Curl_nss_force_init(struct Curl_easy *data)
 }
 
 /* Global cleanup */
-void Curl_nss_cleanup(void)
+static void Curl_nss_cleanup(void)
 {
   /* This function isn't required to be threadsafe and this is only done
    * as a safety feature.
@@ -1426,8 +1426,7 @@ void Curl_nss_cleanup(void)
  *     0 means the connection has been closed
  *    -1 means the connection status is unknown
  */
-int
-Curl_nss_check_cxn(struct connectdata *conn)
+static int Curl_nss_check_cxn(struct connectdata *conn)
 {
   int rc;
   char buf;
@@ -1473,7 +1472,7 @@ static void nss_close(struct ssl_connect_data *connssl)
 /*
  * This function is called when an SSL connection is closed.
  */
-void Curl_nss_close(struct connectdata *conn, int sockindex)
+static void Curl_nss_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_connect_data *connssl_proxy = &conn->proxy_ssl[sockindex];
@@ -2164,13 +2163,13 @@ static CURLcode nss_connect_common(struct connectdata *conn, int sockindex,
   return CURLE_OK;
 }
 
-CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
+static CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 {
   return nss_connect_common(conn, sockindex, /* blocking */ NULL);
 }
 
-CURLcode Curl_nss_connect_nonblocking(struct connectdata *conn,
-                                      int sockindex, bool *done)
+static CURLcode Curl_nss_connect_nonblocking(struct connectdata *conn,
+                                             int sockindex, bool *done)
 {
   return nss_connect_common(conn, sockindex, done);
 }
@@ -2252,22 +2251,22 @@ static ssize_t nss_recv(struct connectdata *conn,  /* connection data */
   return nread;
 }
 
-size_t Curl_nss_version(char *buffer, size_t size)
+static size_t Curl_nss_version(char *buffer, size_t size)
 {
   return snprintf(buffer, size, "NSS/%s", NSS_VERSION);
 }
 
 /* data might be NULL */
-int Curl_nss_seed(struct Curl_easy *data)
+static int Curl_nss_seed(struct Curl_easy *data)
 {
   /* make sure that NSS is initialized */
   return !!Curl_nss_force_init(data);
 }
 
 /* data might be NULL */
-CURLcode Curl_nss_random(struct Curl_easy *data,
-                         unsigned char *entropy,
-                         size_t length)
+static CURLcode Curl_nss_random(struct Curl_easy *data,
+                                unsigned char *entropy,
+                                size_t length)
 {
   Curl_nss_seed(data);  /* Initiate the seed if not already done */
 
@@ -2306,7 +2305,7 @@ static void Curl_nss_sha256sum(const unsigned char *tmp, /* input */
   PK11_DestroyContext(SHA256pw, PR_TRUE);
 }
 
-bool Curl_nss_cert_status_request(void)
+static bool Curl_nss_cert_status_request(void)
 {
 #ifdef SSL_ENABLE_OCSP_STAPLING
   return TRUE;
@@ -2315,7 +2314,7 @@ bool Curl_nss_cert_status_request(void)
 #endif
 }
 
-bool Curl_nss_false_start(void)
+static bool Curl_nss_false_start(void)
 {
 #if NSSVERNUM >= 0x030f04 /* 3.15.4 */
   return TRUE;

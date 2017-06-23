@@ -427,7 +427,7 @@ static CURLcode set_ciphers(struct connectdata *conn,
 }
 
 
-int Curl_gskit_init(void)
+static int Curl_gskit_init(void)
 {
   /* No initialisation needed. */
 
@@ -435,7 +435,7 @@ int Curl_gskit_init(void)
 }
 
 
-void Curl_gskit_cleanup(void)
+static void Curl_gskit_cleanup(void)
 {
   /* Nothing to do. */
 }
@@ -1216,9 +1216,8 @@ static CURLcode gskit_connect_common(struct connectdata *conn, int sockindex,
 }
 
 
-CURLcode Curl_gskit_connect_nonblocking(struct connectdata *conn,
-                                        int sockindex,
-                                        bool *done)
+static CURLcode Curl_gskit_connect_nonblocking(struct connectdata *conn,
+                                               int sockindex, bool *done)
 {
   CURLcode result;
 
@@ -1229,7 +1228,7 @@ CURLcode Curl_gskit_connect_nonblocking(struct connectdata *conn,
 }
 
 
-CURLcode Curl_gskit_connect(struct connectdata *conn, int sockindex)
+static CURLcode Curl_gskit_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done;
@@ -1245,14 +1244,14 @@ CURLcode Curl_gskit_connect(struct connectdata *conn, int sockindex)
 }
 
 
-void Curl_gskit_close(struct connectdata *conn, int sockindex)
+static void Curl_gskit_close(struct connectdata *conn, int sockindex)
 {
   close_one(&conn->ssl[sockindex], conn, sockindex);
   close_one(&conn->proxy_ssl[sockindex], conn, sockindex);
 }
 
 
-int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
+static int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct Curl_easy *data = conn->data;
@@ -1306,14 +1305,14 @@ int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
 }
 
 
-size_t Curl_gskit_version(char *buffer, size_t size)
+static size_t Curl_gskit_version(char *buffer, size_t size)
 {
   strncpy(buffer, "GSKit", size);
   return strlen(buffer);
 }
 
 
-int Curl_gskit_check_cxn(struct connectdata *cxn)
+static int Curl_gskit_check_cxn(struct connectdata *cxn)
 {
   int err;
   int errlen;

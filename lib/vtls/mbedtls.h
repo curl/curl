@@ -26,31 +26,6 @@
 
 #ifdef USE_MBEDTLS
 
-/* Called on first use mbedTLS, setup threading if supported */
-int  Curl_mbedtls_init(void);
-void Curl_mbedtls_cleanup(void);
-bool Curl_mbedtls_data_pending(const struct connectdata *conn, int sockindex);
-
-CURLcode Curl_mbedtls_connect(struct connectdata *conn, int sockindex);
-
-CURLcode Curl_mbedtls_connect_nonblocking(struct connectdata *conn,
-                                           int sockindex,
-                                           bool *done);
-
-/* tell mbedTLS to close down all open information regarding connections (and
-   thus session ID caching etc) */
-void Curl_mbedtls_close_all(struct Curl_easy *data);
-
- /* close a SSL connection */
-void Curl_mbedtls_close(struct connectdata *conn, int sockindex);
-
-void Curl_mbedtls_session_free(void *ptr);
-size_t Curl_mbedtls_version(char *buffer, size_t size);
-int Curl_mbedtls_shutdown(struct connectdata *conn, int sockindex);
-
-CURLcode Curl_mbedtls_random(struct Curl_easy *data, unsigned char *entropy,
-                     size_t length);
-
 extern const struct Curl_ssl Curl_ssl_mbedtls;
 
 #define CURL_SSL_BACKEND CURLSSLBACKEND_MBEDTLS

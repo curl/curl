@@ -186,7 +186,7 @@ static ssize_t Curl_gtls_pull_ssl(void *s, void *buf, size_t len)
  * must only be called from within curl_global_init() to keep the thread
  * situation under control!
  */
-int Curl_gtls_init(void)
+static int Curl_gtls_init(void)
 {
   int ret = 1;
   if(!gtls_inited) {
@@ -200,7 +200,7 @@ int Curl_gtls_init(void)
   return ret;
 }
 
-void Curl_gtls_cleanup(void)
+static void Curl_gtls_cleanup(void)
 {
   if(gtls_inited) {
     gnutls_global_deinit();
@@ -1493,18 +1493,13 @@ gtls_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode
-Curl_gtls_connect_nonblocking(struct connectdata *conn,
-                              int sockindex,
-                              bool *done)
+static CURLcode Curl_gtls_connect_nonblocking(struct connectdata *conn,
+                                              int sockindex, bool *done)
 {
   return gtls_connect_common(conn, sockindex, TRUE, done);
 }
 
-CURLcode
-Curl_gtls_connect(struct connectdata *conn,
-                  int sockindex)
-
+static CURLcode Curl_gtls_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
@@ -1518,7 +1513,8 @@ Curl_gtls_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-bool Curl_gtls_data_pending(const struct connectdata *conn, int connindex)
+static bool Curl_gtls_data_pending(const struct connectdata *conn,
+                                   int connindex)
 {
   bool res = FALSE;
   if(conn->ssl[connindex].session &&
@@ -1570,7 +1566,7 @@ static void close_one(struct ssl_connect_data *ssl)
 #endif
 }
 
-void Curl_gtls_close(struct connectdata *conn, int sockindex)
+static void Curl_gtls_close(struct connectdata *conn, int sockindex)
 {
   close_one(&conn->ssl[sockindex]);
   close_one(&conn->proxy_ssl[sockindex]);
@@ -1580,7 +1576,7 @@ void Curl_gtls_close(struct connectdata *conn, int sockindex)
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
+static int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
 {
   ssize_t result;
   int retval = 0;
@@ -1678,6 +1674,7 @@ static ssize_t gtls_recv(struct connectdata *conn, /* connection data */
 
   if(ret < 0) {
     failf(conn->data, "GnuTLS recv error (%d): %s",
+
           (int)ret, gnutls_strerror((int)ret));
     *curlcode = CURLE_RECV_ERROR;
     return -1;
@@ -1686,12 +1683,12 @@ static ssize_t gtls_recv(struct connectdata *conn, /* connection data */
   return ret;
 }
 
-void Curl_gtls_session_free(void *ptr)
+static void Curl_gtls_session_free(void *ptr)
 {
   free(ptr);
 }
 
-size_t Curl_gtls_version(char *buffer, size_t size)
+static size_t Curl_gtls_version(char *buffer, size_t size)
 {
   return snprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
 }
@@ -1721,9 +1718,8 @@ static int Curl_gtls_seed(struct Curl_easy *data)
 #endif
 
 /* data might be NULL! */
-CURLcode Curl_gtls_random(struct Curl_easy *data,
-                          unsigned char *entropy,
-                          size_t length)
+static CURLcode Curl_gtls_random(struct Curl_easy *data,
+                                 unsigned char *entropy, size_t length)
 {
 #if defined(USE_GNUTLS_NETTLE)
   int rc;
@@ -1777,7 +1773,7 @@ static void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
 #endif
 }
 
-bool Curl_gtls_cert_status_request(void)
+static bool Curl_gtls_cert_status_request(void)
 {
 #ifdef HAS_OCSP
   return TRUE;
