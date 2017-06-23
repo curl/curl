@@ -874,6 +874,13 @@ static void Curl_polarssl_sha256sum(const unsigned char *input,
   sha256(input, inputlen, sha256sum, 0);
 }
 
+static void *Curl_polarssl_get_internals(struct ssl_connect_data *connssl,
+                                         CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return &connssl->ssl;
+}
+
 const struct Curl_ssl Curl_ssl_polarssl = {
   "polarssl",                        /* name */
 
@@ -896,6 +903,7 @@ const struct Curl_ssl Curl_ssl_polarssl = {
   Curl_none_cert_status_request,     /* cert_status_request */
   Curl_polarssl_connect,             /* connect */
   Curl_polarssl_connect_nonblocking, /* connect_nonblocking */
+  Curl_polarssl_get_internals,       /* get_internals */
   Curl_polarssl_close,               /* close */
   Curl_none_close_all,               /* close_all */
   Curl_polarssl_session_free,        /* session_free */

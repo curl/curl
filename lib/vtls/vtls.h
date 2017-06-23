@@ -24,6 +24,7 @@
 #include "curl_setup.h"
 
 struct connectdata;
+struct ssl_connect_data;
 
 struct Curl_ssl {
   const char *name;
@@ -52,6 +53,7 @@ struct Curl_ssl {
   CURLcode (*connect)(struct connectdata *conn, int sockindex);
   CURLcode (*connect_nonblocking)(struct connectdata *conn, int sockindex,
                                   bool *done);
+  void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
   void (*close)(struct connectdata *conn, int sockindex);
   void (*close_all)(struct Curl_easy *data);
   void (*session_free)(void *ptr);

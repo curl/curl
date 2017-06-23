@@ -1782,6 +1782,13 @@ static bool Curl_gtls_cert_status_request(void)
 #endif
 }
 
+static void *Curl_gtls_get_internals(struct ssl_connect_data *connssl,
+                                     CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return connssl->session;
+}
+
 const struct Curl_ssl Curl_ssl_gnutls = {
   "gnutls",                      /* name */
 
@@ -1801,6 +1808,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_gtls_cert_status_request, /* cert_status_request */
   Curl_gtls_connect,             /* connect */
   Curl_gtls_connect_nonblocking, /* connect_nonblocking */
+  Curl_gtls_get_internals,       /* get_internals */
   Curl_gtls_close,               /* close */
   Curl_none_close_all,           /* close_all */
   Curl_glts_session_free,        /* session_free */

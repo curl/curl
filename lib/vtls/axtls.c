@@ -681,6 +681,13 @@ static CURLcode Curl_axtls_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static void *Curl_axtls_get_internals(struct ssl_connect_data *connssl,
+                                      CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return connssl->ssl;
+}
+
 const struct Curl_ssl Curl_ssl_axtls = {
   "axtls",                        /* name */
 
@@ -705,6 +712,7 @@ const struct Curl_ssl Curl_ssl_axtls = {
   Curl_none_cert_status_request,  /* cert_status_request */
   Curl_axtls_connect,             /* connect */
   Curl_axtls_connect_nonblocking, /* connect_nonblocking */
+  Curl_axtls_get_internals,       /* get_internals */
   Curl_axtls_close,               /* close */
   Curl_none_close_all,            /* close_all */
   Curl_axtls_session_free,        /* session_free */

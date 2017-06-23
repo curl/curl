@@ -2866,6 +2866,13 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
   return (ssize_t)processed;
 }
 
+static void *Curl_darwinssl_get_internals(struct ssl_connect_data *connssl,
+                                          CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return connssl->ssl_ctx;
+}
+
 const struct Curl_ssl Curl_ssl_darwinssl = {
   "darwinssl",                        /* name */
 
@@ -2889,6 +2896,7 @@ const struct Curl_ssl Curl_ssl_darwinssl = {
   Curl_none_cert_status_request,      /* cert_status_request */
   Curl_darwinssl_connect,             /* connect */
   Curl_darwinssl_connect_nonblocking, /* connect_nonblocking */
+  Curl_darwinssl_get_internals,       /* get_internals */
   Curl_darwinssl_close,               /* close */
   Curl_none_close_all,                /* close_all */
   Curl_darwinssl_session_free,        /* session_free */

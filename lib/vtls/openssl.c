@@ -3394,6 +3394,14 @@ static bool Curl_ossl_cert_status_request(void)
 #endif
 }
 
+static void *Curl_ossl_get_internals(struct ssl_connect_data *connssl,
+                                     CURLINFO info)
+{
+  /* Legacy: CURLINFO_TLS_SESSION must return an SSL_CTX pointer. */
+  return info == CURLINFO_TLS_SESSION ?
+         (void *)connssl->ctx : (void *)connssl->handle;
+}
+
 const struct Curl_ssl Curl_ssl_openssl = {
   "openssl",                     /* name */
 
@@ -3413,6 +3421,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   Curl_ossl_cert_status_request, /* cert_status_request */
   Curl_ossl_connect,             /* connect */
   Curl_ossl_connect_nonblocking, /* connect_nonblocking */
+  Curl_ossl_get_internals,       /* get_internals */
   Curl_ossl_close,               /* close */
   Curl_ossl_close_all,           /* close_all */
   Curl_ossl_session_free,        /* session_free */

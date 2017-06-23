@@ -1773,6 +1773,13 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 }
 #endif /* _WIN32_WCE */
 
+static void *Curl_schannel_get_internals(struct ssl_connect_data *connssl,
+                                         CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return &connssl->ctxt->ctxt_handle;
+}
+
 const struct Curl_ssl Curl_ssl_schannel = {
   "schannel",                        /* name */
 
@@ -1792,6 +1799,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   Curl_none_cert_status_request,     /* cert_status_request */
   Curl_schannel_connect,             /* connect */
   Curl_schannel_connect_nonblocking, /* connect_nonblocking */
+  Curl_schannel_get_internals,       /* get_internals */
   Curl_schannel_close,               /* close */
   Curl_none_close_all,               /* close_all */
   Curl_schannel_session_free,        /* session_free */
