@@ -176,7 +176,7 @@ gzip -dc $targz | bzip2 --best > $bzip2
 
 xz="curl-$version.tar.xz"
 echo "Generating $xz"
-gzip -dc $targz | xz -9e - > $xz
+gzip -dc $targz | xz -6e - > $xz
 
 ############################################################################
 #
