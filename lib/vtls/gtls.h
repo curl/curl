@@ -30,8 +30,5 @@
 
 extern const struct Curl_ssl Curl_ssl_gnutls;
 
-/* Set the API backend definition to GnuTLS */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_GNUTLS
-
 #endif /* USE_GNUTLS */
 #endif /* HEADER_CURL_GTLS_H */

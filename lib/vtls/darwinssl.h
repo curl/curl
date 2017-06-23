@@ -28,8 +28,5 @@
 
 extern const struct Curl_ssl Curl_ssl_darwinssl;
 
-/* Set the API backend definition to SecureTransport */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_DARWINSSL
-
 #endif /* USE_DARWINSSL */
 #endif /* HEADER_CURL_DARWINSSL_H */

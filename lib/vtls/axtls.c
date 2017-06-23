@@ -703,6 +703,7 @@ static void *Curl_axtls_get_internals(struct ssl_connect_data *connssl,
 
 const struct Curl_ssl Curl_ssl_axtls = {
   "axtls",                        /* name */
+  CURLSSLBACKEND_AXTLS,
 
   0, /* have_ca_path */
   0, /* have_certinfo */

@@ -2886,6 +2886,7 @@ static void *Curl_darwinssl_get_internals(struct ssl_connect_data *connssl,
 
 const struct Curl_ssl Curl_ssl_darwinssl = {
   "darwinssl",                        /* name */
+  CURLSSLBACKEND_DARWINSSL,
 
   0, /* have_ca_path */
   0, /* have_certinfo */

@@ -28,7 +28,5 @@
 
 extern const struct Curl_ssl Curl_ssl_mbedtls;
 
-#define CURL_SSL_BACKEND CURLSSLBACKEND_MBEDTLS
-
 #endif /* USE_MBEDTLS */
 #endif /* HEADER_CURL_MBEDTLS_H */

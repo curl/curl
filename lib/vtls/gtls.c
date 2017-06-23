@@ -1807,6 +1807,7 @@ static void *Curl_gtls_get_internals(struct ssl_connect_data *connssl,
 
 const struct Curl_ssl Curl_ssl_gnutls = {
   "gnutls",                      /* name */
+  CURLSSLBACKEND_GNUTLS,
 
   1, /* have_ca_path */
   1, /* have_certinfo */
@@ -1829,7 +1830,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_gtls_get_internals,       /* get_internals */
   Curl_gtls_close,               /* close */
   Curl_none_close_all,           /* close_all */
-  Curl_glts_session_free,        /* session_free */
+  Curl_gtls_session_free,        /* session_free */
   Curl_none_set_engine,          /* set_engine */
   Curl_none_set_engine_default,  /* set_engine_default */
   Curl_none_engines_list,        /* engines_list */

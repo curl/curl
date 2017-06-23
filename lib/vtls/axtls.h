@@ -29,9 +29,6 @@
 
 extern const struct Curl_ssl Curl_ssl_axtls;
 
-/* Set the API backend definition to axTLS */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_AXTLS
-
 #endif /* USE_AXTLS */
 #endif /* HEADER_CURL_AXTLS_H */
 

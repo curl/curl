@@ -33,8 +33,5 @@
 
 extern const struct Curl_ssl Curl_ssl_openssl;
 
-/* Set the API backend definition to OpenSSL */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_OPENSSL
-
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */
