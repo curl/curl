@@ -27,25 +27,6 @@
 #include "curl/curl.h"
 #include "urldata.h"
 
-int Curl_axtls_init(void);
-void Curl_axtls_cleanup(void);
-CURLcode Curl_axtls_connect(struct connectdata *conn, int sockindex);
-CURLcode Curl_axtls_connect_nonblocking(
-    struct connectdata *conn,
-    int sockindex,
-    bool *done);
-
- /* close a SSL connection */
-void Curl_axtls_close(struct connectdata *conn, int sockindex);
-
-void Curl_axtls_session_free(void *ptr);
-size_t Curl_axtls_version(char *buffer, size_t size);
-int Curl_axtls_shutdown(struct connectdata *conn, int sockindex);
-int Curl_axtls_check_cxn(struct connectdata *conn);
-CURLcode Curl_axtls_random(struct Curl_easy *data,
-                           unsigned char *entropy,
-                           size_t length);
-
 extern const struct Curl_ssl Curl_ssl_axtls;
 
 /* Set the API backend definition to axTLS */

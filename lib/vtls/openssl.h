@@ -31,46 +31,6 @@
 
 #include "urldata.h"
 
-CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex);
-CURLcode Curl_ossl_connect_nonblocking(struct connectdata *conn,
-                                       int sockindex,
-                                       bool *done);
-
-/* close a SSL connection */
-void Curl_ossl_close(struct connectdata *conn, int sockindex);
-
-/* tell OpenSSL to close down all open information regarding connections (and
-   thus session ID caching etc) */
-void Curl_ossl_close_all(struct Curl_easy *data);
-
-/* Sets an OpenSSL engine */
-CURLcode Curl_ossl_set_engine(struct Curl_easy *data, const char *engine);
-
-/* function provided for the generic SSL-layer, called when a session id
-   should be freed */
-void Curl_ossl_session_free(void *ptr);
-
-/* Sets engine as default for all SSL operations */
-CURLcode Curl_ossl_set_engine_default(struct Curl_easy *data);
-
-/* Build list of OpenSSL engines */
-struct curl_slist *Curl_ossl_engines_list(struct Curl_easy *data);
-
-int Curl_ossl_init(void);
-void Curl_ossl_cleanup(void);
-
-size_t Curl_ossl_version(char *buffer, size_t size);
-int Curl_ossl_check_cxn(struct connectdata *cxn);
-int Curl_ossl_shutdown(struct connectdata *conn, int sockindex);
-bool Curl_ossl_data_pending(const struct connectdata *conn,
-                            int connindex);
-
-/* return 0 if a find random is filled in */
-CURLcode Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
-                          size_t length);
-
-bool Curl_ossl_cert_status_request(void);
-
 extern const struct Curl_ssl Curl_ssl_openssl;
 
 /* Set the API backend definition to OpenSSL */

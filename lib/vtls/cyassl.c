@@ -696,7 +696,7 @@ static ssize_t cyassl_send(struct connectdata *conn,
   return rc;
 }
 
-void Curl_cyassl_close(struct connectdata *conn, int sockindex)
+static void Curl_cyassl_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *conssl = &conn->ssl[sockindex];
 
@@ -744,14 +744,14 @@ static ssize_t cyassl_recv(struct connectdata *conn,
 }
 
 
-void Curl_cyassl_session_free(void *ptr)
+static void Curl_cyassl_session_free(void *ptr)
 {
   (void)ptr;
   /* CyaSSL reuses sessions on own, no free */
 }
 
 
-size_t Curl_cyassl_version(char *buffer, size_t size)
+static size_t Curl_cyassl_version(char *buffer, size_t size)
 {
 #if LIBCYASSL_VERSION_HEX >= 0x03006000
   return snprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
@@ -765,13 +765,14 @@ size_t Curl_cyassl_version(char *buffer, size_t size)
 }
 
 
-int Curl_cyassl_init(void)
+static int Curl_cyassl_init(void)
 {
   return (CyaSSL_Init() == SSL_SUCCESS);
 }
 
 
-bool Curl_cyassl_data_pending(const struct connectdata* conn, int connindex)
+static bool Curl_cyassl_data_pending(const struct connectdata* conn,
+                                     int connindex)
 {
   if(conn->ssl[connindex].handle)   /* SSL is in use */
     return (0 != SSL_pending(conn->ssl[connindex].handle)) ? TRUE : FALSE;
@@ -784,7 +785,7 @@ bool Curl_cyassl_data_pending(const struct connectdata* conn, int connindex)
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-int Curl_cyassl_shutdown(struct connectdata *conn, int sockindex)
+static int Curl_cyassl_shutdown(struct connectdata *conn, int sockindex)
 {
   int retval = 0;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -911,18 +912,14 @@ cyassl_connect_common(struct connectdata *conn,
 }
 
 
-CURLcode
-Curl_cyassl_connect_nonblocking(struct connectdata *conn,
-                                int sockindex,
-                                bool *done)
+static CURLcode Curl_cyassl_connect_nonblocking(struct connectdata *conn,
+                                                int sockindex, bool *done)
 {
   return cyassl_connect_common(conn, sockindex, TRUE, done);
 }
 
 
-CURLcode
-Curl_cyassl_connect(struct connectdata *conn,
-                    int sockindex)
+static CURLcode Curl_cyassl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
@@ -936,9 +933,8 @@ Curl_cyassl_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode Curl_cyassl_random(struct Curl_easy *data,
-                            unsigned char *entropy,
-                            size_t length)
+static CURLcode Curl_cyassl_random(struct Curl_easy *data,
+                                   unsigned char *entropy, size_t length)
 {
   RNG rng;
   (void)data;

@@ -744,12 +744,12 @@ static ssize_t mbed_send(struct connectdata *conn, int sockindex,
   return ret;
 }
 
-void Curl_mbedtls_close_all(struct Curl_easy *data)
+static void Curl_mbedtls_close_all(struct Curl_easy *data)
 {
   (void)data;
 }
 
-void Curl_mbedtls_close(struct connectdata *conn, int sockindex)
+static void Curl_mbedtls_close(struct connectdata *conn, int sockindex)
 {
   mbedtls_pk_free(&conn->ssl[sockindex].pk);
   mbedtls_x509_crt_free(&conn->ssl[sockindex].clicert);
@@ -788,21 +788,21 @@ static ssize_t mbed_recv(struct connectdata *conn, int num,
   return len;
 }
 
-void Curl_mbedtls_session_free(void *ptr)
+static void Curl_mbedtls_session_free(void *ptr)
 {
   mbedtls_ssl_session_free(ptr);
   free(ptr);
 }
 
-size_t Curl_mbedtls_version(char *buffer, size_t size)
+static size_t Curl_mbedtls_version(char *buffer, size_t size)
 {
   unsigned int version = mbedtls_version_get_number();
   return snprintf(buffer, size, "mbedTLS/%d.%d.%d", version>>24,
                   (version>>16)&0xff, (version>>8)&0xff);
 }
 
-CURLcode Curl_mbedtls_random(struct Curl_easy *data, unsigned char *entropy,
-                             size_t length)
+static CURLcode Curl_mbedtls_random(struct Curl_easy *data,
+                                    unsigned char *entropy, size_t length)
 {
 #if defined(MBEDTLS_CTR_DRBG_C)
   int ret = -1;
@@ -963,18 +963,14 @@ mbed_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode
-Curl_mbedtls_connect_nonblocking(struct connectdata *conn,
-                                 int sockindex,
-                                 bool *done)
+static CURLcode Curl_mbedtls_connect_nonblocking(struct connectdata *conn,
+                                                 int sockindex, bool *done)
 {
   return mbed_connect_common(conn, sockindex, TRUE, done);
 }
 
 
-CURLcode
-Curl_mbedtls_connect(struct connectdata *conn,
-                     int sockindex)
+static CURLcode Curl_mbedtls_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode retcode;
   bool done = FALSE;
@@ -992,17 +988,18 @@ Curl_mbedtls_connect(struct connectdata *conn,
  * return 0 error initializing SSL
  * return 1 SSL initialized successfully
  */
-int Curl_mbedtls_init(void)
+static int Curl_mbedtls_init(void)
 {
   return Curl_polarsslthreadlock_thread_setup();
 }
 
-void Curl_mbedtls_cleanup(void)
+static void Curl_mbedtls_cleanup(void)
 {
   (void)Curl_polarsslthreadlock_thread_cleanup();
 }
 
-bool Curl_mbedtls_data_pending(const struct connectdata *conn, int sockindex)
+static bool Curl_mbedtls_data_pending(const struct connectdata *conn,
+                                      int sockindex)
 {
   return mbedtls_ssl_get_bytes_avail(&conn->ssl[sockindex].ssl) != 0;
 }

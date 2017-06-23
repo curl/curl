@@ -659,7 +659,7 @@ static ssize_t polarssl_send(struct connectdata *conn,
   return ret;
 }
 
-void Curl_polarssl_close(struct connectdata *conn, int sockindex)
+static void Curl_polarssl_close(struct connectdata *conn, int sockindex)
 {
   rsa_free(&conn->ssl[sockindex].rsa);
   x509_crt_free(&conn->ssl[sockindex].clicert);
@@ -694,7 +694,7 @@ static ssize_t polarssl_recv(struct connectdata *conn,
   return len;
 }
 
-void Curl_polarssl_session_free(void *ptr)
+static void Curl_polarssl_session_free(void *ptr)
 {
   ssl_session_free(ptr);
   free(ptr);
@@ -703,7 +703,7 @@ void Curl_polarssl_session_free(void *ptr)
 /* 1.3.10 was the first rebranded version. All new releases (in 1.3 branch and
    higher) will be mbed TLS branded.. */
 
-size_t Curl_polarssl_version(char *buffer, size_t size)
+static size_t Curl_polarssl_version(char *buffer, size_t size)
 {
   unsigned int version = version_get_number();
   return snprintf(buffer, size, "%s/%d.%d.%d",
@@ -825,18 +825,14 @@ polarssl_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode
-Curl_polarssl_connect_nonblocking(struct connectdata *conn,
-                                  int sockindex,
-                                  bool *done)
+static CURLcode Curl_polarssl_connect_nonblocking(struct connectdata *conn,
+                                                  int sockindex, bool *done)
 {
   return polarssl_connect_common(conn, sockindex, TRUE, done);
 }
 
 
-CURLcode
-Curl_polarssl_connect(struct connectdata *conn,
-                      int sockindex)
+static CURLcode Curl_polarssl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
@@ -854,18 +850,18 @@ Curl_polarssl_connect(struct connectdata *conn,
  * return 0 error initializing SSL
  * return 1 SSL initialized successfully
  */
-int Curl_polarssl_init(void)
+static int Curl_polarssl_init(void)
 {
   return Curl_polarsslthreadlock_thread_setup();
 }
 
-void Curl_polarssl_cleanup(void)
+static void Curl_polarssl_cleanup(void)
 {
   (void)Curl_polarsslthreadlock_thread_cleanup();
 }
 
-
-bool Curl_polarssl_data_pending(const struct connectdata *conn, int sockindex)
+static bool Curl_polarssl_data_pending(const struct connectdata *conn,
+                                       int sockindex)
 {
   return ssl_get_bytes_avail(&conn->ssl[sockindex].ssl) != 0;
 }

@@ -1395,15 +1395,13 @@ cleanup:
   return *err ? -1 : 0;
 }
 
-CURLcode
-Curl_schannel_connect_nonblocking(struct connectdata *conn, int sockindex,
-                                  bool *done)
+static CURLcode Curl_schannel_connect_nonblocking(struct connectdata *conn,
+                                                  int sockindex, bool *done)
 {
   return schannel_connect_common(conn, sockindex, TRUE, done);
 }
 
-CURLcode
-Curl_schannel_connect(struct connectdata *conn, int sockindex)
+static CURLcode Curl_schannel_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
@@ -1417,7 +1415,8 @@ Curl_schannel_connect(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex)
+static bool Curl_schannel_data_pending(const struct connectdata *conn,
+                                       int sockindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
@@ -1428,14 +1427,14 @@ bool Curl_schannel_data_pending(const struct connectdata *conn, int sockindex)
     return FALSE;
 }
 
-void Curl_schannel_close(struct connectdata *conn, int sockindex)
+static void Curl_schannel_close(struct connectdata *conn, int sockindex)
 {
   if(conn->ssl[sockindex].use)
     /* if the SSL/TLS channel hasn't been shut down yet, do that now. */
     Curl_ssl_shutdown(conn, sockindex);
 }
 
-void Curl_schannel_session_free(void *ptr)
+static void Curl_schannel_session_free(void *ptr)
 {
   /* this is expected to be called under sessionid lock */
   struct curl_schannel_cred *cred = ptr;
@@ -1447,7 +1446,7 @@ void Curl_schannel_session_free(void *ptr)
   }
 }
 
-int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
+static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 {
   /* See https://msdn.microsoft.com/en-us/library/windows/desktop/aa380138.aspx
    * Shutting Down an Schannel Connection
@@ -1551,25 +1550,25 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-int Curl_schannel_init(void)
+static int Curl_schannel_init(void)
 {
   return (Curl_sspi_global_init() == CURLE_OK ? 1 : 0);
 }
 
-void Curl_schannel_cleanup(void)
+static void Curl_schannel_cleanup(void)
 {
   Curl_sspi_global_cleanup();
 }
 
-size_t Curl_schannel_version(char *buffer, size_t size)
+static size_t Curl_schannel_version(char *buffer, size_t size)
 {
   size = snprintf(buffer, size, "WinSSL");
 
   return size;
 }
 
-CURLcode Curl_schannel_random(struct Curl_easy *data UNUSED_PARAM,
-                              unsigned char *entropy, size_t length)
+static CURLcode Curl_schannel_random(struct Curl_easy *data UNUSED_PARAM,
+                                     unsigned char *entropy, size_t length)
 {
   HCRYPTPROV hCryptProv = 0;
 

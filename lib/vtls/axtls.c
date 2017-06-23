@@ -49,7 +49,7 @@
 
 
 /* Global axTLS init, called from Curl_ssl_init() */
-int Curl_axtls_init(void)
+static int Curl_axtls_init(void)
 {
 /* axTLS has no global init.  Everything is done through SSL and SSL_CTX
  * structs stored in connectdata structure.  Perhaps can move to axtls.h.
@@ -57,7 +57,7 @@ int Curl_axtls_init(void)
   return 1;
 }
 
-void Curl_axtls_cleanup(void)
+static void Curl_axtls_cleanup(void)
 {
   /* axTLS has no global cleanup.  Perhaps can move this to axtls.h. */
 }
@@ -284,7 +284,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-void Curl_axtls_close(struct connectdata *conn, int sockindex)
+static void Curl_axtls_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
@@ -424,10 +424,8 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
  * Use axTLS's non-blocking connection feature to open an SSL connection.
  * This is called after a TCP connection is already established.
  */
-CURLcode Curl_axtls_connect_nonblocking(
-    struct connectdata *conn,
-    int sockindex,
-    bool *done)
+static CURLcode Curl_axtls_connect_nonblocking(struct connectdata *conn,
+                                               int sockindex, bool *done)
 {
   CURLcode conn_step;
   int ssl_fcn_return;
@@ -491,10 +489,7 @@ CURLcode Curl_axtls_connect_nonblocking(
  * This function is called after the TCP connect has completed. Setup the TLS
  * layer and do all necessary magic for a blocking connect.
  */
-CURLcode
-Curl_axtls_connect(struct connectdata *conn,
-                  int sockindex)
-
+static CURLcode Curl_axtls_connect(struct connectdata *conn, int sockindex)
 {
   struct Curl_easy *data = conn->data;
   CURLcode conn_step = connect_prep(conn, sockindex);
@@ -563,7 +558,7 @@ static ssize_t axtls_send(struct connectdata *conn,
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
+static int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
 {
   /* Outline taken from openssl.c since functions are in axTLS compat layer.
      axTLS's error set is much smaller, so a lot of error-handling was removed.
@@ -662,7 +657,7 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
  *     0 means the connection has been closed
  *    -1 means the connection status is unknown
  */
-int Curl_axtls_check_cxn(struct connectdata *conn)
+static int Curl_axtls_check_cxn(struct connectdata *conn)
 {
   /* openssl.c line: rc = SSL_peek(conn->ssl[FIRSTSOCKET].ssl, (void*)&buf, 1);
      axTLS compat layer always returns the last argument, so connection is
@@ -672,7 +667,7 @@ int Curl_axtls_check_cxn(struct connectdata *conn)
    return 1; /* connection still in place */
 }
 
-void Curl_axtls_session_free(void *ptr)
+static void Curl_axtls_session_free(void *ptr)
 {
   (void)ptr;
   /* free the ID */
@@ -680,14 +675,13 @@ void Curl_axtls_session_free(void *ptr)
      compatibility layer does nothing, so we do nothing too. */
 }
 
-size_t Curl_axtls_version(char *buffer, size_t size)
+static size_t Curl_axtls_version(char *buffer, size_t size)
 {
   return snprintf(buffer, size, "axTLS/%s", ssl_version());
 }
 
-CURLcode Curl_axtls_random(struct Curl_easy *data,
-                           unsigned char *entropy,
-                           size_t length)
+static CURLcode Curl_axtls_random(struct Curl_easy *data,
+                                  unsigned char *entropy, size_t length)
 {
   static bool ssl_seeded = FALSE;
   (void)data;

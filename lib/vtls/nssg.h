@@ -30,31 +30,8 @@
 
 #include "urldata.h"
 
-CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex);
-CURLcode Curl_nss_connect_nonblocking(struct connectdata *conn,
-                                      int sockindex,
-                                      bool *done);
-/* close a SSL connection */
-void Curl_nss_close(struct connectdata *conn, int sockindex);
-
-int Curl_nss_init(void);
-void Curl_nss_cleanup(void);
-
-size_t Curl_nss_version(char *buffer, size_t size);
-int Curl_nss_check_cxn(struct connectdata *cxn);
-int Curl_nss_seed(struct Curl_easy *data);
-
 /* initialize NSS library if not already */
 CURLcode Curl_nss_force_init(struct Curl_easy *data);
-
-CURLcode Curl_nss_random(struct Curl_easy *data,
-                         unsigned char *entropy,
-                         size_t length);
-
-
-bool Curl_nss_cert_status_request(void);
-
-bool Curl_nss_false_start(void);
 
 extern const struct Curl_ssl Curl_ssl_nss;
 

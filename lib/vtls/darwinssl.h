@@ -26,26 +26,6 @@
 
 #ifdef USE_DARWINSSL
 
-CURLcode Curl_darwinssl_connect(struct connectdata *conn, int sockindex);
-
-CURLcode Curl_darwinssl_connect_nonblocking(struct connectdata *conn,
-                                            int sockindex,
-                                            bool *done);
-
-/* close a SSL connection */
-void Curl_darwinssl_close(struct connectdata *conn, int sockindex);
-
-void Curl_darwinssl_session_free(void *ptr);
-size_t Curl_darwinssl_version(char *buffer, size_t size);
-int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex);
-int Curl_darwinssl_check_cxn(struct connectdata *conn);
-bool Curl_darwinssl_data_pending(const struct connectdata *conn,
-                                 int connindex);
-
-CURLcode Curl_darwinssl_random(struct Curl_easy *data, unsigned char *entropy,
-                               size_t length);
-bool Curl_darwinssl_false_start(void);
-
 extern const struct Curl_ssl Curl_ssl_darwinssl;
 
 /* Set the API backend definition to SecureTransport */
