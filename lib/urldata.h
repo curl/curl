@@ -1764,8 +1764,8 @@ struct UserDefined {
   bool global_dns_cache; /* subject for future removal */
   bool tcp_nodelay;      /* whether to enable TCP_NODELAY or not */
   bool ignorecl;         /* ignore content length */
-  bool ftp_skip_ip;      /* skip the IP address the FTP server passes on to
-                            us */
+  long ftp_pasvp_ip_rule; /* how to handle the IP address the FTP server
+                             passes on to us */
   bool connect_only;     /* make connection, let application use the socket */
   long ssh_auth_types;   /* allowed SSH auth types */
   bool http_te_skip;     /* pass the raw body data to the user, even when
