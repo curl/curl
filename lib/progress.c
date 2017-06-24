@@ -361,8 +361,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   now = Curl_tvnow(); /* what time is it */
 
   /* The time spent so far (from the start) */
-  data->progress.timespent = Curl_tvdiff(now, data->progress.start);
-  timespent = (curl_off_t)data->progress.timespent/1000; /* integer seconds */
+  data->progress.timespent = Curl_tvdiff_us(now, data->progress.start);
+  timespent = (curl_off_t)data->progress.timespent/1000000; /* seconds */
 
   /* The average download speed this far */
   data->progress.dlspeed = (curl_off_t)
