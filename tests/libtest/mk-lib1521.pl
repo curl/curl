@@ -27,6 +27,8 @@
 # minimum and maximum long signed values
 my $minlong = "LONG_MIN";
 my $maxlong = "LONG_MAX";
+# maximum long unsigned value
+my $maxulong = "ULONG_MAX";
 
 print <<HEADER
 /***************************************************************************
@@ -62,9 +64,8 @@ struct data {
 
 #define LO $minlong
 #define HI $maxlong
-#define OFF_VAL (curl_off_t) 3123123123
 #define OFF_LO (curl_off_t) LO
-#define OFF_HI (curl_off_t) HI
+#define OFF_HI (curl_off_t) $maxulong
 #define OFF_NO (curl_off_t) 0
 
 /* Unexpected error.
@@ -235,7 +236,7 @@ while(<STDIN>) {
         elsif($type eq "OFF_T") {
             # play conservative to work with 32bit curl_off_t
             print "${pref} OFF_NO);\n$check";
-            print "${pref} OFF_VAL);\n$check";
+            print "${pref} OFF_HI);\n$check";
             print "${pref} OFF_LO);\n$check";
         }
         else {
