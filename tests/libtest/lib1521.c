@@ -31,9 +31,8 @@ struct data {
 
 #define LO LONG_MIN
 #define HI LONG_MAX
-#define OFF_VAL (curl_off_t) 3123123123
 #define OFF_LO (curl_off_t) LO
-#define OFF_HI (curl_off_t) HI
+#define OFF_HI (curl_off_t) ULONG_MAX
 #define OFF_NO (curl_off_t) 0
 
 /* Unexpected error.
@@ -1097,7 +1096,7 @@ int test(char *URL)
   res = curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, OFF_NO);
   if(UNEX(res)) {
     err("INFILESIZE_LARGE", res, __LINE__); goto test_cleanup; }
-  res = curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, OFF_VAL);
+  res = curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, OFF_HI);
   if(UNEX(res)) {
     err("INFILESIZE_LARGE", res, __LINE__); goto test_cleanup; }
   res = curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, OFF_LO);
@@ -1106,7 +1105,7 @@ int test(char *URL)
   res = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, OFF_NO);
   if(UNEX(res)) {
     err("RESUME_FROM_LARGE", res, __LINE__); goto test_cleanup; }
-  res = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, OFF_VAL);
+  res = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, OFF_HI);
   if(UNEX(res)) {
     err("RESUME_FROM_LARGE", res, __LINE__); goto test_cleanup; }
   res = curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, OFF_LO);
@@ -1115,7 +1114,7 @@ int test(char *URL)
   res = curl_easy_setopt(curl, CURLOPT_MAXFILESIZE_LARGE, OFF_NO);
   if(UNEX(res)) {
     err("MAXFILESIZE_LARGE", res, __LINE__); goto test_cleanup; }
-  res = curl_easy_setopt(curl, CURLOPT_MAXFILESIZE_LARGE, OFF_VAL);
+  res = curl_easy_setopt(curl, CURLOPT_MAXFILESIZE_LARGE, OFF_HI);
   if(UNEX(res)) {
     err("MAXFILESIZE_LARGE", res, __LINE__); goto test_cleanup; }
   res = curl_easy_setopt(curl, CURLOPT_MAXFILESIZE_LARGE, OFF_LO);
@@ -1142,7 +1141,7 @@ int test(char *URL)
   res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, OFF_NO);
   if(UNEX(res)) {
     err("POSTFIELDSIZE_LARGE", res, __LINE__); goto test_cleanup; }
-  res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, OFF_VAL);
+  res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, OFF_HI);
   if(UNEX(res)) {
     err("POSTFIELDSIZE_LARGE", res, __LINE__); goto test_cleanup; }
   res = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, OFF_LO);
@@ -1293,7 +1292,7 @@ int test(char *URL)
   res = curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, OFF_NO);
   if(UNEX(res)) {
     err("MAX_SEND_SPEED_LARGE", res, __LINE__); goto test_cleanup; }
-  res = curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, OFF_VAL);
+  res = curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, OFF_HI);
   if(UNEX(res)) {
     err("MAX_SEND_SPEED_LARGE", res, __LINE__); goto test_cleanup; }
   res = curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, OFF_LO);
@@ -1302,7 +1301,7 @@ int test(char *URL)
   res = curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, OFF_NO);
   if(UNEX(res)) {
     err("MAX_RECV_SPEED_LARGE", res, __LINE__); goto test_cleanup; }
-  res = curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, OFF_VAL);
+  res = curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, OFF_HI);
   if(UNEX(res)) {
     err("MAX_RECV_SPEED_LARGE", res, __LINE__); goto test_cleanup; }
   res = curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, OFF_LO);
@@ -2315,6 +2314,12 @@ int test(char *URL)
   res = curl_easy_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS, HI);
   if(UNEX(res)) {
     err("SUPPRESS_CONNECT_HEADERS", res, __LINE__); goto test_cleanup; }
+  res = curl_easy_setopt(curl, CURLOPT_REQUEST_TARGET, "string");
+  if(UNEX(res)) {
+    err("REQUEST_TARGET", res, __LINE__); goto test_cleanup; }
+  res = curl_easy_setopt(curl, CURLOPT_REQUEST_TARGET, NULL);
+  if(UNEX(res)) {
+    err("REQUEST_TARGET", res, __LINE__); goto test_cleanup; }
   res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &charp);
   if(UNEX(res)) {
     geterr("EFFECTIVE_URL", res, __LINE__); goto test_cleanup; }
