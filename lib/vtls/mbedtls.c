@@ -1002,7 +1002,7 @@ void Curl_mbedtls_cleanup(void)
   (void)Curl_polarsslthreadlock_thread_cleanup();
 }
 
-int Curl_mbedtls_data_pending(const struct connectdata *conn, int sockindex)
+bool Curl_mbedtls_data_pending(const struct connectdata *conn, int sockindex)
 {
   return mbedtls_ssl_get_bytes_avail(&conn->ssl[sockindex].ssl) != 0;
 }

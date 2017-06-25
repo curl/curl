@@ -31,7 +31,7 @@
 /* Called on first use PolarSSL, setup threading if supported */
 int  Curl_polarssl_init(void);
 void Curl_polarssl_cleanup(void);
-int Curl_polarssl_data_pending(const struct connectdata *conn, int sockindex);
+bool Curl_polarssl_data_pending(const struct connectdata *conn, int sockindex);
 
 
 CURLcode Curl_polarssl_connect(struct connectdata *conn, int sockindex);
