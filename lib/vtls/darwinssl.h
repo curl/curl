@@ -48,7 +48,7 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
                            size_t tmplen,
                            unsigned char *md5sum, /* output */
                            size_t md5len);
-void Curl_darwinssl_sha256sum(unsigned char *tmp, /* input */
+void Curl_darwinssl_sha256sum(const unsigned char *tmp, /* input */
                               size_t tmplen,
                               unsigned char *sha256sum, /* output */
                               size_t sha256len);
@@ -93,8 +93,7 @@ bool Curl_darwinssl_false_start(void);
 #define curlssl_data_pending(x,y) Curl_darwinssl_data_pending(x, y)
 #define curlssl_random(x,y,z) Curl_darwinssl_random(x, y,z)
 #define curlssl_md5sum(a,b,c,d) Curl_darwinssl_md5sum(a,b,c,d)
-#define curlssl_sha256sum(a,b,c,d) \
-  Curl_darwinssl_sha256sum((unsigned char *)a, b, c, d)
+#define curlssl_sha256sum(a,b,c,d) Curl_darwinssl_sha256sum(a, b, c, d)
 #define curlssl_false_start() Curl_darwinssl_false_start()
 
 #endif /* USE_DARWINSSL */

@@ -2727,7 +2727,7 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
   (void)CC_MD5(tmp, (CC_LONG)tmplen, md5sum);
 }
 
-void Curl_darwinssl_sha256sum(unsigned char *tmp, /* input */
+void Curl_darwinssl_sha256sum(const unsigned char *tmp, /* input */
                               size_t tmplen,
                               unsigned char *sha256sum, /* output */
                               size_t sha256len)
