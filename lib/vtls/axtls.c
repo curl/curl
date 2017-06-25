@@ -284,6 +284,22 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
+void Curl_axtls_close(struct connectdata *conn, int sockindex)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+
+  infof(conn->data, "  Curl_axtls_close\n");
+
+    /* line from openssl.c: (void)SSL_shutdown(connssl->ssl);
+       axTLS compat layer does nothing for SSL_shutdown */
+
+    /* The following line is from openssl.c.  There seems to be no axTLS
+       equivalent.  ssl_free and ssl_ctx_free close things.
+       SSL_set_connect_state(connssl->handle); */
+
+  free_ssl_structs(connssl);
+}
+
 /*
  * For both blocking and non-blocking connects, this function finalizes the
  * SSL connection.
@@ -541,22 +557,6 @@ static ssize_t axtls_send(struct connectdata *conn,
 
   *err = CURLE_OK;
   return rc;
-}
-
-void Curl_axtls_close(struct connectdata *conn, int sockindex)
-{
-  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-
-  infof(conn->data, "  Curl_axtls_close\n");
-
-    /* line from openssl.c: (void)SSL_shutdown(connssl->ssl);
-       axTLS compat layer does nothing for SSL_shutdown */
-
-    /* The following line is from openssl.c.  There seems to be no axTLS
-       equivalent.  ssl_free and ssl_ctx_free close things.
-       SSL_set_connect_state(connssl->handle); */
-
-  free_ssl_structs(connssl);
 }
 
 /*
