@@ -31,7 +31,7 @@
 /* Called on first use mbedTLS, setup threading if supported */
 int  Curl_mbedtls_init(void);
 void Curl_mbedtls_cleanup(void);
-int Curl_mbedtls_data_pending(const struct connectdata *conn, int sockindex);
+bool Curl_mbedtls_data_pending(const struct connectdata *conn, int sockindex);
 
 CURLcode Curl_mbedtls_connect(struct connectdata *conn, int sockindex);
 
