@@ -28,7 +28,7 @@
 #include "urldata.h"
 
 int Curl_axtls_init(void);
-int Curl_axtls_cleanup(void);
+void Curl_axtls_cleanup(void);
 CURLcode Curl_axtls_connect(struct connectdata *conn, int sockindex);
 CURLcode Curl_axtls_connect_nonblocking(
     struct connectdata *conn,

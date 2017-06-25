@@ -200,13 +200,12 @@ int Curl_gtls_init(void)
   return ret;
 }
 
-int Curl_gtls_cleanup(void)
+void Curl_gtls_cleanup(void)
 {
   if(gtls_inited) {
     gnutls_global_deinit();
     gtls_inited = FALSE;
   }
-  return 1;
 }
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
