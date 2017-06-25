@@ -1435,6 +1435,18 @@ void Curl_schannel_close(struct connectdata *conn, int sockindex)
     Curl_ssl_shutdown(conn, sockindex);
 }
 
+void Curl_schannel_session_free(void *ptr)
+{
+  /* this is expected to be called under sessionid lock */
+  struct curl_schannel_cred *cred = ptr;
+
+  cred->refcount--;
+  if(cred->refcount == 0) {
+    s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
+    Curl_safefree(cred);
+  }
+}
+
 int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 {
   /* See https://msdn.microsoft.com/en-us/library/windows/desktop/aa380138.aspx
@@ -1537,18 +1549,6 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
   }
 
   return CURLE_OK;
-}
-
-void Curl_schannel_session_free(void *ptr)
-{
-  /* this is expected to be called under sessionid lock */
-  struct curl_schannel_cred *cred = ptr;
-
-  cred->refcount--;
-  if(cred->refcount == 0) {
-    s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
-    Curl_safefree(cred);
-  }
 }
 
 int Curl_schannel_init(void)
