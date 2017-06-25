@@ -57,10 +57,9 @@ int Curl_axtls_init(void)
   return 1;
 }
 
-int Curl_axtls_cleanup(void)
+void Curl_axtls_cleanup(void)
 {
   /* axTLS has no global cleanup.  Perhaps can move this to axtls.h. */
-  return 1;
 }
 
 static CURLcode map_error_to_curl(int axtls_err)

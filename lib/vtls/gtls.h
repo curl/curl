@@ -29,7 +29,7 @@
 #include "urldata.h"
 
 int Curl_gtls_init(void);
-int Curl_gtls_cleanup(void);
+void Curl_gtls_cleanup(void);
 CURLcode Curl_gtls_connect(struct connectdata *conn, int sockindex);
 CURLcode Curl_gtls_connect_nonblocking(struct connectdata *conn,
                                        int sockindex,
