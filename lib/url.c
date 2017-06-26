@@ -5082,13 +5082,14 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   else
     proxyptr = proxy; /* No xxx:// head: It's a HTTP proxy */
 
-#ifndef HTTPS_PROXY_SUPPORT
-  if(proxytype == CURLPROXY_HTTPS) {
-    failf(data, "Unsupported proxy \'%s\'"
-                ", libcurl is built without the HTTPS-proxy support.", proxy);
-    return CURLE_NOT_BUILT_IN;
-  }
+#ifdef USE_SSL
+  if(!Curl_ssl->support_https_proxy)
 #endif
+    if(proxytype == CURLPROXY_HTTPS) {
+      failf(data, "Unsupported proxy \'%s\', libcurl is built without the "
+                  "HTTPS-proxy support.", proxy);
+      return CURLE_NOT_BUILT_IN;
+    }
 
   sockstype = proxytype == CURLPROXY_SOCKS5_HOSTNAME ||
               proxytype == CURLPROXY_SOCKS5 ||

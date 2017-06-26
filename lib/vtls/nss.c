@@ -2331,6 +2331,7 @@ const struct Curl_ssl Curl_ssl_nss = {
   1, /* have_certinfo */
   1, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
+  1, /* support_https_proxy */
 
   Curl_nss_init,                /* init */
   Curl_nss_cleanup,             /* cleanup */

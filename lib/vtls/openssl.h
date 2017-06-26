@@ -71,9 +71,6 @@ CURLcode Curl_ossl_random(struct Curl_easy *data, unsigned char *entropy,
 
 bool Curl_ossl_cert_status_request(void);
 
-/* Support HTTPS-proxy */
-#define HTTPS_PROXY_SUPPORT 1
-
 extern const struct Curl_ssl Curl_ssl_openssl;
 
 /* Set the API backend definition to OpenSSL */

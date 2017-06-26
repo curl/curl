@@ -33,6 +33,8 @@ struct Curl_ssl {
   unsigned have_pinnedpubkey:1; /* supports CURLOPT_PINNEDPUBLICKEY */
   unsigned have_ssl_ctx:1;      /* supports CURLOPT_SSL_CTX_* */
 
+  unsigned support_https_proxy:1; /* supports access via HTTPS proxies */
+
   int (*init)(void);
   void (*cleanup)(void);
 

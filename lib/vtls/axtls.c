@@ -709,6 +709,7 @@ const struct Curl_ssl Curl_ssl_axtls = {
   0, /* have_certinfo */
   0, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
+  0, /* support_https_proxy */
 
   Curl_axtls_init,                /* init */
   Curl_axtls_cleanup,             /* cleanup */

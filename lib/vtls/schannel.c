@@ -1733,6 +1733,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   1, /* have_certinfo */
   0, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
+  0, /* support_https_proxy */
 
   Curl_schannel_init,                /* init */
   Curl_schannel_cleanup,             /* cleanup */

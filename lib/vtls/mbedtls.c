@@ -1022,6 +1022,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   0, /* have_certinfo */
   1, /* have_pinnedpubkey */
   1, /* have_ssl_ctx */
+  0, /* support_https_proxy */
 
   Curl_mbedtls_init,                /* init */
   Curl_mbedtls_cleanup,             /* cleanup */
