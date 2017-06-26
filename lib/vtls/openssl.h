@@ -36,8 +36,5 @@ extern const struct Curl_ssl Curl_ssl_openssl;
 /* Set the API backend definition to OpenSSL */
 #define CURL_SSL_BACKEND CURLSSLBACKEND_OPENSSL
 
-#define DEFAULT_CIPHER_SELECTION \
-  "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"
-
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */

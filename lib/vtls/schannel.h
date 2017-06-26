@@ -28,54 +28,6 @@
 
 #include "urldata.h"
 
-#ifndef UNISP_NAME_A
-#define UNISP_NAME_A "Microsoft Unified Security Protocol Provider"
-#endif
-
-#ifndef UNISP_NAME_W
-#define UNISP_NAME_W L"Microsoft Unified Security Protocol Provider"
-#endif
-
-#ifndef UNISP_NAME
-#ifdef UNICODE
-#define UNISP_NAME  UNISP_NAME_W
-#else
-#define UNISP_NAME  UNISP_NAME_A
-#endif
-#endif
-
-#ifndef SP_PROT_SSL2_CLIENT
-#define SP_PROT_SSL2_CLIENT             0x00000008
-#endif
-
-#ifndef SP_PROT_SSL3_CLIENT
-#define SP_PROT_SSL3_CLIENT             0x00000008
-#endif
-
-#ifndef SP_PROT_TLS1_CLIENT
-#define SP_PROT_TLS1_CLIENT             0x00000080
-#endif
-
-#ifndef SP_PROT_TLS1_0_CLIENT
-#define SP_PROT_TLS1_0_CLIENT           SP_PROT_TLS1_CLIENT
-#endif
-
-#ifndef SP_PROT_TLS1_1_CLIENT
-#define SP_PROT_TLS1_1_CLIENT           0x00000200
-#endif
-
-#ifndef SP_PROT_TLS1_2_CLIENT
-#define SP_PROT_TLS1_2_CLIENT           0x00000800
-#endif
-
-#ifndef SECBUFFER_ALERT
-#define SECBUFFER_ALERT                 17
-#endif
-
-/* Both schannel buffer sizes must be > 0 */
-#define CURL_SCHANNEL_BUFFER_INIT_SIZE   4096
-#define CURL_SCHANNEL_BUFFER_FREE_SIZE   1024
-
 extern const struct Curl_ssl Curl_ssl_schannel;
 
 /* Set the API backend definition to Schannel */

@@ -152,6 +152,9 @@ static unsigned long OpenSSL_version_num(void)
 #define OSSL_PACKAGE "OpenSSL"
 #endif
 
+#define DEFAULT_CIPHER_SELECTION \
+  "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"
+
 /*
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have
