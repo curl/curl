@@ -1626,13 +1626,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               else
                 err = add2list(&config->headers, h);
               if(err)
-                return err;
+                break;
               h = strtok(NULL, "\r\n");
             }
             free(string);
           }
           if(!use_stdin)
             fclose(file);
+          if(err)
+            return err;
         }
       }
       else {
