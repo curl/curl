@@ -974,6 +974,7 @@ const struct Curl_ssl Curl_ssl_cyassl = {
   0, /* have_pinnedpubkey */
 #endif
   1, /* have_ssl_ctx */
+  0, /* support_https_proxy */
 
   Curl_cyassl_init,                /* init */
   Curl_none_cleanup,               /* cleanup */

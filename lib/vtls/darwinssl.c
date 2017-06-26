@@ -2881,6 +2881,7 @@ const struct Curl_ssl Curl_ssl_darwinssl = {
   0, /* have_pinnedpubkey */
 #endif /* DARWIN_SSL_PINNEDPUBKEY */
   0, /* have_ssl_ctx */
+  0, /* support_https_proxy */
 
   Curl_none_init,                     /* init */
   Curl_none_cleanup,                  /* cleanup */
