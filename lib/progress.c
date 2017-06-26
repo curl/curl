@@ -161,6 +161,9 @@ void Curl_pgrsResetTimesSizes(struct Curl_easy *data)
   Curl_pgrsSetUploadSize(data, -1);
 }
 
+/*
+ * @unittest: 1399
+ */
 void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
   struct timeval now = Curl_tvnow();
@@ -196,7 +199,18 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
     break;
   case TIMER_STARTTRANSFER:
     delta = &data->progress.t_starttransfer;
-    break;
+    /* prevent updating t_starttransfer unless:
+     *   1) this is the first time we're setting t_starttransfer
+     *   2) a redirect has occurred since the last time t_starttransfer was set
+     * This prevents repeated invocations of the function from incorrectly
+     * changing the t_starttransfer time.
+     */
+    if (*delta > data->progress.t_redirect) {
+      return;
+    }
+    else {
+      break;
+    }
   case TIMER_POSTRANSFER:
     /* this is the normal end-of-transfer thing */
     break;
