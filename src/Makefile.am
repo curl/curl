@@ -83,7 +83,6 @@ libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
 libcurltool_la_SOURCES = $(curl_SOURCES)
 endif
 
-BUILT_SOURCES = tool_hugehelp.c
 CLEANFILES = tool_hugehelp.c
 # Use the C locale to ensure that only ASCII characters appear in the
 # embedded text.
@@ -102,9 +101,6 @@ HUGE=tool_hugehelp.c
 
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
-
-$(MANPAGE):
-	cd $(top_builddir)/docs && $(MAKE)
 
 if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and
