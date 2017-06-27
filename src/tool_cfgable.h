@@ -189,6 +189,7 @@ struct OperationConfig {
   char *preproxy;
   int socks5_gssapi_nec;    /* The NEC reference server does not protect the
                                encryption type exchange */
+  unsigned long socks5_auth;/* auth bitmask for socks5 proxies */
   char *proxy_service_name; /* set authentication service name for HTTP and
                                SOCKS5 proxies */
   char *service_name;       /* set authentication service name for DIGEST-MD5,

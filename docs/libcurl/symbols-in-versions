@@ -17,6 +17,7 @@ CURLAUTH_ANYSAFE                7.10.6
 CURLAUTH_BASIC                  7.10.6
 CURLAUTH_DIGEST                 7.10.6
 CURLAUTH_DIGEST_IE              7.19.3
+CURLAUTH_GSSAPI                 7.55.0
 CURLAUTH_GSSNEGOTIATE           7.10.6       7.38.0
 CURLAUTH_NEGOTIATE              7.38.0
 CURLAUTH_NONE                   7.10.6
@@ -527,6 +528,7 @@ CURLOPT_SERVICE_NAME            7.43.0
 CURLOPT_SHARE                   7.10
 CURLOPT_SOCKOPTDATA             7.16.0
 CURLOPT_SOCKOPTFUNCTION         7.16.0
+CURLOPT_SOCKS5_AUTH             7.55.0
 CURLOPT_SOCKS5_GSSAPI_NEC       7.19.4
 CURLOPT_SOCKS5_GSSAPI_SERVICE   7.19.4        7.49.0
 CURLOPT_SOURCE_HOST             7.12.1        -           7.15.5

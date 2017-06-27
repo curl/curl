@@ -1343,6 +1343,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_NEC,
                         config->socks5_gssapi_nec);
 
+        /* new in curl 7.55.0 */
+        if(config->socks5_auth)
+          my_setopt_bitmask(curl, CURLOPT_SOCKS5_AUTH,
+                            (long)config->socks5_auth);
+
         /* new in curl 7.43.0 */
         if(config->proxy_service_name)
           my_setopt_str(curl, CURLOPT_PROXY_SERVICE_NAME,
