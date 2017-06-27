@@ -109,5 +109,11 @@ libhostname_la_SOURCES = sethostname.c sethostname.h
 libhostname_la_LIBADD =
 libhostname_la_DEPENDENCIES =
 
+lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
+	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h > lib1521.c
+
 checksrc:
 	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
+
+dist:
+	rm lib1521.c
