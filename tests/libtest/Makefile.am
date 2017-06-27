@@ -45,7 +45,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 endif
 
 EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
-test1022.pl Makefile.inc notexists.pl CMakeLists.txt
+test1022.pl Makefile.inc notexists.pl CMakeLists.txt mk-lib1521.pl
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
@@ -109,5 +109,11 @@ libhostname_la_SOURCES = sethostname.c sethostname.h
 libhostname_la_LIBADD =
 libhostname_la_DEPENDENCIES =
 
+lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
+	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h > lib1521.c
+
 checksrc:
 	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
+
+dist:
+	rm lib1521.c
