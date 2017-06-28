@@ -76,6 +76,9 @@ option(BUILD_CURL_EXE "Set to ON to build curl executable." ON)
 option(CURL_STATICLIB "Set to ON to build libcurl with static linking." OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 if(WIN32)
+  option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
+  option(ENABLE_INET_PTON "Set to OFF to prevent usage of inet_pton on Windows. For compatability with Windows XP, Windows Server 2003 etc." ON)
+
   CMAKE_DEPENDENT_OPTION(ENABLE_THREADED_RESOLVER
                          "Set to ON to enable threaded DNS lookup"
                          ON "NOT ENABLE_ARES"
@@ -230,6 +233,11 @@ find_package(Perl REQUIRED)
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS ${CMAKE_ANSI_CFLAGS})
+
+if(CURL_STATIC_CRT)
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
+endif()
 
 # Disable warnings on Borland to avoid changing 3rd party code.
 if(BORLAND)
@@ -924,7 +932,9 @@ check_symbol_exists(ioctl          "${CURL_INCLUDES}" HAVE_IOCTL)
 check_symbol_exists(setsockopt     "${CURL_INCLUDES}" HAVE_SETSOCKOPT)
 
 # symbol exists in win32, but function does not.
-check_function_exists(inet_pton HAVE_INET_PTON)
+if(ENABLE_INET_PTON)  
+  check_function_exists(inet_pton HAVE_INET_PTON)
+endif()
 
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
