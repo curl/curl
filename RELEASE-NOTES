@@ -1,8 +1,8 @@
 Curl and libcurl 7.55.0
 
  Public curl releases:         167
- Command line options:         207
- curl_easy_setopt() options:   245
+ Command line options:         210
+ curl_easy_setopt() options:   247
  Public functions in libcurl:  61
  Contributors:                 1571
 
@@ -11,6 +11,10 @@ This release includes the following changes:
  o curl: allow --header and --proxy-header read from file [7]
  o getinfo: provide sizes as curl_off_t [6]
  o curl: prevent binary output spewed to terminal [16]
+ o curl: added --request-target [22]
+ o libcurl: added CURLOPT_REQUEST_TARGET [22]
+ o curl: added --socks5-{basic,gssapi}: control socks5 auth [30]
+ o libcurl: added CURLOPT_SOCKS5_AUTH [30]
 
 This release includes the following bugfixes:
 
@@ -35,6 +39,22 @@ This release includes the following bugfixes:
  o CURLOPT_PREQUOTE: not supported for SFTP [17]
  o http2: fix OOM crash
  o PIPELINING_SERVER_BL: cleanup the internal list use [18]
+ o mkhelp.pl: fix script name in usage text
+ o lib1521: add curl_easy_getinfo calls to the test set
+ o travis: do the distcheck test build out-of-tree as well
+ o if2ip: fix compiler warning in ISO C90 mode
+ o lib: fix the djgpp build [19]
+ o typecheck-gcc: add support for CURLINFO_OFF_T [20]
+ o travis: enable typecheck-gcc warnings [21]
+ o maketgz: switch to xz instead of lzma [23]
+ o CURLINFO_REDIRECT_URL.3: mention the CURLOPT_MAXREDIRS case
+ o curl-compilers.m4: fix unknown-warning-option on Apple clang [24]
+ o winbuild: fix boringssl build [25]
+ o curl/system.h: add check for XTENSA for 32bit gcc [26]
+ o test1537: fixed memory leak on OOM
+ o test1521: fix compiler warnings [27]
+ o curl: fix memory leak on test 1147 OOM [28]
+ o libtest/make: generate lib1521.c dynamically at build-time [29]
 
 This release includes the following known bugs:
 
@@ -43,10 +63,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Fandrich, Daniel Stenberg, Frederik B, Jakub Wilk, Marcel Raad,
-  Matteo B., Michael Kaufmann, Pascal Terjan, Paul Harris, Ray Satiro,
+  Dan Fandrich, Daniel Stenberg, Evert Pot, Frederik B, Gisle Vanem,
+  Henrik S. Gaßmann, Jakub Wilk, Kamil Dudka, Marcel Raad, Matteo B.,
+  Michael Kaufmann, Neil Kolban, Pascal Terjan, Paul Harris, Ray Satiro,
   Simon Warta, Timothe Litt,
-  (12 contributors)
+  (17 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -70,3 +91,15 @@ References to bug reports and discussions on issues:
  [16] = https://curl.haxx.se/bug/?i=1512
  [17] = https://curl.haxx.se/bug/?i=1514
  [18] = https://curl.haxx.se/bug/?i=1584
+ [19] = https://github.com/curl/curl/commit/73a2fcea0b4adea6ba342cd7ed1149782c214ae3#commitcomment-22655993
+ [20] = https://curl.haxx.se/bug/?i=1592
+ [21] = https://curl.haxx.se/bug/?i=1595
+ [22] = https://curl.haxx.se/bug/?i=1593
+ [23] = https://curl.haxx.se/bug/?i=1604
+ [24] = https://curl.haxx.se/bug/?i=1606
+ [25] = https://curl.haxx.se/bug/?i=1610
+ [26] = https://curl.haxx.se/bug/?i=1598
+ [27] = https://curl.haxx.se/bug/?i=1611
+ [28] = https://github.com/curl/curl/pull/1486#issuecomment-310926872
+ [29] = https://curl.haxx.se/bug/?i=1614
+ [30] = https://curl.haxx.se/bug/?i=1454
