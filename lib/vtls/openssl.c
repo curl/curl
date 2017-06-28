@@ -284,22 +284,23 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
   }
 #endif
 
-  /* fallback to a custom seeding of the PRNG using a hash based on a current time. */
+  /* fallback to a custom seeding of the PRNG using a hash based on a current
+     time */
   do {
     unsigned char randb[64];
     int len = sizeof(randb), i, i_max;
-    for (i = 0, i_max = len / sizeof(struct timeval); i < i_max; ++i) {
+    for(i = 0, i_max = len / sizeof(struct timeval); i < i_max; ++i) {
       struct timeval tv = curlx_tvnow();
       Curl_wait_ms(1);
       tv.tv_sec *= i + 1;
       tv.tv_usec *= i + 2;
-      tv.tv_sec ^= ((curlx_tvnow().tv_sec + curlx_tvnow().tv_usec) * (i + 3)) << 8;
-      tv.tv_usec ^= ((curlx_tvnow().tv_sec + curlx_tvnow().tv_usec) * (i + 4)) << 16;
+      tv.tv_sec ^= ((curlx_tvnow().tv_sec + curlx_tvnow().tv_usec) *
+        (i + 3)) << 8;
+      tv.tv_usec ^= ((curlx_tvnow().tv_sec + curlx_tvnow().tv_usec) *
+        (i + 4)) << 16;
       memcpy(&randb[i * sizeof(struct timeval)], &tv, sizeof(struct timeval));
     }
     RAND_add(randb, len, (len >> 1));
-    if(RAND_bytes(randb, len))
-      RAND_add(randb, len, (len >> 1));
   } while(!rand_enough());
 
   /* generates a default path for the random seed file */
@@ -313,7 +314,8 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
   }
 
   infof(data, "libcurl is now using a weak random seed!\n");
-  return (rand_enough() ? CURLE_OK : CURLE_SSL_CONNECT_ERROR /* confusing error code */);
+  return (rand_enough() ? CURLE_OK :
+    CURLE_SSL_CONNECT_ERROR /* confusing error code */);
 }
 
 #ifndef SSL_FILETYPE_ENGINE
