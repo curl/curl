@@ -77,7 +77,7 @@ option(CURL_STATICLIB "Set to ON to build libcurl with static linking." OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
-  option(ENABLE_INET_PTON "Set to OFF to prevent usage of inet_pton on Windows. For compatability with Windows XP, Windows Server 2003 etc." ON)
+  option(ENABLE_INET_PTON "Set to OFF to prevent usage of inet_pton when building against modern SDKs while still requiring compatibility with older Windows versions, such as Windows XP, Windows Server 2003 etc." ON)
 
   CMAKE_DEPENDENT_OPTION(ENABLE_THREADED_RESOLVER
                          "Set to ON to enable threaded DNS lookup"
