@@ -145,6 +145,7 @@ my $HTTPPROXYPORT;       # HTTP proxy port, when using CONNECT
 my $HTTPPIPEPORT;        # HTTP pipelining port
 my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
 my $HTTP2PORT;           # HTTP/2 server port
+my $DICTPORT;            # DICT server port
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
@@ -378,7 +379,8 @@ sub init_serverpidfile_hash {
       }
     }
   }
-  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'gopher', 'httptls')) {
+  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'gopher', 'httptls',
+                  'dict')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -1143,7 +1145,8 @@ my %protofunc = ('http' => \&verifyhttp,
                  'ssh' => \&verifyssh,
                  'socks' => \&verifysocks,
                  'gopher' => \&verifyhttp,
-                 'httptls' => \&verifyhttptls);
+                 'httptls' => \&verifyhttptls,
+                 'dict' => \&verifyftp);
 
 sub verifyserver {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
@@ -2165,6 +2168,82 @@ sub runsocksserver {
 }
 
 #######################################################################
+# start the dict server
+#
+sub rundictserver {
+    my ($verbose, $alt, $port) = @_;
+    my $proto = "dict";
+    my $ip = $HOSTIP;
+    my $ipvnum = 4;
+    my $idnum = 1;
+    my $server;
+    my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
+
+    if($alt eq "ipv6") {
+        # No IPv6
+    }
+
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
+
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
+    my $pid = processexists($pidfile);
+    if($pid > 0) {
+        stopserver($server, "$pid");
+    }
+    unlink($pidfile) if(-f $pidfile);
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
+
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--verbose 1 " if($debugprotocol);
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--id $idnum " if($idnum > 1);
+    $flags .= "--port $port --srcdir \"$srcdir\"";
+
+    my $cmd = "$srcdir/dictserver.py $flags";
+    my ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+
+    if($dictpid <= 0 || !pidexists($dictpid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the $srvrname server\n";
+        stopserver($server, "$pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    # Server is up. Verify that we can speak to it.
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
+    if(!$pid3) {
+        logmsg "RUN: $srvrname server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver($server, "$dictpid $pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+    $pid2 = $pid3;
+
+    if($verbose) {
+        logmsg "RUN: $srvrname server is now running PID $dictpid\n";
+    }
+
+    sleep(1);
+
+    return ($dictpid, $pid2);
+}
+
+#######################################################################
 # Single shot http and gopher server responsiveness test. This should only
 # be used to verify that a server present in %run hash is still functional
 #
@@ -2762,6 +2841,8 @@ sub subVariables {
   $$thing =~ s/%TFTP6PORT/$TFTP6PORT/g;
   $$thing =~ s/%TFTPPORT/$TFTPPORT/g;
 
+  $$thing =~ s/%DICTPORT/$DICTPORT/g;
+
   # server Unix domain socket paths
 
   $$thing =~ s/%HTTPUNIXPATH/$HTTPUNIXPATH/g;
@@ -2796,7 +2877,7 @@ sub subVariables {
 
   # HTTP2
 
-  $$thing =~ s/%H2CVER/$h2cver/g;  
+  $$thing =~ s/%H2CVER/$h2cver/g;
 }
 
 sub fixarray {
@@ -4603,6 +4684,17 @@ sub startservers {
                 $run{'http-unix'}="$pid $pid2";
             }
         }
+        elsif($what eq "dict") {
+            if(!$run{'dict'}) {
+                ($pid, $pid2) = rundictserver($verbose, "", $DICTPORT);
+                if($pid <= 0) {
+                    return "failed starting DICT server";
+                }
+                logmsg sprintf ("* pid DICT => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'dict'}="$pid $pid2";
+            }
+        }
         elsif($what eq "none") {
             logmsg "* starts no server\n" if ($verbose);
         }
@@ -5062,6 +5154,7 @@ $HTTPTLS6PORT    = $base++; # HTTP TLS (non-stunnel) IPv6 server port
 $HTTPPROXYPORT   = $base++; # HTTP proxy port, when using CONNECT
 $HTTPPIPEPORT    = $base++; # HTTP pipelining port
 $HTTP2PORT       = $base++; # HTTP/2 port
+$DICTPORT        = $base++; # DICT port
 $HTTPUNIXPATH    = 'http.sock'; # HTTP server Unix domain socket path
 
 #######################################################################
