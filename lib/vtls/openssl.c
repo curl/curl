@@ -236,7 +236,6 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
   /* we have the "SSL is seeded" boolean static to prevent multiple
      time-consuming seedings in vain */
   static bool ssl_seeded = FALSE;
-  int nread=0;
   char fname[256];
 
   if(ssl_seeded)
@@ -256,12 +255,12 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
 #endif
   {
     /* let the option override the define */
-    nread += RAND_load_file((data->set.str[STRING_SSL_RANDOM_FILE]?
-                             data->set.str[STRING_SSL_RANDOM_FILE]:
-                             RANDOM_FILE),
-                            RAND_LOAD_LENGTH);
+    RAND_load_file((data->set.str[STRING_SSL_RANDOM_FILE]?
+                    data->set.str[STRING_SSL_RANDOM_FILE]:
+                    RANDOM_FILE),
+                   RAND_LOAD_LENGTH);
     if(rand_enough())
-      return nread;
+      return CURLE_OK;
   }
 
 #if defined(HAVE_RAND_EGD)
@@ -279,20 +278,28 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
     int ret = RAND_egd(data->set.str[STRING_SSL_EGDSOCKET]?
                        data->set.str[STRING_SSL_EGDSOCKET]:EGD_SOCKET);
     if(-1 != ret) {
-      nread += ret;
       if(rand_enough())
-        return nread;
+        return CURLE_OK;
     }
   }
 #endif
 
-  /* If we get here, it means we need to seed the PRNG using a "silly"
-     approach! */
+  /* fallback to a custom seeding of the PRNG using a hash based on a current
+     time */
   do {
     unsigned char randb[64];
-    int len = sizeof(randb);
-    if(!RAND_bytes(randb, len))
-      break;
+    int len = sizeof(randb), i, i_max;
+    for(i = 0, i_max = len / sizeof(struct timeval); i < i_max; ++i) {
+      struct timeval tv = curlx_tvnow();
+      Curl_wait_ms(1);
+      tv.tv_sec *= i + 1;
+      tv.tv_usec *= i + 2;
+      tv.tv_sec ^= ((curlx_tvnow().tv_sec + curlx_tvnow().tv_usec) *
+        (i + 3)) << 8;
+      tv.tv_usec ^= ((curlx_tvnow().tv_sec + curlx_tvnow().tv_usec) *
+        (i + 4)) << 16;
+      memcpy(&randb[i * sizeof(struct timeval)], &tv, sizeof(struct timeval));
+    }
     RAND_add(randb, len, (len >> 1));
   } while(!rand_enough());
 
@@ -301,13 +308,14 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
   RAND_file_name(fname, sizeof(fname));
   if(fname[0]) {
     /* we got a file name to try */
-    nread += RAND_load_file(fname, RAND_LOAD_LENGTH);
+    RAND_load_file(fname, RAND_LOAD_LENGTH);
     if(rand_enough())
-      return nread;
+      return CURLE_OK;
   }
 
   infof(data, "libcurl is now using a weak random seed!\n");
-  return CURLE_SSL_CONNECT_ERROR; /* confusing error code */
+  return (rand_enough() ? CURLE_OK :
+    CURLE_SSL_CONNECT_ERROR /* confusing error code */);
 }
 
 #ifndef SSL_FILETYPE_ENGINE
