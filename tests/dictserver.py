@@ -52,34 +52,37 @@ class DictHandler(socketserver.BaseRequestHandler):
         """
         Simple function which responds to all queries with a 552.
         """
+        try:
+            # First, send a response to allow the server to continue.
+            rsp = "220 dictserver <xnooptions> <msgid@msgid>\n"
+            self.request.sendall(rsp.encode("utf-8"))
 
-        # First, send a response to allow the server to continue.
-        rsp = "220 dictserver <xnooptions> <msgid@msgid>\n"
-        self.request.sendall(rsp.encode("utf-8"))
+            # Receive the request.
+            data = self.request.recv(1024).strip()
+            log.debug("[DICT] Incoming data: %r", data)
 
-        # Receive the request.
-        data = self.request.recv(1024).strip()
-        log.debug("[DICT] Incoming data: %r", data)
+            if VERIFIED_REQ in data:
+                log.debug("[DICT] Received verification request from test "
+                          "framework")
+                response_data = VERIFIED_RSP.format(pid=os.getpid())
+            else:
+                log.debug("[DICT] Received normal request")
+                response_data = "No matches"
 
-        if VERIFIED_REQ in data:
-            log.debug("[DICT] Received verification request from test "
-                      "framework")
-            response_data = VERIFIED_RSP.format(pid=os.getpid())
-        else:
-            log.debug("[DICT] Received normal request")
-            response_data = "No matches"
+            # Send back a failure to find.
+            response = "552 {0}\n".format(response_data)
+            log.debug("[DICT] Responding with %r", response)
+            self.request.sendall(response.encode("utf-8"))
 
-        # Send back a failure to find.
-        response = "552 {0}\n".format(response_data)
-        log.debug("[DICT] Responding with %r", response)
-        self.request.sendall(response.encode("utf-8"))
+        except IOError:
+            log.exception("[DICT] IOError hit during request")
 
 
 def get_options():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--port", action="store", default=9016,
-                      type=int, help="port to listen on")
+                        type=int, help="port to listen on")
     parser.add_argument("--verbose", action="store", type=int, default=0,
                         help="verbose output")
     parser.add_argument("--pidfile", action="store",
