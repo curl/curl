@@ -28,6 +28,7 @@
 #include "http2.h"
 #include "http.h"
 #include "sendf.h"
+#include "select.h"
 #include "curl_base64.h"
 #include "strcase.h"
 #include "multiif.h"
@@ -151,6 +152,49 @@ static CURLcode http2_disconnect(struct connectdata *conn,
   return CURLE_OK;
 }
 
+/*
+ * The server may send us data at any point (e.g. PING frames). Therefore,
+ * we cannot assume that an HTTP/2 socket is dead just because it is readable.
+ *
+ * Instead, if it is readable, run Curl_connalive() to peek at the socket
+ * and distinguish between closed and data.
+ */
+static bool http2_connisdead(struct connectdata *check)
+{
+  int sval;
+  bool ret_val = TRUE;
+
+  sval = SOCKET_READABLE(check->sock[FIRSTSOCKET], 0);
+  if(sval == 0) {
+    /* timeout */
+    ret_val = FALSE;
+  }
+  else if(sval & CURL_CSELECT_ERR) {
+    /* socket is in an error state */
+    ret_val = TRUE;
+  }
+  else if(sval & CURL_CSELECT_IN) {
+    /* readable with no error. could still be closed */
+    ret_val = !Curl_connalive(check);
+  }
+
+  return ret_val;
+}
+
+
+static unsigned int http2_conncheck(struct connectdata *check,
+                                    unsigned int checks_to_perform)
+{
+  unsigned int ret_val = CONNRESULT_NONE;
+
+  if(checks_to_perform & CONNCHECK_ISDEAD) {
+    if(http2_connisdead(check))
+      ret_val |= CONNRESULT_DEAD;
+  }
+
+  return ret_val;
+}
+
 /* called from Curl_http_setup_conn */
 void Curl_http2_setup_req(struct Curl_easy *data)
 {
@@ -196,6 +240,7 @@ static const struct Curl_handler Curl_handler_http2 = {
   http2_perform_getsock,                /* perform_getsock */
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  http2_conncheck,                      /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
   PROTOPT_STREAM                        /* flags */
@@ -216,6 +261,7 @@ static const struct Curl_handler Curl_handler_http2_ssl = {
   http2_perform_getsock,                /* perform_getsock */
   http2_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  http2_conncheck,                      /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
   PROTOPT_SSL | PROTOPT_STREAM          /* flags */

@@ -128,6 +128,7 @@ const struct Curl_handler Curl_handler_imap = {
   ZERO_NULL,                        /* perform_getsock */
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
+  ZERO_NULL,                        /* connection_check */
   PORT_IMAP,                        /* defport */
   CURLPROTO_IMAP,                   /* protocol */
   PROTOPT_CLOSEACTION|              /* flags */
@@ -154,6 +155,7 @@ const struct Curl_handler Curl_handler_imaps = {
   ZERO_NULL,                        /* perform_getsock */
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
+  ZERO_NULL,                        /* connection_check */
   PORT_IMAPS,                       /* defport */
   CURLPROTO_IMAPS,                  /* protocol */
   PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */

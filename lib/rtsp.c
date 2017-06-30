@@ -81,6 +81,9 @@ static CURLcode rtsp_rtp_readwrite(struct Curl_easy *data,
 
 static CURLcode rtsp_setup_connection(struct connectdata *conn);
 
+bool rtsp_connisdead(struct connectdata *check);
+static unsigned int rtsp_conncheck(struct connectdata *check,
+                                   unsigned int checks_to_perform);
 
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we're always _sending_ a request and thus we wait for
@@ -117,6 +120,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   ZERO_NULL,                            /* perform_getsock */
   rtsp_disconnect,                      /* disconnect */
   rtsp_rtp_readwrite,                   /* readwrite */
+  rtsp_conncheck,                       /* connection_check */
   PORT_RTSP,                            /* defport */
   CURLPROTO_RTSP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
@@ -143,7 +147,7 @@ static CURLcode rtsp_setup_connection(struct connectdata *conn)
  * Instead, if it is readable, run Curl_connalive() to peek at the socket
  * and distinguish between closed and data.
  */
-bool Curl_rtsp_connisdead(struct connectdata *check)
+bool rtsp_connisdead(struct connectdata *check)
 {
   int sval;
   bool ret_val = TRUE;
@@ -164,6 +168,23 @@ bool Curl_rtsp_connisdead(struct connectdata *check)
 
   return ret_val;
 }
+
+/*
+ * Function to check on various aspects of a connection.
+ */
+static unsigned int rtsp_conncheck(struct connectdata *check,
+                                   unsigned int checks_to_perform)
+{
+  unsigned int ret_val = CONNRESULT_NONE;
+
+  if(checks_to_perform & CONNCHECK_ISDEAD) {
+    if(rtsp_connisdead(check))
+      ret_val |= CONNRESULT_DEAD;
+  }
+
+  return ret_val;
+}
+
 
 static CURLcode rtsp_connect(struct connectdata *conn, bool *done)
 {

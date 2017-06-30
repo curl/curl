@@ -178,6 +178,7 @@ const struct Curl_handler Curl_handler_ftp = {
   ZERO_NULL,                       /* perform_getsock */
   ftp_disconnect,                  /* disconnect */
   ZERO_NULL,                       /* readwrite */
+  ZERO_NULL,                       /* connection_check */
   PORT_FTP,                        /* defport */
   CURLPROTO_FTP,                   /* protocol */
   PROTOPT_DUAL | PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD |
@@ -205,6 +206,7 @@ const struct Curl_handler Curl_handler_ftps = {
   ZERO_NULL,                       /* perform_getsock */
   ftp_disconnect,                  /* disconnect */
   ZERO_NULL,                       /* readwrite */
+  ZERO_NULL,                       /* connection_check */
   PORT_FTPS,                       /* defport */
   CURLPROTO_FTPS,                  /* protocol */
   PROTOPT_SSL | PROTOPT_DUAL | PROTOPT_CLOSEACTION |
