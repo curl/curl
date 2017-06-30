@@ -154,8 +154,8 @@ CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP) $(VC7_LIBVCPROJ) $(VC7_SRCVCPROJ)	\
 
 bin_SCRIPTS = curl-config
 
-SUBDIRS = lib docs src include
-DIST_SUBDIRS = $(SUBDIRS) tests packages scripts
+SUBDIRS = lib src
+DIST_SUBDIRS = $(SUBDIRS) tests packages scripts include docs
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
