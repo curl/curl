@@ -30,7 +30,8 @@
 
 void Curl_speedinit(struct Curl_easy *data)
 {
-  memset(&data->state.keeps_speed, 0, sizeof(struct timeval));
+  memset(&data->state.speedcheck_starttime, 0, sizeof(struct timeval));
+  data->state.speedcheck_startbytes = 0;
 }
 
 /*
@@ -39,35 +40,44 @@ void Curl_speedinit(struct Curl_easy *data)
 CURLcode Curl_speedcheck(struct Curl_easy *data,
                          struct timeval now)
 {
-  if((data->progress.current_speed >= 0) && data->set.low_speed_time) {
-    if(data->progress.current_speed < data->set.low_speed_limit) {
-      if(!data->state.keeps_speed.tv_sec)
-        /* under the limit at this very moment */
-        data->state.keeps_speed = now;
-      else {
-        /* how long has it been under the limit */
-        time_t howlong = Curl_tvdiff(now, data->state.keeps_speed);
+  time_t howlong = Curl_tvdiff(now, data->state.speedcheck_starttime);
+  if(data->set.low_speed_time > 0 && howlong > 0) {
+    /* Note the starttime<now test, don't bother in the same second */
 
-        if(howlong >= data->set.low_speed_time * 1000) {
-          /* too long */
-          failf(data,
-                "Operation too slow. "
-                "Less than %ld bytes/sec transferred the last %ld seconds",
-                data->set.low_speed_limit,
-                data->set.low_speed_time);
-          return CURLE_OPERATION_TIMEDOUT;
-        }
+    curl_off_t so_far = data->progress.downloaded + data->progress.uploaded;
+
+    if(data->state.speedcheck_starttime.tv_sec) {
+      /* we have recorded a starttime */
+
+      /* TODO: thresh is rounded down in this integer division,
+       * is that a problem? */
+      curl_off_t thresh = (data->set.low_speed_limit * howlong) / 1000L;
+
+      if(thresh < (so_far - data->state.speedcheck_startbytes)) {
+        /* reset if enough bytes have been transferred inside the time limit */
+        data->state.speedcheck_starttime = now;
+        data->state.speedcheck_startbytes = so_far;
       }
+      else if(howlong >= data->set.low_speed_time * 1000) {
+        /* too long */
+        failf(data,
+              "Operation too slow. "
+              "Less than %ld bytes/sec transferred the last %ld seconds",
+              data->set.low_speed_limit,
+              data->set.low_speed_time);
+        return CURLE_OPERATION_TIMEDOUT;
+      }
+      /* else, we'll check again next time */
     }
-    else
-      /* faster right now */
-      data->state.keeps_speed.tv_sec = 0;
-  }
+    else {
+      /* we have not started the count yet, begin now */
+      data->state.speedcheck_starttime = now;
+      data->state.speedcheck_startbytes = so_far;
+    }
 
-  if(data->set.low_speed_limit)
-    /* if low speed limit is enabled, set the expire timer to make this
-       connection's speed get checked again in a second */
+    /* set the expire timer to checked again in a second */
     Curl_expire(data, 1000, EXPIRE_SPEEDCHECK);
+  }
 
   return CURLE_OK;
 }

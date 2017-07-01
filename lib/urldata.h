@@ -1374,9 +1374,11 @@ struct UrlState {
      also close the multi handle! */
   bool multi_owned_by_easy;
 
-  /* buffers to store authentication data in, as parsed from input options */
-  struct timeval keeps_speed; /* for the progress meter really */
+  /* speedcheck data */
+  struct timeval speedcheck_starttime;
+  curl_off_t speedcheck_startbytes;
 
+  /* buffers to store authentication data in, as parsed from input options */
   struct connectdata *lastconnect; /* The last connection, NULL if undefined */
 
   char *headerbuff; /* allocated buffer to store headers in */
