@@ -91,7 +91,7 @@ UNITTEST_START
   */
   data.progress.t_startsingle.tv_sec = now.tv_sec - 3;
   data.progress.t_startsingle.tv_usec = now.tv_usec;
-  data.progress.t_redirect = (now.tv_sec - 2) * usec_magnitude;
+  data.progress.t_redirect = data.progress.t_starttransfer + 1;
 
   Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
 
