@@ -1288,6 +1288,13 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     failf(data, "No URL set!");
     return CURLE_URL_MALFORMAT;
   }
+  /* since the URL may have been redirected in a previous use of this handle */
+  if(data->change.url_alloc) {
+    /* the already set URL is allocated, free it first! */
+    Curl_safefree(data->change.url);
+    data->change.url_alloc = FALSE;
+  }
+  data->change.url = data->set.str[STRING_SET_URL];
 
   /* Init the SSL session ID cache here. We do it here since we want to do it
      after the *_setopt() calls (that could specify the size of the cache) but
