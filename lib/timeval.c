@@ -145,8 +145,8 @@ time_t Curl_tvdiff_us(struct timeval newer, struct timeval older)
     return 0x7fffffff;
 #else
   /* for 64bit time_t systems */
-  if(diff >= (0x7fffffffffffffff/1000000))
-    return 0x7fffffffffffffff;
+  if(diff >= (0x7fffffffffffffffLL/1000000))
+    return 0x7fffffffffffffffLL;
 #endif
   return (newer.tv_sec-older.tv_sec)*1000000+
     (time_t)(newer.tv_usec-older.tv_usec);
