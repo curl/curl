@@ -60,15 +60,13 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-/*
- Some hackish cast macros based on:
- https://developer.gnome.org/glib/unstable/glib-Type-Conversion-Macros.html
-*/
-#ifndef GNUTLS_POINTER_TO_INT_CAST
-#define GNUTLS_POINTER_TO_INT_CAST(p) ((int) (long) (p))
+#ifndef GNUTLS_POINTER_TO_SOCKET_CAST
+#define GNUTLS_POINTER_TO_SOCKET_CAST(p) \
+  ((curl_socket_t) ((char *)(p) - (char *)NULL))
 #endif
-#ifndef GNUTLS_INT_TO_POINTER_CAST
-#define GNUTLS_INT_TO_POINTER_CAST(i) ((void *) (long) (i))
+#ifndef GNUTLS_SOCKET_TO_POINTER_CAST
+#define GNUTLS_SOCKET_TO_POINTER_CAST(s) \
+  ((void *) ((char *)NULL + (s)))
 #endif
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
@@ -153,7 +151,7 @@ static int gtls_mapped_sockerrno(void)
 
 static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 {
-  ssize_t ret = swrite(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
+  ssize_t ret = swrite(GNUTLS_POINTER_TO_SOCKET_CAST(s), buf, len);
 #if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
   if(ret < 0)
     gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
@@ -163,7 +161,7 @@ static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 
 static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
 {
-  ssize_t ret = sread(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
+  ssize_t ret = sread(GNUTLS_POINTER_TO_SOCKET_CAST(s), buf, len);
 #if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
   if(ret < 0)
     gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
@@ -850,7 +848,7 @@ gtls_connect_step1(struct connectdata *conn,
   }
   else {
     /* file descriptor for the socket */
-    transport_ptr = GNUTLS_INT_TO_POINTER_CAST(conn->sock[sockindex]);
+    transport_ptr = GNUTLS_SOCKET_TO_POINTER_CAST(conn->sock[sockindex]);
     gnutls_transport_push = Curl_gtls_push;
     gnutls_transport_pull = Curl_gtls_pull;
   }
