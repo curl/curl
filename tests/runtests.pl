@@ -146,6 +146,8 @@ my $HTTPPIPEPORT;        # HTTP pipelining port
 my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
 my $HTTP2PORT;           # HTTP/2 server port
 my $DICTPORT;            # DICT server port
+my $SMBPORT;             # SMB server port
+my $SMBSPORT;            # SMBS server port
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
@@ -380,7 +382,7 @@ sub init_serverpidfile_hash {
     }
   }
   for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'gopher', 'httptls',
-                  'dict')) {
+                  'dict', 'smb', 'smbs')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -1121,6 +1123,67 @@ sub verifysocks {
 }
 
 #######################################################################
+# Verify that the server that runs on $ip, $port is our server.  This also
+# implies that we can speak with it, as there might be occasions when the
+# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
+# assign requested address")
+#
+sub verifysmb {
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $server = servername_id($proto, $ipvnum, $idnum);
+    my $pid = 0;
+    my $time=time();
+    my $extra="";
+
+    my $verifylog = "$LOGDIR/".
+        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+    unlink($verifylog) if(-f $verifylog);
+
+    my $flags = "--max-time $server_response_maxtime ";
+    $flags .= "--silent ";
+    $flags .= "--verbose ";
+    $flags .= "--globoff ";
+    $flags .= "-u 'curltest:curltest' ";
+    $flags .= $extra;
+    $flags .= "\"$proto://$ip:$port/SERVER/verifiedserver\"";
+
+    my $cmd = "$VCURL $flags 2>$verifylog";
+
+    # check if this is our server running on this port:
+    logmsg "RUN: $cmd\n" if($verbose);
+    my @data = runclientoutput($cmd);
+
+    my $res = $? >> 8; # rotate the result
+    if($res & 128) {
+        logmsg "RUN: curl command died with a coredump\n";
+        return -1;
+    }
+
+    foreach my $line (@data) {
+        if($line =~ /WE ROOLZ: (\d+)/) {
+            # this is our test server with a known pid!
+            $pid = 0+$1;
+            last;
+        }
+    }
+    if($pid <= 0 && @data && $data[0]) {
+        # this is not a known server
+        logmsg "RUN: Unknown server on our $server port: $port\n";
+        return 0;
+    }
+    # we can/should use the time it took to verify the server as a measure
+    # on how fast/slow this host is.
+    my $took = int(0.5+time()-$time);
+
+    if($verbose) {
+        logmsg "RUN: Verifying our test $server server took $took seconds\n";
+    }
+    $ftpchecktime = $took>=1?$took:1; # make sure it never is below 1
+
+    return $pid;
+}
+
+#######################################################################
 # Verify that the server that runs on $ip, $port is our server.
 # Retry over several seconds before giving up.  The ssh server in
 # particular can take a long time to start if it needs to generate
@@ -1146,7 +1209,8 @@ my %protofunc = ('http' => \&verifyhttp,
                  'socks' => \&verifysocks,
                  'gopher' => \&verifyhttp,
                  'httptls' => \&verifyhttptls,
-                 'dict' => \&verifyftp);
+                 'dict' => \&verifyftp,
+                 'smb' => \&verifysmb);
 
 sub verifyserver {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
@@ -2244,6 +2308,83 @@ sub rundictserver {
 }
 
 #######################################################################
+# start the SMB server
+#
+sub runsmbserver {
+    my ($verbose, $alt, $port) = @_;
+    my $proto = "smb";
+    my $ip = $HOSTIP;
+    my $ipvnum = 4;
+    my $idnum = 1;
+    my $server;
+    my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
+
+    if($alt eq "ipv6") {
+        # No IPv6
+    }
+
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
+
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
+    my $pid = processexists($pidfile);
+    if($pid > 0) {
+        stopserver($server, "$pid");
+    }
+    unlink($pidfile) if(-f $pidfile);
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
+
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--verbose 1 " if($debugprotocol);
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--id $idnum " if($idnum > 1);
+    $flags .= "--port $port --srcdir \"$srcdir\"";
+
+    my $cmd = "$srcdir/smbserver.py $flags";
+    my ($smbpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+
+    if($smbpid <= 0 || !pidexists($smbpid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the $srvrname server\n";
+        stopserver($server, "$pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    # Server is up. Verify that we can speak to it.
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
+    if(!$pid3) {
+        logmsg "RUN: $srvrname server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver($server, "$smbpid $pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+    $pid2 = $pid3;
+
+    if($verbose) {
+        logmsg "RUN: $srvrname server is now running PID $smbpid\n";
+    }
+
+    sleep(1);
+
+    return ($smbpid, $pid2);
+}
+
+
+#######################################################################
 # Single shot http and gopher server responsiveness test. This should only
 # be used to verify that a server present in %run hash is still functional
 #
@@ -2842,6 +2983,9 @@ sub subVariables {
   $$thing =~ s/%TFTPPORT/$TFTPPORT/g;
 
   $$thing =~ s/%DICTPORT/$DICTPORT/g;
+
+  $$thing =~ s/%SMBPORT/$SMBPORT/g;
+  $$thing =~ s/%SMBSPORT/$SMBSPORT/g;
 
   # server Unix domain socket paths
 
@@ -4695,6 +4839,17 @@ sub startservers {
                 $run{'dict'}="$pid $pid2";
             }
         }
+        elsif($what eq "smb") {
+            if(!$run{'smb'}) {
+                ($pid, $pid2) = runsmbserver($verbose, "", $SMBPORT);
+                if($pid <= 0) {
+                    return "failed starting SMB server";
+                }
+                logmsg sprintf ("* pid SMB => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'dict'}="$pid $pid2";
+            }
+        }
         elsif($what eq "none") {
             logmsg "* starts no server\n" if ($verbose);
         }
@@ -5155,6 +5310,8 @@ $HTTPPROXYPORT   = $base++; # HTTP proxy port, when using CONNECT
 $HTTPPIPEPORT    = $base++; # HTTP pipelining port
 $HTTP2PORT       = $base++; # HTTP/2 port
 $DICTPORT        = $base++; # DICT port
+$SMBPORT         = $base++; # SMB port
+$SMBSPORT        = $base++; # SMBS port
 $HTTPUNIXPATH    = 'http.sock'; # HTTP server Unix domain socket path
 
 #######################################################################
