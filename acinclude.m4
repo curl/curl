@@ -790,8 +790,8 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
   #
   for x_nlibs in '' "$u_libs" \
     '-lldap' \
-    '-llber -lldap' \
     '-lldap -llber' \
+    '-llber -lldap' \
     '-lldapssl -lldapx -lldapsdk' \
     '-lldapsdk -lldapx -lldapssl' ; do
     if test "$curl_cv_ldap_LIBS" = "unknown"; then
