@@ -63,7 +63,7 @@ script:
         fi
     - |
         if [ "$BUILD_TYPE" = "debug" ]; then
-             ./configure --enable-debug
+             ./configure --enable-debug --enable-werror
              make
              make TFLAGS=-n test-nonflaky
         fi
