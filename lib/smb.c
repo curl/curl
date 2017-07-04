@@ -715,6 +715,23 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
   return CURLE_OK;
 }
 
+/*
+ * Convert a timestamp from the Windows world (100 nsec units from
+ * 1 Jan 1601) to Posix time.
+ */
+static void get_posix_time(long *_out, const void *_in)
+{
+#ifdef HAVE_LONGLONG
+  long long time = *(long long *) _in;
+#else
+  unsigned __int64 time = *(unsigned __int64 *) _in;
+#endif
+
+  time -= 116444736000000000ULL;
+  time /= 10000000;
+  *_out = (long) time;
+}
+
 static CURLcode smb_request_state(struct connectdata *conn, bool *done)
 {
   struct smb_request *req = conn->data->req.protop;
@@ -725,6 +742,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
   unsigned short off;
   CURLcode result;
   void *msg = NULL;
+  const struct smb_nt_create_response *smb_m;
 
   /* Start the request */
   if(req->state == SMB_REQUESTING) {
@@ -767,7 +785,8 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_TREE_DISCONNECT;
       break;
     }
-    req->fid = smb_swap16(((struct smb_nt_create_response *)msg)->fid);
+    smb_m = (const struct smb_nt_create_response*) msg;
+    req->fid = smb_swap16(smb_m->fid);
     conn->data->req.offset = 0;
     if(conn->data->set.upload) {
       conn->data->req.size = conn->data->state.infilesize;
@@ -775,9 +794,11 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       next_state = SMB_UPLOAD;
     }
     else {
-      conn->data->req.size =
-        smb_swap64(((struct smb_nt_create_response *)msg)->end_of_file);
+      smb_m = (const struct smb_nt_create_response*) msg;
+      conn->data->req.size = smb_swap64(smb_m->end_of_file);
       Curl_pgrsSetDownloadSize(conn->data, conn->data->req.size);
+      if(conn->data->set.get_filetime)
+        get_posix_time(&conn->data->info.filetime, &smb_m->last_change_time);
       next_state = SMB_DOWNLOAD;
     }
     break;
