@@ -51,7 +51,7 @@ void tool_go_sleep(long ms)
   struct timeval timeout;
   timeout.tv_sec = ms / 1000L;
   ms = ms % 1000L;
-  timeout.tv_usec = (int)ms * 1000L;
+  timeout.tv_usec = (int)ms * 1000;
   select(0, NULL,  NULL, NULL, &timeout);
 #endif
 }
