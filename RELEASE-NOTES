@@ -55,6 +55,24 @@ This release includes the following bugfixes:
  o test1521: fix compiler warnings [27]
  o curl: fix memory leak on test 1147 OOM [28]
  o libtest/make: generate lib1521.c dynamically at build-time [29]
+ o curl_strequal.3: fix typo in SYNOPSIS [31]
+ o progress: prevent resetting t_starttransfer [32]
+ o openssl: improve fallback seed of PRNG with a time based hash [33]
+ o http2: improved PING frame handling [34]
+ o test1450: add simple testing for DICT [35]
+ o make: build the docs subdir only from within src [36]
+ o cmake: Added compatibility options for older Windows versions [37]
+ o gtls: fix build when sizeof(long) < sizeof(void *) [38]
+ o url: make the original string get used on subsequent transfers [39]
+ o timeval.c: Use long long constant type for timeval assignment [40]
+ o tool_sleep: typecast to avoid macos compiler warning
+ o travis.yml: use --enable-werror on debug builds [41]
+ o test1451: add SMB support to the testbed [42]
+ o configure: remove checks for 5 functions never used [43]
+ o configure: try ldap/lber in reversed order first [44]
+ o smb: fix build for djgpp/MSDOS [45]
+ o travis: install nghttp2 on linux builds [46]
+ o smb: add support for CURLOPT_FILETIME [47]
 
 This release includes the following known bugs:
 
@@ -63,11 +81,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Fandrich, Daniel Stenberg, Evert Pot, Frederik B, Gisle Vanem,
-  Henrik S. Gaßmann, Jakub Wilk, Kamil Dudka, Marcel Raad, Matteo B.,
-  Michael Kaufmann, Neil Kolban, Pascal Terjan, Paul Harris, Ray Satiro,
-  Simon Warta, Timothe Litt,
-  (17 contributors)
+  Dan Fandrich, Daniel Stenberg, David E. Narváez, Dmitry Kostjuchenko,
+  Evert Pot, Frederik B, Gisle Vanem, Henrik S. Gaßmann, Jakub Wilk,
+  Jesse Chisholm, Johannes Schindelin, Kamil Dudka, Marcel Raad,
+  Martin Kepplinger, Matteo B., Max Dymond, Michael Kaufmann, Neil Kolban,
+  Pascal Terjan, Paul Harris, Pavel Rochnyak, Per Malmberg, Ray Satiro,
+  Ryan Winograd, Simon Warta, Timothe Litt,
+  (26 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -103,3 +123,20 @@ References to bug reports and discussions on issues:
  [28] = https://github.com/curl/curl/pull/1486#issuecomment-310926872
  [29] = https://curl.haxx.se/bug/?i=1614
  [30] = https://curl.haxx.se/bug/?i=1454
+ [31] = https://curl.haxx.se/bug/?i=1623
+ [32] = https://curl.haxx.se/bug/?i=1616
+ [33] = https://curl.haxx.se/bug/?i=1620
+ [34] = https://curl.haxx.se/bug/?i=1521
+ [35] = https://curl.haxx.se/bug/?i=1615
+ [36] = https://curl.haxx.se/bug/?i=1591
+ [37] = https://curl.haxx.se/bug/?i=1621
+ [38] = https://curl.haxx.se/bug/?i=1617
+ [39] = https://curl.haxx.se/bug/?i=1631
+ [40] = https://curl.haxx.se/mail/lib-2017-07/0003.html
+ [41] = https://curl.haxx.se/bug/?i=1637
+ [42] = https://curl.haxx.se/bug/?i=1630
+ [43] = https://curl.haxx.se/bug/?i=1638
+ [44] = https://curl.haxx.se/bug/?i=1619
+ [45] = https://curl.haxx.se/mail/lib-2017-07/0005.html
+ [46] = https://curl.haxx.se/bug/?i=1642
+ [47] = https://curl.haxx.se/mail/lib-2017-07/0005.html
