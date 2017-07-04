@@ -11,6 +11,10 @@ addons:
             - lcov
             - clang-3.7
             - valgrind
+            - libev-dev
+            - libc-ares-dev
+            - g++-4.8
+            - libstdc++-4.8-dev
 
 matrix:
     include:
@@ -47,11 +51,9 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall libtool > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install openssl libidn rtmpdump libssh2 c-ares libmetalink libressl nghttp2; fi
   - if [ $TRAVIS_OS_NAME = linux ]; then
-      sudo apt-get install -qq libev-dev libc-ares-dev g++-4.8 libstdc++-4.8-dev;
-      export CXX="g++-4.8";
       curl -L https://github.com/nghttp2/nghttp2/releases/download/v1.24.0/nghttp2-1.24.0.tar.gz |
          tar xzf - &&
-         (cd nghttp2-1.24.0 && ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
+         (cd nghttp2-1.24.0 && CXX="g++-4.8" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
     fi
 
 before_script:
