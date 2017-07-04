@@ -8,6 +8,7 @@
 *.o
 *.obj
 *.pdb
+*.pyc
 *~
 .*.sw?
 .cproject
@@ -18,6 +19,7 @@
 .settings
 /build/
 /builds/
+__pycache__
 CHANGES.dist
 Debug
 INSTALL
