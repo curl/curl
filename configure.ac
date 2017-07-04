@@ -3281,23 +3281,18 @@ case $host in
     ;;
 esac
 
-AC_CHECK_FUNCS([fork \
-  geteuid \
+AC_CHECK_FUNCS([geteuid \
   getpass_r \
   getppid \
-  getprotobyname \
   getpwuid \
   getpwuid_r \
   getrlimit \
   gettimeofday \
   if_nametoindex \
-  inet_addr \
-  perror \
   pipe \
   setlocale \
   setmode \
   setrlimit \
-  uname \
   utime \
   utimes
 ],[
