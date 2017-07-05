@@ -25,6 +25,7 @@
  1.7 Detect when called from within callbacks
  1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
+ 1.10 auto-detect proxy
  1.11 minimize dependencies with dynamically loaded modules
  1.12 have form functions use CURL handle argument
  1.14 Typesafe curl_easy_setopt()
@@ -254,6 +255,18 @@
 
  A name resolve that has failed is likely to fail when made again within a
  short period of time. Currently we only cache positive responses.
+
+1.10 auto-detect proxy
+
+ libcurl could be made to detect the system proxy setup automatically and use
+ that. On Windows, macOS and Linux desktops for example.
+
+ The pull-request to use libproxy for this was deferred due to doubts on the
+ reliability of the dependency and how to use it:
+ https://github.com/curl/curl/pull/977
+
+ libdetectproxy is a (C++) library for detecting the proxy on Windows
+ https://github.com/paulharris/libdetectproxy
 
 1.11 minimize dependencies with dynamically loaded modules
 
