@@ -375,7 +375,6 @@
  EWOULDBLOCK or similar. Blocking cases include:
 
  - Name resolves on non-windows unless c-ares or the threaded resolver is used
- - HTTP proxy CONNECT operations
  - SOCKS proxy handshakes
  - file:// transfers
  - TELNET transfers
