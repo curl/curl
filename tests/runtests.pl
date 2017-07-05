@@ -148,6 +148,7 @@ my $HTTP2PORT;           # HTTP/2 server port
 my $DICTPORT;            # DICT server port
 my $SMBPORT;             # SMB server port
 my $SMBSPORT;            # SMBS server port
+my $NEGTELNETPORT;       # TELNET server port with negotiation
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
@@ -382,7 +383,7 @@ sub init_serverpidfile_hash {
     }
   }
   for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'gopher', 'httptls',
-                  'dict', 'smb', 'smbs')) {
+                  'dict', 'smb', 'smbs', 'telnet')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -1184,6 +1185,67 @@ sub verifysmb {
 }
 
 #######################################################################
+# Verify that the server that runs on $ip, $port is our server.  This also
+# implies that we can speak with it, as there might be occasions when the
+# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
+# assign requested address")
+#
+sub verifytelnet {
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $server = servername_id($proto, $ipvnum, $idnum);
+    my $pid = 0;
+    my $time=time();
+    my $extra="";
+
+    my $verifylog = "$LOGDIR/".
+        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+    unlink($verifylog) if(-f $verifylog);
+
+    my $flags = "--max-time $server_response_maxtime ";
+    $flags .= "--silent ";
+    $flags .= "--verbose ";
+    $flags .= "--globoff ";
+    $flags .= "--upload-file - ";
+    $flags .= $extra;
+    $flags .= "\"$proto://$ip:$port\"";
+
+    my $cmd = "echo 'verifiedserver' | $VCURL $flags 2>$verifylog";
+
+    # check if this is our server running on this port:
+    logmsg "RUN: $cmd\n" if($verbose);
+    my @data = runclientoutput($cmd);
+
+    my $res = $? >> 8; # rotate the result
+    if($res & 128) {
+        logmsg "RUN: curl command died with a coredump\n";
+        return -1;
+    }
+
+    foreach my $line (@data) {
+        if($line =~ /WE ROOLZ: (\d+)/) {
+            # this is our test server with a known pid!
+            $pid = 0+$1;
+            last;
+        }
+    }
+    if($pid <= 0 && @data && $data[0]) {
+        # this is not a known server
+        logmsg "RUN: Unknown server on our $server port: $port\n";
+        return 0;
+    }
+    # we can/should use the time it took to verify the server as a measure
+    # on how fast/slow this host is.
+    my $took = int(0.5+time()-$time);
+
+    if($verbose) {
+        logmsg "RUN: Verifying our test $server server took $took seconds\n";
+    }
+
+    return $pid;
+}
+
+
+#######################################################################
 # Verify that the server that runs on $ip, $port is our server.
 # Retry over several seconds before giving up.  The ssh server in
 # particular can take a long time to start if it needs to generate
@@ -1210,7 +1272,8 @@ my %protofunc = ('http' => \&verifyhttp,
                  'gopher' => \&verifyhttp,
                  'httptls' => \&verifyhttptls,
                  'dict' => \&verifyftp,
-                 'smb' => \&verifysmb);
+                 'smb' => \&verifysmb,
+                 'telnet' => \&verifytelnet);
 
 sub verifyserver {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
@@ -2383,6 +2446,82 @@ sub runsmbserver {
     return ($smbpid, $pid2);
 }
 
+#######################################################################
+# start the telnet server
+#
+sub runnegtelnetserver {
+    my ($verbose, $alt, $port) = @_;
+    my $proto = "telnet";
+    my $ip = $HOSTIP;
+    my $ipvnum = 4;
+    my $idnum = 1;
+    my $server;
+    my $srvrname;
+    my $pidfile;
+    my $logfile;
+    my $flags = "";
+
+    if($alt eq "ipv6") {
+        # No IPv6
+    }
+
+    $server = servername_id($proto, $ipvnum, $idnum);
+
+    $pidfile = $serverpidfile{$server};
+
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (0,0);
+    }
+
+    my $pid = processexists($pidfile);
+    if($pid > 0) {
+        stopserver($server, "$pid");
+    }
+    unlink($pidfile) if(-f $pidfile);
+
+    $srvrname = servername_str($proto, $ipvnum, $idnum);
+
+    $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    $flags .= "--verbose 1 " if($debugprotocol);
+    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--id $idnum " if($idnum > 1);
+    $flags .= "--port $port --srcdir \"$srcdir\"";
+
+    my $cmd = "$srcdir/negtelnetserver.py $flags";
+    my ($ntelpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+
+    if($ntelpid <= 0 || !pidexists($ntelpid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the $srvrname server\n";
+        stopserver($server, "$pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+
+    # Server is up. Verify that we can speak to it.
+    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
+    if(!$pid3) {
+        logmsg "RUN: $srvrname server failed verification\n";
+        # failed to talk to it properly. Kill the server and return failure
+        stopserver($server, "$ntelpid $pid2");
+        displaylogs($testnumcheck);
+        $doesntrun{$pidfile} = 1;
+        return (0,0);
+    }
+    $pid2 = $pid3;
+
+    if($verbose) {
+        logmsg "RUN: $srvrname server is now running PID $ntelpid\n";
+    }
+
+    sleep(1);
+
+    return ($ntelpid, $pid2);
+}
+
 
 #######################################################################
 # Single shot http and gopher server responsiveness test. This should only
@@ -2986,6 +3125,8 @@ sub subVariables {
 
   $$thing =~ s/%SMBPORT/$SMBPORT/g;
   $$thing =~ s/%SMBSPORT/$SMBSPORT/g;
+
+  $$thing =~ s/%NEGTELNETPORT/$NEGTELNETPORT/g;
 
   # server Unix domain socket paths
 
@@ -4850,6 +4991,19 @@ sub startservers {
                 $run{'dict'}="$pid $pid2";
             }
         }
+        elsif($what eq "telnet") {
+            if(!$run{'telnet'}) {
+                ($pid, $pid2) = runnegtelnetserver($verbose,
+                                                   "",
+                                                   $NEGTELNETPORT);
+                if($pid <= 0) {
+                    return "failed starting neg TELNET server";
+                }
+                logmsg sprintf ("* pid neg TELNET => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'dict'}="$pid $pid2";
+            }
+        }
         elsif($what eq "none") {
             logmsg "* starts no server\n" if ($verbose);
         }
@@ -5312,6 +5466,7 @@ $HTTP2PORT       = $base++; # HTTP/2 port
 $DICTPORT        = $base++; # DICT port
 $SMBPORT         = $base++; # SMB port
 $SMBSPORT        = $base++; # SMBS port
+$NEGTELNETPORT   = $base++; # TELNET port with negotiation
 $HTTPUNIXPATH    = 'http.sock'; # HTTP server Unix domain socket path
 
 #######################################################################
