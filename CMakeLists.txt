@@ -932,8 +932,17 @@ check_symbol_exists(ioctl          "${CURL_INCLUDES}" HAVE_IOCTL)
 check_symbol_exists(setsockopt     "${CURL_INCLUDES}" HAVE_SETSOCKOPT)
 
 # symbol exists in win32, but function does not.
-if(ENABLE_INET_PTON)  
-  check_function_exists(inet_pton HAVE_INET_PTON)
+if(WIN32)
+  if(ENABLE_INET_PTON)
+    check_function_exists(inet_pton HAVE_INET_PTON)
+    # _WIN32_WINNT_VISTA (0x0600)
+    add_definitions(-D_WIN32_WINNT=0x0600)
+  else()
+    # _WIN32_WINNT_WINXP (0x0501)
+    add_definitions(-D_WIN32_WINNT=0x0501)
+  endif()
+else()
+    check_function_exists(inet_pton HAVE_INET_PTON)
 endif()
 
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
@@ -1135,11 +1144,6 @@ set(CURL_PULL_INTTYPES_H ${HAVE_INTTYPES_H})
 include(CMake/OtherTests.cmake)
 
 add_definitions(-DHAVE_CONFIG_H)
-
-# For windows, do not allow the compiler to use default target (Vista).
-if(WIN32)
-  add_definitions(-D_WIN32_WINNT=0x0501)
-endif(WIN32)
 
 # For windows, all compilers used by cmake should support large files
 if(WIN32)

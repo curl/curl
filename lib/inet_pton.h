@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,6 +29,9 @@ int Curl_inet_pton(int, const char *, void *);
 #ifdef HAVE_INET_PTON
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#elif defined(HAVE_WS2TCPIP_H)
+/* inet_pton() exists in Vista or later */
+#include <ws2tcpip.h>
 #endif
 #define Curl_inet_pton(x,y,z) inet_pton(x,y,z)
 #endif
