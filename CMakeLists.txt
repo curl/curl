@@ -104,6 +104,9 @@ if (ENABLE_CURLDEBUG)
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS CURLDEBUG)
 endif()
 
+# For debug libs and exes, add "-d" postfix
+set(CMAKE_DEBUG_POSTFIX "-d" CACHE STRING "Set debug library postfix" FORCE)
+
 # initialize CURL_LIBS
 set(CURL_LIBS "")
 
@@ -116,11 +119,6 @@ if(ENABLE_ARES)
   find_package(CARES REQUIRED)
   list(APPEND CURL_LIBS ${CARES_LIBRARY} )
   set(CURL_LIBS ${CURL_LIBS} ${CARES_LIBRARY})
-endif()
-
-if(MSVC)
-  option(BUILD_RELEASE_DEBUG_DIRS "Set OFF to build each configuration to a separate directory" OFF)
-  mark_as_advanced(BUILD_RELEASE_DEBUG_DIRS)
 endif()
 
 include(CurlSymbolHiding)
@@ -228,8 +226,14 @@ if(ENABLE_MANUAL)
     message(WARNING "Found no *nroff program")
   endif()
 endif()
-# Required for building manual, docs, tests
-find_package(Perl REQUIRED)
+
+option(ENABLE_DOCS "to build docs" ON)
+option(BUILD_TESTING "to build tests" ON)
+
+if(ENABLE_MANUAL OR ENABLE_DOCS OR BUILD_TESTING)
+   # Required for building manual, docs, tests
+   find_package(Perl REQUIRED)
+endif()
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
@@ -1181,7 +1185,10 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-add_subdirectory(docs)
+if(ENABLE_DOCS)
+  add_subdirectory(docs)
+endif()
+
 add_subdirectory(lib)
 if(BUILD_CURL_EXE)
   add_subdirectory(src)
