@@ -239,6 +239,7 @@ SSLpinning
 SSPI
 TLS-SRP
 TrackMemory
+threaded-resolver
 unittest
 unix-sockets
 WinSSL

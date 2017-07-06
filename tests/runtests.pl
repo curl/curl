@@ -3264,6 +3264,11 @@ sub singletest {
                     next;
                 }
             }
+            elsif($1 eq "threaded-resolver") {
+                if($has_threadedres) {
+                    next;
+                }
+            }
             elsif($1 eq "PSL") {
                 if($has_psl) {
                     next;
@@ -3407,6 +3412,11 @@ sub singletest {
                 }
                 elsif($1 eq "PSL") {
                     if(!$has_psl) {
+                        next;
+                    }
+                }
+                elsif($1 eq "threaded-resolver") {
+                    if(!$has_threadedres) {
                         next;
                     }
                 }
