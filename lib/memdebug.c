@@ -115,7 +115,8 @@ void curl_memdebug(const char *logname)
       logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
     /* Flush the log file after every line so the log isn't lost in a crash */
-    setbuf(logfile, (char *)NULL);
+    if(logfile)
+      setbuf(logfile, (char *)NULL);
 #endif
   }
 }
