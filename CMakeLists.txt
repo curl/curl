@@ -72,6 +72,7 @@ set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 include_directories(${PROJECT_BINARY_DIR}/include/curl)
 include_directories( ${CURL_SOURCE_DIR}/include )
 
+option(CURL_WERROR "Turn compiler warnings into errors" OFF)
 option(BUILD_CURL_EXE "Set to ON to build curl executable." ON)
 option(CURL_STATICLIB "Set to ON to build libcurl with static linking." OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
@@ -243,6 +244,16 @@ endif()
 if(BORLAND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
 endif(BORLAND)
+
+if(CURL_WERROR)
+  if(MSVC_VERSION)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /WX")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_RELEASE} /WX")
+  else()
+    # this assumes clang or gcc style options
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  endif()
+endif(CURL_WERROR)
 
 # If we are on AIX, do the _ALL_SOURCE magic
 if(${CMAKE_SYSTEM_NAME} MATCHES AIX)
