@@ -3397,11 +3397,8 @@ else
 fi
 AM_CONDITIONAL(BUILD_LIBHOSTNAME, test x$build_libhostname = xyes)
 
-CURL_CHECK_OPTION_THREADED_RESOLVER
-
-if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
-  AC_MSG_ERROR(
-[Options --enable-threaded-resolver and --enable-ares are mutually exclusive])
+if test "x$want_ares" != xyes; then
+  CURL_CHECK_OPTION_THREADED_RESOLVER
 fi
 
 dnl ************************************************************
