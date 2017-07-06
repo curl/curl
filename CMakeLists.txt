@@ -197,7 +197,7 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 endif()
 
-option(ENABLE_MANUAL "to provide the built-in manual" ON)
+option(ENABLE_MANUAL "to provide the built-in manual and docs" ON)
 unset(USE_MANUAL CACHE) # TODO: cache NROFF/NROFF_MANOPT/USE_MANUAL vars?
 if(ENABLE_MANUAL)
   find_program(NROFF NAMES gnroff nroff)
@@ -227,8 +227,27 @@ if(ENABLE_MANUAL)
     message(WARNING "Found no *nroff program")
   endif()
 endif()
-# Required for building manual, docs, tests
-find_package(Perl REQUIRED)
+
+include(CTest)
+# Perl is required for building manuals including docs, and tests
+if (BUILD_TESTING OR ENABLE_MANUAL)
+  find_package(Perl)
+  if (NOT PERL_FOUND)
+    if (BUILD_TESTING)
+      message("Warning: Perl was not found, but building of tests was enabled through BUILD_TESTING option. \
+Building of tests will be disables.")
+      unset(BUILD_TESTING CACHE)
+    endif()
+    if (ENABLE_MANUAL)
+      message("Warning: perl was not found, which is required to build manual. This means when \
+you build curl the manual will not be available (curl --man^). Integration of \
+the manual is not required and a summary of the options will still be available \
+(curl --help^). To integrate the manual your PATH is required to have \
+groff/nroff, perl and optionally gzip for compression. ")
+      unset(ENABLE_MANUAL CACHE)
+    endif()
+  endif()
+endif()
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
@@ -1170,13 +1189,14 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-add_subdirectory(docs)
+if(ENABLE_MANUAL)
+  add_subdirectory(docs)
+endif()
 add_subdirectory(lib)
 if(BUILD_CURL_EXE)
   add_subdirectory(src)
 endif()
 
-include(CTest)
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
