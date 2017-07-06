@@ -2600,7 +2600,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       data->state.expect100header =
         Curl_compareheader(ptr, "Expect:", "100-continue");
     }
-    else if(postsize > TINY_INITIAL_POST_SIZE || postsize < 0) {
+    else if(postsize > EXPECT_100_THRESHOLD || postsize < 0) {
       result = expect100(data, conn, req_buffer);
       if(result)
         return result;

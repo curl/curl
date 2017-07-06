@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -115,8 +115,13 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 #define MAX_INITIAL_POST_SIZE (64*1024)
 #endif
 
-#ifndef TINY_INITIAL_POST_SIZE
-#define TINY_INITIAL_POST_SIZE 1024
+/* EXPECT_100_THRESHOLD is the request body size limit for when libcurl will
+ * automatically add an "Expect: 100-continue" header in HTTP requests. When
+ * the size is unknown, it will always add it.
+ *
+ */
+#ifndef EXPECT_100_THRESHOLD
+#define EXPECT_100_THRESHOLD 1024
 #endif
 
 #endif /* CURL_DISABLE_HTTP */
