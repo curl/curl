@@ -81,7 +81,7 @@ script:
         if [ "$BUILD_TYPE" = "normal" ]; then
              ./configure --enable-werror
              make
-             make TFLAGS=-n test-nonflaky
+             make test-nonflaky
         fi
     - |
         if [ "$BUILD_TYPE" = "cmake" ]; then
