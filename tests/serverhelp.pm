@@ -105,7 +105,7 @@ sub servername_str {
 
     $proto = uc($proto) if($proto);
     die "unsupported protocol: '$proto'" unless($proto &&
-        ($proto =~ /^(((FTP|HTTP|HTTP\/2|IMAP|POP3|SMTP|HTTP-PIPE)S?)|(TFTP|SFTP|SOCKS|SSH|RTSP|GOPHER|HTTPTLS|DICT|SMB|SMBS))$/));
+        ($proto =~ /^(((FTP|HTTP|HTTP\/2|IMAP|POP3|SMTP|HTTP-PIPE)S?)|(TFTP|SFTP|SOCKS|SSH|RTSP|GOPHER|HTTPTLS|DICT|SMB|SMBS|TELNET))$/));
 
     $ipver = (not $ipver) ? 'ipv4' : lc($ipver);
     die "unsupported IP version: '$ipver'" unless($ipver &&
