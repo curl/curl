@@ -73,6 +73,21 @@ This release includes the following bugfixes:
  o smb: fix build for djgpp/MSDOS [45]
  o travis: install nghttp2 on linux builds [46]
  o smb: add support for CURLOPT_FILETIME [47]
+ o cmake: fix send/recv argument scanner for windows [48]
+ o inet_pton: fix include on windows to get prototype [49]
+ o select.h: avoid macro redefinition harder
+ o cmake: if inet_pton is used, bump _WIN32_WINNT
+ o asyn-thread.c: fix unused variable warnings on macOS
+ o runtests: support "threaded-resolver" as a feature
+ o test506: skip if threaded-resolver
+ o cmake: remove spurious "-l" from linker flags [50]
+ o cmake: add CURL_WERROR for enabling "warning as errors"
+ o memdebug: don't setbuf() if the file open failed [51]
+ o curl_easy_escape.3: mention the (lack of) encoding [52]
+ o test1452: add telnet negotiation [53]
+ o CURLOPT_POSTFIELDS.3: explain the 100-continue magic better
+ o cmake: offer CMAKE_DEBUG_POSTFIX when building with MSVC [54]
+ o tests/valgrind.supp: supress OpenSSL false positive seen on travis [55]
 
 This release includes the following known bugs:
 
@@ -82,12 +97,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Dan Fandrich, Daniel Stenberg, David E. Narváez, Dmitry Kostjuchenko,
-  Evert Pot, Frederik B, Gisle Vanem, Henrik S. Gaßmann, Jakub Wilk,
-  Jesse Chisholm, Johannes Schindelin, Kamil Dudka, Marcel Raad,
-  Martin Kepplinger, Matteo B., Max Dymond, Michael Kaufmann, Neil Kolban,
-  Pascal Terjan, Paul Harris, Pavel Rochnyak, Per Malmberg, Ray Satiro,
-  Ryan Winograd, Simon Warta, Timothe Litt,
-  (26 contributors)
+  Evert Pot, Frederik B, Gisle Vanem, Hannes Magnusson, Henrik S. Gaßmann,
+  Jakub Wilk, Jeroen Ooms, Jesse Chisholm, Johannes Schindelin, Kamil Dudka,
+  Marcel Raad, Martin Kepplinger, Matteo B., Max Dymond, Michael Kaufmann,
+  Neil Kolban, Pascal Terjan, Paul Harris, Pavel Rochnyak, Per Malmberg,
+  Ray Satiro, Ryan Winograd, Sergei Nikulov, Simon Warta, Timothe Litt,
+  (29 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -140,3 +155,11 @@ References to bug reports and discussions on issues:
  [45] = https://curl.haxx.se/mail/lib-2017-07/0005.html
  [46] = https://curl.haxx.se/bug/?i=1642
  [47] = https://curl.haxx.se/mail/lib-2017-07/0005.html
+ [48] = https://curl.haxx.se/bug/?i=1640
+ [49] = https://curl.haxx.se/bug/?i=1639
+ [50] = https://curl.haxx.se/bug/?i=1552
+ [51] = https://github.com/curl/curl/issues/828#issuecomment-313475151
+ [52] = https://curl.haxx.se/bug/?i=1612
+ [53] = https://curl.haxx.se/bug/?i=1645
+ [54] = https://curl.haxx.se/bug/?i=1649
+ [55] = https://curl.haxx.se/bug/?i=1653
