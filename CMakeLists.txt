@@ -226,14 +226,8 @@ if(ENABLE_MANUAL)
     message(WARNING "Found no *nroff program")
   endif()
 endif()
-
-option(ENABLE_DOCS "to build docs" ON)
-option(BUILD_TESTING "to build tests" ON)
-
-if(ENABLE_MANUAL OR ENABLE_DOCS OR BUILD_TESTING)
-   # Required for building manual, docs, tests
-   find_package(Perl REQUIRED)
-endif()
+# Required for building manual, docs, tests
+find_package(Perl REQUIRED)
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
@@ -1185,10 +1179,7 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-if(ENABLE_DOCS)
-  add_subdirectory(docs)
-endif()
-
+add_subdirectory(docs)
 add_subdirectory(lib)
 if(BUILD_CURL_EXE)
   add_subdirectory(src)
