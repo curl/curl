@@ -16,6 +16,7 @@ addons:
             - g++-4.8
             - libstdc++-4.8-dev
             - stunnel4
+            - libssh2-1-dev
 
 matrix:
     include:
