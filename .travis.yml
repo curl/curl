@@ -15,6 +15,7 @@ addons:
             - libc-ares-dev
             - g++-4.8
             - libstdc++-4.8-dev
+            - stunnel4
 
 matrix:
     include:
