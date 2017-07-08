@@ -418,7 +418,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   char *chlg = NULL;
   size_t chlglen = 0;
 #endif
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5)
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
+    defined(USE_NTLM)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :
                         sasl->params->service;
@@ -504,7 +505,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
                                                  &conn->ntlm);
     if(!result)
       result = Curl_auth_create_ntlm_type3_message(data, conn->user,
-                                                   conn->passwd, &conn->ntlm,
+                                                   conn->passwd,
+                                                   service,
+                                                   hostname, &conn->ntlm,
                                                    &resp, &len);
     break;
 #endif

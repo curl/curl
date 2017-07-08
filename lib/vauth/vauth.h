@@ -134,6 +134,8 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
 CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
+                                             const char *service,
+                                             const char *host,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen);
 
