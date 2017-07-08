@@ -122,8 +122,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   /* point to the username, password, service and host */
   const char *userp;
   const char *passwdp;
-  const char *service;
-  const char *hostname;
+  const char *service = NULL;
+  const char *hostname = NULL;
 
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;
@@ -141,9 +141,11 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
+#if defined(USE_WINDOWS_SSPI)
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
               data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.host.name;
+#endif
     ntlm = &conn->proxyntlm;
     authp = &conn->data->state.authproxy;
   }
@@ -151,9 +153,11 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     allocuserpwd = &conn->allocptr.userpwd;
     userp = conn->user;
     passwdp = conn->passwd;
+#if defined(USE_WINDOWS_SSPI)
     service = data->set.str[STRING_SERVICE_NAME] ?
               data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
+#endif
     ntlm = &conn->ntlm;
     authp = &conn->data->state.authhost;
   }
