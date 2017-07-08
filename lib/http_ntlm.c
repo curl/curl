@@ -113,14 +113,17 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   char *base64 = NULL;
   size_t len = 0;
   CURLcode result;
+  struct Curl_easy *data = conn->data;
 
   /* point to the address of the pointer that holds the string to send to the
      server, which is for a plain host or for a HTTP proxy */
   char **allocuserpwd;
 
-  /* point to the name and password for this */
+  /* point to the username, password, service and host */
   const char *userp;
   const char *passwdp;
+  const char *service;
+  const char *hostname;
 
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;
@@ -138,6 +141,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
+    service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
+              data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
+    hostname = conn->http_proxy.host.name;
     ntlm = &conn->proxyntlm;
     authp = &conn->data->state.authproxy;
   }
@@ -145,6 +151,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     allocuserpwd = &conn->allocptr.userpwd;
     userp = conn->user;
     passwdp = conn->passwd;
+    service = data->set.str[STRING_SERVICE_NAME] ?
+              data->set.str[STRING_SERVICE_NAME] : "HTTP";
+    hostname = conn->host.name;
     ntlm = &conn->ntlm;
     authp = &conn->data->state.authhost;
   }
@@ -191,6 +200,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   case NTLMSTATE_TYPE2:
     /* We already received the type-2 message, create a type-3 message */
     result = Curl_auth_create_ntlm_type3_message(conn->data, userp, passwdp,
+                                                 service, hostname,
                                                  ntlm, &base64, &len);
     if(result)
       return result;
