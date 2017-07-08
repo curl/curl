@@ -113,7 +113,6 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   char *base64 = NULL;
   size_t len = 0;
   CURLcode result;
-  struct Curl_easy *data = conn->data;
 
   /* point to the address of the pointer that holds the string to send to the
      server, which is for a plain host or for a HTTP proxy */
@@ -142,8 +141,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
 #if defined(USE_WINDOWS_SSPI)
-    service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
-              data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
+    service = conn->data->set.str[STRING_PROXY_SERVICE_NAME] ?
+              conn->data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.host.name;
 #endif
     ntlm = &conn->proxyntlm;
@@ -154,8 +153,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     userp = conn->user;
     passwdp = conn->passwd;
 #if defined(USE_WINDOWS_SSPI)
-    service = data->set.str[STRING_SERVICE_NAME] ?
-              data->set.str[STRING_SERVICE_NAME] : "HTTP";
+    service = conn->data->set.str[STRING_SERVICE_NAME] ?
+              conn->data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
 #endif
     ntlm = &conn->ntlm;
