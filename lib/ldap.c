@@ -235,7 +235,6 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
                          const char *user, const char *passwd)
 {
   int rc = LDAP_INVALID_CREDENTIALS;
-  ULONG method = LDAP_AUTH_SIMPLE;
 
   PTCHAR inuser = NULL;
   PTCHAR inpass = NULL;
@@ -244,7 +243,7 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
     inuser = Curl_convert_UTF8_to_tchar((char *) user);
     inpass = Curl_convert_UTF8_to_tchar((char *) passwd);
 
-    rc = ldap_bind_s(server, inuser, inpass, method);
+    rc = ldap_simple_bind_s(server, inuser, inpass);
 
     Curl_unicodefree(inuser);
     Curl_unicodefree(inpass);
