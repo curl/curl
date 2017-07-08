@@ -722,14 +722,14 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
 static void get_posix_time(long *_out, const void *_in)
 {
 #ifdef HAVE_LONGLONG
-  long long time = *(long long *) _in;
+  long long timestamp = *(long long *) _in;
 #else
-  unsigned __int64 time = *(unsigned __int64 *) _in;
+  unsigned __int64 timestamp = *(unsigned __int64 *) _in;
 #endif
 
-  time -= 116444736000000000ULL;
-  time /= 10000000;
-  *_out = (long) time;
+  timestamp -= 116444736000000000ULL;
+  timestamp /= 10000000;
+  *_out = (long) timestamp;
 }
 
 static CURLcode smb_request_state(struct connectdata *conn, bool *done)
