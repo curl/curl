@@ -122,6 +122,8 @@ bool Curl_auth_is_ntlm_supported(void);
 CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
+                                             const char *service,
+                                             const char *host,
                                              struct ntlmdata *ntlm,
                                              char **outptr,
                                              size_t *outlen);

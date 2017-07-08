@@ -70,6 +70,8 @@ bool Curl_auth_is_ntlm_supported(void)
  * data    [in]     - The session handle.
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
+ * service [in]     - The service type such as http, smtp, pop or imap.
+ * host    [in]     - The host name.
  * ntlm    [in/out] - The NTLM data struct being used and modified.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
@@ -80,6 +82,8 @@ bool Curl_auth_is_ntlm_supported(void)
 CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
+                                             const char *service,
+                                             const char *host,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
 {
@@ -143,6 +147,10 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   if(!ntlm->context)
     return CURLE_OUT_OF_MEMORY;
 
+  ntlm->spn = Curl_auth_build_spn(service, host, NULL);
+  if(!ntlm->spn)
+    return CURLE_OUT_OF_MEMORY;
+
   /* Setup the type-1 "output" security buffer */
   type_1_desc.ulVersion = SECBUFFER_VERSION;
   type_1_desc.cBuffers  = 1;
@@ -153,7 +161,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   /* Generate our type-1 message */
   status = s_pSecFn->InitializeSecurityContext(ntlm->credentials, NULL,
-                                               (TCHAR *) TEXT(""),
+                                               ntlm->spn,
                                                0, 0, SECURITY_NETWORK_DREP,
                                                NULL, 0,
                                                ntlm->context, &type_1_desc,
@@ -271,7 +279,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   /* Generate our type-3 message */
   status = s_pSecFn->InitializeSecurityContext(ntlm->credentials,
                                                ntlm->context,
-                                               (TCHAR *) TEXT(""),
+                                               ntlm->spn,
                                                0, 0, SECURITY_NETWORK_DREP,
                                                &type_2_desc,
                                                0, ntlm->context,
@@ -329,6 +337,8 @@ void Curl_auth_ntlm_cleanup(struct ntlmdata *ntlm)
 
   /* Reset any variables */
   ntlm->token_max = 0;
+
+  Curl_safefree(ntlm->spn);
 }
 
 #endif /* USE_WINDOWS_SSPI && USE_NTLM */
