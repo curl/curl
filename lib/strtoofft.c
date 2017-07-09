@@ -132,7 +132,7 @@ curlx_strtoll(const char *nptr, char **endptr, int base)
     else
       value = CURL_OFF_T_MAX;
 
-    SET_ERRNO(ERANGE);
+    errno = ERANGE;
   }
 
   if(endptr)
