@@ -442,9 +442,6 @@
 /* CURL_PULL_WS2TCPIP_H is defined above when inclusion of header file  */
 /* ws2tcpip.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_WS2TCPIP_H
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
 #  include <windows.h>
 #  include <winsock2.h>
 #  include <ws2tcpip.h>
