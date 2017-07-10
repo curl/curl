@@ -16,6 +16,7 @@ addons:
             - g++-4.8
             - libstdc++-4.8-dev
             - stunnel4
+            - libidn2-0-dev
 
 matrix:
     include:
