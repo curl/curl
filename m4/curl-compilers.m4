@@ -903,7 +903,14 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only clang 3.2 or later
           if test "$compiler_num" -ge "302"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wmissing-variable-declarations"
+            case $host_os in
+            cygwin* | mingw*)
+              dnl libtool wrapper executable throws these warnings
+              ;;
+            *)
+              tmp_CFLAGS="$tmp_CFLAGS -Wmissing-variable-declarations"
+              ;;
+            esac
           fi
           #
           dnl Only clang 3.6 or later
