@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -631,14 +631,16 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   char *buf, *p;
   size_t max;
   int old_errno;
+#ifdef WIN32
   DWORD old_win_err;
-
+#endif
   DEBUGASSERT(conn);
   DEBUGASSERT(err >= 0);
 
   old_errno = errno;
+#ifdef WIN32
   old_win_err = GetLastError();
-
+#endif
   buf = conn->syserr_buf;
   max = sizeof(conn->syserr_buf)-1;
   *buf = '\0';
@@ -725,10 +727,10 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   p = strrchr(buf, '\r');
   if(p && (p - buf) >= 1)
     *p = '\0';
-
+#ifdef WIN32
   if(old_win_err != GetLastError())
     SetLastError(old_win_err);
-
+#endif
   if(errno != old_errno)
     errno = old_errno;
 
