@@ -50,7 +50,7 @@ int test(char *URL)
 
   upload = fopen(libtest_arg3, "rb");
   if(!upload) {
-    error = ERRNO;
+    error = errno;
     fprintf(stderr, "fopen() failed with error: %d (%s)\n",
             error, strerror(error));
     fprintf(stderr, "Error opening file: (%s)\n", libtest_arg3);

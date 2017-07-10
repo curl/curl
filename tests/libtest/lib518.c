@@ -86,7 +86,7 @@ static int fopen_works(void)
   for(i = 0; i < 3; i++) {
     fpa[i] = fopen(DEV_NULL, FOPEN_READTEXT);
     if(fpa[i] == NULL) {
-      store_errmsg("fopen failed", ERRNO);
+      store_errmsg("fopen failed", errno);
       fprintf(stderr, "%s\n", msgbuff);
       ret = 0;
       break;
@@ -122,7 +122,7 @@ static int rlimit(int keep_open)
   /* get initial open file limits */
 
   if(getrlimit(RLIMIT_NOFILE, &rl) != 0) {
-    store_errmsg("getrlimit() failed", ERRNO);
+    store_errmsg("getrlimit() failed", errno);
     fprintf(stderr, "%s\n", msgbuff);
     return -1;
   }
@@ -169,7 +169,7 @@ static int rlimit(int keep_open)
       rl.rlim_cur = OPEN_MAX;
       if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
         /* on failure don't abort just issue a warning */
-        store_errmsg("setrlimit() failed", ERRNO);
+        store_errmsg("setrlimit() failed", errno);
         fprintf(stderr, "%s\n", msgbuff);
         msgbuff[0] = '\0';
       }
@@ -180,7 +180,7 @@ static int rlimit(int keep_open)
     rl.rlim_cur = rl.rlim_max;
     if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
       /* on failure don't abort just issue a warning */
-      store_errmsg("setrlimit() failed", ERRNO);
+      store_errmsg("setrlimit() failed", errno);
       fprintf(stderr, "%s\n", msgbuff);
       msgbuff[0] = '\0';
     }
@@ -188,7 +188,7 @@ static int rlimit(int keep_open)
     /* get current open file limits */
 
     if(getrlimit(RLIMIT_NOFILE, &rl) != 0) {
-      store_errmsg("getrlimit() failed", ERRNO);
+      store_errmsg("getrlimit() failed", errno);
       fprintf(stderr, "%s\n", msgbuff);
       return -3;
     }
@@ -268,7 +268,7 @@ static int rlimit(int keep_open)
     }
   } while(nitems && !memchunk);
   if(!memchunk) {
-    store_errmsg("memchunk, malloc() failed", ERRNO);
+    store_errmsg("memchunk, malloc() failed", errno);
     fprintf(stderr, "%s\n", msgbuff);
     return -5;
   }
@@ -303,7 +303,7 @@ static int rlimit(int keep_open)
 
   fd = malloc(sizeof(*fd) * (size_t)(num_open.rlim_max));
   if(!fd) {
-    store_errmsg("fd, malloc() failed", ERRNO);
+    store_errmsg("fd, malloc() failed", errno);
     fprintf(stderr, "%s\n", msgbuff);
     free(memchunk);
     return -7;
@@ -326,7 +326,7 @@ static int rlimit(int keep_open)
   fd[0] = open(DEV_NULL, O_RDONLY);
   if(fd[0] < 0) {
     snprintf(strbuff, sizeof(strbuff), "opening of %s failed", DEV_NULL);
-    store_errmsg(strbuff, ERRNO);
+    store_errmsg(strbuff, errno);
     fprintf(stderr, "%s\n", msgbuff);
     free(fd);
     fd = NULL;
