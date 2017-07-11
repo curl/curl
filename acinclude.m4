@@ -199,8 +199,6 @@ AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
     yes)
       AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, 1,
         [Define to 1 if you have the windows.h header file.])
-      AC_DEFINE_UNQUOTED(WIN32_LEAN_AND_MEAN, 1,
-        [Define to avoid automatic inclusion of winsock.h])
       ;;
   esac
 ])
