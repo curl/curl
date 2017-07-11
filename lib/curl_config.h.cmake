@@ -972,9 +972,6 @@
 /* Version number of package */
 #cmakedefine VERSION ${VERSION}
 
-/* Define to avoid automatic inclusion of winsock.h */
-#cmakedefine WIN32_LEAN_AND_MEAN 1
-
 /* Define to 1 if OS is AIX. */
 #ifndef _ALL_SOURCE
 #  undef _ALL_SOURCE
