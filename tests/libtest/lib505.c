@@ -42,7 +42,6 @@ int test(char *URL)
   int hd;
   struct_stat file_info;
   struct curl_slist *hl;
-  int error;
 
   struct curl_slist *headerlist=NULL;
   const char *buf_1 = "RNFR 505";
@@ -55,9 +54,8 @@ int test(char *URL)
 
   hd_src = fopen(libtest_arg2, "rb");
   if(NULL == hd_src) {
-    error = errno;
     fprintf(stderr, "fopen failed with error: %d %s\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "Error opening file: %s\n", libtest_arg2);
     return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
@@ -66,9 +64,8 @@ int test(char *URL)
   hd = fstat(fileno(hd_src), &file_info);
   if(hd == -1) {
     /* can't open file, bail out */
-    error = errno;
     fprintf(stderr, "fstat() failed with error: %d %s\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "ERROR: cannot open file %s\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
