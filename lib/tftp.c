@@ -404,13 +404,17 @@ static CURLcode tftp_parse_option_ack(tftp_state_data_t *state,
   return CURLE_OK;
 }
 
-static size_t tftp_option_add(tftp_state_data_t *state, size_t csize,
-                              char *buf, const char *option)
+static CURLcode tftp_option_add(tftp_state_data_t *state,
+                                const char *option,
+                                char *buf, size_t *sbytes)
 {
-  if(( strlen(option) + csize + 1) > (size_t)state->blksize)
-    return 0;
+  size_t len = strlen(option);
+  if((*sbytes + len + 1) <= *sbytes ||
+     (*sbytes + len + 1) > (size_t)state->blksize)
+    return CURLE_TFTP_ILLEGAL;
   strcpy(buf, option);
-  return strlen(option) + 1;
+  *sbytes += len + 1;
+  return CURLE_OK;
 }
 
 static CURLcode tftp_connect_for_tx(tftp_state_data_t *state,
@@ -483,6 +487,10 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       /* If we are downloading, send an RRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_RRQ);
     }
+
+    /* setpacketevent has set the first two bytes */
+    sbytes = 2;
+
     /* As RFC3617 describes the separator slash is not actually part of the
        file name so we skip the always-present first letter of the path
        string. */
@@ -491,15 +499,14 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     if(result)
       return result;
 
-    if(strlen(filename) > (state->blksize - strlen(mode) - 4)) {
-      failf(data, "TFTP file name too long\n");
-      return CURLE_TFTP_ILLEGAL; /* too long file name field */
-    }
+#define APPEND_OR_ABORT(option)  \
+    result = tftp_option_add(state, option, \
+                             (char *)state->spacket.data + sbytes, &sbytes); \
+    if(result) \
+      return result;
 
-    snprintf((char *)state->spacket.data+2,
-             state->blksize,
-             "%s%c%s%c", filename, '\0',  mode, '\0');
-    sbytes = 4 + strlen(filename) + strlen(mode);
+    APPEND_OR_ABORT(filename);
+    APPEND_OR_ABORT(mode);
 
     /* optional addition of TFTP options */
     if(!data->set.tftp_no_options) {
@@ -510,26 +517,20 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       else
         strcpy(buf, "0"); /* the destination is large enough */
 
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes,
-                                TFTP_OPTION_TSIZE);
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes, buf);
+      APPEND_OR_ABORT(TFTP_OPTION_TSIZE);
+      APPEND_OR_ABORT(buf);
+
       /* add blksize option */
       snprintf(buf, sizeof(buf), "%d", state->requested_blksize);
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes,
-                                TFTP_OPTION_BLKSIZE);
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes, buf);
+
+      APPEND_OR_ABORT(TFTP_OPTION_BLKSIZE);
+      APPEND_OR_ABORT(buf);
 
       /* add timeout option */
       snprintf(buf, sizeof(buf), "%d", state->retry_time);
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes,
-                                TFTP_OPTION_INTERVAL);
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes, buf);
+
+      APPEND_OR_ABORT(TFTP_OPTION_INTERVAL);
+      APPEND_OR_ABORT(buf);
     }
 
     /* the typecase for the 3rd argument is mostly for systems that do
