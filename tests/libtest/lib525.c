@@ -35,7 +35,6 @@ int test(char *URL)
   CURL *curl = NULL;
   FILE *hd_src = NULL;
   int hd;
-  int error;
   struct_stat file_info;
   CURLM *m = NULL;
   int running;
@@ -55,9 +54,8 @@ int test(char *URL)
 
   hd_src = fopen(libtest_arg2, "rb");
   if(NULL == hd_src) {
-    error = errno;
     fprintf(stderr, "fopen failed with error: %d (%s)\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "Error opening file: (%s)\n", libtest_arg2);
     return TEST_ERR_FOPEN;
   }
@@ -66,9 +64,8 @@ int test(char *URL)
   hd = fstat(fileno(hd_src), &file_info);
   if(hd == -1) {
     /* can't open file, bail out */
-    error = errno;
     fprintf(stderr, "fstat() failed with error: %d (%s)\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "ERROR: cannot open file (%s)\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_FSTAT;

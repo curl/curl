@@ -31,6 +31,17 @@
 #define WIN32
 #endif
 
+#ifdef WIN32
+/*
+ * Don't include unneeded stuff in Windows headers to avoid compiler
+ * warnings and macro clashes.
+ * Make sure to define this macro before including any Windows headers.
+ */
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#endif
+
 /*
  * Include configuration script results or hand-crafted
  * configuration file for platforms which lack config tool.
@@ -236,9 +247,6 @@
 #  endif
 #  if defined(_UNICODE) && !defined(UNICODE)
 #    define UNICODE
-#  endif
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
