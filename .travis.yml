@@ -81,7 +81,7 @@ script:
         fi
     - |
         if [ "$BUILD_TYPE" = "normal" ]; then
-             ./configure --enable-werror
+             ./configure --enable-warnings --enable-werror
              make
              make test-nonflaky
         fi
