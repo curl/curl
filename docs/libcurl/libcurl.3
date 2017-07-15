@@ -38,6 +38,10 @@ while using libcurl.  This essentially means you call
 \fIcurl_global_cleanup(3)\fP at the end.  See \fBGLOBAL CONSTANTS\fP below for
 details.
 
+If libcurl was compiled with support for multiple SSL backends, the function
+\fIcurl_global_sslset(3)\fP can be called before \fIcurl_global_init(3)\fP
+to select the active SSL backend.
+
 To transfer files, you create an "easy handle" using \fIcurl_easy_init(3)\fP
 for a single individual transfer (in either direction). You then set your
 desired set of options in that handle with \fIcurl_easy_setopt(3)\fP. Options

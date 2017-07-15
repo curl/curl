@@ -17,4 +17,4 @@ man_MANS = curl_easy_cleanup.3 curl_easy_getinfo.3 curl_easy_init.3      \
   curl_multi_timeout.3 curl_formget.3 curl_multi_assign.3                \
   curl_easy_pause.3 curl_easy_recv.3 curl_easy_send.3                    \
   curl_multi_socket_action.3 curl_multi_wait.3 libcurl-symbols.3         \
-  libcurl-thread.3 curl_multi_socket_all.3
+  libcurl-thread.3 curl_multi_socket_all.3 curl_global_sslset.3
