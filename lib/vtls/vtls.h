@@ -27,8 +27,11 @@ struct connectdata;
 struct ssl_connect_data;
 
 struct Curl_ssl {
-  const char *name;
-  int id; /* one of the CURLSSLBACKEND_* constants */
+  /*
+   * This *must* be the first entry to allow returning the list of available
+   * backends in curl_global_sslset().
+   */
+  curl_ssl_backend info;
 
   unsigned have_ca_path:1;      /* supports CAPATH */
   unsigned have_certinfo:1;     /* supports CURLOPT_CERTINFO */
