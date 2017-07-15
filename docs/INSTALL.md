@@ -222,6 +222,9 @@ subdirectory run following command from mentioned subdirectory:
 In order to build sample program simplessl.c an SSL enabled libcurl is
 required, as well as the OpenSSL libeay32.lib and ssleay32.lib libraries.
 
+In order to build sample program `sslbackend.c`, an SSL enabled libcurl
+is required.
+
 ## Disabling Specific Protocols in Windows builds
 
 The configure utility, unfortunately, is not available for the Windows
