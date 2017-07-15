@@ -138,7 +138,7 @@ int Curl_ssl_backend(void)
 {
 #ifdef USE_SSL
   multissl_init();
-  return Curl_ssl->id;
+  return Curl_ssl->info.id;
 #else
   return (int)CURLSSLBACKEND_NONE;
 #endif
@@ -1099,8 +1099,7 @@ static void Curl_multissl_close(struct connectdata *conn, int sockindex)
 }
 
 static const struct Curl_ssl Curl_ssl_multi = {
-  "multi",                           /* name */
-  CURLSSLBACKEND_NONE,
+  { CURLSSLBACKEND_NONE, "multi" },  /* info */
 
   0, /* have_ca_path */
   0, /* have_certinfo */
@@ -1182,7 +1181,7 @@ static int multissl_init(void)
   env = getenv("CURL_SSL_BACKEND");
   if(env)
     for(i = 0; available_backends[i]; i++)
-      if(!strcmp(env, available_backends[i]->name)) {
+      if(!strcmp(env, available_backends[i]->info.name)) {
         Curl_ssl = available_backends[i];
         return 0;
       }

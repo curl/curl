@@ -901,8 +901,7 @@ static void *Curl_polarssl_get_internals(struct ssl_connect_data *connssl,
 }
 
 const struct Curl_ssl Curl_ssl_polarssl = {
-  "polarssl",                        /* name */
-  CURLSSLBACKEND_POLARSSL,
+  { CURLSSLBACKEND_POLARSSL, "polarssl" }, /* info */
 
   1, /* have_ca_path */
   0, /* have_certinfo */

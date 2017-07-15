@@ -2343,8 +2343,7 @@ static void *Curl_nss_get_internals(struct ssl_connect_data *connssl,
 }
 
 const struct Curl_ssl Curl_ssl_nss = {
-  "nss",                        /* name */
-  CURLSSLBACKEND_NSS,
+  { CURLSSLBACKEND_NSS, "nss" }, /* info */
 
   1, /* have_ca_path */
   1, /* have_certinfo */

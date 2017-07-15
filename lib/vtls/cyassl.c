@@ -978,8 +978,7 @@ static void *Curl_cyassl_get_internals(struct ssl_connect_data *connssl,
 }
 
 const struct Curl_ssl Curl_ssl_cyassl = {
-  "cyassl",                        /* name */
-  CURLSSLBACKEND_CYASSL,
+  { CURLSSLBACKEND_CYASSL, "cyassl" }, /* info */
 
   0, /* have_ca_path */
   0, /* have_certinfo */

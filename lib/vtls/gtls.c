@@ -1806,8 +1806,7 @@ static void *Curl_gtls_get_internals(struct ssl_connect_data *connssl,
 }
 
 const struct Curl_ssl Curl_ssl_gnutls = {
-  "gnutls",                      /* name */
-  CURLSSLBACKEND_GNUTLS,
+  { CURLSSLBACKEND_GNUTLS, "gnutls" }, /* info */
 
   1, /* have_ca_path */
   1, /* have_certinfo */
