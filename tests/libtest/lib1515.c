@@ -95,12 +95,13 @@ static int do_one_request(CURLM *m, char *URL, char *resolve)
     abort_on_test_timeout();
   }
 
-  while((msg = curl_multi_info_read(m, &msgs_left))) {
-    if(msg->msg == CURLMSG_DONE && msg->easy_handle == curls) {
+  do {
+    msg = curl_multi_info_read(m, &msgs_left);
+    if(msg && msg->msg == CURLMSG_DONE && msg->easy_handle == curls) {
       res = msg->data.result;
       break;
     }
-  }
+  } while(msg);
 
 test_cleanup:
 
