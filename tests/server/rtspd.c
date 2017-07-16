@@ -1191,11 +1191,13 @@ int main(int argc, char *argv[])
   int flag;
   unsigned short port = DEFAULT_PORT;
   const char *pidname = ".rtsp.pid";
-  struct httprequest req = {0};
+  struct httprequest req;
   int rc;
   int error;
   int arg=1;
   long pid;
+
+  memset(&req, 0, sizeof(req));
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
