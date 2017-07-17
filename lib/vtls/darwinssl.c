@@ -2027,7 +2027,7 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
 }
 
 #ifdef DARWIN_SSL_PINNEDPUBKEY
-static CURLcode pkp_pin_peer_pubkey(struct SessionHandle *data,
+static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                     SSLContextRef ctx,
                                     const char *pinnedpubkey)
 {  /* Scratch */
