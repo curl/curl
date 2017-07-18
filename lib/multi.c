@@ -1022,6 +1022,8 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
 
   if(nfds) {
     if(nfds > NUM_POLLS_ON_STACK) {
+	  if (nfds > SIZE_MAX / sizeof(struct pollfd))
+		return CURLM_INTERNAL_ERROR;
       ufds = malloc(nfds * sizeof(struct pollfd));
       if(!ufds)
         return CURLM_OUT_OF_MEMORY;
