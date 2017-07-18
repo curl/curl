@@ -1161,6 +1161,11 @@ endif(WIN32)
 
 if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+  if(CMAKE_C_FLAGS MATCHES "/W[0-4]")
+    string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  else(CMAKE_C_FLAGS MATCHES "/W[0-4]")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
+  endif(CMAKE_C_FLAGS MATCHES "/W[0-4]")
 endif(MSVC)
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).

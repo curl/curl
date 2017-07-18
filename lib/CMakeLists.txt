@@ -12,6 +12,7 @@ list(APPEND HHEADERS
 
 if(MSVC)
   list(APPEND CSOURCES libcurl.rc)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4127")
 endif()
 
 # SET(CSOURCES
