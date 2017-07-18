@@ -232,6 +232,7 @@ my $has_crypto;     # set if libcurl is built with cryptographic support
 my $has_cares;      # set if built with c-ares
 my $has_threadedres;# set if built with threaded resolver
 my $has_psl;        # set if libcurl is built with PSL support
+my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -2731,6 +2732,9 @@ sub checksystem {
             $curl =~ s/^(.*)(libcurl.*)/$1/g;
 
             $libcurl = $2;
+            if($curl =~ /linux|bsd|solaris|darwin/) {
+                $has_ldpreload = 1;
+            }
             if($curl =~ /win32|mingw(32|64)/) {
                 # This is a Windows MinGW build or native build, we need to use
                 # Win32-style path.
@@ -3312,6 +3316,11 @@ sub singletest {
             }
             elsif($1 eq "DarwinSSL") {
                 if($has_darwinssl) {
+                    next;
+                }
+            }
+            elsif($1 eq "ld_preload") {
+                if($has_ldpreload && !$debug_build) {
                     next;
                 }
             }

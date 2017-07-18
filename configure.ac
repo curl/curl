@@ -1335,6 +1335,13 @@ else
   CPPFLAGS="$save_CPPFLAGS"
 fi
 
+build_libstubgss=no
+if test x"$want_gss" = "xyes"; then
+  build_libstubgss=yes
+fi
+
+AM_CONDITIONAL(BUILD_STUB_GSS, test "x$build_libstubgss" = "xyes")
+
 dnl -------------------------------------------------------------
 dnl parse --with-default-ssl-backend so it can be validated below
 dnl -------------------------------------------------------------

@@ -763,7 +763,20 @@ static int ProcessRequest(struct httprequest *req)
       logmsg("Authorization header found, as required");
   }
 
-  if(!req->digest && strstr(req->reqbuf, "Authorization: Digest")) {
+  if(strstr(req->reqbuf, "Authorization: Negotiate")) {
+    /* Negotiate iterations */
+    static long prev_testno = -1;
+    static long prev_partno = -1;
+    logmsg("Negotiate: prev_testno: %d, prev_partno: %d",
+            prev_testno, prev_partno);
+    if(req->testno != prev_testno) {
+      prev_testno = req->testno;
+      prev_partno = req->partno;
+    }
+    prev_partno += 1;
+    req->partno = prev_partno;
+  }
+  else if(!req->digest && strstr(req->reqbuf, "Authorization: Digest")) {
     /* If the client is passing this Digest-header, we set the part number
        to 1000. Not only to spice up the complexity of this, but to make
        Digest stuff to work in the test suite. */
