@@ -1788,6 +1788,9 @@ typedef enum {
   /* bitmask of allowed auth methods for connections to SOCKS5 proxies */
   CINIT(SOCKS5_AUTH, LONG, 267),
 
+  /* shuffle addresses before use when DNS returns multiple */
+  CINIT(DNS_SHUFFLE_ADDRESSES, LONG, 268),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

@@ -51,6 +51,7 @@
 #include "sendf.h"
 #include "hostip.h"
 #include "hash.h"
+#include "rand.h"
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
@@ -363,6 +364,56 @@ Curl_fetch_addr(struct connectdata *conn,
 }
 
 /*
+ * Shuffle the order of addresses inside addr.
+ */
+static void addr_shuffle(struct Curl_easy *data,
+                         Curl_addrinfo **addr)
+{
+  const int num_addrs = Curl_num_addresses(*addr);
+
+  if(num_addrs > 1)  {
+    Curl_addrinfo **nodes;
+    infof(data, "Shuffling %i addresses", num_addrs);
+
+    nodes = malloc(num_addrs*sizeof(*nodes));
+    if(nodes)  {
+      int i;
+      unsigned int *rnd;
+      const size_t rnd_size = num_addrs * sizeof(*rnd);
+
+      /* build a plain array of Curl_addrinfo pointers */
+      nodes[0] = *addr;
+      for(i = 1; i < num_addrs; i++)  {
+        nodes[i] = nodes[i-1]->ai_next;
+      }
+
+      rnd = malloc(rnd_size);
+      if(rnd)  {
+        /* Fisher-Yates shuffle */
+        if(Curl_rand(data, (unsigned char *)rnd, rnd_size) == CURLE_OK)  {
+          Curl_addrinfo *swap_tmp;
+          for(i = num_addrs - 1; i > 0; i--)  {
+            swap_tmp = nodes[rnd[i] % (i + 1)];
+            nodes[rnd[i] % (i + 1)] = nodes[i];
+            nodes[i] = swap_tmp;
+          }
+
+          /* relink list in the new order */
+          for(i = 1; i < num_addrs; i++)  {
+            nodes[i-1]->ai_next = nodes[i];
+          }
+
+          nodes[num_addrs-1]->ai_next = NULL;
+          *addr = nodes[0];
+        }
+        free(rnd);
+      }
+      free(nodes);
+    }
+  }
+}
+
+/*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
  *
  * When calling Curl_resolv() has resulted in a response with a returned
@@ -381,6 +432,11 @@ Curl_cache_addr(struct Curl_easy *data,
   size_t entry_len;
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
+
+  /* shuffle addresses if requested */
+  if(data->set.dns_shuffle_addresses)  {
+    addr_shuffle(data, &addr);
+  }
 
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
