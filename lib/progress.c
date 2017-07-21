@@ -166,7 +166,7 @@ void Curl_pgrsResetTimesSizes(struct Curl_easy *data)
  */
 void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
-  struct timeval now = Curl_tvnow();
+  struct curlval now = Curl_tvnow();
   time_t *delta = NULL;
 
   switch(timer) {
@@ -260,8 +260,8 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
 long Curl_pgrsLimitWaitTime(curl_off_t cursize,
                             curl_off_t startsize,
                             curl_off_t limit,
-                            struct timeval start,
-                            struct timeval now)
+                            struct curlval start,
+                            struct curlval now)
 {
   curl_off_t size = cursize - startsize;
   time_t minimum;
@@ -287,7 +287,7 @@ long Curl_pgrsLimitWaitTime(curl_off_t cursize,
 
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  struct timeval now = Curl_tvnow();
+  struct curlval now = Curl_tvnow();
 
   data->progress.downloaded = size;
 
@@ -305,7 +305,7 @@ void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  struct timeval now = Curl_tvnow();
+  struct curlval now = Curl_tvnow();
 
   data->progress.uploaded = size;
 
@@ -351,7 +351,7 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
  */
 int Curl_pgrsUpdate(struct connectdata *conn)
 {
-  struct timeval now;
+  struct curlval now;
   int result;
   char max5[6][10];
   curl_off_t dlpercen=0;

@@ -41,7 +41,7 @@ static int runawhile(struct Curl_easy *easy,
                      int dec)
 {
   int counter = 1;
-  struct timeval now = {1, 0};
+  struct curlval now = {1, 0};
   CURLcode result;
   int finaltime;
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -100,7 +100,7 @@ void logmsg(const char *msg, ...)
   char buffer[2048 + 1];
   FILE *logfp;
   int error;
-  struct timeval tv;
+  struct curlval tv;
   time_t sec;
   struct tm *now;
   char timebuf[20];
@@ -211,9 +211,9 @@ int wait_ms(int timeout_ms)
 {
 #if !defined(MSDOS) && !defined(USE_WINSOCK)
 #ifndef HAVE_POLL_FINE
-  struct timeval pending_tv;
+  struct curlval pending_tv;
 #endif
-  struct timeval initial_tv;
+  struct curlval initial_tv;
   int pending_ms;
   int error;
 #endif

@@ -48,7 +48,7 @@ static bool usec_matches_seconds(time_t time_usec, int expected_seconds)
 
 UNITTEST_START
   struct Curl_easy data;
-  struct timeval now = Curl_tvnow();
+  struct curlval now = Curl_tvnow();
 
   data.progress.t_starttransfer = 0;
   data.progress.t_redirect = 0;

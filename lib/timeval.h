@@ -29,7 +29,12 @@
 
 #include "curl_setup.h"
 
-struct timeval curlx_tvnow(void);
+struct curlval {
+  time_t       tv_sec;     /* seconds */
+  unsigned int tv_usec;    /* microseconds */
+};
+
+struct curlval curlx_tvnow(void);
 
 /*
  * Make sure that the first argument (t1) is the more recent time and t2 is
@@ -37,7 +42,7 @@ struct timeval curlx_tvnow(void);
  *
  * Returns: the time difference in number of milliseconds.
  */
-time_t curlx_tvdiff(struct timeval t1, struct timeval t2);
+time_t curlx_tvdiff(struct curlval t1, struct curlval t2);
 
 /*
  * Make sure that the first argument (t1) is the more recent time and t2 is
@@ -45,7 +50,7 @@ time_t curlx_tvdiff(struct timeval t1, struct timeval t2);
  *
  * Returns: the time difference in number of microseconds.
  */
-time_t Curl_tvdiff_us(struct timeval newer, struct timeval older);
+time_t Curl_tvdiff_us(struct curlval newer, struct curlval older);
 
 /* These two defines below exist to provide the older API for library
    internals only. */
