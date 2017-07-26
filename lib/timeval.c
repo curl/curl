@@ -24,7 +24,7 @@
 
 #if defined(WIN32) && !defined(MSDOS)
 
-struct timeval curlx_tvnow(void)
+struct curltime curlx_tvnow(void)
 {
   /*
   ** GetTickCount() is available on _all_ Windows versions from W95 up
@@ -39,8 +39,8 @@ struct timeval curlx_tvnow(void)
   now.tv_usec = (milliseconds % 1000) * 1000;
 #else
   ULONGLONG milliseconds = GetTickCount64();
-  now.tv_sec = (long) (milliseconds / 1000);
-  now.tv_usec = (long) (milliseconds % 1000) * 1000;
+  now.tv_sec = (time_t) (milliseconds / 1000);
+  now.tv_usec = (unsigned int) (milliseconds % 1000) * 1000;
 #endif
 
   return now;

@@ -76,7 +76,7 @@ int Curl_wait_ms(int timeout_ms)
 {
 #if !defined(MSDOS) && !defined(USE_WINSOCK)
 #ifndef HAVE_POLL_FINE
-  struct curltime pending_tv;
+  struct timeval pending_tv;
 #endif
   struct curltime initial_tv;
   int pending_ms;
@@ -151,8 +151,8 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   struct pollfd pfd[3];
   int num;
 #else
-  struct curltime pending_tv;
-  struct curltime *ptimeout;
+  struct timeval pending_tv;
+  struct timeval *ptimeout;
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
@@ -391,8 +391,8 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 {
 #ifndef HAVE_POLL_FINE
-  struct curltime pending_tv;
-  struct curltime *ptimeout;
+  struct timeval pending_tv;
+  struct timeval *ptimeout;
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
@@ -572,7 +572,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
  * Return values are the same as select's.
  */
 int tpf_select_libcurl(int maxfds, fd_set *reads, fd_set *writes,
-                       fd_set *excepts, struct curltime *tv)
+                       fd_set *excepts, struct timeval *tv)
 {
    int rc;
 
