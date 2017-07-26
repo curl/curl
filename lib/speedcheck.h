@@ -28,6 +28,6 @@
 
 void Curl_speedinit(struct Curl_easy *data);
 CURLcode Curl_speedcheck(struct Curl_easy *data,
-                         struct curlval now);
+                         struct curltime now);
 
 #endif /* HEADER_CURL_SPEEDCHECK_H */

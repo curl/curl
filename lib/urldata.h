@@ -678,8 +678,8 @@ struct SingleRequest {
                              100 reply (without a following second response
                              code) result in a CURLE_GOT_NOTHING error code */
 
-  struct curlval start;         /* transfer started at this time */
-  struct curlval now;           /* current time */
+  struct curltime start;         /* transfer started at this time */
+  struct curltime now;           /* current time */
   bool header;                  /* incoming data has HTTP header */
   enum {
     HEADER_NORMAL,              /* no bad header at all */
@@ -701,7 +701,7 @@ struct SingleRequest {
                                    Content-Range: header */
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
                                    'RTSP/1.? XXX' line */
-  struct curlval start100;      /* time stamp to wait for the 100 code from */
+  struct curltime start100;      /* time stamp to wait for the 100 code from */
   enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
@@ -1016,8 +1016,8 @@ struct connectdata {
   int httpversion;        /* the HTTP version*10 reported by the server */
   int rtspversion;        /* the RTSP version*10 reported by the server */
 
-  struct curlval now;     /* "current" time */
-  struct curlval created; /* creation time */
+  struct curltime now;     /* "current" time */
+  struct curltime created; /* creation time */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
   curl_socket_t tempsock[2]; /* temporary sockets for happy eyeballs */
@@ -1040,7 +1040,7 @@ struct connectdata {
  /* connecttime: when connect() is called on the current IP address. Used to
     be able to track when to move on to try next IP - but only when the multi
     interface is used. */
-  struct curlval connecttime;
+  struct curltime connecttime;
   /* The two fields below get set in Curl_connecthost */
   int num_addr; /* number of addresses to try to connect to */
   time_t timeoutms_per_addr; /* how long time in milliseconds to spend on
@@ -1250,22 +1250,22 @@ struct Progress {
   time_t t_starttransfer;
   time_t t_redirect;
 
-  struct curlval start;
-  struct curlval t_startsingle;
-  struct curlval t_startop;
-  struct curlval t_acceptdata;
+  struct curltime start;
+  struct curltime t_startsingle;
+  struct curltime t_startop;
+  struct curltime t_acceptdata;
 
   /* upload speed limit */
-  struct curlval ul_limit_start;
+  struct curltime ul_limit_start;
   curl_off_t ul_limit_size;
   /* download speed limit */
-  struct curlval dl_limit_start;
+  struct curltime dl_limit_start;
   curl_off_t dl_limit_size;
 
 #define CURR_TIME (5+1) /* 6 entries for 5 seconds */
 
   curl_off_t speeder[ CURR_TIME ];
-  struct curlval speeder_time[ CURR_TIME ];
+  struct curltime speeder_time[ CURR_TIME ];
   int speeder_c;
 };
 
@@ -1360,7 +1360,7 @@ typedef enum {
  */
 struct time_node {
   struct curl_llist_element list;
-  struct curlval time;
+  struct curltime time;
   expire_id eid;
 };
 
@@ -1375,7 +1375,7 @@ struct UrlState {
   bool multi_owned_by_easy;
 
   /* buffers to store authentication data in, as parsed from input options */
-  struct curlval keeps_speed; /* for the progress meter really */
+  struct curltime keeps_speed; /* for the progress meter really */
 
   struct connectdata *lastconnect; /* The last connection, NULL if undefined */
 
@@ -1429,7 +1429,7 @@ struct UrlState {
 #if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *engine;
 #endif /* USE_OPENSSL */
-  struct curlval expiretime; /* set this with Curl_expire() only */
+  struct curltime expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
   struct curl_llist timeoutlist; /* list of pending timeouts */
   struct time_node expires[EXPIRE_LAST]; /* nodes for each expire type */

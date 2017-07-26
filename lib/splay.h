@@ -29,24 +29,24 @@ struct Curl_tree {
   struct Curl_tree *larger;  /* larger node */
   struct Curl_tree *samen;   /* points to the next node with identical key */
   struct Curl_tree *samep;   /* points to the prev node with identical key */
-  struct curlval key;        /* this node's "sort" key */
+  struct curltime key;        /* this node's "sort" key */
   void *payload;             /* data the splay code doesn't care about */
 };
 
-struct Curl_tree *Curl_splay(struct curlval i,
+struct Curl_tree *Curl_splay(struct curltime i,
                              struct Curl_tree *t);
 
-struct Curl_tree *Curl_splayinsert(struct curlval key,
+struct Curl_tree *Curl_splayinsert(struct curltime key,
                                    struct Curl_tree *t,
                                    struct Curl_tree *newnode);
 
 #if 0
-struct Curl_tree *Curl_splayremove(struct curlval key,
+struct Curl_tree *Curl_splayremove(struct curltime key,
                                    struct Curl_tree *t,
                                    struct Curl_tree **removed);
 #endif
 
-struct Curl_tree *Curl_splaygetbest(struct curlval key,
+struct Curl_tree *Curl_splaygetbest(struct curltime key,
                                     struct Curl_tree *t,
                                     struct Curl_tree **removed);
 

@@ -290,8 +290,8 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
     unsigned char randb[64];
     size_t len = sizeof(randb);
     size_t i, i_max;
-    for(i = 0, i_max = len / sizeof(struct curlval); i < i_max; ++i) {
-      struct curlval tv = curlx_tvnow();
+    for(i = 0, i_max = len / sizeof(struct curltime); i < i_max; ++i) {
+      struct curltime tv = curlx_tvnow();
       Curl_wait_ms(1);
       tv.tv_sec *= i + 1;
       tv.tv_usec *= (unsigned int)i + 2;
@@ -300,7 +300,8 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
       tv.tv_usec ^= (unsigned int) ((curlx_tvnow().tv_sec +
                                      curlx_tvnow().tv_usec) *
                                     (i + 4)) << 16;
-      memcpy(&randb[i * sizeof(struct curlval)], &tv, sizeof(struct curlval));
+      memcpy(&randb[i * sizeof(struct curltime)], &tv,
+             sizeof(struct curltime));
     }
     RAND_add(randb, (int)len, (double)len/2);
   } while(!rand_enough());

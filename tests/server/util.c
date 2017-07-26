@@ -100,7 +100,7 @@ void logmsg(const char *msg, ...)
   char buffer[2048 + 1];
   FILE *logfp;
   int error;
-  struct curlval tv;
+  struct curltime tv;
   time_t sec;
   struct tm *now;
   char timebuf[20];
@@ -211,9 +211,9 @@ int wait_ms(int timeout_ms)
 {
 #if !defined(MSDOS) && !defined(USE_WINSOCK)
 #ifndef HAVE_POLL_FINE
-  struct curlval pending_tv;
+  struct curltime pending_tv;
 #endif
-  struct curlval initial_tv;
+  struct curltime initial_tv;
   int pending_ms;
   int error;
 #endif

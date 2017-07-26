@@ -70,7 +70,7 @@ struct timetest {
 
 UNITTEST_START
 {
-  struct curlval now;
+  struct curltime now;
   time_t timeout;
   unsigned int i;
 

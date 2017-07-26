@@ -37,7 +37,7 @@
  * Splay using the key i (which may or may not be in the tree.) The starting
  * root is t.
  */
-struct Curl_tree *Curl_splay(struct curlval i,
+struct Curl_tree *Curl_splay(struct curltime i,
                              struct Curl_tree *t)
 {
   struct Curl_tree N, *l, *r, *y;
@@ -97,11 +97,13 @@ struct Curl_tree *Curl_splay(struct curlval i,
  *
  * @unittest: 1309
  */
-struct Curl_tree *Curl_splayinsert(struct curlval i,
+struct Curl_tree *Curl_splayinsert(struct curltime i,
                                    struct Curl_tree *t,
                                    struct Curl_tree *node)
 {
-  static const struct curlval KEY_NOTUSED = {-1, -1}; /* will *NEVER* appear */
+  static const struct curltime KEY_NOTUSED = {
+    -1, -1
+  }; /* will *NEVER* appear */
 
   if(node == NULL)
     return t;
@@ -114,7 +116,7 @@ struct Curl_tree *Curl_splayinsert(struct curlval i,
          to the end of this list. */
 
       node->key = KEY_NOTUSED; /* we set the key in the sub node to NOTUSED
-                               to quickly identify this node as a subnode */
+                                  to quickly identify this node as a subnode */
       node->samen = t;
       node->samep = t->samep;
       t->samep->samen = node;
@@ -149,11 +151,11 @@ struct Curl_tree *Curl_splayinsert(struct curlval i,
 /* Finds and deletes the best-fit node from the tree. Return a pointer to the
    resulting tree.  best-fit means the smallest node if it is not larger than
    the key */
-struct Curl_tree *Curl_splaygetbest(struct curlval i,
+struct Curl_tree *Curl_splaygetbest(struct curltime i,
                                     struct Curl_tree *t,
                                     struct Curl_tree **removed)
 {
-  static struct curlval tv_zero = {0, 0};
+  static struct curltime tv_zero = {0, 0};
   struct Curl_tree *x;
 
   if(!t) {
@@ -209,7 +211,9 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
                            struct Curl_tree *removenode,
                            struct Curl_tree **newroot)
 {
-  static const struct curlval KEY_NOTUSED = {-1, -1}; /* will *NEVER* appear */
+  static const struct curltime KEY_NOTUSED = {
+    -1, -1
+  }; /* will *NEVER* appear */
   struct Curl_tree *x;
 
   if(!t || !removenode)

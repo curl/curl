@@ -74,12 +74,12 @@ UNITTEST_START
   struct Curl_tree nodes[NUM_NODES*3];
   int rc;
   int i, j;
-  struct curlval tv_now = {0, 0};
+  struct curltime tv_now = {0, 0};
   root = NULL;              /* the empty tree */
 
   /* add nodes */
   for(i = 0; i < NUM_NODES; i++) {
-    struct curlval key;
+    struct curltime key;
     size_t payload;
 
     key.tv_sec = 0;
@@ -111,7 +111,7 @@ UNITTEST_START
 
   /* rebuild tree */
   for(i = 0; i < NUM_NODES; i++) {
-    struct curlval key;
+    struct curltime key;
 
     key.tv_sec = 0;
     key.tv_usec = (541*i)%1023;
