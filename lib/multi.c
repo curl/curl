@@ -1022,6 +1022,10 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
 
   if(nfds) {
     if(nfds > NUM_POLLS_ON_STACK) {
+      /* 'nfds' is a 32 bit value and 'struct pollfd' is typically 8 bytes
+         big, so at 2^29 sockets this value might wrap. When a process gets
+         the capability to actually handle over 500 million sockets this
+         calculation needs a integer overflow check. */
       ufds = malloc(nfds * sizeof(struct pollfd));
       if(!ufds)
         return CURLM_OUT_OF_MEMORY;
