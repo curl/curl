@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2011 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2011 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -513,7 +513,7 @@ sub scanfile {
 
         # check for 'void func() {', but avoid false positives by requiring
         # both an open and closed parentheses before the open brace
-        if($l =~ /^((\w).*){\z/) {
+        if($l =~ /^((\w).*)\{\z/) {
             my $k = $1;
             $k =~ s/const *//;
             $k =~ s/static *//;
