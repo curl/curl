@@ -122,6 +122,8 @@ struct curltime curlx_tvnow(void)
  *
  * Returns: the time difference in number of milliseconds. For large diffs it
  * returns 0x7fffffff on 32bit time_t systems.
+ *
+ * @unittest: 1323
  */
 time_t curlx_tvdiff(struct curltime newer, struct curltime older)
 {
@@ -133,7 +135,7 @@ time_t curlx_tvdiff(struct curltime newer, struct curltime older)
     return 0x7fffffff;
 #endif
   return (newer.tv_sec-older.tv_sec)*1000+
-    (time_t)(newer.tv_usec-older.tv_usec)/1000;
+    (int)(newer.tv_usec-older.tv_usec)/1000;
 }
 
 /*
