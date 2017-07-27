@@ -816,7 +816,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     sha256sumdigest = malloc(SHA256_DIGEST_LENGTH);
     if(!sha256sumdigest)
       return CURLE_OUT_OF_MEMORY;
-    curlssl_sha256sum(pubkey, pubkeylen,
+    curlssl_sha256sum((unsigned char *)pubkey, pubkeylen,
                       sha256sumdigest, SHA256_DIGEST_LENGTH);
     encode = Curl_base64_encode(data, (char *)sha256sumdigest,
                                 SHA256_DIGEST_LENGTH, &encoded, &encodedlen);

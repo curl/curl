@@ -854,14 +854,14 @@ CF_INLINE CFStringRef CopyCertSubject(SecCertificateRef cert)
 #else
 #if CURL_BUILD_MAC_10_7
   /* Lion & later: Get the long description if we can. */
-  if(SecCertificateCopyLongDescription != NULL)
+  if(&SecCertificateCopyLongDescription != NULL)
     server_cert_summary =
       SecCertificateCopyLongDescription(NULL, cert, NULL);
   else
 #endif /* CURL_BUILD_MAC_10_7 */
 #if CURL_BUILD_MAC_10_6
   /* Snow Leopard: Get the certificate summary. */
-  if(SecCertificateCopySubjectSummary != NULL)
+  if(&SecCertificateCopySubjectSummary != NULL)
     server_cert_summary = SecCertificateCopySubjectSummary(cert);
   else
 #endif /* CURL_BUILD_MAC_10_6 */
@@ -927,7 +927,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
   /* SecItemCopyMatching() was introduced in iOS and Snow Leopard.
      kSecClassIdentity was introduced in Lion. If both exist, let's use them
      to find the certificate. */
-  if(SecItemCopyMatching != NULL && kSecClassIdentity != NULL) {
+  if(&SecItemCopyMatching != NULL && kSecClassIdentity != NULL) {
     CFTypeRef keys[5];
     CFTypeRef values[5];
     CFDictionaryRef query_dict;
@@ -1121,7 +1121,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
   }
 
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
-  if(SSLSetProtocolVersionMax != NULL) {
+  if(&SSLSetProtocolVersionMax != NULL) {
     SSLProtocol darwin_ver_min = kTLSProtocol1;
     SSLProtocol darwin_ver_max = kTLSProtocol1;
     CURLcode result = darwinssl_version_from_curl(&darwin_ver_min,
@@ -1205,7 +1205,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif /* CURL_BUILD_MAC */
 
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
-  if(SSLCreateContext != NULL) {  /* use the newer API if avaialble */
+  if(&SSLCreateContext != NULL) {  /* use the newer API if avaialble */
     if(connssl->ssl_ctx)
       CFRelease(connssl->ssl_ctx);
     connssl->ssl_ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
@@ -1239,7 +1239,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
-  if(SSLSetProtocolVersionMax != NULL) {
+  if(&SSLSetProtocolVersionMax != NULL) {
     switch(conn->ssl_config.version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
@@ -1489,9 +1489,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   Darwin 15.x.x is El Capitan (10.11)
   */
 #if CURL_BUILD_MAC
-  if(SSLSetSessionOption != NULL && darwinver_maj >= 13) {
+  if(&SSLSetSessionOption != NULL && darwinver_maj >= 13) {
 #else
-  if(SSLSetSessionOption != NULL) {
+  if(&SSLSetSessionOption != NULL) {
 #endif /* CURL_BUILD_MAC */
     bool break_on_auth = !conn->ssl_config.verifypeer || ssl_cafile;
     err = SSLSetSessionOption(connssl->ssl_ctx,
@@ -1665,7 +1665,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   /* We want to enable 1/n-1 when using a CBC cipher unless the user
      specifically doesn't want us doing that: */
-  if(SSLSetSessionOption != NULL) {
+  if(&SSLSetSessionOption != NULL) {
     /* TODO s/data->set.ssl.enable_beast/SSL_SET_OPTION(enable_beast)/g */
     SSLSetSessionOption(connssl->ssl_ctx, kSSLSessionOptionSendOneByteRecord,
                       !data->set.ssl.enable_beast);
@@ -2033,7 +2033,9 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                     const char *pinnedpubkey)
 {  /* Scratch */
   size_t pubkeylen, realpubkeylen, spkiHeaderLength = 24;
-  unsigned char *pubkey = NULL, *realpubkey = NULL, *spkiHeader = NULL;
+  const unsigned char *pubkey = NULL;
+  unsigned char *realpubkey = NULL;
+  const unsigned char *spkiHeader = NULL;
   CFDataRef publicKeyBits = NULL;
 
   /* Result is returned to caller */
@@ -2333,7 +2335,7 @@ show_verbose_server_cert(struct connectdata *conn,
      private API and doesn't work as expected. So we have to look for
      a different symbol to make sure this code is only executed under
      Lion or later. */
-  if(SecTrustEvaluateAsync != NULL) {
+  if(&SecTrustEvaluateAsync != NULL) {
 #pragma unused(server_certs)
     err = SSLCopyPeerTrust(connssl->ssl_ctx, &trust);
     /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
@@ -2571,7 +2573,7 @@ void Curl_darwinssl_close(struct connectdata *conn, int sockindex)
   if(connssl->ssl_ctx) {
     (void)SSLClose(connssl->ssl_ctx);
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
-    if(SSLCreateContext != NULL)
+    if(&SSLCreateContext != NULL)
       CFRelease(connssl->ssl_ctx);
 #if CURL_SUPPORT_MAC_10_8
     else
@@ -2733,7 +2735,7 @@ void Curl_darwinssl_sha256sum(unsigned char *tmp, /* input */
 bool Curl_darwinssl_false_start(void)
 {
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
-  if(SSLSetSessionOption != NULL)
+  if(&SSLSetSessionOption != NULL)
     return TRUE;
 #endif
   return FALSE;
