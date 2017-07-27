@@ -1075,7 +1075,8 @@ CF_INLINE bool is_file(const char *filename)
 }
 
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
-static CURLcode darwinssl_version_from_curl(long *darwinver, long ssl_version)
+static CURLcode darwinssl_version_from_curl(SSLProtocol *darwinver,
+                                            long ssl_version)
 {
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_0:
