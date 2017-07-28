@@ -98,7 +98,14 @@
 #define CURL_GSKPROTO_TLSV12_MASK        (1 << CURL_GSKPROTO_TLSV12)
 #define CURL_GSKPROTO_LAST      5
 
-#define BACKEND connssl
+struct ssl_backend_data {
+  gsk_handle handle;
+  int iocport;
+  int localfd;
+  int remotefd;
+};
+
+#define BACKEND connssl->backend
 
 /* Supported ciphers. */
 typedef struct {
@@ -638,7 +645,7 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
   if(FD_ISSET(BACKEND->remotefd, &fds_write)) {
     /* Try getting data from HTTPS proxy and pipe it upstream. */
     n = 0;
-    i = gsk_secure_soc_read(connproxyssl->handle,
+    i = gsk_secure_soc_read(connproxyssl->backend->handle,
                             buf, sizeof buf, &n);
     switch(i) {
     case GSK_OK:
@@ -664,7 +671,7 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
     if(n < 0)
       return -1;
     if(n) {
-      i = gsk_secure_soc_write(connproxyssl->handle, buf, n, &m);
+      i = gsk_secure_soc_write(connproxyssl->backend->handle, buf, n, &m);
       if(i != GSK_OK || n != m)
         return -1;
       ret = 1;
@@ -1355,6 +1362,7 @@ const struct Curl_ssl Curl_ssl_gskit = {
   /* TODO: convert to 1 and fix test #1014 (if need) */
   0, /* support_https_proxy */
 
+  sizeof(struct ssl_backend_data),
 
   Curl_gskit_init,                /* init */
   Curl_gskit_cleanup,             /* cleanup */

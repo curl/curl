@@ -107,7 +107,15 @@ static bool gtls_inited = FALSE;
 # include <gnutls/ocsp.h>
 #endif
 
-#define BACKEND connssl
+struct ssl_backend_data {
+  gnutls_session_t session;
+  gnutls_certificate_credentials_t cred;
+#ifdef USE_TLS_SRP
+  gnutls_srp_client_credentials_t srp_client_cred;
+#endif
+};
+
+#define BACKEND connssl->backend
 
 /*
  * Custom push and pull callback functions used by GNU TLS to read and write
@@ -843,7 +851,7 @@ gtls_connect_step1(struct connectdata *conn,
   }
 
   if(conn->proxy_ssl[sockindex].use) {
-    transport_ptr = conn->proxy_ssl[sockindex].session;
+    transport_ptr = conn->proxy_ssl[sockindex].backend->session;
     gnutls_transport_push = Curl_gtls_push_ssl;
     gnutls_transport_pull = Curl_gtls_pull_ssl;
   }
@@ -1805,6 +1813,8 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   1, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
   1, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
 
   Curl_gtls_init,                /* init */
   Curl_gtls_cleanup,             /* cleanup */

@@ -31,6 +31,8 @@
 
 #ifdef USE_POLARSSL
 
+#elif defined USE_POLARSSL
+
 #include <polarssl/net.h>
 #include <polarssl/ssl.h>
 #include <polarssl/certs.h>
@@ -70,7 +72,18 @@
 #define PUB_DER_MAX_BYTES   (RSA_PUB_DER_MAX_BYTES > ECP_PUB_DER_MAX_BYTES ? \
                              RSA_PUB_DER_MAX_BYTES : ECP_PUB_DER_MAX_BYTES)
 
-#define BACKEND connssl
+struct ssl_backend_data {
+  ctr_drbg_context ctr_drbg;
+  entropy_context entropy;
+  ssl_context ssl;
+  int server_fd;
+  x509_crt cacert;
+  x509_crt clicert;
+  x509_crl crl;
+  rsa_context rsa;
+};
+
+#define BACKEND connssl->backend
 
 /* apply threading? */
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
@@ -895,6 +908,8 @@ const struct Curl_ssl Curl_ssl_polarssl = {
   1, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
 
   Curl_polarssl_init,                /* init */
   Curl_polarssl_cleanup,             /* cleanup */

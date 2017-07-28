@@ -91,6 +91,7 @@ and that's a problem since options.h hasn't been included yet. */
 #include "x509asn1.h"
 #include "curl_printf.h"
 
+#include <cyassl/openssl/ssl.h>
 #include <cyassl/ssl.h>
 #ifdef HAVE_CYASSL_ERROR_SSL_H
 #include <cyassl/error-ssl.h>
@@ -122,7 +123,12 @@ and that's a problem since options.h hasn't been included yet. */
 #endif
 #endif
 
-#define BACKEND connssl
+struct ssl_backend_data {
+  SSL_CTX* ctx;
+  SSL*     handle;
+};
+
+#define BACKEND connssl->backend
 
 static Curl_recv cyassl_recv;
 static Curl_send cyassl_send;
@@ -983,6 +989,8 @@ const struct Curl_ssl Curl_ssl_cyassl = {
 #endif
   1, /* have_ssl_ctx */
   0, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
 
   Curl_cyassl_init,                /* init */
   Curl_none_cleanup,               /* cleanup */

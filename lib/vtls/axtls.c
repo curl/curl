@@ -47,7 +47,12 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define BACKEND connssl
+struct ssl_backend_data {
+  SSL_CTX* ssl_ctx;
+  SSL*     ssl;
+};
+
+#define BACKEND connssl->backend
 
 static CURLcode map_error_to_curl(int axtls_err)
 {
@@ -652,7 +657,7 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
 static int Curl_axtls_check_cxn(struct connectdata *conn)
 {
   /* openssl.c line:
-     rc = SSL_peek(conn->ssl[FIRSTSOCKET].ssl, (void*)&buf, 1);
+     rc = SSL_peek(conn->ssl[FIRSTSOCKET].backend->ssl, (void*)&buf, 1);
      axTLS compat layer always returns the last argument, so connection is
      always alive? */
 
@@ -704,6 +709,8 @@ const struct Curl_ssl Curl_ssl_axtls = {
   0, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
 
   /*
    * axTLS has no global init.  Everything is done through SSL and SSL_CTX

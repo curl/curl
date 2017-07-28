@@ -61,7 +61,20 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define BACKEND connssl
+struct ssl_backend_data {
+  mbedtls_ctr_drbg_context ctr_drbg;
+  mbedtls_entropy_context entropy;
+  mbedtls_ssl_context ssl;
+  int server_fd;
+  mbedtls_x509_crt cacert;
+  mbedtls_x509_crt clicert;
+  mbedtls_x509_crl crl;
+  mbedtls_pk_context pk;
+  mbedtls_ssl_config config;
+  const char *protocols[3];
+};
+
+#define BACKEND connssl->backend
 
 /* apply threading? */
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
@@ -1033,6 +1046,8 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   1, /* have_pinnedpubkey */
   1, /* have_ssl_ctx */
   0, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
 
   Curl_mbedtls_init,                /* init */
   Curl_mbedtls_cleanup,             /* cleanup */
