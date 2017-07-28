@@ -3275,7 +3275,7 @@ Curl_oldest_idle_connection(struct Curl_easy *data)
   struct curl_hash_element *he;
   time_t highscore=-1;
   time_t score;
-  struct timeval now;
+  struct curltime now;
   struct connectdata *conn_candidate = NULL;
   struct connectbundle *bundle;
 
@@ -3338,7 +3338,7 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
   struct curl_llist_element *curr;
   time_t highscore=-1;
   time_t score;
-  struct timeval now;
+  struct curltime now;
   struct connectdata *conn_candidate = NULL;
   struct connectdata *conn;
 
@@ -3426,7 +3426,7 @@ static int call_disconnect_if_dead(struct connectdata *conn,
  */
 static void prune_dead_connections(struct Curl_easy *data)
 {
-  struct timeval now = Curl_tvnow();
+  struct curltime now = Curl_tvnow();
   time_t elapsed = Curl_tvdiff(now, data->state.conn_cache->last_cleanup);
 
   if(elapsed >= 1000L) {

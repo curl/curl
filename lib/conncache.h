@@ -27,7 +27,7 @@ struct conncache {
   struct curl_hash hash;
   size_t num_connections;
   long next_connection_id;
-  struct timeval last_cleanup;
+  struct curltime last_cleanup;
 };
 
 #define BUNDLE_NO_MULTIUSE -1

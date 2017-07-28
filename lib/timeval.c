@@ -24,14 +24,14 @@
 
 #if defined(WIN32) && !defined(MSDOS)
 
-struct timeval curlx_tvnow(void)
+struct curltime curlx_tvnow(void)
 {
   /*
   ** GetTickCount() is available on _all_ Windows versions from W95 up
   ** to nowadays. Returns milliseconds elapsed since last system boot,
   ** increases monotonically and wraps once 49.7 days have elapsed.
   */
-  struct timeval now;
+  struct curltime now;
 #if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
     (_WIN32_WINNT < _WIN32_WINNT_VISTA)
   DWORD milliseconds = GetTickCount();
@@ -39,8 +39,8 @@ struct timeval curlx_tvnow(void)
   now.tv_usec = (milliseconds % 1000) * 1000;
 #else
   ULONGLONG milliseconds = GetTickCount64();
-  now.tv_sec = (long) (milliseconds / 1000);
-  now.tv_usec = (long) (milliseconds % 1000) * 1000;
+  now.tv_sec = (time_t) (milliseconds / 1000);
+  now.tv_usec = (unsigned int) (milliseconds % 1000) * 1000;
 #endif
 
   return now;
@@ -48,7 +48,7 @@ struct timeval curlx_tvnow(void)
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
 
-struct timeval curlx_tvnow(void)
+struct curltime curlx_tvnow(void)
 {
   /*
   ** clock_gettime() is granted to be increased monotonically when the
@@ -58,10 +58,11 @@ struct timeval curlx_tvnow(void)
   ** system has started up.
   */
   struct timeval now;
+  struct curltime cnow;
   struct timespec tsnow;
   if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
-    now.tv_sec = tsnow.tv_sec;
-    now.tv_usec = tsnow.tv_nsec / 1000;
+    cnow.tv_sec = tsnow.tv_sec;
+    cnow.tv_usec = (unsigned int)(tsnow.tv_nsec / 1000);
   }
   /*
   ** Even when the configure process has truly detected monotonic clock
@@ -69,20 +70,23 @@ struct timeval curlx_tvnow(void)
   ** run-time. When this occurs simply fallback to other time source.
   */
 #ifdef HAVE_GETTIMEOFDAY
-  else
+  else {
     (void)gettimeofday(&now, NULL);
+    cnow.tv_sec = now.tv_sec;
+    cnow.tv_usec = (unsigned int)now.tv_usec;
+  }
 #else
   else {
-    now.tv_sec = (long)time(NULL);
-    now.tv_usec = 0;
+    cnow.tv_sec = time(NULL);
+    cnow.tv_usec = 0;
   }
 #endif
-  return now;
+  return cnow;
 }
 
 #elif defined(HAVE_GETTIMEOFDAY)
 
-struct timeval curlx_tvnow(void)
+struct curltime curlx_tvnow(void)
 {
   /*
   ** gettimeofday() is not granted to be increased monotonically, due to
@@ -90,19 +94,22 @@ struct timeval curlx_tvnow(void)
   ** forward or backward in time.
   */
   struct timeval now;
+  struct curltime ret;
   (void)gettimeofday(&now, NULL);
-  return now;
+  ret.tv_sec = now.tv_sec;
+  ret.tv_usec = now.tv_usec;
+  return ret;
 }
 
 #else
 
-struct timeval curlx_tvnow(void)
+struct curltime curlx_tvnow(void)
 {
   /*
   ** time() returns the value of time in seconds since the Epoch.
   */
-  struct timeval now;
-  now.tv_sec = (long)time(NULL);
+  struct curltime now;
+  now.tv_sec = time(NULL);
   now.tv_usec = 0;
   return now;
 }
@@ -115,8 +122,10 @@ struct timeval curlx_tvnow(void)
  *
  * Returns: the time difference in number of milliseconds. For large diffs it
  * returns 0x7fffffff on 32bit time_t systems.
+ *
+ * @unittest: 1323
  */
-time_t curlx_tvdiff(struct timeval newer, struct timeval older)
+time_t curlx_tvdiff(struct curltime newer, struct curltime older)
 {
 #if SIZEOF_TIME_T < 8
   /* for 32bit time_t systems, add a precaution to avoid overflow for really
@@ -126,7 +135,7 @@ time_t curlx_tvdiff(struct timeval newer, struct timeval older)
     return 0x7fffffff;
 #endif
   return (newer.tv_sec-older.tv_sec)*1000+
-    (time_t)(newer.tv_usec-older.tv_usec)/1000;
+    (int)(newer.tv_usec-older.tv_usec)/1000;
 }
 
 /*
@@ -136,7 +145,7 @@ time_t curlx_tvdiff(struct timeval newer, struct timeval older)
  * Returns: the time difference in number of microseconds. For too large diffs
  * it returns max value.
  */
-time_t Curl_tvdiff_us(struct timeval newer, struct timeval older)
+time_t Curl_tvdiff_us(struct curltime newer, struct curltime older)
 {
   time_t diff = newer.tv_sec-older.tv_sec;
 #if SIZEOF_TIME_T < 8
