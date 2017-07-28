@@ -1327,7 +1327,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   curl_off_t total_ul = 0;
 #endif
   ssize_t nread;
-  struct timeval now;
+  struct curltime now;
   bool keepon = TRUE;
   char *buf = data->state.buffer;
   struct TELNET *tn;

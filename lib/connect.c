@@ -180,12 +180,12 @@ singleipconnect(struct connectdata *conn,
  * @unittest: 1303
  */
 time_t Curl_timeleft(struct Curl_easy *data,
-                     struct timeval *nowp,
+                     struct curltime *nowp,
                      bool duringconnect)
 {
   int timeout_set = 0;
   time_t timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
-  struct timeval now;
+  struct curltime now;
 
   /* if a timeout is set, use the most restrictive one */
 
@@ -723,7 +723,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   time_t allow;
   int error = 0;
-  struct timeval now;
+  struct curltime now;
   int rc;
   int i;
 
@@ -1136,7 +1136,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                           const struct Curl_dns_entry *remotehost)
 {
   struct Curl_easy *data = conn->data;
-  struct timeval before = Curl_tvnow();
+  struct curltime before = Curl_tvnow();
   CURLcode result = CURLE_COULDNT_CONNECT;
 
   time_t timeout_ms = Curl_timeleft(data, &before, TRUE);

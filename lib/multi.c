@@ -70,7 +70,7 @@ static void singlesocket(struct Curl_multi *multi,
                          struct Curl_easy *data);
 static int update_timer(struct Curl_multi *multi);
 
-static CURLMcode add_next_timeout(struct timeval now,
+static CURLMcode add_next_timeout(struct curltime now,
                                   struct Curl_multi *multi,
                                   struct Curl_easy *d);
 static CURLMcode multi_timeout(struct Curl_multi *multi,
@@ -1301,7 +1301,7 @@ static CURLcode multi_do_more(struct connectdata *conn, int *complete)
 }
 
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
-                                 struct timeval now,
+                                 struct curltime now,
                                  struct Curl_easy *data)
 {
   struct Curl_message *msg = NULL;
@@ -2146,7 +2146,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
   struct Curl_easy *data;
   CURLMcode returncode=CURLM_OK;
   struct Curl_tree *t;
-  struct timeval now = Curl_tvnow();
+  struct curltime now = Curl_tvnow();
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -2496,11 +2496,11 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
  * The splay tree only has each sessionhandle as a single node and the nearest
  * timeout is used to sort it on.
  */
-static CURLMcode add_next_timeout(struct timeval now,
+static CURLMcode add_next_timeout(struct curltime now,
                                   struct Curl_multi *multi,
                                   struct Curl_easy *d)
 {
-  struct timeval *tv = &d->state.expiretime;
+  struct curltime *tv = &d->state.expiretime;
   struct curl_llist *list = &d->state.timeoutlist;
   struct curl_llist_element *e;
   struct time_node *node = NULL;
@@ -2551,7 +2551,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   CURLMcode result = CURLM_OK;
   struct Curl_easy *data = NULL;
   struct Curl_tree *t;
-  struct timeval now = Curl_tvnow();
+  struct curltime now = Curl_tvnow();
 
   if(checkall) {
     /* *perform() deals with running_handles on its own */
@@ -2777,11 +2777,11 @@ CURLMcode curl_multi_socket_all(struct Curl_multi *multi, int *running_handles)
 static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms)
 {
-  static struct timeval tv_zero = {0, 0};
+  static struct curltime tv_zero = {0, 0};
 
   if(multi->timetree) {
     /* we have a tree of expire times */
-    struct timeval now = Curl_tvnow();
+    struct curltime now = Curl_tvnow();
 
     /* splay the lowest to the bottom */
     multi->timetree = Curl_splay(tv_zero, multi->timetree);
@@ -2833,7 +2833,7 @@ static int update_timer(struct Curl_multi *multi)
     return -1;
   }
   if(timeout_ms < 0) {
-    static const struct timeval none={0, 0};
+    static const struct curltime none={0, 0};
     if(Curl_splaycomparekeys(none, multi->timer_lastcall)) {
       multi->timer_lastcall = none;
       /* there's no timeout now but there was one previously, tell the app to
@@ -2884,7 +2884,7 @@ multi_deltimeout(struct Curl_easy *data, expire_id eid)
  */
 static CURLMcode
 multi_addtimeout(struct Curl_easy *data,
-                 struct timeval *stamp,
+                 struct curltime *stamp,
                  expire_id eid)
 {
   struct curl_llist_element *e;
@@ -2932,9 +2932,9 @@ multi_addtimeout(struct Curl_easy *data,
 void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
 {
   struct Curl_multi *multi = data->multi;
-  struct timeval *nowp = &data->state.expiretime;
+  struct curltime *nowp = &data->state.expiretime;
   int rc;
-  struct timeval set;
+  struct curltime set;
 
   /* this is only interesting while there is still an associated multi struct
      remaining! */
@@ -2944,8 +2944,8 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
   DEBUGASSERT(id < EXPIRE_LAST);
 
   set = Curl_tvnow();
-  set.tv_sec += (long)(milli/1000);
-  set.tv_usec += (long)(milli%1000)*1000;
+  set.tv_sec += milli/1000;
+  set.tv_usec += (unsigned int)(milli%1000)*1000;
 
   if(set.tv_usec >= 1000000) {
     set.tv_sec++;
@@ -3007,7 +3007,7 @@ void Curl_expire_done(struct Curl_easy *data, expire_id id)
 void Curl_expire_clear(struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
-  struct timeval *nowp = &data->state.expiretime;
+  struct curltime *nowp = &data->state.expiretime;
   int rc;
 
   /* this is only interesting while there is still an associated multi struct

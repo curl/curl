@@ -148,7 +148,7 @@ struct Curl_multi {
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;
   void *timer_userp;
-  struct timeval timer_lastcall; /* the fixed time for the timeout for the
+  struct curltime timer_lastcall; /* the fixed time for the timeout for the
                                     previous callback */
 };
 
