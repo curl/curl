@@ -51,8 +51,10 @@
 #include "strcase.h"
 #include "hostcheck.h"
 #include "curl_printf.h"
-
 #include <openssl/ssl.h>
+#ifdef HAVE_OPENSSL_ENGINE_H
+#include <openssl/engine.h>
+#endif
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
 #ifndef OPENSSL_NO_DSA
@@ -155,7 +157,14 @@ static unsigned long OpenSSL_version_num(void)
 #define DEFAULT_CIPHER_SELECTION \
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"
 
-#define BACKEND connssl
+struct ssl_backend_data {
+  /* these ones requires specific SSL-types */
+  SSL_CTX* ctx;
+  SSL*     handle;
+  X509*    server_cert;
+};
+
+#define BACKEND connssl->backend
 
 /*
  * Number of bytes to read from the random number seed file. This must be
@@ -2273,7 +2282,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
   if(conn->proxy_ssl[sockindex].use) {
     BIO *const bio = BIO_new(BIO_f_ssl());
-    SSL *handle = conn->proxy_ssl[sockindex].handle;
+    SSL *handle = conn->proxy_ssl[sockindex].backend->handle;
     DEBUGASSERT(ssl_connection_complete == conn->proxy_ssl[sockindex].state);
     DEBUGASSERT(BACKEND->handle != NULL);
     DEBUGASSERT(bio != NULL);
@@ -3414,6 +3423,8 @@ const struct Curl_ssl Curl_ssl_openssl = {
   1, /* have_pinnedpubkey */
   1, /* have_ssl_ctx */
   1, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
 
   Curl_ossl_init,                /* init */
   Curl_ossl_cleanup,             /* cleanup */

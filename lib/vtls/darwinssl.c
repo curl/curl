@@ -44,6 +44,8 @@
 #endif
 
 #include <Security/Security.h>
+/* For some reason, when building for iOS, the omnibus header above does
+ * not include SecureTransport.h as of iOS SDK 5.1. */
 #include <Security/SecureTransport.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <CommonCrypto/CommonDigest.h>
@@ -118,7 +120,14 @@
 #define ioErr -36
 #define paramErr -50
 
-#define BACKEND connssl
+struct ssl_backend_data {
+  SSLContextRef ssl_ctx;
+  curl_socket_t ssl_sockfd;
+  bool ssl_direction; /* true if writing, false if reading */
+  size_t ssl_write_buffered_length;
+};
+
+#define BACKEND connssl->backend
 
 /* pinned public key support tests */
 
@@ -2887,6 +2896,8 @@ const struct Curl_ssl Curl_ssl_darwinssl = {
 #endif /* DARWIN_SSL_PINNEDPUBKEY */
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
 
   Curl_none_init,                     /* init */
   Curl_none_cleanup,                  /* cleanup */

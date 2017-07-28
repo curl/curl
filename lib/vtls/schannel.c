@@ -46,6 +46,8 @@
 #  error "Can't compile SCHANNEL support without SSPI."
 #endif
 
+#include <schnlsp.h>
+#include <schannel.h>
 #include "curl_sspi.h"
 #include "schannel.h"
 #include "vtls.h"
@@ -127,7 +129,38 @@
  * #define failf(x, y, ...) printf(y, __VA_ARGS__)
  */
 
-#define BACKEND connssl
+/* Structs to store Schannel handles */
+struct curl_schannel_cred {
+  CredHandle cred_handle;
+  TimeStamp time_stamp;
+  int refcount;
+};
+
+struct curl_schannel_ctxt {
+  CtxtHandle ctxt_handle;
+  TimeStamp time_stamp;
+};
+
+struct ssl_backend_data {
+  struct curl_schannel_cred *cred;
+  struct curl_schannel_ctxt *ctxt;
+  SecPkgContext_StreamSizes stream_sizes;
+  size_t encdata_length, decdata_length;
+  size_t encdata_offset, decdata_offset;
+  unsigned char *encdata_buffer, *decdata_buffer;
+  /* encdata_is_incomplete: if encdata contains only a partial record that
+     can't be decrypted without another Curl_read_plain (that is, status is
+     SEC_E_INCOMPLETE_MESSAGE) then set this true. after Curl_read_plain writes
+     more bytes into encdata then set this back to false. */
+  bool encdata_is_incomplete;
+  unsigned long req_flags, ret_flags;
+  CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
+  bool recv_sspi_close_notify; /* true if connection closed by close_notify */
+  bool recv_connection_closed; /* true if connection closed, regardless how */
+  bool use_alpn; /* true if ALPN is used for this connection */
+};
+
+#define BACKEND connssl->backend
 
 static Curl_recv schannel_recv;
 static Curl_send schannel_send;
@@ -1790,6 +1823,8 @@ const struct Curl_ssl Curl_ssl_schannel = {
   0, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
 
   Curl_schannel_init,                /* init */
   Curl_schannel_cleanup,             /* cleanup */

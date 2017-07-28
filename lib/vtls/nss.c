@@ -78,7 +78,15 @@
 /* enough to fit the string "PEM Token #[0|1]" */
 #define SLOTSIZE 13
 
-#define BACKEND connssl
+struct ssl_backend_data {
+  PRFileDesc *handle;
+  char *client_nickname;
+  struct Curl_easy *data;
+  struct curl_llist obj_list;
+  PK11GenericObject *obj_clicert;
+};
+
+#define BACKEND connssl->backend
 
 static PRLock *nss_initlock = NULL;
 static PRLock *nss_crllock = NULL;
@@ -1480,7 +1488,7 @@ static void Curl_nss_close(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_connect_data *connssl_proxy = &conn->proxy_ssl[sockindex];
 
-  if(BACKEND->handle || connssl_proxy->handle) {
+  if(BACKEND->handle || connssl_proxy->backend->handle) {
     /* NSS closes the socket we previously handed to it, so we must mark it
        as closed to avoid double close */
     fake_sclose(conn->sock[sockindex]);
@@ -1489,9 +1497,9 @@ static void Curl_nss_close(struct connectdata *conn, int sockindex)
 
   if(BACKEND->handle)
     /* nss_close(connssl) will transitively close also
-       connssl_proxy->handle if both are used. Clear it to avoid
+       connssl_proxy->backend->handle if both are used. Clear it to avoid
        a double close leading to crash. */
-    connssl_proxy->handle = NULL;
+    connssl_proxy->backend->handle = NULL;
 
   nss_close(connssl);
   nss_close(connssl_proxy);
@@ -1911,8 +1919,8 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
 
   if(conn->proxy_ssl[sockindex].use) {
     DEBUGASSERT(ssl_connection_complete == conn->proxy_ssl[sockindex].state);
-    DEBUGASSERT(conn->proxy_ssl[sockindex].handle != NULL);
-    nspr_io = conn->proxy_ssl[sockindex].handle;
+    DEBUGASSERT(conn->proxy_ssl[sockindex].backend->handle != NULL);
+    nspr_io = conn->proxy_ssl[sockindex].backend->handle;
     second_layer = TRUE;
   }
   else {
@@ -2342,6 +2350,8 @@ const struct Curl_ssl Curl_ssl_nss = {
   1, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
   1, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
 
   Curl_nss_init,                /* init */
   Curl_nss_cleanup,             /* cleanup */
