@@ -104,12 +104,8 @@
 
 #include <polarssl/ssl.h>
 #include <polarssl/version.h>
-#if POLARSSL_VERSION_NUMBER<0x01010000
-#include <polarssl/havege.h>
-#else
 #include <polarssl/entropy.h>
 #include <polarssl/ctr_drbg.h>
-#endif /* POLARSSL_VERSION_NUMBER<0x01010000 */
 
 #endif /* USE_POLARSSL */
 
