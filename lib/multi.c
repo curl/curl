@@ -2532,10 +2532,8 @@ static CURLMcode add_next_timeout(struct curltime now,
     /* copy the first entry to 'tv' */
     memcpy(tv, &node->time, sizeof(*tv));
 
-    /* remove first entry from list */
-    Curl_llist_remove(list, e, NULL);
-
-    /* insert this node again into the splay */
+    /* Insert this node again into the splay.  Keep the timer in the list in
+       case we need to recompute future timers. */
     multi->timetree = Curl_splayinsert(*tv, multi->timetree,
                                        &d->state.timenode);
   }
@@ -2952,25 +2950,24 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
     set.tv_usec -= 1000000;
   }
 
+  /* Remove any timer with the same id just in case. */
+  multi_deltimeout(data, id);
+
+  /* Add it to the timer list.  It must stay in the list until it has expired
+     in case we need to recompute the minimum timer later. */
+  multi_addtimeout(data, &set, id);
+
   if(nowp->tv_sec || nowp->tv_usec) {
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
        is. */
     time_t diff = curlx_tvdiff(set, *nowp);
 
-    /* remove the previous timer first, if there */
-    multi_deltimeout(data, id);
-
     if(diff > 0) {
-      /* the new expire time was later so just add it to the queue
-         and get out */
-      multi_addtimeout(data, &set, id);
+      /* The current splay tree entry is sooner than this new expiry time.
+         We don't need to update our splay tree entry. */
       return;
     }
-
-    /* the new time is newer than the presently set one, so add the current
-       to the queue and update the head */
-    multi_addtimeout(data, nowp, id);
 
     /* Since this is an updated time, we must remove the previous entry from
        the splay tree first and then re-add the new value */
@@ -2981,6 +2978,8 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
       infof(data, "Internal error removing splay node = %d\n", rc);
   }
 
+  /* Indicate that we are in the splay tree and insert the new timer expiry
+     value since it is our local minimum. */
   *nowp = set;
   data->state.timenode.payload = data;
   multi->timetree = Curl_splayinsert(*nowp, multi->timetree,
