@@ -3279,7 +3279,7 @@ Curl_oldest_idle_connection(struct Curl_easy *data)
   struct connectdata *conn_candidate = NULL;
   struct connectbundle *bundle;
 
-  now = Curl_tvnow();
+  now = curlx_tvnow();
 
   Curl_hash_start_iterate(&bc->hash, &iter);
 
@@ -3295,7 +3295,7 @@ Curl_oldest_idle_connection(struct Curl_easy *data)
 
       if(!conn->inuse) {
         /* Set higher score for the age passed since the connection was used */
-        score = Curl_tvdiff(now, conn->now);
+        score = curlx_tvdiff(now, conn->setup_time);
 
         if(score > highscore) {
           highscore = score;
@@ -3344,7 +3344,7 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
 
   (void)data;
 
-  now = Curl_tvnow();
+  now = curlx_tvnow();
 
   curr = bundle->conn_list.head;
   while(curr) {
@@ -3352,7 +3352,7 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
 
     if(!conn->inuse) {
       /* Set higher score for the age passed since the connection was used */
-      score = Curl_tvdiff(now, conn->now);
+      score = curlx_tvdiff(now, conn->setup_time);
 
       if(score > highscore) {
         highscore = score;
@@ -3426,8 +3426,8 @@ static int call_disconnect_if_dead(struct connectdata *conn,
  */
 static void prune_dead_connections(struct Curl_easy *data)
 {
-  struct curltime now = Curl_tvnow();
-  time_t elapsed = Curl_tvdiff(now, data->state.conn_cache->last_cleanup);
+  struct curltime now = curlx_tvnow();
+  time_t elapsed = curlx_tvdiff(now, data->state.conn_cache->last_cleanup);
 
   if(elapsed >= 1000L) {
     Curl_conncache_foreach(data->state.conn_cache, data,
@@ -4194,7 +4194,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   connclose(conn, "Default to force-close");
 
   /* Store creation time to help future close decision making */
-  conn->created = Curl_tvnow();
+  conn->created = curlx_tvnow();
 
   conn->data = data; /* Setup the association between this connection
                         and the Curl_easy */
@@ -6116,7 +6116,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
                                bool *async)
 {
   CURLcode result=CURLE_OK;
-  time_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
+  time_t timeout_ms = Curl_timeleft(data, TRUE);
 
   /*************************************************************
    * Resolve the name of the server or proxy
@@ -6916,9 +6916,9 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
   data->state.crlf_conversions = 0; /* reset CRLF conversion counter */
 #endif /* CURL_DO_LINEEND_CONV */
 
-  /* set start time here for timeout purposes in the connect procedure, it
-     is later set again for the progress meter purpose */
-  conn->now = Curl_tvnow();
+  /* set setup time here for timeout purposes in the connect procedure, it is
+     later set again for the progress meter purpose */
+  conn->setup_time = curlx_tvnow();
 
   if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
     conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
@@ -6935,8 +6935,8 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
     Curl_verboseconnect(conn);
   }
 
-  conn->now = Curl_tvnow(); /* time this *after* the connect is done, we
-                               set this here perhaps a second time */
+  conn->setup_time = curlx_tvnow(); /* sets this *after* the connect is done,
+                                       perhaps a second time */
 
 #ifdef __EMX__
   /*
@@ -7026,12 +7026,9 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
        HTTP. */
     data->set.httpreq = HTTPREQ_GET;
 
-  k->start = Curl_tvnow(); /* start time */
-  k->now = k->start;   /* current time is now */
+  k->start = curlx_tvnow(); /* start time */
   k->header = TRUE; /* assume header */
-
   k->bytecount = 0;
-
   k->buf = data->state.buffer;
   k->hbufp = data->state.headerbuff;
   k->ignorebody=FALSE;

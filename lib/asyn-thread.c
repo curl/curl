@@ -522,7 +522,10 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   }
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
-    time_t elapsed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
+    time_t elapsed;
+    data->state.now = curlx_tvnow();
+    elapsed = curlx_tvdiff(data->state.now,
+                           data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
 

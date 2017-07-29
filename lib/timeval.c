@@ -24,7 +24,7 @@
 
 #if defined(WIN32) && !defined(MSDOS)
 
-struct curltime curlx_tvnow(void)
+static struct curltime tvnow(void)
 {
   /*
   ** GetTickCount() is available on _all_ Windows versions from W95 up
@@ -48,7 +48,7 @@ struct curltime curlx_tvnow(void)
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
 
-struct curltime curlx_tvnow(void)
+static struct curltime tvnow(void)
 {
   /*
   ** clock_gettime() is granted to be increased monotonically when the
@@ -86,7 +86,7 @@ struct curltime curlx_tvnow(void)
 
 #elif defined(HAVE_GETTIMEOFDAY)
 
-struct curltime curlx_tvnow(void)
+static struct curltime tvnow(void)
 {
   /*
   ** gettimeofday() is not granted to be increased monotonically, due to
@@ -103,7 +103,7 @@ struct curltime curlx_tvnow(void)
 
 #else
 
-struct curltime curlx_tvnow(void)
+static struct curltime tvnow(void)
 {
   /*
   ** time() returns the value of time in seconds since the Epoch.
@@ -116,6 +116,27 @@ struct curltime curlx_tvnow(void)
 
 #endif
 
+#ifdef CURLDEBUG
+/* for testing purposes, this allows a fake time to be returned */
+static struct curltime fake_now;
+struct curltime curlx_tvnow(void)
+{
+  if(fake_now.tv_sec || fake_now.tv_usec)
+    return fake_now;
+  else
+    return tvnow();
+}
+void curlx_tvnow_set(struct curltime now)
+{
+  fake_now = now;
+}
+
+#else
+struct curltime curlx_tvnow(void)
+{
+  return tvnow();
+}
+#endif
 /*
  * Make sure that the first argument is the more recent time, as otherwise
  * we'll get a weird negative time-diff back...

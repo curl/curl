@@ -285,7 +285,7 @@ static CURLcode handshake(struct connectdata *conn,
 
   for(;;) {
     /* check allowed time left */
-    timeout_ms = Curl_timeleft(data, NULL, duringconnect);
+    timeout_ms = Curl_timeleft(data, duringconnect);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */

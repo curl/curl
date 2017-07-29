@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -206,7 +206,7 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
   time(&state->start_time);
 
   /* Compute drop-dead time */
-  timeout_ms = Curl_timeleft(state->conn->data, NULL, start);
+  timeout_ms = Curl_timeleft(state->conn->data, start);
 
   if(timeout_ms < 0) {
     /* time-out, bail out, go home */
@@ -1287,7 +1287,7 @@ static CURLcode tftp_doing(struct connectdata *conn, bool *dophase_done)
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(conn->data, Curl_tvnow());
+      result = Curl_speedcheck(conn->data, curlx_tvnow());
   }
   return result;
 }

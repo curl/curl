@@ -844,7 +844,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
 
   if(ssl_connect_1 == connssl->connecting_state) {
     /* check out how much more time we're allowed */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timeout_ms = Curl_timeleft(data, TRUE);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
@@ -862,7 +862,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
         ssl_connect_2_writing == connssl->connecting_state) {
 
     /* check out how much more time we're allowed */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timeout_ms = Curl_timeleft(data, TRUE);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
@@ -1026,7 +1026,7 @@ schannel_send(struct connectdata *conn, int sockindex,
 
       this_write = 0;
 
-      timeleft = Curl_timeleft(conn->data, NULL, FALSE);
+      timeleft = Curl_timeleft(conn->data, FALSE);
       if(timeleft < 0) {
         /* we already got the timeout */
         failf(conn->data, "schannel: timed out sending data "

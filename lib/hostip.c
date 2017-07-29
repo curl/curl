@@ -688,11 +688,14 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    unsigned long elapsed_secs = (unsigned long) (Curl_tvdiff(Curl_tvnow(),
-                                   conn->created) / 1000);
+    unsigned long elapsed_secs;
+    unsigned long alarm_set;
+    data->state.now = curlx_tvnow();
+    elapsed_secs =
+      (unsigned long) (curlx_tvdiff(data->state.now, conn->created) / 1000);
 
     /* the alarm period is counted in even number of seconds */
-    unsigned long alarm_set = prev_alarm - elapsed_secs;
+    alarm_set = prev_alarm - elapsed_secs;
 
     if(!alarm_set ||
        ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {

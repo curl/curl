@@ -3059,7 +3059,7 @@ static CURLcode ossl_connect_common(struct connectdata *conn,
 
   if(ssl_connect_1 == connssl->connecting_state) {
     /* Find out how much more time we're allowed */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timeout_ms = Curl_timeleft(data, TRUE);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
@@ -3077,7 +3077,7 @@ static CURLcode ossl_connect_common(struct connectdata *conn,
         ssl_connect_2_writing == connssl->connecting_state) {
 
     /* check allowed time left */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timeout_ms = Curl_timeleft(data, TRUE);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
