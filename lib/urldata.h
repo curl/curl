@@ -407,6 +407,10 @@ struct curl_ssl_session {
   struct ssl_primary_config ssl_config; /* setup for this session */
 };
 
+#ifdef USE_WINDOWS_SSPI
+#include "curl_sspi.h"
+#endif
+
 /* Struct used for Digest challenge-response authentication */
 struct digestdata {
 #if defined(USE_WINDOWS_SSPI)
@@ -437,10 +441,6 @@ typedef enum {
   NTLMSTATE_TYPE3,
   NTLMSTATE_LAST
 } curlntlm;
-
-#ifdef USE_WINDOWS_SSPI
-#include "curl_sspi.h"
-#endif
 
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
 #include <iconv.h>
