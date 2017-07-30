@@ -1,6 +1,6 @@
 Long: include
 Short: i
-Help: Include protocol headers in the output
+Help: Include protocol response headers in the output
 See-also: verbose
 ---
 Include the HTTP response headers in the output. The HTTP response headers can
