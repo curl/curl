@@ -2782,6 +2782,7 @@ if test "$want_winidn" = "yes"; then
   clean_LDFLAGS="$LDFLAGS"
   clean_LIBS="$LIBS"
   WINIDN_LIBS="-lnormaliz"
+  WINIDN_CPPFLAGS="-DWINVER=0x0600"
   #
   if test "$want_winidn_path" != "default"; then
     dnl path has been specified
@@ -2797,7 +2798,11 @@ if test "$want_winidn" = "yes"; then
   #
   AC_MSG_CHECKING([if IdnToUnicode can be linked])
   AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([IdnToUnicode])
+    AC_LANG_PROGRAM([[
+      #include <windows.h>
+    ]],[[
+      IdnToUnicode(0, NULL, 0, NULL, 0);
+    ]])
   ],[
     AC_MSG_RESULT([yes])
     tst_links_winidn="yes"
